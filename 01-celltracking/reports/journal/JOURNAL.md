@@ -1,0 +1,137 @@
+# Research Journal — Biohub Cell Tracking During Development (Kaggle 2026)
+
+A manuscript-style, continuously updated research log (Stanford-style): standard
+sections for the scientific argument, plus a dated **Research Log** recording the
+iterative process, decisions, and dead-ends. Figures/animations live in
+`reports/figures/`. This document is committed and pushed on every change.
+
+**Authors:** aryaarun0910-debug (PI), Claude (implementation), Codex (intelligence/red-team).
+**Repo:** https://github.com/aryaarun0910-debug/Biohub-CellTracking-2026 (private)
+
+---
+
+## Abstract
+
+We aim to win the Kaggle *Cell Tracking During Development* competition: detect cell
+centroids in 3D+time zebrafish light-sheet (DaXi) microscopy, link them across time, and
+reconstruct lineages including divisions. Scoring is
+`weighted_avg(adjusted_edge_Jaccard) + 0.1·division_Jaccard`, with per-timepoint optimal
+bipartite node matching within 7 µm. The training set is only **two embryos** (199 crops),
+and labels are **~1–2% sparse** point annotations; the hidden test is a disjoint embryo.
+
+Our central finding, established by an exact-metric edge-error taxonomy on a faithful
+reproduction of the public 0.842 "V3" pipeline, is that **71–79% of missed edges are
+genuine non-detections** (no candidate within 7 µm), while assignment and linking errors are
+minor. Independently, reverse-engineering the evaluator shows the field's shared structural
+weakness: matching is decided *before* edges are judged, so a spatially-closer duplicate can
+steal a ground-truth match from the proposal carrying the correct trajectory. These converge
+on a single thesis: **over-propose internally, then select one representative per cell by
+matching-aware, track-conditioned arbitration, and recover missed cells along strong tracks.**
+Target: **≥0.88 on the private leaderboard** (current public leader 0.875).
+
+## 1. Introduction
+
+The competition (host: CZ Biohub Royer Lab) provides Zarr volumes `(T,Z,Y,X)` uint16, typical
+`(100,64,256,256)`, voxel scale `(z,y,x)=(1.625,0.40625,0.40625) µm` — Z is 4× coarser
+(**Fig. 6**, XZ projection). Ground truth is sparse GEFF point graphs; the count adjustment
+uses a metadata `estimated_number_of_nodes`. Because only two embryo identities exist in
+training and the test embryo is disjoint, the dominant risk is **domain overfitting**, not
+raw model capacity.
+
+**Fig. 1** quantifies the sparsity: the median crop annotates ~1–2% of its estimated cells.
+**Fig. 6** (XY projection) makes it visceral — hundreds of visible nuclei, ~12 annotated.
+[Time-lapse animation](../figures/anim_xy_timelapse.gif) shows cell motion and density over
+time; [rotating 3D lineage](../figures/anim_3d_rotate.gif) shows the annotated tracks.
+
+## 2. Literature Review (synthesis)
+
+Full deep-dives: `reports/research/` (methods, Royer ecosystem, competitive methods).
+
+- **Host baseline** (`royerlab/kaggle-cell-tracking-competition`): a single jointly-trained
+  temporal-U-Net + cross-attention edge transformer; detection loss = BCE with single-voxel
+  positives and `neg_weight=0.01`; edge loss = focal on `softmax(dim=0)` (each target picks one
+  parent; a parent may spawn two → divisions). Two latent levers: a *no-op* division up-weight
+  and a checkpoint metric (`acc·recall`) that is not the leaderboard metric.
+- **Detection from sparse points**: Spotiflow (Nat. Methods 2025) multiscale heatmaps +
+  stereographic-flow subpixel offsets — but it does *not* ignore unlabeled voxels, so the
+  **Linajea soft-mask** (loss weight 1 within a nucleus radius, ~0.01–1e-6 elsewhere) is the
+  key adaptation; PAC-MAP proximity-adjusted Gaussians; Hirsch–Kainmueller CPV auxiliary loss.
+- **Association / global solve**: Ultrack (multi-hypothesis + ILP, CBC offline), motile (SCIP
+  offline, division-aware, `fit_weights` sSVM), Trackastra (transformer linker, 3D `ctc` model).
+- **Same-domain external assets** (rules-permitted): `unet-daxi.pt`/`unet-simview.pt`, ZSNS001–005
+  embryos + dense track CSVs; the exact-voxel-scale 522-frame Ultrack embryo is the strongest
+  provenance lead (identity unproven).
+
+## 3. Methodology
+
+- **Operating model.** Local machine (MX350, 2 GB) does dev, full-data EDA, CPU DoG sweeps, and
+  exact scoring on all 199 crops; heavy GPU training/inference runs on Kaggle/cloud.
+- **Exact metric, reimplemented.** `src/biotrack/metric_numpy.py` reproduces the organizer's
+  edge term (per-timepoint optimal bipartite match maximizing `1/(1+d)` within 7 µm; directed
+  matched-edge mask; adjusted Jaccard with count penalty). **Validated exactly** vs the
+  tracksdata implementation on 20 perturbation cases *and* 7 hand-built adversarial
+  assignment-conflict cases (`tests/`). Runs without tracksdata → usable on Kaggle. The
+  division term is deliberately *not* reimplemented; division-sensitive gates use the
+  authoritative tracksdata harness (`biotrack.metric`).
+- **Validation design.** Leave-one-embryo-out is the honesty gate; to avoid overfitting the two
+  folds, selection uses nested grouped crop/time splits *within* an embryo with bootstrap CIs,
+  then evaluates the frozen config cross-embryo.
+- **V3 reproduction.** `notebooks/kaggle_dog_infer.py` implements the verified public 0.842
+  recipe (multiscale DoG, NMS 4 µm, XY offset, (3,9,9) refinement, two-pass velocity-aware
+  Hungarian, min-track-length-4).
+- **Edge-error taxonomy.** Each missed GT edge is attributed to *no-candidate* (undetected),
+  *lost-assignment* (a candidate existed within 7 µm but lost the match), or *association*
+  (both endpoints matched, no predicted edge).
+
+## 4. Results
+
+- **Data characterization.** 199 crops from 2 embryos (44b6: 71, 6bba: 128); 128,883 annotated
+  edges, 151 divisions. Sparsity ~1–2% (**Fig. 1**); edge volume is embryo-imbalanced ~5:1
+  (**Fig. 2**) — the 6bba fold dominates weighted scoring.
+- **Recall drives score.** Across crops, adjusted edge Jaccard rises steeply with node recall
+  (**Fig. 3**); crops with recall <0.65 score <0.5, crops >0.95 score >0.9.
+- **Why edges are missed (the decisive result).** 3-way taxonomy: **no-candidate 70–79%**,
+  lost-assignment ~0–1%, association 21–29% (**Fig. 4**). The current bottleneck is genuine
+  under-detection (V3 count ratio <1), *not* assignment stealing — which validates investing in
+  recall (learned residual detector / redetection), with arbitration as the guard once we
+  over-propose.
+- **Normalization is not the gap.** Per-frame (V3) vs precomputed per-volume quantiles are
+  statistically identical (adjusted J 0.747 vs 0.742; **Fig. 5**). The ~0.73 local vs 0.842
+  public gap is a real recall deficit, not a normalization mismatch.
+
+## 5. Discussion
+
+The evaluator couples detection and linking through its match-first design; the field optimizes
+them separately, so their errors are correlated and structural. Our measured taxonomy shows the
+proximate cause here is under-detection, but naïvely scaling a detector risks the assignment-
+stealing failure mode once recall rises. The plan therefore pairs **high-recall internal
+over-proposal** with **matching-aware, track-conditioned arbitration** and **gap redetection**,
+followed by tissue-flow linking, count calibration, a learned residual detector (Spotiflow +
+soft-mask + CPV, gated on the taxonomy), a global solve only if residual conflicts remain, and
+sparse precision-gated divisions. Selection is private-set-first: min(fold) with bootstrap CIs,
+diversified final submissions, and submissions only for locally-qualified hypotheses. External
+public data is permitted for priors/pretraining; exact test-crop→public-label transfer awaits a
+private organizer clarification; score-probing is forbidden. Full plan:
+`reports/EXECUTION_PLAN.md`.
+
+---
+
+## Research Log
+
+### 2026-07-02
+- Established exact numpy edge metric; validated 20/20 vs tracksdata, then 7/7 adversarial
+  (assignment stealing, crowded, anisotropic, ties, duplicates, empty). Divisions kept on the
+  tracksdata harness by design.
+- Reproduced public V3 (0.842 recipe) with the corrected same-cell conflict definition (7 µm is
+  the evaluator gate, **not** a dedup radius — real nuclei coexist within it).
+- **Corrected dataset ground truth: 199 crops, not 129** (the API manifest was incomplete);
+  rebuilt inventory + leave-one-embryo-out splits from local pairs.
+- **3-way edge taxonomy** (corrected from 2-way): no-candidate dominant (70–79%), lost-assignment
+  ~0–1% → detection recall is the true bottleneck; Spotiflow investment justified.
+- Normalization A/B: per-frame ≈ precomputed → not the V3 gap.
+- Repo trustworthiness repair (Codex read-only audit): fixed `score_submission` omitted-dataset
+  inflation (+tests), DAXI anisotropic NMS (axial nuclei were being collapsed; +test), locked
+  deps, removed an unsafe `rm -rf data/train` permission, first intentional commit.
+- Set up private GitHub repo; established figures + animations pipeline (this journal).
+- **Next:** Phase 1 — matching-aware arbitration + track-conditioned redetection on over-proposed
+  candidates, gated on the exact metric across both embryo folds.

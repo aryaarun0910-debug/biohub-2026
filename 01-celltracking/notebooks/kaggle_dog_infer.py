@@ -64,8 +64,13 @@ def downsample_xy(vol: np.ndarray, f: int = XY_DOWNSAMPLE) -> np.ndarray:
     return v.reshape(Z, Y2 // f, f, X2 // f, f).mean(axis=(2, 4))
 
 
-def normalize_frame(vol: np.ndarray) -> np.ndarray:
-    lo, hi = (float(q) for q in np.quantile(vol, NORM_Q))
+def normalize_frame(vol: np.ndarray, lohi: tuple[float, float] | None = None) -> np.ndarray:
+    """Percentile normalize to [0,1]. If ``lohi`` given (precomputed per-volume quantiles),
+    use it for every frame (host-style); else recompute per-frame (V3-style)."""
+    if lohi is None:
+        lo, hi = (float(q) for q in np.quantile(vol, NORM_Q))
+    else:
+        lo, hi = lohi
     return np.clip((vol - lo) / (hi - lo + 1e-6), 0.0, 1.0).astype(np.float32)
 
 
@@ -94,9 +99,9 @@ def refine_com(vol: np.ndarray, coords: np.ndarray, radius=REFINE_RADIUS) -> np.
     return out
 
 
-def detect_frame(raw_iso: np.ndarray) -> np.ndarray:
+def detect_frame(raw_iso: np.ndarray, lohi: tuple[float, float] | None = None) -> np.ndarray:
     """Detect centroids in one isotropic (downsampled) frame. Returns (N,3) (z,y,x) iso coords."""
-    norm = normalize_frame(raw_iso)
+    norm = normalize_frame(raw_iso, lohi)
     resp = multiscale_dog(norm)
     thr = DOG_REL_THRESHOLD * float(resp.max()) if resp.max() > 0 else DOG_REL_THRESHOLD
     min_vox = max(1, int(round(NMS_DIST_UM / ISO_UM)))
@@ -240,9 +245,18 @@ def build_rows(dataset: str, cents_by_t, edges) -> list[dict]:
     return rows
 
 
+NORM_MODE = "per_frame"          # "per_frame" (V3) | "precomputed" (host per-volume quantiles)
+PRECOMP_Q = ("0.001", "0.999")   # quantile keys for precomputed mode
+
+
 def infer_dataset(zarr_path: Path) -> list[dict]:
-    arr = zarr.open_group(str(zarr_path), mode="r")["0"]
-    cents_by_t = [to_raw_coords(detect_frame(downsample_xy(np.asarray(arr[t]))))
+    grp = zarr.open_group(str(zarr_path), mode="r")
+    arr = grp["0"]
+    lohi = None
+    if NORM_MODE == "precomputed":
+        q = dict(grp.attrs).get("image_statistics", {}).get("quantiles", {})
+        lohi = (float(q[PRECOMP_Q[0]]), float(q[PRECOMP_Q[1]]))
+    cents_by_t = [to_raw_coords(detect_frame(downsample_xy(np.asarray(arr[t])), lohi))
                   for t in range(arr.shape[0])]
     return build_rows(zarr_path.stem, cents_by_t, link_frames(cents_by_t))
 

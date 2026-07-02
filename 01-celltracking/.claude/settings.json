@@ -69,7 +69,13 @@
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_v3_taxonomy.py --per-embryo 10)",
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_v3_taxonomy.py --per-embryo 200)",
       "Bash(sed -n '/per-embryo/,$p' reports/v3_taxonomy_all199.txt)",
-      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe -m pytest tests/test_numpy_metric.py -q)"
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe -m pytest tests/test_numpy_metric.py -q)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe -m pytest tests/test_scoring.py tests/test_numpy_metric.py -q)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/phase0_norm_ablation.py --per-embryo 3)",
+      "Skill(dataviz)",
+      "Skill(dataviz:*)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/make_figures.py)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/make_animation.py)"
     ]
   }
 }
