@@ -1,0 +1,12 @@
+# full 87GB dataset - never committed (reproducible via kaggle download)
+data/
+# local venv
+.venv/
+# vendored organizer repo - reproducible via git clone (see pyproject.toml)
+vendor/
+# pretrained weights - reproducible from public URLs (see reports/research/)
+weights/
+__pycache__/
+*.pyc
+.pytest_cache/
+kt_out/
