@@ -1,20 +1,21 @@
-"""Run the V3 DoG pipeline on train crops, score with the numpy metric, and build
-the edge-error taxonomy that decides detector-vs-linker investment.
+"""Run the V3 DoG pipeline on train crops, score with the exact numpy metric, and write a
+machine-readable per-crop edge-error taxonomy CSV (the source of truth for figures/journal).
 
-For each crop: run V3 (detect+link) on the image, match pred->GT nodes, then split
-every GT edge into:
-  - TP: both endpoints matched AND a pred edge connects the matched pair;
-  - DETECTION-miss: >=1 endpoint has no pred node within 7um (a detection failure);
-  - ASSOCIATION-miss: both endpoints detected but no pred edge (a linking failure).
+Per missed GT edge:
+  - no_cand:     an endpoint has NO pred node within 7um (true detection miss);
+  - lost_assign: an endpoint has a candidate within 7um but lost the 1-to-1 match (arbitration);
+  - assoc:       both endpoints matched but no pred edge connects them (linking).
+Also per-crop: Npred, Nest, count ratio, node recall, adjusted edge Jaccard.
 
-If DETECTION-miss dominates -> fund a learned detector (Spotiflow). If ASSOCIATION-miss
-dominates -> fix linking, don't build a detector. Also reports node_recall, count ratio,
-and adjusted edge Jaccard per crop and per embryo (44b6 vs 6bba = the CV folds).
+Writes reports/inventory/v3_taxonomy.csv. Parallel across crops.
 
-Usage: python scripts/run_v3_taxonomy.py --per-embryo 6
+Usage:
+    python scripts/run_v3_taxonomy.py --all --workers 8
+    python scripts/run_v3_taxonomy.py --per-embryo 10 --workers 6
 """
 
 import argparse
+import csv
 import importlib.util
 import sys
 from collections import defaultdict
@@ -28,12 +29,14 @@ sys.path.insert(0, str(ROOT / "src"))
 from biotrack.metric import estimated_nodes  # noqa: E402
 from biotrack.metric_numpy import Sample, gt_candidate_within, match_nodes, score_sample  # noqa: E402
 
-# import the V3 notebook module
 _spec = importlib.util.spec_from_file_location("dogv3", ROOT / "notebooks" / "kaggle_dog_infer.py")
 dog = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(dog)
 
-NID = None  # set below via tracksdata keys
+TRAIN = ROOT / "data" / "train"
+OUT = ROOT / "reports" / "inventory" / "v3_taxonomy.csv"
+FIELDS = ["crop", "fam", "n_pred", "n_est", "ratio", "recall", "adjJ",
+          "edge_tp", "edge_fp", "edge_fn", "tp", "no_cand", "lost_assign", "assoc"]
 
 
 def rows_to_sample(rows: list[dict]) -> Sample:
@@ -41,15 +44,10 @@ def rows_to_sample(rows: list[dict]) -> Sample:
     for r in rows:
         if r["row_type"] == "node":
             nid.append(r["node_id"]); t.append(r["t"]); zyx.append((r["z"], r["y"], r["x"]))
-    for r in rows:
-        if r["row_type"] == "edge":
+        elif r["row_type"] == "edge":
             edges.append((r["source_id"], r["target_id"]))
-    return Sample(
-        node_ids=np.asarray(nid, np.int64),
-        t=np.asarray(t, np.int64),
-        zyx=np.asarray(zyx, float).reshape(-1, 3),
-        edges=np.asarray(edges, np.int64).reshape(-1, 2),
-    )
+    return Sample(node_ids=np.asarray(nid, np.int64), t=np.asarray(t, np.int64),
+                  zyx=np.asarray(zyx, float).reshape(-1, 3), edges=np.asarray(edges, np.int64).reshape(-1, 2))
 
 
 def geff_to_sample(geff: str) -> Sample:
@@ -70,15 +68,9 @@ def geff_to_sample(geff: str) -> Sample:
 
 
 def classify_edges(pred: Sample, gt: Sample) -> dict:
-    """3-way FN split (corrected): a GT edge FN is attributed to
-       - no_cand:     an endpoint has NO pred node within 7um (true detection miss);
-       - lost_assign: an endpoint has a candidate within 7um but lost the 1-to-1 match
-                      (arbitration/assignment-stealing failure, NOT a detector failure);
-       - assoc:       both endpoints matched but no pred edge connects them (linking failure).
-    """
-    matched = match_nodes(pred, gt)                       # pred_id -> gt_id
-    gt_to_pred = {g: p for p, g in matched.items()}       # bipartite -> clean inverse
-    cand = gt_candidate_within(pred, gt)                  # gt_id -> pred within 7um exists?
+    matched = match_nodes(pred, gt)
+    gt_to_pred = {g: p for p, g in matched.items()}
+    cand = gt_candidate_within(pred, gt)
     pred_edge_set = {(int(a), int(b)) for a, b in pred.edges}
     tp = no_cand = lost_assign = assoc = 0
     for gs, gt_ in gt.edges:
@@ -92,64 +84,70 @@ def classify_edges(pred: Sample, gt: Sample) -> dict:
         else:
             unmatched = [g for g, p in ((gs, ps), (gt_, pt)) if p is None]
             if any(not cand.get(g, False) for g in unmatched):
-                no_cand += 1          # undetected -> better detector / redetection
+                no_cand += 1
             else:
-                lost_assign += 1      # detected but lost the match -> arbitration
+                lost_assign += 1
     return {"tp": tp, "no_cand": no_cand, "lost_assign": lost_assign, "assoc": assoc}
+
+
+def process_crop(name: str) -> dict:
+    rows = dog.infer_dataset(TRAIN / f"{name}.zarr")
+    pred = rows_to_sample(rows)
+    gt = geff_to_sample(str(TRAIN / f"{name}.geff"))
+    n_est = estimated_nodes(str(TRAIN / f"{name}.geff"))
+    s = score_sample(pred, gt, n_est)
+    tax = classify_edges(pred, gt)
+    return {"crop": name, "fam": name.split("_")[0], "n_pred": s["num_pred_nodes"],
+            "n_est": int(n_est), "ratio": round(s["num_pred_nodes"] / n_est, 4) if n_est else float("nan"),
+            "recall": round(s["node_recall"], 4), "adjJ": round(s["adj_edge_jaccard"], 4),
+            "edge_tp": s["edge_tp"], "edge_fp": s["edge_fp"], "edge_fn": s["edge_fn"], **tax}
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--per-embryo", type=int, default=6, help="crops per embryo family")
+    ap.add_argument("--all", action="store_true")
+    ap.add_argument("--per-embryo", type=int, default=10)
+    ap.add_argument("--workers", type=int, default=6)
     args = ap.parse_args()
 
-    geffs = {p.stem: p for p in (ROOT / "data/train").glob("*.geff")}
-    zarrs = {p.stem: p for p in (ROOT / "data/train").glob("*.zarr")}
-    both = sorted(set(geffs) & set(zarrs))
-    by_fam = defaultdict(list)
-    for name in both:
-        by_fam[name.split("_")[0]].append(name)
+    both = sorted(p.stem for p in TRAIN.glob("*.geff") if (TRAIN / f"{p.stem}.zarr").exists())
+    if not args.all:
+        by_fam = defaultdict(list)
+        for n in both:
+            by_fam[n.split("_")[0]].append(n)
+        both = [n for names in by_fam.values() for n in names[: args.per_embryo]]
 
-    picks = []
-    for fam, names in by_fam.items():
-        picks += names[: args.per_embryo]
+    print(f"Running V3 on {len(both)} crops with {args.workers} workers...")
+    if args.workers > 1:
+        from multiprocessing import Pool
+        with Pool(args.workers) as pool:
+            results = []
+            for i, r in enumerate(pool.imap_unordered(process_crop, both), 1):
+                results.append(r)
+                if i % 10 == 0 or i == len(both):
+                    print(f"  {i}/{len(both)}")
+    else:
+        results = [process_crop(n) for n in both]
+
+    results.sort(key=lambda r: r["crop"])
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    with OUT.open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=FIELDS); w.writeheader(); w.writerows(results)
+    print(f"Wrote {OUT} ({len(results)} crops)")
 
     agg = defaultdict(lambda: defaultdict(float))
-    print(f"Running V3 on {len(picks)} crops ({args.per_embryo}/embryo)...\n")
-    print(f"{'crop':18s} {'fam':5s} {'Npred':>6} {'Nest':>6} {'ratio':>5} {'recall':>6} "
-          f"{'adjJ':>6} {'tp':>5} {'noCand':>6} {'lostA':>6} {'assoc':>6}")
-    for name in picks:
-        rows = dog.infer_dataset(zarrs[name])
-        pred = rows_to_sample(rows)
-        gt = geff_to_sample(str(geffs[name]))
-        n_est = estimated_nodes(str(geffs[name]))
-        s = score_sample(pred, gt, n_est)
-        tax = classify_edges(pred, gt)
-        fam = name.split("_")[0]
-        ratio = s["num_pred_nodes"] / n_est if n_est else float("nan")
-        print(f"{name[:18]:18s} {fam:5s} {s['num_pred_nodes']:6d} {int(n_est):6d} {ratio:5.2f} "
-              f"{s['node_recall']:6.3f} {s['adj_edge_jaccard']:6.3f} "
-              f"{tax['tp']:5d} {tax['no_cand']:6d} {tax['lost_assign']:6d} {tax['assoc']:6d}")
-        for k in ("edge_tp", "edge_fp", "edge_fn"):
-            agg[fam][k] += s[k]
-        for k in ("tp", "no_cand", "lost_assign", "assoc"):
-            agg[fam]["tax_" + k] += tax[k]
-        agg[fam]["adjw"] += s["adj_edge_jaccard"] * (s["edge_tp"] + s["edge_fp"] + s["edge_fn"])
-        agg[fam]["w"] += s["edge_tp"] + s["edge_fp"] + s["edge_fn"]
-        agg[fam]["recall_sum"] += s["node_recall"]; agg[fam]["n"] += 1
-
+    for r in results:
+        a = agg[r["fam"]]
+        w = r["edge_tp"] + r["edge_fp"] + r["edge_fn"]
+        a["adjw"] += r["adjJ"] * w; a["w"] += w; a["recall"] += r["recall"]; a["n"] += 1
+        for k in ("no_cand", "lost_assign", "assoc"):
+            a["tax_" + k] += r[k]
     print("\n=== per-embryo (fold) summary ===")
     for fam, a in sorted(agg.items()):
-        tp, fp, fn = a["edge_tp"], a["edge_fp"], a["edge_fn"]
-        micro_J = tp / (tp + fp + fn) if (tp + fp + fn) else float("nan")
-        adjJ = a["adjw"] / a["w"] if a["w"] else float("nan")
         nc, la, asc = a["tax_no_cand"], a["tax_lost_assign"], a["tax_assoc"]
         tot = nc + la + asc or 1
-        print(f"  {fam}: adjJ={adjJ:.4f} microJ={micro_J:.4f} recall={a['recall_sum']/a['n']:.3f} "
-              f"| FN no-candidate={nc:.0f} ({nc/tot*100:.0f}%) lost-assignment={la:.0f} ({la/tot*100:.0f}%) "
-              f"association={asc:.0f} ({asc/tot*100:.0f}%)")
-    print("\nno-candidate dominant -> detector/recall (Spotiflow). lost-assignment dominant -> ARBITRATION. "
-          "association dominant -> linking.")
+        print(f"  {fam}: adjJ={a['adjw']/a['w']:.4f} recall={a['recall']/a['n']:.3f} | "
+              f"no-candidate={nc/tot*100:.0f}% lost-assignment={la/tot*100:.0f}% association={asc/tot*100:.0f}%")
 
 
 if __name__ == "__main__":

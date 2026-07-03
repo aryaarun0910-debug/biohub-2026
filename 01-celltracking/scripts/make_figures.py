@@ -82,40 +82,44 @@ def fig2_edges(rows):
     fig.tight_layout(); fig.savefig(FIG / "fig2_edges_per_crop.png"); plt.close(fig)
 
 
-def _parse_taxonomy_txt(path):
-    """Parse per-crop rows: crop fam Npred Nest ratio recall adjJ ..."""
-    out = []
-    for ln in Path(path).read_text().splitlines():
-        m = re.match(r"^(\S+)\s+(44b6|6bba)\s+(\d+)\s+(\d+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)", ln)
-        if m:
-            out.append({"fam": m.group(2), "ratio": float(m.group(5)),
-                        "recall": float(m.group(6)), "adjJ": float(m.group(7))})
-    return out
+def _load_taxonomy():
+    src = ROOT / "reports" / "inventory" / "v3_taxonomy.csv"
+    rows = list(csv.DictReader(src.open(encoding="utf-8")))
+    for r in rows:
+        for k in ("ratio", "recall", "adjJ"):
+            r[k] = float(r[k])
+        for k in ("no_cand", "lost_assign", "assoc", "edge_tp", "edge_fp", "edge_fn"):
+            r[k] = int(r[k])
+    return rows
 
 
 def fig3_recall_adjj():
-    src = ROOT / "reports" / "v3_taxonomy_20crops.txt"
-    if not src.exists():
-        return
-    d = _parse_taxonomy_txt(src)
+    d = _load_taxonomy()
+    n = len(d)
     fig, ax = plt.subplots(figsize=(6.4, 4.6))
     for f in ["44b6", "6bba"]:
         pts = [(r["recall"], r["adjJ"]) for r in d if r["fam"] == f]
         if not pts:
             continue
         xs, ys = zip(*pts)
-        ax.scatter(xs, ys, s=42, c=C[f], alpha=0.8, edgecolors="white", linewidths=0.6,
+        ax.scatter(xs, ys, s=34, c=C[f], alpha=0.75, edgecolors="white", linewidths=0.5,
                    label=f"embryo {f}", zorder=3)
     ax.set_xlabel("node recall (fraction of GT cells detected within 7 um)")
     ax.set_ylabel("adjusted edge Jaccard")
-    ax.set_title("Recall drives score  (V3 DoG, per crop)", color=INK, fontweight="bold", loc="left")
+    ax.set_title(f"Recall drives score  (V3 DoG, all {n} crops)", color=INK, fontweight="bold", loc="left")
     ax.legend(frameon=False, loc="upper left")
     fig.tight_layout(); fig.savefig(FIG / "fig3_recall_vs_adjj.png"); plt.close(fig)
 
 
 def fig4_taxonomy():
-    # 3-way FN split, per-embryo aggregates from the corrected taxonomy (10 crops/embryo)
-    data = {"44b6": (79, 0, 21), "6bba": (70, 1, 29)}
+    d = _load_taxonomy()
+    data, ncrops = {}, {}
+    for f in ["44b6", "6bba"]:
+        sub = [r for r in d if r["fam"] == f]
+        nc = sum(r["no_cand"] for r in sub); la = sum(r["lost_assign"] for r in sub)
+        asc = sum(r["assoc"] for r in sub); tot = nc + la + asc or 1
+        data[f] = (nc / tot * 100, la / tot * 100, asc / tot * 100)
+        ncrops[f] = len(sub)
     cats = ["no-candidate\n(undetected)", "lost-assignment\n(arbitration)", "association\n(linking)"]
     seg = ["#0072B2", "#009E73", "#CC79A7"]  # Okabe-Ito blue/green/purple by FAILURE MODE
     fig, ax = plt.subplots(figsize=(6.8, 4.2))
@@ -131,6 +135,7 @@ def fig4_taxonomy():
                         ha="center", va="center", color="white", fontweight="bold", fontsize=10)
         bottom += vals
     ax.set_ylabel("share of missed GT edges (%)"); ax.set_ylim(0, 100)
+    ax.set_xticklabels([f"embryo {f}\n(n={ncrops[f]})" for f in data])
     ax.set_title("Why edges are missed", color=INK, fontweight="bold", loc="left")
     ax.text(0, 104, "no-candidate (undetected) dominates -> raise recall", color=MUTED, fontsize=9.5)
     ax.legend(frameon=False, bbox_to_anchor=(1.0, 1.0), loc="upper left", fontsize=9)
@@ -139,19 +144,26 @@ def fig4_taxonomy():
 
 
 def fig5_norm():
-    modes = ["per-frame\n(V3)", "precomputed\n(host)"]
-    adjJ = [0.7466, 0.7417]; recall = [0.822, 0.820]
-    x = np.arange(len(modes)); w = 0.35
-    fig, ax = plt.subplots(figsize=(6.0, 4.2))
-    b1 = ax.bar(x - w / 2, adjJ, w, color="#0072B2", label="adjusted edge Jaccard", edgecolor="white", linewidth=2)
-    b2 = ax.bar(x + w / 2, recall, w, color="#56B4E9", label="node recall", edgecolor="white", linewidth=2)
-    for bars in (b1, b2):
-        for b in bars:
-            ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 0.005, f"{b.get_height():.3f}",
-                    ha="center", va="bottom", color=INK, fontsize=9)
-    ax.set_xticks(x); ax.set_xticklabels(modes); ax.set_ylim(0, 1.0)
-    ax.set_title("Normalization ablation  (no meaningful difference)", color=INK, fontweight="bold", loc="left")
-    ax.legend(frameon=False, loc="upper right", fontsize=9)
+    src = ROOT / "reports" / "inventory" / "norm_ablation.csv"
+    rows = list(csv.DictReader(src.open(encoding="utf-8")))
+    fig, ax = plt.subplots(figsize=(5.6, 5.2))
+    ax.plot([0, 1], [0, 1], color=MUTED, ls="--", lw=1, zorder=1)
+    for f in ["44b6", "6bba"]:
+        pts = [(float(r["pf_adjJ"]), float(r["pc_adjJ"])) for r in rows if r["fam"] == f]
+        if not pts:
+            continue
+        xs, ys = zip(*pts)
+        ax.scatter(xs, ys, s=48, c=C[f], alpha=0.8, edgecolors="white", linewidths=0.6,
+                   label=f"embryo {f}", zorder=3)
+    md = max(abs(float(r["pf_adjJ"]) - float(r["pc_adjJ"])) for r in rows)
+    ax.set_xlabel("adjusted edge Jaccard - per-frame (V3)")
+    ax.set_ylabel("adjusted edge Jaccard - precomputed (host)")
+    ax.set_xlim(0.3, 1.0); ax.set_ylim(0.3, 1.0)
+    ax.set_title(f"Normalization has no effect  (n={len(rows)}, max|delta|={md:.3f})",
+                 color=INK, fontweight="bold", loc="left")
+    ax.text(0.34, 0.95, "every crop on the diagonal:\nDoG relative threshold is\nscale-invariant to normalization",
+            color=MUTED, fontsize=9, va="top")
+    ax.legend(frameon=False, loc="lower right")
     fig.tight_layout(); fig.savefig(FIG / "fig5_norm_ablation.png"); plt.close(fig)
 
 

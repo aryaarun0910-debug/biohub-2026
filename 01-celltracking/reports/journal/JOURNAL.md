@@ -19,10 +19,10 @@ reconstruct lineages including divisions. Scoring is
 bipartite node matching within 7 µm. The training set is only **two embryos** (199 crops),
 and labels are **~1–2% sparse** point annotations; the hidden test is a disjoint embryo.
 
-Our central finding, established by an exact-metric edge-error taxonomy on a faithful
-reproduction of the public 0.842 "V3" pipeline, is that **71–79% of missed edges are
-genuine non-detections** (no candidate within 7 µm), while assignment and linking errors are
-minor. Independently, reverse-engineering the evaluator shows the field's shared structural
+Our central finding, established by an exact-metric edge-error taxonomy over **all 199 crops**
+on a faithful reproduction of the public 0.842 "V3" pipeline, is that **77–80% of missed edges
+are genuine non-detections** (no candidate within 7 µm), while assignment (≤2%) and linking
+errors are minor. Independently, reverse-engineering the evaluator shows the field's shared structural
 weakness: matching is decided *before* edges are judged, so a spatially-closer duplicate can
 steal a ground-truth match from the proposal carrying the correct trajectory. These converge
 on a single thesis: **over-propose internally, then select one representative per cell by
@@ -88,16 +88,20 @@ Full deep-dives: `reports/research/` (methods, Royer ecosystem, competitive meth
 - **Data characterization.** 199 crops from 2 embryos (44b6: 71, 6bba: 128); 128,883 annotated
   edges, 151 divisions. Sparsity ~1–2% (**Fig. 1**); edge volume is embryo-imbalanced ~5:1
   (**Fig. 2**) — the 6bba fold dominates weighted scoring.
-- **Recall drives score.** Across crops, adjusted edge Jaccard rises steeply with node recall
-  (**Fig. 3**); crops with recall <0.65 score <0.5, crops >0.95 score >0.9.
-- **Why edges are missed (the decisive result).** 3-way taxonomy: **no-candidate 70–79%**,
-  lost-assignment ~0–1%, association 21–29% (**Fig. 4**). The current bottleneck is genuine
-  under-detection (V3 count ratio <1), *not* assignment stealing — which validates investing in
-  recall (learned residual detector / redetection), with arbitration as the guard once we
-  over-propose.
-- **Normalization is not the gap.** Per-frame (V3) vs precomputed per-volume quantiles are
-  statistically identical (adjusted J 0.747 vs 0.742; **Fig. 5**). The ~0.73 local vs 0.842
-  public gap is a real recall deficit, not a normalization mismatch.
+  All figures below are generated from committed CSV artifacts
+  (`reports/inventory/v3_taxonomy.csv`, `norm_ablation.csv`), not hard-coded.
+- **Recall drives score.** Across **all 199 crops**, adjusted edge Jaccard rises steeply with
+  node recall (**Fig. 3**); crops with recall <0.65 score <0.5, crops >0.95 score >0.9.
+- **Why edges are missed (the decisive result).** 3-way taxonomy over **all 199 crops**:
+  no-candidate **80% (44b6) / 77% (6bba)**, lost-assignment 2% / 0%, association 18% / 23%
+  (**Fig. 4**). The bottleneck is genuine under-detection (V3 count ratio <1, recall 0.82 / 0.88),
+  *not* assignment stealing — validating investment in recall (learned residual detector /
+  redetection), with arbitration as the guard once we over-propose. V3 reproduction adjusted J is
+  **0.632 (44b6) / 0.756 (6bba)** locally; the gap to the public ~0.842 is this recall deficit.
+- **Normalization has no effect (not the gap).** Per-frame (V3) vs precomputed per-volume
+  quantiles gave **identical results on all 30 tested crops** (max |delta| = 0.000; **Fig. 5**) —
+  because DoG uses a *relative* threshold (a fraction of the max response), which is scale-invariant
+  to linear normalization. Normalization is therefore not a lever for the DoG detector.
 
 ## 5. Discussion
 
@@ -133,5 +137,19 @@ private organizer clarification; score-probing is forbidden. Full plan:
   inflation (+tests), DAXI anisotropic NMS (axial nuclei were being collapsed; +test), locked
   deps, removed an unsafe `rm -rf data/train` permission, first intentional commit.
 - Set up private GitHub repo; established figures + animations pipeline (this journal).
+
+### 2026-07-03 (evidence hardening — Codex 2nd audit)
+- Replaced hard-coded figure values with machine-readable CSV artifacts: taxonomy runner now
+  parallel (7 workers) and writes `v3_taxonomy.csv`; norm ablation writes `norm_ablation.csv`.
+- **Full-199 taxonomy** (was 20 crops): no-candidate 80%/77%, lost-assignment 2%/0%, assoc 18%/23%;
+  V3 adjJ 0.632/0.756, recall 0.82/0.88 — the no-candidate dominance holds robustly.
+- **Norm ablation** (n=30, both directions): per-frame == precomputed EXACTLY (max|delta|=0) —
+  DoG relative-threshold is scale-invariant; "statistically identical" claim upgraded to
+  mechanistic identity.
+- Figures 3/4/5 regenerated exclusively from those CSVs.
+- Fixed `fetch.py` to build the COMPLETE 199-embryo manifest (was truncated to 129); documented the
+  canonical whole-competition bulk download.
+- Portable dependency pin (organizer pkg via git URL, not local path) + `requirements.txt` + GitHub
+  Actions CI running the synthetic-data metric tests on every push.
 - **Next:** Phase 1 — matching-aware arbitration + track-conditioned redetection on over-proposed
   candidates, gated on the exact metric across both embryo folds.

@@ -1,0 +1,19 @@
+# Portable install for a fresh clone / CI (Python 3.11-3.13; 3.14 unsupported by tracksdata).
+#   uv venv .venv --python 3.12
+#   uv pip install --python .venv torch --index-url https://download.pytorch.org/whl/cpu
+#   uv pip install --python .venv -r requirements.txt
+# Exact machine snapshot: requirements.lock.txt.
+torch
+tracking-cellmot @ git+https://github.com/royerlab/kaggle-cell-tracking-competition
+geff
+polars
+scipy
+scikit-image
+numpy
+pandas
+zarr
+dask[array]
+kaggle
+matplotlib
+pillow
+pytest

@@ -75,7 +75,18 @@
       "Skill(dataviz)",
       "Skill(dataviz:*)",
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/make_figures.py)",
-      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/make_animation.py)"
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/make_animation.py)",
+      "Bash(grep -qa \"per-embryo\" reports/v3_taxonomy_all199.txt)",
+      "Bash(echo \"remote: $\\(git remote get-url origin\\)\")",
+      "Bash(.venv/Scripts/python.exe -c \"import os; print\\(os.cpu_count\\(\\), 'cpus'\\)\")",
+      "Bash(time PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_v3_taxonomy.py --per-embryo 3 --workers 4)",
+      "Bash(rm -f reports/v3_taxonomy_all199.txt reports/v3_taxonomy_20crops.txt)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_v3_taxonomy.py --all --workers 7)",
+      "Bash(grep -n \"file:///\" requirements.lock.txt)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/fetch.py --refresh-manifest)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/phase0_norm_ablation.py --per-embryo 15 --workers 7)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe -)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe -m pytest tests/ -q)"
     ]
   }
 }

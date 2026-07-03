@@ -10,3 +10,4 @@ __pycache__/
 *.pyc
 .pytest_cache/
 kt_out/
+reports/*.log
