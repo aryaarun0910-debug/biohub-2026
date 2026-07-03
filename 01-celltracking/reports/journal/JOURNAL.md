@@ -253,3 +253,16 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - FIX = COUNT CALIBRATION (Phase 2), not continuity scoring: over-propose where recall low, restrain
   where already-detected (target ratio 0.95-1.05). Should convert +0.052 min-fold into edge-weighted gain.
 - op_bright still worth submitting (robustness win on hard embryo + 2nd local<->LB calibration point).
+
+### 2026-07-03 (Codex correction accepted; temporal smoothing = the V11 classical lever)
+- Accepted Codex corrections: op_bright ~0.812 is HONEST (not misleading); count-cal is an uncalibrated
+  operating point (unproven, est_n hidden at inference, ~0.815 ceiling even if perfect); CLASSICAL CEILING
+  IS 0.854 (public Rule-Based V11 via temporal coordinate smoothing w=0.7), NOT 0.842. My "learned detector
+  required above 0.842" was FALSE.
+- Ported temporal coordinate smoothing (smooth each linked node toward its edge-neighbours' mean, w=0.7).
+  20-crop ablation: V3+smooth improves BOTH folds (44b6 0.677->0.703, 6bba 0.782->0.787). op_bright+smooth
+  STACKS: 44b6 0.677->0.734 (+0.057), 6bba 0.782->0.791 (+0.009). Both folds up incl. dominant 6bba ->
+  real EDGE-WEIGHTED gain (~+0.016 on subset) unlike op_bright alone. Confirming on 199.
+- Revised path (Codex): op_bright ~0.81 -> +count-cal ~0.815-0.825 -> +V11 smoothing ~0.84-0.855 ->
+  learned detector over validated 0.85 base ~0.865-0.885. 0.88+ prob ~15-25%, rises after reproducing 0.854.
+- Plan: run classical (smoothing/calibration, CPU) + learned (dense-external pretraining, GPU) CONCURRENTLY.

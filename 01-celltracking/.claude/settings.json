@@ -108,7 +108,9 @@
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config v3 --per-embryo 8 --workers 7)",
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/tbd_diagnostic.py --n-crops 6 --window 2)",
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config op_bright --per-embryo 10 --workers 7)",
-      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config v3 --per-embryo 10 --workers 7)"
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config v3 --per-embryo 10 --workers 7)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config v3_smooth --per-embryo 10 --workers 7)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config op_bright_smooth --per-embryo 10 --workers 7)"
     ]
   }
 }

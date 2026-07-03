@@ -72,7 +72,36 @@ def cfg_op_bright(crop: str) -> Sample:
     return _op_dedup(crop, nms_um=1.0, r_same_um=3.0, rep="bright")
 
 
-CONFIGS = {"v3": cfg_v3, "op_bright": cfg_op_bright}
+def smooth_sample(s: Sample, w: float = 0.7) -> Sample:
+    """Temporal coordinate smoothing (public V11 lever, ~0.854): blend each linked node's position
+    toward its edge-neighbours' mean. Smoother tracks localize better -> the 7um 1/(1+d) matcher
+    rewards it. w = weight on the node's own position."""
+    if len(s.node_ids) == 0:
+        return s
+    id_to_i = {int(n): i for i, n in enumerate(s.node_ids)}
+    nbr = {i: [] for i in range(len(s.node_ids))}
+    for a, b in s.edges:
+        ia, ib = id_to_i.get(int(a)), id_to_i.get(int(b))
+        if ia is not None and ib is not None:
+            nbr[ia].append(ib); nbr[ib].append(ia)
+    zyx = s.zyx.copy()
+    out = s.zyx.copy()
+    for i, ns in nbr.items():
+        if ns:
+            out[i] = w * zyx[i] + (1 - w) * zyx[ns].mean(axis=0)
+    return Sample(node_ids=s.node_ids, t=s.t, zyx=out, edges=s.edges)
+
+
+def cfg_v3_smooth(crop: str) -> Sample:
+    return smooth_sample(cfg_v3(crop))
+
+
+def cfg_op_bright_smooth(crop: str) -> Sample:
+    return smooth_sample(cfg_op_bright(crop))
+
+
+CONFIGS = {"v3": cfg_v3, "op_bright": cfg_op_bright,
+           "v3_smooth": cfg_v3_smooth, "op_bright_smooth": cfg_op_bright_smooth}
 # steps 5-6 add: arbitration-scored representatives, track-conditioned redetection
 
 
