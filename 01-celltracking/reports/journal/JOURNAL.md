@@ -215,3 +215,15 @@ private organizer clarification; score-probing is forbidden. Full plan:
   connected component qualifies a GT division, dodges division-FP). Prize/DQ risk -> DO NOT SUBMIT
   without written host clearance. We do not build strategy around it. (Endorsed.)
 - Immediate plan: build the track-before-detect falsification diagnostic (top bet, CPU, hours).
+
+### 2026-07-03 (track-before-detect: NO-GO, redirect to learned detector)
+- Built + ran the TBD falsification diagnostic (scripts/tbd_diagnostic.py) on 6 worst-recall crops.
+  Temporal DoG-response integration recovered only 5.5% of DoG-missed GT above the null 95th pct
+  (single-frame 3%) - Codex gate was >=20%. **NO-GO for naive track-before-detect** (killed in ~20min).
+- Sanity check (mapping correct): missed-GT DoG response median 0.096 vs detected 0.137 vs null 0.021.
+  Missed cells are SUBTHRESHOLD (real signal, above background median) but DoG has a heavy bright-
+  background tail (texture/membranes) that overlaps dim cells -> temporal summing lifts both, no clean
+  separation. => the recall lever is a LEARNED detector (NIS3D/Spotiflow separates dim cells from
+  texture where DoG can't) + over-proposal/arbitration; NOT temporal DoG integration.
+- Redirect: prioritize the learned-detector path (NIS3D dense pretraining / Spotiflow) + the free
+  op_bright arbitration. March-22 provenance gate remains the conditional jackpot.

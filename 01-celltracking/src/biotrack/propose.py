@@ -77,6 +77,13 @@ def _multiscale_dog_and_scale(vol: np.ndarray, scale_pairs, iso=ISO_UM):
     return resp, which
 
 
+def dog_response(raw_iso_norm: np.ndarray, scale_pairs=None) -> np.ndarray:
+    """Max multiscale-DoG RESPONSE volume for a normalized ISO frame (for track-before-detect:
+    integrate this along motion paths BEFORE thresholding, instead of thresholding per frame)."""
+    resp, _ = _multiscale_dog_and_scale(raw_iso_norm, scale_pairs or ProposeConfig().scale_pairs_um)
+    return resp
+
+
 def propose_frame(raw_iso: np.ndarray, cfg: ProposeConfig) -> np.ndarray:
     """Over-propose candidates in one isotropic (downsampled) frame. Returns (M,8), ISO coords."""
     norm = normalize_frame(raw_iso, cfg.norm_q)

@@ -105,7 +105,8 @@
       "Bash(.venv/Scripts/python.exe -m kaggle kernels output aryaarun07/biohub-spotiflow-zeroshot-screen -p kt_screen)",
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe -c ' *)",
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config op_bright --per-embryo 8 --workers 7)",
-      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config v3 --per-embryo 8 --workers 7)"
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config v3 --per-embryo 8 --workers 7)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/tbd_diagnostic.py --n-crops 6 --window 2)"
     ]
   }
 }
