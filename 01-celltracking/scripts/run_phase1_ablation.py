@@ -44,8 +44,36 @@ def cfg_v3(crop: str) -> Sample:
     return rows_to_sample(dog.infer_dataset(TRAIN / f"{crop}.zarr"))
 
 
-CONFIGS = {"v3": cfg_v3}
-# steps 3-6 register: "overpropose", "arbitrate", "redetect", "phase1_full"
+def _op_dedup(crop: str, nms_um: float, r_same_um: float, rep: str) -> Sample:
+    """Over-propose (loose NMS) -> same-cell conflict sets -> ONE representative per set -> V3 link.
+    rep: 'bright' (max DoG response) or 'central' (min mean physical dist within set)."""
+    from biotrack import arbitrate, propose
+    frames = propose.propose_volume(TRAIN / f"{crop}.zarr", propose.ProposeConfig(nms_dist_um=nms_um))
+    cents_by_t = []
+    for f in frames:
+        if len(f) == 0:
+            cents_by_t.append(np.zeros((0, 3), np.float32)); continue
+        coords = f[:, :3]
+        labels = arbitrate.same_cell_sets(coords, r_same_um=r_same_um)
+        reps = []
+        for lab in np.unique(labels):
+            idx = np.where(labels == lab)[0]
+            if rep == "bright":
+                reps.append(idx[np.argmax(f[idx, 3])])            # max response
+            else:
+                p = coords[idx] * np.array(arbitrate.SCALE)
+                reps.append(idx[np.argmin(np.linalg.norm(p - p.mean(0), axis=1))])
+        cents_by_t.append(coords[reps])
+    rows = dog.build_rows(crop, cents_by_t, dog.link_frames(cents_by_t))
+    return rows_to_sample(rows)
+
+
+def cfg_op_bright(crop: str) -> Sample:
+    return _op_dedup(crop, nms_um=1.0, r_same_um=3.0, rep="bright")
+
+
+CONFIGS = {"v3": cfg_v3, "op_bright": cfg_op_bright}
+# steps 5-6 add: arbitration-scored representatives, track-conditioned redetection
 
 
 def score_crop(crop: str, pred: Sample) -> dict:
