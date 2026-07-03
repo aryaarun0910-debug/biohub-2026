@@ -90,7 +90,12 @@
       "Bash(rm -f data/_v3_test_submission.csv)",
       "Bash(.venv/Scripts/python.exe -c \"import json,os; p=os.path.expanduser\\('~/.kaggle/kaggle.json'\\); print\\(json.load\\(open\\(p\\)\\)['username']\\)\")",
       "Bash(.venv/Scripts/python.exe -m kaggle competitions submissions -c biohub-cell-tracking-during-development)",
-      "Bash(.venv/Scripts/python.exe -m kaggle kernels status aryaarun07/biohub-v3-anchor)"
+      "Bash(.venv/Scripts/python.exe -m kaggle kernels status aryaarun07/biohub-v3-anchor)",
+      "Bash(rm -rf kt_anchor)",
+      "Bash(mkdir -p kt_anchor)",
+      "Bash(.venv/Scripts/python.exe -m kaggle kernels output aryaarun07/biohub-v3-anchor -p kt_anchor)",
+      "Bash(rm -rf kt_anchor kt_probe kt_out)",
+      "Bash(printf \"kt_*/\\\\n\")"
     ]
   }
 }
