@@ -151,5 +151,20 @@ private organizer clarification; score-probing is forbidden. Full plan:
   canonical whole-competition bulk download.
 - Portable dependency pin (organizer pkg via git URL, not local path) + `requirements.txt` + GitHub
   Actions CI running the synthetic-data metric tests on every push.
-- **Next:** Phase 1 — matching-aware arbitration + track-conditioned redetection on over-proposed
-  candidates, gated on the exact metric across both embryo folds.
+- Evidence hardening + Phase-1 design (see later entries).
+
+### 2026-07-03 (Phase 1 launch)
+- V3 anchor submitted to Kaggle: hit a real env gap (Kaggle image has NO zarr/numcodecs but HAS
+  tensorstore) -> portable volume reader (zarr local / tensorstore Kaggle); kernel
+  `aryaarun07/biohub-v3-anchor` v2 produces a valid 206,786-row submission.
+- Built the Phase-1 ablation harness (`run_phase1_ablation.py`, config registry, per-fold min-adjJ
+  gate) + candidate cache (`src/biotrack/cache.py`).
+- **Step 1a finding (over-proposal frontier): NMS radius, not DoG threshold, is the recall lever.**
+  Lowering the response threshold leaves recall/count nearly flat (missed cells produce NO DoG local
+  max, not a sub-threshold one). Loosening NMS 3.2->1.0 um lifts recall (hard 44b6 crop 0.65->0.78 at
+  ratio 1.33; 6bba 0.86->0.90). Finer scales HURT (add count, not recall). BUT DoG recall plateaus
+  ~0.78-0.90 < the 0.95 target -> over-proposal is a partial lever; the last stretch needs
+  track-conditioned redetection and/or a learned residual detector (Spotiflow). propose.py default
+  set to loose NMS (1.0 um), 2 scales.
+- **Next:** basin-based same-cell conflict sets + guardrail test (step 4), then brightest-rep ->
+  link -> arbitrate -> relink (step 5); redetection (step 6) is now clearly needed for recall.
