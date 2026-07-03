@@ -235,3 +235,13 @@ private organizer clarification; score-probing is forbidden. Full plan:
   penalty stayed controlled. Free CPU win; plausibly ~0.84 LB if the ~+0.07 local<->LB offset holds.
 - Confirming on all 199 (background). Next: full arbitration (continuity + matching-stability scoring,
   not just brightest) = upside; then learned detector stacks on top.
+
+### 2026-07-03 (op_bright full-199: min-fold +0.052 but edge-weighted +0.004)
+- op_bright ALL 199: 44b6 0.632->0.684 (+0.052, recall 0.816->0.882), 6bba 0.756->0.751 (-0.005).
+  MIN-FOLD 0.632->0.684 (+0.052) = big ROBUSTNESS win on the hard embryo. BUT edge-weighted both-fold
+  (the LB proxy) only 0.737->0.741 (+0.004) because dense 6bba (5x edge volume) slightly regressed:
+  crude "brightest" over-proposal adds FP/count on already-well-detected crops. LB likely ~0.81 (from 0.807).
+- Runtime OK: ~25s/dense crop -> ~1.4h for hidden test (<12h). op_bright kernel pushed (aryaarun07/biohub-op-bright).
+- FIX = continuity/matching-stability arbitration (not brightest) to keep recall gain without the 6bba
+  regression -> should lift the weighted score. Then learned detector stacks. Submitting op_bright as a
+  calibration point + robustness win (expect ~0.81, not a leap).
