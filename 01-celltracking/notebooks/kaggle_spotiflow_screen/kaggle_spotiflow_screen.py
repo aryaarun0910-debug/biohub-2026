@@ -7,7 +7,15 @@ what fraction of DoG-MISSED GT nodes each model recovers within 7 um. Gate = >=8
 Kaggle: GPU=T4, INTERNET=ON (pip install spotiflow + pretrained weights). Not a submission.
 """
 import subprocess, sys
-subprocess.run([sys.executable, "-m", "pip", "install", "-q", "spotiflow"], check=False)
+print("installing spotiflow...", flush=True)
+r = subprocess.run([sys.executable, "-m", "pip", "install", "spotiflow"], capture_output=True, text=True)
+print("pip rc:", r.returncode, flush=True)
+if r.returncode != 0:
+    print("PIP STDERR:", r.stderr[-3000:], flush=True)
+try:
+    import spotiflow; print("spotiflow", spotiflow.__version__, flush=True)
+except Exception as e:
+    print("SPOTIFLOW IMPORT FAILED:", repr(e), flush=True)
 
 import json
 from collections import defaultdict
@@ -139,4 +147,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import traceback
+    try:
+        main()
+    except Exception:
+        traceback.print_exc(); sys.stdout.flush()

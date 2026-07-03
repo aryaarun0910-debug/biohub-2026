@@ -188,3 +188,11 @@ private organizer clarification; score-probing is forbidden. Full plan:
   + arbitration), THEN stack the learned detector. Test-easier read modestly improves the odds.
 - Built the Kaggle T4 zero-shot screen notebook (notebooks/kaggle_spotiflow_screen/, self-contained:
   reads volumes + GT geffs via tensorstore, full-frame complement recall). Runs free on Kaggle T4.
+
+### 2026-07-03 (screen error + strategic pivot to CPU arbitration)
+- Kaggle Spotiflow screen ERRORED (empty log; likely pip-install/numpy-2.0 conflict). Hardened the
+  notebook to surface pip + import + traceback. Ran on P100 (Kaggle default for enable_gpu); P100 is
+  fine for inference screening; T4x2 (for concurrent fold TRAINING) is a UI accelerator selection.
+- **Strategic pivot:** the anchor score revealed a CERTAIN free win - close the 0.807->0.842 V3 gap
+  via CPU arbitration (over-proposal + same-cell dedup + link). Prioritizing step-5 arbitration over
+  blind remote-debugging the marginal, out-of-domain Spotiflow zero-shot screen.
