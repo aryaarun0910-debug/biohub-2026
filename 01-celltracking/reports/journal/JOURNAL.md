@@ -168,3 +168,12 @@ private organizer clarification; score-probing is forbidden. Full plan:
   set to loose NMS (1.0 um), 2 scales.
 - **Next:** basin-based same-cell conflict sets + guardrail test (step 4), then brightest-rep ->
   link -> arbitrate -> relink (step 5); redetection (step 6) is now clearly needed for recall.
+
+### 2026-07-03 (sprint to 0.90 locked; compute = cloud A100)
+- Codex sprint plan adopted (reports/SPRINT_2026-07-03.md). Honest odds: 0.90 ~10-15%; robust
+  0.86-0.88 ~55-65%. Primary lever = Spotiflow-3D residual fine-tune (union DoG -> arbitration).
+- Fixed Codex P0/P1: propose density now in ISO isotropic space; real candidate merge audit added
+  (GT too sparse for close pairs -> diameter-cap structural guarantee is the safeguard). 13 tests pass.
+- Built the FIRST KILL GATE: scripts/spotiflow_zeroshot_screen.py — does pretrained synth_3d/smfish_3d
+  recover >=8% of DoG-missed GT nodes zero-shot? Runs on A100. If no -> pivot to DAXI union+redetection.
+- V3 full baseline (harness): min-fold adjJ 0.632. Anchor 54290725 still PENDING.
