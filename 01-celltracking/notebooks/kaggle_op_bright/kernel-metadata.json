@@ -1,0 +1,13 @@
+{
+  "id": "aryaarun07/biohub-op-bright",
+  "title": "Biohub Op Bright",
+  "code_file": "kaggle_op_bright_infer.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": false,
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "dataset_sources": [],
+  "kernel_sources": []
+}
