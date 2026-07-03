@@ -11,3 +11,4 @@ __pycache__/
 .pytest_cache/
 kt_out/
 reports/*.log
+reports/inventory/spotiflow_zeroshot.csv

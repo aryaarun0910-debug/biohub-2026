@@ -59,36 +59,53 @@ def spotiflow_points(model, iso_vol: np.ndarray) -> np.ndarray:
     return np.asarray(pts, float).reshape(-1, 3)
 
 
-def screen_crop(crop: str, models: dict) -> list[dict]:
-    from spotiflow.utils import imread as _  # noqa: F401  (ensures spotiflow importable)
-    from biotrack.propose import open_volume, read_frame
+def _near(a_zyx, b_zyx, gate_um=7.0):
+    """Boolean mask over a: is there a b within gate_um (physical)?"""
+    if len(a_zyx) == 0:
+        return np.zeros(0, bool)
+    if len(b_zyx) == 0:
+        return np.zeros(len(a_zyx), bool)
+    from scipy.spatial import cKDTree
+    tree = cKDTree(np.asarray(b_zyx) * RAW)
+    d, _ = tree.query(np.asarray(a_zyx) * RAW)
+    return d <= gate_um
+
+
+def screen_crop(crop: str, models: dict, frame_stride: int = 1) -> list[dict]:
+    from biotrack.propose import downsample_xy, open_volume, read_frame, propose_frame, to_raw, ProposeConfig
     arr = open_volume(TRAIN / f"{crop}.zarr")
     gt = geff_to_sample(str(TRAIN / f"{crop}.geff"))
-    n_est = estimated_nodes(str(TRAIN / f"{crop}.geff"))
+    cfg = ProposeConfig(nms_dist_um=1.0)
+    T = arr.shape[0]
+    ts = list(range(0, T, frame_stride))
 
-    # DoG candidates (loose NMS) -> which GT nodes DoG MISSES
-    dog_frames = propose.propose_volume(TRAIN / f"{crop}.zarr", propose.ProposeConfig(nms_dist_um=1.0))
-    dog = _cand_sample(dog_frames)
-    dog_hit = gt_candidate_within(dog, gt)                 # gt_id -> DoG candidate within 7um?
-    missed = {g for g, h in dog_hit.items() if not h}
+    # per-frame: GT nodes, DoG candidates, DoG-missed GT
+    per = {}
+    total_missed = 0
+    for t in ts:
+        gt_t = gt.zyx[gt.t == t]
+        raw = read_frame(arr, t)
+        dog = to_raw(propose_frame(downsample_xy(raw, 4), cfg), 4)[:, :3]
+        missed_mask = ~_near(gt_t, dog) if len(gt_t) else np.zeros(0, bool)
+        per[t] = {"raw": raw, "gt_missed": gt_t[missed_mask]}
+        total_missed += int(missed_mask.sum())
 
     rows = []
     for name, model in models.items():
-        pts_by_t = []
-        for t in range(arr.shape[0]):
-            iso, zoom_to_raw = resample_iso(read_frame(arr, t))
+        recovered = sf_pts = 0
+        for t in ts:
+            iso, zoom = resample_iso(per[t]["raw"])
             p = spotiflow_points(model, iso)
             if len(p):
-                p = p * zoom_to_raw                        # iso-idx -> raw-idx
-            pts_by_t.append(p)
-        sf = _pts_sample(pts_by_t)
-        sf_hit = gt_candidate_within(sf, gt)               # gt_id -> spotiflow point within 7um?
-        recovered = sum(1 for g in missed if sf_hit.get(g, False))
+                p = p * zoom
+            sf_pts += len(p)
+            miss = per[t]["gt_missed"]
+            if len(miss):
+                recovered += int(_near(miss, p).sum())
         rows.append({"crop": crop, "fam": crop.split("_")[0], "model": name,
-                     "dog_missed": len(missed), "recovered": recovered,
-                     "complement_recall": round(recovered / max(len(missed), 1), 4),
-                     "sf_points": int(sf.zyx.shape[0]),
-                     "sf_ratio": round(sf.zyx.shape[0] / n_est, 3) if n_est else float("nan")})
+                     "dog_missed": total_missed, "recovered": recovered,
+                     "complement_recall": round(recovered / max(total_missed, 1), 4),
+                     "sf_points_per_frame": round(sf_pts / max(len(ts), 1), 1)})
     return rows
 
 
@@ -115,6 +132,7 @@ def _pts_sample(pts_by_t):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--per-embryo", type=int, default=6)
+    ap.add_argument("--frame-stride", type=int, default=1, help="subsample frames (speed; use ~20 on CPU)")
     args = ap.parse_args()
     from spotiflow.model import Spotiflow
 
@@ -136,23 +154,24 @@ def main():
 
     allrows = []
     for crop in picks:
-        allrows.extend(screen_crop(crop, models))
-        print("done", crop)
+        allrows.extend(screen_crop(crop, models, args.frame_stride))
+        print("done", crop, allrows[-len(models):])
 
     import csv
     out = ROOT / "reports" / "inventory" / "spotiflow_zeroshot.csv"
     with out.open("w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=list(allrows[0].keys())); w.writeheader(); w.writerows(allrows)
     print(f"\nWrote {out}")
-    print("\n=== complement recall of DoG-missed GT (mean over crops) ===")
+    print("\n=== complement recall of DoG-missed GT (pooled over crops) ===")
     agg = defaultdict(lambda: defaultdict(lambda: [0, 0, 0.0, 0]))
     for r in allrows:
         a = agg[r["model"]][r["fam"]]
-        a[0] += r["recovered"]; a[1] += r["dog_missed"]; a[2] += r["sf_ratio"]; a[3] += 1
+        a[0] += r["recovered"]; a[1] += r["dog_missed"]; a[2] += r["sf_points_per_frame"]; a[3] += 1
     for model in agg:
         for fam in sorted(agg[model]):
-            rec, miss, rat, n = agg[model][fam]
-            print(f"  {model:10s} {fam}: complement_recall={rec/max(miss,1):.3f} (target>=0.08)  sf_ratio~{rat/n:.2f}")
+            rec, miss, ppf, n = agg[model][fam]
+            print(f"  {model:10s} {fam}: complement_recall={rec/max(miss,1):.3f} (target>=0.08)  "
+                  f"sf_pts/frame~{ppf/n:.0f}  (missed={miss})")
     print("\nGATE: >=8% complement recall on BOTH embryos -> Spotiflow fine-tune is worth it.")
 
 
