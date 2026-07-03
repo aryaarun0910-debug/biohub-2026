@@ -94,8 +94,10 @@ def propose_frame(raw_iso: np.ndarray, cfg: ProposeConfig) -> np.ndarray:
     # local contrast: peak minus mean of a small neighborhood (via maximum/mean proxy)
     local_mean = gaussian_filter(norm, 1.0)[zz, yy, xx]
     contrast = intensity - local_mean
-    # local density: candidates within density_radius (physical) -> crowding feature
-    phys = peaks * np.array(SCALE, np.float32)
+    # local density: candidates within density_radius (physical) -> crowding feature.
+    # peaks are in the DOWNSAMPLED frame, which is ISOTROPIC at ISO_UM (XY/4 -> 4*0.40625=1.625um;
+    # Z already 1.625um). Use ISO_UM in ALL axes, NOT the raw anisotropic SCALE (P0 fix).
+    phys = peaks.astype(np.float32) * ISO_UM
     tree = cKDTree(phys)
     density = np.array([len(tree.query_ball_point(p, cfg.density_radius_um)) - 1 for p in phys], np.float32)
     return np.stack([zz, yy, xx, response, scale_id, intensity, contrast, density], axis=1).astype(np.float32)

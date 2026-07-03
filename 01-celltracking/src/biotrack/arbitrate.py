@@ -58,3 +58,33 @@ def merge_rate(gt_coords_by_t: list[np.ndarray], scale=SCALE, r_same_um: float =
                 n_merged += 1
     return {"gt_pairs_within_gate": n_pairs, "merged": n_merged,
             "merge_rate": (n_merged / n_pairs) if n_pairs else 0.0, "r_same_um": r_same_um}
+
+
+def candidate_merge_audit(cand_coords_by_t: list[np.ndarray], gt_coords_by_t: list[np.ndarray],
+                          scale=SCALE, r_same_um: float = 3.0, gate_um: float = 7.0,
+                          match_um: float = 3.0) -> dict:
+    """Real-candidate guardrail (P1 fix): cluster the ACTUAL dense candidate set per frame, then for
+    each GT nuclei PAIR <gate_um apart, map each GT node to its nearest candidate (within match_um)
+    and check whether those two candidates share a conflict set. Merge => two real nuclei collapsed.
+
+    This is stronger than merge_rate() (which used GT points as candidates): it tests whether the
+    dense proposal cloud chain-bridges neighbouring nuclei."""
+    sc = np.asarray(scale, float)
+    n_pairs = n_merged = n_unresolved = 0
+    for cand, gt in zip(cand_coords_by_t, gt_coords_by_t):
+        if len(gt) < 2 or len(cand) == 0:
+            continue
+        labels = same_cell_sets(cand, scale, r_same_um)
+        ctree = cKDTree(cand * sc)
+        gt_phys = gt * sc
+        gtree = cKDTree(gt_phys)
+        for i, j in gtree.query_pairs(gate_um):
+            n_pairs += 1
+            di, ci = ctree.query(gt_phys[i]); dj, cj = ctree.query(gt_phys[j])
+            if di > match_um or dj > match_um:
+                n_unresolved += 1                 # a GT node has no nearby candidate (a detection miss)
+                continue
+            if labels[ci] == labels[cj]:
+                n_merged += 1
+    return {"gt_pairs_within_gate": n_pairs, "merged": n_merged, "unresolved": n_unresolved,
+            "merge_rate": (n_merged / max(n_pairs - n_unresolved, 1)), "r_same_um": r_same_um}
