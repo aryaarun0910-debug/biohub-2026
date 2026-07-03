@@ -96,7 +96,8 @@
       "Bash(.venv/Scripts/python.exe -m kaggle kernels output aryaarun07/biohub-v3-anchor -p kt_anchor)",
       "Bash(rm -rf kt_anchor kt_probe kt_out)",
       "Bash(printf \"kt_*/\\\\n\")",
-      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config v3 --per-embryo 5 --workers 6)"
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config v3 --per-embryo 5 --workers 6)",
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe -m pytest tests/test_arbitrate.py -q)"
     ]
   }
 }
