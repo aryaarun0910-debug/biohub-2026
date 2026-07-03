@@ -25,13 +25,16 @@ Generate a HIGH-RECALL candidate set per frame with per-candidate features:
 Target: raise node recall from ~0.83 toward >0.95 on held-out embryo (measure directly).
 
 ### 2. Same-cell conflict sets  (src/biotrack/arbitrate.py)
-Group candidates that are duplicate detections of ONE nucleus. Edge between two candidates iff:
-- physical distance < r_same (a SMALL same-cell radius ~ one nuclear radius, well below 7 um), AND
-- they share image support (both on the same local intensity mode: connected above a local
-  fraction of the shared peak / monotone intensity ridge between them).
-Connected components = same-cell sets. Distinct nuclei within 7 um land in DIFFERENT sets.
-VALIDATION: on GT, assert two annotated nuclei <7 um apart are NOT merged into one set (target
-merge-rate ~0); this is the guardrail test for the whole phase.
+Group candidates that are duplicate detections of ONE nucleus. **Do NOT use transitive connected
+components (P0 fix): a chain of nearby proposals can bridge two real nuclei.** Instead:
+- primary: assign each candidate to a **watershed / intensity basin** of the DoG (or foreground)
+  response; candidates in the same basin are same-cell duplicates. Basins respect the intensity
+  saddle between two real nuclei, so they don't bridge.
+- fallback/secondary: **complete-linkage** clustering with a hard **diameter cap** (max pairwise
+  distance < r_same ~ one nuclear radius) so no cluster can span two nuclei via a chain.
+Distinct nuclei within 7 um land in DIFFERENT sets by construction.
+GUARDRAIL TEST (phase-critical): on GT, two annotated nuclei <7 um apart must NOT share a set
+(target merge-rate ~0); this test gates the whole phase and runs in CI on synthetic + GT crops.
 
 ### 3. Matching-aware arbitration  (src/biotrack/arbitrate.py)
 Within each same-cell set, pick ONE representative maximizing a score:
@@ -39,29 +42,39 @@ Within each same-cell set, pick ONE representative maximizing a score:
 - image_evidence: DoG response / contrast (subvoxel-refined centroid);
 - temporal_continuity: does this position extend a strong track (velocity-consistent neighbor in
   t-1 and t+1)? computed from a first-pass link on the deduped set;
-- matching_stability: is it robust to small perturbation (won't be stolen / won't steal)?
+- **matching_stability (P1 fix: operationalized, not vibes):**
+  (a) bidirectional link residual = |predicted - observed| for the incoming AND outgoing link;
+  (b) best-vs-second-best association margin (how much better is this candidate's chosen partner
+      than its runner-up — larger margin = more stable);
+  (c) link invariance under small coordinate perturbation (jitter +-epsilon; fraction of links
+      unchanged). Each is computed from the first-pass link; combine as a normalized sum.
 Compare against baselines (brightest peak; nearest-motion) on the exact metric.
 
 ### 4. Track-conditioned redetection  (src/biotrack/redetect.py)
 For strong tracks (>= L consecutive velocity-consistent links) with a 1-frame gap or a weak
 endpoint, predict the position at the missing t via inherited velocity and search the local
-full-res image. ACCEPT by a calibrated confidence gate:
+full-res image. ACCEPT by a confidence gate:
   accept if image_score(patch) >= tau_img AND trajectory_consistency >= tau_traj
-(tau_* calibrated on the held-out embryo to a target added-node precision > 70%). Add at most one
-node per predicted gap. NEVER uses GT.
+**Calibration (P0 fix: no leakage). tau_* are calibrated INSIDE the TRAINING embryo's inner
+splits (nested CV), FROZEN, then evaluated cross-embryo** — never tuned on the evaluation embryo.
+Add at most one node per predicted gap. NEVER uses GT at inference.
 
 ### 5. Linking + emit
 Reuse the V3 two-pass velocity Hungarian on the arbitrated+redetected node set; apply the min-
 track-length filter; emit deduplicated nodes only. Count calibration (Phase 2) stays out for now.
 
+**Redetection value metric (P1 fix): NOT "added-node precision" (ambiguous under sparse labels).**
+Gate on **marginal edge contribution**: for the added nodes, report added TP edges, added FP edges,
+recovered FN edges, and the exact-score delta. A recovery is good only if exact-score delta > 0.
+
 ## Experiment ladder (gate = min(fold) improvement, bootstrap CI excludes 0)
 | Step | Change | Success metric |
 |---|---|---|
-| 1a | Over-proposal recall ceiling | recall on held-out embryo >0.95 at ratio <=2x (headroom exists) |
-| 1b | Same-cell conflict sets | GT merge-rate ~0 (guardrail); dedup count sane |
+| 1a | Over-proposal recall-vs-count frontier | recall >0.95 achievable at ratio <=2x on TRAIN inner splits |
+| 1b | Basin same-cell conflict sets | GT merge-rate ~0 (guardrail); sane dedup count |
 | 1c | Arbitration vs brightest/nearest | min-fold adjJ +>=0.005 over V3 |
-| 1d | + track-conditioned redetection | min-fold adjJ +>=0.003; added-node precision >70% |
-| 1e | Full Phase-1 vs V3 anchor | min-fold adjJ up; count ratio in 0.95-1.10; no slice regresses |
+| 1d | + track-conditioned redetection | min-fold adjJ +>=0.003; positive marginal edge contribution |
+| 1e | Full Phase-1 vs V3 anchor | min-fold adjJ up; count ratio 0.95-1.10; no slice regresses |
 
 ## Deliverables
 - `src/biotrack/propose.py`, `arbitrate.py`, `redetect.py` (+ unit tests incl. the <7um-no-merge guardrail).
@@ -70,7 +83,15 @@ track-length filter; emit deduplicated nodes only. Count calibration (Phase 2) s
 - Figures from that CSV; journal entry with both-fold bootstrap CIs.
 - Commit + push each step.
 
-## First build (this session)
-Step 1a-1b: `propose.py` (over-proposal + features) and the same-cell conflict-set builder in
-`arbitrate.py`, with the GT guardrail test (two nuclei <7 um must not merge). Measure the recall
-ceiling and merge-rate before touching arbitration.
+## Corrected launch order (Codex, adopted)
+1. **Run + submit untouched V3 — one anchor submission** (account has none; later gains are
+   uninterpretable without it). Notebook-only comp -> push `kaggle_dog_infer.py` as a Kaggle kernel.
+2. Build `run_phase1_ablation.py` + candidate caching (cache proposals so ladder steps are fast).
+3. Implement `propose.py`; measure the recall-vs-candidate-count frontier.
+4. Implement basin-based same-cell conflict sets + guardrail tests.
+5. Provisional brightest representatives -> link -> arbitrate -> relink.
+6. Track-conditioned redetection ONLY after arbitration shows positive cross-embryo transfer.
+7. Submit Phase-1 ONLY if BOTH frozen embryo evaluations improve.
+
+Realistic expectation (Codex): Phase 1 -> +0.01-0.03; **0.880 from a 0.842 anchor likely needs
+Phase 1 + tissue-flow/count adaptation (Phase 2) or sparse divisions (Phase 5).** Sequence honestly.
