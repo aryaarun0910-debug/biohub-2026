@@ -86,7 +86,11 @@
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/fetch.py --refresh-manifest)",
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/phase0_norm_ablation.py --per-embryo 15 --workers 7)",
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe -)",
-      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe -m pytest tests/ -q)"
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe -m pytest tests/ -q)",
+      "Bash(rm -f data/_v3_test_submission.csv)",
+      "Bash(.venv/Scripts/python.exe -c \"import json,os; p=os.path.expanduser\\('~/.kaggle/kaggle.json'\\); print\\(json.load\\(open\\(p\\)\\)['username']\\)\")",
+      "Bash(.venv/Scripts/python.exe -m kaggle competitions submissions -c biohub-cell-tracking-during-development)",
+      "Bash(.venv/Scripts/python.exe -m kaggle kernels status aryaarun07/biohub-v3-anchor)"
     ]
   }
 }
