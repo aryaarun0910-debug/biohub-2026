@@ -1,10 +1,16 @@
-"""Kaggle inference: over-propose -> same-cell dedup -> V3 velocity linking (op_bright).
+"""Kaggle inference: over-propose -> same-cell dedup -> V3 velocity linking -> temporal smoothing.
 
-Beats the V3 anchor locally (min-fold adjJ 0.677 -> 0.720, +0.043; hard-fold recall 0.827->0.889).
-Over-propose with LOOSE NMS (recovers subthreshold cells), collapse same-cell duplicates via
-complete-linkage with a hard diameter cap (no chain-bridging), keep the brightest representative
-per cell, then link with the V3 two-pass velocity-aware Hungarian. Self-contained: numpy/scipy/
-skimage + tensorstore (Kaggle has no zarr). No internet needed.
+Faithfully deploys the locally-validated op_bright_smooth pipeline (SMOOTH=True; full-199 min-fold
+adjJ 0.6996, both folds above op_bright). Over-propose with LOOSE NMS (recovers subthreshold cells),
+collapse same-cell duplicates via complete-linkage with a hard diameter cap (no chain-bridging), keep
+the brightest representative per cell, link with the V3 two-pass velocity-aware Hungarian, then apply
+V11 temporal coordinate smoothing (blend each node toward its edge-neighbours' mean, w=0.7).
+Set SMOOTH=False for the pure op_bright calibration point. Self-contained: numpy/scipy/skimage +
+tensorstore (Kaggle has no zarr). No internet needed.
+
+NOTE: candidate clustering happens on the ISOTROPIC downsampled grid, so same_cell_sets scales coords
+by ISO (uniform), NOT the anisotropic SCALE — the raw mapping only happens after dedup, in detect().
+COM refinement is intentionally OMITTED here so node counts reproduce the local ablation exactly.
 
 Kaggle: Accelerator none/GPU (CPU fine); Run All -> /kaggle/working/submission.csv
 """
@@ -22,8 +28,8 @@ SCALE = np.array([1.625, 0.40625, 0.40625]); ISO = 1.625; F = 4; XY_OFF = (F - 1
 NORM_Q = (0.01, 0.997); SCALE_PAIRS = [(1.5, 4.0), (2.2, 5.5)]
 OP_REL = 0.02; OP_NMS_UM = 1.0; MAX_PEAKS = 60000       # over-proposal
 R_SAME_UM = 3.0                                          # same-cell dedup diameter cap
-REFINE = (1, 4, 4)
 LINK1, LINK2, VEL, GAP, MINLEN = 6.0, 8.0, 0.5, 6.0, 4  # V3 linker
+SMOOTH = True; SMOOTH_W = 0.7                            # V11 temporal coordinate smoothing (op_bright_smooth)
 IN_DIR = Path("/kaggle/input/competitions/biohub-cell-tracking-during-development/test")
 OUT_CSV = Path("/kaggle/working/submission.csv")
 COLS = ["id", "dataset", "row_type", "node_id", "t", "z", "y", "x", "source_id", "target_id"]
@@ -71,28 +77,21 @@ def same_cell_sets(coords):
     n = len(coords)
     if n <= 1:
         return np.zeros(n, int)
-    Z = linkage(coords * SCALE, method="complete")
+    # coords are on the ISOTROPIC (downsampled) grid at ISO µm/voxel in all 3 axes, so scale
+    # uniformly by ISO. Using the anisotropic SCALE here compresses XY 4x and merges distinct
+    # nuclei (the raw->physical mapping only happens AFTER dedup, in detect()).
+    Z = linkage(coords * ISO, method="complete")
     return fcluster(Z, t=R_SAME_UM, criterion="distance").astype(int) - 1
 
 
-def refine_com(vol, coords):
-    Z, Y, X = vol.shape; rz, ry, rx = REFINE; out = coords.astype(np.float32).copy()
-    for i, (z, y, x) in enumerate(coords.astype(int)):
-        z0, z1 = max(0, z - rz), min(Z, z + rz + 1); y0, y1 = max(0, y - ry), min(Y, y + ry + 1); x0, x1 = max(0, x - rx), min(X, x + rx + 1)
-        w = vol[z0:z1, y0:y1, x0:x1]; s = w.sum()
-        if s > 0:
-            zz, yy, xx = np.mgrid[z0:z1, y0:y1, x0:x1]; out[i] = [(zz * w).sum() / s, (yy * w).sum() / s, (xx * w).sum() / s]
-    return out
-
-
 def detect(iso):
-    """Over-propose -> same-cell dedup (brightest rep) -> COM refine -> RAW coords."""
+    """Over-propose -> same-cell dedup (brightest rep) -> RAW coords (matches local op_bright)."""
     cand = over_propose(iso)
     if len(cand) == 0:
         return np.zeros((0, 3), np.float32)
     coords = cand[:, :3]; labels = same_cell_sets(coords)
     reps = [idx[np.argmax(cand[idx, 3])] for lab in np.unique(labels) for idx in [np.where(labels == lab)[0]]]
-    ref = refine_com(iso, coords[reps])
+    ref = coords[reps].astype(np.float32).copy()
     ref[:, 1] = ref[:, 1] * F + XY_OFF; ref[:, 2] = ref[:, 2] * F + XY_OFF
     return ref
 
@@ -152,18 +151,38 @@ def comps(nodes, edges):
     return out
 
 
+def smooth_coords(coord_by_id, edge_ids):
+    """V11 temporal smoothing on RAW coords: out = w*self + (1-w)*mean(edge-neighbours' ORIGINAL pos).
+    Single pass over original positions (matches biotrack run_phase1_ablation.smooth_sample)."""
+    nbr = {k: [] for k in coord_by_id}
+    for s, t in edge_ids:
+        if s in coord_by_id and t in coord_by_id:
+            nbr[s].append(t); nbr[t].append(s)
+    orig = {k: np.asarray(v, np.float64) for k, v in coord_by_id.items()}
+    out = {}
+    for k, c in orig.items():
+        ns = nbr[k]
+        out[k] = SMOOTH_W * c + (1 - SMOOTH_W) * np.mean([orig[n] for n in ns], axis=0) if ns else c
+    return out
+
+
 def build(ds, cbt, edges):
     linked = {(t, i) for t, i, _, _ in edges} | {(t2, j) for _, _, t2, j in edges}
     keep = set().union(*[c for c in comps(linked, edges) if len(c) >= MINLEN]) if linked else set()
-    nid, rows, k = {}, [], 1
+    nid, meta, coord_by_id, k = {}, {}, {}, 1
     for t, cs in enumerate(cbt):
         for i, (z, y, x) in enumerate(cs):
             if (t, i) not in keep:
                 continue
-            nid[(t, i)] = k; rows.append(dict(dataset=ds, row_type="node", node_id=k, t=int(t), z=float(z), y=float(y), x=float(x), source_id=-1, target_id=-1)); k += 1
-    for t, i, t2, j in edges:
-        if (t, i) in nid and (t2, j) in nid:
-            rows.append(dict(dataset=ds, row_type="edge", node_id=-1, t=-1, z=-1, y=-1, x=-1, source_id=nid[(t, i)], target_id=nid[(t2, j)]))
+            nid[(t, i)] = k; meta[k] = int(t); coord_by_id[k] = (float(z), float(y), float(x)); k += 1
+    edge_ids = [(nid[(t, i)], nid[(t2, j)]) for t, i, t2, j in edges if (t, i) in nid and (t2, j) in nid]
+    coords = smooth_coords(coord_by_id, edge_ids) if SMOOTH else coord_by_id
+    rows = []
+    for node_id in sorted(coord_by_id):
+        z, y, x = coords[node_id]
+        rows.append(dict(dataset=ds, row_type="node", node_id=node_id, t=meta[node_id], z=float(z), y=float(y), x=float(x), source_id=-1, target_id=-1))
+    for s, t in edge_ids:
+        rows.append(dict(dataset=ds, row_type="edge", node_id=-1, t=-1, z=-1, y=-1, x=-1, source_id=s, target_id=t))
     return rows
 
 
