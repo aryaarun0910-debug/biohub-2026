@@ -227,3 +227,11 @@ private organizer clarification; score-probing is forbidden. Full plan:
   texture where DoG can't) + over-proposal/arbitration; NOT temporal DoG integration.
 - Redirect: prioritize the learned-detector path (NIS3D dense pretraining / Spotiflow) + the free
   op_bright arbitration. March-22 provenance gate remains the conditional jackpot.
+
+### 2026-07-03 (op_bright arbitration BEATS V3 - first real Phase-1 gain)
+- op_bright (over-propose loose-NMS 1.0 -> same-cell dedup complete-linkage+diameter-cap -> V3 link,
+  brightest representative) vs V3 on same 20 crops: MIN-FOLD adjJ 0.677 -> 0.720 (+0.043, ~9x the
+  +0.005 gate). Hard fold 44b6 recall 0.827 -> 0.889; 6bba flat (0.782->0.783). adjJ rose so count
+  penalty stayed controlled. Free CPU win; plausibly ~0.84 LB if the ~+0.07 local<->LB offset holds.
+- Confirming on all 199 (background). Next: full arbitration (continuity + matching-stability scoring,
+  not just brightest) = upside; then learned detector stacks on top.
