@@ -1,0 +1,22 @@
+[{"stream_name":"stdout","time":0.939814958,"data":"MISSING zarr No module named 'zarr'\n"}
+,{"stream_name":"stdout","time":0.940103651,"data":"MISSING numcodecs No module named 'numcodecs'\n"}
+,{"stream_name":"stdout","time":1.5663014830000002,"data":"OK tensorstore ?\n"}
+,{"stream_name":"stdout","time":3.204261042,"data":"OK dask 2026.3.0\n"}
+,{"stream_name":"stdout","time":5.985405171,"data":"OK xarray 2025.12.0\n"}
+,{"stream_name":"stdout","time":5.985596964,"data":"MISSING ome_zarr No module named 'ome_zarr'\n"}
+,{"stream_name":"stdout","time":6.199857931,"data":"OK fsspec 2025.3.0\n"}
+,{"stream_name":"stdout","time":6.199925066,"data":"OK numpy 2.0.2\n"}
+,{"stream_name":"stdout","time":6.1999345009999995,"data":"OK scipy 1.16.3\n"}
+,{"stream_name":"stdout","time":6.214200724,"data":"OK skimage 0.25.2\n"}
+,{"stream_name":"stdout","time":6.214250724,"data":"OK pandas 2.3.3\n"}
+,{"stream_name":"stdout","time":6.214259549,"data":"=== /kaggle/input ===\n"}
+,{"stream_name":"stdout","time":6.214736358,"data":"  /kaggle/input/competitions\n"}
+,{"stream_name":"stdout","time":6.214801946,"data":"    /kaggle/input/competitions/biohub-cell-tracking-during-development\n"}
+,{"stream_name":"stdout","time":6.214815823,"data":"    /kaggle/input/competitions/biohub-cell-tracking-during-development\n"}
+,{"stream_name":"stderr","time":9.23156716,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":9.231645178,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":9.590651264,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":9.590705115,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":10.459827047,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":12.178897028,"data":"[NbConvertApp] Writing 276190 bytes to __results__.html\n"}
+]

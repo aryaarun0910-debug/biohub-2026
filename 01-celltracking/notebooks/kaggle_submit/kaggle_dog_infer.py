@@ -20,11 +20,11 @@ V3 changes on top (verified diff):
 Kaggle: CPU is fine; Run All -> /kaggle/working/submission.csv
 """
 
+import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import zarr
 from scipy.ndimage import gaussian_filter
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial import cKDTree
@@ -249,14 +249,40 @@ NORM_MODE = "per_frame"          # "per_frame" (V3) | "precomputed" (host per-vo
 PRECOMP_Q = ("0.001", "0.999")   # quantile keys for precomputed mode
 
 
+def open_volume(zarr_path: Path):
+    """Return the (T,Z,Y,X) array for a dataset. Prefers zarr (local); falls back to tensorstore
+    (Kaggle image has tensorstore but NOT zarr/numcodecs). Competition arrays are zarr v3 at <id>.zarr/0."""
+    try:
+        import zarr
+        return zarr.open_group(str(zarr_path), mode="r")["0"]
+    except ImportError:
+        import tensorstore as ts
+        return ts.open({"driver": "zarr3",
+                        "kvstore": {"driver": "file", "path": str(Path(zarr_path) / "0")}}).result()
+
+
+def read_frame(arr, t) -> np.ndarray:
+    fr = arr[t]
+    if hasattr(fr, "read"):              # tensorstore lazy view
+        return np.asarray(fr.read().result())
+    return np.asarray(fr)
+
+
+def _precomputed_lohi(zarr_path: Path):
+    """Read per-volume quantiles from group metadata (zarr attrs, or zarr.json 'attributes')."""
+    try:
+        import zarr
+        q = dict(zarr.open_group(str(zarr_path), mode="r").attrs).get("image_statistics", {}).get("quantiles", {})
+    except ImportError:
+        meta = json.loads((Path(zarr_path) / "zarr.json").read_text())
+        q = meta.get("attributes", {}).get("image_statistics", {}).get("quantiles", {})
+    return (float(q[PRECOMP_Q[0]]), float(q[PRECOMP_Q[1]]))
+
+
 def infer_dataset(zarr_path: Path) -> list[dict]:
-    grp = zarr.open_group(str(zarr_path), mode="r")
-    arr = grp["0"]
-    lohi = None
-    if NORM_MODE == "precomputed":
-        q = dict(grp.attrs).get("image_statistics", {}).get("quantiles", {})
-        lohi = (float(q[PRECOMP_Q[0]]), float(q[PRECOMP_Q[1]]))
-    cents_by_t = [to_raw_coords(detect_frame(downsample_xy(np.asarray(arr[t])), lohi))
+    arr = open_volume(zarr_path)
+    lohi = _precomputed_lohi(zarr_path) if NORM_MODE == "precomputed" else None
+    cents_by_t = [to_raw_coords(detect_frame(downsample_xy(read_frame(arr, t)), lohi))
                   for t in range(arr.shape[0])]
     return build_rows(zarr_path.stem, cents_by_t, link_frames(cents_by_t))
 
