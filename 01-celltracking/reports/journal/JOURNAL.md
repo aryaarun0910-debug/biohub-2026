@@ -177,3 +177,14 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - Built the FIRST KILL GATE: scripts/spotiflow_zeroshot_screen.py — does pretrained synth_3d/smfish_3d
   recover >=8% of DoG-missed GT nodes zero-shot? Runs on A100. If no -> pivot to DAXI union+redetection.
 - V3 full baseline (harness): min-fold adjJ 0.632. Anchor 54290725 still PENDING.
+
+### 2026-07-03 (anchor score + local<->public calibration)
+- **V3 anchor scored 0.807 public** (submission 54290725). Real public V3 = 0.842 -> we carry a
+  0.035 reproduction gap (measured recall deficit; we under-detect vs real V3) = a cheap classical win.
+- **Calibration (1 point):** our local both-embryo edge-weighted adjJ ~0.737 (44b6 0.632/19.8k edges +
+  6bba 0.756/109k edges) -> public 0.807. The HIDDEN TEST EMBRYO IS EASIER than our hard 44b6 fold
+  (0.807 > 0.632). Supports Codex's condition for 0.90 (test resembles the easier end).
+- Strategic update: immediate cheapest win = close the V3 0.035 gap via recall (loose-NMS over-proposal
+  + arbitration), THEN stack the learned detector. Test-easier read modestly improves the odds.
+- Built the Kaggle T4 zero-shot screen notebook (notebooks/kaggle_spotiflow_screen/, self-contained:
+  reads volumes + GT geffs via tensorstore, full-frame complement recall). Runs free on Kaggle T4.

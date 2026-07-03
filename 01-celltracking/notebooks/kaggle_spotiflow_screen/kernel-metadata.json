@@ -1,0 +1,13 @@
+{
+  "id": "aryaarun07/biohub-spotiflow-screen",
+  "title": "Biohub Spotiflow Zeroshot Screen",
+  "code_file": "kaggle_spotiflow_screen.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "dataset_sources": [],
+  "kernel_sources": []
+}
