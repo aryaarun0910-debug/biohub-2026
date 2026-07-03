@@ -202,3 +202,16 @@ private organizer clarification; score-probing is forbidden. Full plan:
   tracks: cross-domain tracking, metric/format exploits, provenance/leakage, newest sparse/PU detection,
   organizer footprint, Kaggle meta, domain-generalization, wildcards) + synthesis. Hard filter: skip all
   saturated competitive intel; only NEW/actionable/high-EV/cited edges. Runs parallel to execution.
+
+### 2026-07-03 (lateral sweep results)
+- Codex multi-agent lateral sweep -> reports/codex_lateral_sweep_results_2026-07-03.md. Top edges:
+  (1) **motion-compensated TRACK-BEFORE-DETECT** - integrate low-threshold DoG/PSF response along
+  3-7 frame motion-consistent paths BEFORE thresholding; attacks the no-candidate bottleneck; CPU,
+  falsifiable in HOURS; +0.005-0.020. (2) **March-22 exact-scale embryo + zoo/Zebrafish 122MB track
+  bundle (~11.85M pts)** = dense same-modality pretraining IF provenance/alignment gate passes;
+  +0.010-0.040. (3) **NIS3D (3.3GB dense zebrafish, CC-BY) + nnPU** pretraining fallback; +0.005-0.030.
+  Rules explicitly allow public external data for model development.
+- **QUARANTINED evaluator defect**: a division-scoring loophole (distant unmatched fork in a weakly-
+  connected component qualifies a GT division, dodges division-FP). Prize/DQ risk -> DO NOT SUBMIT
+  without written host clearance. We do not build strategy around it. (Endorsed.)
+- Immediate plan: build the track-before-detect falsification diagnostic (top bet, CPU, hours).
