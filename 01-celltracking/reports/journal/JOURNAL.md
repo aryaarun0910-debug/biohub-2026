@@ -245,3 +245,11 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - FIX = continuity/matching-stability arbitration (not brightest) to keep recall gain without the 6bba
   regression -> should lift the weighted score. Then learned detector stacks. Submitting op_bright as a
   calibration point + robustness win (expect ~0.81, not a leap).
+
+### 2026-07-03 (6bba regression diagnosed = over-detection, not arbitration)
+- Per-crop: 6bba regressions correlate with COUNT RATIO, not recall. Worst crops: op_bright ratio
+  1.06-1.36 vs v3 0.88-1.06; recall delta ~0. 6bba mean ratio 0.88->1.06 (crossed 1.0). Sparse 44b6
+  (ratio<1) is helped by over-proposal; dense 6bba (already detected) is over-shot -> count penalty+FP.
+- FIX = COUNT CALIBRATION (Phase 2), not continuity scoring: over-propose where recall low, restrain
+  where already-detected (target ratio 0.95-1.05). Should convert +0.052 min-fold into edge-weighted gain.
+- op_bright still worth submitting (robustness win on hard embryo + 2nd local<->LB calibration point).
