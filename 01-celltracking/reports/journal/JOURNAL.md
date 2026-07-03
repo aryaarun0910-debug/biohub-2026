@@ -196,3 +196,9 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - **Strategic pivot:** the anchor score revealed a CERTAIN free win - close the 0.807->0.842 V3 gap
   via CPU arbitration (over-proposal + same-cell dedup + link). Prioritizing step-5 arbitration over
   blind remote-debugging the marginal, out-of-domain Spotiflow zero-shot screen.
+
+### 2026-07-03 (lateral sweep brief for Codex)
+- Drafted reports/codex_lateral_sweep_2026-07-03.md: multi-agent ORTHOGONAL research sweep (8 parallel
+  tracks: cross-domain tracking, metric/format exploits, provenance/leakage, newest sparse/PU detection,
+  organizer footprint, Kaggle meta, domain-generalization, wildcards) + synthesis. Hard filter: skip all
+  saturated competitive intel; only NEW/actionable/high-EV/cited edges. Runs parallel to execution.
