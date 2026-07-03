@@ -1,5 +1,9 @@
 # Biohub Cell Tracking 2026
 
+> **New session? Start with [HANDOFF.md](HANDOFF.md)** — current state, scores, open threads, how to run,
+> and the corrected path to 0.88. Then `reports/journal/JOURNAL.md` for the full dated trail.
+
+
 Kaggle: *Cell Tracking During Development* (zebrafish 3D+time). Detect cell
 centroids, link across time, find divisions, reconstruct lineages.
 Metric: `weighted_avg(adj_edge_jaccard) + 0.1 * division_jaccard`.

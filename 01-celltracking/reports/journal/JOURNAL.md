@@ -266,3 +266,9 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - Revised path (Codex): op_bright ~0.81 -> +count-cal ~0.815-0.825 -> +V11 smoothing ~0.84-0.855 ->
   learned detector over validated 0.85 base ~0.865-0.885. 0.88+ prob ~15-25%, rises after reproducing 0.854.
 - Plan: run classical (smoothing/calibration, CPU) + learned (dense-external pretraining, GPU) CONCURRENTLY.
+
+### 2026-07-03 (session handoff documented)
+- Wrote HANDOFF.md (repo root) = single "start here for a new session" doc: current scores/baselines,
+  open async threads (op_bright submission 54301967 pending; op_bright_smooth 199 running; Spotiflow
+  screen broken), corrected path to 0.88, DO-NOT (quarantined evaluator defect), how-to-run commands,
+  key code map, environment, immediate next steps. README points to it. User submitted op_bright.
