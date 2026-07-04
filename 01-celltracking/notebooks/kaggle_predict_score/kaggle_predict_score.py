@@ -87,11 +87,15 @@ def load_corrupt() -> set[str]:
 
 
 def find_weights() -> tuple[Path, Path | None]:
-    w = glob.glob(f"/kaggle/input/*/edge_predictor_best_split_{FOLD}.pth")
+    # Prefer the top-level copy; fall back to the trainer's native path (survives even if the training
+    # kernel's final copy step was skipped, e.g. a timeout) so a long unattended run isn't wasted.
+    w = (glob.glob(f"/kaggle/input/*/edge_predictor_best_split_{FOLD}.pth")
+         + glob.glob(f"/kaggle/input/*/repo/weights/*/split_{FOLD}/edge_predictor_best.pth"))
     if not w:
         raise SystemExit(f"No trained weights for FOLD {FOLD}. Run the training kernel "
                          f"(aryaarun07/biohub-train-oof) with FOLD={FOLD} first, then attach it here.")
-    c = glob.glob(f"/kaggle/input/*/config_split_{FOLD}.json")
+    c = (glob.glob(f"/kaggle/input/*/config_split_{FOLD}.json")
+         + glob.glob(f"/kaggle/input/*/repo/weights/*/split_{FOLD}/config.json"))
     return Path(w[0]), (Path(c[0]) if c else None)
 
 
