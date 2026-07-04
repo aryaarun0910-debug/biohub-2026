@@ -143,6 +143,18 @@ def main():
     sys.path.insert(0, str(repo / "scripts"))
     print(f"repo -> {repo}", flush=True)
 
+    # The trainer only saves the epoch that maximizes acc*recall on the val set — a proxy that saturates
+    # early (best often = epoch 0, an UNDERtrained detector) and is measured at det_threshold 0.3, not the
+    # 0.99 predict uses. So ALSO save the last (fully-trained) epoch each epoch; we score THAT.
+    tf = repo / "scripts" / "train_unet_transformer.py"
+    tsrc = tf.read_text()
+    anchor = '        marker = "*" if is_best else " "'
+    save_last = ('        torch.save({k.replace("unet.module.", "unet.", 1): v for k, v in '
+                 'model.state_dict().items()}, output_dir / "edge_predictor_last.pth")\n')
+    assert anchor in tsrc, "trainer anchor for last-epoch save not found (script version changed?)"
+    tf.write_text(tsrc.replace(anchor, save_last + anchor, 1))
+    print("Patched trainer: also save edge_predictor_last.pth each epoch (we score the trained model).", flush=True)
+
     sh([sys.executable, "-m", "pip", "install", "-q",
         "tracksdata", "geff>=1.1.3.1.1", "zarr>=3.0.10,<4", "polars>=1.36",
         "numcodecs>=0.13", "blosc2", "imagecodecs", "rustworkx>=0.17.1", "tqdm"])
@@ -166,11 +178,16 @@ def main():
     sh(cmd, env=env)
 
     out = repo / "weights" / "unet_transformer" / f"split_{FOLD}"
-    ckpt = out / "edge_predictor_best.pth"
-    if ckpt.exists():
-        shutil.copy(ckpt, WORK / f"edge_predictor_best_split_{FOLD}.pth")
+    # Export the LAST (fully-trained) epoch under the name the predict kernel looks for; the proxy-"best"
+    # (often undertrained epoch 0) is kept separately for reference.
+    last, best = out / "edge_predictor_last.pth", out / "edge_predictor_best.pth"
+    src = last if last.exists() else best
+    if src.exists():
+        shutil.copy(src, WORK / f"edge_predictor_best_split_{FOLD}.pth")   # <- this is the LAST epoch
         shutil.copy(out / "config.json", WORK / f"config_split_{FOLD}.json")
-        print(f"\nDONE. Checkpoint -> {WORK}/edge_predictor_best_split_{FOLD}.pth (downloadable).", flush=True)
+        if best.exists():
+            shutil.copy(best, WORK / f"edge_predictor_proxybest_split_{FOLD}.pth")
+        print(f"\nDONE. Scored checkpoint (last epoch) -> {WORK}/edge_predictor_best_split_{FOLD}.pth", flush=True)
     print(f"\nNext: run the predict-and-score kernel for FOLD {FOLD} to score the HELD-OUT {held_out} "
           f"embryo -> the clean OOF number. Then repeat with FOLD={1 - FOLD}.", flush=True)
 
