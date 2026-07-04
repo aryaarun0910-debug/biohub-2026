@@ -11,7 +11,8 @@
   "competition_sources": ["biohub-cell-tracking-during-development"],
   "dataset_sources": [
     "pilkwang/biohub-tracking-support-pack-50ep-v1",
-    "kms111201/biohub-cell-tracking-data"
+    "kms111201/biohub-cell-tracking-data",
+    "aryaarun07/biohub-oof-weights"
   ],
-  "kernel_sources": ["aryaarun07/biohub-train-oof"]
+  "kernel_sources": []
 }
