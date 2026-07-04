@@ -151,8 +151,11 @@ def main():
     train_dir = gather_train_dir()
     splits = write_embryo_held_out_splits(train_dir, subset=4 if SMOKE else None)
 
-    # 5. train the held-out fold (PYTHONUNBUFFERED + -u so trainer logs stream live)
-    env = dict(os.environ, BIOHUB_DATA_DIR=str(train_dir), PYTHONUNBUFFERED="1")
+    # 5. train the held-out fold. The trainer runs as a SUBPROCESS (fresh Python) so it does NOT inherit
+    #    our sys.path -> put repo/src (biohub_tracking) + repo/scripts (augmentations, dataspec) on
+    #    PYTHONPATH. -u + PYTHONUNBUFFERED so its logs stream live.
+    pypath = os.pathsep.join([str(repo / "src"), str(repo / "scripts"), os.environ.get("PYTHONPATH", "")])
+    env = dict(os.environ, BIOHUB_DATA_DIR=str(train_dir), PYTHONUNBUFFERED="1", PYTHONPATH=pypath)
     cmd = [sys.executable, "-u", str(repo / "scripts" / "train_unet_transformer.py"),
            "--split", str(FOLD),
            "--data-dir", str(train_dir),
