@@ -36,8 +36,9 @@ Do NOT trust the local<->LB +0.07 offset (n=1). LB is EDGE-WEIGHTED (6bba domina
 ## Open async threads (check these on resume)
 - **op_bright submission 54301967 resolved to 0.727 = broken artifact** (coord bug). Fixed notebook committed
   (2fa4e64); NOT re-submitted. Classical line is now a fallback, not the main thrust.
-- **v3 / v3_smooth --all 199 re-runs** in progress (regenerating clobbered CSVs; settles op_bright's marginal
-  value over free smoothing — red-team #5). Low priority: do NOT let it delay the learned stack.
+- **v3(199) CSV regenerated** (min-fold 0.6322, confirms the clobbered record — red-team #1 resolved).
+  **v3_smooth(199) intentionally DROPPED as redundant** (Codex): under the pivot the classical line is a
+  fallback, so op_bright-vs-free-smoothing (red-team #5) is a dead-end comparison. Not worth the CPU.
 - **Spotiflow zero-shot screen** ERRORED, unresolved. Superseded — the learned lever is the organizer stack.
 
 ## The restructured plan (Codex-reviewed 2026-07-03, ACCEPTED — supersedes the old classical ladder)
@@ -116,8 +117,13 @@ Add a new pipeline: register a config fn in scripts/run_phase1_ablation.py CONFI
 ## Immediate next (resume order — restructured plan steps 1-4)
 1. Mount the public 50ep support pack + its pinned repo; offline smoke test -> reproduce ONE unchanged
    submission (plan step 1). Confirm local(4-movie)<->public parity. Do not tune from it.
-2. Harden `biotrack.metric` (dense-crop parity + division fixtures; emit full metric breakdown) — step 2.
+   RUNBOOK: reports/RUNBOOK_step1_public_baseline_2026-07-03.md.
+2. Harden `biotrack.metric` — DONE (commit 21c6f3a): numpy<->authoritative parity exact on real crops +
+   division fixtures; full breakdown already emitted by summarise. Suite 16 tests green.
 3. Stand up the clean embryo-held-out learned OOF baseline (fold A/B), make it the sole target — step 3.
+   RUNBOOK: reports/RUNBOOK_step3_clean_oof_baseline_2026-07-04.md (folds already correct in
+   data/dataset_splits.json; VERIFIED traps: predict pool_kernel_um must be 5.0 not the 3.0 default; the
+   trainer's best-epoch selection peeks at the held-out embryo -> use a train-embryo val split or fixed epochs).
 4. Factorial ablation of the EXISTING ILP/division/gap/threshold knobs on frozen detections — step 4.
-(Classical v3/op_bright_smooth = fallback only; finish the 199 re-runs but don't let them delay the above.)
+(Classical v3/op_bright_smooth = fallback only; v3_smooth(199) dropped as redundant.)
 ```

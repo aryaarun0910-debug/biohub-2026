@@ -21,10 +21,10 @@ Grounded in the pack's real `repo/scripts/predict_unet_transformer.py` (read 202
 `predict_unet_transformer.py`'s `PredictConfig.pool_kernel_um` defaults to **3.0** and is NOT read from
 `config.json` and NOT exposed on the CLI — but the artifact `config.json` says **5.0**. `pool_kernel_um`
 sets the detection local-max suppression distance (µm), so 3.0 vs 5.0 changes detection density/count and
-therefore the count-penalty and edge score. Before the calibration submission, confirm which value the
-reference submission notebook used (the pack points to `submission/submission_22_*.ipynb`); if it used
-5.0, set it (edit the `PredictConfig` default or the notebook) so the reproduction is faithful. Flag this
-as the first thing to check — it is the most likely silent train/serve gap.
+therefore the count-penalty and edge score. **CONFIRMED (2026-07-04): the training script trains detection
+with pool_kernel_um=5.0** (its default, and it writes 5.0 into config.json), so faithful inference MUST use
+5.0 — set `PredictConfig.pool_kernel_um = 5.0` before the calibration submission. This is a real train/serve
+mismatch left in the predict default, not hypothetical; it is the first thing to fix.
 
 ## CLI (real, from the script)
 ```
