@@ -1,29 +1,21 @@
-"""Kaggle kernel: train the organizer UNet+transformer EMBRYO-HELD-OUT (clean OOF baseline = step 3).
+"""Kaggle kernel: train the organizer UNet+transformer for a CLEAN embryo-held-out OOF baseline (step 3).
 
-This is the "sole optimization target" from the Codex-reviewed plan: train on one embryo family, hold the
-other out entirely, so the score predicts the disjoint HIDDEN embryo far better than the leakable public
-board (all 4 visible test movies have labeled train copies). Uses the public organizer code + data:
-  - repo/code: pilkwang/biohub-tracking-support-pack-50ep-v1  (CC0; its own pinned biohub_tracking repo)
-  - train+GT: kms111201/biohub-cell-tracking-data             (CC0; 79GB, chunked train_chunk_*/train/)
+The "sole optimization target" from the Codex-reviewed plan. One embryo family is held out ENTIRELY from
+training and scored separately (by the predict-and-score kernel) — that OOF predicts the disjoint HIDDEN
+embryo far better than the leakable public board. Public organizer code + data (both CC0):
+  - repo/code: pilkwang/biohub-tracking-support-pack-50ep-v1
+  - train+GT: kms111201/biohub-cell-tracking-data   (79GB, chunked train_chunk_*/train/)
 
-WHAT THIS DOES
-  1. finds the pack repo + copies it to writable /kaggle/working/repo (so WEIGHTS_PATH is writable)
-  2. installs training deps (internet ON — enable it for this training kernel)
-  3. gathers the chunked train crops (zarr+geff) into one dir via symlinks (glob-discovered; layout-robust)
-  4. writes the EMBRYO-HELD-OUT splits: fold 0 = train 6bba / test 44b6 ; fold 1 = train 44b6 / test 6bba
-  5. runs train_unet_transformer.py with pool_kernel_um=5.0 (the value the model is trained/served with)
+CLEAN-OOF DESIGN (fixes the two traps found in the code):
+  - The HELD-OUT embryo is NOT used in training at all -> scored once, later, by the predict kernel.
+  - The trainer selects its best epoch by scoring its `test` set each epoch. We set that to a small
+    VALIDATION subset of the TRAINING embryo (NOT the held-out embryo), so (a) best-epoch selection never
+    peeks at the held-out embryo, and (b) per-epoch eval is cheap enough to fit the 12h limit. (The
+    original code evaluated the full 71-crop held-out embryo every epoch -> ~15-20h, would time out.)
+  - pool_kernel_um=5.0 (the value the model is trained AND must be served with; predict defaults to 3.0!).
 
-DEFAULT = a fast SMOKE run (2 epochs, 50 iters) to prove the whole pipeline runs on GPU before you commit
-hours. Set SMOKE=False for the real run and watch the per-epoch timing print to stay under the 12h limit.
-
-Notes / caveats (see reports/RUNBOOK_step3_clean_oof_baseline_2026-07-04.md):
-  - crops have DIFFERENT spatial shapes -> BATCH_SIZE must be 1 (so effectively single-T4; DataParallel
-    needs batch>=2 same-shape). Real 50ep may need >1 session or --max-iters.
-  - the trainer selects "best" epoch by acc*recall ON the held-out embryo -> that number is OPTIMISTIC
-    (model-selection leakage). For a strictly clean OOF, carve a few TRAIN-embryo crops as val, or use a
-    fixed epoch count, then score ONCE with the exact metric (biotrack.metric / the pack's --evaluate).
-  - after training, predict the held-out fold with predict_unet_transformer.py (SET pool_kernel_um=5.0,
-    it defaults to 3.0!) --use-ilp --det-threshold 0.99, then score. That OOF is the real target.
+RUN ORDER: keep SMOKE=True for a fast pipeline check first; then SMOKE=False for the real run; run once
+per FOLD (0 and 1). After each fold, run the predict-and-score kernel to get that fold's OOF number.
 """
 import glob
 import json
@@ -34,23 +26,18 @@ import sys
 from pathlib import Path
 
 # ============================ CONFIG ============================
-FOLD = 0                 # 0 = train 6bba / test 44b6 (Fold A);  1 = train 44b6 / test 6bba (Fold B)
-SMOKE = True             # True: fast end-to-end check. Set False for the real run.
-EPOCHS = 2 if SMOKE else 50
-MAX_ITERS = 50 if SMOKE else 1500   # cap train iters/epoch to bound runtime; raise/remove for full epochs
-BATCH_SIZE = 1           # keep 1: train crops have varying spatial shapes
-POOL_KERNEL_UM = 5.0     # MUST match training/serving (config.json says 5.0)
+FOLD = 0                 # 0 = HOLD OUT 44b6 (train on 6bba);  1 = HOLD OUT 6bba (train on 44b6)
+SMOKE = False            # True: tiny fast pipeline check.  False: real budget-bounded run.
+VAL_N = 6                # train-embryo crops used as validation for best-epoch selection (NOT held-out embryo)
+EPOCHS = 2 if SMOKE else 30
+MAX_ITERS = 50 if SMOKE else 800   # cap train iters/epoch. Watch epoch-0 timing: if EPOCHS*(train+test)
+                                   # projects > ~10h, lower EPOCHS or MAX_ITERS (12h hard limit).
+BATCH_SIZE = 1           # keep 1: train crops have varying spatial shapes (so effectively single-T4)
+POOL_KERNEL_UM = 5.0
 LR = 1e-4
 WORK = Path("/kaggle/working")
 # ===============================================================
 
-
-def sh(cmd, **kw):
-    print("+ " + " ".join(str(c) for c in cmd), flush=True)
-    return subprocess.run(cmd, check=True, **kw)
-
-
-# Kaggle script kernels block-buffer stdout; force line-buffering so logs stream live.
 try:
     sys.stdout.reconfigure(line_buffering=True)
     sys.stderr.reconfigure(line_buffering=True)
@@ -58,24 +45,24 @@ except Exception:
     pass
 
 
+def sh(cmd, **kw):
+    print("+ " + " ".join(str(c) for c in cmd), flush=True)
+    return subprocess.run(cmd, check=True, **kw)
+
+
 def find_pack_repo() -> Path:
-    """Locate the support pack's repo/ under /kaggle/input (glob = layout-robust)."""
     hits = glob.glob("/kaggle/input/**/repo/scripts/train_unet_transformer.py", recursive=True)
     if not hits:
         raise SystemExit("Support pack repo not found. Add dataset "
                          "'pilkwang/biohub-tracking-support-pack-50ep-v1' as input.")
-    return Path(hits[0]).parents[1]  # .../repo
+    return Path(hits[0]).parents[1]
 
 
 def gather_train_dir() -> Path:
-    """Symlink every train crop (.zarr + matching .geff), wherever it is mounted, into one dir.
-
-    Handles the chunked layout (train_chunk_*/train/<crop>.zarr|.geff) and any mount path.
-    A crop is kept only if BOTH its .zarr and .geff exist (GT required for training)."""
+    """Symlink every crop (.zarr + matching .geff) into one dir. Fixed-depth globs (NOT recursive **),
+    which would walk millions of .zarr chunk files across the 79GB mount."""
     dst = WORK / "train"
     dst.mkdir(exist_ok=True)
-    # Fixed-depth globs (NOT recursive **): a recursive walk descends into millions of .zarr chunk
-    # files across the 79GB mount and takes minutes. Crops live at input/<ds>[/<chunk>]/train/*.geff.
     geffs: list[str] = []
     for pat in ("/kaggle/input/*/train/*.geff",
                 "/kaggle/input/*/*/train/*.geff",
@@ -84,7 +71,6 @@ def gather_train_dir() -> Path:
     geffs = sorted(set(geffs))
     n = 0
     for g in geffs:
-        stem = Path(g).stem
         z = str(Path(g).with_suffix(".zarr"))
         if not os.path.exists(z):
             continue
@@ -94,46 +80,61 @@ def gather_train_dir() -> Path:
                 try:
                     os.symlink(src, link)
                 except OSError:
-                    # fall back to copy if symlinks are disallowed
                     (shutil.copytree if os.path.isdir(src) else shutil.copy)(src, link)
         n += 1
     if n == 0:
         raise SystemExit("No train crops (.zarr + .geff) found. Add dataset "
                          "'kms111201/biohub-cell-tracking-data' as input.")
-    print(f"Gathered {n} train crops -> {dst}", flush=True)
+    print(f"Gathered {n} crops -> {dst}", flush=True)
     return dst
 
 
-def write_embryo_held_out_splits(train_dir: Path, subset: int | None = None) -> Path:
-    """fold 0 = train 6bba / test 44b6 ; fold 1 = train 44b6 / test 6bba.
+def load_corrupt_stems() -> set[str]:
+    """Crops flagged in the dataset's metadata_files/corrupt_files.txt (some chunks unreadable).
+    Excluding whole crops avoids a mid-run crash. Returns a set of crop stems."""
+    import re
+    hits = (glob.glob("/kaggle/input/*/metadata_files/corrupt_files.txt")
+            + glob.glob("/kaggle/input/*/*/corrupt_files.txt"))
+    stems: set[str] = set()
+    for h in hits:
+        stems |= set(re.findall(r"(?:44b6|6bba)_[0-9a-f]+", Path(h).read_text()))
+    if stems:
+        print(f"Excluding {len(stems)} corrupt crops: {sorted(stems)}", flush=True)
+    return stems
 
-    When *subset* is set (SMOKE), keep only that many crops per family so the run loads a handful of
-    geffs instead of all 199 — a genuinely fast end-to-end validation.
-    """
+
+def write_train_val_splits(train_dir: Path, val_n: int, smoke: bool, corrupt: set[str]) -> tuple[Path, str]:
+    """Write a 2-fold splits file where each fold's train/test are BOTH from the TRAINING embryo
+    (train = most crops, test = a small val subset for epoch selection). The held-out embryo is
+    excluded here and scored later. Returns (splits_path, held_out_family_for_FOLD)."""
     crops = sorted(p.stem for p in train_dir.glob("*.geff")
-                   if (train_dir / f"{p.stem}.zarr").exists())
+                   if (train_dir / f"{p.stem}.zarr").exists() and p.stem not in corrupt)
     by_fam: dict[str, list[str]] = {}
     for c in crops:
         by_fam.setdefault(c.split("_")[0], []).append(c)
     fams = sorted(by_fam)
     assert len(fams) == 2, f"expected 2 embryo families, got {fams}"
-    a, b = fams  # '44b6', '6bba'
-    if subset:
-        by_fam = {f: v[:subset] for f, v in by_fam.items()}
-    folds = [
-        {"train": by_fam[b], "test": by_fam[a]},   # fold 0: train 6bba, test 44b6
-        {"train": by_fam[a], "test": by_fam[b]},   # fold 1: train 44b6, test 6bba
-    ]
+    a, b = fams  # a='44b6', b='6bba'
+
+    def fold_for(train_fam: str) -> dict:
+        cf = by_fam[train_fam]
+        if smoke:
+            cf = cf[:8]           # 8 crops -> 2 val + 6 train, fast
+        vn = 2 if smoke else val_n
+        return {"train": cf[vn:], "test": cf[:vn]}   # test = validation subset (same embryo)
+
+    folds = [fold_for(b), fold_for(a)]   # fold 0 trains 6bba (holds out 44b6); fold 1 trains 44b6
+    held_out = {0: a, 1: b}
     for i, f in enumerate(folds):
-        print(f"fold {i}: train {len(f['train'])} ({f['train'][0].split('_')[0]}) / "
-              f"test {len(f['test'])} ({f['test'][0].split('_')[0]})", flush=True)
+        tr_fam = f["train"][0].split("_")[0]
+        print(f"fold {i}: train {len(f['train'])} + val {len(f['test'])} ({tr_fam})  "
+              f"| HELD OUT (scored separately): {held_out[i]}", flush=True)
     p = WORK / "dataset_splits.json"
     p.write_text(json.dumps(folds))
-    return p
+    return p, held_out[FOLD]
 
 
 def main():
-    # 1. writable copy of the pack repo
     pack_repo = find_pack_repo()
     repo = WORK / "repo"
     if not repo.exists():
@@ -142,42 +143,36 @@ def main():
     sys.path.insert(0, str(repo / "scripts"))
     print(f"repo -> {repo}", flush=True)
 
-    # 2. training deps (internet ON). torch is preinstalled on the Kaggle GPU image.
     sh([sys.executable, "-m", "pip", "install", "-q",
         "tracksdata", "geff>=1.1.3.1.1", "zarr>=3.0.10,<4", "polars>=1.36",
         "numcodecs>=0.13", "blosc2", "imagecodecs", "rustworkx>=0.17.1", "tqdm"])
 
-    # 3-4. data + splits (SMOKE uses a few crops/family for a genuinely fast end-to-end check)
     train_dir = gather_train_dir()
-    splits = write_embryo_held_out_splits(train_dir, subset=4 if SMOKE else None)
+    corrupt = load_corrupt_stems()
+    splits, held_out = write_train_val_splits(train_dir, VAL_N, SMOKE, corrupt)
+    print(f"Training FOLD {FOLD} (holds out {held_out}); {'SMOKE' if SMOKE else 'REAL'} run: "
+          f"{EPOCHS} epochs x <= {MAX_ITERS} iters.", flush=True)
 
-    # 5. train the held-out fold. The trainer runs as a SUBPROCESS (fresh Python) so it does NOT inherit
-    #    our sys.path -> put repo/src (biohub_tracking) + repo/scripts (augmentations, dataspec) on
-    #    PYTHONPATH. -u + PYTHONUNBUFFERED so its logs stream live.
+    # trainer runs as a SUBPROCESS (fresh Python) -> put repo/src (biohub_tracking) + repo/scripts on
+    # PYTHONPATH; -u + PYTHONUNBUFFERED so its logs stream live.
     pypath = os.pathsep.join([str(repo / "src"), str(repo / "scripts"), os.environ.get("PYTHONPATH", "")])
     env = dict(os.environ, BIOHUB_DATA_DIR=str(train_dir), PYTHONUNBUFFERED="1", PYTHONPATH=pypath)
     cmd = [sys.executable, "-u", str(repo / "scripts" / "train_unet_transformer.py"),
-           "--split", str(FOLD),
-           "--data-dir", str(train_dir),
-           "--splits", str(splits),
-           "--epochs", str(EPOCHS),
-           "--lr", str(LR),
-           "--batch-size", str(BATCH_SIZE),
+           "--split", str(FOLD), "--data-dir", str(train_dir), "--splits", str(splits),
+           "--epochs", str(EPOCHS), "--lr", str(LR), "--batch-size", str(BATCH_SIZE),
            "--pool-kernel-um", str(POOL_KERNEL_UM)]
     if MAX_ITERS is not None:
         cmd += ["--max-iters", str(MAX_ITERS)]
     sh(cmd, env=env)
 
     out = repo / "weights" / "unet_transformer" / f"split_{FOLD}"
-    print(f"\nDONE. Weights -> {out} (copy to /kaggle/working to download).", flush=True)
     ckpt = out / "edge_predictor_best.pth"
     if ckpt.exists():
         shutil.copy(ckpt, WORK / f"edge_predictor_best_split_{FOLD}.pth")
         shutil.copy(out / "config.json", WORK / f"config_split_{FOLD}.json")
-        print(f"Copied checkpoint + config to {WORK} for download.", flush=True)
-    print("\nNext: set SMOKE=False for the real run; then predict the held-out fold with "
-          "predict_unet_transformer.py (SET PredictConfig.pool_kernel_um=5.0!) --use-ilp "
-          "--det-threshold 0.99, and score with biotrack.metric = the clean OOF target.", flush=True)
+        print(f"\nDONE. Checkpoint -> {WORK}/edge_predictor_best_split_{FOLD}.pth (downloadable).", flush=True)
+    print(f"\nNext: run the predict-and-score kernel for FOLD {FOLD} to score the HELD-OUT {held_out} "
+          f"embryo -> the clean OOF number. Then repeat with FOLD={1 - FOLD}.", flush=True)
 
 
 if __name__ == "__main__":
