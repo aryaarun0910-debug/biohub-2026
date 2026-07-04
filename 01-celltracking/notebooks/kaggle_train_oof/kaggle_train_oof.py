@@ -50,6 +50,14 @@ def sh(cmd, **kw):
     return subprocess.run(cmd, check=True, **kw)
 
 
+# Kaggle script kernels block-buffer stdout; force line-buffering so logs stream live.
+try:
+    sys.stdout.reconfigure(line_buffering=True)
+    sys.stderr.reconfigure(line_buffering=True)
+except Exception:
+    pass
+
+
 def find_pack_repo() -> Path:
     """Locate the support pack's repo/ under /kaggle/input (glob = layout-robust)."""
     hits = glob.glob("/kaggle/input/**/repo/scripts/train_unet_transformer.py", recursive=True)
@@ -89,8 +97,12 @@ def gather_train_dir() -> Path:
     return dst
 
 
-def write_embryo_held_out_splits(train_dir: Path) -> Path:
-    """fold 0 = train 6bba / test 44b6 ; fold 1 = train 44b6 / test 6bba."""
+def write_embryo_held_out_splits(train_dir: Path, subset: int | None = None) -> Path:
+    """fold 0 = train 6bba / test 44b6 ; fold 1 = train 44b6 / test 6bba.
+
+    When *subset* is set (SMOKE), keep only that many crops per family so the run loads a handful of
+    geffs instead of all 199 — a genuinely fast end-to-end validation.
+    """
     crops = sorted(p.stem for p in train_dir.glob("*.geff")
                    if (train_dir / f"{p.stem}.zarr").exists())
     by_fam: dict[str, list[str]] = {}
@@ -99,6 +111,8 @@ def write_embryo_held_out_splits(train_dir: Path) -> Path:
     fams = sorted(by_fam)
     assert len(fams) == 2, f"expected 2 embryo families, got {fams}"
     a, b = fams  # '44b6', '6bba'
+    if subset:
+        by_fam = {f: v[:subset] for f, v in by_fam.items()}
     folds = [
         {"train": by_fam[b], "test": by_fam[a]},   # fold 0: train 6bba, test 44b6
         {"train": by_fam[a], "test": by_fam[b]},   # fold 1: train 44b6, test 6bba
@@ -126,13 +140,13 @@ def main():
         "tracksdata", "geff>=1.1.3.1.1", "zarr>=3.0.10,<4", "polars>=1.36",
         "numcodecs>=0.13", "blosc2", "imagecodecs", "rustworkx>=0.17.1", "tqdm"])
 
-    # 3-4. data + splits
+    # 3-4. data + splits (SMOKE uses a few crops/family for a genuinely fast end-to-end check)
     train_dir = gather_train_dir()
-    splits = write_embryo_held_out_splits(train_dir)
+    splits = write_embryo_held_out_splits(train_dir, subset=4 if SMOKE else None)
 
-    # 5. train the held-out fold
-    env = dict(os.environ, BIOHUB_DATA_DIR=str(train_dir))
-    cmd = [sys.executable, str(repo / "scripts" / "train_unet_transformer.py"),
+    # 5. train the held-out fold (PYTHONUNBUFFERED + -u so trainer logs stream live)
+    env = dict(os.environ, BIOHUB_DATA_DIR=str(train_dir), PYTHONUNBUFFERED="1")
+    cmd = [sys.executable, "-u", str(repo / "scripts" / "train_unet_transformer.py"),
            "--split", str(FOLD),
            "--data-dir", str(train_dir),
            "--splits", str(splits),
