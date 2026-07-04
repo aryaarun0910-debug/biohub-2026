@@ -74,7 +74,14 @@ def gather_train_dir() -> Path:
     A crop is kept only if BOTH its .zarr and .geff exist (GT required for training)."""
     dst = WORK / "train"
     dst.mkdir(exist_ok=True)
-    geffs = glob.glob("/kaggle/input/**/train/*.geff", recursive=True)
+    # Fixed-depth globs (NOT recursive **): a recursive walk descends into millions of .zarr chunk
+    # files across the 79GB mount and takes minutes. Crops live at input/<ds>[/<chunk>]/train/*.geff.
+    geffs: list[str] = []
+    for pat in ("/kaggle/input/*/train/*.geff",
+                "/kaggle/input/*/*/train/*.geff",
+                "/kaggle/input/*/*/*/train/*.geff"):
+        geffs += glob.glob(pat)
+    geffs = sorted(set(geffs))
     n = 0
     for g in geffs:
         stem = Path(g).stem
