@@ -1,0 +1,17 @@
+{
+  "id": "aryaarun07/biohub-meta-oof",
+  "title": "Biohub Meta OOF",
+  "code_file": "kaggle_meta_oof.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "enable_internet": true,
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "dataset_sources": [
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "kms111201/biohub-cell-tracking-data"
+  ],
+  "kernel_sources": []
+}

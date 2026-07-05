@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 # ============================ CONFIG ============================
-FOLD = 0                 # which trained fold to ablate (0 -> held-out 44b6; 1 -> held-out 6bba)
+FOLD = 1                 # ablate the WEAK fold (1 -> held-out 6bba; greedy 0.559 + 10,786 division FPs)
 SUBSET = 20              # score on the first N held-out crops for a FAST sweep (None = full embryo)
 POOL_KERNEL_UM = 5.0
 # (name, det_threshold, use_ilp, ilp_division_weight)
