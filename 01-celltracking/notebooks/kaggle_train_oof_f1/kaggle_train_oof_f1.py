@@ -29,9 +29,9 @@ from pathlib import Path
 FOLD = 1                 # 0 = HOLD OUT 44b6 (train on 6bba);  1 = HOLD OUT 6bba (train on 44b6)
 SMOKE = False            # True: tiny fast pipeline check.  False: real budget-bounded run.
 VAL_N = 6                # train-embryo crops used as validation for best-epoch selection (NOT held-out embryo)
-EPOCHS = 2 if SMOKE else 30
-MAX_ITERS = 50 if SMOKE else 800   # cap train iters/epoch. Watch epoch-0 timing: if EPOCHS*(train+test)
-                                   # projects > ~10h, lower EPOCHS or MAX_ITERS (12h hard limit).
+EPOCHS = 2 if SMOKE else 45        # FULL-LENGTH retrain (~1.9x the budget model's total training)
+MAX_ITERS = 50 if SMOKE else 1000  # ~45x1000 projects ~11h; my last-epoch patch saves each epoch so a
+                                   # 12h timeout still keeps progress. Watch epoch-0 timing.
 BATCH_SIZE = 1           # keep 1: train crops have varying spatial shapes (so effectively single-T4)
 POOL_KERNEL_UM = 5.0
 LR = 1e-4

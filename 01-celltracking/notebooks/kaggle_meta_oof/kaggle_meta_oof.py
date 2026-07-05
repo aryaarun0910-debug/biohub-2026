@@ -44,8 +44,7 @@ def main():
     pf.write_text(s.replace("pool_kernel_um: float = 3.0", f"pool_kernel_um: float = {POOL_KERNEL_UM}"))
 
     sh([sys.executable, "-m", "pip", "install", "-q", "tracksdata", "geff>=1.1.3.1.1", "zarr>=3.0.10,<4",
-        "polars>=1.36", "numcodecs>=0.13", "blosc2", "imagecodecs", "rustworkx>=0.17.1", "tqdm",
-        "pyscipopt", "ilpy>=0.5.1"])
+        "polars>=1.36", "numcodecs>=0.13", "blosc2", "imagecodecs", "rustworkx>=0.17.1", "tqdm"])
 
     data = WORK / "data"; data.mkdir(exist_ok=True)
     geffs = []
@@ -71,16 +70,18 @@ def main():
     print(f"META OOF: {len(held)} held-out {held_fam} crops.", flush=True)
 
     # the PACK's own checkpoint (public meta); load_model reads config.json from its parent dir.
-    w = glob.glob("/kaggle/input/*/repo/weights/*/split_0/edge_predictor_best.pth")
+    w = (glob.glob("/kaggle/input/*/repo/weights/*/split_0/edge_predictor_best.pth")
+         + glob.glob("/kaggle/input/*/weights/*/split_0/edge_predictor_best.pth"))
     if not w:
         raise SystemExit("pack meta weights not found.")
     print(f"meta weights: {w[0]}", flush=True)
 
     pypath = os.pathsep.join([str(repo / "src"), str(repo / "scripts"), os.environ.get("PYTHONPATH", "")])
     env = dict(os.environ, BIOHUB_DATA_DIR=str(data), PYTHONUNBUFFERED="1", PYTHONPATH=pypath)
+    # GREEDY (no --use-ilp) -> like-for-like vs our greedy 0.559, and avoids the big-crop ILP OOM.
     sh([sys.executable, "-u", str(pf), "--split", str(FOLD), "--method", "meta",
         "--data-dir", str(data), "--splits", str(splits), "--weights", w[0],
-        "--det-threshold", "0.99", "--use-ilp", "--ilp-division-weight", "1.0", "--evaluate"], env=env)
+        "--det-threshold", "0.99", "--evaluate"], env=env)
 
     for d in (repo / "predictions").rglob(f"split_{FOLD}"):
         dest = WORK / f"meta_geffs_split_{FOLD}"
