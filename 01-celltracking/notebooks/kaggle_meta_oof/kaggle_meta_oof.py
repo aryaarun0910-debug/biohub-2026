@@ -69,11 +69,14 @@ def main():
     splits = data / "dataset_splits.json"; splits.write_text(json.dumps(folds))
     print(f"META OOF: {len(held)} held-out {held_fam} crops.", flush=True)
 
-    # the PACK's own checkpoint (public meta); load_model reads config.json from its parent dir.
-    w = (glob.glob("/kaggle/input/*/repo/weights/*/split_0/edge_predictor_best.pth")
-         + glob.glob("/kaggle/input/*/weights/*/split_0/edge_predictor_best.pth"))
+    # the PACK's own checkpoint (public meta). RECURSIVE glob under the pack mount root (found_pack_repo
+    # is recursive and works, so the pack nests deeper than a fixed-depth glob expects). load_model reads
+    # config.json from the weights' parent dir.
+    mount_root = Path(hits[0]).parents[2]   # .../<pack>/[nesting]/repo/scripts/predict.py -> pack root
+    w = glob.glob(str(mount_root / "**" / "edge_predictor_best.pth"), recursive=True)
     if not w:
-        raise SystemExit("pack meta weights not found.")
+        seen = glob.glob(str(mount_root / "**" / "*.pth"), recursive=True)[:20]
+        raise SystemExit(f"pack meta weights not found under {mount_root}; .pth seen: {seen}")
     print(f"meta weights: {w[0]}", flush=True)
 
     pypath = os.pathsep.join([str(repo / "src"), str(repo / "scripts"), os.environ.get("PYTHONPATH", "")])
