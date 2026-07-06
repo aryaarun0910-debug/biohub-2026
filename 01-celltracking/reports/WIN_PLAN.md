@@ -32,8 +32,8 @@ Metric = `weighted_avg(adj_edge_jaccard) + 0.1 · division_jaccard`.
 | # | Lever | Why it matters (esp. for the PRIVATE/disjoint embryo) | Status |
 |---|---|---|---|
 | 1 | **ILP linking, tuned** | +0.11 proven; sweep division-weight, add 1-frame gap recovery. Biggest banked lever. | proven local; scale on Kaggle (cap giant-crop ILP to avoid OOM) |
-| 2 | **NIS3D / external pretraining** | THE differentiator — pretrain the detector on dense external zebrafish/embryo nuclei (CC-BY) so it doesn't overfit our 2 embryos. Most teams won't. This is what wins a disjoint board. | not started |
-| 3 | **Proper full-length training** | Out-train the public 50ep; more epochs + augmentation. | fold-1 running |
+| 2 | **NIS3D / external pretraining** | THE differentiator — pretrain the detector on dense external zebrafish/embryo nuclei (CC-BY) so it doesn't overfit our 2 embryos. Most teams won't. This is what wins a disjoint board. **NOW #1 PRIORITY** (evidence below). | not started |
+| 3 | ~~Proper full-length training~~ **MEASURED: NOT the lever** | 2026-07-06: 45ep (1.9x) model scored WORSE than 30ep on all 3 held-out crops (0.60-0.64 vs 0.64-0.70) and lower recall = OVERFITTING to our 2 embryos. Do NOT push epochs; keep the budget model. This is the hard evidence that the bottleneck is GENERALIZATION, not training. | done, negative |
 | 4 | **Divisions as a weapon** | The 0.1 term is ~unexploited by the field. Precision-gated division detection = near-free points once ILP kills the FPs. | ILP fixes FP; need TP |
 | 5 | **Ensemble + TTA** | fold-A ∪ fold-B, flip-TTA (already in code). Marginal alone, decisive at the very top. | not started |
 | 6 | **Metric-quirk exploits** | Sub-voxel centroid refine (free recall at the 7µm gate); count-calibration exploiting the one-sided penalty; edges between two unmatched nodes are FREE (not FP). | identified |
