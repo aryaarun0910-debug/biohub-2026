@@ -13,5 +13,6 @@ __pycache__/
 kt_out/
 artifacts/
 scratch_live_lb/
+scratch_public_kernels/
 reports/*.log
 reports/inventory/spotiflow_zeroshot.csv

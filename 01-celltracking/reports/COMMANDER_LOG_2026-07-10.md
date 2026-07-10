@@ -131,3 +131,16 @@ chosen on one held-out embryo and transferred unchanged to the other.
 Forcing Trackastra to one child per parent reduced edge J to 0.82869 on the
 first crop, despite removing its two false divisions. Unlike the organizer
 graph, Trackastra divisions must not be suppressed blindly.
+
+## Live public-code correction
+
+Authenticated Kaggle kernel search on 2026-07-10 shows the visible frontier has
+moved beyond a uniform 50-epoch baseline. Public `lb897-baseline` descendants
+expose a 400-epoch temporal model, spatial D4 detection TTA, ILP, motion relinking,
+one-frame gap repair, safe divisions, and short-track filtering/recovery. A public
+DoG+Trackastra notebook and offline Trackastra model/package bundle also exist.
+
+**Implication:** Trackastra alone is not an asymmetric secret. The potentially
+decisive stack is learned detections + embryo-held-out Trackastra calibration +
+metric-aware fusion + legal target-embryo adaptation. Public code will be used
+as deployment reference, never as evidence of private generalization.

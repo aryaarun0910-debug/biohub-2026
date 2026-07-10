@@ -16,6 +16,14 @@ Authenticated Kaggle snapshot on 2026-07-10:
 
 The public board is saturated and unusually tied. It contains four visible movies whose IDs also occur with labels in train, so it is vulnerable to seen-movie tuning. The 71% private board is a disjoint hidden embryo. Our competitive opening is not another public-only tweak; it is reducing degradation on the unseen embryo.
 
+The live public code frontier has moved beyond the old 50-epoch shorthand. The
+public `lb897-baseline` family and the 2026-07-10 blend notebook expose a claimed
+400-epoch temporal model, spatial D4 detection TTA, learned/ILP links, motion
+relinking, gap repair, safe divisions, and adaptive short-track recovery. A
+public DoG+Trackastra notebook also exists. Therefore neither "use Trackastra"
+nor "train longer" is a moat by itself; our differentiation must be measured
+cross-embryo calibration and target-time generalization.
+
 ## 2. North-star doctrine
 
 1. **Private-shuffle generalization is the product.** Every model decision is gated on embryo-held-out OOF in both directions.
@@ -25,16 +33,17 @@ The public board is saturated and unusually tied. It contains four visible movie
 5. **Optimize the real metric.** Candidate probabilities feed a metric-aligned lineage solver; generic tracking likelihood is not the final objective.
 6. **Preserve prize eligibility.** No private-label reconstruction, public-source label transfer into an identified test crop, submission probing, or quarantined division-evaluator exploit.
 
-## 3. Current evidence—provisional until artifacts are re-scored
+## 3. Current measured evidence
 
 - Classical fallback: V3 `0.632/0.756` adjusted edge-J by embryo; op-bright-smooth `0.700/0.762`.
-- Learned detector is reported at roughly 90–95% held-out node recall, with the weaker learned fold around 0.885 in prior notes. This is **not solved**: track-conditioned recovery may lift the edge oracle materially.
-- Learned greedy OOF was reported around `0.656` on held-out 44b6 and `0.559` on held-out 6bba.
-- ILP produced large local gains and suppressed division-FP catastrophes, but a complete full-fold, both-direction, exact artifact score is not yet banked locally.
-- More training appeared to overfit, but the negative 45-epoch read was only three held-out crops.
-- Trackastra, endpoint/candidate oracles, metric-aligned fractional ILP, and target-time adaptation have not yet been tested.
-
-The first commander action is therefore artifact recovery and exact rescoring. No inherited `~0.70` number is treated as truth without its GEFFs and TP/FP/FN decomposition.
+- Recovered learned OOF is complete: 71 `44b6` and 128 `6bba` crops.
+- Authoritative combined scores are **0.6562** on held-out `44b6` and **0.5593** on held-out `6bba`; node recall is 0.9536 / 0.8966.
+- Organizer divisions are catastrophically uncalibrated across embryos: 594 and 10,786 false divisions. Fork suppression raises the two scores only to 0.6595 / 0.5680.
+- Selected-edge subset ceilings are 0.7343 / 0.7112. Assignment-feasible endpoint ceilings are **0.9179 / 0.8756**. Relinking existing detections is the dominant measured lever; redetection is needed beyond the hard-fold ceiling.
+- Global organizer confidence and displacement gates do not transfer useful gain.
+- Blind raw-intensity dangling-track redetection failed its gate on the first ten crops of both folds. Revisit only with stronger linker residual features.
+- Trackastra zero-shot on frozen detections raises exact edge J from 0.75769 to **0.83158** on the first screened crop; a cached threshold of 0.8 reaches **0.87425** on that crop. These are promising one-crop results, not fold evidence. The balanced 10+10 screen is running.
+- Target-time adaptation is implemented and synthetically gated, but has not yet been evaluated on real Trackastra candidate exports.
 
 ## 4. Parallel attack fronts
 
@@ -136,7 +145,7 @@ We do not cap ambition at 0.89, and we do not plan from 0.94 mythology. The orac
 - Local CPU: exact scorer, oracles, redetection diagnostics, calibration, small ILPs, artifact registry.
 - Kaggle T4: learned inference and Trackastra screens.
 - Kaggle T4×2 / cloud: only gated training or adaptation jobs.
-- Current Kaggle quota snapshot: 16.85 GPU-hours remaining before the 2026-07-11 00:00 UTC reset; no Biohub kernel running.
+- Commander-start Kaggle quota snapshot: 16.85 GPU-hours before the 2026-07-11 00:00 UTC reset. The balanced Trackastra screen is running; a CPU wheelhouse pack runs concurrently.
 - Submission notebook: internet off, ≤12h, all wheels/weights shipped as versioned datasets.
 
 Run concurrently:
@@ -162,14 +171,14 @@ Public score may reject a broken deployment. It may not promote a model that fai
 
 ## 8. Immediate 72-hour orders
 
-1. Recover all learned OOF GEFFs/weights and publish the actual score decomposition.
-2. Run endpoint/candidate/lineage oracles on recovered folds.
-3. Land and unit-test the Trackastra point→mask→association adapter.
-4. Package Trackastra `ctc` code/weights for an offline T4 screen.
-5. Repair and preflight the frozen-detection ablation kernel.
-6. Prototype track-conditioned redetection on the worst no-candidate crops.
-7. Preserve the authenticated rules rationale for target-time optimization; optionally ask the organizer for confirmation before final submission.
-8. Launch only the experiments whose inputs and output paths pass preflight.
+1. Finish and exact-score the fixed 10+10 Trackastra screen.
+2. Select the Trackastra greedy threshold on one embryo and transfer it unchanged to the other; require bilateral gain.
+3. Expand Trackastra to full 199-crop OOF only if the balanced gate passes.
+4. Integrate Trackastra behind the strongest public learned detector wrapper, not the classical DoG submission.
+5. Calibrate Trackastra/organizer candidate TP and metric-counted-FP probabilities out of fold, then run the metric solver.
+6. Evaluate real target-time motion/path adaptation on candidate exports.
+7. Complete an internet-off submission dry run with versioned wheels, weights and hashes.
+8. Submit only after exact both-fold OOF and runtime gates.
 
 ## 9. Legal red lines
 
