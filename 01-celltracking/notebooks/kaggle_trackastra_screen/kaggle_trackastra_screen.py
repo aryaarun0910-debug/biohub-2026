@@ -22,7 +22,7 @@ from pathlib import Path
 
 WORK = Path("/kaggle/working")
 MAX_CROPS_PER_FOLD = 10
-FOLDS = (0, 1)
+FOLDS = (1,)
 MODE = "greedy"
 EDGE_THRESHOLD = 0.05
 BATCH_SIZE = 16

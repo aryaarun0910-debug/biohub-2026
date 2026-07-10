@@ -144,3 +144,42 @@ DoG+Trackastra notebook and offline Trackastra model/package bundle also exist.
 decisive stack is learned detections + embryo-held-out Trackastra calibration +
 metric-aware fusion + legal target-embryo adaptation. Public code will be used
 as deployment reference, never as evidence of private generalization.
+
+## 16:59 UTC leaderboard refresh
+
+Authenticated full download contains 1,030 ranked teams. #1 remains 0.910,
+#10 is 0.901, #20 is 0.900, and the top-20 spread is 0.010. There are 401 teams
+at or above 0.880; median is 0.842. Our account is rank 650 at 0.807 before the
+running LB897 calibration kernel. Public saturation is increasing, while the
+winning public score is unchanged.
+
+## Deployment calibration and offline packaging
+
+The current public `lb897-baseline` notebook was run unchanged as private kernel
+`aryaarun07/biohub-lb897-calibration` version 1. Its output has 239,901 contiguous
+unique rows (122,035 nodes, 117,866 edges), covers all four test datasets, and has
+SHA256 `284DECB6C3618879E06647761187FF8D97A4DF6240AA2AFA503D69BEAAD262AA`.
+Code-competition submission ref **54534923** is pending. This is deployment/public
+calibration only; its dataset-specific public-movie tuning is not private evidence.
+
+The support-pack manifest now identifies itself as the 400-epoch snapshot despite
+the legacy `50ep` dataset slug. Model weight SHA256 is
+`12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771`.
+
+A lean 54.8 MB Trackastra wheel archive was built and uploaded privately with
+SHA256 `31317ff2c670837f096ff42773e5443d96549d48b506a3a4b2de1533b4d15911`.
+An internet-off CPU smoke kernel installed the support-pack graph stack, installed
+Trackastra/edt/lz4 without dependencies, loaded the CTC checkpoint, and printed
+`OFFLINE TRACKASTRA SMOKE PASS`.
+
+## Trackastra 10-crop `44b6` gate
+
+On the first ten `44b6` OOF crops, organizer combined score is **0.6880**. Pure
+Trackastra default is 0.6065; its best simple cached setting is no-divisions at
+threshold 0.5 with edge J 0.6418. The one-crop 0.874 result did not generalize.
+
+Edge-level agreement fusion is materially better: add +3.0 to the Trackastra
+logit when the organizer independently proposes the same edge, then run no-div
+greedy at threshold 0.5. Authoritative materialized edge J is **0.7076**, a
++0.0213 edge-J gain over organizer edge J on the slice. Fold-1 is running with
+the same candidate generation; bonus/threshold/mode must transfer unchanged.

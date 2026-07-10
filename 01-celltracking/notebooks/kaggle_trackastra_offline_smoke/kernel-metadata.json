@@ -1,0 +1,17 @@
+{
+  "id": "aryaarun07/biohub-trackastra-offline-smoke",
+  "title": "Biohub Trackastra Offline Smoke",
+  "code_file": "kaggle_trackastra_offline_smoke.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": false,
+  "dataset_sources": [
+    "aryaarun07/biohub-trackastra-offline-wheels",
+    "aryaarun07/biohub-trackastra-ctc-bundle",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1"
+  ],
+  "competition_sources": [],
+  "kernel_sources": []
+}

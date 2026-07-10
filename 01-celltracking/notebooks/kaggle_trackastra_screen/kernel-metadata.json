@@ -13,5 +13,8 @@
     "aryaarun07/biohub-trackastra-ctc-bundle",
     "kms111201/biohub-cell-tracking-data"
   ],
-  "kernel_sources": ["aryaarun07/biohub-predict-score"]
+  "kernel_sources": [
+    "aryaarun07/biohub-predict-score",
+    "aryaarun07/biohub-predict-score-f1"
+  ]
 }

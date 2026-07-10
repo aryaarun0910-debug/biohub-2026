@@ -25,10 +25,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pred-dir", required=True, help="dir with predicted <crop>.geff")
     ap.add_argument("--gt-dir", default=str(ROOT / "data" / "train"))
+    ap.add_argument("--max-crops", type=int)
     args = ap.parse_args()
 
     pred_dir, gt_dir = Path(args.pred_dir), Path(args.gt_dir)
     preds = sorted(pred_dir.glob("*.geff"))
+    if args.max_crops is not None:
+        if args.max_crops < 1:
+            ap.error("--max-crops must be positive")
+        preds = preds[: args.max_crops]
     if not preds:
         sys.exit(f"No *.geff in {pred_dir}")
 

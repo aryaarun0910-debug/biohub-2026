@@ -1,4 +1,9 @@
-"""Build a complete Linux/Python 3.12 wheelhouse for offline Trackastra inference."""
+"""Build a lean Linux/Python 3.12 wheel pack for offline Trackastra inference.
+
+Kaggle already ships torch/CUDA, numpy, scipy and the core scientific stack. The
+learned-detector support pack supplies GEFF/tracksdata. Pulling Trackastra's full
+dependency closure would add 3+ GiB and risk replacing the working CUDA runtime.
+"""
 
 from __future__ import annotations
 
@@ -14,17 +19,24 @@ WORK = Path("/kaggle/working")
 WHEELS = WORK / "trackastra_wheelhouse"
 REQUIREMENTS = [
     "trackastra==0.5.2",
-    "tracksdata",
-    "geff>=1.1.3.1.1",
-    "zarr>=3.0.10,<4",
-    "polars>=1.36",
+    "edt",
+    "lz4",
 ]
 
 
 def main() -> None:
     WHEELS.mkdir(parents=True, exist_ok=True)
     subprocess.run(
-        [sys.executable, "-m", "pip", "download", "--dest", str(WHEELS), *REQUIREMENTS],
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "download",
+            "--no-deps",
+            "--dest",
+            str(WHEELS),
+            *REQUIREMENTS,
+        ],
         check=True,
     )
     archive = Path(shutil.make_archive(str(WORK / "trackastra_wheelhouse"), "zip", WHEELS))

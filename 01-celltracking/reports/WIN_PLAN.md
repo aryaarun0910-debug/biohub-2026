@@ -8,11 +8,12 @@
 
 Authenticated Kaggle snapshot on 2026-07-10:
 
-- 1,014 ranked teams in the downloaded public leaderboard snapshot.
-- Leader: **0.910**; #10: **0.901**; #20: **0.898**.
-- Top-20 spread: **0.012**.
-- **385 teams ≥0.880**; public median **0.839**.
+- 1,030 ranked teams in the 16:59 UTC refreshed leaderboard snapshot.
+- Leader: **0.910**; #10: **0.901**; #20: **0.900**.
+- Top-20 spread: **0.010**.
+- **401 teams ≥0.880**; public median **0.842**.
 - Our completed submissions: **0.807** valid V3 anchor and **0.727** broken-coordinate artifact.
+- Our current public rank is 650; the LB897 calibration kernel is running.
 
 The public board is saturated and unusually tied. It contains four visible movies whose IDs also occur with labels in train, so it is vulnerable to seen-movie tuning. The 71% private board is a disjoint hidden embryo. Our competitive opening is not another public-only tweak; it is reducing degradation on the unseen embryo.
 
