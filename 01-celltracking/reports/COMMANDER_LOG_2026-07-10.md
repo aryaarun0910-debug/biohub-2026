@@ -92,3 +92,13 @@ almost no proposals and produced no useful gain.
 GT-conditioned top-3 rescue result proves image signal exists, but confidence
 alone cannot identify it safely. Revisit only after the linker supplies stronger
 residual/cycle-consistency features; do not spend more cycles threshold-fishing.
+
+## Organizer edge-probability sweep
+
+With detections frozen and forks capped at one child, thresholds 0.0 through
+0.5 are identical because every selected organizer edge has `edge_prob >= 0.5`.
+Thresholds above 0.5 monotonically destroy performance on both folds (for
+example, threshold 0.7 gives edge J 0.448 on `44b6` and 0.516 on `6bba`).
+
+**Decision:** the subset-oracle gap cannot be captured by a global confidence
+cutoff. It requires contextual association or a structured solver.
