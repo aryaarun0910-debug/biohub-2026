@@ -78,3 +78,17 @@ on `44b6` and 150,568 on `6bba`. Exact OOF becomes:
 This is a safe floor improvement on both folds, but it captures only a small
 fraction of the oracle selection headroom. Keep suppression in the baseline;
 do not confuse it with the required association solution.
+
+## Blind dangling-track redetection gate
+
+The first ten crops from each held-out embryo were tested with identical blind
+query logic and exact post-hoc scoring. The default confidence 1.0 policy lost
+score on 19/20 crops; losses reached -0.0581 on `44b6`. Confidence thresholds
+1.25, 1.5, 1.75, 2.0, and 3.0 were then frozen and applied to both folds.
+Threshold 1.25 remained negative overall; thresholds 1.5 and above selected
+almost no proposals and produced no useful gain.
+
+**Decision:** current raw-intensity dangling-track redetection is a no-go. The
+GT-conditioned top-3 rescue result proves image signal exists, but confidence
+alone cannot identify it safely. Revisit only after the linker supplies stronger
+residual/cycle-consistency features; do not spend more cycles threshold-fishing.

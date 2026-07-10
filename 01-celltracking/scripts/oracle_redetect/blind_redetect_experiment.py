@@ -67,7 +67,7 @@ def main() -> None:
         volume = open_volume(args.image_dir / f"{stem}.zarr")
         queries, proposals = blind_redetection_proposals(
             pred,
-            len(volume),
+            int(volume.shape[0]),
             lambda t, v=volume: v[t],
             directions=parse_directions(args.direction),
             allow_stationary=not args.no_stationary,
