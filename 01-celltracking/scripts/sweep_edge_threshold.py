@@ -34,6 +34,18 @@ def selected_edges(rows, threshold: float, max_children: int) -> list[tuple[int,
     return output
 
 
+def selected_edges_by_distance(rows, max_distance: float, max_children: int) -> list[tuple[int, int]]:
+    by_source: dict[int, list[tuple[float, int]]] = {}
+    for source, target, distance, probability in rows:
+        if distance <= max_distance:
+            by_source.setdefault(source, []).append((probability, target))
+    output: list[tuple[int, int]] = []
+    for source, candidates in by_source.items():
+        candidates.sort(reverse=True)
+        output.extend((source, target) for _, target in candidates[:max_children])
+    return output
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pred-dir", action="append", required=True)
@@ -42,13 +54,19 @@ def main() -> None:
         "--thresholds",
         default="0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.85,0.9,0.95",
     )
+    parser.add_argument(
+        "--distance-thresholds",
+        default="1,1.5,2,2.5,3,4,5,7,10,1000000",
+    )
     parser.add_argument("--max-children", type=int, default=1)
     args = parser.parse_args()
     thresholds = [float(value) for value in args.thresholds.split(",")]
+    distance_thresholds = [float(value) for value in args.distance_thresholds.split(",")]
     if args.max_children < 1:
         parser.error("--max-children must be positive")
 
     totals: dict[str, dict[float, list[tuple[float, int]]]] = {}
+    distance_totals: dict[str, dict[float, list[tuple[float, int]]]] = {}
     gt_dir = Path(args.gt_dir)
     for pred_dir in map(Path, args.pred_dir):
         for pred_path in sorted(pred_dir.glob("*.geff")):
@@ -60,19 +78,39 @@ def main() -> None:
             gt_edges = {(int(s), int(t)) for s, t in gt.edges}
             gt_out = {source for source, _ in gt_edges}
             gt_in = {target for _, target in gt_edges}
-            attrs = load_graph(str(pred_path)).edge_attrs(attr_keys=["edge_prob"])
+            attrs = load_graph(str(pred_path)).edge_attrs(attr_keys=["edge_prob", "edge_dist"])
             rows = [
                 (int(source), int(target), float(probability))
                 for source, target, probability in attrs.select(
                     ["source_id", "target_id", "edge_prob"]
                 ).iter_rows()
             ]
+            distance_rows = [
+                (int(source), int(target), float(distance), float(probability))
+                for source, target, distance, probability in attrs.select(
+                    ["source_id", "target_id", "edge_dist", "edge_prob"]
+                ).iter_rows()
+            ]
             n_est = estimated_nodes(gt_path)
             count_multiplier = max(0.0, 1.0 - ALPHA * (len(pred.node_ids) - n_est) / n_est)
             fold = totals.setdefault(embryo, {threshold: [] for threshold in thresholds})
-            for threshold in thresholds:
+            distance_fold = distance_totals.setdefault(
+                embryo, {threshold: [] for threshold in distance_thresholds}
+            )
+            selections = [
+                (fold, threshold, selected_edges(rows, threshold, args.max_children))
+                for threshold in thresholds
+            ] + [
+                (
+                    distance_fold,
+                    threshold,
+                    selected_edges_by_distance(distance_rows, threshold, args.max_children),
+                )
+                for threshold in distance_thresholds
+            ]
+            for destination, threshold, edges in selections:
                 tp = valid = 0
-                for source, target in selected_edges(rows, threshold, args.max_children):
+                for source, target in edges:
                     gs, gt_target = matched.get(source), matched.get(target)
                     is_tp = gs is not None and gt_target is not None and (gs, gt_target) in gt_edges
                     is_valid = (gs is not None and gs in gt_out) or (
@@ -84,7 +122,7 @@ def main() -> None:
                 fn = len(gt_edges) - tp
                 denominator = tp + fp + fn
                 adjusted = (tp / denominator if denominator else 0.0) * count_multiplier
-                fold[threshold].append((adjusted, denominator))
+                destination[threshold].append((adjusted, denominator))
 
     for embryo, threshold_rows in sorted(totals.items()):
         print(f"\n{embryo}")
@@ -96,6 +134,17 @@ def main() -> None:
             print(f"  threshold={threshold:>5.2f} edgeJ={score:.6f}")
             best = max(best, (score, threshold))
         print(f"  BEST threshold={best[1]:.2f} edgeJ={best[0]:.6f}")
+
+        print("  distance gate")
+        best = (-1.0, None)
+        for threshold in distance_thresholds:
+            rows = distance_totals[embryo][threshold]
+            weight = sum(denominator for _, denominator in rows)
+            score = sum(value * denominator for value, denominator in rows) / weight
+            label = "none" if threshold > 100000 else f"{threshold:.2f}"
+            print(f"    max_distance={label:>5} edgeJ={score:.6f}")
+            best = max(best, (score, threshold))
+        print(f"    BEST max_distance={best[1]:.2f} edgeJ={best[0]:.6f}")
 
 
 if __name__ == "__main__":

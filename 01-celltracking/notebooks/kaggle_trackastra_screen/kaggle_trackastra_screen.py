@@ -21,8 +21,8 @@ from pathlib import Path
 
 
 WORK = Path("/kaggle/working")
-MAX_CROPS = 1
-FOLD = 0
+MAX_CROPS_PER_FOLD = 10
+FOLDS = (0, 1)
 MODE = "greedy"
 EDGE_THRESHOLD = 0.05
 BATCH_SIZE = 16
@@ -114,16 +114,6 @@ def main() -> None:
     import zarr
     from trackastra.model import Trackastra
 
-    pred_dirs = sorted(glob.glob(f"/kaggle/input/**/pred_geffs_split_{FOLD}", recursive=True))
-    if not pred_dirs:
-        seen = sorted(glob.glob("/kaggle/input/**/*.geff", recursive=True))[:20]
-        raise FileNotFoundError(f"fold-{FOLD} prediction source absent; sample GEFFs={seen}")
-    pred_dir = Path(pred_dirs[0])
-    detections_paths = sorted(pred_dir.glob("*.geff"))[:MAX_CROPS]
-    if not detections_paths:
-        raise FileNotFoundError(f"no GEFFs under {pred_dir}")
-    print(f"frozen predictions: {pred_dir}; crops={len(detections_paths)}", flush=True)
-
     model = Trackastra.from_folder(model_dir, device="cuda", batch_size=BATCH_SIZE)
     for method in ("_predict", "_track_from_predictions"):
         if not hasattr(model, method):
@@ -131,45 +121,57 @@ def main() -> None:
     if "edge_threshold" not in inspect.signature(model._predict).parameters:
         raise RuntimeError("unexpected Trackastra _predict signature")
 
-    geff_out = WORK / f"trackastra_geffs_split_{FOLD}"
-    edge_out = WORK / f"trackastra_edges_split_{FOLD}"
     temp_root = WORK / "trackastra_temp"
-    for d in (geff_out, edge_out, temp_root):
-        d.mkdir(exist_ok=True)
+    temp_root.mkdir(exist_ok=True)
+    for fold in FOLDS:
+        pred_dirs = sorted(glob.glob(f"/kaggle/input/**/pred_geffs_split_{fold}", recursive=True))
+        if not pred_dirs:
+            seen = sorted(glob.glob("/kaggle/input/**/*.geff", recursive=True))[:20]
+            raise FileNotFoundError(f"fold-{fold} prediction source absent; sample GEFFs={seen}")
+        pred_dir = Path(pred_dirs[0])
+        detections_paths = sorted(pred_dir.glob("*.geff"))[:MAX_CROPS_PER_FOLD]
+        if not detections_paths:
+            raise FileNotFoundError(f"no GEFFs under {pred_dir}")
+        print(f"frozen predictions: {pred_dir}; crops={len(detections_paths)}", flush=True)
+        geff_out = WORK / f"trackastra_geffs_split_{fold}"
+        edge_out = WORK / f"trackastra_edges_split_{fold}"
+        geff_out.mkdir(exist_ok=True)
+        edge_out.mkdir(exist_ok=True)
 
-    for crop_i, detections_path in enumerate(detections_paths, start=1):
-        crop_t0 = time.time()
-        name = detections_path.stem
-        image_path = find_image(name)
-        image = zarr.open_group(str(image_path), mode="r")["0"]
-        detections = load_frozen_detections(detections_path)
-        mask_path = temp_root / f"{name}_instances.npy"
-        mapping_path = temp_root / f"{name}_mapping.csv"
-        masks, mapping = rasterize_ellipsoid_masks(
-            detections, tuple(int(v) for v in image.shape), output_npy=mask_path,
-        )
-        write_mask_mapping(mapping, mapping_path)
-        print(
-            f"[{crop_i}/{len(detections_paths)}] {name}: nodes={len(detections.node_ids)} "
-            f"shape={tuple(image.shape)} maskGiB={mask_path.stat().st_size/2**30:.3f}",
-            flush=True,
-        )
+        for crop_i, detections_path in enumerate(detections_paths, start=1):
+            crop_t0 = time.time()
+            name = detections_path.stem
+            image_path = find_image(name)
+            image = zarr.open_group(str(image_path), mode="r")["0"]
+            detections = load_frozen_detections(detections_path)
+            mask_path = temp_root / f"{name}_instances.npy"
+            mapping_path = temp_root / f"{name}_mapping.csv"
+            masks, mapping = rasterize_ellipsoid_masks(
+                detections, tuple(int(v) for v in image.shape), output_npy=mask_path,
+            )
+            write_mask_mapping(mapping, mapping_path)
+            print(
+                f"fold={fold} [{crop_i}/{len(detections_paths)}] {name}: "
+                f"nodes={len(detections.node_ids)} shape={tuple(image.shape)} "
+                f"maskGiB={mask_path.stat().st_size/2**30:.3f}",
+                flush=True,
+            )
 
-        predictions = model._predict(
-            np.asarray(image), masks, edge_threshold=EDGE_THRESHOLD,
-            batch_size=BATCH_SIZE,
-        )
-        selected = model._track_from_predictions(predictions, mode=MODE)
-        export_trackastra_result(
-            detections, mapping, predictions, selected,
-            output_geff=geff_out / f"{name}.geff",
-            output_edge_scores=edge_out / f"{name}.csv",
-        )
-        del masks, image, predictions, selected
-        for path in (mask_path, mapping_path):
-            if path.exists():
-                path.unlink()
-        print(f"{name} complete in {(time.time()-crop_t0)/60:.1f} min", flush=True)
+            predictions = model._predict(
+                np.asarray(image), masks, edge_threshold=EDGE_THRESHOLD,
+                batch_size=BATCH_SIZE,
+            )
+            selected = model._track_from_predictions(predictions, mode=MODE)
+            export_trackastra_result(
+                detections, mapping, predictions, selected,
+                output_geff=geff_out / f"{name}.geff",
+                output_edge_scores=edge_out / f"{name}.csv",
+            )
+            del masks, image, predictions, selected
+            for path in (mask_path, mapping_path):
+                if path.exists():
+                    path.unlink()
+            print(f"{name} complete in {(time.time()-crop_t0)/60:.1f} min", flush=True)
 
     if temp_root.exists():
         shutil.rmtree(temp_root)

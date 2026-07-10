@@ -102,3 +102,22 @@ example, threshold 0.7 gives edge J 0.448 on `44b6` and 0.516 on `6bba`).
 
 **Decision:** the subset-oracle gap cannot be captured by a global confidence
 cutoff. It requires contextual association or a structured solver.
+
+A matching displacement-distance sweep also failed as a hard rule. `44b6`
+preferred no gate; `6bba` improved only +0.00056 at a 7-unit maximum, which was
+slightly negative on `44b6`. Retain distance as a soft linker feature only.
+
+## Trackastra zero-shot first result
+
+On frozen organizer detections for `44b6_0113de3b`, Trackastra CTC zero-shot
+greedy association changed only the edges:
+
+| linker | nodes | edges | exact adj edge J |
+|---|---:|---:|---:|
+| organizer | 28,119 | 25,139 | 0.75769 |
+| Trackastra | 28,119 | 26,945 | **0.83158** |
+
+The gain is **+0.07390** on identical coordinates. Trackastra produced two false
+divisions on a crop with no GT divisions. This is a high-EV association signal,
+not yet a fold-level result. A fixed-settings 10-crop-per-fold screen was launched
+immediately as kernel version 4.
