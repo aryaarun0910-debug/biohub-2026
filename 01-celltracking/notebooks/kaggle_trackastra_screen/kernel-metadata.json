@@ -1,0 +1,17 @@
+{
+  "id": "aryaarun07/biohub-trackastra-ctc-zero-shot-screen",
+  "title": "Biohub Trackastra CTC Zero Shot Screen",
+  "code_file": "kaggle_trackastra_screen.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "enable_internet": true,
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "dataset_sources": [
+    "aryaarun07/biohub-trackastra-ctc-bundle",
+    "kms111201/biohub-cell-tracking-data"
+  ],
+  "kernel_sources": ["aryaarun07/biohub-predict-score"]
+}

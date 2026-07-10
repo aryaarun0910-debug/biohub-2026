@@ -2,6 +2,7 @@
 data/
 # local venv
 .venv/
+.venv-trackastra/
 # vendored organizer repo - reproducible via git clone (see pyproject.toml)
 vendor/
 # pretrained weights - reproducible from public URLs (see reports/research/)
@@ -10,5 +11,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 kt_out/
+artifacts/
+scratch_live_lb/
 reports/*.log
 reports/inventory/spotiflow_zeroshot.csv
