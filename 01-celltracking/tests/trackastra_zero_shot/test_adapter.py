@@ -9,6 +9,7 @@ import numpy as np
 from scripts.trackastra_zero_shot.adapter import (
     FrozenDetections,
     export_trackastra_result,
+    export_frozen_edge_selection,
     load_frozen_detections,
     rasterize_ellipsoid_masks,
     write_mask_mapping,
@@ -118,3 +119,19 @@ def test_export_restores_points_and_writes_candidate_scores(tmp_path: Path):
     assert row["target_node_id"] == "202"
     assert float(row["score"]) == 0.875
     assert row["selected"] == "1"
+
+
+def test_export_cached_selection_preserves_frozen_points(tmp_path: Path):
+    detections = FrozenDetections(
+        node_ids=np.array([101, 202]),
+        time=np.array([0, 1]),
+        zyx=np.array([[1.25, 2.5, 3.75], [2.0, 3.0, 4.0]]),
+    )
+    geff = export_frozen_edge_selection(
+        detections,
+        [(101, 202)],
+        {(101, 202): 0.875},
+        tmp_path / "cached.geff",
+    )
+    loaded = load_frozen_detections(geff)
+    np.testing.assert_allclose(loaded.zyx, detections.zyx)

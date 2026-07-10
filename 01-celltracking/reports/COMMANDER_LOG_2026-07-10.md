@@ -121,3 +121,13 @@ The gain is **+0.07390** on identical coordinates. Trackastra produced two false
 divisions on a crop with no GT divisions. This is a high-EV association signal,
 not yet a fold-level result. A fixed-settings 10-crop-per-fold screen was launched
 immediately as kernel version 4.
+
+Cached candidate scores permit tracker-threshold ablation without rerunning the
+GPU. On this same crop, the default threshold 0.5 reproduces 0.83158 exactly;
+threshold 0.8 materializes and authoritative-scores at **0.87425**. This is a
+one-crop tuning result only. The threshold is not eligible for promotion until
+chosen on one held-out embryo and transferred unchanged to the other.
+
+Forcing Trackastra to one child per parent reduced edge J to 0.82869 on the
+first crop, despite removing its two false divisions. Unlike the organizer
+graph, Trackastra divisions must not be suppressed blindly.

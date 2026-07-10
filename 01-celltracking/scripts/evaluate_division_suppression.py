@@ -18,15 +18,15 @@ from biotrack.metric import load_graph, score_pred_graph  # noqa: E402
 from tracking_cellmot.metrics import summarise  # noqa: E402
 
 
-def cap_children(graph, max_children: int = 1) -> int:
+def cap_children(graph, max_children: int = 1, score_attr: str = "edge_prob") -> int:
     """Keep the highest-probability outgoing edges for every source node."""
 
     if max_children < 1:
         raise ValueError("max_children must be at least one")
-    attrs = graph.edge_attrs(attr_keys=["edge_prob"])
+    attrs = graph.edge_attrs(attr_keys=[score_attr])
     by_source: dict[int, list[tuple[float, int]]] = {}
     for edge_id, source_id, probability in attrs.select(
-        ["edge_id", "source_id", "edge_prob"]
+        ["edge_id", "source_id", score_attr]
     ).iter_rows():
         by_source.setdefault(int(source_id), []).append((float(probability), int(edge_id)))
     remove: list[int] = []
@@ -44,6 +44,7 @@ def main() -> None:
     parser.add_argument("--pred-dir", action="append", required=True)
     parser.add_argument("--gt-dir", default=str(ROOT / "data" / "train"))
     parser.add_argument("--max-children", type=int, default=1)
+    parser.add_argument("--score-attr", default="edge_prob")
     args = parser.parse_args()
 
     gt_dir = Path(args.gt_dir)
@@ -52,7 +53,7 @@ def main() -> None:
     for pred_root in map(Path, args.pred_dir):
         for path in sorted(pred_root.glob("*.geff")):
             graph = load_graph(str(path))
-            removed = cap_children(graph, args.max_children)
+            removed = cap_children(graph, args.max_children, args.score_attr)
             embryo = path.stem.split("_", 1)[0]
             rows_by_embryo.setdefault(embryo, []).append(
                 score_pred_graph(graph, str(gt_dir / path.name))

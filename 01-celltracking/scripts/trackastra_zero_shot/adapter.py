@@ -323,6 +323,56 @@ def export_trackastra_result(
     return output_geff, output_edge_scores
 
 
+def export_frozen_edge_selection(
+    detections: FrozenDetections,
+    selected_edges: Sequence[tuple[int, int]],
+    score_by_edge: Mapping[tuple[int, int], float],
+    output_geff: str | Path,
+) -> Path:
+    """Materialize cached candidate selection with unchanged detection coordinates."""
+
+    try:
+        import polars as pl
+        import tracksdata as td
+    except ImportError as exc:  # pragma: no cover
+        raise RuntimeError("GEFF export requires the repo's polars/tracksdata environment") from exc
+
+    lookup = {int(node_id): i for i, node_id in enumerate(detections.node_ids)}
+    unknown = {node for edge in selected_edges for node in edge if int(node) not in lookup}
+    if unknown:
+        raise ValueError(f"selected edges contain unknown frozen node ids: {sorted(unknown)[:5]}")
+    graph = td.graph.InMemoryGraph()
+    for axis in ("z", "y", "x"):
+        graph.add_node_attr_key(axis, pl.Float64, -999999.0)
+    internal = graph.bulk_add_nodes(
+        [
+            {"t": int(t), "z": float(c[0]), "y": float(c[1]), "x": float(c[2])}
+            for t, c in zip(detections.time, detections.zyx)
+        ]
+    )
+    if selected_edges:
+        graph.add_edge_attr_key("trackastra_score", pl.Float64, 0.0)
+        graph.bulk_add_edges(
+            [
+                {
+                    "source_id": internal[lookup[int(source)]],
+                    "target_id": internal[lookup[int(target)]],
+                    "trackastra_score": float(score_by_edge[(int(source), int(target))]),
+                }
+                for source, target in selected_edges
+            ]
+        )
+    output_geff = Path(output_geff)
+    output_geff.parent.mkdir(parents=True, exist_ok=True)
+    if output_geff.exists():
+        if output_geff.is_dir():
+            shutil.rmtree(output_geff)
+        else:
+            output_geff.unlink()
+    graph.to_geff(output_geff)
+    return output_geff
+
+
 def estimated_mask_bytes(shape: Sequence[int], detections: FrozenDetections) -> int:
     counts = np.bincount(detections.time, minlength=int(shape[0])) if len(detections.time) else np.zeros(int(shape[0]), int)
     return math.prod(int(v) for v in shape) * _mask_dtype(int(counts.max(initial=0))).itemsize
