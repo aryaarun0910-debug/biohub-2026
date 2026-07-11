@@ -1,0 +1,27 @@
+{
+  "id": "aryaarun07/biohub-lb897-trackastra-fusion",
+  "title": "Biohub LB897 Trackastra Fusion",
+  "code_file": "biohub_lb897_trackastra.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": false,
+  "keywords": [
+    "gpu"
+  ],
+  "dataset_sources": [
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "thibautgoldsborough/cellmot-baseline-artifacts",
+    "aryaarun07/biohub-trackastra-ctc-bundle",
+    "aryaarun07/biohub-trackastra-offline-wheels"
+  ],
+  "kernel_sources": [],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "model_sources": [],
+  "docker_image": "gcr.io/kaggle-private-byod/python@sha256:57e612b484cf3df5026ee4dcc3cb176974b22b2bc0937fb1e16132a8be4cb13c",
+  "machine_shape": "NvidiaTeslaT4"
+}
