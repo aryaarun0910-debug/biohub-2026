@@ -13,6 +13,13 @@ reverse-selected setting remained positive on `44b6` (0.6880 to **0.7042**).
 The full 199-crop OOF export is running; promotion remains contingent on that
 exact result.
 
+**2026-07-11 full-fold promotion:** the 199-crop result is now complete. Frozen
+Trackastra/organizer agreement fusion scores **0.6801** on held-out `44b6` and
+**0.5809** on held-out `6bba`, improving the fork-suppressed organizer by
+**+0.0206 / +0.0129**. This passes the bilateral association gate and promotes
+fusion ahead of further solver/adaptation work. These full-fold results supersede
+the more optimistic 10-crop deltas.
+
 ## 1. Live field truth
 
 Authenticated Kaggle snapshot on 2026-07-10:

@@ -207,3 +207,29 @@ Submission 54534923 completed at **0.889**, not the source notebook's claimed
 leaderboard snapshot. The board has a new **0.968** outlier at rank 1; rank 2 is
 0.910 and rank 3 is 0.908. Treat the outlier as an unresolved intelligence item,
 not as evidence that our private target or legal strategy should change.
+
+## 2026-07-11 full Trackastra fusion OOF
+
+Kaggle kernel version 6 exported Trackastra candidates for all 199 OOF crops.
+The fold-0-selected configuration was frozen unchanged: organizer-agreement
+logit bonus 3.0, greedy threshold 0.5, one child per parent/no divisions.
+
+Authoritative materialized exact scores:
+
+| Held-out embryo | organizer | fork-suppressed organizer | Trackastra agreement fusion | gain vs safe organizer |
+|---|---:|---:|---:|---:|
+| `44b6` (71 crops) | 0.6562 | 0.6595 | **0.6801** | **+0.0206** |
+| `6bba` (128 crops) | 0.5593 | 0.5680 | **0.5809** | **+0.0129** |
+
+Both full folds pass the predeclared association promotion gate. The earlier
+10-crop improvements were directionally valid but overstated the hard-fold
+effect; full-fold numbers now supersede them. Fusion is promoted to the legal
+private-board stack. It currently emits no divisions, so division recovery must
+be evaluated as an explicit posterior after association rather than by relaxing
+Trackastra's child capacity.
+
+The research-swarm claim that Trackastra had already captured a large portion of
+the +0.18 oracle headroom was premature before this run. The corrected statement
+is: Trackastra captures a reproducible +0.013 to +0.021 across embryos, leaving
+substantial calibrated-association, pruning, target-adaptation and candidate
+headroom.
