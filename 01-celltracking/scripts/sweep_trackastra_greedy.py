@@ -90,6 +90,16 @@ def main() -> None:
     parser.add_argument("--materialize-threshold", type=float)
     parser.add_argument("--materialize-mode", choices=["div", "nodiv"], default="div")
     parser.add_argument("--materialize-agreement-bonus", type=float, default=0.0)
+    parser.add_argument(
+        "--prune-isolated",
+        action="store_true",
+        help="when materializing, retain only nodes incident to a selected edge",
+    )
+    parser.add_argument(
+        "--materialize-only",
+        action="store_true",
+        help="export the requested configuration without computing the sweep table",
+    )
     args = parser.parse_args()
     thresholds = [float(value) for value in args.thresholds.split(",")]
     bonuses = [float(value) for value in args.agreement_bonuses.split(",")]
@@ -106,12 +116,6 @@ def main() -> None:
         embryo = name.split("_", 1)[0]
         node_path = find_named(args.node_dir, name, ".geff")
         gt_path = args.gt_dir / f"{name}.geff"
-        nodes = load_sample(node_path)
-        gt = load_sample(gt_path)
-        matched = match_nodes(nodes, gt)
-        gt_edges = {(int(source), int(target)) for source, target in gt.edges}
-        gt_out = {source for source, _ in gt_edges}
-        gt_in = {target for _, target in gt_edges}
         candidates = read_candidates(candidate_path)
         organizer_edges: set[tuple[int, int]] = set()
         if args.organizer_dir:
@@ -143,7 +147,16 @@ def main() -> None:
                 chosen,
                 score_by_edge,
                 args.materialize_dir / f"{name}.geff",
+                prune_isolated=args.prune_isolated,
             )
+            if args.materialize_only:
+                continue
+        nodes = load_sample(node_path)
+        gt = load_sample(gt_path)
+        matched = match_nodes(nodes, gt)
+        gt_edges = {(int(source), int(target)) for source, target in gt.edges}
+        gt_out = {source for source, _ in gt_edges}
+        gt_in = {target for _, target in gt_edges}
         n_est = estimated_nodes(gt_path)
         count_multiplier = max(0.0, 1.0 - ALPHA * (len(nodes.node_ids) - n_est) / n_est)
         fold = totals.setdefault(

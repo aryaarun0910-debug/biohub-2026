@@ -20,6 +20,13 @@ Trackastra/organizer agreement fusion scores **0.6801** on held-out `44b6` and
 fusion ahead of further solver/adaptation work. These full-fold results supersede
 the more optimistic 10-crop deltas.
 
+**2026-07-11 stacked result:** retaining only nodes incident to the fused edge
+graph raises exact OOF again to **0.6948 / 0.6044**. Relative to the safe
+fork-suppressed organizer this is a balanced **+0.0353 / +0.0364**. Fusion plus
+incident-node pruning is now the production association baseline. The public
+0.889 wrapper already contains isolated-node pruning, so only fusion is a novel
+public deployment increment.
+
 ## 1. Live field truth
 
 Authenticated Kaggle snapshot on 2026-07-10:

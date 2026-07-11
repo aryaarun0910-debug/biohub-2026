@@ -328,8 +328,10 @@ def export_frozen_edge_selection(
     selected_edges: Sequence[tuple[int, int]],
     score_by_edge: Mapping[tuple[int, int], float],
     output_geff: str | Path,
+    *,
+    prune_isolated: bool = False,
 ) -> Path:
-    """Materialize cached candidate selection with unchanged detection coordinates."""
+    """Materialize cached edges, optionally dropping nodes with no selected edge."""
 
     try:
         import polars as pl
@@ -344,19 +346,34 @@ def export_frozen_edge_selection(
     graph = td.graph.InMemoryGraph()
     for axis in ("z", "y", "x"):
         graph.add_node_attr_key(axis, pl.Float64, -999999.0)
+    kept = (
+        {int(node) for edge in selected_edges for node in edge}
+        if prune_isolated
+        else set(lookup)
+    )
+    kept_indices = [i for i, node_id in enumerate(detections.node_ids) if int(node_id) in kept]
     internal = graph.bulk_add_nodes(
         [
-            {"t": int(t), "z": float(c[0]), "y": float(c[1]), "x": float(c[2])}
-            for t, c in zip(detections.time, detections.zyx)
+            {
+                "t": int(detections.time[i]),
+                "z": float(detections.zyx[i, 0]),
+                "y": float(detections.zyx[i, 1]),
+                "x": float(detections.zyx[i, 2]),
+            }
+            for i in kept_indices
         ]
     )
+    internal_by_source_id = {
+        int(detections.node_ids[i]): internal[position]
+        for position, i in enumerate(kept_indices)
+    }
     if selected_edges:
         graph.add_edge_attr_key("trackastra_score", pl.Float64, 0.0)
         graph.bulk_add_edges(
             [
                 {
-                    "source_id": internal[lookup[int(source)]],
-                    "target_id": internal[lookup[int(target)]],
+                    "source_id": internal_by_source_id[int(source)],
+                    "target_id": internal_by_source_id[int(target)],
                     "trackastra_score": float(score_by_edge[(int(source), int(target))]),
                 }
                 for source, target in selected_edges

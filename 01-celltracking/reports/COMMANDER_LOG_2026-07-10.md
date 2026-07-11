@@ -233,3 +233,24 @@ the +0.18 oracle headroom was premature before this run. The corrected statement
 is: Trackastra captures a reproducible +0.013 to +0.021 across embryos, leaving
 substantial calibrated-association, pruning, target-adaptation and candidate
 headroom.
+
+## 2026-07-11 fusion plus incident-node pruning
+
+The fusion materializer now has a tested `--prune-isolated` mode that exports
+only detections incident to a selected edge. This stacks cleanly with Trackastra
+agreement fusion on every OOF crop:
+
+| Held-out embryo | fusion | fusion + pruning | pruning delta | gain vs safe organizer |
+|---|---:|---:|---:|---:|
+| `44b6` | 0.6801 | **0.6948** | +0.0147 | **+0.0353** |
+| `6bba` | 0.5809 | **0.6044** | +0.0235 | **+0.0364** |
+
+Node recall falls only from 0.9536 to 0.9459 on `44b6` and 0.8966 to 0.8933
+on `6bba`; removing assignment-stealing isolated detections and improving the
+count multiplier more than compensates. This establishes a balanced legal stack
+before target adaptation, Dinkelbach calibration or legitimate divisions.
+
+Deployment caveat: the public 0.889 wrapper already prunes isolated output nodes.
+Therefore the entire OOF pruning delta cannot be added to 0.889 as a public-score
+forecast. Trackastra association fusion is the new deployment increment; pruning
+is a required invariant that preserves its measured benefit.

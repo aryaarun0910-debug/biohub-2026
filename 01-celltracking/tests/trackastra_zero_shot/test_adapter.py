@@ -135,3 +135,21 @@ def test_export_cached_selection_preserves_frozen_points(tmp_path: Path):
     )
     loaded = load_frozen_detections(geff)
     np.testing.assert_allclose(loaded.zyx, detections.zyx)
+
+
+def test_export_cached_selection_can_prune_isolated_nodes(tmp_path: Path):
+    detections = FrozenDetections(
+        node_ids=np.array([101, 202, 303]),
+        time=np.array([0, 1, 1]),
+        zyx=np.array([[1.25, 2.5, 3.75], [2.0, 3.0, 4.0], [9.0, 9.0, 9.0]]),
+    )
+    geff = export_frozen_edge_selection(
+        detections,
+        [(101, 202)],
+        {(101, 202): 0.875},
+        tmp_path / "pruned.geff",
+        prune_isolated=True,
+    )
+    loaded = load_frozen_detections(geff)
+    assert len(loaded.node_ids) == 2
+    np.testing.assert_allclose(loaded.zyx, detections.zyx[:2])
