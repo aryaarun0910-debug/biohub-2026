@@ -272,3 +272,18 @@ private organizer clarification; score-probing is forbidden. Full plan:
   open async threads (op_bright submission 54301967 pending; op_bright_smooth 199 running; Spotiflow
   screen broken), corrected path to 0.88, DO-NOT (quarantined evaluator defect), how-to-run commands,
   key code map, environment, immediate next steps. README points to it. User submitted op_bright.
+
+### 2026-07-06 (learned-stack pivot; oracle; Codex + opus research swarm; reorder to ASSOCIATION)
+- Pivoted from classical DoG (median 0.807) to the organizer LEARNED stack (vendored tracking_cellmot). Built+
+  validated train->predict->score kernels (heavy debugging: T4x2 pin, PYTHONPATH, glob nesting, ILP OOM, model-
+  specific det_threshold). Trained both embryo-held-out folds; greedy OOF fold0 0.656 / fold1 0.559 (min 0.559).
+- ILP proven the lever locally: fold-1 0.559->~0.67 (+0.11), division-FP catastrophe crushed. Full-length retrain
+  (45ep) OVERFIT (< 30ep on held-out) -> more training on 2 embryos is negative; bottleneck = GENERALIZATION.
+- Candidate-edge ORACLE (Codex P0): max edge-J = 0.935 (44b6) / 0.885 (6bba) = min-fold detection ceiling.
+  0.94 is DEAD (need 0.88 edge with margin). But +0.18 pure-linking headroom (0.67->0.885) = the win.
+- Leaderboard: 1065 teams, top 0.968 (leakage outlier), pack ~0.90, everyone forked one "LB897" baseline ->
+  PRIVATE (disjoint embryo) shuffle is wide open = generalization contest = our OOF.
+- Codex red-team + opus 6-lane research swarm -> reordered plan (reports/WIN_PLAN.md "RESEARCH-BACKED
+  EXECUTION"): 4 levers (metric-aligned Dinkelbach ILP [Nowozin 2014]; path-consistency association TTA
+  [Lu CVPR24]; track-conditioned redetection to raise the 0.885 cap; two-stage fork-posterior divisions) each
+  with a cheap CPU-local kill-gate. Honest private target 0.84-0.90. Cleanup: removed 82GB redundant data zip.

@@ -211,3 +211,49 @@ high-recall track-conditioned detections
 ```
 
 The next move is not choosing Trackastra *or* endpoint recovery. They run in parallel; the oracle tells us which becomes the dominant spend.
+
+---
+
+# RESEARCH-BACKED EXECUTION (2026-07-06 opus research-swarm synthesis)
+
+The oracle + 5 research lanes (reports/research/*_2026-07-06.md) reorder everything. Detection caps min-fold
+edge-J at 0.885; current linking 0.67 -> ~+0.18 linking headroom is the win; realistic private 0.84-0.90.
+Public board = 1065 teams forking ONE shared "LB897" baseline, top 0.968 a leakage outlier, pack ~0.90 ->
+the PRIVATE shuffle is wide open. Each lever has a CHEAP KILL-GATE run first.
+
+## The 4 levers (evidence-backed) + their kill-gate first experiments
+1. **Metric-aligned Dinkelbach ILP** [Nowozin 2014 CVPR expected-IoU parametric-LP; Dinkelbach 1967].
+   Change SCIP edge cost to c_e = -(pTP(e) - lambda*pFP(e)), iterate lambda=N/D. The -lambda*G term is
+   constant in x -> hidden G NOT needed for a fixed OOF-calibrated lambda. CENTRAL FACT: sparse labels ->
+   pFP != 1-pTP (3 classes: TP/metric-FP/ignored) -> calibrate pTP,pFP separately (temperature/isotonic OOF).
+   KILL-GATE: OOF lambda-sweep on frozen candidates; go if min-fold adjJ +>=0.010, no fold regression.
+2. **Association test-time adaptation** [Path Consistency, Lu CVPR 2024] — the private-shuffle weapon.
+   KILL-GATE (a day, offline, SAFE, no gradient): forward-backward consistency GATING of the EXISTING edge
+   scores. If consistency-gated edges beat raw cross-embryo -> the learned TTA (few grad steps on the edge
+   head's affine/last layers, path-consistency loss on the UNLABELED target embryo) very likely pays. If it
+   does nothing -> abandon the TTA branch. RULES FLAG: learned variant trains on test images -> needs host
+   clearance; gating variant is safe (post-processes our own preds). Design learned step as a toggle.
+3. **Detection-ceiling recovery** (raise the 0.885 cap) [ByteTrack two-tier + ELEPHANT predict->verify +
+   3D anisotropic-Gaussian localization]. Track-conditioned redetection: accept a low-threshold candidate
+   ONLY where (a) a track brackets/predicts it AND (b) the raw image supports it (dual gate -> recall up,
+   FP controlled). FALSIFICATION #0 (first): classify oracle missing-endpoint edges bracketed-by-a-track vs
+   not; >=60% bracketed -> this bet captures most of the ceiling; else escalate to full TBD (shift-and-stack).
+4. **Divisions** [two-stage: high-recall proposal -> learned fork classifier; arXiv 2509.02627]. Predict
+   AFTER association as an explicit fork POSTERIOR gate (NOT lowering the global ILP division cost) -> only
+   ADDS a 2nd daughter edge on frozen best linking, can't remove a continuation edge. Per-embryo calibration
+   (26 vs 125 imbalance). Why geometric proposals failed: thresholds encode embryo-specific density/velocity/
+   division-rate scale. First gate: D>=0.25, edge-J degradation <=0.005 both folds.
+
+## Also: sparse-label loss (only if we RETRAIN)
+Labels are positive-only ~1% -> any "no annotation = background" loss suppresses ~99% of real signal. Use a
+PU / masked loss stack. Lower priority (retraining overfit), but mandatory if we ever retrain the detector.
+
+## The 3 CPU-LOCAL kill-gate experiments to run FIRST (info-per-hour, no GPU, no Kaggle)
+A. Missing-endpoint bracketed analysis (detection kill-gate) — from oracle + geffs.
+B. Forward-backward edge-consistency gating (TTA kill-gate) — needs candidate edge scores exported.
+C. Dinkelbach lambda-sweep on frozen calibrated candidates (metric-solver kill-gate).
+Each is falsifiable in hours and decides whether its lever is worth GPU/build effort.
+
+## Deferred/dropped by evidence
+NIS3D detection pretraining: near-worthless (detection ~solved; ceiling is 0.885, and it's endpoint-recovery
+not classification that raises it). External data effort -> ASSOCIATION/MOTION (Fluo-N3DL-DRO close sampling).
