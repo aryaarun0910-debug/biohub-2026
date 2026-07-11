@@ -765,17 +765,26 @@ def prepare_trackastra_runtime() -> tuple[object, object, object]:
     """Install the pinned offline runtime and load the official CTC checkpoint."""
 
     archives = sorted(glob.glob("/kaggle/input/**/trackastra_wheelhouse.zip", recursive=True))
-    if len(archives) != 1:
-        raise FileNotFoundError(f"expected one Trackastra wheel archive, found {archives}")
-    archive = Path(archives[0])
     expected = "31317ff2c670837f096ff42773e5443d96549d48b506a3a4b2de1533b4d15911"
-    actual = hashlib.sha256(archive.read_bytes()).hexdigest()
-    if actual != expected:
-        raise RuntimeError(f"Trackastra wheel archive hash mismatch: {actual}")
-    wheel_dir = WORKING_DIR / "trackastra_wheels"
-    wheel_dir.mkdir(exist_ok=True)
-    with zipfile.ZipFile(archive) as handle:
-        handle.extractall(wheel_dir)
+    if archives:
+        if len(archives) != 1:
+            raise FileNotFoundError(f"expected one Trackastra wheel archive, found {archives}")
+        archive = Path(archives[0])
+        actual = hashlib.sha256(archive.read_bytes()).hexdigest()
+        if actual != expected:
+            raise RuntimeError(f"Trackastra wheel archive hash mismatch: {actual}")
+        wheel_dir = WORKING_DIR / "trackastra_wheels"
+        wheel_dir.mkdir(exist_ok=True)
+        with zipfile.ZipFile(archive) as handle:
+            handle.extractall(wheel_dir)
+    else:
+        # Kaggle normally expands ZIP-only datasets before mounting them.
+        unpacked = sorted(glob.glob("/kaggle/input/**/trackastra-0.5.2-*.whl", recursive=True))
+        if len(unpacked) != 1:
+            raise FileNotFoundError(
+                f"expected one unpacked Trackastra wheel, found {unpacked}"
+            )
+        wheel_dir = Path(unpacked[0]).parent
     subprocess.run(
         [
             sys.executable,
