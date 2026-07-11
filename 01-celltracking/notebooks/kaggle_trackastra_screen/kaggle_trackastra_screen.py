@@ -21,8 +21,11 @@ from pathlib import Path
 
 
 WORK = Path("/kaggle/working")
-MAX_CROPS_PER_FOLD = 10
-FOLDS = (1,)
+# Promoted after bilateral 10-crop transfer: b=3/t=.5 improved held-out
+# 6bba by +0.0398 and the reverse-selected setting remained positive on 44b6.
+# Export the complete candidate surface for an exact 199-crop OOF decision.
+MAX_CROPS_PER_FOLD = 10_000
+FOLDS = (0, 1)
 MODE = "greedy"
 EDGE_THRESHOLD = 0.05
 BATCH_SIZE = 16

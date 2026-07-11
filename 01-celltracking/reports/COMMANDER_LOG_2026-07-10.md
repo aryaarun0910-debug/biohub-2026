@@ -183,3 +183,27 @@ logit when the organizer independently proposes the same edge, then run no-div
 greedy at threshold 0.5. Authoritative materialized edge J is **0.7076**, a
 +0.0213 edge-J gain over organizer edge J on the slice. Fold-1 is running with
 the same candidate generation; bonus/threshold/mode must transfer unchanged.
+
+## 2026-07-11 cross-embryo promotion gate
+
+The frozen fold-0 agreement rule transferred unchanged to the first ten held-out
+`6bba` crops. Organizer combined score was **0.6035**; pure Trackastra was
+**0.6116**; agreement fusion (bonus 3, threshold 0.5, no divisions) was
+**0.6433**. The deployable gain is therefore **+0.0398 absolute** on the exact
+combined metric, with identical detections.
+
+A coarse grid chosen on `6bba` preferred bonus 3 / threshold 0.8 / no divisions
+at 0.6451. Applied unchanged back to the first ten `44b6` crops it scored
+**0.7042**, still materially above the organizer's 0.6880 baseline (although
+below the 0.7076 fold-0-selected setting). The broad bilateral-positive surface
+passes the generalization gate. Kaggle kernel version 6 now exports Trackastra
+candidates for the complete 199-crop OOF set; no leaderboard submission will be
+made until that exact full-OOF result is scored.
+
+## 2026-07-11 public calibration and leaderboard refresh
+
+Submission 54534923 completed at **0.889**, not the source notebook's claimed
+0.897. Our team `Arya Arun` is rank **358 / 1,054** in the 07:35 UTC full
+leaderboard snapshot. The board has a new **0.968** outlier at rank 1; rank 2 is
+0.910 and rank 3 is 0.908. Treat the outlier as an unresolved intelligence item,
+not as evidence that our private target or legal strategy should change.

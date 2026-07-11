@@ -4,6 +4,15 @@
 **Deadline:** 2026-09-29 23:59 UTC
 **Objective:** finish #1 on the private leaderboard. Public rank is a serve check, not the target.
 
+**2026-07-11 update:** our unchanged public calibration scored **0.889**, rank
+**358 / 1,054**. A new 0.968 public outlier sits above the previous 0.910
+frontier and is an intelligence question, not yet a reproducible target. More
+importantly, Trackastra/organizer agreement fusion passed bilateral cross-embryo
+transfer: 0.6035 to **0.6433** on the held-out `6bba` slice (+0.0398), while the
+reverse-selected setting remained positive on `44b6` (0.6880 to **0.7042**).
+The full 199-crop OOF export is running; promotion remains contingent on that
+exact result.
+
 ## 1. Live field truth
 
 Authenticated Kaggle snapshot on 2026-07-10:
