@@ -16,3 +16,5 @@ scratch_live_lb/
 scratch_public_kernels/
 reports/*.log
 reports/inventory/spotiflow_zeroshot.csv
+scratch_lb/
+scratch_nb/
