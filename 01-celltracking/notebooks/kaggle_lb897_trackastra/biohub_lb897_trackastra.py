@@ -8,14 +8,18 @@ if cover_image_path.exists():
 # %%
 
 import os, json
-BIOHUB_PRESET = "dataset_mintrack_recall_059"
-BIOHUB_SCORE_AXIS = "high-confidence dataset-specific short-track recall restore"
+BIOHUB_PRESET = "trackastra_direct_fusion_prune"
+BIOHUB_SCORE_AXIS = "Trackastra agreement owns association; incident-node pruning only"
 # Variant environment overrides. These are intentionally set before the main config cell.
-os.environ["BIOHUB_OUTPUT_FILTER_SHORT_TRACKS"] = "1"
+os.environ["BIOHUB_OUTPUT_FILTER_SHORT_TRACKS"] = "0"
 os.environ["BIOHUB_OUTPUT_MIN_TRACK_LEN"] = "7"
 os.environ["BIOHUB_OUTPUT_KEEP_DIVISION_COMPONENTS"] = "1"
 os.environ["BIOHUB_SHORT_TRACK_MIN_LEN_BY_DATASET"] = json.dumps({"6bba_05b6850b": 6})
 os.environ["BIOHUB_OUTPUT_GAP2_RECOVERY"] = "0"
+os.environ["BIOHUB_OUTPUT_MOTION_RELINK"] = "0"
+os.environ["BIOHUB_OUTPUT_GAP_CLOSE"] = "0"
+os.environ["BIOHUB_OUTPUT_SAFE_DIVISIONS"] = "0"
+os.environ["BIOHUB_OUTPUT_LINEFIT_SMOOTH"] = "0"
 # Keep the LB0.897 safe-division/gap/motion settings unless explicitly overridden below.
 os.environ.setdefault("BIOHUB_RUN_OUTPUT_DIAGNOSTICS", "1")
 print("BIOHUB_PRESET:", BIOHUB_PRESET)
