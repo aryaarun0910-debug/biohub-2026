@@ -76,7 +76,7 @@ Full deep-dives: `reports/research/` (methods, Royer ecosystem, competitive meth
 - **Validation design.** Leave-one-embryo-out is the honesty gate; to avoid overfitting the two
   folds, selection uses nested grouped crop/time splits *within* an embryo with bootstrap CIs,
   then evaluates the frozen config cross-embryo.
-- **V3 reproduction.** `notebooks/kaggle_dog_infer.py` implements the verified public 0.842
+- **V3 reproduction.** `notebooks/kaggle_submit/kaggle_dog_infer.py` implements the verified public 0.842
   recipe (multiscale DoG, NMS 4 µm, XY offset, (3,9,9) refinement, two-pass velocity-aware
   Hungarian, min-track-length-4).
 - **Edge-error taxonomy.** Each missed GT edge is attributed to *no-candidate* (undetected),

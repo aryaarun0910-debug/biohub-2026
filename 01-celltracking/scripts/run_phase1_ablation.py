@@ -28,7 +28,9 @@ from biotrack.metric import estimated_nodes  # noqa: E402
 from biotrack.metric_numpy import Sample, score_sample  # noqa: E402
 from run_v3_taxonomy import classify_edges, geff_to_sample, rows_to_sample  # noqa: E402
 
-_spec = importlib.util.spec_from_file_location("dog_p1", ROOT / "notebooks" / "kaggle_dog_infer.py")
+_spec = importlib.util.spec_from_file_location(
+    "dog_p1", ROOT / "notebooks" / "kaggle_submit" / "kaggle_dog_infer.py"
+)
 dog = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(dog)
 
