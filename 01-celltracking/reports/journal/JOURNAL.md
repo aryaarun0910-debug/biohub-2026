@@ -287,3 +287,33 @@ private organizer clarification; score-probing is forbidden. Full plan:
   EXECUTION"): 4 levers (metric-aligned Dinkelbach ILP [Nowozin 2014]; path-consistency association TTA
   [Lu CVPR24]; track-conditioned redetection to raise the 0.885 cap; two-stage fork-posterior divisions) each
   with a cheap CPU-local kill-gate. Honest private target 0.84-0.90. Cleanup: removed 82GB redundant data zip.
+
+### 2026-07-12 (research brain swarm; verified scorer; breadth win-bet; E0b wrapper extraction)
+- Built a persistent research brain (reports/research/brain/): 6-lane interdisciplinary + red-team swarm
+  (01 Kaggle intel, 02 track-before-detect, 03 assoc/MOT/OT/TTA, 04 lineage/division/PU/DA, 05 metric
+  decision-theory, 06 red-team) + SYNTHESIS.md + ROADMAP.md. Committed 6994935, 0cbff83.
+- RED-TEAM KILLER POINT (evidence-based): both-fold-OOF gate ALREADY produced a false positive (fusion
+  +0.035 OOF -> -0.024 hidden). ~2 effective samples -> run <=2 confirmatory tests/round vs the RIGHT
+  baseline. KILL: from-scratch 4D Lagrangian field, naive TBD as main bet, standalone OT/FGW.
+- VERIFIED scorer facts (read vendored tracking_cellmot; METRIC_SEMANTICS_VERIFIED.md): off-annotation
+  edges are FREE (FP only if endpoint matches an annotated GT node with an edge); N_pred=graph.num_nodes(),
+  N_est is a NODE count (hidden at inference -> analysis-only anchor, not deployable); division FP only on
+  annotated CONTINUING cells; division term worth up to +0.1 (not +0.025). Corrections logged after Codex
+  review (optimal 1:1 bipartite matching; added nodes still hurt via assignment-stealing).
+- WIN-BET = training BREADTH (the generalization lever, not count-pruning). Acquired 4 dense Zebrahub embryo
+  lineages ZSNS001/003/004/005 (~1.8GB, data/external/zebrahub/, SHA256'd) = 3x embryo diversity, dense not
+  sparse. Scale-free association scorer (velocity/density-normalized, NO appearance). CROSS-EMBRYO transfer
+  (train 003/004/005 -> held-out 001, different coord scale): pooled AUC 0.997; on AMBIGUOUS links (nearest
+  != truth) per-source top-1 0.2935 vs NN 0.0, MRR 0.581 vs 0.430, cand recall@6 0.96. Thesis alive: model
+  recovers ~29% of links pure-distance linking gets wrong. Pooled AUC is easy-negative noise; per-source
+  top-1/MRR is the metric (Codex reframe).
+- E0b (BLOCKER) = reproduce the pure-0.889 wrapper on fold OOF. Extracted the LB897 post-processing into
+  src/biotrack/wrapper.py (config 91-140 + fns 957-1887 sliced; pure defaults = motion-relink/safe-div/
+  linefit/gap-close ON, gap2/div-geom OFF, min-track 6; NO trackastra fusion = the 0.865 reject; gap-refine
+  disabled, minor). Driver scripts/win_bet/e0_replay.py. Smoke (3 crops 44b6): adjJ 0.733 vs greedy 0.656 =
+  wrapper adds ~+0.08 -> confirms prior deltas measured the WRONG baseline. Full 199-crop both-fold run in
+  progress -> reports/inventory/e0_wrapper_oof.txt (authoritative baseline for Phase B gate).
+- NEXT: full baseline -> export candidate edges + edge_prob -> competition-transfer gate (breadth scorer vs
+  edge_prob on held-out family) -> selective repair reverse-fold (promote only if both folds beat E0b +
+  regime slices stable). Additional levers: division posterior on Zebrahub breadth (+up to 0.1), March-14
+  DAXI closer-domain breadth, Trackastra 2nd linker, gradient-free target-time consistency, image-N_est.
