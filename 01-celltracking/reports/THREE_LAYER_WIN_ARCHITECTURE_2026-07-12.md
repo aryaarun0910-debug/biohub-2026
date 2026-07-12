@@ -4,6 +4,25 @@
 **Objective:** maximize private-set accuracy, precision and prize-eligible score by
 treating data, algorithms and inference/compute as three compounding systems.
 
+> **2026-07-12 evidence revision — READ FIRST.** A six-lane interdisciplinary
+> research + red-team swarm (see `research/brain/SYNTHESIS.md`) and a verification
+> of the actual scorer (`research/brain/METRIC_SEMANTICS_VERIFIED.md`) supersede the
+> bet portfolio below. Headlines: (1) **KILL** the from-scratch 4D Lagrangian
+> Lineage Field and naïve track-before-detect as main bets — the measured oracle
+> says the headroom is association, not detection, and their EV/cost is worst.
+> (2) The **highest-ROI first move is scale-free component/edge selection** on the
+> 0.889 wrapper's fold-specific OOF. Hidden `N_est` is unavailable at inference;
+> a global Dinkelbach lambda is an experiment, not an oracle-count controller.
+> (3) Our both-fold-OOF gate
+> **already produced a false positive** (fusion +0.035 OOF → −0.024 hidden); all
+> gates must re-base on the 0.889 wrapper's *own* OOF + regime-slice stability, and
+> with ~2 effective samples we run **no more than two confirmatory tests at a time**.
+> (4) The safer posture is **baseline-preserving selective repair**, but additions
+> can still regress through assignment stealing, count penalties, and false positives.
+> The revised portfolio and pre-registered first
+> experiments live in `research/brain/SYNTHESIS.md`. The material below is retained
+> as design rationale, not the current operating plan.
+
 ## Executive thesis
 
 The field largely shares one pipeline:
