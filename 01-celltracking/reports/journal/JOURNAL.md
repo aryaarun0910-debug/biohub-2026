@@ -357,5 +357,13 @@ private organizer clarification; score-probing is forbidden. Full plan:
     exact once, score fast). metric_numpy proposed as authoritative -> REJECTED (edge-only, no divisions).
   * Legacy reorg over-moved run_phase1_ablation/run_v3_taxonomy -> pytest FAILED (test_metric_parity imports
     them) -> reverted; remaining 12-file legacy move re-verified (50 passed). legacy/README.md.
-- NEXT: finish Stage-1 cache (resume: e0c_run.py --shard i/4) -> e0c_score.py --workers 4 = authoritative E0c
-  baseline -> freeze -> Phase-B competition-transfer gate on the cached candidate surface.
+- E0c FROZEN (2026-07-13): Stage-1 cache completed 199/199 (0 failed); e0c_score.py authoritative =
+  44b6 0.7595 / 6bba 0.6484 (min-fold 0.6490). Beats E0b min-fold (0.6456) because min-len 7 helped 6bba;
+  44b6 ~flat (0.7595 vs 0.7601). Division-J ~0 (0/93/26; 4/582/121). THIS is the authoritative baseline;
+  gate all deltas vs it. numpy-vs-authoritative EDGE parity across 199: 194 exact, 5 MISMATCH (max adj-J
+  0.055) -> metric_numpy confirmed fast-diagnostic-ONLY, not authoritative (1-crop parity did NOT hold on
+  the population, as reviewer predicted). Phase-B candidate surface cached same pass: 6.15M rows (4.82M
+  selected) in artifacts/kaggle/e0c_cache/candidates/.
+- NEXT: Phase-B competition-transfer gate on the cached candidate surface — label candidates via scorer
+  pred->GT matching, compare breadth model vs wrapper COMPOSITE (cost/selected), gate on exact graph-level
+  gain over E0c (0.7595/0.6484) both folds, not AUC.

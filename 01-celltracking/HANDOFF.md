@@ -12,26 +12,27 @@ deployment signal; model selection is embryo-held-out.
 
 | System | Public | OOF `44b6` | OOF `6bba` | Decision |
 |---|---:|---:|---:|---|
-| **E0b wrapper (strong; NOT yet exact)** | 0.889 | 0.7601 | 0.6450 | strong baseline; **E0c parity pending** before authoritative |
+| **E0c wrapper (AUTHORITATIVE, deployment-exact)** | **0.889** | **0.7595** | **0.6484** | **THE baseline — gate all deltas vs this (min-fold 0.6490)** |
+| E0b wrapper (min-len 6, no gap-refine) | 0.889 | 0.7601 | 0.6450 | superseded ablation of E0c |
 | raw greedy OOF (pre-wrapper) | — | 0.6562 | 0.5593 | weak; do NOT gate against this |
 | fork-suppressed organizer | — | 0.6595 | 0.5680 | old safe OOF baseline |
 | Trackastra hint inside motion relinker | 0.889 | — | — | neutral; do not repeat |
 | direct Trackastra + pruning | 0.865 | 0.6948 | 0.6044 | BELOW wrapper on both folds — rejected |
 
-**E0b (2026-07-13), strong but deployment-inexact.** The extracted pure-0.889 wrapper
-OOF is **0.7601 / 0.6450** (min-fold 0.6456) via `scripts/win_bet/e0_replay.py` over
-`artifacts/kaggle/oof_clean`. It already **exceeds** the direct Trackastra-fusion OOF
-(0.6948 / 0.6044) on both folds — proving fusion's +0.035/+0.036 "gain" was an artifact
-of the weak greedy (0.656/0.559); against the real wrapper fusion regresses
-(−0.065/−0.041), which is why it lost hidden (0.865 vs 0.889). Trackastra replacement
-is conclusively dead. **But E0b is not deployment-exact — two mismatches vs the saved
-0.889 `run_stats.csv`:** (1) min-track-len — the submission used **7** everywhere
-(effective 6 only on the `6bba_05b6850b` public-test movie), E0b used 6 for all crops;
-(2) image-based **synthetic-gap refinement** was ON in the submission (gap_refined
-144/988/72/931), OFF in E0b. **E0c must fix both, prove exact/explained parity on the
-four saved test movies vs `run_stats.csv`, then re-score OOF — only then authoritative.**
-The `6bba_05b6850b`=6 exception is a specific public-test movie and must NOT generalize
-to the OOF family (use 7 uniformly for OOF).
+**E0c FROZEN (2026-07-13) — AUTHORITATIVE baseline = 0.7595 / 0.6484 (min-fold 0.6490).**
+Deployment-exact wrapper (min-len 7 uniform, image gap-refine ON), parity-verified EXACT
+on all 15 diagnostics across the 4 saved test movies vs `run_stats.csv`, scored over the
+199 cached post-wrapper graphs (`e0c_score.py`, authoritative edge+division). Gate ALL
+future deltas vs this, both folds, no regime-slice regression. Division-J ~0 (0/93/26 and
+4/582/121) — low-ceiling on sparse OOF. Notes: (a) beats E0b's min-fold (0.6456→0.6490)
+because min-len 7 helped 6bba; (b) numpy-vs-authoritative EDGE parity across 199 crops =
+194 exact, **5 mismatch (max adj-J 0.055)** → `metric_numpy` is a fast diagnostic ONLY,
+not authoritative (its 1-crop parity did not hold on the population). Earlier context: the
+wrapper OOF exceeds the direct Trackastra-fusion OOF (0.6948/0.6044) on both folds, proving
+fusion's "+0.035" was vs the weak greedy — Trackastra replacement is conclusively dead.
+
+**Phase-B asset already cached** (same E0c pass, no reprocessing): 6.15M pre-assignment
+candidate rows (4.82M wrapper-selected) in `artifacts/kaggle/e0c_cache/candidates/`.
 
 **E0c HYBRID PIPELINE (deployment-exact, cached, resumable).** The old serial
 `e0_replay` is superseded. Two decoupled stages, cache = `artifacts/kaggle/e0c_cache/`
