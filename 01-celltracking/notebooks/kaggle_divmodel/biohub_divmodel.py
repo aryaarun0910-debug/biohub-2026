@@ -81,27 +81,27 @@ def run_fold(data, held, dev):
     lossf = nn.BCEWithLogitsLoss()
     Xtr_t = torch.tensor(Xtr, device=dev); gtr_t = torch.tensor(gtr, device=dev); ytr_t = torch.tensor(ytr, device=dev)
     Xte_t = torch.tensor(Xte, device=dev); gte_t = torch.tensor(gte, device=dev)
-    n, bs, best = len(ytr), 512, {"ap": -1}
+    # NO LEAK: held-out embryo is NEVER used for model/epoch selection. Train a FIXED
+    # number of epochs (chosen a-priori) and evaluate the held-out embryo EXACTLY ONCE at
+    # the final epoch. (Inner-validation-embryo selection + 3 seeds is the Job-B upgrade.)
+    n, bs, FIXED_EPOCHS = len(ytr), 512, 25
     ckpt = OUT / f"divmodel_{held}.pt"
-    for ep in range(40):
+    for ep in range(FIXED_EPOCHS):
         model.train(); idx = torch.randperm(n, device=dev)
         for b in range(0, n, bs):
             j = idx[b:b + bs]
             opt.zero_grad()
             loss = lossf(model(Xtr_t[j], gtr_t[j]), ytr_t[j]); loss.backward(); opt.step()
-        model.eval()
-        with torch.no_grad():
-            p = torch.sigmoid(model(Xte_t, gte_t)).cpu().numpy()
-        ap = average_precision_score(yte, p); auc = roc_auc_score(yte, p)
-        if ap > best["ap"]:
-            best = {"ap": ap, "auc": auc, "recall@p90": recall_at_precision(yte, p),
-                    "calib": float(p.mean() - yte.mean()), "ep": ep}
-            torch.save({"state": model.state_dict(), "gfeat": gtr.shape[1]}, ckpt)
-        if ep % 5 == 0:
-            log(f"  [{held}] ep{ep} ap={ap:.4f} auc={auc:.4f}")
-    log(f"HELD-OUT {held}: PR-AUC={best['ap']:.4f} ROC-AUC={best['auc']:.4f} "
-        f"recall@P0.9={best['recall@p90']:.4f} calib={best['calib']:+.4f} (ep{best['ep']})")
-    return best
+    model.eval()
+    with torch.no_grad():
+        p = torch.sigmoid(model(Xte_t, gte_t)).cpu().numpy()
+    torch.save({"state": model.state_dict(), "gfeat": gtr.shape[1]}, ckpt)  # final-epoch model
+    res = {"ap": float(average_precision_score(yte, p)), "auc": float(roc_auc_score(yte, p)),
+           "recall@p90": recall_at_precision(yte, p), "calib": float(p.mean() - yte.mean()),
+           "ep": FIXED_EPOCHS - 1, "note": "final-epoch, no held-out selection (balanced diag view)"}
+    log(f"HELD-OUT {held} (final ep{FIXED_EPOCHS-1}, no leak): PR-AUC={res['ap']:.4f} "
+        f"ROC-AUC={res['auc']:.4f} recall@P0.9={res['recall@p90']:.4f} calib={res['calib']:+.4f}")
+    return res
 
 def main():
     dev = "cuda" if torch.cuda.is_available() else "cpu"

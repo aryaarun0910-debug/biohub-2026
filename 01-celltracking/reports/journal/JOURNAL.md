@@ -429,3 +429,23 @@ private organizer clarification; score-probing is forbidden. Full plan:
   richer features/temporal model; 3 seeds after transfer gate); PU fine-tune on competition; joint fork
   selection accounting for edge-J/count/lineage/assignment-stealing; then exact graph-level score vs E0c.
   Track A still owed: selective-repair + no-fork + existing-fork exact tests; one calibration submission.
+
+### 2026-07-13 (Job-A leak fixed; Track-A no-fork ablation = forks net-neutral)
+- COMMANDER CORRECTIONS accepted: (1) GPU lane is IDLE (status COMPLETE != running) -- only claim "running"
+  when kaggle kernels status == RUNNING. (2) Job A LEAKED -- run_fold saved the best HELD-OUT PR-AUC epoch =
+  model selection on the held-out embryo -> 0.85 LOEO is OPTIMISTIC, infra-smoke only, NOT validated. FIXED:
+  fixed-epoch (25), held-out evaluated exactly once at final epoch, no held-out selection (biohub_divmodel.py).
+  Full Job-B upgrade still owed: inner-validation-embryo selection, 3 fixed seeds mean+/-std, natural-prevalence
+  eval (recall@P0.90/0.95/0.98 + calib), genuine self-supervised motion corpus (masked recon/next-step/f-b
+  consistency/motion contrast on millions of ordinary trajectories), deployment-matched HARD negatives.
+  (3) balanced dataset != deployment prevalence (divisions rare) -> balanced PR-AUC misleading.
+- TRACK-A NO-FORK ABLATION (phaseb_ablation.py, exact authoritative vs E0c): 44b6 0.7595 (-0.0000),
+  6bba 0.6482 (~-0.0008 vs composite 0.6490). => wrapper forks are NET-NEUTRAL (FP forks don't hurt the
+  composite; the ~4 TP barely help). No free gain from suppressing existing forks -> existing-fork oracle ~0;
+  ALL division value is in ADDING new correct forks (proposal-oracle +0.02 headroom = the Track-B posterior).
+- HONEST SCORE ESTIMATE: current 0.889 (~#358). Divisions landing (~30-50% of +0.02 oracle) + repair ->
+  ~0.895-0.910 public (into the ~0.90 pack, near #4=0.910). Everything+breadth -> ~0.91-0.92. #3=0.941 needs
+  a lever we lack; #1/#2=0.968/0.970 likely public-split leakage. Private: top-20..50 if divisions transfer,
+  NOT clearly #1 -> more work needed. OOF->LB calibration submission will measure actual transfer.
+- STILL OWED Track A: selective-repair exact test; exact division-proposal oracle (graph construction+score);
+  then one low-risk calibration submission.
