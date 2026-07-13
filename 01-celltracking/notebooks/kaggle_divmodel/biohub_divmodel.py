@@ -27,10 +27,14 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 EMBRYOS = ["ZSNS001", "ZSNS003", "ZSNS004", "ZSNS005"]
 
 def load():
+    import glob
+    files = glob.glob("/kaggle/input/**/*.npz", recursive=True)
+    log("mounted /kaggle/input:", sorted(os.listdir("/kaggle/input")) if Path("/kaggle/input").exists() else "MISSING")
+    log("npz found:", files)
     data = {}
-    for e in EMBRYOS:
-        f = IN / f"{e}.npz"
-        if f.exists():
+    for f in files:
+        e = Path(f).stem
+        if e in EMBRYOS:
             d = np.load(f); data[e] = (d["X"].astype(np.float32), d["y"].astype(np.float32))
     return data
 

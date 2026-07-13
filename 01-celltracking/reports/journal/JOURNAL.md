@@ -409,3 +409,23 @@ private organizer clarification; score-probing is forbidden. Full plan:
   higher-recall fork proposal generator can raise the ceiling further. NEXT: exact fork oracle (construct+
   score oracle-fork graphs) to confirm; then no-fork ablation + selective-repair exact tests (Track A);
   then build the Zebrahub-trained PU division posterior (Track B).
+
+### 2026-07-13 (Kaggle T4 GPU lane ACTIVATED; division model transfers cross-embryo)
+- Two-machine split live: LOCAL = exact evidence/gates; KAGGLE T4 = representation training; LB = sparse calib.
+- Data-prep LOCAL (divevents_extract.py): scale-free mother-centric (3,5,3) division fork-events from Zebrahub
+  (positive=real division; negative=genuine non-dividing continuation + nearby fake 2nd daughter). Balanced,
+  57,690 events across 4 embryos. Uploaded as Kaggle dataset aryaarun07/biohub-divevents-zebrahub (SHA256'd).
+  NOTE Kaggle CLI Windows path bug on upload -> must run kaggle datasets/kernels from PowerShell (native paths).
+- GPU Job A (notebooks/kaggle_divmodel, aryaarun07/biohub-divmodel-t4): compact conv-temporal fork classifier,
+  LOEO, T4-PINNED (machine_shape NvidiaTeslaT4 -> confirmed ran on Tesla T4), internet off, deterministic,
+  checkpoint/resume, runtime-guarded, exports metrics/config/log/env. v1/v2 ran empty (pushed before dataset
+  ready / hardcoded mount path) -> fixed load() to glob /kaggle/input recursively -> v3 trained.
+- RESULT (LOEO cross-embryo): PR-AUC ZSNS001 0.886 / ZSNS003 0.814 / ZSNS004 0.795 / ZSNS005 0.908
+  (mean 0.851); recall@P0.9 0.640 / 0.013 / 0.112 / 0.717 (mean 0.370). => divisions ARE learnable+transferable
+  from scale-free trajectory geometry alone (no appearance/embryo-id) -> Track-B thesis validated. BUT
+  high-precision recall is UNEVEN across embryos (0.01-0.72) -> cross-embryo calibration (the critical metric)
+  not yet there. Strong v1 seed, NOT yet a deployable posterior.
+- NEXT: improve high-P recall/calibration (Job B self-supervised motion pretraining; per-embryo calibration;
+  richer features/temporal model; 3 seeds after transfer gate); PU fine-tune on competition; joint fork
+  selection accounting for edge-J/count/lineage/assignment-stealing; then exact graph-level score vs E0c.
+  Track A still owed: selective-repair + no-fork + existing-fork exact tests; one calibration submission.
