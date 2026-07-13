@@ -489,3 +489,15 @@ private organizer clarification; score-probing is forbidden. Full plan:
   the optimistic reachability estimate (+0.027/+0.020) -> reachability oracle massively overstated.
 - DECISION: AMBER -> prepare corrected self-supervised Job-B data/code (no major GPU spend); one short leak-free
   division seed; the real build is the joint selector. Isolated-miss signal-separability gate still owed (moonshot).
+
+### 2026-07-13 (AMBER execution: division seed FAILS high-precision gate; isolated-miss Stage-1 pending)
+- Corrected division seed v4 (leak-free nested inner-val, daughter-swap invariant [verified max|diff|=0.0],
+  single seed, T4, confirmed RUNNING then COMPLETE): LOEO PR-AUC 0.675/0.739/0.671/0.777 (mean 0.715, down
+  from leaked v3 0.851); recall@P0.9 0.0005/0.0018/0.000/0.176 (mean 0.045, down from leaked 0.37). The leak
+  was doing heavy lifting. HONEST cross-embryo high-precision recall is ~0 on 3/4 embryos -> model can RANK
+  divisions but CANNOT identify at high precision. On EASY nearby-fake negatives (deployment hard negatives
+  worse). => FAILS the AMBER continuation gate (high-precision fork operation). Oracle-C's +0.018 needs
+  near-perfect fork ID + conflict resolution; a posterior with ~0 high-P recall cannot deliver it. Per
+  commander decision tree: STOP the division GPU program after this seed unless isolated-detection rescues.
+- Isolated-miss Stage-1 reachability (isolated_stage1.py, DAXI low-thresh proposals vs isolated misses)
+  RUNNING locally -> result pending; decides the de-novo detection route.
