@@ -33,6 +33,17 @@ four saved test movies vs `run_stats.csv`, then re-score OOF — only then autho
 The `6bba_05b6850b`=6 exception is a specific public-test movie and must NOT generalize
 to the OOF family (use 7 uniformly for OOF).
 
+**TO RESUME E0c after reboot** (the background OOF run is killed on shutdown; wrapper is
+already parity-verified, so just re-run and record):
+```powershell
+.\.venv\Scripts\python.exe scripts\win_bet\e0_replay.py --pred-dir artifacts\kaggle\oof_clean\pred_geffs_split_0
+.\.venv\Scripts\python.exe scripts\win_bet\e0_replay.py --pred-dir artifacts\kaggle\oof_clean\pred_geffs_split_1
+```
+Then record both-fold numbers in journal + HANDOFF, mark E0c authoritative, and commit.
+Then Phase B: export the full pre-assignment candidate surface (not final edges), label
+via scorer pred→GT matching, compare vs the wrapper's composite decision, gate on exact
+graph-level gain over E0c (not AUC).
+
 ## Current architecture direction
 
 Maintain the 0.889 graph as the hedge while testing a new three-layer system:
