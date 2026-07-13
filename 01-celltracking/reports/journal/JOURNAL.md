@@ -367,3 +367,28 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - NEXT: Phase-B competition-transfer gate on the cached candidate surface — label candidates via scorer
   pred->GT matching, compare breadth model vs wrapper COMPOSITE (cost/selected), gate on exact graph-level
   gain over E0c (0.7595/0.6484) both folds, not AUC.
+
+### 2026-07-13 (Phase-B labeling fix + controlled breadth gate — breadth helps but fails both-fold)
+- LABELING BUG FOUND+FIXED (d4f3737): v1 treated sparse unannotated candidates as negatives -> reported
+  candidate recall 0.78% / wrapper "precision" 0.6% (MEANINGLESS, diluted by 99% unannotated sources).
+  v2 = three-state supervision (positive / reliable_negative / unlabeled), ranking negatives ONLY within
+  answerable source groups. Corrected 1-crop: candidate coverage 0.78% -> 96%, wrapper top-1 ~98%.
+  label_candidates.py -> candidates_labeled_v2/.
+- Competition-only ranker control (d68c8c9, LGBMRanker w/ edge_prob+cost features): 44b6 +0.0039, 6bba
+  -0.0035 vs wrapper -> FAILS both-fold -> two-embryo training insufficient (6bba regression). Not submitted.
+- CONTROLLED BREADTH GATE (phaseb_gate_breadth.py, geometry-only scale-free features raw_rel/motion_rel/
+  min-ratios/rank_frac/log_n_cand, NO edge_prob/cost -> transferable; answerable-group top-1/MRR):
+  * Zebrahub candidates generated (gen_zebrahub_candidates.py): 737,262 answerable groups from ZSNS003/4/5.
+  * 44b6: wrapper 0.9635 | comp-geom 0.9645 (+0.0010) | zebrahub+comp 0.9645 (+0.0010, +0.0000 vs comp).
+  * 6bba: wrapper 0.9319 | comp-geom 0.9301 (-0.0017) | zebrahub+comp 0.9313 (-0.0005, +0.0012 vs comp).
+- FINDINGS: (a) external breadth MEASURABLY helps the weak fold (6bba comp-only -0.0017 -> breadth -0.0005;
+  +0.0012 over comp-only) -> reverse-fold-asymmetry thesis DIRECTIONALLY CONFIRMED. (b) BUT geometry-only
+  (even +breadth) does NOT beat wrapper on BOTH folds (6bba still -0.0005) -> FAILS gate, NOT submittable as
+  a wholesale ranker replacement. (c) edge_prob is strong but NON-transferable (comp-only w/ edge_prob 6bba
+  -0.0035 < geometry-only -0.0017 -> overfits comp detector distribution). (d) wrapper composite already
+  ~93-96% top-1 -> candidate-RERANKING headroom nearly exhausted.
+- IMPLICATION: blanket geometry replacement won't win. Reranking is not the lever. NEXT (per plan):
+  selective uncertainty-gated repair + EXACT graph-level scoring vs E0c (top-1 parity does not preclude
+  targeted graph gains, but expect marginal); AND weigh bigger levers — divisions (+0.1 metric ceiling,
+  currently ~0 on OOF), endpoint recovery. Leaderboard: #1 0.970 / #2 0.968 (extreme outliers, investigate
+  but do NOT distort private validation to imitate) / #3 0.941 / #4 0.910.
