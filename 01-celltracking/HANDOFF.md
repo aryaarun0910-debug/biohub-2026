@@ -33,16 +33,33 @@ four saved test movies vs `run_stats.csv`, then re-score OOF — only then autho
 The `6bba_05b6850b`=6 exception is a specific public-test movie and must NOT generalize
 to the OOF family (use 7 uniformly for OOF).
 
-**TO RESUME E0c after reboot** (the background OOF run is killed on shutdown; wrapper is
-already parity-verified, so just re-run and record):
+**E0c HYBRID PIPELINE (deployment-exact, cached, resumable).** The old serial
+`e0_replay` is superseded. Two decoupled stages, cache = `artifacts/kaggle/e0c_cache/`
+(gitignored; per-crop atomic writes + status manifest => safe to interrupt/resume):
+
+Stage 1 — exact wrapper pass (gap-refine ON, min-len 7 uniform), caches post-wrapper
+graph + FULL candidate surface + diagnostics. Sharded for parallelism (start 4; raise if
+RAM allows). Already-done crops are skipped by config-hash. **TO RESUME, just re-run:**
 ```powershell
-.\.venv\Scripts\python.exe scripts\win_bet\e0_replay.py --pred-dir artifacts\kaggle\oof_clean\pred_geffs_split_0
-.\.venv\Scripts\python.exe scripts\win_bet\e0_replay.py --pred-dir artifacts\kaggle\oof_clean\pred_geffs_split_1
+# 4 parallel shards (one per terminal, or background):
+.\.venv\Scripts\python.exe scripts\win_bet\e0c_run.py --shard 0/4
+.\.venv\Scripts\python.exe scripts\win_bet\e0c_run.py --shard 1/4
+.\.venv\Scripts\python.exe scripts\win_bet\e0c_run.py --shard 2/4
+.\.venv\Scripts\python.exe scripts\win_bet\e0c_run.py --shard 3/4
 ```
-Then record both-fold numbers in journal + HANDOFF, mark E0c authoritative, and commit.
-Then Phase B: export the full pre-assignment candidate surface (not final edges), label
-via scorer pred→GT matching, compare vs the wrapper's composite decision, gate on exact
-graph-level gain over E0c (not AUC).
+Stage 2-4 — score the cache once Stage 1 is complete (fast, re-runnable):
+```powershell
+.\.venv\Scripts\python.exe scripts\win_bet\e0c_score.py --workers 4
+```
+This prints per-fold authoritative adj-edge-J + division-J + composite (the baseline),
+and numpy-vs-authoritative edge parity across all crops. Record numbers in journal +
+HANDOFF, mark E0c authoritative, commit. metric_numpy is a fast EDGE diagnostic only
+(no divisions) — never authoritative.
+
+Then Phase B (candidate surface already cached — no reprocessing): label the cached
+candidates via scorer pred→GT matching (positive iff both endpoints match GT AND the GT
+edge exists), compare the breadth model vs the wrapper's COMPOSITE decision (cost/selected,
+not edge_prob alone), and gate on exact graph-level gain over E0c on both folds (not AUC).
 
 ## Current architecture direction
 

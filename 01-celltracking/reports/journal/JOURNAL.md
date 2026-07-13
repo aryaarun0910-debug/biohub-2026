@@ -329,3 +329,33 @@ private organizer clarification; score-probing is forbidden. Full plan:
   (they lack negatives). Labels via scorer optimal pred-node->GT matching: positive only if BOTH endpoints
   match GT nodes AND the GT edge exists (nearest-GT = false supervision). Compare breadth model vs the
   wrapper's COMPOSITE decision (motion+distance+prob+constraints), not edge_prob alone.
+
+### 2026-07-13 (E0c hybrid pipeline; deployment-exactness; several failures corrected)
+- CORRECTION (review): E0b (0.7601/0.6450) was STRONG but deployment-INEXACT — used min-track-len 6 for all
+  crops + disabled image gap-refine, whereas the 0.889 submission used min-len 7 (effective 6 only on the
+  6bba_05b6850b public-test movie) with synthetic-gap refine ON. Not authoritative until fixed.
+- E0c PARITY: extracted-wrapper diagnostics vs saved run_stats.csv on the 4 test movies = EXACT on all 15
+  load-bearing fields (nodes/edges, gap_refined 144/988/72/931, short_track_min_len_effective 7/7/6/7,
+  safe_divisions, motion_relink, prune). Wrapper is a bit-faithful reproduction. scripts/win_bet/e0c_parity.py.
+- ARCHITECTURE (review): old e0_replay coupled slow wrapper + slow scoring in one serial loop = the real
+  defect. Refactored to a hybrid: e0c_run.py (Stage 1) runs the exact wrapper ONCE (gap-refine ON, min-len 7
+  uniform), caches per crop (atomic/resumable/sharded): post-wrapper graph + FULL pre-assignment candidate
+  surface (Phase-B asset, same pass) + manifest (config hash, git, diagnostics, explicit status). e0c_score.py
+  (Stages 2-4): numpy edge diagnostic + authoritative edge+division in a ProcessPool + numpy-vs-authoritative
+  edge parity across the population. Verified: smoke gap-refine 345 refined/0 failed, 30k cands; score 2 crops
+  0.8132/0.7497; Stage-4 numpy parity 0/2 mismatch, max adj-J diff 0.00e+00. Full baseline pending (cache).
+- FAILURES / dead-ends this session (kept for continuity):
+  * Duplicate-process incident: user "closed" the machine but it did NOT fully shut down -> pre-reboot E0c
+    survived; my post-reboot relaunch made a 2nd, both tee-writing the SAME file (corrupted), and TaskStop left
+    orphaned `for S in 0 1` bash loops RESPAWNING workers faster than I killed them -> 4+ python at 101% CPU,
+    ~0 crops/min. Fix: kill by .venv exec-path + launch DIRECT python (no for-loop = no respawn). Lesson: shard
+    E0c as independent direct processes writing distinct files, never a tee'd for-loop.
+  * Kill commands self-terminated (exit 255): kill pattern 'e0_replay' appeared in the killing shell's own
+    command line -> killed its own shell. Fix: exclude via Stop-Process/CimInstance guard or match exec-path.
+  * gap-refine on OOF ~1-2 min/crop (reads data/train frames) -> 3-10h for 199. Nearly shipped an ablation
+    (gap-refine OFF) as the baseline = WRONG (not deployment-exact). Correct answer = caching pipeline (run
+    exact once, score fast). metric_numpy proposed as authoritative -> REJECTED (edge-only, no divisions).
+  * Legacy reorg over-moved run_phase1_ablation/run_v3_taxonomy -> pytest FAILED (test_metric_parity imports
+    them) -> reverted; remaining 12-file legacy move re-verified (50 passed). legacy/README.md.
+- NEXT: finish Stage-1 cache (resume: e0c_run.py --shard i/4) -> e0c_score.py --workers 4 = authoritative E0c
+  baseline -> freeze -> Phase-B competition-transfer gate on the cached candidate surface.
