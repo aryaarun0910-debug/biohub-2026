@@ -392,3 +392,20 @@ private organizer clarification; score-probing is forbidden. Full plan:
   targeted graph gains, but expect marginal); AND weigh bigger levers — divisions (+0.1 metric ceiling,
   currently ~0 on OOF), endpoint recovery. Leaderboard: #1 0.970 / #2 0.968 (extreme outliers, investigate
   but do NOT distort private validation to imitate) / #3 0.941 / #4 0.910.
+
+### 2026-07-13 (Commander barbell plan; Track-B DIVISION ORACLE GATE PASSES)
+- Commander two-track plan: Track A = fast exact-graph experiments -> ONE calibration submission (selective
+  repair; no-fork ablation; existing-fork oracle; division-proposal oracle). Track B = breadth division
+  reconstruction, GATED on division-proposal oracle showing >=+0.01 exact composite on BOTH folds; else kill
+  division as main bet and redirect to candidate-gen/redetection. Kaggle = sparse calibration instrument only
+  (one submission per system family; never promote on ranking AUC/top-1; exact graph gains first).
+- DIVISION-PROPOSAL ORACLE (phaseb_division_oracle.py, read-only, from labeled_v2 source/target_gt_id +
+  GT divisions): reachable = GT div whose matched pred parent has >=2 of the parent's GT children as
+  candidate targets.
+  * 44b6: 26 GT div, 7 reachable (26.9%), cur div-J 0.0000 -> oracle 0.2692 => optimistic d_composite +0.0269
+  * 6bba: 125 GT div, 26 reachable (20.8%), cur div-J 0.0057 -> oracle 0.2080 => optimistic d_composite +0.0202
+  GATE PASSES both folds (>=+0.01). Track B = breadth division posterior is GO. CAVEAT: optimistic ceiling
+  (assumes 0 FP, ignores single-parent assignment-stealing); exact < this. Reachability only ~20-27% -> a
+  higher-recall fork proposal generator can raise the ceiling further. NEXT: exact fork oracle (construct+
+  score oracle-fork graphs) to confirm; then no-fork ablation + selective-repair exact tests (Track A);
+  then build the Zebrahub-trained PU division posterior (Track B).
