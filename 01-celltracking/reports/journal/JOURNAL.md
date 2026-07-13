@@ -470,3 +470,22 @@ private organizer clarification; score-probing is forbidden. Full plan:
   + Oracle C exact score with conflict resolution/parent-stealing -> the number that decides GPU division
   quota); selective-repair exact test; corrected self-supervised Job-B pretraining on T4 (nested LOEO, window/
   lineage grouping, daughter-symmetry, deployment-matched hard negatives, natural prevalence) in parallel.
+
+### 2026-07-13 (DIVISION ORACLE C — exact gate = AMBER; value is in joint conflict resolution)
+- Oracle C (phaseb_oracle_c.py): edges-only edits (no nodes -> count penalty unchanged), scorer-consistent
+  E0c->GT match, global constraints (<=1 parent/daughter, <=2 children/mother, distinct daughters, daughter-
+  competition), authoritative scoring. GT-informed OFFLINE upper bound, written to GT_ORACLE_do_not_submit/
+  (never packaged). Baseline sanity PASSES: reproduces E0c exactly (44b6 0.7595, 6bba 0.6490).
+- RESULTS vs E0c composite:
+  * add_only (conflict-free): 44b6 +0.0045 / 6bba +0.0037 (div-J 0.042/0.041; only 5/29 forks added, 21/... skipped)
+  * add_replace (conflict-aware, TRUE upper bound): 44b6 +0.0182 / 6bba +0.0138 (div-J 0.168/0.131; 20/93 forks
+    forced; 15 steals on 44b6; edge-J ALSO +0.0014/+0.0013 -> forced daughter edges are TPs).
+- GATE = AMBER (44b6 GREEN >=+0.015; 6bba +0.0138 in AMBER band; not GREEN both folds). Per commander: one
+  SHORT leak-free GPU seed; proceed only if the learned posterior captures a substantial fraction at high precision.
+- KEY STRUCTURAL INSIGHT: add_replace (+0.018) is ~4x add_only (+0.004) -> the division value lives in CONFLICT
+  RESOLUTION (removing daughters' wrong parents / daughter competition), not division classification alone. A
+  standalone fork classifier caps near +0.004 (RED); the deployable win REQUIRES a JOINT fork+edge selector with
+  assignment-stealing resolution (confirms Codex). Also the exact upper bound (+0.018/+0.014) is ~6x lower than
+  the optimistic reachability estimate (+0.027/+0.020) -> reachability oracle massively overstated.
+- DECISION: AMBER -> prepare corrected self-supervised Job-B data/code (no major GPU spend); one short leak-free
+  division seed; the real build is the joint selector. Isolated-miss signal-separability gate still owed (moonshot).
