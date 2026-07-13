@@ -501,3 +501,19 @@ private organizer clarification; score-probing is forbidden. Full plan:
   commander decision tree: STOP the division GPU program after this seed unless isolated-detection rescues.
 - Isolated-miss Stage-1 reachability (isolated_stage1.py, DAXI low-thresh proposals vs isolated misses)
   RUNNING locally -> result pending; decides the de-novo detection route.
+
+- ISOLATED-MISS STAGE-1 REACHABILITY (isolated_stage1.py, DAXI unet low-thresh 0.20 proposals, NO GT coords):
+  6bba_05db0fb1 27/27 reached, 44b6_0113de3b 3/3 -> 30/30 = 100%. Isolated misses ARE visible to a
+  low-threshold detector (de-novo detection NOT dead at proposal gen). CAVEAT: 100% is driven by MASSIVE
+  over-proposal ~41k (6bba) / 87k (44b6) peaks/frame (~40x real cell count) -> the difficulty is entirely
+  Stages 2-4 (temporal tracklet filtering + PU discrimination at high precision + exact graph test protecting
+  count/edge-J). Precision bar brutal (40k candidates -> must add ~0 FP). Division model's ~0 high-P recall is
+  a warning. Isolated lever ALIVE at Stage 1, UNDECIDED at Stages 2-4 (the real gate).
+- AMBER OUTCOME (both tracks executed): DIVISION seed FAILS high-precision gate -> division learned-posterior
+  program essentially dead (Oracle-C +0.018 unreachable without near-perfect fork ID). ISOLATED detection
+  passes Stage-1 reachability but faces a severe Stages-2-4 discrimination gate. Per commander decision tree:
+  not "both pass"; isolated is the only credible-but-hard route left. NEXT: build isolated Stages 2-4 (de-novo
+  temporal tracklet construction + natural-prevalence PU discrimination + exact graph insertion/scoring);
+  gate = >=20% isolated recovery + min-fold composite >=+0.005, no count/regime collapse. If it fails, current
+  architecture's winning-scale routes are falsified -> ship best disciplined ~0.90-0.91 calibration system and
+  begin a genuinely different architecture search.
