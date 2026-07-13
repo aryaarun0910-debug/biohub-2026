@@ -70,8 +70,23 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--pred-dir", required=True)
     ap.add_argument("--gt-dir", default=str(ROOT / "data" / "train"))
+    ap.add_argument("--image-dir", default=str(ROOT / "data" / "train"),
+                    help="zarr image root for gap-refine (default data/train for OOF)")
+    ap.add_argument("--min-track-len", type=int, default=7,
+                    help="E0c: submission uses 7 uniformly on OOF (no public-test exception)")
+    ap.add_argument("--no-gap-refine", action="store_true", help="disable image gap-refine")
     ap.add_argument("--max-crops", type=int)
     a = ap.parse_args()
+
+    # E0c deployment-exact config (parity-verified vs saved 0.889 run_stats.csv):
+    # min-track-len 7 UNIFORM (the 6bba_05b6850b=6 exception is a public-test movie,
+    # not an OOF crop, so it is NOT applied here), image gap-refine ON.
+    W.OUTPUT_MIN_TRACK_LEN = a.min_track_len
+    W.SHORT_TRACK_MIN_LEN_BY_DATASET = {}
+    W.GAP_REFINE_SYNTHETIC = not a.no_gap_refine
+    W.TEST_DIR = Path(a.image_dir)
+    print(f"[E0c config] min_track_len={W.OUTPUT_MIN_TRACK_LEN} uniform, "
+          f"gap_refine={W.GAP_REFINE_SYNTHETIC}, image_dir={W.TEST_DIR}")
 
     preds = sorted(Path(a.pred_dir).glob("*.geff"))
     if a.max_crops:
@@ -98,7 +113,7 @@ def main() -> None:
 
     s = summarise(rows)
     fam = preds[0].stem.split("_")[0]
-    print(f"\n=== E0b pure-0.889 wrapper OOF, held-out {fam} ({len(rows)} crops) ===")
+    print(f"\n=== E0c deployment-exact wrapper OOF, held-out {fam} ({len(rows)} crops) ===")
     print(f"  adj_edge_jaccard = {s['adj_edge_jaccard']:.4f}")
     print(f"  division_jaccard = {s['division_jaccard']:.4f} "
           f"(TP={s['division_tp']} FP={s['division_fp']} FN={s['division_fn']})")

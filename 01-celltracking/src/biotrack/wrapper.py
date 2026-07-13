@@ -7,7 +7,6 @@ trackastra fusion preset (which scored 0.865). gap-refine is disabled here
 (image-dependent; bounded minor deviation). Entry point: filter_output_graph().
 """
 import os, json, math, warnings
-os.environ.setdefault("BIOHUB_GAP_REFINE_SYNTHETIC", "0")  # E0b: skip image-dependent synthetic refine
 from pathlib import Path
 import numpy as np
 import tracksdata as td
@@ -15,6 +14,17 @@ try:
     from scipy.optimize import linear_sum_assignment  # noqa: F401
 except Exception:
     pass
+try:
+    import blosc2  # fast chunk decode for read_test_frame; zarr fallback if absent
+except Exception:
+    blosc2 = None
+
+# Image root for gap-refine (read_test_frame). Set by the driver per run:
+# data/test for the 4 test-movie parity check, data/train for OOF. None => refine
+# no-ops gracefully. GAP_REFINE_SYNTHETIC defaults ON (submission-faithful); the
+# driver may override any config constant as a module attribute before calling
+# filter_output_graph (functions read these as module globals at call time).
+TEST_DIR = None
 
 VOXEL_SCALE_UM = (1.625, 0.40625, 0.40625)  # kernel line 954 (competition z,y,x scale)
 

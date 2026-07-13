@@ -12,20 +12,26 @@ deployment signal; model selection is embryo-held-out.
 
 | System | Public | OOF `44b6` | OOF `6bba` | Decision |
 |---|---:|---:|---:|---|
-| **E0b pure-0.889 wrapper (authoritative)** | **0.889** | **0.7601** | **0.6450** | **production baseline — gate all deltas vs this** |
+| **E0b wrapper (strong; NOT yet exact)** | 0.889 | 0.7601 | 0.6450 | strong baseline; **E0c parity pending** before authoritative |
 | raw greedy OOF (pre-wrapper) | — | 0.6562 | 0.5593 | weak; do NOT gate against this |
 | fork-suppressed organizer | — | 0.6595 | 0.5680 | old safe OOF baseline |
 | Trackastra hint inside motion relinker | 0.889 | — | — | neutral; do not repeat |
 | direct Trackastra + pruning | 0.865 | 0.6948 | 0.6044 | BELOW wrapper on both folds — rejected |
 
-**E0b (2026-07-13):** the pure-0.889 wrapper OOF is **0.7601 / 0.6450** (min-fold
-0.6456), reproduced locally via `scripts/win_bet/e0_replay.py` over
-`artifacts/kaggle/oof_clean`. This is now THE baseline. It **exceeds** the direct
-Trackastra-fusion OOF (0.6948 / 0.6044) on both folds — proving that fusion's
-+0.035/+0.036 "gain" was an artifact of comparing to the weak greedy (0.656/0.559);
-against the real wrapper the fusion regresses (−0.065/−0.041), which is why it lost
-hidden (0.865 vs 0.889). The direct system scored 0.9065 on the four labelled dummy
-movies but only 0.865 hidden. Dummy-movie score is not a promotion gate.
+**E0b (2026-07-13), strong but deployment-inexact.** The extracted pure-0.889 wrapper
+OOF is **0.7601 / 0.6450** (min-fold 0.6456) via `scripts/win_bet/e0_replay.py` over
+`artifacts/kaggle/oof_clean`. It already **exceeds** the direct Trackastra-fusion OOF
+(0.6948 / 0.6044) on both folds — proving fusion's +0.035/+0.036 "gain" was an artifact
+of the weak greedy (0.656/0.559); against the real wrapper fusion regresses
+(−0.065/−0.041), which is why it lost hidden (0.865 vs 0.889). Trackastra replacement
+is conclusively dead. **But E0b is not deployment-exact — two mismatches vs the saved
+0.889 `run_stats.csv`:** (1) min-track-len — the submission used **7** everywhere
+(effective 6 only on the `6bba_05b6850b` public-test movie), E0b used 6 for all crops;
+(2) image-based **synthetic-gap refinement** was ON in the submission (gap_refined
+144/988/72/931), OFF in E0b. **E0c must fix both, prove exact/explained parity on the
+four saved test movies vs `run_stats.csv`, then re-score OOF — only then authoritative.**
+The `6bba_05b6850b`=6 exception is a specific public-test movie and must NOT generalize
+to the OOF family (use 7 uniformly for OOF).
 
 ## Current architecture direction
 
