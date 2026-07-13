@@ -449,3 +449,24 @@ private organizer clarification; score-probing is forbidden. Full plan:
   NOT clearly #1 -> more work needed. OOF->LB calibration submission will measure actual transfer.
 - STILL OWED Track A: selective-repair exact test; exact division-proposal oracle (graph construction+score);
   then one low-risk calibration submission.
+
+### 2026-07-13 (Codex verdict adopted; bracketed-miss oracle DEFLATES the completion lever)
+- CODEX corrections accepted: central estimate LOWERED (next submission ~0.890-0.900, division system
+  ~0.895-0.910, 0.91+ a stretch, 0.94+ from divisions/reranking VERY UNLIKELY); REMOVE private-rank estimate
+  (unknowable); division oracle is REACHABILITY not SCORE; 0.970/0.968 outliers "possibly" not "almost
+  certainly" public-overfit. Codex's proposed winning bet = track-conditioned hypothesis COMPLETION + joint
+  lineage selection (generate missing nodes/forks from raw evidence, select jointly) -- not a better classifier.
+- BRACKETED-MISS ENDPOINT ORACLE (phaseb_bracketed_oracle.py, read-only, E0c->GT match):
+  * 44b6: node recall 0.9543, 923 missed -> bracketed 147 (16%) / continuation 367 (40%) / isolated 409 (44%);
+    edges restorable by bracketed completion <=295 (<=1.49% of GT edges).
+  * 6bba: node recall 0.8776, 13843 missed -> bracketed 402 (3%) / continuation 2258 (16%) / isolated 11183
+    (81%); restorable <=804 (<=0.74% of GT edges).
+- FINDING: the SAFE bracketed gap-completion mode is SMALL (<=1.5%/0.7% edge-recall ceiling). The missed-node
+  mass is mostly ISOLATED (44%/81%) = needs de-novo detection (near-ceiling, hard). So hypothesis-completion's
+  safe form does NOT open a large score source; reinforces Codex ~0.91 honest ceiling. Divisions (<=+0.02) +
+  bracketed (~1%) are not a credible path to 0.94+. Isolated-miss detection is the true (hard) frontier.
+- EXECUTION (Codex order, in progress): [done] no-fork ablation (neutral), reachability div oracle (+0.02),
+  bracketed-miss oracle (small). [next] exact topology-aware division oracle (Oracle B constrained reachability
+  + Oracle C exact score with conflict resolution/parent-stealing -> the number that decides GPU division
+  quota); selective-repair exact test; corrected self-supervised Job-B pretraining on T4 (nested LOEO, window/
+  lineage grouping, daughter-symmetry, deployment-matched hard negatives, natural prevalence) in parallel.
