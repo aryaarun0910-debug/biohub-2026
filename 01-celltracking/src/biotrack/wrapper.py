@@ -26,6 +26,11 @@ except Exception:
 # filter_output_graph (functions read these as module globals at call time).
 TEST_DIR = None
 
+# Phase-B candidate export hook. When set to a list, motion_relink_edges appends
+# EVERY within-gate candidate it evaluates (pre-assignment surface) with features and
+# a `selected` flag. Default None => no recording, behavior identical (parity-safe).
+_CANDIDATE_SINK = None
+
 VOXEL_SCALE_UM = (1.625, 0.40625, 0.40625)  # kernel line 954 (competition z,y,x scale)
 
 # ===== sliced config constants (kernel 91-140) =====
@@ -255,6 +260,7 @@ def motion_relink_edges(
         source_ids: list[int],
         target_ids: list[int],
         gate_um: float,
+        pass_name: str = "",
     ) -> list[tuple[int, int, float, float, float]]:
         if not source_ids or not target_ids:
             return []
@@ -263,6 +269,7 @@ def motion_relink_edges(
         raw_dist = np.full_like(cost, np.inf)
         motion_dist = np.full_like(cost, np.inf)
         prob_matrix = np.zeros_like(cost)
+        cand_local: list[tuple] = []
         for i, source_id in enumerate(source_ids):
             source_pos = position_um[source_id]
             prev_pos = predecessor_position_um.get(source_id)
@@ -281,8 +288,11 @@ def motion_relink_edges(
                 motion_dist[i, j] = motion
                 prob_matrix[i, j] = prob
                 cost[i, j] = motion + 0.05 * raw - MOTION_RELINK_LEARNED_BONUS * prob
+                if _CANDIDATE_SINK is not None:
+                    cand_local.append((i, j, source_id, target_id, raw, motion, prob, float(cost[i, j])))
         row_ind, col_ind = linear_sum_assignment(cost)
         matches: list[tuple[int, int, float, float, float]] = []
+        selected_ij: set = set()
         for r, c in zip(row_ind, col_ind):
             if cost[r, c] >= big:
                 continue
@@ -293,6 +303,15 @@ def motion_relink_edges(
                 float(motion_dist[r, c]),
                 float(prob_matrix[r, c]),
             ))
+            selected_ij.add((int(r), int(c)))
+        if _CANDIDATE_SINK is not None:
+            for (i, j, sid, tid, raw, motion, prob, cst) in cand_local:
+                _CANDIDATE_SINK.append({
+                    "source_id": sid, "target_id": tid, "raw_um": raw,
+                    "motion_um": motion, "edge_prob": prob, "cost": cst,
+                    "pass": pass_name, "gate_um": gate_um,
+                    "selected": int((i, j) in selected_ij),
+                })
         return matches
 
     times = sorted(ids_by_t)
@@ -307,7 +326,7 @@ def motion_relink_edges(
         for pass_name, gate_um in (("tight", MOTION_RELINK_TIGHT_UM), ("relaxed", MOTION_RELINK_RELAXED_UM)):
             pass_sources = [node_id for node_id in source_ids if node_id in unmatched_sources]
             pass_targets = [node_id for node_id in target_ids if node_id in unmatched_targets]
-            matches = assign_pass(pass_sources, pass_targets, gate_um)
+            matches = assign_pass(pass_sources, pass_targets, gate_um, pass_name)
             for source_id, target_id, raw, motion, prob in matches:
                 if source_id not in unmatched_sources or target_id not in unmatched_targets:
                     continue
