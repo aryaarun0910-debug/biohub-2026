@@ -310,10 +310,15 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - E0b (BLOCKER) = reproduce the pure-0.889 wrapper on fold OOF. Extracted the LB897 post-processing into
   src/biotrack/wrapper.py (config 91-140 + fns 957-1887 sliced; pure defaults = motion-relink/safe-div/
   linefit/gap-close ON, gap2/div-geom OFF, min-track 6; NO trackastra fusion = the 0.865 reject; gap-refine
-  disabled, minor). Driver scripts/win_bet/e0_replay.py. Smoke (3 crops 44b6): adjJ 0.733 vs greedy 0.656 =
-  wrapper adds ~+0.08 -> confirms prior deltas measured the WRONG baseline. Full 199-crop both-fold run in
-  progress -> reports/inventory/e0_wrapper_oof.txt (authoritative baseline for Phase B gate).
-- NEXT: full baseline -> export candidate edges + edge_prob -> competition-transfer gate (breadth scorer vs
+  disabled, minor). Driver scripts/win_bet/e0_replay.py.
+- E0b DONE (2026-07-13, 199 crops, reports/inventory/e0_wrapper_oof.txt): AUTHORITATIVE wrapper OOF
+  adj-J = 44b6 0.7601 / 6bba 0.6450 (min-fold 0.6456). div-J ~0 (44b6 0 TP/91 FP; 6bba 4 TP/582 FP/121 FN;
+  safe-divisions net-neutral on sparse OOF). HARD-NUMBER CONFIRMATION of the red-team: this EXCEEDS the
+  prior "best" Trackastra-fusion OOF 0.6948/0.6044 on BOTH folds -> the fusion +0.035/+0.036 "gain" was an
+  artifact of comparing to the weak greedy 0.656/0.559; vs the REAL wrapper the fusion REGRESSES
+  (-0.065/-0.041), which is why it lost hidden (0.865 vs 0.889). Every future delta is measured vs
+  0.7601/0.6450, min-fold gate on 0.6456.
+- NEXT: export candidate edges + edge_prob from the wrapper -> competition-transfer gate (breadth scorer vs
   edge_prob on held-out family) -> selective repair reverse-fold (promote only if both folds beat E0b +
   regime slices stable). Additional levers: division posterior on Zebrahub breadth (+up to 0.1), March-14
   DAXI closer-domain breadth, Trackastra 2nd linker, gradient-free target-time consistency, image-N_est.

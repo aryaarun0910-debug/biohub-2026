@@ -12,13 +12,20 @@ deployment signal; model selection is embryo-held-out.
 
 | System | Public | OOF `44b6` | OOF `6bba` | Decision |
 |---|---:|---:|---:|---|
-| 400-epoch learned anchor | **0.889** | 0.6562 | 0.5593 | production baseline |
-| fork-suppressed organizer | — | 0.6595 | 0.5680 | safe OOF baseline |
+| **E0b pure-0.889 wrapper (authoritative)** | **0.889** | **0.7601** | **0.6450** | **production baseline — gate all deltas vs this** |
+| raw greedy OOF (pre-wrapper) | — | 0.6562 | 0.5593 | weak; do NOT gate against this |
+| fork-suppressed organizer | — | 0.6595 | 0.5680 | old safe OOF baseline |
 | Trackastra hint inside motion relinker | 0.889 | — | — | neutral; do not repeat |
-| direct Trackastra + pruning | 0.865 | **0.6948** | **0.6044** | OOF signal, hidden replacement rejected |
+| direct Trackastra + pruning | 0.865 | 0.6948 | 0.6044 | BELOW wrapper on both folds — rejected |
 
-The direct system scored 0.9065 on the four labelled dummy movies but only 0.865
-on hidden public scoring. Dummy-movie score is no longer a promotion gate.
+**E0b (2026-07-13):** the pure-0.889 wrapper OOF is **0.7601 / 0.6450** (min-fold
+0.6456), reproduced locally via `scripts/win_bet/e0_replay.py` over
+`artifacts/kaggle/oof_clean`. This is now THE baseline. It **exceeds** the direct
+Trackastra-fusion OOF (0.6948 / 0.6044) on both folds — proving that fusion's
++0.035/+0.036 "gain" was an artifact of comparing to the weak greedy (0.656/0.559);
+against the real wrapper the fusion regresses (−0.065/−0.041), which is why it lost
+hidden (0.865 vs 0.889). The direct system scored 0.9065 on the four labelled dummy
+movies but only 0.865 hidden. Dummy-movie score is not a promotion gate.
 
 ## Current architecture direction
 
