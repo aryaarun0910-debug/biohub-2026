@@ -1,0 +1,18 @@
+
+######### ISOLATED GATE mode=oracle #########
+Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 1137.68it/s]
+Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 2100.28it/s]
+Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 1250.58it/s]
+  44b6 (3 crops): composite=0.7348 (dvs E0c -0.0247) | isolated 3 recovered 0 (0.0%) | nodes added 0
+Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs:  68%|######8   | 68/100 [00:00<00:00, 611.38it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 630.36it/s]
+Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs:  50%|#####     | 50/100 [00:00<00:00, 487.51it/s]Matching nodes between graphs:  99%|#########9| 99/100 [00:00<00:00, 436.37it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 447.90it/s]
+  6bba (2 crops): composite=0.7281 (dvs E0c +0.0791) | isolated 57 recovered 5 (8.8%) | nodes added 3280
+
+######### ISOLATED GATE mode=conf #########
+Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 2092.35it/s]
+Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 2102.60it/s]
+Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 1569.87it/s]
+  44b6 (3 crops): composite=0.0674 (dvs E0c -0.6921) | isolated 3 recovered 0 (0.0%) | nodes added 1378504
+Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs:  91%|#########1| 91/100 [00:00<00:00, 823.09it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 826.17it/s]
+Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs:  55%|#####5    | 55/100 [00:00<00:00, 549.63it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 475.71it/s]
+  6bba (2 crops): composite=0.3108 (dvs E0c -0.3382) | isolated 57 recovered 0 (0.0%) | nodes added 599228

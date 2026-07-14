@@ -517,3 +517,25 @@ private organizer clarification; score-probing is forbidden. Full plan:
   gate = >=20% isolated recovery + min-fold composite >=+0.005, no count/regime collapse. If it fails, current
   architecture's winning-scale routes are falsified -> ship best disciplined ~0.90-0.91 calibration system and
   begin a genuinely different architecture search.
+
+### 2026-07-14 (ISOLATED GATE FAILS -> both winning routes falsified; disciplined-floor pivot)
+- Isolated Stages 2-4 gate (isolated_gate.py; DAXI cache 600k peaks/crop over 100 frames; tracklets len>=3;
+  oracle+conf selection; exact insertion). (NOTE: reported dvs-E0c is a subset-vs-full-fold mis-comparison =
+  INVALID; the recovery + node-cost signals below are valid and decisive.)
+  * ORACLE (perfect selection = ceiling): 44b6 recovered 0/3 (0%), 0 nodes added; 6bba 5/57 (8.8%) but 3280
+    nodes added to recover 5 misses. CONF (realistic): +1.4M/599k nodes added -> composite collapse (0.07/0.31),
+    ~0% recovery.
+- CONCLUSION (robust): isolated misses are reachable PER-FRAME (Stage-1 100%) but do NOT form coherent
+  multi-frame tracklets (oracle recovery 0-9% << 20% gate) -- they are barely-detectable transient cells; a
+  single-frame peak exists but no consistent 3-frame track, and a lone recovered node restores NO edge (its GT
+  neighbours are also missed) while still paying the count penalty. Count penalty is catastrophic (low-thresh
+  proposals add thousands-to-millions of nodes). Isolated de-novo detection FAILS the gate on both recovery and
+  node-cost. => Both winning-scale routes (division learned-posterior + isolated detection) are FALSIFIED.
+- DECISION-TREE OUTCOME: neither passes -> the detect->link->repair architecture family is exhausted at
+  ~0.90-0.91. Disciplined floor = the frozen E0c wrapper (public 0.889, already deployed). No new deployable
+  improvement has cleared the both-fold exact gate. NEXT: (1) rigorous final synthesis of every lever's exact
+  measured ceiling; (2) evidence-based directions for a GENUINELY DIFFERENT architecture (the only remaining
+  route to >0.91): learned motion-compensated temporal EVIDENCE INTEGRATION (proper track-before-detect that
+  ACCUMULATES weak sub-threshold response along motion-compensated candidate tubes BEFORE declaring nodes --
+  the simple DAXI-single-frame+tracklet version failed precisely because it does not integrate weak temporal
+  evidence), trained on breadth; else accept ~0.90 and optimize private generalization.
