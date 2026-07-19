@@ -1,5 +1,10 @@
 # Brain synthesis — evidence-updated strategy
 
+**SUPERSEDED 2026-07-14:** the plan below was executed and its winning-scale bets (division
+posterior, isolated detection, breadth reranking) were falsified. See
+[FINAL_SYNTHESIS_2026-07-14.md](FINAL_SYNTHESIS_2026-07-14.md) for the current conclusion.
+Kept for historical record of the reasoning that led there.
+
 **Date:** 2026-07-12
 
 This synthesis cross-reads the six research lanes and the vendored scorer. Lane

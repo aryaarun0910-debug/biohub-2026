@@ -539,3 +539,23 @@ private organizer clarification; score-probing is forbidden. Full plan:
   ACCUMULATES weak sub-threshold response along motion-compensated candidate tubes BEFORE declaring nodes --
   the simple DAXI-single-frame+tracklet version failed precisely because it does not integrate weak temporal
   evidence), trained on breadth; else accept ~0.90 and optimize private generalization.
+
+### 2026-07-14 (moonshot falsification pilot: oracle-motion DAXI accumulation -> NEGATIVE lean)
+- Ran the cheap falsification `FINAL_SYNTHESIS_2026-07-14.md` prescribed before committing to the temporal-
+  integration moonshot: does motion-compensated accumulation of raw DAXI response along an oracle (GT-lineage)
+  tube reveal signal at isolated-miss locations that single-frame thresholding misses? (`daxi_accumulation_v2.py`,
+  oracle-motion upper bound; paired hard controls = cached low-thresh DAXI peaks given the same displacement
+  tube; no new model.)
+- RESULTS: 44b6_0113de3b pairs=3 (underpowered, no fold conclusion); 6bba_05db0fb1 pairs=55 (adequately
+  sampled) single_AUC=0.0283 static_AUC=0.2225 GT_motion_AUC=0.1921 -> motion accumulation LOWER than static
+  by 0.0304 AUC on the only well-powered crop. Confound noted: control matching used cached full-volume
+  response while evaluation used patch inference, so absolute single-frame AUCs are not clean (this blocks a
+  fully confident kill, not just a soft one).
+- DECISION (per the doc's own go/no-go rule): the pilot leans NO -- oracle GT-motion accumulation did not
+  show the hoped-for advantage over static accumulation on the powered crop. Per commander: do not open the
+  temporal-integration GPU program on this evidence. Before any further moonshot spend, a cleaner rerun would
+  need patch-response-matched controls and more 44b6 crops; absent that, treat the moonshot as UNSUPPORTED
+  (not proven impossible, but no measured mechanism). Combined with the division and isolated falsifications,
+  ALL THREE candidate winning-scale levers are now negative or falsified. Disciplined floor stands: frozen
+  E0c wrapper, public 0.889, min-fold OOF 0.6490. No further architecture work is scheduled unless a cleaner
+  falsification or a new idea clears its own cheap gate first.

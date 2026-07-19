@@ -1,6 +1,6 @@
 # Current handoff
 
-**Updated:** 2026-07-12
+**Updated:** 2026-07-14
 **Branch:** `master`
 
 ## Objective
@@ -62,29 +62,44 @@ candidates via scorer pred→GT matching (positive iff both endpoints match GT A
 edge exists), compare the breadth model vs the wrapper's COMPOSITE decision (cost/selected,
 not edge_prob alone), and gate on exact graph-level gain over E0c on both folds (not AUC).
 
-## Current architecture direction
+## Current architecture direction — disciplined floor (2026-07-14 pivot)
 
-Maintain the 0.889 graph as the hedge while testing a new three-layer system:
+The three-layer plan below the fold (`THREE_LAYER_WIN_ARCHITECTURE_2026-07-12.md`,
+`reports/research/brain/ROADMAP.md`, `WIN_BET.md`, `SYNTHESIS.md` — all now flagged
+superseded) was fully executed against the exact E0c baseline. **Every winning-scale
+lever measured has failed its both-fold gate:**
 
-1. **Data:** dense public trajectory supervision, corruption, PU labels and
-   acquisition-regime metadata.
-2. **Algorithms:** track-before-detect lineage field, baseline-preserving
-   selective repairs, component posterior and legitimate division prediction.
-3. **Inference/compute:** cached candidates, uncertainty cascades, target motion
-   calibration and complementary ensembles.
+| Lever | Exact result vs E0c | Verdict |
+|---|---|---|
+| Candidate reranking (breadth-trained scorer vs wrapper `edge_prob`) | beats wrapper on neither fold | saturated |
+| Division learned posterior (leak-free, daughter-swap-invariant) | recall@P0.9 mean 0.045 (~0 on 3/4 embryos) | dead |
+| Isolated de-novo detection (DAXI tracklets, Stages 2-4) | oracle recovery 0%/8.8% (need >=20%) | dead |
+| Moonshot pilot: oracle-motion DAXI accumulation (cheap falsification) | GT-motion AUC lower than static on the powered crop (0.1921 vs 0.2225, 6bba) | negative lean, not deployable |
 
-Primary design: [THREE_LAYER_WIN_ARCHITECTURE_2026-07-12.md](reports/THREE_LAYER_WIN_ARCHITECTURE_2026-07-12.md).
+Full evidence and reasoning: [FINAL_SYNTHESIS_2026-07-14.md](reports/research/brain/FINAL_SYNTHESIS_2026-07-14.md)
+(division/isolated verdicts + the addendum recording the moonshot pilot). Journal trail:
+`reports/journal/JOURNAL.md`, entries 2026-07-13 through 2026-07-14.
+
+**Current position:** ship nothing new. The frozen **E0c wrapper (public 0.889, OOF
+0.7595/0.6490)** is the disciplined floor — no measured deployable improvement exists.
+No detect->link->repair lever has a credible mechanism left to reach 0.94+; the only
+route to materially exceed ~0.91 would be a genuinely different architecture (temporal
+evidence integration), and its own cheap falsification came back negative.
 
 ## Immediate queue
 
-1. Bracketed-miss analysis: determine what fraction of missing endpoints can be
-   predicted from a track on both sides.
-2. Motion-compensated response integration using raw pre-NMS detector evidence.
-3. Baseline-preserving selective edge replacement; never replace the whole
-   association graph.
-4. Component-confidence and count-aware pruning curves across both embryos.
-5. Public March-22 dense-track edge/existence/fork training table.
-6. Forward/backward consistency gate before any learned target adaptation.
+1. **No architecture work is currently scheduled.** Before spending any further compute,
+   a new idea (or a cleaner rerun of the moonshot pilot with patch-response-matched
+   controls and more 44b6 crops) must clear its own cheap falsification gate first —
+   see the addendum in `FINAL_SYNTHESIS_2026-07-14.md`.
+2. If accepting the floor: focus shifts to private-generalization hygiene (regime-slice
+   robustness, provenance/runtime gates) rather than new score-moving levers.
+3. Two untracked local artifacts from the division/isolated/moonshot work are not yet
+   committed: `reports/inventory/{e0c_run_*.txt,phaseB_label.txt,daxi_cache.txt}` (raw
+   operational logs backing already-journaled 07-13 results) and unrelated stale WIP
+   from 2026-07-03 (`reports/inventory/phase1_v3{,_smooth}.csv` full-199-crop extension,
+   `.claude/settings.json`, `.gitignore`) predating the E0c pivot — confirm intent before
+   committing or discarding either group.
 
 ## Canonical local artifacts
 

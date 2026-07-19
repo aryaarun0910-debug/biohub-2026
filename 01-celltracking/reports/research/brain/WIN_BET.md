@@ -1,5 +1,10 @@
 # WIN_BET — the generalization lever (swing-for-the-win track)
 
+**SUPERSEDED 2026-07-14:** the Milestone-0 candidate-reranking gate ran; breadth beat the
+wrapper's own edge ranking on neither fold ("saturated" in
+[FINAL_SYNTHESIS_2026-07-14.md](FINAL_SYNTHESIS_2026-07-14.md)). This thesis is falsified.
+Kept for historical record.
+
 **Date:** 2026-07-12. Runs in parallel with E0. Authoritative alongside
 `SYNTHESIS.md`. This is the bet that can actually win, not the incremental
 count/consistency hygiene.

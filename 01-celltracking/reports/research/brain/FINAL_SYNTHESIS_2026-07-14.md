@@ -95,3 +95,23 @@ independently instead of integrating weak evidence over motion).
 The value of this session is negative certainty: we now know, with exact measurements, that
 the obvious levers cannot win — which prevents pouring weeks into any of them. The one honest
 moonshot is temporal evidence integration, gated by the cheap accumulation falsification above.
+
+## Addendum (2026-07-14, later same day) — the falsification came back negative
+
+Ran the prescribed cheap falsification (`scripts/win_bet/daxi_accumulation_v2.py`, oracle GT-motion
+accumulation vs static accumulation, paired hard controls from cached DAXI peaks). On the only
+adequately-powered crop (6bba, 55 pairs), motion-compensated accumulation was **lower** than static
+accumulation (0.1921 vs 0.2225 AUC, −0.0304); 44b6 (3 pairs) is underpowered. Full numbers and caveats
+in `reports/inventory/daxi_accumulation_v2.txt` and the 2026-07-14 journal entry.
+
+**Per this doc's own decision rule: this is a "no."** The oracle-motion mechanism this bet depends on
+did not show an advantage on the powered test. A real confound (control matching used cached full-volume
+response, evaluation used patch inference) keeps this from being a fully clean kill, so the moonshot is
+marked **unsupported, not disproven** — but per the recommendation above ("if no → the detection ceiling
+is real and ~0.90–0.91 is the honest end of this competition for us"), no multi-week temporal-integration
+GPU program is justified on current evidence. Combined with the division posterior (dead) and isolated
+detection (dead) results, **all three candidate winning-scale levers are now negative.**
+
+**Current disciplined position:** ship nothing new; the frozen E0c wrapper (public 0.889, OOF 0.7595/0.6490)
+stands as the floor. Any further architecture work should first clear its own cheap falsification gate
+(e.g., a patch-response-matched rerun of this pilot with more 44b6 crops) before any GPU commitment.

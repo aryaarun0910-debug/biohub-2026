@@ -1,5 +1,9 @@
 # MASTER ROADMAP — the complete map to winning
 
+**SUPERSEDED 2026-07-14:** phases A-D below were executed; the division posterior, isolated
+detection, and breadth-reranking bets all failed their exact both-fold gates (see
+[FINAL_SYNTHESIS_2026-07-14.md](FINAL_SYNTHESIS_2026-07-14.md)). Kept for historical record.
+
 **Date:** 2026-07-12. Consolidates `SYNTHESIS.md`, `WIN_BET.md`,
 `METRIC_SEMANTICS_VERIFIED.md`, the six lanes, and measured results into one battle
 plan. This is the operating map; the others are the evidence beneath it.
