@@ -96,7 +96,7 @@ Full evidence and reasoning: [FINAL_SYNTHESIS_2026-07-14.md](reports/research/br
 **Current position:** keep **E0c (public 0.889, OOF 0.7595/0.6490)** frozen as the
 fallback, but an aggressive post-patch attrition campaign is active. A clean-public-0.903
 wrapper delta is running over all 199 OOF crops in an isolated four-shard cache. In
-parallel, Kaggle kernel `aryaarun07/biohub-daxi-cache-20` v2 is running on a T4 to build
+parallel, Kaggle kernel `aryaarun07/biohub-daxi-cache-20` v3 is running on a T4 to build
 a corrected 20-crop temporal-signal gate (10 crops per embryo across the prediction-count
 range). Neither branch is promoted until both folds improve under the exact patched metric.
 
@@ -104,7 +104,7 @@ range). Neither branch is promoted until both folds improve under the exact patc
 
 1. Finish and score `artifacts/kaggle/clean903_wrapper_oof_cache` using
    `e0c_score.py --cache ...`; promote only for bilateral >=+0.005 min-fold gain.
-2. Monitor/download Kaggle `aryaarun07/biohub-daxi-cache-20` v2; run the corrected
+2. Monitor/download Kaggle `aryaarun07/biohub-daxi-cache-20` v3; run the corrected
    patch-response-matched temporal pilot on >=10 crops/family and bootstrap by crop.
 3. Only after temporal GO, spend GPU on the compact affinity-field model described in
    `reports/CLAUDE_CODE_EXECUTION_2026-07-19.md`. E0c remains the submission fallback.

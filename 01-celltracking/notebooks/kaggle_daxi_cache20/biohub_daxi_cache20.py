@@ -53,7 +53,11 @@ def find_one(pattern: str) -> Path:
 def foreground(model, frame: np.ndarray) -> np.ndarray:
     frame = frame.astype(np.float32)
     lo, hi = np.percentile(frame, (1.0, 99.9))
-    frame = np.clip((frame - lo) / (hi - lo + 1e-6), 0.0, 1.0)
+    frame = np.clip(
+        (frame - np.float32(lo)) / np.float32(hi - lo + 1e-6),
+        0.0,
+        1.0,
+    ).astype(np.float32, copy=False)
     zdim, ydim, xdim = frame.shape
     result = np.zeros_like(frame, dtype=np.float32)
     step = PATCH_YX - OVERLAP
@@ -63,8 +67,11 @@ def foreground(model, frame: np.ndarray) -> np.ndarray:
         for x0 in xs:
             y1, x1 = min(y0 + PATCH_YX, ydim), min(x0 + PATCH_YX, xdim)
             y0, x0 = max(0, y1 - PATCH_YX), max(0, x1 - PATCH_YX)
-            patch = np.ascontiguousarray(frame[:, y0:y1, x0:x1])
-            output = model(torch.from_numpy(patch)[None, None].cuda())[0, 0].float().cpu().numpy()
+            patch = np.ascontiguousarray(frame[:, y0:y1, x0:x1], dtype=np.float32)
+            tensor = torch.from_numpy(patch)[None, None].cuda()
+            if tensor.dtype != torch.float32:
+                raise TypeError(f"DAXI input must be float32, got {tensor.dtype}")
+            output = model(tensor)[0, 0].float().cpu().numpy()
             result[:, y0:y1, x0:x1] = np.maximum(result[:, y0:y1, x0:x1], output)
     return result
 

@@ -589,3 +589,15 @@ private organizer clarification; score-probing is forbidden. Full plan:
   embryo. V1 failed immediately because the base image lacked zarr; v2 uses the existing
   offline support wheels and is running. Output feeds the corrected, patch-response-matched
   temporal signal gate; it is diagnostic and not automatically submission-eligible.
+
+### 2026-07-19 (Kaggle DAXI cache v2 failure fixed; v3 running)
+- V2 successfully installed offline zarr wheels, mounted the private DAXI weight and
+  competition train data, and selected a Tesla T4. It then failed on the first tile:
+  NumPy percentile arithmetic promoted the normalized volume to float64, conflicting
+  with float32 TorchScript weights. No experiment result was produced.
+- Fixed normalization by explicitly casting percentile scalars, the clipped frame, and
+  each contiguous tile to float32; added a runtime tensor-dtype assertion. Local preflight
+  confirms dtype=float32, contiguous=True, finite=True.
+- Pushed Kaggle kernel `aryaarun07/biohub-daxi-cache-20` version 3 and verified status
+  `RUNNING`. The fixed 20-crop design, T4, private weight dataset, and internet-OFF policy
+  are unchanged.

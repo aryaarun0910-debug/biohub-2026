@@ -125,6 +125,7 @@ check only. Never use the patched division exploit or any test-ID-specific logic
   full-OOF CPU shards running. Score with `scripts/win_bet/e0c_score.py --cache
   artifacts/kaggle/clean903_wrapper_oof_cache --workers 4` after all 199 statuses are OK.
 - Track 2 active: private offline DAXI weight dataset created; Kaggle T4 kernel
-  `aryaarun07/biohub-daxi-cache-20` v2 running on the fixed 20-crop gate.
+  `aryaarun07/biohub-daxi-cache-20` v3 running on the fixed 20-crop gate. V2 reached
+  the T4 but failed on a float64 normalization promotion; v3 forces contiguous float32.
 - Track 3 remains gated. Do not start affinity training until Track 2 establishes a
   bilateral temporal signal with crop-bootstrap lower bounds above zero.
