@@ -32,18 +32,18 @@ import polars as pl  # noqa: E402
 CACHE = ROOT / "artifacts" / "kaggle" / "e0c_cache"
 
 
-def cached_crops(split: int):
+def cached_crops(split: int, cache: Path = CACHE):
     out = []
-    for sp in (CACHE / "status").glob(f"{split}__*.json"):
+    for sp in (cache / "status").glob(f"{split}__*.json"):
         st = json.loads(sp.read_text())
         if st.get("status") == "ok":
             out.append(st["crop"])
     return sorted(out)
 
 
-def _pred_sample(split: int, crop: str):
+def _pred_sample(split: int, crop: str, cache: Path = CACHE):
     from biotrack.metric_numpy import Sample
-    df = pl.read_parquet(CACHE / "graphs" / str(split) / f"{crop}.parquet")
+    df = pl.read_parquet(cache / "graphs" / str(split) / f"{crop}.parquet")
     nd = df.filter(pl.col("row_type") == "node")
     ids = nd["node_id"].to_numpy().astype(np.int64)
     t = nd["t"].to_numpy().astype(np.int64)
@@ -54,12 +54,12 @@ def _pred_sample(split: int, crop: str):
     return Sample(node_ids=ids, t=t, zyx=zyx, edges=edges)
 
 
-def numpy_edge(split: int, crop: str) -> dict:
+def numpy_edge(split: int, crop: str, cache: Path = CACHE) -> dict:
     from biotrack.metric import estimated_nodes
     from biotrack.metric_numpy import score_sample
     from run_v3_taxonomy import geff_to_sample
     gt_geff = ROOT / "data" / "train" / f"{crop}.geff"
-    pred = _pred_sample(split, crop)
+    pred = _pred_sample(split, crop, cache)
     gt = geff_to_sample(str(gt_geff))
     r = score_sample(pred, gt, estimated_nodes(str(gt_geff)))
     return {"crop": crop, "split": split, "np_tp": r["edge_tp"], "np_fp": r["edge_fp"],
@@ -68,12 +68,13 @@ def numpy_edge(split: int, crop: str) -> dict:
 
 def auth_score(args) -> dict:
     """Process-pool worker: authoritative edge + division score for one cached crop."""
-    split, crop = args
+    split, crop, cache_str = args
+    cache = Path(cache_str)
     import sys as _sys
     _sys.path.insert(0, str(ROOT / "src"))
     from biotrack.metric import score_pred_graph
     from biotrack.submission import submission_to_graphs
-    gdf = (pl.read_parquet(CACHE / "graphs" / str(split) / f"{crop}.parquet")
+    gdf = (pl.read_parquet(cache / "graphs" / str(split) / f"{crop}.parquet")
            .with_columns(pl.lit(crop).alias("dataset")).with_row_index("id"))
     graph = submission_to_graphs(gdf)[crop]
     row = score_pred_graph(graph, str(ROOT / "data" / "train" / f"{crop}.geff"))
@@ -85,17 +86,20 @@ def auth_score(args) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--cache", type=Path, default=CACHE)
     a = ap.parse_args()
     from tracking_cellmot.metrics import summarise
 
-    tasks = [(s, c) for s in (0, 1) for c in cached_crops(s)]
-    n0, n1 = len(cached_crops(0)), len(cached_crops(1))
+    cache = a.cache.resolve()
+    pairs = [(s, c) for s in (0, 1) for c in cached_crops(s, cache)]
+    tasks = [(s, c, str(cache)) for s, c in pairs]
+    n0, n1 = len(cached_crops(0, cache)), len(cached_crops(1, cache))
     print(f"[e0c_score] cached ok: fold0(44b6)={n0}/71  fold1(6bba)={n1}/128  total={len(tasks)}")
     if not tasks:
         sys.exit("no cached crops with status=ok yet")
 
     print("Stage 2 (numpy edge, fast)...")
-    np_rows = {(s, c): numpy_edge(s, c) for s, c in tasks}
+    np_rows = {(s, c): numpy_edge(s, c, cache) for s, c in pairs}
 
     print(f"Stage 3 (authoritative edge+division, {a.workers} workers)...")
     auth = {}
@@ -109,7 +113,7 @@ def main() -> None:
     from tracking_cellmot.metrics import EvaluationResult
     for fold, fam in ((0, "44b6"), (1, "6bba")):
         rows = []
-        for c in cached_crops(fold):
+        for c in cached_crops(fold, cache):
             r = auth[(fold, c)]
             er = EvaluationResult(r["edge_tp"], r["edge_fp"], r["edge_fn"],
                                   r["division_tp"], r["division_fp"], r["division_fn"], r["num_pred_nodes"])
@@ -124,7 +128,7 @@ def main() -> None:
 
     # Stage 4: numpy vs authoritative EDGE parity across the population
     diffs = []
-    for k in tasks:
+    for k in pairs:
         a_r, n_r = auth[k], np_rows[k]
         diffs.append((abs(a_r["edge_tp"] - n_r["np_tp"]) + abs(a_r["edge_fp"] - n_r["np_fp"])
                       + abs(a_r["edge_fn"] - n_r["np_fn"]), abs(a_r["adj_edge_jaccard"] - n_r["np_adj"])))

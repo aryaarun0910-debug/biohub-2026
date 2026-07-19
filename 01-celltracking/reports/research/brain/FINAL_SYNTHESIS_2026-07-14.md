@@ -115,3 +115,12 @@ detection (dead) results, **all three candidate winning-scale levers are now neg
 **Current disciplined position:** ship nothing new; the frozen E0c wrapper (public 0.889, OOF 0.7595/0.6490)
 stands as the floor. Any further architecture work should first clear its own cheap falsification gate
 (e.g., a patch-response-matched rerun of this pilot with more 44b6 crops) before any GPU commitment.
+
+## Post-patch execution note (2026-07-19)
+
+Official scorer commit `075fc5f` leaves the substantive results stable. Full E0c remains
+0.7595/0.6490; no-fork is neutral/-0.0002; exact Oracle C remains +0.0045/+0.0037
+add-only and +0.0182/+0.0138 add-replace. The synthesis therefore still rules out a
+plain division head, but the earlier temporal pilot's documented control-path confound is
+now being closed with a pre-registered 20-crop, response-path-matched T4/CPU rerun. In
+parallel, the clean-public-0.903 wrapper delta is receiving one isolated bilateral OOF gate.

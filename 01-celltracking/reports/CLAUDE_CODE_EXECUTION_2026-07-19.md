@@ -115,3 +115,16 @@ round because the effective validation sample size is two embryos.
 A submission requires patched exact OOF, both folds up, min-fold >=+0.005, regime-slice audit, runtime <9 h,
 internet-off dry run, immutable commit/config/hashes, and provenance/license manifest. Public LB is a deployment
 check only. Never use the patched division exploit or any test-ID-specific logic.
+
+## Execution status (2026-07-19)
+
+- Track 0 complete: 69/69 focused/upstream scorer tests; patched E0c 0.7595/0.6490;
+  no-fork neutral/-0.0002; Oracle C ceilings unchanged (+0.0045/+0.0037 add-only,
+  +0.0182/+0.0138 add-replace).
+- Track 1 active: density-adaptive wrapper port tested, isolated cache smoke passed, four
+  full-OOF CPU shards running. Score with `scripts/win_bet/e0c_score.py --cache
+  artifacts/kaggle/clean903_wrapper_oof_cache --workers 4` after all 199 statuses are OK.
+- Track 2 active: private offline DAXI weight dataset created; Kaggle T4 kernel
+  `aryaarun07/biohub-daxi-cache-20` v2 running on the fixed 20-crop gate.
+- Track 3 remains gated. Do not start affinity training until Track 2 establishes a
+  bilateral temporal signal with crop-bootstrap lower bounds above zero.

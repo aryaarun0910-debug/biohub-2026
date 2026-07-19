@@ -1,13 +1,13 @@
 # Current handoff
 
-**Updated:** 2026-07-14
+**Updated:** 2026-07-19
 **Branch:** `master`
 
-> **2026-07-19 scoring reset in progress.** The organizer patched both edge
+> **2026-07-19 scoring reset complete.** The organizer patched edge
 > canonicalization and division evaluation at official commit `075fc5f`. The
-> dependency is now pinned and exploit regressions pass; full E0c rescoring is
-> running. Until the post-patch aggregate is recorded, historical scores below
-> are pre-patch evidence and must not be used to promote a new submission.
+> dependency is pinned, 69 focused/upstream tests pass, and the full 199-crop
+> patched E0c rescore reproduced 0.7595/0.6490. No-fork and Oracle C were also
+> re-run; their conclusions and values are stable across the scoring epoch.
 
 ## Objective
 
@@ -36,6 +36,13 @@ because min-len 7 helped 6bba; (b) numpy-vs-authoritative EDGE parity across 199
 not authoritative (its 1-crop parity did not hold on the population). Earlier context: the
 wrapper OOF exceeds the direct Trackastra-fusion OOF (0.6948/0.6044) on both folds, proving
 fusion's "+0.035" was vs the weak greedy — Trackastra replacement is conclusively dead.
+
+**Post-patch verification (2026-07-19):** official scorer `075fc5f` gives composite
+0.7595 (44b6; division TP/FP/FN 0/93/26) and 0.6490 (6bba; 4/582/121), so the
+frozen floor is unchanged. Removing every fork is neutral/-0.0002. Patched Oracle C
+also reproduces add-only +0.0045/+0.0037 and add-replace +0.0182/+0.0138. The only
+material division ceiling requires near-perfect joint fork detection plus assignment
+conflict resolution; the failed high-precision division seed cannot realize it.
 
 **Phase-B asset already cached** (same E0c pass, no reprocessing): 6.15M pre-assignment
 candidate rows (4.82M wrapper-selected) in `artifacts/kaggle/e0c_cache/candidates/`.
@@ -86,21 +93,22 @@ Full evidence and reasoning: [FINAL_SYNTHESIS_2026-07-14.md](reports/research/br
 (division/isolated verdicts + the addendum recording the moonshot pilot). Journal trail:
 `reports/journal/JOURNAL.md`, entries 2026-07-13 through 2026-07-14.
 
-**Current position:** ship nothing new. The frozen **E0c wrapper (public 0.889, OOF
-0.7595/0.6490)** is the disciplined floor — no measured deployable improvement exists.
-No detect->link->repair lever has a credible mechanism left to reach 0.94+; the only
-route to materially exceed ~0.91 would be a genuinely different architecture (temporal
-evidence integration), and its own cheap falsification came back negative.
+**Current position:** keep **E0c (public 0.889, OOF 0.7595/0.6490)** frozen as the
+fallback, but an aggressive post-patch attrition campaign is active. A clean-public-0.903
+wrapper delta is running over all 199 OOF crops in an isolated four-shard cache. In
+parallel, Kaggle kernel `aryaarun07/biohub-daxi-cache-20` v2 is running on a T4 to build
+a corrected 20-crop temporal-signal gate (10 crops per embryo across the prediction-count
+range). Neither branch is promoted until both folds improve under the exact patched metric.
 
 ## Immediate queue
 
-1. **No architecture work is currently scheduled.** Before spending any further compute,
-   a new idea (or a cleaner rerun of the moonshot pilot with patch-response-matched
-   controls and more 44b6 crops) must clear its own cheap falsification gate first —
-   see the addendum in `FINAL_SYNTHESIS_2026-07-14.md`.
-2. If accepting the floor: focus shifts to private-generalization hygiene (regime-slice
-   robustness, provenance/runtime gates) rather than new score-moving levers.
-3. Two untracked local artifacts from the division/isolated/moonshot work are not yet
+1. Finish and score `artifacts/kaggle/clean903_wrapper_oof_cache` using
+   `e0c_score.py --cache ...`; promote only for bilateral >=+0.005 min-fold gain.
+2. Monitor/download Kaggle `aryaarun07/biohub-daxi-cache-20` v2; run the corrected
+   patch-response-matched temporal pilot on >=10 crops/family and bootstrap by crop.
+3. Only after temporal GO, spend GPU on the compact affinity-field model described in
+   `reports/CLAUDE_CODE_EXECUTION_2026-07-19.md`. E0c remains the submission fallback.
+4. Two untracked local artifact groups from earlier work are not yet
    committed: `reports/inventory/{e0c_run_*.txt,phaseB_label.txt,daxi_cache.txt}` (raw
    operational logs backing already-journaled 07-13 results) and unrelated stale WIP
    from 2026-07-03 (`reports/inventory/phase1_v3{,_smooth}.csv` full-199-crop extension,

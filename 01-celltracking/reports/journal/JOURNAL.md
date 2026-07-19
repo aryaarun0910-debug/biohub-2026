@@ -569,3 +569,23 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - Full 199-crop E0c patched rescore launched with four CPU workers. Historical division-dependent results are
   quarantined until rescored. NEXT: record patched E0c aggregate, then rescore Oracle C/no-fork; in parallel,
   port the clean public 0.903 wrapper for one bilateral OOF gate and prepare the corrected temporal-signal job.
+
+### 2026-07-19 (scoring epoch closed; CPU + Kaggle attrition campaign active)
+- Patched E0c authoritative full-OOF result is stable: 44b6 adj-J/composite 0.7595/0.7595,
+  division TP/FP/FN 0/93/26; 6bba adj-J/composite 0.6484/0.6490, division 4/582/121.
+  The official patch does not move the disciplined floor.
+- Patched no-fork: 44b6 0.7595 (neutral), 6bba 0.6482 (-0.0002). Indiscriminate fork
+  suppression is rejected.
+- Patched Oracle C reproduced the prior ceiling exactly: add-only +0.0045/+0.0037;
+  add-replace +0.0182/+0.0138. Therefore topology-aware conflict resolution is necessary,
+  while the already-failed high-precision division classifier remains the realizability blocker.
+- Ported the clean-public-0.903 density-adaptive gap rule behind a default-OFF flag, added
+  a regression test, a separate cache, and generic `e0c_score.py --cache`. One-crop smoke
+  passed; full 199-crop OOF launched as four resumable CPU shards. This is a wrapper-only
+  0.990-detection gate; exact 0.970 detection regeneration is GPU-gated on bilateral gain.
+- Created private Kaggle dataset `aryaarun07/biohub-daxi-weights-diagnostic` from the
+  previously verified DAXI TorchScript weight. Launched T4 kernel
+  `aryaarun07/biohub-daxi-cache-20` v2, internet OFF, on 10 fixed count-stratified crops per
+  embryo. V1 failed immediately because the base image lacked zarr; v2 uses the existing
+  offline support wheels and is running. Output feeds the corrected, patch-response-matched
+  temporal signal gate; it is diagnostic and not automatically submission-eligible.

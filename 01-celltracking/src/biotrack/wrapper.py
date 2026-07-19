@@ -12,6 +12,7 @@ import numpy as np
 import tracksdata as td
 try:
     from scipy.optimize import linear_sum_assignment  # noqa: F401
+    from scipy.spatial import cKDTree
 except Exception:
     pass
 try:
@@ -53,6 +54,12 @@ DIV_DROP_TO_SINGLE_IF_BAD = os.environ.get("BIOHUB_DIV_DROP_TO_SINGLE_IF_BAD", "
 OUTPUT_GAP_CLOSE = os.environ.get("BIOHUB_OUTPUT_GAP_CLOSE", "1") != "0"
 GAP_CLOSE_MAX_GAP = int(os.environ.get("BIOHUB_GAP_CLOSE_MAX_GAP", "1"))
 GAP_CLOSE_UM = float(os.environ.get("BIOHUB_GAP_CLOSE_UM", "6.0"))
+GAP_DENSITY_ADAPTIVE = os.environ.get("BIOHUB_GAP_DENSITY_ADAPTIVE", "0") != "0"
+GAP_DENSITY_REFERENCE_UM = float(os.environ.get("BIOHUB_GAP_DENSITY_REFERENCE_UM", "6.5"))
+GAP_DENSITY_GAIN = float(os.environ.get("BIOHUB_GAP_DENSITY_GAIN", "0.040"))
+GAP_DENSITY_MAX_STEP_DELTA_UM = float(os.environ.get("BIOHUB_GAP_DENSITY_MAX_STEP_DELTA_UM", "0.125"))
+GAP_DENSITY_NEIGHBORS = int(os.environ.get("BIOHUB_GAP_DENSITY_NEIGHBORS", "3"))
+PREFIX_DENSITY_BLEND = float(os.environ.get("BIOHUB_PREFIX_DENSITY_BLEND", "0.20"))
 GAP_CLOSE_REUSE_EXISTING = os.environ.get("BIOHUB_GAP_CLOSE_REUSE_EXISTING", "1") != "0"
 GAP_CLOSE_REUSE_UM = float(os.environ.get("BIOHUB_GAP_CLOSE_REUSE_UM", "3.2"))
 GAP_CLOSE_MAX_ADDED_FRAC = float(os.environ.get("BIOHUB_GAP_CLOSE_MAX_ADDED_FRAC", "0.05"))
@@ -99,6 +106,15 @@ def _parse_short_track_min_len_by_dataset() -> dict[str, int]:
 
 
 SHORT_TRACK_MIN_LEN_BY_DATASET = _parse_short_track_min_len_by_dataset()
+
+# Optional transductive, unlabeled density priors. Drivers populate these from the
+# prediction graphs for each held-out embryo/test batch. Defaults preserve E0c.
+PREFIX_DENSITY_PRIOR_UM: dict[str, float] = {}
+GLOBAL_DENSITY_MEDIAN_UM = float(GAP_DENSITY_REFERENCE_UM)
+
+
+def dataset_embryo_prefix(dataset: str | None) -> str:
+    return str(dataset).split("_", 1)[0] if dataset else ""
 
 
 def short_track_min_len_for_dataset(dataset: str | None) -> int:
@@ -369,8 +385,10 @@ def close_single_frame_gaps(
     ends_by_t: dict[int, list[int]] = {}
     starts_by_t: dict[int, list[int]] = {}
     isolated_by_t: dict[int, list[int]] = {}
+    all_ids_by_t: dict[int, list[int]] = {}
     for node_id, node in nodes_by_id.items():
         t = int(node["t"])
+        all_ids_by_t.setdefault(t, []).append(node_id)
         if node_id not in outgoing:
             ends_by_t.setdefault(t, []).append(node_id)
         if node_id not in incoming:
@@ -388,6 +406,44 @@ def close_single_frame_gaps(
     used_isolated: set[int] = set()
     synthetic_added = 0
     new_edges: list[dict[str, object]] = []
+    density_cache: dict[int, dict[int, float]] = {}
+
+    def local_spacing_by_id(t: int) -> dict[int, float]:
+        if t in density_cache:
+            return density_cache[t]
+        frame_ids = all_ids_by_t.get(t, [])
+        if len(frame_ids) <= 1:
+            result = {node_id: GAP_DENSITY_REFERENCE_UM for node_id in frame_ids}
+            density_cache[t] = result
+            return result
+        positions = np.stack([
+            np.array([
+                float(nodes_by_id[node_id]["z"]) * VOXEL_SCALE_UM[0],
+                float(nodes_by_id[node_id]["y"]) * VOXEL_SCALE_UM[1],
+                float(nodes_by_id[node_id]["x"]) * VOXEL_SCALE_UM[2],
+            ], dtype=np.float64)
+            for node_id in frame_ids
+        ])
+        tree = cKDTree(positions)
+        k = min(len(frame_ids), max(2, GAP_DENSITY_NEIGHBORS + 1))
+        distances, _ = tree.query(positions, k=k)
+        if distances.ndim == 1:
+            distances = distances[:, None]
+        prefix_prior = float(PREFIX_DENSITY_PRIOR_UM.get(
+            dataset_embryo_prefix(dataset), GLOBAL_DENSITY_MEDIAN_UM
+        ))
+        blend = float(np.clip(PREFIX_DENSITY_BLEND, 0.0, 1.0))
+        result: dict[int, float] = {}
+        for idx, node_id in enumerate(frame_ids):
+            neighbour_distances = distances[idx, 1:]
+            neighbour_distances = neighbour_distances[np.isfinite(neighbour_distances)]
+            spacing = (float(np.median(neighbour_distances)) if neighbour_distances.size
+                       else GAP_DENSITY_REFERENCE_UM)
+            result[node_id] = (1.0 - blend) * spacing + blend * prefix_prior
+            stats["prefix_density_nodes_blended"] += 1
+        density_cache[t] = result
+        stats["gap_density_nodes_scored"] += len(result)
+        return result
 
     effective_gap_max = min(GAP_CLOSE_MAX_GAP, 1)
     stats["gap_close_effective_max_gap"] = effective_gap_max
@@ -401,18 +457,37 @@ def close_single_frame_gaps(
             start_points = [node_point(nodes_by_id[sid]) for sid in start_ids]
             threshold_um = GAP_CLOSE_UM * (gap + 1)
             d = np.zeros((len(end_ids), len(start_ids)), dtype=np.float64)
+            adaptive_threshold = np.full_like(d, threshold_um)
+            source_spacing = local_spacing_by_id(t) if GAP_DENSITY_ADAPTIVE else {}
+            target_spacing = local_spacing_by_id(t + gap + 1) if GAP_DENSITY_ADAPTIVE else {}
             for i, ep in enumerate(end_points):
                 for j, sp in enumerate(start_points):
                     d[i, j] = point_distance_um(ep, sp)
-            stats["gap_candidates"] += int((d <= threshold_um).sum())
+                    if GAP_DENSITY_ADAPTIVE:
+                        local_spacing = 0.5 * (
+                            source_spacing.get(end_ids[i], GAP_DENSITY_REFERENCE_UM)
+                            + target_spacing.get(start_ids[j], GAP_DENSITY_REFERENCE_UM)
+                        )
+                        step_delta = float(np.clip(
+                            GAP_DENSITY_GAIN * (local_spacing - GAP_DENSITY_REFERENCE_UM),
+                            -GAP_DENSITY_MAX_STEP_DELTA_UM,
+                            GAP_DENSITY_MAX_STEP_DELTA_UM,
+                        ))
+                        adaptive_threshold[i, j] = threshold_um + step_delta * (gap + 1)
+                        stats["gap_density_step_delta_milli_sum"] += int(round(1000.0 * step_delta))
+            base_mask = d <= threshold_um
+            adaptive_mask = d <= adaptive_threshold
+            stats["gap_candidates"] += int(adaptive_mask.sum())
+            stats["gap_density_candidates_expanded"] += int((adaptive_mask & ~base_mask).sum())
+            stats["gap_density_candidates_restricted"] += int((base_mask & ~adaptive_mask).sum())
             if not np.isfinite(d).any():
                 continue
 
-            big = threshold_um * 1000.0 + 1.0
-            cost = np.where(d <= threshold_um, d, big)
+            big = float(np.nanmax(adaptive_threshold)) * 1000.0 + 1.0
+            cost = np.where(adaptive_mask, d, big)
             row_ind, col_ind = linear_sum_assignment(cost)
             for r, c in zip(row_ind, col_ind):
-                if d[r, c] > threshold_um:
+                if d[r, c] > adaptive_threshold[r, c]:
                     continue
                 source_id = end_ids[int(r)]
                 target_id = start_ids[int(c)]
@@ -478,6 +553,8 @@ def close_single_frame_gaps(
                 incoming.add(target_id)
                 used_starts.add(target_id)
                 stats["gap_pairs_selected"] += 1
+                if d[r, c] > threshold_um:
+                    stats["gap_density_selected_outside_base"] += 1
                 stats["gap_added_edges"] += 2
 
     if new_edges:
@@ -893,6 +970,12 @@ def filter_output_graph(
         "gap_added_nodes": 0,
         "gap_added_edges": 0,
         "gap_skipped_node_cap": 0,
+        "gap_density_nodes_scored": 0,
+        "gap_density_candidates_expanded": 0,
+        "gap_density_candidates_restricted": 0,
+        "gap_density_selected_outside_base": 0,
+        "gap_density_step_delta_milli_sum": 0,
+        "prefix_density_nodes_blended": 0,
         "gap_refined_synthetic": 0,
         "gap_refine_failed": 0,
         "gap_refine_rejected_shift": 0,
@@ -1029,5 +1112,3 @@ def filter_output_graph(
     nodes_by_id = linefit_smooth_output_graph(nodes_by_id, edges, stats)
 
     return nodes_by_id, edges, stats
-
-

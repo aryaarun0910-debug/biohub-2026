@@ -1,0 +1,18 @@
+{
+  "id": "aryaarun07/biohub-daxi-cache-20",
+  "title": "Biohub DAXI Cache 20",
+  "code_file": "biohub_daxi_cache20.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "enable_internet": false,
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "dataset_sources": [
+    "aryaarun07/biohub-daxi-weights-diagnostic",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1"
+  ],
+  "kernel_sources": [],
+  "model_sources": []
+}
