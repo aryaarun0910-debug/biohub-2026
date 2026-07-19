@@ -4,7 +4,9 @@
 #   uv pip install --python .venv -r requirements.txt
 # Exact machine snapshot: requirements.lock.txt.
 torch
-tracking-cellmot @ git+https://github.com/royerlab/kaggle-cell-tracking-competition
+# Pin the post-2026-07-17 evaluator patch.  Moving main would silently change
+# canonical OOF scores and invalidate experiment comparisons.
+tracking-cellmot @ git+https://github.com/royerlab/kaggle-cell-tracking-competition@075fc5f5a52d11077f9dc2b074644618f26939e2
 geff
 polars
 scipy

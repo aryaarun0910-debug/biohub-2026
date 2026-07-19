@@ -3,6 +3,12 @@
 **Updated:** 2026-07-14
 **Branch:** `master`
 
+> **2026-07-19 scoring reset in progress.** The organizer patched both edge
+> canonicalization and division evaluation at official commit `075fc5f`. The
+> dependency is now pinned and exploit regressions pass; full E0c rescoring is
+> running. Until the post-patch aggregate is recorded, historical scores below
+> are pre-patch evidence and must not be used to promote a new submission.
+
 ## Objective
 
 Win the private leaderboard while remaining prize-eligible. Public score is a

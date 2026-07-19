@@ -86,7 +86,7 @@ tifffile==2026.6.1
 toolz==1.1.0
 torch==2.12.1+cpu
 tqdm==4.68.3
-tracking-cellmot @ git+https://github.com/royerlab/kaggle-cell-tracking-competition
+tracking-cellmot @ git+https://github.com/royerlab/kaggle-cell-tracking-competition@075fc5f5a52d11077f9dc2b074644618f26939e2
 tracksdata @ git+https://github.com/royerlab/tracksdata@980c2d30aeca76b86eddef0aeadb4d10dee8530d
 traitlets==5.15.1
 typer==0.26.8

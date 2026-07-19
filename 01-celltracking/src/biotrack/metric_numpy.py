@@ -5,6 +5,9 @@ Faithful to the host algorithm (reverse-engineered from tracksdata):
   w = 1/(1+d), over pairs within max_distance (physical um), scale-corrected;
 - a predicted edge u->v is a TP iff u,v match GT nodes g_u,g_v AND GT has edge
   g_u->g_v (directed);
+- before scoring, the patched host metric keeps only consecutive-frame edges,
+  collapses multiple predicted edges mapping to the same GT edge, and caps each
+  predicted node at two outgoing edges (stable input/edge-id order);
 - a predicted edge is "valid" (counts as FP if not TP) iff its matched source has
   GT out-degree>0 OR its matched target has GT in-degree>0 (FP only in annotated regions);
 - edge_fp = valid_pred - tp; edge_fn = gt_edges - tp; J = tp/(tp+fp+fn);
@@ -120,18 +123,42 @@ def score_sample(pred: Sample, gt: Sample, n_est: float,
     n_pred_nodes = len(pred.node_ids)
     gt_num_edges = len(gt.edges)
 
-    # dedup predicted edges, keeping a matched copy if duplicates disagree (host behavior)
+    # Patched host canonicalization (2026-07-17): exact edge de-duplication,
+    # consecutive-frame filtering, merge collapse in stable edge-id order, and
+    # out-degree cap at two.  Array order is the numpy representation of the
+    # tracksdata edge-id order used for each keep-first decision.
+    pred_time = {int(node_id): int(t) for node_id, t in zip(pred.node_ids, pred.t, strict=True)}
+    canonical: list[tuple[int, int]] = []
+    exact_seen: set[tuple[int, int]] = set()
+    matched_pair_seen: set[tuple[int, int]] = set()
+    source_counts: dict[int, int] = {}
+    for raw_s, raw_t in pred.edges:
+        s, t = int(raw_s), int(raw_t)
+        edge = (s, t)
+        if edge in exact_seen:
+            continue
+        exact_seen.add(edge)
+        if s not in pred_time or t not in pred_time or pred_time[t] != pred_time[s] + 1:
+            continue
+        gs, gt_ = matched.get(s), matched.get(t)
+        if gs is not None and gt_ is not None:
+            matched_pair = (gs, gt_)
+            if matched_pair in matched_pair_seen:
+                continue
+            matched_pair_seen.add(matched_pair)
+        if source_counts.get(s, 0) >= 2:
+            continue
+        source_counts[s] = source_counts.get(s, 0) + 1
+        canonical.append(edge)
+
     seen: dict[tuple[int, int], bool] = {}
-    for s, t in pred.edges:
-        s, t = int(s), int(t)
+    for s, t in canonical:
         gs, gt_ = matched.get(s), matched.get(t)
         is_tp = gs is not None and gt_ is not None and (gs, gt_) in gt_edge_set
         # valid = FP-eligible: matched src has GT out>0 OR matched tgt has GT in>0
         is_valid = (gs is not None and gt_out.get(gs, 0) > 0) or \
                    (gt_ is not None and gt_in.get(gt_, 0) > 0)
-        prev = seen.get((s, t))
-        # keep matched=True if any duplicate is matched; valid if any is valid
-        seen[(s, t)] = (bool(prev[0]) or is_tp, bool(prev[1]) or is_valid) if prev else (is_tp, is_valid)
+        seen[(s, t)] = (is_tp, is_valid)
 
     edge_tp = sum(1 for tp, _ in seen.values() if tp)
     valid_pred = sum(1 for _, v in seen.values() if v)

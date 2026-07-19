@@ -559,3 +559,13 @@ private organizer clarification; score-probing is forbidden. Full plan:
   ALL THREE candidate winning-scale levers are now negative or falsified. Disciplined floor stands: frozen
   E0c wrapper, public 0.889, min-fold OOF 0.6490. No further architecture work is scheduled unless a cleaner
   falsification or a new idea clears its own cheap gate first.
+### 2026-07-19 (official metric patch integrated; E0c rescore running)
+- Organizer patch `075fc5f` pinned in both requirements files and checked out in the local editable vendor.
+  The scoring epoch changes: nonconsecutive edges are dropped, duplicate predictions mapping to one GT edge
+  are collapsed, out-degree is capped at two, and division credit now requires local directed fork topology.
+- Added an off-volume weak-component hub regression; updated the fast numpy edge gate to mirror the patched
+  edge canonicalization. Verification: project focused metric tests 11/11 pass; official patched division
+  suites 58/58 pass.
+- Full 199-crop E0c patched rescore launched with four CPU workers. Historical division-dependent results are
+  quarantined until rescored. NEXT: record patched E0c aggregate, then rescore Oracle C/no-fork; in parallel,
+  port the clean public 0.903 wrapper for one bilateral OOF gate and prepare the corrected temporal-signal job.
