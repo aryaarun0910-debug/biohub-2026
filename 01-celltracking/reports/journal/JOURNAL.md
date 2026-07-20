@@ -656,3 +656,19 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - DECISION: `signal_gate_pass=false`; KILL temporal accumulation and do not unlock the
   compact affinity GPU model. This closes the v2 control-path confound at adequate power
   and exhausts the last identified winning-scale mechanism. Frozen E0c remains the floor.
+
+### 2026-07-20 (live-board reset; clean-frontier attack launched)
+- Authenticated Kaggle refresh: public leader 0.982; twenty teams score >=0.964; our
+  submitted E0c remains 0.889. Public notebooks now openly add negative-time,
+  out-of-volume hub/fork graphs to exploit division scoring. This branch stays
+  quarantined because it conflicts with the patched organizer metric and prize audit.
+- Pulled the latest public clean kernel. The clean lineage has a confirmed 0.909 v120
+  result; v122 is a clean 0.910+ candidate coupling detector threshold 0.9690 with ILP
+  appearance/disappearance 0.0/1.5, min-track 6, and density-adaptive gap closing.
+  This was not covered by our failed wrapper-only test on frozen 0.990 detections.
+- Forked the exact v122 public artifact into private internet-off T4 kernel
+  `aryaarun07/biohub-clean-v122-reproduction` v1; push succeeded and status RUNNING.
+  On completion: audit and submit immediately if structurally clean.
+- Replaced the exhausted roadmap with `reports/ATTACK_REGIME_2026-07-20.md`: coupled
+  C0/C1 OOF regeneration, full-data model training/ensembling, external NIS3D/Zebrahub
+  image pretraining, and legal gradient-free target robustness. E0c remains fallback.

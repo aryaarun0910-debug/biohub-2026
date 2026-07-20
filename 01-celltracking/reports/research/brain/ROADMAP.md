@@ -4,6 +4,12 @@
 detection, and breadth-reranking bets all failed their exact both-fold gates (see
 [FINAL_SYNTHESIS_2026-07-14.md](FINAL_SYNTHESIS_2026-07-14.md)). Kept for historical record.
 
+**REPLACED 2026-07-20:** the live campaign is
+[`ATTACK_REGIME_2026-07-20.md`](../../ATTACK_REGIME_2026-07-20.md). It separates the
+contaminated 0.982 public board from the clean 0.909 frontier, launches the clean v122
+reproduction, and moves research from exhausted wrappers to full-data/model-ensemble and
+external image-pretraining fronts.
+
 **Date:** 2026-07-12. Consolidates `SYNTHESIS.md`, `WIN_BET.md`,
 `METRIC_SEMANTICS_VERIFIED.md`, the six lanes, and measured results into one battle
 plan. This is the operating map; the others are the evidence beneath it.

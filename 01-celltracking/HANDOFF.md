@@ -105,16 +105,18 @@ Track 3 affinity training is therefore not justified.
 
 ## Immediate queue
 
-1. Keep the temporal-integration/affinity branch killed. The powered exact-path v3 run
-   scored 268 paired events across 40 44b6 crops and 202 across all 10 6bba crops;
-   neither primary nor oracle motion cleared a positive lower confidence bound, and
-   both frozen cross-family thresholds failed their deployment operating-point gate.
-2. Keep the clean-public-0.903 wrapper branch killed unless new independent evidence
-   changes the pre-registered bilateral gate; do not tune its constants on these folds.
-3. Keep E0c as the submission fallback. Any further research must introduce a genuinely
-   independent mechanism with a cheap bilateral falsification; do not relabel a temporal
-   accumulator, affinity field, matched filter, or threshold sweep as a new branch.
-4. Two untracked local artifact groups from earlier work are not yet
+1. Monitor `aryaarun07/biohub-clean-v122-reproduction` v1. On completion, download and
+   audit the submission, then submit it if it contains no invalid-time/out-of-volume
+   nodes, artificial hubs, nonconsecutive edges, or out-degree >2.
+2. Build the coupled C0/C1 OOF cache gate: detector threshold 0.96875 vs 0.9690 with
+   ILP disappearance 1.5. This is distinct from the failed clean-0.903 wrapper-only
+   test on frozen 0.990 detections.
+3. Prepare full-data organizer-model training, then external NIS3D/Zebrahub image
+   pretraining. Follow `reports/ATTACK_REGIME_2026-07-20.md`; do not reopen temporal
+   accumulation, Trackastra replacement, division posterior, or geometry reranking.
+4. Keep E0c as the private-safe fallback until a new core model passes the bilateral
+   +0.005 min-fold gate. Public submissions are deployment probes, not model selection.
+5. Two untracked local artifact groups from earlier work are not yet
    committed: `reports/inventory/{e0c_run_*.txt,phaseB_label.txt,daxi_cache.txt}` (raw
    operational logs backing already-journaled 07-13 results) and unrelated stale WIP
    from 2026-07-03 (`reports/inventory/phase1_v3{,_smooth}.csv` full-199-crop extension,
@@ -140,6 +142,8 @@ Track 3 affinity training is therefore not justified.
 - Neutral hint submission: `54588144`, score 0.889.
 - Direct Trackastra submission: `54601594`, score 0.865.
 - Deployment kernel: `aryaarun07/biohub-lb897-trackastra-fusion`.
+- Clean frontier probe: `aryaarun07/biohub-clean-v122-reproduction` v1 (launched
+  2026-07-20; T4, internet off).
 
 ## Guardrails
 
