@@ -99,7 +99,7 @@ Geometry-only Zebrahub reranking is dead; external data must train the image mod
 
 ## Active operations
 
-- `aryaarun07/biohub-clean-v122-reproduction` v1: RUNNING on T4.
-- On completion: download, audit, submit, journal exact public score.
+- `aryaarun07/biohub-clean-v122-reproduction` v1: COMPLETE on T4.
+- Artifact audit passed; code-competition submission `54854143` is PENDING scoring.
+- Append the exact public score when Kaggle completes it.
 - In parallel: prepare C0/C1 OOF cache kernel and the full-data training kernel.
-

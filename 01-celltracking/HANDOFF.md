@@ -105,9 +105,9 @@ Track 3 affinity training is therefore not justified.
 
 ## Immediate queue
 
-1. Monitor `aryaarun07/biohub-clean-v122-reproduction` v1. On completion, download and
-   audit the submission, then submit it if it contains no invalid-time/out-of-volume
-   nodes, artificial hubs, nonconsecutive edges, or out-degree >2.
+1. Monitor submission `54854143` (clean v122); it is accepted and PENDING scoring.
+   Kernel v1 completed, and the downloaded 237,023-row artifact passed every structural
+   audit. SHA256: `4E36B4797C0F07FF7B3C55C8FD6C73C4E9EC5AF264C4B4F21828B1F97CA9D616`.
 2. Build the coupled C0/C1 OOF cache gate: detector threshold 0.96875 vs 0.9690 with
    ILP disappearance 1.5. This is distinct from the failed clean-0.903 wrapper-only
    test on frozen 0.990 detections.
@@ -142,8 +142,8 @@ Track 3 affinity training is therefore not justified.
 - Neutral hint submission: `54588144`, score 0.889.
 - Direct Trackastra submission: `54601594`, score 0.865.
 - Deployment kernel: `aryaarun07/biohub-lb897-trackastra-fusion`.
-- Clean frontier probe: `aryaarun07/biohub-clean-v122-reproduction` v1 (launched
-  2026-07-20; T4, internet off).
+- Clean frontier probe: `aryaarun07/biohub-clean-v122-reproduction` v1 (COMPLETE;
+  T4, internet off); submission `54854143` pending.
 
 ## Guardrails
 

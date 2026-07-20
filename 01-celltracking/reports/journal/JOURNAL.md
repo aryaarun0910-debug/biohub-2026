@@ -672,3 +672,20 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - Replaced the exhausted roadmap with `reports/ATTACK_REGIME_2026-07-20.md`: coupled
   C0/C1 OOF regeneration, full-data model training/ensembling, external NIS3D/Zebrahub
   image pretraining, and legal gradient-free target robustness. E0c remains fallback.
+
+### 2026-07-20 (clean v122 audited and submitted)
+- `aryaarun07/biohub-clean-v122-reproduction` v1 completed successfully. Downloaded
+  `submission.csv`: 237,023 rows = 120,633 nodes + 116,390 edges across four placeholder
+  crops; SHA256 `4E36B4797C0F07FF7B3C55C8FD6C73C4E9EC5AF264C4B4F21828B1F97CA9D616`.
+- Independent local audit: node t 0..99; z 0..63; y/x 0..254; zero missing edge
+  endpoints; zero nonconsecutive edges; max out-degree 2; max in-degree 1. No exploit
+  structure is present. The completed artifact therefore passed the attack regime's
+  submission gate.
+- Raw-file API submission returned HTTP 400 because this is now enforced as a Kaggle
+  code competition. Submitting kernel `aryaarun07/biohub-clean-v122-reproduction`
+  version 1 succeeded: submission ID `54854143`, status PENDING.
+- Provenance correction: `run_stats.csv` says experiment tag
+  `120_clean_ilp_disappearance_150`, but runtime configuration and end-of-run output
+  verify detector threshold 0.9690/v122. Corrected the retained notebook source tag to
+  `122_clean_precision_det09690_disappearance150`; this does not alter the submitted
+  v1 artifact. NEXT: append public score, then run C0/C1 full OOF regeneration.
