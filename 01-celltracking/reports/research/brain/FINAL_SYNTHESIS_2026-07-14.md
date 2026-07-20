@@ -135,3 +135,27 @@ and +0.005 gates. No 0.970 detector regeneration or parameter tuning is justifie
 The 20-crop DAXI T4 cache also completed (11.64M peaks; 18/20 crops at the 600k cap).
 This is an input asset, not a positive result: the response-path-matched temporal
 separability and crop-bootstrap gate still must be run.
+
+## Powered temporal gate result (2026-07-20)
+
+The confound-closing run is complete. `daxi_accumulation_v3.py` used all 71 cached
+44b6 crops and the 10 cached 6bba crops, identical float32 patch inference for positives
+and matched controls, the preregistered five-frame window, spatial kNN E0c flow, oracle
+GT motion, crop-level bootstrap, and frozen cross-family thresholds.
+
+- Coverage: 44b6 had 311 eligible events across 41 informative crops (303 selected;
+  268 finally paired across 40 crops). 6bba had 835 eligible events across 10 crops
+  (264 selected; 202 paired).
+- Primary spatial-flow contrast `(motion-static)_positive - (motion-static)_control`:
+  44b6 **+0.0000609**, 95% CI **[-0.0001288,+0.0003302]**; 6bba **-0.0168708**,
+  95% CI **[-0.0456935,-0.0001467]**.
+- Oracle GT-motion ceiling: 44b6 **+0.0003829**, CI **[-0.0000701,+0.0011551]**;
+  6bba **-0.0090423**, CI **[-0.0406812,+0.0113874]**. Neither lower bound is positive.
+- Cross-fit failures: the 44b6-trained threshold gave 40.1% TPR but 12.9% control FPR
+  on 6bba; the 6bba-trained threshold gave 0% TPR and 0.37% FPR on 44b6.
+
+**Decision: KILL (`signal_gate_pass=false`).** This is no longer merely an unsupported
+pilot. The powered response-path-matched test finds no robust bilateral motion advantage,
+and the deployment-realistic arm is significantly harmful on 6bba. Because even oracle
+motion fails the preregistered mechanism gate, the compact affinity/temporal GPU program
+is not justified. The frozen E0c wrapper remains the disciplined floor.

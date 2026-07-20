@@ -632,3 +632,27 @@ private organizer clarification; score-probing is forbidden. Full plan:
   311 eligible five-frame events (291 seven-frame), 303 selected under the per-crop cap.
   This clears the >=200-event power target. NEXT: Kaggle cache all 71 44b6 crops, then
   run v3 against that cache plus the existing 10-crop 6bba cache.
+
+### 2026-07-20 (powered temporal accumulation gate -> KILL)
+- Kaggle kernel `aryaarun07/biohub-daxi-cache-44-all` completed all 71/71 44b6 crops
+  without errors in ~83.7 minutes T4 time. Downloaded 71 NPZ outputs plus manifest;
+  the full output tree is 41,921,783 bytes.
+- Ran `daxi_accumulation_v3.py` locally for 6613.1 seconds using 8 Torch threads and
+  10,000 crop-bootstrap draws, combining the 71-crop 44b6 cache with the existing
+  10-crop 6bba cache. Result artifact SHA256:
+  `2F943E1B1A487056B063AC06B0CC3817F59BA297D825F9E017267D9680620D51`.
+- Powered coverage: 44b6 = 311 eligible five-frame events/41 informative crops,
+  303 selected, 268 paired across 40 crops; 6bba = 835 eligible/10 crops, 264 selected,
+  202 paired. The pre-run power targets were met.
+- Preregistered primary spatial-flow contrast: 44b6 mean +0.0000609, crop-bootstrap
+  95% CI [-0.0001288,+0.0003302]; 6bba mean -0.0168708,
+  CI [-0.0456935,-0.0001467]. Spatial motion is null on 44b6 and significantly worse
+  than static on 6bba.
+- Oracle GT-motion ceiling also fails: 44b6 +0.0003829,
+  CI [-0.0000701,+0.0011551]; 6bba -0.0090423,
+  CI [-0.0406812,+0.0113874]. Neither family has a positive lower bound.
+- Frozen cross-fit thresholds fail both directions: train-44b6/test-6bba gives
+  TPR 0.401 at control FPR 0.129; train-6bba/test-44b6 gives TPR 0.000 at FPR 0.0037.
+- DECISION: `signal_gate_pass=false`; KILL temporal accumulation and do not unlock the
+  compact affinity GPU model. This closes the v2 control-path confound at adequate power
+  and exhausts the last identified winning-scale mechanism. Frozen E0c remains the floor.

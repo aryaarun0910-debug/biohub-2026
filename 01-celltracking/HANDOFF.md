@@ -1,6 +1,6 @@
 # Current handoff
 
-**Updated:** 2026-07-19
+**Updated:** 2026-07-20
 **Branch:** `master`
 
 > **2026-07-19 scoring reset complete.** The organizer patched edge
@@ -87,7 +87,7 @@ lever measured has failed its both-fold gate:**
 | Candidate reranking (breadth-trained scorer vs wrapper `edge_prob`) | beats wrapper on neither fold | saturated |
 | Division learned posterior (leak-free, daughter-swap-invariant) | recall@P0.9 mean 0.045 (~0 on 3/4 embryos) | dead |
 | Isolated de-novo detection (DAXI tracklets, Stages 2-4) | oracle recovery 0%/8.8% (need >=20%) | dead |
-| Moonshot pilot: oracle-motion DAXI accumulation (cheap falsification) | GT-motion AUC lower than static on the powered crop (0.1921 vs 0.2225, 6bba) | negative lean, not deployable |
+| Temporal accumulation v3 (exact-path controls; spatial + oracle flow) | 44b6 spatial contrast +0.000061, CI [-0.000129,+0.000330]; 6bba -0.01687, CI [-0.04569,-0.000147]; oracle lower bounds also <=0 | **dead** |
 
 Full evidence and reasoning: [FINAL_SYNTHESIS_2026-07-14.md](reports/research/brain/FINAL_SYNTHESIS_2026-07-14.md)
 (division/isolated verdicts + the addendum recording the moonshot pilot). Journal trail:
@@ -98,18 +98,22 @@ fallback. The clean-public-0.903 wrapper delta completed all 199 crops but faile
 bilateral gate: 0.7614 (+0.0019) on 44b6 and 0.6457 (-0.0033) on 6bba, worsening the
 min-fold. Do not regenerate its 0.970 detections. Kaggle kernel
 `aryaarun07/biohub-daxi-cache-20` v3 completed all 20 crops in 27.8 minutes and its
-outputs are downloaded. The corrected temporal-signal analysis is the only active gate.
+outputs are downloaded. The powered temporal-signal gate is complete and negative:
+`signal_gate_pass=false`. Spatial-flow accumulation is null on 44b6 and significantly
+harmful on 6bba; even oracle GT motion has no positive crop-bootstrap lower bound.
+Track 3 affinity training is therefore not justified.
 
 ## Immediate queue
 
-1. Complete the expanded 44b6 DAXI cache, then run `daxi_accumulation_v3.py` over all
-   71 44b6 crops plus the existing 10 6bba crops. The 20-crop audit was underpowered
-   on 44b6 (44 eligible events/6 crops); the full-family audit found 311 eligible
-   five-frame events across 41 crops, enough for crop-bootstrap inference.
+1. Keep the temporal-integration/affinity branch killed. The powered exact-path v3 run
+   scored 268 paired events across 40 44b6 crops and 202 across all 10 6bba crops;
+   neither primary nor oracle motion cleared a positive lower confidence bound, and
+   both frozen cross-family thresholds failed their deployment operating-point gate.
 2. Keep the clean-public-0.903 wrapper branch killed unless new independent evidence
    changes the pre-registered bilateral gate; do not tune its constants on these folds.
-3. Only after temporal GO, spend GPU on the compact affinity-field model described in
-   `reports/CLAUDE_CODE_EXECUTION_2026-07-19.md`. E0c remains the submission fallback.
+3. Keep E0c as the submission fallback. Any further research must introduce a genuinely
+   independent mechanism with a cheap bilateral falsification; do not relabel a temporal
+   accumulator, affinity field, matched filter, or threshold sweep as a new branch.
 4. Two untracked local artifact groups from earlier work are not yet
    committed: `reports/inventory/{e0c_run_*.txt,phaseB_label.txt,daxi_cache.txt}` (raw
    operational logs backing already-journaled 07-13 results) and unrelated stale WIP

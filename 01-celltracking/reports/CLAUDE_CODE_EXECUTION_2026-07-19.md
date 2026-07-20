@@ -124,11 +124,10 @@ check only. Never use the patched division exploit or any test-ID-specific logic
 - Track 1 failed: all 199 manifests completed, but the patched exact result was
   0.7614 (+0.0019) on 44b6 and 0.6457 (-0.0033) on 6bba. The bilateral/min-fold gate
   fails; do not regenerate the 0.970 detector configuration or tune wrapper constants.
-- Track 2 active: Kaggle T4 kernel `aryaarun07/biohub-daxi-cache-20` v3 completed all
-  20 fixed crops in 1667.7 seconds. Outputs are downloaded locally (11.64M candidate
-  peaks; 18/20 crops hit 600k). Coverage audit found the original subset underpowered
-  on 44b6 (44 eligible five-frame events across 6 crops) but the full 71-crop family
-  contains 311 eligible events across 41 crops. `daxi_accumulation_v3.py` is implemented;
-  cache all 71 44b6 crops before running the preregistered response analysis.
-- Track 3 remains gated. Do not start affinity training until Track 2 establishes a
-  bilateral temporal signal with crop-bootstrap lower bounds above zero.
+- Track 2 failed decisively: the expanded 71-crop 44b6 T4 cache completed and the full
+  exact-path CPU gate ran against it plus the 10-crop 6bba cache. Primary spatial-flow
+  contrast was +0.000061 (95% CI [-0.000129,+0.000330]) on 44b6 and -0.01687
+  ([-0.04569,-0.000147]) on 6bba. Oracle-motion lower bounds were also <=0; both
+  frozen cross-family operating points failed. `signal_gate_pass=false`.
+- Track 3 is killed, not merely gated. Do not start affinity/temporal training without
+  genuinely independent evidence that overturns the failed mechanism test.
