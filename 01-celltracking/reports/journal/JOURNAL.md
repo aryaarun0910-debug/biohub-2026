@@ -613,3 +613,22 @@ private organizer clarification; score-probing is forbidden. Full plan:
   reach the 600,000 peak cap, reinforcing the high-precision selection risk. This is
   not a temporal-signal result. NEXT: corrected patch-response-matched AUC/effect analysis
   and crop bootstrap, followed by exact graph insertion only if bilateral signal exists.
+
+### 2026-07-20 (temporal v3 built; power audit forces full 44b6 expansion)
+- Implemented `scripts/win_bet/daxi_accumulation_v3.py` with a preregistered five-frame
+  primary endpoint: `(spatial-flow - static)_positive - (spatial-flow - static)_control`.
+  Controls are same-crop/frame DAXI peaks matched on depth, predicted density, and final
+  centre response through the identical float32 patch-inference path. Cached responses
+  do not determine final matching or scores.
+- Deployable motion is a spatial kNN median field from unambiguous frozen-E0c edges,
+  falling back to per-timepoint then global robust median. Frame-only flow and 3/7-frame
+  windows are diagnostics. GT motion is an oracle ceiling. Thresholds cross-fit between
+  embryo families; bootstrap unit is crop. Unit gates: 3/3 pass (spatial locality,
+  crop-weighted bootstrap, frozen cross-fit threshold).
+- The staged 20-crop audit is NOT adequately powered on 44b6: 59 isolated misses, only
+  44 eligible five-frame events across 6 informative crops (vs 835 eligible/10 crops on
+  6bba). Per preregistration, inference was not launched on this imbalance.
+- Full frozen-OOF 44b6 audit: 71 crops, 41 informative crops, 409 isolated misses,
+  311 eligible five-frame events (291 seven-frame), 303 selected under the per-crop cap.
+  This clears the >=200-event power target. NEXT: Kaggle cache all 71 44b6 crops, then
+  run v3 against that cache plus the existing 10-crop 6bba cache.

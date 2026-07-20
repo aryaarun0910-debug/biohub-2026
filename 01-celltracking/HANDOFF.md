@@ -102,9 +102,10 @@ outputs are downloaded. The corrected temporal-signal analysis is the only activ
 
 ## Immediate queue
 
-1. Run the corrected patch-response-matched temporal pilot on the downloaded 20-crop
-   DAXI cache and bootstrap by crop. The cache contains 11.64M peaks; 18/20 crops hit
-   the 600k cap, so high-precision selection remains the central risk.
+1. Complete the expanded 44b6 DAXI cache, then run `daxi_accumulation_v3.py` over all
+   71 44b6 crops plus the existing 10 6bba crops. The 20-crop audit was underpowered
+   on 44b6 (44 eligible events/6 crops); the full-family audit found 311 eligible
+   five-frame events across 41 crops, enough for crop-bootstrap inference.
 2. Keep the clean-public-0.903 wrapper branch killed unless new independent evidence
    changes the pre-registered bilateral gate; do not tune its constants on these folds.
 3. Only after temporal GO, spend GPU on the compact affinity-field model described in

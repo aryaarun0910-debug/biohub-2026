@@ -126,6 +126,9 @@ check only. Never use the patched division exploit or any test-ID-specific logic
   fails; do not regenerate the 0.970 detector configuration or tune wrapper constants.
 - Track 2 active: Kaggle T4 kernel `aryaarun07/biohub-daxi-cache-20` v3 completed all
   20 fixed crops in 1667.7 seconds. Outputs are downloaded locally (11.64M candidate
-  peaks; 18/20 crops hit 600k), ready for the response-path-matched temporal analysis.
+  peaks; 18/20 crops hit 600k). Coverage audit found the original subset underpowered
+  on 44b6 (44 eligible five-frame events across 6 crops) but the full 71-crop family
+  contains 311 eligible events across 41 crops. `daxi_accumulation_v3.py` is implemented;
+  cache all 71 44b6 crops before running the preregistered response analysis.
 - Track 3 remains gated. Do not start affinity training until Track 2 establishes a
   bilateral temporal signal with crop-bootstrap lower bounds above zero.
