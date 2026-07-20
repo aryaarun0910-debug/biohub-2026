@@ -94,18 +94,19 @@ Full evidence and reasoning: [FINAL_SYNTHESIS_2026-07-14.md](reports/research/br
 `reports/journal/JOURNAL.md`, entries 2026-07-13 through 2026-07-14.
 
 **Current position:** keep **E0c (public 0.889, OOF 0.7595/0.6490)** frozen as the
-fallback, but an aggressive post-patch attrition campaign is active. A clean-public-0.903
-wrapper delta is running over all 199 OOF crops in an isolated four-shard cache. In
-parallel, Kaggle kernel `aryaarun07/biohub-daxi-cache-20` v3 is running on a T4 to build
-a corrected 20-crop temporal-signal gate (10 crops per embryo across the prediction-count
-range). Neither branch is promoted until both folds improve under the exact patched metric.
+fallback. The clean-public-0.903 wrapper delta completed all 199 crops but failed the
+bilateral gate: 0.7614 (+0.0019) on 44b6 and 0.6457 (-0.0033) on 6bba, worsening the
+min-fold. Do not regenerate its 0.970 detections. Kaggle kernel
+`aryaarun07/biohub-daxi-cache-20` v3 completed all 20 crops in 27.8 minutes and its
+outputs are downloaded. The corrected temporal-signal analysis is the only active gate.
 
 ## Immediate queue
 
-1. Finish and score `artifacts/kaggle/clean903_wrapper_oof_cache` using
-   `e0c_score.py --cache ...`; promote only for bilateral >=+0.005 min-fold gain.
-2. Monitor/download Kaggle `aryaarun07/biohub-daxi-cache-20` v3; run the corrected
-   patch-response-matched temporal pilot on >=10 crops/family and bootstrap by crop.
+1. Run the corrected patch-response-matched temporal pilot on the downloaded 20-crop
+   DAXI cache and bootstrap by crop. The cache contains 11.64M peaks; 18/20 crops hit
+   the 600k cap, so high-precision selection remains the central risk.
+2. Keep the clean-public-0.903 wrapper branch killed unless new independent evidence
+   changes the pre-registered bilateral gate; do not tune its constants on these folds.
 3. Only after temporal GO, spend GPU on the compact affinity-field model described in
    `reports/CLAUDE_CODE_EXECUTION_2026-07-19.md`. E0c remains the submission fallback.
 4. Two untracked local artifact groups from earlier work are not yet

@@ -124,3 +124,14 @@ add-only and +0.0182/+0.0138 add-replace. The synthesis therefore still rules ou
 plain division head, but the earlier temporal pilot's documented control-path confound is
 now being closed with a pre-registered 20-crop, response-path-matched T4/CPU rerun. In
 parallel, the clean-public-0.903 wrapper delta is receiving one isolated bilateral OOF gate.
+
+## Post-patch gate result (2026-07-20)
+
+The isolated clean-public-0.903 wrapper gate completed all 199 OOF crops under one
+config and the patched authoritative scorer: 44b6 = 0.7614 (+0.0019 vs E0c), 6bba =
+0.6457 (-0.0033), so the min-fold falls from 0.6490 to 0.6457. It fails the bilateral
+and +0.005 gates. No 0.970 detector regeneration or parameter tuning is justified.
+
+The 20-crop DAXI T4 cache also completed (11.64M peaks; 18/20 crops at the 600k cap).
+This is an input asset, not a positive result: the response-path-matched temporal
+separability and crop-bootstrap gate still must be run.

@@ -121,11 +121,11 @@ check only. Never use the patched division exploit or any test-ID-specific logic
 - Track 0 complete: 69/69 focused/upstream scorer tests; patched E0c 0.7595/0.6490;
   no-fork neutral/-0.0002; Oracle C ceilings unchanged (+0.0045/+0.0037 add-only,
   +0.0182/+0.0138 add-replace).
-- Track 1 active: density-adaptive wrapper port tested, isolated cache smoke passed, four
-  full-OOF CPU shards running. Score with `scripts/win_bet/e0c_score.py --cache
-  artifacts/kaggle/clean903_wrapper_oof_cache --workers 4` after all 199 statuses are OK.
-- Track 2 active: private offline DAXI weight dataset created; Kaggle T4 kernel
-  `aryaarun07/biohub-daxi-cache-20` v3 running on the fixed 20-crop gate. V2 reached
-  the T4 but failed on a float64 normalization promotion; v3 forces contiguous float32.
+- Track 1 failed: all 199 manifests completed, but the patched exact result was
+  0.7614 (+0.0019) on 44b6 and 0.6457 (-0.0033) on 6bba. The bilateral/min-fold gate
+  fails; do not regenerate the 0.970 detector configuration or tune wrapper constants.
+- Track 2 active: Kaggle T4 kernel `aryaarun07/biohub-daxi-cache-20` v3 completed all
+  20 fixed crops in 1667.7 seconds. Outputs are downloaded locally (11.64M candidate
+  peaks; 18/20 crops hit 600k), ready for the response-path-matched temporal analysis.
 - Track 3 remains gated. Do not start affinity training until Track 2 establishes a
   bilateral temporal signal with crop-bootstrap lower bounds above zero.

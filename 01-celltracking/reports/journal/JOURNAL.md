@@ -601,3 +601,15 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - Pushed Kaggle kernel `aryaarun07/biohub-daxi-cache-20` version 3 and verified status
   `RUNNING`. The fixed 20-crop design, T4, private weight dataset, and internet-OFF policy
   are unchanged.
+
+### 2026-07-20 (clean-wrapper gate fails; DAXI cache completes)
+- Clean-public-0.903 wrapper-only OOF completed 199/199 manifests under config
+  `6e2f4ca93fe73098`, zero failures. Patched authoritative score: 44b6 0.7614
+  (+0.0019 vs E0c 0.7595); 6bba 0.6457 (-0.0033 vs E0c 0.6490). Division-J was
+  0.0000/0.0044. Verdict: FAIL bilateral and >=+0.005 min-fold gates; kill this
+  branch and do not spend GPU on deployment-exact 0.970 detection regeneration.
+- Kaggle DAXI cache v3 status COMPLETE: 20/20 crop outputs plus manifest downloaded;
+  T4 compute 1667.7 seconds. Cache contains 11,639,313 low-threshold peaks; 18/20 crops
+  reach the 600,000 peak cap, reinforcing the high-precision selection risk. This is
+  not a temporal-signal result. NEXT: corrected patch-response-matched AUC/effect analysis
+  and crop bootstrap, followed by exact graph insertion only if bilateral signal exists.
