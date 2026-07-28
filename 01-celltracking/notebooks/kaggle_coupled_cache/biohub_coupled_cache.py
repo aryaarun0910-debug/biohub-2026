@@ -62,17 +62,19 @@ sys.path.insert(0, str(repo / "src"))
 sys.path.insert(0, str(repo / "scripts"))
 os.environ.setdefault("BIOHUB_DATA_DIR", str(data_dir))
 
-# Kaggle's July-2026 GPU image omits zarr, and predict_unet_transformer imports it at
-# module level. Install the submission kernel's pinned offline wheels; internet stays off.
-_wheels = []
-for _pat in ("donfig-*.whl", "google_crc32c-*.whl", "numcodecs-*.whl", "zarr-*.whl"):
-    _hits = sorted(glob.glob(f"/kaggle/input/**/{_pat}", recursive=True))
-    if not _hits:
-        raise FileNotFoundError(f"offline wheel missing: {_pat}")
-    _wheels.append(_hits[0])
+# Kaggle's July-2026 GPU image lacks zarr AND tracksdata (plus their transitive deps), and
+# predict_unet_transformer imports both at module level. Install the support pack's full
+# pinned offline wheel set in one pass; --no-index/--no-deps keeps internet off and pins
+# exactly the versions the deployed kernels used (incl. tracksdata 0.1.0rc6.dev3+g980c2d30a).
+_wheels = sorted(glob.glob("/kaggle/input/**/wheels/*.whl", recursive=True))
+if not _wheels:
+    raise FileNotFoundError("no offline wheels found under /kaggle/input/**/wheels/")
 subprocess.check_call([sys.executable, "-m", "pip", "install",
                        "--no-index", "--no-deps", "-q", *_wheels])
-print("offline wheels installed:", [Path(w).name for w in _wheels], flush=True)
+print(f"offline wheels installed: {len(_wheels)}", flush=True)
+for _m in ("zarr", "tracksdata", "polars"):
+    __import__(_m)
+print("dependency preflight OK: zarr, tracksdata, polars importable", flush=True)
 
 import predict_unet_transformer as P  # noqa: E402
 import zarr  # noqa: E402
