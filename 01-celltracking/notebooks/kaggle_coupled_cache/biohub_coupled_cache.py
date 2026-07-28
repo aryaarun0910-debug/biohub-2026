@@ -70,47 +70,54 @@ os.environ.setdefault("BIOHUB_DATA_DIR", str(data_dir))
 # breaks the preinstalled scipy's ABI (`cannot import name '_center' from numpy._core.umath`).
 # This allowlist mirrors the deployed v122 kernel's PACKAGE_SPECS and deliberately contains
 # no numpy/scipy/torch entry, so ABI-sensitive image packages are never touched.
-_MODULE_TO_DIST = {
-    "tracksdata": "tracksdata", "zarr": "zarr", "pyscipopt": "pyscipopt",
-    "geff": "geff", "geff_spec": "geff_spec", "ilpy": "ilpy", "polars": "polars",
-    "polars_runtime_32": "polars_runtime_32", "blosc2": "blosc2", "dask": "dask",
-    "imagecodecs": "imagecodecs", "skimage": "scikit_image", "pyarrow": "pyarrow",
-    "rustworkx": "rustworkx", "sqlalchemy": "sqlalchemy", "numcodecs": "numcodecs",
-    "donfig": "donfig", "google_crc32c": "google_crc32c", "bidict": "bidict",
-    "psygnal": "psygnal", "rich": "rich", "networkx": "networkx",
-    "pydantic": "pydantic", "pydantic_core": "pydantic_core",
-    "annotated_types": "annotated_types", "typing_extensions": "typing_extensions",
-    "toolz": "toolz", "cloudpickle": "cloudpickle", "fsspec": "fsspec",
-    "msgpack": "msgpack", "locket": "locket", "partd": "partd", "click": "click",
-    "markdown_it": "markdown_it_py", "mdurl": "mdurl", "ndindex": "ndindex",
-    "numba": "numba", "llvmlite": "llvmlite", "greenlet": "greenlet",
-    "lazy_loader": "lazy_loader", "imageio": "imageio", "tifffile": "tifffile",
-    "certifi": "certifi", "idna": "idna", "charset_normalizer": "charset_normalizer",
-    "deprecated": "deprecated", "wrapt": "wrapt", "annotated_doc": "annotated_doc",
-    "typing_inspection": "typing_inspection",
-}
-_pool = {Path(w).name.split("-")[0].lower(): w
-         for w in sorted(glob.glob("/kaggle/input/**/wheels/*.whl", recursive=True))}
-if not _pool:
+# This mirrors the deployed v122 kernel's bootstrap, which is the only version proven to
+# work on this image. Two properties matter and were the cause of three earlier failures:
+#   * install by SPEC via --find-links, not by raw wheel path -- and the spec list contains
+#     no numpy/scipy/torch, so ABI-sensitive image packages are never replaced. Blanket-
+#     installing the 62 wheels DOES replace numpy 2.4.6 / scipy 1.18.0 and breaks the image
+#     ("cannot import name '_center' from numpy._core.umath").
+#   * install unconditionally rather than only-if-missing. The image ships an OLD polars;
+#     skipping it while installing polars-runtime-32 yields "Polars binary is missing!" and
+#     a missing pl.Float16 that tracksdata needs at import.
+os.environ.setdefault("POLARS_PREFER_PKG", "32")
+
+_SPECS = [
+    "tracksdata", "zarr>=3.0.10,<4", "pyscipopt", "geff>=1.1.3.1.1", "geff-spec<1.2",
+    "ilpy>=0.5.1", "polars>=1.36", "polars-runtime-32", "blosc2", "dask", "imagecodecs",
+    "scikit-image>=0.24", "pyarrow", "rustworkx>=0.17.1", "sqlalchemy>=2",
+    "numcodecs>=0.13,<0.16", "donfig>=0.8", "google-crc32c>=1.5", "bidict>=0.23.1",
+    "psygnal>=0.14", "rich", "networkx>=3.2.1", "pydantic>=2.11", "pydantic-core",
+    "annotated-types", "typing-extensions>=4.13", "typing-inspection", "markdown-it-py",
+    "pygments", "click", "cloudpickle", "fsspec", "partd", "locket", "toolz", "pyyaml",
+    "ndindex", "msgpack", "numexpr", "deprecated", "wrapt", "imageio", "pillow",
+    "tifffile", "lazy-loader", "tqdm",
+]
+_wheel_dirs = sorted({str(Path(w).parent)
+                      for w in glob.glob("/kaggle/input/**/wheels/*.whl", recursive=True)})
+if not _wheel_dirs:
     raise FileNotFoundError("no offline wheels found under /kaggle/input/**/wheels/")
 
-import importlib.util as _ilu  # noqa: E402
+_cmd = [sys.executable, "-m", "pip", "install", "--no-index", "--no-deps", "-q"]
+for _d in _wheel_dirs:
+    _cmd += ["--find-links", _d]
+_cmd += _SPECS
+subprocess.check_call(_cmd)
+print(f"offline deps installed from {_wheel_dirs}", flush=True)
 
-_todo = []
-for _mod, _dist in _MODULE_TO_DIST.items():
-    if _ilu.find_spec(_mod) is not None:
-        continue
-    _w = _pool.get(_dist.lower())
-    if _w:
-        _todo.append(_w)
-if _todo:
-    subprocess.check_call([sys.executable, "-m", "pip", "install",
-                           "--no-index", "--no-deps", "-q", *_todo])
-print(f"offline wheels installed: {len(_todo)} (of {len(_pool)} available)", flush=True)
+# Drop any stale pre-install imports before verifying.
+for _root in ("polars", "zarr", "tracksdata", "numcodecs", "geff"):
+    for _name in [n for n in list(sys.modules) if n == _root or n.startswith(_root + ".")]:
+        del sys.modules[_name]
 
-for _m in ("numpy", "scipy.spatial", "zarr", "tracksdata", "polars"):
-    __import__(_m)
-print("dependency preflight OK: numpy, scipy, zarr, tracksdata, polars", flush=True)
+import numpy as _np_check  # noqa: E402
+import scipy.spatial as _sp_check  # noqa: E402
+import polars as _pl_check  # noqa: E402
+import zarr as _zarr_check  # noqa: E402
+import tracksdata as _td_check  # noqa: E402
+assert hasattr(_pl_check, "Float16"), "polars too old for tracksdata"
+print(f"dependency preflight OK: numpy {_np_check.__version__}, scipy {_sp_check.__name__}, "
+      f"polars {_pl_check.__version__}, zarr {_zarr_check.__version__}, "
+      f"tracksdata {getattr(_td_check, '__version__', '?')}", flush=True)
 
 import predict_unet_transformer as P  # noqa: E402
 import zarr  # noqa: E402
