@@ -418,6 +418,32 @@ manifest = {
     "results": [],
 }
 
+# ---------------------------------------------------------------- startup self-test
+# Exercise the EXACT output path (savez -> replace -> reload) before any GPU work.
+# The full-population launch burned hours because np.savez_compressed appends ".npz"
+# to a temp name, so os.replace failed AFTER each crop's inference had completed.
+# This makes that entire class of failure a ~5-second abort instead.
+def _selftest() -> None:
+    d = OUT / "_selftest"
+    d.mkdir(parents=True, exist_ok=True)
+    path = d / "probe__tta-4view__det-0.969.npz"
+    _tmp = path.parent / (path.stem + ".tmp.npz")
+    np.savez_compressed(_tmp, coords=np.zeros((2, 4), np.int16),
+                        edge_src=np.zeros(1, np.int64), edge_tgt=np.zeros(1, np.int64),
+                        edge_prob=np.zeros(1, np.float32), edge_dist=np.zeros(1, np.float32))
+    assert _tmp.exists(), f"savez wrote an unexpected filename; dir={list(d.iterdir())}"
+    os.replace(_tmp, path)
+    assert path.exists() and np.load(path)["coords"].shape == (2, 4), "reload failed"
+    _ = sha256(path)
+    for f in d.iterdir():
+        f.unlink()
+    d.rmdir()
+    print("startup self-test OK: savez -> atomic replace -> reload -> hash", flush=True)
+
+
+_selftest()
+
+
 STATUS = OUT / "status"
 STATUS.mkdir(parents=True, exist_ok=True)
 _t0 = time.time()
@@ -446,6 +472,12 @@ for _i, crop in enumerate(CROPS):
     _tmp.write_text(json.dumps(_rec))
     os.replace(_tmp, _sp)
     manifest["results"].append(_rec)
+    # Canary: abort on the FIRST crop failure rather than burning the whole session.
+    if _i == 0 and _rec.get("status") != "ok":
+        (OUT / f"manifest_shard{SHARD}.json").write_text(json.dumps(manifest, indent=2))
+        raise SystemExit(
+            f"CANARY ABORT: first crop {crop} failed ({_rec.get('error')}). "
+            "Stopping immediately instead of processing the remaining crops.")
 
 (OUT / f"manifest_shard{SHARD}.json").write_text(json.dumps(manifest, indent=2))
 _ok = sum(1 for r in manifest["results"] if r.get("status") == "ok")
