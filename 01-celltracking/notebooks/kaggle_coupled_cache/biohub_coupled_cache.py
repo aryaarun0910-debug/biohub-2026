@@ -121,7 +121,55 @@ print(f"dependency preflight OK: numpy {_np_check.__version__}, scipy {_sp_check
 
 import predict_unet_transformer as P  # noqa: E402
 import zarr  # noqa: E402
-from tracking_cellmot.io import open_dataset  # noqa: E402
+
+# The support pack names this package `biohub_tracking`; our local vendored checkout calls
+# the same package `tracking_cellmot`. Accept either and record which one is live.
+try:
+    from tracking_cellmot.io import open_dataset  # noqa: E402
+    import tracking_cellmot.io as inference_io  # noqa: E402
+    INFERENCE_PACKAGE = "tracking_cellmot"
+except ModuleNotFoundError:
+    from biohub_tracking.io import open_dataset  # noqa: E402
+    import biohub_tracking.io as inference_io  # noqa: E402
+    INFERENCE_PACKAGE = "biohub_tracking"
+
+import inspect as _inspect  # noqa: E402
+
+print("\n" + "=" * 78)
+print("!! SUPPORT PACK IS INFERENCE-ONLY !!")
+print("  Its repository predates official metric patch 075fc5f (pack dated 2026-07-08).")
+print("  It MAY produce coords/edges. It MUST NEVER score, validate or select an")
+print("  experiment. Authoritative scoring happens locally with the pinned patched")
+print("  scorer; nothing this kernel emits is a score.")
+print("=" * 78)
+print(f"INFERENCE_PACKAGE   : {INFERENCE_PACKAGE}")
+print(f"inference_io.__file__: {inference_io.__file__}")
+print(f"open_dataset sig     : {_inspect.signature(open_dataset)}")
+
+# Provenance of the attached artifacts.
+_pack_root = Path(str(repo)).parent
+_pack_manifest = _pack_root / "ARTIFACT_MANIFEST.json"
+if _pack_manifest.exists():
+    _pm = json.loads(_pack_manifest.read_text())
+    print(f"pack manifest        : {json.dumps(_pm)[:400]}")
+else:
+    print(f"pack manifest        : absent; repo mtime="
+          f"{time.strftime('%Y-%m-%d', time.gmtime(Path(P.__file__).stat().st_mtime))}")
+for _s in (0, 1):
+    _wp = weights_root / f"edge_predictor_best_split_{_s}.pth"
+    print(f"weight split_{_s} sha256 : {sha256(_wp)}  ({_wp.stat().st_size} bytes)")
+print("pack weights          : NOT USED (LOEO fold weights come from the private dataset)")
+
+# Scoring-module audit. `predict_unet_transformer` transitively imports the pack's
+# `evaluate`/`metrics`, so they can be PRESENT; what matters is that this kernel never
+# calls them and never emits a score. Assert the local authoritative scorer is absent.
+_scoring_present = sorted(m for m in sys.modules
+                          if "metric" in m.lower() or m.endswith("evaluate"))
+print(f"scoring modules present (transitive, NEVER CALLED): {_scoring_present}")
+assert "biotrack" not in sys.modules, "local authoritative scorer must not load here"
+assert not any(m.startswith("biotrack") for m in sys.modules)
+print("confirmed: no authoritative scoring module imported; kernel emits caches only")
+print("=" * 78 + "\n", flush=True)
 
 device = torch.device("cuda")
 if not torch.cuda.is_available():
