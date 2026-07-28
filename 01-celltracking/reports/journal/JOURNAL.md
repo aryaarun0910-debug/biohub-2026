@@ -689,3 +689,36 @@ private organizer clarification; score-probing is forbidden. Full plan:
   verify detector threshold 0.9690/v122. Corrected the retained notebook source tag to
   `122_clean_precision_det09690_disappearance150`; this does not alter the submitted
   v1 artifact. NEXT: append public score, then run C0/C1 full OOF regeneration.
+
+### 2026-07-28 (instrument audit: OOF<->public calibration is NOT POSSIBLE with existing artifacts)
+- Ran the pre-registered OOF<->public rank audit over all 6 scored submissions
+  (`scripts/win_bet/instrument_audit.py`; full write-up + limitations in
+  `reports/INSTRUMENT_AUDIT_2026-07-28.md`). Availability tiers were ENFORCED, never estimated.
+- PRIMARY RESULT: only **n=1** submission qualifies (post-patch scorer 075fc5f AND proven
+  deployment parity) = E0c `54534923` (0.889, OOF 0.7595/0.6490). Rank correlation on
+  qualifying data is NOT COMPUTABLE; the audit cannot be completed as specified. Disqualified:
+  Trackastra-direct `54601594` (OOF pre-patch, division term changed), classical `54290725`/
+  `54301967` (kernel never parity-checked vs the local 199-crop config), Trackastra-hint
+  `54588144` (no OOF exists), v122 `54854143` (no OOF yet).
+- VERIFIED COMPARABILITY before computing anything: `run_phase1_ablation.py::fold_summary`
+  weights by `edge_tp+edge_fp+edge_fn`, identical to `tracking_cellmot.metrics.summarise`,
+  so classical-era and E0c-era fold numbers ARE the same statistic.
+- PUBLIC SCORES THEMSELVES MOVED: JOURNAL recorded `54290725` = 0.807 (2026-07-03); the Kaggle
+  API now returns 0.815. The patch rescore DID shift a non-exploit submission, contrary to the
+  host note. Any historically recorded public score must be refreshed from the API before use.
+- DEGRADED DIAGNOSTIC (tier A+B, n=4, explicitly not a calibration): min_fold Spearman -0.400 /
+  Kendall -0.333; edge_weighted -0.800/-0.667; arith and harmonic means -0.400; 6bba_only -0.600;
+  44b6_only **+0.800/+0.667** (the only positive). Leave-one-out on min_fold swings from +0.500
+  (drop op_bright) to -1.000 (drop E0c). Child-vs-parent: op_bright vs V3 d_public -0.074 vs
+  d_minfold +0.052 = **INVERTED**; Trackastra-direct vs E0c anchor = AGREE.
+- INTERPRETATION (this does NOT convict min-fold): the sign is driven by a classical-vs-learned
+  family confound (classical = high OOF/low public, learned = the reverse); the result is
+  controlled by one observation; and op_bright -- which drives every discordant pair -- has
+  UNPROVEN deployment parity (predicted ~0.81, scored 0.741), so instrument failure and config
+  drift are indistinguishable. `44b6_only=+0.800` is treated as noise at n=4.
+- DECISION: keep LOEO min-fold as the private-safety gate; do NOT retune it to six public
+  observations; do NOT promote any deployment-ranking statistic (including 44b6_only) on this
+  evidence. The instrument is uncalibrated and no existing artifact can fix it -- the only route
+  to a second qualifying observation is deployment-parity post-patch OOF at the coupled operating
+  point. NEXT: C0/C1 coupled experiment (now doubly load-bearing: primary attack AND the sole
+  source of calibration evidence).
