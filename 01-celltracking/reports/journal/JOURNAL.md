@@ -722,3 +722,44 @@ private organizer clarification; score-probing is forbidden. Full plan:
   to a second qualifying observation is deployment-parity post-patch OOF at the coupled operating
   point. NEXT: C0/C1 coupled experiment (now doubly load-bearing: primary attack AND the sole
   source of calibration evidence).
+
+### 2026-07-28 (coupled C0/C1 harness: two spec corrections, Arm A parity EXACT)
+- Built the coupled decomposition harness (`scripts/win_bet/coupled_arms.py`,
+  `coupled_replay.py`, `tests/test_coupled_arms.py`). Retained the exact v122 source at
+  `notebooks/kaggle_clean_v122/` (SHA256 703A05E2...C7C2FBC, kernel
+  `aryaarun07/biohub-clean-v122-reproduction v1`) -- closes the open Phase-0 retention item.
+- CORRECTION 1 -- **E0c has no ILP stage.** `oof_clean/pred_geffs_split_{0,1}` was produced by
+  `kaggle_predict_score.py` with `USE_ILP = False` at det 0.99, i.e. greedy selection
+  (max_parents=1, max_children=2) inside `predict_video`. Arm A is therefore
+  detector + greedy + wrapper. The preregistered B->C step was consequently split into
+  B->B' (introducing ILP at default 0.1/0.1) and B'->C (survival costs 0.0/1.5) so the
+  structural change is not reported as a cost-tuning delta.
+- CORRECTION 2 -- **the clean-903 port is not the v122 wrapper.** Diffing the retained source
+  against `clean903_wrapper_run.py::set_clean903_wrapper_config` found three drifted
+  constants: PREFIX_DENSITY_BLEND (v122 0.0 vs port 0.20), SAFE_DIV_GLOBAL_FRAC_CAP
+  (0.00375 vs 0.00385), MOTION_RELINK_LEARNED_BONUS (1.0 vs 0.75). The first is structural:
+  v122's `frame_local_spacing` returns pure local kNN spacing and the notebook contains no
+  PREFIX_DENSITY concept at all -- the blended transductive per-embryo prior is our own
+  addition. Both promotion candidates (D, C0) now use the faithful retained-v122 wrapper.
+  The earlier clean-903 kill stands for what it tested (frozen 0.990 detections, different
+  upstream graph) but does NOT transfer to the true v122 promotion pipeline.
+- Added diagnostic-only seventh arm **D-port** (identical cached 0.9690 detections and
+  identical C1 ILP output as D; differs ONLY in those three constants) to quantify the
+  bundled wrapper drift. Not a promotion candidate; must not delay D/C0.
+- CACHE DESIGN (approved): edge logits CANNOT be shared across detector thresholds -- the
+  edge head cross-attends over the whole node set (`SimpleNodeTransformer`,
+  `nn.MultiheadAttention`) and `predict_video` applies `softmax(dim=0)` over the source
+  axis, so both the attention context and the normaliser change with the node population.
+  Caching UNet features instead is infeasible (~33 MB/frame fp16 -> ~670 GB for 199 crops
+  vs 361 GB free). Correct boundary is the pre-graph `(coords, edges)` output: one exact
+  GPU pass per threshold, all ILP/wrapper variants replayed on CPU. B/B'/C/D/D-port share
+  one 0.9690 pass; C0 needs 0.96875; A reuses the existing artifact. ~200 MB total.
+- PREFLIGHT: config hashes distinct for all 7 arms (no collisions); 11 regression
+  assertions pass, including a SHA256 lock on the retained notebook so the three constants
+  cannot silently drift back. **Arm A parity EXACT on both preflight crops**: node/edge
+  diagnostics reproduce `e0c_run_smoke.txt` (28119->27338, 6847->6214) and the composite is
+  bit-identical to the cached E0c artifact (|delta| < 1e-9) at 0.8132 (44b6_0113de3b) and
+  0.7497 (6bba_05b6850b). ILP confirmed available locally (pyscipopt 6.2.1, ilpy 0.6.0).
+- NEXT: Kaggle inference-cache kernel; verify 0.9690 peaks are a superset of 0.990 before
+  edge inference; then the two full passes and the CPU replays. Phase 2 training stays
+  blocked until C0/C1 is complete and recorded.
