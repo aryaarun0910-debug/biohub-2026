@@ -62,19 +62,55 @@ sys.path.insert(0, str(repo / "src"))
 sys.path.insert(0, str(repo / "scripts"))
 os.environ.setdefault("BIOHUB_DATA_DIR", str(data_dir))
 
-# Kaggle's July-2026 GPU image lacks zarr AND tracksdata (plus their transitive deps), and
-# predict_unet_transformer imports both at module level. Install the support pack's full
-# pinned offline wheel set in one pass; --no-index/--no-deps keeps internet off and pins
-# exactly the versions the deployed kernels used (incl. tracksdata 0.1.0rc6.dev3+g980c2d30a).
-_wheels = sorted(glob.glob("/kaggle/input/**/wheels/*.whl", recursive=True))
-if not _wheels:
+# Kaggle's July-2026 GPU image lacks zarr and tracksdata; predict_unet_transformer imports
+# both at module level. Install ONLY what is genuinely missing, from the support pack's
+# pinned wheels, with internet off.
+#
+# Do NOT blanket-install the whole wheels/ directory: that overwrites the image's numpy and
+# breaks the preinstalled scipy's ABI (`cannot import name '_center' from numpy._core.umath`).
+# This allowlist mirrors the deployed v122 kernel's PACKAGE_SPECS and deliberately contains
+# no numpy/scipy/torch entry, so ABI-sensitive image packages are never touched.
+_MODULE_TO_DIST = {
+    "tracksdata": "tracksdata", "zarr": "zarr", "pyscipopt": "pyscipopt",
+    "geff": "geff", "geff_spec": "geff_spec", "ilpy": "ilpy", "polars": "polars",
+    "polars_runtime_32": "polars_runtime_32", "blosc2": "blosc2", "dask": "dask",
+    "imagecodecs": "imagecodecs", "skimage": "scikit_image", "pyarrow": "pyarrow",
+    "rustworkx": "rustworkx", "sqlalchemy": "sqlalchemy", "numcodecs": "numcodecs",
+    "donfig": "donfig", "google_crc32c": "google_crc32c", "bidict": "bidict",
+    "psygnal": "psygnal", "rich": "rich", "networkx": "networkx",
+    "pydantic": "pydantic", "pydantic_core": "pydantic_core",
+    "annotated_types": "annotated_types", "typing_extensions": "typing_extensions",
+    "toolz": "toolz", "cloudpickle": "cloudpickle", "fsspec": "fsspec",
+    "msgpack": "msgpack", "locket": "locket", "partd": "partd", "click": "click",
+    "markdown_it": "markdown_it_py", "mdurl": "mdurl", "ndindex": "ndindex",
+    "numba": "numba", "llvmlite": "llvmlite", "greenlet": "greenlet",
+    "lazy_loader": "lazy_loader", "imageio": "imageio", "tifffile": "tifffile",
+    "certifi": "certifi", "idna": "idna", "charset_normalizer": "charset_normalizer",
+    "deprecated": "deprecated", "wrapt": "wrapt", "annotated_doc": "annotated_doc",
+    "typing_inspection": "typing_inspection",
+}
+_pool = {Path(w).name.split("-")[0].lower(): w
+         for w in sorted(glob.glob("/kaggle/input/**/wheels/*.whl", recursive=True))}
+if not _pool:
     raise FileNotFoundError("no offline wheels found under /kaggle/input/**/wheels/")
-subprocess.check_call([sys.executable, "-m", "pip", "install",
-                       "--no-index", "--no-deps", "-q", *_wheels])
-print(f"offline wheels installed: {len(_wheels)}", flush=True)
-for _m in ("zarr", "tracksdata", "polars"):
+
+import importlib.util as _ilu  # noqa: E402
+
+_todo = []
+for _mod, _dist in _MODULE_TO_DIST.items():
+    if _ilu.find_spec(_mod) is not None:
+        continue
+    _w = _pool.get(_dist.lower())
+    if _w:
+        _todo.append(_w)
+if _todo:
+    subprocess.check_call([sys.executable, "-m", "pip", "install",
+                           "--no-index", "--no-deps", "-q", *_todo])
+print(f"offline wheels installed: {len(_todo)} (of {len(_pool)} available)", flush=True)
+
+for _m in ("numpy", "scipy.spatial", "zarr", "tracksdata", "polars"):
     __import__(_m)
-print("dependency preflight OK: zarr, tracksdata, polars importable", flush=True)
+print("dependency preflight OK: numpy, scipy, zarr, tracksdata, polars", flush=True)
 
 import predict_unet_transformer as P  # noqa: E402
 import zarr  # noqa: E402
