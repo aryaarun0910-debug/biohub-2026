@@ -378,9 +378,13 @@ def run_crop(crop: str) -> dict:
         dest = OUT / ("peaks" if thr == PEAK_ONLY_THRESHOLD else "cache")
         dest.mkdir(parents=True, exist_ok=True)
         path = dest / f"{tag}.npz"
-        _tmp = path.with_suffix(".npz.tmp")
+        # np.savez_compressed APPENDS ".npz" unless the name already ends in it, so a
+        # ".npz.tmp" temp name silently becomes ".npz.tmp.npz" and os.replace then fails.
+        # Keep the temp name ending in .npz.
+        _tmp = path.parent / (path.stem + ".tmp.npz")
         np.savez_compressed(_tmp, coords=coords, edge_src=src, edge_tgt=tgt,
                             edge_prob=prob, edge_dist=dist)
+        assert _tmp.exists(), f"temp cache not written: {_tmp}"
         os.replace(_tmp, path)
         records[tag] = {"crop": crop, "family": crop.split("_")[0], "tta": tta,
                         "det_threshold": thr, "split_used": split,
