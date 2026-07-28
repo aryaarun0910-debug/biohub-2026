@@ -62,6 +62,18 @@ sys.path.insert(0, str(repo / "src"))
 sys.path.insert(0, str(repo / "scripts"))
 os.environ.setdefault("BIOHUB_DATA_DIR", str(data_dir))
 
+# Kaggle's July-2026 GPU image omits zarr, and predict_unet_transformer imports it at
+# module level. Install the submission kernel's pinned offline wheels; internet stays off.
+_wheels = []
+for _pat in ("donfig-*.whl", "google_crc32c-*.whl", "numcodecs-*.whl", "zarr-*.whl"):
+    _hits = sorted(glob.glob(f"/kaggle/input/**/{_pat}", recursive=True))
+    if not _hits:
+        raise FileNotFoundError(f"offline wheel missing: {_pat}")
+    _wheels.append(_hits[0])
+subprocess.check_call([sys.executable, "-m", "pip", "install",
+                       "--no-index", "--no-deps", "-q", *_wheels])
+print("offline wheels installed:", [Path(w).name for w in _wheels], flush=True)
+
 import predict_unet_transformer as P  # noqa: E402
 import zarr  # noqa: E402
 from tracking_cellmot.io import open_dataset  # noqa: E402
