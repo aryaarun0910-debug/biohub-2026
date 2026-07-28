@@ -800,3 +800,29 @@ private organizer clarification; score-probing is forbidden. Full plan:
   CPU replay 60-84 s per ILP arm at 28k nodes (peak RSS ~870 MB), 9-14 s at 6k.
   199-crop projection: median 20.0k nodes, mean 25.7k, p90 59.1k, max 84.2k.
 - NEXT (awaiting review, NOT started): full 199-crop passes at 0.9690 and 0.96875.
+
+### 2026-07-28 (full-population launch: C0, D-port and D4 TTA dropped on preflight nulls)
+- RESOURCE DECISION recorded BEFORE launch. Three branches killed from full-population
+  expansion on preflight evidence:
+  * **C0 / det 0.96875** -- detector-level no-op vs 0.9690 (9 nodes on 44b6, 0 on 6bba;
+    d_score +/-0.0000 both crops). The "coupled precision push" separating public v120 from
+    v122 does not exist at the detector level.
+  * **D-port** -- clean-903 wrapper drift immaterial (1-3 nodes, d_score +/-0.0000). The
+    wrapper-drift question is closed and the earlier clean-903 kill is NOT overturned by it.
+    The three constants will NOT be split into further arms.
+  * **D4 TTA** -- not part of the parity-proven baseline and would confound the gate.
+    Stock 4-view is retained precisely because it reproduces oof_clean node counts EXACTLY
+    (28,119 / 6,847), so A and B differ only by detector threshold.
+- LAUNCHED: 199-crop cache at det 0.9690, stock 4-view TTA, LOEO routing (44b6->split_0,
+  6bba->split_1), two private internet-off T4 shards. Shards built by greedy balancing on
+  E0c node counts, not crop count: shard0 = 100 crops / 2,560,379 nodes (38x44b6, 62x6bba),
+  shard1 = 99 crops / 2,557,662 nodes (33x44b6, 66x6bba) -> **0.11% load imbalance**, both
+  families in both shards, max crop 84,233 / 82,537 nodes.
+- Kernel adds atomic per-crop .npz writes, a resumable status manifest (skip-completed),
+  per-crop peak GPU memory, elapsed telemetry, and per-crop hashes. No scoring or GT access
+  in the GPU path; the support pack remains inference-only.
+- CPU replay will REUSE WORK rather than run six pipelines: build the pre-selection graph
+  once per crop, then B (greedy), B' (default ILP), C (C1 ILP), and D reuses C's solved
+  graph with only the v122 wrapper swapped -- the C1 ILP is never solved twice. Arm A needs
+  no inference or solve. Max 3 local ILP workers, isolated subprocesses, large crops
+  scheduled apart.
