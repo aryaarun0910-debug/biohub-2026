@@ -80,11 +80,16 @@ def graph_from_cached_detections(path: Path):
     coords = d["coords"]
 
     graph = td.graph.RustWorkXGraph()
-    graph.add_node_attr_key("t", 0)
-    for key in ("z", "y", "x"):
-        graph.add_node_attr_key(key, 0.0)
-    graph.add_edge_attr_key("edge_prob", 0.0)
-    graph.add_edge_attr_key("edge_dist", 0.0)
+    # RustWorkXGraph already defines "t"; adding an existing key raises.
+    existing_nodes = set(graph.node_attr_keys())
+    for key, dtype, default in (("t", pl.Int64, 0), ("z", pl.Float64, 0.0),
+                                ("y", pl.Float64, 0.0), ("x", pl.Float64, 0.0)):
+        if key not in existing_nodes:
+            graph.add_node_attr_key(key, dtype, default)
+    existing_edges = set(graph.edge_attr_keys())
+    for key in ("edge_prob", "edge_dist"):
+        if key not in existing_edges:
+            graph.add_edge_attr_key(key, pl.Float64, 0.0)
 
     id_map = [graph.add_node({"t": int(c[0]), "z": float(c[1]),
                               "y": float(c[2]), "x": float(c[3])}) for c in coords]

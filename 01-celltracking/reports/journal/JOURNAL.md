@@ -763,3 +763,40 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - NEXT: Kaggle inference-cache kernel; verify 0.9690 peaks are a superset of 0.990 before
   edge inference; then the two full passes and the CPU replays. Phase 2 training stays
   blocked until C0/C1 is complete and recorded.
+
+### 2026-07-28 (coupled preflight COMPLETE: caches produced, all 7 arms replayed)
+- Kernel `aryaarun07/biohub-coupled-cache-preflight` v7 COMPLETE after six environment
+  failures (v1 zarr; v2 tracksdata; v3 blanket wheel install clobbered image numpy/scipy;
+  v4 only-if-missing kept an old polars; v5 package named `biohub_tracking` not
+  `tracking_cellmot`; v6 reached full inference but died serialising via polars, whose
+  compiled runtime is not loadable on the image). v7 serialises with numpy. No GPU was
+  spent on real inference before v6; no submissions consumed.
+- **DETECTOR REPRODUCTION IS EXACT.** Our det-0.990 + stock 4-view TTA yields 28,119 coords
+  (44b6_0113de3b) and 6,847 (6bba_05b6850b) -- byte-equal to oof_clean/E0c's node counts.
+  This validates the inference path end-to-end AND empirically settles that oof_clean used
+  4-view TTA, not D4 (D4 gives 27,751 / 6,855).
+- PREFLIGHT GATES ALL PASS: 12/12 caches hash-verified vs the kernel manifest; peak
+  superset holds in every case (0.990 subset of 0.9690, and 0.9690 subset of 0.96875,
+  0 missing); Arm A bit-identical to the E0c artifact (0.8132 / 0.7497); 7/7 config
+  hashes distinct; D and C0 both use the faithful retained-v122 wrapper.
+- PER-ARM (2 crops only -- NOT a verdict):
+  A 0.8132/0.7497 | B 0.7967/0.7088 | B' 0.7334/0.7594 | C 0.6380/0.8226 |
+  D 0.6374/0.8131 | D-port 0.6374/0.8131 | C0 0.6373/0.8131
+- **D vs C0 is a NULL RESULT**: d_score +/-0.0000 on both crops (9 node difference on 44b6,
+  0 on 6bba). The 0.96875 -> 0.9690 "coupled precision push" separating v120 from v122 is
+  essentially a no-op at the detector level on this evidence.
+- **D vs D-port is a NULL RESULT**: d_score +/-0.0000 (1-3 nodes). The clean-903 port's
+  three drifted wrapper constants are immaterial, so the earlier clean-903 kill is NOT
+  overturned by that drift. Wrapper-drift question closed; do not split the constants.
+- DOMINANT LEVER is the ILP survival cost, not the detector or wrapper: B'->C moves
+  -0.0954 (44b6) / +0.0633 (6bba); C->D (whole wrapper stage) moves only -0.0006 / -0.0096.
+- **THE FOLDS DISAGREE VIOLENTLY**: A->D = -0.1758 (44b6) vs +0.0633 (6bba); 44b6 node
+  recall collapses 0.9423 -> 0.7115 under disappearance 1.5. CAVEAT THAT DOMINATES
+  EVERYTHING: 44b6_0113de3b carries only **50 GT edges** (52 GT nodes) against
+  6bba_05b6850b's **845**. The 44b6 preflight crop is near-powerless; these deltas are
+  pipeline validation, NOT a promotion signal. No gate is evaluated on 2 crops.
+- MEASURED COSTS: GPU 21.1 min setup (one-time) + 2.7 min (44b6, 33.5k nodes) + 1.8 min
+  (6bba, 7.3k) covering BOTH TTA schemes and all 4 edge passes. Cache 1.6 MB / 12 files.
+  CPU replay 60-84 s per ILP arm at 28k nodes (peak RSS ~870 MB), 9-14 s at 6k.
+  199-crop projection: median 20.0k nodes, mean 25.7k, p90 59.1k, max 84.2k.
+- NEXT (awaiting review, NOT started): full 199-crop passes at 0.9690 and 0.96875.
