@@ -348,7 +348,10 @@ def run_crop(crop: str) -> dict:
         del unet_out, det_by_tta, imgs
 
     # ------------------------------------------------------------------ write per combo
-    import polars as pl
+    # Serialised with numpy, NOT polars: the image's polars python package is present but
+    # its compiled runtime is not loadable here ("Polars binary is missing!" ->
+    # NameError: PyDataFrame). numpy is verified working, and this keeps the cache format
+    # independent of the pack's dependency state. Inference is unaffected.
     records = {}
     for key, st in state.items():
         tta, thr = key
@@ -357,24 +360,24 @@ def run_crop(crop: str) -> dict:
         coords[:, 1:] *= ds_arr
         coords = coords.astype(np.int16)
 
-        rows = [{"row_type": "node", "node_id": i, "t": int(c[0]), "z": float(c[1]),
-                 "y": float(c[2]), "x": float(c[3]), "source_id": -1, "target_id": -1,
-                 "edge_prob": 0.0, "edge_dist": 0.0} for i, c in enumerate(coords)]
-        rows += [{"row_type": "edge", "node_id": -1, "t": -1, "z": 0.0, "y": 0.0, "x": 0.0,
-                  "source_id": int(s), "target_id": int(t), "edge_prob": float(p),
-                  "edge_dist": float(d)} for s, t, p, d in st["edges"]]
+        e = st["edges"]
+        src = np.asarray([x[0] for x in e], dtype=np.int64)
+        tgt = np.asarray([x[1] for x in e], dtype=np.int64)
+        prob = np.asarray([x[2] for x in e], dtype=np.float32)
+        dist = np.asarray([x[3] for x in e], dtype=np.float32)
 
         tag = f"{crop}__tta-{tta}__det-{thr:g}"
         dest = OUT / ("peaks" if thr == PEAK_ONLY_THRESHOLD else "cache")
         dest.mkdir(parents=True, exist_ok=True)
-        path = dest / f"{tag}.parquet"
-        pl.DataFrame(rows).write_parquet(path)
+        path = dest / f"{tag}.npz"
+        np.savez_compressed(path, coords=coords, edge_src=src, edge_tgt=tgt,
+                            edge_prob=prob, edge_dist=dist)
         records[tag] = {"crop": crop, "family": crop.split("_")[0], "tta": tta,
                         "det_threshold": thr, "split_used": split,
-                        "n_coords": int(len(coords)), "n_edges": int(len(st["edges"])),
+                        "n_coords": int(len(coords)), "n_edges": int(len(e)),
                         "output_sha256": sha256(path), "output_bytes": path.stat().st_size,
                         "path": str(path.relative_to(OUT))}
-        print(f"  {tag}: {len(coords)} coords, {len(st['edges'])} edges", flush=True)
+        print(f"  {tag}: {len(coords)} coords, {len(e)} edges", flush=True)
 
     return {"crop": crop, "split_used": split, "status": "ok",
             "runtime_s": round(time.time() - t_start, 1), "outputs": records,

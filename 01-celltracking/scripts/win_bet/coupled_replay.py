@@ -51,8 +51,15 @@ RAW_OOF = ROOT / "artifacts" / "kaggle" / "oof_clean"
 FOLDS = {0: "44b6", 1: "6bba"}
 
 
-def det_cache_dir(det: float) -> Path:
-    return CACHE_ROOT / f"det_{det:.5f}".rstrip("0").rstrip(".")
+# Detector TTA scheme of the cache being replayed. E0c/oof_clean used stock 4-view; the
+# deployed v122 patches it to spatial D4. This is a real pipeline factor with no arm yet,
+# so it is selected explicitly and recorded in every status record.
+TTA = "d4"
+
+
+def cache_path(crop: str, det: float) -> Path:
+    """Kernel emits flat files: <crop>__tta-<scheme>__det-<threshold>.npz"""
+    return CACHE_ROOT / "det" / f"{crop}__tta-{TTA}__det-{det:g}.npz"
 
 
 def out_dir(arm: str) -> Path:
@@ -61,12 +68,16 @@ def out_dir(arm: str) -> Path:
 
 # --------------------------------------------------------------------------- graph build
 def graph_from_cached_detections(path: Path):
-    """Rebuild the pre-ILP tracksdata graph from a cached (coords, edges) parquet."""
+    """Rebuild the pre-ILP tracksdata graph from a cached (coords, edges) .npz.
+
+    The cache is numpy rather than parquet because the Kaggle image's polars runtime is
+    not loadable in the inference kernel; see notebooks/kaggle_coupled_cache.
+    Cached coord indices are positional, so index i in `coords` is node id i.
+    """
     import tracksdata as td
 
-    df = pl.read_parquet(path)
-    nodes = df.filter(pl.col("row_type") == "node")
-    edges = df.filter(pl.col("row_type") == "edge")
+    d = np.load(path)
+    coords = d["coords"]
 
     graph = td.graph.RustWorkXGraph()
     graph.add_node_attr_key("t", 0)
@@ -75,17 +86,15 @@ def graph_from_cached_detections(path: Path):
     graph.add_edge_attr_key("edge_prob", 0.0)
     graph.add_edge_attr_key("edge_dist", 0.0)
 
-    id_map: dict[int, int] = {}
-    for row in nodes.iter_rows(named=True):
-        nid = graph.add_node({"t": int(row["t"]), "z": float(row["z"]),
-                              "y": float(row["y"]), "x": float(row["x"])})
-        id_map[int(row["node_id"])] = nid
-    for row in edges.iter_rows(named=True):
-        s, t = id_map.get(int(row["source_id"])), id_map.get(int(row["target_id"]))
-        if s is None or t is None:
+    id_map = [graph.add_node({"t": int(c[0]), "z": float(c[1]),
+                              "y": float(c[2]), "x": float(c[3])}) for c in coords]
+    n = len(id_map)
+    for s, t, p, dist in zip(d["edge_src"], d["edge_tgt"], d["edge_prob"], d["edge_dist"]):
+        si, ti = int(s), int(t)
+        if not (0 <= si < n and 0 <= ti < n):
             continue
-        graph.add_edge(s, t, {"edge_prob": float(row["edge_prob"]),
-                              "edge_dist": float(row["edge_dist"])})
+        graph.add_edge(id_map[si], id_map[ti],
+                       {"edge_prob": float(p), "edge_dist": float(dist)})
     return graph
 
 
@@ -146,7 +155,7 @@ def replay_crop(arm: str, split: int, crop: str) -> dict:
         graph = W.graph_from_geff(src)
         cand_hash = hashlib.sha256(str(src).encode()).hexdigest()[:16]
     else:
-        src = det_cache_dir(spec["det"]) / str(split) / f"{crop}.parquet"
+        src = cache_path(crop, spec["det"])
         if not src.exists():
             return {"crop": crop, "split": split, "arm": arm, "status": "missing_cache",
                     "detail": str(src)}
@@ -164,7 +173,7 @@ def replay_crop(arm: str, split: int, crop: str) -> dict:
 
     return {
         "crop": crop, "split": split, "arm": arm, "status": "ok",
-        "config_hash": CA.config_hash(arm), "candidate_hash": cand_hash,
+        "config_hash": CA.config_hash(arm), "candidate_hash": cand_hash, "tta": TTA,
         "det_threshold": spec["det"], "ilp": spec["ilp"],
         "wrapper": spec["wrapper"],
         "nodes_pre_wrapper": len(nbi), "nodes_post_wrapper": len(fn),
@@ -193,10 +202,14 @@ def main() -> None:
     ap.add_argument("--arm", required=True, choices=list(CA.ARMS))
     ap.add_argument("--splits", default="0,1")
     ap.add_argument("--crops", default="", help="comma-separated crop subset (preflight)")
+    ap.add_argument("--tta", default="d4", choices=["4view", "d4"],
+                    help="detector TTA scheme of the cache to replay")
     ap.add_argument("--isolated", action="store_true",
                     help="run each crop in its own subprocess (ILP OOM containment)")
     a = ap.parse_args()
 
+    global TTA
+    TTA = a.tta
     arm = a.arm
     splits = [int(s) for s in a.splits.split(",") if s != ""]
     subset = [c for c in a.crops.split(",") if c]
