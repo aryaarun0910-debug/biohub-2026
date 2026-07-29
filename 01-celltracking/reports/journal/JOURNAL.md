@@ -947,9 +947,13 @@ private organizer clarification; score-probing is forbidden. Full plan:
   augmentation counts over 40 samples gamma 22 / noise 22 / brightness 20 / contrast 16 /
   psf_blur 15 / drift 14 (all near configured probabilities); edge-positive targets 40/40
   windows, mean 2.6 per window; grad norm median 85.2 p90 148.7 max 232.3, 0 non-finite.
-- LARGE CLIPPED GRADIENTS (median 85 vs clip threshold 1.0) are INHERITED BASELINE
-  behaviour. Per commander: instrument clipped-step frequency, component losses and grad
-  norms, but do NOT alter clipping or loss weights during M1.
+- LARGE CLIPPED GRADIENTS (median 85 vs clip threshold 1.0): **THIS CLAIM WAS WRONG AND IS
+  RETRACTED.** It was measured in the pre-fix smoke that ran with train_epoch's own 0.1/0.1
+  loss weights. Under the CORRECT baseline weights (10.0/0.01), session 1 measured grad-norm
+  median 2.2 falling to 0.2, with clipped-step frequency declining 57% -> 35% across epochs
+  1-15. The median-85 figure was an artifact of the loss-weight bug, not inherited baseline
+  behaviour. Clipping and loss weights remain unaltered during M1, and clipped-step
+  frequency, component losses and grad norms are instrumented per epoch.
 - `max_nodes=10` computed over TRAIN crops only (baseline uses train+test, but test there is
   the held-out family M1 must not touch). It sets padding width and is masked -> semantically
   neutral.

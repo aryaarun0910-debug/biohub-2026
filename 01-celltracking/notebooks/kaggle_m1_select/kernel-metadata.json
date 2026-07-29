@@ -8,10 +8,13 @@
   "enable_gpu": true,
   "machine_shape": "NvidiaTeslaT4",
   "enable_internet": false,
-  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
   "dataset_sources": [
     "aryaarun07/biohub-m1-code",
     "aryaarun07/biohub-m1-fold1-ckpt",
+    "aryaarun07/biohub-coupled-fold-weights",
     "pilkwang/biohub-tracking-support-pack-50ep-v1"
   ],
   "kernel_sources": [],

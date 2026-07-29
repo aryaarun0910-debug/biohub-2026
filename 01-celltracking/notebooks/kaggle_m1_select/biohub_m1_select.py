@@ -34,6 +34,23 @@ CANDIDATE_EPOCHS = [10, 15, 20, 25, 30]
 FORBIDDEN_FAMILY = "6bba"
 EXPECT_CONFIG_HASH = "fc7e4644ea37a90a"
 EXPECT_AUG = "368908ecc44c0214"
+EXPECT_SEED = 20260729
+EXPECT_MANIFEST_SHA = ("ea5fe9b2eb9bd0fee8df513512c93b38"
+                       "ec9268a8da1c6fece57f2dbd5f0324f0")
+EXPECT_TRAINER_SHA = ("c4f6317736bb3bb1ec8f3f6e9a6d935a"
+                      "463e3f0f1f685481b2d13218d35dc9ea")
+EXPECT_PREDICTOR_SHA = ("c44e771ba5980b820f93091e03a303c2"
+                        "5dfe8f3232e501f54dc9565731c234b9")
+# Inference-parity canary: the parity-proven split-0 checkpoint on 44b6_0113de3b at
+# det 0.990 / 4-view. All four values were verified locally against oof_clean before
+# being pinned here.
+CANARY = {
+    "crop": "44b6_0113de3b", "n_coords": 28119, "n_edges": 25139,
+    "coords_sha": ("8e16e63bc8c8e198328ce135d9dc6b49"
+                   "f2b8e8c5262747dcd3ca92811de5407a"),
+    "edges_sha": ("d5c21c7a0d0645045b6d0f90fe85de7a"
+                  "6fe1dbbd805188ef0cc21fdaa2ed6c43"),
+}
 
 
 def find_one(pattern: str) -> Path:
@@ -109,11 +126,54 @@ import m1_augment as M1A  # noqa: E402
 from m1_config import config_hash  # noqa: E402
 
 # ---------------------------------------------------------------- guards
-manifest = json.loads((m1_dir / "val_manifests.json").read_text())
+manifest_path = m1_dir / "val_manifests.json"
+manifest = json.loads(manifest_path.read_text())
 d1 = manifest["directions"]["1"]
 VAL_CROPS = sorted(d1["inner_val_crops"])
 if config_hash() != EXPECT_CONFIG_HASH or M1A.config_fingerprint() != EXPECT_AUG:
-    raise SystemExit("ABORT -- config/augmentation hash mismatch")
+    raise SystemExit("ABORT -- live config/augmentation hash mismatch")
+if sha256(manifest_path) != EXPECT_MANIFEST_SHA:
+    raise SystemExit(f"ABORT -- manifest SHA {sha256(manifest_path)} != {EXPECT_MANIFEST_SHA}")
+pred_sha = sha256(repo / "scripts" / "predict_unet_transformer.py")
+train_sha = sha256(repo / "scripts" / "train_unet_transformer.py")
+if pred_sha != EXPECT_PREDICTOR_SHA:
+    raise SystemExit(f"ABORT -- predictor source SHA {pred_sha} != expected")
+if train_sha != EXPECT_TRAINER_SHA:
+    raise SystemExit(f"ABORT -- trainer source SHA {train_sha} != expected")
+print(f"provenance locked: manifest/predictor/trainer SHAs verified", flush=True)
+
+# ---- resolve exactly ONE checkpoint directory holding exactly the 5 required epochs
+cand_files = {}
+for ep in CANDIDATE_EPOCHS:
+    hits = sorted(glob.glob(f"/kaggle/input/**/m1_fold1_epoch{ep:02d}.pt", recursive=True))
+    if len(hits) == 0:
+        raise SystemExit(f"ABORT -- checkpoint for epoch {ep} is missing; all 5 required")
+    if len(hits) > 1:
+        raise SystemExit(f"ABORT -- duplicate checkpoints for epoch {ep}: {hits}")
+    cand_files[ep] = Path(hits[0])
+ck_dirs = {p.parent for p in cand_files.values()}
+if len(ck_dirs) != 1:
+    raise SystemExit(f"ABORT -- checkpoints span multiple directories: {ck_dirs}")
+
+CK_META = {}
+for ep, p in cand_files.items():
+    b = torch.load(p, map_location="cpu", weights_only=False)
+    checks = {
+        "epoch": (b.get("epoch"), ep),
+        "global_step": (b.get("global_step"), ep * 800),
+        "seed": (b.get("seed"), EXPECT_SEED),
+        "config_hash": (b.get("config_hash"), EXPECT_CONFIG_HASH),
+        "aug_fingerprint": (b.get("aug_fingerprint"), EXPECT_AUG),
+        "manifest_sha256": (b.get("manifest_sha256"), EXPECT_MANIFEST_SHA),
+    }
+    bad = {k: v for k, v in checks.items() if v[0] != v[1]}
+    if bad:
+        raise SystemExit(f"ABORT -- epoch {ep} checkpoint field mismatch: {bad}")
+    CK_META[ep] = {"file": p.name, "sha256": sha256(p), "bytes": p.stat().st_size,
+                   "epoch": b["epoch"], "global_step": b["global_step"]}
+    print(f"  checkpoint epoch {ep:2d}: step={b['global_step']} sha={CK_META[ep]['sha256'][:16]} OK",
+          flush=True)
+print(f"all {len(CANDIDATE_EPOCHS)} checkpoints verified in {ck_dirs.pop()}", flush=True)
 leak = [c for c in VAL_CROPS if c.startswith(FORBIDDEN_FAMILY)]
 if leak:
     raise SystemExit(f"ABORT -- held-out family in selection set: {leak}")
@@ -238,17 +298,61 @@ def infer_crop(model, crop: str, window_size: int = 2, downsample=(1, 4, 4)) -> 
             "edge_dist": np.asarray([e[3] for e in edges], np.float32)}
 
 
+# ---------------------------------------------------------------- inference-parity canary
+def _canary() -> dict:
+    """Reproduce the parity-proven split-0 result before spending 60 candidate runs.
+
+    Any mismatch means this kernel's inference path differs from the one that produced the
+    verified E0c/oof_clean graph, so every candidate number would be untrustworthy.
+    """
+    import train_unet_transformer as _T
+    w = sorted(glob.glob("/kaggle/input/**/edge_predictor_best_split_0.pth", recursive=True))
+    if not w:
+        raise SystemExit("ABORT -- parity split-0 checkpoint not attached; cannot run canary")
+    cfg = sorted(glob.glob("/kaggle/input/**/config_split_0.json", recursive=True))
+    stage = Path("/kaggle/working/_canary_w")
+    stage.mkdir(parents=True, exist_ok=True)
+    (stage / "edge_predictor.pth").write_bytes(Path(w[0]).read_bytes())
+    if cfg:
+        (stage / "config.json").write_bytes(Path(cfg[0]).read_bytes())
+    model, _ws, _ds = P.load_model(stage / "edge_predictor.pth", device)
+    model.eval()
+    out = infer_crop(model, CANARY["crop"])
+    co = np.ascontiguousarray(out["coords"].astype(np.int16))
+    order = np.lexsort((out["edge_tgt"], out["edge_src"]))
+    pairs = np.ascontiguousarray(np.stack([out["edge_src"][order],
+                                           out["edge_tgt"][order]], 1).astype(np.int64))
+    got = {"n_coords": int(co.shape[0]), "n_edges": int(pairs.shape[0]),
+           "coords_sha": hashlib.sha256(co.tobytes()).hexdigest(),
+           "edges_sha": hashlib.sha256(pairs.tobytes()).hexdigest()}
+    for k in ("n_coords", "n_edges", "coords_sha", "edges_sha"):
+        status = "OK" if got[k] == CANARY[k] else "MISMATCH"
+        print(f"  canary {k:<11}: {got[k] if 'sha' not in k else got[k][:24]} {status}",
+              flush=True)
+    if any(got[k] != CANARY[k] for k in ("n_coords", "n_edges", "coords_sha", "edges_sha")):
+        raise SystemExit("ABORT -- inference parity canary FAILED; candidate inference "
+                         "would be untrustworthy")
+    del model
+    torch.cuda.empty_cache()
+    return got
+
+
+print("")
+print("=== INFERENCE-PARITY CANARY (before any candidate run) ===", flush=True)
+canary_got = _canary()
+print("canary PASSED: inference path reproduces the parity-proven split-0 graph", flush=True)
+
 manifest_out = {"det_threshold": DET_THRESHOLD, "tta": TTA, "downstream": "E0c greedy (no ILP)",
+                "canary": canary_got, "checkpoints": CK_META,
+                "provenance": {"manifest_sha256": EXPECT_MANIFEST_SHA,
+                               "trainer_sha256": EXPECT_TRAINER_SHA,
+                               "predictor_sha256": EXPECT_PREDICTOR_SHA},
                 "val_crops": VAL_CROPS, "config_hash": config_hash(),
                 "aug_fingerprint": M1A.config_fingerprint(),
                 "gpu": torch.cuda.get_device_name(0), "results": []}
 t_all = time.time()
 for ep in CANDIDATE_EPOCHS:
-    cks = sorted(glob.glob(f"/kaggle/input/**/m1_fold1_epoch{ep:02d}.pt", recursive=True))
-    if not cks:
-        print(f"  epoch {ep}: checkpoint not attached, skipping", flush=True)
-        continue
-    ck = Path(cks[0])
+    ck = cand_files[ep]                    # already verified; missing/duplicate aborted above
     model, blob = load_m1_model(ck)
     print(f"\n=== checkpoint epoch {ep} (step {blob['global_step']}, "
           f"sha {sha256(ck)[:16]}) ===", flush=True)
@@ -270,6 +374,12 @@ for ep in CANDIDATE_EPOCHS:
     del model
     torch.cuda.empty_cache()
 
+EXPECTED_CELLS = len(CANDIDATE_EPOCHS) * len(VAL_CROPS)
+if len(manifest_out["results"]) != EXPECTED_CELLS:
+    raise SystemExit(f"ABORT -- incomplete grid: {len(manifest_out['results'])}/"
+                     f"{EXPECTED_CELLS} caches. A partial grid is a FAILURE, not a result.")
+manifest_out["grid_complete"] = True
+manifest_out["expected_cells"] = EXPECTED_CELLS
 manifest_out["total_hours"] = round((time.time() - t_all) / 3600, 2)
 (OUT / "select_manifest.json").write_text(json.dumps(manifest_out, indent=2))
 print(f"\nDONE in {manifest_out['total_hours']} h; "
