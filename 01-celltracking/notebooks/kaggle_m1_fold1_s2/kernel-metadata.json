@@ -1,0 +1,19 @@
+{
+  "id": "aryaarun07/biohub-m1-fold1-s2",
+  "title": "Biohub M1 Fold1 S2",
+  "code_file": "biohub_m1_fold1.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "enable_internet": false,
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "dataset_sources": [
+    "aryaarun07/biohub-m1-code",
+    "aryaarun07/biohub-m1-fold1-ckpt",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1"
+  ],
+  "kernel_sources": [],
+  "model_sources": []
+}
