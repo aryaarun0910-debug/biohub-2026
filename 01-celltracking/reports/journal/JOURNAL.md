@@ -826,3 +826,31 @@ private organizer clarification; score-probing is forbidden. Full plan:
   graph with only the v122 wrapper swapped -- the C1 ILP is never solved twice. Arm A needs
   no inference or solve. Max 3 local ILP workers, isolated subprocesses, large crops
   scheduled apart.
+
+### 2026-07-29 (full-population coupled cache COMPLETE; CPU replay running)
+- **GPU: 199/199 crops cached, ZERO failures.** Two private internet-off T4 shards,
+  det 0.9690, stock 4-view TTA, LOEO routing. shard0 100/100 in 3.51h, shard1 99/99 in
+  3.53h (0.6% wall imbalance vs 0.11% predicted by node-count balancing). Peak GPU
+  601/599 MB. All 199 outputs hash-verified against the kernel manifests (199 ok, 0 bad),
+  46 MB, covering exactly 71x44b6 + 128x6bba.
+- VERIFICATION: production kernel reproduced the v7 preflight cache BIT-FOR-BIT on the
+  shared crop (44b6_0113de3b: 34,539 coords / 29,000 edges), confirming the atomic-write
+  fix and production hardening did not perturb numbers.
+- GUARDS WORKED: startup self-test passed at 502s; canary stayed silent; both added after
+  an earlier launch burned ~26 min of T4 per shard because np.savez_compressed appends
+  ".npz" to a temp name, so os.replace failed AFTER each crop's inference. Root cause was
+  process, not the bug: a validated preflight script was MODIFIED (atomic writes, sharding,
+  resumability) and the modified script was scaled to 199 crops without re-validation.
+- CPU replay (shared-solve: C1 ILP solved once, reused by D) at 184/199, 0 failures.
+  ILP cost ~8ms/node; 21 crops >=68k nodes run serially because the largest (102,959 nodes)
+  peaks at ~2.2GB RSS -- three concurrently would exceed available RAM. Light crops run
+  3-wide. Heavy phase ~10-14 min/crop; light phase reached ~87 crops/hr.
+- Scoring/decomposition script built AND validated ahead of the data; validation caught two
+  bugs pre-emptively: displacement read a non-existent edge_dist column, and -- more
+  serious -- aggregates were computed over per-arm crop sets, so arm A (all 199 from the
+  frozen E0c cache) was being compared against D-on-N, silently fabricating a delta. All
+  aggregates are now restricted to the per-fold intersection with loud partial-coverage
+  warnings.
+- NEXT (resume point): `.\.venv\Scripts\python.exe scripts\win_bet\coupled_replay_shared.py --workers 3`
+  (resumable, skips completed) then `.\.venv\Scripts\python.exe scripts\win_bet\coupled_score.py --workers 4`.
+  Promotion gate: D improves both folds, min-fold D-A >= +0.005, no regime collapse.
