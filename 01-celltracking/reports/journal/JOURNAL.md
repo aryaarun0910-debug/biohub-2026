@@ -979,3 +979,23 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - NEXT: guarded selection stage -- inference-parity canary, all-5-checkpoint verification,
   full 5x12=60 grid, then local E0c-wrapper + patched scoring and a single frozen-rule
   selection on the 12-crop 44b6 inner validation. Held-out 6bba still untouched.
+
+### 2026-07-29 (M1 checkpoint selection: EPOCH 10 wins; later checkpoints degrade sharply)
+- Selection stage passed every guard: inference-parity canary reproduced the parity-proven
+  split-0 graph EXACTLY (28,119 coords / 25,139 greedy edges, both canonical SHAs);
+  provenance verified (manifest ea5fe9b2...0324f0, trainer c4f63177...d35dc9ea, predictor
+  c44e771b...31c234b9); complete 5x12=60 grid in 1.2 h; local scoring path parity-tested
+  against E0c's recorded 0.8132 before any candidate was scored.
+- INNER-VALIDATION COMPOSITE (12-crop 44b6, edge-volume weighted, E0c downstream):
+  **epoch 10 = 0.7963** | epoch 15 = 0.7955 | epoch 25 = 0.7501 | epoch 30 = 0.6975 |
+  epoch 20 = 0.6820. Selected epoch 10 by the frozen rule (max composite; ties -> earlier).
+- **THE EARLIEST CHECKPOINT IS BEST AND LATER ONES DEGRADE** -- graph-level composite falls
+  ~0.10 from epoch 10 to epoch 20/30 while the training edge loss kept falling 0.0060 ->
+  0.0006. That is textbook proxy-metric divergence and vindicates both the decision to select
+  on exact patched composite rather than acc*recall, and the decision to retain early
+  candidates instead of taking the final model. A 45-epoch run would have been worse still.
+- LIKE-FOR-LIKE vs E0c on the SAME 12 crops: E0c 0.7889, M1 epoch-10 0.7963 -> **+0.0074**.
+  Above the +0.005 bar, but this is the TRAINING family (held-out crops, same embryo), NOT
+  the promotion gate. The gate is cross-family on 6bba.
+- NEXT: single one-shot evaluation of epoch 10 on the complete 128-crop held-out 6bba family;
+  gate >= +0.005 over E0c's 0.6490 with no major regime collapse.

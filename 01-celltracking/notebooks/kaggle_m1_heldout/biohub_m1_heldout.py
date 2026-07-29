@@ -32,7 +32,9 @@ DET_THRESHOLD = 0.990          # E0c operating point
 TTA = "4view"
 # Set from the frozen inner-validation selection. Exactly ONE checkpoint is
 # evaluated, exactly ONCE, on the complete held-out family.
-SELECTED_EPOCH = int(os.environ.get("M1_SELECTED_EPOCH", "0"))
+# Frozen inner-validation selection (reports/inventory/m1_selection.json):
+# epoch 10 composite 0.7963 (15: 0.7955, 25: 0.7501, 30: 0.6975, 20: 0.6820).
+SELECTED_EPOCH = 10
 CANDIDATE_EPOCHS = [SELECTED_EPOCH]
 HELD_OUT_FAMILY = "6bba"
 EXPECT_CONFIG_HASH = "fc7e4644ea37a90a"
