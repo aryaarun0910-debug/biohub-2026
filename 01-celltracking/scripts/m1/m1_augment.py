@@ -164,3 +164,29 @@ if __name__ == "__main__":
     import json as _json
     print(_json.dumps(DEFAULT.to_dict(), indent=2))
     print("fingerprint:", config_fingerprint())
+
+
+# ---------------------------------------------------------------- trainer adapter
+def as_trainer_augmentation(cfg: AugmentConfig = DEFAULT):
+    """Adapt the M1 image-only pipeline to the trainer's augmentation contract.
+
+    The trainer calls ``aug(imgs, coords, masks, *, rng) -> (imgs, coords, masks)`` where
+    ``imgs`` is a torch tensor of shape (W, *spatial). Coordinates and masks are returned
+    UNCHANGED -- that is the property that makes round-one augmentation target-safe.
+    """
+    def _aug(imgs, coords, masks, *, rng):
+        import torch
+        arr = imgs.detach().cpu().float().numpy()
+        out = apply_augmentations(arr, rng, cfg)
+        return torch.from_numpy(out).to(imgs.device, imgs.dtype), coords, masks
+    _aug.__name__ = "m1_image_only_augment"
+    return _aug
+
+
+# Source patch for the trainer's UNSEEDED per-sample RNG. FrameWindowDataset.__getitem__
+# creates `np.random.default_rng()` with no seed, which is the root reproducibility defect.
+# `idx` is in scope there, so the replacement derives the generator from
+# (seed, epoch, idx) -- reproducible, yet decorrelated across epochs and samples.
+RNG_PATCH_OLD = "            rng = np.random.default_rng()"
+RNG_PATCH_NEW = ("            rng = np.random.default_rng("
+                 "[M1_SEED, int(M1_EPOCH[0]), int(idx)])")

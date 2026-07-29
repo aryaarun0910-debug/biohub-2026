@@ -118,3 +118,26 @@ def test_ranges_are_physically_sane():
     assert c.blur_sigma_um[0] == 0.0 and c.blur_sigma_um[1] <= 1.5
     assert c.poisson_scale[0] > 0
     assert 0 <= c.drift_max <= 0.2
+
+
+def test_trainer_adapter_leaves_coords_and_masks_identical():
+    """The whole safety argument for round one: targets must pass through untouched."""
+    torch = pytest.importorskip("torch")
+    aug = M.as_trainer_augmentation()
+    imgs = torch.rand(2, 6, 12, 12)
+    coords = torch.rand(2, 5, 3)
+    masks = torch.ones(2, 5, dtype=torch.bool)
+    o_i, o_c, o_m = aug(imgs, coords, masks, rng=np.random.default_rng(3))
+    assert o_i.shape == imgs.shape and o_i.dtype == imgs.dtype
+    assert torch.equal(o_c, coords), "coordinates must be unchanged"
+    assert torch.equal(o_m, masks), "masks must be unchanged"
+    assert not torch.equal(o_i, imgs), "image should actually be transformed"
+
+
+def test_rng_patch_targets_the_real_unseeded_line():
+    """The patch string must match the vendored trainer exactly, or determinism silently
+    fails to apply."""
+    src = (Path(__file__).resolve().parents[1]
+           / "vendor/kaggle-cell-tracking/scripts/train_unet_transformer.py").read_text()
+    assert M.RNG_PATCH_OLD in src, "unseeded RNG line not found; patch would be a no-op"
+    assert "M1_SEED" in M.RNG_PATCH_NEW and "idx" in M.RNG_PATCH_NEW
