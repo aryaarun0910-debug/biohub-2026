@@ -126,3 +126,102 @@ def step_stats(log: list[dict]) -> dict:
         "det_loss": {"first10": float(dl[:10].mean()), "last10": float(dl[-10:].mean())},
         "nonfinite": int((~np.isfinite(e)).sum() + (~np.isfinite(dl)).sum()),
     }
+
+
+# ---------------------------------------------------------------- baseline loss weights
+# CRITICAL: train_epoch()'s OWN defaults are (0.1, 0.1), but train() -- the baseline path --
+# passes (1e1, 1e-2). Calling train_epoch without these silently trains with a 100x smaller
+# detection weight and a 10x larger negative weight, which would make M1 incomparable to the
+# baseline. Locked here and asserted in tests/test_m1_driver.py.
+BASELINE_LOSS_WEIGHTS = {
+    "det_loss_weight": 1e1,
+    "det_neg_weight": 1e-2,
+    "pool_kernel_um": 5.0,
+}
+
+
+class ResumableSampler:
+    """Deterministic epoch ordering with exact mid-epoch resume.
+
+    A fresh shuffle on resume is NOT acceptable here: it replays already-consumed samples
+    instead of continuing. The epoch permutation is derived from (seed, epoch) so it can be
+    reconstructed exactly, and iteration starts at the next unconsumed index.
+    """
+
+    def __init__(self, n: int, seed: int, epoch: int, start: int = 0,
+                 length: int | None = None):
+        self.n, self.seed, self.epoch = n, seed, epoch
+        self.perm = np.random.default_rng([seed, epoch]).permutation(n)
+        self.start = start
+        self.length = min(length if length is not None else n, n)
+
+    def __iter__(self):
+        return iter(self.perm[self.start:self.length].tolist())
+
+    def __len__(self) -> int:
+        return max(0, self.length - self.start)
+
+    def permutation_hash(self) -> str:
+        import hashlib
+        return hashlib.sha256(self.perm.tobytes()).hexdigest()[:16]
+
+    def state(self) -> dict:
+        return {"n": self.n, "seed": self.seed, "epoch": self.epoch,
+                "start": self.start, "length": self.length,
+                "permutation_hash": self.permutation_hash()}
+
+    @classmethod
+    def resume(cls, state: dict, step_in_epoch: int):
+        s = cls(state["n"], state["seed"], state["epoch"],
+                start=step_in_epoch, length=state["length"])
+        if s.permutation_hash() != state["permutation_hash"]:
+            raise SystemExit("ABORT -- epoch permutation hash mismatch on resume; the data "
+                             "ordering could not be reconstructed")
+        return s
+
+
+# Per-sample identity log, used by the resume test to prove that resumed steps consume the
+# SAME samples with the SAME augmentations. Disabled during full training (hashing every
+# augmented volume is expensive).
+SAMPLE_LOG: list[dict] = []
+SAMPLE_LOG_ENABLED = [False]
+
+SAMPLE_PATCH_OLD = """            meta = {**meta, "coords": c, "masks": m}"""
+SAMPLE_PATCH_NEW = """            meta = {**meta, "coords": c, "masks": m}
+        try:
+            import m1_driver as _m1d
+            if _m1d.SAMPLE_LOG_ENABLED[0]:
+                import hashlib as _hl
+                _m1d.SAMPLE_LOG.append({
+                    "idx": int(idx),
+                    "img_hash": _hl.sha256(
+                        imgs.detach().cpu().float().numpy().tobytes()).hexdigest()[:12],
+                })
+        except Exception:
+            pass"""
+
+
+# Capture the gradient norm: clip_grad_norm_ RETURNS the pre-clip total norm but the
+# vendored code discards it, so grad-norm statistics are otherwise unavailable.
+GRADNORM_OLD = "        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)"
+GRADNORM_NEW = "        _m1_gn = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)"
+
+TELEMETRY_RICH_OLD = '"t_bwd": float(t3 - t2),'
+_NL = chr(10)
+TELEMETRY_RICH_NEW = _NL.join([
+    '"t_bwd": float(t3 - t2),',
+    '                "grad_norm": float(_m1_gn),',
+    '                "n_pos_targets": int(targets.sum().item()),',
+])
+
+
+def patch_all(src: str, seed: int, augment_module) -> str:
+    """Apply every source patch: determinism, telemetry, grad-norm, sample identity."""
+    src = patch_trainer_source(src, seed, augment_module)
+    for old, new, label in ((GRADNORM_OLD, GRADNORM_NEW, "grad-norm"),
+                            (TELEMETRY_RICH_OLD, TELEMETRY_RICH_NEW, "rich telemetry"),
+                            (SAMPLE_PATCH_OLD, SAMPLE_PATCH_NEW, "sample identity")):
+        if old not in src:
+            raise SystemExit(f"ABORT -- {label} anchor missing; patch would no-op")
+        src = src.replace(old, new, 1)
+    return src

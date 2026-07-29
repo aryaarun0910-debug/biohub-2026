@@ -144,13 +144,27 @@ ORDER = [("p_brightness", brightness), ("p_gamma", gamma), ("p_contrast", contra
          ("p_noise", shot_and_read_noise), ("p_blur", psf_blur), ("p_drift", intensity_drift)]
 
 
+AUG_LOG: list[dict] = []
+AUG_LOG_ENABLED = [False]
+
+
 def apply_augmentations(vol: np.ndarray, rng: np.random.Generator,
                         cfg: AugmentConfig = DEFAULT) -> np.ndarray:
-    """Apply the frozen M1 image-only pipeline. Coordinates/targets are NEVER touched."""
+    """Apply the frozen M1 image-only pipeline. Coordinates/targets are NEVER touched.
+
+    When AUG_LOG_ENABLED[0] is set, records which transforms fired per call so the smoke
+    can report observed counts and ranges rather than only the configured ones.
+    """
     out = vol.astype(np.float32, copy=True)
+    fired = []
     for prob_attr, fn in ORDER:
         if rng.random() < getattr(cfg, prob_attr):
+            before = float(out.mean())
             out = fn(out, rng, cfg)
+            fired.append({"t": fn.__name__, "d_mean": float(out.mean()) - before})
+    if AUG_LOG_ENABLED[0]:
+        AUG_LOG.append({"fired": [f["t"] for f in fired],
+                        "d_mean": {f["t"]: round(f["d_mean"], 5) for f in fired}})
     return np.clip(out, 0.0, 1.0).astype(np.float32)
 
 

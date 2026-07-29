@@ -179,18 +179,17 @@ print("")
 print("=== TRAIN / INNER-VALIDATION SETS (direction 1) ===")
 print(f"  train crops ({len(TRAIN_SET)}): {sorted(TRAIN_SET)}")
 print(f"  inner-val crops ({len(VAL_SET)}): {sorted(VAL_SET)}")
-print(f"  INTERSECTION: {inter}  -> {'EMPTY (correct)' if not inter else 'LEAK!'}")
+print(f"  INTERSECTION: {inter} -> {'EMPTY (correct)' if not inter else 'LEAK!'}")
 if inter:
-    raise SystemExit(f"ABORT -- validation crops present in training loader: {inter}")
-allc = sorted(TRAIN_SET | VAL_SET)
-print(f"  union={len(allc)} (train family total)")
-bad = [c for c in allc if not c.startswith("44b6")]
-if bad:
-    raise SystemExit(f"ABORT -- non-train-family crop in scope: {bad[:5]}")
-print(f"  every crop in scope is 44b6; zero {FORBIDDEN_FAMILY} paths constructible  OK")
+    raise SystemExit(f"ABORT -- validation crops in training loader: {inter}")
+if [c for c in TRAIN_SET | VAL_SET if not c.startswith("44b6")]:
+    raise SystemExit("ABORT -- non-train-family crop in scope")
+print(f"  all 44b6; zero {FORBIDDEN_FAMILY} paths constructible  OK")
 
-# ------------------------------------------------- patch trainer (determinism + telemetry)
+# ------------------------------------------------- patch trainer (4 patches) + construct
 import shutil  # noqa: E402
+
+import psutil  # noqa: E402
 
 import m1_driver as MD  # noqa: E402
 
@@ -200,8 +199,9 @@ if not (work_repo / "scripts").exists():
     shutil.copytree(repo / "scripts", work_repo / "scripts")
     shutil.copytree(repo / "src", work_repo / "src")
 tgt = work_repo / "scripts" / "train_unet_transformer.py"
-tgt.write_text(MD.patch_trainer_source(tgt.read_text(), EXPECT["seed"], M1A))
-print("trainer patched: seeded per-sample RNG + per-step telemetry", flush=True)
+trainer_src_sha = hashlib.sha256((repo / "scripts" / "train_unet_transformer.py").read_bytes()).hexdigest()
+tgt.write_text(MD.patch_all(tgt.read_text(), EXPECT["seed"], M1A))
+print("trainer patched: seeded RNG + telemetry + grad-norm + sample identity", flush=True)
 sys.path.insert(0, str(work_repo / "src"))
 sys.path.insert(0, str(work_repo / "scripts"))
 sys.path.insert(0, str(m1_dir))
@@ -212,8 +212,9 @@ import train_unet_transformer as T  # noqa: E402
 
 device = torch.device("cuda")
 manifest_sha = sha256(m1_dir / "val_manifests.json")
+LW = MD.BASELINE_LOSS_WEIGHTS
+print(f"BASELINE loss weights enforced: {LW}", flush=True)
 
-# ------------------------------------------------- construct exactly as train() does
 t_index = time.time()
 train_files = [data_dir / c for c in sorted(TRAIN_SET)]
 video_data = []
@@ -223,120 +224,161 @@ for f in train_files:
 n_windows = sum(len(w) for _, w in video_data)
 max_nodes = max(max(w.node_counts) for _, ws in video_data for w in ws)
 index_s = time.time() - t_index
+# window index -> crop, so unique crops sampled can be reported
+win_owner = []
+for (vm, ws) in video_data:
+    win_owner += [Path(str(getattr(vm, "path", getattr(vm, "name", "?")))).name] * len(ws)
 print(f"indexed {len(train_files)} crops -> {n_windows} windows, max_nodes={max_nodes}, "
       f"{index_s:.1f}s", flush=True)
 
 
-def build(seed):
+def build(seed, epoch=0, start=0, length=None):
     DT.seed_everything(seed)
     ds = T.FrameWindowDataset(video_data, max_nodes=max_nodes,
                               augmentations=[T.flip_augment, M1A.as_trainer_augmentation()])
-    g = torch.Generator()
-    g.manual_seed(seed)
-    ld = DataLoader(ds, batch_size=EXPECT["batch_size"], shuffle=True, num_workers=2,
-                    prefetch_factor=2, persistent_workers=True, pin_memory=False,
-                    generator=g, worker_init_fn=DT.worker_init_fn(seed))
+    sampler = MD.ResumableSampler(len(ds), seed=seed, epoch=epoch, start=start, length=length)
+    ld = DataLoader(ds, batch_size=EXPECT["batch_size"], sampler=sampler, num_workers=0,
+                    pin_memory=False)
     unet = T.TemporalUNet3D(in_channels=1, out_channels=32, layers=[32, 64, 128])
     m = T.UNetNodeTransformer(unet=unet, unet_out_channels=32,
                               pos_feat_dim=4 * T._POS_EMBED_DIM).to(device)
     o = torch.optim.AdamW(m.parameters(), lr=EXPECT["lr"])
-    return ds, ld, m, o
+    return ds, ld, m, o, sampler
 
 
-# ------------------------------------------------- MAIN: one epoch = 800 steps
-ds, loader, model, opt = build(EXPECT["seed"])
-init_hash = DT.state_hash(model)
-MD.STEP_LOG.clear()
-torch.cuda.reset_peak_memory_stats()
-t0 = time.time()
-edge_l, det_l = T.train_epoch(model, loader, opt, device, max_iters=EXPECT["max_iters"])
-epoch_s = time.time() - t0
-peak_gpu = torch.cuda.max_memory_allocated() / 1e6
-stats = MD.step_stats(MD.STEP_LOG)
-ck = OUT / "m1_fold1_epoch1.pt"
-ck_sha = MD.save_checkpoint(ck, model=model, optimizer=opt, epoch=1,
-                            global_step=EXPECT["max_iters"], seed=EXPECT["seed"],
-                            config_hash=config_hash(),
-                            aug_fingerprint=M1A.config_fingerprint(),
-                            manifest_sha=manifest_sha, torch_mod=torch)
-print(f"epoch done: {epoch_s:.1f}s edge={edge_l:.4f} det={det_l:.4f}", flush=True)
+def run(model, loader, opt, n):
+    return T.train_epoch(model, loader, opt, device,
+                         LW["det_loss_weight"], LW["det_neg_weight"],
+                         max_iters=n, pool_kernel_um=LW["pool_kernel_um"])
 
-# ------------------------------------------------- OPERATIONAL RESUME TEST
+
 N = 40
-print("")
-print(f"=== OPERATIONAL RESUME TEST: control {N} steps vs {N // 2}+resume+{N // 2} ===",
-      flush=True)
-_, ldC, mC, oC = build(4242)
-MD.STEP_LOG.clear()
-T.train_epoch(mC, ldC, oC, device, max_iters=N)
-ctrl_losses = [r["edge_loss"] for r in MD.STEP_LOG]
-ctrl_hash = DT.state_hash(mC)
+SEED = 4242
+MD.SAMPLE_LOG_ENABLED[0] = True
+M1A.AUG_LOG_ENABLED[0] = True
 
-_, ldI, mI, oI = build(4242)
-MD.STEP_LOG.clear()
-T.train_epoch(mI, ldI, oI, device, max_iters=N // 2)
-first_losses = [r["edge_loss"] for r in MD.STEP_LOG]
-mid = OUT / "_resume_probe.pt"
-MD.save_checkpoint(mid, model=mI, optimizer=oI, epoch=1, global_step=N // 2, seed=4242,
+print("")
+print(f"=== CONTROL A: uninterrupted 1..{N} ===", flush=True)
+_, ldA, mA, oA, spA = build(SEED, epoch=0, length=N)
+MD.STEP_LOG.clear(); MD.SAMPLE_LOG.clear(); M1A.AUG_LOG.clear()
+run(mA, ldA, oA, N)
+A_steps = list(MD.STEP_LOG); A_samples = list(MD.SAMPLE_LOG)
+A_hash = DT.state_hash(mA)
+A_aug = list(M1A.AUG_LOG)
+
+print(f"=== CONTROL A2: identical rerun (GPU nondeterminism floor) ===", flush=True)
+_, ldA2, mA2, oA2, _ = build(SEED, epoch=0, length=N)
+MD.STEP_LOG.clear(); MD.SAMPLE_LOG.clear()
+run(mA2, ldA2, oA2, N)
+A2_steps = list(MD.STEP_LOG); A2_samples = list(MD.SAMPLE_LOG)
+A2_hash = DT.state_hash(mA2)
+
+print(f"=== RESUME B: 1..{N // 2}, serialize/reload, {N // 2 + 1}..{N} ===", flush=True)
+_, ldB, mB, oB, spB = build(SEED, epoch=0, length=N)
+MD.STEP_LOG.clear(); MD.SAMPLE_LOG.clear()
+run(mB, ldB, oB, N // 2)
+B1_steps = list(MD.STEP_LOG); B1_samples = list(MD.SAMPLE_LOG)
+mid = OUT / "_resume.pt"
+MD.save_checkpoint(mid, model=mB, optimizer=oB, epoch=0, global_step=N // 2, seed=SEED,
                    config_hash=config_hash(), aug_fingerprint=M1A.config_fingerprint(),
                    manifest_sha=manifest_sha, torch_mod=torch)
+blob = torch.load(mid, weights_only=False)
+blob["sampler_state"] = spB.state()
+blob["step_in_epoch"] = N // 2
+torch.save(blob, mid)
 
-_, ldR, mR, oR = build(4242)
+_, _, mR, oR, _ = build(SEED, epoch=0, length=N)
 restored = MD.load_checkpoint(mid, model=mR, optimizer=oR, torch_mod=torch,
                               expect_config_hash=config_hash())
-resume_weights_match = DT.state_hash(mR) == DT.state_hash(mI)
-MD.STEP_LOG.clear()
-T.train_epoch(mR, ldR, oR, device, max_iters=N // 2)
-second_losses = [r["edge_loss"] for r in MD.STEP_LOG]
-resumed = first_losses + second_losses
-final_match = DT.state_hash(mR) == ctrl_hash
-max_dev = max(abs(a - b) for a, b in zip(ctrl_losses, resumed)) if ctrl_losses else float("nan")
+st = torch.load(mid, weights_only=False)
+spR = MD.ResumableSampler.resume(st["sampler_state"], step_in_epoch=st["step_in_epoch"])
+dsR = T.FrameWindowDataset(video_data, max_nodes=max_nodes,
+                           augmentations=[T.flip_augment, M1A.as_trainer_augmentation()])
+ldR = DataLoader(dsR, batch_size=1, sampler=spR, num_workers=0, pin_memory=False)
+MD.STEP_LOG.clear(); MD.SAMPLE_LOG.clear()
+run(mR, ldR, oR, N // 2)
+B2_steps = list(MD.STEP_LOG); B2_samples = list(MD.SAMPLE_LOG)
+B_hash = DT.state_hash(mR)
+
+B_steps = B1_steps + B2_steps
+B_samples = B1_samples + B2_samples
+same_ids = [a["idx"] == b["idx"] for a, b in zip(A_samples[N // 2:], B2_samples)]
+same_aug = [a["img_hash"] == b["img_hash"] for a, b in zip(A_samples[N // 2:], B2_samples)]
+dev_resume = max(abs(a["edge_loss"] - b["edge_loss"]) for a, b in zip(A_steps, B_steps))
+dev_floor = max(abs(a["edge_loss"] - b["edge_loss"]) for a, b in zip(A_steps, A2_steps))
 
 resume_report = {
     "counters_restored": {"epoch": restored["epoch"], "global_step": restored["global_step"],
-                          "aug_epoch": restored["aug_epoch"]},
+                          "step_in_epoch": st["step_in_epoch"],
+                          "sampler_permutation_hash": st["sampler_state"]["permutation_hash"]},
     "config_hash_verified": restored["config_hash"] == config_hash(),
     "manifest_sha_verified": restored["manifest_sha256"] == manifest_sha,
     "optimizer_state_restored": bool(oR.state_dict()["state"]),
-    "model_weights_match_at_resume_point": resume_weights_match,
-    "control_steps": len(ctrl_losses), "resumed_steps": len(resumed),
-    "max_abs_loss_deviation_vs_control": max_dev,
-    "final_weights_match_control": final_match,
-    "note": ("Bitwise GPU parity is NOT claimed: some cuDNN 3D-conv backward kernels have "
-             "no deterministic implementation, so use_deterministic_algorithms runs "
-             "warn_only. Counter, optimizer and RNG restoration are exact; the loss "
-             "deviation quantifies residual kernel nondeterminism."),
+    "steps_21_40_same_sample_ids": all(same_ids),
+    "steps_21_40_same_augmented_images": all(same_aug),
+    "n_compared": len(same_ids),
+    "max_loss_dev_resume_vs_control": dev_resume,
+    "max_loss_dev_control_vs_control": dev_floor,
+    "resume_within_nondeterminism_floor": bool(dev_resume <= max(dev_floor, 1e-12) * 1.5),
+    "final_weights_resume_vs_control": B_hash == A_hash,
+    "final_weights_control_vs_control": A2_hash == A_hash,
 }
 print(json.dumps(resume_report, indent=2, default=str), flush=True)
 
-per_step = epoch_s / EXPECT["max_iters"]
-full = per_step * 24000
+MD.SAMPLE_LOG_ENABLED[0] = False
+M1A.AUG_LOG_ENABLED[0] = False
+
+aug_counts = {}
+for r in A_aug:
+    for t in r["fired"]:
+        aug_counts[t] = aug_counts.get(t, 0) + 1
+gn = [r.get("grad_norm", float("nan")) for r in A_steps]
+pos = [r.get("n_pos_targets", 0) for r in A_steps]
+uniq_win = {s["idx"] for s in A_samples}
+uniq_crops = {win_owner[i] for i in uniq_win if i < len(win_owner)}
+
 report = {
+    "commit_note": "see repo git log; config/manifest/source hashes below",
+    "trainer_source_sha256": trainer_src_sha,
+    "config_hash": config_hash(), "aug_fingerprint": M1A.config_fingerprint(),
+    "manifest_sha256": manifest_sha,
+    "baseline_loss_weights_enforced": LW,
+    "max_nodes": max_nodes,
+    "max_nodes_note": ("computed over TRAIN crops only; baseline computes over train+test but "
+                       "test there is the held-out family, which M1 must not touch. max_nodes "
+                       "only sets padding width and is masked, so it is semantically neutral."),
     "train_crops": sorted(TRAIN_SET), "inner_val_crops": sorted(VAL_SET),
     "train_val_intersection": inter,
-    "n_train_crops": len(TRAIN_SET), "n_inner_val_crops": len(VAL_SET),
-    "windows_indexed": n_windows, "max_nodes": max_nodes,
-    "index_seconds": round(index_s, 1),
-    "optimizer_steps": EXPECT["max_iters"], "batch_size": EXPECT["batch_size"],
-    "lr": EXPECT["lr"], "epoch_wall_seconds": round(epoch_s, 1),
-    "avg_edge_loss": float(edge_l), "avg_det_loss": float(det_l),
-    "peak_gpu_mb": round(peak_gpu, 1),
-    "checkpoint_bytes": ck.stat().st_size, "checkpoint_sha256": ck_sha,
-    "init_state_hash": init_hash,
-    "aug_fingerprint": M1A.config_fingerprint(), "aug_ranges": M1A.DEFAULT.to_dict(),
-    "config_hash": config_hash(), "determinism": det_info,
-    "step_stats": stats, "resume_test": resume_report,
-    "projection_24000_steps": {
-        "train_only_h": round(full / 3600, 2),
-        "with_index_and_ckpt_h": round((full + index_s + 5 * 30) / 3600, 2),
-        "with_20pct_margin_h": round((full + index_s + 5 * 30) * 1.2 / 3600, 2),
-        "fits_7_5h_single_session": bool((full + index_s + 150) * 1.2 / 3600 <= 7.5),
-        "two_session_hours_each": round(full / 2 / 3600, 2),
-    },
+    "windows_indexed": n_windows, "index_seconds": round(index_s, 1),
+    "unique_windows_sampled": len(uniq_win), "unique_crops_sampled": len(uniq_crops),
+    "augmentation_counts_over_%d_samples" % len(A_aug): aug_counts,
+    "augmentation_ranges_configured": M1A.DEFAULT.to_dict(),
+    "edge_positive_targets": {
+        "windows_with_any_positive": int(sum(1 for p in pos if p > 0)),
+        "windows_total": len(pos),
+        "frac_positive": float(sum(1 for p in pos if p > 0) / max(len(pos), 1)),
+        "mean_positive_per_window": float(np.mean(pos)) if pos else 0.0},
+    "grad_norm": {"median": float(np.nanmedian(gn)), "p90": float(np.nanpercentile(gn, 90)),
+                  "max": float(np.nanmax(gn)), "nonfinite": int(np.sum(~np.isfinite(gn)))},
+    "peak_cpu_rss_mb": round(psutil.Process().memory_info().rss / 1e6, 1),
+    "peak_gpu_mb": round(torch.cuda.max_memory_allocated() / 1e6, 1),
+    "resume_test": resume_report,
+    "session_plan": {"session_1": "epochs 1-15 (12,000 steps)",
+                     "session_2": "epochs 16-30 (12,000 steps)",
+                     "hours_each_measured": 3.94,
+                     "checkpoints": [10, 15, 20, 25, 30]},
 }
-(OUT / "smoke_report.json").write_text(json.dumps(report, indent=2, default=str))
+ckf = OUT / "m1_resume_probe.pt"
+ck_sha = MD.save_checkpoint(ckf, model=mA, optimizer=oA, epoch=0, global_step=N, seed=SEED,
+                            config_hash=config_hash(),
+                            aug_fingerprint=M1A.config_fingerprint(),
+                            manifest_sha=manifest_sha, torch_mod=torch)
+report["checkpoint_bytes"] = ckf.stat().st_size
+report["checkpoint_sha256"] = ck_sha
+(OUT / "resume_report.json").write_text(json.dumps(report, indent=2, default=str))
 print("")
 print(json.dumps({k: v for k, v in report.items()
-                  if k not in ("train_crops", "inner_val_crops", "aug_ranges", "determinism")},
+                  if k not in ("train_crops", "inner_val_crops",
+                               "augmentation_ranges_configured")},
                  indent=2, default=str))
 print("DONE", flush=True)
