@@ -887,3 +887,32 @@ private organizer clarification; score-probing is forbidden. Full plan:
   WITHIN a family; if none does, the selector cannot generalise and the branch should close.
 - E0c (A) remains the honest OOF baseline: 0.7595 / 0.6490. No promotion. Phase 2 GPU training
   stays blocked pending the selector-feasibility check.
+
+### 2026-07-29 (SELECTOR FEASIBILITY AUDIT -> KILL; detector/ILP/wrapper repair family closed)
+- Ran the preregistered falsification audit on the A-vs-D selector. Deployment-legal
+  features only (no GT, N_est, family/crop ID). Primary target = continuous D-A weighted
+  by each crop's edge denominator.
+- **STEP 1 mixed-sign power (both families DO have mixed mass, so not trivially dead):**
+  44b6 D>A 14 crops / 11.6% edge mass (+0.0056), D<A 57 crops / 88.4% (-0.0763);
+  6bba D>A 102 crops / 78.3% (+0.0566), D<A 26 crops / 21.7% (-0.0058).
+- **ORACLE CEILING (decisive):** per-crop max(A,D) using the TRUE sign -- unreachable upper
+  bound for any selector -- gives 44b6 +0.0056 and 6bba +0.0566. **Min-fold +0.0056 vs a
+  +0.005 gate: a PERFECT oracle passes by 0.0006.** On 44b6 upside is +0.0056 against
+  downside -0.0763 (13.6x adverse), so a deployable rule must capture 90% of the upside
+  while leaking <=0.8% of the downside. No margin exists.
+- STEP 2 univariate: six features DO show same-sign association in both families with 44b6
+  bootstrap CIs excluding zero (ep_p10/p50/p90/mean, node_retention, edge_retention;
+  44b6 rho ~0.27-0.33, 6bba rho ~0.44-0.69). Correlation is real -- which is precisely why
+  the falsification protocol was necessary.
+- **STEP 4 leave-family-out transfer: ALL SIX FAIL.** Trained on 6bba -> +0.052 in-sample but
+  **-0.004 to -0.035 on held-out 44b6** (actively harmful). Trained on 44b6 -> best in-sample
+  gain is **-0.0001**, i.e. the optimum on 44b6 IS "never pick D", and the two retention
+  features degenerate to picking D on 0/128 6bba crops. No feature passes; min-fold is
+  negative in every case.
+- **VERDICT: SELECTOR BRANCH CLOSED.** Gate not loosened, family identity not added, no
+  nonlinear search attempted. Stronger than transfer failure: a single-feature rule cannot
+  extract 44b6's oracle gain even WITH its own labels.
+- CONSEQUENCE per the decision tree: all current detector/ILP/wrapper repair levers are
+  closed (C0, D-port, v122 wrapper, fixed-ILP D, and now the A/D selector). E0c remains
+  authoritative at 0.7595 / 0.6490. Phase 2 rebases directly on E0c with the new core
+  image-model round (M1).
