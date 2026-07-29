@@ -961,3 +961,21 @@ private organizer clarification; score-probing is forbidden. Full plan:
   368908ecc44c0214, manifest ea5fe9b2eb9bd0fe.
 - PROJECTION ACCEPTED: 7.89 h train-only for 24,000 steps -> two sessions, epochs 1-15 and
   16-30, ~3.94 h each. LAUNCHING M1 fold 1 (train 44b6, hold out 6bba).
+
+### 2026-07-29 (M1 fold-1 training COMPLETE: 30 epochs / 24,000 steps, zero mechanical failures)
+- Session 1 epochs 1-15: 3.93 h; session 2 epochs 16-30: 3.85 h (resumed from a hash-verified
+  checkpoint at step 12,000). Total 7.78 h vs the 7.89 h measured projection. **Zero
+  non-finite values across all 24,000 steps**; no mechanical guard fired.
+- Edge loss 0.0060 -> 0.0017 (session 1) -> 0.0006 (session 2, plateauing). Detection loss
+  stayed in a noisy 0.045-0.086 band with no clear trend. Grad-norm median fell 2.2 -> 0.15
+  and clipped-step frequency 57% -> 27%.
+- All five candidate checkpoints retained and verified: epochs 10/15/20/25/30 with
+  global_step == epoch*800, seed 20260729, config fc7e4644ea37a90a, augmentation
+  368908ecc44c0214, manifest ea5fe9b2...0324f0. SHAs 1353be9c / e4c2cb53 / db7bb932 /
+  244740da / 28c3aab3.
+- The detection/edge trade-off (edge loss falling while detection loss is flat/noisy) is
+  exactly what the 10/15/20/25/30 sweep exists to resolve; it is NOT treated as a signal in
+  itself and no proxy metric was used during training.
+- NEXT: guarded selection stage -- inference-parity canary, all-5-checkpoint verification,
+  full 5x12=60 grid, then local E0c-wrapper + patched scoring and a single frozen-rule
+  selection on the 12-crop 44b6 inner validation. Held-out 6bba still untouched.
