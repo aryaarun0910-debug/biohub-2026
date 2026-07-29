@@ -916,3 +916,44 @@ private organizer clarification; score-probing is forbidden. Full plan:
   closed (C0, D-port, v122 wrapper, fixed-ILP D, and now the A/D selector). E0c remains
   authoritative at 0.7595 / 0.6490. Phase 2 rebases directly on E0c with the new core
   image-model round (M1).
+
+### 2026-07-29 (M1 pre-launch: resume made bit-exact; 100x loss-weight bug caught; sampling audit PASS)
+- **BASELINE-FIDELITY BUG (caught by commander request, would have invalidated M1).**
+  `train_epoch()`'s own defaults are det_loss_weight=0.1 / det_neg_weight=0.1, but `train()`
+  -- the baseline path the OOF model was trained through -- passes 1e1 / 1e-2. The M1 driver
+  called `train_epoch` without them, so the first smoke ran a **100x smaller detection
+  weight and 10x larger negative weight**. M1 would not have been comparable to the baseline.
+  Now passed explicitly and locked by a test that reads train()'s defaults from the vendored
+  source via AST. Enforced: det_loss_weight=10.0, det_neg_weight=0.01, pool_kernel_um=5.0.
+- **RESUME NOW BIT-EXACT.** The earlier 0.0157 divergence was NOT cuDNN nondeterminism (my
+  original attribution, now retracted): the checkpoint restored training state but not the
+  data-stream position, so resume replayed samples 1-20 instead of continuing to 21-40.
+  `ResumableSampler` derives the epoch permutation from (seed, epoch), exposes a permutation
+  hash, resumes at the next unconsumed index, and aborts on hash mismatch. Controlled test:
+  Control A (1-40), Control A2 (identical rerun = nondeterminism floor), Resume B
+  (1-20 -> serialize/reload -> 21-40). Result: steps 21-40 identical sample ids AND identical
+  augmented images (n=20); max loss deviation resume-vs-control **0.0**; control-vs-control
+  floor **0.0**; final weight hashes match both ways. There is no measurable GPU
+  nondeterminism on this workload.
+- **SAMPLING AUDIT (zero GPU) PASS.** The smoke's `unique_crops_sampled=1` was a reporting
+  artifact of a broken window->crop attribution with a "?" fallback, not a sampler defect.
+  Rebuilt attribution from canonical `VideoMeta.zarr_path`. Epoch-1 first 800 positions over
+  5,145 windows: **800 unique windows, 59/59 crops touched, 11/11 strata covered**, steps per
+  crop min=4 median=13 max=22, zero crops with no draws, zero validation crops, zero 6bba,
+  zero unresolved ids. Largest exposure deviation -10.4/+6.6 against ~15 expected = ordinary
+  multinomial spread.
+- SMOKE TELEMETRY: 800 steps/epoch measured 946.4s; step seconds median 1.174 p90 1.242
+  max 3.437; data wait 0.6% (GPU-bound 99.4%); peak GPU 3,000 MB, peak CPU RSS 2,443 MB;
+  augmentation counts over 40 samples gamma 22 / noise 22 / brightness 20 / contrast 16 /
+  psf_blur 15 / drift 14 (all near configured probabilities); edge-positive targets 40/40
+  windows, mean 2.6 per window; grad norm median 85.2 p90 148.7 max 232.3, 0 non-finite.
+- LARGE CLIPPED GRADIENTS (median 85 vs clip threshold 1.0) are INHERITED BASELINE
+  behaviour. Per commander: instrument clipped-step frequency, component losses and grad
+  norms, but do NOT alter clipping or loss weights during M1.
+- `max_nodes=10` computed over TRAIN crops only (baseline uses train+test, but test there is
+  the held-out family M1 must not touch). It sets padding width and is masked -> semantically
+  neutral.
+- HASHES: trainer source c4f6317736bb3bb1..., config fc7e4644ea37a90a, augmentation
+  368908ecc44c0214, manifest ea5fe9b2eb9bd0fe.
+- PROJECTION ACCEPTED: 7.89 h train-only for 24,000 steps -> two sessions, epochs 1-15 and
+  16-30, ~3.94 h each. LAUNCHING M1 fold 1 (train 44b6, hold out 6bba).
