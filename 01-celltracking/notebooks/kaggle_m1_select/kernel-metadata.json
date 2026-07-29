@@ -1,0 +1,19 @@
+{
+  "id": "aryaarun07/biohub-m1-select",
+  "title": "Biohub M1 Select",
+  "code_file": "biohub_m1_select.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "enable_internet": false,
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "dataset_sources": [
+    "aryaarun07/biohub-m1-code",
+    "aryaarun07/biohub-m1-fold1-ckpt",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1"
+  ],
+  "kernel_sources": [],
+  "model_sources": []
+}
