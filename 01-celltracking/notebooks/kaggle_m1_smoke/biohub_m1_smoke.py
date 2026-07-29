@@ -82,9 +82,43 @@ _cmd = [sys.executable, "-m", "pip", "install", "--no-index", "--no-deps", "-q"]
 for _d in _dirs:
     _cmd += ["--find-links", _d]
 subprocess.check_call(_cmd + _SPECS)
+
+
+def polars_runtime_ready() -> bool:
+    """FUNCTIONAL polars check, not just importability.
+
+    The image ships a polars whose compiled backend does not load: `import polars` succeeds
+    but `polars._plr.PySeries` is undefined, so any real Series/DataFrame construction dies
+    with `NameError: PySeries`. That is invisible to an import test and only surfaced when
+    tracksdata tried to read a GT geff -- i.e. minutes into the run. This mirrors the
+    deployed v122 kernel's own readiness probe.
+    """
+    try:
+        import polars as _pl
+        from polars._plr import PySeries as _PySeries  # noqa: F401
+        return (hasattr(_pl, "Float16")
+                and _pl.Series([-999999.0], dtype=_pl.Float64).dtype == _pl.Float64)
+    except Exception:
+        return False
+
+
+if not polars_runtime_ready():
+    print("polars runtime NOT ready -> force-reinstalling polars + runtime", flush=True)
+    for _mod in [m for m in list(sys.modules) if m == "polars" or m.startswith("polars.")]:
+        del sys.modules[_mod]
+    subprocess.check_call(_cmd + ["--force-reinstall", "polars>=1.36", "polars-runtime-32"])
+    for _mod in [m for m in list(sys.modules) if m == "polars" or m.startswith("polars.")]:
+        del sys.modules[_mod]
+    if not polars_runtime_ready():
+        raise SystemExit("ABORT -- polars runtime still unusable after force-reinstall; "
+                         "tracksdata cannot read GT geffs without it")
+    print("polars runtime repaired", flush=True)
+
 for _m in ("numpy", "scipy.spatial", "polars", "zarr", "tracksdata"):
     __import__(_m)
-print("deps OK", flush=True)
+import polars as _pl_check  # noqa: E402
+assert _pl_check.DataFrame({"a": [1.0, 2.0]}).height == 2, "polars DataFrame unusable"
+print(f"deps OK (polars {_pl_check.__version__} functional)", flush=True)
 
 import torch  # noqa: E402
 import m1_augment as M1A  # noqa: E402
