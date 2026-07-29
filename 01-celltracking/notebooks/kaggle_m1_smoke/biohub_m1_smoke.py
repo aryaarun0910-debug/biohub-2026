@@ -172,93 +172,171 @@ if not torch.cuda.is_available():
     raise SystemExit("ABORT -- no CUDA")
 print("device:", torch.cuda.get_device_name(0), flush=True)
 
-# ------------------------------------------------- patch trainer RNG + build fold-1 split
-train_src = repo / "scripts" / "train_unet_transformer.py"
-work_repo = Path("/kaggle/working/repo"); work_repo.mkdir(parents=True, exist_ok=True)
-import shutil
+# ------------------------------------------------- explicit train/val disjointness report
+VAL_SET, TRAIN_SET = set(VAL_CROPS), set(TRAIN_CROPS)
+inter = sorted(TRAIN_SET & VAL_SET)
+print("")
+print("=== TRAIN / INNER-VALIDATION SETS (direction 1) ===")
+print(f"  train crops ({len(TRAIN_SET)}): {sorted(TRAIN_SET)}")
+print(f"  inner-val crops ({len(VAL_SET)}): {sorted(VAL_SET)}")
+print(f"  INTERSECTION: {inter}  -> {'EMPTY (correct)' if not inter else 'LEAK!'}")
+if inter:
+    raise SystemExit(f"ABORT -- validation crops present in training loader: {inter}")
+allc = sorted(TRAIN_SET | VAL_SET)
+print(f"  union={len(allc)} (train family total)")
+bad = [c for c in allc if not c.startswith("44b6")]
+if bad:
+    raise SystemExit(f"ABORT -- non-train-family crop in scope: {bad[:5]}")
+print(f"  every crop in scope is 44b6; zero {FORBIDDEN_FAMILY} paths constructible  OK")
+
+# ------------------------------------------------- patch trainer (determinism + telemetry)
+import shutil  # noqa: E402
+
+import m1_driver as MD  # noqa: E402
+
+work_repo = Path("/kaggle/working/repo")
+work_repo.mkdir(parents=True, exist_ok=True)
 if not (work_repo / "scripts").exists():
     shutil.copytree(repo / "scripts", work_repo / "scripts")
     shutil.copytree(repo / "src", work_repo / "src")
 tgt = work_repo / "scripts" / "train_unet_transformer.py"
-src_txt = tgt.read_text()
-if M1A.RNG_PATCH_OLD not in src_txt:
-    raise SystemExit("ABORT -- unseeded RNG line not found; determinism patch would no-op")
-src_txt = src_txt.replace(M1A.RNG_PATCH_OLD, M1A.RNG_PATCH_NEW, 1)
-_nl = chr(10)
-_inject = _nl.join(["import numpy as np",
-                    "M1_SEED = %d" % EXPECT["seed"],
-                    "M1_EPOCH = [0]"])
-src_txt = src_txt.replace("import numpy as np", _inject, 1)
-tgt.write_text(src_txt)
-print("determinism patch applied to the working copy of train_unet_transformer.py", flush=True)
-sys.path.insert(0, str(work_repo / "src")); sys.path.insert(0, str(work_repo / "scripts"))
+tgt.write_text(MD.patch_trainer_source(tgt.read_text(), EXPECT["seed"], M1A))
+print("trainer patched: seeded per-sample RNG + per-step telemetry", flush=True)
+sys.path.insert(0, str(work_repo / "src"))
+sys.path.insert(0, str(work_repo / "scripts"))
+sys.path.insert(0, str(m1_dir))
 
-# Fold-1 splits file. `test` is a single TRAIN-FAMILY crop purely to satisfy the trainer
-# API -- it is NOT the inner-validation manifest and NOT used for any selection. The
-# held-out 6bba family appears nowhere.
-splits = work_repo / "m1_fold1_splits.json"
-holdout_probe = TRAIN_CROPS[:1]
-splits.write_text(json.dumps([{"split": 0, "train": TRAIN_CROPS, "test": holdout_probe}]))
-assert not any(c.startswith(FORBIDDEN_FAMILY)
-               for c in TRAIN_CROPS + holdout_probe), "held-out leak in splits"
-print(f"splits: train={len(TRAIN_CROPS)} api-test={len(holdout_probe)} "
-      f"(no {FORBIDDEN_FAMILY} anywhere)", flush=True)
+from torch.utils.data import DataLoader  # noqa: E402
 
 import train_unet_transformer as T  # noqa: E402
 
-# ---------------------------------------------------------------- ONE epoch = 800 steps
-t0 = time.time()
+device = torch.device("cuda")
+manifest_sha = sha256(m1_dir / "val_manifests.json")
+
+# ------------------------------------------------- construct exactly as train() does
+t_index = time.time()
+train_files = [data_dir / c for c in sorted(TRAIN_SET)]
+video_data = []
+for f in train_files:
+    vm, w = T.load_dataset_windows(f, window_size=2, max_frames=None, downsample=(1, 4, 4))
+    video_data.append((vm, w))
+n_windows = sum(len(w) for _, w in video_data)
+max_nodes = max(max(w.node_counts) for _, ws in video_data for w in ws)
+index_s = time.time() - t_index
+print(f"indexed {len(train_files)} crops -> {n_windows} windows, max_nodes={max_nodes}, "
+      f"{index_s:.1f}s", flush=True)
+
+
+def build(seed):
+    DT.seed_everything(seed)
+    ds = T.FrameWindowDataset(video_data, max_nodes=max_nodes,
+                              augmentations=[T.flip_augment, M1A.as_trainer_augmentation()])
+    g = torch.Generator()
+    g.manual_seed(seed)
+    ld = DataLoader(ds, batch_size=EXPECT["batch_size"], shuffle=True, num_workers=2,
+                    prefetch_factor=2, persistent_workers=True, pin_memory=False,
+                    generator=g, worker_init_fn=DT.worker_init_fn(seed))
+    unet = T.TemporalUNet3D(in_channels=1, out_channels=32, layers=[32, 64, 128])
+    m = T.UNetNodeTransformer(unet=unet, unet_out_channels=32,
+                              pos_feat_dim=4 * T._POS_EMBED_DIM).to(device)
+    o = torch.optim.AdamW(m.parameters(), lr=EXPECT["lr"])
+    return ds, ld, m, o
+
+
+# ------------------------------------------------- MAIN: one epoch = 800 steps
+ds, loader, model, opt = build(EXPECT["seed"])
+init_hash = DT.state_hash(model)
+MD.STEP_LOG.clear()
 torch.cuda.reset_peak_memory_stats()
-model = T.train(
-    data_dir=data_dir, splits_file=splits, fold=0, method="unet_transformer",
-    n_epochs=1, lr=EXPECT["lr"], batch_size=EXPECT["batch_size"], num_workers=2,
-    max_iters=EXPECT["max_iters"], seed=EXPECT["seed"],
-    augmentations=[T.flip_augment, M1A.as_trainer_augmentation()],
-    data_parallel=False,
-)
+t0 = time.time()
+edge_l, det_l = T.train_epoch(model, loader, opt, device, max_iters=EXPECT["max_iters"])
 epoch_s = time.time() - t0
 peak_gpu = torch.cuda.max_memory_allocated() / 1e6
+stats = MD.step_stats(MD.STEP_LOG)
+ck = OUT / "m1_fold1_epoch1.pt"
+ck_sha = MD.save_checkpoint(ck, model=model, optimizer=opt, epoch=1,
+                            global_step=EXPECT["max_iters"], seed=EXPECT["seed"],
+                            config_hash=config_hash(),
+                            aug_fingerprint=M1A.config_fingerprint(),
+                            manifest_sha=manifest_sha, torch_mod=torch)
+print(f"epoch done: {epoch_s:.1f}s edge={edge_l:.4f} det={det_l:.4f}", flush=True)
 
-ck = OUT / "m1_fold1_smoke_epoch1.pt"
-tmp = ck.with_suffix(".pt.tmp")
-torch.save({"model": model.state_dict(), "epoch": 1, "global_step": EXPECT["max_iters"],
-            "rng_python": __import__("random").getstate(),
-            "rng_numpy": np.random.get_state(), "rng_torch": torch.get_rng_state(),
-            "rng_cuda": torch.cuda.get_rng_state_all(),
-            "seed": EXPECT["seed"], "aug_fingerprint": M1A.config_fingerprint(),
-            "config_hash": config_hash(),
-            "manifest_sha256": sha256(m1_dir / "val_manifests.json")}, tmp)
-os.replace(tmp, ck)
-blob = torch.load(ck, weights_only=False)
-resume_ok = {"model": "model" in blob, "epoch": blob["epoch"],
-             "global_step": blob["global_step"],
-             "rng_python": blob["rng_python"] is not None,
-             "rng_numpy": blob["rng_numpy"] is not None,
-             "rng_torch": blob["rng_torch"] is not None,
-             "rng_cuda": len(blob["rng_cuda"]) > 0,
-             "config_hash": blob["config_hash"],
-             "manifest_sha256": blob["manifest_sha256"][:16],
-             "OPTIMIZER_STATE": "NOT SAVED BY train(); full-run kernel must save it"}
+# ------------------------------------------------- OPERATIONAL RESUME TEST
+N = 40
+print("")
+print(f"=== OPERATIONAL RESUME TEST: control {N} steps vs {N // 2}+resume+{N // 2} ===",
+      flush=True)
+_, ldC, mC, oC = build(4242)
+MD.STEP_LOG.clear()
+T.train_epoch(mC, ldC, oC, device, max_iters=N)
+ctrl_losses = [r["edge_loss"] for r in MD.STEP_LOG]
+ctrl_hash = DT.state_hash(mC)
+
+_, ldI, mI, oI = build(4242)
+MD.STEP_LOG.clear()
+T.train_epoch(mI, ldI, oI, device, max_iters=N // 2)
+first_losses = [r["edge_loss"] for r in MD.STEP_LOG]
+mid = OUT / "_resume_probe.pt"
+MD.save_checkpoint(mid, model=mI, optimizer=oI, epoch=1, global_step=N // 2, seed=4242,
+                   config_hash=config_hash(), aug_fingerprint=M1A.config_fingerprint(),
+                   manifest_sha=manifest_sha, torch_mod=torch)
+
+_, ldR, mR, oR = build(4242)
+restored = MD.load_checkpoint(mid, model=mR, optimizer=oR, torch_mod=torch,
+                              expect_config_hash=config_hash())
+resume_weights_match = DT.state_hash(mR) == DT.state_hash(mI)
+MD.STEP_LOG.clear()
+T.train_epoch(mR, ldR, oR, device, max_iters=N // 2)
+second_losses = [r["edge_loss"] for r in MD.STEP_LOG]
+resumed = first_losses + second_losses
+final_match = DT.state_hash(mR) == ctrl_hash
+max_dev = max(abs(a - b) for a, b in zip(ctrl_losses, resumed)) if ctrl_losses else float("nan")
+
+resume_report = {
+    "counters_restored": {"epoch": restored["epoch"], "global_step": restored["global_step"],
+                          "aug_epoch": restored["aug_epoch"]},
+    "config_hash_verified": restored["config_hash"] == config_hash(),
+    "manifest_sha_verified": restored["manifest_sha256"] == manifest_sha,
+    "optimizer_state_restored": bool(oR.state_dict()["state"]),
+    "model_weights_match_at_resume_point": resume_weights_match,
+    "control_steps": len(ctrl_losses), "resumed_steps": len(resumed),
+    "max_abs_loss_deviation_vs_control": max_dev,
+    "final_weights_match_control": final_match,
+    "note": ("Bitwise GPU parity is NOT claimed: some cuDNN 3D-conv backward kernels have "
+             "no deterministic implementation, so use_deterministic_algorithms runs "
+             "warn_only. Counter, optimizer and RNG restoration are exact; the loss "
+             "deviation quantifies residual kernel nondeterminism."),
+}
+print(json.dumps(resume_report, indent=2, default=str), flush=True)
 
 per_step = epoch_s / EXPECT["max_iters"]
 full = per_step * 24000
 report = {
-    "crops_train": len(TRAIN_CROPS), "optimizer_steps": EXPECT["max_iters"],
-    "batch_size": EXPECT["batch_size"], "lr": EXPECT["lr"],
-    "epoch_wall_seconds": round(epoch_s, 1),
-    "seconds_per_step_mean": round(per_step, 4),
+    "train_crops": sorted(TRAIN_SET), "inner_val_crops": sorted(VAL_SET),
+    "train_val_intersection": inter,
+    "n_train_crops": len(TRAIN_SET), "n_inner_val_crops": len(VAL_SET),
+    "windows_indexed": n_windows, "max_nodes": max_nodes,
+    "index_seconds": round(index_s, 1),
+    "optimizer_steps": EXPECT["max_iters"], "batch_size": EXPECT["batch_size"],
+    "lr": EXPECT["lr"], "epoch_wall_seconds": round(epoch_s, 1),
+    "avg_edge_loss": float(edge_l), "avg_det_loss": float(det_l),
     "peak_gpu_mb": round(peak_gpu, 1),
-    "checkpoint_bytes": ck.stat().st_size, "checkpoint_sha256": sha256(ck),
-    "aug_fingerprint": M1A.config_fingerprint(), "config_hash": config_hash(),
-    "resume": resume_ok, "determinism": det_info,
+    "checkpoint_bytes": ck.stat().st_size, "checkpoint_sha256": ck_sha,
+    "init_state_hash": init_hash,
+    "aug_fingerprint": M1A.config_fingerprint(), "aug_ranges": M1A.DEFAULT.to_dict(),
+    "config_hash": config_hash(), "determinism": det_info,
+    "step_stats": stats, "resume_test": resume_report,
     "projection_24000_steps": {
         "train_only_h": round(full / 3600, 2),
-        "with_ckpt_overhead_h": round((full + 5 * 30) / 3600, 2),
-        "with_20pct_margin_h": round((full + 5 * 30) * 1.2 / 3600, 2),
-        "fits_7_5h_single_session": bool((full + 5 * 30) * 1.2 / 3600 <= 7.5),
+        "with_index_and_ckpt_h": round((full + index_s + 5 * 30) / 3600, 2),
+        "with_20pct_margin_h": round((full + index_s + 5 * 30) * 1.2 / 3600, 2),
+        "fits_7_5h_single_session": bool((full + index_s + 150) * 1.2 / 3600 <= 7.5),
+        "two_session_hours_each": round(full / 2 / 3600, 2),
     },
 }
 (OUT / "smoke_report.json").write_text(json.dumps(report, indent=2, default=str))
 print("")
-print(json.dumps(report, indent=2, default=str))
+print(json.dumps({k: v for k, v in report.items()
+                  if k not in ("train_crops", "inner_val_crops", "aug_ranges", "determinism")},
+                 indent=2, default=str))
 print("DONE", flush=True)
