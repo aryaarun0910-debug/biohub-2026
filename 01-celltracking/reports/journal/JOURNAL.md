@@ -854,3 +854,36 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - NEXT (resume point): `.\.venv\Scripts\python.exe scripts\win_bet\coupled_replay_shared.py --workers 3`
   (resumable, skips completed) then `.\.venv\Scripts\python.exe scripts\win_bet\coupled_score.py --workers 4`.
   Promotion gate: D improves both folds, min-fold D-A >= +0.005, no regime collapse.
+
+### 2026-07-29 (COUPLED C0/C1 RESULT: D FAILS the bilateral gate; ILP splits the folds)
+- Full 199-crop, 5-arm result under the patched authoritative scorer. Complete matched
+  coverage (A/B/B'/C/D all 199), zero failures anywhere in GPU or CPU.
+- **PROMOTION GATE: FAIL.** 44b6 A=0.7595 D=0.6962 (**-0.0633**); 6bba A=0.6490 D=0.6997
+  (**+0.0507**). Both folds improve = False; min-fold -0.0633 vs gate >= +0.005.
+- NOT NOISE: 44b6 loses on 57/71 crops, 6bba gains on 102/128; crop-bootstrap CIs are tight
+  and non-overlapping (44b6 [-0.0953,-0.0492], 6bba [+0.0440,+0.0623]).
+- SEQUENTIAL DECOMPOSITION (order-dependent, contains interactions), 44b6 / 6bba:
+  B-A detector population  -0.0112 / +0.0036
+  B'-B introduce ILP 0.1/0.1  -0.0211 / +0.0328
+  C-B' survival costs 0.0/1.5  **-0.0359 / +0.0125**
+  D-C wrapper -> v122  +0.0049 / +0.0018
+  D-A TOTAL  -0.0633 / +0.0507
+- **The ILP is the entire effect and it is fold-splitting.** Introducing it plus raising the
+  disappearance cost costs 44b6 -0.057 and gains 6bba +0.045. The detector threshold is
+  near-inert (-0.011/+0.004) and the WHOLE v122 wrapper is worth only +0.005/+0.002 --
+  independently confirming the preflight decision to drop C0 and D-port was correct.
+- MECHANISM = node-recall collapse on the sparse fold: 44b6 recall 0.9482 -> 0.7854 under the
+  C1 ILP; 6bba only 0.8731 -> 0.8527. The count multiplier IMPROVES for both
+  (0.9895->1.0136, 0.9974->1.0110), so D buys count-penalty margin while destroying edges on
+  44b6 -- it prunes tracks the sparse fold cannot afford.
+- REGIME SLICES (D-A by tercile) -- **no deployment-observable feature separates the sign**:
+  every 44b6 tercile negative (-0.031..-0.100), every 6bba tercile positive (+0.006..+0.090),
+  across density, count ratio and displacement. Only gradient is 6bba density (+0.090 low ->
+  +0.006 high): the benefit fades with density but never inverts.
+- DECISION: per the preregistered fallback this is the "helps one regime, harms another" case,
+  so the ILP branch is NOT killed. BUT the slices warn that the discriminating variable may be
+  embryo identity itself, which is forbidden as a routing feature. Before committing to the
+  cross-fit A-vs-D selector round, test whether ANY observable feature separates the sign
+  WITHIN a family; if none does, the selector cannot generalise and the branch should close.
+- E0c (A) remains the honest OOF baseline: 0.7595 / 0.6490. No promotion. Phase 2 GPU training
+  stays blocked pending the selector-feasibility check.

@@ -1,0 +1,79 @@
+[score] cached=995 to_score=0
+
+====================================================================================================
+AGGREGATE BY FOLD (edge-volume weighted, patched authoritative scorer)
+====================================================================================================
+arm  fold       n  composite     adjJ     rawJ    divJ    mult  recall     nodes     edges
+----------------------------------------------------------------------------------------------------
+A    44b6      71     0.7595   0.7595   0.7673  0.0000  0.9895  0.9482   2864419   2761276
+A    6bba     128     0.6490   0.6484   0.6499  0.0057  0.9974  0.8731   2253622   2154846
+B    44b6      71     0.7483   0.7483   0.7665  0.0000  0.9767  0.9468   3167946   3046262
+B    6bba     128     0.6526   0.6521   0.6568  0.0043  0.9918  0.8877   2387566   2283645
+Bp   44b6      71     0.7273   0.7263   0.7286  0.0095  0.9983  0.8815   2563092   2466727
+Bp   6bba     128     0.6854   0.6854   0.6842  0.0000  1.0014  0.8795   2132186   2043964
+C    44b6      71     0.6914   0.6914   0.6830  0.0000  1.0149  0.7765   2088794   2007056
+C    6bba     128     0.6979   0.6977   0.6897  0.0016  1.0125  0.8458   1813436   1737244
+D    44b6      71     0.6962   0.6947   0.6871  0.0152  1.0136  0.7854   2123909   2035833
+D    6bba     128     0.6997   0.6992   0.6921  0.0047  1.0110  0.8527   1846035   1763931
+
+====================================================================================================
+SEQUENTIAL DECOMPOSITION -- ORDER-DEPENDENT, CONTAINS INTERACTIONS
+====================================================================================================
+
+B-A     detector population (greedy downstream)
+   44b6   n= 71  aggregate_d=-0.0112   percrop_mean=-0.0121  CI[-0.0174,-0.0071]   crops_up=17/71
+   6bba   n=128  aggregate_d=+0.0036   percrop_mean=+0.0051  CI[+0.0020,+0.0084]   crops_up=67/128
+
+B'-B    introduce global ILP at default 0.1/0.1
+   44b6   n= 71  aggregate_d=-0.0211   percrop_mean=-0.0165  CI[-0.0336,-0.0008]   crops_up=32/71
+   6bba   n=128  aggregate_d=+0.0328   percrop_mean=+0.0333  CI[+0.0278,+0.0386]   crops_up=112/128
+
+C-B'    ILP survival costs -> 0.0/1.5
+   44b6   n= 71  aggregate_d=-0.0359   percrop_mean=-0.0477  CI[-0.0652,-0.0310]   crops_up=19/71
+   6bba   n=128  aggregate_d=+0.0125   percrop_mean=+0.0128  CI[+0.0065,+0.0188]   crops_up=85/128
+
+D-C     wrapper/min-track/gap -> v122
+   44b6   n= 71  aggregate_d=+0.0049   percrop_mean=+0.0049  CI[+0.0009,+0.0099]   crops_up=20/71
+   6bba   n=128  aggregate_d=+0.0018   percrop_mean=+0.0021  CI[+0.0007,+0.0036]   crops_up=75/128
+
+D-A     TOTAL coupled effect
+   44b6   n= 71  aggregate_d=-0.0633   percrop_mean=-0.0715  CI[-0.0953,-0.0492]   crops_up=14/71
+   6bba   n=128  aggregate_d=+0.0507   percrop_mean=+0.0532  CI[+0.0440,+0.0623]   crops_up=102/128
+
+====================================================================================================
+PROMOTION GATE (D vs A)
+====================================================================================================
+   44b6: A=0.7595 D=0.6962 delta=-0.0633
+   6bba: A=0.6490 D=0.6997 delta=+0.0507
+
+   both folds improve : False
+   min-fold delta     : -0.0633  (gate: >= +0.005)
+   VERDICT            : FAIL
+
+====================================================================================================
+REGIME SLICES (D-A by tercile of each deployment-observable feature)
+====================================================================================================
+
+  density
+    44b6  low   n= 24  mean_dJ=-0.0756
+    44b6  mid   n= 23  mean_dJ=-0.0777
+    44b6  high  n= 24  mean_dJ=-0.0615
+    6bba  low   n= 43  mean_dJ=+0.0898
+    6bba  mid   n= 42  mean_dJ=+0.0639
+    6bba  high  n= 43  mean_dJ=+0.0063
+
+  ratio
+    44b6  low   n= 24  mean_dJ=-0.0314
+    44b6  mid   n= 23  mean_dJ=-0.1004
+    44b6  high  n= 24  mean_dJ=-0.0839
+    6bba  low   n= 43  mean_dJ=+0.0679
+    6bba  mid   n= 42  mean_dJ=+0.0515
+    6bba  high  n= 43  mean_dJ=+0.0403
+
+  displacement
+    44b6  low   n= 24  mean_dJ=-0.0500
+    44b6  mid   n= 23  mean_dJ=-0.0723
+    44b6  high  n= 24  mean_dJ=-0.0922
+    6bba  low   n= 43  mean_dJ=+0.0634
+    6bba  mid   n= 42  mean_dJ=+0.0511
+    6bba  high  n= 43  mean_dJ=+0.0451
