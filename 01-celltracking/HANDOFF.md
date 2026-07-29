@@ -1,6 +1,6 @@
 # Current handoff
 
-**Updated:** 2026-07-20
+**Updated:** 2026-07-29
 **Branch:** `master`
 
 > **2026-07-19 scoring reset complete.** The organizer patched edge
@@ -93,35 +93,57 @@ Full evidence and reasoning: [FINAL_SYNTHESIS_2026-07-14.md](reports/research/br
 (division/isolated verdicts + the addendum recording the moonshot pilot). Journal trail:
 `reports/journal/JOURNAL.md`, entries 2026-07-13 through 2026-07-14.
 
-**Current position:** keep **E0c (public 0.889, OOF 0.7595/0.6490)** frozen as the
-fallback. The clean-public-0.903 wrapper delta completed all 199 crops but failed the
-bilateral gate: 0.7614 (+0.0019) on 44b6 and 0.6457 (-0.0033) on 6bba, worsening the
-min-fold. Do not regenerate its 0.970 detections. Kaggle kernel
-`aryaarun07/biohub-daxi-cache-20` v3 completed all 20 crops in 27.8 minutes and its
-outputs are downloaded. The powered temporal-signal gate is complete and negative:
-`signal_gate_pass=false`. Spatial-flow accumulation is null on 44b6 and significantly
-harmful on 6bba; even oracle GT motion has no positive crop-bootstrap lower bound.
-Track 3 affinity training is therefore not justified.
+**Current position (2026-07-29): the entire detector/ILP/wrapper REPAIR family is CLOSED.**
+E0c remains authoritative at **public 0.889, OOF 0.7595 / 0.6490 (min-fold 0.6490)**.
+The active track is now **M1 — a new core image model trained on top of E0c**.
 
-## Immediate queue
+Closed this round, each on exact 199-crop both-fold evidence:
 
-1. Monitor submission `54854143` (clean v122); it is accepted and PENDING scoring.
-   Kernel v1 completed, and the downloaded 237,023-row artifact passed every structural
-   audit. SHA256: `4E36B4797C0F07FF7B3C55C8FD6C73C4E9EC5AF264C4B4F21828B1F97CA9D616`.
-2. Build the coupled C0/C1 OOF cache gate: detector threshold 0.96875 vs 0.9690 with
-   ILP disappearance 1.5. This is distinct from the failed clean-0.903 wrapper-only
-   test on frozen 0.990 detections.
-3. Prepare full-data organizer-model training, then external NIS3D/Zebrahub image
-   pretraining. Follow `reports/ATTACK_REGIME_2026-07-20.md`; do not reopen temporal
-   accumulation, Trackastra replacement, division posterior, or geometry reranking.
-4. Keep E0c as the private-safe fallback until a new core model passes the bilateral
-   +0.005 min-fold gate. Public submissions are deployment probes, not model selection.
-5. Two untracked local artifact groups from earlier work are not yet
-   committed: `reports/inventory/{e0c_run_*.txt,phaseB_label.txt,daxi_cache.txt}` (raw
-   operational logs backing already-journaled 07-13 results) and unrelated stale WIP
-   from 2026-07-03 (`reports/inventory/phase1_v3{,_smooth}.csv` full-199-crop extension,
-   `.claude/settings.json`, `.gitignore`) predating the E0c pivot — confirm intent before
-   committing or discarding either group.
+| lever | result | status |
+|---|---|---|
+| clean-public-0.903 wrapper (frozen 0.990 detections) | +0.0019 / -0.0033 | killed |
+| **v122 coupled operating point (arm D)** | **-0.0633 / +0.0507, min-fold -0.0633** | **killed** |
+| C0 (det 0.96875) | detector-level no-op vs 0.9690 (9 nodes / 0 nodes) | killed |
+| D-port (clean-903 wrapper constants) | +/-0.0000 (1-3 nodes) | killed |
+| A-vs-D cross-fit selector | oracle ceiling +0.0056 vs +0.005 gate; no feature transfers | killed |
+| temporal accumulation v3 | null on 44b6, harmful on 6bba | killed |
+
+Key mechanistic findings from the coupled experiment (`reports/inventory/coupled_score_2026-07-29.txt`):
+- **The ILP survival cost is the only material lever, and it splits the folds.** Introducing
+  the ILP and raising disappearance to 1.5 costs 44b6 -0.057 and gains 6bba +0.045.
+- The detector threshold is near-inert (-0.011/+0.004) and the ENTIRE v122 wrapper is worth
+  only +0.005/+0.002.
+- Mechanism = node-recall collapse on the sparse fold (44b6 0.9482 -> 0.7854) while the count
+  multiplier improves; D buys count-penalty margin by pruning tracks 44b6 cannot afford.
+- **No deployment-observable feature separates the sign** (every 44b6 tercile negative, every
+  6bba tercile positive across density/count/displacement), so routing between A and D is not
+  learnable without embryo identity -- which is forbidden. Audit:
+  `scripts/win_bet/selector_audit.py`, `reports/inventory/selector_audit_2026-07-29.json`.
+
+## Immediate queue — M1 (new core image model on E0c)
+
+Prepared and committed; **GPU launch is gated on a measured one-epoch smoke**:
+
+1. **M1 fold 1 FIRST** (train 44b6, hold out 6bba) — 6bba is the current min-fold at 0.6490.
+   If it fails, spend no GPU on fold 0.
+2. Budget matched to the baseline OOF model so the training change is the only variable:
+   **batch 1, 800 iters/epoch, 30 epochs = 24,000 optimizer steps, LR 1e-4**
+   (verified against `notebooks/kaggle_train_oof`). Batch stays 1 because train crops have
+   varying spatial shapes.
+3. Downstream held fixed: **E0c greedy + faithful E0c wrapper, NO ILP.** The v122 ILP failed
+   bilaterally; it may be retested once only if M1 itself passes.
+4. No per-epoch proxy eval. Checkpoints at epochs 10/15/20/25/30, selected AFTER training by
+   exact patched composite on the frozen inner-validation manifest; no soup.
+5. Held-out family scored EXACTLY ONCE, after checkpoint selection.
+6. Promotion still requires both folds up and min-fold >= +0.005.
+
+M1 assets (all committed, tests green):
+- `scripts/m1/m1_config.py` — frozen config, hash `fc7e4644ea37a90a`
+- `scripts/m1/val_manifests.json` — frozen inner-validation, 12 crops/direction, drawn only
+  from the training family (6.0x / 3.2x more GT edges than the biased first-6-sorted split)
+- `scripts/m1/m1_augment.py` — image-only transforms, fingerprint `368908ecc44c0214`
+- `scripts/m1/m1_determinism.py` — full seeding + twin-run proof
+- `tests/test_m1_augment.py` (22), `tests/test_m1_determinism.py` (7)
 
 ## Canonical local artifacts
 

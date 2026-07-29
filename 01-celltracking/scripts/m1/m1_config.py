@@ -29,8 +29,22 @@ M1_CONFIG = {
     "architecture": "organizer UNet+transformer (unchanged)",
     "seeds": 1,
     "seed": 20260729,
+    # Budget matched to the EXISTING OOF model so the training change is the only variable.
+    # Verified against notebooks/kaggle_train_oof: BATCH_SIZE=1, MAX_ITERS=800, EPOCHS=30,
+    # LR=1e-4 -> 24,000 optimizer steps. Batch size stays 1 because train crops have
+    # varying spatial shapes (the baseline's own stated reason); raising it would both
+    # confound augmentation with training volume and require padding/bucketing.
     "epochs": 30,
-    "early_stopping": {"enabled": True, "monitor": "inner_val_loss", "patience": 6},
+    "max_iters_per_epoch": 800,
+    "batch_size": 1,
+    "lr": 1e-4,
+    "total_optimizer_steps": 24000,
+    "budget_provenance": "matches notebooks/kaggle_train_oof (baseline OOF model)",
+    # No per-epoch proxy evaluation: the 12-crop manifest is ~1,200 windows, would dominate
+    # runtime, and acc*recall is NOT the selection metric. Exact inner-validation scoring is
+    # a separate post-training stage.
+    "per_epoch_validation": False,
+    "select_best_by_proxy": False,
     "checkpoint_epochs": CHECKPOINT_EPOCHS,
     "checkpoint_selection": {
         "method": "exact patched composite on the frozen inner-validation manifest",

@@ -103,3 +103,47 @@ Geometry-only Zebrahub reranking is dead; external data must train the image mod
 - Artifact audit passed; code-competition submission `54854143` is PENDING scoring.
 - Append the exact public score when Kaggle completes it.
 - In parallel: prepare C0/C1 OOF cache kernel and the full-data training kernel.
+
+---
+
+## Status update 2026-07-29 — repair family CLOSED; M1 is the active track
+
+The tracks below are resolved. Front 1 (coupled operating point) ran to completion on all
+199 OOF crops with the patched authoritative scorer and **failed**; the follow-on selector
+was falsified; the whole detector/ILP/wrapper repair family is now closed.
+
+**Front 1 result (arm D = full v122 coupled config):**
+44b6 0.7595 -> 0.6962 (**-0.0633**), 6bba 0.6490 -> 0.6997 (**+0.0507**).
+Both-folds-improve = False; min-fold -0.0633 against a +0.005 gate. Not noise: 57/71 crops
+down on 44b6, 102/128 up on 6bba, tight non-overlapping crop-bootstrap CIs.
+
+Sequential decomposition (order-dependent, contains interactions), 44b6 / 6bba:
+
+| step | 44b6 | 6bba |
+|---|---:|---:|
+| B-A detector population | -0.0112 | +0.0036 |
+| B'-B introduce ILP (0.1/0.1) | -0.0211 | +0.0328 |
+| **C-B' survival costs -> 0.0/1.5** | **-0.0359** | **+0.0125** |
+| D-C wrapper -> v122 | +0.0049 | +0.0018 |
+| **D-A total** | **-0.0633** | **+0.0507** |
+
+Consequences for this document's plan:
+
+- **Front 0/1 detector-threshold work is closed.** C0 (0.96875) is a detector-level no-op
+  versus 0.9690, and the entire v122 wrapper is worth only +0.005/+0.002. The "coupled
+  precision push" separating public v120 from v122 does not exist at the detector level.
+- **The ILP survival cost is the only material lever and it splits the folds** by
+  mechanism: it buys count-penalty margin by pruning tracks, which 6bba tolerates and the
+  sparse 44b6 fold cannot (node recall 0.9482 -> 0.7854).
+- **Selective routing between A and D is not learnable.** A perfect GT-informed oracle
+  clears the min-fold gate by only 0.0006, and no deployment-observable feature transfers
+  across families. Closed; not to be reopened with nonlinear models or a relaxed gate.
+- **Front 4 wildcards remain unopened** and are not scheduled.
+
+**Active track: Front 2 (train models the monoculture does not have), rebased on E0c.**
+M1 is prepared and committed; GPU launch is gated on a measured one-epoch smoke. It keeps
+the organizer architecture, matches the baseline optimisation budget exactly (batch 1,
+800 iters/epoch, 30 epochs = 24,000 steps, LR 1e-4) so the training change is isolated, and
+holds the downstream fixed at E0c greedy + faithful E0c wrapper with NO ILP. Fold 1
+(train 44b6, hold out 6bba) runs first because 6bba is the current minimum fold; if it
+fails, no GPU is spent on fold 0.
