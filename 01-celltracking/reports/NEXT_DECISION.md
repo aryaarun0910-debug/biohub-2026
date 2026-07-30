@@ -246,19 +246,38 @@ Both viability gates PASS (>=+0.03 and >=60% bilaterally), retaining 90% / 83% o
 GT-informed D0' ceiling on a surface that never consults ground truth. Candidate total
 **24.52M exceeds the 15M raw budget** -> engineering classification, not a kill.
 
-## NEXT ACTION (unfinished — session ended mid-run)
+## H0b rank-compression audit — COMPLETE, PASS
 
-`scripts/win_bet/phaseb_h0b_rankcompress.py` is implemented and smoke-tested, but the full
-199-crop run **did not complete and none of its output is recorded**. Resume first:
+Superseding the earlier "unfinished" note: the run completed. Rank of the true pair among its
+own mother's candidates on the full 15/15 surface (label-free single features, no threshold
+selected from any candidate's label):
 
-```powershell
-.\.venv\Scripts\python.exe scripts\win_bet\phaseb_h0b_rankcompress.py --workers 6
-```
+| ranking | 44b6 med / K1 / K3 | 6bba med / K1 / K3 |
+|---|---|---|
+| **midpoint_residual** | **0.0 / 0.70 / 0.80** | **0.0 / 0.71 / 0.93** |
+| parent_midpoint | 0.0 / 0.55 / 0.85 | 0.0 / 0.55 / 0.87 |
+| fwd_support | 5.0 / 0.15 / 0.45 | 2.0 / 0.34 / 0.63 |
+| sister_separation | 8.0 / 0.05 / 0.30 | 2.0 / 0.33 / 0.57 |
+| persistence | 10.5 / 0.10 / 0.20 | 4.0 / 0.21 / 0.45 |
 
-Provisional single-crop smoke only (`6bba_48816121`, 3 divisions): the true pair ranked 0, 0, 2
-under flow-midpoint residual versus 3, 10, 4 under sister separation. Suggestive that a small
-top-K-per-mother shortlist retains the divisions, **but it is one crop and is not the audit
-result.** Decide H0c cascade compression only on the completed run. H1/H2/H3 remain unstarted.
+Shortlist sizes (both families): K1 4.96M, K3 14.37M, K10 42.74M.
 
-Reverse-time association, secondary detection and DeepCenter features are UNAVAILABLE locally;
-reverse-time needs the V18 source still blocked at retrieval (403 on version-pinned pulls).
+**Gate PASSES bilaterally with margin.** End-to-end reachable retention:
+- **K=3**: 80.0% (16/20) and 81.7% (76/93), shortlist **14.37M** — inside the 15M budget.
+- K=1: 70.0% (14/20) and 62.4% (58/93), shortlist 4.96M.
+
+The flow-midpoint residual puts the true pair at **median rank zero in both families**, while
+sister separation ranks it 8.0 / 2.0 — a weak discriminator, which is precisely why using it as
+a hard 8.5 um veto destroyed 75-79% of reachable divisions in H0. The quantity that works is the
+flow-predicted centre-of-mass residual: the pair midpoint, not either daughter individually.
+
+## NEXT ACTION
+
+H0c cascade compression is viable and is the recommended architecture: broad 15/15 geometry
+generation -> cheap flow-midpoint rank pruning to top-K per mother -> expensive multimodal critic
+on the shortlist only -> graph conflict resolution last. Recommended operating point K=3.
+
+Not yet tried: a learned cross-fitted combination of these features (H1), which should beat any
+single fixed ranker. Reverse-time association, secondary detection and DeepCenter remain
+unavailable locally; reverse-time needs the V18 source still blocked at retrieval (403 on
+version-pinned Kaggle pulls). H1/H2/H3 remain unstarted and no GPU has been spent.

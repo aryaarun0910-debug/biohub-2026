@@ -1350,3 +1350,51 @@ private organizer clarification; score-probing is forbidden. Full plan:
   DeepCenter are recorded as UNAVAILABLE locally rather than silently omitted; reverse-time
   needs the V18 source that is still blocked at retrieval.
 - E0c unchanged as authoritative. Nothing promoted. No GPU spent. H1/H2/H3 not started.
+
+### 2026-07-30 (CORRECTION + result: H0b rank-compression audit DID complete — PASS)
+
+- CORRECTION to the preceding entry and to commit `1fb13cf`, which recorded this audit as
+  unfinished with no output. The run in fact completed; the notification arrived after the
+  save. The earlier "INCOMPLETE / none of its output is recorded" statements are superseded by
+  the numbers below. The single-crop smoke previously flagged as provisional is likewise
+  superseded by the full 199-crop result.
+- RESULT on the complete fixed 15/15 outer surface (64,699,626 / 44,145,348 candidates;
+  reachable divisions present in the surface n=20 of 20 on 44b6, n=82 of 93 on 6bba).
+  Rank of the true pair among its own mother's candidates, label-free single-feature rankings:
+
+  44b6                rank med   p90   | retention K1    K3    K10
+    midpoint_residual     0.0    4.2   |           0.70  0.80  1.00
+    parent_midpoint       0.0    5.1   |           0.55  0.85  1.00
+    fwd_support           5.0   23.3   |           0.15  0.45  0.70
+    sister_separation     8.0   16.9   |           0.05  0.30  0.60
+    persistence          10.5   23.3   |           0.10  0.20  0.40
+
+  6bba                rank med   p90   | retention K1    K3    K10
+    midpoint_residual     0.0    2.0   |           0.71  0.93  0.99
+    parent_midpoint       0.0    3.0   |           0.55  0.87  0.98
+    fwd_support           2.0   13.0   |           0.34  0.63  0.85
+    sister_separation     2.0   11.0   |           0.33  0.57  0.83
+    persistence           4.0   16.0   |           0.21  0.45  0.72
+
+  Shortlist sizes (both families summed): K1 4,957,806; K3 14,371,002; K10 42,736,809.
+- GATE: "can a fixed top-K-per-mother budget retain >=60% of reachable divisions while keeping
+  the shortlist manageable" -> **YES, bilaterally, with margin.**
+  * K=3 on flow-midpoint residual: end-to-end reachable retention 16/20 = 80.0% (44b6) and
+    0.93*82 = 76/93 = 81.7% (6bba); shortlist **14.37M**, inside the 15M budget.
+  * K=1: 14/20 = 70.0% and 58/93 = 62.4%; shortlist **4.96M**, far inside budget.
+  Both K values clear 60% on both families. K=3 is the better operating point; K=1 is the
+  cheap option and 6bba at 62.4% is close to the floor.
+- MECHANISM CONFIRMED THREE WAYS: the flow-midpoint residual puts the true pair at MEDIAN RANK
+  ZERO in both families, while sister separation ranks it 8.0 / 2.0. Sister separation is a
+  weak discriminator, which is exactly why using it as a hard 8.5 um veto destroyed 75-79% of
+  reachable divisions in H0. The quantity that works is the flow-predicted centre-of-mass
+  residual -- the pair midpoint, not either daughter individually.
+- No threshold was selected from any candidate's label; all five rankings are fixed single
+  deployment-observable features. A learned cross-fitted combination (H1) has not been tried
+  and would be expected to improve on these.
+- Reverse-time association, secondary detection and DeepCenter remain UNAVAILABLE locally and
+  are recorded as such, not silently omitted. `fwd_support` uses the raw OOF GEFF transformer
+  probability where the pair exists as an edge (0.0 otherwise).
+- CONSEQUENCE: H0c cascade compression is viable — broad 15/15 geometry generation, cheap
+  flow-midpoint rank pruning to top-K per mother, expensive critic on the shortlist only, graph
+  conflict resolution last. E0c unchanged; nothing promoted; no GPU spent; H1/H2/H3 unstarted.
