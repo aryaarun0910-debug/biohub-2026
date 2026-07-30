@@ -999,3 +999,33 @@ private organizer clarification; score-probing is forbidden. Full plan:
   the promotion gate. The gate is cross-family on 6bba.
 - NEXT: single one-shot evaluation of epoch 10 on the complete 128-crop held-out 6bba family;
   gate >= +0.005 over E0c's 0.6490 with no major regime collapse.
+
+### 2026-07-30 (M1 FOLD-1 HELD-OUT: FAIL +0.0010 vs +0.005 gate; M1 stopped after one seed)
+- One-shot evaluation of the selected epoch-10 checkpoint on the complete 128-crop held-out
+  6bba family. Run integrity: inference-parity canary reproduced the reference graph EXACTLY
+  (28,119 coords / 25,139 edges, both SHAs), 128/128 grid, single checkpoint, 2.24 h GPU.
+  Scoring reproduces **E0c 0.6490 exactly**, so the comparison is population-matched and sound.
+- **RESULT: E0c 0.6490 -> M1 0.6499 = +0.0010** against a +0.005 gate. Crops improved 64/128
+  (a coin flip). Crop-bootstrap mean +0.0010, CI [-0.0102, +0.0132] -- **spans zero**.
+  **VERDICT: FAIL.** Per the decision tree, M1 is stopped after this one seed; fold 0 is NOT
+  run and no constants are swept.
+- MECHANISM -- M1 did not collapse, it traded and netted nothing:
+  raw edge J 0.6499 -> **0.6421 (worse linking)**; nodes 2,253,622 -> **1,797,802 (-20%)**;
+  adjusted J 0.6484 -> 0.6498 because the COUNT MULTIPLIER rescues the loss. Node recall
+  0.8731 -> 0.8664; division-J 0.0057 -> 0.0013. The +0.0010 is essentially the count-penalty
+  term rewarding a smaller graph, not better tracking -- the same mechanism that made arm D
+  look good on 6bba and catastrophic on 44b6.
+- **THE DECISIVE PATTERN: inner validation (44b6, same family) +0.0074 vs held-out (6bba,
+  cross-family) +0.0010.** M1 generalises within an embryo and evaporates at the family
+  boundary. Identical signature to breadth reranking, learned divisions, isolated detection,
+  temporal accumulation and the coupled ILP: six independent methods, one shared wall.
+- WHAT THE ROUND DID EARN:
+  * The checkpoint sweep was worth its cost. Inner-validation composite: epoch 10 = 0.7963,
+    15 = 0.7955, 25 = 0.7501, 30 = 0.6975, 20 = 0.6820 -- a 0.11 spread -- while training edge
+    loss fell monotonically 0.0060 -> 0.0006. Selecting the final model, or selecting on
+    acc*recall, would have shipped a worse checkpoint and a MORE negative held-out result.
+    Exact graph-level selection on early candidates is a keeper.
+  * Domain randomisation (PSF/noise/gamma/contrast/drift) did NOT buy cross-embryo
+    robustness; it bought within-embryo robustness. That is evidence about the augmentation
+    set itself, not merely about this seed.
+- E0c remains the authoritative baseline: public 0.889, OOF 0.7595 / 0.6490.
