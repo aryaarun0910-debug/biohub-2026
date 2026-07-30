@@ -1029,3 +1029,26 @@ private organizer clarification; score-probing is forbidden. Full plan:
     robustness; it bought within-embryo robustness. That is evidence about the augmentation
     set itself, not merely about this seed.
 - E0c remains the authoritative baseline: public 0.889, OOF 0.7595 / 0.6490.
+
+### 2026-07-30 (session hook rewritten; state consolidated)
+
+- No compute run. Rewrote `HANDOFF.md` as the cold-start hook for a new session: added a
+  START-HERE pointer, a `STATE (2026-07-30)` section, and moved the stale Phase-B "next
+  step" block into a historical note (the breadth reranker was built and killed).
+- Consolidated the eight closed levers into one table with their exact both-fold numbers:
+  breadth reranking (neither fold), learned division posterior (recall@P0.9 ~0 on 3/4),
+  isolated de-novo detection (0% / 8.8% oracle recovery), temporal accumulation v3 (null /
+  harmful), clean-903 wrapper (+0.0019 / -0.0033), coupled arm D (-0.0633 / +0.0507),
+  A-vs-D selector (perfect oracle clears by 0.0006), M1 (inner +0.0074, held-out +0.0010).
+- Recorded the M1 assets that survive the KILL (config/manifest/augment/determinism/driver
+  hashes, kernels, datasets) and the six environment traps that each cost real time
+  (train_epoch loss-weight defaults, broken Kaggle polars backend, `biohub_tracking` vs
+  `tracking_cellmot`, pack predating `075fc5f`, `np.savez_compressed` temp-name, dependency
+  bootstrap by spec + unconditional).
+- Expanded Guardrails with the standing constraints: gradient-free TTA only, support pack
+  never scores, external assets need URL+license+checksum, <=2 confirmatory tests/round,
+  do not push to origin unless instructed, keep the parallel agent's dirty files out of commits.
+- State unchanged: E0c authoritative (public 0.889, OOF 0.7595 / 0.6490), nothing promoted,
+  nothing running. Next step is a decision, not a run -- either private-generalisation
+  hygiene at ~0.889, or a mechanism that attacks the family boundary directly. No current
+  candidate for the latter clears its own cheap falsification gate.
