@@ -1244,3 +1244,68 @@ private organizer clarification; score-probing is forbidden. Full plan:
   principle (e.g. division-specific displacement priors), not fitted to these numbers.
 - E0c unchanged as authoritative. Nothing promoted. D0R is NOT started: it was conditional on
   D0P passing, and D0P failed its frozen gate.
+
+### 2026-07-30 (division_flow_pair / H0 — RED; the SISTER cap is the sole binding constraint)
+
+- Executed the frozen `division_flow_pair` surface (hash `35b6abef7f13`) and its frame-median
+  control (`f81cba9039de`) unchanged. Constants inherited, not swept: parent<=15.0 um
+  (outer_diag), sister<=8.5 um (geometric_core), pair-midpoint<=6.0 um from
+  `mother + local_flow` (E0c `MOTION_RELINK_TIGHT_UM`), knn_k=16 / knn_min=4 frozen into the
+  hash. Local flow from high-confidence one-parent/one-child E0c continuations only.
+- RESULT (both surfaces identical to four decimals):
+  * 44b6 composite 0.7790 (`+0.0195`), coverage **5/20** reachable (25.0%), 5/26 all;
+  * 6bba composite 0.6632 (`+0.0142`), coverage **20/93** reachable (21.5%), 20/125 all;
+  * candidates 2,942,847 / 2,213,972 = 5.16M total (budget 15M -> PASS);
+  * reliable-negative 17,784 / 63,403; per-mother pairs median 1.0, p99 5.0/4.0, max 16/20;
+  * flow fallback: kNN supplied 100% of estimates (14 frame-median fallbacks on 6bba, 0
+    global). The frame-median control scores identically, so flow estimator choice is
+    irrelevant here and no family-specific selection was needed.
+- GATE = **RED on two independent criteria**: 6bba `+0.0142` is below the `+0.015` floor, and
+  reachable recall 25.0% / 21.5% is below the 40% RED threshold (GREEN required 60%). Candidate
+  budget passed comfortably. Per the one-shot rule, reconstruction closes and D0R/H1 do not start.
+- DECISIVE MECHANISTIC FINDING, isolated precisely because all three surfaces were frozen
+  rather than swept:
+  * geometric_core  parent 10.5, sister 8.5            -> 5/20 and 20/93
+  * division_flow_pair parent 15.0, sister 8.5, mid 6.0 -> 5/20 and 20/93  (IDENTICAL)
+  * outer_diag      parent 15.0, sister 15.0           -> 20/20 and 82/93
+  Raising the parent cap 10.5 -> 15.0 changed coverage by exactly ZERO. Raising the sister cap
+  8.5 -> 15.0 recovered everything. **The sister-separation cap is the sole binding constraint;
+  the parent-daughter cap and the flow-midpoint gate are not binding at all.**
+- This INVERTS the 2026-07-30 D0P hypothesis, which is recorded there and is now corrected: I
+  reasoned that divisions displace the mother further than migration and proposed a tighter
+  sister constraint to control cost. The data says the opposite -- at the annotated split frame
+  the daughters are already separated by MORE than 8.5 um, and it is the sister cap, not the
+  parent cap, that discards 75-79% of reachable divisions. The flow-midpoint gate did cut cost
+  (4.20M -> 2.94M on 44b6) without losing a single division, so it is a free constraint, but it
+  is not the limiter.
+- NOT DESIGNING ANOTHER SURFACE. Per directive, RED closes reconstruction without another
+  geometry round. Recorded as a factual consequence only: a surface holding the flow-midpoint
+  gate while relaxing the sister cap would sit far below outer_diag's 64.7M/44.1M triplets,
+  because the midpoint gate demonstrably removes cost without removing divisions. That is an
+  observation for the commander, not an executed experiment.
+- The original D0P RED remains valid for `native` and `geometric_core`; this was a new frozen
+  hypothesis prompted by the outer diagnostic's preregistered purpose, not a retrospective
+  threshold adjustment. E0c unchanged as authoritative; nothing promoted; no GPU spent.
+
+### 2026-07-30 (public V18 audit — BLOCKED at retrieval)
+
+- Priority-1 target was exact No-Hack V18 (public 0.914) as a deployment hedge. The Kaggle CLI
+  documents `<owner>/<kernel>/<version>` for `kernels pull`, so the stated Version-History
+  blocker looked avoidable. It is not: version-pinned pulls of another user's kernel return
+  `403 Client Error: Forbidden for url: .../GetKernel`. Tried v18 and v19 on both
+  `yusuketogashi/no-hack-biohub-cell-another-approch-3rd` and
+  `yusuketogashi/clean-approach-lightweight-local-cv-no-hack`; all four 403.
+- Unversioned pull succeeds and returns the LATEST version only:
+  `no-hack-biohub-cell-another-approch-3rd.ipynb`, sha256 `8fe651af1132cfc946102c7b5779aedd...`,
+  166,627 bytes, 17 cells. It contains `harmonic` (11 occurrences) and `fusion` (10), so this is
+  **V19 — the rejected harmonic-fusion version**, not the 0.914 hedge. It must not be used as
+  the deployment hedge.
+- Kernel metadata confirms the family: competition source `biohub-cell-tracking-during-development`,
+  dataset sources `pilkwang/biohub-temporal-unet3d-seed314159-v1` and
+  `pilkwang/biohub-tracking-support-pack-50ep-v1` (all-training-data artifacts, so public-only
+  evidence), T4, internet off.
+- Reverse-time association IS present in the retrieved V19 source (`reverse` 28, `logit` 74),
+  so the D1 feature extraction is not blocked by the V18 retrieval failure even though the
+  reproduction hedge is. Held outside the tracked repo per directive.
+- V18 exact source therefore requires a manual Version-History download by the operator; it
+  cannot be obtained headlessly with these credentials.

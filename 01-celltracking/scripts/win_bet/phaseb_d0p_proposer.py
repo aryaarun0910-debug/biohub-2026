@@ -58,6 +58,20 @@ SURFACES = {
     "native": {"parent_um": None, "sister_um": None},        # from cached candidate edges
     "geometric_core": {"parent_um": 10.5, "sister_um": 8.5},
     "outer_diag": {"parent_um": 15.0, "sister_um": 15.0},
+    # --- division_flow_pair: frozen 2026-07-30 BEFORE execution, no cap sweep -------------
+    # Ordinary migration constrains the daughters' CENTRE OF MASS, not either daughter
+    # independently. A raw mother->daughter gate conflates tissue motion with daughter
+    # separation; this surface allows large individual displacement while keeping the pair
+    # biologically coherent. Every constant is inherited, none selected from D0P outcomes:
+    #   parent_um  15.0 : already-frozen outer raw cap (outer_diag)
+    #   sister_um   8.5 : already-frozen core cap (geometric_core)
+    #   midpoint_um 6.0 : E0c's existing tight motion gate MOTION_RELINK_TIGHT_UM
+    # knn_k / knn_min are conventional defaults for a robust local median, frozen here and
+    # included in the surface hash; they are not tuned.
+    "division_flow_pair": {"parent_um": 15.0, "sister_um": 8.5, "midpoint_um": 6.0,
+                           "flow": "knn", "knn_k": 16, "knn_min": 4},
+    "division_flow_pair_framemedian": {"parent_um": 15.0, "sister_um": 8.5, "midpoint_um": 6.0,
+                                       "flow": "frame_median", "knn_k": 0, "knn_min": 0},
 }
 
 
@@ -129,14 +143,44 @@ def native_pairs_by_mother(split: int, crop: str, nd: pl.DataFrame) -> dict[int,
     return out, (hit / tot if tot else 0.0)
 
 
-def propose(sub, t, pos, surface, native_map):
-    """GT-FREE candidate generation. Returns mother -> list of canonical (d1,d2) pairs."""
+def _continuations(edges, idx_of_sub, t, pos):
+    """High-confidence one-parent/one-child continuations -> (frame, src_idx, displacement).
+
+    Deployment-observable: uses only E0c graph topology, never GT.
+    """
+    outdeg, indeg = Counter(), Counter()
+    for a, b in edges:
+        outdeg[a] += 1
+        indeg[b] += 1
+    by_frame: dict[int, tuple[list[int], list[np.ndarray]]] = {}
+    for a, b in edges:
+        if outdeg[a] != 1 or indeg[b] != 1:
+            continue
+        ia, ib = idx_of_sub.get(int(a)), idx_of_sub.get(int(b))
+        if ia is None or ib is None:
+            continue
+        f = int(t[ia])
+        e = by_frame.setdefault(f, ([], []))
+        e[0].append(ia)
+        e[1].append(pos[ib] - pos[ia])
+    return by_frame
+
+
+def propose(sub, t, pos, surface, native_map, edges=()):
+    """GT-FREE candidate generation. Returns (mother -> canonical (d1,d2) pairs, flow_stats)."""
     from scipy.spatial import cKDTree
     cfg = SURFACES[surface]
     by_t: dict[int, list[int]] = {}
     for i, tt in enumerate(t):
         by_t.setdefault(int(tt), []).append(i)
     idx_of_sub = {int(s): i for i, s in enumerate(sub)}
+    use_flow = "midpoint_um" in cfg
+
+    fstat = Counter()
+    cont = _continuations(edges, idx_of_sub, t, pos) if use_flow else {}
+    if use_flow:
+        all_d = [d for f in cont.values() for d in f[1]]
+        global_med = np.median(np.stack(all_d), axis=0) if all_d else np.zeros(3)
 
     out: dict[int, list[tuple[int, int]]] = {}
     for tt in sorted(by_t):
@@ -144,17 +188,38 @@ def propose(sub, t, pos, surface, native_map):
         kids = by_t.get(tt + 1, [])
         if not mothers or not kids:
             continue
-        kid_pos = pos[kids]
         if surface == "native":
             get_d = lambda mi: [idx_of_sub[d] for d in native_map.get(int(sub[mi]), ())
                                 if d in idx_of_sub]
         else:
-            tree = cKDTree(kid_pos)
+            tree = cKDTree(pos[kids])
             get_d = lambda mi: [kids[j] for j in tree.query_ball_point(pos[mi], cfg["parent_um"])]
+
+        if use_flow:
+            src, disp = cont.get(tt, ([], []))
+            frame_med = np.median(np.stack(disp), axis=0) if disp else None
+            ktree = cKDTree(pos[src]) if (cfg["flow"] == "knn" and len(src) >= cfg["knn_min"]) else None
+            disp_arr = np.stack(disp) if disp else None
+
+            def flow_at(mi):
+                if ktree is not None:
+                    k = min(cfg["knn_k"], len(src))
+                    _, jj = ktree.query(pos[mi], k=k)
+                    jj = np.atleast_1d(jj)
+                    if len(jj) >= cfg["knn_min"]:
+                        fstat["knn"] += 1
+                        return np.median(disp_arr[jj], axis=0)
+                if frame_med is not None:
+                    fstat["frame_median"] += 1
+                    return frame_med
+                fstat["global_median"] += 1
+                return global_med
+
         for mi in mothers:
             D = get_d(mi)
             if len(D) < 2:
                 continue
+            pc = pos[mi] + flow_at(mi) if use_flow else None
             pairs = []
             for a in range(len(D)):
                 for b in range(a + 1, len(D)):
@@ -162,11 +227,15 @@ def propose(sub, t, pos, surface, native_map):
                     if cfg["sister_um"] is not None:
                         if float(np.linalg.norm(pos[i1] - pos[i2])) > cfg["sister_um"]:
                             continue
+                    if use_flow:
+                        mid = 0.5 * (pos[i1] + pos[i2])
+                        if float(np.linalg.norm(mid - pc)) > cfg["midpoint_um"]:
+                            continue
                     s1, s2 = int(sub[i1]), int(sub[i2])
                     pairs.append((min(s1, s2), max(s1, s2)))
             if pairs:
                 out[int(sub[mi])] = sorted(set(pairs))
-    return out
+    return out, dict(fstat)
 
 
 def audit_one(args) -> dict:
@@ -183,7 +252,7 @@ def audit_one(args) -> dict:
     native_map, native_fid = native_pairs_by_mother(split, crop, nd) if surface == "native" else ({}, 1.0)
 
     # ---- GT-FREE generation ------------------------------------------------
-    prop = propose(sub, tt, pos, surface, native_map)
+    prop, flow_stats = propose(sub, tt, pos, surface, native_map, edges)
 
     # ---- GT used ONLY from here, for auditing and labels -------------------
     gt_geff = str(ROOT / "data" / "train" / f"{crop}.geff")
@@ -315,6 +384,7 @@ def audit_one(args) -> dict:
             "pm_median": float(np.median(pm)), "pm_p90": float(np.percentile(pm, 90)),
             "pm_p99": float(np.percentile(pm, 99)), "pm_max": int(pm.max()),
             "runtime_s": time.time() - t0, "native_map_fidelity": native_fid,
+            **{f"flow_{k}": v for k, v in flow_stats.items()},
             **{k: row[k] for k in ("edge_tp", "edge_fp", "edge_fn", "division_tp", "division_fp",
                                    "division_fn", "node_recall", "num_pred_nodes")}}
 
@@ -335,7 +405,7 @@ def aggregate(res, surface) -> list[dict]:
                 estimated_nodes(str(ROOT / "data" / "train" / f"{c}.geff")), r["node_recall"]))
             npred += r["num_pred_nodes"]
             for k, v in r.items():
-                if k.startswith(("cat_", "cand_")) or k in ("n_gt_div", "reachable",
+                if k.startswith(("cat_", "cand_", "flow_")) or k in ("n_gt_div", "reachable",
                                                             "covered_reachable", "mothers_with_cands"):
                     agg[k] += v
             agg["runtime_s"] += r["runtime_s"]
@@ -356,6 +426,10 @@ def aggregate(res, surface) -> list[dict]:
               f"unlabeled={agg.get('cat_unlabeled',0):,}")
         print(f"       per-mother pairs: median={np.median(pm[:,0]):.1f} p90={np.median(pm[:,1]):.1f} "
               f"p99={np.median(pm[:,2]):.1f} max={int(pm[:,3].max())}")
+        fl = {k[5:]: v for k, v in agg.items() if k.startswith("flow_")}
+        if fl:
+            tot_f = sum(fl.values()) or 1
+            print("     flow source: " + " ".join(f"{k}={v:,}({v/tot_f:.3f})" for k, v in sorted(fl.items())))
         print(f"     runtime={agg['runtime_s']:.0f}s over {len(rows)} crops")
         out.append({"surface": surface, "surface_hash": surface_hash(surface), "fold": fold,
                     "family": fam, "composite": s["score"], "delta_vs_e0c": delta,
