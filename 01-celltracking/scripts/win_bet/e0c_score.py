@@ -32,6 +32,22 @@ import polars as pl  # noqa: E402
 CACHE = ROOT / "artifacts" / "kaggle" / "e0c_cache"
 
 
+def _geff_to_sample(path: str | Path):
+    """Convert a GEFF graph without depending on a retired experiment module."""
+    from biotrack.metric import load_graph
+    from biotrack.metric_numpy import Sample
+    graph = load_graph(str(path))
+    nodes = graph.node_attrs().sort("node_id")
+    edges = graph.edge_attrs()
+    return Sample(
+        node_ids=nodes["node_id"].to_numpy().astype(np.int64),
+        t=nodes["t"].to_numpy().astype(np.int64),
+        zyx=nodes.select(["z", "y", "x"]).to_numpy().astype(float),
+        edges=(edges.select(["source_id", "target_id"]).to_numpy().astype(np.int64)
+               if len(edges) else np.empty((0, 2), dtype=np.int64)),
+    )
+
+
 def cached_crops(split: int, cache: Path = CACHE):
     out = []
     for sp in (cache / "status").glob(f"{split}__*.json"):
@@ -57,10 +73,9 @@ def _pred_sample(split: int, crop: str, cache: Path = CACHE):
 def numpy_edge(split: int, crop: str, cache: Path = CACHE) -> dict:
     from biotrack.metric import estimated_nodes
     from biotrack.metric_numpy import score_sample
-    from run_v3_taxonomy import geff_to_sample
     gt_geff = ROOT / "data" / "train" / f"{crop}.geff"
     pred = _pred_sample(split, crop, cache)
-    gt = geff_to_sample(str(gt_geff))
+    gt = _geff_to_sample(gt_geff)
     r = score_sample(pred, gt, estimated_nodes(str(gt_geff)))
     return {"crop": crop, "split": split, "np_tp": r["edge_tp"], "np_fp": r["edge_fp"],
             "np_fn": r["edge_fn"], "np_adj": r["adj_edge_jaccard"]}

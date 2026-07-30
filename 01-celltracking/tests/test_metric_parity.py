@@ -21,11 +21,12 @@ CROP = "6bba_07477033"  # crowded but small: real per-frame collisions, fast eno
 def test_numpy_gate_matches_authoritative_on_real_crop():
     from biotrack.metric import estimated_nodes, score_pred_graph
     from biotrack.metric_numpy import score_sample
-    from run_phase1_ablation import cfg_op_bright
-    from run_v3_taxonomy import geff_to_sample
-    from validate_metric_parity import sample_to_graph
+    from validate_metric_parity import canonical_oof, geff_to_sample, sample_to_graph
 
-    pred = cfg_op_bright(CROP)
+    pred_path = canonical_oof(CROP)
+    if not pred_path.exists():
+        pytest.skip("needs canonical OOF prediction")
+    pred = geff_to_sample(pred_path)
     gt = geff_to_sample(str(TRAIN / f"{CROP}.geff"))
     n_est = estimated_nodes(str(TRAIN / f"{CROP}.geff"))
 

@@ -1,51 +1,57 @@
-# Biohub Cell Tracking 2026 — project operating instructions
+# Biohub Cell Tracking 2026 — operating instructions
 
-## Standing workflow: record + commit after every experiment
+## Start here
 
-**After any test, experiment, or meaningful change that produces a result — without
-being asked — do BOTH of these before moving on:**
+Read, in order:
 
-1. **Update the research record.**
-   - Add a dated, terse entry to `reports/journal/JOURNAL.md` (match the existing
-     `### YYYY-MM-DD (short title)` bullet style): what was run, the numbers, the
-     decision, and the next step. Convert relative dates to absolute.
-   - If the result changes a conclusion, also update the relevant brain doc
-     (`reports/research/brain/SYNTHESIS.md`, `ROADMAP.md`, `WIN_BET.md`, or
-     `METRIC_SEMANTICS_VERIFIED.md`) and `HANDOFF.md`.
-2. **Commit to the git repo** with a clear, descriptive message summarising the result
-   (not just "update"). End commit messages with the Co-Authored-By trailer. Include
-   the code, the updated docs, and any small canonical result files (CSVs/summaries);
-   do not commit ignored data/weights/artifacts.
+1. `HANDOFF.md`
+2. `reports/NEXT_DECISION.md`
+3. `reports/EXPERIMENT_LEDGER.md`
+4. `reports/METRIC_SEMANTICS_VERIFIED.md`
 
-Applies to: OOF scoring runs, kill-gates, ablations, kernel results, wrapper/repair
-changes, new scripts, and research-doc/synthesis updates. A failed or negative result
-is still recorded and committed — negative evidence is kept, never discarded.
+Older plans and transfer briefs were removed from the active tree on 2026-07-30. Recover
+them only when necessary from Git tag `pre-lean-2026-07-30`; they are not live instructions.
 
-If a run is still in progress, commit the code/setup now and append the numbers to the
-same journal entry (and commit again) once it completes.
+## Standing workflow
 
-## The authoritative plan
+After every experiment or meaningful result:
 
-`reports/research/brain/ROADMAP.md` is the current battle plan; `SYNTHESIS.md` +
-`METRIC_SEMANTICS_VERIFIED.md` are the evidence beneath it. `HANDOFF.md` is the
-start-here for scores/decisions. These supersede the older
-`THREE_LAYER_WIN_ARCHITECTURE` portfolio.
+1. Append a dated, terse entry to `reports/journal/JOURNAL.md`: execution, exact numbers,
+   decision, and next step.
+2. Update `HANDOFF.md` and `reports/NEXT_DECISION.md` if the conclusion or active queue
+   changes.
+3. Commit code, small canonical results, and documentation together with a descriptive
+   message and a `Co-Authored-By` trailer.
 
-## Non-negotiable measurement rules
+Negative evidence must remain in the journal/ledger. Do not resurrect a closed method
+without identifying a genuinely unmeasured mechanism and a cheap falsification gate.
 
-- Measure every delta against the **E0b full-0.889-wrapper OOF** baseline
-  (`scripts/win_bet/e0_replay.py`), never the weaker organizer greedy.
-- Promote only on **embryo-held-out** evidence: both folds up, min-fold ≥ +0.005, no
-  regime-slice regression. Never tune on the four visible placeholder test movies.
-- With ~2 effectively-independent samples, run **≤2 confirmatory tests per round**.
-- **Augment-never-replace**: the wrapper is the fallback; new methods override edges
-  only under gate. No wholesale association replacement (it has failed twice).
-- Prize eligibility: external data/models need URL + license + checksum; gradient-free
-  target-time adaptation only (weight-update TTA needs written host clearance); the
-  unmatched-fork division evaluator defect stays quarantined.
+## Measurement rules
+
+- Baseline: E0c exact wrapper, public `0.889`, LOEO OOF `0.7595 / 0.6490`.
+- Promotion: both embryo families improve, min-fold delta at least `+0.005`, no major
+  regime collapse, exact patched scorer.
+- Use at most two confirmatory parameterizations per round.
+- Never tune on the four visible placeholder movies.
+- Never use family/crop identity as a deployment router.
+- Public metric exploits, negative-time/out-of-volume nodes, and artificial hubs/forks are
+  quarantined and may not enter a submission.
+- External data/models require URL, license, checksum, and transformation provenance.
+- Test-time weight updates require written host clearance.
+
+## Active track
+
+Only `reports/NEXT_DECISION.md` is active. Generic retraining, more seeds, full-data fitting,
+and ensembling remain blocked. GPU may be spent only after the clean-public candidate-breadth
+or family-boundary oracle gate passes.
 
 ## Environment
 
-- Metric/dev: `.venv` (Python 3.12). Trackastra: `.venv-trackastra`.
-- Run tests: `.\.venv\Scripts\python.exe -m pytest -q`.
-- Score OOF: `.\.venv\Scripts\python.exe scripts\score_oof.py --pred-dir <dir> --gt-dir data\train`.
+- Main environment: `.venv` (Python 3.12).
+- Trackastra environment is historical and may be removed locally.
+- Tests: `.\.venv\Scripts\python.exe -m pytest -q`
+- Exact scoring:
+  `.\.venv\Scripts\python.exe scripts\score_oof.py --pred-dir <dir> --gt-dir data\train`
+
+Preserve unrelated dirty user files. Generated data, weights, caches, and Kaggle outputs
+remain ignored and should not be committed.

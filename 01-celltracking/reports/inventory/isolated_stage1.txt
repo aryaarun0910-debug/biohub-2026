@@ -1,7 +1,0 @@
-Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs:   1%|1         | 1/100 [00:00<00:22,  4.33it/s]Matching nodes between graphs:  19%|#9        | 19/100 [00:00<00:01, 70.49it/s]Matching nodes between graphs:  47%|####6     | 47/100 [00:00<00:00, 142.63it/s]Matching nodes between graphs:  66%|######6   | 66/100 [00:00<00:00, 146.29it/s]Matching nodes between graphs:  87%|########7 | 87/100 [00:00<00:00, 164.47it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 136.26it/s]
-6bba_05db0fb1 (split1): 25 frames, isolated 27, reached<=7um 27 (100.0%), avg peaks/frame 41381
-Matching nodes between graphs:   0%|          | 0/100 [00:00<?, ?it/s]Matching nodes between graphs: 100%|##########| 100/100 [00:00<00:00, 1191.39it/s]
-44b6_0113de3b (split0): 3 frames, isolated 3, reached<=7um 3 (100.0%), avg peaks/frame 87056
-
-=== STAGE-1 reachability: 30/30 isolated misses reached by DAXI low-thresh proposals = 100.0% ===
-Gate: if reachability is high, de-novo proposals CAN see the isolated misses (then tracklet+PU+exact-graph decide value). If low, isolated detection is dead.

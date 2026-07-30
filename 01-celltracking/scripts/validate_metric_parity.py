@@ -5,8 +5,8 @@ Red-team #10 / Codex hardening: `biotrack.metric_numpy` (our fast local gate) wa
 where crowded frames (hundreds of nuclei with overlapping 7um gates) can make the dense LSA and the
 host's sparse min-weight-full-bipartite matcher disagree under ties.
 
-This runs the SAME predicted graph (op_bright pipeline output) through BOTH scorers per crop and asserts
-edge TP/FP/FN and adjusted edge Jaccard agree. Picks a few crowded 6bba crops by default.
+This runs the SAME canonical OOF graph through BOTH scorers per crop and asserts edge
+TP/FP/FN and adjusted edge Jaccard agree. Picks a few crowded crops by default.
 
 Usage: .venv/Scripts/python.exe scripts/validate_metric_parity.py [crop ...]
 """
@@ -20,16 +20,34 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from biotrack.metric import estimated_nodes, score_pred_graph  # noqa: E402
+from biotrack.metric import estimated_nodes, load_graph, score_pred_graph  # noqa: E402
 from biotrack.metric_numpy import Sample, score_sample  # noqa: E402
 from biotrack.submission import submission_to_graphs  # noqa: E402
-from run_phase1_ablation import cfg_op_bright  # noqa: E402
-from run_v3_taxonomy import geff_to_sample  # noqa: E402
 
 TRAIN = ROOT / "data" / "train"
+OOF = ROOT / "artifacts" / "kaggle" / "oof_clean"
 # crowded-but-modest crops: real per-frame collisions, fast enough for a check
 DEFAULT_CROPS = ["6bba_05b6850b", "6bba_062c8d37", "6bba_07477033", "44b6_0113de3b"]
 ATOL_ADJ = 5e-4  # adj_edge_jaccard tolerance
+
+
+def geff_to_sample(path: str | Path) -> Sample:
+    """Convert a GEFF graph to the lightweight numpy metric representation."""
+    graph = load_graph(str(path))
+    nodes = graph.node_attrs().sort("node_id")
+    edges = graph.edge_attrs()
+    return Sample(
+        node_ids=nodes["node_id"].to_numpy().astype(np.int64),
+        t=nodes["t"].to_numpy().astype(np.int64),
+        zyx=nodes.select(["z", "y", "x"]).to_numpy().astype(np.float64),
+        edges=(edges.select(["source_id", "target_id"]).to_numpy().astype(np.int64)
+               if len(edges) else np.empty((0, 2), dtype=np.int64)),
+    )
+
+
+def canonical_oof(crop: str) -> Path:
+    split = 0 if crop.startswith("44b6_") else 1
+    return OOF / f"pred_geffs_split_{split}" / f"{crop}.geff"
 
 
 def sample_to_graph(s: Sample, dataset: str):
@@ -54,10 +72,15 @@ def main():
     print(f"{'crop':<16} {'np TP/FP/FN':>18} {'td TP/FP/FN':>18} {'np adjJ':>9} {'td adjJ':>9} {'result':>7}")
     all_ok = True
     for crop in crops:
-        pred = cfg_op_bright(crop)                       # numpy Sample (over-propose->dedup->link)
+        pred_path = canonical_oof(crop)
+        if not pred_path.exists():
+            print(f"{crop:<16} missing canonical OOF: {pred_path}")
+            all_ok = False
+            continue
+        pred = geff_to_sample(pred_path)
         gt = geff_to_sample(str(TRAIN / f"{crop}.geff"))
         n_est = estimated_nodes(str(TRAIN / f"{crop}.geff"))
-        npm = score_sample(pred, gt, n_est)              # our fast numpy gate
+        npm = score_sample(pred, gt, n_est)
         g = sample_to_graph(pred, crop)
         tdm = score_pred_graph(g, str(TRAIN / f"{crop}.geff"))  # authoritative tracksdata
 

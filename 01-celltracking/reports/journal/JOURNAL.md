@@ -40,8 +40,9 @@ raw model capacity.
 
 **Fig. 1** quantifies the sparsity: the median crop annotates ~1–2% of its estimated cells.
 **Fig. 6** (XY projection) makes it visceral — hundreds of visible nuclei, ~12 annotated.
-[Time-lapse animation](../figures/anim_xy_timelapse.gif) shows cell motion and density over
-time; [rotating 3D lineage](../figures/anim_3d_rotate.gif) shows the annotated tracks.
+The historical time-lapse and rotating 3D lineage animations show cell motion, density,
+and annotated tracks; they were removed from the lean tree and remain available from Git
+tag `pre-lean-2026-07-30`.
 
 ## 2. Literature Review (synthesis)
 
@@ -1029,6 +1030,33 @@ private organizer clarification; score-probing is forbidden. Full plan:
     robustness; it bought within-embryo robustness. That is evidence about the augmentation
     set itself, not merely about this seed.
 - E0c remains the authoritative baseline: public 0.889, OOF 0.7595 / 0.6490.
+
+### 2026-07-30 (LEAN RESET + FAMILY-BOUNDARY PIVOT)
+- Consolidated the active research surface after seven exact-gate failures. The tracked tree
+  before cleanup contained 246 files, including 61 Markdown files and 125 Python files.
+  The lean working tree contains 51 project files: 10 Markdown files and 26 Python files.
+- Preserved full recovery in annotated Git tag `pre-lean-2026-07-30` at commit `7897511`.
+  Pre-existing dirty/untracked local files were copied to
+  `C:\Users\aryaa\Documents\Biohub-CellTracking-2026-prelean-local-2026-07-30` before
+  pruning; historical raw logs were then removed from the active repository.
+- Replaced stale and contradictory command documents with four authoritative surfaces:
+  `HANDOFF.md`, `reports/NEXT_DECISION.md`, `reports/EXPERIMENT_LEDGER.md`, and
+  `reports/METRIC_SEMANTICS_VERIFIED.md`. Negative evidence remains in this journal, the
+  compact ledger, canonical result files, and the recovery tag.
+- Removed retired M1/coupled/DAXI/division/Trackastra/solver implementations, their tests,
+  duplicate Kaggle kernels, old transfer briefs, generated figures, and redundant inventory
+  outputs from the active tree. Retained the E0c baseline, exact scoring utilities, public
+  v122 hedge, OOF train/predict kernels, metric/wrapper tests, and six canonical results.
+- LIVE LANDSCAPE CHECK: pulled two current public notebooks advertising roughly 0.95. Both
+  append negative-time, out-of-volume hub/fork structures to the scored submission; those
+  scores are exploit-contaminated and quarantined. The clean pre-exploit code exposes one
+  potentially unmeasured mechanism: retain top-two transformer parent candidates down to
+  probability 0.25 before a global ILP.
+- DECISION: no generic retraining, extra M1 seeds, full-data fit, or ensemble. Active round
+  has two cheap branches only: (A) candidate-breadth clean extraction/oracle gate on the two
+  highest-edge-mass crops, and (B) CPU-only family-boundary decomposition. GPU is allowed
+  only after a bilateral cheap gate. If neither exposes a bilateral oracle ceiling >=0.01,
+  stop research compute and retain E0c/v122 as the final private/public hedge.
 
 ### 2026-07-30 (session hook; concurrent-write collision, corrected)
 
