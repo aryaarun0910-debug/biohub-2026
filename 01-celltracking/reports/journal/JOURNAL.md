@@ -1030,25 +1030,33 @@ private organizer clarification; score-probing is forbidden. Full plan:
     set itself, not merely about this seed.
 - E0c remains the authoritative baseline: public 0.889, OOF 0.7595 / 0.6490.
 
-### 2026-07-30 (session hook rewritten; state consolidated)
+### 2026-07-30 (session hook; concurrent-write collision, corrected)
 
-- No compute run. Rewrote `HANDOFF.md` as the cold-start hook for a new session: added a
-  START-HERE pointer, a `STATE (2026-07-30)` section, and moved the stale Phase-B "next
-  step" block into a historical note (the breadth reranker was built and killed).
-- Consolidated the eight closed levers into one table with their exact both-fold numbers:
-  breadth reranking (neither fold), learned division posterior (recall@P0.9 ~0 on 3/4),
-  isolated de-novo detection (0% / 8.8% oracle recovery), temporal accumulation v3 (null /
-  harmful), clean-903 wrapper (+0.0019 / -0.0033), coupled arm D (-0.0633 / +0.0507),
-  A-vs-D selector (perfect oracle clears by 0.0006), M1 (inner +0.0074, held-out +0.0010).
-- Recorded the M1 assets that survive the KILL (config/manifest/augment/determinism/driver
-  hashes, kernels, datasets) and the six environment traps that each cost real time
-  (train_epoch loss-weight defaults, broken Kaggle polars backend, `biohub_tracking` vs
-  `tracking_cellmot`, pack predating `075fc5f`, `np.savez_compressed` temp-name, dependency
-  bootstrap by spec + unconditional).
-- Expanded Guardrails with the standing constraints: gradient-free TTA only, support pack
-  never scores, external assets need URL+license+checksum, <=2 confirmatory tests/round,
-  do not push to origin unless instructed, keep the parallel agent's dirty files out of commits.
-- State unchanged: E0c authoritative (public 0.889, OOF 0.7595 / 0.6490), nothing promoted,
-  nothing running. Next step is a decision, not a run -- either private-generalisation
-  hygiene at ~0.889, or a mechanism that attacks the family boundary directly. No current
-  candidate for the latter clears its own cheap falsification gate.
+- No compute run. Task was to produce a cold-start hook for a new session.
+- COLLISION: I rewrote `HANDOFF.md` in place; the parallel agent replaced the same file
+  with its own lean rewrite between my edit and my `git add`. Commit `51d3c95` therefore
+  contains the parallel agent's 81-line version, NOT the content its own message
+  describes. History is left intact (the other agent may have branched from it); this
+  entry is the correction. Working tree is the intended state.
+- The landed `HANDOFF.md` is the better doc: it carries v122 deployment-probe OOF
+  (0.6962 / 0.6997 vs public 0.908) that my draft lacked, and points at two new docs --
+  `reports/EXPERIMENT_LEDGER.md` (indexed figures) and `reports/NEXT_DECISION.md` (the
+  active preregistered plan). Tag `pre-lean-2026-07-30` preserves the pre-clean tree.
+- One thing the lean rewrite dropped was worth keeping, so I wrote it to
+  `reports/ENVIRONMENT_TRAPS.md` and linked it from HANDOFF: the six environment defects
+  that each cost real time -- `train_epoch()` loss-weight defaults (0.1/0.1) diverging
+  from the baseline `train()` path (1e1/1e-2); the Kaggle image's polars whose compiled
+  backend does not load while `import polars` succeeds; `biohub_tracking` vs
+  `tracking_cellmot` naming; the support pack predating scorer patch `075fc5f`;
+  `np.savez_compressed` appending `.npz` to a `.npz.tmp` temp name and failing the atomic
+  replace AFTER the GPU work; and DataLoader position needing to be checkpointed to
+  resume. Plus three process rules (never scale a script modified after preflight;
+  cross-check node counts after any replay; score only over the arm intersection).
+- State unchanged: E0c authoritative (public 0.889, OOF 0.7595 / 0.6490), nothing
+  promoted, no compute running. Next work is `reports/NEXT_DECISION.md`: branch A (clean
+  extraction of expanded pre-ILP top-two/0.25 candidates, gated on a two-crop audit) and
+  branch B (CPU-only family-boundary decomposition). Both are cheap falsification gates;
+  at most one graduates to GPU.
+- LESSON for a shared worktree: stage a file immediately after editing it, and verify the
+  staged blob is what you wrote before committing. A commit message asserting content is
+  worthless if the content was replaced underneath it.

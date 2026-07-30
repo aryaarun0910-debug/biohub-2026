@@ -73,6 +73,11 @@ submission hedge: E0c for private robustness and v122 for public strength.
 - Preserve unrelated dirty user files.
 - Journal and commit every experiment, including negative results.
 
+Before writing a Kaggle kernel or calling the trainer directly, read
+[`reports/ENVIRONMENT_TRAPS.md`](reports/ENVIRONMENT_TRAPS.md) — six environment defects
+(trainer loss-weight defaults, broken image polars, package naming, pack/scorer vintage,
+`np.savez_compressed` naming, resume data stream) that have each already cost time here.
+
 ## Verification
 
 ```powershell
