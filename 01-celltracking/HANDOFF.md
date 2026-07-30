@@ -67,7 +67,11 @@ nothing there is submittable. The live question is realizability, and the previo
 classifier was killed on the wrong instrument: it was gated at precision `0.9`, whereas after
 suppression `J = k/(26+m)`, so a detector at 30–50% precision clears the `+0.005` gate.
 
-Active queue is in [`reports/NEXT_DECISION.md`](reports/NEXT_DECISION.md): D0 operating-point
+**Latest state (2026-07-30, H0b):** a GT-free proposer surface now reaches **+0.0704 / +0.0613** with 90.0% / 83.9% reachable-division recall (`division_flow_pair_wide`, hash `34f91ada4626`) - retaining ~90% of the D0' oracle ceiling without consulting ground truth. Its 24.52M candidates exceed the 15M engineering budget, so the deciding step is the rank-compression audit in `scripts/win_bet/phaseb_h0b_rankcompress.py`, which **was launched but did not finish**. Re-run it first; nothing from it is recorded. Three frozen surfaces proved the 8.5 um sister cap was the sole limiter (parent-cap and flow-estimator changes were exact nulls).
+
+Public V18 (0.914) reproduction remains blocked: version-pinned Kaggle pulls return 403 and the unversioned pull returns V19 (the rejected harmonic-fusion build). Exact V18 needs a manual Version-History download. The retrieved V19 source does contain the reverse-time association implementation kept for future fork features, held outside the tracked repo.
+
+Older queue in [`reports/NEXT_DECISION.md`](reports/NEXT_DECISION.md): D0 operating-point
 reanalysis (needs an inference-only re-run — no saved posterior predictions survive), then D1
 covariance fork audit, then D2 joint re-optimiser. Branch B is demoted behind divisions; the
 stop rule is suspended while the division track is live.

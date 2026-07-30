@@ -211,3 +211,54 @@ If neither branch passes, stop research compute. Preserve two final candidates:
 
 Do not spend on full-data training, additional M1 seeds, logit ensembles, or external
 pretraining until a family-boundary mechanism clears its cheap gate.
+
+## division_flow_pair (H0) — RED; the SISTER cap is the sole limiter
+
+Frozen before execution (hash `35b6abef7f13`): parent <=15.0 um, sister <=8.5 um, pair-midpoint
+<=6.0 um from `mother + local_flow`, knn_k=16 / knn_min=4.
+
+| surface | parent | sister | 44b6 delta / reach | 6bba delta / reach | candidates |
+|---|---|---|---|---|---|
+| geometric_core | 10.5 | 8.5 | +0.0195 - 5/20 | +0.0142 - 20/93 | 4.20M / 3.21M |
+| division_flow_pair | 15.0 | 8.5 | +0.0195 - 5/20 | +0.0142 - 20/93 | 2.94M / 2.21M |
+| outer_diag | 15.0 | 15.0 | +0.0783 - 20/20 | +0.0646 - 82/93 | 64.7M / 44.1M |
+
+RED: 6bba `+0.0142` below the `+0.015` floor and reachable recall 25.0% / 21.5% below the 40%
+floor. Raising the parent cap changed coverage by exactly zero; raising the sister cap recovered
+everything. **The sister-separation cap was the sole binding constraint.** The frame-median
+control scored identically, so the flow estimator is irrelevant here.
+
+## H0b — flow-gated wide-sister surface: PASSES scientific viability
+
+Preregistration amendment (hash `34f91ada4626`). Every division_flow_pair constant identical;
+only the falsified 8.5 um sister prior relaxed: parent 15.0, sister 15.0, midpoint 6.0, same kNN
+estimator, same resolver, no family routing, no sweep.
+
+| | 44b6 | 6bba |
+|---|---:|---:|
+| composite | 0.8299 | 0.7103 |
+| oracle delta | **+0.0704** | **+0.0613** |
+| reachable recall | **18/20 = 90.0%** | **78/93 = 83.9%** |
+| candidates | 14.37M | 10.15M |
+| metric-visible | 91,560 | 253,526 |
+
+Both viability gates PASS (>=+0.03 and >=60% bilaterally), retaining 90% / 83% of the
+GT-informed D0' ceiling on a surface that never consults ground truth. Candidate total
+**24.52M exceeds the 15M raw budget** -> engineering classification, not a kill.
+
+## NEXT ACTION (unfinished — session ended mid-run)
+
+`scripts/win_bet/phaseb_h0b_rankcompress.py` is implemented and smoke-tested, but the full
+199-crop run **did not complete and none of its output is recorded**. Resume first:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\win_bet\phaseb_h0b_rankcompress.py --workers 6
+```
+
+Provisional single-crop smoke only (`6bba_48816121`, 3 divisions): the true pair ranked 0, 0, 2
+under flow-midpoint residual versus 3, 10, 4 under sister separation. Suggestive that a small
+top-K-per-mother shortlist retains the divisions, **but it is one crop and is not the audit
+result.** Decide H0c cascade compression only on the completed run. H1/H2/H3 remain unstarted.
+
+Reverse-time association, secondary detection and DeepCenter features are UNAVAILABLE locally;
+reverse-time needs the V18 source still blocked at retrieval (403 on version-pinned pulls).

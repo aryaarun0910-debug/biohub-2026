@@ -72,6 +72,17 @@ SURFACES = {
                            "flow": "knn", "knn_k": 16, "knn_min": 4},
     "division_flow_pair_framemedian": {"parent_um": 15.0, "sister_um": 8.5, "midpoint_um": 6.0,
                                        "flow": "frame_median", "knn_k": 0, "knn_min": 0},
+    # --- H0b flow-gated wide-sister: frozen 2026-07-30 BEFORE execution -------------------
+    # Preregistration amendment. H0 falsified the 8.5 um SISTER prior, not deployable
+    # reconstruction: parent 10.5->15.0 and knn->frame_median were exact nulls, while
+    # sister 8.5->15.0 recovered 5/20 -> 20/20 and 20/93 -> 82/93. This surface keeps every
+    # other constant identical to division_flow_pair and relaxes only the falsified prior.
+    #   parent_um  15.0 : unchanged from division_flow_pair
+    #   sister_um  15.0 : already-frozen outer_diag cap (the only change)
+    #   midpoint_um 6.0 : unchanged E0c MOTION_RELINK_TIGHT_UM
+    #   flow/knn        : identical estimator, identical constants
+    "division_flow_pair_wide": {"parent_um": 15.0, "sister_um": 15.0, "midpoint_um": 6.0,
+                                "flow": "knn", "knn_k": 16, "knn_min": 4},
 }
 
 

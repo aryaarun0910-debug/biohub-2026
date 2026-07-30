@@ -1309,3 +1309,44 @@ private organizer clarification; score-probing is forbidden. Full plan:
   reproduction hedge is. Held outside the tracked repo per directive.
 - V18 exact source therefore requires a manual Version-History download by the operator; it
   cannot be obtained headlessly with these credentials.
+
+### 2026-07-30 (H0b — flow-gated wide-sister surface PASSES scientific viability)
+
+- Preregistration amendment executed. H0b (`division_flow_pair_wide`, hash `34f91ada4626`)
+  keeps every division_flow_pair constant identical and relaxes ONLY the falsified 8.5 um
+  sister prior: parent 15.0, sister 15.0, midpoint 6.0, same kNN flow estimator (k=16, min=4),
+  same suppress-all/add-replace resolver, no family routing, no sweep.
+- RESULT:
+  * 44b6 composite 0.8299 (`+0.0704`), coverage **18/20 reachable = 90.0%**, 18/26 all GT;
+  * 6bba composite 0.7103 (`+0.0613`), coverage **78/93 reachable = 83.9%**, 78/125 all GT;
+  * candidates 14,365,276 / 10,154,368 = **24.52M total**;
+  * metric-visible (non-unlabeled) candidates 91,560 / 253,526 -- the real precision denominator;
+  * per-mother pairs median 4.0/2.0, p90 8.0/5.0, p99 13.0/9.0, max 43/54;
+  * steals 14,022,639 / 9,889,209; node recall unchanged (0.9482 / 0.8731), edges-only edits.
+- SCIENTIFIC VIABILITY GATE: reachable recall >=60% bilaterally -> PASS (90.0% / 83.9%);
+  oracle exact delta >=+0.03 bilaterally -> PASS (`+0.0704` / `+0.0613`). Confirms the H0
+  diagnosis exactly: the 8.5 um sister prior, not the proposer concept, was the limiter.
+  Relative to the GT-informed D0' ceiling (`+0.0783` / `+0.0737`), H0b's GT-free surface
+  retains 90% and 83% of the available upside.
+- ENGINEERING CLASSIFICATION: 24.52M exceeds the 15M raw budget, which per the amendment
+  triggers the rank-compression audit rather than an automatic kill.
+- RANK-COMPRESSION AUDIT (analysis B, `scripts/win_bet/phaseb_h0b_rankcompress.py`):
+  IMPLEMENTED AND SMOKE-TESTED BUT THE FULL 199-CROP RUN DID NOT COMPLETE -- the session ended
+  while it was in flight. NOTHING from the full run is recorded. Re-run to finish:
+      .\.venv\Scripts\python.exe scripts\win_bet\phaseb_h0b_rankcompress.py --workers 6
+  Smoke evidence on `6bba_48816121` (258,566 candidates, 4 reachable divisions, 3 of which are
+  present in the 15/15 surface) -- rank of the true pair among that mother's candidates:
+      midpoint_residual   0, 0, 2   (of 24, 20, 7)
+      parent_midpoint     0, 0, 2
+      fwd_support         1, 1, 5
+      sister_separation   3, 10, 4
+      persistence         6, 8, 5
+  Shortlist sizes on that crop: K=1 25,197; K=3 73,142; K=10 195,647; full 258,566.
+  READ THIS AS PROVISIONAL: one crop, three divisions. It is suggestive that the flow-midpoint
+  residual is a strong label-free ranker and that sister separation is a WEAK one -- consistent
+  with it having been the wrong veto -- but it is not the audit result.
+- Rankings use only deployment-observable quantities, continuous, never as a veto, never
+  selected using a candidate's own label. Reverse-time association, secondary detection and
+  DeepCenter are recorded as UNAVAILABLE locally rather than silently omitted; reverse-time
+  needs the V18 source that is still blocked at retrieval.
+- E0c unchanged as authoritative. Nothing promoted. No GPU spent. H1/H2/H3 not started.
