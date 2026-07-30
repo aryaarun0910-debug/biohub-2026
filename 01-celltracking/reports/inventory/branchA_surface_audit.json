@@ -1,0 +1,26 @@
+[
+  {
+    "split": 0,
+    "crop": "44b6_d29c9ab2",
+    "n_edges": 37405,
+    "min_edge_prob": 0.5000078678131104,
+    "max_edge_prob": 0.9896280765533447,
+    "in_degree_hist": {
+      "1": 37405
+    },
+    "targets_with_two_parents": 0,
+    "edges_below_0p5": 0
+  },
+  {
+    "split": 1,
+    "crop": "6bba_bb9f20c3",
+    "n_edges": 20213,
+    "min_edge_prob": 0.500015377998352,
+    "max_edge_prob": 0.9986718893051147,
+    "in_degree_hist": {
+      "1": 20213
+    },
+    "targets_with_two_parents": 0,
+    "edges_below_0p5": 0
+  }
+]

@@ -21,6 +21,7 @@ Canonical result: `inventory/e0c_score_full.txt`.
 | v122 coupled ILP | 44b6 `-0.0633`, 6bba `+0.0507` | bilateral fail | `inventory/coupled_score_2026-07-29.txt` |
 | A/D selector | perfect oracle min-fold only `+0.0056`; learned leave-family-out rules harmful | closed | `inventory/selector_audit_2026-07-29.json` |
 | M1 domain-randomised model | same-family `+0.0074`; cross-family `+0.0010`, CI `[-0.0102,+0.0132]` | stopped after one seed | `inventory/m1_selection.json`, `inventory/m1_heldout_result.json` |
+| Pre-ILP candidate breadth (10 µm) | 44b6 `-0.1596`, 6bba `-0.1496`; still `-0.1319 / -0.1281` under a perfect oracle edge probability | closed on CPU, no GPU spent | `inventory/branchA_*.json`, journal 2026-07-30 |
 
 ## Mechanistic conclusions
 
@@ -31,6 +32,10 @@ Canonical result: `inventory/e0c_score_full.txt`.
   `+0.0010` composite change was count credit, not improved tracking.
 - The recurrent obstacle is embryo-family conditional shift, not insufficient compute on
   the same training recipe.
+- Candidate breadth fails for a structural reason, not a scoring one: the per-frame
+  assignment is one-to-one, so widening the gate to 10 µm adds ~1550 / ~940 extra relink
+  edges per crop and each false assignment can displace a true one. Edge TP falls below
+  baseline even when every true pair is given probability 1.
 - Exact graph-level checkpoint selection is retained as good infrastructure: M1 epoch 10
   scored `0.7963` internally while later epochs fell as low as `0.6820`, despite monotonically
   improving training loss.

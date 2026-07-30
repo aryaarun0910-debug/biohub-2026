@@ -1088,3 +1088,54 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - LESSON for a shared worktree: stage a file immediately after editing it, and verify the
   staged blob is what you wrote before committing. A commit message asserting content is
   worthless if the content was replaced underneath it.
+
+### 2026-07-30 (BRANCH A GATE — candidate breadth falsified on CPU, zero GPU spent)
+
+- Executed `reports/NEXT_DECISION.md` branch A end to end without a Kaggle session.
+  Reproduction: `scripts/branchA_gate.py --stage all`. Preregistered crops only
+  (`44b6_d29c9ab2` split 0, `6bba_bb9f20c3` split 1). No threshold was tuned on them.
+- GATE A0.2 — the cache does NOT contain the mechanism. The organizer OOF GEFFs are
+  hard-pruned upstream at `p >= 0.5` (observed minimum `edge_prob` `0.500008` / `0.500015`,
+  nothing below) and the in-degree histogram is `{1: 37405}` / `{1: 20213}` — every target
+  has exactly ONE parent, zero targets have two. Top-two-parents-down-to-`0.25` is therefore
+  genuinely absent and cannot be replayed from cached artifacts.
+  `inventory/branchA_surface_audit.json`.
+- GATE A1.1 — oracle ceiling PASSES. Of E0c's matched-edge false negatives (60 on 44b6,
+  215 on 6bba): recoverable by any within-10um mechanism `44 / 107` = `73.3% / 49.8%`;
+  of those, not already a transformer edge `36 / 64` = `60.0% / 29.8%`; of those, requiring
+  enumeration E0c never performs at all `22 / 39` = `36.7% / 18.1%`. Every level is above
+  the 10% bar. `inventory/branchA_oracle_ceiling.json`.
+- MECHANISM — 100% of those never-enumerated candidates are beyond E0c's 6um tight gate. E0c
+  enumerates a tight 6um pass over all nodes and then a relaxed 10um pass restricted to
+  tight-pass leftovers, so a true pair beyond 6um whose endpoints were consumed by the tight
+  pass is never enumerated. Median separation `8.29um / 7.62um`. No transformer probability
+  is needed to ENUMERATE them, so the breadth half is testable on CPU.
+- GATE A1.2 — FAILS decisively. One global 10um enumeration (single preregistered
+  configuration), exact patched scorer:
+  44b6 adjJ `0.8821 -> 0.7225` (`-0.1596`), edge_tp `1268 -> 1177`, edge_fp `99 -> 288`;
+  6bba adjJ `0.8068 -> 0.6572` (`-0.1496`), edge_tp `1664 -> 1532`, edge_fp `191 -> 459`.
+  Re-running the wrapper at the E0c gate reproduced the cached graphs exactly
+  (tp/fp/node counts identical), so the harness is sound.
+  `inventory/branchA_widen10um_twocrop.json`.
+- CEILING UNDER A PERFECT PROBABILITY — still fails. Granting the widened surface an ORACLE
+  edge probability (p=1 on true GT pairs, never submitted) gives
+  44b6 `-0.1611` at the shipped learned bonus and `-0.1319` with the probability dominating
+  geometry (bonus 40); 6bba `-0.1500` and `-0.1281`. edge_tp stays BELOW baseline in every
+  variant (`1198 < 1268`, `1555 < 1664`). `inventory/branchA_oracle_prob_twocrop.json`.
+- CONTROL — not a downstream artifact. With the short-track filter disabled the widened
+  oracle configuration is still `-0.1281 / -0.1125`. `inventory/branchA_control_nofilter.json`.
+- WHY IT FAILS: the per-frame assignment is one-to-one. Widening the gate to 10um adds
+  ~1550 (44b6) / ~940 (6bba) extra relink edges per crop, and each false assignment can also
+  displace a true one, so true positives fall even when every true pair is scored perfectly.
+  Candidate breadth is not merely neutral here — it is actively destructive.
+- DECISION: Gate A1 requires ALL of its bullets; bullet 2 fails on both crops under the
+  most favourable possible edge scoring. Branch A is CLOSED. No two-crop T4 cache, no GPU.
+- RESIDUAL, stated honestly: this falsifies expanded candidates inside E0c's per-frame
+  Hungarian assignment, not inside the public notebooks' global ILP. That combination
+  remains formally untested. It rests on two independently negative components — this
+  result, and closed lever 5 (v122 coupled ILP, 44b6 `-0.0633`). Reopening it needs a new
+  argument for why the interaction beats both parts, not just the observation that it is
+  untested.
+- E0c unchanged as authoritative: public `0.889`, OOF `0.7595 / 0.6490`. Nothing promoted.
+  Next active work is branch B (CPU-only family-boundary decomposition); if it also fails
+  its bilateral `+0.01` gate, the stop rule fires and the final hedge is E0c + clean v122.
