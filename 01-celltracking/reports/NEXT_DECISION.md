@@ -1,8 +1,47 @@
 # Next decision — attack the family boundary, not the same recipe
 
 **Preregistered:** 2026-07-30
-**Status:** active — branch A CLOSED 2026-07-30 (CPU, no GPU spent); branch B open
+**Status:** superseded 2026-07-30 by the division track (D0' GREEN). Branch A CLOSED;
+branch B demoted behind divisions.
 **Compute state:** idle
+
+## Primary track — Jaccard-optimal joint fork selection (D0' GREEN)
+
+D0' measured the composed operation Oracle C never tested: remove existing false forks, then
+reconstruct reachable true ones. Five parity-controlled arms, 199 crops, exact patched scorer,
+edges-only edits (`N_pred` and node recall identical in every arm).
+
+| arm | 44b6 | Δ | 6bba | Δ |
+|---|---:|---:|---:|---:|
+| baseline (parity OK) | 0.7595 | +0.0000 | 0.6490 | −0.0000 |
+| suppress_all | 0.7630 | +0.0035 | 0.6517 | +0.0027 |
+| suppress_all_then_add_replace | 0.8413 | +0.0818 | 0.7273 | +0.0783 |
+| selective_suppress_then_add_replace | 0.8413 | +0.0818 | 0.7273 | +0.0783 |
+| add_replace_then_selective_suppress | 0.8413 | +0.0818 | 0.7273 | +0.0783 |
+
+GT-free child-retention control (`--fallback-only`): **+0.0783 / +0.0737**. Order does not
+matter and the operations do not interfere. Division goes `TP0/FP93/FN26 → TP20/FP0/FN6` and
+`TP4/FP582/FN121 → TP93/FP0/FN32`.
+
+GREEN on both conditions: composed min-fold `+0.0737` (bar `+0.03`); suppression contributes
+`+0.0601 / +0.0599` over Oracle-C-alone (bar `+0.01` bilateral). Strongly super-additive —
+`0.0035 + 0.0182 = 0.0217` apart versus `0.0783` composed.
+
+**Everything above is a GT-informed oracle ceiling and is not submittable.** Fork selection is
+oracle in every arm. Next gates, in order:
+
+- **D0** — Jaccard-optimal operating-point reanalysis of the existing division posterior. No
+  saved v4 predictions exist under `artifacts/` (`divevents/*.npz` are balanced training events
+  only), so this needs the authorised inference-only re-run. Threshold on exact composite after
+  fork edits, cross-fitted between embryos — never precision `0.9`. Gate: `≥+0.005` exact
+  composite on both families, or `≥30%` of the D0' bilateral upside.
+- **D1** — covariance fork audit if D0 falls short. Candidate population is the union of E0c's
+  existing forks, the reachable proposals, and their competing parent assignments; the scorer
+  jointly decides suppress/retain/reconstruct/steal. Note the retain decision is near-vacuous:
+  only `0` and `2` of ~20k existing forks sit on a true divider.
+- **D2** — joint fork/parent re-optimiser, only after D1 passes.
+
+Missed-node displacement forensics run in parallel; the broad atlas stays deferred.
 
 ## Decision
 

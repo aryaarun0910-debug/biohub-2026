@@ -23,6 +23,18 @@ Canonical result: `inventory/e0c_score_full.txt`.
 | M1 domain-randomised model | same-family `+0.0074`; cross-family `+0.0010`, CI `[-0.0102,+0.0132]` | stopped after one seed | `inventory/m1_selection.json`, `inventory/m1_heldout_result.json` |
 | Pre-ILP candidate breadth (10 µm) | 44b6 `-0.1596`, 6bba `-0.1496`; still `-0.1319 / -0.1281` under a perfect oracle edge probability | closed on CPU, no GPU spent | `inventory/branchA_*.json`, journal 2026-07-30 |
 
+## Reopened method
+
+| Method | Exact decisive result | Verdict | Evidence |
+|---|---|---|---|
+| Jaccard-optimal joint fork suppression + reconstruction | composed oracle ceiling `+0.0783 / +0.0737` (GT-free child retention); suppression contributes `+0.0601 / +0.0599` over Oracle-C-alone | GREEN, primary track | `inventory/phaseb_oracle_d0prime.json`, journal 2026-07-30 |
+
+Distinct from the killed "high-precision trajectory posterior": that was gated at precision
+`0.9`, whereas the metric rewards maximising exact composite. After suppression the division
+count starts at `TP0/FP0/FN26`, so `J = k/(26+m)` for `k` true and `m` false forks added — a
+detector at 30–50% precision clears the `+0.005` gate. Realizability is unproven; the oracle
+selects forks with ground truth in every arm.
+
 ## Mechanistic conclusions
 
 - The v122 improvement is survival pruning: it improves the count multiplier but collapses
@@ -32,6 +44,10 @@ Canonical result: `inventory/e0c_score_full.txt`.
   `+0.0010` composite change was count credit, not improved tracking.
 - The recurrent obstacle is embryo-family conditional shift, not insufficient compute on
   the same training recipe.
+- E0c's fork layer is essentially pure noise: 11,441 forks on 44b6 and 9,012 on 6bba, of which
+  `0` and `2` sit on a true GT divider. Only 93 / 584 are metric-evaluable; the rest fall in
+  unannotated regions. Suppressing all of them is edge-neutral (`-0.0000 / -0.0020`), which is
+  why suppression and reconstruction are worthless apart and strongly super-additive together.
 - Candidate breadth fails for a structural reason, not a scoring one: the per-frame
   assignment is one-to-one, so widening the gate to 10 µm adds ~1550 / ~940 extra relink
   edges per crop and each false assignment can displace a true one. Edge TP falls below

@@ -53,12 +53,28 @@ its oracle ceiling collapses in practice: widening enumeration to the `10 µm` c
 the one-to-one per-frame assignment lets each false edge displace a true one. Reproduce with
 `scripts/branchA_gate.py --stage all`.
 
-Branch B — the CPU-only family-boundary decomposition over existing E0c/M1 artifacts — is the
-last open gate. It graduates only on a bilateral `+0.01` oracle ceiling with a
-leave-family-out sign-stable, deployment-observable mechanism.
+**The primary track is now divisions.** E0c scores `division_jaccard` `0.0000 / 0.0057` — it
+harvests essentially none of a term worth up to `+0.1`. D0' (2026-07-30) measured the
+composition Oracle C never tested — remove existing false forks, then reconstruct reachable
+true ones — at **`+0.0783 / +0.0737`** bilateral (GT-free child-retention control; `+0.0818 /
++0.0783` with it). Suppression and reconstruction are worthless apart and strongly
+super-additive together, because E0c's fork layer is essentially noise: 11,441 / 9,012 forks,
+of which `0` and `2` sit on a true divider. Reproduce with
+`scripts\win_bet\phaseb_oracle_d0prime.py`.
 
-GPU remains blocked. If branch B also fails, stop research compute and retain a final
-submission hedge: E0c for private robustness and v122 for public strength.
+That is a GT-informed oracle ceiling, not a result. Fork selection is oracle in every arm and
+nothing there is submittable. The live question is realizability, and the previous division
+classifier was killed on the wrong instrument: it was gated at precision `0.9`, whereas after
+suppression `J = k/(26+m)`, so a detector at 30–50% precision clears the `+0.005` gate.
+
+Active queue is in [`reports/NEXT_DECISION.md`](reports/NEXT_DECISION.md): D0 operating-point
+reanalysis (needs an inference-only re-run — no saved posterior predictions survive), then D1
+covariance fork audit, then D2 joint re-optimiser. Branch B is demoted behind divisions; the
+stop rule is suspended while the division track is live.
+
+GPU remains blocked until a mechanism passes a deployable gate. Final hedges stay E0c for
+private robustness and v122 for public strength, with a third slot reserved for the division
+track if it graduates.
 
 ## Canonical assets
 

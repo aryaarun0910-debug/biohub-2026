@@ -1139,3 +1139,56 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - E0c unchanged as authoritative: public `0.889`, OOF `0.7595 / 0.6490`. Nothing promoted.
   Next active work is branch B (CPU-only family-boundary decomposition); if it also fails
   its bilateral `+0.01` gate, the stop rule fires and the final hedge is E0c + clean v122.
+
+### 2026-07-30 (D0' — GREEN: composed fork suppression + reconstruction is +0.0783 / +0.0737)
+
+- Executed D0' per the amended division priority. Reproduction:
+  `scripts/win_bet/phaseb_oracle_d0prime.py --workers 6 --materialize` (five parity-controlled
+  arms, 199 crops, authoritative patched scorer, edges-only edits so `N_pred` and node recall
+  are identical in every arm). GT-informed graphs written under `GT_ORACLE_do_not_submit/`.
+- MOTIVATION: Oracle C only ever ADDED or REPLACED forks; it never REMOVED one, so its
+  division denominator retained all 93 / 584 false forks. `divJ = 20/(20+93+6) = 0.168` is
+  78% false-fork denominator. Suppression alone is worthless (`0/(0+0+26) = 0`) and was
+  rejected in isolation on 2026-07-19. The two operations were never composed.
+- ARMS (composite, delta vs E0c 0.7595 / 0.6490):
+  * baseline                            0.7595 / 0.6490  (+0.0000 / -0.0000) PARITY OK
+  * suppress_all                        0.7630 / 0.6517  (+0.0035 / +0.0027)
+  * suppress_all_then_add_replace       0.8413 / 0.7273  (+0.0818 / +0.0783)
+  * selective_suppress_then_add_replace 0.8413 / 0.7273  (+0.0818 / +0.0783)
+  * add_replace_then_selective_suppress 0.8413 / 0.7273  (+0.0818 / +0.0783)
+  All three add arms are identical: order does not matter and the operations do not interfere
+  (`readded_after_suppression` = 0 / 2). Division goes `TP0/FP93/FN26 -> TP20/FP0/FN6`
+  (divJ 0.769) and `TP4/FP582/FN121 -> TP93/FP0/FN32` (divJ 0.744).
+- GT-FREE CONTROL (`--fallback-only`, deterministic lowest-id child retention, no GT-consistent
+  child assist): suppress_all 0.7595 / 0.6470; suppress_all_then_add_replace 0.8378 / 0.7227,
+  i.e. **+0.0783 / +0.0737**. The GT-assisted child retention was worth only +0.0035 / +0.0046.
+  GT-free suppress_all reproduces the historical patched no-fork anchor on 44b6 exactly
+  (0.7595, diff -0.0000); 6bba differs by -0.0012 (0.6470 vs 0.6482) because the historical
+  ablation used a different retained-child rule. `inventory/phaseb_oracle_d0prime.json` and
+  `phaseb_oracle_d0prime_gtfree_control.json`.
+- DECISION = GREEN on both preregistered conditions. Composed min-fold ceiling +0.0737 vs the
+  +0.03 bar. False-fork suppression contributes composed minus Oracle-C-alone =
+  `+0.0783-0.0182 = +0.0601` and `+0.0737-0.0138 = +0.0599`, vs the +0.01 bilateral bar.
+  The composition is strongly super-additive: 0.0035 + 0.0182 = 0.0217 in isolation versus
+  0.0783 composed. The extra ~0.06 is purely the false-fork denominator collapsing.
+- STRUCTURE FOR D1: E0c emits 11,441 forks on 44b6 and 9,012 on 6bba, of which **0 and 2** sit
+  on a true GT divider. The fork layer is essentially pure noise; only 93 / 584 of those forks
+  are metric-evaluable, the rest fall in unannotated regions and are invisible to the scorer.
+  Reachable true forks are 20/26 and 93/125.
+- REALIZABILITY (why the precision-0.9 kill was the wrong instrument): after suppression the
+  division count starts at `TP0/FP0/FN26`, so adding `k` true and `m` false forks gives
+  `J = k/(26+m)`. FN is fixed; each FP costs only one denominator slot. At 50% precision with
+  10 true recovered, `J = 10/36 = 0.278 -> +0.028`; at 30% precision, `J = 10/49 = 0.204 ->
+  +0.020`. Both clear the `+0.005` promotion gate by a wide margin. The killed v4 posterior had
+  LOEO PR-AUC 0.715, which is plausibly sufficient at this operating point even though its
+  recall@P0.9 was ~0.045. This is a genuinely different gate, not a rerun of the closed method.
+- HONEST LIMITS: this is a GT-informed ORACLE ceiling. Fork SELECTION remains oracle in every
+  arm; the `--fallback-only` control only removes the secondary oracle assist in choosing a
+  retained child. Nothing here is deployable and none of it may be submitted. The deployable
+  question is unchanged and is now D0: can a real posterior, thresholded for exact composite
+  rather than precision 0.9, capture a useful fraction of +0.0783 / +0.0737.
+- NEXT: D0 Jaccard-optimal operating-point reanalysis. NOTE — no saved v4 posterior predictions
+  exist anywhere under `artifacts/`; `artifacts/kaggle/divevents/*.npz` are the balanced
+  training events only (ZSNS001 38262 / ZSNS003 3376 / ZSNS004 5728 / ZSNS005 10324). D0
+  therefore requires the inference-only re-run already authorised. E0c unchanged as
+  authoritative; nothing promoted.
