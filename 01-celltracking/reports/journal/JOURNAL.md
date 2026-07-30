@@ -1192,3 +1192,55 @@ private organizer clarification; score-probing is forbidden. Full plan:
   training events only (ZSNS001 38262 / ZSNS003 3376 / ZSNS004 5728 / ZSNS005 10324). D0
   therefore requires the inference-only re-run already authorised. E0c unchanged as
   authoritative; nothing promoted.
+
+### 2026-07-30 (D0P — GT-free proposer audit: frozen deployable surfaces RED; the cap, not the approach, is the limiter)
+
+- Executed D0P per directive. Reproduction: `scripts/win_bet/phaseb_d0p_proposer.py --workers 6`.
+  Candidate generation never consults GT: every E0c node at `t` may be a mother, daughters are
+  distinct E0c nodes at `t+1`, daughters that already have a parent stay eligible (stealing is
+  required), incumbent+alternative and two-alternative pairs both included, daughter order
+  canonicalised and deduplicated. GT is used only afterwards for auditing and labels. The
+  reported oracle is "proposable-only": `suppress_all` (GT-free lowest-id retention) then
+  add-replace restricted to forks the proposer actually generated.
+- RESULTS (composite, delta vs E0c 0.7595 / 0.6490):
+  * `geometric_core` (10.5 um parent->daughter, 8.5 um sister; hash 8d588cd8446f)
+    44b6 0.7790 (+0.0195), coverage 5/20 reachable, 5/26 all;
+    6bba 0.6632 (+0.0142), coverage 20/93 reachable, 20/125 all.
+    Candidates 4,197,640 / 3,213,390; reliable-negative 24,677 / 81,594; per-mother pairs
+    median 2.0/1.0, p99 6.0/5.0, max 21/32.
+  * `native` (pairs from the pre-assignment candidate-edge cache; hash de1097294192)
+    44b6 0.7711 (+0.0116), coverage 3/20; 6bba 0.6526 (+0.0036), coverage 7/93.
+    Candidates 297,313 / 269,302. CAVEAT: E0c applies `OUTPUT_LINEFIT_SMOOTH` (weight 0.8), so
+    raw candidate coordinates are displaced from cached graph coordinates; endpoints were mapped
+    by nearest neighbour within 2.0 um at 80.1% fidelity. Even at perfect fidelity this surface
+    is far below the others.
+  * `outer_diag` (fixed 15.0 / 15.0 um; hash e68b4ee31e50)
+    44b6 0.8378 (+0.0783), coverage **20/20** reachable; 6bba 0.7136 (+0.0646), coverage 82/93.
+    Candidates 64,699,626 / 44,145,348; reliable-negative 405,212 / 965,478; per-mother pairs
+    median 18.0/7.0, max 159/197.
+- DECISION per the preregistered rule = **RED**. GREEN required bilateral `>=+0.03`; AMBER
+  `+0.015-0.03`; RED if either family is below `+0.015`. `geometric_core` gives 44b6 `+0.0195`
+  (AMBER band) but 6bba `+0.0142`, below the `+0.015` floor. `native` is far below on both.
+  No frozen deployable surface passes.
+- BUT THE DIAGNOSTIC DID ITS JOB, and this is the load-bearing finding: `outer_diag` recovers
+  **20/20** reachable divisions on 44b6 and reproduces the GT-free D0' ceiling **exactly**
+  (+0.0783). So the prize IS present in a GT-free surface; the `10.5 um` parent->daughter cap,
+  not the proposer concept, is what discards it. Coverage goes 5/20 -> 20/20 on 44b6 and
+  20/93 -> 82/93 on 6bba purely by widening the caps.
+- MECHANISTIC READING: the 10.5 um cap was calibrated on MIGRATION (it is E0c's motion-relink
+  gate). At division the daughters separate, so parent-to-daughter displacement is
+  systematically larger than ordinary frame-to-frame motion. A migration-calibrated cap is
+  therefore the wrong prior for a division proposer. This is consistent with the Branch A
+  measurement that recoverable missed edges sit at median 8.29 / 7.62 um with p90 9.61 / 8.78 --
+  ordinary continuations live just under the cap, while divisions live above it.
+- COST: the metric-visible precision problem is far smaller than the raw candidate count,
+  because division FP accrues only at annotated mothers. For `outer_diag` the effective
+  denominator is 405,212 / 965,478 reliable-negative candidates, not 64.7M / 44.1M. Recovering
+  k=20 true forks against m false gives `J = k/(26+m)`, so m <= ~50 keeps J >= 0.29 -- roughly a
+  4-order-of-magnitude discrimination task on metric-visible candidates, with a further burden
+  of not firing on ~64M unlabeled candidates that can still steal assignments.
+- NOT TUNING: caps were frozen before execution and are NOT being re-selected after seeing
+  results. No family-specific cap was chosen. Any new surface must be preregistered on
+  principle (e.g. division-specific displacement priors), not fitted to these numbers.
+- E0c unchanged as authoritative. Nothing promoted. D0R is NOT started: it was conditional on
+  D0P passing, and D0P failed its frozen gate.

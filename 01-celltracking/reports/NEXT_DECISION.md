@@ -28,7 +28,42 @@ GREEN on both conditions: composed min-fold `+0.0737` (bar `+0.03`); suppression
 `0.0035 + 0.0182 = 0.0217` apart versus `0.0783` composed.
 
 **Everything above is a GT-informed oracle ceiling and is not submittable.** Fork selection is
-oracle in every arm. Next gates, in order:
+oracle in every arm.
+
+### D0P — GT-free proposer audit: RED on frozen surfaces, but the cap is the limiter
+
+Generation never consults GT; the oracle below is "proposable-only" (`suppress_all` then
+add-replace restricted to forks the proposer generated).
+
+| surface | 44b6 Δ | reachable covered | 6bba Δ | reachable covered | candidates |
+|---|---:|---|---:|---|---|
+| geometric_core 10.5/8.5 µm | +0.0195 | 5/20 | +0.0142 | 20/93 | 4.20M / 3.21M |
+| native (candidate-edge cache) | +0.0116 | 3/20 | +0.0036 | 7/93 | 0.30M / 0.27M |
+| outer_diag 15/15 µm (fixed) | **+0.0783** | **20/20** | **+0.0646** | 82/93 | 64.7M / 44.1M |
+
+**RED by the preregistered rule** — 6bba `geometric_core` is `+0.0142`, below the `+0.015`
+floor. No frozen deployable surface passes.
+
+**But the diagnostic did its job.** `outer_diag` recovers 20/20 reachable divisions on 44b6 and
+reproduces the GT-free D0′ ceiling exactly (`+0.0783`). The prize *is* present in a GT-free
+surface; the `10.5 µm` cap discards it. That cap is E0c's motion-relink gate — calibrated on
+**migration**. At division the daughters separate, so parent→daughter displacement is
+systematically larger than ordinary motion, which makes a migration-calibrated cap the wrong
+prior for a division proposer. Branch A corroborates: ordinary recoverable continuations sit at
+median 8.29 / 7.62 µm, just under the cap.
+
+Effective cost is far below the raw count: division FP accrues only at annotated mothers, so
+`outer_diag`'s metric-visible denominator is 405,212 / 965,478 reliable negatives, not 64.7M /
+44.1M. With `J = k/(26+m)`, holding `m ≤ ~50` at `k = 20` keeps `J ≈ 0.29`.
+
+Caps were frozen before execution and have **not** been re-selected afterwards. Any successor
+surface must be preregistered on principle, not fitted to these numbers.
+
+**Open decision — RED says close reconstruction, but the diagnostic that was built to
+distinguish "cap-limited" from "approach-limited" says cap-limited.** Resolving that tension is
+a command decision, not a threshold to quietly retune.
+
+Next gates, in order (D0R remains conditional and is NOT started):
 
 - **D0** — Jaccard-optimal operating-point reanalysis of the existing division posterior. No
   saved v4 predictions exist under `artifacts/` (`divevents/*.npz` are balanced training events
