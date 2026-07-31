@@ -131,11 +131,8 @@ def audit_one(args) -> dict:
     na = g.node_attrs(attr_keys=[td.DEFAULT_ATTR_KEYS.NODE_ID, td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID])
     i2g = {int(r[td.DEFAULT_ATTR_KEYS.NODE_ID]): r[td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID]
            for r in na.iter_rows(named=True)}
-    gt_to_sub = {}
-    for s, iid in s2i.items():
-        m = i2g.get(iid)
-        if m not in (None, -1):
-            gt_to_sub[int(m)] = s
+    from gt_collision import gt_maps_from_matches
+    gt_to_sub, _s2g, _ = gt_maps_from_matches(s2i, i2g, context=f"h0b_rankcompress {crop}")
     ids = [int(n) for n in gt.node_ids()]
     outdeg = dict(zip(ids, gt.out_degree(ids)))
     truth = {}

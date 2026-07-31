@@ -208,12 +208,9 @@ def score_one(args) -> dict:
     na = g.node_attrs(attr_keys=[td.DEFAULT_ATTR_KEYS.NODE_ID, td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID])
     int_to_gt = {int(r[td.DEFAULT_ATTR_KEYS.NODE_ID]): r[td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID]
                  for r in na.iter_rows(named=True)}
-    gt_to_sub, sub_to_gt = {}, {}
-    for s, iid in sub_to_int.items():
-        mid = int_to_gt.get(iid)
-        if mid not in (None, -1):
-            gt_to_sub[int(mid)] = s
-            sub_to_gt[s] = int(mid)
+    from gt_collision import gt_maps_from_matches
+    gt_to_sub, sub_to_gt, _ = gt_maps_from_matches(
+        sub_to_int, int_to_gt, context=f"oracle_d0prime {crop}")
 
     ids = [int(n) for n in gt.node_ids()]
     outdeg = dict(zip(ids, gt.out_degree(ids)))

@@ -79,12 +79,8 @@ def census_one(args) -> dict:
     na = g.node_attrs(attr_keys=[td.DEFAULT_ATTR_KEYS.NODE_ID, td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID])
     i2g = {int(r[td.DEFAULT_ATTR_KEYS.NODE_ID]): r[td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID]
            for r in na.iter_rows(named=True)}
-    sub_to_gt, gt_to_sub = {}, {}
-    for s, iid in s2i.items():
-        m = i2g.get(iid)
-        if m not in (None, -1):
-            sub_to_gt[int(s)] = int(m)
-            gt_to_sub[int(m)] = int(s)
+    from gt_collision import gt_maps_from_matches
+    gt_to_sub, sub_to_gt, _ = gt_maps_from_matches(s2i, i2g, context=f"h1a_census {crop}")
     ids = [int(n) for n in gt.node_ids()]
     outdeg = dict(zip(ids, gt.out_degree(ids)))
     true_pair: dict[int, tuple[int, int]] = {}

@@ -2031,3 +2031,150 @@ valid -- it is the trajectory-feature critic that is closed.
 
 Consequence for the factorised architecture: `P(mother divides)` remains entirely unsupplied,
 and it is now the ONLY missing factor. Lane C (H1-M) is the sole live attempt at it.
+
+### 2026-07-31 (Lane C — H1-M: the FIRST bilaterally positive mechanism; Zebrahub falsified for divisions)
+
+Mother-level gate `P(divides | mother-centred evidence)`, one row per `(crop, mother, t)`, no
+pair duplication. Scripts `scripts/h1m_{features,mother_events,zebrahub_appearance,gate,audit}.py`;
+full write-up `agent_runs/laneC/H1M_FINDINGS.md`.
+
+**Competition dataset** (`comp_mother_events.parquet`, 199 crops):
+
+| family | mother events | dividers | realisable | hard negatives |
+|---|---:|---:|---:|---:|
+| 44b6 | 18,553 | 24 | 16 | 6,740 |
+| 6bba | 79,039 | 113 | 76 | 28,196 |
+
+Matched negatives 20/divider, same crop, nearest in standardised (t, density, core mass, track
+age, speed); balanced to |SMD| <= 0.081.
+
+**RESULT — in-family crop-grouped CV, cross-fitted admission budget, no threshold chosen on the
+test family: `+0.00396 / +0.00201` exact composite.** For comparison H1-T was `+0.0006 / -0.0003`.
+Best single features are mother-only and self-normalising: `R_massn_p1` AUC 0.242/0.209,
+`D_rg_p1` 0.771/0.707. A confirmatory GBDT arm was WORSE at the tail
+(`+0.00058 / -0.00261`) -- capacity fits idiosyncrasy, exactly as the EPV ceiling predicted.
+
+**This is the first mechanism in the campaign that is bilaterally positive on exact composite
+under an honest cross-fitted rule.** It is below the old per-family `+0.005` bar, but that bar is
+no longer the primary objective -- the pooled response is (Lane B is measuring it).
+
+**ZEBRAHUB IS FALSIFIED AS A DIVISION CORPUS, with a mechanism.** External LOEO AUC 0.692
+(0.681/0.704/0.692) -- but transferred to competition data it is **AUC 0.494 / 0.532, i.e.
+CHANCE**, cross-fitted `+0.00034 / -0.00244`. All the usual suspects were audited and PASS:
+coordinates verified on both domains (Zebrahub true-vs-null AUC 0.941, core mass 130,417 vs 0),
+domain shift tiny (mean |SMD| 0.210, ZERO of 77 features above 1 SD), disjointness/sampler/
+determinism clean.
+
+The decisive measurement -- forward one-step core-mass collapse, re-anchored to allow annotation
+offset:
+
+| dataset | anchor 0 | anchor -1 | anchor -2 | rg growth |
+|---|---:|---:|---:|---:|
+| competition 44b6 | **-0.981** | +0.049 | -0.175 | **+0.926** |
+| competition 6bba | **-0.723** | -0.031 | -0.009 | **+0.649** |
+| ZSNS003/4/5 (best of 4 windows) | -0.195 | +0.206 | +0.135 | +0.168 |
+
+**Zebrahub has no mitotic signature at any anchor** -- 4.75x amplitude shortfall, and its only
+cross-embryo-consistent effect has the WRONG SIGN. Two measured causes: (1) it is temporally
+over-sampled, true daughter separation at t+1 is 5.7 um vs the competition's 10.3 um, so both
+nascent daughters are still inside the 3 um core; (2) its fork frames come from an AUTOMATED
+tracker, so `t0` marks when detections resolved, not when the cell divided -- the competition GT
+is human-curated. **More imagery cannot fix a label-timing defect.** This also retrospectively
+justifies excluding ZSNS001 (635,041 divisions against a +15,790 net cell gain implies ~619k
+terminations; 3.2%/frame vs 0.44-0.70%) -- though the retained embryos fail for a reason ZSNS001
+would share anyway.
+
+Imagery cost was 10x cheaper than the prior estimate: 7.52 GB of level-0 OME-Zarr streamed and
+decoded in 828 s (9.1 MB/s). No padding; out-of-slab events dropped and counted.
+
+CAVEAT CARRIED FORWARD: `realisable` assumes H0c's ORACLE pair selection among the top 3. The
+frozen top-1 ranker retains only 70% / 62%, so the deployable number is BELOW the figures above.
+Suppression's unconditional edge cost is already charged throughout.
+
+NEXT CORPUS: needs frame-accurate, human-curated division times. Cell Tracking Challenge
+Fluo-N3DH / Fluo-N3DL are worth a cheap provenance check before any further external spend.
+
+### 2026-07-31 (Lane E — correctness closure; and a DISPUTED count in our own baseline)
+
+Tests 18 -> **30 passed**. Modified `src/biotrack/wrapper.py` and the five proposer scripts;
+added `scripts/{repair_linefit_volume,verify_gt_collision_parity,pooled_bootstrap}.py`,
+`scripts/win_bet/gt_collision.py`, `tests/test_{gt_collision,linefit_volume_guard}.py`.
+
+**P0-C repaired by RESTORE, not clamp -- with a uniqueness proof.** Root cause:
+`linefit_smooth_output_graph` blends toward a line fit over the +/-2 neighbourhood; node 15274 is
+a track ENDPOINT (in-degree 0) so its window is one-sided `[0,+1,+2]` and the fit EXTRAPOLATES,
+coefficients `0.8667*o0 + 0.2667*o1 - 0.1333*o2` -- the negative term pushes past the face.
+Originals were never persisted, so they were recovered: the smoother is affine with
+topology-determined coefficients over integer voxel inputs, and a DP over the 15-node unique-degree
+chain enumerated every integer preimage. For z the feasible set is exactly **{63}** -- proven, not
+guessed. (y gave {183,184} and x {247,248,249}, so uniqueness is a real certificate, not
+automatic.) Repaired output PASSES all 10 gates; 1 node re-keyed, 0 net nodes/edges/divisions.
+
+**Pile-up audit inverts the intuition: smoothing RELIEVES boundaries.** Face occupancy falls in
+every crop and axis (44b6_0b24845f z=63: 224 -> 212). So the 369-nodes-on-z=63 pile-up is a
+DETECTOR artifact, and a clamp repair would have pushed in exactly the wrong direction.
+
+**DISPUTED -- out-of-volume coordinates in the E0c baseline.** Lane E reports 7,349 nodes
+(0.144%), **all non-integral**, concluding smoothing is 100% responsible. My own independent
+recount over the same cache disagrees:
+
+| source | nodes OOV | z | y | x | integral |
+|---|---:|---:|---:|---:|---:|
+| Lane E | 7,349 | 102 | 3,132 | 4,115 | **0** |
+| my recount | **14,319** (0.2798%) | 5,250 | 4,023 | 5,168 | **1,658** |
+
+Same total node count (5,118,041) and same z range (-0.800 .. 63.667), so this is an aggregation
+or bound difference, not a different dataset. The disagreement matters because 1,658 INTEGRAL
+violations would mean smoothing is NOT the sole cause and some detector coordinates are
+themselves out of volume. **Unresolved -- do not cite either figure as settled until reconciled.**
+
+What both agree on, and what matters: **E0c's published 0.7595 / 0.6490 were measured with
+thousands of out-of-volume coordinates present.** They stayed invisible because the kernel writer
+emits `max(0, int(round(v)))`, silently clamping the low side; only a high-side leak is auditable,
+which is exactly how P0-C's z=64 escaped.
+
+**Volume guard defaults OFF** (`BIOHUB_OUTPUT_VOLUME_GUARD=0`). `e0c_run.py:163` calls
+`filter_output_graph`, so defaulting it on would move thousands of coordinates and silently shift
+the baseline the whole promotion gate is defined against. **That is a decision to re-measure E0c,
+not a bug fix, and it needs a human call.** Set `=1` for any artifact that must pass the
+structural audit.
+
+**Five `gt_to_sub` sites guarded, outputs PROVEN identical.** The guard raises rather than
+resolving, so a completed run proves it never fired. `verify_gt_collision_parity.py` monkeypatches
+the exact pre-fix loop and compares full result dicts: both folds, 10 runs, all 5 sites IDENTICAL.
+(First pass flagged one as different; the sole difference was the wall-clock `runtime_s` field.)
+
+**Script classification: nothing DEAD.** AUTHORITATIVE: `audit_submission_structure.py`,
+`private_split_simulator.py`, `private_portfolio_risk.py`, `phaseb_h0d_livefilter.py`. The other
+ten are EXPERIMENTAL. Zero writes into `artifacts/`. One hazard flagged:
+`private_portfolio_risk.py` hardcodes its output dir and would clobber another lane's file.
+
+**COMPETITION RULE FOUND (verbatim), settling the P0-A licence question.**
+`https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/rules`, accessed
+2026-07-31. Winner License: **MIT**. Data: **CC0**. Section 3.6.b, Public Code Sharing:
+
+> "b. Public Code Sharing. You are permitted to publicly share Competition Code, provided that
+> such public sharing does not violate the intellectual property rights of any third party. If you
+> do choose to share Competition Code or other such code, you are required to share it on
+> Kaggle.com on the discussion forum or notebooks associated specifically with the Competition for
+> the benefit of all competitors. By so sharing, you are deemed to have licensed the shared code
+> under an Open Source Initiative-approved license (see www.opensource.org) that in no event
+> limits commercial use of such Competition Code or model containing or depending on such
+> Competition Code."
+
+So `saitejabandaruin/biohub-top-notebook-0-913` is deemed OSI-licensed **by operation of the
+rules**; the absent API metadata field is irrelevant. The P0-A licence question is CLOSED.
+
+**Bootstrap (20,000 crop-block draws).** All five marginal CIs OVERLAP; only paired deltas
+separate: v122 0.69909 [0.67355, 0.72283]; C_survival 0.69692; Bp_ilp 0.69162 [0.66720, 0.71438];
+B_detpop 0.66677; E0c 0.66539 [0.64087, 0.68875]. P(v122 rank 1) = **99.5%**.
+Bp vs C_survival (CI [-0.01121, +0.00081]) and E0c vs B_detpop ([-0.00388, +0.00100]) are NOT
+separable.
+
+**Portfolio: v122+Bp_ilp beats v122+E0c, but NOT significantly.** Bp is far MORE correlated with
+v122 (0.61-0.88) than E0c (-0.17 to 0.60), yet its +0.026 level advantage outweighs the
+correlation penalty: Bp wins p5 in 6/6 scenarios and E[max] in 5/6. Notably in density-only-wide
+E0c is ANTI-correlated with v122 (-0.166) and still loses -- decorrelation does not cover a 0.026
+deficit. BUT the margins (+0.0001 to +0.0011 E[max]) are **an order of magnitude below the
+paired-delta crop-resampling SE (~0.003)**. The preference is conditional on this OOF cache, not
+significant. C_survival confirmed strictly dominated (reversal 0.01%, corr 0.998, gain +0.00000).

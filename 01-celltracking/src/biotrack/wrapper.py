@@ -77,6 +77,40 @@ OUTPUT_LINEFIT_SMOOTH = os.environ.get("BIOHUB_OUTPUT_LINEFIT_SMOOTH", "1") != "
 OUTPUT_LINEFIT_WEIGHT = float(os.environ.get("BIOHUB_OUTPUT_LINEFIT_WEIGHT", "0.8"))
 OUTPUT_LINEFIT_WINDOW = int(os.environ.get("BIOHUB_OUTPUT_LINEFIT_WINDOW", "2"))
 
+# Volume guard for coordinate-rewriting output stages.
+#
+# ``linefit_smooth_output_graph`` blends each node towards a line fitted over its
+# +/- OUTPUT_LINEFIT_WINDOW neighbourhood. For a track endpoint the neighbourhood is
+# one-sided, so the fit EXTRAPOLATES and can push a node outside the acquisition
+# volume (observed: P0-C node 15274 of 44b6_0b24845f, t=43, z=64 with z_max=63).
+# Every crop in data/train (199/199) and every movie in data/test (4/4) is exactly
+# (T, Z, Y, X) = (100, 64, 256, 256), so these bounds hold for the whole competition
+# dataset; override only if that ever stops being true.
+#
+# The repair is NOT a clamp. A clamp invents a boundary coordinate the detector never
+# proposed and manufactures a pile-up on the boundary plane. Instead the smoothed value
+# is discarded per axis and the ORIGINAL unsmoothed detector coordinate is restored, so
+# smoothing is provably unable to move a node out of the volume.
+#
+# DEFAULT OFF, DELIBERATELY. This is not a latent defect: 7,349 of the 5,118,041 node
+# coordinates in artifacts/kaggle/e0c_cache/graphs (199/199 crops) are already outside the
+# volume -- y 3,132, x 4,115, z 102 -- and EVERY ONE of them is non-integral, i.e. produced
+# by this smoothing step and by nothing upstream. The authoritative E0c numbers
+# (0.7595 / 0.6490) were measured WITH those coordinates in place, so enabling the guard by
+# default would silently move the baseline the whole promotion gate is defined against.
+# Enabling it is therefore a decision to re-measure E0c, not a bug fix; make that decision
+# explicitly. Set BIOHUB_OUTPUT_VOLUME_GUARD=1 for any artifact that must pass
+# scripts/audit_submission_structure.py.
+#
+# Most of the 7,349 never reached a submission because the Kaggle kernel writer emits
+# max(0, int(round(v))) and so silently clamps the low side; only a high-side leak is
+# visible to the audit, which is exactly how P0-C's z=64 escaped.
+OUTPUT_VOLUME_GUARD = os.environ.get("BIOHUB_OUTPUT_VOLUME_GUARD", "0") != "0"
+OUTPUT_VOLUME_ZYX = tuple(
+    int(v) for v in os.environ.get("BIOHUB_OUTPUT_VOLUME_ZYX", "64,256,256").split(",")
+)
+VOLUME_AXES = ("z", "y", "x")
+
 OUTPUT_GAP2_RECOVERY = os.environ.get("BIOHUB_OUTPUT_GAP2_RECOVERY", "0") != "0"
 GAP2_MAX_TOTAL_UM = float(os.environ.get("BIOHUB_GAP2_MAX_TOTAL_UM", "10.2"))
 GAP2_MAX_STEP_UM = float(os.environ.get("BIOHUB_GAP2_MAX_STEP_UM", "4.4"))
@@ -877,6 +911,44 @@ def filter_short_track_components(
     return kept_nodes, kept_edges
 
 
+def coordinate_in_volume(value: float, axis: int) -> bool:
+    """True when ``value`` still names a voxel of the acquisition volume once written.
+
+    Rounding is part of the predicate on purpose: the submission writer emits
+    ``int(round(v))``, so ``z = 63.5`` is an out-of-volume coordinate even though the
+    float itself is below the ``z <= 63`` limit.
+    """
+    return 0 <= int(round(float(value))) <= OUTPUT_VOLUME_ZYX[axis] - 1
+
+
+def _restore_out_of_volume_axes(
+    blended: np.ndarray,
+    original: np.ndarray,
+    stats: dict[str, int],
+) -> np.ndarray:
+    """Per axis, undo a smoothing step that would leave the acquisition volume.
+
+    Axis-wise, not node-wise: a fit may extrapolate out of bounds in ``z`` while the
+    ``y``/``x`` components remain good, and there is no reason to throw those away.
+    The restored value is the original detector coordinate, never the boundary.
+    """
+    out = blended.copy()
+    for axis in range(3):
+        if coordinate_in_volume(out[axis], axis):
+            continue
+        name = VOLUME_AXES[axis]
+        stats[f"linefit_volume_fallback_{name}"] = stats.get(f"linefit_volume_fallback_{name}", 0) + 1
+        # Restore unconditionally: smoothing must be provably incapable of moving a node
+        # out of the volume. If the detector coordinate was ALSO out of bounds this is an
+        # upstream defect, and it is counted separately rather than masked by a clamp --
+        # the structural audit is then supposed to fail and say so.
+        if not coordinate_in_volume(original[axis], axis):
+            key = f"linefit_volume_original_invalid_{name}"
+            stats[key] = stats.get(key, 0) + 1
+        out[axis] = original[axis]
+    return out
+
+
 def linefit_smooth_output_graph(
     nodes_by_id: dict[int, dict[str, object]],
     edges: list[dict[str, object]],
@@ -940,7 +1012,10 @@ def linefit_smooth_output_graph(
         if not np.isfinite(fitted).all():
             stats["linefit_skipped_nodes"] += 1
             continue
-        updated_pos[node_id] = (1.0 - weight) * original_pos[node_id] + weight * fitted
+        blended = (1.0 - weight) * original_pos[node_id] + weight * fitted
+        if OUTPUT_VOLUME_GUARD:
+            blended = _restore_out_of_volume_axes(blended, original_pos[node_id], stats)
+        updated_pos[node_id] = blended
 
     for node_id, pos in updated_pos.items():
         nodes_by_id[node_id]["z"] = float(pos[0])
@@ -1002,6 +1077,12 @@ def filter_output_graph(
         "short_track_min_len_effective": 0,
         "linefit_smoothed_nodes": 0,
         "linefit_skipped_nodes": 0,
+        "linefit_volume_fallback_z": 0,
+        "linefit_volume_fallback_y": 0,
+        "linefit_volume_fallback_x": 0,
+        "linefit_volume_original_invalid_z": 0,
+        "linefit_volume_original_invalid_y": 0,
+        "linefit_volume_original_invalid_x": 0,
     }
 
     edges: list[dict[str, object]] = []
