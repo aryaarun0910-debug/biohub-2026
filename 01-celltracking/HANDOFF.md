@@ -1,112 +1,145 @@
 # Current handoff
 
-**Updated:** 2026-07-30  
-**Branch:** `master`  
-**Authoritative experiment state:** commit `7897511`
+**Updated:** 2026-07-31
+**Branch:** `master`
+**Best public score:** **0.914** (P0-B)
+**Authoritative OOF objective:** exact **pooled** composite (see §2 — this changed this cycle)
 
-## Outcome
+## Read in order
 
-E0c remains the private-safe baseline. Nothing is promoted.
+1. This file
+2. `reports/NEXT_DECISION.md` — active queue
+3. `reports/submissions/CANDIDATE_LEDGER.md` — every submission, hash, audit, score
+4. `reports/RESEARCH_SYNTHESIS.md` — external evidence, one living doc
+5. `reports/ENVIRONMENT_TRAPS.md` — **13 defects that have each cost real time**
+6. `reports/EXPERIMENT_LEDGER.md` — closed methods
 
-| System | Public | OOF 44b6 | OOF 6bba | Decision |
-|---|---:|---:|---:|---|
-| **E0c wrapper** | **0.889** | **0.7595** | **0.6490** | authoritative private-safe floor |
-| clean v122 deployment probe | 0.908 | 0.6962 | 0.6997 | public-positive, bilateral OOF fail |
-| M1 epoch 10 | — | not run cross-family | 0.6499 | fail: `+0.0010`, CI spans zero |
+## 1. Deployment state
 
-The official scorer is pinned at patch commit `075fc5f`. E0c reproduces exactly across all
-199 crops. Gate every future delta against E0c: both families positive, min-fold at least
-`+0.005`, and no major regime regression.
+| system | public | note |
+|---|---:|---|
+| **P0-B** clean 0.913 base + reverse-time (w=0.20) | **0.914** | current base |
+| P0-A exact clean 0.913 reproduction | 0.913 | reproduced the public notebook exactly |
+| v122 | 0.908 | previous best; best *pooled OOF* arm (0.69909) |
+| E0c | 0.889 | scientific anchor only; pooled OOF 0.66539 |
 
-## What the campaign established
+`P0-B − P0-A = +0.001` = **exactly one unit of LB resolution**. The arms differ by ~0.05% of
+nodes, so this cannot separate a real gain from rounding. Reverse-time is **not harmful**;
+it is **not established as beneficial**. Do not re-litigate with another global blend weight.
 
-Eight independent approaches failed exact both-family gates:
+Milestones from 0.914: **0.920** needs +0.006 · **0.925** +0.011 · **0.935** +0.021 · **0.942** +0.028.
 
-1. breadth reranking saturated;
-2. learned division posterior had effectively zero high-precision recall;
-3. isolated de-novo detection recovered only 0–9% even under oracle gating;
-4. temporal accumulation was null on 44b6 and harmful on 6bba;
-5. the v122 ILP gained on 6bba but lost `0.0633` on 44b6;
-6. an A/D selector had an oracle ceiling barely above the gate and did not transfer;
-7. M1 improved same-family validation by `+0.0074` but only `+0.0010` cross-family;
-8. pre-ILP candidate breadth at the `10 µm` cap lost `0.1596 / 0.1496`, and still lost
-   `0.1319 / 0.1281` when handed a perfect oracle edge probability.
+**Submissions: 8 used. Slot 3 of this cycle's 3 is HELD** — nothing deployable clears a credible margin.
 
-The shared failure is embryo-family transfer. M1 also worsened raw linking
-(`0.6499 -> 0.6421`); its small composite gain came from emitting 20% fewer nodes and
-receiving count-multiplier credit. It is not “nearly passing.”
+## 2. THE OBJECTIVE CHANGED — read this before scoring anything
 
-Full figures, canonical files, and recovery commits are indexed in
-[`reports/EXPERIMENT_LEDGER.md`](reports/EXPERIMENT_LEDGER.md). The complete pre-clean tree
-is recoverable from Git tag `pre-lean-2026-07-30`.
+The leaderboard **pools** all samples with edge-volume weighting. It does **not** average families.
+44b6 carries only **14.94%** of edge mass.
 
-## Active decision
+- **PRIMARY:** exact pooled composite — one combined `summarise()` over all crops.
+- **DIAGNOSTICS (always report):** both family scores, per-family delta, crop-block bootstrap,
+  rank-reversal risk, worst-regime behaviour.
+- **Min-fold is a robustness constraint, NOT the optimisation target.**
 
-Do not run more generic training, extra seeds, full-data fitting, or ensembles.
+Proof: `scripts/verify_pooled_objective.py` (parity to 2.2e-16; hand-reconstruction from raw
+totals; family averaging diverges by up to +0.039). Locked by `tests/test_pooled_objective.py`.
 
-The only active work is [`reports/NEXT_DECISION.md`](reports/NEXT_DECISION.md). Its branch A
-(expanded pre-ILP candidate breadth, the one apparently unmeasured mechanism in the clean
-public pipeline) was **closed on 2026-07-30 with zero GPU spent** — the organizer GEFFs are
-pruned to one parent per target at `p >= 0.5`, so the mechanism was genuinely unmeasured, but
-its oracle ceiling collapses in practice: widening enumeration to the `10 µm` cap loses
-`0.1596 / 0.1496` and still loses `0.1319 / 0.1281` under a perfect edge probability, because
-the one-to-one per-frame assignment lets each false edge displace a true one. Reproduce with
-`scripts/branchA_gate.py --stage all`.
+The old **bilateral-delta gate rejected every better pooled arm** — v122 (+0.0337 pooled), C
+(+0.0315), Bp (+0.0262) were all closed for losing on a 15%-mass family.
 
-**The primary track is now divisions.** E0c scores `division_jaccard` `0.0000 / 0.0057` — it
-harvests essentially none of a term worth up to `+0.1`. D0' (2026-07-30) measured the
-composition Oracle C never tested — remove existing false forks, then reconstruct reachable
-true ones — at **`+0.0783 / +0.0737`** bilateral (GT-free child-retention control; `+0.0818 /
-+0.0783` with it). Suppression and reconstruction are worthless apart and strongly
-super-additive together, because E0c's fork layer is essentially noise: 11,441 / 9,012 forks,
-of which `0` and `2` sit on a true divider. Reproduce with
-`scripts\win_bet\phaseb_oracle_d0prime.py`.
+**The pooled objective is closed-form** (verified 2.27e-13 at corpus scale):
+`pooled = Σ tp_i(1−0.1 r_i) / Σ (tp_i+fp_i+fn_i) + 0.1·DTP/(DTP+DFP+DFN)`.
+Use it — 14.4M scorer calls become vector arithmetic (`scripts/agent5_ledger.py`).
 
-That is a GT-informed oracle ceiling, not a result. Fork selection is oracle in every arm and
-nothing there is submittable. The live question is realizability, and the previous division
-classifier was killed on the wrong instrument: it was gated at precision `0.9`, whereas after
-suppression `J = k/(26+m)`, so a detector at 30–50% precision clears the `+0.005` gate.
+## 3. Reporting discipline — this cycle's hardest lesson
 
-**Latest state (2026-07-30, H0b):** a GT-free proposer surface now reaches **+0.0704 / +0.0613** with 90.0% / 83.9% reachable-division recall (`division_flow_pair_wide`, hash `34f91ada4626`) - retaining ~90% of the D0' oracle ceiling without consulting ground truth. Its 24.52M candidates exceed the 15M engineering budget, so **H0c has now PASSED all four gates (2026-07-31): +0.0625 / +0.0597 exact composite on a 14.37M bounded shortlist, retention 80.0% / 81.7%, node counts and node recall exactly invariant per crop.** Division goes TP0/FP93/FN26 -> TP16/FP0/FN10 and TP4/FP582/FN121 -> TP76/FP0/FN49. Caveat carried forward: adjEdgeJ falls -0.0006 on 6bba with 79/128 crops regressing, because suppression's edge cost is unconditional while the division gain is conditional on correct fork selection. H1 (cheap deployment-observable discriminator) is OPEN and unstarted - see NEXT_DECISION. Earlier: the rank-compression audit **completed and PASSED**: ranking each mother's candidate pairs by flow-midpoint residual puts the true pair at median rank ZERO in both families, so a top-K=3 shortlist retains 80.0% / 81.7% of reachable divisions in 14.37M candidates (inside the 15M budget); K=1 gives 70.0% / 62.4% in 4.96M. Sister separation ranks the true pair 8.0 / 2.0 - a weak discriminator, which is why it was the wrong veto. H0c cascade compression is therefore viable: broad 15/15 generation -> flow-midpoint rank pruning -> critic on the shortlist only -> conflict resolution last. Three frozen surfaces proved the 8.5 um sister cap was the sole limiter (parent-cap and flow-estimator changes were exact nulls).
+Three headline numbers I reported shrank on the corpus:
 
-Public V18 (0.914) reproduction remains blocked: version-pinned Kaggle pulls return 403 and the unversioned pull returns V19 (the rejected harmonic-fusion build). Exact V18 needs a manual Version-History download. The retrieved V19 source does contain the reverse-time association implementation kept for future fork features, held outside the tracked repo.
+| quantity | reported | honest | ratio |
+|---|---:|---:|---:|
+| H1-M pooled | ~+0.0023 | **+0.00007 / −0.00131** | ~30× |
+| node budget | +0.00822 | **+0.00157** | 5.2× |
+| FN association share | 63.5% | **43.3%** | 1.5× |
 
-Older queue in [`reports/NEXT_DECISION.md`](reports/NEXT_DECISION.md): D0 operating-point
-reanalysis (needs an inference-only re-run — no saved posterior predictions survive), then D1
-covariance fork audit, then D2 joint re-optimiser. Branch B is demoted behind divisions; the
-stop rule is suspended while the division track is live.
+**RULE: no smoke or in-family probe may be quoted as a headline. Corpus numbers only, and name
+the basis explicitly every time** — in-family CV vs cross-family LOFO vs GT oracle.
 
-GPU remains blocked until a mechanism passes a deployable gate. Final hedges stay E0c for
-private robustness and v122 for public strength, with a third slot reserved for the division
-track if it graduates.
+## 4. What is deployable and corpus-verified
 
-## Canonical assets
+| mechanism | pooled Δ | basis |
+|---|---:|---|
+| node budget (keep_frac 0.975) | **+0.00157** | corpus, arm A |
+| ssl × geometry veto | **+0.00141** | corpus LOFO, P(>+0.005) = 0.0004 |
 
-- `artifacts/kaggle/oof_clean/` — fold-specific organizer OOF predictions.
-- `artifacts/kaggle/e0c_cache/` — authoritative post-wrapper graphs and candidate surface.
-- `artifacts/kaggle/weights_dataset/` — fold-specific checkpoints/configs.
-- `reports/inventory/e0c_score_full.txt` — exact E0c score.
-- `reports/inventory/coupled_score_2026-07-29.txt` — v122 decomposition.
-- `reports/inventory/m1_selection.json` and `m1_heldout_result.json` — M1 verdict.
-- `reports/inventory/branchA_*.json` — branch A gate evidence (surface audit, oracle
-  ceiling, widened run, oracle-probability ceiling, filter control).
+That is the complete list. ~+0.003 combined *if* independent and *if* they transfer to P0-B —
+neither established. Everything larger is a GT oracle.
 
-## Guardrails
+## 5. Oracles — real ceilings, not deployable
 
-- No public-score exploitation, negative-time nodes, out-of-volume nodes, or synthetic hubs.
-- No routing on family/crop identity and no tuning on visible placeholder test movies.
-- No test-time gradient updates without written host clearance.
-- Preserve unrelated dirty user files.
-- Journal and commit every experiment, including negative results.
+- **H0c cascade `+0.06012` pooled** — suppress all forks, reconstruct GT-selected ones. Live-filter
+  variant `+0.0641/+0.0646` per-family. Substrate-dependent: E0c reach 20/26 + 93/125; v122 only
+  15/26 + 68/125; clean903 20/26 + 96/125.
+- **Hybrid substrate** — v122 tracking + clean903 auxiliary division nodes lifts 6bba reachable
+  divisions **68 → 101** for ~50 aux nodes. Count-multiplier objection dead (aux cost ~1.5e-6/node;
+  the wrapper deletes more than we add). Reachability sets are **not nested**.
 
-Before writing a Kaggle kernel or calling the trainer directly, read
-[`reports/ENVIRONMENT_TRAPS.md`](reports/ENVIRONMENT_TRAPS.md) — six environment defects
-(trainer loss-weight defaults, broken image polars, package naming, pack/scorer vintage,
-`np.savez_compressed` naming, resume data stream) that have each already cost time here.
+## 6. Closed, with mechanisms
 
-## Verification
+- **Exploit is score-NEGATIVE** (−0.0027/−0.0007). 0.950-advertising notebooks score 0.881–0.911.
+- **Detector diversity empty** — threshold variants strictly nested (0 new nodes); union of all five
+  gains +0/+1 GT nodes; publicly falsified (Spotiflow 0.360, StarDist 0.505).
+- **Appearance × appearance stacking closed** — all appearance scorers concentrate FPs on the *same*
+  mothers (7–232× independence), measured lift **0.00**. Only appearance × geometry works, as a
+  broad veto (keeps best 44%), and it is spent.
+- **Zebrahub dead on lineage** — 5.7–11.7 terminations per division; oracle over all 30
+  anchor×stride pairs still wrong-signed. Pre-flight filter for any future corpus:
+  **require `term/div ≲ 1` and `sep(+1) ≥ 0.8 × 10.57 µm` before downloading a voxel.**
+- **CTC licence-blocked**; **H1-T closed structurally** (b = 0 in 44b6 — its correct set is a strict
+  subset of geometry's, so no blend can pass).
+
+## 7. Method findings to carry forward
+
+- **SMD audits drastically understate multivariate separability** — synthetic patches passed the
+  same per-feature audit H1-M used while being 98.9% separable. Any "domain shift is tiny"
+  conclusion resting on per-feature SMD is suspect.
+- **FN attribution:** 56.7% never detected · **43.3% detected then discarded** by our own pipeline.
+- **Break-even:** detection needs **40.6%** precision; a division action needs **10.15%** — and that
+  10.15% is at *full recall*; held to ~37 of 92 divisions it stays ~10%, where H1-M delivers 2.25%.
+- **E0c's published baseline contains thousands of out-of-volume coordinates**, invisible because
+  the writer emits `max(0, int(round(v)))`. Volume guard exists but **defaults OFF** — enabling it
+  shifts the baseline and is a decision to re-measure E0c. **Unresolved count dispute: 7,349 vs my
+  recount of 14,319 (1,658 integral).**
+
+## 8. Immediate next action
+
+**Re-run LOEO fold-0 sharded.** The kernel `aryaarun07/biohub-loeo-f0-strict` produced a correct
+manifest (`secondary_enabled: false`, `deepcenter_enabled: false`, pack `split_0` primary — no
+leakage) but died after **16 of 71 crops**, almost certainly on the `/kaggle/working` size limit:
+it accumulates a full zarr geff per crop plus a copied weights dir. Fix by sharding the fold or
+converting-and-deleting each geff. Use `scripts/kaggle_factory.py`.
+
+This is the highest-value open measurement: **does the +0.06 division oracle transfer to the
+substrate that actually scores 0.914?** Everything else on the table is sub-+0.002.
+
+**P0-A contains an all-training-data model** (`unet_transformer_alltrain_seed314159_v1`,
+`train_datasets: 199`) blended at **0.475 detection weight**. It is a *public deployment* platform,
+not OOF-valid. Only fold 0 + arm `strict` is comparable to E0c/clean903/v122.
+
+## 9. Guardrails
+
+- No public-score exploitation, negative-time nodes, out-of-volume nodes, synthetic hubs.
+- No routing on family/crop identity; no tuning on the four visible placeholder movies.
+- External data needs URL, licence, checksum, provenance. Zebrahub is CC BY 4.0; **CTC is blocked**.
+- Public notebook code: competition rule **3.6.b** deems shared competition notebooks OSI-licensed
+  by operation of the rules (Winner License MIT, Data CC0) — the absent API metadata is irrelevant.
+- **Submissions come from NOTEBOOKS only.** A CSV upload fails `CreateSubmission` with
+  `FAILED_PRECONDITION`, shown as a bare 400. Every candidate must be a completed kernel.
+- Stage explicit paths when committing; agents run concurrently and `git add -A` sweeps unreviewed code.
+
+## 10. Verification
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m pytest -q          # 30 passed
+.\.venv\Scripts\python.exe scripts\verify_pooled_objective.py
 git status --short
 ```

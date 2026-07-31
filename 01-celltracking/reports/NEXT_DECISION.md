@@ -1,3 +1,90 @@
+# Next decision
+
+**Updated:** 2026-07-31
+**Status:** active
+**Best public:** 0.914 (P0-B) · **Slot 3 HELD**
+**Objective:** exact **pooled** composite (min-fold is a robustness constraint only)
+
+Superseded plans are preserved below and in `reports/journal/JOURNAL.md`.
+
+## 1. The one measurement that changes the picture
+
+**Re-run LOEO fold-0, sharded.**
+
+`aryaarun07/biohub-loeo-f0-strict` had a **correct** manifest — `fold 0`, `arm strict`,
+`secondary_enabled: false`, `deepcenter_enabled: false`, pack `split_0` primary, 71 crops — so
+there is no leakage path and the science is sound. It died after **16 of 71 crops**. Not a
+timeout (~26 predict-minutes against a 9h session); the output tree holds a full zarr geff per
+crop plus a copied `secondary_seed_weights` dir, so the `/kaggle/working` size limit is the
+prime suspect.
+
+**Fix:** shard the fold across kernels, or convert each geff to rows and delete it before the
+next crop. Use `scripts/kaggle_factory.py` (spec-driven, trap-hardened, never submits).
+
+**Why it matters more than anything else queued:** the H0c division cascade is worth
+**+0.06012 pooled** on E0c's substrate, and the ceiling is substrate-dependent (E0c 20/26 + 93/125
+vs v122 15/26 + 68/125). We have never measured P0-A/P0-B's substrate. If its reach matches
+clean903's 20/26 with node recall holding, the 0.914 platform and the division track **multiply**
+instead of competing. Early hint: on the only placeholder crop with divisions P0-A reaches 3/3,
+and its own division layer converts them to TP 0 / FP 6 / FN 3.
+
+## 2. Ready to run (CPU; exact commands in the journal)
+
+| item | status |
+|---|---|
+| H2a hybrid full scored oracle (4 arms × 199 crops, ~45–90 min wall) | census done, scoring not run |
+| `agent5_utility.py --max-admit 6000` (utility vs probability ordering) | ledger done, comparison not run |
+| `h4_ssl_gate_replay.py` (exact replay of the ssl×geom gate) | built, smoked, not run |
+| `h1n_exact_replay.py` (H1-M admissions, ~82 min) | built, smoked, not run |
+| node budget on **arm D** (v122) | only arm A measured |
+
+The last one matters: node budget gave **+0.00157** on E0c, which over-predicts nodes (+0.0832
+ratio). v122 already sits at −0.1598 and may have **no headroom at all**. Until arm D is measured,
+node budget is not known to be a deployable gain on our actual base.
+
+## 3. Slot 3 policy
+
+Priority: (1) a portable H1 composition with positive expected pooled utility; (2) repaired P0-C
+(`biohub-p0cr-v122-revtime-volguard` v1, COMPLETE, audit PASS, output byte-identical to the
+offline repair) **if** it answers a still-open causal question; (3) a genuinely diverse candidate.
+
+**Do not spend it on another global reverse-time weight or a threshold sweep.**
+
+Nothing currently qualifies: the only corpus-verified deployable mechanisms are +0.00157 and
++0.00141, against +0.006 needed just to reach 0.920.
+
+## 4. Open research, ranked by (expected pooled Δ × transfer plausibility) ÷ cost
+
+1. **Association recovery** — 43.3% of missed GT edges were *detected then discarded* by our own
+   pipeline (bipartite competition, wrapper filters, linefit displacement). Zero GPU, no precision
+   bar to clear, upstream of both the division track and the portfolio problem.
+2. **A within-track frame-selection signal** — the only measured route to +0.005 on the division
+   layer (temporal-snap oracle reaches +0.00599). 32% of H1-M's FPs are duplicate admissions of the
+   same track within ±2 frames. Nothing tested can pick the frame: H1-I, reverse-time and geometry
+   all discriminate *across* cells, not *within* a track.
+   **The +0.00369 GT-free snap figure was computed on the in-family basis that inflated H1-M ~30×.
+   Re-derive cross-family before quoting it.**
+3. **A second independent veto** — geometry-as-broad-veto is the only fusion that survived
+   cross-family transfer (~2× FP reduction) and it is spent. Forward-association support and
+   daughter persistence are label-free and plausibly FP-disjoint from appearance. A second 0.44×
+   veto is worth more than any further appearance modelling.
+4. **Hybrid deployable version** — the oracle recovers 33 divisions on 6bba for ~50 aux nodes, but
+   the FP cost of running the proposer over the *enlarged* surface is unmeasured and will decide it.
+5. **E0c volume-guard decision** — thousands of out-of-volume coordinates sit in the published
+   baseline. Enabling the guard shifts the baseline the promotion gate is defined against. Needs a
+   human call, and the 7,349-vs-14,319 count dispute needs reconciling first.
+
+## 5. Do not reopen without new evidence
+
+Exploit structures (score-negative, −0.0027/−0.0007) · detector diversity (nested; 0 new nodes) ·
+appearance × appearance stacking (lift 0.00, mechanism known) · Zebrahub for divisions (lineage
+fragmentation, 5.7–11.7 terminations per division) · CTC (licence-blocked) · H1-T (structurally a
+subset of geometry) · a global reverse-time blend weight (measured at one LSB).
+
+---
+
+# Superseded — preregistered plans of 2026-07-30 (kept for audit)
+
 # Next decision — attack the family boundary, not the same recipe
 
 **Preregistered:** 2026-07-30
