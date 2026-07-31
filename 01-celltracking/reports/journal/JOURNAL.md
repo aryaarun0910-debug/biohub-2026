@@ -2178,3 +2178,74 @@ E0c is ANTI-correlated with v122 (-0.166) and still loses -- decorrelation does 
 deficit. BUT the margins (+0.0001 to +0.0011 E[max]) are **an order of magnitude below the
 paired-delta crop-resampling SE (~0.003)**. The preference is conditional on this OOF cache, not
 significant. C_survival confirmed strictly dominated (reversal 0.01%, corr 0.998, gain +0.00000).
+
+### 2026-07-31 (Lane B — pooled break-even measured, not approximated)
+
+`scripts/win_bet/phaseb_pooled_breakeven.py`. Edits applied to real graphs, scored by one
+combined `summarise()` over all 199 crops. No 15/85 re-weighting of precomputed composites.
+
+**DEFECT IN MY OWN SCRIPT'S DOCSTRING:** it claims "all of the above with the real live
+wrapper/filter re-run after the edits". The implementation does NOT re-run the wrapper filter --
+it scores the edited edge set against the cached node rows. These are therefore the NO-REFILTER
+numbers. H0d showed the live filter is strictly more favourable (per-family `+0.0641/+0.0646` vs
+`+0.0625/+0.0597`, and it flips suppress-only from negative to positive), so the pooled figures
+below are a LOWER BOUND. The docstring is wrong and is corrected in the file.
+
+pooled BASE = **0.66540** (cfg `04eeac97500d`)
+
+| arm | pooled | delta | 44b6 | 6bba | divTP | divFP |
+|---|---:|---:|---:|---:|---:|---:|
+| base | 0.66540 | +0.00000 | 0.75955 | 0.64897 | 4 | 675 |
+| supp | 0.66368 | **-0.00173** | 0.75946 | 0.64696 | 0 | 0 |
+| k0.25 | 0.66770 | +0.00230 | 0.75946 | 0.65182 | 6 | 0 |
+| k0.5 | 0.68180 | +0.01639 | 0.76728 | 0.66722 | 27 | 0 |
+| k0.75 | 0.72147 | +0.05607 | 0.82208 | 0.70377 | 86 | 0 |
+| **k1.0** | 0.72552 | **+0.06012** | 0.82208 | 0.70865 | 92 | 0 |
+| fp1 | 0.70158 | +0.03618 | 0.79539 | 0.68527 | 91 | 92 |
+| fp2 | 0.69087 | +0.02546 | 0.78477 | 0.67452 | 91 | 184 |
+| fp5 | 0.67667 | +0.01127 | 0.76997 | 0.66041 | 88 | 460 |
+| fp10 | 0.66853 | +0.00313 | 0.76120 | 0.65235 | 88 | 912 |
+| fp25 | 0.65764 | -0.00776 | 0.74858 | 0.64172 | 87 | 2233 |
+
+**REQUIRED PRECISION-AMONG-VISIBLE, pooled objective** (interpolated on measured points, not
+derived from `J = k/(N+m)` algebra which was itself written under the old per-family bar):
+
+| pooled target | max FP:TP ratio | implied precision |
+|---|---:|---:|
+| +0.002 | 11.55 | **7.97%** |
+| +0.005 | 8.85 | **10.15%** |
+| +0.010 | 5.78 | 14.75% |
+| +0.015 | 4.21 | 19.19% |
+
+**I EXPECTED THE POOLED BAR TO BE EASIER. IT IS HARDER.** The old per-family bar needed
+4.07% / 6.38% precision for `+0.005` in a given family; pooled `+0.005` needs **10.15%**. That is
+not a contradiction -- it is the point. `+0.005` on 44b6 alone was a ~1.3-mother test on a
+26-mother population (agent 5), i.e. two lucky mothers. The pooled bar demands a real aggregate
+gain, so it is both harder and far more meaningful. My speculation that the correction might make
+H1-I trivially promotable was wrong.
+
+**PER-DIVISION MARGINAL VALUE -- the asymmetry inverts under the correct objective.**
+
+| family | divisions | family delta | per division (family) | per division (pooled) |
+|---|---:|---:|---:|---:|
+| 44b6 | 16 | +0.06253 | **+0.003908** | ~+0.000587 |
+| 6bba | 76 | +0.05968 | +0.000785 | ~+0.000667 |
+
+In FAMILY terms a 44b6 division looks **5.0x** more valuable. In POOLED terms they are nearly
+equal, and 6bba divisions are marginally MORE valuable. The 15/85 mass split almost exactly
+cancels the 26-vs-125 division-count split. This kills any temptation to over-weight 44b6 work,
+and it means division effort should follow whichever family is easier to detect in, not whichever
+shows the larger family-delta.
+
+**Suppress-only is `-0.00173` pooled** in this no-refilter variant. H0d showed the live filter
+turns it positive per-family, so the deployable suppression step DEPENDS on re-running the real
+wrapper filter. That dependency is now load-bearing rather than cosmetic.
+
+**H1-M ASSESSED AGAINST THIS BAR.** Lane C's cross-fitted gate gave `+0.00396 / +0.00201`
+per-family, which is approximately **`+0.0023` pooled**. That sits just above the `+0.002` line
+and far below `+0.005`. Against agent 5's crop-resampling paired-delta SE of ~0.003, **+0.0023 is
+inside the noise band**. H1-M is pooled-positive but NOT statistically distinguishable from zero
+at this scale.
+
+**DECISION: slot 3 stays HELD.** No candidate clears a credible pooled margin. H1-M is the best
+mechanism the campaign has produced and it is still not a submission.
