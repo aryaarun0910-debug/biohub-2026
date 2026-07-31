@@ -2333,3 +2333,37 @@ domain distance (dividers SMD 0.409 -> 0.328), so the repair worked; the corpus 
 **$0 PRE-FLIGHT FILTER for any future external corpus** (the reusable output of this lane):
 require `term/div <~ 1` AND `sep(+1) >= 0.8 x 10.57 um` BEFORE downloading a single voxel.
 No GPU was spent; 7.5 GB streamed on Kaggle CPU kernels in 373 s.
+
+### 2026-07-31 (H2a hybrid census — 199 crops, GT-free candidate generation, 33 aux-only divisions recovered on 6bba)
+
+Ran the agent-prepared census (`phaseb_h2a_hybrid_oracle.py --arms ""`, no scorer calls).
+Wall 1126 s, per-crop mean 5.7 s, 4047 worker-seconds at 4 workers.
+
+**6bba (128 crops), v122 main + clean903 aux:**
+- GT divisions 125; **reach_main 68**, reach_aux 96, **RECOVERY (aux-only) = 33**, **union 101**.
+- So the hybrid lifts reachable divisions from 68/125 to **101/125** -- a 48% increase over v122
+  alone, and the union again EXCEEDS max(main, aux) = 96, confirming the not-nested finding at
+  corpus scale.
+- **27 of 33** recovered pairs already sit in the mother's frozen top-3 (cfg `04eeac97500d`), so
+  the GT-free proposer would find them once the aux nodes exist.
+- Auxiliary nodes added: **41** (7 mother / 34 daughter); triples needing 1/2/3 aux = 26/6/1.
+- Duplicate collisions: 11 aux within 7.0 um of a same-frame main node (6 of those GT-matched),
+  3 within 3.5 um, min nn distance 0.747 um -- close enough to need watching, but aux survival
+  after the REAL wrapper filter is 41/41.
+- Count multiplier moves the RIGHT way: `dmult +0.000288` on `hybrid_full`, because the wrapper
+  deletes 5,922 nodes while we add 41.
+- Local reassignment: steals main 49 / hybrid_full 56; suppressed edges 5,509 of which 5,508 are
+  pre-existing forks. GT collisions 0 on both surfaces. Crops with >=1 recovery triple: 24/128.
+
+**44b6:** aux added 9 nodes (N_pred 2,119,813 -> 2,119,822 between `main_oracle` and
+`hybrid_full`), `dmult +0.000159`.
+
+**Total auxiliary nodes across 199 crops: ~50.** The count-multiplier objection to this design is
+now dead twice over -- at smoke scale and at corpus scale.
+
+ORDER-OF-MAGNITUDE VALUE: at the measured pooled per-division value on 6bba (~+0.000667),
+33 recovered divisions is worth roughly **+0.022 pooled** if perfectly selected. That is an ORACLE
+figure -- the deployable fraction depends on the FP cost of running the proposer over the enlarged
+surface, which remains unmeasured and is the thing that will actually decide it.
+
+Full scored oracle (4 arms x 199 crops, est. 45-90 min wall) is the next command, still gated.
