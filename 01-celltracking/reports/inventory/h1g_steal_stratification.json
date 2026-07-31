@@ -1,0 +1,24 @@
+{
+  "44b6": {
+    "total": 8284112,
+    "positives": 16,
+    "visible": 54059,
+    "cp0_rows": 227784,
+    "cp0_pos": 5,
+    "cp0_vis": 1558,
+    "cp0r0_rows": 101584,
+    "cp0r0_pos": 5,
+    "cp0r0_vis": 725
+  },
+  "6bba": {
+    "total": 6086890,
+    "positives": 76,
+    "visible": 199448,
+    "cp0_rows": 188678,
+    "cp0_pos": 27,
+    "cp0_vis": 8317,
+    "cp0r0_rows": 87220,
+    "cp0r0_pos": 24,
+    "cp0r0_vis": 4821
+  }
+}

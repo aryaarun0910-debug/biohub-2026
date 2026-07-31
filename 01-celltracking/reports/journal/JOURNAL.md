@@ -1539,3 +1539,57 @@ private organizer clarification; score-probing is forbidden. Full plan:
   (image loading, normalisation, tiling, node coordinates, window construction) from the
   notebook; the source-locked block is the association step only, not the whole path.
 - E0c unchanged as authoritative. Nothing promoted. No GPU spent. G/F/R all unstarted.
+
+### 2026-07-31 (H1-G result — CONTINUE, not PROMOTE: geometry closes ~half the log-gap, not enough)
+
+- G feature extraction complete with exact parity: 14,371,002 rows, 92 positives, 23
+  geometry/topology features, no model inference. `scripts/win_bet/phaseb_h1g_features.py`.
+- BILATERAL AUC on the metric-visible subset (44b6: 16 pos / 54,031 reliable neg;
+  6bba: 76 pos / 199,319). AUC < 0.5 means the feature is inversely related; sign consistency
+  across families is the transfer diagnostic. `inventory/h1g_feature_auc.json`.
+  Sign-CONSISTENT, strongest first (44b6 / 6bba):
+    competing_parents      0.0271 / 0.1130   <- strongest bilateral separator by a wide margin
+    resid_ratio            0.1740 / 0.2587
+    flow_midpoint_residual 0.1926 / 0.2685   <- the frozen ranker, behaves as designed
+    rank                   0.0853 / 0.2748
+    daughter_angle         0.2303 / 0.3587   <- anti-parallelism CONFIRMED with correct sign
+    cos_split_vs_flow      0.6878 / 0.6037
+    vel_consistency        0.5824 / 0.6581
+    pd_ratio               0.6331 / 0.5760
+  Sign-INCONSISTENT (these ARE the family-boundary diagnosis, per the B17 protocol):
+    n_persist              0.1747 / 0.7549   <- COMPLETE REVERSAL
+    cos_daughter_axis      0.6951 / 0.4873
+    mother_speed_um        0.4802 / 0.5651
+    local_density_t        0.5198 / 0.4673
+- TWO FINDINGS THAT MATTER MORE THAN THE RANKING:
+  1. **Daughter anti-parallelism is confirmed bilaterally with the correct sign.** Lower
+     `cos(daughter angle)` (more anti-parallel) predicts a true division in BOTH families. The
+     three-source convergence (our smoke, btrack `P_branch`, mitosis literature) holds up.
+  2. **`n_persist` REVERSES SIGN between families** (0.1747 vs 0.7549). Persistence into t+2 is
+     the core of the public "persistence-confirmed divisions" heuristic (agent A, finding A-08).
+     It does NOT transfer across our family boundary. Anything built on it is family-specific.
+- THE DIMENSIONLESS HYPOTHESIS IS NOT SUPPORTED AS STATED. Dimensionless features do occupy the
+  top of the sign-consistent ranking (competing_parents, resid_ratio, rank), but sign
+  inconsistency is split evenly: 2 dimensionless (`n_persist`, `cos_daughter_axis`) and 2
+  dimensional (`mother_speed_um`, `local_density_t`) flip. Being dimensionless is not sufficient
+  for transfer. The agent-C hypothesis is downgraded from "explains the family boundary" to
+  "correlates with the top of the ranking".
+- STRATIFICATION AGAINST BREAK-EVEN (`inventory/h1g_steal_stratification.json`). Required
+  precision-among-metric-visible for `+0.005` is **4.07% / 6.38%** (agent D, D-07).
+    frozen ranker alone            0.107% / 0.101%
+    competing_parents == 0         0.321% / 0.325%   (5/16 and 27/76 positives retained)
+    competing_parents==0 & rank==0 **0.690% / 0.498%** (5/16 and 24/76 positives retained)
+  Best label-free geometric stratum improves precision **6.4x / 4.9x** over the frozen ranker
+  but remains **5.9x / 12.8x short** of break-even, and costs ~68% of recall.
+- VERDICT = **CONTINUE**, not PROMOTE, by the directive's own classification: the mechanism
+  measurably improves separability bilaterally, but calibration is nowhere near sufficient.
+  Geometry alone cannot fund the division track. No submission is justified from G.
+- CONSEQUENCE, and this now rests on a measured shortfall rather than an assumption: the
+  remaining ~6-13x must come from evidence geometry does not contain -- image appearance
+  (mass conservation, saddle depth, condensation, um-scaled second moments) or association
+  scores. That is the first properly grounded justification for the expensive arms.
+- Also note D-12 is partly answered: positives are NOT uniformly spread over the stealing
+  population. `competing_parents<=1` retains 16/16 and 74/76 positives, so excluding
+  full-stealing candidates does not collapse retention -- the branch-A failure mode is less
+  threatening here than feared, though `competing_parents==0` alone keeps only ~31%.
+- E0c unchanged as authoritative. Nothing promoted. No GPU spent. No submission consumed.
