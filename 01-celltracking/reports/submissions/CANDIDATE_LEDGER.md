@@ -4,8 +4,9 @@ Every candidate must record source/config hash, output hash, structural audit, O
 public-source justification, graph delta from its anchor, and the causal question it asks.
 No candidate may be submitted without all six.
 
-**Submissions consumed to date: 6.** This cycle authorises up to 3 more; slots 4-5 require
-explicit review before use.
+**Submissions consumed to date: 9** (was recorded as 6 before P0-A / P0-B / P0-CR landed).
+Cycle slots: **3 of 3 used** — P0-A, P0-B, P0-CR. Two Kaggle daily slots were left DELIBERATELY
+UNUSED on 2026-07-31 because nothing built that day had positive expected value.
 
 ## Standing prohibitions
 
@@ -73,8 +74,9 @@ Same mechanism applied to our own 0.908 baseline, detector/ILP/wrapper otherwise
 | P0-A | `biohub-p0a-clean-913-repro` v1 | `8c1605b5944d25e4…` | **PASS 10/10** (re-verified independently) | **ref 55136759** | **0.913** |
 | P0-B | `biohub-p0b-clean-913-reverse-time` v1 | `4c285cae0c220a11…` | **PASS** (re-verified independently) | **ref 55136908** | **0.914 — NEW BEST** |
 | P0-C | `biohub-p0c-v122-revtime-run` v1 | `3370222f811fddc9…` | **FAIL** — 1 node out of volume | no | — |
+| **P0-CR** | `biohub-p0cr-v122-revtime-volguard` v1 | `435bf5d19d85563c…` | **PASS 10/10** (A1–A10, outside=0) | **ref 55147215** | *pending* |
 
-**Slots consumed this cycle: 2 of 3.** Slot 3 held.
+**Slots consumed this cycle: 3 of 3.** Slot 3 spent 2026-07-31 22:23 local on P0-CR.
 
 **RESULT: P0-A reproduced 0.913 exactly; P0-B reached 0.914, our best public score (previous 0.908).** P0-B minus P0-A is +0.001 = exactly one unit of LB resolution, so the reverse-time mechanism is positive-but-unresolved, not established. Deployment base moves to P0-B.
 
@@ -109,3 +111,28 @@ notebook default is Apache 2.0; recorded as **UNVERIFIED-DEFAULT-APACHE-2.0**. T
 self-declares attribution to `pilkwang/biohub-cell-tracking-two-seeds-logit-blend` and flags
 `metric_hack_used: false`, `public_output_used: false`. **A human should confirm on the notebook
 page in a browser.**
+
+## P0-CR — v122 + reverse-time + line-fit volume guard (slot 3, 2026-07-31)
+
+| field | value |
+|---|---|
+| kernel | `aryaarun07/biohub-p0cr-v122-revtime-volguard` v1, COMPLETE |
+| output sha256 | `435bf5d19d85563c84140e162b3a84f476fdf2fc2cf6ab4b9b759986b9fb9fea` |
+| size | 12,343,722 bytes · 237,168 rows = 120,673 nodes + 116,495 edges · 4 datasets · 323 divisions |
+| structural audit | **PASS 10/10** — A1–A10, `outside=0`, max in-degree 1, max out-degree 2, t 0–99 |
+| submission | **ref 55147215**, 2026-07-31 21:23 UTC |
+| expectation | **0.908–0.912** — a causal probe, explicitly **not** a score climb |
+
+**Causal question:** is reverse-time's effect base-dependent? P0-B (clean 0.913 base) gave +0.001
+with divisions **−9**; this arm applies the identical source-locked mechanism to v122, where the
+structural evidence had divisions moving **+10**. The two arms together are the only way to
+separate "reverse-time helps" from "reverse-time helps *their* base".
+
+**Why it cleared the slot-3 bar when nothing else did:** it is the sole candidate that was a
+COMPLETED kernel with a passing audit, and it answers a still-open causal question (policy
+priority 4). It repairs the exact defect that failed the original P0-C — v122 line-fit-smooths
+coordinates without clamping, parking node 15274 of `44b6_0b24845f` at z=64 against a valid 0–63.
+
+**Deliberately not submitted the same day:** P1 (P0-B + node budget) was built, audited PASS 10/10,
+and measured at **−0.0000103** — a slot spent to confirm noise. P2 has a bolt-on ceiling of exactly
+zero. P3 does not exist. Two daily slots were left unused rather than filled.
