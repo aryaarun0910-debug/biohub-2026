@@ -1488,3 +1488,54 @@ private organizer clarification; score-probing is forbidden. Full plan:
   calibration use scorer-reliable labels only; unlabeled deployment behaviour is reported
   separately, never folded in as negatives.
 - E0c unchanged as authoritative. Nothing promoted. No GPU spent. H1b/H1c not started.
+
+### 2026-07-31 (H1 amendment — reverse-time source-locked; cost model established; G separable from F/R)
+
+- CORRECTION ACCEPTED from the commander, and the H1a entry above is wrong on one point: I
+  described the choose-among-three formulation as giving the ranker "plentiful" labelled
+  signal. It does not. Three alternatives per mother improves the FORMULATION but not the
+  labelled sample size, which remains **16 positive mothers on 44b6 and 76 on 6bba**. Model
+  capacity must stay correspondingly tiny (L2 logistic / Firth-style; no MLP unless the linear
+  model shows genuine bilateral ranking signal).
+- SOURCE-LOCKED the reverse-time implementation to `vendor/public_v19_reverse/reverse_time_block.py`
+  (verbatim cell-11 extract, 5,500 chars, extract sha256 `eb94e2745f270649865b6b89f8927450`),
+  from kernel `yusuketogashi/no-hack-biohub-cell-another-approch-3rd`, notebook sha256
+  `8fe651af1132cfc946102c7b5779aedd5aa173f29a85afc62a72c43e1147a1e4`, retrieved 2026-07-30.
+  That pull is the LATEST version = **V19, the rejected harmonic-fusion build**; version-pinned
+  pulls 403 and V18 (public 0.914) is still not obtained. V19 is never used as a hedge. The
+  public `0.20` bidirectional blend weight is NOT adopted -- reverse scores enter H1 as
+  FEATURES only.
+- MECHANISM, now precisely understood:
+      reverse_logits_native = model.predict_edges(unet_feat_tgt, unet_feat_src,
+                                                  coords_tgt, coords_src,
+                                                  pos_tgt, pos_src, mask_tgt, mask_src)
+      reverse_logits_pair   = reverse_logits_native.transpose(1, 2)
+  then per-column alignment to the forward scale: subtract reverse centre, multiply by
+  `(forward_scale / reverse_scale).clamp(0.5, 2.0)`, add forward centre.
+  It swaps the source/target argument groups of the SAME model on the SAME U-Net features.
+- COST MODEL, the key feasibility finding: because the reverse view reuses the already-computed
+  U-Net features of both frames, it costs roughly ONE EXTRA `predict_edges` call per frame pair
+  -- not a second encode. The expensive part is the full inference pass itself, which we must
+  run regardless because the cached OOF GEFF is pruned to one parent per target at `p >= 0.5`
+  and therefore carries no pair-level logits for the candidates we care about.
+- LOCAL FEASIBILITY CONFIRMED: model code
+  `artifacts/kaggle/lb897_calibration/tracking_repo/src/biohub_tracking/models/{temporal_unet,
+  simple_node_transformer}.py`; fold-specific checkpoints
+  `weights_dataset/edge_predictor_best_split_{0,1}.pth` (136 tensors, `unet.*` + heads);
+  configs (unet_out_channels 32, layers [32,64,128], downsample [1,4,4], window_size 2,
+  pool_kernel_um 5.0); image volumes `data/train/*.zarr`. Nothing external is required.
+- ABLATION DECOMPOSES CLEANLY, and this matters for sequencing:
+  * **G (cheap geometry) needs NO model inference at all** -- it is derivable from the census
+    table plus E0c graph topology, and can run immediately on CPU;
+  * **F and R share ONE inference pass** -- forward pair logits for arbitrary candidate pairs
+    are not cached anywhere, so F is not free either; once that pass is running, R is
+    approximately one extra matmul per frame pair.
+  Therefore G should be measured first, for free, to establish the geometry-only baseline that
+  F and R must beat. This also protects the ablation's meaning: if G alone already promotes,
+  the association-consistency hypothesis is not what is doing the work.
+- NOT STARTED: the two-crop preflight (ID alignment both directions, double-reversal identity,
+  deterministic cache hashes, low-margin coverage of positives/reliable negatives, proof that
+  no graph is mutated during extraction). It requires reconstructing the inference pipeline
+  (image loading, normalisation, tiling, node coordinates, window construction) from the
+  notebook; the source-locked block is the association step only, not the whole path.
+- E0c unchanged as authoritative. Nothing promoted. No GPU spent. G/F/R all unstarted.
