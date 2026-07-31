@@ -2509,3 +2509,39 @@ families on the smoke (0.1047 vs 0.0073): annotation coverage does NOT transfer 
 boundary, and the agent deliberately does not learn visibility from features (that would be a
 metric exploit), so it enters only as a training-fold constant -- the weakest link in the
 deployable utility.
+
+### 2026-07-31 (CORRECTION — full-corpus FN attribution: 43.3% recoverable, not 63.5%)
+
+Full-corpus utility ledger complete (199 crops, wall 852 s at 4 workers -- 4x faster than the
+57-min estimate).
+
+**CORRECTION TO THE NUMBER I REPORTED LAST TURN.** Agent 5's 3-crop smoke gave
+"63.5% of missed GT nodes were detected then discarded", and I promoted that to the
+top-ranked target. The full corpus says otherwise:
+
+| quantity | value | share of all FN |
+|---|---:|---:|
+| GT edges | 128,883 | - |
+| edge TP | 101,178 | - |
+| **FN_detection** (never detected) | **15,703** (12.184% of GT edges) | **56.68%** |
+| **FN_association** (detected, lost downstream) | **12,002** (9.312% of GT edges) | **43.32%** |
+
+So the recoverable-without-a-new-detector share is **43.3%, not 63.5%** -- the smoke overstated it
+by ~20 points on 3 unrepresentative crops. The zero-GPU association-recovery target is real but
+materially smaller than I said.
+
+The flip side is equally decision-relevant: **56.68% of missed edges are genuine detection
+failures**, so that IS the ceiling on what any better detector could add. Agent 5's own preflight
+shows that ceiling is hard to reach -- cheap detector diversity is strictly nested (0 new nodes at
+det-0.99, +0/+1 GT nodes from unioning all five variants) and a new detector must clear **40.6%**
+precision among visible new edges. So the larger half of the FN mass sits behind the more
+expensive and more forgiving-free door.
+
+**All identity checks passed at corpus scale:**
+- `max|w*adjJ - tp*(1-0.1r)| = 2.274e-13`
+- `tp + fn == gt_edges` True
+- independently recomputed edge TP == scorer TP True
+- vector parity: **398,000 candidates re-derived by the reference loop, 0 mismatches**
+
+The closed-form pooled objective therefore holds at full scale, which is what makes the utility
+work tractable at all.
