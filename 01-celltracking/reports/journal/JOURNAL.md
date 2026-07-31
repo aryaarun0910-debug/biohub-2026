@@ -2545,3 +2545,75 @@ expensive and more forgiving-free door.
 
 The closed-form pooled objective therefore holds at full scale, which is what makes the utility
 work tractable at all.
+
+### 2026-07-31 (Agent 4 — H1-M's "+0.0023 pooled" WAS AN IN-FAMILY CEILING PROBE; appearance-stacking closed with a mechanism)
+
+**CORRECTION, and it is the most consequential of the cycle.** I reported H1-M at
+`+0.00396 / +0.00201` per-family and derived "~+0.0023 pooled", then called it the first
+bilaterally positive mechanism of the campaign. Agent 4 traced that figure: it comes from H1-M's
+**IN-FAMILY CV CEILING PROBE**, not its cross-family arm. On honest CROSS-FAMILY transfer H1-M
+pools to **+0.00007** (h0c edge convention) or **-0.00131** (conservative).
+
+Exact pooled constants recovered from `coupled_cache/scores/A__*.json`: edge-mass shares
+**0.148633 / 0.851367** (151,615 total), `G_pooled = 151`, `divJ_base = 0.00484262`. Pooled
+break-even needs `divJ > 0.00846` (h0c) or `> 0.02227` (conservative); **+0.005 needs
+`divJ > 0.0585 / 0.0723`.**
+
+**SEPARABILITY (199 crops, 95,511 metric-visible mother events, 92 realisable, LOFO cross-fitted):**
+
+| scorer | AUC 44b6 | AUC 6bba | LOFO k/m | divJ | dC h0c | dC cons |
+|---|---:|---:|---:|---:|---:|---:|
+| `ssl_split` (label-free) | 0.773 | 0.696 | 5/411 | 0.00890 | +0.00004 | -0.00134 |
+| `ssl_mag` (ZERO labels, zero direction) | 0.737 | **0.841** | 5/436 | 0.00852 | +0.00001 | -0.00138 |
+| `h1i_massratio` (hand-built) | 0.817 | 0.815 | 11/1088 | 0.00888 | +0.00004 | -0.00134 |
+| `h1m_cross` (77-feat, labels) | 0.842 | **0.630** | 5/392 | 0.00921 | **+0.00007** | -0.00131 |
+| **`ssl_split & geom_resid`** | - | - | **8/203** | **0.02260** | **+0.00141** | +0.00003 |
+
+Note `ssl_mag` -- pure unsupervised novelty, no labels and no assumed direction -- is bilaterally
+strong (0.737/0.841) exactly where the label-fitted H1-M COLLAPSES on 6bba (0.630).
+
+**APPEARANCE x APPEARANCE STACKING IS NOW CLOSED WITH A MECHANISM, not a null.** FP-set Jaccard
+vs independence: `ssl|h1m` 0.148/0.034 (74x/17x chance), `ssl|h1i` 0.533/0.408 (267x/203x),
+`ssl|geom` **0.0000/0.0000 (0x)**. But complementarity only converts if LIFT (TP co-admission over
+FP co-admission, both relative to independence) exceeds 1. Measured lift: `ssl x h1m` **0.00**,
+`ssl x h1i` 0.04-0.09, `h1m x h1i` **0.00**. **All appearance-AND rules fail because appearance
+scorers concentrate their false positives on the SAME mothers (7-232x independence) while almost
+never agreeing on true ones.** That mechanistically explains every failed feature-stack in this
+campaign.
+
+Only **appearance x geometry** has anti-correlated FPs, and the working mechanism is NOT
+co-ranking -- it is a **broad veto**: geometry keeps the best ~44% of mothers (7,992 / 33,641),
+which contain almost no true dividers in the discarded half, letting the appearance threshold go
+deeper at the same FP budget. `ssl_split` alone k=5/m=411 -> with veto **k=8/m=203**.
+
+**FRAGILITY (crop bootstrap B=20,000):** divJ 95% CI [0.00843, 0.04050]; dC_h0c
+[-0.00000, +0.00320]. P(above break-even) 0.974 (h0c) but **0.498 (conservative)**.
+**P(dC > +0.005) = 0.0004 / 0.0000.** The best arm reaches 2.3% of the H0c pooled oracle
+(+0.0601) against a gate of +0.005 or 30% of upside (+0.0180).
+
+**VARIANT B (synthetic split) IS DEAD, killed by its own cheap pre-test as instructed.** 40 crops,
+96 real dividers, 845 synthetic each; synthesis used the measured 10.3 um separation and exact
+mass conservation, and correctly needed no PSF model (translating an already-convolved field is
+exact for a shift-invariant PSF). T1 kill test real_normal vs synth_normal: multivariate CV AUC
+**0.9888** -- trivially separable, FAIL. T3 decisive: train pure synthetic -> evaluate pure real
+gives AUC **0.664**, versus a real-trained reference of 0.867 and the FREE hand-built feature at
+0.771.
+
+**METHODOLOGICAL FINDING WORTH PROPAGATING BEYOND THIS LANE:** T1's mean |SMD| is 0.302 with only
+1 of 34 features over 1 SD -- i.e. it PASSES the SMD-based domain-shift audit that H1-M itself
+used (audit E) while being **98.9% multivariately separable**. **SMD audits drastically understate
+multivariate domain separability.** Any prior "domain shift is tiny" conclusion in this campaign
+that rested on per-feature SMD is now suspect.
+
+Salvage: on the 13 features informative in real data, synthetic and real signature signs agree
+**12/13** (all 4 disagreements have |AUC-0.5| < 0.034). Synthesis is usable as a SIGN PRIOR, never
+as a training corpus.
+
+All local CPU, no GPU, no Kaggle, no submission. Peak ~440 MB.
+
+**NEXT (agent's, and I agree):** the binding constraint is not AUC (gates sit at 0.63-0.86) but
+TAIL PRECISION -- ~2-4% at the honest operating point against ~6% needed at full recall. The only
+measured multiplicative axis left is geometry-as-broad-veto (~2x FP reduction), and it is already
+spent. The cheap unmeasured question is whether a SECOND independent veto exists -- forward
+association support or daughter persistence, both label-free and plausibly FP-disjoint from
+appearance. A second 0.44x veto is worth more than any further appearance modelling.
