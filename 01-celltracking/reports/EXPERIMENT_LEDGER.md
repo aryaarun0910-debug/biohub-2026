@@ -131,3 +131,64 @@ cross-family, ~30x); node budget +0.00822 -> **+0.00157** (5.2x); FN association
   full recall.
 - E0c's published baseline contains thousands of out-of-volume coordinates, hidden by
   `max(0, int(round(v)))`. Count disputed (7,349 vs 14,319); volume guard defaults OFF.
+
+## Cycle 2026-07-31 (late) — the deployable list went to zero, the substrate went green
+
+### Substrate: RESOLVED, and it is the best we have
+
+LOEO fold-0 strict on the P0-A/P0-B substrate, recovered from a FAILED kernel with **zero GPU**
+(all 71 crops had been predicted; the run died at the export assertion on 2 nodes out of 1,900,633
+with out-degree 3). Manifest audit PASS, no leakage path.
+
+| quantity (71 crops, fold 0 / 44b6) | value |
+|---|---:|
+| adj_edge_jaccard | 0.89859 |
+| node_recall | 0.98457 |
+| division_jaccard | 0.01587 (TP 2 / FP 100 / FN 24) |
+| **reachable GT divisions** | **22 / 26** |
+
+Beats E0c 20/26, clean903 20/26, v122 15/26. H0c oracle on this substrate is **+0.0830** on 44b6;
+a selector recovering 10 of 26 while admitting 60 false forks still returns **+0.010**.
+**Bounded:** 44b6 is 14.94% of edge mass and 6bba is unmeasured on this substrate.
+
+### Newly closed methods
+
+| method | decisive result | verdict |
+|---|---|---|
+| Node budget (any under-predicting substrate) | arm D corpus **−0.00088**, P(Δ>0)=0.109, pooled optimum keep_frac 1.00; P0-B direct −0.00001 | **CLOSED** — gain requires over-prediction |
+| ssl × geometry veto as a bolt-on fork filter | P0-B divisions TP0/FP8/FN3 ⇒ divJ already 0, ceiling **exactly 0** | **CLOSED** — mis-scoped; it is the H0c admission gate |
+| Association repair via bipartite competition | LOFO **+0.00099 / +0.00002**, 50× disagreement on an in-sample net of +4 targets; inside `target_taken` the transformer picks the true parent **9.36%** vs ~50% break-even | **CLOSED** — sign-unstable |
+| Orphan-target swap | blind swap −0.01667; best in-sample rule +0.00059; LOFO −0.00019 / +0.00006 | **CLOSED** |
+| Blanket short-component retention | branch A exact control: edge TP *falls*, adjJ 0.8821→0.8766 / 0.8068→0.7924 | **CLOSED** — re-added nodes steal bipartite matches |
+| Edge-level selection among short-component deletions | deleted true edges statistically identical to selected (prob 0.785 vs 0.786; raw_um 2.30 vs 2.30) | **CLOSED** |
+
+### Mechanistic conclusion that generalises
+
+**Node budget's arm-A gain was a count-multiplier effect, not a tracking improvement** — ~116% of
++0.00157 was the multiplier and ~−16% was edge quality. Its sign tracks the node ratio
+(E0c +0.0832 → +0.00157; v122 −0.1598 → −0.00088; P0-B −0.1028 → −0.00001). Any future mechanism
+whose gain decomposes mostly into the multiplier should be treated as a metric artifact and
+audited against the pipeline's own `metric_hack_used: false` declaration before deployment.
+
+### Association FN attribution — complete
+
+All 27,705 corpus FN assigned to a first-loss stage, parity-exact against the agent5 ledger (zero
+mismatches) and against the patched scorer (dNUM error 0.000e+00 on 10 crops). 43.80% never
+detected; recoverable pool 43.32% → **+0.13288 GT ORACLE**.
+**Unit economics: one net-correct repair = 1.095e-05 pooled ⇒ +0.002 needs 183 net-correct repairs.**
+Largest single pipeline-caused loss: `filter_short_track_components` deletes **5,311 GT edges the
+relink had already linked correctly** (19.2% of all FN). Component-level selection is the only
+untested handle on it.
+
+### Defect fixed
+
+`scripts/win_bet/phaseb_node_budget.py` accepted `--arm` and ignored it — `--arm D` scored arm A
+while labelling the output "D". Fixed and recorded as **trap 14**. Caught only by per-crop parity
+against cached anchors.
+
+### Deployment state
+
+Best public **0.914** (P0-B) unchanged. **P0-CR submitted** (ref 55147215) as a base-dependence
+probe: v122 + reverse-time + volume guard, audit PASS 10/10, expected 0.908–0.912 — not a climb.
+**There is currently no deployable mechanism between 0.914 and 0.920.** The division track on the
+22/26 substrate is the only live route and its selector is unbuilt.
