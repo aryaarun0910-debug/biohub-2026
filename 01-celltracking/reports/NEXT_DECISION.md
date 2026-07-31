@@ -7,7 +7,22 @@
 
 Superseded plans are preserved below and in `reports/journal/JOURNAL.md`.
 
-## 1. The one measurement that changes the picture
+## 1. RESOLVED 2026-07-31 — reach is 22/26, the best substrate we have measured
+
+The measurement below was **recovered with zero GPU** and no shards: the kernel had predicted all
+71 crops and failed only at the export/audit assertion on 2 nodes out of 1.9M with out-degree 3.
+`/kaggle/working` survives a failed kernel. Result: adj_edge_jaccard 0.89859, node_recall 0.98457,
+divJ 0.01587 (TP 2 / FP 100 / FN 24), **reachable GT divisions 22/26** vs E0c 20/26, clean903
+20/26, v122 15/26. Manifest audit PASS, no leakage path.
+
+**Decision per the preregistered rule: reach ≥ 20/26 with node recall holding ⇒ replay H0c/H2a on
+this substrate and build the deployable mother gate.** Scripts live in `scripts/win_bet/`:
+`phaseb_h0c_replay.py`, `phaseb_h2a_hybrid_oracle.py`, `phaseb_d0p_proposer.py`. The +0.06 remains
+a GT oracle; the selector is unbuilt and that is now the binding constraint, not the substrate.
+
+Superseded text follows.
+
+## 1b. (superseded) The one measurement that changes the picture
 
 **Re-run LOEO fold-0, sharded.**
 
@@ -30,13 +45,17 @@ and its own division layer converts them to TP 0 / FP 6 / FN 3.
 
 ## 2. Ready to run (CPU; exact commands in the journal)
 
-| item | status |
-|---|---|
-| H2a hybrid full scored oracle (4 arms × 199 crops, ~45–90 min wall) | census done, scoring not run |
-| `agent5_utility.py --max-admit 6000` (utility vs probability ordering) | ledger done, comparison not run |
-| `h4_ssl_gate_replay.py` (exact replay of the ssl×geom gate) | built, smoked, not run |
-| `h1n_exact_replay.py` (H1-M admissions, ~82 min) | built, smoked, not run |
-| node budget on **arm D** (v122) | only arm A measured |
+**Paths matter — most of these live in `scripts/win_bet/`, not `scripts/`. Searching only the top
+level of `scripts/` makes three of them look missing. It cost me time on 2026-07-31; don't repeat it.**
+
+| item | path | status |
+|---|---|---|
+| H2a hybrid full scored oracle (4 arms × 199 crops, ~45–90 min wall) | `scripts/win_bet/phaseb_h2a_hybrid_oracle.py` | census done, scoring not run |
+| utility vs probability ordering (`--max-admit 6000`) | `scripts/agent5_utility.py` | ledger done, comparison not run |
+| exact replay of the ssl×geom gate (needs `--admit`) | `scripts/win_bet/h4_ssl_gate_replay.py` | built, smoked, not run |
+| H1-M admissions exact replay (~82 min) | `scripts/h1n_exact_replay.py` | built, smoked, not run |
+| node budget on **arm D** (v122) | `scripts/win_bet/phaseb_node_budget.py` | only arm A measured |
+| H0c cascade replay | `scripts/win_bet/phaseb_h0c_replay.py` | now unblocked — substrate is 22/26 |
 
 The last one matters: node budget gave **+0.00157** on E0c, which over-predicts nodes (+0.0832
 ratio). v122 already sits at −0.1598 and may have **no headroom at all**. Until arm D is measured,

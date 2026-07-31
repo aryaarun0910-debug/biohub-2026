@@ -112,14 +112,37 @@ neither established. Everything larger is a GT oracle.
 
 ## 8. Immediate next action
 
-**Re-run LOEO fold-0 sharded.** The kernel `aryaarun07/biohub-loeo-f0-strict` produced a correct
-manifest (`secondary_enabled: false`, `deepcenter_enabled: false`, pack `split_0` primary — no
-leakage) but died after **16 of 71 crops**, almost certainly on the `/kaggle/working` size limit:
-it accumulates a full zarr geff per crop plus a copied weights dir. Fix by sharding the fold or
-converting-and-deleting each geff. Use `scripts/kaggle_factory.py`.
+**DONE 2026-07-31 — the substrate question is answered. Reach is 22/26 on the P0-A/P0-B substrate.**
 
-This is the highest-value open measurement: **does the +0.06 division oracle transfer to the
-substrate that actually scores 0.914?** Everything else on the table is sub-+0.002.
+The previous text here said the LOEO fold-0 kernel "died after 16 of 71 crops, almost certainly on
+the `/kaggle/working` size limit". **That was wrong on both cause and extent.** The log shows
+`Found 71 prediction graphs` — every crop predicted — with no disk error and no OOM. It failed at
+the injected export/audit cell on `44b6_a2bb48bb: out-degree > 2`, i.e. **2 nodes out of 1,900,633
+(0.00011%)** carrying out-degree 3. `/kaggle/working` survives a FAILED kernel, so the whole
+measurement was recovered **with zero GPU** and no shards.
+
+| quantity (71 crops, fold 0 / 44b6) | value |
+|---|---:|
+| adj_edge_jaccard | 0.89859 |
+| node_recall | **0.98457** |
+| division_jaccard | 0.01587 (TP 2 / FP 100 / FN 24) |
+| **reachable GT divisions** | **22 / 26** |
+
+**GREEN: 22/26 beats E0c 20/26, clean903 20/26 and v122 15/26 with node recall holding.** The 0.914
+platform and the division track multiply rather than compete. Next: replay H0c/H2a on *this*
+substrate (`scripts/win_bet/phaseb_h0c_replay.py`, `phaseb_h2a_hybrid_oracle.py`) and build the
+deployable mother gate. The +0.06 figure remains a **GT oracle** — the selector is still unbuilt.
+
+**Two live defects this exposed.** (a) The export cell hard-fails on out-degree > 2; it should
+record and report rather than discard a completed run. (b) The pipeline can emit an out-degree-3
+node — it did not occur in the P0-A/P0-B test submissions (A9 PASS, max out-degree 2), but it is a
+latent structural-audit failure for any future candidate.
+
+**Node ratio:** adj (0.89859) exceeds raw (0.88224), so the multiplier is 1.0185 and the implied
+mean node ratio is **−0.1853** — this arm UNDER-predicts. But it is the `strict` arm with the
+secondary model and DeepCenter OFF, so **it is not P0-B's ratio and must not be transferred.**
+
+**Do not compare 0.89859 with E0c's published 44b6 0.7595** — weighting conventions are unreconciled.
 
 **P0-A contains an all-training-data model** (`unet_transformer_alltrain_seed314159_v1`,
 `train_datasets: 199`) blended at **0.475 detection weight**. It is a *public deployment* platform,

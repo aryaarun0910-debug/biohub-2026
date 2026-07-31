@@ -2703,3 +2703,67 @@ mechanisms we hold are node budget at **+0.00157** and the ssl x geometry veto a
 Together, if independent and if they transfer to this substrate (neither is established), they are
 ~+0.003 -- half of what 0.920 alone requires. Everything larger in the programme is still a GT
 oracle. Slot 3 remains held.
+
+### 2026-07-31 (LOEO FOLD-0 RECOVERED WITHOUT GPU — SUBSTRATE DECISION IS GREEN, 22/26)
+
+**The recorded cause of death was wrong on both cause and extent.** HANDOFF and NEXT_DECISION
+stated `biohub-loeo-f0-strict` "died after 16 of 71 crops, almost certainly on the
+`/kaggle/working` size limit". The kernel log says otherwise:
+
+- `Found 71 test videos` / `Found 71 prediction graphs` — **all 71 crops predicted successfully**;
+- **no** disk error, **no** OOM anywhere in the log;
+- it failed at `In [8]`, the injected LOEO export/audit cell, on
+  `RuntimeError: 44b6_a2bb48bb: out-degree > 2` — my own assertion at `loeo_export.py:68`.
+
+Cause: **2 nodes out of 1,900,633 (0.00011%)** carry out-degree 3 — one in `44b6_a2bb48bb`,
+one in `44b6_abf82518`. A 2.7-hour GPU run (t=9727s) was discarded by a hard assertion over two
+nodes, after all the expensive work had completed. The gzip/cleanup lines run *after* the
+assertion, so no `.csv.gz` was written — but `/kaggle/working` survives on a FAILED kernel.
+
+**Recovery: zero GPU.** `submission.csv` (198,211,344 bytes, sha256 `6880f2fa04969f4007908738`),
+`loeo_manifest.json` and `run_stats.csv` pulled by URL from the failed session.
+No shards were built and none were needed.
+
+Manifest audit **PASS**: fold 0, arm strict, `secondary_enabled false`, `deepcenter_enabled false`,
+weights `split_0/edge_predictor_best.pth`, det_threshold 0.96875, 71 crops unique and all 44b6,
+and the crop list is **set-equal to the spec's declared stems**. No leakage path.
+
+**Exact result (71 crops, corpus for fold 0 / 44b6 only):**
+
+| quantity | value |
+|---|---:|
+| edge_jaccard (raw) | 0.88224 |
+| adj_edge_jaccard | 0.89859 |
+| division_jaccard | 0.01587 (TP 2 / FP 100 / FN 24) |
+| node_recall | **0.98457** |
+| composite | 0.90018 |
+| **reachable GT divisions (44b6)** | **22 / 26** |
+
+**SUBSTRATE DECISION: GREEN.** 22/26 beats E0c 20/26, clean903 20/26 and v122 15/26, and node
+recall holds at 0.9846. The 0.914 deployment platform and the division track **multiply rather
+than compete** — this substrate has the most reachable divisions we have ever measured.
+
+The division layer on this substrate is meanwhile near-worthless: divJ 0.0159 on TP2/FP100/FN24.
+That is the H0c operation's ideal starting condition (suppress-all costs almost nothing here
+because there is almost nothing true to lose), but the deployable selector remains unbuilt and
+every large division number in this programme is still a GT oracle.
+
+**Node-ratio finding.** adj (0.89859) EXCEEDS raw (0.88224), so the multiplier is 1.01853 > 1 and
+the implied mean node ratio is **−0.1853** — this arm UNDER-predicts nodes, more so than v122
+(−0.1598); E0c arm A OVER-predicts (+0.0832). Under-prediction is rewarded (the multiplier is not
+clipped above 1), so node budgeting has no obvious count headroom here.
+**CAVEAT, stated explicitly: this is the `strict` arm with the secondary model and DeepCenter
+DISABLED, so it emits fewer nodes than real P0-B. This ratio is NOT P0-B's ratio and must not be
+transferred to it.** Arm-D measurement pending.
+
+**Do NOT compare 0.89859 against E0c's published 44b6 figure of 0.7595.** The two may not share a
+weighting convention and I have not reconciled them. No claim rests on that comparison.
+
+Artifacts: `reports/inventory/loeo_f0_strict.json` (sha256 `b5f98a6499fab3c14da0e396`),
+`reports/inventory/loeo_f0_strict_manifest.json`.
+
+**Submitted P0-CR** (ref 55147215, PENDING): v122 base + reverse-time w=0.20 + line-fit volume
+guard, out sha256 `435bf5d19d85563c`, structural audit **PASS 10/10** (A1–A10, outside=0 — the
+volume guard fixed the z=64 defect that failed the original P0-C). Causal question: is
+reverse-time's effect base-dependent? Expected ~0.908–0.912; this is a causal probe, **not** a
+score-climb candidate.
