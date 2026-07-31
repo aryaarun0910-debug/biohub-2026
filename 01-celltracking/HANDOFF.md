@@ -64,15 +64,43 @@ Three headline numbers I reported shrank on the corpus:
 **RULE: no smoke or in-family probe may be quoted as a headline. Corpus numbers only, and name
 the basis explicitly every time** — in-family CV vs cross-family LOFO vs GT oracle.
 
-## 4. What is deployable and corpus-verified
+## 4. What is deployable on P0-B — **NOTHING. Both mechanisms died 2026-07-31.**
 
-| mechanism | pooled Δ | basis |
-|---|---:|---|
-| node budget (keep_frac 0.975) | **+0.00157** | corpus, arm A |
-| ssl × geometry veto | **+0.00141** | corpus LOFO, P(>+0.005) = 0.0004 |
+The previous version of this section listed node budget (+0.00157) and the ssl × geometry veto
+(+0.00141) as "deployable and corpus-verified", and projected ~+0.003 combined. **Both were
+measured on the actual 0.914 base and both failed.** Do not rebuild either from the old numbers.
 
-That is the complete list. ~+0.003 combined *if* independent and *if* they transfer to P0-B —
-neither established. Everything larger is a GT oracle.
+| mechanism | old claim | measured on P0-B | verdict |
+|---|---:|---:|---|
+| node budget (keep_frac 0.975) | +0.00157 | **−0.0000103** | **NO-GO** |
+| ssl × geometry veto | +0.00141 | ceiling **exactly 0** | **NO-GO / mis-scoped** |
+
+**Node budget.** Like-for-like, same four movies, same frozen keep_frac, exact patched scorer:
+E0c arm A **+0.006339**, P0-B **−0.0000103**. Offline parity is exact — the stage at keep_frac 1.0
+reproduces the live P0-B artifact byte-identically (`4c285cae0c220a11`).
+*Mechanism:* P0-B under-predicts nodes (ratio **−0.1028** vs E0c **+0.1269**) and already runs
+`filter_short_track_components`, so its weakest surviving components are **correct tracks**. On the
+highest-edge-weight crop the stage destroys **5 counted edge TPs and removes 0 counted edge FPs**;
+on E0c the identical operation *gains* TPs (992→994) because the junk it deleted was stealing
+bipartite matches. Note the sign of the node ratio is **not** the cause — the multiplier term
+`0.1·f·(1+r₀)·J` stays positive at r₀ = −0.10, just 17% smaller. Substrate quality is the cause.
+*Integrity flag:* ~**116%** of the original +0.00157 was the **count multiplier**, ~−16% edge
+quality — a count effect, not a precision effect, while P0-B's own report cell declares
+`"metric_hack_used": false`. Treat any revival as a metric-artifact question, not a tracking gain.
+
+**ssl × geometry veto.** It is **not a bolt-on filter**. The +0.00141 is the *admission gate of the
+H0c division-reconstruction cascade*, and is an arithmetic projection through **constant E0c edge
+costs** that `scripts/win_bet/h4_ssl_gate_replay.py` has **never actually validated**. The one
+bolt-on reading — vetoing P0-B's existing forks — has ceiling **exactly zero**: P0-B's divisions are
+TP 0 / FP 8 / FN 3, so divJ is 0 before *and* after a perfect veto.
+
+Basis, stated explicitly: four visible placeholder movies, in-sample on the public set. Sparse
+annotation under-samples the edge cost while the multiplier is fully realised, so **the proxy is
+biased in node budget's favour — and it still fails.** No keep_frac sweep was run.
+
+**Consequence: there is currently no deployable mechanism between 0.914 and 0.920.** Everything
+larger remains a GT oracle. The division track (§5, substrate 22/26) is the only live route, and
+its selector is unbuilt.
 
 ## 5. Oracles — real ceilings, not deployable
 
