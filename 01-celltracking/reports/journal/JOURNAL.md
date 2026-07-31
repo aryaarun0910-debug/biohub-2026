@@ -2767,3 +2767,36 @@ guard, out sha256 `435bf5d19d85563c`, structural audit **PASS 10/10** (A1–A10,
 volume guard fixed the z=64 defect that failed the original P0-C). Causal question: is
 reverse-time's effect base-dependent? Expected ~0.908–0.912; this is a causal probe, **not** a
 score-climb candidate.
+
+#### Addendum — division headroom on the 22/26 substrate (GT ORACLE + selector sensitivity)
+
+Arithmetic on the measured fold-0 numbers only (composite = adjEdgeJ + 0.1·divJ, adjEdgeJ held
+fixed at 0.8985894; H0c's measured edge effect on E0c was +0.0010 / −0.0006, i.e. second-order).
+
+| arm | divJ | composite | Δ vs measured |
+|---|---:|---:|---:|
+| measured (TP2/FP100/FN24) | 0.01587 | 0.9001767 | — |
+| suppress-all only | 0.00000 | 0.8985894 | **−0.00159** |
+| **H0c oracle** (reconstruct all 22 reachable, FP 0) | 0.84615 | 0.9832048 | **+0.08303** |
+
+Suppress-all alone is now slightly *negative* (it deletes 2 real TPs), which differs from E0c where
+it was edge-neutral. The gain is entirely in reconstruction, as before.
+
+**Selector sensitivity — the precision bar is low.** k = true forks recovered, m = false admitted:
+
+| k \ m | 0 | 10 | 30 | 60 |
+|---|---:|---:|---:|---:|
+| 22 | +0.0830 | +0.0595 | +0.0377 | +0.0240 |
+| 15 | +0.0561 | +0.0401 | +0.0252 | +0.0159 |
+| 10 | +0.0369 | +0.0262 | +0.0163 | +0.0100 |
+
+Recovering only **10 of 26** divisions while admitting **60** false forks — ~14% precision — still
+returns **+0.010** on this fold. That corroborates the documented 10.15% break-even from an
+independent direction.
+
+**THE LIMIT OF THIS RESULT, STATED PLAINLY.** Every number above is 44b6 / fold 0 only, and 44b6
+carries just **14.94% of edge mass**. The pooled objective is dominated by 6bba, which is
+**unmeasured on this substrate** — fold 1 is LEAKY with the pack's `split_0` weights (trained on
+6bba) and needs our own `split_1`. `scripts/kaggle_specs/loeo_f1_strict.json` exists.
+**Do not convert any figure above into a pooled or public-score claim.** The honest status is:
+44b6 headroom is large and the precision bar is low; the 85%-mass family is unknown.
