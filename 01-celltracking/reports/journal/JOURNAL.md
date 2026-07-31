@@ -3031,3 +3031,40 @@ the comparison until someone scores E0c and this artifact through one entry poin
   quoted as a headline.
 - **`phaseb_h2a_hybrid_oracle.py`** — not run; interface confirmed working. From its own artifacts
   (3 crops in 133.4 s) the full 199 crops is **~2.5 h at 3 workers**.
+
+### 2026-08-01 (CORRECTION — the node-ratio mechanism was wrong; verdicts unchanged)
+
+The 2026-07-31 arm-D entry above says "**The sign flips with the sign of the node ratio**" and calls
+the arm-A gain a count-multiplier effect "available only to a graph that OVER-predicts nodes".
+**The empirical results are unchanged and node budget stays CLOSED — but that explanation is
+falsified.**
+
+The per-node count cost is `0.1·tp_i/N_est_i`. `N_est_i` is **GT metadata**, so the cost is
+**exactly invariant** to whether the substrate over- or under-predicts. The node ratio enters the
+decision only through `w_i = 1 − 0.1·r_i`, which shifts the threshold by **1.1%** across the whole
+±0.16 range — nowhere near enough to flip a sign. And per-crop node ratios are **mixed-sign on both
+substrates**, so "E0c over-predicts, P0-B under-predicts" was never the clean dichotomy I described.
+
+**What actually flipped it** `[4 movies, exact scorer]` is the `d_tp/d_fp` composition of the
+components being deleted:
+
+| substrate | d_tp | d_fp | q_net | deleting is | measured Δ |
+|---|---:|---:|---:|---|---:|
+| E0c arm A | −5 | +8 | −1.67 | correct | **+0.006339** |
+| P0-B | +5 | 0 | +1.00 | wrong | **−0.0000103** |
+
+P0-B already runs `filter_short_track_components`, so its weakest surviving components are *correct
+tracks* and there is nothing left worth deleting. Lane 3 actually reported this correctly at the
+time ("the sign of the node ratio is not the cause… substrate quality is"); I then wrote the
+node-ratio story into the arm-D entry and the ledger anyway. **That is a synthesis error of mine,
+not a measurement error**, and it is the fifth reporting correction of this cycle.
+
+**Closed form now available and verified:** retain iff
+`q = d_tp/(d_tp+d_fp) > (Jbar + 0.1·n·ρ_i/a)/(w_i + Jbar)`, floor **0.3994**, which independently
+reproduces the project's separately-derived **40.6%** detection-precision bar. Implementation:
+`decision_kernel.py` (research store); if adopted it belongs at `src/biotrack/decision.py`.
+
+**Standing rule extended:** the reporting-discipline section covers *numbers*. It now also covers
+*mechanisms* — a causal story attached to a correct number is itself a claim, and must be stated as
+a hypothesis until something tests it. "The sign tracks r" was never measured; it was pattern-matched
+from three data points that happened to line up.

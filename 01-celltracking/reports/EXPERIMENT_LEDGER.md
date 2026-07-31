@@ -165,10 +165,28 @@ a selector recovering 10 of 26 while admitting 60 false forks still returns **+0
 ### Mechanistic conclusion that generalises
 
 **Node budget's arm-A gain was a count-multiplier effect, not a tracking improvement** — ~116% of
-+0.00157 was the multiplier and ~−16% was edge quality. Its sign tracks the node ratio
-(E0c +0.0832 → +0.00157; v122 −0.1598 → −0.00088; P0-B −0.1028 → −0.00001). Any future mechanism
-whose gain decomposes mostly into the multiplier should be treated as a metric artifact and
-audited against the pipeline's own `metric_hack_used: false` declaration before deployment.
++0.00157 was the multiplier and ~−16% was edge quality. Any future mechanism whose gain decomposes
+mostly into the multiplier should be treated as a metric artifact and audited against the
+pipeline's own `metric_hack_used: false` declaration before deployment.
+
+**CORRECTION 2026-08-01 — the node-ratio explanation was WRONG.** This section previously said the
+sign "tracks the node ratio" (E0c +0.0832 → +0.00157; v122 −0.1598 → −0.00088; P0-B −0.1028 →
+−0.00001). **The empirical verdicts are unchanged and node budget remains CLOSED, but the mechanism
+was misattributed.** The per-node count cost is `0.1·tp_i/N_est_i`, and `N_est_i` is GT metadata, so
+it is **exactly invariant** to whether the substrate over- or under-predicts. The node ratio enters
+only through `w_i = 1 − 0.1·r_i`, which moves the decision threshold by **1.1%** across the entire
+±0.16 range. Per-crop node ratios are in fact **mixed-sign on both substrates**.
+
+What actually flipped the sign is the **d_tp/d_fp composition of the deleted components**
+`[4 movies, exact scorer]`: E0c deletions carried `d_tp = −5, d_fp = +8` (`q_net = −1.67`, so
+deleting was correct → +0.006339), while P0-B deletions carried `d_tp = +5, d_fp = 0`
+(`q_net = +1.00`, so deleting was wrong → −0.0000103). P0-B already runs
+`filter_short_track_components`, so its weakest surviving components are *correct tracks*.
+
+**Generalised rule (closed form, verified):** retain a component iff
+`q = d_tp/(d_tp+d_fp) > (Jbar + 0.1·n·ρ_i/a)/(w_i + Jbar)`, floor **0.3994** — which independently
+reproduces this project's separately-derived 40.6% detection-precision bar. Judge an edit by the
+edge quality of what it touches, **not** by the substrate's aggregate node ratio.
 
 ### Association FN attribution — complete
 
