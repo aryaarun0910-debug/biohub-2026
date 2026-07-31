@@ -1899,3 +1899,71 @@ Unguarded `gt_to_sub[m] = s` overwrites remain at `phaseb_d0p_proposer.py:287`,
 
 Caveat: agent 1's clean-0.913 base has no local OOF graphs yet, so `clean903` is the closest
 available proxy, labelled as the superseded port rather than the 0.913 base itself.
+
+### 2026-07-31 (POOLED-OBJECTIVE HARD LOCK — proven, tested, and my framing corrected)
+
+`scripts/verify_pooled_objective.py` proves the objective against the authoritative patched
+scorer over the 995 cached per-crop rows. `tests/test_pooled_objective.py` locks it (4 tests;
+suite now 18 passed).
+
+**PROOF 1+2 — parity and hand reconstruction.** One combined `summarise()` over all 199 crops
+equals a by-hand rebuild from raw global totals to machine precision (max |diff| `2.2e-16`
+across all five arms). The weighting is therefore explicit and auditable, not trusted:
+`adj_edge_jaccard` is an edge-VOLUME-weighted mean of per-sample adjusted Jaccards
+(`w = TP+FP+FN`), and `division_jaccard` is micro-pooled. Published per-family anchors
+reproduce (E0c 0.7595/0.6490, v122 0.6962/0.6997).
+
+**PROOF 3 — family averaging is NOT the objective.**
+
+| arm | pooled | mean(fam) | gap | min-fold | gap |
+|---|---:|---:|---:|---:|---:|
+| E0c | 0.66539 | 0.70425 | **+0.03886** | 0.64895 | -0.01644 |
+| B_detpop | 0.66677 | 0.70046 | +0.03369 | 0.65256 | -0.01420 |
+| Bp_ilp | 0.69162 | 0.70633 | +0.01471 | 0.68538 | -0.00624 |
+| C_survival | 0.69692 | 0.69463 | -0.00228 | 0.69139 | -0.00553 |
+| v122 | 0.69909 | 0.69795 | -0.00114 | 0.69625 | -0.00285 |
+
+44b6 edge-mass share is 14.81-14.97% across arms.
+
+**CORRECTION TO MY OWN FRAMING.** I wrote that "the min-fold gate is not the competition
+objective" and implied min-fold RANKING misordered candidates. My first version of proof 4
+tested exactly that and **FAILED**: min-fold ranking and pooled ranking give the identical order
+here (v122 > C_survival > Bp_ilp > B_detpop > E0c). The criterion that actually closed arms was
+not min-fold ranking but the **promotion gate**: delta versus E0c must be positive on BOTH
+families, min-fold delta >= +0.005. That is the thing that diverges from the objective.
+
+**PROOF 4 (corrected) — the bilateral-delta gate rejects arms the objective prefers.**
+
+| arm | pooled d(E0c) | 44b6 d | 6bba d | bilateral gate | pooled says |
+|---|---:|---:|---:|---|---|
+| v122 | **+0.03370** | -0.06330 | +0.05071 | REJECT | BETTER |
+| C_survival | **+0.03153** | -0.06816 | +0.04893 | REJECT | BETTER |
+| Bp_ilp | **+0.02623** | -0.03227 | +0.03643 | REJECT | BETTER |
+| B_detpop | +0.00137 | -0.01120 | +0.00361 | REJECT | BETTER |
+
+**All four non-E0c arms are pooled-better and all four were rejected.** v122 -- our best public
+score at 0.908 -- is among them. The gate rejected the winner.
+
+**SELECTION DOCTRINE CHANGED.**
+- PRIMARY: official exact pooled OOF composite.
+- MANDATORY DIAGNOSTICS alongside every claim: both family scores, per-family delta,
+  block-bootstrap uncertainty, pseudo-private rank-reversal risk, worst-regime behaviour.
+- Min-fold is a ROBUSTNESS CONSTRAINT, not the optimisation target.
+
+The regression test fails if anyone restores 50/50 family weighting or a bilateral-delta gate as
+the primary criterion, and asserts on the real cache that 44b6's edge-mass share stays in
+(0.10, 0.20).
+
+**Re-ranked historical arms under the corrected objective** (`inventory/pooled_objective_parity.json`):
+
+| rank | arm | pooled OOF | 44b6 | 6bba | public | old status | corrected status |
+|---|---|---:|---:|---:|---:|---|---|
+| 1 | v122 | **0.69909** | 0.69625 | 0.69966 | 0.908 | hedge only | **best pooled arm** |
+| 2 | C_survival | 0.69692 | 0.69139 | 0.69788 | - | CLOSED | reopened, pooled +0.0315 |
+| 3 | Bp_ilp | 0.69162 | 0.72728 | 0.68538 | - | CLOSED | reopened, pooled +0.0262 |
+| 4 | B_detpop | 0.66677 | 0.74835 | 0.65256 | - | CLOSED | marginal, pooled +0.0014 |
+| 5 | E0c | 0.66539 | 0.75955 | 0.64895 | 0.889 | authoritative anchor | decorrelated hedge |
+
+Caveat carried forward from the simulator: `C_survival` is strictly dominated by v122 in
+20,000/20,000 composition draws (per-crop error correlation 0.9995) and must never occupy a
+submission slot despite its pooled rank.
