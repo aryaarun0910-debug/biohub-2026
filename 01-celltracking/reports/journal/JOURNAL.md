@@ -2427,3 +2427,85 @@ it is the one path where the 0.913 plateau and the division track MULTIPLY inste
 P0-A supplies the substrate, H0c supplies the layer that E0c's fork noise (11,441 forks, 0 on a
 true divider) squanders. Early signal: on the only placeholder crop with divisions P0-A reaches
 **3/3**, and its own division layer converts them to TP 0 / FP 6 / FN 3.
+
+### 2026-07-31 (Agent 5 — the pooled objective is CLOSED-FORM, detector diversity is empty, and 63.5% of missed nodes were found then discarded)
+
+Three new scripts: `scripts/agent5_ledger.py` (`d3a946eda79bcdeb`), `agent5_utility.py`
+(`46439e21c676547f`), `agent5_detector_preflight.py` (`1b0921ff2337d13c`).
+
+**THE ENABLING RESULT — the pooled objective has a closed form.** Because `w_i = tp+fp+fn` is
+exactly the denominator the Jaccard divides by, `w_i * adjJ_i == tp_i * (1 - 0.1*r_i)`, so
+
+    pooled = SUM_i tp_i*(1 - 0.1*r_i) / SUM_i (tp_i+fp_i+fn_i)  +  0.1*DTP/(DTP+DFP+DFN)
+
+with `r_i` invariant under edges-only edits and `tp_i + fn_i = gt_edges_i` constant. **Proved
+against the authoritative `summarise()` to 5.684e-14**, with `tp+fn == gt_edges` True and
+independently recomputed edge TP matching the scorer on every smoke crop. This converts
+"cumulative pooled gain over 14.37M candidates" from 14.4M scorer calls into VECTOR ARITHMETIC,
+and yields the four utility weights directly with no fitting. Corollary now algebraic rather than
+empirical: an edge with NEITHER endpoint annotated changes the score by exactly zero.
+
+**SUBTRACK A — do NOT build a diverse detector yet. Cheap detector diversity is EMPTY.**
+
+| variant vs `tta-4view__det-0.969` | genuinely new nodes | node Jaccard |
+|---|---:|---:|
+| `det-0.96875` | 37 / 1 | 0.9989 / 0.9999 |
+| `det-0.99` | **0 / 0** | 0.8239 / 0.9539 |
+| `tta-d4` | 166 / 92 (0.50% / 1.27%) | 0.9694 / 0.9701 |
+
+Threshold diversity is **strictly nested** -- zero new nodes, only removals -- so it cannot
+decorrelate anything. And the gate: reference detector recall is ALREADY **100.0% / 99.54%**;
+unioning all five other variants gains **+0 and +1** GT nodes.
+
+**THE INVERSION, and it is the most valuable unmeasured target in the programme.** Raw detector
+recall **97.64%** vs the recall the scorer actually sees on the E0c graph **93.55%**. The pipeline
+DISCARDS 4.09 pp / 73 GT nodes it had already found. Of the GT nodes the scorer misses, only
+**36.5% were never detected -- 63.5% were detected and lost downstream** to one-to-one bipartite
+competition, wrapper filters and linefit displacement. (Upper bound: the recall test is
+many-to-one where the scorer is one-to-one. Direction unambiguous.) **Zero GPU, upstream of both
+the division track and the portfolio-diversity problem.**
+
+**Detection break-even, exact:** one recovered true edge is worth `+w/DEN`, one visible false edge
+costs `-adj/DEN`, so a new detector must clear **precision >= adj/(w+adj) = 40.6%** among visible
+new edges -- versus **10.15%** for a division action at +0.005. Detection actions are ~4x LESS
+forgiving. The node-count penalty is the SMALL term (order 1e-3 of one edge); DISPLACEMENT is the
+real cost, consistent with branch A's -0.1596/-0.1496.
+
+**SUBTRACK B — the mechanism utility ordering exploits is now MEASURED, not assumed.**
+Smoke (3 crops, 29,800 candidates, 7 positives), exact counter deltas of the isolated action on
+the suppress-all graph:
+
+| label | n | mean d_tp | mean d_fp | destroys a true edge |
+|---|---:|---:|---:|---:|
+| positive | 7 | **+1.143** | **-0.714** | **0.0%** |
+| reliable_negative (visible) | 2,236 | -0.067 | +0.948 | **15.8%** |
+| unlabeled | 27,557 | -0.069 | +0.055 | - |
+
+True divisions are DOUBLY good -- they add division TP AND edge TP, and never steal a true edge.
+The cost of a wrong action concentrates in the 15.8% of visible negatives that destroy a true
+edge. That heterogeneity is precisely what utility ordering can exploit and probability ordering
+cannot.
+
+**Structural flaw found and fixed:** at the suppress-all anchor `DTP = 0`, so the LINEARISED
+division-FP cost is identically zero and a derivative-based utility would admit unlimited false
+forks. Utility is now a FINITE DIFFERENCE at an anticipated operating point, plus a
+confidence-adaptive re-ranking mode that re-scores at the current `(k, m)` every 25 admissions.
+
+**Does utility beat probability? NOT YET ANSWERABLE.** On 3 crops one fold has a single training
+positive so the model degenerates to the prior and every curve is noise (peaks at n=1, +/-0.0008).
+The agent explicitly declined to name a winner from that. Full corpus required. Ledger launched
+(~5.7 h CPU, ~57 min wall at 6 workers).
+
+**Two bugs caught by self-checks the agent added:** (1) numpy `bool + bool` is logical OR, not
+addition -- the first vectorisation silently capped two-true-edge candidates at 1 (positives'
+`e_add_tp` read 1.000 instead of 1.143); now guarded by a per-crop parity assertion re-deriving
+2,000 candidates with the reference loop, 6,000 checked, 0 mismatches. (2) The naive
+`iter_rows(named=True)` loop would have taken ~5 CPU-hours on 14.37M rows.
+
+**Caveats:** all deltas are NO-REFILTER (matching `phaseb_pooled_breakeven.py`), so they are a
+LOWER BOUND -- H0d showed the live filter is strictly more favourable, and any promoted operating
+point must be confirmed through `phaseb_h0d_livefilter.py`. `pi_vis` differs **14x** across
+families on the smoke (0.1047 vs 0.0073): annotation coverage does NOT transfer across the family
+boundary, and the agent deliberately does not learn visibility from features (that would be a
+metric exploit), so it enters only as a training-fold constant -- the weakest link in the
+deployable utility.
