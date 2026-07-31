@@ -2249,3 +2249,87 @@ at this scale.
 
 **DECISION: slot 3 stays HELD.** No candidate clears a credible pooled margin. H1-M is the best
 mechanism the campaign has produced and it is still not a submission.
+
+### 2026-07-31 (Node budget + H1-M forensics + H1-M2 close — three results, one crosses the bar)
+
+**NODE-BUDGET SWEEP (mine, `scripts/win_bet/phaseb_node_budget.py`).** RT surfaced the unclipped
+count multiplier; this tests whether selective pruning pays. Weakest-component-first
+(short first, division-containing components protected), deployment-observable ranking only.
+12-crop smoke on E0c:
+
+| keep | pooled | delta | 44b6 | 6bba | ratio | recall |
+|---|---:|---:|---:|---:|---:|---:|
+| 1.000 | 0.73328 | +0.00000 | 0.83553 | 0.71046 | +0.1171 | 0.9499 |
+| **0.975** | **0.74150** | **+0.00822** | 0.83335 | 0.72090 | +0.0890 | 0.9397 |
+| 0.950 | 0.74115 | +0.00787 | 0.83108 | 0.72091 | +0.0610 | 0.9330 |
+| 0.900 | 0.72705 | -0.00623 | 0.80275 | 0.70991 | +0.0051 | 0.8934 |
+| 0.800 | 0.70438 | -0.02890 | 0.73297 | 0.69774 | -0.1067 | 0.8273 |
+
+Pooled optimum at **0.975 = +0.00822**; per-family optima 44b6 1.0, 6bba 0.95. **KILL RULE NOT
+TRIGGERED** (optimum >= 0.99 on BOTH families would have closed it). This is a larger single
+number than anything the entire H1 programme has produced, on 12 crops. Full 199-crop run
+launched. Caveat: E0c over-predicts (+0.0832 ratio) so it has the most to gain; v122 already sits
+at -0.1598 and may have no headroom. The full run and an arm-D repeat decide it.
+
+**H1-M FORENSICS (agent 7).** Preregistered before outcomes (`PREREG_HASH 6bbff7f83541a917`,
+amended pre-outcome for a coverage defect, with signal equivalence VERIFIED not assumed:
+`R_massn_p1` vs `m_massratio_p1` Spearman 1.000000, residual max abs diff 0.0). Reproduction
+bit-identical before any forensics ran.
+
+The decision set is **218 mothers (16 TP / 202 FP), precision 7.34%**, not the 27 I quoted.
+Error taxonomy of the 202 FPs: **CALIBRATION 131 (64.9%)**, RANKING 44, TEMPORAL_PHASE 26,
+SUBSTRATE 1. And **118 of the 131 calibration errors sit in crops containing ZERO realisable
+divisions** -- one crop absorbed 51 admissions with 0 TP. The dominant failure is not
+discrimination at all.
+
+**MY +0.005 TARGET WAS WRONG.** The 10.15% precision figure was derived AT FULL RECALL. Corrected
+frontier: +0.005 needs >=10% precision held out to **~37 of 92 divisions**. H1-M's precision
+collapses with recall (13.75% at TP=11, 11.38% at 14, 5.29% at 20, **2.25% at 37**). So the gap is
+a **4.5x shortfall at the recall that matters**, not 1.4x at the recall we operate at. Composition
+C reaches 18.52% precision (both families above 10.15%) and still only makes +0.00109.
+
+Overlap matrix (Jaccard of removed-FP sets): H1M-H1I **0.380** (most redundant -- `R_massn_p1` IS
+an H1-M feature), H1M-GEOM 0.271 (most complementary). Preregistered winner is **A (H1-M alone,
++0.00248)**; B (H1-I gated) LOSES to doing nothing, exactly as the matrix predicted. Agent 7 also
+falsified the matrix as a PREDICTIVE instrument: it gets the sign at the extremes but not the
+ordering, because complementarity must be weighted by standalone power (RTD_A has AUC 0.492 on
+44b6 -- chance -- so its low overlap buys nothing).
+
+**THE CHANNEL THAT CROSSES THE BAR — TEMPORAL SNAP.** 65 of A's 202 FPs (**32%**) are duplicate
+admissions of the SAME predicted track within +/-2 frames.
+
+| arm | TP | FP | precision | pooled delta |
+|---|--:|--:|--:|--:|
+| no snap (= A) | 16 | 202 | 0.0734 | +0.00248 |
+| **GT-free per-track dedup (W=2)** | 16 | **137** | **0.1046** | **+0.00369** |
+| ORACLE frame choice (ceiling) | 22 | 131 | 0.1438 | **+0.00599** |
+
+Dedup uses NOTHING but the frozen predicted graph, is deployable today, buys **+0.00121 free**,
+and crosses 10.15%. Robust across the window (+0.00306/+0.00369/+0.00316 at W=1/2/3; W=2 was
+preregistered). The ORACLE frame choice reaches **+0.00599, above the bar** -- and none of
+H1-I / RTD_A / RTD_G / GEOM can select the frame. **A within-track frame-selection signal is the
+only measured route to +0.005.**
+
+`scripts/h1n_exact_replay.py` built and smoked (4 crops: division TP 1->2, FP 11->8, composite
+0.74120->0.74979); 147.5 s/crop, 199 crops on 6 workers ~82 min. Compute-gated.
+
+**H1-M2 CLOSED, and it corrects lane C's diagnosis.** Lane C blamed temporal over-sampling. That
+is **WRONG**: the clocks are the same (Zebrahub 1.32-1.75 vs competition 1.82 um/frame) and
+nuclear size is the same (L_rg 4.47-4.53 vs 4.47 um). The anchor was repaired anyway
+(34.8% of 92,172 forks realigned to a competition-like configuration, rule chosen from track
+geometry alone so the A/B is not circular) and the mitotic signature **did not recover**:
+R_massn effect stays +0.300 / -0.172 / +0.026 against competition's **-1.393 / -1.551**, wrong
+sign on two of three embryos. The killer control is an ORACLE over all 30 (anchor, stride) pairs
+-- an upper bound no rule can beat -- giving **+0.330 / +0.003 / +0.224**. There is no anchor to
+move to.
+
+Real cause: **LINEAGE FRAGMENTATION.** 5.7-11.7 track TERMINATIONS PER DIVISION, so a Zebrahub
+"fork" is predominantly a fragment-to-fragment assignment. Confirmed by what actually predicts a
+Zebrahub fork: `massn`/`peakn` HIGHER and `coff` LOWER (AUC 0.59-0.62) -- bright, well-centred
+detections are the ones the tracker splits. That is detector confidence, not mitosis.
+Realignment did move transfer from anti-correlated to chance (44b6 AUC 0.308 -> 0.576) and cut
+domain distance (dividers SMD 0.409 -> 0.328), so the repair worked; the corpus is still wrong.
+
+**$0 PRE-FLIGHT FILTER for any future external corpus** (the reusable output of this lane):
+require `term/div <~ 1` AND `sep(+1) >= 0.8 x 10.57 um` BEFORE downloading a single voxel.
+No GPU was spent; 7.5 GB streamed on Kaggle CPU kernels in 373 s.
