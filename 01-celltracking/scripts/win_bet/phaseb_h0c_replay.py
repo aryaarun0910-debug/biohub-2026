@@ -97,7 +97,8 @@ def shortlist(sub, t, pos, edges):
                 continue
             n_pre += len(scored)
             scored.sort(key=lambda z: z[0])
-            out[int(sub[mi])] = [k for _, k in scored[:CFG["topk"]]]
+            # value is [(residual, (d1, d2)), ...] in rank order; selection is unchanged.
+            out[int(sub[mi])] = scored[:CFG["topk"]]
     return out, n_pre
 
 
@@ -157,7 +158,7 @@ def replay_one(args) -> dict:
         if pM is None or p1 is None or p2 is None or p1 == p2:
             continue
         reachable += 1
-        if (min(p1, p2), max(p1, p2)) in set(prop.get(pM, ())):
+        if (min(p1, p2), max(p1, p2)) in {k for _, k in prop.get(pM, ())}:
             retained[pM] = (min(p1, p2), max(p1, p2))
 
     # ---- suppress-all then add-replace over the retained shortlist ----------
