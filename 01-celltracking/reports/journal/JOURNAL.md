@@ -2617,3 +2617,50 @@ measured multiplicative axis left is geometry-as-broad-veto (~2x FP reduction), 
 spent. The cheap unmeasured question is whether a SECOND independent veto exists -- forward
 association support or daughter persistence, both label-free and plausibly FP-disjoint from
 appearance. A second 0.44x veto is worth more than any further appearance modelling.
+
+### 2026-07-31 (CORRECTION — node budget on the full corpus is +0.00157, not the smoke's +0.00822)
+
+Full 199-crop sweep, arm A (E0c), weakest-component-first, divisions protected:
+
+| keep | pooled | delta | 44b6 | 6bba | ratio | recall |
+|---|---:|---:|---:|---:|---:|---:|
+| 1.000 | 0.66539 | +0.00000 | 0.75955 | 0.64895 | +0.0832 | 0.8999 |
+| **0.975** | **0.66696** | **+0.00157** | 0.75740 | 0.65111 | +0.0559 | 0.8907 |
+| 0.950 | 0.66462 | -0.00077 | 0.75155 | 0.64933 | +0.0288 | 0.8769 |
+| 0.900 | 0.65750 | -0.00789 | 0.74200 | 0.64251 | -0.0254 | 0.8499 |
+| 0.800 | 0.63002 | -0.03537 | 0.69995 | 0.61745 | -0.1338 | 0.7851 |
+
+Pooled optimum still 0.975 and the KILL RULE is still NOT triggered (per-family optima: 44b6 1.0,
+6bba 0.975), so selective pruning genuinely pays -- **but it pays +0.00157, not +0.00822.** The
+12-crop smoke overstated it **5.2x**.
+
+**THIRD SMOKE-TO-CORPUS SHRINKAGE THIS CYCLE**, and the pattern is now systematic enough to be a
+rule rather than three coincidences:
+
+| quantity | smoke / probe | corpus / honest | ratio |
+|---|---:|---:|---:|
+| node-budget delta | +0.00822 (12 crops) | **+0.00157** | 5.2x |
+| FN association share | 63.5% (3 crops) | **43.3%** | 1.5x |
+| H1-M pooled | ~+0.0023 (in-family CV) | **+0.00007** | ~30x |
+
+In each case I reported the optimistic figure before the corpus number existed. **Standing rule
+from here: no smoke or in-family probe gets quoted as a headline. Corpus numbers only, and the
+basis (in-family CV vs cross-family LOFO vs oracle) named explicitly every time.**
+
+**WHERE THE DIVISION PROGRAMME ACTUALLY STANDS, honestly:**
+
+| mechanism | honest pooled delta | basis |
+|---|---:|---|
+| H0c cascade | +0.06012 | GT ORACLE, E0c substrate |
+| hybrid substrate | 6bba reach 68->101 | GT ORACLE, ~50 aux nodes |
+| node budget (keep 0.975) | **+0.00157** | corpus, deployable |
+| ssl_split & geom_resid | +0.00141 | corpus LOFO, P(>+0.005)=0.0004 |
+| temporal snap (GT-free) | +0.00369 | in-family basis -- NEEDS RE-DERIVING cross-family |
+| H1-M cross-family | +0.00007 / -0.00131 | corpus LOFO |
+
+Only two things are both deployable and corpus-verified: node budget at +0.00157 and the
+ssl x geometry veto at +0.00141. Neither approaches +0.005. Every large number in this programme
+is still an oracle.
+
+**The temporal-snap figure (+0.00369) was computed on the same in-family basis that inflated
+H1-M ~30x and must be re-derived cross-family before it is quoted again.**
