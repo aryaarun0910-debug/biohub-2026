@@ -72,7 +72,49 @@ offline repair) **if** it answers a still-open causal question; (3) a genuinely 
 Nothing currently qualifies: the only corpus-verified deployable mechanisms are +0.00157 and
 +0.00141, against +0.006 needed just to reach 0.920.
 
-## 4. Open research, ranked by (expected pooled Δ × transfer plausibility) ÷ cost
+## 4. Open research — REVISED 2026-07-31 after three lanes closed most of it
+
+**Closed tonight, with corpus numbers:**
+
+- **Node budget — DEAD.** Arm D corpus −0.00088 (P(Δ>0)=0.109, pooled optimum keep_frac 1.00);
+  P0-B direct −0.00001. The sign tracks the node ratio: gain exists only where the graph
+  OVER-predicts (E0c +0.0832 → +0.00157; v122 −0.1598 → −0.00088; P0-B −0.1028 → −0.00001).
+  ~116% of the original arm-A gain was the count multiplier.
+- **ssl × geometry veto — mis-scoped.** Not a bolt-on filter; it is the H0c cascade's admission
+  gate. Bolt-on ceiling on P0-B is **exactly 0** (divisions TP0/FP8/FN3, divJ already 0).
+- **Association recovery — attributed in full, then closed.** All 27,705 corpus FN assigned to a
+  first-loss stage. 43.80% never detected; the 43.32% recoverable pool is +0.13288 as a GT oracle.
+  **One net-correct repair = 1.095e-05 pooled, so +0.002 needs 183 net-correct repairs.**
+  Enumeration is closed (widening already falsified). Bipartite is the only unfalsified lane and
+  fails cross-family: LOFO **+0.00099 vs +0.00002**, a 50× disagreement resting on an in-sample net
+  of +4 targets. Inside `target_taken` the transformer prefers the true parent in **9.36%** of
+  cases against a ~50% break-even.
+
+**NEW finding worth one cheap test — the only association lead still alive:**
+`filter_short_track_components` deletes **5,311 GT edges the relink had already linked correctly**
+(19.2% of ALL FN). Blanket retention is falsified (branch A control: edge TP *falls*, re-added
+nodes steal bipartite matches) and the **edge-level** signal is dead (deleted true edges are
+statistically identical to selected ones: prob 0.785 vs 0.786, raw_um 2.30 vs 2.30). But the
+**component-level** signal — length, node count, mean cost, degree profile, frame density — has
+never been measured. ~20 min CPU. **Gate hard: require a GT-free component score with
+leave-family-out sign stability BEFORE any replay**, since blanket retention is −0.0055/−0.0144.
+
+**Ranked queue now:**
+
+1. **The division track on the 22/26 substrate** — the only route with real headroom. Oracle
+   +0.0830 on 44b6, and a selector recovering just 10 of 26 while admitting 60 false forks still
+   returns +0.010. The substrate question is answered; **the selector is the binding constraint.**
+2. **Fold 1 (6bba) on the P0-B substrate** — 44b6 is only 14.94% of edge mass, so nothing above is
+   a pooled claim yet. `scripts/kaggle_specs/loeo_f1_strict.json` is ready and expects our
+   `split_1` weights. The export cell now records structural anomalies instead of discarding the
+   run, so it will no longer die the way fold 0 did.
+3. **Component-level selective retention** (above), gated.
+4. **Re-run the FN attribution against `artifacts/kaggle/clean903_wrapper_oof_cache`** (199 crops,
+   same schema) to learn whether the loss profile transfers off E0c at all. E0c is a scientific
+   anchor, not the deployment base.
+
+<details>
+<summary>Superseded ranking of 2026-07-31 morning (kept for audit)</summary>
 
 1. **Association recovery** — 43.3% of missed GT edges were *detected then discarded* by our own
    pipeline (bipartite competition, wrapper filters, linefit displacement). Zero GPU, no precision
@@ -93,7 +135,16 @@ Nothing currently qualifies: the only corpus-verified deployable mechanisms are 
    baseline. Enabling the guard shifts the baseline the promotion gate is defined against. Needs a
    human call, and the 7,349-vs-14,319 count dispute needs reconciling first.
 
+</details>
+
 ## 5. Do not reopen without new evidence
+
+**Added 2026-07-31:** node budget on any under-predicting substrate (corpus −0.00088 on arm D,
+−0.00001 on P0-B; the gain is a count-multiplier effect requiring over-prediction) · the ssl ×
+geometry veto as a bolt-on fork filter (ceiling exactly 0 on P0-B) · blanket short-component
+retention (branch A control: edge TP falls) · edge-level selection among short-component deletions
+(deleted true edges are statistically identical to selected ones) · orphan-swap and contested-target
+repair rules (LOFO −0.00019/+0.00006 and +0.00002/+0.00099 — sign-unstable across families).
 
 Exploit structures (score-negative, −0.0027/−0.0007) · detector diversity (nested; 0 new nodes) ·
 appearance × appearance stacking (lift 0.00, mechanism known) · Zebrahub for divisions (lineage
