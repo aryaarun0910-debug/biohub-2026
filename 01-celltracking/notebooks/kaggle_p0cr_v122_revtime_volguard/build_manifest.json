@@ -1,0 +1,29 @@
+{
+  "name": "p0cr_v122_revtime_volguard",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p0cr_v122_revtime_volguard.json",
+  "base_notebook": "notebooks/kaggle_p0c_v122_revtime/biohub-p0c-v122-revtime.ipynb",
+  "base_sha256": "bfcf5fa9e980ec20f6f9f979823720ddcfafe0cdae04634f2b45561b15522b4f",
+  "built_notebook": "notebooks\\kaggle_p0cr_v122_revtime_volguard\\biohub-p0cr-v122-revtime-volguard.ipynb",
+  "built_sha256": "853b1a6c3cf747eab683895e3dc21e313714d67803b5e46c5dd7ae12b99b7885",
+  "config_hash": "a0bf230c5162",
+  "n_cells": 16,
+  "edits": [
+    {
+      "kind": "insert_before",
+      "cells": [
+        13
+      ],
+      "payload_sha256": "3188c95d02bf3615b11b43fe03af6f5189d4d2f501f1ad0444d0957702fc1927"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        13
+      ],
+      "payload_sha256": "c593ae6b324b495fa67a21098f131451b0a180892288a1934591496c4398d575"
+    }
+  ],
+  "declared_slug": "biohub-p0cr-v122-revtime-volguard",
+  "title": "Biohub P0Cr V122 Revtime Volguard",
+  "pushed_slug": "biohub-p0cr-v122-revtime-volguard"
+}

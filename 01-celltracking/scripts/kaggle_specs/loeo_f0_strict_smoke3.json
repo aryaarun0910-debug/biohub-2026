@@ -1,0 +1,54 @@
+{
+  "name": "loeo_f0_strict_smoke3",
+  "slug": "biohub-loeo-f0-strict-smoke3",
+  "title": "Biohub Loeo F0 Strict Smoke3",
+  "code_file": "biohub-loeo-f0-strict-smoke3.ipynb",
+  "out_dir": "notebooks/kaggle_loeo_f0_strict_smoke3",
+  "base_notebook": "notebooks/kaggle_p0a_clean913/biohub-p0a-clean913-repro.ipynb",
+  "base_sha256": "35681256f355bc98552d9cbdc4d208a9670657f18b7e7c4ce5637e6619e5e570",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork",
+    "kms111201/biohub-cell-tracking-data"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": false,
+  "purpose": "LOEO analogue of P0-A: identical pipeline retargeted at fold 0 of the labelled train crops, to measure node recall and reachable GT divisions on P0-A's substrate.",
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_LOEO_FOLD": "0",
+        "BIOHUB_LOEO_ARM": "strict",
+        "BIOHUB_LOEO_LIMIT": "3",
+        "BIOHUB_LOEO_STEMS": "[\"44b6_0113de3b\", \"44b6_0b24845f\", \"44b6_0c582fdc\", \"44b6_0db75fae\", \"44b6_12dfb391\", \"44b6_144b256d\", \"44b6_1574802b\", \"44b6_18ced818\", \"44b6_1d530831\", \"44b6_24264f12\", \"44b6_267148e4\", \"44b6_2a2eff9f\", \"44b6_2f31fc2f\", \"44b6_33b596bf\", \"44b6_341df25f\", \"44b6_3a861e03\", \"44b6_3bb3690f\", \"44b6_40c45f5a\", \"44b6_415c0a3a\", \"44b6_53f95252\", \"44b6_551a5dba\", \"44b6_5740d24b\", \"44b6_587a1e22\", \"44b6_5f15d135\", \"44b6_668e0cc7\", \"44b6_66f9292d\", \"44b6_706092f0\", \"44b6_71a4179f\", \"44b6_74d0c52e\", \"44b6_7a302da0\", \"44b6_7e557709\", \"44b6_808952d6\", \"44b6_81c256f0\", \"44b6_87bba6c4\", \"44b6_8cc6506c\", \"44b6_8f5ab931\", \"44b6_8f9ecab4\", \"44b6_90724892\", \"44b6_949adeb1\", \"44b6_95029e92\", \"44b6_97725144\", \"44b6_996155de\", \"44b6_9be80b04\", \"44b6_9bfa6a0a\", \"44b6_a21120c2\", \"44b6_a2bb48bb\", \"44b6_aaf8b0ea\", \"44b6_abf82518\", \"44b6_b2c44266\", \"44b6_c15fded2\", \"44b6_c50204e0\", \"44b6_c771cb04\", \"44b6_c8e2a523\", \"44b6_c96cfa10\", \"44b6_cf2536e8\", \"44b6_cf8fed6b\", \"44b6_d29c9ab2\", \"44b6_d2f34f90\", \"44b6_d5e7d891\", \"44b6_d754aa59\", \"44b6_d78e09d9\", \"44b6_db3c847b\", \"44b6_ddf577ad\", \"44b6_deabac95\", \"44b6_e28840c6\", \"44b6_e29f0176\", \"44b6_e31261b4\", \"44b6_e35b117d\", \"44b6_e57ff5c6\", \"44b6_eb2880fc\", \"44b6_f28707c6\"]"
+      }
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "def list_test_stems() -> list[str]:",
+      "cell_match": "_ps = REPO_DIR",
+      "code_file": "scripts/kaggle_edits/loeo_retarget.py"
+    },
+    {
+      "kind": "replace",
+      "old": "test_stems = list_test_stems()",
+      "new": "test_stems = list(LOEO_STEMS)  # LOEO retarget",
+      "expect": 1
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "_guard_submission = Path(",
+      "code_file": "scripts/kaggle_edits/loeo_export.py"
+    }
+  ]
+}

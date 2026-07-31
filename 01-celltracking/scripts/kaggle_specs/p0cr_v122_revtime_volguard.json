@@ -1,0 +1,41 @@
+{
+  "name": "p0cr_v122_revtime_volguard",
+  "slug": "biohub-p0cr-v122-revtime-volguard",
+  "title": "Biohub P0Cr V122 Revtime Volguard",
+  "code_file": "biohub-p0cr-v122-revtime-volguard.ipynb",
+  "out_dir": "notebooks/kaggle_p0cr_v122_revtime_volguard",
+  "base_notebook": "notebooks/kaggle_p0c_v122_revtime/biohub-p0c-v122-revtime.ipynb",
+  "base_sha256": "bfcf5fa9e980ec20f6f9f979823720ddcfafe0cdae04634f2b45561b15522b4f",
+  "datasets": [
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "thibautgoldsborough/cellmot-baseline-artifacts"
+  ],
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "purpose": "Slot-3 candidate. P0-C (v122 + source-locked reverse-time association w=0.20) with the linefit volume guard applied IN-KERNEL, so the artifact passes scripts/audit_submission_structure.py at emission rather than needing an unsubmittable local repair.",
+  "provenance": {
+    "defect": "P0-C node 15274 of 44b6_0b24845f at t=43 emitted z=64 (z_max=63) -> audit gate A3 FAIL",
+    "offline_repair": "scripts/repair_linefit_volume.py, 1 edit, repaired sha256 435bf5d19d85563c84140e162b3a84f476fdf2fc2cf6ab4b9b759986b9fb9fea",
+    "why_in_kernel": "this competition accepts submissions from NOTEBOOKS only; a locally repaired CSV can never be submitted",
+    "expected_effect": "identical to the offline repair on the one known node; the guard is per-axis and restorative, never a clamp"
+  },
+  "edits": [
+    {
+      "kind": "insert_before",
+      "anchor": "def linefit_smooth_output_graph(",
+      "cell_match": "def linefit_smooth_output_graph(",
+      "code_file": "scripts/kaggle_edits/volume_guard_linefit.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def linefit_smooth_output_graph(",
+      "old": "        updated_pos[node_id] = (1.0 - weight) * original_pos[node_id] + weight * fitted",
+      "new": "        _vg_blended = (1.0 - weight) * original_pos[node_id] + weight * fitted\n        updated_pos[node_id] = _vg_restore_axes(_vg_blended, original_pos[node_id], stats)",
+      "expect": 1
+    }
+  ]
+}
