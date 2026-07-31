@@ -1,0 +1,28 @@
+{
+  "name": "p1_p0b_nodebudget",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p1_p0b_nodebudget.json",
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "built_notebook": "notebooks\\kaggle_p1_p0b_nodebudget\\biohub-p1-p0b-nodebudget.ipynb",
+  "built_sha256": "898a4113e0e5625a68a50468ecfe322affa86ce437f0c96ac1d52b95f32bee81",
+  "config_hash": "e02bae465eaa",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "31eb9c80ef2bc008f18fa493b26a0551a2f105edd0ba42444fa36c57bcf3dc9e"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "575941b89994adfb84f2955b7a82152c55561926383a28ad9e3498ec67e21d11"
+    }
+  ],
+  "declared_slug": "biohub-p1-p0b-node-budget-0975",
+  "title": "Biohub P1 P0B Node Budget 0975"
+}

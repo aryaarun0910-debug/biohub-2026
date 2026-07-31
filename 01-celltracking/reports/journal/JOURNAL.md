@@ -2800,3 +2800,66 @@ carries just **14.94% of edge mass**. The pooled objective is dominated by 6bba,
 6bba) and needs our own `split_1`. `scripts/kaggle_specs/loeo_f1_strict.json` exists.
 **Do not convert any figure above into a pooled or public-score claim.** The honest status is:
 44b6 headroom is large and the precision bar is low; the 85%-mass family is unknown.
+
+### 2026-07-31 (Lane 3 — NODE BUDGET DOES NOT TRANSFER TO P0-B; the ssl×geometry veto is not a deployable stage)
+
+**Execution.** Fetched the live P0-B artifact (`aryaarun07/biohub-p0b-clean-913-reverse-time`,
+sha256 `4c285cae0c220a11…`, 120,861 nodes / 116,604 edges / 305 divisions, structural audit
+**PASS 10/10**, max out-degree 2 — the reported out-degree>2 defect is **not** present in P0-B's
+test output). Ported `scripts/win_bet/phaseb_node_budget.py` verbatim to a deployable in-notebook
+stage, `scripts/kaggle_edits/node_budget_stage.py`. At `keep_frac 1.0` the replay reproduces the
+live artifact **byte-identically**, so the harness is exact.
+
+**Like-for-like, same four movies, same frozen `keep_frac 0.975`, exact patched scorer:**
+
+| substrate | pooled node ratio | composite | + node budget | Δ |
+|---|---:|---:|---:|---:|
+| E0c arm A | **+0.1269** | 0.749642 | 0.755981 | **+0.006339** |
+| **P0-B (live 0.914)** | **−0.1028** | 0.889225 | 0.889214 | **−0.0000103** |
+
+**P0-B's node ratio is −0.1028** — it UNDER-predicts, answering the open gate. (Caveat: measured
+against the placeholder crops' `estimated_number_of_nodes`, not the hidden movies. It is also not
+the strict arm's −0.1853, which the LOEO fold-0 entry correctly refused to transfer.)
+
+**Mechanism.** The `+0.00157` corpus gain is **~116% count multiplier**: first-order,
+multiplier-only Δ = `+0.0018258` against a measured `+0.0015699`, implying an edge-quality cost of
+`−0.0002559`. It is a count effect, not a precision effect. The multiplier term is
+`0.1·f·(1+r₀)·J`, which SHRINKS but does not change sign under under-prediction — so the sign of
+r₀ is not what kills it. What kills it is the substrate: **P0-B already runs
+`filter_short_track_components`**, so its weakest surviving components average 6.8 nodes and are
+correct tracks. On the highest-edge-weight crop (`6bba_05db0fb1`) the stage destroys **5 counted
+edge TPs and removes 0 counted edge FPs** (adjJ 0.83534 → 0.83364). On E0c the same operation
+*gains* TPs (748→751, 992→994) because the junk it deletes was stealing bipartite matches.
+
+**Proxy bias, stated explicitly.** These four crops score 0.889225 locally for the artifact whose
+public score is **0.914**, so this is not the leaderboard. Their annotation is sparse (~50 counted
+edges per 44b6 crop), which UNDER-samples the edge cost while the multiplier is fully realised —
+the proxy is biased **in the node budget's favour**, and it still lands at −0.00001.
+
+**P1 graph delta vs P0-B:** nodes −3,027 (0 added), edges −2,580 (0 added), divisions 305→305
+(fork protection verified), **0 parent reassignments**, structural audit **PASS 10/10**, simulated
+artifact sha256 `00e7fed996b6b783…`. Built as `scripts/kaggle_specs/p1_p0b_nodebudget.json`
+(built sha256 `898a4113e0e5625a…`, config hash `e02bae465eaa`, blast radius = cell 6 only).
+**NOT pushed. NO-GO.**
+
+**P2 (ssl × geometry veto) is not a bolt-on veto and was not built.** Reading
+`scripts/h4_ssl_fuse.py` + `scripts/win_bet/h4_ssl_gate_replay.py`: the `+0.00141` is the
+**admission gate of the H0c division-reconstruction cascade** — which mothers get their rank-0
+shortlist pair reconstructed — not a filter over an existing graph. Deploying it needs 15/15
+candidate generation, flow-midpoint top-3 ranking, the 17-descriptor 5-frame appearance cache, a
+ridge normal-continuation fit, suppress-all + add-replace on the test movies, and an admission
+*rate* whose LOFO value is derived per-family from train labels. Moreover `+0.00141` is an
+arithmetic projection through **constant E0c edge costs**; `h4_ssl_gate_replay.py`'s own docstring
+warns against exactly that, and it **has never been run**.
+
+The one reading that *is* a bolt-on — vetoing P0-B's existing forks — has a **GT-oracle** corridor
+of only `+0.00042 … +0.00216` pooled on E0c (remove all 675 division FPs, keep the 4 TPs:
+divJ `4/826 → 4/151`, minus the measured suppress-all edge cost `−0.00174`). On P0-B's own four
+crops it is **exactly 0**: division TP0 / FP8 / FN3, so divJ is 0 before and after a perfect veto.
+
+**Decision.** P1 NO-GO, P2 not buildable, **P3 does not exist**. Neither of the two "corpus-verified
+deployable mechanisms" is deployable on the 0.914 base. Integrity note for whoever revisits P1:
+its gain is ~116% count multiplier, while P0-B's own in-kernel report cell declares
+`"metric_hack_used": false`.
+
+Artifact: `reports/inventory/p1_node_budget_p0b_substrate.json`.

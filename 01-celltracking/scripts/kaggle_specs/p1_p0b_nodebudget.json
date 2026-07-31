@@ -1,0 +1,47 @@
+{
+  "name": "p1_p0b_nodebudget",
+  "slug": "biohub-p1-p0b-node-budget-0975",
+  "title": "Biohub P1 P0B Node Budget 0975",
+  "code_file": "biohub-p1-p0b-nodebudget.ipynb",
+  "out_dir": "notebooks/kaggle_p1_p0b_nodebudget",
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "purpose": "P1 = P0-B + node budget (keep_frac 0.975). PROVISIONAL / NOT RECOMMENDED. Built so the candidate exists, not because the evidence supports it: the +0.00157 corpus number was measured on E0c arm A (node ratio +0.083) and does NOT transfer to P0-B. See provenance.",
+  "provenance": {
+    "base": "P0-B, public 0.914, live kernel aryaarun07/biohub-p0b-clean-913-reverse-time v1, artifact sha256 4c285cae0c220a11b8ffdeeea1e02de86b5c1e7795daeb2bb27c073e1ab4ecec",
+    "mechanism": "scripts/win_bet/phaseb_node_budget.py, ported verbatim (weakest-whole-component-first, fork-containing components protected, keep_frac 0.975 inherited frozen from the arm-A corpus optimum -- NOT reselected here)",
+    "detector_and_reverse_time": "untouched; no threshold sweep, no blend re-weighting; the stage runs strictly after filter_output_graph and edits only the emitted graph",
+    "offline_parity": "the same stage at keep_frac 1.0 reproduces the live P0-B artifact byte-identically (sha256 4c285cae0c220a11...)",
+    "measured_effect_on_p0b": "exact patched scorer, four public placeholder crops, frozen keep_frac 0.975: composite 0.889225 -> 0.889214 (-0.0000103). Same measurement on E0c arm A over the same four movies: 0.749642 -> 0.755981 (+0.006339).",
+    "why_it_does_not_transfer": "P0-B under-predicts nodes (pooled ratio -0.1028 vs E0c +0.1269) and already runs filter_short_track_components, so its weakest surviving components are correct tracks: on the highest-edge-weight crop the stage destroys 5 counted edge TPs and removes 0 counted edge FPs.",
+    "removal": "delete the single `apply_node_budget(...)` line in edit 1 to obtain the unmodified P0-B base"
+  },
+  "edits": [
+    {
+      "kind": "insert_before",
+      "anchor": "DEEPCENTER_VETO_DETECTOR = load_deepcenter_veto_detector()",
+      "cell_match": "DEEPCENTER_VETO_DETECTOR = load_deepcenter_veto_detector()",
+      "code_file": "scripts/kaggle_edits/node_budget_stage.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "post-processing removed every node",
+      "old": "        if not nodes_by_id:\n            raise AssertionError(f\"{dataset}: post-processing removed every node\")\n",
+      "new": "        if not nodes_by_id:\n            raise AssertionError(f\"{dataset}: post-processing removed every node\")\n\n        # --- P1 node budget: one line; delete it to recover the P0-B base exactly ---\n        nodes_by_id, edges, _nb_stats = apply_node_budget(nodes_by_id, edges, NODE_BUDGET_KEEP_FRAC)\n        filter_stats.update(_nb_stats)\n        if not nodes_by_id:\n            raise AssertionError(f\"{dataset}: node budget removed every node\")\n        print(f\"[node_budget] {dataset}: nodes {_nb_stats['nb_nodes_before']} -> {len(nodes_by_id)}, \"\n              f\"edges {_nb_stats['nb_edges_before']} -> {len(edges)}, \"\n              f\"components dropped {_nb_stats['nb_components_dropped']}/{_nb_stats['nb_components']}, \"\n              f\"forks dropped {_nb_stats['nb_forks_dropped']}\")\n",
+      "expect": 1
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "live_p0b",
+  "slug": "biohub-p0b-clean-913-reverse-time",
+  "title": "Biohub P0B Clean 913 Reverse Time",
+  "code_file": "biohub-p0b-clean913-revtime.ipynb",
+  "out_dir": "notebooks/kaggle_p0b_clean913_revtime",
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "purpose": "Descriptor for the ALREADY-LIVE P0-B kernel (public 0.914, our deployment base). Use for status / log / fetch / audit / submitcmd ONLY. It carries no edits; running `build` would rewrite the live notebook in place and running `push` would burn a kernel version. Do not run build or push against this spec.",
+  "edits": []
+}
