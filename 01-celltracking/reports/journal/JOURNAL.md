@@ -1593,3 +1593,77 @@ private organizer clarification; score-probing is forbidden. Full plan:
   full-stealing candidates does not collapse retention -- the branch-A failure mode is less
   threatening here than feared, though `competing_parents==0` alone keeps only ~31%.
 - E0c unchanged as authoritative. Nothing promoted. No GPU spent. No submission consumed.
+
+### 2026-07-31 (STRUCTURAL CORRECTION — the min-fold gate is not the competition objective)
+
+Agent 5 challenged a premise I had supplied (that E0c and v122 rank oppositely public vs OOF).
+I verified independently by re-aggregating the 995 cached per-crop rows in
+`artifacts/kaggle/coupled_cache/scores/` through `tracking_cellmot.metrics.summarise`.
+**The agent is right and I was wrong.**
+
+| arm | pooled OOF | 44b6 | 6bba | min-fold | public |
+|---|---:|---:|---:|---:|---:|
+| A = E0c | 0.66539 | 0.75955 | 0.64895 | 0.64895 | 0.889 |
+| B | 0.66677 | 0.74835 | 0.65256 | 0.65256 | - |
+| Bp | 0.69162 | 0.72728 | 0.68538 | 0.68538 | - |
+| C | 0.69692 | 0.69139 | 0.69788 | 0.69139 | - |
+| D = v122 | **0.69909** | 0.69625 | 0.69966 | 0.69625 | **0.908** |
+
+**44b6 edge mass = 21,578; 6bba = 122,815 -> 44b6 is 14.94% of total.**
+
+- Pooled OOF ranks v122 above E0c by `+0.0337`. Public ranks v122 above E0c by `+0.019`.
+  **Same direction. There is no public/OOF rank reversal.**
+- The apparent reversal is an artifact of our own min-fold promotion gate, which weights the two
+  families 50/50 while the actual scorer weights them ~15/85 by edge volume
+  (`summarise` weights `adj_edge_jaccard` by `w = TP+FP+FN` per sample).
+- CONSEQUENCE, and it is serious: **the min-fold bilateral gate is not the competition's
+  objective function.** Arms C and Bp are `+0.0315` and `+0.0262` on pooled OOF versus E0c, yet
+  both FAIL the min-fold gate because they lose on 44b6 -- a family carrying 15% of the score
+  mass. v122, our best public score, is also our best pooled arm and would likewise have failed a
+  min-fold gate against E0c. We have been judging candidates by a criterion the leaderboard does
+  not use.
+- This does NOT make the min-fold gate worthless. It is a legitimate PRIVATE-ROBUSTNESS criterion
+  protecting against a private set with a different family mix. The error is that the project has
+  treated it as the PRIMARY promotion criterion rather than as a risk constraint reported
+  alongside the pooled score. Both numbers must be reported from now on.
+- Caveat that cuts the other way: E0c scores 0.889 public but 0.66539 pooled OOF, a +0.22 gap.
+  The OOF crop pool is therefore NOT representative of the test movies, which argues for weighting
+  wide-composition scenarios over the OOF-like one when choosing finalists.
+
+**Composition risk (20,000+ draws, exact scorer semantics):**
+P(public winner is also private winner) = 0.9365 exchangeable -> 0.671 under independent family
+composition -> 0.425 under independent family x density composition. Public rank is a weak private
+signal once composition is not held fixed.
+
+**Lower-tail:** v122 has the best mean AND best p5 in every scenario (uniform p5 0.68591;
+wide-composition p5 0.66731; adversarial min 0.66500).
+
+**Error covariance:** no low-correlation pair exists in the current candidate set -- all five arms
+share one detector and one transformer. Mass-weighted per-crop error correlation with v122:
+C 0.9995, Bp 0.987, E0c 0.959. At the SCORE level under composition uncertainty E0c is the only
+decorrelated challenger: corr 0.233 (family-uncertain), 0.224 (joint wide), **-0.154**
+(density-uncertain). C_survival is strictly dominated by v122 in all 20,000 draws and must never
+occupy a slot.
+
+**Recommended portfolio: v122 anchor + E0c challenger.** In the 37.1% of wide-joint draws where
+v122 is not the private winner, E0c recovers mean +0.0075, p95 +0.0396, max +0.0702. The flip axis
+is density, only partly the family label: density-low tercile v122 beats E0c by +0.081;
+density-high tercile E0c beats v122 by +0.029. (Not a router -- routing on family/crop identity
+remains forbidden.)
+
+**Spurious-pass probability, independently recomputed and WORSE than the earlier estimate:**
+SD of the 44b6 division-driven composite delta = **0.00952** (three methods agree: closed form,
+200k fixed-crop MC, crop-clustered bootstrap), i.e. **1.91x** the `+0.005` bar, not 1.72x.
+P(bilateral spurious pass) = 3.79% per trial; **17.6% at 5 trials** (not 12.7%), 32.1% at 10.
+Independence is optimistic -- at rho 0.25/0.50/0.75 the 5-trial figure rises to 25.6/33.8/42.6%.
+A `+0.005` bilateral gate on 44b6 is a **1.3-mother test on a 26-mother population**; it fires on
+two lucky mothers. For division-term candidates the bar should be `>=0.015` on 44b6 (~4 mothers,
+1.6 sigma) or a per-family division-count CI must be reported alongside. H0c itself sits at
+6.6 sigma / 13.7 sigma above the null, so H0c's risk is the zero-FP oracle conditioning, not
+sampling noise.
+
+**H0c is orthogonal to the edge-arm choice.** It leaves the edge term essentially untouched
+(delta adj `+0.00099 / -0.00055`) and should be applied ON TOP of whichever arm is selected rather
+than consuming a submission slot.
+
+New tools: `scripts/private_split_simulator.py`, `scripts/private_portfolio_risk.py`.
