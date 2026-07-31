@@ -68,8 +68,42 @@ Same mechanism applied to our own 0.908 baseline, detector/ILP/wrapper otherwise
 
 ## Status
 
-| candidate | built | audited | reproduced | submitted | public |
+| candidate | kernel | output sha256 | audit | submitted | public |
 |---|---|---|---|---|---|
-| P0-A | source pulled | **source PASS** | pending | no | — |
-| P0-B | pending | — | — | no | — |
-| P0-C | pending | — | — | no | — |
+| P0-A | `biohub-p0a-clean-913-repro` v1 | `8c1605b5944d25e4…` | **PASS 10/10** (re-verified independently) | **ref 55136759** | PENDING |
+| P0-B | `biohub-p0b-clean-913-reverse-time` v1 | `4c285cae0c220a11…` | **PASS** (re-verified independently) | **ref 55136908** | PENDING |
+| P0-C | `biohub-p0c-v122-revtime-run` v1 | `3370222f811fddc9…` | **FAIL** — 1 node out of volume | no | — |
+
+**Slots consumed this cycle: 2 of 3.** Slot 3 held.
+
+### P0-A result detail
+237,298 rows = 120,797 nodes + 116,501 edges, 4 datasets, 314 divisions, t 0–99,
+z 0–63, y 0–254, x 0–254. Kernel COMPLETE in 1522 s on T4x2. Pushed notebook asserted
+byte-identical to the audited public source at build time; upstream re-pulled first and had
+not drifted.
+
+### P0-B result detail
+Delta vs P0-A: nodes **+64** net (1,994 added / 1,930 removed after discounting 1,875 sub-2 µm
+coordinate-smoothing shifts), edges **+103** net, divisions **−9** (314→305), **749 parent
+reassignments** (0.66% of 112,993 targets with a parent in both arms). No harmonic fusion, no
+blend sweep.
+
+### P0-C — FAILS audit, withheld
+`44b6_0b24845f` node 15274, t=43, **z=64** (valid 0–63). This is a latent **v122** defect, not a
+property of reverse-time: v122 line-fit-smooths coordinates without clamping to the volume and
+already parks 369 nodes exactly on z=63. The agent correctly did **not** clamp or drop the node,
+which would have altered the pipeline mid-experiment. Delta vs v122 baseline: nodes +40, edges
++105, divisions **+10** (313→323), 850 parent reassignments.
+
+### Causal read across P0-B and P0-C
+Division counts move in **opposite directions** on the two bases — **−9** on the clean 0.913 base,
+**+10** on v122 — and under 1% of parent assignments move either way. The reverse-time mechanism's
+effect is **base-dependent**, so the public 0.912→0.914 claim does not transfer to our pipeline on
+structural evidence alone. That is precisely what the two submitted arms are measuring.
+
+### Licence status — UNRESOLVED
+Neither the API, the SDK response, nor the `.ipynb` metadata carries a licence field. Kaggle's
+notebook default is Apache 2.0; recorded as **UNVERIFIED-DEFAULT-APACHE-2.0**. The notebook
+self-declares attribution to `pilkwang/biohub-cell-tracking-two-seeds-logit-blend` and flags
+`metric_hack_used: false`, `public_output_used: false`. **A human should confirm on the notebook
+page in a browser.**

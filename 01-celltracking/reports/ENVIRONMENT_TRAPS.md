@@ -54,3 +54,48 @@ comments because they are properties of the *environment*, not of our code.
   cheap invariant (node/edge counts) against a known-good artifact after any replay.
 - **Score only over the intersection of crops present in every arm.** An arm with 199
   crops compared against an arm with 1 fabricates a promotion delta.
+
+## Kaggle submission and kernel defects (discovered 2026-07-31)
+
+**7. THIS COMPETITION ONLY ACCEPTS SUBMISSIONS FROM NOTEBOOKS.** A direct CSV upload uploads the
+whole file successfully and then fails on `CreateSubmission`:
+
+```
+400 {"error":{"code":400,"message":"Submission not allowed:  This competition only accepts
+Submissions from Notebooks.","status":"FAILED_PRECONDITION"}}
+```
+
+The CLI truncates this to a bare `400 Client Error`, so it looks like a transport failure. The
+working form requires a COMPLETED kernel:
+
+```powershell
+kaggle competitions submit -c biohub-cell-tracking-during-development `
+  -k <owner>/<kernel-slug> -v <version> -f submission.csv -m "<message>"
+```
+
+Consequence for planning: **every candidate must exist as a completed Kaggle kernel before it can
+score.** A locally-produced CSV can never be submitted, however well audited.
+
+**8. `kaggle kernels push` reads notebooks with the locale codec.** Dies on non-ASCII content with
+`'charmap' codec can't decode byte 0x9d`. Set `PYTHONUTF8=1` on every Kaggle CLI call.
+
+**9. A kernel created during an SSL-error window is permanently broken.** A push whose response was
+lost to `SSLEOFError` still created the kernel; that kernel then failed three consecutive runs with
+`/kaggle/input` entirely unmounted while the API reported its datasets correctly attached. An
+identical-metadata probe mounted fine, and the same notebook under a FRESH SLUG worked first time.
+Cost: three wasted GPU sessions. Rule: if `/kaggle/input` is empty, do not debug the notebook --
+re-create the kernel under a new slug.
+
+**10. Never parse kernel status by substring.** Matching `"ERROR"` in CLI output makes any transient
+`SSLError` look like a failed kernel. Use the typed
+`get_kernel_session_status(...).status.name`.
+
+**11. `kaggle kernels output` pulls the entire working directory** (168 files including weights) and
+times out. Fetch `submission.csv` by URL via `list_kernel_session_output`.
+
+**12. Kaggle slugifies the TITLE, not the id.** `"Biohub P0A Clean 913 Repro"` becomes
+`biohub-p0a-clean-913-repro`, silently diverging from whatever `id` is in `kernel-metadata.json`.
+Always read the slug back after a push.
+
+**13. Public scoring is slow.** Submissions can stay `PENDING` for hours. Do not poll; submit a
+coherent batch and check back later.
