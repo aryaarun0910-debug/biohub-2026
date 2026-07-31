@@ -47,6 +47,17 @@ import polars as pl  # noqa: E402
 
 from phaseb_d0p_proposer import CACHE, cached_crops  # noqa: E402
 
+# Arm -> graph-cache layout.  Corroborated independently by phaseb_h2a_hybrid_oracle.py,
+# which declares v122 graphs at artifacts/kaggle/coupled_cache/arms/D.
+COUPLED_ARMS = ROOT / "artifacts" / "kaggle" / "coupled_cache" / "arms"
+
+
+def arm_graph_path(arm: str, split, crop: str) -> Path:
+    """Resolve one crop's post-wrapper graph for `arm`.  Arm A is the canonical E0c cache."""
+    if arm == "A":
+        return CACHE / "graphs" / str(split) / f"{crop}.parquet"
+    return COUPLED_ARMS / arm / str(split) / f"{crop}.parquet"
+
 OUT = ROOT / "reports/inventory/node_budget_sweep.json"
 KEEP_FRACS = (1.00, 0.975, 0.95, 0.90, 0.85, 0.80)
 
@@ -81,9 +92,18 @@ def prune_one(args) -> dict:
     from biotrack.metric import estimated_nodes, score_pred_graph
     from biotrack.submission import submission_to_graphs
 
-    # arm A == the canonical E0c cache; other arms live in the coupled cache if materialised
-    gp = CACHE / "graphs" / str(split) / f"{crop}.parquet"
+    # arm A == the canonical E0c cache; other arms live in the coupled cache if materialised.
+    # 2026-07-31 DEFECT FIX: `arm` was unpacked above and then never used -- this line was
+    # hardcoded to CACHE, so `--arm D` scored ARM A while writing "arm": "D" into the output
+    # JSON. A silent wrong-arm result labelled as the right one. Resolve by arm, and fail
+    # LOUDLY on a missing arm cache rather than silently falling back to arm A.
+    gp = arm_graph_path(arm, split, crop)
     if not gp.exists():
+        if arm != "A" and not (COUPLED_ARMS / arm).is_dir():
+            raise FileNotFoundError(
+                f"arm {arm!r} has no materialised cache at {COUPLED_ARMS / arm}. "
+                f"Refusing to fall back to arm A -- that is the defect this check exists to stop."
+            )
         return {"split": split, "crop": crop, "skipped": True}
     df = pl.read_parquet(gp)
     nd = df.filter(pl.col("row_type") == "node").sort("node_id")

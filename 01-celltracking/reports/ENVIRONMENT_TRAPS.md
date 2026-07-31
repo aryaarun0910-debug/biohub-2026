@@ -99,3 +99,20 @@ Always read the slug back after a push.
 
 **13. Public scoring is slow.** Submissions can stay `PENDING` for hours. Do not poll; submit a
 coherent batch and check back later.
+
+## Silent wrong-arm scoring (discovered 2026-07-31)
+
+**14. `phaseb_node_budget.py` accepted `--arm` and ignored it.** `prune_one()` unpacked `arm` and
+never read it again; the graph path was hardcoded to the arm-A cache. Running `--arm D` therefore
+**scored arm A while writing `"arm": "D"` into the output JSON** — a wrong result labelled as the
+right one, with no error and no warning. Lane 2 caught it only by cross-checking `keep_frac=1.0`
+per-crop counters against the cached `coupled_cache/scores/D__<split>__<crop>.json` anchors.
+
+Fixed by `arm_graph_path()`, which resolves arm A to `e0c_cache/graphs/` and B/Bp/C/D to
+`coupled_cache/arms/<arm>/`, and **raises** on a missing arm cache instead of falling back.
+
+Generalisation worth internalising: **an argument that is accepted but unused is more dangerous
+than one that is rejected.** Before trusting any per-arm/per-fold/per-seed number, verify the
+selector actually changes the bytes read — cheapest check is that two settings produce different
+node counts. The parity habit that caught this (compare a no-op setting against a known-good
+cached anchor, per crop) is the general defence and costs seconds.
