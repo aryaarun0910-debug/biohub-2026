@@ -1,0 +1,50 @@
+{
+  "config": {
+    "parent_um": 15.0,
+    "sister_um": 15.0,
+    "rank": "flow_midpoint_residual",
+    "topk": 3,
+    "flow": "knn",
+    "knn_k": 16,
+    "knn_min": 4,
+    "suppress": "all_lowest_id",
+    "reconstruct": "add_replace"
+  },
+  "config_hash": "04eeac97500d",
+  "expected_rows": 14371002,
+  "total_rows": 14371002,
+  "row_parity": true,
+  "total_positives": 92,
+  "h0c_retained_expected": 92,
+  "table_dir": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\artifacts\\kaggle\\e0c_cache\\fork_candidates\\h0c_top3",
+  "rows": [
+    {
+      "family": "44b6",
+      "fold": 0,
+      "crops": 71,
+      "rows": 8284112,
+      "mothers": 2816276,
+      "reachable": 20,
+      "positives": 16,
+      "reliable_negatives": 54031,
+      "unlabeled": 8230065,
+      "metric_visible": 54059,
+      "steal_required": 8056328,
+      "cand_pre_topk": 64699626
+    },
+    {
+      "family": "6bba",
+      "fold": 1,
+      "crops": 128,
+      "rows": 6086890,
+      "mothers": 2141530,
+      "reachable": 93,
+      "positives": 76,
+      "reliable_negatives": 199319,
+      "unlabeled": 5887495,
+      "metric_visible": 199448,
+      "steal_required": 5898212,
+      "cand_pre_topk": 44145348
+    }
+  ]
+}

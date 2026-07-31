@@ -1448,3 +1448,43 @@ private organizer clarification; score-probing is forbidden. Full plan:
   independently over 14M pairs. Reverse-time, secondary-model and DeepCenter evidence enter as
   later ablations when available; V18 is still blocked at retrieval and H1 does not wait for it.
 - E0c unchanged as authoritative. Nothing promoted. No GPU spent. H1/H2/H3 not started.
+
+### 2026-07-31 (H1a canonical candidate census — parity OK; the label surface is very small)
+
+- Built the partitioned, provenance-preserving Parquet dataset over the frozen H0c top-3
+  shortlist (cfg hash `04eeac97500d`; surface immutable, nothing retuned). One file per
+  fold/crop under `artifacts/kaggle/e0c_cache/fork_candidates/h0c_top3/`. Reproduction:
+  `scripts/win_bet/phaseb_h1a_census.py --workers 6`.
+- PARITY, both checks exact:
+  * total rows **14,371,002 = expected 14,371,002** (OK);
+  * total positives **92 = H0c retained 92** (16 + 76) (OK) -- every H0c oracle-positive
+    candidate is reproduced in the table.
+- CENSUS:
+  * 44b6: rows 8,284,112 (pre-topK 64,699,626), mothers 2,816,276, 71 crops;
+    positives **16**, reliable negatives 54,031, unlabeled 8,230,065 (**99.35%**);
+    metric-visible **54,059 = 0.653%** of shortlist; positive base rate among visible
+    **0.000296** (~1 in 3,379); steals required 8,056,328; per-mother mean 2.94, max 3.
+  * 6bba: rows 6,086,890 (pre-topK 44,145,348), mothers 2,141,530, 128 crops;
+    positives **76**, reliable negatives 199,319, unlabeled 5,887,495 (**96.72%**);
+    metric-visible **199,448 = 3.277%** of shortlist; positive base rate among visible
+    **0.000381** (~1 in 2,624); steals required 5,898,212; per-mother mean 2.84, max 3.
+- THE METRIC-VISIBLE NUMBER OWED FROM H0c IS NOW MEASURED: 54,059 / 199,448 = 253,507 total,
+  i.e. only 1.76% of the 14.37M shortlist can ever contribute a division FP. The effective
+  discrimination problem is ~1 in 3,000 among metric-visible candidates, not 1 in 156,000
+  against the raw shortlist. That is the denominator H1 must be judged against.
+- THE BINDING CONSTRAINT IS NOW LABELS, NOT CANDIDATES. The entire supervised surface is
+  **92 positives and 253,350 reliable negatives**. In the leave-family-out direction that
+  trains on 44b6 there are only **16 positives**. The two directions are therefore severely
+  asymmetric (16 -> 6bba versus 76 -> 44b6) and the 44b6-trained direction should be expected
+  to be the weaker and noisier of the two. Any bilateral claim must survive the 16-positive
+  direction, which is the honest bottleneck for H1c.
+- This strongly favours the structured per-mother formulation already directed for H1b: a
+  choice among three ranked pairs plus explicit abstention needs far fewer parameters than a
+  flat 14.37M binary classifier, and the abstention class is where almost all the label mass
+  sits. It also argues for heavy regularisation and for reporting the ranking stage and the
+  gate stage separately, since the ranker can be trained on relative order within a mother's
+  choice set while the gate carries the scarce positive signal.
+- Sparse annotation confirmed: 96.7-99.4% of candidates are unlabeled. Training and primary
+  calibration use scorer-reliable labels only; unlabeled deployment behaviour is reported
+  separately, never folded in as negatives.
+- E0c unchanged as authoritative. Nothing promoted. No GPU spent. H1b/H1c not started.
