@@ -281,3 +281,53 @@ Not yet tried: a learned cross-fitted combination of these features (H1), which 
 single fixed ranker. Reverse-time association, secondary detection and DeepCenter remain
 unavailable locally; reverse-time needs the V18 source still blocked at retrieval (403 on
 version-pinned Kaggle pulls). H1/H2/H3 remain unstarted and no GPU has been spent.
+
+## H0c exact replay — PASSES all four gates (2026-07-31)
+
+Frozen cascade, config hash `04eeac97500d`, K and ranking inherited from H0b and not retuned:
+15/15 generation -> flow-midpoint top-3 per mother -> suppress-all -> oracle selection (ceiling
+only) -> add-replace -> exact patched scorer. Per-crop baseline scored alongside.
+
+| | 44b6 | 6bba |
+|---|---:|---:|
+| baseline composite | 0.7595 | 0.6490 |
+| H0c composite | **0.8221** | **0.7086** |
+| **delta** | **+0.0625** | **+0.0597** |
+| division | TP0/FP93/FN26 -> **TP16/FP0/FN10** | TP4/FP582/FN121 -> **TP76/FP0/FN49** |
+| divJ | 0.0000 -> 0.6154 | 0.0057 -> 0.6080 |
+| adjEdgeJ effect | +0.0010 | **-0.0006** |
+| retention | 16/20 = 80.0% | 76/93 = 81.7% |
+| shortlist | 8,284,112 | 6,086,890 |
+| node invariance | N_pred and node_recall identical every crop | same |
+
+Gates: delta >=+0.03 bilaterally PASS; retention >=60% bilaterally PASS; <=15M candidates PASS
+(14,371,002); no unexplained node damage PASS (invariance verified per crop, not assumed).
+
+**Edge-side cost is real and must not be glossed.** adjEdgeJ falls `-0.0006` on 6bba, and
+22/71 and 79/128 individual crops regress (worst `-0.0117` / `-0.0113`). Suppress-all deletes
+fork children and add-replace steals parents, trading a little edge quality for division credit.
+At the oracle point the trade is overwhelmingly favourable, but **the edge cost is unconditional
+while the division gain is conditional on correct fork selection** — a weak classifier keeps the
+cost and loses the gain. H1 must report exact composite, never the division term alone.
+
+## H1 — OPEN (next action)
+
+Not started. Requirements, in order:
+
+1. Persist the canonical candidate table over the frozen 14.37M top-3 shortlist with full
+   provenance (crop, frame, mother/daughter ids, config hash, proposal-source flags).
+2. Emit the **metric-visible (annotated-mother) subset size** of that shortlist — not yet
+   measured; H0b's 91,560 / 253,526 are for the un-ranked wide surface and are upper bounds.
+   This is the true precision denominator.
+3. Cheap deployment-observable features first: midpoint and parent-midpoint residuals, forward
+   association support, parent/daughter persistence, local density and track history,
+   physically scaled covariance/eigenstructure (voxel spacing 1.625/0.40625/0.40625),
+   fluorescence mass conservation, peak splitting.
+4. One cross-fitted L2 logistic or compact MLP, leave-family-out both directions, before any
+   3D CNN. Unlabeled candidates excluded from supervised loss, retained during exact replay.
+5. Encode expensive image features once per node/event and fuse cached embeddings per
+   candidate. Never run a 3D encoder over 14M pairs.
+
+Promotion: exact composite >=+0.005 bilaterally, or >=30% of the H0c upside. Only then is the
+five-frame multimodal critic or large pretraining authorised. Reverse-time, secondary-model and
+DeepCenter evidence are later ablations; V18 remains blocked at retrieval and H1 does not wait.

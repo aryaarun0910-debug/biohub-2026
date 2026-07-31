@@ -1398,3 +1398,53 @@ private organizer clarification; score-probing is forbidden. Full plan:
 - CONSEQUENCE: H0c cascade compression is viable — broad 15/15 geometry generation, cheap
   flow-midpoint rank pruning to top-K per mother, expensive critic on the shortlist only, graph
   conflict resolution last. E0c unchanged; nothing promoted; no GPU spent; H1/H2/H3 unstarted.
+
+### 2026-07-31 (H0c exact replay — PASSES all four gates; +0.0625 / +0.0597 on a bounded shortlist)
+
+- Ran the frozen cascade unchanged (config hash `04eeac97500d`): 15/15 outer generation ->
+  flow-midpoint top-3 per mother -> suppress-all (GT-free lowest-id retention) -> oracle
+  selection for ceiling only -> identical add-replace resolver -> exact patched scorer.
+  K and the ranking were inherited from H0b and NOT retuned. Reproduction:
+  `scripts/win_bet/phaseb_h0c_replay.py --workers 6`.
+- RESULT (per-crop baseline scored alongside, so nothing is assumed):
+  * 44b6 baseline 0.7595 -> H0c **0.8221**, delta **+0.0625** (vs E0c anchor +0.0626);
+    divJ 0.0000 -> 0.6154, TP0/FP93/FN26 -> **TP16/FP0/FN10**; adjEdgeJ +0.0010.
+  * 6bba baseline 0.6490 -> H0c **0.7086**, delta **+0.0597** (vs anchor +0.0596);
+    divJ 0.0057 -> 0.6080, TP4/FP582/FN121 -> **TP76/FP0/FN49**; adjEdgeJ **-0.0006**.
+  * retention 16/20 = 80.0% and 76/93 = 81.7%.
+  * shortlist 8,284,112 + 6,086,890 = **14,371,002** candidates, from 64.7M/44.1M pre-topK.
+    This reproduces the H0b projection exactly.
+  * steals only 11 / 50; mothers 2,816,276 / 2,141,530.
+  * **node invariance verified, not assumed: N_pred identical on every crop and node_recall
+    identical on every crop, both families.** Edits are edges-only, so the count multiplier is
+    untouched.
+- GATE: all four PASS.
+  1. exact oracle delta >=+0.03 bilaterally -> +0.0625 / +0.0597;
+  2. reachable retention >=60% bilaterally -> 80.0% / 81.7%;
+  3. <=15M candidates -> 14.37M;
+  4. no unexplained edge or node damage -> node metrics exactly invariant; edge effect is
+     +0.0010 on 44b6 and -0.0006 on 6bba, both explained below.
+- EDGE-SIDE HONESTY, the one result that is not clean. adjEdgeJ falls slightly on 6bba
+  (`-0.0006`) and 22/71 (44b6) and 79/128 (6bba) individual crops regress on adjEdgeJ, worst
+  cases `-0.0117` and `-0.0113`. Cause is mechanical and expected: suppress-all deletes fork
+  children and add-replace performs parent steals, so a small amount of edge quality is traded
+  for division credit. At the oracle operating point the trade is overwhelmingly favourable
+  (division contributes +0.0615 / +0.0603 against an edge cost of at most 0.0006), but it is a
+  real cost and it does not disappear when the classifier is imperfect.
+- THE RISK THIS CREATES FOR H1, stated now so it is not discovered late: the edge cost is
+  incurred by SUPPRESSION, which is unconditional, while the division gain is conditional on
+  correctly selecting forks. A real classifier reduces the gain but not the suppression cost.
+  After suppress-all, `J = k/(N_gt + m)` with `N_gt` = 26 / 125 fixed, so the break-even
+  condition is roughly `0.1 * k/(N_gt+m) > edge_cost`. With `edge_cost ~ 0.0006` on 6bba the
+  bar is low, but H1 must report the composite, not the division term alone.
+- NOT MEASURED YET: the metric-visible (annotated-mother) subset of the 14.37M top-3 shortlist.
+  H0b measured it for the un-ranked wide surface (91,560 / 253,526); the top-3 figure will be
+  smaller and is the true precision denominator for H1. H1 must emit it.
+- CONSEQUENCE: H1 opens. Cheap deployment-observable features first (midpoint and
+  parent-midpoint residuals, forward association support, parent/daughter persistence, local
+  density and track history, physically scaled covariance/eigenstructure, fluorescence mass
+  conservation, peak splitting), one cross-fitted L2 logistic or compact MLP before any 3D CNN.
+  Expensive image features must be encoded once per node/event and fused from cache, never run
+  independently over 14M pairs. Reverse-time, secondary-model and DeepCenter evidence enter as
+  later ablations when available; V18 is still blocked at retrieval and H1 does not wait for it.
+- E0c unchanged as authoritative. Nothing promoted. No GPU spent. H1/H2/H3 not started.
