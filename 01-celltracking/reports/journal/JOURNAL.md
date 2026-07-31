@@ -2863,3 +2863,68 @@ its gain is ~116% count multiplier, while P0-B's own in-kernel report cell decla
 `"metric_hack_used": false`.
 
 Artifact: `reports/inventory/p1_node_budget_p0b_substrate.json`.
+
+### 2026-07-31 (ASSOCIATION FN ATTRIBUTION — complete, exact, and NEGATIVE for deployment)
+
+**Basis: E0c substrate, 199 crops, exact pooled composite. NOT the P0-B base that scores 0.914.**
+Baseline pooled 0.6654043 (edge 0.6649200 + div 0.0004843); GT edges 128,883; TP 101,178 /
+FP 22,731 / **FN 27,705**. Parity against the agent5 ledger: **zero** mismatches on
+`edge_tp`/`edge_fn`/`gt_nodes_matched`/`num_pred_nodes`/`r_i`; closed form verified against the
+authoritative patched scorer on 10 crops (dNUM error 0.000e+00).
+
+| first-loss stage | count | share | pooled ceiling Δ | replay-only |
+|---|---:|---:|---:|---|
+| detector never found an endpoint | 12,135 | 43.80% | +0.00000 | no — needs a detector |
+| enumeration, relaxed-pass starved (6–10 µm) | 3,871 | 13.97% | **+0.04052** | yes |
+| short-component filter, GT match taken over | 2,922 | 10.55% | **+0.03210** | yes (edges-only) |
+| short-component filter, endpoint lost after a *correct* link | 2,389 | 8.62% | +0.00000 | no |
+| bipartite: both endpoints consumed | 1,400 | 5.05% | +0.01540 | yes |
+| bipartite: target took another parent | 1,293 | 4.67% | +0.01428 | yes |
+| short-component filter, no prior link | 1,179 | 4.26% | +0.00000 | no |
+| bipartite: source took another child (orphan) | 1,108 | 4.00% | +0.00899 | yes |
+| enumeration, beyond the 10 µm cap | 1,091 | 3.94% | +0.01114 | yes |
+| endpoint exists only as a gap-inserted node | 317 | 1.14% | +0.00327 | yes |
+| **total** | **27,705** | | | |
+
+All-recoverable 12,002 (**43.32%**, reproducing the known figure exactly) → **+0.13288 GT ORACLE**.
+
+**UNIT ECONOMICS (exact): one net-correct repair = 1.095e-05 pooled ⇒ +0.002 needs 183 net-correct
+repairs, +0.003 needs 274.** Use this instead of arguing about shares.
+
+**Three mechanisms, three verdicts.**
+- **Enumeration (4,962 edges, +0.052 ceiling) — CLOSED.** True pairs sit at 6.08–9.88 µm or beyond
+  10 µm; the only mechanism is widening, already falsified corpus-wide by branch A.
+- **Short-component filter (5,311 edges = 19.2% of ALL FN) — NEW, mechanism falsified.** After the
+  relink the only edge-removing stage is `filter_short_track_components` (corpus
+  `dropped_multi_parent_edges` = 0). It deletes 5,311 GT edges the relink had **already linked
+  correctly**. Count-multiplier cost of full retention is only −0.00605, so on paper retention nets
+  +0.0288 — **but branch A's exact control falsifies it**: with the filter off, edge TP *falls* and
+  adjJ drops 0.8821→0.8766 / 0.8068→0.7924, because re-added nodes steal bipartite matches. And the
+  edge-level signal is dead: deleted true edges are statistically **identical** to the average
+  selected relink edge (prob median 0.785 vs 0.786; raw_um median 2.30 vs 2.30).
+- **Bipartite competition (3,801 edges, +0.039 ceiling) — the only unfalsified lane, fails
+  cross-family.** Contested targets: relink is correct **87.51%** of the time. Inside `target_taken`
+  the transformer prefers the true parent in only **9.36%** of cases (raw separation 7.89%), far
+  below the ~50% break-even. LOFO: 44b6→6bba **+0.00099**, 6bba→44b6 **+0.00002** — a 50×
+  disagreement, and the 44b6 fit's in-sample net was +4 targets, i.e. noise. Orphan swap: blind
+  swapping is −0.01667; best in-sample rule +0.00059; LOFO −0.00019 / +0.00006. **Falsified.**
+
+**DECISION: integrate nothing; do not spend a slot on this.** Best cross-family value for any
+repair is +0.00006…+0.00099 against a +0.002 target. The two LOFO directions disagreeing by 50× is
+the exact signature that closed seven prior methods.
+
+**Next (cheap, gated):** component-level selective retention — the 5,311-edge bucket is the largest
+pipeline-caused loss whose *component*-level signal (length, node count, mean cost, degree profile,
+frame density) is still unmeasured, even though the edge-level one is dead. Gate hard: require a
+GT-free component score with leave-family-out sign stability **before** any replay, since blanket
+retention is already −0.0055/−0.0144. Second: re-run the attribution against
+`artifacts/kaggle/clean903_wrapper_oof_cache` (199 crops, same schema) to learn whether this loss
+profile transfers to the 0.913/0.914 substrate at all.
+
+**Could not be delivered:** reciprocal forward/reverse support — no reverse-time cache exists
+locally. Self-corrected defect: `det_never_detected` was tested before `final_both`, misfiling 317
+edges; corrected from stored per-row flags and the split reproduces 15,703 / 12,002 to the edge.
+
+Artifacts preserved outside the worktree at
+`..._RESEARCH/agent_runs/lane4_fn_attribution_2026-07-31/` (25 MB);
+ceilings copied to `reports/inventory/fn_attribution_ceilings.json`.
