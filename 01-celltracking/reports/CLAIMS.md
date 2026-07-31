@@ -1,6 +1,6 @@
 # Claims table (generated -- do not edit by hand)
 
-**Generated:** 2026-07-31 by `scripts/claims_table.py`
+**Generated:** 2026-08-01 by `scripts/claims_table.py`
 
 Every number below is read from an artifact at generation time. If an artifact moves or a
 path stops resolving, this file fails to build rather than asserting a stale value. Hand-
@@ -39,7 +39,17 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 | arm D node ratio @ 1.0 | `-0.1598` | `exact-pooled-OOF` | under-predicts; parity-exact against the published v122 anchor |
 | P0-B delta @ keep_frac 0.975 | `-0.0000103` | `placeholder-proxy` | proxy is BIASED IN FAVOUR of the mechanism and it still fails |
 | P0-B node ratio | `-0.10282` | `placeholder-proxy` |  |
-| E0c arm A delta @ keep_frac 0.975 (same 4 movies) | `+0.006339` | `placeholder-proxy` | the sign flips with the sign of the node ratio |
+| E0c arm A delta @ keep_frac 0.975 (same 4 movies) | `+0.006339` | `placeholder-proxy` | CORRECTED 2026-08-01: this is NOT explained by the node-ratio sign - see the q_net rows below |
+
+## Decision rule (corrected mechanism)
+
+| claim | value | basis | note |
+|---|---:|---|---|
+| E0c arm A q_net of deleted components | `-1.6667` | `placeholder-proxy` | d_tp -5 / d_fp +8 -> below the 0.3994 floor, so DELETING is correct there |
+| P0-B q_net of deleted components | `+1.0000` | `placeholder-proxy` | d_tp +5 / d_fp 0 -> above the floor, so deleting is WRONG; this is the real mechanism, not the node ratio (count cost is 0.1*tp/N_est, invariant to over/under-prediction) |
+| H0c oracle reproduced from the closed form | `+0.0601164` | `GT-oracle` | admitting all 92 census positives reproduces the reported +0.06012 - validates the kernel |
+| metric-visible reliable negatives | `253350` | `exact-pooled-OOF` | vs 14,117,560 unlabeled candidates of which only 65 are metric-visible - the precision denominator is the visible set, not the raw shortlist |
+| pi_vis measured (DO NOT DEPLOY) | `0.01763` | `exact-pooled-OOF` | MUST be pinned to 1.0 in any selector - fitting it is an annotation-coverage exploit |
 
 ## ssl x geometry gate (CLOSED)
 
@@ -73,4 +83,4 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 
 ---
 
-28 claims from 6 artifacts under `reports/inventory/`.
+33 claims from 8 artifacts under `reports/inventory/`.

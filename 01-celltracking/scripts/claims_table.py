@@ -90,7 +90,26 @@ CLAIMS: list[tuple] = [
     ("Node budget (CLOSED)", "E0c arm A delta @ keep_frac 0.975 (same 4 movies)",
      "p1_node_budget_p0b_substrate.json",
      "like_for_like_same_four_movies.e0c_armA.delta", "placeholder-proxy", "{:+.6f}",
-     "the sign flips with the sign of the node ratio"),
+     "CORRECTED 2026-08-01: this is NOT explained by the node-ratio sign - see the q_net rows below"),
+
+    # ---------------------------------------------- decision theory (mechanism, corrected)
+    ("Decision rule (corrected mechanism)", "E0c arm A q_net of deleted components",
+     "decision_node_budget_qnet.json", "totals.e0c_armA.q_net", "placeholder-proxy", "{:+.4f}",
+     "d_tp -5 / d_fp +8 -> below the 0.3994 floor, so DELETING is correct there"),
+    ("Decision rule (corrected mechanism)", "P0-B q_net of deleted components",
+     "decision_node_budget_qnet.json", "totals.p0b.q_net", "placeholder-proxy", "{:+.4f}",
+     "d_tp +5 / d_fp 0 -> above the floor, so deleting is WRONG; this is the real mechanism, "
+     "not the node ratio (count cost is 0.1*tp/N_est, invariant to over/under-prediction)"),
+    ("Decision rule (corrected mechanism)", "H0c oracle reproduced from the closed form",
+     "decision_div_threshold.json", "oracle_delta_vs_base", "GT-oracle", "{:+.7f}",
+     "admitting all 92 census positives reproduces the reported +0.06012 - validates the kernel"),
+    ("Decision rule (corrected mechanism)", "metric-visible reliable negatives",
+     "decision_div_threshold.json", "classes.reliable_negative.n", "exact-pooled-OOF", "{:.0f}",
+     "vs 14,117,560 unlabeled candidates of which only 65 are metric-visible - "
+     "the precision denominator is the visible set, not the raw shortlist"),
+    ("Decision rule (corrected mechanism)", "pi_vis measured (DO NOT DEPLOY)",
+     "decision_div_threshold.json", "pi_vis", "exact-pooled-OOF", "{:.5f}",
+     "MUST be pinned to 1.0 in any selector - fitting it is an annotation-coverage exploit"),
 
     # ---------------------------------------------------------------- ssl gate
     ("ssl x geometry gate (CLOSED)", "pooled delta",

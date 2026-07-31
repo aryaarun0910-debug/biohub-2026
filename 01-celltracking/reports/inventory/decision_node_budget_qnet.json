@@ -1,0 +1,114 @@
+{
+ "basis": "reports/inventory/p1_node_budget_p0b_substrate.json, four visible placeholder movies, exact patched scorer",
+ "rule": "DELETE is correct iff q_net = d_tp/(d_tp+d_fp) < Jbar/(1+Jbar) = 0.3994",
+ "crops": {
+  "44b6_0113de3b": {
+   "e0c_armA": {
+    "nodes_deleted": 687,
+    "d_tp": 0,
+    "d_fp": 0,
+    "a": 0,
+    "q_net": null,
+    "r_base": 0.06146,
+    "w_i": 0.993854,
+    "adjJ_delta": 0.0021820000000000173
+   },
+   "p0b": {
+    "nodes_deleted": 637,
+    "d_tp": 0,
+    "d_fp": 0,
+    "a": 0,
+    "q_net": null,
+    "r_base": -0.01526,
+    "w_i": 1.001526,
+    "adjJ_delta": 0.0022360000000000158
+   }
+  },
+  "44b6_0b24845f": {
+   "e0c_armA": {
+    "nodes_deleted": 1232,
+    "d_tp": 0,
+    "d_fp": 0,
+    "a": 0,
+    "q_net": null,
+    "r_base": 0.49581,
+    "w_i": 0.950419,
+    "adjJ_delta": 0.0032010000000000094
+   },
+   "p0b": {
+    "nodes_deleted": 486,
+    "d_tp": 0,
+    "d_fp": 0,
+    "a": 0,
+    "q_net": null,
+    "r_base": -0.40726,
+    "w_i": 1.040726,
+    "adjJ_delta": 0.001338999999999979
+   }
+  },
+  "6bba_05b6850b": {
+   "e0c_armA": {
+    "nodes_deleted": 161,
+    "d_tp": -3,
+    "d_fp": 6,
+    "a": 3,
+    "q_net": -1.0,
+    "r_base": -0.02326,
+    "w_i": 1.002326,
+    "adjJ_delta": 0.009463
+   },
+   "p0b": {
+    "nodes_deleted": 156,
+    "d_tp": 0,
+    "d_fp": 0,
+    "a": 0,
+    "q_net": null,
+    "r_base": -0.03427,
+    "w_i": 1.003427,
+    "adjJ_delta": 0.0023640000000000327
+   }
+  },
+  "6bba_05db0fb1": {
+   "e0c_armA": {
+    "nodes_deleted": 1738,
+    "d_tp": -2,
+    "d_fp": 2,
+    "a": 0,
+    "q_net": null,
+    "r_base": -0.00855,
+    "w_i": 1.000855,
+    "adjJ_delta": 0.0043680000000000385
+   },
+   "p0b": {
+    "nodes_deleted": 1748,
+    "d_tp": 5,
+    "d_fp": 0,
+    "a": 5,
+    "q_net": 1.0,
+    "r_base": 0.00166,
+    "w_i": 0.999834,
+    "adjJ_delta": -0.0017079999999999318
+   }
+  }
+ },
+ "totals": {
+  "e0c_armA": {
+   "n": 3818,
+   "d_tp": -5,
+   "d_fp": 8,
+   "q_net": -1.6666666666666667,
+   "verdict": "DELETE correct"
+  },
+  "p0b": {
+   "n": 3027,
+   "d_tp": 5,
+   "d_fp": 0,
+   "q_net": 1.0,
+   "verdict": "RETAIN correct"
+  }
+ },
+ "measured_composite_delta": {
+  "e0c_armA": 0.006339377372427513,
+  "p0b": -1.0272266292798982e-05
+ }
+}
