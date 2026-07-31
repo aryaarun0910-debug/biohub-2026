@@ -337,7 +337,8 @@ def edit_edges(edges, retained, suppress: bool, reconstruct: bool):
 
 # ---------------------------------------------------------------- per-crop worker
 def replay_one(args) -> dict:
-    surface, split, crop, allow_coll = args
+    surface, split, crop, allow_coll, arms = args
+    arms = tuple(arms)
     import sys as _sys
     _sys.path.insert(0, str(ROOT / "src"))
     import biotrack.wrapper as W
@@ -420,17 +421,20 @@ def replay_one(args) -> dict:
     # degenerate "everything that survived the pre-edit filter" guard: must be all nodes
     guard_full_is_identity = (k0 == all_nodes)
 
-    rows = {
-        "base": score(all_nodes, base_edge_set),
-        "h0c_post": score(all_nodes, es_h0c),
-        "h0c_refilt": score(k_h0c, e_h0c),
-        "h0c_refilt_guard": score(guard_keep, guard_edges),
-        "supp_post": score(all_nodes, es_sup),
-        "supp_refilt": score(k_sup, e_sup),
+    arm_graphs = {
+        "base": (all_nodes, base_edge_set),
+        "h0c_post": (all_nodes, es_h0c),
+        "h0c_refilt": (k_h0c, e_h0c),
+        "h0c_refilt_guard": (guard_keep, guard_edges),
+        "supp_post": (all_nodes, es_sup),
+        "supp_refilt": (k_sup, e_sup),
     }
+    rows = {a: score(*arm_graphs[a]) for a in arms}
+    # analytic node counts for EVERY arm, including unscored ones (the count multiplier is
+    # a pure function of N_pred and N_est, so it never needs a scorer pass)
+    n_pred_by_arm = {a: len(v[0]) for a, v in arm_graphs.items()}
 
     # ---- how many of the exempt components actually lost their exemption ----
-    _, outc_after = components_and_outdeg(all_nodes, es_h0c)
     exempt_lost_nodes = len(exempt_nodes - k_h0c)
     comps_pre, outc_pre = components_and_outdeg(all_nodes, base_edge_set)
     exempt_comps_lost = 0
@@ -469,7 +473,9 @@ def replay_one(args) -> dict:
            "pruned_isolated_supp": int(st_sup.get("pruned_isolated_nodes", 0)),
            "shorttrack_nodes_supp": int(st_sup.get("short_track_nodes_removed", 0)),
            "linefit_exposed_nodes": linefit_exposed,
+           "scored_arms": list(arms),
            "runtime_s": time.time() - t0}
+    out.update({f"npred__{a}": v for a, v in n_pred_by_arm.items()})
     keys = ("edge_tp", "edge_fp", "edge_fn", "division_tp", "division_fp", "division_fn",
             "node_recall", "num_pred_nodes")
     for arm, r in rows.items():
@@ -484,44 +490,57 @@ def aggregate(res: list[dict], surface: str, fold: int, fam: str) -> dict:
 
     keys = ("edge_tp", "edge_fp", "edge_fn", "division_tp", "division_fp", "division_fn",
             "num_pred_nodes")
-    per_arm_rows: dict[str, list[dict]] = {a: [] for a in ARMS}
+    scored = [a for a in ARMS if a in set(res[0]["scored_arms"])]
+    per_arm_rows: dict[str, list[dict]] = {a: [] for a in scored}
     n_est_by_crop = {}
     for r in res:
         ne = estimated_nodes(str(ROOT / "data" / "train" / f"{r['crop']}.geff"))
         n_est_by_crop[r["crop"]] = ne
-        for a in ARMS:
+        for a in scored:
             per_arm_rows[a].append(per_sample_metrics(
                 EvaluationResult(*[r[f"{a}__{k}"] for k in keys]), ne, r[f"{a}__node_recall"]))
 
-    summ = {a: summarise(per_arm_rows[a]) for a in ARMS}
+    summ = {a: summarise(per_arm_rows[a]) for a in scored}
 
     def mult(row):  # count multiplier = 1 - 0.1 * (N_pred - N_est)/N_est
         return 1.0 - 0.1 * row["total_node_ratio"]
 
-    w = [r["edge_tp"] + r["edge_fp"] + r["edge_fn"] for r in per_arm_rows["base"]]
+    # analytic multiplier for EVERY arm (scored or not): pure function of N_pred and N_est
+    ne_list = [n_est_by_crop[r["crop"]] for r in res]
+    mult_analytic = {a: [1.0 - 0.1 * (r[f"npred__{a}"] - ne) / ne
+                         for r, ne in zip(res, ne_list)] for a in ARMS}
+
+    if scored:
+        w = [r["edge_tp"] + r["edge_fp"] + r["edge_fn"] for r in per_arm_rows[scored[0]]]
+    else:  # no scorer pass: weight by cached edge count, the best available proxy
+        w = [r["n_edges_cached"] for r in res]
     tw = float(sum(w)) or 1.0
 
     def wmean(vals):
         return float(sum(wi * v for wi, v in zip(w, vals)) / tw)
 
     mult_stats = {}
-    base_rows = per_arm_rows["base"]
     for a in ARMS:
-        rows_a = per_arm_rows[a]
-        m_b = [mult(r) for r in base_rows]
-        m_a = [mult(r) for r in rows_a]
-        j_b = [r["edge_jaccard"] for r in base_rows]
-        j_a = [r["edge_jaccard"] for r in rows_a]
+        m_b, m_a = mult_analytic["base"], mult_analytic[a]
         mult_stats[a] = {
             "mult_w": wmean(m_a),
             "d_mult_w": wmean([x - y for x, y in zip(m_a, m_b)]),
-            "n_pred_total": int(sum(r["num_pred_nodes"] for r in rows_a)),
-            # first-order decomposition of d(adjJ) = d(J)*mult_b + J_b*d(mult) + cross
-            "term_rawJ": wmean([(x - y) * mb for x, y, mb in zip(j_a, j_b, m_b)]),
-            "term_mult": wmean([jb * (x - y) for jb, x, y in zip(j_b, m_a, m_b)]),
-            "term_cross": wmean([(ja - jb) * (ma - mb)
-                                 for ja, jb, ma, mb in zip(j_a, j_b, m_a, m_b)]),
+            "n_pred_total": int(sum(r[f"npred__{a}"] for r in res)),
+            "scored": a in scored,
         }
+        if a in scored and "base" in scored:
+            base_rows, rows_a = per_arm_rows["base"], per_arm_rows[a]
+            mb = [mult(r) for r in base_rows]
+            ma = [mult(r) for r in rows_a]
+            j_b = [r["edge_jaccard"] for r in base_rows]
+            j_a = [r["edge_jaccard"] for r in rows_a]
+            # first-order decomposition of d(adjJ) = d(J)*mult_b + J_b*d(mult) + cross
+            mult_stats[a].update({
+                "term_rawJ": wmean([(x - y) * m for x, y, m in zip(j_a, j_b, mb)]),
+                "term_mult": wmean([jb * (x - y) for jb, x, y in zip(j_b, ma, mb)]),
+                "term_cross": wmean([(ja - jb) * (x - y)
+                                     for ja, jb, x, y in zip(j_a, j_b, ma, mb)]),
+            })
 
     agg = {k: int(sum(r[k] for r in res)) for k in (
         "n_nodes_cached", "n_edges_cached", "n_gt_div", "reachable", "retained",
@@ -538,7 +557,7 @@ def aggregate(res: list[dict], surface: str, fold: int, fam: str) -> dict:
     agg["est_nodes_total"] = float(sum(n_est_by_crop.values()))
 
     return {"surface": surface, "fold": fold, "family": fam,
-            "summary": {a: summ[a] for a in ARMS},
+            "summary": {a: summ[a] for a in scored},
             "mult": mult_stats, "agg": agg,
             "n_est_total": agg["est_nodes_total"]}
 
@@ -570,21 +589,29 @@ def report(block: dict) -> None:
           f"{a['linefit_exposed_nodes']:,}")
     print(f"  {'arm':<18}{'composite':>10}{'delta':>9}{'adjEdgeJ':>10}{'rawJ':>8}"
           f"{'divJ':>8}{'mult':>8}{'dmult':>9}{'N_pred':>11}{'dNodes':>9}")
-    b = s["base"]["score"]
+    b = s["base"]["score"] if "base" in s else float("nan")
     for arm in ARMS:
-        r, mm = s[arm], m[arm]
-        print(f"  {arm:<18}{r['score']:>10.4f}{r['score']-b:>+9.4f}"
-              f"{r['adj_edge_jaccard']:>10.4f}{r['edge_jaccard']:>8.4f}"
-              f"{r['division_jaccard']:>8.4f}{mm['mult_w']:>8.4f}{mm['d_mult_w']:>+9.5f}"
-              f"{mm['n_pred_total']:>11,}"
-              f"{mm['n_pred_total']-m['base']['n_pred_total']:>+9,}")
+        mm = m[arm]
+        if arm in s:
+            r = s[arm]
+            print(f"  {arm:<18}{r['score']:>10.4f}{r['score']-b:>+9.4f}"
+                  f"{r['adj_edge_jaccard']:>10.4f}{r['edge_jaccard']:>8.4f}"
+                  f"{r['division_jaccard']:>8.4f}{mm['mult_w']:>8.4f}{mm['d_mult_w']:>+9.5f}"
+                  f"{mm['n_pred_total']:>11,}"
+                  f"{mm['n_pred_total']-m['base']['n_pred_total']:>+9,}")
+        else:
+            print(f"  {arm:<18}{'(not scored)':>10}{'':>9}{'':>10}{'':>8}{'':>8}"
+                  f"{mm['mult_w']:>8.4f}{mm['d_mult_w']:>+9.5f}{mm['n_pred_total']:>11,}"
+                  f"{mm['n_pred_total']-m['base']['n_pred_total']:>+9,}")
     for arm in ("h0c_post", "h0c_refilt", "h0c_refilt_guard"):
         mm = m[arm]
-        print(f"    {arm}: d(adjJ) decomposition  rawJ={mm['term_rawJ']:+.5f} "
-              f"mult={mm['term_mult']:+.5f} cross={mm['term_cross']:+.5f}")
+        if "term_rawJ" in mm:
+            print(f"    {arm}: d(adjJ) decomposition  rawJ={mm['term_rawJ']:+.5f} "
+                  f"mult={mm['term_mult']:+.5f} cross={mm['term_cross']:+.5f}")
     for arm in ARMS:
-        r = s[arm]
-        print(f"    {arm}: div TP{r['division_tp']}/FP{r['division_fp']}/FN{r['division_fn']}")
+        if arm in s:
+            r = s[arm]
+            print(f"    {arm}: div TP{r['division_tp']}/FP{r['division_fp']}/FN{r['division_fn']}")
 
 
 def main() -> None:
@@ -593,6 +620,10 @@ def main() -> None:
     ap.add_argument("--surfaces", default="e0c")
     ap.add_argument("--folds", default="0,1")
     ap.add_argument("--limit", type=int, default=0, help="first N crops per fold (smoke)")
+    ap.add_argument("--arms", default=",".join(ARMS),
+                    help="comma-separated arms to SCORE; pass '' for structure-only (no "
+                         "scorer pass at all -- node counts and the count multiplier are "
+                         "still exact because they are analytic)")
     ap.add_argument("--allow-gt-collisions", action="store_true")
     ap.add_argument("--out", default=str(DEFAULT_OUT))
     ap.add_argument("--per-crop", default="", help="optional parquet path for per-crop rows")
@@ -600,12 +631,16 @@ def main() -> None:
 
     surfaces = [s.strip() for s in args.surfaces.split(",") if s.strip()]
     folds = [int(f) for f in args.folds.split(",") if f.strip()]
+    arms = tuple(a.strip() for a in args.arms.split(",") if a.strip())
     for s in surfaces:
         if s not in SURFACES:
             raise SystemExit(f"unknown surface {s}; known: {sorted(SURFACES)}")
+    for a in arms:
+        if a not in ARMS:
+            raise SystemExit(f"unknown arm {a}; known: {ARMS}")
 
-    print(f"H0d live-filter replay | frozen proposer cfg {CFG_HASH}: {CFG}")
-    print(f"surfaces={surfaces} folds={folds}")
+    print(f"H0d live-filter replay | frozen proposer cfg {CFG_HASH}: {CFG}", flush=True)
+    print(f"surfaces={surfaces} folds={folds} scored_arms={arms}", flush=True)
 
     blocks, all_rows = [], []
     for surface in surfaces:
@@ -617,14 +652,14 @@ def main() -> None:
             if not crops:
                 print(f"  [skip] {surface} fold {fold}: no crops")
                 continue
-            tasks = [(surface, fold, c, args.allow_gt_collisions) for c in crops]
+            tasks = [(surface, fold, c, args.allow_gt_collisions, arms) for c in crops]
             t0 = time.time()
             with ProcessPoolExecutor(max_workers=args.workers) as ex:
                 res = list(ex.map(replay_one, tasks))
             blk = aggregate(res, surface, fold, fam)
             blk["wall_s"] = time.time() - t0
             report(blk)
-            print(f"  wall={blk['wall_s']:.0f}s")
+            print(f"  wall={blk['wall_s']:.0f}s", flush=True)
             blocks.append(blk)
             all_rows.extend(res)
 

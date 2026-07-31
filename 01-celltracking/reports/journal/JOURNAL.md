@@ -1667,3 +1667,91 @@ sampling noise.
 than consuming a submission slot.
 
 New tools: `scripts/private_split_simulator.py`, `scripts/private_portfolio_risk.py`.
+
+### 2026-07-31 (H1-I appearance result + CORRECTION: my AUC had a tie-handling bug)
+
+**CORRECTION 3 — my H1-G AUC table was wrong for tied features.** Agent 3 could not reproduce
+my `competing_parents` number, which exposed the cause: my AUC used ordinal ranks
+(`np.argsort(np.argsort(a))`) with NO midrank tie correction. For continuous features this is
+harmless -- `daughter_angle` and `flow_midpoint_residual` reproduce to 4 dp. For 2-3 valued
+integer features it is badly wrong.
+
+| feature | uniq | reported (wrong) | CORRECT (midrank) |
+|---|---|---|---|
+| competing_parents | 3 | 0.0271 / 0.1130 | **0.3164 / 0.3141** |
+| n_persist | 3 | 0.1747 / 0.7549 | **0.5282 / 0.5019** |
+| rank | 3 | 0.0853 / 0.2748 | 0.2137 / 0.3060 |
+| persist_d1 | 2 | 0.0930 / 0.7705 | 0.5161 / 0.4962 |
+| persist_d2 | 2 | 0.1529 / 0.7717 | 0.5158 / 0.5100 |
+| daughter_angle | 53733 | 0.2303 / 0.3587 | 0.2303 / 0.3587 (unchanged) |
+| flow_midpoint_residual | 53741 | 0.1926 / 0.2685 | unchanged |
+
+Agent 3's independent value (0.3164 / 0.3157) matches the corrected figure, confirming the fix.
+
+Two headline claims I made are therefore withdrawn:
+1. **"`competing_parents` is the strongest bilateral separator by a wide margin"** -- FALSE. At
+   0.3164/0.3141 it is a real but ordinary separator, weaker than `flow_midpoint_residual`
+   (0.1926/0.2685) and `resid_ratio`. The strongest geometric separators are the continuous ones,
+   which were never affected by the bug.
+2. **"`n_persist` REVERSES SIGN between families (0.1747 vs 0.7549)"** -- FALSE, and the
+   correction changes the conclusion rather than softening it. True value 0.5282 / 0.5019:
+   persistence into `t+2` carries **essentially no discriminative signal in either family**. The
+   public "persistence-confirmed divisions" heuristic is therefore not family-specific as I
+   reported; on our metric-visible subset it is simply not discriminative. Same practical
+   verdict, different and correct reason.
+
+**H1-I RESULT — appearance beats geometry, sign-consistently.**
+Coverage: 97/199 crops but **all 92 positives**, plus 65% / 47% of reliable negatives
+(128,031 of 253,442 labelled metric-visible rows). Pipeline calibrated against our frozen
+geometry (`daughter_angle` 0.2315/0.3594 vs 0.2303/0.3587).
+
+| feature | src | 44b6 | 6bba | min_sep |
+|---|---|---|---|---|
+| **m_massratio_p1** | IMAGE | 0.1758 | 0.1978 | **0.3022** |
+| G_resid_ratio | GEOM | 0.1732 | 0.2537 | 0.2463 |
+| G_flow_midpoint_residual | GEOM | 0.1904 | 0.2577 | 0.2423 |
+| m_saddle_p1 | IMAGE | 0.2004 | 0.2610 | 0.2390 |
+| m_massratio_p2 | IMAGE | 0.1637 | 0.2660 | 0.2340 |
+
+`m_massratio_p1` -- the mother's background-normalised core mass at `t+1` over that at `t` -- is
+the strongest single separator measured so far. All 16 image features reaching the top 24 are
+sign-consistent. The winners tell one coherent biological story measured four ways: at `t+1` the
+mother's site loses mass, becomes a saddle, spreads, and its intensity centroid displaces. They
+are correlated, not four independent bits.
+
+**The dimensionless hypothesis is REINSTATED for intensity features specifically.** I withdrew it
+on geometry evidence (where sign flips split evenly between dimensionless and dimensional). For
+appearance the split is clean: every flipped feature is raw-scale (`m_massn` 0.4536/0.5983,
+`d_mass_mean` 0.3741/0.5103), every ratio feature transfers. Correct statement: self-normalisation
+is load-bearing for INTENSITY features; it is not a general law about geometry.
+
+**Precision vs break-even (leave-one-family-out, capacity-compliant 1-2 features):**
+
+| arm | 44b6 | 6bba |
+|---|---|---|
+| geometry alone | 0.00-0.61% | 0.50% |
+| image alone | 0.61% | 1.64% |
+| geometry + image | **1.82%** | **1.64%** |
+| break-even | 4.07% | 6.38% |
+
+Shortfall narrows from `5.9x / 12.8x` to **`~2.2x / 3.9x`**. Still a bilateral FAIL.
+
+**Agent 3 flagged a temptation and I am honouring it:** at 6-10 features the point estimates DO
+cross break-even on both families (n_feats=10: 44b6 42.5%, 6bba 13.1%). That must NOT be funded --
+it rests on 3-4 events, is erratic and non-monotone across `n_feats`, and violates the
+10-events-per-variable limit outright. It is threshold-and-hyperparameter mining on a handful of
+events.
+
+Caveat: 6bba's negatives come only from positive-bearing crops; on 44b6 (where both crop types are
+sampled) the FP rate differs 0.55x-2.3x by crop type, so 6bba precision could be off ~2x either
+way. 44b6's negative sample is sound.
+
+**Runtime:** 1.31 ms/node measured uncontended; ~2.2 h single-core for all 5.1M nodes, ~45-70 min
+on 2-4 workers. Optimisation from a naive 567 s/crop (31 h) to 68 s/crop via a radius-sorted
+sphere kernel with edge-padded frames and moments to order 4 from a single BLAS gemm. Parallelism
+scales poorly -- zarr blosc decompression dominates.
+
+**Verdict: CONTINUE.** Appearance is the right residual and the mechanism is biologically legible
+rather than a fitted artifact, but on a 92-positive label budget it does not reach deployability.
+The binding constraint remains labels, not features -- which is precisely what H1-T (external
+pretraining) exists to attack.

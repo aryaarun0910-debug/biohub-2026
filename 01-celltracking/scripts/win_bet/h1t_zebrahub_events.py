@@ -420,6 +420,8 @@ def main() -> None:
     ap.add_argument("--build", action="store_true")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--embryos", type=str, default=",".join(EMBRYOS))
+    ap.add_argument("--window", type=int, default=WINDOW)
+    ap.add_argument("--windows", type=int, default=STRIDE_WINDOWS)
     a = ap.parse_args()
 
     if a.prep:
@@ -436,10 +438,10 @@ def main() -> None:
     for e in a.embryos.split(","):
         tmax = int(pl.scan_parquet(PREP / f"{e}.parquet").select(pl.col("t").max()).collect()[0, 0])
         # windows spread across the movie, avoiding the first/last 10%
-        lo, hi = int(0.10 * tmax), int(0.90 * tmax) - WINDOW
-        for k in range(STRIDE_WINDOWS):
-            t0 = lo + int(k * (hi - lo) / max(STRIDE_WINDOWS - 1, 1))
-            tasks.append((e, t0, t0 + WINDOW))
+        lo, hi = int(0.10 * tmax), int(0.90 * tmax) - a.window
+        for k in range(a.windows):
+            t0 = lo + int(k * (hi - lo) / max(a.windows - 1, 1))
+            tasks.append((e, t0, t0 + a.window))
     print(f"  {len(tasks)} shards: {tasks}")
 
     with ProcessPoolExecutor(max_workers=a.workers) as ex:

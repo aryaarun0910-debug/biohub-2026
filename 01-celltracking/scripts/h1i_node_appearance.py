@@ -231,7 +231,16 @@ def extract_crop(crop: str, fold: int, root: Path, out_path: Path,
             if 0 <= f < T:
                 need.setdefault(f, []).append((dt, idxs))
 
-    out_chunks = []
+    # accumulate into flat numpy buffers; one DataFrame is built at the end
+    # (building a DataFrame per (frame, dt) group costs more than the maths)
+    n_out = sum(idxs.size for f in need for _, idxs in need[f])
+    cols = {k: np.empty(n_out, dtype=np.float32) for k in FEATURE_COLS}
+    col_node = np.empty(n_out, dtype=np.int64)
+    col_dt = np.empty(n_out, dtype=np.int8)
+    col_frame = np.empty(n_out, dtype=np.int16)
+    col_inside = np.empty(n_out, dtype=bool)
+    w_ptr = 0
+
     n_gathered = 0
     t_read = 0.0
     for f in sorted(need):
@@ -243,24 +252,25 @@ def extract_crop(crop: str, fold: int, root: Path, out_path: Path,
         hi = float(np.percentile(sub, 99.5))
         padded = np.pad(frame, ((HZ, HZ), (HY, HY), (HX, HX)), mode="edge").ravel()
         for dt, sel in need[f]:
-            feats = {k: np.empty(sel.size, dtype=np.float32)
-                     for k in FEATURE_COLS if k not in ("bg", "hi")}
+            lo = w_ptr
             for s0 in range(0, sel.size, block):
                 bidx = sel[s0:s0 + block]
                 box = padded[base[bidx][:, None] + off_flat[None, :]]
                 n_gathered += box.size
+                a, b = lo + s0, lo + s0 + bidx.size
                 for k, v in _node_features(box, bg).items():
-                    feats[k][s0:s0 + bidx.size] = v
-            df = pd.DataFrame(feats)
-            df.insert(0, "node_id", nid[sel])
-            df.insert(1, "dt", np.int8(dt))
-            df.insert(2, "frame", np.int16(f))
-            df["inside"] = inside[sel]
-            df["bg"] = np.float32(bg)
-            df["hi"] = np.float32(hi)
-            out_chunks.append(df)
+                    cols[k][a:b] = v
+            hi_ = lo + sel.size
+            col_node[lo:hi_] = nid[sel]
+            col_dt[lo:hi_] = dt
+            col_frame[lo:hi_] = f
+            col_inside[lo:hi_] = inside[sel]
+            cols["bg"][lo:hi_] = bg
+            cols["hi"][lo:hi_] = hi
+            w_ptr = hi_
 
-    res = pd.concat(out_chunks, ignore_index=True)
+    res = pd.DataFrame({"node_id": col_node, "dt": col_dt, "frame": col_frame,
+                        **cols, "inside": col_inside})
     res["crop"] = crop
     res["fold"] = np.int8(fold)
     out_path.parent.mkdir(parents=True, exist_ok=True)
