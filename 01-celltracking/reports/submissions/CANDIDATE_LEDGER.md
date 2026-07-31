@@ -70,11 +70,13 @@ Same mechanism applied to our own 0.908 baseline, detector/ILP/wrapper otherwise
 
 | candidate | kernel | output sha256 | audit | submitted | public |
 |---|---|---|---|---|---|
-| P0-A | `biohub-p0a-clean-913-repro` v1 | `8c1605b5944d25e4…` | **PASS 10/10** (re-verified independently) | **ref 55136759** | PENDING |
-| P0-B | `biohub-p0b-clean-913-reverse-time` v1 | `4c285cae0c220a11…` | **PASS** (re-verified independently) | **ref 55136908** | PENDING |
+| P0-A | `biohub-p0a-clean-913-repro` v1 | `8c1605b5944d25e4…` | **PASS 10/10** (re-verified independently) | **ref 55136759** | **0.913** |
+| P0-B | `biohub-p0b-clean-913-reverse-time` v1 | `4c285cae0c220a11…` | **PASS** (re-verified independently) | **ref 55136908** | **0.914 — NEW BEST** |
 | P0-C | `biohub-p0c-v122-revtime-run` v1 | `3370222f811fddc9…` | **FAIL** — 1 node out of volume | no | — |
 
 **Slots consumed this cycle: 2 of 3.** Slot 3 held.
+
+**RESULT: P0-A reproduced 0.913 exactly; P0-B reached 0.914, our best public score (previous 0.908).** P0-B minus P0-A is +0.001 = exactly one unit of LB resolution, so the reverse-time mechanism is positive-but-unresolved, not established. Deployment base moves to P0-B.
 
 ### P0-A result detail
 237,298 rows = 120,797 nodes + 116,501 edges, 4 datasets, 314 divisions, t 0–99,

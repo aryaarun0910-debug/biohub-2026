@@ -2664,3 +2664,42 @@ is still an oracle.
 
 **The temporal-snap figure (+0.00369) was computed on the same in-family basis that inflated
 H1-M ~30x and must be re-derived cross-family before it is quoted again.**
+
+### 2026-07-31 (SCORES LANDED — P0-A 0.913 exact, P0-B 0.914, new best public)
+
+| ref | candidate | out sha256 | public |
+|---|---|---|---:|
+| 55136908 | P0-B clean base + source-locked reverse-time w=0.20 | `4c285cae0c220a11` | **0.914** |
+| 55136759 | P0-A exact clean 0.913 reproduction | `8c1605b5944d25e4` | **0.913** |
+| 54854143 | v122 (previous best) | - | 0.908 |
+
+**MILESTONE MET: the 0.913-0.914 platform is confirmed on our own account**, +0.006 over our
+previous best. P0-A reproduces the public notebook's advertised 0.913 EXACTLY, which validates the
+whole reproduction chain end to end -- source audit, byte-identical push, kernel execution,
+structural audit, and the notebook-only submission path.
+
+**P0-B minus P0-A = +0.001, which is EXACTLY ONE UNIT OF LEADERBOARD RESOLUTION.** Agent 1
+pre-registered the read before the scores existed: the LB reports 3 dp, and the two arms differ by
+nodes +64 / edges +103 / divisions -9 out of 120,797 nodes -- a ~0.05% perturbation. A delta of
+one LSB is **positive but at the resolution floor**: a single measurement cannot distinguish a
+real `+0.001` from rounding across the 3-dp boundary.
+
+Per the standing rule ("if P0-B improves, reverse-time joins the base; if not, the global blend
+closes and conditional disagreement survives"), this outcome is genuinely ambiguous and must not
+be over-read in either direction. What IS established:
+- reverse-time at w=0.20 is **not harmful** on a clean base (the structural evidence had it moving
+  divisions -9 on this base and +10 on v122, so harm was a live possibility);
+- it is **not established as beneficial** either -- +0.001 is one quantum.
+The honest position: adopt P0-B as the deployment base because it is >= P0-A on the only
+measurement we have and carries no measured downside, while recording that the mechanism's value
+is unresolved at this resolution.
+
+**DEPLOYMENT STATE UPDATED.** New platform: **P0-B at 0.914**. Distances to the milestones --
+0.920 exit-the-plateau needs +0.006; 0.925 next-cycle target needs +0.011; 0.935 podium needs
++0.021; 0.942 winning needs +0.028.
+
+Sobering context from this cycle's corrections: the only two DEPLOYABLE, CORPUS-VERIFIED
+mechanisms we hold are node budget at **+0.00157** and the ssl x geometry veto at **+0.00141**.
+Together, if independent and if they transfer to this substrate (neither is established), they are
+~+0.003 -- half of what 0.920 alone requires. Everything larger in the programme is still a GT
+oracle. Slot 3 remains held.
