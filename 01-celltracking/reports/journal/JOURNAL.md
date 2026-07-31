@@ -1822,3 +1822,80 @@ swept agent-authored scripts into the tree that I had not read. Committing unrev
 exactly the discipline this project otherwise enforces. The files are inert (nothing imports them
 from the deployed path) but they must be reviewed or removed before anything depends on them.
 Stop using `git add -A` with agents running; stage explicit paths only.
+
+### 2026-07-31 (H0d live-filter + portability -- the node-invariance error runs the FAVOURABLE way)
+
+**TASK 1 -- corrected H0c under the real wrapper. My flagged risk was wrong in sign.**
+`scripts/win_bet/phaseb_h0d_livefilter.py` replays the frozen cascade then re-runs the real
+`wrapper.filter_short_track_components` and the `OUTPUT_PRUNE_ISOLATED` block. `shortlist`/`CFG`
+imported verbatim from `phaseb_h0c_replay` (hash `04eeac97500d`); nothing retuned.
+
+| arm (E0c) | 44b6 | delta | 6bba | delta |
+|---|---:|---:|---:|---:|
+| baseline | 0.7595 | - | 0.6490 | - |
+| h0c, no re-filter (published) | 0.8221 | +0.0625 | 0.7086 | +0.0597 |
+| **h0c, real live filter** | **0.8237** | **+0.0641** | **0.7135** | **+0.0646** |
+| h0c + retention guard | 0.8237 | +0.0641 | 0.7134 | +0.0645 |
+| suppress-only, no re-filter | 0.7595 | -0.0001 | 0.6470 | -0.0020 |
+| **suppress-only, live filter** | 0.7611 | **+0.0015** | 0.6518 | **+0.0029** |
+
+- Node deletions 14,395 / 12,844; suppression alone 14,378 / 12,780 -- exactly my estimate.
+  Count multiplier +0.00056 / +0.00068, also as estimated.
+- **CORRECTION TO MY OWN RISK CLAIM.** I wrote that suppression's edge cost is UNCONDITIONAL
+  while the division gain is CONDITIONAL, so "a weak classifier keeps the cost and loses the
+  gain". Falsified: under the real filter suppress-only is **+0.0015 / +0.0029**, not negative.
+  The published 6bba adjEdgeJ regression disappears entirely (rawJ -0.00053 -> **+0.00404**)
+  because the deleted nodes were carrying metric-counted FP edges. The unconditional term is a
+  small unconditional GAIN. H1's downside risk is materially lower than I reported.
+- The `has_division` exemption I identified is a MINOR cause: 134 comps / 652 nodes (44b6) and
+  122 / 586 (6bba) kept solely by it = 4.5% / 4.6% of deletions. ~95% comes from suppression
+  fragmenting components already above min_len and orphaning children.
+- **The retention guard is unnecessary and slightly harmful** (-0.00003 / -0.00009).
+- TRAP: E0c built with `OUTPUT_MIN_TRACK_LEN = 7` (`e0c_run.py:53`), not the wrapper default 6;
+  v122/clean903 use 6. Re-filtering at 6 makes the pass a no-op and hides 100% of deletions.
+  Now read per crop from each surface's status manifest and asserted.
+- Validity control: re-filtering the UNEDITED cached graph is the exact identity on all 199 crops
+  x 4 surfaces. The no-refilter arm reproduces published H0c exactly.
+- Un-modelled residual: `OUTPUT_LINEFIT_SMOOTH` deliberately not re-run (coordinate blend, not
+  idempotent). Exposed set 17,383 / 13,210 nodes.
+
+**TASK 2 -- portability. The proposer transfers; the CEILING does not.**
+
+| surface | fam | N_pred | forks | reach/GT | retain | ret% | shortlist | del(supp) |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| e0c | 44b6 | 2,864,419 | 11,441 | **20**/26 | 16 | 80.0 | 8,284,112 | 14,378 |
+| e0c | 6bba | 2,253,622 | 9,012 | **93**/125 | 76 | 81.7 | 6,086,890 | 12,780 |
+| v122 | 44b6 | 2,123,909 | 4,667 | **15**/26 | 11 | 73.3 | 5,865,670 | 4,092 |
+| v122 | 6bba | 1,846,035 | 5,508 | **68**/125 | 54 | 79.4 | 4,699,347 | 5,863 |
+| clean903 | 44b6 | 2,903,338 | 11,054 | **20**/26 | 17 | 85.0 | 8,402,579 | 10,731 |
+| clean903 | 6bba | 2,294,949 | 8,696 | **96**/125 | 79 | 82.3 | 6,212,738 | 9,730 |
+| ilp_c | 44b6 | 2,088,794 | 4,162 | **15**/26 | 12 | 80.0 | 5,756,033 | 5,147 |
+| ilp_c | 6bba | 1,813,436 | 5,264 | **67**/125 | 53 | 79.1 | 4,598,893 | 7,451 |
+
+Scored ceilings under the live filter: **E0c +0.0641 / +0.0646** (divJ 0.6154 / 0.6080) vs
+**v122 +0.0419 / +0.0461** (divJ 0.4231 / 0.4320). v122 base composites reproduce arm-D
+0.6962 / 0.6997 exactly.
+
+- **One frozen proposer DOES operate unchanged on every surface** -- identical function object,
+  identical schema, no retune, no failure, zero GT-map collisions across all 8 blocks, shortlist
+  inside the 15M budget everywhere (4.60M-8.40M).
+- **But the ceiling is substrate-dependent.** v122 loses 25% / 27% of REACHABLE divisions purely
+  because its node set drops mothers or daughters. Retention GIVEN reachability is nearly
+  preserved (73.3%/79.4% vs 80.0%/81.7%): **the ranker transfers, the node population is the
+  limiter.**
+- `ilp_c` (v122's ILP + E0c's wrapper) also shows 15/26 and 67/125, so **the reachability loss
+  originates in the ILP/detector stage, not the v122 wrapper.**
+- **clean903 (greedy detector population) is the best substrate measured: 20/26 and 96/125** --
+  better than E0c on 6bba. The division layer should be deployed on a greedy-detector base, NOT
+  on v122's ILP-pruned population.
+- `has_division` retention is essentially INERT on v122/ilp_c (0-1 exempt comps vs 122-134 on
+  E0c), and the multiplier direction FLIPS (E0c over-predicts, v122 under-predicts), so deletion
+  economics differ 3-4x by surface.
+
+Mother-collision assertion added in `build_gt_maps` (raises by default). 0 collisions measured.
+Unguarded `gt_to_sub[m] = s` overwrites remain at `phaseb_d0p_proposer.py:287`,
+`phaseb_h0c_replay.py:147`, `phaseb_h0b_rankcompress.py:138`, `phaseb_h1a_census.py:87`,
+`phaseb_oracle_d0prime.py:215`.
+
+Caveat: agent 1's clean-0.913 base has no local OOF graphs yet, so `clean903` is the closest
+available proxy, labelled as the superseded port rather than the 0.913 base itself.
