@@ -47,6 +47,7 @@ if _loeo_seen != sorted(LOEO_STEMS):
     raise RuntimeError({"expected": sorted(LOEO_STEMS), "actual": _loeo_seen})
 
 _loeo_rows = []
+_loeo_violations: dict = {}
 for _crop, _grp in _loeo_df.groupby("dataset", sort=True):
     _n = _grp[_grp["row_type"].eq("node")]
     _e = _grp[_grp["row_type"].eq("edge")]
@@ -62,10 +63,22 @@ for _crop, _grp in _loeo_df.groupby("dataset", sort=True):
             raise RuntimeError(f"{_crop}: invalid lineage edge {_s}->{_d}")
         _indeg[_d] += 1
         _outdeg[_s] += 1
-    if _indeg and max(_indeg.values()) > 1:
-        raise RuntimeError(f"{_crop}: in-degree > 1")
-    if _outdeg and max(_outdeg.values()) > 2:
-        raise RuntimeError(f"{_crop}: out-degree > 2")
+    # 2026-07-31: these were hard `raise`s. A completed 2.7-hour fold-0 run was DISCARDED by the
+    # out-degree assertion firing on 2 nodes out of 1,900,633 (0.00011%) -- after every expensive
+    # step had already succeeded -- and the loss was then misrecorded as a /kaggle/working size
+    # limit. This artifact is a MEASUREMENT, never a submission (`expects_submission: false`), so a
+    # rare structural anomaly must be RECORDED AND SURFACED, not allowed to destroy the run.
+    # It stays fatal in scripts/audit_submission_structure.py, which is what gates real candidates.
+    _viol = {
+        "in_degree_gt_1": sorted(k for k, v in _indeg.items() if v > 1),
+        "out_degree_gt_2": sorted(k for k, v in _outdeg.items() if v > 2),
+    }
+    if _viol["in_degree_gt_1"] or _viol["out_degree_gt_2"]:
+        _loeo_violations[_crop] = {
+            k: {"nodes": v[:20], "count": len(v)} for k, v in _viol.items() if v
+        }
+        print(f"  !! {_crop}: STRUCTURAL ANOMALY RECORDED (run continues) -> "
+              f"in>1={len(_viol['in_degree_gt_1'])} out>2={len(_viol['out_degree_gt_2'])}")
     _loeo_rows.append({
         "dataset": _crop,
         "nodes": int(len(_n)),
@@ -79,6 +92,8 @@ for _crop, _grp in _loeo_df.groupby("dataset", sort=True):
 
 _loeo_summary = {
     **LOEO_MANIFEST,
+    "structural_violations": _loeo_violations,
+    "structural_violation_crops": len(_loeo_violations),
     "rows": len(_loeo_df),
     "total_nodes": int(sum(r["nodes"] for r in _loeo_rows)),
     "total_edges": int(sum(r["edges"] for r in _loeo_rows)),
