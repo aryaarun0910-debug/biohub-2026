@@ -9,12 +9,13 @@ branch B demoted behind divisions.
 
 D0' measured the composed operation Oracle C never tested: remove existing false forks, then
 reconstruct reachable true ones. Five parity-controlled arms, 199 crops, exact patched scorer,
-edges-only edits (`N_pred` and node recall identical in every arm).
+edges-only edits on a FIXED node set (see 2026-07-31 correction: node invariance was assumed by construction, and the live pipeline DOES delete division-exempt components under suppression).
 
 | arm | 44b6 | Δ | 6bba | Δ |
 |---|---:|---:|---:|---:|
 | baseline (parity OK) | 0.7595 | +0.0000 | 0.6490 | −0.0000 |
-| suppress_all | 0.7630 | +0.0035 | 0.6517 | +0.0027 |
+| suppress_all (GT-informed child retention) | 0.7630 | +0.0035 | 0.6517 | +0.0027 |
+| suppress_all (GT-FREE control) | 0.7595 | -0.00004 | 0.6470 | **-0.00204** |
 | suppress_all_then_add_replace | 0.8413 | +0.0818 | 0.7273 | +0.0783 |
 | selective_suppress_then_add_replace | 0.8413 | +0.0818 | 0.7273 | +0.0783 |
 | add_replace_then_selective_suppress | 0.8413 | +0.0818 | 0.7273 | +0.0783 |
@@ -22,6 +23,9 @@ edges-only edits (`N_pred` and node recall identical in every arm).
 GT-free child-retention control (`--fallback-only`): **+0.0783 / +0.0737**. Order does not
 matter and the operations do not interfere. Division goes `TP0/FP93/FN26 → TP20/FP0/FN6` and
 `TP4/FP582/FN121 → TP93/FP0/FN32`.
+
+CORRECTION 2026-07-31: the decomposition below used the GT-INFORMED suppress_all row.
+The GT-FREE control is -0.00004 / -0.00204, so suppression alone contributes NO free gain.
 
 GREEN on both conditions: composed min-fold `+0.0737` (bar `+0.03`); suppression contributes
 `+0.0601 / +0.0599` over Oracle-C-alone (bar `+0.01` bilateral). Strongly super-additive —
