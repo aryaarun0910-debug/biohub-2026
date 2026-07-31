@@ -116,3 +116,20 @@ than one that is rejected.** Before trusting any per-arm/per-fold/per-seed numbe
 selector actually changes the bytes read — cheapest check is that two settings produce different
 node counts. The parity habit that caught this (compare a no-op setting against a known-good
 cached anchor, per crop) is the general defence and costs seconds.
+
+**15. `h4_ssl_gate_replay.py` had never run, and its aggregator was unpenalised.** Two defects,
+both found 2026-07-31 when it was executed for the first time:
+
+- `main()` called `cached_crops()` with no argument, but it is defined `cached_crops(split: int)`
+  and yields crop *stems*, not `(split, crop)` pairs — so the script raised `TypeError` before
+  doing any work. It had been recorded in the queue as "built, smoked, not run"; in fact it
+  **could not run**. Treat "smoked" as unverified unless a result artifact exists.
+- `agg()` computed the count multiplier as `abs(N_pred_arm − N_pred_baseline) / N_pred_baseline`,
+  which is **identically zero** for an edges-only replay, so every arm was scored with **no count
+  penalty at all** and its `adj_edge_jaccard` was not comparable to the published 0.7595 / 0.6490
+  anchors. The canonical multiplier is **signed** and defined against **`N_est`**
+  (`metrics.py:440`), not absolute and not against our own baseline.
+
+Both fixed. **The general check both defects fail: a replay's baseline arm must reproduce the
+published anchor before any delta from it is quoted.** That single assertion catches this whole
+class and takes seconds.

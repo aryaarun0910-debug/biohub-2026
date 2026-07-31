@@ -2974,3 +2974,60 @@ Caught only by the per-crop parity cross-check. Fixed by `arm_graph_path()`, whi
 missing arm cache instead of silently falling back. Recorded as trap 14.
 
 Artifacts: `reports/inventory/node_budget_armD.json`.
+
+### 2026-07-31 (ssl × geometry EXACT REPLAY — first ever run; headline was ~26% high)
+
+**Basis: CORPUS, 199 crops, exact patched scorer, canonical pooled objective, E0c substrate.**
+Runtime ~39.8 min, 3 workers. Baseline arm reproduces the published anchors exactly
+(44b6 **0.759549**, 6bba **0.648965**, pooled **0.665404**) — the check that makes the delta
+trustworthy.
+
+| | pooled | 44b6 | 6bba |
+|---|---:|---:|---:|
+| Δ composite | **+0.001042** | +0.003153 | **+0.000097** |
+| 95% CI | [−0.00056, +0.00293] | [−0.00086, +0.00819] | [−0.00143, +0.00201] |
+| P(Δ > 0) | 0.890 | 0.933 | **0.520** |
+| P(Δ > +0.005) | 0.0001 | 0.207 | 0.0001 |
+
+Divisions TP 4→9, FP 675→202, FN 147→142. Edge cost −0.00102 pooled, uniform across families.
+211 admitted → 211 forks retained, 226 parent steals.
+
+**The headline was overstated.** `ssl_fuse_v2.json` carried two arithmetic projections spanning
+**43×** — `h0c_measured` **+0.001413** (which became the HANDOFF §4 headline) and `conservative`
+**+0.000033**. The exact scorer says **+0.001042**: the optimistic convention was ~26% high, the
+conservative one 32× low. This is the fourth reporting correction of the cycle and the same
+pattern each time — a projection quoted as a measurement.
+
+**DECISION: does not change deployment.** Min-fold **+0.000097** with **P(6bba gain) = 0.52**, a
+coin flip, against a +0.005 bilateral gate; the entire pooled effect is carried by 44b6. It is also
+measured on **E0c**, not the P0-B base that scores 0.914, and it is not a bolt-on veto — deploying
+it requires the whole H0c cascade at test time.
+
+**TWO DEFECTS FIXED (trap 15).** The script had **never actually run**: `main()` called
+`cached_crops()` with no argument against a `cached_crops(split: int)` signature, raising
+`TypeError` immediately — despite being recorded as "built, smoked, not run". And `agg()` computed
+the multiplier as `abs(N_pred_arm − N_pred_baseline)/N_pred_baseline`, identically **0** for an
+edges-only replay, so results were **unpenalised** and incomparable to the published anchors. Now
+computed signed against `N_est`. Verified: the job list builds 199 crops (71 + 128).
+
+### Open reconciliation — the 0.8986 vs 0.7595 gap is NOT a weighting convention
+
+Lane 2 checked directly: `scripts/score_oof.py` and `scripts/score_loeo_submission.py` **both** build
+rows via `per_sample_metrics(..., estimated_nodes(gt_geff), ...)` and aggregate with the same
+`tracking_cellmot.metrics.summarise`. **A convention mismatch between the two entry points is ruled
+out.** So the fold-0 adj_edge_jaccard of 0.89859 versus E0c's published 44b6 0.7595 is either a
+genuine substrate difference or a config/leakage issue. The manifest audit argues against leakage
+(secondary off, DeepCenter off, `split_0` is LOEO-clean on fold 0). **Unresolved — do not build on
+the comparison until someone scores E0c and this artifact through one entry point in one pass.**
+
+### CPU queue items NOT run, with reasons (no fabricated numbers)
+
+- **`agent5_utility.py --max-admit 6000`** — not attempted. Joins 24 float32 features onto a
+  **14,371,002-row** shortlist, ~3–5 GB peak against 2.7–5.7 GB free while three jobs held the
+  worker cap. Runnable on a free box; note `out_dir = ledger.parent`, so redirect the output.
+- **`h1n_exact_replay.py`** — not run, **and the "~82 min" estimate is suspect**: the existing
+  smoke artifact records **4 crops in 590 s**, which scales naively to ~8 h for 199. Re-derive the
+  estimate before budgeting. Its `pooled_delta = +0.00859` is a **4-crop smoke** and must not be
+  quoted as a headline.
+- **`phaseb_h2a_hybrid_oracle.py`** — not run; interface confirmed working. From its own artifacts
+  (3 crops in 133.4 s) the full 199 crops is **~2.5 h at 3 workers**.

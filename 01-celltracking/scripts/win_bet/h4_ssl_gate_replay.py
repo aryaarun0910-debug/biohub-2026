@@ -62,7 +62,7 @@ def replay_one(args) -> dict:
     split, crop, admitted = args
     import sys as _sys
     _sys.path.insert(0, str(ROOT / "src"))
-    from biotrack.metric import load_graph, score_pred_graph  # noqa: F401
+    from biotrack.metric import estimated_nodes, load_graph, score_pred_graph  # noqa: F401
     from biotrack.submission import submission_to_graphs
 
     sub, t, pos, edges, nd = load_e0c_tables(split, crop)
@@ -120,6 +120,9 @@ def replay_one(args) -> dict:
             "node_recall", "num_pred_nodes")
     return {"split": split, "crop": crop, "n_admitted": len(admitted),
             "n_forked": len(retained), "steals": steals,
+            # 2026-07-31: n_est is REQUIRED by agg().  The count multiplier is defined against
+            # the GEFF estimated_number_of_nodes, not against our own baseline node count.
+            "n_est": int(estimated_nodes(gt_geff)),
             "cand_shortlist": sum(len(v) for v in prop.values()), "cand_pre_topk": n_pre,
             **{f"b_{k}": base[k] for k in keys},
             **{f"t_{k}": treat[k] for k in keys}}
@@ -137,7 +140,11 @@ def main() -> None:
     for r in adm.iter_rows(named=True):
         by_crop.setdefault(r["crop"], set()).add(int(r["mother"]))
 
-    jobs = [(s, c, by_crop.get(c, set())) for s, c in cached_crops()]
+    # 2026-07-31 DEFECT FIX: this called cached_crops() with no argument, but it is defined
+    # cached_crops(split: int) and yields crop STEMS, not (split, crop) pairs -- so this line
+    # raised TypeError before any work happened.  The script had therefore never run at all,
+    # despite being recorded as "built, smoked, not run".
+    jobs = [(s, c, by_crop.get(c, set())) for s in (0, 1) for c in cached_crops(s)]
     rows = []
     with ProcessPoolExecutor(max_workers=a.workers) as ex:
         for r in ex.map(replay_one, jobs):
@@ -154,8 +161,15 @@ def main() -> None:
             tp, fp, fn = r[f"{pfx}edge_tp"], r[f"{pfx}edge_fp"], r[f"{pfx}edge_fn"]
             w = tp + fp + fn
             j = tp / w if w else 0.0
-            ratio = abs(r[f"{pfx}num_pred_nodes"] - r["b_num_pred_nodes"]) / max(
-                r["b_num_pred_nodes"], 1)
+            # 2026-07-31 DEFECT FIX.  This was
+            #     abs(N_pred_arm - N_pred_baseline) / N_pred_baseline
+            # which is identically ZERO for an edges-only replay (the node set never moves),
+            # so every arm was scored with an UNPENALISED multiplier and the resulting
+            # adj_edge_jaccard was not comparable to the published 0.7595 / 0.6490 anchors.
+            # The canonical multiplier is signed and defined against N_est (metrics.py:440),
+            # NOT absolute and NOT against our own baseline.  With this fix the baseline
+            # arm reproduces the published anchors exactly (44b6 0.759549, 6bba 0.648965).
+            ratio = (r[f"{pfx}num_pred_nodes"] - r["n_est"]) / max(r["n_est"], 1)
             num += w * max(0.0, j * (1.0 - ADJUSTMENT_ALPHA * ratio))
             den += w
             dtp += r[f"{pfx}division_tp"]; dfp += r[f"{pfx}division_fp"]

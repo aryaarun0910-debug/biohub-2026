@@ -70,10 +70,10 @@ The previous version of this section listed node budget (+0.00157) and the ssl �
 (+0.00141) as "deployable and corpus-verified", and projected ~+0.003 combined. **Both were
 measured on the actual 0.914 base and both failed.** Do not rebuild either from the old numbers.
 
-| mechanism | old claim | measured on P0-B | verdict |
+| mechanism | old claim | measured | verdict |
 |---|---:|---:|---|
-| node budget (keep_frac 0.975) | +0.00157 | **−0.0000103** | **NO-GO** |
-| ssl × geometry veto | +0.00141 | ceiling **exactly 0** | **NO-GO / mis-scoped** |
+| node budget (keep_frac 0.975) | +0.00157 | **−0.0000103** on P0-B; **−0.00088** corpus on arm D | **NO-GO** |
+| ssl × geometry veto | +0.00141 | **+0.00104** exact corpus (E0c); min-fold **+0.000097** | **NO-GO / mis-scoped** |
 
 **Node budget.** Like-for-like, same four movies, same frozen keep_frac, exact patched scorer:
 E0c arm A **+0.006339**, P0-B **−0.0000103**. Offline parity is exact — the stage at keep_frac 1.0
@@ -88,11 +88,29 @@ bipartite matches. Note the sign of the node ratio is **not** the cause — the 
 quality — a count effect, not a precision effect, while P0-B's own report cell declares
 `"metric_hack_used": false`. Treat any revival as a metric-artifact question, not a tracking gain.
 
-**ssl × geometry veto.** It is **not a bolt-on filter**. The +0.00141 is the *admission gate of the
-H0c division-reconstruction cascade*, and is an arithmetic projection through **constant E0c edge
-costs** that `scripts/win_bet/h4_ssl_gate_replay.py` has **never actually validated**. The one
+**ssl × geometry veto.** Two independent problems.
+
+*(a) It is not a bolt-on filter.* The mechanism is the *admission gate of the H0c
+division-reconstruction cascade*; deploying it means running the whole cascade at test time. The one
 bolt-on reading — vetoing P0-B's existing forks — has ceiling **exactly zero**: P0-B's divisions are
 TP 0 / FP 8 / FN 3, so divJ is 0 before *and* after a perfect veto.
+
+*(b) The headline was overstated and is now measured exactly.* `h4_ssl_gate_replay.py` was run on
+the full 199-crop corpus for the first time on 2026-07-31 (it had never run before — see trap 15).
+On the canonical pooled objective, with the baseline arm reproducing the published anchors exactly
+(44b6 0.759549, 6bba 0.648965, pooled 0.665404):
+
+| | pooled | 44b6 | 6bba |
+|---|---:|---:|---:|
+| Δ composite | **+0.001042** | +0.003153 | **+0.000097** |
+| P(Δ > 0) | 0.890 | 0.933 | **0.520** |
+| P(Δ > +0.005) | 0.0001 | 0.207 | 0.0001 |
+
+Divisions TP 4→9, FP 675→202, FN 147→142; edge cost −0.00102 pooled. **Min-fold is +0.000097 with
+P(6bba gain) = 0.52 — a coin flip** — against a +0.005 bilateral gate, and the whole pooled effect
+is carried by 44b6. The old +0.00141 was the optimistic of two arithmetic projections spanning 43×
+(+0.001413 vs +0.000033); the exact scorer says **+0.001042**, so the headline was ~26% high.
+Measured on the **E0c** substrate, not P0-B.
 
 Basis, stated explicitly: four visible placeholder movies, in-sample on the public set. Sparse
 annotation under-samples the edge cost while the multiplier is fully realised, so **the proxy is
