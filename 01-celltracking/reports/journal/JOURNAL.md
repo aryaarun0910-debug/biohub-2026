@@ -1967,3 +1967,67 @@ the primary criterion, and asserts on the real cache that 44b6's edge-mass share
 Caveat carried forward from the simulator: `C_survival` is strictly dominated by v122 in
 20,000/20,000 composition draws (per-crop error correlation 0.9995) and must never occupy a
 submission slot despite its pooled rank.
+
+### 2026-07-31 (Lane D — H1-T CLOSED PERMANENTLY on a structural argument, not a threshold)
+
+H1-T was already RED as a mother-level detector. This lane asked the only remaining question:
+does it survive as the SECOND factor, `P(pair | mother divides)`? Answer: no, in either family.
+`scripts/win_bet/h1t_conditional_ranker.py`; results in `agent_runs/laneD/laneD_conditional_ranks.json`.
+
+Conditioning set: the 92 mothers that genuinely divide AND whose true pair survived into the
+frozen top-3 shortlist (16 in 44b6, 76 in 6bba; 259 candidate pairs). Every candidate belonging
+to a conditioning mother is `metric_visible` and labelled, so the comparison is like-for-like
+with no label-driven set truncation. Calibration-free ranks within each mother's choice set; no
+global threshold anywhere.
+
+| family | ranker | rank@1 | 95% CI | MRR |
+|---|---|---|---|---|
+| 44b6 (16) | **frozen geometry** | **14/16 = 0.875** | [0.640, 0.965] | **0.9375** |
+| 44b6 | H1-T MLP | 13/16 = 0.812 | [0.570, 0.934] | 0.9062 |
+| 44b6 | H1-T linear | 13/16 = 0.812 | [0.570, 0.934] | 0.9062 |
+| 44b6 | H1-T GBDT | 14/16 = 0.875 | [0.640, 0.965] | 0.9271 |
+| 6bba (76) | **frozen geometry** | **58/76 = 0.763** | [0.656, 0.845] | **0.8684** |
+| 6bba | H1-T MLP | 55/76 = 0.724 | [0.614, 0.812] | 0.8487 |
+| 6bba | H1-T linear | 55/76 = 0.724 | [0.614, 0.812] | 0.8509 |
+| 6bba | H1-T GBDT | 54/76 = 0.711 | [0.600, 0.800] | 0.8377 |
+
+Paired McNemar on identical mothers: all p >= 0.39. Correctly read as "H1-T fails to beat
+geometry", NOT "H1-T is significantly worse". Restricting to mothers with a genuine choice
+(n>=2 candidates; 15 and 72) changes nothing: 13/15 vs 12/15 and 54/72 vs 51/72, both favouring
+geometry.
+
+**THE STRUCTURAL FINDING THAT MAKES THIS PERMANENT: in 44b6, b = 0.** There is not one mother
+where H1-T ranks the true pair first and geometry does not. H1-T's correct set is a STRICT
+SUBSET of geometry's. So the union oracle -- the best any blend, gate, ensemble or cascade of
+the two scorers could achieve with a perfect selector -- is **14/16 = 0.875 in 44b6, identical
+to geometry alone**. Under the both-families rule, no weighting can pass. The arm closes
+structurally, not at one operating point.
+
+Two reporting notes worth keeping:
+- **rank@3 is degenerate here and must never be quoted as success.** The shortlist is top-3 per
+  mother, so every ranker scores 100% by construction. Only rank@1 (marginally rank@2)
+  discriminates.
+- Machinery validated: a `residual_as_score = -flow_midpoint_residual` control reproduced the
+  frozen `rank` column's ordering event-for-event across all 92 mothers, and the H1-T top-1
+  figures reproduce the prior 0.812 / 0.724 exactly from the frozen weight file -- no
+  retraining, no drift. Zero score ties, zero residual ties.
+
+Why this was the expected outcome: the conditioning set is "the true pair is among the
+residual's own top 3", so geometry has already demonstrated competence on exactly these events.
+The residual is not a weak incumbent -- it is the third-largest effect in H1-T's own 24-feature
+block and it is the feature that BUILT the shortlist. H1-T is a noisier re-weighting of a set
+the incumbent already ordered well.
+
+There is also no headroom worth chasing: a PERFECT conditional pair ranker adds at most 2
+divisions in 44b6 and 18 in 6bba, and only on mothers the first factor admits. The first factor
+is where H1-T is dead (0/100 true dividers in the top-100 mothers, both families). A perfect
+second factor multiplied by a zero first factor is still zero.
+
+**VERDICT: close the H1-T external trajectory critic permanently in both roles.** The frozen
+flow-midpoint residual remains the incumbent pair ranker and is not displaced. This does NOT
+touch the H1-T appearance probe (different feature space, different lane), and the reusable
+infrastructure (`h1t_zebrahub_events.py`, `h1t_h0c_learned.py`, the external event set) stays
+valid -- it is the trajectory-feature critic that is closed.
+
+Consequence for the factorised architecture: `P(mother divides)` remains entirely unsupplied,
+and it is now the ONLY missing factor. Lane C (H1-M) is the sole live attempt at it.
