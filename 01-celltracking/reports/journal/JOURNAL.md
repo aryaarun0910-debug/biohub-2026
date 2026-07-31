@@ -2928,3 +2928,49 @@ edges; corrected from stored per-row flags and the split reproduces 15,703 / 12,
 Artifacts preserved outside the worktree at
 `..._RESEARCH/agent_runs/lane4_fn_attribution_2026-07-31/` (25 MB);
 ceilings copied to `reports/inventory/fn_attribution_ceilings.json`.
+
+### 2026-07-31 (NODE BUDGET ON ARM D — CORPUS, 199 crops: −0.00088. Channel closed.)
+
+**Basis: CORPUS. 199/199 cached OOF crops (71×44b6 + 128×6bba), exact patched scorer, pooled
+objective. Not a smoke, not in-family.** Parity: keep_frac 1.0 reproduces the published v122
+anchor exactly — pooled **0.69909203** vs published 0.69909, node ratio **−0.1598** vs published
+−0.1598, **0 mismatches across 199 crops** against the cached `coupled_cache/scores/D__*` counters.
+
+| keep_frac | pooled | Δ | 44b6 | 6bba | node ratio | node recall |
+|---|---:|---:|---:|---:|---:|---:|
+| **1.00** | **0.69909** | **0.00000** | 0.69625 | 0.69966 | −0.1598 | 0.8286 |
+| 0.975 | 0.69821 | **−0.00088** | 0.68984 | 0.69976 | −0.1810 | 0.8189 |
+| 0.95 | 0.69504 | −0.00405 | 0.68389 | 0.69709 | −0.2020 | 0.8084 |
+| 0.90 | 0.68617 | −0.01292 | 0.66852 | 0.68938 | −0.2440 | 0.7826 |
+
+Crop-block bootstrap (10,000 resamples; closed-form vs `summarise()` max abs diff **2.22e-16**):
+at 0.975 **P(Δ>0) = 0.1088**, at 0.95 P = 0.0008, at 0.90 P = 0.0. **Pooled optimum is
+keep_frac = 1.00 — no pruning.**
+
+The preregistered kill rule (optimum ≥ 0.99 on *both* families) did not literally trigger, because
+6bba's optimum is 0.975 — but that "gain" is **+0.00010**, one ten-thousandth, while 44b6 loses
+**−0.00641**, sixty-four times larger. On the primary pooled objective the channel is closed.
+
+**THE MECHANISM, now settled across three independent measurements.**
+
+| substrate | node ratio | node-budget Δ @0.975 | basis |
+|---|---:|---:|---|
+| E0c arm A | **+0.0832** (over) | **+0.00157** | corpus, 199 crops |
+| v122 arm D | **−0.1598** (under) | **−0.00088** | corpus, 199 crops |
+| P0-B (deployment) | **−0.1028** (under) | **−0.00001** | 4 placeholder movies |
+
+**The sign flips with the sign of the node ratio.** Node budget's arm-A gain is a *count-multiplier*
+effect available only to a graph that OVER-predicts nodes. Arm D already under-predicts at −0.1598;
+pruning drives it to −0.1810, the multiplier term is saturated, and only the edge-quality cost
+remains. This is independently consistent with the arm-A decomposition (~116% of +0.00157 was the
+multiplier, ~−16% edge quality) and with the direct P0-B measurement from the other lane.
+
+**DECISION: KILL the "P0-B + node budget" candidate.** Not a mechanism that transfers off arm A.
+
+**DEFECT FOUND AND FIXED.** `scripts/win_bet/phaseb_node_budget.py` accepted `--arm` and ignored
+it: `prune_one()` unpacked `arm` and never read it, and the graph path was hardcoded to the arm-A
+cache. **Running `--arm D` would have scored arm A while writing `"arm": "D"` into the output.**
+Caught only by the per-crop parity cross-check. Fixed by `arm_graph_path()`, which now raises on a
+missing arm cache instead of silently falling back. Recorded as trap 14.
+
+Artifacts: `reports/inventory/node_budget_armD.json`.
