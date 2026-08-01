@@ -210,3 +210,17 @@ Best public **0.914** (P0-B) unchanged. **P0-CR submitted** (ref 55147215) as a 
 probe: v122 + reverse-time + volume guard, audit PASS 10/10, expected 0.908–0.912 — not a climb.
 **There is currently no deployable mechanism between 0.914 and 0.920.** The division track on the
 22/26 substrate is the only live route and its selector is unbuilt.
+
+
+## Licence-blocked external assets (running list)
+
+| asset | block | date |
+|---|---|---|
+| CTC (Cell Tracking Challenge) data | "cloning of datasets or their parts, including reference annotations, is strictly forbidden" | 2026-07-31 |
+| OrganoidTracker marginalisation code | GPL-2, no MIT header — reimplement, never vendor | 2026-07-31 |
+| **CAP (`YXSong000/CAP`)** | **NO LICENCE AT ALL** (`license: null`, `/license` 404, zero LICENSE blobs) ⇒ all rights reserved. Stricter than GPL-2: GPL-2 grants use, no-licence grants nothing. Compounded by three more: it imports **CoTracker (CC BY-NC 4.0)** at runtime, its only obtainable weights are CC BY-NC 4.0, and it trains on **CTC** (already blocked) while redistributing CTC eval binaries. | 2026-08-01 |
+
+**Standing rule:** audit the licence BEFORE reading the code for reuse, not after. Two of the three
+blocks above were found only after substantial reading. Also verify advertised checkpoints exist —
+CAP's abstract claims "code and model checkpoints are available" and **none exist**: no weights in
+the tree, zero releases, no HuggingFace repo.
