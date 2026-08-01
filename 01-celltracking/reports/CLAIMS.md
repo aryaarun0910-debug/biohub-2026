@@ -29,7 +29,22 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 | adj_edge_jaccard | `0.89859` | `exact-pooled-OOF` | 71 crops, arm strict. NOT comparable to E0c 0.7595 until reconciled in one pass. |
 | node_recall | `0.98457` | `exact-pooled-OOF` |  |
 | division_jaccard | `0.01587` | `exact-pooled-OOF` | TP 2 / FP 100 / FN 24 - its own division layer is near-worthless here |
-| reachable GT divisions | `22` | `exact-pooled-OOF` | of 26. Beats E0c 20/26, clean903 20/26, v122 15/26. 6bba UNMEASURED on this substrate. |
+| reachable GT divisions | `22` | `exact-pooled-OOF` | of 26. Beats E0c/clean903 20/26 and v122 15/26 on THIS family only - the advantage INVERTS on 6bba (66/125, worst measured). See the fold-1 rows. |
+
+## P0 substrate (fold 1 / 6bba)
+
+| claim | value | basis | note |
+|---|---:|---|---|
+| adj_edge_jaccard | `0.70248` | `exact-pooled-OOF` | 128 crops, our own split_1, manifest audit PASS |
+| node_recall | `0.85474` | `exact-pooled-OOF` | collapses from 0.98457 on fold 0 across the family boundary |
+| reachable GT divisions | `66` | `exact-pooled-OOF` | of 125. WORST measured - E0c 93, clean903 96, v122 68. Pooled reach 88/151 = 58.3% vs E0c 74.8% and clean903 76.8%. 6bba is 85.06% of edge mass. |
+
+## Component retention (CLOSED)
+
+| claim | value | basis | note |
+|---|---:|---|---|
+| GT-oracle corpus-scaled delta | `+0.008727` | `GT-oracle` | 763 components retained; bilaterally positive; clears the +0.002 bar 4x over |
+| GT-free selector corpus-scaled delta | `-0.007761` | `cross-family-LOFO` | 11,683 components retained - 15x the oracle - adding 49,688 nodes for edge TP -117; families disagree in sign (+0.0012 / -0.0115). Headroom is real; selection is the constraint. |
 
 ## Node budget (CLOSED)
 
@@ -83,4 +98,4 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 
 ---
 
-33 claims from 8 artifacts under `reports/inventory/`.
+38 claims from 10 artifacts under `reports/inventory/`.

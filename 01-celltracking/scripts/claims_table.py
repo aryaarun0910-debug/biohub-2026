@@ -71,7 +71,27 @@ CLAIMS: list[tuple] = [
      "TP 2 / FP 100 / FN 24 - its own division layer is near-worthless here"),
     ("P0 substrate (fold 0 / 44b6)", "reachable GT divisions",
      "loeo_f0_strict.json", "family_reach.44b6.reachable", "exact-pooled-OOF", "{:.0f}",
-     "of 26. Beats E0c 20/26, clean903 20/26, v122 15/26. 6bba UNMEASURED on this substrate."),
+     "of 26. Beats E0c/clean903 20/26 and v122 15/26 on THIS family only - the advantage INVERTS on 6bba (66/125, worst measured). See the fold-1 rows."),
+
+    ("P0 substrate (fold 1 / 6bba)", "adj_edge_jaccard",
+     "loeo_f1_strict.json", "summary.adj_edge_jaccard", "exact-pooled-OOF", "{:.5f}",
+     "128 crops, our own split_1, manifest audit PASS"),
+    ("P0 substrate (fold 1 / 6bba)", "node_recall",
+     "loeo_f1_strict.json", "summary.node_recall", "exact-pooled-OOF", "{:.5f}",
+     "collapses from 0.98457 on fold 0 across the family boundary"),
+    ("P0 substrate (fold 1 / 6bba)", "reachable GT divisions",
+     "loeo_f1_strict.json", "family_reach.6bba.reachable", "exact-pooled-OOF", "{:.0f}",
+     "of 125. WORST measured - E0c 93, clean903 96, v122 68. Pooled reach 88/151 = 58.3% "
+     "vs E0c 74.8% and clean903 76.8%. 6bba is 85.06% of edge mass."),
+
+    ("Component retention (CLOSED)", "GT-oracle corpus-scaled delta",
+     "laneA_component_retention_replay.json", "corpus.oracle", "GT-oracle", "{:+.6f}",
+     "763 components retained; bilaterally positive; clears the +0.002 bar 4x over"),
+    ("Component retention (CLOSED)", "GT-free selector corpus-scaled delta",
+     "laneA_component_retention_replay.json", "corpus.selector",
+     "cross-family-LOFO", "{:+.6f}",
+     "11,683 components retained - 15x the oracle - adding 49,688 nodes for edge TP -117; "
+     "families disagree in sign (+0.0012 / -0.0115). Headroom is real; selection is the constraint."),
 
     # ---------------------------------------------------------------- node budget
     ("Node budget (CLOSED)", "arm D (v122) delta @ keep_frac 0.975",
