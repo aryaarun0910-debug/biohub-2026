@@ -93,10 +93,19 @@ CLAIMS: list[tuple] = [
      "11,683 components retained - 15x the oracle - adding 49,688 nodes for edge TP -117; "
      "families disagree in sign (+0.0012 / -0.0115). Headroom is real; selection is the constraint."),
 
-    ("Motion-residual gate (WS-A arm B)", "pooled delta",
+    ("Motion-residual gate (WS-A arm B)", "pooled delta (ACTUAL, real probabilities)",
+     "wsa_armB_cache_actual.json", "delta.pooled", "exact-pooled-OOF", "{:+.7f}",
+     "199/199 crops, complete wrapper, parity 199/199. SUPERSEDES the +0.0087299 prob=zero lower "
+     "diagnostic. Bootstrap [+0.006163,+0.011659], P(d>0)=1.000, P(d>+0.005)=0.9995. "
+     "E0c SUBSTRATE, not P0-B - NOT a deployment claim."),
+    ("Motion-residual gate (WS-A arm B)", "44b6 delta (ACTUAL, min fold)",
+     "wsa_armB_cache_actual.json", "delta.44b6", "exact-pooled-OOF", "{:+.7f}",
+     "clears the CLAUDE.md min-fold >= +0.005 gate"),
+    ("Motion-residual gate (WS-A arm B)", "6bba delta (ACTUAL)",
+     "wsa_armB_cache_actual.json", "delta.6bba", "exact-pooled-OOF", "{:+.7f}", "85.06% of edge mass"),
+    ("Motion-residual gate (WS-A arm B)", "pooled delta (prob=zero LOWER diagnostic)",
      "wsa_PROMOTION_CANDIDATE_arm_B.json", "delta.pooled", "exact-pooled-OOF", "{:+.7f}",
-     "199/199 crops, complete wrapper, parity gap EXACTLY 0.0 vs canonical anchors. prob=zero on "
-     "new pairs is a LOWER diagnostic, so deployable >= this. E0c SUBSTRATE, not P0-B."),
+     "the lower bound; the actual value above exceeds it by 7.6e-05, confirming the bound was tight"),
     ("Motion-residual gate (WS-A arm B)", "44b6 delta (min fold)",
      "wsa_PROMOTION_CANDIDATE_arm_B.json", "delta.44b6", "exact-pooled-OOF", "{:+.7f}",
      "clears the CLAUDE.md min-fold >= +0.005 gate - the FIRST mechanism in the programme to do so"),

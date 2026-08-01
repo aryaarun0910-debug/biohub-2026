@@ -50,7 +50,10 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 
 | claim | value | basis | note |
 |---|---:|---|---|
-| pooled delta | `+0.0087299` | `exact-pooled-OOF` | 199/199 crops, complete wrapper, parity gap EXACTLY 0.0 vs canonical anchors. prob=zero on new pairs is a LOWER diagnostic, so deployable >= this. E0c SUBSTRATE, not P0-B. |
+| pooled delta (ACTUAL, real probabilities) | `+0.0088059` | `exact-pooled-OOF` | 199/199 crops, complete wrapper, parity 199/199. SUPERSEDES the +0.0087299 prob=zero lower diagnostic. Bootstrap [+0.006163,+0.011659], P(d>0)=1.000, P(d>+0.005)=0.9995. E0c SUBSTRATE, not P0-B - NOT a deployment claim. |
+| 44b6 delta (ACTUAL, min fold) | `+0.0074359` | `exact-pooled-OOF` | clears the CLAUDE.md min-fold >= +0.005 gate |
+| 6bba delta (ACTUAL) | `+0.0090668` | `exact-pooled-OOF` | 85.06% of edge mass |
+| pooled delta (prob=zero LOWER diagnostic) | `+0.0087299` | `exact-pooled-OOF` | the lower bound; the actual value above exceeds it by 7.6e-05, confirming the bound was tight |
 | 44b6 delta (min fold) | `+0.0072796` | `exact-pooled-OOF` | clears the CLAUDE.md min-fold >= +0.005 gate - the FIRST mechanism in the programme to do so |
 | 6bba delta | `+0.0090040` | `exact-pooled-OOF` | 85.06% of edge mass |
 | bootstrap lower 95% | `+0.006272` | `exact-pooled-OOF` | 2000 crop-block draws; P(d>0)=1.000 and P(d>+0.002)=1.000 |
@@ -121,4 +124,4 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 
 ---
 
-46 claims from 13 artifacts under `reports/inventory/`.
+49 claims from 14 artifacts under `reports/inventory/`.

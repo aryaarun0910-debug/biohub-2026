@@ -576,3 +576,25 @@ mechanisms that looked good on E0c and died on P0-B — node budget went **+0.00
 and five substrate-transfer failures overall. **+0.0087299 is not a deployment claim until it is
 re-measured on the deployment substrate.** That re-measurement is now the single highest-value
 action available.
+
+
+### WS-A arm B — ACTUAL value with real probabilities (supersedes the lower diagnostic)
+
+`replay_B_cache`, 199/199 crops, parity 199/199, complete wrapper, E0c substrate.
+
+| | pooled | 44b6 | 6bba |
+|---|---:|---:|---:|
+| **Δ (ACTUAL)** | **+0.0088059** | **+0.0074359** | **+0.0090668** |
+| Δ (prob=zero lower diagnostic) | +0.0087299 | +0.0072796 | +0.0090040 |
+| bootstrap 95% (actual) | [+0.006163, +0.011659] | — | — |
+| P(Δ>0) / P(Δ>+0.005) | 1.000 / **0.9995** | — | — |
+
+The actual exceeds the bound by **7.6e-05**, confirming WS-A's finding that for a fixed gate the
+probability lever is negligible — **`prob = zero` is an adequate proxy, so future gate arms need no
+GPU inference pass.** Artifact `inventory/wsa_armB_cache_actual.json`.
+
+### Arm E2 — measured, NOT bilateral
+
++0.0015418 pooled but **44b6 −0.0006104** / 6bba +0.0019071 `[exact-pooled-OOF, 199/199]`. Confirms
+the pattern: every acquisition-state-conditioned arm is either negative or fails min-fold. **Arm B,
+which routes on nothing, is the only one that works.**

@@ -1,0 +1,22 @@
+{
+  "arm": "B_cache - flow-compensated residual gate, REAL cached probabilities",
+  "supersedes": "the prob=zero LOWER diagnostic (+0.0087299); this is the actual value",
+  "basis_tag": "exact-pooled-OOF, 199/199 crops, complete wrapper, E0c substrate",
+  "parity_ok": "199/199",
+  "delta": {
+    "pooled": 0.00880588468173582,
+    "44b6": 0.007435934072796302,
+    "6bba": 0.009066846586699873
+  },
+  "base_pooled": 0.6653932886896154,
+  "base_44b6": 0.7595490689190139,
+  "base_6bba": 0.6489523829566959,
+  "bootstrap_pooled": {
+    "mean": 0.008850689811857321,
+    "lo95": 0.0061628805278294285,
+    "hi95": 0.011658568461213936,
+    "p_gt_0": 1.0,
+    "p_gt_0.005": 0.9995,
+    "n_boot": 2000
+  }
+}
