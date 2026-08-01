@@ -1,0 +1,102 @@
+{
+ "basis": "GT-oracle CEILING, precision 1.0, zero false candidates, zero theft; exact-pooled-OOF corpus, E0c substrate, 199 crops; canonical anchors",
+ "parity": {
+  "pooled": 0.6653932886896151,
+  "44b6": 0.7595490689190139,
+  "6bba": 0.6489523829566957
+ },
+ "arms": {
+  "W1_single_step_measured": {
+   "pooled": {
+    "nodes_added": 1326,
+    "edge_tp_gained": 1326,
+    "d_pooled": 0.008677381144660545,
+    "base": 0.6653932886896151,
+    "arm": 0.6740706698342757
+   },
+   "44b6": {
+    "nodes_added": 173,
+    "edge_tp_gained": 173,
+    "d_pooled": 0.00757152447595566,
+    "base": 0.7595490689190139,
+    "arm": 0.7671205933949695
+   },
+   "6bba": {
+    "nodes_added": 1153,
+    "edge_tp_gained": 1153,
+    "d_pooled": 0.008870443431841069,
+    "base": 0.6489523829566957,
+    "arm": 0.6578228263885367
+   }
+  },
+  "W8_full_bidirectional_oracle": {
+   "pooled": {
+    "nodes_added": 7717,
+    "edge_tp_gained": 8866,
+    "d_pooled": 0.057974205862719286,
+    "base": 0.6653932886896151,
+    "arm": 0.7233674945523344
+   },
+   "44b6": {
+    "nodes_added": 866,
+    "edge_tp_gained": 1143,
+    "d_pooled": 0.04999874824623607,
+    "base": 0.7595490689190139,
+    "arm": 0.8095478171652499
+   },
+   "6bba": {
+    "nodes_added": 6851,
+    "edge_tp_gained": 7723,
+    "d_pooled": 0.05936657445109417,
+    "base": 0.6489523829566957,
+    "arm": 0.7083189574077898
+   }
+  },
+  "W16_full_bidirectional_oracle": {
+   "pooled": {
+    "nodes_added": 8659,
+    "edge_tp_gained": 9823,
+    "d_pooled": 0.06426801192994591,
+    "base": 0.6653932886896151,
+    "arm": 0.729661300619561
+   },
+   "44b6": {
+    "nodes_added": 874,
+    "edge_tp_gained": 1151,
+    "d_pooled": 0.05034679501809192,
+    "base": 0.7595490689190139,
+    "arm": 0.8098958639371058
+   },
+   "6bba": {
+    "nodes_added": 7785,
+    "edge_tp_gained": 8672,
+    "d_pooled": 0.06669840101507618,
+    "base": 0.6489523829566957,
+    "arm": 0.7156507839717718
+   }
+  },
+  "ALL_never_detected_oracle": {
+   "pooled": {
+    "nodes_added": 14708,
+    "edge_tp_gained": 15636,
+    "d_pooled": 0.10215893125886677,
+    "base": 0.6653932886896151,
+    "arm": 0.7675522199484819
+   },
+   "44b6": {
+    "nodes_added": 895,
+    "edge_tp_gained": 1164,
+    "d_pooled": 0.050915361971560213,
+    "base": 0.7595490689190139,
+    "arm": 0.8104644308905741
+   },
+   "6bba": {
+    "nodes_added": 13813,
+    "edge_tp_gained": 14472,
+    "d_pooled": 0.11110511838227433,
+    "base": 0.6489523829566957,
+    "arm": 0.76005750133897
+   }
+  }
+ }
+}

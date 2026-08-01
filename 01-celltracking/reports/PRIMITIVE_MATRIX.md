@@ -709,3 +709,123 @@ parity on 3/3 6bba crops. This is why the GPU pre-wrapper export was necessary.
 144/199 crops; the remaining 55 are extending unattended (~3–5 h, **no further GPU** — fold 0 came
 free from the earlier failed kernel). The verdict does not depend on them: both families are
 positive with P(Δ>0) = 1.000 and the min-fold gate is cleared.
+
+
+---
+
+# LANE 2 — bidirectional seeded propagation: **CLOSE. 0 GPU spent.**
+
+Fails by ~2 orders of magnitude on the deciding family. Parity exact against the canonical anchors
+(gap 0.0), and its reachability code reproduces `propagator_reachability.json` corpus-wide on all
+three families, so it *extended* that measurement rather than a lookalike.
+
+## The gate
+
+6bba, one bidirectional step: **162,001 candidates for 1,153 recoveries = 140.5 candidates per
+recovered node, precision 0.712%** against a break-even of **39.83%** (derived from the closed form,
+independently reproducing the project's 0.3994 retain floor from a separate code path).
+**56× short of zero, 85× short of +0.005.**
+
+**It fails even with a GT oracle telling it where to look.** Restricting to termini that match an
+annotated GT node with a live GT continuation — the strongest restriction that exists — gives
+precision 26.19% and an **exact pooled Δ of −0.0074579**, still 1.5× short.
+
+| arm | pooled | 44b6 | 6bba |
+|---|---:|---:|---:|
+| perfect selector, single step (ceiling) | +0.0086254 | +0.0075752 | +0.0088047 |
+| full bidirectional w8 GT-oracle | +0.0579742 | +0.0499987 | +0.0593666 |
+| **deployable, whole surface, FP counted** | **−0.4521730** | −0.6674598 | **−0.3579996** |
+
+**The idea is not dead on reachability — it is dead on selection.** And a *perfect* single-step
+selector buys +0.0088, i.e. roughly what arm B already banked **from the same population**.
+
+## Corrections to how I was reading the reachability table
+
+- **High-confidence seeding is near-vacuous.** `filter_short_track_components` already deletes every
+  component below `min_len_effective = 7`, so the published **49.60% was already high-confidence
+  seeded** (L=1→L=8 seeds fall only 2.1%).
+- **Oracle ≠ achievable, by ~2×.** The published figure counts a node reachable if any detected GT
+  neighbour is within *w* hops; the procedure additionally needs that neighbour's predicted node to
+  be a **free track end**. Achievable/oracle = 46.1% on 6bba. **Achievable single-step recall on 6bba
+  is 8.35%, not 49.60%.**
+- **74% of the recoverable population is `dropped_edge`** — the continuation exists *and was
+  detected*; the pipeline dropped the **edge**, not the node. **That is arm B's population, already
+  harvested for +0.0088059.** The right action there is a link, not a new node.
+
+## The finding that reframes node recovery: window-1 is ALREADY DEPLOYED
+
+`wrapper.py::close_single_frame_gaps` **is** bidirectional seeded propagation at window 1 — it pairs
+END(t) with START(t+2), requires spatial agreement at `GAP_CLOSE_UM*(gap+1) = 12.0 µm`, inserts a
+propagated node at t+1, is **default ON**, and has already inserted **169,509 synthetic nodes
+corpus-wide (3.31% of N_pred, 52.4% selection rate)**. **The 14,708 never-detected pool is what
+remains AFTER it ran**, and this candidate surface is its residue — residual END/START closest-pair
+median **21.34 µm**, with only 5.97% of frames retaining any pair inside the deployed 12 µm gate.
+
+## The arm-B "wrong constant in a gate" pattern does NOT generalise
+
+Tested directly, and all four fail:
+
+| lever | measured | verdict |
+|---|---|---|
+| raise the gap-close node cap | 0.287% precision, **−0.0399** | NO-GO |
+| widen `GAP_CLOSE_UM` 12→30 | precision 0.287→0.143%, Δ −0.040→−0.317 | NO-GO, monotone |
+| enable `OUTPUT_GAP2_RECOVERY` | 0.412%, **−0.2479** | NO-GO |
+| **arm-B re-aim of the gap-close gate** (flow residual, same 12 µm) | precision 0.287→0.390% pooled, **right sign, both families** | **real but 100× insufficient, −0.0475** |
+
+The re-aim *mechanism* reproduces here with the correct sign and bilaterally — and is still nowhere
+near enough. **A wrong constant is only worth fixing where the surface it gates is already
+precision-viable.** This says nothing either way about `div_sister_max_um`, which remains ranked #1.
+
+## Discipline worth noting
+
+The agent flagged and **quarantined** a +0.0037 row that appears if false candidates are priced as
+metric-free (98.2% sit off annotation): it is the annotation-coverage exploit `pi_vis = 1.0` exists
+to block, it is a pure count-multiplier effect (node budget's failure mode), and break-even theft is
+θ* = 2.22% — at θ = 0.10 it is −0.0129. Correctly refused.
+
+Matched controls confirm **propagation accuracy is not the constraint**: target median residual
+3.68 µm vs control 3.77 µm, indistinguishable. The motion model works; the denominator kills it.
+Family mechanism is structural: 44b6 carries 141.8 predicted nodes per annotated GT node against
+6bba's 19.9, a **7.12×** density ratio that predicts the observed **6.76×** precision ratio.
+
+
+---
+
+# CORRECTION 2026-08-01 — my ranked-#1 sister-gate lead was based on DEAD CODE
+
+I published, and committed as "ranked #1 for the next cycle", that *"P0's division layer excludes
+~71% of real divisions at the geometry gate, before any selection happens"*, on the strength of
+`"div_sister_max_um": 8.0` appearing in the kernel run log. **That is wrong. The constant is never
+applied.**
+
+**Verified three ways** (Lane 1's, plus my own independent check of the source):
+
+- `DIV_SISTER_MAX_UM` is read at `wrapper.py:52` but used **only** at `:1170`, inside
+  `if OUTPUT_DIVISION_GEOMETRY_FILTER and edges:` (`:1150`).
+- `OUTPUT_DIVISION_GEOMETRY_FILTER` (`:50`) reads `BIOHUB_OUTPUT_DIVISION_GEOMETRY_FILTER`,
+  **defaulting to `"0"` → False**. **No P0/v122/LOEO notebook ever sets it** — including
+  `kaggle_p0b_clean913_revtime`, the live 0.914 base, which *does* explicitly set
+  `BIOHUB_SAFE_DIV_SISTER_MAX_UM = '8.5'` but not this one.
+- Corroborated empirically: `dropped_division_edges == 0` on 174 WS-F crops; changing 8.0 → 15.0
+  leaves the graph **byte-identical** while forcing the filter on *does* change it; and **33 of
+  10,730 forks in the shipped P0-strict output have sister separation above 8.0 µm (max 9.24)** — a
+  live 8.0 µm filter could not have left them there.
+
+**The `div_sister_max_um: 8.0` line in the run log is an unconditional config echo, not evidence the
+gate runs.** I inferred live behaviour from a printed constant without checking whether the code
+path executes. That is the sixth correction of this programme and it is the same class as trap 15
+(a script recorded as "smoked" that could not run) — **a value being present is not a value being
+used.**
+
+**What IS live:** `SAFE_DIV_SISTER_MAX_UM = 8.5` at `:816`, inside `add_safe_divisions_postlink`. It
+is **additive** — it limits which *new* second-child edges may be proposed — and never discards an
+existing fork. So the honest residual lead is narrower than I claimed: an 8.5 µm cap on *proposals*
+against a measured sister median of 10.57 µm may still suppress new division proposals, but it
+cannot be responsible for discarding real divisions already in the graph, and the "~71% excluded"
+figure is withdrawn entirely.
+
+Lane 1's arms are still running against the live additive gate; its verdict supersedes this note.
+
+**Standing rule extended:** before attributing behaviour to a constant, confirm the branch that uses
+it actually executes on the deployment path — by fingerprint (change the value, check the output
+moves) or by a counter, not by reading a config dump.

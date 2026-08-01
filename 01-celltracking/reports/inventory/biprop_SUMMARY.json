@@ -1,0 +1,96 @@
+{
+ "lane": "LANE 2 / bidirectional seeded propagation -- CHEAP FALSIFICATION GATE",
+ "date": "2026-08-01",
+ "verdict": "CLOSE. Do not build. Do not spend GPU.",
+ "gpu_spent": 0,
+ "basis_tags": {
+  "reachability_and_labels": "GT-oracle",
+  "counters_and_deltas": "exact-pooled-OOF, 199 crops, E0c substrate",
+  "anchor": "inventory/pooled_objective_parity.json (CANONICAL, trap 18)",
+  "parity": {
+   "pooled": 0.6653932886896151,
+   "44b6": 0.7595490689190139,
+   "6bba": 0.6489523829566957,
+   "gap_vs_canonical": 0.0,
+   "reproduced_per_crop_against": "artifacts/kaggle/coupled_cache/scores/A__*.json",
+   "reachability_parity": "L=1 unrestricted reproduces propagator_reachability.json per crop (44b6_0113de3b fwd_w8 0 / bi_w8 0; 6bba_05b6850b fwd_w8 3 / bi_w8 5)"
+  },
+  "motion_vector": "kNN16 flow, l2_estimators.crop_flow reproduced verbatim. NO image registration (measured worse than zero motion)."
+ },
+ "headline": {
+  "6bba_never_detected": 13813,
+  "achievable_single_step_recall_6bba": 1153,
+  "achievable_single_step_recall_6bba_pct_of_never_detected": 8.35,
+  "candidate_burden_6bba_single_step": 162001,
+  "candidates_per_recovered_node_6bba": 140.5,
+  "measured_precision_6bba": 0.007117,
+  "break_even_precision_6bba_exact": 0.39825,
+  "enrichment_required_to_reach_zero_6bba": 56.0,
+  "enrichment_required_for_plus0005_6bba": 85.3,
+  "exact_pooled_delta_at_full_surface_6bba": -0.3579996,
+  "exact_pooled_delta_on_GT_ORACLE_VISIBLE_surface_6bba": -0.0074579
+ },
+ "answers": {
+  "Q1_achievable_recall_from_high_confidence_seeds": {
+   "high_confidence_restriction_is_near_vacuous": "L=1 seeds 99,276 -> L=8 seeds 97,197 (-2.1%). filter_short_track_components already deletes every component below min_len_effective=7, so the published 49.60% bidirectional-w8 figure IS ALREADY a high-confidence-seeded figure. 6bba bi_w8 49.60% (L1) -> 47.34% (L8).",
+   "oracle_is_not_achievable": "The published table counts a never-detected node as reachable if ANY detected GT neighbour exists within w hops. The PROCEDURE additionally requires that neighbour's predicted node to be a FREE TRACK END (out-degree 0 forward / in-degree 0 backward). Measured at hop 1 on 6bba: oracle 2,499, but only 1,298 (51.9%) have a free-end seed, and 1,153 of those (88.8%) land within 7 um. Achievable/oracle = 46.1% on 6bba, 35.9% on 44b6, 44.5% pooled.",
+   "achievable_6bba_single_step": "1,153 / 13,813 = 8.35%",
+   "deeper_windows_lower_precision": "6bba oracle marginal per hop: 2499 / 1344 / 838 / 607 / 436 / 337 / 263 / 216. Burden grows ~linearly with window depth (a false chain never terminates) while true yield decays; precision at step 2 is ~0.38% against step 1's 0.71%."
+  },
+  "Q2_false_candidate_burden": {
+   "single_step_candidates_pooled": 326234,
+   "single_step_candidates_6bba": 162001,
+   "composition_6bba_L8": {
+    "target_seed_has_never_detected_continuation": 1298,
+    "dropped_edge_seed_continuation_EXISTS_and_IS_detected": 3104,
+    "gt_terminal_seed_GT_node_genuinely_ends": 866,
+    "unsupported_seed_matches_no_annotated_GT_node": 156733,
+    "lands_within_7um_of_an_already_detected_GT_node_THEFT": 6791,
+    "lands_on_nothing": 153945
+   },
+   "the_decisive_row": "On the GT-ORACLE-VISIBLE surface -- only termini that an oracle says match an annotated GT node WITH a live GT continuation -- precision is 26.19% on 6bba (1,153 / 4,402) and 26.42% pooled, BELOW the exactly-derived break-even of 39.83% / 40.35%. Exact pooled delta -0.0074579 (6bba) / -0.0075052 (pooled). The mechanism fails even with a perfect oracle telling it where to look.",
+   "why": "74% of annotated free ends with a live GT continuation had that continuation DETECTED -- the pipeline dropped the EDGE, not the node. The correct action there is a link, not a new node. That population is WS-A arm B's, already harvested for +0.0088059."
+  },
+  "Q3_expected_pooled_delta": {
+   "kernel": "src/biotrack/decision.py PooledState, exact closed form, parity gap 0.0 vs canonical anchors",
+   "perfect_selector_ceiling_single_step": {"pooled": 0.0086254, "44b6": 0.0075752, "6bba": 0.0088047},
+   "full_bidirectional_w8_GT_oracle_ceiling": {"pooled": 0.0579742, "44b6": 0.0499987, "6bba": 0.0593666},
+   "all_never_detected_GT_oracle_ceiling": {"pooled": 0.1021589, "44b6": 0.0509154, "6bba": 0.1111051},
+   "deployable_whole_surface_FP_counted": {"pooled": -0.4521730, "44b6": -0.6674598, "6bba": -0.3579996},
+   "metric_free_FP_variant_QUARANTINED": {
+    "value": {"pooled": 0.0037316, "44b6": 0.0029176, "6bba": 0.0038737},
+    "why_quarantined": "It is positive ONLY because 98.2% of the candidates sit off annotation and the edge term cannot see them -- the same annotation-coverage exploit the project pinned pi_vis=1.0 to prevent, and a pure count-multiplier effect (cf. node budget, 116% multiplier). It also assumes ZERO bipartite theft. Break-even theft rate over the 7,697 near-detected candidates is theta* = 2.22% (pooled) / 2.25% (6bba); at theta=0.10 the arm is -0.0129 pooled and at theta=0.25 it is -0.0373. Not a promotable number."
+   }
+  },
+  "Q4_matched_controls_through_the_identical_path": {
+   "design": "Same generator, same kNN16 flow, same 7 um host rule; termini partitioned ONLY by what GT says lies beyond them.",
+   "target_never_detected_continuation": {"n": 1477, "weighted_median_residual_um": 3.676, "within_7um": 1326, "rate": 0.898},
+   "control_dropped_edge_continuation_exists_and_detected": {"n": 3542, "weighted_median_residual_um": 3.766, "within_7um": 3086, "rate": 0.871},
+   "conclusion": "Propagation accuracy is NOT the binding constraint and is statistically indistinguishable between the target and the control (3.68 vs 3.77 um median, 89.8% vs 87.1% within 7 um). The idea's motion model works. What fails is the denominator."
+  }
+ },
+ "distinction_from_the_two_closed_methods": {
+  "vs_DAXI_temporal_accumulation": {
+   "distinction_is_REAL": "DAXI accumulation integrated DETECTOR RESPONSE along motion paths and required sub-threshold image evidence; its isolated gate seeded from DE-NOVO low-threshold peaks (41k-87k peaks/frame, ~40x the real cell count) and its moonshot pilot propagated around an ORACLE GT-lineage tube. This proposal asserts a node from LINEAGE CONTINUITY with a GT-FREE kNN16 flow, seeded only from existing tracks, and needs no detector response at all.",
+   "and_it_IS_better": "DAXI isolated gate oracle: 6bba 5/57 misses recovered (8.8%) for 3,280 added nodes = 656 nodes per recovery. This proposal: 1,153/13,813 (8.35%) for 162,001 candidates = 140.5 per recovery -- 4.7x more efficient.",
+   "and_it_still_fails": "56x short of break-even on 6bba, and -0.0075 even on the GT-oracle-visible surface."
+  },
+  "vs_de_novo_peak_detection_detector_diversity": {
+   "distinction_is_REAL_AND_MEASURED": "Detector diversity was strictly nested (0 new nodes; union of five gained +0/+1 GT nodes). This mechanism recovers 1,153 6bba never-detected GT nodes at positions no detector threshold produces, because the position comes from flow propagation rather than from a peak. The distinction is measured, not argued.",
+   "and_it_still_fails": "on precision, not on reachability."
+  },
+  "vs_WHAT_IS_ALREADY_DEPLOYED_the_finding_that_matters_most": {
+   "claim": "The window-1 form of this proposal IS ALREADY LIVE. src/biotrack/wrapper.py::close_single_frame_gaps pairs a track END at t with a track START at t+2, requires SPATIAL AGREEMENT (raw distance <= GAP_CLOSE_UM*(gap+1) = 12.0 um, density-adaptive), and inserts a propagated node at t+1. OUTPUT_GAP_CLOSE defaults ON; GAP_CLOSE_MAX_GAP is pinned to 1 by effective_gap_max = min(GAP_CLOSE_MAX_GAP, 1).",
+   "scale_already_spent": "169,509 synthetic gap-close nodes inserted corpus-wide (3.31% of the 5,118,041 final nodes): 44b6 95,208, 6bba 74,301, from 323,231 gap candidates (52.4% selection rate). gap_reused_existing 0. The 14,708 never-detected pool is what REMAINS AFTER that operator ran.",
+   "the_candidate_surface_is_its_residue": "Residual end(t)/start(t+2) closest-pair distance has per-crop median 21.34 um and only 5.97% of frames retain any pair within the deployed 12 um threshold -- the operator has already consumed everything inside its own gate. Direct measurement of the proposal's own bidirectional-agreement criterion on the residue: pooled 1,778 agreeing pairs at R=7 um for 8 hits."
+  }
+ },
+ "follow_on_levers_ALSO_FALSIFIED": {
+  "note": "These looked like the arm-B 'wrong constant in a gate' pattern, which PRIMITIVE_MATRIX ranks #1 for the next cycle. On the gap-closer the pattern does NOT hold. This says nothing about div_sister_max_um, which is a different operator.",
+  "raise_the_gap_close_node_cap": "gap_skipped_node_cap = 24,944 corpus-wide and binds on 43/199 crops, so the cap IS live. But the residual r=12 surface is 4,873 inserted nodes for 14 hits = 0.287% precision, exact pooled -0.0399056. NO-GO.",
+  "widen_GAP_CLOSE_UM": "12 -> 15 -> 18 -> 24 -> 30 um: pooled precision 0.287% -> 0.241% -> 0.218% -> 0.169% -> 0.143%; exact pooled -0.0399 -> -0.1139 -> -0.1786 -> -0.2668 -> -0.3166. Monotone worse. NO-GO.",
+  "enable_OUTPUT_GAP2_RECOVERY": "currently OFF (gap2_candidates 0 on all 199 crops). Window-2 surface at r=12: 45,610 inserted nodes, 188 hits, 0.412% precision, exact pooled -0.2479214. NO-GO.",
+  "arm_B_style_re_aim_of_the_gap_close_gate": "Gating on the kNN16 flow-compensated end-start residual at the SAME 12 um radius instead of the raw distance improves precision in the right direction on both families -- pooled 0.287% -> 0.390% (1.36x), 6bba 0.712% -> 0.829% (1.16x) -- exactly arm B's signature. But the absolute level is two orders of magnitude below break-even, so the arm is still -0.0475392 pooled. The re-aim is REAL and INSUFFICIENT here."
+ },
+ "gate_decision": "FAIL. The +0.005 gate needs 60.68% precision on 6bba against a measured 0.71% (85.3x) and against 26.19% (1.5x) even on a GT-oracle-visible surface. The oracle ceiling is large (+0.0594 6bba at window 8) so the idea is not dead on reachability -- it is dead on selection, and the required enrichment is not reachable by any measured channel in this project's inventory. CLOSE."
+}
