@@ -152,3 +152,16 @@ declared pattern and then a **bounded** `*/` ladder (depths 1–4) on the basena
 Cost: ~10 GPU-minutes, cheap only because the assertion fired before `predict`. The general rule:
 **any hard assertion on an input path must print the actual mount tree in its failure message**,
 otherwise "wrong path" and "broken kernel" look identical.
+
+**16. Kaggle datasets mount OWNER-QUALIFIED, one level deeper than competition data.** A fold-1
+kernel died at t = 628 s on `weights glob '/kaggle/input/*/…' matched []` — **after** the same run
+had successfully mounted 128 zarrs and resolved the support pack. This is **not trap 9**: the mount
+was healthy. Attached *datasets* appear at `/kaggle/input/datasets/<owner>/<slug>/…` while
+competition data sits at `/kaggle/input/<slug>/…`, so a single-star glob silently matches nothing.
+
+Fixed in `scripts/kaggle_edits/loeo_retarget.py::_loeo_find` with a **bounded depth ladder**.
+**Never use `recursive=True` here** — it walks the 79 GB zarr tree. The failure path now prints the
+mount tree so the two failure modes stay distinguishable. Cost ~10 GPU-minutes.
+
+Distinguishing rule: `/kaggle/input` **empty** ⇒ trap 9, re-create under a fresh slug.
+`/kaggle/input` **populated but your glob matched nothing** ⇒ trap 16, widen the depth ladder.
