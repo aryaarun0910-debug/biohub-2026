@@ -886,3 +886,50 @@ radius and in principle the 14 µm `OUTPUT_EDGE_MAX_UM`. This is inherent to the
 (WS-F had it and still scored +0.008) and violates no audit rule, but it is **unmeasured on P0-B**.
 P0-B's own per-crop maxima are 6.31 / 7.27 / 5.34 / 7.31 µm. The delta tool reports >6 / >10 / >14 µm
 counts and the max for exactly this reason.
+
+
+---
+
+# ARM-B DEPLOYMENT RUN — baseline PASSES, arm B **BLOCKED** on a structural violation
+
+| kernel | status | result |
+|---|---|---|
+| `biohub-p2-armb-baseline` | **COMPLETE** | **sha256 `4c285cae0c220a11…` — byte-identical to live P0-B. GATE 1 PASS.** |
+| `biohub-p2-armb-flowgate` | **ERROR** | pipeline completed, then **P0-B's own guard raised** `6bba_05db0fb1: invalid lineage degree` |
+
+## The causal pair did exactly its job
+
+**Gate 1 passing is decisive.** With the flag off, the entire build — patch, environment, kernel path,
+docker image — reproduces the deployed artifact **byte-for-byte**. So the harness has **zero drift**,
+and the failure is fully attributable to the gate change rather than to the build.
+
+## The violation, diagnosed exactly
+
+Fetched the failed kernel's `submission.csv` (`/kaggle/working` survives an ERROR) —
+12,382,805 bytes, sha256 `bb39927210aaef48…`, 237,917 rows = 121,003 nodes + 116,914 edges.
+Degree audit keyed on `(dataset, node_id)` per trap 24:
+
+**Exactly ONE node, in `6bba_05db0fb1`, has out-degree 3.** In-degree violations: **zero**.
+Everything else is clean.
+
+So arm B creates a **triple fork** on 1 node in 121,003 (0.0008%). This is the same defect class that
+destroyed the LOEO fold-0 run (2 nodes in 1.9M) — the pipeline *can* emit out-degree-3 nodes, and
+arm B's extra admitted edge makes it happen on a real test crop.
+
+**It is a genuine hard blocker, not a nuisance:** P0-B's own in-notebook guard rejects it, and the
+competition's structural audit would too. The artifact is **NOT submittable as built.**
+
+## Why it happens, and the minimal repair
+
+Arm B admits more pairs at the tight radius (+0.169% E0c / +0.388% P0-strict). The relink's own
+assignment is one-to-one, so it cannot create in-degree 2 — consistent with the zero in-degree
+violations observed. But a relink edge can attach a **third** child to a source that already gained
+two from another stage (safe divisions / single-parent repair / gap close). The out-degree ≤ 2
+invariant is assumed everywhere downstream but never enforced *inside* the relink.
+
+**Minimal principled repair: enforce out-degree ≤ 2 at edge admission in the relink** (or drop the
+lowest-probability third child). That restores an invariant the pipeline already assumes rather than
+changing the mechanism — the perturbation is one edge in one crop.
+
+**It does require a re-run** (~25 min GPU) and, strictly, re-measurement — though a single dropped
+edge in 116,914 cannot move a pooled figure materially. **Not submitted. Blocked pending the fix.**
