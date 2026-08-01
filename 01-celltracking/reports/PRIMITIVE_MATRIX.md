@@ -2,8 +2,14 @@
 
 **Target:** 0.925 needs +0.011 from P0-B 0.914 · 0.950 needs +0.036.
 **Objective:** exact pooled composite. **6bba carries 85.06% of edge mass — a 44b6-only figure is
-never a headline.** Anchors every lane must reproduce before quoting a delta: pooled **0.665404**,
-44b6 **0.759549**, 6bba **0.648965**.
+never a headline.** Anchors every lane must reproduce before quoting a delta — **CANONICAL, from
+`inventory/pooled_objective_parity.json`, pinned by `tests/test_pooled_objective.py`**:
+pooled **0.6653932886896151** · 44b6 **0.7595490689190139** · 6bba **0.6489523829566957**.
+**Trap 18:** a second anchor set (pooled 0.6654043, 6bba 0.6489652) circulates in the replay
+scripts and differs by exactly one edge — they rebuild edges with a bare set comprehension and
+lose insertion order, which the scorer's lowest-EDGE_ID tie-breaks are sensitive to. Magnitude
+1.10e-05 pooled: harmless to every gate, fatal to the meaning of "parity passed". State which
+anchor you used, and prefer a per-crop check against `artifacts/kaggle/coupled_cache/scores/A__*.json`.
 
 Basis tags: `public` · `exact-pooled-OOF` · `cross-family-LOFO` · `in-family-CV` ·
 `placeholder-proxy` · `GT-oracle`.
