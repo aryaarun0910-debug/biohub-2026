@@ -92,6 +92,12 @@ CLAIMS: list[tuple] = [
      "cross-family-LOFO", "{:+.6f}",
      "11,683 components retained - 15x the oracle - adding 49,688 nodes for edge TP -117; "
      "families disagree in sign (+0.0012 / -0.0115). Headroom is real; selection is the constraint."),
+    ("Arm B ON DEPLOYMENT SUBSTRATE (WS-F)", "net pairs admitted vs status quo",
+     "wsf_ARMB_P0STRICT.json", "re_aim.net_admitted_pct", "exact-pooled-OOF", "{:+.4f}",
+     "CORRECTION: arm B admits MORE, not fewer. My published 're-aim, not widen' claim quoted only "
+     "the relaxed-10um row (-0.293%); the tight-6um row was ALWAYS +0.169% on E0c. Branch A is "
+     "still not live because B is NOT a superset of A (7.2%/7.5% churn) - a re-aim with small net "
+     "widening, not monotone widening."),
 
     ("Motion-residual gate (WS-A arm B)", "pooled delta (ACTUAL, real probabilities)",
      "wsa_armB_cache_actual.json", "delta.pooled", "exact-pooled-OOF", "{:+.7f}",
@@ -120,6 +126,18 @@ CLAIMS: list[tuple] = [
      "bound_2_UPPER_DIAGNOSTIC_GT_oracle_probability_on_newly_admitted_pairs.pooled", "GT-oracle", "{:+.7f}",
      "arm E is FALSIFIED: even its upper bound is negative. The loss is in the candidate surface "
      "(net -422 GT-true pairs); a pair off the surface cannot be selected at any probability."),
+
+    ("Arm B ON DEPLOYMENT SUBSTRATE (WS-F)", "pooled delta, P0-strict",
+     "wsf_ARMB_P0STRICT.json", "pooled.delta", "exact-pooled-OOF", "{:+.7f}",
+     "144/144 crops parity EXACT vs loeo_f{0,1}_strict.json; PooledState - summarise = 0.0 exactly. "
+     "prob=0 lower diagnostic, so deployable >= this. THE TRANSFER SUCCEEDS - positive on both "
+     "families on BOTH substrates."),
+    ("Arm B ON DEPLOYMENT SUBSTRATE (WS-F)", "44b6 delta, P0-strict",
+     "wsf_ARMB_P0STRICT.json", "by_family.44b6.delta", "exact-pooled-OOF", "{:+.7f}",
+     "E0c gave +0.0071719 on the same crops; P0-strict more than DOUBLES it"),
+    ("Arm B ON DEPLOYMENT SUBSTRATE (WS-F)", "6bba delta, P0-strict (min fold)",
+     "wsf_ARMB_P0STRICT.json", "by_family.6bba.delta", "exact-pooled-OOF", "{:+.7f}",
+     "85.20% of edge mass; clears the +0.005 min-fold gate"),
 
     ("Suppress-all (WS-B)", "P0-strict OOF pooled delta, complete wrapper",
      "wsb_suppressall_p0strict.json", "result.pooled.delta_composite",

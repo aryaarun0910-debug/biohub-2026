@@ -1,0 +1,57 @@
+{
+  "name": "loeo_f1_strict_pregraph",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\loeo_f1_strict_pregraph.json",
+  "base_notebook": "notebooks/kaggle_p0a_clean913/biohub-p0a-clean913-repro.ipynb",
+  "base_sha256": "35681256f355bc98552d9cbdc4d208a9670657f18b7e7c4ce5637e6619e5e570",
+  "built_notebook": "notebooks\\kaggle_loeo_f1_strict_pregraph\\biohub-loeo-f1-strict-pregraph.ipynb",
+  "built_sha256": "c3574288c107b2d022e8f6c026b46098eddad09834d4b64844a07eb08ffc6d9a",
+  "config_hash": "1bb87c56f1ef",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "a110d11e7b0bd5e060379460b9bed055531f0fbba81dd94373ff0d99f8f295bb"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "d8e8bd4dac7f38677df1f68ba81b4344e1382155c8ad1fe7496b13f0c8d877ec"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "7e2712e00a82f54ca9623544c04e5e8ec31b0fae7faa8cd79f01d50141c31fda"
+    },
+    {
+      "kind": "insert_after",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "5cbb94850ba34054edf11f98ef44b3ee18bec83222bfe2337832604ecb74907f"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "b6a6c809e5d33dbf3b856b571a9ac5348da8e50dae1c9830e7481fd8efc4e5f5"
+    }
+  ],
+  "declared_slug": "biohub-loeo-f1-strict-pregraph",
+  "title": "Biohub Loeo F1 Strict Pregraph",
+  "pushed_slug": "biohub-loeo-f1-strict-pregraph"
+}

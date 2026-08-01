@@ -46,6 +46,12 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 | GT-oracle corpus-scaled delta | `+0.008727` | `GT-oracle` | 763 components retained; bilaterally positive; clears the +0.002 bar 4x over |
 | GT-free selector corpus-scaled delta | `-0.007761` | `cross-family-LOFO` | 11,683 components retained - 15x the oracle - adding 49,688 nodes for edge TP -117; families disagree in sign (+0.0012 / -0.0115). Headroom is real; selection is the constraint. |
 
+## Arm B ON DEPLOYMENT SUBSTRATE (WS-F)
+
+| claim | value | basis | note |
+|---|---:|---|---|
+| net pairs admitted vs status quo | `+0.3882` | `exact-pooled-OOF` | CORRECTION: arm B admits MORE, not fewer. My published 're-aim, not widen' claim quoted only the relaxed-10um row (-0.293%); the tight-6um row was ALWAYS +0.169% on E0c. Branch A is still not live because B is NOT a superset of A (7.2%/7.5% churn) - a re-aim with small net widening, not monotone widening. |
+
 ## Motion-residual gate (WS-A arm B)
 
 | claim | value | basis | note |
@@ -63,6 +69,14 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 | claim | value | basis | note |
 |---|---:|---|---|
 | UPPER diagnostic - GT-oracle probability | `-0.0022931` | `GT-oracle` | arm E is FALSIFIED: even its upper bound is negative. The loss is in the candidate surface (net -422 GT-true pairs); a pair off the surface cannot be selected at any probability. |
+
+## Arm B ON DEPLOYMENT SUBSTRATE (WS-F)
+
+| claim | value | basis | note |
+|---|---:|---|---|
+| pooled delta, P0-strict | `+0.0079822` | `exact-pooled-OOF` | 144/144 crops parity EXACT vs loeo_f{0,1}_strict.json; PooledState - summarise = 0.0 exactly. prob=0 lower diagnostic, so deployable >= this. THE TRANSFER SUCCEEDS - positive on both families on BOTH substrates. |
+| 44b6 delta, P0-strict | `+0.0167567` | `exact-pooled-OOF` | E0c gave +0.0071719 on the same crops; P0-strict more than DOUBLES it |
+| 6bba delta, P0-strict (min fold) | `+0.0067055` | `exact-pooled-OOF` | 85.20% of edge mass; clears the +0.005 min-fold gate |
 
 ## Suppress-all (WS-B)
 
@@ -124,4 +138,4 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 
 ---
 
-49 claims from 14 artifacts under `reports/inventory/`.
+53 claims from 15 artifacts under `reports/inventory/`.

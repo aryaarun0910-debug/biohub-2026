@@ -1,0 +1,66 @@
+{
+  "question": "Can artifacts/kaggle/p0strict_cache (199 post-wrapper OOF graphs) carry arm B?",
+  "verdict": "NO. It is a POST-wrapper surface and arm B edits a PRE-wrapper stage.",
+  "evidence": {
+    "1_no_edge_prob": {
+      "cache_columns": [
+        "row_type",
+        "node_id",
+        "t",
+        "z",
+        "y",
+        "x",
+        "source_id",
+        "target_id"
+      ],
+      "pre_wrapper_edges_with_prob": 1801603,
+      "post_wrapper_edges_with_prob": 0,
+      "why_it_matters": "the P0 relink cost is motion + 0.05*raw - 1.0*prob (BIOHUB_MOTION_RELINK_LEARNED_BONUS=1.0, vs 0.75 on E0c). With no probabilities the learned term is identically zero for BOTH arms, so any delta measured there belongs to a different cost function."
+    },
+    "2_wrong_node_population": {
+      "pre_wrapper_nodes": 1957771,
+      "post_wrapper_nodes": 1900633,
+      "nodes_the_relink_sees_that_the_cache_lacks": 83260,
+      "pct_of_relink_population_missing": 4.2527956538328535,
+      "nodes_in_cache_that_did_not_exist_at_relink_time": 26122,
+      "why_it_matters": "motion_relink_edges runs on the raw detector node set. 83,260 nodes (4.25%) are pruned/short-track-filtered away before the cache exists, and 26,122 synthetic gap-close nodes are added after the relink has already run."
+    },
+    "3_coordinates_have_moved": {
+      "frac_surviving_nodes_displaced": 0.9196243713693865,
+      "median_displacement_um": 0.5745242597140698,
+      "p95_displacement_um": 2.0714766773970688,
+      "max_displacement_um": 8.09447390585083,
+      "tight_gate_um": 6.0,
+      "why_it_matters": "the gate is a distance in um computed from these coordinates. 92.0% of them have been linefit-smoothed and then written as max(0,int(round(v))); the median move is 0.575 um against a 6.0 um radius."
+    },
+    "4_edges_are_already_relink_output": {
+      "note": "filter_output_graph line: edges = motion_edges. The cache edge list IS the relink result, so re-gating it is a SECOND relink of an already-relinked graph."
+    },
+    "5_empirical_parity": {
+      "test": "re-run the DEPLOYED motion_relink_edges (comp=0, the identity operation) on the cached node set and compare per-crop counters with the published anchors",
+      "n_crops": 6,
+      "cache_matches_anchor": 6,
+      "relink_matches_anchor": 3,
+      "by_family": {
+        "44b6": {
+          "n": 3,
+          "relink_parity_ok": 3
+        },
+        "6bba": {
+          "n": 3,
+          "relink_parity_ok": 0
+        }
+      },
+      "edge_jaccard_vs_cache": [
+        0.9985,
+        0.9956,
+        0.9947,
+        0.9943,
+        0.9954,
+        0.9953
+      ],
+      "reading": "the identity operation already breaks per-crop parity on 3 of 3 6bba crops - the family carrying 85.06% of edge mass. WS-F non-negotiable 1 aborts here."
+    }
+  },
+  "what_WS_B_actually_did": "WS-B re-ran ONLY OUTPUT_PRUNE_ISOLATED + filter_short_track_components on this cache and relied on refilter_identity being True (the cache is a fixed point of that node filter). It never re-ran motion relink, gap close, gap2, safe divisions or linefit - those stages have no inputs on a post-wrapper surface. Its result is sound for suppress-all, which is a pure topology edit, and gives no licence for a pre-wrapper gate change."
+}

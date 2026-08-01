@@ -658,3 +658,54 @@ only thing that has worked all cycle, and it was exactly that. Widening `div_sis
 15 µm is a single frozen-constant change on an already-characterised surface, needs no classifier,
 and can be scored with `prob = zero` (worth ≤2.26e-05 for a fixed gate) — i.e. **no GPU**.
 **Ranked #1 for the next cycle.**
+
+
+---
+
+# WS-F — **ARM B HOLDS ON THE DEPLOYMENT SUBSTRATE. The sixth substrate transfer SUCCEEDS.**
+
+`[exact-pooled-OOF, P0-strict LOEO, PRE-WRAPPER graphs, COMPLETE wrapper, prob=0 lower diagnostic]`
+**144/144 crops reproduce `loeo_f{0,1}_strict.json` EXACTLY**; `PooledState − summarise = 0.0`.
+
+| | pooled | 44b6 (14.80%) | **6bba (85.20%)** |
+|---|---:|---:|---:|
+| **Δ composite** | **+0.0079822** | **+0.0167567** | **+0.0067055** |
+| bootstrap 95% | [+0.005621, +0.010542] | [+0.008397, +0.025259] | [+0.004405, +0.009357] |
+| P(Δ>0) / P(Δ>+0.005) | 1.000 / 0.9945 | 1.000 / 0.9985 | 1.000 / 0.9135 |
+
+Edge TP **+444**, FP **−429**, FN **−444** — precision *and* recall. **100.9% raw edge quality,
+−0.9% count multiplier.** Nodes +0.075%. Divisions untouched (2/447/85 → 2/453/85). 97 crops better
+/ 42 worse. **Min-fold +0.0067 clears the +0.005 gate.**
+
+**Transfer, same crops, only the substrate varying:**
+44b6 E0c +0.0071719 → P0-strict **+0.0167567** (more than doubles) ·
+6bba E0c +0.0086560 → P0-strict **+0.0067055**.
+**Positive on both families on both substrates.** After five substrate-transfer failures, this one
+holds — and it is the mechanism that routes on nothing.
+
+## CORRECTION — my "re-aim, not widen" claim was selectively quoted
+
+I published: *"at the identical radius every arm admits FEWER pairs than the status quo (B −45,782,
+−0.293%)"*. **That was the relaxed-10 µm row only.** WS-A's own `ARM_CANDIDATE_SURFACES.json` also
+carries the **tight-6 µm** row: **5,803,970 → 5,813,794 = +9,824 (+0.169%)**. On P0-strict arm B
+admits **+7,697 (+0.388%)** overall, 6bba alone **+13,124 (+2.04%)**.
+
+**So the re-aim property never held as I stated it.** Branch A is nevertheless **not** live, for a
+structural reason rather than the sign: **B is not a superset of A** — 1,116,871 pairs in against
+1,162,653 out, i.e. **7.2% / 7.5% churn**. It is a genuine re-aim carrying a small net widening, not
+the monotone widening that scored −0.1596 / −0.1496. The distinction is real, but I asserted the
+stronger claim without checking both rows.
+
+## Route 1 (post-wrapper cache) is dead — measured, not argued
+
+`p0strict_cache` cannot express a pre-wrapper gate change: **0 of 1,801,603 edges carry `edge_prob`**
+(the P0 cost is `motion + 0.05·raw − 1.0·prob`); **83,260 nodes (4.25%)** of the relink's own
+population are absent and 26,122 gap-close nodes did not exist yet; **92.0% of coordinates have
+moved** (median 0.575 µm against a 6.0 µm gate). Empirically the *identity* operation already breaks
+parity on 3/3 6bba crops. This is why the GPU pre-wrapper export was necessary.
+
+## Status
+
+144/199 crops; the remaining 55 are extending unattended (~3–5 h, **no further GPU** — fold 0 came
+free from the earlier failed kernel). The verdict does not depend on them: both families are
+positive with P(Δ>0) = 1.000 and the min-fold gate is cleared.
