@@ -224,3 +224,49 @@ probe: v122 + reverse-time + volume guard, audit PASS 10/10, expected 0.908–0.
 blocks above were found only after substantial reading. Also verify advertised checkpoints exist —
 CAP's abstract claims "code and model checkpoints are available" and **none exist**: no weights in
 the tree, zero releases, no HuggingFace repo.
+
+## Cycle 2 (2026-08-01) — the division route CLOSES; acquisition state is the only live mechanism
+
+### Closed
+
+| method | decisive result | verdict |
+|---|---|---|
+| Shape-aware localisation | oracle +0.009125, deployed **−0.008778**, shrunk arms sign-opposite; shape does not separate misses (SMD ≤ 0.122) | CLOSED |
+| CAP / track-as-point | licence-blocked four ways (no licence at all; CC BY-NC upstream; CTC training data); no weights exist; not detection-free | CLOSED |
+| Flat mother classification | 92 true among 4,957,806 ⇒ needs AUC 0.983–0.9992, measured 0.86–0.92; capacity makes it worse | CLOSED |
+| **Branch-emergence proposer (D1)** | **G2 11/92 vs 50% · G5 29.8× vs 100×. A GT-ORACLE in-sample logit is still 19.5× over budget.** 50% retention at K=20,000 needs AUC **0.9695**; measured 0.856/0.777 | **CLOSED — division route closes** |
+| **Counterfactual image critic** | **foreclosed by arithmetic, never launched**: a perfectly independent channel needs AUC **0.9386**; appearance measures 0.657/0.496 and is 7–232× dependent | **CLOSED without GPU spend** |
+| Dense registration as a motion vector | block deformable 2.167 µm, phase correlation 2.801 — both worse than assuming ZERO motion (1.817) vs kNN flow's 1.329 | DO NOT FUND (keep as state flags only) |
+
+### Live
+
+| mechanism | pooled Δ | basis | status |
+|---|---:|---|---|
+| **suppress-all, complete wrapper, P0-strict OOF** | **+0.0016970** | exact-pooled-OOF, 199 crops, CI [+0.000716,+0.002545] | **PROMOTED** — not bilateral (44b6 −0.000619) |
+| acquisition-state relink (WS-A) | not yet measured | oracle ceiling +0.020212; bilateral core +0.003389 | RUNNING |
+
+### Corrections to earlier ledger entries
+
+- **suppress-all sign**: recorded −0.001728 (edges-only artifact) → **+0.002706 on E0c** through the
+  complete wrapper. Trap 14 in reverse.
+- **suppress-all does not port**: E0c +0.002706 *bilateral* → P0-strict **+0.001697** with 44b6
+  **negative**. Mechanism: suppression is free only where divJ is already 0; E0c 44b6 had TP0,
+  P0-strict 44b6 has TP2.
+- **"P0-B has 8 forks" was a UNITS ERROR** — 8 is its metric division-FP count. P0-B has **305**
+  graph forks (2.52e-3/node) vs P0-strict 2.86e-3 and E0c 3.98e-3. Substrates are comparable in
+  fork density; the reason to re-measure was always divJ.
+- **Temporal NMS is NOT free.** Recorded as losing zero true forks; that was a property of one
+  score. Under other rankers it destroys **38–48 of 92**. Re-measure per lane.
+- **Annotation-coverage inflation is FALSE** for division features — full-denominator AUC matches
+  the annotated subpopulation. They are not inflated, just not strong enough.
+- **`cos_daughter_axis` is wrong-signed** (axis vs migration, AUC 0.3234/0.5528); use
+  `daughter_angle` (0.6551/0.6024).
+
+### The programme-level pattern, now five instances
+
+Node budget · H0d live-filter cross-term · reverse-time · the 22/26 substrate · suppress-all.
+**Every one transferred badly across substrate or family.** Combined with three lanes where the
+oracle cleared the bar and the deployable selector did not (localisation +0.009→−0.009, component
+retention +0.0087→−0.0078, division +0.0646→+0.0001), the conclusion is that **+0.036 will not come
+from better selection over existing candidate populations.** It requires a mechanism that changes
+the base rate or the detection surface itself.

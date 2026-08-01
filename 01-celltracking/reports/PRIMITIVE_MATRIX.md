@@ -320,8 +320,8 @@ flow-compensated residual, state-conditioned on (L+1).
 |---|---|---|---|
 | **A** | acquisition-aware union inference cache + 5-arm exact replay | GPU + CPU replay | **RUNNING** |
 | **B** | suppress-all through the complete wrapper on 199 P0-strict OOF graphs | CPU | **LANDED — PROMOTE (conditional)** |
-| **C** | branch-emergence proposer (denominator compression, NOT classification) | CPU | **RUNNING** |
-| D | counterfactual image evidence | CPU/GPU | staged — **depends on C's proposer output** |
+| **C** | branch-emergence proposer (denominator compression, NOT classification) | CPU | **LANDED — CLOSE. Division route closes.** |
+| D | counterfactual image evidence | — | **NOT LAUNCHED — foreclosed by WS-C arithmetic** |
 | E | pseudo-lineage consensus substrate | CPU background | staged |
 
 D and E are staged rather than launched for two reasons: D operates *per proposed mother* and so has
@@ -439,3 +439,72 @@ not violated.
 mechanism, not a +0.006 one; it does not reach 0.920 alone. The 44b6 CI straddles zero
 ([−0.003819, +0.001681]), so 44b6 harm is *not established* either — but it is not established
 absent, and that is the residual risk a slot would buy information about.
+
+
+---
+
+## WS-C — branch-emergence proposer: **CLOSE. The division route closes.**
+
+Two of five preregistered gates fail, and they fail by a margin **a GT-oracle in-sample fit over the
+same representation cannot rescue.**
+
+| gate | budget | measured | verdict |
+|---|---|---|---|
+| G1 ≤ 20,000 proposed mother-events | 20,000 | 19,900 | PASS |
+| **G2 retain ≥ 50% of the 92** | 0.50 | **11/92 = 0.1196** | **FAIL (4.2×)** |
+| G3 same-sign retention both families | — | 44b6 18.8% · 6bba 10.5% | PASS (sign only) |
+| G4 no family/crop identifier | 0.65 | family AUC **0.5601** | PASS |
+| **G5 base-rate gain ≥ 100×** | 100× | **29.79×** | **FAIL (3.4×)** |
+
+### Why it fails — three independent reasons, none of them tuning
+
+**1. The GT oracle is 19.5× over budget.** To retain 46 of 92, `K@50%` is 445,357 for the best
+GT-free ranker and **390,677 for a GT-oracle in-sample logit that reads all 92 labels with no
+held-out anything**. That oracle also **flipped three of the mechanism signs**, so it had already
+searched the sign space — "a sign was backwards" cannot explain the gap.
+
+**2. The arithmetic bar, and it forecloses the image route without spending GPU.** 50% retention
+inside K = 20,000 (FPR 4.034e-03) requires binormal mother AUC **0.9695**; measured is
+**0.8560 / 0.7767**. A **perfectly independent** new channel would itself need AUC **0.9386** to
+close the gap (d′ = √(2.6492² − 1.5025²) = 2.182). The only unspent channel is appearance, measured
+on this project at **0.657 / 0.496** — and appearance scorers here are **7–232× dependent**, so even
+that generous independence assumption over-prices it.
+
+**3. The premise is defeated by our own shortlist.** The frozen top-3 shortlist is built by
+minimising `flow_midpoint_residual` — which *is* the branch hypothesis's residual. The alternative
+hypothesis therefore already fits near-optimally for **all 4,957,806** mothers, leaving the
+likelihood ratio no discriminative alternative term. Measured directly: `branch_beats_cont`
+compresses 15.7× but retains only **8 of 92** — gain **1.37×**, *worse than the null term alone*.
+
+Pure structural compression does not exist either: over 21 GT-free predicates and conjunctions the
+**best gain is 4.40×**, and that one (`no_steal`) is forbidden because it destroys 60/92.
+
+### Ledger corrections from this lane
+
+- **Temporal NMS is NOT free.** Lane 3 recorded W=2 NMS as losing **zero** true forks. That is a
+  property of *Lane 3's score*, not of the operator: under `BE_rank` it destroys **38 of 92** true
+  mothers, under `BE_phys` **48 of 92**. **Any future lane applying NMS must re-measure its own
+  true-fork loss.**
+- **The annotated-subpopulation inflation hypothesis is FALSE.** Per-term mother AUC on the full
+  4,957,806 is essentially identical to the annotated subpopulation (`cont_resid_um` 0.8440/0.8603
+  on 44b6, 0.7904/0.8017 on 6bba). Division features are **not** overstated by annotation coverage —
+  they are simply not strong enough. That removes a standing explanation.
+- **`cos_daughter_axis` is wrong-signed and family-unstable.** It computes axis-vs-*migration*
+  (`phaseb_h1g_features.py:137`), not daughter anti-parallelism: AUC **0.3234 / 0.5528** with the
+  intuitive sign. The correct feature is `daughter_angle` (`:139`) at 0.6551 / 0.6024, same sign in
+  both families.
+- **Real divisions here are strongly ASYMMETRIC about the mother**: only **6 of 92** true pairs have
+  `min/max arm > 1/1.5`, against 27% of all candidates. The symmetric-split prior is wrong on this
+  surface — consistent with 60/92 requiring a daughter steal, so the shortlisted mother sits off the
+  true geometric centre.
+
+### Integration consequence — WS-D is NOT launched
+
+WS-D (counterfactual image evidence) exists to supply exactly the independent channel reason 2
+prices. **It needs AUC 0.9386 to close the gap; appearance measures 0.657 / 0.496 and is 7–232×
+dependent on the scorers already counted.** Launching it would spend GPU to confirm an arithmetic
+result. **Not launched.** Reopen the division route only if some method produces mother-level AUC
+**≥ 0.97 on the full 4.96M denominator** — nothing in the measured inventory is within reach.
+
+**D2 stays on the shelf, unspent** (75/92, +0.049871 pooled, paired +0.003541), waiting on a mother
+set this route cannot produce.
