@@ -3368,3 +3368,79 @@ H2a was not run; that slot went to H0d, which invalidated an inherited constant 
 Fold 1 (`aryaarun07/biohub-loeo-f1-strict` v2) is RUNNING on GPU; `split_1` was verified LOEO-clean
 before spend (split 1 = train 71×44b6 / test 128×6bba, best epoch chosen on a validation subset of
 the *training* embryo). New **trap 16** recorded.
+
+### 2026-08-01 (RED TEAM — both selector feature sets fail a leakage budget; set (A) fails transfer)
+
+Full audit: `..._RESEARCH/agent_runs/research_redteam_2026-07-31/REDTEAM_FEATURE_AUDIT.md`.
+
+**The corpus fact that drives everything.** 44b6 is cell-DENSE (404 nodes/frame) and SPARSELY
+annotated (label_fraction 0.0077); 6bba is cell-SPARSE (94.9) and DENSELY annotated (0.0971).
+Background intensity differs **5.3×**, nuclear peak 2.1×, `edge_prob` 0.652 vs 0.819. Meanwhile
+**division rate per 1000 GT nodes is 1.29 vs 1.11** — division biology is the *one* thing that
+matches across families. Almost everything else our selectors are fed is **regime, not biology**.
+
+**Family-discriminability** (per-fold HGB, GroupKFold by crop, budget ≤ 0.65):
+
+| feature set | rows / crops | family AUC | verdict |
+|---|---|---:|---|
+| crop-level descriptors | 199 crops | **0.9955** | (reference) |
+| component set (A), 34 feats | 40k / 78 | **0.865** | **FAIL** |
+| single candidate edge, 10 feats | 139k / 199 | 0.793 | FAIL |
+| fork geometry (B), 14 feats | 20k / 199 | 0.709 | FAIL |
+| appearance-4 RAW | 22k / 199 | 0.699 | FAIL |
+| (A) "hardened" to 7 feats | 40k / 78 | 0.697 | FAIL |
+| **appearance-4, per-crop rank-normalised** | 22k / 199 | **0.532** | **PASS** |
+
+Mean |SMD| for set (A) is **0.151** and for a single edge 0.118 — **the SMD trap reproduced on our
+real deployment features**, exactly as the prior synthetic-patch result predicted.
+
+**Set (A) does not transfer** `[cross-family-LOFO, GT proxy, 23 crops]`. Base rate differs **11.3×**
+(0.357% vs 4.034%), so thresholds are mis-set before features matter. In **3 of 4 direction × label
+cells the transferred selector is at or below random-selection utility** (lift 0.88× / 1.31× /
+0.77×); cross-family AUC **inverts below 0.5** in the 44b6→6bba direction; 44b6's in-family CV AUC
+is **0.354 on 21 positives**. Also measured: only **52% of GT edges inside deleted components are
+uncontested**, halving the 5,311 ceiling to **~2,760**.
+
+**The division appearance channel survives — but only normalised.** Family AUC **0.699 raw →
+0.532 after per-crop rank normalisation**. The leak is entirely the two `peak_above_bg` terms
+(0.673 alone, |SMD| 0.575); **`aniso(t−1)` alone is 0.504**, independently confirming it as
+physically invariant. **The LOEO division AUC 0.719 is NOT yet a transfer claim** — it must be
+re-measured on the rank-normalised set. If it holds ≈0.72 at family AUC 0.53, adopt it; if it drops,
+the 0.719 was partly family-conditional.
+
+**Boundary flag: SPLIT IT, two booleans, never fused, never continuous.**
+Temporal (movie start/end) rate ratio **0.98**, family AUC **0.4979** — the cleanest feature in the
+whole audit. Spatial (volume boundary) rate ratio 0.54, AUC 0.4108 — 6bba's deleted components are
+**1.84× more likely** to touch the boundary, i.e. crop framing. Continuous `bdist_min_um` is worst
+(0.5915).
+
+**Normalisers.** Required: N1 per-crop rank (0.699→0.532); N2 density ÷ crop-median NN
+(|AUC−0.5| 0.142→0.012); N3 `(I−p50)/(p99.9−p50)` (0.516). **Explicitly REJECTED: peak/background**
+— the intuitive choice and measurably *worse* than raw (0.343). Standing rule, generalising the
+`sister_um` counterexample: **report a normaliser's effect on BOTH family AUC and target AUC before
+adopting it.** A noisy predicted denominator imports more variance than it removes.
+
+**The methodological headline, from the red team's own self-correction.** It classified trajectory
+smoothness PHYSICALLY INVARIANT on distributional grounds (block leakage 0.506, the lowest it
+measured) and then **falsified it**: straightness 0.545/0.416, cos_mean 0.527/0.460 cross-family,
+**reversed on both labels**. Conversely, several features it had flagged as family proxies
+(`prob_mean`, `nn5_mean_um`, `cnt10_mean`) *passed* the sign test.
+**MARGINAL FAMILY-BLINDNESS DOES NOT IMPLY SIGN-STABILITY AGAINST THE TARGET, AND VICE VERSA.**
+Neither direction of that inference is safe. Only bilateral LOFO sign-stability counts.
+
+**Drop list (16)**, headed by: absolute intensity/mass · forward persistence (`n_persist` 0.175 →
+0.755, a complete reversal) · absolute local density (0.520 → 0.467) · crop aggregates (0.998) ·
+raw model probabilities · `nuc_snr` · division-rate/synchrony priors · and
+**`BIOHUB_SHORT_TRACK_MIN_LEN_BY_DATASET`** — a **live** env-driven per-dataset override in
+`src/biotrack/wrapper.py` that keys the short-track filter on the crop stem. It defaults to `{}`
+and is inert, but nothing prevented it being set. **Now locked by `tests/test_no_family_routing.py`**
+(5 tests: override empty, env unset, every stem resolves to the global constant, and no `44b6_` /
+`6bba_` literal gates control flow in the wrapper). Suite 33 → 38.
+
+**Pre-registration adopted — 8 gates before either selector goes near a submission:**
+Gate 0 leakage ≤0.65 · Gate 1 per-feature sign stability + base-rate ratio ≤3× (**necessary, not
+sufficient** — 9/28 features pass while the model still transfers at 0.77×) · Gate 2 bilateral
+pooled Δ ≥ +0.002 with the two LOFO directions agreeing within **3×** · Gate 3 family-oracle
+ablation ≤ +0.0005 · Gate 3b normalisation control · Gate 4 P(Δ>0) ≥ 0.80 in the *weaker* family ·
+Gate 5 unit economics against a **random equal-sized retention control**, not against nothing ·
+Gate 6 count-multiplier ≤50% of the gain · Gate 7 basis tags on every number.
