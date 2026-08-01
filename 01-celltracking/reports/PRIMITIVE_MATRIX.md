@@ -319,7 +319,7 @@ flow-compensated residual, state-conditioned on (L+1).
 | WS | scope | resource | status |
 |---|---|---|---|
 | **A** | acquisition-aware union inference cache + 5-arm exact replay | GPU + CPU replay | **RUNNING** |
-| **B** | suppress-all through the complete wrapper on 199 P0-strict OOF graphs | CPU | **RUNNING** |
+| **B** | suppress-all through the complete wrapper on 199 P0-strict OOF graphs | CPU | **LANDED — PROMOTE (conditional)** |
 | **C** | branch-emergence proposer (denominator compression, NOT classification) | CPU | **RUNNING** |
 | D | counterfactual image evidence | CPU/GPU | staged — **depends on C's proposer output** |
 | E | pseudo-lineage consensus substrate | CPU background | staged |
@@ -352,3 +352,90 @@ from the common cache.** A slot must represent a distinct mechanism and pass str
 Report **four separate things** and never let one stand in for another: **state-detection accuracy ·
 candidate-surface recall · assignment quality · exact final pooled score.** A rise in candidate
 recall is **not** success. The decision is the exact pooled graph score.
+
+
+---
+
+## WS-B — suppress-all on P0-strict OOF: **+0.0016970 pooled**, and the E0c result did NOT port
+
+`[exact-pooled-OOF, 199 crops, complete wrapper re-run]` · parity **0/199** counter mismatches,
+`refilter_identity` True on 199/199, `PooledState` vs `summarise` error exactly **0.0**, and the
+fold-0 arm reproduces `laneB_h0d_p0strict_f0.json` digit-for-digit **under a different edge
+insertion order** — so trap 18 has no bite on this operation.
+
+| | pooled | 44b6 (14.74%) | 6bba (85.26%) |
+|---|---:|---:|---:|
+| **Δ composite** | **+0.0016970** | **−0.0006187** | **+0.0020926** |
+| Δ edge term | +0.0021013 | +0.0009686 | +0.0022549 |
+| Δ division term | −0.0004043 | −0.0015873 | −0.0001623 |
+| bootstrap 95% CI | **[+0.000716, +0.002545]**, P(Δ>0)=0.9995 | [−0.003819, +0.001681], P=0.339 | [+0.001120, +0.002967], P=1.000 |
+
+Edge term carries **124%** of the delta and the division term is **negative (−24%)** — the exact
+inverse of node budget's 116%-multiplier profile. Deleted content `q_net` **0.2126** against the
+substrate's own retain floor **0.4187** ⇒ deleting is correct by the project's independently-derived
+rule. 141 crops improve / 57 regress / 1 flat.
+
+**Prerequisite resolved properly:** the fold-1 graph cache did not exist. It was built and the
+builder was **validated by running it on the fold-0 CSV and asserting frame-equality against the
+shipped fold-0 cache — 71/71 crops, 0 mismatches — before being applied to fold 1.** Schema tested,
+not assumed.
+
+### Why the sign inverts on 44b6 — the mechanism, and it is not the substrate being "worse"
+
+Suppress-all is division-free **only where divJ is already 0**. On E0c, 44b6 divisions were
+TP0/FP93/FN26 ⇒ divJ = 0, so suppression cost nothing and the arm was bilaterally positive. On
+P0-strict, 44b6 divisions are **TP2**/FP100/FN24 ⇒ divJ 0.015873, and suppression destroys **2 real
+TPs** for −0.0015873 against an edge gain of only +0.0009686. **44b6's edge side still improves.**
+What makes it expensive is the family-restricted division denominator (126); pooled, those same 3
+TPs sit over a denominator of 742 and the whole division cost is −0.00040431.
+
+**This is the fifth substrate-transfer failure of the programme** — E0c +0.002706 *bilateral* became
++0.001697 pooled with a *negative* 15%-mass family, a ~37% magnitude loss with the mechanism fully
+identified.
+
+### Zero division-exemption components — extends Lane B's fold-0 finding to fold 1
+
+**0 components and 0 nodes** were removed because a division exemption disappeared, measured per
+crop on all 199. No component on P0-strict is kept only by `has_division`, so the D0′ hazard cannot
+fire. All 9,233 deleted nodes come from fork suppression *splitting* long components (585
+prune-isolated + 8,648 short-track across 2,248 components); every one was in a fork-bearing
+pre-edit component, so attribution is 100%.
+
+### P0-B deployment-integrity diagnostic `[placeholder-proxy — a check, NOT a gate]`
+
+Base reproduces 0.889224766308105 exactly. Frozen operation: **0.8892248 → 0.8899725, Δ +0.0007477**.
+Divisions **TP0/FP8/FN3 → TP0/FP0/FN3** — **divJ is 0 before *and* after**, so on P0-B the operation
+**cannot lose division credit at all**, and the mechanism that penalises 44b6 on P0-strict is
+structurally absent there. The four movies did not select anything.
+
+### PREMISE CORRECTION — "P0-B has 8 forks" was a UNITS ERROR, and I propagated it
+
+The "8" was P0-B's **metric division-FP count**, not its graph fork count. Measured:
+
+| substrate | graph forks | nodes | forks/node |
+|---|---:|---:|---:|
+| P0-B | **305** | 120,861 | 2.52e-3 |
+| P0-strict | 10,726 | 3,752,580 | 2.86e-3 |
+| E0c | 20,353 | 5,118,041 | 3.98e-3 |
+
+On the **same four crops**, P0-strict has 307 forks against P0-B's 305. **The substrates are
+comparable in fork density**, so the "magnitude cannot port because P0-B has almost no forks"
+argument I circulated was wrong — the right reason to re-measure was always divJ, not fork count.
+
+### Integration decision — a rule conflict, resolved
+
+- WS-B clause 1 (pooled positive, bootstrap LCB ≥ 0): **MET** (+0.0016970, LCB +0.000716).
+- WS-B clause 2 (≥ +0.0015 with strong mechanistic parity): **MET at the point estimate**;
+  P(Δ > +0.0015) = 0.658, so the margin above that bar is itself uncertain.
+- CLAUDE.md standing gate (both families improve, min-fold ≥ +0.005): **NOT MET.**
+
+**Resolution: the pooled objective governs, and min-fold is a robustness constraint — that was
+established and locked earlier in this programme** (`scripts/verify_pooled_objective.py`,
+`tests/test_pooled_objective.py`), after the bilateral gate was shown to reject every better pooled
+arm including v122, our own best public score. The CLAIMS entry for the old gate stands superseded,
+not violated.
+
+**Verdict: PROMOTE as a submission candidate, with its size stated honestly.** It is a **+0.0017**
+mechanism, not a +0.006 one; it does not reach 0.920 alone. The 44b6 CI straddles zero
+([−0.003819, +0.001681]), so 44b6 harm is *not established* either — but it is not established
+absent, and that is the residual risk a slot would buy information about.

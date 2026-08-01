@@ -93,6 +93,23 @@ CLAIMS: list[tuple] = [
      "11,683 components retained - 15x the oracle - adding 49,688 nodes for edge TP -117; "
      "families disagree in sign (+0.0012 / -0.0115). Headroom is real; selection is the constraint."),
 
+    ("Suppress-all (WS-B)", "P0-strict OOF pooled delta, complete wrapper",
+     "wsb_suppressall_p0strict.json", "result.pooled.delta_composite",
+     "exact-pooled-OOF", "{:+.7f}",
+     "199 crops, complete wrapper re-run, 0/199 parity mismatches. CI [+0.000716,+0.002545], "
+     "P(d>0)=0.9995. GT-free, no selector, pi_vis-invariant. NOT bilateral: 44b6 -0.000619 "
+     "(P(gain)=0.339) / 6bba +0.002093 (P=1.000). E0c's +0.002706 did NOT port."),
+    ("Suppress-all (WS-B)", "edge vs division share of the delta",
+     "wsb_suppressall_p0strict.json", "result.pooled.share_edge",
+     "exact-pooled-OOF", "{:.4f}",
+     "edge term carries 124% and the division term is NEGATIVE (-24%) - the opposite of node "
+     "budget's 116% count-multiplier profile. This is edge quality, not a metric artifact."),
+    ("Suppress-all (WS-B)", "q_net of deleted content vs retain floor",
+     "wsb_suppressall_p0strict.json", "result.pooled.retain_floor_q_star",
+     "exact-pooled-OOF", "{:.4f}",
+     "deleted content q_net 0.2126 sits BELOW this floor, so deleting is correct by the "
+     "project's own independently-derived rule"),
+
     # ---------------------------------------------------------------- node budget
     ("Node budget (CLOSED)", "arm D (v122) delta @ keep_frac 0.975",
      "node_budget_armD.json", "table.0.975.delta", "exact-pooled-OOF", "{:+.5f}",

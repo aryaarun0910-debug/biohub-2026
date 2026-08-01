@@ -46,6 +46,14 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 | GT-oracle corpus-scaled delta | `+0.008727` | `GT-oracle` | 763 components retained; bilaterally positive; clears the +0.002 bar 4x over |
 | GT-free selector corpus-scaled delta | `-0.007761` | `cross-family-LOFO` | 11,683 components retained - 15x the oracle - adding 49,688 nodes for edge TP -117; families disagree in sign (+0.0012 / -0.0115). Headroom is real; selection is the constraint. |
 
+## Suppress-all (WS-B)
+
+| claim | value | basis | note |
+|---|---:|---|---|
+| P0-strict OOF pooled delta, complete wrapper | `+0.0016970` | `exact-pooled-OOF` | 199 crops, complete wrapper re-run, 0/199 parity mismatches. CI [+0.000716,+0.002545], P(d>0)=0.9995. GT-free, no selector, pi_vis-invariant. NOT bilateral: 44b6 -0.000619 (P(gain)=0.339) / 6bba +0.002093 (P=1.000). E0c's +0.002706 did NOT port. |
+| edge vs division share of the delta | `1.2383` | `exact-pooled-OOF` | edge term carries 124% and the division term is NEGATIVE (-24%) - the opposite of node budget's 116% count-multiplier profile. This is edge quality, not a metric artifact. |
+| q_net of deleted content vs retain floor | `0.4187` | `exact-pooled-OOF` | deleted content q_net 0.2126 sits BELOW this floor, so deleting is correct by the project's own independently-derived rule |
+
 ## Node budget (CLOSED)
 
 | claim | value | basis | note |
@@ -98,4 +106,4 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 
 ---
 
-38 claims from 10 artifacts under `reports/inventory/`.
+41 claims from 11 artifacts under `reports/inventory/`.
