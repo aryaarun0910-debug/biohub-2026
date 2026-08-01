@@ -46,6 +46,21 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 | GT-oracle corpus-scaled delta | `+0.008727` | `GT-oracle` | 763 components retained; bilaterally positive; clears the +0.002 bar 4x over |
 | GT-free selector corpus-scaled delta | `-0.007761` | `cross-family-LOFO` | 11,683 components retained - 15x the oracle - adding 49,688 nodes for edge TP -117; families disagree in sign (+0.0012 / -0.0115). Headroom is real; selection is the constraint. |
 
+## Motion-residual gate (WS-A arm B)
+
+| claim | value | basis | note |
+|---|---:|---|---|
+| pooled delta | `+0.0087299` | `exact-pooled-OOF` | 199/199 crops, complete wrapper, parity gap EXACTLY 0.0 vs canonical anchors. prob=zero on new pairs is a LOWER diagnostic, so deployable >= this. E0c SUBSTRATE, not P0-B. |
+| 44b6 delta (min fold) | `+0.0072796` | `exact-pooled-OOF` | clears the CLAUDE.md min-fold >= +0.005 gate - the FIRST mechanism in the programme to do so |
+| 6bba delta | `+0.0090040` | `exact-pooled-OOF` | 85.06% of edge mass |
+| bootstrap lower 95% | `+0.006272` | `exact-pooled-OOF` | 2000 crop-block draws; P(d>0)=1.000 and P(d>+0.002)=1.000 |
+
+## Acquisition policy (WS-A arm E)
+
+| claim | value | basis | note |
+|---|---:|---|---|
+| UPPER diagnostic - GT-oracle probability | `-0.0022931` | `GT-oracle` | arm E is FALSIFIED: even its upper bound is negative. The loss is in the candidate surface (net -422 GT-true pairs); a pair off the surface cannot be selected at any probability. |
+
 ## Suppress-all (WS-B)
 
 | claim | value | basis | note |
@@ -106,4 +121,4 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 
 ---
 
-41 claims from 11 artifacts under `reports/inventory/`.
+46 claims from 13 artifacts under `reports/inventory/`.

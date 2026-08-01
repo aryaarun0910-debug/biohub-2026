@@ -318,7 +318,7 @@ flow-compensated residual, state-conditioned on (L+1).
 
 | WS | scope | resource | status |
 |---|---|---|---|
-| **A** | acquisition-aware union inference cache + 5-arm exact replay | GPU + CPU replay | **RUNNING** |
+| **A** | acquisition-aware union inference cache + 5-arm exact replay | GPU + CPU replay | **LANDED — arm B PROMOTES, arms C/D/E falsified** |
 | **B** | suppress-all through the complete wrapper on 199 P0-strict OOF graphs | CPU | **LANDED — PROMOTE (conditional)** |
 | **C** | branch-emergence proposer (denominator compression, NOT classification) | CPU | **LANDED — CLOSE. Division route closes.** |
 | D | counterfactual image evidence | — | **NOT LAUNCHED — foreclosed by WS-C arithmetic** |
@@ -508,3 +508,71 @@ result. **Not launched.** Reopen the division route only if some method produces
 
 **D2 stays on the shelf, unspent** (75/92, +0.049871 pooled, paired +0.003541), waiting on a mother
 set this route cannot produce.
+
+
+---
+
+## WS-A — **arm B clears every promotion gate. First mechanism in the programme to do so.**
+
+### The result
+
+**Arm B = change the gate QUANTITY in `motion_relink_edges` from raw source–target distance to the
+kNN16 flow-compensated residual. Same 6/10 µm radius. Same cost function. Same node population.
+It routes on NOTHING** — no acquisition state, no family, no crop identity.
+
+`[exact-pooled-OOF, 199/199 crops, complete wrapper, prob = 0 on newly admitted pairs — a LOWER
+diagnostic, so the deployable value is ≥ this]` · parity gap **EXACTLY 0.0** against all three
+canonical anchors, 199/199 per-crop.
+
+| | pooled | 44b6 | 6bba |
+|---|---:|---:|---:|
+| **Δ composite** | **+0.0087299** | **+0.0072796** | **+0.0090040** |
+| bootstrap 95% | [+0.006272, +0.011223] | [+0.002938, +0.012035] | [+0.006285, +0.011818] |
+| P(Δ>0) | **1.000** | 0.9995 | 1.000 |
+
+| gate | verdict |
+|---|---|
+| exact pooled ≥ +0.002 | **PASS — 4.4×** |
+| both families improve | **PASS** |
+| min-fold ≥ +0.005 (CLAUDE.md) | **PASS at +0.0072796** |
+| regime | 141/199 crops better, 58 worse (28.8% of edge mass), **none collapses**; top crop = 6.2% of the delta |
+
+**Not a metric artifact: 101.6% raw edge quality, −1.6% count multiplier** — the exact mirror of the
+node-budget failure. Edge TP **+904**, FP **−688**, FN **−904**: precision *and* recall improve.
+Nodes move +0.041%.
+
+**Re-aim, not widen — verified numerically.** At the identical radius every arm admits FEWER pairs
+than the status quo (B **−45,782**, −0.293%). Branch A's global widening is not repeated.
+
+**The GPU pass cost zero extra model FLOPs.** `predict_unet_transformer.py:447-457` already returns
+the full `(n_src, n_tgt)` logit matrix per frame pair and softmaxes over all sources; the ~9.88 µm
+ceiling on exported `edge_prob` is `threshold=0.5` + parent/child caps, **not a distance gate in the
+model**. With the node set unchanged the cached probabilities are bit-identical to the deployed ones —
+**max-abs-diff 0.0 across 4,167,217 pairs.**
+
+### Three falsifications — the acquisition framing itself does NOT pay
+
+- **Arm E (full acquisition policy) is FALSIFIED — even its UPPER bound is negative**
+  (lower −0.0023157, upper **−0.0022931**, bracket width 2.26e-05). The loss is in the *candidate
+  surface* (net −422 GT-true pairs); a pair off the surface cannot be selected at any probability.
+  **Corollary worth reusing: for a fixed gate the probability lever is worth ≤ 2.26e-05 pooled, so
+  `prob = zero` is an adequate proxy for the deployable score.**
+- **The (L+1) scaling is falsified as a GATE quantity.** Post-frozen reach ≤6 µm: raw 0.7280,
+  unscaled **0.8325**, (L+1)-scaled 0.7353 — and at 10 µm it falls *below* raw. The flow is rebuilt
+  from the raw geff edges of the same frame pair, which already span the enlarged interval, so the
+  multiplier **double-counts**. Lane 2 saw the opposite sign using a flow from the *post-wrapper*
+  graph — an estimator that does not exist where the gate runs.
+- **Phase correlation as a vector is catastrophic** (core reach ≤10 µm 0.9185 → **0.5691**),
+  independently reconfirming "valid flag, useless vector".
+
+**So arm B is NOT an acquisition-state result.** What Lane 2 actually surfaced is that
+`motion_relink_edges` gates on the **wrong quantity**; the state conditioning is not what pays.
+Arms C/C2 have net-true-pairs **exactly 0** on 44b6 — transfer there is vacuous, not demonstrated.
+
+### THE CAVEAT THAT GOVERNS DEPLOYMENT
+
+**Arm B is measured on E0c (public 0.889), NOT on P0-B.** This programme has already recorded two
+mechanisms that looked good on E0c and died on P0-B — node budget went **+0.006339 → −0.0000103** —
+and five substrate-transfer failures overall. **+0.0087299 is not a deployment claim until it is
+re-measured on the deployment substrate.** That re-measurement is now the single highest-value
+action available.

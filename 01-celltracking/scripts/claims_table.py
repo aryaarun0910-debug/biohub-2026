@@ -93,6 +93,25 @@ CLAIMS: list[tuple] = [
      "11,683 components retained - 15x the oracle - adding 49,688 nodes for edge TP -117; "
      "families disagree in sign (+0.0012 / -0.0115). Headroom is real; selection is the constraint."),
 
+    ("Motion-residual gate (WS-A arm B)", "pooled delta",
+     "wsa_PROMOTION_CANDIDATE_arm_B.json", "delta.pooled", "exact-pooled-OOF", "{:+.7f}",
+     "199/199 crops, complete wrapper, parity gap EXACTLY 0.0 vs canonical anchors. prob=zero on "
+     "new pairs is a LOWER diagnostic, so deployable >= this. E0c SUBSTRATE, not P0-B."),
+    ("Motion-residual gate (WS-A arm B)", "44b6 delta (min fold)",
+     "wsa_PROMOTION_CANDIDATE_arm_B.json", "delta.44b6", "exact-pooled-OOF", "{:+.7f}",
+     "clears the CLAUDE.md min-fold >= +0.005 gate - the FIRST mechanism in the programme to do so"),
+    ("Motion-residual gate (WS-A arm B)", "6bba delta",
+     "wsa_PROMOTION_CANDIDATE_arm_B.json", "delta.6bba", "exact-pooled-OOF", "{:+.7f}",
+     "85.06% of edge mass"),
+    ("Motion-residual gate (WS-A arm B)", "bootstrap lower 95%",
+     "wsa_PROMOTION_CANDIDATE_arm_B.json", "bootstrap_pooled.lo95", "exact-pooled-OOF", "{:+.6f}",
+     "2000 crop-block draws; P(d>0)=1.000 and P(d>+0.002)=1.000"),
+    ("Acquisition policy (WS-A arm E)", "UPPER diagnostic - GT-oracle probability",
+     "wsa_BOUNDS_arm_E.json",
+     "bound_2_UPPER_DIAGNOSTIC_GT_oracle_probability_on_newly_admitted_pairs.pooled", "GT-oracle", "{:+.7f}",
+     "arm E is FALSIFIED: even its upper bound is negative. The loss is in the candidate surface "
+     "(net -422 GT-true pairs); a pair off the surface cannot be selected at any probability."),
+
     ("Suppress-all (WS-B)", "P0-strict OOF pooled delta, complete wrapper",
      "wsb_suppressall_p0strict.json", "result.pooled.delta_composite",
      "exact-pooled-OOF", "{:+.7f}",

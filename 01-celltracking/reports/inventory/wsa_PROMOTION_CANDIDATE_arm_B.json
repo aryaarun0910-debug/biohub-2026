@@ -1,0 +1,64 @@
+{
+ "arm": "B - flow-compensated residual gate EVERYWHERE, same 6/10 um radius",
+ "what_it_is": "the gate quantity in src/biotrack/wrapper.py::motion_relink_edges changes from the RAW source-target distance to the kNN16-flow-compensated residual. The radius is unchanged, the cost function is unchanged, the node population is unchanged. It routes on NOTHING - no acquisition state, no family, no crop identity.",
+ "basis_tag": "exact-pooled-OOF, 199/199 crops, complete wrapper, pinned patched scorer, prob=zero on newly admitted pairs (LOWER diagnostic, so the deployable value is >= this)",
+ "parity": "199/199 per-crop against A__*.json; pooled/44b6/6bba reproduce the CANONICAL anchors with gap EXACTLY 0.0",
+ "delta": {
+  "pooled": 0.008729871854085691,
+  "44b6": 0.007279554449911574,
+  "6bba": 0.009004029965641536
+ },
+ "bootstrap_pooled": {
+  "mean": 0.008719439243529322,
+  "lo95": 0.006271577405379716,
+  "hi95": 0.01122313130454541,
+  "p_gt_0": 1.0,
+  "p_gt_0.002": 1.0,
+  "n_boot": 2000
+ },
+ "bootstrap_44b6": {
+  "mean": 0.007256017997969929,
+  "lo95": 0.0029375273713402815,
+  "hi95": 0.012035363234334873,
+  "p_gt_0": 0.9995,
+  "p_gt_0.002": 0.9895,
+  "n_boot": 2000
+ },
+ "bootstrap_6bba": {
+  "mean": 0.009035286110751474,
+  "lo95": 0.006285306028836016,
+  "hi95": 0.011817948219628149,
+  "p_gt_0": 1.0,
+  "p_gt_0.002": 1.0,
+  "n_boot": 2000
+ },
+ "promotion_gates": {
+  "exact_pooled_delta_ge_0.002": "PASS - +0.008730, 4.4x the bar",
+  "both_families_improve": "PASS - 44b6 +0.007280, 6bba +0.009004",
+  "min_fold_delta_ge_0.005 (CLAUDE.md)": "PASS - min fold +0.007280",
+  "P(delta>+0.002)": 1.0,
+  "no_major_regime_collapse": "141 of 199 crops improve, 58 worsen; the worsening crops carry 28.8% of edge mass and none collapses"
+ },
+ "integrity_it_is_NOT_a_metric_artifact": {
+  "d_adj_raw_edge_quality": 0.009326199757096316,
+  "d_adj_count_multiplier": -0.0001504137419588083,
+  "quality_share_pct": 101.63924640037014,
+  "multiplier_share_pct": -1.6392464003701397,
+  "node_delta": 2075,
+  "node_delta_pct": 0.04054285614359088,
+  "reading": "101.6% raw edge quality, -1.6% count multiplier - the exact mirror image of the node budget failure (116% multiplier). Edge TP +904, FP -688, FN -904: precision AND recall both improve. Node count moves 0.04%.",
+  "division_cost": "divJ -0.001258 pooled (TP 4->3, FP 675->686, FN 147->148), worth -0.000126 of score"
+ },
+ "candidate_surface_recall": {
+  "net_true_pairs": 320,
+  "true_newly_admitted": 664,
+  "true_newly_excluded": 344,
+  "caveat": "a rise in candidate recall is NOT success; this is here to explain the score, not to be it"
+ },
+ "re_aim_not_widen": "arm B admits 45,782 FEWER pairs in aggregate than arm A at the same radius (-0.293%). Branch A's global widening (-0.1596 / -0.1496) is not repeated.",
+ "MUST_READ_CAVEATS": [
+  "SUBSTRATE. This is measured on E0c (public 0.889), the scientific anchor - NOT on P0-B (0.914). HANDOFF section 4 records TWO mechanisms that looked good on E0c and died on P0-B (node budget +0.006339 -> -0.0000103). This number is not a deployment claim until it is re-measured on the deployment substrate.",
+  "It is NOT an acquisition-state result. Arm B routes on nothing. The acquisition-state policy arms (C, D, E as specified) are all NEGATIVE. What Lane 2 actually surfaced is that motion_relink gates on the wrong quantity; the state conditioning is not what pays.",
+  "prob=zero is the LOWER diagnostic. The deployable cache variant is running and should land within ~2e-04 above this, per the measured probability bracket."
+ ]
+}

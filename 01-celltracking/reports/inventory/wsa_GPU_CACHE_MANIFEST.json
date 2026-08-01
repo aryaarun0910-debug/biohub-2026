@@ -1,0 +1,311 @@
+{
+ "workstream": "A - acquisition-aware inference cache",
+ "artifact": "GPU_CACHE_MANIFEST",
+ "date": "2026-08-01",
+ "basis_tag": "offline enumeration over the frozen E0c/oof_clean node population; NO score here",
+ "what_this_is": "The union candidate surface for ONE GPU inference pass. The cache holds the union of pairs any arm can need; EVERY final arm still applies the original 6/10 um radius to its own residual. This is offline enumeration, not deployment-time widening.",
+ "node_population": {
+  "source": "artifacts/kaggle/oof_clean/pred_geffs_split_{0,1}/*.geff (the E0c substrate)",
+  "n_nodes_total": 5383277,
+  "n_nodes_e0c_cache_status": 5383277,
+  "identical": true,
+  "rule": "UNCHANGED for every arm; the kernel re-hashes its detections and hard-fails on mismatch"
+ },
+ "surfaces": {
+  "S1_raw": "|p_t1 - p_t| <= 10.0 um (the existing gate)",
+  "S2_resid": "|p_t1 - (p_t + f_knn)| <= 10.0 um (unscaled kNN16-flow residual)",
+  "S3_residL": "|p_t1 - (p_t + (L+1)*f_knn)| <= 10.0 um, post_frozen_gap only",
+  "S4_core": "|p_t1 - (p_t + f_knn + pc_shift)| <= 10.0 um, bilateral acquisition core only (global_translation / deformation / intensity_discontinuity)",
+  "radius": {
+   "tight_um": 6.0,
+   "relaxed_um": 10.0
+  },
+  "flow_estimator": "kNN16 median displacement over unique raw continuations (k=16, min=4), rebuilt from the RAW geff edges after the wrapper's next-frame and <=14um pre-filters -- GT-free and available at motion-relink time"
+ },
+ "counts": {
+  "n_pairs": 16817541,
+  "n_nodes": 5383277,
+  "n_raw_edges": 4176149,
+  "n_s1": 15606253,
+  "n_s2": 15560471,
+  "n_s3": 445093,
+  "n_s4": 86641,
+  "n_new": 1211288,
+  "n_new_needs_gpu": 1209305,
+  "n_new_has_geff_prob": 1983,
+  "n_s1_tight": 5803970,
+  "n_crops": 199,
+  "n_crops_44b6": 71,
+  "n_crops_6bba": 128
+ },
+ "by_state": {
+  "deformation": {
+   "pairs": 24911,
+   "new": 7228,
+   "new_gpu": 7169,
+   "s1": 17683,
+   "s2": 17719,
+   "s3": 0,
+   "s4": 16455
+  },
+  "exact_duplicate": {
+   "pairs": 545798,
+   "new": 0,
+   "new_gpu": 0,
+   "s1": 545798,
+   "s2": 545798,
+   "s3": 0,
+   "s4": 0
+  },
+  "global_translation": {
+   "pairs": 90933,
+   "new": 38922,
+   "new_gpu": 38656,
+   "s1": 52011,
+   "s2": 53169,
+   "s3": 0,
+   "s4": 44939
+  },
+  "intensity_discontinuity": {
+   "pairs": 30947,
+   "new": 5473,
+   "new_gpu": 5415,
+   "s1": 25474,
+   "s2": 25444,
+   "s3": 0,
+   "s4": 25247
+  },
+  "near_duplicate": {
+   "pairs": 80996,
+   "new": 1512,
+   "new_gpu": 1511,
+   "s1": 79484,
+   "s2": 79643,
+   "s3": 0,
+   "s4": 0
+  },
+  "ordinary_motion": {
+   "pairs": 15482475,
+   "new": 1049634,
+   "new_gpu": 1048552,
+   "s1": 14432841,
+   "s2": 14384863,
+   "s3": 0,
+   "s4": 0
+  },
+  "post_frozen_gap": {
+   "pairs": 561481,
+   "new": 108519,
+   "new_gpu": 108002,
+   "s1": 452962,
+   "s2": 453835,
+   "s3": 445093,
+   "s4": 0
+  }
+ },
+ "by_family": {
+  "44b6": {
+   "pairs": 9536398,
+   "new": 561631,
+   "new_gpu": 561416,
+   "s1": 0,
+   "s2": 0,
+   "s3": 0,
+   "s4": 0,
+   "n_pairs": 9536398,
+   "n_new": 561631,
+   "n_new_needs_gpu": 561416,
+   "n_nodes": 2990907
+  },
+  "6bba": {
+   "pairs": 7281143,
+   "new": 649657,
+   "new_gpu": 647889,
+   "s1": 0,
+   "s2": 0,
+   "s3": 0,
+   "s4": 0,
+   "n_pairs": 7281143,
+   "n_new": 649657,
+   "n_new_needs_gpu": 647889,
+   "n_nodes": 2392370
+  }
+ },
+ "existing_cache_comparison": {
+  "e0c_cache_candidates": 6153554,
+  "note": "the E0c candidate cache enumerates the tight pass over all nodes and the relaxed pass over UNMATCHED nodes only, so it is a strict subset of S1; verified subset + raw_um identical to 0.0 on the parity crop"
+ },
+ "gpu_cost": {
+  "model_flops_delta": "ZERO",
+  "why": "predict_unet_transformer.py::predict_video already computes the FULL (n_src, n_tgt) edge logit matrix per consecutive frame pair and applies softmax(dim=0) over ALL sources. cfg.threshold=0.5 plus max_parents=1/max_children=2 is what truncates the geff export at ~9.88 um -- there is no distance gate in the model. The union cache is an EXPORT-SURFACE change, not extra compute.",
+  "normalisation_exactness": "softmax is over the complete source set of the frame, which is the unchanged node population, so cached probabilities are identical to the ones the deployed model already computes.",
+  "checkpoints": {
+   "fold_0": "edge_predictor_best_split_0.pth + config_split_0.json",
+   "fold_1": "edge_predictor_best_split_1.pth + config_split_1.json",
+   "resolution": "same find_weights() order that produced oof_clean"
+  }
+ },
+ "canonical_anchors": {
+  "pooled": 0.6653932886896151,
+  "44b6": 0.7595490689190139,
+  "6bba": 0.6489523829566957
+ },
+ "per_crop_index": "cache_manifest/gpu_request/INDEX.json (n_pairs + sha256 per crop)",
+ "arm_candidate_surfaces": {
+  "A": {
+   "relaxed_admitted": 15606253,
+   "delta_vs_A": 0,
+   "pct_vs_A": 0.0,
+   "tight_admitted": 5803970,
+   "tight_delta_vs_A": 0,
+   "newly_admitted": 0,
+   "newly_excluded": 0
+  },
+  "B": {
+   "relaxed_admitted": 15560471,
+   "delta_vs_A": -45782,
+   "pct_vs_A": -0.2934,
+   "tight_admitted": 5813794,
+   "tight_delta_vs_A": 9824,
+   "newly_admitted": 1116871,
+   "newly_excluded": 1162653
+  },
+  "C": {
+   "relaxed_admitted": 15598384,
+   "delta_vs_A": -7869,
+   "pct_vs_A": -0.0504,
+   "tight_admitted": 5804856,
+   "tight_delta_vs_A": 886,
+   "newly_admitted": 104948,
+   "newly_excluded": 112817
+  },
+  "D": {
+   "relaxed_admitted": 15597726,
+   "delta_vs_A": -8527,
+   "pct_vs_A": -0.0546,
+   "tight_admitted": 5801504,
+   "tight_delta_vs_A": -2466,
+   "newly_admitted": 42369,
+   "newly_excluded": 50896
+  },
+  "E": {
+   "relaxed_admitted": 15589857,
+   "delta_vs_A": -16396,
+   "pct_vs_A": -0.1051,
+   "tight_admitted": 5802390,
+   "tight_delta_vs_A": -1580,
+   "newly_admitted": 147317,
+   "newly_excluded": 163713
+  }
+ },
+ "re_aim_not_widen_verdict": {
+  "claim": "the repair re-aims the gate at the same radius; it does not widen it",
+  "test": "aggregate admitted-pair count per arm at the identical 6/10 um radius",
+  "result": {
+   "A": {
+    "delta_vs_A": 0,
+    "pct_vs_A": 0.0
+   },
+   "B": {
+    "delta_vs_A": -45782,
+    "pct_vs_A": -0.2934
+   },
+   "C": {
+    "delta_vs_A": -7869,
+    "pct_vs_A": -0.0504
+   },
+   "D": {
+    "delta_vs_A": -8527,
+    "pct_vs_A": -0.0546
+   },
+   "E": {
+    "delta_vs_A": -16396,
+    "pct_vs_A": -0.1051
+   }
+  },
+  "verdict": "PASS - every arm admits FEWER pairs in aggregate than arm A (B -0.293%, C -0.050%, D -0.055%, E -0.105%). Branch A global widening (-0.1596/-0.1496) is not repeated.",
+  "basis_tag": "offline enumeration, candidate counts only - NOT a score"
+ },
+ "request_set_sha256": "c7d708254669826b21de39dec9de3abd982b580983aed05d77ea22c4aeaf36ab",
+ "request_files": {
+  "dir": "cache_manifest/gpu_request/<split>__<crop>.parquet",
+  "n_files": 199,
+  "total_rows": 16817541,
+  "bytes_on_disk": "58 MB"
+ },
+ "pushed": {
+  "dataset": {
+   "slug": "aryaarun07/biohub-wsa-union-manifest",
+   "status_readback": "ready",
+   "files": [
+    "union_request_split_0.parquet (9,536,398 rows, 36.3 MB)",
+    "union_request_split_1.parquet (7,281,143 rows, 29.0 MB)",
+    "INDEX.json (per-crop n_pairs + pair sha256 + n_nodes + coord_sha256)",
+    "PAYLOAD.json"
+   ],
+   "note": "trap 16 - consumers resolve it with a bounded depth ladder, never recursive glob"
+  },
+  "kernels": [
+   {
+    "slug": "aryaarun07/biohub-wsa-union-cache-f0",
+    "fold": 0,
+    "held_out": "44b6",
+    "crops": 71,
+    "slug_read_back": true,
+    "gpu": "NvidiaTeslaT4"
+   },
+   {
+    "slug": "aryaarun07/biohub-wsa-union-cache-f1",
+    "fold": 1,
+    "held_out": "6bba",
+    "crops": 128,
+    "slug_read_back": true,
+    "gpu": "NvidiaTeslaT4"
+   }
+  ],
+  "kernel_source": "notebooks/kaggle_wsa_union_cache{,_f1}/ (repo, not committed by this agent)",
+  "submits": "NONE - these kernels emit no submission.csv by design"
+ },
+ "live_validation": {
+  "what_the_kernel_asserts_per_crop": [
+   "n_nodes == manifest n_nodes (else RuntimeError, node population changed)",
+   "sha256 of the int16 (t,z,y,x) detection array == manifest coord_sha256",
+   "exported pair count == manifest n_pairs",
+   "every requested (source_id, target_id) resolves inside the frame index range"
+  ],
+  "observed": "every crop logged so far passes all four; fold 0 ~66 s/crop, fold 1 ~63 s/crop",
+  "why_it_matters": "this is the proof that the union cache is measured on the SAME node population as the E0c substrate, so cross-attention and softmax normalisation are the deployed ones, not a re-derived approximation"
+ },
+ "gpu_pass_result": {
+  "status": "COMPLETE, BOTH FOLDS, FULLY VALIDATED",
+  "fold_0": {
+   "kernel": "aryaarun07/biohub-wsa-union-cache-f0 (+ ...-f0-topup for 5 crops v1 silently dropped)",
+   "crops": 71,
+   "rows": 9536398,
+   "weights_sha256": "d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f",
+   "weights": "edge_predictor_best_split_0.pth"
+  },
+  "fold_1": {
+   "kernel": "aryaarun07/biohub-wsa-union-cache-f1",
+   "crops": 128,
+   "rows": 7281143,
+   "weights_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+   "weights": "edge_predictor_best_split_1.pth"
+  },
+  "total": {
+   "crops": 199,
+   "rows": 16817541,
+   "equals_manifest": true
+  },
+  "validation": {
+   "coverage": "PASS - every manifest pair present exactly once, 199/199 crops",
+   "node_population": "PASS - kernel-side coord_sha256 assertion passed per crop and was re-checked locally",
+   "reproduction": "PASS - worst_max_abs_diff 0.0 across 4,167,217 pairs that already carried a geff probability. The re-run reproduced the deployed model state EXACTLY.",
+   "artifacts": [
+    "GPU_CACHE_VALIDATION_split_0.json",
+    "GPU_CACHE_VALIDATION_split_1.json"
+   ]
+  },
+  "probability_profile": "CACHE_PROBABILITY_PROFILE.json - newly admitted pairs get median prob 0.047 (44b6 GT-true) / 0.024 (6bba GT-true) vs 0.018 / 0.007 for GT-false. Purity of the newly admitted set is 690 / 1,211,288 = 0.057%."
+ }
+}
