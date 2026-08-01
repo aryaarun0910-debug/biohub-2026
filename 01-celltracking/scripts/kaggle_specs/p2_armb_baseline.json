@@ -1,0 +1,59 @@
+{
+  "name": "p2_armb_baseline",
+  "slug": "biohub-p2-armb-baseline",
+  "title": "Biohub P2 Armb Baseline",
+  "code_file": "biohub-p2-armb-baseline.ipynb",
+  "out_dir": "notebooks/kaggle_p2_armb_baseline",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "purpose": "REGRESSION LOCK for p2_armb_flowgate. Byte-for-byte the same build with BIOHUB_ARMB_FLOW_GATE=0, so GATE_COMPENSATION stays empty and the gate quantity reduces to the deployed raw source-target distance. Its submission.csv MUST hash to 4c285cae0c220a11b8ffdeeea1e02de86b5c1e7795daeb2bb27c073e1ab4ecec. If it does not, the arm-B delta is not attributable to the gate change and the artifact is blocked.",
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_ARMB_FLOW_GATE": "0"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "def motion_relink_edges(",
+      "cell_match": "def motion_relink_edges(",
+      "code_file": "scripts/kaggle_edits/armb_flow_gate.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def motion_relink_edges(",
+      "old": "                raw = float(np.linalg.norm(target_pos - source_pos))\n                if raw > gate_um:\n                    continue\n",
+      "new": "                raw = float(np.linalg.norm(target_pos - source_pos))\n                _comp = GATE_COMPENSATION.get(source_id)\n                _gate_q = raw if _comp is None else float(\n                    np.linalg.norm(target_pos - (source_pos + _comp)))\n                if GATE_STATS:\n                    _sfx = '_tight' if gate_um == MOTION_RELINK_TIGHT_UM else '_relaxed'\n                    GATE_STATS['pairs' + _sfx] += 1\n                    _a, _b = raw <= gate_um, _gate_q <= gate_um\n                    GATE_STATS['admit_raw' + _sfx] += int(_a)\n                    GATE_STATS['admit_arm' + _sfx] += int(_b)\n                    GATE_STATS['newly_admitted' + _sfx] += int(_b and not _a)\n                    GATE_STATS['newly_excluded' + _sfx] += int(_a and not _b)\n                if _gate_q > gate_um:\n                    continue\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "motion_relink_fallback_raw",
+      "old": "        motion_edges = motion_relink_edges(nodes_by_id, stats, learned_edge_probs)\n",
+      "new": "        GATE_COMPENSATION.clear()\n        if ARMB_FLOW_GATE:\n            GATE_COMPENSATION.update(_armb_flow_compensation(nodes_by_id, raw_edges))\n        motion_edges = motion_relink_edges(nodes_by_id, stats, learned_edge_probs)\n",
+      "expect": 1
+    },
+    {
+      "kind": "append_cell",
+      "code_file": "scripts/kaggle_edits/armb_provenance.py"
+    }
+  ]
+}

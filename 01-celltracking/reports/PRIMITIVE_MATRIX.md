@@ -829,3 +829,60 @@ Lane 1's arms are still running against the live additive gate; its verdict supe
 **Standing rule extended:** before attributing behaviour to a constant, confirm the branch that uses
 it actually executes on the deployment path — by fingerprint (change the value, check the output
 moves) or by a counter, not by reading a config dump.
+
+
+---
+
+# CORRECTION — my arm-B brief was ambiguous, and the literal reading is the WRONG ARM
+
+I briefed the deployment build as *"gate on the flow-compensated motion residual"*, pointing at
+`wrapper.py:332-340` where `motion = |target − predicted|` and
+`predicted = source + 0.5·(source − predecessor)`.
+
+**Implementing that literally would have built a different, unmeasured arm.** That `motion` term is a
+per-node **velocity extrapolation** whose `predecessor_position_um` is populated *incrementally by
+the relink itself*.
+
+**The arm that actually scored +0.0079822 pooled / +0.0167567 / +0.0067055 gates on**
+
+```
+_gate_q = | target − ( source + kNN16_flow(source) ) |
+```
+
+where the flow is a **GT-free per-frame kNN16 median of raw prediction-graph displacements**
+(out-degree-1 / in-degree-1 pairs within the ≤14 µm horizon, per-frame kD-tree, median of the 16
+nearest source displacements, frame-median fallback below 4 sources, global-median for an empty
+frame). **Anyone rebuilding arm B from my brief text alone would build the wrong thing.**
+
+The build agent implemented the measured one and proved it: the patched `motion_relink_edges` is
+**byte-identical (`c9ee69affc74a8d8…`) to the WS-F function that produced the number**, and a CPU
+preflight reproduced WS-F's per-crop results **exactly on 11/11 crops** across both arms — including
+the full 10-field gate census. So the notebook contains the measured mechanism, not a re-derivation
+that happens to be positive.
+
+## Provenance strengthened
+
+All **27** top-level definitions in P0-B's wrapper cell are byte-identical to the measurement
+wrapper `p0strict_pipeline.py`, with `motion_relink_edges` the sole exception — and that difference
+*is* the arm-B parameterisation. **The WS-F substrate transfer was therefore measured through the
+same wrapper source that deploys**, which is a stronger statement than anything previously recorded.
+
+## Static regression lock — 13/13 PASS, before any kernel
+
+Blast radius **exactly three cells** (env, wrapper, appended diagnostic) · **25 of 27** pre-existing
+definitions byte-identical · the `filter_output_graph` change is **exactly three wiring lines** ·
+**159 module-level constants compared, 0 drifted, 0 lost** · 38 `os.environ` assignments differ by
+the single new flag · radius/division/detector constants explicitly resolved and identical ·
+**the arm-B and baseline notebooks differ in exactly ONE character** · internet off, T4 pinned,
+docker digest and dataset set identical to P0-B · zero exploit constructs and **zero family literals
+in executable lines**, with `BIOHUB_SHORT_TRACK_MIN_LEN_BY_DATASET` structurally absent rather than
+merely empty.
+
+## One property to watch in the delta table
+
+**Arm B raises the maximum emitted edge length.** With the gate on `_gate_q`, admissible `raw` is
+bounded by `gate_um + |flow|` rather than `gate_um`, so relink edges can exceed the 10 µm relaxed
+radius and in principle the 14 µm `OUTPUT_EDGE_MAX_UM`. This is inherent to the measured mechanism
+(WS-F had it and still scored +0.008) and violates no audit rule, but it is **unmeasured on P0-B**.
+P0-B's own per-crop maxima are 6.31 / 7.27 / 5.34 / 7.31 µm. The delta tool reports >6 / >10 / >14 µm
+counts and the max for exactly this reason.

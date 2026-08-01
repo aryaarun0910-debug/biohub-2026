@@ -240,3 +240,14 @@ the fold missing) because its crop list came from a corrupt-filtered glob rather
 Nothing failed; the run simply covered less than it claimed. Caught only by comparing counts.
 **Rule: the manifest is authoritative — every declared item must resolve or the job dies naming the
 missing ones.** Never let a filter silently shrink a declared work set.
+
+**24. `node_id` is NOT unique across movies in the submission format.** Counting node degree with a
+bare `node_id` key instead of `(dataset, node_id)` reports **15,471 "hub" nodes on the clean P0-B
+artifact**, whose true maximum out-degree is 2. Found 2026-08-01 in a freshly-written diagnostic
+*and* in the audit tool meant to check it — the same defect in both, because both were written from
+the same wrong mental model. **Always key graph structure on `(dataset, node_id)`.**
+
+Related hardening adopted at the same time: **a diagnostic cell must never be able to fail the
+kernel.** Wrap appended provenance/diagnostic cells in `try/except` that writes a `*_FAILED.txt`
+rather than raising — this competition can only submit from a **COMPLETE** kernel, so a diagnostic
+that raises converts a good run into an unsubmittable one.
