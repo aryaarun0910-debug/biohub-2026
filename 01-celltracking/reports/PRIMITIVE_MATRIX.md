@@ -18,7 +18,7 @@ Basis tags: `public` · `exact-pooled-OOF` · `cross-family-LOFO` · `in-family-
 |---|---|---|---|---|---|---|---|
 | 1 | shape-aware localisation | genuinely new (first coordinate-only arm) | **+0.009125** @ ≤8.5 µm `[GT-oracle]` | **−0.008778** (λ=1); +0.000333 best shrinkage | **FAILS — sign-opposite** | ~3.4 core-h, 0 GPU | **NO-GO** |
 | 2 | acquisition-state inference | — | — | — | — | — | RUNNING |
-| 3 | event-centric division state | — | — | — | — | — | RUNNING |
+| 3 | event-centric division state | genuinely new (t−3…t+3 states, 3 heads) | **+0.064574** pooled, complete wrapper `[GT-oracle]` | **+0.002706** — but that is suppress-all, NOT the selector | selector transfers (AUC 0.881/0.916, leak 0.512); **base rate defeats it** | ~2.2 core-h, 0 GPU | **NO-GO** |
 | 4 | CAP / track-as-point | real but insufficient | 35.45% of never-detected nodes @ w8 `[GT-oracle]` | **none — not measurable** | 85.14% / 32.23% | ~2 CPU-min, 0 GPU | **CLOSED — licence, Step 1** |
 | 5 | dense self-supervised 3D motion | — | — | — | — | — | staged |
 | 6 | counterfactual image critic | — | — | — | — | — | staged |
@@ -153,3 +153,78 @@ so **break-even purity is 20.4% against a 5.1% base rate — a 4.0× enrichment 
 the selector retained 11,683 components against an oracle's 763. Reopen only if a cross-fitted
 multivariate selector clears **20.4% purity leave-family-out** on the 6,496-node addressable
 population — ~20 CPU-minutes, and it must pass *before* another exact-scorer replay is spent.
+
+
+---
+
+## Lane 3 — event-centric division state: NO-GO on all three gates, with a SIGN CORRECTION
+
+### The correction — act on this before anything else in the division track
+
+`CLAIMS.md` and the D0′ table record **suppress-all alone = −0.001728**. That is an **EDGES-ONLY
+artifact on a fixed node set**. Through the **COMPLETE wrapper**:
+
+**suppress-all = +0.002706 pooled** · 95% CI **[+0.001726, +0.003703]** · P(Δ>0) = **1.000** ·
+44b6 **+0.001532** / 6bba **+0.002872** — **bilaterally positive, GT-FREE, no selector required,
+and `pi_vis`-invariant** (it creates zero division FP). **A +0.0044 swing. Trap 14 in reverse: the
+negative was the artifact.**
+
+It is edge *quality*, not a count effect: d_rawJ **+0.002798** / d_mult +0.000431 → **86.9% raw edge
+quality, 13.5% multiplier** (contrast node budget's 116% multiplier). The deleted content carries
+d_tp −174 / d_fp −887 ⇒ **q_net 0.164**, below the project's own 0.3994 retain floor — so deleting
+is correct by the independently-derived rule.
+
+**E0c ONLY. Do not inherit it.** E0c has 20,353 forks; P0-B has **8** (TP0/FP8/FN3). The magnitude
+cannot port. **Re-measuring suppress-all through the complete wrapper on P0-B is the cheapest open
+item in the whole programme** — GT-free, no selector, and it closes a question the ledger currently
+records backwards.
+
+### Why mother admission fails — arithmetic, not feature engineering
+
+92 true pairs among **4,957,806** mothers ⇒ base rate **1.856e-05**. Inverting the ROC, 12% precision
+demands mother AUC **0.983 at K=100, 0.991 at K=200, 0.9992 at K=600**, and at 12% the admission
+budget is **capped at K=766 by the size of the positive set itself**. Measured AUC is 0.86–0.92.
+Gates: ≥12% precision **FAIL by ~250×** · ≥+0.006 **FAIL** (best +0.004823) · ≥+0.003 LCB **FAIL**
+(best LCB +0.002743).
+
+**The `pi_vis` pin is what killed it.** Raw scorer says +0.004823; pinned at 1.0 it is +0.002842 —
+i.e. the temporal selector adds **+0.000136 over doing nothing but suppress-all**, and **44% of the
+raw headline was annotation coverage**. The pin caught exactly what it was written to catch.
+
+**Capacity is not the missing ingredient.** Same features, same LOFO: HistGradientBoosting scores
+mother AUC **0.59–0.73** against the L2 logistic's **0.86–0.93** in all six cells. With 16/76
+positives, added capacity destroys transfer.
+
+### Kept — two hand-offs
+
+**D2 (daughter-pair selection) is ready and waits on any lane that produces a mother set.** Against
+the frozen flow-midpoint rank-0 (72/92 pairs, +0.046330), the temporal head takes **75/92, +0.049871**
+— paired gain **+0.003541**, 44b6 flat (no regression) / 6bba +0.004215, CI [−0.001733, +0.008785],
+P(>0) = 0.929. Not significant; it rests on 4 divisions. `pi_vis`-invariant, family AUC 0.512.
+
+**Four new bilateral family-blind features, the best measured on this problem:**
+`cont_resid_um` (the *continue*-hypothesis residual) **0.859 / 0.803** — better than appearance-4's
+LOEO 0.719; `sep_growth2` **0.852 / 0.779**; `sep_growth3` 0.848 / 0.753; `sep_mono` 0.746 / 0.704.
+**`n_persist` is sign-unstable (0.755 on 6bba, 0.175 on 44b6) and must not carry a positive sign.**
+
+### Closed — do not rebuild
+
+- **The intuitive "broken division" structural signature is EMPTY**: mother terminates & both
+  daughters orphaned → **155 candidates, 0 true**; `m_terminates=1` → **474,876 candidates, 0 true**.
+  E0c always links the mother forward, so a real division never presents as a clean track-end —
+  and **60 of 92 true pairs require STEALING a daughter** from another track.
+- **Temporal NMS is free but inert**: cuts the population 5.5× (4,957,806 → 908,922) with **zero**
+  loss of true forks and **zero** precision change at every K. Keep it as a structural constraint;
+  do not expect precision from it.
+- **Marginal family-blindness does not compose — third independent demonstration.** Every one of 55
+  features is individually blind under N1 (leak 0.41–0.52), yet the 40-feature set reconstructs
+  family at **0.689** and a 46-feature "hardened" subset at 0.673. Only **cardinality** fixes it:
+  n ≤ 12 passes at 0.512, n = 16 at 0.540.
+
+### Where the 151 divisions go — new decomposition
+
+151 GT → **113 reachable** on E0c → **92** whose true pair is inside the frozen top-3 shortlist
+(proposer loses 21) → **75** survive D2 selection (D2 loses 17) → **D1 must find those 75 among
+4.96M mothers.** D1 is ~100% of the remaining loss. Lane 1's finding that 50.3% of 6bba's unmatched
+GT nodes have nothing within 14 µm caps the 113 from below: **no division-side method recovers an
+undetected mother.**

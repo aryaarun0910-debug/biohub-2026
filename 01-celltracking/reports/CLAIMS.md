@@ -88,7 +88,7 @@ ground truth in the decision, so it is a CEILING and never a candidate.
 | claim | value | basis | note |
 |---|---:|---|---|
 | H0c full oracle pooled delta | `+0.06012` | `GT-oracle` | CEILING, not a candidate - fork choice uses ground truth |
-| suppress-all alone | `-0.001728` | `exact-pooled-OOF` | negative alone; the gain is entirely in reconstruction |
+| suppress-all alone (EDGES-ONLY - superseded) | `-0.001728` | `exact-pooled-OOF` | SIGN CORRECTED 2026-08-01: this -0.001728 is an EDGES-ONLY artifact on a fixed node set. Through the COMPLETE wrapper suppress-all is +0.002706 pooled, CI [+0.001726,+0.003703], P(d>0)=1.000, 44b6 +0.001532 / 6bba +0.002872 - bilaterally positive, GT-FREE, no selector, pi_vis-invariant. A +0.0044 swing; trap 14 in reverse. E0c ONLY - E0c has 20,353 forks, P0-B has 8, so the magnitude cannot port and must be re-measured. |
 | delta at 1 FP per true fork | `+0.03618` | `GT-oracle` | 92 true / 92 false |
 | delta at 5 FP per true fork | `+0.01127` | `GT-oracle` | 88 true / 460 false |
 | delta at 10 FP per true fork | `+0.00313` | `GT-oracle` | 88 true / 912 false |

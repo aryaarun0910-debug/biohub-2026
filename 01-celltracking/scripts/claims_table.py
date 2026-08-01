@@ -158,9 +158,13 @@ CLAIMS: list[tuple] = [
     ("Division economics", "H0c full oracle pooled delta",
      "pooled_breakeven.json", "arms.k1.0.delta", "GT-oracle", "{:+.5f}",
      "CEILING, not a candidate - fork choice uses ground truth"),
-    ("Division economics", "suppress-all alone",
+    ("Division economics", "suppress-all alone (EDGES-ONLY - superseded)",
      "pooled_breakeven.json", "arms.supp.delta", "exact-pooled-OOF", "{:+.6f}",
-     "negative alone; the gain is entirely in reconstruction"),
+     "SIGN CORRECTED 2026-08-01: this -0.001728 is an EDGES-ONLY artifact on a fixed node set. "
+     "Through the COMPLETE wrapper suppress-all is +0.002706 pooled, CI [+0.001726,+0.003703], "
+     "P(d>0)=1.000, 44b6 +0.001532 / 6bba +0.002872 - bilaterally positive, GT-FREE, no selector, "
+     "pi_vis-invariant. A +0.0044 swing; trap 14 in reverse. E0c ONLY - E0c has 20,353 forks, "
+     "P0-B has 8, so the magnitude cannot port and must be re-measured."),
     ("Division economics", "delta at 1 FP per true fork",
      "pooled_breakeven.json", "arms.fp1.delta", "GT-oracle", "{:+.5f}", "92 true / 92 false"),
     ("Division economics", "delta at 5 FP per true fork",
