@@ -131,8 +131,8 @@ annotation under-samples the edge cost while the multiplier is fully realised, s
 biased in node budget's favour — and it still fails.** No keep_frac sweep was run.
 
 **Consequence: there is currently no deployable mechanism between 0.914 and 0.920.** Everything
-larger remains a GT oracle. The division track (§5, substrate 22/26) is the only live route, and
-its selector is unbuilt.
+larger remains a GT oracle. The division track is the least-bad remaining route, but see §8:
+its substrate advantage is **44b6-only and inverts on the 85% family**, and its selector is unbuilt.
 
 ## 5. Oracles — real ceilings, not deployable
 
@@ -172,7 +172,7 @@ its selector is unbuilt.
 
 ## 8. Immediate next action
 
-**DONE 2026-07-31 — the substrate question is answered. Reach is 22/26 on the P0-A/P0-B substrate.**
+**SUPERSEDED 2026-08-01 — see the retraction below. Fold 0 said 22/26; fold 1 says 66/125.**
 
 The previous text here said the LOEO fold-0 kernel "died after 16 of 71 crops, almost certainly on
 the `/kaggle/working` size limit". **That was wrong on both cause and extent.** The log shows
@@ -188,42 +188,34 @@ measurement was recovered **with zero GPU** and no shards.
 | division_jaccard | 0.01587 (TP 2 / FP 100 / FN 24) |
 | **reachable GT divisions** | **22 / 26** |
 
-**GREEN: 22/26 beats E0c 20/26, clean903 20/26 and v122 15/26 with node recall holding.** The 0.914
-platform and the division track multiply rather than compete. Next: replay H0c/H2a on *this*
-substrate (`scripts/win_bet/phaseb_h0c_replay.py`, `phaseb_h2a_hybrid_oracle.py`) and build the
-deployable mother gate. The +0.06 figure remains a **GT oracle** — the selector is still unbuilt.
+**RETRACTED 2026-08-01 BY FOLD 1. The 22/26 was 44b6 only — 14.94% of edge mass — and the
+advantage INVERTS on the 85% family.**
 
-**Two live defects this exposed.** (a) The export cell hard-fails on out-degree > 2; it should
-record and report rather than discard a completed run. (b) The pipeline can emit an out-degree-3
-node — it did not occur in the P0-A/P0-B test submissions (A9 PASS, max out-degree 2), but it is a
-latent structural-audit failure for any future candidate.
+| substrate | 44b6 | 6bba | **POOLED** |
+|---|---|---|---|
+| E0c | 20/26 = 0.769 | 93/125 = 0.744 | **113/151 = 0.748** |
+| clean903 | 20/26 = 0.769 | 96/125 = 0.768 | **116/151 = 0.768** |
+| v122 | 15/26 = 0.577 | 68/125 = 0.544 | **83/151 = 0.550** |
+| **P0-strict** | **22/26 = 0.846** | **66/125 = 0.528** | **88/151 = 0.583** |
 
-**Node ratio:** adj (0.89859) exceeds raw (0.88224), so the multiplier is 1.0185 and the implied
-mean node ratio is **−0.1853** — this arm UNDER-predicts. But it is the `strict` arm with the
-secondary model and DeepCenter OFF, so **it is not P0-B's ratio and must not be transferred.**
+Fold 1 (128 crops, our own `split_1`, manifest audit PASS): adj_edge_jaccard **0.7025**, node_recall
+**0.8547**, divJ 0.0016 (TP 1 / FP 491 / FN 124), composite 0.7026, **reach 66/125**.
 
-**RECONCILED 2026-08-01 (Lane B) — the comparison with E0c's 0.7595 is now legitimate.** Both arms
-were scored through ONE entry point (`biotrack.metric.score_pred_graph`) in ONE run over the SAME 71
-crops; the E0c arm reproduces `0.7595` to |d| = 4.9e-05 and the P0 arm reproduces
-`inventory/loeo_f0_strict.json` at |d| = 0.000e+00. **The gap is real: +0.140628 composite.** It is
-**not** a weighting convention. Attribution: **+0.114905 (81.7%) genuine matching quality** (edge
-precision 0.8646 → 0.9306, recall 0.8722 → 0.9444, one million FEWER nodes with HIGHER node recall),
-**+0.024136 (17.2%) count multiplier**, +0.001587 division term. Evidence:
-`inventory/laneB_reconcile_e0c_vs_p0strict.json`.
+**P0-strict is the BEST substrate on 44b6 and the WORST on 6bba** — below even v122 — and node
+recall falls **0.9846 → 0.8547** across the family boundary. Pooled reach **58.3%** against E0c's
+74.8% and clean903's 76.8%.
 
-**Caveat that must travel with the number.** Fold 0 runs the *support pack's* `split_0`
-(8,363,159 B, sha256 `12f6881ee3620a83…`), E0c runs *ours* (8,357,783 B, `d3e89eb361eeadef…`), so
-fold 0 conflates model vintage with pipeline. **The pack ships no training record at all** — no
-`train_datasets`, no held-out declaration — and its own manifest calls it
-`biohub-tracking-support-pack-400ep-snapshot-v1` while the dataset is named "50ep". The only
-evidence 44b6 was held out is the directory name `split_0`. No memorisation signature is present
-(per-crop adjJ spans 0.559–1.064; the held-out OOF 0.9002 sits *below* P0-A's public 0.913), so
-treat it as **clean-pending-provenance**. Fold 1 has no such confound — it runs our `split_1` on
-both sides.
+**What this retracts:** "the 0.914 platform and the division track multiply rather than compete",
+and "the ranker, not the substrate, is now the first loss". Both were read off fold 0 alone. The
+H0c **+0.073877** figure is a **44b6 GT-oracle** number and must never be pooled or extrapolated.
+Honest position: **on the deployment substrate the division track has LESS pooled headroom than on
+E0c, not more.**
 
-**P0-A contains an all-training-data model** (`unet_transformer_alltrain_seed314159_v1`,
-`train_datasets: 199`) blended at **0.475 detection weight**. It is a *public deployment* platform,
-not OOF-valid. Only fold 0 + arm `strict` is comparable to E0c/clean903/v122.
+**Process lesson.** The 44b6-only bound was stated every single time the number was quoted, and it
+still produced a wrong strategic read for a whole cycle. **Naming a caveat is not acting on one.**
+Fold 1 should have been ranked above the H0c replay, the cost pricing and the cascade design — all
+of which were built on a 15%-mass result. When a result rests on a minority of the objective's mass,
+the next action is to measure the majority, not to build on the minority.
 
 ## 9. Guardrails
 

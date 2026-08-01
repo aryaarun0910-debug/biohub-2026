@@ -3481,3 +3481,78 @@ It also retires the P0-B ambiguity in the honest direction: P0-B's +0.001 is sti
 and still not established as a real gain, but the mechanism is now known to be *capable* of moving
 score in both directions, so the +0.001 is not automatically noise either. Do not re-litigate it
 with another blend weight — that remains closed.
+
+### 2026-08-01 (FOLD 1 LANDS — THE 22/26 SUBSTRATE ADVANTAGE DOES NOT TRANSFER)
+
+`aryaarun07/biohub-loeo-f1-strict` COMPLETE in 6.89 h (Lane B estimated 2.70 h; 9 h session limit).
+Manifest audit PASS: fold 1, arm strict, 128 unique 6bba crops, **our own `split_1`** weights
+override, secondary OFF, DeepCenter OFF. The export fix worked — 4 clean files, gzip and cleanup
+both ran, no 500-file dump.
+
+| quantity (128 crops, 6bba, fold 1) | value |
+|---|---:|
+| adj_edge_jaccard | 0.7025 |
+| node_recall | **0.8547** |
+| division_jaccard | 0.0016 (TP 1 / FP 491 / FN 124) |
+| composite | 0.7026 |
+| **reachable GT divisions** | **66 / 125 (0.528)** |
+
+**THE HEADLINE OF THIS CYCLE IS OVERTURNED.**
+
+| substrate | 44b6 | 6bba | **POOLED** |
+|---|---|---|---|
+| E0c | 20/26 = 0.769 | 93/125 = 0.744 | **113/151 = 0.748** |
+| clean903 | 20/26 = 0.769 | 96/125 = 0.768 | **116/151 = 0.768** |
+| v122 | 15/26 = 0.577 | 68/125 = 0.544 | **83/151 = 0.550** |
+| **P0-strict** | **22/26 = 0.846** | **66/125 = 0.528** | **88/151 = 0.583** |
+
+P0-strict is the **best substrate on 44b6 and the WORST on 6bba** — below even v122's 68/125.
+Node recall collapses **0.9846 → 0.8547** across the family boundary. Since 6bba carries **85.06%
+of edge mass**, the pooled reach is **58.3%**, far below E0c's 74.8% and clean903's 76.8%.
+
+**What this retracts.** The 2026-07-31 conclusion "the 0.914 platform and the division track
+multiply rather than compete", and the follow-on "the ranker, not the substrate, is now the first
+loss", were both drawn from **fold 0 only — 14.94% of edge mass**. On the 85% family the substrate
+is the worst we have measured. The +0.073877 H0c figure is a **44b6 GT-oracle** number and must
+never be pooled or extrapolated. The honest statement is now: **on the deployment substrate the
+division track has LESS pooled headroom than on E0c, not more.**
+
+I flagged the 44b6-only bound every time I quoted it, and it still produced a wrong strategic read
+for a full cycle. **Naming a caveat is not the same as acting on it.** The fold-1 measurement should
+have been ranked above the H0c replay, the cost-side pricing and the cascade design — all of which
+were built on a 15%-mass result.
+
+**This is the FOURTH substrate-transfer failure of the cycle**, after node budget, the H0d
+live-filter cross-term, and reverse-time. It is now the project's defining failure mode.
+
+### 2026-08-01 (LANE A — CLOSED. Headroom exists; the GT-free selector cannot find it.)
+
+Exact replay, 116 of 199 crops (80.1% of target signal after re-ordering by signal-per-second).
+**Parity PASSES:** pooled baseline **0.645667332** vs ledger 0.645667332, |d| = **1.11e-16**,
+**0/116** per-crop disagreements, and per-family exact to **0.00e+00** (44b6 0.722882164,
+6bba 0.639929760).
+
+| arm | components retained | corpus-scaled Δ | 44b6 | 6bba | bar |
+|---|---:|---:|---:|---:|---:|
+| **selector (GT-free)** | 11,683 | **−0.007761** | +0.001230 | **−0.011504** | +0.002 |
+| **oracle (GT)** | 763 | **+0.008727** | +0.011003 | +0.012475 | +0.002 |
+
+**VERDICT: CLOSE component retention.** The headroom is real — the GT oracle clears the bar more
+than 4× over at **+0.008727**, and it is bilaterally positive. But the deployable selector is
+**−0.007761**, and its two families **disagree in sign** (+0.0012 vs −0.0115), which is precisely
+the failure the red team predicted from family AUC 0.865 and transfer at or below random utility.
+
+The mechanism is stark: the selector retains **11,683 components where the oracle retains 763** —
+15× too many — adding **49,688 nodes** and **1,297 false edges** to achieve edge TP **−117**. The
+oracle adds 3,257 nodes for edge TP **+1440**. The signal exists and is worth having; nothing we can
+build from deployment-observable features locates it.
+
+Recorded for anyone who reopens this: the honest ceiling is **+0.0087 corpus-scaled**, so the lane
+is not closed for lack of headroom — it is closed because **selection is the binding constraint**,
+and three independent corrections all deflate the naive estimate (per-component attribution
+overstates the joint effect ~2.4×; only 52% of GT edges in deleted components are uncontested;
+retention is additive so the unit is 6.57e-06, not 1.095e-05).
+
+Artifacts: `reports/inventory/loeo_f1_strict.json`, `loeo_f1_strict_manifest.json`,
+`laneA_component_retention_replay.json`. Fold-1 CSV preserved outside the worktree at
+`..._RESEARCH/exports/loeo_f1_strict/` (33 MB).

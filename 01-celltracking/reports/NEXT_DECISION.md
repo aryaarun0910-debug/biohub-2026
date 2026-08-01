@@ -7,7 +7,31 @@
 
 Superseded plans are preserved below and in `reports/journal/JOURNAL.md`.
 
-## 1. RESOLVED 2026-07-31 — reach is 22/26, the best substrate we have measured
+## 0. RETRACTION 2026-08-01 — read before anything below
+
+**Fold 1 landed and inverts the substrate conclusion.** P0-strict reach is **22/26 on 44b6 (best
+measured) but 66/125 on 6bba (WORST measured, below v122)**. Node recall **0.9846 → 0.8547**. 6bba
+carries **85.06% of edge mass**, so pooled reach is **88/151 = 58.3%** against E0c 74.8% and
+clean903 76.8%. Fold-1 composite 0.7026, divJ 0.0016 (TP 1 / FP 491 / FN 124).
+Artifacts: `inventory/loeo_f1_strict.json`, `loeo_f1_strict_manifest.json`.
+
+**Everything in §1 and item 1 of §4 below was read off fold 0 = 14.94% of edge mass.** The H0c
++0.073877 is a 44b6 GT-oracle number. **Do not pool it, do not extrapolate it.**
+
+**Lane A CLOSED the same day.** Component retention: GT oracle **+0.008727** corpus-scaled
+(bilaterally positive) but the GT-free selector **−0.007761**, with families disagreeing in sign
+(+0.0012 / −0.0115). Parity exact (|d| = 1.11e-16, 0/116 per-crop disagreements). The selector
+retains 11,683 components where the oracle retains 763 — 15× too many — adding 49,688 nodes for
+edge TP −117. **Headroom is real; selection is the binding constraint.**
+
+**Consequently there is no live route to +0.006 that has been demonstrated on the 85% family.**
+The next action is not another cascade stage. It is to decide, with the pooled reach table in hand,
+whether the division track is worth further spend at all versus the clean903 substrate
+(pooled reach 76.8%, the best measured) which we have never deployed.
+
+---
+
+## 1. (SUPERSEDED — see §0) reach is 22/26, the best substrate we have measured
 
 The measurement below was **recovered with zero GPU** and no shards: the kernel had predicted all
 71 crops and failed only at the export/audit assertion on 2 nodes out of 1.9M with out-degree 3.
