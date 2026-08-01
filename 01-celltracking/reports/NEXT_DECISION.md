@@ -91,6 +91,11 @@ Nothing currently qualifies: the only corpus-verified deployable mechanisms are 
 - **Association recovery — attributed in full, then closed.** All 27,705 corpus FN assigned to a
   first-loss stage. 43.80% never detected; the 43.32% recoverable pool is +0.13288 as a GT oracle.
   **One net-correct repair = 1.095e-05 pooled, so +0.002 needs 183 net-correct repairs.**
+  **CORRECTION 2026-08-01: that unit does NOT transfer to component retention.** 1.095e-05 was
+  calibrated on edge *swaps*, which delete a wrong edge (`d_fp ~= -0.84` per repair). Component
+  retention is purely **additive** — it only adds edges and nodes — so `d_fp >= 0` and the unit
+  value is at most `wbar/DEN = 6.57e-06`. **+0.002 there needs >= 304 net-correct edges at zero
+  FP and zero node cost, and more once either is charged.** Match the unit to the action.
   Enumeration is closed (widening already falsified). Bipartite is the only unfalsified lane and
   fails cross-family: LOFO **+0.00099 vs +0.00002**, a 50× disagreement resting on an in-sample net
   of +4 targets. Inside `target_taken` the transformer prefers the true parent in **9.36%** of

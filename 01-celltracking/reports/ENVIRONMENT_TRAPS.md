@@ -165,3 +165,20 @@ mount tree so the two failure modes stay distinguishable. Cost ~10 GPU-minutes.
 
 Distinguishing rule: `/kaggle/input` **empty** ⇒ trap 9, re-create under a fresh slug.
 `/kaggle/input` **populated but your glob matched nothing** ⇒ trap 16, widen the depth ladder.
+
+**17. `linefit_smooth_output_graph` mutates node dicts IN PLACE.** A shallow copy therefore does not
+isolate the arm from the baseline: the second graph is silently **double-smoothed**, while a parity
+check on the *first* call still passes, so the defect hides behind a green check. Found 2026-08-01
+during component-retention replay.
+
+Fix applied in the affected replay scripts: build the **arm first and the baseline second**, so the
+parity assertion itself exercises the mutation path. General rule for this codebase: **any replay
+that constructs two graphs from one source must deep-copy, and must order its arms so parity covers
+the mutating call** — a parity check that only ever runs on a pristine first invocation proves
+nothing about the second.
+
+**Ordering also matters for cost, not just correctness.** The same lane initially sorted crops
+size-descending and spent 2 CPU-hours covering **9.9%** of its target signal, because 91.2% of the
+target edges live in *small* `6bba` crops. Re-ordering by *target-count ÷ predicted runtime* reached
+**80.1%** coverage in a further **9 wall-minutes**. Before any long corpus sweep, sort by expected
+signal per second — not by crop size, and not by directory order.
