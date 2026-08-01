@@ -224,3 +224,19 @@ on the answer. **Always build the id→t map from the geff itself; never infer i
 **21. polars schema inference silently drops conditionally-populated columns.** If a column is
 absent from the first inference window it is dropped without warning, so a field that only appears
 in some rows vanishes from the frame. Declare the schema explicitly when rows are heterogeneous.
+
+**22. `list_kernel_session_output` is PAGINATED and caps a page at 500 entries.**
+`scripts/kaggle_factory.py::session_outputs()` made a single call and returned `resp.files`. For any
+kernel that also writes a zarr/geff tree the page fills with chunk files and the **named outputs are
+absent** — which is indistinguishable from "the kernel produced nothing". Verified on
+`biohub-loeo-f0-strict`: the unpaginated call returned **500 files / 15 distinct geff crops**; following
+`next_page_token` returns **2,377 files / 71 crops** (the true count) and surfaces `submission.csv`.
+
+Fixed 2026-08-01 — `session_outputs()` now follows `next_page_token` with `page_size=500` and a
+200-page hard stop. **A truncated listing is worse than an error, because it looks like data.**
+
+**23. A glob is not a manifest.** A WS-A kernel silently processed **66 of 71** fold-0 crops (8.2% of
+the fold missing) because its crop list came from a corrupt-filtered glob rather than the manifest.
+Nothing failed; the run simply covered less than it claimed. Caught only by comparing counts.
+**Rule: the manifest is authoritative — every declared item must resolve or the job dies naming the
+missing ones.** Never let a filter silently shrink a declared work set.

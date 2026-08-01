@@ -388,13 +388,35 @@ def cmd_status(spec: dict) -> int:
 
 # --------------------------------------------------------------------------- fetch
 def session_outputs(slug: str) -> dict[str, str]:
+    """List EVERY output file of a kernel session, following pagination.
+
+    TRAP 22 (2026-08-01): this used to make ONE call and return `resp.files`. The endpoint
+    caps a page at 500 entries, so for any kernel that also writes a zarr/geff tree the page
+    filled with chunk files and the NAMED outputs were absent -- indistinguishable from "the
+    kernel produced nothing". One workstream lost time to exactly that; following
+    `next_page_token` turned 500 files into 1,943.
+
+    Always paginate. A truncated listing is worse than an error because it looks like data.
+    """
     from kagglesdk.kernels.types.kernels_api_service import ApiListKernelSessionOutputRequest
     api = _client()
+    out: dict[str, str] = {}
+    token = None
     with api.build_kaggle_client() as k:
-        req = ApiListKernelSessionOutputRequest()
-        req.user_name, req.kernel_slug = OWNER, slug
-        resp = k.kernels.kernels_api_client.list_kernel_session_output(req)
-    return {f.file_name: f.url for f in resp.files}
+        for _ in range(200):                      # hard stop; 200 * 500 = 100k files
+            req = ApiListKernelSessionOutputRequest()
+            req.user_name, req.kernel_slug = OWNER, slug
+            req.page_size = 500
+            if token:
+                req.page_token = token
+            resp = k.kernels.kernels_api_client.list_kernel_session_output(req)
+            out.update({f.file_name: f.url for f in resp.files})
+            token = getattr(resp, "next_page_token", None) or None
+            if not token:
+                break
+        else:
+            raise RuntimeError(f"{slug}: output listing did not terminate after 200 pages")
+    return out
 
 
 def cmd_fetch(spec: dict, files: list[str], dest: Path) -> int:
