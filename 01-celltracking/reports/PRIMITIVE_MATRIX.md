@@ -10,7 +10,7 @@ Basis tags: `public` · `exact-pooled-OOF` · `cross-family-LOFO` · `in-family-
 
 | lane | primitive | novelty | oracle ceiling | deployable Δ | family transfer | compute | decision |
 |---|---|---|---|---|---|---|---|
-| 1 | shape-aware localisation | — | — | — | — | — | RUNNING |
+| 1 | shape-aware localisation | genuinely new (first coordinate-only arm) | **+0.009125** @ ≤8.5 µm `[GT-oracle]` | **−0.008778** (λ=1); +0.000333 best shrinkage | **FAILS — sign-opposite** | ~3.4 core-h, 0 GPU | **NO-GO** |
 | 2 | acquisition-state inference | — | — | — | — | — | RUNNING |
 | 3 | event-centric division state | — | — | — | — | — | RUNNING |
 | 4 | CAP / track-as-point | real but insufficient | 35.45% of never-detected nodes @ w8 `[GT-oracle]` | **none — not measurable** | 85.14% / 32.23% | ~2 CPU-min, 0 GPU | **CLOSED — licence, Step 1** |
@@ -88,3 +88,62 @@ the division track's binding constraint is the selector, that framing is worth r
 training data we do not have, so it is a note, not a queue item.
 
 **Do not reopen** without a licence change by the authors *and* a CoTracker-free reimplementation.
+
+
+---
+
+## Lane 1 — shape-aware localisation: NO-GO (both proceed-gates passed, final gate failed)
+
+**Novelty is real.** Every previously closed lane edited *topology* — candidate breadth
+(−0.1596/−0.1496), node budget, component retention, fork reconstruction. This is the first arm that
+moves **coordinates on a frozen node and edge set**, so `N_pred` and `N_est` are invariant by
+construction and it is not a metric-artifact question. Node-count invariance verified 199/199.
+
+### Census of all 14,766 unmatched GT nodes `[exact-pooled-OOF; bucket labels GT-oracle]`
+
+| first cause | pooled | 44b6 | 6bba |
+|---|---:|---:|---:|
+| (a) no predicted evidence within 14 µm | 6,972 (47.2%) | 10 (1.1%) | 6,962 (50.3%) |
+| **(b) displaced free detection, 7–14 µm** | **5,826 (39.5%)** | **737 (79.8%)** | 5,089 (36.8%) |
+| (e) boundary/volume | 1,784 (12.1%) | 148 (16.0%) | 1,636 (11.8%) |
+| (c) merged/ambiguous component | 131 (0.9%) | 0 | 131 (0.9%) |
+| (d) assignment conflict | 53 (0.4%) | 28 (3.0%) | 25 (0.2%) |
+
+**The families have structurally different failure modes: 44b6 misses are 79.8% displaced-but-detected;
+6bba misses are 50.3% nothing-within-14 µm — genuine non-detection.** Since 6bba is 85.06% of edge
+mass, the corpus problem is detection, not localisation. Addressable (b+c) = 6,683 edge FN = **24.12%**
+of corpus edge FN, so the ≥10% proceed-gate passed bilaterally. The census independently reproduces
+the project's 56.7 / 43.3 node-vs-association split.
+
+### Oracle ceiling — the headroom is real
+
+| arm | pooled Δ | 44b6 | 6bba | nodes moved |
+|---|---:|---:|---:|---:|
+| **oracle ≤8.5 µm** | **+0.009125** | +0.011077 | +0.008699 | 2,458 |
+| oracle ≤14 µm | +0.019289 | +0.014986 | +0.020018 | 6,486 |
+| oracle unbounded | +0.042079 | +0.015193 | +0.047011 | 14,570 |
+
+Crop-block bootstrap (2,000): ≤8.5 µm CI **[+0.007698, +0.010782]**, P(Δ>0) = 1.000, bilaterally
+positive. Only the ≤8.5 µm arm is a *localisation* ceiling — the unbounded arm is teleportation
+(median move 18.7 µm) and is a fixed-topology node-recall bound only.
+
+### The deployable primitive fails, and the reason is measured
+
+Background-subtracted power-2 intensity centroid, image-only, `[exact scorer, family-balanced
+60-crop stratified sample]`: λ=1 gives **−0.008778** (negative on both families); λ=0.5 and λ=0.25
+are **sign-opposite** across families (44b6 −0.0054 / 6bba +0.0013). Final gate fails on every arm.
+
+**Why: the shape signal this lane was built on is absent.** Every one of six estimators has a
+*worse* median miss displacement than the status quo, and each fixes a minority tail while breaking
+correctly-matched nuclei — corpus-scaled net ledger: intensity_centroid **−11,192**, soft-argmax
+T=0.5 −3,027, cc_centroid −75,174, LoG −74,986. Local component shape is statistically identical
+between misses and correct detections (√λ_major SMD 0.122, √λ_minor 0.030, LoG σ 0.003).
+
+### Next integration dependency — a SELECTOR, with an exact bar
+
+Best conservative estimator (soft-argmax T=0.5) has P(fix|miss) = 0.125 and P(break|matched) = 0.032,
+so **break-even purity is 20.4% against a 5.1% base rate — a 4.0× enrichment merely to reach zero**;
++0.002 needs ~50% purity over ≥11,600 nodes. **This is the same shape as component retention**, where
+the selector retained 11,683 components against an oracle's 763. Reopen only if a cross-fitted
+multivariate selector clears **20.4% purity leave-family-out** on the 6,496-node addressable
+population — ~20 CPU-minutes, and it must pass *before* another exact-scorer replay is spent.

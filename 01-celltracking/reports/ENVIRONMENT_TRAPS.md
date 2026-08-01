@@ -182,3 +182,30 @@ size-descending and spent 2 CPU-hours covering **9.9%** of its target signal, be
 target edges live in *small* `6bba` crops. Re-ordering by *target-count ÷ predicted runtime* reached
 **80.1%** coverage in a further **9 wall-minutes**. Before any long corpus sweep, sort by expected
 signal per second — not by crop size, and not by directory order.
+
+**18. TWO different "published anchors" are in circulation, and they differ by one edge.**
+Found 2026-08-01 by Lane 1's per-crop parity check.
+
+| source | pooled | 6bba |
+|---|---|---|
+| **`inventory/pooled_objective_parity.json` — CANONICAL, locked by `tests/test_pooled_objective.py`** | **0.6653932886896151** | **0.6489523829566957** |
+| `fn_attribution_ceilings.json`, `h4_ssl_gate_replay_pooled.json`, `phaseb_h0c_replay`, `phaseb_oracle_d0prime` | 0.6654043056779476 | 0.6489651953216343 |
+
+**Cause:** those replay scripts rebuild the edge list as a Python **set** — `{(a,b) for a,b in edges}`.
+The cache contains **zero duplicate edges** (4,916,122 checked), so nothing is dropped; what changes
+is **insertion order**. The metric's out-degree>2 cap and its merge-dedup both keep the **lowest
+EDGE_ID**, so a different edge survives. Corpus edge weight 151,615 vs 151,614; corpus edge FN
+**27,706 vs 27,705**.
+
+**Magnitude 1.10e-05 pooled = 0.55% of a +0.002 gate.** No verdict on record flips. The damage is
+epistemic: a lane can truthfully say "reproduces the published anchor exactly" while matching the
+*other* anchor, so "parity passed" stops being a single well-defined claim.
+
+**Rules from this:**
+- Parity-check against the **canonical** triple, and state which anchor you used.
+- Better: check **per-crop counts** against the independent cached artifacts
+  `artifacts/kaggle/coupled_cache/scores/A__*.json`. That is what caught this; a single scalar
+  would not have.
+- **Never rebuild an edge list with a bare set comprehension.** Use a list plus a seen-set so
+  insertion order is preserved — the scorer is order-sensitive through its tie-breaks even when the
+  edge *set* is identical.

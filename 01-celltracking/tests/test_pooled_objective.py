@@ -117,3 +117,28 @@ def test_real_corpus_mass_imbalance_if_cache_present():
     share = m0 / (m0 + m1)
     assert 0.10 < share < 0.20, f"44b6 edge-mass share {share:.4f} outside the measured ~0.149"
     assert share < 0.5, "44b6 is a minority of edge mass; 50/50 family weighting is not the metric"
+
+
+def test_canonical_anchor_is_unambiguous():
+    """Trap 18: two anchors differing by one edge were circulating simultaneously.
+
+    `pooled_objective_parity.json` is the canonical source. Replay scripts that rebuild edges
+    with a bare set comprehension lose insertion order and, through the scorer's lowest-EDGE_ID
+    tie-breaks, keep a different edge -- shifting pooled by 1.1e-05. That is harmless to any
+    gate on record but makes "parity passed" ambiguous, so the canonical value is pinned here.
+    """
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    p = root / "reports" / "inventory" / "pooled_objective_parity.json"
+    if not p.exists():
+        import pytest
+        pytest.skip("pooled_objective_parity.json absent")
+    a = json.loads(p.read_text(encoding="utf-8"))["arms"]["A"]
+    assert abs(a["pooled"] - 0.6653932886896151) < 1e-15, (
+        f"canonical pooled anchor moved: {a['pooled']!r}"
+    )
+    assert abs(a["f6bba"] - 0.6489523829566957) < 1e-15, (
+        f"canonical 6bba anchor moved: {a['f6bba']!r}"
+    )
