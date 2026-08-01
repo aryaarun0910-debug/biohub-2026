@@ -3444,3 +3444,40 @@ pooled Δ ≥ +0.002 with the two LOFO directions agreeing within **3×** · Gat
 ablation ≤ +0.0005 · Gate 3b normalisation control · Gate 4 P(Δ>0) ≥ 0.80 in the *weaker* family ·
 Gate 5 unit economics against a **random equal-sized retention control**, not against nothing ·
 Gate 6 count-multiplier ≤50% of the gain · Gate 7 basis tags on every number.
+
+### 2026-08-01 (P0-CR SCORED 0.906 — reverse-time is BASE-DEPENDENT, and the structural read called it)
+
+`ref 55147215` landed at **0.906** after ~4.5 h PENDING (kernel COMPLETE, no error throughout —
+trap 13 at its extreme; P0-A and P0-B both scored within minutes on the same day).
+
+| base | without reverse-time | with reverse-time | Δ | divisions |
+|---|---:|---:|---:|---:|
+| clean 0.913 | P0-A **0.913** | P0-B **0.914** | **+0.001** | −9 |
+| v122 | v122 **0.908** | P0-CR **0.906** | **−0.002** | +10 |
+
+**The signs differ. Reverse-time is not a general mechanism.** Same source-locked extract, same
+`w = 0.20`, opposite outcomes on two bases. The slot bought a real answer rather than a confirmation.
+
+**The pre-registered structural read predicted the direction before any score existed.** The
+CANDIDATE_LEDGER recorded, from graph structure alone, that divisions moved **−9** on the clean base
+and **+10** on v122, and flagged the mechanism as base-dependent on that basis. The arm whose
+divisions moved *up* is the one that lost 0.002. **Reusable rule: measure the division-count
+direction before spending a slot** — it is cheap, offline, and it worked.
+
+**Confound, named:** P0-CR bundles the line-fit volume guard with reverse-time, so the −0.002 is
+strictly (reverse-time + guard) vs neither. The guard repaired exactly **one** out-of-volume node
+(`44b6_0b24845f` node 15274, z=64) out of ~120,673 and cannot plausibly carry −0.002, but this is
+not a pure single-variable contrast and must not be quoted as one.
+
+**What changes.** Deployment is unchanged — P0-B remains the base at **0.914**, and P0-CR was never
+a climb candidate. What changes is a *rule*: **a mechanism validated on one substrate is unvalidated
+everywhere else.** That is now the third independent instance this cycle — node budget (+0.00157 on
+E0c → −0.00088 on v122 → −0.00001 on P0-B), the H0d live-filter cross-term (+0.004894 on E0c 6bba →
++0.000459 on P0-strict, because P0-strict has zero division-exempt short components), and now
+reverse-time (+0.001 → −0.002). **Substrate transfer is this project's dominant failure mode, ahead
+of overfitting and ahead of compute.**
+
+It also retires the P0-B ambiguity in the honest direction: P0-B's +0.001 is still one LB quantum
+and still not established as a real gain, but the mechanism is now known to be *capable* of moving
+score in both directions, so the +0.001 is not automatically noise either. Do not re-litigate it
+with another blend weight — that remains closed.

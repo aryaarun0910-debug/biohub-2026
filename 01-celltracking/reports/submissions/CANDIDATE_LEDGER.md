@@ -74,7 +74,7 @@ Same mechanism applied to our own 0.908 baseline, detector/ILP/wrapper otherwise
 | P0-A | `biohub-p0a-clean-913-repro` v1 | `8c1605b5944d25e4…` | **PASS 10/10** (re-verified independently) | **ref 55136759** | **0.913** |
 | P0-B | `biohub-p0b-clean-913-reverse-time` v1 | `4c285cae0c220a11…` | **PASS** (re-verified independently) | **ref 55136908** | **0.914 — NEW BEST** |
 | P0-C | `biohub-p0c-v122-revtime-run` v1 | `3370222f811fddc9…` | **FAIL** — 1 node out of volume | no | — |
-| **P0-CR** | `biohub-p0cr-v122-revtime-volguard` v1 | `435bf5d19d85563c…` | **PASS 10/10** (A1–A10, outside=0) | **ref 55147215** | *pending* |
+| **P0-CR** | `biohub-p0cr-v122-revtime-volguard` v1 | `435bf5d19d85563c…` | **PASS 10/10** (A1–A10, outside=0) | **ref 55147215** | **0.906** |
 
 **Slots consumed this cycle: 3 of 3.** Slot 3 spent 2026-07-31 22:23 local on P0-CR.
 
@@ -122,6 +122,7 @@ page in a browser.**
 | structural audit | **PASS 10/10** — A1–A10, `outside=0`, max in-degree 1, max out-degree 2, t 0–99 |
 | submission | **ref 55147215**, 2026-07-31 21:23 UTC |
 | expectation | **0.908–0.912** — a causal probe, explicitly **not** a score climb |
+| **RESULT** | **0.906** — BELOW the v122 base it was built on. Landed 2026-08-01 after ~4.5 h PENDING. |
 
 **Causal question:** is reverse-time's effect base-dependent? P0-B (clean 0.913 base) gave +0.001
 with divisions **−9**; this arm applies the identical source-locked mechanism to v122, where the
@@ -136,3 +137,31 @@ coordinates without clamping, parking node 15274 of `44b6_0b24845f` at z=64 agai
 **Deliberately not submitted the same day:** P1 (P0-B + node budget) was built, audited PASS 10/10,
 and measured at **−0.0000103** — a slot spent to confirm noise. P2 has a bolt-on ceiling of exactly
 zero. P3 does not exist. Two daily slots were left unused rather than filled.
+
+### P0-CR result — reverse-time is BASE-DEPENDENT and harmful on v122
+
+| base | without reverse-time | with reverse-time | Δ | division count move |
+|---|---:|---:|---:|---:|
+| clean 0.913 | P0-A **0.913** | P0-B **0.914** | **+0.001** | −9 |
+| v122 | v122 **0.908** | P0-CR **0.906** | **−0.002** | +10 |
+
+**The signs differ.** The same source-locked mechanism at the same `w = 0.20` helps the clean base
+by one LB quantum and *hurts* v122 by two. The causal question this slot was spent on is answered:
+**reverse-time is not a general mechanism — its sign depends on the base it is applied to.**
+
+The pre-registered structural read called the direction correctly before any score existed:
+divisions moved **−9** on the clean base and **+10** on v122, and the arm whose divisions moved *up*
+is the one that lost score. That is a genuine predictive success for structural pre-registration and
+should be reused: **measure the division-count direction before spending a slot.**
+
+**Confound, named honestly:** P0-CR carries the line-fit volume guard as well as reverse-time, so
+strictly the −0.002 is (reverse-time + guard) vs neither. The guard repaired exactly **one**
+out-of-volume node (`44b6_0b24845f` node 15274, z=64) out of ~120,673, so it cannot plausibly
+account for −0.002 — but the arm is not a pure single-variable contrast and must not be quoted as one.
+
+**Deployment: unchanged.** P0-B stays the base at **0.914**. What changes is the *rule*: do not
+port reverse-time onto any other substrate without re-measuring, and treat a mechanism validated on
+one base as unvalidated everywhere else until shown otherwise.
+
+**Cycle slots: 3 of 3 consumed** (P0-A, P0-B, P0-CR). Two further Kaggle daily slots were left
+deliberately unused on 2026-07-31 because nothing built that day had positive expected value.

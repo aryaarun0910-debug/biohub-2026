@@ -22,10 +22,18 @@
 | P0-A exact clean 0.913 reproduction | 0.913 | reproduced the public notebook exactly |
 | v122 | 0.908 | previous best; best *pooled OOF* arm (0.69909) |
 | E0c | 0.889 | scientific anchor only; pooled OOF 0.66539 |
+| P0-CR = v122 + reverse-time + volume guard | 0.906 | **causal probe, scored 2026-08-01** |
 
-`P0-B − P0-A = +0.001` = **exactly one unit of LB resolution**. The arms differ by ~0.05% of
-nodes, so this cannot separate a real gain from rounding. Reverse-time is **not harmful**;
-it is **not established as beneficial**. Do not re-litigate with another global blend weight.
+`P0-B − P0-A = +0.001` = **exactly one unit of LB resolution**, so it cannot separate a real
+gain from rounding. Do not re-litigate with another global blend weight.
+
+**UPDATED 2026-08-01 — reverse-time is BASE-DEPENDENT.** The same source-locked mechanism at the
+same `w = 0.20` gives **+0.001 on the clean 0.913 base** and **−0.002 on v122** (0.908 → 0.906,
+P0-CR). The signs differ, so it is **not a general mechanism** and must not be ported onto any
+other substrate without re-measuring. The pre-registered structural read called this before any
+score existed: divisions moved **−9** on the clean base and **+10** on v122, and the arm whose
+divisions rose is the one that lost score. **Measure the division-count direction before
+spending a slot.**
 
 Milestones from 0.914: **0.920** needs +0.006 · **0.925** +0.011 · **0.935** +0.021 · **0.942** +0.028.
 
