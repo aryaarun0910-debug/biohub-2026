@@ -85,12 +85,32 @@ print(f"LOEO fold {LOEO_FOLD} arm {LOEO_ARM}: {len(LOEO_STEMS)} crops -> {TEST_D
 
 # ------------------------------------------------------------------- 2. fold weights
 # fold 0 keeps the pack's split_0 (clean on 44b6); fold 1 needs our own split_1.
+def _loeo_find(pattern: str) -> list[str]:
+    """Resolve an input glob at whatever depth Kaggle mounted the dataset.
+
+    2026-08-01: a fold-1 kernel died at t=628 s because the declared glob was
+    `/kaggle/input/*/<file>` while datasets were mounted at
+    `/kaggle/input/datasets/<owner>/<slug>/<file>` -- the same run resolved the support
+    pack at that nested path, so /kaggle/input was NOT empty and this was not trap 9.
+    Try the declared pattern first, then a bounded depth ladder on its basename (the
+    same defence the .zarr mount above already uses). Bounded, never recursive: a
+    `**` walk over /kaggle/input would descend the 79 GB competition zarr tree.
+    """
+    _hits = list(_loeo_glob.glob(pattern))
+    _base = Path(pattern).name
+    for _d in (1, 2, 3, 4):
+        _hits += _loeo_glob.glob("/kaggle/input/" + "*/" * _d + _base)
+    return sorted(set(_hits))
+
+
 _loeo_weight_override = os.environ.get("BIOHUB_LOEO_WEIGHTS_GLOB", "").strip()
 if _loeo_weight_override:
-    _cand = sorted(_loeo_glob.glob(_loeo_weight_override))
+    _cand = _loeo_find(_loeo_weight_override)
     if len(_cand) != 1:
+        for _lvl in ("/kaggle/input/*", "/kaggle/input/*/*", "/kaggle/input/*/*/*"):
+            print(_lvl, "->", sorted(_loeo_glob.glob(_lvl))[:40])
         raise RuntimeError(f"weights glob {_loeo_weight_override!r} matched {_cand}")
-    _cfg = sorted(_loeo_glob.glob(os.environ["BIOHUB_LOEO_CONFIG_GLOB"]))
+    _cfg = _loeo_find(os.environ["BIOHUB_LOEO_CONFIG_GLOB"])
     if len(_cfg) != 1:
         raise RuntimeError(f"config glob matched {_cfg}")
     _wdir = WORKING_DIR / "loeo_weights"

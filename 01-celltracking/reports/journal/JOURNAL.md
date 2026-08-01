@@ -3117,3 +3117,173 @@ crop-normalised and 44b6 collapses to 0.542** — it partially encodes an embryo
 always be crop-normalised. Anisotropy ax1/ax3 *improves* under normalisation (0.658 → 0.665),
 the signature of a genuinely dimensionless quantity. Note controls sit at 1.73 from the anisotropic
 PSF alone, so only the **excess** over that is biology.
+
+### 2026-08-01 (Lane B — the 0.7595-vs-0.89859 gap is REAL; H0c is +0.0739 live on the P0-strict substrate)
+
+**GATE 1 — RECONCILIATION. Resolved: a genuine substrate difference, not a weighting convention.**
+The open caveat ("do not compare 0.89859 with E0c's published 44b6 0.7595 — weighting conventions
+are unreconciled") is closed. Both arms scored through **one entry point**
+(`biotrack.metric.score_pred_graph`) in **one run** over the **same 71 fold-0 crops**:
+
+| arm (71 crops, 44b6, fold 0) | raw edge_J | adj_edge_J | node_recall | divJ | composite | N_pred |
+|---|---:|---:|---:|---:|---:|---:|
+| E0c cached post-wrapper graphs | 0.767340 | 0.759549 | 0.948158 | 0.0000 (0/93/26) | **0.759549** | 2,864,419 |
+| P0-strict recovered LOEO f0 | 0.882245 | 0.898589 | 0.984573 | 0.01587 (2/100/24) | **0.900177** | 1,900,633 |
+| **delta** | +0.114905 | +0.139040 | +0.036415 | +0.01587 | **+0.140628** | −963,786 |
+
+PARITY: the E0c arm reproduces the published anchor to |d| = 4.9e-05 (rounding of `0.7595`), and
+per-crop it matches branch A's published `44b6_d29c9ab2` adjJ **0.8821** exactly. The P0 arm
+reproduces `reports/inventory/loeo_f0_strict.json` at **|d| = 0.000e+00 on every field**. CSV
+sha256 verified `6880f2fa04969f4007908738cbc88045015f95142c3aee7f8da95392164ce6be`. 255.7 s,
+3 workers. 66/71 crops have node recall >= E0c's; only 2/71 regress on adjJ.
+
+**Attribution of the +0.140628** `[exact-pooled-OOF, fold 0 / 44b6 only]`:
+
+- **+0.114905 (81.7%) real matching quality.** Edge TP 17,292 -> 18,723, FP 2,709 -> 1,396,
+  FN 2,534 -> 1,103. Precision 0.8646 -> 0.9306, recall 0.8722 -> 0.9444. P0-strict emits
+  **one million fewer nodes** and finds **more** GT nodes.
+- **+0.024136 (17.2%) count multiplier.** Edge-mass-weighted node ratio +0.1048 -> -0.1852, so the
+  unclipped multiplier goes 0.98952 -> 1.01852. Stated as a share of the observed gap only — the
+  metric agent's correction stands: the per-node count cost is `0.1*tp_i/N_est_i`, invariant to
+  over/under-prediction.
+- **+0.001587 (1.1%) division term.**
+
+**No leakage signature, but the pack's provenance is undocumented and this must be said.**
+P0-strict fold 0 runs the *support pack's* `split_0`, not ours. FOR cleanliness: only 2/71 crops
+regress; per-crop adjJ still spans 0.5591–1.0640 and node recall bottoms at 0.9256; divisions are
+still TP2/FP100/FN24; and the held-out-family OOF composite (0.9002) sits **below** P0-A's public
+0.913 — memorisation would invert that. AGAINST certainty: the pack ships **no training record at
+all** — no `train_datasets`, no held-out declaration — and its own `ARTIFACT_MANIFEST.json` names it
+**`biohub-tracking-support-pack-400ep-snapshot-v1`** while the Kaggle dataset is called "50ep"
+(`source: "public learned baseline artifact, repackaged locally"`). **The only evidence that 44b6
+was held out is the directory name `split_0`.** Treat 0.900177 as clean-pending-provenance.
+
+**The two 44b6 numbers are also not the same system.** Pack `split_0` is 8,363,159 B, sha256
+`12f6881ee3620a83…`; our LOEO `split_0` is 8,357,783 B, sha256 `d3e89eb361eeadef…` — E0c ran ours.
+Fold 0 therefore conflates *model vintage* with *pipeline*. **Fold 1 does not**: it runs our
+`split_1` on both sides, so fold 1 vs E0c 6bba isolates the pipeline alone.
+
+---
+
+**GATE 2 — FOLD 1 (6bba) LAUNCHED, RUNNING.** `aryaarun07/biohub-loeo-f1-strict` v2, slug read back
+after push (trap 12), `PYTHONUTF8=1` throughout (trap 8).
+
+*Leak-freeness of `split_1`, verified before spending GPU:* `data/dataset_splits.json` split 1 =
+train 71x44b6 / test 128x6bba; `notebooks/kaggle_train_oof_f1/kaggle_train_oof_f1.py` sets
+`FOLD = 1` ("HOLD OUT 6bba (train on 44b6)"), 45 epochs, and picks its best epoch on a **6-crop
+validation subset of the TRAINING embryo** — never the held-out one. The exported filenames are
+exactly those in `aryaarun07/biohub-oof-weights`. **LOEO-clean for 6bba.** Kernel log confirms the
+override resolved to sha256 `2e4ebf616b3d4fb5…`, secondary DISABLED, DeepCenter DISABLED, 128
+crops, both GPU shards on `/kaggle/working/loeo_weights/edge_predictor.pth`.
+
+*Serving check:* `pool_kernel_um` comes from `PredictConfig` (3.0), **not** `config.json` (which
+supplies only `window_size`/`downsample`), so both folds serve at 3.0 — no asymmetry.
+
+**v1 died at t = 628 s -> new trap 16.** `weights glob '/kaggle/input/*/edge_predictor_best_split_1.pth'
+matched []`. **Not trap 9:** the same run had already mounted 128 train `.zarr` crops and resolved
+the pack at `/kaggle/input/datasets/pilkwang/…` — datasets mount **owner-qualified, one level
+deeper**. Fixed in `scripts/kaggle_edits/loeo_retarget.py::_loeo_find` (declared pattern, then a
+**bounded** `*/`-ladder on the basename; never `recursive=True`, which would descend the 79 GB
+competition zarr tree), and the failure path now prints the mount tree. Cost ~10 GPU-minutes.
+No shards needed: fold 0 was 71 crops / 2.86 M E0c-nodes in 2.70 h against a 9 h session; fold 1 is
+128 crops / **2.25 M** E0c-nodes — 6bba crops are individually smaller.
+
+---
+
+**GATE 3 — H0c AND H0d ON THE P0-STRICT SUBSTRATE.** Frozen cascade, config hash `04eeac97500d`,
+K and ranking inherited from H0b and **not retuned**. Two independent implementations agree:
+`h0c_replay_p0strict.py` (loader rebound, `replay_one` imported verbatim) gives +0.073419;
+`phaseb_h0d_livefilter.py --surfaces p0strict` gives +0.073418. Baseline parity |d| = 0.000e+00 on
+every field in both. 1418 s / 1944 s at 3 workers.
+
+| arm (71 crops, 44b6, fold 0) | composite | Δ vs base | adj_edge_J | raw edge_J | divisions |
+|---|---:|---:|---:|---:|---|
+| base | 0.900177 | +0.000000 | 0.898589 | 0.882245 | TP2/FP100/FN24 |
+| `supp_post` suppress-all, no re-filter | 0.899097 | −0.001080 | 0.899097 | 0.882756 | TP0/FP0/FN26 |
+| `supp_refilt` + live wrapper filter | 0.899558 | −0.000619 | 0.899558 | 0.883081 | TP0/FP0/FN26 |
+| `h0c_post` published H0c form | 0.973595 | **+0.073418** | 0.900518 | 0.884155 | TP19/FP0/FN7 |
+| `h0c_refilt` **LIVE PATH** | **0.974054** | **+0.073877** | 0.900977 | 0.884475 | TP19/FP0/FN7 |
+| `h0c_refilt_guard` | 0.974054 | +0.073877 | 0.900977 | 0.884475 | TP19/FP0/FN7 |
+
+`[GT-oracle, fold 0 / 44b6 only — 14.94% of corpus edge mass. NOT a pooled claim.]`
+
+Retention **19/22 reachable = 86.4%**; shortlist 5,267,771 from 28,956,390 pre-top-K over
+1,833,541 mothers; only **12 parent steals**; `gt_collisions = 0`; 5,300 existing forks suppressed.
+This reconciles with the circulated **+0.0830**: that is the analytic k=22/m=0 ceiling, while the
+frozen flow-midpoint top-3 shortlist actually retains 19 of 22 -> **+0.0734**. The missing +0.0096
+is exactly the 3 reachable divisions the ranker drops — i.e. **the ranker, not the substrate, is
+now the first loss.**
+
+**The edge side is POSITIVE here, unlike E0c.** adj_edge_J +0.001929 (`h0c_post`), +0.002388 (live).
+On E0c it was +0.0010 (44b6) and **−0.0006** (6bba). Suppress-all alone is edge-**positive**
+(+0.000508); add-replace of the 19 true forks adds +0.001421.
+
+**The live-filter cross-term must NOT be inherited from E0c — measured, it shrinks 3.5x:**
+
+| surface | `h0c_refilt − h0c_post` | `supp_refilt − supp_post` | division-exempt short components |
+|---|---:|---:|---|
+| E0c 44b6 | +0.001610 | +0.001617 | 134 comps / 652 nodes, **all lost** |
+| E0c 6bba | +0.004894 | +0.004865 | 122 comps / 586 nodes, **all lost** |
+| **P0-strict 44b6** | **+0.000459** | **+0.000461** | **0 comps / 0 nodes** |
+
+The mechanism is structurally absent: on P0-strict **no component survives the wrapper only through
+its division exemption**, so the D0′ hazard cannot fire and the GT-free retention guard is a literal
+no-op (`h0c_refilt == h0c_refilt_guard` to 1e-6). The 3,767–3,784 nodes the live filter does delete
+are ordinary short components exposed by edge removal, and deleting them *helps* slightly.
+**E0c's 6bba +0.0049 — larger than the whole +0.005 promotion gate — has no support here and must be
+re-measured on fold 1, not inherited.** `live-filter idempotent on the unedited graph: True` per
+crop, which is what validates `min_track_len = 6` (P0-A's own `output_min_track_len`, with
+`output_keep_division_components: true`, `output_prune_isolated: true`).
+
+*Invariance, measured not assumed:* under the edges-only replay N_pred and node_recall are identical
+on every crop **by construction** (one immutable node frame) — that arm proves nothing, exactly as
+trap-14 thinking predicts. H0d is the authority; it re-runs the real `filter_short_track_components`
+and reports the deletions above. 15/71 crops regress on adj_edge_J (worst `44b6_9be80b04` −0.0139).
+
+---
+
+**GATE 4 — the cost side of the mother gate is now MEASURED, and two GT-only falsifications fire.**
+
+**Marginal cost of a FALSE fork** (`fp_cost_p0strict.py`, 1828 s, base parity PASS). After
+suppress-all, admit the per-crop top `ceil(q x mothers)` shortlist pairs ranked by the frozen
+flow-midpoint residual, with GT used **only** to exclude true dividers, so every admission is false
+by construction and the delta is a pure cost:
+
+| q | forks admitted | composite | Δ vs suppress-all | per fork |
+|---:|---:|---:|---:|---:|
+| 1e-5 | 71 | 0.899097 | **+0.000000** | 0.000e+00 |
+| 1e-4 | 220 | 0.898827 | −0.000270 | −1.228e-06 |
+| 1e-3 | 1,847 | 0.896159 | −0.002937 | −1.590e-06 |
+
+**The top-ranked 71 false forks are exactly metric-free** (off-annotation edits cost nothing), and
+the asymptotic cost is ~**1.6e-06** composite per false fork. Against a **+0.003921 per true fork**
+gain (`h0c_post − supp_post = +0.074498` over 19), the *edge-side* value ratio is ~2,470:1.
+**So the edge cost is NOT the binding constraint on this substrate** — at k=19 the division-FP term
+is `0.1*(19/27 − 19/26) = −2.707e-03`, **1,700x larger** than the edge cost. The gate must be tuned
+against the division-J denominator, exactly as the metric agent's kernel says, and the "unconditional
+edge cost" caution from the E0c era is quantitatively small here.
+
+Marginal admit thresholds from that kernel with **`pi_vis` PINNED at 1.0** (never fitted — fitting it
+is an annotation-coverage exploit), `[exact-pooled-OOF restricted to fold 0 / 44b6]`: edge-neutral
+edit **1.55% at k=0 -> 15.89% at k=22**; pessimistic edit (steal 1 TP, add 1 FP) **12.76% -> 25.47%**.
+A single fixed bar over-admits early and under-admits late — do not use one.
+
+**`gt_lineage_census.py` over all 199 GT crops** (133,318 nodes, 128,883 edges, **151 divisions** =
+26 + 125, matching the known denominators):
+
+- **A hazard head over cell age is NOT MEASURABLE. 0 of 151 mothers has an observed birth** — no
+  division mother's parent is itself a division anywhere in the corpus. Every "age" is
+  left-censored at an annotation start, so `P(divide | age = k)` cannot be estimated. **Do not build
+  the discrete-time competing-risks head.**
+- **A GT-fitted refractory window is NOT MEASURABLE: 0 observed inter-division intervals.** Temporal
+  NMS along a track is still worth building, but only as a **structural** constraint on our own
+  predicted tracks (one admitted fork per track per window, keep the argmax) — never as a
+  GT-calibrated threshold.
+- Positive: GT tracklets are long — median **20** frames, mean 28.1, max 100, only 0.2% of length 1
+  — so there is ample within-track context for temporal NMS to act on. Express windows in FRAMES:
+  the zarr T axis declares `unit: "second", scale: 1.0`, a placeholder.
+
+Artifacts (scratchpad `laneB/`): `reconcile_e0c_vs_p0strict.json`, `h0c_p0strict_f0.json`,
+`h0d_p0strict_f0.json` + per-crop parquet, `fp_cost_p0strict.json`, `gt_lineage_census.json`.
+The P0-strict fold-0 graphs are rematerialised as a first-class H0d surface at
+`artifacts/kaggle/p0strict_f0_cache/graphs/0/` (71 parquet, E0c schema, gitignored).

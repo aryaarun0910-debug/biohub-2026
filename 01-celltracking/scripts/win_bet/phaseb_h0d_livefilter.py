@@ -113,6 +113,15 @@ SURFACES: dict[str, dict] = {
     "clean903": {"graphs": "artifacts/kaggle/clean903_wrapper_oof_cache/graphs",
                  "status": "artifacts/kaggle/clean903_wrapper_oof_cache/status",
                  "arm": None, "min_len": 6},
+    # P0-strict LOEO fold 0 (44b6, 71 crops), rematerialised from the recovered submission
+    # `loeo_f0_strict_submission.csv` (sha256 6880f2fa04969f40...). FOLD 0 ONLY -- fold 1 on
+    # this substrate does not exist yet. `min_len` 6 is P0-A's own `output_min_track_len`
+    # from the kernel config dump (`output_keep_division_components: true`,
+    # `output_prune_isolated: true`), and the per-crop `refilter_identity` assertion is what
+    # actually validates it.
+    "p0strict": {"graphs": "artifacts/kaggle/p0strict_f0_cache/graphs",
+                 "status": "artifacts/kaggle/p0strict_f0_cache/status",
+                 "arm": None, "min_len": 6},
 }
 E0C_ANCHOR = {0: 0.7595, 1: 0.6490}
 ARMS = ("base", "h0c_post", "h0c_refilt", "h0c_refilt_guard", "supp_post", "supp_refilt")

@@ -77,9 +77,15 @@ Nothing currently qualifies: the only corpus-verified deployable mechanisms are 
 **Closed tonight, with corpus numbers:**
 
 - **Node budget — DEAD.** Arm D corpus −0.00088 (P(Δ>0)=0.109, pooled optimum keep_frac 1.00);
-  P0-B direct −0.00001. The sign tracks the node ratio: gain exists only where the graph
-  OVER-predicts (E0c +0.0832 → +0.00157; v122 −0.1598 → −0.00088; P0-B −0.1028 → −0.00001).
-  ~116% of the original arm-A gain was the count multiplier.
+  P0-B direct −0.00001. ~116% of the original arm-A gain was the count multiplier.
+  **MECHANISM CORRECTED 2026-08-01 — it is NOT the node ratio.** The per-node count cost is
+  `0.1·tp_i/N_est_i` and `N_est_i` is GT metadata, so it is *exactly invariant* to over- or
+  under-prediction; `r` enters only via `w_i = 1 − 0.1·r_i`, moving the threshold **1.1%** across the
+  whole ±0.16 range, and per-crop ratios are **mixed-sign on both substrates**. The real driver is
+  the `d_tp/d_fp` composition of what gets deleted: E0c **−5/+8** (`q_net −1.67`, deleting correct)
+  vs P0-B **+5/0** (`q_net +1.00`, deleting wrong). Retain iff
+  `q > (Jbar + 0.1·n·ρ/a)/(w + Jbar)`, floor **0.3994** — which independently reproduces the
+  project's separately-derived 40.6% detection bar.
 - **ssl × geometry veto — mis-scoped.** Not a bolt-on filter; it is the H0c cascade's admission
   gate. Bolt-on ceiling on P0-B is **exactly 0** (divisions TP0/FP8/FN3, divJ already 0).
 - **Association recovery — attributed in full, then closed.** All 27,705 corpus FN assigned to a
@@ -101,13 +107,28 @@ leave-family-out sign stability BEFORE any replay**, since blanket retention is 
 
 **Ranked queue now:**
 
-1. **The division track on the 22/26 substrate** — the only route with real headroom. Oracle
-   +0.0830 on 44b6, and a selector recovering just 10 of 26 while admitting 60 false forks still
-   returns +0.010. The substrate question is answered; **the selector is the binding constraint.**
-2. **Fold 1 (6bba) on the P0-B substrate** — 44b6 is only 14.94% of edge mass, so nothing above is
-   a pooled claim yet. `scripts/kaggle_specs/loeo_f1_strict.json` is ready and expects our
-   `split_1` weights. The export cell now records structural anomalies instead of discarding the
-   run, so it will no longer die the way fold 0 did.
+1. **The division track on the 22/26 substrate** — the only route with real headroom.
+   **MEASURED 2026-08-01 (Lane B), replacing the analytic +0.0830:** the frozen H0c cascade run on
+   the P0-strict substrate is **+0.073418** edges-only and **+0.073877 on the live path**
+   (`h0c_refilt`, real `filter_short_track_components` re-run), divisions TP2/FP100/FN24 →
+   TP19/FP0/FN7, retention **19/22 = 86.4%** `[GT-oracle, fold 0 / 44b6, 14.94% of edge mass]`.
+   +0.0830 was the analytic k=22/m=0 ceiling; the flow-midpoint top-3 shortlist drops 3 of the 22,
+   which is the whole difference. **The ranker, not the substrate, is now the first loss.**
+   Cost side measured too: a false fork costs **~1.6e-06** composite (the top-ranked 71 cost
+   *exactly zero* — off-annotation edits are metric-free) against **+0.003921 per true fork**, so
+   the binding term is the division-J denominator (−2.707e-03 per FP at k=19), **not** the edge
+   cost. Marginal admit threshold, `pi_vis` PINNED at 1.0: **1.55% (k=0) → 15.89% (k=22)**. Do not
+   use one fixed precision bar. Evidence: `inventory/laneB_h0c_p0strict_f0.json`,
+   `laneB_h0d_p0strict_f0.json`, `laneB_fp_cost_p0strict.json`.
+   *Also settled:* the live-filter cross-term is **+0.000459** here vs E0c's +0.001610 / +0.004894,
+   because P0-strict has **zero** division-exempt short components — so the D0′ hazard cannot fire
+   and the retention guard is a no-op. **Do not inherit E0c's 6bba +0.0049.**
+2. **Fold 1 (6bba) on the P0-strict substrate — LAUNCHED 2026-08-01, `aryaarun07/biohub-loeo-f1-strict`
+   v2.** 44b6 is only 14.94% of edge mass, so nothing above is a pooled claim yet. `split_1` verified
+   LOEO-clean before spending GPU (trained on 44b6 only, best-epoch chosen on a 6-crop *training*-embryo
+   validation subset). v1 died in 628 s on a mount-depth assumption — see **trap 16**, now fixed.
+   Fold 1 is the only comparison free of the model-vintage confound: it runs our `split_1` on both
+   sides, so P0-strict-vs-E0c on 6bba isolates the pipeline alone.
 3. **Component-level selective retention** (above), gated.
 4. **Re-run the FN attribution against `artifacts/kaggle/clean903_wrapper_oof_cache`** (199 crops,
    same schema) to learn whether the loss profile transfers off E0c at all. E0c is a scientific

@@ -133,3 +133,22 @@ both found 2026-07-31 when it was executed for the first time:
 Both fixed. **The general check both defects fail: a replay's baseline arm must reproduce the
 published anchor before any delta from it is quoted.** That single assertion catches this whole
 class and takes seconds.
+
+## Kaggle input mount depth (discovered 2026-08-01)
+
+**16. Datasets do not always mount at `/kaggle/input/<slug>/`.** The fold-1 LOEO kernel died at
+t = 628 s on `weights glob '/kaggle/input/*/edge_predictor_best_split_1.pth' matched []` while the
+*same run* had already resolved the support pack at
+`/kaggle/input/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1/` — i.e. an
+`owner`-qualified, one-level-deeper layout. A depth-1 glob therefore misses a correctly attached
+dataset.
+
+**This is not trap 9.** `/kaggle/input` was fully populated (128 train `.zarr` crops mounted, the
+competition dir present); only the depth assumption was wrong. Distinguish the two by printing the
+mount tree before raising — `scripts/kaggle_edits/loeo_retarget.py::_loeo_find` now tries the
+declared pattern and then a **bounded** `*/` ladder (depths 1–4) on the basename. Do **not** use
+`glob(..., recursive=True)` over `/kaggle/input`: it descends the 79 GB competition zarr tree.
+
+Cost: ~10 GPU-minutes, cheap only because the assertion fired before `predict`. The general rule:
+**any hard assertion on an input path must print the actual mount tree in its failure message**,
+otherwise "wrong path" and "broken kernel" look identical.

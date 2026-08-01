@@ -4,7 +4,7 @@
   "base_notebook": "notebooks/kaggle_p0a_clean913/biohub-p0a-clean913-repro.ipynb",
   "base_sha256": "35681256f355bc98552d9cbdc4d208a9670657f18b7e7c4ce5637e6619e5e570",
   "built_notebook": "notebooks\\kaggle_loeo_f1_strict\\biohub-loeo-f1-strict.ipynb",
-  "built_sha256": "538b8b9b280b0b7e23899f3922fb5241856efe1a07eff4e2d647fc684c09962a",
+  "built_sha256": "a2815eab8909658552a24c2592ab1d09d1f05790f1f6a38fdc65bd01623eafb3",
   "config_hash": "ddb5ebe2726a",
   "n_cells": 11,
   "edits": [
@@ -38,5 +38,6 @@
     }
   ],
   "declared_slug": "biohub-loeo-f1-strict",
-  "title": "Biohub Loeo F1 Strict"
+  "title": "Biohub Loeo F1 Strict",
+  "pushed_slug": "biohub-loeo-f1-strict"
 }

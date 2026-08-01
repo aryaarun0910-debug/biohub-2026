@@ -11,7 +11,7 @@
 2. `reports/NEXT_DECISION.md` — active queue
 3. `reports/submissions/CANDIDATE_LEDGER.md` — every submission, hash, audit, score
 4. `reports/RESEARCH_SYNTHESIS.md` — external evidence, one living doc
-5. `reports/ENVIRONMENT_TRAPS.md` — **13 defects that have each cost real time**
+5. `reports/ENVIRONMENT_TRAPS.md` — **15 defects that have each cost real time**
 6. `reports/EXPERIMENT_LEDGER.md` — closed methods
 
 ## 1. Deployment state
@@ -78,12 +78,18 @@ measured on the actual 0.914 base and both failed.** Do not rebuild either from 
 **Node budget.** Like-for-like, same four movies, same frozen keep_frac, exact patched scorer:
 E0c arm A **+0.006339**, P0-B **−0.0000103**. Offline parity is exact — the stage at keep_frac 1.0
 reproduces the live P0-B artifact byte-identically (`4c285cae0c220a11`).
-*Mechanism:* P0-B under-predicts nodes (ratio **−0.1028** vs E0c **+0.1269**) and already runs
-`filter_short_track_components`, so its weakest surviving components are **correct tracks**. On the
-highest-edge-weight crop the stage destroys **5 counted edge TPs and removes 0 counted edge FPs**;
+*Mechanism (corrected 2026-08-01 — it is NOT the node ratio):* the per-node count cost is
+`0.1·tp_i/N_est_i`, and `N_est_i` is **GT metadata**, so it is *exactly invariant* to whether a
+substrate over- or under-predicts. The ratio enters only via `w_i = 1 − 0.1·r_i`, shifting the
+decision threshold by **1.1%** across the entire ±0.16 range, and per-crop ratios are **mixed-sign
+on both substrates**. What actually flips the sign is the **`d_tp/d_fp` composition of the deleted
+components**: E0c deletions carry **−5/+8** (`q_net −1.67`, so deleting is correct → +0.006339)
+while P0-B's carry **+5/0** (`q_net +1.00`, so deleting is wrong → −0.0000103). P0-B already runs
+`filter_short_track_components`, so its weakest surviving components are **correct tracks** — on the
+highest-edge-weight crop the stage destroys 5 counted edge TPs and removes 0 counted edge FPs, while
 on E0c the identical operation *gains* TPs (992→994) because the junk it deleted was stealing
-bipartite matches. Note the sign of the node ratio is **not** the cause — the multiplier term
-`0.1·f·(1+r₀)·J` stays positive at r₀ = −0.10, just 17% smaller. Substrate quality is the cause.
+bipartite matches. **General rule:** retain iff `q = d_tp/(d_tp+d_fp) > (Jbar + 0.1·n·ρ/a)/(w + Jbar)`,
+floor **0.3994** — judge an edit by the edge quality of what it touches, never by the aggregate node ratio.
 *Integrity flag:* ~**116%** of the original +0.00157 was the **count multiplier**, ~−16% edge
 quality — a count effect, not a precision effect, while P0-B's own report cell declares
 `"metric_hack_used": false`. Treat any revival as a metric-artifact question, not a tracking gain.
@@ -188,7 +194,24 @@ latent structural-audit failure for any future candidate.
 mean node ratio is **−0.1853** — this arm UNDER-predicts. But it is the `strict` arm with the
 secondary model and DeepCenter OFF, so **it is not P0-B's ratio and must not be transferred.**
 
-**Do not compare 0.89859 with E0c's published 44b6 0.7595** — weighting conventions are unreconciled.
+**RECONCILED 2026-08-01 (Lane B) — the comparison with E0c's 0.7595 is now legitimate.** Both arms
+were scored through ONE entry point (`biotrack.metric.score_pred_graph`) in ONE run over the SAME 71
+crops; the E0c arm reproduces `0.7595` to |d| = 4.9e-05 and the P0 arm reproduces
+`inventory/loeo_f0_strict.json` at |d| = 0.000e+00. **The gap is real: +0.140628 composite.** It is
+**not** a weighting convention. Attribution: **+0.114905 (81.7%) genuine matching quality** (edge
+precision 0.8646 → 0.9306, recall 0.8722 → 0.9444, one million FEWER nodes with HIGHER node recall),
+**+0.024136 (17.2%) count multiplier**, +0.001587 division term. Evidence:
+`inventory/laneB_reconcile_e0c_vs_p0strict.json`.
+
+**Caveat that must travel with the number.** Fold 0 runs the *support pack's* `split_0`
+(8,363,159 B, sha256 `12f6881ee3620a83…`), E0c runs *ours* (8,357,783 B, `d3e89eb361eeadef…`), so
+fold 0 conflates model vintage with pipeline. **The pack ships no training record at all** — no
+`train_datasets`, no held-out declaration — and its own manifest calls it
+`biohub-tracking-support-pack-400ep-snapshot-v1` while the dataset is named "50ep". The only
+evidence 44b6 was held out is the directory name `split_0`. No memorisation signature is present
+(per-crop adjJ spans 0.559–1.064; the held-out OOF 0.9002 sits *below* P0-A's public 0.913), so
+treat it as **clean-pending-provenance**. Fold 1 has no such confound — it runs our `split_1` on
+both sides.
 
 **P0-A contains an all-training-data model** (`unet_transformer_alltrain_seed314159_v1`,
 `train_datasets: 199`) blended at **0.475 detection weight**. It is a *public deployment* platform,
