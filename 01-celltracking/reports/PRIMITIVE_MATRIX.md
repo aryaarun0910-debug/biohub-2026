@@ -618,3 +618,43 @@ the complete wrapper gives **−0.0031111**: a sign flip and a 0.0065 swing. **L
 So of five acquisition arms, four are negative or non-bilateral, and the single winner **routes on no
 acquisition state at all**. The acquisition-state programme's contribution was diagnostic — it
 located the wrong gate *quantity* in `motion_relink_edges` — not deployable in itself.
+
+
+### WS-A CLOSED — final arm table, all seven arms at 199/199 `[exact-pooled-OOF, complete wrapper, E0c]`
+
+| arm | pooled | 44b6 | 6bba | verdict |
+|---|---:|---:|---:|---|
+| **B — flow-compensated residual gate (routes on NOTHING)** | **+0.0088059** | **+0.0074359** | **+0.0090668** | **PASS both + min-fold** |
+| B — same, prob=zero lower bound | +0.0087299 | +0.0072796 | +0.0090040 | PASS (bound) |
+| C2 — frozen-run variant | +0.0012043 | **0.0000000** | +0.0014109 | not bilateral (44b6 vacuous) |
+| C — frozen-run (L+1) scaling | +0.0006369 | **0.0000000** | +0.0007392 | not bilateral (44b6 vacuous) |
+| E2 — acquisition policy variant | +0.0015418 | −0.0006104 | +0.0019071 | not bilateral |
+| E — full acquisition policy | −0.0023157 | −0.0005541 | −0.0026197 | **NEGATIVE** |
+| D — bilateral acquisition core | **−0.0031111** | −0.0005541 | −0.0035437 | **NEGATIVE** |
+
+**Six of seven arms fail. The one that works conditions on no acquisition state at all.** Both
+frozen-run arms are exactly 0.0000000 on 44b6 — the state has zero incidence there, so their
+"positive" pooled figures are carried entirely by 6bba and their bilateral status is **vacuous**.
+
+## LEAD FOR THE NEXT CYCLE — P0's own sister cap is below the measured distribution
+
+The P0 kernel config (read from the live WS-F run log) sets:
+
+```
+"div_sister_max_um": 8.0
+"safe_div_sister_max_um": 8.5
+```
+
+Against our own measurement over all 199 crops and all 151 GT divisions: **sister separation median
+10.57 µm, p10 6.36, p90 14.36, max 20.30**, where an **8.5 µm cap retains only 29.1%** of true pairs
+and 15 µm retains **93.4%**.
+
+**So P0's division layer excludes ~71% of real divisions at the geometry gate, before any selection
+happens.** That mechanically explains its output — TP2/FP100/FN24 on fold 0, TP1/FP491/FN124 on
+fold 1 — and it means the weakness there is *not* a selector problem.
+
+This is the same shape as arm B: **a wrong constant in a gate, not a missing model.** Arm B is the
+only thing that has worked all cycle, and it was exactly that. Widening `div_sister_max_um` toward
+15 µm is a single frozen-constant change on an already-characterised surface, needs no classifier,
+and can be scored with `prob = zero` (worth ≤2.26e-05 for a fixed gate) — i.e. **no GPU**.
+**Ranked #1 for the next cycle.**
