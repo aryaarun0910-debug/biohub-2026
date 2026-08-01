@@ -598,3 +598,23 @@ GPU inference pass.** Artifact `inventory/wsa_armB_cache_actual.json`.
 +0.0015418 pooled but **44b6 −0.0006104** / 6bba +0.0019071 `[exact-pooled-OOF, 199/199]`. Confirms
 the pattern: every acquisition-state-conditioned arm is either negative or fails min-fold. **Arm B,
 which routes on nothing, is the only one that works.**
+
+
+### WS-A — the complete arm table `[exact-pooled-OOF, 199/199 crops, complete wrapper, E0c]`
+
+| arm | pooled | 44b6 | 6bba | verdict |
+|---|---:|---:|---:|---|
+| **B — flow-compensated residual gate (routes on NOTHING)** | **+0.0088059** | **+0.0074359** | **+0.0090668** | **PASS both families + min-fold** |
+| C — frozen-run (L+1) scaling only | +0.0006369 | **0.0000000** | +0.0007392 | not bilateral (44b6 incidence is zero ⇒ vacuous) |
+| E2 — acquisition policy variant | +0.0015418 | −0.0006104 | +0.0019071 | not bilateral |
+| E — full acquisition policy | −0.0023157 | −0.0005541 | −0.0026197 | **NEGATIVE** |
+| **D — bilateral acquisition core** | **−0.0031111** | −0.0005541 | −0.0035437 | **NEGATIVE** |
+
+**Arm D is the important falsification.** Lane 2 reported the bilateral core as its transferable
+result at **+0.003389 pooled (+0.003637 / +0.003349)** — a *GT-oracle ceiling*. Exact replay through
+the complete wrapper gives **−0.0031111**: a sign flip and a 0.0065 swing. **Lane 2's one
+"genuinely bilateral" number did not survive exact replay.**
+
+So of five acquisition arms, four are negative or non-bilateral, and the single winner **routes on no
+acquisition state at all**. The acquisition-state programme's contribution was diagnostic — it
+located the wrong gate *quantity* in `motion_relink_edges` — not deployable in itself.
