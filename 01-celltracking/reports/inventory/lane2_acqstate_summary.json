@@ -1,0 +1,129 @@
+{
+ "lane": "LANE 2 - acquisition-state primitive",
+ "date": "2026-08-01",
+ "parity": {
+  "status": "PASS",
+  "anchor_used": "CANONICAL inventory/pooled_objective_parity.json (insertion-order edge reconstruction)",
+  "pooled": 0.6653932886896151,
+  "44b6": 0.7595490689190139,
+  "6bba": 0.6489523829566957,
+  "abs_gap_all_three": 0.0,
+  "closed_form_vs_authoritative_summarise_gap": 0.0,
+  "per_crop_cross_check": "199/199 crops vs artifacts/kaggle/coupled_cache/scores/A__*.json, 0 field mismatches over edge_tp/fp/fn, division_tp/fp/fn, num_pred_nodes",
+  "note": "an earlier run of this harness used a set comprehension for the edge list and reproduced the NON-canonical 0.6654043056779473 / 0.6489651953216341 variant; the one-edge / 1.10e-05 difference is documented as a trap below"
+ },
+ "premise_verdict": {
+  "byte_identical_duplicate_volumes": "TRUE at corpus scale, but ONLY in 6bba",
+  "n_exact_duplicate_pairs_consecutive": 947,
+  "n_exact_duplicate_pairs_any_lag": 1111,
+  "n_crops_with_any": 114,
+  "n_crops_44b6_with_any": 0,
+  "n_crops_6bba_with_any": 114,
+  "validation": "decoded and compared arrays for claimed duplicates in 6bba_6321a359: (0,1) (60,61) (60,62) all np.array_equal True; control (1,2) maxabsdiff 685",
+  "why_the_seed_datum_saw_none": "44b6_d754aa59 is a 44b6 crop; 44b6 has ZERO exact duplicates in all 71 crops x 100 frames",
+  "near_duplicates": "NOT a second mode. The non-identical nrmsd distribution is continuous (p0.1 0.0577, p1 0.0826, p50 0.2774) with no gap. Pairs in the low tail have GT displacement 1.28 um median, i.e. ORDINARY motion, and their FN excess is 96% det_never_detected. near_duplicate is a LOW-CONTRAST DETECTION state, not a frozen-acquisition state."
+ },
+ "step1_state_census": {
+  "coverage": "all 199 crops x 99 consecutive frame pairs = 19,701 pairs, no sampling",
+  "units": "FRAMES throughout; the zarr T axis placeholder (unit second, scale 1.0) is never used as a duration",
+  "states_exclusive": {
+   "ordinary_motion": {"n_pairs": 17476, "edge_mass_share": 0.8623, "gt_disp_med_um": 1.862},
+   "exact_duplicate": {"n_pairs": 947, "edge_mass_share": 0.0656, "gt_disp_med_um": 0.0},
+   "post_frozen_gap": {"n_pairs": 823, "edge_mass_share": 0.0528, "gt_disp_med_um": 3.375},
+   "near_duplicate": {"n_pairs": 188, "edge_mass_share": 0.0105, "gt_disp_med_um": 1.285},
+   "global_translation": {"n_pairs": 118, "edge_mass_share": 0.0033, "gt_disp_med_um": 8.826},
+   "intensity_discontinuity": {"n_pairs": 110, "edge_mass_share": 0.0040, "gt_disp_med_um": 3.054},
+   "deformation": {"n_pairs": 39, "edge_mass_share": 0.0015, "gt_disp_med_um": 7.589}
+  },
+  "edge_mass_gate": {
+   "pair_level_non_ordinary": 0.1377,
+   "crop_level_crops_containing_any_frozen_pair": 0.7408,
+   "verdict": "PASS on either reading"
+  }
+ },
+ "dropped_interval_mechanism": {
+  "claim": "a byte-identical repeat is a stalled acquisition re-written by the writer, so the NEXT pair spans L+1 effective intervals",
+  "evidence_dose_response": [
+   {"frozen_run_L": 0, "intervals": 1, "gt_disp_med_ratio": 1.0, "fn_rate": 0.2090},
+   {"frozen_run_L": 1, "intervals": 2, "gt_disp_med_ratio": 1.799, "fn_rate": 0.3382, "n_gt": 6425},
+   {"frozen_run_L": 2, "intervals": 3, "gt_disp_med_ratio": 2.138, "fn_rate": 0.5522, "n_gt": 67},
+   {"frozen_run_L": 3, "intervals": 4, "gt_disp_med_ratio": 3.579, "fn_rate": 0.7067, "n_gt": 225}
+  ],
+  "corroboration": "on frozen pairs GT displacement is EXACTLY 0 for 8,339/8,339 GT edges (max 0 um) - the annotation itself treats the interval as absent",
+  "competing_explanation_rejected": "'the embryo happened to be still' predicts no dependence on L and no exactly-zero annotation; both are contradicted"
+ },
+ "step2_fn_attribution": {
+  "fn_rate_by_state_vs_ordinary": {
+   "ordinary_motion": 1.0, "post_frozen_gap": 1.79, "exact_duplicate": 0.94,
+   "near_duplicate": 4.17, "global_translation": 3.51, "deformation": 2.99,
+   "intensity_discontinuity": 2.01
+  },
+  "top_stage_x_state_enrichment": [
+   {"stage": "assoc_enum_beyond_cap", "state": "global_translation", "n": 101, "enrichment": 28.68},
+   {"stage": "assoc_enum_beyond_cap", "state": "deformation", "n": 25, "enrichment": 15.96},
+   {"stage": "wrapper_node_loss_no_link", "state": "global_translation", "n": 58, "enrichment": 15.24},
+   {"stage": "det_never_detected", "state": "near_duplicate", "n": 1189, "enrichment": 8.21},
+   {"stage": "assoc_enum_beyond_cap", "state": "post_frozen_gap", "n": 276, "enrichment": 4.85}
+  ],
+  "reading": "the enumeration cap is the state-sensitive stage; detection failure is concentrated in the low-contrast near_duplicate state, not in the frozen states"
+ },
+ "step3_motion_estimators": {
+  "target": "GT continuation displacement, 128,581 GT edges with source out-degree 1",
+  "pooled_median_residual_um": {
+   "E5_knn16_x_interval": 1.327, "E2_knn16_existing": 1.329, "E1_frame_median_existing": 1.383,
+   "E0_zero": 1.817, "E4_block_flow_dense_registration": 2.167, "E3_phase_correlation": 2.801
+  },
+  "verdict": "IMAGE REGISTRATION LOSES. Global phase correlation (2.801 um) and 4x4x4 block deformable registration (2.167 um) are both WORSE THAN ASSUMING ZERO MOTION (1.817 um); the existing graph-derived kNN flow (1.329 um) beats both by ~2x. On the very state phase correlation defines (global_translation) its residual is 19.2 um against zero-motion's 8.83 um - it is actively harmful as a vector estimate while remaining a valid FLAG.",
+  "state_conditioning_gain": "E5 = existing knn16 scaled by the observed interval multiplier (L+1) improves post_frozen_gap reach<=6um from 0.8776 to 0.9005 and median residual 2.482 -> 2.256 um; pooled reach<=6um 0.9825 -> 0.9837. Free, right sign, tiny pooled.",
+  "block_flow_basis": "sampled 26 crops = 22.93% of pooled edge mass (12 heaviest 6bba, 8 heaviest 44b6, 6 most-frozen); all other estimators are corpus-complete"
+ },
+ "step4_policy_and_ceiling": {
+  "policy": "P-ACQ: condition association on an OBSERVABLE frame-pair state computed from raw pixels only. (a) detect exact repeats by hashing the compressed zarr chunk (one chunk == one frame, zero decode); (b) on a frozen pair force zero-displacement association; (c) on the pair following a frozen run of length L, treat the effective interval as L+1 and scale the motion prior and the enumeration cap accordingly; (d) on a global_translation / deformation pair, flag the pair as high-displacement. No crop identifier, no family identifier, no ground truth enters at any point.",
+  "why_this_is_not_family_routing": "the state is a function of the pixel content of two consecutive volumes and is evaluated per pair at test time; the fact that it never fires in 44b6 is an OUTCOME of the data, not an input to the rule",
+  "oracle_ceilings_pooled_association_stage_FN_only": {
+   "P_all_states": {"pooled": 0.020212, "44b6": 0.003875, "6bba": 0.022925, "n_fn": 1971},
+   "P_frozen_family_exact_dup_plus_post_frozen": {"pooled": 0.016538, "44b6": 0.0, "6bba": 0.019285, "n_fn": 1614},
+   "P_xfam_global_translation_deformation_intensity": {"pooled": 0.003389, "44b6": 0.003637, "6bba": 0.003349, "n_fn": 335},
+   "post_frozen_gap_only": {"pooled": 0.013014, "44b6": 0.0, "6bba": 0.015174},
+   "exact_duplicate_only": {"pooled": 0.003475, "44b6": 0.0, "6bba": 0.004043},
+   "global_translation_only": {"pooled": 0.001785, "44b6": 0.002667, "6bba": 0.001640},
+   "CONTROL_ordinary_motion": {"pooled": 0.106511, "44b6": 0.086163, "6bba": 0.109849},
+   "CONTROL_all_assoc_FN": {"pooled": 0.129128, "44b6": 0.090389, "6bba": 0.135622}
+  },
+  "gates": {
+   "oracle_ceiling_ge_0.003_pooled": "PASS (+0.020212 full policy; +0.003389 even for the cross-family-only subset)",
+   "edge_mass_material": "PASS (13.77% of pooled edge mass at pair level; 74.08% at crop level)",
+   "cross_family_sign_stability": "SPLIT VERDICT - see below"
+  },
+  "cross_family_verdict": "The full policy is positive on both families (+0.003875 / +0.022925), so it cannot invert. But 85% of its ceiling comes from two states that have ZERO incidence in 44b6, where the policy is a literal no-op - transfer there is VACUOUS, not demonstrated. Only P_xfam (global_translation + deformation + intensity_discontinuity) is genuinely bilateral, and it is nearly balanced: +0.003637 on 44b6 vs +0.003349 on 6bba. That is the transferable core, and it is worth +0.0034 pooled as a ceiling."
+ },
+ "deployable_status": {
+  "exact_pooled_delta": "NOT MEASURED",
+  "reason": "the two state-sensitive stages are assoc_enum_beyond_cap and assoc_enum_relaxed_starved. Widening or re-centring the enumeration gate cannot be replayed exactly from artifacts/kaggle/e0c_cache/candidates: that cache only contains pairs already inside E0c's 10.0 um relaxed gate, and edge_prob is nonzero out to 9.88 um, so the transformer's probabilities for the newly admitted pairs are unknown and cannot be assumed 0. An exact deployable number requires re-running inference, i.e. GPU.",
+  "the_specific_mechanism_found": "src/biotrack/wrapper.py::motion_relink_edges gates on the RAW source-target distance (`if raw > gate_um: continue`) while its COST uses the motion-predicted distance. On a frame-pair whose effective interval is doubled, or which carries an abrupt global displacement, the true partner is excluded by the raw gate before the cost is ever evaluated. The state-conditioned repair is to gate on the FLOW-COMPENSATED residual at the same radius rather than to widen the radius - which admits no extra candidates and therefore does not repeat branch A's failure (global widening to 10 um cost -0.1596 / -0.1496).",
+  "supporting_measurement": "under the existing knn16 flow the reach<=6um of true continuations rises from 0.9769 (raw gate) to 0.9908 on ordinary pairs, and from 0.8029 to 0.8776 on post_frozen_gap pairs; scaling by the interval multiplier takes post_frozen_gap to 0.9005"
+ },
+ "compute": {
+  "gpu_seconds": 0,
+  "wall_clock_s_approx": 4900,
+  "cpu_hours_approx": 3.5,
+  "workers": 3,
+  "bytes_read": "85.7 GB compressed zarr for the corpus census (all 199 crops decoded once) + 11.2 GB for the 26-crop block-flow sample",
+  "exact_duplicate_census_cost": "110 s for the whole corpus - the size-prefilter trick made it effectively free"
+ },
+ "new_environment_traps_found": {
+  "trap_18_scorer_is_input_row_order_dependent": "The exact patched scorer's edge classification depends on the ORDER of the edge rows handed to submission_to_graphs. On 6bba_a90a0b9c, insertion order gives edge_tp 828 / fp 274 / fn 284 while set order gives 829 / 273 / 283. There are no duplicate edges; the out-degree>2 cap and the merge-dedup both keep the lowest edge id, so insertion order decides. Corpus effect: DEN 151615 vs 151614, pooled 0.6653932886896151 vs 0.6654043056779473, |d| = 1.10e-05. CANONICAL is insertion order. Any replay that rebuilds an edge list must use a list plus a seen-set, never a bare set comprehension, or it silently anchors to the wrong baseline.",
+  "trap_19_zarr_chunk_equals_frame": "train crops are zarr v3, chunk_shape (1,64,256,256), storage_transformers []. One frame is exactly one chunk file, and the blosc/zstd codec is deterministic, so raw-volume identity is equivalent to compressed-byte identity. A pure os.stat size prefilter over 19,900 files followed by sha256 on the 1,800 size collisions settles exact duplication over the whole corpus in 110 s instead of 160 GB of decoding.",
+  "trap_20_gt_node_id_encoding_differs_by_family": "44b6 GT geffs encode node_id = (t + crop_offset)*1e9 + track_id with a per-crop offset; 6bba encodes (t+1)*1e6 + track_id. A single decode rule silently produces nonsense frame indices on one family. Build node_id -> t from the geff, never from an arithmetic assumption.",
+  "trap_21_polars_schema_inference_drops_a_column": "pl.DataFrame(list_of_dicts) infers the schema from the leading rows. A field that is absent (or None) in the first crops processed is dropped or typed Null and then fails on append. Pass an explicit schema for any per-row accumulation whose keys are conditionally populated."
+ },
+ "primitive_matrix_row": {
+  "novelty": "HIGH - the corpus contains 947 byte-identical consecutive volume pairs (6.56% of pooled edge mass) that no prior lane had detected, and they mark a dropped acquisition interval with a verified dose-response",
+  "oracle_ceiling": "+0.020212 pooled (full policy) / +0.003389 pooled (cross-family-transferable subset only) [GT-oracle]",
+  "deployable_exact_pooled_delta": "NOT MEASURED - requires GPU re-inference; the enumerated-candidate cache cannot answer it",
+  "family_transfer": "full policy positive on both (+0.0039 / +0.0229) but VACUOUS on 44b6 for 85% of the ceiling; only the +0.0034 global_translation/deformation/intensity subset is genuinely bilateral (+0.003637 / +0.003349)",
+  "compute_consumed": "3.5 CPU-hours, 0 GPU, 97 GB read",
+  "decision": "GATES PASS. Promote the acquisition-state flag as a cheap, GT-free, always-on primitive. Do NOT promote image registration as a motion estimator - it is measurably worse than assuming zero motion.",
+  "next_integration_dependency": "one GPU inference pass with the motion-relink gate applied to the FLOW-COMPENSATED residual instead of the raw distance, state-conditioned on (L+1); everything else needed is already measured and cached"
+ }
+}

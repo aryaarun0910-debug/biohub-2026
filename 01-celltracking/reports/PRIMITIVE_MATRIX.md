@@ -17,7 +17,7 @@ Basis tags: `public` · `exact-pooled-OOF` · `cross-family-LOFO` · `in-family-
 | lane | primitive | novelty | oracle ceiling | deployable Δ | family transfer | compute | decision |
 |---|---|---|---|---|---|---|---|
 | 1 | shape-aware localisation | genuinely new (first coordinate-only arm) | **+0.009125** @ ≤8.5 µm `[GT-oracle]` | **−0.008778** (λ=1); +0.000333 best shrinkage | **FAILS — sign-opposite** | ~3.4 core-h, 0 GPU | **NO-GO** |
-| 2 | acquisition-state inference | — | — | — | — | — | RUNNING |
+| 2 | acquisition-state inference | HIGH | **+0.020212** pooled; bilateral core **+0.003389** `[GT-oracle]` | **not measured** (needs 1 GPU pass) | core is balanced: +0.003637 / +0.003349 | 3.5 core-h, 0 GPU | **PROMOTE** |
 | 3 | event-centric division state | genuinely new (t−3…t+3 states, 3 heads) | **+0.064574** pooled, complete wrapper `[GT-oracle]` | **+0.002706** — but that is suppress-all, NOT the selector | selector transfers (AUC 0.881/0.916, leak 0.512); **base rate defeats it** | ~2.2 core-h, 0 GPU | **NO-GO** |
 | 4 | CAP / track-as-point | real but insufficient | 35.45% of never-detected nodes @ w8 `[GT-oracle]` | **none — not measurable** | 85.14% / 32.23% | ~2 CPU-min, 0 GPU | **CLOSED — licence, Step 1** |
 | 5 | dense self-supervised 3D motion | — | — | — | — | — | staged |
@@ -228,3 +228,85 @@ LOEO 0.719; `sep_growth2` **0.852 / 0.779**; `sep_growth3` 0.848 / 0.753; `sep_m
 4.96M mothers.** D1 is ~100% of the remaining loss. Lane 1's finding that 50.3% of 6bba's unmatched
 GT nodes have nothing within 14 µm caps the 113 from below: **no division-side method recovers an
 undetected mother.**
+
+
+---
+
+## Lane 2 — acquisition-state inference: **PROMOTE** (the cycle's first)
+
+### The premise is TRUE — and it lives entirely in 6bba
+
+**947 byte-identical consecutive volume pairs across 114 crops — ALL 6bba, ZERO in 44b6** (all 71
+44b6 crops × 100 frames checked). My seed probe found none because it sampled `44b6_d754aa59`, a
+44b6 crop: **the probe was structurally incapable of finding them.** A negative result from a
+one-crop sample proved nothing about a phenomenon that is family-exclusive, and I should have
+sampled both families before circulating it.
+
+Settled in **110 s** corpus-wide via trap 19 (chunk == frame ⇒ byte identity), not 160 GB of decoding.
+
+**Near-duplicates are a DIFFERENT phenomenon and the lane did not force the framing.** The `nrmsd`
+distribution is continuous with no gap, low-tail pairs carry *ordinary* GT displacement (1.28 µm
+median), and 96% of their FN excess is `det_never_detected` (enrichment 8.21×). `near_duplicate` is
+a **low-contrast detection state**, not a frozen-acquisition state.
+
+### Dropped intervals — dose-response, and the GT itself confirms it
+
+| frozen run L | effective intervals | GT displacement ratio | FN rate |
+|---|---|---:|---:|
+| 0 | 1 | 1.00 | 0.209 |
+| 1 | 2 | **1.80** | 0.338 |
+| 2 | 3 | 2.14 | 0.552 |
+| 3 | 4 | **3.58** | 0.707 |
+
+Displacement tracks **L+1**. On frozen pairs GT displacement is **exactly 0 for 8,339 / 8,339 GT
+edges** — *the annotation itself treats the interval as absent*. "The embryo was merely still"
+predicts neither the zero nor the dose-response. `assoc_enum_beyond_cap` × `global_translation`
+enrichment is **28.68×**: the enumeration cap is the state-sensitive stage.
+
+### Gates
+
+Oracle ceiling **PASS** (+0.020212 vs a +0.003 bar) · edge mass **PASS** (13.77% pair-level, 74.08%
+crop-level) · cross-family **SPLIT**. The full policy is positive on both families (+0.003875 /
++0.022925) so it *cannot* invert — but **85% of the ceiling comes from states with zero incidence in
+44b6**, where the policy is a literal no-op. **Transfer is vacuous, not demonstrated.** That is the
+mirror image of the retracted 22/26 result, not a repeat of it.
+
+The **genuinely bilateral core** — `global_translation + deformation + intensity_discontinuity` — is
+**+0.003389 pooled, +0.003637 on 44b6, +0.003349 on 6bba**: nearly balanced, and consistent with
+Lane 1's structural split (44b6 misses are displaced-but-detected → global-motion states; 6bba
+misses are non-detection → the low-contrast state).
+
+### Image registration LOSES — reject it as a motion estimator
+
+Median residual against GT continuation displacement (128,581 edges): existing kNN16 flow **1.329 µm**
+· zero-motion **1.817** · block deformable registration **2.167** · global phase correlation **2.801**.
+**Both image estimators are worse than assuming no motion at all**, and on the very state phase
+correlation defines its residual is **19.2 µm against zero-motion's 8.83**. It is a valid *flag* and
+a useless *vector*. **This substantially undercuts Lane 5's premise (dense self-supervised 3D motion)
+— do not fund it as a motion estimator on this evidence.**
+
+Free and right-signed: scaling the existing kNN flow by the observed (L+1) multiplier lifts
+post-frozen reach ≤6 µm from 0.8776 to 0.9005.
+
+### The deployable mechanism — verified in our own source
+
+`src/biotrack/wrapper.py::motion_relink_edges` **gates on RAW distance but scores on MOTION distance**:
+
+```
+332:  raw = float(np.linalg.norm(target_pos - source_pos))
+333:  if raw > gate_um:
+334:      continue                                   # <- true partner excluded HERE
+335:  motion = float(np.linalg.norm(target_pos - predicted))
+340:  cost[i, j] = motion + 0.05 * raw - MOTION_RELINK_LEARNED_BONUS * prob
+```
+
+On a doubled interval or an abrupt global shift the true partner is discarded at line 334 *before*
+the motion-aware cost at line 340 is ever evaluated. **The repair is to gate on the
+flow-compensated residual at the SAME radius** — which admits no extra candidates in aggregate and
+therefore does **not** repeat branch A's global-widening failure (−0.1596 / −0.1496). It re-aims the
+gate rather than widening it.
+
+**Deployable delta NOT MEASURED.** The candidate cache holds only pairs inside the 10.0 µm relaxed
+gate and `edge_prob` is nonzero out to 9.88 µm, so probabilities for newly admitted pairs cannot be
+assumed zero. **Next dependency: one GPU inference pass**, gating the motion relink on the
+flow-compensated residual, state-conditioned on (L+1).

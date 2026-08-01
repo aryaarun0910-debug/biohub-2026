@@ -209,3 +209,18 @@ epistemic: a lane can truthfully say "reproduces the published anchor exactly" w
 - **Never rebuild an edge list with a bare set comprehension.** Use a list plus a seen-set so
   insertion order is preserved — the scorer is order-sensitive through its tie-breaks even when the
   edge *set* is identical.
+
+**19. A zarr chunk IS a frame, so an exact-duplicate census is nearly free.** Each timepoint is
+exactly one chunk file and blosc/zstd is deterministic, so **raw identity ⟺ compressed-byte
+identity**. A size prefilter over 19,900 files plus sha256 on the ~1,800 size collisions settles
+duplicate detection across all 199 crops in **110 seconds**, against ~160 GB of decoding for the
+naive approach. Check file-level identity before writing a decoder.
+
+**20. GT node-id encoding DIFFERS BY FAMILY.** 44b6 encodes `(t + offset) * 1e9`; 6bba encodes
+`(t + 1) * 1e6`. Any code that derives a timepoint from a node id arithmetically will be silently
+wrong on one family — and, because 6bba is 85% of edge mass, "wrong on one family" is usually wrong
+on the answer. **Always build the id→t map from the geff itself; never infer it.**
+
+**21. polars schema inference silently drops conditionally-populated columns.** If a column is
+absent from the first inference window it is dropped without warning, so a field that only appears
+in some rows vanishes from the frame. Declare the schema explicitly when rows are heterogeneous.
