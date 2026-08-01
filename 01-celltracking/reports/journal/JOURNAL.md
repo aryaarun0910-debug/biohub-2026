@@ -3068,3 +3068,52 @@ reproduces the project's separately-derived **40.6%** detection-precision bar. I
 *mechanisms* — a causal story attached to a correct number is itself a claim, and must be stated as
 a hypothesis until something tests it. "The sign tracks r" was never measured; it was pattern-matched
 from three data points that happened to line up.
+
+### 2026-08-01 (DIVISION BIOLOGY — measured on our own 151 GT divisions, not cited)
+
+Measured directly over all 199 crops (151 GT divisions: 26 in 44b6, 125 in 6bba — the same
+denominators as the division track). Grade A unless noted. Raw material and scripts:
+`..._RESEARCH/agent_runs/research_division_biology_2026-07-31/`; research.sqlite 90 → 102.
+
+**Two facts that reframe the division problem.**
+1. **The label is a histone** (`tg(h2afva:h2afva-mCherry)`). Mitosis here is a **condensation**
+   event, not an envelope event — which is exactly why compaction features work and
+   rounding/envelope features have nothing to key on. Stop looking for envelope signatures.
+2. **The acquisition interval is NOT in the released metadata** — the zarr declares the T axis as
+   `unit: "second", scale: 1.0`, a placeholder. Two independent estimates (a 4–6 frame condensation
+   window against a ~25 min zebrafish NEB→daughters mitosis, and the 1.82 µm/frame median
+   displacement) put the true cadence at **~2–3 min/frame** `[grade C]`. **Express every temporal
+   window in FRAMES, never in physical time.** Worth asking the host to confirm.
+
+**The free win: every appearance channel is strictly better at t−1 than at the annotated fork
+frame.** peak-above-background 0.679 vs 0.604 · anisotropy 0.658 vs 0.583 · half-max volume
+**0.657 vs 0.496**. By the fork frame the object is already re-expanding, so the compaction signal
+has cancelled. Same features, one frame back: **+0.05 to +0.08 AUC for zero cost.**
+
+**A cross-family appearance channel that transfers.** `[peak(t−1), halfmax_vol(t−2),
+anisotropy(t−1), peak(t−2)]` in an L2 logistic reaches **leave-one-embryo-out AUC 0.719** —
+held-out 44b6 **0.746**, held-out 6bba **0.728**, both independently above 0.72
+`[cross-family-LOFO]`. The geometry-only candidate surface has no such channel.
+
+**Geometry, measured.** `sister_um` median **10.57 µm**, p10 6.36, p90 14.36, **max 20.30**.
+A 15 µm cap keeps **93.4%** of true pairs, 18 µm keeps **99.3%**, and the old 8.5 µm cap kept only
+**29.1%** — which quantitatively explains why that cap destroyed 75–79% of reachable divisions.
+The frozen 15/15 surface is sound; **18 µm is the only justified widening**. Flow-midpoint residual
+median **2.33 µm** against a **1.82 µm** single-frame noise floor — the tightest invariant we have.
+
+**Killed, each by measurement rather than argument:**
+
+| proposal | result | verdict |
+|---|---|---|
+| local division-rate / synchrony prior | 56% of crops have ZERO divisions; per-node rate 0.0013 vs 0.0011; χ²/df 1.40 vs constant-rate Poisson; nearest-division distance 39.1 µm in a 104 µm cube (= random) | **no synchrony, no clustering.** The only variance it can absorb is per-crop annotation density ⇒ a crop-identity proxy. **Forbidden.** |
+| mother→daughters mass conservation | 1.607 vs 1.000 for controls — but that is **two apertures versus one**; peak is only 0.7–1.2× background at NND ≈ 8.9 µm | aperture artefact, `[grade D]`. Correct null is non-dividing FORK candidates |
+| pre-mitotic motion / IKNM | speed AUC 0.518, flow residual 0.553, track age 0.451; persistence separates in the WRONG direction | drop all motion terms |
+| density-normalised sister cap | sister/NN1 median **1.16**, not the scale-free 2×; normalising raises CV 0.300 → 0.619 | raw microns wins — a noisy denominator imports more family variance than it removes |
+| metaphase-plate oblateness / pre-separation bimodality | AUC 0.539 / 0.565; the plate spans ~4 z-planes at 1.625 µm | unresolvable |
+| division-axis orientation | mean \|cos θ_z\| 0.455 vs 0.5 uniform | isotropic, no prior exists |
+
+**Normalisation caveat carried forward:** peak-above-background is 0.679 raw but **0.634
+crop-normalised and 44b6 collapses to 0.542** — it partially encodes an embryo gain term and must
+always be crop-normalised. Anisotropy ax1/ax3 *improves* under normalisation (0.658 → 0.665),
+the signature of a genuinely dimensionless quantity. Note controls sit at 1.73 from the anisotropic
+PSF alone, so only the **excess** over that is biology.
