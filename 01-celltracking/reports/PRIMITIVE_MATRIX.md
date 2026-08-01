@@ -20,9 +20,9 @@ Basis tags: `public` · `exact-pooled-OOF` · `cross-family-LOFO` · `in-family-
 | 2 | acquisition-state inference | HIGH | **+0.020212** pooled; bilateral core **+0.003389** `[GT-oracle]` | **not measured** (needs 1 GPU pass) | core is balanced: +0.003637 / +0.003349 | 3.5 core-h, 0 GPU | **PROMOTE** |
 | 3 | event-centric division state | genuinely new (t−3…t+3 states, 3 heads) | **+0.064574** pooled, complete wrapper `[GT-oracle]` | **+0.002706** — but that is suppress-all, NOT the selector | selector transfers (AUC 0.881/0.916, leak 0.512); **base rate defeats it** | ~2.2 core-h, 0 GPU | **NO-GO** |
 | 4 | CAP / track-as-point | real but insufficient | 35.45% of never-detected nodes @ w8 `[GT-oracle]` | **none — not measurable** | 85.14% / 32.23% | ~2 CPU-min, 0 GPU | **CLOSED — licence, Step 1** |
-| 5 | dense self-supervised 3D motion | — | — | — | — | — | staged |
-| 6 | counterfactual image critic | — | — | — | — | — | staged |
-| 7 | pseudo-lineage substrate | — | — | — | — | — | staged |
+| 5 | dense self-supervised 3D motion | — | — | — | — | — | **DO NOT FUND as a motion vector** (Lane 2 evidence) |
+| 6 | counterfactual image critic → **WS-D** | — | — | — | — | — | staged behind WS-C's proposer |
+| 7 | pseudo-lineage substrate → **WS-E** | — | — | — | — | — | staged (background) |
 
 ---
 
@@ -310,3 +310,45 @@ gate rather than widening it.
 gate and `edge_prob` is nonzero out to 9.88 µm, so probabilities for newly admitted pairs cannot be
 assumed zero. **Next dependency: one GPU inference pass**, gating the motion relink on the
 flow-compensated residual, state-conditioned on (L+1).
+
+
+---
+
+# Cycle 2 — workstreams (launched 2026-08-01)
+
+| WS | scope | resource | status |
+|---|---|---|---|
+| **A** | acquisition-aware union inference cache + 5-arm exact replay | GPU + CPU replay | **RUNNING** |
+| **B** | suppress-all through the complete wrapper on 199 P0-strict OOF graphs | CPU | **RUNNING** |
+| **C** | branch-emergence proposer (denominator compression, NOT classification) | CPU | **RUNNING** |
+| D | counterfactual image evidence | CPU/GPU | staged — **depends on C's proposer output** |
+| E | pseudo-lineage consensus substrate | CPU background | staged |
+
+D and E are staged rather than launched for two reasons: D operates *per proposed mother* and so has
+a genuine data dependency on C, and three concurrent heavy-CPU lanes is the measured saturation point
+of this box (established across two prior cycles). They launch as capacity frees.
+
+## Formal closures carried into cycle 2 — do not rebuild
+
+| item | status | reason |
+|---|---|---|
+| Lane 1 localisation / recentering estimators | **CLOSED** | oracle +0.009125, deployed −0.008778, sign-opposite; shape does not separate misses (SMD ≤ 0.122) |
+| Lane 4 CAP | **CLOSED** | licence (no licence at all + CC BY-NC upstream + CTC training data), no weights exist, not detection-free |
+| Lane 5 dense registration **as a motion vector** | **DO NOT FUND** | block deformable 2.167 µm and phase correlation 2.801 are both worse than assuming ZERO motion (1.817) vs kNN flow's 1.329. Keep phase/deformable outputs **only as state flags** |
+| Lane 3 flat mother classification | **CLOSED** | arithmetically hopeless: needs AUC 0.983–0.9992 at base rate 1.856e-05, measured 0.86–0.92; capacity makes it worse |
+| D2 daughter-pair selector | **KEPT ON SHELF** | +0.003541 paired, 44b6 flat, `pi_vis`-invariant — waits on a viable mother proposer |
+
+## Submission portfolio — reserved, none spent until exact replay lands
+
+1. P0-B + **bilateral acquisition core** · 2. P0-B + **full acquisition-state policy** ·
+3. P0-B + **suppress-all**, only if P0-strict OOF promotes · 4. best acquisition + suppress-all
+composition **after interaction replay** · 5. **hold** for branch-emergence or a result-informed correction.
+
+**Never spend a slot on an alternative radius, flow multiplier or threshold — those replay locally
+from the common cache.** A slot must represent a distinct mechanism and pass structural audit.
+
+## Reporting rule for WS-A specifically
+
+Report **four separate things** and never let one stand in for another: **state-detection accuracy ·
+candidate-surface recall · assignment quality · exact final pooled score.** A rise in candidate
+recall is **not** success. The decision is the exact pooled graph score.
