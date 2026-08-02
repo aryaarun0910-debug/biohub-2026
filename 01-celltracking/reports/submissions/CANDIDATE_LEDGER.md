@@ -165,3 +165,67 @@ one base as unvalidated everywhere else until shown otherwise.
 
 **Cycle slots: 3 of 3 consumed** (P0-A, P0-B, P0-CR). Two further Kaggle daily slots were left
 deliberately unused on 2026-07-31 because nothing built that day had positive expected value.
+
+---
+
+## 2026-08-02 — ARM B SUBMITTED (slot 10), invariant fix verified in production
+
+**Kaggle submission `55181562` — status pending at time of writing.** One slot spent today.
+
+### Artifacts, hashes preserved
+
+| kernel | sha256 | bytes | rows | nodes | edges |
+|---|---|---:|---:|---:|---:|
+| `p2_armb_baseline` | `4c285cae0c220a11b8ffdeeea1e02de86b5c1e7795daeb2bb27c073e1ab4ecec` | 12,359,118 | 237,465 | 120,861 | 116,604 |
+| `p2_armb_flowgate` (**submitted**) | `83498f9e27d4453212f1d2e75b2b4999939733d1ce4fa183b0e4d670cc6ef6dd` | 12,382,751 | 237,916 | 121,003 | 116,913 |
+
+**GATE 1 PASSES AGAIN.** The baseline hash is byte-identical to deployed P0-B *with the
+out-degree fix applied*. Since the fix is shared code, this is the proof that it is **inert on the
+P0-B path** — the arm-B delta remains fully attributable to the gate change, not to the repair.
+
+### The invariant fix, verified on the real test set
+
+| | failed run (2026-08-01) | this run |
+|---|---:|---:|
+| nodes | 121,003 | 121,003 |
+| edges | 116,914 | **116,913** |
+| max out-degree | **3** | **2** |
+| nodes at out-degree > 2 | **1** | **0** |
+
+**Net production effect of the fix: exactly one edge removed, zero nodes changed.** The
+safe-division cap was slack on `6bba_05db0fb1`, so it was a pure removal rather than the
+cap-bound swap seen locally on `44b6_a2bb48bb`. Independent audit (degrees keyed on
+`(dataset, node_id)` per trap 24): max in-degree 1, 0 dangling, 0 non-consecutive, 0 duplicate
+nodes or edges, 0 negative times or coordinates.
+
+### Structural delta vs P0-B — matches the pre-registered prediction
+
+Churn **7.148%** (documented caveat said 7.2%, "B is not a superset of A") · division parents
+**305 → 318** (+13; correction 8's "P0-B has 305 forks" confirmed exactly).
+
+| dataset | −P0B | +armB | shared | churn % |
+|---|---:|---:|---:|---:|
+| `44b6_0113de3b` | 465 | 584 | 24,147 | 4.262 |
+| `44b6_0b24845f` | 883 | 895 | 17,303 | 9.777 |
+| `6bba_05b6850b` | 47 | 78 | 5,893 | 2.104 |
+| `6bba_05db0fb1` | 2,618 | 2,765 | 65,248 | 7.932 |
+
+### The "one property to watch" is now CLOSED empirically
+
+`PRIMITIVE_MATRIX` flagged that arm B gates on the residual, so admissible `raw` is bounded by
+`gate_um + |flow|` and could in principle exceed the 10 µm relaxed radius or the 14 µm
+`OUTPUT_EDGE_MAX_UM`. Measured on the artifact:
+
+| | max | p99 | p50 | >6 µm | >10 µm | >14 µm |
+|---|---:|---:|---:|---:|---:|---:|
+| P0-B | 7.312 µm | 4.083 | 1.724 | 24 | **0** | **0** |
+| arm B | 7.846 µm | 4.143 | 1.724 | 49 | **0** | **0** |
+
+Arm B does lengthen the tail (max +0.534 µm, >6 µm count doubles 24 → 49), but **nothing crosses
+10 µm, let alone 14 µm.** The risk is real in principle and empty in practice on this substrate.
+
+**Structural pre-registration read:** divisions moved **+13** (up). The P0-CR precedent — "the arm
+whose divisions moved *up* is the one that lost score" — is the one signal pointing against arm B
+here. It is a single prior observation on a different substrate, and arm B's divisions rise because
+the relink leaves a different target set unlinked rather than because the division logic changed;
+but it is on the record **before** the score lands, which is the point.

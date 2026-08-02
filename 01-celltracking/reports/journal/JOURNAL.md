@@ -3640,3 +3640,84 @@ This does not touch the baseline regression gate: the guard is inert when no vio
 live P0-B passed its own degree guard, so its artifact must still hash to `4c285cae0c220a11…`.
 
 **Still blocked** on the Kaggle push permission. No GPU spent, no submission slot spent.
+
+---
+
+## 2026-08-02 (later) — Arm B submitted; residual census; sister-gate relaxation FALSIFIED
+
+**Kaggle submission `55181562`, pending.** Codex ran both kernels. I did the independent
+verification and the productive CPU work while the scorer runs. No GPU, no further slots.
+
+### Independent artifact audit — the fix is verified in production
+
+Baseline sha256 `4c285cae0c220a11…` — **byte-identical to deployed P0-B with the out-degree fix
+applied**. Since the fix is shared code, that is the proof it is inert on the P0-B path, so the
+arm-B delta stays attributable to the gate change.
+
+Arm B `83498f9e27d4453212f1d2e75b2b4999939733d1ce4fa183b0e4d670cc6ef6dd`, 237,916 rows.
+Against the failed 2026-08-01 run: same 121,003 nodes, **116,914 → 116,913 edges**, **max
+out-degree 3 → 2**, violating nodes **1 → 0**. **Net production effect: exactly one edge removed.**
+The safe-division cap was slack on `6bba_05db0fb1`, so a pure removal rather than the cap-bound
+swap seen locally. Degrees keyed on `(dataset, node_id)` per trap 24; 0 dangling, 0 non-consecutive,
+0 duplicates, 0 negative coordinates.
+
+Churn vs P0-B **7.148%** (caveat predicted 7.2%). Divisions **305 → 318**. Edge length max
+7.312 → 7.846 µm, >6 µm 24 → 49, **>10 µm and >14 µm both zero** — the "one property to watch"
+(arm B can in principle exceed the relaxed radius) is now **closed empirically**.
+
+### Residual-error census — 50 OOF crops, exact scorer
+
+`score 0.734918 = adj_edge_J 0.734418 + 0.1·div_J 0.005000` ·
+edge TP/FP/FN `28904/4193/6704` · division TP/FP/FN `1/151/48`.
+
+**Corrected oracles** (a repaired FN becomes a TP; my first pass wrongly scaled FN out of the
+denominator and understated every recall ceiling):
+
+| oracle | Δ |
+|---|---:|
+| edge recall perfect | **+0.170959** |
+| division perfect (both) | +0.099500 |
+| edge precision perfect | +0.082648 |
+| division recall perfect | +0.024000 |
+| **edge: 10% of FN recovered** | **+0.017096** |
+| division precision perfect | +0.001541 |
+| node ratio → 0 | **−0.008205** |
+
+6bba carries **95.2%** of missed edges (6,380 vs 324) at score 0.7012 vs 44b6 0.9014.
+
+`total_node_ratio = −0.1476` — we under-predict nodes by 15% and the count adjustment **pays us
++0.0082 for it**. Adding nodes surrenders that bonus first. Not a free axis.
+
+### Sister-gate: designed, measured, closed as a relaxation
+
+The live gate is `SAFE_DIV_SISTER_MAX_UM = 8.5`, **not** the `DIV_SISTER_MAX_UM = 8.0` that
+correction 6 killed (re-confirmed dead: `OUTPUT_DIVISION_GEOMETRY_FILTER` defaults "0", never set).
+
+GT geometry, 151 true divisions over all 199 crops: **sister p50 = 10.570 µm**. The gate sits at
+8.5 — **below the median** — and rejects **70.9%** of true divisions, versus 42.4% and 40.4% for the
+two parent gates. It is genuinely mis-centred, which is a real and previously unquantified fault.
+
+But relaxing it loses. Break-even precision for added candidates is only 0.498% *on the division
+term alone* — however each safe division also emits an edge that lands in edge FP. Measured both
+sides: added candidates need **≈20–25% precision** to be net positive. Relaxing 8.5 → 12.0 µm
+unlocks **+23 of 151** true divisions (1.58×) while candidate volume grows as
+**(12/8.5)³ = 2.81×** → achievable precision **≈2.7%** → division gain ≈+0.0011 against edge cost
+≈−0.0047, **net ≈ −0.0036. FALSIFIED, on CPU, for free.**
+
+Seventh instance of oracle-clears/selector-fails: oracle +0.024, achievable 2.7% vs required 20–25%.
+
+**A re-aim at constant admission count is NOT falsified** — no extra edge cost, so any precision
+gain is pure. Ceiling is +0.024 even at perfect recall.
+
+**WITHDRAWN:** I first tested `sister_dist / local_spacing` on **GT** density and it looked
+strongly falsified (CV 0.2997 → 0.4845, family transfer worse). Invalid — GT annotates ~670 nodes
+per crop against ~25,000 predicted, so GT spacing (p50 22.9 µm) is not what a deployed gate would
+compute. It falsifies a variant nobody would ship.
+
+### Recommendation
+
+**Next primitive attacks 6bba edge recall, not divisions.** +0.171 at oracle, only 10% capture
+needed to clear +0.011 to 0.925, 95% of mass in one family. Divisions cap at +0.024.
+
+Reproduce: `scripts/armb_census.py`, `scripts/gt_division_gates.py`,
+`scripts/audit_armb_artifact.py`. Full writeup `reports/ARMB_RESIDUAL_CENSUS.md`.
