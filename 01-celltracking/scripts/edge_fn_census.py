@@ -36,6 +36,8 @@ import sys
 from collections import Counter, defaultdict
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
+PREGRAPH_ROOT = (REPO.parent / "Biohub-CellTracking-2026_RESEARCH" / "agent_runs"
+                 / "ws_f_armB_p0b_2026-08-01" / "data")
 
 DEPLOY_ENV = {
     "BIOHUB_OUTPUT_FILTER_SHORT_TRACKS": "1", "BIOHUB_MOTION_RELINK_LEARNED_BONUS": "1.0",
@@ -165,19 +167,37 @@ def work(path):
     from biotrack.metric import load_graph, score_pred_graph
 
     name = pathlib.Path(path).stem
+    if name.endswith("__nodes"):
+        name = name[: -len("__nodes")]
     gt_path = REPO / "data" / "train" / f"{name}.geff"
     if not gt_path.exists():
         return None
     fam = name.split("_")[0]
 
-    d = pl.read_parquet(path)
-    nd = d.filter(pl.col("row_type") == "node")
-    ed = d.filter(pl.col("row_type") == "edge")
-    base_nodes = {int(r["node_id"]): {"node_id": int(r["node_id"]), "t": int(r["t"]),
-                                      "z": float(r["z"]), "y": float(r["y"]), "x": float(r["x"])}
-                  for r in nd.iter_rows(named=True)}
-    base_edges = [{"source_id": int(r["source_id"]), "target_id": int(r["target_id"])}
-                  for r in ed.iter_rows(named=True)]
+    p = pathlib.Path(path)
+    if p.name.endswith("__nodes.parquet"):
+        # PRE-WRAPPER substrate (WS-F f0/f1 pregraphs): carries edge_prob and the full
+        # relink node population. This is the ONLY substrate that can express a pre-wrapper
+        # gate change -- see reports/inventory/wsf_ROUTE1_VERDICT.json.
+        nd = pl.read_parquet(p)
+        ed = pl.read_parquet(str(p).replace("__nodes.parquet", "__edges.parquet"))
+        base_nodes = {int(r["node_id"]): {"node_id": int(r["node_id"]), "t": int(r["t"]),
+                                          "z": float(r["z"]), "y": float(r["y"]),
+                                          "x": float(r["x"])}
+                      for r in nd.iter_rows(named=True)}
+        base_edges = [{"source_id": int(r["source_id"]), "target_id": int(r["target_id"]),
+                       "edge_prob": float(r["edge_prob"])}
+                      for r in ed.iter_rows(named=True)]
+    else:
+        d = pl.read_parquet(p)
+        nd = d.filter(pl.col("row_type") == "node")
+        ed = d.filter(pl.col("row_type") == "edge")
+        base_nodes = {int(r["node_id"]): {"node_id": int(r["node_id"]), "t": int(r["t"]),
+                                          "z": float(r["z"]), "y": float(r["y"]),
+                                          "x": float(r["x"])}
+                      for r in nd.iter_rows(named=True)}
+        base_edges = [{"source_id": int(r["source_id"]), "target_id": int(r["target_id"])}
+                      for r in ed.iter_rows(named=True)]
 
     out = {"crop": name, "family": fam, "prewrapper_nodes": len(base_nodes)}
 
@@ -331,9 +351,18 @@ def main():
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--out", default=str(REPO / "reports/inventory/edge_fn_census.json"))
+    ap.add_argument("--substrate", choices=("prewrapper", "postwrapper"), default="prewrapper",
+                    help="prewrapper = WS-F f0/f1 pregraphs (has edge_prob, full relink node "
+                         "population). postwrapper = p0strict_cache, which ROUTE1_VERDICT "
+                         "rejects for any pre-wrapper change.")
     a = ap.parse_args()
 
-    crops = sorted(glob.glob(str(REPO / "artifacts/kaggle/p0strict_cache/graphs/*/*.parquet")))
+    if a.substrate == "prewrapper":
+        base = pathlib.Path(PREGRAPH_ROOT)
+        crops = sorted(glob.glob(str(base / "f0_pregraphs" / "*__nodes.parquet"))) + \
+            sorted(glob.glob(str(base / "f1_pregraphs" / "*__nodes.parquet")))
+    else:
+        crops = sorted(glob.glob(str(REPO / "artifacts/kaggle/p0strict_cache/graphs/*/*.parquet")))
     crops = crops[::a.stride]
     if a.limit:
         crops = crops[: a.limit]

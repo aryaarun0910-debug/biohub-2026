@@ -1,5 +1,41 @@
 # Cycle report — Lanes A, B, C0
 
+> # ⛔ RETRACTED 2026-08-02 — WRONG SUBSTRATE. DO NOT CITE ANY NUMBER BELOW.
+>
+> Every measurement in this report was computed on `artifacts/kaggle/p0strict_cache`, which
+> **this repository had already examined and explicitly rejected for exactly this purpose**
+> before I started — `reports/inventory/wsf_ROUTE1_VERDICT.json`:
+>
+> > *"Can artifacts/kaggle/p0strict_cache (199 post-wrapper OOF graphs) carry arm B? **NO. It is
+> > a POST-wrapper surface and arm B edits a PRE-wrapper stage.**"*
+>
+> Four independent structural reasons, all measured in that verdict:
+>
+> 1. **No edge probabilities.** 1,801,603 pre-wrapper edges carry `edge_prob`; the cache has
+>    **zero**. The relink cost is `motion + 0.05·raw − 1.0·prob`, so on this cache the learned
+>    term is identically zero for *both* arms — "any delta measured there belongs to a different
+>    cost function."
+> 2. **Wrong node population.** 83,260 nodes (4.25%) that the relink actually sees are absent,
+>    and 26,122 synthetic gap-close nodes are present that did not exist when the relink ran.
+> 3. **Coordinates have moved.** 92.0% of surviving nodes are linefit-smoothed and rounded;
+>    median displacement 0.575 µm against a 6.0 µm gate.
+> 4. **The edges ARE the relink output** (`edges = motion_edges`), so re-gating them is a
+>    *second* relink of an already-relinked graph.
+>
+> **Consequently the headline claim of this report — that arm B is `+0.000435` rather than
+> `+0.0079822` — is WITHDRAWN. It was my error, not a defect in the record.** `+0.0079822`
+> stands unrefuted. The Lane A portfolio simulation, the Lane B stage attribution and the Lane C0
+> oracle ceiling are all invalid as stated, because all three were built on this substrate.
+>
+> This is the project's own dominant failure mode — substrate transfer — committed by me, in a
+> cycle whose stated purpose was to be rigorous about it, against a written verdict already in
+> `reports/inventory/`. I did not read it before building on the cache.
+>
+> Correct substrate: the WS-F pre-wrapper pregraphs (`f0_pregraphs` / `f1_pregraphs`, 71 + 128 =
+> 199 crops, schema `source_id, target_id, edge_prob`). Re-measurement is in
+> `reports/CYCLE2_SUBSTRATE_CORRECTION.md`.
+
+
 **Date:** 2026-08-02 · **Substrate:** P0-strict, **all 199 cached crops**, complete wrapper,
 exact scorer, `prob = 0` proxy · **No GPU. No submission. Slots spent: 0.**
 
