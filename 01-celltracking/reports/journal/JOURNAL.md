@@ -3556,3 +3556,53 @@ retention is additive so the unit is 6.57e-06, not 1.095e-05).
 Artifacts: `reports/inventory/loeo_f1_strict.json`, `loeo_f1_strict_manifest.json`,
 `laneA_component_retention_replay.json`. Fold-1 CSV preserved outside the worktree at
 `..._RESEARCH/exports/loeo_f1_strict/` (33 MB).
+
+---
+
+## 2026-08-02 — Arm-B blocker: the diagnosis was wrong, the real defect is in safe divisions
+
+**Execution.** Picked up the arm-B deployment blocker (`biohub-p2-armb-flowgate` ERROR:
+`6bba_05db0fb1: invalid lineage degree`, one node in 121,003 at out-degree 3, zero in-degree
+violations). The inherited handoff attributed it to `motion_relink_edges` and prescribed an
+out-degree ≤ 2 guard at relink edge admission. **Read the deployment source before implementing
+it — the attribution is false and the prescribed fix is a silent no-op.**
+
+**Why the relink cannot be the site.** `motion_relink_edges` runs FIRST and REPLACES the whole
+edge list (`edges = motion_edges`). Its `linear_sum_assignment` is one-to-one per frame pair,
+`unmatched_sources` blocks a second match in the relaxed pass, and a node is a source for exactly
+one frame pair. Out-degree ≤ 1 by construction. Measured over 300 randomized dense frames:
+**max out-degree 1, max in-degree 1**. `close_single_frame_gaps` guards `source_id in outgoing`
+and also cannot raise a source past 1. `OUTPUT_SINGLE_CHILD_REPAIR` and
+`OUTPUT_DIVISION_GEOMETRY_FILTER` both default `"0"` and are never set in the deployment env,
+so neither is live (same dead-code class as correction 6).
+
+**The real defect.** `add_safe_divisions_postlink` builds `proposals` over
+`source_ids × candidate_ids`, so several candidates may share a source. The admission loop dedupes
+on the **target** only (`used_targets` / `incoming`) and never advances `out_by_source`. With
+`frame_cap ≥ 2` and `global_cap ≥ 2`, one source with an existing child takes **two** safe
+divisions in one frame → **out-degree 3**. This is the only mechanism that yields the observed
+signature — one violating node, **zero** in-degree violations — because the target-side dedupe is
+correct and there is no source-side dedupe at all. Arm B's role is real but indirect: it changes
+which targets are left unlinked, shifting the candidate population until the latent defect fires.
+
+**Repair, at admission rather than post-processing.** Live `out_degree_now` map; reject any
+proposal whose source already holds 2 children; count `safe_division_skipped_outdegree`; advance
+on admission. Existing edges preserved, existing cost order (`proposals.sort` by score) untouched,
+target in-degree ≤ 1 still enforced. Added `assert_degree_invariants(edges, stage)` after the
+relink/repair, gap-close, safe-division and export stages so a future breach names its own stage.
+Also pre-initialised the new stats key — `stats` is a plain dict and `+=` on a missing key would
+have raised `KeyError` inside the kernel.
+
+**Numbers.** Pre-fix reproduction: out-degree 3 on exactly one node, in-degree clean. Post-fix:
+**exactly one edge rejected, zero edges added**, node set / coordinates / times identical, and
+**bit-inert** when only one candidate exists (P0-B path untouched). Tests **42 → 49**; claims 53
+still resolve. Both notebooks rebuilt: blast radius 3 cells, and the arm-B and baseline notebooks
+still **differ in exactly one character** (`BIOHUB_ARMB_FLOW_GATE`), so the causal pair survives.
+
+**Decision.** The baseline arm **must be re-run**, reversing the previous handoff's "do not re-run
+the baseline". The fix is shared code, so the baseline's byte-identity to
+`4c285cae0c220a11…` is now the regression gate that proves the fix is inert on the deployed path.
+
+**Next step.** Push both kernels, audit, then submit arm B SOLO. **BLOCKED:** the Kaggle push was
+denied by the harness permission classifier this session; it needs the user to run the push or
+grant the permission. No GPU spent, no submission slot spent.

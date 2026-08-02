@@ -16,27 +16,51 @@
 
 ## 1. THE ONE THING TO DO NEXT
 
-**Arm B is measured, validated, built, and blocked on a one-line bug. Fix it and submit.**
+**Arm B is measured, validated, and the invariant bug is FIXED locally. Both kernels need a
+push, an audit, and then a solo arm-B submission.**
 
 | kernel | status |
 |---|---|
-| `biohub-p2-armb-baseline` | **COMPLETE** — sha256 `4c285cae0c220a11…`, **byte-identical to live P0-B**. Harness has zero drift. |
-| `biohub-p2-armb-flowgate` | **ERROR** — P0-B's own guard: `6bba_05db0fb1: invalid lineage degree` |
+| `biohub-p2-armb-baseline` | rebuilt with the fix — **must be re-run** and must still hash to `4c285cae0c220a11…` |
+| `biohub-p2-armb-flowgate` | rebuilt with the fix — previously ERROR on `6bba_05db0fb1: invalid lineage degree` |
 
-Diagnosed exactly from the failed session's artifact: **one node in 121,003 has out-degree 3**; zero
-in-degree violations. The relink's assignment is one-to-one so it cannot make in-degree 2, but an
-admitted relink edge can attach a **third** child to a source that already gained two from safe
-divisions / single-parent repair / gap close. **The out-degree ≤ 2 invariant is assumed downstream
-but never enforced inside the relink** — arm B admits more pairs and trips a latent bug.
-
-**Repair:** enforce out-degree ≤ 2 at edge admission in `motion_relink_edges` (or drop the
-lowest-probability third child). Then:
 ```powershell
 $env:PYTHONUTF8=1
+.\.venv\Scripts\python.exe scripts\kaggle_factory.py push --spec scripts\kaggle_specs\p2_armb_baseline.json
 .\.venv\Scripts\python.exe scripts\kaggle_factory.py push --spec scripts\kaggle_specs\p2_armb_flowgate.json
-# ~25 min, then: status -> fetch -> audit -> per-crop delta vs P0-B -> submit
+# ~25 min each, concurrent (Kaggle allows 2 GPU sessions), then per kernel:
+#   status -> fetch -> audit -> per-crop delta vs P0-B -> submit ARM B ONLY
 ```
-**Do not re-run the baseline — it already passed.** Kaggle allows 2 concurrent GPU sessions.
+
+**The baseline must now be re-run**, contrary to the previous handoff: the fix touches code
+shared by both arms, so its byte-identity to live P0-B is what proves the fix is inert on the
+deployed path. That is the regression gate, not a formality.
+
+### CORRECTION 10 — the previous diagnosis of this bug was WRONG
+
+The previous handoff said a relink edge attaches a third child to a source that already gained
+two downstream, and told the next agent to enforce out-degree ≤ 2 **inside `motion_relink_edges`**.
+**That fix would have been a silent no-op** and the kernel would have failed a second time.
+
+`motion_relink_edges` **replaces the entire edge list** (`edges = motion_edges`,
+`filter_output_graph`) and assigns one-to-one per frame pair, so it emits **out-degree ≤ 1 by
+construction**. It runs *first*, not last. Verified: 300 randomized dense frames, max out-degree 1.
+Locked by `tests/test_lineage_degree_invariants.py::test_relink_cannot_exceed_out_degree_one`.
+
+**The real site is `add_safe_divisions_postlink`.** It builds a proposal list that may hold
+several candidates for the *same* source, then dedupes admissions by **TARGET** only
+(`used_targets` / `incoming`) and never advances `out_by_source`. One source with an existing
+child can be handed **two** safe divisions in one frame → out-degree 3. This exactly explains the
+observed signature — one violating node, **zero** in-degree violations — which a relink-side
+defect could not produce.
+
+Arm B's role is real but indirect: it changes *which* targets are left unlinked, shifting the
+safe-division candidate population until the latent defect fires.
+
+**The fix** (`out_degree_now` guard at admission, plus `assert_degree_invariants` after every
+mutating stage) is in `src/biotrack/wrapper.py` and in both notebook specs. Reproduced pre-fix,
+proven post-fix: exactly one edge rejected, zero edges added, node set / coordinates / times
+untouched, and provably inert when no violation exists.
 
 ## 2. What arm B is, and the number
 
@@ -79,7 +103,11 @@ i.e. **~0.919**.
 **D2 daughter-pair selector stays on the shelf** (+0.003541 paired, `pi_vis`-invariant), waiting on a
 mother set no route can produce.
 
-## 4. Corrections — nine this cycle. Read these before trusting older docs.
+## 4. Corrections — ten. Read these before trusting older docs.
+
+0. **The out-degree-3 diagnosis was wrong and the prescribed fix was a no-op** — see §1
+   CORRECTION 10. The site is `add_safe_divisions_postlink`, not `motion_relink_edges`.
+
 
 1. **suppress-all sign**: −0.001728 was an edges-only artifact; **+0.002706** through the complete wrapper (trap 14 in reverse).
 2. **node-budget mechanism**: NOT the node ratio (count cost is `0.1·tp/N_est`, GT metadata, invariant). It is the **`d_tp/d_fp` composition** of deleted content.

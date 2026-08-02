@@ -919,17 +919,43 @@ arm B's extra admitted edge makes it happen on a real test crop.
 **It is a genuine hard blocker, not a nuisance:** P0-B's own in-notebook guard rejects it, and the
 competition's structural audit would too. The artifact is **NOT submittable as built.**
 
-## Why it happens, and the minimal repair
+## Why it happens, and the minimal repair — **CORRECTED 2026-08-02**
 
-Arm B admits more pairs at the tight radius (+0.169% E0c / +0.388% P0-strict). The relink's own
-assignment is one-to-one, so it cannot create in-degree 2 — consistent with the zero in-degree
-violations observed. But a relink edge can attach a **third** child to a source that already gained
-two from another stage (safe divisions / single-parent repair / gap close). The out-degree ≤ 2
-invariant is assumed everywhere downstream but never enforced *inside* the relink.
+> The paragraph previously here blamed the relink and prescribed a guard inside
+> `motion_relink_edges`. **Both were wrong, and that guard would have been a silent no-op.**
+> Retained below as a correction, not as guidance.
 
-**Minimal principled repair: enforce out-degree ≤ 2 at edge admission in the relink** (or drop the
-lowest-probability third child). That restores an invariant the pipeline already assumes rather than
-changing the mechanism — the perturbation is one edge in one crop.
+**The relink cannot be the site.** `motion_relink_edges` runs *first* and **replaces the entire
+edge list** (`edges = motion_edges` in `filter_output_graph`); its `linear_sum_assignment` is
+one-to-one per frame pair and `unmatched_sources` bookkeeping prevents a second match in the
+relaxed pass. A node is a source for exactly one frame pair. So the relink emits **out-degree ≤ 1
+by construction**. Measured: 300 randomized dense frames → max out-degree 1, max in-degree 1.
+Downstream, `close_single_frame_gaps` guards `source_id in outgoing` and so also cannot raise a
+source past 1, and `OUTPUT_SINGLE_CHILD_REPAIR` / `OUTPUT_DIVISION_GEOMETRY_FILTER` are both
+**disabled** in the deployment env (defaults `"0"`, never set in cell02).
 
-**It does require a re-run** (~25 min GPU) and, strictly, re-measurement — though a single dropped
-edge in 116,914 cannot move a pooled figure materially. **Not submitted. Blocked pending the fix.**
+**The real site is `add_safe_divisions_postlink`.** For each frame it builds `proposals` over
+`source_ids × candidate_ids`, so the list may contain **several candidates for the same source**.
+The admission loop then dedupes on the **target** only —
+`if candidate_id in used_targets or candidate_id in incoming` — and never advances
+`out_by_source`. With `frame_cap ≥ 2` and `global_cap ≥ 2`, one source holding an existing child
+can be handed **two** safe divisions in the same frame and reach **out-degree 3**.
+
+This is the only mechanism consistent with the observed signature: **one violating node and
+exactly zero in-degree violations**. The target-side dedupe is correct, so in-degree stays ≤ 1;
+there is no source-side dedupe at all.
+
+**Arm B's role is real but indirect** — it changes which targets are left unlinked, shifting the
+safe-division candidate population until the latent defect fires.
+
+**The repair, at admission (not post-processing):** carry a live `out_degree_now` map, reject any
+proposal whose source already has 2 children, count it as `safe_division_skipped_outdegree`, and
+advance the map on admission. Existing edges are preserved and the existing cost order
+(`proposals.sort` by score) is untouched. Plus `assert_degree_invariants(edges, stage)` after the
+relink/repair, gap-close, safe-division and export stages, so a future breach names its own stage.
+
+**Verified locally** (`tests/test_lineage_degree_invariants.py`, 7 tests):
+pre-fix reproduces out-degree 3 with in-degree clean; post-fix rejects **exactly one** edge, adds
+**zero**, leaves the node set, coordinates and times identical; and is **bit-inert** when only one
+candidate exists, so the P0-B path is untouched. Because the fix is shared code, the baseline arm
+**must be re-run** — its byte-identity to `4c285cae0c220a11…` is the regression gate.

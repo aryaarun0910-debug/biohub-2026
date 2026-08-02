@@ -52,6 +52,69 @@
       "expect": 1
     },
     {
+      "kind": "insert_before",
+      "anchor": "def filter_output_graph(",
+      "cell_match": "def filter_output_graph(",
+      "code_file": "scripts/kaggle_edits/degree_invariants.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "        \"safe_division_skipped_cap\": 0,\n",
+      "new": "        \"safe_division_skipped_cap\": 0,\n        \"safe_division_skipped_outdegree\": 0,\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "    used_targets: set[int] = set()\n",
+      "new": "    used_targets: set[int] = set()\n    out_degree_now: dict[int, int] = {\n        _src: len(_lst) for _src, _lst in out_by_source.items()\n    }\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "            if candidate_id in used_targets or candidate_id in incoming:\n                continue\n",
+      "new": "            if candidate_id in used_targets or candidate_id in incoming:\n                continue\n            if out_degree_now.get(source_id, 0) >= 2:\n                stats[\"safe_division_skipped_outdegree\"] += 1\n                continue\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "            used_targets.add(candidate_id)\n            added_this_frame += 1\n",
+      "new": "            used_targets.add(candidate_id)\n            out_degree_now[source_id] = out_degree_now.get(source_id, 0) + 1\n            added_this_frame += 1\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "    repair_frame_cache: dict[int, np.ndarray] = {}\n",
+      "new": "    assert_degree_invariants(edges, \"motion relink + parent/child repair\")\n\n    repair_frame_cache: dict[int, np.ndarray] = {}\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "    nodes_by_id, edges = recover_strict_gap2(nodes_by_id, edges, stats, dataset=dataset)\n    edges = add_safe_divisions_postlink(\n",
+      "new": "    nodes_by_id, edges = recover_strict_gap2(nodes_by_id, edges, stats, dataset=dataset)\n    assert_degree_invariants(edges, \"gap close + gap2 recovery\")\n    edges = add_safe_divisions_postlink(\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "        deepcenter_cache=deepcenter_heatmap_cache,\n    )\n\n    if OUTPUT_DIVISION_GEOMETRY_FILTER and edges:\n",
+      "new": "        deepcenter_cache=deepcenter_heatmap_cache,\n    )\n    assert_degree_invariants(edges, \"safe divisions\")\n\n    if OUTPUT_DIVISION_GEOMETRY_FILTER and edges:\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "    nodes_by_id = linefit_smooth_output_graph(nodes_by_id, edges, stats)\n\n    return nodes_by_id, edges, stats",
+      "new": "    nodes_by_id = linefit_smooth_output_graph(nodes_by_id, edges, stats)\n\n    assert_degree_invariants(edges, \"export\")\n    return nodes_by_id, edges, stats",
+      "expect": 1
+    },
+    {
       "kind": "append_cell",
       "code_file": "scripts/kaggle_edits/armb_provenance.py"
     }

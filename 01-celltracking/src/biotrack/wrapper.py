@@ -783,6 +783,12 @@ def add_safe_divisions_postlink(
     global_cap = max(1, int(round(max(1, len(edges)) * SAFE_DIV_GLOBAL_FRAC_CAP)))
     added: list[dict[str, object]] = []
     used_targets: set[int] = set()
+    # Live out-degree, advanced as proposals are admitted. `proposals` may hold several
+    # candidates for the SAME source; without this the target-side dedupe below admits
+    # them all and the source reaches out-degree 3.
+    out_degree_now: dict[int, int] = {
+        source_id: len(source_edges) for source_id, source_edges in out_by_source.items()
+    }
 
     for t in sorted(ids_by_t):
         child_frame_ids = ids_by_t.get(t + 1, [])
@@ -831,6 +837,9 @@ def add_safe_divisions_postlink(
                 break
             if candidate_id in used_targets or candidate_id in incoming:
                 continue
+            if out_degree_now.get(source_id, 0) >= 2:
+                stats["safe_division_skipped_outdegree"] += 1
+                continue
             candidate = nodes_by_id[candidate_id]
             added.append({
                 "source_id": source_id,
@@ -840,6 +849,7 @@ def add_safe_divisions_postlink(
                 "safe_division": 1,
             })
             used_targets.add(candidate_id)
+            out_degree_now[source_id] = out_degree_now.get(source_id, 0) + 1
             added_this_frame += 1
 
     if added:
@@ -1026,6 +1036,29 @@ def linefit_smooth_output_graph(
     return nodes_by_id
 
 
+def assert_degree_invariants(edges: list[dict[str, object]], stage: str) -> None:
+    """Lineage degrees the whole pipeline assumes: in <= 1, out <= 2.
+
+    Raised as soon as a stage breaks them so the offending stage is named, rather than
+    surfacing at the submission guard with the pipeline already finished.
+    """
+    out_degree: dict[int, int] = {}
+    in_degree: dict[int, int] = {}
+    for edge in edges:
+        source_id = int(edge["source_id"])
+        target_id = int(edge["target_id"])
+        out_degree[source_id] = out_degree.get(source_id, 0) + 1
+        in_degree[target_id] = in_degree.get(target_id, 0) + 1
+    bad_out = sorted(node_id for node_id, d in out_degree.items() if d > 2)
+    bad_in = sorted(node_id for node_id, d in in_degree.items() if d > 1)
+    if bad_out or bad_in:
+        raise RuntimeError(
+            f"degree invariant violated after {stage}: "
+            f"out-degree>2 on {bad_out[:8]} (n={len(bad_out)}), "
+            f"in-degree>1 on {bad_in[:8]} (n={len(bad_in)})"
+        )
+
+
 def filter_output_graph(
     nodes_by_id: dict[int, dict[str, object]],
     raw_edges: list[dict[str, object]],
@@ -1070,6 +1103,7 @@ def filter_output_graph(
         "safe_division_candidates": 0,
         "safe_divisions_added": 0,
         "safe_division_skipped_cap": 0,
+        "safe_division_skipped_outdegree": 0,
         "short_track_components_removed": 0,
         "short_track_nodes_removed": 0,
         "short_track_edges_removed": 0,
@@ -1143,9 +1177,13 @@ def filter_output_graph(
         stats["dropped_multi_child_edges"] = sum(1 for edge in edges if id(edge) not in kept_ids)
         edges = [edge for edge in edges if id(edge) in kept_ids]
 
+    assert_degree_invariants(edges, "motion relink + parent/child repair")
+
     nodes_by_id, edges = close_single_frame_gaps(nodes_by_id, edges, stats, dataset=dataset)
     nodes_by_id, edges = recover_strict_gap2(nodes_by_id, edges, stats, dataset=dataset)
+    assert_degree_invariants(edges, "gap close + gap2 recovery")
     edges = add_safe_divisions_postlink(nodes_by_id, edges, stats)
+    assert_degree_invariants(edges, "safe divisions")
 
     if OUTPUT_DIVISION_GEOMETRY_FILTER and edges:
         by_source: dict[int, list[dict[str, object]]] = {}
@@ -1192,4 +1230,5 @@ def filter_output_graph(
     nodes_by_id, edges = filter_short_track_components(nodes_by_id, edges, stats, dataset=dataset)
     nodes_by_id = linefit_smooth_output_graph(nodes_by_id, edges, stats)
 
+    assert_degree_invariants(edges, "export")
     return nodes_by_id, edges, stats
