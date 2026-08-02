@@ -229,3 +229,37 @@ whose divisions moved *up* is the one that lost score" — is the one signal poi
 here. It is a single prior observation on a different substrate, and arm B's divisions rise because
 the relink leaves a different target set unlinked rather than because the division logic changed;
 but it is on the record **before** the score lands, which is the point.
+
+### RESULT — arm B `55181562` scored **0.914**. Public delta ZERO.
+
+| submission | arm | public |
+|---|---|---:|
+| `55136908` | P0-B | **0.914** |
+| `55181562` | arm B solo | **0.914** |
+
+Expected ≈ +0.0045 from an OOF→public slope of ~0.56. Delivered **< 0.001**. Slots consumed: 10.
+
+**Retain P0-B. Do not adopt arm B. Do not discard it either.**
+
+The build was flawless — baseline byte-identical to deployed P0-B, audit clean, churn 7.148%
+against a pre-registered 7.2%. This is not a deployment defect. Arm B moved 7.148% of edges and the
+score did not move.
+
+**The instrument is the likely explanation.** GT annotation covers **0.655%** of estimated cells on
+44b6 and **8.529%** on 6bba — a 13× family asymmetry, median 209 and 800 annotated edges per crop,
+128,883 annotated edges across all 199 training crops. Edge Jaccard is computed only over annotated
+cells. The 4 public movies are therefore scored over roughly **2,000 GT edges**: one edge ≈ 0.05% of
+Jaccard, and +0.008 needs ~16 net correct annotated edges. Arm B's ~8,335 churned edges touch maybe
+~143 annotated ones, so the required precision edge (~56/44) is well inside the noise of which cells
+happen to be annotated.
+
+**Our OOF instrument is ~64× more sensitive than the public leaderboard.** Arm B's
+P(Δ>0) = 1.000 over 144 crops may still be worth ~+0.008 privately, where there are more movies.
+Public flatness is not evidence of worthlessness.
+
+**Standing rule from this slot: never spend a submission to resolve an effect smaller than ~0.005.**
+The LB is a smoke test for large effects; OOF is the instrument.
+
+Structural pre-registration note: divisions moved **+13 (up)**, and the P0-CR precedent said the arm
+whose divisions move up is the one that loses score. It did not lose — it went flat. The precedent
+is not confirmed and not refuted.

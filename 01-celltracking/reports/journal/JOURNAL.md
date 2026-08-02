@@ -3721,3 +3721,49 @@ needed to clear +0.011 to 0.925, 95% of mass in one family. Divisions cap at +0.
 
 Reproduce: `scripts/armb_census.py`, `scripts/gt_division_gates.py`,
 `scripts/audit_armb_artifact.py`. Full writeup `reports/ARMB_RESIDUAL_CENSUS.md`.
+
+---
+
+## 2026-08-02 (result) — Arm B scores 0.914. Zero public movement.
+
+`55181562` COMPLETE at **0.914**, identical to P0-B `55136908`. Expected +0.0045, delivered <0.001.
+
+Arm B was the only mechanism ever to clear every gate here: P0-strict +0.0079822, E0c +0.0088059,
+P(Δ>0)=1.000, min-fold over +0.005, 144/144 crops parity-exact. It changed **7.148%** of the edges
+on the test movies. The public score did not move.
+
+**The build was not at fault.** Baseline re-run byte-identical to deployed P0-B
+(`4c285cae0c220a11…`) *with the fix applied*, proving the repair inert on the deployed path. Audit
+clean: max out-degree 2, in-degree 1, zero dangling/non-consecutive/duplicate/negative rows. Churn
+7.148% against a pre-registered 7.2%.
+
+**Diagnosis: the public instrument cannot resolve the effect.** Measured GT annotation density
+across all 199 training crops:
+
+| family | crops | med annotated nodes | med annotated edges | med est_nodes | coverage |
+|---|---:|---:|---:|---:|---:|
+| 44b6 | 71 | 214 | 209 | 32,681 | **0.655%** |
+| 6bba | 128 | 826 | 800 | 9,691 | **8.529%** |
+
+Total annotated edges over 199 crops: **128,883**. Edge Jaccard scores only annotated cells, so the
+4 public movies carry roughly **2,000 scored edges**: 1 edge ≈ 0.05% Jaccard, and +0.008 needs ~16
+net correct. Arm B's ~8,335 churned edges intersect ~143 annotated ones; the needed ~56/44 split is
+inside the noise of which cells were annotated.
+
+This also explains correction 3 (6bba is 85% of edge mass) mechanistically: 6bba is **13× better
+annotated** than 44b6.
+
+**Two conclusions.**
+
+1. **Retain P0-B; do not adopt arm B; do not discard it.** OOF P(Δ>0)=1.000 over 144 crops may
+   still pay on the private set, which has more movies and therefore more resolution. Public
+   flatness is not evidence of worthlessness.
+2. **Stop using the public LB as a measurement instrument.** OOF spans 128,883 annotated edges and
+   is ~64× more sensitive. Never spend a slot to resolve an effect below ~0.005.
+
+Caveat: the density figures are from *training* GT; there is no test GT. The inference is
+consistent with everything observed but is not proven.
+
+Substrate transfer now stands at **seven failures and zero confirmed successes** — arm B was the
+one claimed success and it went flat. Next cycle's first job is the instrument question, then 6bba
+edge recall (+0.171 oracle, 10% capture clears +0.011). HANDOFF.md rewritten as the cold-start brief.
