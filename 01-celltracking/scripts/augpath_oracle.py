@@ -33,6 +33,8 @@ import sys
 from collections import defaultdict
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
+PREGRAPH_ROOT = (REPO.parent / "Biohub-CellTracking-2026_RESEARCH" / "agent_runs"
+                 / "ws_f_armB_p0b_2026-08-01" / "data")
 SCALE = (1.625, 0.40625, 0.40625)
 MATCH_MAX_UM = 7.0
 TIGHT_UM, RELAXED_UM = 6.0, 10.0
@@ -118,18 +120,30 @@ def work(path):
 
     m = _S["m"]
     name = pathlib.Path(path).stem
+    if name.endswith("__nodes"):
+        name = name[: -len("__nodes")]
     gt_path = REPO / "data" / "train" / f"{name}.geff"
     if not gt_path.exists():
         return None
 
-    d = pl.read_parquet(path)
-    nd = d.filter(pl.col("row_type") == "node")
-    ed = d.filter(pl.col("row_type") == "edge")
-    nodes = {int(r["node_id"]): {"node_id": int(r["node_id"]), "t": int(r["t"]),
-                                 "z": float(r["z"]), "y": float(r["y"]), "x": float(r["x"])}
-             for r in nd.iter_rows(named=True)}
-    edges = [{"source_id": int(r["source_id"]), "target_id": int(r["target_id"])}
-             for r in ed.iter_rows(named=True)]
+    _p = pathlib.Path(path)
+    if _p.name.endswith("__nodes.parquet"):
+        nd = pl.read_parquet(_p)
+        ed = pl.read_parquet(str(_p).replace("__nodes.parquet", "__edges.parquet"))
+        nodes = {int(r["node_id"]): {"node_id": int(r["node_id"]), "t": int(r["t"]),
+                                     "z": float(r["z"]), "y": float(r["y"]), "x": float(r["x"])}
+                 for r in nd.iter_rows(named=True)}
+        edges = [{"source_id": int(r["source_id"]), "target_id": int(r["target_id"]),
+                  "edge_prob": float(r["edge_prob"])} for r in ed.iter_rows(named=True)]
+    else:
+        d = pl.read_parquet(_p)
+        nd = d.filter(pl.col("row_type") == "node")
+        ed = d.filter(pl.col("row_type") == "edge")
+        nodes = {int(r["node_id"]): {"node_id": int(r["node_id"]), "t": int(r["t"]),
+                                     "z": float(r["z"]), "y": float(r["y"]), "x": float(r["x"])}
+                 for r in nd.iter_rows(named=True)}
+        edges = [{"source_id": int(r["source_id"]), "target_id": int(r["target_id"])}
+                 for r in ed.iter_rows(named=True)]
 
     def pos(n):
         return np.array([n["z"] * SCALE[0], n["y"] * SCALE[1], n["x"] * SCALE[2]])
@@ -307,10 +321,17 @@ def main():
     ap.add_argument("--stride", type=int, default=1)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--substrate", choices=("prewrapper", "postwrapper"),
+                    default="prewrapper")
     ap.add_argument("--out", default=str(REPO / "reports/inventory/augpath_oracle.json"))
     a = ap.parse_args()
 
-    crops = sorted(glob.glob(str(REPO / "artifacts/kaggle/p0strict_cache/graphs/*/*.parquet")))[::a.stride]
+    if a.substrate == "prewrapper":
+        crops = (sorted(glob.glob(str(PREGRAPH_ROOT / "f0_pregraphs" / "*__nodes.parquet")))
+                 + sorted(glob.glob(str(PREGRAPH_ROOT / "f1_pregraphs" / "*__nodes.parquet"))))
+    else:
+        crops = sorted(glob.glob(str(REPO / "artifacts/kaggle/p0strict_cache/graphs/*/*.parquet")))
+    crops = crops[::a.stride]
     if a.limit:
         crops = crops[: a.limit]
     print(f"crops={len(crops)} workers={a.workers}", flush=True)
