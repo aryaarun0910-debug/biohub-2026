@@ -954,8 +954,26 @@ advance the map on admission. Existing edges are preserved and the existing cost
 (`proposals.sort` by score) is untouched. Plus `assert_degree_invariants(edges, stage)` after the
 relink/repair, gap-close, safe-division and export stages, so a future breach names its own stage.
 
-**Verified locally** (`tests/test_lineage_degree_invariants.py`, 7 tests):
-pre-fix reproduces out-degree 3 with in-degree clean; post-fix rejects **exactly one** edge, adds
-**zero**, leaves the node set, coordinates and times identical; and is **bit-inert** when only one
-candidate exists, so the P0-B path is untouched. Because the fix is shared code, the baseline arm
-**must be re-run** — its byte-identity to `4c285cae0c220a11…` is the regression gate.
+**Verified locally** (`tests/test_lineage_degree_invariants.py`, 8 tests):
+pre-fix reproduces out-degree 3 with in-degree clean; post-fix leaves the node set, coordinates and
+times identical; and is **bit-inert** when no violation exists, so the P0-B path is untouched.
+Because the fix is shared code, the baseline arm **must be re-run** — its byte-identity to
+`4c285cae0c220a11…` is the regression gate.
+
+**Real-data replay — 40 cached P0-strict crops, complete wrapper, arm-B gate ON:**
+
+| | pre-fix | post-fix |
+|---|---:|---:|
+| crops with out-degree > 2 | **1** (`44b6_a2bb48bb`, node 16693) | **0** |
+| in-degree violations | 0 | 0 |
+| violations at export | — | **0** |
+| invariant assert fired | — | 0 |
+
+**The fix is a one-edge SWAP, not a pure removal, when the cap binds.** `SAFE_DIV_GLOBAL_FRAC_CAP`
+budgets safe-division additions; the guard `continue`s rather than spending the slot, so a rejected
+third child frees budget for the next-ranked valid proposal. On `44b6_a2bb48bb` the cap bound at
+exactly **166**: removed `(16693, 17368)`, added `(38172, 38903)`, total **166 before and after**.
+Deliberate — an invalid proposal must not consume budget — and locked by
+`test_rejected_proposal_does_not_consume_the_cap_budget`. An earlier draft of this note claimed the
+fix "adds zero edges"; that holds only when the cap is slack, and is **withdrawn**. Net perturbation
+is one edge in ~44,500.

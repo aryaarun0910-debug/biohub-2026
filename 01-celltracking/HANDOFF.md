@@ -58,9 +58,22 @@ Arm B's role is real but indirect: it changes *which* targets are left unlinked,
 safe-division candidate population until the latent defect fires.
 
 **The fix** (`out_degree_now` guard at admission, plus `assert_degree_invariants` after every
-mutating stage) is in `src/biotrack/wrapper.py` and in both notebook specs. Reproduced pre-fix,
-proven post-fix: exactly one edge rejected, zero edges added, node set / coordinates / times
-untouched, and provably inert when no violation exists.
+mutating stage) is in `src/biotrack/wrapper.py` and in both notebook specs. Provably **inert**
+when no violation exists, so the P0-B path is untouched.
+
+**Reproduced on REAL data.** A 40-crop CPU replay of the complete wrapper with the arm-B gate on
+cached P0-strict graphs: pre-fix, crop `44b6_a2bb48bb` node 16693 reaches **out-degree 3**;
+post-fix, **zero** degree violations across all 40 crops and zero at export. The new asserts never
+fired spuriously.
+
+**One behaviour to know: the fix is a one-edge SWAP, not a pure removal, when the cap binds.**
+`SAFE_DIV_GLOBAL_FRAC_CAP` budgets how many safe divisions may be added. The guard `continue`s
+rather than spending the slot, so a rejected third child frees budget for the next valid proposal.
+On `44b6_a2bb48bb` the cap bound at exactly **166** safe divisions: removed `(16693, 17368)`,
+added `(38172, 38903)`, total **166 before and after**. This is deliberate — an invalid proposal
+must not consume budget — and is locked by
+`test_rejected_proposal_does_not_consume_the_cap_budget`. Net perturbation is still one edge in
+~44,500.
 
 ## 2. What arm B is, and the number
 

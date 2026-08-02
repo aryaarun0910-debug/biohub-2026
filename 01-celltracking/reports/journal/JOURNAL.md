@@ -3606,3 +3606,37 @@ the baseline". The fix is shared code, so the baseline's byte-identity to
 **Next step.** Push both kernels, audit, then submit arm B SOLO. **BLOCKED:** the Kaggle push was
 denied by the harness permission classifier this session; it needs the user to run the push or
 grant the permission. No GPU spent, no submission slot spent.
+
+### Same day — real-data replay confirms the diagnosis, and corrects one of my own claims
+
+**Execution.** 40 cached P0-strict crops (stride 5 over both folds), complete wrapper, arm-B gate
+ON, 6 CPU workers. One pipeline pass per crop; the state entering `add_safe_divisions_postlink` is
+captured and BOTH the pre-fix and post-fix implementations run on that identical state, so the
+comparison isolates the fix exactly. `prob = 0` proxy, per the established finding.
+
+| | pre-fix | post-fix |
+|---|---:|---:|
+| crops with out-degree > 2 | **1** (`44b6_a2bb48bb`, node 16693) | **0** |
+| in-degree violations | 0 | 0 |
+| violations at export | — | **0** |
+| invariant assert fired | — | 0 |
+
+**The defect is real on real data**, not only in the synthetic reproduction — one crop in 40 on the
+training substrate, consistent with one node in 121,003 on the test substrate.
+
+**CORRECTION to my own earlier claim in this session.** I wrote that the fix "rejects exactly one
+edge and adds zero". That is true only when the safe-division cap is slack. On `44b6_a2bb48bb` the
+**global cap binds at exactly 166**, and because the guard `continue`s rather than spending the
+slot, the rejection frees budget for the next-ranked valid proposal: removed `(16693, 17368)`,
+**added** `(38172, 38903)`, total 166 safe divisions before and after. **The fix is a one-edge SWAP
+under a binding cap, not a pure removal.**
+
+Kept deliberately — an invalid proposal must not consume budget, and the alternative (charging the
+cap for a rejected proposal) would be an extra semantic change, not a smaller one. Now locked by
+`test_rejected_proposal_does_not_consume_the_cap_budget`, which reconstructs the binding-cap
+reallocation from first principles and reproduces it exactly. Tests **49 → 50**.
+
+This does not touch the baseline regression gate: the guard is inert when no violation exists, and
+live P0-B passed its own degree guard, so its artifact must still hash to `4c285cae0c220a11…`.
+
+**Still blocked** on the Kaggle push permission. No GPU spent, no submission slot spent.

@@ -110,6 +110,52 @@ def test_guard_is_inert_when_only_one_candidate_exists(wrapper):
     assert stats["safe_division_skipped_outdegree"] == 0
 
 
+def test_rejected_proposal_does_not_consume_the_cap_budget(wrapper):
+    """A rejected third child frees its slot for the next valid proposal.
+
+    `SAFE_DIV_GLOBAL_FRAC_CAP` is a budget on how many safe divisions may be added. The guard
+    `continue`s rather than counting the rejection, so when the cap binds the fix is a one-edge
+    SWAP, not a pure removal: the invalid third child is dropped and a valid division that the
+    cap had crowded out is admitted in its place.
+
+    Observed on real data -- P0-strict crop 44b6_a2bb48bb, global cap binding at exactly 166:
+    removed (16693, 17368), added (38172, 38903), total safe divisions 166 before and after.
+    Locked here because it is a deliberate choice: an invalid proposal must not spend budget.
+    """
+    nodes, edges = {}, []
+    node_id = 0
+    for chain in range(220):                       # 660 nodes / 440 edges
+        y = chain * 100.0                          # global_cap = round(440*0.00375) = 2
+        a, b, c = node_id, node_id + 1, node_id + 2
+        node_id += 3
+        nodes[a], nodes[b], nodes[c] = _node(a, 0, y=y), _node(b, 1, y=y), _node(c, 2, y=y)
+        edges.append({"source_id": a, "target_id": b, "edge_prob": 0.9, "distance_um": 0.0})
+        edges.append({"source_id": b, "target_id": c, "edge_prob": 0.9, "distance_um": 0.0})
+
+    src0, mid1 = 0, 4                              # chain 0 t=0 source; chain 1 t=1 middle
+    cand_a, cand_b, cand_c = node_id, node_id + 1, node_id + 2
+    nodes[cand_a] = _node(cand_a, 1, x=3.0)        # nearest -> ranks first
+    nodes[cand_b] = _node(cand_b, 1, x=-5.0)       # the would-be third child
+    nodes[cand_c] = _node(cand_c, 2, y=100.0, x=4.0)   # crowded out by the cap pre-fix
+
+    stats = defaultdict(int)
+    result = wrapper.add_safe_divisions_postlink(nodes, edges, stats)
+
+    added = {(int(e["source_id"]), int(e["target_id"]))
+             for e in result if e.get("safe_division") == 1}
+    out, inn = _degrees(result)
+
+    assert stats["safe_division_skipped_outdegree"] == 1
+    assert max(out.values()) == 2, "no triple fork"
+    assert max(inn.values()) == 1
+    assert (src0, cand_b) not in added, "the third child must be rejected"
+    assert (src0, cand_a) in added, "the better-ranked division survives"
+    assert (mid1, cand_c) in added, (
+        "the freed cap slot must go to the next valid proposal, not be wasted"
+    )
+    assert stats["safe_divisions_added"] == 2, "the budget is still fully spent"
+
+
 def test_relink_cannot_exceed_out_degree_one(wrapper):
     """The relink is structurally one-to-one, so an out-degree guard there is a no-op.
 
