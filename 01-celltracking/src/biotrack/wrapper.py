@@ -525,7 +525,9 @@ def close_single_frame_gaps(
                     continue
                 source_id = end_ids[int(r)]
                 target_id = start_ids[int(c)]
-                if source_id in outgoing or target_id in used_starts:
+                # `incoming` also covers the mirror case: a node consumed earlier as a
+                # reused MIDDLE is in `incoming` but not in `used_starts`.
+                if source_id in outgoing or target_id in used_starts or target_id in incoming:
                     continue
 
                 source = nodes_by_id[source_id]
@@ -539,7 +541,12 @@ def close_single_frame_gaps(
 
                 middle_id: int | None = None
                 if GAP_CLOSE_REUSE_EXISTING:
-                    candidates = [nid for nid in isolated_by_t.get(mid_t, []) if nid not in used_isolated]
+                    # `used_isolated` alone is NOT sufficient. A node consumed earlier as a
+                    # TARGET is recorded in `used_starts`/`incoming` but never in
+                    # `used_isolated`, so it stays eligible here and would take a SECOND
+                    # parent. `incoming` is the authoritative "already has a parent" record.
+                    candidates = [nid for nid in isolated_by_t.get(mid_t, [])
+                                  if nid not in used_isolated and nid not in incoming]
                     if candidates:
                         distances = [point_distance_um(node_point(nodes_by_id[nid]), mid_point) for nid in candidates]
                         best_idx = int(np.argmin(distances))

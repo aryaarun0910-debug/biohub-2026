@@ -185,6 +185,61 @@ def test_relink_cannot_exceed_out_degree_one(wrapper):
     assert worst_in <= 1
 
 
+def test_gap_close_cannot_give_a_node_two_parents(wrapper):
+    """A node consumed as a gap-close TARGET must not be reusable as a gap-close MIDDLE.
+
+    `close_single_frame_gaps` kept two disjoint consumption sets. `used_starts` recorded
+    targets, `used_isolated` recorded reused middles, and NEITHER admission guard consulted
+    the other. So a node taken as a target (recorded in `used_starts`/`incoming`) stayed
+    eligible as a reused middle, where only `used_isolated` was checked -- and picked up a
+    SECOND incoming edge.
+
+    Found on the real pre-wrapper substrate: the full-corpus census died at crop 185/199 with
+    `in-degree>1 on [3863]`. It never fired on the post-wrapper cache, which lacks 83,260 of
+    the nodes the gap-closer actually sees, so the wrong substrate had been masking it.
+
+    Reachable ordering, which this reconstructs: frames are walked in ascending t, so the
+    pair whose TARGET is X is processed before the pair that wants X as its MIDDLE.
+    """
+    mod = wrapper
+    for name, value in {
+        "OUTPUT_GAP_CLOSE": True,
+        "GAP_CLOSE_MAX_GAP": 1,
+        "GAP_CLOSE_UM": 40.0,
+        "GAP_CLOSE_REUSE_EXISTING": True,
+        "GAP_CLOSE_REUSE_UM": 40.0,
+        "GAP_DENSITY_ADAPTIVE": False,
+        "DEEPCENTER_GAP_VETO": False,
+        "OUTPUT_GAP2_RECOVERY": False,
+    }.items():
+        if hasattr(mod, name):
+            setattr(mod, name, value)
+
+    #   t=0  S2(isolated end)            t=1  S1(end, has a parent)
+    #   t=2  X (isolated -> start AND reuse candidate)
+    #   t=3  T1(start)
+    # pair B (t=0): S2 -> [synthetic] -> X          consumes X as a TARGET
+    # pair A (t=1): S1 -> [X reused]   -> T1        would give X a second parent
+    nodes = {
+        0: _node(0, 0, x=0.0),          # S2
+        1: _node(1, 1, x=0.0),          # S1
+        2: _node(2, 2, x=0.0),          # X  (isolated)
+        3: _node(3, 3, x=0.0),          # T1
+        4: _node(4, 0, x=200.0),        # parent of S1, keeps S1 out of starts
+    }
+    edges = [{"source_id": 4, "target_id": 1, "edge_prob": 0.9, "distance_um": 0.0}]
+    stats = defaultdict(int)
+
+    new_nodes, new_edges = mod.close_single_frame_gaps(nodes, edges, stats)
+
+    _, inn = _degrees(new_edges)
+    assert max(inn.values()) <= 1, (
+        f"gap close gave a node two parents: "
+        f"{sorted(n for n, d in inn.items() if d > 1)}"
+    )
+    mod.assert_degree_invariants(new_edges, "gap close regression")
+
+
 def test_assert_degree_invariants_rejects_a_triple_fork(wrapper):
     bad = [
         {"source_id": 1, "target_id": 2},

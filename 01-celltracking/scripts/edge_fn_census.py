@@ -161,6 +161,19 @@ def _to_graph(out_nodes, out_edges):
 
 
 def work(path):
+    """Never raise. A single bad crop must not destroy a multi-hour pooled run --
+    that already happened once, at 185/199."""
+    try:
+        return _work(path)
+    except Exception as exc:  # noqa: BLE001
+        import traceback
+        return {"crop": pathlib.Path(path).stem.replace("__nodes", ""),
+                "family": pathlib.Path(path).stem.split("_")[0],
+                "error": f"{type(exc).__name__}: {exc}",
+                "traceback": traceback.format_exc()[-1200:]}
+
+
+def _work(path):
     import numpy as np
     import polars as pl
     import tracksdata as td
@@ -379,6 +392,13 @@ def main():
     pathlib.Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     json.dump(rows, open(a.out, "w"), indent=1)
     print(f"\nwrote {a.out}  ({len(rows)} crops)")
+
+    errs = [r for r in rows if "error" in r]
+    if errs:
+        print(f"\n  !! {len(errs)} crop(s) FAILED and were skipped:")
+        for r in errs[:8]:
+            print(f"     {r['crop']}: {r['error']}")
+    rows = [r for r in rows if "error" not in r]
 
     agg = defaultdict(Counter)
     for r in rows:
