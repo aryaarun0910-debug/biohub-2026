@@ -152,3 +152,47 @@ Note the framing correction that matters for any PU attempt: our 0.655–8.529% 
 frequency**, not the class prior `π` the estimator consumes. Conflating them is the dominant
 implementation failure. The strongest quantitative evidence (F1 0.522 vs 0.102 at 1–9% retained
 annotation) is 2D region-level, **not** 3D voxel heatmaps, so it is unproven at our sparsity.
+
+---
+
+## 6. M2 PRE-GATE RESULT — the Gaussian-target line is largely dead; the LOSS line survives
+
+`scripts/target_extractor_ceiling.py` rasterises GT centres into a perfect heatmap and runs the
+deployed peak rule on it. Recall below 1.0 would be a ceiling no training could exceed.
+
+| sigma (grid units) | pool (3,3,3) | (3,9,9) | (5,5,5) |
+|---:|---:|---:|---:|
+| **0.00 (current single-voxel)** | **1.0000** | 1.0000 | 1.0000 |
+| 0.50 – 2.00 | 1.0000 | 1.0000 | 1.0000 |
+
+**Recall ceiling is 1.0 everywhere, peaks/GT is exactly 1.000.** By the falsification rule this
+line was given — *"if the current single-voxel target already yields a 1.0 ceiling, this whole line
+is dead"* — **changing the target parameterisation to Gaussians does not buy recall.**
+
+Why: GT **nearest-neighbour distance** among annotated cells is p50 **22.44 µm = 13.8 grid units**,
+p5 ≈ 10.5 µm, min 7.19 µm. Annotated centres are far apart relative to any sigma ≤ 2 grid units,
+so no two targets merge.
+
+### The caveat that must travel with this result
+
+This measures separation of the **annotated subset**, not of all cells. Annotation covers only
+0.655–8.529% of cells, so the annotated cells are naturally well separated (22 µm) while the true
+population sits at ~6.5 µm. The test is therefore **correct for the training target** — which only
+ever contains annotated centres — but it does **not** bound merging at inference over the full cell
+population. A Gaussian target could still matter for inference-time separation; it just cannot be
+justified as a fix for a training-target recall ceiling, because there is none.
+
+### Consequence for M2
+
+**Reorder: the loss change is the mechanism, not the target parameterisation.**
+
+1. **Masked / ignore-radius loss** — the confirmed defect (91.5–99.3% of real nuclei explicitly
+   trained as background at `neg_weight=0.1`). Linajea, MIT, validated in our exact modality.
+2. Gaussian/soft targets — demoted. No recall-ceiling justification; keep only as a possible
+   inference-separation aid, and combine kernels by **maximum, not sum** (summing invents a
+   super-peak between touching centres).
+3. nnPU — last, and blocked on having no dense validation region to search the class prior on.
+
+Centre-separation / repulsion terms are also demoted by the same measurement: with annotated
+pairs at p50 22 µm and p1 7.19 µm, almost no annotated pair sits inside 2·sigma, so a separation
+term has essentially no support in the training signal.
