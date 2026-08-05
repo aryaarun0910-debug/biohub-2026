@@ -3857,3 +3857,36 @@ Carry forward: P0-CR showed reverse-time is **base-dependent** (+0.001 on clean9
 Harmonic sits on the same pathway, and arm B's relink cost consumes `prob`, which harmonic fusion
 directly rewrites — so arm B and harmonic **will interact** and must be measured together, never
 assumed additive.
+
+---
+
+## 2026-08-05 (result) — P3 harmonic scores 0.915. The re-baselining theory is falsified.
+
+`55274582` COMPLETE at **0.915**, against P0-B 0.914. **+0.001.** New best; slots consumed 11.
+
+Harmonic mutual-support fusion is worth **+0.001** on our base — the same magnitude the arithmetic
+reverse-time blend gave over clean913. A marginal refinement of the same mechanism, not a different
+class of thing.
+
+**The theory this submission was built to test is dead.** The hypothesis was that the field's move
+to 0.93–0.948 was carried by this public CC0 rule and that adopting it would put us near 0.93. It
+put us at 0.915. **Whatever separates the 0.93+ teams from us is not harmonic fusion**, and it is
+not in the public notebooks we have examined — the Kretzschmar kernel and the "clean 913" frontier
+kernel both turned out to be our own ancestor with one change.
+
+This supports the instinct that the leaders hold genuine proprietary edge, and it reframes the
+remaining 0.033 gap as a research problem rather than an adoption problem.
+
+**Calibration, scored honestly.** Predicted 0.913–0.928 with a modal band of 0.916–0.921 at 55%.
+Actual 0.915: inside the range, below the mode. Third consecutive optimistic central estimate.
+The signal that worked was **structural churn against a known-null reference** — arm B churned
+7.148% for 0.000, P3 churned 4.368%, which correctly implied a small gain. The signal that failed
+was net cardinality (+1% nodes and edges), which I used to push the estimate up and which carried
+nothing. Use churn-vs-null, not cardinality, for the next structural pre-registration.
+
+**Standing implication unchanged and now sharper:** the only asset large enough to close 0.033 is
+detection — +0.095 oracle ceiling with the root cause confirmed in the shared training code
+(`neg_weight=0.1`, no ignore mask, 91.5–99.3% of real nuclei supervised as background). Association
+caps at +0.033 at oracle with an unproven selector.
+
+**C0-FULL/C1 must now re-base onto P3, not P0-B.**

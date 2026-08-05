@@ -312,3 +312,35 @@ arm is harmonic **alone**.
 P0-B. Harmonic changes the edge-FN population that Lane B's base rates and Lane C's ceiling are
 computed from, so **the overnight run must not proceed on the old base** — that would repeat the
 substrate error with a different substrate.
+
+### RESULT — P3 harmonic `55274582` scored **0.915**. New best, +0.001 over P0-B.
+
+| submission | arm | public |
+|---|---|---:|
+| `55136908` | P0-B | 0.914 |
+| `55181562` | arm B solo | 0.914 |
+| `55274582` | **P3 harmonic** | **0.915** |
+
+**Harmonic mutual-support fusion is worth +0.001 on our base** — the same magnitude the arithmetic
+reverse-time blend gave over clean913 (0.913 → 0.914). It is a marginal refinement of that
+mechanism, not a different class of thing.
+
+**This falsifies the re-baselining theory.** The working hypothesis was that the field's move to
+0.93–0.948 was driven by this public CC0 rule, and that adopting it would land us near 0.93.
+It did not. **Whatever is separating the 0.93+ teams from us is NOT harmonic fusion.**
+
+That is a genuinely useful negative: it means the leaders hold something the public notebooks do
+not, which supports treating the remaining gap as a research problem rather than an adoption
+problem.
+
+**Prediction scored.** Range given before the result: 0.913–0.928, modal band 0.916–0.921 at 55%,
+low band 0.913–0.914 at 25%. Actual **0.915** — inside the full range, **below the modal band**.
+Third consecutive optimistic central estimate (arm B: predicted +0.0045, got 0.000).
+
+The reasoning that worked was **structural churn**: "arm B churned 7.148% and moved 0.000; P3
+churns 4.368%, so it is hard to argue it buys +0.016." That pointed correctly at a small gain and
+should have been weighted more heavily. The argument that pushed the estimate up — net-additive
++1% nodes and edges — carried no predictive signal. **Churn magnitude against a known-null
+reference is the better predictor; net cardinality change is not.**
+
+**New platform: P3 harmonic at 0.915.** Slots consumed: 11. Gap to leader (0.948): **0.033**.
