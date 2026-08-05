@@ -3767,3 +3767,93 @@ consistent with everything observed but is not proven.
 Substrate transfer now stands at **seven failures and zero confirmed successes** — arm B was the
 one claimed success and it went flat. Next cycle's first job is the instrument question, then 6bba
 edge recall (+0.171 oracle, 10% capture clears +0.011). HANDOFF.md rewritten as the cold-start brief.
+
+---
+
+## 2026-08-02/03 — Substrate error, retraction, two deployment defects, four lanes
+
+Consolidated entry covering commits `b0ce6c2`..`cf673d0`. The journal had drifted 12 commits
+behind the reports; that is a standing-workflow failure and this closes it.
+
+**The cycle's dominant event: I measured on the wrong substrate.** Built four instruments and three
+lanes on `artifacts/kaggle/p0strict_cache`, which `reports/inventory/wsf_ROUTE1_VERDICT.json` had
+already examined and rejected in writing before I started — "NO. It is a POST-wrapper surface and
+arm B edits a PRE-wrapper stage." Zero `edge_prob` against 1,801,603 pre-wrapper edges, 83,260
+relink-population nodes missing, 92% of coordinates linefit-shifted, and the cache edge list IS the
+relink output. **Retracted**: "arm B is +0.000435". `+0.0079822` stood unrefuted.
+
+**P0 parity, correct substrate, 199 crops:** arm B = **+0.0084877** pooled (44b6 +0.0139120, 6bba
++0.0076907, bootstrap CI **[+0.00745, +0.01365]**). WS-F's 144-crop +0.0079822 was right; the
++0.0005 residual is crop population.
+
+**Two latent deployment defects, both found only because the substrate was fixed.**
+Safe divisions could emit out-degree 3 (target-side dedupe, no source-side). Gap close could give a
+node two parents (`used_starts` and `used_isolated` disjoint, neither guard consulting the other) —
+this one killed the census at crop 185/199 and **never fired on the wrong substrate**, which lacks
+83,260 of the nodes the gap-closer sees. Same defect class both times: admission dedupes against one
+bookkeeping record while another path writes a different one. Both fixed at admission, both locked.
+Tests 42 → 51.
+
+**Lane O — sampling variance FALSIFIED.** With the true +0.008488 a 4-movie panel moves UP with
+p=0.8995, DOWN 0.0683, FLAT **0.0322**. We observed the 3.2% outcome. Family mix (0.82–0.93),
+weighting (0.906 vs 0.882) and concentration (top-20 = 49.6%, ESS 142/199) all fail to rescue it.
+Remaining hypotheses B/C/D not separable without test GT. **Decision rule: promotion ≥ +0.015,
+submission ≥ +0.020, trust OOF ranking not magnitude.**
+
+**Lane B — detection owns the loss.** 72.2% of edge FN is detection (17,444, oracle **+0.10332**);
+association-addressable 19.8%, ceiling **+0.032931**. Denominators only became trustworthy on the
+correct substrate: relaxed surface 2,292 → **77,599**, starvation base rate 1.544 (impossible) →
+**0.040245**, i.e. 1 in 25 vs 1 in 834 for the undifferentiated surface.
+
+**Lane D0 — new detector or nothing.** 15,296 missing GT nodes (11.47%), 28,732 edges at stake.
+44b6 misses **1.37%**; 6bba misses **13.28%** with **40.5% having nothing within 15 µm**. Class C
+(wrapper removed it) ≈ 0. Priced: +0.103322 against −0.008633 of surrendered node-ratio bonus, net
+≈ **+0.095**, ~3× association.
+
+**D1/M2 settled without GPU.** The A/B/D partition is exactly computable from the peak rule. The
+detector grid is **isotropic at 1.625 µm** (downsample [1,4,4] cancels the 4× voxel anisotropy), so
+the pool suppresses only ±1.625 µm against ~6.5 µm spacing — class B small, arms N/TN likely dead.
+`compute_detection_loss` confirmed: `neg_weight=0.1`, no ignore mask, single-voxel targets →
+**91.5–99.3% of real nuclei explicitly trained as background.** Two sub-hypotheses killed free:
+target-voxel collisions **0 of 133,318**, and perfect-heatmap recall ceiling **1.0000 at every
+sigma** → the Gaussian-target line is dead as a recall fix; the LOSS is the mechanism.
+
+**C0-FULL never completed** — first attempt was on the wrong substrate and stopped; the relaunch was
+killed by my own process cleanup using a 30-minute window. C1 never started.
+
+**Decision: no submission.** Nothing cleared +0.020. Slots consumed remain 10.
+
+---
+
+## 2026-08-05 — Leaderboard re-baseline: the field moved and we did not
+
+Public top is now **0.948**; 0.924 is ~15th. **P0-B at 0.914 is well off the pace** and the
+0.920–0.925 target this project was pursuing is obsolete.
+
+Pulled public CC0 kernel `raykkretzschmar/biohub-harmonic-bidirectional-association-v1`. It is
+**our own base again** — clean913, same three datasets, wrapper cell byte-identical in size — and
+its reverse-time patch is character-for-character our `_bi_new` with **one changed expression**.
+
+We blend forward/reverse as an **arithmetic mean of logits**:
+`edge_logits_pair = (1-w)*forward + w*reverse_aligned`.
+
+It blends as a **weighted harmonic mean in probability space**:
+`harmonic_prob = 1/((1-w)/forward_prob + w/reverse_prob)`, renormalised, logged, then affinely
+rescaled back onto the forward logit scale so the downstream threshold and ILP see the same range.
+λ = 0.20, identical to our `BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT`. The harmonic mean is dominated by the
+**lower** of the two directions, so a link must be supported both ways; the arithmetic mean lets one
+confident direction carry a bad edge.
+
+Provenance: transcribed from `yusuketogashi/no-hack-biohub-cell-another-approch-3rd` v18, **CC0**.
+Satisfies the external-asset rule with attribution.
+
+**Consequence for the planned work.** The C0-FULL/C1 association programme is measured against P0-B.
+Harmonic fusion rewrites the edge logits, which changes which targets are left unlinked, which
+changes the entire edge-FN population that Lane B's base rates and Lane C's ceiling are computed
+from. **Running C0-FULL on the old base would repeat the substrate error with a different
+substrate.** Overnight run held pending re-baseline.
+
+Carry forward: P0-CR showed reverse-time is **base-dependent** (+0.001 on clean913, −0.002 on v122).
+Harmonic sits on the same pathway, and arm B's relink cost consumes `prob`, which harmonic fusion
+directly rewrites — so arm B and harmonic **will interact** and must be measured together, never
+assumed additive.
