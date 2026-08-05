@@ -263,3 +263,52 @@ The LB is a smoke test for large effects; OOF is the instrument.
 Structural pre-registration note: divisions moved **+13 (up)**, and the P0-CR precedent said the arm
 whose divisions move up is the one that loses score. It did not lose — it went flat. The precedent
 is not confirmed and not refuted.
+
+---
+
+## 2026-08-05 — P3 HARMONIC RE-BASELINE SUBMITTED (slot 11). Kaggle `55274582`, PENDING.
+
+**Context: the field moved and we did not.** Public top is now **0.948**; 0.924 is ~15th. P0-B at
+0.914 is well off the pace and the 0.920–0.925 target was obsolete.
+
+**One semantic edit on P0-B.** Forward/reverse association fusion changes from an arithmetic mean
+of logits to a weighted **harmonic mean in probability space**, renormalised and affinely rescaled
+back onto the forward logit scale. λ = 0.20 unchanged. Harmonic is dominated by the **lower** of
+the two directions, so a link must be supported both ways; the arithmetic mean lets one confident
+direction carry a bad edge.
+
+Built by swapping the single-quoted `_bi_new` runtime-patch literal wholesale — our 2005-char
+literal for the 3518-char harmonic one, shared prefix 1702 — so the patch text is
+transcription-exact. Cell 5 grew by exactly **1513 = 3518 − 2005**, confirming a clean single
+swap with no collateral edit.
+
+**Provenance.** Rule transcribed from public **CC0** notebook
+`yusuketogashi/no-hack-biohub-cell-another-approch-3rd` v18 ("Biohub 145 | Bidirectional Harmonic
+Probability"), via `raykkretzschmar/biohub-harmonic-bidirectional-association-v1` (id_no
+129697527). Credit for the rule: Yusuke Togashi.
+
+**Also carries both invariant fixes** (safe-division out-degree, gap-close in-degree) plus the
+export assertions. Harmonic rewrites the edge logits, shifting which targets the relink leaves
+unlinked — the exact mechanism that tripped the safe-division defect and blocked the first arm-B
+run. The assertions passed in-kernel.
+
+| | P0-B | P3 harmonic |
+|---|---:|---:|
+| sha256 | `4c285cae0c220a11…` | `3e98739f5c46f2dd…` |
+| rows | 237,465 | 239,886 |
+| nodes | 120,861 | **122,083** |
+| edges | 116,604 | **117,803** |
+| divisions | 305 | 307 |
+| public | **0.914** | pending |
+
+Structural audit **PASS 10/10**: max in-degree 1, max out-degree 2, 0 outside-volume, 0
+cross-dataset, 0 non-consecutive, 0 duplicate `(dataset, node_id)`.
+
+**Interaction warning, recorded before the score lands:** arm B's relink cost consumes `prob`,
+which this edit rewrites. The two **must** be measured together and never assumed additive. This
+arm is harmonic **alone**.
+
+**Consequence for the queued work:** the C0-FULL / C1 association programme was measured against
+P0-B. Harmonic changes the edge-FN population that Lane B's base rates and Lane C's ceiling are
+computed from, so **the overnight run must not proceed on the old base** — that would repeat the
+substrate error with a different substrate.
