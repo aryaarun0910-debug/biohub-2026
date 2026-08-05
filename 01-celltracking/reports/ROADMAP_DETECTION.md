@@ -1,5 +1,23 @@
 # Roadmap — the detection route
 
+> ## AMENDED — see `reports/ROADMAP_DETECTION_ADDENDUM.md` before acting on this file.
+>
+> Three claims below are corrected there:
+> 1. **`neg_weight=0.1` is WRONG.** The baseline path is `det_neg_weight=0.01` (`train()` and the
+>    CLI both), and `reports/ENVIRONMENT_TRAPS.md` had already documented the 0.1 default as a
+>    trap. Aggregate loss mass is 1.0 positive against 0.01 negative, so the background term is
+>    **1% of the detection loss**, not the dominant force this file implies. `det_loss_weight`
+>    is separately **unresolved** (1.0 via CLI vs 10.0 via `train()`, help text contradicts itself).
+> 2. **D1 class D does not imply an encoder problem.** `detect_head` is
+>    `Conv3d(32, 1, kernel_size=1)` — **33 parameters**. D1-F, a frozen-feature linear probe, is
+>    the decisive gate before any encoder retraining.
+> 3. **Linajea mask-only is not a safe deployment loss.** It leaves background unconstrained by
+>    design; our metric charges surplus nodes and assignment stealing. It is an **ablation (H1)**,
+>    never the final design.
+>
+> The primary mechanism is now **M2-CTPU** (masked + training-only count prior + temporal
+> pseudo-positives), not mask-only.
+
 **Written:** 2026-08-05 · **Platform:** P3 harmonic, public **0.915** · leader 0.948 · gap **0.033**
 · slots consumed 11. No deadline constraint. Overnight CPU and submission authority granted.
 
