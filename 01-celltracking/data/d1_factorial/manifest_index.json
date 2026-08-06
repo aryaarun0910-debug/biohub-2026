@@ -1,0 +1,25 @@
+{
+  "census_sha256": "eb4ec2ec9c5387e025d8017ad88bf45b31ce2ca520a63478ee3851210fb3771b",
+  "kind": "d1_factorial_index",
+  "schema_version": 1,
+  "tiers": {
+    "full": {
+      "file": "manifest_full.json",
+      "n_crops": 199,
+      "n_rows": 398,
+      "sha256": "23392b9d7be9cd61c92f2ba544408cc4d10308cd0cabf074c47b5ce17bd4142f"
+    },
+    "pilot": {
+      "file": "manifest_pilot.json",
+      "n_crops": 19,
+      "n_rows": 38,
+      "sha256": "ff6670529518a8a2584bb30019d875a35df47646660cc85483606538dbdc9936"
+    },
+    "smoke": {
+      "file": "manifest_smoke.json",
+      "n_crops": 3,
+      "n_rows": 6,
+      "sha256": "bc5bd4f02dcbeea84749a10209fc75a7b95d45420a6f7d0cacbd3ca358b28846"
+    }
+  }
+}
