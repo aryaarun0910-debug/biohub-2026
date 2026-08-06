@@ -4,9 +4,9 @@
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
   "built_notebook": "notebooks\\kaggle_p3_d1_smoke_f0\\biohub-p3-d1-smoke-f0.ipynb",
-  "built_sha256": "130cb51a4b5643b3a38dfdd6d77e88fc3eb0138cb3628e38c49413fa6ac4e2c7",
-  "config_hash": "e919ea005add",
-  "n_cells": 11,
+  "built_sha256": "f6210027e65f7bc9894a0aab1a292adcd4b4fd0ad533a4bd2ed58f66c09d271e",
+  "config_hash": "20ee3d668e86",
+  "n_cells": 12,
   "edits": [
     {
       "kind": "env",
@@ -121,11 +121,18 @@
       "payload_sha256": "321af62a571cb8512524425924ac2458bc6f3198173766077e89f6312bff5411"
     },
     {
+      "kind": "append_cell",
+      "cells": [
+        11
+      ],
+      "payload_sha256": "d3a1b80d9c7bbc984a8be362e95aa8cb1ec38bf92eada2fff74709c0c3795eaa"
+    },
+    {
       "kind": "replace",
       "cells": [
         7
       ],
-      "payload_sha256": "d6f1e263e5a0079963e44e51181e9fc72e8e55945ecf7fd43a9208aa85f6c321"
+      "payload_sha256": "407f60a4f96733f76fbd1f509e83053c5e059e973a364aa9bb4e0faddc1c4ec8"
     }
   ],
   "declared_slug": "biohub-p3-d1-smoke-f0",

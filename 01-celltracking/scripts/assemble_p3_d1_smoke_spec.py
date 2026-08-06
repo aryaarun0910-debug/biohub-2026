@@ -157,6 +157,9 @@ def build(fold: int) -> dict:
         "5. pre-wrapper prediction-graph export")
     add(l_edits[3], "E08_export_cell", "loeo_f1_strict_pregraph#3",
         "6. LOEO export cell replaces the submission guard")
+    add({"kind": "append_cell", "code_file": "scripts/kaggle_edits/d1_aggregate.py"},
+        "E10_aggregator", "scripts/kaggle_edits/d1_aggregate.py",
+        "6. parent aggregator: read immutable per-crop records, fail hard on any gap")
     add(keep, "E09_keep", "loeo_f1_strict_pregraph#5 (+d1_audit)",
         "6. artifact retention: keep pregraphs AND the d1_audit directory")
 

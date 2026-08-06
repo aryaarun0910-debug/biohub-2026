@@ -34,8 +34,8 @@
       "loeo_pregraph": "5cbb94850ba34054edf11f98ef44b3ee18bec83222bfe2337832604ecb74907f",
       "loeo_keep": "b6a6c809e5d33dbf3b856b571a9ac5348da8e50dae1c9830e7481fd8efc4e5f5"
     },
-    "d1_inject_sha256": "a17b2bde44409a84b3faf2d6e5487e6b46b10895c70efc76573706fb7362a78e",
-    "d1_block_sha256": "788848379e54c3201a83fa75645d7a1561bcecdbebfc96a61db526aac104a965",
+    "d1_inject_sha256": "a19e0e10a478f9b9d43bf473bccad1e88606a36d5bb8b37b41146a1acd1de3d9",
+    "d1_block_sha256": "6bb0c5d6bdb9e63c7dc69ab2fdb18b8c083ce56d1ce5d73133b04add9aefbf51",
     "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
     "stems": [
       "6bba_6feb10f0",
@@ -276,6 +276,17 @@
       }
     },
     {
+      "kind": "append_cell",
+      "code_file": "scripts/kaggle_edits/d1_aggregate.py",
+      "_audit": {
+        "edit_id": "E10_aggregator",
+        "source": "scripts/kaggle_edits/d1_aggregate.py",
+        "canonical_sha256": "2e6ad13cb55cfe555a647dba8df865d1c7c923472bec5d763a9b790adb80d8db",
+        "intent": "6. parent aggregator: read immutable per-crop records, fail hard on any gap",
+        "order": 16
+      }
+    },
+    {
       "kind": "replace",
       "old": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\"}",
       "new": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\",\n              f\"pregraphs_split{LOEO_FOLD}.parquet\", f\"pregraphs_split{LOEO_FOLD}.json\",\n              \"d1_audit\"}",
@@ -285,7 +296,7 @@
         "source": "loeo_f1_strict_pregraph#5 (+d1_audit)",
         "canonical_sha256": "fcd3924fe744584c0b3e8a3cdabc2db83674fe698637f4e1675eb247d8d10b43",
         "intent": "6. artifact retention: keep pregraphs AND the d1_audit directory",
-        "order": 16
+        "order": 17
       }
     }
   ]

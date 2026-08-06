@@ -2,13 +2,14 @@
   "folds": [
     {
       "fold": 0,
-      "spec_sha256": "35a8aaaf081b",
-      "notebook_sha256": "130cb51a4b5643b3a38dfdd6d77e88fc3eb0138cb3628e38c49413fa6ac4e2c7",
+      "spec_sha256": "df8a6c4e9878",
+      "notebook_sha256": "f6210027e65f7bc9894a0aab1a292adcd4b4fd0ad533a4bd2ed58f66c09d271e",
       "changed_cells": [
         2,
         5,
         6,
-        7
+        7,
+        11
       ],
       "cell_to_edits": {
         "2": [
@@ -35,6 +36,9 @@
         "7": [
           "E08_export_cell",
           "E09_keep"
+        ],
+        "11": [
+          "E10_aggregator"
         ]
       },
       "patched_predict_sha256": "30667fca0728b5d562afda3a568ee39f2b55eb4ebbda5e021c2307efe0078ccf",
@@ -217,6 +221,17 @@
         },
         {
           "order": 16,
+          "edit_id": "E10_aggregator",
+          "source": "scripts/kaggle_edits/d1_aggregate.py",
+          "cells": [
+            11
+          ],
+          "kind": "append_cell",
+          "canonical_sha256": "2e6ad13cb55cfe55",
+          "intent": "6. parent aggregator: read immutable per-crop records, fail hard on any gap"
+        },
+        {
+          "order": 17,
           "edit_id": "E09_keep",
           "source": "loeo_f1_strict_pregraph#5 (+d1_audit)",
           "cells": [
@@ -230,13 +245,14 @@
     },
     {
       "fold": 1,
-      "spec_sha256": "7449654e1df4",
-      "notebook_sha256": "0350d804ae7117c868d4ad22d24a9c1d965d51c32f3806325336796f297130b7",
+      "spec_sha256": "c1858b5b7ec8",
+      "notebook_sha256": "85c22c1cb56caa1b457760da96c3129c21903ec1cd677e9b641db81211ec0fbf",
       "changed_cells": [
         2,
         5,
         6,
-        7
+        7,
+        11
       ],
       "cell_to_edits": {
         "2": [
@@ -263,6 +279,9 @@
         "7": [
           "E08_export_cell",
           "E09_keep"
+        ],
+        "11": [
+          "E10_aggregator"
         ]
       },
       "patched_predict_sha256": "30667fca0728b5d562afda3a568ee39f2b55eb4ebbda5e021c2307efe0078ccf",
@@ -445,6 +464,17 @@
         },
         {
           "order": 16,
+          "edit_id": "E10_aggregator",
+          "source": "scripts/kaggle_edits/d1_aggregate.py",
+          "cells": [
+            11
+          ],
+          "kind": "append_cell",
+          "canonical_sha256": "2e6ad13cb55cfe55",
+          "intent": "6. parent aggregator: read immutable per-crop records, fail hard on any gap"
+        },
+        {
+          "order": 17,
           "edit_id": "E09_keep",
           "source": "loeo_f1_strict_pregraph#5 (+d1_audit)",
           "cells": [
