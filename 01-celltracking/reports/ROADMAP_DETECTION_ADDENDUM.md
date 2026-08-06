@@ -37,7 +37,29 @@ they got **1.0**, not 10.0. **The shipped `config_split_{0,1}.json` records only
 (`downsample`, `pool_kernel_um`, `unet_layers`, `unet_out_channels`, `window_size`, sha256
 `e9b4e396c58081bc`, identical for both folds) — **no loss weights, no command, no log.**
 
-**Status: `det_neg_weight = 0.01` accepted. `det_loss_weight` UNRESOLVED (1.0 or 10.0).**
+### RESOLVED 2026-08-06 — a retained training_config settles it
+
+The ordered search found a **retained `training_config.json` from an actual run of this trainer**
+(`../Biohub-CellTracking-2026_RESEARCH/.../secondary_seed_weights/unet_transformer/split_0/`,
+sha256 `4f29349439e133ad`):
+
+```
+det_loss_weight = 1.0        <-- the CLI default (1e0), NOT train()'s 1e1
+det_neg_weight  = 0.01
+pool_kernel_um  = 5.0        downsample = [1,4,4]    unet_out_channels = 32
+method = unet_transformer_alltrain_seed314159_v1     train_datasets = 199
+```
+
+**`det_loss_weight = 1.0` and `det_neg_weight = 0.01`.** The CLI path was used, so `train()`'s
+`1e1` signature default was never in play and the help-text contradiction is inert.
+
+**Scope caveat, stated precisely:** this config belongs to the **secondary** seed model
+(`alltrain_seed314159_v1`, all 199 datasets, fold 0), not to the primary support-pack 50-epoch
+weights. It is direct evidence of how *this trainer is actually invoked* — same script, same CLI —
+but it is not the primary pack's own log. Treat `1.0 / 0.01` as **operative and well-evidenced**,
+not as byte-proven for the primary checkpoint.
+
+**Status: `det_neg_weight = 0.01` and `det_loss_weight = 1.0`, evidenced.**
 Neither may be quoted as runtime-proven until a training log or command is recovered. Any M2 arm
 must fix both explicitly and regression-lock them.
 
@@ -230,7 +252,7 @@ prediction **conceptually**; it does **not** establish that our ~19,900-frame 3D
 | claim | before | now |
 |---|---|---|
 | background suppression strength | `neg_weight=0.1` | **0.01**, aggregate 1% of detection loss |
-| `det_loss_weight` | 10.0 assumed | **unresolved, 1.0 or 10.0** |
+| `det_loss_weight` | 10.0 assumed | **1.0**, from a retained training_config |
 | masked loss is *the* fix | high | **low-to-moderate** — it removes a 1% term |
 | class D ⇒ encoder problem | assumed | **rejected** — 33-parameter head, D1-F decides |
 | Linajea as final design | proposed | **ablation only** — leaves background unconstrained |
