@@ -5,6 +5,74 @@
 
 ---
 
+## 0b. AUDIT CORRECTIONS — three claims below are wrong
+
+Independent audit, verified bit-exact by the integrator.
+
+### The deployed TTA applies SEVEN distinct views, not eight
+
+In the generated notebook (c5, identical in f0/f1/harmonic, in **both** the primary and
+secondary blocks):
+
+```python
+imgs_at = torch.rot90(imgs, 1, dims=(-2, -1)).transpose(-1, -2)
+```
+
+is labelled the anti-transpose but **is exactly `imgs.flip(-1)`** — already view 1. Verified as
+a bit-exact index permutation. Every single-order composition of `rot90` at odd `k` with
+`transpose` collapses to a flip; a true anti-transpose needs `k=2`. That is why it was easy to
+write and never caught.
+
+| | |
+|---|---|
+| encode calls | **8** |
+| distinct views | **7** |
+| weight on `flip(-1)` | **2/8** |
+| weight on the true anti-transpose | **0/8** |
+| divisor | 8 |
+
+`_nv` still reaches 8, so the arithmetic is self-consistent — but the measure is **non-uniform
+on D4**, and a 7-element subset of an order-8 group is never a subgroup, so **the deployed
+average is not a group average.** Measured against a true uniform D4 average on real weights:
+max |Δlogit| **1.33**, and **201 of 1,780 accepted peaks (~11%) change identity on one frame.**
+
+> **v6 MUST REPLICATE THE COLLISION VERBATIM.** v6 exists to describe *the deployed detector*.
+> Parity holds either way, but a "corrected" view set makes the exported features describe a
+> detector that is not in production. **Fixing it is a detector change** — under C3 it changes
+> the node population, forces a full `predict_edges` rerun, and voids the 0.889 anchor. It is a
+> legitimate standalone experiment and must not ride along inside v6.
+>
+> Record **`n_encode_calls = 8` and `n_distinct_views = 7` as separate manifest fields.** Do not
+> write a single `n_views` that conflates them. Add a test asserting the duplicate is present
+> and intentional, so a future agent cannot "fix" it by accident.
+
+### `Y == X` is NOT the safety property — §1 and §4 item 6 are refuted
+
+Every inverse restores shape on non-square input, and the encoder demonstrably runs all 8 views
+on a `(1,2,64,48,64)` input. **Drop the `Y == X` assertion.** Assert the **distinct-permutation
+count** instead — that is the property actually violated here.
+
+### The signed-residual test does not catch wrong inverses — §2 is incomplete
+
+The parity gate below says a systematically signed or logit-correlated residual implies abort.
+**Injected inverse bugs come out exactly zero-mean (bias = 0.0000).** Signedness catches offset
+and scale errors only. The gate must **also** check magnitude and, decisively,
+**accepted-peak-set equality**.
+
+Measured parity, real checkpoints, both splits: max |Δ| **3.8e-6 – 5.7e-6**, p99.9 2.4–3.8e-6,
+median 2.4e-7–9.5e-7, float32 throughout, **accepted-peak sets bit-identical in all four cases**.
+The derived float32 bound is **≈7.3e-6**, so the `1e-4` below is **18–26× loose and not
+derived**. Prefer `8 · 2⁻²⁴ · max|logit|` **plus peak-set equality**.
+
+### One more overstatement of mine
+
+"The patch guard is a `print`, not a `raise`, so the view count silently degrades" is
+**overstated**. The *next* patch anchors on text containing `_nv` (c5:l63, c5:l72-77), so a
+failed TTA patch hard-fails one cell later in all three notebooks. The guard is still worth
+converting to a `raise` for locality, but the failure is not silent.
+
+---
+
 ## 0. The trap this spec exists to avoid
 
 Every research lane independently proposed the same v6 fix: *accumulate `unet_out` over the
