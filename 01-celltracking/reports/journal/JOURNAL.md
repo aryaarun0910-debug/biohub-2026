@@ -4048,3 +4048,59 @@ journal table at 2026-08-06 retains 3,027 as the fold-1 subtotal it actually was
 **Swarm status:** all nine agents terminated by the session limit. Partial work salvaged to
 their branches (`d1_postprocess.py` +504, `d1f_probe.py` +2,194, `d1_response_audit.py` +405)
 as unreviewed WIP commits. Nothing merged to master.
+
+---
+
+## 2026-08-06 (halt) — cycle stopped at Stage A on instruction
+
+Full record: `reports/CYCLE_OUTPUT_2026-08-06.md`.
+
+**Score movement 0.000. GPU 0. Kaggle pushes 0. Submissions 0.** Public stays 0.915.
+Tests 90 -> 224. Commits `2c91bc6` -> `6cdd016`, pushed.
+
+The cycle set out to spend ~11.5 T4-hours on a 199-crop D1/D1-F export and did not. Five
+instrument defects were found, **four of which would have returned a plausible answer rather
+than an error**: byte-identical H1-H4 arms reading as convergent evidence; identity-view
+features paired with post-TTA logits; a polars schema drop voiding 28/199 crops while
+reporting COMPLETE; and family/checkpoint confounding that returns "representation deficit"
+with probability ~1 from a basis mismatch.
+
+Two further traps were caught while writing the fixes. Every research lane proposed
+accumulating the TTA mean into `unet_out`, which `predict_edges` reads downstream -- that would
+have destroyed the 0.915 association substrate under cover of a bug fix. And
+`augpath_oracle.json` turned out to be the retracted post-wrapper run (40 crops, not 199)
+sitting at the script's own default `--out`.
+
+**A defect in the deployed detector.** The view written as the anti-transpose,
+`rot90(imgs,1,(-2,-1)).transpose(-1,-2)`, is exactly `flip(-1)` -- already view 1. So the
+deployed detector makes 8 encode calls over 7 distinct views, `flip(-1)` weighted 2/8 and the
+true anti-transpose 0/8, divisor 8. Non-uniform on D4; not a group average. Against a true
+uniform D4 average: max |Dlogit| 1.33 and 201/1,780 accepted peaks (~11%) change identity on
+one frame. Decision: ship unchanged, because v6 must describe the deployed detector and
+correcting the view set is a detector change that voids the anchors. Locked by test.
+
+**Ten claims corrected, most of them mine.** The two that matter most: the TTA view count (I
+audited `vendor/`, which is replaced at build time -- the base file is not the run), and the
+partition, whose total row summed GT/M over two crops but submission-matched over three. Real
+totals GT 3,079 / M 1,521. The deeper point that had never been stated: `44b6_0113de3b` is
+52/52 matched, so **every unmatched GT node is 6bba** and D=0 is a 2-crop 6bba-only result with
+zero 44b6 representation.
+
+Also corrected: M1 is not CPU-exact (a changed accepted set changes existing edge logits
+through cross-attention and source-softmax); |T u L| is not a ceiling and +0.015 needs ~2,221
+perfect recoveries, not 3,400; `Y == X` is not the safety property; and a signed-residual test
+does not catch wrong inverses, which come out exactly zero-mean.
+
+**Unmerged, untested work is preserved on two branches** with resume points in the cycle
+output. Agents 7-10 never started; Agent 9's recall-ceiling re-audit at true nuclear density
+(9.68 um measured spacing vs ~10 um axial PSF) is the highest-leverage unstarted item, since it
+can re-price the +0.10332 detection oracle before any GPU.
+
+**Two decisions await the host:** a `.gitignore` negation for `data/d1_factorial/` (not made --
+`.gitignore` is under a do-not-touch instruction), and the scope of the full run. FULL is
+22.44 T4-h against ~11.5 remaining and cannot be sharded away, because the LOEO retarget binds
+one fold at module level. Recommended: **split 1 only, 7.88 T4-h**, ~85% of the objective.
+
+**On 0.930:** not on an evidenced path. +0.015 public would be 15x the largest public gain this
+project has recorded (P3 +0.001; arm B +0.0085 OOF -> 0.000 public). Nothing on the shelf
+clears +0.020.

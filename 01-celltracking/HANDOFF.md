@@ -1,5 +1,23 @@
 # Current handoff — cold start
 
+> **CYCLE HALTED 2026-08-06 at Stage A.** Read `reports/CYCLE_OUTPUT_2026-08-06.md` FIRST —
+> it is the complete cycle record, including five instrument defects, a defect in the deployed
+> detector, ten corrected claims, and two decisions awaiting the host.
+>
+> **Score movement this cycle: 0.000. GPU spent: 0. Submissions: 0.** Public stays **0.915**.
+>
+> **Two branches carry unmerged, untested work — resume points in §6 of that file:**
+> - `worktree-agent-ab3310e9b5a4cd85d` @ `ffb2dd1` — v6 TTA export, 11 files. Base is
+>   `d540c38`; **rebase onto master before finishing.**
+> - `worktree-agent-a6d67b0ce12e98f08` @ `68dd81d` — D1-F rewrite, `d1f_probe.py` 2,291 lines,
+>   master already merged in. **`tests/test_d1f_probe.py` does not exist — that is the blocker.**
+>
+> **Highest-leverage unstarted item:** the 30-CPU-minute recall-ceiling re-audit at true nuclear
+> density (9.68 µm measured spacing vs ~10 µm axial PSF). It can re-price the +0.10332 detection
+> oracle before any GPU is spent.
+>
+> **Do not launch full-199.** It is 22.44 T4-h against ~11.5 remaining. See §7.
+
 **Updated:** 2026-08-06 · **Branch:** `master` · **Best public score: 0.915** (P3 harmonic)
 · leader **0.948** · gap **0.033** · slots consumed **11**
 
