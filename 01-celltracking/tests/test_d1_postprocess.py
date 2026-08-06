@@ -124,13 +124,13 @@ def test_vendored_four_view_block_is_the_patch_target_not_the_deployed_code():
 
 
 @pytest.mark.skipif(not all(p.exists() for p in NOTEBOOKS), reason="built notebooks absent")
-def test_deployed_tta_is_eight_views_derived_from_the_generated_notebook():
-    """THE DEPLOYED VIEW COUNT IS 8, not the vendored 4.
+def test_deployed_tta_makes_eight_encode_calls():
+    """The deployed path makes 8 encode calls, not the vendored 4, divided by `_nv`.
 
-    Runtime accumulation is identity(1) + 3 flips + rot90(k=1,3) + transpose +
-    anti-transpose = 8, divided by the RUNTIME COUNTER `_nv`. The literal `_nv += 1`
-    appears 4 times because three of the views are produced inside loops -- counting the
-    literal is wrong, so this asserts the view SET.
+    The literal `_nv += 1` appears 4 times because three views are produced inside loops,
+    so counting the literal is wrong; this asserts the call SET.
+    See `test_deployed_tta_has_only_seven_distinct_views` for what those 8 calls actually
+    compute -- it is NOT 8 distinct views.
     """
     for nb in NOTEBOOKS:
         src = _nb_source(nb)
@@ -145,8 +145,81 @@ def test_deployed_tta_is_eight_views_derived_from_the_generated_notebook():
         assert blk.count("model.encode") == 4, "encode call count changed"
         assert blk.count("_nv += 1") == 4, "increment sites changed"
         assert "det_logits[f] = det_logits[f] / _nv" in blk, "denominator is not the counter"
-        # 1 identity + 3 flips + 2 rots + 1 transpose + 1 anti-transpose
-        assert 1 + 3 + 2 + 1 + 1 == 8
+
+
+def test_deployed_tta_has_only_seven_distinct_views():
+    """THE COLLISION, AND IT IS DELIBERATE THAT WE DO NOT FIX IT.
+
+    The view written as the anti-transpose
+
+        torch.rot90(imgs, 1, dims=(-2, -1)).transpose(-1, -2)
+
+    is EXACTLY `imgs.flip(-1)`, which is already view 1. Every single-order composition of
+    rot90 at odd k with transpose collapses to a flip; a true anti-transpose needs k=2.
+
+    So the deployed detector makes 8 encode calls over 7 distinct views: `flip(-1)` carries
+    weight 2/8 and the true anti-transpose carries 0/8, while the divisor is still 8. The
+    measure is therefore NON-UNIFORM on D4, and a 7-element subset of an order-8 group is
+    never a subgroup -- the deployed average is not a group average.
+
+    v6 MUST REPLICATE THIS VERBATIM. v6 exists to describe the DEPLOYED detector. Correcting
+    the view set is a detector change: it moves the node population, forces a predict_edges
+    rerun, and voids the 0.889 anchor. Legitimate as a standalone experiment; never as a
+    silent ride-along.
+    """
+    import torch
+
+    torch.manual_seed(0)
+    x = torch.randn(1, 2, 3, 5, 7, 7)          # (B, W, C, Z, Y, X)
+
+    as_coded = torch.rot90(x, 1, dims=(-2, -1)).transpose(-1, -2)
+    assert torch.equal(as_coded, x.flip(-1)), (
+        "the anti-transpose no longer collides with flip(-1) -- the deployed view set "
+        "changed, which is a DETECTOR change and voids the current anchors"
+    )
+
+    views = [
+        x,
+        x.flip(-1),
+        x.flip(-2),
+        x.flip((-2, -1)),
+        torch.rot90(x, 1, dims=(-2, -1)),
+        torch.rot90(x, 3, dims=(-2, -1)),
+        x.transpose(-1, -2),
+        as_coded,
+    ]
+    assert len(views) == 8, "encode-call count"
+    assert len({v.numpy().tobytes() for v in views}) == 7, "distinct-view count"
+
+    # a true anti-transpose needs k=2 and is absent from the deployed set
+    true_anti = torch.rot90(x, 2, dims=(-2, -1)).transpose(-1, -2)
+    assert all(not torch.equal(true_anti, v) for v in views)
+
+
+def test_every_deployed_view_inverse_is_a_true_inverse_including_non_square():
+    """The output is mis-WEIGHTED, not corrupted: all 8 inverses round-trip exactly, and
+    they do so on non-square input too -- so `Y == X` is NOT the safety property here."""
+    import torch
+
+    torch.manual_seed(1)
+    for shape in ((1, 2, 3, 5, 7, 7), (1, 2, 3, 5, 6, 8)):   # square and non-square Y/X
+        x = torch.randn(*shape)
+        pairs = [
+            (lambda t: t, lambda t: t),
+            (lambda t: t.flip(-1), lambda t: t.flip(-1)),
+            (lambda t: t.flip(-2), lambda t: t.flip(-2)),
+            (lambda t: t.flip((-2, -1)), lambda t: t.flip((-2, -1))),
+            (lambda t: torch.rot90(t, 1, dims=(-2, -1)),
+             lambda t: torch.rot90(t, -1, dims=(-2, -1))),
+            (lambda t: torch.rot90(t, 3, dims=(-2, -1)),
+             lambda t: torch.rot90(t, -3, dims=(-2, -1))),
+            (lambda t: t.transpose(-1, -2), lambda t: t.transpose(-1, -2)),
+            # composition -- the inverse applies in REVERSE order
+            (lambda t: torch.rot90(t, 1, dims=(-2, -1)).transpose(-1, -2),
+             lambda t: torch.rot90(t.transpose(-1, -2), -1, dims=(-2, -1))),
+        ]
+        for i, (fwd, inv) in enumerate(pairs):
+            assert torch.equal(inv(fwd(x)), x), f"view {i} inverse failed on {shape}"
 
 
 @pytest.mark.skipif(not all(p.exists() for p in NOTEBOOKS), reason="built notebooks absent")
@@ -159,12 +232,29 @@ def test_a_second_independent_tta_block_exists_for_the_secondary_model():
 
 
 @pytest.mark.skipif(not all(p.exists() for p in NOTEBOOKS), reason="built notebooks absent")
-def test_tta_patch_failure_is_silent_and_must_become_fatal_in_v6():
-    """The patch guard falls back to 4 views with a PRINT, not a raise, and the view count
-    is recorded in no manifest field. v6 must raise and record `n_views`."""
+def test_tta_patch_failure_is_caught_downstream_not_silently_tolerated():
+    """CORRECTED. I first recorded the TTA patch guard as a silent degradation because it
+    ends in a `print`, not a `raise`. That was wrong, and the mechanism matters.
+
+    The guard itself does only print. But the NEXT patch anchors on text containing `_nv`:
+
+        'for f in range(W):\\n    det_logits[f] = det_logits[f] / _nv\\n\\n    del imgs'
+
+    If the TTA patch had failed, the file would still read `/ 4`, that anchor would not
+    match, and the patch machinery raises on a match-count mismatch. So a failed TTA patch
+    hard-fails one step later rather than shipping a 4-view detector.
+
+    Converting the guard to a `raise` is still worth doing for locality -- the failure
+    should name its own cause -- but it is a readability fix, not a correctness hole.
+    """
     src = _nb_source(NOTEBOOKS[0])
     assert 'print("TTA WARNING: block not found - using default 4-way")' in src, (
-        "if this became a raise, update this lock -- the silent fallback is the defect"
+        "the guard changed; re-check whether the downstream anchor still protects it"
+    )
+    after = src[src.find("TTA WARNING"):]
+    assert "det_logits[f] = det_logits[f] / _nv" in after[:1200], (
+        "the downstream anchor no longer references _nv, so a failed TTA patch would "
+        "become genuinely silent -- restore the anchor or make the guard raise"
     )
     assert "n_views" not in src, "n_views now recorded; update the v6 locks"
 
