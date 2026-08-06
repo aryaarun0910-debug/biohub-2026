@@ -3890,3 +3890,79 @@ detection — +0.095 oracle ceiling with the root cause confirmed in the shared 
 caps at +0.033 at oracle with an unproven selector.
 
 **C0-FULL/C1 must now re-base onto P3, not P0-B.**
+
+---
+
+## 2026-08-06 — v5 D1 audited: three blockers, the full-199 launch stopped
+
+**Execution.** Pulled both v5 smoke kernels (`aryaarun07/biohub-p3-d1-smoke-f0`/`-f1`, both
+COMPLETE). Downloaded manifests are sha256-identical to the archived copies. Ran the acceptance
+audit that the previous handoff listed as "not yet run". It had never been run because the data
+to run it on does not exist in the export.
+
+**Three blockers.**
+
+1. **The kernel never emitted the partition.** `{crop}__rows.parquet` has no `d1_class` and no
+   `matched` column — raw spherical statistics only. `matched` can only come from the scorer's
+   bipartite matching, a CPU step. Not a defect; a missing stage believed to exist.
+
+2. **`scripts/d1f_probe.py` cannot load a v5 artifact.** Reads `__feat_near.npy` (kernel writes
+   `__feat_max.npy`) and columns `d1_class`/`near_dist_um` (neither exists). `main()` *fits* H0
+   instead of reading the checkpoint head. `build_arm(..., pi_crop=None)` is hardcoded with no
+   temporal logic, so **H1/H2/H3/H4 are byte-identical arms** — four identical rows that would
+   have read as convergent evidence. Never run.
+
+3. **FATAL — features are identity-view, logits are post-TTA.** `predict_unet_transformer.py:372-388`:
+   `unet_out, det_logits = model.encode(imgs)` binds features once from the identity view; the
+   TTA loop then does `_, det_flip = model.encode(imgs_flip)`, **discarding every flipped feature
+   map**, and averages only logits over 4 views (identity + 3 planar flips, `/4`).
+   `d1_inject.py:264` passes the post-TTA logits and the identity-view features to the audit as a
+   matched pair, and `d1_response_audit.py:5` states the misconception in a comment. Therefore
+   `checkpoint_detect_head(feat)` cannot reproduce the deployed logit and **H0 parity is
+   mathematically unavailable from a v5 export.**
+
+**Damage is bounded, and the boundary is exact.** Every neighbourhood statistic is computed from
+`logits_1zyx`, which *is* the post-TTA tensor. So the partition is sound; only the 32-D features
+are contaminated. v5 = PASS on wiring/manifests/statistics/serialization, NOT RUN on M/C/T/L/D,
+INVALID on D1-F.
+
+**Numbers.** Built `scripts/d1_postprocess.py` (versioned `d1-derived-1`, deterministic,
+manifest-driven, raw inputs read-only, calls the scorer's own matching). Match authority is
+*measured*, not assumed: the pregraph reproduces the recorded parity target **52/52** on
+`44b6_0113de3b`; the post-wrapper submission gives only 49/52.
+
+| crop | GT | M | C | T | L | D |
+|---|---:|---:|---:|---:|---:|---:|
+| `44b6_0113de3b` | 52 | 52 | 0 | 0 | 0 | 0 |
+| `6bba_57b7cc1e` | 1,659 | 1,314 | 242 | 39 | 64 | 0 |
+| `6bba_6feb10f0` | 1,368 | 155 | 47 | 810 | 356 | 0 |
+| **total** | **3,027** | **1,469** | **289** | **849** | **420** | **0** |
+
+Of 1,558 unmatched GT: **C 18.5% · T 54.5% · L 27.0% · D 0.0%.** Basis: 3-crop smoke,
+IN-FAMILY, **diagnostic only** — one crop was deliberately selected as extreme. Not a census.
+
+**Class D is exactly zero.** Every missed GT node has a local maximum within 15 µm; at this
+radius there is no evidence of a response-poor representation on these crops. T dominates at
+54.5% — response present within 7 µm, nothing clearing `det_threshold = 0.96875` (logit 3.434),
+i.e. the **calibration/operating-point** cause, which explicitly does not justify encoder work.
+This points away from encoder retraining, which is the cheap direction, so the bar for believing
+it goes up, not down. v6 first.
+
+**Side finding, recorded not chased.** Pregraph-matched 1,521 vs submission-matched 1,505: the
+post-wrapper stage (short-track filter, isolated-node prune) **destroys 16 GT matches, 1.05%**,
+on every crop measured (52→49, 1314→1307, 155→149).
+
+**Acceptance checks all pass** on the 3 crops: partition invariants; every distance ≤ 15 µm
+(max observed **14.982 µm**, so v4's 24.4 µm cube-corner leak is genuinely fixed); peak parity
+`voxel_accepted == is_local_max & over_threshold`; monotonic neighbourhood counts;
+`subthr_localmax` rows all local maxima and all under threshold; features `(n,32)` finite;
+terminal per-crop manifests agree with the aggregate.
+
+**Decision.** Full-199 export **not launched**. Order: v6 TTA-consistent feature export
+(inverse-transform and accumulate features over the same view list; assert
+`detect_head(mean(aligned_features)) == mean(aligned_logits)` numerically) → rewrite
+`d1f_probe.py` with a capability registry that hard-fails unimplemented arms → re-run the
+3-crop smoke as v6 → **one** combined full-199 launch. Do not run full v5 then repeat 199 for v6.
+
+**Next step.** v6 export patch. Tests 90 → **103**; new locks in `tests/test_d1_postprocess.py`
+cover the partition rules and pin the TTA defect so a v6 fix must be a deliberate change.

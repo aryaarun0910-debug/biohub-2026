@@ -24,24 +24,34 @@ git rev-list --left-right --count origin/master...master    # expect 0 0
 
 ## 1. THE ONE THING TO DO NEXT
 
-**The D1 smoke passed. Audit it, then run D1-F. Do not launch the full corpus first.**
+**Build the v6 TTA-consistent feature export. Read `reports/D1_V5_STATUS.md` first.**
 
-v5 smoke (`biohub-p3-d1-smoke-f0` / `-f1`, both version 5, COMPLETE):
+v5 is **not** clean. Three blockers were found on 2026-08-06; the full-199 export was **not**
+launched and `scripts/d1f_probe.py` was **never run**. Corrected triage:
 
-| fold | crop | GT rows | rows | features |
-|---|---|---:|---:|---|
-| 0 | `44b6_0113de3b` (parity) | 52 | 9,652 | 9,652 × 32 finite |
-| 1 | `6bba_57b7cc1e` (stress) | 1,659 | 11,259 | 11,259 × 32 finite |
-| 1 | `6bba_6feb10f0` (extreme) | 1,368 | 10,968 | 10,968 × 32 finite |
+| area | status |
+|---|---|
+| kernel wiring, immutable manifests, aggregation, raw statistics, feature serialization | **PASS** |
+| M/C/T/L/D partition | **NOT RUN in v5** — now derived CPU-side by `scripts/d1_postprocess.py` |
+| D1-F representation-vs-head | **INVALID / UNPROVEN** |
 
-**Both folds `COMPLETE=True`, 3/3, zero aggregator problems.**
+**The fatal blocker:** the deployed TTA loop averages **only detection logits** over 4 views
+(identity + 3 planar flips) and **discards every flipped feature map**; `unet_out` is bound
+once from the identity view (`predict_unet_transformer.py:372-388`). v5 therefore paired
+post-TTA logits with identity-view features, so `checkpoint_detect_head(feat)` cannot
+reproduce the deployed logit and **H0 parity is mathematically unavailable**. The damage is
+bounded: neighbourhood statistics come from the post-TTA logits, so **the partition is sound
+and only the 32-D features are contaminated.**
 
-Remaining acceptance checks (not yet run): M+C+T+L+D == all GT · C+T+L+D == scorer-unmatched
-· all sphere distances ≤ 15 µm · exact peak/pregraph parity · graph invariants · no unexplained
-files. The parity gate (52/52, `node_recall 1.000000`) was already proven locally against v4.
+The derived partition over the 3-crop smoke (pregraph authority, reproduces **52/52** on
+`44b6_0113de3b`): GT 3,027 · **M 1,469 · C 289 · T 849 · L 420 · D 0**. Of 1,558 unmatched:
+C 18.5%, T 54.5%, L 27.0%, **D 0.0%**. Basis: 3-crop smoke, IN-FAMILY, **diagnostic only** —
+one crop was deliberately chosen as extreme. Class counts still may never authorise encoder
+retraining on their own.
 
-Then **D1-F** (`scripts/d1f_probe.py`) is the actual encoder-vs-head verdict. **Class counts are
-diagnostic only and must never authorise encoder retraining on their own.**
+Order of work: v6 export → rewrite `d1f_probe.py` with a capability registry → re-run the
+3-crop smoke as v6 → **only then** one combined full-199 launch. Do not run full v5 and then
+repeat 199 crops for v6.
 
 ---
 
