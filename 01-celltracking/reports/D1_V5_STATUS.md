@@ -10,14 +10,14 @@ previous handoff. **No full-199 export was launched.** `scripts/d1f_probe.py` wa
 | area | status |
 |---|---|
 | kernel wiring, immutable manifests, aggregation | **PASS** |
-| raw spherical neighbourhood statistics | **PASS** |
+| raw spherical neighbourhood statistics | **PASS on the 3 smoke crops; NOT SAFE at corpus scale** (B4) |
 | feature serialization (shape, finiteness, atomicity) | **PASS** |
 | M/C/T/L/D partition | **NOT RUN in v5** — now derived CPU-side, see below |
 | D1-F representation-vs-head experiment | **INVALID / UNPROVEN** |
 
 ---
 
-## The three blockers
+## The four blockers
 
 ### B1 — the kernel never emitted the partition
 
@@ -43,20 +43,37 @@ capability registry that hard-fails unimplemented arms.
 
 ### B3 — features are identity-view, logits are post-TTA. **This is the fatal one.**
 
-`vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py`:
+> **CORRECTION 2026-08-06, my error.** I first wrote that the deployed view list is
+> "exactly 4", having read `vendor/.../predict_unet_transformer.py:379-388`. **That file
+> never runs.** The generated notebook replaces that block at build time with a full
+> **8-view D4** TTA. Lane 5 caught it; verified directly and locked by
+> `tests/test_d1_postprocess.py`. The instruction to derive the view list from the
+> *generated notebook* was explicit and I did not follow it. The conclusion below is
+> unchanged and in fact strengthened — the feature/logit gap is 8-fold, not 4-fold.
+
+The vendored file is only the **patch target**:
 
 ```
-372:  unet_out, det_logits = model.encode(imgs)          # identity view
-379:  if cfg.det_tta:
-380:      tta_flips = [(-1,), (-2,), (-2, -1)]
-383:          _, det_flip = model.encode(imgs_flip)      # features DISCARDED
-385:          det_logits[f] = det_logits[f] + det_flip[f].flip(dims)
-388:      det_logits[f] = det_logits[f] / 4
+372:  unet_out, det_logits = model.encode(imgs)          # identity view, bound ONCE
+383:      _, det_flip = model.encode(imgs_flip)          # features DISCARDED
+385:      det_logits[f] = det_logits[f] + det_flip[f].flip(dims)
+388:      det_logits[f] = det_logits[f] / 4              # <- REPLACED at build time
 ```
 
-The deployed view list is **exactly 4** (identity + 3 planar flips) and **only logits** are
-accumulated. `unet_out` is bound once from the identity view and never touched again.
-`scripts/kaggle_edits/d1_inject.py:264` then passes `det_logits[f_idx][0]` and
+The generated notebook substitutes identity + `flip(-1)` + `flip(-2)` + `flip(-2,-1)` +
+`rot90(k=1)` + `rot90(k=3)` + `transpose(-1,-2)` + anti-transpose, dividing by the **runtime
+counter `_nv` = 8**. Every one of the 4 encode calls still discards its feature map.
+
+Two further facts, both verified:
+
+- **The patch guard is a `print`, not a `raise`**: `else: print("TTA WARNING: block not
+  found - using default 4-way")`. The view count therefore depends on an exact string match
+  at runtime and **is recorded in no manifest field**. v6 must raise and record `n_views`.
+- **There are TWO such blocks** — a primary and a secondary detection model
+  (`_nv = 1` appears twice). Anything reasoning about "the" deployed detection field must
+  account for both.
+
+`scripts/kaggle_edits/d1_inject.py:264` passes `det_logits[f_idx][0]` and
 `unet_out[0, f_idx]` to the audit **as though they were a matched pair** — and
 `d1_response_audit.py:5` documents the misconception in a comment:
 *"post-TTA det_logits[f_idx][0] and the 32-channel unet_out[:, f_idx] are both in scope."*
@@ -68,6 +85,38 @@ the representation-versus-head question is unproven, not merely mislabelled.
 **Scope of the damage is exactly bounded:** every neighbourhood statistic is computed from
 `logits_1zyx`, which *is* the post-TTA tensor. So **the partition is sound and only the 32-D
 features are contaminated.** Locked by `tests/test_d1_postprocess.py`.
+
+**Bias direction matters.** TTA averaging is variance reduction: the labels derive from the
+denoised 8-view field while the probe would be fitted on the noisier identity-view features.
+That handicaps the probe relative to the deployed head and biases D1-F toward *"probe cannot
+recover ⇒ representation deficit"* — the conclusion that authorises the most expensive
+programme. **A null D1-F result on identity-view features may not buy GPU.**
+
+### B4 — the exporter would have silently lost the D1 payload on 28 of 199 crops
+
+`_d1_flush` built `_pl.DataFrame(_rows)` from **heterogeneous dicts** with no declared
+schema. polars infers from the first **100** rows. Emission order per frame is: GT rows,
+then 64 uniform + 32 sub-threshold = **96 non-GT rows**. So a crop whose first GT lands at
+frame ≥ 2 puts the first GT row at index ≥ 192 — past the window — and **every gt-only
+column (`n_lm_7um`, `n_acc_7um`, `n_lm_15um`, `best7_*`, `gt_z/y/x`, `k0..k6_*`) vanishes
+with no error.** The terminal record still reports the correct `gt_rows` and
+`status: complete`, because `kind` survives.
+
+Reproduced at the pinned polars 1.42.1: 99 lead non-GT rows → all columns present;
+**100 → all gt-only columns gone.** Corpus blast radius, measured over all 199 GT geffs:
+
+| | crops | trap fires | share |
+|---|---:|---:|---:|
+| all | 199 | **28** | **14.1%** |
+| 44b6 | 71 | 14 | 19.7% |
+| 6bba | 128 | 14 | 10.9% |
+
+Worst: `6bba_767a1e17` (first GT at t=46), `44b6_e29f0176` (t=30), `44b6_90724892` (t=29).
+
+**All three smoke crops start at frame 0, so the smoke could never have caught this**, and
+`gate_p3_d1_smoke.py` verifies composition, not artifact schema. Found by the red-team lane
+and independently reproduced. **Fixed**: `infer_schema_length=None` plus a hard
+`_D1_REQUIRED_COLS` contract check that raises. Locked by three tests.
 
 ---
 

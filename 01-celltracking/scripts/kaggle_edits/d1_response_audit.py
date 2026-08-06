@@ -51,6 +51,16 @@ _D1_RNG = _d1_np.random.default_rng(20260806)
 
 _D1_N_UNIFORM = int(_d1_os.environ.get("BIOHUB_D1_N_UNIFORM", "64"))
 _D1_N_SUBTHR = int(_d1_os.environ.get("BIOHUB_D1_N_SUBTHR", "32"))
+
+# Columns that MUST survive to the parquet whenever the crop has any GT row. Asserted in
+# _d1_flush; see the trap-21 note there for why an assertion rather than trust.
+_D1_REQUIRED_COLS = (
+    "dataset", "t", "kind", "z", "y", "x", "logit", "prob", "pooled",
+    "voxel_is_local_max", "voxel_over_threshold", "voxel_accepted",
+    "n_lm_7um", "n_lm_15um", "n_acc_7um", "n_acc_15um",
+    "best7_dist_um", "near15_dist_um", "best15_dist_um",
+    "gt_z", "gt_y", "gt_x",
+)
 _D1_KLIST = int(_d1_os.environ.get("BIOHUB_D1_KLIST", "8"))
 _D1_MATCH_UM = 7.0      # the scorer's max_distance
 _D1_SEARCH_UM = 15.0
@@ -238,7 +248,20 @@ def _d1_flush(fold=None, ckpt_hash=None, expected_crops=None):
                    else _d1_np.zeros((0, 32), "f4"))
             _fm = (_d1_np.stack(_b["feat_max"]) if _b.get("feat_max")
                    else _d1_np.zeros((0, 32), "f4"))
-            _df = _pl.DataFrame(_rows)
+            # TRAP 21. Rows are heterogeneous dicts: gt-only keys are absent from the
+            # 96 non-GT rows emitted per frame (64 uniform + 32 subthr). polars infers the
+            # schema from the first 100 rows by default, so a crop whose first GT lands at
+            # frame >= 2 (96*2 = 192 > 100) SILENTLY LOSES every gt-only column while the
+            # terminal record still reports the right gt_rows and status=complete.
+            # Measured: 28 of 199 corpus crops (14.1%) -- 44b6 19.7%, 6bba 10.9%. All three
+            # smoke crops start at frame 0, so the smoke could never have caught it.
+            _df = _pl.DataFrame(_rows, infer_schema_length=None)
+            _missing = [c for c in _D1_REQUIRED_COLS if c not in _df.columns]
+            if _missing and any(r.get("kind") == "gt_centre" for r in _rows):
+                raise RuntimeError(
+                    f"D1 column contract violated for {_ds}: missing {_missing}. "
+                    "Schema inference dropped gt-only columns (trap 21)."
+                )
             _d1_atomic(_D1_OUT / f"{_ds}__rows.parquet", lambda p: _df.write_parquet(p))
 
             def _save(arr):

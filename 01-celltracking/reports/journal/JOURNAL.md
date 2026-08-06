@@ -3966,3 +3966,51 @@ terminal per-crop manifests agree with the aggregate.
 
 **Next step.** v6 export patch. Tests 90 → **103**; new locks in `tests/test_d1_postprocess.py`
 cover the partition rules and pin the TTA defect so a v6 fix must be a deliberate change.
+
+---
+
+## 2026-08-06 (correction) — I audited a file that never runs. Views are 8, not 4. Plus a fourth blocker.
+
+**My error, corrected.** I reported the deployed TTA view list as "exactly 4 (identity + 3
+planar flips), `/4`", citing `predict_unet_transformer.py:379-388`. **That block is replaced
+at build time.** The generated notebook substitutes a full D4 set — identity + `flip(-1)` +
+`flip(-2)` + `flip(-2,-1)` + `rot90(k=1)` + `rot90(k=3)` + `transpose(-1,-2)` +
+anti-transpose — dividing by the runtime counter `_nv` = **8**. Lane 5 caught it; verified
+directly against the generated notebook and locked by tests.
+
+The instruction to derive the view list from the *generated notebook* rather than assume
+four-view was explicit, and I did not follow it. The B3 conclusion is unchanged and in fact
+strengthened: the feature/logit mismatch is 8-fold, not 4-fold.
+
+**Meta-rule, now the important part: the deployment artifact is `base file + notebook string
+patches`. Auditing the base alone audits a file that never runs.** Every constant quoted from
+`vendor/` in the reports is subject to this. Mirror image of correction 6 (dead-code
+constant).
+
+Two further facts from the same read: the TTA patch guard is `print("TTA WARNING: block not
+found - using default 4-way")` — **a print, not a raise** — so the view count depends on an
+exact string match at runtime and appears in **no manifest field**. And there are **two**
+8-view blocks: a primary and a secondary detection model.
+
+**B4 — a fourth blocker that would have destroyed the full-199 export.** `_d1_flush` built
+`_pl.DataFrame(_rows)` from heterogeneous dicts with no declared schema. polars infers from
+the first 100 rows; emission is 96 non-GT rows per frame (64 uniform + 32 subthr). So any
+crop whose first GT lands at frame >= 2 puts the first GT row past the window and **every
+gt-only column silently disappears** while the terminal record still reports the right
+`gt_rows` and `status: complete`.
+
+Reproduced at pinned polars 1.42.1: 99 lead rows fine, **100 → total loss**. Measured over
+all 199 GT geffs: **28 crops (14.1%)** would fire — 44b6 14/71 (19.7%), 6bba 14/128 (10.9%);
+worst `6bba_767a1e17` (first GT t=46), `44b6_e29f0176` (t=30), `44b6_90724892` (t=29).
+**All three smoke crops start at frame 0, so the smoke could never have caught it**, and the
+composition gate checks cells and edit hashes, not artifact schema. Found by the red-team
+lane, independently reproduced here.
+
+**Fixed:** `infer_schema_length=None` plus a `_D1_REQUIRED_COLS` contract that raises. Locked
+by three tests. Tests 103 -> **109**.
+
+**Decision unchanged:** full-199 still not launched. v6 must additionally raise (not print) if
+the TTA patch fails to apply, and record `n_views` / `tta_view_set` in the manifest.
+
+**Next step.** v6 export patch: accumulate inverse-transformed features over the same 8 views
+as the logits, assert `detect_head(mean(aligned_features)) == mean(aligned_logits)`.

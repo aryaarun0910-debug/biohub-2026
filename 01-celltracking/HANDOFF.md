@@ -35,13 +35,26 @@ launched and `scripts/d1f_probe.py` was **never run**. Corrected triage:
 | M/C/T/L/D partition | **NOT RUN in v5** — now derived CPU-side by `scripts/d1_postprocess.py` |
 | D1-F representation-vs-head | **INVALID / UNPROVEN** |
 
-**The fatal blocker:** the deployed TTA loop averages **only detection logits** over 4 views
-(identity + 3 planar flips) and **discards every flipped feature map**; `unet_out` is bound
-once from the identity view (`predict_unet_transformer.py:372-388`). v5 therefore paired
-post-TTA logits with identity-view features, so `checkpoint_detect_head(feat)` cannot
-reproduce the deployed logit and **H0 parity is mathematically unavailable**. The damage is
-bounded: neighbourhood statistics come from the post-TTA logits, so **the partition is sound
-and only the 32-D features are contaminated.**
+**The fatal blocker (B3):** the deployed TTA loop averages **only detection logits** and
+**discards every flipped feature map**; `unet_out` is bound once from the identity view
+(`predict_unet_transformer.py:372-388`). v5 therefore paired post-TTA logits with
+identity-view features, so `checkpoint_detect_head(feat)` cannot reproduce the deployed
+logit and **H0 parity is mathematically unavailable**. Damage is bounded: neighbourhood
+statistics come from the post-TTA logits, so **the partition is sound and only the 32-D
+features are contaminated.**
+
+**The deployed view count is 8, not 4.** The vendored `/4` block is *replaced at build time*
+by a full D4 set (identity + 3 flips + rot90 k=1,3 + transpose + anti-transpose, `/_nv`).
+**Read the generated notebook, never `vendor/` — the base file is not the run.** The patch
+guard is a `print`, not a `raise`, and the view count is in no manifest field. There are
+**two** such blocks (primary + secondary detection model).
+
+**A second launch-blocker (B4), found by the red team and reproduced:** `_d1_flush` used
+polars' default 100-row schema inference on heterogeneous dicts. With 96 non-GT rows emitted
+per frame, any crop whose first GT lands at frame ≥ 2 **silently loses every gt-only column**
+while still reporting `gt_rows` and `status: complete`. **28 of 199 crops (14.1%)** would
+have been destroyed; all three smoke crops start at frame 0 so the smoke could not catch it.
+Fixed with `infer_schema_length=None` + a hard column contract.
 
 The derived partition over the 3-crop smoke (pregraph authority, reproduces **52/52** on
 `44b6_0113de3b`): GT 3,027 · **M 1,469 · C 289 · T 849 · L 420 · D 0**. Of 1,558 unmatched:
