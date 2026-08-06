@@ -11,6 +11,7 @@ Two independent things are locked here:
 from __future__ import annotations
 
 import sys
+import warnings
 from pathlib import Path
 
 import pytest
@@ -20,10 +21,22 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from d1_postprocess import (  # noqa: E402
     DERIVED_SCHEMA_VERSION,
+    FEAT_MAX_VALID,
     MATCH_UM,
     REQUIRED_ROW_COLUMNS,
+    ROW_ID,
     SEARCH_UM,
+    apply_validity,
+    assert_radius_binding,
+    atomic_write,
+    attach_row_id,
+    check_feature_contract,
     classify,
+    feat_max_validity,
+    guard_out_dir,
+    matched_gt_ids,
+    save_npy,
+    sort_rows_with_features,
 )
 
 PREDICT = ROOT / "vendor" / "kaggle-cell-tracking" / "scripts" / "predict_unet_transformer.py"
@@ -83,7 +96,7 @@ def test_radii_match_the_scorer_and_the_design():
 
 def test_derived_schema_version_is_pinned():
     """Changing the derivation MUST change this string, or old artifacts silently mix."""
-    assert DERIVED_SCHEMA_VERSION == "d1-derived-1"
+    assert DERIVED_SCHEMA_VERSION == "d1-derived-2"
 
 
 # --------------------------------------------------------------- the TTA defect
@@ -259,3 +272,396 @@ def test_audit_passes_identity_view_features_alongside_post_tta_logits():
     assert "__feat_tta_mean_gt.npy" not in src, (
         "TTA-mean features appear present -- this is the v6 contract, update the locks"
     )
+
+
+# =============================================================================================
+# THE SIX C6 REPAIRS. One block per defect; every test below fails against the pre-repair
+# postprocessor (`d1-derived-1`), which had none of these functions or guarantees.
+# =============================================================================================
+import numpy as np  # noqa: E402
+import polars as pl  # noqa: E402
+
+
+def _rows(n_frames=3, n_gt=2, n_non_gt=4):
+    """Emission order as the kernel actually writes it: each frame emits its gt_centre rows
+    FIRST, then the non-GT rows. So GT rows are a NON-CONTIGUOUS subset of the feature
+    array -- the mechanism behind defect 1."""
+    out = []
+    for t in range(n_frames):
+        for g in range(n_gt):
+            out.append({"t": t, "kind": "gt_centre",
+                        # descending in y so a sort genuinely permutes the rows
+                        "gt_z": 0.0, "gt_y": float(n_gt - g), "gt_x": 0.0,
+                        "n_lm_15um": 1})
+        for _ in range(n_non_gt):
+            out.append({"t": t, "kind": "uniform",
+                        "gt_z": None, "gt_y": None, "gt_x": None, "n_lm_15um": None})
+    return pl.DataFrame(out)
+
+
+def _feats(n, dim=3):
+    """Feature row i is the constant vector i, so a misaligned gather is self-evident."""
+    return np.repeat(np.arange(n, dtype=np.float32)[:, None], dim, axis=1)
+
+
+# ------------------------------------------------------------------ defect 1: misalignment
+def test_gt_rows_are_a_non_contiguous_subset_so_a_positional_join_misaligns():
+    """THE DEFECT, reproduced in miniature. Filtering to gt_centre and then indexing the
+    feature array by POSITION reads the wrong feature for all but the first row."""
+    df = _rows().with_row_index(ROW_ID).with_columns(pl.col(ROW_ID).cast(pl.Int64))
+    feats = _feats(df.height)
+    gt = df.filter(pl.col("kind") == "gt_centre")
+
+    # 2 GT rows then 4 non-GT rows per frame => GT feature rows are 0,1, 6,7, 12,13
+    assert gt.get_column(ROW_ID).to_list() == [0, 1, 6, 7, 12, 13]
+
+    naive = feats[: gt.height]                          # the bug: positional join
+    correct = feats[gt.get_column(ROW_ID).to_numpy()]   # the fix: join by row_id
+    assert not np.array_equal(naive, correct)
+    # only the FIRST frame's GT block lands by luck; every later frame is offset
+    wrong = int((naive[:, 0] != correct[:, 0]).sum())
+    assert wrong == 4, wrong
+
+
+def test_sort_rows_with_features_applies_the_identical_permutation():
+    """C6: never sort rows without applying the identical permutation to the features."""
+    df, _ = attach_row_id(_rows(), "c", allow_v5_emission_order=True)
+    feats = _feats(df.height)
+    gt = df.filter(pl.col("kind") == "gt_centre")
+
+    out, gathered = sort_rows_with_features(gt, {"feat_gt": feats})
+    # the sort really did reorder the rows
+    assert out.get_column(ROW_ID).to_list() != gt.get_column(ROW_ID).to_list()
+    # and every feature row still belongs to its own label row
+    assert np.array_equal(gathered["feat_gt"][:, 0],
+                          out.get_column(ROW_ID).to_numpy().astype(np.float32))
+    assert out.height == gt.height == gathered["feat_gt"].shape[0]
+
+
+def test_sort_is_total_and_reproducible_when_the_spatial_keys_tie():
+    """row_id is the final sort key, so tied coordinates cannot reorder run to run."""
+    tied = pl.DataFrame(
+        [{"t": 0, "kind": "gt_centre", "gt_z": 0.0, "gt_y": 0.0, "gt_x": 0.0}] * 5)
+    df, _ = attach_row_id(tied, "c", allow_v5_emission_order=True)
+    out, gathered = sort_rows_with_features(df, {"f": _feats(df.height)})
+    assert out.get_column(ROW_ID).to_list() == [0, 1, 2, 3, 4]
+    assert np.array_equal(gathered["f"][:, 0], np.arange(5, dtype=np.float32))
+
+
+def test_reordering_without_row_id_is_refused_outright():
+    with pytest.raises(SystemExit, match=ROW_ID):
+        sort_rows_with_features(_rows(), {"f": _feats(18)})
+
+
+# --------------------------------------------------------------------- defect 2: row_id
+def test_a_v5_export_without_row_id_is_refused_rather_than_guessed():
+    """v5 predates the contract. Guessing emission order is exactly the silent-misalignment
+    failure this repair exists to prevent, so it must be declared, not assumed."""
+    with pytest.raises(SystemExit, match="row_id"):
+        attach_row_id(_rows(), "c", allow_v5_emission_order=False)
+
+
+def test_the_v5_assumption_can_be_declared_explicitly_and_is_recorded():
+    df, source = attach_row_id(_rows(), "c", allow_v5_emission_order=True)
+    assert source == "v5-emission-order-declared"
+    assert df.get_column(ROW_ID).to_list() == list(range(df.height))
+
+
+def test_an_exported_row_id_is_consumed_not_regenerated():
+    raw = _rows().with_columns(pl.Series(ROW_ID, list(range(18)), dtype=pl.Int64))
+    df, source = attach_row_id(raw, "c", allow_v5_emission_order=False)
+    assert source == "export"
+    assert df.get_column(ROW_ID).to_list() == list(range(18))
+
+
+def test_a_reordered_export_is_still_exact_because_features_are_gathered_by_row_id():
+    """row_id -- not parquet position -- is the join key. A shuffled parquet is recoverable
+    and must NOT be rejected, but the fact is recorded rather than assumed."""
+    raw = _rows().with_columns(pl.Series(ROW_ID, list(range(18)), dtype=pl.Int64))
+    shuffled = raw.sample(fraction=1.0, shuffle=True, seed=7)
+    df, source = attach_row_id(shuffled, "c", allow_v5_emission_order=False)
+    assert source == "export-reordered"
+    out, gathered = sort_rows_with_features(
+        df.filter(pl.col("kind") == "gt_centre"), {"f": _feats(18)})
+    assert np.array_equal(gathered["f"][:, 0],
+                          out.get_column(ROW_ID).to_numpy().astype(np.float32))
+
+
+@pytest.mark.parametrize("bad", [
+    list(range(17)) + [16],          # duplicate
+    list(range(1, 19)),              # 1-based
+    list(range(17)) + [99],          # out of range
+])
+def test_a_row_id_that_is_not_a_bijection_is_fatal(bad):
+    raw = _rows().with_columns(pl.Series(ROW_ID, bad, dtype=pl.Int64))
+    with pytest.raises(SystemExit, match="bijection"):
+        attach_row_id(raw, "c", allow_v5_emission_order=False)
+
+
+def test_a_null_row_id_is_fatal():
+    raw = _rows().with_columns(pl.Series(ROW_ID, [None] + list(range(1, 18)), dtype=pl.Int64))
+    with pytest.raises(SystemExit, match="null"):
+        attach_row_id(raw, "c", allow_v5_emission_order=False)
+
+
+# ------------------------------------------------------- defect 3: MATCH_UM is not a literal
+def test_match_um_is_bound_to_the_scorer_rather_than_written_down():
+    """MATCH_UM must BE the scorer's radius, not a literal that happens to agree today."""
+    import inspect
+
+    from biotrack.metric import MAX_DISTANCE
+    from tracking_cellmot.metrics import evaluate as _ev
+
+    assert MATCH_UM == float(MAX_DISTANCE)
+    assert MATCH_UM == float(inspect.signature(_ev).parameters["max_distance"].default)
+    src = (ROOT / "scripts" / "d1_postprocess.py").read_text(encoding="utf-8")
+    assert "MATCH_UM: float = float(MAX_DISTANCE)" in src, (
+        "MATCH_UM is a literal again; a scorer change would silently desynchronise the "
+        "partition from the matching that defines it"
+    )
+
+
+def test_a_drifting_component_makes_the_postprocessor_refuse_to_run():
+    import biotrack.d1_partition as _d1p
+
+    assert assert_radius_binding()["scorer_max_distance"] == MATCH_UM
+    old = _d1p.MATCH_UM
+    try:
+        _d1p.MATCH_UM = 8.0
+        with pytest.raises(SystemExit, match="desynchronised"):
+            assert_radius_binding()
+    finally:
+        _d1p.MATCH_UM = old
+    assert assert_radius_binding()["d1_partition_match_um"] == MATCH_UM
+
+
+def test_the_outer_search_radius_must_exceed_the_match_radius():
+    assert SEARCH_UM > MATCH_UM
+
+
+# ------------------------------------------------------------------ defect 4: zero-edge match
+def _graph(coords, edges=()):
+    import tracksdata as td
+
+    from biotrack.submission import submission_to_graphs
+    if not coords:
+        g = td.graph.InMemoryGraph()
+        for key in ("z", "y", "x"):
+            g.add_node_attr_key(key, pl.Float64, -999999.0)
+        return g
+    rows = [{"id": i, "dataset": "X", "row_type": "node", "node_id": i + 1,
+             "t": t, "z": float(z), "y": float(y), "x": float(x),
+             "source_id": -1, "target_id": -1}
+            for i, (t, z, y, x) in enumerate(coords)]
+    for j, (s, d) in enumerate(edges):
+        rows.append({"id": len(rows) + j, "dataset": "X", "row_type": "edge", "node_id": -1,
+                     "t": -1, "z": -1.0, "y": -1.0, "x": -1.0,
+                     "source_id": s + 1, "target_id": d + 1})
+    return submission_to_graphs(pl.DataFrame(rows))["X"]
+
+
+COORDS = [(0, 0.0, 0.0, 0.0), (1, 0.0, 0.0, 0.0), (2, 0.0, 0.0, 0.0)]
+GT_EDGES = [(0, 1), (1, 2)]
+
+
+def test_the_scorer_never_writes_a_matching_for_a_zero_edge_prediction():
+    """THE CAUSE. `_evaluate` warns and returns 0.0 BEFORE `graph.match(...)`, so
+    MATCHED_NODE_ID is never written. Reading that as 'nothing matched' is the defect."""
+    import tracksdata as td
+
+    from biotrack.metric import DEFAULT_SCALE, MAX_DISTANCE
+    from tracking_cellmot.metrics import evaluate as _ev
+
+    pred, gt = _graph(COORDS), _graph(COORDS, GT_EDGES)
+    assert pred.num_nodes() == 3 and pred.num_edges() == 0
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        _ev(pred, gt, scale=DEFAULT_SCALE, max_distance=MAX_DISTANCE)
+    assert td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID not in pred.node_attr_keys(), (
+        "the vendored scorer now matches zero-edge graphs; the special case can be removed"
+    )
+
+
+def test_a_zero_edge_prediction_still_matches_every_node_it_should():
+    """A prediction can have nodes and no edges, and those nodes still match. The zero SCORE
+    is about edges; node matching is a different question."""
+    pred, gt = _graph(COORDS), _graph(COORDS, GT_EDGES)
+    ids, path = matched_gt_ids(pred, gt)
+    assert path == "distance-matching-zero-edge"
+    assert len(ids) == gt.num_nodes() == 3, (
+        "zero-edge nodes were dropped from the matching; every GT of such a crop would be "
+        "misclassified as unmatched"
+    )
+
+
+def test_a_prediction_with_edges_still_uses_the_scorer_itself():
+    ids, path = matched_gt_ids(_graph(COORDS, GT_EDGES), _graph(COORDS, GT_EDGES))
+    assert path == "evaluate"
+    assert len(ids) == 3
+
+
+def test_a_prediction_with_no_nodes_at_all_matches_nothing():
+    ids, path = matched_gt_ids(_graph([]), _graph(COORDS, GT_EDGES))
+    assert path == "no-nodes" and ids == set()
+
+
+def test_far_away_zero_edge_nodes_do_not_match():
+    """The zero-edge path must respect the same radius, not match everything blindly."""
+    far = [(t, 500.0, 500.0, 500.0) for t, *_ in COORDS]
+    ids, path = matched_gt_ids(_graph(far), _graph(COORDS, GT_EDGES))
+    assert path == "distance-matching-zero-edge" and ids == set()
+
+
+# ------------------------------------------------------- defect 5: feat_max_valid semantics
+def test_infinities_are_neither_valid_nor_invalid_and_are_rejected():
+    arr = np.zeros((3, 4), dtype=np.float32)
+    arr[1, 2] = np.inf
+    with pytest.raises(SystemExit, match="inf"):
+        check_feature_contract("c", "feat_max", arr)
+
+
+def test_a_row_may_not_mix_nan_with_finite_values():
+    arr = np.zeros((3, 4), dtype=np.float32)
+    arr[1, 2] = np.nan
+    with pytest.raises(SystemExit, match="mix"):
+        check_feature_contract("c", "feat_max", arr)
+
+
+def test_all_nan_iff_invalid_is_enforced_in_both_directions():
+    arr = np.zeros((3, 4), dtype=np.float32)
+    arr[1] = np.nan
+    assert np.array_equal(check_feature_contract("c", "f", arr, [True, False, True]),
+                          [True, False, True])
+    for wrong in ([True, True, True], [False, False, True]):
+        with pytest.raises(SystemExit, match=FEAT_MAX_VALID):
+            check_feature_contract("c", "f", arr, wrong)
+
+
+def test_apply_validity_makes_invalid_rows_all_nan_without_touching_valid_ones():
+    arr = np.arange(12, dtype=np.float32).reshape(3, 4)
+    out = apply_validity(arr, [True, False, True])
+    assert np.isnan(out[1]).all()
+    assert np.array_equal(out[[0, 2]], arr[[0, 2]])
+    assert np.array_equal(arr, np.arange(12, dtype=np.float32).reshape(3, 4)), "input mutated"
+    assert apply_validity(np.zeros((2, 2), dtype=np.float64), [True, True]).dtype == np.float64
+
+
+def test_v5_feat_max_validity_is_reconstructed_from_the_export_and_verified():
+    """v5 wrote a COPY OF feat_gt where no maximum existed instead of NaN, and shipped no
+    validity column. The reconstruction must be checked against the data, not trusted."""
+    df = pl.DataFrame({"kind": ["gt_centre", "gt_centre", "uniform"],
+                       "n_lm_15um": [1, 0, None]})
+    fg = np.arange(9, dtype=np.float32).reshape(3, 3)
+    fm = fg.copy()
+    fm[0] = 99.0                                  # row 0 has a real maximum
+    valid, source = feat_max_validity("c", df, {"feat_gt": fg, "feat_max": fm})
+    assert source == "v5-reconstructed-and-verified"
+    assert valid.tolist() == [True, False, False]
+
+
+def test_the_v5_reconstruction_refuses_when_the_fallback_is_not_feat_gt():
+    """If an invalid row does not literally carry feat_gt, v5 semantics are not what the
+    repair assumes -- refuse rather than fabricate a validity mask."""
+    df = pl.DataFrame({"kind": ["gt_centre", "uniform"], "n_lm_15um": [0, None]})
+    fg = np.zeros((2, 3), dtype=np.float32)
+    fm = np.ones((2, 3), dtype=np.float32)
+    with pytest.raises(SystemExit, match="fallback"):
+        feat_max_validity("c", df, {"feat_gt": fg, "feat_max": fm})
+
+
+def test_an_exported_validity_column_is_used_verbatim():
+    df = pl.DataFrame({"kind": ["gt_centre"] * 2, "n_lm_15um": [0, 0],
+                       FEAT_MAX_VALID: [True, False]})
+    valid, source = feat_max_validity("c", df, {})
+    assert source == "export" and valid.tolist() == [True, False]
+
+
+# ---------------------------------------------------------------------- defect 6: atomicity
+def test_a_failed_write_leaves_neither_a_partial_nor_a_truncated_output(tmp_path):
+    target = tmp_path / "out.parquet"
+
+    def boom(p):
+        Path(p).write_bytes(b"half")
+        raise RuntimeError("interrupted")
+
+    with pytest.raises(RuntimeError):
+        atomic_write(target, boom)
+    assert not target.exists()
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_atomic_write_catches_a_writer_that_renames_the_temp_file(tmp_path):
+    """REGRESSION LOCK. `np.save(path, arr)` APPENDS '.npy', so writing the array through a
+    path -- not a handle -- produced `out.npy.partial.npy`, os.replace raised
+    FileNotFoundError and a stray file was left behind. Atomicity was defeated by the very
+    call that was supposed to provide it."""
+    target = tmp_path / "out.npy"
+    with pytest.raises(SystemExit, match="did not produce"):
+        atomic_write(target, lambda p: np.save(p, np.zeros(3), allow_pickle=False))
+
+
+def test_save_npy_writes_through_a_handle_so_the_partial_name_survives(tmp_path):
+    target = tmp_path / "out.npy"
+    arr = np.arange(6, dtype=np.float32).reshape(3, 2)
+    atomic_write(target, save_npy(arr))
+    assert target.exists()
+    assert [p.name for p in tmp_path.iterdir()] == ["out.npy"], "a stray file was left"
+    assert np.array_equal(np.load(target), arr)
+
+
+def _report(tmp_path, fold="0", **over):
+    import json
+    r = {"derived_schema_version": DERIVED_SCHEMA_VERSION, "fold": fold,
+         "match_authority": "pregraph", "scorer": {"tracking_cellmot_files": {"a.py": "h"}}}
+    r.update(over)
+    (tmp_path / f"d1_derived_split{fold}.json").write_text(json.dumps(r), encoding="utf-8")
+    (tmp_path / f"d1_derived_split{fold}.parquet").write_bytes(b"x")
+    return {"tracking_cellmot_files": {"a.py": "h"}}
+
+
+def test_a_second_fold_may_share_a_derived_directory(tmp_path):
+    scorer = _report(tmp_path, "0")
+    assert guard_out_dir(tmp_path, "1", "pregraph", scorer) == ["0"]
+
+
+def test_rerunning_a_fold_needs_an_explicit_overwrite(tmp_path):
+    scorer = _report(tmp_path, "0")
+    with pytest.raises(SystemExit, match="overwrite"):
+        guard_out_dir(tmp_path, "0", "pregraph", scorer)
+    assert guard_out_dir(tmp_path, "0", "pregraph", scorer, overwrite=True) == ["0"]
+
+
+@pytest.mark.parametrize("over,authority,match", [
+    ({"derived_schema_version": "d1-derived-1"}, "pregraph", "schema"),
+    ({}, "submission", "authorit"),
+])
+def test_mixed_derived_directories_are_refused(tmp_path, over, authority, match):
+    scorer = _report(tmp_path, "0", **over)
+    with pytest.raises(SystemExit, match=match):
+        guard_out_dir(tmp_path, "1", authority, scorer)
+
+
+def test_a_different_scorer_build_is_refused(tmp_path):
+    _report(tmp_path, "0")
+    with pytest.raises(SystemExit, match="scorer"):
+        guard_out_dir(tmp_path, "1", "pregraph",
+                      {"tracking_cellmot_files": {"a.py": "DIFFERENT"}})
+
+
+def test_an_aborted_run_is_refused_rather_than_merged(tmp_path):
+    scorer = _report(tmp_path, "0")
+    (tmp_path / "d1_derived_split1.parquet.partial").write_bytes(b"x")
+    with pytest.raises(SystemExit, match="aborted"):
+        guard_out_dir(tmp_path, "1", "pregraph", scorer)
+
+
+def test_an_artifact_with_no_report_is_refused(tmp_path):
+    scorer = _report(tmp_path, "0")
+    (tmp_path / "d1_derived_split3__feat_gt.npy").write_bytes(b"x")
+    with pytest.raises(SystemExit, match="no matching report"):
+        guard_out_dir(tmp_path, "1", "pregraph", scorer)
+
+
+def test_an_empty_or_absent_directory_is_fine(tmp_path):
+    assert guard_out_dir(tmp_path / "nope", "0", "pregraph", {}) == []
+    assert guard_out_dir(tmp_path, "0", "pregraph", {}) == []
