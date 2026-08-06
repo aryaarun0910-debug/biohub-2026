@@ -1,0 +1,5 @@
+# Factorial manifests are byte-reproducibility artifacts: a test regenerates them and
+# compares. core.autocrlf=true is set in this environment and there is no other
+# .gitattributes, so a fresh checkout would rewrite them to CRLF and the regenerated
+# LF output would no longer match byte-for-byte. Pin them to LF.
+data/d1_factorial/*.json text eol=lf
