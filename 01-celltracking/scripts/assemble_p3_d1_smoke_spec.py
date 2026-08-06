@@ -137,6 +137,33 @@ def build(fold: int) -> dict:
     keep["new"] = keep["new"].replace(
         anchor, '"pregraphs_split{LOEO_FOLD}.json",\n              "d1_audit"}', 1)
 
+    # v6 REQUIREMENT: the TTA patch guard RAISES instead of printing.
+    #
+    # The base notebook ends its TTA patch with
+    #     else:
+    #         print("TTA WARNING: block not found - using default 4-way")
+    # so a failed patch left the vendored FOUR-view average in place and carried on. That is
+    # not silent in practice -- the NEXT patch anchors on text containing `_nv`, so a failed
+    # TTA patch already hard-fails one cell later -- but the failure is reported a step away
+    # from its cause. This converts it into a local, self-naming abort. It is a LOCALITY fix,
+    # NOT the repair of a correctness hole; recorded that way so nobody credits it with more.
+    #
+    # Scoped to the D1 smoke specs only. The base notebook is not this lane's file to change.
+    tta_guard = {
+        "kind": "replace",
+        "cell_match": "TTA patch applied",
+        "old": '    print("TTA WARNING: block not found - using default 4-way")',
+        "new": chr(10).join([
+            "    raise RuntimeError(",
+            '        "TTA PATCH FAILED: the eight-encode-call TTA block was not found in "',
+            '        + str(_ps) + ". The deployed view set would fall back to the vendored "',
+            '        "four-view average, so any feature exported under the post-TTA name "',
+            '        "would describe a detector that is not in production. Refusing."',
+            "    )",
+        ]),
+        "expect": 1,
+    }
+
     d1_inject = {
         "kind": "insert_before",
         "anchor": "def list_test_stems() -> list[str]:",
@@ -165,6 +192,8 @@ def build(fold: int) -> dict:
     for i, e in enumerate(invariants):
         add(e, f"E05_{i:02d}_invariant", "p3_harmonic#invariant",
             "3. degree-invariant fixes and export assertions")
+    add(tta_guard, "E05b_tta_guard", "assembler",
+        "4. TTA patch guard raises instead of printing (locality, not correctness)")
     add(d1_inject, "E06_d1_inject", "scripts/kaggle_edits/d1_inject.py",
         "4. D1 audit + frozen-feature injection into the predict script")
     add(l_edits[4], "E07_pregraph", "loeo_f1_strict_pregraph#4",

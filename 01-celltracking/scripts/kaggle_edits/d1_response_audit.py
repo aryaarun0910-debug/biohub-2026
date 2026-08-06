@@ -92,15 +92,94 @@ _D1_TTA_VIEW_SET = (
     "identity", "flip_x", "flip_y", "flip_xy",
     "rot90_k1", "rot90_k3", "transpose_yx", "rot90_k1_then_transpose_yx",
 )
-# A view count below this is a DEGRADED export, not a fallback. It raises.
-_D1_REQUIRE_VIEWS = int(_d1_os.environ.get("BIOHUB_D1_REQUIRE_TTA_VIEWS", "8"))
+# THE 8/7 SPLIT. Two DIFFERENT numbers; never merge them into one conflated count.
+#
+#   n_encode_calls   = 8  -- model.encode() is called 8 times; the divisor `_nv` reaches 8.
+#   n_distinct_views = 7  -- but only 7 of those 8 are distinct spatial permutations.
+#
+# The view written as the anti-transpose, `torch.rot90(imgs, 1, dims=(-2,-1)).transpose(-1,-2)`,
+# is EXACTLY `imgs.flip(-1)` -- already view 1. Every single-order composition of rot90 at odd
+# k with transpose collapses to a flip; a true anti-transpose needs k=2. So `flip(-1)` carries
+# weight 2/8, the true anti-transpose carries 0/8, and the divisor is still 8. The measure is
+# NON-UNIFORM on D4, and a 7-element subset of an order-8 group is never a subgroup, so the
+# deployed average is NOT a group average.
+#
+# v6 REPLICATES THIS VERBATIM AND DOES NOT FIX IT. v6 exists to describe the DEPLOYED detector.
+# Correcting the view set is a DETECTOR change: it moves the node population, forces a
+# predict_edges rerun (correction C3), and voids the 0.889 anchor. Legitimate as a standalone
+# experiment; never as a silent ride-along inside v6.
+_D1_REQUIRE_ENCODE_CALLS = int(_d1_os.environ.get("BIOHUB_D1_REQUIRE_ENCODE_CALLS", "8"))
+_D1_REQUIRE_DISTINCT_VIEWS = int(_d1_os.environ.get("BIOHUB_D1_REQUIRE_DISTINCT_VIEWS", "7"))
 
-# Parity gate. float32 rounding on a 32-term dot product is ~1e-6; 1e-4 is two orders of
-# headroom. The two structure gates fire on residuals that are small but NOT noise: pure
-# rounding noise has |mean|/rms ~ 1/sqrt(N) ~ 0.002 and |pearson| ~ 0.002 at N = 262,144.
-_D1_PARITY_MAX_ABS = float(_d1_os.environ.get("BIOHUB_D1_PARITY_MAX_ABS", "1e-4"))
+# Parity gate, DERIVED rather than guessed.
+#
+# The reconstruction sums `n_encode_calls` float32 terms and divides; each term carries at most
+# one float32 rounding at 2**-24 relative. So the residual bound is
+#
+#     n_encode_calls * 2**-24 * max|logit|
+#
+# At the measured max|logit| ~ 15 this is ~7.3e-6, against a MEASURED max|delta| of 3.8e-6 to
+# 5.7e-6 on real checkpoints across both splits -- i.e. the derived bound is tight, roughly 1.3x
+# the observed worst case. The previous literal `1e-4` was 18-26x loose and not derived from
+# anything; it would have passed a genuinely broken accumulator.
+_D1_PARITY_ULP = 2.0 ** -24            # float32 unit roundoff
+_D1_PARITY_SLACK = float(_d1_os.environ.get("BIOHUB_D1_PARITY_SLACK", "4.0"))
+_D1_PARITY_LOGIT_FLOOR = 1.0           # keeps the bound positive on an all-zero frame
 _D1_PARITY_MAX_SIGN_RATIO = 0.5
 _D1_PARITY_MAX_CORR = 0.05
+
+
+def _d1_parity_bound(logit_abs_max):
+    """The derived float32 residual bound: n_encode_calls * 2**-24 * max|logit|.
+
+    `_D1_PARITY_SLACK` is a small multiplier for accumulation-order effects (the sum is not
+    performed in a fixed order on GPU); it is NOT a fudge factor for a wrong accumulator. Even
+    at slack 4 the gate is ~5x tighter than the retired 1e-4 literal.
+    """
+    return (_D1_REQUIRE_ENCODE_CALLS * _D1_PARITY_ULP * _D1_PARITY_SLACK
+            * max(float(logit_abs_max), _D1_PARITY_LOGIT_FLOOR))
+
+
+# The forward view for each recorded name. This is the SINGLE source of truth for what the
+# names mean, so the distinct-permutation count below is computed from the same definitions
+# the notebook patch uses rather than from a comment.
+_D1_VIEW_FN = {
+    "identity": lambda t: t,
+    "flip_x": lambda t: t.flip(-1),
+    "flip_y": lambda t: t.flip(-2),
+    "flip_xy": lambda t: t.flip((-2, -1)),
+    "rot90_k1": lambda t: _d1_torch.rot90(t, 1, dims=(-2, -1)),
+    "rot90_k3": lambda t: _d1_torch.rot90(t, 3, dims=(-2, -1)),
+    "transpose_yx": lambda t: t.transpose(-1, -2),
+    "rot90_k1_then_transpose_yx": (
+        lambda t: _d1_torch.rot90(t, 1, dims=(-2, -1)).transpose(-1, -2)),
+}
+
+
+def _d1_distinct_view_count(names):
+    """Count DISTINCT spatial permutations among `names`, by applying each to an index grid.
+
+    This replaces the `Y == X` assertion that earlier drafts of the spec called the safety
+    property. That was refuted: every one of the 8 inverses round-trips exactly, including on
+    non-square (Y, X) input, so squareness is not what protects the export. The property that
+    IS violated -- and the one worth asserting -- is the distinct-permutation count.
+
+    A square grid is used deliberately: rot90 and transpose change the shape on a non-square
+    grid, so two views could only ever collide on a square one. Counting there is what makes
+    the collision visible rather than hidden behind a shape mismatch.
+    """
+    _n = 5
+    _idx = _d1_torch.arange(_n * _n, dtype=_d1_torch.int64).reshape(1, 1, 1, _n, _n)
+    _seen = set()
+    for _nm in names:
+        _fn = _D1_VIEW_FN.get(_nm)
+        if _fn is None:
+            raise RuntimeError(
+                f"D1 v6: unknown TTA view name {_nm!r}; the distinct-permutation count "
+                "cannot be verified, so the export is refused"
+            )
+        _seen.add(_fn(_idx).reshape(-1).contiguous().numpy().tobytes())
+    return len(_seen)
 
 # Columns that MUST survive to the parquet whenever the crop has any GT row. Asserted in
 # _d1_flush; see the trap-21 note there for why an assertion rather than trust.
@@ -198,7 +277,18 @@ def _d1_load_gt(dataset, gt_dir):
     return by_t
 
 
-def _d1_parity_frame(det_head, feats_tta_czyx, logits_1zyx):
+def _d1_accepted_set(logits_1zyx, pool_kernel, det_threshold):
+    """The ACCEPTED-PEAK set: local maxima under max_pool3d that clear the probability
+    threshold. These are the nodes. Returned as a set of (z, y, x) index triples."""
+    _l = logits_1zyx.detach().float()
+    _pl = _d1_F.max_pool3d(_l.unsqueeze(0), pool_kernel, stride=1,
+                           padding=tuple(k // 2 for k in pool_kernel))[0]
+    _ac = (_l == _pl) & (_d1_torch.sigmoid(_l) > det_threshold)
+    _nz = _d1_np.argwhere(_ac[0].cpu().numpy())
+    return set(map(tuple, _nz.tolist()))
+
+
+def _d1_parity_frame(det_head, feats_tta_czyx, logits_1zyx, pool_kernel, det_threshold):
     """detect_head(mean_v aligned_feature_v) MUST equal mean_v aligned_logit_v.
 
     `detect_head` is Conv3d(C, 1, kernel_size=1) -- a pointwise affine map -- so it commutes
@@ -235,9 +325,24 @@ def _d1_parity_frame(det_head, feats_tta_czyx, logits_1zyx):
     _rcent = _r - _r.mean()
     _den = float(_d1_np.sqrt((_lcent ** 2).sum())) * float(_d1_np.sqrt((_rcent ** 2).sum()))
     _corr = (float((_lcent * _rcent).sum()) / _den) if _den > 0.0 else 0.0
+    # ---- ACCEPTED-PEAK-SET EQUALITY: the decisive check ------------------------------------
+    # A signed-residual test alone does NOT catch a wrong inverse transform: injected inverse
+    # bugs come out exactly zero-mean (measured bias 0.0000), because a permutation only moves
+    # mass around, it does not bias it. Magnitude plus peak-set equality is what catches them.
+    # The peak set is the one that matters because ACCEPTED PEAKS ARE THE NODES -- if they are
+    # identical, the reconstruction and the deployed field select the same detector.
+    _dep_pk = _d1_accepted_set(logits_1zyx, pool_kernel, det_threshold)
+    _rec_pk = _d1_accepted_set(_recon, pool_kernel, det_threshold)
+    _symdiff = _dep_pk ^ _rec_pk
+    _logit_absmax = float(_d1_np.abs(_lg).max())
     return {
         "n_voxels": int(_r.size),
         "max_abs_err": float(_absr.max()),
+        "parity_bound": _d1_parity_bound(_logit_absmax),
+        "n_accepted_deployed": len(_dep_pk),
+        "n_accepted_recon": len(_rec_pk),
+        "n_peak_set_symdiff": len(_symdiff),
+        "peak_set_identical": bool(not _symdiff),
         "p999_abs_err": float(_d1_np.percentile(_absr, 99.9)),
         "median_abs_err": float(_d1_np.median(_absr)),
         "mean_signed_err": _mean,
@@ -245,7 +350,7 @@ def _d1_parity_frame(det_head, feats_tta_czyx, logits_1zyx):
         "sign_ratio": (abs(_mean) / _rms) if _rms > 0.0 else 0.0,
         "frac_positive": float((_r > 0).mean()),
         "pearson_r_vs_logit": _corr,
-        "logit_abs_max": float(_d1_np.abs(_lg).max()),
+        "logit_abs_max": _logit_absmax,
         "dtype_feat_tta_mean": str(feats_tta_czyx.dtype),
         "dtype_det_logits": str(logits_1zyx.dtype),
         "dtype_head_weight": str(_w.dtype),
@@ -259,9 +364,22 @@ def _d1_parity_frame(det_head, feats_tta_czyx, logits_1zyx):
 def _d1_parity_verdict(rec):
     """Return the list of abort reasons. Empty list == float noise, proceed."""
     _sus = []
-    if not (rec["max_abs_err"] <= _D1_PARITY_MAX_ABS):
+    # Decisive gate first: the accepted peaks ARE the nodes. A zero-mean residual can hide a
+    # wrong inverse; a changed peak set cannot.
+    if not rec["peak_set_identical"]:
         _sus.append(
-            f"max_abs_err {rec['max_abs_err']:.6e} > {_D1_PARITY_MAX_ABS:.6e}. Suspects, in "
+            f"ACCEPTED-PEAK SETS DIFFER: {rec['n_peak_set_symdiff']} voxels in the symmetric "
+            f"difference ({rec['n_accepted_deployed']} deployed vs {rec['n_accepted_recon']} "
+            "reconstructed). The reconstruction selects a DIFFERENT NODE POPULATION, so the "
+            "exported features do not describe the deployed detector. This fires even when "
+            "the residual is exactly zero-mean, which is precisely how an inverse-transform "
+            "bug presents."
+        )
+    if not (rec["max_abs_err"] <= rec["parity_bound"]):
+        _sus.append(
+            f"max_abs_err {rec['max_abs_err']:.6e} > derived bound "
+            f"{rec['parity_bound']:.6e} (= {_D1_REQUIRE_ENCODE_CALLS} encode calls * 2**-24 * "
+            f"slack {_D1_PARITY_SLACK} * max|logit| {rec['logit_abs_max']:.4f}). Suspects, in "
             "order: (a) det_logits was blended after the TTA mean -- "
             f"BIOHUB_SECONDARY_DETECTION_WEIGHT={rec['secondary_detection_weight']!r}, which "
             "must be '0' for parity to be achievable; (b) the feature accumulator missed a "
@@ -288,7 +406,7 @@ def _d1_parity_verdict(rec):
 
 def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_tta_czyx, feats_idview_czyx,
                     det_threshold, pool_kernel, voxel_size, downsample,
-                    det_head=None, tta_view_set=None, n_views=None,
+                    det_head=None, tta_view_set=None, n_encode_calls=None,
                     n_frames_total=None, window_size=None):
     """Audit one frame.
 
@@ -304,17 +422,31 @@ def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_tta_czyx, feats_idvie
 
     # ---- view-set contract: a degraded view set is an abort, never a silent fallback -----
     _views = tuple(tta_view_set) if tta_view_set is not None else ()
-    _nv = int(n_views) if n_views is not None else -1
+    _nv = int(n_encode_calls) if n_encode_calls is not None else -1
     if len(_views) != _nv:
         raise RuntimeError(
-            f"D1 v6: tta_view_set has {len(_views)} entries but n_views={_nv}; the deployed "
-            "divisor and the recorded view list disagree"
+            f"D1 v6: tta_view_set has {len(_views)} entries but n_encode_calls={_nv}; the "
+            "deployed divisor and the recorded view list disagree"
         )
-    if _nv != _D1_REQUIRE_VIEWS:
+    if _nv != _D1_REQUIRE_ENCODE_CALLS:
         raise RuntimeError(
-            f"D1 v6: {_nv} TTA views accumulated, {_D1_REQUIRE_VIEWS} required. Refusing to "
-            "export identity-view features under the post-TTA name -- that is blocker B3. "
-            "Set BIOHUB_D1_REQUIRE_TTA_VIEWS deliberately if a different view set is intended."
+            f"D1 v6: {_nv} encode calls accumulated, {_D1_REQUIRE_ENCODE_CALLS} required. "
+            "Refusing to export identity-view features under the post-TTA name -- that is "
+            "blocker B3. Set BIOHUB_D1_REQUIRE_ENCODE_CALLS deliberately if a different view "
+            "set is intended."
+        )
+    # THE 8/7 SPLIT, ASSERTED AT RUNTIME. 8 encode calls, 7 distinct permutations. If a future
+    # change "fixes" the anti-transpose collision, this fires -- and it SHOULD, because that is
+    # a detector change that moves the node population and voids the 0.889 anchor. It is not a
+    # bug to be repaired here.
+    _ndv = _d1_distinct_view_count(_views)
+    if _ndv != _D1_REQUIRE_DISTINCT_VIEWS:
+        raise RuntimeError(
+            f"D1 v6: the view set has {_ndv} DISTINCT permutations over "
+            f"{_nv} encode calls, but {_D1_REQUIRE_DISTINCT_VIEWS} distinct are required. "
+            "The deployed detector applies 8 encode calls over only 7 distinct views "
+            "(rot90(1) then transpose IS flip(-1)). v6 must replicate that collision "
+            "verbatim; changing the view set is a DETECTOR change and voids the anchors."
         )
     # Identity, not just arity. A view set with the right COUNT but the wrong members (an
     # inverse applied in the wrong order, a rot90 k mixed up) still divides by 8 and still
@@ -327,7 +459,9 @@ def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_tta_czyx, feats_idvie
             "generated notebook's patch averages"
         )
     _b["tta_view_set"] = list(_views)
-    _b["n_views"] = _nv
+    # Two SEPARATE fields. Never a single conflated count.
+    _b["n_encode_calls"] = _nv
+    _b["n_distinct_views"] = _ndv
 
     _lg = logits_1zyx.detach().float()
     _pooled = _d1_F.max_pool3d(_lg.unsqueeze(0), pool_kernel, stride=1,
@@ -338,13 +472,17 @@ def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_tta_czyx, feats_idvie
     _step = tuple(float(v) for v in voxel_size)
 
     # ---- PARITY: the whole point of v6. Hard abort, no "proceed with caveat" branch. -----
-    _par = _d1_parity_frame(det_head, feats_tta_czyx, logits_1zyx)
+    _par = _d1_parity_frame(det_head, feats_tta_czyx, logits_1zyx,
+                            pool_kernel, det_threshold)
     _par["dataset"] = dataset
     _par["t"] = int(t)
     _reasons = _d1_parity_verdict(_par)
     _agg = _b.setdefault("parity", {"n_frames": 0, "worst": None, "max_abs_err": 0.0,
                                     "max_p999_abs_err": 0.0, "max_sign_ratio": 0.0,
-                                    "max_abs_corr": 0.0, "dtypes": None})
+                                    "max_abs_corr": 0.0, "dtypes": None,
+                                    "max_parity_bound": 0.0,
+                                    "n_peak_set_symdiff_total": 0,
+                                    "all_peak_sets_identical": True})
     _agg["n_frames"] += 1
     _agg["dtypes"] = {k: v for k, v in _par.items() if k.startswith("dtype")}
     if _par["max_abs_err"] >= _agg["max_abs_err"]:
@@ -353,6 +491,10 @@ def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_tta_czyx, feats_idvie
     _agg["max_p999_abs_err"] = max(_agg["max_p999_abs_err"], _par["p999_abs_err"])
     _agg["max_sign_ratio"] = max(_agg["max_sign_ratio"], _par["sign_ratio"])
     _agg["max_abs_corr"] = max(_agg["max_abs_corr"], abs(_par["pearson_r_vs_logit"]))
+    _agg["max_parity_bound"] = max(_agg["max_parity_bound"], _par["parity_bound"])
+    _agg["n_peak_set_symdiff_total"] += int(_par["n_peak_set_symdiff"])
+    _agg["all_peak_sets_identical"] = bool(
+        _agg["all_peak_sets_identical"] and _par["peak_set_identical"])
     if _reasons:
         raise RuntimeError(
             f"D1 v6 PARITY ABORT for {dataset} t={t}: " + " | ".join(_reasons)
@@ -633,7 +775,11 @@ def _d1_flush(fold=None, ckpt_hash=None, expected_crops=None):
                 "feat_max_valid_rows": int(_valid.sum()),
                 "feat_max_invalid_rows": int((~_valid).sum()),
                 "tta_view_set": _b.get("tta_view_set"),
-                "n_views": _b.get("n_views"),
+                # TWO SEPARATE FIELDS, never conflated. 8 encode calls over 7 distinct
+                # permutations: rot90(1)-then-transpose IS flip(-1), so flip(-1) carries
+                # weight 2/8 and the true anti-transpose 0/8, while the divisor stays 8.
+                "n_encode_calls": _b.get("n_encode_calls"),
+                "n_distinct_views": _b.get("n_distinct_views"),
                 "grid_zyx": _b.get("grid_zyx"),
                 "n_frames": _b.get("n_frames"),
                 "n_frames_total": _b.get("n_frames_total"),
@@ -642,15 +788,30 @@ def _d1_flush(fold=None, ckpt_hash=None, expected_crops=None):
                 "estimated_number_of_nodes": _b.get("estimated_number_of_nodes"),
                 "n_local_max_total": _b.get("n_local_max_total"),
                 "n_subthr_localmax_total": _b.get("n_subthr_localmax_total"),
+                # RADII. `assert_export_radii` in scripts/d1_postprocess.py is wired but inert
+                # against v5, which records neither -- so a change to the match or search
+                # radius is currently UNDETECTABLE from the export. Recording both here is what
+                # arms that check.
+                "match_um": _D1_MATCH_UM,
+                "search_um": _D1_SEARCH_UM,
                 "parity": {
-                    "gate_max_abs_err": _D1_PARITY_MAX_ABS,
+                    # The gate is DERIVED per frame from max|logit|, so the recorded value is
+                    # the worst bound actually applied, not a literal.
+                    "gate_formula": ("n_encode_calls * 2**-24 * slack * max|logit|"),
+                    "gate_n_encode_calls": _D1_REQUIRE_ENCODE_CALLS,
+                    "gate_ulp": _D1_PARITY_ULP,
+                    "gate_slack": _D1_PARITY_SLACK,
+                    "gate_max_abs_err_applied": _par.get("max_parity_bound"),
                     "gate_max_sign_ratio": _D1_PARITY_MAX_SIGN_RATIO,
                     "gate_max_abs_corr": _D1_PARITY_MAX_CORR,
+                    "gate_requires_peak_set_equality": True,
                     "n_frames_checked": _par.get("n_frames"),
                     "max_abs_err": _par.get("max_abs_err"),
                     "max_p999_abs_err": _par.get("max_p999_abs_err"),
                     "max_sign_ratio": _par.get("max_sign_ratio"),
                     "max_abs_corr": _par.get("max_abs_corr"),
+                    "all_peak_sets_identical": _par.get("all_peak_sets_identical"),
+                    "n_peak_set_symdiff_total": _par.get("n_peak_set_symdiff_total"),
                     "dtypes": _par.get("dtypes"),
                     "worst_frame": _par.get("worst"),
                 },
