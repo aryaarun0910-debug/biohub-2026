@@ -9,6 +9,104 @@ Basis tags: `EXACT-OOF` · `LOEO` · `IN-FAMILY` · `ORACLE` · `PUBLIC-LB` · `
 
 ---
 
+## 0. CORRECTIONS — these supersede the body below
+
+Issued by command decision after review. **Seven items, all of which narrow or invalidate a
+claim made below.** Read this section before acting on anything after it.
+
+### C1 · B5 is fatal to the D1-F design as scheduled, not merely a caveat
+
+The routed export puts 44b6 in split-0's 32-D channel basis and 6bba in split-1's. **A head
+fitted in one network's channel basis cannot be applied to the other** — the bases are
+independent (rel-L2 1.41542 ≈ √2). The body treats this as "replication only"; that is too
+weak. **The design is replaced by a 2×2 checkpoint × family factorial:**
+
+- **split 0** encodes 6bba (source/training) **and** 44b6 (held-out)
+- **split 1** encodes 44b6 (source/training) **and** 6bba (held-out)
+- fit and select **exclusively on the source family within the same checkpoint basis**
+- freeze, then open the target family **once**
+
+**Stage split 1 first at full scale** — its held-out family is 6bba, which carries ~85% of the
+objective.
+
+### C2 · D1-F cannot return REPRESENTATION DEFICIT
+
+The permitted verdict set is exactly three:
+
+| verdict | meaning |
+|---|---|
+| **CALIBRATION** | intercept/temperature-only repair works |
+| **LINEAR_HEAD** | a ranking-changing linear refit works |
+| **LINEAR_PROBE_NULL** | *this probe* failed |
+
+**A null cannot fund an encoder programme.** §6 and §10 of the body, and Lane 1's declaration
+thresholds, are amended: "representation deficit" is not an available output of this
+instrument.
+
+### C3 · M1 is NOT CPU-exact — the body's central claim about it is wrong
+
+The body says the frozen peak set means "the CPU measurement is exact and there is no CPU→GPU
+gap." **That is incorrect.** Freezing peak *extraction* does not freeze the *accepted* set, and
+accepted peaks are the nodes. A changed node population feeds `SimpleNodeTransformer`, whose
+cross-attention and source-softmax **change existing edge logits** — including for nodes that
+did not change.
+
+**Encoder features may be reused; `predict_edges` must be rerun for every genuinely different
+node population** before any wrapper/scorer evaluation. M1's ranking in §3 stands only if that
+rerun is budgeted (see Agent 8).
+
+### C4 · `|T ∪ L|` is not the ceiling, and the "3,400" figure was wrong
+
+Three separate errors:
+
+1. **L maxima lie beyond the scorer's 7 µm match radius** and cannot become matches while their
+   coordinates stay frozen. Including L in a recoverable count is invalid.
+2. **Multiple GT rows can reference the same maximum** — raw row counts double-count.
+3. **T is an initial addressable class, not a TP count.**
+
+The ceiling must be built as: **unique GT-free maxima → maximum bipartite matching to missing
+GT → recoverable incident-edge mass → exact oracle graph replay.** Never a constant multiplied
+by raw T/L rows.
+
+**Arithmetic correction, verified:** value per recovered node is `0.10332 / 15,296 =
+6.754707e-06`, so **+0.015 needs ≈ 2,221 perfect recoveries** and +0.020 needs ≈ 2,961. My
+"< 3,400 at any precision" was wrong: 3,400 silently embeds a precision of **0.653**, and it
+conflated Lane 1's 3,348 *admitted candidates* at q=0.80 with a TP floor. **Any threshold above
+2,221 carries a precision assumption and must state it.**
+
+### C5 · Strict LOEO is not the public P3 detector
+
+Strict LOEO disables the all-training secondary detector; public P3 runs the **blended**
+primary/secondary path with the retention guard. Primary-head results are scientifically valid
+but **not directly deployable**. **Any winner must receive a final transfer test inside the
+unchanged P3 blend and retention logic** before it is treated as a candidate.
+
+### C6 · `scripts/d1_postprocess.py` must be repaired before it is trusted
+
+Six defects, several of which I introduced:
+
+| # | defect | consequence |
+|---|---|---|
+| 1 | rows sorted by `(t, gt_z, gt_y, gt_x)` while feature arrays keep raw order | **any positional join silently misaligns features to labels** |
+| 2 | no stable `row_id` across raw rows / feature arrays / manifests / derived rows | alignment is unverifiable |
+| 3 | `MATCH_UM = 7.0` is a literal, never asserted equal to the scorer's imported `MAX_DISTANCE` | a scorer change desynchronises the partition silently |
+| 4 | `matched_gt_ids` returns `∅` when a prediction has nodes but **zero edges** | every GT marked unmatched; partition wrong |
+| 5 | no `feat_max_valid` semantics | invalid entries must be **all-NaN iff invalid, finite iff valid, never ±inf** |
+| 6 | output not atomic; stale/mixed derived directories not refused | silent staleness |
+
+**Rule: never sort rows without applying the identical permutation to the feature arrays.**
+
+### C7 · Statistical language
+
+The 199 crops come from **only two embryos**. Crop-block bootstrap intervals measure variation
+*within* those embryos and **do not estimate private-embryo generalisation.** Always report the
+two transfer directions **separately** — a pooled number hides the only comparison that matters.
+
+**The +0.020 submission threshold is POLICY, not a calibrated transfer law.** It must not be
+described as if it were derived.
+
+---
+
 ## 1. What actually happened
 
 The cycle began intending to launch a 199-crop D1/D1-F export. **It was not launched, and that
