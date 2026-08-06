@@ -90,7 +90,10 @@ def _d1_load_gt(dataset, gt_dir):
         _p = _d1_resolve_gt(dataset, gt_dir)
         if _p is None:
             raise FileNotFoundError(f"no GT geff for {dataset} under /kaggle/input")
-        _g = _td.io.load_geff(str(_p))
+        # Use the SAME loader our exact scorer uses (src/biotrack/metric.py::load_graph).
+        # `tracksdata.io.load_geff` does not exist in this build -- v3 returned gt=0 on
+        # AttributeError for every crop.
+        _g = _td.graph.IndexedRXGraph.from_geff(_D1Path(str(_p)))
         if isinstance(_g, tuple):
             _g = _g[0]
         _na = _g.node_attrs(attr_keys=["t", "z", "y", "x"])
@@ -206,6 +209,13 @@ def _d1_atomic_write(path, write_fn):
 def _d1_flush(fold=None, ckpt_hash=None, expected_crops=None):
     """Per-crop atomic artifacts + manifest. Global sentinel only if every crop closed."""
     import polars as _pl
+    # Seed an entry for every EXPECTED stem so a crop that was never reached is visible as
+    # "not_reached" rather than silently absent. v3 wrote two crops' artifacts but listed only
+    # one in the manifest, which made a missing crop look like it had never existed.
+    for _want in _d1_json.loads(_d1_os.environ.get("BIOHUB_LOEO_STEMS", "[]")):
+        _e = _D1_MANIFEST.setdefault(_want, {})
+        _e.setdefault("dataset", _want)
+        _e.setdefault("status", "not_reached")
     _ok = []
     for _ds, _b in _D1_BUF.items():
         _entry = _D1_MANIFEST.setdefault(_ds, {})
