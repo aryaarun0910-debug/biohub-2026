@@ -173,6 +173,34 @@ def test_tta_loop_discards_the_flipped_feature_maps():
     assert "unet_out" not in tta, "unet_out is now touched inside the TTA loop"
 
 
+# ------------------------------------------- unet_out is the ASSOCIATION representation
+@pytest.mark.skipif(not PREDICT.exists(), reason="vendored predict script not present")
+def test_unet_out_feeds_predict_edges_so_v6_must_not_reassign_it():
+    """THE v6 TRAP. Every research lane proposed accumulating the TTA mean INTO `unet_out`.
+    But `unet_out` is read AFTER the TTA block by `_index_features` -> `predict_edges`, so
+    reassigning it would silently change every edge feature and alter the 0.915 association
+    substrate -- the largest downside risk in the roadmap, introduced by the fix for B3.
+
+    v6 must accumulate into a SEPARATE tensor and leave `unet_out` alone.
+    """
+    src = PREDICT.read_text(encoding="utf-8")
+    assert "unet_out, det_logits = model.encode(imgs)" in src
+
+    # the association reads, and they are downstream of the TTA block
+    bind = src.index("unet_out, det_logits = model.encode(imgs)")
+    tta = src.index("if cfg.det_tta:")
+    assoc = [i for i in range(len(src)) if src.startswith("unet_out[:, f_idx", i)]
+    assert len(assoc) == 2, f"expected 2 association reads of unet_out, found {len(assoc)}"
+    assert bind < tta < min(assoc), "TTA block is no longer between the bind and the reads"
+
+    # inside the TTA block, unet_out must never appear on a left-hand side
+    block = src[tta:src.index("del imgs", tta)]
+    assert "unet_out" not in block, (
+        "unet_out is touched inside the TTA loop -- if this is the v6 accumulator it MUST "
+        "be a separate tensor, or association is silently changed"
+    )
+
+
 # --------------------------------------------------------------- trap 21: schema drop
 def test_polars_silently_drops_columns_absent_from_the_inference_window():
     """The defect itself, reproduced. 96 non-GT rows are emitted per frame, so a crop whose
