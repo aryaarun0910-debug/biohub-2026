@@ -1,0 +1,133 @@
+{
+  "name": "p3_d1_smoke_f1",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p3_d1_smoke_f1.json",
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "built_notebook": "notebooks\\kaggle_p3_d1_smoke_f1\\biohub-p3-d1-smoke-f1.ipynb",
+  "built_sha256": "c876e5d83685c4d4908647368b60564550ff852e648398595554c4b6f1a2b0f3",
+  "config_hash": "ce4987ca2651",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "1c82caed2d0d4b20d1a3fab3f769c1188247ac016d9a0c8f55529cdfe5b55490"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "504ddcbe5188e98c49ad68fa70cdb7f77848118c9d276696beafad1d4e251daf"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "cd0c22ccd7bdbb74c0ca5108104aee76afc1dd10cea84ee988f56825e979aaef"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "f18d8550a017fe0f41be58a423a5c59c2174cb861c2ca333eeef04ef945da678"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "9a5867f26162347fc1499d13f0aa8ee0b350581a93ce4b43f4c6c935ba1974ef"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "3fdb66ebdfe9adf7c6993fe58b06d101bebf0034722c1c9bfa2ba842fff20f8b"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "9982cbc97989e4a086464b9bba42f519e8ae2d2e1fe4e32d50c7006f2b40f404"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "22b64e4e92dee2cea654f32f763869e8048d841eaca1e4f819500070d208c0e0"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "0256d6d8311133bd5479d42987cddb07e784d67ed031c3046bef49de01cd824f"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "4c3a797e420b442d42aa36a28da96acd51a9b491ebfe4be9e29ab55b74a63e7e"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "f95686f71d17b3b75549b68926565a23c64fea6ffe4fbea9b1f9a12f43222c69"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "9096dd117c36a2a200dadb776b2d36afc6cc7fdca04c8068d8843beb8bec954b"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "46c14065859fa83d4819955761521619cfe04cfa9fde9322d02f3112ed38ab36"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "1db6960bb84938a18125e410602c893a1cfd4acf0b11900c6d2eeb22ac769505"
+    },
+    {
+      "kind": "insert_after",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "19be10a9156c1c6518de39b403b7ead74be93ac767129a7a8f9f450a4f5dcd37"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "321af62a571cb8512524425924ac2458bc6f3198173766077e89f6312bff5411"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "d6f1e263e5a0079963e44e51181e9fc72e8e55945ecf7fd43a9208aa85f6c321"
+    }
+  ],
+  "declared_slug": "biohub-p3-d1-smoke-f1",
+  "title": "Biohub P3 D1 Smoke F1"
+}

@@ -1,0 +1,292 @@
+{
+  "name": "p3_d1_smoke_f1",
+  "slug": "biohub-p3-d1-smoke-f1",
+  "title": "Biohub P3 D1 Smoke F1",
+  "code_file": "biohub-p3-d1-smoke-f1.ipynb",
+  "out_dir": "notebooks/kaggle_p3_d1_smoke_f1",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork",
+    "kms111201/biohub-cell-tracking-data",
+    "aryaarun07/biohub-oof-weights"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "is_private": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": false,
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "purpose": "STRUCTURAL SMOKE, fold 1, 2 crop(s). Combined P3 + D1 + D1-F export: one encoder pass per crop emits the P3 pre-wrapper graph (harmonic association), accepted detector peaks, the exact A/B/D classification of every GT node with D stratified by distance to the nearest local maximum, and 32-D frozen features at BOTH the GT voxel and that maximum. Combinable because the harmonic patch touches edge_logits_pair only and never det_logits. NOT a scientific verdict and NOT a submission.",
+  "provenance": {
+    "backbone": "p3_harmonic.json sha256 1384e5044f79521b89a0de14670415dc8650db206f926f3a22c7995864b2b91c",
+    "loeo_source": "loeo_f1_strict_pregraph.json sha256 0dc68c81e554828e5719bd6cc70fcc408c5439b74833a178cccbaa169ea01055",
+    "imported_edit_sha256": {
+      "loeo_retarget": "d8e8bd4dac7f38677df1f68ba81b4344e1382155c8ad1fe7496b13f0c8d877ec",
+      "loeo_test_stems": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68",
+      "loeo_export_cell": "7e2712e00a82f54ca9623544c04e5e8ec31b0fae7faa8cd79f01d50141c31fda",
+      "loeo_pregraph": "5cbb94850ba34054edf11f98ef44b3ee18bec83222bfe2337832604ecb74907f",
+      "loeo_keep": "b6a6c809e5d33dbf3b856b571a9ac5348da8e50dae1c9830e7481fd8efc4e5f5"
+    },
+    "d1_inject_sha256": "426e82e9330c9103bad45691faa1f7401881bdf02c0b1cdd726649fd8f17ff6d",
+    "d1_block_sha256": "cbceb107c8a34292cb3f8a8cca834b2d3eafe4bcb7d48957835b6a746e47797c",
+    "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+    "stems": [
+      "6bba_6feb10f0",
+      "6bba_57b7cc1e"
+    ],
+    "two_spec_rationale": "The LOEO retarget binds one fold at module level and rebinds TEST_DIR globally, so two folds in one kernel would require restructuring the notebook's single-pass predict/wrapper/export flow. Each crop is still encoded exactly once; the two manifests are aggregated only after both runs complete."
+  },
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_LOEO_FOLD": "1",
+        "BIOHUB_LOEO_ARM": "strict",
+        "BIOHUB_LOEO_LIMIT": "0",
+        "BIOHUB_LOEO_STEMS": "[\"6bba_6feb10f0\", \"6bba_57b7cc1e\"]",
+        "BIOHUB_LOEO_WEIGHTS_GLOB": "/kaggle/input/*/edge_predictor_best_split_1.pth",
+        "BIOHUB_LOEO_CONFIG_GLOB": "/kaggle/input/*/config_split_1.json",
+        "BIOHUB_D1_FOLD": "1",
+        "BIOHUB_D1_CKPT_SHA": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+        "BIOHUB_D1_EXPECTED_CROPS": "2",
+        "BIOHUB_D1_N_UNIFORM": "64",
+        "BIOHUB_D1_N_SUBTHR": "32"
+      },
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E01_env",
+        "source": "assembler",
+        "canonical_sha256": "a909eea48d071c28e6c9599dc8a5ad520be748482393659a9467acaebf58ac04",
+        "intent": "1. environment: LOEO fold routing + D1 knobs",
+        "order": 0
+      }
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "def list_test_stems() -> list[str]:",
+      "cell_match": "_ps = REPO_DIR",
+      "code_file": "scripts/kaggle_edits/loeo_retarget.py",
+      "_audit": {
+        "edit_id": "E02_loeo_retarget",
+        "source": "loeo_f1_strict_pregraph#1",
+        "canonical_sha256": "d8e8bd4dac7f38677df1f68ba81b4344e1382155c8ad1fe7496b13f0c8d877ec",
+        "intent": "1. LOEO retarget: mount fold crops, rebind TEST_DIR, resolve fold weights",
+        "order": 1
+      }
+    },
+    {
+      "kind": "replace",
+      "old": "test_stems = list_test_stems()",
+      "new": "test_stems = list(LOEO_STEMS)  # LOEO retarget",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E03_test_stems",
+        "source": "loeo_f1_strict_pregraph#2",
+        "canonical_sha256": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68",
+        "intent": "1. route stem discovery at the LOEO fold",
+        "order": 2
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "_bi_new = ",
+      "old": "_bi_new = '            edge_logits_pair = model.predict_edges(\\n                unet_feat_src, unet_feat_tgt,\\n                p_coords_src * ds_arr_t, p_coords_tgt * ds_arr_t,\\n                p_pos_src, p_pos_tgt,\\n                p_mask_src, p_mask_tgt,\\n            )  # (1, n_src, n_tgt)\\n\\n            _bidirectional_weight = float(\\n                os.environ.get(\"BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT\", \"0\")\\n            )\\n            if _bidirectional_weight > 0.0:\\n                reverse_logits_native = model.predict_edges(\\n                    unet_feat_tgt, unet_feat_src,\\n                    p_coords_tgt * ds_arr_t, p_coords_src * ds_arr_t,\\n                    p_pos_tgt, p_pos_src,\\n                    p_mask_tgt, p_mask_src,\\n                )  # (1, n_tgt, n_src)\\n                reverse_logits_pair = reverse_logits_native.transpose(1, 2)\\n\\n                forward_center = edge_logits_pair.mean(dim=1, keepdim=True)\\n                forward_scale = edge_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_center = reverse_logits_pair.mean(dim=1, keepdim=True)\\n                reverse_scale = reverse_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_scale_ratio = (forward_scale / reverse_scale).clamp(0.5, 2.0)\\n                reverse_scale_ratio = reverse_scale_ratio.to(reverse_logits_pair.dtype)\\n                reverse_aligned = (\\n                    (reverse_logits_pair - reverse_center) * reverse_scale_ratio\\n                    + forward_center\\n                )\\n                edge_logits_pair = (\\n                    (1.0 - _bidirectional_weight) * edge_logits_pair\\n                    + _bidirectional_weight * reverse_aligned\\n                )\\n                del reverse_logits_native, reverse_logits_pair, reverse_aligned\\n\\n            if secondary_model is not None:\\n'",
+      "new": "_bi_new = '            edge_logits_pair = model.predict_edges(\\n                unet_feat_src, unet_feat_tgt,\\n                p_coords_src * ds_arr_t, p_coords_tgt * ds_arr_t,\\n                p_pos_src, p_pos_tgt,\\n                p_mask_src, p_mask_tgt,\\n            )  # (1, n_src, n_tgt)\\n\\n            _bidirectional_weight = float(\\n                os.environ.get(\"BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT\", \"0\")\\n            )\\n            if _bidirectional_weight > 0.0:\\n                reverse_logits_native = model.predict_edges(\\n                    unet_feat_tgt, unet_feat_src,\\n                    p_coords_tgt * ds_arr_t, p_coords_src * ds_arr_t,\\n                    p_pos_tgt, p_pos_src,\\n                    p_mask_tgt, p_mask_src,\\n                )  # (1, n_tgt, n_src)\\n                reverse_logits_pair = reverse_logits_native.transpose(1, 2)\\n\\n                forward_center = edge_logits_pair.mean(dim=1, keepdim=True)\\n                forward_scale = edge_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_center = reverse_logits_pair.mean(dim=1, keepdim=True)\\n                reverse_scale = reverse_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_scale_ratio = (forward_scale / reverse_scale).clamp(0.5, 2.0)\\n                reverse_scale_ratio = reverse_scale_ratio.to(reverse_logits_pair.dtype)\\n                reverse_aligned = (\\n                    (reverse_logits_pair - reverse_center) * reverse_scale_ratio\\n                    + forward_center\\n                )\\n                # Biohub 145: require mutual forward/reverse support in probability space.\\n                # The harmonic mean penalizes a candidate when either temporal direction\\n                # assigns it very low probability, while calibration preserves the forward\\n                # logit scale used by the unchanged downstream candidate threshold and ILP.\\n                forward_prob = torch.softmax(edge_logits_pair.float(), dim=1).clamp_min(1e-8)\\n                reverse_prob = torch.softmax(reverse_aligned.float(), dim=1).clamp_min(1e-8)\\n                harmonic_prob = 1.0 / (\\n                    (1.0 - _bidirectional_weight) / forward_prob\\n                    + _bidirectional_weight / reverse_prob\\n                )\\n                harmonic_prob = harmonic_prob / harmonic_prob.sum(\\n                    dim=1, keepdim=True\\n                ).clamp_min(1e-8)\\n                harmonic_logits = torch.log(harmonic_prob.clamp_min(1e-8))\\n                harmonic_center = harmonic_logits.mean(dim=1, keepdim=True)\\n                harmonic_scale = harmonic_logits.std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                harmonic_scale_ratio = (forward_scale / harmonic_scale).clamp(0.5, 2.0)\\n                edge_logits_pair = (\\n                    (harmonic_logits - harmonic_center) * harmonic_scale_ratio\\n                    + forward_center\\n                ).to(reverse_aligned.dtype)\\n                del (\\n                    reverse_logits_native,\\n                    reverse_logits_pair,\\n                    reverse_aligned,\\n                    forward_prob,\\n                    reverse_prob,\\n                    harmonic_prob,\\n                    harmonic_logits,\\n                )\\n            if secondary_model is not None:\\n'",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E04_harmonic",
+        "source": "p3_harmonic#harmonic",
+        "canonical_sha256": "8ed0fc04f3cfa853ad326cb4bb160883d2a92c12a1b6a0e3e0b9a248c7866789",
+        "intent": "2. harmonic edge-logit fusion (edge_logits_pair ONLY)",
+        "order": 3
+      }
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "def filter_output_graph(",
+      "cell_match": "def filter_output_graph(",
+      "code_file": "scripts/kaggle_edits/degree_invariants.py",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_00_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "9621f91471ac447c09cafea63d559afe4717ae1cb50b1f72be7258b6fbd02548",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 4
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "        \"safe_division_skipped_cap\": 0,\n",
+      "new": "        \"safe_division_skipped_cap\": 0,\n        \"safe_division_skipped_outdegree\": 0,\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_01_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "4a5d28fd3c7d71d882def9b51782f64eab0c27c1ee2787679748ef3ce012a0c9",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 5
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "    used_targets: set[int] = set()\n",
+      "new": "    used_targets: set[int] = set()\n    out_degree_now: dict[int, int] = {\n        _src: len(_lst) for _src, _lst in out_by_source.items()\n    }\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_02_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "c2c01e6546923987cc25ca8cc34cbef7ee1d64fb2932d383f5a37287a84a390b",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 6
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "            if candidate_id in used_targets or candidate_id in incoming:\n                continue\n",
+      "new": "            if candidate_id in used_targets or candidate_id in incoming:\n                continue\n            if out_degree_now.get(source_id, 0) >= 2:\n                stats[\"safe_division_skipped_outdegree\"] += 1\n                continue\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_03_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "3781cdc0fbf75b49fa058fbf1c412d37b3a3f04a41e9ee50df5595b461d62366",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 7
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "            used_targets.add(candidate_id)\n            added_this_frame += 1\n",
+      "new": "            used_targets.add(candidate_id)\n            out_degree_now[source_id] = out_degree_now.get(source_id, 0) + 1\n            added_this_frame += 1\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_04_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "586fd991cc14cae802995ed52342b97df52bf202170a5f58a3eeebdafcbcb168",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 8
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def close_single_frame_gaps(",
+      "old": "                    candidates = [nid for nid in isolated_by_t.get(mid_t, []) if nid not in used_isolated]\n",
+      "new": "                    candidates = [nid for nid in isolated_by_t.get(mid_t, [])\n                                  if nid not in used_isolated and nid not in incoming]\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_05_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "e810b6443db50b91f761cb91395318cf7d3f831b5f41129516847c032aa2c86a",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 9
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def close_single_frame_gaps(",
+      "old": "                if source_id in outgoing or target_id in used_starts:\n                    continue\n",
+      "new": "                if source_id in outgoing or target_id in used_starts or target_id in incoming:\n                    continue\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_06_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "4a229f113df72061966d3296783c4f42e14fabadab9811554c85e3bb29756310",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 10
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "    repair_frame_cache: dict[int, np.ndarray] = {}\n",
+      "new": "    assert_degree_invariants(edges, \"motion relink + parent/child repair\")\n\n    repair_frame_cache: dict[int, np.ndarray] = {}\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_07_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "9005cc78a5840b6a180044d5d8e63857887dc9191cbdfc9ad198063d1cbf29f0",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 11
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "    nodes_by_id = linefit_smooth_output_graph(nodes_by_id, edges, stats)\n\n    return nodes_by_id, edges, stats",
+      "new": "    nodes_by_id = linefit_smooth_output_graph(nodes_by_id, edges, stats)\n\n    assert_degree_invariants(edges, \"export\")\n    return nodes_by_id, edges, stats",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_08_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "6a1829cd1507792d8332dcad36ad86b9f976466ae88d907d519546b741e20ff0",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 12
+      }
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "def list_test_stems() -> list[str]:",
+      "cell_match": "_ps = REPO_DIR",
+      "code_file": "scripts/kaggle_edits/d1_inject.py",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E06_d1_inject",
+        "source": "scripts/kaggle_edits/d1_inject.py",
+        "canonical_sha256": "3d8cf39ba377c9be23d6a62e76af8e7934f4c52a8a20c2628056b38ad472339f",
+        "intent": "4. D1 audit + frozen-feature injection into the predict script",
+        "order": 13
+      }
+    },
+    {
+      "kind": "insert_after",
+      "anchor": "print(f\"Found {len(geffs)} prediction graphs\")",
+      "cell_match": "def filter_output_graph(",
+      "code_file": "scripts/kaggle_edits/loeo_pregraph_export.py",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E07_pregraph",
+        "source": "loeo_f1_strict_pregraph#4",
+        "canonical_sha256": "5cbb94850ba34054edf11f98ef44b3ee18bec83222bfe2337832604ecb74907f",
+        "intent": "5. pre-wrapper prediction-graph export",
+        "order": 14
+      }
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "_guard_submission = Path(",
+      "code_file": "scripts/kaggle_edits/loeo_export.py",
+      "_audit": {
+        "edit_id": "E08_export_cell",
+        "source": "loeo_f1_strict_pregraph#3",
+        "canonical_sha256": "7e2712e00a82f54ca9623544c04e5e8ec31b0fae7faa8cd79f01d50141c31fda",
+        "intent": "6. LOEO export cell replaces the submission guard",
+        "order": 15
+      }
+    },
+    {
+      "kind": "replace",
+      "old": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\"}",
+      "new": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\",\n              f\"pregraphs_split{LOEO_FOLD}.parquet\", f\"pregraphs_split{LOEO_FOLD}.json\",\n              \"d1_audit\"}",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E09_keep",
+        "source": "loeo_f1_strict_pregraph#5 (+d1_audit)",
+        "canonical_sha256": "fcd3924fe744584c0b3e8a3cdabc2db83674fe698637f4e1675eb247d8d10b43",
+        "intent": "6. artifact retention: keep pregraphs AND the d1_audit directory",
+        "order": 16
+      }
+    }
+  ]
+}
