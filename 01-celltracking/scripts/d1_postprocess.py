@@ -189,12 +189,25 @@ def atomic_write(path: Path, write_fn) -> Path:
         tmp.unlink()
     try:
         write_fn(tmp)
+        if not tmp.exists():
+            raise SystemExit(
+                f"{path.name}: the writer did not produce {tmp.name}. Some writers rename "
+                f"what they are given -- np.save APPENDS '.npy' to a PATH argument -- which "
+                f"silently defeats the .partial rename. Pass an open file handle instead")
         os.replace(tmp, path)
     except BaseException:
         if tmp.exists():
             tmp.unlink()
         raise
     return path
+
+
+def save_npy(arr: np.ndarray):
+    """A writer for `atomic_write`. MUST take a handle: `np.save(Path)` appends '.npy'."""
+    def _w(p: Path) -> None:
+        with open(p, "wb") as fh:
+            np.save(fh, arr, allow_pickle=False)
+    return _w
 
 
 def scorer_fingerprint() -> dict:
@@ -346,12 +359,17 @@ def attach_row_id(df: pl.DataFrame, crop: str, *,
         arr = rid.to_numpy()
         if arr.dtype.kind not in "iu":
             raise SystemExit(f"{crop}: {ROW_ID} dtype {arr.dtype} is not integral")
-        if not np.array_equal(arr, np.arange(df.height, dtype=arr.dtype)):
+        ident = np.arange(df.height, dtype=arr.dtype)
+        if not np.array_equal(np.sort(arr), ident):
             raise SystemExit(
-                f"{crop}: {ROW_ID} violates the export contract -- it must be 0-based, "
-                f"increase by exactly one per emitted row, and index the feature arrays "
-                f"positionally (row_id i == feature row i)")
-        return df.with_columns(pl.col(ROW_ID).cast(pl.Int64)), "export"
+                f"{crop}: {ROW_ID} is not a bijection onto 0..{df.height - 1} -- it must be "
+                f"0-based, dense and unique, because feature-array row i IS the row with "
+                f"{ROW_ID} == i")
+        # Parquet row ORDER is not part of the contract: every feature read in this module
+        # gathers BY row_id, so a re-ordered parquet is still exactly recoverable. Only the
+        # bijection above is load-bearing. Which case we are in is recorded, not assumed.
+        source = "export" if np.array_equal(arr, ident) else "export-reordered"
+        return df.with_columns(pl.col(ROW_ID).cast(pl.Int64)), source
 
     if not allow_v5_emission_order:
         raise SystemExit(
@@ -441,7 +459,8 @@ def feat_max_validity(crop: str, df: pl.DataFrame,
 
 def apply_validity(arr: np.ndarray, valid: np.ndarray) -> np.ndarray:
     """Return a copy whose invalid rows are all-NaN, so the contract holds downstream."""
-    out = np.array(arr, dtype=np.float32, copy=True)
+    dtype = arr.dtype if np.issubdtype(arr.dtype, np.floating) else np.float32
+    out = np.array(arr, dtype=dtype, copy=True)
     out[~np.asarray(valid, dtype=bool)] = np.nan
     return out
 
@@ -719,6 +738,19 @@ def main(argv: list[str] | None = None) -> int:
         if arr.shape[0] != all_derived.height:
             raise SystemExit(
                 f"{name}: {arr.shape[0]} rows vs {all_derived.height} derived rows")
+
+    # The published join key. `row_id` is PER-CROP, so only (dataset, row_id) identifies a
+    # raw row; `feat_row` is the fold-global index into the emitted feature arrays and must
+    # be exactly 0..N-1 in parquet order or the shipped contract is false.
+    if all_derived.select(["dataset", ROW_ID]).n_unique() != all_derived.height:
+        raise SystemExit(
+            f"(dataset, {ROW_ID}) is not unique across the derived rows; the join key "
+            f"cannot address a raw row")
+    if not np.array_equal(all_derived.get_column(FEAT_ROW).to_numpy(),
+                          np.arange(all_derived.height)):
+        raise SystemExit(
+            f"{FEAT_ROW} is not 0..{all_derived.height - 1} in parquet order; the derived "
+            f"feature arrays cannot be joined positionally as documented")
     check_feature_contract("derived", "feat_gt", stacked["feat_gt"],
                            np.ones(all_derived.height, dtype=bool))
     check_feature_contract("derived", "feat_max", stacked["feat_max"],
@@ -730,7 +762,7 @@ def main(argv: list[str] | None = None) -> int:
     out_files = {out_pq.name: sha256_file(out_pq)}
     for name in FEATURE_ARRAYS:
         p = out_dir / f"{_DERIVED_STEM}{fold}__{name}.npy"
-        atomic_write(p, lambda q, _a=stacked[name]: np.save(q, _a, allow_pickle=False))
+        atomic_write(p, save_npy(stacked[name]))
         out_files[p.name] = sha256_file(p)
 
     report = {
