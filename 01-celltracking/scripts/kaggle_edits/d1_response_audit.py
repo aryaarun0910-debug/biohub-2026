@@ -189,10 +189,17 @@ def _d1_flush(fold=None, ckpt_hash=None, expected_crops=None):
             _fn = _d1_np.stack(_b["feat_near"]) if _b["feat_near"] else _d1_np.zeros((0, 32), "f4")
             _df = _pl.DataFrame(_rows)
             _d1_atomic_write(_D1_OUT / f"{_ds}__rows.parquet", lambda p: _df.write_parquet(p))
-            _d1_atomic_write(_D1_OUT / f"{_ds}__feat_gt.npy",
-                             lambda p: _d1_np.save(p, _fg))
-            _d1_atomic_write(_D1_OUT / f"{_ds}__feat_near.npy",
-                             lambda p: _d1_np.save(p, _fn))
+            # np.save APPENDS ".npy" when the path does not already end in it, so writing to
+            # "<name>.npy.tmp" silently produced "<name>.npy.tmp.npy" and the rename source
+            # never existed. Hand it an open file object, which suppresses that behaviour.
+            def _save_npy(_arr):
+                def _w(_p):
+                    with open(_p, "wb") as _fh:
+                        _d1_np.save(_fh, _arr)
+                return _w
+
+            _d1_atomic_write(_D1_OUT / f"{_ds}__feat_gt.npy", _save_npy(_fg))
+            _d1_atomic_write(_D1_OUT / f"{_ds}__feat_near.npy", _save_npy(_fn))
             _gt = _df.filter(_pl.col("kind") == "gt_centre") if len(_df) else _df
             _cls = dict(zip(*_gt["d1_class"].value_counts().to_dict(as_series=False).values())) \
                 if len(_gt) else {}

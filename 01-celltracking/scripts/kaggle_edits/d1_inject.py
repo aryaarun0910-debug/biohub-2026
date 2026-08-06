@@ -3,7 +3,7 @@
 # THREE injections, each with an asserted-unique anchor. Aborts on 0 or >1 matches.
 # Idempotent: re-running is a no-op once `_d1_audit_frame` is present.
 #
-# Audit block sha256: cbceb107c8a34292cb3f8a8cca834b2d3eafe4bcb7d48957835b6a746e47797c
+# Audit block sha256: 5d29a4d60764a73499bab2795dcb039f601511b415e72b91590f49a1de5708a4
 import base64 as _d1i_b64
 import hashlib as _d1i_hashlib
 
@@ -175,53 +175,60 @@ _D1_BLOCK_B64 = (
     "ZWF0X25lYXIiXSkgaWYgX2JbImZlYXRfbmVhciJdIGVsc2UgX2QxX25wLnplcm9zKCgwLCAzMiks"
     "ICJmNCIpCiAgICAgICAgICAgIF9kZiA9IF9wbC5EYXRhRnJhbWUoX3Jvd3MpCiAgICAgICAgICAg"
     "IF9kMV9hdG9taWNfd3JpdGUoX0QxX09VVCAvIGYie19kc31fX3Jvd3MucGFycXVldCIsIGxhbWJk"
-    "YSBwOiBfZGYud3JpdGVfcGFycXVldChwKSkKICAgICAgICAgICAgX2QxX2F0b21pY193cml0ZShf"
-    "RDFfT1VUIC8gZiJ7X2RzfV9fZmVhdF9ndC5ucHkiLAogICAgICAgICAgICAgICAgICAgICAgICAg"
-    "ICAgIGxhbWJkYSBwOiBfZDFfbnAuc2F2ZShwLCBfZmcpKQogICAgICAgICAgICBfZDFfYXRvbWlj"
-    "X3dyaXRlKF9EMV9PVVQgLyBmIntfZHN9X19mZWF0X25lYXIubnB5IiwKICAgICAgICAgICAgICAg"
-    "ICAgICAgICAgICAgICBsYW1iZGEgcDogX2QxX25wLnNhdmUocCwgX2ZuKSkKICAgICAgICAgICAg"
-    "X2d0ID0gX2RmLmZpbHRlcihfcGwuY29sKCJraW5kIikgPT0gImd0X2NlbnRyZSIpIGlmIGxlbihf"
-    "ZGYpIGVsc2UgX2RmCiAgICAgICAgICAgIF9jbHMgPSBkaWN0KHppcCgqX2d0WyJkMV9jbGFzcyJd"
+    "YSBwOiBfZGYud3JpdGVfcGFycXVldChwKSkKICAgICAgICAgICAgIyBucC5zYXZlIEFQUEVORFMg"
+    "Ii5ucHkiIHdoZW4gdGhlIHBhdGggZG9lcyBub3QgYWxyZWFkeSBlbmQgaW4gaXQsIHNvIHdyaXRp"
+    "bmcgdG8KICAgICAgICAgICAgIyAiPG5hbWU+Lm5weS50bXAiIHNpbGVudGx5IHByb2R1Y2VkICI8"
+    "bmFtZT4ubnB5LnRtcC5ucHkiIGFuZCB0aGUgcmVuYW1lIHNvdXJjZQogICAgICAgICAgICAjIG5l"
+    "dmVyIGV4aXN0ZWQuIEhhbmQgaXQgYW4gb3BlbiBmaWxlIG9iamVjdCwgd2hpY2ggc3VwcHJlc3Nl"
+    "cyB0aGF0IGJlaGF2aW91ci4KICAgICAgICAgICAgZGVmIF9zYXZlX25weShfYXJyKToKICAgICAg"
+    "ICAgICAgICAgIGRlZiBfdyhfcCk6CiAgICAgICAgICAgICAgICAgICAgd2l0aCBvcGVuKF9wLCAi"
+    "d2IiKSBhcyBfZmg6CiAgICAgICAgICAgICAgICAgICAgICAgIF9kMV9ucC5zYXZlKF9maCwgX2Fy"
+    "cikKICAgICAgICAgICAgICAgIHJldHVybiBfdwoKICAgICAgICAgICAgX2QxX2F0b21pY193cml0"
+    "ZShfRDFfT1VUIC8gZiJ7X2RzfV9fZmVhdF9ndC5ucHkiLCBfc2F2ZV9ucHkoX2ZnKSkKICAgICAg"
+    "ICAgICAgX2QxX2F0b21pY193cml0ZShfRDFfT1VUIC8gZiJ7X2RzfV9fZmVhdF9uZWFyLm5weSIs"
+    "IF9zYXZlX25weShfZm4pKQogICAgICAgICAgICBfZ3QgPSBfZGYuZmlsdGVyKF9wbC5jb2woImtp"
+    "bmQiKSA9PSAiZ3RfY2VudHJlIikgaWYgbGVuKF9kZikgZWxzZSBfZGYKICAgICAgICAgICAgX2Ns"
+    "cyA9IGRpY3QoemlwKCpfZ3RbImQxX2NsYXNzIl0udmFsdWVfY291bnRzKCkudG9fZGljdChhc19z"
+    "ZXJpZXM9RmFsc2UpLnZhbHVlcygpKSkgXAogICAgICAgICAgICAgICAgaWYgbGVuKF9ndCkgZWxz"
+    "ZSB7fQogICAgICAgICAgICBfc3RyID0gZGljdCh6aXAoKl9ndC5maWx0ZXIoX3BsLmNvbCgiZDFf"
+    "Y2xhc3MiKSA9PSAiRCIpWyJkX3N0cmF0dW0iXQogICAgICAgICAgICAgICAgICAgICAgICAgICAg"
     "LnZhbHVlX2NvdW50cygpLnRvX2RpY3QoYXNfc2VyaWVzPUZhbHNlKS52YWx1ZXMoKSkpIFwKICAg"
-    "ICAgICAgICAgICAgIGlmIGxlbihfZ3QpIGVsc2Uge30KICAgICAgICAgICAgX3N0ciA9IGRpY3Qo"
-    "emlwKCpfZ3QuZmlsdGVyKF9wbC5jb2woImQxX2NsYXNzIikgPT0gIkQiKVsiZF9zdHJhdHVtIl0K"
-    "ICAgICAgICAgICAgICAgICAgICAgICAgICAgIC52YWx1ZV9jb3VudHMoKS50b19kaWN0KGFzX3Nl"
-    "cmllcz1GYWxzZSkudmFsdWVzKCkpKSBcCiAgICAgICAgICAgICAgICBpZiBsZW4oX2d0KSBlbHNl"
-    "IHt9CiAgICAgICAgICAgIF9uZCA9IF9ndC5maWx0ZXIoX3BsLmNvbCgiZDFfY2xhc3MiKSA9PSAi"
-    "RCIpWyJuZWFyX2Rpc3RfdW0iXS50b19udW1weSgpIFwKICAgICAgICAgICAgICAgIGlmIGxlbihf"
-    "Z3QpIGVsc2UgX2QxX25wLnplcm9zKDApCiAgICAgICAgICAgIF9lbnRyeS51cGRhdGUoewogICAg"
-    "ICAgICAgICAgICAgIm5fcm93cyI6IGludChsZW4oX2RmKSksICJndF9yb3dzIjogaW50KGxlbihf"
-    "Z3QpKSwKICAgICAgICAgICAgICAgICJhYmRfY291bnRzIjoge3N0cihrKTogaW50KHYpIGZvciBr"
-    "LCB2IGluIF9jbHMuaXRlbXMoKX0sCiAgICAgICAgICAgICAgICAiZF9zdHJhdGEiOiB7c3RyKGsp"
-    "OiBpbnQodikgZm9yIGssIHYgaW4gX3N0ci5pdGVtcygpfSwKICAgICAgICAgICAgICAgICJmZWF0"
-    "X3Jvd3MiOiBpbnQoX2ZnLnNoYXBlWzBdKSwKICAgICAgICAgICAgICAgICJmZWF0X2RpbSI6IGlu"
-    "dChfZmcuc2hhcGVbMV0pIGlmIF9mZy5zaXplIGVsc2UgMCwKICAgICAgICAgICAgICAgICJmZWF0"
-    "X2Zpbml0ZSI6IGJvb2woX2QxX25wLmlzZmluaXRlKF9mZykuYWxsKCkgYW5kIF9kMV9ucC5pc2Zp"
-    "bml0ZShfZm4pLmFsbCgpKSwKICAgICAgICAgICAgICAgICJuZWFyX2Rpc3RfdW0iOiB7CiAgICAg"
-    "ICAgICAgICAgICAgICAgInA1MCI6IGZsb2F0KF9kMV9ucC5wZXJjZW50aWxlKF9uZCwgNTApKSBp"
-    "ZiBfbmQuc2l6ZSBlbHNlIE5vbmUsCiAgICAgICAgICAgICAgICAgICAgInA5MCI6IGZsb2F0KF9k"
-    "MV9ucC5wZXJjZW50aWxlKF9uZCwgOTApKSBpZiBfbmQuc2l6ZSBlbHNlIE5vbmUsCiAgICAgICAg"
-    "ICAgICAgICAgICAgIm1heCI6IGZsb2F0KF9uZC5tYXgoKSkgaWYgX25kLnNpemUgZWxzZSBOb25l"
-    "fSwKICAgICAgICAgICAgICAgICJzdGF0dXMiOiAiY29tcGxldGUifSkKICAgICAgICAgICAgX29r"
-    "LmFwcGVuZChfZHMpCiAgICAgICAgZXhjZXB0IEV4Y2VwdGlvbiBhcyBfZXhjOgogICAgICAgICAg"
-    "ICBfZW50cnlbImV4Y2VwdGlvbiJdID0gZiJ7dHlwZShfZXhjKS5fX25hbWVfX306IHtfZXhjfSIK"
-    "ICAgICAgICAgICAgX2VudHJ5WyJ0cmFjZWJhY2siXSA9IF9kMV90Yi5mb3JtYXRfZXhjKClbLTE1"
-    "MDA6XQogICAgICAgICAgICBwcmludChmIkQxOiBGTFVTSCBGQUlMRUQgZm9yIHtfZHN9OiB7X2Vu"
-    "dHJ5WydleGNlcHRpb24nXX0iLCBmbHVzaD1UcnVlKQoKICAgIF9tYW4gPSB7ImNyb3BzIjogX0Qx"
-    "X01BTklGRVNULCAibl9jb21wbGV0ZSI6IGxlbihfb2spLAogICAgICAgICAgICAiZXhwZWN0ZWRf"
-    "Y3JvcHMiOiBleHBlY3RlZF9jcm9wcywKICAgICAgICAgICAgIkNPTVBMRVRFIjogYm9vbChleHBl"
-    "Y3RlZF9jcm9wcyBpcyBub3QgTm9uZSBhbmQgbGVuKF9vaykgPT0gZXhwZWN0ZWRfY3JvcHMKICAg"
-    "ICAgICAgICAgICAgICAgICAgICAgICAgICBhbmQgYWxsKHYuZ2V0KCJzdGF0dXMiKSA9PSAiY29t"
-    "cGxldGUiCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBmb3IgdiBpbiBfRDFf"
-    "TUFOSUZFU1QudmFsdWVzKCkpKX0KICAgIF9kMV9hdG9taWNfd3JpdGUoX0QxX09VVCAvICJkMV9t"
-    "YW5pZmVzdC5qc29uIiwKICAgICAgICAgICAgICAgICAgICAgbGFtYmRhIHA6IF9EMVBhdGgocCku"
-    "d3JpdGVfdGV4dChfZDFfanNvbi5kdW1wcyhfbWFuLCBpbmRlbnQ9MiwgZGVmYXVsdD1zdHIpKSkK"
-    "ICAgIHByaW50KGYiRDE6IGZsdXNoZWQge2xlbihfb2spfS97ZXhwZWN0ZWRfY3JvcHN9IGNyb3Bz"
-    "LCBDT01QTEVURT17X21hblsnQ09NUExFVEUnXX0iLAogICAgICAgICAgZmx1c2g9VHJ1ZSkK"
+    "ICAgICAgICAgICAgIGlmIGxlbihfZ3QpIGVsc2Uge30KICAgICAgICAgICAgX25kID0gX2d0LmZp"
+    "bHRlcihfcGwuY29sKCJkMV9jbGFzcyIpID09ICJEIilbIm5lYXJfZGlzdF91bSJdLnRvX251bXB5"
+    "KCkgXAogICAgICAgICAgICAgICAgaWYgbGVuKF9ndCkgZWxzZSBfZDFfbnAuemVyb3MoMCkKICAg"
+    "ICAgICAgICAgX2VudHJ5LnVwZGF0ZSh7CiAgICAgICAgICAgICAgICAibl9yb3dzIjogaW50KGxl"
+    "bihfZGYpKSwgImd0X3Jvd3MiOiBpbnQobGVuKF9ndCkpLAogICAgICAgICAgICAgICAgImFiZF9j"
+    "b3VudHMiOiB7c3RyKGspOiBpbnQodikgZm9yIGssIHYgaW4gX2Nscy5pdGVtcygpfSwKICAgICAg"
+    "ICAgICAgICAgICJkX3N0cmF0YSI6IHtzdHIoayk6IGludCh2KSBmb3IgaywgdiBpbiBfc3RyLml0"
+    "ZW1zKCl9LAogICAgICAgICAgICAgICAgImZlYXRfcm93cyI6IGludChfZmcuc2hhcGVbMF0pLAog"
+    "ICAgICAgICAgICAgICAgImZlYXRfZGltIjogaW50KF9mZy5zaGFwZVsxXSkgaWYgX2ZnLnNpemUg"
+    "ZWxzZSAwLAogICAgICAgICAgICAgICAgImZlYXRfZmluaXRlIjogYm9vbChfZDFfbnAuaXNmaW5p"
+    "dGUoX2ZnKS5hbGwoKSBhbmQgX2QxX25wLmlzZmluaXRlKF9mbikuYWxsKCkpLAogICAgICAgICAg"
+    "ICAgICAgIm5lYXJfZGlzdF91bSI6IHsKICAgICAgICAgICAgICAgICAgICAicDUwIjogZmxvYXQo"
+    "X2QxX25wLnBlcmNlbnRpbGUoX25kLCA1MCkpIGlmIF9uZC5zaXplIGVsc2UgTm9uZSwKICAgICAg"
+    "ICAgICAgICAgICAgICAicDkwIjogZmxvYXQoX2QxX25wLnBlcmNlbnRpbGUoX25kLCA5MCkpIGlm"
+    "IF9uZC5zaXplIGVsc2UgTm9uZSwKICAgICAgICAgICAgICAgICAgICAibWF4IjogZmxvYXQoX25k"
+    "Lm1heCgpKSBpZiBfbmQuc2l6ZSBlbHNlIE5vbmV9LAogICAgICAgICAgICAgICAgInN0YXR1cyI6"
+    "ICJjb21wbGV0ZSJ9KQogICAgICAgICAgICBfb2suYXBwZW5kKF9kcykKICAgICAgICBleGNlcHQg"
+    "RXhjZXB0aW9uIGFzIF9leGM6CiAgICAgICAgICAgIF9lbnRyeVsiZXhjZXB0aW9uIl0gPSBmInt0"
+    "eXBlKF9leGMpLl9fbmFtZV9ffToge19leGN9IgogICAgICAgICAgICBfZW50cnlbInRyYWNlYmFj"
+    "ayJdID0gX2QxX3RiLmZvcm1hdF9leGMoKVstMTUwMDpdCiAgICAgICAgICAgIHByaW50KGYiRDE6"
+    "IEZMVVNIIEZBSUxFRCBmb3Ige19kc306IHtfZW50cnlbJ2V4Y2VwdGlvbiddfSIsIGZsdXNoPVRy"
+    "dWUpCgogICAgX21hbiA9IHsiY3JvcHMiOiBfRDFfTUFOSUZFU1QsICJuX2NvbXBsZXRlIjogbGVu"
+    "KF9vayksCiAgICAgICAgICAgICJleHBlY3RlZF9jcm9wcyI6IGV4cGVjdGVkX2Nyb3BzLAogICAg"
+    "ICAgICAgICAiQ09NUExFVEUiOiBib29sKGV4cGVjdGVkX2Nyb3BzIGlzIG5vdCBOb25lIGFuZCBs"
+    "ZW4oX29rKSA9PSBleHBlY3RlZF9jcm9wcwogICAgICAgICAgICAgICAgICAgICAgICAgICAgIGFu"
+    "ZCBhbGwodi5nZXQoInN0YXR1cyIpID09ICJjb21wbGV0ZSIKICAgICAgICAgICAgICAgICAgICAg"
+    "ICAgICAgICAgICAgICAgIGZvciB2IGluIF9EMV9NQU5JRkVTVC52YWx1ZXMoKSkpfQogICAgX2Qx"
+    "X2F0b21pY193cml0ZShfRDFfT1VUIC8gImQxX21hbmlmZXN0Lmpzb24iLAogICAgICAgICAgICAg"
+    "ICAgICAgICBsYW1iZGEgcDogX0QxUGF0aChwKS53cml0ZV90ZXh0KF9kMV9qc29uLmR1bXBzKF9t"
+    "YW4sIGluZGVudD0yLCBkZWZhdWx0PXN0cikpKQogICAgcHJpbnQoZiJEMTogZmx1c2hlZCB7bGVu"
+    "KF9vayl9L3tleHBlY3RlZF9jcm9wc30gY3JvcHMsIENPTVBMRVRFPXtfbWFuWydDT01QTEVURSdd"
+    "fSIsCiAgICAgICAgICBmbHVzaD1UcnVlKQo="
 )
 _d1_block_bytes = _d1i_b64.b64decode(_D1_BLOCK_B64)
 _d1_block_sha = _d1i_hashlib.sha256(_d1_block_bytes).hexdigest()
-if _d1_block_sha != 'cbceb107c8a34292cb3f8a8cca834b2d3eafe4bcb7d48957835b6a746e47797c':
+if _d1_block_sha != '5d29a4d60764a73499bab2795dcb039f601511b415e72b91590f49a1de5708a4':
     raise RuntimeError("D1 block hash drift: " + _d1_block_sha)
 
 _d1_mod = _ps.parent / "_d1_audit_block.py"
@@ -240,7 +247,7 @@ else:
                 "D1 anchor " + _nm + " matched " + str(_n) + " times, expected exactly 1"
             )
     _s = _s.replace(_d1_anchors["A1"], 'from _d1_audit_block import _d1_audit_frame, _d1_flush  # noqa: E402\nimport os as _d1_os  # noqa: E402\n\n\n' + _d1_anchors["A1"], 1)
-    _s = _s.replace(_d1_anchors["A2"], _d1_anchors["A2"] + '\n                _d1_audit_frame(\n                    ds_path.stem, ds_path.parent, t, det_logits[f_idx],\n                    unet_out[0, f_idx], cfg.det_threshold, pool_k,\n                    voxel_size, downsample,\n                )', 1)
+    _s = _s.replace(_d1_anchors["A2"], _d1_anchors["A2"] + '\n                _d1_audit_frame(\n                    ds_path.stem, ds_path.parent, t, det_logits[f_idx][0],\n                    unet_out[0, f_idx], cfg.det_threshold, pool_k,\n                    voxel_size, downsample,\n                )', 1)
     _s = _s.replace(_d1_anchors["A3"], '_d1_orig_main = main\n\n\ndef main():\n    try:\n        _d1_orig_main()\n    finally:\n        _d1_flush(\n            fold=_d1_os.environ.get("BIOHUB_D1_FOLD"),\n            ckpt_hash=_d1_os.environ.get("BIOHUB_D1_CKPT_SHA"),\n            expected_crops=int(_d1_os.environ.get("BIOHUB_D1_EXPECTED_CROPS", "0"))\n            or None,\n        )\n\n\n' + _d1_anchors["A3"], 1)
     compile(_s, str(_ps), "exec")
     _ps.write_text(_s)

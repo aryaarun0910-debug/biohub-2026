@@ -38,9 +38,14 @@ IMPORTS = (
     "import os as _d1_os  # noqa: E402\n\n\n"
 )
 
+# NOTE: det_logits[f_idx] is (1, 1, Z, Y, X) -- the predict script passes det_logits[f_idx][0]
+# to _detect_cells_pooled, which is (1, Z, Y, X). Passing the un-indexed tensor and then
+# unsqueezing gave a 6D input and max_pool3d rejected it at runtime:
+#   "Expected 4D or 5D tensor for input, but got: [1, 1, 1, 64, 64, 64]"
+# Match what the deployed extractor receives.
 CALL = (
     "\n                _d1_audit_frame(\n"
-    "                    ds_path.stem, ds_path.parent, t, det_logits[f_idx],\n"
+    "                    ds_path.stem, ds_path.parent, t, det_logits[f_idx][0],\n"
     "                    unet_out[0, f_idx], cfg.det_threshold, pool_k,\n"
     "                    voxel_size, downsample,\n"
     "                )"

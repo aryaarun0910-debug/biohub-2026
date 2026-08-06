@@ -18,3 +18,5 @@ reports/*.log
 reports/inventory/spotiflow_zeroshot.csv
 scratch_lb/
 scratch_nb/
+/biohub-cell-tracking-during-development.zip
+reports/CLAUDE_HANDOFF_V3_RERUN_2026-07-03.md
