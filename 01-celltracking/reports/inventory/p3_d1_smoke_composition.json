@@ -2,8 +2,8 @@
   "folds": [
     {
       "fold": 0,
-      "spec_sha256": "df8a6c4e9878",
-      "notebook_sha256": "f6210027e65f7bc9894a0aab1a292adcd4b4fd0ad533a4bd2ed58f66c09d271e",
+      "spec_sha256": "bbc796413ca6",
+      "notebook_sha256": "c943bce4260f55587840074cff365d07f291c3d16d6f5521eb8826ebda11c5d2",
       "changed_cells": [
         2,
         5,
@@ -41,7 +41,7 @@
           "E10_aggregator"
         ]
       },
-      "patched_predict_sha256": "30667fca0728b5d562afda3a568ee39f2b55eb4ebbda5e021c2307efe0078ccf",
+      "patched_predict_sha256": "65130187d9fdf96a1357276641957e9c0cb73224643b23d239c2682856c47042",
       "edits": [
         {
           "order": 0,
@@ -51,7 +51,7 @@
             2
           ],
           "kind": "env",
-          "canonical_sha256": "f9d68eec94eca212",
+          "canonical_sha256": "5842c694aadda96b",
           "intent": "1. environment: LOEO fold routing + D1 knobs"
         },
         {
@@ -245,8 +245,8 @@
     },
     {
       "fold": 1,
-      "spec_sha256": "c1858b5b7ec8",
-      "notebook_sha256": "85c22c1cb56caa1b457760da96c3129c21903ec1cd677e9b641db81211ec0fbf",
+      "spec_sha256": "38d0855e998c",
+      "notebook_sha256": "44ff93a69dda544e56bc4bfb6f5159073913decd9eddafb48a3ed2a0c7d7154b",
       "changed_cells": [
         2,
         5,
@@ -284,7 +284,7 @@
           "E10_aggregator"
         ]
       },
-      "patched_predict_sha256": "30667fca0728b5d562afda3a568ee39f2b55eb4ebbda5e021c2307efe0078ccf",
+      "patched_predict_sha256": "65130187d9fdf96a1357276641957e9c0cb73224643b23d239c2682856c47042",
       "edits": [
         {
           "order": 0,
@@ -294,7 +294,7 @@
             2
           ],
           "kind": "env",
-          "canonical_sha256": "a909eea48d071c28",
+          "canonical_sha256": "33ae4f456ae55b4d",
           "intent": "1. environment: LOEO fold routing + D1 knobs"
         },
         {

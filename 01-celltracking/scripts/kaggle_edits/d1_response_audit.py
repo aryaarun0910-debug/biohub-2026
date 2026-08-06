@@ -217,31 +217,35 @@ def _d1_parity_frame(det_head, feats_tta_czyx, logits_1zyx):
         _x = _x.to(_w.dtype)
     with _d1_torch.no_grad():
         _recon = det_head(_x)[0]
-    _lg = logits_1zyx.detach().float().reshape(-1)
-    _r = _recon.detach().float().reshape(-1) - _lg
-    if _r.numel() != _lg.numel():
+    if tuple(_recon.shape) != tuple(logits_1zyx.shape):
         raise RuntimeError(
             f"D1 v6 parity: shape mismatch recon {tuple(_recon.shape)} vs "
             f"det_logits {tuple(logits_1zyx.shape)} -- wrong tensor pairing"
         )
-    _absr = _r.abs()
+    # Statistics in numpy on the host. torch.quantile refuses inputs above ~2**24 elements,
+    # which a larger output grid would hit; a silent RuntimeError inside the parity check is
+    # the one failure mode that must never happen, because it is the gate for everything else.
+    _lg = logits_1zyx.detach().float().reshape(-1).cpu().numpy().astype(_d1_np.float64)
+    _rc_v = _recon.detach().float().reshape(-1).cpu().numpy().astype(_d1_np.float64)
+    _r = _rc_v - _lg
+    _absr = _d1_np.abs(_r)
     _mean = float(_r.mean())
-    _rms = float(_r.pow(2).mean().sqrt())
-    _lc = _lg - _lg.mean()
-    _rc = _r - _r.mean()
-    _den = float(_lc.pow(2).sum().sqrt()) * float(_rc.pow(2).sum().sqrt())
-    _corr = (float((_lc * _rc).sum()) / _den) if _den > 0.0 else 0.0
+    _rms = float(_d1_np.sqrt((_r ** 2).mean()))
+    _lcent = _lg - _lg.mean()
+    _rcent = _r - _r.mean()
+    _den = float(_d1_np.sqrt((_lcent ** 2).sum())) * float(_d1_np.sqrt((_rcent ** 2).sum()))
+    _corr = (float((_lcent * _rcent).sum()) / _den) if _den > 0.0 else 0.0
     return {
-        "n_voxels": int(_r.numel()),
+        "n_voxels": int(_r.size),
         "max_abs_err": float(_absr.max()),
-        "p999_abs_err": float(_d1_torch.quantile(_absr, 0.999)),
-        "median_abs_err": float(_absr.median()),
+        "p999_abs_err": float(_d1_np.percentile(_absr, 99.9)),
+        "median_abs_err": float(_d1_np.median(_absr)),
         "mean_signed_err": _mean,
         "rms_err": _rms,
         "sign_ratio": (abs(_mean) / _rms) if _rms > 0.0 else 0.0,
-        "frac_positive": float((_r > 0).float().mean()),
+        "frac_positive": float((_r > 0).mean()),
         "pearson_r_vs_logit": _corr,
-        "logit_abs_max": float(_lg.abs().max()),
+        "logit_abs_max": float(_d1_np.abs(_lg).max()),
         "dtype_feat_tta_mean": str(feats_tta_czyx.dtype),
         "dtype_det_logits": str(logits_1zyx.dtype),
         "dtype_head_weight": str(_w.dtype),
@@ -311,6 +315,16 @@ def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_tta_czyx, feats_idvie
             f"D1 v6: {_nv} TTA views accumulated, {_D1_REQUIRE_VIEWS} required. Refusing to "
             "export identity-view features under the post-TTA name -- that is blocker B3. "
             "Set BIOHUB_D1_REQUIRE_TTA_VIEWS deliberately if a different view set is intended."
+        )
+    # Identity, not just arity. A view set with the right COUNT but the wrong members (an
+    # inverse applied in the wrong order, a rot90 k mixed up) still divides by 8 and still
+    # produces a plausible-looking mean; only the parity assert would catch it, and only if
+    # det_logits happened to be built the same wrong way. Pin the members too.
+    if _views != _D1_TTA_VIEW_SET:
+        raise RuntimeError(
+            f"D1 v6: TTA view set {list(_views)} != the deployed set "
+            f"{list(_D1_TTA_VIEW_SET)}; the accumulator is not averaging the views the "
+            "generated notebook's patch averages"
         )
     _b["tta_view_set"] = list(_views)
     _b["n_views"] = _nv

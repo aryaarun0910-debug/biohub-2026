@@ -109,10 +109,24 @@ def build(fold: int) -> dict:
         "BIOHUB_LOEO_WEIGHTS_GLOB": f"/kaggle/input/*/edge_predictor_best_split_{split}.pth",
         "BIOHUB_LOEO_CONFIG_GLOB": f"/kaggle/input/*/config_split_{split}.json",
         "BIOHUB_D1_FOLD": str(fold),
+        # The manifest must name the checkpoint BASIS, not just the fold: 44b6 sits in
+        # split-0's 32-D basis and 6bba in split-1's, and the two bases are independent
+        # (rel-L2 1.41542 ~ sqrt(2)). A head fitted in one cannot be applied in the other,
+        # so every exported feature row has to carry the split it was encoded in.
+        "BIOHUB_D1_SPLIT": str(split),
         "BIOHUB_D1_CKPT_SHA": CKPT_SHA[split],
         "BIOHUB_D1_EXPECTED_CROPS": str(len(stems)),
         "BIOHUB_D1_N_UNIFORM": "64",
         "BIOHUB_D1_N_SUBTHR": "32",
+        # v6 view-set contract. Both are RAISE gates, not preferences.
+        #   REQUIRE_TTA_VIEWS   the audit refuses to export unless 8 views were accumulated,
+        #                       so it can never ship identity-view features under the
+        #                       post-TTA name (blocker B3).
+        #   REQUIRE_NOTEBOOK_TTA the injector refuses to proceed if only the vendored 4-view
+        #                       block is present, i.e. if the notebook's own TTA patch
+        #                       silently failed -- its guard only prints.
+        "BIOHUB_D1_REQUIRE_TTA_VIEWS": "8",
+        "BIOHUB_D1_REQUIRE_NOTEBOOK_TTA": "1",
     }
 
     # keep-list: derive from the imported edit rather than transcribing it, then extend so the
@@ -182,8 +196,11 @@ def build(fold: int) -> dict:
             f"STRUCTURAL SMOKE, fold {fold}, {len(stems)} crop(s). Combined P3 + D1 + D1-F "
             "export: one encoder pass per crop emits the P3 pre-wrapper graph (harmonic "
             "association), accepted detector peaks, the exact A/B/D classification of every GT "
-            "node with D stratified by distance to the nearest local maximum, and 32-D frozen "
-            "features at BOTH the GT voxel and that maximum. Combinable because the harmonic "
+            "node with D stratified by distance to the nearest local maximum, and FOUR 32-D "
+            "frozen feature arrays: the 8-view TTA MEAN (the post-TTA detector "
+            "representation) and the IDENTITY VIEW (the association representation that "
+            "predict_edges actually reads), each at the sampled voxel and at the strongest "
+            "nearby local maximum. Combinable because the harmonic "
             "patch touches edge_logits_pair only and never det_logits. NOT a scientific verdict "
             "and NOT a submission."
         ),

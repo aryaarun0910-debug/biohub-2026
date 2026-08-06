@@ -1,11 +1,11 @@
 {
   "name": "p3_d1_smoke_f0",
-  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p3_d1_smoke_f0.json",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\.claude\\worktrees\\agent-ab3310e9b5a4cd85d\\scripts\\kaggle_specs\\p3_d1_smoke_f0.json",
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
   "built_notebook": "notebooks\\kaggle_p3_d1_smoke_f0\\biohub-p3-d1-smoke-f0.ipynb",
-  "built_sha256": "f6210027e65f7bc9894a0aab1a292adcd4b4fd0ad533a4bd2ed58f66c09d271e",
-  "config_hash": "20ee3d668e86",
+  "built_sha256": "c943bce4260f55587840074cff365d07f291c3d16d6f5521eb8826ebda11c5d2",
+  "config_hash": "7edda083684d",
   "n_cells": 12,
   "edits": [
     {
@@ -13,7 +13,7 @@
       "cells": [
         2
       ],
-      "payload_sha256": "7801f4473a4f33c409d1e56bce96db7b269137dc7735e61297cdc6058970bf7d"
+      "payload_sha256": "0c567f47cb693db70f8ecc2a58a37bd91a4c7a798defdf28b98debf8552da427"
     },
     {
       "kind": "insert_before",
@@ -136,6 +136,5 @@
     }
   ],
   "declared_slug": "biohub-p3-d1-smoke-f0",
-  "title": "Biohub P3 D1 Smoke F0",
-  "pushed_slug": "biohub-p3-d1-smoke-f0"
+  "title": "Biohub P3 D1 Smoke F0"
 }
