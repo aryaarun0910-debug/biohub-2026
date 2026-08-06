@@ -169,7 +169,56 @@ Ledger base rate: ~20 mechanisms decisive, **2 promoted, 1 cleared min-fold** �
 
 ---
 
-## 9. Standing rules unchanged
+## 9. Incident during the halt — I destroyed and rebuilt `.venv`
+
+Recorded because it cost real time and the next agent should know the trap exists.
+
+While pruning the two fully-merged agent worktrees I ran a loop that derived each worktree path
+from `git worktree list --porcelain` via `grep -B2` and passed it to `git worktree remove
+--force`. Immediately afterwards `.venv` had lost `Lib/`, `Include/` and `pyvenv.cfg`, keeping
+only `Scripts/` and `share/`. **The exact causal step is not proven** — `git worktree remove`
+should not touch `.venv`, and the fragile path extraction is the prime suspect — but the
+damage appeared within that command and nowhere else.
+
+`.venv` is gitignored, so there was nothing to restore from.
+
+**Two things made the rebuild harder than it should have been, both worth knowing:**
+
+1. **VS Code holds `.venv\Scripts\python.exe` open.** A python process kept respawning from the
+   venv (parent chain resolves to the VS Code Python extension), so `python -m venv .venv`
+   failed with `Permission denied` on that one file every time — *after* correctly recreating
+   `Include/`, `Lib/` and `pyvenv.cfg`. Killing the process is futile; it respawns. The existing
+   launcher is a valid 3.12 venv stub, so the fix is to rebuild **around** it, not replace it.
+2. **venv creation aborts before installing pip**, so the rebuilt venv had no pip.
+   `python -m ensurepip --upgrade` bootstraps it.
+
+**The lockfile cannot be installed with plain `pip`.** `requirements.lock.txt` was produced by
+`uv`, and two pins conflict under pip's resolver: vendored `tracking-cellmot` requires
+`tracksdata@main`, while the lock pins `tracksdata@980c2d30`, and `main` has since moved to
+`54d74878`. The working command is:
+
+```powershell
+.\.venv\Scripts\python.exe -m ensurepip --upgrade
+uv pip install --python .venv -r requirements.lock.txt --no-deps `
+   --index-strategy unsafe-best-match --extra-index-url https://download.pytorch.org/whl/cpu
+```
+
+`--no-deps` is correct for a complete lock and sidesteps the resolution conflict;
+`--index-strategy unsafe-best-match` is required because `torch==2.12.1+cpu` lives on the
+PyTorch CPU index while everything else is on PyPI.
+
+**Restored and verified:** torch 2.12.1+cpu · numpy 2.4.6 · polars 1.42.1 · zarr 3.2.1 ·
+pytest 9.1.1 · `tracksdata` and `tracking_cellmot` import · **224 passed** · **53 claims
+resolve**. No repo file was affected; the environment is gitignored and the tree was already
+committed and pushed before the incident.
+
+**Lesson for the next agent: do not compute paths for a destructive command with `grep`/`cut`.
+Use `git worktree list --porcelain` parsed properly, or remove worktrees by explicit literal
+path.**
+
+---
+
+## 10. Standing rules unchanged
 
 No submission from a probe or sampled-row metric. Promotion ≥ +0.015 OOF; submission ≥ +0.020
 (**policy, not a calibrated transfer law**). The 199 crops come from **two embryos** — crop-block

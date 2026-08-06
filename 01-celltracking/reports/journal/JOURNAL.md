@@ -4104,3 +4104,23 @@ one fold at module level. Recommended: **split 1 only, 7.88 T4-h**, ~85% of the 
 **On 0.930:** not on an evidenced path. +0.015 public would be 15x the largest public gain this
 project has recorded (P3 +0.001; arm B +0.0085 OOF -> 0.000 public). Nothing on the shelf
 clears +0.020.
+
+**Incident during the halt: I destroyed and rebuilt `.venv`.** Pruning the two fully-merged
+agent worktrees, I passed a `grep -B2`-derived path to `git worktree remove --force`; `.venv`
+immediately afterwards had lost `Lib/`, `Include/` and `pyvenv.cfg`. Exact causal step
+unproven, but the damage appeared within that command. `.venv` is gitignored so nothing was
+recoverable.
+
+Rebuild notes, all worth knowing:
+- **VS Code holds `.venv\Scripts\python.exe` open** and respawns it, so `python -m venv .venv`
+  fails `Permission denied` on that one file every time -- after correctly recreating
+  `Include/`, `Lib/` and `pyvenv.cfg`. Rebuild AROUND the existing launcher; it is a valid stub.
+- venv creation aborts before pip, so `python -m ensurepip --upgrade` is needed.
+- **`requirements.lock.txt` cannot be installed with plain pip.** Vendored `tracking-cellmot`
+  requires `tracksdata@main` while the lock pins `tracksdata@980c2d30`, and main has moved to
+  `54d74878`. Use:
+  `uv pip install --python .venv -r requirements.lock.txt --no-deps --index-strategy unsafe-best-match --extra-index-url https://download.pytorch.org/whl/cpu`
+
+Restored and verified: torch 2.12.1+cpu, numpy 2.4.6, polars 1.42.1, zarr 3.2.1, pytest 9.1.1,
+tracksdata and tracking_cellmot import, **224 passed, 53 claims resolve**. No repo file
+affected. Lesson: never compute a path for a destructive command with grep/cut.
