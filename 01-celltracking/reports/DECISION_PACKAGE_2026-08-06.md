@@ -345,7 +345,7 @@ can be killed for under an hour of CPU before any GPU is spent.**
 | deployed TTA is **8 views**, `/_nv`, two blocks, guard is a `print` | `SOURCE-EXACT` |
 | `unet_out` read by `predict_edges` at L442/L445, after the TTA block | `SOURCE-EXACT` |
 | trap 21 fires on **28/199 crops**; smoke crops all start at frame 0 | `EXACT` |
-| 3-crop partition: M 1469 · C 289 · T 849 · L 420 · **D 0**; 52/52 parity | `IN-FAMILY` |
+| partition: GT 3,079 · M 1,521 · C 289 · T 849 · L 420 · **D 0**; 52/52 parity. **All unmatched GT is 6bba** — 44b6 is 52/52 — so the class split is a 2-crop 6bba-only measurement | `IN-FAMILY` |
 | wrapper destroys **16 GT matches (1.05%)** on every crop measured | `IN-FAMILY` |
 | `N_est` is a per-movie total — reproduces `total_node_ratio` 199/199, err 0.000e+00 | `EXACT` |
 | π pooled 9.0577e-4; label fraction 0.028215; ratio ~31× | `EXACT` |

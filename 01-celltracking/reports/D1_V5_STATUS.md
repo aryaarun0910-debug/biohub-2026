@@ -136,13 +136,30 @@ pregraph, the detection-honest substrate.
 | `44b6_0113de3b` | 52 | **52** | 0 | 0 | 0 | 0 | 49 |
 | `6bba_57b7cc1e` | 1,659 | 1,314 | 242 | 39 | 64 | 0 | 1,307 |
 | `6bba_6feb10f0` | 1,368 | 155 | 47 | 810 | 356 | 0 | 149 |
-| **total** | **3,027** | **1,469** | **289** | **849** | **420** | **0** | **1,505** |
+| **fold-1 subtotal (6bba only)** | **3,027** | **1,469** | **289** | **849** | **420** | **0** | **1,456** |
+| **all three crops** | **3,079** | **1,521** | **289** | **849** | **420** | **0** | **1,505** |
+
+> **CORRECTED 2026-08-06.** The original total row was internally inconsistent: it summed
+> GT and M over the **two fold-1 crops only** (3,027 / 1,469) while summing submission-matched
+> over **all three** (1,505). Correct all-crop totals are **GT 3,079 · M 1,521**. Everywhere
+> "GT 3,027" was quoted as a 3-crop figure — `HANDOFF.md`, the decision package, the journal —
+> it was a 2-crop fold-1 figure wearing a 3-crop label. Caught by the postprocessor-repair lane.
 
 Of 1,558 unmatched GT nodes: **C 18.5% · T 54.5% · L 27.0% · D 0.0%.**
+These percentages are **unaffected** by the correction: `44b6_0113de3b` contributes 52 GT and
+52 M, so it adds nothing to the unmatched pool.
 
-**Basis tag: 3-crop smoke, IN-FAMILY, diagnostic only.** One crop was deliberately selected
-as "extreme". This is *not* a corpus census and must not be quoted as one. Class counts are
-diagnostic and may never authorise encoder retraining on their own.
+**That is itself the finding, and it was not previously stated: every unmatched GT node in this
+smoke comes from 6bba.** `44b6_0113de3b` is 52/52 matched. So `D = 0`, `T = 54.5%` and the
+whole class distribution are **6bba-only measurements with zero 44b6 representation** — on the
+family whose corpus miss rate is 1.37% against 6bba's 13.28%. Per the standing rule that the
+two transfer directions are reported separately, these numbers may not be described as
+covering both families.
+
+**Basis tag: 2 crops for the class distribution (6bba), 3 crops for parity. IN-FAMILY,
+diagnostic only.** One crop was deliberately selected as "extreme". This is *not* a corpus
+census and must not be quoted as one. Class counts are diagnostic and may never authorise
+encoder retraining on their own.
 
 ### What it nonetheless says
 

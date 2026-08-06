@@ -4014,3 +4014,37 @@ the TTA patch fails to apply, and record `n_views` / `tta_view_set` in the manif
 
 **Next step.** v6 export patch: accumulate inverse-transformed features over the same 8 views
 as the logits, assert `detect_head(mean(aligned_features)) == mean(aligned_logits)`.
+
+---
+
+## 2026-08-06 (correction) — the "3-crop" partition was a 2-crop 6bba-only figure
+
+The v6 build swarm was terminated mid-flight by a session limit. Before dying, the
+postprocessor-repair lane reported a baseline that contradicted a number I had propagated into
+three documents.
+
+**The bug was mine and it was arithmetic.** The total row of the partition table summed GT and
+M over the **two fold-1 crops only** (3,027 / 1,469) while summing submission-matched over
+**all three** (1,505). Verified from the artifacts: `44b6_0113de3b` GT 52, `6bba_57b7cc1e`
+1,659, `6bba_6feb10f0` 1,368; 1,659 + 1,368 = 3,027 but 52 + 1,659 + 1,368 = **3,079**, and
+M is **1,521**, not 1,469.
+
+**The unmatched analysis is unaffected** — 44b6 contributes 52 GT and 52 M, so 1,558 unmatched
+and the C 18.5% / T 54.5% / L 27.0% / D 0.0% split hold exactly as recorded.
+
+**But the reason it is unaffected is the actual finding, and I had not stated it: every
+unmatched GT node in the smoke comes from 6bba.** `44b6_0113de3b` is 52/52 matched. So `D = 0`
+and the whole class distribution are **6bba-only measurements from two crops**, carrying zero
+44b6 representation — on the family whose corpus miss rate is 1.37% against 6bba's 13.28%.
+Anywhere the partition was described as covering the smoke's families, it did not.
+
+This is correction C7 biting on my own numbers one commit after I wrote it down: the two
+transfer directions must be reported separately, and a pooled label hid the fact that one
+direction had no data at all.
+
+Corrected in `reports/D1_V5_STATUS.md`, `HANDOFF.md` and the decision package. The earlier
+journal table at 2026-08-06 retains 3,027 as the fold-1 subtotal it actually was.
+
+**Swarm status:** all nine agents terminated by the session limit. Partial work salvaged to
+their branches (`d1_postprocess.py` +504, `d1f_probe.py` +2,194, `d1_response_audit.py` +405)
+as unreviewed WIP commits. Nothing merged to master.

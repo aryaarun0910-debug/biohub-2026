@@ -56,11 +56,15 @@ while still reporting `gt_rows` and `status: complete`. **28 of 199 crops (14.1%
 have been destroyed; all three smoke crops start at frame 0 so the smoke could not catch it.
 Fixed with `infer_schema_length=None` + a hard column contract.
 
-The derived partition over the 3-crop smoke (pregraph authority, reproduces **52/52** on
-`44b6_0113de3b`): GT 3,027 · **M 1,469 · C 289 · T 849 · L 420 · D 0**. Of 1,558 unmatched:
-C 18.5%, T 54.5%, L 27.0%, **D 0.0%**. Basis: 3-crop smoke, IN-FAMILY, **diagnostic only** —
-one crop was deliberately chosen as extreme. Class counts still may never authorise encoder
-retraining on their own.
+The derived partition (pregraph authority, reproduces **52/52** on `44b6_0113de3b`):
+all three crops **GT 3,079 · M 1,521**; class split **C 289 · T 849 · L 420 · D 0**.
+Of 1,558 unmatched: C 18.5%, T 54.5%, L 27.0%, **D 0.0%**.
+
+**Every unmatched GT node comes from 6bba** — `44b6_0113de3b` is 52/52 matched — so the class
+distribution and `D = 0` are **6bba-only, from two crops**, with zero 44b6 representation.
+(GT 3,027 / M 1,469, quoted here previously as a 3-crop figure, was the 2-crop fold-1 subtotal;
+corrected 2026-08-06.) Basis: IN-FAMILY, **diagnostic only** — one crop was deliberately chosen
+as extreme. Class counts still may never authorise encoder retraining on their own.
 
 Order of work: v6 export → rewrite `d1f_probe.py` with a capability registry → re-run the
 3-crop smoke as v6 → **only then** one combined full-199 launch. Do not run full v5 and then
