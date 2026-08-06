@@ -267,7 +267,7 @@ def test_tta_block_asserts_y_equals_x(patched_predict):
 
 
 def test_det_tta_off_aliases_identity_and_declares_one_view(patched_predict):
-    """Not a fallback: the audit refuses n_views != 8, so this branch cannot silently ship
+    """Not a fallback: the audit refuses n_encode_calls != 8, so this branch cannot ship
     identity-view features under the post-TTA name."""
     g, _, unet_out = _run_tta_block(patched_predict, det_tta=False)
     assert g["_d1_unet_tta"] is unet_out
@@ -350,7 +350,7 @@ def audit_run(tmp_path):
     mod._d1_audit_frame(
         ds, tmp_path, 0, logits, feats_tta, feats_idv,
         0.5, (1, 3, 3), (2.0, 1.0, 1.0), (1, 4, 4),
-        det_head=head, tta_view_set=VIEW_SET, n_views=8,
+        det_head=head, tta_view_set=VIEW_SET, n_encode_calls=8,
         n_frames_total=1, window_size=2,
     )
     mod._d1_flush(fold=1, ckpt_hash="deadbeef")
@@ -457,21 +457,30 @@ def test_manifest_records_the_view_set_and_the_population_fields(audit_run):
     _, out, ds, _ft, _fi = audit_run
     man = json.loads((out / "manifests" / f"{ds}.complete.json").read_text(encoding="utf-8"))
     assert man["tta_view_set"] == VIEW_SET
-    assert man["n_views"] == 8
+    assert man["n_encode_calls"] == 8
+    assert man["n_distinct_views"] == 7
+    assert "n_views" not in man, "the 8/7 split must never be conflated into one field"
+    # RADII: these arm `assert_export_radii` in scripts/d1_postprocess.py, which is
+    # wired but inert against v5 because v5 records neither.
+    assert man["match_um"] == 7.0 and man["search_um"] == 15.0
     assert man["grid_zyx"] == [5, 9, 9]
     for key in ("n_frames", "n_uniform_per_frame", "estimated_number_of_nodes",
                 "checkpoint_sha256", "split", "memory", "parity", "row_id_contract"):
         assert key in man, key
     assert man["checkpoint_sha256"] == "deadbeef"
     assert man["memory"]["tta_accumulator_bytes"] > 0
-    assert man["parity"]["max_abs_err"] <= 1e-4
+    assert man["parity"]["max_abs_err"] <= man["parity"]["gate_max_abs_err_applied"]
+    assert man["parity"]["gate_requires_peak_set_equality"] is True
+    assert man["parity"]["all_peak_sets_identical"] is True
+    assert man["parity"]["n_peak_set_symdiff_total"] == 0
+    assert man["parity"]["gate_n_encode_calls"] == 8
     assert man["parity"]["dtypes"]["dtype_det_logits"] == "torch.float32"
 
 
 # ======================================================================================
 # 4. the parity assert
 # ======================================================================================
-def _audit_call(mod, tmp_path, ds, *, det_head, view_set, n_views, feats_tta=None):
+def _audit_call(mod, tmp_path, ds, *, det_head, view_set, n_encode_calls, feats_tta=None):
     torch.manual_seed(3)
     c, z, y, x = 6, 5, 9, 9
     head = torch.nn.Conv3d(c, 1, kernel_size=1)
@@ -483,7 +492,7 @@ def _audit_call(mod, tmp_path, ds, *, det_head, view_set, n_views, feats_tta=Non
         ds, tmp_path, 0, logits, ft, ft + 0.1,
         0.5, (1, 3, 3), (2.0, 1.0, 1.0), (1, 4, 4),
         det_head=det_head if det_head is not None else head,
-        tta_view_set=view_set, n_views=n_views,
+        tta_view_set=view_set, n_encode_calls=n_encode_calls,
         n_frames_total=1, window_size=2,
     )
 
@@ -494,7 +503,8 @@ def test_parity_aborts_on_a_foreign_head(tmp_path):
     torch.manual_seed(99)
     foreign = torch.nn.Conv3d(6, 1, kernel_size=1)
     with pytest.raises(RuntimeError, match="PARITY ABORT"):
-        _audit_call(mod, tmp_path, "x", det_head=foreign, view_set=VIEW_SET, n_views=8)
+        _audit_call(mod, tmp_path, "x", det_head=foreign, view_set=VIEW_SET,
+                    n_encode_calls=8)
 
 
 def test_parity_requires_a_head_at_all(tmp_path):
@@ -503,7 +513,7 @@ def test_parity_requires_a_head_at_all(tmp_path):
         mod._d1_audit_frame(
             "x", tmp_path, 0, torch.zeros(1, 2, 2, 2), torch.zeros(3, 2, 2, 2),
             torch.zeros(3, 2, 2, 2), 0.5, (1, 1, 1), (1.0, 1.0, 1.0), (1, 1, 1),
-            det_head=None, tta_view_set=VIEW_SET, n_views=8,
+            det_head=None, tta_view_set=VIEW_SET, n_encode_calls=8,
         )
 
 
@@ -513,7 +523,8 @@ def test_degraded_view_set_raises_rather_than_falling_back(tmp_path):
     mod = _load_audit_block(tmp_path)
     with pytest.raises(RuntimeError, match="TTA views accumulated"):
         _audit_call(mod, tmp_path, "x", det_head=None,
-                    view_set=["identity", "flip_x", "flip_y", "flip_xy"], n_views=4)
+                    view_set=["identity", "flip_x", "flip_y", "flip_xy"],
+                    n_encode_calls=4)
 
 
 def test_wrong_view_members_raise_even_at_the_right_count(tmp_path):
@@ -521,13 +532,13 @@ def test_wrong_view_members_raise_even_at_the_right_count(tmp_path):
     bad = list(VIEW_SET)
     bad[4], bad[5] = bad[5], bad[4]
     with pytest.raises(RuntimeError, match="TTA view set"):
-        _audit_call(mod, tmp_path, "x", det_head=None, view_set=bad, n_views=8)
+        _audit_call(mod, tmp_path, "x", det_head=None, view_set=bad, n_encode_calls=8)
 
 
 def test_view_count_must_match_the_declared_list(tmp_path):
     mod = _load_audit_block(tmp_path)
     with pytest.raises(RuntimeError, match="disagree"):
-        _audit_call(mod, tmp_path, "x", det_head=None, view_set=VIEW_SET, n_views=7)
+        _audit_call(mod, tmp_path, "x", det_head=None, view_set=VIEW_SET, n_encode_calls=7)
 
 
 def test_parity_verdict_flags_a_signed_or_correlated_residual(tmp_path):
@@ -629,7 +640,7 @@ def test_audit_call_passes_both_representations_in_the_right_order(patched_predi
     call = patched_predict[i:patched_predict.index("\n                )", i)]
     assert call.index("_d1_unet_tta[0, f_idx]") < call.index("unet_out[0, f_idx]")
     assert "det_head=model.detect_head" in call
-    assert "tta_view_set=_d1_tta_views" in call and "n_views=_nv" in call
+    assert "tta_view_set=_d1_tta_views" in call and "n_encode_calls=_nv" in call
 
 
 def test_association_reads_still_use_the_identity_view(patched_predict):
@@ -671,4 +682,4 @@ def test_injected_call_binds_to_the_audit_signature(patched_predict, tmp_path):
     assert bound.arguments["feats_idview_czyx"] == "unet_out[0, f_idx]"
     assert bound.arguments["logits_1zyx"] == "det_logits[f_idx][0]"
     assert bound.arguments["det_head"] == "model.detect_head"
-    assert bound.arguments["n_views"] == "_nv"
+    assert bound.arguments["n_encode_calls"] == "_nv"
