@@ -54,6 +54,32 @@ _D1_SEARCH_UM = 15.0
 _D1_NEAR_UM, _D1_MID_UM = 5.0, 10.0
 
 
+def _d1_resolve_gt(dataset, gt_dir):
+    """Locate the GT geff.
+
+    The LOEO retarget deliberately symlinks ONLY the .zarr images into its working dir --
+    "the kernel must be incapable of reading a label" -- so `ds_path.parent` has no .geff and
+    the first smoke returned gt=0 rows. That invariant protects the SCORING arm. This kernel
+    emits no submission and uses GT strictly as an audit LABEL, never for inference or
+    proposal generation, so it resolves the geff from the mounted competition data instead.
+    Bounded depth ladder, never a recursive walk: `**` over /kaggle/input would descend the
+    79 GB zarr tree.
+    """
+    import glob as _g
+    _direct = _D1Path(str(gt_dir)) / f"{dataset}.geff"
+    if _direct.exists():
+        return str(_direct)
+    for _pat in (f"/kaggle/input/*/train/{dataset}.geff",
+                 f"/kaggle/input/*/*/train/{dataset}.geff",
+                 f"/kaggle/input/*/*/*/train/{dataset}.geff",
+                 f"/kaggle/input/*/{dataset}.geff",
+                 f"/kaggle/input/*/*/{dataset}.geff"):
+        _hits = _g.glob(_pat)
+        if _hits:
+            return sorted(_hits)[0]
+    return None
+
+
 def _d1_load_gt(dataset, gt_dir):
     """GT centres per frame in ORIGINAL voxel coords. Time comes from the `t` ATTRIBUTE."""
     if dataset in _D1_GT_CACHE:
@@ -61,7 +87,9 @@ def _d1_load_gt(dataset, gt_dir):
     by_t, err = {}, None
     try:
         import tracksdata as _td
-        _p = _D1Path(str(gt_dir)) / f"{dataset}.geff"
+        _p = _d1_resolve_gt(dataset, gt_dir)
+        if _p is None:
+            raise FileNotFoundError(f"no GT geff for {dataset} under /kaggle/input")
         _g = _td.io.load_geff(str(_p))
         if isinstance(_g, tuple):
             _g = _g[0]

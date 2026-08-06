@@ -34,8 +34,8 @@
       "loeo_pregraph": "5cbb94850ba34054edf11f98ef44b3ee18bec83222bfe2337832604ecb74907f",
       "loeo_keep": "b6a6c809e5d33dbf3b856b571a9ac5348da8e50dae1c9830e7481fd8efc4e5f5"
     },
-    "d1_inject_sha256": "c31ffd8d14727dd53d55b974d099b59ad11491c80580b88c19b796529494dbd3",
-    "d1_block_sha256": "5d29a4d60764a73499bab2795dcb039f601511b415e72b91590f49a1de5708a4",
+    "d1_inject_sha256": "850dda376a833a0c79009ccb219deb9e463efbac5926f6bf9f0a2a0f0362bd4e",
+    "d1_block_sha256": "d0b76e890bb8809b01fab92d44148da71fcc887c3a11bfb246d96b38febe47c6",
     "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
     "stems": [
       "6bba_6feb10f0",
