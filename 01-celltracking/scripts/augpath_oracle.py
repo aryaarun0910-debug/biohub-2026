@@ -323,7 +323,14 @@ def main():
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--substrate", choices=("prewrapper", "postwrapper"),
                     default="prewrapper")
-    ap.add_argument("--out", default=str(REPO / "reports/inventory/augpath_oracle.json"))
+    # No default. The previous default wrote `augpath_oracle.json`, and the file left at
+    # that path was the RETRACTED post-wrapper run (40 crops, not 199) -- quarantined as
+    # `augpath_oracle_RETRACTED_postwrapper_40crops.json`. A default output path let a
+    # retracted artifact sit where a valid one was expected, and would have let a rerun
+    # silently overwrite it. `--out` is now required and must name its substrate.
+    ap.add_argument("--out", required=True,
+                    help="output path; include the substrate in the name, e.g. "
+                         "reports/inventory/augpath_oracle_prewrapper_199.json")
     a = ap.parse_args()
 
     if a.substrate == "prewrapper":
