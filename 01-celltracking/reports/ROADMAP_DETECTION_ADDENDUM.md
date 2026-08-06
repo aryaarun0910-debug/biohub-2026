@@ -59,9 +59,14 @@ weights. It is direct evidence of how *this trainer is actually invoked* — sam
 but it is not the primary pack's own log. Treat `1.0 / 0.01` as **operative and well-evidenced**,
 not as byte-proven for the primary checkpoint.
 
-**Status: `det_neg_weight = 0.01` and `det_loss_weight = 1.0`, evidenced.**
-Neither may be quoted as runtime-proven until a training log or command is recovered. Any M2 arm
-must fix both explicitly and regression-lock them.
+**Status: `det_neg_weight = 0.01` and `det_loss_weight = 1.0`, evidenced by a retained
+training_config from this trainer.** Any M2 arm must still fix both explicitly and
+regression-lock them, and must not describe either as the primary pack's byte-proven config.
+
+Per the standing instruction, any later **full-model** experiment runs paired arms at
+`det_loss_weight` 1 and 10 with identical seed, samples and optimizer steps, and neither is
+called "the organizer baseline" without exact reproduction. The **head-only** path is unaffected:
+it freezes the encoder and transformer, so this constant does not enter it.
 
 ### What this does to the thesis
 
