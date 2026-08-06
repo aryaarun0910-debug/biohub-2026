@@ -371,6 +371,27 @@ def test_census_verified_the_pinned_hashes_against_the_real_files(census):
         assert int(rec["size_bytes"]) == 8_357_783
 
 
+def test_pinned_hashes_match_the_checkpoint_files_when_they_are_reachable():
+    """Re-hash the real .pth files.
+
+    ``census`` already hard-fails on a mismatch and records the verified digest, so the
+    committed census is the durable proof.  This re-runs the check live wherever the weights
+    are actually present (they are gitignored, so a worktree may not see them).
+    """
+    candidates = [
+        REPO / "artifacts" / "kaggle" / "weights_dataset",
+        REPO.parent.parent.parent / "artifacts" / "kaggle" / "weights_dataset",
+    ]
+    ckpt_dir = next((c for c in candidates if c.is_dir()), None)
+    if ckpt_dir is None:
+        pytest.skip("LOEO checkpoints not reachable from this checkout")
+    for fold, spec in bdf.CHECKPOINTS.items():
+        p = ckpt_dir / spec["weights_file"]
+        if not p.exists():
+            pytest.skip(f"{p} absent")
+        assert bdf.sha256_file(p) == spec["sha256"], f"fold {fold} checkpoint changed"
+
+
 @pytest.mark.parametrize("tier", TIERS)
 def test_every_row_and_cell_pins_the_right_checkpoint(manifests, tier):
     m = manifests[tier]
