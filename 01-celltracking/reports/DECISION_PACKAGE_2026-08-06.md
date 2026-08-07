@@ -74,6 +74,21 @@ by raw T/L rows.
 conflated Lane 1's 3,348 *admitted candidates* at q=0.80 with a TP floor. **Any threshold above
 2,221 carries a precision assumption and must state it.**
 
+> **SUPERSEDED 2026-08-07 — the 2,221 / 2,961 figures are themselves too low by 1.27–2.56×.**
+> They assume each recovered node converts to edge value **independently**. It does not:
+> **65.8% of at-stake edge mass has BOTH endpoints missing**, so an edge is recovered only when
+> *both* of its nodes are. At 2,961 recoveries the exact net is **+0.0078 (random order) /
+> +0.0158 (coherent)** — **neither reaches +0.020 even at perfect precision.**
+>
+> **Corrected requirement: ≈5,400–7,600 nodes at 70% precision.**
+>
+> Two consequences. **Recovery ORDER is a lever**: coherent recovery (both endpoints of the same
+> edge) is worth ~2× random recovery at equal node count, so a method that recovers *neighbouring*
+> misses beats one that recovers scattered ones. And the related `28,732 edges at stake` figure
+> is a **degree sum, not an edge count** — `E1 + 2·E2 = 5,922 + 2·11,405 = 28,732` bit-exactly;
+> **unique at-stake edges are 17,327**. The **+0.136531 oracle is inflated 1.658× and is
+> RETRACTED**; **+0.10332 survives**, corroborated to 0.67%. See `reports/GATE_A_CEILING_VERDICT.md`.
+
 ### C5 · Strict LOEO is not the public P3 detector
 
 Strict LOEO disables the all-training secondary detector; public P3 runs the **blended**
