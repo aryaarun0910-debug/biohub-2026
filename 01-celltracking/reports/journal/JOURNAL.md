@@ -4124,3 +4124,57 @@ Rebuild notes, all worth knowing:
 Restored and verified: torch 2.12.1+cpu, numpy 2.4.6, polars 1.42.1, zarr 3.2.1, pytest 9.1.1,
 tracksdata and tracking_cellmot import, **224 passed, 53 claims resolve**. No repo file
 affected. Lesson: never compute a path for a destructive command with grep/cut.
+
+---
+
+## 2026-08-07 — v7 diagnostic cycle: four gates returned, no GPU spent
+
+Full record: `reports/CYCLE_OUTPUT_2026-08-07.md`. Commits `39705de` -> `95d4b46`, pushed.
+Tests **224 -> 487**. GPU 0, Kaggle pushes 0, submissions 0, score movement 0.000.
+
+**Gate A: PROCEED.** At most 3,410 of 15,296 misses (22.3%) are optically unresolvable at
+measured density and measured anisotropic PSF; ceiling +0.062-0.069, above +0.020 for any
+added-node precision p >= 0.55. The density objection was half right and it was the wrong half:
+23-34% of the true population IS merged, but MAX_DISTANCE = 7.0 um exceeds the whole merge
+scale, so a merged pair still sites its maximum inside the scorer radius 97.7-98.3% of the time.
+**Merging is falsified as the cause of the misses** -- 85.94% of GT centres have a local maximum
+within 7 um but only 58.27% have an ACCEPTED one, crowding stratification runs BACKWARDS
+(15.06% -> 89.19% across quartiles), and 44b6 is 3.4x denser while missing 9.7x fewer. The
+deficit is calibration, not optics.
+
+**Gate B: REJECT** the synthetic corpus. Licence unverifiable in fact (CC0 claimed in post text
+only; no machine-reachable field anywhere). Confirmatory: one fit-free rank statistic separates
+the corpora at AUC 1.0000, worse than the 0.9888 fitted classifier that closed this line before.
+Motion direction inverted, division rate 35.6x, sister separation provably unreweightable.
+
+**Gate C: KILL** true-D4. Ceiling +0.00068, 22.1x short; net +2 of 659 GT. The defect is real --
+8 encode calls over 7 distinct views, and the SECONDARY block carries the same collision live at
+0.475 on the public path -- but it is not measurably costly. **C3 confirmed with a number:**
+predict_edges rerun shows max |d softmax prob| = 0.723 on node pairs that did not themselves
+change.
+
+**THE POLICY FINDING. The +0.020 bar rests on a statistical error.** Lane O used a POINT
+probability as a p-value; from its own table the correct tail is 0.1005 (0.1089 at the actual
+mix), not 0.0322. Sampling variance was never falsified -- we fail to reject it. Section
+retracted. And the bar gates the wrong variable: scaling arm B leaves the panel t invariant at
+~1.15, while a HOMOGENEOUS +0.005 has P(up) = 1.0000. The decision variable is cross-crop
+homogeneity (t4 = 2/CV); arm B's CV of 1.71 against the 1.22 needed means **it never had a 95%
+chance of showing at any magnitude**. Churn does not predict transfer either (Spearman -0.63).
+
+**Every instrument was broken.** D1-F had six independent verdict-path defects, all found by
+RUNNING it -- including a null regime that crashed instead of returning the verdict built for
+it, and H3/H4 silently blocked. The 1.0000 recall ceiling was degenerate by construction (27
+nuclei in one pool window still returns 1.0000). The v6 spec advertised a gate no code read.
+
+**Corrections to my own numbers:** the recovery requirement is 1.27-2.56x worse than I stated
+(65.8% of at-stake edge mass has BOTH endpoints missing, so +0.020 needs ~5,400-7,600 nodes at
+70% precision, not 2,961); "28,732 edges at stake" is a DEGREE SUM (unique = 17,327), so the
++0.136531 oracle is inflated 1.658x and retracted while +0.10332 survives; and my "201 of 1,780
+peaks" replicates as a fraction but not as counts.
+
+**Phase 3 not started.** The cross-encoded smoke build is still running and is a hard
+dependency -- D1-F correctly refuses routed-only data and our smoke is routed-only.
+
+**The risk that outweighs the rest:** 44b6 holds 2.42% of at-stake edge mass, so its entire
+detection oracle is +0.0025. If the private embryo behaves like 44b6 the route cannot clear
++0.020 at any recall or precision. Irreducible on two embryos.
