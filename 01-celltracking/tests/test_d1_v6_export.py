@@ -874,27 +874,41 @@ def test_terminal_record_declares_the_handshake_the_postprocessor_needs(audit_ru
     assert man["parity"]["gate_slack"] == 2.0
 
 
-def test_the_postprocessor_still_expects_the_v5_array_names_INTEGRATION_GAP():
-    """LOCK, NOT A PASS. `scripts/d1_postprocess.py` is owned by another lane and still
-    declares FEATURE_ARRAYS = ("feat_gt", "feat_max"). A v6 export writes four differently
-    named arrays, so `load_features` will SystemExit with `missing feature array
-    <crop>__feat_gt.npy` on the first v6 artifact it is pointed at.
+def test_the_v6_export_reader_handshake_is_complete():
+    """INVERTED 2026-08-07. This was a machine-visible LOCK on an open gap: the postprocessor
+    declared `FEATURE_ARRAYS = ("feat_gt", "feat_max")`, so it would SystemExit on the first
+    v6 artifact. The lock fired when the reader lane closed the gap, exactly as intended.
 
-    This test asserts the CURRENT state so the gap is machine-visible rather than prose in a
-    report. When the postprocessor lane adopts the v6 names, this test fires -- and at that
-    point the rest of the handshake must land with it:
+    It now asserts the four things the original docstring said had to land TOGETHER, so the
+    handshake cannot be half-undone later:
 
-      1. FEATURE_ARRAYS -> the four v6 names (`schema_version == "d1_v6"` selects them).
-      2. `feat_max_validity`'s v5 reconstruction path (feat_max == feat_gt) must not run
-         against v6, which ships an explicit `feat_max_valid` column and NaN sentinels.
-      3. `assert_export_radii(agg)` reads the TOP-LEVEL d1_manifest.json. v6 records
-         match_um/search_um in each per-crop terminal record; `scripts/kaggle_edits/
-         d1_aggregate.py` (also another lane's file) must promote them, asserting agreement
-         across crops, or the radius binding stays inert.
-      4. `--v5-emission-order-row-id` becomes unnecessary: v6 ships a real `row_id`.
+      1. schema-DISPATCHED array names, never inferred from which files exist;
+      2. the v5 `feat_max == feat_gt` reconstruction must not run against v6, which ships a
+         real `feat_max_valid` column and NaN sentinels;
+      3. `match_um`/`search_um` promoted from the per-crop terminal records with agreement
+         asserted across crops, so the scorer binding is live rather than decorative;
+      4. `--v5-emission-order-row-id` is a v5-only declaration; v6 ships a real `row_id`.
     """
     src = POSTPROCESS.read_text(encoding="utf-8")
-    assert 'FEATURE_ARRAYS = ("feat_gt", "feat_max")' in src, (
-        "the postprocessor's feature-array names changed -- finish the v6 handshake listed "
-        "in this test's docstring, then update or delete this lock"
-    )
+    agg = (ROOT / "scripts" / "kaggle_edits" / "d1_aggregate.py").read_text(encoding="utf-8")
+
+    # 1. dispatch on the DECLARED schema, and the old single-tuple constant is gone
+    assert 'FEATURE_ARRAYS = ("feat_gt", "feat_max")' not in src, "the v5-only constant is back"
+    assert "FEATURE_ARRAYS_BY_SCHEMA" in src and "REPRESENTATIONS" in src
+    for name in ("feat_tta_mean_gt", "feat_tta_mean_max", "feat_idview_gt", "feat_idview_max"):
+        assert name in src, f"v6 reader lost {name}"
+
+    # the two representations must not be silently interchangeable
+    assert "--representation" in src, "the representation choice must be explicit"
+    assert "detector" in src and "association" in src
+
+    # 2. v5 reconstruction is gated on the declaration
+    assert "def feat_max_validity" in src and "schema" in src
+
+    # 3. the radius gate is live: promoted by the aggregator, checked by the reader
+    assert "match_um" in agg and "search_um" in agg, "aggregator no longer promotes the radii"
+    assert "assert_export_radii" in src
+    assert "MATCH_UM: float = float(MAX_DISTANCE)" in src, "MATCH_UM is a literal again"
+
+    # 4. the v5 row-id flag is v5-only
+    assert "v5-emission-order-row-id" in src or "v5_emission_order_row_id" in src
