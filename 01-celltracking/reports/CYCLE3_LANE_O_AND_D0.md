@@ -9,7 +9,46 @@ Reproduce: `scripts/oof_public_calibration.py`, `scripts/detection_preflight.py`
 
 ---
 
-## 1. LANE O — sampling variance is FALSIFIED as the explanation
+## 1. LANE O — ~~sampling variance is FALSIFIED~~ **RETRACTED 2026-08-07**
+
+> ### RETRACTION — this section's conclusion is wrong, and it is wrong on its own numbers.
+>
+> §1 tested the sampling-variance hypothesis with a **point probability where a tail
+> probability is required.** It observed the flat outcome and quoted `P(flat) = 0.0322` as
+> though that were a p-value. The correct one-sided test statistic is
+> `P(outcome at least as extreme as flat)`:
+>
+> ```
+> P(down) + P(flat) = 0.0683 + 0.0322 = 0.1005          <- from §1's OWN table
+> at the actual public mix (0.50):  0.0737 + 0.0352 = 0.1089
+> ```
+>
+> Admitting any between-embryo variance raises it further (independently estimated ≈0.176).
+>
+> **At p ≈ 0.10–0.18, four-movie sampling variance is NOT falsified at any conventional
+> level.** Stated precisely: we *fail to reject* it. That is not the same as confirming it —
+> hypotheses B, C and D remain live — but §1's central claim, and the "cannot carry the
+> explanation on its own" wording, do not survive.
+>
+> **Consequence, and it is the important one: the `+0.020` submission bar was raised largely
+> on the strength of this falsification.** The bar is therefore **POLICY resting on a
+> statistical error**, not a derived quantity, and it must not be described as evidence-based
+> until it is re-derived. Correction C7 already forbade calling it a calibrated transfer law;
+> this is why.
+>
+> **A further finding supersedes the framing entirely.** Scaling arm B's per-crop deltas leaves
+> the panel t-statistic invariant at ≈1.15 — a 4× larger arm (+0.0348) has `P(public up)`
+> **0.914** against the 1× arm's **0.890**, while a *homogeneous* +0.005 has `P(up)` **1.0000**.
+> **The decision variable is cross-crop homogeneity, not magnitude**, closed-form `t4 = 2/CV`.
+> Arm B's per-crop CV is **1.71**; 0.95 confidence needs CV ≤ **1.22**. **Arm B never had a 95%
+> chance of showing on a four-movie panel at any magnitude whatsoever.** Raising a *magnitude*
+> bar could not have fixed that, and cannot now.
+>
+> Retained below unaltered as the record of what was believed. The per-crop pair rebuild, the
+> family-mix table, and the concentration/ESS figures (top-1 4.97%, ESS 142.1/199) are
+> unaffected and remain usable.
+
+## 1. LANE O — sampling variance is FALSIFIED as the explanation *(as originally written)*
 
 **Correction first:** the earlier `P(public tie) = 0.4148` consumed the invalid post-wrapper
 `+0.000435` deltas and could not speak to this question. Rebuilt from the correct per-crop pairs.
