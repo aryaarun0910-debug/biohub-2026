@@ -4178,3 +4178,43 @@ dependency -- D1-F correctly refuses routed-only data and our smoke is routed-on
 **The risk that outweighs the rest:** 44b6 holds 2.42% of at-stake edge mass, so its entire
 detection oracle is +0.0025. If the private embryo behaves like 44b6 the route cannot clear
 +0.020 at any recall or precision. Irreducible on two embryos.
+
+## 2026-08-07 — P2D merged: the smoke was never a factorial; halted here
+
+**Execution.** Merged the cross-encoded smoke build (a04b562 + a rebuild). The last outstanding
+lane of the v7 cycle. No GPU, no kernel push, no submission.
+
+**The finding.** D1-F was not broken when it raised CROSS-ENCODED — the corpus was. The smoke
+pinned 44b6 under split_0 and 6bba under split_1, i.e. each family under the checkpoint that
+HELD IT OUT. Both cells are TARGET cells, so run_direction found zero source rows in every
+basis and refused, correctly. Four cells now, one per manifest shard: s1 split_1/44b6/SOURCE
+(1 crop, new), s2 split_1/6bba/TARGET (2), s3 split_0/6bba/SOURCE (2, new), s4
+split_0/44b6/TARGET (1). 6 crop-inferences = 3 crops x 2 checkpoints; each split carries both
+families. Role is never a parameter: role = source iff crop family == SPLIT_SOURCE_FAMILY
+[split], derived at assembly and RE-DERIVED in-kernel from the split of the checkpoint actually
+loaded and the family prefix of the stems actually mounted. A relabelled cell raises before any
+GPU work. Source cells need no kernel edit: loeo_retarget selects purely by
+BIOHUB_LOEO_STEMS membership and LOEO_FOLD never gates fold membership (AST test locks this).
+
+**gate_p3_d1_smoke.py had the same defect as the corpus.** It iterated `for fold in (0, 1)` and
+asserted no crop of the checkpoint's own training family appears — the TARGET rule applied to
+every cell, which is exactly the routed-only assumption, and which made a SOURCE cell
+ungateable. Now role-aware and manifest-driven. GATE PASSED, 6/6 crop-inferences.
+
+**Semantic merge conflict, textually clean.** e199467 changed d1_aggregate.py (the top-level
+manifest promotion) after P2D built its notebooks, so the committed notebooks were stale
+against master's aggregator and the byte-identical-rebuild test failed. Rebuilt all four from
+spec; that test exists precisely to catch this. 528 passed, 53 claims resolve.
+
+**Budget.** 1.3232 T4-h and 17.29 MiB for all six inferences against 11.5 T4-h remaining. 68%
+of that is the 4 x 900 s fixed kernel overhead, not inference.
+
+**Decision: HALT.** User called a stop. Phase 3a/3b not launched.
+
+**Open, and owned by nobody yet:** (1) nothing assembles the four kernel outputs into the
+<root>/basis_N/ layout load_factorial expects, with one merged d1_manifest.json per basis —
+within a basis the two cells are family-disjoint so filenames do not collide, but across bases
+the crop names recur, which is why basis_N/ namespacing exists; (2) d1_aggregate records fold
+and checkpoint_sha256 but not shard_id/role/family, which the kernel now emits to
+d1_audit/d1_cell.json — promoting them closes the loop; (3) kaggle_factory bakes an absolute
+_spec_path into build_manifest.json, so that file is worktree-dependent. Pre-existing.
