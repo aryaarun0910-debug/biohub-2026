@@ -2423,6 +2423,16 @@ def run_direction(corpus: Corpus, *, basis_split: int, h0: LinearHead,
         row = {
             "arm": name, "role": REGISTRY[name_b].role,
             "param_space": arm.param_space, "fitted": arm.fitted,
+            # A probe that reports a promotable head but does not preserve the 33 numbers
+            # cannot produce a candidate.  Keep the exact float64 deployment parameters in
+            # the result artifact; downstream kernels may cast once to the checkpoint dtype.
+            "deployed_head": {
+                "w": [float(v) for v in head.w],
+                "b": float(head.b),
+                "basis_split": head.basis_split,
+                "param_sha256": head.param_sha256(),
+                "provenance": head.provenance,
+            },
             "threshold_logit": thr, "selection": sel,
             "fingerprint": fps.get(name),
             "fit": None if res is None else {
