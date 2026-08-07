@@ -4218,3 +4218,44 @@ the crop names recur, which is why basis_N/ namespacing exists; (2) d1_aggregate
 and checkpoint_sha256 but not shard_id/role/family, which the kernel now emits to
 d1_audit/d1_cell.json — promoting them closes the loop; (3) kaggle_factory bakes an absolute
 _spec_path into build_manifest.json, so that file is worktree-dependent. Pre-existing.
+
+## 2026-08-07 (post-lean) — two GPU-wasting defects closed before stage 3
+
+**Execution.** Post-reset baseline 7143ef0 verified: 0 0 with origin, 528 tests, 53 claims,
+only the two user-owned dirty files. Stage 1 of the lean sequence launched as two CPU lanes
+(corpus C/T/L/D census; probability-at-the-deployed-gate oracle) against caches already on
+disk -- 199-crop `coupled_cache/det/*__tta-4view__det-0.969.npz` and
+`clean903_wrapper_oof_cache/candidates/{0,1}/*.parquet`. No GPU, no Kaggle, no submission.
+
+**Defect 1: D1-F would have raised ContractError on the artifact, after the GPU was spent.**
+`validate_manifest` hard-required top-level `crops`, `tta_view_set` and `n_views`; the
+aggregator promoted none of the last two. Worse, `n_views` is the exact conflated field v6
+exists to forbid -- 8 encode calls over 7 distinct views, because
+rot90(imgs,1,dims=(-2,-1)).transpose(-1,-2) IS imgs.flip(-1) -- and merging the averaging
+divisor with the distinct-view count is what produced the four-view misreport. The probe now
+REFUSES the merged field rather than ignoring it, and checks what the two counts assert about
+each other: len(tta_view_set) == n_encode_calls (the list is per CALL),
+len(set(tta_view_set)) == n_distinct_views (the collision is measured, not free),
+n_distinct_views <= n_encode_calls. `expect_views` renamed `expect_encode_calls`; the
+ambiguous name was the bug. The aggregator promotes all three fields under its existing
+cross-crop agreement assert. Verified end to end.
+
+**Defect 2: nothing assembled the four kernel outputs into a readable shape.** Each cell
+returns its own d1_audit/; load_factorial reads <root>/basis_N/, one dir per checkpoint
+holding BOTH families under a single merged manifest. All four cells could have been fetched
+and still been unreadable. `scripts/assemble_d1_factorial.py` performs the merge and trusts
+nothing it can re-derive: role recomputed from SPLIT_SOURCE_FAMILY, the sha256 the kernel
+observed for its loaded weights checked against the pin, COMPLETE required, and a basis that
+is not exactly one source + one target refused -- the routed-only shape that made the probe
+refuse in the first place. Measurement-defining scalars must AGREE across the two halves; a
+half that lost one is a disagreement, not a default. It stamps shard_id/stage/role/family
+onto each crop record and sets encoder_split to the checkpoint that produced the row (a crop
+appears in both bases under different checkpoints, so without this C1's same-basis guarantee
+is unenforceable), then validates its own output through validate_manifest before returning.
+
+**State.** 552 tests, 53 claims, smoke gate 6/6 crop-inferences, master aff3655 pushed.
+Both remaining P2D gaps are closed; the third (kaggle_factory baking an absolute _spec_path
+into build_manifest.json) is cosmetic and untouched.
+
+**Stage 3 is now structurally unblocked but NOT authorised.** GPU spend awaits the two CPU
+lanes and explicit approval.
