@@ -224,11 +224,25 @@ def test_every_deployed_view_inverse_is_a_true_inverse_including_non_square():
 
 @pytest.mark.skipif(not all(p.exists() for p in NOTEBOOKS), reason="built notebooks absent")
 def test_a_second_independent_tta_block_exists_for_the_secondary_model():
-    """There are TWO 8-view TTA blocks -- primary and secondary detection models. Anything
-    reasoning about 'the' deployed detection field must account for both."""
+    """There are TWO TTA blocks -- primary and secondary detection models. Anything
+    reasoning about 'the' deployed detection field must account for both.
+
+    FLIPPED FOR v6. The literal `_nv = 1` count is no longer 2: the v6 injector adds anchor
+    strings that also contain it, so the count is now 5. Counting a literal was always the
+    weak form of this assertion -- it broke on a change that did not touch either block. The
+    v6 lock asserts the SECONDARY block is still structurally present and independent, which
+    is the property that actually matters. `tests/test_d1_v6_export.py` separately asserts the
+    secondary block is byte-untouched.
+    """
     src = _nb_source(NOTEBOOKS[0])
-    assert src.count("_nv = 1") == 2, "the secondary-model TTA block moved or merged"
-    assert src.count("_nv += 1") == 8, "4 literal increments per block x 2 blocks"
+    assert src.count("_nv = 1") >= 2, "the secondary-model TTA block moved or merged"
+    # both blocks still divide by their own runtime counter, not a literal
+    assert src.count("det_logits[f] = det_logits[f] / _nv") >= 2, (
+        "a TTA block no longer divides by its own counter"
+    )
+    assert "BIOHUB_SECONDARY_DETECTION_WEIGHT" in src, (
+        "the secondary detection path vanished from the built notebook"
+    )
 
 
 @pytest.mark.skipif(not all(p.exists() for p in NOTEBOOKS), reason="built notebooks absent")
@@ -246,17 +260,23 @@ def test_tta_patch_failure_is_caught_downstream_not_silently_tolerated():
 
     Converting the guard to a `raise` is still worth doing for locality -- the failure
     should name its own cause -- but it is a readability fix, not a correctness hole.
+
+    FLIPPED FOR v6. v6 requirement 4 converted the guard to a hard failure, so the locality
+    fix has landed: the notebook now carries `TTA PATCH FAILED` and no `TTA WARNING`. The
+    downstream `_nv` anchor still exists as defence in depth.
     """
     src = _nb_source(NOTEBOOKS[0])
-    assert 'print("TTA WARNING: block not found - using default 4-way")' in src, (
-        "the guard changed; re-check whether the downstream anchor still protects it"
+    assert 'print("TTA WARNING: block not found - using default 4-way")' not in src, (
+        "the silent-degradation guard came back; v6 requires a hard failure"
     )
-    after = src[src.find("TTA WARNING"):]
-    assert "det_logits[f] = det_logits[f] / _nv" in after[:1200], (
-        "the downstream anchor no longer references _nv, so a failed TTA patch would "
-        "become genuinely silent -- restore the anchor or make the guard raise"
+    assert "TTA PATCH FAILED" in src, "the TTA patch no longer fails loudly"
+    assert "det_logits[f] = det_logits[f] / _nv" in src, (
+        "the downstream anchor no longer references _nv -- restore the defence in depth"
     )
-    assert "n_views" not in src, "n_views now recorded; update the v6 locks"
+    # The 8/7 split must be recorded as TWO fields; a single conflated `n_views` is the bug.
+    assert "n_views" not in src, (
+        "a conflated n_views reappeared -- record n_encode_calls=8 and n_distinct_views=7"
+    )
 
 
 @pytest.mark.skipif(not PREDICT.exists(), reason="vendored predict script not present")
@@ -355,13 +375,22 @@ def test_exporter_declares_schema_and_asserts_the_column_contract():
 
 @pytest.mark.skipif(not AUDIT.exists(), reason="audit edit not present")
 def test_audit_passes_identity_view_features_alongside_post_tta_logits():
-    """Records the pairing that makes v5 D1-F invalid, so a v6 fix is a conscious change."""
+    """FLIPPED FOR v6. This lock recorded the v5 defect -- post-TTA logits paired with
+    IDENTITY-VIEW features -- so that fixing it had to be deliberate. v6 fixed it, so the
+    lock now asserts the v6 contract instead: BOTH representations are exported under names
+    that cannot be confused, and the identity-view pair is never called post-TTA.
+
+    The identity-view arrays are retained on purpose: `predict_edges` genuinely reads the
+    identity view, so they are the ASSOCIATION representation. Conflating them with the
+    detector representation is exactly what made v5 D1-F invalid.
+    """
     src = AUDIT.read_text(encoding="utf-8")
-    assert "def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_czyx" in src
-    assert "feat_max" in src and "feat_gt" in src
-    assert "__feat_tta_mean_gt.npy" not in src, (
-        "TTA-mean features appear present -- this is the v6 contract, update the locks"
-    )
+    for name in ("__feat_tta_mean_gt.npy", "__feat_tta_mean_max.npy",
+                 "__feat_idview_gt.npy", "__feat_idview_max.npy"):
+        assert name in src, f"v6 must export {name}"
+    # the detector feature must come from a SEPARATE accumulator, never from unet_out
+    assert "_d1_unet_tta" in src, "the TTA-mean accumulator is gone"
+    assert "unet_out" in src, "the identity-view (association) feature is gone"
 
 
 # =============================================================================================
