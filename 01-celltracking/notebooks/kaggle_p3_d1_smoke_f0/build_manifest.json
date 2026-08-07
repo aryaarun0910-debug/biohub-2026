@@ -1,11 +1,11 @@
 {
   "name": "p3_d1_smoke_f0",
-  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\.claude\\worktrees\\agent-af12f46fb6823c302\\scripts\\kaggle_specs\\p3_d1_smoke_f0.json",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\.claude\\worktrees\\agent-ac178d0bad2ba1c78\\scripts\\kaggle_specs\\p3_d1_smoke_f0.json",
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
   "built_notebook": "notebooks\\kaggle_p3_d1_smoke_f0\\biohub-p3-d1-smoke-f0.ipynb",
-  "built_sha256": "752f8d55a68d3bc98a33af9c65a7b43235e6ea8bc6a4c14d71adcba725893385",
-  "config_hash": "cee5d5fe8ab3",
+  "built_sha256": "015501cce05f3f492f95fdd702fd17426d5f97fab6ed8e7dd0a15c0d0e611589",
+  "config_hash": "37ee5ea3f428",
   "n_cells": 12,
   "edits": [
     {
@@ -13,7 +13,7 @@
       "cells": [
         2
       ],
-      "payload_sha256": "89685b90efa749239bbbf9a205eb687d76a78df3855c1a290adcd4d13f7a95d3"
+      "payload_sha256": "056031dab3a9335dc661851e4336e9bcfebcc2aaf492245d324921a918fd3022"
     },
     {
       "kind": "insert_before",
@@ -23,123 +23,130 @@
       "payload_sha256": "504ddcbe5188e98c49ad68fa70cdb7f77848118c9d276696beafad1d4e251daf"
     },
     {
-      "kind": "replace",
+      "kind": "insert_after",
       "cells": [
         5
       ],
-      "payload_sha256": "cd0c22ccd7bdbb74c0ca5108104aee76afc1dd10cea84ee988f56825e979aaef"
+      "payload_sha256": "fe21c2ae2bfcf31a5ce909482a79030bbf66b4d221ac6a2d70272f1ab70fab3c"
     },
     {
       "kind": "replace",
       "cells": [
         5
       ],
-      "payload_sha256": "f18d8550a017fe0f41be58a423a5c59c2174cb861c2ca333eeef04ef945da678"
+      "payload_sha256": "ad12ec0c431d32c447cef97b2ab605ddad7a3f2d78f8474edc5438eae5f3505b"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "8bfc2bb2e1e4dba79cb8ede2c74d6491cf1536ecf82b0938972f5ce541bae788"
     },
     {
       "kind": "insert_before",
       "cells": [
         6
       ],
-      "payload_sha256": "9a5867f26162347fc1499d13f0aa8ee0b350581a93ce4b43f4c6c935ba1974ef"
+      "payload_sha256": "ab6dd300b37331b8a06a0cb38b2bc6b4c2c780b9a5d154e212f93668a16b8a9b"
     },
     {
       "kind": "replace",
       "cells": [
         6
       ],
-      "payload_sha256": "3fdb66ebdfe9adf7c6993fe58b06d101bebf0034722c1c9bfa2ba842fff20f8b"
+      "payload_sha256": "c1062775295dd5ee891ab311d7ef46b189f10e18b0a452563aefc93d12f8c964"
     },
     {
       "kind": "replace",
       "cells": [
         6
       ],
-      "payload_sha256": "9982cbc97989e4a086464b9bba42f519e8ae2d2e1fe4e32d50c7006f2b40f404"
+      "payload_sha256": "30ccb6dcb54a49e77601ec508d051f034d348e9ebe5a1c5ca04df6b2e60d4983"
     },
     {
       "kind": "replace",
       "cells": [
         6
       ],
-      "payload_sha256": "22b64e4e92dee2cea654f32f763869e8048d841eaca1e4f819500070d208c0e0"
+      "payload_sha256": "cbe21a9e48c55ccb0959bd61e6cc3bf3169d480f1a3aba1e1384eb1c6be963f7"
     },
     {
       "kind": "replace",
       "cells": [
         6
       ],
-      "payload_sha256": "0256d6d8311133bd5479d42987cddb07e784d67ed031c3046bef49de01cd824f"
+      "payload_sha256": "796cec522ee668284a17f063450248ee579a0563ca795eb5b637bb90bd388adc"
     },
     {
       "kind": "replace",
       "cells": [
         6
       ],
-      "payload_sha256": "4c3a797e420b442d42aa36a28da96acd51a9b491ebfe4be9e29ab55b74a63e7e"
+      "payload_sha256": "7c39067c2051cbe95d05dfb52f32e76598c7914050b4c4157d4882a9ec325ba5"
     },
     {
       "kind": "replace",
       "cells": [
         6
       ],
-      "payload_sha256": "f95686f71d17b3b75549b68926565a23c64fea6ffe4fbea9b1f9a12f43222c69"
+      "payload_sha256": "d24893642fdfb6bf94f8a0f281f68844f06cc2bc5803c76812ce0a64ba04e0e1"
     },
     {
       "kind": "replace",
       "cells": [
         6
       ],
-      "payload_sha256": "9096dd117c36a2a200dadb776b2d36afc6cc7fdca04c8068d8843beb8bec954b"
+      "payload_sha256": "b56e0d711e6acf9ade3a533643d5c3a3ddde0472bf0c5f13a1cf675e8cf22d85"
     },
     {
       "kind": "replace",
       "cells": [
         6
       ],
-      "payload_sha256": "46c14065859fa83d4819955761521619cfe04cfa9fde9322d02f3112ed38ab36"
+      "payload_sha256": "118a8f4569516a9d34711e90889cbe82aab2a5ee1bd0666ab9263919052649ae"
     },
     {
       "kind": "replace",
       "cells": [
         5
       ],
-      "payload_sha256": "129a1380d560457c6dc3bdc24eedb477d3b34eacda8487491aadce5a97aa0b28"
+      "payload_sha256": "b92e1c5eea65a5865af43655c52b3ae53249ce20164360ba2fffa15e736a6dcf"
     },
     {
       "kind": "insert_before",
       "cells": [
         5
       ],
-      "payload_sha256": "99010caf1441ff94060ade998f06215d8bf7d0713509269ee4409c60515c01a9"
+      "payload_sha256": "74478017bb95ea97bf52166c12fa2de4febeb3c343ce6b53d391f7cda3e7f0be"
     },
     {
       "kind": "insert_after",
       "cells": [
         6
       ],
-      "payload_sha256": "957b16edd76af7dd2e03cbf1e8c278238ea0ffe53c9632e731cbb3b7f0c66075"
+      "payload_sha256": "0933d767cf943d86f4ef0c852308012330e19880a260e6f82ac6b95b8614331d"
     },
     {
       "kind": "replace_cell",
       "cells": [
         7
       ],
-      "payload_sha256": "93ce98d35959f85766173b0aee1202e24d9b8f0235b766542169f90f46eeab68"
+      "payload_sha256": "ef47aa3205536edbf1c5eb6ea5954b54b003b59348b45871243d6e27c19eb5c3"
     },
     {
       "kind": "append_cell",
       "cells": [
         11
       ],
-      "payload_sha256": "18deb8de8ace3ca2f7a3507cfc05203c348bc20711fe8b42cc722d06b9d3cef0"
+      "payload_sha256": "fe3d5976dc5c7daab1142ee0a24afc658f7f7224d3f7b9fd782dbe5308da0fed"
     },
     {
       "kind": "replace",
       "cells": [
         7
       ],
-      "payload_sha256": "bc67530d4c53fd051b57f7ec3119684259e9c533d55f109b4744f30931f2719e"
+      "payload_sha256": "65162e9754e47129a43ab7ffba681fea4e0b8d4d1edc5777a684e3aaeac5cd65"
     }
   ],
   "declared_slug": "biohub-p3-d1-smoke-f0",
