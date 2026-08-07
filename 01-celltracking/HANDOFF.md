@@ -6,7 +6,7 @@
 
 **Public:** **0.915** (P3 harmonic)
 
-**GPU running:** none
+**GPU running:** split-1 D1 smoke source and target cells
 
 **Submission ready:** none
 
@@ -31,25 +31,26 @@ HOCT stack, graph ensemble, or full retraining programme.
 
 ## One execution sequence
 
-1. Complete the two CPU measurements:
-   - corpus-wide C/T/L/D census on the scorer-exact partition;
-   - probability-at-the-deployed-gate oracle for association.
-2. Verify the rebuilt 2x2 smoke artifacts from `c939bbf`:
+1. Complete the probability-at-the-deployed-gate oracle for association. The corpus-wide
+   census is complete; split/merge arbitration is closed at +0.000581.
+2. Verify the rebuilt 2x2 smoke artifacts:
    - both checkpoints x both families;
    - TTA-consistent features;
    - no mutation of the association feature tensor;
    - complete manifests and exact H0 parity.
-3. Run the three-crop smoke.
-4. If structurally green, run a 16-24 crop split-1 pilot spanning median, p90, extreme,
-   dense, and sparse 6bba regimes.
-5. Return the pilot report. Launch the 7.88-hour split-1 run only if the mechanism, not just
-   the oracle, shows portable ranking or re-acceptance value.
+3. Finish the four-cell three-crop smoke. Split-1 is running; split-0 is queued behind
+   Kaggle's two-session limit.
+4. If structurally green, run the existing 19-crop two-direction pilot.
+5. If the pilot shows portable ranking, run a one-basis candidate replay with the fitted
+   33-parameter head through P3, the complete wrapper, and the exact scorer.
+6. Only a graph-scored, homogeneous pilot gain may launch public test inference. The
+   7.88-hour full split-1 export is confirmatory and no longer the automatic next spend.
 
 ## Pilot decision logic
 
 - Large **T** mass with useful frozen-feature ranking: build a tiny re-acceptance head.
-- Large **T** mass but no portable ranking: test a per-crop scalar threshold under a fixed
-  node budget; do not build a larger network.
+- Large **T** mass but no portable ranking: close re-acceptance. The scalar-threshold
+  fallback is measured at about 0.3% marginal precision and -0.0234 pooled, so it is dead.
 - Large **L/D** mass or chance-level frozen representation: detector representation work is
   justified, beginning with a paired minimal training ablation.
 - Revised net ceiling below +0.020 pooled: close the detection attack.

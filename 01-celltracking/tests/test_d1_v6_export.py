@@ -9,7 +9,7 @@ Structure:
   1. the injected TTA block          -- 8 views, correct inverses, `unet_out` untouched
   2. the D4 inverse algebra          -- the anti-transpose composes in REVERSE order
   3. the audit block's row contract  -- row_id, feature alignment, NaN sentinel
-  4. the parity assert               -- hard abort, no "proceed with caveat" branch
+  4. the parity assert               -- hard abort unless every peak flip is ulp-explained
   5. the injector's structure        -- five anchors, both source forms, idempotency
 
 Nothing here needs a GPU and nothing here talks to Kaggle.
@@ -511,7 +511,8 @@ def test_manifest_records_the_view_set_and_the_population_fields(audit_run):
     assert man["checkpoint_sha256"] == "deadbeef"
     assert man["memory"]["tta_accumulator_bytes"] > 0
     assert man["parity"]["max_abs_err"] <= man["parity"]["gate_max_abs_err_applied"]
-    assert man["parity"]["gate_requires_peak_set_equality"] is True
+    assert man["parity"]["gate_requires_peak_set_equality"] is False
+    assert man["parity"]["gate_requires_all_peak_differences_float_explained"] is True
     assert man["parity"]["all_peak_sets_identical"] is True
     assert man["parity"]["n_peak_set_symdiff_total"] == 0
     assert man["parity"]["gate_n_encode_calls"] == 8
@@ -589,6 +590,8 @@ def _clean_parity_record():
             "logit_abs_max": 15.0, "sign_ratio": 0.002, "pearson_r_vs_logit": 0.001,
             "n_voxels": 262144, "secondary_detection_weight": "0",
             "peak_set_identical": True, "n_peak_set_symdiff": 0,
+            "n_peak_set_symdiff_explained": 0,
+            "n_peak_set_symdiff_unexplained": 0,
             "n_accepted_deployed": 1780, "n_accepted_recon": 1780}
 
 
@@ -639,12 +642,27 @@ def test_a_zero_mean_residual_with_a_changed_peak_set_still_aborts(tmp_path):
     inverse_bug = dict(_clean_parity_record(),
                        sign_ratio=0.0, pearson_r_vs_logit=0.0, mean_signed_err=0.0,
                        peak_set_identical=False, n_peak_set_symdiff=201,
+                       n_peak_set_symdiff_explained=0,
+                       n_peak_set_symdiff_unexplained=201,
                        n_accepted_recon=1774)
     reasons = mod._d1_parity_verdict(inverse_bug)
     assert reasons, "a zero-mean inverse bug slipped through -- this is exactly S0b's point"
     assert any("ACCEPTED-PEAK SETS DIFFER" in r for r in reasons)
     # and the peak-set check must be reported FIRST, ahead of the magnitude gate
     assert "ACCEPTED-PEAK SETS DIFFER" in reasons[0]
+
+
+def test_an_ulp_explained_boundary_flip_does_not_masquerade_as_transform_drift(tmp_path):
+    mod = _load_audit_block(tmp_path)
+    boundary = dict(
+        _clean_parity_record(),
+        peak_set_identical=False,
+        n_peak_set_symdiff=1,
+        n_peak_set_symdiff_explained=1,
+        n_peak_set_symdiff_unexplained=0,
+        max_peak_decision_gap=4.8e-6,
+    )
+    assert mod._d1_parity_verdict(boundary) == []
 
 
 def test_accepted_peak_set_equality_is_computed_from_the_real_pooling_rule(tmp_path):

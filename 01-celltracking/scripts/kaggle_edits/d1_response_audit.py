@@ -351,13 +351,59 @@ def _d1_parity_frame(det_head, feats_tta_czyx, logits_1zyx, pool_kernel, det_thr
     _rec_pk = _d1_accepted_set(_recon, pool_kernel, det_threshold)
     _symdiff = _dep_pk ^ _rec_pk
     _logit_absmax = float(_d1_np.abs(_lg).max())
+    _bound = _d1_parity_bound(_logit_absmax)
+
+    # Float32 addition is not associative.  The deployed path averages eight per-view
+    # logits, whereas the audit averages eight per-view feature tensors and applies the
+    # 1x1x1 head once.  Those operations commute algebraically, but can differ by a few
+    # ulps at the acceptance threshold or at a near-tied local maximum.  A one-voxel
+    # boundary flip is therefore not evidence of a wrong inverse transform.  Prove each
+    # changed decision is explainable by the already-derived numerical bound; any other
+    # changed peak remains a hard abort.
+    _thr_logit = float(_d1_np.log(det_threshold / (1.0 - det_threshold)))
+    _dep_l = logits_1zyx.detach().float()[0].cpu().numpy().astype(_d1_np.float64)
+    _rec_l = _recon.detach().float()[0].cpu().numpy().astype(_d1_np.float64)
+    _dep_p = _d1_F.max_pool3d(logits_1zyx.detach().float().unsqueeze(0), pool_kernel,
+                              stride=1, padding=tuple(k // 2 for k in pool_kernel))[0, 0]
+    _rec_p = _d1_F.max_pool3d(_recon.detach().float().unsqueeze(0), pool_kernel,
+                              stride=1, padding=tuple(k // 2 for k in pool_kernel))[0, 0]
+    _dep_p = _dep_p.cpu().numpy().astype(_d1_np.float64)
+    _rec_p = _rec_p.cpu().numpy().astype(_d1_np.float64)
+    _explained, _unexplained, _worst_decision_gap = 0, 0, 0.0
+    for _coord in _symdiff:
+        _dep_accept = _coord in _dep_pk
+        # Inspect the path that rejected this coordinate.  It is explainable only when
+        # either its threshold margin or its local-maximum margin is within the propagated
+        # float32 error bound (2x for a comparison of two reconstructed values).
+        if _dep_accept:
+            _lval, _pval = _rec_l[_coord], _rec_p[_coord]
+        else:
+            _lval, _pval = _dep_l[_coord], _dep_p[_coord]
+        _failed_gaps = []
+        if float(_lval) <= _thr_logit:
+            _failed_gaps.append(_thr_logit - float(_lval))
+        if float(_lval) != float(_pval):
+            _failed_gaps.append(abs(float(_pval) - float(_lval)))
+        # The selected coordinate is known to be rejected on this path, so at least one
+        # predicate must fail. Requiring *every* failed predicate to be numerically close
+        # prevents a near-tied maximum from hiding a materially wrong threshold score (or
+        # vice versa).
+        _decision_gap = max(_failed_gaps) if _failed_gaps else float("inf")
+        _worst_decision_gap = max(_worst_decision_gap, _decision_gap)
+        if _decision_gap <= 2.0 * _bound:
+            _explained += 1
+        else:
+            _unexplained += 1
     return {
         "n_voxels": int(_r.size),
         "max_abs_err": float(_absr.max()),
-        "parity_bound": _d1_parity_bound(_logit_absmax),
+        "parity_bound": _bound,
         "n_accepted_deployed": len(_dep_pk),
         "n_accepted_recon": len(_rec_pk),
         "n_peak_set_symdiff": len(_symdiff),
+        "n_peak_set_symdiff_explained": int(_explained),
+        "n_peak_set_symdiff_unexplained": int(_unexplained),
+        "max_peak_decision_gap": float(_worst_decision_gap),
         "peak_set_identical": bool(not _symdiff),
         "p999_abs_err": float(_d1_np.percentile(_absr, 99.9)),
         "median_abs_err": float(_d1_np.median(_absr)),
@@ -382,9 +428,12 @@ def _d1_parity_verdict(rec):
     _sus = []
     # Decisive gate first: the accepted peaks ARE the nodes. A zero-mean residual can hide a
     # wrong inverse; a changed peak set cannot.
-    if not rec["peak_set_identical"]:
+    _unexplained = int(rec.get("n_peak_set_symdiff_unexplained",
+                               rec["n_peak_set_symdiff"]))
+    if _unexplained:
         _sus.append(
-            f"ACCEPTED-PEAK SETS DIFFER: {rec['n_peak_set_symdiff']} voxels in the symmetric "
+            f"ACCEPTED-PEAK SETS DIFFER BEYOND FLOAT BOUND: {_unexplained} unexplained of "
+            f"{rec['n_peak_set_symdiff']} voxels in the symmetric "
             f"difference ({rec['n_accepted_deployed']} deployed vs {rec['n_accepted_recon']} "
             "reconstructed). The reconstruction selects a DIFFERENT NODE POPULATION, so the "
             "exported features do not describe the deployed detector. This fires even when "
@@ -498,6 +547,8 @@ def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_tta_czyx, feats_idvie
                                     "max_abs_corr": 0.0, "dtypes": None,
                                     "max_parity_bound": 0.0,
                                     "n_peak_set_symdiff_total": 0,
+                                    "n_peak_set_symdiff_explained_total": 0,
+                                    "n_peak_set_symdiff_unexplained_total": 0,
                                     "all_peak_sets_identical": True})
     _agg["n_frames"] += 1
     _agg["dtypes"] = {k: v for k, v in _par.items() if k.startswith("dtype")}
@@ -509,6 +560,10 @@ def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_tta_czyx, feats_idvie
     _agg["max_abs_corr"] = max(_agg["max_abs_corr"], abs(_par["pearson_r_vs_logit"]))
     _agg["max_parity_bound"] = max(_agg["max_parity_bound"], _par["parity_bound"])
     _agg["n_peak_set_symdiff_total"] += int(_par["n_peak_set_symdiff"])
+    _agg["n_peak_set_symdiff_explained_total"] += int(
+        _par["n_peak_set_symdiff_explained"])
+    _agg["n_peak_set_symdiff_unexplained_total"] += int(
+        _par["n_peak_set_symdiff_unexplained"])
     _agg["all_peak_sets_identical"] = bool(
         _agg["all_peak_sets_identical"] and _par["peak_set_identical"])
     if _reasons:
@@ -820,7 +875,8 @@ def _d1_flush(fold=None, ckpt_hash=None, expected_crops=None):
                     "gate_max_abs_err_applied": _par.get("max_parity_bound"),
                     "gate_max_sign_ratio": _D1_PARITY_MAX_SIGN_RATIO,
                     "gate_max_abs_corr": _D1_PARITY_MAX_CORR,
-                    "gate_requires_peak_set_equality": True,
+                    "gate_requires_peak_set_equality": False,
+                    "gate_requires_all_peak_differences_float_explained": True,
                     "n_frames_checked": _par.get("n_frames"),
                     "max_abs_err": _par.get("max_abs_err"),
                     "max_p999_abs_err": _par.get("max_p999_abs_err"),
@@ -828,6 +884,10 @@ def _d1_flush(fold=None, ckpt_hash=None, expected_crops=None):
                     "max_abs_corr": _par.get("max_abs_corr"),
                     "all_peak_sets_identical": _par.get("all_peak_sets_identical"),
                     "n_peak_set_symdiff_total": _par.get("n_peak_set_symdiff_total"),
+                    "n_peak_set_symdiff_explained_total": _par.get(
+                        "n_peak_set_symdiff_explained_total"),
+                    "n_peak_set_symdiff_unexplained_total": _par.get(
+                        "n_peak_set_symdiff_unexplained_total"),
                     "dtypes": _par.get("dtypes"),
                     "worst_frame": _par.get("worst"),
                 },
