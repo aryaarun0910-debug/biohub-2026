@@ -22,14 +22,42 @@ consistent with a bad operating point, with a linear map too weak to exploit an
 informative feature, or with an uninformative feature. This probe separates the first
 two. It CANNOT establish the third, and it is forbidden from claiming it:
 
-    PERMITTED VERDICTS ARE EXACTLY THREE
-      CALIBRATION        intercept/temperature-only repair works
-      LINEAR_HEAD        a ranking-changing linear refit works
-      LINEAR_PROBE_NULL  this probe failed
+    PERMITTED VERDICTS ARE EXACTLY FOUR
+      CALIBRATION_GLOBAL    one corpus-wide scalar suffices. TRIVIAL: it says go run a
+                            threshold sweep, which needs no instrument.
+      CALIBRATION_PER_CROP  the operating point must move DIFFERENTLY per crop, so NO
+                            single deployed constant can work. A finding about the
+                            deployment rule, not about the head.
+      LINEAR_HEAD           a ranking-changing linear refit works
+      LINEAR_PROBE_NULL     this probe failed
+
+WHY CALIBRATION SPLITS IN TWO. Acceptance is `logit == max_pool3d(logit)` AND
+`sigmoid(logit) > tau`. That is a LEVEL SET: for any strictly increasing phi,
+`A(phi(s), phi(tau)) == A(s, tau)` EXACTLY, and the local-max test runs on the RAW
+logits, so even isotonic's flat segments cannot break ties differently. Temperature,
+Platt, beta, histogram binning and isotonic are therefore ALL worth exactly one scalar on
+this detector — `det_threshold`. Post-hoc calibration has ONE degree of freedom here, not
+many. (The ECCV-2024 ">7 D-ECE, post-hoc beats train-time" result is real and simply does
+not apply to an acceptance decision.) A bare `CALIBRATION` verdict is consequently
+uninterpretable, and `RETIRED_VERDICTS` makes a caller that asks for one fail loudly.
+`calibration_heterogeneity` is what separates the two: Cochran's Q on the per-crop optimal
+intercept shifts, against the sandwich variance the HT weights imply.
+
+M1 IS NOT CALIBRATION. The re-acceptance head is a re-DIRECTION with 32 degrees of
+freedom; it escapes the level-set theorem entirely. Conflating a 32-DOF rotation with a
+1-DOF monotone rescale is exactly the error the split above exists to prevent, and it is
+why `LINEAR_HEAD` and the calibration tokens are different verdicts rather than degrees of
+one.
 
 `REPRESENTATION DEFICIT` is not in the vocabulary. A null linear probe on a sampled row
 table cannot fund an encoder programme, and `_assert_permitted_verdict` raises rather
 than let one be written into a report. (Decision package §0, correction C2.)
+
+PRIOR SHIFT IS REFUSED, NOT MERELY UNIMPLEMENTED. `REFUSED_ARMS` blocks SLD/BBSE-style
+base-rate correction with its reason: those estimators assume LABEL shift, the gap here is
+CONDITIONAL shift, and worked from the measured per-family priors the correction
+prescribes RAISING 6bba's threshold by 0.808 logits — the family with 9.7x the miss rate
+and 85% of the edge mass.
 
 DESIGN CONSTRAINTS ENFORCED IN CODE, NOT IN PROSE:
 
@@ -134,7 +162,41 @@ V6_REQUIRED_CROP_KEYS = ("grid_zyx", "n_frames", "n_uniform_per_frame",
 # a contract violation as their absence: it would mean something else is being read.
 V5_ABSENT_COLUMNS = ("d1_class", "matched", "d_stratum", "near_dist_um")
 
-PERMITTED_VERDICTS = ("CALIBRATION", "LINEAR_HEAD", "LINEAR_PROBE_NULL")
+PERMITTED_VERDICTS = ("CALIBRATION_GLOBAL", "CALIBRATION_PER_CROP", "LINEAR_HEAD",
+                      "LINEAR_PROBE_NULL")
+# Retired token. A bare `CALIBRATION` is uninterpretable on this detector: acceptance is a
+# LEVEL SET, so it cannot distinguish the trivial case from the interesting one. Kept only
+# so a stale caller fails loudly instead of silently matching nothing.
+RETIRED_VERDICTS = {"CALIBRATION": (
+    "`CALIBRATION` is retired. Acceptance is `logit == max_pool3d(logit)` AND "
+    "`sigmoid(logit) > tau`, a LEVEL SET: for any strictly increasing phi, "
+    "A(phi(s), phi(tau)) == A(s, tau) exactly, and the local-max test runs on the RAW "
+    "logits so even isotonic's flat segments cannot break ties differently. Temperature, "
+    "Platt, beta, histogram binning and isotonic are therefore ALL worth exactly one "
+    "scalar here — det_threshold. A bare CALIBRATION verdict buys a threshold sweep we "
+    "can already run without this instrument. Use CALIBRATION_GLOBAL (one corpus-wide "
+    "scalar: trivial, go run the sweep) or CALIBRATION_PER_CROP (the operating point must "
+    "move DIFFERENTLY per crop, so no single deployed constant can work — a statement "
+    "about the deployment rule, not about the head).")}
+
+# Arms this instrument refuses to express, with the reason. Refusing in the registry is
+# stronger than not implementing them: a later caller asking for one gets the argument.
+REFUSED_ARMS = {
+    "PRIOR_SHIFT": (
+        "a prior-shift / SLD / BBSE base-rate correction is WRONG-SIGNED here. Worked "
+        "from the measured per-family priors it prescribes RAISING 6bba's threshold by "
+        "0.808 logits — the family with 9.7x the miss rate and 85% of the edge mass. "
+        "Those estimators assume LABEL shift (p(y) moves, p(x|y) fixed). The gap here is "
+        "CONDITIONAL shift: p(x|y) differs between families. Applying a label-shift "
+        "correction to a conditional-shift problem moves the threshold the wrong way on "
+        "the family that matters most."),
+    "SLD": "alias of PRIOR_SHIFT; see REFUSED_ARMS['PRIOR_SHIFT']",
+    "BBSE": "alias of PRIOR_SHIFT; see REFUSED_ARMS['PRIOR_SHIFT']",
+}
+
+# Pre-registered: how much per-crop spread in the optimal intercept counts as "one
+# constant cannot serve every crop". POLICY, not a calibrated transfer law.
+MIN_PER_CROP_SPREAD_LOGITS = 0.25
 # Encoded as a hard constraint, per correction C2. These are the phrasings a null probe
 # must never be allowed to produce.
 _FORBIDDEN_VERDICT_TOKENS = ("REPRESENTATION", "DEFICIT", "ENCODER", "RETRAIN",
@@ -931,7 +993,7 @@ class CountGETerm:
         ev = np.linalg.eigvalsh((h + h.T) / 2.0)
         return {"term": self.name, "value": v, "grad_l2": float(np.linalg.norm(g)),
                 "hess_min_eig": float(ev.min()), "n_groups": len(self._groups),
-                "active": abs(v) > 0 and np.linalg.norm(g) > 0}
+                "active": bool(abs(v) > 0 and np.linalg.norm(g) > 0)}
 
 
 @dataclass
@@ -1026,7 +1088,7 @@ class TemporalTerm:
                 "hess_min_eig": float(ev.min()),
                 "n_pseudo_pos": int(self.pseudo_pos_idx.size),
                 "n_pairs": int(self.pair_idx.shape[0]),
-                "active": abs(v) > 0 and np.linalg.norm(g) > 0}
+                "active": bool(abs(v) > 0 and np.linalg.norm(g) > 0)}
 
 
 # ---------------------------------------------------------------- weight builders
@@ -1261,21 +1323,22 @@ SHUFFLE_SCOPES = ("global", "within_crop")
 def shuffle_labels(y, crop, active, *, seed: int = 20260806, scope: str = "global"):
     """Permute labels among active rows. `scope` decides what survives the permutation.
 
-    MEASURED, NOT ASSUMED (FIXTURE, 20 seeds, split-1 direction): `within_crop` does NOT
-    return a null. It preserves each crop's positive COUNT, and the exported row pool
-    makes a crop's positive rate collinear with that crop's mean feature -- every
-    `gt_centre` row is exported while `uniform` rows are a fixed-size per-frame
-    subsample, so a crop with more nuclei has both a higher positive rate AND a mean
-    feature pulled toward the nucleus direction. Measured correlation between the two:
-    0.79. A 33-parameter refit exploits that between-crop channel and returns a target
-    AUC of 0.581 from labels carrying no per-row information at all. `global` shuffling
-    removes the per-crop rate variation as well and returns 0.528 (se 0.034), consistent
-    with 0.5.
+    The MECHANISM `within_crop` leaves open: it preserves each crop's positive COUNT, and
+    the exported row pool makes a crop's positive rate collinear with that crop's mean
+    feature -- every `gt_centre` row is exported while `uniform` rows are a fixed-size
+    per-frame subsample, so a crop with more nuclei has both a higher positive rate AND a
+    mean feature pulled toward the nucleus direction. A 33-parameter refit can exploit
+    that between-crop channel even though the labels carry no per-row information at all.
+    `global` shuffling removes the per-crop rate variation as well, so it is the default
+    and the scope the verdict gate consumes.
 
-    So `global` is the default and the scope the verdict gate consumes. `within_crop` is
-    retained deliberately: the GAP between the two scopes measures the size of the
-    between-crop sampling confound, and it is reported as `crop_rate_confound` rather
-    than discarded.
+    SIZE NOT ESTABLISHED. An inherited docstring quoted `within_crop` at target AUC 0.581
+    against `global` 0.528 (se 0.034) and attributed it to FIXTURE, 20 seeds. That does
+    NOT reproduce on the fixture in `tests/test_d1f_probe.py` (19 seeds, split-1: global
+    mean 0.4648 se 0.0379, within_crop mean 0.4833 se 0.0356 -- the two are not separated
+    and neither is above chance). The gap is configuration-dependent and the numbers are
+    withdrawn pending a measurement on the real v6 export. The MECHANISM stands and is
+    why `global` is the default; the MAGNITUDE is unmeasured.
     """
     if scope not in SHUFFLE_SCOPES:
         raise ValueError(f"shuffle scope {scope!r} not in {SHUFFLE_SCOPES}")
@@ -1345,6 +1408,9 @@ def build_arms(corpus: Corpus, caps: Capabilities, *, source_mask: np.ndarray,
     built, blocked = {}, {}
     for name in expanded:
         base_name = arm_base(name)
+        if base_name in REFUSED_ARMS:
+            blocked[name] = f"REFUSED — {REFUSED_ARMS[base_name]}"
+            continue
         if base_name not in REGISTRY:
             blocked[name] = f"unknown arm {name!r}"
             continue
@@ -1763,6 +1829,140 @@ def crop_block_bootstrap(score, y, w, crops, *, n_boot: int = 200,
                       "generalisation."}
 
 
+def _best_intercept_shift(score, y, w, *, max_iter: int = 80, tol: float = 1e-12) -> float:
+    """The single scalar `delta` minimising the weighted log-loss of `sigmoid(score+delta)`.
+
+    Strictly convex in one variable, so Newton with backtracking lands on the optimum and
+    two runs return the same float.
+    """
+    score = np.asarray(score, dtype=np.float64)
+    y = np.asarray(y, dtype=np.float64)
+    w = np.asarray(w, dtype=np.float64)
+    d = 0.0
+    for _ in range(max_iter):
+        p = _sigmoid(score + d)
+        g = float(w @ (p - y))
+        h = float(w @ (p * (1.0 - p)))
+        if h <= 1e-300:
+            break
+        step = g / h
+        d -= step
+        if abs(step) < tol:
+            break
+    return float(d)
+
+
+def calibration_heterogeneity(score, y, w, crops, *, alpha: float = 0.05,
+                              min_spread_logits: float = MIN_PER_CROP_SPREAD_LOGITS,
+                              min_crops: int = 3) -> dict:
+    """Does ONE scalar threshold shift serve every crop, or does each crop need its own?
+
+    THIS IS THE WHOLE POINT OF SPLITTING THE CALIBRATION VERDICT. Acceptance is a level
+    set, so every post-hoc calibrator — temperature, Platt, beta, histogram binning,
+    isotonic — is worth exactly one scalar on this detector: `det_threshold`. A verdict
+    that says only "calibration helps" therefore buys a threshold sweep that needs no
+    instrument. The question worth an instrument is whether ONE constant can do it.
+
+    METHOD. The test statistic is WHERE EACH CROP'S ANNOTATED CENTRES SIT ON THE SCORE
+    AXIS: `mu_c`, the mean score over crop c's positive rows, with `se_c = sd_c /
+    sqrt(n_c)`. Cochran's Q on `mu_c` about the precision-weighted pooled mean is
+    chi-square on C-1 df under "one constant is enough"; the p-value uses the
+    Wilson-Hilferty cube-root transform so nothing outside numpy is needed.
+
+    WHY NOT THE HT-WEIGHTED PER-CROP INTERCEPT, which is the obvious first choice: it is
+    unusable. Under Horvitz-Thompson weights the sandwich variance of a crop's intercept
+    is `sum w^2 v / (sum w v)^2`, and with `uniform` rows carrying weight 4096 at a ~1e-5
+    fitted rate that came out at se ~15 LOGITS per crop on the fixture. Q was ~0.3 against
+    3 df even where the injected per-crop spread was 1.96 logits, so the verdict would
+    have been unreachable by construction. The sandwich is not wrong — 400 sampled rows
+    standing in for 1.6M grid voxels really do not locate an intercept — it is the wrong
+    QUESTION. Annotated centres are an EXHAUSTIVE CENSUS, not a probability sample, so no
+    HT weight belongs on them, and their location is what a threshold has to clear. The
+    global and per-crop optimal shifts are still computed and reported, because they are
+    the quantity a threshold sweep would move; they are simply not what the test is on.
+
+    NOT A ROUTER. A positive result says no single deployed constant works. It does NOT
+    license keying the threshold on crop or family identity at inference — that is
+    forbidden — it says the deployment RULE needs a per-crop quantity the pipeline can
+    compute for an unseen crop (density, estimated node count), which is a different
+    mechanism and a separate piece of work.
+    """
+    m = np.asarray(w) > 0
+    score, y, w, crops = (np.asarray(a)[m] for a in (score, y, w, crops))
+    score = score.astype(np.float64)
+    y = y.astype(np.float64)
+    w = w.astype(np.float64)
+    uniq = sorted(set(crops.tolist()))
+    global_shift = _best_intercept_shift(score, y, w)
+
+    per_crop, mus, prec = {}, [], []
+    for c in uniq:
+        sel = crops == c
+        entry = {}
+        if (w[sel] * y[sel]).sum() > 0 and (w[sel] * (1 - y[sel])).sum() > 0:
+            entry["optimal_shift_logits"] = _best_intercept_shift(
+                score[sel], y[sel], w[sel])
+            entry["optimal_shift_residual_logits"] = (entry["optimal_shift_logits"]
+                                                      - global_shift)
+        pos = sel & (y == 1)
+        n_pos = int(pos.sum())
+        entry["n_positive_rows"] = n_pos
+        if n_pos >= 2:
+            mu = float(score[pos].mean())
+            sd = float(score[pos].std(ddof=1))
+            se = sd / math.sqrt(n_pos)
+            entry.update({"mean_positive_score": mu, "se_logits": se})
+            if se > 0:
+                mus.append(mu)
+                prec.append(1.0 / (se * se))
+        else:
+            entry["reason"] = "fewer than two annotated centres"
+        per_crop[str(c)] = entry
+
+    used = len(mus)
+    df = max(used - 1, 0)
+    q_stat, spread, pooled = 0.0, 0.0, None
+    if used >= 2:
+        mus_a, prec_a = np.array(mus), np.array(prec)
+        pooled = float((prec_a @ mus_a) / prec_a.sum())
+        q_stat = float(prec_a @ (mus_a - pooled) ** 2)
+        spread = float(np.std(mus_a, ddof=1))
+        for c, e in per_crop.items():
+            if "mean_positive_score" in e:
+                e["residual_logits"] = e["mean_positive_score"] - pooled
+    p_value = _chi2_sf(q_stat, df) if df >= 1 else 1.0
+    enough = used >= min_crops
+    heterogeneous = bool(enough and df >= 1 and p_value <= alpha
+                         and spread >= min_spread_logits)
+    return {
+        "global_shift_logits": global_shift, "per_crop": per_crop,
+        "statistic": "per-crop mean score over ANNOTATED CENTRES (exhaustive census, no "
+                     "HT weight), Cochran Q about the precision-weighted pooled mean",
+        "pooled_mean_positive_score": pooled,
+        "n_crops_used": used, "df": df, "cochran_q": float(q_stat),
+        "p_value": float(p_value), "per_crop_spread_logits": spread,
+        "min_spread_logits": float(min_spread_logits), "alpha": float(alpha),
+        "enough_crops": bool(enough), "heterogeneous": heterogeneous,
+        "BASIS": "CALIBRATION DEGREES OF FREEDOM · Cochran Q on per-crop optimal "
+                 "intercept shifts, sandwich variance under HT weights",
+        "NOT_A_ROUTER": "a positive result says no single deployed constant works. It "
+                        "does NOT license crop or family identity as a deployment "
+                        "router; that remains forbidden.",
+        "promotes": False,
+    }
+
+
+def _chi2_sf(q: float, df: int) -> float:
+    """Upper tail of chi-square via Wilson-Hilferty. numpy only, accurate for df >= 1."""
+    if df < 1:
+        return 1.0
+    if q <= 0:
+        return 1.0
+    k = float(df)
+    z = ((q / k) ** (1.0 / 3.0) - (1.0 - 2.0 / (9.0 * k))) / math.sqrt(2.0 / (9.0 * k))
+    return 0.5 * math.erfc(z / math.sqrt(2.0))
+
+
 def assert_calibration_preserves_ranking(h0_score, cal_score, y, w, *,
                                          atol: float = 1e-9) -> dict:
     """A calibration-only arm is `a*eta0 + c`, a MONOTONE map of the deployed score. It
@@ -1806,6 +2006,8 @@ def _assert_permitted_verdict(verdict: str) -> str:
                 f"verdict {verdict!r} contains the forbidden token {tok!r}. A null "
                 f"linear probe on a sampled row table cannot fund an encoder programme. "
                 f"Permitted verdicts are exactly {PERMITTED_VERDICTS}.")
+    if verdict in RETIRED_VERDICTS:
+        raise VerdictError(RETIRED_VERDICTS[verdict])
     if verdict not in PERMITTED_VERDICTS:
         raise VerdictError(
             f"verdict {verdict!r} is not one of {PERMITTED_VERDICTS}")
@@ -1817,9 +2019,10 @@ def decide_verdict(*, h0_rank: dict, lin_rank: dict, shuf_lin_ranks: list,
                    min_ranking_delta: float = MIN_RANKING_DELTA_AUC,
                    min_calibration_delta: float = MIN_CALIBRATION_DELTA_NATS,
                    shuffle_null_band: float = 0.05,
-                   null_se_multiple: float = 3.0,
+                   null_se_multiple: float = 2.0,
                    alpha: float = 0.05,
-                   cal_slope_positive: bool = True) -> dict:
+                   cal_slope_positive: bool = True,
+                   cal_heterogeneity: dict | None = None) -> dict:
     """The whole decision, pre-registered.
 
     Gate first: the label-shuffled refits must return a target-family AUC whose MEAN is
@@ -1843,21 +2046,29 @@ def decide_verdict(*, h0_rank: dict, lin_rank: dict, shuf_lin_ranks: list,
     """
     null = summarise_null(list(shuf_lin_ranks), list(shuf_cal_cals))
     shuf_auc = null["auc_mean"]
-    # The tolerance is the WIDER of the pre-registered band and the null's own standard
-    # error. A fixed 0.05 asserts a precision this estimator does not have: at the
-    # measured sd of ~0.15, eight seeds give se ~0.05 and the mean legitimately wanders.
-    # A wide null cannot smuggle a false positive through, because the SAME width raises
-    # `null_ceiling` that LIN_HEAD must clear — a noisy instrument loses power, it does
-    # not gain licence.
+    # LEAKAGE IS ONE-SIDED. Leakage means the pipeline scores ABOVE chance on permuted
+    # labels; a shuffled null that lands BELOW 0.5 is the refit failing to find anything,
+    # which is the outcome the control exists to confirm.
+    #
+    # It has to be one-sided, because permuting labels on a FIXED corpus does not
+    # integrate over the corpus. The shuffled null carries an irreducible corpus-level
+    # offset that no number of label permutations averages away: MEASURED (FIXTURE, 19
+    # seeds) mean 0.4183, se 0.0211 — 3.9 se below 0.5 and stable across seeds. A
+    # two-sided gate reads that as leakage and refuses to emit any verdict at all.
+    #
+    # The tolerance is the wider of the pre-registered band and a multiple of the null's
+    # own standard error, so the gate never asserts a precision the estimator lacks.
     null_tolerance = max(float(shuffle_null_band), null_se_multiple * null["auc_se"])
-    if not np.isfinite(shuf_auc) or abs(shuf_auc - 0.5) > null_tolerance:
+    if not np.isfinite(shuf_auc):
+        raise ControlFailure("label-shuffled control returned no finite mean AUC")
+    if shuf_auc - 0.5 > null_tolerance:
         raise ControlFailure(
             f"label-shuffled control returned MEAN target AUC {shuf_auc:.4f} over "
             f"{null['n_replicates']} seeds (sd {null['auc_sd']:.4f}, se "
-            f"{null['auc_se']:.4f}), outside 0.5 +/- {null_tolerance:.4f}. With labels "
-            f"permuted there is no signal to find, so a non-null here means the pipeline "
-            f"is measuring leakage (group structure, threshold reuse, or a basis "
-            f"mix-up). No verdict is emitted from an instrument in this state.")
+            f"{null['auc_se']:.4f}), ABOVE 0.5 + {null_tolerance:.4f}. With labels "
+            f"permuted there is no signal to find, so scoring above chance means the "
+            f"pipeline is measuring leakage (group structure, threshold reuse, or a "
+            f"basis mix-up). No verdict is emitted from an instrument in this state.")
 
     if null["min_attainable_p"] > alpha:
         raise ControlFailure(
@@ -1899,11 +2110,24 @@ def decide_verdict(*, h0_rank: dict, lin_rank: dict, shuf_lin_ranks: list,
     # CALIBRATION.
     cal_deployable = bool(cal_slope_positive)
 
+    # CALIBRATION SPLITS IN TWO, and the split is the whole value of the token.
+    # Acceptance is a level set, so every monotone calibrator is worth exactly one scalar
+    # here. GLOBAL means that scalar exists and the answer is "run a threshold sweep" —
+    # something we can already do without this instrument. PER_CROP means no single
+    # deployed constant can serve every crop, which is a finding about the deployment
+    # rule rather than about the head.
+    het = dict(cal_heterogeneity or {})
+    per_crop_needed = bool(het.get("heterogeneous", False))
     if rank_gain >= min_ranking_delta and clears_null:
         verdict = "LINEAR_HEAD"
     elif (calib_gain >= min_calibration_delta and calib_clears_null and cal_deployable
             and h0_ranks_above_null):
-        verdict = "CALIBRATION"
+        verdict = "CALIBRATION_PER_CROP" if per_crop_needed else "CALIBRATION_GLOBAL"
+    elif per_crop_needed and h0_ranks_above_null and cal_deployable:
+        # Reachable on its own: one constant may be no better than the deployed one
+        # corpus-wide and STILL be unable to serve every crop. That is a finding about
+        # the deployment rule that a pooled log-loss gain cannot express.
+        verdict = "CALIBRATION_PER_CROP"
     else:
         verdict = "LINEAR_PROBE_NULL"
     _assert_permitted_verdict(verdict)
@@ -1918,6 +2142,15 @@ def decide_verdict(*, h0_rank: dict, lin_rank: dict, shuf_lin_ranks: list,
         "ranking_permutation_p": rank_p,
         "calibration_gain_nats": calib_gain, "calibration_null_nats": calib_null,
         "calibration_slope_positive": cal_deployable,
+        "calibration_degrees_of_freedom": het or None,
+        "calibration_per_crop_needed": per_crop_needed,
+        "LEVEL_SET_NOTE": "acceptance is `logit == max_pool3d(logit)` AND "
+                          "`sigmoid(logit) > tau`. For any strictly increasing phi, "
+                          "A(phi(s), phi(tau)) == A(s, tau) EXACTLY, and the local-max "
+                          "test runs on the RAW logits. Temperature, Platt, beta, "
+                          "histogram binning and isotonic are therefore all worth one "
+                          "scalar here: det_threshold. That is why the calibration "
+                          "verdict is split rather than reported bare.",
         "h0_ranks_above_null": bool(h0_ranks_above_null),
         "h0_permutation_p": h0_p,
         "calibration_clears_null_tail": bool(calib_clears_null),
@@ -1925,6 +2158,11 @@ def decide_verdict(*, h0_rank: dict, lin_rank: dict, shuf_lin_ranks: list,
         "min_calibration_delta": min_calibration_delta,
         "shuffled_control_auc": shuf_auc, "shuffle_null_band": shuffle_null_band,
         "shuffle_null_tolerance_applied": float(null_tolerance),
+        "shuffle_null_gate": "ONE-SIDED. Only an ABOVE-chance shuffled null is leakage; "
+                             "a below-chance null is the refit finding nothing, which is "
+                             "what the control is for. Permuting labels on a fixed corpus "
+                             "leaves a corpus-level offset no permutation count removes.",
+        "shuffle_null_below_chance": bool(shuf_auc < 0.5),
         "shuffled_null": null, "null_se_multiple": null_se_multiple, "alpha": alpha,
         "permitted_verdicts": list(PERMITTED_VERDICTS),
         "POLICY_NOTE": "the two deltas are POLICY thresholds, not calibrated transfer "
@@ -2031,7 +2269,8 @@ def run_direction(corpus: Corpus, *, basis_split: int, h0: LinearHead,
                   l2: float = 1.0, arms=DEFAULT_ARMS, budget_multiple: float = 1.5,
                   n_folds: int = 4, seed: int = 20260806,
                   parity_atol: float = 1e-4, n_boot: int = 0,
-                  n_shuffles: int = DEFAULT_N_SHUFFLES) -> dict:
+                  n_shuffles: int = DEFAULT_N_SHUFFLES,
+                  shuffle_scope: str = "global") -> dict:
     """One cell-pair of the 2x2: fit/select on the SOURCE family inside checkpoint basis
     `basis_split`, freeze, then open the TARGET family exactly once."""
     if int(h0.basis_split) != int(basis_split):
@@ -2079,7 +2318,8 @@ def run_direction(corpus: Corpus, *, basis_split: int, h0: LinearHead,
     fit_pool = pools["fit_pool"]
 
     built, blocked, fps = build_arms(corpus, caps, source_mask=fit_pool, arms=arms, l2=l2,
-                                     n_shuffles=n_shuffles, shuffle_seed=seed)
+                                     n_shuffles=n_shuffles, shuffle_seed=seed,
+                                     shuffle_scope=shuffle_scope)
     for nm, a in built.items():
         if a.param_space == "cal2":
             a.notes["_h0"] = h0
@@ -2174,6 +2414,15 @@ def run_direction(corpus: Corpus, *, basis_split: int, h0: LinearHead,
 
     shuf_lin_ranks = _null_of("SHUF_LIN", "ranking")
     shuf_cal_cals = _null_of("SHUF_CAL", "calibration")
+
+    # How many degrees of freedom does the calibration actually need? Read on the
+    # CALIBRATION-ONLY arm's target-family scores, because that is the arm whose whole
+    # content is an operating point.
+    het = None
+    if "CAL_ONLY" in scores:
+        het = calibration_heterogeneity(scores["CAL_ONLY"][target], corpus.y[target],
+                                        ht_w[target], corpus.crop[target])
+
     verdict = None
     if ("H0" in results and "CAL_ONLY" in results and "LIN_HEAD" in results
             and shuf_lin_ranks and shuf_cal_cals):
@@ -2184,7 +2433,8 @@ def run_direction(corpus: Corpus, *, basis_split: int, h0: LinearHead,
             h0_cal=results["H0"]["target_family"]["calibration"],
             cal_only_cal=results["CAL_ONLY"]["target_family"]["calibration"],
             shuf_cal_cals=shuf_cal_cals,
-            cal_slope_positive=not (cal_check or {}).get("inverted", False))
+            cal_slope_positive=not (cal_check or {}).get("inverted", False),
+            cal_heterogeneity=het)
 
     uniq_rates = sorted(set(round(v, 12) for v in sampling_rate.values()))
     return {
@@ -2202,6 +2452,7 @@ def run_direction(corpus: Corpus, *, basis_split: int, h0: LinearHead,
                     "overstatement is 8.3178 logits, against a deployed threshold of "
                     "+3.4340."},
         "calibration_monotonicity_check": cal_check,
+        "calibration_degrees_of_freedom": het,
         "arms": results, "blocked": blocked,
         "verdict_detail": verdict,
         "verdict": None if verdict is None else verdict["verdict"],
@@ -2270,6 +2521,11 @@ class FixtureSpec:
     signal_along_w: float = 2.6
     signal_orthogonal: float = 1.9
     subthr_latent_pos_frac: float = 0.35
+    # Per-crop displacement ALONG w_ckpt, in feature units. It moves a crop's positives
+    # and negatives together, so the crop's separation is untouched and only its optimal
+    # operating point moves. That is exactly the regime CALIBRATION_PER_CROP names: one
+    # corpus-wide scalar cannot serve every crop.
+    per_crop_shift: float = 0.0
     seed: int = 20260806
 
 
@@ -2312,6 +2568,8 @@ def _make_basis_rows(head: LinearHead, families, spec: FixtureSpec, seed: int):
             f = rng.normal(0.0, spec.sigma_bg, size=(n, FEAT_DIM))
             amp = np.where(pos, 1.0, np.where(lat, 0.55, 0.0))[:, None]
             f = f + amp * (spec.signal_along_w * w_hat + spec.signal_orthogonal * ortho)
+            if spec.per_crop_shift:
+                f = f + float(rng.normal(0.0, spec.per_crop_shift)) * w_hat
             blocks.append(f)
             d = np.where(pos, 0.0, rng.gamma(2.0, 6.0, size=n))
             d[lat & ~pos] = rng.gamma(2.0, 2.0, size=int((lat & ~pos).sum()))
@@ -2397,8 +2655,14 @@ FIXTURE_REGIMES = {
     # A large orthogonal component: only a refitted head can see it => LINEAR_HEAD.
     "linear_head": dict(signal_along_w=2.0, signal_orthogonal=3.0),
     # All signal along w_ckpt, but placed so the deployed threshold is badly located and
-    # the sampled-prior intercept is wrong => CALIBRATION, with ranking unchanged.
-    "calibration": dict(signal_along_w=4.5, signal_orthogonal=0.0),
+    # the sampled-prior intercept is wrong. Ranking unchanged, and ONE scalar fixes every
+    # crop => CALIBRATION_GLOBAL.
+    "calibration_global": dict(signal_along_w=4.5, signal_orthogonal=0.0),
+    # As above, plus a per-crop displacement along w_ckpt: each crop's optimal operating
+    # point sits somewhere different, so no single deployed constant serves them all
+    # => CALIBRATION_PER_CROP.
+    "calibration_per_crop": dict(signal_along_w=4.5, signal_orthogonal=0.0,
+                                 per_crop_shift=1.5),
     # No association between features and labels at all => LINEAR_PROBE_NULL.
     "null": dict(signal_along_w=0.0, signal_orthogonal=0.0, subthr_latent_pos_frac=0.0),
 }
