@@ -1,32 +1,65 @@
 # =====================================================================================
-# D1 + D1-F  —  RESPONSE AUDIT AND FROZEN-FEATURE EXPORT  (v5)
+# D1 + D1-F  —  RESPONSE AUDIT AND FROZEN-FEATURE EXPORT  (v6)
 #
 # Injected into predict_unet_transformer.py's per-frame peak-extraction loop, where the FINAL
-# post-TTA det_logits[f_idx][0] and the 32-channel unet_out[:, f_idx] are both in scope.
+# post-TTA det_logits[f_idx][0], the TTA-MEAN feature accumulator _d1_unet_tta[0, f_idx] and
+# the IDENTITY-VIEW unet_out[0, f_idx] are all in scope.
 # Compact statistics only -- never a heatmap volume.
 #
-# WHAT CHANGED FROM v4, AND WHY.
+# THE RULE THAT DEFINES v6. `unet_out` is READ-ONLY. It is read at L442/L445 by
+# `_index_features` -> `predict_edges`, AFTER the TTA block; it is the ASSOCIATION
+# representation and carries the 0.915 substrate. The TTA-consistent detector feature is
+# accumulated into a SEPARATE tensor (`_d1_unet_tta`) that only this audit ever reads.
+# Accumulating into `unet_out` -- the fix every research lane independently proposed -- would
+# silently change every edge feature in the pipeline.
 #
-# 1. SPHERE, NOT CUBE. v4 searched an axis-aligned 15 um BOX, which admits 15*sqrt(3) = 25.98 um
-#    at the corner; it duly reported near-distance p50 15.4 um and max 24.4 um for a "15 um"
-#    search. Every radial comparison here is physical Euclidean and masked to a sphere first.
+# WHAT CHANGED FROM v5, AND WHY.
 #
-# 2. SUFFICIENT STATISTICS, NOT K-NEAREST. The causal class depends on the STRONGEST response
-#    in each radius, not the closest. We export the strongest maximum within <=7 um, the
-#    strongest within (7,15], the nearest within <=15, and counts -- so no arbitrary K can
-#    influence the primary M/C/T/L/D classification. An optional K-list is ranked by LOGIT
-#    after the spherical mask, carrying both rank and distance.
+# 1. TTA-CONSISTENT FEATURES (blocker B3). v5 paired post-TTA det_logits with the
+#    IDENTITY-VIEW feature and called the pair a detector representation. It is not: the
+#    deployed logit is the mean of 8 aligned views, so checkpoint_detect_head(feat_v5)
+#    reproduces the identity-view logit, not the deployed one. v6 exports FOUR arrays and
+#    never conflates them:
+#       {crop}__feat_tta_mean_gt.npy   32-D at the sampled voxel,  8-view TTA mean
+#       {crop}__feat_tta_mean_max.npy  32-D at the strongest nearby local max, TTA mean
+#       {crop}__feat_idview_gt.npy     identity view -- the ASSOCIATION representation
+#       {crop}__feat_idview_max.npy    identity view at that same maximum
+#    The identity-view arrays are retained because `predict_edges` genuinely reads the
+#    identity view. They must NEVER be described as the post-TTA detector representation.
 #
-# 3. THE EXACT-VOXEL CLASS IS SECONDARY. Detection success is decided by bipartite matching of
-#    accepted peaks to GT within the scorer's 7 um radius, so an accepted peak one voxel away
-#    matches correctly even when the GT voxel itself is pool-suppressed. v4 proved the point:
-#    44b6_0113de3b matched 52/52 GT while the exact-voxel rule called 26 of them "suppressed".
-#    Those columns are retained, renamed `voxel_*`, and drive NOTHING.
+# 2. THE PARITY ASSERT. `detect_head` is Conv3d(32, 1, kernel_size=1): 33 parameters, a
+#    pointwise affine map, so it commutes with both the spatial permutations and the mean.
+#    Therefore detect_head(mean_v aligned_feature_v) MUST equal mean_v aligned_logit_v. The
+#    audit applies the fold-routed checkpoint head to the TTA-mean feature and HARD ABORTS on
+#    disagreement. A near-miss is the dangerous case, not the safe one, so a residual that is
+#    systematically signed or correlated with the logit aborts even when its magnitude is
+#    below the tolerance. There is no "proceed with caveat" branch.
 #
-# 4. IMMUTABLE PER-CROP MANIFESTS. v4 wrote one shared manifest per flush and overwrote it, so
-#    with several flushes only the last crop survived and the other looked as if it had never
-#    run. Each crop now writes its own start/complete/error record; a parent aggregator builds
-#    the global manifest afterwards and fails hard.
+# 3. NaN SENTINEL, NOT A SILENT FALLBACK. v5 wrote `feat_max = feat_gt` whenever no local
+#    maximum existed, so non-GT rows silently received "the feature at a random voxel" while
+#    GT rows received "the feature at a local max" -- a ~100% label-correlated artefact the
+#    moment the two are contrasted. v6 writes an all-NaN row and a `feat_max_valid` boolean.
+#    Contract: all-NaN iff invalid, finite iff valid, never +-inf. Asserted at flush.
+#
+# 4. STABLE row_id. The only alignment key between rows, feature arrays and manifests.
+#    0-based, monotonically increasing in emission order; feature-array row i corresponds to
+#    row_id == i. Downstream code must NEVER sort rows without applying the identical
+#    permutation to the feature arrays.
+#
+# 5. RANKING DENOMINATORS. n_local_max_in_frame / n_subthr_localmax_in_frame /
+#    n_accepted_in_frame are recorded on every row, so a ranking metric no longer has to guess
+#    its denominator (the required AUC bar swings ~0.86 -> ~0.99 across its plausible range).
+#
+# 6. dist_to_nearest_gt_um on every row -- the masked-loss arm cannot be built without it.
+#
+# INHERITED FROM v5 AND UNCHANGED.
+#
+#   SPHERE, NOT CUBE. Every radial comparison is physical Euclidean, masked to a sphere first.
+#   SUFFICIENT STATISTICS, NOT K-NEAREST -- the causal class depends on the STRONGEST response
+#   in each radius, not the closest.
+#   THE EXACT-VOXEL CLASS IS SECONDARY (`voxel_*` columns drive NOTHING): detection success is
+#   decided by bipartite matching of accepted peaks to GT within the scorer's 7 um radius.
+#   IMMUTABLE PER-CROP MANIFESTS: one write-once start/complete/error record per crop.
 #
 # GT IS AN AUDIT LABEL ONLY. Never used for inference, peak extraction or proposals.
 # =====================================================================================
@@ -52,14 +85,139 @@ _D1_RNG = _d1_np.random.default_rng(20260806)
 _D1_N_UNIFORM = int(_d1_os.environ.get("BIOHUB_D1_N_UNIFORM", "64"))
 _D1_N_SUBTHR = int(_d1_os.environ.get("BIOHUB_D1_N_SUBTHR", "32"))
 
+# The deployed view set, in accumulation order. Derived from the GENERATED notebook's TTA
+# patch (identity + 3 flips + rot90 k=1,3 + transpose + anti-transpose), NOT from the vendored
+# base file -- the base file is not the run.
+_D1_TTA_VIEW_SET = (
+    "identity", "flip_x", "flip_y", "flip_xy",
+    "rot90_k1", "rot90_k3", "transpose_yx", "rot90_k1_then_transpose_yx",
+)
+# THE 8/7 SPLIT. Two DIFFERENT numbers; never merge them into one conflated count.
+#
+#   n_encode_calls   = 8  -- model.encode() is called 8 times; the divisor `_nv` reaches 8.
+#   n_distinct_views = 7  -- but only 7 of those 8 are distinct spatial permutations.
+#
+# The view written as the anti-transpose, `torch.rot90(imgs, 1, dims=(-2,-1)).transpose(-1,-2)`,
+# is EXACTLY `imgs.flip(-1)` -- already view 1. Every single-order composition of rot90 at odd
+# k with transpose collapses to a flip; a true anti-transpose needs k=2. So `flip(-1)` carries
+# weight 2/8, the true anti-transpose carries 0/8, and the divisor is still 8. The measure is
+# NON-UNIFORM on D4, and a 7-element subset of an order-8 group is never a subgroup, so the
+# deployed average is NOT a group average.
+#
+# v6 REPLICATES THIS VERBATIM AND DOES NOT FIX IT. v6 exists to describe the DEPLOYED detector.
+# Correcting the view set is a DETECTOR change: it moves the node population, forces a
+# predict_edges rerun (correction C3), and voids the 0.889 anchor. Legitimate as a standalone
+# experiment; never as a silent ride-along inside v6.
+_D1_REQUIRE_ENCODE_CALLS = int(_d1_os.environ.get("BIOHUB_D1_REQUIRE_ENCODE_CALLS", "8"))
+_D1_REQUIRE_DISTINCT_VIEWS = int(_d1_os.environ.get("BIOHUB_D1_REQUIRE_DISTINCT_VIEWS", "7"))
+
+# Parity gate, DERIVED rather than guessed.
+#
+# The reconstruction sums `n_encode_calls` float32 terms and divides; each term carries at most
+# one float32 rounding at 2**-24 relative. So the residual bound is
+#
+#     n_encode_calls * 2**-24 * max|logit|
+#
+# At the measured max|logit| ~ 15 this is ~7.3e-6, against a MEASURED max|delta| of 3.8e-6 to
+# 5.7e-6 on real checkpoints across both splits -- i.e. the derived bound is tight, roughly 1.3x
+# the observed worst case. The previous literal `1e-4` was 18-26x loose and not derived from
+# anything; it would have passed a genuinely broken accumulator.
+_D1_PARITY_ULP = 2.0 ** -24            # float32 unit roundoff
+_D1_PARITY_SLACK = float(_d1_os.environ.get("BIOHUB_D1_PARITY_SLACK", "2.0"))
+_D1_PARITY_LOGIT_FLOOR = 1.0           # keeps the bound positive on an all-zero frame
+_D1_PARITY_MAX_SIGN_RATIO = 0.5
+_D1_PARITY_MAX_CORR = 0.05
+
+
+def _d1_parity_bound(logit_abs_max):
+    """The derived float32 residual bound: n_encode_calls * 2**-24 * max|logit|.
+
+    `_D1_PARITY_SLACK` = 2.0 is a small multiplier for accumulation-order effects (the sum is
+    not performed in a fixed order on GPU); it is NOT a fudge factor for a wrong accumulator.
+    It is RECORDED in the manifest (`parity.gate_slack`) so the choice is auditable, and the
+    number was picked from the measurement, not for comfort:
+
+        derived bound, slack 1, at max|logit| ~ 15   7.15e-6
+        MEASURED worst |delta|, both splits          5.70e-6   (1.25x headroom -- too thin)
+        gate at slack 2                              1.43e-5   (2.5x the measured worst case)
+        retired literal                              1.00e-4   (7x looser than this gate)
+
+    Slack 1 is the spec's bare formula but leaves only 1.25x margin on a HARD ABORT that would
+    kill a multi-hour job; slack 4 gives back most of what tightening bought. Two is the
+    smallest multiplier that clears the measured envelope with room for accumulation order.
+
+    The magnitude gate is in any case the COARSE half. Every failure mode it is meant to catch
+    -- a dropped view, a wrong divisor, a foreign head, a wrong inverse -- lands at O(0.1-1.3)
+    (a true-D4 replacement measures max |delta-logit| 1.33), five orders of magnitude above any
+    choice in this range. The DECISIVE half is accepted-peak-set equality, which is the only
+    check with power against a zero-mean inverse bug.
+    """
+    return (_D1_REQUIRE_ENCODE_CALLS * _D1_PARITY_ULP * _D1_PARITY_SLACK
+            * max(float(logit_abs_max), _D1_PARITY_LOGIT_FLOOR))
+
+
+# The forward view for each recorded name. This is the SINGLE source of truth for what the
+# names mean, so the distinct-permutation count below is computed from the same definitions
+# the notebook patch uses rather than from a comment.
+_D1_VIEW_FN = {
+    "identity": lambda t: t,
+    "flip_x": lambda t: t.flip(-1),
+    "flip_y": lambda t: t.flip(-2),
+    "flip_xy": lambda t: t.flip((-2, -1)),
+    "rot90_k1": lambda t: _d1_torch.rot90(t, 1, dims=(-2, -1)),
+    "rot90_k3": lambda t: _d1_torch.rot90(t, 3, dims=(-2, -1)),
+    "transpose_yx": lambda t: t.transpose(-1, -2),
+    "rot90_k1_then_transpose_yx": (
+        lambda t: _d1_torch.rot90(t, 1, dims=(-2, -1)).transpose(-1, -2)),
+}
+
+
+def _d1_distinct_view_count(names):
+    """Count DISTINCT spatial permutations among `names`, by applying each to an index grid.
+
+    This replaces the `Y == X` assertion that earlier drafts of the spec called the safety
+    property. That was refuted: every one of the 8 inverses round-trips exactly, including on
+    non-square (Y, X) input, so squareness is not what protects the export. The property that
+    IS violated -- and the one worth asserting -- is the distinct-permutation count.
+
+    A square grid is used deliberately: rot90 and transpose change the shape on a non-square
+    grid, so two views could only ever collide on a square one. Counting there is what makes
+    the collision visible rather than hidden behind a shape mismatch.
+    """
+    _n = 5
+    _idx = _d1_torch.arange(_n * _n, dtype=_d1_torch.int64).reshape(1, 1, 1, _n, _n)
+    _seen = set()
+    for _nm in names:
+        _fn = _D1_VIEW_FN.get(_nm)
+        if _fn is None:
+            raise RuntimeError(
+                f"D1 v6: unknown TTA view name {_nm!r}; the distinct-permutation count "
+                "cannot be verified, so the export is refused"
+            )
+        _seen.add(_fn(_idx).reshape(-1).contiguous().numpy().tobytes())
+    return len(_seen)
+
 # Columns that MUST survive to the parquet whenever the crop has any GT row. Asserted in
 # _d1_flush; see the trap-21 note there for why an assertion rather than trust.
 _D1_REQUIRED_COLS = (
+    "row_id",
     "dataset", "t", "kind", "z", "y", "x", "logit", "prob", "pooled",
     "voxel_is_local_max", "voxel_over_threshold", "voxel_accepted",
     "n_lm_7um", "n_lm_15um", "n_acc_7um", "n_acc_15um",
     "best7_dist_um", "near15_dist_um", "best15_dist_um",
     "gt_z", "gt_y", "gt_x",
+    "feat_max_valid", "dist_to_nearest_gt_um",
+    "n_local_max_in_frame", "n_subthr_localmax_in_frame", "n_accepted_in_frame",
+)
+# The four exported feature arrays, and which rows they are defined on.
+_D1_FEAT_ARRAYS = (
+    "feat_tta_mean_gt", "feat_tta_mean_max", "feat_idview_gt", "feat_idview_max",
+)
+_D1_FEAT_MAX_ARRAYS = ("feat_tta_mean_max", "feat_idview_max")
+_D1_ROW_ID_CONTRACT = (
+    "row_id is 0-based and monotonically increasing in emission order; feature-array row i "
+    "corresponds to row_id == i. Never sort rows without applying the identical permutation "
+    "to the feature arrays."
 )
 _D1_KLIST = int(_d1_os.environ.get("BIOHUB_D1_KLIST", "8"))
 _D1_MATCH_UM = 7.0      # the scorer's max_distance
@@ -85,6 +243,7 @@ def _d1_start(dataset):
     _d1_write_json(_D1_MAN / f"{dataset}.start.json", {
         "dataset": dataset, "pid": _d1_os.getpid(),
         "fold": _d1_os.environ.get("BIOHUB_D1_FOLD"),
+        "split": _d1_os.environ.get("BIOHUB_D1_SPLIT"),
         "checkpoint_sha256": _d1_os.environ.get("BIOHUB_D1_CKPT_SHA"),
     })
 
@@ -134,11 +293,191 @@ def _d1_load_gt(dataset, gt_dir):
     return by_t
 
 
-def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_czyx, det_threshold,
-                    pool_kernel, voxel_size, downsample):
+def _d1_accepted_set(logits_1zyx, pool_kernel, det_threshold):
+    """The ACCEPTED-PEAK set: local maxima under max_pool3d that clear the probability
+    threshold. These are the nodes. Returned as a set of (z, y, x) index triples."""
+    _l = logits_1zyx.detach().float()
+    _pl = _d1_F.max_pool3d(_l.unsqueeze(0), pool_kernel, stride=1,
+                           padding=tuple(k // 2 for k in pool_kernel))[0]
+    _ac = (_l == _pl) & (_d1_torch.sigmoid(_l) > det_threshold)
+    _nz = _d1_np.argwhere(_ac[0].cpu().numpy())
+    return set(map(tuple, _nz.tolist()))
+
+
+def _d1_parity_frame(det_head, feats_tta_czyx, logits_1zyx, pool_kernel, det_threshold):
+    """detect_head(mean_v aligned_feature_v) MUST equal mean_v aligned_logit_v.
+
+    `detect_head` is Conv3d(C, 1, kernel_size=1) -- a pointwise affine map -- so it commutes
+    with the D4 spatial permutations and with the mean. Any disagreement therefore means the
+    two tensors are not the pair we believe they are. Returns a record; the caller aborts.
+    """
+    if det_head is None:
+        raise RuntimeError(
+            "D1 v6: no detect_head supplied to the audit; the TTA-feature/logit parity "
+            "assert is mandatory and must not be skipped"
+        )
+    _w = next(det_head.parameters())
+    _x = feats_tta_czyx.detach().unsqueeze(0)
+    _cast = bool(_x.dtype != _w.dtype)
+    if _cast:
+        _x = _x.to(_w.dtype)
+    with _d1_torch.no_grad():
+        _recon = det_head(_x)[0]
+    if tuple(_recon.shape) != tuple(logits_1zyx.shape):
+        raise RuntimeError(
+            f"D1 v6 parity: shape mismatch recon {tuple(_recon.shape)} vs "
+            f"det_logits {tuple(logits_1zyx.shape)} -- wrong tensor pairing"
+        )
+    # Statistics in numpy on the host. torch.quantile refuses inputs above ~2**24 elements,
+    # which a larger output grid would hit; a silent RuntimeError inside the parity check is
+    # the one failure mode that must never happen, because it is the gate for everything else.
+    _lg = logits_1zyx.detach().float().reshape(-1).cpu().numpy().astype(_d1_np.float64)
+    _rc_v = _recon.detach().float().reshape(-1).cpu().numpy().astype(_d1_np.float64)
+    _r = _rc_v - _lg
+    _absr = _d1_np.abs(_r)
+    _mean = float(_r.mean())
+    _rms = float(_d1_np.sqrt((_r ** 2).mean()))
+    _lcent = _lg - _lg.mean()
+    _rcent = _r - _r.mean()
+    _den = float(_d1_np.sqrt((_lcent ** 2).sum())) * float(_d1_np.sqrt((_rcent ** 2).sum()))
+    _corr = (float((_lcent * _rcent).sum()) / _den) if _den > 0.0 else 0.0
+    # ---- ACCEPTED-PEAK-SET EQUALITY: the decisive check ------------------------------------
+    # A signed-residual test alone does NOT catch a wrong inverse transform: injected inverse
+    # bugs come out exactly zero-mean (measured bias 0.0000), because a permutation only moves
+    # mass around, it does not bias it. Magnitude plus peak-set equality is what catches them.
+    # The peak set is the one that matters because ACCEPTED PEAKS ARE THE NODES -- if they are
+    # identical, the reconstruction and the deployed field select the same detector.
+    _dep_pk = _d1_accepted_set(logits_1zyx, pool_kernel, det_threshold)
+    _rec_pk = _d1_accepted_set(_recon, pool_kernel, det_threshold)
+    _symdiff = _dep_pk ^ _rec_pk
+    _logit_absmax = float(_d1_np.abs(_lg).max())
+    return {
+        "n_voxels": int(_r.size),
+        "max_abs_err": float(_absr.max()),
+        "parity_bound": _d1_parity_bound(_logit_absmax),
+        "n_accepted_deployed": len(_dep_pk),
+        "n_accepted_recon": len(_rec_pk),
+        "n_peak_set_symdiff": len(_symdiff),
+        "peak_set_identical": bool(not _symdiff),
+        "p999_abs_err": float(_d1_np.percentile(_absr, 99.9)),
+        "median_abs_err": float(_d1_np.median(_absr)),
+        "mean_signed_err": _mean,
+        "rms_err": _rms,
+        "sign_ratio": (abs(_mean) / _rms) if _rms > 0.0 else 0.0,
+        "frac_positive": float((_r > 0).mean()),
+        "pearson_r_vs_logit": _corr,
+        "logit_abs_max": _logit_absmax,
+        "dtype_feat_tta_mean": str(feats_tta_czyx.dtype),
+        "dtype_det_logits": str(logits_1zyx.dtype),
+        "dtype_head_weight": str(_w.dtype),
+        "dtype_recon": str(_recon.dtype),
+        "dtype_cast_applied": _cast,
+        "secondary_detection_weight": _d1_os.environ.get(
+            "BIOHUB_SECONDARY_DETECTION_WEIGHT", "0"),
+    }
+
+
+def _d1_parity_verdict(rec):
+    """Return the list of abort reasons. Empty list == float noise, proceed."""
+    _sus = []
+    # Decisive gate first: the accepted peaks ARE the nodes. A zero-mean residual can hide a
+    # wrong inverse; a changed peak set cannot.
+    if not rec["peak_set_identical"]:
+        _sus.append(
+            f"ACCEPTED-PEAK SETS DIFFER: {rec['n_peak_set_symdiff']} voxels in the symmetric "
+            f"difference ({rec['n_accepted_deployed']} deployed vs {rec['n_accepted_recon']} "
+            "reconstructed). The reconstruction selects a DIFFERENT NODE POPULATION, so the "
+            "exported features do not describe the deployed detector. This fires even when "
+            "the residual is exactly zero-mean, which is precisely how an inverse-transform "
+            "bug presents."
+        )
+    if not (rec["max_abs_err"] <= rec["parity_bound"]):
+        _sus.append(
+            f"max_abs_err {rec['max_abs_err']:.6e} > derived bound "
+            f"{rec['parity_bound']:.6e} (= {_D1_REQUIRE_ENCODE_CALLS} encode calls * 2**-24 * "
+            f"slack {_D1_PARITY_SLACK} * max|logit| {rec['logit_abs_max']:.4f}). Suspects, in "
+            "order: (a) det_logits was blended after the TTA mean -- "
+            f"BIOHUB_SECONDARY_DETECTION_WEIGHT={rec['secondary_detection_weight']!r}, which "
+            "must be '0' for parity to be achievable; (b) the feature accumulator missed a "
+            "view or used a different divisor than det_logits; (c) a stale or foreign "
+            "detect_head (wrong fold checkpoint); (d) an inverse transform that is not the "
+            "inverse of its forward view."
+        )
+    if rec["sign_ratio"] > _D1_PARITY_MAX_SIGN_RATIO:
+        _sus.append(
+            f"residual is SYSTEMATICALLY SIGNED: |mean|/rms {rec['sign_ratio']:.4f} > "
+            f"{_D1_PARITY_MAX_SIGN_RATIO} (float noise gives ~1/sqrt(N) = "
+            f"{(1.0 / max(rec['n_voxels'], 1)) ** 0.5:.2e}). A signed offset is a real "
+            "mismatch -- a partial accumulation or a dtype cast -- not rounding."
+        )
+    if abs(rec["pearson_r_vs_logit"]) > _D1_PARITY_MAX_CORR:
+        _sus.append(
+            f"residual is CORRELATED WITH THE LOGIT: pearson r "
+            f"{rec['pearson_r_vs_logit']:+.4f}, |r| > {_D1_PARITY_MAX_CORR}. Rounding noise is "
+            "uncorrelated; a correlated residual means the reconstruction is a scaled or "
+            "partial version of the deployed logit."
+        )
+    return _sus
+
+
+def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_tta_czyx, feats_idview_czyx,
+                    det_threshold, pool_kernel, voxel_size, downsample,
+                    det_head=None, tta_view_set=None, n_encode_calls=None,
+                    n_frames_total=None, window_size=None):
+    """Audit one frame.
+
+    `feats_tta_czyx` is the 8-view TTA MEAN (the post-TTA detector representation).
+    `feats_idview_czyx` is the identity view -- what `predict_edges` actually reads, i.e. the
+    ASSOCIATION representation. They are different tensors and are never interchanged.
+    """
     _d1_start(dataset)
     _b = _D1_BUF.setdefault(dataset, {})
-    _b.setdefault("rows", []); _b.setdefault("feat_gt", []); _b.setdefault("feat_max", [])
+    _b.setdefault("rows", [])
+    for _k in _D1_FEAT_ARRAYS:
+        _b.setdefault(_k, [])
+
+    # ---- view-set contract: a degraded view set is an abort, never a silent fallback -----
+    _views = tuple(tta_view_set) if tta_view_set is not None else ()
+    _nv = int(n_encode_calls) if n_encode_calls is not None else -1
+    if len(_views) != _nv:
+        raise RuntimeError(
+            f"D1 v6: tta_view_set has {len(_views)} entries but n_encode_calls={_nv}; the "
+            "deployed divisor and the recorded view list disagree"
+        )
+    if _nv != _D1_REQUIRE_ENCODE_CALLS:
+        raise RuntimeError(
+            f"D1 v6: {_nv} encode calls accumulated, {_D1_REQUIRE_ENCODE_CALLS} required. "
+            "Refusing to export identity-view features under the post-TTA name -- that is "
+            "blocker B3. Set BIOHUB_D1_REQUIRE_ENCODE_CALLS deliberately if a different view "
+            "set is intended."
+        )
+    # THE 8/7 SPLIT, ASSERTED AT RUNTIME. 8 encode calls, 7 distinct permutations. If a future
+    # change "fixes" the anti-transpose collision, this fires -- and it SHOULD, because that is
+    # a detector change that moves the node population and voids the 0.889 anchor. It is not a
+    # bug to be repaired here.
+    _ndv = _d1_distinct_view_count(_views)
+    if _ndv != _D1_REQUIRE_DISTINCT_VIEWS:
+        raise RuntimeError(
+            f"D1 v6: the view set has {_ndv} DISTINCT permutations over "
+            f"{_nv} encode calls, but {_D1_REQUIRE_DISTINCT_VIEWS} distinct are required. "
+            "The deployed detector applies 8 encode calls over only 7 distinct views "
+            "(rot90(1) then transpose IS flip(-1)). v6 must replicate that collision "
+            "verbatim; changing the view set is a DETECTOR change and voids the anchors."
+        )
+    # Identity, not just arity. A view set with the right COUNT but the wrong members (an
+    # inverse applied in the wrong order, a rot90 k mixed up) still divides by 8 and still
+    # produces a plausible-looking mean; only the parity assert would catch it, and only if
+    # det_logits happened to be built the same wrong way. Pin the members too.
+    if _views != _D1_TTA_VIEW_SET:
+        raise RuntimeError(
+            f"D1 v6: TTA view set {list(_views)} != the deployed set "
+            f"{list(_D1_TTA_VIEW_SET)}; the accumulator is not averaging the views the "
+            "generated notebook's patch averages"
+        )
+    _b["tta_view_set"] = list(_views)
+    # Two SEPARATE fields. Never a single conflated count.
+    _b["n_encode_calls"] = _nv
+    _b["n_distinct_views"] = _ndv
 
     _lg = logits_1zyx.detach().float()
     _pooled = _d1_F.max_pool3d(_lg.unsqueeze(0), pool_kernel, stride=1,
@@ -148,19 +487,99 @@ def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_czyx, det_threshold,
     # voxel_size in predict_video is ALREADY scale*downsample: the OUTPUT-grid step.
     _step = tuple(float(v) for v in voxel_size)
 
+    # ---- PARITY: the whole point of v6. Hard abort, no "proceed with caveat" branch. -----
+    _par = _d1_parity_frame(det_head, feats_tta_czyx, logits_1zyx,
+                            pool_kernel, det_threshold)
+    _par["dataset"] = dataset
+    _par["t"] = int(t)
+    _reasons = _d1_parity_verdict(_par)
+    _agg = _b.setdefault("parity", {"n_frames": 0, "worst": None, "max_abs_err": 0.0,
+                                    "max_p999_abs_err": 0.0, "max_sign_ratio": 0.0,
+                                    "max_abs_corr": 0.0, "dtypes": None,
+                                    "max_parity_bound": 0.0,
+                                    "n_peak_set_symdiff_total": 0,
+                                    "all_peak_sets_identical": True})
+    _agg["n_frames"] += 1
+    _agg["dtypes"] = {k: v for k, v in _par.items() if k.startswith("dtype")}
+    if _par["max_abs_err"] >= _agg["max_abs_err"]:
+        _agg["max_abs_err"] = _par["max_abs_err"]
+        _agg["worst"] = _par
+    _agg["max_p999_abs_err"] = max(_agg["max_p999_abs_err"], _par["p999_abs_err"])
+    _agg["max_sign_ratio"] = max(_agg["max_sign_ratio"], _par["sign_ratio"])
+    _agg["max_abs_corr"] = max(_agg["max_abs_corr"], abs(_par["pearson_r_vs_logit"]))
+    _agg["max_parity_bound"] = max(_agg["max_parity_bound"], _par["parity_bound"])
+    _agg["n_peak_set_symdiff_total"] += int(_par["n_peak_set_symdiff"])
+    _agg["all_peak_sets_identical"] = bool(
+        _agg["all_peak_sets_identical"] and _par["peak_set_identical"])
+    if _reasons:
+        raise RuntimeError(
+            f"D1 v6 PARITY ABORT for {dataset} t={t}: " + " | ".join(_reasons)
+            + f" | record={_d1_json.dumps(_par, default=str)}"
+        )
+
     _lgc = _lg[0].cpu().numpy()
     _plc = _pooled[0].cpu().numpy()
     _prc = _prob[0].cpu().numpy()
     _islm = (_lgc == _plc)
     _acc = _islm & (_prc > det_threshold)
-    _fe = feats_czyx.detach().float().cpu().numpy()
+    _fe_tta = feats_tta_czyx.detach().float().cpu().numpy()
+    _fe_idv = feats_idview_czyx.detach().float().cpu().numpy()
+    if _fe_tta.shape != _fe_idv.shape:
+        raise RuntimeError(
+            f"D1 v6: TTA-mean feature {_fe_tta.shape} and identity-view feature "
+            f"{_fe_idv.shape} disagree in shape"
+        )
+    _C = int(_fe_tta.shape[0])
+    _nan_feat = _d1_np.full((_C,), _d1_np.nan, dtype=_d1_np.float32)
+
+    # ---- ranking denominators, recorded on every row of this frame ----------------------
+    _n_lm_frame = int(_islm.sum())
+    _n_acc_frame = int(_acc.sum())
+    _sub_mask = _islm & (_prc <= det_threshold)
+    _n_sub_frame = int(_sub_mask.sum())
+
+    # ---- memory: the accumulator is one extra (1, W, C, Z, Y, X) float32 tensor ---------
+    _slice_bytes = int(feats_tta_czyx.element_size() * feats_tta_czyx.nelement())
+    _mem = _b.setdefault("memory", {})
+    _mem["feat_slice_bytes"] = _slice_bytes
+    _mem["window_size"] = int(window_size) if window_size is not None else None
+    _mem["tta_accumulator_bytes"] = (
+        _slice_bytes * int(window_size) if window_size is not None else None)
+    _mem["feat_dtype"] = str(feats_tta_czyx.dtype)
+    try:
+        if _d1_torch.cuda.is_available():
+            _mem["cuda_max_memory_allocated_bytes"] = int(
+                _d1_torch.cuda.max_memory_allocated())
+            _mem["cuda_max_memory_reserved_bytes"] = int(
+                _d1_torch.cuda.max_memory_reserved())
+    except Exception as _exc:                                   # never fail the run on telemetry
+        _mem["cuda_query_error"] = f"{type(_exc).__name__}: {_exc}"
 
     _rz = max(1, int(_d1_np.ceil(_D1_SEARCH_UM / _step[0])))
     _ry = max(1, int(_d1_np.ceil(_D1_SEARCH_UM / _step[1])))
     _rx = max(1, int(_d1_np.ceil(_D1_SEARCH_UM / _step[2])))
 
-    def _feat(z, y, x):
-        return _fe[:, z, y, x].astype(_d1_np.float32)
+    _gt_orig = _d1_load_gt(dataset, gt_dir).get(int(t), [])
+    # GT centres on the OUTPUT grid, as floats -- distances stay physical via _step.
+    _gt_grid = _d1_np.array(
+        [[gz / downsample[0], gy / downsample[1], gx / downsample[2]]
+         for (gz, gy, gx) in _gt_orig], dtype=_d1_np.float64
+    ).reshape(-1, 3)
+
+    def _feat(arr, z, y, x):
+        return arr[:, z, y, x].astype(_d1_np.float32)
+
+    def _dist_to_nearest_gt_um(z, y, x):
+        """Physical Euclidean distance to the nearest GT centre IN THIS FRAME. NaN if the
+        frame has no GT -- never 0, never a sentinel that could be read as 'adjacent'."""
+        if not len(_gt_grid):
+            return float("nan")
+        _d = _d1_np.sqrt(
+            ((_gt_grid[:, 0] - z) * _step[0]) ** 2
+            + ((_gt_grid[:, 1] - y) * _step[1]) ** 2
+            + ((_gt_grid[:, 2] - x) * _step[2]) ** 2
+        )
+        return float(_d.min())
 
     def _sphere_maxima(z, y, x):
         """Local maxima within a 15 um SPHERE, as (dist_um, logit, prob, accepted, z,y,x)."""
@@ -185,14 +604,23 @@ def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_czyx, det_threshold,
     def _emit(kind, z, y, x, extra=None):
         z = int(min(max(z, 0), _Z - 1)); y = int(min(max(y, 0), _Y - 1))
         x = int(min(max(x, 0), _X - 1))
-        row = {"dataset": dataset, "t": int(t), "kind": kind, "z": z, "y": y, "x": x,
+        # row_id is assigned from the CURRENT length of the row buffer, so it is 0-based and
+        # monotonic in emission order across the whole crop, and the feature lists -- appended
+        # exactly once per row below -- are indexed by the same integer.
+        row = {"row_id": len(_b["rows"]),
+               "dataset": dataset, "t": int(t), "kind": kind, "z": z, "y": y, "x": x,
                "logit": float(_lgc[z, y, x]), "prob": float(_prc[z, y, x]),
                "pooled": float(_plc[z, y, x]),
                # SECONDARY voxel diagnostics only -- these drive nothing.
                "voxel_is_local_max": bool(_islm[z, y, x]),
                "voxel_over_threshold": bool(_prc[z, y, x] > det_threshold),
-               "voxel_accepted": bool(_acc[z, y, x])}
-        fmax = None
+               "voxel_accepted": bool(_acc[z, y, x]),
+               # ranking denominators for this frame
+               "n_local_max_in_frame": _n_lm_frame,
+               "n_subthr_localmax_in_frame": _n_sub_frame,
+               "n_accepted_in_frame": _n_acc_frame,
+               "dist_to_nearest_gt_um": _dist_to_nearest_gt_um(z, y, x)}
+        best15 = None
         if kind == "gt_centre":
             ms = _sphere_maxima(z, y, x)
             in7 = [m for m in ms if m[0] <= _D1_MATCH_UM]
@@ -215,23 +643,45 @@ def _d1_audit_frame(dataset, gt_dir, t, logits_1zyx, feats_czyx, det_threshold,
             for r, m in enumerate(sorted(ms, key=lambda m: -m[1])[:_D1_KLIST]):
                 row[f"k{r}_dist_um"] = m[0]; row[f"k{r}_logit"] = m[1]
                 row[f"k{r}_prob"] = m[2]; row[f"k{r}_accepted"] = m[3]; row[f"k{r}_rank"] = r
-            fmax = _feat(best15[4], best15[5], best15[6]) if best15 else None
+        # NaN SENTINEL. A row with no local maximum in its 15 um sphere -- which is EVERY
+        # non-GT row, because the search is only run for gt_centre -- gets an all-NaN feature
+        # and feat_max_valid=False. v5 substituted feat_gt here, which made "feature at a
+        # local max" perfectly predict "is a GT row".
+        row["feat_max_valid"] = bool(best15 is not None)
         if extra:
             row.update(extra)
         _b["rows"].append(row)
-        _b["feat_gt"].append(_feat(z, y, x))
-        _b["feat_max"].append(fmax if fmax is not None else _feat(z, y, x))
+        _b["feat_tta_mean_gt"].append(_feat(_fe_tta, z, y, x))
+        _b["feat_idview_gt"].append(_feat(_fe_idv, z, y, x))
+        if best15 is None:
+            _b["feat_tta_mean_max"].append(_nan_feat.copy())
+            _b["feat_idview_max"].append(_nan_feat.copy())
+        else:
+            _b["feat_tta_mean_max"].append(_feat(_fe_tta, best15[4], best15[5], best15[6]))
+            _b["feat_idview_max"].append(_feat(_fe_idv, best15[4], best15[5], best15[6]))
 
-    for (_gz, _gy, _gx) in _d1_load_gt(dataset, gt_dir).get(int(t), []):
+    for (_gz, _gy, _gx) in _gt_orig:
         _emit("gt_centre", int(round(_gz / downsample[0])), int(round(_gy / downsample[1])),
               int(round(_gx / downsample[2])), {"gt_z": _gz, "gt_y": _gy, "gt_x": _gx})
     for _ in range(_D1_N_UNIFORM):
         _emit("uniform", int(_D1_RNG.integers(_Z)), int(_D1_RNG.integers(_Y)),
               int(_D1_RNG.integers(_X)))
-    _si = _d1_np.argwhere(_islm & (_prc <= det_threshold))
+    _si = _d1_np.argwhere(_sub_mask)
     if len(_si):
         for _i in _D1_RNG.choice(len(_si), size=min(_D1_N_SUBTHR, len(_si)), replace=False):
             _emit("subthr_localmax", *(int(v) for v in _si[_i]))
+
+    # ---- per-crop shape / population bookkeeping for the manifest -----------------------
+    _b["grid_zyx"] = [int(_Z), int(_Y), int(_X)]
+    _b["feat_dim"] = _C
+    _b["n_frames"] = int(_b.get("n_frames", 0)) + 1
+    _b["n_frames_total"] = int(n_frames_total) if n_frames_total is not None else None
+    # Each frame is audited exactly once (the caller guards on `seen_frames`), so summing the
+    # accepted peaks over audited frames IS the estimated node population for this crop.
+    _b["estimated_number_of_nodes"] = int(
+        _b.get("estimated_number_of_nodes", 0)) + _n_acc_frame
+    _b["n_local_max_total"] = int(_b.get("n_local_max_total", 0)) + _n_lm_frame
+    _b["n_subthr_localmax_total"] = int(_b.get("n_subthr_localmax_total", 0)) + _n_sub_frame
 
 
 def _d1_flush(fold=None, ckpt_hash=None, expected_crops=None):
@@ -244,10 +694,12 @@ def _d1_flush(fold=None, ckpt_hash=None, expected_crops=None):
             continue                                    # terminal record is write-once
         try:
             _rows = _b.get("rows", [])
-            _fg = (_d1_np.stack(_b["feat_gt"]) if _b.get("feat_gt")
-                   else _d1_np.zeros((0, 32), "f4"))
-            _fm = (_d1_np.stack(_b["feat_max"]) if _b.get("feat_max")
-                   else _d1_np.zeros((0, 32), "f4"))
+            _dim = int(_b.get("feat_dim", 32))
+            _arrs = {}
+            for _name in _D1_FEAT_ARRAYS:
+                _lst = _b.get(_name) or []
+                _arrs[_name] = (_d1_np.stack(_lst) if _lst
+                                else _d1_np.zeros((0, _dim), "f4"))
             # TRAP 21. Rows are heterogeneous dicts: gt-only keys are absent from the
             # 96 non-GT rows emitted per frame (64 uniform + 32 subthr). polars infers the
             # schema from the first 100 rows by default, so a crop whose first GT lands at
@@ -262,24 +714,124 @@ def _d1_flush(fold=None, ckpt_hash=None, expected_crops=None):
                     f"D1 column contract violated for {_ds}: missing {_missing}. "
                     "Schema inference dropped gt-only columns (trap 21)."
                 )
-            _d1_atomic(_D1_OUT / f"{_ds}__rows.parquet", lambda p: _df.write_parquet(p))
+            # ---- row_id contract: the ONLY alignment key ------------------------------
+            _ids = _df["row_id"].to_list() if len(_df) else []
+            if _ids != list(range(len(_rows))):
+                raise RuntimeError(
+                    f"D1 row_id contract violated for {_ds}: row_id is not 0..n-1 in "
+                    "emission order, so no positional join to the feature arrays is safe"
+                )
+            for _name, _a in _arrs.items():
+                if _a.shape[0] != len(_rows):
+                    raise RuntimeError(
+                        f"D1 alignment violated for {_ds}: {_name} has {_a.shape[0]} rows, "
+                        f"rows table has {len(_rows)}"
+                    )
+            # ---- NaN sentinel contract: all-NaN iff invalid, finite iff valid, no +-inf --
+            _valid = _d1_np.array(
+                [bool(r.get("feat_max_valid")) for r in _rows], dtype=bool)
+            for _name in _D1_FEAT_MAX_ARRAYS:
+                _a = _arrs[_name]
+                if _a.size:
+                    if _d1_np.isinf(_a).any():
+                        raise RuntimeError(f"D1 {_name} for {_ds} contains +-inf")
+                    if not bool(_d1_np.isfinite(_a[_valid]).all()):
+                        raise RuntimeError(
+                            f"D1 {_name} for {_ds}: a feat_max_valid row is not finite")
+                    if not bool(_d1_np.isnan(_a[~_valid]).all()):
+                        raise RuntimeError(
+                            f"D1 {_name} for {_ds}: an invalid row is not all-NaN")
+            for _name in ("feat_tta_mean_gt", "feat_idview_gt"):
+                _a = _arrs[_name]
+                if _a.size and not bool(_d1_np.isfinite(_a).all()):
+                    raise RuntimeError(
+                        f"D1 {_name} for {_ds} is not finite; the sampled-voxel feature is "
+                        "defined on every row and must never be NaN"
+                    )
+            # ---- the TTA-mean and identity-view features must actually DIFFER ----------
+            # If they are equal the accumulator collapsed to the identity view, which is
+            # exactly blocker B3 wearing the v6 name.
+            _identical = bool(
+                _arrs["feat_tta_mean_gt"].size
+                and _d1_np.array_equal(_arrs["feat_tta_mean_gt"], _arrs["feat_idview_gt"])
+            )
+            if _identical:
+                raise RuntimeError(
+                    f"D1 v6 for {_ds}: the TTA-mean feature is bit-identical to the identity "
+                    "view. The accumulator did not accumulate; exporting it under the "
+                    "post-TTA name would reintroduce blocker B3."
+                )
 
             def _save(arr):
                 def _w(p):
                     with open(p, "wb") as fh:
                         _d1_np.save(fh, arr)
                 return _w
-            _d1_atomic(_D1_OUT / f"{_ds}__feat_gt.npy", _save(_fg))
-            _d1_atomic(_D1_OUT / f"{_ds}__feat_max.npy", _save(_fm))
+            _d1_atomic(_D1_OUT / f"{_ds}__rows.parquet", lambda p: _df.write_parquet(p))
+            for _name, _a in _arrs.items():
+                _d1_atomic(_D1_OUT / f"{_ds}__{_name}.npy", _save(_a))
             _gt = _df.filter(_pl.col("kind") == "gt_centre") if len(_df) else _df
+            _par = _b.get("parity") or {}
             _d1_write_json(_term, {
                 "dataset": _ds, "status": "complete", "pid": _d1_os.getpid(),
+                "schema_version": "d1_v6",
                 "fold": fold, "checkpoint_sha256": ckpt_hash,
+                "split": _d1_os.environ.get("BIOHUB_D1_SPLIT"),
                 "gt_load_error": _b.get("gt_load_error"),
                 "n_rows": int(len(_df)), "gt_rows": int(len(_gt)),
-                "feat_rows": int(_fg.shape[0]),
-                "feat_dim": int(_fg.shape[1]) if _fg.size else 0,
-                "feat_finite": bool(_d1_np.isfinite(_fg).all() and _d1_np.isfinite(_fm).all()),
+                "row_id_contract": _D1_ROW_ID_CONTRACT,
+                "feat_arrays": list(_D1_FEAT_ARRAYS),
+                "feat_rows": int(_arrs["feat_tta_mean_gt"].shape[0]),
+                "feat_dim": int(_arrs["feat_tta_mean_gt"].shape[1])
+                if _arrs["feat_tta_mean_gt"].size else 0,
+                # feat_finite keeps its v5 meaning for the parent aggregator: reaching this
+                # line means the always-defined arrays are finite AND the *_max arrays satisfy
+                # the NaN sentinel contract asserted above. Any violation raised already.
+                "feat_finite": True,
+                "feat_max_valid_rows": int(_valid.sum()),
+                "feat_max_invalid_rows": int((~_valid).sum()),
+                "tta_view_set": _b.get("tta_view_set"),
+                # TWO SEPARATE FIELDS, never conflated. 8 encode calls over 7 distinct
+                # permutations: rot90(1)-then-transpose IS flip(-1), so flip(-1) carries
+                # weight 2/8 and the true anti-transpose 0/8, while the divisor stays 8.
+                "n_encode_calls": _b.get("n_encode_calls"),
+                "n_distinct_views": _b.get("n_distinct_views"),
+                "grid_zyx": _b.get("grid_zyx"),
+                "n_frames": _b.get("n_frames"),
+                "n_frames_total": _b.get("n_frames_total"),
+                "n_uniform_per_frame": _D1_N_UNIFORM,
+                "n_subthr_per_frame": _D1_N_SUBTHR,
+                "estimated_number_of_nodes": _b.get("estimated_number_of_nodes"),
+                "n_local_max_total": _b.get("n_local_max_total"),
+                "n_subthr_localmax_total": _b.get("n_subthr_localmax_total"),
+                # RADII. `assert_export_radii` in scripts/d1_postprocess.py is wired but inert
+                # against v5, which records neither -- so a change to the match or search
+                # radius is currently UNDETECTABLE from the export. Recording both here is what
+                # arms that check.
+                "match_um": _D1_MATCH_UM,
+                "search_um": _D1_SEARCH_UM,
+                "parity": {
+                    # The gate is DERIVED per frame from max|logit|, so the recorded value is
+                    # the worst bound actually applied, not a literal.
+                    "gate_formula": ("n_encode_calls * 2**-24 * slack * max|logit|"),
+                    "gate_n_encode_calls": _D1_REQUIRE_ENCODE_CALLS,
+                    "gate_ulp": _D1_PARITY_ULP,
+                    "gate_slack": _D1_PARITY_SLACK,
+                    "gate_max_abs_err_applied": _par.get("max_parity_bound"),
+                    "gate_max_sign_ratio": _D1_PARITY_MAX_SIGN_RATIO,
+                    "gate_max_abs_corr": _D1_PARITY_MAX_CORR,
+                    "gate_requires_peak_set_equality": True,
+                    "n_frames_checked": _par.get("n_frames"),
+                    "max_abs_err": _par.get("max_abs_err"),
+                    "max_p999_abs_err": _par.get("max_p999_abs_err"),
+                    "max_sign_ratio": _par.get("max_sign_ratio"),
+                    "max_abs_corr": _par.get("max_abs_corr"),
+                    "all_peak_sets_identical": _par.get("all_peak_sets_identical"),
+                    "n_peak_set_symdiff_total": _par.get("n_peak_set_symdiff_total"),
+                    "dtypes": _par.get("dtypes"),
+                    "worst_frame": _par.get("worst"),
+                },
+                "memory": _b.get("memory"),
                 "exception": None,
             })
         except Exception as _exc:

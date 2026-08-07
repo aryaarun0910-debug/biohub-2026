@@ -109,10 +109,43 @@ def build(fold: int) -> dict:
         "BIOHUB_LOEO_WEIGHTS_GLOB": f"/kaggle/input/*/edge_predictor_best_split_{split}.pth",
         "BIOHUB_LOEO_CONFIG_GLOB": f"/kaggle/input/*/config_split_{split}.json",
         "BIOHUB_D1_FOLD": str(fold),
+        # The manifest must name the checkpoint BASIS, not just the fold: 44b6 sits in
+        # split-0's 32-D basis and 6bba in split-1's, and the two bases are independent
+        # (rel-L2 1.41542 ~ sqrt(2)). A head fitted in one cannot be applied in the other,
+        # so every exported feature row has to carry the split it was encoded in.
+        "BIOHUB_D1_SPLIT": str(split),
         "BIOHUB_D1_CKPT_SHA": CKPT_SHA[split],
         "BIOHUB_D1_EXPECTED_CROPS": str(len(stems)),
         "BIOHUB_D1_N_UNIFORM": "64",
         "BIOHUB_D1_N_SUBTHR": "32",
+        # v6 view-set contract. All RAISE gates, not preferences.
+        #
+        # THE 8/7 SPLIT IS TWO NUMBERS AND MUST STAY TWO NUMBERS. The deployed TTA makes
+        # EIGHT encode calls over SEVEN distinct spatial permutations, because
+        # `torch.rot90(imgs, 1, dims=(-2,-1)).transpose(-1,-2)` -- written as the
+        # anti-transpose -- is exactly `imgs.flip(-1)`, already view 1. So flip(-1) carries
+        # weight 2/8, the true anti-transpose 0/8, and the divisor is still 8. A single
+        # conflated `n_views` cannot express that and would let a future agent "fix" the
+        # collision silently. Fixing it is a DETECTOR change: it moves the node population
+        # (correction C3) and voids the 0.889 anchor. v6 replicates it verbatim.
+        #
+        #   REQUIRE_ENCODE_CALLS    refuse to export unless the divisor reached 8, so
+        #                           identity-view features can never ship under the post-TTA
+        #                           name (blocker B3).
+        #   REQUIRE_DISTINCT_VIEWS  refuse unless exactly 7 of those 8 are distinct
+        #                           permutations -- counted by applying each named view to an
+        #                           index grid, not asserted from a comment.
+        #   REQUIRE_NOTEBOOK_TTA    the injector refuses to proceed if only the vendored
+        #                           4-view block is present, i.e. if the notebook's own TTA
+        #                           patch silently failed -- its guard only prints.
+        #   PARITY_SLACK            multiplier on the DERIVED float32 bound
+        #                           `n_encode_calls * 2**-24 * max|logit|`. Pinned in the spec
+        #                           so the gate that hard-aborts the run is recorded, not
+        #                           inherited from a default. See _d1_parity_bound.
+        "BIOHUB_D1_REQUIRE_ENCODE_CALLS": "8",
+        "BIOHUB_D1_REQUIRE_DISTINCT_VIEWS": "7",
+        "BIOHUB_D1_REQUIRE_NOTEBOOK_TTA": "1",
+        "BIOHUB_D1_PARITY_SLACK": "2.0",
     }
 
     # keep-list: derive from the imported edit rather than transcribing it, then extend so the
@@ -122,6 +155,33 @@ def build(fold: int) -> dict:
     assert keep["new"].count(anchor) == 1, "keep-list shape changed; refusing to guess"
     keep["new"] = keep["new"].replace(
         anchor, '"pregraphs_split{LOEO_FOLD}.json",\n              "d1_audit"}', 1)
+
+    # v6 REQUIREMENT: the TTA patch guard RAISES instead of printing.
+    #
+    # The base notebook ends its TTA patch with
+    #     else:
+    #         print("TTA WARNING: block not found - using default 4-way")
+    # so a failed patch left the vendored FOUR-view average in place and carried on. That is
+    # not silent in practice -- the NEXT patch anchors on text containing `_nv`, so a failed
+    # TTA patch already hard-fails one cell later -- but the failure is reported a step away
+    # from its cause. This converts it into a local, self-naming abort. It is a LOCALITY fix,
+    # NOT the repair of a correctness hole; recorded that way so nobody credits it with more.
+    #
+    # Scoped to the D1 smoke specs only. The base notebook is not this lane's file to change.
+    tta_guard = {
+        "kind": "replace",
+        "cell_match": "TTA patch applied",
+        "old": '    print("TTA WARNING: block not found - using default 4-way")',
+        "new": chr(10).join([
+            "    raise RuntimeError(",
+            '        "TTA PATCH FAILED: the eight-encode-call TTA block was not found in "',
+            '        + str(_ps) + ". The deployed view set would fall back to the vendored "',
+            '        "four-view average, so any feature exported under the post-TTA name "',
+            '        "would describe a detector that is not in production. Refusing."',
+            "    )",
+        ]),
+        "expect": 1,
+    }
 
     d1_inject = {
         "kind": "insert_before",
@@ -151,6 +211,8 @@ def build(fold: int) -> dict:
     for i, e in enumerate(invariants):
         add(e, f"E05_{i:02d}_invariant", "p3_harmonic#invariant",
             "3. degree-invariant fixes and export assertions")
+    add(tta_guard, "E05b_tta_guard", "assembler",
+        "4. TTA patch guard raises instead of printing (locality, not correctness)")
     add(d1_inject, "E06_d1_inject", "scripts/kaggle_edits/d1_inject.py",
         "4. D1 audit + frozen-feature injection into the predict script")
     add(l_edits[4], "E07_pregraph", "loeo_f1_strict_pregraph#4",
@@ -182,8 +244,13 @@ def build(fold: int) -> dict:
             f"STRUCTURAL SMOKE, fold {fold}, {len(stems)} crop(s). Combined P3 + D1 + D1-F "
             "export: one encoder pass per crop emits the P3 pre-wrapper graph (harmonic "
             "association), accepted detector peaks, the exact A/B/D classification of every GT "
-            "node with D stratified by distance to the nearest local maximum, and 32-D frozen "
-            "features at BOTH the GT voxel and that maximum. Combinable because the harmonic "
+            "node with D stratified by distance to the nearest local maximum, and FOUR 32-D "
+            "frozen feature arrays: the TTA MEAN over the deployed view set -- 8 encode "
+            "calls over 7 DISTINCT views, divisor 8, replicated verbatim -- which is the "
+            "post-TTA detector representation, and the IDENTITY VIEW, which is the "
+            "association representation that predict_edges actually reads; each at the "
+            "sampled voxel and at the strongest nearby local maximum. Combinable because "
+            "the harmonic "
             "patch touches edge_logits_pair only and never det_logits. NOT a scientific verdict "
             "and NOT a submission."
         ),
