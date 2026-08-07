@@ -1,18 +1,19 @@
-# Biohub Cell Tracking 2026
+# Biohub Cell Tracking 2026 — archived
 
-Lean execution repository for the Kaggle Biohub cell-tracking competition.
+This project was permanently closed on **2026-08-07**. It is retained as a reproducible,
+read-only research archive. Do not launch training, Kaggle kernels, submissions, monitors,
+or unfinished experiments from this repository.
 
 ## Current position
 
-- Public score: **0.915** (P3 harmonic).
-- Leader at the last verified check: approximately **0.949**.
-- Active scientific question: can rejected local maxima in the 6bba detector be
-  re-accepted with useful precision?
-- No scoring candidate is currently ready to submit.
+- Final verified public score: **0.915** (P3 harmonic).
+- Public rank at closure: **143**.
+- Active compute: **none**.
+- Closure rationale and preservation details: `HANDOFF.md`.
 
-Read only these files to start:
+Read only these files for historical context:
 
-1. `HANDOFF.md` - current state and next command.
+1. `HANDOFF.md` - permanent closure record.
 2. `SYSTEM_DESIGN.md` - stable architecture and repository boundaries.
 3. `reports/CYCLE_OUTPUT_2026-08-07.md` - evidence behind the current decision.
 
@@ -23,7 +24,7 @@ Git tag `pre-lean-2026-08-07`. Raw research and large artifacts live in the sibl
 ## Commands
 
 ```powershell
-# Fast correctness gate for active development
+# Historical correctness gate (read-only verification)
 .\.venv\Scripts\python.exe -m pytest -q `
   tests/test_scoring.py tests/test_metric_parity.py `
   tests/test_d1_partition.py tests/test_d1_postprocess.py `

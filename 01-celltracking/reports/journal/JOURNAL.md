@@ -4341,3 +4341,15 @@ Engineering closure: the pilot assembler incorrectly called the smoke-tier manif
 loader default even when `--tier pilot` was supplied. It now forwards the named tier and
 has a regression test. Full external artifacts are in the sibling research store; Git
 retains only the decision record and instrument code.
+# 2026-08-07 — Project permanently closed
+
+- Final verified public score: **0.915** from P3 harmonic; public rank **143** at closure.
+- Stopped the unfinished seven-worker probability-at-the-deployed-gate oracle. Partial
+  rows in the sibling research store are explicitly non-authoritative and must not be
+  interpreted as a completed result.
+- Verified the recent Biohub Kaggle kernels were complete; no local or remote compute was
+  left running.
+- No new submission was made. The repository and external research store were preserved
+  intact; `.claude/settings.json` and `.gitignore` were not modified.
+- Strategic decision: archive Biohub permanently and move competition investment to a
+  higher-ROI campaign. Reopening requires an explicit reversal by the user.
