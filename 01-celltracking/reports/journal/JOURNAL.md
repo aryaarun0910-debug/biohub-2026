@@ -4310,3 +4310,10 @@ entirely a phi argument.
 
 **State.** master, 552 tests, 53 claims. R2-A1 (probability-at-the-deployed-gate oracle) still
 running; it has been sent the clean903 and 2.42% corrections mid-flight.
+
+## 2026-08-07 — lean cycle output; halted at the session limit
+
+Cycle output written to `reports/CYCLE_OUTPUT_2026-08-07_LEAN.md`. Census merged and
+verified; two pre-GPU defects fixed; oracle lane still running and NOT reported. No GPU, no
+Kaggle, no submission, score movement 0.000. Next: re-scope the smoke as the corpus-T and
+phi measurement, and retire the scalar-threshold fallback (measured negative).
