@@ -156,6 +156,8 @@ DEPLOYED_NEG_WEIGHT = 0.01
 ROW_KINDS = ("gt_centre", "uniform", "subthr_localmax")
 
 V6_REQUIRED_FEATURE_FILES = ("__feat_tta_mean_gt.npy", "__feat_tta_mean_max.npy")
+V6_REQUIRED_MANIFEST_KEYS = ("crops", "tta_view_set", "n_encode_calls",
+                            "n_distinct_views")
 V6_REQUIRED_CROP_KEYS = ("grid_zyx", "n_frames", "n_uniform_per_frame",
                          "estimated_number_of_nodes", "checkpoint_sha256", "split")
 # Columns the v5 script assumed and the export does not emit. Their PRESENCE is as much
@@ -509,28 +511,57 @@ def family_of(crop: str) -> str:
     return str(crop).split("_")[0]
 
 
-def validate_manifest(manifest: dict, *, expect_views: int | None = None) -> dict:
-    """Hard gate on the v6 manifest. Missing keys BLOCK; they never warn."""
-    missing = [k for k in ("crops", "tta_view_set", "n_views") if k not in manifest]
+def validate_manifest(manifest: dict, *,
+                      expect_encode_calls: int | None = None) -> dict:
+    """Hard gate on the v6 manifest. Missing keys BLOCK; they never warn.
+
+    `n_views` is REFUSED, not merely absent. Conflating "how many times encode() was
+    called" with "how many distinct spatial views that produced" is the exact error that
+    made a whole lane report a four-view TTA for a block that makes 8 encode calls over 7
+    distinct views. v6 records the two separately and so must every consumer.
+    """
+    if "n_views" in manifest:
+        raise ContractError(
+            "manifest carries the retired field `n_views`. It conflates the averaging "
+            "divisor with the number of distinct spatial views, which differ here (8 vs "
+            "7). Emit `n_encode_calls` and `n_distinct_views` instead.")
+    missing = [k for k in V6_REQUIRED_MANIFEST_KEYS if k not in manifest]
     if missing:
         raise ContractError(f"manifest missing top-level keys {missing}")
-    n_views = int(manifest["n_views"])
-    if expect_views is not None and n_views != expect_views:
+    n_encode_calls = int(manifest["n_encode_calls"])
+    n_distinct_views = int(manifest["n_distinct_views"])
+    views = list(manifest["tta_view_set"])
+    if len(views) != n_encode_calls:
         raise ContractError(
-            f"manifest says n_views={n_views} but the kernel's TTA block averages "
-            f"{expect_views}. A TTA-mean feature averaged over a DIFFERENT view set than "
-            f"the logits is not the detector representation.")
+            f"tta_view_set lists {len(views)} entries but n_encode_calls="
+            f"{n_encode_calls}; the view list is per-CALL, so they must agree.")
+    if len(set(map(str, views))) != n_distinct_views:
+        raise ContractError(
+            f"tta_view_set holds {len(set(map(str, views)))} distinct entries but "
+            f"n_distinct_views={n_distinct_views}. The duplicate-view collision is the "
+            f"measured property of this block; a manifest that miscounts it cannot be "
+            f"used to reason about the average.")
+    if n_distinct_views > n_encode_calls:
+        raise ContractError(
+            f"n_distinct_views={n_distinct_views} exceeds n_encode_calls="
+            f"{n_encode_calls}; a view cannot appear without being encoded.")
+    if expect_encode_calls is not None and n_encode_calls != expect_encode_calls:
+        raise ContractError(
+            f"manifest says n_encode_calls={n_encode_calls} but the kernel's TTA block "
+            f"averages {expect_encode_calls}. A TTA-mean feature averaged over a "
+            f"DIFFERENT view set than the logits is not the detector representation.")
     problems = {c: [k for k in V6_REQUIRED_CROP_KEYS if k not in m]
                 for c, m in manifest["crops"].items()}
     problems = {c: v for c, v in problems.items() if v}
     if problems:
         raise ContractError(f"per-crop manifest keys missing: {problems}")
-    return {"n_crops": len(manifest["crops"]), "n_views": n_views,
+    return {"n_crops": len(manifest["crops"]), "n_encode_calls": n_encode_calls,
+            "n_distinct_views": n_distinct_views,
             "tta_view_set": manifest["tta_view_set"]}
 
 
 def load_basis(audit_dir, *, encoder_split: int | None = None,
-               expect_views: int | None = None) -> Corpus:
+               expect_encode_calls: int | None = None) -> Corpus:
     """Load ONE checkpoint basis: a v6 audit directory whose rows were all encoded by a
     single checkpoint. `encoder_split` overrides the manifest's own declaration."""
     import polars as pl  # noqa: PLC0415
@@ -540,7 +571,7 @@ def load_basis(audit_dir, *, encoder_split: int | None = None,
     if not man_p.exists():
         raise ContractError(f"no d1_manifest.json in {audit_dir}")
     manifest = json.loads(man_p.read_text(encoding="utf-8"))
-    validate_manifest(manifest, expect_views=expect_views)
+    validate_manifest(manifest, expect_encode_calls=expect_encode_calls)
 
     crops = sorted(c for c, m in manifest["crops"].items()
                    if m.get("status", "complete") == "complete")
@@ -597,7 +628,7 @@ def load_basis(audit_dir, *, encoder_split: int | None = None,
         manifest=manifest, feature_source="tta_mean")
 
 
-def load_factorial(root, *, expect_views: int | None = None) -> Corpus:
+def load_factorial(root, *, expect_encode_calls: int | None = None) -> Corpus:
     """Load the 2x2 checkpoint x family export.
 
     Layout: `<root>/basis_0/` and `<root>/basis_1/`, each a v6 audit dir holding BOTH
@@ -608,13 +639,16 @@ def load_factorial(root, *, expect_views: int | None = None) -> Corpus:
     root = pathlib.Path(root)
     basis_dirs = sorted(p for p in root.glob("basis_*") if (p / "d1_manifest.json").exists())
     if not basis_dirs:
-        return load_basis(root, expect_views=expect_views)
+        return load_basis(root, expect_encode_calls=expect_encode_calls)
     parts = []
     for p in basis_dirs:
         split = int(p.name.split("_")[-1])
-        parts.append(load_basis(p, encoder_split=split, expect_views=expect_views))
+        parts.append(load_basis(p, encoder_split=split,
+                                expect_encode_calls=expect_encode_calls))
     merged_manifest = {"tta_view_set": parts[0].manifest["tta_view_set"],
-                       "n_views": parts[0].manifest["n_views"], "crops": {}}
+                       "n_encode_calls": parts[0].manifest["n_encode_calls"],
+                       "n_distinct_views": parts[0].manifest["n_distinct_views"],
+                       "crops": {}}
     for p in parts:
         merged_manifest["crops"].update(p.manifest["crops"])
     return Corpus(
@@ -2633,8 +2667,10 @@ def make_factorial_fixture(heads: dict, spec: FixtureSpec | None = None):
         logit=np.concatenate([p["logit"] for p in parts]),
         encoder_split=np.concatenate([p["enc"] for p in parts]),
         dist_to_nearest_gt_um=np.concatenate([p["dist"] for p in parts]),
-        manifest={"tta_view_set": f"fixture_planar{spec.n_views}",
-                  "n_views": spec.n_views, "crops": manifest_crops},
+        manifest={"tta_view_set": [f"fixture_planar{spec.n_views}_{_i}"
+                                  for _i in range(spec.n_views)],
+                  "n_encode_calls": spec.n_views,
+                  "n_distinct_views": spec.n_views, "crops": manifest_crops},
         feature_source="tta_mean")
     return corpus, np.concatenate(latents)
 

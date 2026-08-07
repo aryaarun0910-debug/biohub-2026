@@ -577,14 +577,18 @@ def test_subset_returns_a_new_corpus_and_leaves_the_original_intact(corpus):
 # ==================================================================================
 def _write_audit_dir(tmp_path, crops=("44b6_aa", "44b6_bb"), *, split=1, n=40,
                      drop_features=(), extra_columns=None, statuses=None,
-                     stray_crop=None, n_views=8):
+                     stray_crop=None, n_encode_calls=8, n_distinct_views=7):
     """A minimal but real v6 audit directory: parquet rows + two feature blocks + a
     manifest. Everything the loader is supposed to check is expressible here."""
     import polars as pl
 
     tmp_path.mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(0)
-    manifest = {"tta_view_set": "planar8", "n_views": n_views, "crops": {}}
+    # per-CALL list with the deployed collision: 8 calls, 7 distinct entries.
+    _views = [f"v{i}" for i in range(n_distinct_views)]
+    _views += [_views[-1]] * (n_encode_calls - n_distinct_views)
+    manifest = {"tta_view_set": _views, "n_encode_calls": n_encode_calls,
+                "n_distinct_views": n_distinct_views, "crops": {}}
     for c in crops:
         cols = {"dataset": [c] * n, "kind": ["gt_centre"] * n,
                 "t": list(range(n)), "logit": [0.0] * n}
@@ -652,9 +656,9 @@ def test_a_v5_column_that_the_export_does_not_emit_raises_if_present(tmp_path, c
 def test_a_manifest_missing_top_level_keys_raises(tmp_path):
     d = _write_audit_dir(tmp_path / "g")
     m = json.loads((d / "d1_manifest.json").read_text(encoding="utf-8"))
-    del m["n_views"]
+    del m["n_encode_calls"]
     (d / "d1_manifest.json").write_text(json.dumps(m), encoding="utf-8")
-    with pytest.raises(D.ContractError, match="n_views"):
+    with pytest.raises(D.ContractError, match="n_encode_calls"):
         D.load_basis(d)
 
 
@@ -671,9 +675,9 @@ def test_a_manifest_missing_per_crop_keys_raises_and_names_the_crop(tmp_path):
 def test_a_view_set_mismatch_raises(tmp_path):
     """A TTA-mean feature averaged over a different view set than the logits is not the
     detector's representation."""
-    d = _write_audit_dir(tmp_path / "i", n_views=4)
-    with pytest.raises(D.ContractError, match="n_views"):
-        D.load_basis(d, expect_views=8)
+    d = _write_audit_dir(tmp_path / "i", n_encode_calls=4, n_distinct_views=4)
+    with pytest.raises(D.ContractError, match="n_encode_calls"):
+        D.load_basis(d, expect_encode_calls=8)
 
 
 def test_a_missing_manifest_raises(tmp_path):
@@ -1595,3 +1599,59 @@ def test_the_value_per_recovered_node_and_the_counts_it_implies():
     assert value == pytest.approx(6.754707e-06, rel=1e-6)
     assert math.ceil(0.015 / value) == 2221
     assert math.ceil(0.020 / value) == 2961
+
+
+# ----------------------------------------------------------------------------------
+# 6b. THE RETIRED `n_views` FIELD IS REFUSED, NOT MERELY UNREAD
+# ----------------------------------------------------------------------------------
+def test_a_manifest_carrying_the_retired_n_views_is_refused(tmp_path):
+    """Conflating the averaging divisor with the number of distinct spatial views is the
+    exact error that produced a four-view report for an 8-call / 7-view block. A manifest
+    that still carries the merged field must block, not be silently ignored."""
+    d = _write_audit_dir(tmp_path / "nv")
+    m = json.loads((d / "d1_manifest.json").read_text(encoding="utf-8"))
+    m["n_views"] = 8
+    (d / "d1_manifest.json").write_text(json.dumps(m), encoding="utf-8")
+    with pytest.raises(D.ContractError, match="retired field"):
+        D.load_basis(d)
+
+
+def test_the_view_list_length_must_equal_the_encode_call_count(tmp_path):
+    d = _write_audit_dir(tmp_path / "vl")
+    m = json.loads((d / "d1_manifest.json").read_text(encoding="utf-8"))
+    m["tta_view_set"] = m["tta_view_set"][:5]
+    (d / "d1_manifest.json").write_text(json.dumps(m), encoding="utf-8")
+    with pytest.raises(D.ContractError, match="per-CALL"):
+        D.load_basis(d)
+
+
+def test_a_miscounted_collision_blocks(tmp_path):
+    """8 calls over 7 distinct views is a MEASURED property of the deployed block. A
+    manifest whose distinct-count disagrees with its own view list cannot be used to
+    reason about what the average is over."""
+    d = _write_audit_dir(tmp_path / "cc")
+    m = json.loads((d / "d1_manifest.json").read_text(encoding="utf-8"))
+    m["n_distinct_views"] = 8              # the list still holds only 7 distinct entries
+    (d / "d1_manifest.json").write_text(json.dumps(m), encoding="utf-8")
+    with pytest.raises(D.ContractError, match="distinct"):
+        D.load_basis(d)
+
+
+def test_validate_manifest_reports_both_counts_separately(tmp_path):
+    d = _write_audit_dir(tmp_path / "bc")
+    m = json.loads((d / "d1_manifest.json").read_text(encoding="utf-8"))
+    got = D.validate_manifest(m)
+    assert got["n_encode_calls"] == 8 and got["n_distinct_views"] == 7
+    assert "n_views" not in got
+
+
+def test_the_aggregator_promotes_both_view_fields_and_never_the_merged_one():
+    """The kernel-side aggregator is what actually writes d1_manifest.json. If it does not
+    promote these, every field above is unreachable and the probe blocks on the artifact
+    AFTER the GPU has been spent."""
+    src = (Path(__file__).resolve().parents[1]
+           / "scripts" / "kaggle_edits" / "d1_aggregate.py").read_text(encoding="utf-8")
+    promote = src.split("_AGG_PROMOTE = (", 1)[1].split(")", 1)[0]
+    for field in ("tta_view_set", "n_encode_calls", "n_distinct_views"):
+        assert f'"{field}"' in promote, f"aggregator does not promote {field}"
+    assert '"n_views"' not in promote

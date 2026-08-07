@@ -832,6 +832,15 @@ AGGREGATE = ROOT / "scripts" / "kaggle_edits" / "d1_aggregate.py"
 V6_ARRAYS = ("feat_tta_mean_gt", "feat_tta_mean_max", "feat_idview_gt", "feat_idview_max")
 
 
+# The deployed block: 8 encode calls over 7 distinct views, because
+# rot90(imgs,1,dims=(-2,-1)).transpose(-1,-2) IS imgs.flip(-1). The two counts are
+# declared separately and must never be merged back into one field.
+_V6_VIEW_DECLARATION = {
+    "tta_view_set": ["identity", "rot90_k1", "rot90_k2", "rot90_k3", "flipY",
+                     "transpose", "flipX", "flipX"],
+    "n_encode_calls": 8, "n_distinct_views": 7}
+
+
 def _v6_terminal(dataset="c", **over):
     """A v6 terminal record: the fields `_d1_flush` writes that dispatch actually reads."""
     rec = {"dataset": dataset, "status": "complete", "fold": "0",
@@ -839,7 +848,8 @@ def _v6_terminal(dataset="c", **over):
            "feat_rows": 18, "feat_dim": 32, "feat_finite": True,
            "gt_load_error": None, "exception": None,
            SCHEMA_DECLARATION: SCHEMA_V6, "feat_arrays": list(V6_ARRAYS),
-           "match_um": MATCH_UM, "search_um": SEARCH_UM}
+           "match_um": MATCH_UM, "search_um": SEARCH_UM,
+           **_V6_VIEW_DECLARATION}
     rec.update(over)
     return rec
 
@@ -1157,6 +1167,11 @@ def test_the_aggregator_promotes_the_per_crop_declarations_to_the_top_level(tmp_
     assert man["COMPLETE"] is True
     assert man["match_um"] == MATCH_UM and man["search_um"] == SEARCH_UM
     assert man[SCHEMA_DECLARATION] == SCHEMA_V6
+    # d1f_probe.validate_manifest blocks without these, and it blocks on the ARTIFACT --
+    # i.e. after the GPU has been paid for. They are promoted separately, never merged.
+    assert man["n_encode_calls"] == 8 and man["n_distinct_views"] == 7
+    assert len(man["tta_view_set"]) == 8 and len(set(man["tta_view_set"])) == 7
+    assert "n_views" not in man
 
 
 def test_crops_that_disagree_on_a_radius_fail_the_aggregation(tmp_path):
@@ -1275,7 +1290,8 @@ def _v6_fixture_from_v5(dst: Path) -> Path:
         (src_audit / "manifests" / f"{CROP}.complete.json").read_text(encoding="utf-8"))
     rec = dict(v5rec)
     rec.update({SCHEMA_DECLARATION: SCHEMA_V6, "feat_arrays": list(V6_ARRAYS),
-                "match_um": MATCH_UM, "search_um": SEARCH_UM})
+                "match_um": MATCH_UM, "search_um": SEARCH_UM,
+                **_V6_VIEW_DECLARATION})
     man, failure = _run_aggregator(dst_audit, {CROP: rec}, fold="0",
                                    ckpt=v5rec["checkpoint_sha256"])
     assert failure is None, failure

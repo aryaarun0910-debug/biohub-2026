@@ -64,7 +64,13 @@ for _stem in _agg_expected:
         _agg_problems.append(f"{_stem}: ZERO GT rows -- the audit has no subject")
 
 # ---- promote the per-crop declarations, asserting agreement across crops ---------------
-_AGG_PROMOTE = ("schema_version", "match_um", "search_um")
+# n_encode_calls and n_distinct_views are promoted SEPARATELY and are never merged into
+# one field: this block makes 8 encode calls over 7 distinct views (the
+# rot90(1).transpose collision), and collapsing the two is what made an earlier audit
+# report a four-view TTA. d1f_probe.validate_manifest REFUSES the merged form outright,
+# so emitting it would block the probe AFTER the GPU had already been spent.
+_AGG_PROMOTE = ("schema_version", "match_um", "search_um", "tta_view_set",
+                "n_encode_calls", "n_distinct_views")
 _agg_promoted: dict = {}
 for _field in _AGG_PROMOTE:
     _vals = {_s: _r.get(_field) for _s, _r in _agg_crops.items()
