@@ -35,6 +35,8 @@ AUDIT_SRC = ROOT / "scripts" / "kaggle_edits" / "d1_response_audit.py"
 INJECT_SRC = ROOT / "scripts" / "kaggle_edits" / "d1_inject.py"
 PREDICT = ROOT / "vendor" / "kaggle-cell-tracking" / "scripts" / "predict_unet_transformer.py"
 NOTEBOOK = ROOT / "notebooks" / "kaggle_p3_d1_smoke_f0" / "biohub-p3-d1-smoke-f0.ipynb"
+SPECS = [ROOT / "scripts" / "kaggle_specs" / f"p3_d1_smoke_f{f}.json" for f in (0, 1)]
+POSTPROCESS = ROOT / "scripts" / "d1_postprocess.py"
 
 VIEW_SET = [
     "identity", "flip_x", "flip_y", "flip_xy",
@@ -786,3 +788,113 @@ def test_injected_call_binds_to_the_audit_signature(patched_predict, tmp_path):
     assert bound.arguments["logits_1zyx"] == "det_logits[f_idx][0]"
     assert bound.arguments["det_head"] == "model.detect_head"
     assert bound.arguments["n_encode_calls"] == "_nv"
+
+
+# ======================================================================================
+# 6. the spec -> audit -> postprocessor handshake
+#
+# Every gate in this file is enforced by an ENV VAR the audit reads. A spec that sets a name
+# nothing reads is a gate that does not exist, and the failure is invisible: the audit falls
+# back to its default, which happens to be right, so the run passes while the spec documents
+# a contract it is not enforcing. That is what the first v6 draft shipped.
+# ======================================================================================
+@pytest.mark.parametrize("spec_path", SPECS, ids=lambda p: p.stem)
+def test_spec_sets_only_env_names_the_audit_actually_reads(spec_path):
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    env = next(e for e in spec["edits"] if e["kind"] == "env")["vars"]
+    audit = AUDIT_SRC.read_text(encoding="utf-8")
+    inject = INJECT_SRC.read_text(encoding="utf-8")
+    for name in env:
+        if not name.startswith("BIOHUB_D1_"):
+            continue
+        assert f'"{name}"' in audit or f'"{name}"' in inject, (
+            f"{name} is set by {spec_path.name} but read by neither the audit block nor the "
+            f"injector -- it is a gate that does not exist"
+        )
+
+
+@pytest.mark.parametrize("spec_path", SPECS, ids=lambda p: p.stem)
+def test_spec_pins_the_8_7_split_as_two_fields_and_the_parity_slack(spec_path):
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    env = next(e for e in spec["edits"] if e["kind"] == "env")["vars"]
+    assert env["BIOHUB_D1_REQUIRE_ENCODE_CALLS"] == "8"
+    assert env["BIOHUB_D1_REQUIRE_DISTINCT_VIEWS"] == "7"
+    assert "BIOHUB_D1_REQUIRE_TTA_VIEWS" not in env, (
+        "the conflated view count is back; 8 encode calls and 7 distinct views are two "
+        "different numbers and a single field cannot express the collision"
+    )
+    assert env["BIOHUB_D1_REQUIRE_NOTEBOOK_TTA"] == "1"
+    # the gate that hard-aborts the run must be recorded in the spec, not inherited
+    assert env["BIOHUB_D1_PARITY_SLACK"] == "2.0"
+    assert "8 encode calls over 7 DISTINCT views" in spec["purpose"], (
+        "the spec purpose describes the view set to a human reader; it must not say "
+        "'8-view', which is the conflation"
+    )
+
+
+@pytest.mark.parametrize("spec_path", SPECS, ids=lambda p: p.stem)
+def test_spec_replaces_the_tta_print_guard_with_a_raise(spec_path):
+    """v6 requirement 1. The guard is converted for LOCALITY -- the downstream `_nv` anchor
+    already hard-fails one cell later -- so the failure names its own cause."""
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    guard = [e for e in spec["edits"] if e["_audit"]["edit_id"] == "E05b_tta_guard"]
+    assert len(guard) == 1
+    g = guard[0]
+    assert g["old"].strip().startswith("print(")
+    assert "TTA WARNING" in g["old"]
+    assert g["new"].lstrip().startswith("raise RuntimeError(")
+    assert g["expect"] == 1
+    # and the guard must be applied BEFORE the D1 injection reads the patched file
+    order = {e["_audit"]["edit_id"]: e["_audit"]["order"] for e in spec["edits"]}
+    assert order["E05b_tta_guard"] < order["E06_d1_inject"]
+
+
+def test_built_notebook_has_no_surviving_print_guard_and_no_conflated_view_count():
+    for fold in (0, 1):
+        nb = ROOT / f"notebooks/kaggle_p3_d1_smoke_f{fold}" / f"biohub-p3-d1-smoke-f{fold}.ipynb"
+        src = "".join("".join(c["source"])
+                      for c in json.loads(nb.read_text(encoding="utf-8"))["cells"])
+        assert "TTA WARNING" not in src, f"f{fold}: the print guard survived the build"
+        assert src.count("TTA PATCH FAILED") == 1, f"f{fold}: the raise guard is not present"
+        assert "n_views" not in src, f"f{fold}: a conflated view count reached the notebook"
+        assert src.count("BIOHUB_D1_REQUIRE_ENCODE_CALLS") == 1
+        assert src.count("BIOHUB_D1_REQUIRE_DISTINCT_VIEWS") == 1
+        # the notebook's own TTA patch must still run BEFORE the D1 injection replaces it
+        assert src.index("TTA patch applied") < src.index("D1 + D1-F INJECTION")
+
+
+def test_terminal_record_declares_the_handshake_the_postprocessor_needs(audit_run):
+    """The per-crop record names its schema and its feature arrays, so a consumer dispatches
+    on a declaration instead of guessing from filenames."""
+    _, out, ds, _ft, _fi = audit_run
+    man = json.loads((out / "manifests" / f"{ds}.complete.json").read_text(encoding="utf-8"))
+    assert man["schema_version"] == "d1_v6"
+    assert man["feat_arrays"] == ["feat_tta_mean_gt", "feat_tta_mean_max",
+                                  "feat_idview_gt", "feat_idview_max"]
+    assert man["parity"]["gate_slack"] == 2.0
+
+
+def test_the_postprocessor_still_expects_the_v5_array_names_INTEGRATION_GAP():
+    """LOCK, NOT A PASS. `scripts/d1_postprocess.py` is owned by another lane and still
+    declares FEATURE_ARRAYS = ("feat_gt", "feat_max"). A v6 export writes four differently
+    named arrays, so `load_features` will SystemExit with `missing feature array
+    <crop>__feat_gt.npy` on the first v6 artifact it is pointed at.
+
+    This test asserts the CURRENT state so the gap is machine-visible rather than prose in a
+    report. When the postprocessor lane adopts the v6 names, this test fires -- and at that
+    point the rest of the handshake must land with it:
+
+      1. FEATURE_ARRAYS -> the four v6 names (`schema_version == "d1_v6"` selects them).
+      2. `feat_max_validity`'s v5 reconstruction path (feat_max == feat_gt) must not run
+         against v6, which ships an explicit `feat_max_valid` column and NaN sentinels.
+      3. `assert_export_radii(agg)` reads the TOP-LEVEL d1_manifest.json. v6 records
+         match_um/search_um in each per-crop terminal record; `scripts/kaggle_edits/
+         d1_aggregate.py` (also another lane's file) must promote them, asserting agreement
+         across crops, or the radius binding stays inert.
+      4. `--v5-emission-order-row-id` becomes unnecessary: v6 ships a real `row_id`.
+    """
+    src = POSTPROCESS.read_text(encoding="utf-8")
+    assert 'FEATURE_ARRAYS = ("feat_gt", "feat_max")' in src, (
+        "the postprocessor's feature-array names changed -- finish the v6 handshake listed "
+        "in this test's docstring, then update or delete this lock"
+    )
