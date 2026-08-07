@@ -1,9 +1,9 @@
 {
-  "name": "p3_d1_smoke_f1",
-  "slug": "biohub-p3-d1-smoke-f1",
-  "title": "Biohub P3 D1 Smoke F1",
-  "code_file": "biohub-p3-d1-smoke-f1.ipynb",
-  "out_dir": "notebooks/kaggle_p3_d1_smoke_f1",
+  "name": "p3_d1_smoke_f1_src",
+  "slug": "biohub-p3-d1-smoke-f1-src",
+  "title": "Biohub P3 D1 Smoke F1 SRC",
+  "code_file": "biohub-p3-d1-smoke-f1-src.ipynb",
+  "out_dir": "notebooks/kaggle_p3_d1_smoke_f1_src",
   "datasets": [
     "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
     "pilkwang/biohub-temporal-unet3d-seed314159-v1",
@@ -26,29 +26,28 @@
   "d1_cell": {
     "kind": "d1_factorial_cell",
     "tier": "smoke",
-    "shard_id": "smoke__s2__split_1__6bba__target__0",
-    "stage": 2,
+    "shard_id": "smoke__s1__split_1__44b6__source__0",
+    "stage": 1,
     "split": 1,
     "fold": 1,
-    "family": "6bba",
-    "role": "target",
+    "family": "44b6",
+    "role": "source",
     "checkpoint_file": "edge_predictor_best_split_1.pth",
     "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
     "checkpoint_trained_on_family": "44b6",
     "checkpoint_heldout_family": "6bba",
     "crops": [
-      "6bba_57b7cc1e",
-      "6bba_6feb10f0"
+      "44b6_0113de3b"
     ],
-    "n_crops": 2,
-    "gt_nodes_total": 3027,
-    "est_bytes": 6408325,
-    "est_wall_hours": 0.3577,
+    "n_crops": 1,
+    "gt_nodes_total": 52,
+    "est_bytes": 2656100,
+    "est_wall_hours": 0.3039,
     "manifest": "data/d1_factorial/manifest_smoke.json",
     "manifest_sha256_lf": "bc5bd4f02dcbeea84749a10209fc75a7b95d45420a6f7d0cacbd3ca358b28846",
-    "spec": "p3_d1_smoke_f1"
+    "spec": "p3_d1_smoke_f1_src"
   },
-  "purpose": "STRUCTURAL SMOKE. Factorial cell smoke__s2__split_1__6bba__target__0 (stage 2 of 4): the split_1 checkpoint over 2 6bba crop(s), role TARGET -- the checkpoint runs over the family it has NEVER seen, so these rows are the measurement and are opened exactly once after the head is frozen. The four smoke cells together encode all three crops under BOTH checkpoints, which is what makes the C1 2x2 runnable at all: a routed-only export puts each family in its own 32-D basis and d1f_probe refuses it as CROSS-ENCODED. Combined P3 + D1 + D1-F export: one encoder pass per crop emits the P3 pre-wrapper graph (harmonic association), accepted detector peaks, the exact A/B/D classification of every GT node with D stratified by distance to the nearest local maximum, and FOUR 32-D frozen feature arrays: the TTA MEAN over the deployed view set -- 8 encode calls over 7 DISTINCT views, divisor 8, replicated verbatim -- which is the post-TTA detector representation, and the IDENTITY VIEW, which is the association representation that predict_edges actually reads; each at the sampled voxel and at the strongest nearby local maximum. Combinable because the harmonic patch touches edge_logits_pair only and never det_logits. Runs under BIOHUB_LOEO_ARM=strict, so the secondary detector is off and the result is NOT directly deployable (correction C5: the public path blends 0.525 primary + 0.475 aligned secondary behind a per-frame retention guard). NOT a scientific verdict and NOT a submission.",
+  "purpose": "STRUCTURAL SMOKE. Factorial cell smoke__s1__split_1__44b6__source__0 (stage 1 of 4): the split_1 checkpoint over 1 44b6 crop(s), role SOURCE -- the checkpoint runs over the family it was TRAINED on, so these rows are the fitting/selection substrate and are never a measurement. The four smoke cells together encode all three crops under BOTH checkpoints, which is what makes the C1 2x2 runnable at all: a routed-only export puts each family in its own 32-D basis and d1f_probe refuses it as CROSS-ENCODED. Combined P3 + D1 + D1-F export: one encoder pass per crop emits the P3 pre-wrapper graph (harmonic association), accepted detector peaks, the exact A/B/D classification of every GT node with D stratified by distance to the nearest local maximum, and FOUR 32-D frozen feature arrays: the TTA MEAN over the deployed view set -- 8 encode calls over 7 DISTINCT views, divisor 8, replicated verbatim -- which is the post-TTA detector representation, and the IDENTITY VIEW, which is the association representation that predict_edges actually reads; each at the sampled voxel and at the strongest nearby local maximum. Combinable because the harmonic patch touches edge_logits_pair only and never det_logits. Runs under BIOHUB_LOEO_ARM=strict, so the secondary detector is off and the result is NOT directly deployable (correction C5: the public path blends 0.525 primary + 0.475 aligned secondary behind a per-frame retention guard). NOT a scientific verdict and NOT a submission.",
   "provenance": {
     "backbone": "p3_harmonic.json sha256 1384e5044f79521b89a0de14670415dc8650db206f926f3a22c7995864b2b91c",
     "loeo_source": "loeo_f1_strict_pregraph.json sha256 0dc68c81e554828e5719bd6cc70fcc408c5439b74833a178cccbaa169ea01055",
@@ -63,10 +62,9 @@
     "d1_block_sha256": "cdb293880a9558758000c97245702a1c2870074dfa967be358c515a3753cd366",
     "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
     "stems": [
-      "6bba_57b7cc1e",
-      "6bba_6feb10f0"
+      "44b6_0113de3b"
     ],
-    "routing_source": "data/d1_factorial/manifest_smoke.json shard smoke__s2__split_1__6bba__target__0 (LF sha256 bc5bd4f02dcbeea84749a10209fc75a7b95d45420a6f7d0cacbd3ca358b28846). Stems, weights glob, config glob, fold, checkpoint hash and expected-crop count are copied from the shard and asserted equal; nothing here is transcribed and no glob stands in for a manifest.",
+    "routing_source": "data/d1_factorial/manifest_smoke.json shard smoke__s1__split_1__44b6__source__0 (LF sha256 bc5bd4f02dcbeea84749a10209fc75a7b95d45420a6f7d0cacbd3ca358b28846). Stems, weights glob, config glob, fold, checkpoint hash and expected-crop count are copied from the shard and asserted equal; nothing here is transcribed and no glob stands in for a manifest.",
     "four_spec_rationale": "The LOEO retarget binds one fold at module level and rebinds TEST_DIR globally, so two checkpoints in one kernel would require restructuring the notebook's single-pass predict/wrapper/export flow. The 2x2 needs four kernels: each of the two checkpoints must encode BOTH families, because the two 32-D bases are independent (rel-L2 1.41542 ~ sqrt(2), cos(w0,w1) = -0.155) and a head fitted in one cannot be applied in the other. Six crop-inferences total; each is paid for exactly once and the four manifests are aggregated only after all four runs complete.",
     "source_cells_need_no_kernel_edit": "scripts/kaggle_edits/loeo_retarget.py mounts EVERY train .zarr under /kaggle/input and selects purely by BIOHUB_LOEO_STEMS membership; LOEO_FOLD only names the scratch directory, the printed manifest and the export files. There is no fold-membership guard, and the primary weights come solely from BIOHUB_LOEO_WEIGHTS_GLOB. Running a checkpoint over its own training family is therefore a configuration change, not a code change."
   },
@@ -78,13 +76,13 @@
         "BIOHUB_LOEO_FOLD": "1",
         "BIOHUB_LOEO_ARM": "strict",
         "BIOHUB_LOEO_LIMIT": "0",
-        "BIOHUB_LOEO_STEMS": "[\"6bba_57b7cc1e\", \"6bba_6feb10f0\"]",
+        "BIOHUB_LOEO_STEMS": "[\"44b6_0113de3b\"]",
         "BIOHUB_LOEO_WEIGHTS_GLOB": "/kaggle/input/*/edge_predictor_best_split_1.pth",
         "BIOHUB_LOEO_CONFIG_GLOB": "/kaggle/input/*/config_split_1.json",
         "BIOHUB_D1_FOLD": "1",
         "BIOHUB_D1_SPLIT": "1",
         "BIOHUB_D1_CKPT_SHA": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
-        "BIOHUB_D1_EXPECTED_CROPS": "2",
+        "BIOHUB_D1_EXPECTED_CROPS": "1",
         "BIOHUB_D1_N_UNIFORM": "64",
         "BIOHUB_D1_N_SUBTHR": "32",
         "BIOHUB_D1_REQUIRE_ENCODE_CALLS": "8",
@@ -96,7 +94,7 @@
       "_audit": {
         "edit_id": "E01_env",
         "source": "assembler+manifest_smoke.json",
-        "canonical_sha256": "7b8e20d959e56c5f77180d9979ab6b7c7c5866cc04e4fdb0ca661b412242e265",
+        "canonical_sha256": "69dbd3b1dd84f205416930a58be18a8e793e355737c1101639319e5cc815bee8",
         "intent": "1. environment: LOEO fold routing + D1 knobs",
         "order": 0
       }
@@ -118,12 +116,12 @@
       "kind": "insert_after",
       "cell_match": "_ps = REPO_DIR",
       "anchor": "print(json.dumps(LOEO_MANIFEST, indent=2)[:800])",
-      "code": "# ---------------------------------------------------------- D1 FACTORIAL CELL IDENTITY\n# This kernel is ONE cell of the 2x2 checkpoint x family factorial (correction C1).\n# A SOURCE cell runs a checkpoint over the family it was TRAINED on and supplies the\n# fitting rows; a TARGET cell runs the SAME checkpoint over the family it has NEVER\n# seen and is the measurement. Both live in one 32-D basis -- that is the only reason a\n# head fitted on the source can be applied to the target at all.\n#\n# The role is not a free parameter. It is re-derived below from the split of the\n# checkpoint that was actually loaded and the family prefix of the stems that were\n# actually mounted, then compared with the value assembled from the manifest. A cell\n# that has been mislabelled cannot run.\n_D1C = {\n    \"checkpoint_file\": \"edge_predictor_best_split_1.pth\",\n    \"checkpoint_heldout_family\": \"6bba\",\n    \"checkpoint_sha256\": \"2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de\",\n    \"checkpoint_trained_on_family\": \"44b6\",\n    \"crops\": [\n        \"6bba_57b7cc1e\",\n        \"6bba_6feb10f0\"\n    ],\n    \"est_bytes\": 6408325,\n    \"est_wall_hours\": 0.3577,\n    \"family\": \"6bba\",\n    \"fold\": 1,\n    \"gt_nodes_total\": 3027,\n    \"kind\": \"d1_factorial_cell\",\n    \"manifest\": \"data/d1_factorial/manifest_smoke.json\",\n    \"manifest_sha256_lf\": \"bc5bd4f02dcbeea84749a10209fc75a7b95d45420a6f7d0cacbd3ca358b28846\",\n    \"n_crops\": 2,\n    \"role\": \"target\",\n    \"shard_id\": \"smoke__s2__split_1__6bba__target__0\",\n    \"spec\": \"p3_d1_smoke_f1\",\n    \"split\": 1,\n    \"stage\": 2,\n    \"tier\": \"smoke\"\n}\n_D1C_TRAINED_ON = {0: \"6bba\", 1: \"44b6\"}\n_D1C_HELD_OUT = {0: \"44b6\", 1: \"6bba\"}\n\n_d1c_split = int(_D1C[\"split\"])\n_d1c_fams = sorted({_s.split(\"_\")[0] for _s in LOEO_STEMS})\nif len(_d1c_fams) != 1:\n    raise RuntimeError(\n        f\"{_D1C['shard_id']}: stems span families {_d1c_fams}; a factorial cell is \"\n        \"family-pure by construction\")\n_d1c_family = _d1c_fams[0]\n_d1c_role = \"source\" if _d1c_family == _D1C_TRAINED_ON[_d1c_split] else \"target\"\n\n_d1c_bad = []\nif _d1c_family != _D1C[\"family\"]:\n    _d1c_bad.append(f\"family: mounted {_d1c_family} != declared {_D1C['family']}\")\nif _d1c_role != _D1C[\"role\"]:\n    _d1c_bad.append(f\"ROLE INVERSION: split {_d1c_split} trained on \"\n                    f\"{_D1C_TRAINED_ON[_d1c_split]} and held out \"\n                    f\"{_D1C_HELD_OUT[_d1c_split]}, so {_d1c_family} crops are \"\n                    f\"{_d1c_role}, but this cell declares {_D1C['role']}\")\nif sorted(LOEO_STEMS) != sorted(_D1C[\"crops\"]):\n    _d1c_bad.append(f\"crop list: mounted {sorted(LOEO_STEMS)} != declared \"\n                    f\"{sorted(_D1C['crops'])}\")\nif int(LOEO_FOLD) != int(_D1C[\"fold\"]):\n    _d1c_bad.append(f\"fold: env {LOEO_FOLD} != declared {_D1C['fold']}\")\nif os.environ.get(\"BIOHUB_D1_SPLIT\") != str(_d1c_split):\n    _d1c_bad.append(f\"basis: BIOHUB_D1_SPLIT=\"\n                    f\"{os.environ.get('BIOHUB_D1_SPLIT')!r} != {_d1c_split}\")\nif os.environ.get(\"BIOHUB_D1_CKPT_SHA\") != _D1C[\"checkpoint_sha256\"]:\n    _d1c_bad.append(\"basis: BIOHUB_D1_CKPT_SHA is not this cell's checkpoint\")\nif os.environ.get(\"BIOHUB_D1_EXPECTED_CROPS\") != str(_D1C[\"n_crops\"]):\n    _d1c_bad.append(\"crop budget: BIOHUB_D1_EXPECTED_CROPS disagrees with the manifest\")\n\n# The weights the kernel actually resolved, hashed in full -- the retarget only prints\n# the first 16 hex digits, which is a display, not a gate.\n_d1c_obs = hashlib.sha256(Path(WEIGHTS_RELATIVE).read_bytes()).hexdigest()\nif _d1c_obs != _D1C[\"checkpoint_sha256\"]:\n    _d1c_bad.append(f\"checkpoint: loaded sha256 {_d1c_obs} != pinned \"\n                    f\"{_D1C['checkpoint_sha256']}\")\n\nif _d1c_bad:\n    raise RuntimeError(\n        f\"D1 FACTORIAL CELL {_D1C['shard_id']} IS NOT WHAT IT CLAIMS TO BE:\\n  \"\n        + \"\\n  \".join(_d1c_bad))\n\n_d1c_dir = Path(\"/kaggle/working/d1_audit\")\n_d1c_dir.mkdir(parents=True, exist_ok=True)\n_d1c_rec = dict(_D1C)\n_d1c_rec.update({\n    \"checkpoint_sha256_observed\": _d1c_obs,\n    \"weights_path\": str(WEIGHTS_RELATIVE),\n    \"family_rederived\": _d1c_family,\n    \"role_rederived\": _d1c_role,\n    \"crops_mounted\": sorted(LOEO_STEMS),\n    \"arm\": LOEO_ARM,\n})\n(_d1c_dir / \"d1_cell.json\").write_text(\n    json.dumps(_d1c_rec, indent=2, sort_keys=True), encoding=\"utf-8\")\nprint(f\"D1 CELL {_D1C['shard_id']}: split {_d1c_split} basis, family \"\n      f\"{_d1c_family}, role {_d1c_role.upper()}, {len(LOEO_STEMS)} crop(s), \"\n      f\"checkpoint {_d1c_obs[:16]} VERIFIED\", flush=True)\n# --------------------------------------------------------------------------------------\n",
+      "code": "# ---------------------------------------------------------- D1 FACTORIAL CELL IDENTITY\n# This kernel is ONE cell of the 2x2 checkpoint x family factorial (correction C1).\n# A SOURCE cell runs a checkpoint over the family it was TRAINED on and supplies the\n# fitting rows; a TARGET cell runs the SAME checkpoint over the family it has NEVER\n# seen and is the measurement. Both live in one 32-D basis -- that is the only reason a\n# head fitted on the source can be applied to the target at all.\n#\n# The role is not a free parameter. It is re-derived below from the split of the\n# checkpoint that was actually loaded and the family prefix of the stems that were\n# actually mounted, then compared with the value assembled from the manifest. A cell\n# that has been mislabelled cannot run.\n_D1C = {\n    \"checkpoint_file\": \"edge_predictor_best_split_1.pth\",\n    \"checkpoint_heldout_family\": \"6bba\",\n    \"checkpoint_sha256\": \"2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de\",\n    \"checkpoint_trained_on_family\": \"44b6\",\n    \"crops\": [\n        \"44b6_0113de3b\"\n    ],\n    \"est_bytes\": 2656100,\n    \"est_wall_hours\": 0.3039,\n    \"family\": \"44b6\",\n    \"fold\": 1,\n    \"gt_nodes_total\": 52,\n    \"kind\": \"d1_factorial_cell\",\n    \"manifest\": \"data/d1_factorial/manifest_smoke.json\",\n    \"manifest_sha256_lf\": \"bc5bd4f02dcbeea84749a10209fc75a7b95d45420a6f7d0cacbd3ca358b28846\",\n    \"n_crops\": 1,\n    \"role\": \"source\",\n    \"shard_id\": \"smoke__s1__split_1__44b6__source__0\",\n    \"spec\": \"p3_d1_smoke_f1_src\",\n    \"split\": 1,\n    \"stage\": 1,\n    \"tier\": \"smoke\"\n}\n_D1C_TRAINED_ON = {0: \"6bba\", 1: \"44b6\"}\n_D1C_HELD_OUT = {0: \"44b6\", 1: \"6bba\"}\n\n_d1c_split = int(_D1C[\"split\"])\n_d1c_fams = sorted({_s.split(\"_\")[0] for _s in LOEO_STEMS})\nif len(_d1c_fams) != 1:\n    raise RuntimeError(\n        f\"{_D1C['shard_id']}: stems span families {_d1c_fams}; a factorial cell is \"\n        \"family-pure by construction\")\n_d1c_family = _d1c_fams[0]\n_d1c_role = \"source\" if _d1c_family == _D1C_TRAINED_ON[_d1c_split] else \"target\"\n\n_d1c_bad = []\nif _d1c_family != _D1C[\"family\"]:\n    _d1c_bad.append(f\"family: mounted {_d1c_family} != declared {_D1C['family']}\")\nif _d1c_role != _D1C[\"role\"]:\n    _d1c_bad.append(f\"ROLE INVERSION: split {_d1c_split} trained on \"\n                    f\"{_D1C_TRAINED_ON[_d1c_split]} and held out \"\n                    f\"{_D1C_HELD_OUT[_d1c_split]}, so {_d1c_family} crops are \"\n                    f\"{_d1c_role}, but this cell declares {_D1C['role']}\")\nif sorted(LOEO_STEMS) != sorted(_D1C[\"crops\"]):\n    _d1c_bad.append(f\"crop list: mounted {sorted(LOEO_STEMS)} != declared \"\n                    f\"{sorted(_D1C['crops'])}\")\nif int(LOEO_FOLD) != int(_D1C[\"fold\"]):\n    _d1c_bad.append(f\"fold: env {LOEO_FOLD} != declared {_D1C['fold']}\")\nif os.environ.get(\"BIOHUB_D1_SPLIT\") != str(_d1c_split):\n    _d1c_bad.append(f\"basis: BIOHUB_D1_SPLIT=\"\n                    f\"{os.environ.get('BIOHUB_D1_SPLIT')!r} != {_d1c_split}\")\nif os.environ.get(\"BIOHUB_D1_CKPT_SHA\") != _D1C[\"checkpoint_sha256\"]:\n    _d1c_bad.append(\"basis: BIOHUB_D1_CKPT_SHA is not this cell's checkpoint\")\nif os.environ.get(\"BIOHUB_D1_EXPECTED_CROPS\") != str(_D1C[\"n_crops\"]):\n    _d1c_bad.append(\"crop budget: BIOHUB_D1_EXPECTED_CROPS disagrees with the manifest\")\n\n# The weights the kernel actually resolved, hashed in full -- the retarget only prints\n# the first 16 hex digits, which is a display, not a gate.\n_d1c_obs = hashlib.sha256(Path(WEIGHTS_RELATIVE).read_bytes()).hexdigest()\nif _d1c_obs != _D1C[\"checkpoint_sha256\"]:\n    _d1c_bad.append(f\"checkpoint: loaded sha256 {_d1c_obs} != pinned \"\n                    f\"{_D1C['checkpoint_sha256']}\")\n\nif _d1c_bad:\n    raise RuntimeError(\n        f\"D1 FACTORIAL CELL {_D1C['shard_id']} IS NOT WHAT IT CLAIMS TO BE:\\n  \"\n        + \"\\n  \".join(_d1c_bad))\n\n_d1c_dir = Path(\"/kaggle/working/d1_audit\")\n_d1c_dir.mkdir(parents=True, exist_ok=True)\n_d1c_rec = dict(_D1C)\n_d1c_rec.update({\n    \"checkpoint_sha256_observed\": _d1c_obs,\n    \"weights_path\": str(WEIGHTS_RELATIVE),\n    \"family_rederived\": _d1c_family,\n    \"role_rederived\": _d1c_role,\n    \"crops_mounted\": sorted(LOEO_STEMS),\n    \"arm\": LOEO_ARM,\n})\n(_d1c_dir / \"d1_cell.json\").write_text(\n    json.dumps(_d1c_rec, indent=2, sort_keys=True), encoding=\"utf-8\")\nprint(f\"D1 CELL {_D1C['shard_id']}: split {_d1c_split} basis, family \"\n      f\"{_d1c_family}, role {_d1c_role.upper()}, {len(LOEO_STEMS)} crop(s), \"\n      f\"checkpoint {_d1c_obs[:16]} VERIFIED\", flush=True)\n# --------------------------------------------------------------------------------------\n",
       "expect": 1,
       "_audit": {
         "edit_id": "E02b_cell_identity",
         "source": "assembler+manifest_smoke.json",
-        "canonical_sha256": "6ee6a9df87d88b9b2c1322754ea0b1b5da4a22e50b590ba81039290e11a01d32",
+        "canonical_sha256": "2b9786eae9911dbc72c7e7726e87f7b8ba0793b0db6979cdea4f2e57729fea32",
         "intent": "1. factorial cell identity: re-derive the role, verify the loaded checkpoint, emit d1_cell.json",
         "order": 2
       }
