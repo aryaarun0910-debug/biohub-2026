@@ -61,7 +61,11 @@ SPECS = ROOT / "scripts" / "kaggle_specs"
 MANIFEST = ROOT / "data" / "d1_factorial" / "manifest_smoke.json"
 
 BACKBONE = SPECS / "p3_harmonic.json"
-LOEO = SPECS / "loeo_f1_strict_pregraph.json"
+LOEO = ROOT / "scripts" / "kaggle_templates" / "loeo_pregraph_edits.json"
+LOEO_OUTPUT_PROVENANCE = (
+    "loeo_f1_strict_pregraph.json sha256 "
+    "0dc68c81e554828e5719bd6cc70fcc408c5439b74833a178cccbaa169ea01055"
+)
 
 # LOEO semantics. Fold 0 holds out 44b6, so the split_0 checkpoint TRAINED on 6bba; fold 1
 # holds out 6bba, so split_1 trained on 44b6. These two dicts are the only definition of
@@ -516,7 +520,10 @@ def build(shard: dict) -> dict:
         ),
         "provenance": {
             "backbone": f"p3_harmonic.json sha256 {sha_file(BACKBONE)}",
-            "loeo_source": f"loeo_f1_strict_pregraph.json sha256 {sha_file(LOEO)}",
+                # Preserve the generated spec's original source identity byte-for-byte. The
+                # complete source is archived at pre-lean-2026-08-07; the active tree retains
+                # only its five hash-pinned edits in kaggle_templates/.
+                "loeo_source": LOEO_OUTPUT_PROVENANCE,
             "imported_edit_sha256": imported_sha,
             "d1_inject_sha256": sha_file(ROOT / "scripts/kaggle_edits/d1_inject.py"),
             "d1_block_sha256": sha_file(ROOT / "scripts/kaggle_edits/d1_response_audit.py"),

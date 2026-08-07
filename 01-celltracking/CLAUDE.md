@@ -1,57 +1,39 @@
-# Biohub Cell Tracking 2026 — operating instructions
+# Claude operating contract
 
-## Start here
+Read `HANDOFF.md` and `SYSTEM_DESIGN.md`. They are the only live instructions.
 
-Read, in order:
+## Mission
 
-1. `HANDOFF.md`
-2. `reports/NEXT_DECISION.md`
-3. `reports/EXPERIMENT_LEDGER.md`
-4. `reports/METRIC_SEMANTICS_VERIFIED.md`
+Convert the current detector-calibration finding into a scored candidate, or kill it with
+the cheapest valid experiment. Do not reopen archived branches without a new mechanism and
+a stated falsification test.
 
-Older plans and transfer briefs were removed from the active tree on 2026-07-30. Recover
-them only when necessary from Git tag `pre-lean-2026-07-30`; they are not live instructions.
+## Execution rules
 
-## Standing workflow
+1. Preserve `.claude/settings.json` and `.gitignore` unless the host explicitly authorises
+   editing them.
+2. Never use the four visible placeholder movies for model or threshold selection.
+3. Use the official patched scorer and the pooled objective; always report both embryo
+   directions separately.
+4. Tests enforce software contracts only. Scientific promotion decisions belong in an
+   experiment result, not in a unit test.
+5. Start with smoke, then representative pilot, then full evaluation. A passing smoke is
+   not scientific evidence.
+6. Do not create a new Markdown plan for each cycle. Update `HANDOFF.md`, append one compact
+   row to `reports/EXPERIMENT_LEDGER.md`, and store raw output outside Git.
+7. Stage explicit paths. Never use `git add -A` or `git add -u`.
+8. No GPU launch or submission is automatic. Return the measured pilot report first unless
+   the host explicitly authorises the next stage.
 
-After every experiment or meaningful result:
+## Active code surface
 
-1. Append a dated, terse entry to `reports/journal/JOURNAL.md`: execution, exact numbers,
-   decision, and next step.
-2. Update `HANDOFF.md` and `reports/NEXT_DECISION.md` if the conclusion or active queue
-   changes.
-3. Commit code, small canonical results, and documentation together with a descriptive
-   message and a `Co-Authored-By` trailer.
+- `src/biotrack/`: immutable scorer/graph core and deployed wrapper.
+- `scripts/d1_postprocess.py`: scorer-exact M/C/T/L/D partition.
+- `scripts/d1f_probe.py`: representation-versus-head diagnosis.
+- `scripts/build_d1_factorial_manifests.py`: checkpoint x family manifests.
+- `scripts/assemble_p3_d1_smoke_spec.py`: current kernel assembly.
+- `scripts/kaggle_factory.py`: reproducible Kaggle build/push tooling.
+- `scripts/kaggle_edits/`, `scripts/kaggle_specs/`: active kernel patches and specs.
 
-Negative evidence must remain in the journal/ledger. Do not resurrect a closed method
-without identifying a genuinely unmeasured mechanism and a cheap falsification gate.
-
-## Measurement rules
-
-- Baseline: E0c exact wrapper, public `0.889`, LOEO OOF `0.7595 / 0.6490`.
-- Promotion: both embryo families improve, min-fold delta at least `+0.005`, no major
-  regime collapse, exact patched scorer.
-- Use at most two confirmatory parameterizations per round.
-- Never tune on the four visible placeholder movies.
-- Never use family/crop identity as a deployment router.
-- Public metric exploits, negative-time/out-of-volume nodes, and artificial hubs/forks are
-  quarantined and may not enter a submission.
-- External data/models require URL, license, checksum, and transformation provenance.
-- Test-time weight updates require written host clearance.
-
-## Active track
-
-Only `reports/NEXT_DECISION.md` is active. Generic retraining, more seeds, full-data fitting,
-and ensembling remain blocked. GPU may be spent only after the clean-public candidate-breadth
-or family-boundary oracle gate passes.
-
-## Environment
-
-- Main environment: `.venv` (Python 3.12).
-- Trackastra environment is historical and may be removed locally.
-- Tests: `.\.venv\Scripts\python.exe -m pytest -q`
-- Exact scoring:
-  `.\.venv\Scripts\python.exe scripts\score_oof.py --pred-dir <dir> --gt-dir data\train`
-
-Preserve unrelated dirty user files. Generated data, weights, caches, and Kaggle outputs
-remain ignored and should not be committed.
+Everything else is support, immutable evidence, or history. If a file is not named by
+`HANDOFF.md` or `SYSTEM_DESIGN.md`, do not treat it as an instruction.

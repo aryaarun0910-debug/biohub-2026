@@ -1,0 +1,50 @@
+{
+  "purpose": "Minimal retained edit template used by the D1 smoke assembler.",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork",
+    "kms111201/biohub-cell-tracking-data",
+    "aryaarun07/biohub-oof-weights"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "edits": [
+    {
+      "kind": "template_placeholder"
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "def list_test_stems() -> list[str]:",
+      "cell_match": "_ps = REPO_DIR",
+      "code_file": "scripts/kaggle_edits/loeo_retarget.py"
+    },
+    {
+      "kind": "replace",
+      "old": "test_stems = list_test_stems()",
+      "new": "test_stems = list(LOEO_STEMS)  # LOEO retarget",
+      "expect": 1
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "_guard_submission = Path(",
+      "code_file": "scripts/kaggle_edits/loeo_export.py"
+    },
+    {
+      "kind": "insert_after",
+      "anchor": "print(f\"Found {len(geffs)} prediction graphs\")",
+      "cell_match": "def filter_output_graph(",
+      "code_file": "scripts/kaggle_edits/loeo_pregraph_export.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "old": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\"}",
+      "new": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\",\n              f\"pregraphs_split{LOEO_FOLD}.parquet\", f\"pregraphs_split{LOEO_FOLD}.json\"}",
+      "expect": 1
+    }
+  ]
+}
