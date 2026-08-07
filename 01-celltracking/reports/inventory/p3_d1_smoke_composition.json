@@ -2,8 +2,8 @@
   "folds": [
     {
       "fold": 0,
-      "spec_sha256": "bbc796413ca6",
-      "notebook_sha256": "c943bce4260f55587840074cff365d07f291c3d16d6f5521eb8826ebda11c5d2",
+      "spec_sha256": "75c70a410763",
+      "notebook_sha256": "752f8d55a68d3bc98a33af9c65a7b43235e6ea8bc6a4c14d71adcba725893385",
       "changed_cells": [
         2,
         5,
@@ -19,6 +19,7 @@
           "E02_loeo_retarget",
           "E03_test_stems",
           "E04_harmonic",
+          "E05b_tta_guard",
           "E06_d1_inject"
         ],
         "6": [
@@ -41,7 +42,7 @@
           "E10_aggregator"
         ]
       },
-      "patched_predict_sha256": "65130187d9fdf96a1357276641957e9c0cb73224643b23d239c2682856c47042",
+      "patched_predict_sha256": "0e12490cb6713b6d3c35b46b610c7f6eeb57434d0a97e67fc25d37039bcff5bc",
       "edits": [
         {
           "order": 0,
@@ -51,7 +52,7 @@
             2
           ],
           "kind": "env",
-          "canonical_sha256": "5842c694aadda96b",
+          "canonical_sha256": "04ff7a9d1550b8a9",
           "intent": "1. environment: LOEO fold routing + D1 knobs"
         },
         {
@@ -188,6 +189,17 @@
         },
         {
           "order": 13,
+          "edit_id": "E05b_tta_guard",
+          "source": "assembler",
+          "cells": [
+            5
+          ],
+          "kind": "replace",
+          "canonical_sha256": "e7b6cdd730e39443",
+          "intent": "4. TTA patch guard raises instead of printing (locality, not correctness)"
+        },
+        {
+          "order": 14,
           "edit_id": "E06_d1_inject",
           "source": "scripts/kaggle_edits/d1_inject.py",
           "cells": [
@@ -198,7 +210,7 @@
           "intent": "4. D1 audit + frozen-feature injection into the predict script"
         },
         {
-          "order": 14,
+          "order": 15,
           "edit_id": "E07_pregraph",
           "source": "loeo_f1_strict_pregraph#4",
           "cells": [
@@ -209,7 +221,7 @@
           "intent": "5. pre-wrapper prediction-graph export"
         },
         {
-          "order": 15,
+          "order": 16,
           "edit_id": "E08_export_cell",
           "source": "loeo_f1_strict_pregraph#3",
           "cells": [
@@ -220,7 +232,7 @@
           "intent": "6. LOEO export cell replaces the submission guard"
         },
         {
-          "order": 16,
+          "order": 17,
           "edit_id": "E10_aggregator",
           "source": "scripts/kaggle_edits/d1_aggregate.py",
           "cells": [
@@ -231,7 +243,7 @@
           "intent": "6. parent aggregator: read immutable per-crop records, fail hard on any gap"
         },
         {
-          "order": 17,
+          "order": 18,
           "edit_id": "E09_keep",
           "source": "loeo_f1_strict_pregraph#5 (+d1_audit)",
           "cells": [
@@ -245,8 +257,8 @@
     },
     {
       "fold": 1,
-      "spec_sha256": "38d0855e998c",
-      "notebook_sha256": "44ff93a69dda544e56bc4bfb6f5159073913decd9eddafb48a3ed2a0c7d7154b",
+      "spec_sha256": "6b712b8aa9e1",
+      "notebook_sha256": "38b59187d0fb46df1a665d189d4bf8095b19ab9719bcfb72c23c8d39bee12782",
       "changed_cells": [
         2,
         5,
@@ -262,6 +274,7 @@
           "E02_loeo_retarget",
           "E03_test_stems",
           "E04_harmonic",
+          "E05b_tta_guard",
           "E06_d1_inject"
         ],
         "6": [
@@ -284,7 +297,7 @@
           "E10_aggregator"
         ]
       },
-      "patched_predict_sha256": "65130187d9fdf96a1357276641957e9c0cb73224643b23d239c2682856c47042",
+      "patched_predict_sha256": "0e12490cb6713b6d3c35b46b610c7f6eeb57434d0a97e67fc25d37039bcff5bc",
       "edits": [
         {
           "order": 0,
@@ -294,7 +307,7 @@
             2
           ],
           "kind": "env",
-          "canonical_sha256": "33ae4f456ae55b4d",
+          "canonical_sha256": "d4117707185090c9",
           "intent": "1. environment: LOEO fold routing + D1 knobs"
         },
         {
@@ -431,6 +444,17 @@
         },
         {
           "order": 13,
+          "edit_id": "E05b_tta_guard",
+          "source": "assembler",
+          "cells": [
+            5
+          ],
+          "kind": "replace",
+          "canonical_sha256": "e7b6cdd730e39443",
+          "intent": "4. TTA patch guard raises instead of printing (locality, not correctness)"
+        },
+        {
+          "order": 14,
           "edit_id": "E06_d1_inject",
           "source": "scripts/kaggle_edits/d1_inject.py",
           "cells": [
@@ -441,7 +465,7 @@
           "intent": "4. D1 audit + frozen-feature injection into the predict script"
         },
         {
-          "order": 14,
+          "order": 15,
           "edit_id": "E07_pregraph",
           "source": "loeo_f1_strict_pregraph#4",
           "cells": [
@@ -452,7 +476,7 @@
           "intent": "5. pre-wrapper prediction-graph export"
         },
         {
-          "order": 15,
+          "order": 16,
           "edit_id": "E08_export_cell",
           "source": "loeo_f1_strict_pregraph#3",
           "cells": [
@@ -463,7 +487,7 @@
           "intent": "6. LOEO export cell replaces the submission guard"
         },
         {
-          "order": 16,
+          "order": 17,
           "edit_id": "E10_aggregator",
           "source": "scripts/kaggle_edits/d1_aggregate.py",
           "cells": [
@@ -474,7 +498,7 @@
           "intent": "6. parent aggregator: read immutable per-crop records, fail hard on any gap"
         },
         {
-          "order": 17,
+          "order": 18,
           "edit_id": "E09_keep",
           "source": "loeo_f1_strict_pregraph#5 (+d1_audit)",
           "cells": [

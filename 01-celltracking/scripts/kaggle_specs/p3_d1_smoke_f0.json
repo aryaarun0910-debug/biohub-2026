@@ -23,7 +23,7 @@
   "expects_submission": false,
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
-  "purpose": "STRUCTURAL SMOKE, fold 0, 1 crop(s). Combined P3 + D1 + D1-F export: one encoder pass per crop emits the P3 pre-wrapper graph (harmonic association), accepted detector peaks, the exact A/B/D classification of every GT node with D stratified by distance to the nearest local maximum, and FOUR 32-D frozen feature arrays: the 8-view TTA MEAN (the post-TTA detector representation) and the IDENTITY VIEW (the association representation that predict_edges actually reads), each at the sampled voxel and at the strongest nearby local maximum. Combinable because the harmonic patch touches edge_logits_pair only and never det_logits. NOT a scientific verdict and NOT a submission.",
+  "purpose": "STRUCTURAL SMOKE, fold 0, 1 crop(s). Combined P3 + D1 + D1-F export: one encoder pass per crop emits the P3 pre-wrapper graph (harmonic association), accepted detector peaks, the exact A/B/D classification of every GT node with D stratified by distance to the nearest local maximum, and FOUR 32-D frozen feature arrays: the TTA MEAN over the deployed view set -- 8 encode calls over 7 DISTINCT views, divisor 8, replicated verbatim -- which is the post-TTA detector representation, and the IDENTITY VIEW, which is the association representation that predict_edges actually reads; each at the sampled voxel and at the strongest nearby local maximum. Combinable because the harmonic patch touches edge_logits_pair only and never det_logits. NOT a scientific verdict and NOT a submission.",
   "provenance": {
     "backbone": "p3_harmonic.json sha256 1384e5044f79521b89a0de14670415dc8650db206f926f3a22c7995864b2b91c",
     "loeo_source": "loeo_f1_strict_pregraph.json sha256 0dc68c81e554828e5719bd6cc70fcc408c5439b74833a178cccbaa169ea01055",
@@ -34,8 +34,8 @@
       "loeo_pregraph": "5cbb94850ba34054edf11f98ef44b3ee18bec83222bfe2337832604ecb74907f",
       "loeo_keep": "b6a6c809e5d33dbf3b856b571a9ac5348da8e50dae1c9830e7481fd8efc4e5f5"
     },
-    "d1_inject_sha256": "71009e1e47685d9216c2c68d7013eaa08731c119248850c84628c53e8867882d",
-    "d1_block_sha256": "88c350306a02ca34e9e6c502420651c0ea8534903c803a5a8a32f8e94ffc0e1f",
+    "d1_inject_sha256": "2579b9c2a949e93476dd18365ba2d53540c693440f1e89869399124fa9937971",
+    "d1_block_sha256": "cdb293880a9558758000c97245702a1c2870074dfa967be358c515a3753cd366",
     "checkpoint_sha256": "d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f",
     "stems": [
       "44b6_0113de3b"
@@ -59,14 +59,16 @@
         "BIOHUB_D1_EXPECTED_CROPS": "1",
         "BIOHUB_D1_N_UNIFORM": "64",
         "BIOHUB_D1_N_SUBTHR": "32",
-        "BIOHUB_D1_REQUIRE_TTA_VIEWS": "8",
-        "BIOHUB_D1_REQUIRE_NOTEBOOK_TTA": "1"
+        "BIOHUB_D1_REQUIRE_ENCODE_CALLS": "8",
+        "BIOHUB_D1_REQUIRE_DISTINCT_VIEWS": "7",
+        "BIOHUB_D1_REQUIRE_NOTEBOOK_TTA": "1",
+        "BIOHUB_D1_PARITY_SLACK": "2.0"
       },
       "expect": 1,
       "_audit": {
         "edit_id": "E01_env",
         "source": "assembler",
-        "canonical_sha256": "5842c694aadda96bca41b0ef0018ee2611c1d39b6c0bd4f8c11d2b0b91303d37",
+        "canonical_sha256": "04ff7a9d1550b8a96a9df9248ada17ef7bc52ca42830547e1e72dad488c92a7a",
         "intent": "1. environment: LOEO fold routing + D1 knobs",
         "order": 0
       }

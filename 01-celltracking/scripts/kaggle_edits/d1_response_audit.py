@@ -123,7 +123,7 @@ _D1_REQUIRE_DISTINCT_VIEWS = int(_d1_os.environ.get("BIOHUB_D1_REQUIRE_DISTINCT_
 # the observed worst case. The previous literal `1e-4` was 18-26x loose and not derived from
 # anything; it would have passed a genuinely broken accumulator.
 _D1_PARITY_ULP = 2.0 ** -24            # float32 unit roundoff
-_D1_PARITY_SLACK = float(_d1_os.environ.get("BIOHUB_D1_PARITY_SLACK", "4.0"))
+_D1_PARITY_SLACK = float(_d1_os.environ.get("BIOHUB_D1_PARITY_SLACK", "2.0"))
 _D1_PARITY_LOGIT_FLOOR = 1.0           # keeps the bound positive on an all-zero frame
 _D1_PARITY_MAX_SIGN_RATIO = 0.5
 _D1_PARITY_MAX_CORR = 0.05
@@ -132,9 +132,25 @@ _D1_PARITY_MAX_CORR = 0.05
 def _d1_parity_bound(logit_abs_max):
     """The derived float32 residual bound: n_encode_calls * 2**-24 * max|logit|.
 
-    `_D1_PARITY_SLACK` is a small multiplier for accumulation-order effects (the sum is not
-    performed in a fixed order on GPU); it is NOT a fudge factor for a wrong accumulator. Even
-    at slack 4 the gate is ~5x tighter than the retired 1e-4 literal.
+    `_D1_PARITY_SLACK` = 2.0 is a small multiplier for accumulation-order effects (the sum is
+    not performed in a fixed order on GPU); it is NOT a fudge factor for a wrong accumulator.
+    It is RECORDED in the manifest (`parity.gate_slack`) so the choice is auditable, and the
+    number was picked from the measurement, not for comfort:
+
+        derived bound, slack 1, at max|logit| ~ 15   7.15e-6
+        MEASURED worst |delta|, both splits          5.70e-6   (1.25x headroom -- too thin)
+        gate at slack 2                              1.43e-5   (2.5x the measured worst case)
+        retired literal                              1.00e-4   (7x looser than this gate)
+
+    Slack 1 is the spec's bare formula but leaves only 1.25x margin on a HARD ABORT that would
+    kill a multi-hour job; slack 4 gives back most of what tightening bought. Two is the
+    smallest multiplier that clears the measured envelope with room for accumulation order.
+
+    The magnitude gate is in any case the COARSE half. Every failure mode it is meant to catch
+    -- a dropped view, a wrong divisor, a foreign head, a wrong inverse -- lands at O(0.1-1.3)
+    (a true-D4 replacement measures max |delta-logit| 1.33), five orders of magnitude above any
+    choice in this range. The DECISIVE half is accepted-peak-set equality, which is the only
+    check with power against a zero-mean inverse bug.
     """
     return (_D1_REQUIRE_ENCODE_CALLS * _D1_PARITY_ULP * _D1_PARITY_SLACK
             * max(float(logit_abs_max), _D1_PARITY_LOGIT_FLOOR))

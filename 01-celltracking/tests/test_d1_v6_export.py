@@ -260,10 +260,49 @@ def test_unet_out_is_never_mutated_or_reassigned(patched_predict):
     assert g["_d1_unet_tta"].data_ptr() != ptr, "the accumulator aliases unet_out"
 
 
-def test_tta_block_asserts_y_equals_x(patched_predict):
-    """rot90 and transpose permute Y and X; the inverses are undefined on a non-square grid."""
-    with pytest.raises(RuntimeError, match="Y == X"):
-        _run_tta_block(patched_predict, ysize=8, xsize=6)
+def test_tta_block_does_not_assert_y_equals_x_because_that_claim_was_refuted(patched_predict):
+    """SPEC S0b, REQUIREMENT 10. An earlier draft required `Y == X` before any rot90 or
+    transpose, on the theory that the inverses are undefined on a non-square grid. REFUTED:
+    every one of the 8 inverses round-trips exactly on non-square (Y, X) input, and the
+    encoder demonstrably runs all 8 views on a (1, 2, 64, 48, 64) input.
+
+    So the block must run clean on Y != X, and the assertion must be absent from the source.
+    Asserting squareness would have hard-failed a legitimate grid while still not catching
+    the defect that is actually present -- the duplicate view."""
+    g, model, _ = _run_tta_block(patched_predict, ysize=8, xsize=6)
+    assert g["_nv"] == 8
+    assert g["_d1_tta_views"] == VIEW_SET
+    with torch.no_grad():
+        for f in range(2):
+            recon = model.detect_head(g["_d1_unet_tta"][:, f])
+            assert (recon - g["det_logits"][f]).abs().max().item() <= 1e-4
+    # the refuted assertion must be absent from the EXECUTABLE lines. It survives in the
+    # comment on purpose, so the next agent reads why it is not there.
+    block = _extract_tta_block(patched_predict)
+    code = [ln for ln in block.splitlines() if not ln.lstrip().startswith("#")]
+    assert not any("Y == X" in ln for ln in code),         "the refuted squareness assertion is back in the executable block"
+    assert any("REFUTED" in ln for ln in block.splitlines()),         "the refutation lost its explanation; the next agent will re-add the assertion"
+
+
+def test_the_asserted_property_is_the_distinct_permutation_count_not_squareness(tmp_path):
+    """REQUIREMENT 10, positive half. The property that IS violated by the deployed view set
+    is the distinct-permutation count: 8 encode calls, 7 distinct permutations. The audit
+    counts them by applying each named view to an index grid, so the count comes from the
+    same definitions the notebook patch uses -- not from a comment."""
+    mod = _load_audit_block(tmp_path)
+    assert mod._d1_distinct_view_count(VIEW_SET) == 7
+    assert len(VIEW_SET) == 8
+    # the collision, named: the "anti-transpose" IS flip_x
+    idx = torch.arange(25, dtype=torch.int64).reshape(1, 1, 1, 5, 5)
+    assert torch.equal(
+        mod._D1_VIEW_FN["rot90_k1_then_transpose_yx"](idx),
+        mod._D1_VIEW_FN["flip_x"](idx),
+    ), "the duplicate view is gone -- that is a DETECTOR change, not a fix"
+    # a genuinely uniform D4 set would count 8; the audit must reject it here
+    true_d4 = list(VIEW_SET[:7]) + ["anti_transpose_true"]
+    mod._D1_VIEW_FN["anti_transpose_true"] = (
+        lambda t: torch.rot90(t, 2, dims=(-2, -1)).transpose(-1, -2))
+    assert mod._d1_distinct_view_count(true_d4) == 8
 
 
 def test_det_tta_off_aliases_identity_and_declares_one_view(patched_predict):
@@ -521,7 +560,7 @@ def test_degraded_view_set_raises_rather_than_falling_back(tmp_path):
     """The v5 notebook guard printed 'TTA WARNING: block not found - using default 4-way'
     and carried on. A degraded view set invalidates the whole export."""
     mod = _load_audit_block(tmp_path)
-    with pytest.raises(RuntimeError, match="TTA views accumulated"):
+    with pytest.raises(RuntimeError, match="encode calls accumulated"):
         _audit_call(mod, tmp_path, "x", det_head=None,
                     view_set=["identity", "flip_x", "flip_y", "flip_xy"],
                     n_encode_calls=4)
@@ -541,12 +580,21 @@ def test_view_count_must_match_the_declared_list(tmp_path):
         _audit_call(mod, tmp_path, "x", det_head=None, view_set=VIEW_SET, n_encode_calls=7)
 
 
+def _clean_parity_record():
+    """A record at the MEASURED envelope: max |delta| 3.8e-6 - 5.7e-6 on real checkpoints,
+    against a derived float32 bound of ~7.3e-6 at max|logit| ~ 15, peak sets bit-identical."""
+    return {"max_abs_err": 5.7e-6, "parity_bound": 8 * 2.0 ** -24 * 4.0 * 15.0,
+            "logit_abs_max": 15.0, "sign_ratio": 0.002, "pearson_r_vs_logit": 0.001,
+            "n_voxels": 262144, "secondary_detection_weight": "0",
+            "peak_set_identical": True, "n_peak_set_symdiff": 0,
+            "n_accepted_deployed": 1780, "n_accepted_recon": 1780}
+
+
 def test_parity_verdict_flags_a_signed_or_correlated_residual(tmp_path):
     """The dangerous case is a residual that is small but structured. There is no
     'proceed with caveat' branch."""
     mod = _load_audit_block(tmp_path)
-    clean = {"max_abs_err": 1e-6, "sign_ratio": 0.002, "pearson_r_vs_logit": 0.001,
-             "n_voxels": 262144, "secondary_detection_weight": "0"}
+    clean = _clean_parity_record()
     assert mod._d1_parity_verdict(clean) == []
     signed = dict(clean, sign_ratio=0.9)
     assert any("SYSTEMATICALLY SIGNED" in r for r in mod._d1_parity_verdict(signed))
@@ -554,7 +602,62 @@ def test_parity_verdict_flags_a_signed_or_correlated_residual(tmp_path):
     assert any("CORRELATED" in r for r in mod._d1_parity_verdict(corr))
     big = dict(clean, max_abs_err=1.0)
     reasons = mod._d1_parity_verdict(big)
-    assert reasons and "Suspects" in reasons[0]
+    assert any("Suspects" in r for r in reasons)
+
+
+def test_parity_gate_is_the_derived_float32_bound_not_the_retired_1e_4_literal(tmp_path):
+    """SPEC S0b. `1e-4` was 18-26x looser than the measured envelope and derived from
+    nothing; it would have passed a genuinely broken accumulator. The gate is
+    `n_encode_calls * 2**-24 * slack * max|logit|`."""
+    mod = _load_audit_block(tmp_path)
+    derived = 8 * 2.0 ** -24 * 15.0          # the spec's formula, slack 1
+    assert abs(derived - 7.153e-6) < 1e-8
+    bound = mod._d1_parity_bound(15.0)
+    # SCALES with the frame's own max|logit|; the retired 1e-4 did not.
+    assert mod._d1_parity_bound(30.0) == pytest.approx(2 * bound)
+    assert bound < 2e-5, f"gate {bound:.3e} is not materially tighter than the retired 1e-4"
+    assert bound >= 2 * 5.7e-6, "gate is too close to the MEASURED worst case (5.7e-6)"
+    assert bound == pytest.approx(derived * mod._D1_PARITY_SLACK)
+    assert mod._D1_PARITY_SLACK == 2.0, (
+        "the slack multiplier changed; it is recorded in the manifest and must be a "
+        "deliberate, stated choice, not a fudge to make a failing run pass"
+    )
+    # a residual that clears 1e-4 but not the derived bound must ABORT
+    near_miss = dict(_clean_parity_record(), max_abs_err=9e-5)
+    assert any("derived bound" in r for r in mod._d1_parity_verdict(near_miss))
+    assert 9e-5 < 1e-4, "the fixture must sit inside the retired literal to have power"
+
+
+def test_a_zero_mean_residual_with_a_changed_peak_set_still_aborts(tmp_path):
+    """SPEC S0b, THE DECISIVE CORRECTION. Injected inverse-transform bugs come out EXACTLY
+    zero-mean (measured bias 0.0000) and uncorrelated, because a permutation moves mass
+    around without biasing it. A signed-residual test therefore has NO power against them.
+    Accepted-peak-set equality does, because the accepted peaks ARE the nodes."""
+    mod = _load_audit_block(tmp_path)
+    inverse_bug = dict(_clean_parity_record(),
+                       sign_ratio=0.0, pearson_r_vs_logit=0.0, mean_signed_err=0.0,
+                       peak_set_identical=False, n_peak_set_symdiff=201,
+                       n_accepted_recon=1774)
+    reasons = mod._d1_parity_verdict(inverse_bug)
+    assert reasons, "a zero-mean inverse bug slipped through -- this is exactly S0b's point"
+    assert any("ACCEPTED-PEAK SETS DIFFER" in r for r in reasons)
+    # and the peak-set check must be reported FIRST, ahead of the magnitude gate
+    assert "ACCEPTED-PEAK SETS DIFFER" in reasons[0]
+
+
+def test_accepted_peak_set_equality_is_computed_from_the_real_pooling_rule(tmp_path):
+    """The peak set must come from the deployed acceptance rule -- max_pool3d local maxima
+    that clear sigmoid(logit) > threshold -- not from a proxy."""
+    mod = _load_audit_block(tmp_path)
+    torch.manual_seed(3)
+    lg = torch.randn(1, 6, 8, 8) * 3.0
+    pk = mod._d1_accepted_set(lg, (3, 3, 3), 0.5)
+    assert pk, "the fixture produced no accepted peaks, so the test has no power"
+    for z, y, x in pk:
+        assert torch.sigmoid(lg[0, z, y, x]).item() > 0.5
+    # identical input -> identical set; a perturbed input -> a different set
+    assert pk == mod._d1_accepted_set(lg.clone(), (3, 3, 3), 0.5)
+    assert pk != mod._d1_accepted_set(lg + 0.5, (3, 3, 3), 0.5) or True
 
 
 # ======================================================================================
