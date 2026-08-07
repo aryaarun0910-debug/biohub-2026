@@ -26,7 +26,8 @@ the choice is evidence rather than assumption. `matched` in the derived rows fol
 
 The raw export is treated as READ-ONLY. Nothing is written back into it.
 
-THE SIX v6 REPAIRS (correction C6). Each has a lock in tests/test_d1_postprocess.py.
+THE SIX v6 REPAIRS (correction C6) AND THE v6 READER INTEGRATION (7). Each has a lock in
+tests/test_d1_postprocess.py.
 
   1. ROW/FEATURE ALIGNMENT. GT rows are a NON-CONTIGUOUS SUBSET of the emitted rows (96
      non-GT rows follow every frame's GT rows) and the derivation additionally sorts them.
@@ -52,6 +53,22 @@ THE SIX v6 REPAIRS (correction C6). Each has a lock in tests/test_d1_postprocess
      anywhere -- asserted on load. v5 wrote a COPY OF feat_gt instead of NaN and shipped no
      validity column; that fallback is reconstructed, VERIFIED row by row, and repaired to
      NaN in the derived copy so the derived artifact always satisfies the contract.
+  7. TWO EXPORT SCHEMAS, DISPATCHED ON A DECLARATION. v5 shipped ONE pair of arrays,
+     `{crop}__feat_gt.npy` and `{crop}__feat_max.npy`, and declared nothing about itself.
+     Those arrays are the IDENTITY VIEW sampled beside POST-TTA logits -- blocker B3 -- so
+     v5 has an association representation and NO detector representation at all. v6 ships
+     FOUR: `feat_tta_mean_{gt,max}` (the DETECTOR representation, the 8-encode-call /
+     7-distinct-view TTA mean that `detect_head` scores) and `feat_idview_{gt,max}` (the
+     ASSOCIATION representation, the identity view `predict_edges` actually reads). Every v6
+     terminal record declares `schema_version == "d1_v6"` and lists `feat_arrays`.
+     The schema is READ FROM THAT DECLARATION, never inferred from which .npy files happen
+     to exist -- a half-copied v6 directory and a v5 directory look identical to a glob, and
+     guessing wrong pairs one representation's name with the other's data. An absent
+     declaration means v5 and must be declared on the command line; an unrecognised or mixed
+     declaration is fatal. The two representations are never interchangeable, so
+     `--representation` is REQUIRED and has no default, and asking a v5 export for the
+     detector representation is refused by name because it does not have one.
+
   6. ATOMIC OUTPUT, NO MIXED DIRECTORIES. Every output goes through `<name>.partial` +
      os.replace, the JSON report is written last as the completion marker, and an output
      directory holding artifacts from another schema version, another match authority,
@@ -89,10 +106,12 @@ from biotrack.metric import DEFAULT_SCALE, MAX_DISTANCE, load_graph  # noqa: E40
 from biotrack.submission import submission_to_graphs  # noqa: E402
 from tracking_cellmot.metrics import evaluate  # noqa: E402
 
-# Bumped from d1-derived-1: rows now carry `row_id`/`feat_row`/`feat_max_valid`, aligned
-# feature arrays are emitted alongside, and zero-edge predictions match their nodes. Old
-# artifacts must NOT silently mix with new ones.
-DERIVED_SCHEMA_VERSION = "d1-derived-2"
+# Bumped from d1-derived-2: the derived feature arrays are now named after the SOURCE array
+# they carry (`feat_tta_mean_gt` / `feat_idview_gt` / ... instead of a generic `feat_gt`), and
+# the rows and report record which export schema and which representation they came from. A
+# d1-derived-2 artifact does not say which representation it holds, so it must NOT silently
+# mix with these.
+DERIVED_SCHEMA_VERSION = "d1-derived-3"
 
 # NOT A LITERAL. The scorer owns the match radius; MATCH_UM follows it and
 # assert_radius_binding() below refuses to run if any other component disagrees.
@@ -105,8 +124,60 @@ MID = td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID
 ROW_ID = "row_id"
 FEAT_ROW = "feat_row"
 FEAT_MAX_VALID = "feat_max_valid"
-FEATURE_ARRAYS = ("feat_gt", "feat_max")
 SORT_KEYS = ("t", "gt_z", "gt_y", "gt_x")
+
+# --------------------------------------------------------------- the two export schemas (7)
+SCHEMA_V5 = "d1_v5"           # declares nothing; recognised only when declared on the CLI
+SCHEMA_V6 = "d1_v6"           # every terminal record carries schema_version == this
+SCHEMA_DECLARATION = "schema_version"
+
+DETECTOR = "detector"         # the 8-call / 7-distinct-view TTA mean; detect_head scores it
+ASSOCIATION = "association"   # the identity view; predict_edges reads it
+
+# (gt array, max array) per representation, per schema. v5 has NO detector representation:
+# its single pair is the IDENTITY VIEW sampled beside POST-TTA logits, which is blocker B3.
+REPRESENTATIONS: dict[str, dict[str, tuple[str, str]]] = {
+    SCHEMA_V5: {ASSOCIATION: ("feat_gt", "feat_max")},
+    SCHEMA_V6: {DETECTOR: ("feat_tta_mean_gt", "feat_tta_mean_max"),
+                ASSOCIATION: ("feat_idview_gt", "feat_idview_max")},
+}
+# Every array the export ships, in the order the v6 terminal record declares them.
+FEATURE_ARRAYS_BY_SCHEMA: dict[str, tuple[str, ...]] = {
+    SCHEMA_V5: ("feat_gt", "feat_max"),
+    SCHEMA_V6: ("feat_tta_mean_gt", "feat_tta_mean_max",
+                "feat_idview_gt", "feat_idview_max"),
+}
+
+
+def gt_arrays(schema: str) -> tuple[str, ...]:
+    """Arrays defined on EVERY emitted row: always finite, never NaN."""
+    return tuple(pair[0] for pair in REPRESENTATIONS[schema].values())
+
+
+def max_arrays(schema: str) -> tuple[str, ...]:
+    """Arrays defined only where a nearby maximum exists: all-NaN iff invalid."""
+    return tuple(pair[1] for pair in REPRESENTATIONS[schema].values())
+
+
+def representation_arrays(schema: str, representation: str) -> tuple[str, str]:
+    """(gt array, max array) for ONE representation. There is deliberately NO default.
+
+    The TTA-mean pair describes the DETECTOR; the identity-view pair describes the
+    ASSOCIATION substrate `predict_edges` reads. They are different tensors with different
+    meanings, and v5 exported the second under the first's name. Forcing the caller to name
+    one is the API-level guard against that recurring.
+    """
+    try:
+        table = REPRESENTATIONS[schema]
+    except KeyError:
+        raise SystemExit(f"unknown export schema {schema!r}") from None
+    if representation not in table:
+        raise SystemExit(
+            f"the {schema} export has no {representation!r} representation; it ships "
+            f"{sorted(table)}. v5 sampled the IDENTITY VIEW beside POST-TTA logits, so it "
+            f"has no detector representation at all -- that mismatch IS blocker B3, and "
+            f"renaming its arrays cannot create a tensor it never exported")
+    return table[representation]
 
 # Columns the derivation actually reads. Presence is asserted, so a schema drift in the
 # kernel export fails loudly here instead of silently changing the partition.
@@ -155,8 +226,17 @@ def assert_radius_binding() -> dict:
 RADII = assert_radius_binding()
 
 
-def assert_export_radii(agg: dict) -> dict:
-    """If the export recorded the radii it used, they must equal ours. v5 recorded none."""
+def assert_export_radii(agg: dict, terminals: dict[str, dict], schema: str) -> dict:
+    """The radii the EXPORT used must equal the ones this partition is defined at.
+
+    v5 recorded neither, at either level, so this gate was decorative. v6 records both in
+    every PER-CROP terminal record and `scripts/kaggle_edits/d1_aggregate.py` promotes them
+    to the top level after asserting they agree across crops. BOTH levels are checked here:
+    the promoted value against the scorer-bound constants, and every terminal record against
+    the promoted value -- so a stale or hand-edited aggregate cannot silently re-inert the
+    gate, and a per-crop disagreement (two radii inside one export) is fatal rather than
+    averaged away.
+    """
     rec: dict = {}
     for key, want in (("match_um", MATCH_UM), ("search_um", SEARCH_UM)):
         got = agg.get(key, agg.get(f"d1_{key}"))
@@ -167,9 +247,76 @@ def assert_export_radii(agg: dict) -> dict:
             raise SystemExit(
                 f"export recorded {key}={got} but this postprocessor uses {want}; the "
                 "neighbourhood statistics were computed at a different radius")
-        rec[key] = float(got)
-    rec["recorded"] = any(v is not None for k, v in rec.items() if k != "recorded")
+        rec[key] = float(want)
+        for crop, term in sorted(terminals.items()):
+            per = term.get(key)
+            if per is None:
+                raise SystemExit(
+                    f"{crop}: the aggregate promotes {key}={got} but this crop's terminal "
+                    f"record does not record {key}; the promotion has no source")
+            if float(per) != float(want):
+                raise SystemExit(
+                    f"{crop}: terminal record {key}={per} disagrees with the promoted "
+                    f"{key}={got}; one export cannot have used two different radii")
+    rec["recorded"] = all(rec[k] is not None for k in ("match_um", "search_um"))
+    if schema == SCHEMA_V6 and not rec["recorded"]:
+        raise SystemExit(
+            f"a {SCHEMA_V6} export must record match_um and search_um at the TOP LEVEL of "
+            f"d1_manifest.json. The per-crop terminal records carry them; "
+            f"scripts/kaggle_edits/d1_aggregate.py must promote them, or this binding to "
+            f"the scorer's MAX_DISTANCE ({MATCH_UM}) stays inert")
     return rec
+
+
+# ------------------------------------------------------------------ schema resolution (7)
+def resolve_schema(terminals: dict[str, dict], agg: dict, *, v5_declared: bool) -> str:
+    """Which export schema this artifact IS, read from its own declaration.
+
+    NEVER inferred from which .npy files happen to be present: a half-copied v6 directory
+    and a v5 directory are indistinguishable to a glob, and guessing wrong pairs one
+    representation's NAME with the other's DATA -- which is exactly blocker B3.
+    """
+    declared = {crop: term.get(SCHEMA_DECLARATION) for crop, term in terminals.items()}
+    distinct = set(declared.values())
+    if len(distinct) > 1:
+        raise SystemExit(
+            f"crops declare different {SCHEMA_DECLARATION}s: {declared}; one export cannot "
+            f"hold two schemas")
+    value = distinct.pop() if distinct else None
+
+    top = agg.get(SCHEMA_DECLARATION)
+    if top is not None and top != value:
+        raise SystemExit(
+            f"aggregate manifest declares {SCHEMA_DECLARATION}={top!r} but the terminal "
+            f"records declare {value!r}")
+
+    if value is None:
+        if not v5_declared:
+            raise SystemExit(
+                f"no {SCHEMA_DECLARATION} in any terminal record. v5 exports predate the "
+                f"declaration, so pass --v5-emission-order-row-id to state EXPLICITLY that "
+                f"this is a v5 artifact whose parquet row order is its emission order. "
+                f"Refusing to guess the schema from the filenames on disk")
+        return SCHEMA_V5
+    if value != SCHEMA_V6:
+        raise SystemExit(
+            f"unrecognised {SCHEMA_DECLARATION}={value!r}; this postprocessor reads "
+            f"{SCHEMA_V6!r} and undeclared v5. Refusing to guess")
+    if v5_declared:
+        raise SystemExit(
+            f"--v5-emission-order-row-id was passed against a {SCHEMA_V6} export, which "
+            f"ships a real {ROW_ID!r} column. The flag declares an assumption that is both "
+            f"unnecessary and unverifiable here; drop it rather than have it honoured "
+            f"silently")
+    want = FEATURE_ARRAYS_BY_SCHEMA[SCHEMA_V6]
+    for crop, term in sorted(terminals.items()):
+        got = term.get("feat_arrays")
+        if tuple(got or ()) != want:
+            raise SystemExit(
+                f"{crop}: declares feat_arrays={got} but {SCHEMA_V6} is defined as "
+                f"{list(want)}; the declaration and the reader disagree about what was "
+                f"exported")
+    return SCHEMA_V6
 
 
 # ----------------------------------------------------------------------------- utilities
@@ -237,13 +384,20 @@ def classify(matched: bool, n_lm_7: int, n_acc_7: int, n_lm_15: int) -> str:
     return "D"
 
 
-def complete_crops(audit_dir: Path) -> tuple[dict, list[str]]:
-    """Resolve crops through the TERMINAL manifests, never by globbing filenames."""
+def complete_crops(audit_dir: Path) -> tuple[dict, list[str], dict[str, dict]]:
+    """Resolve crops through the TERMINAL manifests, never by globbing filenames.
+
+    Returns the aggregate manifest, the complete crop names, and every crop's terminal
+    record. The terminal records carry the schema and radius DECLARATIONS (repair 7), so
+    they are returned rather than re-read: what this function validated is what dispatch
+    sees.
+    """
     agg = json.loads((audit_dir / "d1_manifest.json").read_text(encoding="utf-8"))
     if not agg.get("COMPLETE"):
         raise SystemExit(f"aggregate manifest COMPLETE is not true in {audit_dir}")
     per_crop_dir = audit_dir / "manifests"
     crops = []
+    terminals: dict[str, dict] = {}
     for name, entry in sorted(agg["crops"].items()):
         if entry.get("status") != "complete":
             raise SystemExit(f"{name}: aggregate status {entry.get('status')!r}, refusing partial")
@@ -258,9 +412,10 @@ def complete_crops(audit_dir: Path) -> tuple[dict, list[str]]:
                     f"{t.get(k)!r} vs {entry.get(k)!r}"
                 )
         crops.append(name)
+        terminals[name] = t
     if not crops:
         raise SystemExit(f"no complete crops in {audit_dir}")
-    return agg, crops
+    return agg, crops, terminals
 
 
 def open_maybe_gz(path: Path) -> Path:
@@ -383,9 +538,11 @@ def attach_row_id(df: pl.DataFrame, crop: str, *,
 
 
 # ------------------------------------------------------- feature arrays + contract (C6.5)
-def load_features(audit_dir: Path, crop: str, n_rows: int) -> dict[str, np.ndarray]:
+def load_features(audit_dir: Path, crop: str, n_rows: int,
+                  names: tuple[str, ...]) -> dict[str, np.ndarray]:
+    """Load exactly the arrays the DECLARED schema says exist. `names` is never guessed."""
     out: dict[str, np.ndarray] = {}
-    for name in FEATURE_ARRAYS:
+    for name in names:
         p = audit_dir / f"{crop}__{name}.npy"
         if not p.exists():
             raise SystemExit(f"{crop}: missing feature array {p}")
@@ -428,15 +585,21 @@ def check_feature_contract(crop: str, name: str, arr: np.ndarray,
     return finite
 
 
-def feat_max_validity(crop: str, df: pl.DataFrame,
-                      feats: dict[str, np.ndarray]) -> tuple[np.ndarray, str]:
-    """Per-row validity of `feat_max`, from the export column when it exists.
+def feat_max_validity(crop: str, df: pl.DataFrame, feats: dict[str, np.ndarray],
+                      *, schema: str) -> tuple[np.ndarray, str]:
+    """Per-row validity of the *_max arrays, from the export column when it exists.
 
-    v5 has no `feat_max_valid` and, where no maximum existed, wrote a COPY OF feat_gt
-    instead of NaN. That fallback is reconstructed from the exported statistics and then
-    VERIFIED row by row: every row this reconstruction calls invalid must literally carry
-    the feat_gt vector. If a single row disagrees the v5 semantics are not what the repair
-    assumes and we refuse rather than fabricate a validity mask.
+    THE v5 RECONSTRUCTION MUST NEVER RUN AGAINST v6 (repair 7). v5 shipped no validity
+    column and, where no maximum existed, wrote a COPY OF feat_gt instead of NaN, so
+    validity is recovered by testing `feat_max == feat_gt` and then VERIFIED row by row:
+    every row the reconstruction calls invalid must literally carry the feat_gt vector, and
+    a single disagreement means v5 semantics are not what this repair assumes, so we refuse
+    rather than fabricate a mask.
+
+    v6 ships a real `feat_max_valid` column and honest NaN sentinels. There, feat_max equal
+    to feat_gt does NOT mean "invalid" -- it means two voxels happened to carry the same
+    vector -- so the reconstruction would return a plausible, wrong mask. It is therefore
+    gated on the DECLARED schema, not on whether the column happens to be missing.
     """
     if FEAT_MAX_VALID in df.columns:
         s = df.get_column(FEAT_MAX_VALID)
@@ -444,10 +607,18 @@ def feat_max_validity(crop: str, df: pl.DataFrame,
             raise SystemExit(f"{crop}: {FEAT_MAX_VALID} contains {s.null_count()} null(s)")
         return s.cast(pl.Boolean).to_numpy().astype(bool), "export"
 
+    if schema != SCHEMA_V5:
+        raise SystemExit(
+            f"{crop}: the {schema} export declares a {FEAT_MAX_VALID} column and NaN "
+            f"sentinels, but these rows carry no {FEAT_MAX_VALID}. The v5 reconstruction "
+            f"(feat_max == feat_gt) is INVALID here and would return a plausible, wrong "
+            f"validity mask. Refusing")
+
+    gt_name, max_name = representation_arrays(SCHEMA_V5, ASSOCIATION)
     is_gt = (df.get_column("kind") == "gt_centre").to_numpy()
     n15 = df.get_column("n_lm_15um").fill_null(0).cast(pl.Int64).to_numpy()
     valid = is_gt & (n15 > 0)
-    same = np.all(feats["feat_max"] == feats["feat_gt"], axis=1)
+    same = np.all(feats[max_name] == feats[gt_name], axis=1)
     broken = (~valid) & (~same)
     if broken.any():
         raise SystemExit(
@@ -455,6 +626,29 @@ def feat_max_validity(crop: str, df: pl.DataFrame,
             f"carry the v5 feat_gt fallback vector; v5 feat_max semantics are not what this "
             f"repair assumes")
     return valid, "v5-reconstructed-and-verified"
+
+
+def assert_representations_differ(crop: str, schema: str,
+                                  feats: dict[str, np.ndarray]) -> dict | None:
+    """v6 ships BOTH representations; bit-identical ones mean the accumulator collapsed.
+
+    The exporter asserts this at write time. It is re-asserted on read because the point of
+    dispatching on a declaration is that a FILE can be wrong: an artifact whose TTA-mean
+    array is byte-for-byte the identity view passes every other check here and would hand
+    the probe the exact input that invalidated v5 D1-F.
+    """
+    if schema != SCHEMA_V6:
+        return None
+    det = REPRESENTATIONS[schema][DETECTOR][0]
+    assoc = REPRESENTATIONS[schema][ASSOCIATION][0]
+    a, b = feats[det], feats[assoc]
+    if a.size and np.array_equal(a, b):
+        raise SystemExit(
+            f"{crop}: {det} is bit-identical to {assoc}. The TTA accumulator collapsed to "
+            f"the identity view, so this export contains no detector representation at all "
+            f"-- that is blocker B3 wearing the v6 name")
+    return {"arrays": [det, assoc],
+            "max_abs_diff": float(np.max(np.abs(a - b))) if a.size else 0.0}
 
 
 def apply_validity(arr: np.ndarray, valid: np.ndarray) -> np.ndarray:
@@ -499,15 +693,21 @@ def _fold_of(name: str) -> str | None:
     return m.group(1) if m else None
 
 
-def guard_out_dir(out_dir: Path, fold: str, authority: str,
-                  scorer: dict, *, overwrite: bool = False) -> list[str]:
+def guard_out_dir(out_dir: Path, fold: str, authority: str, scorer: dict, *,
+                  representation: str, export_schema: str,
+                  overwrite: bool = False) -> list[str]:
     """Refuse a derived directory that would end up mixing runs.
 
     Rejected: leftovers from an aborted run (`*.partial`), a different
-    `derived_schema_version`, a different `--authority`, a different scorer build, an
-    artifact with no report (orphan/stale), and re-running a fold already present unless
-    --overwrite is given. Different FOLDS may legitimately share a directory -- that is the
-    intended way to assemble both splits -- so folds alone are not a conflict.
+    `derived_schema_version`, a different `--authority`, a different `--representation`, a
+    different EXPORT schema, a different scorer build, an artifact with no report
+    (orphan/stale), and re-running a fold already present unless --overwrite is given.
+    Different FOLDS may legitimately share a directory -- that is the intended way to
+    assemble both splits -- so folds alone are not a conflict.
+
+    Representation and export schema join the list for repair 7: the detector and the
+    association arrays are different tensors, and a directory holding one fold of each
+    would be silently averaged by any consumer that concatenates folds.
     """
     out_dir = Path(out_dir)
     if not out_dir.exists():
@@ -535,6 +735,15 @@ def guard_out_dir(out_dir: Path, fold: str, authority: str,
             raise SystemExit(
                 f"{rp.name}: match authority {r.get('match_authority')!r} != {authority!r}; "
                 f"refusing to mix match authorities in {out_dir}")
+        if r.get("representation") != representation:
+            raise SystemExit(
+                f"{rp.name}: representation {r.get('representation')!r} != "
+                f"{representation!r}; the detector and association arrays are different "
+                f"tensors and must not be mixed in {out_dir}")
+        if r.get("export_schema_version") != export_schema:
+            raise SystemExit(
+                f"{rp.name}: export schema {r.get('export_schema_version')!r} != "
+                f"{export_schema!r}; refusing to mix export schemas in {out_dir}")
         prev = (r.get("scorer") or {}).get("tracking_cellmot_files")
         if prev is not None and prev != scorer.get("tracking_cellmot_files"):
             raise SystemExit(
@@ -571,9 +780,18 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--gt-dir", default=str(ROOT / "data" / "train"))
     ap.add_argument("--authority", choices=("pregraph", "submission"), default="pregraph",
                     help="which graph defines `matched` in the derived rows")
+    ap.add_argument("--representation", choices=(DETECTOR, ASSOCIATION), required=True,
+                    help="which 32-D representation the derived arrays carry. "
+                         f"{DETECTOR}: the TTA-mean feature detect_head scores. "
+                         f"{ASSOCIATION}: the identity view predict_edges reads. NO DEFAULT "
+                         "-- v5 exported the second under the first's name (blocker B3), so "
+                         "the caller must say which one it wants. A v5 export has only "
+                         f"{ASSOCIATION}")
     ap.add_argument("--v5-emission-order-row-id", action="store_true",
-                    help="declare EXPLICITLY that a pre-row_id (v5) export's parquet row "
-                         "order is its emission order; without this such exports are refused")
+                    help="declare EXPLICITLY that this is a pre-schema_version (v5) export "
+                         "AND that its parquet row order is its emission order. v6 declares "
+                         "its schema and ships a real row_id, so passing this against a v6 "
+                         "export is an error rather than a no-op")
     ap.add_argument("--overwrite", action="store_true",
                     help="replace this fold's artifacts in an existing derived dir")
     a = ap.parse_args(argv)
@@ -582,11 +800,15 @@ def main(argv: list[str] | None = None) -> int:
 
     fold_dir, out_dir, gt_dir = Path(a.fold_dir), Path(a.out_dir), Path(a.gt_dir)
     audit_dir = fold_dir / "d1_audit"
-    agg, crops = complete_crops(audit_dir)
+    agg, crops, terminals = complete_crops(audit_dir)
     fold = str(agg["fold"])
-    export_radii = assert_export_radii(agg)
+    schema = resolve_schema(terminals, agg, v5_declared=a.v5_emission_order_row_id)
+    feat_names = FEATURE_ARRAYS_BY_SCHEMA[schema]
+    gt_name, max_name = representation_arrays(schema, a.representation)
+    export_radii = assert_export_radii(agg, terminals, schema)
     scorer = scorer_fingerprint()
-    guard_out_dir(out_dir, fold, a.authority, scorer, overwrite=a.overwrite)
+    guard_out_dir(out_dir, fold, a.authority, scorer, representation=a.representation,
+                  export_schema=schema, overwrite=a.overwrite)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     sub_csv = fold_dir / f"loeo_split{fold}_strict.csv.gz"
@@ -595,6 +817,8 @@ def main(argv: list[str] | None = None) -> int:
         if not p.exists():
             raise SystemExit(f"missing required graph artifact: {p}")
 
+    print(f"fold {fold}: {schema} export, {a.representation} representation "
+          f"-> {gt_name} / {max_name}")
     print(f"fold {fold}: {len(crops)} complete crop(s) -> {crops}")
     sub_graphs = submission_to_graphs(pl.read_csv(open_maybe_gz(sub_csv)))
     pre_df = pl.read_parquet(pre_pq).drop("edge_prob")
@@ -607,7 +831,7 @@ def main(argv: list[str] | None = None) -> int:
     }
 
     census, frames = [], []
-    feat_out: dict[str, list[np.ndarray]] = {n: [] for n in FEATURE_ARRAYS}
+    feat_out: dict[str, list[np.ndarray]] = {n: [] for n in (gt_name, max_name)}
     provenance: dict[str, dict] = {}
     feat_cursor = 0
 
@@ -624,20 +848,23 @@ def main(argv: list[str] | None = None) -> int:
 
         # --- row_id + feature arrays, before ANY reordering ---------------------------
         df, rid_source = attach_row_id(
-            df, crop, allow_v5_emission_order=a.v5_emission_order_row_id)
-        feats = load_features(audit_dir, crop, df.height)
-        for name in FEATURE_ARRAYS:
+            df, crop, allow_v5_emission_order=(schema == SCHEMA_V5))
+        feats = load_features(audit_dir, crop, df.height, feat_names)
+        for name in feat_names:
             input_hashes[f"{crop}__{name}.npy"] = sha256_file(audit_dir / f"{crop}__{name}.npy")
 
-        valid, valid_source = feat_max_validity(crop, df, feats)
-        check_feature_contract(crop, "feat_gt", feats["feat_gt"],
-                               np.ones(df.height, dtype=bool))
-        if valid_source == "export":
-            check_feature_contract(crop, "feat_max", feats["feat_max"], valid)
-        else:
-            check_feature_contract(crop, "feat_max", feats["feat_max"], None)
-            feats["feat_max"] = apply_validity(feats["feat_max"], valid)
-            check_feature_contract(crop, "feat_max", feats["feat_max"], valid)
+        valid, valid_source = feat_max_validity(crop, df, feats, schema=schema)
+        every_row = np.ones(df.height, dtype=bool)
+        for name in gt_arrays(schema):
+            check_feature_contract(crop, name, feats[name], every_row)
+        for name in max_arrays(schema):
+            if valid_source == "export":
+                check_feature_contract(crop, name, feats[name], valid)
+            else:
+                check_feature_contract(crop, name, feats[name], None)
+                feats[name] = apply_validity(feats[name], valid)
+                check_feature_contract(crop, name, feats[name], valid)
+        collapse = assert_representations_differ(crop, schema, feats)
 
         # --- GT subset, sorted TOGETHER with its features ------------------------------
         gt_mask = (df.get_column("kind") == "gt_centre").to_numpy()
@@ -707,9 +934,13 @@ def main(argv: list[str] | None = None) -> int:
             pl.Series(FEAT_MAX_VALID, gvalid, dtype=pl.Boolean),
             pl.lit(DERIVED_SCHEMA_VERSION).alias("derived_schema_version"),
             pl.lit(a.authority).alias("match_authority"),
+            # WHAT these 32 numbers ARE travels with them. A consumer that reads the parquet
+            # alone must not have to infer the representation from an array filename.
+            pl.lit(schema).alias("export_schema_version"),
+            pl.lit(a.representation).alias("representation"),
         ])
         frames.append(derived)
-        for name in FEATURE_ARRAYS:
+        for name in (gt_name, max_name):
             feat_out[name].append(gfeat[name])
         feat_cursor += gtr.height
 
@@ -719,9 +950,10 @@ def main(argv: list[str] | None = None) -> int:
             "n_raw_rows": int(df.height),
             "n_gt_rows": int(gtr.height),
             "n_non_gt_rows": int(df.height - int(gt_mask.sum())),
-            "feat_dim": int(feats["feat_gt"].shape[1]),
+            "feat_dim": int(feats[gt_name].shape[1]),
             "n_feat_max_valid": int(gvalid.sum()),
             "match_path": match_path,
+            "representations_differ": collapse,
         }
 
         row = {"dataset": crop, "family": crop.split("_")[0], "n_gt": n_gt, **counts,
@@ -733,7 +965,7 @@ def main(argv: list[str] | None = None) -> int:
               f"[sub {row['matched_submission']} | pre {row['matched_pregraph']}]")
 
     all_derived = pl.concat(frames, how="vertical")
-    stacked = {n: np.concatenate(feat_out[n], axis=0) for n in FEATURE_ARRAYS}
+    stacked = {n: np.concatenate(feat_out[n], axis=0) for n in (gt_name, max_name)}
     for name, arr in stacked.items():
         if arr.shape[0] != all_derived.height:
             raise SystemExit(
@@ -751,16 +983,16 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit(
             f"{FEAT_ROW} is not 0..{all_derived.height - 1} in parquet order; the derived "
             f"feature arrays cannot be joined positionally as documented")
-    check_feature_contract("derived", "feat_gt", stacked["feat_gt"],
+    check_feature_contract("derived", gt_name, stacked[gt_name],
                            np.ones(all_derived.height, dtype=bool))
-    check_feature_contract("derived", "feat_max", stacked["feat_max"],
+    check_feature_contract("derived", max_name, stacked[max_name],
                            all_derived.get_column(FEAT_MAX_VALID).to_numpy().astype(bool))
 
     # ---- atomic output; the JSON report is the completion marker, written LAST --------
     out_pq = out_dir / f"{_DERIVED_STEM}{fold}.parquet"
     atomic_write(out_pq, lambda p: all_derived.write_parquet(p))
     out_files = {out_pq.name: sha256_file(out_pq)}
-    for name in FEATURE_ARRAYS:
+    for name in (gt_name, max_name):
         p = out_dir / f"{_DERIVED_STEM}{fold}__{name}.npy"
         atomic_write(p, save_npy(stacked[name]))
         out_files[p.name] = sha256_file(p)
@@ -769,6 +1001,10 @@ def main(argv: list[str] | None = None) -> int:
         "derived_schema_version": DERIVED_SCHEMA_VERSION,
         "fold": fold,
         "match_authority": a.authority,
+        "export_schema_version": schema,
+        "representation": a.representation,
+        "feature_arrays": {"gt": gt_name, "max": max_name},
+        "declared_feat_arrays": list(feat_names),
         "checkpoint_sha256": agg.get("checkpoint_sha256"),
         "crops": crops,
         "census": census,
@@ -781,6 +1017,9 @@ def main(argv: list[str] | None = None) -> int:
             "feat_row_column": FEAT_ROW,
             "sort_keys": [*SORT_KEYS, ROW_ID],
             "contract": "derived feature array row i == derived parquet row with feat_row == i",
+            "representation_contract": (
+                f"{gt_name}/{max_name} are the {a.representation} representation of the "
+                f"{schema} export; they are NOT interchangeable with the other pair"),
         },
         "input_sha256": input_hashes,
         "derived_sha256": out_files,

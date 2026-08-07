@@ -10,6 +10,15 @@
 #
 # It FAILS NONZERO rather than merely setting COMPLETE=false, so a broken audit cannot be
 # mistaken for a finished one by anything downstream.
+#
+# IT ALSO PROMOTES the per-crop declarations that downstream consumers gate on. v6 records
+# schema_version, match_um and search_um in every PER-CROP terminal record, but
+# scripts/d1_postprocess.py reads the TOP-LEVEL manifest -- so without promotion its match
+# radius binding to the scorer's MAX_DISTANCE is decorative and a radius change in the kernel
+# is UNDETECTABLE from the export. Promotion is only meaningful if the crops agree, so a
+# disagreement is a PROBLEM rather than a majority vote: two radii inside one export means
+# the neighbourhood statistics of different crops are not comparable, and two schemas inside
+# one export means the feature arrays do not all mean the same thing.
 import json as _agg_json
 from pathlib import Path as _AggPath
 
@@ -54,6 +63,27 @@ for _stem in _agg_expected:
     if not _rec.get("gt_rows"):
         _agg_problems.append(f"{_stem}: ZERO GT rows -- the audit has no subject")
 
+# ---- promote the per-crop declarations, asserting agreement across crops ---------------
+_AGG_PROMOTE = ("schema_version", "match_um", "search_um")
+_agg_promoted: dict = {}
+for _field in _AGG_PROMOTE:
+    _vals = {_s: _r.get(_field) for _s, _r in _agg_crops.items()
+             if _r.get("status") == "complete"}
+    if not _vals:
+        _agg_promoted[_field] = None
+        continue
+    _distinct = {_agg_json.dumps(_v, sort_keys=True, default=str) for _v in _vals.values()}
+    if len(_distinct) > 1:
+        _agg_problems.append(
+            f"crops disagree on {_field}: {_vals}; one export cannot hold two values")
+        _agg_promoted[_field] = None
+        continue
+    _one = next(iter(_vals.values()))
+    if _one is None:
+        _agg_problems.append(
+            f"no crop records {_field}; the postprocessor's top-level check would stay inert")
+    _agg_promoted[_field] = _one
+
 # a stem set that differs from what was declared is a routing/config failure, not a warning
 _agg_actual = sorted(p.name.split(".")[0] for p in _AGG_MAN.glob("*.start.json"))
 if _agg_actual != _agg_expected:
@@ -61,6 +91,8 @@ if _agg_actual != _agg_expected:
 
 _agg_manifest = {
     "fold": _agg_fold, "checkpoint_sha256": _agg_ckpt,
+    # promoted from the per-crop terminal records above, only when every crop agreed
+    **_agg_promoted,
     "expected_crops": len(_agg_expected), "expected_stems": _agg_expected,
     "started_stems": _agg_actual,
     "n_complete": sum(1 for v in _agg_crops.values() if v.get("status") == "complete"),
