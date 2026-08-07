@@ -2,68 +2,63 @@
 
 **Updated:** 2026-08-07
 
-**Active implementation commit:** pending this cycle's detector-pilot commit
-
 **Public:** **0.915** (P3 harmonic)
 
-**GPU running:** 19-crop pilot, split-1 source and target cells
+**GPU running:** none
 
 **Submission ready:** none
 
 ## Decision
 
-Proceed with the detector-calibration branch, but do not launch the 7.88 T4-hour split-1
-run yet.
+**Close scalar and 33-parameter-head re-acceptance. Do not launch the 199-crop D1 export
+and do not submit a D1 candidate.** The completed 19-crop, four-cell cross-encoded pilot
+returned `CALIBRATION_PER_CROP` in both directions and no candidate-consistent operating
+point.
 
-The corpus audit and completed four-cell smoke found:
+The key correction is substrate-level. The large apparent detection prize belongs mainly
+to the sparse-trained split-1 LOEO detector, while P3 deploys split 0:
 
-- at most 22.3% of detector misses appear optically unresolvable;
-- 85.94% of GT centres have a local maximum within 7 um;
-- only 58.27% have an accepted maximum;
-- 66.30% of unmatched GT retain an unaccepted maximum inside 7 um;
-- the remaining estimated detection ceiling is +0.062 to +0.069 pooled;
-- true eight-view D4 is dead at +0.00068;
-- the synthetic corpus is rejected for the active path;
-- association-score proposals await a free probability-at-gate oracle.
-- the v6 smoke is structurally complete across both checkpoint bases;
-- held-out split-1/6bba contains **849 T nodes among 3,027 GT nodes** on the two stress
-  crops: missed GT with a rejected local maximum within 7 um.  This is a large rankable
-  surface, not evidence that a scalar threshold works;
-- split-0/source on the same 6bba crops has 7 T nodes and the 44b6 parity crop has zero,
-  so the pilot—not the smoke—must establish cross-family head transfer.
+| checkpoint / role | family | GT | M | C | T | L |
+|---|---|---:|---:|---:|---:|---:|
+| split 1 source | 44b6 | 2,366 | 2,087 | 62 | 203 | 14 |
+| split 1 target | 6bba | 9,604 | 7,173 | 736 | 1,098 | 597 |
+| split 0 source | 6bba | 9,604 | 8,295 | 700 | **10** | 599 |
+| split 0 target | 44b6 | 2,366 | 2,103 | 168 | **0** | 95 |
 
-This is evidence for an acceptance/head problem, not permission to build a detector bank,
-HOCT stack, graph ensemble, or full retraining programme.
+`T` is an unmatched GT node with a rejected local maximum inside 7 um. On the actual
+deployment checkpoint it is essentially absent in this stratified pilot. Therefore the
+previous `+0.08088` detection ceiling must not be quoted as a P3-deployment opportunity;
+it was measured on fold-routed LOEO substrates.
+
+The candidate-exact split-1 gate also kills add-only re-acceptance: H0 AUC 0.6747 and the
+linear head AUC 0.8394, but both have zero recall at 0.55--0.90 Horvitz-corrected precision.
+At 10% T recall the linear head reaches only about 1.6% precision, versus roughly 55%
+break-even. Only 220/1,098 target T rows have an exported feature at the exact <=7 um
+candidate; the original gate incorrectly used the strongest feature anywhere inside
+15 um and produced impossible above-threshold "rejected" logits. That result is withdrawn
+and the corrected contract is locked by tests.
 
 ## One execution sequence
 
-1. Complete the probability-at-the-deployed-gate oracle for association. The corpus-wide
-   census is complete; split/merge arbitration is closed at +0.000581.
-2. **DONE:** verify the rebuilt 2x2 smoke artifacts:
-   - both checkpoints x both families;
-   - TTA-consistent features;
-   - no mutation of the association feature tensor;
-   - complete manifests and exact H0 parity.
-3. **DONE:** finish the four-cell three-crop smoke. The first real-artifact pass exposed
-   and repaired three CPU-consumer defects (semantic TTA aliasing, positional Parquet
-   column order, and valid all-NaN max-feature sentinels); none requires another GPU run.
-4. **RUNNING:** existing 19-crop two-direction pilot. Split-1 source and target occupy both
-   Kaggle GPU slots; launch split-0 source and target as slots free.
-5. If the pilot shows portable ranking, run a one-basis candidate replay with the fitted
-   33-parameter head through P3, the complete wrapper, and the exact scorer.
-6. Only a graph-scored, homogeneous pilot gain may launch public test inference. The
-   7.88-hour full split-1 export is confirmatory and no longer the automatic next spend.
+1. Let the already-running probability-at-the-deployed-gate association oracle finish;
+   it is resumable and owns seven CPU workers. Do not start a duplicate.
+2. Re-price every remaining detection claim on the **deployed split-0 substrate**, not
+   fold-routed LOEO. No new 199-crop export is authorised merely to make this table larger.
+3. The next model primitive, if funded, must address fixed-count candidate replacement or
+   C/L separation (accepted peaks competing for GT), not admission thresholding. A paired
+   minimal training ablation is required; its unchanged control must reproduce split 0.
+4. No Kaggle submission is ready. Public remains 0.915. Spend a slot only after complete
+   graph inference, wrapper replay and exact scoring show a credible deployment-substrate
+   gain; AUC, a GT oracle, or the split-1 T mass cannot authorise one.
 
-## Pilot decision logic
+## Active research question
 
-- Large **T** mass with useful frozen-feature ranking: build a tiny re-acceptance head.
-- Large **T** mass but no portable ranking: close re-acceptance. The scalar-threshold
-  fallback is measured at about 0.3% marginal precision and -0.0234 pooled, so it is dead.
-- Large **L/D** mass or chance-level frozen representation: detector representation work is
-  justified, beginning with a paired minimal training ablation.
-- Revised net ceiling below +0.020 pooled: close the detection attack.
-- Cross-crop coefficient of variation above 1.22: retain as private hedge, not a public-LB
-  promise.
+Can a new detector objective improve the ordering/separation of the already-present local
+maxima at fixed per-frame count without damaging the split-0 association representation?
+The smallest defensible candidates are positive-unlabelled/ignore-aware supervision and a
+centre-separation or offset head. They require a paired training smoke first. A global
+threshold, learned 33-parameter replacement head, TTA expansion, recentering, and wrapper
+repair are already closed.
 
 ## Verification
 
@@ -76,5 +71,7 @@ git rev-list --left-right --count origin/master...master
 
 Expected user-owned dirty files: `.claude/settings.json`, `.gitignore`.
 
-Historical detail is recoverable from tag `pre-lean-2026-08-07`; do not reconstruct it in
-new Markdown files.
+Large pilot artifacts and fitted outputs live outside Git under:
+`C:\Users\aryaa\Documents\Biohub-CellTracking-2026_RESEARCH\`.
+Historical detail remains recoverable from tag `pre-lean-2026-08-07`; do not reconstruct
+it in new Markdown files.

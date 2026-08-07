@@ -4317,3 +4317,27 @@ Cycle output written to `reports/CYCLE_OUTPUT_2026-08-07_LEAN.md`. Census merged
 verified; two pre-GPU defects fixed; oracle lane still running and NOT reported. No GPU, no
 Kaggle, no submission, score movement 0.000. Next: re-scope the smoke as the corpus-T and
 phi measurement, and retire the scalar-threshold fallback (measured negative).
+### 2026-08-07 (D1 cross-encoded pilot — re-acceptance closed)
+
+Completed all four cells of the preregistered 19-crop checkpoint-by-family pilot. Both
+frozen-feature directions returned `CALIBRATION_PER_CROP`. The scorer-exact partition was:
+split1/source44 `M/C/T/L=2087/62/203/14`; split1/target6 `7173/736/1098/597`;
+split0/source6 `8295/700/10/599`; split0/target44 `2103/168/0/95` (D=0 throughout).
+
+This changes the substrate diagnosis: the large T surface belongs to the sparse-trained
+split-1 LOEO detector, while public P3 deploys split 0, where T is 10/9604 in source 6bba
+and 0/2366 in held-out 44b6. The prior +0.08088 LOEO detection ceiling is not a P3
+deployment ceiling.
+
+The first candidate gate was invalid and withdrawn: it scored T with `feat_max`, the
+strongest maximum inside 15 um, even when the T-defining rejected maximum was inside 7 um.
+That produced impossible above-threshold "rejected" logits. The repaired gate uses exact
+`best7_logit` for H0 and permits a learned feature only when `best15_dist_um <= 7`. On
+split1 target 6bba, H0 AUC=0.6747 and LIN_HEAD AUC=0.8394, but both have zero recall at
+HT precision 0.55--0.90; LIN_HEAD is about 1.6% precise at 10% T recall. Add-only scalar
+and 33-parameter-head re-acceptance are closed. No submission was produced.
+
+Engineering closure: the pilot assembler incorrectly called the smoke-tier manifest
+loader default even when `--tier pilot` was supplied. It now forwards the named tier and
+has a regression test. Full external artifacts are in the sibling research store; Git
+retains only the decision record and instrument code.

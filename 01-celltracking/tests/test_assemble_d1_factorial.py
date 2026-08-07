@@ -204,6 +204,22 @@ def test_a_partial_factorial_is_refused_when_a_tier_is_named(tmp_path):
         A.assemble(cells, tmp_path / "out", tier="smoke")
 
 
+def test_named_tier_is_forwarded_to_the_manifest_authority(tmp_path, monkeypatch):
+    cells = _all_cells(tmp_path)
+    calls = []
+    original = ASM.load_shards
+
+    def checked(*, tier="smoke"):
+        calls.append(tier)
+        # Reuse the smoke fixture ids while verifying that the requested tier was not
+        # silently replaced by the loader default (the defect found on the real pilot).
+        return original(tier="smoke")
+
+    monkeypatch.setattr(ASM, "load_shards", checked)
+    A.assemble(cells, tmp_path / "out", tier="pilot")
+    assert calls == ["pilot"]
+
+
 def test_a_single_split_is_refused(tmp_path):
     cells = [_write_cell(tmp_path, s) for s in (1, 2)]
     with pytest.raises(A.AssemblyError, match="the factorial needs both"):

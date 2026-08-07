@@ -203,7 +203,7 @@ def assemble(cell_paths, out_root: pathlib.Path, *, tier: str | None = None,
             raise AssemblyError(f"shard {c['shard_id']} supplied twice")
         seen[c["shard_id"]] = str(c["dir"])
     if tier:
-        expected = {s["shard_id"] for s in ASM.load_shards()}
+        expected = {s["shard_id"] for s in ASM.load_shards(tier=tier)}
         missing, extra = expected - set(seen), set(seen) - expected
         if missing or extra:
             raise AssemblyError(
