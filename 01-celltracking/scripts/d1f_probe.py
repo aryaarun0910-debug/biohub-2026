@@ -429,8 +429,17 @@ class Corpus:
         bad = set(np.unique(self.kind)) - set(ROW_KINDS)
         if bad:
             raise ContractError(f"unknown row kinds {sorted(bad)}; expected {ROW_KINDS}")
-        if not np.isfinite(self.X).all() or not np.isfinite(self.X_max).all():
-            raise ContractError("non-finite features")
+        if not np.isfinite(self.X).all():
+            raise ContractError("non-finite sampled-voxel features")
+        # X_max is defined only for GT-centre rows with a local maximum inside the
+        # search sphere.  The exporter deliberately writes an all-NaN sentinel for
+        # uniform/subthreshold samples and for GT rows with no such maximum.  Partial
+        # rows are corruption; all-finite and all-NaN rows are the two valid states.
+        max_finite = np.isfinite(self.X_max)
+        partial = max_finite.any(axis=1) & ~max_finite.all(axis=1)
+        if partial.any():
+            raise ContractError(
+                f"partially non-finite max features on {int(partial.sum())} row(s)")
 
     @property
     def n(self) -> int:
@@ -535,9 +544,18 @@ def validate_manifest(manifest: dict, *,
         raise ContractError(
             f"tta_view_set lists {len(views)} entries but n_encode_calls="
             f"{n_encode_calls}; the view list is per-CALL, so they must agree.")
-    if len(set(map(str, views))) != n_distinct_views:
+    # The exporter records call labels, not canonical spatial permutations.  In the
+    # deployed block ``rot90(k=1) -> transpose(y,x)`` is algebraically identical to
+    # ``flip_x`` (locked by tests/test_d1_v6_export.py).  Canonicalise that known alias
+    # before checking the measured 8-call/7-view collision; otherwise a truthful v6
+    # artifact is rejected merely because the duplicate calls have different labels.
+    canonical_views = [
+        "flip_x" if str(v) == "rot90_k1_then_transpose_yx" else str(v)
+        for v in views
+    ]
+    if len(set(canonical_views)) != n_distinct_views:
         raise ContractError(
-            f"tta_view_set holds {len(set(map(str, views)))} distinct entries but "
+            f"tta_view_set holds {len(set(canonical_views))} canonical spatial views but "
             f"n_distinct_views={n_distinct_views}. The duplicate-view collision is the "
             f"measured property of this block; a manifest that miscounts it cannot be "
             f"used to reason about the average.")
@@ -611,6 +629,11 @@ def load_basis(audit_dir, *, encoder_split: int | None = None,
                 f"{c}: row schema differs from the first crop (missing "
                 f"{sorted(cols0 - set(f.columns))}, extra "
                 f"{sorted(set(f.columns) - cols0)}). Trap 21.")
+    # Parquet schemas can contain the same named fields in different physical order when
+    # optional K-list keys first appear on different rows.  That is not schema drift, but
+    # Polars vertical concat is positional and will otherwise fail (or, in older versions,
+    # misalign fields).  Canonicalise to the first crop only after exact set equality.
+    frames = [f.select(frames[0].columns) for f in frames]
     df = pl.concat(frames, how="vertical_relaxed")
     X = np.concatenate(xs).astype(np.float32, copy=False)
     Xm = np.concatenate(xm).astype(np.float32, copy=False)
@@ -2742,7 +2765,9 @@ def main() -> None:
                     help="run the whole instrument on a synthetic corpus (the v6 export "
                          "does not exist yet and the 3-crop v5 smoke is forbidden as "
                          "training data)")
-    ap.add_argument("--expect-views", type=int, default=8)
+    ap.add_argument("--expect-encode-calls", "--expect-views", dest="expect_encode_calls",
+                    type=int, default=8,
+                    help="expected TTA encode-call count (legacy --expect-views alias retained)")
     ap.add_argument("--l2", type=float, default=1.0)
     ap.add_argument("--mask-radius-um", type=float, default=None)
     ap.add_argument("--budget-multiple", type=float, default=1.5)
@@ -2776,7 +2801,7 @@ def main() -> None:
         if not a.audit_root or not a.weights_dir:
             raise SystemExit("--audit-root and --weights-dir are required without "
                              "--fixture")
-        corpus = load_factorial(a.audit_root, expect_views=a.expect_views)
+        corpus = load_factorial(a.audit_root, expect_encode_calls=a.expect_encode_calls)
         heads = {s: LinearHead.for_basis(s, a.weights_dir) for s in corpus.bases()}
         payload = run_factorial(corpus, heads, mask_radius_um=a.mask_radius_um,
                                 temporal=temporal, l2=a.l2,

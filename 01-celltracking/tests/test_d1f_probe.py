@@ -784,6 +784,34 @@ def test_a_non_finite_feature_block_is_refused(corpus):
             encoder_split=corpus.encoder_split)
 
 
+def test_all_nan_max_sentinel_is_valid_but_partial_nan_is_refused(corpus):
+    xm = corpus.X_max.copy()
+    xm[3] = np.nan
+    ok = D.Corpus(
+        X=corpus.X, X_max=xm, kind=corpus.kind, crop=corpus.crop,
+        family=corpus.family, t=corpus.t, logit=corpus.logit,
+        encoder_split=corpus.encoder_split)
+    assert np.isnan(ok.X_max[3]).all()
+    xm_bad = xm.copy()
+    xm_bad[3, 0] = 0.0
+    with pytest.raises(D.ContractError, match="partially non-finite"):
+        D.Corpus(
+            X=corpus.X, X_max=xm_bad, kind=corpus.kind, crop=corpus.crop,
+            family=corpus.family, t=corpus.t, logit=corpus.logit,
+            encoder_split=corpus.encoder_split)
+
+
+def test_load_basis_canonicalises_equal_schema_with_different_column_order(tmp_path):
+    import polars as pl
+
+    d = _write_audit_dir(tmp_path / "order", crops=("44b6_aa", "44b6_bb"))
+    p = d / "44b6_bb__rows.parquet"
+    df = pl.read_parquet(p)
+    df.select(list(reversed(df.columns))).write_parquet(p)
+    got = D.load_basis(d, encoder_split=1, expect_encode_calls=8)
+    assert got.n == 80
+
+
 def test_a_head_of_the_wrong_width_is_refused():
     with pytest.raises(ValueError, match=r"\(32,\)"):
         D.LinearHead(w=np.zeros(16), b=0.0)
@@ -1643,6 +1671,22 @@ def test_validate_manifest_reports_both_counts_separately(tmp_path):
     got = D.validate_manifest(m)
     assert got["n_encode_calls"] == 8 and got["n_distinct_views"] == 7
     assert "n_views" not in got
+
+
+def test_real_export_call_labels_canonicalise_the_known_duplicate_view():
+    """The kernel names calls, while the contract counts spatial permutations."""
+    views = [
+        "identity", "flip_x", "flip_y", "flip_xy", "rot90_k1", "rot90_k3",
+        "transpose_yx", "rot90_k1_then_transpose_yx",
+    ]
+    got = D.validate_manifest({
+        "tta_view_set": views,
+        "n_encode_calls": 8,
+        "n_distinct_views": 7,
+        "crops": {},
+    })
+    assert got["n_encode_calls"] == 8
+    assert got["n_distinct_views"] == 7
 
 
 def test_the_aggregator_promotes_both_view_fields_and_never_the_merged_one():

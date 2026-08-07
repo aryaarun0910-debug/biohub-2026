@@ -1,0 +1,377 @@
+{
+  "name": "p3_d1_pilot_f1_src",
+  "slug": "biohub-p3-d1-pilot-f1-src",
+  "title": "Biohub P3 D1 Pilot F1 SRC",
+  "code_file": "biohub-p3-d1-pilot-f1-src.ipynb",
+  "out_dir": "notebooks/kaggle_p3_d1_pilot_f1_src",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork",
+    "kms111201/biohub-cell-tracking-data",
+    "aryaarun07/biohub-oof-weights"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "is_private": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": false,
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "d1_cell": {
+    "kind": "d1_factorial_cell",
+    "tier": "pilot",
+    "shard_id": "pilot__s1__split_1__44b6__source__0",
+    "stage": 1,
+    "split": 1,
+    "fold": 1,
+    "family": "44b6",
+    "role": "source",
+    "checkpoint_file": "edge_predictor_best_split_1.pth",
+    "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+    "checkpoint_trained_on_family": "44b6",
+    "checkpoint_heldout_family": "6bba",
+    "crops": [
+      "44b6_0113de3b",
+      "44b6_2f31fc2f",
+      "44b6_40c45f5a",
+      "44b6_5f15d135",
+      "44b6_668e0cc7",
+      "44b6_8cc6506c",
+      "44b6_90724892",
+      "44b6_aaf8b0ea",
+      "44b6_eb2880fc"
+    ],
+    "n_crops": 9,
+    "gt_nodes_total": 2366,
+    "est_bytes": 24616650,
+    "est_wall_hours": 0.7348,
+    "manifest": "data/d1_factorial/manifest_pilot.json",
+    "manifest_sha256_lf": "ff6670529518a8a2584bb30019d875a35df47646660cc85483606538dbdc9936",
+    "spec": "p3_d1_pilot_f1_src"
+  },
+  "purpose": "PILOT FACTORIAL EXPORT. Factorial cell pilot__s1__split_1__44b6__source__0 (stage 1 of 4): the split_1 checkpoint over 9 44b6 crop(s), role SOURCE -- the checkpoint runs over the family it was TRAINED on, so these rows are the fitting/selection substrate and are never a measurement. The four smoke cells together encode all three crops under BOTH checkpoints, which is what makes the C1 2x2 runnable at all: a routed-only export puts each family in its own 32-D basis and d1f_probe refuses it as CROSS-ENCODED. Combined P3 + D1 + D1-F export: one encoder pass per crop emits the P3 pre-wrapper graph (harmonic association), accepted detector peaks, the exact A/B/D classification of every GT node with D stratified by distance to the nearest local maximum, and FOUR 32-D frozen feature arrays: the TTA MEAN over the deployed view set -- 8 encode calls over 7 DISTINCT views, divisor 8, replicated verbatim -- which is the post-TTA detector representation, and the IDENTITY VIEW, which is the association representation that predict_edges actually reads; each at the sampled voxel and at the strongest nearby local maximum. Combinable because the harmonic patch touches edge_logits_pair only and never det_logits. Runs under BIOHUB_LOEO_ARM=strict, so the secondary detector is off and the result is NOT directly deployable (correction C5: the public path blends 0.525 primary + 0.475 aligned secondary behind a per-frame retention guard). NOT a scientific verdict and NOT a submission.",
+  "provenance": {
+    "backbone": "p3_harmonic.json sha256 1384e5044f79521b89a0de14670415dc8650db206f926f3a22c7995864b2b91c",
+    "loeo_source": "loeo_f1_strict_pregraph.json sha256 0dc68c81e554828e5719bd6cc70fcc408c5439b74833a178cccbaa169ea01055",
+    "imported_edit_sha256": {
+      "loeo_retarget": "d8e8bd4dac7f38677df1f68ba81b4344e1382155c8ad1fe7496b13f0c8d877ec",
+      "loeo_test_stems": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68",
+      "loeo_export_cell": "7e2712e00a82f54ca9623544c04e5e8ec31b0fae7faa8cd79f01d50141c31fda",
+      "loeo_pregraph": "5cbb94850ba34054edf11f98ef44b3ee18bec83222bfe2337832604ecb74907f",
+      "loeo_keep": "b6a6c809e5d33dbf3b856b571a9ac5348da8e50dae1c9830e7481fd8efc4e5f5"
+    },
+    "d1_inject_sha256": "e172b917b7cfe4413ac421c85c3f9fca0ff9cc86c1a4df36cad02b92731e7f9d",
+    "d1_block_sha256": "ec9666f7d498e72da0e053eca6a044241d1e91004e7fba161b3e2b64a2ed3c27",
+    "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+    "stems": [
+      "44b6_0113de3b",
+      "44b6_2f31fc2f",
+      "44b6_40c45f5a",
+      "44b6_5f15d135",
+      "44b6_668e0cc7",
+      "44b6_8cc6506c",
+      "44b6_90724892",
+      "44b6_aaf8b0ea",
+      "44b6_eb2880fc"
+    ],
+    "routing_source": "data/d1_factorial/manifest_pilot.json shard pilot__s1__split_1__44b6__source__0 (LF sha256 ff6670529518a8a2584bb30019d875a35df47646660cc85483606538dbdc9936). Stems, weights glob, config glob, fold, checkpoint hash and expected-crop count are copied from the shard and asserted equal; nothing here is transcribed and no glob stands in for a manifest.",
+    "four_spec_rationale": "The LOEO retarget binds one fold at module level and rebinds TEST_DIR globally, so two checkpoints in one kernel would require restructuring the notebook's single-pass predict/wrapper/export flow. The 2x2 needs four kernels: each of the two checkpoints must encode BOTH families, because the two 32-D bases are independent (rel-L2 1.41542 ~ sqrt(2), cos(w0,w1) = -0.155) and a head fitted in one cannot be applied in the other. Six crop-inferences total; each is paid for exactly once and the four manifests are aggregated only after all four runs complete.",
+    "source_cells_need_no_kernel_edit": "scripts/kaggle_edits/loeo_retarget.py mounts EVERY train .zarr under /kaggle/input and selects purely by BIOHUB_LOEO_STEMS membership; LOEO_FOLD only names the scratch directory, the printed manifest and the export files. There is no fold-membership guard, and the primary weights come solely from BIOHUB_LOEO_WEIGHTS_GLOB. Running a checkpoint over its own training family is therefore a configuration change, not a code change."
+  },
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_LOEO_FOLD": "1",
+        "BIOHUB_LOEO_ARM": "strict",
+        "BIOHUB_LOEO_LIMIT": "0",
+        "BIOHUB_LOEO_STEMS": "[\"44b6_0113de3b\", \"44b6_2f31fc2f\", \"44b6_40c45f5a\", \"44b6_5f15d135\", \"44b6_668e0cc7\", \"44b6_8cc6506c\", \"44b6_90724892\", \"44b6_aaf8b0ea\", \"44b6_eb2880fc\"]",
+        "BIOHUB_LOEO_WEIGHTS_GLOB": "/kaggle/input/*/edge_predictor_best_split_1.pth",
+        "BIOHUB_LOEO_CONFIG_GLOB": "/kaggle/input/*/config_split_1.json",
+        "BIOHUB_D1_FOLD": "1",
+        "BIOHUB_D1_SPLIT": "1",
+        "BIOHUB_D1_CKPT_SHA": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+        "BIOHUB_D1_EXPECTED_CROPS": "9",
+        "BIOHUB_D1_N_UNIFORM": "64",
+        "BIOHUB_D1_N_SUBTHR": "32",
+        "BIOHUB_D1_REQUIRE_ENCODE_CALLS": "8",
+        "BIOHUB_D1_REQUIRE_DISTINCT_VIEWS": "7",
+        "BIOHUB_D1_REQUIRE_NOTEBOOK_TTA": "1",
+        "BIOHUB_D1_PARITY_SLACK": "2.0"
+      },
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E01_env",
+        "source": "assembler+manifest_pilot.json",
+        "canonical_sha256": "30cfcb7ffe4afa99cbe909234abc26a89f907e60610844c7e3022386971e1286",
+        "intent": "1. environment: LOEO fold routing + D1 knobs",
+        "order": 0
+      }
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "def list_test_stems() -> list[str]:",
+      "cell_match": "_ps = REPO_DIR",
+      "code_file": "scripts/kaggle_edits/loeo_retarget.py",
+      "_audit": {
+        "edit_id": "E02_loeo_retarget",
+        "source": "loeo_f1_strict_pregraph#1",
+        "canonical_sha256": "d8e8bd4dac7f38677df1f68ba81b4344e1382155c8ad1fe7496b13f0c8d877ec",
+        "intent": "1. LOEO retarget: mount fold crops, rebind TEST_DIR, resolve fold weights",
+        "order": 1
+      }
+    },
+    {
+      "kind": "insert_after",
+      "cell_match": "_ps = REPO_DIR",
+      "anchor": "print(json.dumps(LOEO_MANIFEST, indent=2)[:800])",
+      "code": "# ---------------------------------------------------------- D1 FACTORIAL CELL IDENTITY\n# This kernel is ONE cell of the 2x2 checkpoint x family factorial (correction C1).\n# A SOURCE cell runs a checkpoint over the family it was TRAINED on and supplies the\n# fitting rows; a TARGET cell runs the SAME checkpoint over the family it has NEVER\n# seen and is the measurement. Both live in one 32-D basis -- that is the only reason a\n# head fitted on the source can be applied to the target at all.\n#\n# The role is not a free parameter. It is re-derived below from the split of the\n# checkpoint that was actually loaded and the family prefix of the stems that were\n# actually mounted, then compared with the value assembled from the manifest. A cell\n# that has been mislabelled cannot run.\n_D1C = {\n    \"checkpoint_file\": \"edge_predictor_best_split_1.pth\",\n    \"checkpoint_heldout_family\": \"6bba\",\n    \"checkpoint_sha256\": \"2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de\",\n    \"checkpoint_trained_on_family\": \"44b6\",\n    \"crops\": [\n        \"44b6_0113de3b\",\n        \"44b6_2f31fc2f\",\n        \"44b6_40c45f5a\",\n        \"44b6_5f15d135\",\n        \"44b6_668e0cc7\",\n        \"44b6_8cc6506c\",\n        \"44b6_90724892\",\n        \"44b6_aaf8b0ea\",\n        \"44b6_eb2880fc\"\n    ],\n    \"est_bytes\": 24616650,\n    \"est_wall_hours\": 0.7348,\n    \"family\": \"44b6\",\n    \"fold\": 1,\n    \"gt_nodes_total\": 2366,\n    \"kind\": \"d1_factorial_cell\",\n    \"manifest\": \"data/d1_factorial/manifest_pilot.json\",\n    \"manifest_sha256_lf\": \"ff6670529518a8a2584bb30019d875a35df47646660cc85483606538dbdc9936\",\n    \"n_crops\": 9,\n    \"role\": \"source\",\n    \"shard_id\": \"pilot__s1__split_1__44b6__source__0\",\n    \"spec\": \"p3_d1_pilot_f1_src\",\n    \"split\": 1,\n    \"stage\": 1,\n    \"tier\": \"pilot\"\n}\n_D1C_TRAINED_ON = {0: \"6bba\", 1: \"44b6\"}\n_D1C_HELD_OUT = {0: \"44b6\", 1: \"6bba\"}\n\n_d1c_split = int(_D1C[\"split\"])\n_d1c_fams = sorted({_s.split(\"_\")[0] for _s in LOEO_STEMS})\nif len(_d1c_fams) != 1:\n    raise RuntimeError(\n        f\"{_D1C['shard_id']}: stems span families {_d1c_fams}; a factorial cell is \"\n        \"family-pure by construction\")\n_d1c_family = _d1c_fams[0]\n_d1c_role = \"source\" if _d1c_family == _D1C_TRAINED_ON[_d1c_split] else \"target\"\n\n_d1c_bad = []\nif _d1c_family != _D1C[\"family\"]:\n    _d1c_bad.append(f\"family: mounted {_d1c_family} != declared {_D1C['family']}\")\nif _d1c_role != _D1C[\"role\"]:\n    _d1c_bad.append(f\"ROLE INVERSION: split {_d1c_split} trained on \"\n                    f\"{_D1C_TRAINED_ON[_d1c_split]} and held out \"\n                    f\"{_D1C_HELD_OUT[_d1c_split]}, so {_d1c_family} crops are \"\n                    f\"{_d1c_role}, but this cell declares {_D1C['role']}\")\nif sorted(LOEO_STEMS) != sorted(_D1C[\"crops\"]):\n    _d1c_bad.append(f\"crop list: mounted {sorted(LOEO_STEMS)} != declared \"\n                    f\"{sorted(_D1C['crops'])}\")\nif int(LOEO_FOLD) != int(_D1C[\"fold\"]):\n    _d1c_bad.append(f\"fold: env {LOEO_FOLD} != declared {_D1C['fold']}\")\nif os.environ.get(\"BIOHUB_D1_SPLIT\") != str(_d1c_split):\n    _d1c_bad.append(f\"basis: BIOHUB_D1_SPLIT=\"\n                    f\"{os.environ.get('BIOHUB_D1_SPLIT')!r} != {_d1c_split}\")\nif os.environ.get(\"BIOHUB_D1_CKPT_SHA\") != _D1C[\"checkpoint_sha256\"]:\n    _d1c_bad.append(\"basis: BIOHUB_D1_CKPT_SHA is not this cell's checkpoint\")\nif os.environ.get(\"BIOHUB_D1_EXPECTED_CROPS\") != str(_D1C[\"n_crops\"]):\n    _d1c_bad.append(\"crop budget: BIOHUB_D1_EXPECTED_CROPS disagrees with the manifest\")\n\n# The weights the kernel actually resolved, hashed in full -- the retarget only prints\n# the first 16 hex digits, which is a display, not a gate.\n_d1c_obs = hashlib.sha256(Path(WEIGHTS_RELATIVE).read_bytes()).hexdigest()\nif _d1c_obs != _D1C[\"checkpoint_sha256\"]:\n    _d1c_bad.append(f\"checkpoint: loaded sha256 {_d1c_obs} != pinned \"\n                    f\"{_D1C['checkpoint_sha256']}\")\n\nif _d1c_bad:\n    raise RuntimeError(\n        f\"D1 FACTORIAL CELL {_D1C['shard_id']} IS NOT WHAT IT CLAIMS TO BE:\\n  \"\n        + \"\\n  \".join(_d1c_bad))\n\n_d1c_dir = Path(\"/kaggle/working/d1_audit\")\n_d1c_dir.mkdir(parents=True, exist_ok=True)\n_d1c_rec = dict(_D1C)\n_d1c_rec.update({\n    \"checkpoint_sha256_observed\": _d1c_obs,\n    \"weights_path\": str(WEIGHTS_RELATIVE),\n    \"family_rederived\": _d1c_family,\n    \"role_rederived\": _d1c_role,\n    \"crops_mounted\": sorted(LOEO_STEMS),\n    \"arm\": LOEO_ARM,\n})\n(_d1c_dir / \"d1_cell.json\").write_text(\n    json.dumps(_d1c_rec, indent=2, sort_keys=True), encoding=\"utf-8\")\nprint(f\"D1 CELL {_D1C['shard_id']}: split {_d1c_split} basis, family \"\n      f\"{_d1c_family}, role {_d1c_role.upper()}, {len(LOEO_STEMS)} crop(s), \"\n      f\"checkpoint {_d1c_obs[:16]} VERIFIED\", flush=True)\n# --------------------------------------------------------------------------------------\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E02b_cell_identity",
+        "source": "assembler+manifest_pilot.json",
+        "canonical_sha256": "7ceeaaae3803bffbf64f0cf7b252385e4140e40eeb8098d9bde568003582199c",
+        "intent": "1. factorial cell identity: re-derive the role, verify the loaded checkpoint, emit d1_cell.json",
+        "order": 2
+      }
+    },
+    {
+      "kind": "replace",
+      "old": "test_stems = list_test_stems()",
+      "new": "test_stems = list(LOEO_STEMS)  # LOEO retarget",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E03_test_stems",
+        "source": "loeo_f1_strict_pregraph#2",
+        "canonical_sha256": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68",
+        "intent": "1. route stem discovery at the LOEO fold",
+        "order": 3
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "_bi_new = ",
+      "old": "_bi_new = '            edge_logits_pair = model.predict_edges(\\n                unet_feat_src, unet_feat_tgt,\\n                p_coords_src * ds_arr_t, p_coords_tgt * ds_arr_t,\\n                p_pos_src, p_pos_tgt,\\n                p_mask_src, p_mask_tgt,\\n            )  # (1, n_src, n_tgt)\\n\\n            _bidirectional_weight = float(\\n                os.environ.get(\"BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT\", \"0\")\\n            )\\n            if _bidirectional_weight > 0.0:\\n                reverse_logits_native = model.predict_edges(\\n                    unet_feat_tgt, unet_feat_src,\\n                    p_coords_tgt * ds_arr_t, p_coords_src * ds_arr_t,\\n                    p_pos_tgt, p_pos_src,\\n                    p_mask_tgt, p_mask_src,\\n                )  # (1, n_tgt, n_src)\\n                reverse_logits_pair = reverse_logits_native.transpose(1, 2)\\n\\n                forward_center = edge_logits_pair.mean(dim=1, keepdim=True)\\n                forward_scale = edge_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_center = reverse_logits_pair.mean(dim=1, keepdim=True)\\n                reverse_scale = reverse_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_scale_ratio = (forward_scale / reverse_scale).clamp(0.5, 2.0)\\n                reverse_scale_ratio = reverse_scale_ratio.to(reverse_logits_pair.dtype)\\n                reverse_aligned = (\\n                    (reverse_logits_pair - reverse_center) * reverse_scale_ratio\\n                    + forward_center\\n                )\\n                edge_logits_pair = (\\n                    (1.0 - _bidirectional_weight) * edge_logits_pair\\n                    + _bidirectional_weight * reverse_aligned\\n                )\\n                del reverse_logits_native, reverse_logits_pair, reverse_aligned\\n\\n            if secondary_model is not None:\\n'",
+      "new": "_bi_new = '            edge_logits_pair = model.predict_edges(\\n                unet_feat_src, unet_feat_tgt,\\n                p_coords_src * ds_arr_t, p_coords_tgt * ds_arr_t,\\n                p_pos_src, p_pos_tgt,\\n                p_mask_src, p_mask_tgt,\\n            )  # (1, n_src, n_tgt)\\n\\n            _bidirectional_weight = float(\\n                os.environ.get(\"BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT\", \"0\")\\n            )\\n            if _bidirectional_weight > 0.0:\\n                reverse_logits_native = model.predict_edges(\\n                    unet_feat_tgt, unet_feat_src,\\n                    p_coords_tgt * ds_arr_t, p_coords_src * ds_arr_t,\\n                    p_pos_tgt, p_pos_src,\\n                    p_mask_tgt, p_mask_src,\\n                )  # (1, n_tgt, n_src)\\n                reverse_logits_pair = reverse_logits_native.transpose(1, 2)\\n\\n                forward_center = edge_logits_pair.mean(dim=1, keepdim=True)\\n                forward_scale = edge_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_center = reverse_logits_pair.mean(dim=1, keepdim=True)\\n                reverse_scale = reverse_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_scale_ratio = (forward_scale / reverse_scale).clamp(0.5, 2.0)\\n                reverse_scale_ratio = reverse_scale_ratio.to(reverse_logits_pair.dtype)\\n                reverse_aligned = (\\n                    (reverse_logits_pair - reverse_center) * reverse_scale_ratio\\n                    + forward_center\\n                )\\n                # Biohub 145: require mutual forward/reverse support in probability space.\\n                # The harmonic mean penalizes a candidate when either temporal direction\\n                # assigns it very low probability, while calibration preserves the forward\\n                # logit scale used by the unchanged downstream candidate threshold and ILP.\\n                forward_prob = torch.softmax(edge_logits_pair.float(), dim=1).clamp_min(1e-8)\\n                reverse_prob = torch.softmax(reverse_aligned.float(), dim=1).clamp_min(1e-8)\\n                harmonic_prob = 1.0 / (\\n                    (1.0 - _bidirectional_weight) / forward_prob\\n                    + _bidirectional_weight / reverse_prob\\n                )\\n                harmonic_prob = harmonic_prob / harmonic_prob.sum(\\n                    dim=1, keepdim=True\\n                ).clamp_min(1e-8)\\n                harmonic_logits = torch.log(harmonic_prob.clamp_min(1e-8))\\n                harmonic_center = harmonic_logits.mean(dim=1, keepdim=True)\\n                harmonic_scale = harmonic_logits.std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                harmonic_scale_ratio = (forward_scale / harmonic_scale).clamp(0.5, 2.0)\\n                edge_logits_pair = (\\n                    (harmonic_logits - harmonic_center) * harmonic_scale_ratio\\n                    + forward_center\\n                ).to(reverse_aligned.dtype)\\n                del (\\n                    reverse_logits_native,\\n                    reverse_logits_pair,\\n                    reverse_aligned,\\n                    forward_prob,\\n                    reverse_prob,\\n                    harmonic_prob,\\n                    harmonic_logits,\\n                )\\n            if secondary_model is not None:\\n'",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E04_harmonic",
+        "source": "p3_harmonic#harmonic",
+        "canonical_sha256": "8ed0fc04f3cfa853ad326cb4bb160883d2a92c12a1b6a0e3e0b9a248c7866789",
+        "intent": "2. harmonic edge-logit fusion (edge_logits_pair ONLY)",
+        "order": 4
+      }
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "def filter_output_graph(",
+      "cell_match": "def filter_output_graph(",
+      "code_file": "scripts/kaggle_edits/degree_invariants.py",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_00_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "9621f91471ac447c09cafea63d559afe4717ae1cb50b1f72be7258b6fbd02548",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 5
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "        \"safe_division_skipped_cap\": 0,\n",
+      "new": "        \"safe_division_skipped_cap\": 0,\n        \"safe_division_skipped_outdegree\": 0,\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_01_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "4a5d28fd3c7d71d882def9b51782f64eab0c27c1ee2787679748ef3ce012a0c9",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 6
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "    used_targets: set[int] = set()\n",
+      "new": "    used_targets: set[int] = set()\n    out_degree_now: dict[int, int] = {\n        _src: len(_lst) for _src, _lst in out_by_source.items()\n    }\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_02_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "c2c01e6546923987cc25ca8cc34cbef7ee1d64fb2932d383f5a37287a84a390b",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 7
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "            if candidate_id in used_targets or candidate_id in incoming:\n                continue\n",
+      "new": "            if candidate_id in used_targets or candidate_id in incoming:\n                continue\n            if out_degree_now.get(source_id, 0) >= 2:\n                stats[\"safe_division_skipped_outdegree\"] += 1\n                continue\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_03_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "3781cdc0fbf75b49fa058fbf1c412d37b3a3f04a41e9ee50df5595b461d62366",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 8
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "            used_targets.add(candidate_id)\n            added_this_frame += 1\n",
+      "new": "            used_targets.add(candidate_id)\n            out_degree_now[source_id] = out_degree_now.get(source_id, 0) + 1\n            added_this_frame += 1\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_04_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "586fd991cc14cae802995ed52342b97df52bf202170a5f58a3eeebdafcbcb168",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 9
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def close_single_frame_gaps(",
+      "old": "                    candidates = [nid for nid in isolated_by_t.get(mid_t, []) if nid not in used_isolated]\n",
+      "new": "                    candidates = [nid for nid in isolated_by_t.get(mid_t, [])\n                                  if nid not in used_isolated and nid not in incoming]\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_05_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "e810b6443db50b91f761cb91395318cf7d3f831b5f41129516847c032aa2c86a",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 10
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def close_single_frame_gaps(",
+      "old": "                if source_id in outgoing or target_id in used_starts:\n                    continue\n",
+      "new": "                if source_id in outgoing or target_id in used_starts or target_id in incoming:\n                    continue\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_06_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "4a229f113df72061966d3296783c4f42e14fabadab9811554c85e3bb29756310",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 11
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "    repair_frame_cache: dict[int, np.ndarray] = {}\n",
+      "new": "    assert_degree_invariants(edges, \"motion relink + parent/child repair\")\n\n    repair_frame_cache: dict[int, np.ndarray] = {}\n",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_07_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "9005cc78a5840b6a180044d5d8e63857887dc9191cbdfc9ad198063d1cbf29f0",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 12
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "    nodes_by_id = linefit_smooth_output_graph(nodes_by_id, edges, stats)\n\n    return nodes_by_id, edges, stats",
+      "new": "    nodes_by_id = linefit_smooth_output_graph(nodes_by_id, edges, stats)\n\n    assert_degree_invariants(edges, \"export\")\n    return nodes_by_id, edges, stats",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05_08_invariant",
+        "source": "p3_harmonic#invariant",
+        "canonical_sha256": "6a1829cd1507792d8332dcad36ad86b9f976466ae88d907d519546b741e20ff0",
+        "intent": "3. degree-invariant fixes and export assertions",
+        "order": 13
+      }
+    },
+    {
+      "kind": "replace",
+      "cell_match": "TTA patch applied",
+      "old": "    print(\"TTA WARNING: block not found - using default 4-way\")",
+      "new": "    raise RuntimeError(\n        \"TTA PATCH FAILED: the eight-encode-call TTA block was not found in \"\n        + str(_ps) + \". The deployed view set would fall back to the vendored \"\n        \"four-view average, so any feature exported under the post-TTA name \"\n        \"would describe a detector that is not in production. Refusing.\"\n    )",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E05b_tta_guard",
+        "source": "assembler",
+        "canonical_sha256": "e7b6cdd730e394431b0f3925c8abd8f7bd1a8ca7e1fd07dad4596083d3ddc93d",
+        "intent": "4. TTA patch guard raises instead of printing (locality, not correctness)",
+        "order": 14
+      }
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "def list_test_stems() -> list[str]:",
+      "cell_match": "_ps = REPO_DIR",
+      "code_file": "scripts/kaggle_edits/d1_inject.py",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E06_d1_inject",
+        "source": "scripts/kaggle_edits/d1_inject.py",
+        "canonical_sha256": "3d8cf39ba377c9be23d6a62e76af8e7934f4c52a8a20c2628056b38ad472339f",
+        "intent": "4. D1 audit + frozen-feature injection into the predict script",
+        "order": 15
+      }
+    },
+    {
+      "kind": "insert_after",
+      "anchor": "print(f\"Found {len(geffs)} prediction graphs\")",
+      "cell_match": "def filter_output_graph(",
+      "code_file": "scripts/kaggle_edits/loeo_pregraph_export.py",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E07_pregraph",
+        "source": "loeo_f1_strict_pregraph#4",
+        "canonical_sha256": "5cbb94850ba34054edf11f98ef44b3ee18bec83222bfe2337832604ecb74907f",
+        "intent": "5. pre-wrapper prediction-graph export",
+        "order": 16
+      }
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "_guard_submission = Path(",
+      "code_file": "scripts/kaggle_edits/loeo_export.py",
+      "_audit": {
+        "edit_id": "E08_export_cell",
+        "source": "loeo_f1_strict_pregraph#3",
+        "canonical_sha256": "7e2712e00a82f54ca9623544c04e5e8ec31b0fae7faa8cd79f01d50141c31fda",
+        "intent": "6. LOEO export cell replaces the submission guard",
+        "order": 17
+      }
+    },
+    {
+      "kind": "append_cell",
+      "code_file": "scripts/kaggle_edits/d1_aggregate.py",
+      "_audit": {
+        "edit_id": "E10_aggregator",
+        "source": "scripts/kaggle_edits/d1_aggregate.py",
+        "canonical_sha256": "2e6ad13cb55cfe555a647dba8df865d1c7c923472bec5d763a9b790adb80d8db",
+        "intent": "6. parent aggregator: read immutable per-crop records, fail hard on any gap",
+        "order": 18
+      }
+    },
+    {
+      "kind": "replace",
+      "old": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\"}",
+      "new": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\",\n              f\"pregraphs_split{LOEO_FOLD}.parquet\", f\"pregraphs_split{LOEO_FOLD}.json\",\n              \"d1_audit\"}",
+      "expect": 1,
+      "_audit": {
+        "edit_id": "E09_keep",
+        "source": "loeo_f1_strict_pregraph#5 (+d1_audit)",
+        "canonical_sha256": "fcd3924fe744584c0b3e8a3cdabc2db83674fe698637f4e1675eb247d8d10b43",
+        "intent": "6. artifact retention: keep pregraphs AND the d1_audit directory",
+        "order": 19
+      }
+    }
+  ]
+}

@@ -52,13 +52,19 @@ Determinism: sorted keys, no timestamps, no randomness. Generating twice must be
 from __future__ import annotations
 
 import hashlib
+import argparse
 import json
 import pathlib
 import re
+import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SPECS = ROOT / "scripts" / "kaggle_specs"
-MANIFEST = ROOT / "data" / "d1_factorial" / "manifest_smoke.json"
+MANIFESTS = {
+    "smoke": ROOT / "data" / "d1_factorial" / "manifest_smoke.json",
+    "pilot": ROOT / "data" / "d1_factorial" / "manifest_pilot.json",
+}
+MANIFEST = MANIFESTS["smoke"]  # Back-compatible import surface for existing tests.
 
 BACKBONE = SPECS / "p3_harmonic.json"
 LOEO = ROOT / "scripts" / "kaggle_templates" / "loeo_pregraph_edits.json"
@@ -128,14 +134,15 @@ def tag(edit: dict, edit_id: str, source: str, order: int, intent: str) -> dict:
     return out
 
 
-def load_shards() -> list[dict]:
-    """Every shard of the smoke tier, in the manifest's own stage order."""
-    man = json.loads(MANIFEST.read_text(encoding="utf-8"))
+def load_shards(tier: str = "smoke") -> list[dict]:
+    """Every shard of a frozen tier, in the manifest's own stage order."""
+    manifest = MANIFESTS[tier]
+    man = json.loads(manifest.read_text(encoding="utf-8"))
     assert man["kind"] == "d1_factorial_manifest", man["kind"]
-    assert man["tier"] == "smoke", man["tier"]
+    assert man["tier"] == tier, man["tier"]
     shards = sorted(man["shards"], key=lambda s: int(s["stage"]))
     assert [int(s["stage"]) for s in shards] == list(range(1, len(shards) + 1)), (
-        "smoke stages are not a contiguous 1..N run")
+        f"{tier} stages are not a contiguous 1..N run")
     return shards
 
 
@@ -143,7 +150,7 @@ def cell_key(shard: dict) -> str:
     return f"f{int(shard['fold'])}{ROLE_SUFFIX[shard['role']]}"
 
 
-def cell_record(shard: dict) -> dict:
+def cell_record(shard: dict, tier: str = "smoke") -> dict:
     """The immutable identity of one factorial cell.
 
     Every value is a str/int/list of str so the dict is simultaneously valid JSON and a valid
@@ -160,7 +167,7 @@ def cell_record(shard: dict) -> dict:
         f"{shard['shard_id']}: training-set flag contradicts the derived role")
     return {
         "kind": "d1_factorial_cell",
-        "tier": "smoke",
+        "tier": tier,
         "shard_id": shard["shard_id"],
         "stage": int(shard["stage"]),
         "split": split,
@@ -176,9 +183,9 @@ def cell_record(shard: dict) -> dict:
         "gt_nodes_total": int(shard["gt_nodes_total"]),
         "est_bytes": int(shard["est_bytes"]),
         "est_wall_hours": float(shard["est_wall_hours"]),
-        "manifest": "data/d1_factorial/manifest_smoke.json",
-        "manifest_sha256_lf": sha_lf(MANIFEST),
-        "spec": f"p3_d1_smoke_{cell_key(shard)}",
+        "manifest": f"data/d1_factorial/manifest_{tier}.json",
+        "manifest_sha256_lf": sha_lf(MANIFESTS[tier]),
+        "spec": f"p3_d1_{tier}_{cell_key(shard)}",
     }
 
 
@@ -286,7 +293,7 @@ def identity_code(rec: dict) -> str:
     ]) + "\n"
 
 
-def build(shard: dict) -> dict:
+def build(shard: dict, tier: str = "smoke") -> dict:
     backbone = json.loads(BACKBONE.read_text(encoding="utf-8"))
     loeo = json.loads(LOEO.read_text(encoding="utf-8"))
     b_edits, l_edits = backbone["edits"], loeo["edits"]
@@ -319,7 +326,7 @@ def build(shard: dict) -> dict:
     invariants = [e for e in b_edits if e is not harmonic[0]]
     assert len(invariants) == 9, f"expected 9 invariant edits, got {len(invariants)}"
 
-    rec = cell_record(shard)
+    rec = cell_record(shard, tier=tier)
     key = cell_key(shard)
     split, fold, role = rec["split"], rec["fold"], rec["role"]
     stems = rec["crops"]
@@ -446,11 +453,11 @@ def build(shard: dict) -> dict:
         n += 1
 
     add({"kind": "env", "cell_match": "BIOHUB_PRESET", "vars": env_vars, "expect": 1},
-        "E01_env", "assembler+manifest_smoke.json",
+        "E01_env", f"assembler+manifest_{tier}.json",
         "1. environment: LOEO fold routing + D1 knobs")
     add(l_edits[1], "E02_loeo_retarget", "loeo_f1_strict_pregraph#1",
         "1. LOEO retarget: mount fold crops, rebind TEST_DIR, resolve fold weights")
-    add(cell_identity, "E02b_cell_identity", "assembler+manifest_smoke.json",
+    add(cell_identity, "E02b_cell_identity", f"assembler+manifest_{tier}.json",
         "1. factorial cell identity: re-derive the role, verify the loaded checkpoint, "
         "emit d1_cell.json")
     add(l_edits[2], "E03_test_stems", "loeo_f1_strict_pregraph#2",
@@ -481,13 +488,16 @@ def build(shard: dict) -> dict:
         if role == "source" else
         "the checkpoint runs over the family it has NEVER seen, so these rows are the "
         "measurement and are opened exactly once after the head is frozen")
+    purpose_prefix = (
+        "STRUCTURAL SMOKE" if tier == "smoke" else "PILOT FACTORIAL EXPORT"
+    )
 
     return {
-        "name": f"p3_d1_smoke_{key}",
-        "slug": f"biohub-p3-d1-smoke-{key.replace('_', '-')}",
-        "title": f"Biohub P3 D1 Smoke {key.upper().replace('_', ' ')}",
-        "code_file": f"biohub-p3-d1-smoke-{key.replace('_', '-')}.ipynb",
-        "out_dir": f"notebooks/kaggle_p3_d1_smoke_{key}",
+        "name": f"p3_d1_{tier}_{key}",
+        "slug": f"biohub-p3-d1-{tier}-{key.replace('_', '-')}",
+        "title": f"Biohub P3 D1 {tier.title()} {key.upper().replace('_', ' ')}",
+        "code_file": f"biohub-p3-d1-{tier}-{key.replace('_', '-')}.ipynb",
+        "out_dir": f"notebooks/kaggle_p3_d1_{tier}_{key}",
         "datasets": loeo["datasets"],
         "competition_sources": loeo["competition_sources"],
         "enable_gpu": True,
@@ -499,7 +509,7 @@ def build(shard: dict) -> dict:
         "base_sha256": backbone["base_sha256"],
         "d1_cell": rec,
         "purpose": (
-            f"STRUCTURAL SMOKE. Factorial cell {rec['shard_id']} (stage {rec['stage']} of 4): "
+            f"{purpose_prefix}. Factorial cell {rec['shard_id']} (stage {rec['stage']} of 4): "
             f"the split_{split} checkpoint over {len(stems)} {rec['family']} crop(s), role "
             f"{role_word} -- {role_gloss}. The four smoke cells together encode all three "
             "crops under BOTH checkpoints, which is what makes the C1 2x2 runnable at all: a "
@@ -530,7 +540,7 @@ def build(shard: dict) -> dict:
             "checkpoint_sha256": rec["checkpoint_sha256"],
             "stems": stems,
             "routing_source": (
-                f"data/d1_factorial/manifest_smoke.json shard {rec['shard_id']} "
+                f"data/d1_factorial/manifest_{tier}.json shard {rec['shard_id']} "
                 f"(LF sha256 {rec['manifest_sha256_lf']}). Stems, weights glob, config glob, "
                 "fold, checkpoint hash and expected-crop count are copied from the shard and "
                 "asserted equal; nothing here is transcribed and no glob stands in for a "
@@ -559,9 +569,13 @@ def build(shard: dict) -> dict:
     }
 
 
-def main() -> None:
-    for shard in load_shards():
-        spec = build(shard)
+def main(argv: list[str] | None = ()) -> None:
+    ap = argparse.ArgumentParser(description="Assemble cross-encoded P3+D1 factorial specs")
+    ap.add_argument("--tier", choices=sorted(MANIFESTS), default="smoke")
+    args = ap.parse_args(argv)
+    tier = args.tier
+    for shard in load_shards(tier):
+        spec = build(shard, tier=tier)
         out = SPECS / f"{spec['name']}.json"
         text = json.dumps(spec, indent=2, sort_keys=False) + "\n"
         out.write_text(text, encoding="utf-8")
@@ -573,4 +587,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
