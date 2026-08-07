@@ -4259,3 +4259,54 @@ into build_manifest.json) is cosmetic and untouched.
 
 **Stage 3 is now structurally unblocked but NOT authorised.** GPU spend awaits the two CPU
 lanes and explicit approval.
+
+## 2026-08-07 (post-lean) — corpus census: arbitration closed, threshold lever refuted
+
+**Execution.** R2-P1 merged. 199/199 crops, 133,318 GT nodes, scorer-exact, CPU only.
+`reports/CORPUS_CTLD_CENSUS.md`. Zero GPU, zero Kaggle, zero submission.
+
+**The 43x disagreement is settled.** Measured 59 arbitration-loss nodes -> +0.000581 pooled.
++0.00045 and +0.0012 bracket the truth; **+0.019 is refuted by ~31x**. Cause identified, not
+asserted: the 3-crop M=1,521 was the POST-wrapper scorer node match of a degraded smoke
+submission (adj-J 0.33 on 6bba against deployed 0.648, det_threshold 0.96875), differenced
+against a PRE-wrapper accepted-peak count of 1,794. The ~273-node "C class" was measuring
+wrapper/solver node loss, not detector arbitration. **Split/merge arbitration is closed at
+<=59 nodes / ~+0.0006 pooled.** Substrate-independent: repeating on P0-B pregraphs reproduces
+A7 exactly and gives L_assign = 50.
+
+**Detection is not closed.** Recall 91.881% pooled (44b6 95.836% / 6bba 91.175%). Ceiling
++0.08088 at p=1, +0.03764 at p=0.7/phi=2, bilaterally positive to p ~ 0.6, break-even
+p ~ 0.55. +0.020 at p=0.7 needs 6,695 coherent / 8,257 random nodes -- so the earlier
+"5,400-7,600, not 2,961" correction was right in direction and still ~20% optimistic.
+
+**The finding that changes the pilot.** Acceptance 0.990 -> 0.969 over all 199 crops admits
+~530-590k nodes to recover 1,656 GT: marginal precision **~0.003 where the ceiling needs
+~0.55**. I verified this independently on the only two crops holding both thresholds:
+44b6_0113de3b +6,420 nodes -> +0 GT (52/52 at both); 6bba_05b6850b +381 nodes -> +1 GT.
+**Re-acceptance cannot be a threshold. It must be a ranker**, and the pilot must demonstrate
+ranking rather than assume it. The HANDOFF's "per-crop scalar threshold under a fixed node
+budget" fallback is therefore already priced -- and it is negative (-0.0234 pooled at the
+empirical phi).
+
+**Corrections carried in.** (1) The scorer MAXIMISES 1/(1+d); it does not minimise distance.
+Gate A's matcher was wrong; the census matcher agrees node-for-node with
+`biotrack.metric_numpy.match_nodes` on 20 random crops. (2) `clean903_wrapper_oof_cache` is
+"clean903 wrapper on frozen 0.990 detections" -- a strict subset of the deployed 0.969 set and
+unusable for metric claims. Verified here: its raw_nodes for 44b6_0113de3b is exactly the
+28,119 of the det-0.99 npz. (3) "44b6 holds 2.42% of at-stake edge mass" is SUBSTRATE-SPECIFIC,
+not a corpus property -- 10.80% on the deployed export. The stable per-family quantity is the
+scorer weight share, 14.86% / 85.14%. That weakens, but does not remove, the private-embryo
+portability worry.
+
+**My own check disagrees slightly and immaterially:** admitted-node denominator 527,276 vs the
+lane's 588,766 (11.7%, most likely nodes carrying no candidate edge), giving marginal precision
+0.00314 vs 0.00281. The gap to 0.55 is ~175x either way.
+
+**Largest unmeasured item:** the corpus split of the 10,765 NA7 nodes. Corpus T is NOT
+CPU-reachable -- it needs rejected maxima and no logit volume exists on disk for any crop. The
+3-crop extrapolation is 3,100-7,400 nodes, 2.4x wide, with zero 44b6 basis. Second: phi has
+never been measured for a TARGETED re-acceptance, and the sign of the ceiling below p ~ 0.6 is
+entirely a phi argument.
+
+**State.** master, 552 tests, 53 claims. R2-A1 (probability-at-the-deployed-gate oracle) still
+running; it has been sent the clean903 and 2.42% corrections mid-flight.
