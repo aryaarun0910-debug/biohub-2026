@@ -42,8 +42,8 @@ import polars as pl  # noqa: E402
 from h1t_external_critic import FEATS, NEG_PER_POS, SEED, balance  # noqa: E402
 from phaseb_h0c_replay import CFG_HASH  # noqa: E402
 
-AGENT4 = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026_RESEARCH\agent_runs\agent4")
-LANED = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026_RESEARCH\agent_runs\laneD")
+AGENT4 = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026\_evidence\agent_runs\agent4")
+LANED = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026\_evidence\agent_runs\laneD")
 COMP = ROOT / "artifacts/kaggle/e0c_cache/fork_candidates/h1g_features"
 WEIGHTS = AGENT4 / "h1t_critic_weights.npz"
 EVENTS = AGENT4 / "external_events"

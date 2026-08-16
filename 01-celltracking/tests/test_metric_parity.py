@@ -2,7 +2,7 @@
 
 Our numpy metric was only validated on 7 hand-built adversarial cases; this confirms it agrees with the
 organizer's DistanceMatching on a real crowded crop (dense-frame tie handling). Skips when local train
-data is absent (e.g. CI). The full multi-crop check is scripts/validate_metric_parity.py.
+data is absent (e.g. CI). The full multi-crop check is scripts/metric/validate_metric_parity.py.
 """
 import sys
 from pathlib import Path

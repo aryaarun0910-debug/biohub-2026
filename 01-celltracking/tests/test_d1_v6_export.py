@@ -36,7 +36,7 @@ INJECT_SRC = ROOT / "scripts" / "kaggle_edits" / "d1_inject.py"
 PREDICT = ROOT / "vendor" / "kaggle-cell-tracking" / "scripts" / "predict_unet_transformer.py"
 NOTEBOOK = ROOT / "notebooks" / "kaggle_p3_d1_smoke_f0" / "biohub-p3-d1-smoke-f0.ipynb"
 SPECS = [ROOT / "scripts" / "kaggle_specs" / f"p3_d1_smoke_f{f}.json" for f in (0, 1)]
-POSTPROCESS = ROOT / "scripts" / "d1_postprocess.py"
+POSTPROCESS = ROOT / "scripts" / "d1" / "d1_postprocess.py"
 
 VIEW_SET = [
     "identity", "flip_x", "flip_y", "flip_xy",
@@ -501,7 +501,7 @@ def test_manifest_records_the_view_set_and_the_population_fields(audit_run):
     assert man["n_encode_calls"] == 8
     assert man["n_distinct_views"] == 7
     assert "n_views" not in man, "the 8/7 split must never be conflated into one field"
-    # RADII: these arm `assert_export_radii` in scripts/d1_postprocess.py, which is
+    # RADII: these arm `assert_export_radii` in scripts/d1/d1_postprocess.py, which is
     # wired but inert against v5 because v5 records neither.
     assert man["match_um"] == 7.0 and man["search_um"] == 15.0
     assert man["grid_zyx"] == [5, 9, 9]
@@ -684,7 +684,7 @@ def test_accepted_peak_set_equality_is_computed_from_the_real_pooling_rule(tmp_p
 # 5. the injector's structure
 # ======================================================================================
 def test_embedded_block_is_the_current_audit_source():
-    """d1_inject.py is hand-maintained for v6; scripts/gen_d1_inject.py still emits the v5
+    """d1_inject.py is hand-maintained for v6; scripts/d1/gen_d1_inject.py still emits the v5
     three-injection template. If anyone regenerates with it, this and the marker test below
     both fail rather than silently shipping a v5 injector with a v6 payload."""
     text = INJECT_SRC.read_text(encoding="utf-8")

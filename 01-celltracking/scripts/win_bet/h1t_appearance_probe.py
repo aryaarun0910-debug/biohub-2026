@@ -38,7 +38,7 @@ import polars as pl  # noqa: E402
 from h1t_external_critic import COMP, FEATS  # noqa: E402
 from phaseb_d0p_proposer import SCALE, load_e0c_tables  # noqa: E402
 
-SCRATCH = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026_RESEARCH\agent_runs\agent4")
+SCRATCH = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026\_evidence\agent_runs\agent4")
 WEIGHTS = SCRATCH / "h1t_critic_weights.npz"
 OUT = SCRATCH / "h1t_appearance.json"
 R_NUC_UM = 3.5      # nuclear ball

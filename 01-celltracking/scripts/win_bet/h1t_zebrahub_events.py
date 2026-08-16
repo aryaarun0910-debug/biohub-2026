@@ -61,7 +61,7 @@ import polars as pl  # noqa: E402
 from phaseb_h0c_replay import CFG, CFG_HASH, shortlist  # noqa: E402
 
 RAW = ROOT / "data" / "external" / "zebrahub"
-SCRATCH = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026_RESEARCH\agent_runs\agent4")
+SCRATCH = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026\_evidence\agent_runs\agent4")
 PREP = SCRATCH / "zebrahub_prep"
 EVENTS = SCRATCH / "external_events"
 EPS = 1e-9

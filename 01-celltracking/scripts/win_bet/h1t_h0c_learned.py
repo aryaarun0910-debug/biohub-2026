@@ -41,7 +41,7 @@ from phaseb_h0c_replay import CFG, CFG_HASH, shortlist  # noqa: E402
 from h1t_external_critic import FEATS  # noqa: E402
 from h1t_zebrahub_events import h1g_features  # noqa: E402
 
-SCRATCH = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026_RESEARCH\agent_runs\agent4")
+SCRATCH = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026\_evidence\agent_runs\agent4")
 WEIGHTS = SCRATCH / "h1t_critic_weights.npz"
 OUT_JSON = SCRATCH / "h1t_h0c_learned.json"
 E0C = {0: 0.7595, 1: 0.6490}

@@ -58,7 +58,7 @@ def arm_graph_path(arm: str, split, crop: str) -> Path:
         return CACHE / "graphs" / str(split) / f"{crop}.parquet"
     return COUPLED_ARMS / arm / str(split) / f"{crop}.parquet"
 
-OUT = ROOT / "reports/inventory/node_budget_sweep.json"
+OUT = ROOT / "research/06-knowledge-system/inventory/node_budget_sweep.json"
 KEEP_FRACS = (1.00, 0.975, 0.95, 0.90, 0.85, 0.80)
 
 

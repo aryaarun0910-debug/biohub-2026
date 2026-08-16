@@ -45,7 +45,7 @@ from phaseb_d0p_proposer import CACHE, cached_crops, load_e0c_tables  # noqa: E4
 from phaseb_h0c_replay import CFG, CFG_HASH, shortlist  # noqa: E402
 
 TABLE = CACHE / "fork_candidates" / "h0c_top3"
-OUT_JSON = ROOT / "reports/inventory/phaseb_h1a_census.json"
+OUT_JSON = ROOT / "research/06-knowledge-system/inventory/phaseb_h1a_census.json"
 EXPECTED_ROWS = 14_371_002
 
 

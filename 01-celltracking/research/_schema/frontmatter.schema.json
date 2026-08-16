@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "biohub/research/frontmatter",
+  "title": "Research markdown frontmatter",
+  "description": "Every .md under research/ must open with a YAML frontmatter block conforming to this schema. Enforced by scripts/validate_research_tree.py.",
+  "type": "object",
+  "required": ["id", "title", "area", "status", "updated", "owner", "links", "tags"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^0[0-7]-[a-z-]+/[a-z0-9-]+$",
+      "description": "area/slug, e.g. 02-theory/mechanisms"
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "area": {
+      "type": "string",
+      "enum": [
+        "00-system", "01-research-direction", "02-theory", "03-experimentation",
+        "04-data", "05-analysis", "06-knowledge-system", "07-outputs"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "scaffold", "reference", "generated", "superseded"]
+    },
+    "updated": { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "owner": { "type": "string", "minLength": 1 },
+    "links": { "type": "array", "items": { "type": "string" } },
+    "tags": { "type": "array", "items": { "type": "string" } }
+  }
+}

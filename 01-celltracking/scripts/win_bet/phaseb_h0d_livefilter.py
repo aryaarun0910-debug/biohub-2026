@@ -91,7 +91,7 @@ import polars as pl  # noqa: E402
 from phaseb_d0p_proposer import SCALE  # noqa: E402
 from phaseb_h0c_replay import CFG, CFG_HASH, shortlist  # noqa: E402  (frozen, verbatim)
 
-DEFAULT_OUT = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026_RESEARCH"
+DEFAULT_OUT = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026\_evidence"
                    r"\agent_runs\agent2\phaseb_h0d_livefilter.json")
 
 # Graph surfaces. Every one of these stores the identical parquet schema

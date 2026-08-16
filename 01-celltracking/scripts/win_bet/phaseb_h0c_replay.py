@@ -44,7 +44,7 @@ from phaseb_d0p_proposer import (  # noqa: E402
     CACHE, SCALE, cached_crops, load_e0c_tables, _continuations,
 )
 
-OUT_JSON = ROOT / "reports/inventory/phaseb_h0c_replay.json"
+OUT_JSON = ROOT / "research/06-knowledge-system/inventory/phaseb_h0c_replay.json"
 CFG = {"parent_um": 15.0, "sister_um": 15.0, "rank": "flow_midpoint_residual", "topk": 3,
        "flow": "knn", "knn_k": 16, "knn_min": 4, "suppress": "all_lowest_id",
        "reconstruct": "add_replace"}

@@ -41,7 +41,7 @@ import polars as pl  # noqa: E402
 from phaseb_d0p_proposer import CACHE, cached_crops, load_e0c_tables  # noqa: E402
 from phaseb_h0c_replay import CFG_HASH, shortlist  # noqa: E402
 
-OUT = ROOT / "reports/inventory/pooled_breakeven.json"
+OUT = ROOT / "research/06-knowledge-system/inventory/pooled_breakeven.json"
 CENSUS = CACHE / "fork_candidates" / "h0c_top3"
 
 

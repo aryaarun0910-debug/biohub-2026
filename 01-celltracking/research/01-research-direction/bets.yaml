@@ -1,0 +1,105 @@
+# Research bet portfolio (machine-readable). Mirrors research-bets.md.
+# Validated against ../_schema/bet.schema.json by scripts/validate_research_tree.py.
+bets:
+  - id: bet-motion-gate
+    title: Motion-residual flow gate (arm B) on the deployment substrate
+    theme: E
+    hypothesis: >
+      A flow-compensated relink eligibility gate (|target-(source+flow(source))|) recovers
+      false-rejected links in fast-moving tissue and improves adj_edge_jaccard when composed
+      with harmonic fusion.
+    mechanism: >
+      GT-free kNN-16 median flow compensates local tissue motion before the distance gate;
+      measured together with harmonic because both rewrite `prob`.
+    expected_benefit: "+0.0088 pooled (min-fold +0.0074); P0-strict LOEO +0.0080, P(d>0)=1.0"
+    cost: low
+    status: measuring
+    falsification: >
+      Not bilaterally positive vs P3-alone on the two built LOEO-export kernels
+      (either fold <= its anchor: 44b6 0.759549 / 6bba 0.648965).
+    links: ["02-theory/mechanisms.md", "07-outputs/deployed-artifacts.md"]
+    evidence: ["P0-strict LOEO", "E0c replay"]
+
+  - id: bet-zebrahub-retrain
+    title: Retrain detector/associator on external Zebrahub
+    theme: A
+    hypothesis: >
+      Training the detector/associator on external same-domain Zebrahub imaging + dense Ultrack
+      lineages pushes adj_edge_jaccard past the ~0.91 public wall.
+    mechanism: >
+      Same-domain external supervision generalises the edge model beyond the public 50-epoch
+      checkpoint the whole field shares.
+    expected_benefit: "past the ~0.91 adj_edge_J public plateau (the measured path off it)"
+    cost: high
+    status: proposed
+    falsification: "No LOEO gain over the public 50ep weights (train 6bba/eval 44b6 and reverse)."
+    links: ["01-research-direction/research-landscape.md", "04-data/data-acquisition.md"]
+    evidence: []
+
+  - id: bet-learned-ranker
+    title: Learned FP-suppressing candidate ranker
+    theme: B
+    hypothesis: >
+      Over-propose candidates (recall ~0.98) then re-score each with a small transformer to
+      restore precision on the junk pool that the linker currently mis-links.
+    mechanism: >
+      A ranker (not a threshold) attends to neighbours and suppresses false positives on the
+      rare/small/low-confidence candidates that are our failure mode.
+    expected_benefit: "restore precision where marginal scalar precision ~0.003 vs ceiling ~0.55"
+    cost: high
+    status: proposed
+    falsification: "Cross-family ranker AUC no better than the scalar threshold it replaces."
+    links: ["02-theory/mechanisms.md", "05-analysis/machine-learning-deep-learning.md"]
+    evidence: []
+
+  - id: bet-synthetic-division
+    title: Synthetic / dense division supervision
+    theme: C
+    hypothesis: >
+      Adding Freitas synthetic divisions (pooling-matched) as supervision raises real-fold
+      division_jaccard and supports the retrain/ranker bets.
+    mechanism: "165k labeled divisions (~540x real) give the division head signal the corpus lacks."
+    expected_benefit: "division supervision feeding Themes A/B"
+    cost: medium
+    status: proposed
+    falsification: "Synthetic divisions do not transfer: real-fold division_J does not rise on LOEO."
+    links: ["04-data/data-acquisition.md"]
+    evidence: []
+
+  - id: bet-division-selector
+    title: High-precision fork selector for the division ceiling
+    theme: D
+    hypothesis: >
+      A high-precision fork selector banks the +0.06 division ceiling without inflating FP forks.
+    mechanism: "A learned division edge-head (e.g. HOCT-style) selects forks above the break-even."
+    expected_benefit: "+0.06 GT-oracle ceiling (needs ~10% precision at full recall)"
+    cost: medium
+    status: parked
+    falsification: "Fork-selector precision below the ~10% break-even at full recall."
+    links: ["06-knowledge-system/papers.md"]
+    evidence: []
+
+  # --- closed (kept for memory; do not reopen without a new mechanism + falsification) ---
+  - id: bet-scalar-reacceptance
+    title: Scalar-threshold re-acceptance
+    theme: B
+    hypothesis: "A scalar confidence threshold re-accepts missed detections."
+    mechanism: "Threshold on detection confidence."
+    expected_benefit: "negative"
+    cost: low
+    status: lost
+    falsification: "Measured -0.023 on LOEO; detection recovery is a ranker, not a threshold."
+    links: ["06-knowledge-system/failed-experiments.md"]
+    evidence: ["LOEO -0.023"]
+
+  - id: bet-component-selector
+    title: GT-free component selector
+    theme: E
+    hypothesis: "A GT-free selector prunes junk components net-positive."
+    mechanism: "Score-based component retention."
+    expected_benefit: "negative"
+    cost: low
+    status: lost
+    falsification: "Measured -0.008 on LOEO; removes more signal than junk."
+    links: ["06-knowledge-system/failed-experiments.md"]
+    evidence: ["LOEO -0.008"]

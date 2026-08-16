@@ -88,7 +88,7 @@ PRIMARY METRIC
 EXACT POOLED OOF: every crop from both folds goes into ONE combined
 `tracking_cellmot.metrics.summarise()` call. Per-family composites are DIAGNOSTICS ONLY --
 44b6 carries ~15% of edge mass, so averaging or min-ing the families optimises a different
-objective (see scripts/verify_pooled_objective.py).
+objective (see scripts/metric/verify_pooled_objective.py).
 
 Usage:
   smoke (<=3 crops, no full-corpus run):
@@ -125,7 +125,7 @@ from phaseb_h0d_livefilter import (  # noqa: E402  (surface handling + collision
     load_surface_tables, surface_crops, surface_min_track_len, wrapper_component_filter,
 )
 
-DEFAULT_OUT = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026_RESEARCH"
+DEFAULT_OUT = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026\_evidence"
                    r"\agent_runs\hybrid\phaseb_h2a_hybrid_oracle.json")
 
 # Hybrid configuration. FROZEN BEFORE EXECUTION; hashed into the output so a retune is visible.

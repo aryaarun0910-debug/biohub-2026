@@ -1,6 +1,6 @@
 """Acceptance locks for the D1-F frozen-feature linear probe.
 
-`scripts/d1f_probe.py` was rewritten wholesale and merged to master WITHOUT TESTS. This
+`scripts/d1/d1f_probe.py` was rewritten wholesale and merged to master WITHOUT TESTS. This
 module is the missing gate. It is organised as one section per acceptance criterion, and
 each section states what would have to be true of the instrument for the corresponding
 number to mean anything.
@@ -22,7 +22,7 @@ as evidence and was not:
      association representation and must never be mutated.
   6. A manifest is authoritative; a glob is not. A missing crop must raise and be named.
   7. The M/C/T/L/D partition is the SCORER's. Bind to `biotrack.metric.MAX_DISTANCE`,
-     never to a literal 7.0, and reuse `scripts/d1_postprocess.py` rather than
+     never to a literal 7.0, and reuse `scripts/d1/d1_postprocess.py` rather than
      reimplementing it.
   8. Joins must be deterministic and the 32-D features finite: two runs, identical bytes.
 
@@ -521,7 +521,7 @@ def test_the_probe_never_names_unet_out_at_all():
     """`unet_out` is read at L442/L445 by `predict_edges`, AFTER the TTA block. This
     module is a numpy probe over an exported row table and has no business touching it;
     the safest guarantee is that the identifier does not appear."""
-    src = (ROOT / "scripts" / "d1f_probe.py").read_text(encoding="utf-8")
+    src = (ROOT / "scripts" / "d1" / "d1f_probe.py").read_text(encoding="utf-8")
     assert "unet_out" not in src
 
 
@@ -724,9 +724,9 @@ def test_every_component_agrees_on_the_match_radius():
 
 
 def test_the_probe_does_not_reimplement_the_partition():
-    """C6 / criterion 7: `scripts/d1_postprocess.py` is the merged reference
+    """C6 / criterion 7: `scripts/d1/d1_postprocess.py` is the merged reference
     implementation with 58 tests. A second copy inside the probe would drift."""
-    src = (ROOT / "scripts" / "d1f_probe.py").read_text(encoding="utf-8")
+    src = (ROOT / "scripts" / "d1" / "d1f_probe.py").read_text(encoding="utf-8")
     for token in ("MATCH_UM", "SEARCH_UM", "def classify"):
         assert token not in src, f"the probe appears to reimplement the partition: {token}"
     # `d_stratum` may appear ONLY in the list of columns the export must not emit.
@@ -738,7 +738,7 @@ def test_the_probe_does_not_reimplement_the_partition():
 def test_the_probe_contains_no_bare_match_radius_literal():
     """A literal 7.0 anywhere in the probe would be a second, unbound copy of the
     scorer's match radius."""
-    src = (ROOT / "scripts" / "d1f_probe.py").read_text(encoding="utf-8")
+    src = (ROOT / "scripts" / "d1" / "d1f_probe.py").read_text(encoding="utf-8")
     assert "7.0" not in src
 
 
@@ -908,7 +908,7 @@ def test_an_unlisted_verdict_is_refused_even_without_a_forbidden_token():
 
 def test_the_module_mentions_representation_deficit_only_as_a_prohibition():
     """Audit item: the phrase must appear only where it is being FORBIDDEN."""
-    src = (ROOT / "scripts" / "d1f_probe.py").read_text(encoding="utf-8")
+    src = (ROOT / "scripts" / "d1" / "d1f_probe.py").read_text(encoding="utf-8")
     lines = [ln for ln in src.splitlines() if "REPRESENTATION DEFICIT" in ln.upper()]
     assert lines, "the prohibition itself has gone missing"
     for ln in lines:
@@ -1086,7 +1086,7 @@ def test_the_re_acceptance_head_is_never_called_calibration():
     """M1 is a re-DIRECTION with 32 degrees of freedom: it escapes the level-set theorem
     entirely. Conflating a 32-DOF rotation with a 1-DOF monotone rescale is exactly the
     error the verdict split exists to prevent."""
-    src = (ROOT / "scripts" / "d1f_probe.py").read_text(encoding="utf-8")
+    src = (ROOT / "scripts" / "d1" / "d1f_probe.py").read_text(encoding="utf-8")
     for line in src.splitlines():
         low = line.lower()
         if "m1" in low.split() or "re-acceptance" in low:

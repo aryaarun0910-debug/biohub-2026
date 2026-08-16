@@ -554,7 +554,7 @@ def test_match_um_is_bound_to_the_scorer_rather_than_written_down():
 
     assert MATCH_UM == float(MAX_DISTANCE)
     assert MATCH_UM == float(inspect.signature(_ev).parameters["max_distance"].default)
-    src = (ROOT / "scripts" / "d1_postprocess.py").read_text(encoding="utf-8")
+    src = (ROOT / "scripts" / "d1" / "d1_postprocess.py").read_text(encoding="utf-8")
     assert "MATCH_UM: float = float(MAX_DISTANCE)" in src, (
         "MATCH_UM is a literal again; a scorer change would silently desynchronise the "
         "partition from the matching that defines it"
@@ -1229,11 +1229,9 @@ def test_two_export_schemas_may_not_share_a_derived_directory(tmp_path):
 # and 49/52 under submission. That fold is IN-FAMILY and carries NO 6bba representation.
 # =============================================================================================
 def _research_root():
-    for base in (ROOT, *ROOT.parents):
-        cand = base.parent / "Biohub-CellTracking-2026_RESEARCH"
-        if cand.is_dir():
-            return cand
-    return None
+    # evidence was folded into the repo as _evidence/ (research-machine restructure, 2026-08-16)
+    evid = ROOT / "_evidence"
+    return evid if evid.is_dir() else None
 
 
 _RESEARCH = _research_root()

@@ -19,7 +19,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-ARTIFACT = ROOT / "reports" / "inventory" / "decision_div_threshold.json"
+ARTIFACT = ROOT / "research" / "06-knowledge-system" / "inventory" / "decision_div_threshold.json"
 
 PUBLISHED_BASE_POOLED = 0.6654043056779476
 

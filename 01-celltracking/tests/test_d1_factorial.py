@@ -20,7 +20,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parent.parent
-SCRIPT = REPO / "scripts" / "build_d1_factorial_manifests.py"
+SCRIPT = REPO / "scripts" / "d1" / "build_d1_factorial_manifests.py"
 FACT_DIR = REPO / "data" / "d1_factorial"
 CENSUS = FACT_DIR / "crop_census.json"
 

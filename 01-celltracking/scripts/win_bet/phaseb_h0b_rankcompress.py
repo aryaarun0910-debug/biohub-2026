@@ -47,7 +47,7 @@ from phaseb_d0p_proposer import (  # noqa: E402
     CACHE, SCALE, cached_crops, load_e0c_tables, _continuations,
 )
 
-OUT_JSON = ROOT / "reports/inventory/phaseb_h0b_rankcompress.json"
+OUT_JSON = ROOT / "research/06-knowledge-system/inventory/phaseb_h0b_rankcompress.json"
 SURFACE = {"parent_um": 15.0, "sister_um": 15.0, "flow": "knn", "knn_k": 16, "knn_min": 4}
 RANKINGS = ("midpoint_residual", "parent_midpoint", "sister_separation", "persistence", "fwd_support")
 K_GRID = (1, 2, 3, 5, 10, 20, 50, 100)

@@ -49,7 +49,7 @@ sys.path.insert(0, str(ROOT / "src"))
 import polars as pl  # noqa: E402
 
 CACHE = ROOT / "artifacts/kaggle/e0c_cache"
-OUT_JSON = ROOT / "reports/inventory/phaseb_d0p_proposer.json"
+OUT_JSON = ROOT / "research/06-knowledge-system/inventory/phaseb_d0p_proposer.json"
 TABLE_DIR = CACHE / "fork_candidates"  # canonical bridge table (D0R persists here)
 E0C = {0: 0.7595, 1: 0.6490}
 SCALE = (1.625, 0.40625, 0.40625)

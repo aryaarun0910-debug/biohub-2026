@@ -38,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import polars as pl  # noqa: E402
 
-SCRATCH = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026_RESEARCH\agent_runs\agent4")
+SCRATCH = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026\_evidence\agent_runs\agent4")
 EVENTS = SCRATCH / "external_events"
 COMP = ROOT / "artifacts/kaggle/e0c_cache/fork_candidates/h1g_features"
 OUT = SCRATCH / "h1t_results.json"

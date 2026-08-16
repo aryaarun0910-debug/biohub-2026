@@ -8,7 +8,7 @@ These tests fail if anyone restores 50/50 family weighting, or a bilateral-delta
 PRIMARY selection criterion. Min-fold remains legitimate as a robustness CONSTRAINT reported
 alongside the pooled score -- it is just not the thing being optimised.
 
-See scripts/verify_pooled_objective.py for the full proof against cached per-crop rows.
+See scripts/metric/verify_pooled_objective.py for the full proof against cached per-crop rows.
 """
 from __future__ import annotations
 
@@ -131,7 +131,7 @@ def test_canonical_anchor_is_unambiguous():
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[1]
-    p = root / "reports" / "inventory" / "pooled_objective_parity.json"
+    p = root / "research" / "06-knowledge-system" / "inventory" / "pooled_objective_parity.json"
     if not p.exists():
         import pytest
         pytest.skip("pooled_objective_parity.json absent")

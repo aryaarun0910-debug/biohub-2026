@@ -1,6 +1,6 @@
 """The smoke build must BE the 2x2, not merely be adjacent to it.
 
-`scripts/d1f_probe.py::run_direction` raises `CROSS-ENCODED` when it is handed a routed-only
+`scripts/d1/d1f_probe.py::run_direction` raises `CROSS-ENCODED` when it is handed a routed-only
 export, and it is right to: correction C1 established that the two 32-D bases are independent
 (rel-L2 1.41542 ~ sqrt(2), cos(w0,w1) = -0.155), so a head fitted in split-0's basis cannot be
 evaluated in split-1's. The 2x2 therefore needs the SAME checkpoint to encode both families,

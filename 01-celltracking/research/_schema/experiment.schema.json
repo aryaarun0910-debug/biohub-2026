@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "biohub/research/experiment",
+  "title": "Experiment ledger row",
+  "description": "Shape of a single experiment record in 06-knowledge-system/experimental-records.md (the human ledger keeps these fields per row).",
+  "type": "object",
+  "required": ["id", "hypothesis", "parent", "basis", "decision"],
+  "additionalProperties": true,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "hypothesis": { "type": "string", "minLength": 1 },
+    "parent": { "type": "string", "description": "Parent experiment or baseline" },
+    "code_hash": { "type": "string" },
+    "config_hash": { "type": "string" },
+    "input_hash": { "type": "string" },
+    "basis": {
+      "type": "string",
+      "enum": ["public", "exact-pooled-OOF", "cross-family-LOFO", "in-family-CV", "placeholder-proxy", "GT-oracle"],
+      "description": "The six legal validation bases (same vocabulary as claims_table.py)"
+    },
+    "pooled_metric": { "type": ["number", "string"] },
+    "per_family_metric": { "type": ["object", "string"] },
+    "runtime": { "type": "string" },
+    "decision": { "type": "string", "enum": ["promote", "reject", "iterate", "park"] },
+    "falsification_reason": { "type": "string" }
+  }
+}

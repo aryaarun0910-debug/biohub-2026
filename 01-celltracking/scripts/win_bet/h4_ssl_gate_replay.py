@@ -32,7 +32,7 @@ Inputs
 Usage (AWAITING GO)
 -------------------
   .venv\\Scripts\\python.exe scripts\\win_bet\\h4_ssl_gate_replay.py ^
-      --admit <admit.parquet> --workers 6 --out reports/inventory/h4_ssl_gate_replay.json
+      --admit <admit.parquet> --workers 6 --out research/06-knowledge-system/inventory/h4_ssl_gate_replay.json
 """
 from __future__ import annotations
 
@@ -132,7 +132,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--admit", required=True)
     ap.add_argument("--workers", type=int, default=6)
-    ap.add_argument("--out", default=str(ROOT / "reports/inventory/h4_ssl_gate_replay.json"))
+    ap.add_argument("--out", default=str(ROOT / "research/06-knowledge-system/inventory/h4_ssl_gate_replay.json"))
     a = ap.parse_args()
 
     adm = pl.read_parquet(a.admit)

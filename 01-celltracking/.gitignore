@@ -5,16 +5,27 @@ data/
 .venv-trackastra/
 # vendored organizer repo - reproducible via git clone (see pyproject.toml)
 vendor/
-# pretrained weights - reproducible from public URLs (see reports/research/)
+# pretrained weights - reproducible from public URLs (see research/04-data/data-acquisition.md)
 weights/
 __pycache__/
 *.pyc
 .pytest_cache/
+*.egg-info/
 kt_out/
 artifacts/
 scratch_live_lb/
 scratch_public_kernels/
-reports/*.log
-reports/inventory/spotiflow_zeroshot.csv
 scratch_lb/
 scratch_nb/
+/biohub-cell-tracking-during-development.zip
+# consolidated raw research store (was the _RESEARCH sibling) - durable-raw evidence tier
+_evidence/
+# research DB and backups live physically in-repo but stay untracked (binary)
+research/**/*.sqlite
+research/**/*.sqlite.bak*
+# transient logs and the one large zero-shot csv kept as evidence, not tracked
+research/**/*.log
+research/06-knowledge-system/inventory/spotiflow_zeroshot.csv
+# RAG artifacts (embeddings, vector stores, indexes) live under .claude/rag/ - gitignored
+# (large/binary); the RAG POLICY is tracked in research/04-data/databases.md
+.claude/rag/

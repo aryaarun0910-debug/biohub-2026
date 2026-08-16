@@ -42,7 +42,7 @@ import polars as pl  # noqa: E402
 
 CACHE = ROOT / "artifacts/kaggle/e0c_cache"
 ORACLE_DIR = CACHE / "GT_ORACLE_do_not_submit"
-OUT_JSON = ROOT / "reports/inventory/phaseb_oracle_d0prime.json"
+OUT_JSON = ROOT / "research/06-knowledge-system/inventory/phaseb_oracle_d0prime.json"
 
 # Historical patched anchors (journal 2026-07-19): (edge_jaccard, composite)
 E0C = {0: (0.7595, 0.7595), 1: (0.6484, 0.6490)}

@@ -19,3 +19,6 @@ kaggle
 matplotlib
 pillow
 pytest
+# research-machine integrity validator (scripts/validate_research_tree.py + its test)
+pyyaml
+jsonschema

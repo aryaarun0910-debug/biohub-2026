@@ -1,7 +1,7 @@
 """H1-T — export the external event set as a Kaggle dataset for the training kernel.
 
 Writes NPZ, not parquet: the Kaggle image ships a polars whose compiled backend does not
-load (reports/ENVIRONMENT_TRAPS.md), so the kernel must not depend on it.
+load (research/03-experimentation/quality-control.md), so the kernel must not depend on it.
 
 Emits the feature matrix, labels, and the grouping keys the leave-one-embryo-out design and
 the per-mother selection rule need, plus a provenance blob carried inside the archive so the
@@ -28,7 +28,7 @@ from h1t_external_critic import EVENTS, FEATS  # noqa: E402
 from h1t_zebrahub_events import COORD_SPACE, LINK_GATE_UM, ZARR_SCALE_UM  # noqa: E402
 from phaseb_h0c_replay import CFG, CFG_HASH  # noqa: E402
 
-OUT = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026_RESEARCH\agent_runs\agent4"
+OUT = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026\_evidence\agent_runs\agent4"
            r"\kaggle_dataset")
 
 PROVENANCE = {
