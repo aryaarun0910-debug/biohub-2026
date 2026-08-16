@@ -1,16 +1,22 @@
 # Reports
 
-This directory contains evidence, not competing instructions.
+Evidence and topic notes, not competing instructions. The live instruction is always
+`../HANDOFF.md`; stable boundaries are in `../SYSTEM_DESIGN.md`.
 
-Active retained files:
+## Topic markdowns (append here; read when relevant)
 
-- `CYCLE_OUTPUT_2026-08-07.md`: current cycle evidence.
-- `CLAIMS.md`: generated, artifact-backed claims.
-- `EXPERIMENT_LEDGER.md`: compact experiment index.
-- `METRIC_SEMANTICS_VERIFIED.md`: immutable scorer semantics.
-- `ENVIRONMENT_TRAPS.md`: reproducibility and environment failures.
-- `journal/JOURNAL.md`: historical chronology; do not use as a current plan.
+- `CLAIMS.md` — generated, artifact-backed claims (regenerate via `scripts/claims_table.py`; never hand-edit).
+- `EXPERIMENT_LEDGER.md` — compact experiment index (append one row per experiment).
+- `METRIC_SEMANTICS_VERIFIED.md` — immutable scorer semantics.
+- `ENVIRONMENT_TRAPS.md` — reproducibility and environment failures.
+- `CORPUS_CTLD_CENSUS.md` — corpus C/T/L/D census (detection/arbitration accounting).
+- `submissions/CANDIDATE_LEDGER.md` — submission-by-submission record + public scores.
+- `journal/JOURNAL.md` — historical chronology; a record, never a current plan.
+- `inventory/` — machine-readable artifacts (CSVs) the claims table reads.
 
-The current instruction is always `HANDOFF.md` at the repository root. Historical reports
-removed during the lean reset are recoverable from tag `pre-lean-2026-08-07`. Large raw
-outputs and research snapshots belong in the sibling research store, not here.
+## Conventions
+
+- No per-cycle "CYCLE_OUTPUT" dumps. A cycle's findings go into CLAIMS (via artifacts), one
+  EXPERIMENT_LEDGER row, and the journal; raw output stays in the sibling research store.
+- Historical/removed material is recoverable from git tags `pre-lean-2026-08-07`,
+  `biohub-closed-2026-08-07`. Archived notebooks are under `../notebooks/_archive/`.
