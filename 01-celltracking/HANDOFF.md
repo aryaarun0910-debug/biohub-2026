@@ -9,12 +9,23 @@ Aggressive climb toward **top-3** on the public leaderboard, private-set-honest.
 reproducible **0.915** system (P3 harmonic); the leader is **0.948** (gap **0.033**), rank at
 reopen ~143. Public score is a deployment signal; model selection stays embryo-held-out (LOEO).
 
-## The central problem (from the submission ledger, verified)
+## The central problem — CRACKED (frontier swarm, 2026-08-16; full reports in _RESEARCH/agent_reports/)
 
-The field moved to **0.93–0.948**. That jump is **NOT** harmonic fusion (tested: adopting the
-public CC0 rule gave 0.915, not 0.93). **The 0.93+ teams hold something undisclosed.** Closing the
-gap is a RESEARCH problem, not an adoption problem. A fresh frontier analysis (what that edge is)
-is the first work of the reopen.
+Top-3 boundary = **0.948** (leader 0.950). Our 0.915 = the PUBLIC PLATEAU (302 teams at exactly
+0.915; ~rank 447). The 0.93–0.950 tier's edge is NOT post-processing (exhausted ~0.911–0.916,
+confirming our own finding), NOT the patched metric hack, and NOT a drop-in pretrained linker
+(community tested Trackastra/CoTracker and even the host's HOCT — HOCT UNDERPERFORMED a tuned ILP,
+discussion #728551, so HOCT is NOT the edge). **The edge is a RETRAINED/GENERALIZING edge model
+enabled by EXTERNAL same-domain data.** Specifically:
+- **H1 (strongest): retrain the detector/associator on external ZEBRAHUB data** (imaging + dense
+  Ultrack `*_tracks.csv` lineages), host-unlocked **2026-08-13** ("no overlap with test set", #734330).
+- **H2 (= our own gap): a learned FP-suppressing candidate ranker** — the failure is PRECISION not
+  recall (DoG already finds 0.91–0.94 of nuclei; the junk candidate pool mis-links). "A ranker, not a threshold."
+- **H3: dense pseudo-labels / synthetic tracks** (José Freitas 18.5GB CC0, 165k labeled divisions, ~540x real).
+- H4: division recovery +~0.02, but 304 events → shakeup-prone secondary lever.
+
+**TIMING:** we closed 2026-08-07; Zebrahub external data unlocked 2026-08-13 — SIX DAYS AFTER we quit.
+The biggest lever the top tier rides did not exist as a legal option when we closed. The reopen is well-timed.
 
 ## Baseline and what is proven (gate all deltas vs this, both folds, no regime-slice regression)
 
@@ -29,13 +40,18 @@ is the first work of the reopen.
   on P0-B where forks are 8 not 20k). Division GT-oracle ceiling is +0.06 but needs a high-precision fork
   selector (break-even ~10% precision at full recall).
 
-## Immediate queue
+## Immediate queue (post-frontier; LOEO-gated on the PATCHED scorer before any GPU submission)
 
-1. **Fresh frontier analysis (IN PROGRESS, agents):** current top-20; the top-3 boundary; and the crux —
-   what do the 0.93–0.948 teams have that public notebooks do not. Methods since the July break.
-2. Harvest the two un-shipped positive mechanisms into a candidate (motion-residual gate; re-measured
-   division suppression) and submit if bilateral.
-3. Architecture decision + a learned-ranker / detector escalation (GPU) once the frontier read lands.
+0. **Quick bump (free, CPU):** harvest the un-shipped motion-residual gate (+0.0088 pooled, min-fold
+   +0.0074) into a candidate on P3 and submit — banks a small real gain off 0.915 while the retrain spins up.
+1. **THE program (H1+H2 — GPU T4x2):** retrain the detector + a learned FP-suppressing candidate ranker on
+   external ZEBRAHUB (+ synthetic H3), validated leave-one-embryo-out with the patched scorer. Target: push
+   adj_edge_jaccard past the ~0.91 public wall. This is the only measured path off the plateau.
+   - Detector recall lever: LEAD "over-propose + learned re-scoring" (learned-3D-NMS/D2D) — the ranker mechanism.
+   - Data: Zebrahub imaging + tracks (dense same-domain); Freitas 18.5GB synthetic (division supervision);
+     leave-one-embryo-out CV is the community-validated protocol.
+2. **Division (H4), late + precision-gated:** small (+~0.02), shakeup-prone — only after edges clear, watch CV/LB divergence.
+3. Keep P3 harmonic 0.915 as the frozen hedge; every candidate gates vs it on both folds, patched scorer.
 
 ## Guardrails (unchanged, prize-critical)
 
