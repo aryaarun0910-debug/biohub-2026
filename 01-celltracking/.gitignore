@@ -32,3 +32,6 @@ research/06-knowledge-system/inventory/spotiflow_zeroshot.csv
 notebooks/kaggle_p3_armb_loeo_f0_smoke/
 notebooks/kaggle_p3_base_loeo_f0/
 notebooks/kaggle_p3_base_loeo_f1/
+notebooks/kaggle_p3_subvoxel_loeo_f0/
+notebooks/kaggle_p3_subvoxel_loeo_f1/
+notebooks/kaggle_p3_subvoxel_loeo_f0_smoke/
