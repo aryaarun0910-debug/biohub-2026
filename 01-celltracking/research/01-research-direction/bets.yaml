@@ -92,7 +92,9 @@ bets:
     status: proposed
     falsification: "First clause RESOLVED: detector does NOT refine. Remaining kill: added refinement yields no LOEO gain."
     links: ["06-knowledge-system/internal-reports/competitive_refresh_2026-08-17.md"]
-    evidence: ["AUDIT 2026-08-17: predict_unet_transformer.py:285-293 returns integer int16 coords via max-pool local-max, no sub-voxel refine, at the 4x-downsampled grid -> lever LIVE. Applying it needs the detection logit maps (a detector re-run), not pure post-processing on existing geffs."]
+    evidence:
+      - "AUDIT 2026-08-17: predict_unet_transformer.py:285-293 returns integer int16 coords via max-pool local-max, no sub-voxel refine, at the 4x-downsampled grid -> lever LIVE. Applying it needs the detection logit maps (a detector re-run), not pure post-processing on existing geffs."
+      - "SCAFFOLD 2026-08-17: scripts/win_bet/h1r_subvoxel_refine.py (parabolic per-axis offset) self-tested -> integer-argmax err 0.497 vox -> refined 0.138 vox (>3.5x). Integration = one-block kaggle_edit on extract_coords_from_logits (return float32) + detector re-run."
 
   - id: bet-ot-linker
     title: Unbalanced optimal-transport linker

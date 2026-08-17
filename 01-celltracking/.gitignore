@@ -29,3 +29,4 @@ research/06-knowledge-system/inventory/spotiflow_zeroshot.csv
 # RAG artifacts (embeddings, vector stores, indexes) live under .claude/rag/ - gitignored
 # (large/binary); the RAG POLICY is tracked in research/04-data/databases.md
 .claude/rag/
+notebooks/kaggle_p3_armb_loeo_f0_smoke/
