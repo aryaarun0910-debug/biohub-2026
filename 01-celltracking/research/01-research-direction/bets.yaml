@@ -18,7 +18,7 @@ bets:
       Not bilaterally positive vs P3-alone on the two built LOEO-export kernels
       (either fold <= its anchor: 44b6 0.759549 / 6bba 0.648965).
     links: ["02-theory/mechanisms.md", "07-outputs/deployed-artifacts.md"]
-    evidence: ["P0-strict LOEO", "E0c replay"]
+    evidence: ["P0-strict LOEO +0.0080 P(d>0)=1.0", "E0c replay +0.0088", "DE-RISK 2026-08-17 (code-level): gate is pure geometry (wrapper.py:333, armb_flow_gate.py:5-9); prob enters only the cost after the gate (wrapper.py:340) -> harmonic cannot un-admit armB edges, downside bounded. Full confirmation = the built GPU LOEO kernels."]
 
   - id: bet-zebrahub-retrain
     title: Retrain detector/associator on external Zebrahub
@@ -78,6 +78,63 @@ bets:
     falsification: "Fork-selector precision below the ~10% break-even at full recall."
     links: ["06-knowledge-system/papers.md"]
     evidence: []
+
+  # --- added by the quick-wins swarm, 2026-08-17 (cheap levers before the H1 heavy phase) ---
+  - id: bet-subvoxel-refine
+    title: Sub-voxel centroid refinement
+    theme: E
+    hypothesis: >
+      If the detector emits integer-voxel / coarse-argmax centroids, parabolic/Gaussian sub-voxel
+      peak refinement recovers localization the 7um-match metric rewards.
+    mechanism: "Metric matches within 7um maximizing 1/(1+d); community EDA: 3um->-41%, 4um->-74%."
+    expected_benefit: "several points IF currently integer-argmax (unverified); else nil"
+    cost: low
+    status: proposed
+    falsification: "First clause RESOLVED: detector does NOT refine. Remaining kill: added refinement yields no LOEO gain."
+    links: ["06-knowledge-system/internal-reports/competitive_refresh_2026-08-17.md"]
+    evidence: ["AUDIT 2026-08-17: predict_unet_transformer.py:285-293 returns integer int16 coords via max-pool local-max, no sub-voxel refine, at the 4x-downsampled grid -> lever LIVE. Applying it needs the detection logit maps (a detector re-run), not pure post-processing on existing geffs."]
+
+  - id: bet-ot-linker
+    title: Unbalanced optimal-transport linker
+    theme: B
+    hypothesis: >
+      An entropic unbalanced-Sinkhorn transport plan over the candidate graph beats greedy/threshold
+      linking by handling appearance/disappearance/division and node calibration jointly.
+    mechanism: "KL-relaxed marginals = appear/disappear; one->two mass split = division; mass knob = N_pred vs N_est."
+    expected_benefit: "edge + node-multiplier + division jointly; cross-family calibratable"
+    cost: medium
+    status: proposed
+    falsification: "Unbalanced-OT <= current linker on LOEO with tau fit on A, evaluated on B (both directions)."
+    links: ["06-knowledge-system/internal-reports/novel_crossdomain_2026-08-17.md"]
+    evidence: []
+
+  - id: bet-meta-ranker
+    title: Post-hoc meta-classifier ranker (MetaDetect + nnPU + conformal)
+    theme: B
+    hypothesis: >
+      A GBM/shallow-MLP on existing candidate+edge features, trained with a PU-corrected loss and
+      conformal-bounded acceptance, filters FP edges and ranks toward N_est cheaply.
+    mechanism: "MetaDetect/LMD quality head; nnPU corrects 2.8%-annotation PU bias; conformal bounds spurious-edge FDR."
+    expected_benefit: "precision on the junk candidate pool at seconds CPU; cross-family-honest"
+    cost: low
+    status: proposed
+    falsification: "GBM/nnPU cross-family AUC (fit A / eval B) no better than the scalar threshold it replaces."
+    links: ["06-knowledge-system/internal-reports/novel_crossdomain_2026-08-17.md"]
+    evidence: []
+
+  - id: bet-node-budget
+    title: Node-budget pruning (reopened -- prior kill used a forbidden substrate)
+    theme: E
+    hypothesis: >
+      Weakest-component-first pruning toward N_est improves the adjusted-J multiplier on the weaker
+      fold; the prior kill used the forbidden placeholder-movie substrate and is not honestly closed.
+    mechanism: "adjusted_J penalizes (N_pred-N_est)/N_est linearly; per-family keep_frac trims over-emission."
+    expected_benefit: "+0.001 bilateral (settled sub-bar); 44b6 +0.00110 / 6bba +0.00087 / pooled +0.00099"
+    cost: low
+    status: closed
+    falsification: "SETTLED 2026-08-17: full 199-crop P0-strict sweep optimum at keep_frac 0.975 on all three folds (kill rule NOT triggered, so the old 'no-pruning optimum' claim was false), but effect is +0.001 -- an order below the +0.005 bar, ~count-multiplier artifact. Honestly reopened then re-closed as sub-bar."
+    links: ["06-knowledge-system/internal-reports/redteam_blindspots_2026-08-17.md"]
+    evidence: ["199-crop P0-strict sweep keep_frac 0.975: 44b6 +0.00110, 6bba +0.00087, pooled +0.00099"]
 
   # --- closed (kept for memory; do not reopen without a new mechanism + falsification) ---
   - id: bet-scalar-reacceptance

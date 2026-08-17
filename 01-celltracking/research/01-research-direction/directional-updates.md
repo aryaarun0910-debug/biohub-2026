@@ -15,6 +15,38 @@ tags:
 
 > Dated steering log. [`../00-system/handoff.md`](../00-system/handoff.md) points here for the current direction. Newest first.
 
+## 2026-08-17 (later) — Quick-wins swarm: shortlist before the heavy phase
+
+Four-agent swarm (reports in `../06-knowledge-system/internal-reports/{quickwins_internal,
+competitive_refresh,novel_crossdomain,redteam_blindspots}_2026-08-17.md`; +5 findings in
+research.sqlite; portfolio updated in [research-bets.md](research-bets.md) + [bets.yaml](bets.yaml)).
+
+**Ranked shortlist (EV × cheapness) — cheap wins to bank before the H1 retrain:**
+1. **Ship Arm B / motion-gate** (`bet-motion-gate`) — unanimous #1 (quickwins + red-team).
+   +0.0088 pooled / +0.0074 min-fold, P(d>0)=1.0; already built as the two committed `p3_armb`
+   LOEO kernels. New insight: the gate is **pure geometry (never reads `prob`)**, so harmonic
+   can't break it. Cheap de-risk: re-run armB on local `p0strict` graphs with the `prob` cost
+   term zeroed (~1 h CPU) → then the two GPU kernels confirm. **The near-term bank.**
+2. **Sub-voxel centroid refinement** (`bet-subvoxel-refine`) — measured scorer cliff at σ≈2 µm.
+   **Audit first** (CPU minutes) whether the detector already refines; if integer-argmax, add
+   parabolic refine → potentially several points. Highest-uncertainty / highest-upside cheap lever.
+3. **Meta-ranker + OT linker** (`bet-meta-ranker`, `bet-ot-linker`) — the cheap "ranker not
+   threshold" (GBM/nnPU/conformal on existing features) and an unbalanced-Sinkhorn linker, both
+   CPU on OOF geffs, both cross-family-honest (fit A / eval B).
+
+**Corrections & confounds (red-team):**
+- **Node-budget "closed" was false** (used the forbidden placeholder-movie substrate) but settled
+  at **+0.001 bilateral** on the full 199-crop sweep — sub-bar footnote, not a lever.
+- **Every positive lever we hold is an E0c number**; the deployed P0-strict substrate differs
+  materially → **persist P3 OOF graphs once** (fold into the motion-gate GPU session) = highest-
+  value unspent compute; converts E0c replays to deployment-substrate replays.
+- **Divisions soundly dead** (both families, both factors); node-count gap share is E0c-relative
+  and already banked in P3 → both reinforce the **H1 edge-retrain** pivot.
+
+**Infra picked up:** adopt sleepymegacat's 80-line numpy scorer for fast offline LOEO CV;
+investigate `kkunizaw/biohub-zmnscrops` (3.66 GB packaged Zebrahub crops) — may shrink the H1
+level-1 imaging acquisition. Leaderboard barely moved (0.945+ tier crowding; public ceiling now 0.918).
+
 ## 2026-08-17 — H1 Zebrahub retrain scoped; level-1 acquisition decided
 
 - **Committed to the H1 edge/detector retrain** as the real gap-closer (the ~0.029 to the
