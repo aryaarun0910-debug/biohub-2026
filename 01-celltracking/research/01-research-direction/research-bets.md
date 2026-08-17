@@ -18,7 +18,7 @@ tags:
 
 | id | theme | status | expected | cost | falsification |
 |---|---|---|---|---|---|
-| `bet-motion-gate` | E | **ready** | +0.0088 pooled (min-fold +0.0074) | low | not bilaterally positive vs P3-alone on LOEO |
+| `bet-motion-gate` | E | **WON** | 44b6 +0.0144 / 6bba +0.0090 (deployment LOEO, paired) | low | SETTLED: bilaterally positive on the deployment substrate → PROMOTE |
 | `bet-subvoxel-refine` | E | proposed | several pts **if** currently integer-argmax | low | detector already sub-voxel-refines, or no LOEO gain |
 | `bet-ot-linker` | B | proposed | edge + node + division jointly | medium | unbalanced-OT ≤ current linker cross-family (fit A / eval B) |
 | `bet-meta-ranker` | B | proposed | precision on junk pool (cheap) | low | GBM/nnPU AUC ≤ scalar cross-family (fit A / eval B) |
@@ -46,6 +46,9 @@ tags:
   cost within an unchanged eligible set (second-order). Cheap de-risk: re-run armB on local
   `p0strict` graphs with the `prob` cost term zeroed (~1 h CPU); if Δ stays bilateral-positive,
   harmonic can't break it → then the two built `p3_armb` LOEO kernels confirm on GPU.
+  **WON 2026-08-17:** clean paired deployment-substrate LOEO (official scorer) = base
+  0.9037/0.7051 → armB 0.9181/0.7141, i.e. **44b6 +0.0144 / 6bba +0.0090** (bilaterally positive,
+  min-fold > +0.005). Promote → build the P3+armB submission kernel (human submits).
 - **bet-subvoxel-refine** — community EDA measured a localization cliff (3 µm → −41 %, 4 µm →
   −74 %). If our detector emits integer-voxel/coarse-argmax centroids, add parabolic/Gaussian
   sub-voxel refinement. **First step is an audit** (CPU minutes) of whether we already refine.

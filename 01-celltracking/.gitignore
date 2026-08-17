@@ -30,3 +30,5 @@ research/06-knowledge-system/inventory/spotiflow_zeroshot.csv
 # (large/binary); the RAG POLICY is tracked in research/04-data/databases.md
 .claude/rag/
 notebooks/kaggle_p3_armb_loeo_f0_smoke/
+notebooks/kaggle_p3_base_loeo_f0/
+notebooks/kaggle_p3_base_loeo_f1/

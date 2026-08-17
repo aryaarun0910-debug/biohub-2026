@@ -11,12 +11,13 @@ bets:
     mechanism: >
       GT-free kNN-16 median flow compensates local tissue motion before the distance gate;
       measured together with harmonic because both rewrite `prob`.
-    expected_benefit: "+0.0088 pooled (min-fold +0.0074); P0-strict LOEO +0.0080, P(d>0)=1.0"
+    expected_benefit: "MEASURED deployment-substrate LOEO: 44b6 +0.0144, 6bba +0.0090 (min-fold +0.0090)"
     cost: low
-    status: measuring
+    status: won
     falsification: >
-      Not bilaterally positive vs P3-alone on the two built LOEO-export kernels
-      (either fold <= its anchor: 44b6 0.759549 / 6bba 0.648965).
+      SETTLED 2026-08-17: clean paired LOEO (P0-B base, official scorer, only ARMB_FLOW_GATE
+      differs) -- base 0.9037/0.7051 -> armB 0.9181/0.7141, bilaterally positive, min-fold
+      +0.0090 > +0.005. PROMOTE -> build P3+armB submission kernel (human submits).
     links: ["02-theory/mechanisms.md", "07-outputs/deployed-artifacts.md"]
     evidence: ["P0-strict LOEO +0.0080 P(d>0)=1.0", "E0c replay +0.0088", "DE-RISK 2026-08-17 (code-level): gate is pure geometry (wrapper.py:333, armb_flow_gate.py:5-9); prob enters only the cost after the gate (wrapper.py:340) -> harmonic cannot un-admit armB edges, downside bounded. Full confirmation = the built GPU LOEO kernels."]
 

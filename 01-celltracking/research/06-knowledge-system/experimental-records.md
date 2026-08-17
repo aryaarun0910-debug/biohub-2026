@@ -321,3 +321,22 @@ separability — synthetic patches passed at mean |SMD| 0.302 while being 98.9% 
 **Reopening condition:** a corrected generator whose sister-separation distribution matches
 10.57 µm median / 14.36 µm p90, **plus** a demonstration that real-vs-synth discriminability is near
 chance. Craft alone is not the bar; distributional fidelity in the load-bearing parameter is.
+
+---
+
+## 2026-08-17 — Motion-gate (arm B) PROMOTED: bilaterally positive on the deployment substrate
+
+Clean **paired** LOEO — P0-B base, official `tracking_cellmot` scorer, identical crops, only
+`BIOHUB_ARMB_FLOW_GATE` differs — via four Kaggle T4×2 kernels
+(`biohub-p3-armb-loeo-f{0,1}` treatment, `biohub-p3-base-armb-off-loeo-f{0,1}` baseline):
+
+| fold | family | baseline (armB off) | armB | delta |
+|---|---|---|---|---|
+| 0 | 44b6 | 0.9037 | 0.9181 | **+0.0144** |
+| 1 | 6bba | 0.7051 | 0.7141 | **+0.0090** |
+
+Bilaterally positive, min-fold **+0.0090** (> +0.005 bar). Division FP dropped 103→98 (f0) while
+edge Jaccard rose — the "admit valid relinks" mechanism, prob-independent (harmonic cannot break it).
+**Decision: PROMOTE.** Next: build the P3+armB *submission* kernel; a human submits it per the
+factory `submitcmd` discipline. Note: I first mis-anchored against the E0c numbers (0.7595/0.6490,
+wrong substrate); the delta above is the corrected paired result.

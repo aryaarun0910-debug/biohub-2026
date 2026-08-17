@@ -15,6 +15,22 @@ tags:
 
 > Dated steering log. [`../00-system/handoff.md`](../00-system/handoff.md) points here for the current direction. Newest first.
 
+## 2026-08-17 (latest) — Motion-gate PROMOTED (first measured win off the plateau)
+
+`bet-motion-gate` **WON** on the deployment substrate. Clean paired LOEO (four Kaggle T4×2
+kernels; P0-B base, official `tracking_cellmot` scorer, identical crops, only
+`BIOHUB_ARMB_FLOW_GATE` differs):
+
+| fold | family | base (armB off) | armB | delta |
+|---|---|---|---|---|
+| 0 | 44b6 | 0.9037 | 0.9181 | +0.0144 |
+| 1 | 6bba | 0.7051 | 0.7141 | +0.0090 |
+
+Bilaterally positive, min-fold **+0.0090** > +0.005. (Correction: I first mis-anchored against
+the E0c numbers 0.7595/0.6490 — wrong substrate; the paired baseline above is the honest read.)
+**Next:** build the P3+armB *submission* kernel and hand the `submitcmd` (human submits, per the
+factory discipline). Then the freshest cheap lever is `bet-subvoxel-refine` (scaffolded).
+
 ## 2026-08-17 (later) — Quick-wins swarm: shortlist before the heavy phase
 
 Four-agent swarm (reports in `../06-knowledge-system/internal-reports/{quickwins_internal,
