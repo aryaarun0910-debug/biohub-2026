@@ -1,11 +1,11 @@
 {
-  "name": "p3_armb_loeo_f1",
-  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p3_armb_loeo_f1.json",
+  "name": "p4_detsweep_export_f0",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p4_detsweep_export_f0.json",
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
-  "built_notebook": "notebooks\\kaggle_p3_armb_loeo_f1\\biohub-p3-armb-loeo-f1.ipynb",
-  "built_sha256": "9036c6ae04b9598674aa5de5cacafb5085845021f83c62e4f8aef2ac8fb61937",
-  "config_hash": "b51c027d70b5",
+  "built_notebook": "notebooks\\kaggle_p4_detsweep_export_f0\\biohub-p4-detsweep-export-f0.ipynb",
+  "built_sha256": "b79ffca0e76e46c8894c78c1ed3b73f200cb6e38c1b39431c1258105c89b0acc",
+  "config_hash": "2083e0f6f582",
   "n_cells": 12,
   "edits": [
     {
@@ -13,7 +13,7 @@
       "cells": [
         2
       ],
-      "payload_sha256": "cd591ce57f783660c06d3ab48cb8deb8c76829bd991d3118a074941197bca19b"
+      "payload_sha256": "788ef66cddbbd9c0df1c98514605b576abd804ed669c0d7708acb4fe2e4d6186"
     },
     {
       "kind": "replace",
@@ -133,9 +133,22 @@
         7
       ],
       "payload_sha256": "7e2712e00a82f54ca9623544c04e5e8ec31b0fae7faa8cd79f01d50141c31fda"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "04152c5119e66e83b65f730847d06532e9bd80ef857f149324c58930d719ed48"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "024239b2f55598bbd2649eb35901119fb328259a878095c81d07cf8f893ec70f"
     }
   ],
-  "declared_slug": "biohub-p3-armb-loeo-f1",
-  "title": "Biohub P3 ArmB LOEO F1",
-  "pushed_slug": "biohub-p3-armb-loeo-f1"
+  "declared_slug": "biohub-p4-detsweep-export-f0",
+  "title": "Biohub P4 DetPeak Superset Export LOEO F0"
 }
