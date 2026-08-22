@@ -272,8 +272,14 @@ happen to be annotated.
 P(Δ>0) = 1.000 over 144 crops may still be worth ~+0.008 privately, where there are more movies.
 Public flatness is not evidence of worthlessness.
 
-**Standing rule from this slot: never spend a submission to resolve an effect smaller than ~0.005.**
-The LB is a smoke test for large effects; OOF is the instrument.
+**~~Standing rule from this slot: never spend a submission to resolve an effect smaller than ~0.005.
+The LB is a smoke test for large effects; OOF is the instrument.~~ STRUCK 2026-08-18.**
+This rule assumed OOF *was* an instrument. It is not: LB-vs-local calibration over n=6 known
+anchors gives Spearman +0.500 (p=0.333), slope 0.066, and the local substrate is anti-informative
+(Pearson -0.199 across the four non-armB configs). Measured MDE at 80% power: fold 0 +/-0.0043,
+fold 1 +/-0.0057, pooled +/-0.0049 -- so the +0.005 bar sat BELOW fold 1's own detection limit.
+The LB resolves 0.001, measures the shipped pipeline, and allows ~35 tests/week.
+**The leaderboard is now the instrument.** See `internal-reports/instrument_repair_2026-08-18.md`.
 
 Structural pre-registration note: divisions moved **+13 (up)**, and the P0-CR precedent said the arm
 whose divisions move up is the one that loses score. It did not lose — it went flat. The precedent
@@ -359,3 +365,355 @@ should have been weighted more heavily. The argument that pushed the estimate up
 reference is the better predictor; net cardinality change is not.**
 
 **New platform: P3 harmonic at 0.915.** Slots consumed: 11. Gap to leader (0.948): **0.033**.
+
+---
+
+## 2026-08-17 — `55585140` P3 + arm-B motion-gate — **PENDING**
+
+Submitted 19:59 UTC (kernel `aryaarun07/biohub-p3-armb`, version 1). Still
+`SubmissionStatus.PENDING` at 21:29 (1h30m). Slots consumed: 12.
+
+**Basis.** Paired deployment-substrate LOEO on the official `tracking_cellmot` scorer, only
+`BIOHUB_ARMB_FLOW_GATE` differing: 44b6 0.9037 → 0.9181 (+0.0144); 6bba 0.7051 → 0.7141
+(+0.0090). Bilaterally positive, min-fold above the +0.005 bar.
+
+**Prediction (recorded before the score).** 0.916–0.920. Stated caution, consistent with this
+log's own lesson that LOEO deltas have repeatedly over-predicted LB movement (arm B solo:
+predicted +0.0045, got 0.000; P3: predicted modal 0.916–0.921, got 0.915): the honest low band
+is **0.915–0.916 at ~40%**, i.e. a real chance this reads as flat. A result at 0.915 would mean
+a bilateral LOEO gain of +0.009/+0.014 did not transfer — which would itself be the fourth
+consecutive optimistic central estimate and a substantive finding about LOEO→LB transfer.
+
+**Score: 0.915 — IDENTICAL to P3 alone. Delta +0.000.**
+
+**Prediction scored.** Recorded band 0.916–0.920 with an explicit low band of 0.915–0.916 at ~40%.
+Actual **0.915** — in the low band, **below** the stated central estimate. That is the **fourth
+consecutive optimistic central estimate** (arm B solo: predicted +0.0045, got 0.000; P3: predicted
+modal 0.916–0.921, got 0.915; motion-gate: predicted 0.916–0.920, got 0.915).
+
+**This is a methodology result, not just a lever result.** The motion-gate was measured on our
+*best* instrument — a clean **paired deployment-substrate LOEO** on the official scorer, identical
+crops, single toggle, bilaterally positive (+0.0144 / +0.0090, min-fold above the +0.005 bar).
+That instrument was adopted specifically to fix the substrate mismatch that discredited earlier
+estimates. **It still failed to transfer.** A bilateral LOEO gain of +0.009 to +0.014 produced
++0.000 on the leaderboard.
+
+Consequences:
+- **The +0.005 bilateral LOEO bar is not a sufficient promotion gate.** It has now passed a lever
+  that delivered nothing. Every LOEO-only projection in the portfolio should be discounted hard.
+- The open diagnostic: LOEO evaluates held-out-embryo crops from `data/train` using per-fold
+  weights, while the LB scores `data/test` crops. Which part of that gap kills the signal — the
+  crop population or the weights — is **not yet established** and is the single highest-value
+  methodology question we have.
+- Slots consumed: 12. Platform unchanged at **P3 harmonic 0.915**. Gap to leader (0.950): 0.035.
+
+---
+
+## 2026-08-18 — `p5_divfix` (kernel pushed, NOT yet submitted) — prediction recorded first
+
+**What it is.** P3 harmonic + three COUPLED division changes: `BIOHUB_ILP_DIVISION_WEIGHT=0.55`
+(L1), `BIOHUB_OUTPUT_SAFE_DIVISIONS=0` (patch off), `BIOHUB_RESTORE_LEARNED_DIVISIONS=1` plus the
+`restore_learned_divisions()` wrapper stage (L3). Kernel `aryaarun07/biohub-p5-divfix` v1.
+
+**Basis (measured, not projected).** Kernel `biohub-p4-preilp-loeo-f1` v2 exported the candidate
+graph the ILP is handed: 176,835 fold-1 sources with out-degree ≥ 2 offered, **zero** divisions
+emitted. Of 125 GT divisions, 34 mothers matched a ≥2-candidate source and **29 had BOTH true
+daughters offered**, at median `edge_prob` **0.9188**. Fold-1 division-term arithmetic:
+L1 alone +0.0046; **L1 + patch-OFF +0.0227**; at the 61-case ceiling +0.0483.
+
+**Prediction, recorded BEFORE the score, applying the ledger's own low-band-as-central rule**
+(four consecutive optimistic central estimates; realisation ratio ≈0.083):
+
+| band | range | weight |
+|---|---|---|
+| **central (was my low band)** | **0.915–0.919** | **~45%** |
+| upside | 0.920–0.930 | ~30% |
+| flat/negative | 0.912–0.915 | ~25% |
+
+**Why the caution despite a measured mechanism.** (i) The 29 offered divisions are a fold-1
+count on the LEAKY arm; the hidden test may differ. (ii) `edge_prob` is a **share**, not a
+calibrated probability — the loss is a bare column softmax and provably shift-invariant, so
+0.9188 means "best available parent by a wide margin", not "92% likely real". (iii) The three
+changes are coupled and untested TOGETHER; if L3 does not fire, this is P3-minus-safe-divisions
+and should land near **0.914** (−0.0007). (iv) Divisions are only 0.117% of GT edges, so the
+edge term is unchanged by construction — all movement must come from the 0.1×divJ term.
+
+**Falsification.** ≤0.915 with `restore_div_restored > 0` in `run_stats.csv` ⇒ the division term
+does not transfer to the hidden set and the whole division lane closes.
+`restore_div_restored == 0` ⇒ L3 never fired; the test is void, not negative — debug and re-run.
+
+**SUBMITTED 2026-08-18 as ref `55616685`** (kernel `aryaarun07/biohub-p5-divfix` v1).
+Slots consumed: 13.
+
+**Pre-submit verification, all passed:**
+- `safe_divisions_added` = **0** — the patch is genuinely off
+- `restore_div_sources_seen` = **844** — L1 worked: the ILP now EMITS divisions where it
+  previously emitted none (176,835 offered / 0 taken before this change)
+- `restore_div_restored` = **703** — L3 worked: the motion relink no longer deletes them
+- `division_like_sources` = **703**, exactly matching — so **every** output division now
+  originates in the ILP, none in the post-hoc patch
+- structural audit **PASS 10/10**, max in-degree 1, max out-degree 2, artifact sha256
+  `76efe6a21b8dd137...`
+
+**OBSERVATION RECORDED AFTER THE PREDICTION, BEFORE THE SCORE** (stated separately so the
+prediction above stands exactly as written): **703 divisions across 4 test crops = ~176/crop.**
+Annotated GT holds 151 divisions across 199 train crops (~0.76/crop); at ~2.8% annotation that
+implies a true rate near ~27/crop. **We are emitting roughly 6× the estimated true division
+rate.** Division FPs are charged only on annotated cells, which damps the penalty, but this is a
+material over-division risk that the recorded prediction did not account for. If the score comes
+back flat or negative, over-division — not the mechanism — is the first hypothesis, and the fix
+is a higher `BIOHUB_ILP_DIVISION_WEIGHT` (0.55 → 0.7–0.8), which tightens the price without
+touching the architecture.
+
+**Score: 0.915 — FLAT. Identical to P3 alone and to P3+armB.**
+
+**Prediction scored.** Recorded central band 0.915–0.919 (~45%), upside 0.920–0.930 (~30%),
+flat/negative 0.912–0.915 (~25%). Actual **0.915** — the bottom edge of the central band, i.e.
+indistinguishable from flat. Promoting the low band to central (the correction adopted this
+session) **worked**: this is the first prediction in five that was not optimistic. The method is
+now 1/1; the previous four central estimates were all too high.
+
+### The finding is the three-way tie, not this lever
+
+| ref | config | divisions (4 crops) | edge churn vs P3 | public |
+|---|---|---|---|---|
+| `55274582` | P3 harmonic | 307 | — | **0.915** |
+| `55585140` | P3 + armB | 328 | **~6%** (8,150 admitted / 9,373 excluded) | **0.915** |
+| `55616685` | P3 + division fix | **703** | safe-div patch OFF | **0.915** |
+
+**Three materially different graphs — differing in edges AND in a 2.3× change in division count —
+return the identical score to three decimals.**
+
+**This is not explainable by rounding.** Moving 0.915 → 0.916 requires +0.0005. The predicted
+fold-1 division-term gain was **+0.0227**, roughly **45×** the rounding threshold. If the mechanism
+had transferred at anything like its measured magnitude, the score would have moved. It did not
+move at all.
+
+**What is now established:** the division mechanism, though **proven to fire** (844 ILP division
+sources, 703 restored, 0 from the patch, audit PASS 10/10), does not convert to public-LB score.
+Two surviving explanations, not yet separated:
+1. **Over-division** — 703 divisions over 4 crops ≈ 176/crop against an estimated true ~27/crop
+   (~6×). FPs swamp `divJ = TP/(TP+FP+FN)`, leaving the 0.1×divJ term at ~0 either way.
+   (Flagged in this ledger BEFORE the score.)
+2. **The division term does not transfer** to the hidden set at all.
+
+**Separating them costs one slot:** re-run at `BIOHUB_ILP_DIVISION_WEIGHT = 0.75` (tighter price,
+fewer and higher-confidence divisions). If still 0.915, explanation 2 holds and the division lane
+closes for good.
+
+### A cheaper, higher-value probe now available
+
+The three-way tie is itself an unplanned and unusually strong instrument result — stronger than
+the 1-slot determinism probe `instrument_repair_2026-08-18.md` recommended, because it varies the
+input instead of repeating it. It licenses a sharper question: **is the public LB responsive to
+our submissions at all?** The decisive test is a deliberately DEGRADED submission (e.g. drop the
+motion relink, or halve the detection threshold) which should move the score by a large,
+unmistakable margin. If that also returns 0.915, the fault is in the measurement chain, not in any
+lever — and every conclusion drawn from LB scores this session needs revisiting. **Run this before
+spending any further slot on a lever.** One slot, unambiguous outcome either way.
+
+Slots consumed: 13. Platform unchanged at **P3 harmonic 0.915**. Gap to leader (0.951): 0.036.
+
+---
+
+## 2026-08-19 — `p6_control_degraded` — INSTRUMENT CONTROL (not a lever). Prediction recorded first.
+
+**Why.** Three materially different graphs returned **exactly 0.915**: P3 (307 divisions),
+P3+armB (328 divisions, ~6% edge churn), P3+divfix (703 divisions, safe-div patch off). The
+divfix prediction was **+0.0227 — ~45× the 0.0005 rounding threshold** — and nothing moved.
+Before spending another slot on any lever, establish that the public LB **responds to our
+submissions at all.**
+
+**What shipped.** `BIOHUB_DET_THRESHOLD` **0.96875 → 0.999** (kernel
+`aryaarun07/biohub-p6-control-degraded` v1, verified in the built notebook). This sharply cuts
+detections, so node recall and edge TP must fall. Chosen over dropping the motion relink because
+a relink toggle could plausibly be score-NEUTRAL, which would leave the test ambiguous; fewer
+detections cannot be neutral. It is also cheaper to run, not more expensive.
+
+**PREDICTION, recorded before the score — this one is deliberately NOT hedged.** A working
+measurement chain must return **≤ 0.90, and most likely 0.80–0.89**. I would be surprised by
+anything above 0.905.
+
+**Interpretation, fixed in advance:**
+- **Score drops sharply (≤ 0.90)** → the chain is SOUND. Our levers really are sub-0.0005 on the
+  hidden set, the plateau is real, and the three-way tie means those three graphs genuinely score
+  the same. Proceed to the abstention main line (+0.010 to +0.040).
+- **Score returns 0.915 (or barely moves)** → the fault is in the MEASUREMENT CHAIN, not in any
+  lever. **Every LB-based conclusion of 2026-08-18 needs revisiting**, including the arm-B kill and
+  the division kill, and the LOEO→LB diagnosis reopens from the other end. First suspects would be:
+  the submitted artifact not being the scored artifact, the score being dominated by a component
+  our edits do not reach, or LB caching.
+
+Note this is a stronger test than the "resubmit unchanged" determinism probe originally planned in
+`instrument_repair_2026-08-18.md`, because it varies the input rather than repeating it.
+
+**PREDICTION CORRECTED BEFORE SUBMITTING** (the original reasoning was wrong; recorded openly
+rather than quietly replaced). I predicted "≤ 0.90, most likely 0.80–0.89" on the assumption that
+cutting detections cuts score proportionally. **It does not.** Measured locally on the placeholder
+substrate with the official scorer:
+
+| artifact | node_recall | divJ | local SCORE |
+|---|---|---|---|
+| `p3_harmonic` (LB 0.915) | 0.9841 | — | 0.8907 |
+| `p6_control_degraded` | **0.9147** | 0.0000 (TP=0/FP=8/FN=3) | **0.8816** |
+
+Degradation confirmed structurally: **28.0% of nodes and 28.4% of edges removed**
+(122,214 → 87,945 nodes), one crop losing 70%. Yet the score falls only **−0.0091**, because the
+node-count multiplier is **unclamped above 1** — under-producing earns a bonus that partially
+offsets the lost true positives. A 28% cut is worth ~9 quanta, not ~100.
+
+**Corrected prediction: LB ≈ 0.906 if the local→LB offset is additive (0.915 − 0.0091), possibly
+as low as ~0.891.** The discriminating question is therefore NOT the absolute value but simply:
+**does the score move at all?** Three consecutive submissions returned exactly 0.915; any movement
+of ≥ 1 quantum shows the chain responds.
+
+- **Moves (any amount)** → chain SOUND. The three-way tie means those graphs genuinely scored the
+  same, our levers are real but sub-threshold on the hidden set, and the abstention lane proceeds.
+- **Returns exactly 0.915** → chain FAULT. A 28% node cut cannot be invisible. Every LB conclusion
+  of 2026-08-18 reopens.
+
+**Caveat carried from `cross_synthesis_2026-08-19.md`:** `evaluate.py:73-76` intersects
+`pred_names & gt_names`, so **missing datasets are silently SKIPPED, not zeroed** — a truncated
+submission would score high, not low. Worth remembering if any future artifact looks anomalously good.
+
+**Score: 0.883. THE CHAIN IS SOUND.**
+
+**Prediction scored.** Corrected band was "≈ 0.906 additive, possibly ~0.891", with the
+discriminating question stated as *does it move at all*. Actual **0.883** — it moved **−0.032
+(32 quanta)**, further than either bracket. The un-hedged pre-registration was right in direction
+and conservative in magnitude.
+
+### The public leaderboard responds to our submissions. Everything from 2026-08-18 stands.
+
+- The three-way tie (P3 / P3+armB / P3+divfix all exactly 0.915) is **REAL**, not an artifact.
+  Those three graphs genuinely score the same on the hidden set.
+- **The arm-B kill and the division kill both STAND.**
+- No chain-fault story is needed. The `cross_synthesis` scepticism about over-reading the tie was
+  correct.
+
+### The far more useful finding: which lever CLASSES transfer
+
+| submission | local (placeholder) | LB | local Δ | LB Δ | transfer |
+|---|---|---|---|---|---|
+| P3 harmonic | 0.8907 | 0.915 | — | — | — |
+| **control** (28% of nodes cut) | 0.8816 | **0.883** | **−0.0091** | **−0.0320** | **3.5× AMPLIFIED** |
+| divfix (division economics) | 0.8978 | 0.915 | **+0.0071** | **+0.0000** | **0× — none** |
+
+**A detection-surface change transfers at 3.5× its local magnitude. A division-term change does not
+transfer at all.** Both measured on the same substrates with the same scorer.
+
+**Why, and it is not a paradox.** The placeholder crops hold **3 GT divisions between them**
+(2 of the 4 have zero, and two sit in the 1st–2nd percentile of annotation density). If the hidden
+test resembles them — and the transfer ratios say it does for detection — then the
+`0.1 x division_jaccard` term has almost no headroom to win there, while `adj_edge_jaccard`
+responds strongly. That reconciles every LB result we hold:
+
+- edge-rewiring levers (arm B): permute a fixed candidate set → **0.000**
+- division levers (divfix): a term with ~no hidden-set headroom → **0.000**
+- detection-surface changes (control): → **−0.032**, amplified
+
+**Consequence — this is the campaign's operating rule from here:** *only levers that change the
+detection surface or the candidate set have demonstrated LB transfer.* Which is precisely where
+`error_atlas_2026-08-19` independently put the bottleneck: **17,067 detectable GT edges
+(15.65%) are never nominated as candidates**, while a perfect solver over today's candidates is
+worth +0.0012.
+
+**Also now calibrated:** the placeholder substrate **understates** detection-class effects by ~3.5×.
+It is usable as a directional instrument for that class, with that factor stated — a real
+improvement on "we hold no validated instrument", and it costs no slots.
+
+Slots consumed: 14. Platform unchanged at **P3 harmonic 0.915**.
+
+---
+
+## 2026-08-19 — `p7_cleanedge` — DECISION RULE PRE-REGISTERED BEFORE THE RESULT
+
+Kernel `aryaarun07/biohub-p7-cleanedge` v1 (pushed, running). P3 harmonic with the edge predictor
+swapped for `leevvin/biohub-movie-heldout-edge-predictor-v1` (CC0, 195-movie held-out retrain,
+host-verified strict=True 136/136 into our exact `UNetNodeTransformer`). Zero training cost.
+
+**Why this is the right CLASS.** The edge head's column softmax > 0.5 defines every candidate
+edge, so replacing it is a **candidate-set** change. Measured transfer law (2026-08-19):
+
+| lever class | local Δ | LB Δ |
+|---|---|---|
+| detection-surface (control, 28% node cut) | −0.0091 | **−0.0320** (3.5× amplified) |
+| division term (divfix) | +0.0071 | 0.000 |
+| edge permutation (arm B) | — | 0.000 |
+
+**PRE-REGISTERED DECISION RULE (fixed before any result is seen):**
+- Score `p7` locally on the four placeholder crops with the official scorer; compare against
+  **P3 harmonic's 0.8907** on the identical substrate.
+- **SUBMIT if local ≥ 0.8907** (not worse than P3). Slots are abundant (171 left, 5/day) and the
+  binding constraint is calendar, not slots — so the value of an LB reading on a
+  *candidate-set-class* lever exceeds the cost of a slot.
+- **DO NOT SUBMIT if local < 0.8907.** A checkpoint that is worse on the substrate it was
+  explicitly held out from is not worth a reading.
+- Audit must PASS 10/10 regardless; a failing audit blocks submission unconditionally.
+
+**Instrument note, and its limit.** leevvin held out exactly these four crops, so this checkpoint
+is **uncontaminated on the scoring substrate** — the first time that has been true for us. But the
+detector, DeepCenter and the `seed314159` secondary are unchanged and still contaminated, so the
+**absolute** local number remains inflated. The **delta vs P3 on the identical substrate** is the
+honest quantity, and per the transfer law it should be read as roughly ×3.5 to the LB.
+
+**DECISION: DO NOT SUBMIT. Rule applied as pre-registered.**
+
+p7 v3 completed but produced **400 nodes / 368 edges across all four crops**, against P3's
+**122,214 nodes** — a **99.7% collapse**. Local score and audit both moot; the rule said
+"do not submit if below 0.8907", and this is far below.
+
+**Diagnosis (informative, not a bug).** `edge_predictor_best.pth` is the **entire model**
+state_dict — 136 tensors = the `TemporalUNet3D` detector **plus** the transformer edge head. So
+rebinding `--weights` replaced the **detector** as well, and leevvin's detector is not calibrated
+for our inherited `BIOHUB_DET_THRESHOLD = 0.96875`: almost nothing clears it.
+
+**This does not kill the checkpoint** — it says the swap needs its own operating point. A
+`det_threshold` sweep against leevvin's weights is the correct follow-up, and it is a
+detection-surface change (the class with 3.5× LB transfer). Deferred, not abandoned.
+
+**Two prior kernel failures on the way here, both fixed and worth recording:** Kaggle's mount is
+not reliably `/kaggle/input/<slug>/` (an rglob for the exact filename returned nothing), and
+`REPO_DIR/weights/...` sits on a **read-only** filesystem (OSError 30 on copy). v3 searches
+`/kaggle/input` for a `.pth` of exactly 8,355,927 bytes and rebinds `predict_cmd`'s `--weights`
+rather than copying. Every failure was caught by an explicit guard rather than silently scoring
+the old weights.
+
+## 2026-08-22 — `p8_loosefilter` — the public 0.923 pattern, reproduced
+
+Kernel `aryaarun07/biohub-p8-loosefilter` v1 (pushed). Source: `yunusgmsoy/kimi-notebook-v17`,
+the public 0.923 frontier. Its config was diffed against ours — **31 of 41 settings identical**,
+6 meaningful differences:
+
+| setting | ours (0.915) | theirs (0.923) | role |
+|---|---|---|---|
+| `SAFE_DIV_MAX_UM` | 4.66 | **12.0** | loose propose |
+| `SAFE_DIV_SISTER_MAX_UM` | 8.5 | **15.0** | loose propose |
+| `SAFE_DIV_EXISTING_CHILD_MAX_UM` | 7.65 | **10.0** | loose propose |
+| **`DEEPCENTER_SAFE_DIV_VETO`** | **0** | **1** | **the discriminator** |
+| `BIDIRECTIONAL_EDGE_WEIGHT` | 0.20 | **0.30** | harmonic weight |
+| DeepCenter ckpt / epoch | `checkpoint_last.pt` / 500 | **`best.pt` / 2** | veto model |
+
+**This is the loose-propose/strict-filter design, and three independent analyses of ours
+converged on it:**
+1. Our division funnel measured true parent_dist median **7.42/8.87 µm against a 4.7 gate** — 135
+   of 151 divisions unproposable — and concluded relaxation alone drowns at ~2,400:1 and **needs a
+   discriminator**.
+2. `public_code_teardown_2026-08-19` found the identical loose-propose/strict-filter shape in the
+   0.917 public stack.
+3. `error_atlas_2026-08-19` located the bottleneck in candidate generation.
+
+**`BIOHUB_DEEPCENTER_SAFE_DIV_VETO` is the discriminator, it is already implemented in our
+wrapper, and we had it switched OFF.** The whole change is configuration — no new code.
+
+**Build trap caught before spending GPU:** cell 5 re-assigns
+`BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT = "0.20"` *after* the env cell, so the env edit alone left it at
+0.20. A second `replace` edit patches the late assignment; all six settings then verified
+last-wins-correct in the built notebook.
+
+**Prediction (recorded before the score, low-band-as-central per the standing correction):**
+central **0.918–0.923**, upside 0.924–0.928 (~20%), flat 0.915 (~25%). The flat case would mean
+the design does not transfer off its author's substrate.
+
+**Score:** _pending._
+

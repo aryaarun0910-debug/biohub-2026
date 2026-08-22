@@ -3,7 +3,7 @@ id: 01-research-direction/directional-updates
 title: Directional Updates
 area: 01-research-direction
 status: active
-updated: '2026-08-16'
+updated: '2026-08-17'
 owner: biohub
 links: []
 tags:
@@ -15,7 +15,65 @@ tags:
 
 > Dated steering log. [`../00-system/handoff.md`](../00-system/handoff.md) points here for the current direction. Newest first.
 
-## 2026-08-17 (latest) — Motion-gate PROMOTED (first measured win off the plateau)
+## 2026-08-17 (newest) — H1 imaging gate LIFTED: packaged Zebrahub crops exist on Kaggle
+
+The stated blocker on `bet-zebrahub-retrain` — "Zebrahub on disk is TRACKS-ONLY; retrain needs
+imaging (150–232 GB at level-1)" — is **no longer binding for a pilot**. Another competitor
+(`kkunizaw`) has published the imaging, already cropped, as public Kaggle datasets:
+
+| dataset | size | contents (verified locally) |
+|---|---|---|
+| `kkunizaw/biohub-zh001r` | 363 MB | `zh001r_iso.npy` **(72, 20, 64, 64, 64) uint8** real ZSNS001 imaging; `zh001r_tgt.npy` same shape (target volume); `zh001r_nodes.npz` 1440 arrays `f{crop*20+t}` of `(N,4) float32 = [t,z,y,x]`, ~900 nuclei/frame, coords inside the 64³ box |
+| `kkunizaw/biohub-zmnscrops` | 3.66 GB | `zmns001_crops.npz` 5.76 GB + `zmns002_crops.npz` 7.13 GB — "Windowed crops derived from the public Zebrahub multi-view imaging dataset (zebrahub.sf.czbiohub.org, CZ Biohub / Royer Lab)… No competition data included." (contents not yet opened) |
+
+`zh001r_iso.npy` was downloaded and inspected: real intensity data (min 0, max 255, mean 51.8,
+86% nonzero), 72 crops × 20 timepoints of 64³ **isotropic** volumes with matching per-frame
+nuclei coordinates. That is a complete, ready-to-train detector set in **754 MB** instead of the
+150–232 GB acquisition the level-1 plan budgeted for.
+
+**Why this matters.** H1 is the only stated path to top-3 and it was gated on data acquisition,
+not on method. The gate is now a *format* question rather than a *bandwidth* question, and Kaggle
+datasets attach to kernels directly — so an H1 pilot can run on Kaggle GPU with zero local
+download and no kernel internet.
+
+**But it unblocks only half of H1 (measured same day, see the experimental record).** The node
+arrays are `(N,4) = [t,z,y,x]` with **no track identity**, so `zh001r` supervises the **detector**
+retrain and **cannot** supervise the **edge/association** retrain — which is the half our own
+thesis says the plateau lives in. Our `h1r_fetch_imaging.py` level-1 stream does carry track ids.
+Treat the two as complementary lanes, not as a replacement.
+
+**Scaffold built and passing (CPU, no GPU spent):** `scripts/win_bet/h1r_zh001r_audit.py`
+(integrity gate: structure, label/imaging alignment 2.29× contrast, geometry ruler) and
+`scripts/win_bet/h1r_zh001r_smoke.py` (packaged crop → deployed `TemporalUNet3D` →
+`compute_detection_loss` → backward → step; det_loss 0.7028→0.5787, UNet + detect_head both
+receive grad; reproduced on a second crop).
+
+**Caveats (do not skip before building on this).**
+- It is a **third party's preprocessing**. Their "iso" scale was unstated — now **measured**
+  (same day, see the experimental record): a nucleus-size radial-profile ruler puts it at
+  **~1.6–1.8 µm/voxel isotropic** (median 1.762, 1.084× our grid), i.e. the *same geometry
+  family* as our deployed 64³ @ 1.625 µm detector input, not a separate resolution lineage.
+  This removes the level-1 premise that a retrain "voids the deployed 0.915 anchor". The ruler
+  assumes comparable nucleus size across stages; their nuclei are denser (later stage), which
+  would bias the estimate upward — true scale may be nearer 1.625 µm.
+- Node labels are theirs (presumably Ultrack-derived); we have not audited them against Zebrahub.
+- ZSNS001 only in `zh001r`; `zmnscrops` covers ZSNS001+002 as raw crops.
+- Zebrahub is **CC BY-NC**. Host has cleared Zebrahub imaging + tracks (#734330), so use is
+  permitted, but per [../04-data/data-governance.md](../04-data/data-governance.md) the license of
+  every shipped external asset must be recorded in the submission notebook.
+
+**Competitive read.** `zh001r` was uploaded **2026-08-17** (today) and `zmnscrops` 2026-08-16 —
+a rival is actively executing the Zebrahub retrain right now. This confirms the H1 lane is the
+live frontier and implies the plateau will move.
+
+**Next (unauthorised until green-light):** voxel scale is now established (above), so the open
+choice is (a) their crops as a pilot shortcut — geometry-compatible, ~750 MB, attachable to a
+kernel — versus (b) our own `scripts/win_bet/h1r_fetch_imaging.py` level-1 stream, which we
+control end-to-end and whose labels we can audit. Remaining pre-pilot checks: audit their node
+labels, open `zmnscrops`, and settle intensity renormalisation (their uint8 vs our uint16). The
+falsification for `bet-zebrahub-retrain` is unchanged.
+
+## 2026-08-17 (earlier) — Motion-gate PROMOTED (first measured win off the plateau)
 
 `bet-motion-gate` **WON** on the deployment substrate. Clean paired LOEO (four Kaggle T4×2
 kernels; P0-B base, official `tracking_cellmot` scorer, identical crops, only

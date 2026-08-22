@@ -35,7 +35,7 @@ harmonic bidirectional fusion (= our **P3 harmonic**). Post-processing is exhaus
 
 `adj_edge_jaccard` plateaus ~0.90–0.91 on the public stack and `division_J ~0` for nearly
 everyone → the separation is the **edge term = a genuinely better / retrained model**. Only 2
-physical embryos, 199 chunks, ~2.8% nuclei annotated, ~304 division events → a
+physical embryos, 199 chunks, ~2.8% nuclei annotated, **151 division events** (302 daughter links; the older "~304" counted links, not events — remeasured 2026-08-17 over all 199 crops: 44b6 26, 6bba 125) → a
 **data/generalisation** problem, not post-processing.
 
 - **H1 (strongest)** retrain detector/associator on **external Zebrahub** (imaging + dense

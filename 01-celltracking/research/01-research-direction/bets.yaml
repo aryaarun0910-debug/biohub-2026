@@ -11,15 +11,80 @@ bets:
     mechanism: >
       GT-free kNN-16 median flow compensates local tissue motion before the distance gate;
       measured together with harmonic because both rewrite `prob`.
-    expected_benefit: "MEASURED deployment-substrate LOEO: 44b6 +0.0144, 6bba +0.0090 (min-fold +0.0090)"
+    expected_benefit: "LOEO +0.0144/+0.0090 but MEASURED LB DELTA = +0.000 (submission 55585140 = 0.915, same as P3 alone)"
     cost: low
-    status: won
+    status: closed
     falsification: >
-      SETTLED 2026-08-17: clean paired LOEO (P0-B base, official scorer, only ARMB_FLOW_GATE
-      differs) -- base 0.9037/0.7051 -> armB 0.9181/0.7141, bilaterally positive, min-fold
-      +0.0090 > +0.005. PROMOTE -> build P3+armB submission kernel (human submits).
+      SETTLED 2026-08-17 on LOEO: clean paired LOEO (P0-B base, official scorer, only
+      ARMB_FLOW_GATE differs) -- base 0.9037/0.7051 -> armB 0.9181/0.7141, bilaterally positive,
+      min-fold +0.0090 > +0.005. PROMOTED and submitted.
+      OVERTURNED 2026-08-18 ON THE LEADERBOARD: submission 55585140 scored 0.915, identical to
+      P3 alone. A bilateral LOEO gain of +0.0090..+0.0144 produced +0.000 on the LB. The lever is
+      closed AND the promotion gate itself is falsified: "+0.005 bilateral on paired
+      deployment-substrate LOEO" is NOT sufficient for LB transfer. Open diagnostic: LOEO scores
+      data/train held-out-embryo crops with per-fold weights; the LB scores data/test crops --
+      whether the signal dies on crop population or on per-fold weights is unestablished.
     links: ["02-theory/mechanisms.md", "07-outputs/deployed-artifacts.md"]
     evidence: ["P0-strict LOEO +0.0080 P(d>0)=1.0", "E0c replay +0.0088", "DE-RISK 2026-08-17 (code-level): gate is pure geometry (wrapper.py:333, armb_flow_gate.py:5-9); prob enters only the cost after the gate (wrapper.py:340) -> harmonic cannot un-admit armB edges, downside bounded. Full confirmation = the built GPU LOEO kernels."]
+
+  - id: bet-division-proposal
+    title: Division proposal via relaxed geometric gates (post-processing)
+    theme: E
+    hypothesis: >
+      The unclaimed 0.1 division term is blocked by a mis-set geometric gate; relaxing it recovers
+      enough divisions to close the leaderboard gap.
+    mechanism: "SAFE_DIV gates sit below GT division geometry; relaxation admits true sisters."
+    expected_benefit: "hypothesised +0.036 (to ~0.951); MEASURED: unreachable"
+    cost: low
+    status: closed
+    falsification: >
+      REFUTED 2026-08-18 by div_proposal_funnel.py (counts, instrument-independent). 1 of 151 GT
+      divisions admitted. (i) The linker consumes the second daughter in 61/96 (64%) of detected
+      divisions -- candidate_ids requires no incoming edge (wrapper.py:806) -- unproposable at any
+      gate. (ii) The binding gate is SAFE_DIV_MAX_UM=4.7 (parent, true median 7.42/8.87 um), not
+      the sister constant. (iii) Relaxation opens ~2400-3300 false candidates per true division and
+      the tightest-first ranker puts true (wide) divisions last -> precision collapse. Real
+      proposable pool is 35, not the 89 previously estimated; ceiling ~+0.023 at perfect precision,
+      which is exactly what is unavailable. Divisions require a learned appearance-based sister
+      discriminator + a non-stealing linker = the edge model. Redirects INTO bet-zebrahub-retrain.
+    links: ["06-knowledge-system/internal-reports/division_lane_2026-08-18.md"]
+    evidence: []
+
+  - id: bet-ilp-division-economics
+    title: Restore division economics in the ILP (L1 + safe-div OFF + L3)
+    theme: E
+    hypothesis: >
+      The solver is offered high-confidence divisions and declines them purely on cost, because we
+      set appearance_weight=0.0; repricing divisions recovers them at no detection cost.
+    mechanism: >
+      Minimised min-cost-flow: converting a link to a division costs
+      division_weight - appearance_weight - p = 1.0 - p >= 0 for every p <= 1 under our override,
+      so division is strictly dominated. Vendor default appearance_weight is 0.1.
+    expected_benefit: "fold-1 division term +0.0046 (L1 alone) to +0.0227 (L1 + safe-div patch OFF); ceiling +0.0483"
+    cost: low
+    status: parked
+    falsification: >
+      LB RESULT 2026-08-18: submission 55616685 scored 0.915 -- FLAT vs P3 alone. The mechanism
+      demonstrably FIRED (844 ILP division sources, 703 restored, safe_divisions_added=0, audit
+      PASS 10/10, 2.3x the division count of P3) but produced no score movement, against a
+      predicted +0.0227 fold-1 division-term gain (~45x the 0.0005 rounding threshold).
+      Two unseparated explanations: (a) over-division -- 703 divisions over 4 crops ~176/crop vs an
+      estimated true ~27/crop, so FPs swamp divJ=TP/(TP+FP+FN); (b) the division term does not
+      transfer to the hidden set. PARKED not closed: separating them costs ONE slot at
+      BIOHUB_ILP_DIVISION_WEIGHT=0.75. But run the degraded-submission control FIRST (see below).
+      PRIOR (still valid, measured):
+      MEASURED LIVE 2026-08-18 (kernel biohub-p4-preilp-loeo-f1 v2, counts not scores):
+      of 125 fold-1 GT divisions, 34 mothers matched a >=2-candidate source and 29 had BOTH true
+      daughters offered to the solver -- against a pre-stated kill bar of 15. Declined second-daughter
+      edges carry median edge_prob 0.9188 (min 0.5506). Kill bar passed by ~2x.
+      REMAINING FALSIFICATION: no LB gain from L1 + safe-div-OFF + L3 shipped together.
+      NOTE the three are COUPLED -- L1 alone is +0.0046 because the patch's 507 FPs dominate the
+      denominator; L3 is mandatory because motion_relink_edges (wrapper.py:1158-1161) replaces the
+      ILP's edges wholesale.
+    links: ["06-knowledge-system/internal-reports/linker_division_capacity_2026-08-18.md"]
+    evidence:
+      - "pre-ILP candidate graph fold 1: 2,523,479 nodes / 2,162,040 candidate edges / 176,835 sources with out-degree>=2; post-ILP out-degree>=2 = 0"
+      - "29 of 31 orphan cases had both true daughters offered; declined edge_prob median 0.9188"
 
   - id: bet-zebrahub-retrain
     title: Retrain detector/associator on external Zebrahub
@@ -35,7 +100,11 @@ bets:
     status: proposed
     falsification: "No LOEO gain over the public 50ep weights (train 6bba/eval 44b6 and reverse)."
     links: ["01-research-direction/research-landscape.md", "04-data/data-acquisition.md"]
-    evidence: []
+    evidence:
+      - "DATA GATE LIFTED 2026-08-17: packaged Zebrahub imaging is public on Kaggle. kkunizaw/biohub-zh001r verified locally = zh001r_iso.npy (72,20,64,64,64) uint8 real ZSNS001 imaging + tgt volume + 1440 per-frame node arrays (N,4)[t,z,y,x], 754 MB total, vs the 150-232 GB level-1 acquisition budgeted. kkunizaw/biohub-zmnscrops (3.66 GB) adds ZSNS001+002 raw windowed crops. Attachable to kernels: no local download, no kernel internet. UNVERIFIED: their isotropic voxel scale vs our level-1 convention, and their node labels. Zebrahub CC BY-NC, host-cleared #734330."
+      - "SCALE MEASURED 2026-08-17: nucleus-size radial-profile ruler (884 competition GT nodes vs ~1500 of theirs) puts zh001r at ~1.6-1.8 um/voxel isotropic (median 1.762, 1.084x our 1.625 um deployed grid); normalised profiles near-identical. Same geometry family as the deployed 64^3 detector input -> the level-1 premise that a retrain voids the deployed 0.915 anchor does NOT hold for this substrate. Confound: ruler assumes comparable nucleus size; their nuclei are denser (later stage), biasing the estimate upward."
+      - "SCOPE LIMIT 2026-08-17: zh001r node arrays are (N,4)[t,z,y,x] with NO track identity (all 1440 arrays exactly 4 cols) -> supervises the DETECTOR retrain only; the edge/association half cannot be trained from it. Our own h1r_fetch_imaging.py level-1 stream does carry track ids. Complementary lanes, not a replacement. Scaffold h1r_zh001r_{audit,smoke}.py built + passing on CPU: alignment 2.29x intensity contrast at nodes, geometry 1.677 um (1.032x ours), det_loss 0.7028->0.5787 with UNet+detect_head grad."
+      - "COMPETITIVE 2026-08-17: kkunizaw uploaded zh001r today and zmnscrops 2026-08-16 -- a rival is actively running the Zebrahub retrain; the H1 lane is the live frontier." 
 
   - id: bet-learned-ranker
     title: Learned FP-suppressing candidate ranker
@@ -90,8 +159,8 @@ bets:
     mechanism: "Metric matches within 7um maximizing 1/(1+d); community EDA: 3um->-41%, 4um->-74%."
     expected_benefit: "several points IF currently integer-argmax (unverified); else nil"
     cost: low
-    status: proposed
-    falsification: "First clause RESOLVED: detector does NOT refine. Remaining kill: added refinement yields no LOEO gain."
+    status: closed
+    falsification: "KILLED 2026-08-18. Full paired deployment-substrate LOEO: 44b6 0.9037->0.9033 (-0.0004), 6bba 0.7051->0.7042 (-0.0009). Bilaterally NEGATIVE, an order below the +0.005 bar. Mechanism predicted in advance from predict_unet_transformer.py:495: z has zero quantisation error, y/x a 0.609 um systematic bias, RMS radial 1.075 um -- already inside the metric's free zone (cliff ~1.5-2 um), and OUTPUT_LINEFIT_SMOOTH dilutes the remainder. Residual untested: a constant +0.5-voxel grid-centre shift would cut RMS 1.075 -> 0.642 um at zero cost (different intervention)."
     links: ["06-knowledge-system/internal-reports/competitive_refresh_2026-08-17.md"]
     evidence:
       - "AUDIT 2026-08-17: predict_unet_transformer.py:285-293 returns integer int16 coords via max-pool local-max, no sub-voxel refine, at the 4x-downsampled grid -> lever LIVE. Applying it needs the detection logit maps (a detector re-run), not pure post-processing on existing geffs."
