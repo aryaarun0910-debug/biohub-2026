@@ -23,8 +23,10 @@ Each stage hard-fails on one of the documented environment traps
           matching on CLI text (trap 10, a transient SSLError reads as "ERROR").
   fetch   named files pulled by URL via ``list_kernel_session_output`` (trap 11,
           ``kaggle kernels output`` pulls the whole 168-file working dir and times out).
-  audit   delegates to ``scripts/d1/audit_submission_structure.py`` and propagates its
-          exit code.  An artifact that fails the audit gets no submit command.
+  audit   delegates to ``scripts/d1/audit_submission_structure.py`` and writes a durable
+          byte-bound release receipt. An artifact that fails gets no receipt.
+  submitcmd refuses stale/missing receipts and requires the exact explicit kernel version
+          recorded by ``audit``. It still never submits.
 
 SPEC FORMAT (JSON, see scripts/kaggle_specs/*.json)
 ---------------------------------------------------
@@ -67,8 +69,8 @@ USAGE
   .\.venv\Scripts\python.exe scripts\core\kaggle_factory.py status    --spec <spec.json>
   .\.venv\Scripts\python.exe scripts\core\kaggle_factory.py log       --spec <spec.json> [--dest DIR]
   .\.venv\Scripts\python.exe scripts\core\kaggle_factory.py fetch     --spec <spec.json> [--files submission.csv ...] [--dest DIR]
-  .\.venv\Scripts\python.exe scripts\core\kaggle_factory.py audit     --spec <spec.json> [--dest DIR]
-  .\.venv\Scripts\python.exe scripts\core\kaggle_factory.py submitcmd --spec <spec.json> -m "message"
+  .\.venv\Scripts\python.exe scripts\core\kaggle_factory.py audit     --spec <spec.json> --kernel-version N [--dest DIR]
+  .\.venv\Scripts\python.exe scripts\core\kaggle_factory.py submitcmd --spec <spec.json> --kernel-version N -m "message"
   .\.venv\Scripts\python.exe scripts\core\kaggle_factory.py verify    --spec <spec.json>   # cell-level diff vs base
 
 Always run with ``PYTHONUTF8=1`` set (this module sets it for its own child processes).
@@ -96,6 +98,9 @@ COMPETITION = "biohub-cell-tracking-during-development"
 OWNER = os.environ.get("BIOHUB_KAGGLE_OWNER", "aryaarun07")
 TERMINAL = {"COMPLETE", "ERROR", "CANCEL_REQUESTED", "CANCEL_ACKNOWLEDGED"}
 DEFECT_LEDGER = REPO / "scripts" / "core" / "experiment_defects.json"
+AUDIT_RECEIPT = "audit_receipt.json"
+AUDIT_REPORT = "structural_audit.json"
+RECEIPT_SCHEMA_VERSION = 1
 
 
 # --------------------------------------------------------------------------- utils
@@ -105,6 +110,119 @@ def sha256_bytes(b: bytes) -> str:
 
 def sha256_file(p: Path) -> str:
     return sha256_bytes(p.read_bytes())
+
+
+def normalized_spec_sha256(spec: dict) -> str:
+    """Hash only portable JSON spec content, excluding factory runtime metadata."""
+    portable = {key: value for key, value in spec.items() if not key.startswith("_")}
+    payload = json.dumps(
+        portable, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+    ).encode("utf-8")
+    return sha256_bytes(payload)
+
+
+def _repo_relative(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(REPO.resolve()).as_posix()
+    except (OSError, ValueError):
+        return path.resolve().as_posix()
+
+
+def audit_script_path() -> Path:
+    return REPO / "scripts" / "d1" / "audit_submission_structure.py"
+
+
+def receipt_path(dest: Path) -> Path:
+    return Path(dest) / AUDIT_RECEIPT
+
+
+def _positive_kernel_version(version: int | None) -> int:
+    if isinstance(version, bool) or not isinstance(version, int) or version <= 0:
+        raise SystemExit(
+            "an explicit positive --kernel-version is required; the factory does not infer "
+            "a mutable latest version"
+        )
+    return version
+
+
+def _release_materials(spec: dict, dest: Path, kernel_version: int) -> dict:
+    """Resolve and validate every local byte string bound by a release receipt."""
+    version = _positive_kernel_version(kernel_version)
+    csv = Path(dest) / "submission.csv"
+    if not csv.is_file():
+        raise SystemExit(f"no {csv}; run `fetch` first")
+    notebook = built_nb(spec)
+    manifest = manifest_path(spec)
+    auditor = audit_script_path()
+    spec_path = Path(spec.get("_spec_path", ""))
+    for label, path in (
+        ("experiment spec", spec_path),
+        ("built notebook", notebook),
+        ("build manifest", manifest),
+        ("defect ledger", DEFECT_LEDGER),
+        ("structural auditor", auditor),
+    ):
+        if not path.is_file():
+            raise SystemExit(f"missing {label}: {path}")
+    try:
+        disk_spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"unreadable experiment spec {spec_path}: {exc}") from exc
+    spec_sha = normalized_spec_sha256(spec)
+    if normalized_spec_sha256(disk_spec) != spec_sha:
+        raise SystemExit("loaded spec no longer matches its current on-disk JSON")
+    try:
+        build = json.loads(manifest.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"unreadable build manifest {manifest}: {exc}") from exc
+    notebook_sha = sha256_file(notebook)
+    if build.get("built_sha256") != notebook_sha:
+        raise SystemExit(
+            "built notebook no longer matches build_manifest.json: "
+            f"manifest={build.get('built_sha256')!r}, current={notebook_sha}"
+        )
+    if build.get("declared_slug") != spec.get("slug"):
+        raise SystemExit(
+            "build manifest slug does not match current spec: "
+            f"manifest={build.get('declared_slug')!r}, spec={spec.get('slug')!r}"
+        )
+    return {
+        "spec": {
+            "path": _repo_relative(spec_path),
+            "sha256": spec_sha,
+        },
+        "build": {
+            "notebook_path": _repo_relative(notebook),
+            "notebook_sha256": notebook_sha,
+            "manifest_path": _repo_relative(manifest),
+            "manifest_sha256": sha256_file(manifest),
+        },
+        "defect_ledger": {
+            "path": _repo_relative(DEFECT_LEDGER),
+            "sha256": sha256_file(DEFECT_LEDGER),
+        },
+        "submission": {
+            "path": csv.name,
+            "sha256": sha256_file(csv),
+            "bytes": csv.stat().st_size,
+        },
+        "auditor": {
+            "path": _repo_relative(auditor),
+            "sha256": sha256_file(auditor),
+        },
+        "kernel": {
+            "owner": OWNER,
+            "slug": spec["slug"],
+            "version": version,
+        },
+    }
+
+
+def _write_json_atomic(path: Path, value: dict) -> None:
+    path = Path(path)
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(path)
 
 
 def load_spec(path: Path) -> dict:
@@ -675,27 +793,117 @@ def cmd_log(spec: dict, dest: Path) -> int:
     return 0
 
 
-def cmd_audit(spec: dict, dest: Path) -> int:
+def cmd_audit(spec: dict, dest: Path, kernel_version: int | None = None) -> int:
+    """Audit and atomically issue a receipt binding every local release input."""
+    dest = Path(dest)
+    receipt = receipt_path(dest)
+    report = dest / AUDIT_REPORT
+    report_tmp = report.with_name(report.name + ".tmp")
+    # A new audit attempt invalidates any prior authorization before validation starts.
+    receipt.unlink(missing_ok=True)
+    report.unlink(missing_ok=True)
+    report_tmp.unlink(missing_ok=True)
+
+    materials = _release_materials(spec, dest, _positive_kernel_version(kernel_version))
     csv = dest / "submission.csv"
-    if not csv.exists():
-        raise SystemExit(f"no {csv}; run `fetch` first")
-    r = run([sys.executable, "scripts/d1/audit_submission_structure.py", "audit", str(csv)])
+    r = run([
+        sys.executable, "scripts/d1/audit_submission_structure.py", "audit", str(csv),
+        "--json-out", str(report_tmp),
+    ])
     print((r.stdout or "") + (r.stderr or ""))
     if r.returncode != 0:
+        report_tmp.unlink(missing_ok=True)
         print("AUDIT FAILED -- no submit command will be issued for this artifact.")
-    return r.returncode
+        return r.returncode
+
+    try:
+        reports = json.loads(report_tmp.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        report_tmp.unlink(missing_ok=True)
+        raise SystemExit(f"auditor returned PASS without a readable JSON report: {exc}") from exc
+    if not isinstance(reports, list) or len(reports) != 1:
+        report_tmp.unlink(missing_ok=True)
+        raise SystemExit("auditor JSON report must contain exactly one artifact")
+    audited = reports[0]
+    if audited.get("verdict") != "PASS" \
+            or audited.get("sha256") != materials["submission"]["sha256"]:
+        report_tmp.unlink(missing_ok=True)
+        raise SystemExit(
+            "auditor result does not bind the current submission bytes: "
+            f"verdict={audited.get('verdict')!r}, sha256={audited.get('sha256')!r}"
+        )
+    current_materials = _release_materials(
+        spec, dest, materials["kernel"]["version"],
+    )
+    if current_materials != materials:
+        report_tmp.unlink(missing_ok=True)
+        raise SystemExit("release inputs changed while the structural audit was running")
+    report_tmp.replace(report)
+    release_receipt = {
+        "schema_version": RECEIPT_SCHEMA_VERSION,
+        "verdict": "PASS",
+        **materials,
+        "audit_report": {
+            "path": report.name,
+            "sha256": sha256_file(report),
+        },
+    }
+    _write_json_atomic(receipt, release_receipt)
+    print(f"release receipt -> {receipt} (sha256 {sha256_file(receipt)})")
+    return 0
 
 
-def cmd_submitcmd(spec: dict, message: str, dest: Path) -> int:
-    """Print the ONLY working submit form.  Never runs it."""
-    csv = dest / "submission.csv"
-    sha = sha256_file(csv) if csv.exists() else "<fetch first>"
-    print("\n# Preconditions: kernel COMPLETE, audit exit 0, human owns the slot.")
-    print(f"# artifact sha256 {sha}")
+def cmd_submitcmd(
+    spec: dict, message: str, dest: Path, kernel_version: int | None = None,
+) -> int:
+    """Print a receipt-bound submit command. Never runs it."""
+    if spec.get("expects_submission") is not True:
+        raise SystemExit(
+            f"spec {spec.get('name', '<unnamed>')} is not submission-authorized "
+            "(expects_submission must be true)"
+        )
+    version = _positive_kernel_version(kernel_version)
+    dest = Path(dest)
+    materials = _release_materials(spec, dest, version)
+    receipt = receipt_path(dest)
+    if not receipt.is_file():
+        raise SystemExit(f"no {receipt}; run `audit --kernel-version {version}` first")
+    try:
+        recorded = json.loads(receipt.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"unreadable release receipt {receipt}: {exc}") from exc
+    if recorded.get("schema_version") != RECEIPT_SCHEMA_VERSION \
+            or recorded.get("verdict") != "PASS":
+        raise SystemExit("release receipt is not a supported PASS receipt")
+    mismatches = [
+        key for key, expected in materials.items() if recorded.get(key) != expected
+    ]
+    if mismatches:
+        raise SystemExit(
+            "release receipt no longer matches current release inputs: "
+            + ", ".join(mismatches)
+        )
+    report_record = recorded.get("audit_report", {})
+    if report_record.get("path") != AUDIT_REPORT:
+        raise SystemExit("release receipt names an unexpected structural audit report")
+    report = dest / AUDIT_REPORT
+    if not report.is_file() or sha256_file(report) != report_record.get("sha256"):
+        raise SystemExit("structural audit report is absent or changed since receipt issuance")
+    try:
+        reports = json.loads(report.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"unreadable structural audit report: {exc}") from exc
+    if not isinstance(reports, list) or len(reports) != 1 \
+            or reports[0].get("verdict") != "PASS" \
+            or reports[0].get("sha256") != materials["submission"]["sha256"]:
+        raise SystemExit("structural audit report does not authorize the current submission")
+
+    print("\n# Receipt-bound local gates PASS; human still verifies remote kernel COMPLETE.")
+    print(f"# receipt sha256 {sha256_file(receipt)}")
+    print(f"# artifact sha256 {materials['submission']['sha256']}")
     print("$env:PYTHONUTF8=1; .\\.venv\\Scripts\\kaggle.exe competitions submit "
-          f"-c {COMPETITION} -k {OWNER}/{spec['slug']} -v <VERSION> "
+          f"-c {COMPETITION} -k {OWNER}/{spec['slug']} -v {version} "
           f"-f submission.csv -m \"{message}\"")
-    print("# -v is the kernel VERSION number, visible on the kernel's Output tab.")
     print("# A local CSV cannot be submitted: this competition accepts notebooks only.\n")
     return 0
 
@@ -708,6 +916,7 @@ def main() -> int:
     ap.add_argument("--spec", required=True)
     ap.add_argument("--files", nargs="*", default=["submission.csv"])
     ap.add_argument("--dest")
+    ap.add_argument("--kernel-version", type=int)
     ap.add_argument("-m", "--message", default="")
     args = ap.parse_args()
 
@@ -727,9 +936,11 @@ def main() -> int:
     if args.stage == "fetch":
         return cmd_fetch(spec, args.files, dest)
     if args.stage == "audit":
-        return cmd_audit(spec, dest)
+        return cmd_audit(spec, dest, args.kernel_version)
     if args.stage == "submitcmd":
-        return cmd_submitcmd(spec, args.message or spec.get("name", ""), dest)
+        return cmd_submitcmd(
+            spec, args.message or spec.get("name", ""), dest, args.kernel_version,
+        )
     return 2
 
 
