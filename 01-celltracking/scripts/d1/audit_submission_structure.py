@@ -14,11 +14,18 @@ Audit gates (all must PASS before an artifact is considered submission-ready):
   A9  out_degree       max out-degree <= 2
   A10 datasets         the emitted dataset set equals the expected test set
 
+Optional baseline plausibility gates (enabled only by ``--baseline``):
+
+  B0  baseline         the explicitly named baseline itself passes A1-A10
+  B1  total_retention  candidate node and edge counts retain the configured baseline fractions
+  B2  dataset_coverage every baseline dataset independently retains the configured fractions
+
 Volume bounds come from the competition test zarrs: T=100, Z=64, Y=256, X=256,
 so valid index ranges are t in [0, 99], z in [0, 63], y in [0, 255], x in [0, 255].
 
 Usage:
   python scripts/d1/audit_submission_structure.py audit  <submission.csv> [more.csv ...]
+      [--baseline BASE.csv] [--min-node-retention 0.5] [--min-edge-retention 0.5]
   python scripts/d1/audit_submission_structure.py diff   <base.csv> <arm.csv>
 """
 from __future__ import annotations
@@ -50,6 +57,7 @@ EXPECTED_DATASETS = [
 NUMERIC_COLUMNS = [
     "id", "node_id", "t", "z", "y", "x", "source_id", "target_id",
 ]
+DEFAULT_MIN_RETENTION = 0.5
 
 
 def load(path: Path) -> pd.DataFrame:
@@ -78,7 +86,122 @@ def _numeric_contract(df: pd.DataFrame) -> tuple[pd.DataFrame, int, int]:
     return numeric, nonfinite, fractional
 
 
-def audit(path: Path) -> dict:
+def _validated_fraction(name: str, value: float) -> float:
+    value = float(value)
+    if not np.isfinite(value) or not 0.0 <= value <= 1.0:
+        raise ValueError(f"{name} must be finite and in [0, 1], got {value!r}")
+    return value
+
+
+def _retention(candidate: int, baseline: int) -> float:
+    """Fraction retained; an empty baseline has no population that can be lost."""
+    return float(candidate / baseline) if baseline else 1.0
+
+
+def _apply_baseline_plausibility(
+    report: dict,
+    baseline_path: Path,
+    *,
+    min_node_retention: float,
+    min_edge_retention: float,
+    min_dataset_node_retention: float,
+    min_dataset_edge_retention: float,
+) -> None:
+    """Append generic count-retention gates against an explicitly selected baseline."""
+    thresholds = {
+        "min_node_retention": _validated_fraction(
+            "min_node_retention", min_node_retention
+        ),
+        "min_edge_retention": _validated_fraction(
+            "min_edge_retention", min_edge_retention
+        ),
+        "min_dataset_node_retention": _validated_fraction(
+            "min_dataset_node_retention", min_dataset_node_retention
+        ),
+        "min_dataset_edge_retention": _validated_fraction(
+            "min_dataset_edge_retention", min_dataset_edge_retention
+        ),
+    }
+    baseline = audit(Path(baseline_path))
+    baseline_ok = baseline["verdict"] == "PASS"
+    report["checks"].append({
+        "check": "B0 baseline",
+        "pass": baseline_ok,
+        "detail": (
+            f"path={baseline_path}; sha256={baseline['sha256']}; "
+            f"structural_verdict={baseline['verdict']}"
+        ),
+    })
+
+    node_retention = _retention(report["nodes"], baseline["nodes"])
+    edge_retention = _retention(report["edges"], baseline["edges"])
+    totals_ok = (
+        node_retention >= thresholds["min_node_retention"]
+        and edge_retention >= thresholds["min_edge_retention"]
+    )
+    report["checks"].append({
+        "check": "B1 total_retention",
+        "pass": totals_ok,
+        "detail": (
+            f"nodes={report['nodes']}/{baseline['nodes']}={node_retention:.6f} "
+            f"(min={thresholds['min_node_retention']:.6f}); "
+            f"edges={report['edges']}/{baseline['edges']}={edge_retention:.6f} "
+            f"(min={thresholds['min_edge_retention']:.6f})"
+        ),
+    })
+
+    per_dataset = {}
+    failed_datasets = []
+    for dataset, base_counts in baseline["per_dataset"].items():
+        candidate_counts = report["per_dataset"].get(dataset, {"nodes": 0, "edges": 0})
+        ds_node_retention = _retention(candidate_counts["nodes"], base_counts["nodes"])
+        ds_edge_retention = _retention(candidate_counts["edges"], base_counts["edges"])
+        passed = (
+            ds_node_retention >= thresholds["min_dataset_node_retention"]
+            and ds_edge_retention >= thresholds["min_dataset_edge_retention"]
+        )
+        if not passed:
+            failed_datasets.append(dataset)
+        per_dataset[dataset] = {
+            "baseline_nodes": base_counts["nodes"],
+            "candidate_nodes": candidate_counts["nodes"],
+            "node_retention": ds_node_retention,
+            "baseline_edges": base_counts["edges"],
+            "candidate_edges": candidate_counts["edges"],
+            "edge_retention": ds_edge_retention,
+            "pass": passed,
+        }
+    report["checks"].append({
+        "check": "B2 dataset_coverage",
+        "pass": not failed_datasets,
+        "detail": (
+            f"datasets_checked={len(per_dataset)}; failed={failed_datasets}; "
+            f"min_nodes={thresholds['min_dataset_node_retention']:.6f}; "
+            f"min_edges={thresholds['min_dataset_edge_retention']:.6f}"
+        ),
+    })
+    report["baseline_plausibility"] = {
+        "baseline_path": str(baseline_path),
+        "baseline_sha256": baseline["sha256"],
+        "thresholds": thresholds,
+        "node_retention": node_retention,
+        "edge_retention": edge_retention,
+        "per_dataset": per_dataset,
+    }
+    report["verdict"] = (
+        "PASS" if all(check["pass"] for check in report["checks"]) else "FAIL"
+    )
+
+
+def audit(
+    path: Path,
+    *,
+    baseline: Path | None = None,
+    min_node_retention: float = DEFAULT_MIN_RETENTION,
+    min_edge_retention: float = DEFAULT_MIN_RETENTION,
+    min_dataset_node_retention: float = DEFAULT_MIN_RETENTION,
+    min_dataset_edge_retention: float = DEFAULT_MIN_RETENTION,
+) -> dict:
     raw = path.read_bytes()
     df = load(path)
     checks: list[tuple[str, bool, str]] = []
@@ -226,7 +349,7 @@ def audit(path: Path) -> dict:
             "t_max": int(n["t"].max()),
         }
 
-    return {
+    report = {
         "path": str(path),
         "sha256": hashlib.sha256(raw).hexdigest(),
         "bytes": len(raw),
@@ -247,6 +370,16 @@ def audit(path: Path) -> dict:
         "checks": [{"check": c, "pass": bool(p), "detail": d} for c, p, d in checks],
         "verdict": "PASS" if all(p for _, p, _ in checks) else "FAIL",
     }
+    if baseline is not None:
+        _apply_baseline_plausibility(
+            report,
+            baseline,
+            min_node_retention=min_node_retention,
+            min_edge_retention=min_edge_retention,
+            min_dataset_node_retention=min_dataset_node_retention,
+            min_dataset_edge_retention=min_dataset_edge_retention,
+        )
+    return report
 
 
 def _graph(path: Path):
@@ -336,6 +469,18 @@ def main(argv: list[str]) -> int:
     a = sub.add_parser("audit")
     a.add_argument("paths", nargs="+", type=Path)
     a.add_argument("--json-out", type=Path)
+    a.add_argument(
+        "--baseline", type=Path,
+        help="explicit baseline submission used for optional count-retention gates",
+    )
+    a.add_argument("--min-node-retention", type=float, default=DEFAULT_MIN_RETENTION)
+    a.add_argument("--min-edge-retention", type=float, default=DEFAULT_MIN_RETENTION)
+    a.add_argument(
+        "--min-dataset-node-retention", type=float, default=DEFAULT_MIN_RETENTION,
+    )
+    a.add_argument(
+        "--min-dataset-edge-retention", type=float, default=DEFAULT_MIN_RETENTION,
+    )
     d = sub.add_parser("diff")
     d.add_argument("base", type=Path)
     d.add_argument("arm", type=Path)
@@ -343,7 +488,14 @@ def main(argv: list[str]) -> int:
     args = ap.parse_args(argv)
 
     if args.cmd == "audit":
-        reports = [audit(p) for p in args.paths]
+        reports = [audit(
+            p,
+            baseline=args.baseline,
+            min_node_retention=args.min_node_retention,
+            min_edge_retention=args.min_edge_retention,
+            min_dataset_node_retention=args.min_dataset_node_retention,
+            min_dataset_edge_retention=args.min_dataset_edge_retention,
+        ) for p in args.paths]
         for rep in reports:
             print_audit(rep)
         if args.json_out:
