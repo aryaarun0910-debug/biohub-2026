@@ -42,8 +42,8 @@
     "producer_config_sha256": "fdeff5809574543376eeee4fe83d9c344f45680535b505c9d712ecd77b966a57",
     "producer_summary_sha256": "eb965ba98e403f50f4b6f74dee38ab624f9e34ef365ebb2163e972e0e6300421",
     "producer_training_audit_sha256": "a67bfab726835a509ac25647560945889160623efcd3f133e276416db67cc0f8",
-    "consumer_patch_sha256": "149e5439656ff43101093dd05aaa62e76cce3f0a123d5915b28616c84bbd9b48",
-    "expected_built_notebook_sha256": "06a91e6da4b60897b329a10441fb0b8265670f192c634c331583e5ed42f12f05",
+    "consumer_patch_sha256": "c3e2580bf02f475120d474a440828c0f46e0e4d3d4ffc25b41e111e693b0c65d",
+    "expected_built_notebook_sha256": "d49a10ea86959cda96c0129ecee6661600291d850aef3f1d4fd9f0015f2b8dce",
     "measured_tensor_delta": "30/136 changed: exactly 10 U-Net BatchNorm modules x running_mean/running_var/num_batches_tracked; 106/136 identical including detect_head and transformer"
   },
   "edits": [

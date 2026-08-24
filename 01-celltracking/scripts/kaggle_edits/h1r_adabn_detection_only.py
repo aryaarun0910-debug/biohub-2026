@@ -191,24 +191,46 @@ def install_adabn_detection_only(
     if sha256_file(primary_path) != PRIMARY_SHA256:
         raise RuntimeError("P3 primary association checkpoint hash mismatch")
 
-    candidates = [p for p in input_root.rglob("edge_predictor_best.pth")
-                  if sha256_file(p) == CALIBRATED_SHA256]
-    if len(candidates) != 1:
-        raise RuntimeError(f"expected one exact AdaBN checkpoint, got {candidates}")
-    source_dir = candidates[0].parent
     files = {
         "config.json": CONFIG_SHA256,
         "summary.json": SUMMARY_SHA256,
         "training_audit.json": AUDIT_SHA256,
     }
-    for name, expected in files.items():
-        path = source_dir / name
-        if not path.is_file() or sha256_file(path) != expected:
-            raise RuntimeError(f"AdaBN control sidecar hash mismatch: {path}")
+    candidates = [p for p in input_root.rglob("edge_predictor_best.pth")
+                  if sha256_file(p) == CALIBRATED_SHA256]
+    valid = []
+    for candidate in candidates:
+        source_dir = candidate.parent
+        if all((source_dir / name).is_file()
+               and sha256_file(source_dir / name) == expected
+               for name, expected in files.items()):
+            valid.append(candidate)
+    if not valid:
+        raise RuntimeError(
+            f"expected an exact AdaBN checkpoint bundle, got {candidates}"
+        )
+
+    # Kaggle notebook sources can expose one output bundle twice: flattened at
+    # the kernel mount root and under its original output directory. Treat those
+    # byte-identical paths as one source, but still reject a match from a second
+    # kernel/dataset mount because its provenance would be ambiguous.
+    def source_key(path: Path) -> tuple[str, ...]:
+        parts = path.relative_to(input_root).parts
+        if parts and parts[0] == "notebooks" and len(parts) >= 4:
+            return parts[:3]  # notebooks/<owner>/<kernel-slug>
+        return parts[:1]      # legacy dataset/kernel mount
+
+    source_keys = {source_key(path) for path in valid}
+    if len(source_keys) != 1:
+        raise RuntimeError(
+            f"expected one exact AdaBN source mount, got {sorted(source_keys)}"
+        )
+    calibrated_path = min(valid, key=lambda path: len(path.parts))
+    source_dir = calibrated_path.parent
 
     import torch
     primary = torch.load(primary_path, map_location="cpu", weights_only=True)
-    calibrated = torch.load(candidates[0], map_location="cpu", weights_only=True)
+    calibrated = torch.load(calibrated_path, map_location="cpu", weights_only=True)
     changed = validate_adabn_state_contract(primary, calibrated)
     audit = json.loads((source_dir / "training_audit.json").read_text(encoding="utf-8"))
     summary = json.loads((source_dir / "summary.json").read_text(encoding="utf-8"))

@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 import torch
 
+import scripts.kaggle_edits.h1r_adabn_detection_only as adabn_module
 from scripts.kaggle_edits.h1r_adabn_detection_only import (
     AUDIT_SHA256,
     CALIBRATED_SHA256,
@@ -102,6 +103,73 @@ def test_protocol_contract_is_lr_zero_and_control_only() -> None:
     ]:
         with pytest.raises(RuntimeError):
             validate_adabn_artifact_contract(bad_audit, bad_summary)
+
+
+def _fake_bundle(root: Path) -> None:
+    root.mkdir(parents=True, exist_ok=True)
+    for name in (
+        "edge_predictor_best.pth", "config.json", "summary.json",
+        "training_audit.json",
+    ):
+        (root / name).write_bytes(name.encode("ascii"))
+
+
+def test_install_accepts_flattened_duplicate_from_same_kaggle_source(
+    tmp_path, monkeypatch,
+) -> None:
+    input_root = tmp_path / "input"
+    mount = input_root / "notebooks" / "owner" / "control-kernel"
+    _fake_bundle(mount)
+    _fake_bundle(mount / "h1r_detector")
+    repo = tmp_path / "repo"
+    primary = repo / "weights" / "primary.pth"
+    primary.parent.mkdir(parents=True)
+    primary.write_bytes(b"primary")
+
+    expected = {
+        "primary.pth": PRIMARY_SHA256,
+        "edge_predictor_best.pth": CALIBRATED_SHA256,
+        "config.json": CONFIG_SHA256,
+        "summary.json": SUMMARY_SHA256,
+        "training_audit.json": AUDIT_SHA256,
+    }
+    monkeypatch.setattr(adabn_module, "sha256_file", lambda path: expected[path.name])
+    monkeypatch.setattr(torch, "load", lambda *args, **kwargs: _state())
+    monkeypatch.setattr(adabn_module, "validate_adabn_state_contract", lambda *_: [])
+    monkeypatch.setattr(
+        adabn_module, "validate_adabn_artifact_contract", lambda *_: {"lr": 0.0},
+    )
+    monkeypatch.setattr(adabn_module, "patch_detection_only_predictor", lambda *_: "a" * 64)
+    monkeypatch.setattr(json, "loads", lambda *_: {})
+
+    record = adabn_module.install_adabn_detection_only(
+        repo, "weights/primary.pth", input_root, tmp_path / "working",
+    )
+    assert record["calibrated_sha256"] == CALIBRATED_SHA256
+
+
+def test_install_rejects_same_artifact_from_two_source_mounts(
+    tmp_path, monkeypatch,
+) -> None:
+    input_root = tmp_path / "input"
+    _fake_bundle(input_root / "notebooks" / "owner" / "kernel-a")
+    _fake_bundle(input_root / "notebooks" / "owner" / "kernel-b")
+    repo = tmp_path / "repo"
+    primary = repo / "weights" / "primary.pth"
+    primary.parent.mkdir(parents=True)
+    primary.write_bytes(b"primary")
+    expected = {
+        "primary.pth": PRIMARY_SHA256,
+        "edge_predictor_best.pth": CALIBRATED_SHA256,
+        "config.json": CONFIG_SHA256,
+        "summary.json": SUMMARY_SHA256,
+        "training_audit.json": AUDIT_SHA256,
+    }
+    monkeypatch.setattr(adabn_module, "sha256_file", lambda path: expected[path.name])
+    with pytest.raises(RuntimeError, match="one exact AdaBN source mount"):
+        adabn_module.install_adabn_detection_only(
+            repo, "weights/primary.pth", input_root, tmp_path / "working",
+        )
 
 
 def _predictor_source() -> str:
