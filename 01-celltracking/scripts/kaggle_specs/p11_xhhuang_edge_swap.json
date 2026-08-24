@@ -1,0 +1,60 @@
+{
+  "name": "p11_xhhuang_edge_swap",
+  "slug": "biohub-p11-xhhuang-edge-swap",
+  "title": "Biohub P11 XHHuang Edge Swap",
+  "code_file": "biohub-p11-xhhuang-edge-swap.ipynb",
+  "out_dir": "notebooks/kaggle_p11_xhhuang_edge_swap",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork",
+    "xhhuang/biohub-edge-predictor-v6-weights"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb",
+  "base_sha256": "6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
+  "purpose": "Isolated P9 coupled-division inference A/B: replace only the primary edge_predictor_best.pth selected by predict_cmd with xhhuang/biohub-edge-predictor-v6-weights split_0_edge_predictor_best.pth. The attached file path, byte size, SHA-256, complete config, state count, state schema fingerprint, and exact 136/136 key+shape+dtype compatibility with the P9 primary state all fail closed before workers start. The independent secondary seed, harmonic fusion, detector threshold/TTA, coupled divisions, DeepCenter state, ILP, relinking, gap closing, short-track policy, caps, datasets other than the added checkpoint, and submission format remain exactly P9. No launch or submission is performed by this spec.",
+  "provenance": {
+    "base": "P9 coupled-division built notebook, sha256 6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
+    "hypothesis": "The primary edge checkpoint controls candidate nomination, the model surface with demonstrated leaderboard transfer. Test whether xhhuang's v6 primary state improves P9 while retaining the fixed P9 independent secondary seed and harmonic fusion.",
+    "artifact": {
+      "dataset": "xhhuang/biohub-edge-predictor-v6-weights",
+      "license_verified_2026_08_24": "CC0-1.0",
+      "exact_mount_path": "/kaggle/input/biohub-edge-predictor-v6-weights/split_0_edge_predictor_best.pth",
+      "bytes": 8357783,
+      "sha256": "19cfbbeb082f54845564b77d48528998d43cfe1f8b1023101425427c834aa68f",
+      "state_tensors": 136,
+      "state_schema_sha256": "5011bba0806057be37c5090fb7b7a1c081a145d64e626f02a25cf6c715af0868",
+      "config_path": "/kaggle/input/biohub-edge-predictor-v6-weights/split_0_config.json",
+      "config": {
+        "unet_out_channels": 32,
+        "unet_layers": [32, 64, 128],
+        "downsample": [1, 4, 4],
+        "window_size": 2,
+        "pool_kernel_um": 5.0
+      },
+      "verification": "Kaggle file listing and a fresh local dataset download on 2026-08-24 agreed on filename, 8,357,783 bytes, SHA-256, config, and strict 136/136 key+shape+dtype compatibility with the repository's exact UNetNodeTransformer surface."
+    },
+    "training_normalization": "UNKNOWN. The dataset publishes weights and a small architecture config but no training code or authoritative intensity-normalization contract. Shape compatibility is not evidence that its training normalization matches P9 inference.",
+    "owner_leaderboard_evidence": "The owner's reported public leaderboard score is 0.920, but that run is non-isolated evidence: its full notebook, preprocessing, thresholds, fusion, and post-processing are not held equal to P9. Do not attribute 0.920 to this checkpoint alone.",
+    "routes_on": "one globally fixed, content-independent primary checkpoint selector only; no dataset, crop, acquisition, family, hidden label, graph statistic, or image-content routing",
+    "interaction_warning": "This is isolated relative to P9 configuration, but the new primary state feeds both detection and edge logits and is then mixed with P9's independent secondary model. Unknown training normalization and the harmonic interaction make direction and magnitude empirical; owner LB 0.920 is context, not an additive estimate."
+  },
+  "edits": [
+    {
+      "kind": "insert_before",
+      "cell_match": "available_gpu_count = _torch.cuda.device_count()",
+      "anchor": "available_gpu_count = _torch.cuda.device_count()",
+      "code_file": "scripts/kaggle_edits/p11_xhhuang_edge_swap.py",
+      "expect": 1
+    }
+  ]
+}

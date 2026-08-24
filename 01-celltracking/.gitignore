@@ -17,6 +17,7 @@ scratch_live_lb/
 scratch_public_kernels/
 scratch_lb/
 scratch_nb/
+notebooks/**/_out/
 /biohub-cell-tracking-during-development.zip
 # consolidated raw research store (was the _RESEARCH sibling) - durable-raw evidence tier
 _evidence/
