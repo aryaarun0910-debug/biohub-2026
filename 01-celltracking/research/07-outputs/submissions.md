@@ -715,5 +715,37 @@ last-wins-correct in the built notebook.
 central **0.918–0.923**, upside 0.924–0.928 (~20%), flat 0.915 (~25%). The flat case would mean
 the design does not transfer off its author's substrate.
 
-**Score:** _pending._
+**Score: 0.912 — WORSE than baseline by −0.003. Prediction MISSED.**
+
+Recorded band was central 0.918–0.923, upside 0.924–0.928, flat 0.915 at ~25%. Actual **0.912**
+was **below every band** — the first prediction that missed on the low side, and it missed for a
+reason the host identified BEFORE the score landed but AFTER the submission: p8 ports kimi-v17's
+loose gates (12/15/10) without its three precision filters
+(`SAFE_DIV_REQUIRE_DIVERGENCE`, `SAFE_DIV_DIVERGE_UM`, `SAFE_DIV_REQUIRE_MUTUAL_NN`), which our
+wrapper does not implement at all (diverge 0, mutual 0, orphan 0 occurrences).
+
+**Loose propose without the strict filter is actively harmful — now measured, not inferred.**
+The DeepCenter veto did fire (14,188 checked, 5,900 rejected, 41.6%), but it tests *"is there a
+cell here?"* not *"are these two sisters?"*, and at ~2,400:1 most false candidates are real cells.
+455 divisions emitted against 3 GT divisions on the placeholder substrate.
+
+### This REVISES the transfer law — division changes CAN move the LB
+
+| submission | change | LB Δ |
+|---|---|---|
+| divfix (703 divisions, no discriminator) | division term | **0.000** |
+| **p8 (455 divisions, loose gates + veto)** | division term + bidirectional 0.20→0.30 | **−0.003** |
+| control (28% node cut) | detection surface | −0.032 |
+
+The earlier reading — "division-term changes score 0.000" — was drawn from a single sample.
+**Division changes are not invisible to the LB; ours have been neutral-to-harmful.** That is a
+materially different and more actionable statement.
+
+**CONFOUND, host error:** p8 bundled the division gates AND `BIDIRECTIONAL_EDGE_WEIGHT` 0.20→0.30.
+The −0.003 cannot be attributed between them. Deliberate bundling was justified for a faithful
+port; it was not a faithful port, so the bundle bought a confounded result. **If the bidirectional
+weight is retested, it must ship alone.**
+
+Slots consumed: 15. Platform unchanged at **P3 harmonic 0.915** — p8 is NOT adopted.
+
 

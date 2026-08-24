@@ -15,6 +15,39 @@ tags: [handoff, entry-point]
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
 
+## 🎯 HOST DECISION 2026-08-23: **TOP-3 OR NOTHING.** Bronze is not the win condition.
+
+Operator, verbatim: *"top 3 or nothing - im willing to go all out."*
+
+**Consequence — this reorders everything.** Bronze (0.918) is +0.003 away and cheap; top-3 (0.947)
+is +0.032 away and needs the retrain. They compete for the same 37 days. The decision is that
+**post-processing work is no longer a phase**. The four free config levers
+(`OUTPUT_MIN_TRACK_LEN` 6→4, `ADAPTIVE_SHORT_TRACK_RESCUE`, the `GAP_CLOSE_MAX_GAP` clamp, the
+det-threshold sweep) are worth running only because they are CPU-cheap and ride along — **they are
+not the plan and must not consume calendar.**
+
+**The plan is H1: retrain, on Colab, starting immediately.**
+
+**Why nothing else reaches 0.947 — measured, not argued:**
+- Wrapping a public notebook can only put us AT the public frontier, never ahead of it. When
+  kimi-v17 (0.923) appeared, 155 teams reached 0.917 within days. 665 teams now sit at ≥0.915.
+- The leader moved **0.951 → 0.962 in four days**. Chasing +0.002 increments against +0.01/week
+  is losing while running.
+- `error_atlas_2026-08-19`: the loss is NOT concentrated (worst decile only 1.62×
+  over-represented); abstention is CLOSED (58.3% vs a 58.88% bar); **the candidate generator
+  withholds 17,067 detectable GT edges (15.65%)** while a perfect solver over today's candidates
+  is worth **+0.0012**. Those are facts about the detector and linker, and no post-processing
+  config changes them.
+
+**The one asset the field cannot fork from a public notebook:** `data/external/zebrahub/zh001r_identity.npz`
+— **1,258,182 GT association edges** incl. 65,741 division-daughter links, registered onto ZSNS001
+(72/72 crops, median residual 4e-5 µm) at exactly the deployed 1.625 µm geometry. We own 151
+division events; this is ~436× more. Nobody else appears to have registered those crops.
+
+**Budget:** 37 days to 2026-09-29. Colab Pro ~45 GPU-h/week (training, internet) + Kaggle ~30 h/week
+(inference/submission only). ~168 submission slots at 5/day. **Calendar is the binding constraint,
+not slots and no longer compute.**
+
 ## Mission
 
 Aggressive climb toward **top-3** (private-set-honest). Deployed **P3 harmonic 0.915** public;
