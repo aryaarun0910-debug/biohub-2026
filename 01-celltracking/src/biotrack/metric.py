@@ -115,11 +115,18 @@ def score_submission(
     graphs = submission_to_graphs(read_submission(submission_path))
     if expected is None:
         expected = sorted(p.stem for p in gt_dir.glob("*.geff"))
+    expected = list(expected)
+    if not expected:
+        raise ValueError(f"no expected GT datasets under {gt_dir}")
+    missing_gt = [dataset for dataset in expected
+                  if not (gt_dir / f"{dataset}.geff").exists()]
+    if missing_gt:
+        raise FileNotFoundError(
+            f"expected GT dataset(s) missing under {gt_dir}: {sorted(missing_gt)}"
+        )
     rows = []
     for dataset in sorted(expected):
         gt_geff = gt_dir / f"{dataset}.geff"
-        if not gt_geff.exists():
-            continue  # no GT to score against; genuinely not part of the set
         pred = graphs.get(dataset, _empty_graph())  # missing prediction -> all-FN
         rows.append(score_pred_graph(pred, gt_geff, scale, max_distance))
     # warn if the submission contains datasets that aren't in the expected set

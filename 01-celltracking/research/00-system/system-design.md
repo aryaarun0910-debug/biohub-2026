@@ -3,7 +3,7 @@ id: 00-system/system-design
 title: System Design
 area: 00-system
 status: active
-updated: '2026-08-16'
+updated: '2026-08-24'
 owner: biohub
 links: []
 tags: [architecture]
@@ -20,8 +20,10 @@ memory, not a transcript of every conversation.
 
 ## Two things in one folder
 
-- **The instrument** — the working code: `src/biotrack/` (immutable scorer/graph core + the
-  deployed wrapper), `scripts/`, `tests/`, `notebooks/`. Unchanged by the knowledge layer.
+- **The instrument** — the working code: `src/biotrack/` (immutable scorer/graph core + a
+  partial wrapper mirror), `scripts/`, `tests/`, `notebooks/`. The built Kaggle notebook is the
+  deployed program and must be audited directly; neither it nor `src/biotrack/wrapper.py` is a
+  superset of the other. Unchanged by the knowledge layer.
 - **The research machine** — `research/`, a scientific-method operating system in ordered
   areas. Narrative in Markdown; machine-readable spine in YAML/JSON. Mapped by
   [README.md](../README.md); declared by [system.yaml](../system.yaml).

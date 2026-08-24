@@ -97,7 +97,7 @@ bets:
       checkpoint the whole field shares.
     expected_benefit: "past the ~0.91 adj_edge_J public plateau (the measured path off it)"
     cost: high
-    status: proposed
+    status: measuring
     falsification: "No LOEO gain over the public 50ep weights (train 6bba/eval 44b6 and reverse)."
     links: ["01-research-direction/research-landscape.md", "04-data/data-acquisition.md"]
     evidence:
@@ -105,6 +105,8 @@ bets:
       - "SCALE MEASURED 2026-08-17: nucleus-size radial-profile ruler (884 competition GT nodes vs ~1500 of theirs) puts zh001r at ~1.6-1.8 um/voxel isotropic (median 1.762, 1.084x our 1.625 um deployed grid); normalised profiles near-identical. Same geometry family as the deployed 64^3 detector input -> the level-1 premise that a retrain voids the deployed 0.915 anchor does NOT hold for this substrate. Confound: ruler assumes comparable nucleus size; their nuclei are denser (later stage), biasing the estimate upward."
       - "SCOPE LIMIT 2026-08-17: zh001r node arrays are (N,4)[t,z,y,x] with NO track identity (all 1440 arrays exactly 4 cols) -> supervises the DETECTOR retrain only; the edge/association half cannot be trained from it. Our own h1r_fetch_imaging.py level-1 stream does carry track ids. Complementary lanes, not a replacement. Scaffold h1r_zh001r_{audit,smoke}.py built + passing on CPU: alignment 2.29x intensity contrast at nodes, geometry 1.677 um (1.032x ours), det_loss 0.7028->0.5787 with UNet+detect_head grad."
       - "COMPETITIVE 2026-08-17: kkunizaw uploaded zh001r today and zmnscrops 2026-08-16 -- a rival is actively running the Zebrahub retrain; the H1 lane is the live frontier." 
+      - "IDENTITY LANE EXECUTABLE 2026-08-24: strict row-aligned loader over the real 72x20 pack reproduces 1,192,441 continuation + 65,741 division-daughter links exactly; schema/duplicate/time/parent ambiguity failures are fatal."
+      - "S1 PACKAGED 2026-08-24: smoke/full Kaggle specs add exact 1.625um validation, zero-epoch threshold sweep, strict init, full resume state, and paired T4x2 fp32/fp16 telemetry; smoke v1 launched, no submission."
 
   - id: bet-learned-ranker
     title: Learned FP-suppressing candidate ranker

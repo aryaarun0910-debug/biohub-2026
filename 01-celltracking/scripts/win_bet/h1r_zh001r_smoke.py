@@ -36,7 +36,7 @@ ROOT = next(_p for _p in Path(__file__).resolve().parents if (_p / "pyproject.to
 sys.path.insert(0, str(ROOT / "vendor" / "kaggle-cell-tracking" / "scripts"))
 import train_unet_transformer as T  # noqa: E402
 
-THEIR_VOX_UM = 1.677     # measured by h1r_zh001r_audit.py (ratio 1.032x our 1.625 um grid)
+THEIR_VOX_UM = 1.625     # exact registered geometry; supersedes the old intensity ruler
 
 
 def main() -> None:

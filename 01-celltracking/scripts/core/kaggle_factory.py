@@ -447,10 +447,29 @@ def cmd_log(spec: dict, dest: Path) -> int:
     dest.mkdir(parents=True, exist_ok=True)
     target = dest / "kernel.log"
     with api.build_kaggle_client() as k:
-        stream = k.kernels.kernels_api_client.get_kernel_session_logs_stream(
-            OWNER, spec["slug"]
+        # kaggle>=2.2.2 accepts a typed request and returns a requests.Response.
+        # Keep the legacy fallbacks because older SDKs returned bytes/an iterator.
+        from kagglesdk.kernels.types.kernels_api_service import (
+            ApiGetKernelSessionLogsStreamRequest,
         )
-        body = stream if isinstance(stream, (str, bytes)) else b"".join(stream)
+
+        request = ApiGetKernelSessionLogsStreamRequest()
+        request.user_name = OWNER
+        request.kernel_slug = spec["slug"]
+        stream = k.kernels.kernels_api_client.get_kernel_session_logs_stream(request)
+        if hasattr(stream, "raise_for_status"):
+            stream.raise_for_status()
+            content_type = stream.headers.get("content-type", "").lower()
+            if "application/json" in content_type:
+                events = stream.json()
+                body = "".join(
+                    event.get("data", "") if isinstance(event, dict) else str(event)
+                    for event in events
+                )
+            else:
+                body = stream.content
+        else:
+            body = stream if isinstance(stream, (str, bytes)) else b"".join(stream)
     if isinstance(body, bytes):
         body = body.decode("utf-8", "replace")
     target.write_text(body, encoding="utf-8")

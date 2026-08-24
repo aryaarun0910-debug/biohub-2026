@@ -62,7 +62,7 @@ def _h1r_enable_amp_unet() -> None:
     _orig = TemporalUNet3D.forward
 
     def _fwd(self, x, _orig=_orig):
-        if _H1R_AMP and torch.cuda.is_available():
+        if getattr(self, "_h1r_amp_enabled", _H1R_AMP) and torch.cuda.is_available():
             with torch.autocast("cuda", dtype=torch.float16):
                 out = _orig(self, x)
             return out.float()
@@ -70,6 +70,7 @@ def _h1r_enable_amp_unet() -> None:
 
     TemporalUNet3D.forward = _fwd
     TemporalUNet3D._h1r_amp = True
+    TemporalUNet3D._h1r_amp_enabled = _H1R_AMP
 
 
 _h1r_enable_amp_unet()

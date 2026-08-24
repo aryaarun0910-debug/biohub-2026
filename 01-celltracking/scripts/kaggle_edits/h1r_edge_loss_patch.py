@@ -305,13 +305,20 @@ _PREDICT_NEW = '''            raw = edge_logits_pair[0]
             #   softmax     -- vendored bare column softmax (sums to 1 per column)
             #   softmax_bg  -- parental softmax with the "no parent" background term
             #   sigmoid     -- the auxiliary absolute per-edge score (needs H1R_AUX_SIGMOID>0)
-            _h1r_edge_prob = os.environ.get("H1R_EDGE_PROB", "softmax")
+            _h1r_edge_prob = os.environ.get("H1R_EDGE_PROB")
+            if _h1r_edge_prob is None:
+                _h1r_edge_prob = (
+                    "softmax_bg" if os.environ.get("H1R_BG_TERM", "1") == "1"
+                    else cfg.edge_activation
+                )
+            if _h1r_edge_prob not in {"softmax", "softmax_bg", "sigmoid"}:
+                raise ValueError(f"unsupported H1R_EDGE_PROB={_h1r_edge_prob!r}")
             if _h1r_edge_prob == "softmax_bg":
                 _bg = torch.zeros(1, raw.shape[1], device=raw.device, dtype=raw.dtype)
                 probs = torch.softmax(torch.cat([raw, _bg], dim=0), dim=0)[:-1].cpu().numpy()
             elif _h1r_edge_prob == "sigmoid":
                 probs = torch.sigmoid(raw).cpu().numpy()
-            elif cfg.edge_activation == "softmax":
+            elif _h1r_edge_prob == "softmax":
                 probs = torch.softmax(raw, dim=0).cpu().numpy()
             else:
                 probs = torch.sigmoid(raw).cpu().numpy()

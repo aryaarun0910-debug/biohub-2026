@@ -62,5 +62,25 @@ def test_scoring_only_present_would_inflate(tmp_path):
     assert res["summary"]["adj_edge_jaccard"] > 1.0  # count-undercount reward on a perfect single set
 
 
+def test_misspelled_expected_gt_fails_closed(tmp_path):
+    a, _ = _two_datasets()
+    ga = load_graph(str(TRAIN / f"{a}.geff"))
+    sub = tmp_path / "s.csv"
+    graphs_to_submission({a: ga}).write_csv(sub)
+    with pytest.raises(FileNotFoundError, match="definitely-not-a-crop"):
+        score_submission(sub, TRAIN, expected=["definitely-not-a-crop"])
+
+
+def test_empty_gt_directory_fails_closed(tmp_path):
+    a, _ = _two_datasets()
+    ga = load_graph(str(TRAIN / f"{a}.geff"))
+    sub = tmp_path / "s.csv"
+    graphs_to_submission({a: ga}).write_csv(sub)
+    gt_dir = tmp_path / "empty-gt"
+    gt_dir.mkdir()
+    with pytest.raises(ValueError, match="no expected GT datasets"):
+        score_submission(sub, gt_dir)
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))

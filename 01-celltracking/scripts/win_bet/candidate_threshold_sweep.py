@@ -36,10 +36,35 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import zarr
-from scipy.spatial import cKDTree
+from scipy.optimize import linear_sum_assignment
 
 SCALE = np.array([1.625, 0.40625, 0.40625])
 MATCH_UM = 7.0  # scorer matching radius
+
+
+def match_gt_to_pred_one_to_one(
+    pred_ids: np.ndarray,
+    pred_pos_um: np.ndarray,
+    gt_ids: np.ndarray,
+    gt_pos_um: np.ndarray,
+    max_distance: float = MATCH_UM,
+) -> dict[int, int]:
+    """Return GT->prediction matches using the scorer's one-to-one objective."""
+    if len(pred_ids) == 0 or len(gt_ids) == 0:
+        return {}
+    distance = np.linalg.norm(
+        pred_pos_um[:, None, :] - gt_pos_um[None, :, :], axis=2
+    )
+    in_gate = distance <= max_distance
+    if not in_gate.any():
+        return {}
+    weight = np.where(in_gate, 1.0 / (1.0 + distance), 0.0)
+    pred_row, gt_col = linear_sum_assignment(weight, maximize=True)
+    return {
+        int(gt_ids[g]): int(pred_ids[p])
+        for p, g in zip(pred_row, gt_col)
+        if in_gate[p, g]
+    }
 
 
 def load_gt(path: Path):
@@ -88,19 +113,18 @@ def main() -> None:
         pt = gn["t"].to_numpy().astype(np.int64)
         pid = gn["node_id"].to_numpy().astype(np.int64)
 
-        # match each GT node to the nearest predicted node in the same frame, within MATCH_UM
+        # Match with the scorer's one-to-one weighted bipartite objective. Independent
+        # nearest neighbours can assign several GT nodes to one prediction and inflate
+        # the supposedly detectable edge ceiling.
         gt2pred: dict[int, int] = {}
         for tt in np.unique(gt_t):
             pm = pt == tt
             if not pm.any():
                 continue
-            tree = cKDTree(pos[pm])
-            ids_here = pid[pm]
             gm = gt_t == tt
-            d, j = tree.query(gpos[gm])
-            for gid, dd, jj in zip(gnid[gm], d, j):
-                if dd <= MATCH_UM:
-                    gt2pred[int(gid)] = int(ids_here[jj])
+            gt2pred.update(match_gt_to_pred_one_to_one(
+                pid[pm], pos[pm], gnid[gm], gpos[gm], MATCH_UM
+            ))
 
         # GT edges whose BOTH endpoints were detected -- the reachable ceiling
         pairs = []
@@ -148,7 +172,8 @@ def main() -> None:
 
     print()
     print("Deployed BIOHUB_DUAL_SEED_EDGE_THRESHOLD = 0.48 -> identical to tau=0.50 "
-          "(export floor; a column softmax cannot fall below 0.5 for the argmax entry).")
+          "in this left-censored export. This artifact contains only edges already above "
+          "0.5, so it cannot measure recovery from a lower threshold or top-k export.")
 
     if args.json:
         Path(args.json).write_text(json.dumps(out, indent=2))

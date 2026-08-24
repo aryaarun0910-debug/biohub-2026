@@ -3,7 +3,7 @@ id: 00-system/readme
 title: The Research Machine — Map
 area: 00-system
 status: active
-updated: 2026-08-16
+updated: 2026-08-24
 owner: biohub
 links: []
 tags: [meta, map]
@@ -23,15 +23,16 @@ same "fail loudly on drift" discipline as the claims table.
 
 ## Repository at a glance
 
-Deployed public score **0.915** (P3 harmonic); leader 0.950, top-3 boundary 0.948, gap **+0.033**.
+Deployed public score **0.915** (P3 harmonic); leader 0.962, top-3 boundary 0.953, gap **+0.038**
+(2026-08-24 15:52 UTC).
 Live direction: [`00-system/handoff.md`](00-system/handoff.md) →
 [`01-research-direction/directional-updates.md`](01-research-direction/directional-updates.md).
 
 | Path | What |
 |---|---|
 | `research/` | This knowledge machine — 8 ordered areas (00 + 01–07). |
-| `../src/biotrack/` | Immutable scorer/graph core + the deployed wrapper (the instrument). |
-| `../scripts/`, `../tests/`, `../notebooks/` | Tooling, software-contract tests, Kaggle kernels. |
+| `../src/biotrack/` | Immutable scorer/graph core + a partial wrapper mirror; not the deployed program. |
+| `../scripts/`, `../tests/`, `../notebooks/` | Tooling, software-contract tests, and Kaggle kernels; built notebooks are the deployed artifacts. |
 | `../config/` | Dependency pins (`requirements.txt`, `requirements.lock.txt`). |
 | `../_evidence/` | **Gitignored** durable-raw store (agent runs, snapshots, caches, `research.sqlite`). |
 | `../.claude/rag/` | **Gitignored** RAG artifacts (embeddings, indexes) — policy in [`04-data/databases.md`](04-data/databases.md). |
