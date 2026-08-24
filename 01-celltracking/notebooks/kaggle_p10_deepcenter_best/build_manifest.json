@@ -1,0 +1,25 @@
+{
+  "name": "p10_deepcenter_best",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p10_deepcenter_best.json",
+  "base_notebook": "notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb",
+  "base_sha256": "6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
+  "built_notebook": "notebooks\\kaggle_p10_deepcenter_best\\biohub-p10-deepcenter-best.ipynb",
+  "built_sha256": "78cf17161a71d1d6f36ee3ffce8ccaeddad52d3413b77788a5583fbdaf696ea7",
+  "config_hash": "6295a6d6e29e",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "804deeaa986fdfb0fa25751016b3fe756275328cf049547a21991fde67b6c16e"
+    }
+  ],
+  "declared_slug": "biohub-p10-deepcenter-best",
+  "title": "Biohub P10 DeepCenter Best",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}
