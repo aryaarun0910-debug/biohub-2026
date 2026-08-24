@@ -2,7 +2,8 @@
 
 Audit gates (all must PASS before an artifact is considered submission-ready):
 
-  A1  schema           exactly the 10 required columns, contiguous ids, row_type in {node, edge}
+  A1  schema           exact columns; contiguous ids; finite integral numeric fields; node/edge
+                       sentinel contract; non-empty dataset; row_type in {node, edge}
   A2  node_time        every node has 0 <= t <= T_MAX and t is integral
   A3  volume           every node lies inside the plausible acquisition volume
   A4  node_ids         node_id unique within a dataset; no node row is also an edge row
@@ -29,6 +30,7 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 COLUMNS = [
@@ -45,10 +47,35 @@ EXPECTED_DATASETS = [
     "6bba_05b6850b",
     "6bba_05db0fb1",
 ]
+NUMERIC_COLUMNS = [
+    "id", "node_id", "t", "z", "y", "x", "source_id", "target_id",
+]
 
 
 def load(path: Path) -> pd.DataFrame:
     return pd.read_csv(path)
+
+
+def _numeric_contract(df: pd.DataFrame) -> tuple[pd.DataFrame, int, int]:
+    """Return a safe numeric view plus counts of non-finite and fractional cells.
+
+    ``astype(int)`` silently truncates fractional values, which previously let malformed
+    coordinates and times pass the topology checks.  Coercing once here lets the audit record
+    the defect while replacing unsafe cells with a sentinel so later checks still produce a
+    complete FAIL report instead of crashing.
+    """
+    numeric = pd.DataFrame(index=df.index)
+    nonfinite = 0
+    fractional = 0
+    for column in NUMERIC_COLUMNS:
+        values = pd.to_numeric(df[column], errors="coerce")
+        array = values.to_numpy(dtype=np.float64, na_value=np.nan)
+        finite = np.isfinite(array)
+        integral = finite & (array == np.trunc(array))
+        nonfinite += int((~finite).sum())
+        fractional += int((finite & ~integral).sum())
+        numeric[column] = np.where(integral, array, -1).astype(np.int64)
+    return numeric, nonfinite, fractional
 
 
 def audit(path: Path) -> dict:
@@ -58,16 +85,58 @@ def audit(path: Path) -> dict:
 
     ok = df.columns.tolist() == COLUMNS
     detail = "columns match" if ok else f"columns={df.columns.tolist()}"
+    if not ok:
+        raise ValueError(f"submission schema mismatch: {detail}")
+
+    numeric, nonfinite, fractional = _numeric_contract(df)
+    # All later graph checks operate on this validated/sanitised integer view. Invalid cells
+    # remain represented by -1, guaranteeing a FAIL without unsafe float-to-int truncation.
+    work = df.copy()
+    work[NUMERIC_COLUMNS] = numeric
+
     contiguous = df["id"].tolist() == list(range(len(df)))
-    rowtypes = set(df["row_type"].unique())
-    ok = ok and contiguous and rowtypes <= {"node", "edge"}
+    rowtypes = set(df["row_type"].dropna().unique())
+    rowtypes_valid = bool(df["row_type"].notna().all() and rowtypes <= {"node", "edge"})
+    ok = ok and contiguous and rowtypes_valid
     checks.append((
         "A1 schema", ok,
-        f"{detail}; contiguous_ids={contiguous}; row_types={sorted(rowtypes)}",
+        f"{detail}; contiguous_ids={contiguous}; row_types={sorted(map(str, rowtypes))}; "
+        f"missing_row_type={int(df['row_type'].isna().sum())}",
     ))
 
-    nodes = df[df["row_type"].eq("node")]
-    edges = df[df["row_type"].eq("edge")]
+    checks.append((
+        "A1 numeric", nonfinite == 0 and fractional == 0,
+        f"non_numeric_or_nonfinite={nonfinite}; fractional={fractional}",
+    ))
+
+    dataset_missing = int(df["dataset"].isna().sum())
+    dataset_blank = int((
+        df["dataset"].notna() & df["dataset"].astype(str).str.strip().eq("")
+    ).sum())
+    node_mask = df["row_type"].eq("node")
+    edge_mask = df["row_type"].eq("edge")
+    unknown_rows = int((~(node_mask | edge_mask)).sum())
+    node_contract_bad = int((
+        (numeric.loc[node_mask, "node_id"] < 0)
+        | (numeric.loc[node_mask, ["t", "z", "y", "x"]] < 0).any(axis=1)
+        | numeric.loc[node_mask, "source_id"].ne(-1)
+        | numeric.loc[node_mask, "target_id"].ne(-1)
+    ).sum())
+    edge_contract_bad = int((
+        numeric.loc[edge_mask, ["node_id", "t", "z", "y", "x"]].ne(-1).any(axis=1)
+        | (numeric.loc[edge_mask, ["source_id", "target_id"]] < 0).any(axis=1)
+    ).sum())
+    checks.append((
+        "A1 row_contract",
+        dataset_missing == 0 and dataset_blank == 0 and unknown_rows == 0
+        and node_contract_bad == 0 and edge_contract_bad == 0,
+        f"missing_dataset={dataset_missing}; blank_dataset={dataset_blank}; "
+        f"unknown_row_type={unknown_rows}; bad_node_rows={node_contract_bad}; "
+        f"bad_edge_rows={edge_contract_bad}",
+    ))
+
+    nodes = work[node_mask]
+    edges = work[edge_mask]
 
     t_bad = int(((nodes["t"] < 0) | (nodes["t"] > T_MAX)).sum())
     checks.append((
@@ -137,13 +206,13 @@ def audit(path: Path) -> dict:
     checks.append(("A8 in_degree", max_in <= 1, f"max in-degree={max_in}"))
     checks.append(("A9 out_degree", max_out <= 2, f"max out-degree={max_out}"))
 
-    got_ds = sorted(df["dataset"].astype(str).unique())
+    got_ds = sorted({str(value) for value in df["dataset"].dropna().unique()})
     checks.append((
         "A10 datasets", got_ds == EXPECTED_DATASETS, f"datasets={got_ds}",
     ))
 
     per_ds = {}
-    for ds, grp in df.groupby("dataset", sort=True):
+    for ds, grp in work.groupby("dataset", sort=True):
         n = grp[grp["row_type"].eq("node")]
         e = grp[grp["row_type"].eq("edge")]
         d_out = Counter()
