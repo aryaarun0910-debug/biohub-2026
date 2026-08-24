@@ -1,0 +1,32 @@
+{
+  "name": "p12_forward_acceleration_lookahead",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p12_forward_acceleration_lookahead.json",
+  "base_notebook": "notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb",
+  "base_sha256": "6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
+  "built_notebook": "notebooks\\kaggle_p12_forward_acceleration\\biohub-p12-forward-acceleration.ipynb",
+  "built_sha256": "36fd059bfcac7263250de0dda29d8779927c9cf26f8a4af42acb4fda8252bd2b",
+  "config_hash": "6d7a1ad01f10",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "5252609e45cca6a6eebe80c4e976dc13c3c7e384be30ce5518803fe0a691515e"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "de372696ed86bd6ce1712ffb935708495f62197a245e1844a4fbbb7756f53274"
+    }
+  ],
+  "declared_slug": "biohub-p12-forward-acceleration",
+  "title": "Biohub P12 Forward Acceleration",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "name": "p12_forward_acceleration_lookahead",
+  "slug": "biohub-p12-forward-acceleration",
+  "title": "Biohub P12 Forward Acceleration",
+  "code_file": "biohub-p12-forward-acceleration.ipynb",
+  "out_dir": "notebooks/kaggle_p12_forward_acceleration",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb",
+  "base_sha256": "6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
+  "purpose": "One-factor P9 coupled-division A/B: add a bounded three-frame forward-acceleration bonus only inside the existing motion-relink assignment cost. Every already-admissible t->t+1 candidate searches physical t+2 continuations with next-step distance <=10 um; its minimum acceleration residual receives a linear bonus from 0.20 at 0 um to 0 at 4 um. Detector, checkpoints, learned and harmonic association probabilities, candidate gates, Hungarian passes, ILP, gap repair, DeepCenter, short-track policy, linefit, coupled divisions, caps, datasets, and submission format remain exactly P9. No launch or submission is performed by this spec.",
+  "provenance": {
+    "base": "P9 coupled-division built notebook, sha256 6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
+    "public_source": {
+      "kernel": "lonnieqin/biohub-gap2-joint-node-budget",
+      "kernel_id": 130118421,
+      "notebook_sha256": "f52775e15057fb93663a9581a30a2ea60830d9d7965b84464669638e9568d483",
+      "rule": "For each geometrically admissible source-target edge, scan t+2 nodes with next-step distance <=10 um, take the minimum velocity-difference norm, and subtract 0.20*max(0,1-residual/4.0) from assignment cost.",
+      "isolation_warning": "The public notebook carries additional ranker, edge-TTA, gap2, and shared-budget mechanisms. Its leaderboard position is evidence for mechanism plausibility, not an isolated causal delta for this rule."
+    },
+    "independent_public_observation": "The 2026-08-17 competitive refresh found the same three-frame acceleration motif in three public 0.915-to-0.918-era notebooks, but those stacks also contained other changes. P12 therefore tests the rule atomically rather than importing their claimed delta.",
+    "routes_on": "physical node coordinates and time only; no dataset, crop, acquisition, hidden label, image content, or ground truth routing",
+    "interaction_warning": "The bonus is small (<=0.20 cost units) but can change Hungarian assignments, which can change downstream gaps and coupled-division orphan topology. Those are consequences of the single assignment-cost treatment, not separately tuned edits.",
+    "frozen_controls": "P9 datasets, weights, detector threshold/TTA, harmonic lambda, dual-seed state, motion gates and velocity weight, learned bonus, DeepCenter epoch 500, gap rules, linefit, 8/11/10 coupled-division geometry, 2.25 divergence, caps, and all output invariants are unchanged."
+  },
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_USE_FORWARD_ACCELERATION_LOOKAHEAD": "1",
+        "BIOHUB_FORWARD_LOOKAHEAD_NEXT_STEP_UM": "10.0",
+        "BIOHUB_FORWARD_LOOKAHEAD_MAX_ACCEL_UM": "4.0",
+        "BIOHUB_FORWARD_LOOKAHEAD_MAX_BONUS": "0.20"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "def close_single_frame_gaps(",
+      "anchor": "def close_single_frame_gaps(",
+      "code_file": "scripts/kaggle_edits/p12_forward_acceleration_lookahead.py",
+      "expect": 1
+    }
+  ]
+}
