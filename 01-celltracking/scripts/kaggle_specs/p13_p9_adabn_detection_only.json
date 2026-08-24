@@ -1,0 +1,60 @@
+{
+  "name": "p13_p9_adabn_detection_only",
+  "slug": "biohub-p13-p9-adabn-detection-only",
+  "title": "Biohub P13 P9 AdaBN Detection Only",
+  "code_file": "biohub-p13-p9-adabn-detection-only.ipynb",
+  "out_dir": "notebooks/kaggle_p13_p9_adabn_detection_only",
+  "artifact_role": "deployment",
+  "consumes_artifacts": [
+    {
+      "producer_spec": "scripts/kaggle_specs/h1r_det_s1_adabn_control.json",
+      "artifact": "edge_predictor_best.pth",
+      "mode": "detection_only_bn_buffers",
+      "sha256": "1371c35a63a55366e6daba77f025b7c39b57a7ba7a63d516cd70b2c3d5e358de"
+    }
+  ],
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "kernel_sources": [
+    "aryaarun07/biohub-h1r-detector-s1-adabn-control"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb",
+  "base_sha256": "6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
+  "purpose": "P13 composes P9 coupled division with the exact completed LR=0 AdaBN detector calibration. The calibrated checkpoint supplies only all eight detector TTA logits. Original P9 primary/secondary association models, identity-view unet_out features, harmonic fusion, coupled-division code and 8/11/10/2.25 um parameters, ILP, relinking, gap closing, caps, and submission assembly remain byte-identical to P9. Runtime aborts unless all source hashes match and all 30 checkpoint differences are U-Net BatchNorm running buffers.",
+  "provenance": {
+    "base_candidate": "P9 coupled division",
+    "base_notebook_sha256": "6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
+    "producer_kernel": "aryaarun07/biohub-h1r-detector-s1-adabn-control",
+    "producer_last_run_utc": "2026-08-24T19:05:20.613Z",
+    "producer_built_notebook_sha256": "25c983118dcf725d7585847072ea321616a3b0b3b5f6da5f38e01d86be56d2b2",
+    "primary_checkpoint_sha256": "12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771",
+    "calibrated_checkpoint_sha256": "1371c35a63a55366e6daba77f025b7c39b57a7ba7a63d516cd70b2c3d5e358de",
+    "producer_config_sha256": "fdeff5809574543376eeee4fe83d9c344f45680535b505c9d712ecd77b966a57",
+    "producer_summary_sha256": "eb965ba98e403f50f4b6f74dee38ab624f9e34ef365ebb2163e972e0e6300421",
+    "producer_training_audit_sha256": "a67bfab726835a509ac25647560945889160623efcd3f133e276416db67cc0f8",
+    "consumer_patch_sha256": "c3e2580bf02f475120d474a440828c0f46e0e4d3d4ffc25b41e111e693b0c65d",
+    "expected_built_notebook_sha256": "93b7286cd3e20d95183e4423d626c96446c00111a3294219bb14d0ecc16af999",
+    "measured_tensor_delta": "30/136 changed: exactly 10 U-Net BatchNorm modules x running_mean/running_var/num_batches_tracked; 106/136 identical including detect_head and transformer"
+  },
+  "edits": [
+    {
+      "kind": "insert_before",
+      "cell_match": "start_time = time.time()",
+      "anchor": "start_time = time.time()",
+      "code_file": "scripts/kaggle_edits/h1r_adabn_detection_only.py",
+      "expect": 1
+    }
+  ]
+}

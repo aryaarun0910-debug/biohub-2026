@@ -117,7 +117,10 @@
     {
       "id": "DG-008-calibration-crosses-into-association",
       "severity": "SEV-1",
-      "scope": {"spec_name_globs": ["deploy_h1r_adabn_detection_only"]},
+      "scope": {"spec_name_globs": [
+        "deploy_h1r_adabn_detection_only",
+        "p13_p9_adabn_detection_only"
+      ]},
       "checks": [
         {
           "kind": "notebook_require_regex",

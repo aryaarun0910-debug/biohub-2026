@@ -295,11 +295,11 @@ def test_specs_pin_reciprocal_mode_and_exact_completed_artifacts() -> None:
         "artifact": "edge_predictor_best.pth", "mode": CALIBRATION_MODE,
         "sha256": CALIBRATED_SHA256,
     }]
-    assert declared == [{
+    assert {
         "artifact": "edge_predictor_best.pth",
         "spec": "scripts/kaggle_specs/deploy_h1r_adabn_detection_only.json",
         "mode": CALIBRATION_MODE, "sha256": CALIBRATED_SHA256,
-    }]
+    } in declared
     assert producer["artifact_role"] == "calibration"
     provenance = spec["provenance"]
     assert spec["base_notebook"] == (

@@ -24,6 +24,12 @@
       "spec": "scripts/kaggle_specs/deploy_h1r_adabn_detection_only.json",
       "mode": "detection_only_bn_buffers",
       "sha256": "1371c35a63a55366e6daba77f025b7c39b57a7ba7a63d516cd70b2c3d5e358de"
+    },
+    {
+      "artifact": "edge_predictor_best.pth",
+      "spec": "scripts/kaggle_specs/p13_p9_adabn_detection_only.json",
+      "mode": "detection_only_bn_buffers",
+      "sha256": "1371c35a63a55366e6daba77f025b7c39b57a7ba7a63d516cd70b2c3d5e358de"
     }
   ],
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
