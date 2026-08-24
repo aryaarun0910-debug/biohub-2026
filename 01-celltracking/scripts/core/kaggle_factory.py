@@ -202,10 +202,21 @@ def _reciprocal_consumer(spec: dict, artifact: str, consumer: dict) -> str | Non
     if str(rel).replace("\\", "/") == want_producer:
         return f"artifact {artifact!r} cannot name its producer as its deployment consumer"
     consumes = other.get("consumes_artifacts", [])
+    producer_role = spec.get("artifact_role")
+    required_mode = "detection_only_bn_buffers" if producer_role == "calibration" else None
+    expected_sha256 = consumer.get("sha256")
+    if required_mode:
+        if consumer.get("mode") != required_mode:
+            return (f"calibration artifact {artifact!r} consumer {rel} must declare "
+                    f"mode={required_mode!r}")
+        if not isinstance(expected_sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_sha256):
+            return f"calibration artifact {artifact!r} requires a lowercase sha256 pin"
     matched = any(
         isinstance(row, dict)
         and str(row.get("producer_spec", "")).replace("\\", "/") == want_producer
         and row.get("artifact") == artifact
+        and (required_mode is None or row.get("mode") == required_mode)
+        and (required_mode is None or row.get("sha256") == expected_sha256)
         for row in consumes
     )
     if not matched:
@@ -281,10 +292,16 @@ def validate_defect_gate(spec: dict, nb: dict, ledger: dict | None = None) \
                                        "deploy_consumers; choose a truthful artifact role")
                             break
                         continue
-                    if role != "training":
+                    if role not in {"training", "calibration"}:
                         message = (f"produced artifact {artifact!r} must declare artifact_role as "
-                                   "'training' or 'diagnostic'")
+                                   "'training', 'calibration', or 'diagnostic'")
                         break
+                    if role == "calibration":
+                        reason = spec.get("calibration_reason")
+                        if not isinstance(reason, str) or len(reason.strip()) < 12:
+                            message = (f"calibration artifact {artifact!r} requires a specific "
+                                       "calibration_reason (at least 12 characters)")
+                            break
                     consumers = [row for row in spec.get("deploy_consumers", [])
                                  if isinstance(row, dict) and row.get("artifact") == artifact]
                     if not consumers:

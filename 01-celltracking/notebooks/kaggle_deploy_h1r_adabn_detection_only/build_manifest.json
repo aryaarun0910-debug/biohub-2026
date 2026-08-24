@@ -1,0 +1,27 @@
+{
+  "name": "deploy_h1r_adabn_detection_only",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\deploy_h1r_adabn_detection_only.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_deploy_h1r_adabn_detection_only\\biohub-h1r-adabn-detection-only.ipynb",
+  "built_sha256": "06a91e6da4b60897b329a10441fb0b8265670f192c634c331583e5ed42f12f05",
+  "config_hash": "3c7dc139c775",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "e6a5ba5d6c8cf5d628221bbd937798bdcb35e5be5e32dbdce9d3b3c5c0b23b5c"
+    }
+  ],
+  "declared_slug": "biohub-h1r-adabn-detection-only",
+  "title": "Biohub H1R AdaBN Detection Only",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": [
+      "DG-008-calibration-crosses-into-association"
+    ]
+  }
+}

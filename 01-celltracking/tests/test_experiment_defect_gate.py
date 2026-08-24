@@ -34,7 +34,7 @@ def defect_ids(given_spec: dict, source: str) -> set[str]:
     return {row.split(" [", 1)[0] for row in violations}
 
 
-def test_ledger_has_exactly_the_seven_known_defect_classes():
+def test_ledger_has_exactly_the_eight_known_defect_classes():
     ledger = KF.load_defect_ledger()
     assert [d["id"] for d in ledger["defects"]] == [
         "DG-001-cuda-bce-under-autocast",
@@ -44,6 +44,7 @@ def test_ledger_has_exactly_the_seven_known_defect_classes():
         "DG-005-unreachable-resume",
         "DG-006-identity-sidecar-missing",
         "DG-007-produced-artifact-has-no-deployer",
+        "DG-008-calibration-crosses-into-association",
     ]
 
 
@@ -139,6 +140,67 @@ def test_diagnostic_artifact_requires_reason_and_cannot_name_deployer():
     assert "DG-007-produced-artifact-has-no-deployer" not in defect_ids(given, source)
     given["deploy_consumers"] = [{"artifact": "edge_predictor_best.pth", "spec": "x.json"}]
     assert "DG-007-produced-artifact-has-no-deployer" in defect_ids(given, source)
+
+
+def test_calibration_artifact_requires_exact_mode_hash_and_reciprocity(tmp_path, monkeypatch):
+    monkeypatch.setattr(KF, "REPO", tmp_path)
+    producer_rel = "scripts/kaggle_specs/calibrate.json"
+    consumer_rel = "scripts/kaggle_specs/deploy.json"
+    source = "torch.save(state, 'edge_predictor_best.pth')\n"
+    given = spec("h1r_det_s1_adabn_control", source_path=str(tmp_path / producer_rel),
+                 env={"H1R_SELECT_THRESHOLD": "deployed"})
+    given.update({
+        "artifact_role": "calibration",
+        "calibration_reason": "Only BatchNorm buffers may reach detector logits.",
+        "deploy_consumers": [{
+            "artifact": "edge_predictor_best.pth", "spec": consumer_rel,
+            "mode": "detection_only_bn_buffers", "sha256": "ab" * 32,
+        }],
+    })
+    consumer = tmp_path / consumer_rel
+    consumer.parent.mkdir(parents=True)
+    consumer.write_text(json.dumps({
+        "artifact_role": "deployment",
+        "consumes_artifacts": [{
+            "producer_spec": producer_rel, "artifact": "edge_predictor_best.pth",
+            "mode": "detection_only_bn_buffers", "sha256": "ab" * 32,
+        }],
+    }), encoding="utf-8")
+    assert "DG-007-produced-artifact-has-no-deployer" not in defect_ids(given, source)
+
+    given["deploy_consumers"][0]["mode"] = "whole_checkpoint"
+    assert "DG-007-produced-artifact-has-no-deployer" in defect_ids(given, source)
+    given["deploy_consumers"][0]["mode"] = "detection_only_bn_buffers"
+    given["deploy_consumers"][0]["sha256"] = "unpinned"
+    assert "DG-007-produced-artifact-has-no-deployer" in defect_ids(given, source)
+
+
+def test_calibration_consumer_blocks_association_access():
+    safe = """\
+CALIBRATION_MODE = "detection_only_bn_buffers"
+validate_adabn_state_contract(primary, calibrated)
+unet_out, _primary_det_logits_unused = model.encode(imgs)
+"""
+    given = spec("deploy_h1r_adabn_detection_only")
+    assert "DG-008-calibration-crosses-into-association" not in defect_ids(given, safe)
+    unsafe = safe + "adabn_detection_model.predict_edges(a, b)\n"
+    assert "DG-008-calibration-crosses-into-association" in defect_ids(given, unsafe)
+
+
+@pytest.mark.parametrize("missing", [
+    'CALIBRATION_MODE = "detection_only_bn_buffers"\n',
+    "validate_adabn_state_contract(primary, calibrated)\n",
+])
+def test_calibration_consumer_requires_both_whitelist_and_mode(missing):
+    safe = """\
+CALIBRATION_MODE = "detection_only_bn_buffers"
+validate_adabn_state_contract(primary, calibrated)
+unet_out, _primary_det_logits_unused = model.encode(imgs)
+"""
+    given = spec("deploy_h1r_adabn_detection_only")
+    assert "DG-008-calibration-crosses-into-association" in defect_ids(
+        given, safe.replace(missing, "")
+    )
 
 
 def test_cmd_build_fails_before_writing_a_known_bad_notebook(tmp_path, monkeypatch):

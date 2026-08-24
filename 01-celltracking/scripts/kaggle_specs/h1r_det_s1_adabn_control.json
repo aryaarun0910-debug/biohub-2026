@@ -16,11 +16,19 @@
   "enable_internet": false,
   "machine_shape": "NvidiaTeslaT4",
   "expects_submission": false,
-  "artifact_role": "diagnostic",
-  "diagnostic_reason": "LR=0 AdaBN falsification control; any emitted checkpoint is evidence only and must never be deployed.",
+  "artifact_role": "calibration",
+  "calibration_reason": "LR=0 control output may supply only whitelisted U-Net BatchNorm running buffers to the isolated detection-logit path; wholesale checkpoint deployment and association-feature use remain forbidden.",
+  "deploy_consumers": [
+    {
+      "artifact": "edge_predictor_best.pth",
+      "spec": "scripts/kaggle_specs/deploy_h1r_adabn_detection_only.json",
+      "mode": "detection_only_bn_buffers",
+      "sha256": "1371c35a63a55366e6daba77f025b7c39b57a7ba7a63d516cd70b2c3d5e358de"
+    }
+  ],
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
-  "purpose": "Cheap discriminating AdaBN control: one complete Zh001r epoch at LR=0 with no timing benchmark and single-view validation. Any detection shift is due to BatchNorm running buffers, never parameter learning. AdamW-step evidence distinguishes valid finite backward passes from GradScaler skips. Diagnostic only; no submission.",
+  "purpose": "Cheap discriminating AdaBN control: one complete Zh001r epoch at LR=0 with no timing benchmark and single-view validation. Any detection shift is due to BatchNorm running buffers, never parameter learning. AdamW-step evidence distinguishes valid finite backward passes from GradScaler skips. Calibration evidence only; wholesale checkpoint deployment is forbidden and no submission is emitted.",
   "edits": [
     {
       "kind": "env",
