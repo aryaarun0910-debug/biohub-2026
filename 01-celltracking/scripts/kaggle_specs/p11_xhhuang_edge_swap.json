@@ -21,7 +21,7 @@
   "expects_submission": true,
   "base_notebook": "notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb",
   "base_sha256": "6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
-  "purpose": "Isolated P9 coupled-division inference A/B: replace only the primary edge_predictor_best.pth selected by predict_cmd with xhhuang/biohub-edge-predictor-v6-weights split_0_edge_predictor_best.pth. Kaggle mount prefixes vary, so the named weight is discovered across /kaggle/input, filtered by exact byte size and SHA-256, and required to have exactly one match. Its colocated config is preferred; otherwise an exact-hash config is resolved uniquely. File identity, complete config, state count, state schema fingerprint, and exact 136/136 key+shape+dtype compatibility with the P9 primary state all fail closed before workers start. The independent secondary seed, harmonic fusion, detector threshold/TTA, coupled divisions, DeepCenter state, ILP, relinking, gap closing, short-track policy, caps, datasets other than the added checkpoint, and submission format remain exactly P9. No launch or submission is performed by this spec.",
+  "purpose": "Isolated P9 coupled-division inference A/B: replace only the primary edge_predictor_best.pth selected by predict_cmd with xhhuang/biohub-edge-predictor-v6-weights split_0_edge_predictor_best.pth and its authoritative inference config. Kaggle mount prefixes vary, so the named weight is discovered across /kaggle/input, filtered by exact byte size and SHA-256, and required to have exactly one match. Its colocated config is preferred; otherwise an exact-hash config is resolved uniquely. The verified pair is copied to /kaggle/working/p11_xhhuang_primary/split_0 under the loader's canonical names edge_predictor_best.pth and config.json; predict_cmd points to that staged weight. The deployed predictor asserts the canonical sidecar exists, refuses its default-config fallback, and applies the verified pool_kernel_um=5.0. File identity, complete config, state count, state schema fingerprint, and exact 136/136 key+shape+dtype compatibility with the P9 primary state all fail closed before workers start. The independent secondary seed, harmonic fusion, detector threshold/TTA, coupled divisions, DeepCenter state, ILP, relinking, gap closing, short-track policy, caps, datasets other than the added checkpoint, and submission format remain exactly P9. No launch or submission is performed by this spec.",
   "provenance": {
     "base": "P9 coupled-division built notebook, sha256 6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
     "hypothesis": "The primary edge checkpoint controls candidate nomination, the model surface with demonstrated leaderboard transfer. Test whether xhhuang's v6 primary state improves P9 while retaining the fixed P9 independent secondary seed and harmonic fusion.",
@@ -37,6 +37,9 @@
       "config_filenames": ["split_0_config.json", "config.json"],
       "config_bytes": 165,
       "config_sha256": "e9b4e396c58081bca08adf8275bd0bd1c2d3fd6eb091a1912a5116cb6de7b50a",
+      "staged_weight_path": "/kaggle/working/p11_xhhuang_primary/split_0/edge_predictor_best.pth",
+      "staged_config_path": "/kaggle/working/p11_xhhuang_primary/split_0/config.json",
+      "runtime_config_contract": "The predictor must find weights_path.parent/config.json, must not enter its default-config fallback, and must report pool_kernel_um=5.0 from the verified sidecar.",
       "config": {
         "unet_out_channels": 32,
         "unet_layers": [32, 64, 128],

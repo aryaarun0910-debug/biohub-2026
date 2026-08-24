@@ -4,7 +4,7 @@
   "base_notebook": "notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb",
   "base_sha256": "6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
   "built_notebook": "notebooks\\kaggle_p11_xhhuang_edge_swap\\biohub-p11-xhhuang-edge-swap.ipynb",
-  "built_sha256": "1e72037099d24ed1589a61f57800691d85d00d24c02e63e022dd9b6be0c922c4",
+  "built_sha256": "330cab12172859c26748ece38d46c65c62d7de00e87e4c9d3f4316e4d708782c",
   "config_hash": "22fa23406261",
   "n_cells": 11,
   "edits": [
@@ -21,6 +21,5 @@
   "defect_gate": {
     "ledger": "scripts\\core\\experiment_defects.json",
     "passed": []
-  },
-  "pushed_slug": "biohub-p11-xhhuang-edge-swap"
+  }
 }

@@ -7,6 +7,7 @@
 # to one and only one file across /kaggle/input.
 import hashlib as _p11_hashlib
 import json as _p11_json
+import shutil as _p11_shutil
 from pathlib import Path as _P11_Path
 
 
@@ -111,19 +112,106 @@ def _p11_state_schema(state: dict[str, _torch.Tensor]) -> list[dict[str, object]
     ]
 
 
-_P11_WEIGHT_PATH = _p11_find_unique_hashed_file(
+_P11_SOURCE_WEIGHT_PATH = _p11_find_unique_hashed_file(
     _P11_INPUT_ROOT,
     (_P11_WEIGHT_FILENAME,),
     _P11_EXPECTED_WEIGHT_SHA256,
     _P11_EXPECTED_WEIGHT_BYTES,
 )
-_P11_CONFIG_PATH = _p11_find_unique_hashed_file(
+_P11_SOURCE_CONFIG_PATH = _p11_find_unique_hashed_file(
     _P11_INPUT_ROOT,
     _P11_CONFIG_FILENAMES,
     _P11_EXPECTED_CONFIG_SHA256,
     _P11_EXPECTED_CONFIG_BYTES,
-    preferred_parent=_P11_WEIGHT_PATH.parent,
+    preferred_parent=_P11_SOURCE_WEIGHT_PATH.parent,
 )
+
+# The prediction loader has one canonical sidecar contract:
+# weights_path.parent / "config.json". Kaggle's source artifact calls that file
+# split_0_config.json, so stage the already hash-verified pair under canonical
+# names in writable /kaggle/working before rebinding predict_cmd.
+_P11_STAGE_DIR = WORKING_DIR / "p11_xhhuang_primary" / "split_0"
+_P11_STAGE_DIR.mkdir(parents=True, exist_ok=True)
+_P11_WEIGHT_PATH = _P11_STAGE_DIR / "edge_predictor_best.pth"
+_P11_CONFIG_PATH = _P11_STAGE_DIR / "config.json"
+_p11_shutil.copy2(_P11_SOURCE_WEIGHT_PATH, _P11_WEIGHT_PATH)
+_p11_shutil.copy2(_P11_SOURCE_CONFIG_PATH, _P11_CONFIG_PATH)
+
+_p11_staged_contract = (
+    (_P11_WEIGHT_PATH, _P11_EXPECTED_WEIGHT_BYTES, _P11_EXPECTED_WEIGHT_SHA256),
+    (_P11_CONFIG_PATH, _P11_EXPECTED_CONFIG_BYTES, _P11_EXPECTED_CONFIG_SHA256),
+)
+for _p11_staged_path, _p11_expected_bytes, _p11_expected_sha in _p11_staged_contract:
+    if not _p11_staged_path.is_file():
+        raise FileNotFoundError(f"P11 staged artifact is missing: {_p11_staged_path}")
+    if _p11_staged_path.stat().st_size != _p11_expected_bytes:
+        raise RuntimeError(
+            f"P11 staged byte-size mismatch for {_p11_staged_path}: "
+            f"expected {_p11_expected_bytes}, got {_p11_staged_path.stat().st_size}"
+        )
+    _p11_staged_sha = _p11_sha256_file(_p11_staged_path)
+    if _p11_staged_sha != _p11_expected_sha:
+        raise RuntimeError(
+            f"P11 staged SHA256 mismatch for {_p11_staged_path}: "
+            f"expected {_p11_expected_sha}, got {_p11_staged_sha}"
+        )
+
+# Fail closed on the deployed loader contract, then make the primary model's
+# verified pool_kernel_um operative. load_model reads the canonical config for
+# architecture/window/downsample; this adjacent check prevents its warning/fallback
+# branch and binds detection pooling to the same verified sidecar.
+_p11_predictor_source = _ps.read_text(encoding="utf-8")
+_p11_loader_contract = 'config_path = weights_path.parent / "config.json"'
+if _p11_predictor_source.count(_p11_loader_contract) != 1:
+    raise RuntimeError(
+        "P11 predictor config-loader contract drifted: expected exactly one "
+        f"{_p11_loader_contract!r}"
+    )
+_p11_pool_anchor = (
+    "    model, window_size, downsample = load_model(weights_path, device)\n\n"
+    "    secondary_model = None\n"
+)
+_p11_pool_patch = (
+    "    model, window_size, downsample = load_model(weights_path, device)\n\n"
+    "    # P11: the verified primary sidecar is mandatory; never use loader defaults.\n"
+    "    _p11_runtime_config_path = weights_path.parent / 'config.json'\n"
+    "    if not _p11_runtime_config_path.is_file():\n"
+    "        raise FileNotFoundError(\n"
+    "            f'P11 canonical config missing; refusing load_model fallback: '\n"
+    "            f'{_p11_runtime_config_path}'\n"
+    "        )\n"
+    "    _p11_runtime_config = json.loads(\n"
+    "        _p11_runtime_config_path.read_text(encoding='utf-8')\n"
+    "    )\n"
+    "    if _p11_runtime_config.get('pool_kernel_um') != 5.0:\n"
+    "        raise RuntimeError(\n"
+    "            'P11 pool_kernel_um contract mismatch: '\n"
+    "            f\"{_p11_runtime_config.get('pool_kernel_um')!r}\"\n"
+    "        )\n"
+    "    cfg.pool_kernel_um = float(_p11_runtime_config['pool_kernel_um'])\n"
+    "    print(\n"
+    "        f'P11 canonical config loaded: {_p11_runtime_config_path} | '\n"
+    "        f'pool_kernel_um={cfg.pool_kernel_um}', flush=True,\n"
+    "    )\n\n"
+    "    secondary_model = None\n"
+)
+if _p11_predictor_source.count(_p11_pool_anchor) != 1:
+    raise RuntimeError(
+        "P11 predictor pool-config anchor drifted; refusing an unverified runtime patch"
+    )
+_p11_predictor_source = _p11_predictor_source.replace(
+    _p11_pool_anchor, _p11_pool_patch, 1
+)
+compile(_p11_predictor_source, str(_ps), "exec")
+_ps.write_text(_p11_predictor_source, encoding="utf-8")
+_p11_deployed_predictor = _ps.read_text(encoding="utf-8")
+if _p11_deployed_predictor.count("P11 canonical config loaded:") != 1:
+    raise RuntimeError("P11 canonical-config runtime assertion was not deployed exactly once")
+if _P11_CONFIG_PATH != _P11_WEIGHT_PATH.parent / "config.json":
+    raise RuntimeError(
+        "P11 staged config is not at the predictor's canonical sibling path: "
+        f"weight={_P11_WEIGHT_PATH}, config={_P11_CONFIG_PATH}"
+    )
 
 _p11_weight_bytes = _P11_WEIGHT_PATH.stat().st_size
 if _p11_weight_bytes != _P11_EXPECTED_WEIGHT_BYTES:

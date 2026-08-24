@@ -73,6 +73,14 @@ def test_spec_is_one_primary_checkpoint_selector_with_exact_artifact_contract():
     assert artifact["config_filenames"] == ["split_0_config.json", "config.json"]
     assert artifact["config_bytes"] == 165
     assert artifact["config_sha256"] == CONFIG_SHA256
+    assert artifact["staged_weight_path"] == (
+        "/kaggle/working/p11_xhhuang_primary/split_0/edge_predictor_best.pth"
+    )
+    assert artifact["staged_config_path"] == (
+        "/kaggle/working/p11_xhhuang_primary/split_0/config.json"
+    )
+    assert "must not enter" in artifact["runtime_config_contract"]
+    assert "pool_kernel_um=5.0" in artifact["runtime_config_contract"]
     assert artifact["config"] == EXPECTED_CONFIG
 
 
@@ -105,7 +113,46 @@ def test_runtime_edit_fails_closed_on_discovered_artifact_identity():
     assert "_p11_changed_indices != [_p11_weights_index]" in source
     assert "root.rglob(filename)" in source
     assert "len(exact_matches) != 1" in source
+    assert 'WORKING_DIR / "p11_xhhuang_primary" / "split_0"' in source
+    assert '_P11_STAGE_DIR / "edge_predictor_best.pth"' in source
+    assert '_P11_STAGE_DIR / "config.json"' in source
+    assert "_p11_shutil.copy2(_P11_SOURCE_WEIGHT_PATH, _P11_WEIGHT_PATH)" in source
+    assert "_p11_shutil.copy2(_P11_SOURCE_CONFIG_PATH, _P11_CONFIG_PATH)" in source
+    assert "_p11_staged_sha != _p11_expected_sha" in source
     assert "BIOHUB_P11" not in source
+
+
+def test_runtime_patch_forces_canonical_config_and_verified_pool_kernel():
+    source = EDIT.read_text(encoding="utf-8")
+    assert '_p11_loader_contract = \'config_path = weights_path.parent / "config.json"\'' in source
+    assert "_p11_predictor_source.count(_p11_loader_contract) != 1" in source
+    assert "_p11_runtime_config_path = weights_path.parent / 'config.json'" in source
+    assert "if not _p11_runtime_config_path.is_file():" in source
+    assert "refusing load_model fallback" in source
+    assert "_p11_runtime_config.get('pool_kernel_um') != 5.0" in source
+    assert "cfg.pool_kernel_um = float(_p11_runtime_config['pool_kernel_um'])" in source
+    assert "P11 canonical config loaded:" in source
+    assert '_P11_CONFIG_PATH != _P11_WEIGHT_PATH.parent / "config.json"' in source
+    assert "P11 canonical-config runtime assertion was not deployed exactly once" in source
+
+
+def test_p9_runtime_patch_materializes_the_exact_v3_pool_anchor_once():
+    base = json.loads(BASE.read_text(encoding="utf-8"))
+    tree = ast.parse(_source(base["cells"][5]))
+    assignment = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and len(node.targets) == 1
+        and isinstance(node.targets[0], ast.Name)
+        and node.targets[0].id == "_ensemble_replacements"
+    )
+    replacements = ast.literal_eval(assignment.value)
+    anchor = (
+        "    model, window_size, downsample = load_model(weights_path, device)\n\n"
+        "    secondary_model = None\n"
+    )
+    assert sum(new.count(anchor) for _, new in replacements) == 1
 
 
 @pytest.mark.parametrize(
