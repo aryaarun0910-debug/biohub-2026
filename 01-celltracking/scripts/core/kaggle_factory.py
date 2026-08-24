@@ -41,6 +41,11 @@ SPEC FORMAT (JSON, see scripts/kaggle_specs/*.json)
   "enable_gpu": true, "enable_internet": false, "machine_shape": "NvidiaTeslaT4",
   "docker_image": "<pinned digest>",
   "expects_submission": true,
+  "artifact_role": "training",                     # or diagnostic + diagnostic_reason
+  "deploy_consumers": [{"artifact": "x.pth", "spec": "scripts/kaggle_specs/deploy.json"}],
+  "consumes_artifacts": [{"producer_spec": "scripts/kaggle_specs/train.json",
+                           "artifact": "x.pth"}],   # reciprocal, on deployment spec
+  "resume_sources": [{"dataset": "owner/prior-run", "artifact": "last.pth"}],
   "edits": [
     {"kind": "env",           "vars": {"BIOHUB_X": "1"}, "cell_match": "BIOHUB_PRESET"},
     {"kind": "replace",       "old": "...", "new": "...", "expect": 1},
@@ -52,7 +57,8 @@ SPEC FORMAT (JSON, see scripts/kaggle_specs/*.json)
 
 ``code_file`` paths are repo-relative.  Keeping the injected code in a real ``.py`` file
 is the point: it can be imported, linted and unit-tested locally before it ever touches
-a kernel.
+a kernel.  ``scripts/core/experiment_defects.json`` scopes known-regression signatures
+to affected spec families; both ``build`` and ``verify`` fail closed on a ledger violation.
 
 USAGE
 -----
@@ -70,9 +76,11 @@ Always run with ``PYTHONUTF8=1`` set (this module sets it for its own child proc
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.request
@@ -87,6 +95,7 @@ DEFAULT_DOCKER = (
 COMPETITION = "biohub-cell-tracking-during-development"
 OWNER = os.environ.get("BIOHUB_KAGGLE_OWNER", "aryaarun07")
 TERMINAL = {"COMPLETE", "ERROR", "CANCEL_REQUESTED", "CANCEL_ACKNOWLEDGED"}
+DEFECT_LEDGER = REPO / "scripts" / "core" / "experiment_defects.json"
 
 
 # --------------------------------------------------------------------------- utils
@@ -140,6 +149,166 @@ def run(cmd: list[str], **kw) -> subprocess.CompletedProcess:
         [str(c) for c in cmd], cwd=REPO, env=env(),
         capture_output=True, text=True, encoding="utf-8", errors="replace", **kw,
     )
+
+
+# --------------------------------------------------------------- defect build gate
+def load_defect_ledger(path: Path = DEFECT_LEDGER) -> dict:
+    """Load the small, machine-enforced ledger of previously observed defects."""
+    ledger = json.loads(Path(path).read_text(encoding="utf-8"))
+    if ledger.get("schema_version") != 1 or not isinstance(ledger.get("defects"), list):
+        raise SystemExit(f"invalid defect ledger schema: {path}")
+    ids = [d.get("id") for d in ledger["defects"]]
+    if any(not isinstance(i, str) or not i for i in ids) or len(ids) != len(set(ids)):
+        raise SystemExit(f"defect ledger has missing/duplicate ids: {path}")
+    return ledger
+
+
+def _spec_env(spec: dict) -> dict[str, str]:
+    """Flatten factory env edits; later edits intentionally take precedence."""
+    out: dict[str, str] = {}
+    for edit in spec.get("edits", []):
+        if edit.get("kind") == "env":
+            out.update({str(k): str(v) for k, v in edit.get("vars", {}).items()})
+    return out
+
+
+def _defect_applies(defect: dict, spec: dict) -> bool:
+    scope = defect.get("scope", {})
+    globs = scope.get("spec_name_globs", ["*"])
+    return any(fnmatch.fnmatchcase(str(spec.get("name", "")), pattern) for pattern in globs)
+
+
+def _reciprocal_consumer(spec: dict, artifact: str, consumer: dict) -> str | None:
+    """Return an error unless a real consumer spec names this exact producer artifact."""
+    rel = consumer.get("spec")
+    if not isinstance(rel, str) or not rel:
+        return f"artifact {artifact!r} has a consumer entry without a spec path"
+    path = REPO / rel
+    if not path.is_file():
+        return f"artifact {artifact!r} consumer spec does not exist: {rel}"
+    try:
+        other = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return f"artifact {artifact!r} consumer spec is unreadable: {rel} ({exc})"
+    if other.get("artifact_role") != "deployment":
+        return f"artifact {artifact!r} consumer {rel} is not marked artifact_role=deployment"
+    want_producer = spec.get("_spec_path")
+    if want_producer:
+        try:
+            want_producer = str(Path(want_producer).resolve().relative_to(REPO.resolve()))
+        except (ValueError, OSError):
+            want_producer = str(want_producer)
+        want_producer = want_producer.replace("\\", "/")
+    if str(rel).replace("\\", "/") == want_producer:
+        return f"artifact {artifact!r} cannot name its producer as its deployment consumer"
+    consumes = other.get("consumes_artifacts", [])
+    matched = any(
+        isinstance(row, dict)
+        and str(row.get("producer_spec", "")).replace("\\", "/") == want_producer
+        and row.get("artifact") == artifact
+        for row in consumes
+    )
+    if not matched:
+        return (f"artifact {artifact!r} consumer {rel} lacks reciprocal "
+                f"consumes_artifacts declaration for {want_producer}")
+    return None
+
+
+def validate_defect_gate(spec: dict, nb: dict, ledger: dict | None = None) \
+        -> tuple[list[str], list[str]]:
+    """Return (applicable defect ids, violations) for a fully assembled notebook.
+
+    Regex checks are deliberately signatures of *known regressions*, not a general static
+    analyser.  Structural facts (datasets, resume inputs, deployment consumers) are checked
+    from the spec and the reciprocal consumer spec instead of trusting prose in code.
+    """
+    ledger = load_defect_ledger() if ledger is None else ledger
+    source = "\n\n# --- defect-gate cell boundary ---\n\n".join(cells_text(nb))
+    datasets = set(map(str, spec.get("datasets", [])))
+    env_vars = _spec_env(spec)
+    applicable: list[str] = []
+    violations: list[str] = []
+
+    for defect in ledger["defects"]:
+        if not _defect_applies(defect, spec):
+            continue
+        defect_id = defect["id"]
+        applicable.append(defect_id)
+        for check in defect.get("checks", []):
+            kind = check.get("kind")
+            message: str | None = None
+            if kind == "notebook_forbid_regex":
+                if re.search(check["pattern"], source, flags=re.MULTILINE | re.DOTALL):
+                    message = check.get("message", f"forbidden notebook signature {check['pattern']!r}")
+            elif kind == "notebook_require_regex":
+                if not re.search(check["pattern"], source, flags=re.MULTILINE | re.DOTALL):
+                    message = check.get("message", f"required notebook signature {check['pattern']!r} missing")
+            elif kind == "notebook_require_any_regex":
+                patterns = check.get("patterns", [])
+                if not any(re.search(p, source, flags=re.MULTILINE | re.DOTALL) for p in patterns):
+                    message = check.get("message", "none of the required notebook signatures is present")
+            elif kind == "spec_require_dataset":
+                required = check["dataset"]
+                if required not in datasets:
+                    message = check.get("message", f"required dataset is not attached: {required}")
+            elif kind == "spec_require_env":
+                name, value = check["name"], str(check["value"])
+                if env_vars.get(name) != value:
+                    message = check.get(
+                        "message", f"spec must explicitly set {name}={value!r}"
+                    )
+            elif kind == "resume_requires_source":
+                names = [k for k, v in env_vars.items()
+                         if re.fullmatch(check["env_pattern"], k) and v.lower() in {"1", "true", "yes"}]
+                if names and not spec.get("resume_sources"):
+                    message = check.get(
+                        "message",
+                        f"resume is enabled by {names}, but resume_sources is empty; /kaggle/working starts empty",
+                    )
+            elif kind == "artifacts_require_consumers":
+                for artifact in check.get("artifacts", []):
+                    if artifact not in source:
+                        continue
+                    role = spec.get("artifact_role")
+                    if role == "diagnostic":
+                        reason = spec.get("diagnostic_reason")
+                        if not isinstance(reason, str) or len(reason.strip()) < 12:
+                            message = (f"diagnostic artifact {artifact!r} requires a specific "
+                                       "diagnostic_reason (at least 12 characters)")
+                            break
+                        if spec.get("deploy_consumers"):
+                            message = (f"diagnostic artifact {artifact!r} cannot also declare "
+                                       "deploy_consumers; choose a truthful artifact role")
+                            break
+                        continue
+                    if role != "training":
+                        message = (f"produced artifact {artifact!r} must declare artifact_role as "
+                                   "'training' or 'diagnostic'")
+                        break
+                    consumers = [row for row in spec.get("deploy_consumers", [])
+                                 if isinstance(row, dict) and row.get("artifact") == artifact]
+                    if not consumers:
+                        message = (check.get("message") or
+                                   f"produced artifact {artifact!r} has no declared deployment consumer")
+                        break
+                    errors = [_reciprocal_consumer(spec, artifact, row) for row in consumers]
+                    errors = [e for e in errors if e]
+                    if errors:
+                        message = "; ".join(errors)
+                        break
+            else:
+                raise SystemExit(f"defect {defect_id}: unknown check kind {kind!r}")
+            if message:
+                violations.append(f"{defect_id} [{defect.get('severity', 'UNKNOWN')}]: {message}")
+    return applicable, violations
+
+
+def enforce_defect_gate(spec: dict, nb: dict) -> list[str]:
+    applicable, violations = validate_defect_gate(spec, nb)
+    if violations:
+        detail = "\n  - ".join(violations)
+        raise SystemExit(f"defect gate failed for {spec.get('name', '<unnamed>')}:\n  - {detail}")
+    return applicable
 
 
 # --------------------------------------------------------------------------- build
@@ -286,6 +455,8 @@ def cmd_build(spec: dict) -> int:
     for n, edit in enumerate(spec.get("edits", [])):
         records.append(apply_edit(nb, edit, f"{spec['name']}/edit{n}({edit['kind']})"))
 
+    defect_gate = enforce_defect_gate(spec, nb)
+
     dest = out_dir(spec)
     dest.mkdir(parents=True, exist_ok=True)
     dump_nb(nb, built_nb(spec))
@@ -305,6 +476,8 @@ def cmd_build(spec: dict) -> int:
         "built_sha256": built_sha, "config_hash": cfg,
         "n_cells": len(nb["cells"]), "edits": records,
         "declared_slug": spec["slug"], "title": spec["title"],
+        "defect_gate": {"ledger": str(DEFECT_LEDGER.relative_to(REPO)),
+                        "passed": defect_gate},
     }
     manifest_path(spec).write_text(json.dumps(man, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(man, indent=2))
@@ -314,7 +487,10 @@ def cmd_build(spec: dict) -> int:
 def cmd_verify(spec: dict) -> int:
     """Cell-level diff of built vs base -- proves the blast radius of the edits."""
     a = cells_text(load_nb(REPO / spec["base_notebook"]))
-    b = cells_text(load_nb(built_nb(spec)))
+    built = load_nb(built_nb(spec))
+    passed = enforce_defect_gate(spec, built)
+    print(f"defect gate: PASS ({len(passed)} applicable rules)")
+    b = cells_text(built)
     print(f"cells: base={len(a)} built={len(b)}")
     for i in range(max(len(a), len(b))):
         x = a[i] if i < len(a) else None

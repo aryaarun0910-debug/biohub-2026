@@ -2,13 +2,21 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+import torch
 
 from scripts.kaggle_edits.h1r_det_train import (
     DEPLOYED_SIGMOID_THR,
     Zh001rWindows,
+    _train_step,
+    assert_trunk_unchanged,
     best_operating_point,
+    configure_trunk_contract,
+    encode_detection_logits,
+    enforce_trunk_mode,
     eval_thresholds,
     global_max_nodes,
+    selection_at_threshold,
+    trunk_snapshot,
 )
 
 
@@ -31,6 +39,103 @@ def test_best_operating_point_breaks_f1_ties_on_precision() -> None:
     })
     assert name == "strict"
     assert stats["precision"] == 0.9
+
+
+def test_checkpoint_selection_is_fixed_to_declared_threshold() -> None:
+    val = {
+        "p0.5": {"f1": 0.9, "precision": 0.8},
+        "deployed": {"f1": 0.7, "precision": 0.95},
+    }
+    name, stats = selection_at_threshold(val)
+    assert name == "deployed"
+    assert stats["f1"] == 0.7
+    with pytest.raises(KeyError):
+        selection_at_threshold(val, "missing")
+
+
+class _EquivariantDetector(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.calls = 0
+
+    def encode(self, imgs):
+        self.calls += 1
+        return None, [imgs[:, f].clone() for f in range(imgs.shape[1])]
+
+
+def test_eight_view_tta_matches_identity_for_equivariant_detector() -> None:
+    model = _EquivariantDetector()
+    imgs = torch.arange(2 * 2 * 3 * 4 * 4, dtype=torch.float32).reshape(2, 2, 3, 4, 4)
+    logits = encode_detection_logits(model, imgs, use_tta=True)
+    assert model.calls == 8
+    assert all(torch.equal(logits[f], imgs[:, f]) for f in range(2))
+
+
+class _DetectorForStep(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.weight = torch.nn.Parameter(torch.tensor(0.25))
+
+    def encode(self, imgs):
+        return None, [self.weight * imgs[:, f] for f in range(imgs.shape[1])]
+
+
+class _LossModule:
+    @staticmethod
+    def compute_detection_loss(logits, coords, masks, neg_weight):
+        return (logits - 1.0).square().mean()
+
+
+def test_train_step_proves_adamw_ran_even_with_zero_lr() -> None:
+    model = _DetectorForStep()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0)
+    scaler = torch.amp.GradScaler("cuda", enabled=False)
+    batch = {
+        "imgs": torch.ones(2, 2, 2, 2, 2),
+        "coords": torch.zeros(2, 2, 1, 3),
+        "masks": torch.ones(2, 2, 1, dtype=torch.bool),
+    }
+    record = _train_step(
+        _LossModule, model, batch, torch.device("cpu"), 0.1, optimizer, scaler
+    )
+    assert record["finite_loss"]
+    assert record["finite_gradients"]
+    assert record["optimizer_step_occurred"]
+    assert record["optimizer_step_before"] == 0
+    assert record["optimizer_step_after"] == 1
+    assert model.weight.item() == 0.25
+
+
+class _SharedModel(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.unet = torch.nn.Sequential(
+            torch.nn.Conv3d(1, 2, 1), torch.nn.BatchNorm3d(2)
+        )
+        self.detect_head = torch.nn.Conv3d(2, 1, 1)
+
+
+def test_freeze_contract_preserves_parameters_and_bn_buffers() -> None:
+    model = _SharedModel()
+    configure_trunk_contract(model, "freeze", 1e-4)
+    model.train()
+    enforce_trunk_mode(model, "freeze")
+    assert not model.unet.training
+    assert not any(p.requires_grad for p in model.unet.parameters())
+    assert all(p.requires_grad for p in model.detect_head.parameters())
+    before = trunk_snapshot(model)
+    with torch.no_grad():
+        model.detect_head.weight.add_(1)
+    assert_trunk_unchanged(model, before)
+    with torch.no_grad():
+        model.unet[1].running_mean.add_(1)
+    with pytest.raises(RuntimeError, match="frozen trunk contract violated"):
+        assert_trunk_unchanged(model, before)
+
+
+def test_adabn_control_requires_zero_lr() -> None:
+    with pytest.raises(ValueError, match="requires H1R_LR=0"):
+        configure_trunk_contract(_SharedModel(), "adabn_control", 1e-4)
 
 
 def test_global_max_prevents_validation_truncation(tmp_path) -> None:

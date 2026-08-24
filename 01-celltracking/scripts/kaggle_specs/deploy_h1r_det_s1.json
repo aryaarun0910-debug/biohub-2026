@@ -1,0 +1,39 @@
+{
+  "name": "deploy_h1r_det_s1",
+  "slug": "biohub-deploy-h1r-detector-s1",
+  "title": "Biohub Deploy H1R Detector S1",
+  "code_file": "biohub-deploy-h1r-det-s1.ipynb",
+  "out_dir": "notebooks/kaggle_deploy_h1r_det_s1",
+  "artifact_role": "deployment",
+  "consumes_artifacts": [
+    {
+      "producer_spec": "scripts/kaggle_specs/h1r_det_s1.json",
+      "artifact": "edge_predictor_best.pth"
+    }
+  ],
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "kernel_sources": ["aryaarun07/biohub-h1r-detector-s1"],
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "purpose": "Deploy the full S1 detector-head checkpoint into the 0.915 P3 harmonic pipeline. Fails closed unless the producer proves a frozen shared trunk, eight-view deployed-threshold selection, finite AdamW steps, and a weight hash distinct from the original. No automatic submission.",
+  "edits": [
+    {
+      "kind": "insert_before",
+      "cell_match": "start_time = time.time()",
+      "anchor": "start_time = time.time()",
+      "code_file": "scripts/kaggle_edits/h1r_det_deploy_weights.py",
+      "expect": 1
+    }
+  ]
+}

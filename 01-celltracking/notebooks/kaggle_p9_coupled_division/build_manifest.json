@@ -1,0 +1,33 @@
+{
+  "name": "p9_coupled_division",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p9_coupled_division.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p9_coupled_division\\biohub-p9-coupled-division.ipynb",
+  "built_sha256": "6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
+  "config_hash": "4b2574960406",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "dad55a793f3067ef0ae01e3ec970c311ca637fd9a226aff13bef36378f45af3f"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    }
+  ],
+  "declared_slug": "biohub-p9-coupled-division",
+  "title": "Biohub P9 Coupled Division",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p9-coupled-division"
+}

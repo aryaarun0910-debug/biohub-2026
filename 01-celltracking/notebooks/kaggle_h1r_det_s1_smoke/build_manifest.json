@@ -4,8 +4,8 @@
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
   "built_notebook": "notebooks\\kaggle_h1r_det_s1_smoke\\biohub-h1r-det-s1-smoke.ipynb",
-  "built_sha256": "aa1d3b91cd3b6be497a6946778b670525efc01d9696db59ac7828d7a02edce52",
-  "config_hash": "eebc8103d734",
+  "built_sha256": "d67c3cd9d431c4881e39cfccb71975d959460585ae58f4fc7d4658517439eb85",
+  "config_hash": "1424474df29c",
   "n_cells": 11,
   "edits": [
     {
@@ -13,7 +13,7 @@
       "cells": [
         2
       ],
-      "payload_sha256": "b2c6d38d62bf76e7701d52af6a70412fedfab0d3c21f795d293bda1f5b547436"
+      "payload_sha256": "a786197087c9874385364938e1e6f2477c00dc1fbf206f9d54bf77df5d2e0948"
     },
     {
       "kind": "replace_cell",
@@ -39,5 +39,12 @@
   ],
   "declared_slug": "biohub-h1r-detector-s1-smoke",
   "title": "Biohub H1R Detector S1 Smoke",
-  "pushed_slug": "biohub-h1r-detector-s1-smoke"
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": [
+      "DG-004-any-threshold-checkpoint-selection",
+      "DG-005-unreachable-resume",
+      "DG-007-produced-artifact-has-no-deployer"
+    ]
+  }
 }

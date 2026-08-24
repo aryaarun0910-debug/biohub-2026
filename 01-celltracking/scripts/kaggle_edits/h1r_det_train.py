@@ -14,6 +14,11 @@ Checkpoint selection is detection F1 on held-out crops at the DEPLOYED operating
 (sigmoid 0.96875 == BIOHUB_DET_THRESHOLD in the P0-B kernel; logit 3.434), which is the A3 fix:
 the vendored `acc*recall` score has no precision term and selects the junkiest detector.
 
+The default trunk contract is deliberately conservative: the shared UNet (including BatchNorm
+buffers) is frozen and kept in eval mode, so detector-head tuning cannot silently rewrite the
+features consumed by the already-trained association transformer.  `adabn_control` is a
+diagnostic-only contract that requires LR=0 and permits BatchNorm running-stat adaptation.
+
 All knobs are env-driven so kernel smoke/pilot specs differ only in their env cell:
   H1R_ROOT            dir holding zh001r_iso.npy / zh001r_nodes.npz
   H1R_OUT             output dir (checkpoints + metrics.json)
@@ -66,7 +71,15 @@ def eval_thresholds(raw: str) -> dict[str, float]:
 
 
 def best_operating_point(val: dict[str, dict]) -> tuple[str, dict]:
+    """Diagnostic best point in a sweep; never used for checkpoint promotion."""
     return max(val.items(), key=lambda item: (item[1]["f1"], item[1]["precision"]))
+
+
+def selection_at_threshold(val: dict[str, dict], name: str = "deployed") -> tuple[str, dict]:
+    """Return the predeclared deployment operating point, failing closed if absent."""
+    if name not in val:
+        raise KeyError(f"selection threshold {name!r} missing from {sorted(val)}")
+    return name, val[name]
 
 
 # =============================================================================
@@ -168,8 +181,42 @@ def global_max_nodes(root: Path) -> int:
 # Train / eval
 # =============================================================================
 
+def encode_detection_logits(model, imgs: torch.Tensor, use_tta: bool) -> list[torch.Tensor]:
+    """Encode detector logits with the exact deployed eight-view planar transform set."""
+    _, det_logits = model.encode(imgs)
+    if not use_tta:
+        return det_logits
+
+    n_views = 1
+    for dims in [(-1,), (-2,), (-2, -1)]:
+        _, transformed = model.encode(imgs.flip(dims))
+        for f in range(len(det_logits)):
+            det_logits[f] = det_logits[f] + transformed[f].flip(dims)
+        n_views += 1
+    for k in (1, 3):
+        _, transformed = model.encode(torch.rot90(imgs, k, dims=(-2, -1)))
+        for f in range(len(det_logits)):
+            det_logits[f] = det_logits[f] + torch.rot90(
+                transformed[f], -k, dims=(-2, -1)
+            )
+        n_views += 1
+    _, transformed = model.encode(imgs.transpose(-1, -2))
+    for f in range(len(det_logits)):
+        det_logits[f] = det_logits[f] + transformed[f].transpose(-1, -2)
+    n_views += 1
+    anti = torch.rot90(imgs, 1, dims=(-2, -1)).transpose(-1, -2)
+    _, transformed = model.encode(anti)
+    for f in range(len(det_logits)):
+        det_logits[f] = det_logits[f] + torch.rot90(
+            transformed[f].transpose(-1, -2), -1, dims=(-2, -1)
+        )
+        det_logits[f] = det_logits[f] / (n_views + 1)
+    return det_logits
+
+
 @torch.no_grad()
-def eval_detection(T, model, loader, device, thresholds: dict[str, float]) -> dict:
+def eval_detection(T, model, loader, device, thresholds: dict[str, float],
+                   use_tta: bool = True) -> dict:
     """Detection P/R/F1 vs zh001r nodes at each logit threshold in *thresholds*.
 
     Non-overlapping eval windows count every frame exactly once. Matching is the
@@ -182,7 +229,7 @@ def eval_detection(T, model, loader, device, thresholds: dict[str, float]) -> di
         coords = batch["coords"].to(device, non_blocking=True)
         masks = batch["masks"].to(device, non_blocking=True)
         B, W = imgs.shape[:2]
-        _, det_logits = model.encode(imgs)
+        det_logits = encode_detection_logits(model, imgs, use_tta=use_tta)
         for name, thr in thresholds.items():
             for i in range(W):
                 _, _, det_m, matches = T.detect_and_match(
@@ -212,7 +259,17 @@ def _strip_dp(state: dict) -> dict:
     return {k.replace("unet.module.", "unet.", 1): v for k, v in state.items()}
 
 
-def _train_step(T, model, batch, device, neg_weight, optimizer, scaler) -> tuple[float, int]:
+def optimizer_step_index(optimizer: torch.optim.Optimizer) -> int:
+    """Largest per-parameter Adam step; unlike LR, this advances only if AdamW ran."""
+    steps: list[int] = []
+    for state in optimizer.state.values():
+        value = state.get("step")
+        if value is not None:
+            steps.append(int(value.item() if torch.is_tensor(value) else value))
+    return max(steps, default=0)
+
+
+def _train_step(T, model, batch, device, neg_weight, optimizer, scaler) -> dict:
     imgs = batch["imgs"].to(device, dtype=torch.float32, non_blocking=True)
     coords = batch["coords"].to(device, non_blocking=True)
     masks = batch["masks"].to(device, non_blocking=True)
@@ -225,10 +282,62 @@ def _train_step(T, model, batch, device, neg_weight, optimizer, scaler) -> tuple
     optimizer.zero_grad()
     scaler.scale(loss).backward()
     scaler.unscale_(optimizer)
-    torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+    grad_norm = torch.nn.utils.clip_grad_norm_(
+        (p for p in model.parameters() if p.requires_grad), 1.0
+    )
+    finite_gradients = bool(torch.isfinite(grad_norm).item())
+    step_before = optimizer_step_index(optimizer)
+    scale_before = float(scaler.get_scale())
     scaler.step(optimizer)
     scaler.update()
-    return float(loss.detach()), B
+    step_after = optimizer_step_index(optimizer)
+    scale_after = float(scaler.get_scale())
+    return {
+        "loss": float(loss.detach()), "batch_size": B,
+        "finite_loss": bool(torch.isfinite(loss.detach()).item()),
+        "finite_gradients": finite_gradients,
+        "grad_norm": float(grad_norm.detach()),
+        "optimizer_step_before": step_before,
+        "optimizer_step_after": step_after,
+        "optimizer_step_occurred": step_after > step_before,
+        "scaler_scale_before": scale_before,
+        "scaler_scale_after": scale_after,
+        "scaler_backoff": scale_after < scale_before,
+    }
+
+
+def configure_trunk_contract(model, contract: str, lr: float) -> None:
+    """Apply the explicit shared-representation safety contract."""
+    if contract not in {"freeze", "adabn_control", "joint_unsafe"}:
+        raise ValueError(f"unknown H1R_TRUNK_CONTRACT={contract!r}")
+    if contract == "adabn_control" and lr != 0.0:
+        raise ValueError("adabn_control is diagnostic-only and requires H1R_LR=0")
+    if contract == "freeze":
+        for parameter in model.unet.parameters():
+            parameter.requires_grad_(False)
+
+
+def enforce_trunk_mode(model, contract: str) -> None:
+    """`model.train()` also toggles frozen BN modules, so reassert eval mode each epoch."""
+    if contract == "freeze":
+        model.unet.eval()
+
+
+def trunk_snapshot(model) -> dict[str, torch.Tensor]:
+    return {
+        k: v.detach().cpu().clone()
+        for k, v in _strip_dp(model.state_dict()).items()
+        if k.startswith("unet.")
+    }
+
+
+def assert_trunk_unchanged(model, before: dict[str, torch.Tensor]) -> None:
+    after = trunk_snapshot(model)
+    if after.keys() != before.keys():
+        raise RuntimeError("frozen trunk state keys changed")
+    changed = [k for k in before if not torch.equal(before[k], after[k])]
+    if changed:
+        raise RuntimeError(f"frozen trunk contract violated: {changed[:5]}")
 
 
 def benchmark_amp(T, model, loader, device, neg_weight, lr, steps: int) -> dict:
@@ -296,6 +405,12 @@ def run_h1r_detector(trainer_dir: Path, root: Path, out_dir: Path) -> dict:
     seed = int(env("H1R_SEED", "0"))
     bench_steps = int(env("H1R_BENCH_STEPS", "50"))
     min_amp_speedup = float(env("H1R_MIN_AMP_SPEEDUP", "1.3"))
+    eval_tta = env("H1R_EVAL_TTA", "1") == "1"
+    selection_threshold = env("H1R_SELECT_THRESHOLD", "deployed")
+    trunk_contract = env("H1R_TRUNK_CONTRACT", "freeze")
+    require_optimizer_steps = env("H1R_REQUIRE_OPT_STEPS", "1") == "1"
+    patience = int(env("H1R_PATIENCE", "3"))
+    min_delta = float(env("H1R_MIN_DELTA", "1e-4"))
     thresholds = eval_thresholds(env(
         "H1R_EVAL_PROBS", "0.50,0.75,0.90,0.95,0.96875,0.98,0.99"
     ))
@@ -345,6 +460,7 @@ def run_h1r_detector(trainer_dir: Path, root: Path, out_dir: Path) -> dict:
         if missing or unexpected:
             raise RuntimeError({"missing": missing, "unexpected": unexpected})
     model.to(device)
+    configure_trunk_contract(model, trunk_contract, lr)
 
     start_epoch = 0
     history: list[dict] = []
@@ -361,8 +477,14 @@ def run_h1r_detector(trainer_dir: Path, root: Path, out_dir: Path) -> dict:
     if device.type == "cuda" and torch.cuda.device_count() > 1:
         model.unet = torch.nn.DataParallel(model.unet)
         print(f"DataParallel UNet across {torch.cuda.device_count()} GPUs", flush=True)
+    # Snapshot after a possible resume load and DataParallel wrapping. The normalised
+    # state keys still match deployment, and the guard now checks the state actually trained.
+    frozen_trunk = trunk_snapshot(model) if trunk_contract == "freeze" else None
 
-    opt = torch.optim.AdamW(model.parameters(), lr=lr)
+    trainable = [p for p in model.parameters() if p.requires_grad]
+    if not trainable:
+        raise RuntimeError("trunk contract left no trainable parameters")
+    opt = torch.optim.AdamW(trainable, lr=lr)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=max(epochs, 1))
     scaler = torch.amp.GradScaler("cuda", enabled=amp)
     if resume_ck is not None and "optimizer" in resume_ck:
@@ -390,8 +512,12 @@ def run_h1r_detector(trainer_dir: Path, root: Path, out_dir: Path) -> dict:
     # The zero-epoch checkpoint is the scientific baseline and a safe fallback if every
     # fine-tuned epoch is worse. It is measured across a real operating-point sweep.
     if not history:
-        baseline_val = eval_detection(T, model, val_loader, device, thresholds)
-        baseline_name, baseline_best = best_operating_point(baseline_val)
+        baseline_val = eval_detection(
+            T, model, val_loader, device, thresholds, use_tta=eval_tta
+        )
+        baseline_name, baseline_best = selection_at_threshold(
+            baseline_val, selection_threshold
+        )
         baseline = {"epoch": -1, "stage": "zero_epoch", "val": baseline_val,
                     "selection": {"threshold": baseline_name, **baseline_best}}
         history.append(baseline)
@@ -400,30 +526,86 @@ def run_h1r_detector(trainer_dir: Path, root: Path, out_dir: Path) -> dict:
         print(f"zero epoch | best={baseline_name} P={baseline_best['precision']:.3f} "
               f"R={baseline_best['recall']:.3f} F1={baseline_best['f1']:.3f}", flush=True)
 
-    best_f1 = max((best_operating_point(h["val"])[1]["f1"] for h in history), default=0.0)
+    best_f1 = max(
+        (selection_at_threshold(h["val"], selection_threshold)[1]["f1"] for h in history),
+        default=0.0,
+    )
+    stale_epochs = 0
+    total_attempted_steps = 0
+    total_optimizer_steps = 0
+    total_finite_optimizer_steps = 0
+    total_nonfinite_steps = 0
+    epoch_audits: list[dict] = []
     for epoch in range(start_epoch, epochs):
         model.train()
+        enforce_trunk_mode(model, trunk_contract)
         t0 = time.monotonic()
         tot, n = 0.0, 0
+        epoch_step_records = []
         for step, batch in enumerate(train_loader):
             if max_steps and step >= max_steps:
                 break
-            loss_value, B = _train_step(
+            step_record = _train_step(
                 T, model, batch, device, neg_weight, opt, scaler
             )
-            tot += loss_value * B
-            n += B
+            epoch_step_records.append(step_record)
+            tot += step_record["loss"] * step_record["batch_size"]
+            n += step_record["batch_size"]
         train_time = time.monotonic() - t0
 
+        attempted = len(epoch_step_records)
+        optimizer_steps = sum(r["optimizer_step_occurred"] for r in epoch_step_records)
+        finite_optimizer_steps = sum(
+            r["optimizer_step_occurred"] and r["finite_loss"] and r["finite_gradients"]
+            for r in epoch_step_records
+        )
+        nonfinite = sum(not (r["finite_loss"] and r["finite_gradients"])
+                        for r in epoch_step_records)
+        total_attempted_steps += attempted
+        total_optimizer_steps += optimizer_steps
+        total_finite_optimizer_steps += finite_optimizer_steps
+        total_nonfinite_steps += nonfinite
+        audit = {
+            "epoch": epoch, "attempted_steps": attempted,
+            "optimizer_steps": optimizer_steps, "skipped_steps": attempted - optimizer_steps,
+            "finite_optimizer_steps": finite_optimizer_steps,
+            "nonfinite_steps": nonfinite,
+            "final_optimizer_step_index": optimizer_step_index(opt),
+            "initial_scaler_scale": (epoch_step_records[0]["scaler_scale_before"]
+                                     if epoch_step_records else float(scaler.get_scale())),
+            "final_scaler_scale": float(scaler.get_scale()),
+            "max_grad_norm": max((r["grad_norm"] for r in epoch_step_records), default=0.0),
+        }
+        epoch_audits.append(audit)
+        training_audit = {
+            "contract": trunk_contract, "lr": lr, "eval_tta": eval_tta,
+            "selection_threshold": selection_threshold,
+            "attempted_steps": total_attempted_steps,
+            "optimizer_steps": total_optimizer_steps,
+            "finite_optimizer_steps": total_finite_optimizer_steps,
+            "skipped_steps": total_attempted_steps - total_optimizer_steps,
+            "nonfinite_steps": total_nonfinite_steps,
+            "epochs": epoch_audits,
+        }
+        (out_dir / "training_audit.json").write_text(json.dumps(training_audit, indent=2))
+        if require_optimizer_steps and attempted and finite_optimizer_steps == 0:
+            raise RuntimeError(
+                f"optimizer-step contract failed in epoch {epoch}: "
+                f"0/{attempted} finite AdamW steps; "
+                f"audit={out_dir / 'training_audit.json'}"
+            )
+
         t0 = time.monotonic()
-        val = eval_detection(T, model, val_loader, device, thresholds)
+        val = eval_detection(T, model, val_loader, device, thresholds, use_tta=eval_tta)
         val_time = time.monotonic() - t0
         sched.step()
 
         d = val["deployed"]
-        selected_name, selected = best_operating_point(val)
-        is_best = selected["f1"] >= best_f1
+        selected_name, selected = selection_at_threshold(val, selection_threshold)
+        is_best = selected["f1"] > best_f1 + min_delta
         state = _strip_dp(model.state_dict())
+        if frozen_trunk is not None:
+            assert_trunk_unchanged(model, frozen_trunk)
         torch.save({
             "model": state, "epoch": epoch, "optimizer": opt.state_dict(),
             "scheduler": sched.state_dict(), "scaler": scaler.state_dict(),
@@ -433,9 +615,13 @@ def run_h1r_detector(trainer_dir: Path, root: Path, out_dir: Path) -> dict:
         if is_best:
             best_f1 = selected["f1"]
             torch.save(state, out_dir / "edge_predictor_best.pth")  # deploy-compatible name
+            stale_epochs = 0
+        else:
+            stale_epochs += 1
         history.append({"epoch": epoch, "det_loss": tot / max(n, 1), "val": val,
                         "selection": {"threshold": selected_name, **selected},
                         "lr": sched.get_last_lr()[0],
+                        "step_audit": audit,
                         "train_s": train_time, "val_s": val_time})
         (out_dir / "metrics.json").write_text(json.dumps(history, indent=1))
         print(f"epoch {epoch:3d} | det_loss={tot / max(n, 1):.4f} | "
@@ -444,12 +630,25 @@ def run_h1r_detector(trainer_dir: Path, root: Path, out_dir: Path) -> dict:
               f"selected={selected_name} F1={selected['f1']:.3f} | "
               f"best={best_f1:.3f}{' *' if is_best else ''} | "
               f"train={train_time:.0f}s val={val_time:.0f}s", flush=True)
-    baseline_name, baseline_best = best_operating_point(history[0]["val"])
+        if patience > 0 and stale_epochs >= patience:
+            print(f"early stop after {stale_epochs} non-improving epochs", flush=True)
+            break
+    baseline_name, baseline_best = selection_at_threshold(
+        history[0]["val"], selection_threshold
+    )
+    diagnostic_name, diagnostic_best = best_operating_point(history[-1]["val"])
     result = {
         "baseline": {"threshold": baseline_name, **baseline_best},
-        "best_f1_any_threshold": best_f1,
+        "selection_threshold": selection_threshold,
+        "best_f1_at_selection_threshold": best_f1,
+        "diagnostic_best_final_sweep": {"threshold": diagnostic_name, **diagnostic_best},
         "improvement_over_baseline": best_f1 - baseline_best["f1"],
-        "epochs_run": epochs - start_epoch, "history": history,
+        "epochs_run": sum(h.get("stage") != "zero_epoch" for h in history),
+        "trunk_contract": trunk_contract, "eval_tta": eval_tta,
+        "training_audit": training_audit if epoch_audits else {
+            "attempted_steps": 0, "optimizer_steps": 0,
+        },
+        "history": history,
     }
     (out_dir / "summary.json").write_text(json.dumps(result, indent=2))
     return result

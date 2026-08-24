@@ -50,7 +50,8 @@ result = run_h1r_detector(
 
 out = Path(os.environ["H1R_OUT"])
 for name in ("edge_predictor_best.pth", "detector_last.pth", "config.json",
-             "metrics.json", "summary.json", "amp_benchmark.json"):
+             "metrics.json", "summary.json", "amp_benchmark.json",
+             "training_audit.json"):
     source = out / name
     if source.is_file():
         shutil.copy2(source, Path("/kaggle/working") / name)

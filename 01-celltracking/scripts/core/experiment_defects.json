@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "defects": [
+    {
+      "id": "DG-001-cuda-bce-under-autocast",
+      "severity": "SEV-1",
+      "scope": {"spec_name_globs": ["h1r_edge_s5*"]},
+      "checks": [
+        {
+          "kind": "notebook_forbid_regex",
+          "pattern": "F\\.binary_cross_entropy\\(",
+          "message": "raw probability BCE is forbidden in the AMP edge trainer; use an autocast-safe fp32/logit loss"
+        }
+      ]
+    },
+    {
+      "id": "DG-002-shared-unet-detector-drift",
+      "severity": "SEV-1",
+      "scope": {"spec_name_globs": ["h1r_edge_s5*"]},
+      "checks": [
+        {
+          "kind": "notebook_require_any_regex",
+          "patterns": [
+            "for\\s+p\\s+in\\s+self\\.base\\.unet\\.parameters\\(\\):\\s*p\\.requires_grad_\\(False\\)",
+            "detection_drift_loss",
+            "joint_detection_loss"
+          ],
+          "message": "association training must freeze the shared UNet, distil against a frozen detector teacher, or jointly supervise detection"
+        }
+      ]
+    },
+    {
+      "id": "DG-003-division-supervision-deleted",
+      "severity": "SEV-1",
+      "scope": {"spec_name_globs": ["h1r_edge_s5*"]},
+      "checks": [
+        {
+          "kind": "notebook_forbid_regex",
+          "pattern": "continuation\\s*\\[:,\\s*torch\\.from_numpy\\(division_cols\\)\\]\\s*=\\s*0(?:\\.0)?",
+          "message": "division-daughter positives are explicitly zeroed before training"
+        },
+        {
+          "kind": "notebook_forbid_regex",
+          "pattern": "keep\\s*=\\s*~division_cols",
+          "message": "division columns are explicitly removed from the association objective"
+        },
+        {
+          "kind": "notebook_require_any_regex",
+          "patterns": ["division_loss", "division_supervision_loss", "lineage_loss"],
+          "message": "no positive division-supervision loss is wired into the edge trainer"
+        }
+      ]
+    },
+    {
+      "id": "DG-004-any-threshold-checkpoint-selection",
+      "severity": "SEV-1",
+      "scope": {"spec_name_globs": ["h1r_det_s1*"]},
+      "checks": [
+        {
+          "kind": "notebook_forbid_regex",
+          "pattern": "selected_name\\s*,\\s*selected\\s*=\\s*best_operating_point\\(val\\)",
+          "message": "checkpoint selection uses max F1 over the sweep instead of the declared deployed operating point"
+        },
+        {
+          "kind": "notebook_require_any_regex",
+          "patterns": [
+            "selected_name\\s*,\\s*selected\\s*=\\s*selection_at_threshold\\(\\s*val\\s*,\\s*selection_threshold\\s*\\)",
+            "checkpoint_selection[^\\n]*deployed",
+            "selection_metric[^\\n]*deployed"
+          ],
+          "message": "no deployed-threshold checkpoint-selection signature is present"
+        },
+        {
+          "kind": "spec_require_env",
+          "name": "H1R_SELECT_THRESHOLD",
+          "value": "deployed",
+          "message": "the checkpoint-selection operating point must be explicit in the spec, not inherited from a Python default"
+        }
+      ]
+    },
+    {
+      "id": "DG-005-unreachable-resume",
+      "severity": "SEV-3",
+      "scope": {"spec_name_globs": ["h1r_det_s1*", "h1r_edge_s5*"]},
+      "checks": [
+        {
+          "kind": "resume_requires_source",
+          "env_pattern": "H1R_(?:EDGE_)?RESUME",
+          "message": "resume is enabled but resume_sources is absent; a fresh Kaggle /working directory cannot contain the checkpoint"
+        }
+      ]
+    },
+    {
+      "id": "DG-006-identity-sidecar-missing",
+      "severity": "SEV-1",
+      "scope": {"spec_name_globs": ["h1r_edge_s5*"]},
+      "checks": [
+        {
+          "kind": "spec_require_dataset",
+          "dataset": "aryaarun07/biohub-zh001r-identity",
+          "message": "S5 requires the row-aligned Zh001r identity sidecar dataset"
+        }
+      ]
+    },
+    {
+      "id": "DG-007-produced-artifact-has-no-deployer",
+      "severity": "SEV-2",
+      "scope": {"spec_name_globs": ["h1r_det_s1*", "h1r_edge_s5*"]},
+      "checks": [
+        {
+          "kind": "artifacts_require_consumers",
+          "artifacts": ["edge_predictor_best.pth", "appearance_projector_best.pth"],
+          "message": "a training artifact is produced but no reciprocal deployment consumer is declared"
+        }
+      ]
+    }
+  ]
+}
