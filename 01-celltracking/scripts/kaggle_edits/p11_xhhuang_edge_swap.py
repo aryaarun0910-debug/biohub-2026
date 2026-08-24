@@ -1,19 +1,25 @@
 # P11: fail-closed primary-checkpoint swap to xhhuang's v6 edge predictor.
 #
 # This block runs after the P9 prediction command has been assembled and before
-# any inference worker starts.  The attached artifact is addressed by one exact
-# Kaggle mount path: discovery by filename/size is intentionally forbidden.
+# any inference worker starts. Kaggle has exposed this attachment through both
+# legacy and newer mount layouts, so the mount prefix is deliberately not assumed.
+# Identity remains fail-closed: exact filename, byte size and SHA-256 must resolve
+# to one and only one file across /kaggle/input.
 import hashlib as _p11_hashlib
 import json as _p11_json
 from pathlib import Path as _P11_Path
 
 
-_P11_DATASET_ROOT = _P11_Path("/kaggle/input/biohub-edge-predictor-v6-weights")
-_P11_WEIGHT_PATH = _P11_DATASET_ROOT / "split_0_edge_predictor_best.pth"
-_P11_CONFIG_PATH = _P11_DATASET_ROOT / "split_0_config.json"
+_P11_INPUT_ROOT = _P11_Path("/kaggle/input")
+_P11_WEIGHT_FILENAME = "split_0_edge_predictor_best.pth"
+_P11_CONFIG_FILENAMES = ("split_0_config.json", "config.json")
 _P11_EXPECTED_WEIGHT_BYTES = 8_357_783
 _P11_EXPECTED_WEIGHT_SHA256 = (
     "19cfbbeb082f54845564b77d48528998d43cfe1f8b1023101425427c834aa68f"
+)
+_P11_EXPECTED_CONFIG_BYTES = 165
+_P11_EXPECTED_CONFIG_SHA256 = (
+    "e9b4e396c58081bca08adf8275bd0bd1c2d3fd6eb091a1912a5116cb6de7b50a"
 )
 _P11_EXPECTED_STATE_SCHEMA_SHA256 = (
     "5011bba0806057be37c5090fb7b7a1c081a145d64e626f02a25cf6c715af0868"
@@ -35,6 +41,58 @@ def _p11_sha256_file(path: _P11_Path) -> str:
     return digest.hexdigest()
 
 
+def _p11_find_unique_hashed_file(
+    root: _P11_Path,
+    filenames: tuple[str, ...],
+    expected_sha256: str,
+    expected_bytes: int,
+    *,
+    preferred_parent: _P11_Path | None = None,
+) -> _P11_Path:
+    """Resolve one immutable artifact across Kaggle's legacy/new mount layouts."""
+    if not root.is_dir():
+        raise FileNotFoundError(f"P11 attachment root is missing: {root}")
+
+    def matching(paths: list[_P11_Path]) -> list[_P11_Path]:
+        result = []
+        for path in paths:
+            if not path.is_file() or path.stat().st_size != expected_bytes:
+                continue
+            if _p11_sha256_file(path) == expected_sha256:
+                result.append(path)
+        return result
+
+    # Prefer an exact-hash config beside the already resolved weight. This avoids
+    # an unrelated config.json elsewhere in a large attachment tree.
+    if preferred_parent is not None:
+        preferred = [preferred_parent / name for name in filenames]
+        preferred_matches = matching(preferred)
+        if len(preferred_matches) == 1:
+            return preferred_matches[0]
+        if len(preferred_matches) > 1:
+            raise RuntimeError(
+                "P11 artifact resolution is ambiguous beside the checkpoint: "
+                f"{[str(path) for path in preferred_matches]}"
+            )
+
+    candidates = sorted(
+        {path for filename in filenames for path in root.rglob(filename)},
+        key=lambda path: str(path),
+    )
+    exact_matches = matching(candidates)
+    if len(exact_matches) != 1:
+        observed = [
+            {"path": str(path), "bytes": path.stat().st_size}
+            for path in candidates
+            if path.is_file()
+        ]
+        raise RuntimeError(
+            "P11 artifact resolution expected exactly one exact-hash match for "
+            f"{filenames}, got {len(exact_matches)}; candidates={observed}"
+        )
+    return exact_matches[0]
+
+
 def _p11_state_schema(state: dict[str, _torch.Tensor]) -> list[dict[str, object]]:
     if not isinstance(state, dict):
         raise RuntimeError(
@@ -53,12 +111,19 @@ def _p11_state_schema(state: dict[str, _torch.Tensor]) -> list[dict[str, object]
     ]
 
 
-for _p11_required in (_P11_WEIGHT_PATH, _P11_CONFIG_PATH):
-    if not _p11_required.is_file():
-        raise FileNotFoundError(
-            "P11 checkpoint contract failed: exact attached path is missing: "
-            f"{_p11_required}"
-        )
+_P11_WEIGHT_PATH = _p11_find_unique_hashed_file(
+    _P11_INPUT_ROOT,
+    (_P11_WEIGHT_FILENAME,),
+    _P11_EXPECTED_WEIGHT_SHA256,
+    _P11_EXPECTED_WEIGHT_BYTES,
+)
+_P11_CONFIG_PATH = _p11_find_unique_hashed_file(
+    _P11_INPUT_ROOT,
+    _P11_CONFIG_FILENAMES,
+    _P11_EXPECTED_CONFIG_SHA256,
+    _P11_EXPECTED_CONFIG_BYTES,
+    preferred_parent=_P11_WEIGHT_PATH.parent,
+)
 
 _p11_weight_bytes = _P11_WEIGHT_PATH.stat().st_size
 if _p11_weight_bytes != _P11_EXPECTED_WEIGHT_BYTES:

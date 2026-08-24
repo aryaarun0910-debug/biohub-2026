@@ -1,4 +1,5 @@
 import copy
+import ast
 import hashlib
 import json
 from pathlib import Path
@@ -18,9 +19,8 @@ BUILT = (
 )
 
 DATASET = "xhhuang/biohub-edge-predictor-v6-weights"
-WEIGHT_PATH = "/kaggle/input/biohub-edge-predictor-v6-weights/split_0_edge_predictor_best.pth"
-CONFIG_PATH = "/kaggle/input/biohub-edge-predictor-v6-weights/split_0_config.json"
 WEIGHT_SHA256 = "19cfbbeb082f54845564b77d48528998d43cfe1f8b1023101425427c834aa68f"
+CONFIG_SHA256 = "e9b4e396c58081bca08adf8275bd0bd1c2d3fd6eb091a1912a5116cb6de7b50a"
 SCHEMA_SHA256 = "5011bba0806057be37c5090fb7b7a1c081a145d64e626f02a25cf6c715af0868"
 EXPECTED_CONFIG = {
     "unet_out_channels": 32,
@@ -33,6 +33,20 @@ EXPECTED_CONFIG = {
 
 def _source(cell):
     return "".join(cell.get("source", []))
+
+
+def _discovery_helpers():
+    tree = ast.parse(EDIT.read_text(encoding="utf-8"))
+    selected = []
+    wanted = {"_p11_sha256_file", "_p11_find_unique_hashed_file"}
+    for node in tree.body:
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            selected.append(node)
+        elif isinstance(node, ast.FunctionDef) and node.name in wanted:
+            selected.append(node)
+    namespace = {}
+    exec(compile(ast.Module(body=selected, type_ignores=[]), str(EDIT), "exec"), namespace)
+    return namespace["_p11_find_unique_hashed_file"]
 
 
 def test_spec_is_one_primary_checkpoint_selector_with_exact_artifact_contract():
@@ -50,12 +64,15 @@ def test_spec_is_one_primary_checkpoint_selector_with_exact_artifact_contract():
 
     artifact = spec["provenance"]["artifact"]
     assert artifact["dataset"] == DATASET
-    assert artifact["exact_mount_path"] == WEIGHT_PATH
-    assert artifact["config_path"] == CONFIG_PATH
+    assert artifact["expected_filename"] == "split_0_edge_predictor_best.pth"
+    assert "/kaggle/input" in artifact["mount_resolution"]
     assert artifact["bytes"] == 8_357_783
     assert artifact["sha256"] == WEIGHT_SHA256
     assert artifact["state_tensors"] == 136
     assert artifact["state_schema_sha256"] == SCHEMA_SHA256
+    assert artifact["config_filenames"] == ["split_0_config.json", "config.json"]
+    assert artifact["config_bytes"] == 165
+    assert artifact["config_sha256"] == CONFIG_SHA256
     assert artifact["config"] == EXPECTED_CONFIG
 
 
@@ -70,13 +87,14 @@ def test_provenance_does_not_promote_owner_score_or_invent_normalization():
     assert "do not attribute" in owner_evidence
 
 
-def test_runtime_edit_fails_closed_without_discovery_or_fallback():
+def test_runtime_edit_fails_closed_on_discovered_artifact_identity():
     source = EDIT.read_text(encoding="utf-8")
     compile(source, str(EDIT), "exec")
-    assert '"/kaggle/input/biohub-edge-predictor-v6-weights"' in source
+    assert '"/kaggle/input"' in source
     assert '"split_0_edge_predictor_best.pth"' in source
     assert '"split_0_config.json"' in source
     assert WEIGHT_SHA256 in source
+    assert CONFIG_SHA256 in source
     assert SCHEMA_SHA256 in source
     assert "_P11_EXPECTED_WEIGHT_BYTES = 8_357_783" in source
     assert "len(_p11_external_schema) != 136" in source
@@ -85,9 +103,84 @@ def test_runtime_edit_fails_closed_without_discovery_or_fallback():
     assert "_p11_reference_model_config != _P11_EXPECTED_CONFIG" in source
     assert 'predict_cmd.count("--weights") != 1' in source
     assert "_p11_changed_indices != [_p11_weights_index]" in source
-    assert ".rglob(" not in source
-    assert "glob(" not in source
+    assert "root.rglob(filename)" in source
+    assert "len(exact_matches) != 1" in source
     assert "BIOHUB_P11" not in source
+
+
+@pytest.mark.parametrize(
+    "relative",
+    [
+        Path("biohub-edge-predictor-v6-weights") / "split_0_edge_predictor_best.pth",
+        Path("datasets") / "xhhuang" / "biohub-edge-predictor-v6-weights" / "split_0_edge_predictor_best.pth",
+    ],
+    ids=["new_mount", "legacy_mount"],
+)
+def test_discovery_accepts_legacy_and_new_mount_shapes(tmp_path, relative):
+    payload = b"verified-xh-checkpoint"
+    expected = tmp_path / relative
+    expected.parent.mkdir(parents=True)
+    expected.write_bytes(payload)
+    resolved = _discovery_helpers()(
+        tmp_path,
+        ("split_0_edge_predictor_best.pth",),
+        hashlib.sha256(payload).hexdigest(),
+        len(payload),
+    )
+    assert resolved == expected
+
+
+def test_discovery_fails_closed_when_artifact_is_absent(tmp_path):
+    with pytest.raises(RuntimeError, match="got 0"):
+        _discovery_helpers()(
+            tmp_path,
+            ("split_0_edge_predictor_best.pth",),
+            hashlib.sha256(b"missing").hexdigest(),
+            len(b"missing"),
+        )
+
+
+def test_discovery_fails_closed_on_duplicate_exact_hash_matches(tmp_path):
+    payload = b"duplicate-xh-checkpoint"
+    for mount in ("legacy", "new"):
+        path = tmp_path / mount / "split_0_edge_predictor_best.pth"
+        path.parent.mkdir()
+        path.write_bytes(payload)
+    with pytest.raises(RuntimeError, match="got 2"):
+        _discovery_helpers()(
+            tmp_path,
+            ("split_0_edge_predictor_best.pth",),
+            hashlib.sha256(payload).hexdigest(),
+            len(payload),
+        )
+
+
+def test_config_prefers_colocated_exact_hash_then_supports_hashed_fallback(tmp_path):
+    payload = b"verified-config"
+    weight_parent = tmp_path / "opaque-mount" / "nested"
+    weight_parent.mkdir(parents=True)
+    colocated = weight_parent / "split_0_config.json"
+    colocated.write_bytes(payload)
+    find = _discovery_helpers()
+    assert find(
+        tmp_path,
+        ("split_0_config.json", "config.json"),
+        hashlib.sha256(payload).hexdigest(),
+        len(payload),
+        preferred_parent=weight_parent,
+    ) == colocated
+
+    colocated.unlink()
+    fallback = tmp_path / "another-mount" / "config.json"
+    fallback.parent.mkdir()
+    fallback.write_bytes(payload)
+    assert find(
+        tmp_path,
+        ("split_0_config.json", "config.json"),
+        hashlib.sha256(payload).hexdigest(),
+        len(payload),
+        preferred_parent=weight_parent,
+    ) == fallback
 
 
 def test_edit_payload_hash_is_pinned_by_built_manifest():
