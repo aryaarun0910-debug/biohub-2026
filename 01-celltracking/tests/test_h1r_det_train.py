@@ -155,3 +155,37 @@ def test_global_max_prevents_validation_truncation(tmp_path) -> None:
     item = validation[0]
     assert item["coords"].shape == (2, 3, 3)
     assert item["masks"].sum().item() == 4
+
+
+def test_detector_resume_discovery_searches_the_kaggle_input_mount(tmp_path, monkeypatch):
+    """H1R_RESUME=1 was dead code on Kaggle and read as a safety net.
+
+    /kaggle/working starts EMPTY on every batch run, so <out>/detector_last.pth cannot exist
+    on a fresh push. A preempted 12h kernel therefore lost everything and silently restarted
+    from epoch 0. A prior run's state can only arrive as an ATTACHED INPUT.
+    """
+    import scripts.kaggle_edits.h1r_det_train as mod
+
+    out = tmp_path / "work"; out.mkdir()
+    assert mod.discover_detector_resume(out) is None      # fresh run: nothing to resume
+
+    local = out / "detector_last.pth"; local.write_bytes(b"x")
+    assert mod.discover_detector_resume(out) == local     # prefers local when present
+
+    # Fall back to an attached dataset when /kaggle/input is the only place state exists.
+    fake_root = tmp_path / "input"
+    attached = fake_root / "prior-run" / "detector_last.pth"
+    attached.parent.mkdir(parents=True)
+    attached.write_bytes(b"y")
+
+    real_path = mod.Path
+
+    class RoutedPath(type(real_path())):
+        def __new__(cls, *a, **kw):
+            if a and str(a[0]) == "/kaggle/input":
+                return real_path(fake_root)
+            return real_path(*a, **kw)
+
+    monkeypatch.setattr(mod, "Path", RoutedPath)
+    out2 = tmp_path / "work2"; out2.mkdir()
+    assert mod.discover_detector_resume(out2) == attached

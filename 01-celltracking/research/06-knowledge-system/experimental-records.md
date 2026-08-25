@@ -2113,3 +2113,1705 @@ placeholder movies, so CLAUDE.md rule 2 admits it as **diagnosis that the mechan
   furthest from the data (13.2nd/29.1st percentile), because division-class transfer measures 0.000
   and `p8_loosefilter` is live-testing exactly that — deliberately declining to pre-empt a running
   experiment.
+
+## 2026-08-24 — COMPUTE: Colab withdrawn. H1 survives on its own numbers; the S0-before-S1 gate inverts
+
+- **Host change:** the two-pool budget is void. One pool remains — Kaggle GPU, host-stated ~45 h/wk
+  (published quota is 30; plan against 30). It now covers training, inference and submission alike.
+- **H1 was never compute-bound and its own spec says so.** Restating `h1_execution_spec_2026-08-18`
+  §7 against one pool: S0+S0b+S0c 6–10 h, S1+S1b+S2 2–3.5 h, S3+S4 6–8 h, S5+S6 7–11 h —
+  **21–33 GPU-h and 2 slots for the whole programme**, under one week even at 30 h. **Calendar
+  remains the binding constraint.** The plan does not need re-planning; it needs re-sequencing.
+- **DECISION INVERTED — S0 no longer gates S1.** Spec §6.6 ordered S0 first so a cheap proxy could
+  pause H1 *before Colab hours were spent*. In one pool **S0+S0c costs 6–10 GPU-h + 1 slot while
+  the S1 detector arm costs 0.5–2 GPU-h + 0 slots** — the gate is 3–5× more expensive than what it
+  protected. Sequencing S1 behind S0 now buys nothing and spends calendar. **S1 runs in the same
+  week as S0.** S0 is kept (it is the only leg producing LB evidence, the only evidence that counts
+  since the LOEO suspension); only S3/S4 stay gated.
+- **Two spec open items CLOSED by the move, not by work.** (#5) Colab's non-deterministic
+  T4/L4/A100 allocation is gone — Kaggle is deterministically T4×2, CC 7.5, so fp16+`GradScaler` is
+  correct and the hard-coded `torch.float16` needs no bf16 branch. (#1) The P2 OME-Zarr metadata
+  re-audit and the `h1r_fetch_imaging.py` 3×4-chunk bug leave the critical path, because the edge
+  half's data is **already an attachable Kaggle dataset** — `kkunizaw/biohub-zh001r` verified live
+  2026-08-24: `zh001r_iso.npy` 377 MB, `zh001r_tgt.npy` 377 MB, `zh001r_nodes.npz` 9.4 MB.
+- **One risk PROMOTED.** The `nn.DataParallel`/autocast trap (spec F5/F8) was conditional on Colab
+  allocating 2 GPUs; on T4×2 it is guaranteed every run. The patch already autocasts *inside*
+  `TemporalUNet3D.forward` (the only placement that survives DataParallel's worker threads) but is
+  **still unverified on GPU (open item #4)**. S1b is now mandatory, not optional: an unmeasured run
+  can be ~4× slow and look fine. Escape hatch: Kaggle P100 is single-GPU.
+- **NEW BLOCKER, zero GPU, on the critical path:** `data/external/zebrahub/zh001r_identity.npz`
+  (8.7 MB, the 1,258,182-edge sidecar) is **not** a Kaggle dataset — verified against
+  `kaggle datasets list --mine`. Colab read it from local disk; a Kaggle kernel cannot.
+  **Nothing in H1 runs until it is pushed.**
+- **Contract fixed (the 2026-08-22 audit's top item, now done).** `CLAUDE.md` named `src/biotrack/`
+  as "the deployed wrapper"; re-verified this session — `DEEPCENTER` **0× in `wrapper.py` vs 73× in
+  the built notebook**, `VOLUME_GUARD` 4× vs 0×. `CLAUDE.md` now names
+  `notebooks/kaggle_<name>/biohub-<name>.ipynb` as the audited artifact and labels `src/biotrack/`
+  a partial mirror.
+- **Baseline re-verified 2026-08-24:** `pytest -q` → 530 passed / 3 skipped / 29 failures, and with
+  the two known files ignored **466 passed, 3 skipped, 0 failures** — the failures are confirmed
+  confined, 0 new. `validate_research_tree.py` OK (65 area docs); `claims_table.py --check` OK
+  (53 claims resolve).
+
+## 2026-08-24 — S0 (xiaoleilian A/B) is DEAD on a tensor-level premise check. Zero GPU, zero slots.
+
+`h1_execution_spec_2026-08-18` §6.3 designs S0 as a **drop-in weights swap** — "our deployed P3
+pipeline, unchanged, with only the detector weights path repointed at their checkpoint" — costed at
+2–4 GPU-h. The spec flagged the risk itself: *"their architecture may not match
+`TemporalUNet3D([32,64,128])` … that count is itself the first measurement."* **Measured 2026-08-24,
+locally, on CPU:**
+
+- **`xiaoleilian/biohub-m001-ens3-sm6-sim2` returns 403 Forbidden** — one of the two named assets is
+  no longer accessible. `biohub-unet3d-weights-v2models` is live (4 files;
+  `unet3d_v2_tophat_b32.pt`, 22,453,556 B).
+- **Key-name overlap with our `TemporalUNet3D`: 0 of 106.** `load_state_dict(strict=False)` →
+  **missing=64, unexpected=106**.
+- **It is a different architecture, not a renamed one.** Theirs: plain UNet3D, blocks
+  `e1/e2/e3/bott/u1-u3/d1-d3/out`, **4 pooling levels**, **5,605,359 params**, no attention.
+  Ours: `encoder_blocks/decoder_blocks/temporal_blocks/head`, **3 levels**, **1,497,610 params**,
+  with multi-head **temporal attention** (`temporal_blocks.{1,2}.attn`, 64- and 128-dim).
+  **They have no analogue for the temporal blocks at all**, and the depth differs — so even a
+  hand-written key remap does not align. (`shape exists anywhere in theirs: 65/74` is BN-vector
+  coincidence, not correspondence.)
+
+**Consequence:** S0 is not a 2–4 GPU-h weights swap. The only valid version is the spec's fallback —
+run their detector standalone for a node set and feed our linker — which is a real integration job
+(their `preproc='tophat'`, `norm='p50-p99.5'`, neither of which our pipeline does) carrying exactly
+the class-C/D risk of getting someone else's preprocessing subtly wrong.
+
+**And the payoff evidence is weak, from their own checkpoint metadata:** `val_recall = 0.5789`,
+`epoch_best = 8` of `epochs = 120`, `n_train_movies = 171`. A detector recording **57.9% validation
+recall**, from a team **+0.003 ahead of us**. **RECOMMENDATION: kill S0**, release its 6–10 GPU-h
+and 1 slot to S1. This is a class-C kill verified at tensor level, and the ledger's own rule applies
+— *code-level reasoning is 1/1 for kills, 0/2 for opportunities*; this is a kill.
+
+**Free intel extracted for S1 (the reason the check was worth running anyway).** xiaoleilian's full
+recipe, read out of the checkpoint: `base=32`, `pool=4`, `norm='p50-p99.5'`, `preproc='tophat'`,
+`aug='flip'`, `fpm=0`, `seed=0`, `epochs=120`, **`epoch_best=8`**.
+- **`epoch_best=8` of 120 corroborates our S1 plan.** The spec's 20-epoch cosine fine-tune is the
+  right order of magnitude; long training overfits this data. Select checkpoints aggressively.
+- **`pool=4` vs our 3 encoder levels** is a depth lever no report has considered.
+- **`preproc='tophat'`** is a detection-surface change — the one class with measured LB transfer.
+
+**PROCESS NOTE — the disproving evidence was on local disk the whole time.** All three
+xiaoleilian checkpoints have sat in `data/external/public_weights/` since **2026-08-18**
+(`unet3d_v2_tophat_b32.pt`, md5 `d86d476a86cbed15ad0fa88b9120b06b`, byte-identical to the copy
+re-downloaded today) — the same day `h1_execution_spec` was written naming S0 the first move and
+the gate for the whole programme. The check that killed it is `torch.load` + `load_state_dict`,
+one line, no GPU, no network. **This is the recurring failure mode again** — sound planning on an
+unverified premise, with the machine holding the refutation and never re-reading it. It is the
+same shape as the `src/biotrack/` mismatch fixed today. Concrete guard: **a bet that names an
+external artifact must load it and assert compatibility before it is allowed to be costed.**
+
+**Also cleared this session:** `aryaarun07/biohub-zh001r-identity` created **private**
+(8,696,665 B, byte-count matches local; absent from public search). The H1 prerequisite blocker is
+gone — every Kaggle training kernel can now attach the sidecar alongside `kkunizaw/biohub-zh001r`.
+
+## 2026-08-24 — H1 execution surface built; corrected S1 smoke passed
+
+- Real association-loader gate passed on the 72×20 pack: **1,192,441 continuation + 65,741
+  division-daughter = 1,258,182**; nine corruption/ambiguity contracts pass.
+- S1 detector defects fixed before GPU: 1.625 µm authority, no validation truncation, strict
+  checkpoint init, zero-epoch seven-point threshold sweep, full optimizer/scheduler/scaler/RNG
+  resume, and paired fp32/fp16 DataParallel telemetry with a 1.3× abort gate.
+- Reproducible specs built: `h1r_det_s1_smoke` and `h1r_det_s1`; after integrating the edge lane,
+  the focused suite is 42/42 and the non-D1 suite is 506 passed / 3 skipped.
+- Kaggle `aryaarun07/biohub-h1r-detector-s1-smoke` v1 failed during import, before touching model
+  or data: `ModuleNotFoundError: biohub_tracking`. Root cause was the vendored trainer's `src/`
+  directory missing from `sys.path`. Both required import roots are now inserted. Corrected v2
+  completed on T4x2: fp32 4.4975 s vs fp16 1.1549 s for two paired steps (**3.894x speedup**);
+  selected-threshold validation F1 **0.6335 -> 0.7375** and deployed-threshold F1 **0.5538 ->
+  0.7008**. This is a plumbing smoke, not promotion evidence. No competition submission. The
+  full S1 run has passed its technical gate and awaits explicit host authorization.
+- Embedding play implemented but not promoted: opt-in zero-gated 64-D cosine residual with
+  continuation-only spatial-KNN hard triplets, plus a threshold-union-top-k candidate sidecar.
+  Both are legacy-parity when disabled and require held-out association evidence before use.
+- S5 now has a runnable edge trainer: deterministic adjacent-window sampling, strict public
+  initialization, frozen/bypassed detector, continuation-only focal parental-softmax, exact zero
+  gradient on division-daughter columns, zero-epoch baseline, top-1/candidate-recall metrics, and
+  optimizer/scheduler/scaler/RNG resume. It is implementation readiness, not promotion evidence.
+- S5 packaging is now complete: `h1r_edge_s5_smoke.json` and `h1r_edge_s5.json` both attach
+  `kkunizaw/biohub-zh001r` and private `aryaarun07/biohub-zh001r-identity`, replace inference with
+  artifact-only training cells, and declare `expects_submission=false`. Neither was launched.
+
+## 2026-08-24 — SEVEN-AGENT CYCLE: the 0.926 is real, the naive port is dead, both GPU lanes are broken
+
+### A. The 0.926 is LB-VERIFIED and its delta is one atomic transplant
+
+`rockerritesh/0-926-biohub-divsub` and `kunaldesale2408/biohub-cell-tracking` are the **same notebook**
+(code diff = 14 lines, all whitespace) and **both teams sit on the leaderboard at exactly 0.926**
+(Rocker Ritesh 2026-08-23, Kunal Desale 2026-08-24). Their notebooks' internal markdown still says
+"Public score: 0.913" and `metadata.codex.displayed_public_score = 0.913` — that is **stale
+kernel-version-1 metadata**, not a refutation. Two agents raised a false alarm on it; the leaderboard
+settles it. `divport` appears nowhere in our repo, so the "this is our own comment" claim was wrong.
+
+**Lineage (verified by full config diff, 94 of 100 env keys byte-identical):**
+- shared base = `pilkwang` 0.913 "Dual Seed Frame Retention Guard V1"
+- theirs = base + **division transplant** -> **0.926 (+0.013)**
+- ours  = base + bidirectional harmonic + out-degree guard + gap guards -> **0.915 (+0.002)**
+
+**We are siblings, not followers.** Nothing differs in detection, secondary-seed, ILP, gap-density,
+DeepCenter or short-track config. Their `BIDIRECTIONAL_EDGE_WEIGHT` is ABSENT; it is ours alone.
+
+**The transplant is five coupled items, not one lever:**
+radii **8.0 / 11.0 / 10.0** (vs our 4.66 / 8.5 / 7.65) + **C1** mid-track parent
+(`source_id in incoming`) + **C2** mutual-nearest-orphan sisters (cKDTree) + **C3** t+2 divergence
+(`d(_n1,_n2) - sister_dist >= 2.25`). Their own comment: the wide radii without the constraints
+"produced hundreds of forks and never a single TP" — **that is exactly p8, and exactly our -0.003.**
+Trap: their *markdown* still documents 4.66/8.5/7.65; a second env block overwrites it with 8/11/10.
+Porting the prose ports the wrong numbers. The DeepCenter safe-div veto is **OFF in theirs**,
+same as ours — it was never the missing discriminator.
+
+### B. C3 ALONE IS DEAD — measured on our own GT, zero GPU
+
+Statistic `delta = d(daughters at t+2) - d(daughters at t+1)` over `data/train` (199 crops, 151 GT divisions):
+
+| | n | p10 | Q1 | median | Q3 |
+|---|---|---|---|---|---|
+| GT division delta (um) | 147 | **0.00** | 0.91 | **2.35** | 4.12 |
+
+**At the public tau=2.25, only 76 of 151 (50.3%) true divisions survive — in PERFECT ground truth.**
+Separation AUC vs our scored false forks = **0.632** (weak). Our shipped LOEO graphs emit
+**11,582 forks of which 2 are true divisions**. Best trade is tau~2.0-2.25 at ~7.8 FPs cut per TP lost;
+FP reduction is real (722 -> 118 scored FPs, -84%) but lifts div_jaccard only **0.0023 -> 0.0074**.
+**A precision filter downstream of a 2/151 proposer cannot add a true division. DO NOT ship C3 alone.**
+
+### C. ...but the same measurement VALIDATES the radii half, which is the load-bearing half
+
+**GT median sister separation at birth = 10.57 um. Our sister gate is 8.5 um. Theirs is 11.0 um.**
+In perfect GT, **only 19 of 151 divisions satisfy our geometric gates at all.** Our gates are tuned
+below where divisions actually live; theirs are tuned to it. This is independent, GT-based
+corroboration that 8/11/10 is right and 4.66/8.5/7.65 is wrong — arrived at without reference to
+their notebook.
+
+**The dominant residual lever is upstream of every gate.** `div_proposal_funnel.py`, fold 0, 26 GT
+divisions: mother detected 26 -> both daughters detected 25 -> mother out-degree 1: 24 -> linked child is
+a true daughter 23 -> **other daughter is ORPHAN: 4 (loses 19)** -> parent_dist <= 4.7: **0 (loses 4)**.
+**Zero of 26 are proposable.** Condition (e) — the second daughter already having a parent — kills
+19/26 and **no gate setting touches it.**
+
+### D. Both GPU lanes are defective. Neither may launch as specified.
+
+**S1 smoke performed ZERO optimiser steps — VERIFIED, not inferred.** `kernel.log:136,139` carries
+`UserWarning: Detected call of 'lr_scheduler.step()' before 'optimizer.step()'`, which PyTorch emits
+only when the optimiser has never stepped: GradScaler started at 65536, hit inf/nan, skipped both
+steps. `det_loss=4.6878` is the loss of the **unmodified** initialisation. The entire **+0.104 F1 is
+BatchNorm running-statistic adaptation** (AdaBN), doubled per step because gradient checkpointing
+recomputes conv blocks in backward. **The smoke is not evidence that training works.**
+Discriminating control, no code change: `H1R_LR=0, H1R_EPOCHS=1, H1R_MAX_STEPS=0, H1R_BENCH_STEPS=0`
+~ **0.1 GPU-h**.
+
+**S1 further:** checkpoint selection is `max F1 over ALL thresholds` (`h1r_det_train.py:68`, `:424`)
+while the docstring claims the deployed operating point — the sweep is monotone decreasing so it
+always selects the loosest probe (p0.5, 0.469 away from deployed 0.96875). `eval_detection` uses ONE
+forward while deployment uses **8-view TTA**, so the number labelled "deployed" is not the deployed
+operating point. Training normalises per-crop over uint8; deployment over whole-video zarr attrs over
+uint16. `H1R_RESUME=1` is dead code on Kaggle (`/kaggle/working` starts empty, no `kernel_sources`).
+**SEV-1: the fine-tuned UNet trunk IS the association representation** — `unet_out` feeds
+`predict_edges` in deployment, so moving the detector rewrites every edge feature under a transformer
+trained on the old one. That trunk is the 0.915 substrate and nothing measures it.
+
+**S5 would crash on step 1 and, if fixed, would train the wrong objective.**
+
+1. `F.binary_cross_entropy` (`h1r_edge_train.py:177`) inside CUDA autocast (`:336`) — banned op, hard
+   RuntimeError. **`h1r_trainer_patch.py:12-13` documents this exact trap**; the edge lane never
+   applies that patch. A CPU smoke cannot reproduce it.
+2. **ALL division supervision is deleted** (`:95-97` zeroes division columns, `:165-167` drops them
+   from the loss). The model never sees one mother->daughter positive. **This discards the entire
+   65,741-link asset that is H1's whole rationale**, and inverts the repo's own P3 division upweight.
+3. "Frozen detection" freezes only `detect_head` (one 1x1 conv); the shared UNet trains 20 epochs.
+   The post-run guard (`:351-353`) is tautological. The saved checkpoint is the full model + config ->
+   silently ships a drifted detector.
+4. `node_cap=256` against ~942 nodes/frame with **independent** source/target sampling: a target's
+   true parent survives ~27% of the time, so training sees ~73% of columns as "no parent" while
+   deployment has ~92% *with* one — background prior ~9x off, softmax denominator 256 vs ~900.
+5. Checkpoint selection is `accuracy x recall` — the exact rule `h1r_trainer_patch.py:19-22` already
+   rejected for having no precision term.
+
+Verified clean: both specs DO attach `kkunizaw/biohub-zh001r` AND `aryaarun07/biohub-zh001r-identity`;
+label construction and t->t+1 indexing are correct.
+
+### E. Free intel, LB-measured by other people
+
+- `evgendvorkin/biohub-0-923-lb` annotates its config with results: **`ILP_DIVISION_WEIGHT` at
+  0.3 / 1.0 / 2.0 / 3.0 ALL scored 0.915.** Independently confirms our "ILP is structurally inert"
+  finding and closes that lever for free.
+- **`leevvin` README claims the public support pack was trained with `test` inside `train` over all 199
+  labelled movies.** If true this is a mechanistic explanation of the entire LOEO->LB transfer
+  failure — instrument contamination, not "no offline instrument can predict the LB". UNVERIFIED;
+  `splits_movie_heldout.json` is already on disk at `data/external/public_weights/leevvin/`.
+- 0.926 and 0.923 lineages **disagree on the DeepCenter checkpoint**: `checkpoint_last.pt` (epoch 500)
+  vs `best.pt` (epoch 2), same dataset. One-flag A/B.
+- Highest live public score across ~900 kernels is **0.926**; the two 0.950 titles are pre-rescore
+  metric-hack-era artifacts and are dead. Top-3 is now **0.953** (TWEAK), leader 0.962.
+
+### F. THE PROCESS FINDING — the repo does not inherit its own fixes
+
+S5 defects 1, 2 and 5 are each a mistake **already found, documented and fixed in
+`h1r_trainer_patch.py`**, then re-made in a new file that does not apply that patch. Same shape as the
+two other recurrences today: `CLAUDE.md` pointing at `src/biotrack` while the real program was the
+notebook, and xiaoleilian's weights sitting unread on disk for six days while a spec costed an
+experiment around them. **A capability ledger would not catch any of these.** What is needed is a
+**defect ledger** — known trap -> where found -> what fixes it -> which files must inherit it — enforced
+as a `kaggle_factory` build gate, the same way it already asserts exact-match on edits.
+
+## 2026-08-25 — POST-P9 CYCLE: LOEO contamination confirmed in our own specs; the contested-daughter loss is STRUCTURAL
+
+### A. TASK 1 — the "leak". leevvin's claim is UNVERIFIABLE. Ours is WORSE and it is VERIFIED.
+
+**leevvin's claim (public support pack trained with `test` inside `train`, all 199 movies) cannot be
+checked and the evidence points against it.** The support pack publishes no split manifest and no
+main training script (only the DeepCenter one) — verified by listing
+`pilkwang/biohub-tracking-support-pack-50ep-v1` (no `run_main_training_oneshot.sh`, no
+`split_manifest.json`). The vendored trainer's DEFAULT split is **clean and disjoint**:
+`vendor/kaggle-cell-tracking/scripts/train_unet_transformer.py:1050` →
+`folds = [{"split": 0, "train": stems[n_val:], "test": stems[:n_val]}]`. A leak would require a
+custom splits file that is not published. **Record this as UNVERIFIED, not as fact.**
+
+**But the sharper question is answerable and the answer is yes — our LOEO split the CROPS and never
+the MODEL.** All nine LOEO specs attach `pilkwang/biohub-tracking-support-pack-50ep-v1` and evaluate
+on competition training movies. The weights are fixed public weights trained on some portion of the
+same 199 labelled movies. **Any post-processing tuned on that instrument was tuned against a model
+that had already seen its evaluation set.** This is a mechanistic explanation of the LOEO→LB gap
+that does not depend on leevvin at all.
+
+**AND THE TWO FOLDS ARE NOT THE SAME INSTRUMENT — verified:**
+
+| spec | own weights attached |
+|---|---|
+| `p3_base_loeo_f0`, `p3_armb_loeo_f0` | **none** (public weights only) |
+| `p3_base_loeo_f1`, `p3_armb_loeo_f1` | **`aryaarun07/biohub-oof-weights`** |
+
+Fold 0 is public-weights-only; fold 1 attaches our own out-of-fold weights. **We have been pooling a
+contaminated arm with a possibly-clean one and reading the average**, which plausibly explains the
+fold-0/fold-1 MDE asymmetry (±0.0043 vs ±0.0057) we had attributed to noise.
+**LIMIT OF THIS FINDING: attachment is verified, USE is not.** Confirming the f1 notebook actually
+loads `biohub-oof-weights` is the next step and it is a grep, not an experiment.
+
+### B. TASK 2 — the contested-daughter loss is STRUCTURAL, caused by one line, and has a known fix
+
+**Verified in the DEPLOYED P9 notebook (not the `src/biotrack/wrapper.py` mirror):
+`motion_relink_edges` solves `linear_sum_assignment(cost)` — 3 occurrences.** That returns a
+**bijection**, so **out-degree ≤ 1 is a hard structural invariant of the linker.** "The second
+daughter already has a parent" is therefore unreachable by ANY radius, threshold or constraint.
+This unifies three previously separate observations: the relink discards 99.87% of solver output;
+100% of output divisions are post-processor artifacts; and the orphan requirement appears in BOTH
+`coupled_division_transplant.py` and `restore_learned_divisions.py` — it is forced, not chosen.
+
+**Therefore: no gate tuning can recover the 19/26. Stop tuning C3's 2.25 µm threshold.**
+
+**THE FIX (M1, top-ranked): duplicated-source LAP.** Augment the cost matrix from `(|S|,|T|)` to
+`(|S|+|S_div|,|T|)` with a duplicate row block for division-eligible mothers at `cost + δ_div`, then
+solve the SAME `linear_sum_assignment`. Out-degree 2 becomes a first-class outcome chosen on cost;
+there is no "already linked" node because a daughter is just a column. Restrict `S_div` to
+C1-satisfying mid-track sources to bound the runtime (LAP is O(n²m), `MOTION_RELINK_MAX_FRAME_NODES`
+= 2600). δ_div is in µm, same units as `motion + 0.05*raw - 0.75*prob`.
+
+**Corroboration from the literature:** every tracker that handles division well relaxes exactly this
+bijection — Linajea's ILP (`Σ next_edges − 2·selected ≤ 0`), Padfield's coupled min-cost flow,
+Haubold's generalised successive shortest paths, and the duplicated-column trick in arXiv 2403.15011.
+**Jaqaman's second-LAP is NOT the right model** — it requires the daughter to be a segment start,
+i.e. it shares our defect. TrackMate-Oneat measured branching accuracy **0.122 → 0.328** via exactly
+this kind of contested re-linking.
+
+**PRE-REGISTERED CHEAP TEST, zero GPU, NOT YET RUN.** Replay the augmented LAP offline against
+`C:/temp/preilp_f1_v2/preilp_split1.parquet` (4,685,519 rows; columns dataset/row_type/node_id/
+t/z/y/x/source_id/target_id/edge_prob) and count how many of the 19 contested daughters flip to the
+correct mother. **KILL CRITERION, fixed in advance: fewer than 8 of 19 flip at any δ_div ⇒ M1 is
+dead.**
+
+**Two supporting levers found with it:**
+- **`H1R_DIV_WEIGHT` is 3.0; Trackastra's published λ_div gives weight 11** — a 3.7× under-weighting
+  of division rows, one env var.
+- **The proposer writes `edge_prob: None` on every fork** — it never receives the discriminant that
+  measured median 0.9188 at true divisions, while C3's divergence statistic has AUC only 0.632.
+  Replacing C3's gate with an `edge_prob` gate is a one-script AUC comparison on existing dumps.
+
+### C. THE PUBLIC FRONTIER MOVED AGAIN — 0.927, and still with NO retraining
+
+`evgendvorkin/biohub-0-927-lb` (ran 2026-08-24 21:25, 14 votes) attaches only the three stock
+pilkwang datasets. Deltas vs the 0.926 lineage: **8-view D4 detection TTA**, a **second temporal
+model ensemble**, `BIDIRECTIONAL_EDGE_WEIGHT` **0.20 → 0.30**, `DEEPCENTER_SAFE_DIV_VETO` **ON**.
+
+**This contradicts our P9 interference finding and the contradiction is live.** We inferred from
+0.913+0.013 vs 0.915+0.010 that our harmonic is subsumed and should be *removed*; the 0.927 raises
+it to 0.30 instead. Both cannot be right. One slot settles it. `xstargate/biohub-v17-e1..e4`
+(2026-08-23) are published ablations of exactly these mechanisms — free attribution data.
+
+### D. FIRST PUBLISHED LOEO ASSETS — the two halves of our own planned pipeline, now public
+
+- **`poonszesen/biohub-c1-honest-fold1-e25-probe`** (2026-08-24, 7.7 MB) — LOEO fold-1 edge
+  predictor, `training_embryo 44b6` / `held_out_embryo 6bba`, 25 epochs, seed 314159. Caveat:
+  `skip_validation: true`, author calls it a calibration probe.
+- **`daifanhao/biohub-loeo-synth-code-public-v1`** (2026-08-23, 4.7 KB) — a complete LOEO trainer
+  that **asserts** train/held-out disjointness (`raise RuntimeError("LOEO train/held-out overlap")`),
+  `EXPECTED_COUNTS {"44b6": 71, "6bba": 128}`, and warm-starts the UNet+detector head **without
+  touching edge weights**. Pairs with `daifanhao/biohub-synthetic-detector-pretrain-public-v1`.
+- **`raykkretzschmar/biohub-robust-motion-proposals-v2`** — the only asset publishing held-out
+  numbers on a **movie-disjoint** split (clean proposal recall @2 µm 0.9035, corrupted 0.8987).
+- `yuki0731/biohub-coord-inject` (2026-08-25, 83 MB) — 4-seed detector ensemble + coordinate
+  refiners, **but epoch-0/1/6 checkpoints and no protocol or metrics**. Unvalidated.
+
+### E. OPEN / NOT DONE — carry these forward
+
+1. **The M1 LAP replay has NOT been run.** It is the decisive test for the largest identified loss
+   channel and costs only CPU. Kill criterion is pre-registered above.
+2. **Confirm the f1 LOEO notebook actually LOADS `biohub-oof-weights`** (grep, not experiment).
+3. **Metric headroom analysis was still running at close** — the question it answers is whether the
+   0.1-weighted division term can mathematically deliver +0.028 at all, or whether it cannot and the
+   budget must go to detection/association. **Do not commit GPU before this is answered.**
+4. Top-solution gap analysis stalled twice; its "major intelligence" finding was not recovered.
+5. S5 remains unlaunchable (CUDA-autocast BCE crash; all division labels masked out). S1 has three
+   SEV-1 defects. Neither may promote anything.
+
+## 2026-08-25 — SWARM RESULTS (cited). The metric says DIVISIONS CAN reach top-3; two top-3 teams say the gap is NOT the edge model.
+
+### A. COMPETITOR INTELLIGENCE — verbatim, cited
+
+**TWEAK (rank 3, LB 0.953)** — https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/735352
+> "we are not focused on 0.0001 or Division J; we are working on a **universal plugin that the bio cell
+> team can plug into their current pipeline with minimal changes. We have tested our plugin with every
+> available unique public notebook and model, with gains ranging from 0.030, 0.040, to 0.050 instantly
+> just attaching our plugin. We've seen gains from a single public model reach a score of 0.940
+> untuned.** We are not focused on the 0.0001 or tuning to the hidden."
+
+Existence and magnitude VERIFIED (their words); **mechanism NOT disclosed** — Sergio Alvarez asked the
+disambiguating question in-thread and TWEAK never answered. This is +0.028 and more, **without new
+weights**, and explicitly **not division work**.
+
+**Soheil Ayati (rank 2, LB 0.959)** — https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/737101
+> "Break your missed edges into two categories: **missing endpoint nodes and incorrect associations. In
+> my case, many 'linking' issues actually originated earlier during node selection**, so improving the
+> edge model won't necessarily help. **Always validate complete movies using the official scorer and
+> movie-level OOF splits. Edge-level random CV can be highly misleading.**"
+
+**Tang (rank 7, LB 0.946)** — https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/734604
+> "the current ckpt has kind of hit a wall, it's hard to get more gain from post-processing alone."
+> "the common approach ... is basically two parts: **modeling and track optimization, aka
+> post-processing.** ... i'm not working on that part."
+Tang is at 0.946 **without** the track-optimisation half — consistent with TWEAK's plugin being a
+separable +0.03–0.05.
+
+**Mendrika Ramarlina (rank 87)**, same thread — the cleanest public decomposition:
+> "**Edge recall ≈ node recall² × conditional linking accuracy.** This means **detector misses are
+> especially expensive.**" and "keep the detector fixed while comparing linkers ... otherwise
+> post-processing can appear to improve locally by changing the candidate set and graph simultaneously."
+
+**mikelou1 (rank 28)**, discussion/735352 and /737101 — calibration points: retrained **from scratch**
+and reached only **0.928**; his division J ≈ **0.3** is considered good; and he reports **0.919 CV vs
+0.895 LB** — a 0.024 inversion, the exact pathology Soheil warns about.
+
+### B. LEADERBOARD STRUCTURE — the body is one forked artifact, the top is bespoke
+
+Downloaded 2026-08-25, 2,693 teams. Exact-value spikes: **0.926 → 106 teams**, 0.915 → 198, 0.913 → 105,
+0.917 → 92, 0.923 → 42. **Above 0.927 no score value has more than 7 teams**; from 0.940 up it is 1–3.
+
+| band | teams |
+|---|---|
+| ≥ 0.926 | 202 |
+| 0.926 ≤ x < 0.947 | 196 |
+| **≥ 0.947** | **6** |
+| ≥ 0.953 (top-3) | 3 |
+
+**There is no cluster at the top to reverse-engineer.** Note also Dylan Gallagher reached 0.944 in
+**7 submissions** and Corwin 0.943 in **9** — unreachable without a trusted offline signal.
+
+### C. METRIC HEADROOM — computed, and it OVERTURNS my earlier statement
+
+Scorer verified at `.venv/Lib/site-packages/tracking_cellmot/metrics.py`:
+`adj_i = max(0, J_i·(1 − 0.1·r_i))` (`:446-451`), `ADJ = Σw_i·adj_i / Σw_i` (`:498-504`, edge-volume
+weighted mean), `D` = **micro**-pooled division Jaccard (`:508-521`), `SCORE = ADJ + 0.1·D` (`:522`).
+`node_recall` is reported but **is NOT in the score** (verified absent from the expression).
+Hand-recomputation matched the stored value bit-exactly (0.9001767463).
+
+**Pooled LOEO baseline 0.733456** (f0 0.903318 / f1 0.704231; div TP/FP/FN = 5/613/146; D = 0.006545).
+
+| oracle scenario | Δ pooled |
+|---|---|
+| **division J → 1.0** | **+0.099346** |
+| division reach-limited oracle (all 89 reachable, FP=0) | **+0.058286** |
+| division FP → 0 ONLY | **+0.002657** |
+| division FN → 0 (current FP kept) | +0.019110 |
+| edge ADJ → 1.0 | +0.277081 |
+| edge FN → 0 | +0.167171 |
+| edge FP → 0 | +0.089494 |
+
+**I PREVIOUSLY SUGGESTED THE 0.1-WEIGHTED DIVISION TERM MIGHT MATHEMATICALLY NOT REACH +0.028. THAT IS
+FALSE.** A perfect division Jaccard is worth **+0.0993 — 3.5× the gap**. Even the reach-limited oracle
+is **+0.0583, 2× the gap**. Required: div J **0.006545 → 0.2865**.
+
+**Exact frontier for +0.028** (151 GT divisions, 89 currently reachable):
+
+| div FP | div TP needed | feasible? |
+|---|---|---|
+| 0 | 44 | YES |
+| 50 | 58 | YES |
+| 100 | 72 | YES |
+| ≥170 | >89 | **NO** |
+
+Current: **TP=5, FP=613, precision 0.8%**.
+
+**RULED OUT — division FP suppression alone (+0.0027).** Any fork-precision project that does not also
+raise TP is mathematically incapable of closing the gap. **P9 was a precision fix; the next one must
+raise TP.**
+
+**RULED OUT — node-count / N_est manipulation.** Two independent grounds: (i) `estimated_number_of_nodes`
+lives only in `data/train/*.geff/zarr.json` and is **not observable at inference**; (ii) measured — the
+node-budget sweep earned +0.014437 in ratio bonus against −0.049805 Jaccard damage, **net −0.035368**.
+
+**Marginal costs (pooled):** a missing GT-matched node costs **−1.40e-5**; a spurious node in
+unannotated space costs **−3.33e-8**. **Missing costs 420× more than spurious — over-detect.**
+One division TP = **+1.31e-4** = worth **19 edge FNs**.
+
+**Dead zones (verified):** 98.1% of predicted edges are never scored (p9: 117,901 predicted, **2,190**
+`pred_valid`); **97.95% of predicted forks are never charged** (f0: 5,279 forks, 108 charged). A fork is
+charged **iff** it sits on an annotated GT cell with ≥1 GT child. **Global fork suppression is therefore
+pure downside** — it cannot preferentially reduce charged FPs but does destroy TPs.
+
+### D. NOMINATION ARCHITECTURE — Ultrack uses TOP-K; we use a bare threshold
+
+**Ultrack** (Nature Methods 2025, DOI 10.1038/s41592-025-02778-0; arXiv 2308.04526), verbatim:
+> "For each segmentation i ∈ H ... compute its candidates **2k-nearest neighbors within a predefined
+> radius** ... The association score ... **w(i,j) = IoU(i,j)^γ** ... γ is consistently set to four ...
+> **Include into E_T the k pairs per segment in t with the largest IoU, using their distance as a
+> tie-breaker.**"
+
+Code: `ultrack/core/linking/processing.py` — `KDTree(...).query(target_pos, k=2*config.max_neighbors,
+distance_upper_bound=config.max_distance)` then `sorted(neighborhood, reverse=True)[:config.max_neighbors]`.
+Defaults (`ultrack/config/config.py`): **`max_neighbors = 5`, `max_distance = 15.0`**.
+**Retrieve 2k geometrically → rerank by appearance (masked IoU⁴) → hard-truncate to k.**
+The search ball is **movement-displaced** (`target_pos += target_shift`) when optical flow is on.
+Ultrack also ships an **oracle instrument for candidate-set ceiling** — MTIoU, `ultrack/core/match_gt.py`
++ CLI `ultrack/cli/match_gt.py`.
+
+**Linajea** (Nature Biotech 41, 44–49 (2023), DOI **10.1038/s41587-022-01427-7** — note a DOI given
+earlier in this project was wrong and resolved to a COVID vaccine paper) uses a **fixed radius, no k**:
+`extract_edges_blockwise.py` → `pre_kd_tree.query_ball_point(nex_parent_center, edge_move_threshold)`,
+ball centred on the **movement-displaced** position (`use_mv_distance` default True). Out-degree is
+unbounded. Published θ ∈ {25, 30, 40, 45} **world units, not µm**. Node recall reported >0.99 (mouse,
+Drosophila) / >0.96 (zebrafish); **edge recall of the candidate graph is NOT published**, though the
+instrument exists (`linajea/evaluation/analyze_candidates.py::get_edge_recall`).
+
+**Abstention:** both put the null option **inside the same "exactly one" sum** as the real candidates —
+Linajea `Σ_{p∈P_v} y_p + y_v^T − y_v = 0` (appear indicator competes with every parent edge); Ultrack
+`x_α`/`x_β` slack variables. **Neither normalises abstention against candidate scores.** Our column
+softmax has **no null column at all** — this is the structural gap.
+
+### E. WHAT THIS IMPLIES — three cheap CPU tests that gate the GPU spend
+
+1. **Oracle-node substitution** — replace predicted nodes with GT nodes on a held-out movie, keep linker
+   and solver fixed, score officially. Gives the exact detection headroom. Motivated by Soheil (#2) and
+   by `edge recall ≈ node recall² × linking accuracy`.
+2. **Candidate-width sweep** — recompute the oracle ceiling as a function of candidate radius and top-K
+   only. If it rises ≫0.03 as K widens, TWEAK's plugin is localised to candidate generation. Our own
+   `error_atlas` says a perfect solver over *today's* candidates is worth only +0.0012, so H1 must be a
+   candidate **widening**, not a better solver.
+3. **LOEO↔LB regression** — regress our historical LOEO scores against achieved LB. Given §A's finding
+   that fold 0 uses public weights and fold 1 attaches our own, and mikelou1's 0.919/0.895 inversion,
+   this decides whether our decision loop is load-bearing at all. Zero compute.
+
+**Do not commit the 21–33 GPU-h until tests 1 and 2 have run.** mikelou1 retrained from scratch and
+landed at 0.928 — retraining is necessary-but-nowhere-near-sufficient.
+
+## 2026-08-25 — RETRIEVAL TEARDOWN: the nominator is a hard ARGMAX, 70.6% of the loss is RANKING, and the ILP cannot prune
+
+Measured on `c:/temp/error_atlas/*.parquet` and `c:/temp/preilp_f1_v2/preilp_split1.parquet`
+(fold 1, 128 crops, 2,523,479 nodes / 2,162,040 candidate edges), scale [1.625, 0.40625, 0.40625] µm.
+
+### A. The deployed nominator is a per-target ARGMAX, not "at most 2 parents"
+
+| candidate in-degree per target | count |
+|---|---|
+| **1** | **2,162,040** |
+| 2 | **0** |
+
+`min(edge_prob) = 0.5000002`, p01 = 0.5103. The column softmax is so peaked at deployment node counts
+that **only the column winner ever clears the 0.48 gate, and it always clears 0.5**. The rule is
+operationally `argmax_i p[:,j] if max > 0.5 else abstain`. Out-degree (source axis) is unconstrained:
+{1: 1,795,844, 2: 165,148, 3: 10,911, 4: 715, 5: 59, 6: 2}.
+
+**335,210 of 2,497,250 non-first-frame nodes (13.42%) receive ZERO candidate parents** → forced track
+starts. This supersedes the earlier "3 × 0.48 = 1.44 > 1 so at most 2 parents" argument — directionally
+right, but the measured reality is stronger: it is always exactly one.
+
+### B. The 17,001 missing GT edges are TWO different failures, and the big one is RANKING
+
+| branch | count | share |
+|---|---|---|
+| **target already has a candidate — the WRONG parent** | **11,996** | **70.6%** |
+| target has zero candidates | 5,005 | 29.4% |
+
+**This kills the "lower the threshold / add abstention" family as a PRIMARY fix.** 70.6% of the loss is
+a ranking error, not a thresholding error.
+
+**The true parent is geometrically CLOSER than the nominated one in 77.3% of the 11,996 cases:**
+
+| | median | p75 |
+|---|---|---|
+| GT parent → child displacement | **2.19 µm** | 3.83 |
+| nominated parent → child displacement | **4.77 µm** | 6.13 |
+
+**Divisions are hit ~3× harder:** 49.6% of division-daughter links are un-nominated vs 17.3% of
+continuations.
+
+### C. kNN-3 is a near-SUPERSET of today's nominations and recovers 92.5% of the misses
+
+cKDTree per (dataset, t−1), all 17,001 missing edges evaluated:
+
+| gate | missing GT edges contained | contains today's nominated source |
+|---|---|---|
+| k = 1 | 24.7% (4,203) | — |
+| **k = 3** | **92.5% (15,726)** | **99.4%** |
+| k = 5 | 97.7% (16,609) | 99.7% |
+
+(k=2 and k=10 NOT computed. Superset figure is a 24,000-edge sample over 8 of 128 datasets.)
+
+So **kNN-3 ≈ (today's set, 99.4% retained) ∪ (92.5% of the misses)** at **3.5× the candidate count**
+(2.16 M → ~7.49 M). The k=1 → k=3 jump is the finding: **nearest-neighbour alone is NOT the fix (24.7%)**,
+and combined with §B neither probability alone nor distance alone ranks correctly — **retrieval and
+ranking must be separated.**
+
+### D. THE BLOCKER — VERIFIED IN THE DEPLOYED P9 NOTEBOOK, not the mirror
+
+`vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py:555-563`:
+```python
+solver = td.solvers.ILPSolver(
+    edge_weight=cfg.ilp_edge_weight * td.EdgeAttr("edge_prob"),   # ilp_edge_weight = -1.0
+    appearance_weight=cfg.ilp_appearance_weight,
+    disappearance_weight=cfg.ilp_disappearance_weight,
+    division_weight=cfg.ilp_division_weight)
+```
+Deployed env, verified in `notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb`:
+**`BIOHUB_ILP_APPEARANCE_WEIGHT = "0.0"`**, `BIOHUB_ILP_DISAPPEARANCE_WEIGHT = "1.5"`.
+
+1. **The ILP ranks by `edge_prob`, which IS the column softmax. Widening the candidate set WITHOUT
+   rescoring is a NO-OP** — the ILP re-selects the same argmax, because in-degree ≤ 1 makes this a
+   replacement decision and every added candidate is by construction lower-probability.
+2. **With `appearance_weight = 0.0` there is NO abstention price.** Selecting an edge changes the
+   objective by −p; leaving the target to appear costs 0. **Every feasible candidate is accepted.**
+   The ILP is a maximiser, not a filter — so **"over-nominate and let the ILP prune", the
+   Ultrack/Linajea contract, DOES NOT HOLD in our deployment.** Restoring appearance weight is a
+   PRECONDITION for any candidate-widening work, not an independent lever.
+
+### E. Ranked mechanisms
+
+- **M2 (run FIRST, trivial):** `BIOHUB_ILP_APPEARANCE_WEIGHT` 0.0 → 0.1 (vendor default). Kill if it does
+  not hold or improve adjusted Jaccard on the *current* candidate set. Precondition for M1; the two
+  interact and are NOT additive.
+- **M1 (rank 1):** kNN-3 geometric gate ∪ today's set, then **rescore with a signal orthogonal to the
+  column softmax** — Ultrack's shape exactly (geometric retrieve → different-signal rerank → ILP select).
+  Candidate features already measured in `error_atlas_2026-08-19.md:255-268`: `rev_margin_um` AUC 0.7277,
+  `nn_margin_um` 0.7152, combined 0.7752. No retrain for the gate. CPU-only kill test on the pre-ILP
+  parquet; **distance-alone is already falsified (24.7%)**.
+- **M3 (rank 3, information):** `scripts/kaggle_edits/h1r_candidate_export_patch.py` already exports
+  top-k raw logits per target (`H1R_EDGE_TOPK`, default 5), is unit-tested, and **has never been run.**
+  It is the only way to learn whether the true parent is in the *model's* top-3 logits — which decides
+  whether M1 can use model score at all or must lean on geometry. Kill the learned-rerank lane if top-5
+  logit recall over the misses is below ~50% (geometry already gives 97.7%).
+- **M4 (rank 4, deferred):** null/background column in the parental softmax. Already implemented in
+  `h1r_edge_loss_patch.py` (E1, `H1R_BG_TERM`). **Do NOT ship inference-only** — it is a monotone
+  per-column rescale that strictly lowers every probability, so at a fixed 0.48 threshold it can only
+  SHRINK the candidate set and make recall worse. Needs the retrain to pay. It fixes the 29.4%
+  calibration branch, not the 70.6% ranking branch.
+- **M6 — ALREADY FALSIFIED, do not build:** blanket top-1 fallback for zero-candidate targets is
+  ≤5,005 TP for ~335,210 added edges ≈ **1.5% precision against a ~47% break-even**.
+
+**CORRECTION carried into this record:** the metric fact "a missing detection costs ~420× a spurious one"
+applies to **DETECTIONS**, not edges. The edge term is Jaccard-like and symmetric, so it does **not**
+rescue over-nomination of edges. Do not transfer that asymmetry across terms.
+
+### F. Literature, cited
+
+- **Ultrack** — retrieve-2k-then-rerank; `KDTree.query(target_pos, k=2*max_neighbors,
+  distance_upper_bound=max_distance)` then rerank by masked IoU⁴, truncate to k. Defaults
+  `max_neighbors=5`, `max_distance=15.0`. https://arxiv.org/pdf/2308.04526 ·
+  https://raw.githubusercontent.com/royerlab/ultrack/main/ultrack/core/linking/processing.py ·
+  Nature Methods 2025 DOI 10.1038/s41592-025-02778-0
+- **Linajea** — fixed radius, NO k; `query_ball_point(nex_parent_center, edge_move_threshold)`,
+  unbounded out-degree, ball centred on the **movement-displaced** position. Nature Biotechnology 41,
+  44–49 (2023), **DOI 10.1038/s41587-022-01427-7** (a DOI used earlier in this project was wrong and
+  resolved to a COVID-19 vaccine paper). https://github.com/funkelab/linajea
+- **Trackastra** — "parental softmax": block-wise sum of possible parent associations **at most one**;
+  candidate graph built by averaging over a sliding temporal window. ECCV 2024,
+  https://arxiv.org/abs/2405.15700 · https://github.com/weigertlab/trackastra
+- Both Ultrack and Linajea place the abstention/null option **inside the same "exactly one parent" sum**
+  as the real candidates. **Our column softmax has no null column** — the structural gap.
+- Cross-domain (cited from memory, URLs NOT fetched — verify before quoting): two-stage retrieval
+  doctrine, Covington RecSys 2016; Huang KDD 2020 https://arxiv.org/abs/2006.11632; dustbin/null
+  options SuperGlue https://arxiv.org/abs/1911.11763, LightGlue https://arxiv.org/abs/2306.13643,
+  DETR https://arxiv.org/abs/2005.12872; Deformable DETR https://arxiv.org/abs/2010.04159;
+  calibration Guo https://arxiv.org/abs/1706.04599.
+
+### G. Caveats
+Fold 1 only; fold 0 untested. The kNN gate measured is **static**, Linajea's is motion-displaced — a
+displaced gate would likely do better at the same k, untested. EmbedTrack / PAC-MAP / CellTrackFormer /
+CTC-winner nomination rules remain an open gap.
+
+## 2026-08-25 — DETECTION TEARDOWN: the NMS rule is EXONERATED; the one-hot delta target explains the threshold pathology
+
+### A. The peak/NMS rule costs at most 0.12 pp of recall — MEASURED, model-independent
+
+`predict_unet_transformer.py:284-286` `is_peak = (logits == max_pool3d(logits, pool_kernel, stride=1)) &
+sigmoid(logits) > det_threshold`. Kernel resolves via `pool_kernel_from_um` (`:229-251`):
+`voxel_size = ds.scale x downsample = (1.625,0.40625,0.40625) x (1,4,4) = (1.625,1.625,1.625)` isotropic,
+`round(3.0/1.625) = 2 -> forced odd -> 3`. **Kernel (3,3,3), suppression radius exactly 1 voxel =
+1.625 um.** Training uses `pool_kernel_um=5.0` (`train_unet_transformer.py:626`) -> `round(5/1.625)=3`
+-> also (3,3,3). **No train/inference mismatch.** The plausible bug (raw anisotropic `ds.scale` leaking
+in, giving (3,7,7) ~ 11.4 um lateral suppression) was checked and is **NOT present**.
+
+**Competition GT, all 199 movies, 131,641 nuclei:** GT pairs in the same 1.625 um voxel = **0**;
+nuclei sharing a (3,3,3) block = **0 (0.000%)**. NN distance p1 = 11.87, median **43.42 um**.
+**Recall ceiling of the peak rule on scored data = 100.000%.**
+
+**Dense Zebrahub GT, `ZSNS001_tracks.csv`, 9 timepoints, 245,998 nuclei:** same-voxel **0**;
+sharing a (3,3,3) block **287 (0.12%)**; NN p1 = 4.32, median **7.13 um**. **Ceiling >= 99.88%.**
+
+**Nuclei are ~7 um apart; the NMS radius is 1.625 um — a 4.3x margin. Pool-kernel tuning is a DEAD
+LEVER; do not spend a GPU run on it.** Sub-voxel refinement is likewise not a recall lever (the metric
+matches at 7 um and median NN is 7.13 um, so +-0.8 um quantisation almost never flips a match) —
+consistent with the measured bilateral -0.0004/-0.0009 that closed `bet-subvoxel-refine`.
+
+**Therefore all of the missing ~55% recall is in the heatmap values and the 0.96875 threshold.**
+
+### B. THE CAUSE: a one-hot delta target the network cannot fit
+
+`train_unet_transformer.py:528-573`:
+```python
+target = torch.zeros_like(logits)
+zi = gt_coords[:,0].long().clamp(...)   # float um position TRUNCATED, not rounded
+target[b, zi, yi, xi] = 1.0             # ONE-HOT, single voxel, no spatial extent
+```
+A delta target with 1-voxel support in a 64^3 = 262,144-voxel volume, at a **truncated** index
+(`.long()` not `.round()` -> systematic half-voxel bias, `:562-564`).
+
+1. **The target is not a learnable function of the image** — the net cannot know which of the ~8 voxels
+   under a 7 um nucleus the annotator's float coordinate truncated to. The optimal hedge under BCE is a
+   **broad low-amplitude blob**, whose argmax is ill-defined and whose max sigmoid sits well below
+   0.96875. **This explains the monotone-decreasing F1-vs-threshold curve as a SYMPTOM OF THE TARGET,
+   not an independent bug.**
+2. **Zero gradient credit for near-misses** — one voxel off scores as both a FN and a FP.
+3. `neg_weight=0.1` makes positives dominate 10:1, which *should* over-produce detections, yet recall is
+   0.445 — only explicable if peaks are flattened by (1) then guillotined by the 0.96875 gate.
+
+**Honest limit:** the parameterisation explains the SHAPE of our failure but **not** a dense-packing loss,
+because §A shows we do not have a dense-packing problem. PAC-MAP's proximity-adjusted amplitude,
+StarDist's polyhedral NMS and Spotiflow's flow refinement are all solutions to *crowding*, which costs us
+<= 0.12 pp. **Ours is a calibration / target-smoothness problem.**
+
+### C. Ranked, with the cheapest also the largest
+
+1. **Move the operating point down the existing PR curve (0.96875 -> ~0.50). ZERO GPU.**
+   Measured: recall 0.445 -> 0.563 (+0.118), precision -0.008. Since `edge recall ~ node_recall^2`, that
+   is **x1.60 on edge recall**. **`scripts/kaggle_specs/p4_detsweep_export_f0.json` already exists,
+   exports the full local-max superset at sigmoid > 0.5 plus raw logits, and HAS NEVER BEEN PUSHED.**
+   The local-max test is threshold-independent, so the whole [0.5, 1.0] curve is a **CPU-only replay**.
+   Risk: the 3.5x LB amplification — but that was measured for a node *cut*, not an addition.
+4. **TTA aggregation destroys peaks.** `predict_unet_transformer.py:375-388` averages 4 flipped logit
+   volumes and divides by 4. **Averaging is a low-pass filter — if the views peak +-1 voxel apart, the
+   mean has no strict local maximum and the peak is annihilated.** Replace `/4` with `torch.maximum`
+   accumulation, or emit peaks per view and union with a 1.625 um dedup. Union >= any single view by
+   construction. **Most under-examined line in the inference path.**
+12. **z-depth recall diagnostic (CPU, trivial):** stratify measured Zebrahub recall by depth. If flat,
+    the whole depth-dependent-SNR / PSF / restoration branch dies for free.
+10. **Temporal attention may be dead weight.** The LB-0.918 rival's plain 4-level UNet3D (5.6 M params,
+    NO attention, val_recall 0.5789) matches our best recall 0.563 with 1.5 M params + temporal MHA.
+    Ablation: zero the temporal-attention output (identity residual) at inference, re-measure F1 on
+    held-out Zebrahub. If F1 moves < 0.01 the attention is dead weight and its parameter budget should
+    move into a 4th encoder level. Time helps *association*, not detection — Trackastra and Ultrack both
+    put temporal reasoning in the linker.
+2+3. **Gaussian heatmap target + Adaptive Wing loss** (one retrain, A/B against one-hot BCE on identical
+    crops/epochs, compare **best-over-threshold** F1). PAC-MAP F1 **0.774** vs StarDist-3D **0.640** on
+    mouse-brain LSFM; **0.793** vs SAU-Net 0.750 on dense spheroids. AWing is ~30 lines
+    (theta=0.5, alpha=2.1, omega=14, eps=1).
+11. **Candidate-hypothesis detection into the ILP (Ultrack pattern)** — pass peaks from several
+    thresholds as competing node hypotheses with an exclusivity constraint. Converts the threshold from
+    a guess into a decision variable. Strategically correct end-state, but only after #1.
+
+**Surveyed and DECLINED, with reasons:** StarDist-3D (needs instance masks, we have points only);
+Cellpose/Omnipose (2D-flow compositing noisy on anisotropic data); foundation models (LSFM FM pretrained
+on only 1,023 96^3 patches — **we are label-rich with 1.357 M positions; FMs pay off when label-poor**);
+Spotiflow stereographic flow (localisation not detection; small for us given 7.13 um NN vs 7 um match).
+
+### D. Sources
+[Spotiflow, Nature Methods 2025](https://www.nature.com/articles/s41592-025-02662-x) ·
+[spotiflow repo](https://github.com/weigertlab/spotiflow) ·
+[Adaptive Wing Loss, ICCV 2019](https://openaccess.thecvf.com/content_ICCV_2019/papers/Wang_Adaptive_Wing_Loss_for_Robust_Face_Alignment_via_Heatmap_Regression_ICCV_2019_paper.pdf) ·
+[StarDist-3D, WACV 2020](https://arxiv.org/abs/1908.03636) ·
+[PAC-MAP, Comput Biol Med 2024](https://www.sciencedirect.com/science/article/pii/S0010482524016469) +
+[repo](https://github.com/DeVosLab/PAC-MAP) · [Cellpose-SAM](https://www.biorxiv.org/content/10.1101/2025.04.28.651001v1) ·
+[Omnipose, Nature Methods 2022](https://www.nature.com/articles/s41592-022-01639-4) ·
+[uSAM, Nature Methods 2024](https://www.nature.com/articles/s41592-024-02580-4) ·
+[3D LSFM foundation model](https://arxiv.org/html/2605.26026v1) ·
+[Ultrack, Nature Methods 2025](https://www.nature.com/articles/s41592-025-02778-0) ·
+[Trackastra, ECCV 2024](https://arxiv.org/abs/2405.15700) ·
+[DeAbe](https://www.nature.com/articles/s41467-024-55267-x) ·
+[Kaggle discussion 737101, rank-2 on node selection](https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/737101)
+Code: `train_unet_transformer.py:528-573,626` · `predict_unet_transformer.py:229-251,284-286,334-335,375-388`
+· `h1r_zh001r_register.py:17-21` · `p4_detsweep_export_f0.json` · `data/train/*.geff` ·
+`data/external/zebrahub/ZSNS001_tracks.csv`
+
+## 2026-08-25 — TRAINING PROTOCOL: tune EARLY layers not the head; and the assert that would have caught our phantom gain
+
+### A. Can a student exceed the Ultrack teacher? SPLIT VERDICT
+
+Ultrack is an **integer-linear-program over segmentation hypotheses** (arXiv 2308.04526, VERIFIED) — a
+*deterministic* selection rule, so **its errors are structured and input-determined**, which is the case
+where noise-averaging does NOT work.
+
+| label type | volume | expected noise | verdict |
+|---|---|---|---|
+| nucleus detections | 1,357,051 | low (centroid localisation << the tracking ILP) | **student can exceed** |
+| continuation edges | ~1,192,441 | moderate | marginal |
+| **division links** | **65,741** | **highest — division topology is the weakest part of every ILP tracker, and it is exactly what our metric charges** | **student will NOT exceed without cleaning** |
+
+**PRESCRIPTION: trust Ultrack's detections, distrust Ultrack's divisions.** Down-weight division links
+to ~0.5 and clean them before they touch the loss. **Anyone promising "fine-tune on 1.26 M edges and
+beat the teacher" is relying on a mechanism that does not apply to a deterministic ILP teacher.**
+
+Mechanisms that DO transfer: cross-domain wash-out (we must beat Ultrack on the *competition* embryos,
+not on ZSNS001 — its Zebrahub-specific tuning is baked into the labels but is not transferable), and
+different hypothesis class (we are a learned detector, not an ILP). But Burns et al. (weak-to-strong,
+arXiv 2312.09390, VERIFIED) found **plain fine-tuning underdelivers this** — it needed an auxiliary
+**confidence** loss letting the student trust its own confident predictions over the weak label.
+Counter-evidence to watch: Stanton et al. (arXiv 2106.05945, VERIFIED) — **matching the teacher more
+closely does not improve student generalisation**; fidelity and generalisation are distinct axes.
+
+**Kill test T1.1 (<1 GPU-h, go/no-go):** run the deployed 0.915 model on Zebrahub and compare its
+detections to Ultrack's labels. **If the disagreements are STRUCTURED (e.g. Ultrack systematically drops
+dim/deep nuclei), we are about to train TOWARD a worse teacher.**
+**T1.4 (decisive):** after fine-tuning, compare the student against **Ultrack run on the target data**.
+If we cannot beat Ultrack on target, we have merely distilled it.
+
+### B. THE COUNTER-INTUITIVE FINDING — tune EARLY layers, not the head
+
+- **Bai et al., PES (arXiv 2106.15853, VERIFIED):** *"the latter layers in a DNN are much more sensitive
+  to label noise, while their former counterparts are quite robust."* **Later layers memorise noise
+  first.**
+- Lee et al., Surgical Fine-Tuning (arXiv 2210.11466, INFERRED): appearance/input shift → tune **early**
+  layers; label/output shift → tune **later**.
+
+Ours is appearance shift (different embryo) **and** noisy labels. **Both readings converge: tune the
+ENCODER more and the HEADS less. The universal reflex — "freeze the backbone, train the head" — is the
+WORST choice under this combination.**
+
+**COROLLARY: do NOT apply layer-wise LR decay.** ULMFiT-style discriminative fine-tuning prescribes
+*lower* LR for early layers (arXiv 1801.06146, INFERRED) — the exact opposite. Applying LLRD by habit
+pushes the wrong way.
+
+Other arms worth one run each: **BN-affine-only** training (arXiv 2003.00152, INFERRED) — a few thousand
+params, near-zero overfit risk, genuinely attractive with one embryo. **LP-FT** (arXiv 2202.10054,
+INFERRED) — full FT distorts pretrained features and underperforms OOD; our deployment IS OOD, so adopt
+linear-probe-then-fine-tune as the default. **Skip LoRA** — it exists for LLM-scale parameter efficiency;
+our whole model (1.5 M params) is smaller than one LLM layer.
+**Check first what `TemporalUNet3D` normalises with:** if BatchNorm at 3D batch sizes of 1–2, the running
+statistics are near-garbage, which alone may explain both the fragility and the size of the phantom +0.104.
+
+### C. Representation drift — the highest-risk item, with a 1-hour gate
+
+`L_total = L_det + λ·KL(assoc_new ‖ assoc_frozen)`. **The frozen teacher for the association head IS our
+deployed 0.915 model** — we have it, and unlimited unlabelled input; cost is one extra forward pass.
+**Distil the association head's OUTPUT LOGITS, not trunk features** — feature matching over-constrains the
+trunk and blocks the detection gain we are paying for. Add a **hard drift gate**: evaluate the association
+head on a fixed frozen batch every N steps, assert AUC stays within ε, kill the run otherwise.
+
+**T3.1 — RUN THIS BEFORE ANY OF THE MACHINERY (<1 GPU-h):** fine-tune detection 200 steps with NO drift
+control and measure the association AUC drop. **<1% ⇒ all of the drift apparatus is unnecessary and must
+not be paid for. 10% ⇒ the problem is quantified and the machinery is justified.** Either outcome is worth
+an hour. PCGrad / GradNorm / uncertainty-weighting do **not** apply out of the box (only one supervised
+loss) — they become relevant only after the distillation term exists and only if gradient cosine < 0.
+
+### D. THE ASSERT THAT WOULD HAVE CAUGHT OUR PHANTOM +0.104, ON ITS OWN
+
+**`assert optimizer.state[p]['step'] > 0` for every trainable parameter.** Adam's internal counter
+increments only on a real step.
+
+Plus, all cheap and all permanent:
+- Count skipped steps: `before = scaler.get_scale(); scaler.step(opt); scaler.update();
+  skipped += (scaler.get_scale() < before)`. **Assert skipped/total < 0.05; hard-fail above 0.20.**
+- Snapshot `w0`; log `‖p − w0‖₂ / ‖w0‖₂` **per layer group** each epoch; assert max relative delta > 1e-6.
+  **Bonus: that table IS the "which layers actually moved" diagnostic for §B, free.**
+- **Always run three arms. Arm A — no-op control: LR = 0, model still in `train()` so norm buffers update,
+  same forward passes. ANY gain in Arm A is pure AdaBN — this is the arm that would have caught +0.104.**
+  Arm B — real fine-tune with all norm layers in `eval()`. Arm C — the actual run.
+  **Report `gain(C) − gain(A)`.**
+- Log pre-clip global grad norm every step (assert finite and > 0; `inf` on 100% of steps is the
+  fp16-overflow signature) and `scaler.get_scale()` (monotone decay to floor = permanent overflow).
+- **Overfit-one-batch gate:** one crop, 200 steps, assert train loss < 10% of initial. **If the model
+  cannot overfit one batch, no gain from the full run is real.** Two minutes of GPU.
+- Root cause fix: T4 is Turing sm_75 — **no efficient bf16**, so fp16 is forced and the guards are
+  mandatory. Mitigate with `GradScaler(init_scale=2**10)`, loss in fp32, and hunt the overflow source
+  (usually an exp/softmax in the temporal attention, or a divide-by-small-count in the detection loss).
+- AdaBN (arXiv 1603.04779, INFERRED) **is a real, free effect** — it must be run as a separate, explicitly
+  labelled baseline arm every time, never folded into a fine-tuning result.
+
+### E. Validation and selection — never select on Zebrahub
+
+Crop-modulo over one embryo at the same timepoints is the textbook **spatial-autocorrelation leak**
+(Roberts 2017, doi:10.1111/ecog.02881, INFERRED). Ranked, worst → best predictor of cross-embryo transfer:
+(1) crop-modulo *(what we have — predicts essentially nothing)*; (2) **spatially blocked with a buffer
+shell ≥ max displacement + nucleus diameter, ≥10 voxels at 1.625 µm**; (3) **temporal holdout** train
+t=0..13 / val t=16..19 with a 2-frame gap; (4) anatomical-region holdout.
+**Run the 2×2 of (2)×(3); the gap between crop-modulo and blocked+temporal IS our leakage estimate** —
+that number is a deliverable in its own right.
+
+**HARD RULE: never select a checkpoint on Zebrahub validation** — it is a training-health monitor only.
+Select on the target objective: export `.geff`, score against `data/train` with the patched scorer via
+`scripts/core/score_oof.py`, pooled, **both embryo directions separately**. Evidence: the rival's
+`epochs=120 / epoch_best=8 / val_recall=0.5789` was selected on same-domain validation, and mikelou1's
+from-scratch retrain landed at **0.928** — at the public frontier, not above it.
+**Do not select on the LB either** — three of our graphs scored exactly 0.915.
+
+**WiSE-FT is the best compute-to-candidate ratio available to us** (arXiv 2109.01903, INFERRED):
+interpolate in weight space, `θ_α = (1−α)·θ_deployed + α·θ_ft`, α ∈ {0, 0.2, 0.4, 0.6, 0.8, 1.0}.
+**One training run yields ~10 candidates for the price of ~10 CPU scorer runs.** Expect the optimum at
+α < 1. **Kill criterion: if best α = 0, the fine-tune added nothing — log to `failed-experiments.md`
+and stop.**
+
+### F. 1.36 M nuclei is A LITTLE, not a lot
+
+The *effective* sample size is 1 embryo × 1 developmental stage × 20 timepoints — independent units ≈ 20,
+arguably 1. Nuclei within a frame are near-duplicates for a detector (same illumination, PSF, stage,
+chromatin appearance). **Our risk is overfitting to one embryo's appearance, not underfitting.**
+Consequences: spend the augmentation budget on **intensity / noise / blur / PSF**, not more crops; and
+**one additional Zebrahub embryo is worth more than 10× more crops of ZSNS001.** Heavy input noise is also
+exactly what Noisy Student (arXiv 1911.04252, VERIFIED) requires for a student to exceed its teacher —
+two independent arguments converging on the same action.
+
+### G. Citation ledger
+**VERIFIED this session (abstract-level, not full text):** arXiv 2312.09390 · 2007.00151 · 1804.06872 ·
+1911.00068 · 2106.05945 · 1911.04252 · 2106.15853 · 2308.04526
+**INFERRED (recalled, URL given, NOT re-read — verify before quoting):** arXiv 2210.11466 · 1603.04779 ·
+2003.00152 · 2106.09685 · 2202.10054 · 1801.06146 · 1612.00796 · 2001.06782 · 1711.02257 · 1705.07115 ·
+1606.09282 · 2109.01903 · 2203.05482 · 2207.07048 · Roberts 2017 doi:10.1111/ecog.02881
+**Method caveat:** the session's WebSearch budget was exhausted, so verification was by direct WebFetch
+against arXiv abstract pages — sufficient for the attributed claims, but methods sections were not read.
+
+**Per the standing rule, all of the above is THESIS, not result.** Stage 0 — overfit-one-batch gate,
+T3.1 drift measurement, Arm-A no-op AdaBN control, T1.1 teacher-noise audit — is **~2–4 GPU-h and
+converts the three highest-risk theses into measurements. Any one of them can cancel the project cheaply.**
+
+## 2026-08-25 — EXPERIMENT: M1 (duplicated-source LAP) is DEAD; divisions need k=5, not k=3
+
+Two CPU-only experiments, pre-registered, run on fold 1
+(`C:/temp/preilp_f1_v2/preilp_split1.parquet`, `C:/temp/error_atlas/*_pre1.parquet`).
+Scripts kept outside the repo; the reusable half is now
+`scripts/win_bet/candidate_gate_eval.py` (8 contract tests).
+
+### A. M1 IS DEAD — killed analytically, not marginally
+
+M1 proposed augmenting `motion_relink_edges`' cost matrix with duplicate rows for
+division-eligible mothers so one mother could win two targets, making the contested
+daughter reachable. **Strict precondition:** `linear_sum_assignment` can only choose among
+candidates present in the matrix, so M1 needs the TRUE MOTHER to be a candidate parent of
+the contested daughter.
+
+**P1 — the candidate set gives every target EXACTLY ONE parent:**
+
+| candidate parents per target | count |
+|---|---|
+| **1** | **2,162,040** |
+| 2+ | **0** |
+
+335,210 of 2,497,250 eligible targets (13.42%) get **zero** candidates.
+
+**P2 — 125 GT divisions, 123 mothers mapped, 236 mapped daughter rows:**
+
+| daughter state | count | share |
+|---|---|---|
+| true mother IS the candidate | 119 | 50.4% |
+| **contested** (a candidate exists, but not the mother) | **76** | **32.2%** |
+| zero candidates | 41 | 17.4% |
+| **contested daughters where the mother was available** | **0** | **0%** |
+
+**Since each target has exactly one candidate, a contested daughter's sole candidate is BY
+DEFINITION the wrong parent — the true mother is never in the cost matrix. No augmentation
+of the assignment problem can select a candidate that was never nominated. M1 CANNOT WORK.**
+This is stronger than the pre-registered "<8 of 19 flip ⇒ dead" criterion: the mechanism is
+impossible, not merely unprofitable. **Do not build it.**
+
+**Cross-check:** 76 + 41 = **117/236 = 49.6%** of division daughters need a nomination-stage
+fix — reproducing the independently-derived "49.6% of division-daughter links are
+un-nominated" to the decimal, from an entirely different computation.
+
+**Consequence: candidate widening at NOMINATION is not *a* path to division recovery, it is
+the ONLY one.** Everything at or below the relink is downstream of a set that already
+committed to one parent per target.
+
+### B. DIVISIONS NEED k=5, NOT k=3 — a uniform gate under-serves them
+
+Containment of the true parent within the child's k nearest frame-(t−1) predicted nodes:
+
+| k | **division daughters (n=117)** | continuations (n=16,884) | candidate-set size |
+|---|---|---|---|
+| 1 | 31.6% | 24.6% | 1.16x |
+| 2 | 57.3% | 80.4% | 2.31x |
+| **3** | **75.2%** | **92.7%** | 3.47x |
+| **5** | **93.2%** | 97.7% | 5.78x |
+| 10 | 97.4% | 99.6% | 11.55x |
+| 20 | 99.2% | 99.95% | 23.1x |
+
+**At k=3 — the previously recommended value — continuations reach 92.7% but divisions only
+75.2%, a 17.5-point gap.** A uniform k=3 gate would systematically under-serve exactly the
+class carrying the largest untouched metric headroom (+0.0993 division oracle).
+**Recommend k=5**, or an asymmetric/adaptive k that spends the extra breadth only where a
+division is plausible.
+
+**Mechanism (consistent, not merely fitted):** after a division the mother sits roughly
+equidistant from BOTH daughters with other cells intervening, so she is rarely the nearest
+neighbour of either. **Divisions are intrinsically a higher-k problem.** Note the control at
+k=1 (24.6%) reproduces the prior independent measurement of 24.7%.
+
+**Cost:** k=5 is a **5.8x** candidate set. That is a real ILP cost and it interacts with the
+appearance-weight blocker — with `BIOHUB_ILP_APPEARANCE_WEIGHT = "0.0"` the solver pays
+nothing to leave a target unlinked, so **a wider gate is NOT pruned; every feasible
+candidate is accepted.** Restoring appearance weight remains a precondition.
+
+### C. NEW TOOL — `scripts/win_bet/candidate_gate_eval.py`
+
+Built because this session hand-rolled the same containment measurement twice. Given a
+pre-ILP export and the error atlas it reports, for any k: containment **split by
+continuation vs division**, the in-degree histogram, the count needing a nomination fix, and
+the candidate-set size multiplier. **It always reports the class split**, because pooling
+hides the division gap that is the whole point. The docstring carries the two standing
+caveats (one-parent-per-target; appearance weight 0.0 ⇒ the solver does not prune) so the
+next reader cannot mistake an oracle ceiling for a predicted score.
+8 contract tests in `tests/test_candidate_gate_eval.py`, including that the µm scale is the
+deployed geometry and that unevaluable pairs are skipped rather than silently counted as
+misses.
+
+## 2026-08-25 — THE BIJECTION DESTROYS 29 REAL DIVISIONS; but the two-population fix FAILS its pre-registered bar
+
+Three CPU-only experiments on fold 1 (`C:/temp/preilp_f1_v2/preilp_split1.parquet`,
+`C:/temp/error_atlas/*_pre1.parquet`, 128 crops, 125 GT divisions). Nothing in the repo modified.
+
+### A. 29 of 125 GT divisions are ALREADY in the candidate set and the 1:1 relink destroys them
+
+The candidate set is NOT a matching. Source out-degree:
+`{1: 1,795,844, 2: 165,148, 3: 10,911, 4: 715, 5: 59, 6: 2}` — **176,835 sources carry a division
+hypothesis**, and `motion_relink_edges` solves a `linear_sum_assignment` **bijection**, forcing
+out-degree <= 1 and destroying **189,361 excess edges**.
+
+| GT division state | count | share of 125 |
+|---|---|---|
+| **BOTH daughters nominated to the true mother** | **29** | **23.2%** |
+| exactly one daughter nominated | 57 | 45.6% |
+| neither nominated | 27 | 21.6% |
+| unmapped | 12 | 9.6% |
+
+**29 real divisions are fully formed in the candidate set and are thrown away by the relink** —
+and the deployed pipeline then tries to bolt divisions back on afterwards by hunting for orphans.
+We currently emit **5 division TPs across 199 crops**. This is a strictly worse route to the same
+goal, and it is a post-processing fact — no nomination change, no retraining.
+
+### B. But P9's OWN gates reject 22 of those 29
+
+Applying the shipped P9 gates (radii 8.0 / 11.0 / 10.0, C1 mid-track, C3 t+2 divergence >= 2.25)
+to the 29:
+
+| outcome | count |
+|---|---|
+| **PASS** | **7** |
+| C3: no unique successor | 9 |
+| radius_parent (> 8.0 um) | 8 |
+| radius_sister (> 11.0 um) | 4 |
+| C3: no divergence | 1 |
+
+**P9's gates — which scored +0.010 — reject 76% of the true divisions that are already fully
+nominated.** They were calibrated against ORPHAN proposals, where the prior that a pair is a real
+division is ~1:2400. For the already-nominated population the model has already committed both
+daughters to this mother, so the prior is far higher and the same radii are miscalibrated.
+
+### C. TWO-POPULATION HYPOTHESIS — TESTED AND FAILED ITS PRE-REGISTERED BAR
+
+**Pre-registered bar: >= 20 of 29 TP at an admitted count within the range P9 already tolerates
+(P9 ships 406 divisions).** Sweep over the already-nominated population (29 true; 176,835
+multi-child sources as the FP pool):
+
+| C3 successor test | parent <= | sister <= | TP / 29 | sources admitted |
+|---|---|---|---|---|
+| ON | 8.0 | 11.0 | **7** | 9,263 |
+| ON | 10.0 | 14.0 | 10 | 10,449 |
+| ON | 15.0 | 18.0 | **10 (ceiling)** | 10,905 |
+| OFF | 8.0 | 11.0 | 17 | 135,519 |
+| OFF | 8.0 | 14.0 | **21** | 137,638 |
+| OFF | 10.0 | 14.0 | 28 | 150,723 |
+| OFF | 12.0 | 14.0 | **29** | 154,409 |
+
+**VERDICT: FAILED.** The only settings reaching >= 20 TP admit **137,638+ sources — 339x more than
+the 406 divisions P9 ships.** No setting meets the bar. **Do not build the two-population gate as
+specified.**
+
+**The diagnostic that survives, and it is the useful part: C3, NOT the radii, is the binding
+filter.** With C3 ON, TP ceilings at **10 of 29 no matter how wide the radii go** (8->15 um parent,
+11->18 um sister changes nothing beyond 10). With C3 OFF at the SAME 8.0/11.0 radii, TP jumps
+**7 -> 17**. So the thing rejecting already-nominated true divisions is C3's requirement that
+**both daughters have exactly one successor at t+1** — a harsh structural demand in a candidate set
+where 13.42% of targets have zero parents at all. It is a candidate-sparsity artifact being read as
+a biological signal.
+
+### D. Honest caveats
+- **Fold 1 only** (125 GT divisions); pooled GT is 151.
+- **C2 (mutual-nearest-orphan) was NOT applied** — it is P9's strongest precision filter, so every
+  "admitted" figure is an UPPER bound on FP. TP counts are unbiased.
+- "Admitted" counts SOURCES with >= 1 qualifying pair, not final emitted divisions. P9's global
+  frac cap (0.00375 x edges ~ 8,100 here), frame cap and score-ordered selection would truncate
+  heavily. **Whether the 21 TP survive score-ordering into the top ~8,100 of 137,638 is UNTESTED
+  and is the one live question that could revive this lane.**
+- 97.95% of predicted forks are never charged (a fork only costs on an annotated GT cell with >= 1
+  GT child), so raw FP counts overstate metric damage — but not by the ~339x needed here.
+
+### E. What this changes
+1. **M1 (duplicated-source LAP) stays dead** — for CONTESTED daughters the true mother is not a
+   candidate at all (0 of 76).
+2. **The bijection is a real and quantified loss** (29 divisions, 23.2% of GT) — recorded as a
+   mechanism, not yet as a lever.
+3. **C3's unique-successor clause is the highest-value thing to re-examine in the shipped P9
+   design.** It is cheap to test: the same sweep with C3 divergence retained but the
+   unique-successor requirement relaxed to "at least one successor".
+
+## 2026-08-25 — THE BIJECTION FORBIDS DIVISIONS. divJ ceiling is ZERO. +0.0232 is structurally unreachable.
+
+**This supersedes the standing "+0.0012 perfect solver" figure, which was computed UNDER the
+out-degree <= 1 constraint and therefore never bounded this.**
+
+### Verified in the DEPLOYED artifact, not the mirror
+
+`notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb` contains **two bare
+`linear_sum_assignment(cost)` calls** — no block matrix, no initiation/termination dummy rows.
+Both association stages are BIJECTIONS. (The mirror `src/biotrack/wrapper.py:343,:522` agrees, but
+the mirror is not load-bearing; the notebook is.)
+
+### The measurement (fold 1, 128 crops, 109,057 GT edges, 125 GT divisions)
+
+```
+reachable (true parent IS the target's nominated candidate) : 81,055 / 109,057  (74.32%)
+reachable children per source                               : {1: 80,997, 2: 29}
+
+O1  out-degree <= 1 : 81,026 edges  ->   0 complete division events
+O2  out-degree <= 2 : 81,055 edges  ->  29 complete division events
+
+divJ CEILING   out-deg<=1 : 0.0000
+divJ CEILING   out-deg<=2 : 0.2320
+SCORE delta from the division term alone : +0.0232
+```
+
+**Under the bijection the SOLVER'S division Jaccard ceiling is literally ZERO.** A division event
+requires out-degree 2; `linear_sum_assignment` forbids it by construction. Therefore **100% of the
+divisions we emit come from the post-processor bolt-on, and the solver can never contribute one at
+any parameter setting.** This is a feasibility-set failure, not a modelling failure — it explains
+every null division result in the ledger (divfix 0.000, ILP division weight 0.3/1.0/2.0/3.0 all
+0.915 on someone else's LB) without appealing to any of them.
+
+**The bijection buys almost nothing in exchange:** lifting it changes the adjacency term by
+**29 edges out of 81,055**. It forfeits the entire division term to save nothing.
+
+**Realistic gain:** current divJ ~0.0152 -> ceiling 0.232 is **+0.1 x (0.232 - 0.0152) = +0.0217**
+of SCORE. Our gap to top-3 is +0.028.
+
+### Why the current bolt-on cannot rescue it — measured the same day
+
+Under P9's real global cap (0.00375 x 2,162,040 = **8,108**) and its shipped ordering
+`score = parent_dist + 0.15 * sister_dist` ascending:
+
+| C3 variant | radii | proposals | emitted | **TP in cap** | est divJ |
+|---|---|---|---|---|---|
+| A (shipped) | 8.0 / 11.0 | 9,263 | 8,108 | **4** | 0.0137 |
+| A | 10.0 / 14.0 | 10,449 | 8,108 | 3 | 0.0103 |
+| B (>=1 successor) | 8.0 / 11.0 | 11,397 | 8,108 | 2 | 0.0069 |
+| C (abstain on missing successor) | 8.0 / 11.0 | 90,836 | 8,108 | **0** | 0.0000 |
+| D (no C3) | 10.0 / 14.0 | 150,723 | 8,108 | **0** | 0.0000 |
+
+**Loosening the gates makes it WORSE, not better.** True divisions are not the geometrically closest
+pairs, so ranking by `parent_dist + 0.15*sister_dist` buries them: at 90,836 proposals against a
+cap of 8,108, **zero** true divisions survive. The shipped variant A wins this comparison — which
+validates P9's tightness as a local optimum **of a fundamentally wrong architecture**.
+
+### THREE stacked structural failures, all now measured
+
+1. **The bijection forbids out-degree 2** -> solver divJ ceiling 0.
+2. **The bolt-on ranks by a non-discriminative score** -> true divisions are buried by distance.
+3. **The global cap truncates at 8,108** -> whatever survives 1 and 2 is cut anyway.
+
+Fixing any one alone does not help. Fixing 1 makes 2 and 3 irrelevant, because a division-aware
+global solve chooses jointly instead of propose-rank-cap.
+
+### External corroboration (VERIFIED by agent, quantitative)
+
+The Cell Tracking Challenge ran a **Cell Linking Benchmark** (ISBI 2024) — a linking-only benchmark
+holding segmentation FIXED and swapping only the linker (https://celltrackingchallenge.net/ctc-vii/,
+results spreadsheet http://public.celltrackingchallenge.net/documents/CellLinkingBenchmark.xlsx,
+parsed). Over 13 datasets, linker swap alone spans **LNK 0.070 / BIO 0.189**; on
+**Fluo-N3DH-CE**, a dense dividing 3D embryo — the closest analogue to our data — the spread is
+**LNK 0.1313 and BIO 0.449** (PAST-FR 0.9822/0.8619 vs KTH-SE 0.8510/0.4128).
+**The division-sensitive measure has ~2.7x the spread of the pure linking measure: linker choice
+dominates specifically on divisions.** The winner, PAST-FR, is Institut Pasteur — the TrackMate
+group — running a **two-stage LAP with explicit gap-closing and SPLITTING blocks**.
+So a +0.03-0.05 gain from swapping only the linker is the documented norm, not an extraordinary
+claim. It also makes TWEAK's unanswered "refines the graph or replaces the method?" legible: the
+answer is both, and saying so gives the method away.
+
+### THE ARCHITECTURE TO BUILD
+
+Two-stage LAP (Jaqaman / TrackMate form, https://imagej.net/plugins/trackmate/trackers/lap-trackers):
+- **Stage 1, frame-to-frame:** solve the `(n+m) x (n+m)` BLOCK matrix rather than the bare `n x m` —
+  top-left link costs, top-right diagonal **termination**, bottom-left diagonal **initiation**,
+  bottom-right transpose block. This alone legalises the **13.42% of targets that currently get zero
+  candidates**: they become track starts instead of corrupting the assignment.
+- **Stage 2, segment linking:** a second LAP over segment endpoints with a **gap-closing** block, a
+  **SPLITTING** block (segment start -> interior spot of another segment: the ONLY operation that
+  creates out-degree 2), a **merging** block set to infinity (biologically invalid for cells, and it
+  will otherwise eat divisions), and diagonal **rejection** blocks at alternative cost
+  `1.05 x max(C)` — data-derived, which is why it works UNTUNED.
+- Pure `scipy.optimize.linear_sum_assignment`. No weights, no internet, no new dependency — it drops
+  straight into a Kaggle kernel.
+
+Equivalent alternative: min-cost flow with coupled division arcs
+(https://pubmed.ncbi.nlm.nih.gov/20864383/).
+
+### Composition with candidate widening
+The 0.232 ceiling counts only the 29 divisions where BOTH daughters are already reachable. The other
+96 are not nominated. **kNN widening at k=5 (measured: 93.2% division-daughter containment vs 75.2%
+at k=3) raises the reachable count, and the division-aware solver then claims it.** The two levers
+compose: widening raises the ceiling, the solver reaches it. Neither works alone — widening without
+a division-aware solver is a no-op (the ILP re-selects the same argmax and appearance_weight = 0.0
+means it never prunes), and the solver without widening caps at 0.232.
+
+### Caveats
+Fold 1 only (125 GT divisions; pooled GT is 151). The 0.232 ceiling is an upper bound a real solver
+would not fully attain. divJ 0.0152 is taken from the existing ledger, not re-measured here.
+
+### Not adopted: napari-chatgpt
+Royer lab's LLM-driven napari assistant (https://github.com/royerlab/napari-chatgpt) is an
+interactive GUI agent. We run no napari, have no interactive step, and already have the LLM layer.
+**Recorded as declined.** The load-bearing Royer-lab artifact for us is **Ultrack**, which implements
+exactly the two mechanisms this entry proves we lack: multi-hypothesis candidate generation and an
+ILP with **division arcs** rather than a bijection.
+
+## 2026-08-25 — THE BLIND SPOT: we could see 9.5% of the public corpus. All three mechanisms we lack are in the 90.5%.
+
+### A. Quantified blind spot (host's instinct, confirmed)
+
+**719 unique public kernels** (not ~900), enumerated exhaustively across 4 sort orders x 8 pages, all
+converging. Saved at `C:/tmp/nb/all_kernels.csv`.
+
+| | count | share |
+|---|---|---|
+| title contains a score/LB token | **68** | **9.5%** |
+| title has NO score token | **651** | **90.5%** |
+
+**Every score-keyed search this project has run could see under one tenth of the corpus** — and the
+score-titled tenth is almost entirely forks of the same 0.926/0.927 lineage. **All three
+mechanism-bearing notebooks below have NO number in their titles.** The frontier is in the 9.5%;
+the mechanisms are in the 90.5%.
+
+### B. FIND 1 — `beicicc/biohub-exp041-vmerckle-relink-division-slot` (4 votes, 2026-07-07)
+
+**Raw code for an out-degree-2 relink — the exact mechanism our oracle proved we need.**
+Confirmed ABSENT from our `notebooks/` and `src/` (grep, 0 matches). ~48 lines, self-contained,
+`exp041.flat.py:1730-1776`. Runs AFTER the Hungarian pass, over `unmatched_targets`, letting a
+source that holds exactly one match reserve a SECOND daughter — upstream of gap recovery, not a
+post-hoc geometric add.
+
+```python
+score = -prob + 0.015 * raw + 0.006 * sister + 0.004 * motion
+```
+
+**THE CRITICAL DIFFERENCE FROM OUR P9 BOLT-ON: this ranks by PROBABILITY with distance as a small
+tiebreak. P9 ranks by `parent_dist + 0.15*sister_dist` — pure geometry.** Our own capped experiment
+measured why that matters: under P9's cap and distance ordering, **zero** true divisions survive out
+of 90,836 proposals, because true divisions are not the geometrically closest pairs. A
+probability-led score is the discriminative signal we have been missing.
+
+**It targets exactly the population our oracle identified.** The 29 GT divisions with both daughters
+nominated to the mother: the Hungarian takes one, the other becomes an unmatched target — which is
+precisely what this slot reclaims.
+
+Gates: `MIN_PROB 0.42`, `PARENT_MAX_UM 7.2`, `SISTER_MAX_UM 8.5`, `FRAME_FRAC_CAP 0.006`, one slot
+per source. Note the radii are TIGHTER than P9's 8.0/11.0 — the selectivity comes from probability,
+not geometry.
+
+### C. FIND 2 — `dalloliogm/biohub-exp227-divergence-mutualnn-wide` (0 votes, 2026-08-23)
+
+Carries three things we lack:
+- **Learned local association ranker** (`:2600-2790`): per-candidate feature matrix scored by
+  `LOCAL_ASSOCIATION_RANKER.predict_proba`, folded into the LSA cost as
+  `0.85*ranker + 0.15*primary`. **This is retrieve-then-rerank** — the primitive the retrieval
+  analysis said we need. (It still ends in `linear_sum_assignment`, so it is NOT a multi-parent
+  nominator.)
+- **KD-tree geometric gating** (`:2528-2534`): `cKDTree(...).query_ball_point(points, r=7.0,
+  return_length=True)` → a `density_7um` feature per node per frame.
+- **Mutual-NN division gate** (`:3297-3340`).
+
+**PUBLIC WEIGHTS, 18.5 KB:** `pilkwang/biohub-local-association-ranker-unet300-v1` (downloaded,
+`C:/tmp/rk/`). `model/local_association_ranker.pt` = 20,283 bytes. MLP hidden=64, dropout=0.05,
+best_epoch 7, **best_score 0.9777**, trained on 385,648 rows / 108,876 groups, split by dataset,
+22 named features. Author's own constraint, verbatim: *"Use only as a constrained local association
+tie-breaker, not as a global edge veto."* A 34-vote carrier of the same ranker exists at
+`lonnieqin/biohub-gap2-joint-node-budget`.
+
+### D. CORRECTION — the ILP appearance weight is NOT an oversight. Lever CLOSED.
+
+I queued `BIOHUB_ILP_APPEARANCE_WEIGHT` 0.0 -> 0.1 as a "precondition for candidate widening".
+**That was wrong.** `dalloliogm/biohub-exp110-ilp-birth-death-cost` (15 votes) sets it deliberately:
+```
+os.environ["BIOHUB_ILP_APPEARANCE_WEIGHT"]    = "0.0"
+| ILP appearance cost | 0.0 | Avoid over-penalizing new track starts. |
+```
+The CODE DEFAULT is 0.1, so 0.0 is a deliberate override — and **all 26 pulled kernels set 0.0**.
+(The 1.5/1.55/1.575 values a naive grep finds are `DISAPPEARANCE_WEIGHT` matching as a substring.)
+**Our 0.0 is the tuned public consensus. Treat as a closed lever absent a new mechanism.**
+
+### E. The public ceiling is 0.927 and there is nothing above it
+
+`evgendvorkin/biohub-0-927-lb` re-ran 2026-08-24 21:25. Diff vs the 0.926: DeepCenter checkpoint
+`checkpoint_last.pt` epoch 500 -> **`best.pt` epoch 2**; `BIDIRECTIONAL_EDGE_WEIGHT` **0.30**;
+`BIDIRECTIONAL_FUSION_MODE harmonic_probability`. **The epoch-500 -> epoch-2 DeepCenter swap is the
+substantive change.** Its inline comment records `ILP_DIVISION_WEIGHT` 0.3/1.0/2.0/3.0 **all scoring
+0.915 on the real leaderboard** — independently closing that knob.
+
+Last-wins audit: 0.927 assigns `SAFE_DIV_MAX_UM` twice (plain `12.0` then env `"8.0"`); the read is
+`float(os.environ.get(...))` so **env wins, 8.0/11.0/10.0**, and `DIVERGE_UM` has no env at all →
+code default 2.25. `backtracking/biohub-general-v11` assigns
+`BIOHUB_MOTION_RELINK_LEARNED_BONUS` twice — `"1.0"` then `"2.0"`; **last wins = 2.0**.
+
+### F. THE CHECK ON OUR DIVISION THESIS — read this before over-investing
+
+mikelou1, 2026-08-18, discussion 735352: *"I trained mine from scratch since my division score is
+quite good [0.3] and edge is really bad [~0.01 below public notebooks]"* — and mikelou1 scores
+**0.928**. So **divJ 0.30 is demonstrably attainable, and on its own it yields 0.928, not 0.947.**
+INFERRED but well-supported: **the >=0.947 cluster is winning on EDGE, not on division.**
+
+This does NOT retire the division work — our own oracle says the bijection forfeits +0.0232 for
+almost nothing (29 edges of 81,055) — but it caps the expectation. **Divisions are necessary, not
+sufficient.** The edge term (oracle headroom: FN->0 is +0.167) is where the top of the board lives.
+
+### G. Mechanisms NOT found anywhere in 719 kernels — searched SOURCE, not titles
+
+- **Multi-parent nominator (>1 candidate parent per target): NOT FOUND.** Every kernel terminates in
+  `scipy.optimize.linear_sum_assignment`, a strict bijection. Out-degree 2 is only ever reached by a
+  post-assignment second-daughter add (exp041) or a post-hoc geometric add (the 0.926 lineage).
+- **Dustbin / no-parent / abstention column: ZERO hits** for
+  `dustbin|no_parent|null_column|abstain|background_class|no_match` across every kernel pulled.
+- **Learned division classifier: NOT FOUND.** All division logic is geometric gates or mutual-NN.
+
+**So the entire public field shares our structural ceiling.** Nobody has a multi-parent nominator and
+nobody has abstention. That is simultaneously the best news of the sweep — the ceiling is not
+knowledge we lack, it is a mechanism nobody has built — and the reason the frontier is stuck at 0.927.
+
+### H. Order to run
+1. **exp041 second-daughter slot** — ~48 lines, no new weights, no new dataset, probability-led
+   scoring, directly attacks the measured `{1: 2,162,040}` in-degree histogram and the 29.
+2. **exp227 local association ranker** — 20 KB public weights, needs the 22-feature port. Higher
+   ceiling, higher integration cost. Honour the author's tie-breaker-not-veto constraint.
+3. ~~ILP appearance weight~~ — CLOSED, see D.
+4. Do not chase `flexonafft/biohub-harmonic-fusion` or the backtracking forks — 0.926 clones with
+   single-knob deltas.
+
+## 2026-08-25 — END-TO-END: the bijection costs +0.0018 in ADJACENCY, not divisions. Blanket relaxation is HARMFUL.
+
+Three graphs built from the SAME pre-ILP candidate set (fold 1), differing ONLY in the out-degree
+rule, each scored by the OFFICIAL patched scorer on 25 crops vs `data/train`. Because in-degree is
+exactly 1 for every target, the frame assignment degenerates and the out-degree cap is the only
+variable — so the deltas are cleanly attributable.
+
+| graph | rule | edges | SCORE | adjJ | divJ | div TP / FP |
+|---|---|---|---|---|---|---|
+| **G1** | out-degree <= 1 (the deployed bijection) | 1,972,679 | **0.5944** | 0.5944 | 0.0000 | **0 / 0** |
+| **G2** | out-degree <= 2, BLANKET (top-2 by edge_prob) | 2,149,514 | **0.5863** | 0.5860 | 0.0027 | 6 / 2,160 |
+| **G3** | out-degree <= 2, gated exactly as exp041 | 1,988,076 | **0.5962** | 0.5962 | 0.0000 | 0 / 370 |
+
+(Absolute scores are low because these are RAW candidate graphs with none of the deployed
+post-processing — gap closing, short-track filter, safe divisions. Only the deltas are meaningful.)
+
+### THREE RESULTS, ALL PRE-REGISTERED
+
+1. **The bijection emits literally ZERO forks** — G1 divJ 0.0000 with **FP=0**, i.e. not one
+   out-degree-2 node exists. This is the direct end-to-end confirmation of the oracle: the solver's
+   division ceiling is not low, it is *zero*.
+2. **Blanket out-degree <=2 is HARMFUL: -0.0081.** It buys 6 division TPs and pays 2,160 division FPs
+   plus **-0.0084 of adjacency**. **The oracle's +0.0232 is a ceiling under PERFECT selection; naive
+   relaxation lands far below zero.** Taking the second-best child unconditionally adds a wrong edge
+   for most of the 176,835 eligible sources. This is the single most important calibration of the
+   division lane and it kills any "just allow out-degree 2" proposal.
+3. **exp041's gating PASSES its bar: G3 = 0.5962 vs G1 = 0.5944, +0.0018** — with 130,832 candidates
+   passing the gates and only **15,397** admitted after the 0.6% per-frame cap.
+
+### THE SURPRISE — the gain is ADJACENCY, not divisions
+
+G3 recovers **zero** true divisions (TP=0, divJ 0.0000, same as G1). Its entire +0.0018 is
+`adj_edge_jaccard`. **The bijection's real cost on this substrate is CORRECT CONTINUATION EDGES that
+it rejects when two targets compete for one source** — not mitosis. The second-daughter slot is
+mis-named for what it actually buys us.
+
+Caveat on the division reading: with TP=0 in both arms, divJ = 0/(0+FP+FN) = 0 either way, so G3's
+370 division FPs are currently free. **They would NOT be free once TPs exist** — a future arm that
+recovers real divisions must re-measure this, because 370 FPs would then dilute divJ hard.
+
+### WHAT THIS MEANS FOR THE RANKED PLAN
+- exp041's second-daughter slot is a **real but small** lever (+0.0018 on a raw substrate, 25 crops,
+  fold 1), and it works through a different mechanism than its author's framing implies.
+- The division lane still needs a *selector*, not a *relaxation*. The oracle ceiling (+0.0232) stands,
+  but nothing yet reaches it: blanket relaxation is -0.0081, exp041 gating gets +0.0018 with no
+  divisions at all.
+- Consistent with the sweep's mikelou1 datapoint: **divJ 0.30 yields 0.928, so divisions are
+  necessary but not sufficient; the >=0.947 cluster wins on EDGE.** G3 gaining purely on adjacency
+  points the same way.
+
+## 2026-08-25 — Local association ranker VENDORED and locally validated (build in progress)
+
+`scripts/kaggle_edits/ranker_block.py` (425 lines, 7 contract tests in
+`tests/test_ranker_block.py`). Extracted verbatim from the public notebook
+`dalloliogm/biohub-exp227-divergence-mutualnn-wide` (flattened lines 322-703), loading the public
+CC dataset `pilkwang/biohub-local-association-ranker-unet300-v1` (18.5 KB).
+
+**VERIFIED locally on CPU 2026-08-25:** loads the real checkpoint, reports `input_dim` 22 and 22
+feature names, returns finite probabilities in [0,1] on probe rows. Architecture from the state dict:
+`net.0 Linear(22,64)` -> norm -> `net.4 Linear(64,32)` -> `net.6 Linear(32,1)`; the checkpoint also
+carries `median`/`mean`/`std` for its own feature normalisation, so it is fully self-contained.
+Manifest: `best_epoch 7`, `best_score 0.9777`, 385,648 rows / 108,876 groups.
+
+**The integration, verbatim from exp227 (`:2547-2551`):**
+```python
+evidence = 0.85 * ranker_matrix[i, col] + 0.15 * primary_matrix[i, col]
+cost[i, col] = motion_dist[i, col] + 0.05 * raw_dist[i, col] - MOTION_RELINK_LEARNED_BONUS * evidence
+```
+It REPLACES the bare edge probability in the relink cost with a blend. Ours uses bare `prob`.
+So the patch is a one-line swap at a cost line we already have.
+
+**WHY THIS LANE:** our measured bottleneck is the EDGE term, not divisions — oracle headroom
+FN->0 is **+0.167** vs **+0.0993** for divisions, and mikelou1 reached **divJ 0.30 and still only
+scores 0.928**. This ranker is the *rerank* half of the retrieve-then-rerank primitive that Ultrack
+and Linajea both implement and that no kernel in the 719-notebook corpus has.
+
+### TWO CONSTRAINTS RECORDED IN THE MODULE DOCSTRING AND ENFORCED BY TESTS
+
+1. **Author's own limit, verbatim:** *"Use only as a constrained local association tie-breaker, not
+   as a global edge veto."*
+2. **LOCAL EVALUATION IS CONTAMINATED.** Manifest: `datasets_seen: 199`, `split_column: "dataset"`,
+   `val_fraction: 0.15` — trained on ~169 of the 199 competition TRAINING movies, so it has seen most
+   of `data/train`. **Any local score using this ranker is inflated and must NOT gate promotion.**
+   It is legitimate for the leaderboard (the hidden set is not among the 199), so **the only honest
+   instrument for this lever is a submission slot.** Same leak pattern `leevvin` documented for the
+   public support pack. `tests/test_ranker_block.py` fails if this caveat is ever removed from the
+   docstring.
+
+**REMAINING FOR THE KERNEL:** the feature-extraction call site. 20 of the 22 features are computable
+from the pre-ILP export (probs, degrees, frame counts, KD-tree `density_7um`, candidate rank/count,
+the six displacement terms, `has_prev`/`has_next`, `best_next_prob`, `t_norm`); the two motion
+features (`motion_dist_um`, `motion_gain_um`) need the flow model's predicted position, which exists
+only inside the kernel. exp227's `_ranker_feature_aliases_from_semantics` (already inside the
+vendored block) builds the alias dict; what still needs porting is the ~100-line context builder at
+exp227 `:2450-2535`.
+
+## 2026-08-25 — FORUM BREAKTHROUGH: over-detection is nearly free, and ONE SLOT reads our exact adj_edge
+
+Read via the Kaggle SDK's undocumented `discussion_api_client.get_topic` / `list_comments`. The CLI
+`forums topics list --competition` 403s and the `-s` fallback silently caps at 20 and omits threads;
+WebFetch returns only page titles on this SPA. **34 threads confirmed to exist, 21 read in full.**
+Recipe + harvested JSON: `%TEMP%\kbatch.py`, `%TEMP%\klist.py`, `%TEMP%\threads\*.json`.
+Rate limit ~100 rapid calls then 429; 6 s spacing is stable.
+
+### A. THE METRIC PAYS FOR RECALL AND BARELY CHARGES FOR OVER-DETECTION
+
+Luka Duvanov, discussion/733877, 2026-08-08, VERIFIED verbatim:
+> "Over-detection is almost free. A predicted node that matches no ground-truth node is never a false
+> positive; the whole cost is the adjusted-Jaccard term. The line is exactly **1 - 0.1 x
+> over-prediction**, so 10% more nodes has to buy only a 1% relative gain in edge Jaccard to break
+> even. Recall on detection is worth far more than precision here, and I think most peoples
+> thresholds are too high."
+
+> "**Duplicating a detection costs ~9% and buys nothing.** Node matching is a one-to-one bipartite
+> assignment, so a twin one voxel away matches nothing. If you take the union of two models
+> detections without a merge pass, you pay this in full."
+
+Mendrika Ramarlina, discussion/734604, +5:
+> "**Edge recall ~ node recall^2 x conditional linking accuracy**"
+
+**This is the quantitative rule behind our own measurement** that detection F1 is monotone decreasing
+in threshold with the optimum at or below p0.50 (recall 0.445 -> 0.563 at p0.5). Node recall enters
+edge recall SQUARED while over-prediction is taxed only 0.1x linearly.
+**`scripts/kaggle_specs/p4_detsweep_export_f0.json` is built and has NEVER been pushed.**
+Mandatory companion: a merge/NMS pass, or near-duplicates cost the full ~9% for nothing.
+
+Corroborating, Alan Thanickal discussion/724917:
+> "raising the detection threshold to cut nodes 17% costs ~0.18 edge Jaccard"
+
+Counter-signal (INFERRED, linker capacity not detector): Moawiz — "the detector is finding the real
+cells, but it is also producing an enormous junk candidate pool. The linker then has to choose among
+those candidates which ends up with wrong linking." **So the recall push pays only if the linker can
+reject junk.** That is exactly what the local association ranker is for. The two levers are coupled.
+
+### B. ONE SLOT READS OUR EXACT adj_edge — no modelling work
+
+Arul Prasad S P, discussion/734192, VERIFIED:
+> "summarise() **drops the division term entirely when a submission contains no divisions at all**
+> (score = edge_jaccard if not has_divisions). So a fork-free submission returns your pure adjusted
+> edge Jaccard, and the division term follows by subtraction."
+
+mikelou1's decomposition: **0.928 = adj_edge 0.898 + 0.030 (divJ 0.30)**, and "my edge algorithms are
+really bad and has ~0.895 on actual lb and 0.919 CV" — **a -0.024 CV->LB gap**, about the whole
+distance we need.
+**A 0.953 team with mikelou1 divisions needs adj_edge ~0.923. The frontier is an EDGE race,
+arithmetically now, not by inference.**
+**ACTION: a fork-free submission is the cheapest decisive diagnostic we have.**
+
+### C. INDEPENDENT PUBLIC CONFIRMATION OF OUR BIJECTION RESULT
+
+Luka Duvanov, discussion/733877, VERIFIED:
+> "A Hungarian linker forfeits the whole division term by construction. One successor per cell means
+> no node ever has two outgoing edges, so **division Jaccard is exactly 0.000 - in my test, 40 FN out
+> of 40** - and 0.1 of the available 1.1 is gone before the tracker sees an image."
+
+Measured independently, in public, on 2026-08-08. Our G1 arm reproduced it exactly (divJ 0.0000,
+FP=0). Two independent derivations of the same structural fact.
+
+### D. HOST RULINGS AND DATA FACTS
+
+- **ZEBRAHUB IS EXPLICITLY CLEARED.** Thibgolds (organizer), discussion/734330, 2026-08-13:
+  "Yes you are free to use the data and all resources in Zebrahub for this competition! **There is no
+  overlap with the test set.**" Green-lights the entire `scripts/win_bet/` Zebrahub workstream and the
+  1.26M GT association edges — for the term that actually separates the frontier.
+- **No embryo overlap train/test** (Thibgolds, discussion/716793); public LB ~29% of test, private 71%.
+- **The four visible clips are a placeholder only** (Thibgolds, discussion/723921) — independent host
+  confirmation of our standing rule.
+- **GT edges span exactly one frame.** An edge between non-consecutive frames is structurally
+  unmatchable and scores 0.0 with no diagnostic (Diana Daher, discussion/728613).
+  **Never stride frames — budget a contiguous block from t=0.**
+- **Voxels are 1.625 x 0.40625 x 0.40625 um, so a radius expressed in VOXELS is 4x wrong in z**
+  (Luka Duvanov, discussion/733973). Our `candidate_gate_eval.py` uses um and a test pins the scale.
+  Same thread: displacement median 1.82 um, p95 5.34, p99 8.38 - an 8.4 um NN radius reaches 99% of
+  true links. **151 divisions total, one link in 853, and 112 of 199 movies contain NONE** - so
+  division CV on random splits is noise.
+- **Frozen frames: 57.3% of training videos have >=1 frozen transition; 89.1% of 6bba (114/128, 947
+  duplicate pairs) vs 0% of 44b6** (discussion/724283). A large embryo-asymmetric artifact - any
+  6bba/44b6 asymmetry in our results may be this, not biology.
+- **Any local CV from before 2026-07-22 is VOID** - the division-exploit metric patch
+  (discussion/727154, organizer).
+
+### E. METHOD INTEL FROM THE TOP
+
+- Soheil Ayati (**rank 2, 0.959**), discussion/737101 - MORE than we had:
+  "Always validate complete movies using the official scorer and **movie-level OOF splits**.
+  Edge-level random CV can be highly misleading."
+- Tang (0.946): "retrain the model instead of just using the public ckpt... the current ckpt has kind
+  of hit a wall, it is hard to get more gain from post-processing alone."
+- Mendrika's instruction, directly relevant to how we run arms: **"keep the detector fixed while
+  comparing linkers, and keep the linker fixed while comparing detectors. Otherwise post-processing
+  can appear to improve locally by changing the candidate set and graph simultaneously."**
+- ISAKA Tsuyoshi (7th/344 then), discussion/716952, +47: "Detection was the biggest lever... DoG at
+  multiple scales... jumped LB 0.786 -> 0.826 (+0.040). In contrast, division edges hurt and gap
+  closing was roughly neutral." And: **"detection improvements track CV ~ LB (~1:1). Graph-level
+  add-ons (like divisions) can raise CV yet lower LB."**
+- **adj_edge plateaus ~0.90-0.91 across the shared split_0 stack** (Arul, discussion/728551) -
+  passing it means leaving that stack, not tuning it.
+- **HOCT is a dead end for point detections** - Arul measured it under-performing a tuned ILP,
+  over-linking, ~45 min/movie; the Ultrack author confirms "we haven't tried on the competition
+  dataset". Closed, and paid for by someone else.
+- hengck23, discussion/723655, +23: the solver forces wrong links on large displacements because
+  "link cost < termination cost + new-track cost" - the termination/disappearance cost is the knob.
+  And **<1% of links are labelled**, so pseudo-labelling short tracks from an ensemble of open-source
+  trackers is his stated route to a better edge model.
+
+### F. GAPS
+**No team at >=0.947 has described their method** beyond Soheil's node-selection line. TWEAK posted
+once with substance and never answered the direct follow-up. **Nobody has publicly stated an adj_edge
+above ~0.90** - the >=0.947 cluster's edge number is not in the forum. No thread mentions Trackastra,
+TrackMate, Linajea or motile at all.
+
+### G. WHAT THIS REORDERS
+1. **Fork-free probe (1 slot)** - returns our exact adj_edge. Decisive, no modelling work, tells us
+   whether we are edge- or division-limited before any further spend.
+2. **Detection threshold reduction + merge pass** - `p4_detsweep_export_f0.json` is already built and
+   unpushed; the metric line is 1 - 0.1 x over-prediction and node recall enters edge recall squared.
+3. **Local association ranker** - now doubly motivated: it is the only thing that lets the linker
+   reject the junk pool that a recall push creates (Moawiz's counter-signal).
+
+## 2026-08-25 — HOST DECISION: Kaggle for ALL GPU compute. Colab DECLINED. Both training lanes REPAIRED.
+
+### A. Compute decision — single pool, final
+
+Host, 2026-08-25: *"actually just use Kaggle for all GPU Compute tasks"*. Colab Pro and the
+Colab VS Code extension are **declined**. This reinstates the single-pool plan.
+
+Investigated before declining (recorded so it is not re-litigated): the extension
+(https://marketplace.visualstudio.com/items?itemName=Google.colab) "exposes Colab servers
+directly in VS Code", i.e. **cloud runtimes, not a local runtime** — so it would have been
+genuinely additive GPU that does not touch the Kaggle quota, and being single-GPU it would have
+sidestepped the DataParallel autocast trap entirely. It was declined anyway. **Two practical
+limits made it a poor fit regardless:** it is an interactive editor integration with a browser
+sign-in step and **cannot be driven from this session**, so every Colab run would be a manual
+hand-off; and the marketplace page documents no GPU types, no session limits and no Pro
+specifics.
+
+**Consequences of Kaggle-only, restated:**
+- Device is deterministically **T4x2, CC 7.5** — fp16 + `GradScaler` is correct and no bf16
+  branch is needed. Colab's non-deterministic T4/L4/A100 allocation stays closed.
+- **The DataParallel/autocast trap is guaranteed on every run**, not conditional.
+- Training and inference now compete for the same ~30-45 GPU-h/week.
+- **NEW OPERATIONAL LIMIT, measured today: Kaggle permits a maximum of 2 concurrent GPU BATCH
+  sessions.** `p17_det094` was refused — *"Maximum batch GPU session count of 2 reached"* —
+  while `p15_forkfree_probe` and `p16_det090` were running. **Kernel pushes must be pipelined
+  two at a time.** This was not previously in the ledger and it bounds how many arms can be in
+  flight.
+
+### B. S5 (`h1r_edge_train.py`) — all six audit defects REPAIRED
+
+1. **CUDA autocast crash.** `F.binary_cross_entropy` is banned under CUDA autocast and raised at
+   runtime on step 1. The loss now runs in **fp32 with autocast explicitly disabled**, while the
+   UNet/transformer forward keeps its fp16. **No CPU smoke could ever have caught this** — the
+   CPU autocast path permits the op, which is exactly why it survived a passing smoke.
+2. **ALL division supervision was deleted — the worst defect, now fixed.** Root cause was subtle:
+   `_transition_indices` (`h1r_edge_data.py:190-203`) **already** resolves a daughter to her
+   mother's row via `div_i = source_row.get(parent_id)`, so the correct target existed all along.
+   The trainer destroyed it twice — zeroing those columns out of the target and dropping them
+   from the loss — so the model never saw one mother->daughter positive, discarding the
+   **65,741-link asset the lane exists for**. The original intent was legitimate (avoid a false
+   negative when the node cap drops a mother) but the remedy was wrong: **that is a SAMPLING
+   problem, not a DIVISION problem, and it applies identically to continuations.** The mask now
+   keys on the sampling condition alone, and divisions are supervised and upweighted 3x
+   (`H1R_DIV_WEIGHT`, matching this repo's own P3 patch; Trackastra uses 11).
+3. **Node-cap sampling bias.** Source and target frames were drawn INDEPENDENTLY, so with ~942
+   nuclei and a cap of 256 a target's true parent survived only ~27% of draws — making ~73% of
+   columns look parentless while deployment has ~92% *with* a parent, a **~9x background-prior
+   error on the exact quantity the parental softmax must calibrate**. Targets are now drawn
+   first and their true parents retained in the source draw. **The cap is unchanged; only which
+   nodes fill it.**
+4. **Checkpoint selection was `link_top1 * candidate_recall`** — the exact product
+   `h1r_trainer_patch.py:19-22` already rejected once for having no precision term and
+   "selecting the junkiest detector". Replaced with the harmonic mean.
+5. **"Frozen detection" froze only `detect_head` (one 1x1 conv)** while the shared UNet trained.
+   The contract is now EXPLICIT: `H1R_TRUNK_MODE` = `frozen` (DEFAULT) | `adapt` | `distill`.
+   `frozen` freezes the trunk itself — because every detection logit is `detect_head(unet(x))`
+   **and `unet_out` is the exact tensor deployment feeds to `predict_edges`**, so training the
+   trunk rewrites every edge feature under a transformer trained on the old representation, and
+   that representation IS the 0.915 substrate.
+6. **The post-run guard was TAUTOLOGICAL** — it compared `detect_head`'s state_dict to its
+   initial values, parameters that were never in the optimizer and cannot change. Replaced with
+   `detection_drift()`, which measures detection **behaviour** against a frozen reference on a
+   fixed probe batch, reports every epoch, and hard-fails if `frozen` mode ever drifts >1e-4.
+   **This is also the T3.1 pre-flight gate made runnable:** run a short `adapt` fine-tune, read
+   `max_abs`, and if detection barely moves the entire drift apparatus is unnecessary.
+7. **Resume was unreachable** (`/kaggle/working` starts empty). Now discovers an attached
+   prior-run checkpoint under `/kaggle/input`.
+
+### C. S1 (`h1r_det_train.py`) — the three SEV-1 defects were ALREADY FIXED. Verified, not redone.
+
+A previous session repaired them between the audit and now. **Verified at file:line rather than
+assumed:**
+- Selection binds to `selection_at_threshold(val, "deployed")`, and `best_operating_point` now
+  carries the docstring *"Diagnostic best point in a sweep; never used for checkpoint
+  promotion."* `is_best` uses `>` with `min_delta`. The module docstring's claim about selecting
+  at the deployed operating point is now **true**.
+- `encode_detection_logits` implements the full 8-view planar TTA set; `H1R_EVAL_TTA` defaults
+  to "1" and `eval_detection` uses it.
+- `H1R_TRUNK_CONTRACT` defaults to `freeze` with a real byte-level `assert_trunk_unchanged`
+  guard on a trunk snapshot (a genuine check, unlike S5's old head-bytes version, because the
+  trunk IS in the optimizer under adapt mode).
+- SEV-2 "20 epochs, no early stopping" is also closed: `H1R_PATIENCE` 3, `H1R_MIN_DELTA` 1e-4.
+
+**One defect DID remain and is now fixed:** resume was still local-only, the same dead code as
+S5 — a preempted 12 h kernel silently restarted from epoch 0. It now searches `/kaggle/input`.
+**And the latent corruption the audit flagged alongside it is closed:** resuming a checkpoint
+without its `metrics.json` left `history == []`, which makes the downstream zero-epoch branch
+label a **partially trained** model as the baseline and overwrite `edge_predictor_best.pth` with
+it, turning every later `improvement_over_baseline` into fiction. It now fails closed.
+
+### D. Test-quality findings worth keeping
+
+- **Three S5 tests encoded the defects as contracts**, one literally named
+  `test_division_columns_have_exactly_zero_loss_gradient`. All rewritten to assert the corrected
+  behaviour. A fourth, `test_division_columns_stay_masked_when_node_cap_drops_the_mother`, failed
+  *because the fix worked* — parent-retention now rescues the mother — and was renamed
+  accordingly.
+- **A pre-existing FLAKY test was exposed.** `test_synthetic_end_to_end...` asserts the projector
+  receives gradient, but the triplet loss is margin-based: on an unlucky unseeded draw every
+  triplet already satisfies the margin and the gradient is legitimately zero. It failed alone and
+  passed in-suite — the signature of RNG order dependence. Verified across three seeds that
+  gradient always flows when seeded, then seeded the test. **The flake predates this work;
+  changing the sampler merely shifted the RNG stream enough to expose it.**
+- **One of my own new tests was wrong** and passed for the wrong reason: I wrote `0.60 x 0.60`
+  against `0.20 x 1.00` as "equal products" (0.36 vs 0.20). Corrected to `0.36 x 1.00` so the
+  test actually isolates the harmonic mean's preference.
+
+### E. Verification
+`pytest -q` -> **761 passed**, 0 failures. `validate_research_tree.py` OK (65 docs);
+`claims_table.py --check` OK (53 claims).
+
+### F. Still open on S5, deliberately
+The edge lane has **no DataParallel at all**, so the second T4 is idle — but `H1R_EDGE_BS=1`
+means it could not split anything anyway. If DataParallel is ever added, note that the training
+autocast at the call site is main-thread and **would then hit the thread-local trap**; the fix is
+the same one applied to the loss.
+
+## 2026-08-25 — THE `leevvin` LEAK CLAIM: UNVERIFIED, and the vendored default CONTRADICTS it. The practical conclusion survives anyway.
+
+This closes an item that has been open since it was first raised and was repeatedly cited as a
+possible explanation for the whole LOEO->LB validation crisis. **It does not hold as stated.**
+
+### The claim
+
+`leevvin/biohub-movie-heldout-edge-predictor-v1` README, VERIFIED verbatim (file on disk at
+`data/external/public_weights/leevvin/README.md`):
+> "The widely used public support-pack checkpoint was trained with `train=199` videos and a test
+> list that is a *subset* of those 199 - so it has seen every labelled movie. Anyone validating
+> locally on movies from `train/` is therefore scoring a model that memorised them, which makes
+> offline post-processing sweeps point the wrong way."
+
+### What the code actually does — VERIFIED at file:line
+
+`vendor/kaggle-cell-tracking/scripts/train_unet_transformer.py:1036-1051`, the split construction:
+```python
+stems = sorted(p.name[:-5] for p in data_dir.glob("*.zarr") if (data_dir / f"{p.name[:-5]}.geff").exists())
+random.Random(0).shuffle(stems)
+n_val = max(1, len(stems) // 10)
+folds = [{"split": 0, "train": stems[n_val:], "test": stems[:n_val]}]
+```
+**The default split is 90/10 and strictly DISJOINT** — `train = stems[n_val:]`, `test = stems[:n_val]`,
+by construction non-overlapping. Producing `test` as a SUBSET of `train` would require a custom
+`dataset_splits.json`, and **the support pack does not ship one for `unet_transformer`**: its
+weights directory contains only `checkpoint_last.pth`, `config.json` and `edge_predictor_best.pth`
+(verified against the dataset file listing). The `split_manifest.json` referenced by
+`source_scripts/run_full_frame_center_training.sh:248` belongs to the **DeepCenter full-frame
+detector**, a different model.
+
+Our own `data/dataset_splits.json` is also clean: two folds, 128/71 and 71/128, **overlap 0** in
+both directions.
+
+**VERDICT: the specific `test is a subset of train` mechanism is UNVERIFIED and the default code
+path contradicts it.** It cannot be confirmed without the support pack's actual splits file, which
+is not published. Do not cite it as established.
+
+### BUT the practical conclusion survives, for a different and simpler reason
+
+A 90/10 split over 199 movies still puts **~179 of 199 movies in training**. So any given movie in
+`data/train` has roughly a **90% chance of having been trained on**, and our four placeholder crops
+are almost certainly among them. **Local scoring against `data/train` with the public support-pack
+weights is therefore contaminated regardless of whether `test` was a strict subset of `train`.**
+
+The distinction matters:
+- **Wrong reason (leevvin's):** a deliberate `test`-inside-`train` construction. Unverified.
+- **Right reason:** an ordinary 90/10 split means almost everything is in train, so validating on
+  `train/` movies scores a model that saw them.
+
+The consequence for us is unchanged — **local post-processing sweeps on `data/train` are not a
+trustworthy promotion gate** — but the mechanism should be stated correctly, because the wrong
+mechanism implies a deliberate defect in the public artifact and the right one implies only that
+we are validating on the wrong movies.
+
+### What this does and does not license
+
+- It does **not** retire the standing suspension of LOEO as a promotion instrument; that was
+  measured directly (arm-B +0.0144/+0.0090 local -> +0.000 LB), independently of any leak.
+- It does **not** justify reopening closed levers on the grounds that they "were closed on
+  contaminated evidence". Abstention in particular was closed on a 58.3%-vs-58.88% margin, and
+  nothing here shows that margin was inflated by contamination.
+- It **does** reinforce rank-2 Soheil Ayati's forum advice (discussion/737101, VERIFIED):
+  *"Always validate complete movies using the official scorer and movie-level OOF splits.
+  Edge-level random CV can be highly misleading."*
+- It **does** raise the value of `leevvin`'s actual artifact, whatever the reasoning behind it:
+  that checkpoint holds out exactly our four placeholder crops, which makes it the only public
+  edge predictor that is uncontaminated on our scoring substrate.
+
+### Process note
+This is the fourth time a premise cited as established turned out not to be verified at
+`file:line`. It cost nothing to check — two greps into the vendored trainer.

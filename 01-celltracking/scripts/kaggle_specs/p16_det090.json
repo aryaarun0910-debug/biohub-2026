@@ -1,0 +1,46 @@
+{
+  "name": "p16_det090",
+  "slug": "biohub-p16-det090",
+  "title": "Biohub P16 DET090",
+  "code_file": "biohub-p16-det090.ipynb",
+  "out_dir": "notebooks/kaggle_p16_det090",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "purpose": "DETECTION-SURFACE ARM. P9 (LB 0.925) with BIOHUB_DET_THRESHOLD 0.90 instead of the inherited 0.96875. Everything downstream is byte-identical, so this isolates the detection threshold exactly (Mendrika discussion/734604: keep the linker fixed while comparing detectors). Motivation, all VERIFIED: the metric charges over-prediction only 1 - 0.1 x over-prediction (Luka Duvanov discussion/733877), while edge recall ~ node recall^2 x conditional linking accuracy (Mendrika discussion/734604) -- so recall is quadratic and over-detection is nearly free. Alan Thanickal discussion/724917 measured that cutting nodes 17%% cost ~0.18 edge Jaccard, i.e. we sit on a steep part of the curve. Our own S1 detector sweep found F1 monotone DECREASING in threshold with the optimum at or below p0.50. NOTE: lowering a threshold on ONE detector does not create the near-duplicates that Duvanov warns cost ~9%% for nothing -- those come from unioning two models without a merge pass. The local-max NMS already dedupes within 1.625 um.",
+  "provenance": "Single-variable arm off p9_coupled_division. CAUTION: detection-surface changes carry a measured ~3.5x LB amplification, and our only prior control (a 28%% node CUT) scored -0.032. Adding nodes is the untested direction; the metric line above bounds the downside at roughly -0.1 x over-prediction if edge Jaccard does not improve.",
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_SAFE_DIV_MAX_UM": "8.0",
+        "BIOHUB_SAFE_DIV_SISTER_MAX_UM": "11.0",
+        "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM": "10.0",
+        "BIOHUB_SAFE_DIV_DIVERGE_UM": "2.25",
+        "BIOHUB_DET_THRESHOLD": "0.90"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "def filter_short_track_components(",
+      "anchor": "def filter_short_track_components(",
+      "code_file": "scripts/kaggle_edits/coupled_division_transplant.py",
+      "expect": 1
+    }
+  ]
+}

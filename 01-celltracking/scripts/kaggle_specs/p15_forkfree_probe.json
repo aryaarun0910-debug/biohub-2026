@@ -1,0 +1,46 @@
+{
+  "name": "p15_forkfree_probe",
+  "slug": "biohub-p15-forkfree-probe",
+  "title": "Biohub P15 ForkFree Probe",
+  "code_file": "biohub-p15-forkfree-probe.ipynb",
+  "out_dir": "notebooks/kaggle_p15_forkfree_probe",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "purpose": "DIAGNOSTIC, NOT A LEVER. Emits P9 (LB 0.925) with BIOHUB_OUTPUT_SAFE_DIVISIONS=0, i.e. a FORK-FREE graph. The official summarise() drops the division term entirely when a submission contains no divisions (score = edge_jaccard if not has_divisions), so the returned public score IS our pure adjusted edge Jaccard. divJ then follows by subtraction from P9: divJ = (0.925 - probe) / 0.1. Expected to score BELOW 0.925; that is correct and is the point. Source of the mechanism: Kaggle discussion/734192 (Arul Prasad S P), host-verified reading of the scorer. Reference decomposition: mikelou1 0.928 = adj_edge 0.898 + 0.030 (divJ 0.30), so a 0.953 team needs adj_edge ~0.923.",
+  "provenance": "Derived from p9_coupled_division (LB 0.925) by a single env flip. Identical base notebook, identical datasets, identical division transplant code -- the ONLY difference is that the safe-division proposer is switched off, so no fork can be emitted. The bijection in motion_relink_edges already forbids out-degree 2, so this flag is the sole remaining fork source.",
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_SAFE_DIV_MAX_UM": "8.0",
+        "BIOHUB_SAFE_DIV_SISTER_MAX_UM": "11.0",
+        "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM": "10.0",
+        "BIOHUB_SAFE_DIV_DIVERGE_UM": "2.25",
+        "BIOHUB_OUTPUT_SAFE_DIVISIONS": "0"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "def filter_short_track_components(",
+      "anchor": "def filter_short_track_components(",
+      "code_file": "scripts/kaggle_edits/coupled_division_transplant.py",
+      "expect": 1
+    }
+  ]
+}

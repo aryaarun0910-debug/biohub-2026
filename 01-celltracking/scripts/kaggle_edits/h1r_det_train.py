@@ -331,6 +331,26 @@ def trunk_snapshot(model) -> dict[str, torch.Tensor]:
     }
 
 
+def discover_detector_resume(out_dir: Path) -> Path | None:
+    """Find a resume checkpoint, including one attached as a Kaggle dataset.
+
+    ``/kaggle/working`` starts EMPTY on every batch run, so ``<out>/detector_last.pth`` can
+    never exist on a fresh push. A local-only lookup therefore made ``H1R_RESUME=1`` dead
+    code that read as a safety net: a preempted 12 h kernel silently lost everything and
+    restarted from epoch 0. A prior run's state can only arrive as an ATTACHED INPUT.
+    """
+    local = out_dir / "detector_last.pth"
+    if local.is_file():
+        return local
+    root = Path("/kaggle/input")
+    if root.is_dir():
+        for pattern in ("*/detector_last.pth", "*/*/detector_last.pth"):
+            found = sorted(root.glob(pattern))
+            if found:
+                return found[0]
+    return None
+
+
 def assert_trunk_unchanged(model, before: dict[str, torch.Tensor]) -> None:
     after = trunk_snapshot(model)
     if after.keys() != before.keys():
@@ -466,13 +486,23 @@ def run_h1r_detector(trainer_dir: Path, root: Path, out_dir: Path) -> dict:
     history: list[dict] = []
     last_path = out_dir / "detector_last.pth"
     resume_ck = None
-    if resume and last_path.exists():
-        resume_ck = torch.load(last_path, map_location=device, weights_only=True)
+    resume_src = discover_detector_resume(out_dir) if resume else None
+    if resume_src is not None:
+        resume_ck = torch.load(resume_src, map_location=device, weights_only=True)
         model.load_state_dict(resume_ck["model"])
         start_epoch = int(resume_ck["epoch"]) + 1
-        history = json.loads((out_dir / "metrics.json").read_text()) \
-            if (out_dir / "metrics.json").exists() else []
-        print(f"resumed at epoch {start_epoch} from {last_path}", flush=True)
+        metrics_path = resume_src.parent / "metrics.json"
+        if not metrics_path.exists():
+            # Fail closed. With history == [] the zero-epoch branch downstream would label a
+            # PARTIALLY TRAINED model as stage "zero_epoch" and overwrite the best checkpoint
+            # with it, making every later improvement_over_baseline a fiction.
+            raise FileNotFoundError(
+                f"resuming from {resume_src} but {metrics_path} is missing; refusing to "
+                "restart history, which would mislabel a trained model as the zero-epoch "
+                "baseline and corrupt checkpoint selection"
+            )
+        history = json.loads(metrics_path.read_text())
+        print(f"resumed at epoch {start_epoch} from {resume_src}", flush=True)
 
     if device.type == "cuda" and torch.cuda.device_count() > 1:
         model.unet = torch.nn.DataParallel(model.unet)

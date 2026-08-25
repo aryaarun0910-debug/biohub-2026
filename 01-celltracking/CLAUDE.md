@@ -35,7 +35,14 @@ mechanism and a stated falsification test.
 
 ## Active code surface
 
-- `src/biotrack/`: immutable scorer/graph core and deployed wrapper.
+- `notebooks/kaggle_<name>/biohub-<name>.ipynb`: **the deployed artifact and the one that must
+  be audited.** Built by `kaggle_factory` from `scripts/kaggle_specs/*.json`; the live platform is
+  `notebooks/kaggle_p3_harmonic/`. Any claim about deployed behaviour is verified here, at
+  `file:line`, and nowhere else.
+- `src/biotrack/`: immutable scorer/graph core, plus a **partial** wrapper mirror — it is NOT the
+  deployed program. Measured 2026-08-22: `DEEPCENTER` 0x in `wrapper.py` vs 73x in the built
+  notebook; `VOLUME_GUARD` 4x vs 0x. Neither is a superset of the other, so auditing the division
+  path here finds no filter stage and wrongly concludes there is none.
 - `scripts/d1/d1_postprocess.py`: scorer-exact M/C/T/L/D partition.
 - `scripts/d1/d1f_probe.py`: representation-versus-head diagnosis.
 - `scripts/core/kaggle_factory.py`: reproducible Kaggle build/push tooling (never auto-submits).

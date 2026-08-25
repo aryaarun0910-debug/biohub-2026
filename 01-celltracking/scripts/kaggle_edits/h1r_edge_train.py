@@ -66,10 +66,33 @@ class Zh001rEdgeWindows(Dataset):
     def __len__(self) -> int:
         return len(self.items)
 
-    def _select(self, crop: int, frame: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _select(self, crop: int, frame: int,
+                required: set[int] | None = None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Sample up to ``node_cap`` nodes, always retaining ``required`` track ids.
+
+        Source and target frames used to be drawn INDEPENDENTLY. With ~942 nuclei per frame
+        and a cap of 256 that left a target's true parent in the source draw only ~27% of the
+        time, so ~73% of columns looked like "no parent" while deployment has ~92% *with* one
+        -- a background prior about 9x off, on the exact quantity the parental softmax has to
+        calibrate. Retaining the required parents removes that bias at no memory cost: the cap
+        is unchanged, only which nodes fill it.
+        """
         fr = self.data.frame(crop, frame)
-        take = epoch_sample_indices(len(fr.track_ids), self.node_cap, seed=self.seed,
+        n = len(fr.track_ids)
+        take = epoch_sample_indices(n, self.node_cap, seed=self.seed,
                                     epoch=self.epoch, crop=crop, frame=frame)
+        if required and n > self.node_cap:
+            ids = np.asarray(fr.track_ids)
+            need = np.flatnonzero(np.isin(ids, np.fromiter(required, dtype=ids.dtype,
+                                                           count=len(required))))
+            if need.size:
+                keep = np.union1d(take, need)
+                if keep.size > self.node_cap:
+                    # Required parents win the cap; drop the tail of the random fill.
+                    filler = np.setdiff1d(keep, need, assume_unique=False)
+                    room = max(0, self.node_cap - need.size)
+                    keep = np.union1d(need[: self.node_cap], filler[:room])
+                take = np.sort(keep).astype(np.int64)
         return fr.coords[take], fr.track_ids[take], fr.parent_track_ids[take]
 
     def __getitem__(self, index: int) -> dict:
@@ -81,25 +104,41 @@ class Zh001rEdgeWindows(Dataset):
         qlo, qhi = self._quantiles[crop]
         raw = np.asarray(self.iso[crop, frame:frame + 2], dtype=np.float32)
         imgs = np.clip((raw - qlo) / (qhi - qlo + 1e-6), 0.0, None)
-        c0, tid0, _ = self._select(crop, frame)
         c1, tid1, pid1 = self._select(crop, frame + 1)
+        # Draw the TARGET frame first, then retain those targets' true parents in the source
+        # draw, so the sampled matrix keeps the positives it is supposed to teach.
+        required_parents = {int(t) for t in tid1}
+        required_parents |= {int(p) for p in pid1 if int(p) >= 0}
+        c0, tid0, _ = self._select(crop, frame, required=required_parents)
         target, _, _ = build_transition_target(tid0, tid1, pid1)
-        # The negative mask is defined from the FULL source frame, not the sampled
-        # source subset.  If the 256-node cap happens to drop a mother, her daughters
-        # remain division daughters and must not silently become no-parent negatives.
-        full_src_set = set(map(int, self.data.frame(crop, frame).track_ids))
-        division_cols = np.array([
-            int(p) in full_src_set and int(t) not in full_src_set
+        # `target` already encodes divisions: _transition_indices resolves a daughter to
+        # its MOTHER's row via `div_i = source_row.get(parent_id)`.  Supervising it as-is
+        # is the whole point of this lane -- the 65,741 division-daughter links are the
+        # asset the field cannot fork.
+        #
+        # The real hazard is SAMPLING, not divisions.  `source_row` is built from the
+        # sampled source subset, so if the node cap drops a column's true parent the
+        # column has no positive and supervising it as background is a FALSE NEGATIVE.
+        # That applies identically to continuations and divisions, so it is masked on the
+        # sampling condition alone.
+        full_src = set(map(int, self.data.frame(crop, frame).track_ids))
+        sampled_src = set(map(int, tid0))
+        unresolved_cols = np.array([
+            ((int(t) in full_src) or (int(p) >= 0 and int(p) in full_src))
+            and not ((int(t) in sampled_src) or (int(p) >= 0 and int(p) in sampled_src))
             for t, p in zip(tid1, pid1, strict=True)
         ], dtype=bool)
-        continuation = target.clone()
-        if len(division_cols):
-            continuation[:, torch.from_numpy(division_cols)] = 0.0
+        # Division columns that ARE resolvable in this sample, kept for loss upweighting.
+        division_cols = np.array([
+            int(p) >= 0 and int(p) in sampled_src and int(t) not in sampled_src
+            for t, p in zip(tid1, pid1, strict=True)
+        ], dtype=bool)
         return {
             "crop": crop, "frame": frame, "imgs": torch.from_numpy(imgs),
             "coords0": torch.from_numpy(c0.copy()), "coords1": torch.from_numpy(c1.copy()),
             "tid0": torch.from_numpy(tid0.copy()), "tid1": torch.from_numpy(tid1.copy()),
-            "target": continuation, "division_cols": torch.from_numpy(division_cols),
+            "target": target, "division_cols": torch.from_numpy(division_cols),
+            "unresolved_cols": torch.from_numpy(unresolved_cols),
         }
 
 
@@ -109,15 +148,18 @@ def collate_edge_windows(rows: list[dict]) -> dict:
     mask0 = torch.zeros(b, m0, dtype=torch.bool); mask1 = torch.zeros(b, m1, dtype=torch.bool)
     tid0 = torch.full((b, m0), -1, dtype=torch.long); tid1 = torch.full((b, m1), -1, dtype=torch.long)
     targets = torch.zeros(b, m0, m1); div_cols = torch.zeros(b, m1, dtype=torch.bool)
+    unres_cols = torch.zeros(b, m1, dtype=torch.bool)
     for i, r in enumerate(rows):
         n0, n1 = len(r["tid0"]), len(r["tid1"])
         coords0[i, :n0] = r["coords0"]; coords1[i, :n1] = r["coords1"]
         mask0[i, :n0] = True; mask1[i, :n1] = True
         tid0[i, :n0] = r["tid0"]; tid1[i, :n1] = r["tid1"]
         targets[i, :n0, :n1] = r["target"]; div_cols[i, :n1] = r["division_cols"]
+        unres_cols[i, :n1] = r["unresolved_cols"]
     return {"imgs": torch.stack([r["imgs"] for r in rows]), "coords0": coords0,
             "coords1": coords1, "mask0": mask0, "mask1": mask1, "tid0": tid0,
             "tid1": tid1, "targets": targets, "division_cols": div_cols,
+            "unresolved_cols": unres_cols,
             "crop": torch.tensor([r["crop"] for r in rows]),
             "frame": torch.tensor([r["frame"] for r in rows])}
 
@@ -131,6 +173,16 @@ class EdgeTrainingModel(nn.Module):
         self.projector = (nn.Linear(channels, appearance_dim) if appearance_dim > 0 else None)
         for p in self.base.detect_head.parameters():
             p.requires_grad_(False)
+        self.trunk_mode = TRUNK_MODE
+        if self.trunk_mode == "frozen":
+            # Freeze the SHARED TRUNK too. detect_head's bytes being frozen does not freeze
+            # detection: every detection logit is detect_head(unet(x)), and `unet_out` is also
+            # the exact tensor deployment feeds to predict_edges. Training the trunk therefore
+            # rewrites every edge feature under a transformer trained on the old representation
+            # -- and that representation IS the 0.915 substrate. Freezing it is the honest
+            # default and the baseline any adaptive mode must beat.
+            for p in self.base.unet.parameters():
+                p.requires_grad_(False)
 
 
 def load_public_full_model(T, weights: str | Path, device: torch.device,
@@ -151,19 +203,93 @@ def load_public_full_model(T, weights: str | Path, device: torch.device,
     return EdgeTrainingModel(base, appearance_dim).to(device)
 
 
+DIVISION_LOSS_WEIGHT = float(os.environ.get("H1R_DIV_WEIGHT", "3.0"))
+
+# The trunk contract, chosen EXPLICITLY rather than implied by a docstring.
+#   frozen : UNet + detect_head frozen. Only transformer (+ projector) train. Zero
+#            representation drift by construction. DEFAULT, and the baseline the other
+#            modes must beat.
+#   adapt  : UNet trains. Detection behaviour WILL move even though detect_head's bytes do
+#            not. Nothing calls this "frozen detection".
+#   distill: UNet trains, with a frozen teacher penalising association-logit drift.
+TRUNK_MODE = os.environ.get("H1R_TRUNK_MODE", "frozen").strip().lower()
+if TRUNK_MODE not in {"frozen", "adapt", "distill"}:
+    raise ValueError(f"H1R_TRUNK_MODE must be frozen|adapt|distill, got {TRUNK_MODE!r}")
+
+
+@torch.no_grad()
+def detection_drift(model: "EdgeTrainingModel", reference: torch.Tensor,
+                    imgs: torch.Tensor) -> dict[str, float]:
+    """Measure how far detection logits have moved from a frozen reference.
+
+    The previous guard compared ``detect_head``'s state_dict bytes to their initial values.
+    That is TAUTOLOGICAL: those parameters were excluded from the optimizer, so they cannot
+    change, and the check proves nothing about detection BEHAVIOUR. What actually moves is
+    the shared trunk feeding them.
+
+    This is the instrument for the cheap pre-flight gate: run a short adapt-mode fine-tune
+    and read ``max_abs``. If detection barely moves, the whole drift apparatus is
+    unnecessary and should not be built.
+    """
+    was_training = model.training
+    model.eval()
+    # encode returns (unet_out, det_logits) where det_logits is a LIST of W tensors.
+    _, logits = model.base.encode(imgs)
+    logits = torch.stack(logits, dim=1) if isinstance(logits, (list, tuple)) else logits
+    model.train(was_training)
+    delta = (logits.float() - reference.float())
+    denom = reference.float().abs().max().clamp_min(1e-6)
+    return {"max_abs": float(delta.abs().max()),
+            "mean_abs": float(delta.abs().mean()),
+            "relative": float(delta.abs().max() / denom)}
+
+
+def _selection_score(link_top1: float, candidate_recall: float) -> float:
+    """Harmonic mean, so a checkpoint cannot win on recall alone.
+
+    The previous criterion was ``link_top1 * candidate_recall`` -- the exact product this
+    repo already rejected once, in ``h1r_trainer_patch.py:19-22``: *"the vendored
+    test_acc * test_recall ... has no precision term and selects the junkiest detector"*.
+    A model that spreads probability mass over every column scores well on that product.
+    """
+    if link_top1 <= 0.0 or candidate_recall <= 0.0:
+        return 0.0
+    return 2.0 * link_top1 * candidate_recall / (link_top1 + candidate_recall)
+
+
 def continuation_loss(logits: torch.Tensor, target: torch.Tensor,
                       source_mask: torch.Tensor, target_mask: torch.Tensor,
-                      division_cols: torch.Tensor) -> torch.Tensor:
-    """Parental-softmax BCE; division-daughter columns contribute zero gradient."""
+                      division_cols: torch.Tensor,
+                      unresolved_cols: torch.Tensor | None = None) -> torch.Tensor:
+    """Parental-softmax focal BCE over association columns.
+
+    Divisions ARE supervised and upweighted by ``H1R_DIV_WEIGHT`` (default 3.0, matching
+    this repo's own P3 trainer patch; Trackastra uses 11).  `target` already resolves a
+    daughter to her mother's row, so no extra construction is needed.
+
+    Only UNRESOLVABLE columns are dropped -- those whose true parent exists in the frame
+    but was not sampled by the node cap.  Supervising those as background would be a false
+    negative.  That is a sampling artifact and applies to continuations and divisions
+    alike, so it is masked on the sampling condition, never on "is this a division".
+
+    The body runs in fp32 with autocast DISABLED: ``F.binary_cross_entropy`` is banned
+    under CUDA autocast (documented in ``h1r_trainer_patch.py:12-13``) and raises at
+    runtime -- a CPU smoke cannot reproduce it because CPU autocast permits the op.
+    """
     losses = []
     for b in range(logits.shape[0]):
         ns = int(source_mask[b].sum()); nt = int(target_mask[b].sum())
         if not ns or not nt:
             continue
         z = logits[b, :ns, :nt]; y = target[b, :ns, :nt]
-        keep = ~division_cols[b, :nt]
+        if unresolved_cols is None:
+            keep = torch.ones(nt, dtype=torch.bool, device=z.device)
+        else:
+            keep = ~unresolved_cols[b, :nt]
         if not bool(keep.any()):
             continue
+        col_w = torch.where(division_cols[b, :nt][keep],
+                            z.new_full((), DIVISION_LOSS_WEIGHT), z.new_ones(()))
         z, y = z[:, keep], y[:, keep]
         bg = torch.zeros(1, z.shape[1], device=z.device, dtype=z.dtype)
         prob = torch.softmax(torch.cat([z, bg], 0), 0)[:-1].clamp(1e-7, 1 - 1e-7)
@@ -176,7 +302,8 @@ def continuation_loss(logits: torch.Tensor, target: torch.Tensor,
             continue
         bce = F.binary_cross_entropy(prob, y, reduction="none")
         p_t = prob * y + (1.0 - prob) * (1.0 - y)
-        losses.append((((1.0 - p_t) ** 2) * bce)[supervised].mean())
+        focal = ((1.0 - p_t) ** 2) * bce * col_w.unsqueeze(0)
+        losses.append(focal[supervised].mean())
     return torch.stack(losses).mean() if losses else logits.sum() * 0.0
 
 
@@ -212,6 +339,7 @@ def forward_batch(T, model: EdgeTrainingModel, batch: dict, device: torch.device
     c0 = batch["coords0"].to(device); c1 = batch["coords1"].to(device)
     m0 = batch["mask0"].to(device); m1 = batch["mask1"].to(device)
     target = batch["targets"].to(device); div = batch["division_cols"].to(device)
+    unresolved = batch["unresolved_cols"].to(device)
     tid0 = batch["tid0"].to(device); tid1 = batch["tid1"].to(device)
     # Bypass detect_head completely: this lane trains association representations only.
     maps = model.base.unet(imgs.unsqueeze(2))
@@ -225,7 +353,11 @@ def forward_batch(T, model: EdgeTrainingModel, batch: dict, device: torch.device
     p0 = T._pos_embed_torch(torch.cat([t0, pc0], -1), shape)
     p1 = T._pos_embed_torch(torch.cat([t1, pc1], -1), shape)
     logits = model.base.predict_edges(f0, f1, pc0, pc1, p0, p1, m0, m1)
-    assoc = continuation_loss(logits, target, m0, m1, div)
+    # F.binary_cross_entropy is BANNED under CUDA autocast and raises at runtime; the CPU
+    # autocast path permits it, so no CPU smoke can catch this. Force fp32 with autocast
+    # disabled for the loss only -- the UNet/transformer forward above keeps its fp16.
+    with torch.autocast(device.type, enabled=False):
+        assoc = continuation_loss(logits.float(), target, m0, m1, div, unresolved)
     triplet = (appearance_triplet_loss(model.projector, f0, f1, tid0, tid1, m0, m1)
                if triplet_weight > 0.0 else f0.sum() * 0.0)
     loss = assoc + float(triplet_weight) * triplet
@@ -253,13 +385,34 @@ def evaluate(T, model: EdgeTrainingModel, loader: DataLoader, device: torch.devi
                 reached += int(float(probs[i, j]) >= candidate_threshold)
     return {"loss": float(np.mean(losses)) if losses else float("nan"),
             "link_top1": correct / max(total, 1),
-            "candidate_recall": reached / max(total, 1), "n_links": total}
+            "candidate_recall": reached / max(total, 1),
+            "select_score": _selection_score(correct / max(total, 1),
+                                             reached / max(total, 1)),
+            "n_links": total}
 
 
 def _rng_state() -> dict:
     return {"python": random.getstate(), "numpy": np.random.get_state(),
             "torch": torch.get_rng_state(),
             "cuda": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else []}
+
+
+def _discover_resume(out_dir: Path) -> Path:
+    """Find a resume checkpoint, including one attached as a Kaggle dataset.
+
+    ``/kaggle/working`` starts EMPTY on every batch run, so ``<out>/edge_resume.pth`` never
+    exists on a fresh push and ``--resume`` was dead code that read as a safety net. A prior
+    run's state can only arrive as an ATTACHED INPUT, so search there too.
+    """
+    local = out_dir / "edge_resume.pth"
+    if local.is_file():
+        return local
+    root = Path("/kaggle/input")
+    if root.is_dir():
+        found = sorted(root.glob("*/edge_resume.pth")) + sorted(root.glob("*/*/edge_resume.pth"))
+        if found:
+            return found[0]
+    return local
 
 
 def save_resume(path: str | Path, model: EdgeTrainingModel, optimizer, scheduler, scaler,
@@ -308,13 +461,23 @@ def run(args) -> dict:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.manual_seed(args.seed); random.seed(args.seed); np.random.seed(args.seed)
     model = load_public_full_model(T, args.weights, device, appearance_dim=args.appearance_dim)
-    detect_before = {k: v.detach().cpu().clone() for k, v in model.base.detect_head.state_dict().items()}
+    # Fixed probe batch + frozen reference logits: this is what makes detection drift
+    # OBSERVABLE. Comparing detect_head's bytes (as the old guard did) is tautological --
+    # those parameters are not in the optimizer and cannot move.
+    _probe = next(iter(val_loader))
+    _probe_imgs = _probe["imgs"].to(device)
+    with torch.no_grad():
+        model.eval(); _, _ref_logits = model.base.encode(_probe_imgs); model.train()
+    _detect_reference = (torch.stack(_ref_logits, dim=1)
+                         if isinstance(_ref_logits, (list, tuple)) else _ref_logits).detach().clone()
     params = [p for p in model.parameters() if p.requires_grad]
+    if not params:
+        raise ValueError("no trainable parameters: check H1R_TRUNK_MODE and appearance_dim")
     opt = torch.optim.AdamW(params, lr=args.lr)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=max(args.epochs, 1))
     scaler = torch.amp.GradScaler("cuda", enabled=args.amp and device.type == "cuda")
     start, best, history = 0, -1.0, []
-    resume = Path(args.out) / "edge_resume.pth"
+    resume = _discover_resume(Path(args.out))
     Path(args.out).mkdir(parents=True, exist_ok=True)
     public_config = Path(args.weights).parent / "config.json"
     (Path(args.out) / "config.json").write_text(public_config.read_text())
@@ -323,7 +486,7 @@ def run(args) -> dict:
         val_ds.set_epoch(0)
         zero_val = evaluate(T, model, val_loader, device)
         history.append({"epoch": -1, "val": zero_val})
-        best = zero_val["link_top1"] * zero_val["candidate_recall"]
+        best = zero_val["select_score"]
         torch.save(model.base.state_dict(), Path(args.out) / "edge_predictor_best.pth")
         if model.projector is not None:
             torch.save(model.projector.state_dict(), Path(args.out) / "appearance_projector_best.pth")
@@ -342,16 +505,24 @@ def run(args) -> dict:
         # Validation keeps the epoch-0 cap sample fixed so checkpoint metrics are paired.
         sched.step(); metrics = evaluate(T, model, val_loader, device)
         row = {"epoch": epoch, "train_loss": float(np.mean(vals)), "val": metrics}; history.append(row)
-        score = metrics["link_top1"] * metrics["candidate_recall"]
+        # Detection drift is REPORTED every epoch, not asserted away. In frozen mode it must
+        # be identically zero; in adapt/distill it is the number that decides whether the
+        # drift apparatus is worth building at all.
+        drift = detection_drift(model, _detect_reference, _probe_imgs)
+        row["detection_drift"] = drift
+        if TRUNK_MODE == "frozen" and drift["max_abs"] > 1e-4:
+            raise RuntimeError(
+                f"H1R_TRUNK_MODE=frozen but detection logits moved by {drift['max_abs']:.3e} -- "
+                "the trunk is not actually frozen"
+            )
+        score = metrics["select_score"]
         if score >= best:
             best = score; torch.save(model.base.state_dict(), Path(args.out) / "edge_predictor_best.pth")
             if model.projector is not None: torch.save(model.projector.state_dict(), Path(args.out) / "appearance_projector_best.pth")
         save_resume(resume, model, opt, sched, scaler, epoch=epoch, best=best, history=history)
         (Path(args.out) / "metrics.json").write_text(json.dumps(history, indent=1))
-    for k, v in detect_before.items():
-        if not torch.equal(v, model.base.detect_head.state_dict()[k].detach().cpu()):
-            raise RuntimeError("frozen detection-head bytes changed")
-    return {"best": best, "history": history}
+    return {"best": best, "history": history, "trunk_mode": TRUNK_MODE,
+            "final_detection_drift": history[-1].get("detection_drift") if history else None}
 
 
 def main(argv=None) -> int:

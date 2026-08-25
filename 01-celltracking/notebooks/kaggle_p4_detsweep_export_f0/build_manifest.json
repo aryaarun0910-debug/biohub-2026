@@ -150,5 +150,10 @@
     }
   ],
   "declared_slug": "biohub-p4-detsweep-export-f0",
-  "title": "Biohub P4 DetPeak Superset Export LOEO F0"
+  "title": "Biohub P4 DetPeak Superset Export LOEO F0",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p4-detpeak-superset-export-loeo-f0"
 }

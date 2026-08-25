@@ -3,7 +3,7 @@ id: 00-system/handoff
 title: Handoff
 area: 00-system
 status: active
-updated: '2026-08-18'
+updated: '2026-08-24'
 owner: biohub
 links: []
 tags: [handoff, entry-point]
@@ -11,9 +11,105 @@ tags: [handoff, entry-point]
 
 # Current handoff
 
-**Status:** PAUSED 2026-08-18; host resumes **full-time 2026-08-24**. Branch `master`.
+**Status:** ACTIVE 2026-08-24. Branch `master`.
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
+
+## 🎯 LIVE 2026-08-25 — P9 SCORED 0.925 (rank 207/2,693). NEXT ACTIONS ARE CPU-ONLY.
+
+**P9 coupled division transplant scored 0.925** (submission 55753516), **+0.010** — the largest gain of
+the campaign and the **first division-class change ever to score positive**. Recorded prediction band
+(central 0.919-0.925) HIT. Detail: `../07-outputs/submissions.md`; seven-agent cycle:
+`../06-knowledge-system/experimental-records.md` (2026-08-25 entries).
+
+**Public frontier is 0.927 and SATURATED** — 202 teams at >=0.926, **106 at exactly 0.926** (one forked
+artifact). Top-3 = **0.953**, leader 0.962, gap **+0.028**. Only **6 teams** are at >=0.947.
+
+### FIVE MEASURED FACTS THAT DRIVE THE NEXT CYCLE
+
+1. **Divisions CAN reach top-3 — my earlier doubt is REFUTED.** Perfect division Jaccard = **+0.0993**
+   pooled (3.5x the gap); reach-limited oracle **+0.0583**. BUT **division FP suppression alone caps at
+   +0.0027** — P9 was a precision fix; **the next division move must raise TP** (~44 TP at 0 FP, or 72
+   at <=100 FP, against 5 today).
+2. **The nominator is a hard per-target ARGMAX** — in-degree 1 for all 2,162,040 candidate edges, zero
+   with in-degree 2. **70.6% of the 17,001 missing GT edges are a RANKING error** (a wrong parent is
+   already nominated); only 29.4% are thresholding. kNN-3 recovers **92.5%** of the misses while
+   retaining **99.4%** of today's nominations, at 3.5x set size.
+3. **BLOCKER on any candidate widening:** the ILP ranks by `edge_prob` = the same column softmax, and
+   **`BIOHUB_ILP_APPEARANCE_WEIGHT = "0.0"` means there is NO abstention price** — every feasible
+   candidate is accepted. **"Over-nominate and let the ILP prune" DOES NOT HOLD here.** Restoring
+   appearance weight is a PRECONDITION, not an independent lever.
+4. **The NMS/peak rule is EXONERATED** — 0 collisions on competition GT, 0.12% on dense Zebrahub,
+   ceiling >=99.88%. **Pool-kernel tuning is dead.** The recall loss is the **one-hot delta target**
+   (`target[b,zi,yi,xi]=1.0` at a TRUNCATED index), which forces broad low-amplitude blobs — **so the
+   monotone-decreasing F1-vs-threshold curve is a SYMPTOM of the target, not a separate bug.**
+5. **Two of the top three say the gap is NOT the edge model.** TWEAK (#3, 0.953): a *"universal plugin
+   ... gains ranging from 0.030, 0.040, to 0.050"*, no new weights, explicitly not division work
+   (discussion/735352). Soheil Ayati (#2, 0.959): *"many 'linking' issues actually originated earlier
+   during **node selection**"* (discussion/737101). mikelou1 retrained from scratch -> only **0.928**.
+
+### DO THESE FIRST — all CPU-only or <1 GPU-h, all gate the 21-33 GPU-h spend
+
+| # | action | cost | kill criterion |
+|---|---|---|---|
+| 1 | **Push `p4_detsweep_export_f0.json`** — built, never pushed. The local-max test is threshold-independent, so the whole [0.5,1.0] PR curve is a CPU replay. Measured recall 0.445 -> 0.563 at p0.5; `edge recall ~ node_recall^2` => **x1.60** | CPU replay | curve does not beat 0.96875 on the official scorer |
+| 2 | **`BIOHUB_ILP_APPEARANCE_WEIGHT` 0.0 -> 0.1** on the CURRENT candidate set | 1 kernel | does not hold or improve adjusted Jaccard |
+| 3 | **M1 duplicated-source LAP replay** on `C:/temp/preilp_f1_v2/preilp_split1.parquet` | CPU | **<8 of 19 contested daughters flip at any delta_div** |
+| 4 | **T3.1 drift gate** — 200 steps detection FT, no drift control, measure association AUC drop | <1 GPU-h | **<1% drop => the whole drift apparatus is unnecessary; do not build it** |
+| 5 | **Arm-A no-op control** (LR=0, model still in `train()`) attached to any training claim | 0.1 GPU-h | any gain in Arm A is pure AdaBN |
+| 6 | **TTA union instead of mean** — `predict_unet_transformer.py:375-388` averages 4 flipped logit volumes and divides by 4; **averaging annihilates peaks that disagree by +-1 voxel** | 1 kernel | union does not raise node count / edge TP |
+
+### STANDING CORRECTIONS
+- **Tune EARLY layers, not the head.** PES (VERIFIED): later layers memorise noise first. Under
+  appearance shift + noisy labels the reflex *"freeze the backbone, train the head"* is the WORST choice.
+  **Do not apply layer-wise LR decay** — it pushes the opposite way.
+- **`assert optimizer.state[p]['step'] > 0`** would have caught the phantom +0.104 on its own.
+- **Never select a checkpoint on Zebrahub validation.** Select on the target metric via
+  `scripts/core/score_oof.py`, LOEO, both embryo directions separately. Use **WiSE-FT** weight-space
+  interpolation to get ~10 candidates per training run for CPU cost.
+- **Our LOEO split the CROPS but never the MODEL** — all nine specs attach the public support pack.
+  Fold 0 is public-weights-only; fold 1 attaches `aryaarun07/biohub-oof-weights`. **The two folds are not
+  the same instrument and must not be pooled** until this is resolved (attachment verified, USE is not).
+- **Trust Ultrack's detections, distrust Ultrack's divisions** — it is a deterministic ILP, so its errors
+  are structured and input-determined: the case where noise-averaging fails.
+
+### STILL BROKEN — neither GPU lane may launch
+**S5** crashes on step 1 (`F.binary_cross_entropy` under CUDA autocast — a trap `h1r_trainer_patch.py:12-13`
+already documents) and **deletes every division label** (`h1r_edge_train.py:95-97`, `:165-167`), discarding
+the 65,741-link asset that is the lane's entire rationale. **S1** carries three SEV-1 defects: selection at
+max-F1 rather than the deployed operating point; single-forward eval against 8-view deployed TTA; and a
+fine-tuned trunk that silently rewrites every edge feature.
+
+## LIVE UPDATE 2026-08-24 — S1 smoke v2 passed; full run awaits host green-light
+
+This section supersedes the stale P7/S0/blocker text later in this handoff.
+
+- Live position: **0.915, rank 515 / 2,686**; leader 0.962, top-3 boundary 0.953, gap +0.038.
+- **P7 is dead and was not submitted:** 400 nodes / 368 edges, local 0.1090 vs the 0.8907 gate.
+  The checkpoint replaced the detector as well as the edge head and is catastrophically
+  miscalibrated at the inherited 0.96875 detector threshold.
+- **S0 is dead without GPU:** xiaoleilian's checkpoint has 0/106 key-name overlap with our model,
+  four pooling levels vs three, and no temporal-attention analogue. Its 6–10 GPU-h return to H1.
+- The identity blocker is cleared: private Kaggle dataset
+  `aryaarun07/biohub-zh001r-identity` exists. The new executable loader reproduces the authority
+  exactly: **1,192,441 continuation + 65,741 division-daughter = 1,258,182 associations**.
+- S1 now has reproducible smoke/full specs. Pre-launch defects fixed: exact 1.625 µm geometry,
+  global validation padding, strict initialization, zero-epoch threshold sweep, full
+  optimizer/scheduler/scaler/RNG resume, and paired fp32/fp16 DataParallel telemetry with a 1.3×
+  abort gate. Smoke v1 failed before model/data execution because the vendored trainer's `src/`
+  was absent from `sys.path`; the runner now inserts both import roots. Corrected v2 completed on
+  Kaggle T4x2: AMP was **3.894x** faster, selected-threshold validation F1 moved **0.6335 ->
+  0.7375** after the two-step plumbing run, and the deployed-threshold F1 moved **0.5538 ->
+  0.7008**. The smoke never submitted. The full S1 run is technically cleared but awaits the
+  host's explicit next-stage authorization under `CLAUDE.md` rule 8.
+- The embedding lane is concrete: opt-in 64-D normalized appearance projector over existing U-Net
+  node features, zero-gated bounded cosine residual, continuation-only spatial-KNN hard triplets,
+  and a top-k pre-threshold candidate sidecar. Legacy logits/graph selection remain byte-identical
+  when disabled. A runnable S5 trainer now joins adjacent Zh001r windows, freezes and bypasses the
+  detector, masks division daughters, reports top-1/candidate recall, and supports full resume.
+  Both a two-step smoke spec and a full S5 spec now attach the public Zh001r pack plus the private
+  identity sidecar and emit no submission. S5 remains gated behind S1 evidence rather than being
+  promoted speculatively.
 
 ## 🎯 HOST DECISION 2026-08-23: **TOP-3 OR NOTHING.** Bronze is not the win condition.
 
@@ -26,7 +122,7 @@ is +0.032 away and needs the retrain. They compete for the same 37 days. The dec
 det-threshold sweep) are worth running only because they are CPU-cheap and ride along — **they are
 not the plan and must not consume calendar.**
 
-**The plan is H1: retrain, on Colab, starting immediately.**
+**The plan is H1: retrain, on Kaggle, starting immediately.** (Colab is gone -- host, 2026-08-24. See the compute section below: this does *not* change the plan's substance.)
 
 **Why nothing else reaches 0.947 — measured, not argued:**
 - Wrapping a public notebook can only put us AT the public frontier, never ahead of it. When
@@ -44,9 +140,79 @@ not the plan and must not consume calendar.**
 (72/72 crops, median residual 4e-5 µm) at exactly the deployed 1.625 µm geometry. We own 151
 division events; this is ~436× more. Nobody else appears to have registered those crops.
 
-**Budget:** 37 days to 2026-09-29. Colab Pro ~45 GPU-h/week (training, internet) + Kaggle ~30 h/week
-(inference/submission only). ~168 submission slots at 5/day. **Calendar is the binding constraint,
-not slots and no longer compute.**
+**Budget:** 36 days to 2026-09-29. **ONE pool: Kaggle GPU, host-stated ~45 h/week** (Kaggle's published
+quota is 30 h/wk -- plan against 30, it still fits). Covers training AND inference AND submission.
+~165 submission slots at 5/day. **Calendar is still the binding constraint, not slots and not compute.**
+
+## 💻 COMPUTE CHANGE 2026-08-24 — Colab is gone. H1 survives; the *ordering* changes.
+
+Host, verbatim: *"we have only 45 hours on Kaggle GPUs a week no Colab"*. The two-pool budget in
+`h1_execution_spec_2026-08-18` §1 is void. **Do not re-plan H1 away — re-read its own numbers.**
+
+**H1 was never compute-bound, and the spec says so.** Its §7 budget check, restated against one pool:
+
+| leg | GPU-h | slots |
+|---|---|---|
+| S0 xiaoleilian A/B + S0b Option-D discriminator + S0c LB leg | 6-10 | 1 |
+| S1 detector arm + S1b AMP measurement + S2 background-weight ablation | 2-3.5 | 0 |
+| S3 competition LOEO on retrained detector + S4 submission | 6-8 | 1 |
+| S5 edge half + S6 AdaBN / surgical-FT | 7-11 | 0 |
+| **whole programme** | **21-33** | **2** |
+
+That is **under one week of the new single pool** even at Kaggle's conservative 30 h. Compute did
+not become the constraint; calendar still is.
+
+### What actually changes — five items, and one of them inverts a decision
+
+1. **Device is now deterministic: Kaggle T4x2, CC 7.5.** This **closes spec open-item #5**
+   (non-deterministic Colab T4/L4/A100). fp16 + `GradScaler` is now *correct* rather than a gamble,
+   and the patch's hard-coded `torch.float16` needs no bf16 branch. A simplification, not a cost.
+2. **The DataParallel/autocast trap goes from conditional to guaranteed.** On Colab a single-GPU
+   allocation would have made spec F5/F8 moot. On T4x2 every run is `nn.DataParallel`, so the
+   patch's "autocast *inside* `TemporalUNet3D.forward`" design is load-bearing on **every** run.
+   It is written that way already but is **still unverified on GPU (open item #4)**. S1b is
+   therefore no longer optional: measure the fp16 speed-up on the first 50 steps or the run is
+   silently ~4x slow. **Escape hatch: Kaggle P100 is single-GPU** and sidesteps DataParallel
+   entirely if AMP misbehaves -- pin `machine_shape` explicitly either way.
+3. **Internet is available but not free.** `kaggle_factory` supports it
+   (`scripts/core/kaggle_factory.py:266` `enable_internet`), but an internet-on kernel cannot
+   submit. Pattern: train internet-on -> save weights as a dataset -> attach to an internet-off
+   submission kernel. **The streaming lane is not needed at all** -- see item 4.
+4. **The edge half's data is ALREADY a Kaggle dataset, which removes a blocker.**
+   `kkunizaw/biohub-zh001r` is live and attachable (verified 2026-08-24):
+   `zh001r_iso.npy` 377 MB, `zh001r_tgt.npy` 377 MB, `zh001r_nodes.npz` 9.4 MB. So the OME-Zarr
+   stream lane is off the critical path, and with it **spec open-item #1 (the P2 metadata
+   re-audit) and the `h1r_fetch_imaging.py` 3x4-chunk bug**. Losing Colab's internet costs nothing
+   here; moving to Kaggle actively helps, because the training data no longer has to be
+   re-downloaded per session.
+5. **NEW HARD PREREQUISITE, zero GPU: upload `data/external/zebrahub/zh001r_identity.npz`
+   (8.7 MB) as a Kaggle dataset.** Verified 2026-08-24: it is **not** among our datasets. Colab
+   would have read it off local disk; a Kaggle kernel cannot. **Nothing in H1 runs until this is
+   pushed.** It is minutes of work and it is now on the critical path.
+
+### The inversion — S0-before-S1 was calibrated for a budget that no longer exists
+
+Spec §6.6 puts S0 first so that a cheap proxy (a higher-ranked team's retrained detector) can
+**pause H1 before Colab hours are spent**. Restate the costs in one pool:
+
+- **S0 + S0c: 6-10 GPU-h and 1 slot.**
+- **S1 detector arm: 0.5-2 GPU-h and 0 slots.**
+
+**The gate now costs 3-5x more than the thing it was protecting, and a slot on top.** "Run S0
+first to avoid wasting training hours" was sound when training sat in a separate, scarcer pool. It
+is no longer a saving -- sequencing S1 behind S0 buys nothing and **spends calendar, the one
+binding constraint.**
+
+**Therefore: run S1 in the same week as S0, not after it.** Keep S0 -- it still answers the
+central premise question (*does any retrained detector move OUR LB?*) and it is the only leg that
+produces LB evidence, which per the transfer law and the LOEO suspension is the only evidence that
+counts. But it no longer gates S1. Only S3/S4 -- the legs that cost 6-8 h and a slot -- stay behind
+a gate.
+
+**Unchanged and still binding:** every GPU launch needs explicit host green-light; no submission is
+automatic; checkpoint-resume (patch P6, `edge_predictor_last.pth` every epoch) is now genuine
+insurance rather than convenience, because a preempted Kaggle kernel loses everything since the
+last save.
 
 ## Mission
 
@@ -137,9 +303,8 @@ the absolute.
 
 ## 📍 POSITION FOR 2026-08-24
 
-Rank **370 / 2,588**; bronze ≈ 258. Deadline **2026-09-29** (~5.5 weeks). **171 slots** left at
-5/day — slots are NOT the constraint, **calendar is**. Compute: Colab Pro ~45 GPU-h/wk (training,
-internet) + Kaggle ~30 h/wk (inference/submission only).
+Rank **449 / 2,659**; deadline **2026-09-29** (~5 weeks). Slots are NOT the constraint, **calendar is**.
+Compute: **Kaggle only, ~30-45 GPU-h/wk, one pool for everything** (see the compute section).
 
 **Wrapping is exhausted — measured, not judged.** Nine levers dead; three whole classes closed this
 week (division post-processing, detection threshold, abstention at 58.3% vs a 58.88% bar).

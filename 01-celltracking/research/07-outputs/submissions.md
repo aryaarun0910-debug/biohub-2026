@@ -749,3 +749,227 @@ weight is retested, it must ship alone.**
 Slots consumed: 15. Platform unchanged at **P3 harmonic 0.915** — p8 is NOT adopted.
 
 
+
+## 2026-08-24 — `p9_coupled_division` v1 — PREDICTION RECORDED BEFORE THE SCORE
+
+Kernel `aryaarun07/biohub-p9-coupled-division` v1, COMPLETE. Receipt-bound, verdict PASS.
+Submission sha256 `7d9c24d620656c56d04d63160a64a3b7030fb62b164bf5b4c65c367fefb032a8` (12,491,452 B),
+independently re-hashed from the file and matching the receipt. Built on **our** `p3_harmonic`
+base (sha `70b636b6…`), so our bidirectional harmonic is retained.
+
+**What it ships — the FULL coupled transplant, verified in the injected code**
+(`scripts/kaggle_edits/coupled_division_transplant.py`), not p8's half-port:
+
+| item | P9 | our 0.915 | source 0.926 |
+|---|---|---|---|
+| `SAFE_DIV_MAX_UM` | **8.0** | 4.66 | 8.0 |
+| `SAFE_DIV_SISTER_MAX_UM` | **11.0** | 8.5 | 11.0 |
+| `SAFE_DIV_EXISTING_CHILD_MAX_UM` | **10.0** | 7.65 | 10.0 |
+| C1 mid-track parent (`:143`) | present | absent | present |
+| C2 mutual-nearest-orphan (`:115`) | present | absent | present |
+| C3 t+2 divergence 2.25 µm (`:205`) | present | absent | present |
+
+**THE DECISIVE PRE-SUBMISSION CONTROL — we ran the real 0.926 notebook on the same substrate:**
+
+| | nodes | edges | divisions |
+|---|---|---|---|
+| our P3 harmonic (0.915) | 122,214 | — | — |
+| **P9 coupled** | **122,084** | **117,901** | **406** |
+| **0.926 rocker (control)** | **120,748** | **116,536** | **384** |
+| p8 loosefilter (scored **−0.003**) | — | — | 455 |
+| p5 divfix (scored **0.000**) | — | — | 703 |
+
+**P9's division count lands within 6% of the real 0.926 and clearly apart from both of our failed
+division arms.** The constraint set is doing what it does in their pipeline. Node count is −130 vs
+P3 (−0.1%), so the detection surface — the only class with measured 3.5× LB amplification — is
+essentially untouched. That is the risk we most needed to avoid.
+
+**PREDICTION (recorded before the score; low band promoted to central per the standing rule):**
+- **central 0.919–0.925**
+- upside 0.926–0.930 (~20%)
+- flat/down 0.912–0.918 (~25%)
+
+**I do NOT endorse the 0.926–0.928 expectation.** Two measured reasons to discount:
+1. `div_proposal_funnel` fold 0: **condition (e), "second daughter is already parented", kills 19 of
+   26 GT divisions and no gate setting touches it.** Our pipeline loses divisions upstream of every
+   gate in this transplant.
+2. Division-class changes have scored **0.000** and **−0.003** for us. This is the
+   mechanism-complete version and the control is reassuring, but the class prior is poor.
+
+Against that, the case for a real gain is the strongest this project has had on a division lever:
+the transplant is LB-verified at 0.926 by **two independent teams**, it is the complete design rather
+than p8's radii-without-filters, and our own GT says the radii are right (**GT median sister
+separation at birth 10.57 µm vs our 8.5 µm gate**; only 19 of 151 divisions clear our gates at all).
+
+**Falsifier:** a score of 0.915 ± 0.001 means the transplant does not transfer off its author's
+substrate despite reproducing their division count — which would be a genuinely new fact, since it
+would separate "emits the same divisions" from "scores the same".
+
+Verification at submit time: `pytest -q` → **739 passed, 0 failures** (the 29 previously known
+failures are gone); research tree 65 docs OK; claims table 53 OK.
+
+### SCORE: **0.925** — submission `55753516`, 2026-08-24 21:13. PREDICTION HIT.
+
+Recorded band was central **0.919–0.925**, upside 0.926–0.930 (~20%), flat/down 0.912–0.918 (~25%).
+Actual **0.925** — top of the central band. **The first central estimate in seven to contain the
+outcome**, and the first after the standing "promote the low band" correction was applied. The
+correction worked: the naive modal estimate (0.926–0.928, held by the host) was still optimistic.
+
+**+0.010 — the largest single gain of the campaign**, and the **first division-class change ever to
+score positive** for us (prior: divfix 0.000, p8 −0.003).
+
+Rank **207 / 2,693**, up from 449 / 2,659.
+
+### THIS REVISES THE TRANSFER LAW AGAIN — and the revision is the useful part
+
+| division submission | design | LB Δ |
+|---|---|---|
+| p5 divfix | ILP division economics, no discriminator | **0.000** |
+| p8 loosefilter | loose radii 12/15/10, **filters omitted** | **−0.003** |
+| **p9 coupled** | **radii 8/11/10 + C1 + C2 + C3, complete** | **+0.010** |
+
+The prior reading — "division changes are neutral-to-harmful" — was drawn from two **incomplete**
+ports. **Division changes transfer when the mechanism is complete.** The discriminating variable is
+not the lever class; it is whether the precision constraints ship with the aperture. That is a
+materially different and more actionable law, and it retires "post-processing is exhausted".
+
+### THE NEW MEASUREMENT NOBODY ASKED FOR: our harmonic is now dead weight
+
+| | base | + transplant | delta |
+|---|---|---|---|
+| theirs (0.913 + transplant) | 0.913 | **0.926** | +0.013 |
+| ours (0.915 = 0.913 + harmonic) | 0.915 | **0.925** | **+0.010** |
+
+Full additivity would put us at **0.928**. We measured **0.925**. So the bidirectional harmonic,
+worth **+0.002** on the bare base, is worth about **−0.001** once the coupled division transplant is
+present. **The two patches interfere and the harmonic is subsumed.**
+
+Mechanism (consistent with `candidate generation` analysis): the harmonic is a mutual-support
+*penalty* applied upstream of an unchanged 0.48 gate — it suppresses one-directionally-supported
+edges. The transplant's C2 (mutual-nearest-orphan) is itself a mutual-support test. Both are asking
+the same question; running them in series double-charges it.
+
+**Falsifiable, one slot, no GPU: P9 with `BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT` disabled should score
+≈0.926.** Note the guard at `p3_harmonic` cell 5 (`if not 0.0 < w <= 0.35: raise`) must be relaxed to
+admit 0, so this is a code edit, not an env edit.
+
+### POSITION AFTER THE GAIN — the honest read
+
+- **202 teams at ≥0.926, 209 at ≥0.925.** The public 0.926 has been widely adopted; we are at the
+  frontier, not ahead of it. Wrapping is exhausted *again*, one generation up.
+- Top-3 boundary **0.953**; leader 0.962. **Gap +0.028.**
+- Everything reachable by porting public code is now spent. The remaining +0.028 must come from
+  something the field does not have — which returns the campaign to H1 and the zh001r asset.
+
+### WHAT THE FUNNEL SAYS IS LEFT IN DIVISIONS
+
+`div_proposal_funnel` fold 0, 26 GT divisions, **measured with the old gates but the killer is
+gate-independent**: condition (e) — *the second daughter already has a parent* — loses **19 of 26**,
+and no radius or constraint in this transplant touches it. The transplant fixed the gate half
+(conditions g); condition (e) is untouched and is now the largest identified division loss.
+The mechanism it implies is *contested reassignment*: allow the proposer to take a daughter away
+from an existing link when division evidence is strong, rather than requiring an orphan.
+**This is post-processing, needs no GPU, and is the natural successor experiment to P9.**
+
+## 2026-08-25 — `p15_forkfree_probe` — PREDICTION RECORDED BEFORE THE SCORE
+
+**This is a DIAGNOSTIC, not a lever. It is expected to score BELOW 0.925 and that is the point.**
+
+Mechanism (Kaggle discussion/734192, Arul Prasad S P, VERIFIED): the official `summarise()` **drops
+the division term entirely when a submission contains no divisions at all** —
+`score = edge_jaccard if not has_divisions`. So a fork-free submission returns our **pure adjusted
+edge Jaccard**, and the division term follows by subtraction.
+
+Build: P9 (LB 0.925) with a single env flip, `BIOHUB_OUTPUT_SAFE_DIVISIONS = '0'`. Verified in the
+built notebook: set in cell 2, read in cell 3 (`!= "0"` -> False), guard fires in cell 6
+(`if not OUTPUT_SAFE_DIVISIONS ... return edges`). **Single assignment, no last-wins trap** — the
+trap that nearly broke the p8 build was explicitly checked for. The bijection in
+`motion_relink_edges` already forbids out-degree 2, so this flag is the sole remaining fork source.
+Everything else — datasets, division transplant code, radii — is byte-identical to P9.
+
+### The arithmetic
+
+`0.925 = adj_edge + 0.1 * divJ`  =>  `divJ = (0.925 - probe) / 0.1`
+
+Reference decomposition from the forum (mikelou1, VERIFIED): **0.928 = adj_edge 0.898 + 0.030**,
+i.e. divJ 0.30. **So a 0.953 team carrying mikelou1's divisions needs adj_edge ~0.923.**
+
+### PREDICTION (low band promoted to central, per the standing correction)
+
+- **central 0.921–0.924**
+- upside (probe >= 0.9245, i.e. divisions contributing almost nothing) ~25%
+- downside (probe <= 0.920, i.e. divisions worth >= 0.005) ~20%
+
+Basis: our LOEO divJ is ~0.015, which would put `0.1*divJ` at ~0.0015 and the probe at ~0.9235.
+P9 emits 406 divisions; if most are false positives the division term is near-worthless and the probe
+lands high.
+
+### THE TWO BRANCHES — both are decisive, and they point OPPOSITE ways
+
+**Branch A — probe ~0.923-0.924 (adj_edge already ~0.923).** Then our EDGE term is already at the
+level a 0.953 team needs, and **our entire deficit is divisions.** This would REVERSE the strategic
+read I have been building all session (that the frontier is an edge race) and would send everything
+back to the division lane — where our own oracle says the bijection forfeits a +0.0232 ceiling.
+
+**Branch B — probe ~0.915-0.920 (adj_edge ~0.915-0.920).** Then divisions are already contributing
+0.005-0.010 and the remaining gap is genuinely in the edge term, confirming the forum arithmetic and
+the mikelou1 datapoint. Detection-recall + reranking becomes the lane, as currently queued.
+
+**Either way this single slot settles the question that four separate analyses have been arguing
+about, at the cost of one submission and zero modelling work.**
+
+### Falsifier
+A probe score materially ABOVE 0.925 would mean the fork-free reading is wrong (divisions currently
+cost us score rather than earning it), which would itself be a large finding and would immediately
+retire the entire division lane including P9's +0.010.
+
+## 2026-08-25 — DETECTION-THRESHOLD ARMS `p16_det090` / `p17_det094` — PREDICTIONS BEFORE THE SCORE
+
+Both are single-variable arms off P9 (LB 0.925): `BIOHUB_DET_THRESHOLD` 0.96875 -> 0.90 and -> 0.94,
+everything downstream byte-identical. This honours Mendrika's rule (discussion/734604): *"keep the
+linker fixed while comparing detectors."*
+
+**Build check passed the known trap.** Cell 2 of the base carries `BIOHUB_DET_THRESHOLD = "0.96875"`
+and our edit appends a SECOND assignment after it; the read is in cell 3. Verified last-wins gives
+0.90 / 0.94. This is the same last-wins shape that nearly broke the p8 build and that we found in the
+public 0.926 and 0.927 notebooks.
+
+### Why this arm, stated as measured facts
+
+- **The metric charges over-prediction only `1 - 0.1 x over-prediction`** (Luka Duvanov,
+  discussion/733877, VERIFIED). So +20% nodes costs ~2% if edge Jaccard does not improve at all.
+- **`edge recall ~ node recall^2 x conditional linking accuracy`** (Mendrika, discussion/734604).
+  Recall enters QUADRATICALLY while over-detection is taxed 0.1x linearly.
+- **Cutting nodes 17% cost ~0.18 edge Jaccard** (Alan Thanickal, discussion/724917) — we are on a
+  steep part of the curve, and the deployed threshold sits high on it.
+- **Our own S1 sweep: detection F1 is monotone DECREASING in threshold**, optimum at or below p0.50
+  (deployed-threshold recall 0.445 vs 0.563 at p0.5).
+- **The near-duplicate trap does NOT apply.** Duvanov's ~9%-for-nothing penalty comes from unioning
+  two models' detections without a merge pass. Lowering one detector's threshold cannot create a
+  twin, because the local-max NMS already suppresses within 1.625 um — and we measured that NMS
+  costs at most 0.12 pp of recall.
+
+### PREDICTION (low band promoted to central, per the standing correction)
+
+**p17 (0.94, the modest step):** central **0.923–0.927**, upside 0.928–0.932 (~25%),
+downside 0.918–0.922 (~25%).
+
+**p16 (0.90, the real step):** central **0.920–0.928**, upside 0.929–0.935 (~25%),
+downside 0.910–0.919 (~30%). Wider band both ways — a larger move on the one lever class with a
+**measured ~3.5x LB amplification**.
+
+**The standing caution, restated honestly:** detection-surface changes amplify ~3.5x on the LB, and
+our ONLY prior control in this class was a 28% node CUT that scored **-0.032**. **Adding** nodes is
+the untested direction. The metric line bounds the downside at roughly `-0.1 x over-prediction` if
+edge Jaccard fails to improve, which is why a big step is affordable at all.
+
+**Read the PAIR, not either alone.** Monotone improvement 0.94 -> 0.90 says push the threshold
+further and a third arm is warranted. Non-monotone (0.94 up, 0.90 down) locates an interior optimum
+between them. Both down retires the whole recall-push thesis despite four independent lines of
+evidence supporting it — which would itself be the most surprising result of the campaign.
+
+### OPERATIONAL FACT DISCOVERED — record it
+**Kaggle permits a maximum of 2 concurrent GPU BATCH sessions.** `p17_det094` was refused with
+*"Maximum batch GPU session count of 2 reached"* while `p15_forkfree_probe` and `p16_det090` were
+running. **Kernel pushes must be pipelined 2 at a time**, which is a real constraint on how many arms
+can be in flight and was not previously in the ledger.
