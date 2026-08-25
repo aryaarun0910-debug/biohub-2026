@@ -76,10 +76,17 @@ levers:
     status: running
     falsifier: >-
       EXP-0016 / EXP-0017 read as a PAIR must show a monotone or interior-optimum gain.
-    closed_by: [FACT-0102]
+    closed_by: [FACT-0102, FACT-0111]
     closed_date: '2026-08-25'
     outcome: >-
-      REFUTED IN THE DIRECTION TESTED. Both arms scored inside their pre-registered bands and
+      FULLY CLOSED - both directions, by LB arms AND by the offline curve. The curve bought
+      from the repaired p4 export shows detection recall is SATURATED: dropping 0.96875 to
+      0.5 buys +0.0010 recall for 23.7% more nodes, raising to 0.999 costs -0.043
+      (FACT-0111). That PREDICTS the measured arms exactly. The inherited threshold is
+      effectively optimal; there is no headroom either way. The real detection lever moved
+      DOWNSTREAM (FACT-0112, now LEVER-0011).
+      .
+      Originally: REFUTED IN THE DIRECTION TESTED. Both arms scored inside their pre-registered bands and
       both moved DOWN: 0.90 -> 0.922, 0.94 -> 0.924 against the deployed 0.96875 -> 0.925.
       Four independent lines of evidence supported lowering the threshold and all were wrong
       about the sign. With the p6 control (0.999 -> 0.883) the four points bracket an interior
@@ -92,7 +99,7 @@ levers:
       slots, which subsumes the pointwise arms. Smoke (EXP-0004S) shows the per-crop spread
       is large - 4% vs 49% extra nodes on two crops of the same fold - so a single global
       threshold is probably the wrong instrument.
-    priority: 3
+    priority: 9
 
   - id: LEVER-0004
     claim: Trackastra used as a PRUNER of candidate edges
@@ -167,3 +174,24 @@ levers:
       Widening the 8 rules would fail nearly every deploy spec. The real gap is that no rule
       has ever been written for the deploy substrate, which is a coverage problem needing
       new rules, not a globbing problem.
+
+  - id: LEVER-0011
+    claim: >-
+      Node recall is lost DOWNSTREAM of detection - in filtering and post-processing, not at
+      the threshold - and recovering it is worth more than any threshold change
+    status: open
+    falsifier: >-
+      If the peak-stage and scored-frame node recall agree on fold 1, there is nothing
+      downstream to recover and this closes.
+    supporting: [FACT-0110, FACT-0112, FACT-0083]
+    note: >-
+      Fold 0 loses ~1 point of recall between peak detection (0.9955) and the scored graph
+      (0.9861). The prior record puts scored fold-1 node recall at 0.8691, implying a far
+      larger downstream loss on the fold that carries essentially all the headroom
+      (FACT-0031). This is the same shape as the division finding - the pipeline discards
+      what it already has (FACT-0083) - and matches Soheil Ayati's public remark that "many
+      linking issues actually originated earlier during node selection".
+      .
+      FIRST STEP is free: rerun the curve on the p4 fold-1 export when it lands and compare
+      peak-stage recall against the scored frame. No GPU, no slot.
+    priority: 2

@@ -579,3 +579,74 @@ facts:
       threshold is a subset and the curve can search above 0.96875 for zero slots.
     date: '2026-08-25'
     tags: [detection, refuted, curve]
+
+  # ---- the detection curve, bought offline 2026-08-25 ------------------------------
+  - id: FACT-0110
+    statement: >-
+      Peak-stage node recall at the deployed threshold 0.96875, fold 0, measured under the
+      scorer's one-to-one 7.0 um matching
+    value: 0.9955
+    unit: recall
+    scope: {fold: f0, stage: raw_peaks, n_gt: 20197}
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/detpeak_curve.py matcher over _evidence/p4_detpeak_f0_v2/detpeaks
+      (71 crops, 2,885,180 peaks) vs gtnodes_f0
+    date: '2026-08-25'
+    tags: [detection, curve]
+
+  - id: FACT-0111
+    statement: >-
+      Detection recall is SATURATED at the deployed threshold - the whole [0.5, 0.999] curve
+      moves recall by at most +0.0010 downward
+    value: null
+    unit: curve
+    scope:
+      fold: f0
+      recall_by_threshold:
+        0.5: 0.9965
+        0.9: 0.9963
+        0.94: 0.9961
+        0.96875: 0.9955
+        0.98: 0.9950
+        0.99: 0.9928
+        0.995: 0.9879
+        0.999: 0.9527
+    provenance: MEASURED
+    instrument: scripts/win_bet/detpeak_curve.py matcher over the p4 fold-0 export
+    note: >-
+      Dropping to 0.5 buys +0.0010 recall for 23.7% more nodes; raising costs -0.0027 at
+      0.99 and -0.043 at 0.999. This PREDICTS the measured LB: p16 (+23% nodes) scored -0.003
+      and p6 (0.999, -4.3% recall) scored -0.032. LEVER-0003 closes in BOTH directions - the
+      inherited 0.96875 is effectively optimal and there is no threshold headroom.
+      .
+      CAUTION on the other columns: GT is SPARSELY ANNOTATED (20,197 nodes against a ~1.9M
+      node graph), so N_pred/N_gt ~115x is NOT total_node_ratio (which is -0.0937) and the
+      ~0.009 "precision" is mostly unannotated real cells the metric ignores. Only recall is
+      interpretable here.
+    date: '2026-08-25'
+    tags: [detection, curve, closed]
+
+  - id: FACT-0112
+    statement: >-
+      Node recall is LOST DOWNSTREAM of detection, not at the threshold - 0.9955 at the peak
+      stage versus 0.9861 in the final scored fold-0 graph
+    value: 0.0094
+    unit: recall_lost
+    scope: {fold: f0}
+    provenance: MEASURED
+    instrument: FACT-0110 against the recorded scored-frame node_recall 0.9861
+    derived_from: [FACT-0110]
+    note: >-
+      ~1 point of recall disappears between peak detection and the scored graph on fold 0,
+      to filtering and post-processing. The prior record puts scored-frame node recall at
+      0.8691 on fold 1, so the downstream loss there is far larger - and fold 1 is where
+      essentially all the headroom sits. This relocates the detection lever from the
+      THRESHOLD to what happens after it, matching Soheil Ayati's public remark that "many
+      linking issues actually originated earlier during node selection" and our own finding
+      that the pipeline destroys divisions it already has (FACT-0083).
+      .
+      UNVERIFIED COMPONENT: the fold-1 half is quoted from the prior record, not re-measured;
+      the p4 fold-1 export was still running when this was written.
+    date: '2026-08-25'
+    tags: [detection, downstream, lever]

@@ -4525,3 +4525,62 @@ destroyed first.
 not be run for fold 0. The contract requires both embryo directions and fold 0 is unmeasured.
 
 Recorded as `FACT-0090`..`FACT-0092`.
+
+## 2026-08-25 — THE DETECTION CURVE, BOUGHT OFFLINE: the threshold has NO headroom either way
+
+The repaired p4 export delivered in full — **71/71 crops, 2,885,180 peaks with logits, 16 MB** —
+and `scripts/win_bet/detpeak_curve.py` had input for the first time since it was written.
+
+Fold 0, matched under the scorer's one-to-one 7.0 um rule against 20,197 GT nodes:
+
+| threshold | n_pred | node recall |
+|---|---|---|
+| 0.5 | 2,885,180 | 0.9965 |
+| 0.90 | 2,565,781 | 0.9963 |
+| 0.94 | 2,466,568 | 0.9961 |
+| **0.96875 (deployed)** | **2,332,348** | **0.9955** |
+| 0.98 | 2,233,765 | 0.9950 |
+| 0.99 | 2,066,216 | 0.9928 |
+| 0.995 | 1,879,169 | 0.9879 |
+| 0.999 | 1,343,549 | 0.9527 |
+
+**Detection recall is SATURATED.** Dropping to 0.5 buys **+0.0010 recall for 23.7% more nodes**;
+raising costs −0.0027 at 0.99 and −0.043 at 0.999. That *predicts the measured leaderboard*:
+p16 (+23% nodes) scored −0.003, p6 (0.999) scored −0.032. `LEVER-0003` is now closed in **both**
+directions by two independent instruments.
+
+### Two columns from this run must NOT be quoted
+
+GT is **sparsely annotated** — 20,197 nodes against a ~1.9M-node graph. So:
+
+* `N_pred/N_gt ≈ 115x` is **not** `total_node_ratio`, which is −0.0937. `N_est` is the
+  organiser's estimated cell count, not the annotated count.
+* the ~0.009 "node precision" is mostly **unannotated real cells**, which the metric explicitly
+  ignores rather than penalising.
+
+Only recall is interpretable here. Both columns are discarded.
+
+### The instrument encoded a premise that was refuted the same day
+
+`detpeak_curve.py` computes `projected_edge_index = recall^2 * (1 - 0.1 * over)` — the
+recall-squared law, which `FACT-0102` refuted this morning and which our own earlier work had
+already replaced with `edge recall = P(both endpoints) x CLA`. The projection was not used.
+**A committed instrument is not automatically a correct one**; its assumptions age like any
+other claim.
+
+### Where the detection lever actually went
+
+Peak-stage recall is **0.9955**; the scored fold-0 graph records **0.9861**. About a point of
+recall disappears *downstream* of detection, in filtering and post-processing. The prior record
+puts scored fold-1 node recall at **0.8691** — a far larger downstream loss on the fold that
+carries essentially all the headroom.
+
+That is the same shape as the division finding: **the pipeline discards what it already has.**
+It also matches Soheil Ayati (rank 2) publicly: *"many 'linking' issues actually originated
+earlier during node selection."*
+
+Opened as `LEVER-0011`, priority 2. Its first step is free — rerun this curve on the fold-1
+export when it lands and compare peak-stage against scored recall. The fold-1 half of
+`FACT-0112` is quoted from the prior record and **not yet re-measured**.
+
+Recorded as `FACT-0110`..`FACT-0112`.
