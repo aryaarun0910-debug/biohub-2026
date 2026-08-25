@@ -4366,3 +4366,70 @@ missing-coverage problem, not a globbing problem.
 remains unbought; re-running it needs a fresh push and is **not** automatic.
 
 **Raw output:** `_evidence/p4_detpeak_f0/`.
+
+## 2026-08-25 — TEMPORAL POSITION SMOOTHING IS DEAD as an association lever (CPU-only, zero slots)
+
+The #1 ranked next action, killed on its own pre-registered criterion. **Smoothing moved the
+statistic DOWN in all six measurements**, across two substrates and both estimators.
+
+### Result
+
+Fold-1 PRE-ILP frame (coords BEFORE the deployed output smoother; 17,462 mislinked GT edges):
+
+| arm | endpoints smoothed, pool fixed | everything smoothed |
+|---|---|---|
+| deployed baseline | **26.08%** | — |
+| tracklet **mean** (the pre-registered form) | 20.44% (**-5.64 pp**) | 20.04% (-6.04 pp) |
+| tracklet **linefit** (the deployed form) | 24.66% (**-1.41 pp**) | 24.44% (-1.64 pp) |
+| GT coords (ceiling) | **78.85%** | — |
+
+Fold-1 SCORED frame (already linefit-smoothed; 6,861 mislinked GT edges): baseline 12.24%, mean
+10.52% / 10.28%, GT ceiling 73.24%. Same sign.
+
+**The kill is robust to the anchor problem below**, because it depends only on the SIGN of the change
+against each run's OWN baseline — not on the baseline's absolute value. Six of six negative.
+
+### Mechanism, including a prediction that was made and then confirmed
+
+The mean was predicted to be the worse estimator *before* it was run: a zeroth-order average pulls
+each node toward its track centroid, which for a moving cell injects systematic motion bias — the
+same failure already recorded as *"a static distance prior is BACKWARDS"*. The first-order line fit
+has no such bias. Measured: mean **-5.64 pp** vs linefit **-1.41 pp**, a 4x difference in exactly the
+predicted direction.
+
+But the line fit still LOSES. The reason the handoff's arithmetic ("cut displacement-noise rms
+2.44 -> ~1.9 um") did not translate into a gain: **smoothing follows PREDICTED tracks, and predicted
+tracks are the thing that is broken.** Denoising along a partly-wrong linkage propagates that link's
+error into the position. Only 35-39% of the localisation error is independent per frame, so that is
+all the smoother can remove, while the bias it adds applies to every node on a wrong track.
+
+### Consequence for the deployed pipeline — the current ordering is accidentally CORRECT
+
+`linefit_smooth_output_graph` (built notebook cell 6:1210) is invoked at cell 6:1514, the last call
+before `return`, AFTER division filtering, isolated pruning and short-track filtering — i.e. after
+every edge is final. **The linker never sees a smoothed coordinate.** The proposal was to move it
+earlier; this measurement says moving it earlier would COST about **1.4 pp** of nearest-parent
+accuracy. **Do not reorder it.** Its present position is harmless (linking is already done) and its
+only effect is on reported positions, which the edge-based metric barely rewards.
+
+### The 3.44% anchor does not reproduce, and is now unverified
+
+The oracle was run ad-hoc last cycle and never preserved as code; only its numbers reached this
+ledger. Rebuilt as `scripts/win_bet/nearest_parent_oracle.py` with mandatory calibration gates:
+
+* **Gate 1 PASSES** — correctly-linked GT displacement median **1.817 um** vs the known 1.82 um. The
+  coordinate convention is right.
+* The mislinked-edge count reproduces **exactly** (6,861 on the scored f1 frame).
+* **Gate 2 FAILS** — deployed **12.24%** vs recorded 3.44%; GT **73.24%** vs recorded 68.39%.
+
+The coordinate trap was tested as the explanation and **REFUTED**: isotropic 1.625 gives 11.15% and
+raw voxels give 11.15% (uniform scaling cannot change nearest-ordering; only the correct anisotropic
+scale does, at 12.24%). None approach 3.44%. The difference is therefore in the pool or statistic
+definition, and cannot be reconciled without last cycle's script.
+
+**Neither number should be cited until reconciled.** The new implementation is the one with an
+independent physical calibration; the recorded 3.44% has none. Note this is the second time an
+instrument existed only as numbers in the ledger — **an oracle that is not committed as code is not a
+result, it is an anecdote.**
+
+**Raw output:** `C:/temp/error_atlas/npo_pre1_v2.json`, `nearest_parent_oracle_f1.json`.

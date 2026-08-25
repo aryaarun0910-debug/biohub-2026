@@ -157,10 +157,39 @@ where resuming without `metrics.json` relabelled a trained model as the zero-epo
 
 ---
 
+### ❌ CLOSED 2026-08-25 — TEMPORAL POSITION SMOOTHING, the former #1 ranked action
+
+Killed on its own pre-registered criterion, CPU-only, zero slots. **Six of six measurements moved the
+statistic DOWN**, across two substrates and both estimators. On the unsmoothed pre-ILP frame (17,462
+mislinked GT edges): baseline **26.08%**, tracklet-mean **20.44%** (-5.64 pp), tracklet-linefit
+**24.66%** (-1.41 pp), GT ceiling 78.85%. The scored f1 frame agrees in sign.
+
+The kill survives the anchor problem below, because it depends only on the SIGN of the change against
+each run's own baseline.
+
+**Mechanism.** The mean was predicted to be worse before it ran — a zeroth-order average pulls nodes
+toward the track centroid, injecting the motion bias already recorded as *"a static distance prior is
+BACKWARDS"* — and it was, by 4x, in the predicted direction. But the line fit loses too, because
+**smoothing follows PREDICTED tracks and predicted tracks are what is broken**; denoising along a
+wrong link propagates that link's error. Only 35-39% of localisation error is independent per frame,
+so that is the ceiling on what any smoother can remove.
+
+**Do NOT reorder the deployed smoother.** `linefit_smooth_output_graph` runs at cell 6:1514, last
+before `return`, so the linker never sees a smoothed coordinate. Moving it earlier — the actual
+proposal — would COST ~1.4 pp of nearest-parent accuracy. Its current position is accidentally right.
+
+**The 3.44% anchor does not reproduce and is now unverified.** Rebuilt as
+`scripts/win_bet/nearest_parent_oracle.py` (the old one was ad-hoc and never committed). Calibration
+gate 1 PASSES (GT displacement median **1.817 um** vs known 1.82) and the mislinked count reproduces
+exactly (6,861), but the oracle reads **12.24%** vs recorded 3.44% and **73.24%** vs 68.39%. The
+coordinate trap was tested as the cause and REFUTED (isotropic and raw-voxel both give 11.15%; only
+the correct anisotropic scale differs, at 12.24%). Cite neither number until reconciled.
+
 ### NEXT, gated on the in-flight readings
 1. **p15 decides the lane.** ~0.923-0.924 => our edge term is already at 0.953 level and the whole
    deficit is divisions. ~0.915-0.920 => the gap is genuinely edge, as the forum arithmetic implies.
-2. **p4's curve picks the detection threshold** without spending a slot per point.
+2. **p4's curve picks the detection threshold** without spending a slot per point — but the export
+   was BROKEN and bought nothing; see the IN FLIGHT section. Repaired and re-smoked 2026-08-25.
 3. **The association ranker** (`scripts/kaggle_edits/ranker_block.py`, vendored + validated) is the
    rerank half of retrieve-then-rerank. Remaining work is the ~100-line feature context builder.
    **Its local evaluation is CONTAMINATED, so a slot is the only honest instrument for it.**
