@@ -520,3 +520,62 @@ facts:
       assign a source two targets, plus a selector deciding which sources earn it.
     date: '2026-08-25'
     tags: [division, structural, actionable, headline]
+
+  # ---- 2026-08-25 evening: the three probes scored ---------------------------------
+  - id: FACT-0100
+    statement: Public LB of the fork-free probe (OUTPUT_SAFE_DIVISIONS=0 on P9)
+    value: 0.906
+    unit: score
+    scope: {leaderboard: public}
+    provenance: MEASURED
+    instrument: kaggle submission 55768476
+    experiment: EXP-0015
+    note: >-
+      BELOW both pre-registered bands (0.915-0.920 and 0.923-0.924). The naive subtraction
+      would give divJ = (0.925-0.906)/0.1 = 0.19, which contradicts the DIRECT measurement of
+      1/125 division recovery (FACT-0080) by 24x. The probe is confounded: it lost 578 edges
+      and 230 nodes BEYOND its 406 divisions, ~984 edges or 1.2% of the edge set, almost all
+      true positives - enough to explain the whole drop on its own. See FACT-0101.
+    date: '2026-08-25'
+    tags: [score, probe, confounded]
+
+  - id: FACT-0101
+    statement: >-
+      Our pure adj_edge term, bounded rather than pinned by the fork-free probe
+    value: null
+    unit: score_range
+    range: [0.906, 0.925]
+    provenance: MEASURED
+    instrument: kaggle submission 55768476 with the P9 baseline 55753516
+    derived_from: [FACT-0001, FACT-0080, FACT-0100]
+    note: >-
+      0.906 is a LOWER bound, not the value, because the probe destroyed ~984 true-positive
+      edges it was not meant to touch. Two readings fit: (a) adj_edge ~0.924 with divJ ~0.01,
+      the edge loss explaining the drop; (b) adj_edge ~0.906 with divJ ~0.19 from the naive
+      subtraction. Reading (a) agrees with a direct measurement by a committed instrument;
+      (b) rests on a subtraction pre-registered as biased high. PREFER (a) - our edge term is
+      near top-3 level and the deficit is divisions - but this is INFERRED, not pinned. A
+      clean read needs a probe that removes forks WITHOUT triggering the short-track filter.
+    date: '2026-08-25'
+    tags: [score, adj_edge, inferred]
+
+  - id: FACT-0102
+    statement: >-
+      Detection-threshold response is MONOTONE DECREASING as the threshold is lowered -
+      the recall-push thesis is refuted
+    value: null
+    unit: curve
+    scope: {points: {0.90: 0.922, 0.94: 0.924, 0.96875: 0.925, 0.999: 0.883}}
+    provenance: MEASURED
+    instrument: kaggle submissions 55768483, 55769398, 55753516, 55667537
+    derived_from: [FACT-0001]
+    note: >-
+      Both arms landed inside their pre-registered bands and both moved DOWN. Four
+      independent lines of evidence supported lowering the threshold - the 1-0.1x
+      over-prediction charge, Mendrika's recall-squared formula, Alan Thanickal's 17%-cut
+      datapoint, and our own S1 sweep - and ALL were wrong about the direction. With the p6
+      control at 0.999 -> 0.883, the four points bracket an interior optimum at or slightly
+      ABOVE the deployed 0.96875. The detpeak superset is exported at T=0.5, so every higher
+      threshold is a subset and the curve can search above 0.96875 for zero slots.
+    date: '2026-08-25'
+    tags: [detection, refuted, curve]

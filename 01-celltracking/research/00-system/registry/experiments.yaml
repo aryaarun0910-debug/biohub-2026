@@ -79,23 +79,25 @@ experiments:
     spec: scripts/kaggle_specs/p15_forkfree_probe.json
     kernel: aryaarun07/biohub-p15-forkfree-probe
     submission: 55768476
-    lb: null
-    status: pending
+    lb: 0.906
+    status: scored
     date: '2026-08-25'
     note: >-
       OUTPUT_SAFE_DIVISIONS=0 on P9. summarise() drops the division term when a submission
       has no forks, so the score IS our pure adj_edge and divJ follows by subtraction.
       CAVEAT - it also lost 578 edges / 230 nodes beyond its 406 divisions because the
       short-track filter reacts, so the subtraction is approximate and biased to read divJ
-      high. Kernel COMPLETE; leaderboard has not returned a score.
+      high. SCORED 0.906 - BELOW both pre-registered bands. The naive subtraction gives divJ
+      0.19, contradicting the direct 1/125 measurement (FACT-0080) by 24x; the ~984 lost
+      true-positive edges explain the drop on their own. See FACT-0100 / FACT-0101.
 
   - id: EXP-0016
     title: Detection threshold 0.96875 -> 0.90
     spec: scripts/kaggle_specs/p16_det090.json
     kernel: aryaarun07/biohub-p16-det090
     submission: 55768483
-    lb: null
-    status: pending
+    lb: 0.922
+    status: scored
     date: '2026-08-25'
     note: Read as a PAIR with EXP-0017 for slope, not as a point.
 
@@ -104,8 +106,8 @@ experiments:
     spec: scripts/kaggle_specs/p17_det094.json
     kernel: aryaarun07/biohub-p17-det094
     submission: 55769398
-    lb: null
-    status: pending
+    lb: 0.924
+    status: scored
     date: '2026-08-25'
 
   - id: EXP-0004

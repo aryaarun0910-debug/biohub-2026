@@ -108,9 +108,33 @@ ceiling is **structurally ZERO** (below), and fixing that needs no retraining wh
 
 | ref / kernel | what it settles | state |
 |---|---|---|
-| 55768476 **p15 fork-free** | `summarise()` drops the division term when a submission has no forks, so the score IS our pure **adj_edge**; divJ follows by subtraction | PENDING (kernel COMPLETE, scoring not returned) |
-| 55768483 **p16 det 0.90** | First LB reading on **adding** nodes (+2.73%) — the untested direction of the 3.5x-amplified class | PENDING (kernel COMPLETE) |
-| **p17 det 0.94** (55769398) | Pairs with p16 for SLOPE, not a point | PENDING (kernel COMPLETE) |
+| 55768476 **p15 fork-free** | pure **adj_edge** by subtraction | ✅ **0.906** — below both bands; confounded, see below |
+| 55768483 **p16 det 0.90** | first LB reading on **adding** nodes | ✅ **0.922** (−0.003) — band HIT |
+| **p17 det 0.94** (55769398) | pairs with p16 for SLOPE | ✅ **0.924** (−0.001) — band HIT |
+
+#### ✅ 2026-08-25 evening — ALL THREE PROBES SCORED. The detection lane is REFUTED.
+
+**Prediction record: 2 of 3 bands hit.** Four points now bracket the detection optimum:
+
+```
+0.90 -> 0.922 | 0.94 -> 0.924 | 0.96875 -> 0.925 (deployed) | 0.999 -> 0.883 (p6)
+```
+
+**Monotone decreasing as the threshold drops.** The pre-registration said both arms down
+*"retires the whole recall-push thesis"* — both went down. Its four supporting lines (the
+`1 − 0.1x` charge, recall-squared, the 17%-cut datapoint, our S1 sweep) were wrong about the
+SIGN. Lowering is CLOSED (`FACT-0102`). The live remnant is whether a **slightly higher**
+threshold pays — the detpeak superset answers that offline for zero slots, since it is exported
+at T=0.5 and every higher threshold is a subset.
+
+**p15 does NOT pin divJ — do not quote the subtraction.** It gives divJ 0.19, contradicting this
+session's direct 1-of-125 measurement (`FACT-0080`) by **24x**. The probe lost ~984
+true-positive edges beyond its 406 divisions, enough to explain the whole drop. Preferred
+reading: **adj_edge ≈ 0.924, divJ ≈ 0.01** — our edge term is near top-3 level and the deficit
+IS divisions — but that is INFERRED (`FACT-0101`), not measured. A clean read needs a fork-free
+probe that does not trip the short-track filter.
+
+**Net: the lane is divisions, and `LEVER-0002` owns it.**
 | **p4 detpeak f0** | ❌ **RETURNED NOTHING** — empty `detpeaks/`, see below | COMPLETE, VOID |
 | **p4 detpeak f1** | Same defect; still yields a current-substrate fold-1 LOEO export | RUNNING (left to finish) |
 

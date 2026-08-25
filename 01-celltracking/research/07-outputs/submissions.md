@@ -974,3 +974,52 @@ evidence supporting it — which would itself be the most surprising result of t
 *"Maximum batch GPU session count of 2 reached"* while `p15_forkfree_probe` and `p16_det090` were
 running. **Kernel pushes must be pipelined 2 at a time**, which is a real constraint on how many arms
 can be in flight and was not previously in the ledger.
+
+## 2026-08-25 evening — THE THREE PROBES SCORED
+
+| ref | arm | predicted (central) | **actual** | vs P9 0.925 | verdict |
+|---|---|---|---|---|---|
+| 55769398 | p17, det 0.94 | 0.923–0.927 | **0.924** | −0.001 | band HIT |
+| 55768483 | p16, det 0.90 | 0.920–0.928 | **0.922** | −0.003 | band HIT |
+| 55768476 | p15, fork-free | 0.915–0.920 / 0.923–0.924 | **0.906** | −0.019 | **MISS, below both** |
+
+**Prediction record: 2 of 3 bands hit.** Both detection arms landed inside their stated bands.
+The p15 miss is informative — the confound was larger than estimated, not the mechanism
+different.
+
+### The detection lane is refuted in the direction tested
+
+With the p6 control, four points now bracket the optimum:
+
+```
+0.90    -> 0.922
+0.94    -> 0.924
+0.96875 -> 0.925   (deployed)
+0.999   -> 0.883   (p6 control)
+```
+
+Monotone decreasing as the threshold drops. The pre-registration said plainly that both arms
+down *"retires the whole recall-push thesis despite four independent lines of evidence
+supporting it — which would itself be the most surprising result of the campaign."* Both went
+down. The four supporting lines — the `1 − 0.1x` over-prediction charge, Mendrika's
+recall-squared formula, Alan Thanickal's 17%-cut datapoint, and our own S1 sweep — were all
+wrong about the SIGN.
+
+Lowering is closed. The live remnant is whether a **slightly higher** threshold pays, and the
+detpeak superset answers that offline for zero slots: it is exported at T=0.5, so every higher
+threshold is a subset of it.
+
+### p15 does not pin divJ, and must not be quoted as if it does
+
+The naive subtraction gives `divJ = (0.925 − 0.906)/0.1 = 0.19`. That contradicts this
+session's DIRECT measurement of 1-of-125 division recovery (`FACT-0080`) by **24x**. The probe
+lost **578 edges and 230 nodes beyond its 406 divisions** — ~984 edges, ~1.2% of the set,
+almost all true positives — which is enough to explain the entire drop by itself.
+
+Two readings fit 0.906: (a) adj_edge ≈ 0.924 with divJ ≈ 0.01, or (b) adj_edge ≈ 0.906 with
+divJ ≈ 0.19. Reading (a) agrees with a committed instrument; (b) rests on a subtraction we
+pre-registered as biased high. **Prefer (a): the edge term is near top-3 level and the deficit
+is divisions — but that is INFERRED, not pinned.** A clean read needs a fork-free probe that
+does not trip the short-track filter.
+
+Recorded as `FACT-0100`..`FACT-0102`.

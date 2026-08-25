@@ -76,13 +76,23 @@ levers:
     status: running
     falsifier: >-
       EXP-0016 / EXP-0017 read as a PAIR must show a monotone or interior-optimum gain.
+    closed_by: [FACT-0102]
+    closed_date: '2026-08-25'
+    outcome: >-
+      REFUTED IN THE DIRECTION TESTED. Both arms scored inside their pre-registered bands and
+      both moved DOWN: 0.90 -> 0.922, 0.94 -> 0.924 against the deployed 0.96875 -> 0.925.
+      Four independent lines of evidence supported lowering the threshold and all were wrong
+      about the sign. With the p6 control (0.999 -> 0.883) the four points bracket an interior
+      optimum at or slightly ABOVE 0.96875. LOWERING is closed; the remaining live question is
+      whether a SLIGHTLY HIGHER threshold pays, which the detpeak curve answers offline for
+      zero slots since T=0.5 makes every higher threshold a subset.
     experiments: [EXP-0016, EXP-0017, EXP-0004A, EXP-0004B]
     note: >-
       The p4 detpeak export buys the whole [0.5,1.0] curve offline for zero submission
       slots, which subsumes the pointwise arms. Smoke (EXP-0004S) shows the per-crop spread
       is large - 4% vs 49% extra nodes on two crops of the same fold - so a single global
       threshold is probably the wrong instrument.
-    priority: 2
+    priority: 3
 
   - id: LEVER-0004
     claim: Trackastra used as a PRUNER of candidate edges
@@ -115,8 +125,16 @@ levers:
       EXP-0015 returns our pure adj_edge. ~0.923-0.924 means the edge term is already at
       top-3 level and the whole deficit is divisions; ~0.915-0.920 means the gap is edges.
     experiments: [EXP-0015]
-    note: This decides which lane gets the remaining budget. Everything downstream branches on it.
-    priority: 0
+    supporting: [FACT-0100, FACT-0101, FACT-0080]
+    note: >-
+      PARTIALLY ANSWERED, NOT PINNED. The probe scored 0.906, BELOW both pre-registered bands.
+      The naive subtraction gives divJ 0.19, contradicting the direct 1/125 measurement
+      (FACT-0080) by 24x - the probe destroyed ~984 true-positive edges it was not meant to
+      touch, which alone explains the drop. Preferred reading: adj_edge ~0.924 with divJ ~0.01,
+      i.e. our EDGE term is near top-3 level and the deficit IS divisions. That is inferred,
+      not measured. A clean read needs a fork-free probe that does not trip the short-track
+      filter. Either way the direction of travel is divisions, which LEVER-0002 owns.
+    priority: 1
 
   - id: LEVER-0007
     claim: ILP_APPEARANCE_WEIGHT is mistuned
