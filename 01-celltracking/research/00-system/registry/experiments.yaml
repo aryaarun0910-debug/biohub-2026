@@ -158,9 +158,23 @@ experiments:
     kernel_version: 2
     submission: null
     lb: null
-    status: running
+    status: cancelled
     date: '2026-08-25'
-    note: The 6bba fold carries essentially all the headroom (FACT-0031).
+    note: >-
+      CANCELLED mid-run by the host to save GPU, on a deliberate call. Its original purpose -
+      selecting a detection threshold - was closed the same day by FACT-0111: the fold-0 curve
+      showed recall saturated (+0.0010 down to 0.5, -0.043 up to 0.999) and PREDICTED both
+      scored arms. Fold 1 would most likely have re-closed a closed lever.
+      .
+      WHAT WE GAVE UP, stated so nobody assumes it is available: this was the only source of
+      fold-1 PEAK-STAGE node recall, which would size LEVER-0011. Fold 0 loses ~1 point
+      between peak 0.9955 and scored 0.9861; the record puts fold-1 scored recall at 0.8691,
+      implying a much larger downstream loss on the fold carrying essentially all the
+      headroom (FACT-0031). That number remains UNMEASURED and the fold-1 half of FACT-0112
+      is still quoted from the record, not re-derived. Re-running costs one GPU session and
+      nothing is blocked on it.
+      .
+      The 6bba fold carries essentially all the headroom (FACT-0031).
 
   - id: EXP-0018
     title: P18 relink division - a priced second row per source in the motion relink
