@@ -190,3 +190,40 @@ experiments:
       is post-processing and cheap relative to inference, so one kernel could emit the whole
       penalty sweep as several LOEO exports and be scored offline for zero submission slots.
       That is the better design and it is NOT yet built.
+
+  - id: EXP-0019
+    title: P19 relink division penalty SWEEP - the whole curve from one GPU session
+    spec: scripts/kaggle_specs/p19_relink_sweep_f1.json
+    kernel: aryaarun07/biohub-p19-relink-sweep-f1
+    submission: null
+    lb: null
+    status: built
+    date: '2026-08-25'
+    facts: [FACT-0090, FACT-0093, FACT-0102, FACT-0111]
+    note: >-
+      BUILT AND VERIFIED, NOT LAUNCHED (rule 8). Supersedes the single-value EXP-0018 as the
+      thing to run. Emits one LOEO fold-1 export per penalty in {-1, 0, 1, 2, 4, 8}, each
+      scoreable offline against data/train with scripts/core/score_oof.py - ZERO submission
+      slots.
+      .
+      WHY A SWEEP: two slots were spent on two points of the DETECTION curve (EXP-0016/0017)
+      which one offline CPU pass then reproduced entirely (FACT-0111). The relink penalty has
+      the same shape - one scalar, unknown optimum - so a per-value submission would repeat
+      that mistake. Cheap because the geffs are cached: only filter_output_graph is re-run
+      per penalty, not the UNet, edge model or ILP.
+      .
+      ON THE CHAMPION SUBSTRATE. Built from notebooks/kaggle_p3_harmonic (the deployed base)
+      plus the P9 coupled-division transplant, NOT the older p0b base the existing LOEO chain
+      uses. So it measures what we actually deploy. Discovered while building this: our LOEO
+      diagnostics have been running on a DIFFERENT substrate from the deployment.
+      .
+      ORDERING IS LOAD-BEARING: the sweep must run BEFORE the LOEO cleanup, which deletes
+      every /kaggle/working entry not in _LOEO_KEEP - and the geffs live under
+      /kaggle/working/tracking_repo. A sweep ordered after it would find nothing and waste
+      the session silently. Verified at build (offset 3,532 vs 12,300) and guarded by a test.
+      .
+      IN-RUN CONTROL: penalty -1 is the disabled sentinel and must reproduce the champion
+      exactly. If its node/edge counts do not match the primary LOEO export, the sweep is
+      invalid and must not be interpreted.
+      .
+      43 contract tests pass across EXP-0018/0019.

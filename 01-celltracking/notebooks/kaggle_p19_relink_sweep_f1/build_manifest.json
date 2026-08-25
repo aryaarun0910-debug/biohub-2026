@@ -1,0 +1,81 @@
+{
+  "name": "p19_relink_sweep_f1",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p19_relink_sweep_f1.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p19_relink_sweep_f1\\biohub-p19-relink-sweep-f1.ipynb",
+  "built_sha256": "11520e171c415738e28b6adb3a0ce64dc4d912e864855b916148ddcb93399040",
+  "config_hash": "6ca2de26e3ed",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "3bb6bce1ca4dabc1ef630834f818c37cff9f33eafe0640f443fe6e9590399e17"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        3
+      ],
+      "payload_sha256": "80e98992a3904d3672a1aa469d95368fc81147d056482da3aea1218b7672040d"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "91cd4f6164bd2f86c8cc4dc9af1017b4b5474f457c57367ca27a1784f53e3eae"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "8d15030bec2f040f2bd186e7a3ebed167b0f17414de3aeef15f9994fb3710461"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "7956542e7190dbb71f06fef09d7e77f0785fcd2d46f3646c56fea5d162bb23a0"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "8be0433869eafd6adafa9c406db8e1848ca138020bb15d35aeecc7a39ebaf52c"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "32582192ed21aa95de8f1e718d0e31f8e6f85568f6d0579a0a13180ece9c3f09"
+    }
+  ],
+  "declared_slug": "biohub-p19-relink-sweep-f1",
+  "title": "Biohub P19 Relink Division Sweep LOEO F1",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}

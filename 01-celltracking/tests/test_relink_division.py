@@ -109,3 +109,49 @@ def test_built_notebook_carries_the_mechanism_and_defaults_off():
     assert src.count("linear_sum_assignment(cost)") == 1, (
         "the gap-close bijection should not have been modified by this arm"
     )
+
+
+# --------------------------------------------------------------------------------------
+# The penalty SWEEP (EXP-0019) — buys the whole curve from one GPU session.
+# --------------------------------------------------------------------------------------
+
+SWEEP = REPO / "notebooks" / "kaggle_p19_relink_sweep_f1" / "biohub-p19-relink-sweep-f1.ipynb"
+
+
+@pytest.mark.skipif(not SWEEP.is_file(), reason="p19 sweep notebook not built")
+class TestSweepNotebook:
+    @staticmethod
+    def cells() -> list[str]:
+        return ["".join(c["source"]) for c in json.load(SWEEP.open(encoding="utf-8"))["cells"]]
+
+    def test_sweep_runs_before_the_cleanup_that_deletes_the_geffs(self):
+        """The LOEO cleanup removes every /kaggle/working entry not in _LOEO_KEEP, and the
+        geffs live under /kaggle/working/tracking_repo. A sweep ordered after it would find
+        nothing to post-process and would burn a full GPU session producing empty files."""
+        for cell in self.cells():
+            if "for _sw_pen in _sw_pens:" in cell and "_LOEO_KEEP = {" in cell:
+                assert cell.index("for _sw_pen in _sw_pens:") < cell.index("_LOEO_KEEP = {")
+                return
+        pytest.fail("sweep and cleanup are not in the same cell; ordering is unverified")
+
+    def test_sweep_outputs_survive_the_cleanup(self):
+        src = "\n".join(self.cells())
+        assert '_LOEO_KEEP |= set(globals().get("_SWEEP_KEEP", []))' in src
+
+    def test_sweep_includes_the_disabled_control(self):
+        """Penalty -1 reproduces the champion, so it is the in-run control. Without it the
+        sweep has no way to show it is measuring what it claims to."""
+        src = "\n".join(self.cells())
+        assert 'BIOHUB_RELINK_DIVISION_SWEEP' in src
+        assert '"-1,0,1,2,4,8"' in src or "'-1,0,1,2,4,8'" in src
+
+    def test_sweep_emits_no_submission(self):
+        """This is a diagnostic export. It must not consume a submission slot."""
+        spec = json.loads((REPO / "scripts/kaggle_specs/p19_relink_sweep_f1.json").read_text())
+        assert spec.get("expects_submission") is False
+
+    def test_sweep_is_on_the_champion_substrate(self):
+        spec = json.loads((REPO / "scripts/kaggle_specs/p19_relink_sweep_f1.json").read_text())
+        assert "p3_harmonic" in spec["base_notebook"], (
+            "the sweep must measure the substrate we deploy, not the older p0b LOEO base"
+        )

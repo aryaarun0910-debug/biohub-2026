@@ -67,9 +67,13 @@ result: >-
   reproduction of the champion when disabled. Launch needs a free GPU slot and host
   authorisation.
   .
-  NEXT: the penalty value is an unmeasured guess. Prefer buying the whole penalty CURVE in
-  one run (the relink is cheap post-processing) and scoring it offline via LOEO, rather than
-  spending a submission per point - the exact mistake the detection arms just made.
+  STEP 3 BUILT 2026-08-25: EXP-0019, the penalty SWEEP, on the CHAMPION substrate. Emits one
+  LOEO fold-1 export per penalty in {-1,0,1,2,4,8}, scoreable offline for zero submission
+  slots, with penalty -1 as the in-run control. Supersedes the single-value EXP-0018.
+  .
+  NEXT: launch EXP-0019 when a GPU slot frees and the host authorises (rule 8). Then score
+  each export offline with scripts/core/score_oof.py, CHECK THE -1 CONTROL FIRST, and report
+  fold 1 and fold 0 separately - the lever ranking flips by fold.
   .
   LIMITATION: the atlas carries a pre-ILP frame for fold 1 only, so this diff could not be
   run for fold 0. The contract requires both embryo directions; fold 0 is unmeasured here.
