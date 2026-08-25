@@ -1,6 +1,6 @@
 {
   "name": "p4_detsweep_export_f1",
-  "slug": "biohub-p4-detsweep-export-f1",
+  "slug": "biohub-p4-detpeak-superset-export-loeo-f1",
   "title": "Biohub P4 DetPeak Superset Export LOEO F1",
   "code_file": "biohub-p4-detsweep-export-f1.ipynb",
   "out_dir": "notebooks/kaggle_p4_detsweep_export_f1",
