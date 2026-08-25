@@ -3985,3 +3985,76 @@ caveats, VERIFIED verbatim:
 `ApiListTopicsRequest` / `list_topics` 403s on `forum_slug` exactly like the CLI, so **the SDK cannot
 enumerate a competition forum** — enumeration requires the rendered SPA via CDP. `get_topic` works by
 id. Raw curl returns a 5.6 KB SPA shell with zero topic ids.
+
+## 2026-08-25 — METRIC CORRECTION: node_recall is NOT in the score, and we are PAID for under-producing
+
+**I stated that "the metric charges over-prediction only 1 - 0.1x, and edge recall enters squared" as
+though those combined into one argument for lowering the detection threshold. They do not combine, and
+the sign of the second one was wrong. Two submissions (p16, p17) are in flight on that framing.**
+
+### The score, VERIFIED at file:line
+
+`.venv/Lib/site-packages/tracking_cellmot/metrics.py:28-33, 439-448, 517-522`:
+```
+ADJUSTMENT_ALPHA   = 0.1
+SCORE_DIVISION_WEIGHT = 0.1
+total_node_ratio = (N_pred - n_total) / n_total
+J_adj = max(0, edge_jaccard * (1 - ADJUSTMENT_ALPHA * total_node_ratio))
+score = J_adj + SCORE_DIVISION_WEIGHT * division_jaccard
+```
+
+**`node_recall` appears NOWHERE in the score expression.** It is a reporting column only
+(`METRIC_COLUMNS`, `:42`; computed `:394-409`). **The `node_recall^2` relation is a COMBINATORIAL
+IDENTITY** — both endpoints must exist for an edge to be scoreable — **not a metric weighting.** It
+and the `1 - 0.1 x ratio` adjustment are not the same currency and must never be summed or traded off
+against each other.
+
+**`n_total` is NOT the GT node count.** `src/biotrack/metric.py:37-63`: it is
+`estimated_nodes(gt_geff)` = the `estimated_number_of_nodes` field in the geff metadata, i.e. the
+organizer's estimate of the TRUE cell count including unannotated cells. The GT annotation is sparse
+(~660 nodes per movie across all frames); N_est is far larger.
+
+**The multiplier is clamped BELOW at 0 and UNCAPPED ABOVE 1.** So under-producing is not merely
+unpenalised — it is REWARDED.
+
+### MEASURED: we under-produce, and are collecting a bonus
+
+P9 (LB 0.925) against `estimated_number_of_nodes` on the four visible crops:
+
+| crop | N_pred | N_est | ratio | multiplier |
+|---|---|---|---|---|
+| 44b6_0113de3b | 25,473 | 25,755 | -0.0109 | 1.00109 |
+| 44b6_0b24845f | 19,862 | 32,795 | **-0.3944** | **1.03944** |
+| 6bba_05b6850b | 6,169 | 6,362 | -0.0303 | 1.00303 |
+| 6bba_05db0fb1 | 70,580 | 69,800 | +0.0112 | 0.99888 |
+| **POOLED** | **122,084** | **134,712** | **-0.0937** | **1.00937** |
+
+**We currently hold a ~0.94% BONUS on edge Jaccard.**
+
+### CONSEQUENCE FOR THE IN-FLIGHT DETECTION ARMS
+
+p16 adds **+2.73%** nodes -> pooled ratio -0.094 -> approximately -0.069 -> multiplier
+1.00937 -> ~1.0069. That is **~-0.0023 of adj_edge BEFORE any edge gain**. p16 must beat 0.0023 on
+raw `edge_jaccard` merely to break even.
+
+**This does NOT kill the arms** — a real edge-Jaccard gain can exceed 0.0023 — but it removes the
+"over-detection is nearly free" rationale I gave them. The honest framing is: **adding nodes erodes a
+bonus we already collect.** Read p16/p17 against that bar, not against zero.
+
+**Caveat, stated:** these are the four VISIBLE placeholder crops, which must never be used for
+selection. `N_est` is an organizer-supplied field so the structure plausibly carries to the hidden
+set, but the magnitude is unverified there. Note also that ONE crop (`44b6_0b24845f`, ratio -0.394,
+we emit only 60% of estimated cells) dominates the pooled bonus — so the ratio is unstable across
+substrates and a per-crop node budget may matter more than a global threshold.
+
+### RELATED: the "duplicates cost ~9%" figure is consistent with this
+A duplicate raises `N_pred` without raising `edge_tp` (matching is one-to-one bipartite), so it moves
+`total_node_ratio` up and shrinks the multiplier while `edge_jaccard` stays flat. Same mechanism,
+same direction.
+
+### WHAT REMAINS TRUE
+- Divisions are still worth a full 0.1 of a 1.1 ceiling, and our solver's divJ ceiling is
+  structurally ZERO. That finding is untouched.
+- Conditional linking accuracy 0.8219 is untouched — it is a statement about edge correctness, not
+  node count.
+- The `1 - 0.1 x ratio` adjustment is real; only my SIGN and my COMMENSURABILITY claim were wrong.
