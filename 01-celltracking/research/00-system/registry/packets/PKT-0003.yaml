@@ -57,8 +57,19 @@ result: >-
   Headline (FACT-0092): the pipeline collapses 14 real forks and then emits 6,303 fabricated
   ones to hit 1. Fix the destruction before tuning the fabrication.
   .
-  NEXT: identify which stage performs the collapse - the ILP solve or the post-ILP relink -
-  at file:line in the built notebook. Only then design the selector.
+  STEP 1 DONE 2026-08-25. The collapse is motion_relink_edges at built-notebook cell 6:487
+  (FACT-0093, VERIFIED) - a POST-PROCESS gated on OUTPUT_MOTION_RELINK, not the ILP and not
+  the model. Its cost at cell 6:486 already carries the learned edge probability, so the
+  joint scorer's input was already plumbed in.
+  .
+  STEP 2 BUILT, NOT LAUNCHED: EXP-0018 gives each source a second, PRICED row so the solver
+  selects divisions instead of collapsing them. 38 contract tests pass including exact
+  reproduction of the champion when disabled. Launch needs a free GPU slot and host
+  authorisation.
+  .
+  NEXT: the penalty value is an unmeasured guess. Prefer buying the whole penalty CURVE in
+  one run (the relink is cheap post-processing) and scoring it offline via LOEO, rather than
+  spending a submission per point - the exact mistake the detection arms just made.
   .
   LIMITATION: the atlas carries a pre-ILP frame for fold 1 only, so this diff could not be
   run for fold 0. The contract requires both embryo directions; fold 0 is unmeasured here.

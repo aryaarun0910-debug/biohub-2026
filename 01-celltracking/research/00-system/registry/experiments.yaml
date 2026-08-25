@@ -161,3 +161,32 @@ experiments:
     status: running
     date: '2026-08-25'
     note: The 6bba fold carries essentially all the headroom (FACT-0031).
+
+  - id: EXP-0018
+    title: P18 relink division - a priced second row per source in the motion relink
+    spec: scripts/kaggle_specs/p18_relink_division.json
+    kernel: aryaarun07/biohub-p18-relink-division
+    submission: null
+    lb: null
+    status: built
+    date: '2026-08-25'
+    facts: [FACT-0090, FACT-0093]
+    note: >-
+      BUILT AND VERIFIED, NOT LAUNCHED (rule 8; both GPU slots also busy with EXP-0004A/B).
+      Single-variable arm off the champion EXP-0009. Duplicates each source row in the
+      relink cost matrix and prices the copy, so linear_sum_assignment SELECTS which sources
+      earn a second child jointly over motion + raw distance + learned probability - the
+      joint-scorer structure the multi-cause evidence (FACT-0084) calls for, rather than a
+      fifth AND-gate. Targets the 14 fork-collapsed divisions (FACT-0090).
+      .
+      38 contract tests pass: the disabled default (-1) reproduces the champion EXACTLY on
+      random matrices, in-degree <= 1 and out-degree <= 2 always hold, the penalty is
+      monotone in second children (so it is a real selector), and the gap-close bijection at
+      cell 6:697 is left untouched.
+      .
+      CAVEAT: the penalty 2.0 is an UNMEASURED GUESS. Cost units are roughly um
+      (motion + 0.05*raw - 0.75*prob), so 2.0 demands a clearly better second child, but
+      nothing has measured it. Today's lesson says buy the CURVE not the point - the relink
+      is post-processing and cheap relative to inference, so one kernel could emit the whole
+      penalty sweep as several LOEO exports and be scored offline for zero submission slots.
+      That is the better design and it is NOT yet built.
