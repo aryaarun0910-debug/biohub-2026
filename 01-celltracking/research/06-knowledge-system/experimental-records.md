@@ -4058,3 +4058,152 @@ same direction.
 - Conditional linking accuracy 0.8219 is untouched — it is a statement about edge correctness, not
   node count.
 - The `1 - 0.1 x ratio` adjustment is real; only my SIGN and my COMMENSURABILITY claim were wrong.
+
+## 2026-08-25 — M1 (static distance prior) is BACKWARDS. Mis-linking correlates with LARGER displacement.
+
+A research agent proposed adding an isotropic-um distance log-prior to the association logits,
+premised on "in 77.3% of ranking errors the TRUE parent is geometrically CLOSER than the nominated
+one (median 2.19 vs 4.77 um)". **Measured on our own data, the opposite holds.**
+
+### The measurement, and the coordinate bug it caught first
+
+FIRST ATTEMPT WAS WRONG and the calibration caught it. I converted the pre-ILP export coords with
+`raw * DOWNSAMPLE * SCALE`, giving a GT displacement median of 6.70 um against a known 1.82. The
+export carries **FULL-RES voxel indices** (y/x span 0-252 on a 64x256x256 volume), so microns =
+`raw * SCALE = raw * (1.625, 0.40625, 0.40625)`, ANISOTROPIC. With that convention, correctly-linked
+GT edges give a displacement median of **1.817 um** against the forum's independently stated
+**1.82** — a three-decimal match that validates the convention.
+**NOTE the two exports use DIFFERENT conventions:** `detpeak_export.py` writes the MODEL grid
+(pre `coords[:, 1:] *= ds_arr`, isotropic 1.625), while the pre-ILP / error-atlas exports write
+full-res indices. `scripts/win_bet/detpeak_curve.py` asserts the former and is correct for its input.
+
+### Result — the direction is inverted
+
+Ranking-error population (both endpoints detected, nominated parent != true parent), n = **12,088**:
+
+| | true parent | nominated parent |
+|---|---|---|
+| distance to child, um (q25/median/q75) | 4.875 / **6.080** / 8.286 | 1.625 / **2.815** / 3.980 |
+| **true parent is CLOSER** | **8.55%** | |
+| true parent is closer, in RAW VOXELS | 14.64% | |
+
+Independent cross-check on all GT edges with both endpoints detected (n = 98,056), using the
+gtedges file's own endpoint coordinates:
+
+| | n | displacement median | p95 |
+|---|---|---|---|
+| correctly linked (`is_tp`) | 80,594 | **1.817 um** | 4.89 |
+| **MIS-LINKED** | 17,462 | **2.334 um** | **8.22** |
+
+**Mis-linked GT edges have systematically LARGER true displacement.** The model is losing the
+FAST-MOVING cells to nearer distractors. It is not ignoring geometry and it is not picking farther
+nodes — it is picking the NEAREST node, and the nearest node is wrong precisely when the true parent
+moved a long way.
+
+### CONSEQUENCE
+
+**A static distance prior favouring the nearer candidate would REINFORCE the error it is meant to
+fix. M1 as specified is dead.** It would have cost a submission slot to learn this on the leaderboard.
+
+**The right form is a MOTION prior, not a distance prior.** A cell that moved far is far in absolute
+distance but CLOSE to its motion-extrapolated position. This is why Linajea centres its candidate ball
+on the **movement-displaced** position rather than the static one
+(https://arxiv.org/pdf/2208.11467). The prior belongs on the residual from a velocity extrapolation.
+
+**Cheap next test, CPU only, no GPU and no slot:** from the existing graph, fit a constant-velocity
+predictor `pred = source + (source - prev)` and measure the residual to the TRUE child for the 17,462
+mis-linked edges versus the static residual. If the motion residual collapses toward the 1.82 um
+scale, a motion prior is the lever and its kernel width is measured rather than guessed. If it does
+not, the fast-moving cells are genuinely unpredictable from one frame of history and the lane needs
+appearance, not geometry.
+
+### PROCESS NOTE
+This is the fifth premise this cycle that failed at file:line, and the second where MY OWN first
+computation was wrong before the calibration caught it. The check that saved it was cheap and
+specific: compare a derived quantity against an independently known value (GT displacement median
+1.82 um) before trusting any number built on it.
+
+## 2026-08-25 — CORRECTION TO MY OWN CLA ANALYSIS: the square law is wrong, and the lever ranking FLIPS by fold
+
+### A. `edge recall = P(both endpoints detected) x CLA`, NOT `node_recall^2 x CLA`
+
+Endpoint detection is strongly CORRELATED across a frame pair (measured endpoint-error correlation
++0.61/+0.51/+0.54 on f0, +0.65/+0.61/+0.61 on f1), so independence fails and the square law
+UNDERSTATES. Verified in all three exports:
+
+| export | node_recall | node_recall^2 | **P(both endpoints)** | CLA | P(both) x CLA |
+|---|---|---|---|---|---|
+| f0 | 0.9861 | 0.9725 | **0.9816** | 0.9632 | 0.9455 |
+| f1 | 0.8691 | 0.7554 | **0.8533** | 0.9263 | 0.7904 |
+| pre1 | 0.9119 | 0.8315 | **0.8991** | 0.8219 | 0.7390 |
+
+**I derived node_recall as sqrt(0.8991) = 0.9482 assuming independence. The measured value is
+0.9119.** `gtnodes.detected` gives it directly and I should have read it rather than inferred it.
+
+### B. THE LEVER RANKING FLIPS BY FOLD — my "linking is 1.9x bigger" was measured on the wrong frame
+
+| | perfect nodes | perfect linking | larger lever |
+|---|---|---|---|
+| fold 0 | +0.018 | +0.036 | linking, 2.0x |
+| **fold 1** | **+0.136** | +0.063 | **NODES, 2.2x** |
+| pooled | — | — | **nodes ~1.55x** |
+
+**Essentially all headroom is in the fold-1 embryo direction.** My earlier conclusion came from the
+`pre1` PRE-ILP artifact; `_f0`/`_f1` are the post-filter/dedup/outdeg-cap SCORED frame and are
+authoritative for score attribution. This is precisely why the contract requires reporting both
+embryo directions separately — pooling hid a 2.2x-vs-2.0x inversion.
+
+### C. THE MECHANISM: localisation noise is 84-89% of the motion signal
+
+| | fold 0 | fold 1 |
+|---|---|---|
+| node localisation residual rms (pred vs matched GT) | 2.26 um | 3.39 um |
+| per-axis sd (z/y/x) | 1.58/0.90/0.95 | 2.08/1.41/1.32 |
+| **displacement noise rms** | **1.89 um** | **2.44 um** |
+| **true inter-frame displacement rms** | **2.26 um** | **2.74 um** |
+| **noise / signal** | **0.84** | **0.89** |
+
+**The causal oracle** (fold 1, 6,861 mislinked GT edges, **decoy pool held completely FIXED** — only
+the two endpoint coordinates replaced by GT):
+```
+true parent is the NEAREST frame-(t-1) node:
+  MISLINKED   deployed coords  3.44%  ->  GT coords 68.39%   (+65.0 pp)
+  TP control  deployed coords 22.83%  ->  GT coords 74.48%   (+51.7 pp)
+```
+**The linker is not losing to a large candidate pool; it is losing to NOISY COORDINATES.** An
+association model cannot recover a displacement whose measurement noise is 89% of the signal. This
+mechanises Soheil Ayati's "many linking issues actually originated earlier during node selection".
+
+Corroborates my own independent finding the same day (wrong parent closer in 91.45% of ranking
+errors); they measure 97.5% (f0) / 98.9% (f1), median 1.8 um vs 7.7 um.
+
+**Moawiz's junk-pool objection is largely answered:** 99.5-100% of wrong predicted edges have an
+unannotated endpoint and are IGNORED, not scored FPs (834 of 1.75M on f0; 9,170 of 1.79M on f1 touch
+an annotated node). And the oracle holds the decoy pool fixed, so decoy COUNT is not the cause —
+decoy WINNING is, and it wins on coordinate noise.
+
+### D. THE COORDINATE TRAP, HIT INDEPENDENTLY BY TWO ANALYSES THE SAME DAY
+Their note: *"atlas coords are (z, y_fullres, x_fullres) and must be scaled by
+(1.625, 0.40625, 0.40625) — NOT isotropic 1.625; the wrong scale inflates y/x 4x and every distance
+conclusion flips."* I made exactly this error and caught it only by calibrating against the known GT
+displacement median of 1.82 um. **Two of the three distance analyses attempted today started wrong.**
+Assert `max matched residual <= 7.0 um` as a convention check in any new distance code.
+
+### E. TOP MECHANISM: temporal position smoothing — inference-only, CPU, no slot
+35-39% of the localisation error is INDEPENDENT per frame (corr ~0.61), so averaging node positions
+along a tracklet and relinking removes it. 3-frame -> displacement-noise rms 2.44 -> ~1.9 um;
+5-frame -> ~1.75 (SNR 0.89 -> 0.64). Test: rerun the nearest-parent oracle with tracklet-smoothed
+coordinates; **kill if "true parent is nearest" does not move off 3.44%.**
+
+### F. KILLS — measured, do not spend
+- **Global coordinate bias correction: DEAD.** A real systematic bias exists (gt-pred =
+  +1.68/+0.43/+0.29 um on f1, partly `.long()` truncation) and correcting it halves the residual
+  3.07 -> 2.06 um — but it gains 1,385 newly-reachable GT nodes while **breaking 1,171 existing
+  matches** (f1 net +214, **f0 net NEGATIVE**), and being common-mode it **cancels exactly in
+  displacement**, so it cannot help linking either. Dead on both channels.
+- **Sub-voxel parabolic refine stays closed, now with a mechanism:** quantisation is only ~8% of
+  localisation variance (0.81 um of 2.90 um rms), capping parabolic interpolation at ~4% rms
+  reduction — consistent with the measured -0.0004/-0.0009.
+- **Count budgeting against `N_est` is NOT ACTIONABLE:** `estimated_number_of_nodes` is GT metadata,
+  unreadable at test time. My node-ratio analysis is descriptive, not a lever.
+- NMS/pool-kernel tuning (0 GT collisions) and duplicate merge (ceiling +0.003) remain dead.
