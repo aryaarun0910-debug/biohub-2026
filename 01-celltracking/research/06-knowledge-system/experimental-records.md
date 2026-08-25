@@ -4207,3 +4207,94 @@ coordinates; **kill if "true parent is nearest" does not move off 3.44%.**
 - **Count budgeting against `N_est` is NOT ACTIONABLE:** `estimated_number_of_nodes` is GT metadata,
   unreadable at test time. My node-ratio analysis is descriptive, not a lever.
 - NMS/pool-kernel tuning (0 GT collisions) and duplicate merge (ceiling +0.003) remain dead.
+
+## 2026-08-25 — TRACKASTRA WAS ALREADY RUN ON BOTH OOF FOLDS AND NEVER SCORED
+
+`artifacts/kaggle/trackastra_full_v6/` contains materialized `.geff` graphs for **both** LOEO splits
+(`materialized_fused_pruned_b3_t05_split0`, 354 files; `..._split1`, 639 files), plus the raw
+`trackastra_edges_split_0` / `_split_1`. The run log
+`artifacts/kaggle/lb897_trackastra_v3/biohub-lb897-trackastra-fusion.log:105-170` records
+`trackastra-0.5.2` from offline wheels, the `ctc` pretrained model on `cuda`, over 100-frame 3D movies.
+
+**So "does the pretrained Trackastra generalise to our 3D data?" is VERIFIED, not inferred — it runs
+and produces edges.** Offline wheels and the model bundle are already staged as Kaggle datasets.
+
+**And no score for any of it exists anywhere in the research machine.** Grepping `research/**/*.md`
+for `lb897|trackastra_edges|trackastra-fusion` returns a single hit, and it is a file path, not a
+result. The family was instead pre-classified **H5, "a detour"**
+(`research/01-research-direction/research-landscape.md:46-47`) — on the strength of *HOCT*
+underperforming a tuned ILP (discussion/728551). **That is evidence about a DIFFERENT model.**
+Trackastra was closed by association.
+
+**The most interesting number in the artifact is the rejection rate**, per-movie from the log:
+
+| movie | kept / candidates | rejected |
+|---|---|---|
+| 44b6_0113de3b | 24,496 / 28,722 | 14.7% |
+| 44b6_0b24845f | 21,807 / 48,703 | **55.2%** |
+| 6bba_05db0fb1 | 65,336 / 107,528 | 39.2% |
+
+That is aggressive, **movie-adaptive abstention** — the behaviour the metric rewards, given our
+measured break-even deletion precision of **59.0%** and an edge-FP oracle of **+0.0895**. Whether
+those rejections clear 59% precision is the entire question, and the data to answer it has been on
+disk since 2026-07-11.
+
+**Caveat on substrate:** the v2/v3 `run_stats.csv` covers only the four placeholder movies, which
+rule 2 forbids for selection. The `split_0`/`split_1` caches are the legitimate movie-level substrate
+and are what is being scored.
+
+**Caveat on mode:** what was run is `trackastra_direct_fusion_prune` — Trackastra *agreement* used to
+PRUNE the host's candidates. That is NOT the same as Trackastra OWNING re-association with its
+background class live. The cached run tests the pruning variant only.
+
+### PROCESS: a grep bug manufactured false negatives that reached two reports
+
+An agent used ripgrep's `-E` expecting extended-regex. In ripgrep `-E` means `--encoding`, so the
+command failed with `unknown encoding: out-?degree|outdeg|collision` and emitted a 1 KB error file.
+**The empty match list was read as a verified negative and published twice** ("no out-degree stats in
+`_evidence/`", "no node-precision measurement exists"). Both were false: the primary source was
+`_evidence/kaggle_runs/p4_preilp_loeo_f1_v1/biohub-p4-preilp-loeo-f1.log:349`, which states
+`pre-ILP roll-up: TOTAL sources with candidate out-degree >= 2 = 176,835` — confirming from the
+generating run what had only been inferred from a markdown summary, and confirming my own independent
+count of 176,835 against `audit_deadcode_2026-08-22.md:147`'s erroneous 176,833 (it dropped the
+`6: 2` bin).
+
+Also note `_evidence/` and `artifacts/` are **git-ignored**, so ripgrep skips them silently by
+default — a second, independent source of false negatives.
+
+**RULE: a negative claim built on an empty grep result is not evidence.** Check the command's exit
+status, and for `_evidence/`/`artifacts/` pass the flag that includes ignored paths.
+
+### SCORED, 2026-08-25 — Trackastra-as-PRUNER is substantially HARMFUL. Lane closed by measurement.
+
+The cached graphs from 2026-07-11 have now been scored with the official scorer (25 crops per fold,
+`scripts/core/score_oof.py`):
+
+| | Trackastra fused+pruned | baseline (full fold) | delta |
+|---|---|---|---|
+| **f0 / 44b6** | **adj_edge 0.7162**, node_recall 0.9464, divJ 0.0000 (0/0/6) | **0.903318** (71 crops) | **-0.187** |
+| **f1 / 6bba** | **adj_edge 0.6203**, node_recall 0.9021, divJ 0.0000 (0/0/24) | **0.704231** (128 crops) | **-0.084** |
+
+Baseline verified at `internal-reports/operating_point_2026-08-18.md:30,34`.
+
+**NOT strictly paired** — 25 crops vs full folds of 71/128 — so the exact deltas are approximate.
+But -0.187 is far outside any plausible subset effect, and on f1 the Trackastra subset had HIGHER
+node recall than the baseline fold (0.9021 vs 0.8656), i.e. it drew the easier crops and still lost.
+
+**Mechanism, and it is consistent with everything already measured.** The log shows rejection rates of
+14.7% / 55.2% / 39.2% per movie. Deleting 55% of candidate edges destroys recall, and our measured
+best deletion precision is **58.3% against a 58.88% break-even** — nothing has ever cleared that bar.
+Trackastra's abstention is aggressive and movie-adaptive, which looked promising, but aggressive
+deletion is exactly the operation the metric punishes here.
+
+**This closes the PRUNING variant by measurement rather than by association.** Note the lane had been
+filed as "H5, a detour" on the strength of *HOCT* underperforming a tuned ILP — evidence about a
+different model. It is now closed on its own evidence.
+
+**What is NOT closed:** Trackastra **OWNING** re-association, with its background class live,
+replacing the geometric LAP rather than filtering its output. That is a different mechanism and it
+remains untested. Given the pruning result, the prior on it should drop — but the two are not the
+same experiment, and the distinction must not be collapsed.
+
+**Cost of this measurement: zero.** No GPU, no slot. The graphs had been on disk since 2026-07-11 and
+were never scored into the record.
