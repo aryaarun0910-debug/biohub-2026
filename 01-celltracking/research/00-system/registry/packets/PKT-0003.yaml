@@ -1,8 +1,8 @@
 id: PKT-0003
 title: Division stage 2 - a learned selector, not a relaxation
 lever: LEVER-0002
-owner: null
-lock: open
+owner: primary
+lock: running
 opened: '2026-08-25'
 
 claim: >-
@@ -44,4 +44,21 @@ outputs:
   facts_added: []
   record: one row in experimental-records.md
 
-result: null
+result: >-
+  STEP 0 DONE 2026-08-25. Localised where the divisions die between the pre-ILP graph and the
+  scored output (scripts/win_bet/division_loss_diff.py). Of the 24 held upstream:
+  14 fork_collapsed (FACT-0090), 9 node_lost (FACT-0091), 1 still held, 0 both-edges-lost.
+  .
+  The 14 are the prize: every endpoint still detected, exactly one daughter edge kept, lost
+  purely because linear_sum_assignment cannot express out-degree 2. Recoverable by changing
+  association STRUCTURE alone. The 9 node_lost are a DIFFERENT lever (detection/filtering)
+  and are not fixed by the same change - do not conflate them.
+  .
+  Headline (FACT-0092): the pipeline collapses 14 real forks and then emits 6,303 fabricated
+  ones to hit 1. Fix the destruction before tuning the fabrication.
+  .
+  NEXT: identify which stage performs the collapse - the ILP solve or the post-ILP relink -
+  at file:line in the built notebook. Only then design the selector.
+  .
+  LIMITATION: the atlas carries a pre-ILP frame for fold 1 only, so this diff could not be
+  run for fold 0. The contract requires both embryo directions; fold 0 is unmeasured here.

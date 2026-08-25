@@ -4482,3 +4482,46 @@ positive class to compare against.
 
 Recorded as `FACT-0080`..`FACT-0084`; `LEVER-0002` sharpened and `PKT-0003` restructured to put
 the cheap upstream-recovery diff before any model work.
+
+## 2026-08-25 — WHERE THE DIVISIONS DIE: the bijection collapses 14 of the 24 we already have
+
+`PKT-0003` step 0, CPU-only, zero slots, data already on disk. New instrument:
+`scripts/win_bet/division_loss_diff.py`.
+
+Of the **24** GT divisions held in the pre-ILP fold-1 graph, by the time the output is scored:
+
+| fate | count | share of those held upstream |
+|---|---|---|
+| **fork_collapsed** — every endpoint still detected, exactly ONE daughter edge kept | **14** | **58.3%** |
+| node_lost — an endpoint stops being detected | 9 | 37.5% |
+| still held | 1 | 4.2% |
+| both edges lost | 0 | 0.0% |
+
+**`fork_collapsed` is the bijection signature.** `linear_sum_assignment` cannot express
+out-degree 2, so a fork is resolved by discarding one branch. Those 14 need **no new model, no
+new candidates, and no detection change** — only an association structure that can represent a
+division. They are 11.2% of all 125 GT divisions, sitting in the graph with one daughter edge
+already correct.
+
+The 9 `node_lost` are a **different lever** — detection and filtering, not association. They
+will not be fixed by the same change and must not be conflated with the 14.
+
+### The headline, and it is worse than "too conservative"
+
+Combined with the 6,303 divisions we emit (`FACT-0082`): **the linker collapses the 14 real
+forks it can see, and the SAFE_DIVISIONS post-process then fabricates 6,303 replacements and
+hits once.** We are wrong in both directions simultaneously — destroying signal, then guessing.
+Any division work that tunes the fabrication before fixing the destruction is tuning guesses
+against evidence that was already thrown away.
+
+This also reframes P9's +0.010. That gain came from the *fabrication* stage getting slightly
+less wrong, not from recovering anything real.
+
+**Next:** identify at `file:line` which stage performs the collapse — the ILP solve or the
+post-ILP relink. Then design the selector against a candidate set that is no longer being
+destroyed first.
+
+**Limitation, stated:** the atlas carries a pre-ILP frame for fold 1 only, so this diff could
+not be run for fold 0. The contract requires both embryo directions and fold 0 is unmeasured.
+
+Recorded as `FACT-0090`..`FACT-0092`.

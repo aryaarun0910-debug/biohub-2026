@@ -445,3 +445,78 @@ facts:
       only 1 recovered division on f1 the comparison has n=1 and is meaningless.
     date: '2026-08-25'
     tags: [division, external, competitor]
+
+  # ---- where the divisions die -----------------------------------------------------
+  - id: FACT-0090
+    statement: >-
+      GT divisions held in the pre-ILP fold-1 graph whose fork is COLLAPSED by the time the
+      output is scored - every endpoint still detected, exactly one daughter edge kept
+    value: 14
+    unit: count
+    scope: {fold: f1, of_held_upstream: 24, of_all_gt_divisions: 125}
+    provenance: MEASURED
+    instrument: scripts/win_bet/division_loss_diff.py
+    note: >-
+      58.3% of everything available upstream, and the single largest loss channel. This is
+      the bijection signature: linear_sum_assignment cannot express out-degree 2, so a fork
+      is resolved by discarding one branch. Recoverable by changing association STRUCTURE
+      alone - no new model, no new candidates, no detection change.
+    date: '2026-08-25'
+    tags: [division, structural, actionable]
+
+  - id: FACT-0091
+    statement: >-
+      GT divisions held pre-ILP that are lost because an ENDPOINT stops being detected
+    value: 9
+    unit: count
+    scope: {fold: f1, of_held_upstream: 24}
+    provenance: MEASURED
+    instrument: scripts/win_bet/division_loss_diff.py
+    note: >-
+      37.5%. A detection/filtering loss, NOT an association loss - a different lever from
+      FACT-0090 and not fixed by the same change.
+    date: '2026-08-25'
+    tags: [division, detection]
+
+  - id: FACT-0092
+    statement: >-
+      The deployed pipeline COLLAPSES the real forks it can see and then fabricates
+      replacements: 14 available divisions discarded while 6,303 divisions are emitted, of
+      which 1 is correct
+    value: null
+    unit: structural
+    provenance: MEASURED
+    instrument: scripts/win_bet/division_loss_diff.py with FACT-0082
+    derived_from: [FACT-0080, FACT-0082, FACT-0090]
+    note: >-
+      The bijection linker destroys forks; the SAFE_DIVISIONS post-process then adds 6,303
+      back by rule and hits once. So the failure is not conservatism - it is being wrong in
+      BOTH directions at once. Any division work must fix the destruction before tuning the
+      fabrication, or it is tuning guesses against a signal that was already thrown away.
+    date: '2026-08-25'
+    tags: [division, structural, headline]
+
+  - id: FACT-0093
+    statement: >-
+      The fork-destroying bijection is motion_relink_edges, a POST-PROCESS we fully control -
+      not the ILP and not the model
+    value: null
+    unit: structural
+    provenance: VERIFIED
+    instrument: >-
+      notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb cell 6:487, inside
+      motion_relink_edges defined at cell 6:420
+    note: >-
+      Only two linear_sum_assignment calls exist in the built notebook: cell 6:487 in
+      motion_relink_edges and cell 6:697 in close_single_frame_gaps. NEITHER is the primary
+      association stage - that is the ILP, which runs in the prediction subprocess. Calling
+      these "both association stages" understated how reachable they are: the relink builds a
+      cost matrix per frame pair and its `matches` REPLACE the edge set, so every fork the
+      ILP produced is discarded here, by a post-process gated on OUTPUT_MOTION_RELINK.
+      .
+      Line 6:486 reads `cost = motion + 0.05*raw - MOTION_RELINK_LEARNED_BONUS * prob`, so the
+      LEARNED EDGE PROBABILITY IS ALREADY AVAILABLE at the exact point where divisions die.
+      A joint scorer has its input plumbed in already; what is missing is the ability to
+      assign a source two targets, plus a selector deciding which sources earn it.
+    date: '2026-08-25'
+    tags: [division, structural, actionable, headline]
