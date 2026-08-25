@@ -140,8 +140,22 @@ Never `git add -A`; stage explicit paths. Never touch `.claude/settings.json` (d
 deliberately untouched). Committed through **3534386** on `master`.
 
 ## KNOWN WEAKNESSES IN THE MACHINE ITSELF
-- **The defect ledger gates almost nothing** — 34 of 41 specs match zero rules, including P9. Its
-  `spec_name_globs` should default the substrate-independent rules to `["*"]`.
+- **The defect ledger gates almost nothing** — 34 of 41 specs match zero rules, including P9.
+  ~~Its `spec_name_globs` should default the substrate-independent rules to `["*"]`.~~
+  **CORRECTED 2026-08-25 — that fix does not exist and would be harmful.**
+  `scripts/core/kaggle_factory.py:295` **already** reads
+  `globs = scope.get("spec_name_globs", ["*"])`; the default is not the problem. All 8 rules narrow
+  their own scope explicitly, and 7 of them target the two training specs (`h1r_edge_s5*`,
+  `h1r_det_s1*`). Widening them to `["*"]` would fail nearly every deploy spec: `DG-002` and `DG-004`
+  are `require`-shaped against training-only code, and `DG-006` demands a training dataset.
+  **The real gap is missing coverage, not globbing** — no rule has ever been written for the
+  deploy/post-processing substrate. Writing one is a data addition, not a one-line change.
+- **A whole GPU session bought nothing and looked healthy doing it.** The p4 fold-0 detpeak export
+  returned an empty `detpeaks/`; its hooks were passed through the parent's `builtins` while the
+  predictor runs in a `subprocess`. Both call sites were `is not None`-guarded, so the failure was
+  silent in both branches. Repaired and falsified both directions (see handoff). **Second instance of
+  the cross-context-state class**, after DataParallel/autocast. Treat "does state cross a process,
+  thread, or replica boundary?" as a standing build-time question.
 - **A live instance of an ungated defect shipped:** `p8_loosefilter` sets
   `DEEPCENTER_SAFE_DIV_VETO=1` while no spec pins `DEEPCENTER_SAFE_DIV_THRESHOLD` (silent 0.12
   default) — a **third, unrecorded confound** in p8's -0.003.

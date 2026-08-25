@@ -4298,3 +4298,71 @@ same experiment, and the distinction must not be collapsed.
 
 **Cost of this measurement: zero.** No GPU, no slot. The graphs had been on disk since 2026-07-11 and
 were never scored into the record.
+
+## 2026-08-25 — p4 DETPEAK EXPORT RETURNED NOTHING: a cross-process hook, silent in both branches
+
+**The instrument did not run.** `biohub-p4-detpeak-superset-export-loeo-f0` completed in 9,439 s and
+its output carries `detpeaks/` as an **EMPTY DIRECTORY** across all 71 crops. Cost: one full GPU
+batch session bought zero detection-curve data.
+
+**The failure was invisible.** The kernel log (289 lines, terminates cleanly) contains the patch-
+applied banner and the manifest, and contains **neither** the per-crop success line
+`detpeak: {crop} -> N peaks` **nor** its own negative branch `detpeak: no peaks buffered for {crop}`.
+Both branches live inside the flush, so the flush never executed even once. Nothing raised, nothing
+warned, and `detpeak_manifest.json` was written normally — the run looked healthy from every artifact
+except the one that mattered.
+
+### Root cause, verified at `file:line`
+
+The notebook does not import the predictor. It launches it as a **subprocess**, one shard per GPU:
+
+```
+subprocess.Popen([sys.executable, "scripts/predict_unet_transformer.py", ...],
+                 cwd=REPO_DIR, env=shard_env)     # base notebook cell 5:388
+```
+
+`scripts/kaggle_edits/detpeak_export.py` did two things. Rewriting `predict_unet_transformer.py` on
+disk **did** cross the boundary — the child reads the patched file. Installing the sink and flush on
+`builtins` (`_builtins._BIOHUB_PEAK_SINK = ...`) **did not**: a subprocess is a fresh interpreter with
+its own `builtins`. Inside the child both lookups returned `None`, and both call sites were guarded
+(`if _sink is not None`, `if _fl is not None`), so each no-oped without raising.
+
+**This is the same class as the DataParallel/autocast trap already in the ledger** — state scoped to
+one execution context silently failing to reach another. It is now the second instance.
+
+### Falsification, both directions
+
+A control was run before accepting the diagnosis. The **old** patch was applied to the real vendor
+source and its hook resolution reproduced in a fresh interpreter carrying only env vars — the exact
+child condition: `builtins._BIOHUB_PEAK_SINK -> None`, `_BIOHUB_FLUSH_PEAKS -> None`, export block did
+not run, flush did not run, **0 npz written**. That reproduces the fold-0 outcome exactly. The
+**repaired** patch under the identical condition writes the file and round-trips
+`t/zyx/logit` (6 peaks, shapes `(6,)`, `(6,3)`, `(6,)`).
+
+### The repair
+
+Sink and flush are now defined **inside the patched source at module level**, gated on
+`BIOHUB_DETPEAK_ENABLE`, with `BIOHUB_DETPEAK_EXPORT_T` and `BIOHUB_DETPEAK_DIR` alongside. Env vars
+are the channel that does cross (`shard_env` derives from `os.environ`). Zero `builtins` references
+remain. Applied against the real vendor file: three anchors match 1x each, patched module compiles,
+all five hook sites present exactly once. `pytest` 769 passed.
+
+The child now prints `detpeak: export ACTIVE in pid N` on entry, so a future silent no-op is
+impossible to miss — the absence of that line is now itself the alarm.
+
+### Standing correction to the machine's own weakness list
+
+The prior handoff proposed fixing the defect ledger by defaulting `spec_name_globs` to `["*"]`. **That
+fix does not exist and would be harmful.** `scripts/core/kaggle_factory.py:295` **already** defaults to
+`["*"]`; all 8 rules narrow their own scope explicitly. Widening them would fail nearly every deploy
+spec — `DG-002` and `DG-004` are `require`-shaped and match training-only code, and `DG-006` demands a
+training dataset. The real gap is that **no rule has ever been written for the deploy/post-processing
+substrate**: 7 of 8 target two training specs. "34 of 41 specs match zero rules" is a
+missing-coverage problem, not a globbing problem.
+
+**Status of the lane:** p4 fold 1 was already pushed with the OLD patch and will produce an empty
+`detpeaks/` too. It still yields a legitimate fold-1 LOEO export on the current substrate (the copy in
+`_evidence/exports/loeo_f1_strict/` predates P9), so it was left to finish. The detection curve
+remains unbought; re-running it needs a fresh push and is **not** automatic.
+
+**Raw output:** `_evidence/p4_detpeak_f0/`.

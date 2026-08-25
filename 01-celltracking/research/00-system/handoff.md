@@ -88,16 +88,42 @@ ceiling is **structurally ZERO** (below), and fixing that needs no retraining wh
 
 | ref / kernel | what it settles | state |
 |---|---|---|
-| 55768476 **p15 fork-free** | `summarise()` drops the division term when a submission has no forks, so the score IS our pure **adj_edge**; divJ follows by subtraction | PENDING |
-| 55768483 **p16 det 0.90** | First LB reading on **adding** nodes (+2.73%) — the untested direction of the 3.5x-amplified class | PENDING |
-| **p17 det 0.94** | Pairs with p16 for SLOPE, not a point | RUNNING |
-| **p4 detpeak export** | The whole `[0.5,1.0]` detection curve offline vs real GT, **zero slots** | RUNNING |
+| 55768476 **p15 fork-free** | `summarise()` drops the division term when a submission has no forks, so the score IS our pure **adj_edge**; divJ follows by subtraction | PENDING (kernel COMPLETE, scoring not returned) |
+| 55768483 **p16 det 0.90** | First LB reading on **adding** nodes (+2.73%) — the untested direction of the 3.5x-amplified class | PENDING (kernel COMPLETE) |
+| **p17 det 0.94** (55769398) | Pairs with p16 for SLOPE, not a point | PENDING (kernel COMPLETE) |
+| **p4 detpeak f0** | ❌ **RETURNED NOTHING** — empty `detpeaks/`, see below | COMPLETE, VOID |
+| **p4 detpeak f1** | Same defect; still yields a current-substrate fold-1 LOEO export | RUNNING (left to finish) |
 
 **p15 caveat:** it lost 578 edges / 230 nodes, not just its 406 divisions, because the short-track
 filter reacts to the changed components. `divJ = (0.925 - probe)/0.1` is therefore APPROXIMATE and
 biased to read divJ high.
 
-Replay harness for p4 is built and tested: `scripts/win_bet/detpeak_curve.py`.
+#### ❌ 2026-08-25 — the p4 detection curve was NOT bought; the export exported nothing
+
+Fold 0 ran 9,439 s and returned `detpeaks/` as an **empty directory** for all 71 crops. The log has
+the patch banner but **neither** the per-crop success line **nor** its own `no peaks buffered`
+warning — the flush never ran, and nothing raised.
+
+**Cause (verified at `file:line`).** The notebook launches the predictor as a **subprocess**
+(`subprocess.Popen([...], env=shard_env)`, base notebook cell 5:388). The old patch passed its sink
+and flush through the parent's `builtins`, which a fresh interpreter does not inherit; both guarded
+call sites saw `None` and no-oped silently. Rewriting the source file DID cross; the in-memory hooks
+did not. **Same class as the DataParallel/autocast trap — this is the second instance.**
+
+**Repaired** in `scripts/kaggle_edits/detpeak_export.py`: sink and flush are now module-level inside
+the patched source, gated on `BIOHUB_DETPEAK_ENABLE` / `_EXPORT_T` / `_DIR` (env vars DO cross).
+Verified against the real vendor source — 3 anchors 1x each, patched module compiles, 5 hook sites
+present, 0 `builtins` refs; a fresh-interpreter test writes and round-trips the npz, while the old
+version under the identical test writes 0 files. `pytest` 769 passed.
+
+The child now announces `detpeak: export ACTIVE in pid N`; its absence is the alarm.
+
+**The curve is still unbought.** Re-running needs a fresh push — **not automatic** (rule 8). Fold 1
+was left running because its LOEO export is on the current substrate (the disk copy in
+`_evidence/exports/loeo_f1_strict/` predates P9). Raw output: `_evidence/p4_detpeak_f0/`.
+
+Replay harness for p4 is built and tested: `scripts/win_bet/detpeak_curve.py` — it has never had
+input.
 
 ---
 
