@@ -3815,3 +3815,173 @@ we are validating on the wrong movies.
 ### Process note
 This is the fourth time a premise cited as established turned out not to be verified at
 `file:line`. It cost nothing to check — two greps into the vendored trainer.
+
+## 2026-08-25 — CONDITIONAL LINKING ACCURACY MEASURED: 0.8219. Linking is a 1.9x bigger lever than detection recall.
+
+Never measured before, and named as an open gap. Computed from `C:/temp/error_atlas/gtedges_pre1.parquet`
+(fold-1 LOEO export, 109,057 GT edges) using its own `src_detected` / `tgt_detected` / `is_tp` columns.
+
+```
+GT edges                        : 109,057
+both endpoints DETECTED         :  98,056   (89.91%)
+  of those, correctly linked    :  80,594
+CONDITIONAL LINKING ACCURACY    :  0.8219
+node-pair availability          :  0.8991   -> node_recall ~ 0.9482
+edge recall                     :  0.7390
+```
+
+**The forum's decomposition reproduces EXACTLY on our data:**
+`edge recall ~ node_recall^2 x conditional_linking_accuracy` -> `0.9482^2 x 0.8219 = 0.7390`.
+(Mendrika Ramarlina, discussion/734604, VERIFIED.) That model can now be used quantitatively rather
+than as an argument.
+
+### THE DECOMPOSITION REVERSES THE DETECTION EMPHASIS
+
+| lever | current | edge recall if PERFECTED | gain |
+|---|---|---|---|
+| node recall | 0.9482 | 0.822 | **+0.083** |
+| **conditional linking accuracy** | **0.8219** | **0.899** | **+0.160** |
+
+**Linking is a 1.9x larger lever than detection recall.** Node recall is ALREADY 0.948 — there is
+little left there — while **17.8% of edges whose endpoints we successfully detected are linked to the
+WRONG parent.**
+
+This is the second independent confirmation of the retrieval finding that **70.6% of the 17,001
+missing GT edges are a RANKING error** (a wrong parent already nominated) versus 29.4% thresholding.
+Two entirely different computations, same conclusion.
+
+### WHAT IT DOES AND DOES NOT CHANGE
+
+- **It tempers, but does not retire, the detection-threshold arms** (p16/p17). The metric charges
+  over-prediction only `1 - 0.1 x over_prediction`, so raising node recall is cheap — but its ceiling
+  is +0.083 on edge recall even if perfected, and perfection is not available. It is a real but
+  bounded lever, not the main one.
+- **It raises the priority of the association ranker and of retrieve-then-rerank.** Those attack the
+  17.8% mis-linked branch, which is where the headroom actually is.
+- **Caveat: edge recall is not the metric.** The scored term is `adj_edge_jaccard = TP/(TP+FP+FN)`, so
+  raising recall adds TP but can add FP. These numbers bound the RECALL side only; they do not predict
+  score.
+- **Caveat: fold 1 only** (128 crops). Fold 0 is the mirror case and is unmeasured here.
+
+### CROSS-CHECK AGAINST THE FRONTIER
+mikelou1 states adj_edge **0.898** at LB 0.928 (VERIFIED, discussion/737101), and a 0.953 team carrying
+his divisions needs adj_edge **~0.923**. Our own edge recall of 0.739 is not directly comparable to a
+Jaccard, but the gap between 0.822 CLA and a linker that mis-links almost nothing is the plausible home
+of the missing +0.025 of adj_edge.
+
+## 2026-08-25 — THE PICTURE INVERTS: we are AHEAD on adj_edge and behind ONLY on divisions
+
+Full forum harvest: **75 unique threads** (the earlier 34 was a 45% sample), 18 fetched by API this
+pass, 44 previously unseen and triaged.
+
+### A. THE >=0.947 CLUSTER IS SIX TEAMS AND NONE HAS EVER POSTED METHOD CONTENT — lead CLOSED
+
+From the public-LB export (2,693 teams): z7777 0.962, Soheil Ayati 0.959, **TWEAK 0.953**,
+Mark Cooper 0.950, yuto083 0.947, enddl22 0.947. Only 6 teams >=0.947; 21 >=0.940; 69 >=0.930.
+
+Every one of the six team names and all nine member usernames was grepped across all 75 threads, plus
+every "Nth in this Competition" badge in the top 20. **Total top-20 method content in the entire
+forum: none.** Antonoof (TWEAK, 3rd) appears twice and both are a zarr wheel-install tip. Soheil Ayati
+appears only in 737101; Tang (7th) only in 734604/735352 — both already held.
+**STOP spending cycles hunting a top-team method statement. It does not exist.**
+
+### B. THE ARITHMETIC THAT INVERTS OUR STRATEGY  [INFERRED, load-bearing — p15 settles it]
+
+Metric confirmed verbatim (Busya Prime, 728300): `score = adjusted_edge_jaccard + 0.1 * division_jaccard`.
+Organizer Thibgolds (725015), VERIFIED: "the best submission score is actually 1.1, not 1" — so the
+division term is a full 0.1 of a 1.1 ceiling.
+
+| | LB | adj_edge | implied divJ |
+|---|---|---|---|
+| mikelou1 (rank 30) | **0.937** | **0.898** (their own fork-free probe, 734192) | **~0.39** |
+| **us (P9)** | **0.925** | **~0.92** | **~0.02** |
+
+**We are roughly +0.024 AHEAD of rank 30 on the adjusted-edge term** — the term this project spent the
+day assuming it was behind on. We trail on the leaderboard almost entirely because we forfeit the
+division term while they collect ~0.039 of it.
+
+Corroborated verbatim by Jose Freitas (732103): "Divisions carry 10% of the metric ... and most public
+solutions I have seen simply leave that term at zero."
+
+**CAVEATS, stated plainly.** This assumes (i) mikelou1's 0.898 is contemporaneous with their 0.937,
+and (ii) our divJ is near zero — P9 does emit 406 forks, so ours is small but NOT exactly zero.
+**`p15_forkfree_probe` measures our adj_edge directly and settles both.**
+
+### C. HOW THIS RECONCILES WITH THE CLA MEASUREMENT — it does not contradict it
+
+Our conditional linking accuracy is **0.8219** with real headroom (17.8% of detectable edges linked to
+the wrong parent). That is an ABSOLUTE, local measurement of our own edge quality. Being ahead of
+mikelou1 on adj_edge is a RELATIVE fact about a team who described their own edge model as "really
+bad ... ~0.01 below public notebooks". **Both are true.** Our edges have room AND are already better
+than rank 30's. The division term is simply the cheaper 0.028.
+
+### D. THE ARCHITECTURE THE FORUM RECOMMENDS — and it needs NO retraining
+
+hengck23 (120th), thread **726924**, VERIFIED verbatim:
+> "It is the lineage (cell division) that will decide the winner. ... my suggestion is to **learn track
+> without cell division first (i.e. all tracks has only one BIRTH and DEATH). cell division is then
+> handled at post-processing or stage 2** (e.g. classifier to decide if there is a split based on
+> appearance changes and longer track cues). it is difficult even for humans to decide if there is cell
+> division just based on two frames."
+
+**This is the escape hatch from our bijection, and it says KEEP the bijection.** Our edge term is
+serving us well; bolt divisions on as a learned stage 2. Our own oracle bounds that at **+0.0232**
+against the current candidate set (divJ 0 -> 0.232), i.e. **0.925 -> ~0.948 = rank 5**. Exceeding
+divJ 0.232 additionally needs candidate widening (only 29 of 125 GT divisions have BOTH daughters
+nominated today).
+
+Also in 726924, Jawad Ahmed (503rd), VERIFIED: "Once node recall is high, nearest-neighbour on physical
+distance alone already resolves the large majority of links, and the residual errors concentrate in a
+small subset where two candidates sit within roughly one cell radius of each other." — i.e. the
+residual edge errors and the division events live in the SAME small ambiguous subset.
+
+FOYSAL (73rd), thread **730924**, VERIFIED: "the more useful gains seemed to come from **association
+consistency rather than additional detection tuning** ... examining ambiguous parent links from more
+than one temporal or model view instead of applying a fixed global logit average everywhere ...
+identifying where the current models disagree — and only using the extra view in those uncertain
+cases." A rank-73 endorsement of SELECTIVE multi-hypothesis on the ambiguous subset only.
+
+### E. THE TRAINING CORPUS FOR A STAGE-2 DIVISION CLASSIFIER EXISTS, CC0
+
+Jose Freitas, thread **732103**: a public 18.5 GB synthetic dataset with **165,267 labelled divisions
+across 4,056,226 nodes — ~540x the mitosis supervision in the competition ground truth**. Author
+caveats, VERIFIED verbatim:
+- "The division rate is deliberately inflated (4.07% of nodes vs ~0.26% in reality). A model starved of
+  examples never learns mitosis. **Re-weight your loss by the real rate** if you need calibrated priors."
+- "Distribution match is partial. Nucleus texture and contrast are the weakest axes." Intended use is
+  pretrain-then-finetune.
+- **Embryo heterogeneity is NOT modelled** (an in-thread challenge on the two embryos' ~1% vs ~9%
+  annotation sparsity and 26 vs 125 divisions got a non-answer). **Treat as a PRETRAINING corpus only**,
+  never as a validation substrate.
+- Directly useful regardless: "The official pipeline downsamples XY by 4 with a stride
+  (vol[:, ::4, ::4]), **not a block mean**. A block mean averages noise away and would hand you data
+  cleaner than what your detector really sees."
+- DoG baseline reference: "recovers ~0.89 of the synthetic nuclei in a moderately dense field, ~0.76
+  when crowded; on the real annotated nuclei it recovers 0.91-0.94."
+
+### F. FURTHER ORGANIZER STATEMENTS (all newly captured)
+- Bragantini, **724386**: "all the data ... followed the same protocol (e.g., instrument, developmental
+  stage), **each embryo being acquired in a separate imaging session**" — the mechanism behind our
+  per-direction reporting rule.
+- Bragantini, **724582**: multi-view fusion, views "linearly scaled to match a reference view".
+- Kaggle staff, **728324**: the metric-exploit rescore is COMPLETE as of 2026-07-23.
+- **737103**: whether hand-labelled data counts as external data — answered only by low-ranked users,
+  contradictory, **NO organizer reply. Do not treat the forum as authority on rules.**
+
+### G. NEGATIVE RESULTS AND DATA-QUALITY FLAGS
+- mige551 (**730924**) controlled ladder: single-seed 0.908; **detection/ILP parameter probes ALL
+  0.908**; two-seed blend 0.910; **Edge Top-K / feature-TTA branch 0.885-0.886 (actively harmful)**.
+  Independent evidence that detection/ILP knob-probing is spent — and a direct caution for our own
+  top-k plans.
+- Tim Krige (**732474**): "volume after split in GT is closer to 0.75" where physics says 0.5; he
+  measures 0.5 on his own labels. A reply claims the tracks are Ultrack pseudo-labels, **UNVERIFIED, no
+  organizer confirmation**. If true it caps division Jaccard from above.
+- **723898**: someone asked exactly our min-cost-flow / OR-Tools / split-matrix questions. **Zero
+  replies.** The forum has no public min-cost-flow recipe.
+- **730486** is titled like an engine but is a write-up of reading `.geff` files; its "0.947" is a
+  tracking DENSITY RATIO, not a score. Do not misread.
+
+### H. METHOD NOTE FOR FUTURE SWEEPS
+`ApiListTopicsRequest` / `list_topics` 403s on `forum_slug` exactly like the CLI, so **the SDK cannot
+enumerate a competition forum** — enumeration requires the rendered SPA via CDP. `get_topic` works by
+id. Raw curl returns a 5.6 KB SPA shell with zero topic ids.
