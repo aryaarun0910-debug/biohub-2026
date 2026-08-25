@@ -75,8 +75,14 @@ ceiling is **structurally ZERO** (below), and fixing that needs no retraining wh
 
 ### THE SIX MEASURED FACTS THAT NOW DRIVE EVERYTHING
 
-1. **THE BIJECTION FORFEITS THE ENTIRE DIVISION TERM.** Both association stages in the DEPLOYED
-   notebook are bare `linear_sum_assignment` calls. Out-degree <= 1 by construction, so **a division
+1. **THE BIJECTION FORFEITS THE ENTIRE DIVISION TERM.** ~~Both association stages~~ **CORRECTED
+   2026-08-25 (`FACT-0093`, VERIFIED): the two `linear_sum_assignment` calls are
+   `motion_relink_edges` (cell 6:487) and `close_single_frame_gaps` (cell 6:697) — POST-PROCESSES
+   we fully control, NOT the primary association, which is the ILP in the prediction subprocess.
+   Calling them "association stages" made this sound like a model problem. It is not.**
+   Measured directly: of the 24 divisions present pre-ILP, **14 are fork-collapsed by the relink**
+   (`FACT-0090`) with every endpoint still detected and one daughter edge already correct.
+   These are bare `linear_sum_assignment` calls. Out-degree <= 1 by construction, so **a division
    is not merely rare, it is INEXPRESSIBLE**. Measured: divJ ceiling **0.0000 at out-degree<=1 vs
    0.2320 at out-degree<=2**, i.e. **+0.0232 of SCORE is structurally unreachable** — for the price
    of 29 edges out of 81,055. Independently confirmed in public by Luka Duvanov (discussion/733877,
@@ -86,7 +92,11 @@ ceiling is **structurally ZERO** (below), and fixing that needs no retraining wh
    (6 TP bought at 2,160 FP plus -0.0084 adjacency). exp041-style gating gave **+0.0018**, and
    entirely through ADJACENCY — zero divisions recovered. **The oracle ceiling needs a SELECTOR, not
    a relaxation.**
-3. **THE METRIC PAYS FOR RECALL AND BARELY CHARGES OVER-DETECTION.** The line is
+3. **~~THE METRIC PAYS FOR RECALL~~ — REFUTED 2026-08-25 BY MEASUREMENT (`FACT-0102`).**
+   Lowering the threshold scored **0.94 -> 0.924** and **0.90 -> 0.922** against 0.96875 -> 0.925:
+   monotone DOWN. All four supporting lines below were wrong about the SIGN. The optimum is at or
+   slightly ABOVE the deployed threshold. Kept for provenance — the reasoning was sound and the
+   conclusion was still false, which is why arms get scored. The line is
    **`1 - 0.1 x over-prediction`**, and **`edge recall ~ node_recall^2 x conditional linking
    accuracy`** — recall enters SQUARED, over-prediction is taxed 0.1x linearly
    (discussion/733877, /734604, VERIFIED). Our deployed threshold 0.96875 is inherited and never
