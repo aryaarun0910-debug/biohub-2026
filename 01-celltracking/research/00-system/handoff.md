@@ -15,70 +15,134 @@ tags: [handoff, entry-point]
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
 
-## 🎯 LIVE 2026-08-25 — P9 SCORED 0.925 (rank 207/2,693). NEXT ACTIONS ARE CPU-ONLY.
+## 🎯 LIVE 2026-08-25 (evening) — 0.925, rank 207/2,693. THE "ONLY RETRAINING WINS" THESIS IS REFUTED.
 
-**P9 coupled division transplant scored 0.925** (submission 55753516), **+0.010** — the largest gain of
-the campaign and the **first division-class change ever to score positive**. Recorded prediction band
-(central 0.919-0.925) HIT. Detail: `../07-outputs/submissions.md`; seven-agent cycle:
-`../06-knowledge-system/experimental-records.md` (2026-08-25 entries).
+**Deployed: P9 coupled division transplant, LB 0.925** (submission 55753516, +0.010 over 0.915) — the
+largest gain of the campaign and the first division-class change ever to score positive. Prediction
+band (central 0.919-0.925) HIT. Committed at `51365e7`.
 
-**Public frontier is 0.927 and SATURATED** — 202 teams at >=0.926, **106 at exactly 0.926** (one forked
-artifact). Top-3 = **0.953**, leader 0.962, gap **+0.028**. Only **6 teams** are at >=0.947.
+**Public frontier 0.927 and SATURATED** — 202 teams >=0.926. Top-3 = **0.953**, leader 0.962, gap
+**+0.028**. Only **6 teams** at >=0.947.
 
-### FIVE MEASURED FACTS THAT DRIVE THE NEXT CYCLE
+---
 
-1. **Divisions CAN reach top-3 — my earlier doubt is REFUTED.** Perfect division Jaccard = **+0.0993**
-   pooled (3.5x the gap); reach-limited oracle **+0.0583**. BUT **division FP suppression alone caps at
-   +0.0027** — P9 was a precision fix; **the next division move must raise TP** (~44 TP at 0 FP, or 72
-   at <=100 FP, against 5 today).
-2. **The nominator is a hard per-target ARGMAX** — in-degree 1 for all 2,162,040 candidate edges, zero
-   with in-degree 2. **70.6% of the 17,001 missing GT edges are a RANKING error** (a wrong parent is
-   already nominated); only 29.4% are thresholding. kNN-3 recovers **92.5%** of the misses while
-   retaining **99.4%** of today's nominations, at 3.5x set size.
-3. **BLOCKER on any candidate widening:** the ILP ranks by `edge_prob` = the same column softmax, and
-   **`BIOHUB_ILP_APPEARANCE_WEIGHT = "0.0"` means there is NO abstention price** — every feasible
-   candidate is accepted. **"Over-nominate and let the ILP prune" DOES NOT HOLD here.** Restoring
-   appearance weight is a PRECONDITION, not an independent lever.
-4. **The NMS/peak rule is EXONERATED** — 0 collisions on competition GT, 0.12% on dense Zebrahub,
-   ceiling >=99.88%. **Pool-kernel tuning is dead.** The recall loss is the **one-hot delta target**
-   (`target[b,zi,yi,xi]=1.0` at a TRUNCATED index), which forces broad low-amplitude blobs — **so the
-   monotone-decreasing F1-vs-threshold curve is a SYMPTOM of the target, not a separate bug.**
-5. **Two of the top three say the gap is NOT the edge model.** TWEAK (#3, 0.953): a *"universal plugin
-   ... gains ranging from 0.030, 0.040, to 0.050"*, no new weights, explicitly not division work
-   (discussion/735352). Soheil Ayati (#2, 0.959): *"many 'linking' issues actually originated earlier
-   during **node selection**"* (discussion/737101). mikelou1 retrained from scratch -> only **0.928**.
+### ⚠️ STRATEGIC REVISION — "the jump to 0.950+ is solely heavy retraining" NO LONGER STANDS
 
-### DO THESE FIRST — all CPU-only or <1 GPU-h, all gate the 21-33 GPU-h spend
+That was the operating thesis from 2026-08-23. **Four independent pieces of evidence now contradict
+it, and one of them is our own leaderboard result:**
 
-| # | action | cost | kill criterion |
-|---|---|---|---|
-| 1 | **Push `p4_detsweep_export_f0.json`** — built, never pushed. The local-max test is threshold-independent, so the whole [0.5,1.0] PR curve is a CPU replay. Measured recall 0.445 -> 0.563 at p0.5; `edge recall ~ node_recall^2` => **x1.60** | CPU replay | curve does not beat 0.96875 on the official scorer |
-| 2 | **`BIOHUB_ILP_APPEARANCE_WEIGHT` 0.0 -> 0.1** on the CURRENT candidate set | 1 kernel | does not hold or improve adjusted Jaccard |
-| 3 | **M1 duplicated-source LAP replay** on `C:/temp/preilp_f1_v2/preilp_split1.parquet` | CPU | **<8 of 19 contested daughters flip at any delta_div** |
-| 4 | **T3.1 drift gate** — 200 steps detection FT, no drift control, measure association AUC drop | <1 GPU-h | **<1% drop => the whole drift apparatus is unnecessary; do not build it** |
-| 5 | **Arm-A no-op control** (LR=0, model still in `train()`) attached to any training claim | 0.1 GPU-h | any gain in Arm A is pure AdaBN |
-| 6 | **TTA union instead of mean** — `predict_unet_transformer.py:375-388` averages 4 flipped logit volumes and divides by 4; **averaging annihilates peaks that disagree by +-1 voxel** | 1 kernel | union does not raise node count / edge TP |
+1. **We gained +0.010 by POST-PROCESSING** (P9), from 0.915 to 0.925, with no retraining at all. The
+   "wrapping is exhausted" claim was false — it was exhausted for *our* ideas, not for the field's.
+2. **mikelou1 retrained from scratch and reached only 0.928** (forum, VERIFIED). Retraining alone
+   demonstrably does NOT reach 0.947+.
+3. **TWEAK is at 0.953 claiming a model-agnostic plugin with NO new weights** — "gains ranging from
+   0.030, 0.040, to 0.050 instantly just attaching our plugin ... a single public model reach a score
+   of 0.940 untuned" (discussion/735352, VERIFIED). That is a post-processing/linker claim AT the
+   top-3 boundary.
+4. **Soheil Ayati (rank 2, 0.959) points at NODE SELECTION, not model capacity** — "many 'linking'
+   issues actually originated earlier during node selection" (discussion/737101, VERIFIED).
 
-### STANDING CORRECTIONS
-- **Tune EARLY layers, not the head.** PES (VERIFIED): later layers memorise noise first. Under
-  appearance shift + noisy labels the reflex *"freeze the backbone, train the head"* is the WORST choice.
-  **Do not apply layer-wise LR decay** — it pushes the opposite way.
-- **`assert optimizer.state[p]['step'] > 0`** would have caught the phantom +0.104 on its own.
-- **Never select a checkpoint on Zebrahub validation.** Select on the target metric via
-  `scripts/core/score_oof.py`, LOEO, both embryo directions separately. Use **WiSE-FT** weight-space
-  interpolation to get ~10 candidates per training run for CPU cost.
-- **Our LOEO split the CROPS but never the MODEL** — all nine specs attach the public support pack.
-  Fold 0 is public-weights-only; fold 1 attaches `aryaarun07/biohub-oof-weights`. **The two folds are not
-  the same instrument and must not be pooled** until this is resolved (attachment verified, USE is not).
-- **Trust Ultrack's detections, distrust Ultrack's divisions** — it is a deterministic ILP, so its errors
-  are structured and input-determined: the case where noise-averaging fails.
+**REVISED THESIS: the gap is ARCHITECTURAL, not capacity.** It sits in candidate generation, node
+selection, and the association/solver structure — none of which necessarily require a bigger or
+better-trained model. Tang (0.946) still says "retrain instead of using the public ckpt", so
+retraining is likely *necessary* for the last stretch; but it is demonstrably **not sufficient**, and
+it is no longer the first thing to spend on.
 
-### STILL BROKEN — neither GPU lane may launch
-**S5** crashes on step 1 (`F.binary_cross_entropy` under CUDA autocast — a trap `h1r_trainer_patch.py:12-13`
-already documents) and **deletes every division label** (`h1r_edge_train.py:95-97`, `:165-167`), discarding
-the 65,741-link asset that is the lane's entire rationale. **S1** carries three SEV-1 defects: selection at
-max-F1 rather than the deployed operating point; single-forward eval against 8-view deployed TTA; and a
-fine-tuned trunk that silently rewrites every edge feature.
+**Our own strongest evidence for the architectural read:** the deployed pipeline's division Jaccard
+ceiling is **structurally ZERO** (below), and fixing that needs no retraining whatsoever.
+
+---
+
+### THE SIX MEASURED FACTS THAT NOW DRIVE EVERYTHING
+
+1. **THE BIJECTION FORFEITS THE ENTIRE DIVISION TERM.** Both association stages in the DEPLOYED
+   notebook are bare `linear_sum_assignment` calls. Out-degree <= 1 by construction, so **a division
+   is not merely rare, it is INEXPRESSIBLE**. Measured: divJ ceiling **0.0000 at out-degree<=1 vs
+   0.2320 at out-degree<=2**, i.e. **+0.0232 of SCORE is structurally unreachable** — for the price
+   of 29 edges out of 81,055. Independently confirmed in public by Luka Duvanov (discussion/733877,
+   "40 FN out of 40"). **Our standing "+0.0012 perfect solver" oracle was computed UNDER that
+   constraint and never bounded this.**
+2. **BUT naive relaxation is HARMFUL.** Blanket out-degree<=2 scored **-0.0081** end-to-end
+   (6 TP bought at 2,160 FP plus -0.0084 adjacency). exp041-style gating gave **+0.0018**, and
+   entirely through ADJACENCY — zero divisions recovered. **The oracle ceiling needs a SELECTOR, not
+   a relaxation.**
+3. **THE METRIC PAYS FOR RECALL AND BARELY CHARGES OVER-DETECTION.** The line is
+   **`1 - 0.1 x over-prediction`**, and **`edge recall ~ node_recall^2 x conditional linking
+   accuracy`** — recall enters SQUARED, over-prediction is taxed 0.1x linearly
+   (discussion/733877, /734604, VERIFIED). Our deployed threshold 0.96875 is inherited and never
+   selected. Caveat: duplicates cost ~9% for nothing, so any union of detectors needs a merge pass.
+4. **THE NOMINATOR IS A PER-TARGET ARGMAX.** In-degree is **1 for all 2,162,040** candidate edges;
+   13.42% of targets get ZERO candidates. **70.6% of the 17,001 missing GT edges are a RANKING error**
+   (a wrong parent already nominated), only 29.4% thresholding. kNN-3 recovers 92.5% of misses and
+   retains 99.4% of today's; **divisions need k=5 (93.2%) where continuations need k=3 (92.7%)**.
+5. **WE COULD SEE ONLY 9.5% OF THE PUBLIC CORPUS.** Of 719 public kernels, **68 have a score in the
+   title** — and all three mechanism-bearing notebooks we found have NO number in their names. Score-
+   keyed searching was structurally blind to 90.5% of the field.
+6. **ZEBRAHUB IS EXPLICITLY HOST-CLEARED** — "Yes you are free to use the data and all resources in
+   Zebrahub ... **There is no overlap with the test set**" (Thibgolds, discussion/734330, VERIFIED).
+   The 1.26M GT association edges are legitimate for the term that separates the frontier.
+
+---
+
+### ⏳ IN FLIGHT (do NOT poll scoring; it can take ~7 h)
+
+| ref / kernel | what it settles | state |
+|---|---|---|
+| 55768476 **p15 fork-free** | `summarise()` drops the division term when a submission has no forks, so the score IS our pure **adj_edge**; divJ follows by subtraction | PENDING |
+| 55768483 **p16 det 0.90** | First LB reading on **adding** nodes (+2.73%) — the untested direction of the 3.5x-amplified class | PENDING |
+| **p17 det 0.94** | Pairs with p16 for SLOPE, not a point | RUNNING |
+| **p4 detpeak export** | The whole `[0.5,1.0]` detection curve offline vs real GT, **zero slots** | RUNNING |
+
+**p15 caveat:** it lost 578 edges / 230 nodes, not just its 406 divisions, because the short-track
+filter reacts to the changed components. `divJ = (0.925 - probe)/0.1` is therefore APPROXIMATE and
+biased to read divJ high.
+
+Replay harness for p4 is built and tested: `scripts/win_bet/detpeak_curve.py`.
+
+---
+
+### ✅ BOTH TRAINING LANES REPAIRED (commit `51365e7`) — launchable, not launched
+
+**S5** had six defects, all fixed: the CUDA-autocast crash on step 1; **all division supervision was
+being deleted** (discarding the 65,741-link asset the lane exists for); a ~9x background-prior error
+from independent source/target sampling; a precision-free selection criterion; a "frozen detection"
+that froze only a 1x1 conv; and a tautological guard, now replaced by a real `detection_drift()`
+instrument that doubles as the pre-flight gate.
+
+**S1**'s three SEV-1 defects were **already fixed by an earlier session** — verified at file:line,
+not redone. One remained and is fixed: resume was local-only dead code, plus a latent corruption
+where resuming without `metrics.json` relabelled a trained model as the zero-epoch baseline.
+
+---
+
+### 📌 CORRECTIONS TO STANDING BELIEFS
+- **`ILP_APPEARANCE_WEIGHT` is a CLOSED lever.** 0.0 is the deliberate tuned public consensus (code
+  default is 0.1; all 26 pulled kernels set 0.0). I had queued flipping it as a "precondition" —
+  that was wrong.
+- **The `leevvin` leak claim does NOT hold as stated.** The vendored trainer's default split is
+  90/10 and strictly DISJOINT (`train_unet_transformer.py:1036-1051`); `test`-inside-`train` needs a
+  custom splits file the support pack does not ship. **But the practical conclusion survives for a
+  simpler reason:** 90/10 over 199 movies still puts ~179 in training, so scoring against
+  `data/train` is contaminated anyway. State the right mechanism.
+- **HOCT is closed** — measured under-performing a tuned ILP at ~45 min/movie by Arul
+  (discussion/728551); the Ultrack author confirms they never tried it on this dataset.
+- **`ILP_DIVISION_WEIGHT` 0.3/1.0/2.0/3.0 ALL scored 0.915** on someone else's LB. Closed, free.
+- **Kaggle permits a MAXIMUM OF 2 CONCURRENT GPU BATCH SESSIONS.** Pushes must be pipelined.
+
+---
+
+### NEXT, gated on the in-flight readings
+1. **p15 decides the lane.** ~0.923-0.924 => our edge term is already at 0.953 level and the whole
+   deficit is divisions. ~0.915-0.920 => the gap is genuinely edge, as the forum arithmetic implies.
+2. **p4's curve picks the detection threshold** without spending a slot per point.
+3. **The association ranker** (`scripts/kaggle_edits/ranker_block.py`, vendored + validated) is the
+   rerank half of retrieve-then-rerank. Remaining work is the ~100-line feature context builder.
+   **Its local evaluation is CONTAMINATED, so a slot is the only honest instrument for it.**
+4. **A division SELECTOR, not a relaxation** — the +0.0232 ceiling is real but unreachable by
+   loosening gates.
+
+
+## 🗄️ SUPERSEDED BELOW (kept for provenance; read the LIVE section above first)
 
 ## LIVE UPDATE 2026-08-24 — S1 smoke v2 passed; full run awaits host green-light
 
