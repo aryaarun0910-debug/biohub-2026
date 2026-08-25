@@ -4434,3 +4434,51 @@ instrument existed only as numbers in the ledger — **an oracle that is not com
 result, it is an anecdote.**
 
 **Raw output:** `C:/temp/error_atlas/npo_pre1_v2.json`, `nearest_parent_oracle_f1.json`.
+
+## 2026-08-25 — THE DIVISION TERM, MEASURED DIRECTLY: we emit 6,303 and get ONE right
+
+Prompted by a competitor post, and it replaced an estimate with a measurement.
+
+| frame | GT divisions | recovered (both daughter edges TP) | divisions PREDICTED |
+|---|---|---|---|
+| f0 scored | 26 | **1 (3.8%)** | 5,279 |
+| f1 scored | 125 | **1 (0.8%)** | 6,303 |
+| **f1 PRE-ILP** | 125 | **24 (19.2%)** | 176,835 |
+
+The standing figure "our divJ is ~0.02" was an ESTIMATE. Measured, the division term is
+effectively zero. The 125 GT-division count and the 176,835 out-degree>=2 source count both
+cross-check prior records exactly, so the read is sound.
+
+### Two findings, and the second is the actionable one
+
+**1. This is a SELECTION failure, not a threshold failure.** We emit 6,303 divisions on f1 and
+recover one. No loosening can help — that is precisely why blanket out-degree<=2 scored
+-0.0081. Independently corroborated by kevin park (48th, divJ ~0.12, EXTERNAL / unverified):
+*"basically none of them fail for js one reason. they fail 2 or 3 checks at once. so loosening
+any single threshold recovers nothing. it js adds false ones."* He runs our architecture — 1:1
+Hungarian with divisions bolted on afterwards — at **6x our division recall**, and calls
+himself stuck.
+
+**Design consequence:** P9 is an AND-chain of independent gates (radii 8/11/10 AND mid-track
+parent AND mutual-nearest-orphan AND t+2 divergence). A conjunction of gates cannot be tuned
+into a joint scorer. It also explains our own transfer law — divfix 0.000, p8 -0.003, P9 +0.010
+only when the mechanism was COMPLETE. Each gate is load-bearing precisely because the failures
+are multi-cause.
+
+**2. The pipeline DESTROYS the divisions it already has.** The pre-ILP graph carries 24 of the
+125; the scored output carries 1. **The ILP and relink throw away 23 of 24.** Recovering what
+already exists is a CPU-only diff over data on disk and precedes training anything. It also
+BOUNDS any selector built on the current candidate set at ~19% division recall — a perfect
+selector over today's candidates reaches divJ ~0.19, i.e. ~0.019 of score, not the +0.0232 of
+`FACT-0034`.
+
+### What could NOT be tested, and why that matters
+
+kevin park also reports missed divisions cluster in crowded frames (~3x node count). **We could
+not test it.** With exactly ONE recovered division on f1, the recovered-versus-missed comparison
+has n=1. The script printed a 2.05x frame-density ratio and a distance delta; **both are
+discarded as meaningless.** The inability to test his claim is itself the finding: we have no
+positive class to compare against.
+
+Recorded as `FACT-0080`..`FACT-0084`; `LEVER-0002` sharpened and `PKT-0003` restructured to put
+the cheap upstream-recovery diff before any model work.

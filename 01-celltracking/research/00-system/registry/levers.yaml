@@ -46,12 +46,27 @@ levers:
     status: open
     falsifier: >-
       Must beat the P9 division mechanism end-to-end on a scored submission.
-    supporting: [FACT-0034]
+    supporting: [FACT-0034, FACT-0080, FACT-0082, FACT-0083, FACT-0084]
     note: >-
-      The ceiling is real but NOT reachable by loosening gates - blanket out-degree<=2
-      scored -0.0081 end-to-end. It needs a SELECTOR. hengck23 (discussion/726924) names the
-      architecture; a CC0 corpus of 165,267 labelled divisions exists for pretraining only
-      (its division rate is inflated 4.07% vs 0.26%).
+      SHARPENED 2026-08-25 by direct measurement. We recover 1 of 125 GT divisions on f1
+      (FACT-0080) while EMITTING 6,303 (FACT-0082) - a selection failure, not a threshold
+      failure, which is why blanket out-degree<=2 scored -0.0081. Independently corroborated
+      by a 48th-place competitor who measures that missed divisions fail 2-3 checks at once,
+      so no single threshold recovers anything (FACT-0084).
+      .
+      THE DESIGN CONSEQUENCE: our P9 mechanism is an AND-chain of independent gates (radii
+      8/11/10 AND mid-track parent AND mutual-nearest-orphan AND t+2 divergence). A
+      conjunction of gates cannot be tuned into a joint scorer - the correct structure is ONE
+      model that sees all cues together and emits a probability, then a top-k selection
+      against a budget.
+      .
+      AND THE CHEAPER MOVE FIRST: the pre-ILP graph already contains 24 of the 125
+      (FACT-0083); the ILP and relink destroy 23 of them. Recovering what we already have
+      precedes training anything. Note this also BOUNDS a selector over the current candidate
+      set at ~19% division recall.
+      .
+      hengck23 (discussion/726924) names the stage-2 architecture; a CC0 corpus of 165,267
+      labelled divisions exists for pretraining only (division rate inflated 4.07% vs 0.26%).
     priority: 1
 
   - id: LEVER-0003

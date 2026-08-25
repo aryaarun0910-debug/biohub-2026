@@ -368,3 +368,80 @@ facts:
       from prior records; the derivation has not been re-run.
     date: '2026-08-24'
     tags: [metric, abstention]
+
+  # ---- the division term, measured directly 2026-08-25 -----------------------------
+  - id: FACT-0080
+    statement: GT divisions RECOVERED (both daughter edges TP) in the scored fold-1 output
+    value: 1
+    unit: count
+    scope: {fold: f1, of: 125}
+    provenance: MEASURED
+    instrument: scratchpad div_density.py over C:/temp/error_atlas gtnodes_f1/gtedges_f1
+    note: >-
+      0.8%. The 125 GT-division count cross-checks the prior record exactly. This replaces
+      the ESTIMATE that our divJ is "~0.02" with a direct measurement - the division term is
+      effectively zero, as the bijection argument predicted.
+    date: '2026-08-25'
+    tags: [division, measured]
+
+  - id: FACT-0081
+    statement: GT divisions recovered in the scored fold-0 output
+    value: 1
+    unit: count
+    scope: {fold: f0, of: 26}
+    provenance: MEASURED
+    instrument: scratchpad div_density.py over C:/temp/error_atlas
+    date: '2026-08-25'
+    tags: [division, measured]
+
+  - id: FACT-0082
+    statement: Divisions we PREDICT in the scored fold-1 output (predicted out-degree 2)
+    value: 6303
+    unit: count
+    scope: {fold: f1}
+    provenance: MEASURED
+    instrument: scratchpad div_density.py over C:/temp/error_atlas edges_f1
+    note: >-
+      We emit 6,303 divisions and get ONE right. This is a SELECTION failure, not a
+      threshold failure - loosening gates cannot help, which is why blanket out-degree<=2
+      scored -0.0081. Independently corroborated by kevin park (FACT-0084).
+    date: '2026-08-25'
+    tags: [division, measured]
+
+  - id: FACT-0083
+    statement: >-
+      GT divisions present in the PRE-ILP fold-1 graph, i.e. available upstream before the
+      ILP and relink destroy them
+    value: 24
+    unit: count
+    scope: {fold: pre1, of: 125}
+    provenance: MEASURED
+    instrument: scratchpad div_density.py over C:/temp/error_atlas gtedges_pre1
+    note: >-
+      19.2% upstream versus 0.8% in the scored output - the pipeline DESTROYS 23 of the 24
+      divisions it already had. The pre-ILP graph carries 176,835 out-degree>=2 sources,
+      matching the recorded roll-up exactly. Consequence: the first move is to stop
+      destroying what exists, not to train a new proposer. It also BOUNDS a selector built
+      on this candidate set at ~24/125 recall unless upstream recall is raised too.
+    date: '2026-08-25'
+    tags: [division, measured, ceiling]
+
+  - id: FACT-0084
+    statement: >-
+      kevin park (48th) reports divJ ~0.12, a 1:1 Hungarian linker with divisions bolted on
+      afterwards, and that missed divisions fail 2-3 checks at once so loosening any single
+      threshold recovers nothing and only adds false positives
+    value: 0.12
+    unit: division_jaccard
+    provenance: EXTERNAL
+    instrument: Kaggle discussion post, 2026-08-25, NOT independently verified
+    note: >-
+      Same architecture as ours and 6x our division recall while calling himself stuck. His
+      multi-cause failure finding independently corroborates FACT-0082 and explains why our
+      conjunction-of-gates design (P9 radii 8/11/10 AND mid-track parent AND
+      mutual-nearest-orphan AND t+2 divergence) has a structural ceiling: an AND-chain of
+      independent gates cannot be tuned into a joint scorer. He also reports missed
+      divisions cluster in crowded frames (~3x node count); WE COULD NOT TEST THIS - with
+      only 1 recovered division on f1 the comparison has n=1 and is meaningless.
+    date: '2026-08-25'
+    tags: [division, external, competitor]

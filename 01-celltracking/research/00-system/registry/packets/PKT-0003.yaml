@@ -15,13 +15,18 @@ falsifier: >-
   merely loosens gates is refuted before it starts.
 
 inputs:
-  facts: [FACT-0034]        # WARNING: FACT-0034 is UNVERIFIED. Re-derive the divJ ceiling
-                            # at file:line in the built notebook BEFORE building on it.
+  facts: [FACT-0034, FACT-0080, FACT-0082, FACT-0083, FACT-0084]
+                            # WARNING: FACT-0034 is UNVERIFIED. Re-derive the divJ ceiling
+                            # before building on it. FACT-0083 bounds a selector over the
+                            # CURRENT candidate set at ~19% division recall.
   artifacts: []
   code: []
 
 method: >-
-  Not started. Re-verify FACT-0034 first. hengck23 (discussion/726924) names the
+  Not started. STEP 0 is now cheaper and comes first: find where the 23 divisions present
+  pre-ILP (FACT-0083) but absent from the scored output are destroyed. That is a CPU-only
+  diff over the atlas already on disk, needs no model, and its result bounds everything
+  downstream. Only then re-verify FACT-0034 and design the joint scorer. hengck23 (discussion/726924) names the
   architecture; a CC0 corpus of 165,267 labelled divisions exists for PRETRAINING ONLY -
   its division rate is inflated 4.07% vs 0.26% and embryo heterogeneity is not modelled.
 
@@ -32,6 +37,7 @@ budget:
 
 forbidden:
   - loosening out-degree gates and calling it a selector
+  - adding another AND-gate to the P9 chain; the conjunction is the thing being replaced
 
 outputs:
   evidence: null
