@@ -1,0 +1,45 @@
+id: PKT-0002
+title: Decide the lane - is the remaining gap edges or divisions?
+lever: LEVER-0006
+owner: primary
+lock: running
+opened: '2026-08-25'
+
+claim: >-
+  A fork-free submission returns our pure adj_edge, because summarise() drops the division
+  term when a submission has no forks. divJ then follows by subtraction.
+
+falsifier: >-
+  A probe score materially ABOVE the deployed score would mean the fork-free reading is
+  wrong - divisions would be COSTING us score - which would retire the whole division lane
+  including the P9 mechanism that produced our largest gain.
+
+prediction: >-
+  ~0.923-0.924 => the edge term is already at top-3 level and the deficit is all divisions.
+  ~0.915-0.920 => the gap is genuinely edge.
+
+inputs:
+  facts: [FACT-0001, FACT-0020]
+  artifacts: []
+  code: []
+
+method: >-
+  EXP-0015 submitted. Kernel COMPLETE, leaderboard score not yet returned.
+
+budget:
+  gpu_sessions: 0
+  submissions: 1
+  wall_clock: scoring can take ~7 h
+
+forbidden:
+  - re-submitting the probe; one slot only
+
+outputs:
+  evidence: null
+  facts_added: []
+  record: one row in experimental-records.md
+
+result: >-
+  PENDING. Caveat already known: the probe lost 578 edges / 230 nodes beyond its 406
+  divisions because the short-track filter reacts, so the subtraction is APPROXIMATE and
+  biased to read divJ high.

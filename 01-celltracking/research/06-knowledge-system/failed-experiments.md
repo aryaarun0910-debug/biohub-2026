@@ -9,6 +9,7 @@ links: []
 tags:
 - negative
 - graveyard
+record_kind: ledger
 ---
 
 # Failed Experiments

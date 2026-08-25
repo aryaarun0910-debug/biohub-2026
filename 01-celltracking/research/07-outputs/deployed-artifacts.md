@@ -9,6 +9,7 @@ links: []
 tags:
 - deployment
 - kernels
+record_kind: state
 ---
 
 # Deployed Artifacts
@@ -18,7 +19,8 @@ tags:
 
 ## Live deployment
 
-- **P3 harmonic — 0.915 public.** Notebook: `../../notebooks/kaggle_p3_harmonic/`. Base P0-B
+- **P9 coupled division — 0.925 public (FACT-0001), the live deployment.** Superseded P3 harmonic at 0.915.
+- **P3 harmonic — 0.915 public, superseded.** Notebook: `../../notebooks/kaggle_p3_harmonic/`. Base P0-B
   (`base_sha256 01408a17…`). Mechanisms: harmonic fusion + degree invariants + DeepCenter veto
   ([../02-theory/mechanisms.md](../02-theory/mechanisms.md)).
 

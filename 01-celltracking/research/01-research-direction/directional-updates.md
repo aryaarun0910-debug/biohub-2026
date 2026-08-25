@@ -9,6 +9,7 @@ links: []
 tags:
 - steering
 - log
+record_kind: state
 ---
 
 # Directional Updates
@@ -53,7 +54,7 @@ receive grad; reproduced on a second crop).
   (same day, see the experimental record): a nucleus-size radial-profile ruler puts it at
   **~1.6–1.8 µm/voxel isotropic** (median 1.762, 1.084× our grid), i.e. the *same geometry
   family* as our deployed 64³ @ 1.625 µm detector input, not a separate resolution lineage.
-  This removes the level-1 premise that a retrain "voids the deployed 0.915 anchor". The ruler
+  This removes the level-1 premise that a retrain "voids the deployed anchor" (then 0.915, FACT-0002). The ruler
   assumes comparable nucleus size across stages; their nuclei are denser (later stage), which
   would bias the estimate upward — true scale may be nearer 1.625 µm.
 - Node labels are theirs (presumably Ultrack-derived); we have not audited them against Zebrahub.
@@ -164,4 +165,4 @@ level-1 imaging acquisition. Leaderboard barely moved (0.945+ tier crowding; pub
 ## Prior chronology
 
 Deployment lineage E0c (0.889) → v122 (0.908) → P0-A (0.913) → P0-B (0.914) → **P3 harmonic
-(0.915, deployed)**. Full history: [../06-knowledge-system/lab-notebooks.md](../06-knowledge-system/lab-notebooks.md).
+(0.925, deployed - FACT-0001)**. Full history: [../06-knowledge-system/lab-notebooks.md](../06-knowledge-system/lab-notebooks.md).

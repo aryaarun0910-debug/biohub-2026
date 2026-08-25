@@ -8,6 +8,7 @@ owner: biohub
 links: []
 tags:
 - results
+record_kind: state
 ---
 
 # Results
@@ -20,7 +21,7 @@ tags:
 ## Headline
 
 - **Deployment: P3 harmonic = 0.915 public** (lineage E0c 0.889 → v122 0.908 → P0-A 0.913 →
-  P0-B 0.914 → P3 0.915).
+  P0-B 0.914 → P3 0.915 → P9 0.925, FACT-0001).
 - **LOEO substrate anchors** (the trustable base, reproduced exactly): 44b6 `0.759549`,
   6bba `0.648965`.
 - **bet-motion-gate**: +0.0088 pooled (min-fold +0.0074) on E0c; +0.0080 P0-strict LOEO

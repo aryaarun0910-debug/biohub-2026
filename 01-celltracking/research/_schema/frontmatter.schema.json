@@ -27,6 +27,11 @@
     "updated": { "type": "string", "format": "date", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
     "owner": { "type": "string", "minLength": 1 },
     "links": { "type": "array", "items": { "type": "string" } },
-    "tags": { "type": "array", "items": { "type": "string" } }
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "record_kind": {
+      "type": "string",
+      "enum": ["state", "ledger", "archive"],
+      "description": "How this document relates to time, which decides whether its numbers may go stale. 'state' asserts what is true NOW and is guarded by validate_registry.py R5 against restating a superseded value as current. 'ledger' is an append-only historical record whose numbers are frozen by design (submissions, experiment rows). 'archive' is a dated snapshot kept for provenance. Absent means unclassified and outside the R5 guard."
+    }
   }
 }

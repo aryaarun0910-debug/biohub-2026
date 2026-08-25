@@ -8,6 +8,7 @@ owner: biohub
 links: []
 tags:
 - mission
+record_kind: state
 ---
 
 # Scientific Mission
@@ -17,8 +18,10 @@ tags:
 ## Mission
 
 Climb the Biohub Cell Tracking public leaderboard to **top-3** (private-set-honest), from a
-reproducible **0.915** system (P3 harmonic). Leader **0.950**; top-3 boundary **0.948**;
-gap to close **+0.033**; rank at reopen ~143 (tied on the 0.915 public plateau).
+reproducible **0.925** system (P9 coupled division, FACT-0001). Leader **0.962**
+(FACT-0011); top-3 boundary **0.953** (FACT-0010); gap to close **+0.028** (FACT-0012);
+rank **207 / 2,693** (FACT-0003). Superseded reading: 0.915 at leader 0.950, top-3 0.948,
+gap +0.033, rank ~143 on the then-current plateau.
 
 ## Win condition
 

@@ -1,9 +1,20 @@
 # Claude operating contract
 
-Read `research/00-system/handoff.md`, `research/00-system/system-design.md`, and
+Read `AGENTS.md` first — it is short, and it is the operating contract for every agent.
+Then `research/00-system/handoff.md`, `research/00-system/system-design.md`, and
 `research/README.md`. `research/00-system/handoff.md` is the live entry point; the current
-direction in full is `research/01-research-direction/directional-updates.md`. This file
-(`CLAUDE.md`) is the only load-bearing doc left at the repo root.
+direction in full is `research/01-research-direction/directional-updates.md`.
+
+Only two docs are load-bearing at the repo root: this file and `AGENTS.md`. Both must stay
+at the root — Claude Code discovers the PROJECT contract there, while `.claude/` holds the
+user-global `CLAUDE.md` and harness machinery (`settings.json`, agents, skills). Moving this
+file into `.claude/` would silently stop it loading as project instructions.
+
+**`research/00-system/registry/` is the only source of truth for numbers.** Cite ids
+(`FACT-0001`), do not restate values. Measured 2026-08-25: the superseded score 0.915
+appeared 244 times across 36 files while the live score appeared 31 times across 7 — an
+agent reading a random doc was 8x more likely to hit a dead number than a live one.
+`scripts/core/validate_registry.py` enforces this and must pass before you finish.
 
 ## Mission
 
@@ -30,6 +41,9 @@ mechanism and a stated falsification test.
    (gitignored). Every `research/**.md` needs conforming frontmatter and a `system.yaml`
    entry — `scripts/core/validate_research_tree.py` enforces it.
 7. Stage explicit paths. Never use `git add -A` or `git add -u`.
+7a. Claim a `LEVER-####` by opening a packet before working a lever. Two packets holding one
+   lever is a hard failure (`validate_registry.py` R6) — that is the anti-duplication lock.
+   A lever may only be closed by evidence **about itself**, and never on `UNVERIFIED` facts.
 8. No GPU launch or submission is automatic. Return the measured pilot report first unless
    the host explicitly authorises the next stage.
 
@@ -50,6 +64,9 @@ mechanism and a stated falsification test.
 - `scripts/core/claims_table.py`: generates `research/06-knowledge-system/claims-table.md` from
   `inventory/*.json`; `--check` fails on drift.
 - `scripts/core/validate_research_tree.py`: research-machine integrity (manifest + frontmatter).
+- `scripts/core/validate_registry.py`: registry integrity — id/xref hygiene, provenance rules,
+  the superseded-value guard on `record_kind: state` docs, and the one-lever-one-owner lock.
+- `research/00-system/registry/`: facts, experiments, levers, packets. The source of truth.
 - `scripts/win_bet/`: learned-ranker / Zebrahub workstream.
 - `scripts/kaggle_edits/`, `scripts/kaggle_specs/`: active kernel patches and specs.
 - Full instrument map: `research/03-experimentation/instrumentation.md`.

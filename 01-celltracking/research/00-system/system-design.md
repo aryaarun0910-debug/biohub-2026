@@ -86,8 +86,61 @@ These stages must never be conflated. `scripts/core/kaggle_factory.py` builds/pu
 
 Every tracked number comes from an artifact. `scripts/core/claims_table.py` generates
 `research/06-knowledge-system/claims-table.md` from `inventory/*.json` and fails loudly on a
-missing path, a moved artifact, or an illegal basis tag. Narrative lives in `results.md`; the
-generated table is authoritative for values.
+missing path, a moved artifact, or an illegal basis tag.
+
+**This principle existed from the start and did not hold, because it governed one generated
+table while the prose went on copying numbers by hand.** Measured 2026-08-25: the superseded
+score `0.915` appeared **244 times across 36 files**; the live score, 31 times across 7. An
+agent opening a research doc at random was **8x more likely to read a dead number than a live
+one**. Fifty-three claims were machine-checked while tens of thousands of assertions in 30,316
+lines of markdown were not.
+
+### The registry closes it
+
+`research/00-system/registry/` is the source of truth for values. Prose cites ids
+(`FACT-0001`); it does not restate numbers. A citation cannot go stale; a copy always can.
+
+| file | holds | id |
+|---|---|---|
+| `facts.yaml` | every measured value, once, with provenance | `FACT-####` |
+| `experiments.yaml` | binds spec ↔ kernel ↔ submission ↔ evidence ↔ score | `EXP-####` |
+| `levers.yaml` | every hypothesis and its status | `LEVER-####` |
+| `packets/` | a unit of work with exactly one owner | `PKT-####` |
+
+Provenance is a claim about **evidence**, not confidence: `VERIFIED` (re-derived at a named
+`file:line`), `MEASURED` (computed by committed code from a named artifact), `EXTERNAL` (a
+third party said so; unchecked), `UNVERIFIED` (ours, never re-derived, not reproducible),
+`SUPERSEDED` (replaced, successor named). The strong two **require** an `instrument` — an
+oracle that is not committed as code is not a result, it is an anecdote.
+
+### Documents relate to time in one of three ways
+
+`record_kind` in the frontmatter decides whether a document's numbers may age:
+
+- **`state`** — asserts what is true *now*. Guarded: it may not restate a superseded value as
+  current.
+- **`ledger`** — append-only history. Its numbers are frozen **by design**; a submission that
+  scored 0.915 scored 0.915 forever.
+- **`archive`** — a dated snapshot kept for provenance.
+
+This distinction is why the fix was not a find-and-replace. Most of those 244 mentions were
+*correct* — purging them would have falsified the record. Only the `state` documents were
+wrong, and only those were changed.
+
+## One lever, one owner
+
+Two agents independently discovering the same thing is waste, and convention does not prevent
+it. An agent claims a `LEVER-####` by opening a packet; `validate_registry.py` **fails** if
+two packets hold the same lever. The lock is a file, not a rule anyone must remember.
+
+A packet declares its **falsifier before it runs**, so an outcome cannot be rationalised
+afterwards. Levers carry the inverse guard too: a lever may only be closed by evidence *about
+itself*. Closure-by-association once shut the Trackastra re-association lane for weeks on
+evidence that was actually about HOCT, a different model.
+
+`scripts/core/validate_registry.py` enforces all of it, and `tests/test_registry_gate.py`
+tests the enforcement — including a negative control that plants a duplicate claim and asserts
+the gate rejects it. An unenforced registry would simply be a fourth place to be wrong.
 
 ## Test architecture
 

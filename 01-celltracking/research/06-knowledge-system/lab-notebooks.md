@@ -9,6 +9,7 @@ links: []
 tags:
 - journal
 - chronology
+record_kind: ledger
 ---
 
 > **Provenance:** migrated verbatim from `reports/journal/JOURNAL.md` on 2026-08-16 during the research-machine restructure. Body preserved unchanged below.

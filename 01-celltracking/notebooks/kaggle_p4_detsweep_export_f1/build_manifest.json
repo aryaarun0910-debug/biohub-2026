@@ -4,8 +4,8 @@
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
   "built_notebook": "notebooks\\kaggle_p4_detsweep_export_f1\\biohub-p4-detsweep-export-f1.ipynb",
-  "built_sha256": "0a57bc8dcee95e7c45edca5afcaf9629fa338899fdc0dc03af59742beb802ed4",
-  "config_hash": "aba19a207ca0",
+  "built_sha256": "b8e61a45fa96e3adc3efbfaa7ffd5b5603461ed0d1b3625481947c7a4899f129",
+  "config_hash": "ff22d342b8a3",
   "n_cells": 12,
   "edits": [
     {
@@ -149,7 +149,7 @@
       "payload_sha256": "024239b2f55598bbd2649eb35901119fb328259a878095c81d07cf8f893ec70f"
     }
   ],
-  "declared_slug": "biohub-p4-detsweep-export-f1",
+  "declared_slug": "biohub-p4-detpeak-superset-export-loeo-f1",
   "title": "Biohub P4 DetPeak Superset Export LOEO F1",
   "defect_gate": {
     "ledger": "scripts\\core\\experiment_defects.json",

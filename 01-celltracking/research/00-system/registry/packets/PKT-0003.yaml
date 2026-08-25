@@ -1,0 +1,41 @@
+id: PKT-0003
+title: Division stage 2 - a learned selector, not a relaxation
+lever: LEVER-0002
+owner: null
+lock: open
+opened: '2026-08-25'
+
+claim: >-
+  Keeping the bijection and adding divisions as a learned STAGE 2 recovers part of the
+  structurally unreachable division score (FACT-0034).
+
+falsifier: >-
+  Must beat the P9 division mechanism end-to-end on a scored submission. Note that blanket
+  out-degree<=2 already scored -0.0081, so a relaxation is NOT the mechanism - anything that
+  merely loosens gates is refuted before it starts.
+
+inputs:
+  facts: [FACT-0034]        # WARNING: FACT-0034 is UNVERIFIED. Re-derive the divJ ceiling
+                            # at file:line in the built notebook BEFORE building on it.
+  artifacts: []
+  code: []
+
+method: >-
+  Not started. Re-verify FACT-0034 first. hengck23 (discussion/726924) names the
+  architecture; a CC0 corpus of 165,267 labelled divisions exists for PRETRAINING ONLY -
+  its division rate is inflated 4.07% vs 0.26% and embryo heterogeneity is not modelled.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: unscoped
+
+forbidden:
+  - loosening out-degree gates and calling it a selector
+
+outputs:
+  evidence: null
+  facts_added: []
+  record: one row in experimental-records.md
+
+result: null

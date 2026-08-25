@@ -9,6 +9,7 @@ links: []
 tags:
 - ledger
 - experiments
+record_kind: ledger
 ---
 
 > **Provenance:** migrated verbatim from `reports/EXPERIMENT_LEDGER.md` on 2026-08-16 during the research-machine restructure. Body preserved unchanged below.

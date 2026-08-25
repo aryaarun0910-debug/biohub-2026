@@ -9,6 +9,7 @@ links: []
 tags:
 - prioritisation
 - gating
+record_kind: state
 ---
 
 # Prioritisation
@@ -17,7 +18,7 @@ tags:
 
 ## Ranking (EV × novelty × cheap-to-falsify)
 
-1. **bet-motion-gate** — free/low cost, banks a small real gain off 0.915 while the retrain
+1. **bet-motion-gate** — free/low cost, banks a small real gain off the deployed score (FACT-0001) while the retrain
    spins up. *Measuring now.*
 2. **bet-zebrahub-retrain + bet-learned-ranker** — the program; highest EV; the only measured
    path off the plateau. Run together (retrain feeds the ranker's candidate pool).

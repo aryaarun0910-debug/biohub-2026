@@ -1,0 +1,136 @@
+# LEVERS REGISTRY - every hypothesis that could move the score, with its status.
+#
+# WHY THIS EXISTS
+# The most expensive recurring mistake in this project has been reopening a lever that was
+# already answered. The second most expensive has been CLOSING one by association - the
+# Trackastra pruning lane was filed as "a detour" on evidence about HOCT, a different model,
+# and stayed closed for weeks on evidence that was never about it.
+#
+# So a lever may only be closed by evidence ABOUT ITSELF, and `closed_by` must name the
+# FACT ids that did it. `scripts/core/validate_registry.py` enforces that a closed lever
+# names its evidence, and that its evidence is not UNVERIFIED.
+#
+# status:
+#   open      live hypothesis, may be claimed by a packet
+#   running   a packet is executing against it
+#   killed    tested and refuted BY EVIDENCE ABOUT ITSELF
+#   closed    ruled out for a stated structural reason (cost, contamination, infeasibility)
+#   parked    plausible but deliberately deferred; `reopen_when` states the trigger
+
+schema_version: 1
+updated: '2026-08-25'
+
+levers:
+
+  - id: LEVER-0001
+    claim: >-
+      Smoothing node positions along a tracklet before the linker recovers association
+      accuracy, because ~37% of localisation error is independent per frame
+    status: killed
+    falsifier: >-
+      The nearest-parent statistic must move UP off the run's own deployed baseline.
+    closed_by: [FACT-0050, FACT-0051]
+    closed_date: '2026-08-25'
+    outcome: >-
+      Six of six measurements moved it DOWN, across two substrates and both estimators.
+      Mean -5.64 pp, linefit -1.41 pp on the pre-ILP frame. The kill is robust to the
+      disputed FACT-0043 anchor because it depends only on the SIGN of the change against
+      each run's own baseline. Mechanism - smoothing follows PREDICTED tracks, and predicted
+      tracks are the broken thing, so denoising along a wrong link propagates its error.
+      Consequence: do NOT move linefit_smooth_output_graph earlier (FACT-0052).
+
+  - id: LEVER-0002
+    claim: >-
+      A division STAGE 2 - keep the bijection, add divisions via a learned selector on
+      appearance change and longer-track cues - unlocks the structurally unreachable divJ
+    status: open
+    falsifier: >-
+      Must beat the P9 division mechanism end-to-end on a scored submission.
+    supporting: [FACT-0034]
+    note: >-
+      The ceiling is real but NOT reachable by loosening gates - blanket out-degree<=2
+      scored -0.0081 end-to-end. It needs a SELECTOR. hengck23 (discussion/726924) names the
+      architecture; a CC0 corpus of 165,267 labelled divisions exists for pretraining only
+      (its division rate is inflated 4.07% vs 0.26%).
+    priority: 1
+
+  - id: LEVER-0003
+    claim: >-
+      The deployed detection threshold 0.96875 is too high; lowering it raises edge recall
+      by more than the under-production bonus it erodes
+    status: running
+    falsifier: >-
+      EXP-0016 / EXP-0017 read as a PAIR must show a monotone or interior-optimum gain.
+    experiments: [EXP-0016, EXP-0017, EXP-0004A, EXP-0004B]
+    note: >-
+      The p4 detpeak export buys the whole [0.5,1.0] curve offline for zero submission
+      slots, which subsumes the pointwise arms. Smoke (EXP-0004S) shows the per-crop spread
+      is large - 4% vs 49% extra nodes on two crops of the same fold - so a single global
+      threshold is probably the wrong instrument.
+    priority: 2
+
+  - id: LEVER-0004
+    claim: Trackastra used as a PRUNER of candidate edges
+    status: killed
+    falsifier: Must beat the cached-graph baseline when scored.
+    closed_by: [FACT-0070, FACT-0071]
+    closed_date: '2026-08-25'
+    outcome: >-
+      Scored from cached graphs f0 -0.187, f1 -0.084. Its 14.7/55.2/39.2% rejection rates
+      cannot clear the measured 58.88% break-even deletion precision. Closed on evidence
+      about ITSELF, replacing an earlier closure-by-association with HOCT.
+
+  - id: LEVER-0005
+    claim: >-
+      Trackastra OWNING re-association with its background class live, replacing the
+      geometric LAP rather than filtering its output
+    status: parked
+    reopen_when: >-
+      A cheaper lever is exhausted, or the p15 reading shows the deficit is edges not
+      divisions.
+    note: >-
+      A DIFFERENT mechanism from LEVER-0004 and explicitly NOT closed by it. The prior on it
+      should drop given the pruning result, but the two are not the same experiment and the
+      distinction must not be collapsed.
+
+  - id: LEVER-0006
+    claim: The remaining gap is divisions rather than edges
+    status: running
+    falsifier: >-
+      EXP-0015 returns our pure adj_edge. ~0.923-0.924 means the edge term is already at
+      top-3 level and the whole deficit is divisions; ~0.915-0.920 means the gap is edges.
+    experiments: [EXP-0015]
+    note: This decides which lane gets the remaining budget. Everything downstream branches on it.
+    priority: 0
+
+  - id: LEVER-0007
+    claim: ILP_APPEARANCE_WEIGHT is mistuned
+    status: closed
+    closed_date: '2026-08-23'
+    outcome: 0.0 is the tuned public consensus; the code default 0.1 was the anomaly. No headroom.
+
+  - id: LEVER-0008
+    claim: HOCT replaces the ILP profitably
+    status: closed
+    closed_date: '2026-08-23'
+    outcome: Measured under-performing a tuned ILP at ~45 min/movie. Cost-infeasible.
+
+  - id: LEVER-0009
+    claim: Abstention / edge deletion improves precision enough to pay for lost recall
+    status: closed
+    closed_date: '2026-08-25'
+    outcome: >-
+      Break-even deletion precision is 58.88%; our best measured is 58.3%. Nothing has ever
+      cleared it. Generalises LEVER-0004.
+
+  - id: LEVER-0010
+    claim: >-
+      The defect ledger can be made to gate real specs by widening spec_name_globs
+    status: killed
+    closed_by: [FACT-0063]
+    closed_date: '2026-08-25'
+    outcome: >-
+      The proposed fix does not exist - kaggle_factory.py:295 ALREADY defaults to ["*"].
+      Widening the 8 rules would fail nearly every deploy spec. The real gap is that no rule
+      has ever been written for the deploy substrate, which is a coverage problem needing
+      new rules, not a globbing problem.

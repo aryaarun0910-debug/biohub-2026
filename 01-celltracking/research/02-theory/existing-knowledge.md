@@ -9,6 +9,7 @@ links: []
 tags:
 - methods
 - frontier
+record_kind: state
 ---
 
 # Existing Knowledge
@@ -19,7 +20,7 @@ tags:
 
 ## Internal (established on this dataset)
 
-- **P3 harmonic = 0.915 public** — the deployment; the shared public engine (see
+- **P9 coupled division = 0.925 public** (FACT-0001) — the deployment, superseding P3 harmonic at 0.915; the shared public engine (see
   [../01-research-direction/research-landscape.md](../01-research-direction/research-landscape.md)).
 - **LOEO substrate anchors** reproduced exactly: 44b6 `0.759549`, 6bba `0.648965`.
 - **Cross-family transfer is the trap**: a ranker fit on 44b6 fails on 6bba (the 2-embryo trap).

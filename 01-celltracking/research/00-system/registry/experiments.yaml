@@ -1,0 +1,161 @@
+# EXPERIMENTS REGISTRY - binds every identifier for one experiment in ONE place.
+#
+# WHY THIS EXISTS
+# An experiment currently has up to six different names: the spec file stem, the spec
+# `name`, the Kaggle slug, the notebook out_dir, the submission ref, and whatever prose
+# called it in the ledger. Nothing tied them together, so answering "what did p15 score?"
+# meant guessing a slug. On 2026-08-25 that cost a wrong-slug API call, and separately a
+# spec copied without changing `out_dir` silently overwrote a sibling kernel's metadata.
+#
+# THE RULE
+# One EXP-#### per experiment. Every other identifier hangs off it. Prose cites the EXP id.
+#
+# status:
+#   built     notebook built locally, never pushed
+#   running   pushed, kernel executing
+#   complete  kernel finished, output fetched
+#   scored    submission has a leaderboard score
+#   pending   submitted, awaiting score
+#   void      ran but produced nothing usable - the run is evidence of a DEFECT, not a result
+#   deployed  the current live submission
+
+schema_version: 1
+updated: '2026-08-25'
+
+experiments:
+
+  - id: EXP-0003
+    title: P3 harmonic re-baseline
+    spec: scripts/kaggle_specs/p3_harmonic.json
+    kernel: aryaarun07/biohub-p3-harmonic
+    submission: 55274582
+    lb: 0.915
+    status: scored
+    date: '2026-08-05'
+    note: Long-standing baseline; superseded as the deployment by EXP-0009.
+
+  - id: EXP-0006
+    title: Instrument control - det_threshold 0.96875 -> 0.999
+    spec: scripts/kaggle_specs/p6_control_degraded.json
+    kernel: aryaarun07/biohub-p6-control-degraded
+    submission: 55667537
+    lb: 0.883
+    status: scored
+    date: '2026-08-21'
+    note: >-
+      Deliberate degradation to prove the LB responds at all after three submissions
+      returned identical 0.915. Removed 28% of nodes; scored -0.032. This is the ONLY prior
+      control in the detection-surface class, and it moved in the SUBTRACTIVE direction.
+
+  - id: EXP-0008
+    title: Loose-propose / strict-filter divisions
+    spec: scripts/kaggle_specs/p8_loosefilter.json
+    kernel: aryaarun07/biohub-p8-loosefilter
+    submission: 55698581
+    lb: 0.912
+    status: scored
+    date: '2026-08-22'
+    confounded: true
+    note: >-
+      Scored -0.003 against P3. Carries a THIRD, unrecorded confound: the spec sets
+      BIOHUB_DEEPCENTER_SAFE_DIV_VETO=1 while pinning no DEEPCENTER_SAFE_DIV_THRESHOLD, so
+      the silent 0.12 default applied. Treat the delta as uninterpretable.
+
+  - id: EXP-0009
+    title: P9 coupled division transplant
+    spec: scripts/kaggle_specs/p9_coupled_division.json
+    kernel: aryaarun07/biohub-p9-coupled-division
+    submission: 55753516
+    lb: 0.925
+    status: deployed
+    date: '2026-08-24'
+    facts: [FACT-0001]
+    note: >-
+      +0.010 over 0.915, the largest gain of the campaign and the first division-class
+      change to score positive. Prediction band (central 0.919-0.925) HIT.
+
+  - id: EXP-0015
+    title: Fork-free diagnostic probe
+    spec: scripts/kaggle_specs/p15_forkfree_probe.json
+    kernel: aryaarun07/biohub-p15-forkfree-probe
+    submission: 55768476
+    lb: null
+    status: pending
+    date: '2026-08-25'
+    note: >-
+      OUTPUT_SAFE_DIVISIONS=0 on P9. summarise() drops the division term when a submission
+      has no forks, so the score IS our pure adj_edge and divJ follows by subtraction.
+      CAVEAT - it also lost 578 edges / 230 nodes beyond its 406 divisions because the
+      short-track filter reacts, so the subtraction is approximate and biased to read divJ
+      high. Kernel COMPLETE; leaderboard has not returned a score.
+
+  - id: EXP-0016
+    title: Detection threshold 0.96875 -> 0.90
+    spec: scripts/kaggle_specs/p16_det090.json
+    kernel: aryaarun07/biohub-p16-det090
+    submission: 55768483
+    lb: null
+    status: pending
+    date: '2026-08-25'
+    note: Read as a PAIR with EXP-0017 for slope, not as a point.
+
+  - id: EXP-0017
+    title: Detection threshold 0.96875 -> 0.94
+    spec: scripts/kaggle_specs/p17_det094.json
+    kernel: aryaarun07/biohub-p17-det094
+    submission: 55769398
+    lb: null
+    status: pending
+    date: '2026-08-25'
+
+  - id: EXP-0004
+    title: DetPeak superset export, fold 0 - version 1
+    spec: scripts/kaggle_specs/p4_detsweep_export_f0.json
+    kernel: aryaarun07/biohub-p4-detpeak-superset-export-loeo-f0
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: void
+    date: '2026-08-25'
+    facts: [FACT-0060]
+    evidence: _evidence/p4_detpeak_f0/
+    note: >-
+      Ran 9,439 s and returned an EMPTY detpeaks/ directory across all 71 crops. Sink and
+      flush were installed on the parent process's builtins while prediction runs in a
+      subprocess; both call sites were None-guarded so the failure was silent in BOTH
+      branches. VOID, not a result. Its LOEO export is still valid.
+
+  - id: EXP-0004S
+    title: DetPeak smoke, 2 crops - verifies the repaired subprocess-local hooks
+    spec: scripts/kaggle_specs/p4_detpeak_smoke_f0.json
+    kernel: aryaarun07/biohub-p4-detpeak-smoke-f0
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-25'
+    evidence: _evidence/p4_detpeak_smoke_f0/
+    note: >-
+      PASSED. Emitted 2 npz (77,031 peaks). Confirms the repair and confirms nested output
+      fetch. Per-crop threshold spread is large - 44b6_0113de3b gains 4% of nodes going
+      0.96875 -> 0.5 while 44b6_0b24845f gains 49%.
+
+  - id: EXP-0004A
+    title: DetPeak superset export, fold 0 - repaired
+    spec: scripts/kaggle_specs/p4_detsweep_export_f0.json
+    kernel: aryaarun07/biohub-p4-detpeak-superset-export-loeo-f0
+    kernel_version: 2
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-25'
+
+  - id: EXP-0004B
+    title: DetPeak superset export, fold 1 - repaired
+    spec: scripts/kaggle_specs/p4_detsweep_export_f1.json
+    kernel: aryaarun07/biohub-p4-detpeak-superset-export-loeo-f1
+    kernel_version: 2
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-25'
+    note: The 6bba fold carries essentially all the headroom (FACT-0031).

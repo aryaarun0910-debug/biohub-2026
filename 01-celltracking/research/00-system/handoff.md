@@ -7,17 +7,37 @@ updated: '2026-08-24'
 owner: biohub
 links: []
 tags: [handoff, entry-point]
+record_kind: state
 ---
 
 # Current handoff
 
-**Status:** ACTIVE 2026-08-24. Branch `master`.
+**Status:** ACTIVE 2026-08-25. Branch `master`.
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
 
+> ## 📌 READ `../../AGENTS.md` FIRST — the record system changed on 2026-08-25
+>
+> **Numbers now live in `registry/`, and prose cites ids instead of restating values.**
+> Measured that day: the superseded score 0.915 appeared **244 times across 36 files** while
+> the live score appeared 31 times across 7 — an agent reading a random doc was **8x more
+> likely to hit a dead number than a live one**. That, not agent coordination, was the main
+> engine of second-guessing.
+>
+> - `registry/facts.yaml` — every value once, with provenance. **8 of 29 are `UNVERIFIED`**,
+>   including the entire lever ranking (`FACT-0030`..`FACT-0033`) that decides where the
+>   headroom is. Treat those as open questions, not knowledge.
+> - `registry/levers.yaml` — every hypothesis and its status. A lever may only be closed by
+>   evidence **about itself**.
+> - `registry/packets/` — one lever, one owner. `validate_registry.py` fails on a double claim.
+> - `record_kind:` frontmatter — `state` docs must be current; `ledger`/`archive` numbers are
+>   frozen by design.
+>
+> `NEXT_SESSION_PROMPT.md` is deleted; it duplicated this file and had already gone wrong once.
+
 ## 🎯 LIVE 2026-08-25 (evening) — 0.925, rank 207/2,693. THE "ONLY RETRAINING WINS" THESIS IS REFUTED.
 
-**Deployed: P9 coupled division transplant, LB 0.925** (submission 55753516, +0.010 over 0.915) — the
+**Deployed: P9 coupled division transplant, LB 0.925** (submission 55753516, +0.010 over the superseded 0.915, FACT-0002) — the
 largest gain of the campaign and the first division-class change ever to score positive. Prediction
 band (central 0.919-0.925) HIT. Committed at `51365e7`.
 
@@ -31,7 +51,7 @@ band (central 0.919-0.925) HIT. Committed at `51365e7`.
 That was the operating thesis from 2026-08-23. **Four independent pieces of evidence now contradict
 it, and one of them is our own leaderboard result:**
 
-1. **We gained +0.010 by POST-PROCESSING** (P9), from 0.915 to 0.925, with no retraining at all. The
+1. **We gained +0.010 by POST-PROCESSING** (P9), from the superseded 0.915 (FACT-0002) to 0.925, with no retraining at all. The
    "wrapping is exhausted" claim was false — it was exhausted for *our* ideas, not for the field's.
 2. **mikelou1 retrained from scratch and reached only 0.928** (forum, VERIFIED). Retraining alone
    demonstrably does NOT reach 0.947+.
@@ -152,7 +172,7 @@ where resuming without `metrics.json` relabelled a trained model as the zero-epo
   `data/train` is contaminated anyway. State the right mechanism.
 - **HOCT is closed** — measured under-performing a tuned ILP at ~45 min/movie by Arul
   (discussion/728551); the Ultrack author confirms they never tried it on this dataset.
-- **`ILP_DIVISION_WEIGHT` 0.3/1.0/2.0/3.0 ALL scored 0.915** on someone else's LB. Closed, free.
+- **`ILP_DIVISION_WEIGHT` 0.3/1.0/2.0/3.0 ALL scored 0.915** on someone else's LB (their number, not FACT-0002). Closed, free.
 - **Kaggle permits a MAXIMUM OF 2 CONCURRENT GPU BATCH SESSIONS.** Pushes must be pipelined.
 
 ---
@@ -187,7 +207,7 @@ the correct anisotropic scale differs, at 12.24%). Cite neither number until rec
 
 ### NEXT, gated on the in-flight readings
 1. **p15 decides the lane.** ~0.923-0.924 => our edge term is already at 0.953 level and the whole
-   deficit is divisions. ~0.915-0.920 => the gap is genuinely edge, as the forum arithmetic implies.
+   deficit is divisions. ~0.915-0.920 (a probe band, not our score) => the gap is genuinely edge, as the forum arithmetic implies.
 2. **p4's curve picks the detection threshold** without spending a slot per point — but the export
    was BROKEN and bought nothing; see the IN FLIGHT section. Repaired and re-smoked 2026-08-25.
 3. **The association ranker** (`scripts/kaggle_edits/ranker_block.py`, vendored + validated) is the

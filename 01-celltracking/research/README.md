@@ -7,6 +7,7 @@ updated: 2026-08-24
 owner: biohub
 links: []
 tags: [meta, map]
+record_kind: state
 ---
 
 # The Research Machine
@@ -23,7 +24,7 @@ same "fail loudly on drift" discipline as the claims table.
 
 ## Repository at a glance
 
-Deployed public score **0.915** (P3 harmonic); leader 0.962, top-3 boundary 0.953, gap **+0.038**
+Deployed public score **0.925** (P9 coupled division, FACT-0001); leader 0.962, top-3 boundary 0.953, gap **+0.028** (FACT-0012)
 (2026-08-24 15:52 UTC).
 Live direction: [`00-system/handoff.md`](00-system/handoff.md) →
 [`01-research-direction/directional-updates.md`](01-research-direction/directional-updates.md).

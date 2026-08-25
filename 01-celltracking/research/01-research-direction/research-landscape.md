@@ -9,6 +9,7 @@ links: []
 tags:
 - landscape
 - competitive
+record_kind: state
 ---
 
 # The Research Landscape
@@ -20,7 +21,7 @@ tags:
 
 Top-3 boundary **0.948** (leader Mark Cooper 0.950; TWEAK 0.949; Soheil Ayati 0.948).
 Distribution: ≥0.950: 1 · ≥0.948: 3 · ≥0.945: 7 · ≥0.940: 10 · ≥0.935: 16 · ≥0.930: 27 (top 1.1%)
-· ≥0.920: 73. Then a **cliff: 0.915 = 302 teams**, ≥0.915 = 447 teams (top 18.4%) = the
+· ≥0.920: 73. Then a **cliff: 0.915 = 302 teams** (a field distribution, not our score), ≥0.915 = 447 teams (top 18.4%) = the
 **public-notebook plateau**, where **we sit**. Gap to top-3 = **+0.033**.
 
 ## The plateau is real and exhausted at ~0.911–0.916

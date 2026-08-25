@@ -1,0 +1,370 @@
+# FACTS REGISTRY - the single source of truth for every measured value.
+#
+# WHY THIS EXISTS
+# Measured on 2026-08-25: the superseded score 0.915 was asserted 244 times across 36
+# files; the live score 0.925 only 31 times across 7. An agent opening a research doc at
+# random was 8x more likely to read a dead number than a live one. The cause is that
+# numbers were COPIED into prose instead of REFERENCED by id, so every restatement was an
+# independent chance to go stale and nothing detected divergence.
+#
+# THE RULE
+# A measured value lives here ONCE. Prose cites `FACT-####`. A `state` document may not
+# assert a superseded value as current; `scripts/core/validate_registry.py` enforces it.
+#
+# PROVENANCE - exactly one per fact, and it is a claim about EVIDENCE, not confidence:
+#   VERIFIED    re-derived this cycle at a named file:line, or by rerunning committed code
+#   MEASURED    computed from a named artifact by code that is committed
+#   EXTERNAL    asserted by a third party (forum, public notebook) - NOT independently checked
+#   UNVERIFIED  recorded in our own history but never re-derived, and not currently reproducible
+#   SUPERSEDED  replaced by a newer fact; `superseded_by` names it
+#
+# Adding a fact with provenance VERIFIED or MEASURED REQUIRES `instrument` to name committed
+# code or a `file:line`. "An oracle that is not committed as code is not a result, it is an
+# anecdote" - learned the hard way when the 3.44% anchor proved unreproducible.
+
+schema_version: 1
+updated: '2026-08-25'
+
+facts:
+
+  # ---- deployed state -------------------------------------------------------------
+  - id: FACT-0001
+    statement: Public LB score of the deployed P9 coupled division transplant
+    value: 0.925
+    unit: score
+    scope: {leaderboard: public}
+    provenance: MEASURED
+    instrument: kaggle submission 55753516
+    experiment: EXP-0009
+    date: '2026-08-24'
+    tags: [score, deployed]
+
+  - id: FACT-0002
+    statement: Public LB score of the P3 harmonic deployment
+    value: 0.915
+    unit: score
+    scope: {leaderboard: public}
+    provenance: SUPERSEDED
+    superseded_by: FACT-0001
+    instrument: kaggle submission 55274582
+    experiment: EXP-0003
+    date: '2026-08-05'
+    guard_state_docs: true   # a `state` doc asserting this as current is an error
+    tags: [score, superseded]
+
+  - id: FACT-0003
+    statement: Our public leaderboard rank
+    value: 207
+    unit: rank
+    scope: {of: 2693}
+    provenance: MEASURED
+    instrument: kaggle leaderboard read 2026-08-25
+    date: '2026-08-25'
+    tags: [rank]
+
+  # ---- the target ------------------------------------------------------------------
+  - id: FACT-0010
+    statement: Top-3 boundary score
+    value: 0.953
+    unit: score
+    provenance: EXTERNAL
+    instrument: public leaderboard
+    date: '2026-08-25'
+    tags: [target]
+
+  - id: FACT-0011
+    statement: Leader (z7777) score
+    value: 0.962
+    unit: score
+    provenance: EXTERNAL
+    instrument: public leaderboard
+    date: '2026-08-25'
+    tags: [target]
+
+  - id: FACT-0012
+    statement: Gap from deployed to top-3
+    value: 0.028
+    unit: score
+    provenance: MEASURED
+    instrument: FACT-0010 minus FACT-0001
+    derived_from: [FACT-0001, FACT-0010]
+    date: '2026-08-25'
+    tags: [target]
+
+  # ---- metric semantics ------------------------------------------------------------
+  - id: FACT-0020
+    statement: >-
+      score = adj_edge_jaccard + 0.1 * division_jaccard, where
+      adj_edge_jaccard = max(0, edge_jaccard * (1 - 0.1 * total_node_ratio)) and
+      total_node_ratio = (N_pred - N_est)/N_est. node_recall appears NOWHERE in the score.
+    value: null
+    unit: formula
+    provenance: VERIFIED
+    instrument: official patched scorer, biohub_tracking/metrics.py summarise()
+    date: '2026-08-25'
+    tags: [metric]
+
+  - id: FACT-0021
+    statement: Pooled total_node_ratio - we UNDER-produce and collect a bonus
+    value: -0.0937
+    unit: ratio
+    provenance: UNVERIFIED
+    instrument: null
+    note: >-
+      Carried from the prior cycle's records; not re-derived since. The multiplier is
+      clamped below at 0 and uncapped above 1, so under-production pays ~0.94%.
+    date: '2026-08-24'
+    tags: [metric]
+
+  # ---- where the headroom is -------------------------------------------------------
+  - id: FACT-0030
+    statement: Score gain from perfecting nodes, fold 0 (44b6)
+    value: 0.018
+    unit: score
+    scope: {fold: f0}
+    provenance: UNVERIFIED
+    date: '2026-08-25'
+    tags: [lever-ranking]
+
+  - id: FACT-0031
+    statement: Score gain from perfecting nodes, fold 1 (6bba)
+    value: 0.136
+    unit: score
+    scope: {fold: f1}
+    provenance: UNVERIFIED
+    note: Essentially ALL headroom is in the fold-1 embryo direction.
+    date: '2026-08-25'
+    tags: [lever-ranking]
+
+  - id: FACT-0032
+    statement: Score gain from perfecting linking, fold 0
+    value: 0.036
+    unit: score
+    scope: {fold: f0}
+    provenance: UNVERIFIED
+    date: '2026-08-25'
+    tags: [lever-ranking]
+
+  - id: FACT-0033
+    statement: Score gain from perfecting linking, fold 1
+    value: 0.063
+    unit: score
+    scope: {fold: f1}
+    provenance: UNVERIFIED
+    date: '2026-08-25'
+    tags: [lever-ranking]
+
+  - id: FACT-0034
+    statement: >-
+      Structurally unreachable score from the bijection - divJ ceiling is 0.0000 at
+      out-degree<=1 versus 0.2320 at out-degree<=2
+    value: 0.0232
+    unit: score
+    provenance: UNVERIFIED
+    note: >-
+      Both association stages are bare linear_sum_assignment calls, so a division is not
+      rare but INEXPRESSIBLE. Needs re-verification at file:line in the built notebook.
+    date: '2026-08-25'
+    tags: [division, ceiling]
+
+  # ---- the localisation-noise mechanism --------------------------------------------
+  - id: FACT-0040
+    statement: Median true inter-frame displacement of correctly-linked GT edges, fold 1
+    value: 1.817
+    unit: um
+    scope: {fold: f1}
+    provenance: VERIFIED
+    instrument: scripts/win_bet/nearest_parent_oracle.py calibrate_displacement()
+    note: >-
+      THE calibration anchor for any distance code. Atlas coords are FULL-RES (z,y,x) and
+      take (1.625, 0.40625, 0.40625), NOT isotropic 1.625. Two of three distance analyses
+      on 2026-08-25 started with the wrong convention; this check catches it.
+    date: '2026-08-25'
+    tags: [calibration, distance]
+
+  - id: FACT-0041
+    statement: >-
+      Nearest-parent oracle on mislinked GT edges, fold-1 SCORED frame - deployed coords
+    value: 12.24
+    unit: percent
+    scope: {fold: f1, frame: scored, n_edges: 6861}
+    provenance: MEASURED
+    instrument: scripts/win_bet/nearest_parent_oracle.py
+    date: '2026-08-25'
+    tags: [oracle, localisation]
+
+  - id: FACT-0042
+    statement: Nearest-parent oracle, fold-1 scored frame - GT coords, pool held fixed
+    value: 73.24
+    unit: percent
+    scope: {fold: f1, frame: scored, n_edges: 6861}
+    provenance: MEASURED
+    instrument: scripts/win_bet/nearest_parent_oracle.py
+    note: The linker loses to NOISY COORDINATES, not to a crowded candidate pool.
+    date: '2026-08-25'
+    tags: [oracle, localisation]
+
+  - id: FACT-0043
+    statement: >-
+      Nearest-parent oracle recorded on 2026-08-25 as 3.44% deployed / 68.39% GT
+    value: 3.44
+    unit: percent
+    provenance: UNVERIFIED
+    instrument: null
+    note: >-
+      DOES NOT REPRODUCE. The rebuilt oracle reads 12.24% (FACT-0041) on the same edge set
+      (6,861 reproduces exactly) with the coordinate convention independently confirmed by
+      FACT-0040. The isotropic-scale trap was tested as the cause and REFUTED - isotropic
+      1.625 and raw voxels both give 11.15%, since uniform scaling cannot change
+      nearest-ordering. The original instrument was ad-hoc and never committed, so the
+      difference cannot be reconciled. DO NOT CITE either number until it is.
+    date: '2026-08-25'
+    tags: [oracle, disputed]
+
+  - id: FACT-0044
+    statement: Nearest-parent oracle, fold-1 PRE-ILP frame - deployed coords
+    value: 26.08
+    unit: percent
+    scope: {fold: pre1, frame: pre-ilp, n_edges: 17462}
+    provenance: MEASURED
+    instrument: scripts/win_bet/nearest_parent_oracle.py
+    date: '2026-08-25'
+    tags: [oracle, localisation]
+
+  - id: FACT-0045
+    statement: Nearest-parent oracle, fold-1 pre-ILP - GT coords ceiling
+    value: 78.85
+    unit: percent
+    scope: {fold: pre1, frame: pre-ilp, n_edges: 17462}
+    provenance: MEASURED
+    instrument: scripts/win_bet/nearest_parent_oracle.py
+    date: '2026-08-25'
+    tags: [oracle, localisation]
+
+  # ---- temporal smoothing, killed --------------------------------------------------
+  - id: FACT-0050
+    statement: >-
+      Tracklet-MEAN smoothing changes the nearest-parent statistic on the pre-ILP frame
+    value: -5.64
+    unit: percentage_points
+    scope: {fold: pre1, estimator: mean, arm: endpoints}
+    provenance: MEASURED
+    instrument: scripts/win_bet/nearest_parent_oracle.py
+    note: >-
+      A zeroth-order mean pulls each node toward its track centroid, injecting motion bias.
+      This was PREDICTED before measurement and confirmed at 4x the linefit's harm.
+    date: '2026-08-25'
+    tags: [smoothing, killed]
+
+  - id: FACT-0051
+    statement: >-
+      Tracklet-LINEFIT smoothing (the deployed estimator) changes the nearest-parent
+      statistic on the pre-ILP frame
+    value: -1.41
+    unit: percentage_points
+    scope: {fold: pre1, estimator: linefit, arm: endpoints}
+    provenance: MEASURED
+    instrument: scripts/win_bet/nearest_parent_oracle.py
+    note: >-
+      Still NEGATIVE. Smoothing follows PREDICTED tracks, and predicted tracks are what is
+      broken; denoising along a wrong link propagates that link's error. Consequence: do NOT
+      move linefit_smooth_output_graph before the linker.
+    date: '2026-08-25'
+    tags: [smoothing, killed]
+
+  - id: FACT-0052
+    statement: >-
+      linefit_smooth_output_graph is invoked as the LAST call before return, after every
+      edge is final, so the linker never sees a smoothed coordinate
+    value: null
+    unit: structural
+    provenance: VERIFIED
+    instrument: notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb cell 6:1514
+    date: '2026-08-25'
+    tags: [smoothing, pipeline-order]
+
+  # ---- instrument / operational ----------------------------------------------------
+  - id: FACT-0060
+    statement: >-
+      Prediction runs as a SUBPROCESS, so parent-process builtins do not reach it; state
+      must travel by env var or by source
+    value: null
+    unit: structural
+    provenance: VERIFIED
+    instrument: notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb cell 5:388
+    note: >-
+      Root cause of the p4 fold-0 detpeak export returning an EMPTY directory after 9,439 s.
+      Second instance of the cross-context-state class, after DataParallel/autocast.
+    date: '2026-08-25'
+    tags: [instrument, defect-class]
+
+  - id: FACT-0061
+    statement: Kaggle permits a maximum of concurrent GPU BATCH sessions
+    value: 2
+    unit: sessions
+    provenance: VERIFIED
+    instrument: push refusal "Maximum batch GPU session count of 2 reached"
+    date: '2026-08-25'
+    tags: [operational]
+
+  - id: FACT-0062
+    statement: >-
+      kaggle kernels output DOES download nested subdirectories, creating parent dirs and
+      paging automatically
+    value: null
+    unit: structural
+    provenance: VERIFIED
+    instrument: .venv/Lib/site-packages/kaggle/api/kaggle_api_extended.py:6712
+    note: detpeaks/ was skipped on fold 0 only because it was empty.
+    date: '2026-08-25'
+    tags: [operational]
+
+  - id: FACT-0063
+    statement: >-
+      The defect ledger applies zero rules to most specs, because 7 of 8 rules target two
+      training specs - a missing-coverage problem, NOT a globbing default problem
+    value: null
+    unit: structural
+    provenance: VERIFIED
+    instrument: scripts/core/kaggle_factory.py:295
+    note: >-
+      Corrects a prior handoff claim that spec_name_globs "should default to [*]". It
+      ALREADY defaults to ["*"]. Widening the rules would fail nearly every deploy spec,
+      since DG-002/DG-004 are require-shaped against training-only code.
+    date: '2026-08-25'
+    tags: [instrument, correction]
+
+  # ---- Trackastra-as-pruner, killed -------------------------------------------------
+  - id: FACT-0070
+    statement: Trackastra used as an edge PRUNER, scored from cached graphs, fold 0
+    value: -0.187
+    unit: score_delta
+    scope: {fold: f0}
+    provenance: MEASURED
+    instrument: scripts/win_bet/e0c_score.py against cached graphs from 2026-07-11
+    date: '2026-08-25'
+    tags: [trackastra, killed]
+
+  - id: FACT-0071
+    statement: Trackastra used as an edge PRUNER, scored from cached graphs, fold 1
+    value: -0.084
+    unit: score_delta
+    scope: {fold: f1}
+    provenance: MEASURED
+    instrument: scripts/win_bet/e0c_score.py against cached graphs from 2026-07-11
+    note: >-
+      On f1 the Trackastra subset had HIGHER node recall than the baseline fold
+      (0.9021 vs 0.8656) - it drew the easier crops and still lost.
+    date: '2026-08-25'
+    tags: [trackastra, killed]
+
+  - id: FACT-0072
+    statement: Break-even deletion precision - below this, deleting an edge costs score
+    value: 58.88
+    unit: percent
+    provenance: UNVERIFIED
+    note: >-
+      Our best measured deletion precision is 58.3%, which has never cleared it. Carried
+      from prior records; the derivation has not been re-run.
+    date: '2026-08-24'
+    tags: [metric, abstention]
