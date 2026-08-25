@@ -1,6 +1,6 @@
 {
   "name": "p19_relink_sweep_f1",
-  "slug": "biohub-p19-relink-sweep-f1",
+  "slug": "biohub-p19-relink-division-sweep-loeo-f1",
   "title": "Biohub P19 Relink Division Sweep LOEO F1",
   "code_file": "biohub-p19-relink-sweep-f1.ipynb",
   "out_dir": "notebooks/kaggle_p19_relink_sweep_f1",

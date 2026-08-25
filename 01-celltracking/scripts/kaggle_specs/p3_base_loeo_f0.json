@@ -1,6 +1,6 @@
 {
   "name": "p3_base_loeo_f0",
-  "slug": "biohub-p3-base-loeo-f0",
+  "slug": "biohub-p3-base-armb-off-loeo-f0",
   "title": "Biohub P3 BASE (armB off) LOEO F0",
   "code_file": "biohub-p3-base-loeo-f0.ipynb",
   "out_dir": "notebooks/kaggle_p3_base_loeo_f0",

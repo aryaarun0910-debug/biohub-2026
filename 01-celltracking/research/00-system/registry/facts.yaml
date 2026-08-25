@@ -650,3 +650,26 @@ facts:
       the p4 fold-1 export was still running when this was written.
     date: '2026-08-25'
     tags: [detection, downstream, lever]
+
+  - id: FACT-0120
+    statement: >-
+      Kaggle derives a kernel's slug from its TITLE, not the declared id, so a spec whose
+      title does not slugify to its slug pushes to a different kernel than status/fetch address
+    value: null
+    unit: structural
+    provenance: VERIFIED
+    instrument: >-
+      observed on the EXP-0019 push; audited across all 44 specs by
+      tests/test_spec_slug_contract.py
+    note: >-
+      THIRD occurrence. Commit 01f9fff repaired it once on a p4 fold-1 export; EXP-0019 hit it
+      again; and the audit then found TWO MORE already broken and unnoticed -
+      p3_base_loeo_f0/f1 declared biohub-p3-base-loeo-f* while the real kernels sit at
+      biohub-p3-base-armb-off-loeo-f* and were COMPLETE the whole time. Their status and fetch
+      had been silently addressing a kernel that does not exist.
+      .
+      The mapping is deterministic (lowercase, non-alphanumerics collapse to '-'), so it is
+      predictable at BUILD time. Now enforced as a test over every spec rather than being
+      discovered after a push has already created a kernel under the wrong name.
+    date: '2026-08-25'
+    tags: [operational, trap, fixed]

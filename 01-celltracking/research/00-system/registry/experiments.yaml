@@ -194,7 +194,7 @@ experiments:
   - id: EXP-0019
     title: P19 relink division penalty SWEEP - the whole curve from one GPU session
     spec: scripts/kaggle_specs/p19_relink_sweep_f1.json
-    kernel: aryaarun07/biohub-p19-relink-sweep-f1
+    kernel: aryaarun07/biohub-p19-relink-division-sweep-loeo-f1
     submission: null
     lb: null
     status: built
