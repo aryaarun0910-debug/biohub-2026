@@ -262,7 +262,9 @@ levers:
     # status_note said the opposite - a contradiction the gate could not see, because nothing
     # graded the evidence. R9 now refuses a closure that rests on an INVALID fact, so the
     # closure is RETRACTED rather than annotated: status follows EXP-0021, which is running.
-    status: running
+    status: killed
+    closed_by: [FACT-0323]
+    closed_date: '2026-08-27'
     falsifier: >-
       Any penalty must beat the disabled control on the offline LOEO score.
     retracted_closure:
@@ -271,7 +273,11 @@ levers:
       reason: >-
         FACT-0131 is INVALID - all six p19 sweep arms ran on the EXP-0019 leak (FACT-0160,
         FACT-0221). Kept here as provenance: this lever WAS closed, and by what.
-    reclose_pending: EXP-0021   # the honest re-run that will decide this lever
+    reclosed: >-
+      2026-08-27 on HONEST fold-0 evidence (FACT-0323, EXP-0022, clean split_0 weights): every penalty is
+      below the control (-0.0087 at best, -0.0140 at worst), division TP never moves, and the score only
+      recovers as the penalty grows - the reopening prediction (FACT-0221) failed on the deciding statistic.
+      Fold 1 (EXP-0021) is recorded when it lands as the second embryo direction; it cannot un-kill this.
     status_note: >-
       REOPENED 2026-08-26 (FACT-0221). This closure rests ENTIRELY on the leaked substrate -
       all six p19 sweep arms used split_0 weights against held-out 6bba. The sweep concluded

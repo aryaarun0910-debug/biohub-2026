@@ -2951,3 +2951,37 @@ facts:
       touching either.
     date: '2026-08-27'
     tags: [provenance, calibration, division, correction]
+
+  - id: FACT-0323
+    statement: >-
+      The HONEST fold-0 relink-penalty sweep (EXP-0022, clean split_0 weights) is harmful at every penalty -
+      control 0.9070 versus 0.8930 / 0.8964 / 0.8959 / 0.8967 / 0.8983 at penalties 0 / 1 / 2 / 4 / 8 - with
+      division TP fixed at 5 in every arm and the score only creeping back toward the control as the
+      penalty grows; the pre-registered "rises monotonically until precision ~3.4%" falsifier fired
+    value: -0.0087
+    unit: score_delta_best_penalty_f0
+    scope:
+      control: {score: 0.9070, adj_edge: 0.9017, divJ: 0.0526, division: [5, 69, 21], edge: [18799, 1394, 1027], node_recall: 0.9881}
+      pen_0: {score: 0.8930, adj_edge: 0.8884, divJ: 0.0459, division: [5, 83, 21], edge: [18675, 1571, 1151]}
+      pen_1: {score: 0.8964, adj_edge: 0.8916, divJ: 0.0476, division: [5, 79, 21], edge: [18703, 1525, 1123]}
+      pen_2: {score: 0.8959, adj_edge: 0.8911, divJ: 0.0481, division: [5, 78, 21], edge: [18694, 1528, 1132]}
+      pen_4: {score: 0.8967, adj_edge: 0.8918, divJ: 0.0495, division: [5, 75, 21], edge: [18708, 1526, 1118]}
+      pen_8: {score: 0.8983, adj_edge: 0.8932, divJ: 0.0505, division: [5, 73, 21], edge: [18718, 1503, 1108]}
+      deltas_vs_control: {pen_0: -0.0140, pen_1: -0.0106, pen_2: -0.0111, pen_4: -0.0103, pen_8: -0.0087}
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/ea_atlas.py on the six EXP-0022 exports (C:/temp/p20_relink_sweep_f0/sweep_pen_*.csv.gz, fetched with
+      kaggle_factory fetch) and tracking_cellmot summarise(); per-arm crops parquets under C:/temp/p20_relink_sweep_f0/atlas/
+    experiment: EXP-0022
+    protocol:
+      weights: pack split_0 edge_predictor_best.pth on held-out 44b6 - clean by construction (44b6 never in split_0 training)
+      eval: scorer-exact per-crop rows over all 71 fold-0 crops, summarise() with the node term
+    note: >-
+      Same shape as the leaked sweep (FACT-0131, INVALID) and the reopening prediction (FACT-0221) is refuted on
+      the deciding statistic: no penalty beats the control, and no arm finds a single additional true division.
+      Mechanism unchanged from the levers.yaml outcome - duplicating source rows in linear_sum_assignment
+      reallocates edges rather than creating them, and the relink cost carries no division-specific signal.
+      Fold 1 (EXP-0021) is still running and will be recorded as the second embryo direction, but the lever's
+      own falsifier has already fired on clean evidence about itself.
+    date: '2026-08-27'
+    tags: [division, killed, relink, honest]

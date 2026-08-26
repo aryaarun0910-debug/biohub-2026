@@ -292,7 +292,8 @@ experiments:
     kernel_version: 1
     submission: null
     lb: null
-    status: running
+    status: complete
+    facts: [FACT-0321, FACT-0322, FACT-0323]
     date: '2026-08-26'
     note: >-
       Fold 0 holds out 44b6, which the pack split_0 weights never saw, so it is LOEO-clean with
