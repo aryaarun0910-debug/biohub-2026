@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/pathlib/_local.py", line 722, in mkdir
+    os.mkdir(self, mode)
+    ~~~~~~~~^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/kaggle/input/datasets/pilkwang'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/tmp/ipykernel_7751/1559978028.py", line 55, in run_job
+    ensure_inputs(job)
+    ~~~~~~~~~~~~~^^^^^
+  File "/tmp/ipykernel_7751/1559978028.py", line 17, in ensure_inputs
+    alias.parent.mkdir(parents=True, exist_ok=True)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/pathlib/_local.py", line 726, in mkdir
+    self.parent.mkdir(parents=True, exist_ok=True)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/pathlib/_local.py", line 722, in mkdir
+    os.mkdir(self, mode)
+    ~~~~~~~~^^^^^^^^^^^^
+OSError: [Errno 30] Read-only file system: '/kaggle/input/datasets'
