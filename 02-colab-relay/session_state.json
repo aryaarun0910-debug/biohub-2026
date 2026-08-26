@@ -1,9 +1,9 @@
 {
   "gpu": "NVIDIA L4",
-  "last_seen": "2026-08-26T21:58:00Z",
+  "last_seen": "2026-08-26T22:25:15Z",
   "rate_units_per_h": 5.0,
-  "session_approved_at": "2026-08-26T21:54:42Z",
-  "spent_units": 0.028893254862891304,
-  "started": "2026-08-26T21:57:33Z",
+  "session_approved_at": "2026-08-26T22:04:34Z",
+  "spent_units": 0.0,
+  "started": "2026-08-26T22:25:15Z",
   "state": "idle"
 }
