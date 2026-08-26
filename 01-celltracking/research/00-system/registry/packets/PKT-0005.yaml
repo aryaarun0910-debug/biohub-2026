@@ -2,7 +2,7 @@ id: PKT-0005
 title: "Phase 1: what separates our 26 true divisions from our 225 false ones"
 lever: LEVER-0014
 owner: rnd-agent
-lock: running
+lock: done
 opened: '2026-08-26'
 
 claim: >-
@@ -39,4 +39,5 @@ outputs:
   facts_added: []
   record: one row in experimental-records.md once integrated
 
-result: null
+result: >-
+  Closed at session end. See experimental-records.md 2026-08-26 R&D TEAM entry and FACT-0230..0232.

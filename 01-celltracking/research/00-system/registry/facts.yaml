@@ -122,9 +122,10 @@ facts:
   - id: FACT-0030
     statement: Score gain from perfecting nodes, fold 0 (44b6)
     value: 0.018
-    unit: score
+    unit: edge_recall_delta   # NOT score - see FACT-0230/0231
     scope: {fold: f0}
-    provenance: UNVERIFIED
+    provenance: MEASURED
+    instrument: scripts/win_bet/ea_atlas.py over C:/temp/error_atlas (LOEO-clean, verified FACT-0232)
     date: '2026-08-25'
     tags: [lever-ranking]
 
@@ -133,9 +134,10 @@ facts:
   - id: FACT-0031
     statement: Score gain from perfecting nodes, fold 1 (6bba)
     value: 0.136
-    unit: score
+    unit: edge_recall_delta   # NOT score - see FACT-0230/0231
     scope: {fold: f1}
-    provenance: UNVERIFIED
+    provenance: MEASURED
+    instrument: scripts/win_bet/ea_atlas.py over C:/temp/error_atlas (LOEO-clean, verified FACT-0232)
     note: Essentially ALL headroom is in the fold-1 embryo direction.
     date: '2026-08-25'
     tags: [lever-ranking]
@@ -145,9 +147,10 @@ facts:
   - id: FACT-0032
     statement: Score gain from perfecting linking, fold 0
     value: 0.036
-    unit: score
+    unit: edge_recall_delta   # NOT score - see FACT-0230/0231
     scope: {fold: f0}
-    provenance: UNVERIFIED
+    provenance: MEASURED
+    instrument: scripts/win_bet/ea_atlas.py over C:/temp/error_atlas (LOEO-clean, verified FACT-0232)
     date: '2026-08-25'
     tags: [lever-ranking]
 
@@ -156,9 +159,10 @@ facts:
   - id: FACT-0033
     statement: Score gain from perfecting linking, fold 1
     value: 0.063
-    unit: score
+    unit: edge_recall_delta   # NOT score - see FACT-0230/0231
     scope: {fold: f1}
-    provenance: UNVERIFIED
+    provenance: MEASURED
+    instrument: scripts/win_bet/ea_atlas.py over C:/temp/error_atlas (LOEO-clean, verified FACT-0232)
     date: '2026-08-25'
     tags: [lever-ranking]
 
@@ -1327,8 +1331,8 @@ facts:
 
   - id: FACT-0193
     statement: >-
-      A false division costs 3.4x more through the EDGE channel than the division channel, so
-      the naive 0.1/(125+FP) understates it by 339-723 percent
+      A false division costs more through the EDGE channel than the division channel - 3.4x on
+      fold 0 and 21.8x on FOLD 1 - so the naive 0.1/(125+FP) badly understates it
     value: null
     unit: marginal_score
     scope:
@@ -1341,6 +1345,13 @@ facts:
       +0.004696 on the EDGE term versus +0.006105 on the division term; algebra validated
       against measurement to 3 significant figures
     note: >-
+      BOTH EMBRYO DIRECTIONS, as the contract requires: the edge-channel factor is 3.4x on
+      fold 0 (44b6) and 21.8x on fold 1 (6bba). Recording only 3.4x understates 6bba ~6x. The
+      mechanism: divJ on 6bba is just 0.0016, so a division FP barely moves the division term
+      while the false fork's extra edge is charged at full price against a 122,779-edge
+      denominator. Exchange rate TP:FP is 28.4:1 across both channels on f1 versus 617:1 looking
+      at divJ alone.
+      .
       Divisions ARE edges, so every fork hits both terms. The two channels are comparable in
       size, not 10:1. Exchange rate TP:FP is 15.3:1 across both channels, versus 63.5:1 if you
       look at divJ alone. 98% of our forks sit at unmatched nodes and are entirely free.
@@ -1349,9 +1360,8 @@ facts:
 
   - id: FACT-0194
     statement: >-
-      Including the edge channel, break-even fork acceptance is 6.15% and our precision is
-      1.96% - we are OVER-ACCEPTING by roughly 3x, the reverse of what the division channel
-      alone implies
+      Including the edge channel we OVER-ACCEPT divisions - by 3.1x on fold 0 and 16.7x on
+      FOLD 1 - the reverse of what the division channel alone implies
     value: 0.0615
     unit: probability
     scope:
@@ -1373,8 +1383,13 @@ facts:
       add-versus-prune conclusion is superseded, because it omitted the channel that carries
       3.4x the cost.
       .
+      BOTH DIRECTIONS: fold 0 break-even 6.15% vs our 1.96% precision (3.1x over-accepting);
+      fold 1 break-even 3.40% vs our 0.20% (16.7x). Recording only the fold-0 figure understates
+      6bba by ~6x.
+      .
       Honest fold-0 headroom, both channels: FP to 0 = +0.0104; TP to the reach ceiling of 22
-      with FP kept = +0.0168; both = +0.0882.
+      with FP kept = +0.0168; both = +0.0882. Fold 1: FP to 0 = +0.0035; TP to 66 = +0.0111;
+      both = +0.0560.
     date: '2026-08-26'
     tags: [metric, division, decision, headline]
 
@@ -1459,3 +1474,319 @@ facts:
       a leaked substrate carry no information whatsoever.
     date: '2026-08-26'
     tags: [leak, methodology, cautionary]
+
+  # ---- 2026-08-26: authoritative honest constants, official-scorer verified --------
+  - id: FACT-0210
+    statement: >-
+      Authoritative honest fold-1 numbers, confirmed against the official scorer
+    value: 0.7026
+    unit: score
+    scope:
+      score: 0.7026
+      adj_edge: 0.7025
+      edge_jaccard: 0.6953
+      node_recall: 0.8547
+      edge: {tp: 85364, fp: 13722, fn: 23693, D: 122779}
+      division: {tp: 1, fp: 491, fn: 124, divJ: 0.00162}
+      reachable: 66
+    provenance: VERIFIED
+    instrument: >-
+      official tracking_cellmot scorer on _evidence/exports/loeo_f1_strict/, cross-checked by an
+      independent matcher that agreed exactly on edge TP, edge FN, node_recall and reach
+    supersedes: FACT-0161
+    note: >-
+      The only divergence was edge FP (independent matcher 17,585 vs official 13,722) because
+      the scorer applies dedup, merge-collapse and out-degree-cap filters before counting
+      pred_valid. That moves D by 3% and every derived constant by under 5%; no conclusion
+      changes.
+      .
+      THE LEAK WAS WORTH +0.203 OF SCORE AND MANUFACTURED 25 OF OUR 26 DIVISION TRUE POSITIVES.
+    date: '2026-08-26'
+    tags: [authoritative, honest, headline]
+
+  - id: FACT-0211
+    statement: >-
+      Deleting a false division is worth three percent of one edge - and deleting ALL 491 of
+      them, exactly rather than by derivative, is worth +0.00064
+    value: 0.00064
+    unit: score
+    scope:
+      one_edge_tp: 8.145e-6
+      one_edge_fp: 5.721e-6
+      one_division_tp: 1.623e-4
+      one_division_fp_pruned: 2.635e-7
+      division_tp_in_edge_tps: 19.9
+      division_fp_in_edge_tps: 0.03
+      p_add: 0.0339
+      p_prune: 0.9661
+    provenance: VERIFIED
+    instrument: exact recomputation against the official scorer on the honest fold-1 export
+    supersedes: FACT-0171
+    note: >-
+      THE NUMBER TO INTERNALISE. The division FALSE-POSITIVE problem - which absorbed a large
+      share of this campaign, including my own "removal is the cheaper half of the lever"
+      reframe - is worth SIX TEN-THOUSANDTHS OF A POINT. It is 2% of the division prize and
+      0.2% of the edge prize.
+      .
+      It only ever looked significant because the leaked substrate put division TP at 26, and
+      the value of pruning scales with TP. A true division is worth 19.9 edge TPs; a pruned
+      false one is worth 0.03.
+    date: '2026-08-26'
+    tags: [division, ceiling, headline, correction]
+
+  - id: FACT-0212
+    statement: >-
+      Removing the dead fork generator moves the precision bar for any future proposer by 5x -
+      from 0.384% to 0.078% - which is the one division action the numbers currently justify
+    value: 0.078
+    unit: percent
+    scope: {bar_now: 0.384, bar_after_removal: 0.078, best_measured_geometric_gate: 0.090}
+    provenance: MEASURED
+    instrument: exact recomputation against the official scorer on the honest fold-1 export
+    note: >-
+      The current generator contributes 1 TP and 491 FP, and those 491 poison the divJ
+      denominator for EVERY future proposer. Strip it and the global precision bar a new
+      proposer must clear falls 5x. The best measured geometric gate achieves 0.090% - BELOW
+      the current 0.384% bar but ABOVE the 0.078% bar that removal creates.
+      .
+      So the sequencing matters more than the selector: remove first, propose second. This is
+      the only division action justified on honest numbers, and it needs no model.
+      .
+      NOTE the metric seat measured a false division costing 3.4x more through the EDGE channel
+      than the division channel (FACT-0193), so removal also pays a small edge dividend beyond
+      the +0.00064 division gain.
+    date: '2026-08-26'
+    tags: [division, actionable, sequencing]
+
+  - id: FACT-0213
+    statement: >-
+      Final honest headroom - perfect edges +0.2975 versus perfect divisions +0.0342, a ratio
+      of 8.7 to 1 in favour of edges
+    value: 8.7
+    unit: ratio
+    scope: {perfect_edges: 0.2975, perfect_divisions_at_reach_ceiling: 0.0342}
+    provenance: VERIFIED
+    instrument: official scorer on the honest fold-1 export
+    supersedes: FACT-0183
+    note: >-
+      The division ceiling is bounded by reach (66/125) and by candidate topology (43 with both
+      daughters in the mother top-2). Edges dominate by nearly an order of magnitude, and the
+      coupling runs one way - fixing edges raises node recall, which raises reach, which raises
+      the division ceiling.
+      .
+      Minor self-correction from the seat: it earlier reported the generator scores 0 division
+      TP under a strict both-daughters-direct criterion. The OFFICIAL topology test allows
+      grandchild fallback evidence and credits 1. The registry number is 1. Immaterial to every
+      conclusion.
+    date: '2026-08-26'
+    tags: [strategy, ceiling, headline]
+
+  - id: FACT-0220
+    statement: >-
+      On honest substrates we OVER-ACCEPT divisions by 3.1x (fold 0) and 16.7x (fold 1) - the
+      leak was what made "we are approximately optimal" look defensible
+    value: null
+    unit: ratio
+    scope:
+      f1_leaky: {break_even: 0.0896, our_precision: 0.1036, verdict: appears_optimal}
+      f0_clean: {break_even: 0.0615, our_precision: 0.0196, over_accept: 3.1}
+      f1_clean: {break_even: 0.0340, our_precision: 0.0020, over_accept: 16.7}
+    provenance: MEASURED
+    instrument: official scorer on _evidence/exports/loeo_f0_strict/ and loeo_f1_strict/, both channels
+    note: >-
+      On the leaked substrate our precision (10.36%) sat just ABOVE break-even (8.96%), so
+      penalising divisions correctly showed no gain. On both honest substrates the premise
+      INVERTS.
+      .
+      The edge channel is 21.8x the division channel for a false division on fold 1 (3.4x on
+      fold 0): divJ is so small that one more FP barely moves it, while the false fork's extra
+      edge is charged at full price in the much larger edge term. Exchange rate TP:FP is 28.4:1
+      across both channels versus 617:1 looking at divJ alone.
+    date: '2026-08-26'
+    tags: [division, metric, correction]
+
+  - id: FACT-0221
+    statement: >-
+      LEVER-0012 was closed on LEAKED evidence and its closure does not transfer - the p19
+      penalty sweep was scored entirely on the contaminated substrate
+    value: null
+    unit: methodological
+    provenance: VERIFIED
+    instrument: _evidence/p19_relink_sweep_f1/loeo_manifest.json weights field; FACT-0160
+    note: >-
+      Every one of the six sweep arms used the leaky split_0 weights. The sweep concluded that
+      division penalties never help - true where precision already exceeds break-even, which the
+      leak arranged. Under our own mission rule a killed lever may be reopened with a NEW
+      MECHANISM and a STATED FALSIFICATION TEST; both now exist.
+      .
+      FALSIFICATION TEST, pre-registered: re-run the pen_* sweep on the honest export. PREDICTION
+      - increasing penalty RAISES the score monotonically until accepted-fork precision reaches
+      about 3.4%. If the score does not rise, the closure stands on honest evidence and the lever
+      dies properly.
+      .
+      This is the leak's second-order cost: it did not only inflate facts, it CLOSED A LANE that
+      may be open.
+    date: '2026-08-26'
+    tags: [leak, reopened, methodology]
+
+  # ---- 2026-08-26: Phase 0, the lever ranking finally pinned ----------------------
+  - id: FACT-0230
+    statement: >-
+      FACT-0030..0033 are now PINNED to an exact formula and a named instrument - but their
+      unit label is WRONG - they are EDGE-RECALL deltas, not score deltas
+    value: null
+    unit: correction
+    scope:
+      f0: {node_recall: 0.9861, p_both: 0.9816, cla: 0.9632, edge_recall: 0.9455, d_nodes: 0.0177, d_link: 0.0361}
+      f1: {node_recall: 0.8691, p_both: 0.8533, cla: 0.9263, edge_recall: 0.7904, d_nodes: 0.1359, d_link: 0.0629}
+    provenance: MEASURED
+    instrument: scripts/win_bet/ea_atlas.py over C:/temp/error_atlas/gtedges_f0.parquet and gtedges_f1.parquet
+    note: >-
+      Formula, reproduced to 4 decimal places - d_nodes = CLA * (1 - P(both)) and
+      d_link = P(both) * (1 - CLA). These four facts had NO instrument for the entire campaign
+      and were the ones I wrongly flagged SUSPECT. They are now reproducible.
+      .
+      BUT recall has no false-positive term while the objective is a Jaccard, so a recall delta
+      is NOT a score delta. See FACT-0231 for the translation, which changes the answer.
+    date: '2026-08-26'
+    tags: [lever-ranking, pinned, correction]
+
+  - id: FACT-0231
+    statement: >-
+      Translated into SCORE units, LINKING beats nodes on BOTH folds - the fold-1 inversion
+      that aimed this campaign at nodes is an artifact of recall units
+    value: null
+    unit: score
+    scope:
+      f0: {baseline: 0.9033, linking_oracle: 0.1791, node_oracle_band: [0.0153, 0.0460]}
+      f1: {baseline: 0.7042, linking_oracle: 0.2100, node_oracle_band: [0.1003, 0.1655]}
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/ea_atlas.py pushed through the real objective (adjacency + 0.1*divJ) on
+      the LOEO-clean atlas; node band spans three FP models
+    supersedes: FACT-0031
+    note: >-
+      LINKING WINS OUTRIGHT ON BOTH FOLDS, even at the TOP of the node-oracle band. On fold 0
+      the ranking is vindicated as recorded; on fold 1 it INVERTS once translated from recall
+      units to score units. The long-standing conclusion that "essentially all headroom is in
+      fold-1 NODES" was a unit error, not a substrate error.
+      .
+      The linking oracle on f0 splits +0.0998 adjacency and +0.0793 division; the NODE oracle
+      buys only +0.0004 of division, because forks remain structurally inexpressible however
+      good the nodes are (FACT-0180).
+      .
+      Consistent with FACT-0213 (perfect edges +0.2975 vs perfect divisions +0.0342) and with
+      the measurement that changing ONLY the edge weights moved fold-1 node recall 12.7 points -
+      node recall is largely DOWNSTREAM of edge quality.
+    date: '2026-08-26'
+    tags: [lever-ranking, strategy, headline]
+
+  - id: FACT-0232
+    statement: >-
+      The error atlas is LOEO-CLEAN and verified, and substrate change does NOT move the lever
+      ranking on a clean fold
+    value: null
+    unit: structural
+    scope: {p4_detpeak_f0: 0.9037, atlas_f0: 0.9033}
+    provenance: VERIFIED
+    instrument: >-
+      atlas built from C:/temp/subvoxel_f0 + subvoxel_f1 (71/71 and 128/128 crops identical on
+      num_pred_nodes; subvoxel_f1 manifest weights = OOF split_1); independent runs reproduced
+      atlas per-crop adjJ exactly and the published oracle table to 4 decimal places
+    note: >-
+      Closes LEVER-0013. A different clean fold-0 substrate (harmonic + TTA, pack split_0, which
+      is clean on 44b6) gives score 0.9037 against the atlas 0.9033, with P(both) 0.9862, CLA
+      0.9618 and division reach 22/26 - ranking holds and magnitudes are stable. The "substrate
+      mismatch" I hypothesised was really the LEAK, and on clean substrates the ranking is
+      robust.
+      .
+      Also: Frechet bounds on the leaky p19 give d_nodes in [0.018, 0.036] and d_link in
+      [0.016, 0.034] - OVERLAPPING - so the leaked export could not have ranked the levers in
+      either direction even if it had been trusted.
+    date: '2026-08-26'
+    tags: [substrate, verified, closes-lever]
+
+  # ==================================================================================
+  # 2026-08-26 — A MEASURED GAIN. Single feature, no model, no GPU.
+  # ==================================================================================
+  - id: FACT-0240
+    statement: >-
+      A single-feature filter, in-plane sibling separation dxy >= 4.5 um, scores +0.0062
+      MEASURED on the LOEO-clean fold 0 - not projected
+    value: 0.0062
+    unit: score_delta
+    scope:
+      fold: f0
+      baseline: {adj_edge: 0.9014, divJ: 0.0233, tp: 3, fp: 103, fn: 23, score: 0.9037}
+      filtered: {adj_edge: 0.9011, divJ: 0.0882, tp: 3, fp: 8, fn: 23, score: 0.9099}
+      forks_dropped: 0.888
+    provenance: MEASURED
+    instrument: >-
+      scripts/core/score_loeo_submission.py end-to-end on the filtered clean fold-0 export;
+      labels reproduced the scorer with ZERO mismatches across all 128+71 crops
+    note: >-
+      THE FIRST MEASURED GAIN OF THE CAMPAIGN SINCE P9. It keeps all 3 true positives while
+      removing 95 of 103 false ones, and costs only -0.0003 on the edge term. It drops 88.8% of
+      all 5,455 forks.
+      .
+      CROSS-FOLD TRANSFER, threshold fit on 44b6 and applied to 6bba: TP 1 -> 1, FP 491 -> 5.
+      The rule generalises across embryos.
+      .
+      This essentially ACHIEVES the +0.0061 fold-0 veto ceiling of FACT-0171 - so that ceiling
+      was right, and my gloss that "the fork-filtering lane is near-worthless" was a fold-1
+      statement (TP=1) wrongly generalised. On fold 0 the lane is worth taking.
+    date: '2026-08-26'
+    tags: [division, measured-gain, actionable, headline]
+
+  - id: FACT-0241
+    statement: >-
+      The interior-mode conjecture is CONFIRMED, and the damage is done by the HARD CEILINGS,
+      not by the monotone ranking
+    value: null
+    unit: mechanism
+    scope:
+      f1_gt_separation: {n: 125, min: 3.72, p5: 5.72, p25: 8.33, median: 11.47, p95: 15.79}
+      f0_gt_separation: {n: 26, min: 2.87, p5: 4.53, p25: 7.19, median: 8.98, p95: 12.13}
+      mass_below_gate_7p2: {f1: 0.144, f0: 0.308}
+    provenance: MEASURED
+    instrument: agent measurement over data/train, both folds, calibrated at 1.8168 um
+    note: >-
+      GT daughter separation is unimodal with an interior mode (11-12 um on f1, 8-10 um on f0)
+      and ZERO mass at zero. Only 14.4% (f1) / 30.8% (f0) of real divisions fall below the
+      deployed SAFE_DIV_SISTER_MAX_UM gate of 7.2 um.
+      .
+      MECHANISM CORRECTED: the proposer cost is parent_dist + 0.15*sister_dist sorted ASCENDING
+      - monotone and minimised, exactly as the misspecification argument predicted - but the
+      frame caps do NOT bind (6,314 added against an 8,308 allowance). So it is the HARD
+      CEILINGS that exclude real divisions, not the ranking order. That is why re-ranking was
+      measured at only ~+0.0004 while a separation FLOOR is worth +0.0062.
+    date: '2026-08-26'
+    tags: [division, mechanism, confirmed]
+
+  - id: FACT-0242
+    statement: >-
+      In-plane sibling separation separates true from false divisions at AUC 0.994 pooled on
+      honest substrates - and my "we never propose a real division" was too strong
+    value: 0.994
+    unit: auc
+    scope:
+      dxy: {pooled_honest: 0.994, f0: 0.982, f1: 0.998, f1_leaky: 0.795}
+      medians: {dxy_tp: 5.94, dxy_fp: 2.93, sib_tp: 6.38, sib_fp: 4.02}
+      dz: {pooled: 0.323}
+    provenance: MEASURED
+    instrument: agent analysis over clean fold-0 and fold-1 exports; labels matched the scorer exactly
+    note: >-
+      FP separations are SMALLER than TP separations in every fold - the conjecture's prediction,
+      replicated across three independent substrates. Leak-immune corroboration: real GT
+      divisions with dxy < 2 um number 1 of 125 (f1) and 0 of 26 (f0).
+      .
+      CORRECTS FACT-0180/0200 IN ONE RESPECT: I recorded that we place a fork on zero real
+      division parents and therefore "never propose a division". We do score TPs (3 on clean f0,
+      1 on clean f1) because the scorer's 7.0 um match tolerance and grandchild fallback award
+      TP to forks that are not at the GT geometry. The generator IS aimed wrongly - that stands -
+      but "never proposes" overstated it.
+      .
+      Note dz is anti-informative (AUC 0.323): the signal is IN-PLANE, which is why dxy beats
+      full 3D sibling separation (0.965).
+    date: '2026-08-26'
+    tags: [division, measured, correction]

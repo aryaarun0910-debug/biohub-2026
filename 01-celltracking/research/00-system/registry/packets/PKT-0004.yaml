@@ -2,7 +2,7 @@ id: PKT-0004
 title: "Phase 0: re-derive the lever ranking on the champion substrate"
 lever: LEVER-0013
 owner: rnd-agent
-lock: running
+lock: done
 opened: '2026-08-26'
 
 claim: >-
@@ -39,4 +39,5 @@ outputs:
   facts_added: []
   record: one row in experimental-records.md once integrated
 
-result: null
+result: >-
+  Closed at session end. See experimental-records.md 2026-08-26 R&D TEAM entry and FACT-0230..0232.

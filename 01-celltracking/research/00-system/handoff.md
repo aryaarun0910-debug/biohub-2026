@@ -3,7 +3,7 @@ id: 00-system/handoff
 title: Handoff
 area: 00-system
 status: active
-updated: '2026-08-24'
+updated: '2026-08-26'
 owner: biohub
 links: []
 tags: [handoff, entry-point]
@@ -15,6 +15,78 @@ record_kind: state
 **Status:** ACTIVE 2026-08-25. Branch `master`.
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
+
+> ## 🔴 READ THIS FIRST — 2026-08-26. The campaign's central belief was leak-manufactured.
+>
+> **`EXP-0019` evaluated LOEO fold 1 (6bba) with weights trained on 6bba.** Its spec set no
+> `BIOHUB_LOEO_WEIGHTS_GLOB`, so it fell back to the pack's `split_0`. All nine other fold-1
+> LOEO specs set the override. Worth **+0.203 of score**, and it manufactured **25 of our 26
+> division true positives** (`FACT-0160`). `tests/test_loeo_weights_hygiene.py` now makes this
+> a build failure.
+>
+> **The honest numbers** (`FACT-0210`, official scorer, `_evidence/exports/loeo_f1_strict/`):
+> fold 1 score **0.7026**, adj_edge **0.7025**, node recall **0.8547**, divisions **TP 1 / FP 491
+> / FN 124**, reach **66/125**. Fold 0 (clean): score 0.9002, adj_edge 0.8986.
+>
+> ### Three things every future session must know
+>
+> 1. **WE NEVER PROPOSE A DIVISION.** Our fork generator's *maximum ever* sibling separation is
+>    **8.97 µm**; the 25th percentile of real divisions is **9.19 µm**. We place a fork on **0 of
+>    106** detected GT division-parent nodes (`FACT-0180`, `FACT-0200`). All 5,426 forks are in
+>    the wrong places. **Every lever that selects, ranks, filters or vetoes among current forks
+>    is capped near zero** — deleting all 491 false divisions is worth **+0.00064** (`FACT-0211`).
+> 2. **THE PROBLEM CLASS IS WRONG.** Daughter antipodality separates at **AUC 0.785**, but it is
+>    a *pairwise* interaction and the relink cost is a *sum over edges* (`FACT-0182`).
+>    Pre-registered prediction: b-matching, min-cost flow and degree-constrained subgraph all
+>    remain linear per-edge and will fail identically. The correct class scores
+>    **(mother, daughter-pair) triples**.
+> 3. **EDGES ARE THE CAMPAIGN, ON BOTH FOLDS.** Perfect edges **+0.2975** vs perfect divisions
+>    **+0.0342** (`FACT-0213`). And the long-standing "all headroom is in fold-1 NODES" was a
+>    **unit error** — `FACT-0031`'s +0.136 is an edge-*recall* delta, not a score delta. In score
+>    units the LINKING oracle beats the node oracle on **both** folds (`FACT-0231`).
+>
+> ### ✅ AND ONE MEASURED GAIN — the only thing in this banner that is good news
+>
+> **`dxy >= 4.5 um` (in-plane sibling separation floor) scores +0.0062 END-TO-END on the
+> LOEO-clean fold 0** — 0.9037 → 0.9099 — keeping all 3 true divisions while removing 95 of 103
+> false ones, at a −0.0003 edge cost (`FACT-0240`). It drops 88.8% of forks. Threshold fit on
+> 44b6 and applied to 6bba takes FP 491 → 5 with TP 1 → 1, so it transfers across embryos.
+> Single feature, **AUC 0.994**, no model, no GPU. Opened as `LEVER-0019`, priority 1.
+>
+> **Why it works:** GT daughter separation is unimodal with an interior mode (11-12 um f1,
+> 8-10 um f0) and zero mass at zero, while only 14.4% / 30.8% of real divisions fall below the
+> deployed `SAFE_DIV_SISTER_MAX_UM = 7.2` gate. The proposer sorts ascending on
+> `parent_dist + 0.15*sister_dist`, but the frame caps do NOT bind — so it is the HARD CEILINGS
+> that exclude real divisions, not the ranking. That is why re-ranking measured ~+0.0004 and a
+> separation FLOOR measures +0.0062 (`FACT-0241`).
+>
+> **Before promoting:** rescore the clean FOLD-1 export with the same rule (killed mid-run at
+> session close) and report both embryo directions, per the contract.
+>
+> ### Open, and genuinely important
+>
+> - **Two scorers exist** in the vendored package — `summarise()` applies the node-count term,
+>   `evaluate_datasets()` has none. We do not know which the leaderboard calls (`FACT-0190`).
+>   If the latter, the entire node-ratio term is a phantom.
+> - **0 of 7 LB-scored experiments have an offline score** (`FACT-0184`). The offline apparatus
+>   has never been calibrated against the leaderboard, so no LOEO number can be compared to a
+>   competitor's LB number — the error that produced the retracted `FACT-0141`.
+> - **`LEVER-0012` is REOPENED** (`FACT-0221`): the p19 penalty sweep was scored entirely on the
+>   leaked substrate, where our precision already exceeded break-even. On honest folds we
+>   over-accept by **3.1x (f0)** and **16.7x (f1)**. Falsifier pre-registered: re-run the sweep on
+>   the honest export; score should rise monotonically until accepted-fork precision hits ~3.4%.
+> - **The one division action the numbers justify** is sequencing, not modelling: removing the
+>   dead generator drops the precision bar for any future proposer **5x, from 0.384% to 0.078%**
+>   (`FACT-0212`) — and the best measured geometric gate already achieves 0.090%.
+>
+> ### Registry gap, unfixed
+>
+> Provenance records no **weights or evaluation protocol**, so two facts on the same crops with
+> different train/test hygiene are indistinguishable — the hole this fell through. Only 3 of 88
+> facts carry an `experiment` id, so **invalidation cannot propagate**; `MEASURED`/`VERIFIED`
+> grade derivation strength and cannot express *"correctly computed from an invalid experiment."*
+> A `validity` axis orthogonal to `provenance` is the missing piece.
+
 
 > ## 📌 READ `../../AGENTS.md` FIRST — the record system changed on 2026-08-25
 >

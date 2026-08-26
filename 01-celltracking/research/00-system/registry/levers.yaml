@@ -219,6 +219,14 @@ levers:
       The terms are coupled in one direction only: fix edges -> node recall rises ->
       reachability rises -> the division ceiling rises with it. This is also what FACT-0030..0033
       said before I wrongly flagged them suspect.
+      .
+      REFRAMED 2026-08-26 (FACT-0231). Translated into SCORE units the LINKING oracle beats the
+      NODE oracle on BOTH folds - f0 +0.1791 vs [0.0153,0.0460], f1 +0.2100 vs [0.1003,0.1655] -
+      even at the top of the node band. The fold-1 "nodes dominate" reading was a UNIT ERROR:
+      the recorded +0.136 was an edge-RECALL delta, not a score delta. So this lever stays
+      priority 1 but its target is EDGE ASSOCIATION, not node recall per se. Node recall is
+      largely downstream of edge quality anyway - changing only the edge weights moved fold-1
+      node recall 12.7 points.
     priority: 1
 
   - id: LEVER-0012
@@ -230,6 +238,17 @@ levers:
       Any penalty must beat the disabled control on the offline LOEO score.
     closed_by: [FACT-0131]
     closed_date: '2026-08-26'
+    status_note: >-
+      REOPENED 2026-08-26 (FACT-0221). This closure rests ENTIRELY on the leaked substrate -
+      all six p19 sweep arms used split_0 weights against held-out 6bba. The sweep concluded
+      penalties never help, which is TRUE where precision already exceeds break-even; the leak
+      arranged exactly that (10.4% vs 9.0%). On both honest folds the premise INVERTS - we
+      over-accept by 3.1x (f0) and 16.7x (f1).
+      New mechanism and stated falsifier both exist, satisfying the mission rule for reopening:
+      re-run the pen_* sweep on _evidence/exports/loeo_f1_strict/. PREDICTION - score rises
+      monotonically with penalty until accepted-fork precision reaches ~3.4%. If it does not
+      rise, the closure stands on honest evidence and the lever dies properly.
+    reopened: true
     outcome: >-
       HARMFUL AT EVERY PENALTY: -0.0040 (p=0) to -0.0023 (p=2) against a control that
       reproduced the champion exactly. divJ FALLS at every setting (0.0743 -> 0.061-0.067)
@@ -264,9 +283,14 @@ levers:
       PREMISE REVERSED 2026-08-26 (FACT-0160). EXP-0019 was not a cleaner measurement - it was
       a LEAKY one, scoring the 6bba embryo with pack split_0 weights trained on 6bba. The
       p0b-substrate atlas is LOEO-CLEAN. A substrate difference may still exist, but it is
-      confounded with the leak and cannot be estimated from EXP-0019. The honest comparison
-      needs the repaired p19 spec rerun with OOF split_1 weights - one GPU session, no slots.
-    priority: 2
+      confounded with the leak and cannot be estimated from EXP-0019.
+      .
+      CLOSED 2026-08-26 (FACT-0232). The atlas is verified LOEO-CLEAN (built from subvoxel_f0 +
+      subvoxel_f1; subvoxel_f1 uses OOF split_1). A different clean fold-0 substrate scores
+      0.9037 against the atlas 0.9033 with the lever ranking intact and magnitudes stable. The
+      "substrate mismatch" was really the LEAK. On clean substrates the ranking is robust.
+    status_note: closed by FACT-0232
+    priority: 9
 
   - id: LEVER-0014
     claim: >-
@@ -403,3 +427,25 @@ levers:
       despite recall being saturated - the lever would be node COUNT, not node QUALITY, and we
       have never optimised it directly.
     priority: 2
+
+  - id: LEVER-0019
+    claim: >-
+      A sibling-separation FLOOR removes most false divisions while keeping the true ones,
+      because real divisions have an interior-mode separation and our gates are hard ceilings
+    status: open
+    falsifier: >-
+      If the measured fold-0 gain does not reproduce on a clean fold-1 rescore, or if it fails
+      on the leaderboard, this closes.
+    supporting: [FACT-0240, FACT-0241, FACT-0242]
+    note: >-
+      MEASURED, NOT PROJECTED: dxy >= 4.5 um scores +0.0062 end-to-end on the LOEO-clean fold 0
+      (0.9037 -> 0.9099), keeping all 3 TP while removing 95 of 103 FP, at a -0.0003 edge cost.
+      Transfers cross-fold: threshold fit on 44b6 applied to 6bba takes FP 491 -> 5 with TP 1 -> 1.
+      Single feature, AUC 0.994 pooled, no model, no GPU.
+      .
+      NEXT STEPS, in order: (1) rescore the clean fold-1 export with the same rule - it was killed
+      mid-run at session close; (2) report both embryo directions before promoting; (3) only then
+      consider a submission. Note this is a REMOVAL rule and FACT-0212 says removal also drops the
+      precision bar for any future proposer 5x, so it composes with the division lane rather than
+      competing with it.
+    priority: 1
