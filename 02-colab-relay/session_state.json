@@ -1,9 +1,9 @@
 {
   "gpu": "NVIDIA L4",
-  "last_seen": "2026-08-26T22:41:35Z",
+  "last_seen": "2026-08-26T22:42:36Z",
   "rate_units_per_h": 5.0,
   "session_approved_at": "2026-08-26T22:04:34Z",
-  "spent_units": 0.0,
+  "spent_units": 1.4381960342327753,
   "started": "2026-08-26T22:25:15Z",
-  "state": "running p21_colab_parity_f0-20260826t2204"
+  "state": "idle"
 }
