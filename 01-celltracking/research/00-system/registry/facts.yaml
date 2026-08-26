@@ -117,6 +117,7 @@ facts:
     tags: [metric]
 
   # ---- where the headroom is -------------------------------------------------------
+  # SUSPECT: derived on the p0b substrate; see FACT-0140. Re-derive before relying on it.
   - id: FACT-0030
     statement: Score gain from perfecting nodes, fold 0 (44b6)
     value: 0.018
@@ -126,6 +127,7 @@ facts:
     date: '2026-08-25'
     tags: [lever-ranking]
 
+  # SUSPECT: derived on the p0b substrate; see FACT-0140. Re-derive before relying on it.
   - id: FACT-0031
     statement: Score gain from perfecting nodes, fold 1 (6bba)
     value: 0.136
@@ -136,6 +138,7 @@ facts:
     date: '2026-08-25'
     tags: [lever-ranking]
 
+  # SUSPECT: derived on the p0b substrate; see FACT-0140. Re-derive before relying on it.
   - id: FACT-0032
     statement: Score gain from perfecting linking, fold 0
     value: 0.036
@@ -145,6 +148,7 @@ facts:
     date: '2026-08-25'
     tags: [lever-ranking]
 
+  # SUSPECT: derived on the p0b substrate; see FACT-0140. Re-derive before relying on it.
   - id: FACT-0033
     statement: Score gain from perfecting linking, fold 1
     value: 0.063
@@ -748,3 +752,49 @@ facts:
       not reproducible. R3 now verifies that a repo-path instrument actually exists.
     date: '2026-08-26'
     tags: [correction, methodology]
+
+  # ---- 2026-08-26: the substrate mismatch invalidates the strategic map ------------
+  - id: FACT-0140
+    statement: >-
+      Fold-1 node recall on the CHAMPION substrate is 0.9818, not the 0.8691 recorded from
+      the p0b substrate - an 11.3 point difference
+    value: 0.9818
+    unit: node_recall
+    scope: {fold: f1, substrate: champion}
+    provenance: MEASURED
+    instrument: scripts/core/score_loeo_submission.py on _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz
+    note: >-
+      Edge Jaccard likewise reads 0.8978 against the recorded p0b figure of 0.7904 (P(both
+      endpoints) 0.8533 x CLA 0.9263). Both prior numbers came from the error atlas, built on
+      notebooks/kaggle_p0b_clean913_revtime - NOT the deployed base. See LEVER-0013.
+      .
+      CONSEQUENCE: the lever ranking FACT-0030..FACT-0033 ("perfecting nodes = +0.136 on f1",
+      "essentially all headroom is in the fold-1 embryo") was derived on that substrate and
+      is very likely WRONG for the deployed system. Fold-1 recall is not 0.869 with 13 points
+      of node headroom; it is 0.982. Those facts are already UNVERIFIED and must be
+      re-derived on the champion substrate before any heavy effort is aimed by them.
+    date: '2026-08-26'
+    tags: [substrate, strategy, correction]
+
+  - id: FACT-0141
+    statement: >-
+      On the champion substrate our adj_edge term already equals mikelou1's reported value;
+      the entire gap to their score is the division term
+    value: null
+    unit: arithmetic
+    scope:
+      ours_loeo_f1: {adj_edge: 0.8980, divJ: 0.0743, score: 0.9054}
+      mikelou1_reported: {adj_edge: 0.898, divJ: 0.39, lb: 0.937}
+    provenance: MEASURED
+    instrument: scripts/core/score_loeo_submission.py against the EXTERNAL mikelou1 forum report
+    derived_from: [FACT-0130]
+    note: >-
+      Their arithmetic checks out exactly: 0.898 + 0.1*0.39 = 0.937. Ours: 0.8980 +
+      0.1*0.0743 = 0.9054. Matching their divJ alone would put us at 0.8980 + 0.039 = 0.937.
+      .
+      So the division term is worth ~+0.032 and our EDGE term is already competitive with a
+      0.937 team. CAVEAT: ours is LOEO on TRAIN, theirs is the public LB, so this is an
+      alignment of magnitudes rather than a like-for-like comparison - our LOEO reads ~0.02
+      below our LB. The mikelou1 half is EXTERNAL and unverified.
+    date: '2026-08-26'
+    tags: [strategy, division, target]
