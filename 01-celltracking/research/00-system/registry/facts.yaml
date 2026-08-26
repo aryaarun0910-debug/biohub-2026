@@ -2836,3 +2836,29 @@ facts:
       calibration stages 1-2 and the fold-1 LOEO configuration repair (FACT-0261).
     date: '2026-08-26'
     tags: [operational, compute, host-decision]
+
+  - id: FACT-0319
+    statement: >-
+      The Colab lane works end-to-end - the first relay job ran on an NVIDIA L4 for an estimated
+      0.011 compute units, with the rule-8 gate admitting it against the host's recorded 10-unit budget
+    value: 0.011
+    unit: colab_compute_units_estimated
+    scope:
+      job: smoke-20260826t2116
+      gpu: NVIDIA L4 (23 GB, driver 580.82.07, CUDA 13.0 runtime; torch 2.11.0+cu128)
+      elapsed_s: 8.19
+      matmul_10x4096_s: 0.304
+      session: {budget_units: 10.0, scope: [smoke, notebook], gpu: L4, hours: 6, host_approval: "10 units, L4, 6 h, smoke + one inference job (host, 2026-08-26)"}
+      rate_assumed_units_per_h: {L4: 5.0, verified: false}
+    provenance: MEASURED
+    instrument: >-
+      scripts/core/colab_factory.py status/fetch reading runs/smoke-20260826t2116/status.json and out/metrics.json
+      in the relay repo aryaarun0910-debug/biohub-colab-relay (copy at C:/temp/colab_runs/smoke-20260826t2116/)
+    note: >-
+      The unit figure is ESTIMATED from wall-clock x the unverified default L4 rate; the host should read the
+      resources panel and pass --rate L4=<value> to `session` so the gate prices jobs correctly. What the
+      smoke proves: Colab Secrets -> relay clone -> gate -> execution -> results pushed back, on the GPU the
+      budget names. What it does not prove: that a factory-built notebook runs unmodified under the recreated
+      /kaggle/input layout - that is the p21 parity pilot's job (scripts/kaggle_specs/p21_colab_parity_f0.json).
+    date: '2026-08-26'
+    tags: [operational, compute, colab, verified-plumbing]

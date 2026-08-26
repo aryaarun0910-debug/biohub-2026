@@ -61,7 +61,13 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > worker recreates `/kaggle/input/<slug>` via `kagglehub`; the competition tree (~79 GB) is re-downloaded per
 > runtime (Drive quota unknown, so it is not cached there). Unit rates are UNVERIFIED defaults rounded up
 > (`FACT-0318`) — the host should pass `--rate L4=<panel value>` once read off the resources panel.
-> **The smoke job has not run yet; it is the first thing to do when a budget is stated.**
+> **Smoke PASSED 2026-08-26 21:43 UTC on an L4 for ~0.011 units (`FACT-0319`).** Next in the same
+> 10-unit session: `p21_colab_parity_f0` - the EXP-0022 champion control arm on the first 20 fold-0
+> crops (`BIOHUB_LOEO_LIMIT=20`, sweep `-1` only), to check crop-for-crop that Colab reproduces Kaggle
+> before any Colab number is trusted, and to measure L4 minutes per crop for unit planning. A full
+> 71-crop fold took 2.71 h on Kaggle T4x2 (`_evidence/exports/loeo_f0_strict/kernel.log`), so a full
+> fold needs a bigger session than 10 units. Known accounting gap: the worker's worst-case estimate
+> covers the notebook's `max_hours` only, not the ~79 GB competition download that precedes it.
 >
 > **Next actions, re-ranked:** (1) read `EXP-0021` / `EXP-0022` when they land — check the −1 control
 > reproduces the champion before anything else; (2) repair the fold-1 LOEO configuration (`FACT-0261`);
