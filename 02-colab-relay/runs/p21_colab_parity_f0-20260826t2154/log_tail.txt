@@ -1,0 +1,59 @@
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/dist-packages/kagglehub/exceptions.py", line 67, in handle_call
+    return fn()
+  File "/usr/local/lib/python3.13/dist-packages/kagglehub/http_resolver.py", line 88, in <lambda>
+    lambda: api_client.competitions.competition_api_client.download_data_files(r), h
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/local/lib/python3.13/dist-packages/kagglesdk/competitions/services/competition_api_service.py", line 191, in download_data_files
+    return self._client.call("competitions.CompetitionApiService", "DownloadDataFiles", request, HttpRedirect)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/kagglesdk/kaggle_http_client.py", line 106, in call
+    response = self._prepare_response(response_type, http_response)
+  File "/usr/local/lib/python3.13/dist-packages/kagglesdk/kaggle_http_client.py", line 134, in _prepare_response
+    http_response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/requests/models.py", line 1026, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 401 Client Error: Unauthorized for url: https://api.kaggle.com/v1/competitions.CompetitionApiService/DownloadDataFiles
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/tmp/ipykernel_7751/1829456209.py", line 60, in run_job
+    ensure_inputs(job)
+    ~~~~~~~~~~~~~^^^^^
+  File "/tmp/ipykernel_7751/1829456209.py", line 14, in ensure_inputs
+    src = Path(kagglehub.competition_download(item["ref"]))
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/kagglehub/competition.py", line 30, in competition_download
+    path, _ = registry.competition_resolver(
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        h,
+        ^^
+    ...<2 lines>...
+        output_dir=output_dir,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/kagglehub/registry.py", line 28, in __call__
+    return impl(*args, **kwargs)
+  File "/usr/local/lib/python3.13/dist-packages/kagglehub/resolver.py", line 35, in __call__
+    path, version = self._resolve(
+                    ~~~~~~~~~~~~~^
+        handle,
+        ^^^^^^^
+    ...<2 lines>...
+        output_dir=output_dir,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/kagglehub/http_resolver.py", line 87, in _resolve
+    response = handle_call(
+        lambda: api_client.competitions.competition_api_client.download_data_files(r), h
+    )
+  File "/usr/local/lib/python3.13/dist-packages/kagglehub/exceptions.py", line 107, in handle_call
+    raise KaggleApiHTTPError(message, response=e.response) from e
+kagglehub.exceptions.KaggleApiHTTPError: 401 Client Error.
+
+You don't have permission to access resource at URL: https://kaggle.com/competitions/biohub-cell-tracking-during-development
+Please make sure you are authenticated and have accepted the competition rules which can be found at this location: https://kaggle.com/competitions/biohub-cell-tracking-during-development/rules
