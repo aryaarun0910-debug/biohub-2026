@@ -1,0 +1,35 @@
+{
+  "competition": "biohub-cell-tracking-during-development",
+  "created_at": "2026-08-26T22:58:18Z",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "drive_outputs": [
+    "**/*"
+  ],
+  "env": {},
+  "id": "p21-parity-f0-a6",
+  "input_rewrites": 36,
+  "input_root": "/content/kaggle/input",
+  "kaggle_dataset_slug": "colab-p21-parity-f0",
+  "kind": "notebook",
+  "max_hours": 1.5,
+  "note": "Colab parity + throughput pilot (attempt 6: clean-env 3.12 kernel with self-test)",
+  "notebook": "notebook.ipynb",
+  "notebook_sha256": "c37cf071ab9f03ac18381ef8f3ab5b9a50fdc5a1f2aa44a88a2e70a9cfeb9c91",
+  "priority": 100,
+  "publish_kaggle": true,
+  "python": "3.12",
+  "relay_outputs": [
+    "submission.csv",
+    "*.json",
+    "*.csv",
+    "*.log"
+  ],
+  "spec": "scripts\\kaggle_specs\\p21_colab_parity_f0.json",
+  "version": 1
+}
