@@ -12,10 +12,11 @@ falsifier: >-
   If agreement is equally common on TP and FP divisions it carries no signal and LEVER-0017 closes.
 
 inputs:
-  facts: [FACT-0130, FACT-0140, FACT-0141]
+  facts: [FACT-0160, FACT-0161]   # FACT-0130/0140/0141 RETRACTED - leak-contaminated
   artifacts:
-    - _evidence/p19_relink_sweep_f1/     # champion substrate, AUTHORITATIVE
-    - C:/temp/error_atlas/               # p0b substrate, CONTAMINATED - comparison only
+    - _evidence/exports/loeo_f1_strict/  # OOF split_1 weights - HONEST fold 1, use this
+    - C:/temp/error_atlas/               # LOEO-CLEAN (p0b substrate, older but honest)
+    - _evidence/p19_relink_sweep_f1/     # LEAK-CONTAMINATED (FACT-0160) - do NOT treat as truth
   code: [scripts/core/score_loeo_submission.py]
 
 method: >-

@@ -117,7 +117,8 @@ facts:
     tags: [metric]
 
   # ---- where the headroom is -------------------------------------------------------
-  # SUSPECT: derived on the p0b substrate; see FACT-0140. Re-derive before relying on it.
+  # VINDICATED 2026-08-26: computed on the LOEO-CLEAN atlas. FACT-0140, which ordered these
+  # re-derived, was itself leak-contaminated (FACT-0160). Still UNVERIFIED - PIN, do not discard.
   - id: FACT-0030
     statement: Score gain from perfecting nodes, fold 0 (44b6)
     value: 0.018
@@ -127,7 +128,8 @@ facts:
     date: '2026-08-25'
     tags: [lever-ranking]
 
-  # SUSPECT: derived on the p0b substrate; see FACT-0140. Re-derive before relying on it.
+  # VINDICATED 2026-08-26: computed on the LOEO-CLEAN atlas. FACT-0140, which ordered these
+  # re-derived, was itself leak-contaminated (FACT-0160). Still UNVERIFIED - PIN, do not discard.
   - id: FACT-0031
     statement: Score gain from perfecting nodes, fold 1 (6bba)
     value: 0.136
@@ -138,7 +140,8 @@ facts:
     date: '2026-08-25'
     tags: [lever-ranking]
 
-  # SUSPECT: derived on the p0b substrate; see FACT-0140. Re-derive before relying on it.
+  # VINDICATED 2026-08-26: computed on the LOEO-CLEAN atlas. FACT-0140, which ordered these
+  # re-derived, was itself leak-contaminated (FACT-0160). Still UNVERIFIED - PIN, do not discard.
   - id: FACT-0032
     statement: Score gain from perfecting linking, fold 0
     value: 0.036
@@ -148,7 +151,8 @@ facts:
     date: '2026-08-25'
     tags: [lever-ranking]
 
-  # SUSPECT: derived on the p0b substrate; see FACT-0140. Re-derive before relying on it.
+  # VINDICATED 2026-08-26: computed on the LOEO-CLEAN atlas. FACT-0140, which ordered these
+  # re-derived, was itself leak-contaminated (FACT-0160). Still UNVERIFIED - PIN, do not discard.
   - id: FACT-0033
     statement: Score gain from perfecting linking, fold 1
     value: 0.063
@@ -688,10 +692,14 @@ facts:
     value: 0.0743
     unit: division_jaccard
     scope: {fold: f1, substrate: champion, div_tp: 26, div_fp: 225, div_fn: 99}
-    provenance: MEASURED
+    provenance: SUPERSEDED
+    superseded_by: FACT-0161
     instrument: scripts/core/score_loeo_submission.py on _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz
     supersedes: FACT-0080
     note: >-
+      LEAK-CONTAMINATED (FACT-0160): derived from EXP-0019, which scored the 6bba embryo
+      with pack split_0 weights TRAINED ON 6bba. Superseded by FACT-0161. DO NOT CITE.
+      .
       THE AUTHORITATIVE divJ. div_tp 26 of 125 GT divisions, not 1. Also div_fp is 225, NOT
       the ~6,300 forks we emit - the metric charges division FP only on ANNOTATED cells, so
       most emitted forks land on unannotated cells and are IGNORED rather than penalised.
@@ -761,9 +769,13 @@ facts:
     value: 0.9818
     unit: node_recall
     scope: {fold: f1, substrate: champion}
-    provenance: MEASURED
+    provenance: SUPERSEDED
+    superseded_by: FACT-0161
     instrument: scripts/core/score_loeo_submission.py on _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz
     note: >-
+      LEAK-CONTAMINATED (FACT-0160): derived from EXP-0019, which scored the 6bba embryo
+      with pack split_0 weights TRAINED ON 6bba. Superseded by FACT-0161. DO NOT CITE.
+      .
       Edge Jaccard likewise reads 0.8978 against the recorded p0b figure of 0.7904 (P(both
       endpoints) 0.8533 x CLA 0.9263). Both prior numbers came from the error atlas, built on
       notebooks/kaggle_p0b_clean913_revtime - NOT the deployed base. See LEVER-0013.
@@ -785,10 +797,14 @@ facts:
     scope:
       ours_loeo_f1: {adj_edge: 0.8980, divJ: 0.0743, score: 0.9054}
       mikelou1_reported: {adj_edge: 0.898, divJ: 0.39, lb: 0.937}
-    provenance: MEASURED
+    provenance: SUPERSEDED
+    superseded_by: FACT-0161
     instrument: scripts/core/score_loeo_submission.py against the EXTERNAL mikelou1 forum report
     derived_from: [FACT-0130]
     note: >-
+      LEAK-CONTAMINATED (FACT-0160): derived from EXP-0019, which scored the 6bba embryo
+      with pack split_0 weights TRAINED ON 6bba. Superseded by FACT-0161. DO NOT CITE.
+      .
       Their arithmetic checks out exactly: 0.898 + 0.1*0.39 = 0.937. Ours: 0.8980 +
       0.1*0.0743 = 0.9054. Matching their divJ alone would put us at 0.8980 + 0.039 = 0.937.
       .
@@ -810,6 +826,10 @@ facts:
     provenance: MEASURED
     instrument: scripts/core/score_loeo_submission.py semantics applied to _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz
     note: >-
+      LEAK-AFFECTED COUNTS (FACT-0160): the TP=26/FP=225/251-scored split came from EXP-0019.
+      The STRUCTURE of each claim survives - GT is sparsely annotated, most forks are unscored,
+      and pruned TPs become FNs - but every number must be re-derived on honest weights.
+      .
       Per cell-per-frame we emit 0.002949 forks against GT's 0.001114. The raw
       "6,314 forks vs 125 GT divisions" framing - which I used repeatedly - overstates the
       over-emission by roughly 19x by comparing a full prediction set against a 5.4% sample.
@@ -826,6 +846,10 @@ facts:
     provenance: MEASURED
     instrument: scripts/core/score_loeo_submission.py on _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz
     note: >-
+      LEAK-AFFECTED COUNTS (FACT-0160): the TP=26/FP=225/251-scored split came from EXP-0019.
+      The STRUCTURE of each claim survives - GT is sparsely annotated, most forks are unscored,
+      and pruned TPs become FNs - but every number must be re-derived on honest weights.
+      .
       26 TP + 225 FP = 251 scored; the other 6,063 touch unannotated cells and are IGNORED,
       neither rewarded nor penalised.
       .
@@ -848,6 +872,10 @@ facts:
       independently by the lead
     derived_from: [FACT-0130]
     note: >-
+      LEAK-AFFECTED COUNTS (FACT-0160): the TP=26/FP=225/251-scored split came from EXP-0019.
+      The STRUCTURE of each claim survives - GT is sparsely annotated, most forks are unscored,
+      and pruned TPs become FNs - but every number must be re-derived on honest weights.
+      .
       Removing EVERY false positive still requires retaining at least 35.7% of true positives
       (9.3 of 26). Keeping half the FP requires retaining 17.6 of 26. So a division filter
       must be strongly PRECISION-preserving, not merely aggressive - proportional pruning is
@@ -865,6 +893,12 @@ facts:
     provenance: MEASURED
     instrument: agent analysis over _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz and data/train
     note: >-
+      PARTIALLY LEAK-AFFECTED (FACT-0160). The GT-side results stand - AUC 0.5592, the 48.8%
+      of divisions at non-positive count change, and the 57.6% boundary enrichment are all
+      ground-truth properties. The TP-versus-FP AUC of 0.4674 was computed on the LEAKY
+      TP=26/FP=225 split and must be re-derived. LEVER-0015's kill survives either way, since
+      it rests on the GT-side half.
+      .
       48.8% of GT divisions occur in intervals where the count change is <= 0, which a budget
       forbids outright. Fork count carries only 2.0% of the variance in count change;
       terminations and appearances dominate. 57.6% of GT track ends lie within 5 um of the
@@ -873,3 +907,82 @@ facts:
       totals 4,723 - 37.8x the entire division signal.
     date: '2026-08-26'
     tags: [division, refuted]
+
+  # ==================================================================================
+  # 2026-08-26 — THE EXP-0019 TRAIN/TEST LEAK. Read this before trusting any fold-1 number.
+  # ==================================================================================
+  - id: FACT-0160
+    statement: >-
+      EXP-0019 evaluated LOEO fold 1 (the 6bba embryo) using the support pack's split_0
+      weights, which were TRAINED ON 6bba - a train/test leak. Every number it produced is
+      inflated.
+    value: null
+    unit: structural
+    provenance: VERIFIED
+    instrument: >-
+      scripts/kaggle_edits/loeo_retarget.py:15-18 ("LOEO-CLEAN on fold 0 and LEAKY on fold
+      1"); _evidence/p19_relink_sweep_f1/loeo_manifest.json weights field; comparison against
+      the nine other fold-1 LOEO specs
+    note: >-
+      ALL NINE other fold-1 LOEO specs set BIOHUB_LOEO_WEIGHTS_GLOB to
+      edge_predictor_best_split_1.pth and attach the oof-weights dataset. p19 set NEITHER,
+      because it was built by copying p9_coupled_division - a TEST submission spec, where pack
+      weights are correct since test data is not in training - and bolting LOEO retargeting on
+      top. loeo_retarget.py then silently fell back to the pack default.
+      .
+      IT WAS INVISIBLE BY CONSTRUCTION. A leaked run looks BETTER, not broken: the build
+      passed, the defect gate reported "0 applicable rules", and the in-run control PASSED -
+      it reproduced its own leaky primary export exactly. The control was real but it
+      validated the wrong thing, because both sides shared the leak.
+      .
+      THE CHECK THAT SHOULD HAVE CAUGHT IT, from facts we already held: p3_harmonic -> P9 is
+      worth +0.010 on the hidden LB, yet the claimed fold-1 "substrate" effect was +0.203 - a
+      20x inconsistency. A two-edit post-processing transplant cannot do that. Calibrating a
+      derived quantity against an independently known value is a standing rule here and I did
+      not apply it.
+    date: '2026-08-26'
+    tags: [leak, incident, methodology]
+
+  - id: FACT-0161
+    statement: >-
+      Honest (out-of-fold) LOEO fold-1 performance is far below the leaked figures
+    value: null
+    unit: comparison
+    scope:
+      honest_oof_split1: {node_recall: 0.8547, edge_jaccard: 0.6953, adj_edge: 0.7025, divJ: 0.0016, score: 0.7026}
+      leaked_exp0019: {node_recall: 0.9818, edge_jaccard: 0.8978, adj_edge: 0.8980, divJ: 0.0743, score: 0.9054}
+      clean_fold0: {node_recall: 0.9846, adj_edge: 0.8986, divJ: 0.0159, score: 0.9002}
+    provenance: MEASURED
+    instrument: >-
+      agent audit over _evidence/exports/loeo_f1_strict/ (OOF split_1 weights per its
+      loeo_manifest) versus _evidence/p19_relink_sweep_f1/; populations verified identical
+      (128 crops, 109,057 GT edges, 125 GT divisions)
+    supersedes: FACT-0130
+    note: >-
+      The leak inflates fold-1 score by +0.203 and divJ by roughly 45x. It beats the honest run
+      on 128 of 128 crops with zero exceptions, with the largest gains on the crops the honest
+      run found hardest - the signature of a memorised detector, not a post-processing gain.
+      Node recall is a DETECTOR quantity and all ten harmonic edits are byte-identical across
+      both chains, so the difference cannot be post-processing.
+      .
+      The honest fold-1 divJ of ~0.0016-0.0047 was ALREADY ON RECORD since 2026-08-18 in
+      research/06-knowledge-system/internal-reports/division_lane_2026-08-18.md. Neither
+      FACT-0080 nor FACT-0130 was ever reconciled against it.
+    date: '2026-08-26'
+    tags: [leak, corrected, authoritative]
+
+  - id: FACT-0162
+    statement: >-
+      RETRACTED - "our adj_edge equals mikelou1's 0.898, so the entire gap is divisions"
+    value: null
+    unit: retraction
+    provenance: SUPERSEDED
+    superseded_by: FACT-0161
+    note: >-
+      FACT-0141 rested on the leaked adj_edge of 0.8980. Honest fold-1 adj_edge is 0.7025, so
+      our edge term is NOT competitive with a 0.937 team - it is roughly 0.20 behind, and the
+      division term is the SMALLER half of the gap, not the larger. This single fact aimed the
+      entire programme at divisions and was cited by eight work packets. The strategic
+      conclusion it produced is withdrawn.
+    date: '2026-08-26'
+    tags: [leak, retraction, strategy]

@@ -236,9 +236,11 @@ levers:
       Found while building EXP-0019. The champion builds from notebooks/kaggle_p3_harmonic;
       the pre-existing LOEO chain builds from notebooks/kaggle_p0b_clean913_revtime, an older
       base carrying 20 forward-porting edits - two of which already patch the relink region.
-      EXP-0019 is the first LOEO measurement on the deployed substrate. Everything measured
-      offline before it, including the error atlas that FACT-0080 and the fork-collapse
-      analysis (FACT-0090/0091) were built on, came from the OTHER base.
+      PREMISE REVERSED 2026-08-26 (FACT-0160). EXP-0019 was not a cleaner measurement - it was
+      a LEAKY one, scoring the 6bba embryo with pack split_0 weights trained on 6bba. The
+      p0b-substrate atlas is LOEO-CLEAN. A substrate difference may still exist, but it is
+      confounded with the leak and cannot be estimated from EXP-0019. The honest comparison
+      needs the repaired p19 spec rerun with OOF split_1 weights - one GPU session, no slots.
     priority: 2
 
   - id: LEVER-0014
@@ -259,8 +261,14 @@ levers:
       Includes the model-misspecification conjecture: if true sibling separation is unimodal
       with an interior mode (~10.6 um publicly reported) while our cost is MONOTONE in
       distance, then any monotone ranker preferentially selects the CLOSEST pairs - which are
-      the false ones. Prediction: FP separation < TP separation.
-    priority: 1
+      the false ones. Prediction: FP separation < TP separation. THAT SUB-CONJECTURE IS
+      UNAFFECTED by the leak - the GT separation distribution is ground truth.
+      .
+      DEPRIORITISED 2026-08-26 (FACT-0160): the headline arithmetic came from the LEAKY
+      TP=26/FP=225 split. On honest weights (TP 1-3, FP ~500) deleting every FP is worth about
+      +0.0019, not +0.0134 - below any promotion bar. The lever is not dead, but it is no longer
+      priority 1 and must be re-costed on honest counts before any effort is committed.
+    priority: 4
 
   - id: LEVER-0015
     claim: >-

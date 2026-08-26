@@ -209,9 +209,10 @@ experiments:
     title: P19 relink division penalty SWEEP - the whole curve from one GPU session
     spec: scripts/kaggle_specs/p19_relink_sweep_f1.json
     kernel: aryaarun07/biohub-p19-relink-division-sweep-loeo-f1
+    kernel_version: 1
     submission: null
     lb: null
-    status: complete
+    status: void
     date: '2026-08-25'
     facts: [FACT-0090, FACT-0093, FACT-0102, FACT-0111]
     note: >-
@@ -242,7 +243,13 @@ experiments:
       .
       43 contract tests pass across EXP-0018/0019.
       .
-      RESULT 2026-08-26: RAN CLEAN, CONTROL PASSED, MECHANISM KILLED. Penalty -1 reproduced
+      VOID 2026-08-26 - TRAIN/TEST LEAK (FACT-0160). It evaluated fold 1 (6bba) with the pack's
+      split_0 weights, TRAINED ON 6bba, because the spec set no BIOHUB_LOEO_WEIGHTS_GLOB. All
+      nine other fold-1 LOEO specs do. Every absolute number below is inflated; the paired
+      penalty COMPARISON may survive but its magnitudes do not. The spec is now repaired and
+      tests/test_loeo_weights_hygiene.py makes the omission a build failure.
+      .
+      ORIGINAL RESULT, RETAINED FOR PROVENANCE: RAN CLEAN, CONTROL PASSED, MECHANISM KILLED. Penalty -1 reproduced
       the champion EXACTLY (2,156,725 nodes / 2,077,140 edges / 6,314 forks), so the sweep is
       valid. Every other penalty scored WORSE: -0.0040 (p=0) to -0.0023 (p=2), with divJ
       falling 0.0743 -> 0.061-0.067 and div_tp dropping 26 -> 21. See FACT-0131, LEVER-0012.

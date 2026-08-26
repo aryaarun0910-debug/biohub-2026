@@ -4703,3 +4703,74 @@ pruned TPs become FNs and remain in the denominator. A division filter must be s
 precision-preserving, not merely aggressive.
 
 Recorded as `FACT-0150`..`FACT-0153`; `LEVER-0015` killed; `PKT-0006` closed.
+
+## 2026-08-26 — INCIDENT: EXP-0019 trained on its own evaluation embryo
+
+**The single largest error of the campaign, and it was mine.** Retracted here in full.
+
+### What happened
+
+`scripts/kaggle_edits/loeo_retarget.py:15-18` states it plainly: the support pack ships **only**
+`weights/unet_transformer/split_0`, trained on 6bba and holding out 44b6 — *"LOEO-CLEAN on fold 0
+and LEAKY on fold 1."* Every fold-1 LOEO spec must override it with our out-of-fold `split_1`
+weights.
+
+`p19_relink_sweep_f1` did not. I built it by copying `p9_coupled_division` — a **test** submission
+spec, where pack weights are correct because test data is not in training — and bolted LOEO
+retargeting on top without adding the weights override. `loeo_retarget.py` fell back to the pack
+default. **All nine other fold-1 LOEO specs set it. Mine alone did not.**
+
+| fold 1, 128 crops, identical GT | honest (OOF split_1) | **EXP-0019 (leaked)** | fold 0 (clean) |
+|---|---|---|---|
+| node recall | 0.8547 | 0.9818 | 0.9846 |
+| adj_edge | **0.7025** | 0.8980 | 0.8986 |
+| divJ | 0.0016 | 0.0743 | 0.0159 |
+| score | 0.7026 | 0.9054 | 0.9002 |
+
+The leak inflates fold-1 score by **+0.203** and divJ by ~45×. It beats the honest run on
+**128 of 128 crops with zero exceptions**, with the largest gains on the crops the honest run
+found hardest — the signature of a memorised detector. Node recall is a *detector* quantity and
+all ten harmonic edits are byte-identical across both chains, so it cannot be post-processing.
+
+### What it invalidated — including the strategy I recommended
+
+* **`FACT-0141` RETRACTED** — *"our adj_edge equals mikelou1's 0.898, so the entire gap is
+  divisions."* Honest adj_edge is 0.7025. We are ~0.20 **behind** on edges, and divisions are the
+  **smaller** half of the gap. This fact aimed the whole programme and was cited by eight packets.
+* **`FACT-0130` superseded** — divJ 0.0743 / TP 26 / FP 225 → honest ~0.0016–0.0047, TP 1–3,
+  FP ~500. `LEVER-0014`'s headline ("delete all FP → +0.0134") becomes ~+0.0019; deprioritised 1 → 4.
+* **`FACT-0140` retracted**, and **`LEVER-0013`'s premise reversed**: EXP-0019 was not a cleaner
+  measurement, it was a leaky one.
+* **`FACT-0030`..`0033` VINDICATED** — I had flagged them SUSPECT and ordered them re-derived. They
+  were computed on the LOEO-**clean** atlas. The fold-1 node headroom is real. **I was one
+  integration away from deleting the correct lever ranking.**
+
+### Why nothing caught it, and the check that should have
+
+**A leaked run looks better, not broken.** The build passed, the defect gate reported "0 applicable
+rules", and the in-run control **passed** — but it reproduced its own leaky primary export, so both
+sides shared the leak and it validated the wrong thing.
+
+The available check: P9 is worth **+0.010** on the hidden LB, yet the claimed fold-1 substrate
+effect was **+0.203** — a 20× inconsistency against a number already in the registry. *Calibrate
+any derived quantity against an independently known value* is a standing rule here. I enforced it
+on eight agents and did not apply it to myself.
+
+Worse: the honest fold-1 divJ of ~0.002 **had been on record since 2026-08-18** in
+`internal-reports/division_lane_2026-08-18.md`. Neither of my division facts was ever reconciled
+against it. The registry stopped the *stale-number* failure mode; it has no defence against the
+*never-cross-checked* one.
+
+### The permanent fix
+
+`tests/test_loeo_weights_hygiene.py` reads the fold from each spec and **fails any fold-1 LOEO spec
+that does not override the leaky pack weights**. It fired exactly on `p19_relink_sweep_f1` and
+passed on all 24 other LOEO specs; the spec is now repaired and it passes. It also anchors itself
+to the source comment so it cannot drift from reality, and asserts every fetched LOEO manifest
+declares its weights.
+
+**The structural gap the audit named, still open:** no provenance field in `facts.yaml` records the
+model weights or evaluation protocol. Two facts can measure the same quantity on the same crops with
+different train/test hygiene and be indistinguishable. That is the hole this fell through.
+
+Recorded as `FACT-0160`..`FACT-0162`; EXP-0019 marked **void**; all 8 packets relabelled.
