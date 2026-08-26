@@ -1257,3 +1257,146 @@ facts:
       divisions) and VALIDATED somewhere other than here.
     date: '2026-08-26'
     tags: [division, statistics, constraint]
+
+  # ---- 2026-08-26: metric forensics -----------------------------------------------
+  - id: FACT-0190
+    statement: >-
+      TWO DIFFERENT SCORERS exist in the vendored package and we do not know which the hidden
+      leaderboard calls - one applies the node-count term, the other has no node term at all
+    value: null
+    unit: risk
+    provenance: VERIFIED
+    instrument: >-
+      .venv/Lib/site-packages/tracking_cellmot/metrics.py - summarise() at :499-522 applies the
+      node adjustment; evaluate_datasets() at :334-383 computes micro edge_jaccard + 0.1*divJ
+      with NO node term
+    note: >-
+      MATERIAL AND UNRESOLVED. If the leaderboard calls evaluate_datasets, the entire
+      node-ratio term - and every conclusion about over- or under-production - is a phantom.
+      This is the highest-value cheap question left in the metric lane and it was never asked.
+    date: '2026-08-26'
+    tags: [metric, risk, unresolved]
+
+  - id: FACT-0191
+    statement: >-
+      The node-count multiplier is genuinely UNCAPPED above 1 (proven), but hard-capped at
+      +10% because N_pred >= 0 implies ratio >= -1
+    value: 1.06403
+    unit: multiplier
+    scope: {crop: 44b6_144b256d, crops_above_1: 6, of: 71}
+    provenance: VERIFIED
+    instrument: tracking_cellmot/metrics.py:447-449 (no upper clamp) and official scoring of _evidence/exports/loeo_f0_strict/
+    note: >-
+      Also corrects the FORM. The multiplier is applied PER CROP and then weight-averaged with
+      w = tp+fp+fn, which collapses to the exact identity
+      adj = edge_J_micro * (1 - 0.1 * rbar), where rbar is the edge-TP-WEIGHTED mean of
+      per-crop ratios - NOT the aggregate (sum N_pred - sum N_est)/sum N_est. On honest fold 0
+      those differ: -0.185 versus -0.274, so quoting the aggregate overstates the bonus by 48%.
+    date: '2026-08-26'
+    tags: [metric, verified]
+
+  - id: FACT-0192
+    statement: >-
+      The under-production bonus IS real on both CLEAN folds (+1.85% fold 0, +1.04% fold 1) -
+      my FACT-0173 claim that we over-produce was itself computed on the leaky export
+    value: null
+    unit: bonus
+    scope:
+      f0_clean: {tp_wtd_ratio: -0.1853, bonus: 0.016345}
+      f1_clean: {tp_wtd_ratio: -0.1037, bonus: 0.007210}
+      f1_leaky: {tp_wtd_ratio: -0.0025, bonus: 0.000227}
+    provenance: MEASURED
+    instrument: recomputed from export CSVs and GT metadata directly, not inherited from FACT-0021
+    supersedes: FACT-0173
+    note: >-
+      THE LEAK DESTROYED THE BONUS - p19 emits +16.5% more nodes on the identical 128 crops
+      (2,156,725 vs 1,851,947), flipping the aggregate ratio positive. Any p19-based conclusion
+      about the node term is INVERTED, including the one I recorded as FACT-0173 an hour ago.
+      FACT-0021's -0.0937 was the right order of magnitude but computed on the four FORBIDDEN
+      placeholder crops and as an aggregate.
+      .
+      NOT EXPLOITABLE EITHER WAY. Shrinking pays only if elasticity E < ~0.07-0.09; measured
+      E = 2.00 on every substrate (the node-recall-squared law), so we are 23-28x away.
+      Contaminating an oracle deletion pool with just 1% GT-matched nodes turns +0.112 into
+      -0.175. And N_est is unreadable at test time - data/test holds only .zarr.
+      .
+      THE ASYMMETRY POINTS THE OTHER WAY: adding nodes pays if >0.23% (f1) / >0.04% (f0) of
+      added nodes match a previously-unmatched GT node. Node price is only -0.00061 per +1%.
+    date: '2026-08-26'
+    tags: [metric, correction, node-count]
+
+  - id: FACT-0193
+    statement: >-
+      A false division costs 3.4x more through the EDGE channel than the division channel, so
+      the naive 0.1/(125+FP) understates it by 339-723 percent
+    value: null
+    unit: marginal_score
+    scope:
+      true_division: {division_channel: 7.937e-04, edge_channel: 4.80e-05, total: 8.42e-04}
+      false_division: {division_channel: -1.250e-05, edge_channel: -4.27e-05, total: -5.52e-05}
+      false_at_unmatched_node: 0
+    provenance: MEASURED
+    instrument: >-
+      oracle de-fork on honest fold 0 - removing exactly the 110 false fork branches gained
+      +0.004696 on the EDGE term versus +0.006105 on the division term; algebra validated
+      against measurement to 3 significant figures
+    note: >-
+      Divisions ARE edges, so every fork hits both terms. The two channels are comparable in
+      size, not 10:1. Exchange rate TP:FP is 15.3:1 across both channels, versus 63.5:1 if you
+      look at divJ alone. 98% of our forks sit at unmatched nodes and are entirely free.
+    date: '2026-08-26'
+    tags: [metric, division, interaction]
+
+  - id: FACT-0194
+    statement: >-
+      Including the edge channel, break-even fork acceptance is 6.15% and our precision is
+      1.96% - we are OVER-ACCEPTING by roughly 3x, the reverse of what the division channel
+      alone implies
+    value: 0.0615
+    unit: probability
+    scope:
+      division_channel_only: 0.0155
+      both_channels: 0.0615
+      both_plus_link_stealing: 0.1042
+      our_precision: 0.0196
+    provenance: MEASURED
+    instrument: honest fold 0, division TP 2 / FP 100 / FN 24, reach 22/26
+    supersedes: FACT-0181
+    note: >-
+      RESOLVES A CONFLICT BETWEEN TWO SEATS. FACT-0181 derived p_add = divJ/(1+divJ) and
+      concluded the metric says ADD, never prune. That is the DIVISION-CHANNEL-ONLY bet, and
+      by division algebra alone 1.96% > 1.55% does say keep accepting. But once the edge
+      channel is included the threshold rises to 6.15% - and to 10.4% if a false fork also
+      steals a correct link - so the correct action REVERSES to cutting by ~3x.
+      .
+      FACT-0181's per-crop-cancellation and uncapped-multiplier results stand; only its
+      add-versus-prune conclusion is superseded, because it omitted the channel that carries
+      3.4x the cost.
+      .
+      Honest fold-0 headroom, both channels: FP to 0 = +0.0104; TP to the reach ceiling of 22
+      with FP kept = +0.0168; both = +0.0882.
+    date: '2026-08-26'
+    tags: [metric, division, decision, headline]
+
+  - id: FACT-0195
+    statement: >-
+      Our edge term IS competitive on the genuinely held-out fold 0 (adj_edge 0.8986) but not
+      on fold 1 (0.7025), and the linking-versus-detection ranking FLIPS between them
+    value: null
+    unit: comparison
+    scope:
+      f0_clean: {edge_jaccard: 0.8822, adj_edge: 0.8986, node_recall: 0.9846, cla: 0.962, reachable: 0.986}
+      f1_clean: {edge_jaccard: 0.6953, adj_edge: 0.7025, node_recall: 0.8547, cla: 0.929, reachable: 0.842}
+    provenance: MEASURED
+    instrument: official scorer on _evidence/exports/loeo_f0_strict/ and _evidence/exports/loeo_f1_strict/
+    note: >-
+      On fold 0, LINKING is 2.7x the bigger lever (744 mislinked vs 274 unreachable). On fold 1,
+      DETECTION is 2.6x bigger (17,189 unreachable vs 6,504 mislinked). The recorded "linking is
+      1.9x bigger" came from the contaminated atlas and reproduces on NEITHER clean substrate.
+      .
+      The edge term is NOT flattered by the multiplier (that contributes a legitimate +0.016 /
+      +0.007). What DOES flatter it structurally: only 1.1% (f0) and 5.6% (f1) of our edges are
+      scored at all - the rest fail FP-eligibility because the metric charges only where GT
+      annotates. Competitor-symmetric, but edge_jaccard measures linking on 1-5% of the graph.
+    date: '2026-08-26'
+    tags: [edge, strategy, fold-split]
