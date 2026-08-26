@@ -1,6 +1,13 @@
 {
+  "drive_dir": "/content/drive/MyDrive/biohub/runs/p21_colab_parity_f0-20260826t2148",
+  "elapsed_s": 5.998592853546143,
+  "finished": "2026-08-26T21:48:26Z",
   "gpu": "NVIDIA L4",
+  "kaggle_dataset": "FAILED: ",
   "kind": "notebook",
+  "reason": "OSError: [Errno 30] Read-only file system: '/root/.cache/kagglehub/datasets/pilkwang/biohub-deepcenter-unet3d-center-prior-v1/versions/5' -> '/kaggle/input/biohub-deepcenter-unet3d-center-prior-v1'",
+  "relay_outputs": [],
   "started": "2026-08-26T21:48:19Z",
-  "state": "running"
+  "state": "failed",
+  "units": 0.00833137896325853
 }
