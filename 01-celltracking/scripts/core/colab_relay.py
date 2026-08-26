@@ -44,8 +44,10 @@ from pathlib import Path
 
 RELAY_VERSION = 1
 COMPETITION = "biohub-cell-tracking-during-development"
-KAGGLE_INPUT = "/kaggle/input"
-KAGGLE_WORKING = "/kaggle/working"
+KAGGLE_INPUT = "/kaggle/input"            # what factory-built notebooks hard-code
+COLAB_INPUT_ROOT = "/content/kaggle/input"  # Colab mounts /kaggle/input READ-ONLY (measured 2026-08-26,
+                                            # EROFS on symlink) so jobs are rewritten to this writable root
+KAGGLE_WORKING = "/kaggle/working"          # writable on Colab (the smoke wrote there)
 
 # Compute-unit rates per GPU-hour. UNVERIFIED defaults, deliberately rounded UP (FACT-0318):
 # the host overrides them in session.json["rates"] from the Colab resources panel.
@@ -94,6 +96,9 @@ JOB_SCHEMA = {
     "notebook_sha256": "",
     "datasets": [],                  # owner/slug, materialised at /kaggle/input/<slug>
     "competition": COMPETITION,      # or "" when the job needs no competition data
+    "input_root": COLAB_INPUT_ROOT,  # where the worker materialises <slug>/ and <competition>/;
+                                     # the queued notebook has its /kaggle/input literals rewritten to it
+    "input_rewrites": 0,             # how many literals were rewritten (0 = notebook untouched)
     "max_hours": 3.0,                # hard timeout AND the unit estimate used by the gate
     "relay_outputs": ["submission.csv", "*.json", "*.csv", "*.log"],   # small files -> relay
     "drive_outputs": ["**/*"],       # everything -> Drive runs/<id>/working/
@@ -219,16 +224,30 @@ def kaggle_layout_plan(job: dict) -> list[dict]:
     /kaggle/input/datasets/<owner>/<slug>), and the competition at
     /kaggle/input/<competition> or /kaggle/input/competitions/<competition>.
     """
+    root = (job.get("input_root") or KAGGLE_INPUT).rstrip("/")
     plan = []
     for ds in job.get("datasets", []) or []:
         owner, slug = ds.split("/", 1)
-        plan.append({"kind": "dataset", "ref": ds, "path": f"{KAGGLE_INPUT}/{slug}",
-                     "alias": f"{KAGGLE_INPUT}/datasets/{owner}/{slug}"})
+        plan.append({"kind": "dataset", "ref": ds, "path": f"{root}/{slug}",
+                     "alias": f"{root}/datasets/{owner}/{slug}"})
     comp = job.get("competition") or ""
     if comp:
-        plan.append({"kind": "competition", "ref": comp, "path": f"{KAGGLE_INPUT}/{comp}",
-                     "alias": f"{KAGGLE_INPUT}/competitions/{comp}"})
+        plan.append({"kind": "competition", "ref": comp, "path": f"{root}/{comp}",
+                     "alias": f"{root}/competitions/{comp}"})
     return plan
+
+
+def rewrite_input_root(nb: dict, new_root: str, old_root: str = KAGGLE_INPUT) -> int:
+    """Replace every `old_root` literal in the notebook's code cells with `new_root`. Returns the count."""
+    n = 0
+    for cell in nb.get("cells", []):
+        if cell.get("cell_type") != "code":
+            continue
+        src = "".join(cell.get("source", []))
+        if old_root in src:
+            n += src.count(old_root)
+            cell["source"] = src.replace(old_root, new_root).splitlines(keepends=True)
+    return n
 
 
 def select_relay_outputs(working: Path, patterns: list[str], max_bytes: int = RELAY_OUTPUT_MAX_BYTES) -> list[Path]:

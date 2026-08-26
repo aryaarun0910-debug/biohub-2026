@@ -179,7 +179,10 @@ def write_job(relay_dir: Path, job: dict, notebook: Path | None) -> Path:
         raise SystemExit(f"job {job['id']} already queued")
     jdir.mkdir(parents=True)
     if notebook is not None:
-        shutil.copy(notebook, jdir / job["notebook"])
+        nb = json.loads(Path(notebook).read_text(encoding="utf-8"))
+        root = job.get("input_root") or ""
+        job["input_rewrites"] = relay.rewrite_input_root(nb, root) if root and root != relay.KAGGLE_INPUT else 0
+        (jdir / job["notebook"]).write_text(json.dumps(nb, indent=1) + "\n", encoding="utf-8")
         job["notebook_sha256"] = hashlib.sha256((jdir / job["notebook"]).read_bytes()).hexdigest()
     relay.write_json(jdir / "job.json", job)
     return jdir
@@ -202,12 +205,13 @@ def cmd_queue(args) -> int:
         competition=(spec.get("competition_sources") or [relay.COMPETITION])[0] if not args.no_competition else "",
         max_hours=float(args.max_hours), publish_kaggle=bool(args.publish_kaggle),
         kaggle_dataset_slug=args.kaggle_dataset_slug or "", note=args.note or spec.get("purpose", ""),
-        env=dict(kv.split("=", 1) for kv in (args.env or [])),
+        env=dict(kv.split("=", 1) for kv in (args.env or [])), input_root=args.input_root,
     )
     relay_pull(relay_dir)
     jdir = write_job(relay_dir, job, built)
     relay_sync(relay_dir, f"queue {job['id']}", push=not args.no_push)
-    print(f"queued {job['id']} -> {jdir} (datasets {len(job['datasets'])}, max {job['max_hours']} h)")
+    print(f"queued {job['id']} -> {jdir} (datasets {len(job['datasets'])}, max {job['max_hours']} h, "
+          f"input_root {job['input_root']}, {job['input_rewrites']} literals rewritten)")
     print("NOTE: it runs only if the worker is up AND session.json admits it (rule 8).")
     return 0
 
@@ -366,10 +370,11 @@ relay.write_json(Path(RELAY_DIR, "session_state.json"), state)
 relay_push("worker up")
 """),
     ("code", """def ensure_inputs(job):
-    \"\"\"Recreate /kaggle/input/<slug> and /kaggle/input/<competition> from kagglehub downloads.\"\"\"
+    \"\"\"Materialise <input_root>/<slug> and <input_root>/<competition> from kagglehub downloads.
+    Colab's own /kaggle/input is a READ-ONLY mount, so jobs are rewritten to /content/kaggle/input.\"\"\"
     import kagglehub
-    Path(KAGGLE_ROOT, "input").mkdir(parents=True, exist_ok=True)
-    for item in relay.kaggle_layout_plan(job):
+    plan = relay.kaggle_layout_plan(job)
+    for item in plan:
         target = Path(item["path"]); alias = Path(item["alias"])
         if target.exists():
             print("  input present:", target); continue
@@ -378,13 +383,17 @@ relay_push("worker up")
             src = Path(kagglehub.dataset_download(item["ref"]))
         else:
             src = Path(kagglehub.competition_download(item["ref"]))
-        target.parent.mkdir(parents=True, exist_ok=True)
-        if not target.exists():
-            target.symlink_to(src, target_is_directory=True)
-        alias.parent.mkdir(parents=True, exist_ok=True)
-        if not alias.exists():
-            alias.symlink_to(src, target_is_directory=True)
+        for link in (target, alias):
+            try:
+                link.parent.mkdir(parents=True, exist_ok=True)
+                if not link.exists():
+                    link.symlink_to(src, target_is_directory=True)
+            except OSError as e:
+                raise RuntimeError(f"cannot link {link} -> {src}: {e}. Is input_root writable? "
+                                   f"(Colab's /kaggle/input is read-only; queue with --input-root /content/kaggle/input)")
         print(f"  input ready: {target} <- {src} ({time.time() - t0:.0f}s)")
+    if plan:
+        print("  layout:", ", ".join(i["path"] for i in plan))
 
 def heartbeat_loop(run_dir, stop_evt, note_fn):
     while not stop_evt.wait(relay.HEARTBEAT_S):
@@ -464,9 +473,11 @@ def run_job(jdir, job):
     relay.write_json(run_dir / "status.json", status)
     return outcome, units
 """),
-    ("code", """idle_since = time.time()
+    ("code", """import importlib
+idle_since = time.time()
 while True:
     relay_pull()
+    relay = importlib.reload(relay)   # pick up lib changes pushed from the laptop without a restart
     session = relay.read_json(Path(RELAY_DIR, "session.json"), {})
     state = relay.read_json(Path(RELAY_DIR, "session_state.json"), {}) or state
     if session.get("stop"):
@@ -542,6 +553,8 @@ def main() -> int:
     p.add_argument("--publish-kaggle", action="store_true"); p.add_argument("--kaggle-dataset-slug")
     p.add_argument("--no-competition", action="store_true"); p.add_argument("--no-build", action="store_true")
     p.add_argument("--env", action="append"); p.add_argument("--note")
+    p.add_argument("--input-root", default=relay.COLAB_INPUT_ROOT,
+                   help="rewrite /kaggle/input literals to this writable root (Colab's /kaggle/input is read-only)")
     p.set_defaults(func=cmd_queue)
     p = sp.add_parser("smoke"); p.add_argument("--job-id"); p.set_defaults(func=cmd_smoke)
     p = sp.add_parser("status"); p.set_defaults(func=cmd_status)

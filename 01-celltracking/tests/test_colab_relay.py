@@ -91,6 +91,7 @@ def test_job_validation():
 
 def test_kaggle_layout_plan_matches_notebook_conventions():
     job = notebook_job()
+    job["input_root"] = relay.KAGGLE_INPUT   # the plan honours whatever root the job names
     plan = relay.kaggle_layout_plan(job)
     paths = {p["path"] for p in plan}
     assert "/kaggle/input/biohub-tracking-support-pack-50ep-v1" in paths
@@ -139,3 +140,37 @@ def test_queue_writes_job_locally_without_push(tmp_path):
     assert written["notebook_sha256"] and written["id"] == "t-job"
     with pytest.raises(SystemExit):
         factory.write_job(relay_dir, job, nb)   # duplicate id refused
+
+
+def test_layout_plan_uses_input_root_and_rewrite_counts_literals():
+    job = notebook_job()
+    job["input_root"] = "/content/kaggle/input"
+    plan = relay.kaggle_layout_plan(job)
+    assert {p["path"] for p in plan} == {"/content/kaggle/input/biohub-tracking-support-pack-50ep-v1",
+                                          "/content/kaggle/input/biohub-cell-tracking-during-development"}
+    nb = {"cells": [
+        {"cell_type": "code", "source": ['x = Path("/kaggle/input/a")\n', 'y = "/kaggle/input/b"\n']},
+        {"cell_type": "markdown", "source": ["/kaggle/input stays in prose\n"]},
+        {"cell_type": "code", "source": ['w = "/kaggle/working"\n']},
+    ]}
+    n = relay.rewrite_input_root(nb, "/content/kaggle/input")
+    assert n == 2
+    assert "".join(nb["cells"][0]["source"]) == 'x = Path("/content/kaggle/input/a")\ny = "/content/kaggle/input/b"\n'
+    assert "".join(nb["cells"][1]["source"]) == "/kaggle/input stays in prose\n"
+    assert "".join(nb["cells"][2]["source"]) == 'w = "/kaggle/working"\n'
+
+
+def test_write_job_rewrites_notebook_and_records_count(tmp_path):
+    relay_dir = tmp_path / "relay"
+    (relay_dir / "jobs" / "pending").mkdir(parents=True)
+    nb = tmp_path / "nb.ipynb"
+    nb.write_text(json.dumps({"cells": [{"cell_type": "code", "metadata": {}, "outputs": [], "execution_count": None,
+                                          "source": ['p = "/kaggle/input/x"\n']}],
+                              "metadata": {}, "nbformat": 4, "nbformat_minor": 5}))
+    job = relay.new_job("rw-job", "notebook", datasets=["a/b"], max_hours=1.0)
+    jdir = factory.write_job(relay_dir, job, nb)
+    written = json.loads((jdir / "job.json").read_text())
+    assert written["input_root"] == "/content/kaggle/input" and written["input_rewrites"] == 1
+    text = (jdir / "notebook.ipynb").read_text()
+    assert 'p = \\"/content/kaggle/input/x\\"' in text      # JSON-escaped source line
+    assert 'p = \\"/kaggle/input/x\\"' not in text
