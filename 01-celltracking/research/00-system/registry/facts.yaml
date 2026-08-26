@@ -2862,3 +2862,29 @@ facts:
       /kaggle/input layout - that is the p21 parity pilot's job (scripts/kaggle_specs/p21_colab_parity_f0.json).
     date: '2026-08-26'
     tags: [operational, compute, colab, verified-plumbing]
+
+  - id: FACT-0320
+    statement: >-
+      Three Colab runtime facts that each broke a factory-built notebook before it ran: /kaggle/input is a
+      READ-ONLY mount; the current Kaggle API rejects username+key and requires a KGAT_ access token; and
+      Colab's system Python is 3.13 while Kaggle kernels and the support pack's wheels are 3.12
+    value: null
+    unit: environment
+    scope:
+      kaggle_input: {mount: "/kaggle/input", writable: false, error: "OSError EROFS on symlink", fix: "rewrite /kaggle/input literals to /content/kaggle/input at queue time (36 literals in the P3-harmonic lineage)"}
+      kaggle_auth: {username_key_basic_auth: "401 on api.kaggle.com and www.kaggle.com, verified-correct key (fingerprint match)", access_token: "200 with Authorization: Bearer KGAT_ from ~/.kaggle/access_token", fix: "Colab secret KAGGLE_API_TOKEN; kagglehub 1.0.2 and kagglesdk read it before username/key"}
+      python: {colab_system: "3.13", kaggle_kernel: "3.12 (20 log lines in _evidence/exports/loeo_f0_strict/kernel.log)", pack_wheels: {cp312: 22, cp310: 2, py3: 35, py2_py3: 3}, error: "psygnal>=0.14 no matching distribution on 3.13", fix: "uv-built Python 3.12 kernel; the notebook's own installer then uses the pack wheels as on Kaggle"}
+      competition_download_on_colab: {size_gb: 79, wall_min_upper_bound: 14, path: "kagglehub competition_download -> /root/.cache/kagglehub"}
+    provenance: MEASURED
+    instrument: >-
+      Colab relay runs p21_colab_parity_f0-20260826t2148 / t2152 / t2154 / t2204 (status.json + log_tail.txt under
+      C:/temp/colab_runs/), local probes with requests against both API hosts, PyPI/pack wheel listings via the Kaggle API;
+      fixes in scripts/core/colab_relay.py, scripts/core/colab_factory.py (commits 7e4275e, 7c7a903, 4837783)
+    note: >-
+      Cost of learning these: 4 failed relay jobs, ~1.5 compute units, ~2 h of wall clock. None were science.
+      The read-only mount and the 3.13 Python are Colab platform facts that will not change per session; the
+      KGAT requirement is Kaggle-side and applies to any new tooling (kagglehub >= 1.0, kaggle CLI >= 2.x),
+      including future local scripts once the laptop's kaggle.json key stops being accepted anywhere. The
+      parity pilot has still NOT produced a result; attempt 5 is queued behind a worker restart.
+    date: '2026-08-26'
+    tags: [operational, compute, colab, kaggle-api, environment]

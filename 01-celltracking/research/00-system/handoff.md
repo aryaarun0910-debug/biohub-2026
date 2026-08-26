@@ -68,6 +68,10 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > 71-crop fold took 2.71 h on Kaggle T4x2 (`_evidence/exports/loeo_f0_strict/kernel.log`), so a full
 > fold needs a bigger session than 10 units. Known accounting gap: the worker's worst-case estimate
 > covers the notebook's `max_hours` only, not the ~79 GB competition download that precedes it.
+> **Four pilot attempts failed on Colab platform facts, none on science (`FACT-0320`):** read-only
+> `/kaggle/input` (fixed: input-root rewrite), Kaggle's API rejecting username+key (fixed: `KAGGLE_API_TOKEN`
+> = the laptop's `KGAT_` access token), and Python 3.13 vs the pack's cp312 wheels (fixed: uv-built 3.12
+> kernel). The competition tree downloads in <14 min on Colab. Worker at commit `4837783`; attempt 5 pending.
 >
 > **Next actions, re-ranked:** (1) read `EXP-0021` / `EXP-0022` when they land — check the −1 control
 > reproduces the champion before anything else; (2) repair the fold-1 LOEO configuration (`FACT-0261`);
