@@ -119,7 +119,8 @@ def test_worker_notebook_generates_valid_python_and_no_secrets():
         compile("".join(c["source"]), "<cell>", "exec")
     text = "".join("".join(c["source"]) for c in nb["cells"])
     assert "owner/relay" in text
-    assert "ghp_" not in text and "gho_" not in text
+    import re
+    assert not re.search(r"gh[po]_[A-Za-z0-9]{20,}", text) and not re.search(r"github_pat_[A-Za-z0-9_]{20,}", text)
     assert 'userdata.get("GH_TOKEN")' in text
     assert "job_allowed" in text
 

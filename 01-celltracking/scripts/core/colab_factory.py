@@ -309,9 +309,11 @@ USE_DRIVE = True
 from pathlib import Path
 
 from google.colab import userdata
-GH_TOKEN = userdata.get("GH_TOKEN")
-os.environ["KAGGLE_USERNAME"] = userdata.get("KAGGLE_USERNAME")
-os.environ["KAGGLE_KEY"] = userdata.get("KAGGLE_KEY")
+GH_TOKEN = userdata.get("GH_TOKEN").strip()
+os.environ["KAGGLE_USERNAME"] = userdata.get("KAGGLE_USERNAME").strip()
+os.environ["KAGGLE_KEY"] = userdata.get("KAGGLE_KEY").strip()
+assert len(os.environ["KAGGLE_KEY"]) == 32, f"KAGGLE_KEY should be 32 chars, got {len(os.environ['KAGGLE_KEY'])}"
+assert GH_TOKEN.startswith(("github_pat_", "ghp_")), "GH_TOKEN does not look like a GitHub token"
 Path.home().joinpath(".kaggle").mkdir(exist_ok=True)
 Path.home().joinpath(".kaggle", "kaggle.json").write_text(json.dumps(
     {"username": os.environ["KAGGLE_USERNAME"], "key": os.environ["KAGGLE_KEY"]}))
