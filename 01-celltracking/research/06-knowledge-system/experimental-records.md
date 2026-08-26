@@ -4774,3 +4774,123 @@ model weights or evaluation protocol. Two facts can measure the same quantity on
 different train/test hygiene and be indistinguishable. That is the hole this fell through.
 
 Recorded as `FACT-0160`..`FACT-0162`; EXP-0019 marked **void**; all 8 packets relabelled.
+
+## 2026-08-26 — R&D TEAM, SIX SEATS: the campaign's central belief was leak-manufactured
+
+Eight seats dispatched with distinct levers under the R6 lock. Six reported. **Every seat that
+touched the division term refuted it**, and between them they retracted the strategy I had
+recommended hours earlier.
+
+### THE MECHANISM — we do not mis-rank divisions, we never propose them
+
+| | value |
+|---|---|
+| our emitted forks, sibling separation | median **4.08 µm**, **max 8.97 µm** |
+| real divisions, sibling separation | median **10.57 µm**, p25 **9.19 µm**, support to 20.30 |
+| forks placed on detected GT division-parent nodes, fold 1 | **0 of 106** |
+| forks placed on detected GT division-parent nodes, fold 0 | **0 of 26** |
+
+**Our generator's maximum-ever sibling separation falls below the 25th percentile of real
+divisions.** It is not imprecise — it is aimed at a disjoint region, consistent with the deployed
+P9 radii 8/11/10. All 5,426 forks land somewhere other than a real division. That single fact
+explains every division result in this project's history: why threshold tweaks were washes, why
+divJ ≈ 0, why misses "fail 2–3 checks at once" (`FACT-0084`) — the candidates never enter the
+window.
+
+**Corollary that closes four levers at once:** any lever framed as *selecting, ranking, filtering
+or vetoing* among current forks is capped near zero by construction. A perfect oracle filter is
+worth **+0.00064 (f1) / +0.0061 (f0)**.
+
+### THE PROBLEM CLASS IS ALSO WRONG
+
+Daughter **antipodality** separates divisions at **AUC 0.785** (GT median cos −0.746 vs null
+−0.033, p = 3.6e−34). So the geometry *does* carry strong signal — deeper than `LEVER-0012`'s
+recorded "no division signal" — but it is a **pairwise interaction between the two daughter
+edges**, and the relink cost is a **sum over edges**. It cannot express an angle between daughter
+vectors.
+
+**Falsifiable prediction on record:** b-matching, min-cost flow with learned per-node capacity,
+and degree-constrained subgraph are *all* still linear in per-edge variables and will fail
+identically. The correct class scores **(mother, daughter-pair) triples**.
+
+### THE DIVISION PRIZE IS SMALL, AND THE FORK DECISION REVERSES
+
+Perfect forks are worth **+0.035**; perfect edges **+0.326**. Divisions are ~10% of headroom, and
+**47% of divisions are lost to detection before any linking question arises**.
+
+Two seats then disagreed, and the disagreement resolved cleanly. The theory seat derived
+`p_add = divJ/(1+divJ)` → the metric says *add, never prune*. True — **for the division channel
+alone**. The metric seat measured the edge channel by oracle de-fork and found a false division
+costs **3.4× more through edges than divisions**. Break-even acceptance rises 1.55% → **6.15%**
+(→10.4% if a false fork steals a correct link) against our **1.96%** precision. **The correct
+action reverses: we over-accept by ~3×.** `FACT-0181`'s algebra stands; only its conclusion is
+superseded, because it omitted the larger channel.
+
+### KILLED THIS CYCLE
+
+- `LEVER-0015` **count conservation** — count change predicts divisions at AUC 0.5592, and 0.4674
+  (*below chance*) for TP-vs-FP. 48.8% of divisions occur where count falls. Crop population is
+  not closed: 57.6% of GT track ends lie within 5 µm of the boundary.
+- `LEVER-0016` **time reversal** — killed at the *mechanism*. `linear_sum_assignment` is invariant
+  under transposing the cost matrix and a bijection's constraints are time-symmetric, so forward
+  and reverse are **one problem**. Control: zeroing the velocity term collapses disagreement to
+  **1 node in 530,792**.
+- `LEVER-0017` **ensembling** — fork agreement AUC 0.482, *below chance*; 96.4% of forks confirmed
+  by no other pipeline while nodes replicate at 79–82%. Closed as low-ceiling **and untestable**.
+- `LEVER-0014` **division removal** — my own reframe. A leak artifact; ceiling +0.0006/+0.0061.
+- `LEVER-0018` **under-production bonus** — see the correction below.
+
+### A LEAK MANUFACTURES SIGNIFICANCE, NOT JUST INFLATION
+
+On the leaked export, time-reversal enrichment measured **60×, p = 3.1e−08**. On honest weights it
+is **0.00×**. A p-value computed on a leaked substrate carries no information at all. The seat
+caught this only because it re-verified the substrate itself.
+
+### CORRECTIONS TO FACTS RECORDED EARLIER THE SAME DAY
+
+- `FACT-0173` (I claimed we over-produce, no bonus) → **wrong, computed on the leaky export**. The
+  bonus is real on both clean folds (+1.85% f0, +1.04% f1); the leak destroyed it by emitting
+  16.5% more nodes. Superseded by `FACT-0192`. Still not exploitable: required elasticity <0.08,
+  measured 2.00 everywhere.
+- The multiplier is genuinely **uncapped above 1** (crop 44b6_144b256d scores 1.06403) but capped
+  at +10%, and is applied **per crop then TP-weighted** — so the score-relevant ratio is not the
+  aggregate, which overstates the bonus by 48%.
+- **The ~10.6 µm interior mode is our own measurement, not a public claim** — and our own prior
+  work already tested the fix: re-ranking was worth ~+0.0004, inside noise, concluding *"we are
+  not ranking true divisions badly — we are refusing to propose them."*
+- `FACT-0141`'s competitor comparison was broken **independently of the leak**: the repo holds two
+  mutually incompatible mikelou1 decompositions, both marked VERIFIED, and the 0.898 datapoint
+  predates the score it was paired with.
+
+### THE UNRESOLVED RISK, AND THE APPARATUS GAP
+
+**Two scorers exist in the vendored package** — `summarise()` applies the node-count adjustment,
+`evaluate_datasets()` has no node term at all. We do not know which the leaderboard calls. If it
+is the latter, the entire node-ratio term is a phantom.
+
+And **no configuration has ever been scored both offline and on the leaderboard** (0 of 7). The
+offline apparatus has never been calibrated against the only ground truth that matters — which
+also flags my own correction: "our edge term is ~0.20 behind" compared an OOF domain-transfer
+number against a full-train LB number, the same incommensurability that produced `FACT-0141`.
+Honest statement: **we do not know how far behind our edge term is.**
+
+Registry gap named: only 3 of 79 facts carry an `experiment` id, so **invalidation cannot
+propagate**. The registry prevents staleness via supersedes chains and has no retraction
+mechanism, and `MEASURED`/`VERIFIED` grade derivation strength only — they cannot express
+"correctly computed from an invalid experiment." A `validity` axis orthogonal to `provenance` is
+the missing piece.
+
+### WHERE THIS LEAVES THE CAMPAIGN
+
+`LEVER-0002` (division stage 2) **demoted 1 → 5** and re-aimed: no selector helps until the
+generator proposes candidates in the right region, and the fold cannot even validate one — 43
+positives against 1.84M candidates.
+
+`LEVER-0011` (recall lost downstream) **promoted 2 → 1**. Changing *only* the edge weights moved
+fold-1 node recall **12.7 points**, so scored node recall is largely downstream of edge quality —
+far larger than the 1 point it was opened on. The terms couple one way: fix edges → recall rises →
+reachability rises → the division ceiling rises with it.
+
+Which is what `FACT-0030`..`0033` said before I wrongly flagged them SUSPECT.
+
+Recorded as `FACT-0150`..`FACT-0202`.

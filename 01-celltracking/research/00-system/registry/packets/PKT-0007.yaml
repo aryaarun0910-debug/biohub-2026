@@ -2,7 +2,7 @@ id: PKT-0007
 title: Forward/reverse assignment disagreement as a division detector
 lever: LEVER-0016
 owner: rnd-agent
-lock: running
+lock: done
 opened: '2026-08-26'
 
 claim: >-
@@ -39,4 +39,5 @@ outputs:
   facts_added: []
   record: one row in experimental-records.md once integrated
 
-result: null
+result: >-
+  KILLED at the mechanism - enrichment 0.00x both folds; fwd/rev is ONE problem. See experimental-records.md 2026-08-26 R&D TEAM entry.

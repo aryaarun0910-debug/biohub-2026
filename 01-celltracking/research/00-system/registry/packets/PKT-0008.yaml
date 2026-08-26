@@ -2,7 +2,7 @@ id: PKT-0008
 title: "Theory seat: reframings, misspecification, and the problem class"
 lever: null            # exploratory; holds no lever
 owner: rnd-agent
-lock: running
+lock: done
 opened: '2026-08-26'
 
 claim: >-
@@ -39,4 +39,5 @@ outputs:
   facts_added: []
   record: one row in experimental-records.md once integrated
 
-result: null
+result: >-
+  DELIVERED - found the mechanism (FACT-0180/0182) and flagged my own correction. See experimental-records.md 2026-08-26 R&D TEAM entry.

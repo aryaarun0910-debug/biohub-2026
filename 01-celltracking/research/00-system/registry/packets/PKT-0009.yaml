@@ -2,7 +2,7 @@ id: PKT-0009
 title: Ensembling as a division veto, and unexploited public technique
 lever: LEVER-0017
 owner: rnd-agent
-lock: running
+lock: done
 opened: '2026-08-26'
 
 claim: >-
@@ -39,4 +39,5 @@ outputs:
   facts_added: []
   record: one row in experimental-records.md once integrated
 
-result: null
+result: >-
+  CLOSED - agreement AUC 0.482 below chance; low-ceiling AND untestable at TP=1. See experimental-records.md 2026-08-26 R&D TEAM entry.

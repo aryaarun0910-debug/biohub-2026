@@ -2,7 +2,7 @@ id: PKT-0011
 title: "Metric forensics: the under-production bonus and the division interaction"
 lever: LEVER-0018
 owner: rnd-agent
-lock: running
+lock: done
 opened: '2026-08-26'
 
 claim: >-
@@ -39,4 +39,5 @@ outputs:
   facts_added: []
   record: one row in experimental-records.md once integrated
 
-result: null
+result: >-
+  DELIVERED - two scorers exist; fork decision reverses to CUT (FACT-0194). See experimental-records.md 2026-08-26 R&D TEAM entry.
