@@ -1,5 +1,5 @@
 {
-  "active": true,
+  "active": false,
   "approved_at": "2026-08-26T22:04:34Z",
   "budget_units": 9.85,
   "expires_at": "2026-08-27T04:04:34Z",
@@ -15,6 +15,6 @@
     "smoke",
     "notebook"
   ],
-  "stop": false,
+  "stop": true,
   "version": 1
 }
