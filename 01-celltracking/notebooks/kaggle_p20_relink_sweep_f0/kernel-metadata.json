@@ -1,7 +1,7 @@
 {
-  "id": "aryaarun07/biohub-p19-relink-division-sweep-loeo-f1",
-  "title": "Biohub P19 Relink Division Sweep LOEO F1",
-  "code_file": "biohub-p19-relink-sweep-f1.ipynb",
+  "id": "aryaarun07/biohub-p20-relink-sweep-loeo-f0",
+  "title": "Biohub P20 Relink Sweep LOEO F0",
+  "code_file": "biohub-p20-relink-sweep-loeo-f0.ipynb",
   "language": "python",
   "kernel_type": "notebook",
   "is_private": true,
@@ -16,8 +16,7 @@
     "pilkwang/biohub-temporal-unet3d-seed314159-v1",
     "pilkwang/biohub-tracking-support-pack-50ep-v1",
     "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
-    "thtennant/taaf-kaggle-source-share-fork",
-    "aryaarun07/biohub-oof-weights"
+    "thtennant/taaf-kaggle-source-share-fork"
   ],
   "kernel_sources": [],
   "competition_sources": [

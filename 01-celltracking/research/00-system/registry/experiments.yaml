@@ -255,3 +255,38 @@ experiments:
       falling 0.0743 -> 0.061-0.067 and div_tp dropping 26 -> 21. See FACT-0131, LEVER-0012.
       Evidence: _evidence/p19_relink_sweep_f1/. Cost: one GPU session, ZERO submission slots,
       six points instead of one - the sweep design paid for itself.
+
+  - id: EXP-0021
+    title: P19 v2 - HONEST relink penalty sweep, fold 1, OOF split_1 weights
+    spec: scripts/kaggle_specs/p19_relink_sweep_f1.json
+    kernel: aryaarun07/biohub-p19-relink-division-sweep-loeo-f1
+    kernel_version: 2
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-26'
+    facts: [FACT-0221, FACT-0160]
+    note: >-
+      Replaces the VOID leaky EXP-0019. Spec repaired with BIOHUB_LOEO_WEIGHTS_GLOB pointing at
+      edge_predictor_best_split_1.pth plus the oof-weights dataset; tests/test_loeo_weights_hygiene.py
+      now makes the omission a build failure.
+      PRE-REGISTERED FALSIFIER (FACT-0221): score should RISE monotonically with penalty until
+      accepted-fork precision reaches about 3.4%. If it does not rise, LEVER-0012 dies properly
+      on honest evidence.
+      Its penalty -1 control is also an honest fold-1 export of the CHAMPION config, which is
+      the substrate LEVER-0019 needs for its fold-1 rescore.
+
+  - id: EXP-0022
+    title: P20 - relink penalty sweep, fold 0, clean by construction
+    spec: scripts/kaggle_specs/p20_relink_sweep_f0.json
+    kernel: aryaarun07/biohub-p20-relink-sweep-loeo-f0
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-26'
+    note: >-
+      Fold 0 holds out 44b6, which the pack split_0 weights never saw, so it is LOEO-clean with
+      no override - and the hygiene test asserts a fold-0 spec must NOT load split_1.
+      Gives the contract-required SECOND EMBRYO DIRECTION for the sweep, and a second
+      offline-versus-LB calibration point on the champion config.

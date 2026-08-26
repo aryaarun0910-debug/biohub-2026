@@ -1790,3 +1790,30 @@ facts:
       full 3D sibling separation (0.965).
     date: '2026-08-26'
     tags: [division, measured, correction]
+
+  # ---- 2026-08-26: cycle 2 opens - item 1 resolved --------------------------------
+  - id: FACT-0250
+    statement: >-
+      The leaderboard uses summarise() with the node-count adjustment - all 199 GT geffs carry
+      estimated_number_of_nodes, which ONLY summarise() consumes
+    value: 199
+    unit: count
+    scope: {of: 199, metadata_range: [3783, 78644]}
+    provenance: VERIFIED
+    instrument: >-
+      src/biotrack/metric.py estimated_nodes() over data/train/*.geff, reading GEFF metadata
+      extra.estimated_number_of_nodes
+    supersedes: FACT-0190
+    note: >-
+      RESOLVES THE TWO-SCORER RISK. evaluate_datasets() (metrics.py:334-383) never reads
+      estimated_number_of_nodes and takes GRAPH OBJECTS rather than a submission, so it is a
+      library convenience function, not the competition entry point. The organisers ship this
+      metadata in EVERY ground-truth graph; it would be inert if the leaderboard used the
+      no-node-term path. src/biotrack/metric.py states the same in its header docstring.
+      .
+      Strong evidence rather than proof - we cannot read Kaggle's scoring code. But the node
+      term is real and the campaign should treat it as live. FACT-0192's under-production
+      bonus therefore stands as a real effect (though still not exploitable, elasticity 2.00
+      versus the ~0.08 required).
+    date: '2026-08-26'
+    tags: [metric, resolved]

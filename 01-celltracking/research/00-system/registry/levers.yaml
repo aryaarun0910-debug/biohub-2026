@@ -449,3 +449,20 @@ levers:
       precision bar for any future proposer 5x, so it composes with the division lane rather than
       competing with it.
     priority: 1
+
+  - id: LEVER-0020
+    claim: >-
+      A defensible offline-to-leaderboard mapping exists, or can be shown not to exist with
+      the data we hold
+    status: running
+    falsifier: >-
+      If no pooling of the two folds reconciles with the LB, offline cannot predict deployed
+      performance and every offline-vs-competitor comparison must carry that caveat.
+    supporting: [FACT-0184]
+    note: >-
+      0 of 7 LB-scored experiments has an offline score. Fold 0 reads 0.900 and fold 1 reads
+      0.703 against an LB of 0.925. This gap produced the retracted FACT-0141 and I then
+      repeated the same incommensurable comparison in my own correction of it. EXP-0021 and
+      EXP-0022 are running and their penalty -1 control arms are the champion config on both
+      folds, which is the first half of a real calibration.
+    priority: 2
