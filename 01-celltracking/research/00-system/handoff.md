@@ -108,18 +108,28 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 >
 > ### ✅ AND ONE MEASURED GAIN — the only thing in this banner that is good news
 >
-> **`dxy >= 4.5 um` (in-plane sibling separation floor) scores +0.0062 END-TO-END on the
-> LOEO-clean fold 0** — 0.9037 → 0.9099 — keeping all 3 true divisions while removing 95 of 103
-> false ones, at a −0.0003 edge cost (`FACT-0240`). It drops 88.8% of forks. Threshold fit on
-> 44b6 and applied to 6bba takes FP 491 → 5 with TP 1 → 1, so it transfers across embryos.
-> Single feature, **AUC 0.994**, no model, no GPU. Opened as `LEVER-0019`, priority 1.
+> **DEFLATED 2026-08-26 (`FACT-0300`) — it is real but ~5× smaller than first measured.**
+> Fold 1 end-to-end: **+0.0003**. Vintage-matched fold 0: **+0.0036** (the original +0.0062 came
+> from a *different notebook vintage*). **Pooled across 199 crops — the objective the contract
+> requires — +0.00085 at T=4.5, at most +0.00111 at 5.0.** Positive on both embryo directions,
+> free at inference, no GPU. **Never quote it as +0.0062 again.** `LEVER-0019`, now priority 3.
 >
-> **Why it works:** GT daughter separation is unimodal with an interior mode (11-12 um f1,
-> 8-10 um f0) and zero mass at zero, while only 14.4% / 30.8% of real divisions fall below the
-> deployed `SAFE_DIV_SISTER_MAX_UM = 7.2` gate. The proposer sorts ascending on
-> `parent_dist + 0.15*sister_dist`, but the frame caps do NOT bind — so it is the HARD CEILINGS
-> that exclude real divisions, not the ranking. That is why re-ranking measured ~+0.0004 and a
-> separation FLOOR measures +0.0062 (`FACT-0241`).
+> **Deploy at 4.5, not the pooled optimum 5.0**: fold 0's lowest TP fork sits at dxy 5.45, so
+> 4.5 leaves 0.95 µm of margin against 0.45 µm. Two priced risks: the margin is the same size as
+> an unmeasured **coordinate distortion of up to 0.74 µm** (exports are linefit-*smoothed*; the
+> gate would see pre-smoothing coords, `FACT-0301`), and it must be a **post-emission removal** —
+> a proposal-time reject frees the cap slot and creates new forks at higher dxy, and the
+> `safe_division` tag decides which edge drops, with the fold-1 **sign** depending on that choice
+> (`FACT-0303`). Also: the AUC 0.994 rests on **four** positives, and it **anti-composes with any
+> ceiling raise** — dxy falls to ~0.51 once long-separation candidates enter (`FACT-0292`).
+>
+> **Why it works, CORRECTED (`FACT-0290`, `FACT-0302`):** the binding gate is
+> `SAFE_DIV_MAX_UM = 4.66` — the **PARENT** distance — not the sister gate. The deployed sister
+> ceiling is **8.5**, not the 7.2 code default I first recorded. The linker takes the *nearer*
+> daughter, so the leftover orphan is systematically the *farther* one at median parent distance
+> **9.21 µm against a 4.66 gate** — which is why raising sister alone to 22 µm admits **zero**
+> true divisions on both folds. And the frame caps **do** bind (`safe_division_skipped_cap=137`),
+> contrary to what I recorded.
 >
 > **Before promoting:** rescore the clean FOLD-1 export with the same rule (killed mid-run at
 > session close) and report both embryo directions, per the contract.

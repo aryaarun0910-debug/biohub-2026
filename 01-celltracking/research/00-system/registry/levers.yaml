@@ -87,7 +87,29 @@ levers:
       perfect edges. 47% of divisions are lost to DETECTION before linking. The fold cannot
       even validate a selector - 43 positives against 1.84M candidates (FACT-0185).
       Demoted to 5. Do not build a selector before the edge/detector lane is exhausted.
-    priority: 5
+      .
+      CLOSED PROPERLY 2026-08-26 by the ceiling-raise seat. Three measurements, each sufficient:
+      (1) the BINDING gate is SAFE_DIV_MAX_UM = 4.66, not the sister gate (FACT-0290), and
+      raising sister to 22 um alone admits ZERO true divisions on both folds;
+      (2) raising the gates WITHOUT replacing the ranking admits zero true candidates inside the
+      cap (FACT-0291), which retro-explains EXP-0008 with no appeal to its confounds;
+      (3) a cross-embryo-validated triple scorer over the raised pool scores BELOW doing nothing
+      in BOTH directions (FACT-0293).
+      And the fold cannot validate a selector anyway - 51/19 positives, FP price differing 4.6x
+      between embryos, against a measured 10.5x cross-embryo precision swing on Zebrahub at 60x
+      the sample size (FACT-0294).
+      .
+      ALSO: the external-data plank named a CC0 corpus that DOES NOT EXIST on disk and was already
+      rejected at Gate B on measured grounds. The real substrate is Zebrahub, with a 1.48M-row
+      triple-feature table ALREADY BUILT (FACT-0296).
+      .
+      TWO UNEXPLOITED FINDINGS SURVIVE for whoever reopens this: the scorer accepts predecessor
+      and granddaughter evidence, so METRIC-LEGAL reach is 80/125 and 23/26 versus a naive 68/21;
+      and the daughter steal is FREE - it breaks a scored TP in ZERO of 48 cases, and allowing it
+      would raise reach 24->51 (f1) and 6->19 (f0) (FACT-0295). Neither rescues the lane alone.
+    closed_by: [FACT-0290, FACT-0291, FACT-0293, FACT-0294]
+    closed_date: '2026-08-26'
+    priority: 8
 
   - id: LEVER-0003
     claim: >-
@@ -463,7 +485,27 @@ levers:
       consider a submission. Note this is a REMOVAL rule and FACT-0212 says removal also drops the
       precision bar for any future proposer 5x, so it composes with the division lane rather than
       competing with it.
-    priority: 1
+      .
+      VALIDATED AND DEFLATED 2026-08-26 (FACT-0300). Fold-1 measured end-to-end at +0.0003 - it
+      holds its single TP while removing 456 of 491 scored FPs. But FACT-0240s fold-0 substrate
+      was a DIFFERENT NOTEBOOK VINTAGE; vintage-matched fold 0 gives +0.0036, and the POOLED
+      objective the contract requires is +0.00085 at T=4.5, at most +0.00111 at 5.0. The headline
+      +0.0062 was a ~5-7x overstatement. Still positive on BOTH embryo directions and free at
+      inference, so it stays open - but it must never again be quoted as +0.0062.
+      .
+      DEPLOY AT 4.5, NOT THE POOLED OPTIMUM 5.0: fold 0s lowest TP fork sits at dxy 5.45, so 4.5
+      leaves 0.95 um of margin against 0.45 um, and the extra +0.0003 does not pay for it.
+      .
+      TWO RISKS PRICED (FACT-0301, FACT-0303): the margin is the same size as an unmeasured
+      coordinate distortion of up to 0.74 um between the smoothed exports it was fitted on and
+      the pre-smoothing coordinates it would run against; and it must be a POST-EMISSION removal,
+      because a proposal-time reject frees the cap slot and creates new forks at higher dxy. The
+      safe_division tag decides which edge is dropped, and the SIGN of the fold-1 result depends
+      on that choice.
+      .
+      ANTI-COMPOSES WITH THE CEILING RAISE (FACT-0292) - dxy AUC falls 0.994 to ~0.51 once
+      long-separation candidates are admitted. It works BECAUSE the gates are tight.
+    priority: 3
 
   - id: LEVER-0020
     claim: >-

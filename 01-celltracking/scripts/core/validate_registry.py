@@ -210,7 +210,13 @@ def main() -> int:
     # so the old check passed, but the file did not exist and the result was not
     # reproducible - and it turned out to disagree with the real scorer by 26x. A named
     # instrument must therefore be resolvable, not merely non-empty.
-    repo_path = re.compile(r"\b(?:scripts|notebooks|src|tests)/[\w./-]+\.(?:py|ipynb)\b")
+    # (?<![\w/]) so that a `src/...` segment INSIDE a longer path -- e.g.
+    # vendor/kaggle-cell-tracking/src/tracking_cellmot/division_metrics.py -- is not
+    # mistaken for a repo-root path and reported missing. That false positive fired twice
+    # on 2026-08-26 against instruments that were perfectly real.
+    repo_path = re.compile(
+        r"(?<![\w/])(?:scripts|notebooks|src|tests|vendor|artifacts)/[\w./-]+\.(?:py|ipynb)\b"
+    )
     for f in facts:
         prov = f.get("provenance")
         instrument = f.get("instrument")

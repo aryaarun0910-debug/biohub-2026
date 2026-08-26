@@ -2249,8 +2249,8 @@ facts:
     provenance: VERIFIED
     instrument: >-
       .venv/Lib/site-packages/tracking_cellmot/metrics.py (536 lines, installed/patched) versus
-      artifacts/kaggle/lb897_calibration/... and artifacts/kaggle/lb897_trackastra_v2/tracking_repo/src/biohub_tracking/metrics.py
-      (450 lines, byte-identical to each other)
+      artifacts/kaggle/lb897_calibration/... and artifacts/kaggle/lb897_trackastra_v2/tracking_repo (450-line metrics module,
+      byte-identical to each other)
     note: >-
       All three carry ADJUSTMENT_ALPHA = 0.1, SCORE_DIVISION_WEIGHT = 0.1 and a BYTE-IDENTICAL
       per_sample_metrics. The installed copy's extra 86 lines are dedup and out-degree guards,
@@ -2265,3 +2265,310 @@ facts:
       rests on the only matcher there is.
     date: '2026-08-26'
     tags: [metric, verified, corroboration]
+
+  # ==================================================================================
+  # 2026-08-26 — THE DIVISION LANE, CLOSED PROPERLY. The PARENT gate is the binding one.
+  # ==================================================================================
+  - id: FACT-0290
+    statement: >-
+      The binding division gate is SAFE_DIV_MAX_UM = 4.66 (parent distance), NOT the sister
+      gate - and the deployed sister gate is 8.5, not 7.2
+    value: 4.66
+    unit: um
+    scope:
+      true_second_daughter_parent_dist: {f1_median: 9.21, f0_median: 8.69, max: 13.98}
+      both_daughters_inside_4p7: {f1: 0.104, f0: 0.269}
+      funnel_f1: {gt: 125, mother_detected: 106, both_daughters_detected: 74, one_linked: 69, second_orphan: 24, parent_le_4p7: 0}
+      funnel_f0: {gt: 26, mother_detected: 26, both_daughters_detected: 25, one_linked: 24, second_orphan: 6, parent_le_4p7: 0}
+    provenance: MEASURED
+    instrument: scripts/win_bet/div_proposal_funnel.py over both clean exports
+    supersedes: FACT-0241
+    note: >-
+      CORRECTS FACT-0241, WHICH I RECORDED. I attributed the exclusion to
+      SAFE_DIV_SISTER_MAX_UM = 7.2. That is the CODE DEFAULT in src/biotrack/wrapper.py:124; the
+      deployed artifact sets 8.5. And the sister gate never binds - the PARENT gate kills 100%
+      of real divisions before the sister test is reached.
+      .
+      MECHANISM: the linker takes the NEARER daughter as the existing child, so the orphan left
+      over is systematically the FARTHER one - median parent distance 9.21 um against a 4.66
+      gate. Raising sister all the way to 22 um with the parent gate untouched admits ZERO true
+      divisions on BOTH folds.
+    date: '2026-08-26'
+    tags: [division, mechanism, correction, headline]
+
+  - id: FACT-0291
+    statement: >-
+      Raising the gates WITHOUT replacing the ranking admits zero true divisions inside the cap
+      - which retro-explains EXP-0008 with no appeal to its three confounds
+    value: 0
+    unit: count
+    scope:
+      cap: {f1: 6638, f0: 6854, formula: "0.00375 * n_edges"}
+      at_gates_12_12: {f1_true_candidates: 24, f0: 6, surviving_inside_cap: 0}
+      candidates_admitted: {f1: 139041, f0: 139994}
+    provenance: MEASURED
+    instrument: scripts/win_bet/div_proposal_funnel.py plus the deployed ranking at cell06:1049
+    note: >-
+      The proposer ranks by parent_dist + 0.15*sister_dist ASCENDING under a global cap. Real
+      divisions are the FAR candidates. Open the gate and ~160,000 near candidates flood in; the
+      cap fills with the closest 6,638 and not one true candidate survives.
+      .
+      EXP-0008 raised parent 4.66->12 and sister 8.5->15 and scored -0.003. That is now
+      explained by the mechanism alone. A ceiling raise is a THREE-PART change to one function -
+      gates AND ranking AND cap - or it is negative.
+    date: '2026-08-26'
+    tags: [division, killed, mechanism]
+
+  - id: FACT-0292
+    statement: >-
+      The dxy purge and the ceiling raise ANTI-COMPOSE - dxy AUC collapses from 0.994 to
+      0.506/0.544 once long-separation candidates are admitted
+    value: 0.506
+    unit: auc
+    scope:
+      tight_gate_auc: 0.994
+      raised_pool_auc: {f1: 0.506, f0: 0.544}
+      raised_pool_other_features: {cos_daughters: [0.720, 0.681], pmid: [0.719, 0.723], parent_um: [0.663, 0.664]}
+    provenance: MEASURED
+    instrument: agent analysis over the raised candidate pool (parent <= 12, sister <= 16) on both clean exports
+    note: >-
+      CRITICAL INTERACTION. FACT-0242 measured dxy AUC 0.994 on the CURRENT TIGHT-GATE fork
+      population, where every false positive is short-separation BY CONSTRUCTION - and on 4
+      pooled true positives. Widen the gates and long-separation FPs enter; dxy falls to chance.
+      .
+      So FACT-0240's measured +0.0062 purge WORKS BECAUSE THE GATES ARE TIGHT. The two moves
+      cannot both be taken. This is the kind of interaction that would have been discovered only
+      after deploying both.
+    date: '2026-08-26'
+    tags: [division, interaction, headline]
+
+  - id: FACT-0293
+    statement: >-
+      A cross-embryo-validated triple scorer over the raised pool performs WORSE than doing
+      nothing, in both directions
+    value: null
+    unit: divJ
+    scope:
+      train_f0_test_f1: {first_tp_rank: 6643, of: 306445, charged_fp_by_then: 1988, divJ: 0.0005, current: 0.00162}
+      train_f1_test_f0: {first_tp_rank: 272, charged_fp: 29, divJ: 0.0182, current: 0.0233, dxy_purged: 0.0882}
+    provenance: MEASURED
+    instrument: 8-feature logistic fitted on one embryo and tested on the other, honest protocol
+    note: >-
+      The learned weights DISAGREE between directions - sister_dxy +0.59 versus +0.18,
+      cos_daughters +0.05 versus -0.35. Best d_score anywhere on the f1 curve is +0.00009.
+      .
+      Even a PERFECT selector recovering all 24 orphan-reachable divisions is worth +0.0039 on
+      f1 while the FP baseline stands, and +0.0185 after the purge - but FACT-0292 shows the
+      purge does not survive the raise. FP tolerance is brutal: on f0, +2 TP bought with +50
+      charged FP is -0.0029, net negative.
+    date: '2026-08-26'
+    tags: [division, killed, triple-scorer]
+
+  - id: FACT-0294
+    statement: >-
+      This fold CANNOT validate a division selector - and the false-positive price differs 4.6x
+      between the two embryos
+    value: 4.6
+    unit: ratio
+    scope:
+      annotated_node_fraction: {f1_6bba: 0.0502, f0_44b6: 0.0108}
+      forks_charged: {f1: "510 of 6303 (8.1%)", f0: "108 of 5279 (2.1%)"}
+      positives: {f1: 51, f0: 19}
+      zebrahub_cross_embryo_precision_swing: 10.5
+    provenance: MEASURED
+    instrument: >-
+      _pred_division_fork_sets charging rule in vendor division_metrics.py, plus a held-out
+      per-embryo scorer on Zebrahub (787-956 positives per embryo)
+    note: >-
+      Division FP is charged ONLY on annotated cells, and 6bba annotates 5.02% of predicted
+      nodes against 44b6's 1.08%. So a threshold tuned on one embryo is MIS-PRICED BY ~5x on the
+      other, and the test embryo's annotation density is unknown.
+      .
+      DIRECT EVIDENCE OF NON-TRANSFER AT 60x OUR SAMPLE SIZE: on Zebrahub, a fitted scorer held
+      out per embryo gives precision-at-recall-0.20 of 0.047 / 0.220 / 0.494 across three
+      embryos of the SAME dataset - a 10.5x swing, each with 787-956 positives. We have 51 and
+      19. Leave-one-crop-out on f1 has ONE positive per held-out fold.
+    date: '2026-08-26'
+    tags: [division, statistics, constraint, headline]
+
+  - id: FACT-0295
+    statement: >-
+      Two free findings the campaign was not using - the scorer's division test is far more
+      permissive than the proposer assumes, and the daughter "steal" is free
+    value: null
+    unit: opportunity
+    scope:
+      metric_legal_reach: {f1: "80/125", f0: "23/26"}
+      naive_reach: {f1: "68/125", f0: "21/26"}
+      steal_breaks_a_scored_TP: {f1: "0 of 33", f0: "0 of 15"}
+      reach_if_steal_allowed: {f1: "24 -> 51", f0: "6 -> 19"}
+    provenance: MEASURED
+    instrument: >-
+      vendor/kaggle-cell-tracking/src/tracking_cellmot/division_metrics.py
+      _is_strongly_connected_division, plus edge-ownership analysis on both exports and the atlas
+    note: >-
+      (1) The scorer accepts a fork at the node matched to the GT divider OR ITS PREDECESSOR
+      (+/-1 frame), and daughter evidence may come from the GT daughter OR A GRANDDAUGHTER at
+      t+2. Metric-legal reach is 80/125 and 23/26 versus a naive 68/125 and 21/26 - +12 and +2
+      divisions with NO detector change.
+      (2) 45 of 69 (f1) reachable divisions die because the second daughter already has a
+      parent. The edge a steal would break is a scored TP in ZERO of 33 (f1) / 15 (f0) cases -
+      it is free in 32/33 and 15/15. It CANNOT be a GT edge, since that daughter's only GT
+      parent is the mother. This is a TARGETED steal of a provably-wrong edge, materially
+      different from the refuted priced-second-row that reallocated blindly.
+      .
+      Both remain unexploited, and neither rescues the lane on its own given FACT-0293.
+    date: '2026-08-26'
+    tags: [division, unexploited, mechanism]
+
+  - id: FACT-0296
+    statement: >-
+      The CC0 corpus of 165,267 divisions DOES NOT EXIST on disk and would teach the wrong
+      prior - the external substrate that does exist is Zebrahub, with a triple-scorer training
+      table already built
+    value: null
+    unit: inventory
+    scope:
+      cc0_corpus: {bytes_on_disk: 0, sister_median: 7.24, ours: 10.57, real_vs_synth_cv_auc: 0.9888}
+      zebrahub: {size_gb: 15, gt_association_edges: 1258182, divisions_both_daughters: 31562}
+      prebuilt_table: {rows: 1484482, cols: 51, positives: 2587, path: "_evidence/agent_runs/agent4/external_events/*.parquet"}
+    provenance: VERIFIED
+    instrument: full-disk search including gitignored paths; independent recomputation of the Zebrahub edge and division counts
+    note: >-
+      LEVER-0002's external-data plank names a corpus that is PROSE ONLY - the literal 165,267
+      appears in exactly two Markdown files - and the repo had ALREADY rejected it at Gate B on
+      measured grounds (its sister separation median is 7.24 um against our 10.57, real-vs-synth
+      CV AUC 0.9888).
+      .
+      What DOES exist: Zebrahub at 15 GB, 1,258,182 GT association edges and 31,562 divisions
+      with both daughters registered (both independently recomputed), plus a 1.48M-row x 51-column
+      feature table with exactly the triple features this architecture needs and 2,587 positives.
+      Its Zebrahub feature AUCs - parent_midpoint 0.967, daughter_angle 0.838 - CONFIRM
+      FACT-0182's antipodality finding at 60x the sample size, and confirm the strongest feature
+      is a TRIPLE quantity no per-edge sum can express.
+      Usable only with PER-EMBRYO SCALE NORMALISATION: the shape matches (pd_ratio 0.707 vs
+      0.620/0.628) but absolute scale differs ~1.6x. Honest limit stated by the repo itself -
+      Zebrahub is Ultrack automated output, not curated GT, one embryo, 4 temporal blocks.
+    date: '2026-08-26'
+    tags: [division, external-data, correction]
+
+  # ==================================================================================
+  # 2026-08-26 — THE dxy FLOOR, VALIDATED AND CUT DOWN. Pooled +0.00085, not +0.0062.
+  # ==================================================================================
+  - id: FACT-0300
+    statement: >-
+      The dxy floor is worth +0.0003 on fold 1 and +0.00085 POOLED across 199 crops - the
+      headline +0.0062 was fold-0-only AND substrate-specific
+    value: 0.00085
+    unit: score_delta
+    scope:
+      f1: {delta: 0.0003, div_fp: "491 -> 35", div_tp: "1 -> 1", adj_edge: -0.0003}
+      f0_detpeak_vintage: 0.0063
+      f0_vintage_matched: 0.0036
+      pooled_199_crops_at_4p5: 0.00085
+      pooled_best_at_5p0: 0.00111
+    provenance: MEASURED
+    instrument: >-
+      official tracking_cellmot._evaluate / division_metrics.score_divisions rebuilt from the
+      vendored path, verified crop-for-crop against scripts/core/score_loeo_submission.py
+    supersedes: FACT-0240
+    note: >-
+      TWO DEFLATIONS. (1) FACT-0240's fold-0 substrate (_evidence/p4_detpeak_f0_v2/, an Aug-25
+      build) is a DIFFERENT NOTEBOOK VINTAGE from the fold-1 export (Aug-01). Vintage-matched,
+      fold 0 gives +0.0036, not +0.0063. (2) The contract requires the POOLED objective, which
+      is +0.00085 at T=4.5 and at most +0.00111 at T=5.0 - a ~5-7x overstatement in the headline.
+      .
+      It still works and is still positive on BOTH embryo directions: fold 1 holds its single TP
+      while removing 456 of 491 scored false divisions. But it should never again be quoted as
+      +0.0062.
+      .
+      Threshold: 4.5 is SAFER than the pooled optimum 5.0. Fold 0's lowest TP fork sits at
+      dxy 5.45 and fold 1's single TP at 6.20, so 4.5 leaves 0.95 um of margin to the cliff
+      against 0.45 um at 5.0, and the extra +0.0003 does not pay for halving it.
+    date: '2026-08-26'
+    tags: [division, measured, deflation, correction]
+
+  - id: FACT-0301
+    statement: >-
+      The dxy floor's safety margin (0.95 um) is the same size as an unmeasured coordinate
+      distortion (up to 0.74 um) between where it was fitted and where it would run
+    value: 0.74
+    unit: um
+    provenance: MEASURED
+    instrument: >-
+      exported coordinates are int(round()) of LINEFIT-SMOOTHED values
+      (biohub-p3-harmonic.ipynb:2116-2118); exported sib3d reaches 9.24 (f0) / 8.97 (f1)
+      against a deployed 8.5 um cap
+    note: >-
+      The gate would see PRE-smoothing coordinates while the threshold was fitted on POST-
+      smoothing exports, which overstate separation by up to +0.74 um. A floor fitted offline at
+      4.5 could behave in-notebook like anything in roughly [3.8, 5.2]. Margin and measurement
+      error are the same magnitude - this is the single biggest risk in deploying it.
+      .
+      FUTURE COST, also unpriced: at T=4.5 the floor rejects 3 of 26 (f0) and 10 of 125 (f1)
+      REAL divisions, permanently foreclosing 8-12% of division headroom for any future
+      proposer. That cuts against FACT-0212's sequencing argument.
+    date: '2026-08-26'
+    tags: [division, risk, deployment]
+
+  - id: FACT-0302
+    statement: >-
+      CORRECTIONS to FACT-0241 and FACT-0242 - the deployed sister ceiling is 8.5 not 7.2, the
+      frame caps DO bind, and the AUC 0.994 rests on FOUR positives
+    value: null
+    unit: correction
+    scope:
+      deployed_sister_ceiling: 8.5
+      code_default: 7.2
+      real_divisions_inside_ceiling: {f0: 0.423, f1: 0.264}
+      safe_division_skipped_cap: 137
+      auc_0p994_n_pos: 4
+    provenance: VERIFIED
+    instrument: >-
+      deployed p3_harmonic and p0b_clean913_revtime notebooks both set
+      BIOHUB_SAFE_DIV_SISTER_MAX_UM='8.5'; run_stats.csv reports safe_division_skipped_cap=137
+    supersedes: FACT-0241
+    note: >-
+      THREE ERRORS IN MY OWN RECORD. (1) I used the 7.2 CODE DEFAULT from
+      src/biotrack/wrapper.py:124 as if it were deployed; the artifact sets 8.5. Correct figures:
+      42.3% (f0) / 26.4% (f1) of real divisions fall INSIDE the ceiling, so it excludes 57.7% /
+      73.6% - not the 85.6% / 69.2% I recorded.
+      (2) "The frame caps do NOT bind" is contradicted by run_stats.csv:
+      safe_division_skipped_cap = 137 on fold 0 (6,500 candidates -> 5,455 added). This matters
+      because it changes where the filter can be deployed.
+      (3) "Zero mass at zero" holds for 3D sibling separation but NOT for dxy, the feature
+      actually used - fold-1 minimum is 1.46 um.
+      (4) FACT-0242's AUC 0.994 rests on FOUR true positives (f0 forks at dxy 5.45/5.69/6.92 and
+      f1's single one at 6.20). It is a statement about four numbers.
+      .
+      Also: "88.8% of forks dropped" is decorative - only 106 of 5,455 (f0) and 492 of 5,426 (f1)
+      forks are SCORED at all. The rule's real work is removing 95/103 and 456/491 scored FPs.
+    date: '2026-08-26'
+    tags: [division, correction, methodology]
+
+  - id: FACT-0303
+    statement: >-
+      The dxy floor must be a POST-EMISSION removal, not a proposal-time reject - and the
+      "safe_division" tag is the exact discriminator on which the fold-1 SIGN depends
+    value: null
+    unit: deployment
+    scope:
+      site: "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb cell 6, after line 2008, before 2010 and before PRUNE_ISOLATED at 2044"
+      env: "BIOHUB_DIV_SISTER_MIN_XY_UM, default 0.0"
+      variant_spread_f1: [0.00023, 0.00004, -0.00020]
+    provenance: VERIFIED
+    instrument: notebook line anchors verified to occur exactly once each
+    note: >-
+      A proposal-time reject FREES the cap slot and the source's out-degree budget, so the
+      next-best candidate is admitted and NEW forks appear at higher dxy. That is a different
+      operation from the one measured, and the evidence licenses only post-emission removal.
+      .
+      The "safe_division": 1 tag at notebook line 1613 identifies exactly which edge to drop,
+      reverting the source to the linker's own output. Without it the offline emulation had to
+      bound three variants, and on fold 1 those span +0.00023 / +0.00004 / -0.00020 - the SIGN
+      of the fold-1 result depends on the choice.
+      .
+      Verification must be a RUN-LEVEL smoke with the flag off, comparing submission.csv sha256
+      against the P3 baseline - not a notebook sha, which necessarily changes.
+    date: '2026-08-26'
+    tags: [division, deployment, actionable]
