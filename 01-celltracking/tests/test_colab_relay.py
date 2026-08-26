@@ -184,3 +184,13 @@ def test_worker_prefers_kaggle_access_token():
     assert 'os.environ["KAGGLE_API_TOKEN"] = _api_token' in text
     assert "KGAT_" in text
     assert 'userdata.get("KAGGLE_USERNAME").strip()' not in text   # legacy pair is optional now
+
+
+def test_notebook_jobs_default_to_python_312_kernel():
+    job = notebook_job()
+    assert job["python"] == "3.12"
+    nb = factory.build_worker_notebook("owner/relay")
+    text = "".join("".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "code")
+    assert "def ensure_kernel(version)" in text and '"--kernel", kernel' in text
+    assert '"uv", "venv"' in text and "ipykernel" in text
+    assert '"datasets", "version"' in text   # publish falls back to a new version when the slug exists

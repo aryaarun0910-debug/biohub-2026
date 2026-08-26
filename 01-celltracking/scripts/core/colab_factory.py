@@ -450,6 +450,32 @@ relay_push("worker up")
     if plan:
         print("  layout:", ", ".join(i["path"] for i in plan))
 
+_KERNELS = {}
+
+def ensure_kernel(version):
+    \"\"\"A Jupyter kernel on the requested CPython, built with uv, cached per runtime.
+    Base stack only (numpy/scipy/pandas/torch/ipykernel); the notebook's own installer adds the rest
+    from the support pack's wheels exactly as it does on Kaggle.\"\"\"
+    if not version:
+        return None
+    if version in _KERNELS:
+        return _KERNELS[version]
+    tag = "biohub" + version.replace(".", "")
+    venv = Path("/content", "venv" + version.replace(".", ""))
+    py = venv / "bin" / "python"
+    t0 = time.time()
+    if not py.exists():
+        sh([sys.executable, "-m", "pip", "install", "-q", "uv"])
+        sh([sys.executable, "-m", "uv", "venv", str(venv), "--python", version, "--seed"])
+        sh([str(py), "-m", "pip", "install", "-q", "ipykernel", "ipython", "numpy", "scipy", "pandas"])
+        sh([str(py), "-m", "pip", "install", "-q", "torch", "--index-url", "https://download.pytorch.org/whl/cu126"])
+        sh([str(py), "-m", "ipykernel", "install", "--user", "--name", tag])
+        ver = sh([str(py), "-c", "import sys,torch;print(sys.version.split()[0], 'torch', torch.__version__, 'cuda', torch.cuda.is_available())"]).stdout.strip()
+        print(f"  kernel {tag} ready in {time.time() - t0:.0f}s: {ver}")
+    _KERNELS[version] = tag
+    return tag
+
+
 def heartbeat_loop(run_dir, stop_evt, note_fn):
     while not stop_evt.wait(relay.HEARTBEAT_S):
         try:
@@ -484,10 +510,13 @@ def run_job(jdir, job):
             log_path.write_text(sh(["nvidia-smi"], check=False).stdout)
         else:
             ensure_inputs(job)
+            kernel = ensure_kernel(job.get("python", ""))
             env = dict(os.environ, **{k: str(v) for k, v in (job.get("env") or {}).items()})
+            cmd = ["papermill", str(jdir / job["notebook"]), str(working / "executed.ipynb"), "--log-output", "--cwd", str(working)]
+            if kernel:
+                cmd += ["--kernel", kernel]
             with open(log_path, "w") as fh:
-                proc = subprocess.Popen(["papermill", str(jdir / job["notebook"]), str(working / "executed.ipynb"),
-                                         "--log-output", "--cwd", str(working)], stdout=fh, stderr=subprocess.STDOUT, env=env)
+                proc = subprocess.Popen(cmd, stdout=fh, stderr=subprocess.STDOUT, env=env)
                 try:
                     rc = proc.wait(timeout=float(job["max_hours"]) * 3600.0)
                 except subprocess.TimeoutExpired:
@@ -519,8 +548,10 @@ def run_job(jdir, job):
         slug = job.get("kaggle_dataset_slug") or f"colab-{job['id']}"
         meta = {"title": slug, "id": f"{os.environ['KAGGLE_USERNAME']}/{slug}", "licenses": [{"name": "CC0-1.0"}]}
         (working / "dataset-metadata.json").write_text(json.dumps(meta))
-        cp = sh(["kaggle", "datasets", "create", "-p", str(working), "-r", "zip", "--dir-mode", "zip"], check=False)
-        kaggle_ds = meta["id"] if cp.returncode == 0 else f"FAILED: {cp.stderr[-300:]}"
+        cp = sh(["kaggle", "datasets", "create", "-p", str(working), "--dir-mode", "zip"], check=False)
+        if cp.returncode != 0 or "already" in (cp.stdout + cp.stderr).lower() or "exists" in (cp.stdout + cp.stderr).lower():
+            cp = sh(["kaggle", "datasets", "version", "-p", str(working), "--dir-mode", "zip", "-m", f"{job['id']} {outcome}"], check=False)
+        kaggle_ds = meta["id"] if cp.returncode == 0 else f"FAILED: {(cp.stdout + cp.stderr)[-300:]}"
     units = relay.estimate_units(gpu_name, elapsed, session.get("rates"))
     status.update({"state": outcome, "reason": reason, "finished": relay.utcnow(), "elapsed_s": elapsed,
                    "units": units, "drive_dir": drive_dir, "kaggle_dataset": kaggle_ds,
