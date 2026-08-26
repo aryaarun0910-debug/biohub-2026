@@ -45,10 +45,23 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 >    annotation — one more reason fold 1 is a crippled configuration (`FACT-0261`), not an embryo.
 >
 > **Compute changed (host, 2026-08-26): Colab Pro is available again** (`FACT-0318`, ~200 compute units).
-> This reverses the 2026-08-24 "Kaggle only" framing below. Nothing runs there automatically (rule 8), and the
-> built notebooks assume `/kaggle/input`, so a Colab variant of the factory output is prerequisite work. The
+> This reverses the 2026-08-24 "Kaggle only" framing below. Nothing runs there automatically (rule 8). The
 > first use that pays: the zero-submission GPU work queued behind Kaggle's two slots (`FACT-0061`) —
 > calibration stages 1–2 and the fold-1 LOEO configuration repair.
+>
+> **The Colab lane is BUILT (same evening): `scripts/core/colab_factory.py` + `colab_relay.py`, worker at
+> `notebooks/colab_worker/biohub-colab-worker.ipynb`, private relay repo `aryaarun0910-debug/biohub-colab-relay`
+> (clone at `C:/temp/colab_relay`).** Host decisions recorded 2026-08-26: Drive job-queue worker (not a remote
+> shell — Colab's terms disallow those), GitHub relay for status/metrics, **per-session unit budget** as the
+> rule-8 mechanism. Flow: host adds Colab Secrets (`GH_TOKEN`, `KAGGLE_USERNAME`, `KAGGLE_KEY`) once; host
+> states a budget → `colab_factory.py session --units N --hours H --gpu L4 --scope smoke,notebook
+> --host-approved "<their words>"`; `smoke` first (~0.1 units), then `queue --spec <kaggle spec>`; host opens
+> the worker on the named GPU and presses Run all; `status` / `fetch` from here. The worker refuses any job
+> outside the recorded budget and exits after 30 idle minutes. Built notebooks run unmodified because the
+> worker recreates `/kaggle/input/<slug>` via `kagglehub`; the competition tree (~79 GB) is re-downloaded per
+> runtime (Drive quota unknown, so it is not cached there). Unit rates are UNVERIFIED defaults rounded up
+> (`FACT-0318`) — the host should pass `--rate L4=<panel value>` once read off the resources panel.
+> **The smoke job has not run yet; it is the first thing to do when a budget is stated.**
 >
 > **Next actions, re-ranked:** (1) read `EXP-0021` / `EXP-0022` when they land — check the −1 control
 > reproduces the champion before anything else; (2) repair the fold-1 LOEO configuration (`FACT-0261`);
