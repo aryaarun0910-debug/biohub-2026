@@ -319,6 +319,23 @@ os.chmod(Path.home() / ".kaggle" / "kaggle.json", 0o600)
 
 subprocess.run([sys.executable, "-m", "pip", "install", "-q", "papermill", "kagglehub", "kaggle"], check=True)
 
+# FAIL FAST on Kaggle credentials: a bad secret must stop the worker here, not 30 minutes into a
+# download. Public datasets download anonymously, so only a COMPETITION call proves the account.
+_comp = "biohub-cell-tracking-during-development"
+_chk = subprocess.run(["kaggle", "competitions", "files", "-c", _comp, "--csv", "--page-size", "1"],
+                      capture_output=True, text=True)
+if _chk.returncode != 0 or "401" in _chk.stdout + _chk.stderr or "403" in _chk.stdout + _chk.stderr:
+    raise SystemExit("KAGGLE AUTH FAILED for competition data. KAGGLE_USERNAME must be the login name in "
+                     "kaggle.json (not the profile slug) and KAGGLE_KEY its 32-char key; the account must have "
+                     "accepted the competition rules.\n" + (_chk.stdout + _chk.stderr)[-600:])
+print("Kaggle auth OK as", os.environ["KAGGLE_USERNAME"], "| competition listing:",
+      (_chk.stdout.strip().splitlines() or ["?"])[-1][:80])
+try:
+    import kagglehub
+    print("kagglehub", kagglehub.__version__, "whoami:", getattr(kagglehub, "whoami", lambda: "n/a")())
+except Exception as _e:
+    print("kagglehub whoami unavailable:", _e)
+
 if USE_DRIVE:
     try:
         from google.colab import drive
@@ -382,7 +399,20 @@ relay_push("worker up")
         if item["kind"] == "dataset":
             src = Path(kagglehub.dataset_download(item["ref"]))
         else:
-            src = Path(kagglehub.competition_download(item["ref"]))
+            try:
+                src = Path(kagglehub.competition_download(item["ref"]))
+            except Exception as e:
+                print(f"  kagglehub competition_download failed ({type(e).__name__}); falling back to the Kaggle CLI")
+                dl = Path("/content/dl"); dl.mkdir(parents=True, exist_ok=True)
+                src = Path("/content/comp") / item["ref"]
+                if not src.exists():
+                    sh(["kaggle", "competitions", "download", "-c", item["ref"], "-p", str(dl)])
+                    zips = sorted(dl.glob("*.zip"))
+                    if not zips:
+                        raise RuntimeError("Kaggle CLI download produced no zip")
+                    src.mkdir(parents=True, exist_ok=True)
+                    sh(["unzip", "-q", "-o", str(zips[-1]), "-d", str(src)])
+                    zips[-1].unlink()
         for link in (target, alias):
             try:
                 link.parent.mkdir(parents=True, exist_ok=True)
