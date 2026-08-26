@@ -194,3 +194,11 @@ def test_notebook_jobs_default_to_python_312_kernel():
     assert "def ensure_kernel(version)" in text and '"--kernel", kernel' in text
     assert '"uv", "venv"' in text and "ipykernel" in text
     assert '"datasets", "version"' in text   # publish falls back to a new version when the slug exists
+
+
+def test_worker_launches_kernel_with_clean_env_and_self_test():
+    nb = factory.build_worker_notebook("owner/relay")
+    text = "".join("".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "code")
+    assert "def clean_env(" in text and '"PYTHONPATH", "PYTHONHOME"' in text
+    assert "kernel_probe.ipynb" in text and "self-test" in text
+    assert "worker_notes.txt" in text

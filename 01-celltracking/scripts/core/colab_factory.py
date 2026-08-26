@@ -419,7 +419,7 @@ relay_push("worker up")
     for item in plan:
         target = Path(item["path"]); alias = Path(item["alias"])
         if target.exists():
-            print("  input present:", target); continue
+            note(f"  input present: {target}"); continue
         t0 = time.time()
         if item["kind"] == "dataset":
             src = Path(kagglehub.dataset_download(item["ref"]))
@@ -446,11 +446,26 @@ relay_push("worker up")
             except OSError as e:
                 raise RuntimeError(f"cannot link {link} -> {src}: {e}. Is input_root writable? "
                                    f"(Colab's /kaggle/input is read-only; queue with --input-root /content/kaggle/input)")
-        print(f"  input ready: {target} <- {src} ({time.time() - t0:.0f}s)")
+        note(f"  input ready: {target} <- {src} ({time.time() - t0:.0f}s)")
     if plan:
-        print("  layout:", ", ".join(i["path"] for i in plan))
+        note("  layout: " + ", ".join(i["path"] for i in plan))
 
 _KERNELS = {}
+_NOTES = None
+
+def note(msg):
+    print(msg, flush=True)
+    if _NOTES is not None:
+        with open(_NOTES, "a") as fh:
+            fh.write(f"{relay.utcnow()} {msg}\\n")
+
+def clean_env(extra=None):
+    \"\"\"Environment for a non-system kernel. Colab exports PYTHONPATH=/env/python (its own 3.13
+    packages); a 3.12 kernel that inherits it dies at launch.\"\"\"
+    env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH", "PYTHONHOME", "PYTHONSTARTUP")}
+    env["PYTHONNOUSERSITE"] = "1"
+    env.update({k: str(v) for k, v in (extra or {}).items()})
+    return env
 
 def ensure_kernel(version):
     \"\"\"A Jupyter kernel on the requested CPython, built with uv, cached per runtime.
@@ -469,9 +484,22 @@ def ensure_kernel(version):
         sh([sys.executable, "-m", "uv", "venv", str(venv), "--python", version, "--seed"])
         sh([str(py), "-m", "pip", "install", "-q", "ipykernel", "ipython", "numpy", "scipy", "pandas"])
         sh([str(py), "-m", "pip", "install", "-q", "torch", "--index-url", "https://download.pytorch.org/whl/cu126"])
-        sh([str(py), "-m", "ipykernel", "install", "--user", "--name", tag])
-        ver = sh([str(py), "-c", "import sys,torch;print(sys.version.split()[0], 'torch', torch.__version__, 'cuda', torch.cuda.is_available())"]).stdout.strip()
-        print(f"  kernel {tag} ready in {time.time() - t0:.0f}s: {ver}")
+        sh([str(py), "-m", "ipykernel", "install", "--user", "--name", tag, "--env", "PYTHONNOUSERSITE", "1",
+            "--env", "PYTHONPATH", ""])
+        ver = sh([str(py), "-c", "import sys,torch,ipykernel,zmq;print(sys.version.split()[0], 'torch', torch.__version__, 'cuda', torch.cuda.is_available())"],
+                 env=clean_env()).stdout.strip()
+        note(f"  kernel {tag} built in {time.time() - t0:.0f}s: {ver}")
+        # self-test: a one-cell notebook through papermill on this kernel, same env as real jobs
+        probe = Path("/content/kernel_probe.ipynb")
+        probe.write_text(json.dumps({"cells": [{"cell_type": "code", "metadata": {}, "outputs": [], "execution_count": None,
+                                                 "source": ["import sys, torch; print('kernel ok', sys.version.split()[0], torch.cuda.is_available())"]}],
+                                     "metadata": {"kernelspec": {"name": tag, "display_name": tag, "language": "python"}},
+                                     "nbformat": 4, "nbformat_minor": 5}))
+        cp = sh(["papermill", str(probe), "/content/kernel_probe_out.ipynb", "--kernel", tag, "--log-output"], check=False, env=clean_env())
+        if cp.returncode != 0:
+            note("  kernel self-test FAILED:\\n" + (cp.stdout + cp.stderr)[-1500:])
+            raise RuntimeError(f"kernel {tag} failed its papermill self-test (see worker_notes.txt)")
+        note("  kernel self-test OK: " + " ".join(l for l in cp.stdout.splitlines() if "kernel ok" in l)[:120])
     _KERNELS[version] = tag
     return tag
 
@@ -492,6 +520,9 @@ def run_job(jdir, job):
     if working.exists(): shutil.rmtree(working)
     working.mkdir(parents=True)
     log_path = Path("/content", f"{job['id']}.log")
+    global _NOTES
+    _NOTES = run_dir / "worker_notes.txt"
+    _NOTES.write_text("")
     t0 = time.time()
     status = {"state": "running", "started": relay.utcnow(), "gpu": gpu_name, "kind": job["kind"]}
     relay.write_json(run_dir / "status.json", status); relay_push(f"start {job['id']}")
@@ -511,7 +542,8 @@ def run_job(jdir, job):
         else:
             ensure_inputs(job)
             kernel = ensure_kernel(job.get("python", ""))
-            env = dict(os.environ, **{k: str(v) for k, v in (job.get("env") or {}).items()})
+            env = clean_env(job.get("env") or {}) if kernel else dict(os.environ, **{k: str(v) for k, v in (job.get("env") or {}).items()})
+            note(f"  papermill start: kernel={kernel or 'system'} notebook={job['notebook']} max_hours={job['max_hours']}")
             cmd = ["papermill", str(jdir / job["notebook"]), str(working / "executed.ipynb"), "--log-output", "--cwd", str(working)]
             if kernel:
                 cmd += ["--kernel", kernel]
