@@ -1,0 +1,9 @@
+{
+  "gpu": "NVIDIA L4",
+  "last_seen": "2026-08-26T21:42:51Z",
+  "rate_units_per_h": 5.0,
+  "session_approved_at": "2026-08-26T21:15:55Z",
+  "spent_units": 0.0,
+  "started": "2026-08-26T21:42:51Z",
+  "state": "idle"
+}
