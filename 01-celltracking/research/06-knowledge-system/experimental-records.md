@@ -4646,3 +4646,60 @@ a negative control proving it fires. `FACT-0080` is marked SUPERSEDED.
 
 Recorded as `FACT-0130`..`FACT-0132`; `LEVER-0012` killed, `LEVER-0013` opened (our offline LOEO
 diagnostics have been running on a different substrate from the deployment), `PKT-0003` closed.
+
+## 2026-08-26 — COUNT CONSERVATION REFUTED, and two corrections to the lead's framing
+
+First R&D seat to report (`PKT-0006`, `LEVER-0015`). Its falsifier fired **verbatim**, and it
+corrected two things I had been repeating.
+
+### The lever is dead
+
+A division raises cell count by exactly 1, so we hoped observed count change would bound the
+division budget. It does not:
+
+* **AUC 0.5592** for count change predicting GT divisions — detectable, operationally useless.
+* **AUC 0.4674, below chance**, for separating our 26 TP forks from our 225 FP.
+* **48.8% of GT divisions occur where the count change is ≤ 0**, which a budget forbids outright.
+* Fork count carries **2.0%** of the variance in count change; terminations and appearances dominate.
+* **57.6% of GT track ends lie within 5 µm of the crop boundary** against a 27.0% base rate. The
+  crop is a ~101³ µm sub-volume of a larger embryo and its population is **not closed**.
+* Conservation holds in aggregate (GT count +114 vs 125 divisions) but per-interval error totals
+  **4,723 — 37.8× the entire division signal**. True on average, useless at the resolution you'd apply it.
+
+Every budget variant loses **even under an oracle within-interval ranking**: best −0.00105,
+realistic −0.0017. Independently corroborated by the p19 sweep, where every suppression setting
+also scored worse.
+
+Calibration passed: GT displacement median **1.8168 µm** vs the known 1.82.
+
+### Correction 1 — my "6,314 forks vs 125 divisions" was apples-to-oranges
+
+**GT annotates only 5.4% of cells** (113,121 GT nodes against ~2,106,147 true). Per cell-per-frame
+we emit 0.002949 forks against GT's 0.001114. **The real over-emission is 2.65×, not ~50×** — I
+overstated it by roughly 19× by comparing a full prediction set against a 5.4% sample. This is the
+*third* correction to that same framing in two days.
+
+### Correction 2 — 96% of our forks are invisible to the metric
+
+Only **251 of 6,314** forks are scored (26 TP + 225 FP). The other 6,063 touch unannotated cells
+and are **ignored — neither rewarded nor penalised**.
+
+**This reshapes `LEVER-0014`.** A division filter must target the **225 scored** false positives
+specifically. Any broad fork-suppression rule prunes overwhelmingly *free* forks while occasionally
+destroying a scarce TP — which is exactly why the p19 penalty sweep lost at every setting, and why
+a global budget loses too. Aggression is not the failure mode; *indiscriminacy* is.
+
+### The break-even algebra that now governs the filter lane
+
+Because TP+FN is pinned at 125, keeping fraction `a` of TP and `b` of FP improves divJ only if:
+
+```
+a  >  0.357 + 0.643 b
+```
+
+Removing **every** false positive still requires retaining **≥ 35.7% of true positives** (9.3 of 26).
+Keeping half the FP requires retaining 17.6 of 26. **Proportional pruning is strictly harmful** —
+pruned TPs become FNs and remain in the denominator. A division filter must be strongly
+precision-preserving, not merely aggressive.
+
+Recorded as `FACT-0150`..`FACT-0153`; `LEVER-0015` killed; `PKT-0006` closed.

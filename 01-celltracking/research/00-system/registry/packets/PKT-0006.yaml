@@ -2,7 +2,7 @@ id: PKT-0006
 title: Cell-count conservation as a per-frame division budget
 lever: LEVER-0015
 owner: rnd-agent
-lock: running
+lock: done
 opened: '2026-08-26'
 
 claim: >-
@@ -38,4 +38,12 @@ outputs:
   facts_added: []
   record: one row in experimental-records.md once integrated
 
-result: null
+result: >-
+  REFUTED 2026-08-26, falsifier fired verbatim. Cell count does not track divisions
+  (AUC 0.5592; 0.4674 - below chance - for TP vs FP). Every budget variant loses even under
+  an oracle ranking: best -0.00105. LEVER-0015 killed; FACT-0150..0153 recorded.
+  .
+  TWO CORRECTIONS TO THE LEAD'S FRAMING, both accepted: (1) GT annotates only 5.4% of cells,
+  so the real over-emission is 2.65x per cell-per-frame, not the ~50x implied by comparing
+  6,314 forks against a 125-division SAMPLE; (2) 96% of our forks are invisible to the metric
+  - only 251 of 6,314 are scored. Calibration passed at 1.8168 um.

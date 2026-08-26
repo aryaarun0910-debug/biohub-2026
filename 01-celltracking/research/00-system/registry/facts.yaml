@@ -798,3 +798,78 @@ facts:
       below our LB. The mikelou1 half is EXTERNAL and unverified.
     date: '2026-08-26'
     tags: [strategy, division, target]
+
+  # ---- 2026-08-26: count conservation refuted, and two corrections to my framing ----
+  - id: FACT-0150
+    statement: >-
+      GT annotates only 5.4% of cells, so our division over-emission is 2.65x per
+      cell-per-frame, NOT the ~50x the raw 6,314-vs-125 comparison implies
+    value: 2.65
+    unit: over_emission_ratio
+    scope: {fold: f1, gt_nodes: 113121, estimated_true_nodes: 2106147}
+    provenance: MEASURED
+    instrument: scripts/core/score_loeo_submission.py semantics applied to _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz
+    note: >-
+      Per cell-per-frame we emit 0.002949 forks against GT's 0.001114. The raw
+      "6,314 forks vs 125 GT divisions" framing - which I used repeatedly - overstates the
+      over-emission by roughly 19x by comparing a full prediction set against a 5.4% sample.
+    date: '2026-08-26'
+    tags: [division, correction, framing]
+
+  - id: FACT-0151
+    statement: >-
+      96% of our predicted forks are INVISIBLE to the metric - only 251 of 6,314 are scored
+      at all
+    value: 251
+    unit: count
+    scope: {fold: f1, of: 6314, tp: 26, fp: 225}
+    provenance: MEASURED
+    instrument: scripts/core/score_loeo_submission.py on _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz
+    note: >-
+      26 TP + 225 FP = 251 scored; the other 6,063 touch unannotated cells and are IGNORED,
+      neither rewarded nor penalised.
+      .
+      CONSEQUENCE FOR ANY FILTER (LEVER-0014): a filter must target the 225 SCORED false
+      positives specifically. A broad fork-suppression rule prunes overwhelmingly FREE forks
+      while occasionally destroying a scarce TP - which is exactly why every setting of the
+      p19 penalty sweep lost, and why a global count budget loses too.
+    date: '2026-08-26'
+    tags: [division, metric, filter-design]
+
+  - id: FACT-0152
+    statement: >-
+      Division-filter break-even - keeping fraction a of TP and b of FP improves divJ only if
+      a > 0.357 + 0.643 b
+    value: null
+    unit: algebra
+    provenance: VERIFIED
+    instrument: >-
+      derived from divJ = 26a/(125 + 225b), since TP+FN is pinned at 125; re-derived
+      independently by the lead
+    derived_from: [FACT-0130]
+    note: >-
+      Removing EVERY false positive still requires retaining at least 35.7% of true positives
+      (9.3 of 26). Keeping half the FP requires retaining 17.6 of 26. So a division filter
+      must be strongly PRECISION-preserving, not merely aggressive - proportional pruning is
+      strictly harmful because pruned TPs become FNs and stay in the denominator.
+    date: '2026-08-26'
+    tags: [division, filter-design, algebra]
+
+  - id: FACT-0153
+    statement: >-
+      Cell-count change does not predict divisions - AUC 0.5592 for GT divisions, and 0.4674
+      (BELOW chance) for separating our TP from FP forks
+    value: 0.5592
+    unit: auc
+    scope: {fold: f1, intervals: 12672}
+    provenance: MEASURED
+    instrument: agent analysis over _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz and data/train
+    note: >-
+      48.8% of GT divisions occur in intervals where the count change is <= 0, which a budget
+      forbids outright. Fork count carries only 2.0% of the variance in count change;
+      terminations and appearances dominate. 57.6% of GT track ends lie within 5 um of the
+      crop boundary against a 27.0% base rate, so the sub-volume population is not closed.
+      Conservation holds in AGGREGATE (GT count +114 vs 125 divisions) but per-interval error
+      totals 4,723 - 37.8x the entire division signal.
+    date: '2026-08-26'
+    tags: [division, refuted]

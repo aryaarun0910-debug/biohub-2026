@@ -266,12 +266,25 @@ levers:
     claim: >-
       Cell-count conservation gives a per-frame division BUDGET that no local geometric gate
       can express
-    status: running
+    status: killed
     falsifier: >-
       If GT cell count does not track division count (cells leave the volume, filtering
       removes them), the conservation assumption fails and this closes.
-    note: A division raises count by exactly 1. We apply no global budget at all today.
-    priority: 3
+    closed_by: [FACT-0153, FACT-0151]
+    closed_date: '2026-08-26'
+    outcome: >-
+      REFUTED - the falsifier fired verbatim. Cell count does not track divisions: AUC 0.5592
+      for GT divisions and 0.4674 (BELOW chance) for separating our TP from FP forks. 48.8%
+      of GT divisions occur where the count change is <= 0. Fork count carries 2.0% of the
+      variance in count change. 57.6% of GT track ends sit within 5 um of the crop boundary
+      (27.0% base rate), so the sub-volume population is not closed and conservation holds
+      only in aggregate - per-interval error is 37.8x the division signal.
+      .
+      EVERY budget variant loses even under an ORACLE within-interval ranking: best case
+      -0.00105, realistic -0.0017. The algebra explains it (FACT-0152): proportional pruning
+      is strictly harmful, and a global budget prunes mostly INVISIBLE forks (96% are unscored,
+      FACT-0151) while paying for the scarce TPs it hits. Independently corroborated by the
+      p19 sweep, where every suppression setting scored worse.
 
   - id: LEVER-0016
     claim: >-
