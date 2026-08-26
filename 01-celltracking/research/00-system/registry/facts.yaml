@@ -986,3 +986,134 @@ facts:
       conclusion it produced is withdrawn.
     date: '2026-08-26'
     tags: [leak, retraction, strategy]
+
+  # ---- 2026-08-26: the ensembling seat, which demolished several of my claims -------
+  - id: FACT-0170
+    statement: >-
+      The honest fold-1 score was ALREADY COMMITTED in the repo at
+      research/06-knowledge-system/inventory/loeo_f1_strict.json and was never consulted
+    value: null
+    unit: process_failure
+    scope: {adj_edge: 0.70248, divJ: 0.00162, div_tp: 1, div_fp: 491, node_recall: 0.8547, score: 0.70264}
+    provenance: VERIFIED
+    instrument: research/06-knowledge-system/inventory/loeo_f1_strict.json
+    note: >-
+      Not merely "on record in prose" - a scored, committed JSON artifact. Every leaked claim
+      I made could have been refuted in one file read. The manifests of the leaky and honest
+      exports are byte-identical in fold, arm, n_crops, det_threshold, secondary_enabled,
+      deepcenter_enabled and experiment_tag; ONLY the `weights` field distinguishes them. That
+      is exactly why provenance must record weights and evaluation protocol.
+    date: '2026-08-26'
+    tags: [leak, process, incident]
+
+  - id: FACT-0171
+    statement: >-
+      The division VETO ceiling is +0.0006 (fold 1) and +0.0061 (fold 0) - deleting EVERY
+      false division perfectly, at zero collateral
+    value: null
+    unit: score_ceiling
+    scope: {clean_f1: 0.00064, clean_f0: 0.00611, break_even_fp_per_tp: {f1: 616, f0: 63}}
+    provenance: MEASURED
+    instrument: agent analysis over research/06-knowledge-system/inventory/loeo_f1_strict.json and loeo_f0_strict
+    supersedes: FACT-0152
+    note: >-
+      KILLS MY REFRAME. I told the host that "removing false divisions is worth as much as
+      finding true ones" and called it the thing we had been wrong about. It was a LEAK
+      ARTIFACT: the veto ceiling scales with TP, and honest TP is 1 (f1) and 2 (f0), not 26.
+      Break-even is 616 false divisions removed per true one lost on fold 1. The NUMERATOR is
+      what is broken - you cannot subtract your way to a score.
+      .
+      Perfect SELECTION (discovery, not veto) is worth +0.053 (f1) and +0.083 (f0) at current
+      reach. Discovery is the lane; veto is not.
+    date: '2026-08-26'
+    tags: [division, ceiling, correction]
+
+  - id: FACT-0172
+    statement: >-
+      Only 66 of 125 fold-1 GT divisions are REACHABLE on honest weights, versus 104 under
+      the leak - nearly half are unreachable regardless of selector quality
+    value: 66
+    unit: count
+    scope: {fold: f1, of: 125, leaky_reach: 104}
+    provenance: MEASURED
+    instrument: research/06-knowledge-system/inventory/loeo_f1_strict.json
+    note: >-
+      Reach caps every division lane before any selector is designed. The leak inflated it by
+      58%, which is why the division opportunity looked larger than it is.
+    date: '2026-08-26'
+    tags: [division, ceiling]
+
+  - id: FACT-0173
+    statement: >-
+      Pooled total_node_ratio is +0.0240 - we OVER-produce nodes. There is no
+      under-production bonus.
+    value: 0.0240
+    unit: ratio
+    provenance: MEASURED
+    instrument: agent computation over the champion export vs GT metadata
+    supersedes: FACT-0021
+    note: >-
+      FACT-0021 recorded -0.0937 with NO instrument and is wrong by ~37x in the wrong
+      DIRECTION. The scorer's weighted-average multiplier implies an effective -0.0025. This
+      falsifies LEVER-0018's premise outright: there is no bonus to exploit. Each 1% of node
+      inflation costs 0.00090 score and needs 54 new true edges merely to break even.
+    date: '2026-08-26'
+    tags: [metric, correction]
+
+  - id: FACT-0174
+    statement: >-
+      The ~10.6 um division-separation interior mode is OUR OWN measurement, not a public
+      claim - and fixing the ranking is worth only ~+0.0004 because the failure is PROPOSAL,
+      not ranking
+    value: 11.47
+    unit: um
+    scope: {fold: f1, gt_divisions: 125, support: [3.72, 20.30], mean: 10.88, kde_mode: 12.27}
+    provenance: MEASURED
+    instrument: agent measurement over data/train fold 1, reproducing research/06-knowledge-system/internal-reports/division_lane_2026-08-18.md
+    note: >-
+      Two corrections. (1) levers.yaml called this "publicly reported"; it is ours, measured
+      over 199 crops at 10.57 um and independently reproduced here at 11.47 um on fold 1. The
+      misspecification conjecture is STRONGER than I stated - it rests on our own data.
+      (2) But our own prior work already tested the fix: replacing the ranking score moved FP
+      571 -> 556 at identical fork count, worth ~+0.0004, inside the +/-0.003 noise floor.
+      The recorded conclusion was "We are not ranking true divisions badly - we are REFUSING
+      TO PROPOSE THEM." So the monotone-cost misspecification is real and largely irrelevant:
+      55.4% of our forks fall outside the entire GT separation support, but only 10.6% of
+      forks are charged at all.
+    date: '2026-08-26'
+    tags: [division, misspecification, correction]
+
+  - id: FACT-0175
+    statement: >-
+      The mikelou1 figures underpinning FACT-0141 are mutually incompatible and temporally
+      unsound
+    value: null
+    unit: external_defect
+    provenance: EXTERNAL
+    instrument: repo prose audit; two decompositions both marked VERIFIED
+    note: >-
+      The repo carries LB 0.928 with divJ 0.30 AND LB 0.937 with divJ 0.39, both labelled
+      VERIFIED. FACT-0141's "+0.032 division lever" rested on the larger. Worse, the adj_edge
+      0.898 datapoint traces to a thread dated 2026-08-10, when the same competitor was at
+      divJ 0.03 - so pairing that adj_edge with any later score is temporally unsound. FACT-0141
+      was therefore broken INDEPENDENTLY of the leak, and would have been wrong even on honest
+      weights.
+    date: '2026-08-26'
+    tags: [external, correction, strategy]
+
+  - id: FACT-0176
+    statement: >-
+      Linker agreement carries no division signal - AUC 0.543 within the sweep and 0.482
+      (below chance) across genuinely different pipelines
+    value: 0.482
+    unit: auc
+    provenance: MEASURED
+    instrument: agent analysis across p0b/preilp/subvoxel exports with a node-overlap control
+    note: >-
+      Only 1.6-2.2% of champion forks have any fork within 7 um in another pipeline; 96.4% are
+      confirmed by none. Control: nodes replicate at 79-82% across the same pairs, so this is
+      not frame misalignment - forks are ~40x less reproducible than nodes. Note the test is
+      also UNPOWERED on honest weights (TP = 1 and 2), so the lane closes as low-ceiling AND
+      untestable rather than as a clean measured null.
+    date: '2026-08-26'
+    tags: [ensembling, refuted]
