@@ -12,7 +12,7 @@ record_kind: state
 
 # Current handoff
 
-**Status:** ACTIVE 2026-08-25. Branch `master`.
+**Status:** ACTIVE 2026-08-26. Branch `master`.
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
 
@@ -28,7 +28,37 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > fold 1 score **0.7026**, adj_edge **0.7025**, node recall **0.8547**, divisions **TP 1 / FP 491
 > / FN 124**, reach **66/125**. Fold 0 (clean): score 0.9002, adj_edge 0.8986.
 >
-> ### Three things every future session must know
+> ### 🔵 CYCLE-2 REVERSAL — our deployed division term is NOT broken (`FACT-0260`)
+>
+> `EXP-0015` emits no forks, so `divJ` is **zero by construction** and its **LB 0.906 is a direct
+> leaderboard reading of our `adj_edge` term**. Therefore our deployed decomposition is:
+>
+> ```
+> adj_edge ≈ 0.906     divJ ≈ 0.16 – 0.19     total 0.925
+> ```
+>
+> **I had this backwards.** `FACT-0101` offered reading (a) `adj_edge 0.924 / divJ 0.01` and
+> reading (b) `adj_edge 0.906 / divJ 0.19`. I chose (a). **(b) is right, by ~6×** — dropping all
+> forks offline costs only −0.00075 `adj_edge`, so the edge channel can explain at most ~16% of
+> the −0.019 LB drop.
+>
+> **Our LOEO substrate understates the deployed division term by ~11× (fold 0) and ~112× (fold
+> 1).** Every "our divisions are catastrophically broken" conclusion in the banner below was
+> measured on a substrate that cannot see them — including "we fork on 0 of 106 GT division
+> parents", which was measured on fold 1.
+>
+> **And fold 1 is a crippled CONFIGURATION, not the 6bba embryo** (`FACT-0261`). Its node-recall
+> collapse (0.8547, min 0.112) belongs to the LOEO ablations — pack primary only, secondary and
+> DeepCenter OFF. The *same crops* reach 0.994–0.999 under the deployed chain. Annotation density
+> and cell density were both tested and killed as explanations. **Do not quote fold-1 numbers as
+> performance.**
+>
+> Also: no pooling reconciles offline with the LB (required fold-0 weight is 1.1257, outside
+> [0,1]; best single fold is still 0.025 short, `FACT-0262`), and offline **levels** carry MDE
+> ±0.026/±0.041 — larger than the whole rank-148-to-rank-1 spread. **Paired deltas** are ±0.0036
+> / ±0.0006 and are the only usable currency (`FACT-0263`).
+>
+> ### Three things every future session must know — READ THE REVERSAL ABOVE FIRST
 >
 > 1. **WE NEVER PROPOSE A DIVISION.** Our fork generator's *maximum ever* sibling separation is
 >    **8.97 µm**; the 25th percentile of real divisions is **9.19 µm**. We place a fork on **0 of
@@ -65,9 +95,10 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 >
 > ### Open, and genuinely important
 >
-> - **Two scorers exist** in the vendored package — `summarise()` applies the node-count term,
->   `evaluate_datasets()` has none. We do not know which the leaderboard calls (`FACT-0190`).
->   If the latter, the entire node-ratio term is a phantom.
+> - ~~**Two scorers exist**~~ **RESOLVED 2026-08-26 (`FACT-0250`).** All **199/199** GT geffs carry
+>   `estimated_number_of_nodes`, which ONLY `summarise()` consumes — `evaluate_datasets()` never
+>   reads it and takes graph objects, not a submission. The node term is LIVE. Strong evidence,
+>   not proof (we cannot read Kaggle's scorer), but the campaign should treat it as real.
 > - **0 of 7 LB-scored experiments have an offline score** (`FACT-0184`). The offline apparatus
 >   has never been calibrated against the leaderboard, so no LOEO number can be compared to a
 >   competitor's LB number — the error that produced the retracted `FACT-0141`.
@@ -79,13 +110,38 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 >   dead generator drops the precision bar for any future proposer **5x, from 0.384% to 0.078%**
 >   (`FACT-0212`) — and the best measured geometric gate already achieves 0.090%.
 >
-> ### Registry gap, unfixed
+> ### Registry gap — FIXED 2026-08-26, with its remaining holes named
 >
-> Provenance records no **weights or evaluation protocol**, so two facts on the same crops with
-> different train/test hygiene are indistinguishable — the hole this fell through. Only 3 of 88
-> facts carry an `experiment` id, so **invalidation cannot propagate**; `MEASURED`/`VERIFIED`
-> grade derivation strength and cannot express *"correctly computed from an invalid experiment."*
-> A `validity` axis orthogonal to `provenance` is the missing piece.
+> `facts.yaml` and `levers.yaml` are now **schema v2**. Validity is a SECOND axis, orthogonal to
+> provenance, because the leaked facts were `MEASURED` and *deserved* it — they were correctly
+> computed **from an invalid run**, and no single axis can say that:
+>
+> ```
+> provenance   how strong is the derivation?            VERIFIED .. UNVERIFIED
+> validity     was the run it derives from legitimate?  VALID | SUSPECT | INVALID | UNKNOWN
+> ```
+>
+> Four new rules in `validate_registry.py`. **R8 is the retraction mechanism**: void an
+> experiment once and every fact naming it must declare itself. R9 forbids closing or
+> supporting a lever on an INVALID fact. R10 reports adoption gaps as notes. Backfilled:
+> 5 INVALID, 3 SUSPECT against `EXP-0019`. 20 tests, each planting a violation and asserting
+> reject-then-recover.
+>
+> **R9 immediately caught four real defects in committed data**, including `LEVER-0012` being
+> `status: killed` AND `reopened: true` simultaneously — a self-contradiction no gate could see.
+>
+> **What it still does NOT do, stated plainly:**
+> 1. **It does not DETECT leaks** — R8 fires only after a human sets `status: void`. This is a
+>    propagation mechanism, not a sensor. Detection is `test_loeo_weights_hygiene.py`'s job and
+>    only for that one defect.
+> 2. **`derived_from` does not propagate transitively** — R8 walks one hop.
+> 3. **17 experiment-derived facts still name no experiment**, so a void cannot reach them.
+> 4. **`protocol.weights` is unverified free text** — nothing cross-checks it against the run's
+>    `loeo_manifest.json`, so a *wrong* protocol string is as invisible as a missing one.
+>    25 held-out-fold facts carry none.
+> 5. **Absence of `validity` means VALID** for 84 facts — "no defect on record", not "audited clean".
+> 6. **A SUSPECT fact can still close a lever** — `LEVER-0015` does, and the caveat lives only in
+>    gate stdout. That is a science call, not an infrastructure one.
 
 
 > ## 📌 READ `../../AGENTS.md` FIRST — the record system changed on 2026-08-25
@@ -96,9 +152,10 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > likely to hit a dead number than a live one**. That, not agent coordination, was the main
 > engine of second-guessing.
 >
-> - `registry/facts.yaml` — every value once, with provenance. **8 of 29 are `UNVERIFIED`**,
->   including the entire lever ranking (`FACT-0030`..`FACT-0033`) that decides where the
->   headroom is. Treat those as open questions, not knowledge.
+> - `registry/facts.yaml` — every value once, with provenance AND validity. As of 2026-08-26:
+>   92 facts, 4 UNVERIFIED, **5 INVALID and 3 SUSPECT** (all from the `EXP-0019` leak).
+>   `FACT-0030`..`FACT-0033` are now PINNED to an instrument and VINDICATED — but their unit is
+>   an edge-RECALL delta, not a score delta (`FACT-0230`).
 > - `registry/levers.yaml` — every hypothesis and its status. A lever may only be closed by
 >   evidence **about itself**.
 > - `registry/packets/` — one lever, one owner. `validate_registry.py` fails on a double claim.

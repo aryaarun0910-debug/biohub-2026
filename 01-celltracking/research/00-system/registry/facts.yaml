@@ -21,9 +21,40 @@
 # Adding a fact with provenance VERIFIED or MEASURED REQUIRES `instrument` to name committed
 # code or a `file:line`. "An oracle that is not committed as code is not a result, it is an
 # anecdote" - learned the hard way when the 3.44% anchor proved unreproducible.
+#
+# VALIDITY - a SECOND, ORTHOGONAL axis. Provenance grades how strongly a number was DERIVED.
+# It cannot say whether the RUN it came from was a legitimate measurement of what it claims.
+# The EXP-0019 leak facts were MEASURED and deserved it - they were correctly computed, from
+# an invalid run. Seven facts and eight packets inherited the leak before anyone noticed.
+#
+#   provenance   how strong is the derivation?             VERIFIED .. UNVERIFIED
+#   validity     was the run it derives from legitimate?   VALID .. INVALID
+#
+#   VALID    (default when absent) no defect on record. NOT a claim of "audited clean".
+#   SUSPECT  a known defect affects PART of the claim. The structure may survive; every
+#            magnitude is untrusted until re-derived. Say in `validity_reason` WHAT survives.
+#   INVALID  the producing run was not a legitimate measurement. No number in it may be used.
+#   UNKNOWN  deliberately not assessed; an audit is owed.
+#
+# Anything not VALID REQUIRES `validity_reason`. A retraction that does not say what broke
+# cannot be acted on by whoever reads it next.
+#
+# TWO MORE FIELDS make retraction and hygiene mechanical:
+#   experiment: EXP-####   the run this fact's numbers come from, directly or through its
+#                          inputs. This is the RETRACTION EDGE - void the experiment and
+#                          validate_registry R8 forces every fact hanging off it to declare
+#                          itself. Without it a void cannot propagate; 89 of 92 facts had no
+#                          such link when the leak happened.
+#   protocol: {weights, eval}
+#                          PROTOCOL PROVENANCE, for any fact measured on a held-out fold.
+#                          The leaky and honest fold-1 manifests were byte-identical in fold,
+#                          arm, n_crops, det_threshold, secondary_enabled, deepcenter_enabled
+#                          and experiment_tag - ONLY `weights` differed, and nothing in a fact
+#                          recorded it. FACT-0130 and FACT-0161 measure the SAME quantity and
+#                          are now distinguishable here, and only here.
 
-schema_version: 1
-updated: '2026-08-25'
+schema_version: 2          # 2 adds the validity axis: validity / validity_reason / protocol
+updated: '2026-08-26'
 
 facts:
 
@@ -707,8 +738,17 @@ facts:
       THE AUTHORITATIVE divJ. div_tp 26 of 125 GT divisions, not 1. Also div_fp is 225, NOT
       the ~6,300 forks we emit - the metric charges division FP only on ANNOTATED cells, so
       most emitted forks land on unannotated cells and are IGNORED rather than penalised.
+    experiment: EXP-0019
+    validity: INVALID
+    validity_reason: >-
+      EXP-0019 is VOID for a train/test leak (FACT-0160) - fold 1 held out the 6bba embryo and
+      was scored with pack split_0 weights TRAINED on 6bba. Honest fold-1 divJ is ~0.0016
+      (FACT-0161), 45x lower: 25 of these 26 division true positives were memorised, not found.
+    protocol:
+      weights: pack default edge_predictor_best.pth = split_0, TRAINED ON the 6bba embryo
+      eval: LOEO fold 1 with 6bba held out - LEAKY, the held-out embryo is in the training set
     date: '2026-08-26'
-    tags: [division, measured, authoritative]
+    tags: [division, retracted, leak]
 
   - id: FACT-0131
     statement: >-
@@ -741,8 +781,19 @@ facts:
       NOT sufficient - the information is not in the cost function.
       .
       Cost of this result: ONE GPU session, ZERO submission slots, six points instead of one.
+    experiment: EXP-0019
+    validity: INVALID
+    validity_reason: >-
+      All six sweep arms ran on the leaked substrate (FACT-0160, FACT-0221). "Penalties never
+      help" is true only where accepted-fork precision already exceeds break-even, which the
+      leak arranged (10.4% vs 9.0%); on both honest folds the premise INVERTS. The in-run
+      control passed because BOTH sides shared the leak, so it validated the wrong thing.
+      LEVER-0012 is reopened and EXP-0021 re-runs the sweep on OOF split_1 weights.
+    protocol:
+      weights: pack default edge_predictor_best.pth = split_0, TRAINED ON the 6bba embryo
+      eval: LOEO fold 1 with 6bba held out - LEAKY, the held-out embryo is in the training set
     date: '2026-08-26'
-    tags: [division, killed, sweep]
+    tags: [division, retracted, sweep]
 
   - id: FACT-0132
     statement: >-
@@ -789,6 +840,15 @@ facts:
       is very likely WRONG for the deployed system. Fold-1 recall is not 0.869 with 13 points
       of node headroom; it is 0.982. Those facts are already UNVERIFIED and must be
       re-derived on the champion substrate before any heavy effort is aimed by them.
+    experiment: EXP-0019
+    validity: INVALID
+    validity_reason: >-
+      EXP-0019 is VOID (FACT-0160). Node recall is a DETECTOR quantity, so the leak hits it
+      head-on: honest fold-1 recall is 0.8547, not 0.9818 (FACT-0161). The "substrate
+      mismatch" this fact reported was the leak, not the substrate.
+    protocol:
+      weights: pack default edge_predictor_best.pth = split_0, TRAINED ON the 6bba embryo
+      eval: LOEO fold 1 with 6bba held out - LEAKY, the held-out embryo is in the training set
     date: '2026-08-26'
     tags: [substrate, strategy, correction]
 
@@ -816,6 +876,15 @@ facts:
       0.937 team. CAVEAT: ours is LOEO on TRAIN, theirs is the public LB, so this is an
       alignment of magnitudes rather than a like-for-like comparison - our LOEO reads ~0.02
       below our LB. The mikelou1 half is EXTERNAL and unverified.
+    experiment: EXP-0019
+    validity: INVALID
+    validity_reason: >-
+      EXP-0019 is VOID (FACT-0160). Honest adj_edge is 0.7025, not 0.8980 (FACT-0161), so the
+      claim that our edge term already matches a 0.937 team was a leak artifact. Explicitly
+      retracted by FACT-0162.
+    protocol:
+      weights: pack default edge_predictor_best.pth = split_0, TRAINED ON the 6bba embryo
+      eval: LOEO fold 1 with 6bba held out - LEAKY, the held-out embryo is in the training set
     date: '2026-08-26'
     tags: [strategy, division, target]
 
@@ -837,6 +906,16 @@ facts:
       Per cell-per-frame we emit 0.002949 forks against GT's 0.001114. The raw
       "6,314 forks vs 125 GT divisions" framing - which I used repeatedly - overstates the
       over-emission by roughly 19x by comparing a full prediction set against a 5.4% sample.
+    experiment: EXP-0019
+    validity: SUSPECT
+    validity_reason: >-
+      The counts behind the ratio (TP 26 / FP 225 / 251 scored / 6,314 forks) come from the
+      VOID EXP-0019 (FACT-0160). The STRUCTURE survives and is ground truth - GT annotates only
+      5.4% of cells, so any raw forks-vs-GT-divisions ratio overstates over-emission - but 2.65
+      itself must be re-derived on honest weights before it is cited as a number.
+    protocol:
+      weights: pack default edge_predictor_best.pth = split_0, TRAINED ON the 6bba embryo
+      eval: LOEO fold 1 with 6bba held out - LEAKY, the held-out embryo is in the training set
     date: '2026-08-26'
     tags: [division, correction, framing]
 
@@ -861,6 +940,16 @@ facts:
       positives specifically. A broad fork-suppression rule prunes overwhelmingly FREE forks
       while occasionally destroying a scarce TP - which is exactly why every setting of the
       p19 penalty sweep lost, and why a global count budget loses too.
+    experiment: EXP-0019
+    validity: SUSPECT
+    validity_reason: >-
+      The 26 TP / 225 FP / 251 scored split comes from the VOID EXP-0019 (FACT-0160). The
+      STRUCTURE survives - most emitted forks touch unannotated cells and are IGNORED by the
+      metric, which is a property of the scorer, not of these weights - but the counts, and
+      therefore the "96%", must be re-derived. Honest fold-1 TP is 1 (FACT-0161).
+    protocol:
+      weights: pack default edge_predictor_best.pth = split_0, TRAINED ON the 6bba embryo
+      eval: LOEO fold 1 with 6bba held out - LEAKY, the held-out embryo is in the training set
     date: '2026-08-26'
     tags: [division, metric, filter-design]
 
@@ -884,6 +973,17 @@ facts:
       (9.3 of 26). Keeping half the FP requires retaining 17.6 of 26. So a division filter
       must be strongly PRECISION-preserving, not merely aggressive - proportional pruning is
       strictly harmful because pruned TPs become FNs and stay in the denominator.
+    experiment: EXP-0019
+    validity: INVALID
+    validity_reason: >-
+      The algebra is sound but its coefficients are pure functions of the leaked TP=26 /
+      FP=225 / 125 split from the VOID EXP-0019 (FACT-0160). Re-costed on honest counts by
+      FACT-0171, break-even is 616 false divisions removed per true one lost on fold 1 - not
+      the 1.56 implied here. The qualitative conclusion (proportional pruning is harmful)
+      survives in FACT-0171; the numbers 0.357 and 0.643 do not.
+    protocol:
+      weights: pack default edge_predictor_best.pth = split_0, TRAINED ON the 6bba embryo
+      eval: LOEO fold 1 with 6bba held out - LEAKY, the held-out embryo is in the training set
     date: '2026-08-26'
     tags: [division, filter-design, algebra]
 
@@ -909,6 +1009,17 @@ facts:
       crop boundary against a 27.0% base rate, so the sub-volume population is not closed.
       Conservation holds in AGGREGATE (GT count +114 vs 125 divisions) but per-interval error
       totals 4,723 - 37.8x the entire division signal.
+    experiment: EXP-0019
+    validity: SUSPECT
+    validity_reason: >-
+      Two halves with different validity. The GT-side results are ground-truth properties and
+      STAND - AUC 0.5592, 48.8% of divisions at non-positive count change, 57.6% boundary
+      enrichment. The TP-versus-FP AUC of 0.4674 was computed on the leaked TP=26 / FP=225
+      split from the VOID EXP-0019 (FACT-0160) and must be re-derived. LEVER-0015's kill rests
+      on the GT-side half, so it is noted rather than reversed.
+    protocol:
+      weights: pack default edge_predictor_best.pth = split_0, TRAINED ON the 6bba embryo
+      eval: LOEO fold 1 with 6bba held out - LEAKY, the held-out embryo is in the training set
     date: '2026-08-26'
     tags: [division, refuted]
 
@@ -972,6 +1083,9 @@ facts:
       The honest fold-1 divJ of ~0.0016-0.0047 was ALREADY ON RECORD since 2026-08-18 in
       research/06-knowledge-system/internal-reports/division_lane_2026-08-18.md. Neither
       FACT-0080 nor FACT-0130 was ever reconciled against it.
+    protocol:
+      weights: edge_predictor_best_split_1.pth from the oof-weights dataset - OOF, never saw 6bba
+      eval: LOEO fold 1 with 6bba held out - CLEAN
     date: '2026-08-26'
     tags: [leak, corrected, authoritative]
 
@@ -1817,3 +1931,135 @@ facts:
       versus the ~0.08 required).
     date: '2026-08-26'
     tags: [metric, resolved]
+
+  # ==================================================================================
+  # 2026-08-26 — THE LEADERBOARD DECOMPOSED. Our real divJ is ~0.16-0.19, not ~0.002.
+  # ==================================================================================
+  - id: FACT-0260
+    statement: >-
+      EXP-0015 emits NO forks, so divJ is zero by construction and its LB 0.906 is a DIRECT
+      leaderboard reading of our adj_edge term - which puts our deployed divJ at 0.16 to 0.19
+    value: null
+    unit: decomposition
+    scope:
+      lb_adj_edge: 0.906
+      lb_divJ_range: [0.16, 0.19]
+      champion_lb: 0.925
+      f0_offline_adj_edge: 0.8986
+      f0_offset: -0.0074
+      f1_offline_adj_edge: 0.7025
+      f1_offset: -0.2035
+    provenance: MEASURED
+    instrument: >-
+      EXP-0015 (submission 55768476, LB 0.906) against EXP-0009 (55753516, LB 0.925), with the
+      fork-drop replayed offline on both clean exports to bound the edge channel
+    experiment: EXP-0015
+    supersedes: FACT-0101
+    note: >-
+      THE MOST DECISION-RELEVANT FACT OF THE CYCLE, and it REVERSES MY CALL. FACT-0101 offered
+      two readings of the 0.906 probe: (a) adj_edge ~0.924 with divJ ~0.01, or (b) adj_edge
+      ~0.906 with divJ ~0.19. I PREFERRED (a). Reading (b) is right, by about 6x.
+      .
+      The bound: dropping ALL forks offline removes 0.30% of annotated TP edges for only
+      -0.00075 adj_edge on fold 0. To explain the LB drop of -0.019 through the edge channel
+      would need ~7.6% of annotated TPs removed, whereas the probe removed 1.2% of its edge
+      set. The edge channel can account for at most ~16% of the drop, so the rest is divisions.
+      .
+      CONSEQUENCE: our LOEO substrate understates the deployed division term by ~11x (fold 0)
+      and ~112x (fold 1). Every "our divisions are catastrophically broken" conclusion from
+      cycle 1 was measured on a substrate that cannot see them. And fold 0's EDGE term is
+      already calibrated to within 0.0074 of the leaderboard's own adj_edge reading.
+    date: '2026-08-26'
+    tags: [calibration, headline, division, correction]
+
+  - id: FACT-0261
+    statement: >-
+      Fold-1 LOEO measures a CRIPPLED CONFIGURATION, not the 6bba embryo - its node-recall
+      collapse belongs to the LOEO ablations, and the same crops reach 0.994-0.999 deployed
+    value: null
+    unit: structural
+    scope:
+      loeo_f1_node_recall: {mean: 0.8547, min: 0.112}
+      deployed_same_crops: [0.994, 0.999]
+      loeo_f0_node_recall: 0.9846
+      reach: {f0: "22/26", f1: "66/125", deployed: "3/3"}
+    provenance: MEASURED
+    instrument: pairwise per-crop comparison of the LOEO export against the deployed champion export on identical crops and GT
+    note: >-
+      The LOEO config runs pack primary only, with the secondary model and DeepCenter OFF and
+      split_1 edge weights. Two hypotheses were tested and KILLED: annotation density (denser
+      annotation correlates POSITIVELY with adjJ, and density-matching makes the gap LARGER,
+      +0.2538 vs +0.1992) and cell density/geometry (44b6 is 3.4x denser and scores HIGHER;
+      geometry is identical at T=100, Z=64, Y=256, X=256 for every crop).
+      .
+      So "which fold does the test set resemble" has NO PURCHASE on the gap. Fold-1 numbers
+      should not be quoted as performance at all until the LOEO ablations are fixed. This also
+      undermines the cycle-1 finding that we fork on 0 of 106 GT division parents - that was
+      measured on this crippled substrate.
+    date: '2026-08-26'
+    tags: [calibration, substrate, headline]
+
+  - id: FACT-0262
+    statement: >-
+      NO pooling of the two folds reconciles with the leaderboard - the required weight on
+      fold 0 is 1.1257, outside [0,1]
+    value: 1.1257
+    unit: weight
+    scope:
+      f0: 0.9002
+      f1: 0.7026
+      lb: 0.925
+      scorer_exact_pool_199_crops: 0.7318
+      best_single_fold_gap: 0.0248
+    provenance: MEASURED
+    instrument: scorer-exact pooling over all 199 crops, plus simple/crop-count/edge-volume variants
+    note: >-
+      Even the BEST single fold is 0.0248 short of the LB. LOEO is a domain-transfer stress
+      test, not an estimate of deployed performance, and no convex combination can make it one.
+    date: '2026-08-26'
+    tags: [calibration, verified]
+
+  - id: FACT-0263
+    statement: >-
+      Offline LEVELS cannot support any decision - fold MDE is +/-0.0255 (f0) and +/-0.0411
+      (f1), larger than the entire spread from rank 148 to rank 1
+    value: null
+    unit: precision
+    scope:
+      level_mde: {f0: 0.0255, f1: 0.0411}
+      paired_delta_mde: {f0: 0.0036, f1: 0.00064}
+      rank148_to_rank1_spread: 0.037
+    provenance: MEASURED
+    instrument: crop bootstrap, 4,000 resamples, exact scorer
+    note: >-
+      Levels are 7x (f0) and 64x (f1) worse than paired deltas. Any calibration built on LEVELS
+      is hopeless; one built on PAIRED DELTAS is feasible. The prior +/-0.0043/+/-0.0057 figures
+      in instrument_repair_2026-08-18 are PAIRED figures and are corroborated (my f0 paired
+      +/-0.0036), not contradicted.
+    date: '2026-08-26'
+    tags: [calibration, precision, methodology]
+
+  - id: FACT-0264
+    statement: >-
+      CORRECTION - "0 of 7 LB-scored experiments has an offline score" and "never calibrated"
+      are both FALSE
+    value: 10
+    unit: count
+    provenance: VERIFIED
+    instrument: research/06-knowledge-system/internal-reports/instrument_repair_2026-08-18.md plus 4 configurations re-measured 2026-08-26
+    supersedes: FACT-0184
+    note: >-
+      TEN LB-scored configurations have offline scores - six from 2026-08-18 and four measured
+      today, with the re-measurements reproducing the 2026-08-18 record exactly (P3+armB 0.9272
+      vs 0.927230; divfix 0.8978 vs 0.8978). A full calibration EXISTS on the placeholder-4
+      substrate. What has never been calibrated is the LOEO substrate specifically - it had n=1
+      and now has n=2.
+      .
+      That placeholder-4 calibration is also damning: only 1 of 9 paired contrasts against the
+      champion gets the SIGN right, and it is the gross degradation. The champion - best on the
+      LB - is the WORST non-degraded arm offline. Spearman -0.144. The 2026-08-18 retirement of
+      that substrate is confirmed and strengthened.
+      .
+      Detection calibrates near 1:1 though: det 0.999 offline -0.0428 vs LB -0.042, ratio 0.98.
+    date: '2026-08-26'
+    tags: [calibration, correction, methodology]

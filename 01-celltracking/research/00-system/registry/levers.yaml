@@ -17,8 +17,8 @@
 #   closed    ruled out for a stated structural reason (cost, contamination, infeasibility)
 #   parked    plausible but deliberately deferred; `reopen_when` states the trigger
 
-schema_version: 1
-updated: '2026-08-25'
+schema_version: 2          # 2 adds retracted_closure / reclose_pending
+updated: '2026-08-26'
 
 levers:
 
@@ -46,7 +46,10 @@ levers:
     status: open
     falsifier: >-
       Must beat the P9 division mechanism end-to-end on a scored submission.
-    supporting: [FACT-0034, FACT-0083, FACT-0084, FACT-0130, FACT-0131]
+    # 2026-08-26 validity backfill: FACT-0130 and FACT-0131 are INVALID (EXP-0019 leak,
+    # FACT-0160). Replaced by their honest successors - FACT-0161 for the fold-1 numbers,
+    # FACT-0180 for the mechanism the lever is now aimed at.
+    supporting: [FACT-0034, FACT-0083, FACT-0084, FACT-0161, FACT-0180]
     note: >-
       SHARPENED 2026-08-25 by direct measurement. We recover 1 of 125 GT divisions on f1
       (FACT-0080) while EMITTING 6,303 (FACT-0082) - a selection failure, not a threshold
@@ -233,11 +236,20 @@ levers:
     claim: >-
       Relaxing the relink bijection with a priced second row per source recovers the
       fork-collapsed divisions
-    status: killed
+    # 2026-08-26 validity backfill. The status said `killed` while `reopened: true` and the
+    # status_note said the opposite - a contradiction the gate could not see, because nothing
+    # graded the evidence. R9 now refuses a closure that rests on an INVALID fact, so the
+    # closure is RETRACTED rather than annotated: status follows EXP-0021, which is running.
+    status: running
     falsifier: >-
       Any penalty must beat the disabled control on the offline LOEO score.
-    closed_by: [FACT-0131]
-    closed_date: '2026-08-26'
+    retracted_closure:
+      facts: [FACT-0131]
+      date: '2026-08-26'
+      reason: >-
+        FACT-0131 is INVALID - all six p19 sweep arms ran on the EXP-0019 leak (FACT-0160,
+        FACT-0221). Kept here as provenance: this lever WAS closed, and by what.
+    reclose_pending: EXP-0021   # the honest re-run that will decide this lever
     status_note: >-
       REOPENED 2026-08-26 (FACT-0221). This closure rests ENTIRELY on the leaked substrate -
       all six p19 sweep arms used split_0 weights against held-out 6bba. The sweep concluded
@@ -300,7 +312,10 @@ levers:
     falsifier: >-
       If no feature separates our 26 TP from our 225 FP better than chance, a filter cannot
       be built and this closes.
-    supporting: [FACT-0130]
+    # 2026-08-26 validity backfill: FACT-0130 is INVALID (EXP-0019 leak, FACT-0160).
+    # Its honest successor FACT-0161 is what actually supports this lever now, and it is
+    # already the evidence that killed the reframe.
+    supporting: [FACT-0161]
     note: >-
       THE REFRAME. TP+FN is FIXED at 125, so FP alone dilutes the denominator. Deleting every
       FP with ZERO new discovery gives 26/125 = 0.208, i.e. +0.0134 of score by subtraction.

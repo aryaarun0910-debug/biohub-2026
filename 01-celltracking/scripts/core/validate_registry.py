@@ -22,6 +22,31 @@ R4  a lever with status ``killed`` must name ``closed_by``, and none of that evi
     be UNVERIFIED. You may not close a lever on evidence nobody can reproduce.
 R5  no ``state`` document may assert a guarded superseded value as current
 R6  no two packets may hold the same lever - the duplicate-work lock
+R7  ``validity`` uses the fixed vocabulary, and anything not VALID states a reason
+R8  a fact produced by a ``void`` or ``cancelled`` experiment may not stay VALID - this is
+    the RETRACTION mechanism
+R9  a lever may not be closed or supported by an INVALID fact
+R10 adoption notes, not failures: an experiment-derived fact should name its experiment,
+    and a held-out-fold fact should name its evaluation ``protocol``
+
+THE SECOND AXIS - why R7-R10 exist
+----------------------------------
+EXP-0019 scored LOEO fold 1 (the 6bba embryo) with weights TRAINED on 6bba, because its
+spec set no ``BIOHUB_LOEO_WEIGHTS_GLOB`` and fell back to the pack default. It inflated the
+fold score by +0.203 and manufactured 25 of 26 division true positives. Seven facts, eight
+packets and a whole strategy were built on it before anyone noticed - and the registry never
+objected, because those facts were ``MEASURED``, the second-strongest provenance, and they
+DESERVED it. They were correctly computed. They were correctly computed FROM AN INVALID RUN.
+
+``provenance`` grades DERIVATION STRENGTH. It cannot express that, and stretching it to try
+- filing a leaked number as UNVERIFIED - would be a lie about the evidence, which is the one
+thing this registry exists to prevent. So validity is a SECOND, ORTHOGONAL axis:
+
+    provenance   how strong is the derivation?            VERIFIED .. UNVERIFIED
+    validity     was the run it derives from legitimate?  VALID .. INVALID
+
+A fact may be MEASURED and INVALID at once. That pair is the exact shape of the leak, and
+nothing in the old schema could write it down.
 
 Run:  .\.venv\Scripts\python.exe scripts\core\validate_registry.py
 """
@@ -58,6 +83,36 @@ FACT_CITATION = re.compile(r"FACT-\d{4}")
 
 STRONG_PROVENANCE = {"VERIFIED", "MEASURED"}
 ALL_PROVENANCE = STRONG_PROVENANCE | {"EXTERNAL", "UNVERIFIED", "SUPERSEDED"}
+
+# ---- the validity axis ----------------------------------------------------------------
+# ABSENT means VALID - "no defect on record". That is deliberate. A schema demanding an
+# explicit stamp on all 92 facts would be filled in by rote and would grade nothing; here
+# the field being PRESENT is itself the signal, so only a fact with a known defect carries
+# it. The cost is stated honestly: absence means "unexamined", not "audited clean".
+VALIDITY_DEFAULT = "VALID"
+#   VALID    no defect recorded in the run or protocol this came from
+#   SUSPECT  a known defect affects PART of the claim - the structure may survive but every
+#            magnitude is untrusted until re-derived on a clean run
+#   INVALID  the run that produced it was not a legitimate measurement of what it claims;
+#            no number in it may be used or cited
+#   UNKNOWN  deliberately not assessed - an audit is owed
+ALL_VALIDITY = {"VALID", "SUSPECT", "INVALID", "UNKNOWN"}
+TAINTED_VALIDITY = {"SUSPECT", "INVALID"}
+
+# An experiment in one of these states did not produce a result, so nothing derived from it
+# may claim to be a clean measurement. This is what makes retraction PROPAGATE: void the
+# experiment once, and every fact pointing at it is forced to declare itself.
+RETRACTING_STATUS = {"void", "cancelled"}
+
+# Facts scoped to a held-out fold are the class where train/test hygiene decides whether the
+# number means anything at all. The leaky and honest fold-1 manifests were byte-identical in
+# fold, arm, n_crops, det_threshold, secondary_enabled, deepcenter_enabled and
+# experiment_tag - ONLY `weights` differed. Nothing in a fact recorded `weights`.
+PROTOCOL_KEYS = ("weights",)
+
+# An instrument that points at a run's output, rather than at a static artifact or a
+# derivation, marks a fact as experiment-derived - so it should name the EXP id.
+EXPERIMENT_DERIVED = re.compile(r"_evidence/|EXP-\d{4}|kaggle submission|submission \d{6}", re.I)
 
 
 def _load(name: str) -> dict:
@@ -138,10 +193,15 @@ def main() -> int:
             errors.append(f"R2 {e['id']}: spec not found: {spec}")
 
     for l in levers:
-        for fid in (l.get("closed_by") or []) + (l.get("supporting") or []):
+        # `retracted_closure.facts` records a closure that was WITHDRAWN because its
+        # evidence turned out invalid. It is provenance, not a live claim, but a dangling
+        # id there is still a broken audit trail.
+        retracted = (l.get("retracted_closure") or {}).get("facts") or []
+        for fid in (l.get("closed_by") or []) + (l.get("supporting") or []) + retracted:
             if fid not in fact_ids:
                 errors.append(f"R2 {l['id']}: references missing fact {fid}")
-        for eid in l.get("experiments", []) or []:
+        for eid in (l.get("experiments") or []) + (
+                [l["reclose_pending"]] if l.get("reclose_pending") else []):
             if eid not in exp_ids:
                 errors.append(f"R2 {l['id']}: references missing experiment {eid}")
 
@@ -245,11 +305,118 @@ def main() -> int:
             else:
                 held[lv] = p.get("id", "?")
 
+    # ---- R7 the validity vocabulary, and a reason whenever it is not VALID -------------
+    # "INVALID" with no reason is a dead end for whoever reads it next: they cannot tell
+    # whether to re-derive the number, drop the claim, or go find the honest successor.
+    validity_of: dict[str, str] = {}
+    for f in facts:
+        v = f.get("validity", VALIDITY_DEFAULT)
+        if v not in ALL_VALIDITY:
+            errors.append(
+                f"R7 {f['id']}: unknown validity {v!r} "
+                f"(expected one of {sorted(ALL_VALIDITY)})"
+            )
+            v = VALIDITY_DEFAULT
+        validity_of[f["id"]] = v
+        if v != "VALID" and not str(f.get("validity_reason") or "").strip():
+            errors.append(
+                f"R7 {f['id']}: validity {v} but no validity_reason. "
+                "A retraction that does not say what broke cannot be acted on."
+            )
+
+    # ---- R8 retraction propagates from the experiment to its facts ---------------------
+    # THE MECHANISM THE LEAK NEEDED. EXP-0019 was voided on 2026-08-26 and every number it
+    # produced stayed MEASURED and unmarked, because nothing walked the link. Note this
+    # keys on `fact.experiment` (the run that PRODUCED the fact), never on
+    # `experiment.facts` - that list also holds the facts that MOTIVATED a run, and voiding
+    # an experiment must not retract its own inputs. EXP-0019 cites FACT-0111, which closed
+    # LEVER-0003 on unrelated evidence and is untouched by the leak.
+    exp_status = {e["id"]: str(e.get("status", "")).lower() for e in exps}
+    for f in facts:
+        eid = f.get("experiment")
+        if not eid or exp_status.get(eid) not in RETRACTING_STATUS:
+            continue
+        if validity_of.get(f["id"], VALIDITY_DEFAULT) not in TAINTED_VALIDITY:
+            errors.append(
+                f"R8 {f['id']}: derived from {eid} (status "
+                f"{exp_status.get(eid)}) but validity is "
+                f"{validity_of.get(f['id'], VALIDITY_DEFAULT)}. A voided run cannot leave a "
+                "clean fact behind - mark it INVALID, or SUSPECT if a stated part survives."
+            )
+
+    # ---- R9 a lever may not rest on an invalid fact ------------------------------------
+    # LEVER-0012 was killed by FACT-0131, which came from the voided EXP-0019. The kill read
+    # as settled science for a day and closed a lane that may be open.
+    for l in levers:
+        for fid in l.get("closed_by") or []:
+            v = validity_of.get(fid, VALIDITY_DEFAULT)
+            if v == "INVALID":
+                errors.append(
+                    f"R9 {l['id']}: closed on INVALID evidence {fid}. "
+                    "A lever closed by a retracted measurement is a lane shut for no reason."
+                )
+            elif v == "SUSPECT":
+                notes.append(
+                    f"R9 {l['id']} is closed by SUSPECT {fid} - the closure holds only on "
+                    "the part of that fact which survives; re-close it on clean evidence"
+                )
+        for fid in l.get("supporting") or []:
+            if validity_of.get(fid, VALIDITY_DEFAULT) == "INVALID":
+                errors.append(
+                    f"R9 {l['id']}: supported by INVALID evidence {fid}. "
+                    "Cite its successor, or drop the support."
+                )
+
+    # A packet is where an invalid fact turns into GPU hours. Note-level: packets are
+    # short-lived and this is meant to be read at claim time, not to block the gate.
+    for p in packets:
+        for fid in (p.get("inputs") or {}).get("facts") or []:
+            v = validity_of.get(fid, VALIDITY_DEFAULT)
+            if v in TAINTED_VALIDITY and p.get("lock") in ("claimed", "running"):
+                notes.append(
+                    f"R9 {p.get('id')} is live and takes {v} {fid} as an input"
+                )
+
+    # ---- R10 adoption notes - deliberately not failures --------------------------------
+    # Only 3 of 92 facts name an experiment. Making that a hard error today would fail the
+    # gate on 21 legacy facts and the rule would simply be deleted, so it reports and the
+    # backlog is visible on every run.
+    missing_exp = [
+        f["id"] for f in facts
+        if f.get("provenance") in STRONG_PROVENANCE
+        and not f.get("experiment")
+        and EXPERIMENT_DERIVED.search(str(f.get("instrument") or ""))
+    ]
+    if missing_exp:
+        notes.append(
+            f"R10 {len(missing_exp)} experiment-derived facts name no `experiment`, so a "
+            f"void cannot reach them: {', '.join(missing_exp[:10])}"
+            + (" ..." if len(missing_exp) > 10 else "")
+        )
+
+    missing_protocol = [
+        f["id"] for f in facts
+        if f.get("provenance") in STRONG_PROVENANCE
+        and isinstance(f.get("scope"), dict) and "fold" in f["scope"]
+        and not all(k in (f.get("protocol") or {}) for k in PROTOCOL_KEYS)
+    ]
+    if missing_protocol:
+        notes.append(
+            f"R10 {len(missing_protocol)} held-out-fold facts name no `protocol.weights`, "
+            f"so leaky and honest measurements of the same quantity are indistinguishable: "
+            f"{', '.join(missing_protocol[:10])}"
+            + (" ..." if len(missing_protocol) > 10 else "")
+        )
+
     # ---- report -----------------------------------------------------------------------
     print(f"registry: {len(facts)} facts, {len(exps)} experiments, "
           f"{len(levers)} levers, {len(packets)} packets")
     by_prov = {p: sum(1 for f in facts if f.get("provenance") == p) for p in sorted(ALL_PROVENANCE)}
     print("provenance: " + ", ".join(f"{k} {v}" for k, v in by_prov.items() if v))
+    by_val = {v: sum(1 for f in facts if f.get("validity", VALIDITY_DEFAULT) == v)
+              for v in sorted(ALL_VALIDITY)}
+    print("validity:   " + ", ".join(f"{k} {v}" for k, v in by_val.items() if v)
+          + "   (unmarked counts as VALID = no defect on record, NOT audited clean)")
     print(f"state docs guarded: {state_docs}; guarded values: "
           f"{[f['value'] for f in guarded]}")
     for nte in notes:

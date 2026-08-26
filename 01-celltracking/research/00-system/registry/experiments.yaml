@@ -17,7 +17,16 @@
 #   scored    submission has a leaderboard score
 #   pending   submitted, awaiting score
 #   void      ran but produced nothing usable - the run is evidence of a DEFECT, not a result
+#   cancelled stopped before it finished; whatever it emitted is partial
 #   deployed  the current live submission
+#
+# TWO LINK DIRECTIONS, AND THEY ARE NOT THE SAME. `experiments[].facts` is a loose "facts
+# involved in this run" list and includes the facts that MOTIVATED it - EXP-0019 cites
+# FACT-0111, which closed LEVER-0003 on unrelated evidence and is untouched by the leak. The
+# RETRACTION edge runs the other way: `facts[].experiment` names the run a fact's numbers came
+# from. validate_registry R8 walks ONLY that direction, so setting a status to `void` or
+# `cancelled` forces every fact DERIVED from it to declare a validity, and never retracts the
+# run's own inputs. If you void an experiment, check that its derived facts carry the link.
 
 schema_version: 1
 updated: '2026-08-25'
