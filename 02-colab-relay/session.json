@@ -1,0 +1,19 @@
+{
+  "active": false,
+  "approved_at": "",
+  "budget_units": 0.0,
+  "expires_at": "",
+  "gpu": "L4",
+  "host_approval": "",
+  "rates": {
+    "A100": 12.0,
+    "L4": 5.0,
+    "T4": 2.0,
+    "unknown": 12.0
+  },
+  "scope_kinds": [
+    "smoke"
+  ],
+  "stop": false,
+  "version": 1
+}
