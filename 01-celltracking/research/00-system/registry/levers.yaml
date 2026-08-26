@@ -332,10 +332,24 @@ levers:
     claim: >-
       Forward/reverse assignment DISAGREEMENT is a division signal obtainable with no new
       model and no new features
-    status: running
+    status: killed
     falsifier: >-
       If GT division parents are not enriched among forward/reverse disagreements versus base
       rate, there is no signal and this closes.
+    closed_by: [FACT-0201, FACT-0200]
+    closed_date: '2026-08-26'
+    outcome: >-
+      ENRICHMENT IS 0.00x IN BOTH FOLDS - 0 of 106 GT division parents among 1,639 disagreement
+      nodes on fold 1, 0 of 26 among 1,468 on fold 0. Killed at the MECHANISM, not merely
+      empirically: linear_sum_assignment is invariant under transposing the cost matrix, and a
+      bijection's constraint set is time-symmetric, so forward and reverse are the SAME problem
+      and abandon the same link. A control zeroing the velocity term drops disagreement to 1
+      node in 530,792, proving 100% of it comes from the asymmetric extrapolation term and none
+      from the bijection. It is a velocity-consistency signal.
+      .
+      CAUTIONARY: on the LEAKED export this looked real at 60x enrichment, p=3.1e-08
+      (FACT-0202). A leak manufactures significant structure in derived analyses, not just
+      inflated headlines.
     note: >-
       A division forward in time is a MERGE backward. Both directions use a bijection, so both
       must abandon something at a real division - but they fail DIFFERENTLY. This extracts

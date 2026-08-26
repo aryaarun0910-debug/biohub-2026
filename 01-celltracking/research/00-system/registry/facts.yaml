@@ -1400,3 +1400,62 @@ facts:
       annotates. Competitor-symmetric, but edge_jaccard measures linking on 1-5% of the graph.
     date: '2026-08-26'
     tags: [edge, strategy, fold-split]
+
+  # ---- 2026-08-26: time-reversal seat ---------------------------------------------
+  - id: FACT-0200
+    statement: >-
+      On honest weights the pipeline places a fork on ZERO of the 106 detected GT
+      division-parent nodes in fold 1
+    value: 0
+    unit: count
+    scope: {fold: f1, detected_gt_division_parents: 106, fold0: {forks_on_gt_parents: 0, of: 26}}
+    provenance: MEASURED
+    instrument: >-
+      agent harness reproducing the honest inventories exactly (f1 TP 1 / FP 491 / FN 124 /
+      divJ 0.001623; f0 TP 2 / FP 100 / FN 24 / divJ 0.015873) over
+      _evidence/exports/loeo_f1_strict/ and loeo_f0_strict/
+    note: >-
+      THE STARKEST STATEMENT OF FACT-0180. We do not pick the wrong divisions - we place a fork
+      on NONE of the real ones. All 5,426 forks land elsewhere. Any lever framed as selecting,
+      ranking or filtering among current forks is therefore capped near zero by construction.
+    date: '2026-08-26'
+    tags: [division, mechanism, headline]
+
+  - id: FACT-0201
+    statement: >-
+      Forward and reverse association are the SAME problem, not two differently-failing ones -
+      linear_sum_assignment is invariant under transposing the cost matrix
+    value: null
+    unit: structural
+    provenance: VERIFIED
+    instrument: >-
+      control experiment - zeroing the velocity term makes forward and reverse disagree on 1
+      node out of 530,792 (0.0002%) versus 357 with the deployed velocity weight
+    note: >-
+      A bijection imposes out-degree <= 1 AND in-degree <= 1 simultaneously, and that constraint
+      set is time-symmetric. So 100% of observed forward/reverse disagreement comes from the one
+      asymmetric cost term - the source-anchored extrapolation - and NONE from the bijection. It
+      is a velocity-consistency signal, not a division signal. At a division the parent's own
+      velocity prior is perfectly ordinary; what is unusual is two daughters COMPETING, and the
+      bijection resolves that competition identically in both directions.
+      .
+      This kills my "a division forward is a merge backward" idea at the mechanism, not just
+      empirically. The idea is only expressible if the backward map is MANY-TO-ONE.
+    date: '2026-08-26'
+    tags: [division, refuted, mechanism]
+
+  - id: FACT-0202
+    statement: >-
+      On the LEAKED export the time-reversal signal looked real at 60x enrichment, p=3.1e-08 -
+      and it is entirely an artifact
+    value: null
+    unit: cautionary
+    provenance: MEASURED
+    instrument: same harness run on _evidence/p19_relink_sweep_f1/ versus the honest exports
+    note: >-
+      1,422 disagreement nodes containing 5 GT division parents on the leaked substrate;
+      0 of 106 on honest weights. A leak does not merely inflate a headline number - it
+      MANUFACTURES statistically significant structure in derived analyses. p-values computed on
+      a leaked substrate carry no information whatsoever.
+    date: '2026-08-26'
+    tags: [leak, methodology, cautionary]
