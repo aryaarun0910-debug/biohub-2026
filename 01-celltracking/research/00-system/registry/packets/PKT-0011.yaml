@@ -1,0 +1,41 @@
+id: PKT-0011
+title: Metric forensics: the under-production bonus and the division interaction
+lever: LEVER-0018
+owner: rnd-agent
+lock: running
+opened: '2026-08-26'
+
+claim: >-
+  The node-ratio multiplier is uncapped above 1, making node count a direct lever; and a division's true marginal value differs from the naive 0.1/(125+FP) because divisions are also edges.
+
+falsifier: >-
+  If the scorer caps the multiplier at 1, LEVER-0018 closes.
+
+inputs:
+  facts: [FACT-0130, FACT-0140, FACT-0141]
+  artifacts:
+    - _evidence/p19_relink_sweep_f1/     # champion substrate, AUTHORITATIVE
+    - C:/temp/error_atlas/               # p0b substrate, CONTAMINATED - comparison only
+  code: [scripts/core/score_loeo_submission.py]
+
+method: >-
+  Dispatched to a background R&D agent. Mandatory calibration: reproduce the GT inter-frame
+  displacement median of 1.82 um before trusting any distance. Agents do not write to the
+  registry; the lead integrates their findings.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: analysis only
+
+forbidden:
+  - modifying research/00-system/registry/
+  - launching any Kaggle kernel or submission
+  - re-proposing a lever already killed without a NEW mechanism and a stated falsifier
+
+outputs:
+  evidence: agent report, integrated by the lead
+  facts_added: []
+  record: one row in experimental-records.md once integrated
+
+result: null

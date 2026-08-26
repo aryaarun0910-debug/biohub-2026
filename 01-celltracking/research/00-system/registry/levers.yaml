@@ -240,3 +240,80 @@ levers:
       offline before it, including the error atlas that FACT-0080 and the fork-collapse
       analysis (FACT-0090/0091) were built on, came from the OTHER base.
     priority: 2
+
+  - id: LEVER-0014
+    claim: >-
+      REMOVING false divisions is worth as much as finding true ones, because
+      divJ = TP/(125+FP) and our FP (225) exceeds all real divisions (125)
+    status: running
+    falsifier: >-
+      If no feature separates our 26 TP from our 225 FP better than chance, a filter cannot
+      be built and this closes.
+    supporting: [FACT-0130]
+    note: >-
+      THE REFRAME. TP+FN is FIXED at 125, so FP alone dilutes the denominator. Deleting every
+      FP with ZERO new discovery gives 26/125 = 0.208, i.e. +0.0134 of score by subtraction.
+      We have spent the cycle trying to FIND divisions while precision sits at 10%. A filter
+      is a ranking problem over 350 existing candidates, not a discovery problem.
+      .
+      Includes the model-misspecification conjecture: if true sibling separation is unimodal
+      with an interior mode (~10.6 um publicly reported) while our cost is MONOTONE in
+      distance, then any monotone ranker preferentially selects the CLOSEST pairs - which are
+      the false ones. Prediction: FP separation < TP separation.
+    priority: 1
+
+  - id: LEVER-0015
+    claim: >-
+      Cell-count conservation gives a per-frame division BUDGET that no local geometric gate
+      can express
+    status: running
+    falsifier: >-
+      If GT cell count does not track division count (cells leave the volume, filtering
+      removes them), the conservation assumption fails and this closes.
+    note: A division raises count by exactly 1. We apply no global budget at all today.
+    priority: 3
+
+  - id: LEVER-0016
+    claim: >-
+      Forward/reverse assignment DISAGREEMENT is a division signal obtainable with no new
+      model and no new features
+    status: running
+    falsifier: >-
+      If GT division parents are not enriched among forward/reverse disagreements versus base
+      rate, there is no signal and this closes.
+    note: >-
+      A division forward in time is a MERGE backward. Both directions use a bijection, so both
+      must abandon something at a real division - but they fail DIFFERENTLY. This extracts
+      division information from structure we already compute, which matters because the relink
+      cost provably contains none (LEVER-0012).
+    priority: 3
+
+  - id: LEVER-0017
+    claim: >-
+      Ensembling used as a division VETO raises divJ without finding anything new
+    status: running
+    falsifier: >-
+      If independent linkers agree on our false divisions as often as on our true ones,
+      agreement carries no signal and this closes.
+    note: >-
+      Detection ensembling is a known trap - unioning detections without a merge pass costs
+      ~9% for nothing (Duvanov, EXTERNAL). But a veto only ever REMOVES, and removal is
+      exactly what divJ = TP/(125+FP) rewards.
+    priority: 3
+
+  - id: LEVER-0018
+    claim: >-
+      The node-ratio multiplier is uncapped above 1, so node COUNT is a direct lever
+      independent of node quality
+    status: running
+    falsifier: >-
+      If the multiplier is in fact capped at 1 in the official scorer, there is no bonus to
+      exploit and this closes.
+    supporting: [FACT-0102, FACT-0111]
+    note: >-
+      adj_edge = edge_jaccard * (1 - 0.1 * total_node_ratio), clamped below at 0 and
+      reportedly UNCAPPED above 1. We under-produce (ratio -0.0937, UNVERIFIED) and reportedly
+      collect a bonus. This would explain why LOWERING the detection threshold scored worse
+      despite recall being saturated - the lever would be node COUNT, not node QUALITY, and we
+      have never optimised it directly.
+    priority: 2
