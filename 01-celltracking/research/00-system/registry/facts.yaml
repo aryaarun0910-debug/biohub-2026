@@ -2888,3 +2888,66 @@ facts:
       parity pilot has still NOT produced a result; attempt 5 is queued behind a worker restart.
     date: '2026-08-26'
     tags: [operational, compute, colab, kaggle-api, environment]
+
+  - id: FACT-0321
+    statement: >-
+      First positive-delta offline-to-LB anchor - on fold 0 the champion (P9 coupled division, EXP-0022
+      control arm) scores +0.0068 over P3-harmonic (loeo_f0_strict), 95% crop-bootstrap CI [+0.0023, +0.0119],
+      against the leaderboard delta of +0.010 (0.915 -> 0.925); the gain splits adj_edge +0.0031 / division +0.0037
+    value: 0.0068
+    unit: score_delta_f0
+    scope:
+      f0_p3_harmonic: {score: 0.9002, adj_edge: 0.8986, edge_jaccard: 0.8822, divJ: 0.0159, division: [2, 100, 24], node_recall: 0.9846, nodes: 1900633}
+      f0_p9_champion: {score: 0.9070, adj_edge: 0.9017, edge_jaccard: 0.8859, divJ: 0.0526, division: [5, 69, 21], node_recall: 0.9881, nodes: 1920218}
+      paired_delta: {score: 0.0068, adj_edge: 0.0031, division_term: 0.0037, ci95: [0.0023, 0.0119], bootstrap_resamples: 2000}
+      lb_delta: 0.010
+      offline_over_lb_ratio: 0.68
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/ea_atlas.py on C:/temp/p20_relink_sweep_f0/sweep_pen_off.csv.gz (EXP-0022 control, fetched via
+      kaggle_factory fetch) and on _evidence/exports/loeo_f0_strict/ (C:/temp/edge_atlas_strict/crops_s0.parquet);
+      tracking_cellmot summarise() over the same 71 crops; crop bootstrap 2,000 resamples
+    experiment: EXP-0022
+    protocol:
+      weights: pack split_0 edge_predictor_best.pth on held-out 44b6 for BOTH arms (clean by construction)
+      eval: scorer-exact per-crop rows, summarise() with the node term; paired over identical crops
+    note: >-
+      This is the anchor the calibration lane (LEVER-0020) lacked - every prior offline-vs-LB point was in the
+      degradation regime (FACT-0260, p16/p17). The offline paired delta is ~0.68x the LB delta with a CI that
+      covers it, so the offline apparatus is NOT systematically inverted on a real gain; it is somewhat
+      conservative. CAVEATS: (1) the P3 export is a 2026-07-31 build and the P9 export a 2026-08-27 build of
+      the same notebook lineage - a vintage difference smaller than the one in FACT-0300 but not zero;
+      (2) one fold, one pair - fold 1 (EXP-0021, still running) is the second direction; (3) the division share
+      of the offline gain (+0.0037) is a fold-0 reading where LOEO understates divisions ~11x (FACT-0260), so
+      the LB's larger delta is consistent with the division term being under-read offline.
+    date: '2026-08-27'
+    tags: [calibration, headline, edge, division, paired-delta]
+
+  - id: FACT-0322
+    statement: >-
+      EXP-0022's penalty -1 control IS the deployed champion configuration by construction - p9 (deployed),
+      p20 and p19 carry identical safe-division env on the same P3-harmonic base - while the Aug-25 fold-0
+      export _evidence/p4_detpeak_f0_v2/ that FACT-0300 called "vintage-matched" comes from the
+      p0b_clean913_revtime lineage and differs from the control on all 71 crops
+    value: null
+    unit: provenance
+    scope:
+      shared_env: {BIOHUB_SAFE_DIV_MAX_UM: 8.0, BIOHUB_SAFE_DIV_SISTER_MAX_UM: 11.0, BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM: 10.0, BIOHUB_SAFE_DIV_DIVERGE_UM: 2.25}
+      base_notebook: notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb (sha 70b636b6...)
+      p4_detpeak_reference: {base: notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb, nodes: 1920266, edges: 1847798, forks: 5455, crops_identical_to_control: 0}
+      p20_control: {nodes: 1920218, edges: 1848390, forks: 6026}
+    provenance: VERIFIED
+    instrument: >-
+      env diff of scripts/kaggle_specs/p9_coupled_division.json, p20_relink_sweep_f0.json, p19_relink_sweep_f1.json,
+      p4_detpeak_smoke_f0.json; per-crop node/edge/fork counts of sweep_pen_off.csv.gz vs
+      _evidence/p4_detpeak_f0_v2/loeo_split0_strict.csv.gz
+    note: >-
+      Two consequences. (1) The relink-sweep controls are the clean champion substrate on both folds, so
+      LEVER-0019's fold-0 rescore and the calibration anchor (FACT-0321) stand on them, not on p4_detpeak.
+      (2) FACT-0300's fold-0 "vintage-matched" +0.0036 was measured on a p0b-lineage export, not on the
+      champion; its pooled +0.00085 should be re-derived on the p20 control before LEVER-0019 is deployed.
+      Open question not chased tonight: FACT-0290 records the binding parent gate as 4.66 um while the env
+      sets BIOHUB_SAFE_DIV_MAX_UM=8.0 - one of them is a different constant; verify at file:line before
+      touching either.
+    date: '2026-08-27'
+    tags: [provenance, calibration, division, correction]
