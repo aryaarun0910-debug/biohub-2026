@@ -310,14 +310,37 @@ from pathlib import Path
 
 from google.colab import userdata
 GH_TOKEN = userdata.get("GH_TOKEN").strip()
-os.environ["KAGGLE_USERNAME"] = userdata.get("KAGGLE_USERNAME").strip()
-os.environ["KAGGLE_KEY"] = userdata.get("KAGGLE_KEY").strip()
-assert len(os.environ["KAGGLE_KEY"]) == 32, f"KAGGLE_KEY should be 32 chars, got {len(os.environ['KAGGLE_KEY'])}"
 assert GH_TOKEN.startswith(("github_pat_", "ghp_")), "GH_TOKEN does not look like a GitHub token"
 Path.home().joinpath(".kaggle").mkdir(exist_ok=True)
-Path.home().joinpath(".kaggle", "kaggle.json").write_text(json.dumps(
-    {"username": os.environ["KAGGLE_USERNAME"], "key": os.environ["KAGGLE_KEY"]}))
-os.chmod(Path.home() / ".kaggle" / "kaggle.json", 0o600)
+
+def _secret(name):
+    try:
+        v = userdata.get(name)
+        return v.strip() if v else ""
+    except Exception:
+        return ""
+
+# Kaggle's current API authenticates with a KGAT_ ACCESS TOKEN (Colab secret KAGGLE_API_TOKEN, the
+# contents of ~/.kaggle/access_token on the laptop). Username+key is legacy and is REJECTED by the
+# api.kaggle.com endpoints kagglehub and the kaggle CLI now use (measured 2026-08-26: 401 with a
+# verified-correct key; 200 with the bearer token). kagglehub and kagglesdk both read
+# KAGGLE_API_TOKEN before anything else.
+_api_token = _secret("KAGGLE_API_TOKEN")
+_kuser, _kkey = _secret("KAGGLE_USERNAME"), _secret("KAGGLE_KEY")
+if _api_token:
+    assert _api_token.startswith("KGAT_"), "KAGGLE_API_TOKEN should start with KGAT_"
+    os.environ["KAGGLE_API_TOKEN"] = _api_token
+    Path.home().joinpath(".kaggle", "access_token").write_text(_api_token)
+    os.chmod(Path.home() / ".kaggle" / "access_token", 0o600)
+    print("Kaggle auth: access token (KGAT_) from secret KAGGLE_API_TOKEN")
+if _kuser and _kkey:
+    assert len(_kkey) == 32, f"KAGGLE_KEY should be 32 chars, got {len(_kkey)}"
+    os.environ["KAGGLE_USERNAME"], os.environ["KAGGLE_KEY"] = _kuser, _kkey
+    Path.home().joinpath(".kaggle", "kaggle.json").write_text(json.dumps({"username": _kuser, "key": _kkey}))
+    os.chmod(Path.home() / ".kaggle" / "kaggle.json", 0o600)
+    print("Kaggle auth: legacy username/key also present (fallback only)")
+if not _api_token and not (_kuser and _kkey):
+    raise SystemExit("No Kaggle credentials: add Colab secret KAGGLE_API_TOKEN (contents of ~/.kaggle/access_token)")
 
 subprocess.run([sys.executable, "-m", "pip", "install", "-q", "papermill", "kagglehub", "kaggle"], check=True)
 
@@ -327,10 +350,10 @@ _comp = "biohub-cell-tracking-during-development"
 _chk = subprocess.run(["kaggle", "competitions", "files", "-c", _comp, "--csv", "--page-size", "1"],
                       capture_output=True, text=True)
 if _chk.returncode != 0 or "401" in _chk.stdout + _chk.stderr or "403" in _chk.stdout + _chk.stderr:
-    raise SystemExit("KAGGLE AUTH FAILED for competition data. KAGGLE_USERNAME must be the login name in "
-                     "kaggle.json (not the profile slug) and KAGGLE_KEY its 32-char key; the account must have "
-                     "accepted the competition rules.\\n" + (_chk.stdout + _chk.stderr)[-600:])
-print("Kaggle auth OK as", os.environ["KAGGLE_USERNAME"], "| competition listing:",
+    raise SystemExit("KAGGLE AUTH FAILED for competition data. Add the Colab secret KAGGLE_API_TOKEN = the KGAT_ "
+                     "token from ~/.kaggle/access_token on the laptop (username/key is rejected by the current API); "
+                     "the account must have accepted the competition rules.\\n" + (_chk.stdout + _chk.stderr)[-600:])
+print("Kaggle auth OK", f"(user {os.environ['KAGGLE_USERNAME']})" if os.environ.get("KAGGLE_USERNAME") else "(access token)", "| competition listing:",
       (_chk.stdout.strip().splitlines() or ["?"])[-1][:80])
 try:
     import kagglehub

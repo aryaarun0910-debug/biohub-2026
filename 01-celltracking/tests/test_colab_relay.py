@@ -175,3 +175,12 @@ def test_write_job_rewrites_notebook_and_records_count(tmp_path):
     text = (jdir / "notebook.ipynb").read_text()
     assert 'p = \\"/content/kaggle/input/x\\"' in text      # JSON-escaped source line
     assert 'p = \\"/kaggle/input/x\\"' not in text
+
+
+def test_worker_prefers_kaggle_access_token():
+    nb = factory.build_worker_notebook("owner/relay")
+    text = "".join("".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "code")
+    assert '_secret("KAGGLE_API_TOKEN")' in text
+    assert 'os.environ["KAGGLE_API_TOKEN"] = _api_token' in text
+    assert "KGAT_" in text
+    assert 'userdata.get("KAGGLE_USERNAME").strip()' not in text   # legacy pair is optional now
