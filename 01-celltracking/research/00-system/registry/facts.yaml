@@ -1117,3 +1117,143 @@ facts:
       untestable rather than as a clean measured null.
     date: '2026-08-26'
     tags: [ensembling, refuted]
+
+  # ==================================================================================
+  # 2026-08-26 - THE MECHANISM. Our fork generator cannot reach a real division.
+  # ==================================================================================
+  - id: FACT-0180
+    statement: >-
+      Our fork generator MAXIMUM EVER sibling separation (8.97 um) falls BELOW the 25th
+      percentile of real divisions (9.19 um) - it is aimed at a disjoint region of feature
+      space, so no threshold inside the current gates can find one
+    value: 8.97
+    unit: um
+    scope:
+      emitted_forks: {n: 5426, median: 4.08, max: 8.97}
+      gt_divisions: {n: 151, median: 10.57, p05: 5.41, max: 20.30}
+      reachable_gt_on_pred_coords: {n: 66, median: 10.87, p05: 7.64, p25: 9.19}
+    provenance: MEASURED
+    instrument: >-
+      agent analysis over _evidence/exports/loeo_f1_strict/ (honest OOF) and data/train;
+      matcher validated against the official scorer (node_recall and reach reproduced exactly)
+    note: >-
+      THE MECHANISM BEHIND EVERYTHING. It is not that our division stage is imprecise - it is
+      POINTED THE WRONG WAY. Consistent with the deployed P9 radii 8/11/10. This explains why
+      every threshold tweak was a wash, why divJ is near zero, and why FACT-0084 "missed
+      divisions fail 2-3 checks at once" holds - the candidates never enter the window.
+      Supporting - GT mother-to-daughter median 5.745 um is the 96.1st percentile of ordinary
+      displacement, and 81.5% of farther daughters exceed the ordinary p95. BOTH daughters look
+      anomalous to a motion cost; only 26.5% of nearer daughters look ordinary, so the linker
+      does not get even one for free.
+    date: '2026-08-26'
+    tags: [division, mechanism, headline]
+
+  - id: FACT-0181
+    statement: >-
+      The metric defines ONE fork threshold and it says ADD, never PRUNE - p_add + p_prune
+      equals 1 exactly, and at our honest divJ a pruner needs 97.3 percent precision to pay
+    value: null
+    unit: algebra
+    scope:
+      honest_f1: {divJ: 0.0, p_add: 0.027, p_prune: 0.973}
+      leaky_p19: {divJ: 0.074, p_add: 0.090, p_prune: 0.910}
+      mikelou1_like: {divJ: 0.391, p_add: 0.285, p_prune: 0.715}
+    provenance: VERIFIED
+    instrument: >-
+      derived and reproduced numerically by perturbing authoritative per-crop rows and
+      re-running summarise(), which reproduced the published score to 4 decimals
+    supersedes: FACT-0152
+    note: >-
+      Optimal stopping for a ranked fork list - keep adding while marginal precision exceeds
+      divJ/(1+divJ). p RISES as you improve, so the correct policy is PERMISSIVE EARLY,
+      CONSERVATIVE LATE, the exact opposite of tightening gates while divJ is near zero.
+      Monotone in how bad your divisions are, so it cannot be an artifact of the operating
+      point. This kills the removal reframe a second, independent time.
+      Also settled - the node-count multiplier is worth 2.5e-4 IN TOTAL, not a lever in either
+      direction; and per-crop weighting CANCELS EXACTLY, so an edge is worth about 1/D
+      everywhere and there is no which-crop effect despite the weighted-average form.
+    date: '2026-08-26'
+    tags: [metric, division, algebra]
+
+  - id: FACT-0182
+    statement: >-
+      Daughter ANTIPODALITY separates divisions at AUC 0.785, and an additively-separable
+      per-edge cost is structurally incapable of representing it
+    value: 0.785
+    unit: auc
+    scope: {gt_median_cos: -0.746, null_median_cos: -0.033, p_value: 3.6e-34}
+    provenance: MEASURED
+    instrument: agent analysis over data/train and _evidence/exports/loeo_f1_strict/
+    note: >-
+      DEEPER THAN THE ROOT CAUSE RECORDED IN LEVER-0012. I recorded that the relink cost
+      contains no division signal. The geometry DOES contain strong signal, but it lives in a
+      PAIRWISE INTERACTION between the two daughter edges, and the cost
+      motion + 0.05*raw - 0.75*prob is a SUM over chosen pairs. It cannot contain a term in the
+      angle between daughter vectors. Duplicating a source row was the wrong repair.
+      74.2 percent of GT divisions have cosine below -0.5 against a 28.1 percent null.
+      STRONG FALSIFIABLE PREDICTION - b-matching, min-cost flow with learned per-node capacity,
+      and degree-constrained subgraph are ALL still linear in per-edge variables and will fail
+      for the same reason. The correct problem class scores (mother, daughter-pair) TRIPLES.
+      Falsifier - exhibit a per-edge cost reaching 0.36 percent global precision on this
+      candidate set. The agent predicts none exists.
+    date: '2026-08-26'
+    tags: [division, problem-class, mechanism]
+
+  - id: FACT-0183
+    statement: >-
+      On honest weights the division prize is +0.035 and the edge prize is +0.326 - divisions
+      are about 10 percent of available headroom
+    value: null
+    unit: score
+    scope: {perfect_forks: 0.0344, perfect_edges: 0.326, reachable: 66, both_daughters_in_top2: 43}
+    provenance: MEASURED
+    instrument: agent analysis over _evidence/exports/loeo_f1_strict/
+    note: >-
+      Reach is 66 of 125; only 43 of those have both true daughters in the mother top-2 nearest
+      candidates, so a PERFECT fork proposer on this substrate gives divJ 43/125 = 0.344.
+      47 PERCENT OF DIVISIONS ARE LOST TO DETECTION before any linking question arises. And the
+      terms are coupled in ONE direction - fix edges, node recall rises (12.7 points moved by
+      changing weights alone), reachability rises, and the division ceiling rises with it.
+      Everything points at the EDGE term.
+    date: '2026-08-26'
+    tags: [strategy, ceiling, headline]
+
+  - id: FACT-0184
+    statement: >-
+      No configuration has EVER been scored both offline and on the leaderboard - the offline
+      apparatus has never been calibrated against the only ground truth that matters
+    value: 0
+    unit: count
+    scope: {lb_scored_experiments: 7, with_offline_score: 0}
+    provenance: VERIFIED
+    instrument: audit of research/00-system/registry/experiments.yaml
+    note: >-
+      FLAGS MY OWN CORRECTION. Saying our edge term is about 0.20 behind mikelou1 compares our
+      OOF number - train 44b6, test 6bba, a single domain-transfer stress test with unknown
+      negative bias - against a competitor full-train LB number. That is the SAME incommensurable
+      comparison that produced the retracted FACT-0141. The honest statement is that WE DO NOT
+      KNOW how far behind our edge term is.
+      Only 3 of 64 facts carry an experiment id, so invalidation cannot propagate - the registry
+      was built to prevent staleness via supersedes chains and has NO retraction mechanism. And
+      MEASURED/VERIFIED grade derivation strength only; the leaky facts were MEASURED, the
+      second-highest tier. The taxonomy cannot express correctly-computed-from-an-INVALID-
+      experiment. A validity axis orthogonal to provenance is the missing piece.
+    date: '2026-08-26'
+    tags: [methodology, incident, registry-gap]
+
+  - id: FACT-0185
+    statement: >-
+      Honest fold 1 has 43 usable division positives against 1.84M candidates - the fold is
+      statistically incapable of validating the lever we ranked number 1
+    value: 43
+    unit: count
+    scope: {candidates: 1840156, base_rate: 0.0000234}
+    provenance: MEASURED
+    instrument: agent analysis over _evidence/exports/loeo_f1_strict/
+    note: >-
+      Gate results at 3 and 9 true divisions carry Poisson SE of 1.7 to 3, so four-times-short
+      of break-even is really two-to-ten-times short - direction certain, magnitude soft. Any
+      learned pair-scorer must be TRAINED on external data (the CC0 corpus of 165,267 labelled
+      divisions) and VALIDATED somewhere other than here.
+    date: '2026-08-26'
+    tags: [division, statistics, constraint]

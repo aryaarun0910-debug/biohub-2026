@@ -67,7 +67,24 @@ levers:
       .
       hengck23 (discussion/726924) names the stage-2 architecture; a CC0 corpus of 165,267
       labelled divisions exists for pretraining only (division rate inflated 4.07% vs 0.26%).
-    priority: 1
+      .
+      RE-AIMED AND DEMOTED 2026-08-26 on honest weights. THE MECHANISM IS NOW KNOWN
+      (FACT-0180): our fork generator's MAXIMUM sibling separation, 8.97 um, sits BELOW the
+      25th percentile of real divisions, 9.19 um. It is not imprecise, it is pointed at a
+      disjoint region. No selector over the current candidate set can help, because real
+      divisions are not IN it.
+      .
+      THE PROBLEM CLASS IS ALSO WRONG (FACT-0182): daughter antipodality separates at AUC
+      0.785, but that is a PAIRWISE interaction between the two daughter edges and the cost is
+      a SUM over edges. b-matching, min-cost flow and degree-constrained subgraph are all still
+      linear per-edge and are predicted to fail identically. The correct class scores
+      (mother, daughter-pair) TRIPLES.
+      .
+      AND THE PRIZE IS SMALL (FACT-0183): perfect forks are worth +0.035 against +0.326 for
+      perfect edges. 47% of divisions are lost to DETECTION before linking. The fold cannot
+      even validate a selector - 43 positives against 1.84M candidates (FACT-0185).
+      Demoted to 5. Do not build a selector before the edge/detector lane is exhausted.
+    priority: 5
 
   - id: LEVER-0003
     claim: >-
@@ -192,9 +209,17 @@ levers:
       what it already has (FACT-0083) - and matches Soheil Ayati's public remark that "many
       linking issues actually originated earlier during node selection".
       .
-      FIRST STEP is free: rerun the curve on the p4 fold-1 export when it lands and compare
-      peak-stage recall against the scored frame. No GPU, no slot.
-    priority: 2
+      PROMOTED TO PRIORITY 1 on 2026-08-26. The honest numbers put essentially all headroom
+      here: perfect edges are worth +0.326 against +0.035 for perfect forks (FACT-0183), and
+      47% of divisions are lost to DETECTION before any linking question arises. Changing ONLY
+      the edge weights moved fold-1 node recall by 12.7 points (0.8547 leaky-vs-honest delta),
+      so scored node recall is largely DOWNSTREAM of edge quality - a far larger effect than
+      the 1 point this lever was opened on.
+      .
+      The terms are coupled in one direction only: fix edges -> node recall rises ->
+      reachability rises -> the division ceiling rises with it. This is also what FACT-0030..0033
+      said before I wrongly flagged them suspect.
+    priority: 1
 
   - id: LEVER-0012
     claim: >-
