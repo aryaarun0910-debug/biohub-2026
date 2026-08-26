@@ -58,6 +58,37 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > ±0.026/±0.041 — larger than the whole rank-148-to-rank-1 spread. **Paired deltas** are ±0.0036
 > / ±0.0006 and are the only usable currency (`FACT-0263`).
 >
+> ### 🟢 THE EDGE MECHANISM, AND THE NEW PRIORITY 1 (`LEVER-0021`)
+>
+> **The linker is correct. The geometry is wrong.** Mislinked cells barely moved — GT
+> displacement median **2.33 / 2.44 µm** — yet our two detections sit **7.68 / 7.93 µm** apart.
+> Endpoint residual is **3.35 / 3.68 µm on mislinks** against **1.68 / 2.30 µm on TPs**, and a
+> *neighbouring* cell sits 1.82 µm from the child, exactly the right displacement. The assignment
+> picks the geometrically better answer and is wrong because the coordinates are (`FACT-0270`).
+>
+> **Reducing endpoint residual 25% is worth +0.014…+0.026 (f0) and +0.021…+0.037 (f1)** —
+> 2–6× the best measured division gain, and the only lever this cycle that moves **both folds
+> the same way** (`FACT-0272`).
+>
+> **And it is completely unexploited.** Every coordinate in both honest exports is **100%
+> integer — including the export labelled "subvoxel"**. Sub-voxel localisation has never reached
+> a submission. Meanwhile **DEEPCENTER**, a trained UNet3D centre-prior heatmap, is already in the
+> deployed pipeline but used *only as a boolean veto* for synthetic gap points — it never moves a
+> primary detection (`FACT-0273`).
+>
+> **Cheapest test: no retraining, no Kaggle, CPU-hours.** Run the DeepCenter heatmap over the
+> existing export, replace integer `(z,y,x)` with local sub-voxel centres, re-score both folds.
+> Two-stage falsifier pre-registered: kill it if the residual does not drop ≥10%; kill it if a
+> ~25% residual drop does not lift the score ≥+0.010 on **both** folds.
+>
+> **Killed alongside it:** widening the relink gate (−0.036 @9µm, −0.19 @12µm on f0),
+> dedup/merge before assignment (**duplicate-stealing REFUTED** — 0 provable steals of 6,047
+> mislinks; the competitor is a *neighbouring cell* at ~8.4 µm ≈ the cell spacing, and we
+> UNDER-predict nodes so there is nothing to dedup), and both-sides-free repair (+0.0002/+0.0009 —
+> the assignment is saturated). Also: a pure-distance LAP at gate 6 reproduces the deployed
+> linker to within 0.001, so **the learned edge model contributes almost nothing to linking**
+> (`FACT-0271`, `FACT-0274`, `FACT-0275`).
+>
 > ### Three things every future session must know — READ THE REVERSAL ABOVE FIRST
 >
 > 1. **WE NEVER PROPOSE A DIVISION.** Our fork generator's *maximum ever* sibling separation is

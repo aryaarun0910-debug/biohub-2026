@@ -2063,3 +2063,158 @@ facts:
       Detection calibrates near 1:1 though: det 0.999 offline -0.0428 vs LB -0.042, ratio 0.98.
     date: '2026-08-26'
     tags: [calibration, correction, methodology]
+
+  # ==================================================================================
+  # 2026-08-26 — THE EDGE MECHANISM. The linker is correct; the geometry is wrong.
+  # ==================================================================================
+  - id: FACT-0270
+    statement: >-
+      Mislinked edges are cells that BARELY MOVED - GT displacement median 2.33/2.44 um - yet
+      our two detections sit 7.68/7.93 um apart. The linker is behaving correctly on geometry
+      that is wrong.
+    value: null
+    unit: mechanism
+    scope:
+      f0: {gt_displacement_median: 2.33, our_detection_gap: 7.68, residual_mislink: 3.35, residual_tp: 1.68}
+      f1: {gt_displacement_median: 2.44, our_detection_gap: 7.93, residual_mislink: 3.68, residual_tp: 2.30}
+      tp_within_6um: {f0: 1.000, f1: 0.999}
+      mislinks_outside_6um: {f0: 0.733, f1: 0.773}
+    provenance: MEASURED
+    instrument: >-
+      C:/temp/edge_atlas_strict rebuilt directly on the two honest exports; metric
+      recomputation reproduces the scorer's pred_valid rule with ZERO mismatches on both folds
+    note: >-
+      77.4% (f0) / 86.0% (f1) of mislinks have at least one endpoint more than 3 um off, while a
+      NEIGHBOURING cell sits 1.82 um from the child - exactly the correct displacement. So the
+      assignment picks the geometrically better answer and is wrong because the coordinates are.
+      .
+      SUBSTRATE NOTE: C:/temp/error_atlas is a SUBVOXEL-REFINED variant, not the strict export
+      (f0 FN 1,080 vs 1,103; f1 22,863 vs 23,693). Facts derived from it are on a third
+      substrate again. The rebuilt atlas reconciles exactly with the honest exports.
+    date: '2026-08-26'
+    tags: [edge, mechanism, headline]
+
+  - id: FACT-0271
+    statement: >-
+      Duplicate-detection stealing is REFUTED - zero provable steals out of 609 (f0) and 5,438
+      (f1) mislinks
+    value: 0
+    unit: count
+    scope: {f0_mislinks: 609, f1_mislinks: 5438, scorer_picked_closest: [0.992, 0.999]}
+    provenance: MEASURED
+    instrument: C:/temp/edge_atlas_strict arbitration analysis
+    note: >-
+      Four independent tests. (1) The scorer's assignment picked the node closest to the GT cell
+      in 99.2%/99.9% of cases - winner 3.07/3.66 um versus contender 6.46/5.53 um. (2) The
+      competing parent sits 8.38 um from the true parent's detection, and within-frame
+      nearest-neighbour spacing is 8.49/8.95 um - it is a NEIGHBOURING CELL, not a duplicate.
+      (3) Only 0.5%/0.4% of wrongly-chosen targets are within 2 um of the true child. (4)
+      total_node_ratio is -0.19/-0.11, so we UNDER-predict; there is no over-detection to dedup.
+      .
+      The FP SHAPE claim does reproduce (both endpoints matched 1.3%/0.7%; within 7 um of the
+      true successor 30.9%/31.3%, higher than the prior 21%) - but the INTERPRETATION was wrong.
+      A merge/dedup pass is worth under +0.001 and would need a radius near the cell spacing,
+      destroying real cells. The seat also retracted its own earlier "27.9% of GT cells carry a
+      surplus detection" as a sparse-annotation confound.
+    date: '2026-08-26'
+    tags: [edge, refuted, correction]
+
+  - id: FACT-0272
+    statement: >-
+      Reducing endpoint localisation residual by 25% is worth +0.014 to +0.026 (fold 0) and
+      +0.021 to +0.037 (fold 1) - 2 to 6x the best measured division gain, in the same
+      direction on both folds
+    value: null
+    unit: score_delta
+    scope:
+      minus_25pct: {f0: [0.0137, 0.0262], f1: [0.0213, 0.0368]}
+      minus_50pct_upper: {f0: 0.0416, f1: 0.0587}
+      perfect_upper: {f0: 0.0513, f1: 0.0761}
+    provenance: MEASURED
+    instrument: >-
+      dose-response simulated with the official metric arithmetic on frozen node-to-GT matches;
+      proxy calibrated - at k=1 it predicts the actual TP rate within 0.6 percentage points
+    note: >-
+      ESTIMATE, NOT A ROUND-TRIP. Refined coordinates would change the node matching itself, so
+      this is simulated rather than scored. The two-stage falsifier below is designed for that.
+      Unlike every other lever this cycle it moves BOTH folds the same way - no inversion.
+    date: '2026-08-26'
+    tags: [edge, dose-response, headline]
+
+  - id: FACT-0273
+    statement: >-
+      Every predicted coordinate is 100% INTEGER-VALUED in both honest exports - including the
+      one labelled "subvoxel" - so sub-voxel localisation has never reached a submission
+    value: null
+    unit: structural
+    provenance: VERIFIED
+    instrument: direct inspection of _evidence/exports/loeo_f0_strict/ and loeo_f1_strict/
+    note: >-
+      And a trained centre-prior model ALREADY EXISTS in the deployed pipeline - DEEPCENTER, a
+      UNet3D full-frame centre heatmap - but it is used ONLY as a boolean VETO for synthetic gap
+      points. It never moves a primary detection.
+      .
+      Voxel quantisation accounts for only ~0.50 um RMS of the 1.68/2.33 um residual; the rest is
+      genuine centroid error whose cause was NOT isolated.
+    date: '2026-08-26'
+    tags: [edge, actionable, unexploited]
+
+  - id: FACT-0274
+    statement: >-
+      The learned edge model contributes almost nothing to linking - a pure-distance LAP at gate
+      6 um reproduces the deployed linker to within 0.001
+    value: 0.001
+    unit: score
+    provenance: MEASURED
+    instrument: C:/temp/edge_atlas_strict LAP replay on both honest exports
+    note: >-
+      The velocity extrapolation, the learned edge bonus and the two-pass cascade are
+      COLLECTIVELY worth about +0.001. Consistent with FACT-0182 - the cost function carries
+      little information beyond geometry, which is also why the geometry being wrong dominates.
+    date: '2026-08-26'
+    tags: [edge, mechanism]
+
+  - id: FACT-0275
+    statement: >-
+      Widening the relink gate is HARMFUL at every setting, and the assignment is saturated
+    value: null
+    unit: curve
+    scope:
+      f0: {"7um": -0.0007, "9um": -0.0361, "12um": -0.1915}
+      f1: {"7um": -0.0004, "9um": -0.0059, "12um": -0.0567}
+      both_sides_free_repair: {f0: 0.0002, f1: 0.0009}
+    provenance: MEASURED
+    instrument: full-scale exact metric recomputation on both honest exports
+    note: >-
+      It recovers only 3-14% of the 6-10 um band while losing 4-10% of baseline TPs. And only 4
+      (f0) / 110 (f1) mislinks have BOTH endpoints unused, so a second-chance repair is worth
+      +0.0002/+0.0009 - the assignment is saturated. Both lanes killed.
+    date: '2026-08-26'
+    tags: [edge, killed]
+
+  - id: FACT-0276
+    statement: >-
+      In SCORE units linking beats detection 5.7x on fold 0 but only 1.05x on fold 1 - on fold 1
+      it is effectively a TIE, not a win
+    value: null
+    unit: score
+    scope:
+      f0: {perfect_linking: 0.1008, perfect_detection: 0.0178, perfect_edges: 0.1199}
+      f1: {perfect_linking: 0.1487, perfect_detection: 0.1421, perfect_edges: 0.3086}
+      fn_split_f0: {mislinked: 731, unreachable: 372}
+      fn_split_f1: {mislinked: 6504, unreachable: 17189}
+    provenance: MEASURED
+    instrument: C:/temp/edge_atlas_strict oracles on both honest exports
+    supersedes: FACT-0231
+    note: >-
+      Refines rather than overturns FACT-0231 - the sign holds on both folds, but the fold-1
+      margin is 1.05x, not a win. The count-versus-score discrepancy resolves cleanly: a mislink
+      costs ~3 metric units (1 FN plus ~2 FP) while an unreachable costs 1.
+      .
+      Also CONFIRMED on clean data: the nominator emits exactly ONE candidate per target - all
+      2,149,514 pre-ILP targets have in-degree exactly 1 - because motion_relink_edges REPLACES
+      the entire edge list with a per-frame-pair linear_sum_assignment. There is no downstream
+      ranking stage, so the recorded "70.6% ranking versus thresholding" framing is misleading;
+      the strict split is 83.3%/16.7% wrong-parent versus orphan.
+    date: '2026-08-26'
+    tags: [edge, lever-ranking, refinement]

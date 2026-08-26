@@ -481,3 +481,38 @@ levers:
       EXP-0022 are running and their penalty -1 control arms are the champion config on both
       folds, which is the first half of a real calibration.
     priority: 2
+
+  - id: LEVER-0021
+    claim: >-
+      Refining endpoint localisation - replacing integer node coordinates with sub-voxel
+      centres - fixes the geometry the linker is failing on, and is worth 2-6x the best
+      measured division gain
+    status: open
+    falsifier: >-
+      TWO STAGES, pre-registered. (a) If the refinement does not reduce the median matched-node
+      residual by at least 10%, kill it BEFORE re-scoring. (b) If the residual drops ~25% but
+      the score does not rise by at least +0.010 on BOTH folds, the dose-response model is wrong
+      and the lever dies.
+    supporting: [FACT-0270, FACT-0272, FACT-0273, FACT-0274]
+    note: >-
+      THE MECHANISM IS MEASURED (FACT-0270): mislinked cells barely moved - GT displacement 2.33
+      / 2.44 um - yet our two detections sit 7.68 / 7.93 um apart. Endpoint residual is
+      3.35 / 3.68 um on mislinks against 1.68 / 2.30 um on true positives. The linker picks the
+      geometrically better answer and is wrong because the coordinates are.
+      .
+      THE OPPORTUNITY IS UNEXPLOITED (FACT-0273): every predicted coordinate in both honest
+      exports is 100% INTEGER - including the export labelled subvoxel - so sub-voxel
+      localisation has never reached a submission. And DEEPCENTER, a trained UNet3D centre-prior
+      heatmap, is ALREADY in the deployed pipeline but used only as a boolean VETO for synthetic
+      gap points. It never moves a primary detection.
+      .
+      CHEAPEST EXPERIMENT: run deepcenter_heatmap_for_frame over the existing strict export,
+      replace each integer (z,y,x) with the local sub-voxel argmax or centre-of-mass, and
+      re-score both folds with scripts/core/score_loeo_submission.py. NO retraining, NO Kaggle,
+      CPU-hours only.
+      .
+      CAVEAT ON THE ESTIMATE: the dose-response is SIMULATED on frozen node-to-GT matches, not a
+      scorer round-trip, because refined coordinates would change the matching itself. That is
+      exactly what stage (b) of the falsifier tests. Voxel quantisation is only ~0.50 um RMS of
+      the residual, so most of the error is genuine centroid error of uncharacterised origin.
+    priority: 1
