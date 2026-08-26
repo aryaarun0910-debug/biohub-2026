@@ -4584,3 +4584,65 @@ export when it lands and compare peak-stage against scored recall. The fold-1 ha
 `FACT-0112` is quoted from the prior record and **not yet re-measured**.
 
 Recorded as `FACT-0110`..`FACT-0112`.
+
+## 2026-08-26 — THE RELINK DIVISION SWEEP: killed at every penalty, and it corrected me
+
+`EXP-0019`. One GPU session, **zero submission slots**, six points instead of one.
+
+**The control passed exactly.** Penalty −1 (disabled sentinel) reproduced the champion at
+2,156,725 nodes / 2,077,140 edges / 6,314 forks, identical to the primary LOEO export. Without
+that gate none of the rest would be interpretable — it is the check the p4 export lacked.
+
+| penalty | score | Δ | edge J | divJ | div_tp | div_fp | div_fn |
+|---|---|---|---|---|---|---|---|
+| **−1 (control)** | **0.90542** | — | 0.89776 | **0.0743** | **26** | 225 | 99 |
+| 0 | 0.90140 | **−0.00402** | 0.89468 | 0.0640 | 22 | 219 | 103 |
+| 1 | 0.90271 | −0.00271 | 0.89623 | 0.0618 | 21 | 215 | 104 |
+| 2 | 0.90314 | −0.00227 | 0.89665 | 0.0623 | 21 | 212 | 104 |
+| 4 | 0.90254 | −0.00287 | 0.89616 | 0.0614 | 21 | 217 | 104 |
+| 8 | 0.90227 | −0.00315 | 0.89536 | 0.0667 | 23 | 220 | 102 |
+
+**Harmful at every setting, and it DESTROYS divisions** — divJ falls at all five penalties and
+`div_tp` drops 26 → 21. The opposite of the intent.
+
+### Why, mechanically
+
+`linear_sum_assignment` returns at most `min(2·n_src, n_tgt)` pairs, so duplicating source rows
+**cannot create edges — only reallocate them**. A source winning two targets orphans another,
+which `OUTPUT_PRUNE_ISOLATED` then deletes. At penalty 0 that cost 3,412 nodes and 6,105 edges
+to buy 95 forks.
+
+**The transferable root cause:** the relink cost is `motion + 0.05·raw − 0.75·prob`, a purely
+geometric prior with **no division-specific signal**. Given permission to fork, the solver picks
+geometrically convenient pairs, not biologically real ones. **Structural permission is necessary
+but not sufficient.** This is the same conclusion the blanket out-degree≤2 result (−0.0081)
+pointed at, now with a mechanism attached.
+
+**This does NOT close `LEVER-0002`.** That lever proposes a *learned* selector on appearance
+change and longer-track cues — a different mechanism, and precisely the signal shown here to be
+missing. Closing it by association would repeat the Trackastra/HOCT error exactly. Recorded
+separately as `LEVER-0012`.
+
+### The correction to my own earlier work
+
+The scorer reports **div_tp 26 of 125, divJ 0.0743** (`FACT-0130`). My atlas measurement earlier
+the same cycle reported **1 of 125**, and I built framing on it — including "we emit 6,303
+divisions and get one right", which is wrong twice over:
+
+* the metric counts **26**, not 1. My strict "both daughter edges are TP" rule is a legitimate
+  quantity but it is **not divJ**, and it understates it ~26x;
+* `division_fp` is **225**, not 6,303 — the metric charges division FP only on **annotated**
+  cells, so most emitted forks land on unannotated cells and are ignored, not penalised.
+
+We are therefore not 6x behind kevin park's reported 0.12 but roughly 1.6x. The division term
+remains the largest single lever (0.1 × (0.39 − 0.074) ≈ 0.032 to reach mikelou1's reported
+divJ) but the framing was wrong.
+
+**Process lesson, and the registry caught it.** `FACT-0080` named its instrument as a
+**scratchpad script that was never committed**. Rule R3 requires committed code for a MEASURED
+fact; the string was non-empty so the check passed, but the file did not exist and the result
+was not reproducible. **R3 now verifies that a cited repo-path instrument actually exists**, with
+a negative control proving it fires. `FACT-0080` is marked SUPERSEDED.
+
+Recorded as `FACT-0130`..`FACT-0132`; `LEVER-0012` killed, `LEVER-0013` opened (our offline LOEO
+diagnostics have been running on a different substrate from the deployment), `PKT-0003` closed.

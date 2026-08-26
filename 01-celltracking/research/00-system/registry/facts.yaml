@@ -375,10 +375,13 @@ facts:
     value: 1
     unit: count
     scope: {fold: f1, of: 125}
-    provenance: MEASURED
+    provenance: SUPERSEDED
+    superseded_by: FACT-0130
     instrument: scratchpad div_density.py over C:/temp/error_atlas gtnodes_f1/gtedges_f1
     note: >-
-      0.8%. The 125 GT-division count cross-checks the prior record exactly. This replaces
+      SUPERSEDED by FACT-0130 - the scorer counts 26, not 1, on the same 125-division
+      population. This measured a STRICTER quantity (both daughter edges TP), not divJ, and
+      its instrument was never committed. 0.8%. The 125 GT-division count cross-checks the prior record exactly. This replaces
       the ESTIMATE that our divJ is "~0.02" with a direct measurement - the division term is
       effectively zero, as the bijection argument predicted.
     date: '2026-08-25'
@@ -673,3 +676,75 @@ facts:
       discovered after a push has already created a kernel under the wrong name.
     date: '2026-08-25'
     tags: [operational, trap, fixed]
+
+  # ---- 2026-08-26: the sweep scored, and it corrects earlier facts of mine ----------
+  - id: FACT-0130
+    statement: >-
+      Division Jaccard on the champion-substrate LOEO fold 1, by the official-style scorer
+    value: 0.0743
+    unit: division_jaccard
+    scope: {fold: f1, substrate: champion, div_tp: 26, div_fp: 225, div_fn: 99}
+    provenance: MEASURED
+    instrument: scripts/core/score_loeo_submission.py on _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz
+    supersedes: FACT-0080
+    note: >-
+      THE AUTHORITATIVE divJ. div_tp 26 of 125 GT divisions, not 1. Also div_fp is 225, NOT
+      the ~6,300 forks we emit - the metric charges division FP only on ANNOTATED cells, so
+      most emitted forks land on unannotated cells and are IGNORED rather than penalised.
+    date: '2026-08-26'
+    tags: [division, measured, authoritative]
+
+  - id: FACT-0131
+    statement: >-
+      Pricing a second child in the relink is HARMFUL at every penalty tested, and it
+      DESTROYS correct divisions rather than finding them
+    value: null
+    unit: curve
+    scope:
+      fold: f1
+      control_score: 0.90542
+      delta_by_penalty: {0: -0.00402, 1: -0.00271, 2: -0.00227, 4: -0.00287, 8: -0.00315}
+      div_tp_by_penalty: {control: 26, 0: 22, 1: 21, 2: 21, 4: 21, 8: 23}
+    provenance: MEASURED
+    instrument: >-
+      EXP-0019 six LOEO exports scored by scripts/core/score_loeo_submission.py; control
+      (penalty -1) reproduced the champion EXACTLY at 2,156,725 nodes / 2,077,140 edges /
+      6,314 forks
+    note: >-
+      divJ FALLS at every setting (0.0743 -> 0.061-0.067) and div_tp drops 26 -> 21. The
+      mechanism does the opposite of its intent.
+      .
+      MECHANISM: linear_sum_assignment returns at most min(2*n_src, n_tgt) pairs, so
+      duplicating source rows CANNOT create edges - only reallocate them. A source winning
+      two targets means another wins none, is orphaned, and OUTPUT_PRUNE_ISOLATED deletes it.
+      At penalty 0 that cost 3,412 nodes and 6,105 edges to buy 95 forks.
+      .
+      ROOT CAUSE: the relink cost is motion + 0.05*raw - 0.75*prob, a GEOMETRIC prior with no
+      division-specific signal. Given permission to fork, the solver picks geometrically
+      convenient pairs, not biologically real ones. Structural permission is necessary but
+      NOT sufficient - the information is not in the cost function.
+      .
+      Cost of this result: ONE GPU session, ZERO submission slots, six points instead of one.
+    date: '2026-08-26'
+    tags: [division, killed, sweep]
+
+  - id: FACT-0132
+    statement: >-
+      A strict "both daughter edges are TP" count is NOT the metric's division measure and
+      understates it by ~26x
+    value: null
+    unit: methodological
+    provenance: VERIFIED
+    instrument: FACT-0130 against FACT-0080 on the same 125-division population
+    note: >-
+      My atlas measurement counted 1 recovered division on fold 1 by requiring BOTH daughter
+      edges to be true positives. The scorer counts 26 on the same GT population. The strict
+      definition is a legitimate quantity but it is NOT divJ, and I built narrative on it as
+      if it were - including "we emit 6,303 and get 1 right", which is wrong twice over.
+      .
+      PROCESS LESSON: FACT-0080 named its instrument as a SCRATCHPAD script that was never
+      committed. Registry rule R3 requires committed code for a MEASURED fact; the string was
+      present so the check passed, but the file did not exist in the repo and the result was
+      not reproducible. R3 now verifies that a repo-path instrument actually exists.
+    date: '2026-08-26'
+    tags: [correction, methodology]

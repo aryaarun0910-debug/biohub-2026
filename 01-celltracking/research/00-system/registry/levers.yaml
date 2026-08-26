@@ -46,7 +46,7 @@ levers:
     status: open
     falsifier: >-
       Must beat the P9 division mechanism end-to-end on a scored submission.
-    supporting: [FACT-0034, FACT-0080, FACT-0082, FACT-0083, FACT-0084]
+    supporting: [FACT-0034, FACT-0083, FACT-0084, FACT-0130, FACT-0131]
     note: >-
       SHARPENED 2026-08-25 by direct measurement. We recover 1 of 125 GT divisions on f1
       (FACT-0080) while EMITTING 6,303 (FACT-0082) - a selection failure, not a threshold
@@ -194,4 +194,49 @@ levers:
       .
       FIRST STEP is free: rerun the curve on the p4 fold-1 export when it lands and compare
       peak-stage recall against the scored frame. No GPU, no slot.
+    priority: 2
+
+  - id: LEVER-0012
+    claim: >-
+      Relaxing the relink bijection with a priced second row per source recovers the
+      fork-collapsed divisions
+    status: killed
+    falsifier: >-
+      Any penalty must beat the disabled control on the offline LOEO score.
+    closed_by: [FACT-0131]
+    closed_date: '2026-08-26'
+    outcome: >-
+      HARMFUL AT EVERY PENALTY: -0.0040 (p=0) to -0.0023 (p=2) against a control that
+      reproduced the champion exactly. divJ FALLS at every setting (0.0743 -> 0.061-0.067)
+      and div_tp drops 26 -> 21, so it DESTROYS correct divisions rather than finding them.
+      .
+      MECHANISM: linear_sum_assignment returns at most min(2*n_src, n_tgt) pairs, so
+      duplicating source rows cannot CREATE edges, only reallocate them - a source winning
+      two targets orphans another, which OUTPUT_PRUNE_ISOLATED then deletes. At penalty 0
+      that cost 3,412 nodes and 6,105 edges to buy 95 forks.
+      .
+      ROOT CAUSE, and this is the transferable part: the relink cost is
+      motion + 0.05*raw - 0.75*prob, a GEOMETRIC prior containing no division-specific
+      signal. Structural permission to fork is NECESSARY BUT NOT SUFFICIENT; the information
+      simply is not in the cost function. Cost: one GPU session, ZERO submission slots.
+    note: >-
+      This does NOT close LEVER-0002. That lever proposes a LEARNED selector on appearance
+      change and longer-track cues - a different mechanism, and precisely the signal shown
+      here to be missing. Closing it by association would repeat the Trackastra/HOCT error.
+
+  - id: LEVER-0013
+    claim: >-
+      Our offline LOEO diagnostics have been measuring a DIFFERENT substrate from the
+      deployment, which may explain past offline-versus-leaderboard disagreements
+    status: open
+    falsifier: >-
+      If a champion-substrate LOEO export and a p0b-substrate one agree within noise on the
+      same fold, the substrate difference is immaterial and this closes.
+    note: >-
+      Found while building EXP-0019. The champion builds from notebooks/kaggle_p3_harmonic;
+      the pre-existing LOEO chain builds from notebooks/kaggle_p0b_clean913_revtime, an older
+      base carrying 20 forward-porting edits - two of which already patch the relink region.
+      EXP-0019 is the first LOEO measurement on the deployed substrate. Everything measured
+      offline before it, including the error atlas that FACT-0080 and the fork-collapse
+      analysis (FACT-0090/0091) were built on, came from the OTHER base.
     priority: 2

@@ -2,7 +2,7 @@ id: PKT-0003
 title: Division stage 2 - a learned selector, not a relaxation
 lever: LEVER-0002
 owner: primary
-lock: running
+lock: done
 opened: '2026-08-25'
 
 claim: >-
@@ -71,9 +71,20 @@ result: >-
   LOEO fold-1 export per penalty in {-1,0,1,2,4,8}, scoreable offline for zero submission
   slots, with penalty -1 as the in-run control. Supersedes the single-value EXP-0018.
   .
-  NEXT: launch EXP-0019 when a GPU slot frees and the host authorises (rule 8). Then score
-  each export offline with scripts/core/score_oof.py, CHECK THE -1 CONTROL FIRST, and report
-  fold 1 and fold 0 separately - the lever ranking flips by fold.
+  STEP 4 DONE 2026-08-26: EXP-0019 ran, the -1 control passed exactly, and the mechanism is
+  KILLED at every penalty (LEVER-0012, FACT-0131). Structural permission to fork is necessary
+  but NOT sufficient - the relink cost is a geometric prior with no division signal, so the
+  solver reallocates edges rather than discovering divisions.
+  .
+  IT ALSO CORRECTED ME. The scorer reports div_tp 26 of 125 and divJ 0.0743 (FACT-0130); my
+  earlier atlas measurement said 1 of 125. The strict "both daughter edges TP" definition is
+  not divJ and understates it ~26x, and its instrument was never committed. FACT-0080 is
+  superseded and registry rule R3 now verifies that a cited instrument actually exists.
+  .
+  PACKET CLOSED. LEVER-0002 remains OPEN and is NOT closed by this - it proposes a LEARNED
+  selector on appearance and track cues, which is exactly the signal shown to be missing.
+  A new packet should carry it. Note also LEVER-0013: the atlas this packet's earlier steps
+  relied on was built on a DIFFERENT substrate from the deployment.
   .
   LIMITATION: the atlas carries a pre-ILP frame for fold 1 only, so this diff could not be
   run for fold 0. The contract requires both embryo directions; fold 0 is unmeasured here.

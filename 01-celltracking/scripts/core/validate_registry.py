@@ -145,13 +145,28 @@ def main() -> int:
             if eid not in exp_ids:
                 errors.append(f"R2 {l['id']}: references missing experiment {eid}")
 
-    # ---- R3 strong provenance requires an instrument ---------------------------------
+    # ---- R3 strong provenance requires an instrument that EXISTS ---------------------
+    # FACT-0080 named a scratchpad script that was never committed. The string was present
+    # so the old check passed, but the file did not exist and the result was not
+    # reproducible - and it turned out to disagree with the real scorer by 26x. A named
+    # instrument must therefore be resolvable, not merely non-empty.
+    repo_path = re.compile(r"\b(?:scripts|notebooks|src|tests)/[\w./-]+\.(?:py|ipynb)\b")
     for f in facts:
-        if f.get("provenance") in STRONG_PROVENANCE and not f.get("instrument"):
+        prov = f.get("provenance")
+        instrument = f.get("instrument")
+        if prov in STRONG_PROVENANCE and not instrument:
             errors.append(
-                f"R3 {f['id']}: provenance {f['provenance']} but no instrument named. "
+                f"R3 {f['id']}: provenance {prov} but no instrument named. "
                 "An oracle that is not committed as code is not a result."
             )
+            continue
+        if prov in STRONG_PROVENANCE and instrument:
+            for cited in repo_path.findall(str(instrument)):
+                if not (REPO / cited).exists():
+                    errors.append(
+                        f"R3 {f['id']}: instrument cites {cited}, which does not exist. "
+                        "A MEASURED fact must be reproducible from committed code."
+                    )
 
     # ---- R4 a killed lever needs reproducible evidence --------------------------------
     prov_of = {f["id"]: f.get("provenance") for f in facts}

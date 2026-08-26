@@ -211,7 +211,7 @@ experiments:
     kernel: aryaarun07/biohub-p19-relink-division-sweep-loeo-f1
     submission: null
     lb: null
-    status: built
+    status: complete
     date: '2026-08-25'
     facts: [FACT-0090, FACT-0093, FACT-0102, FACT-0111]
     note: >-
@@ -241,3 +241,10 @@ experiments:
       invalid and must not be interpreted.
       .
       43 contract tests pass across EXP-0018/0019.
+      .
+      RESULT 2026-08-26: RAN CLEAN, CONTROL PASSED, MECHANISM KILLED. Penalty -1 reproduced
+      the champion EXACTLY (2,156,725 nodes / 2,077,140 edges / 6,314 forks), so the sweep is
+      valid. Every other penalty scored WORSE: -0.0040 (p=0) to -0.0023 (p=2), with divJ
+      falling 0.0743 -> 0.061-0.067 and div_tp dropping 26 -> 21. See FACT-0131, LEVER-0012.
+      Evidence: _evidence/p19_relink_sweep_f1/. Cost: one GPU session, ZERO submission slots,
+      six points instead of one - the sweep design paid for itself.
