@@ -1,0 +1,136 @@
+id: PKT-0017
+title: "LEVER-0021 stage (a)/(b): DeepCenter sub-voxel refinement of the honest LOEO exports"
+lever: LEVER-0021
+owner: primary
+lock: done
+opened: '2026-08-26'
+
+claim: >-
+  Replacing each exported integer (z,y,x) with a local sub-voxel centre read off the
+  DeepCenter centre-prior heatmap reduces the median matched-node residual by >=10% on both
+  folds (stage a), and that residual drop lifts the scorer-exact fold score by >=+0.010 on
+  both folds when the export is re-matched and re-scored (stage b).
+
+falsifier: >-
+  STAGE (a), decided BEFORE any re-scoring, on FROZEN baseline matches (the atlas gt_id
+  assignment of C:/temp/edge_atlas_strict, residual recomputed with refined coordinates):
+  the primary arm must bring the median matched-node residual from 1.675 um (f0) to <=1.508
+  and from 2.369 um (f1) to <=2.132. If the primary arm misses on fold 1 - the only fold on
+  which DeepCenter is out-of-sample - the lever is killed; a fold-0-only pass is IN-SAMPLE
+  for DeepCenter and cannot rescue it.
+  STAGE (b): re-match and re-score the refined export with scripts/win_bet/ea_atlas.py
+  (scorer-exact). If a ~25% residual drop does not lift the fold score by >=+0.010 on BOTH
+  folds, the FACT-0272 dose-response is wrong and the lever dies. Both embryo directions are
+  reported separately; a pooled number never stands alone.
+
+prediction: >-
+  Primary arm (best.pt, centre-of-mass, target-convention decode): residual -12% on fold 1
+  (central; band -5%..-20%) and -15% on fold 0 (in-sample, band -8%..-25%). Control arm
+  (deployed checkpoint_last.pt): ~0% on fold 1, because its heatmap is ~0 on held-out
+  embryos. Stage (b) score delta if (a) passes at ~-12%: +0.005..+0.012 per fold, i.e.
+  BELOW the +0.010 bar is the more likely outcome at that dose - the dose-response in
+  FACT-0272 assumed a 25% drop.
+
+inputs:
+  facts: [FACT-0270, FACT-0272, FACT-0273, FACT-0210, FACT-0040, FACT-0261, FACT-0263]
+  artifacts:
+    - _evidence/exports/loeo_f1_strict/loeo_split1_strict.csv.gz      # HONEST fold 1 (OOF split_1)
+    - _evidence/exports/loeo_f0_strict/loeo_f0_strict_submission.csv  # CLEAN fold 0
+    - C:/temp/edge_atlas_strict/                                      # baseline scorer-exact matches
+    - C:/temp/biohub_deepcenter_p10_audit/best.pt                     # DeepCenter epoch 2 (val-best)
+    - C:/temp/biohub_deepcenter_p10_audit/checkpoint_last.pt          # DeepCenter epoch 500 (DEPLOYED)
+    - data/train/*.zarr                                               # raw frames, all 199 crops
+  code:
+    - scripts/win_bet/dc_subvoxel_refine.py   # NEW: heatmap -> refined coordinates -> CSV per arm
+    - scripts/win_bet/ea_atlas.py             # scorer-exact re-match / re-score
+    - scripts/core/score_loeo_submission.py
+
+method: >-
+  SUBSTRATE CHECKS DONE FIRST (2026-08-26): (1) DeepCenter's split_manifest trains on ALL 71
+  44b6 crops and validates on ALL 128 6bba crops, so fold 0 is IN-SAMPLE for the prior and
+  fold 1 is the honest measurement. (2) The DEPLOYED checkpoint_last.pt (epoch 500) is
+  collapsed: validation loss 0.045 (epoch 2) -> 0.317 (epoch 500); heatmap max 0.003-0.018 on
+  6bba frames, 0.000 at GT nodes; on the four visible test movies it rejects 297/297 and
+  290/290 gap points. best.pt (epoch 2) reads 0.2-0.4 at GT nodes of both embryos. So the
+  PRIMARY arm uses best.pt; checkpoint_last.pt is a control arm expected to do nothing.
+  (3) The atlas reproduces FACT-0210 exactly (0.7026) and fold 0 (0.9002), and the baseline
+  residual medians are 1.675 / 2.369 um with z the dominant axis (RMS 1.58 / 2.38 um).
+  .
+  PIPELINE: for each crop and frame, read the raw zarr chunk, apply the deployed DeepCenter
+  preprocessing verbatim (4x XY block-mean, 50/99.5 percentile normalisation, clip -0.5..6),
+  run the UNet3D on CPU, and for each exported node take a window on the pooled heatmap
+  (z+-1, yx+-1 pooled voxels) around round(z), round(y/4), round(x/4). Arms, pre-registered:
+  com1 (PRIMARY: centre of mass of max(h-0.05,0) in that window, decoded y=4*cy per the
+  training-target convention), com1_off (same, decoded y=4*cy+1.5, the trainer's own decode -
+  a DIAGNOSTIC of the convention, not a fitted correction), par1 (parabolic sub-voxel peak at
+  the local argmax), com2 (z+-2, yx+-2 window). No-signal guard: if the window's max < 0.05
+  the node keeps its original coordinate. Shift clamp: a refined point more than 3.0 um from
+  the original is discarded (kept original) - beyond that it is a neighbour, not a refinement.
+  .
+  smoke (2 crops, fold 1) -> pilot (12 crops per fold, both checkpoints) -> full (both folds,
+  the arms that survive the pilot). Residual on frozen matches decides stage (a); ea_atlas on
+  the refined CSV decides stage (b). Calibration gate: the frozen-match residual of the
+  UNREFINED export must reproduce 1.675 / 2.369 um before any refined number is read.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: ~4-6 CPU-hours (fold 1 ~128 crops x 100 frames x ~0.7 s inference)
+
+forbidden:
+  - launching any Kaggle kernel or submission
+  - using the four visible test movies for any selection (their gap-veto counts above are a diagnostic of the checkpoint, nothing more)
+  - fitting a per-fold bias correction and reporting it as the lever's gain - any fitted offset is labelled fitted and never fitted on fold 1
+  - .claude/settings.json, the deployed spec, notebooks/kaggle_p3_harmonic/
+
+outputs:
+  evidence: C:/temp/dc_refine/<fold>_<ckpt>/ (refined parquet + CSVs, timing) and _evidence/dc_refine/summary.json
+  facts_added: [FACT-0310, FACT-0311, FACT-0312, FACT-0313, FACT-0314]
+  record: >-
+    One section appended to research/06-knowledge-system/experimental-records.md
+
+result_stage_a_b_preregistered_arms: >-
+  PILOT 2026-08-26 (fold 1: 13 crops stride 10, 9,914 frozen matches; fold 0: 12 crops stride 6,
+  3,226). Calibration gate OK on both. FOLD 1 (honest): baseline median 2.3337 um; com1 -1.3%
+  (mean -3.1%), com1_off -1.7%, par1 +5.8%, com2 -9.0% (mean -9.5%). Stage (b) scorer
+  round-trip on the same crops: com1 -0.0045, com2 +0.0025 (baseline 0.7310). FOLD 0
+  (in-sample): com1 median -13.2% but mean -1.0%; com2 -14.4% / +3.6%; stage (b) com1 -0.0005,
+  com2 +0.0002 (baseline 0.9198). VERDICT: the pre-registered primary FAILS stage (a) on the
+  deciding fold, and passes only on the in-sample fold - the outcome the packet said cannot
+  rescue it. The sub-voxel refinement arms are DEAD. Recorded as FACT-0314.
+  .
+  DIAGNOSTIC that survives: seeded at the GT position the SAME heatmap localises to median
+  0.754 / 0.651 um (f1 / f0), mean 0.80 / 0.71, with no z bias - 3x better than the detector
+  (FACT-0315). The detector's error is whole-voxel / whole-slice misplacement, which a +-1 window
+  around the detection cannot see; the score tracks the MEAN and tail, not the median (FACT-0314).
+
+amendment_1_peak_snap: >-
+  PRE-REGISTERED 2026-08-26 after the pilot above and BEFORE any snap measurement. NEW
+  MECHANISM: instead of refining around the detection, re-localise each detection to the centre
+  of the NEAREST DeepCenter peak (3x3x3 local maximum >= 0.10) within 4.0 um; collisions - the
+  nearer detection wins, the other keeps its coordinate; no peak within radius - keep original.
+  Arms: snap_r4 (PRIMARY), snap_r3 / snap_r5 (radius sensitivity, reported not selected), snapu_r4
+  (unique-peak only). Acts on the cached heatmaps of the same pilot crops - no re-inference, no
+  new selection of crops.
+  FALSIFIER (a'): on FOLD 1 frozen matches the primary must cut the MEAN residual by >= 10% AND
+  the fraction of matched nodes with residual > 3 um by >= 20%; if it does not, the peak-snap
+  mechanism is dead too and LEVER-0021 is killed outright. (b'): the scorer round-trip on the
+  pilot crops must be >= +0.005 on fold 1 and >= 0 on fold 0 to justify a full-fold run; the
+  lever's original +0.010-on-both-folds bar then applies at full scale. PRICED RISK: snapping to
+  a neighbour's peak turns a matched node into a duplicate - stage (b') is what prices it; the
+  unique-peak arm bounds it.
+  PREDICTION: mean residual -15% (band -5%..-30%) on fold 1; >3 um fraction -25%; stage (b')
+  +0.003..+0.010 on fold 1 - i.e. the lower half of the band is the more likely outcome.
+
+result: >-
+  LEVER-0021 KILLED 2026-08-26, both folds, both mechanisms, no GPU, no submission. Stage (a):
+  primary arm FAILED on the deciding fold (FACT-0314). Amendment 1 (peak-snap) FAILED its own
+  falsifier in the wrong direction on both folds and lost -0.015 / -0.011 through the scorer
+  (FACT-0316). Root cause measured: the prior's peaks are ~2.6 um from cell centres and its
+  centroid recovers ~20% of an offset (FACT-0317) - the 0.75 um oracle-seeded number was the
+  window, not the model. Substrate facts kept: FACT-0310 (split by embryo), FACT-0311 (deployed
+  checkpoint collapsed), FACT-0312 (gap veto rejects 100% on unseen embryos), FACT-0313 (baseline
+  residual, z-dominant; fold-1 z offset belongs to the LOEO detector). Prediction record: the
+  sub-voxel band (-5..-20% on f1) MISSED (-1.3%); the peak-snap band (-5..-30% mean) MISSED in
+  sign. Instruments committed: scripts/win_bet/dc_subvoxel_refine.py, dc_checkpoint_audit.py,
+  tests/test_dc_subvoxel_refine.py, tests/test_dc_snap.py. Evidence: C:/temp/dc_refine/.

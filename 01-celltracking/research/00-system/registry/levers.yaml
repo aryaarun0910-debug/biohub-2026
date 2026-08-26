@@ -529,7 +529,24 @@ levers:
       Refining endpoint localisation - replacing integer node coordinates with sub-voxel
       centres - fixes the geometry the linker is failing on, and is worth 2-6x the best
       measured division gain
-    status: open
+    status: killed
+    closed_by: [FACT-0314, FACT-0316, FACT-0317]
+    closed_date: '2026-08-26'
+    outcome: >-
+      KILLED on both embryo directions under BOTH pre-registered mechanisms, CPU-only, zero slots
+      (PKT-0017). (1) Sub-voxel refinement around the detection: primary arm -1.3% median residual
+      on the honest fold against a -10% bar; passes only on fold 0, where DeepCenter is in-sample
+      (FACT-0310), and even there the score is flat because the MEAN does not move (FACT-0314).
+      (2) Peak-snap: mean residual +6.4% / +14.2%, scorer round-trip -0.0146 / -0.0114 (FACT-0316).
+      MECHANISM: the deployed centre prior does not localise - its peaks sit a median 2.6 um from the
+      annotated centre and its centroid recovers only ~20% of an imposed offset (FACT-0317). The
+      deployed checkpoint is worse still: collapsed, ~0 on unseen embryos (FACT-0311).
+      .
+      WHAT SURVIVES: FACT-0270 (mislinks are geometrically wrong endpoints) is untouched - it is
+      evidence about the linker's inputs, not about DeepCenter. FACT-0272's dose-response is REFUTED
+      as a median-based model: a -9% / -14% median bought +0.0025 / +0.0002. Reopening needs a
+      DIFFERENT localiser (not DeepCenter) and a falsifier written on the MEAN residual and the >3 um
+      tail, then a scorer round-trip.
     falsifier: >-
       TWO STAGES, pre-registered. (a) If the refinement does not reduce the median matched-node
       residual by at least 10%, kill it BEFORE re-scoring. (b) If the residual drops ~25% but

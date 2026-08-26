@@ -2572,3 +2572,267 @@ facts:
       against the P3 baseline - not a notebook sha, which necessarily changes.
     date: '2026-08-26'
     tags: [division, deployment, actionable]
+
+  - id: FACT-0310
+    statement: >-
+      DeepCenter (pilkwang/biohub-deepcenter-unet3d-center-prior-v1) was trained on ALL 71 44b6
+      crops and validated on ALL 128 6bba crops - fold 0 is IN-SAMPLE for the centre prior and
+      fold 1 is its only out-of-sample measurement
+    value: null
+    unit: split
+    scope:
+      train: {'44b6': 71, '6bba': 0}
+      val: {'44b6': 0, '6bba': 128}
+      seed: 2026
+      val_fraction_declared: 0.1
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/dc_checkpoint_audit.py --split-manifest on the pack's
+      weights/full_frame_center/split_manifest.json (copy at C:/temp/dc_refine/deepcenter_split_manifest.json;
+      re-downloadable with python -m kaggle datasets download -f weights/full_frame_center/split_manifest.json)
+    note: >-
+      The declared val_fraction 0.1 is NOT what the manifest holds - the split is by embryo, 71/128.
+      Any DeepCenter-derived quantity on fold 0 (44b6) is in-sample and cannot carry LEVER-0021 on its
+      own; PKT-0017 pre-registers fold 1 as the deciding fold for that reason. The deployed pipeline
+      applies this prior to unseen TEST embryos, so fold 1 is the honest analogue of deployment.
+    date: '2026-08-26'
+    tags: [deepcenter, substrate, leak-check]
+
+  - id: FACT-0311
+    statement: >-
+      The DEPLOYED DeepCenter checkpoint (checkpoint_last.pt, epoch 500) is collapsed on held-out
+      embryos - validation loss rose 7x from its epoch-2 minimum, and its heatmap is ~0 everywhere on
+      6bba frames including at the GT nodes; best.pt (epoch 2) reads 0.24-0.41 at GT nodes on both embryos
+    value: 0.3167
+    unit: val_loss_epoch_500
+    scope:
+      val_loss_by_epoch: {1: 0.0454, 2: 0.0450, 3: 0.0587, 11: 0.0902, 51: 0.2361, 201: 0.2564, 500: 0.3167}
+      train_loss_epoch_500: 0.0077
+      heatmap_max_checkpoint_last: {'6bba_05b6850b:0': 0.003, '6bba_05b6850b:50': 0.018, '44b6_0113de3b:0': 0.000, '44b6_0113de3b:50': 0.896}
+      heatmap_at_gt_median_checkpoint_last: {'6bba_05b6850b:0': 0.0, '6bba_05b6850b:50': 0.0, '44b6_0113de3b:50': 0.825}
+      heatmap_at_gt_median_best: {'6bba_05b6850b:0': 0.322, '6bba_05b6850b:50': 0.239, '44b6_0113de3b:0': 0.364, '44b6_0113de3b:50': 0.409}
+      frac_ge_0p10_best: [0.0235, 0.0457]
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/dc_checkpoint_audit.py (history read from the checkpoint; heatmaps via the deployed
+      preprocessing copied verbatim in scripts/win_bet/dc_subvoxel_refine.py) - output
+      C:/temp/dc_refine/checkpoint_audit.json
+    note: >-
+      Validation here IS the 6bba embryo (FACT-0310), so this is a measured out-of-embryo collapse, not a
+      guess: the epoch-500 snapshot memorised the sparsely annotated 44b6 cells (it fires 0.825 at the one
+      labelled 44b6 node at t=50 and 0.000 at t=0 of the same crop). Training labels are sparse
+      positive-unlabeled, which is the mechanism. The deployed notebook loads checkpoint_last.pt by default
+      (cell 3:131) with DEEPCENTER_EXPECTED_EPOCH 0 (no epoch assertion). Consequence for the deployed
+      pipeline is FACT-0312; consequence for LEVER-0021 is that best.pt is the only usable prior.
+    date: '2026-08-26'
+    tags: [deepcenter, substrate, deployed, correction]
+
+  - id: FACT-0312
+    statement: >-
+      With the deployed checkpoint the DeepCenter gap veto rejects EVERY checked synthetic gap point on
+      unseen embryos - 297/297 and 290/290 on the four visible movies - while best.pt accepts 53/296
+    value: 0
+    unit: accepted_gap_points
+    scope:
+      checkpoint_last: {p12_forward_acceleration: {checked: 297, accepted: 0, rejected: 297, bypassed_strong_motion: 732}, p13_p9_adabn_detection_only: {checked: 290, accepted: 0, rejected: 290, bypassed_strong_motion: 677}}
+      best_pt: {p10_deepcenter_best: {checked: 296, accepted: 53, rejected: 243, bypassed_strong_motion: 733}}
+      threshold: 0.10
+      movies: 4 visible placeholder test movies - DIAGNOSTIC ONLY, never for selection
+    provenance: MEASURED
+    instrument: >-
+      run_stats.csv emitted by the built P9-lineage notebooks (deepcenter_gap_* stat counters, deployed notebook
+      cell 6:397-411), summed over the four movies; files at C:/temp/p12_forward_acceleration_20260824/,
+      C:/temp/p13_p9_adabn_detection_only_20260824/, C:/temp/p10_deepcenter_best_20260824/
+    note: >-
+      So the deployed gap-close path is effectively "veto every checked point" on the test set, and the
+      DeepCenter safe-division veto is off (checked 0). The P10 A/B (best.pt, EXPECTED_EPOCH 2) was built and
+      run locally but never registered or submitted - its LB effect is unknown. This is a hidden
+      configuration, not a measured loss: whether accepting ~18% of gap points helps or hurts the LB is an
+      open question that would cost one submission. Not a lever until someone states a falsifier.
+    date: '2026-08-26'
+    tags: [deepcenter, deployed, gap-close, unexploited]
+
+  - id: FACT-0313
+    statement: >-
+      Baseline matched-node localisation residual on the honest exports (scorer-exact 7 um matches held
+      fixed) is median 1.675 um (f0) / 2.369 um (f1); z is the dominant axis on both folds and fold 1
+      carries a systematic -0.67 voxel (-1.09 um) z offset that fold 0 does not
+    value: null
+    unit: um
+    scope:
+      f0: {n_matched: 19914, median: 1.675, mean: 1.709, p90: 3.375, rms_um_zyx: [1.578, 0.966, 0.998], signed_bias_vox_zyx: [-0.013, -0.484, 0.084]}
+      f1: {n_matched: 97204, median: 2.369, mean: 2.770, p90: 4.959, rms_um_zyx: [2.375, 1.499, 1.404], signed_bias_vox_zyx: [-0.668, -0.588, -0.309]}
+      stage_a_kill_thresholds_um: {f0: 1.508, f1: 2.132}
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/dc_subvoxel_refine.py eval (calibration gate) on C:/temp/edge_atlas_strict nodes_/gtnodes_
+      parquets built by scripts/win_bet/ea_atlas.py from _evidence/exports/loeo_f{0,1}_strict/
+    protocol:
+      weights: f0 pack split_0 (clean, 44b6 never seen); f1 OOF edge_predictor_best_split_1.pth (honest)
+      eval: tracking_cellmot DistanceMatching max 7 um at scale (1.625, 0.40625, 0.40625); residual on the matched pairs
+    note: >-
+      Consistent with FACT-0270's TP endpoint residuals (1.68 / 2.30 um). Per-axis: z RMS 1.58 / 2.38 um
+      against a 1.625 um slice, so a one-slice z error dominates the residual; XY RMS ~1.0 / ~1.45 um. The
+      fold-1 z offset belongs to the LOEO DETECTOR: the DeepCenter prior, also trained on 44b6 only, shows
+      NO z bias on 6bba when seeded at the GT (FACT-0315: -0.09 voxel). It is an artefact of the crippled
+      fold-1 configuration (FACT-0261), not an annotation convention. A fitted constant correction is
+      forbidden as the lever's gain (PKT-0017).
+    date: '2026-08-26'
+    tags: [edge, localisation, baseline, calibration]
+
+  - id: FACT-0314
+    statement: >-
+      Sub-voxel refinement of exported coordinates around the detection (DeepCenter best.pt, PKT-0017
+      pre-registered arms) FAILS stage (a) on the honest fold - primary com1 cuts the median residual
+      1.3% against a 10% bar - and the score is insensitive to the median even where it drops 13-14%
+    value: -1.3
+    unit: pct_median_residual_f1
+    scope:
+      f1_pilot: {crops: 13, stride: 10, n_matched: 9914, baseline_median_um: 2.3337, baseline_mean_um: 2.6960,
+                 com1: {median_pct: -1.3, mean_pct: -3.1}, com1_off: {median_pct: -1.7}, par1: {median_pct: +5.8},
+                 com2: {median_pct: -9.0, mean_pct: -9.5},
+                 stage_b_score: {baseline: 0.7310, com1: 0.7266, com2: 0.7335}}
+      f0_pilot: {crops: 12, stride: 6, n_matched: 3226, baseline_median_um: 1.675, baseline_mean_um: 1.667,
+                 com1: {median_pct: -13.2, mean_pct: -1.0}, com2: {median_pct: -14.4, mean_pct: +3.6},
+                 stage_b_score: {baseline: 0.9198, com1: 0.9194, com2: 0.9200}}
+      moved_frac_com1: [0.987, 0.998]
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/dc_subvoxel_refine.py refine/eval (frozen matches, calibration gate OK on both folds)
+      and scripts/win_bet/ea_atlas.py + summarise() for the round-trip; outputs C:/temp/dc_refine/pilot_f{0,1}_best/
+    protocol:
+      weights: DeepCenter best.pt (epoch 2, the only usable checkpoint - FACT-0311); export f0 pack split_0, f1 OOF split_1
+      eval: frozen atlas matches for stage (a); scorer-exact re-match for stage (b); both folds reported separately
+    note: >-
+      Three readings. (1) The primary arm passes the 10% bar ONLY on fold 0, where DeepCenter is in-sample
+      (FACT-0310) - exactly the pattern PKT-0017 said cannot rescue the lever. (2) The MEAN barely moves on
+      either fold while the median moves up to 14%, and the score follows the mean: a -9% median on fold 1 is
+      worth +0.0025, a -14% median on fold 0 is worth +0.0002. FACT-0272's dose-response, which is written in
+      terms of the residual level, is REFUTED as a median-based model - 3-5x too optimistic at the doses
+      measured. (3) The failure is mechanical, not a dead prior: FACT-0315 shows the same heatmap localises to
+      <0.8 um when its window is centred on the cell. The detector's error is whole-voxel / whole-slice
+      misplacement that a +-1 window around the detection cannot reach. The sub-voxel arms are dead; the
+      peak-snap mechanism (PKT-0017 amendment 1) is the pre-registered successor.
+    date: '2026-08-26'
+    tags: [edge, localisation, killed-arm, dose-response, correction]
+
+  - id: FACT-0315
+    statement: >-
+      Seeded at the GT position, DeepCenter best.pt localises the cell centre to median 0.754 um (f1) /
+      0.651 um (f0), mean 0.80 / 0.71, p90 1.26 / 1.14, with NO z bias - about 3x more accurate than the
+      deployed-lineage detector's integer position on the honest fold
+    value: 0.754
+    unit: um_median_f1
+    scope:
+      f1: {n: 10753, median: 0.754, mean: 0.803, p90: 1.262, frac_gt_2um: 0.011, signed_bias_vox_zyx: [-0.091, -0.213, -0.503], rms_um_zyx: [0.456, 0.536, 0.540], signal_frac: 0.970}
+      f0: {n: 3247, median: 0.651, mean: 0.712, p90: 1.144, frac_gt_2um: 0.012, signed_bias_vox_zyx: [-0.017, -0.521, -0.543], rms_um_zyx: [0.406, 0.482, 0.494], signal_frac: 0.996}
+      detector_baseline_mean_um: {f1: 2.696, f0: 1.667}
+    provenance: SUPERSEDED
+    superseded_by: FACT-0317
+    instrument: >-
+      scripts/win_bet/dc_subvoxel_refine.py refine --gt-parquet (com1 operator seeded at each GT node) on the
+      pilot crops; gt_seeded.parquet under C:/temp/dc_refine/pilot_f{0,1}_best/
+    protocol:
+      weights: DeepCenter best.pt, trained on 44b6 only - fold 1 is out-of-sample, fold 0 in-sample (FACT-0310)
+      eval: distance from the GT node to the heatmap centre of mass in a +-1 pooled-voxel window around the GT
+    note: >-
+      SUPERSEDED THE SAME DAY. FACT-0317 shows the centroid recovers only 17-25% of an imposed offset, so a
+      window centred on the truth returns the truth by construction - this number measures the window, not
+      the prior. Kept for provenance; do not cite it as DeepCenter's localisation accuracy.
+      .
+      Original reading: this is an ORACLE-SEEDED number (the window is centred on the truth), so it bounds
+      what a correctly centred read-out can achieve, not what a detection-seeded one does. It is honest on fold 1 in the
+      embryo sense (never trained on 6bba) and it carries no z bias - which pins the fold-1 -0.67 voxel z
+      offset (FACT-0313) on the LOEO detector. A consistent -0.5 voxel x bias on both folds says the
+      target-convention decode (y=4c) sits ~0.2 um low and the trainer's +1.5 decode overshoots by ~0.4 um
+      (com1_off bias +0.81 / +0.86 voxel on f1); neither is corrected in any arm.
+    date: '2026-08-26'
+    tags: [edge, localisation, deepcenter, superseded]
+
+  - id: FACT-0316
+    statement: >-
+      Peak-snap re-localisation (PKT-0017 amendment 1) makes localisation WORSE on both folds - mean
+      residual +6.4% (f1) / +14.2% (f0) against a -10% bar, the >3 um tail grows, and the scorer round-trip
+      loses -0.0146 (f1) / -0.0114 (f0) - because DeepCenter's peaks are not at cell centres: the nearest
+      peak to a GT cell is a median 2.6 um away
+    value: 6.4
+    unit: pct_mean_residual_f1
+    scope:
+      f1_pilot: {crops: 13, n_matched: 9914, baseline: {mean_um: 2.6960, frac_gt_3um: 0.386},
+                 snap_r4: {median_pct: +5.4, mean_pct: +6.4, frac_gt_3um: 0.405, moved: 0.892},
+                 snap_r3: {mean_pct: +4.0}, snap_r5: {mean_pct: +8.2}, snapu_r4: {mean_pct: +5.4},
+                 stage_b_score: {baseline: 0.7310, snap_r4: 0.7164, snapu_r4: 0.7159}, node_recall: [0.8911, 0.8860]}
+      f0_pilot: {crops: 12, n_matched: 3226, baseline: {mean_um: 1.6667, frac_gt_3um: 0.124},
+                 snap_r4: {median_pct: -0.4, mean_pct: +14.2, frac_gt_3um: 0.152, moved: 0.936},
+                 stage_b_score: {baseline: 0.9198, snap_r4: 0.9084}}
+      peak_diagnostic_f1: {frames: 1225, peaks_per_frame_median: 82, peaks_per_frame_p90: 424, detections_per_frame_median: 57,
+                           nearest_peak_to_gt_um: {median: 2.601, p75: 3.833, p90: 5.297}, frac_within_1um: 0.079,
+                           frac_within_2um: 0.304, frac_no_peak_within_4um: 0.227, frac_ge2_peaks_within_4um: 0.056}
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/dc_subvoxel_refine.py snap/eval on the cached heatmaps (C:/temp/dc_refine/pilot_f{0,1}_best_hm/heatmaps)
+      and scripts/win_bet/ea_atlas.py + summarise() for the round-trip; outputs C:/temp/dc_refine/pilot_f{0,1}_snap/
+    protocol:
+      weights: DeepCenter best.pt (epoch 2); export f0 pack split_0, f1 OOF split_1
+      eval: frozen atlas matches for (a'); scorer-exact re-match for (b'); both folds reported separately
+    note: >-
+      The pre-registered falsifier (a') fired in the WRONG DIRECTION on the deciding fold and (b') priced it
+      at -0.015 - the snap turns matched nodes into duplicates of the wrong cell. The peak diagnostic is the
+      mechanism: the heatmap has more local maxima than there are cells (82 vs 57 per frame, p90 424), and
+      those maxima sit a median 2.6 um from the annotated centre, i.e. no closer than the detector already is
+      (FACT-0313). Together with FACT-0317 this kills LEVER-0021 under both of its mechanisms.
+    date: '2026-08-26'
+    tags: [edge, localisation, killed-arm, deepcenter, mechanism]
+
+  - id: FACT-0317
+    statement: >-
+      DeepCenter best.pt carries almost no sub-voxel centre information - seeded 1.6 um off the truth its
+      +-1-window centroid recovers only ~20% of the offset (residual 1.29-1.38 um), seeded 3.3 um off only
+      ~25% (2.5-2.6 um); the 0.75 um "self-localisation" of FACT-0315 was the window returning its own centre
+    value: 1.290
+    unit: um_median_after_1p6um_y_offset_f1
+    scope:
+      f1_pilot_gt_nodes: 10753
+      seed_at_gt: {median: 0.754, mean: 0.803}
+      seed_plus_1p6um_y: {median: 1.290, mean: 1.357, p90: 2.081}
+      seed_plus_3p3um_y: {median: 2.475, mean: 2.519}
+      seed_plus_1p6um_z: {median: 1.382, mean: 1.377}
+      seed_plus_3p3um_z: {median: 2.632, mean: 2.598}
+      offset_recovered_frac: [0.17, 0.25]
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/dc_subvoxel_refine.py refine_points (com1 operator) seeded at GT + a known offset on the cached
+      fold-1 heatmaps, C:/temp/dc_refine/pilot_f1_best_hm/heatmaps; residual measured to the GT
+    protocol:
+      weights: DeepCenter best.pt, out-of-sample on 6bba (FACT-0310)
+      eval: distance to the GT node after centroiding in a +-1 pooled-voxel window around the offset seed
+    note: >-
+      The heatmap is a broad, flat blob (sigma-1 Gaussian target on a 1.625 um isotropic grid, trained
+      positive-unlabeled on sparse labels): its centroid inside a small window is set by the window, and its
+      local maxima are unreliable (FACT-0316). So neither centroid nor peak can localise a cell better than
+      the detector does. This is evidence about DeepCenter, not about the localisation MECHANISM - FACT-0270
+      (mislinks are geometrically wrong endpoints) still stands; what died is the assumption that the
+      deployed centre prior can fix them. Any successor needs a different localiser and its own falsifier.
+    date: '2026-08-26'
+    tags: [edge, localisation, deepcenter, mechanism, correction]
+
+  - id: FACT-0318
+    statement: >-
+      Colab Pro is available to the campaign again - 199.52 compute units on 2026-08-26 (host screenshot),
+      reversing the 2026-08-24 "Kaggle only, no Colab" decision
+    value: 199.52
+    unit: colab_compute_units
+    scope:
+      date: '2026-08-26'
+      backend_shown: Python 3 GCE (CPU) at ~0.08 units/h, 12.7 GB RAM, 225.8 GB disk
+      gpu_rates_units_per_hour: UNVERIFIED - roughly T4 ~2, L4 ~5, A100 ~12; check the Colab resources panel before planning
+    provenance: EXTERNAL
+    instrument: host message and screenshot, 2026-08-26 (session PKT-0017)
+    note: >-
+      HOST DECISION, not a measurement. Supersedes the compute framing in handoff.md "COMPUTE CHANGE
+      2026-08-24 - Colab is gone". Nothing runs on Colab automatically (CLAUDE.md rule 8); the built notebooks
+      assume /kaggle/input paths and Kaggle datasets, so a Colab variant of the factory output is prerequisite
+      work. Best first use: the zero-submission GPU work queued behind Kaggle's two-slot limit (FACT-0061) -
+      calibration stages 1-2 and the fold-1 LOEO configuration repair (FACT-0261).
+    date: '2026-08-26'
+    tags: [operational, compute, host-decision]

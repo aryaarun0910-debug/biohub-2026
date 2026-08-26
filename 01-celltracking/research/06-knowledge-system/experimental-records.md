@@ -4894,3 +4894,42 @@ reachability rises → the division ceiling rises with it.
 Which is what `FACT-0030`..`0033` said before I wrongly flagged them SUSPECT.
 
 Recorded as `FACT-0150`..`FACT-0202`.
+
+## 2026-08-26 — LEVER-0021 KILLED: the deployed centre prior cannot localise, and the deployed checkpoint is dead
+
+**Packet** `PKT-0017` · **cost** ~4 CPU-hours, 0 GPU sessions, 0 submissions · **instruments**
+`scripts/win_bet/dc_subvoxel_refine.py` (refine / snap / eval), `scripts/win_bet/dc_checkpoint_audit.py`,
+11 unit tests · **evidence** `C:/temp/dc_refine/` (outside git).
+
+**Substrate checks came first and each one changed the experiment.** DeepCenter's split is by embryo — every
+44b6 crop in training, every 6bba crop in validation (`FACT-0310`) — so fold 0 is in-sample for the prior and
+fold 1 is the deciding fold. The **deployed** `checkpoint_last.pt` is collapsed: validation loss rose 7× from its
+epoch-2 minimum and its heatmap is ~0 on unseen embryos (`FACT-0311`), which means the deployed gap veto rejects
+100% of checked gap points on the visible movies (`FACT-0312`). Only `best.pt` (epoch 2) was usable. The baseline
+residual is z-dominated and fold 1 carries a detector-specific z offset (`FACT-0313`).
+
+**Pre-registered arms (sub-voxel refinement around the detection).** Stage (a) on the honest fold: primary
+−1.3% median residual against a −10% bar. It passes only on the in-sample fold, and there the score is flat
+because the *mean* does not move; the scorer round-trip prices a −9% median at +0.0025 and a −14% median at
++0.0002 (`FACT-0314`). `FACT-0272`'s dose-response is refuted as a median-based model.
+
+**Amendment 1, pre-registered before measurement (peak-snap).** Worse on both folds — mean +6.4% / +14.2%,
+round-trip −0.0146 / −0.0114 (`FACT-0316`). Mechanism: the heatmap has more local maxima than cells and they
+sit a median 2.6 µm from the annotated centre. The seductive "0.75 µm self-localisation" was an oracle-window
+artefact — seeded 1.6 µm off the truth the centroid recovers ~20% of the offset (`FACT-0317`).
+
+| stage | fold 1 (honest) | fold 0 (in-sample) | bar | verdict |
+|---|---|---|---|---|
+| (a) sub-voxel, primary | `FACT-0314` | `FACT-0314` | −10% median | FAIL on f1 |
+| (b) sub-voxel, scorer | `FACT-0314` | `FACT-0314` | ≥ +0.010 | not reached |
+| (a′) peak-snap, primary | `FACT-0316` | `FACT-0316` | −10% mean | FAIL, wrong sign, both |
+| (b′) peak-snap, scorer | `FACT-0316` | `FACT-0316` | ≥ +0.005 f1 | FAIL, both |
+
+**What survives.** `FACT-0270` — mislinks are geometrically wrong endpoints — is evidence about the linker's
+inputs and is untouched. What died is the assumption that the pipeline's own centre prior can fix them.
+Any successor needs a different localiser and a falsifier written on the mean residual and the >3 µm tail.
+
+**Two things the campaign did not know this morning:** the deployed DeepCenter is dead weight that vetoes
+every gap repair (`FACT-0312`) — a one-submission question, not a lever until someone states a falsifier —
+and Colab Pro is back (`FACT-0318`, host decision), which changes where the queued zero-submission GPU work
+can run.

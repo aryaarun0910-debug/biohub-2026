@@ -16,6 +16,46 @@ record_kind: state
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
 
+> ## 🔴 2026-08-26 (late) — LEVER-0021 IS KILLED, the deployed DeepCenter is dead weight, and Colab is back
+>
+> **The priority-1 lane closed in one CPU session, both folds, both mechanisms, zero slots** (`PKT-0017`).
+> Sub-voxel refinement around the detection moved the honest-fold median residual **−1.3%** against a −10%
+> bar and passed only on the fold where DeepCenter is in-sample — and even there the score was flat, because
+> the *mean* residual never moved (`FACT-0314`). The pre-registered successor, snapping each detection to
+> the nearest heatmap peak, was **worse in sign** on both folds and lost −0.015 / −0.011 through the scorer
+> (`FACT-0316`). Root cause, measured: **the prior does not localise** — its peaks sit a median 2.6 µm from
+> the annotated centre and its centroid recovers ~20% of an imposed offset (`FACT-0317`). The 0.75 µm
+> "self-localisation" I recorded mid-session was the window returning its own centre; it is superseded.
+>
+> **What this does NOT kill:** `FACT-0270`. Mislinks are still geometrically wrong endpoints. What died is
+> the idea that the pipeline's own centre prior can fix them. `FACT-0272`'s dose-response is refuted as a
+> median-based model — the score follows the mean and the >3 µm tail. A successor needs a **different
+> localiser** and a falsifier written on those two statistics, then a scorer round-trip; do not reopen on
+> DeepCenter.
+>
+> **Three substrate facts worth more than the lever:**
+> 1. **The deployed DeepCenter checkpoint is collapsed** (`FACT-0311`): validation loss rose 7× from epoch 2
+>    to the deployed epoch 500, and on unseen embryos its heatmap is ~0 — so the deployed gap veto
+>    **rejects 100% of checked gap points** on the visible movies (`FACT-0312`). `best.pt` (epoch 2) accepts
+>    ~18%. The P10 A/B that would have measured this was built and never submitted. Whether accepting gap
+>    repairs helps the LB is a one-submission question; it is not a lever until someone writes its falsifier.
+> 2. **DeepCenter was trained on all of 44b6 and validated on all of 6bba** (`FACT-0310`) — any fold-0 number
+>    that touches it is in-sample.
+> 3. **Fold 1's −0.67-voxel z offset belongs to the LOEO detector** (`FACT-0313`, `FACT-0317`), not to the
+>    annotation — one more reason fold 1 is a crippled configuration (`FACT-0261`), not an embryo.
+>
+> **Compute changed (host, 2026-08-26): Colab Pro is available again** (`FACT-0318`, ~200 compute units).
+> This reverses the 2026-08-24 "Kaggle only" framing below. Nothing runs there automatically (rule 8), and the
+> built notebooks assume `/kaggle/input`, so a Colab variant of the factory output is prerequisite work. The
+> first use that pays: the zero-submission GPU work queued behind Kaggle's two slots (`FACT-0061`) —
+> calibration stages 1–2 and the fold-1 LOEO configuration repair.
+>
+> **Next actions, re-ranked:** (1) read `EXP-0021` / `EXP-0022` when they land — check the −1 control
+> reproduces the champion before anything else; (2) repair the fold-1 LOEO configuration (`FACT-0261`);
+> (3) calibration stages 1–2, now schedulable on Colab; (4) the two free division findings (`FACT-0295`);
+> (5) `LEVER-0019` at 4.5, env-gated. The localisation *mechanism* stays on the board without an owner or
+> an instrument.
+
 > ## 🔴 READ THIS FIRST — 2026-08-26. The campaign's central belief was leak-manufactured.
 >
 > **`EXP-0019` evaluated LOEO fold 1 (6bba) with weights trained on 6bba.** Its spec set no
@@ -58,7 +98,7 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > ±0.026/±0.041 — larger than the whole rank-148-to-rank-1 spread. **Paired deltas** are ±0.0036
 > / ±0.0006 and are the only usable currency (`FACT-0263`).
 >
-> ### 🟢 THE EDGE MECHANISM, AND THE NEW PRIORITY 1 (`LEVER-0021`)
+> ### 🟢 THE EDGE MECHANISM, AND THE ~~NEW PRIORITY 1~~ (`LEVER-0021` — **KILLED the same evening, see the block above**)
 >
 > **The linker is correct. The geometry is wrong.** Mislinked cells barely moved — GT
 > displacement median **2.33 / 2.44 µm** — yet our two detections sit **7.68 / 7.93 µm** apart.
