@@ -327,7 +327,7 @@ _chk = subprocess.run(["kaggle", "competitions", "files", "-c", _comp, "--csv", 
 if _chk.returncode != 0 or "401" in _chk.stdout + _chk.stderr or "403" in _chk.stdout + _chk.stderr:
     raise SystemExit("KAGGLE AUTH FAILED for competition data. KAGGLE_USERNAME must be the login name in "
                      "kaggle.json (not the profile slug) and KAGGLE_KEY its 32-char key; the account must have "
-                     "accepted the competition rules.\n" + (_chk.stdout + _chk.stderr)[-600:])
+                     "accepted the competition rules.\\n" + (_chk.stdout + _chk.stderr)[-600:])
 print("Kaggle auth OK as", os.environ["KAGGLE_USERNAME"], "| competition listing:",
       (_chk.stdout.strip().splitlines() or ["?"])[-1][:80])
 try:
