@@ -2218,3 +2218,50 @@ facts:
       the strict split is 83.3%/16.7% wrong-parent versus orphan.
     date: '2026-08-26'
     tags: [edge, lever-ranking, refinement]
+
+  - id: FACT-0280
+    statement: >-
+      Every cycle-2 edge conclusion holds under BOTH scorers, so the scorer ambiguity is moot
+      for the decisions - not merely resolved
+    value: null
+    unit: robustness
+    scope:
+      localisation_25pct_summarise: {f0: [0.0137, 0.0262], f1: [0.0213, 0.0368]}
+      localisation_25pct_evaluate_datasets: {f0: [0.0134, 0.0256], f1: [0.0210, 0.0364]}
+      gate_widen_micro_J_f0: {baseline: 0.8822, "5": 0.8809, "7": 0.8816, "9": 0.8468, "12": 0.6943}
+      gate_widen_micro_J_f1: {baseline: 0.6953, "5": 0.6906, "7": 0.6949, "9": 0.6895, "12": 0.6391}
+    provenance: MEASURED
+    instrument: dual scoring of every cycle-2 edge experiment under summarise() and evaluate_datasets()
+    note: >-
+      The localisation lever shrinks by only ~2% relative under the no-node-term scorer and stays
+      2-6x the best measured division gain on both folds. Gate widening is at or below baseline
+      at EVERY gate on BOTH folds under BOTH conventions. So LEVER-0021 and the gate kill do not
+      depend on which entry point the leaderboard calls.
+    date: '2026-08-26'
+    tags: [metric, robustness, edge]
+
+  - id: FACT-0281
+    statement: >-
+      The node-ratio term is NOT a vendoring artifact - three independent copies of the scorer,
+      including two derived from a competitor's LB-0.897 artifacts, all carry ADJUSTMENT_ALPHA
+    value: 3
+    unit: count
+    provenance: VERIFIED
+    instrument: >-
+      .venv/Lib/site-packages/tracking_cellmot/metrics.py (536 lines, installed/patched) versus
+      artifacts/kaggle/lb897_calibration/... and artifacts/kaggle/lb897_trackastra_v2/tracking_repo/src/biohub_tracking/metrics.py
+      (450 lines, byte-identical to each other)
+    note: >-
+      All three carry ADJUSTMENT_ALPHA = 0.1, SCORE_DIVISION_WEIGHT = 0.1 and a BYTE-IDENTICAL
+      per_sample_metrics. The installed copy's extra 86 lines are dedup and out-degree guards,
+      not scoring-formula changes.
+      .
+      CORROBORATES FACT-0250 INDEPENDENTLY: a competitor's own vendored scorer carries the node
+      term too. Combined with all 199 GT geffs shipping estimated_number_of_nodes, the node
+      adjustment is real.
+      .
+      Also: exactly ONE DistanceMatching implementation exists in the tree
+      (tracksdata/metrics/_matching.py:195), so the duplicate-stealing refutation (FACT-0271)
+      rests on the only matcher there is.
+    date: '2026-08-26'
+    tags: [metric, verified, corroboration]
