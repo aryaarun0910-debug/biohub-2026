@@ -1,10 +1,10 @@
 {
-  "active": false,
-  "approved_at": "",
-  "budget_units": 0.0,
-  "expires_at": "",
+  "active": true,
+  "approved_at": "2026-08-26T21:15:55Z",
+  "budget_units": 10.0,
+  "expires_at": "2026-08-27T03:15:55Z",
   "gpu": "L4",
-  "host_approval": "",
+  "host_approval": "10 units, L4, 6 h, smoke + one inference job (host, 2026-08-26)",
   "rates": {
     "A100": 12.0,
     "L4": 5.0,
@@ -12,7 +12,8 @@
     "unknown": 12.0
   },
   "scope_kinds": [
-    "smoke"
+    "smoke",
+    "notebook"
   ],
   "stop": false,
   "version": 1
