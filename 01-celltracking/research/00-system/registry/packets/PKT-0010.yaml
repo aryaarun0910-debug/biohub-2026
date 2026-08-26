@@ -1,5 +1,5 @@
 id: PKT-0010
-title: Integrity: substrate-contamination audit of the registry
+title: "Integrity: substrate-contamination audit of the registry"
 lever: null            # exploratory; holds no lever
 owner: rnd-agent
 lock: running
