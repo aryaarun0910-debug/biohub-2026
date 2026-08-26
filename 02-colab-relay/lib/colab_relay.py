@@ -100,6 +100,9 @@ JOB_SCHEMA = {
                                      # the queued notebook has its /kaggle/input literals rewritten to it
     "input_rewrites": 0,             # how many literals were rewritten (0 = notebook untouched)
     "max_hours": 3.0,                # hard timeout AND the unit estimate used by the gate
+    "python": "3.12",                # kernel for notebook jobs. Kaggle kernels run 3.12 and the support
+                                     # pack ships cp312 wheels; Colab's system Python is 3.13 (measured
+                                     # 2026-08-26: the pack's offline install fails there). "" = system.
     "relay_outputs": ["submission.csv", "*.json", "*.csv", "*.log"],   # small files -> relay
     "drive_outputs": ["**/*"],       # everything -> Drive runs/<id>/working/
     "publish_kaggle": False,         # also upload /kaggle/working to a private Kaggle dataset
