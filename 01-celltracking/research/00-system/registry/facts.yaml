@@ -3453,3 +3453,37 @@ facts:
       (tomasa2, Soheil) and node-budget intel (EXTERNAL_RESEARCH.md). Owned by LEVER-0026.
     date: '2026-08-27'
     tags: [edge, adj-edge, detector, ceiling, headline, both-folds, transfer-risk]
+
+  - id: FACT-0339
+    statement: >-
+      RECIPE PARITY FAILS HARD: our July split_0 (30 epochs, batch 1, 800 iters, last-epoch export; trained on 6bba,
+      44b6 held out) scores 0.7447 on the fold-0 champion pipeline against the pack split_0's 0.9070 - a
+      paired delta of -0.1623 (95% crop-bootstrap CI [-0.1914, -0.1334]), driven by a node-recall collapse
+      0.8720 vs 0.9881; our training recipe does NOT reproduce the public detector quality
+    value: -0.1623
+    unit: score_delta_f0_ours_minus_pack
+    scope:
+      control_pack_split_0: {score: 0.9070, node_recall: 0.9881}
+      p25_our_split_0: {score: 0.7447, node_recall: 0.8720, adj_edge_delta: -0.1590}
+      prereg_threshold: "within FACT-0263 MDE (+-0.0036) = parity; > 0.01 below = recipe is the bottleneck"
+      result: "16x past the bottleneck threshold - the recipe is broken, not marginal"
+      our_recipe: {epochs: 30, batch: 1, iters_per_epoch: 800, lr: 1e-4, export: last_epoch, sha: d3e89eb3}
+      pack_recipe: {manifest_name: "biohub-tracking-support-pack-400ep-snapshot-v1", epochs_unknown_slug_says_50, sha: 12f6881e}
+    provenance: MEASURED
+    instrument: >-
+      kaggle_factory fetch of aryaarun07/biohub-p25-recipe-parity-loeo-f0 (EXP-0026) -> C:/temp/p25_recipe/loeo_split0_strict.csv.gz;
+      scripts/win_bet/ea_atlas.py + tracking_cellmot.summarise paired over 71 identical fold-0 crops vs the EXP-0022 control
+      (C:/temp/p20_relink_sweep_f0/atlas/crops_pen_off.parquet); summary C:/temp/p25_recipe/parity_summary.json
+    experiment: EXP-0026
+    protocol:
+      weights: OUR split_0 (loeo_manifest weights /kaggle/working/loeo_weights/edge_predictor.pth, our OOF) vs pack split_0; both 6bba-trained / 44b6 held out - a clean recipe A/B on the same held-out embryo
+      eval: scorer-exact per-crop, paired crop bootstrap 2000 resamples
+    note: >-
+      The decisive cheap test of the retrain question (host, 2026-08-27). It does NOT kill LEVER-0023 but it re-scopes
+      it: a from-scratch/continuation retrain with OUR pipeline lands far BELOW the public stack, matching the external
+      evidence (tomasa2 0.776 vs 0.849, leevvin node recall 0.924 after 3 epochs). Reaching parity needs a materially
+      better recipe (many more epochs, proper best-checkpoint selection, likely the full trunk not the 33-param head)
+      BEFORE any H1 lane can add score. Do not spend Colab units on S5/H1 training until a recipe reaches split_0
+      parity offline. The public pack is a 400-epoch snapshot; ours is 30 epochs - the gap is plausibly under-training.
+    date: '2026-08-27'
+    tags: [retrain, recipe, parity, null, headline, h1]

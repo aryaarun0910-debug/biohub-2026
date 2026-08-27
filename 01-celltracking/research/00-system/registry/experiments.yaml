@@ -362,13 +362,13 @@ experiments:
     kernel_version: 1
     submission: null
     lb: null
-    status: running
+    status: complete
     date: '2026-08-27'
-    facts: [FACT-0321, FACT-0322, FACT-0263]
+    facts: [FACT-0321, FACT-0322, FACT-0263, FACT-0339]
     note: >-
       The cheapest decisive test of the retrain question (LEVER-0023): our 30-epoch x 800-iter, batch-1, lr 1e-4
       split_0 (train 6bba, hold out 44b6; kernel aryaarun07/biohub-train-oof, last epoch = proxy-best, sha d3e89eb3...)
       against the pack's split_0 (sha 12f6881e...) on identical pipeline and crops, paired vs the EXP-0022 control.
       PRE-REGISTERED reading: within the fold-0 paired MDE (FACT-0263) = the recipe reproduces the public quality and
       continued training is credible; more than 0.01 below = the recipe/compute is the bottleneck. No submission.
-      Built + verified 2026-08-27; PUSHED v1 2026-08-27 14:53 local by scripts/core/kaggle_queue.py after the host's GPU/submission authorisation (rule 8 satisfied).
+      SCORED 2026-08-27 (FACT-0339): our split_0 -0.162 below the pack's on fold 0 - the recipe fails parity, retrain re-scoped. Built + verified 2026-08-27; PUSHED v1 2026-08-27 14:53 local by scripts/core/kaggle_queue.py after the host's GPU/submission authorisation (rule 8 satisfied).

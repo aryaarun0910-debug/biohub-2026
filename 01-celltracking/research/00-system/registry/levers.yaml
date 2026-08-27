@@ -630,7 +630,7 @@ levers:
       LOEO export with the new weights must show a paired delta >= +0.005 (FACT-0321 instrument, crop
       bootstrap CI excluding 0) or the weights are not deployed. Gate 4: one submission; band stated
       before the score. Any gate failing closes the lever on evidence about itself.
-    supporting: [FACT-0296, FACT-0321, FACT-0183]
+    supporting: [FACT-0296, FACT-0321, FACT-0183, FACT-0339]
     note: >-
       Re-scoped from the S1/S5 spec after the 2026-08-27 dossier (C:/temp/intel/H1_DOSSIER.md) and
       external research (C:/temp/intel/EXTERNAL_RESEARCH.md): S1 as packaged trains a 33-parameter
