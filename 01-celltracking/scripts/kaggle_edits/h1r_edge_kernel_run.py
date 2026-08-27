@@ -109,6 +109,7 @@ summary = {
     "max_steps": args.max_steps,
     "appearance_dim": args.appearance_dim,
     "triplet_weight": args.triplet_weight,
+    "pos_encoding": POS_ENCODING,
     "nodes": str(edge_assets.nodes),
     "identity": str(edge_assets.identity),
 }
@@ -125,9 +126,15 @@ for name in (
 # Uniquely-named copies for the LOEO consumer (deploy_h1r_edge_s5_loeo_f0.json): loeo_retarget.py
 # resolves BIOHUB_LOEO_WEIGHTS_GLOB with a depth ladder on the BASENAME, and the pack also
 # ships an `edge_predictor_best.pth`, so the plain name would match twice and fail closed.
+# The rope4d arm exports under its OWN basenames so deploy_h1r_edge_s5_rope4d_loeo_f0.json can
+# never pick up a sinusoidal checkpoint (and vice versa); POS_ENCODING comes from the trainer cell.
+_unique_names = {
+    "sinusoidal": ("edge_predictor_best_h1r_s5.pth", "config_h1r_s5.json"),
+    "rope4d": ("edge_predictor_best_h1r_s5_rope4d.pth", "config_h1r_s5_rope4d.json"),
+}[POS_ENCODING]
 for src_name, unique_name in (
-    ("edge_predictor_best.pth", "edge_predictor_best_h1r_s5.pth"),
-    ("config.json", "config_h1r_s5.json"),
+    ("edge_predictor_best.pth", _unique_names[0]),
+    ("config.json", _unique_names[1]),
 ):
     source = out / src_name
     if source.is_file():

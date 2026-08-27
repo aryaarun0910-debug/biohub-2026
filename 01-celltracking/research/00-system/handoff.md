@@ -53,10 +53,34 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > mislocalised real cells, the intensity centroid (`LEVER-0022`) and a >7 um re-localiser compose; if they are false
 > detections, a per-edge "target has no GT-like support" veto is free on the edge term.
 >
-> **Not done / in flight at the time of writing:** stage C rule (agent), RoPE-4D implementation (agent), adversarial
-> audit of `div_reach_steal.py` (agent), FP-edge anatomy (agent). First-wave agents died on an API session limit; their
-> partial artifacts under `C:/temp/div_reach/rule/` are not results. Colab: no session open; the lane still lacks a parity
-> number (`FACT-0327`). No GPU launch or submission was performed by the agent this session.
+> **Resolved after the banner (2026-08-27, host authorised GPU + submissions):**
+> - **GPU queue live** (`scripts/core/kaggle_queue.py`, host-authorised): P24 (`EXP-0025`) PUSHED and SUBMITTED
+>   (submission 55820202, band 0.921-0.929, score pending); p25 recipe parity (`EXP-0026`) and p23 (`LEVER-0022`)
+>   RUNNING; `h1r_edge_s5` then its LOEO consumer queued. The runner honours the 2-slot cap and a foreign-session
+>   cap-hit (fix + `test_kaggle_queue.py`).
+> - **LEVER-0025 stage C FAILED the bar and is PARKED** (`FACT-0337`): the daughter steal does NOT survive GT-free
+>   (precision ~0; the deployable rule scores -0.0141/-0.0076), and the orphan sub-lane is +0.0013 (f1) / -0.0003 (f0),
+>   below +0.003. The +0.0192/+0.0133 oracle (`FACT-0334`) was GT choosing the steal. The instrument is
+>   adversarially audited (23 tests) and confirmed scorer-exact and CONSERVATIVE - do not re-derive it.
+> - **NEW PRIORITY-1 LEVER-0026** (`FACT-0338`): a GT-guided rule that deletes the unmatched endpoints of charged FP
+>   edges scores **+0.065 (f0) / +0.096 (f1)** in the dominant adj_edge term - 3-5x the division ceiling. ~60% of
+>   those endpoints are DUPLICATES of already-detected annotated cells (GT-free deduppable, legitimate); ~40% are
+>   edges into unannotated regions (removing them games the sparse metric - LB transfer UNCERTAIN). This cuts at the
+>   offline/LB seam, so it needs a committed GT-free dedup rule THEN a submission to judge - the offline number
+>   could read the wrong sign. This is the highest unmeasured ceiling on the board and matches the frontier's
+>   'it's the detector' / node-budget intel.
+> - **RoPE-4D built** (model-encoding lane): `H1R_EDGE_POS_ENCODING=rope4d` in `scripts/kaggle_edits/h1r_rope4d.py`,
+>   specs `h1r_edge_s5_rope4d{,_smoke}.json` + `deploy_h1r_edge_s5_rope4d_loeo_f0.json` (inference patch wired),
+>   `tests/test_h1r_rope4d.py`. The sinusoidal control is bit-identical (tested); rope4d starts from the public
+>   weights (RoPE has no params). Gate 2: held-out link_top1 vs sinusoidal at equal steps (`FACT-0329` baseline);
+>   gate 3: fold-0 paired delta. This is the association-term lane `FACT-0335` points at.
+> - **Colab lane:** still no parity number (`FACT-0327`); an observable-bootstrap rebuild was started and cut off by
+>   the rate limit. The next session should finish it (host authorised T4/L4 Colab).
+>
+> **Ranked next actions:** (1) read P24's LB score, then p25's paired delta (the retrain-recipe answer) and p23's
+> score; (2) build the LEVER-0026 GT-free dedup rule and take its stage-2 submission - highest ceiling; (3) run the
+> RoPE-4D smoke then the fold-0 gate on Colab/Kaggle; (4) finish the Colab observable bootstrap. All five queued
+> kernels and both new levers are instrumented and gated.
 
 > ## 🟢 2026-08-27 (early hours) — a live candidate, a two-fold calibration anchor, two levers killed, H1 gated
 >

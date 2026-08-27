@@ -672,7 +672,15 @@ levers:
       predecessor; daughter evidence from the GT child OR a grandchild) plus a TARGETED steal of the
       second daughter from a provably-wrong parent converts metric-legal-but-unscored GT divisions into
       true positives at near-zero edge cost, lifting the division term on BOTH embryo directions
-    status: running
+    status: parked
+    reopen_when: >-
+      a LEARNED triple scorer (LEVER-0002 class) reaches >= 15% precision on the steal candidates cross-fold,
+      or the orphan sub-lane is combined with another positive to clear +0.003 on a fold; the census and
+      oracle (FACT-0333/0334) stand and do not need re-deriving.
+    outcome: >-
+      Stage C FAILED the bar (FACT-0337): the GT-free steal scores -0.0141/-0.0076 (precision ~0), the
+      orphan sub-lane is +0.0013 (f1) / -0.0003 (f0), below +0.003. The +0.0192/+0.0133 oracle was GT
+      selection, not per-candidate signal. Parked, not killed.
     falsifier: >-
       Three stages, each on the clean champion controls (FACT-0322) with the scorer round-trip, both folds
       reported. Stage A (census, committed instrument scripts/win_bet/div_reach_steal.py): must reproduce
@@ -695,3 +703,31 @@ levers:
       a GT-free rule is expected to keep 30-60% of that. Also composes with LEVER-0019 (removal) rather
       than competing. Not a detector change; CPU only; zero submissions until stage C passes.
     priority: 2
+
+  - id: LEVER-0026
+    claim: >-
+      Removing spurious FP-edge endpoints - unmatched predicted nodes that are the downstream endpoint of a
+      charged false-positive edge - lifts the dominant adj_edge term, and the GT-FREE-identifiable subset (a
+      predicted node that duplicates a better-connected neighbour within ~5-7 um) recovers a usable fraction of
+      the +0.065 (f0) / +0.096 (f1) GT-guided ceiling on BOTH embryo directions
+    status: open
+    falsifier: >-
+      Stage 1 (offline, both folds, committed instrument): a GT-free dedup/prune rule scored through the official
+      round-trip on the champion controls must be >= +0.003 on BOTH folds with adj_edge NOT worse than -0.0005;
+      below that offline it does not proceed. Stage 2 (the decisive one, because this lever cuts at the offline/LB
+      seam): ONE submission of the rule on P9 with a band stated first - the offline gain is UNTRUSTWORTHY here
+      because deleting edges to real-but-unannotated cells games the train-GT sparsity, so the LB is the only
+      honest judge; killed if the LB does not move up. The rule must be a pure post-emission node/edge prune, no
+      detector change, and must never delete a node that carries a scored TP edge.
+    supporting: [FACT-0338, FACT-0335, FACT-0260]
+    note: >-
+      Opened 2026-08-27 from the FP-endpoint anatomy. NEW MECHANISM relative to the refuted dedup lane (the
+      2026-08-26 "duplicate-stealing REFUTED, we UNDER-predict nodes" finding was about ~8.4 um mislink competitors
+      on fold 1; this is a DIFFERENT population - the unmatched endpoints of charged FP edges, 815/1377 of which on
+      fold 0 sit within 7 um of an already-detected annotated cell, i.e. genuine local over-detection). The ceiling
+      is a ceiling and PARTLY metric-gaming: ~35-40% of U have no annotation within 7 um and may be real cells.
+      The lever's whole point is the offline/LB seam - the offline apparatus reads ~0.6-0.7x the LB on real gains
+      (FACT-0321/0326) but could read the WRONG SIGN here, so stage 2 is a deliberate submission, not a formality.
+      Instrument to build: a committed GT-free prune in scripts/win_bet/ (dedup by predicted-graph connectivity
+      + distance) with the same round-trip as div_steal_rule.py. Highest unmeasured ceiling on the board.
+    priority: 1

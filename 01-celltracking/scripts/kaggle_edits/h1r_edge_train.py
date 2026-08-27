@@ -23,6 +23,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 
 from h1r_edge_data import Zh001rEdgeData, build_transition_target, discover_edge_assets
+from h1r_rope4d import install_rope4d, resolve_pos_encoding, rope4d_config_from_env
 
 
 DEPLOY_DOWNSAMPLE = (1.0, 4.0, 4.0)
@@ -197,8 +198,16 @@ class EdgeTrainingModel(nn.Module):
 
 
 def load_public_full_model(T, weights: str | Path, device: torch.device,
-                           *, appearance_dim: int = 0) -> EdgeTrainingModel:
-    """Reconstruct and strictly load the exact full public checkpoint."""
+                           *, appearance_dim: int = 0,
+                           pos_encoding: str | None = None) -> EdgeTrainingModel:
+    """Reconstruct and strictly load the exact full public checkpoint.
+
+    ``pos_encoding`` defaults to ``POS_ENCODING`` (the ``H1R_EDGE_POS_ENCODING`` knob). With
+    ``sinusoidal`` the returned model is the untouched vendored class, bit-identical to the
+    public checkpoint. With ``rope4d`` the parameter-free rotary module is installed AFTER
+    the strict load, so every pretrained weight is carried over and training starts from the
+    public model, never from scratch (``h1r_rope4d.py``).
+    """
     weights = Path(weights); cfg_path = weights.parent / "config.json"
     if not cfg_path.is_file():
         raise FileNotFoundError(f"public config missing next to weights: {cfg_path}")
@@ -211,6 +220,8 @@ def load_public_full_model(T, weights: str | Path, device: torch.device,
     if not isinstance(state, dict) or not state or not all(torch.is_tensor(v) for v in state.values()):
         raise ValueError("initial weights must be a bare full-model state_dict")
     base.load_state_dict(state, strict=True)
+    if resolve_pos_encoding(POS_ENCODING if pos_encoding is None else pos_encoding) == "rope4d":
+        install_rope4d(base, ROPE4D_CONFIG if ROPE4D_CONFIG is not None else rope4d_config_from_env())
     return EdgeTrainingModel(base, appearance_dim).to(device)
 
 
@@ -226,6 +237,17 @@ DIVISION_LOSS_WEIGHT = float(os.environ.get("H1R_DIV_WEIGHT", "3.0"))
 TRUNK_MODE = os.environ.get("H1R_TRUNK_MODE", "frozen").strip().lower()
 if TRUNK_MODE not in {"frozen", "adapt", "distill"}:
     raise ValueError(f"H1R_TRUNK_MODE must be frozen|adapt|distill, got {TRUNK_MODE!r}")
+
+# Positional encoding of the association transformer (H1R_EDGE_POS_ENCODING).
+#   sinusoidal : the vendored model untouched -- absolute sinusoidal features only. DEFAULT,
+#                bit-identical to the public checkpoint, and the control rope4d must beat.
+#   rope4d     : ADDS a 4-D rotary rotation of attention queries/keys over (t, z, y, x) in
+#                physical units so every attention logit depends on displacement only
+#                (h1r_rope4d.py). Parameter-free: the public weights load unchanged and the
+#                absolute sinusoidal inputs are kept. Band knobs: H1R_ROPE_BANDS,
+#                H1R_ROPE_SPACE_WAVELENGTHS_UM, H1R_ROPE_TIME_WAVELENGTHS.
+POS_ENCODING = resolve_pos_encoding()
+ROPE4D_CONFIG = rope4d_config_from_env() if POS_ENCODING == "rope4d" else None
 
 
 @torch.no_grad()
@@ -494,7 +516,16 @@ def run(args) -> dict:
     resume = _discover_resume(Path(args.out))
     Path(args.out).mkdir(parents=True, exist_ok=True)
     public_config = Path(args.weights).parent / "config.json"
-    (Path(args.out) / "config.json").write_text(public_config.read_text())
+    config_text = public_config.read_text()
+    if POS_ENCODING == "rope4d":
+        # Self-describing checkpoint: the LOEO consumer's predict subprocess installs the same
+        # rotation from these keys (h1r_rope4d_inference_patch.py). A sinusoidal config is
+        # still copied byte-for-byte.
+        config_text = json.dumps({**json.loads(config_text),
+                                  **model.base.transformer.rope.export_config()}, indent=2)
+    (Path(args.out) / "config.json").write_text(config_text)
+    print("H1R_POS_ENCODING", json.dumps({"pos_encoding": POS_ENCODING, "rope4d": ROPE4D_CONFIG},
+                                          sort_keys=True))
     if args.resume and resume.exists(): start, best, history = load_resume(resume, model, opt, sched, scaler, device)
     if not history:
         val_ds.set_epoch(0)
@@ -536,6 +567,7 @@ def run(args) -> dict:
         save_resume(resume, model, opt, sched, scaler, epoch=epoch, best=best, history=history)
         (Path(args.out) / "metrics.json").write_text(json.dumps(history, indent=1))
     return {"best": best, "history": history, "trunk_mode": TRUNK_MODE,
+            "pos_encoding": POS_ENCODING,
             "final_detection_drift": history[-1].get("detection_drift") if history else None}
 
 

@@ -343,26 +343,26 @@ experiments:
     title: P24 - DeepCenter best.pt + safe-division veto ON, env-only A/B on the P9 champion (LEVER-0024)
     spec: scripts/kaggle_specs/p24_deepcenter_best_veto.json
     kernel: aryaarun07/biohub-p24-deepcenter-best-veto
-    kernel_version: null
-    submission: null
+    kernel_version: 1
+    submission: 55820202
     lb: null
-    status: built
+    status: pending
     date: '2026-08-27'
     facts: [FACT-0311, FACT-0312, FACT-0331]
     note: >-
       Built and verified locally 2026-08-27 (cell-2 env diff only: best.pt path, expected epoch 2,
       BIOHUB_DEEPCENTER_SAFE_DIV_VETO=1; defect gate PASS). PRE-REGISTERED band 0.921-0.929, central 0.925;
-      falsifier <= 0.925. Packet PKT-0020. NOT pushed, NOT submitted - rule 8, host go required. Attribution
+      falsifier <= 0.925. Packet PKT-0020. PUSHED v1 2026-08-27 14:53 local (host GPU + submission authorisation given the same day, rule 8 satisfied); the queue runner submits on audit PASS. Attribution
       follow-up if it moves: P10 (best.pt alone, EXP-less, built 2026-08-24).
 
   - id: EXP-0026
     title: P25 - recipe parity, fold-0 LOEO of the champion configuration with OUR July split_0 instead of the pack's
     spec: scripts/kaggle_specs/p25_recipe_parity_loeo_f0.json
     kernel: aryaarun07/biohub-p25-recipe-parity-loeo-f0
-    kernel_version: null
+    kernel_version: 1
     submission: null
     lb: null
-    status: built
+    status: running
     date: '2026-08-27'
     facts: [FACT-0321, FACT-0322, FACT-0263]
     note: >-
@@ -371,4 +371,4 @@ experiments:
       against the pack's split_0 (sha 12f6881e...) on identical pipeline and crops, paired vs the EXP-0022 control.
       PRE-REGISTERED reading: within the fold-0 paired MDE (FACT-0263) = the recipe reproduces the public quality and
       continued training is credible; more than 0.01 below = the recipe/compute is the bottleneck. No submission.
-      Built + verified 2026-08-27; awaiting push (host).
+      Built + verified 2026-08-27; PUSHED v1 2026-08-27 14:53 local by scripts/core/kaggle_queue.py after the host's GPU/submission authorisation (rule 8 satisfied).

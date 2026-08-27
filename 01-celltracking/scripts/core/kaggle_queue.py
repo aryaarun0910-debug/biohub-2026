@@ -139,11 +139,22 @@ def tick(items: list[Item], *, status_fn, push_fn, complete_fn, max_running: int
             it.status = "running"
             it.pushed_at = now
             events.append(f"{it.name}: pushed -> {KF.OWNER}/{it.slug} v{it.kernel_version}")
+        elif rc == RC_SLOT_CAP:
+            # Kaggle's cap counts kernels this queue does not know about (a foreign or
+            # pre-existing session). Keep the item pending and try again next tick; a
+            # cap hit is never evidence about the spec.
+            it.note = "slot cap reached at push; waiting"
+            events.append(f"{it.name}: slot cap reached, will retry next tick")
+            break
         else:
             it.status = "error"
             it.finished_at = now
             events.append(f"{it.name}: push FAILED ({it.note or rc}) - skipped")
     return events
+
+
+RC_SLOT_CAP = 2
+SLOT_CAP_SIGNATURE = "maximum batch gpu session count"
 
 
 def all_done(items: list[Item]) -> bool:
@@ -185,8 +196,16 @@ def build_queue(spec_paths: list[Path], existing: list[Item], versions: dict[str
 
 # ------------------------------------------------------------------------------ side effects
 def real_push(it: Item) -> int:
+    import contextlib
+    import io
     spec = KF.load_spec(Path(it.spec_path))
-    rc = KF.cmd_push(spec)
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = KF.cmd_push(spec)
+    out = buf.getvalue()
+    print(out.strip())
+    if rc != 0 and SLOT_CAP_SIGNATURE in out.lower():
+        return RC_SLOT_CAP
     if rc == 0:
         man = json.loads(KF.manifest_path(spec).read_text(encoding="utf-8"))
         pushed = man.get("pushed_slug")

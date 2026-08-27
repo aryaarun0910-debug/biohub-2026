@@ -1,11 +1,11 @@
 {
-  "name": "h1r_edge_s5_smoke",
-  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\h1r_edge_s5_smoke.json",
+  "name": "h1r_edge_s5_rope4d_smoke",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\h1r_edge_s5_rope4d_smoke.json",
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
-  "built_notebook": "notebooks\\kaggle_h1r_edge_s5_smoke\\biohub-h1r-edge-s5-smoke.ipynb",
-  "built_sha256": "156aa277d468db2cb8a2a305967f374057235c75a68fbd232901918db3292f24",
-  "config_hash": "dff3130d42d6",
+  "built_notebook": "notebooks\\kaggle_h1r_edge_s5_rope4d_smoke\\biohub-h1r-edge-s5-rope4d-smoke.ipynb",
+  "built_sha256": "3f9e86e39188dd5fa329299c71308a2102e62e74e1c4d97ecf3d70000db0f454",
+  "config_hash": "b9e406328699",
   "n_cells": 11,
   "edits": [
     {
@@ -13,7 +13,7 @@
       "cells": [
         2
       ],
-      "payload_sha256": "9e8e5602137fdd5247a3f4ba5d7e8f9fc601a7181f621b8f5fd8cc870a6b7ae8"
+      "payload_sha256": "7f08fec79a10c16740a1237dc4635a84019d0d8d0fe7382efec2a898223209e7"
     },
     {
       "kind": "replace_cell",
@@ -44,8 +44,8 @@
       "payload_sha256": "7b5223774758abcd46b9a51c161007eb63a6e52438ed0b33ef8750aa2da61017"
     }
   ],
-  "declared_slug": "biohub-h1r-edge-s5-smoke",
-  "title": "Biohub H1R Edge S5 Smoke",
+  "declared_slug": "biohub-h1r-edge-s5-rope4d-smoke",
+  "title": "Biohub H1R Edge S5 RoPE4D Smoke",
   "defect_gate": {
     "ledger": "scripts\\core\\experiment_defects.json",
     "passed": [

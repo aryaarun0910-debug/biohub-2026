@@ -82,6 +82,22 @@ def test_failed_push_marks_error_and_does_not_block_the_queue():
     assert items[0].status == "error" and items[1].status == "running"
 
 
+def test_slot_cap_at_push_keeps_the_item_pending_and_stops_the_tick():
+    """Kaggle's cap counts sessions the queue does not know about. A cap hit is not evidence
+    about the spec: the item stays pending and later items are not attempted this tick."""
+    items = [item("a"), item("b")]
+    calls = []
+
+    def push_fn(it):
+        calls.append(it.name)
+        return Q.RC_SLOT_CAP
+
+    ev = Q.tick(items, status_fn=lambda s: "RUNNING", push_fn=push_fn, complete_fn=lambda it: None, max_running=2, now=0.0)
+    assert calls == ["a"]
+    assert [i.status for i in items] == ["pending", "pending"]
+    assert any("slot cap" in e for e in ev)
+
+
 def test_post_complete_failure_is_recorded_not_raised():
     items = [item("a", status="running", expects=True)]
 

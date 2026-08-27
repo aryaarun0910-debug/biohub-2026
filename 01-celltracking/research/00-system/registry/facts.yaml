@@ -3377,3 +3377,79 @@ facts:
       Our own reader (src/biotrack/submission.py) already parses floats.
     date: '2026-08-27'
     tags: [format, submission, deployment-risk]
+
+  # ==================================================================================
+  # 2026-08-27 (day, cont.) - stage C null for the steal; the FP-endpoint ceiling
+  # ==================================================================================
+  - id: FACT-0337
+    statement: >-
+      LEVER-0025 stage C FAILS its bar: the daughter STEAL does not survive without ground truth - its
+      per-candidate geometry cannot separate the ~35 true steals from ~5.8M lookalikes (precision ~1e-6),
+      and the deployable-style rule (deployed proposer with the orphan condition relaxed) scores
+      -0.0141 (f0, CI -0.0173..-0.0112) / -0.0076 (f1, CI -0.0087..-0.0064). The ORPHAN sub-lane is a real
+      but tiny positive: the best cross-fold rule is +0.0013 (f1, CI +0.0001..+0.0027, adj_edge -0.0002,
+      +11 division TP) and -0.0003 (f0, CI covers 0) - below the +0.003 stage-C bar
+    value: -0.0076
+    unit: score_delta_f1_steal_rule
+    scope:
+      steal_rule_R1: {f0: {delta: -0.0141, ci95: [-0.0173, -0.0112], div_fp: "69->101", applied: 13074}, f1: {delta: -0.0076, ci95: [-0.0087, -0.0064], div_fp: "351->529", applied: 18577}}
+      orphan_rule_fit_f1_R2p: {f1: {delta: 0.0013, ci95: [0.0001, 0.0027], adj_edge: -0.0002, div: "15->26 TP, 351->431 FP", applied: 2475}, f0: {delta: -0.0003, ci95: [-0.0020, 0.0020], applied: 1808}}
+      orphan_rule_fit_f0_R2: {f1: {delta: 0.0008, ci95: [-0.0002, 0.0021]}, f0: {delta: -0.0006, ci95: [-0.0025, 0.0018]}}
+      oracle_ceiling_split: {f0: {steal_pos_value: 0.0110, orphan_pos_value: 0.0055}, f1: {steal_pos_value: 0.0047, orphan_pos_value: 0.0048}}
+      break_even_precision_est: 0.10
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/div_steal_rule.py (features / fit / run) - GT-free candidate population with oracle labels,
+      cross-fold rule search, official per-crop round-trip; outputs C:/temp/div_reach/rule/e2e/run_summary_R*.json,
+      rule_table.md, rulesearch_summary.json; end-to-end paired crop bootstrap 2000 resamples
+    experiment: EXP-0022
+    protocol:
+      weights: f0 pack split_0 (clean), f1 OOF split_1 (honest)
+      eval: scorer-exact per-crop rows, all crops, rule fit on one fold and reported on the other
+    note: >-
+      The stage-B oracle (FACT-0334) was +0.0192/+0.0133 because GROUND TRUTH chose which of 5.8M candidates to
+      steal; the signal is not in per-candidate geometry, so a GT-free rule cannot recover it. This is the honest
+      close of the steal mechanism as a POST-PROCESSING lever - it is not killed (the census and oracle stand, and
+      the orphan sub-lane is cross-fold positive), it is PARKED below the bar. A LEARNED triple scorer over the
+      candidates (FACT-0182's class, Zebrahub triples FACT-0296) is the only remaining route and belongs to
+      LEVER-0002, not here. Prediction record: the break-even precision was estimated at ~10%; the achieved
+      precision on the steal is ~0%, so the honest economics called this correctly before the round-trip.
+    date: '2026-08-27'
+    tags: [division, steal, stage-c, null, both-folds]
+
+  - id: FACT-0338
+    statement: >-
+      The dominant adj_edge term has a large ceiling from removing SPURIOUS FP-edge endpoints: a GT-guided rule
+      that deletes every unmatched node which is an endpoint of a charged FP edge scores +0.0648 (f0, CI
+      +0.0545..+0.0761; edge Jaccard 0.886->0.947, division FP 69->1) and +0.0961 (f1, CI +0.0868..+0.1049; edge
+      Jaccard 0.700->0.790, division FP 351->0) - 3-5x the division ceiling, in the term that is 90% of the score
+    value: 0.0961
+    unit: score_delta_f1_oracle_delete_U
+    scope:
+      f0: {control: 0.9070, rule: 0.9718, delta: 0.0648, ci95: [0.0545, 0.0761], adj_edge_delta: 0.0626, div_fp: "69->1", n_fp_edges: 1394}
+      f1: {control: 0.7086, rule: 0.8046, delta: 0.0961, ci95: [0.0868, 0.1049], adj_edge_delta: 0.0920, div_fp: "351->0", n_fp_edges: 14194}
+      fp_one_unmatched_endpoint: {f0: 1377, f1: 14107}
+      U_composition_f0: {dup_of_detected_annotated_le7um: 815, no_annotation_7_12um: 501, no_annotation_gt12um: 61}
+      U_composition_f1: {dup_of_detected_annotated_le7um: 8761, no_annotation_7_12um: 4949, no_annotation_gt12um: 397}
+      U_within_5um_of_another_pred: {f0: 168}
+    provenance: MEASURED
+    instrument: >-
+      scratchpad audit anatomy.py + score_rule.py (rule oracle_delete_U) - official per-crop round-trip on the
+      EXP-0021/EXP-0022 controls; outputs C:/temp/.../scratchpad/audit/score_f{0,1}_oracle_delete_U.json,
+      anatomy_f{0,1}.json; atlas edge/node tables of scripts/win_bet/ea_atlas.py
+    experiment: EXP-0022
+    protocol:
+      weights: f0 pack split_0 (clean), f1 OOF split_1 (honest)
+      eval: scorer-exact, all crops, GT used ONLY to identify the unmatched endpoints (this is a ceiling)
+    note: >-
+      A GT-GUIDED CEILING, and it cuts exactly at the offline/LB seam, so it must not be quoted as a forecast.
+      The unmatched endpoint U of a charged FP edge (C -> U, C matched so the edge is pred_valid) splits two ways:
+      (1) ~59% (f0) / ~62% (f1) are DUPLICATES within 7 um of an already-DETECTED annotated cell - genuine
+      over-detection, identifiable GT-FREE (U sits near a better-connected predicted node), removal legitimate;
+      (2) the rest are edges into regions with no annotation within 7 um - possibly real UNANNOTATED cells, whose
+      removal GAMES the sparse metric and may NOT transfer to the hidden test (which has its own sparse GT). The
+      legitimate duplicate subset alone bounds a GT-free lever; the whole +0.065/+0.096 is not claimable. This is
+      the single highest-ceiling finding of the campaign and aligns with the frontier's "it's the detector"
+      (tomasa2, Soheil) and node-budget intel (EXTERNAL_RESEARCH.md). Owned by LEVER-0026.
+    date: '2026-08-27'
+    tags: [edge, adj-edge, detector, ceiling, headline, both-folds, transfer-risk]

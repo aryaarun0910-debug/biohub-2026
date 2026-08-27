@@ -1,17 +1,16 @@
 {
-  "name": "h1r_edge_s5",
-  "slug": "biohub-h1r-edge-s5",
-  "title": "Biohub H1R Edge S5",
-  "code_file": "biohub-h1r-edge-s5.ipynb",
-  "out_dir": "notebooks/kaggle_h1r_edge_s5",
+  "name": "h1r_edge_s5_rope4d_smoke",
+  "slug": "biohub-h1r-edge-s5-rope4d-smoke",
+  "title": "Biohub H1R Edge S5 RoPE4D Smoke",
+  "code_file": "biohub-h1r-edge-s5-rope4d-smoke.ipynb",
+  "out_dir": "notebooks/kaggle_h1r_edge_s5_rope4d_smoke",
   "datasets": [
     "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
     "pilkwang/biohub-temporal-unet3d-seed314159-v1",
     "pilkwang/biohub-tracking-support-pack-50ep-v1",
     "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
     "kkunizaw/biohub-zh001r",
-    "aryaarun07/biohub-zh001r-identity",
-    "aryaarun07/biohub-oof-weights"
+    "aryaarun07/biohub-zh001r-identity"
   ],
   "competition_sources": [
     "biohub-cell-tracking-during-development"
@@ -22,28 +21,17 @@
   "expects_submission": false,
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
-  "purpose": "S5 adjacent-frame Zh001r association and optional appearance training. Requires the public node/image pack and the private row-aligned identity sidecar, freezes the detector byte-for-byte, stores complete resume state, and emits training artifacts only. No submission. 2026-08-27: initialises from OUR out-of-fold split_0 (trained on 6bba, 44b6 held out - aryaarun07/biohub-oof-weights) so the fold-0 LOEO transfer gate (deploy_h1r_edge_s5_loeo_f0.json) is clean; fails closed unless both init globs hit exactly once. LEVER-0023 stage 1, PKT-0019. 2026-08-27: the h1r_rope4d module cell is spliced in (inert under H1R_EDGE_POS_ENCODING=sinusoidal, bit-identical model) so this control and the rope4d arm run identical code and differ only in the env knob.",
-  "artifact_role": "training",
-  "deploy_consumers": [
-    {
-      "artifact": "edge_predictor_best.pth",
-      "spec": "scripts/kaggle_specs/deploy_h1r_edge_s5_loeo_f0.json"
-    },
-    {
-      "artifact": "appearance_projector_best.pth",
-      "byproduct_reason": "auxiliary triplet appearance head trained alongside the edge model; no inference path in the P3/P9 lineage consumes it, and the LOEO transfer gate scores the edge weights alone"
-    }
-  ],
+  "purpose": "Two-step S5 plumbing smoke for the rope4d positional-encoding arm (H1R_EDGE_POS_ENCODING=rope4d). Verifies the spliced h1r_rope4d module registers for the trainer cell, the public checkpoint still loads strictly with the rotary twin installed, one fp16-autocast train/eval step through the rotated attention, the frozen-detector drift assertion, and that config_h1r_s5_rope4d.json / edge_predictor_best_h1r_s5_rope4d.pth are exported with the rope keys the inference patch needs. No submission.",
   "edits": [
     {
       "kind": "env",
       "cell_match": "BIOHUB_PRESET",
       "vars": {
         "H1R_KERNEL": "1",
-        "H1R_EDGE_EPOCHS": "20",
+        "H1R_EDGE_EPOCHS": "1",
         "H1R_EDGE_BS": "1",
         "H1R_EDGE_LR": "1e-4",
-        "H1R_EDGE_MAX_STEPS": "0",
+        "H1R_EDGE_MAX_STEPS": "2",
         "H1R_EDGE_NODE_CAP": "256",
         "H1R_EDGE_VAL_MOD": "6",
         "H1R_EDGE_AMP": "1",
@@ -51,9 +39,10 @@
         "H1R_EDGE_SEED": "0",
         "H1R_APPEARANCE_DIM": "64",
         "H1R_TRIPLET_WEIGHT": "0.05",
-        "H1R_EDGE_INIT_WEIGHTS_GLOB": "/kaggle/input/*/edge_predictor_best_split_0.pth",
-        "H1R_EDGE_INIT_CONFIG_GLOB": "/kaggle/input/*/config_split_0.json",
-        "H1R_EDGE_POS_ENCODING": "sinusoidal"
+        "H1R_EDGE_POS_ENCODING": "rope4d",
+        "H1R_ROPE_BANDS": "4",
+        "H1R_ROPE_SPACE_WAVELENGTHS_UM": "10,200",
+        "H1R_ROPE_TIME_WAVELENGTHS": "2,20"
       },
       "expect": 1
     },
@@ -82,5 +71,7 @@
       "code_file": "scripts/kaggle_edits/h1r_edge_kernel_run.py",
       "expect": 1
     }
-  ]
+  ],
+  "artifact_role": "diagnostic",
+  "diagnostic_reason": "Two-step plumbing smoke of the rope4d arm: proves the GPU autocast path through the rotary attention, both Zh001r mounts, the frozen-detector drift assertion and a zero-epoch link_top1/candidate_recall baseline under the rotation. Its edge_predictor_best.pth is NOT for deployment."
 }

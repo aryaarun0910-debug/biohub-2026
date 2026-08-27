@@ -21,7 +21,7 @@
   "expects_submission": false,
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
-  "purpose": "Two-step S5 plumbing smoke. Verifies separate Zh001r image/node and identity mounts, strict public initialization, one train/eval path, frozen detector bytes, and artifact export before any full edge run. No submission.",
+  "purpose": "Two-step S5 plumbing smoke. Verifies separate Zh001r image/node and identity mounts, strict public initialization, one train/eval path, frozen detector bytes, and artifact export before any full edge run. No submission. 2026-08-27: the h1r_rope4d module cell is spliced in (inert under H1R_EDGE_POS_ENCODING=sinusoidal, bit-identical model) so this control and the rope4d arm run identical code and differ only in the env knob.",
   "edits": [
     {
       "kind": "env",
@@ -38,7 +38,8 @@
         "H1R_EDGE_RESUME": "0",
         "H1R_EDGE_SEED": "0",
         "H1R_APPEARANCE_DIM": "64",
-        "H1R_TRIPLET_WEIGHT": "0.05"
+        "H1R_TRIPLET_WEIGHT": "0.05",
+        "H1R_EDGE_POS_ENCODING": "sinusoidal"
       },
       "expect": 1
     },
@@ -52,6 +53,13 @@
       "kind": "replace_cell",
       "cell_match": "SUBMISSION_COLUMNS =",
       "code_file": "scripts/kaggle_edits/h1r_edge_train.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "Runnable S5 Zh001r association/appearance trainer",
+      "anchor": "from h1r_edge_data import Zh001rEdgeData, build_transition_target, discover_edge_assets",
+      "code_file": "scripts/kaggle_edits/h1r_rope4d.py",
       "expect": 1
     },
     {

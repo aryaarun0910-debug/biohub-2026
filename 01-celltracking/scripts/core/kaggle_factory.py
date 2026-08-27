@@ -664,7 +664,9 @@ def cmd_push(spec: dict) -> int:
     d = out_dir(spec)
     if not built_nb(spec).exists():
         raise SystemExit(f"not built: {built_nb(spec)} (run `build` first)")
-    r = run([KAGGLE_EXE, "kernels", "push", "-p", str(d)])
+    # AGENTS.md section 5: the kaggle.exe launcher is blocked by Windows App Control; the module
+    # entry point is the working CLI on this machine.
+    r = run([sys.executable, "-m", "kaggle", "kernels", "push", "-p", str(d)])
     out = (r.stdout or "") + (r.stderr or "")
     print(out.strip())
     if "successfully pushed" not in out.lower():

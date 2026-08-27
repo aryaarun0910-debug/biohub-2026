@@ -73,5 +73,8 @@ result: >-
   STAGE B DONE (FACT-0334): the GT-guided oracle is +0.0192 (f0, CI +0.0116..+0.0272) and +0.0133 (f1, CI
   +0.0098..+0.0170), division FP unchanged, edge term improved on both folds - the stage-B bar (>= +0.003 f1, >= 0 f0)
   is cleared by a wide margin. The oracle band pre-registered above (+0.003..+0.008 f1) was EXCEEDED. Adversarial
-  audit of the instrument requested the same day. STAGE C (GT-free rule) in progress: the economics (a false steal
-  costs ~1.6e-5, a true one earns ~2e-4 on f1) put the break-even precision near 10%.
+  audit of the instrument requested the same day. STAGE C DONE 2026-08-27 (FACT-0337): the steal does NOT survive GT-free (precision ~0; the deployable rule
+  scores -0.0141/-0.0076), and the orphan sub-lane is +0.0013 (f1) / -0.0003 (f0), below the +0.003 bar. LEVER-0025
+  PARKED, not killed - the oracle ceiling stands and needs a LEARNED triple scorer (LEVER-0002) to be reached. The
+  FP-endpoint anatomy done alongside opened LEVER-0026 (a +0.065/+0.096 GT-guided ceiling in the adj_edge term).
+  Instrument tests/test_div_reach_steal_adversarial.py (23) confirm the oracle is scorer-exact and conservative.
