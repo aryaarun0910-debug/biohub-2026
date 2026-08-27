@@ -3517,3 +3517,36 @@ facts:
       (FACT-0339), but this arm changes only the association encoding.
     date: '2026-08-27'
     tags: [training, rope4d, gate, encoding, h1]
+
+  - id: FACT-0341
+    statement: >-
+      P24 (EXP-0025) scores 0.928 on the public LB - the DeepCenter best.pt (epoch 2) + safe-division veto ON bundle,
+      env-only on the P9 champion, is +0.003 over the deployed champion (FACT-0001) and is the campaign's new best
+      configuration; the first gain since the P9 transplant, and pure post-processing (no retrain, no new weights)
+    value: 0.928
+    unit: score
+    scope:
+      leaderboard: public
+      submission: 55820202
+      champion_p9: 0.925
+      delta_over_champion: 0.003
+      band_prereg: [0.921, 0.929]
+      central_prereg: 0.925
+      falsifier: "<= 0.925"
+      fired: false
+      top3_boundary: 0.955
+      gap_to_top3: 0.027
+    provenance: MEASURED
+    instrument: kaggle submission 55820202 (aryaarun07/biohub-p24-deepcenter-best-veto v1); audit receipt notebooks/kaggle_p24_deepcenter_best_veto/_out/
+    experiment: EXP-0025
+    note: >-
+      CONFIRMS LEVER-0024 and FACT-0331: the 0.927 public lineage's edge over P9 is its DeepCenter bundle, not the
+      secondary-detection weight (dead, FACT-0331) or refine_all_centroids (<= 0 rounded, FACT-0324). Both knobs moved
+      together by design (best.pt makes the gap veto accept ~18% instead of 0%, FACT-0312; the safe-div veto then
+      prunes low-heatmap second daughters), so P24 does not separate them - P10 (best.pt alone, built never submitted)
+      is the one-factor attribution if wanted, but is not needed to bank 0.928. This is the new champion CANDIDATE;
+      selecting it for the final leaderboard supersedes P9 (FACT-0001 stays true of P9 itself). It also matches
+      mikelou1's from-scratch retrain (0.928, EXTERNAL) with pure post-processing, reinforcing FACT-0339's read that
+      the cheap retrain recipe is not the path. Prediction record: EXP-0025 hit ABOVE its central band (0.925).
+    date: '2026-08-27'
+    tags: [score, deployed, headline, champion, deepcenter]

@@ -646,7 +646,7 @@ levers:
       The residual of the public 0.927 lineage's edge over P9 is its DeepCenter bundle - the epoch-2
       best.pt checkpoint (whose heatmap is non-zero on unseen embryos) together with the safe-division
       veto switched ON - and deploying that bundle env-only on P9 lifts the public LB
-    status: open
+    status: closed
     falsifier: >-
       One submission of scripts/kaggle_specs/p24_deepcenter_best_veto.json (EXP-0025), pre-registered
       band 0.921-0.929 with the LOW band promoted to central (0.925). Killed if the LB is <= 0.925
@@ -655,6 +655,7 @@ levers:
       If it scores >= 0.927, P10 (best.pt alone, built, never submitted) attributes the gain between
       the two coupled knobs before anything is called a mechanism.
     supporting: [FACT-0311, FACT-0312, FACT-0331]
+    closed_by: [FACT-0341]
     note: >-
       Opened 2026-08-27 after EXP-0023 killed the detection-blend explanation (FACT-0331): the 0.923 ->
       0.927 chain (C:/temp/intel/arnav170_sdw60/REPORT.md) is code-identical to P9 except for sdw

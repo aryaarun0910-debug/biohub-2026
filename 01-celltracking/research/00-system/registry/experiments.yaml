@@ -345,10 +345,10 @@ experiments:
     kernel: aryaarun07/biohub-p24-deepcenter-best-veto
     kernel_version: 1
     submission: 55820202
-    lb: null
-    status: pending
+    lb: 0.928
+    status: scored
     date: '2026-08-27'
-    facts: [FACT-0311, FACT-0312, FACT-0331]
+    facts: [FACT-0311, FACT-0312, FACT-0331, FACT-0341]
     note: >-
       Built and verified locally 2026-08-27 (cell-2 env diff only: best.pt path, expected epoch 2,
       BIOHUB_DEEPCENTER_SAFE_DIV_VETO=1; defect gate PASS). PRE-REGISTERED band 0.921-0.929, central 0.925;

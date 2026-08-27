@@ -16,6 +16,21 @@ record_kind: state
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
 
+> ## 🏆 2026-08-27 — NEW CHAMPION 0.928 (P24), +0.003, gap to top-3 now 0.027
+>
+> **`EXP-0025` P24 scored 0.928** (`FACT-0341`, submission 55820202) — the P9 champion + DeepCenter best.pt
+> (epoch 2) + safe-division veto ON, env-only. First gain since the P9 transplant; **pure post-processing,
+> no retrain**. It confirms LEVER-0024 / `FACT-0331` (the 0.927 lineage edge is the DeepCenter bundle, not the
+> sdw knob or refine_centroids) and matches mikelou1's from-scratch 0.928 — reinforcing `FACT-0339` that the
+> cheap retrain recipe is not the path. **ACTION: select P24 (55820202) as a final leaderboard submission** —
+> it supersedes P9 (`FACT-0001` stays true of P9 at 0.925). LEVER-0024 CLOSED positive.
+>
+> **Climb, updated:** champion **0.928** → top-3 boundary 0.955 (`FACT-0332`), gap **0.027**. The next
+> submissions should stack on the **P24 base (0.928), not P9**: p23 icom float (LEVER-0022, +0.002..+0.004
+> offline, built + COMPLETE, unsubmitted) and the LEVER-0026 FP-endpoint dedup are the candidates; P10
+> (best.pt alone) would attribute how much of the +0.003 is checkpoint vs veto. h1r_edge_s5 (sinusoidal S5
+> control) still running on Kaggle at this note.
+>
 > ## 🟢 2026-08-27 (day) — a +0.019/+0.013 ceiling on the division term, association is the bottleneck, and the retrain question has a cheap test
 >
 > **Frontier:** top-3 boundary re-read and registered (`FACT-0332`, supersedes `FACT-0010`). No lever on the board is

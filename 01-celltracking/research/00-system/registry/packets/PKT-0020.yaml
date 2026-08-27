@@ -54,4 +54,9 @@ outputs:
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md under 2026-08-27 (day)
 
-result: null
+result: >-
+  WON 2026-08-27 (FACT-0341): P24 scored 0.928 on the public LB (submission 55820202) - +0.003 over the champion
+  and ABOVE the pre-registered central 0.925; the falsifier (<= 0.925) did not fire. LEVER-0024 CLOSED positive:
+  the 0.927 lineage's edge is the DeepCenter best.pt + safe-div veto bundle (confirms FACT-0331). P24 is the new
+  best config and should be SELECTED as a final leaderboard submission. Pure post-processing - no retrain, no new
+  weights - and it matches mikelou1's from-scratch 0.928. Next submissions should build on the P24 base, not P9.
