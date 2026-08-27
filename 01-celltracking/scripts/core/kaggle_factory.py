@@ -44,7 +44,8 @@ SPEC FORMAT (JSON, see scripts/kaggle_specs/*.json)
   "docker_image": "<pinned digest>",
   "expects_submission": true,
   "artifact_role": "training",                     # or diagnostic + diagnostic_reason
-  "deploy_consumers": [{"artifact": "x.pth", "spec": "scripts/kaggle_specs/deploy.json"}],
+  "deploy_consumers": [{"artifact": "x.pth", "spec": "scripts/kaggle_specs/deploy.json"},
+                       {"artifact": "aux.pth", "byproduct_reason": "why nothing deploys it"}],
   "consumes_artifacts": [{"producer_spec": "scripts/kaggle_specs/train.json",
                            "artifact": "x.pth"}],   # reciprocal, on deployment spec
   "resume_sources": [{"dataset": "owner/prior-run", "artifact": "last.pth"}],
@@ -343,6 +344,20 @@ def _reciprocal_consumer(spec: dict, artifact: str, consumer: dict) -> str | Non
     return None
 
 
+def _byproduct_or_reciprocal(spec: dict, artifact: str, row: dict) -> str | None:
+    """A consumer row either names a real deployment spec or declares the artifact an
+    undeployed by-product with a specific reason. Never both, never neither."""
+    reason = row.get("byproduct_reason")
+    if reason is None:
+        return _reciprocal_consumer(spec, artifact, row)
+    if row.get("spec"):
+        return (f"artifact {artifact!r} row declares byproduct_reason AND a consumer spec; "
+                "choose one")
+    if not isinstance(reason, str) or len(reason.strip()) < 12:
+        return f"by-product artifact {artifact!r} requires a specific byproduct_reason (at least 12 characters)"
+    return None
+
+
 def validate_defect_gate(spec: dict, nb: dict, ledger: dict | None = None) \
         -> tuple[list[str], list[str]]:
     """Return (applicable defect ids, violations) for a fully assembled notebook.
@@ -426,7 +441,10 @@ def validate_defect_gate(spec: dict, nb: dict, ledger: dict | None = None) \
                         message = (check.get("message") or
                                    f"produced artifact {artifact!r} has no declared deployment consumer")
                         break
-                    errors = [_reciprocal_consumer(spec, artifact, row) for row in consumers]
+                    # A training run may emit an auxiliary artifact that nothing deploys (the S5
+                    # appearance projector). It must SAY so, per artifact, with a reason - the
+                    # alternative was a fake consumer row, which defeats the gate's purpose.
+                    errors = [_byproduct_or_reciprocal(spec, artifact, row) for row in consumers]
                     errors = [e for e in errors if e]
                     if errors:
                         message = "; ".join(errors)

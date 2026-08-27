@@ -1,0 +1,53 @@
+{
+  "name": "p25_recipe_parity_loeo_f0",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p25_recipe_parity_loeo_f0.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p25_recipe_parity_loeo_f0\\biohub-p25-recipe-parity-loeo-f0.ipynb",
+  "built_sha256": "763da0b03a5c18fdbb1ffcf957e5bd4723bc26cb33a11ebfe5b82e7abdf5285d",
+  "config_hash": "c4144dd3b77b",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "00d3da064f7fd59b684c70cb64f5c9f6a027312feb31d7b87238546c65990b0c"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "8d15030bec2f040f2bd186e7a3ebed167b0f17414de3aeef15f9994fb3710461"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "7956542e7190dbb71f06fef09d7e77f0785fcd2d46f3646c56fea5d162bb23a0"
+    }
+  ],
+  "declared_slug": "biohub-p25-recipe-parity-loeo-f0",
+  "title": "Biohub P25 Recipe Parity LOEO F0",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}

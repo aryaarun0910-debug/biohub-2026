@@ -16,6 +16,48 @@ record_kind: state
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
 
+> ## 🟢 2026-08-27 (day) — a +0.019/+0.013 ceiling on the division term, association is the bottleneck, and the retrain question has a cheap test
+>
+> **Frontier:** top-3 boundary re-read and registered (`FACT-0332`, supersedes `FACT-0010`). No lever on the board is
+> measured at a sixth of the gap; the host's instinct that the retrain (LEVER-0023) is the only lane sized for it is
+> supported by the arithmetic — but "H1 as packaged" (S1 33 params, S5 on Zebrahub pseudo-labels) is not the top teams'
+> play, and every published from-scratch retrain lost. The cheap decisive test is **recipe parity**: our July `split_0`
+> vs the pack's on the same fold-0 pipeline, `EXP-0026` / `p25_recipe_parity_loeo_f0.json` (built, verified, reading
+> pre-registered in the spec). If it reproduces the public quality, continued training on competition GT is credible.
+>
+> **The finding:** `LEVER-0025` (metric-legal division reach + targeted daughter steal, `PKT-0021`). Committed census
+> `FACT-0333`; GT-guided oracle **+0.0192 (f0) / +0.0133 (f1)** through the official scorer with division FP unchanged and
+> the edge term improving (`FACT-0334`). A ceiling, not a result — but 3x the deployed transplant and the first mechanism
+> whose ceiling is the size of the gap. Stage C (a GT-free rule; break-even precision ~10%) decides it; an adversarial
+> audit of the instrument was commissioned the same day. Do not quote the ceiling as a forecast.
+>
+> **Direction (`FACT-0335`):** on the honest fold-0 configuration 74% of missed edges have BOTH endpoints detected —
+> association, not node selection — and 99% of FP edges join a matched cell to an unmatched detection. This is the
+> opposite of the rank-1 competitor's split and points the modelling effort at the association head: a relative
+> (RoPE-style, 4-D, physically scaled) positional encoding in the edge transformer is being implemented as an S5 option.
+>
+> **Ready to run (host pushes; kernel pushes are host actions):** `P24` (`EXP-0025`, best.pt + veto, band in `PKT-0020`),
+> `p25` recipe parity (`EXP-0026`), `p23_icom155` (`LEVER-0022`; float format now code-level legal, `FACT-0336`),
+> `h1r_edge_s5` (OOF-initialised, `PKT-0019`) then `deploy_h1r_edge_s5_loeo_f0` (gate 3). One command drives all five in
+> dependency order within the two-slot cap and submits only what is named:
+> `.venv\Scripts\python.exe scripts\core\kaggle_queue.py run --specs scripts/kaggle_specs/p24_deepcenter_best_veto.json scripts/kaggle_specs/p25_recipe_parity_loeo_f0.json scripts/kaggle_specs/p23_icom155.json scripts/kaggle_specs/h1r_edge_s5.json scripts/kaggle_specs/deploy_h1r_edge_s5_loeo_f0.json --submit p24_deepcenter_best_veto,p23_icom155`
+> (~13 GPU-h of the ~19 left; every LOEO in the queue gates a decision: p25 gates the retrain lane, the S5 consumer gates
+> LEVER-0023's deployment).
+>
+> **Novel lanes recorded, unowned, each with its falsifier:** (1) RoPE-4D relative encoding in the association
+> transformer (gate 2: held-out link_top1 vs sinusoidal at equal steps; gate 3: fold-0 paired delta); (2) the steal rule
+> as a learned re-assignment — treat "b's parent P vs mother M" as a triple-scoring problem (FACT-0182's class), trained
+> on Zebrahub triples (`FACT-0296`), validated by the stage-C bar; (3) node-budget-driven detection per volume toward
+> `estimated_number_of_nodes` (rank-1's mechanism; falsifier: paired delta on the champion controls after re-thresholding
+> per crop); (4) FP-edge endpoint anatomy — 1,377 fold-0 FP edges end on an unmatched detection: if those are
+> mislocalised real cells, the intensity centroid (`LEVER-0022`) and a >7 um re-localiser compose; if they are false
+> detections, a per-edge "target has no GT-like support" veto is free on the edge term.
+>
+> **Not done / in flight at the time of writing:** stage C rule (agent), RoPE-4D implementation (agent), adversarial
+> audit of `div_reach_steal.py` (agent), FP-edge anatomy (agent). First-wave agents died on an API session limit; their
+> partial artifacts under `C:/temp/div_reach/rule/` are not results. Colab: no session open; the lane still lacks a parity
+> number (`FACT-0327`). No GPU launch or submission was performed by the agent this session.
+
 > ## 🟢 2026-08-27 (early hours) — a live candidate, a two-fold calibration anchor, two levers killed, H1 gated
 >
 > **Submitted:** `EXP-0023` p22 = the champion with `BIOHUB_SECONDARY_DETECTION_WEIGHT` 0.475 → **0.60**, the one

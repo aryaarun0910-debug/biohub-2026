@@ -4,8 +4,8 @@
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
   "built_notebook": "notebooks\\kaggle_h1r_edge_s5\\biohub-h1r-edge-s5.ipynb",
-  "built_sha256": "6ae6631a12b1555aee3ad67509071c3a4b6e9a0af9d7e08156ba84033253c299",
-  "config_hash": "c1506a67d712",
+  "built_sha256": "ed77105ea014343063d5095c409f481401f3571b47400cf0b5b56a67808021d2",
+  "config_hash": "b4daa490688c",
   "n_cells": 11,
   "edits": [
     {
@@ -13,7 +13,7 @@
       "cells": [
         2
       ],
-      "payload_sha256": "5247aac908106892e4ca60f712ad40702c42e70130ef13b143df158e0043ff8d"
+      "payload_sha256": "b199dcdeda407bb995fd9462a29072e6d8489ab83ad2389ce5aedc4ebc7e7fde"
     },
     {
       "kind": "replace_cell",
@@ -38,5 +38,16 @@
     }
   ],
   "declared_slug": "biohub-h1r-edge-s5",
-  "title": "Biohub H1R Edge S5"
+  "title": "Biohub H1R Edge S5",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": [
+      "DG-001-cuda-bce-under-autocast",
+      "DG-002-shared-unet-detector-drift",
+      "DG-003-division-supervision-deleted",
+      "DG-005-unreachable-resume",
+      "DG-006-identity-sidecar-missing",
+      "DG-007-produced-artifact-has-no-deployer"
+    ]
+  }
 }

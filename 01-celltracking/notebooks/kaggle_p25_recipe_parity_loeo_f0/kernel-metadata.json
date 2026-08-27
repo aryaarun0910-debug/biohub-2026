@@ -1,7 +1,7 @@
 {
-  "id": "aryaarun07/biohub-h1r-edge-s5",
-  "title": "Biohub H1R Edge S5",
-  "code_file": "biohub-h1r-edge-s5.ipynb",
+  "id": "aryaarun07/biohub-p25-recipe-parity-loeo-f0",
+  "title": "Biohub P25 Recipe Parity LOEO F0",
+  "code_file": "biohub-p25-recipe-parity-loeo-f0.ipynb",
   "language": "python",
   "kernel_type": "notebook",
   "is_private": true,
@@ -16,8 +16,7 @@
     "pilkwang/biohub-temporal-unet3d-seed314159-v1",
     "pilkwang/biohub-tracking-support-pack-50ep-v1",
     "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
-    "kkunizaw/biohub-zh001r",
-    "aryaarun07/biohub-zh001r-identity",
+    "thtennant/taaf-kaggle-source-share-fork",
     "aryaarun07/biohub-oof-weights"
   ],
   "kernel_sources": [],

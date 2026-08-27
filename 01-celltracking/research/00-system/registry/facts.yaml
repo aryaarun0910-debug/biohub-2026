@@ -54,7 +54,7 @@
 #                          are now distinguishable here, and only here.
 
 schema_version: 2          # 2 adds the validity axis: validity / validity_reason / protocol
-updated: '2026-08-26'
+updated: '2026-08-27'
 
 facts:
 
@@ -95,10 +95,11 @@ facts:
 
   # ---- the target ------------------------------------------------------------------
   - id: FACT-0010
-    statement: Top-3 boundary score
+    statement: Top-3 boundary score (public LB read 2026-08-25)
     value: 0.953
     unit: score
-    provenance: EXTERNAL
+    provenance: SUPERSEDED
+    superseded_by: FACT-0332
     instrument: public leaderboard
     date: '2026-08-25'
     tags: [target]
@@ -3223,3 +3224,150 @@ facts:
       calibration lane if its offline LOEO replay is ever run.
     date: '2026-08-27'
     tags: [score, killed-knob, prediction-record]
+
+  # ==================================================================================
+  # 2026-08-27 (day) - the frontier moved; the top-3 boundary is re-read and registered
+  # ==================================================================================
+  - id: FACT-0332
+    statement: >-
+      Public leaderboard frontier read on 2026-08-27 - leader 0.962 (two teams), top-3 boundary 0.955,
+      then 0.953 / 0.950 / 0.947 / 0.947; the top-3 boundary moved +0.002 since FACT-0010 and the gap
+      from the deployed score (FACT-0001) to top-3 is 0.030
+    value: 0.955
+    unit: score
+    scope:
+      leaderboard: public
+      top_rows: {rank1: 0.962, rank2: 0.962, rank3: 0.955, rank4: 0.953, rank5: 0.950, rank6: 0.947, rank7: 0.947}
+      rank3_submission_date: '2026-08-26'
+      deployed_gap_to_top3: 0.030
+    provenance: EXTERNAL
+    instrument: >-
+      `python -m kaggle competitions leaderboard biohub-cell-tracking-during-development --show`, read 2026-08-27 in
+      session PKT-0020; the same reading is recorded in C:/temp/intel/EXTERNAL_RESEARCH.md section 1 (outside git)
+    supersedes: FACT-0010
+    note: >-
+      A third-party assertion (the public LB), so EXTERNAL by definition. Consequence for the mission: every
+      lever on the board is measured below +0.005 offline (FACT-0330 is the largest live candidate), while the
+      boundary sits +0.030 above the deployed score; per C:/temp/intel/EXTERNAL_RESEARCH.md, post-processing on
+      the shared public weights is bounded at roughly +0.02..+0.04 by the people who measured it, so 0.955 needs
+      LEVER-0023 (retrained weights) or a mechanism nobody has published. Two of the top seven submitted on
+      2026-08-26; the frontier is still moving.
+    date: '2026-08-27'
+    tags: [target, leaderboard, external]
+
+  # ==================================================================================
+  # 2026-08-27 (day) - LEVER-0025 stage A/B, and the missed-edge anatomy
+  # ==================================================================================
+  - id: FACT-0333
+    statement: >-
+      Committed census of every GT division on the clean champion controls (scorer's own acceptance
+      functions): metric-legal reach 23/26 (f0) and 84/125 (f1) against
+      naive reach 22 / 71; of the unscored-but-legal divisions, 17 (f0) / 61 (f1) are recoverable by
+      a fork plus at most one daughter steal - 12 / 38 of them need a steal and in ZERO cases is the stolen
+      edge a scored true positive; 5 / 23 have an ORPHAN second daughter the deployed proposer still missed
+    value: 61
+    unit: recoverable_divisions_f1
+    scope:
+      f0: {"gt_divisions": 26, "naive_reach": 22, "metric_legal_reach": 23, "scored_now": 5, "status": {"planned": 17, "scored": 5, "illegal": 3, "legal_no_plan": 1}, "route": {"direct": 17}, "daughter_kinds": {"direct": 17}, "second_daughter_state": {"wrong_parent": 12, "orphan": 5}, "steals": 12, "steal_breaks_full_tp": 0, "reach_if_oracle_applied": 22}
+      f1: {"gt_divisions": 125, "naive_reach": 71, "metric_legal_reach": 84, "scored_now": 15, "status": {"planned": 61, "illegal": 41, "scored": 15, "legal_no_plan": 8}, "route": {"direct": 59, "pred": 2}, "daughter_kinds": {"direct": 52, "grand": 9}, "second_daughter_state": {"wrong_parent": 38, "orphan": 23}, "steals": 38, "steal_breaks_full_tp": 0, "reach_if_oracle_applied": 76}
+      fact_0295_comparison: {legal_reach: [23, 80], naive_reach: [21, 68], steal_breaks_tp: ["0/15", "0/33"], note: "f1 legal 84 vs 80 and naive 71 vs 68 - the +-2 stage-A tolerance in PKT-0021 fired by +2/+3 on fold 1; the difference is window (scorer) vs global matching in the uncommitted original; the committed instrument supersedes"}
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/div_reach_steal.py census on C:/temp/p20_relink_sweep_f0/sweep_pen_off.csv.gz and
+      C:/temp/p19_relink_sweep_f1/sweep_pen_off.csv.gz; outputs C:/temp/div_reach/{f0,f1}/census_*.parquet, plans_*.parquet,
+      census_summary_*.json; per-division status uses tracking_cellmot.division_metrics.score_divisions and
+      _matched_division_nodes directly
+    experiment: EXP-0022
+    protocol:
+      weights: f0 pack split_0 (clean), f1 OOF split_1 (honest) - the EXP-0022 / EXP-0021 controls
+      eval: scorer-exact per-division matching (match_divisions), full graphs, all crops
+    note: >-
+      Stage A of PKT-0021. Reproduces FACT-0295 in structure and direction with committed code; the exact
+      counts move by +2..+4 on fold 1 because the scorer matches each division in its own local window.
+      The 'illegal' remainder (3 f0 / 41 f1) has an undetected daughter or mother in every
+      admissible role and is a detector question, not a proposer one.
+    date: '2026-08-27'
+    tags: [division, census, both-folds, instrument]
+
+  - id: FACT-0334
+    statement: >-
+      The GT-guided ORACLE for the division reach + steal mechanism (LEVER-0025 stage B) is worth 0.0192 on
+      fold 0 (95% crop-bootstrap CI [0.0116, 0.0272]) and 0.0133 on fold 1
+      (CI [0.0098, 0.017]) through the official scorer - divisions 5->22 TP (f0) and
+      15->76 TP (f1) with division FP UNCHANGED, and the edge term IMPROVES (f0 edges TP +17 / FP -12;
+      f1 TP +50 / FP -19) because none of the stolen edges was a true positive
+    value: 0.0133
+    unit: score_delta_f1_oracle
+    scope:
+      f0: {control: {score: 0.907, adj_edge: 0.9017, divJ: 0.0526, division: [5, 69, 21], edge: [18799, 1394, 1027]},
+           oracle: {score: 0.9262, adj_edge: 0.903, divJ: 0.2316, division: [22, 69, 4], edge: [18816, 1382, 1010]},
+           delta: {score: 0.0192, adj_edge: 0.0013, divJ: 0.1789}, ci95: [0.0116, 0.0272],
+           applied: 17, plans: 17, steals: 12, steal_breaks_tp: 0, routes: {"direct": 17}}
+      f1: {control: {score: 0.7086, adj_edge: 0.7054, divJ: 0.0315, division: [15, 351, 110], edge: [86272, 14194, 22785]},
+           oracle: {score: 0.7219, adj_edge: 0.7059, divJ: 0.1597, division: [76, 351, 49], edge: [86322, 14175, 22735]},
+           delta: {score: 0.0133, adj_edge: 0.0005, divJ: 0.1282}, ci95: [0.0098, 0.017],
+           applied: 61, plans: 61, steals: 38, steal_breaks_tp: 0, routes: {"direct": 59, "pred": 2}}
+      bootstrap_resamples: 2000
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/div_reach_steal.py oracle (+ resummarise) - GT-guided edits applied to the control exports, both arms
+      rescored per crop with tracking_cellmot.metrics.evaluate / per_sample_metrics / summarise (the ea_atlas path);
+      outputs C:/temp/div_reach/{f0,f1}/oracle_summary_*.json, crops_control_*.parquet, crops_oracle_*.parquet, oracle_*.csv.gz
+    experiment: EXP-0022
+    protocol:
+      weights: the champion controls (f0 pack split_0, f1 OOF split_1)
+      eval: scorer-exact per-crop rows on ALL crops (71 / 128), summarise() with the node term, paired crop bootstrap
+    note: >-
+      A CEILING, not a lever result: ground truth chose which daughter to steal. It is the largest ceiling measured in
+      the campaign - 3x the deployed division transplant's offline reading (FACT-0321/0326) - and it clears PKT-0021's
+      stage-B falsifier on both folds by a wide margin. Stage C (a GT-free rule) decides whether any of it is deployable;
+      the economics are favourable because a false steal costs ~2 edge-Jaccard units (~1.6e-5 on f1) while a true one
+      gains a division TP (~2e-4), so a rule needs only ~10-15% precision. The edit type is post-emission and needs no
+      model, so it composes with every other lever. Pending the adversarial audit of the instrument (2026-08-27).
+    date: '2026-08-27'
+    tags: [division, oracle, ceiling, headline, both-folds]
+
+  - id: FACT-0335
+    statement: >-
+      Missed-edge anatomy on the clean champion controls (Soheil Ayati's split): on the honest fold-0 configuration
+      (node recall 0.99) 757 of 1027 missed GT edges (74%) have BOTH endpoints detected - wrong
+      association - and only 270 have a missing endpoint; 1377 of 1394 FP edges join a matched cell to an
+      UNMATCHED detection. Fold 1 inverts to 70% missing-endpoint because its configuration is crippled (FACT-0261)
+    value: 0.263
+    unit: fraction_fn_missing_endpoint_f0
+    scope: {"f0": {"gt_edges": 19826, "edge_tp": 18799, "edge_fn": 1027, "fn_missing_endpoint": 270, "fn_missing_one": 179, "fn_missing_both": 91, "fn_both_detected_wrong_assoc": 757, "fn_share_missing_endpoint": 0.263, "gt_nodes": 20197, "gt_nodes_detected": 19995, "node_recall": 0.99, "edge_fp": 1394, "fp_both_matched": 17, "fp_one_unmatched": 1377}, "f1": {"gt_edges": 109057, "edge_tp": 86272, "edge_fn": 22785, "fn_missing_endpoint": 15847, "fn_missing_one": 4061, "fn_missing_both": 11786, "fn_both_detected_wrong_assoc": 6938, "fn_share_missing_endpoint": 0.696, "gt_nodes": 113121, "gt_nodes_detected": 98356, "node_recall": 0.8695, "edge_fp": 14194, "fp_both_matched": 87, "fp_one_unmatched": 14107}}
+    provenance: MEASURED
+    instrument: >-
+      atlas tables of scripts/win_bet/ea_atlas.py (gtedges src_detected/tgt_detected/is_tp; edges matched/pred_valid/gt_src/gt_tgt)
+      for the EXP-0022 / EXP-0021 controls; computation saved at C:/temp/div_reach/soheil_split.json (2026-08-27)
+    experiment: EXP-0022
+    protocol:
+      weights: f0 pack split_0 (clean), f1 OOF split_1 (honest, crippled arm)
+      eval: scorer-exact edge/node tables, all crops
+    note: >-
+      The rank-1 competitor reports the opposite split for his pipeline (node selection dominates). For ours, on the
+      configuration that resembles deployment, association dominates: the cells are detected and linked to the wrong
+      partner, and the FP edges are overwhelmingly links from an annotated cell to a detection that matches no GT node.
+      This is the term a relative (RoPE-style) positional encoding in the association transformer targets, and the term
+      LEVER-0011's reframing (FACT-0231) already pointed at. Fold-1 numbers describe the LOEO ablation, not the embryo.
+    date: '2026-08-27'
+    tags: [edge, anatomy, both-folds, direction]
+
+  - id: FACT-0336
+    statement: >-
+      The organizer's published submission converter casts node coordinates to Float64 - float z/y/x
+      are legal in the scorer path, so the LEVER-0022 float export (p23) is not a format risk at the code level
+    value: null
+    unit: format
+    scope:
+      site: "vendor/kaggle-cell-tracking/scripts/csv_to_geffs.py:22-30 (add_node_attr_key z/y/x Float64; pl.col('z').cast(pl.Float64) etc.)"
+      sample_submission: "data/sample_submission.csv shows integer coordinates, but the converter does not require them"
+      residual_risk: "Kaggle's hosted scoring copy is not inspectable; the vendored repo is the organizer's published scorer"
+    provenance: VERIFIED
+    instrument: vendor/kaggle-cell-tracking/scripts/csv_to_geffs.py:22-30, read 2026-08-27
+    note: >-
+      Removes the 'unverified acceptance of float coordinates' caveat that FACT-0324/FACT-0330 attached to the
+      p23_icom155 deployment, down to the residual that the hosted copy could differ from the published code.
+      Our own reader (src/biotrack/submission.py) already parses floats.
+    date: '2026-08-27'
+    tags: [format, submission, deployment-risk]

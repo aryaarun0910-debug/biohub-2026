@@ -59,7 +59,16 @@ outputs:
 
 result: >-
   GATE 1 PASSED 2026-08-27 (FACT-0329): EXP-0024 v2 ran two fp16 steps on T4x2 with detection_drift 0.0 after
-  v1 caught BatchNorm drift in the "frozen" trunk (FACT-0328). Before stage 1 can be authorised: (a) the S5 run
-  must initialise from the OOF split weights for the judged fold (the public pack saw both embryos), (b) an
-  S5 -> LOEO consumer spec must exist so DG-007 admits the full spec and gate 3 has an instrument, (c) the host
-  states the slot/budget. Nothing launched beyond the smoke.
+  v1 caught BatchNorm drift in the "frozen" trunk (FACT-0328). STAGE-1 PREREQUISITES BUILT 2026-08-27 (day):
+  (a) scripts/kaggle_edits/h1r_edge_kernel_run.py now takes H1R_EDGE_INIT_WEIGHTS_GLOB + H1R_EDGE_INIT_CONFIG_GLOB
+  (fail-closed, exactly one hit each, sha256 printed as H1R_INIT_WEIGHTS) and h1r_edge_s5.json initialises from
+  OUR out-of-fold split_0 (aryaarun07/biohub-oof-weights, 6bba-trained, 44b6 never seen; bare 136-tensor
+  state_dict verified loadable under the trainer's contract) with H1R_EDGE_RESUME=0 for the first run (DG-005);
+  (b) the S5 -> LOEO consumer scripts/kaggle_specs/deploy_h1r_edge_s5_loeo_f0.json exists (champion configuration
+  retargeted at fold 0, primary weights overridden by the producer kernel's uniquely-named
+  edge_predictor_best_h1r_s5.pth), so DG-007 admits the full spec (artifact_role training; the appearance projector
+  declared an undeployed by-product with a reason) and gate 3 has its instrument; both specs build through the
+  defect gate (2026-08-27). Tests: tests/test_h1r_edge_s5_oof_init.py. Still required before stage 1 launches: the
+  host's slot/budget statement (rule 8). Nothing launched beyond the smoke. The host's 2026-08-27 question - is a
+  retrain the game-changing play - is answered in the handoff banner: the cheapest decisive test is RECIPE PARITY
+  (our July split_0 vs the pack's split_0 on the same fold-0 pipeline), spec p25_recipe_parity_loeo_f0.json.

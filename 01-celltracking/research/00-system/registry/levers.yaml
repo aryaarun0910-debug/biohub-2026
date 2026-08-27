@@ -18,7 +18,7 @@
 #   parked    plausible but deliberately deferred; `reopen_when` states the trigger
 
 schema_version: 2          # 2 adds retracted_closure / reclose_pending
-updated: '2026-08-26'
+updated: '2026-08-27'
 
 levers:
 
@@ -591,7 +591,8 @@ levers:
     status: parked
     reopen_when: >-
       the host chooses to spend a submission on a +0.002..+0.004 expected gain, or float-coordinate acceptance by
-      Kaggle's scorer is proven by any other submission; deploy spec ready (p23_icom155.json)
+      Kaggle's scorer is proven by any other submission; deploy spec ready (p23_icom155.json). 2026-08-27: the
+      organizer's converter casts coordinates to Float64 (FACT-0336), so the format risk is code-level clear
     outcome: >-
       Full scale, both folds (FACT-0330): +0.0013 / +0.0024 for icom_155 - positive in both directions, below the
       pre-registered +0.005 bar the pilots (FACT-0324) had suggested. Rounded export is <= 0; float export required.
@@ -641,3 +642,56 @@ levers:
       passes and the Colab parity pilot (p21) reproduces Kaggle.
     priority: 1
 
+  - id: LEVER-0024
+    claim: >-
+      The residual of the public 0.927 lineage's edge over P9 is its DeepCenter bundle - the epoch-2
+      best.pt checkpoint (whose heatmap is non-zero on unseen embryos) together with the safe-division
+      veto switched ON - and deploying that bundle env-only on P9 lifts the public LB
+    status: open
+    falsifier: >-
+      One submission of scripts/kaggle_specs/p24_deepcenter_best_veto.json (EXP-0025), pre-registered
+      band 0.921-0.929 with the LOW band promoted to central (0.925). Killed if the LB is <= 0.925
+      (FACT-0001, no gain). No offline instrument is honest for this lever: DeepCenter is in-sample on
+      fold 0 (FACT-0310) and the strict LOEO arm disables it, so the submission IS the cheapest valid test.
+      If it scores >= 0.927, P10 (best.pt alone, built, never submitted) attributes the gain between
+      the two coupled knobs before anything is called a mechanism.
+    supporting: [FACT-0311, FACT-0312, FACT-0331]
+    note: >-
+      Opened 2026-08-27 after EXP-0023 killed the detection-blend explanation (FACT-0331): the 0.923 ->
+      0.927 chain (C:/temp/intel/arnav170_sdw60/REPORT.md) is code-identical to P9 except for sdw
+      (dead), lambda 0.30 (arnav's 0.40 probe flat), refine_all_centroids (<= 0 as deployed, FACT-0324),
+      and this bundle. EXP-0008 turned the veto on with the COLLAPSED checkpoint (FACT-0311), which
+      rejects every checked point (FACT-0312) - so the bundle has never been measured with a live prior
+      on our lineage. Coupled by design: the gap veto also changes from 0% to ~18% accepted (FACT-0312).
+      Sign unknown; this is a one-submission question, not a mechanism claim.
+    priority: 4
+
+  - id: LEVER-0025
+    claim: >-
+      The scorer's ACTUAL division acceptance (fork at the node matched to the GT divider OR its
+      predecessor; daughter evidence from the GT child OR a grandchild) plus a TARGETED steal of the
+      second daughter from a provably-wrong parent converts metric-legal-but-unscored GT divisions into
+      true positives at near-zero edge cost, lifting the division term on BOTH embryo directions
+    status: running
+    falsifier: >-
+      Three stages, each on the clean champion controls (FACT-0322) with the scorer round-trip, both folds
+      reported. Stage A (census, committed instrument scripts/win_bet/div_reach_steal.py): must reproduce
+      FACT-0295's reach and steal counts within +-2, else the premise is wrong and the lever closes.
+      Stage B (GT-guided ORACLE round-trip - the ceiling): killed if the oracle is < +0.003 score on fold 1
+      or < 0 on fold 0; that would mean even perfect targeting cannot pay through the scorer. Stage C
+      (a GT-FREE rule replayed offline on the exports): killed if < +0.003 on fold 1 or < 0 on fold 0
+      paired, or if it costs > 0.0005 adj_edge on either fold - the steal must not break scored edges at
+      scale, which is exactly how the blind priced-second-row died (LEVER-0012).
+    supporting: [FACT-0295, FACT-0290, FACT-0325, FACT-0323, FACT-0333, FACT-0334]
+    note: >-
+      Opened 2026-08-27; the highest-EV UNMEASURED item on the board since FACT-0295 (2026-08-26). NEW
+      MECHANISM relative to the killed division levers: LEVER-0012 reallocated blindly through the
+      assignment; the gate-widening and dxy lanes changed WHICH candidates the proposer sees. This changes
+      neither - it changes what counts as a proposable fork (t-1 / t+2 evidence the proposer never uses)
+      and removes ONE edge that cannot be a GT edge (the second daughter's only GT parent is the mother).
+      Priced from the control counts (FACT-0325 f1 division 15/351/110; FACT-0323 f0 5/69/21): every
+      converted division is +1 TP / -1 FN on the division term with SCORE_DIVISION_WEIGHT applied, so the
+      oracle band is roughly +0.003..+0.008 (f1) and +0.003..+0.010 (f0) if the FACT-0295 counts convert;
+      a GT-free rule is expected to keep 30-60% of that. Also composes with LEVER-0019 (removal) rather
+      than competing. Not a detector change; CPU only; zero submissions until stage C passes.
+    priority: 2

@@ -131,6 +131,38 @@ def test_produced_artifact_requires_real_reciprocal_deployment_spec(tmp_path, mo
     assert "DG-007-produced-artifact-has-no-deployer" not in defect_ids(given, source)
 
 
+def test_training_artifact_may_be_declared_an_undeployed_byproduct_with_a_reason(tmp_path, monkeypatch):
+    """The S5 run emits an appearance projector nothing deploys. The honest declaration is a
+    per-artifact by-product row with a reason - not a fake consumer, not a whole-spec
+    'diagnostic' role that would also disown the edge weights."""
+    monkeypatch.setattr(KF, "REPO", tmp_path)
+    producer_rel = "scripts/kaggle_specs/train.json"
+    consumer_rel = "scripts/kaggle_specs/deploy.json"
+    given = spec("h1r_edge_s5", source_path=str(tmp_path / producer_rel),
+                 datasets=["aryaarun07/biohub-zh001r-identity"])
+    given["artifact_role"] = "training"
+    source = ("division_loss = joint_detection_loss = 0\n"
+              "torch.save(a, 'edge_predictor_best.pth'); torch.save(b, 'appearance_projector_best.pth')\n")
+    consumer_path = tmp_path / consumer_rel
+    consumer_path.parent.mkdir(parents=True)
+    consumer_path.write_text(json.dumps({
+        "artifact_role": "deployment",
+        "consumes_artifacts": [{"producer_spec": producer_rel, "artifact": "edge_predictor_best.pth"}],
+    }), encoding="utf-8")
+    given["deploy_consumers"] = [{"artifact": "edge_predictor_best.pth", "spec": consumer_rel}]
+    # projector undeclared -> blocked
+    assert "DG-007-produced-artifact-has-no-deployer" in defect_ids(given, source)
+    # declared by-product without a real reason -> blocked
+    given["deploy_consumers"].append({"artifact": "appearance_projector_best.pth", "byproduct_reason": "n/a"})
+    assert "DG-007-produced-artifact-has-no-deployer" in defect_ids(given, source)
+    # a specific reason -> admitted
+    given["deploy_consumers"][-1]["byproduct_reason"] = "auxiliary triplet head; no inference path consumes it"
+    assert "DG-007-produced-artifact-has-no-deployer" not in defect_ids(given, source)
+    # a by-product row may not ALSO name a consumer spec
+    given["deploy_consumers"][-1]["spec"] = consumer_rel
+    assert "DG-007-produced-artifact-has-no-deployer" in defect_ids(given, source)
+
+
 def test_diagnostic_artifact_requires_reason_and_cannot_name_deployer():
     source = "selection_metric = 'deployed'\ntorch.save(state, 'edge_predictor_best.pth')\n"
     given = spec("h1r_det_s1_smoke", env={"H1R_SELECT_THRESHOLD": "deployed"})

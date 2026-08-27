@@ -1,0 +1,25 @@
+{
+  "name": "p24_deepcenter_best_veto",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p24_deepcenter_best_veto.json",
+  "base_notebook": "notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb",
+  "base_sha256": "6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
+  "built_notebook": "notebooks\\kaggle_p24_deepcenter_best_veto\\biohub-p24-deepcenter-best-veto.ipynb",
+  "built_sha256": "7072e3fa268d4bff6e16048c12b80933132405bd6c2a5c9a7166baf60bf5dcc2",
+  "config_hash": "3261e8e41c8c",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "3b43d1001263214bcfbf35db77dfbc5bc03f8f325df84220a1dbfc7317d13f1a"
+    }
+  ],
+  "declared_slug": "biohub-p24-deepcenter-best-veto",
+  "title": "Biohub P24 DeepCenter Best Veto",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}

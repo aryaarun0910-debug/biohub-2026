@@ -4959,3 +4959,55 @@ parity number (`FACT-0327`). Next attempt needs an observable bootstrap and a to
 refuted (median-based). Tests 928+ green throughout; every gate run before every commit after one chained push past a
 failing build was caught by Kaggle's slot cap, not by me — recorded so it is not repeated.
 
+## 2026-08-27 (day) — the division ceiling is +0.019 / +0.013, association is the bottleneck, the retrain question gets a cheap test
+
+**Packets** `PKT-0020` (LEVER-0024), `PKT-0021` (LEVER-0025), `PKT-0019` stage-1 prerequisites · **cost** ~6 CPU-hours,
+0 GPU sessions launched by the agent (pushes are host-run; see the queue), 0 submissions · **instruments**
+`scripts/win_bet/div_reach_steal.py` (census / oracle / resummarise, 7 unit tests), `scripts/core/kaggle_queue.py`
+(queue runner, 8 tests), the DG-007 by-product declaration in `scripts/core/kaggle_factory.py` · **evidence**
+`C:/temp/div_reach/` (outside git).
+
+**Frontier re-read and registered.** Top-3 is now `FACT-0332` (supersedes `FACT-0010`); the gap from `FACT-0001` is the
+number every lever on the board is measured against, and none reaches a sixth of it.
+
+**LEVER-0025, stages A and B (the finding of the day).** The committed census (`FACT-0333`) reproduces `FACT-0295` with the
+scorer's own functions: metric-legal reach 23/26 (f0) and 84/125 (f1); 17 / 61 of the unscored-but-legal divisions are
+recoverable by a fork plus at most one daughter steal; 12 / 38 need a steal; in no case is the stolen edge a scored TP.
+The GT-guided oracle round-trip (`FACT-0334`) prices that at **+0.0192 (f0, CI +0.0116..+0.0272)** and **+0.0133 (f1,
+CI +0.0098..+0.0170)** with division FP unchanged and the edge term *improving* on both folds. It is a ceiling — GT chose
+the edits — but it is 3x the deployed division transplant's offline reading and the first mechanism on the board whose
+ceiling is the size of the gap. Stage C (a GT-free rule) is the whole question; the economics (a false steal costs
+~1.6e-5, a true one earns ~2e-4 on f1) put the break-even precision near 10%. Prediction record: stage A's +-2 tolerance
+fired by +2/+3 on fold-1 reach (window vs global matching); stage B's pre-registered band was exceeded, not missed.
+
+**Missed-edge anatomy (`FACT-0335`, the rank-1 competitor's split applied to us).** On the honest fold-0 configuration
+74% of missed GT edges have both endpoints detected — wrong association — and 99% of FP edges join a matched cell to an
+unmatched detection. The bottleneck is association, the opposite of Soheil Ayati's pipeline; this is the term a
+relative (RoPE-style) positional encoding in the edge transformer targets, and the term `LEVER-0011`'s reframing already
+pointed at. Fold 1's inversion is the crippled configuration (`FACT-0261`).
+
+**LEVER-0024 opened, P24 built.** `EXP-0025` = P9 + best.pt + safe-division veto ON, env-only, band pre-registered in
+`PKT-0020` (falsifier <= 0.925). Built, verified, not pushed (rule 8).
+
+**The retrain question, made cheap.** The host asked whether H1 is the game-changing play. Answer recorded in the handoff:
+the arithmetic agrees, but "H1 as packaged" is not the top teams' play, and every published from-scratch retrain lost.
+The decisive cheap test is **recipe parity**: our July `split_0` (30 epochs x 800 iters, batch 1, lr 1e-4, 5.45 h on
+T4x2; last epoch = proxy-best; sha d3e89eb3, verified against the kernel output) against the pack's on the same fold-0
+pipeline — `EXP-0026` / `p25_recipe_parity_loeo_f0.json`, built and verified, pre-registered reading in the spec.
+`PKT-0019` stage-1 prerequisites are done: fail-closed OOF initialisation for S5 and the `deploy_h1r_edge_s5_loeo_f0`
+consumer, both through the defect gate.
+
+**Format risk retired.** The organizer's converter casts coordinates to Float64 (`FACT-0336`), so p23's float export is
+code-level legal.
+
+**Tooling.** DG-007 now accepts an explicit per-artifact by-product declaration instead of forcing a fake consumer.
+`kaggle_queue.py` drives an ordered spec list through push -> status -> fetch -> audit -> (named) submit with the
+producer-before-consumer dependency and the two-slot cap; the host runs it because kernel pushes are host actions.
+
+**Agents.** Four background agents were launched twice; the first wave died on an API session limit (recorded so the
+partial artifacts under `C:/temp/div_reach/rule/` are not mistaken for results). Second-wave outcomes: see the addendum
+below when present.
+
+**Discipline that earned its keep.** The oracle summary crashed on a key mismatch after all crops were scored; the
+per-crop rows were already on disk, so a `resummarise` path rebuilt it without re-scoring — save partial results before
+the summary. Long shell heredocs silently lost their terminator three times; scripts now go through files.

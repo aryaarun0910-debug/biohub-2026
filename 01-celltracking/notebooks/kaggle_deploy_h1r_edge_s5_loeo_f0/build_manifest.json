@@ -1,0 +1,53 @@
+{
+  "name": "deploy_h1r_edge_s5_loeo_f0",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\deploy_h1r_edge_s5_loeo_f0.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_deploy_h1r_edge_s5_loeo_f0\\biohub-deploy-h1r-edge-s5-loeo-f0.ipynb",
+  "built_sha256": "b36cfffa0d105f460c5a15fca7b3bc195e4ee57846ba7da4d29e3d7d66c5a2c2",
+  "config_hash": "5bc60fdb31a4",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "d186bd9c760f62edbcf4177c85f1b88aae76622220d7efc06484043c760f037e"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "8d15030bec2f040f2bd186e7a3ebed167b0f17414de3aeef15f9994fb3710461"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "7956542e7190dbb71f06fef09d7e77f0785fcd2d46f3646c56fea5d162bb23a0"
+    }
+  ],
+  "declared_slug": "biohub-deploy-h1r-edge-s5-loeo-f0",
+  "title": "Biohub Deploy H1R Edge S5 LOEO F0",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}

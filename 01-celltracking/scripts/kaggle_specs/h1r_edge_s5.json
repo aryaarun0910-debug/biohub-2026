@@ -10,16 +10,30 @@
     "pilkwang/biohub-tracking-support-pack-50ep-v1",
     "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
     "kkunizaw/biohub-zh001r",
-    "aryaarun07/biohub-zh001r-identity"
+    "aryaarun07/biohub-zh001r-identity",
+    "aryaarun07/biohub-oof-weights"
   ],
-  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
   "enable_gpu": true,
   "enable_internet": false,
   "machine_shape": "NvidiaTeslaT4",
   "expects_submission": false,
   "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
   "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
-  "purpose": "S5 adjacent-frame Zh001r association and optional appearance training. Requires the public node/image pack and the private row-aligned identity sidecar, freezes the detector byte-for-byte, stores complete resume state, and emits training artifacts only. No submission.",
+  "purpose": "S5 adjacent-frame Zh001r association and optional appearance training. Requires the public node/image pack and the private row-aligned identity sidecar, freezes the detector byte-for-byte, stores complete resume state, and emits training artifacts only. No submission. 2026-08-27: initialises from OUR out-of-fold split_0 (trained on 6bba, 44b6 held out - aryaarun07/biohub-oof-weights) so the fold-0 LOEO transfer gate (deploy_h1r_edge_s5_loeo_f0.json) is clean; fails closed unless both init globs hit exactly once. LEVER-0023 stage 1, PKT-0019.",
+  "artifact_role": "training",
+  "deploy_consumers": [
+    {
+      "artifact": "edge_predictor_best.pth",
+      "spec": "scripts/kaggle_specs/deploy_h1r_edge_s5_loeo_f0.json"
+    },
+    {
+      "artifact": "appearance_projector_best.pth",
+      "byproduct_reason": "auxiliary triplet appearance head trained alongside the edge model; no inference path in the P3/P9 lineage consumes it, and the LOEO transfer gate scores the edge weights alone"
+    }
+  ],
   "edits": [
     {
       "kind": "env",
@@ -33,10 +47,12 @@
         "H1R_EDGE_NODE_CAP": "256",
         "H1R_EDGE_VAL_MOD": "6",
         "H1R_EDGE_AMP": "1",
-        "H1R_EDGE_RESUME": "1",
+        "H1R_EDGE_RESUME": "0",
         "H1R_EDGE_SEED": "0",
         "H1R_APPEARANCE_DIM": "64",
-        "H1R_TRIPLET_WEIGHT": "0.05"
+        "H1R_TRIPLET_WEIGHT": "0.05",
+        "H1R_EDGE_INIT_WEIGHTS_GLOB": "/kaggle/input/*/edge_predictor_best_split_0.pth",
+        "H1R_EDGE_INIT_CONFIG_GLOB": "/kaggle/input/*/config_split_0.json"
       },
       "expect": 1
     },

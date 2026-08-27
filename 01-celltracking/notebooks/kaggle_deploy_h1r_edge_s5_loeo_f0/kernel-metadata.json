@@ -1,7 +1,7 @@
 {
-  "id": "aryaarun07/biohub-h1r-edge-s5",
-  "title": "Biohub H1R Edge S5",
-  "code_file": "biohub-h1r-edge-s5.ipynb",
+  "id": "aryaarun07/biohub-deploy-h1r-edge-s5-loeo-f0",
+  "title": "Biohub Deploy H1R Edge S5 LOEO F0",
+  "code_file": "biohub-deploy-h1r-edge-s5-loeo-f0.ipynb",
   "language": "python",
   "kernel_type": "notebook",
   "is_private": true,
@@ -16,11 +16,11 @@
     "pilkwang/biohub-temporal-unet3d-seed314159-v1",
     "pilkwang/biohub-tracking-support-pack-50ep-v1",
     "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
-    "kkunizaw/biohub-zh001r",
-    "aryaarun07/biohub-zh001r-identity",
-    "aryaarun07/biohub-oof-weights"
+    "thtennant/taaf-kaggle-source-share-fork"
   ],
-  "kernel_sources": [],
+  "kernel_sources": [
+    "aryaarun07/biohub-h1r-edge-s5"
+  ],
   "competition_sources": [
     "biohub-cell-tracking-during-development"
   ],
