@@ -324,9 +324,9 @@ experiments:
     kernel_version: 2
     submission: null
     lb: null
-    status: running
+    status: complete
     date: '2026-08-27'
-    facts: [FACT-0296]
+    facts: [FACT-0296, FACT-0328, FACT-0329]
     note: >-
       First GPU execution of the S5 edge half of H1 (dossier C:/temp/intel/H1_DOSSIER.md). Diagnostic, no
       submission. Proves: both Zh001r mounts resolve; two finite fp16-autocast optimizer steps with the explicit

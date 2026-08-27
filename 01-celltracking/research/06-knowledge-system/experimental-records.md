@@ -4933,3 +4933,29 @@ Any successor needs a different localiser and a falsifier written on the mean re
 every gap repair (`FACT-0312`) — a one-submission question, not a lever until someone states a falsifier —
 and Colab Pro is back (`FACT-0318`, host decision), which changes where the queued zero-submission GPU work
 can run.
+
+## 2026-08-27 — Night 2: a submission, two kills, a two-fold anchor, a parked candidate, and H1 through gate 1
+
+**Kaggle.** `EXP-0023` p22 (secondary detection weight 0.60, the one knob separating 0.923 from 0.927 on a
+code-identical public lineage) built, audited (PASS) and **submitted** (55806155; band 0.924–0.929). `EXP-0021` /
+`EXP-0022` (honest relink sweeps) complete: **`LEVER-0012` killed on both folds** (`FACT-0323`, `FACT-0325`) and their
+controls are the clean champion substrates (`FACT-0322`); the **calibration anchor holds on both folds** — champion −
+P3 = +0.0068 / +0.0059 offline vs +0.010 LB (`FACT-0321`, `FACT-0326`). `EXP-0024` S5 smoke: **v1 failed its own
+frozen-trunk assertion** (BatchNorm drift 3.1e+01, `FACT-0328`), fixed by keeping the frozen trunk in eval mode, **v2
+passed gate 1** (`FACT-0329`).
+
+**Localisation.** `LEVER-0022` (intensity centroid, the 0.927 lineage's `refine_centroids`): pilots +0.006 both folds
+with float coordinates, rounded ≤ 0 (`FACT-0324`); full folds +0.0013 / +0.0024 (`FACT-0330`) — real, both directions,
+below the +0.005 bar → **parked** with a ready deploy spec (`p23_icom155.json`, float writer).
+
+**H1.** Dossier + external research (`C:/temp/intel/`): top-3 is 0.955; post-processing on the shared weights is bounded
+at ~+0.02–0.04; S1 as packaged trains 33 parameters; S5 had never run on a GPU. `LEVER-0023` opened with four gates
+(`PKT-0019`); gate 1 passed; stage 1 blocked on OOF initialisation + an S5→LOEO consumer spec.
+
+**Colab.** Official CLI lane built (WSL Ubuntu, ADC); the parity pilot died server-side at 61 min; ~8.4 units for no
+parity number (`FACT-0327`). Next attempt needs an observable bootstrap and a token-lifetime check.
+
+**Prediction record.** LEVER-0022 pilot band hit at full scale; promotion bar mis-set. `FACT-0272`'s dose-response
+refuted (median-based). Tests 928+ green throughout; every gate run before every commit after one chained push past a
+failing build was caught by Kaggle's slot cap, not by me — recorded so it is not repeated.
+

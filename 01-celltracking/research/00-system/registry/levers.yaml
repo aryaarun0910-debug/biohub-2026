@@ -588,7 +588,13 @@ levers:
       0.927 public lineage's refine_centroids: z+-1, y/x+-3 voxel window, 20th-percentile baseline)
       reduces the mean endpoint residual and the >3 um tail on the honest fold, and that lifts the
       scorer-exact fold score on both embryo directions
-    status: running
+    status: parked
+    reopen_when: >-
+      the host chooses to spend a submission on a +0.002..+0.004 expected gain, or float-coordinate acceptance by
+      Kaggle's scorer is proven by any other submission; deploy spec ready (p23_icom155.json)
+    outcome: >-
+      Full scale, both folds (FACT-0330): +0.0013 / +0.0024 for icom_155 - positive in both directions, below the
+      pre-registered +0.005 bar the pilots (FACT-0324) had suggested. Rounded export is <= 0; float export required.
     falsifier: >-
       Same two stages as LEVER-0021 but on the statistics FACT-0314 showed the score follows:
       (a) on fold-1 frozen matches the primary arm must cut the MEAN residual by >= 10% AND the

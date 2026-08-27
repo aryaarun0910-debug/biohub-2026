@@ -48,9 +48,12 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > server-side at 61 min and the night cost ~8.4 units for no parity number (`FACT-0327`). Fix before spending more:
 > short observable execs, and verify the ADC token lifetime against the keep-alive daemon.
 >
-> **Next actions, ranked:** (1) read `EXP-0023` and `EXP-0024` v2; (2) `LEVER-0022` full-fold result → if ≥ +0.005
-> both folds, build `p23` = P9 + float export + icom_155, submit; (3) parity pilot on Colab with the observable
-> bootstrap; (4) `LEVER-0023` stage 1 only after (1)/(3); (5) `LEVER-0019` re-derived on the champion controls.
+> **Update before close (01:10 UTC):** `EXP-0024` v2 **passed gate 1** (`FACT-0329`, drift 0.0, held-out link_top1
+> 0.858 → 0.870 in two steps). `LEVER-0022` full folds **+0.0013 / +0.0024** (`FACT-0330`) — below the +0.005 bar,
+> PARKED with `p23_icom155.json` built (float writer + `scripts/kaggle_edits/icom_refine.py`) for a deliberate
+> submission. **Next actions, ranked:** (1) read `EXP-0023`'s score; (2) decide on p23 (+0.002..+0.004 expected, float
+> acceptance unverified); (3) H1 stage 1 needs OOF-split initialisation and an S5→LOEO consumer spec before any
+> launch; (4) Colab parity with an observable bootstrap; (5) `LEVER-0019` re-derived on the champion controls.
 
 > ## 🔴 2026-08-26 (late) — LEVER-0021 IS KILLED, the deployed DeepCenter is dead weight, and Colab is back
 >

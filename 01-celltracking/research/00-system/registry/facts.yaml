@@ -3136,3 +3136,67 @@ facts:
       none of them ran on a GPU, so none met this gate. Gate 1 of LEVER-0023 is decided by v2.
     date: '2026-08-27'
     tags: [training, h1, defect, gate]
+
+  - id: FACT-0329
+    statement: >-
+      H1 gate 1 PASSED - the S5 edge-training smoke (EXP-0024 v2) ran two fp16-autocast optimizer steps on Kaggle
+      T4x2 with detection_drift 0.0 (trunk truly frozen after the BatchNorm fix), and even two steps moved the
+      54,400-link held-out metrics up: link_top1 0.8580 -> 0.8700, candidate_recall 0.2439 -> 0.2823
+    value: 0.0
+    unit: detection_drift_max_abs
+    scope:
+      zero_epoch: {link_top1: 0.8580, candidate_recall: 0.2439, select_score: 0.3798, val_loss: 0.007458, n_links: 54400}
+      after_2_steps: {link_top1: 0.8700, candidate_recall: 0.2823, select_score: 0.4262, val_loss: 0.006598, train_loss: 0.03275}
+      detection_drift: {max_abs: 0.0, mean_abs: 0.0, relative: 0.0}
+      artefacts: {edge_predictor_best_pth_bytes: 8363159, appearance_projector_best_pth_bytes: 10613, appearance_dim: 64, triplet_weight: 0.05}
+      hardware: "Tesla T4 x2"
+    provenance: MEASURED
+    instrument: >-
+      kaggle kernels output aryaarun07/biohub-h1r-edge-s5-smoke (version 2): metrics.json, summary.json under
+      C:/temp/h1r_edge_s5_smoke_v2/; the drift number is the trainer's own detection_drift() gate
+    experiment: EXP-0024
+    protocol:
+      weights: initialised from the PUBLIC 50-epoch pack edge_predictor_best.pth (trained on BOTH embryos)
+      eval: Zh001r held-out crops (single embryo, Ultrack pseudo-labels) - NOT a competition-score measurement
+    note: >-
+      What it licenses: LEVER-0023 stage 1 (h1r_edge_s5.json, ~1.5-3 GPU-h) may be launched on the host's go.
+      What it does not say: whether any of this transfers to the competition score - and it exposes a design
+      hole in the transfer gate: initialised from the public pack, the S5 weights have seen both embryos, so a
+      fold-0 LOEO with them is NOT clean. Stage 1 must initialise from the OOF split weights
+      (biohub-oof-weights edge_predictor_best_split_{0,1}.pth) for the fold it will be judged on, and an
+      S5 -> LOEO consumer spec (BIOHUB_LOEO_WEIGHTS_GLOB at the S5 output) must exist before the run - the DG-007
+      gate will refuse the full spec until it does. The two-step metric movement is directional only.
+    date: '2026-08-27'
+    tags: [training, h1, gate, headline]
+
+  - id: FACT-0330
+    statement: >-
+      LEVER-0022 at full scale is positive on BOTH folds but below its promotion bar - icom_155 +0.0013 (f0, 71
+      crops) / +0.0024 (f1, 128 crops), icom_133 +0.0013 / +0.0021, icom_255 +0.0005 / +0.0034 - the pilot
+      subsets had over-read it by ~3-5x
+    value: 0.0024
+    unit: score_delta_f1_full_icom_155
+    scope:
+      f0_full: {crops: 71, n_matched: 19995, baseline: 0.9070, icom_155: 0.9083, icom_133: 0.9083, icom_255: 0.9075,
+                edge_icom_155: {tp: [18799, 18807], fp: [1394, 1372], fn: [1027, 1019]}, divisions: unchanged}
+      f1_full: {crops: 128, n_matched: 98356, baseline: 0.7086, icom_155: 0.7109, icom_133: 0.7107, icom_255: 0.7119,
+                edge_icom_155: {tp: [86272, 86397], fp: [14194, 13960], fn: [22785, 22660]}, divisions: [15, 15]}
+      residual_f1_icom_155: {mean_pct: -4.6, frac_gt_3um: [0.407, 0.360]}
+      paired_mde_reference: {f0: 0.0036, f1: 0.00064}
+      promotion_bar: {both_folds_ge: 0.005, met: false}
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/dc_subvoxel_refine.py icentroid + eval and scripts/win_bet/ea_atlas.py + summarise() on ALL crops
+      of the EXP-0021/EXP-0022 control exports; outputs C:/temp/icom/full_f{0,1}/, summary C:/temp/icom/full_summary.json
+    protocol:
+      weights: the champion controls (f0 pack split_0, f1 OOF split_1)
+      eval: scorer-exact per-crop rows, summarise() with the node term, float coordinates
+    note: >-
+      Real (fold 1 is ~4x its paired MDE; both signs agree) but in the +0.002..+0.004 tier, and it REQUIRES
+      float export (FACT-0324). With the calibration ratio of ~0.6-0.7 (FACT-0321/0326) the LB expectation is
+      roughly +0.002..+0.004 - the same tier as LEVER-0019, and it costs one submission plus the unverified
+      acceptance of float coordinates. The lever is PARKED, not killed: its pre-registered bar was not met, but
+      its evidence is not negative. Deployment code and spec exist (scripts/kaggle_edits/icom_refine.py,
+      scripts/kaggle_specs/p23_icom155.json) so the host can spend a submission on it deliberately.
+    date: '2026-08-27'
+    tags: [edge, localisation, parked, both-folds]

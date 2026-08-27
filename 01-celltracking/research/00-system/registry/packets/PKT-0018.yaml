@@ -2,7 +2,7 @@ id: PKT-0018
 title: "LEVER-0022: intensity-centroid re-localisation (the 0.927 lineage's refine_centroids) on the clean champion exports"
 lever: LEVER-0022
 owner: primary
-lock: running
+lock: done
 opened: '2026-08-27'
 
 claim: >-
@@ -50,4 +50,10 @@ outputs:
   facts_added: [FACT-0324]
   record: one section in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  Pilots (FACT-0324): icom_155 +0.0065 / +0.0057, icom_133 +0.0040 / +0.0038 with float coordinates; the rounded
+  variants are <= 0 on fold 1. Full folds (FACT-0330): icom_155 +0.0013 / +0.0024, icom_133 +0.0013 / +0.0021,
+  icom_255 +0.0005 / +0.0034 - both folds positive, promotion bar (+0.005 both) NOT met. Stage-(a) proxies were
+  retired mid-packet (recorded in FACT-0324 before full scale). Lever PARKED with deploy spec p23_icom155.json
+  built; prediction record: the pilot band (+0.001..+0.004 f1 full) was HIT (+0.0024); the promotion bar was mis-set
+  by the pilots' optimism.

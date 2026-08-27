@@ -57,4 +57,9 @@ outputs:
   facts_added: []
   record: one section per stage in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  GATE 1 PASSED 2026-08-27 (FACT-0329): EXP-0024 v2 ran two fp16 steps on T4x2 with detection_drift 0.0 after
+  v1 caught BatchNorm drift in the "frozen" trunk (FACT-0328). Before stage 1 can be authorised: (a) the S5 run
+  must initialise from the OOF split weights for the judged fold (the public pack saw both embryos), (b) an
+  S5 -> LOEO consumer spec must exist so DG-007 admits the full spec and gate 3 has an instrument, (c) the host
+  states the slot/budget. Nothing launched beyond the smoke.

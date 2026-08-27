@@ -79,7 +79,8 @@ POS_THRESH = 0.05          # DeepCenter training `pos_thresh`; also the no-signa
 MAX_SHIFT_UM = 3.0         # refinement further than this is a neighbour, not a refinement
 ARMS = ("com1", "com1_off", "par1", "com2")
 ICOM_ARMS = {"icom_133": ((1, 3, 3), 2.8), "icom_122": ((1, 2, 2), 2.8), "icom_155": ((1, 5, 5), 2.8),
-             "icom_133_s5": ((1, 3, 3), 5.0)}
+             "icom_133_s5": ((1, 3, 3), 5.0),
+             "icom_255": ((2, 5, 5), 2.8)}   # EXPLORATORY (added after the pilots): z+-2 reaches the z axis the pilots could not
 ICOM_BASELINE_PCT = 20.0
 PEAK_THRESH = 0.10         # BIOHUB_DEEPCENTER_GAP_THRESHOLD default; peaks below it are not cells
 SNAP_ARMS = {"snap_r4": (4.0, False), "snap_r3": (3.0, False), "snap_r5": (5.0, False), "snapu_r4": (4.0, True)}
