@@ -154,6 +154,12 @@ def plan_division(*, t_div, divider, parent_ids, daughter_ids, node_to_gt,
                 removes.append((parent, b))
         if len(covered) + len(adds) < 2:
             continue
+        if not adds and not removes:
+            # Adversarial audit F3 (2026-08-27): a fork whose single unmatched child already
+            # covers both lineages through its successors would yield an edit-free "plan" that
+            # apply_plans would count as applied. If the scorer does not score it now, no edit
+            # of this family fixes it - report legal_no_plan instead of a phantom.
+            continue
         return {"route": route, "fork": fork, "keep": keep, "add": adds,
                 "remove": removes, "daughter_kinds": kinds}
     return None
@@ -172,6 +178,8 @@ def apply_plans(edges: set[tuple[int, int]], plans: list[dict]) -> tuple[set[tup
     for plan in plans:
         removes = [(p, b) for p, b in plan["remove"]]
         adds = [(f, b) for f, b in plan["add"]]
+        if not adds:
+            continue   # audit F3: an edit-free plan is not an applied plan
         if any((p, b) not in edges for p, b in removes):
             continue
         removed_targets = {b for _p, b in removes}
@@ -243,6 +251,10 @@ def analyse_crop(name: str, sub: pl.DataFrame, gt_geff: Path, ea, sc) -> tuple[l
     gt_edges = set(zip(gt_ea[K.EDGE_SOURCE].astype(int), gt_ea[K.EDGE_TARGET].astype(int)))
     gt_na = gt.node_attrs(attr_keys=[K.NODE_ID, "t"]).to_pandas()
     gt_t = dict(zip(gt_na[K.NODE_ID].astype(int), gt_na["t"].astype(int)))
+    # Audit F2: the census picks daughters from the per-division WINDOW matching, but the
+    # scorer's cross-component rejection uses the FULL matching. A daughter that full-matches
+    # a node of another GT track would make the fork a division FP, not a TP. Guard every add.
+    gt_component = dm._gt_weak_component_ids(gt)
 
     rows: list[dict] = []
     plans: list[dict] = []
@@ -276,6 +288,14 @@ def analyse_crop(name: str, sub: pl.DataFrame, gt_geff: Path, ea, sc) -> tuple[l
             plan = plan_division(t_div=row["t_div"], divider=divider, parent_ids=set(parent_ids),
                                  daughter_ids=[set(d) for d in daughter_ids], node_to_gt=node_to_gt,
                                  parent_of=parent_of, children_of=children_of, t_of=t_of, pos_um=pos_um)
+            if plan is not None:
+                div_comp = gt_component.get(int(divider))
+                for _f, b in plan["add"]:
+                    g = full_gt.get(b)
+                    if g is not None and g != -1 and gt_component.get(int(g)) != div_comp:
+                        plan = None
+                        row["plan_reject"] = "cross_component"
+                        break
             if plan is None:
                 row["status"] = "legal_no_plan"
             else:
@@ -321,6 +341,18 @@ def rewrite_crop_edges(sub: pl.DataFrame, edges: set[tuple[int, int]]) -> pl.Dat
     """Nodes unchanged; edge rows rebuilt from ``edges`` in the export's layout (node_id=t=z=y=x=-1)."""
     nodes = sub.filter(pl.col("row_type") == "node")
     dataset = nodes["dataset"][0]
+    # Audit F4: the scorer keeps the two LOWEST edge ids per source and one parent per target
+    # is a pipeline invariant; re-emitting edges in sorted order is only safe while both hold.
+    # Fail loudly rather than let row order decide which edge the scorer drops.
+    out_deg: dict[int, int] = defaultdict(int)
+    in_deg: dict[int, int] = defaultdict(int)
+    for s, t in edges:
+        out_deg[s] += 1
+        in_deg[t] += 1
+    bad_out = [n for n, d in out_deg.items() if d > 2]
+    bad_in = [n for n, d in in_deg.items() if d > 1]
+    if bad_out or bad_in:
+        raise RuntimeError(f"{dataset}: degree invariant violated before rewrite - out>2 on {bad_out[:5]}, in>1 on {bad_in[:5]}")
     src, tgt = zip(*sorted(edges)) if edges else ((), ())
     edge_rows = pl.DataFrame({
         "id": pl.Series([0] * len(src), dtype=pl.Int64),
@@ -372,7 +404,7 @@ def _summarise_census(census: pd.DataFrame) -> dict:
         "second_daughter_state": census.loc[census.status == "planned", "second_daughter_state"].value_counts().to_dict(),
         "steals": int((census.n_remove > 0).sum()),
         "steal_breaks_full_tp": int(census.removed_edge_is_full_tp.sum()),
-        "reach_if_oracle_applied": int(census.scored.sum() + (census.status == "planned").sum()),
+        "scored_plus_planned": int(census.scored.sum() + (census.status == "planned").sum()),
     }
     return out
 

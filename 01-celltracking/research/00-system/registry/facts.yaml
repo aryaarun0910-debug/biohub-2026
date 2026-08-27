@@ -3323,7 +3323,13 @@ facts:
       stage-B falsifier on both folds by a wide margin. Stage C (a GT-free rule) decides whether any of it is deployable;
       the economics are favourable because a false steal costs ~2 edge-Jaccard units (~1.6e-5 on f1) while a true one
       gains a division TP (~2e-4), so a rule needs only ~10-15% precision. The edit type is post-emission and needs no
-      model, so it composes with every other lever. Pending the adversarial audit of the instrument (2026-08-27).
+      model, so it composes with every other lever. ADVERSARIALLY AUDITED 2026-08-27 (tests/test_div_reach_steal_adversarial.py,
+      23 tests): the deltas are scorer-exact and edit-invariant (node matching identical control vs oracle on all 199
+      crops, division FP never moves, every one of the 78 edge deltas reconciled against the atlas); they UNDER-state
+      the edit family's ceiling because the planner tries fewer fork placements than the scorer admits (a wider oracle
+      adds <= 1 f0 / <= 6 f1 divisions, ~+0.001 per fold). Two latent defects with zero incidence here (an edit-free
+      phantom plan; no full-matching cross-component guard on added daughters) and one order-dependence (the scorer's
+      out-degree cap) were fixed in the instrument the same day; the saved results are unchanged by the fixes.
     date: '2026-08-27'
     tags: [division, oracle, ceiling, headline, both-folds]
 
