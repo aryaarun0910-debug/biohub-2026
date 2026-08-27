@@ -2985,3 +2985,66 @@ facts:
       own falsifier has already fired on clean evidence about itself.
     date: '2026-08-27'
     tags: [division, killed, relink, honest]
+
+  - id: FACT-0325
+    statement: >-
+      The HONEST fold-1 relink-penalty sweep (EXP-0021, OOF split_1 weights, verified by the kernel log) agrees
+      with fold 0 - every penalty is below the champion control (0.7086 vs 0.7066 / 0.7074 / 0.7066 / 0.7070 /
+      0.7065 at 0 / 1 / 2 / 4 / 8) and division TP stays within noise of the control's 15
+    value: -0.0012
+    unit: score_delta_best_penalty_f1
+    scope:
+      control: {score: 0.7086, adj_edge: 0.7054, divJ: 0.0315, division: [15, 351, 110], edge: [86272, 14194, 22785], node_recall: 0.8655}
+      pen_0: {score: 0.7066, division: [16, 366, 109]}
+      pen_1: {score: 0.7074, division: [14, 355, 111]}
+      pen_2: {score: 0.7066, division: [15, 359, 110]}
+      pen_4: {score: 0.7070, division: [15, 355, 110]}
+      pen_8: {score: 0.7065, division: [15, 344, 110]}
+      deltas_vs_control: {pen_0: -0.0020, pen_1: -0.0012, pen_2: -0.0020, pen_4: -0.0016, pen_8: -0.0021}
+      weights_line: "LOEO primary weights OVERRIDDEN -> /kaggle/input/biohub-oof-weights/edge_predictor_best_split_1.pth (sha256 2e4ebf616b3d4fb5)"
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/ea_atlas.py on the six EXP-0021 exports (C:/temp/p19_relink_sweep_f1/sweep_pen_*.csv.gz) and
+      summarise(); per-arm crops parquets under C:/temp/p19_relink_sweep_f1/atlas/; kernel log fetched with
+      kaggle_factory log confirms the split_1 override
+    experiment: EXP-0021
+    protocol:
+      weights: OOF edge_predictor_best_split_1.pth on held-out 6bba (honest - the EXP-0019 leak is NOT repeated)
+      eval: scorer-exact per-crop rows over all 128 fold-1 crops, summarise() with the node term
+    note: >-
+      Second embryo direction for the LEVER-0012 kill (FACT-0323): both folds negative at every penalty. The
+      fold-1 champion control also replaces FACT-0210 as the clean fold-1 substrate for LEVER-0019 and the
+      calibration lane: 15 division TP against the P3 export's 1 - the deployed division transplant works on
+      the honest fold too, at 15, not at the leak-manufactured 25 (FACT-0160).
+    date: '2026-08-27'
+    tags: [division, killed, relink, honest, substrate]
+
+  - id: FACT-0326
+    statement: >-
+      The calibration anchor holds in BOTH embryo directions - on fold 1 the champion scores +0.0059 over
+      P3-harmonic (95% crop-bootstrap CI [+0.0022, +0.0098]; adj_edge +0.0029, division +0.0030), matching
+      fold 0's +0.0068 (FACT-0321) against the same LB delta of +0.010
+    value: 0.0059
+    unit: score_delta_f1
+    scope:
+      f1_p3_harmonic: {score: 0.7026, adj_edge: 0.7025, divJ: 0.0016, division: [1, 491, 124], node_recall: 0.8547}
+      f1_p9_champion: {score: 0.7086, adj_edge: 0.7054, divJ: 0.0315, division: [15, 351, 110], node_recall: 0.8655}
+      paired_delta: {score: 0.0059, adj_edge: 0.0029, division_term: 0.0030, ci95: [0.0022, 0.0098], bootstrap_resamples: 2000}
+      both_folds: {f0: 0.0068, f1: 0.0059, lb: 0.010, offline_over_lb: [0.68, 0.59]}
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/ea_atlas.py + summarise() over the same 128 crops for C:/temp/p19_relink_sweep_f1/sweep_pen_off.csv.gz
+      (EXP-0021 control) and _evidence/exports/loeo_f1_strict/ (C:/temp/edge_atlas_strict/crops_s1.parquet)
+    experiment: EXP-0021
+    protocol:
+      weights: OOF split_1 for BOTH arms (honest)
+      eval: scorer-exact, paired over identical crops, crop bootstrap
+    note: >-
+      Two folds, one real LB gain, both offline deltas positive with CIs covering the LB delta and a ratio of
+      ~0.6-0.7. This is the first time the offline apparatus has been shown to read a deployed gain with the
+      right sign on both embryo directions. It licenses using PAIRED offline deltas on the champion controls
+      as the screening currency for LEVER-0019, LEVER-0022 and LEVER-0023's transfer gate, with the caveat that
+      a single anchor pair cannot fix the slope - a second LB-scored pair (EXP-0023 sdw0.60, if it moves the
+      LB) should be replayed offline to add a point.
+    date: '2026-08-27'
+    tags: [calibration, headline, paired-delta]

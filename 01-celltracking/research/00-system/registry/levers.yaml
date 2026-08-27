@@ -263,7 +263,7 @@ levers:
     # graded the evidence. R9 now refuses a closure that rests on an INVALID fact, so the
     # closure is RETRACTED rather than annotated: status follows EXP-0021, which is running.
     status: killed
-    closed_by: [FACT-0323]
+    closed_by: [FACT-0323, FACT-0325]
     closed_date: '2026-08-27'
     falsifier: >-
       Any penalty must beat the disabled control on the offline LOEO score.

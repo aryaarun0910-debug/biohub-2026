@@ -272,9 +272,9 @@ experiments:
     kernel_version: 2
     submission: null
     lb: null
-    status: running
+    status: complete
     date: '2026-08-26'
-    facts: [FACT-0221, FACT-0160]
+    facts: [FACT-0221, FACT-0160, FACT-0325, FACT-0326]
     note: >-
       Replaces the VOID leaky EXP-0019. Spec repaired with BIOHUB_LOEO_WEIGHTS_GLOB pointing at
       edge_predictor_best_split_1.pth plus the oof-weights dataset; tests/test_loeo_weights_hygiene.py
