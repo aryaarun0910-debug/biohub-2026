@@ -408,9 +408,9 @@ experiments:
     spec: scripts/kaggle_specs/p27_champion_icom.json
     kernel: aryaarun07/biohub-p27-champion-icom
     kernel_version: 1
-    submission: null
+    submission: 55830000
     lb: null
-    status: running
+    status: pending
     date: '2026-08-27'
     facts: [FACT-0341, FACT-0330, FACT-0336]
     note: >-
@@ -418,4 +418,4 @@ experiments:
       PLUS LEVER-0022 icom float re-localisation (offline full-fold +0.0013/+0.0024, FACT-0330). Built on the P9
       champion, NOT the superseded base (p23/EXP-0027 tested icom on P9 and is now working backwards). PRE-REGISTERED
       band 0.927-0.931, central 0.929; falsifier <= 0.928 (no gain over the champion P24). Pushed v1 2026-08-27 under
-      host GPU+submission authorisation; the submit is driven manually on completion.
+      host GPU+submission authorisation; SUBMITTED 2026-08-27 (2 subs left); our integer-audit false-positived on the icom floats (FACT-0343), coords verified sound and floats scorer-legal (FACT-0336). Score pending.

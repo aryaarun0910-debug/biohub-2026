@@ -3550,3 +3550,55 @@ facts:
       the cheap retrain recipe is not the path. Prediction record: EXP-0025 hit ABOVE its central band (0.925).
     date: '2026-08-27'
     tags: [score, deployed, headline, champion, deepcenter]
+
+  - id: FACT-0342
+    statement: >-
+      The sinusoidal S5 edge model (LEVER-0027 gate-2 baseline, 20 epochs on Zebrahub zh001r) SATURATES its held-out
+      link_top1 at ~0.999 - zero-epoch 0.9747 -> 0.9991 by epoch 0 and a plateau ~0.9991 thereafter, with candidate_recall
+      0.7217 -> ~0.999 and detection_drift 0.0 throughout; the Zebrahub link task is near-trivial for the edge head
+    value: 0.9991
+    unit: link_top1_zh001r_saturated
+    scope:
+      zero_epoch: {link_top1: 0.9747, candidate_recall: 0.7217}
+      best_epoch: 0.9991
+      epochs: 20
+      pos_encoding: sinusoidal
+    provenance: MEASURED
+    instrument: kaggle kernels output aryaarun07/biohub-h1r-edge-s5 metrics.json/summary.json at C:/temp/h1r_edge_s5_full/
+    experiment: EXP-0028
+    note: >-
+      Two consequences for LEVER-0027 (RoPE-4D). (1) Gate 2 as written - RoPE beats sinusoidal on held-out link_top1 at
+      equal steps - has almost NO signal room: both encodings saturate near 0.999 on Zebrahub, so link_top1 cannot
+      discriminate them. Move the gate to early-epoch link_top1, a harder split, or straight to competition transfer.
+      (2) The edge head learns Zebrahub association almost perfectly while FACT-0339 shows detector weight transfer
+      FAILS - reinforcing that association on clean single-embryo data is easy and the competition difficulty lives in
+      DETECTION and cross-embryo transfer. Re-weights effort toward the detector lanes (LEVER-0028/0031).
+    date: '2026-08-27'
+    tags: [training, s5, saturation, rope4d, direction]
+
+  - id: FACT-0343
+    statement: >-
+      Our submission structural audit (scripts/d1/audit_submission_structure.py) FALSE-POSITIVES on float coordinates -
+      it fails A1-numeric (fractional=366108), A1-row_contract (bad_node_rows=122184) and A3-volume (outside=122184) on
+      a valid icom float export whose values are all finite, >= 0 and in-bounds; the audit assumes integer coordinates
+      while FACT-0336 shows the organizer's converter casts to Float64
+    value: null
+    unit: defect
+    scope:
+      failing_checks: [A1_numeric_fractional, A1_row_contract_bad_node_rows, A3_volume_outside]
+      p27_submission_finite: true
+      p27_z_range: [0.0, 62.947]
+      p27_y_range: [0.697, 253.804]
+      p27_x_range: [0.674, 253.673]
+      affected_specs: [p23_icom155, p27_champion_icom]
+    provenance: MEASURED
+    instrument: kaggle_factory audit on C:/temp/p27/ + direct pandas verification of the fetched submission.csv
+    note: >-
+      Not a submission defect - p27's coordinates are sound (finite, in-bounds, edge rows -1). It is an AUDIT gap: the
+      integer assumption predates the icom float lane. p27 was submitted 2026-08-27 (EXP-0029) with coordinate
+      soundness verified directly, because FACT-0336 establishes floats are scorer-legal. DOWNSTREAM FIX to formally
+      close: audit_submission_structure.py needs a float-coordinate mode (accept fractional; bounds-check after
+      rounding; keep finite + >= 0 + in-bounds + edge-sentinel checks) gated on the spec declaring a float export, so
+      the gate stays meaningful for icom-lineage specs instead of being bypassed by hand.
+    date: '2026-08-27'
+    tags: [audit, float, defect, downstream-fix]
