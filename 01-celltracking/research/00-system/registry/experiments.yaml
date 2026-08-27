@@ -307,10 +307,10 @@ experiments:
     kernel: aryaarun07/biohub-p22-sdw060
     kernel_version: 1
     submission: 55806155
-    lb: null
-    status: pending
+    lb: 0.925
+    status: scored
     date: '2026-08-27'
-    facts: [FACT-0001]
+    facts: [FACT-0001, FACT-0331]
     note: >-
       The single knob separating evgendvorkin/biohub-0-927-lb (self-declared 0.923) from arnav170/biohub-sdw60
       (0.927) on a code-identical lineage (teardown at C:/temp/intel/arnav170_sdw60/REPORT.md). Everything else

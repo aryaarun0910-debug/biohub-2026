@@ -3200,3 +3200,26 @@ facts:
       scripts/kaggle_specs/p23_icom155.json) so the host can spend a submission on it deliberately.
     date: '2026-08-27'
     tags: [edge, localisation, parked, both-folds]
+
+  - id: FACT-0331
+    statement: >-
+      Secondary detection weight 0.60 (p22, EXP-0023) scores exactly the champion's 0.925 on the public LB -
+      the knob that separates the public 0.923 and 0.927 notebooks has ZERO effect on the P9 lineage, so the
+      0.927 lineage's edge over us lives in its bundle (DeepCenter best.pt + safe-division veto + lambda 0.30),
+      not in the detection blend
+    value: 0.925
+    unit: score
+    scope: {leaderboard: public, submission: 55806155, champion: 0.925, band_prereg: [0.924, 0.929], falsifier: "<= 0.925", fired: true}
+    provenance: MEASURED
+    instrument: kaggle submission 55806155 (aryaarun07/biohub-p22-sdw060 v1), audit receipt notebooks/kaggle_p22_sdw060/_out/audit_receipt.json
+    experiment: EXP-0023
+    note: >-
+      Prediction record: the band's floor was hit exactly. The teardown's arithmetic (C:/temp/intel/arnav170_sdw60/
+      REPORT.md) assumed evgendvorkin's base was 0.923 as its markdown said; a zero effect here says its title
+      (0.927) was right and the bundle - best.pt (FACT-0311), veto ON, harmonic 0.30, refine_all_centroids (which
+      FACT-0324 shows is <= 0 when rounded) - carries the +0.002 over our P9. The cheapest next A/B is therefore
+      P10 (best.pt, already built) plus BIOHUB_DEEPCENTER_SAFE_DIV_VETO=1, env-only on P9; its sign is unknown
+      (FACT-0312) and it costs one slot and one submission. p22 also adds an LB-scored pair with delta 0 for the
+      calibration lane if its offline LOEO replay is ever run.
+    date: '2026-08-27'
+    tags: [score, killed-knob, prediction-record]

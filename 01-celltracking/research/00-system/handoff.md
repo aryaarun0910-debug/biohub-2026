@@ -48,6 +48,9 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > server-side at 61 min and the night cost ~8.4 units for no parity number (`FACT-0327`). Fix before spending more:
 > short observable execs, and verify the ADC token lifetime against the keep-alive daemon.
 >
+> **`EXP-0023` SCORED 0.925 = the champion (`FACT-0331`): the sdw knob is dead; the 0.927 edge is in the
+> public bundle (best.pt + safe-div veto + lambda 0.30). Next cheap A/B: P10 best.pt + veto ON, env-only.**
+>
 > **Update before close (01:10 UTC):** `EXP-0024` v2 **passed gate 1** (`FACT-0329`, drift 0.0, held-out link_top1
 > 0.858 → 0.870 in two steps). `LEVER-0022` full folds **+0.0013 / +0.0024** (`FACT-0330`) — below the +0.005 bar,
 > PARKED with `p23_icom155.json` built (float writer + `scripts/kaggle_edits/icom_refine.py`) for a deliberate
