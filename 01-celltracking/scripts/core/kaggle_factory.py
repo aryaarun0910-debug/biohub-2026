@@ -826,10 +826,13 @@ def cmd_audit(spec: dict, dest: Path, kernel_version: int | None = None) -> int:
 
     materials = _release_materials(spec, dest, _positive_kernel_version(kernel_version))
     csv = dest / "submission.csv"
-    r = run([
+    audit_cmd = [
         sys.executable, "scripts/d1/audit_submission_structure.py", "audit", str(csv),
         "--json-out", str(report_tmp),
-    ])
+    ]
+    if spec.get("float_coordinates"):
+        audit_cmd.append("--allow-float-coords")
+    r = run(audit_cmd)
     print((r.stdout or "") + (r.stderr or ""))
     if r.returncode != 0:
         report_tmp.unlink(missing_ok=True)

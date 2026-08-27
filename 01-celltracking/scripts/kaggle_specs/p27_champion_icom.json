@@ -47,6 +47,7 @@
       "LEVER-0022 (icom, FACT-0330)"
     ]
   },
+  "float_coordinates": true,
   "edits": [
     {
       "kind": "env",

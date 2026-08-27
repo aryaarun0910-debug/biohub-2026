@@ -247,3 +247,51 @@ def test_invalid_retention_bound_is_rejected(tmp_path: Path, bound: float) -> No
         audit_mod.audit(
             candidate_path, baseline=baseline_path, min_node_retention=bound,
         )
+
+
+def _float_coord_frame() -> pd.DataFrame:
+    """A structurally valid frame whose node z/y/x carry fractional values (an icom export)."""
+    frame = valid_frame().copy()
+    for col in ("z", "y", "x"):
+        frame[col] = frame[col].astype(float)   # float dtype, else pandas truncates on assign
+    node = frame["row_type"] == "node"
+    frame.loc[node, "z"] = frame.loc[node, "z"] + 0.128
+    frame.loc[node, "y"] = frame.loc[node, "y"] + 0.907
+    frame.loc[node, "x"] = frame.loc[node, "x"] + 0.673
+    return frame
+
+
+def test_float_coordinates_fail_by_default_but_pass_with_allow_flag(tmp_path: Path) -> None:
+    path = tmp_path / "submission.csv"
+    _float_coord_frame().to_csv(path, index=False)
+    # default: the integer contract flags the fractional coordinates
+    assert audit_mod.audit(path)["verdict"] == "FAIL"
+    # icom float mode: fractional z/y/x accepted, everything else still checked
+    rep = audit_mod.audit(path, allow_float_coords=True)
+    assert rep["verdict"] == "PASS", [c for c in rep["checks"] if not c["pass"]]
+    assert check(rep, "A1 numeric")["pass"]
+    assert check(rep, "A1 row_contract")["pass"]
+    assert check(rep, "A3 volume")["pass"]
+
+
+def test_allow_float_coords_still_rejects_fractional_ids_and_time(tmp_path: Path) -> None:
+    # a fractional t or node_id is ALWAYS a defect, float mode or not
+    for col in ("t", "node_id"):
+        frame = _float_coord_frame()
+        frame[col] = frame[col].astype(float)
+        node = frame["row_type"] == "node"
+        frame.loc[node, col] = frame.loc[node, col] + 0.5
+        path = tmp_path / f"sub_{col}.csv"
+        frame.to_csv(path, index=False)
+        assert audit_mod.audit(path, allow_float_coords=True)["verdict"] == "FAIL", col
+
+
+def test_allow_float_coords_still_enforces_volume_bounds(tmp_path: Path) -> None:
+    frame = _float_coord_frame()
+    node = frame["row_type"] == "node"
+    frame.loc[node, "z"] = float(audit_mod.Z_MAX) + 5.5   # out of the acquisition volume
+    path = tmp_path / "sub_oob.csv"
+    frame.to_csv(path, index=False)
+    rep = audit_mod.audit(path, allow_float_coords=True)
+    assert rep["verdict"] == "FAIL"
+    assert not check(rep, "A3 volume")["pass"]

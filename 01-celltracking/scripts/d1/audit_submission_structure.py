@@ -64,7 +64,7 @@ def load(path: Path) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
-def _numeric_contract(df: pd.DataFrame) -> tuple[pd.DataFrame, int, int]:
+def _numeric_contract(df: pd.DataFrame, float_coords=frozenset()) -> tuple[pd.DataFrame, int, int]:
     """Return a safe numeric view plus counts of non-finite and fractional cells.
 
     ``astype(int)`` silently truncates fractional values, which previously let malformed
@@ -79,8 +79,11 @@ def _numeric_contract(df: pd.DataFrame) -> tuple[pd.DataFrame, int, int]:
         values = pd.to_numeric(df[column], errors="coerce")
         array = values.to_numpy(dtype=np.float64, na_value=np.nan)
         finite = np.isfinite(array)
-        integral = finite & (array == np.trunc(array))
         nonfinite += int((~finite).sum())
+        if column in float_coords:
+            numeric[column] = np.where(finite, array, -1.0).astype(np.float64)
+            continue
+        integral = finite & (array == np.trunc(array))
         fractional += int((finite & ~integral).sum())
         numeric[column] = np.where(integral, array, -1).astype(np.int64)
     return numeric, nonfinite, fractional
@@ -201,6 +204,7 @@ def audit(
     min_edge_retention: float = DEFAULT_MIN_RETENTION,
     min_dataset_node_retention: float = DEFAULT_MIN_RETENTION,
     min_dataset_edge_retention: float = DEFAULT_MIN_RETENTION,
+    allow_float_coords: bool = False,
 ) -> dict:
     raw = path.read_bytes()
     df = load(path)
@@ -211,7 +215,8 @@ def audit(
     if not ok:
         raise ValueError(f"submission schema mismatch: {detail}")
 
-    numeric, nonfinite, fractional = _numeric_contract(df)
+    float_coords = frozenset({"z", "y", "x"}) if allow_float_coords else frozenset()
+    numeric, nonfinite, fractional = _numeric_contract(df, float_coords)
     # All later graph checks operate on this validated/sanitised integer view. Invalid cells
     # remain represented by -1, guaranteeing a FAIL without unsafe float-to-int truncation.
     work = df.copy()
@@ -274,9 +279,9 @@ def audit(
     ).sum())
     checks.append((
         "A3 volume", vol_bad == 0,
-        f"z [{int(nodes['z'].min())}, {int(nodes['z'].max())}] "
-        f"y [{int(nodes['y'].min())}, {int(nodes['y'].max())}] "
-        f"x [{int(nodes['x'].min())}, {int(nodes['x'].max())}]; outside={vol_bad}",
+        f"z [{float(nodes['z'].min()):.3g}, {float(nodes['z'].max()):.3g}] "
+        f"y [{float(nodes['y'].min()):.3g}, {float(nodes['y'].max()):.3g}] "
+        f"x [{float(nodes['x'].min()):.3g}, {float(nodes['x'].max()):.3g}]; outside={vol_bad}",
     ))
 
     dup = int(nodes.duplicated(["dataset", "node_id"]).sum())
@@ -481,6 +486,7 @@ def main(argv: list[str]) -> int:
     a.add_argument(
         "--min-dataset-edge-retention", type=float, default=DEFAULT_MIN_RETENTION,
     )
+    a.add_argument("--allow-float-coords", action="store_true")
     d = sub.add_parser("diff")
     d.add_argument("base", type=Path)
     d.add_argument("arm", type=Path)
@@ -495,6 +501,7 @@ def main(argv: list[str]) -> int:
             min_edge_retention=args.min_edge_retention,
             min_dataset_node_retention=args.min_dataset_node_retention,
             min_dataset_edge_retention=args.min_dataset_edge_retention,
+            allow_float_coords=args.allow_float_coords,
         ) for p in args.paths]
         for rep in reports:
             print_audit(rep)

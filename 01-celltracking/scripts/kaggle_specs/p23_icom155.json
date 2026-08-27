@@ -43,6 +43,7 @@
     "interaction_warning": "The three radii and C1/C2/C3 filters are one coupled treatment. Do not ablate or submit C3 alone; local GT shows that would discard about half of true divisions. The P3 harmonic association surface can change which nodes are orphans, so the public +0.013 is evidence for the mechanism family, not a guaranteed additive delta on P3.",
     "derived_from": "scripts/kaggle_specs/p9_coupled_division.json + scripts/kaggle_edits/icom_refine.py + float writer"
   },
+  "float_coordinates": true,
   "edits": [
     {
       "kind": "env",

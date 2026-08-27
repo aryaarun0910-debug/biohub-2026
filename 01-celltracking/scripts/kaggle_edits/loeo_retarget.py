@@ -124,11 +124,19 @@ else:
     print(f"LOEO primary weights: pack default {WEIGHTS_RELATIVE}")
 
 # --------------------------------------------------- 3. arm-specific contamination cut
-if LOEO_ARM in {"strict", "hybrid"}:
+if LOEO_ARM in {"strict", "hybrid", "champion"}:
     os.environ["BIOHUB_SECONDARY_WEIGHTS"] = ""
     os.environ["BIOHUB_SECONDARY_EDGE_WEIGHT"] = "0"
     os.environ["BIOHUB_SECONDARY_DETECTION_WEIGHT"] = "0"
     print("LOEO: secondary all-199-train model DISABLED (it has seen every train crop)")
+if LOEO_ARM == "champion":
+    # P24-lineage (0.928) control: keep the DeepCenter best.pt + safe-div veto bundle ON, driven by
+    # the spec's cell-2 env (the proven P24 path). CAVEAT: DeepCenter has NO fold variant (FACT-0310,
+    # trained on all 44b6 / validated on all 6bba), so on FOLD 0 (44b6 held out) it is IN-SAMPLE and
+    # this control's ABSOLUTE score / offline->LB calibration is contaminated. Use `champion` for
+    # PAIRED lever deltas on the 0.928 base, NOT for the calibration anchor. Fold 1 is the cleaner fold.
+    print("LOEO champion: DeepCenter best.pt + safe-div veto KEPT ON (P24 bundle from spec env); "
+          "fold-0 DeepCenter is in-sample (FACT-0310) - paired deltas only, not calibration.")
 if LOEO_ARM == "strict":
     USE_DEEPCENTER_VETO = False
     REQUIRE_DEEPCENTER_VETO = False

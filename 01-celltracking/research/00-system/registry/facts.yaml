@@ -3600,5 +3600,9 @@ facts:
       close: audit_submission_structure.py needs a float-coordinate mode (accept fractional; bounds-check after
       rounding; keep finite + >= 0 + in-bounds + edge-sentinel checks) gated on the spec declaring a float export, so
       the gate stays meaningful for icom-lineage specs instead of being bypassed by hand.
+      FIXED 2026-08-27: audit_submission_structure.py has an allow_float_coords mode (z/y/x accept finite
+      fractional values; ids/t stay integral; bounds still enforced), the CLI takes --allow-float-coords, the
+      factory passes it when a spec declares float_coordinates:true (set on p23/p27), and the p27 factory audit
+      now PASSES and issues a receipt. Tests in tests/test_submission_structure_audit.py.
     date: '2026-08-27'
-    tags: [audit, float, defect, downstream-fix]
+    tags: [audit, float, defect, downstream-fix, closed]

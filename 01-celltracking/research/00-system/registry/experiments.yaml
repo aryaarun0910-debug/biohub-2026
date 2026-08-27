@@ -419,3 +419,34 @@ experiments:
       champion, NOT the superseded base (p23/EXP-0027 tested icom on P9 and is now working backwards). PRE-REGISTERED
       band 0.927-0.931, central 0.929; falsifier <= 0.928 (no gain over the champion P24). Pushed v1 2026-08-27 under
       host GPU+submission authorisation; SUBMITTED 2026-08-27 (2 subs left); our integer-audit false-positived on the icom floats (FACT-0343), coords verified sound and floats scorer-legal (FACT-0336). Score pending.
+
+  - id: EXP-0030
+    title: P28 champion control f0 - P24-lineage (0.928) LOEO control, fold 0 (best.pt + veto ON, champion arm)
+    spec: scripts/kaggle_specs/p28_champion_control_f0.json
+    kernel: aryaarun07/biohub-p28-champion-control-f0
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-27'
+    facts: [FACT-0341, FACT-0310]
+    note: >-
+      Downstream fix #1: re-establish the offline screening substrate on the 0.928 base. New `champion` LOEO arm keeps
+      the DeepCenter best.pt + safe-div veto bundle ON. CAVEAT (FACT-0310): DeepCenter has no fold variant and is
+      IN-SAMPLE on fold 0 (44b6), so this fold-0 control's ABSOLUTE score is contaminated - use for PAIRED lever deltas
+      only, not the calibration anchor. Pushed 2026-08-27; no submission.
+
+  - id: EXP-0031
+    title: P28 champion control f1 - P24-lineage (0.928) LOEO control, fold 1 (best.pt + veto ON, split_1 weights)
+    spec: scripts/kaggle_specs/p28_champion_control_f1.json
+    kernel: aryaarun07/biohub-p28-champion-control-f1
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-27'
+    facts: [FACT-0341, FACT-0310]
+    note: >-
+      The CLEANER P24-lineage control: fold 1 (6bba held out), OOF split_1 edge weights (leak guard intact), DeepCenter
+      best.pt validated on 6bba (checkpoint selection only, not trained) so near-out-of-sample. This is the fold to
+      trust for the 0.928-base offline calibration and DeepCenter-adjacent lever screening. Pushed 2026-08-27; no submission.
