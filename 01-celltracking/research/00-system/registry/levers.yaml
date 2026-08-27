@@ -581,3 +581,57 @@ levers:
       exactly what stage (b) of the falsifier tests. Voxel quantisation is only ~0.50 um RMS of
       the residual, so most of the error is genuine centroid error of uncharacterised origin.
     priority: 1
+
+  - id: LEVER-0022
+    claim: >-
+      Re-localising every exported node to the intensity-weighted centroid of the RAW frame (the
+      0.927 public lineage's refine_centroids: z+-1, y/x+-3 voxel window, 20th-percentile baseline)
+      reduces the mean endpoint residual and the >3 um tail on the honest fold, and that lifts the
+      scorer-exact fold score on both embryo directions
+    status: running
+    falsifier: >-
+      Same two stages as LEVER-0021 but on the statistics FACT-0314 showed the score follows:
+      (a) on fold-1 frozen matches the primary arm must cut the MEAN residual by >= 10% AND the
+      fraction of matched nodes beyond 3 um by >= 20%; miss either and the lever dies.
+      (b) the scorer round-trip must be >= +0.005 on fold 1 and >= 0 on fold 0 at pilot scale,
+      then >= +0.005 on BOTH folds at full scale. A fold-0-only pass does not count.
+    supporting: [FACT-0270, FACT-0314, FACT-0317]
+    note: >-
+      NEW MECHANISM relative to the killed LEVER-0021: no learned prior at all - the raw image's
+      intensity centroid, which cannot have the flat-blob pathology FACT-0317 measured in DeepCenter.
+      It is IN the 0.927 public notebook (arnav170/biohub-sdw60 cell13:71-134, called before
+      filter_output_graph), so it is field-validated as harmless at worst; its isolated value is
+      unmeasured because the public lineage bundled it with the division port. Instrument:
+      scripts/win_bet/dc_subvoxel_refine.py icentroid + eval, scripts/win_bet/ea_atlas.py; substrate:
+      the clean champion exports of EXP-0021/0022 (FACT-0322). Note the window geometry caps the
+      possible shift at ~2 um, so it can only fix sub-2-um errors - the z axis (RMS 1.6-2.4 um,
+      FACT-0313) is the one it can reach least.
+    priority: 2
+
+  - id: LEVER-0023
+    claim: >-
+      A detector retrained with the FULL trunk on competition GT plus external division supervision
+      (Jose Freitas synthetic divisions, Zebrahub zh001r identity edges) and movie-level validation
+      raises node selection on the under-detected embryo class and lifts the fold-0 paired delta by
+      >= +0.005 - the only lane sized for the +0.03 gap to the top-3 threshold
+    status: open
+    falsifier: >-
+      Gate 1 (plumbing): EXP-0024's S5 smoke must pass (two finite fp16 steps, detection_drift <= 1e-4,
+      a zero-epoch baseline) or the packaging is dead. Gate 2 (learning): the first full training run
+      must beat its own zero-epoch baseline on held-out link_top1 / detection F1 at the deployed
+      threshold; no improvement = the data or objective is wrong, stop. Gate 3 (transfer): a fold-0
+      LOEO export with the new weights must show a paired delta >= +0.005 (FACT-0321 instrument, crop
+      bootstrap CI excluding 0) or the weights are not deployed. Gate 4: one submission; band stated
+      before the score. Any gate failing closes the lever on evidence about itself.
+    supporting: [FACT-0296, FACT-0321, FACT-0183]
+    note: >-
+      Re-scoped from the S1/S5 spec after the 2026-08-27 dossier (C:/temp/intel/H1_DOSSIER.md) and
+      external research (C:/temp/intel/EXTERNAL_RESEARCH.md): S1 as packaged trains a 33-parameter
+      head; every published from-scratch retrain lands at or below the public stack; the teams above
+      0.95 pair retraining with node-budget-driven detection, synthetic division pretraining and new
+      detector architectures. Host confidence stated 2026-08-27: P(>= +0.005 LB) ~ 0.20 for H1 as
+      packaged; the re-scope exists to raise that, not to assume it. Compute: Colab (FACT-0318) under
+      a host-recorded budget; ~100-150 units per training lane on A100. Launch only after EXP-0024
+      passes and the Colab parity pilot (p21) reproduces Kaggle.
+    priority: 1
+

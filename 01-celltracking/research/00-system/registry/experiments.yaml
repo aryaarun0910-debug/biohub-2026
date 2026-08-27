@@ -300,3 +300,37 @@ experiments:
       no override - and the hygiene test asserts a fold-0 spec must NOT load split_1.
       Gives the contract-required SECOND EMBRYO DIRECTION for the sweep, and a second
       offline-versus-LB calibration point on the champion config.
+
+  - id: EXP-0023
+    title: P22 - secondary detection weight 0.60, one-factor A/B on the P9 champion
+    spec: scripts/kaggle_specs/p22_sdw060.json
+    kernel: aryaarun07/biohub-p22-sdw060
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-27'
+    facts: [FACT-0001]
+    note: >-
+      The single knob separating evgendvorkin/biohub-0-927-lb (self-declared 0.923) from arnav170/biohub-sdw60
+      (0.927) on a code-identical lineage (teardown at C:/temp/intel/arnav170_sdw60/REPORT.md). Everything else
+      exactly P9. PRE-REGISTERED band 0.924-0.929, central 0.927; falsifier <= 0.925 (no gain over the champion).
+      Host authorised push AND submission on completion (2026-08-27).
+
+  - id: EXP-0024
+    title: H1R S5 edge-training SMOKE - two optimizer steps on Zh001r + identity sidecar
+    spec: scripts/kaggle_specs/h1r_edge_s5_smoke.json
+    kernel: aryaarun07/biohub-h1r-edge-s5-smoke
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-27'
+    facts: [FACT-0296]
+    note: >-
+      First GPU execution of the S5 edge half of H1 (dossier C:/temp/intel/H1_DOSSIER.md). Diagnostic, no
+      submission. Proves: both Zh001r mounts resolve; two finite fp16-autocast optimizer steps with the explicit
+      fp32 BCE (the autocast-banned op was removed this session); detection_drift.max_abs <= 1e-4 (trunk frozen);
+      a zero-epoch link_top1 / candidate_recall baseline on the held-out crops. A pass licenses h1r_edge_s5.json;
+      a fail kills the S5 packaging before any Colab unit is spent on it.
+
