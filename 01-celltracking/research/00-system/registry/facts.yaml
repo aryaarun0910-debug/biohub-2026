@@ -3487,3 +3487,33 @@ facts:
       parity offline. The public pack is a 400-epoch snapshot; ours is 30 epochs - the gap is plausibly under-training.
     date: '2026-08-27'
     tags: [retrain, recipe, parity, null, headline, h1]
+
+  - id: FACT-0340
+    statement: >-
+      RoPE-4D gate 1 (plumbing) PASSED - the h1r-edge-s5-rope4d two-step smoke (EXP-0028) ran two fp16-autocast steps
+      on the frozen trunk with detection_drift 0.0 and pos_encoding=rope4d, producing a zero-epoch link_top1 0.8622 /
+      candidate_recall 0.2151 that moved to 0.8755 / 0.2640 in two steps; this proves the rotary
+      attention runs and loads the public weights, NOT that it beats sinusoidal (that is gate 2, equal-step, unrun)
+    value: 0.0
+    unit: detection_drift_max_abs_rope4d
+    scope:
+      zero_epoch: {link_top1: 0.8622, candidate_recall: 0.2151, val_loss: 0.007456, n_links: 54400}
+      after_2_steps: {link_top1: 0.8755, candidate_recall: 0.2640, val_loss: 0.006513}
+      detection_drift: {max_abs: 0.0, mean_abs: 0.0}
+      sinusoidal_smoke_ref_FACT_0329: {zero_epoch_link_top1: 0.8580, after_2_link_top1: 0.8700}
+    provenance: MEASURED
+    instrument: >-
+      kaggle kernels output aryaarun07/biohub-h1r-edge-s5-rope4d-smoke: metrics.json, summary.json at
+      C:/temp/h1r_rope4d_smoke/; detection_drift is the trainer's own frozen-trunk gate
+    experiment: EXP-0028
+    protocol:
+      weights: initialised from the PUBLIC 50-epoch pack edge_predictor_best.pth (both embryos)
+      eval: Zh001r held-out crops (single embryo, Ultrack pseudo-labels) - NOT a competition score; smoke has different subsampling than FACT-0329 so the zero-epoch numbers are not directly comparable
+    note: >-
+      Gate 1 of LEVER-0027 / PKT-0023. rope4d starts from the public weights (RoPE has no parameters) and the trunk
+      stays frozen (drift 0.0) under the rotation - the two design requirements hold. The DECISIVE comparison is gate 2:
+      the full h1r_edge_s5_rope4d arm vs the sinusoidal control (h1r_edge_s5, running at cycle close) at EQUAL steps on
+      held-out link_top1; a 2-step smoke cannot judge it. Weight-transfer expectations to the competition score stay low
+      (FACT-0339), but this arm changes only the association encoding.
+    date: '2026-08-27'
+    tags: [training, rope4d, gate, encoding, h1]
