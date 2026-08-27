@@ -16,6 +16,49 @@ record_kind: state
 
 > Dated steering log. [`../00-system/handoff.md`](../00-system/handoff.md) points here for the current direction. Newest first.
 
+## 2026-08-27 (newest) — THE 0.955 MAP: post-processing is the floor, MODEL work is the win; compute must be readied
+
+**Where we are:** champion 0.928 (`FACT-0341`, P24), top-3 boundary 0.955 (`FACT-0332`), leader 0.962; gap +0.027.
+Post-processing on the shared weights is bounded ~+0.02-0.04 (tomasa2 ceilings) and does NOT convert GT-free easily
+(LEVER-0025 steal dead, LEVER-0026 dedup a near-null so far). **Realistic post-processing reach ~0.93-0.94; 0.955+
+almost certainly requires better WEIGHTS/ARCHITECTURE.** Every team above 0.94 retrains.
+
+**Floor (cheap, parallel, harvest now on the P24 base):** LEVER-0026 (FP-endpoint dedup, highest cheap ceiling),
+LEVER-0022 (icom, in flight as p27), LEVER-0030 (ensemble+TTA), untested public knobs (gap params, lambda). Plausibly
+~0.931-0.935. Conviction floor, not the win.
+
+**Win (model lanes, sized for +0.027):** `LEVER-0028` node-budget detection (frontier #1; barely touched); `LEVER-0031`
+detector architecture swap (StarDist3D/HOCT/wide-ResUNet3D/3D foundation model - highest ceiling, all >0.94 teams take
+it); `LEVER-0029` self-supervised representation pretraining (ROOT fix for FACT-0339 - the recipe lands -0.162 below the
+pack; representation may be the gap, not epochs); `LEVER-0027` RoPE-4D association encoding (gate 1 passed FACT-0340);
+`LEVER-0002` learned division triple/hyperedge scorer (antipodality FACT-0182, synthetic+Zebrahub FACT-0296).
+
+**Blind spots (have we considered the WRONG levers?):** (1) the registry is ~90% post-processing because it is cheap
+and Kaggle-gated - the frontier is MODEL; we may be optimising the wrong term out of infra convenience. (2) our offline
+apparatus barely predicts the LB for post-processing and is UNTESTED for model changes - need a movie-level OOF protocol
+(Soheil) before trusting a model lane. (3) never done SSL pretraining, never ensembled distinct weight sets, never
+swapped detector architecture, never probed WHY 44b6 under-detects (scripts/d1/d1f_probe.py is idle).
+
+**Deep-research topics (heavy, in-depth):** 3D light-sheet nuclei detectors (StarDist3D, HOCT, nnU-Net, LSM/DINOCell/
+micro-sam foundation models; licence/prize check - Zebrahub weights CC BY-NC); self-supervised pretraining (MAE/
+contrastive on unlabelled volumes; Attrackt, Noisy-Student); relative/group-equivariant encodings (RoPE-4D and beyond,
+query-lineage transformers, temporal affinity fields); division as hyperedge/triple scoring + sim-to-real on 165k
+synthetic divisions; efficient inference (8-view TTA ~8h T4x2 - distillation/cheaper TTA); interpretability (what
+representation the under-detected class is missing).
+
+**COMPUTE READINESS (gating reality):** Kaggle 2 slots / ~5 subs/day / T4x2 (FACT-0061) - fine for post-processing and
+short training; a ~400-epoch convergence retrain does NOT fit. Colab ~200 units (FACT-0318) but has NEVER produced a
+parity number (FACT-0327) - **the #1 infra blocker: no model lane runs until Colab reproduces Kaggle crop-for-crop
+(p21) with an observable, resumable bootstrap.** Recipe: FACT-0339 - our training recipe is broken; a parity-reaching
+recipe is prerequisite for LEVER-0023/0029/0031.
+
+**DOWNSTREAM TO FIX AND FORMALLY CLOSE before the heavy push:** (1) re-export ONE P24-lineage LOEO control (best.pt+veto)
+so offline screening is on the 0.928 base, not the 0.925 substrate the current controls carry - every lever is
+currently measured one base behind; (2) prove Colab parity (p21) with the observable bootstrap; (3) fix the training
+recipe to reach split_0 parity (the LEVER-0029 gate); (4) establish a movie-level OOF protocol so model changes have a
+trustworthy offline judge.
+
+
 ## 2026-08-17 (newest) — H1 imaging gate LIFTED: packaged Zebrahub crops exist on Kaggle
 
 The stated blocker on `bet-zebrahub-retrain` — "Zebrahub on disk is TRACKS-ONLY; retrain needs

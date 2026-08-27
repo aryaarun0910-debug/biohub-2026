@@ -402,3 +402,20 @@ experiments:
       Gate 1 of LEVER-0027 / PKT-0023. Built and verified locally with the focused RoPE suite passing;
       pushed under the host's GPU authorisation while the sinusoidal S5 control occupies the other
       Kaggle slot. Diagnostic only; a passing smoke is not evidence that RoPE improves link selection.
+
+  - id: EXP-0029
+    title: P27 - DeepCenter best.pt + veto bundle (the 0.928 winner) PLUS icom float, stacked on the P9 champion
+    spec: scripts/kaggle_specs/p27_champion_icom.json
+    kernel: aryaarun07/biohub-p27-champion-icom
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-27'
+    facts: [FACT-0341, FACT-0330, FACT-0336]
+    note: >-
+      The forward stack: P24's winning DeepCenter bundle (best.pt epoch 2 + safe-div veto ON, +0.003 = FACT-0341)
+      PLUS LEVER-0022 icom float re-localisation (offline full-fold +0.0013/+0.0024, FACT-0330). Built on the P9
+      champion, NOT the superseded base (p23/EXP-0027 tested icom on P9 and is now working backwards). PRE-REGISTERED
+      band 0.927-0.931, central 0.929; falsifier <= 0.928 (no gain over the champion P24). Pushed v1 2026-08-27 under
+      host GPU+submission authorisation; the submit is driven manually on completion.

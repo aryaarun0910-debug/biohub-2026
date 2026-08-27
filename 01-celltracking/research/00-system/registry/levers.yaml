@@ -758,3 +758,83 @@ levers:
       Only if all three gates pass may the wavelength bands be swept or the rotation be extended to
       the daughter-pair head (FACT-0182).
     priority: 1
+
+  - id: LEVER-0028
+    claim: >-
+      Node-budget-driven detection per volume - setting the detection threshold / node count per crop toward
+      that crop's estimated_number_of_nodes instead of a single global 0.96875 - recovers the systematically
+      under-detected embryo class (44b6 median 0.888 of estimate vs 6bba 0.988) and lifts the score more than any
+      global threshold, because the rank-1 competitor locates the loss in node selection
+    status: open
+    falsifier: >-
+      A per-volume budget rule replayed offline on both champion controls (adjusting which detections survive per
+      crop toward estimated_number_of_nodes) must beat the global-threshold sweep (FACT-0102) on the pooled objective
+      with a crop-bootstrap CI excluding 0, and then move the LB on one submission. Killed if per-crop budgeting is
+      within noise of the global optimum, or if recovering nodes costs more edge FP than it gains.
+    supporting: [FACT-0102, FACT-0335, FACT-0261]
+    note: >-
+      The frontier's #1 mechanism and one we have barely touched: dariushafshar's node-budget harness measures a
+      0.972-median node ratio with a 44b6 vs 6bba split of 0.888 vs 0.988; Soheil (rank 1) says the loss originates
+      in node selection. Our fold-0 shows association-dominated misses (FACT-0335) ONLY because fold-0 node recall is
+      already 0.99 - on harder/hidden volumes detection is the bottleneck. Instrument: re-threshold per crop from the
+      geff estimate; measure on P24-lineage controls once re-exported. Cheap to prototype offline; a detector change
+      is the deeper version. Priority-1 parallel to LEVER-0026.
+    priority: 1
+
+  - id: LEVER-0029
+    claim: >-
+      Self-supervised / representation pretraining on the UNLABELLED volumes (masked-autoencoding or contrastive on
+      the full light-sheet stacks) before the sparse-label finetune fixes the FACT-0339 recipe failure at its root -
+      a better nucleus representation - and reaches split_0 parity then beats it, unlike the from-scratch 30-epoch head
+    status: open
+    falsifier: >-
+      An SSL-pretrained-then-finetuned detector must first reach split_0 parity offline (within FACT-0263 MDE of the
+      pack on fold 0 - the bar FACT-0339 failed by 0.162), then beat it with a fold-0 paired delta CI excluding 0.
+      Killed if SSL pretraining does not close the parity gap, i.e. representation is not the bottleneck.
+    supporting: [FACT-0339, FACT-0296, FACT-0335]
+    note: >-
+      FACT-0339 showed our 30-epoch from-scratch head lands -0.162 below the pack - the recipe is broken. The public
+      pack is a ~400-epoch snapshot. Rather than brute-force more epochs, the research bet is that SSL pretraining on
+      the abundant UNLABELLED volume (the GT is sparse - only tracked cells) learns a better nucleus representation
+      cheaply, then a short sparse finetune reaches parity. Precedents: Attrackt unsupervised pretraining, Noisy-Student,
+      DINOCell/LSM 3D foundation features. This is the representation-learning lane and the root fix for the retrain
+      recipe. Heavy compute (Colab A100); GATED on Colab parity (FACT-0327) and a working finetune recipe.
+    priority: 2
+
+  - id: LEVER-0030
+    claim: >-
+      A model-agnostic ENSEMBLE of the available public weight sets plus test-time augmentation (multi-seed detection
+      blend + JS-TTA, stacked on the P24 champion) adds score without any retraining, as the top public teams report
+    status: open
+    falsifier: >-
+      An offline ensemble/TTA replay on both champion controls must beat the single-weight champion on the pooled
+      objective with a CI excluding 0, then move the LB on one submission stacked on P24. Killed if the blend is within
+      noise of the best single weight set or if TTA's cost is not repaid.
+    supporting: [FACT-0341, FACT-0331]
+    note: >-
+      TWEAK (0.953) claims a model-agnostic post-processing plugin worth +0.03-0.05 on unchanged weights, unreproduced;
+      Yusuke uses JS-TTA (15%); the shared lineage blends two seeds. We deploy a single blend and 8-view TTA already,
+      but have never ENSEMBLED distinct public weight sets (pilkwang dual-seed, leevvin movie-heldout, our OOF splits)
+      or tuned TTA on the P24 base. Cheap, stackable on the champion, and the closest thing to the claimed frontier
+      plugin. Priority-2 parallel; measure on P24-lineage controls.
+    priority: 2
+
+  - id: LEVER-0031
+    claim: >-
+      A different detector ARCHITECTURE - StarDist3D, a wide ResUNet3D, HOCT hard-negative, or a 3D nuclei foundation
+      model - trained/finetuned for this data beats the pack's UNet3D on node selection and is the only lane sized for
+      the full +0.027 gap to top-3, which the teams above 0.94 all take
+    status: open
+    falsifier: >-
+      Any candidate architecture must reach split_0 detection parity offline, then beat it on a fold-0 paired delta with
+      a CI excluding 0, then move the LB. Killed per-architecture on the parity gate; the lane closes only if NO
+      available 3D nuclei architecture transfers to zebrafish light-sheet within the compute budget.
+    supporting: [FACT-0335, FACT-0339, FACT-0332]
+    note: >-
+      The frontier evidence (EXTERNAL_RESEARCH.md): teams >0.94 pair retraining with new detector architectures -
+      matiasantezana's StarDist3D / wide-ResUNet3D champion weights, rudispresence's HOCT hard-negative + query-lineage
+      transformers, xiaoleilian's from-scratch UNet (0.918). Candidates with public code/weights and a licence check:
+      StarDist3D, HOCT (MIT), nnU-Net, and the 3D nuclei foundation models (LSM, DINOCell, micro-sam). The deepest,
+      highest-ceiling and highest-cost research lane; GATED on Colab parity and a licence/prize-rules check
+      (Zebrahub-derived weights are CC BY-NC). This is the lane that most likely reaches 0.955+.
+    priority: 3
