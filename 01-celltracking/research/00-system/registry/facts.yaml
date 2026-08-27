@@ -3048,3 +3048,91 @@ facts:
       LB) should be replayed offline to add a point.
     date: '2026-08-27'
     tags: [calibration, headline, paired-delta]
+
+  - id: FACT-0324
+    statement: >-
+      Intensity-centroid re-localisation (LEVER-0022) lifts the scorer-exact score on BOTH clean champion
+      pilots with FLOAT coordinates - icom_155 +0.0065 (f0) / +0.0057 (f1), icom_133 +0.0040 / +0.0038 - while
+      the same refinement ROUNDED to integers (what the 0.927 public lineage actually exports) is -0.0032 / -0.0010
+      for icom_133 and +0.0039 / -0.0020 for icom_155
+    value: 0.0057
+    unit: score_delta_f1_pilot_icom_155_float
+    scope:
+      f0_pilot: {crops: 12, n_matched: 3233, baseline: 0.9260, icom_133: 0.9300, icom_155: 0.9326, icom_133_int: 0.9228, icom_155_int: 0.9299,
+                 residual: {baseline_median: 1.675, baseline_mean: 1.651, frac_gt_3um: 0.120, icom_133: {median_pct: -24.2, mean_pct: -3.3, frac_gt_3um: 0.104}, icom_155: {median_pct: -20.7, mean_pct: -5.1, frac_gt_3um: 0.106}}}
+      f1_pilot: {crops: 13, n_matched: 10035, baseline: 0.7306, icom_133: 0.7344, icom_155: 0.7364, icom_133_int: 0.7296, icom_155_int: 0.7286,
+                 residual: {baseline_median: 2.3337, baseline_mean: 2.6858, frac_gt_3um: 0.384, icom_133: {median_pct: -0.4, mean_pct: -4.2, frac_gt_3um: 0.331}, icom_155: {median_pct: -4.6, mean_pct: -5.7, frac_gt_3um: 0.331}}}
+      edge_counts_f1_icom_155: {tp: [8794, 8821], fp: [1465, 1407], fn: [1907, 1880]}
+      divisions_unchanged: true
+      stage_a_prereg_bars: {mean_pct: -10, frac_gt_3um_pct: -20, result: MISSED on both folds by every arm}
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/dc_subvoxel_refine.py icentroid + eval (frozen matches, calibration gate OK on both folds) and
+      scripts/win_bet/ea_atlas.py + summarise() round-trips on the EXP-0021/EXP-0022 control exports; outputs under
+      C:/temp/icom/pilot_f{0,1}/
+    protocol:
+      weights: the champion controls - f0 pack split_0 (clean), f1 OOF split_1 (honest)
+      eval: scorer-exact per-crop rows on stride subsets (f0 stride 6, f1 stride 10), summarise() with the node term
+    note: >-
+      Three readings. (1) The first localisation lever with the SAME SIGN on both embryo directions at pilot scale,
+      and it needs no model - the raw image's intensity centroid in a z+-1, y/x+-3/5 voxel window. (2) The
+      pre-registered stage-(a) proxies (mean -10%, tail -20%) were mis-set: the scorer moved +0.004..+0.0065 on
+      -3%..-6% mean and -13% tail, so the proxy is retired and the round-trip is the only stage from here; this
+      change is recorded BEFORE the full-fold confirmation (running at the time of writing). (3) Rounding destroys
+      the gain: the 0.927 lineage exports int(round()) (its cell13:1679-1681, same as our cell6:1577-1579), so the
+      public value of refine_all_centroids is at best zero as deployed, and our deployment MUST export floats -
+      whether Kaggle's scorer accepts float coordinates is unverified and is the deployment risk. icom_155 is
+      promoted over the pre-registered primary icom_133 at pilot scale (stated here, before full scale).
+    date: '2026-08-27'
+    tags: [edge, localisation, candidate, headline, both-folds]
+
+  - id: FACT-0327
+    statement: >-
+      The official Colab CLI lane (google-colab-cli 0.6.0 in WSL Ubuntu, ADC auth) reached the GPU and ran
+      exec/upload, but the parity pilot never completed - the session was lost server-side 61 minutes into the
+      bootstrap exec - and the lane consumed ~6.7 compute units for no scientific result
+    value: 6.74
+    unit: colab_compute_units_estimated_cli_lane
+    scope:
+      sessions: {first_new_orphaned: 12 min, resumed_run_killed_by_host_terminate: 8 min, attempt_7_lost_server_side: 61 min}
+      total_night_units_estimated: 8.4
+      cli_defects_found: ["jupyter-kernel-client 1.0.2 renamed KernelClient (pin <1.0)", "Windows unsupported (termios) - WSL required", "exec default timeout 30 s", "orphan sessions cannot be adopted or stopped by the CLI"]
+      auth: "ADC with openid, cloud-platform, userinfo.email, colaboratory scopes; token expiry 59 min - unverified whether the keep-alive daemon refreshes it"
+    provenance: MEASURED
+    instrument: >-
+      scripts/core/colab_cli.py ledger C:/temp/colab_cli/ledger.json; `colab status/sessions/log` transcripts;
+      run logs C:/temp/colab_cli/run_p21-parity-f0-a7.log
+    note: >-
+      The session died while `colab status` showed BUSY (exec) and before any bootstrap output returned - the
+      bootstrap ran as ONE 90-minute exec, so nothing was observable until it ended; the console probe that could
+      have seen inside came after the loss. Two lessons for the next attempt, both cheap: split the bootstrap into
+      short execs that write progress to a file, and re-mint / verify the ADC token lifetime against the keep-alive
+      daemon (a 59-minute token and a 61-minute death is suspicious, not proven). The lane is NOT dead - it
+      authenticated, allocated, uploaded and executed - but it has not yet produced a parity number, so no Colab
+      result may be trusted and LEVER-0023's Colab stage stays gated on p21.
+    date: '2026-08-27'
+    tags: [operational, compute, colab, correction]
+
+  - id: FACT-0328
+    statement: >-
+      The H1 S5 edge-training smoke (EXP-0024 v1) failed its own frozen-trunk assertion - detection logits moved by
+      3.065e+01 after two optimizer steps with every trunk parameter at requires_grad=False - because the vendored
+      UNet's BatchNorm3d running statistics update under model.train(); the wrapper now keeps the frozen trunk in
+      eval mode and v2 is running
+    value: 30.65
+    unit: detection_logit_max_abs_drift
+    scope:
+      site: "scripts/kaggle_edits/h1r_edge_train.py:184-185 (freeze) vs :498 (model.train()); vendor temporal_unet.py:22,25 (BatchNorm3d)"
+      fix: "EdgeTrainingModel.train() override -> base.unet.eval(), base.detect_head.eval() when trunk_mode == frozen; tests/test_h1r_edge_train.py::test_frozen_trunk_stays_in_eval_mode"
+      also_fixed_this_session: ["F.binary_cross_entropy under autocast replaced by an explicit fp32 expression (DG-001)", "DG-003 ledger signature reconciled with the verified division supervision", "smoke marked artifact_role diagnostic (DG-007)"]
+    provenance: MEASURED
+    instrument: >-
+      Kaggle kernel log of aryaarun07/biohub-h1r-edge-s5-smoke version 1 (C:/temp/h1r_edge_s5_smoke/kernel.log); the
+      assertion is the trainer's own detection_drift() gate
+    experiment: EXP-0024
+    note: >-
+      This is the smoke doing its job: a silent version of this defect would have trained the edge transformer on a
+      moving representation and reported a plausible loss curve. It also retroactively bounds every earlier S5 claim:
+      none of them ran on a GPU, so none met this gate. Gate 1 of LEVER-0023 is decided by v2.
+    date: '2026-08-27'
+    tags: [training, h1, defect, gate]

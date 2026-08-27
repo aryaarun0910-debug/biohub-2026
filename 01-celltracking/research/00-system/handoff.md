@@ -3,7 +3,7 @@ id: 00-system/handoff
 title: Handoff
 area: 00-system
 status: active
-updated: '2026-08-26'
+updated: '2026-08-27'
 owner: biohub
 links: []
 tags: [handoff, entry-point]
@@ -15,6 +15,42 @@ record_kind: state
 **Status:** ACTIVE 2026-08-26. Branch `master`.
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
+
+> ## 🟢 2026-08-27 (early hours) — a live candidate, a two-fold calibration anchor, two levers killed, H1 gated
+>
+> **Submitted:** `EXP-0023` p22 = the champion with `BIOHUB_SECONDARY_DETECTION_WEIGHT` 0.475 → **0.60**, the one
+> knob that separates the 0.923 and 0.927 public notebooks on a code-identical lineage (teardown at
+> `C:/temp/intel/arnav170_sdw60/REPORT.md`). Submission 55806155, band 0.924–0.929 pre-registered.
+>
+> **Candidate found:** `LEVER-0022` intensity-centroid re-localisation — the 0.927 lineage's `refine_centroids`,
+> no model, raw image only. Pilot round-trips on the clean champion exports: **+0.0065 (f0) / +0.0057 (f1)** for
+> `icom_155`, same sign both folds (`FACT-0324`). Two conditions attached: it only works with **float export**
+> (rounded it is ≤ 0 — which is what the public lineage deployed), and the full-fold confirmation was still running
+> at the time of writing (`C:/temp/icom/full_*`). If it holds, the deploy is a code transplant + float writer on P9,
+> one submission, with Kaggle's acceptance of float coordinates as the priced risk.
+>
+> **Calibration anchor, both directions:** champion − P3 = **+0.0068 (f0) / +0.0059 (f1)** offline vs +0.010 LB
+> (`FACT-0321`, `FACT-0326`). Paired offline deltas on the champion controls are now the screening currency.
+>
+> **Killed on honest evidence, both folds:** `LEVER-0012` relink penalties (`FACT-0323`, `FACT-0325`) and
+> `LEVER-0021` DeepCenter localisation (below). **Provenance fixed:** the sweep controls ARE the champion
+> (`FACT-0322`); the Aug-25 "vintage-matched" export was another lineage.
+>
+> **H1, decided on evidence not hope** (`C:/temp/intel/H1_DOSSIER.md`, `EXTERNAL_RESEARCH.md`): top-3 is now
+> **0.955**; every 0.92x public notebook shares one weight set and post-processing on it is bounded at ~+0.02–0.04,
+> so 0.955 needs retrained weights — but S1 as packaged trains 33 parameters and S5 had never run on a GPU. Host
+> confidence P(≥ +0.005 LB) ≈ 0.20 as packaged. `LEVER-0023` (full-trunk detector retrain with synthetic
+> divisions + Zebrahub) is OPEN with four gates (`PKT-0019`); gate 1 is `EXP-0024`, the S5 smoke: **v1 failed its
+> own frozen-trunk assertion** (BatchNorm drift, `FACT-0328`), fixed, v2 running. No Colab unit goes to H1 until
+> gate 1 and the parity pilot pass.
+>
+> **Colab, honestly:** the official CLI lane works (auth, allocate, upload, exec) but the parity pilot died
+> server-side at 61 min and the night cost ~8.4 units for no parity number (`FACT-0327`). Fix before spending more:
+> short observable execs, and verify the ADC token lifetime against the keep-alive daemon.
+>
+> **Next actions, ranked:** (1) read `EXP-0023` and `EXP-0024` v2; (2) `LEVER-0022` full-fold result → if ≥ +0.005
+> both folds, build `p23` = P9 + float export + icom_155, submit; (3) parity pilot on Colab with the observable
+> bootstrap; (4) `LEVER-0023` stage 1 only after (1)/(3); (5) `LEVER-0019` re-derived on the champion controls.
 
 > ## 🔴 2026-08-26 (late) — LEVER-0021 IS KILLED, the deployed DeepCenter is dead weight, and Colab is back
 >
