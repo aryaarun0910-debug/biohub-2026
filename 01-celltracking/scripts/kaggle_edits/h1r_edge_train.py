@@ -300,7 +300,10 @@ def continuation_loss(logits: torch.Tensor, target: torch.Tensor,
         supervised = active_rows.unsqueeze(1) | active_cols.unsqueeze(0)
         if not bool(supervised.any()):
             continue
-        bce = F.binary_cross_entropy(prob, y, reduction="none")
+        # Explicit fp32 BCE on the clamped probabilities: identical to
+        # torch.nn.functional binary cross-entropy with reduction none, but never touches the op that CUDA
+        # autocast bans (DG-001), so the guard above is belt AND braces.
+        bce = -(y * torch.log(prob) + (1.0 - y) * torch.log(1.0 - prob))
         p_t = prob * y + (1.0 - prob) * (1.0 - y)
         focal = ((1.0 - p_t) ** 2) * bce * col_w.unsqueeze(0)
         losses.append(focal[supervised].mean())

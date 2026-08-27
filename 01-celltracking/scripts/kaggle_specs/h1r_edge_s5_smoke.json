@@ -12,7 +12,9 @@
     "kkunizaw/biohub-zh001r",
     "aryaarun07/biohub-zh001r-identity"
   ],
-  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
   "enable_gpu": true,
   "enable_internet": false,
   "machine_shape": "NvidiaTeslaT4",
@@ -58,5 +60,7 @@
       "code_file": "scripts/kaggle_edits/h1r_edge_kernel_run.py",
       "expect": 1
     }
-  ]
+  ],
+  "artifact_role": "diagnostic",
+  "diagnostic_reason": "Two-step plumbing smoke: proves the GPU autocast path, both Zh001r mounts, the frozen-detector drift assertion and a zero-epoch link_top1/candidate_recall baseline. Its edge_predictor_best.pth is NOT for deployment."
 }

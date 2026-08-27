@@ -33,9 +33,18 @@ any snap measurement; they act on cached heatmaps, no re-inference):
     snap_r3, snap_r5     radius sensitivity, reported not selected
     snapu_r4             as snap_r4 but only when the peak is the UNIQUE one within the radius
 
+Intensity-centroid arms (LEVER-0022, the 0.927 public lineage's `refine_centroids`, cell13:74-113 of
+arnav170/biohub-sdw60 - no model at all, just the RAW frame):
+    icom_133  PRIMARY    intensity-weighted centroid in a z+-1, y+-3, x+-3 VOXEL window, weights
+                         max(patch - p20(patch), 0), max shift 2.8 um (their exact settings)
+    icom_122             window z+-1, y+-2, x+-2
+    icom_155             window z+-1, y+-5, x+-5
+    icom_133_s5          as icom_133 with max shift 5.0 um (tail-reach sensitivity)
+
 Subcommands
 -----------
-refine   run the model, write refined_nodes.parquet + refined_<arm>.csv.gz + timing.json
+refine    run the DeepCenter model, write refined_nodes.parquet + refined_<arm>.csv.gz + timing.json
+icentroid no model: intensity centroid of the raw frame per node -> the same outputs (icom_* arms)
 eval     FROZEN-MATCH residual per arm against a baseline ea_atlas dump (stage (a) statistic),
          with the calibration gate that the unrefined coordinates reproduce the atlas residual.
 
@@ -69,6 +78,9 @@ VOXEL_SCALE_UM = np.array([1.625, 0.40625, 0.40625], dtype=np.float64)
 POS_THRESH = 0.05          # DeepCenter training `pos_thresh`; also the no-signal guard
 MAX_SHIFT_UM = 3.0         # refinement further than this is a neighbour, not a refinement
 ARMS = ("com1", "com1_off", "par1", "com2")
+ICOM_ARMS = {"icom_133": ((1, 3, 3), 2.8), "icom_122": ((1, 2, 2), 2.8), "icom_155": ((1, 5, 5), 2.8),
+             "icom_133_s5": ((1, 3, 3), 5.0)}
+ICOM_BASELINE_PCT = 20.0
 PEAK_THRESH = 0.10         # BIOHUB_DEEPCENTER_GAP_THRESHOLD default; peaks below it are not cells
 SNAP_ARMS = {"snap_r4": (4.0, False), "snap_r3": (3.0, False), "snap_r5": (5.0, False), "snapu_r4": (4.0, True)}
 
@@ -344,6 +356,95 @@ def snap_points(hm: np.ndarray, zyx: np.ndarray, pool: int = 4, thresh: float = 
             moved[a][i] = True
         out[f"moved_{a}"] = moved[a]
     return out
+
+
+def intensity_centroid_points(vol: np.ndarray, zyx: np.ndarray, arms: dict | None = None,
+                              baseline_pct: float = ICOM_BASELINE_PCT) -> dict:
+    """The 0.927 lineage's refine_centroids on a RAW full-resolution frame (Z,Y,X), per arm.
+
+    Returns {arm: (N,3) float64} plus 'moved_<arm>' (N,) bools. A point keeps its original
+    coordinate when the window has no mass above the baseline or the shift exceeds the arm's cap.
+    """
+    arms = ICOM_ARMS if arms is None else arms
+    zyx = np.asarray(zyx, dtype=np.float64)
+    n = len(zyx)
+    Z, Y, X = vol.shape
+    out = {a: zyx.copy() for a in arms}
+    moved = {a: np.zeros(n, dtype=bool) for a in arms}
+    for a, ((wz, wy, wx), max_shift) in arms.items():
+        for i, original in enumerate(zyx):
+            z, y, x = [int(round(v)) for v in original]
+            z0, z1 = max(0, z - wz), min(Z, z + wz + 1)
+            y0, y1 = max(0, y - wy), min(Y, y + wy + 1)
+            x0, x1 = max(0, x - wx), min(X, x + wx + 1)
+            if z0 >= z1 or y0 >= y1 or x0 >= x1:
+                continue
+            patch = vol[z0:z1, y0:y1, x0:x1].astype(np.float64)
+            baseline = float(np.percentile(patch, baseline_pct))
+            w = np.maximum(patch - baseline, 0.0)
+            total = float(w.sum())
+            if total <= 0:
+                continue
+            zz = np.arange(z0, z1, dtype=np.float64)[:, None, None]
+            yy = np.arange(y0, y1, dtype=np.float64)[None, :, None]
+            xx = np.arange(x0, x1, dtype=np.float64)[None, None, :]
+            refined = np.array([(w * zz).sum() / total, (w * yy).sum() / total, (w * xx).sum() / total])
+            if float(np.sqrt((((refined - original) * VOXEL_SCALE_UM) ** 2).sum())) <= max_shift:
+                out[a][i] = refined
+                moved[a][i] = True
+    for a in arms:
+        out[f"moved_{a}"] = moved[a]
+    return out
+
+
+def cmd_icentroid(args) -> int:
+    out = Path(args.out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    df = pd.read_csv(Path(args.csv))
+    node_mask = df["row_type"] == "node"
+    all_names = df.loc[node_mask, "dataset"].unique().tolist()
+    names = select_crops(all_names, args.max_crops, args.crop_stride, args.crops)
+    print(f"{len(names)} crops selected of {len(all_names)}", flush=True)
+    df = df.loc[df["dataset"].isin(names)].reset_index(drop=True)
+    for c in ("z", "y", "x"):
+        df[c] = df[c].astype(np.float64)
+    nodes = df.loc[df["row_type"] == "node", ["dataset", "node_id", "t", "z", "y", "x"]].copy()
+    arms = list(ICOM_ARMS)
+    for a in arms:
+        for c in ("z", "y", "x"):
+            nodes[f"{c}_{a}"] = nodes[c].to_numpy(copy=True)
+        nodes[f"moved_{a}"] = False
+    col = {c: nodes.columns.get_loc(c) for c in nodes.columns}
+    idx_by = nodes.groupby(["dataset", "t"]).indices
+    t_start = time.time()
+    n_frames = 0
+    for ci, name in enumerate(names, 1):
+        zarr_root = Path(args.data_dir) / f"{name}.zarr"
+        if not zarr_root.exists():
+            raise SystemExit(f"missing raw frames: {zarr_root}")
+        ts = sorted({int(t) for (d, t) in idx_by if d == name})
+        c0 = time.time()
+        for t in ts:
+            rows = idx_by[(name, t)]
+            vol = read_frame(zarr_root, t)
+            n_frames += 1
+            res = intensity_centroid_points(vol, nodes.iloc[rows][["z", "y", "x"]].to_numpy())
+            for a in arms:
+                nodes.iloc[rows, col[f"z_{a}"]] = res[a][:, 0]
+                nodes.iloc[rows, col[f"y_{a}"]] = res[a][:, 1]
+                nodes.iloc[rows, col[f"x_{a}"]] = res[a][:, 2]
+                nodes.iloc[rows, col[f"moved_{a}"]] = res[f"moved_{a}"]
+        sub = nodes.loc[nodes["dataset"] == name]
+        print(f"  [{ci}/{len(names)}] {name} frames={len(ts)} nodes={len(sub)} "
+              f"moved(icom_133)={float(sub['moved_icom_133'].mean()):.3f} {time.time() - c0:.0f}s", flush=True)
+    nodes.to_parquet(out / "refined_nodes.parquet")
+    write_arm_csvs(df, nodes, arms, out)
+    (out / "timing.json").write_text(json.dumps({"crops": names, "n_frames": n_frames, "n_nodes": int(len(nodes)),
+                                                  "wall_s": time.time() - t_start, "arms": arms,
+                                                  "icom_arms": {k: [list(v[0]), v[1]] for k, v in ICOM_ARMS.items()},
+                                                  "baseline_pct": ICOM_BASELINE_PCT}, indent=2))
+    print(f"wrote {out} ({n_frames} frames, {time.time() - t_start:.0f}s)")
+    return 0
 
 
 # --------------------------------------------------------------------------------------
@@ -654,6 +755,14 @@ def main() -> int:
     r.add_argument("--save-heatmaps", action="store_true",
                    help="cache each crop's heatmap stack as float16 <out-dir>/heatmaps/<crop>.npy for `snap`")
     r.set_defaults(func=cmd_refine)
+    ic = sp.add_parser("icentroid")
+    ic.add_argument("--csv", required=True)
+    ic.add_argument("--out-dir", required=True)
+    ic.add_argument("--data-dir", default=str(ROOT / "data" / "train"))
+    ic.add_argument("--max-crops", type=int)
+    ic.add_argument("--crop-stride", type=int)
+    ic.add_argument("--crops")
+    ic.set_defaults(func=cmd_icentroid)
     sn = sp.add_parser("snap")
     sn.add_argument("--csv", required=True)
     sn.add_argument("--heatmap-dir", required=True, help="<refine out-dir>/heatmaps")

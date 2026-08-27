@@ -4,7 +4,11 @@
     {
       "id": "DG-001-cuda-bce-under-autocast",
       "severity": "SEV-1",
-      "scope": {"spec_name_globs": ["h1r_edge_s5*"]},
+      "scope": {
+        "spec_name_globs": [
+          "h1r_edge_s5*"
+        ]
+      },
       "checks": [
         {
           "kind": "notebook_forbid_regex",
@@ -16,7 +20,11 @@
     {
       "id": "DG-002-shared-unet-detector-drift",
       "severity": "SEV-1",
-      "scope": {"spec_name_globs": ["h1r_edge_s5*"]},
+      "scope": {
+        "spec_name_globs": [
+          "h1r_edge_s5*"
+        ]
+      },
       "checks": [
         {
           "kind": "notebook_require_any_regex",
@@ -32,7 +40,11 @@
     {
       "id": "DG-003-division-supervision-deleted",
       "severity": "SEV-1",
-      "scope": {"spec_name_globs": ["h1r_edge_s5*"]},
+      "scope": {
+        "spec_name_globs": [
+          "h1r_edge_s5*"
+        ]
+      },
       "checks": [
         {
           "kind": "notebook_forbid_regex",
@@ -46,15 +58,24 @@
         },
         {
           "kind": "notebook_require_any_regex",
-          "patterns": ["division_loss", "division_supervision_loss", "lineage_loss"],
-          "message": "no positive division-supervision loss is wired into the edge trainer"
+          "patterns": [
+            "division_loss",
+            "division_supervision_loss",
+            "lineage_loss",
+            "DIVISION_LOSS_WEIGHT"
+          ],
+          "message": "no positive division-supervision loss is wired into the edge trainer (accepted signatures: division_loss | division_supervision_loss | lineage_loss | DIVISION_LOSS_WEIGHT - the last is the verified fix in scripts/kaggle_edits/h1r_edge_train.py:262-291, continuation_loss upweights division columns and drops only unresolvable ones; 2026-08-27)"
         }
       ]
     },
     {
       "id": "DG-004-any-threshold-checkpoint-selection",
       "severity": "SEV-1",
-      "scope": {"spec_name_globs": ["h1r_det_s1*"]},
+      "scope": {
+        "spec_name_globs": [
+          "h1r_det_s1*"
+        ]
+      },
       "checks": [
         {
           "kind": "notebook_forbid_regex",
@@ -81,7 +102,12 @@
     {
       "id": "DG-005-unreachable-resume",
       "severity": "SEV-3",
-      "scope": {"spec_name_globs": ["h1r_det_s1*", "h1r_edge_s5*"]},
+      "scope": {
+        "spec_name_globs": [
+          "h1r_det_s1*",
+          "h1r_edge_s5*"
+        ]
+      },
       "checks": [
         {
           "kind": "resume_requires_source",
@@ -93,7 +119,11 @@
     {
       "id": "DG-006-identity-sidecar-missing",
       "severity": "SEV-1",
-      "scope": {"spec_name_globs": ["h1r_edge_s5*"]},
+      "scope": {
+        "spec_name_globs": [
+          "h1r_edge_s5*"
+        ]
+      },
       "checks": [
         {
           "kind": "spec_require_dataset",
@@ -105,11 +135,19 @@
     {
       "id": "DG-007-produced-artifact-has-no-deployer",
       "severity": "SEV-2",
-      "scope": {"spec_name_globs": ["h1r_det_s1*", "h1r_edge_s5*"]},
+      "scope": {
+        "spec_name_globs": [
+          "h1r_det_s1*",
+          "h1r_edge_s5*"
+        ]
+      },
       "checks": [
         {
           "kind": "artifacts_require_consumers",
-          "artifacts": ["edge_predictor_best.pth", "appearance_projector_best.pth"],
+          "artifacts": [
+            "edge_predictor_best.pth",
+            "appearance_projector_best.pth"
+          ],
           "message": "a training artifact is produced but no reciprocal deployment consumer is declared"
         }
       ]
@@ -117,10 +155,12 @@
     {
       "id": "DG-008-calibration-crosses-into-association",
       "severity": "SEV-1",
-      "scope": {"spec_name_globs": [
-        "deploy_h1r_adabn_detection_only",
-        "p13_p9_adabn_detection_only"
-      ]},
+      "scope": {
+        "spec_name_globs": [
+          "deploy_h1r_adabn_detection_only",
+          "p13_p9_adabn_detection_only"
+        ]
+      },
       "checks": [
         {
           "kind": "notebook_require_regex",

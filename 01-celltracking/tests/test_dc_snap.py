@@ -67,3 +67,24 @@ def test_snap_no_peaks_keeps_everything():
     for a in dc.SNAP_ARMS:
         assert np.array_equal(res[a], det)
         assert not res[f"moved_{a}"][0]
+
+
+def test_intensity_centroid_recovers_blob_centre_and_respects_shift_cap():
+    # a bright blob at full-res (12.4, 40.7, 60.2) on a dim background; detection 1 z-slice and 2 voxels off
+    Z, Y, X = 24, 80, 80
+    zz, yy, xx = np.mgrid[0:Z, 0:Y, 0:X].astype(np.float64)
+    vol = (200.0 * np.exp(-0.5 * (((zz - 12.4) / 1.2) ** 2 + ((yy - 40.7) / 2.5) ** 2 + ((xx - 60.2) / 2.5) ** 2)) + 20.0).astype(np.uint16)
+    det = np.array([[11.0, 42.0, 58.0], [3.0, 5.0, 5.0]])   # second point: flat background -> stays
+    res = dc.intensity_centroid_points(vol, det)
+    got = res["icom_133"][0]
+    assert res["moved_icom_133"][0]
+    # a small-window centroid pulls PART of the way (window truncation + baseline subtraction): require the
+    # error to shrink on every axis by at least 40%, which is what the arm is for
+    truth = np.array([12.4, 40.7, 60.2])
+    assert np.all(np.abs(got - truth) < 0.6 * np.abs(det[0] - truth))
+    assert not res["moved_icom_133"][1] and np.array_equal(res["icom_133"][1], det[1])
+    # with a z+-1, y/x+-3 voxel window the centroid can move at most ~2.0 um, so the lineage's 2.8 um
+    # cap never binds: the 5 um variant must be identical to the primary
+    far = np.array([[14.0, 47.0, 60.0]])
+    r2 = dc.intensity_centroid_points(vol, far)
+    assert r2["moved_icom_133"][0] and np.array_equal(r2["icom_133"], r2["icom_133_s5"])
