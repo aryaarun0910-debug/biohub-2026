@@ -1,8 +1,8 @@
 """Software contracts for the 4-D RoPE option of the S5 association trainer.
 
 ``H1R_EDGE_POS_ENCODING=sinusoidal|rope4d`` (scripts/kaggle_edits/h1r_rope4d.py). These tests pin
-(a) that sinusoidal is the untouched vendored model bit for bit, (b) that under rope4d the attention
-logits are invariant to a global translation of all nodes (um) and to a global shift in t, (c) that
+(a) that sinusoidal is the untouched vendored model bit for bit, (b) that with projected q/k inputs
+held fixed the rotary attention factor is invariant to a global translation/time shift, (c) that
 they DO change under a relative displacement, (d) that the option round-trips env -> loader ->
 config.json -> inference install -> specs, and (e) that the frozen trunk / zero-drift contract is
 untouched by the rotation. They say nothing about whether rope4d helps - that is the job of gate 2.
@@ -144,7 +144,7 @@ def test_rope4d_attention_logits_change_under_a_relative_displacement():
     assert float((base - q @ k.transpose(-1, -2)).abs().max()) > 1e-2
 
 
-def test_rope4d_model_forward_is_translation_invariant_and_differs_from_sinusoidal(tmp_path):
+def test_rope4d_forward_with_fixed_absolute_inputs_is_translation_invariant_and_differs_from_sinusoidal(tmp_path):
     """Through the real predict_edges path: RoPE is in the forward, and the whole forward stays
     invariant to a global translation / time offset while the absolute inputs are held fixed."""
     base, weights = _public_like(tmp_path, **PUBLIC_TRANSFORMER)

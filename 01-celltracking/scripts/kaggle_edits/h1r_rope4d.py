@@ -7,8 +7,9 @@ in with the UNet features) and its attention logits carry no relative term at al
 only relative quantity in the vendored model is the ``(c_t - c_t1) / 100`` input of the
 pair MLP, downstream of attention. Rotating queries and keys by a position-dependent
 rotation R(p) makes ``q_i^T R(p_i)^T R(p_j) k_j = q_i^T R(p_j - p_i) k_j`` -- the rotations
-are a commutative group over the four coordinates, so every attention logit depends on the
-displacement only and the whole attention stack becomes translation-equivariant.
+are a commutative group over the four coordinates, so the ROTARY FACTOR depends on displacement.
+The complete attention stack is not translation-equivariant because the projected q/k inputs still
+contain the deliberately retained absolute sinusoidal features described below.
 
 Contract
 --------

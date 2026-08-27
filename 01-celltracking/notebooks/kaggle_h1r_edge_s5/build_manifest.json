@@ -56,5 +56,6 @@
       "DG-006-identity-sidecar-missing",
       "DG-007-produced-artifact-has-no-deployer"
     ]
-  }
+  },
+  "pushed_slug": "biohub-h1r-edge-s5"
 }

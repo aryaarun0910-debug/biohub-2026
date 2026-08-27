@@ -122,7 +122,7 @@ def tick(items: list[Item], *, status_fn, push_fn, complete_fn, max_running: int
             events.append(f"{it.name}: COMPLETE after {(now - (it.pushed_at or now)) / 3600:.2f} h")
             try:
                 complete_fn(it)
-            except Exception as exc:  # fetch/audit/submit failures must not kill the queue
+            except (Exception, SystemExit) as exc:  # factory gates use SystemExit on a hard refusal
                 it.note = f"post-complete step failed: {exc}"
                 events.append(f"{it.name}: {it.note}")
         elif head in TERMINAL_BAD:
@@ -223,7 +223,10 @@ def make_complete_fn(submit_names: set[str], dest_root: Path):
         it.status = "fetched"
         if not it.expects_submission:
             return
-        KF.cmd_audit(spec, dest, it.kernel_version)
+        audit_rc = KF.cmd_audit(spec, dest, it.kernel_version)
+        if audit_rc != 0:
+            it.status = "error"
+            raise RuntimeError("structural audit failed; submission blocked")
         it.status = "audited"
         message = f"{it.name}: {spec.get('purpose', '')[:160]}"
         KF.cmd_submitcmd(spec, message, dest, it.kernel_version)   # receipt-bound gate; prints the command

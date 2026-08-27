@@ -588,11 +588,10 @@ levers:
       0.927 public lineage's refine_centroids: z+-1, y/x+-3 voxel window, 20th-percentile baseline)
       reduces the mean endpoint residual and the >3 um tail on the honest fold, and that lifts the
       scorer-exact fold score on both embryo directions
-    status: parked
+    status: open
     reopen_when: >-
-      the host chooses to spend a submission on a +0.002..+0.004 expected gain, or float-coordinate acceptance by
-      Kaggle's scorer is proven by any other submission; deploy spec ready (p23_icom155.json). 2026-08-27: the
-      organizer's converter casts coordinates to Float64 (FACT-0336), so the format risk is code-level clear
+      SATISFIED 2026-08-27: the host authorised the queued p23 submission and the organizer's converter
+      casts coordinates to Float64 (FACT-0336). Deploy spec p23_icom155.json is complete.
     outcome: >-
       Full scale, both folds (FACT-0330): +0.0013 / +0.0024 for icom_155 - positive in both directions, below the
       pre-registered +0.005 bar the pilots (FACT-0324) had suggested. Rounded export is <= 0; float export required.
@@ -730,4 +729,31 @@ levers:
       (FACT-0321/0326) but could read the WRONG SIGN here, so stage 2 is a deliberate submission, not a formality.
       Instrument to build: a committed GT-free prune in scripts/win_bet/ (dedup by predicted-graph connectivity
       + distance) with the same round-trip as div_steal_rule.py. Highest unmeasured ceiling on the board.
+    priority: 1
+
+  - id: LEVER-0027
+    claim: >-
+      Applying parameter-free 4-D rotary position encoding to the S5 association transformer's
+      attention queries and keys improves held-out adjacent-frame link selection over the otherwise
+      identical sinusoidal S5 arm, and the learned edge checkpoint transfers to a positive fold-0
+      paired score delta without changing detector outputs.
+    status: open
+    falsifier: >-
+      Gate 1: the two-step Kaggle smoke must export a finite checkpoint/config, preserve zero detector
+      drift, and emit the training/config heartbeats H1R_POS_ENCODING and H1R_EDGE_RESULT. Gate 2: at equal training steps, held-out link_top1 must
+      exceed the sinusoidal S5 arm (`FACT-0329` supplies only the plumbing baseline; the full equal-step
+      sinusoidal result must be fetched before comparison). Gate 3: the fold-0 LOEO scorer round-trip
+      must show paired delta >= +0.005 with a crop-bootstrap CI excluding zero against the champion
+      control (`FACT-0321` instrument), with H1R_ROPE4D_INFERENCE_PATCH and H1R_ROPE4D_INFERENCE present
+      in the LOEO logs. Any failed gate closes this RoPE mechanism; candidate recall
+      alone cannot rescue a link_top1 failure.
+    supporting: [FACT-0182, FACT-0321, FACT-0329, FACT-0335, FACT-0339]
+    note: >-
+      Opened 2026-08-27 as a separate mechanism from LEVER-0023. It changes association geometry,
+      not the detector recipe refuted by FACT-0339. The implementation is already built in
+      scripts/kaggle_edits/h1r_rope4d.py plus its inference subprocess patch and three Kaggle specs.
+      The rotary factor is relative, but the complete model is NOT translation-equivariant because
+      the public checkpoint's absolute sinusoidal inputs are intentionally retained.
+      Only if all three gates pass may the wavelength bands be swept or the rotation be extended to
+      the daughter-pair head (FACT-0182).
     priority: 1

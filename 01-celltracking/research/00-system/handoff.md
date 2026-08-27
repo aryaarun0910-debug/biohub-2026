@@ -77,10 +77,27 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > - **Colab lane:** still no parity number (`FACT-0327`); an observable-bootstrap rebuild was started and cut off by
 >   the rate limit. The next session should finish it (host authorised T4/L4 Colab).
 >
-> **Ranked next actions:** (1) read P24's LB score, then p25's paired delta (the retrain-recipe answer) and p23's
-> score; (2) build the LEVER-0026 GT-free dedup rule and take its stage-2 submission - highest ceiling; (3) run the
-> RoPE-4D smoke then the fold-0 gate on Colab/Kaggle; (4) finish the Colab observable bootstrap. All five queued
-> kernels and both new levers are instrumented and gated.
+> **CYCLE CLOSED 2026-08-27 (evening) - clean-out, control consolidated to one owner.** Local queue runner(s)
+> STOPPED (nothing new will push/submit); the two Kaggle kernels still on GPU (`h1r_edge_s5` sinusoidal S5
+> control, `h1r-edge-s5-rope4d-smoke` = EXP-0028) were left to finish for free and must be FETCHED next cycle.
+> Final scores/state:
+> - **P24** (`EXP-0025`, submission 55820202): LB still PENDING on Kaggle at close - read it first next cycle.
+> - **p23** (`EXP-0027`, LEVER-0022 icom float): COMPLETE and audited but NOT submitted (the runner's audit step
+>   missed its receipt on a kernel-version quirk). It is READY - one deliberate submission, band 0.925-0.929,
+>   pre-registered in PKT-0018. Host decision.
+> - **p25** (`EXP-0026`): SCORED - recipe parity FAILS by -0.162 (`FACT-0339`); do not spend GPU on detector
+>   retraining until a recipe reaches split_0 parity offline.
+> - **LEVER-0025** (steal): dead GT-free (`FACT-0337`), parked. **LEVER-0026** (FP-endpoint, priority 1): the
+>   +0.065/+0.096 ceiling (`FACT-0338`) does NOT yet convert - the conservative GT-free dedup rule is a near-null
+>   that still deletes scored TP edges (PKT-0022 result); stage 1 NOT passed, lever stays open.
+> - **LEVER-0027** (RoPE-4D, `PKT-0023`): built + tested; gate-1 smoke in flight at close; fetch and compare
+>   link_top1 next cycle. This is the association-term lane (`FACT-0335`).
+> - Full suite GREEN (1038 passed); registry / research-tree / claims OK. HEAD carries the day's findings.
+>
+> **First actions next cycle:** (1) `kaggle_factory status/fetch` the two finished kernels; read P24's LB; (2)
+> decide p23's submission; (3) LEVER-0026 needs a rule with ZERO scored-TP deletions and a positive BOTH-fold
+> full-fold delta before any submission (the ceiling is real but GT-dependent); (4) LEVER-0027 gate 2 =
+> RoPE vs sinusoidal link_top1 at equal steps. Takeover briefs: `C:/temp/intel/CODEX_TAKEOVER.md`.
 
 > ## 🟢 2026-08-27 (early hours) — a live candidate, a two-fold calibration anchor, two levers killed, H1 gated
 >

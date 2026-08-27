@@ -10,6 +10,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts" / "core"))
 import kaggle_queue as Q  # noqa: E402
@@ -108,6 +110,24 @@ def test_post_complete_failure_is_recorded_not_raised():
     assert items[0].status == "complete" and "audit failed" in items[0].note
 
 
+def test_factory_system_exit_does_not_kill_queue_or_block_next_push():
+    """Factory release gates deliberately raise SystemExit on refusal.  A failed artifact
+    must remain unsubmitted while unrelated pending work still fills the freed slot."""
+    items = [item("bad_artifact", status="running", expects=True), item("next_job")]
+    pushed = []
+
+    def complete_fn(_it):
+        raise SystemExit("AUDIT FAILED")
+
+    Q.tick(items, status_fn=lambda _s: "COMPLETE",
+           push_fn=lambda it: pushed.append(it.name) or 0,
+           complete_fn=complete_fn, max_running=2, now=1.0)
+    assert items[0].status == "complete"
+    assert "AUDIT FAILED" in items[0].note
+    assert items[1].status == "running"
+    assert pushed == ["next_job"]
+
+
 def test_state_round_trip(tmp_path):
     items = [item("a", status="running"), item("b", deps=["a"])]
     p = tmp_path / "state.json"
@@ -123,6 +143,20 @@ def test_default_fetch_by_spec_kind():
     assert Q.default_fetch(sub) == ["submission.csv", "run_stats.csv"]
     assert Q.default_fetch(loeo) == ["loeo_split0_strict.csv.gz", "loeo_manifest.json", "run_stats.csv"]
     assert Q.default_fetch(train) == ["metrics.json", "summary.json", "config.json"]
+
+
+def test_nonzero_audit_result_is_an_error_and_never_reaches_submitcmd(monkeypatch, tmp_path):
+    it = item("bad", expects=True, status="complete")
+    submit_called = []
+    monkeypatch.setattr(KF, "load_spec", lambda _p: {"purpose": "test"})
+    monkeypatch.setattr(KF, "cmd_fetch", lambda *_a, **_k: 0)
+    monkeypatch.setattr(KF, "cmd_audit", lambda *_a, **_k: 1)
+    monkeypatch.setattr(KF, "cmd_submitcmd", lambda *_a, **_k: submit_called.append(True))
+
+    with pytest.raises(RuntimeError, match="structural audit failed"):
+        Q.make_complete_fn({"bad"}, tmp_path)(it)
+    assert it.status == "error"
+    assert submit_called == []
 
 
 def test_real_specs_form_a_valid_queue_with_the_consumer_after_its_producer():
