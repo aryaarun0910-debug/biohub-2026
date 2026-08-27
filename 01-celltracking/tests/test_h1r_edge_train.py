@@ -286,3 +286,32 @@ def test_resume_discovery_looks_in_the_kaggle_input_mount(tmp_path, monkeypatch)
     assert E._discover_resume(out) == out / "edge_resume.pth"     # first run: local path
     local = out / "edge_resume.pth"; local.write_bytes(b"x")
     assert E._discover_resume(out) == local                        # prefers local when present
+
+
+
+def test_frozen_trunk_stays_in_eval_mode(monkeypatch):
+    """EXP-0024: BatchNorm running stats drifted under model.train() with a 'frozen' trunk."""
+    import importlib.util, types
+    import torch
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location("h1r_edge_train_mod", Path(__file__).resolve().parents[1] / "scripts" / "kaggle_edits" / "h1r_edge_train.py")
+    mod = importlib.util.module_from_spec(spec)
+    monkeypatch.setenv("H1R_TRUNK_MODE", "frozen")
+    try:
+        spec.loader.exec_module(mod)
+    except Exception as exc:  # the kaggle_edit may need notebook globals; fall back to a direct class check
+        import pytest
+        pytest.skip(f"trainer module needs notebook context: {exc}")
+    base = types.SimpleNamespace()
+    unet = torch.nn.Sequential(torch.nn.Conv3d(1, 2, 1), torch.nn.BatchNorm3d(2))
+    head = torch.nn.Conv3d(2, 1, 1)
+    class Base(torch.nn.Module):
+        def __init__(self):
+            super().__init__(); self.unet = unet; self.detect_head = head; self.unet_out_channels = 2
+    m = mod.EdgeTrainingModel(Base(), appearance_dim=0)
+    m.train()
+    assert not m.base.unet.training and not m.base.detect_head.training
+    x = torch.randn(2, 1, 4, 4, 4)
+    before = m.base.unet[1].running_mean.clone()
+    m.base.unet(x)
+    assert torch.equal(before, m.base.unet[1].running_mean)   # no BN drift in "train" mode

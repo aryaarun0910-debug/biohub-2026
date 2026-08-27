@@ -184,6 +184,17 @@ class EdgeTrainingModel(nn.Module):
             for p in self.base.unet.parameters():
                 p.requires_grad_(False)
 
+    def train(self, mode: bool = True):
+        """Frozen means frozen: the vendored UNet carries BatchNorm3d whose running statistics
+        update in train mode even with every parameter at requires_grad=False. EXP-0024 measured
+        detection logits moving by 3.065e+01 after two optimizer steps for exactly that reason.
+        Keep the frozen trunk (and the frozen detect_head) in eval mode whatever the caller sets."""
+        super().train(mode)
+        if self.trunk_mode == "frozen":
+            self.base.unet.eval()
+            self.base.detect_head.eval()
+        return self
+
 
 def load_public_full_model(T, weights: str | Path, device: torch.device,
                            *, appearance_dim: int = 0) -> EdgeTrainingModel:

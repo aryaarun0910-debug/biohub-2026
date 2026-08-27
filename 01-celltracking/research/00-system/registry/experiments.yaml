@@ -306,9 +306,9 @@ experiments:
     spec: scripts/kaggle_specs/p22_sdw060.json
     kernel: aryaarun07/biohub-p22-sdw060
     kernel_version: 1
-    submission: null
+    submission: 55806155
     lb: null
-    status: running
+    status: pending
     date: '2026-08-27'
     facts: [FACT-0001]
     note: >-
@@ -321,7 +321,7 @@ experiments:
     title: H1R S5 edge-training SMOKE - two optimizer steps on Zh001r + identity sidecar
     spec: scripts/kaggle_specs/h1r_edge_s5_smoke.json
     kernel: aryaarun07/biohub-h1r-edge-s5-smoke
-    kernel_version: 1
+    kernel_version: 2
     submission: null
     lb: null
     status: running
@@ -333,4 +333,9 @@ experiments:
       fp32 BCE (the autocast-banned op was removed this session); detection_drift.max_abs <= 1e-4 (trunk frozen);
       a zero-epoch link_top1 / candidate_recall baseline on the held-out crops. A pass licenses h1r_edge_s5.json;
       a fail kills the S5 packaging before any Colab unit is spent on it.
+      .
+      VERSION 1 (2026-08-27 00:2x UTC) ERRORED at the drift assertion: detection logits moved by 3.065e+01
+      after two steps with every trunk parameter at requires_grad=False - the vendored UNet's BatchNorm3d
+      running statistics updated under model.train() (FACT-0328). Fixed by an EdgeTrainingModel.train()
+      override that keeps the frozen trunk in eval mode (tests/test_h1r_edge_train.py). VERSION 2 pushed.
 
