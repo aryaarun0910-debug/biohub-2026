@@ -28,5 +28,6 @@
   "defect_gate": {
     "ledger": "scripts\\core\\experiment_defects.json",
     "passed": []
-  }
+  },
+  "pushed_slug": "biohub-p29-p28-detpeak-export-f1"
 }

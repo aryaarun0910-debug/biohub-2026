@@ -476,10 +476,10 @@ experiments:
     title: P29 P28 DetPeak full exporter, fold 0
     spec: scripts/kaggle_specs/p29_p28_detpeak_export_f0.json
     kernel: aryaarun07/biohub-p29-p28-detpeak-export-f0
-    kernel_version: null
+    kernel_version: 1
     submission: null
     lb: null
-    status: planned
+    status: running
     date: '2026-08-28'
     facts: [FACT-0345, FACT-0346]
     note: >-
@@ -490,10 +490,10 @@ experiments:
     title: P29 P28 DetPeak full exporter, clean fold 1 with split_1 weights
     spec: scripts/kaggle_specs/p29_p28_detpeak_export_f1.json
     kernel: aryaarun07/biohub-p29-p28-detpeak-export-f1
-    kernel_version: null
+    kernel_version: 1
     submission: null
     lb: null
-    status: planned
+    status: running
     date: '2026-08-28'
     facts: [FACT-0345, FACT-0346, FACT-0160]
     note: >-
