@@ -5077,6 +5077,16 @@ node-adding one. A residual that reproduces a counter exactly is a naming error,
 
 ---
 
+## 2026-08-29 — PKT-0026: exact CPU replay carries the tighter selector through the full chain
+
+The presumed asset blocker was false: the raw images, DeepCenter checkpoint, pre-ILP export, and champion
+controls were already local. An AST-sourced replay of the built P28 notebook reproduced the deployed controls
+exactly across every predeclared stage and the official scorer. A fixed fold-1 panel preserved the tighter
+selector's gain through the complete post-processing chain (`FACT-0367`). The effect is selective rather than
+recall-seeking, but is strongly heterogeneous by crop. Therefore `LEVER-0036` remains open as the top priority; it is
+not promoted until an honest fold-0 pre-ILP export permits the original both-fold gate. Zero GPU, zero
+submissions, and no Colab activity.
+
 ## 2026-08-28 (night) — PKT-0025 closed: the node-budget theme inverts
 
 **What ran.** All six host-directed items, CPU only: packet claimed, exact ILP replayer built and gated, a

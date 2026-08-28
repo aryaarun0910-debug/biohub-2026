@@ -3,7 +3,7 @@ id: 00-system/handoff
 title: Handoff
 area: 00-system
 status: active
-updated: '2026-08-28'
+updated: '2026-08-29'
 owner: biohub
 links: []
 tags: [handoff, entry-point]
@@ -11,6 +11,20 @@ record_kind: state
 ---
 
 # Current handoff
+
+> ## 2026-08-29 — CPU full-chain blocker removed; LEVER-0036 survives, but is not promoted
+>
+> PKT-0026 is done without GPU use or submissions. The predicted raw-image blocker was false: the complete
+> P28 post-ILP chain can be replayed locally from existing assets. The deployed controls were exact across every
+> predeclared stage, and the fixed fold-1 panel remained positive after motion relink, gap repair, DeepCenter,
+> divisions, filtering, smoothing, and the official scorer (`FACT-0367`). This directly answers the transfer
+> uncertainty in `FACT-0365`: relinking does not necessarily erase the tighter solver's selectivity gain.
+>
+> **Do not promote or submit it yet.** The panel was size-stratified, signs were maximally heterogeneous, and it
+> covers only fold 1. `LEVER-0036` is now the top priority, still open, with its original gate intact: acquire an honest
+> fold-0 pre-ILP export, replay both complete folds, and require the preregistered fold-0 result. The reusable
+> instruments are `scripts/win_bet/p28_full_chain_replay.py` and `p28_full_chain_panel.py`; evidence is under
+> `C:/temp/full_chain_replay/`. No GPU or Colab action was taken.
 
 **Status:** ACTIVE 2026-08-26. Branch `master`.
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).

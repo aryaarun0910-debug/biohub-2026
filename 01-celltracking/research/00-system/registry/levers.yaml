@@ -876,7 +876,7 @@ levers:
       zero and >= +0.003 on fold 0, reporting raw edge Jaccard beside the adjusted score. Killed if the gain
       exists only before the relink (FACT-0364), or if it is a count-adjustment artifact, or if fold 0 does not
       move.
-    supporting: [FACT-0365, FACT-0364, FACT-0191, FACT-0192, FACT-0102, FACT-0354]
+    supporting: [FACT-0367, FACT-0365, FACT-0364, FACT-0191, FACT-0192, FACT-0102, FACT-0354]
     note: >-
       This is the one direction PKT-0025 found that survives its own forensics, and it is the OPPOSITE of the
       node-budget theme that produced LEVER-0028 and LEVER-0035. Three independent measurements now agree that
@@ -891,7 +891,11 @@ levers:
       filter_output_graph, which needs the DeepCenter bundle and image frames for gap refinement) or one
       host-authorised GPU run per fold. Fold 0 has no pre-ILP export at all and fold 0 is the promotion gate
       (FACT-0261), so a fold-0 export is required either way before promotion.
-    priority: 2
+      CPU FEASIBILITY RESOLVED 2026-08-29 (FACT-0367): exact control replays prove the complete P28 chain is
+      replayable from local assets, and a fixed fold-1 panel stays positive through the official scorer. This
+      removes the full-chain tooling blocker but does not waive the both-fold gate; the panel is heterogeneous
+      and the honest fold-0 pre-ILP artifact is still absent.
+    priority: 1
 
   - id: LEVER-0029
     claim: >-

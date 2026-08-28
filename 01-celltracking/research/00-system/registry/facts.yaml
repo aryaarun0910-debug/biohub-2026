@@ -4484,3 +4484,55 @@ facts:
       second at 17-21% of node removal; it is second in volume but not in headroom.
     date: '2026-08-28'
     tags: [short-track, sweep, null-result, lever-0035]
+
+  - id: FACT-0367
+    statement: >-
+      The exact P28 full post-ILP chain is CPU-replayable from the existing local fold-1 pre-ILP export, raw
+      images, and DeepCenter checkpoint. Five deployed-weight controls reproduced every predeclared stage count
+      exactly. On a fixed 20-crop size-stratified panel, raising disappearance weight to 3.0 remained positive
+      after motion relink, gap repair, DeepCenter vetoes, safe divisions, short-track filtering, line fitting,
+      and the official scorer: the paired score delta was +0.0195 with a 95% crop-bootstrap interval
+      +0.0007 to +0.0378. The mechanism was selectivity, removing 491 false edges while losing 84 true edges;
+      signs split 10 positive / 10 negative crops
+    value: 0.01950734925261588
+    unit: full_chain_score_delta_f1_size_stratified_panel
+    scope:
+      fold: 1
+      crops: 20
+      selection: five smallest controls plus fifteen fixed raw-node-rank probes
+      deployed_disappearance_weight: 1.5
+      candidate_disappearance_weight: 3.0
+      exact_control_replays: {n: 5, of: 5}
+      delta:
+        score: 0.01950734925261588
+        adjusted_edge_jaccard: 0.016908258934227316
+        raw_edge_jaccard: 0.013246745447816122
+        division_jaccard: 0.02599090318388564
+        edge_tp: -84
+        edge_fp: -491
+        edge_fn: 84
+      paired_bootstrap: {draws: 2000, seed: 20260828, mean: 0.019294974481530263, ci95: [0.000656886585754102, 0.037768559767517786]}
+      crop_signs: {positive: 10, negative: 10, zero: 0}
+      complete_chain: [ILP, motion_relink, gap_close, DeepCenter, safe_division, short_track, linefit, official_scorer]
+    provenance: MEASURED
+    validity: SUSPECT
+    validity_reason: >-
+      This establishes transfer through the full chain and refutes the specific FACT-0365 concern that motion
+      relink necessarily erases the gain. It is not a promotion result: fold 1 only, the panel is deliberately
+      size-stratified rather than the complete fold or a random sample, crop signs are maximally heterogeneous,
+      and FACT-0261 makes fold 0 the promotion gate. The old pre-ILP artifact is licensed for plumbing and
+      mechanism measurement only, not leaderboard projection.
+    instrument: >-
+      scripts/win_bet/p28_full_chain_replay.py and scripts/win_bet/p28_full_chain_panel.py over
+      C:/temp/preilp_f1_v2/preilp_split1.parquet, C:/temp/p28_f1/loeo_split1_champion.csv.gz,
+      C:/temp/biohub_deepcenter_p10_audit/best.pt, and data/train; evidence
+      C:/temp/full_chain_replay/{control_*.json,candidate_3p0_*.json,panel_20.json}; 2026-08-29
+    experiment: EXP-0034
+    note: >-
+      The packet's predicted raw-image blocker was false: all 199 train Zarrs were already local. The extracted
+      chain is sourced directly from the built P28 notebook AST and fingerprints that source, avoiding a second
+      hand-maintained implementation. This finding keeps LEVER-0036 open and raises its priority, but the next
+      scientific gate is unchanged: obtain an honest P28 fold-0 pre-ILP export, run both full folds, and require
+      the predeclared fold-0 threshold before any submission.
+    date: '2026-08-29'
+    tags: [ilp, full-chain, cpu-replay, selectivity, lever-0036, fold-1, suspect]
