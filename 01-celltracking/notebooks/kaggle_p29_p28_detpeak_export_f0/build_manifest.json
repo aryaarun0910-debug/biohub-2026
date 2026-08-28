@@ -1,0 +1,32 @@
+{
+  "name": "p29_p28_detpeak_export_f0",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p29_p28_detpeak_export_f0.json",
+  "base_notebook": "notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb",
+  "base_sha256": "6d54240b85eb563faa6015761cb348fb2ad4df801218077fbf7c6480c8194f8a",
+  "built_notebook": "notebooks\\kaggle_p29_p28_detpeak_export_f0\\biohub-p29-p28-detpeak-export-f0.ipynb",
+  "built_sha256": "8a011943e37f4b690a2fa6a672dfa9b98509e8dd490b5e7513c102779b9d0328",
+  "config_hash": "1e83fef1e991",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "04152c5119e66e83b65f730847d06532e9bd80ef857f149324c58930d719ed48"
+    },
+    {
+      "kind": "insert_after",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "8f74b1d9e55be4f584811612efc6afc72cf1565bc5ba5649556109cadbb449fc"
+    }
+  ],
+  "declared_slug": "biohub-p29-p28-detpeak-export-f0",
+  "title": "Biohub P29 P28 DetPeak Export F0",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}

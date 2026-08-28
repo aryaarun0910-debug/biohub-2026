@@ -45,7 +45,7 @@ method: >-
   fold-1 CI excluding 0, and >= +0.003 both folds licenses ONE P24-based submission with a pre-registered band.
 
 budget:
-  gpu_sessions: 1 Kaggle slot for the candidate-score exporter (+ possibly 1 for the budgeted re-run)
+  gpu_sessions: 3 diagnostic sessions (one 2-crop smoke + one full export per fold), plus at most 1 budgeted relink only after thresholds freeze
   submissions: 1 (only if the offline bar is cleared)
   wall_clock: 2-4 days
 
@@ -59,7 +59,7 @@ forbidden:
 
 outputs:
   evidence: C:/temp/node_budget/ and _evidence/node_budget/
-  facts_added: []          # sentinel result; exporter built; budget-function offline gate; (if passed) the submission
+  facts_added: []          # sentinel result; exporter built/run; budget-function offline gate; (if passed) the submission
   record: >-
     One section per step in research/06-knowledge-system/experimental-records.md
 

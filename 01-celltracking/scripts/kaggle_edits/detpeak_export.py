@@ -79,14 +79,16 @@ _dp_pre_new = '''_BIOHUB_DETPEAK_ENABLE = os.environ.get("BIOHUB_DETPEAK_ENABLE"
 _BIOHUB_DETPEAK_T = float(os.environ.get("BIOHUB_DETPEAK_EXPORT_T", "0.5"))
 _BIOHUB_DETPEAK_DIR = Path(os.environ.get("BIOHUB_DETPEAK_DIR", "/kaggle/working/detpeaks"))
 _BIOHUB_PEAK_ROWS: list = []
+_BIOHUB_PIPELINE_THRESHOLDS: set[float] = set()
 if _BIOHUB_DETPEAK_ENABLE:
     _BIOHUB_DETPEAK_DIR.mkdir(parents=True, exist_ok=True)
     print(f"detpeak: export ACTIVE in pid {os.getpid()} "
           f"(T={_BIOHUB_DETPEAK_T}, dir={_BIOHUB_DETPEAK_DIR})", flush=True)
 
 
-def _biohub_peak_sink(t, idx, logit) -> None:
+def _biohub_peak_sink(t, idx, logit, pipeline_threshold) -> None:
     _BIOHUB_PEAK_ROWS.append((int(t), idx, logit))
+    _BIOHUB_PIPELINE_THRESHOLDS.add(float(pipeline_threshold))
 
 
 def _biohub_flush_peaks(crop_name: str) -> None:
@@ -99,11 +101,28 @@ def _biohub_flush_peaks(crop_name: str) -> None:
     ts = np.concatenate([np.full(len(i), t, dtype=np.int16) for t, i, _ in _BIOHUB_PEAK_ROWS])
     zyx = np.concatenate([i for _, i, _ in _BIOHUB_PEAK_ROWS]).astype(np.int16)
     lg = np.concatenate([g for _, _, g in _BIOHUB_PEAK_ROWS]).astype(np.float32)
+    if len(_BIOHUB_PIPELINE_THRESHOLDS) != 1:
+        raise RuntimeError(
+            f"detpeak: expected one pipeline threshold for {crop_name}, "
+            f"got {sorted(_BIOHUB_PIPELINE_THRESHOLDS)}"
+        )
+    pipeline_threshold = next(iter(_BIOHUB_PIPELINE_THRESHOLDS))
     out = _BIOHUB_DETPEAK_DIR / f"{crop_name}.npz"
-    np.savez_compressed(out, t=ts, zyx=zyx, logit=lg)
+    np.savez_compressed(
+        out,
+        t=ts,
+        zyx=zyx,
+        logit=lg,
+        pipeline_threshold=np.asarray(pipeline_threshold, dtype=np.float64),
+        pipeline_peak_count=np.asarray(
+            np.count_nonzero(1.0 / (1.0 + np.exp(-lg.astype(np.float64))) > pipeline_threshold),
+            dtype=np.int64,
+        ),
+    )
     print(f"  detpeak: {crop_name} -> {len(ts):,} peaks, "
           f"{out.stat().st_size / 1e6:.1f} MB", flush=True)
     _BIOHUB_PEAK_ROWS.clear()
+    _BIOHUB_PIPELINE_THRESHOLDS.clear()
 
 
 def _detect_cells_pooled('''
@@ -131,7 +150,8 @@ _dp_new = """    logits = det_logits.unsqueeze(0)  # (1, 1, Z, Y, X)
                 _pi = _exp_idx.long()
                 _lg = det_logits[0][_pi[:, 0], _pi[:, 1], _pi[:, 2]]
                 _biohub_peak_sink(t, _pi.cpu().numpy().astype(np.int16),
-                                  _lg.detach().float().cpu().numpy().astype(np.float32))
+                                  _lg.detach().float().cpu().numpy().astype(np.float32),
+                                  det_threshold)
             del _exp_idx
         except Exception as _exc:  # never let export break inference
             print("detpeak export warning:", _exc, flush=True)
@@ -162,7 +182,8 @@ _PEAK_MANIFEST = {
     "export_threshold": _PEAK_EXPORT_T,
     "pipeline_threshold_env": "BIOHUB_DET_THRESHOLD",
     "coord_space": "DOWNSAMPLED grid; multiply z,y,x by downsample=[1,4,4] for level-0",
-    "columns": {"t": "int16", "zyx": "int16 (N,3)", "logit": "float32 raw pre-sigmoid"},
+    "columns": {"t": "int16", "zyx": "int16 (N,3)", "logit": "float32 raw pre-sigmoid",
+                "pipeline_threshold": "float64 scalar", "pipeline_peak_count": "int64 scalar"},
     "graph_unchanged": True,
     "delivery": "sink/flush are module-level in the predictor source and env-gated, because "
                 "prediction runs in a SUBPROCESS and process-local builtins do not cross it",

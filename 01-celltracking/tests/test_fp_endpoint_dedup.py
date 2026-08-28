@@ -161,3 +161,30 @@ def test_bad_graph_and_parameter_files_fail_loudly(tmp_path):
     p.write_text('{"oracle_gt_id": 1}', encoding="utf-8")
     with pytest.raises(ValueError, match="unknown"):
         dedup.load_params(p)
+
+
+def test_cli_exposes_explicit_atlas_tag_with_legacy_default(monkeypatch):
+    monkeypatch.setattr("sys.argv", ["fp_endpoint_dedup.py", "run", "--csv", "x.csv",
+                                     "--atlas-dir", "atlas", "--tag", "run",
+                                     "--params", "params.json", "--out-dir", "out"])
+
+    captured = {}
+
+    def fake_run(args):
+        captured["atlas_tag"] = args.atlas_tag
+        return 0
+
+    monkeypatch.setattr(dedup, "cmd_run", fake_run)
+    assert dedup.main() == 0
+    assert captured["atlas_tag"] == "pen_off"
+
+
+def test_cli_accepts_p28_atlas_tag(monkeypatch):
+    monkeypatch.setattr("sys.argv", ["fp_endpoint_dedup.py", "run", "--csv", "x.csv",
+                                     "--atlas-dir", "atlas", "--atlas-tag", "p28f1",
+                                     "--tag", "run", "--params", "params.json",
+                                     "--out-dir", "out"])
+    captured = {}
+    monkeypatch.setattr(dedup, "cmd_run", lambda args: captured.setdefault("atlas_tag", args.atlas_tag) and 0)
+    assert dedup.main() == 0
+    assert captured["atlas_tag"] == "p28f1"

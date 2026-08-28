@@ -450,3 +450,46 @@ experiments:
       The CLEANER P24-lineage control: fold 1 (6bba held out), OOF split_1 edge weights (leak guard intact), DeepCenter
       best.pt validated on 6bba (checkpoint selection only, not trained) so near-out-of-sample. This is the fold to
       trust for the 0.928-base offline calibration and DeepCenter-adjacent lever screening. Pushed 2026-08-27; no submission.
+
+  - id: EXP-0032
+    title: P29 P28 DetPeak exporter two-crop process-boundary smoke, fold 0
+    spec: scripts/kaggle_specs/p29_p28_detpeak_smoke_f0.json
+    kernel: aryaarun07/biohub-p29-p28-detpeak-smoke-f0
+    kernel_version: null
+    submission: null
+    lb: null
+    status: planned
+    date: '2026-08-28'
+    facts: [FACT-0346]
+    note: >-
+      PKT-0024 prerequisite smoke. Must retain the P28 champion output and emit exactly two non-empty
+      per-crop sidecars from the prediction subprocess, each carrying the actual detector threshold and
+      a reconstructable pipeline peak-count heartbeat. Plumbing only; never scientific evidence or a submission.
+
+  - id: EXP-0033
+    title: P29 P28 DetPeak full exporter, fold 0
+    spec: scripts/kaggle_specs/p29_p28_detpeak_export_f0.json
+    kernel: aryaarun07/biohub-p29-p28-detpeak-export-f0
+    kernel_version: null
+    submission: null
+    lb: null
+    status: planned
+    date: '2026-08-28'
+    facts: [FACT-0345, FACT-0346]
+    note: >-
+      Passive candidate-score diagnostic on the P28 fold-0 champion substrate. Launch only after EXP-0032
+      passes. No threshold or graph change, no submission. Fold 0 is paired-delta use only because of FACT-0310.
+
+  - id: EXP-0034
+    title: P29 P28 DetPeak full exporter, clean fold 1 with split_1 weights
+    spec: scripts/kaggle_specs/p29_p28_detpeak_export_f1.json
+    kernel: aryaarun07/biohub-p29-p28-detpeak-export-f1
+    kernel_version: null
+    submission: null
+    lb: null
+    status: planned
+    date: '2026-08-28'
+    facts: [FACT-0345, FACT-0346, FACT-0160]
+    note: >-
+      Passive candidate-score diagnostic on the clean P28 fold-1 champion substrate. The verified P28
+      base retains BIOHUB_LOEO_WEIGHTS_GLOB=split_1. Launch only after EXP-0032 passes; no submission.

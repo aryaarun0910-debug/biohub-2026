@@ -297,9 +297,20 @@ def cmd_run(args) -> int:
         names = names[:args.max_crops]
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    atlas_nodes = pd.read_parquet(Path(args.atlas_dir) / "nodes_pen_off.parquet")
-    atlas_edges = pd.read_parquet(Path(args.atlas_dir) / "edges_pen_off.parquet")
-    atlas_crops = pd.read_parquet(Path(args.atlas_dir) / "crops_pen_off.parquet").set_index("dataset")
+    atlas_tag = str(args.atlas_tag)
+    atlas_root = Path(args.atlas_dir)
+    atlas_paths = {
+        kind: atlas_root / f"{kind}_{atlas_tag}.parquet"
+        for kind in ("nodes", "edges", "crops")
+    }
+    missing_atlas = [str(path) for path in atlas_paths.values() if not path.is_file()]
+    if missing_atlas:
+        raise FileNotFoundError(
+            f"atlas tag {atlas_tag!r} is incomplete under {atlas_root}: {missing_atlas}"
+        )
+    atlas_nodes = pd.read_parquet(atlas_paths["nodes"])
+    atlas_edges = pd.read_parquet(atlas_paths["edges"])
+    atlas_crops = pd.read_parquet(atlas_paths["crops"]).set_index("dataset")
 
     rows_c: list[dict] = []
     rows_r: list[dict] = []
@@ -427,6 +438,7 @@ def cmd_run(args) -> int:
     gate_pass = all(safety_gate.values()) and (all(packet_gate.values()) if packet_gate is not None else True)
     summary = {
         "tag": args.tag,
+        "atlas_tag": atlas_tag,
         "csv": str(args.csv),
         "params": params,
         "params_sha256": params_sha256,
@@ -460,6 +472,11 @@ def main() -> int:
     run = sub.add_parser("run")
     run.add_argument("--csv", required=True)
     run.add_argument("--atlas-dir", required=True)
+    run.add_argument(
+        "--atlas-tag",
+        default="pen_off",
+        help="Suffix in nodes_<tag>.parquet / edges_<tag>.parquet / crops_<tag>.parquet",
+    )
     run.add_argument("--tag", required=True)
     run.add_argument("--params", required=True)
     run.add_argument("--out-dir", required=True)
