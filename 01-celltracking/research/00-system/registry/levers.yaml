@@ -767,7 +767,8 @@ levers:
       that crop's estimated_number_of_nodes instead of a single global 0.96875 - recovers the systematically
       under-detected embryo class (44b6 median 0.888 of estimate vs 6bba 0.988) and lifts the score more than any
       global threshold, because the rank-1 competitor locates the loss in node selection
-    status: open
+    status: killed
+    closed_by: [FACT-0353, FACT-0354, FACT-0102]
     falsifier: >-
       A per-volume budget rule replayed offline on both champion controls (adjusting which detections survive per
       crop toward estimated_number_of_nodes) must beat the global-threshold sweep (FACT-0102) on the pooled objective
@@ -781,6 +782,51 @@ levers:
       already 0.99 - on harder/hidden volumes detection is the bottleneck. Instrument: re-threshold per crop from the
       geff estimate; measure on P24-lineage controls once re-exported. Cheap to prototype offline; a detector change
       is the deeper version. Priority-1 parallel to LEVER-0026.
+
+      KILLED 2026-08-28 at the PREMISE, on the P28 substrate the packet demanded (PKT-0024). The cited 0.888
+      under-count is real but it is NOT a detection deficit: measured crop by crop, the detector already emits at
+      or above estimated_number_of_nodes on BOTH folds and the ILP solver then discards 15-20% of those peaks -
+      0.888 reproduces exactly at the POST-ILP stage, which the detection threshold cannot reach (FACT-0353).
+      Consistent with that, the entire available threshold band (0.96875 down to the export floor 0.5) recovers
+      20 annotated cells on fold 0 for 552,832 extra peaks (FACT-0354), while FACT-0102 already measured the same
+      direction losing monotonically across four LEADERBOARD submissions.
+
+      HONEST SCOPE OF THE KILL. The falsifier as written asked for a frozen budget function scored offline against
+      the best global threshold. That was NOT run, and cannot be: FACT-0353 shows the admitted peaks must pass
+      edge prediction and the ILP before they become nodes, neither of which replays on CPU from a sidecar. The
+      premise is refuted instead, which is cheaper and decisive for THIS mechanism. Reopening requires a new
+      mechanism at the detector, not a re-run of this one. The theme survives at the stage where the deficit is
+      actually created - see LEVER-0035.
+    priority: 1
+
+  - id: LEVER-0035
+    claim: >-
+      The node budget is lost in RETENTION, not detection: relaxing the deployed ILP appearance/disappearance
+      asymmetry and the short-track filter recovers annotated cells the detector already found - 0.0442 of node
+      recall on the clean fold - and lifts the pooled objective on both folds of the P28 substrate
+    status: open
+    falsifier: >-
+      A retention change (ILP weights and/or the short-track filter) replayed on a P28 pre-ILP export must beat
+      the deployed champion on the pooled objective on BOTH folds with a clean fold-1 crop-bootstrap CI excluding
+      zero and >= +0.003, reporting adj WITH and WITHOUT the count adjustment so a node-count gain cannot mask an
+      edge-term loss, and then move the LB on one submission stacked on P24. Killed if recovering these cells does
+      not raise the score - i.e. if they are exactly the cells the solver could not place in a consistent track.
+    supporting: [FACT-0353, FACT-0355, FACT-0345, FACT-0335]
+    note: >-
+      Successor to LEVER-0028, at the stage where the deficit is actually created. Measured on P28: the ILP drops
+      354,243 peaks on fold 0 and 502,767 on fold 1 (FACT-0353), and the pipeline as a whole nets away 133 / 5,000
+      annotated cells the detector had already found, one-directionally - 126 of 128 fold-1 crops lose and none
+      gains (FACT-0355). The deployed weights are the suspect mechanism: BIOHUB_ILP_APPEARANCE_WEIGHT=0.0 with
+      BIOHUB_ILP_DISAPPEARANCE_WEIGHT=1.5 against vendor defaults 0.1/0.1, so an isolated detection must pay to
+      disappear and is dropped unless an edge carries it; BIOHUB_OUTPUT_MIN_TRACK_LEN=6 then removes short
+      components. This is CHEAP to instrument the way DetPeak was: a passive pre-ILP export (nodes + candidate
+      edges with probabilities, before solver.solve) makes the whole weight sweep a CPU replay, one GPU run per
+      fold, no submission. A pre-ILP export already exists for an older substrate
+      (C:/temp/preilp_f1_v2/preilp_split1.parquet) but FACT-0350 forbids inheriting it - it must be re-taken on P28.
+      THE OBVIOUS TRAP, stated first: these may be precisely the junk detections the solver is right to reject, and
+      recovering them would raise node recall while costing the edge term. FACT-0349 adds that aggregate recall
+      cannot certify a parent-plus-two-daughter topology. The count-adjustment split in the falsifier exists to
+      catch both.
     priority: 1
 
   - id: LEVER-0029

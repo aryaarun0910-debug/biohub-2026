@@ -2,7 +2,7 @@ id: PKT-0024
 title: "LEVER-0028: crop-adaptive node budgeting - candidate-score exporter first, then a frozen budget function screened on P28"
 lever: LEVER-0028
 owner: primary
-lock: claimed
+lock: done
 opened: '2026-08-28'
 
 claim: >-
@@ -59,11 +59,36 @@ forbidden:
 
 outputs:
   evidence: C:/temp/node_budget/ and _evidence/node_budget/
-  facts_added: [FACT-0350, FACT-0351] # full-export and budget-function facts append after their gates complete
+  facts_added: [FACT-0350, FACT-0351, FACT-0352, FACT-0353, FACT-0354, FACT-0355]
   record: >-
     One section per step in research/06-knowledge-system/experimental-records.md
 
+closed: '2026-08-28'
+
 result: >-
+  CLOSED. The lever is KILLED at its premise and the packet spent zero submissions and no extra GPU beyond the
+  two exports it had already licensed.
+
   STEP 0 FIRED (FACT-0350): the fixed-tolerance sentinel passed fold 0 but failed the clean fold 1, and the probe
-  rule itself deleted scored TP edges on every substrate. Do not inherit old-control deltas; measure LEVER-0028
-  directly on both P28 folds. STEP 1 smoke passed (FACT-0351); full exports proceed through EXP-0033/0034.
+  rule itself deleted scored TP edges on every substrate. Old-control deltas were therefore not inherited and
+  everything below was measured directly on both P28 folds, as required.
+
+  STEP 1 DONE. The smoke passed (FACT-0351) and both full exports (EXP-0033/0034) are fetched and audited. The
+  DETECTION stage is bit-identical to the P28 champion controls on all 199 crops of both folds; fold 0 reproduces
+  the champion graph exactly, fold 1 reproduces 127 of 128 with the single divergence confined to stages strictly
+  after detection (FACT-0352). The sidecars are a faithful record of the P28 detection surface.
+
+  STEP 2 REFUTED THE PREMISE INSTEAD OF FREEZING A FUNCTION. The 0.888 under-count is not a detection deficit:
+  the detector already emits at or above estimated_number_of_nodes on both folds and the ILP solver then discards
+  15.2% / 19.9% of those peaks, with 0.888 reproducing exactly at the post-ILP stage (FACT-0353). The whole
+  available threshold band recovers 20 annotated cells on fold 0 (FACT-0354). No budget function was frozen
+  because there is no detection deficit for one to close.
+
+  STEPS 3 AND 4 NOT RUN, and they could not have been as written. FACT-0353 establishes that newly admitted peaks
+  must pass edge prediction and the ILP before becoming nodes, so the offline scorer round-trip STEP 3 assumed is
+  not available from a sidecar. No submission was made; the promotion bar was never approached and was not lowered.
+
+  WHAT THE PACKET BOUGHT ANYWAY: the successor. Retention, not detection, holds the headroom - the pipeline nets
+  away 133 (fold 0) and 5,000 (fold 1) annotated cells the detector had already found, one-directionally, which on
+  the clean fold is 2.1x everything the entire sub-threshold band could recover (FACT-0355). That is LEVER-0035,
+  and it is instrumentable the same cheap way: a passive pre-ILP export makes the solver-weight sweep a CPU replay.

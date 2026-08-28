@@ -5011,3 +5011,57 @@ below when present.
 **Discipline that earned its keep.** The oracle summary crashed on a key mismatch after all crops were scored; the
 per-crop rows were already on disk, so a `resummarise` path rebuilt it without re-scoring — save partial results before
 the summary. Long shell heredocs silently lost their terminator three times; scripts now go through files.
+
+---
+
+## 2026-08-28 — PKT-0024 closed: the node deficit is the ILP's, not the detector's
+
+**What ran.** Both full P29 DetPeak exports fetched and audited (`EXP-0033`/`EXP-0034`), then the whole
+detection-threshold curve and a detector-to-final retention measurement replayed on CPU over all 199 crops
+of both P28 folds. Zero submissions, no GPU beyond the two exports already licensed.
+
+**Audit (`FACT-0352`).** Detection is bit-identical to the P28 champion controls on every crop of both folds —
+`run_stats.raw_nodes` agrees crop for crop. Fold 0 reproduces the champion graph exactly (71/71, identical
+decompressed CSV). Fold 1 reproduces 127/128; the one divergent crop differs by 5 nodes and 4 edges out of
+3.78 M rows, with every counter through DeepCenter and safe-division identical and the divergence confined to
+`edge_prediction → motion_relink → short_track_filter`. The exporter only touches `_detect_cells_pooled` inside
+the prediction subprocess and those stages run in the parent afterwards, so there is no causal path from the
+instrument — a mechanism argument plus a null result, not a controlled determinism measurement. Practical
+consequence: a champion rerun is reproducible to ≈1.3 ppm of rows, which is the floor under any offline delta.
+
+**The kill (`FACT-0353`, `FACT-0354`).** `LEVER-0028` assumed the 0.888 node ratio was a detection deficit. It is
+not. Crop by crop the detector already emits at or above `estimated_number_of_nodes` on both folds; the ILP
+solver then discards 15.2 % (fold 0) and 19.9 % (fold 1) of those peaks, and 0.888 reproduces **exactly** at the
+post-ILP stage — a stage the detection threshold cannot reach. Consistently, the entire available threshold band
+(0.96875 down to the export floor 0.5) recovers 20 annotated cells on fold 0 for 552,832 extra peaks. `FACT-0102`
+had already measured that same direction losing monotonically across four leaderboard submissions.
+
+**Honest scope.** The packet's falsifier asked for a frozen budget function scored offline. That was not run and
+*cannot* be: newly admitted peaks must pass edge prediction and the ILP before becoming nodes, neither of which
+replays on CPU from a sidecar. The premise was refuted instead — cheaper and decisive for this mechanism.
+
+**The successor (`FACT-0355`, `LEVER-0035`).** Retention holds the headroom. The pipeline nets away 133 (fold 0)
+and 5,000 (fold 1) annotated cells the detector had already found, one-directionally — 126 of 128 fold-1 crops
+lose, none gains. On the clean fold that is 2.1× everything the entire sub-threshold band could recover, over
+cells that cost no new capability to find. The suspect mechanism is named at source: `ILP_APPEARANCE_WEIGHT=0.0`
+with `ILP_DISAPPEARANCE_WEIGHT=1.5` (vendor defaults 0.1/0.1), so an isolated detection must pay to disappear and
+is dropped unless an edge carries it; `OUTPUT_MIN_TRACK_LEN=6` then removes short components. A passive pre-ILP
+export makes the whole weight sweep a CPU replay the way DetPeak made the threshold curve one.
+
+**The trap, stated before the run.** These may be exactly the junk detections the solver is right to reject.
+Recovering them would raise node recall while costing the edge term, and `FACT-0349` warns that aggregate recall
+cannot certify a parent-plus-two-daughter topology. `LEVER-0035`'s falsifier reports adj with *and* without the
+count adjustment for that reason.
+
+**Bounds this puts on the architecture lanes.** Fold-0 detector node recall is already 0.9955, so a new detector
+architecture or a better representation can buy at most 0.45 % of annotated cells *at the peak-set level* on the
+honest fold. That constrains the detector halves of `LEVER-0029` and `LEVER-0032/0033/0034` — not their
+association or division halves, where `FACT-0335` and `FACT-0349` still locate the loss.
+
+**Instruments committed.** `scripts/win_bet/audit_detpeak_full_export.py` (stage-attributed parity + locatability),
+`detpeak_fold_curve.py` (fold-level threshold curve), `detpeak_retention.py` (detector-vs-final node recall).
+
+**Discipline that earned its keep, again.** Node *precision* and F1 from the curve are not quoted anywhere: the
+annotated GT is sparse (861 cells against an estimate of 6362 on one crop), so most predictions match no GT node
+by construction and the metric does not charge them. Reporting that F1 would have made 0.99 look like the optimum
+for the wrong reason. Long shell heredocs lost their terminator again — scripts go through files.

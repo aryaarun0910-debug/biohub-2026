@@ -479,12 +479,15 @@ experiments:
     kernel_version: 1
     submission: null
     lb: null
-    status: running
+    status: complete
     date: '2026-08-28'
-    facts: [FACT-0345, FACT-0346]
+    facts: [FACT-0345, FACT-0346, FACT-0352, FACT-0353, FACT-0354, FACT-0355]
     note: >-
       Passive candidate-score diagnostic on the P28 fold-0 champion substrate. Launch only after EXP-0032
       passes. No threshold or graph change, no submission. Fold 0 is paired-delta use only because of FACT-0310.
+      FETCHED and AUDITED 2026-08-28: detection bit-identical to the P28 control on all 71 crops and the whole
+      champion graph reproduces exactly (FACT-0352). The replay it bought did NOT support the lever it was built
+      for - the detector is already at budget and the deficit is the ILP's (FACT-0353, FACT-0354, FACT-0355).
 
   - id: EXP-0034
     title: P29 P28 DetPeak full exporter, clean fold 1 with split_1 weights
@@ -493,9 +496,11 @@ experiments:
     kernel_version: 1
     submission: null
     lb: null
-    status: running
+    status: complete
     date: '2026-08-28'
-    facts: [FACT-0345, FACT-0346, FACT-0160]
+    facts: [FACT-0345, FACT-0346, FACT-0160, FACT-0352, FACT-0353, FACT-0354, FACT-0355]
     note: >-
       Passive candidate-score diagnostic on the clean P28 fold-1 champion substrate. The verified P28
       base retains BIOHUB_LOEO_WEIGHTS_GLOB=split_1. Launch only after EXP-0032 passes; no submission.
+      FETCHED and AUDITED 2026-08-28: detection bit-identical on all 128 crops; 127 of 128 crops reproduce the
+      champion graph exactly and the single divergence is confined to stages after detection (FACT-0352).

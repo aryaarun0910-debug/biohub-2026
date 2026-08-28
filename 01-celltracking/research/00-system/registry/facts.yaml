@@ -3851,3 +3851,166 @@ facts:
       scientific contract that matters: passive sidecars, exact threshold reconstruction, and unchanged graph rows.
     date: '2026-08-28'
     tags: [detpeak, exporter, smoke, process-boundary, parity, lever-0028]
+
+  - id: FACT-0352
+    statement: >-
+      Both full P29 DetPeak exports (EXP-0033/0034) are fetched and audited, and the DETECTION stage is
+      bit-identical to the paired P28 champion controls on all 199 crops of both folds - the run_stats raw_nodes
+      count agrees crop for crop. Fold 0 reproduces the champion graph exactly (71/71 crops, identical
+      decompressed CSV); fold 1 reproduces 127 of 128, the single divergent crop differing by 5 nodes and 4 edges
+      out of 3,778,768 rows with every counter up to and including DeepCenter and safe-division identical and the
+      divergence confined to edge_prediction -> motion_relink -> short_track_filter. The sidecars therefore
+      describe the P28 detection surface and are licensed for LEVER-0028 replay
+    value: true
+    unit: detection_contract_pass_both_folds
+    scope:
+      f0: {sidecars: 71, exported_peaks: 2885180, peaks_above_threshold: 2332348, graph_exact_parity: true, divergent_crops: 0}
+      f1: {sidecars: 128, exported_peaks: 2792281, peaks_above_threshold: 2523480, graph_exact_parity: false, divergent_crops: 1, divergent_crop: 6bba_e16ffc58, node_delta: 5, edge_delta: 4, rows_total: 3778768}
+      pipeline_threshold_all_crops: 0.96875
+      export_floor_sigmoid: 0.5
+      stages_differing_f1: [edge_prediction, motion_relink, short_track_filter, linefit, final]
+      stages_identical_f1: [detection, gap_close, deepcenter, safe_division]
+      locatability_within_3.25um: {f0: 0.9819, f1: 0.9734}
+    provenance: MEASURED
+    validity: VALID
+    instrument: >-
+      scripts/win_bet/audit_detpeak_full_export.py on C:/temp/node_budget/p29_f{0,1} against
+      C:/temp/p28_f{0,1}; outputs _evidence/node_budget/p29_f{0,1}_full_audit.json; 2026-08-28
+    experiment: EXP-0033
+    note: >-
+      The exporter's only touchpoint is _detect_cells_pooled inside the prediction SUBPROCESS
+      (scripts/kaggle_edits/detpeak_export.py), and the diverging stages all run in the parent process
+      after prediction, so there is no causal path from the instrument to the divergence; fold 0's 71/71
+      exact parity is the supporting control. That is a mechanism argument plus a null result, NOT a
+      controlled measurement of pipeline determinism - the honest reading is that a champion rerun is
+      reproducible to about 1.3 ppm of rows, which sets a floor under any offline paired delta.
+      Locatability is deliberately a RESIDUAL not an identity test: the pipeline inserts synthetic gap
+      nodes (26,693 f0 / 22,210 f1 by its own counters) and line-fit smooths every surviving node, so a
+      champion coordinate is not a peak coordinate. 3.25 um is two peak-lattice steps.
+    date: '2026-08-28'
+    tags: [detpeak, export, audit, parity, determinism, lever-0028]
+
+  - id: FACT-0353
+    statement: >-
+      The node deficit that LEVER-0028 targets is created by the ILP SOLVER, not by detection. On the P28
+      champion substrate the detector already emits at or above estimated_number_of_nodes on both folds
+      (peaks-above-threshold / n_est median 1.0161 fold 0, 1.1331 fold 1); the ILP then discards 15.2% of
+      them on fold 0 and 19.9% on fold 1, and only after that does the ratio fall to the cited under-count -
+      post-ILP raw_nodes / n_est median 0.8884 on 44b6, reproducing dariushafshar's 0.888 figure EXACTLY at
+      a stage the detection threshold cannot reach
+    value: 0.8884
+    unit: post_ilp_nodes_over_estimate_median_44b6
+    scope:
+      f0_44b6:
+        peaks_over_est_median: 1.0161
+        post_ilp_rawnodes_over_est_median: 0.8884
+        final_nodes_over_est_median: 0.8743
+        totals: {peaks_above: 2332348, raw_nodes: 1978105, final_nodes: 1905264, n_est: 2618970}
+        ilp_dropped: 354243
+        ilp_dropped_frac: 0.152
+      f1_6bba:
+        peaks_over_est_median: 1.1331
+        post_ilp_rawnodes_over_est_median: 0.9449
+        final_nodes_over_est_median: 0.9098
+        totals: {peaks_above: 2523480, raw_nodes: 2020713, final_nodes: 1931622, n_est: 2106147}
+        ilp_dropped: 502767
+        ilp_dropped_frac: 0.199
+      deployed_ilp_weights: {appearance: 0.0, disappearance: 1.5, edge: -1.0, division: 1.0}
+      vendor_default_ilp_weights: {appearance: 0.1, disappearance: 0.1}
+    provenance: VERIFIED
+    validity: VALID
+    instrument: >-
+      per-crop join of the DetPeak sidecar pipeline_peak_count, run_stats.csv raw_nodes/nodes, and
+      biotrack.metric.estimated_nodes over data/train/*.geff, saved at
+      _evidence/node_budget/budget_ratio_f{0,1}.csv; the pre-ILP -> post-ILP path is source-verified at
+      vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py:554-564 (build_graph(coords, edges)
+      -> ILPSolver.solve -> save_graph, nothing between) and the deployed weights at
+      notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb env block
+      (BIOHUB_ILP_APPEARANCE_WEIGHT=0.0, BIOHUB_ILP_DISAPPEARANCE_WEIGHT=1.5)
+    experiment: EXP-0033
+    note: >-
+      This is the finding that redirects the lane. `raw_nodes` in run_stats is the node count of the geff the
+      predictor SAVED, i.e. after the solver; the sidecar's pipeline_peak_count is the node count handed TO
+      build_graph. Their ratio is therefore the solver's node-drop rate and nothing else. Because the detector
+      is already at or over budget, lowering its threshold cannot close a deficit the solver creates one stage
+      later - it can only enlarge the candidate pool the solver is already rejecting. The asymmetric deployed
+      weights are the mechanism: with appearance free and disappearance costed 1.5 (vendor default 0.1), an
+      isolated detection must pay to disappear and is dropped unless an edge carries it. That knob, not the
+      detection threshold, is where a node-budget lever would act - see LEVER-0035.
+    date: '2026-08-28'
+    tags: [detection, ilp, node-budget, lever-0028, mechanism, substrate]
+
+  - id: FACT-0354
+    statement: >-
+      The whole detection-threshold curve replayed on the P28 substrate shows almost no recall headroom below
+      the deployed 0.96875: dropping to the export floor 0.5 admits 552,832 extra peaks on fold 0 to recover 20
+      more annotated cells (+0.00099 node recall, 0.9955 -> 0.9965) and 268,801 extra peaks on fold 1 to recover
+      2,396 (+0.02118, 0.9119 -> 0.9330), while driving N_pred/n_est from 0.89 to 1.10 (fold 0) and 1.20 to 1.33
+      (fold 1) deep into the over-prediction tax
+    value: 0.00099
+    unit: node_recall_gain_full_band_f0
+    scope:
+      f0: {recall_at_0.96875: 0.9955, recall_at_0.50: 0.9965, matched_at_0.96875: 20107, matched_at_0.50: 20127, n_gt: 20197, extra_peaks: 552832, n_pred_over_n_est_pooled: {at_deployed: 0.8906, at_floor: 1.1016}}
+      f1: {recall_at_0.96875: 0.9119, recall_at_0.50: 0.9330, matched_at_0.96875: 103151, matched_at_0.50: 105547, n_gt: 113121, extra_peaks: 268801, n_pred_over_n_est_pooled: {at_deployed: 1.1981, at_floor: 1.3258}}
+      thresholds: [0.50, 0.60, 0.70, 0.80, 0.85, 0.90, 0.93, 0.95, 0.96875, 0.98, 0.99]
+      matching: one-to-one bipartite, MAX_DISTANCE 7.0 um, scale (1.625, 0.40625, 0.40625)
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The recall numbers are sound. Node PRECISION and F1 from the same run are NOT interpretable and are not
+      quoted: the annotated GT is sparse (861 cells against an estimate of 6362 on one crop), so most predicted
+      nodes match no GT node by construction and the metric does not charge them as false positives.
+    instrument: >-
+      scripts/win_bet/detpeak_fold_curve.py (wrapping detpeak_curve.py's official one-to-one matcher) over all
+      71 + 128 sidecars against data/train/*.geff; pooled output _evidence/node_budget/curve_f{0,1}_pooled.json
+    experiment: EXP-0033
+    protocol:
+      substrate: P28 champion controls (FACT-0345), measured directly per FACT-0350
+      floor: the sidecars carry no peak below sigmoid 0.5, so lower thresholds are unmeasurable and the driver refuses them
+    note: >-
+      Detection-surface only. The ILP drops nodes downstream (FACT-0353), so no tracking score follows from
+      these numbers and none is projected. Read with FACT-0102, which measured the same direction on the
+      LEADERBOARD across four submissions and found it monotone LOSING. Fold 0's 0.9955 detector recall also
+      bounds what a new detector ARCHITECTURE or a better representation can buy at the peak-set level on the
+      honest fold - at most 0.45% of annotated cells - which constrains the detector halves of LEVER-0029 and
+      LEVER-0032/0033/0034 but says nothing about their association or division halves (FACT-0335, FACT-0349).
+      Fold 1's larger headroom belongs to a crippled LOEO configuration (FACT-0261), not to the 6bba embryo.
+    date: '2026-08-28'
+    tags: [detection, threshold, curve, headroom, lever-0028, architecture]
+
+  - id: FACT-0355
+    statement: >-
+      The P28 pipeline LOSES annotated cells its own detector already found: node recall falls from 0.9955 to
+      0.9890 on fold 0 (133 cells net) and from 0.9119 to 0.8677 on fold 1 (5,000 cells net) between the
+      detector's surviving peak set and the final champion graph, and on fold 1 the loss is one-directional -
+      126 of 128 crops lose, none gains. On the clean fold that retention loss is 2.1x everything the entire
+      sub-threshold detection band could recover (FACT-0354)
+    value: 0.0442
+    unit: node_recall_lost_in_postprocessing_f1
+    scope:
+      f0: {detector_recall: 0.9955, final_recall: 0.9890, cells_lost_net: 133, recall_lost: 0.0066, crops_worse: 36, crops_better: 7, n_crops: 71}
+      f1: {detector_recall: 0.9119, final_recall: 0.8677, cells_lost_net: 5000, recall_lost: 0.0442, crops_worse: 126, crops_better: 0, n_crops: 128}
+      ratio_retention_loss_over_threshold_headroom: {f0: 6.7, f1: 2.1}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      NET, not gross. Post-processing both removes nodes (ILP, isolated-node pruning, the short-track filter)
+      and inserts them (synthetic gap nodes, safe divisions), and the intermediate graphs are not written to
+      disk - only their counts are - so this does not attribute the net to a single stage. The final-graph
+      recall here (0.9890 / 0.8677) is from a pure node matcher and is close to but NOT identical with the
+      scorer's own node_recall in FACT-0345 (0.9868 / 0.8636); the definitions differ and FACT-0345 remains
+      the scorer-authoritative figure.
+    instrument: >-
+      scripts/win_bet/detpeak_retention.py, same official one-to-one matcher as FACT-0354, sidecars vs the P28
+      champion CSV node rows; output _evidence/node_budget/retention_f{0,1}_pooled.json
+    experiment: EXP-0033
+    note: >-
+      The headroom is in RETENTION, not detection, and it is headroom over cells that cost no new capability to
+      find - the detector already found them. Combined with FACT-0353 (the ILP discards 15-20% of peaks) this
+      names the successor lever: the solver's appearance/disappearance asymmetry and the short-track filter,
+      replayable on CPU from a pre-ILP export the way DetPeak made the threshold curve replayable. It does NOT
+      follow that recovering these cells raises the score - they may be exactly the cells the solver could not
+      place in a consistent track, and FACT-0349 warns that aggregate recall does not certify division topology.
+      That is what LEVER-0035 has to measure.
+    date: '2026-08-28'
+    tags: [retention, ilp, short-track, node-recall, headroom, lever-0035]

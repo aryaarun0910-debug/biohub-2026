@@ -3,7 +3,7 @@ id: 00-system/handoff
 title: Handoff
 area: 00-system
 status: active
-updated: '2026-08-27'
+updated: '2026-08-28'
 owner: biohub
 links: []
 tags: [handoff, entry-point]
@@ -15,6 +15,52 @@ record_kind: state
 **Status:** ACTIVE 2026-08-26. Branch `master`.
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
+
+> ## 🔵 2026-08-28 (late) — LEVER-0028 KILLED at its premise: the node deficit is the ILP's, not the detector's. Retention is the successor lane
+>
+> Both full P29 DetPeak exports are FETCHED and AUDITED (`EXP-0033`/`EXP-0034`). Detection is bit-identical to the
+> P28 champion controls on all 199 crops of both folds; fold 0 reproduces the champion graph exactly, fold 1
+> reproduces 127 of 128 with the single divergence confined to stages strictly AFTER detection (`FACT-0352`). The
+> sidecars are a faithful record of the P28 detection surface. **No submission was made; champion stays P24
+> (`FACT-0341`).**
+>
+> **The lever is dead and the premise is why.** `LEVER-0028` assumed the 0.888 node ratio was a detection deficit.
+> Measured crop by crop on P28, the detector already emits at or ABOVE `estimated_number_of_nodes` on both folds;
+> the ILP solver then discards 15–20% of those peaks, and 0.888 reproduces **exactly** at the post-ILP stage — a
+> stage the detection threshold cannot reach (`FACT-0353`). The entire available threshold band recovers 20
+> annotated cells on fold 0 (`FACT-0354`), and `FACT-0102` had already measured that direction losing across four
+> LB submissions. `LEVER-0028` is `killed`, `PKT-0024` is `done`, and the kill is honest about its scope: the
+> packet's offline scorer round-trip was NOT run because `FACT-0353` shows it cannot be — admitted peaks must pass
+> edge prediction and the ILP first, neither of which replays on CPU.
+>
+> **The successor, and it is bigger.** Retention, not detection, holds the headroom. The pipeline nets away 133
+> (fold 0) and 5,000 (fold 1) annotated cells its own detector already found, one-directionally — 126 of 128 fold-1
+> crops lose and none gains (`FACT-0355`). On the clean fold that is **2.1× everything the entire sub-threshold
+> band could recover**, over cells that cost no new capability to find. `LEVER-0035` (open, priority 1) names the
+> mechanism at source: `ILP_APPEARANCE_WEIGHT=0.0` with `ILP_DISAPPEARANCE_WEIGHT=1.5` (vendor defaults 0.1/0.1),
+> so an isolated detection must pay to disappear and is dropped unless an edge carries it; `OUTPUT_MIN_TRACK_LEN=6`
+> then removes short components. **Next action: a passive pre-ILP export on P28, one GPU run per fold, which makes
+> the whole solver-weight sweep a CPU replay exactly as DetPeak made the threshold curve one.** An old pre-ILP
+> export exists (`C:/temp/preilp_f1_v2/`) but `FACT-0350` forbids inheriting it — re-take on P28.
+>
+> **The trap is written before the run:** these may be exactly the junk detections the solver is right to reject.
+> `LEVER-0035`'s falsifier therefore reports adj WITH and WITHOUT the count adjustment, both folds, clean fold-1 CI
+> excluding zero, ≥ +0.003 — and `FACT-0349` still warns that aggregate recall cannot certify a
+> parent-plus-two-daughter topology.
+>
+> **What this bounds for the architecture / representation lanes (host's question).** Fold-0 detector node recall is
+> already 0.9955, so a new detector architecture or a better representation can buy at most ~0.45% of annotated
+> cells **at the peak-set level** on the honest fold. That is a real ceiling on the DETECTOR halves of `LEVER-0029`
+> (SSL — open, not closed, priority 2), `LEVER-0032` (StarDist3D), `LEVER-0033` (wide-ResUNet3D) and `LEVER-0034`
+> (HOCT). It says nothing about their ASSOCIATION or DIVISION halves, where `FACT-0335` (74% of missed fold-0 edges
+> have both endpoints detected) and `FACT-0349` still locate the loss. Read together with `FACT-0342` — the edge
+> head saturates at ~0.999 on Zebrahub while detector weight transfer fails (`FACT-0339`) — the ranking for those
+> lanes is: **association and division representation first, raw detection capability last.** `LEVER-0034`'s HOCT
+> association half is the strongest documented candidate (`FACT-0347`), and its own zero-division result is the
+> reason a dedicated division pair/hyperedge head stays a separate lane.
+>
+> **Instruments committed this cycle:** `scripts/win_bet/audit_detpeak_full_export.py` (stage-attributed parity +
+> locatability), `detpeak_fold_curve.py`, `detpeak_retention.py`. Evidence in `_evidence/node_budget/`.
 
 > ## 🔴 2026-08-28 — icom FLOAT stack LOST: p27 = 0.914 (-0.014); champion stays 0.928; float export is LB-unsafe
 >
