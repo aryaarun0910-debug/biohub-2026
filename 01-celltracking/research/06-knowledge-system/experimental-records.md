@@ -5065,3 +5065,12 @@ association or division halves, where `FACT-0335` and `FACT-0349` still locate t
 annotated GT is sparse (861 cells against an estimate of 6362 on one crop), so most predictions match no GT node
 by construction and the metric does not charge them. Reporting that F1 would have made 0.99 look like the optimum
 for the wrong reason. Long shell heredocs lost their terminator again — scripts go through files.
+
+**Addendum — the node ledger closes exactly (`FACT-0356`).** From the detector's surviving peaks: the ILP removes
+354,243 (fold 0) / 502,767 (fold 1), the short-track filter a further 93,044 / 104,078, isolated pruning 834 / 1,641,
+and synthetic gap closure adds back 21,037 / 16,628 — reproducing the final champion node count **to the unit** on
+both folds. That exact closure is what makes the attribution safe rather than an estimate, and it sizes `LEVER-0035`:
+the ILP is 79–83 % of all node removal against the short-track filter's 17–21 %, so the solver weights are the first
+knob and `OUTPUT_MIN_TRACK_LEN` the second. It also caught a naming error — the residual came out at exactly minus
+`safe_divisions_added` on *both* folds, which identified that counter as an edge-only operation rather than a
+node-adding one. A residual that reproduces a counter exactly is a naming error, not noise; chase it.

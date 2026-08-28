@@ -39,7 +39,9 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > band could recover**, over cells that cost no new capability to find. `LEVER-0035` (open, priority 1) names the
 > mechanism at source: `ILP_APPEARANCE_WEIGHT=0.0` with `ILP_DISAPPEARANCE_WEIGHT=1.5` (vendor defaults 0.1/0.1),
 > so an isolated detection must pay to disappear and is dropped unless an edge carries it; `OUTPUT_MIN_TRACK_LEN=6`
-> then removes short components. **Next action: a passive pre-ILP export on P28, one GPU run per fold, which makes
+> then removes short components. The node ledger closes EXACTLY on both folds and sizes the two knobs
+> (`FACT-0356`): the ILP is 79–83% of all node removal, the short-track filter 17–21%, isolated pruning is
+> negligible, and safe divisions add edges rather than nodes — so sweep the solver weights first. **Next action: a passive pre-ILP export on P28, one GPU run per fold, which makes
 > the whole solver-weight sweep a CPU replay exactly as DetPeak made the threshold curve one.** An old pre-ILP
 > export exists (`C:/temp/preilp_f1_v2/`) but `FACT-0350` forbids inheriting it — re-take on P28.
 >
@@ -53,7 +55,9 @@ System map: [README.md](../README.md); architecture: [system-design.md](system-d
 > cells **at the peak-set level** on the honest fold. That is a real ceiling on the DETECTOR halves of `LEVER-0029`
 > (SSL — open, not closed, priority 2), `LEVER-0032` (StarDist3D), `LEVER-0033` (wide-ResUNet3D) and `LEVER-0034`
 > (HOCT). It says nothing about their ASSOCIATION or DIVISION halves, where `FACT-0335` (74% of missed fold-0 edges
-> have both endpoints detected) and `FACT-0349` still locate the loss. Read together with `FACT-0342` — the edge
+> have both endpoints detected) and `FACT-0349` still locate the loss. **And the ceiling is on the peak SET, not
+> on localisation quality** — a different architecture could place the same cells more accurately, which
+> `FACT-0270` says is exactly what mislinks need. This is not a kill of the architecture lanes. Read together with `FACT-0342` — the edge
 > head saturates at ~0.999 on Zebrahub while detector weight transfer fails (`FACT-0339`) — the ranking for those
 > lanes is: **association and division representation first, raw detection capability last.** `LEVER-0034`'s HOCT
 > association half is the strongest documented candidate (`FACT-0347`), and its own zero-division result is the

@@ -811,7 +811,7 @@ levers:
       zero and >= +0.003, reporting adj WITH and WITHOUT the count adjustment so a node-count gain cannot mask an
       edge-term loss, and then move the LB on one submission stacked on P24. Killed if recovering these cells does
       not raise the score - i.e. if they are exactly the cells the solver could not place in a consistent track.
-    supporting: [FACT-0353, FACT-0355, FACT-0345, FACT-0335]
+    supporting: [FACT-0353, FACT-0355, FACT-0356, FACT-0345, FACT-0335]
     note: >-
       Successor to LEVER-0028, at the stage where the deficit is actually created. Measured on P28: the ILP drops
       354,243 peaks on fold 0 and 502,767 on fold 1 (FACT-0353), and the pipeline as a whole nets away 133 / 5,000
@@ -819,7 +819,10 @@ levers:
       gains (FACT-0355). The deployed weights are the suspect mechanism: BIOHUB_ILP_APPEARANCE_WEIGHT=0.0 with
       BIOHUB_ILP_DISAPPEARANCE_WEIGHT=1.5 against vendor defaults 0.1/0.1, so an isolated detection must pay to
       disappear and is dropped unless an edge carries it; BIOHUB_OUTPUT_MIN_TRACK_LEN=6 then removes short
-      components. This is CHEAP to instrument the way DetPeak was: a passive pre-ILP export (nodes + candidate
+      components. The node ledger closes EXACTLY on both folds and sizes the two knobs (FACT-0356): the ILP is
+      79-83% of all node removal and the short-track filter 17-21%, so sweep the solver weights FIRST and treat
+      BIOHUB_OUTPUT_MIN_TRACK_LEN as secondary.
+      This is CHEAP to instrument the way DetPeak was: a passive pre-ILP export (nodes + candidate
       edges with probabilities, before solver.solve) makes the whole weight sweep a CPU replay, one GPU run per
       fold, no submission. A pre-ILP export already exists for an older substrate
       (C:/temp/preilp_f1_v2/preilp_split1.parquet) but FACT-0350 forbids inheriting it - it must be re-taken on P28.

@@ -3974,6 +3974,10 @@ facts:
       bounds what a new detector ARCHITECTURE or a better representation can buy at the peak-set level on the
       honest fold - at most 0.45% of annotated cells - which constrains the detector halves of LEVER-0029 and
       LEVER-0032/0033/0034 but says nothing about their association or division halves (FACT-0335, FACT-0349).
+      That ceiling is on the peak SET - how many annotated cells a detector finds. It does NOT bound detector
+      LOCALISATION quality, which is a third thing and is not measured here: a different architecture could
+      place the same cells more accurately, and FACT-0270 holds that mislinked endpoints are geometrically
+      wrong. Do not read this fact as a kill of the architecture lanes.
       Fold 1's larger headroom belongs to a crippled LOEO configuration (FACT-0261), not to the 6bba embryo.
     date: '2026-08-28'
     tags: [detection, threshold, curve, headroom, lever-0028, architecture]
@@ -4014,3 +4018,54 @@ facts:
       That is what LEVER-0035 has to measure.
     date: '2026-08-28'
     tags: [retention, ilp, short-track, node-recall, headroom, lever-0035]
+
+  - id: FACT-0356
+    statement: >-
+      The P28 node ledger closes EXACTLY on both folds and names where the nodes go: from the detector's
+      surviving peaks, the ILP removes 354,243 (fold 0) and 502,767 (fold 1), the short-track filter removes a
+      further 93,044 / 104,078, isolated pruning removes 834 / 1,641, and synthetic gap closure adds back
+      21,037 / 16,628 - reproducing the final champion node count to the unit. The ILP is 79-83% of all node
+      removal and the short-track filter 17-21%; safe divisions add EDGES, not nodes
+    value: 0.791
+    unit: ilp_share_of_node_removal_f0
+    scope:
+      f0:
+        peaks_above_threshold: 2332348
+        ilp_removed: 354243
+        post_ilp_raw_nodes: 1978105
+        gap_synthetic_added: 21037
+        short_track_removed: 93044
+        isolated_pruned: 834
+        final_nodes: 1905264
+        ledger_residual: 0
+        ilp_share_of_removals: 0.791
+        short_track_share_of_removals: 0.208
+      f1:
+        peaks_above_threshold: 2523480
+        ilp_removed: 502767
+        post_ilp_raw_nodes: 2020713
+        gap_synthetic_added: 16628
+        short_track_removed: 104078
+        isolated_pruned: 1641
+        final_nodes: 1931622
+        ledger_residual: 0
+        ilp_share_of_removals: 0.826
+        short_track_share_of_removals: 0.171
+      identity: raw_nodes + gap_added_nodes - short_track_nodes_removed - pruned_isolated_nodes == nodes
+    provenance: VERIFIED
+    validity: VALID
+    instrument: >-
+      summation of the run_stats.csv stage counters at C:/temp/p28_f{0,1}/run_stats.csv against the DetPeak
+      sidecar pipeline_peak_count totals (_evidence/node_budget/budget_ratio_f{0,1}.csv); the identity above
+      closes with residual exactly 0 on both folds, which is what makes the attribution safe
+    experiment: EXP-0033
+    note: >-
+      This is the targeting detail LEVER-0035 needs, and the exact ledger closure is what licenses it: the
+      accounting is not an estimate. Two consequences. (1) The ILP is the dominant removal by a factor of four,
+      so a retention lever should sweep the solver's appearance/disappearance asymmetry FIRST and treat
+      BIOHUB_OUTPUT_MIN_TRACK_LEN as the secondary knob. (2) `safe_divisions_added` was initially mistaken for a
+      node-adding stage; the ledger residual came out at exactly minus that counter on BOTH folds, which
+      identified it as an edge-only operation. A residual that reproduces a counter exactly is a naming error,
+      not noise - it is worth chasing rather than tolerating.
+    date: '2026-08-28'
+    tags: [ilp, short-track, retention, ledger, lever-0035, verified]
