@@ -121,3 +121,36 @@ def test_known_leaky_export_is_labelled_in_the_registry():
         "the registry no longer mentions the EXP-0019 leak; if it was genuinely resolved, "
         "delete this test deliberately rather than letting it lapse"
     )
+
+
+# --- upstream guard: a LOEO arm must be known to loeo_retarget BEFORE a kernel runs -----------
+# The 'champion' arm (2026-08-28) errored 30 s into a Kaggle GPU run with "unknown LOEO arm"
+# because the runtime whitelist in loeo_retarget.py had not been updated. That is a build-time
+# contract: the arm a spec requests must be one the injected code accepts. This test reads the
+# whitelist from the source of truth and validates every LOEO spec against it, so a typo'd or
+# newly-added arm fails at pytest, not on a wasted kernel.
+def _known_loeo_arms() -> set[str]:
+    src = (REPO / "scripts" / "kaggle_edits" / "loeo_retarget.py").read_text(encoding="utf-8")
+    m = re.search(r"LOEO_ARM not in \{([^}]*)\}", src)
+    assert m, "could not find the LOEO arm whitelist in loeo_retarget.py"
+    return {tok.strip().strip("'\"") for tok in m.group(1).split(",") if tok.strip()}
+
+
+def test_the_arm_whitelist_is_parseable_and_nonempty():
+    arms = _known_loeo_arms()
+    assert "strict" in arms and "champion" in arms and len(arms) >= 3
+
+
+@pytest.mark.parametrize("spec_path", SPECS, ids=lambda p: p.stem)
+def test_every_loeo_spec_requests_a_known_arm(spec_path: Path):
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    env = spec_env(spec)
+    arm = env.get("BIOHUB_LOEO_ARM")
+    if arm is None:
+        pytest.skip("not a LOEO spec / no arm requested")
+    known = _known_loeo_arms()
+    assert arm in known, (
+        f"{spec_path.stem} requests BIOHUB_LOEO_ARM={arm!r}, which loeo_retarget.py does not accept "
+        f"(known arms: {sorted(known)}). This would raise 'unknown LOEO arm' at runtime on Kaggle - "
+        "add the arm to the whitelist AND its handling branch before pushing."
+    )
