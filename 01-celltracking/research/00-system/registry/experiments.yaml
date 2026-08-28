@@ -455,16 +455,19 @@ experiments:
     title: P29 P28 DetPeak exporter two-crop process-boundary smoke, fold 0
     spec: scripts/kaggle_specs/p29_p28_detpeak_smoke_f0.json
     kernel: aryaarun07/biohub-p29-p28-detpeak-smoke-f0
-    kernel_version: null
+    kernel_version: 1
     submission: null
     lb: null
-    status: planned
+    status: complete
     date: '2026-08-28'
     facts: [FACT-0346]
     note: >-
       PKT-0024 prerequisite smoke. Must retain the P28 champion output and emit exactly two non-empty
       per-crop sidecars from the prediction subprocess, each carrying the actual detector threshold and
       a reconstructable pipeline peak-count heartbeat. Plumbing only; never scientific evidence or a submission.
+      VERSION 1 preserved graph parity and emitted both sidecars, but the inherited predictor invoked each
+      crop twice and the exporter silently overwrote the first file. Although the logs showed identical counts,
+      byte identity was not proved. A fail-closed collision check was added; version 2 is the decisive smoke.
 
   - id: EXP-0033
     title: P29 P28 DetPeak full exporter, fold 0

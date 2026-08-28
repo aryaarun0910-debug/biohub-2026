@@ -32,6 +32,7 @@ tags:
 
 ## Licenses (verify before shipping)
 
-Freitas synthetic **CC0**; HOCT **CC-BY-NC-ND 4.0** (permits *use*, not redistribution of a
-modified model); Cellpose historically **BSD-3** (verify for Cellpose-SAM). Record the license
+Freitas synthetic **CC0**; the current StableDet-HOCT checkpoint bundle's publisher licence and
+component provenance are recorded in `FACT-0347` (superseding the stale blanket licence here);
+Cellpose historically **BSD-3** (verify for Cellpose-SAM). Record the license
 of every shipped external asset in the submission notebook.

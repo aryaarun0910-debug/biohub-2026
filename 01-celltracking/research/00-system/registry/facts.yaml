@@ -3705,3 +3705,93 @@ facts:
       config. Only then can LEVER-0028 freeze a crop-budget function and be screened offline on the P28 substrate.
     date: '2026-08-28'
     tags: [detection, node-budget, exporter, prerequisite, lever-0028]
+
+  - id: FACT-0347
+    statement: >-
+      The three public architecture lanes now have an asset-level inventory rather than names alone: the
+      matiasantezana CC0 bundle contains directly loadable StarDist3D, wide-UNet3D and wide-ResUNet3D state dicts;
+      safe weights-only inspection confirms distinct detector heads and parameterisations, while the current
+      rudispresence StableDet-HOCT bundle is publisher-licensed CC BY 4.0 and contains honest two-fold detector,
+      HOCT, hard-negative, PQLT and TOQL checkpoints. Its model card reports association gains in both held-out
+      directions but zero division recall, so it is evidence for LEVER-0034's association half, not its division half
+    value: null
+    unit: architecture_asset_inventory
+    scope:
+      matiasantezana:
+        dataset: matiasantezana/biohub-champion-weights
+        kaggle_license: CC0-1.0
+        exp017_wide_unet3d: {bytes: 88915601, tensors: 92, state_elements: 22220879, head: "1x64x1x1x1", sha256: d9daeadfa0e09011e17d2431fe5355fccc9a626a28d498ed897d66d87d650946}
+        exp019_wide_resunet3d: {bytes: 99373539, tensors: 134, state_elements: 24831574, head: "1x64x1x1x1", residual_shortcuts: true, sha256: 32853cd535fb019e9d56e961ea6efd40eadec044bf8f95645f44ed48aa5cd42d}
+        exp022_stardist3d: {bytes: 12854686, tensors: 71, state_elements: 3207467, rays: 32, probability_head: "1x32x1x1x1", distance_head: "32x32x1x1x1", sha256: 90edf65ba5b30e8cfac7416340f6ebafea10edc15589411a65a65d9dd927b198}
+        caveat: "no model card, preprocessing, validation score, or architecture source shipped in the dataset"
+      rudispresence:
+        dataset: rudispresence/biohub-stabledet-hoct-hard-negative-checkpoints
+        checkpoint_license: CC-BY-4.0
+        folds: {fold0: "train 6bba / hold out 44b6", fold1: "train 44b6 / hold out 6bba"}
+        families: [baseline_edge_predictor, hoct_v1, hoct_hard_negative, pqlt, toql]
+        heldout_official_to_hn: {f0: "0.7146705721 -> 0.7271301779", f1: "0.4589713048 -> 0.4954487400"}
+        heldout_hn_to_toql_augmentation: {f0: "0.7271301779 -> 0.7315063613", f1: "0.4954487400 -> 0.5434614310"}
+        division_recall: 0
+    provenance: VERIFIED
+    instrument: >-
+      scripts/win_bet/checkpoint_inventory.py (torch.load weights_only=True state-dict census + SHA256),
+      python -m kaggle datasets files/metadata, and downloaded MODEL_CARD.md/LICENSES.md under
+      C:/temp/arch_inventory; output C:/temp/arch_inventory/checkpoints.json; 2026-08-28
+    note: >-
+      Integration order is fixed by evidence quality. The wide detector assets are cheap to load but poorly
+      documented, so recover their preprocessing/model class and run an output-contract smoke before interpreting
+      quality. StarDist emits object probability plus radial distances and needs a centroid adapter/NMS, not a
+      strict checkpoint swap. HOCT has the strongest published artifact documentation and clean-fold association
+      evidence, but its own zero-division result directly supports a separate division-pair head rather than assuming
+      association gains solve divJ. This fact corrects the stale HOCT checkpoint licence in data-governance.md.
+    date: '2026-08-28'
+    tags: [architecture, assets, stardist3d, resunet3d, hoct, licence]
+
+  - id: FACT-0348
+    statement: >-
+      Lime1123 reports externally that division-specific handling is needed beyond detection recall, that their
+      validation behaves as though division recovery is especially sensitive inside roughly 3 um despite the
+      official 7 um matcher, and that a high adjJ can coexist with a much lower divJ; Tang separately describes the
+      productive order as detection, then linking, then division. These are competitor reports, not our measurements
+    value: null
+    unit: external_competitor_observation
+    scope:
+      source: https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/737543
+      lime_claims: [division_specific_handling, effective_spatial_sensitivity_near_3um, detection_recall_not_sufficient]
+      tang_claim: [detection_first, linking_second, division_third]
+    provenance: EXTERNAL
+    validity: SUSPECT
+    validity_reason: >-
+      The reports are plausible and source-attributed, but no notebook, fold definition, matching census, or
+      scorer artifact was supplied. The 3 um value is not an official metric threshold and must be treated as an
+      empirical operating observation until reproduced on both P28 folds.
+    note: >-
+      The claim is directionally consistent with FACT-0270 (mislinked endpoints disproportionately exceed 3 um
+      residual) and FACT-0296 (division separation is a triple-geometry signal), but consistency is not verification.
+    date: '2026-08-28'
+    tags: [external, kaggle, division, localisation, strategy]
+
+  - id: FACT-0349
+    statement: >-
+      The patched division scorer has no special 3 um cutoff: it independently matches the predicted graph to each
+      GT parent/divider/daughter/granddaughter window with the official 7 um DistanceMatching, then requires a local
+      directed fork whose two predicted child branches map to two distinct GT daughter lineages. Therefore 7 um is
+      only the admissibility radius; spatial errors well inside it can still change one-to-one assignments, branch
+      identity and whether the whole division topology is recovered
+    value: 7.0
+    unit: micron_official_matching_radius
+    scope:
+      matched_window: [predecessor, divider, daughters, granddaughters]
+      topology: "matched parent side plus two distinct matched daughter branches"
+      empirical_three_um_status: "not a scorer constant; external operating observation in FACT-0348"
+    provenance: VERIFIED
+    instrument: >-
+      vendor/kaggle-cell-tracking/src/tracking_cellmot/division_metrics.py::extract_divisions,
+      match_divisions, _matched_division_nodes, _is_strongly_connected_division and score_divisions;
+      src/biotrack/metric.py:28-29; source read 2026-08-28
+    note: >-
+      This reconciles the comment with the metric. A detector can have high aggregate recall yet miss one member of
+      the parent-plus-two-daughter tuple, localise it onto the neighbouring cell under one-to-one assignment, or feed
+      the right nodes into the wrong branches. Detection is a prerequisite, not a sufficient objective for divJ.
+    date: '2026-08-28'
+    tags: [metric, division, localisation, topology, verified]

@@ -108,17 +108,35 @@ def _biohub_flush_peaks(crop_name: str) -> None:
         )
     pipeline_threshold = next(iter(_BIOHUB_PIPELINE_THRESHOLDS))
     out = _BIOHUB_DETPEAK_DIR / f"{crop_name}.npz"
-    np.savez_compressed(
-        out,
-        t=ts,
-        zyx=zyx,
-        logit=lg,
-        pipeline_threshold=np.asarray(pipeline_threshold, dtype=np.float64),
-        pipeline_peak_count=np.asarray(
-            np.count_nonzero(1.0 / (1.0 + np.exp(-lg.astype(np.float64))) > pipeline_threshold),
-            dtype=np.int64,
-        ),
+    pipeline_peak_count = np.asarray(
+        np.count_nonzero(1.0 / (1.0 + np.exp(-lg.astype(np.float64))) > pipeline_threshold),
+        dtype=np.int64,
     )
+    payload = {
+        "t": ts,
+        "zyx": zyx,
+        "logit": lg,
+        "pipeline_threshold": np.asarray(pipeline_threshold, dtype=np.float64),
+        "pipeline_peak_count": pipeline_peak_count,
+    }
+    if out.exists():
+        # Some inherited notebooks invoke each deterministic shard twice. Never allow a
+        # last-writer-wins sidecar: an identical replay is explicit; any divergent detector
+        # stream or nondeterminism crashes the diagnostic.
+        with np.load(out, allow_pickle=False) as previous:
+            mismatch = [
+                key for key, value in payload.items()
+                if key not in previous.files or not np.array_equal(previous[key], value)
+            ]
+        if mismatch:
+            raise RuntimeError(
+                f"detpeak: divergent duplicate write for {crop_name}: {mismatch}"
+            )
+        print(f"  detpeak: {crop_name} duplicate-identical replay VERIFIED", flush=True)
+    else:
+        tmp = out.with_suffix(f".{os.getpid()}.tmp.npz")
+        np.savez_compressed(tmp, **payload)
+        os.replace(tmp, out)
     print(f"  detpeak: {crop_name} -> {len(ts):,} peaks, "
           f"{out.stat().st_size / 1e6:.1f} MB", flush=True)
     _BIOHUB_PEAK_ROWS.clear()
@@ -187,6 +205,7 @@ _PEAK_MANIFEST = {
     "graph_unchanged": True,
     "delivery": "sink/flush are module-level in the predictor source and env-gated, because "
                 "prediction runs in a SUBPROCESS and process-local builtins do not cross it",
+    "collision_policy": "duplicate crop writes must be array-identical; divergence raises instead of overwriting",
     "note": "peaks are local maxima under the 3um pool kernel; the local-max test is "
             "threshold-independent, so this set is a superset of every higher threshold",
 }

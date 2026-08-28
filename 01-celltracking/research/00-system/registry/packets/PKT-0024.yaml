@@ -45,7 +45,7 @@ method: >-
   fold-1 CI excluding 0, and >= +0.003 both folds licenses ONE P24-based submission with a pre-registered band.
 
 budget:
-  gpu_sessions: 3 diagnostic sessions (one 2-crop smoke + one full export per fold), plus at most 1 budgeted relink only after thresholds freeze
+  gpu_sessions: 4 diagnostic sessions (initial smoke exposed duplicate writes; one repaired smoke + one full export per fold), plus at most 1 budgeted relink only after thresholds freeze
   submissions: 1 (only if the offline bar is cleared)
   wall_clock: 2-4 days
 
