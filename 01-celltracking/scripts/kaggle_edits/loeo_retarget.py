@@ -32,7 +32,7 @@ LOEO_ARM = os.environ["BIOHUB_LOEO_ARM"].strip()
 LOEO_LIMIT = int(os.environ.get("BIOHUB_LOEO_LIMIT", "0"))  # >0 => smoke on N crops
 LOEO_STEMS_DECLARED = json.loads(os.environ["BIOHUB_LOEO_STEMS"])
 
-if LOEO_ARM not in {"strict", "asis", "hybrid"}:
+if LOEO_ARM not in {"strict", "asis", "hybrid", "champion"}:
     raise ValueError(f"unknown LOEO arm {LOEO_ARM!r}")
 
 # ---------------------------------------------------------------- 1. train crop mount

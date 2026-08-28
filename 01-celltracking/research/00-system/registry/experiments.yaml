@@ -424,7 +424,7 @@ experiments:
     title: P28 champion control f0 - P24-lineage (0.928) LOEO control, fold 0 (best.pt + veto ON, champion arm)
     spec: scripts/kaggle_specs/p28_champion_control_f0.json
     kernel: aryaarun07/biohub-p28-champion-control-f0
-    kernel_version: 1
+    kernel_version: 2
     submission: null
     lb: null
     status: running
@@ -440,7 +440,7 @@ experiments:
     title: P28 champion control f1 - P24-lineage (0.928) LOEO control, fold 1 (best.pt + veto ON, split_1 weights)
     spec: scripts/kaggle_specs/p28_champion_control_f1.json
     kernel: aryaarun07/biohub-p28-champion-control-f1
-    kernel_version: 1
+    kernel_version: 2
     submission: null
     lb: null
     status: running
