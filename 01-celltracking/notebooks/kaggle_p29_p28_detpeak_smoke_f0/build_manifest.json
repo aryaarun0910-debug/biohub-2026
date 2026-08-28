@@ -4,7 +4,7 @@
   "base_notebook": "notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb",
   "base_sha256": "6d54240b85eb563faa6015761cb348fb2ad4df801218077fbf7c6480c8194f8a",
   "built_notebook": "notebooks\\kaggle_p29_p28_detpeak_smoke_f0\\biohub-p29-p28-detpeak-smoke-f0.ipynb",
-  "built_sha256": "66abdbc1e206473e507326f438f60ed4f64aa817effd85ada8f6edf7afc274ae",
+  "built_sha256": "c14e48fa102a26423e3de0e3a6128ec6c2edc1d0eb6b57e4a71d6fc10298a77e",
   "config_hash": "44efdccf663a",
   "n_cells": 11,
   "edits": [
@@ -35,6 +35,5 @@
   "defect_gate": {
     "ledger": "scripts\\core\\experiment_defects.json",
     "passed": []
-  },
-  "pushed_slug": "biohub-p29-p28-detpeak-smoke-f0"
+  }
 }

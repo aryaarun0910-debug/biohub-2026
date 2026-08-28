@@ -119,7 +119,16 @@ def _biohub_flush_peaks(crop_name: str) -> None:
         "pipeline_threshold": np.asarray(pipeline_threshold, dtype=np.float64),
         "pipeline_peak_count": pipeline_peak_count,
     }
-    if out.exists():
+    # Publish a fully written temporary file with create-if-absent semantics. ``exists()``
+    # followed by ``replace()`` is not atomic: two predictor processes can both observe a
+    # missing destination and silently overwrite one another. A hard link either creates the
+    # final name exactly once or raises FileExistsError; the linked file is already complete.
+    tmp = out.with_suffix(f".{os.getpid()}.tmp.npz")
+    tmp.unlink(missing_ok=True)
+    np.savez_compressed(tmp, **payload)
+    try:
+        os.link(tmp, out)
+    except FileExistsError:
         # Some inherited notebooks invoke each deterministic shard twice. Never allow a
         # last-writer-wins sidecar: an identical replay is explicit; any divergent detector
         # stream or nondeterminism crashes the diagnostic.
@@ -133,10 +142,8 @@ def _biohub_flush_peaks(crop_name: str) -> None:
                 f"detpeak: divergent duplicate write for {crop_name}: {mismatch}"
             )
         print(f"  detpeak: {crop_name} duplicate-identical replay VERIFIED", flush=True)
-    else:
-        tmp = out.with_suffix(f".{os.getpid()}.tmp.npz")
-        np.savez_compressed(tmp, **payload)
-        os.replace(tmp, out)
+    finally:
+        tmp.unlink(missing_ok=True)
     print(f"  detpeak: {crop_name} -> {len(ts):,} peaks, "
           f"{out.stat().st_size / 1e6:.1f} MB", flush=True)
     _BIOHUB_PEAK_ROWS.clear()

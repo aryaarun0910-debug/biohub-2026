@@ -12,6 +12,8 @@ def test_export_crosses_process_boundary_and_has_positive_heartbeats():
     assert "_biohub_flush_peaks(name)" in SOURCE
     assert "divergent duplicate write" in SOURCE
     assert "duplicate-identical replay VERIFIED" in SOURCE
+    assert "os.link(tmp, out)" in SOURCE
+    assert "os.replace(tmp, out)" not in SOURCE
 
 
 def test_export_mask_is_observational_and_pipeline_mask_stays_original():
