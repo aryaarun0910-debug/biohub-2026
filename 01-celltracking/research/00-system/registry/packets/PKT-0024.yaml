@@ -59,8 +59,11 @@ forbidden:
 
 outputs:
   evidence: C:/temp/node_budget/ and _evidence/node_budget/
-  facts_added: []          # sentinel result; exporter built/run; budget-function offline gate; (if passed) the submission
+  facts_added: [FACT-0350] # exporter and budget-function facts append after their gates complete
   record: >-
     One section per step in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  STEP 0 FIRED (FACT-0350): the fixed-tolerance sentinel passed fold 0 but failed the clean fold 1, and the probe
+  rule itself deleted scored TP edges on every substrate. Do not inherit old-control deltas; measure LEVER-0028
+  directly on both P28 folds. STEP 1 remains in progress through EXP-0032/0033/0034.

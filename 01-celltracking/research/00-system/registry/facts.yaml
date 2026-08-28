@@ -3795,3 +3795,29 @@ facts:
       the right nodes into the wrong branches. Detection is a prerequisite, not a sufficient objective for divJ.
     date: '2026-08-28'
     tags: [metric, division, localisation, topology, verified]
+
+  - id: FACT-0350
+    statement: >-
+      The preregistered orthogonal-substrate sentinel did not establish P20/P19-to-P28 paired-delta equivalence on
+      both folds: fold 0 met the fixed absolute tolerance, while the clean fold 1 exceeded it. The tested endpoint
+      dedup rule also failed its own safety and promotion gates on every substrate, so this result licenses neither
+      the rule nor inheritance of old-control deltas; independent levers must be scored directly on P28
+    value: false
+    unit: equivalent_both_folds
+    scope:
+      params_sha256: 70bec614013102a28e4cb80f48e6f08a745746e88119ba7259fd960d627a0090
+      tolerance: 0.00001
+      fold0: {old_delta: -0.00012908896236207834, p28_delta: -0.0001295755002317378, difference: -0.0000004865378696594647, equivalent: true}
+      fold1: {old_delta: 0.00003776826454826576, p28_delta: 0.00005182934860215038, difference: 0.00001406108405388462, equivalent: false}
+      safety: {old_f0_scored_tp_edges_deleted: 3, p28_f0_scored_tp_edges_deleted: 3, old_f1_scored_tp_edges_deleted: 9, p28_f1_scored_tp_edges_deleted: 8}
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/fp_endpoint_dedup.py full-crop safe_v2 runs plus
+      scripts/win_bet/compare_substrate_sentinel.py; committed instruments; summaries and comparison under
+      C:/temp/node_budget/sentinel/; 2026-08-28
+    note: >-
+      The predeclared tolerance is not relaxed after observation. The absolute mismatch is small, but Step 0 was a
+      binary guard and fired. This narrows FACT-0345's qualitative orthogonality reading: it is not a licence to
+      reuse old paired deltas. LEVER-0028 proceeds only through direct P28 fold measurements.
+    date: '2026-08-28'
+    tags: [substrate, sentinel, falsifier, p28, node-budget, dedup]
