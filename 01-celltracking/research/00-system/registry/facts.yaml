@@ -3821,3 +3821,33 @@ facts:
       reuse old paired deltas. LEVER-0028 proceeds only through direct P28 fold measurements.
     date: '2026-08-28'
     tags: [substrate, sentinel, falsifier, p28, node-budget, dedup]
+
+  - id: FACT-0351
+    statement: >-
+      The P29 DetPeak diagnostic passed its two-crop Kaggle smoke on the P28 champion pipeline: both non-empty
+      sidecars reconstruct the detector's surviving peak counts exactly and the final graph is observationally
+      identical to the matching P28 control rows. Repeated Kaggle console lines were not duplicate destination
+      writes: the two GPU subprocesses receive disjoint step slices, and the race-safe create-if-absent sink observed
+      no collision. Full two-fold passive exports are licensed; no score or submission claim is licensed
+    value: true
+    unit: detpeak_smoke_pass
+    scope:
+      kernel: aryaarun07/biohub-p29-p28-detpeak-smoke-f0
+      kernel_version: 3
+      sidecars: 2
+      graph_parity: true
+      pipeline_count_reconstruction: true
+      divergent_duplicate_writes: 0
+      execution_partition: ["--slice 0::2", "--slice 1::2"]
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/validate_detpeak_export.py on C:/temp/node_budget/p29_smoke_v3 plus the committed
+      create-if-absent sink in scripts/kaggle_edits/detpeak_export.py; P28 shard construction at
+      notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb:698-727; 2026-08-28
+    experiment: EXP-0032
+    note: >-
+      Versions 1 and 2 exposed an interpretation defect: duplicated subprocess stdout in Kaggle's captured log was
+      initially mistaken for two writes. Version 3 retained the defensive atomic publication anyway and proved the
+      scientific contract that matters: passive sidecars, exact threshold reconstruction, and unchanged graph rows.
+    date: '2026-08-28'
+    tags: [detpeak, exporter, smoke, process-boundary, parity, lever-0028]
