@@ -429,7 +429,7 @@ experiments:
     lb: null
     status: complete
     date: '2026-08-27'
-    facts: [FACT-0341, FACT-0310]
+    facts: [FACT-0341, FACT-0310, FACT-0345]
     note: >-
       Downstream fix #1: re-establish the offline screening substrate on the 0.928 base. New `champion` LOEO arm keeps
       the DeepCenter best.pt + safe-div veto bundle ON. CAVEAT (FACT-0310): DeepCenter has no fold variant and is
@@ -445,7 +445,7 @@ experiments:
     lb: null
     status: complete
     date: '2026-08-27'
-    facts: [FACT-0341, FACT-0310]
+    facts: [FACT-0341, FACT-0310, FACT-0345]
     note: >-
       The CLEANER P24-lineage control: fold 1 (6bba held out), OOF split_1 edge weights (leak guard intact), DeepCenter
       best.pt validated on 6bba (checkpoint selection only, not trained) so near-out-of-sample. This is the fold to

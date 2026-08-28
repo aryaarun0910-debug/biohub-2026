@@ -3648,3 +3648,36 @@ facts:
       discipline exist to catch.
     date: '2026-08-28'
     tags: [score, killed, icom, float, offline-lb-seam, headline]
+
+  - id: FACT-0345
+    statement: >-
+      The P28 champion controls (EXP-0030/0031) establish the 0.928-base offline screening substrate - scorer-exact
+      fold-0 0.9079 and fold-1 0.7092 with the DeepCenter best.pt + safe-div veto bundle ON - but the DeepCenter
+      OFFLINE delta over the DeepCenter-OFF controls is only +0.0009 (f0) / +0.0007 (f1), both CIs covering zero,
+      versus its +0.003 on the LB (FACT-0341): the offline substrate UNDER-reads the DeepCenter contribution ~3-4x
+    value: 0.7092
+    unit: score_f1_champion_substrate
+    scope:
+      f0: {p28_score: 0.9079, base_off_score: 0.907, deepcenter_delta: 0.0009, ci95: [-0.0003, 0.0021], node_recall: 0.9868, div: [5, 67, 21], caveat: "DeepCenter IN-SAMPLE on 44b6 (FACT-0310) - absolute contaminated, paired-delta only"}
+      f1: {p28_score: 0.7092, base_off_score: 0.7086, deepcenter_delta: 0.0007, ci95: [-0.0001, 0.0014], node_recall: 0.8636, div: [14, 349, 111], note: "the CLEAN fold - primary screening substrate"}
+      lb_deepcenter_delta: 0.003
+      offline_under_read_ratio: "~3-4x"
+    provenance: MEASURED
+    instrument: >-
+      scripts/win_bet/ea_atlas.py + tracking_cellmot.summarise on C:/temp/p28_f{0,1}/loeo_split{0,1}_champion.csv.gz
+      (champion arm, DeepCenter best.pt+veto ON, secondary OFF, f1 OOF split_1) paired vs the DeepCenter-OFF controls
+      C:/temp/p{20,19}_relink_sweep_f{0,1}; crop bootstrap 2000; summary C:/temp/p28_substrate.json
+    experiment: EXP-0030
+    protocol:
+      weights: f0 pack split_0 (clean), f1 OOF split_1 (honest); DeepCenter best.pt epoch 2 (FACT-0311)
+      eval: scorer-exact per-crop, all crops, paired crop bootstrap
+    note: >-
+      Route-to-0.950 step 1 done: future P24-stack levers SCREEN on P28 (fold 1 the clean fold), not the older
+      p20/p19 controls. Two readings. (1) The DeepCenter delta is nearly invisible offline (+0.0007..+0.0009, CI covers
+      0) yet +0.003 on the LB - a third offline/LB-seam data point (with FACT-0321/0326 ~0.6-0.7x and FACT-0344's
+      inversion): DeepCenter-INTERACTING levers cannot be judged offline, only by submission. (2) Because the delta is
+      so small, DeepCenter-INDEPENDENT levers (node-budget, ensemble, dedup) get essentially the SAME paired delta on
+      P28 as on p20/p19 - the substrate swap matters for interaction terms, not for orthogonal ones. The veto slightly
+      lowers node_recall (f0 0.9881->0.9868, f1 0.8655->0.8636) and net-removes FP forks, exactly a conservative filter.
+    date: '2026-08-28'
+    tags: [substrate, calibration, deepcenter, offline-lb-seam, champion-base]
