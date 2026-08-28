@@ -3681,3 +3681,27 @@ facts:
       lowers node_recall (f0 0.9881->0.9868, f1 0.8655->0.8636) and net-removes FP forks, exactly a conservative filter.
     date: '2026-08-28'
     tags: [substrate, calibration, deepcenter, offline-lb-seam, champion-base]
+
+  - id: FACT-0346
+    statement: >-
+      The P28 (and every LOEO/submission) export carries ONLY post-threshold surviving nodes (10 columns, no scores),
+      so crop-adaptive node budgeting (LEVER-0028) CANNOT be replayed offline from it - a diagnostic candidate-score
+      exporter is a prerequisite; the score exists as sigmoid(det_logits) at each local-max peak in
+      predict_unet_transformer.py:285 before the 0.96875 threshold and is discarded
+    value: null
+    unit: prerequisite
+    scope:
+      export_columns: [id, dataset, row_type, node_id, t, z, y, x, source_id, target_id]
+      candidate_score_site: "vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py:255-291 extract_peaks; is_peak = (logits==pooled) & (sigmoid(logits) > det_threshold); peak_idx = nonzero(is_peak)"
+      what_is_needed: "per-crop (t,z,y,x, sigmoid_score) for ALL local-max peaks at a low floor, so a per-crop threshold can be re-fit toward estimated_number_of_nodes and re-scored offline"
+    provenance: VERIFIED
+    instrument: >-
+      column read of C:/temp/p28_f0/loeo_split0_champion.csv.gz; source read of extract_peaks in the vendored and
+      pack predict_unet_transformer.py (2026-08-28)
+    note: >-
+      Directly answers route-to-0.950 step 4. Node budgeting is a re-thresholding of the candidate peak set per crop;
+      the final CSV has thrown the scores away. The exporter patches extract_peaks to emit every local-max peak with
+      its sigmoid probability (det_threshold floored near 0) into a per-crop sidecar, one Kaggle run on the champion
+      config. Only then can LEVER-0028 freeze a crop-budget function and be screened offline on the P28 substrate.
+    date: '2026-08-28'
+    tags: [detection, node-budget, exporter, prerequisite, lever-0028]

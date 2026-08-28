@@ -43,7 +43,7 @@ levers:
     claim: >-
       A division STAGE 2 - keep the bijection, add divisions via a learned selector on
       appearance change and longer-track cues - unlocks the structurally unreachable divJ
-    status: open
+    status: closed
     falsifier: >-
       Must beat the P9 division mechanism end-to-end on a scored submission.
     # 2026-08-26 validity backfill: FACT-0130 and FACT-0131 are INVALID (EXP-0019 leak,
@@ -115,7 +115,7 @@ levers:
     claim: >-
       The deployed detection threshold 0.96875 is too high; lowering it raises edge recall
       by more than the under-production bonus it erodes
-    status: running
+    status: killed
     falsifier: >-
       EXP-0016 / EXP-0017 read as a PAIR must show a monotone or interior-optimum gain.
     closed_by: [FACT-0102, FACT-0111]
@@ -312,7 +312,8 @@ levers:
     claim: >-
       Our offline LOEO diagnostics have been measuring a DIFFERENT substrate from the
       deployment, which may explain past offline-versus-leaderboard disagreements
-    status: open
+    status: closed
+    closed_by: [FACT-0232]
     falsifier: >-
       If a champion-substrate LOEO export and a p0b-substrate one agree within noise on the
       same fold, the substrate difference is immaterial and this closes.
@@ -336,7 +337,7 @@ levers:
     claim: >-
       REMOVING false divisions is worth as much as finding true ones, because
       divJ = TP/(125+FP) and our FP (225) exceeds all real divisions (125)
-    status: running
+    status: killed
     falsifier: >-
       If no feature separates our 26 TP from our 225 FP better than chance, a filter cannot
       be built and this closes.
@@ -825,7 +826,10 @@ levers:
       A different detector ARCHITECTURE - StarDist3D, a wide ResUNet3D, HOCT hard-negative, or a 3D nuclei foundation
       model - trained/finetuned for this data beats the pack's UNet3D on node selection and is the only lane sized for
       the full +0.027 gap to top-3, which the teams above 0.94 all take
-    status: open
+    status: parked
+    reopen_when: >-
+      never as this umbrella - it is DECOMPOSED into LEVER-0032 (StarDist3D), LEVER-0033 (wide-ResUNet3D) and
+      LEVER-0034 (StableDet/HOCT). Claim a specific architecture lever with its own parity gate, not this one.
     falsifier: >-
       Any candidate architecture must reach split_0 detection parity offline, then beat it on a fold-0 paired delta with
       a CI excluding 0, then move the LB. Killed per-architecture on the parity gate; the lane closes only if NO
@@ -838,4 +842,53 @@ levers:
       StarDist3D, HOCT (MIT), nnU-Net, and the 3D nuclei foundation models (LSM, DINOCell, micro-sam). The deepest,
       highest-ceiling and highest-cost research lane; GATED on Colab parity and a licence/prize-rules check
       (Zebrahub-derived weights are CC BY-NC). This is the lane that most likely reaches 0.955+.
+    priority: 3
+
+  - id: LEVER-0032
+    claim: >-
+      A StarDist3D detector (star-convex nucleus polyhedra) - warm-started from the public 3D weights where a licence
+      permits, finetuned to this light-sheet data - beats the Pilkwang UNet3D on node selection and reaches a fold-0
+      paired delta >= +0.005 on the P28 champion substrate
+    status: open
+    falsifier: >-
+      Per-architecture parity gate: the detector must first reach split_0 detection parity offline (within FACT-0263
+      MDE on fold 0), then beat it with a fold-1 paired delta CI excluding zero on the P28 substrate (FACT-0345), then
+      one submission. Killed on the parity gate if StarDist3D does not transfer to zebrafish light-sheet nuclei.
+    supporting: [FACT-0335, FACT-0339, FACT-0345]
+    note: >-
+      Split from the LEVER-0031 umbrella (2026-08-28). StarDist3D has public code (BSD-3) but no official 3D zebrafish
+      light-sheet weights (EXTERNAL_RESEARCH.md); start from any available 3D star-convex weights, else train. GATED on
+      Colab parity (FACT-0327) and a working finetune recipe (FACT-0339). Integrate the public weights BEFORE training.
+    priority: 3
+
+  - id: LEVER-0033
+    claim: >-
+      A wide-ResUNet3D detector (the matiasantezana champion-weights family) integrated as the node source beats the
+      Pilkwang UNet3D and reaches a fold-0 paired delta >= +0.005 on the P28 substrate
+    status: open
+    falsifier: >-
+      Same per-architecture parity gate as LEVER-0032: split_0 parity offline, then a clean fold-1 paired CI excluding
+      zero on P28, then one submission. Killed if the wide-ResUNet3D weights do not transfer or beat the pack detector.
+    supporting: [FACT-0335, FACT-0345]
+    note: >-
+      Split from LEVER-0031 (2026-08-28). matiasantezana/biohub-champion-weights publishes exp017_wide_unet3d /
+      exp019_wide_resunet3d (undocumented, 2026-08-26); a licence/prize-rules check is required. Cheapest of the three
+      to TRY because the weights are public - INTEGRATE first, train only if integration alone underperforms.
+    priority: 3
+
+  - id: LEVER-0034
+    claim: >-
+      A StableDet + HOCT hard-negative detector / query-lineage association stack (the rudispresence checkpoints)
+      integrated for detection and/or association beats the Pilkwang family and reaches a fold-0 paired delta >= +0.005
+    status: open
+    falsifier: >-
+      Per-architecture parity gate: split_0 detection parity (or, for the association half, a link-metric parity on a
+      HARDER movie-held-out split - not the saturated Zebrahub proxy, FACT-0342), then a clean fold-1 paired CI
+      excluding zero on P28, then one submission. Killed if HOCT/StableDet does not transfer to this data.
+    supporting: [FACT-0335, FACT-0342, FACT-0345]
+    note: >-
+      Split from LEVER-0031 (2026-08-28). HOCT is MIT-licensed with public checkpoints and 19 hand-crafted features,
+      1st on Fluo-N3DH-CE but with no zebrafish mention; rudispresence/biohub-stabledet-hoct-hard-negative-checkpoints
+      is CC-BY. Licence/prize check required. This is also the strongest ASSOCIATION candidate (query-lineage
+      transformers) - the harder-association-gate the route-to-0.950 asks for. Integrate public weights before training.
     priority: 3

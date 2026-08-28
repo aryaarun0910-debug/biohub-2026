@@ -1,0 +1,66 @@
+id: PKT-0024
+title: "LEVER-0028: crop-adaptive node budgeting - candidate-score exporter first, then a frozen budget function screened on P28"
+lever: LEVER-0028
+owner: primary
+lock: claimed
+opened: '2026-08-28'
+
+claim: >-
+  Re-thresholding the detection candidate set PER CROP toward that crop's estimated_number_of_nodes (instead of the
+  single global 0.96875) recovers the under-detected embryo class and beats the best global threshold on BOTH folds
+  of the P28 champion substrate, clearing the +0.003 both-fold promotion bar before one P24-based submission.
+
+falsifier: >-
+  Any of: (a) the frozen crop-budget function does not beat the best GLOBAL threshold on both folds offline on P28;
+  (b) the clean fold-1 (6bba) paired-delta CI does not exclude zero; (c) a positive score is an artifact of the
+  node-count adjustment masking an edge-term loss (checked by reporting adj WITHOUT the count term); (d) it does not
+  reach the +0.003 both-fold bar. Near-zero offline is NON-DECISIVE (FACT-0345), not a kill; a LARGE negative kills.
+
+prediction: >-
+  Node budgeting is DeepCenter-independent, so it is screenable offline on P28 (FACT-0345). 44b6 is under-detected
+  (0.888 of estimate vs 6bba 0.988), so budgeting should help fold 0 more; fold 1 is the deciding clean CI. Expected
+  small-to-moderate; the band is written only after the frozen function is fit and its candidate sidecar exists.
+
+inputs:
+  facts: [FACT-0102, FACT-0335, FACT-0345, FACT-0346, FACT-0261]
+  artifacts:
+    - C:/temp/p28_f0/, C:/temp/p28_f1/            # the 0.928-base screening substrate (FACT-0345)
+    - C:/temp/p20_relink_sweep_f0/, C:/temp/p19_relink_sweep_f1/   # for the substrate-equivalence sentinel
+    - data/train/*.geff                            # estimated_number_of_nodes per crop
+  code:
+    - vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py  # extract_peaks:255-291 (the score site)
+    - scripts/win_bet/ea_atlas.py + tracking_cellmot.summarise         # the scorer round-trip
+
+method: >-
+  STEP 0 (substrate sentinel, per the host caution): replay ONE orthogonal DeepCenter-independent transform on BOTH
+  p20/p19 and P28 and confirm the paired deltas agree within noise before treating P28 as equivalent for independent
+  levers. STEP 1 (prerequisite, FACT-0346): build a candidate-score exporter - patch extract_peaks to emit every
+  local-max peak with sigmoid(logits) at a near-zero floor into a per-crop sidecar; one Kaggle run on the champion
+  config, both folds. STEP 2: FREEZE ONE crop-budget function (a monotone map from the crop's candidate-score
+  distribution / estimated_number_of_nodes to a per-crop threshold; NO embryo-name routing). Fit it in ONE direction
+  (one fold), apply UNCHANGED to the other. STEP 3: rebuild each crop's node set at the per-crop threshold, re-link
+  via the champion pipeline (or a fixed offline linker if a full re-run is too costly), and score on P28 with
+  ea_atlas + summarise. Report separately: edge TP/FP/FN, the node term, adj WITH and WITHOUT the count adjustment,
+  node_recall, per fold, paired crop bootstrap. STEP 4: only a both-fold win over the best global threshold, clean
+  fold-1 CI excluding 0, and >= +0.003 both folds licenses ONE P24-based submission with a pre-registered band.
+
+budget:
+  gpu_sessions: 1 Kaggle slot for the candidate-score exporter (+ possibly 1 for the budgeted re-run)
+  submissions: 1 (only if the offline bar is cleared)
+  wall_clock: 2-4 days
+
+forbidden:
+  - embryo-name or dataset routing in the budget function (FACT: no-family-routing contract)
+  - fitting and reporting on the same fold without the reverse direction
+  - a submission on a near-null offline gain (FACT-0345: tiny offline deltas are ambiguous)
+  - float-coordinate export (FACT-0344, LB-unsafe)
+  - lowering the promotion bar below +0.003 both folds
+  - .claude/settings.json
+
+outputs:
+  evidence: C:/temp/node_budget/ and _evidence/node_budget/
+  facts_added: []          # sentinel result; exporter built; budget-function offline gate; (if passed) the submission
+  record: >-
+    One section per step in research/06-knowledge-system/experimental-records.md
+
+result: null
