@@ -3606,3 +3606,39 @@ facts:
       now PASSES and issues a receipt. Tests in tests/test_submission_structure_audit.py.
     date: '2026-08-27'
     tags: [audit, float, defect, downstream-fix, closed]
+
+  - id: FACT-0344
+    statement: >-
+      P27 (icom FLOAT re-localisation stacked on the 0.928 champion) scored 0.914 on the public LB - a -0.014
+      REVERSAL versus P24 (FACT-0341), firing the falsifier hard; the offline +0.0013/+0.0024 (FACT-0330) did NOT
+      transfer and inverted, and the leading cause is that Kaggle's HOSTED scorer does not honour float coordinates
+      the way the vendored converter does (FACT-0336)
+    value: 0.914
+    unit: score
+    scope:
+      leaderboard: public
+      submission: 55827508
+      champion_p24: 0.928
+      delta_vs_champion: -0.014
+      band_prereg: [0.927, 0.931]
+      falsifier: "<= 0.928"
+      fired: true
+      offline_icom_full_fold: {f0: 0.0013, f1: 0.0024}
+    provenance: MEASURED
+    instrument: kaggle submission 55827508 (aryaarun07/biohub-p27-champion-icom v1)
+    experiment: EXP-0029
+    note: >-
+      A decisive negative and a lesson about the offline/LB seam. TWO candidate causes: (1) FLOAT-COORDINATE
+      MISHANDLING - the vendored csv_to_geffs casts z/y/x to Float64 (FACT-0336) but Kaggle's hosted scoring
+      pipeline evidently does NOT reproduce that (a -0.014 hit is far larger than any icom effect); the public 0.927
+      lineage deploys refine_all_centroids ROUNDED to int, and rounded icom was <= 0 offline (FACT-0324), i.e. the
+      field-validated form is integer. (2) icom-on-champion interaction. They are not fully separated by this single
+      submission, but either way the FLOAT-icom deployment is DEAD on the LB. CONSEQUENCES: (a) the champion stays
+      P24 = 0.928 - do NOT deploy p27; (b) do NOT submit p23 (also a float export) - it would likely drop the same
+      way; (c) FACT-0336's "floats are scorer-legal" is REFUTED at the hosted-scorer level and must not be relied on;
+      (d) LEVER-0022 is effectively dead - float icom loses on the LB and rounded icom is <= 0 offline. The #5 audit
+      float mode remains correct as a STRUCTURAL contract, but a float export must never be deployed to this LB.
+      This is exactly the offline/LB-seam risk the P24-lineage controls (EXP-0030/0031) and a submission-as-judge
+      discipline exist to catch.
+    date: '2026-08-28'
+    tags: [score, killed, icom, float, offline-lb-seam, headline]

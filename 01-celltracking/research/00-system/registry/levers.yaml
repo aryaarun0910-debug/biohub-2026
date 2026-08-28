@@ -602,6 +602,7 @@ levers:
       (b) the scorer round-trip must be >= +0.005 on fold 1 and >= 0 on fold 0 at pilot scale,
       then >= +0.005 on BOTH folds at full scale. A fold-0-only pass does not count.
     supporting: [FACT-0270, FACT-0314, FACT-0317]
+    closed_by: [FACT-0344]
     note: >-
       NEW MECHANISM relative to the killed LEVER-0021: no learned prior at all - the raw image's
       intensity centroid, which cannot have the flat-blob pathology FACT-0317 measured in DeepCenter.

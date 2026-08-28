@@ -16,6 +16,17 @@ record_kind: state
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
 
+> ## 🔴 2026-08-28 — icom FLOAT stack LOST: p27 = 0.914 (-0.014); champion stays 0.928; float export is LB-unsafe
+>
+> `EXP-0029` p27 (icom float on the P24 champion) **scored 0.914** (`FACT-0344`) - a -0.014 REVERSAL, falsifier
+> fired hard. The offline +0.0013/+0.0024 (`FACT-0330`) did NOT transfer and inverted. Leading cause: Kaggle's
+> HOSTED scorer does not honour float coordinates the way the vendored converter does - `FACT-0336` is REFUTED
+> at the hosted-scorer level. **CHAMPION STAYS P24 = 0.928. Do NOT deploy p27; do NOT submit p23 (also float).**
+> `LEVER-0022` killed on LB evidence (float loses, rounded is <= 0 offline). Lesson: a float export must never be
+> deployed to this LB; the offline/LB seam bit exactly where the P24-lineage controls and submission-as-judge
+> discipline are meant to catch it. p28 champion controls (`EXP-0030/0031`) are COMPLETE - fetch to establish the
+> 0.928-base screening substrate next.
+>
 > ## 🏆 2026-08-27 — NEW CHAMPION 0.928 (P24), +0.003, gap to top-3 now 0.027
 >
 > **`EXP-0025` P24 scored 0.928** (`FACT-0341`, submission 55820202) — the P9 champion + DeepCenter best.pt

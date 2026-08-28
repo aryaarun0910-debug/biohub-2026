@@ -409,8 +409,8 @@ experiments:
     kernel: aryaarun07/biohub-p27-champion-icom
     kernel_version: 1
     submission: 55830000
-    lb: null
-    status: pending
+    lb: 0.914
+    status: scored
     date: '2026-08-27'
     facts: [FACT-0341, FACT-0330, FACT-0336]
     note: >-
@@ -418,7 +418,7 @@ experiments:
       PLUS LEVER-0022 icom float re-localisation (offline full-fold +0.0013/+0.0024, FACT-0330). Built on the P9
       champion, NOT the superseded base (p23/EXP-0027 tested icom on P9 and is now working backwards). PRE-REGISTERED
       band 0.927-0.931, central 0.929; falsifier <= 0.928 (no gain over the champion P24). Pushed v1 2026-08-27 under
-      host GPU+submission authorisation; SUBMITTED 2026-08-27 (2 subs left); our integer-audit false-positived on the icom floats (FACT-0343), coords verified sound and floats scorer-legal (FACT-0336). Score pending.
+      host GPU+submission authorisation; SUBMITTED 2026-08-27 (2 subs left); our integer-audit false-positived on the icom floats (FACT-0343), coords verified sound and floats scorer-legal (FACT-0336). SCORED 0.914 (FACT-0344): -0.014 REVERSAL, falsifier fired; float export is LB-unsafe. Champion stays P24=0.928.
 
   - id: EXP-0030
     title: P28 champion control f0 - P24-lineage (0.928) LOEO control, fold 0 (best.pt + veto ON, champion arm)
