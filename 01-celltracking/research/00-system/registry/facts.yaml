@@ -4367,3 +4367,120 @@ facts:
       solver.
     date: '2026-08-28'
     tags: [ilp, determinism, degeneracy, replay, lever-0035, verified]
+
+  - id: FACT-0364
+    statement: >-
+      The deployed champion DISCARDS the ILP's edge selection: motion_relink_edges replaces the whole edge list
+      and re-assigns one-to-one per frame pair, and on all 128 fold-1 crops it did so, covering a median 99.9%
+      of the solver's raw edges with zero fallbacks. What survives the solver into the final graph is its NODE
+      SET, not its edges. Any lever that improves the ILP's edge choice is therefore overwritten downstream and
+      cannot be claimed for the champion without re-measuring through the relink
+    value: 0.999
+    unit: median_share_of_raw_edges_replaced_by_motion_relink_f1
+    scope:
+      crops_where_relink_replaced_the_edge_list: {n: 128, of: 128}
+      replaced_over_raw_edges: {median: 0.9990, min: 0.9874, max: 1.0000}
+      motion_relink_fallback_raw: 0
+      final_edges_over_relink_edges_median: 0.9782
+      surviving_ilp_contribution: node set (nodes_by_id), plus raw edge probabilities passed in as a scoring prior
+    provenance: VERIFIED
+    validity: VALID
+    instrument: >-
+      source read of the built P28 notebook - motion_relink_edges definition, the call site
+      `edges = motion_edges`, and the module's own comment "motion_relink_edges replaces the whole edge list
+      and assigns one-to-one per frame pair" - plus the run_stats
+      motion_relink_replaced_raw_edges/raw_edges ratio over all 128 fold-1 crops of C:/temp/p28_f1
+    experiment: EXP-0033
+    note: >-
+      This is a structural constraint on a whole class of ideas, not a detail. It says the ILP is, in the
+      deployed configuration, a NODE SELECTOR whose linking is provisional. Read with FACT-0353 (the ILP is
+      where 15-20% of detected peaks are discarded) the picture is consistent: the solver's job in this pipeline
+      is choosing which detections are real, and motion relink then decides how they connect. The practical
+      rule: score an ILP-stage change on its node set, and treat any edge-term gain measured before the relink
+      as not yet transferable. The raw edge probabilities ARE passed into the relink as a scoring prior, so the
+      influence is not strictly zero - it is indirect and must be measured, not assumed.
+    date: '2026-08-28'
+    tags: [ilp, motion-relink, pipeline-structure, lever-0035, verified]
+
+  - id: FACT-0365
+    statement: >-
+      The fold-1 solver sweep INVERTS LEVER-0035's direction: relaxing the disappearance weight loses
+      monotonically (-0.0095 adjusted Jaccard at 0.1, CI excluding zero) while TIGHTENING it wins, peaking at
+      3.0 with +0.0085 adjusted and +0.0078 raw Jaccard, both CIs excluding zero, before collapsing at 8.0. The
+      winning setting keeps 12.5% FEWER nodes than deployed (377,393 against 431,174) at essentially unchanged
+      node recall (0.8232 against 0.8257) - the gain is selectivity, not retention
+    value: 3.0
+    unit: best_disappearance_weight_f1_pilot
+    scope:
+      pilot: {fold: 1, crops: 26, stride: 5, pipeline: "ILP + short-track filter only"}
+      deployed: 1.5
+      curve:
+        "0.1": {adjJ: 0.65269, rawJ: 0.64474, recall: 0.8140, nodes: 492471, d_adjJ: -0.00949, ci: [-0.01357, -0.00530]}
+        "0.5": {adjJ: 0.65488, rawJ: 0.64760, recall: 0.8224, nodes: 488791, d_adjJ: -0.00794, ci: [-0.01180, -0.00428]}
+        "1.0": {adjJ: 0.66260, rawJ: 0.65518, recall: 0.8253, nodes: 448951, d_adjJ: 0.00035, ci: [-0.00174, 0.00246]}
+        "1.5": {adjJ: 0.66251, rawJ: 0.65509, recall: 0.8257, nodes: 431174, deployed: true}
+        "2.0": {adjJ: 0.66669, rawJ: 0.65902, recall: 0.8250, nodes: 409692, d_adjJ: 0.00407, ci: [0.00146, 0.00721]}
+        "3.0": {adjJ: 0.67078, rawJ: 0.66267, recall: 0.8232, nodes: 377393, d_adjJ: 0.00849, ci: [0.00233, 0.01526], d_rawJ: 0.00778, ci_raw: [0.00179, 0.01437]}
+        "5.0": {adjJ: 0.66572, rawJ: 0.65425, recall: 0.7889, nodes: 325967, d_adjJ: 0.00364, ci: [-0.01563, 0.02467], count_adjustment_artifact: true}
+        "8.0": {adjJ: 0.63615, rawJ: 0.62037, recall: 0.7234, nodes: 272934, d_adjJ: -0.02709, ci: [-0.06030, 0.00865]}
+    provenance: MEASURED
+    validity: SUSPECT
+    validity_reason: >-
+      THE GAIN IS MEASURED ON A STAGE THE CHAMPION DISCARDS. The scored object is ILP output plus the
+      short-track filter; the deployed pipeline replaces the ILP's entire edge list with motion relink on every
+      crop (FACT-0364), so the edge-Jaccard gain that produced this result has no established transfer path. The
+      NODE-set change does survive and is the part worth testing. Further limits: fold 1 only, 26 of 128 crops,
+      and fold 1 is the association-degraded configuration (FACT-0261) while fold 0 is the promotion gate.
+      Absolute scores here are not comparable to the champion's (FACT-0345). The 5.0 arm posted an adjusted gain
+      with no raw gain and is flagged by the instrument as a count-adjustment artifact - an example of exactly
+      what the separate reporting is for.
+    instrument: >-
+      scripts/win_bet/ilp_sweep.py over C:/temp/preilp_f1_v2/preilp_split1.parquet, official
+      tracking_cellmot metric, 2000-draw paired crop bootstrap against the deployed setting;
+      outputs _evidence/retention/sweep_disap{,_hi}.json
+    experiment: EXP-0033
+    note: >-
+      Three findings converge on one story, and it is the opposite of the node-budget theme's founding
+      assumption. FACT-0102 measured that ADDING nodes by lowering the detection threshold loses on the
+      leaderboard; FACT-0354 measured that the detector is already at or above budget; and this sweep finds the
+      solver optimum at FEWER nodes than deployed with recall unchanged. FACT-0191/0192 explain why - the metric
+      multiplier is 1 - 0.1 * total_node_ratio with no upper cap, so under-production is paid. The pipeline is
+      not under-producing by accident; it is under-producing in the direction the metric rewards, and the
+      deployed disappearance weight looks slightly under-tuned. What is NOT established is transfer: the edge
+      gain is discarded by the relink, so the honest next test is whether the smaller, equally-recalling node
+      set at 3.0 helps the FULL champion chain - which needs the post-relink stages replayed, not another ILP
+      sweep.
+    date: '2026-08-28'
+    tags: [ilp, sweep, lever-0035, inversion, node-budget, offline-only]
+
+  - id: FACT-0366
+    statement: >-
+      The deployed short-track filter length of 6 is already at its optimum on the fold-1 pilot: no tested
+      alternative beats it, 8 and 10 are clearly worse on raw edge Jaccard with CIs excluding zero, and 2 and 4
+      are indistinguishable. Lengths 2 and 4 also show the count-adjustment signature in reverse - shortening
+      the filter admits more nodes, which spends the under-production bonus (FACT-0191/0192) and turns a small
+      raw gain at 4 into an adjusted loss
+    value: 6
+    unit: best_min_track_len_f1_pilot
+    scope:
+      pilot: {fold: 1, crops: 26, stride: 5, disappearance: 1.5, pipeline: "ILP + short-track filter only"}
+      arms:
+        "2": {d_adjJ: -0.00746, ci: [-0.02210, 0.00726], d_rawJ: -0.00092, ci_raw: [-0.01574, 0.01396]}
+        "4": {d_adjJ: -0.00180, ci: [-0.01198, 0.00857], d_rawJ: 0.00303, ci_raw: [-0.00731, 0.01363]}
+        "6": {deployed: true}
+        "8": {d_adjJ: -0.00970, ci: [-0.02123, 0.00152], d_rawJ: -0.01380, ci_raw: [-0.02514, -0.00273]}
+        "10": {d_adjJ: -0.03379, ci: [-0.05633, -0.01159], d_rawJ: -0.04082, ci_raw: [-0.06308, -0.01863]}
+    provenance: MEASURED
+    validity: SUSPECT
+    validity_reason: >-
+      Same scope limits as FACT-0365: fold 1 only, 26 of 128 crops, and measured on ILP output rather than the
+      deployed chain - the champion runs this filter AFTER motion relink (FACT-0364), on a different input
+      graph, so these are the filter's properties in isolation.
+    instrument: scripts/win_bet/ilp_sweep.py --factor min_track_len; output _evidence/retention/sweep_mtl.json
+    experiment: EXP-0033
+    note: >-
+      A clean null, and useful as one: it retires the short-track filter as a tuning target and leaves the
+      solver weight as the only responsive knob found in the retention family. FACT-0356 had ranked this filter
+      second at 17-21% of node removal; it is second in volume but not in headroom.
+    date: '2026-08-28'
+    tags: [short-track, sweep, null-result, lever-0035]

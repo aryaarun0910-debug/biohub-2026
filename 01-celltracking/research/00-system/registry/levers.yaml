@@ -812,14 +812,15 @@ levers:
       The node budget is lost in RETENTION, not detection: relaxing the deployed ILP appearance/disappearance
       asymmetry and the short-track filter recovers annotated cells the detector already found - 0.0442 of node
       recall on the clean fold - and lifts the pooled objective on both folds of the P28 substrate
-    status: open
+    status: killed
+    closed_by: [FACT-0357, FACT-0364, FACT-0365, FACT-0366]
     falsifier: >-
       A retention change (ILP weights and/or the short-track filter) replayed on a P28 pre-ILP export must beat
       the deployed champion on the pooled objective on BOTH folds with a clean fold-1 crop-bootstrap CI excluding
       zero and >= +0.003, reporting adj WITH and WITHOUT the count adjustment so a node-count gain cannot mask an
       edge-term loss, and then move the LB on one submission stacked on P24. Killed if recovering these cells does
       not raise the score - i.e. if they are exactly the cells the solver could not place in a consistent track.
-    supporting: [FACT-0353, FACT-0355, FACT-0356, FACT-0345, FACT-0335]
+    supporting: [FACT-0353, FACT-0355, FACT-0356, FACT-0357, FACT-0363, FACT-0191, FACT-0192, FACT-0345, FACT-0335]
     note: >-
       Successor to LEVER-0028, at the stage where the deficit is actually created. Measured on P28: the ILP drops
       354,243 peaks on fold 0 and 502,767 on fold 1 (FACT-0353), and the pipeline as a whole nets away 133 / 5,000
@@ -838,7 +839,59 @@ levers:
       recovering them would raise node recall while costing the edge term. FACT-0349 adds that aggregate recall
       cannot certify a parent-plus-two-daughter topology. The count-adjustment split in the falsifier exists to
       catch both.
+
+      TWO MEASURED HEADWINDS, added 2026-08-28 after the forensics. (1) THE METRIC PAYS US TO UNDER-PRODUCE.
+      The multiplier is 1 - 0.1 * total_node_ratio with no upper cap (FACT-0191), and on the clean folds the
+      pipeline's node deficit is currently collecting a real bonus (FACT-0192). Recovering nodes SPENDS that
+      bonus, so this lever must win on RAW edge Jaccard by more than the bonus it gives back - which is exactly
+      why raw and adjusted are reported separately, and it is also an independent explanation of FACT-0102's
+      leaderboard loss when the detection threshold was lowered. (2) THE RECOVERABLE POPULATION IS SMALL AND
+      MOSTLY NOT THE SOLVER'S FAULT (FACT-0357): 58% of fold-1 losses had no candidate edge or one below 0.8,
+      the drop rate falls monotonically with candidate quality, and on fold 0 - the promotion gate - every lost
+      cell together is 0.88% of node recall. Expect the falsifier to fire on fold 0; run it to find out where the
+      solver IS wrong (the strong-candidate and one-sided-candidate populations), not because a win is likely.
+
+      KILLED 2026-08-28 by PKT-0025, on three independent grounds, none of which is "it did not help enough".
+      (1) THE PREMISE IS MOSTLY WRONG: 58% of the fold-1 losses had no candidate edge or one below 0.8 and the
+      drop rate falls monotonically with candidate quality, so the solver is largely reacting correctly to weak
+      association (FACT-0357). (2) THE DIRECTION IS INVERTED: relaxing the disappearance weight loses
+      monotonically; the optimum is at 3.0, TIGHTER than deployed, keeping 12.5% fewer nodes at unchanged
+      recall (FACT-0365). The short-track filter is already optimal at 6 (FACT-0366). (3) THE CHANNEL IS
+      OVERWRITTEN: the champion replaces the ILP's entire edge list with motion relink on all 128 crops
+      (FACT-0364), so the edge-Jaccard gain that the sweep found has no established path to the deployed score.
+      The surviving direction is a different claim with a different mechanism and is LEVER-0036.
     priority: 1
+
+  - id: LEVER-0036
+    claim: >-
+      The deployed pipeline is under-tuned in the direction the metric actually pays: raising the ILP
+      disappearance weight to about 3.0 yields a SMALLER, more selective node set at unchanged node recall, and
+      that node set - the only part of the solver's output the champion keeps - raises the score through the
+      FULL post-processing chain on both folds
+    status: open
+    falsifier: >-
+      The tightened node set must be scored through the COMPLETE champion chain (motion relink, gap closure,
+      DeepCenter vetoes, safe division, short-track filter, line fit), not the ILP stage alone, and must beat
+      the deployed weight on the pooled objective on BOTH folds with a clean FOLD-0 crop-bootstrap CI excluding
+      zero and >= +0.003 on fold 0, reporting raw edge Jaccard beside the adjusted score. Killed if the gain
+      exists only before the relink (FACT-0364), or if it is a count-adjustment artifact, or if fold 0 does not
+      move.
+    supporting: [FACT-0365, FACT-0364, FACT-0191, FACT-0192, FACT-0102, FACT-0354]
+    note: >-
+      This is the one direction PKT-0025 found that survives its own forensics, and it is the OPPOSITE of the
+      node-budget theme that produced LEVER-0028 and LEVER-0035. Three independent measurements now agree that
+      this pipeline should predict FEWER nodes, not more: adding nodes by lowering the detection threshold lost
+      on the leaderboard (FACT-0102), the detector is already at or above the node estimate (FACT-0354), and the
+      solver optimum sits at 12.5% fewer nodes than deployed with recall unchanged (FACT-0365). FACT-0191/0192
+      give the reason - the metric multiplier is 1 - 0.1 * total_node_ratio with no upper cap, so
+      under-production is paid.
+      WHAT MAKES THIS HARD, AND WHY IT IS NOT JUST A RERUN: the sweep's gain was in the ILP's EDGE structure,
+      which motion relink discards (FACT-0364). Only the node-set change reaches the champion. So the test is
+      not another ILP sweep - it needs the post-relink chain replayed on CPU (the notebook's
+      filter_output_graph, which needs the DeepCenter bundle and image frames for gap refinement) or one
+      host-authorised GPU run per fold. Fold 0 has no pre-ILP export at all and fold 0 is the promotion gate
+      (FACT-0261), so a fold-0 export is required either way before promotion.
+    priority: 2
 
   - id: LEVER-0029
     claim: >-

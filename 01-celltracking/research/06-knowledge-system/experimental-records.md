@@ -5074,3 +5074,56 @@ the ILP is 79–83 % of all node removal against the short-track filter's 17–2
 knob and `OUTPUT_MIN_TRACK_LEN` the second. It also caught a naming error — the residual came out at exactly minus
 `safe_divisions_added` on *both* folds, which identified that counter as an edge-only operation rather than a
 node-adding one. A residual that reproduces a counter exactly is a naming error, not noise; chase it.
+
+---
+
+## 2026-08-28 (night) — PKT-0025 closed: the node-budget theme inverts
+
+**What ran.** All six host-directed items, CPU only: packet claimed, exact ILP replayer built and gated, a
+lost-cell atlas, one-factor solver sweeps with the short-track interaction, Lime's localisation observation
+reproduced, and the association-first architecture contracts extracted. Zero GPU, zero submissions.
+
+**The inversion.** Three independent measurements agree the pipeline should predict *fewer* nodes, not more:
+`FACT-0102` (adding nodes lost on the LB), `FACT-0354` (the detector is already at budget), and `FACT-0365`
+(the solver optimum is 12.5 % fewer nodes at unchanged recall). `FACT-0191`/`FACT-0192` supply the reason —
+the metric multiplier is `1 − 0.1·total_node_ratio` with no upper cap, so under-production is paid. Both
+LEVER-0028 and LEVER-0035 had the sign backwards.
+
+**The replayer, and an unsatisfiable specification (`FACT-0363`).** Using the same `tracksdata` ILPSolver as
+the deployed predictor, node parity is exact on all 128 fold-1 crops against three independently recorded
+runs. Edge parity is not attainable: three identical local solves of one crop returned 5,035 / 5,036 / 5,035
+edges while holding nodes at 5,385 every time. PKT-0025 falsifier (a) asked for exact node *and* edge parity
+— a specification that assumed a determinism the solver does not have. Recorded as a finding rather than
+waved through, and it retro-explains the jitter in `FACT-0352` and `FACT-0358` with one mechanism.
+
+**The atlas decided falsifier (b) before any sweep ran (`FACT-0357`).** 18.1 % of lost cells had no candidate
+edge, 39.9 % only a sub-0.8 one, and the drop rate falls monotonically with candidate quality (51.1 % → 1.90 %).
+The solver is largely reacting correctly to weak association. Detector confidence does not discriminate lost
+from kept — an independent confirmation that this is not a detection problem.
+
+**The structural finding that stopped the lane (`FACT-0364`).** The champion replaces the ILP's entire edge
+list with motion relink on all 128 crops — median 99.9 % coverage, zero fallbacks — so what survives the solver
+is its *node set*. The sweep's edge-Jaccard gain therefore has no established transfer path, STEP 3 was
+correctly not reached, and a whole class of "improve the ILP's linking" ideas is retired at once. This was
+caught by reading the notebook's own comment before trusting a +0.0085 result, which is the difference between
+a finding and a wasted GPU run.
+
+**Divisions (`FACT-0359`, `FACT-0360`).** Topology-dominant: fold 0 has all three members of 85 % of GT
+division tuples matched inside 7 µm yet recovers 22.7 % of those. Lime's 3 µm observation reproduces in
+direction, same sign in both folds, but at n = 93 with Fisher p = 0.052 it is recorded SUSPECT.
+
+**Architecture (`FACT-0361`, `FACT-0362`).** HOCT's base edge predictor is architecturally identical to ours,
+so LEVER-0034's association half is a head swap; the blocker is `pool_kernel_um` 5.0 vs our 3.0. Their fork
+head trained on 327,265 pairs with 110 positives and reported zero division recall — the division lane is
+data-limited, not architecture-limited.
+
+**Instruments committed.** `ilp_replay.py` (same-solver CPU replay + asymmetric parity gate),
+`ilp_sweep.py` (one-factor sweeps, raw and adjusted Jaccard reported separately, count-artifact flag),
+`lost_cell_atlas.py`, `division_localisation.py`, plus `match_one_to_one_pairs` factored out of
+`detpeak_curve.py` so recall numbers and the atlas cannot desync.
+
+**Discipline that earned its keep.** Twice the registry already held what I was about to measure — the
+under-production bonus was `FACT-0191`/`FACT-0192`, not a new finding — and checking first turned a duplicate
+into a citation and a sharper lever. The count-adjustment artifact flag fired unprompted on the 5.0 arm,
+catching exactly the masking the host asked to guard against. And a preregistered tolerance was NOT widened to
+make a gate pass: the edge target was shown not to exist instead.

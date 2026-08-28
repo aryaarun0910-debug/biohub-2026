@@ -2,7 +2,7 @@ id: PKT-0025
 title: "LEVER-0035: retention - exact CPU ILP replay, a lost-cell atlas, then one-factor solver sweeps"
 lever: LEVER-0035
 owner: primary
-lock: claimed
+lock: done
 opened: '2026-08-28'
 
 claim: >-
@@ -72,8 +72,43 @@ forbidden:
 
 outputs:
   evidence: _evidence/retention/ and C:/temp/retention/
-  facts_added: []   # appended as each gate completes
+  facts_added: [FACT-0357, FACT-0358, FACT-0359, FACT-0360, FACT-0361, FACT-0362, FACT-0363, FACT-0364, FACT-0365, FACT-0366]
   record: >-
     One section per step in research/06-knowledge-system/experimental-records.md
 
-result: null
+closed: '2026-08-28'
+
+result: >-
+  CLOSED. LEVER-0035 is KILLED and one successor direction survives as LEVER-0036. Zero GPU, zero submissions.
+
+  STEP 0 (plumbing gate) - PASSED ON NODES, AND FOUND THAT THE EDGE HALF WAS UNSATISFIABLE. The CPU replayer
+  uses the same tracksdata ILPSolver as the deployed predictor and reproduces raw_nodes EXACTLY on all 128
+  fold-1 crops against three independently recorded runs. Edge parity cannot be exact: three identical local
+  solves of one crop returned 5,035/5,036/5,035 edges while holding nodes at 5,385 every time - the ILP has
+  multiple optima (FACT-0363). Falsifier (a) as written demanded exact node AND edge parity; that specification
+  assumed a determinism the solver does not have, and the finding is recorded rather than waved through. The
+  old pre-ILP artifact was additionally shown substrate-equivalent to P28 at the pre-ILP stage (FACT-0358), and
+  was still used only as replay input, never as a source of an inherited delta.
+
+  STEP 1 (lost-cell atlas) - FALSIFIER (b) LARGELY FIRES. Of the 5,440 annotated cells fold 1 detects and then
+  loses, 18.1% had no candidate edge at all and 39.9% only a sub-0.8 candidate, and the solver's drop rate falls
+  monotonically with candidate quality - 51.1% at no candidate against 1.90% above 0.99 (FACT-0357). The solver
+  is mostly reacting correctly to weak association, which is FACT-0335's bottleneck one stage later. Detector
+  confidence does not discriminate lost from kept, independently confirming this is not a detection problem.
+
+  STEP 2 (one-factor sweeps) - DIRECTION INVERTED. Relaxing the disappearance weight loses monotonically; the
+  optimum is at 3.0, TIGHTER than the deployed 1.5, worth +0.0085 adjusted and +0.0078 raw Jaccard with both
+  CIs excluding zero, and it keeps 12.5% FEWER nodes at unchanged recall (FACT-0365). The short-track filter is
+  already at its optimum (FACT-0366). The 5.0 arm posted an adjusted gain with no raw gain and was flagged by
+  the instrument as a count-adjustment artifact - the separate reporting the packet required did its job.
+
+  STEP 3 - NOT REACHED, AND CORRECTLY SO. The champion replaces the ILP's entire edge list with motion relink on
+  all 128 crops (FACT-0364), so the sweep's edge-Jaccard gain has no established transfer path. Only the
+  node-set change survives to the deployed chain. No submission was made and no GPU was spent.
+
+  BONUS, from the architecture half: HOCT's base edge predictor is architecturally identical to ours
+  (FACT-0361), so LEVER-0034's association half is a head swap rather than a port; and its fork head trained on
+  327,265 pairs with 110 positives and reported zero division recall, which says the division lane is
+  data-limited rather than architecture-limited (FACT-0362). Division failure on our own substrate is
+  topology-dominant (FACT-0359) and localisation-sensitive in the direction Lime reported, though not
+  established at n=93 (FACT-0360).

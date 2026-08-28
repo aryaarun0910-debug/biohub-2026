@@ -16,6 +16,59 @@ record_kind: state
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
 
+> ## 🔵 2026-08-28 (night) — PKT-0025: the node-budget theme INVERTS. LEVER-0035 killed, LEVER-0036 opened. Zero GPU, zero submissions
+>
+> Host directed six items; all six ran. **Champion stays P24 (`FACT-0341`); nothing was submitted and no GPU was spent.**
+>
+> **The headline is an inversion.** Three independent measurements now agree this pipeline should predict
+> **fewer** nodes, not more: adding nodes by lowering the detection threshold lost on the LB (`FACT-0102`), the
+> detector is already at or above the node estimate (`FACT-0354`), and the solver optimum sits at **12.5% fewer
+> nodes than deployed at unchanged recall** (`FACT-0365`). `FACT-0191`/`FACT-0192` say why — the metric
+> multiplier is `1 − 0.1·total_node_ratio` with no upper cap, so under-production is *paid*. The node-budget
+> theme that produced LEVER-0028 and LEVER-0035 had the sign backwards throughout.
+>
+> **1. Replay (`FACT-0363`).** The CPU replayer uses the same `tracksdata` ILPSolver as the deployed predictor
+> and reproduces `raw_nodes` **exactly on all 128 fold-1 crops** against three recorded runs. Edge parity cannot
+> be exact — three identical local solves of one crop gave 5,035/5,036/5,035 edges while holding nodes at 5,385
+> every time. The ILP has multiple optima. Falsifier (a) demanded exact node *and* edge parity; that
+> specification assumed a determinism the solver does not have, and this one mechanism also explains the
+> previously unattributed jitter in `FACT-0352`/`FACT-0358`.
+>
+> **2. Lost-cell atlas (`FACT-0357`) — falsifier (b) largely fires.** Of 5,440 fold-1 cells detected then lost,
+> 18.1% had **no** candidate edge and 39.9% only a sub-0.8 one; the drop rate falls monotonically with candidate
+> quality (51.1% at no candidate vs 1.90% above 0.99). The solver is mostly reacting correctly to weak
+> association — `FACT-0335`'s bottleneck one stage later. Detector confidence does **not** discriminate lost from
+> kept. On fold 0, the gate, the entire lost population is 176 cells of 20,107.
+>
+> **3. Sweeps (`FACT-0365`, `FACT-0366`).** Relaxing disappearance loses monotonically; the optimum is **3.0**,
+> tighter than the deployed 1.5 (+0.0085 adj, +0.0078 raw, both CIs excluding zero), collapsing by 8.0. The
+> short-track filter is already optimal at 6. The 5.0 arm posted an adjusted gain with no raw gain and the
+> instrument flagged it as a count-adjustment artifact — the separate reporting the host asked for did its job.
+>
+> **4. The structural finding that stops it (`FACT-0364`).** The champion **replaces the ILP's entire edge list**
+> with motion relink — on all 128 crops, median 99.9% coverage, zero fallbacks. What survives the solver is its
+> **node set**, not its edges. So the sweep's edge gain has no established transfer path, STEP 3 was correctly
+> not reached, and a whole class of "improve the ILP's linking" ideas is retired. **`LEVER-0036`** carries the one
+> surviving direction: the smaller, equally-recalling node set at disappearance 3.0, which must be scored through
+> the *full* post-relink chain before it means anything.
+>
+> **5. Divisions (`FACT-0359`, `FACT-0360`).** Failure is **topology-dominant**: fold 0 has all three members of
+> 85% of GT division tuples matched inside 7 µm yet recovers 22.7% of those. Lime's localisation observation
+> reproduces in direction — recovery 0.333 under 3 µm vs 0.143 above, same sign in both folds — but at n=93 with
+> Fisher p=0.052 it is recorded **SUSPECT**, not established.
+>
+> **6. Architecture (`FACT-0361`, `FACT-0362`).** HOCT's base edge predictor is *architecturally identical* to
+> ours (136 tensors, 2,077,996 params, same shapes), so `LEVER-0034`'s association half is a **head swap, not a
+> port** — the one blocker is their `pool_kernel_um` 5.0 against our 3.0. And their fork head trained on 327,265
+> pairs with **110 positives** and reported zero division recall: the division lane is **data-limited, not
+> architecture-limited**, which points at Zebrahub triples (`FACT-0296`) before any new head is designed.
+> Integration table and ordering in [internal-reports.md](../06-knowledge-system/internal-reports.md).
+>
+> **Next, and it needs a host decision:** `LEVER-0036` cannot be tested with another ILP sweep. It needs the
+> post-relink chain replayed on CPU (the notebook's `filter_output_graph`, which needs the DeepCenter bundle and
+> image frames) **or** one host-authorised GPU pre-ILP export per fold. Fold 0 has no pre-ILP export at all and
+> fold 0 is the promotion gate (`FACT-0261`), so a fold-0 export is required either way before promotion.
+
 > ## 🔵 2026-08-28 (late) — LEVER-0028 KILLED at its premise: the node deficit is the ILP's, not the detector's. Retention is the successor lane
 >
 > Both full P29 DetPeak exports are FETCHED and AUDITED (`EXP-0033`/`EXP-0034`). Detection is bit-identical to the
