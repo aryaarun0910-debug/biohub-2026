@@ -1,0 +1,79 @@
+id: PKT-0025
+title: "LEVER-0035: retention - exact CPU ILP replay, a lost-cell atlas, then one-factor solver sweeps"
+lever: LEVER-0035
+owner: primary
+lock: claimed
+opened: '2026-08-28'
+
+claim: >-
+  The nodes the P28 pipeline discards after detection are recoverable by relaxing the deployed ILP
+  appearance/disappearance asymmetry and the short-track filter, and recovering them raises the pooled objective
+  on BOTH folds of the P28 substrate - clearing +0.003 with a fold-0 gain, not a fold-1-only gain.
+
+falsifier: >-
+  Any of: (a) the CPU ILP replayer does not reproduce its source artifact's recorded post-ILP graph EXACTLY
+  (node and edge parity) - in which case no sweep from it is trustworthy and the packet stops before it starts;
+  (b) the lost-cell atlas shows the discarded cells have NO viable candidate edge, i.e. the solver is reacting
+  correctly to weak association rather than causing the loss - which redirects the effort to association and
+  kills the solver-weight lane; (c) a one-factor solver relaxation does not beat the deployed weights on the
+  pooled objective on BOTH folds with a fold-0 crop-bootstrap CI excluding zero; (d) the gain is an artifact of
+  the node-count adjustment, checked by reporting raw edge Jaccard SEPARATELY from the count term; (e) it does
+  not reach +0.003 on fold 0.
+
+prediction: >-
+  Stated before any sweep. The atlas is expected to split the lost cells, not to fall cleanly one way: a
+  majority with weak or absent edge support (solver reacting correctly, FACT-0335's association bottleneck) and
+  a minority with viable edges lost to the appearance/disappearance asymmetry or the min-track-len cut. If that
+  split holds, the recoverable share is the minority and the honest expectation on fold 0 is SMALL - promote the
+  low band: below +0.003, i.e. the falsifier fires on fold 0 even where fold 1 looks large. Fold 1's 0.0442
+  retention loss (FACT-0355) is NOT the forecast; it is association-degraded (FACT-0261) and fold 0 is the gate.
+
+inputs:
+  facts: [FACT-0353, FACT-0355, FACT-0356, FACT-0345, FACT-0335, FACT-0349, FACT-0350, FACT-0261, FACT-0352]
+  artifacts:
+    - C:/temp/node_budget/p29_f{0,1}/            # DetPeak sidecars, detection-identical to P28 (FACT-0352)
+    - C:/temp/p28_f{0,1}/                        # the 0.928-base champion controls + run_stats (FACT-0345)
+    - C:/temp/preilp_f1_v2/preilp_split1.parquet # OLD substrate - PLUMBING PARITY ONLY, never a result
+    - data/train/*.geff                          # GT nodes/edges and estimated_number_of_nodes
+  code:
+    - vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py  # :554-564 build_graph -> ILPSolver -> save
+    - scripts/win_bet/ea_atlas.py                                      # scorer-exact round-trip
+    - scripts/win_bet/audit_detpeak_full_export.py                     # stage attribution
+
+method: >-
+  STEP 0 (PLUMBING GATE, host-directed): build a CPU ILP replayer and prove it reproduces the OLD pre-ILP
+  artifact's own recorded post-ILP graph with EXACT node and edge parity. The old artifact is used strictly as
+  plumbing - FACT-0350 forbids inheriting its deltas and no scientific claim may cite it. If parity fails, stop:
+  every downstream sweep would be measuring the replayer, not the solver.
+  STEP 1 (LOST-CELL ATLAS): from the P29 sidecars and the P28 champion graph, classify every annotated cell the
+  detector found and the pipeline lost, by detector confidence, candidate-edge support (does a viable edge to a
+  neighbouring frame exist AT ALL), component length, distance to the temporal boundary, division proximity, and
+  localisation residual. This decides falsifier (b) BEFORE any sweep: it separates "the solver threw away
+  recoverable cells" from "the solver correctly declined cells association could not link".
+  STEP 2 (ONE-FACTOR SWEEP): vary appearance, disappearance, division and edge weights ONE AT A TIME on the
+  replayer, then test interaction with BIOHUB_OUTPUT_MIN_TRACK_LEN. Report raw edge Jaccard SEPARATELY from the
+  count-adjusted score, per fold, with paired crop bootstrap.
+  STEP 3: only a both-fold win with a clean FOLD-0 CI excluding zero and >= +0.003 on fold 0 licenses a P28
+  re-export, and only then one P24-based submission with a pre-registered band.
+  A P28 pre-ILP export is a GPU action and is NOT taken in this packet without explicit host authorisation.
+
+budget:
+  gpu_sessions: 0   # CPU forensics only; a P28 pre-ILP export is a separate, host-authorised action
+  submissions: 0    # no submission is licensed by this packet
+  wall_clock: 2-4 days
+
+forbidden:
+  - citing any number derived from the OLD pre-ILP artifact as evidence (FACT-0350) - plumbing parity only
+  - fitting solver weights on fold 1 and promoting on fold 1 (FACT-0261 - fold 0 is the gate)
+  - reporting a count-adjusted gain without the raw edge Jaccard beside it
+  - launching a GPU export or a submission without explicit host authorisation (rule 8)
+  - float-coordinate export (FACT-0344)
+  - .claude/settings.json
+
+outputs:
+  evidence: _evidence/retention/ and C:/temp/retention/
+  facts_added: []   # appended as each gate completes
+  record: >-
+    One section per step in research/06-knowledge-system/experimental-records.md
+
+result: null

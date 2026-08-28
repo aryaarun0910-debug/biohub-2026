@@ -4004,6 +4004,11 @@ facts:
       recall here (0.9890 / 0.8677) is from a pure node matcher and is close to but NOT identical with the
       scorer's own node_recall in FACT-0345 (0.9868 / 0.8636); the definitions differ and FACT-0345 remains
       the scorer-authoritative figure.
+      MAGNITUDE IS NOT A FORECAST (host, 2026-08-28). Fold 1 is leakage-clean but ASSOCIATION-DEGRADED
+      (FACT-0261), and retention loss is downstream of association: a solver starved of good edges drops nodes
+      for reasons the hidden leaderboard will not reproduce. Fold 1's 0.0442 is therefore strong DIAGNOSTIC
+      evidence that the loss exists and where it sits, and NOT an estimate of what is recoverable in
+      deployment. Fold 0's 0.0066 is the conservative figure and fold 0 remains the harder promotion gate.
     instrument: >-
       scripts/win_bet/detpeak_retention.py, same official one-to-one matcher as FACT-0354, sidecars vs the P28
       champion CSV node rows; output _evidence/node_budget/retention_f{0,1}_pooled.json
@@ -4069,3 +4074,296 @@ facts:
       not noise - it is worth chasing rather than tolerating.
     date: '2026-08-28'
     tags: [ilp, short-track, retention, ledger, lever-0035, verified]
+
+  - id: FACT-0357
+    statement: >-
+      The lost-cell atlas answers PKT-0025 falsifier (b) against a simple solver-blame reading: the ILP is
+      mostly REACTING CORRECTLY to weak association, not needlessly discarding good cells. Of the 5,440
+      annotated cells fold 1 detects and then loses, 18.1% had NO candidate edge at all and a further 39.9% had
+      a best candidate probability below 0.8, and the solver's drop rate falls monotonically with candidate
+      quality - 51.1% of cells with no candidate are lost against 1.90% of those with a candidate above 0.99.
+      The genuinely questionable decisions are the 1,300 lost cells (23.9%) whose best candidate exceeded 0.95.
+      On FOLD 0, the promotion gate, the entire lost population is 176 cells of 20,107 (0.88%)
+    value: 0.181
+    unit: share_of_lost_cells_with_no_candidate_edge_f1
+    scope:
+      f1:
+        detected_annotated_cells: 103151
+        lost: 5440
+        lost_fraction: 0.0527
+        by_best_candidate_prob:
+          none: {n_lost: 986, share_of_lost: 0.181, drop_rate_in_band: 0.511}
+          "0.50-0.80": {n_lost: 2168, share_of_lost: 0.399, drop_rate_in_band: 0.145}
+          "0.80-0.95": {n_lost: 986, share_of_lost: 0.181, drop_rate_in_band: 0.042}
+          "0.95-0.99": {n_lost: 502, share_of_lost: 0.092, drop_rate_in_band: 0.024}
+          "0.99-1.00": {n_lost: 798, share_of_lost: 0.147, drop_rate_in_band: 0.019}
+        lost_with_strong_candidate_over_0.95: 1300
+        best_prob_median: {lost: 0.808, kept: 0.981}
+        one_sided_candidates_only: 2788
+        temporal_boundary_share: {lost: 0.0458, kept: 0.0135}
+        detector_prob_median: {lost: 0.99941, kept: 0.99986}
+        residual_um_median: {lost: 2.438, kept: 2.298}
+        lost_rate_by_division_proximity: {at_division_frame: 0.0739, "1-2_frames": 0.0775, "3-5_frames": 0.0633, "6+_frames": 0.0517}
+      f0:
+        detected_annotated_cells: 20107
+        lost: 176
+        lost_fraction: 0.0088
+        temporal_boundary_share: {lost: 0.1080, kept: 0.0168}
+        residual_um_median: {lost: 1.862, kept: 1.675}
+        candidate_columns: null
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Two scope limits. (1) The candidate-edge columns require a pre-ILP graph, which exists only for fold 1
+      and comes from the 2026-08-19 export; that artifact is nodes-identical to P28 on all 128 crops and
+      differs by at most one edge on 6 (FACT-0358), so it is used here as a description of the candidate set,
+      not as a source of any paired delta (FACT-0350). (2) The atlas tracks GT CELLS, not node identity through
+      the pipeline: "kept" means the annotated cell is still matched in the final graph, which post-processing
+      can achieve with a synthetic gap node rather than the original peak. 942 KEPT cells had no candidate edge
+      for exactly that reason.
+    instrument: >-
+      scripts/win_bet/lost_cell_atlas.py over the P29 sidecars, the P28 champion graphs and
+      C:/temp/preilp_f1_v2/preilp_split1.parquet; official one-to-one 7 um matching shared with FACT-0354/0355
+      via detpeak_curve.match_one_to_one_pairs; outputs _evidence/retention/atlas_f{0,1}.json
+    experiment: EXP-0033
+    note: >-
+      This narrows LEVER-0035 sharply rather than killing it. Three readings. (1) The monotone drop-rate curve
+      is the signature of a solver doing its job - it discards what association could not link, which is
+      FACT-0335's bottleneck showing up one stage later. (2) The recoverable population is real but small: on
+      fold 0, the gate, EVERY lost cell is 0.88% of node recall and full recovery is not achievable, so the
+      +0.003 both-fold bar is unlikely on the solver lane alone - as PKT-0025 pre-registered. (3) Two
+      mechanism signals survive and are cheap to act on: lost cells are 3.4x (f1) and 6.4x (f0) enriched at the
+      temporal boundary, exactly where the disappearance cost of 1.5 bites, and 2,788 fold-1 losses had
+      candidates on ONE SIDE only - the asymmetric-weight signature. Detector confidence is NOT the
+      discriminator (0.99941 lost vs 0.99986 kept), which independently confirms FACT-0354: this is not a
+      detection problem.
+    date: '2026-08-28'
+    tags: [retention, ilp, atlas, association, lever-0035, falsifier]
+
+  - id: FACT-0358
+    statement: >-
+      The 2026-08-19 fold-1 pre-ILP export is substrate-equivalent to P28 at the pre-ILP stage: across all 128
+      crops its recorded post-ILP node count matches P28's exactly, and its edge count matches on 122 of 128,
+      differing by at most one edge on the remaining 6. The same +-1 edge jitter appears between P28 and P29
+      on an overlapping set of crops, so it is run-to-run pipeline nondeterminism and not a substrate difference
+    value: 128
+    unit: crops_with_identical_post_ilp_node_count
+    scope:
+      raw_nodes_identical: {n: 128, of: 128}
+      raw_edges_identical: {n: 122, of: 128}
+      edge_delta_max_abs: 1
+      differing_crops: [6bba_085bf656, 6bba_23af9eeb, 6bba_4ffd3da3, 6bba_5c824876, 6bba_7b5d3b2c, 6bba_d1acb6ff]
+      preilp_nodes_equal_p29_detector_peaks: {n: 127, of: 128}
+      shared_config: {det_threshold: 0.96875, ilp_edge: -1.0, ilp_appearance: 0.0, ilp_disappearance: 1.5, ilp_division: 1.0}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      This establishes EQUIVALENCE OF THE CANDIDATE GRAPH, not licence to inherit results. FACT-0350 stands:
+      no paired delta measured on the old controls may be carried to P28. What this fact permits is using the
+      old pre-ILP artifact as the INPUT to a solver replay whose output is then compared against itself under
+      different weights - a self-contained comparison in which the +-1 edge jitter is four orders of magnitude
+      smaller than any promotable effect.
+    instrument: >-
+      per-crop comparison of raw_nodes/raw_edges in C:/temp/preilp_f1/run_stats.csv against
+      C:/temp/p28_f1/run_stats.csv, plus the pre-ILP parquet node counts against the P29 sidecar
+      pipeline_peak_count; solver configuration read from the 2026-08-19 kernel log and the P28 notebook
+    note: >-
+      Consequence for cost: the fold-1 half of LEVER-0035 needs NO new GPU run - the candidate graph is already
+      on disk. Fold 0 has no pre-ILP export and fold 0 is the promotion gate (FACT-0261), so a fold-0 pre-ILP
+      export remains the only GPU action the lever needs, and it should be taken only if the fold-1 sweep shows
+      a direction worth testing. The +-1 edge jitter across three independent runs of one configuration is also
+      the second measurement of pipeline nondeterminism, after FACT-0352's 1.3 ppm row-level figure.
+    date: '2026-08-28'
+    tags: [substrate, preilp, equivalence, lever-0035, nondeterminism]
+
+  - id: FACT-0359
+    statement: >-
+      Division failure on the P28 champion is TOPOLOGY-dominant, not detection-dominant: on fold 0, 22 of 26 GT
+      division tuples (84.6%) have their divider and both daughters matched inside the official 7 um radius, yet
+      only 22.7% of those fully-matched tuples are recovered by the official scorer - 17 of 22 fail with every
+      member present. Fold 1 shows the same pattern at a lower matched rate (56.8% fully matched, 19.7%
+      recovered). A tuple with any member unmatched is recovered 0% of the time in both folds
+    value: 0.2273
+    unit: division_recovery_given_all_members_matched_f0
+    scope:
+      f0: {gt_divisions: 26, recovered: 5, recovery_rate: 0.1923, fully_matched_tuples: 22, fully_matched_share: 0.846, recovery_given_fully_matched: 0.2273, recovery_given_incomplete: 0.0}
+      f1: {gt_divisions: 125, recovered: 14, recovery_rate: 0.1120, fully_matched_tuples: 71, fully_matched_share: 0.568, recovery_given_fully_matched: 0.1972, recovery_given_incomplete: 0.0}
+      tuple_definition: GT divider plus its first two daughters
+      outcome_source: tracking_cellmot.division_metrics.score_divisions (the official function)
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Small n by nature - 151 GT divisions across both folds - so the RATES carry real sampling error even
+      though the qualitative split does not. The 0% recovery for incomplete tuples is mechanically necessary
+      (the scorer requires a matched parent and two distinct matched daughter branches), so it is a check that
+      the instrument is wired correctly, not an independent finding.
+    instrument: >-
+      scripts/win_bet/division_localisation.py on the P28 champion exports; outcome from the official
+      score_divisions, tuple membership from the GT geff out-degree; outputs
+      _evidence/retention/divloc_f{0,1}.json
+    experiment: EXP-0033
+    note: >-
+      This is FACT-0349's verified mechanism now MEASURED on our own substrate, and it is the strongest
+      available argument for a dedicated mother-daughter pair or hyperedge head. On fold 0 the detector and the
+      matcher have already delivered all three members of 85% of divisions; what fails is the local fork -
+      whether two predicted child branches map to two distinct GT daughter lineages. No amount of detection or
+      node retention addresses that. It also bounds LEVER-0035: recovering more nodes cannot fix divisions whose
+      members are already present.
+    date: '2026-08-28'
+    tags: [division, topology, scorer, pair-head, measured]
+
+  - id: FACT-0360
+    statement: >-
+      Lime1123's localisation observation (FACT-0348) REPRODUCES in direction on our data but is not established
+      at our sample size: among division tuples whose members are all matched inside the official 7 um radius,
+      recovery is 0.333 when the worst member residual is under 3 um against 0.143 at or above it - an odds
+      ratio of 3.0, same sign independently in both folds, with a bootstrap 95% CI on the difference of
+      [+0.006, +0.387] that only just excludes zero and a two-sided Fisher exact p of 0.052
+    value: 0.1905
+    unit: division_recovery_difference_under_3um_pooled
+    scope:
+      pooled: {under_3um: {n: 30, recovered: 10, rate: 0.3333}, over_3um: {n: 63, recovered: 9, rate: 0.1429}}
+      odds_ratio: 3.0
+      fisher_exact_two_sided_p: 0.0523
+      bootstrap_ci95: [0.0063, 0.3873]
+      per_fold: {f0: {under: 0.3333, n_under: 12, over: 0.1000, n_over: 10}, f1: {under: 0.3333, n_under: 18, over: 0.1509, n_over: 53}}
+      bands: {"0-1": 0.500, "1-2": 0.4286, "2-3": 0.2857, "3-4": 0.2414, "4-5": 0.0, "5-7": 0.0909}
+    provenance: MEASURED
+    validity: SUSPECT
+    validity_reason: >-
+      Direction is consistent and reproduces independently in both folds, but the evidence is thin: 93
+      fully-matched tuples, Fisher p = 0.052, and a bootstrap CI whose lower bound is +0.006. Two further
+      caveats. The residual is computed by this module's own one-to-one match rather than read from the
+      scorer's internal assignment, so it is a descriptive covariate on an official outcome. And 3 um is
+      inherited from FACT-0348 as the band boundary rather than fitted, which avoids a fishing expedition but
+      means the exact cut point is not itself evidence. Do NOT quote this as a validated threshold.
+    instrument: >-
+      scripts/win_bet/division_localisation.py; Fisher exact and a 20,000-draw paired bootstrap over the
+      pooled fully-matched tuples
+    experiment: EXP-0033
+    note: >-
+      FACT-0349 verified at source that 7 um is only an admissibility radius and that errors well inside it can
+      still change one-to-one assignment and branch identity. This is the first measurement on our data that
+      they DO, and it gives a division pair head a concrete precision target: getting a tuple matched is not
+      enough, it has to be matched WELL. Strengthening this needs more divisions, not more analysis - the
+      cheapest route is the same measurement on additional exports rather than a finer binning of these 93.
+    date: '2026-08-28'
+    tags: [division, localisation, external-reproduction, lime, pair-head, suspect]
+
+  - id: FACT-0361
+    statement: >-
+      The StableDet/HOCT bundle is an ASSOCIATION-ONLY drop-in on our exact model contract, not an architecture
+      port: its base edge predictor is bit-for-bit architecturally identical to the public pack's - 136 tensors,
+      2,077,996 parameters, identical key set and identical shapes - and its model card states the checkpoints
+      score edges over detector-produced nodes with the same fixed downstream ILP. Its own config differs from
+      ours in exactly one detector-side constant, pool_kernel_um 5.0 against our 3.0, with downsample [1,4,4]
+      and window_size 2 shared
+    value: 2077996
+    unit: shared_edge_predictor_parameter_count
+    scope:
+      base_edge_predictor: {tensors: 136, params: 2077996, key_sets_identical: true, shape_mismatches: 0, weights_differ: true}
+      hoct_config: {unet_out_channels: 32, unet_layers: [32, 64, 128], downsample: [1, 4, 4], window_size: 2, pool_kernel_um: 5.0}
+      ours_pool_kernel_um: 3.0
+      hoct_hard_negative: {method: hoct_hard_negative_v1, params: 447376, feature_dim: 32, node_projection_in: 35, gate_um: 15.0, edge_neighbors: 64, frozen_except_edge_head: true, training_files: 128, training_steps: 9294}
+      toql: {method: track_object_query_lineage_v1, params: 113190, feature_dim: 33, hidden_dim: 64, layers: 2, child_slots: [2, 64], candidate_threshold: 0.95, core_threshold: 0.99}
+      pqlt: {method: sparse_point_query_lineage_v1, params: 113124, feature_dim: 32, hidden_dim: 64, layers: 2, child_slots: [2, 64]}
+    provenance: VERIFIED
+    validity: VALID
+    instrument: >-
+      torch.load(weights_only=True) state-dict census and config read of
+      C:/temp/arch_inventory/hoct/weights/{fold0_config.json, fold0_edge_predictor_best.pth,
+      fold0_hoct_hard_negative_9294.pt, fold0_toql_9294.pt, fold0_pqlt_9294.pt} against the pack's
+      split_0 edge_predictor_best.pth; 2026-08-28
+    note: >-
+      This is the cheapest association integration on the board and it upgrades FACT-0347's read. Because the
+      trunk architecture is identical, LEVER-0034's association half needs only the HOCT head's forward pass
+      plus its candidate gating (15 um, 64 neighbours) - no model porting, no training. The one detector-side
+      difference, pool_kernel_um 5.0 vs our 3.0, changes the local-max NMS radius and therefore the node set the
+      head was trained against; it must be reconciled before their held-out numbers are expected to transfer.
+      Their reported gains also sit on a WEAKER baseline than ours (their official fold-0-direction reference is
+      0.7147 against our P28 fold-0 of FACT-0345), so their deltas are not additive to the champion and must be
+      re-measured on our substrate.
+    date: '2026-08-28'
+    tags: [architecture, hoct, association, contract, lever-0034, verified]
+
+  - id: FACT-0362
+    statement: >-
+      The HOCT bundle explains WHY a strong association model can still have zero division recall, and it is a
+      DATA limit rather than an architecture limit: its hard-negative checkpoint did train a fork head, on
+      327,265 supervised fork pairs containing only 110 POSITIVE examples - a 1:2975 imbalance carried by a
+      pos_weight of 371.8 and a logit prior correction of 8.0 - and the published result was zero division
+      recall in both held-out directions. Its PQLT and TOQL checkpoints additionally carry an explicit
+      two-daughter decoder, a learned child_slots (2, 64) parameter
+    value: 110
+    unit: positive_fork_training_pairs
+    scope:
+      fork_supervised_pairs: 327265
+      fork_positive_pairs: 110
+      imbalance_ratio: 2975
+      fork_pos_weight: 371.767
+      fork_logit_prior_correction: 7.998
+      fork_positive_repeat: 8
+      fork_loss_weight: 0.1
+      published_division_recall: 0
+      explicit_daughter_representation: {parameter: child_slots, shape: [2, 64], present_in: [pqlt, toql]}
+    provenance: EXTERNAL
+    validity: SUSPECT
+    validity_reason: >-
+      The training-metadata values are read directly from the published checkpoints and are reliable as a record
+      of what the publisher ran; the zero division recall is their own reported evaluation, which we have not
+      reproduced. The causal claim - that 110 positives is WHY the fork head failed - is an inference from the
+      imbalance, not a measured ablation. It is a strong inference, and it is testable.
+    instrument: >-
+      torch.load(weights_only=True) metadata of C:/temp/arch_inventory/hoct/weights/fold0_hoct_hard_negative_9294.pt
+      and fold0_{pqlt,toql}_9294.pt; MODEL_CARD.md limitations section
+    note: >-
+      This is the most useful thing the architecture hunt has produced for the division lane. It says a
+      dedicated mother-daughter pair or hyperedge head is unlikely to be won by architecture alone - a
+      competent, well-regularised fork head trained on this corpus's 110 positives produced nothing - and that
+      the binding constraint is POSITIVE DIVISION EXAMPLES. That points the division lane at the data side
+      first: Zebrahub division triples (FACT-0296) as an external positive source, which is the one asset we
+      have that changes the count. Read with FACT-0359: on fold 0 the members of 85% of GT division tuples are
+      already detected and matched, so the missing capability is fork topology, and FACT-0360 says it must also
+      be accurate to roughly 3 um. child_slots (2, 64) is prior art for the representation itself.
+    date: '2026-08-28'
+    tags: [division, hoct, data-limit, pair-head, zebrahub, external]
+
+  - id: FACT-0363
+    statement: >-
+      The deployed ILP has MULTIPLE OPTIMA and its edge solution is nondeterministic while its node solution is
+      not. Three identical local solves of one crop's pre-ILP graph, same file, same weights, same solver,
+      returned 5,035 / 5,036 / 5,035 edges and 5,385 nodes every time; the three independently recorded Kaggle
+      runs of the same crop recorded 5,036 / 5,035 / 5,036. This single mechanism explains the previously
+      unattributed +-1 edge jitter in FACT-0352 and FACT-0358 - it is solver degeneracy, not GPU
+      nondeterminism in edge prediction
+    value: 5385
+    unit: deterministic_node_count_across_solves
+    scope:
+      crop: 6bba_7b5d3b2c
+      pre_ilp: {nodes: 6295, edges: 6044}
+      local_solves_edges: [5035, 5036, 5035]
+      local_solves_shuffled_edge_order_edges: 5036
+      local_solves_nodes: [5385, 5385, 5385, 5385]
+      recorded_runs_edges: {preilp_2026_08_19: 5036, p28: 5035, p29: 5036}
+      full_fold_replay_vs_recorded: {node_parity_exact_of_128: 128, edge_agreement_old: 125, edge_agreement_p28: 124, edge_agreement_p29: 125}
+      edge_jitter_max_abs: 2
+      affected_crops_of_128: 7
+    provenance: VERIFIED
+    validity: VALID
+    instrument: >-
+      scripts/win_bet/ilp_replay.py full-fold parity run (C:/temp/retention/parity_f1.json) plus a direct
+      three-trial and shuffled-insertion-order re-solve of 6bba_7b5d3b2c through the same
+      tracksdata ILPSolver; 2026-08-28
+    experiment: EXP-0033
+    note: >-
+      Three consequences. (1) THE REPLAYER IS VALIDATED WHERE IT MATTERS: node parity is exact on all 128 crops
+      against all three recorded runs, and node retention is exactly what LEVER-0035 varies. (2) PKT-0025
+      falsifier (a) demanded exact node AND edge parity; the edge half is UNSATISFIABLE as written, because the
+      target itself is not unique - the specification assumed a determinism the solver does not have. That is a
+      finding, not a pass. (3) The edge noise floor for any offline sweep is ~2 edges on ~5% of crops, about 1
+      ppm of the fold's 1.83M edges, so it is negligible against any promotable effect but must be quoted rather
+      than assumed away. Both prior jitter observations should now be read through this mechanism: the local-max
+      detector is deterministic (FACT-0352 raw_nodes identical everywhere) and the nondeterminism enters at the
+      solver.
+    date: '2026-08-28'
+    tags: [ilp, determinism, degeneracy, replay, lever-0035, verified]

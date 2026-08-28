@@ -797,6 +797,14 @@ levers:
       premise is refuted instead, which is cheaper and decisive for THIS mechanism. Reopening requires a new
       mechanism at the detector, not a re-run of this one. The theme survives at the stage where the deficit is
       actually created - see LEVER-0035.
+
+      WHAT THIS KILL DOES NOT COVER (host, 2026-08-28). The exact per-crop budget POLICY was never scored - no
+      frozen function was fit and no scorer round-trip was run. What is dead is the stated MECHANISM: rescuing a
+      systematically under-detected embryo class by lowering the per-crop detection threshold, because no such
+      under-detection exists at the detector. Candidate PRUNING in the other direction (raising thresholds,
+      confidence-conditioned candidate selection, or any rule that changes WHICH peaks enter the solver rather
+      than how many) is untouched by this evidence and would need its own lever and its own falsifier. Do not
+      cite this kill against those.
     priority: 1
 
   - id: LEVER-0035

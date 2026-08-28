@@ -79,16 +79,19 @@ def peaks_to_um(zyx: np.ndarray) -> np.ndarray:
     return np.asarray(zyx, dtype=np.float64) * np.asarray(_ISO_UM, dtype=np.float64)
 
 
-def match_one_to_one(pred_um: np.ndarray, gt_um: np.ndarray,
-                     max_distance: float = MAX_DISTANCE_UM) -> int:
-    """Count matched pairs under the scorer's one-to-one bipartite rule.
+def match_one_to_one_pairs(pred_um: np.ndarray, gt_um: np.ndarray,
+                           max_distance: float = MAX_DISTANCE_UM) -> list[tuple[int, int, float]]:
+    """The matched ``(gt_index, pred_index, distance_um)`` triples, one-to-one.
 
     Uses a KD-tree to bound the problem, then a Hungarian assignment on the surviving pairs.
     A greedy nearest-neighbour matcher would overcount when two predictions crowd one GT node,
     which is precisely the duplicate case the metric refuses to reward.
+
+    ``match_one_to_one`` is the count of this, and both callers share this one implementation so
+    a recall number and the atlas of which cells were matched can never disagree.
     """
     if len(pred_um) == 0 or len(gt_um) == 0:
-        return 0
+        return []
     from scipy.optimize import linear_sum_assignment
     from scipy.spatial import cKDTree
 
@@ -97,7 +100,7 @@ def match_one_to_one(pred_um: np.ndarray, gt_um: np.ndarray,
     gi = [g for g, ps in enumerate(pairs) for _ in ps]
     pi = [p for ps in pairs for p in ps]
     if not gi:
-        return 0
+        return []
     gi_u = sorted(set(gi)); pi_u = sorted(set(pi))
     g_index = {g: i for i, g in enumerate(gi_u)}
     p_index = {p: i for i, p in enumerate(pi_u)}
@@ -106,7 +109,17 @@ def match_one_to_one(pred_um: np.ndarray, gt_um: np.ndarray,
     for g, p in zip(gi, pi):
         cost[g_index[g], p_index[p]] = float(np.linalg.norm(gt_um[g] - pred_um[p]))
     rows, cols = linear_sum_assignment(cost)
-    return int(sum(1 for r, c in zip(rows, cols) if cost[r, c] <= max_distance))
+    return [
+        (gi_u[r], pi_u[c], float(cost[r, c]))
+        for r, c in zip(rows, cols)
+        if cost[r, c] <= max_distance
+    ]
+
+
+def match_one_to_one(pred_um: np.ndarray, gt_um: np.ndarray,
+                     max_distance: float = MAX_DISTANCE_UM) -> int:
+    """Count matched pairs under the scorer's one-to-one bipartite rule."""
+    return len(match_one_to_one_pairs(pred_um, gt_um, max_distance))
 
 
 def curve(peaks: dict[int, tuple[np.ndarray, np.ndarray]],
