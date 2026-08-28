@@ -3611,8 +3611,8 @@ facts:
     statement: >-
       P27 (icom FLOAT re-localisation stacked on the 0.928 champion) scored 0.914 on the public LB - a -0.014
       REVERSAL versus P24 (FACT-0341), firing the falsifier hard; the offline +0.0013/+0.0024 (FACT-0330) did NOT
-      transfer and inverted, and the leading cause is that Kaggle's HOSTED scorer does not honour float coordinates
-      the way the vendored converter does (FACT-0336)
+      transfer and inverted. The CAUSE is INFERRED, not measured: Kaggle accepted and scored the float notebook, so
+      float mishandling, hidden-embryo inversion and icom-on-champion interaction remain confounded
     value: 0.914
     unit: score
     scope:
@@ -3625,6 +3625,12 @@ facts:
       fired: true
       offline_icom_full_fold: {f0: 0.0013, f1: 0.0024}
     provenance: MEASURED
+    validity: SUSPECT
+    validity_reason: >-
+      The SCORE 0.914 is measured; the CAUSAL attribution to hosted-scorer float mishandling is INFERRED and not
+      isolated. Kaggle accepted and scored the notebook (floats are not "illegal"); float quantisation, hidden-embryo
+      inversion and icom-on-champion interaction are confounded. The operational rule (do not deploy float exports) is
+      sound; a clean attribution needs a rounded-icom control or a p23 submission.
     instrument: kaggle submission 55827508 (aryaarun07/biohub-p27-champion-icom v1)
     experiment: EXP-0029
     note: >-
@@ -3635,7 +3641,7 @@ facts:
       field-validated form is integer. (2) icom-on-champion interaction. They are not fully separated by this single
       submission, but either way the FLOAT-icom deployment is DEAD on the LB. CONSEQUENCES: (a) the champion stays
       P24 = 0.928 - do NOT deploy p27; (b) do NOT submit p23 (also a float export) - it would likely drop the same
-      way; (c) FACT-0336's "floats are scorer-legal" is REFUTED at the hosted-scorer level and must not be relied on;
+      way; (c) FACT-0336's "floats are scorer-legal" must NOT be relied on for DEPLOYMENT (hosted-scorer float handling unverified); the structural claim about the vendored converter stands;
       (d) LEVER-0022 is effectively dead - float icom loses on the LB and rounded icom is <= 0 offline. The #5 audit
       float mode remains correct as a STRUCTURAL contract, but a float export must never be deployed to this LB.
       This is exactly the offline/LB-seam risk the P24-lineage controls (EXP-0030/0031) and a submission-as-judge

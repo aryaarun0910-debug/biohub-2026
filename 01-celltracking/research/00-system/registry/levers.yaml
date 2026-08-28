@@ -588,7 +588,7 @@ levers:
       0.927 public lineage's refine_centroids: z+-1, y/x+-3 voxel window, 20th-percentile baseline)
       reduces the mean endpoint residual and the >3 um tail on the honest fold, and that lifts the
       scorer-exact fold score on both embryo directions
-    status: open
+    status: killed
     reopen_when: >-
       SATISFIED 2026-08-27: the host authorised the queued p23 submission and the organizer's converter
       casts coordinates to Float64 (FACT-0336). Deploy spec p23_icom155.json is complete.

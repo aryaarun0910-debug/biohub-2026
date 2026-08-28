@@ -408,7 +408,7 @@ experiments:
     spec: scripts/kaggle_specs/p27_champion_icom.json
     kernel: aryaarun07/biohub-p27-champion-icom
     kernel_version: 1
-    submission: 55830000
+    submission: 55827508
     lb: 0.914
     status: scored
     date: '2026-08-27'
@@ -427,7 +427,7 @@ experiments:
     kernel_version: 2
     submission: null
     lb: null
-    status: running
+    status: complete
     date: '2026-08-27'
     facts: [FACT-0341, FACT-0310]
     note: >-
@@ -443,7 +443,7 @@ experiments:
     kernel_version: 2
     submission: null
     lb: null
-    status: running
+    status: complete
     date: '2026-08-27'
     facts: [FACT-0341, FACT-0310]
     note: >-
