@@ -1,0 +1,84 @@
+id: PKT-0032
+title: "AGENT B - the division-verifier dataset, its leakage contract and its metric adapter"
+lever: LEVER-0040
+owner: agent-b-division
+lock: claimed
+opened: '2026-08-29'
+
+claim: >-
+  A cross-fitted false-fork verifier can be BUILT and HONESTLY EVALUATED on this pipeline: a dataset of
+  division positives and negatives exists that never lets a model see the fold it judges, includes
+  counterfactual negatives the generator does not naturally produce, and connects to the official division
+  metric through an adapter that reports TP/FP/FN separately.
+
+falsifier: >-
+  This packet's deliverable is a DATASET AND AN ADAPTER, so its falsifiers are about honesty, not accuracy:
+  (a) the positive population is too small to train anything - if fold 1 plus external tuples yields
+      substantially fewer usable positives than HOCT's 110 (FACT-0362), the lane is data-limited at a level
+      no head design fixes and that is the finding;
+  (b) the leakage contract cannot be held - if any feature carries fold identity, or a negative derived from
+      fold 0 reaches a model judged on fold 0, the dataset is void. FACT-0378 is the standing warning: a
+      secondary trained on all 199 movies is un-measurable by any LOEO control we can build;
+  (c) the metric adapter does not reproduce the official division TP/FP/FN on a known control. An adapter
+      that cannot reproduce the deployed numbers cannot be trusted to score a change to them;
+  (d) counterfactual negatives are indistinguishable from positives on every available feature, which would
+      say the surface carries no division signal at all.
+
+prediction: >-
+  Stated before the work. (a) is the real risk and I expect the positive count to be TIGHT: fold 0 has 26
+  annotated divisions and fold 1 has 125-ish, so even with external tuples this is a low-hundreds problem,
+  not a low-thousands one. That is survivable for a VERIFIER precisely because the negative class is
+  abundant - 67 false forks against 5 true on fold 0 alone - and rejection has far more mass to learn from
+  than generation does. I expect (c) to pass and (d) to fail to fire, on the strength of FACT-0371: perfect
+  edges take fold-0 division FP from 67 to ZERO, so the false forks are structurally distinguishable, at
+  least in principle.
+
+inputs:
+  facts: [FACT-0375, FACT-0380, FACT-0371, FACT-0362, FACT-0359, FACT-0360, FACT-0296, FACT-0378]
+  artifacts:
+    - C:/temp/p30_f0/preilp_split0.parquet
+    - C:/temp/preilp_f1_v2/preilp_split1.parquet
+    - C:/temp/p28_f0/loeo_split0_champion.csv.gz
+    - _evidence/retention/divloc_f0.parquet
+    - _evidence/retention/divloc_f1.parquet
+  code:
+    - scripts/win_bet/division_localisation.py
+    - scripts/win_bet/div_reach_steal.py       # official division matching and scoring path
+    - scripts/win_bet/assoc_report.py          # division TP/FP/FN reported separately, always
+    - scripts/win_bet/assoc_parent_dataset.py  # the matching contract to share, not to re-invent
+
+method: >-
+  CPU only, and the leakage contract is written down BEFORE any row is built. (1) Enumerate the division
+  populations on both folds through the OFFICIAL matcher - annotated divisions, recovered TPs, emitted FPs -
+  reusing the same one-to-one 7 um matching the parent surface uses so a cell counted here is the same cell
+  counted there. (2) Define the cross-fitting map explicitly: which fold trains, which is judged, and where
+  external positives sit. (3) Add counterfactual negatives by construction - wrong parent with plausible
+  daughters, correct parent with a wrong sister, temporally incoherent forks - and label how each was made,
+  so a later analysis can tell a learned physics from a learned artifact. (4) Build the metric adapter and
+  PROVE it by reproducing the deployed fold-0 division TP/FP/FN on the champion control. An adapter that
+  cannot reproduce a known number is not shipped. (5) Report the class balance and the feature separability
+  honestly, including the case where they are too small to proceed.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: 1-2 days
+
+forbidden:
+  - training or judging any model on fold-0 false forks that is then scored on fold 0 - the leakage rule is
+    the lever, not a caveat on it
+  - claiming LEVER-0034, LEVER-0037 or LEVER-0039, or investigating them
+  - enabling or evaluating HOCT's fork head - PKT-0029 forbids it and its published recall is zero
+    (FACT-0347) on 110 positives (FACT-0362)
+  - reading any association gain as division recovery (FACT-0371)
+  - treating localisation (FACT-0380) as this lever - it is secondary and belongs to no packet yet
+  - launching a GPU job, pushing a kernel, or making a submission
+  - editing .claude/settings.json, .gitignore, or the deployed spec
+
+outputs:
+  evidence: C:/temp/divverify/ and _evidence/divverify/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null

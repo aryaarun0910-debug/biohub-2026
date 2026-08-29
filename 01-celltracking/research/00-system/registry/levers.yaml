@@ -1123,3 +1123,70 @@ levers:
       is CC-BY. Licence/prize check required. This is also the strongest ASSOCIATION candidate (query-lineage
       transformers) - the harder-association-gate the route-to-0.950 asks for. Integrate public weights before training.
     priority: 3
+
+  - id: LEVER-0039
+    claim: >-
+      A learned TARGET-WISE parent ranker over the frozen candidate surface chooses better parents than the
+      deployed argmax, converting contested wrong-parent choices into net true edges through the complete
+      unchanged chain
+    status: open
+    falsifier: >-
+      Any of, in the order they bite. (a) On held-out contested fold-0 targets the ranker does not beat the
+      deployed 0.8338 (FACT-0381). (b) It beats it but LOSES part of the 78.6% single-candidate population,
+      so overall top-1 does not rise - the two-sided bar, because a model free to abstain can trade the easy
+      targets for the hard ones and post a better contested figure while associating worse overall. (c) Top-1
+      rises but does not CONVERT: net true edges through the complete chain do not increase, which is exactly
+      the FACT-0376 failure one stage earlier. (d) The gain is a count-adjustment artifact - adjusted edge
+      Jaccard up with the raw channel flat or negative (FACT-0375). (e) It does not cross-fit: a ranker
+      trained on one fold does not transfer to the other on its contested population. Any of these kills the
+      SIMPLE-FEATURE version of this lever; (a) failing specifically is informative rather than merely
+      negative, because it says the existing representation is not the limit and richer node context is
+      justified.
+    supporting: [FACT-0381, FACT-0376, FACT-0369, FACT-0370, FACT-0368]
+    note: >-
+      The direct successor to LEVER-0037's kill. FACT-0376 established that availability is not the binding
+      constraint - offering the true parent raised reach by 924 edges and the pipeline took 28 while taking
+      113 wrong ones - so the lane is the SCORER's discrimination. FACT-0381 then sized that lane honestly and
+      it is SMALL and HARD: 691 wrong parent choices on 4,157 contested fold-0 targets, NOT the 87% of the gap
+      FACT-0368 measured for perfect association over all edges. Those are different quantities and conflating
+      them would overstate a ranker's reach substantially. The lane is still worth working because the
+      contested errors are concentrated where divisions also fail, and FACT-0371 showed perfect edges drive
+      division false positives to ZERO - the coupling, not the edge count alone, is what makes this the
+      shortest credible route. Cross-fitting REQUIRES the fold-1 candidate export (PKT-0030): fold 1's
+      surface is single-parent by construction, so top-1 there is 1.0 for any model and a metric that cannot
+      fail is not evidence. Every report goes through scripts/win_bet/assoc_report.py; no other summary counts.
+    priority: 1
+
+  - id: LEVER-0040
+    claim: >-
+      A learned DIVISION VERIFIER that rejects false forks - trained cross-fitted so it never sees the fold it
+      judges - cuts fold-0 division false positives substantially without losing division true positives,
+      and is worth about three times the localisation prize
+    status: open
+    falsifier: >-
+      Any of. (a) The verifier cannot cut false positives without losing true positives roughly one for one -
+      at 5 TP against 67 FP (FACT-0375) there is very little TP to spend, so a precision-recall trade that
+      costs even two TP wipes out the gain. (b) Trained cross-fitted it does not transfer: performance on the
+      fold it never saw collapses to chance, which would mean it learned fold-specific appearance rather than
+      what a false fork looks like. (c) The division-Jaccard gain does not survive the complete chain, where
+      safe-division post-processing and motion relink both rewrite forks after the solver. (d) The gain is
+      real but the combined-score effect is inside noise on a paired interval. Note (a) and (c) are the ones
+      expected to bite.
+    supporting: [FACT-0375, FACT-0380, FACT-0371, FACT-0362, FACT-0359]
+    note: >-
+      Sized from our own arithmetic, not from ambition: fold 0 emits 67 division FPs against 26 annotated
+      divisions, so cutting FPs to about 20 takes divJ from 0.0538 to about 0.109 - roughly +0.006 of score,
+      about three times the +0.002 localisation prize (FACT-0380 note 2). VERIFIER BEFORE GENERATOR is
+      deliberate: the FP population is 13x the TP population, so rejection has far more mass to work on than
+      recall does, and FACT-0362 already showed the division lane is DATA-limited rather than
+      architecture-limited - HOCT's fork head trained on 110 positives and reported zero recall, so a new
+      generator head is not the missing piece. THE LEAKAGE RULE IS PART OF THE LEVER, not a caveat on it:
+      fold-0 false forks cannot train a model judged on fold 0. Positives come from fold 1 and external
+      division tuples (FACT-0296), negatives from fold-1 false forks, and the fold-0 judgement is made by a
+      model that never saw fold 0. Counterfactual negatives are required - wrong parent with plausible
+      daughters, correct parent with a wrong sister, temporally incoherent forks - because a verifier trained
+      only on naturally-occurring negatives learns the generator's habits rather than the physics.
+      Localisation (FACT-0380) is explicitly NOT this lever and stays secondary; if it is used at all it is as
+      a conditional layer where this verifier flags division-sensitive uncertainty, never a global coordinate
+      rewrite.
+    priority: 1

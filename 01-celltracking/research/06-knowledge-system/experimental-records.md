@@ -5137,3 +5137,46 @@ under-production bonus was `FACT-0191`/`FACT-0192`, not a new finding — and ch
 into a citation and a sharper lever. The count-adjustment artifact flag fired unprompted on the 5.0 arm,
 catching exactly the masking the host asked to guard against. And a preregistered tolerance was NOT widened to
 make a gate pass: the edge target was shown not to exist instead.
+
+## 2026-08-29 (evening) — PKT-0030 launched, three learned surfaces partitioned, one shared report contract
+
+**The launch.** `EXP-0039` / `P34` is the passive fold-1 candidate acquisition, pushed as
+`aryaarun07/biohub-p34-acquisition-f1` on the P28 fold-1 champion control base. It exists for one reason:
+`FACT-0381` measured that fold 1's candidate surface is single-parent by construction, so parent top-1 there
+is 1.0 for **every** model and a cross-fitted ranker cannot be evaluated at all. A metric that cannot fail is
+not evidence. Split-1 weights are re-declared explicitly rather than inherited silently (the built notebook
+contains zero `split_0` references), both treatment variables are unset and absent, and the built notebook was
+verified to be a **pure superset** of the control — zero deleted lines in every cell — so graph parity holds by
+construction before audit A confirms it empirically. The pre-ILP export ships in the same run because the
+node-id stability check can only be self-consistent if both artifacts come from one run; joining new sidecars
+to the 2026-08-19 `preilp_f1_v2` parquet would assume the very stability the check exists to prove. No
+submission. Two concurrent GPU sessions now, P33 and P34, which is the `FACT-0061` ceiling — no third.
+
+**The partition, locked mechanically before any agent started.** `LEVER-0039` (learned parent
+discrimination) and `LEVER-0040` (false-fork verifier) were opened, and four packets now hold the cycle:
+`PKT-0029` HOCT (LEVER-0034, primary), `PKT-0031` association baselines (LEVER-0039, agent A), `PKT-0032`
+division verifier (LEVER-0040, agent B), `PKT-0033` adversarial audit (**no lever, deliberately** — an auditor
+that owns a hypothesis has a stake in the answer). `PKT-0030` also holds no lever: it is a substrate
+acquisition, and claiming LEVER-0039 for it would have taken the lever out of agent A's reach under the R6
+lock and made the acquisition look like the experiment. R6 now shows one owner per live lever with no
+collisions.
+
+**The shared report contract — `scripts/win_bet/assoc_report.py`.** Three learned surfaces advancing at once
+would otherwise produce three incomparable claims, each free to quote whichever channel happened to move. The
+module reads `ADJUSTMENT_ALPHA` and `SCORE_DIVISION_WEIGHT` from the scorer rather than restating them, and
+decomposes the adjusted-edge-Jaccard delta against counterfactual arms — `raw_channel` is what better
+association bought, `count_channel` is what the node count bought, with the product's interaction reported as
+a residual rather than hidden. `count_adjustment_artifact` fires when the adjusted delta is positive while the
+raw channel is not: exactly the `FACT-0375` shape that killed LEVER-0036, and the mirror of `FACT-0376`. Ten
+tests cover it, including one that reproduces the LEVER-0036 pathology numerically and asserts the flag fires,
+and one asserting a 10-gained/10-lost wash reports churn 20 rather than a neutral net.
+
+**The frozen surface now states its own degeneracy.** `assoc_parent_dataset.evaluate` gained a contested /
+single-candidate split and a `degenerate_for_ranking` flag. Re-run on the existing tables it reproduces
+`FACT-0381` exactly on fold 0 — 19,444 decidable, 4,157 contested at top-1 0.8338, 691 errors, 15,287
+single-candidate — and on fold 1 it now says `degenerate_for_ranking: true` in its own output instead of
+leaving a caller to notice. The bar the rankers are held to is two-sided by construction: beat 0.8338 on
+contested targets *without* losing the 78.6% that are correct by construction.
+
+**Gates.** `pytest -q` 1153 passed / 136 skipped; `validate_registry.py`, `validate_research_tree.py` and
+`claims_table.py --check` all clean.

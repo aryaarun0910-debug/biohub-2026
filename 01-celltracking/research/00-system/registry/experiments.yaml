@@ -592,3 +592,25 @@ experiments:
       knob is confounded, and a positive result relocates the baseline without advancing the association
       capability FACT-0368 says is needed. No follow-up knob sweeps or stacking on this lineage.
 
+
+  - id: EXP-0039
+    title: P34 passive fold-1 candidate acquisition on the P28 fold-1 champion control
+    spec: scripts/kaggle_specs/p34_acquisition_f1.json
+    kernel: aryaarun07/biohub-p34-acquisition-f1
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-29'
+    facts: [FACT-0381, FACT-0369, FACT-0370, FACT-0373]
+    note: >-
+      PKT-0030. The fold-1 mirror of P30, and the ONLY thing that makes a cross-fitted parent ranker
+      measurable: FACT-0381 showed fold 1's candidate surface is single-parent by construction, so top-1
+      there is 1.0 for any model and a metric that cannot fail is not evidence. Built as a PURE SUPERSET of
+      the P28 fold-1 control - verified before push, zero deleted lines in every cell - so graph parity holds
+      by construction and is then confirmed empirically by audit A. Split-1 weights are re-declared
+      explicitly rather than inherited silently and the built notebook contains zero split_0 references; both
+      TREATMENT variables are unset and absent. The pre-ILP export ships in the same run because audit D
+      (node-id stability) can only be self-consistent if both artifacts come from one run - joining new
+      sidecars to the 2026-08-19 preilp_f1_v2 parquet would assume the stability D exists to prove. No
+      submission.

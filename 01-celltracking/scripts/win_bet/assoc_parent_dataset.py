@@ -183,6 +183,14 @@ def evaluate(table: pl.DataFrame, score_col: str) -> dict:
         return {"decidable_targets": 0}
 
     top1, margins = 0, []
+    # CONTESTED vs SINGLE-CANDIDATE, split here rather than by each caller (FACT-0381). A target
+    # offered one candidate scores top-1 = 1.0 by construction, not by skill, and on fold 0 that is
+    # 78.6% of the surface - so a pooled top-1 is dominated by decisions no model can get wrong and
+    # a real ranking failure barely moves it. The bar every ranker is held to is TWO-SIDED: beat the
+    # deployed top-1 on CONTESTED targets while not losing the single-candidate ones, which a model
+    # scoring the whole surface CAN lose by re-ranking a lone candidate below an abstain threshold.
+    contested_hits, contested_n, single_hits, single_n = 0, 0, 0, 0
+    per_target: dict[tuple[str, int], int] = {}
     for _key, group in decidable.group_by("crop", "target"):
         s = group[score_col].to_numpy()
         y = group["is_true_parent"].to_numpy()
@@ -190,9 +198,15 @@ def evaluate(table: pl.DataFrame, score_col: str) -> dict:
         chosen = order[0]
         hit = bool(y[chosen] == 1)
         top1 += int(hit)
+        per_target[(str(group["crop"][0]), int(group["target"][0]))] = int(hit)
         if len(s) > 1:
             best, second = s[order[0]], s[order[1]]
             margins.append(float(best - second) * (1.0 if hit else -1.0))
+            contested_n += 1
+            contested_hits += int(hit)
+        else:
+            single_n += 1
+            single_hits += int(hit)
     n_targets = decidable.select(["crop", "target"]).unique().height
     unreachable = table.filter(
         (pl.col("target_has_true_parent") == 1) & (pl.col("true_parent_is_candidate") == 0)
@@ -203,6 +217,23 @@ def evaluate(table: pl.DataFrame, score_col: str) -> dict:
         "true_parent_margin_mean": float(np.mean(margins)) if margins else None,
         "true_parent_margin_median": float(np.median(margins)) if margins else None,
         "targets_true_parent_not_offered": unreachable,
+        "contested": {
+            "n": contested_n,
+            "share": contested_n / max(n_targets, 1),
+            "top1": contested_hits / max(contested_n, 1) if contested_n else None,
+            "errors": contested_n - contested_hits,
+        },
+        "single_candidate": {
+            "n": single_n,
+            "share": single_n / max(n_targets, 1),
+            "top1": single_hits / max(single_n, 1) if single_n else None,
+            "note": "1.0 by construction for any model that ranks; not skill",
+        },
+        # A fold whose contested population is empty CANNOT falsify a ranker - top-1 is 1.0 there
+        # for every model. FACT-0381 measured exactly that on fold 1, and a metric that cannot fail
+        # is not evidence, so the surface says so itself rather than leaving a caller to notice.
+        "degenerate_for_ranking": contested_n == 0,
+        "per_target_correct": per_target,
     }
 
 
@@ -238,6 +269,9 @@ def main() -> int:
     table.write_parquet(args.out_table)
 
     baseline = evaluate(table, "prob")   # the DEPLOYED scorer on the same surface
+    # The per-target correctness map is for in-process comparison (assoc_report.parent_conversions);
+    # its tuple keys are not JSON, and dumping 19k rows into a summary would bury the summary.
+    baseline.pop("per_target_correct", None)
     result = {
         "schema_version": 1,
         "preilp": str(args.preilp),
@@ -250,13 +284,27 @@ def main() -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, indent=2, default=float), encoding="utf-8")
     b = baseline
+    contested = b.get("contested", {})
+    single = b.get("single_candidate", {})
     print(
         f"\nASSOC_PARENT_DATASET rows={table.height:,} crops={len(crops)}\n"
         f"  decidable targets            {b.get('decidable_targets', 0):,}\n"
         f"  DEPLOYED parent top-1        {b.get('parent_top1')}\n"
+        f"  CONTESTED targets            {contested.get('n', 0):,} "
+        f"({contested.get('share', 0):.1%})  top-1 {contested.get('top1')}  "
+        f"errors {contested.get('errors', 0):,}\n"
+        f"  single-candidate targets     {single.get('n', 0):,} "
+        f"({single.get('share', 0):.1%})  top-1 1.0 by construction\n"
         f"  true-parent margin (median)  {b.get('true_parent_margin_median')}\n"
-        f"  true parent never offered    {b.get('targets_true_parent_not_offered', 0):,}"
+        f"  true parent never offered    {b.get('targets_true_parent_not_offered', 0):,}\n"
+        f"  DEGENERATE FOR RANKING       {b.get('degenerate_for_ranking')}"
     )
+    if b.get("degenerate_for_ranking"):
+        print(
+            "  ^ no contested targets on this surface: top-1 is 1.0 for ANY model here, so this "
+            "fold cannot falsify a ranker and no ranker claim may be made on it (FACT-0381).",
+            flush=True,
+        )
     return 0
 
 

@@ -1,0 +1,103 @@
+id: PKT-0033
+title: "AGENT C - adversarial audit of the learned-association cycle's own instruments"
+lever: null              # an auditor holds no hypothesis - see `why_no_lever`
+owner: agent-c-auditor
+lock: claimed
+opened: '2026-08-29'
+
+why_no_lever: >-
+  This packet deliberately claims no lever. Its job is to attack the instruments the other packets depend
+  on, and an auditor that owns a hypothesis has a stake in the answer. R6 permits a null lever; the
+  validator only guards packets that name one. It is also the mechanical reason this agent cannot collide
+  with PKT-0029 (LEVER-0034), PKT-0031 (LEVER-0039) or PKT-0032 (LEVER-0040).
+
+claim: >-
+  The instruments this cycle rests on - the frozen parent surface, the shared report contract, the
+  candidate sidecars and the conversion accounting - either survive a deliberate attempt to break them, or
+  the specific way each fails is written down before a result is built on it.
+
+falsifier: >-
+  Inverted, because this packet succeeds by FINDING things: it fails if it returns a clean bill of health
+  without having demonstrated, at file:line or by running committed code, that it actually exercised each
+  named failure mode. "I looked and it seemed fine" is not an audit. An empty grep is not evidence -
+  ripgrep -E means --encoding, and a malformed flag once produced empty output that reached two reports as
+  a verified negative; _evidence/ and artifacts/ are gitignored and skipped silently by default.
+
+prediction: >-
+  Stated before the audit. I expect the single-candidate degeneracy check to confirm FACT-0381's fold-1
+  finding and nothing more; the highest-yield target is the CONVERSION ACCOUNTING, because FACT-0376's
+  delta_edge_tp is a NET count whose per-crop metrics were retained while the final graphs were not - so
+  28 net could be 28 gained and none lost, or hundreds gained and nearly as many displaced, and PKT-0027
+  rule (5) already flags that as unresolved. Second most likely to yield: label ambiguity in the matching
+  contract shared across FACT-0354/0355/0357/0381.
+
+audit_targets:
+  leakage: >-
+    Trace every proposed train/evaluate split for fold identity reaching a model that judges that fold.
+    Include the subtle routes: features derived from fold-wide statistics, hyperparameters selected on the
+    judged fold, and any checkpoint whose provenance is not split-specific. FACT-0378 is the precedent - a
+    secondary trained on all 199 movies is legitimate against a hidden test set and un-measurable offline.
+  label_ambiguity: >-
+    Attack the frozen label contract in assoc_parent_dataset.py. Does one-to-one 7 um matching ever assign
+    a target a parent that GT would dispute? What happens at track starts, at division targets where the
+    true parent is a divider, and where a GT cell has no matched pre-ILP node? The contract says ties break
+    by lower source index and two-predecessor cells are dropped - confirm both are actually what the code
+    does, not merely what the docstring says.
+  single_candidate_degeneracy: >-
+    Confirm independently that fold 1's surface admits exactly one parent per target and that top-1 there
+    is 1.0 by arithmetic, and search the fold-0 surface for any other metric that cannot fail. This cycle
+    has already caught a metric that could not fail, a test that grepped source instead of running it, and
+    an arming block overridden by a later contamination cut.
+  cache_parity: >-
+    Review the PKT-0029 Gate 1 parity design for what a PASS would NOT prove. Specifically: the smoke runs
+    two crops frame-capped, so what classes of cache error survive it, and does reproducing candidate
+    edges and probabilities actually establish that a NEW head trained on the cache sees what the deployed
+    head saw?
+  conversion_accounting: >-
+    The highest-value target. Establish exactly what FACT-0376's 28 net true edges is made of, or establish
+    that it CANNOT be recovered from retained artifacts and say so plainly. Then check that
+    assoc_report.parent_conversions closes that hole for every future model, and that its gained/lost/churn
+    cannot be satisfied by a net figure.
+
+inputs:
+  facts: [FACT-0376, FACT-0381, FACT-0378, FACT-0373, FACT-0369, FACT-0370, FACT-0354, FACT-0371]
+  artifacts:
+    - C:/temp/assoc/f0.parquet
+    - C:/temp/assoc/f1.parquet
+    - C:/temp/p30_f0/
+    - _evidence/ecb/conversion_l37.json
+    - _evidence/ecb/panel_l37_f0.json
+  code:
+    - scripts/win_bet/assoc_parent_dataset.py
+    - scripts/win_bet/assoc_report.py
+    - scripts/win_bet/lever37_conversion.py
+    - scripts/win_bet/audit_p30_acquisition.py
+    - scripts/kaggle_edits/assoc_feature_parity.py
+
+method: >-
+  CPU only, read-and-run. Verify every premise at file:line or by rerunning committed code - that discipline
+  is what caught the HOCT pool-kernel blocker being inert (FACT-0379) and the champion already running a
+  consensus it was said to lack (FACT-0377, corrected). Where a check needs a script, write it under
+  scripts/win_bet/ and make it fail closed; a silent no-op is worse than a crash, so prefer a positive
+  heartbeat whose ABSENCE is the alarm. Report findings ranked by what would change a decision, and for each
+  say plainly whether it is CONFIRMED at a named location or merely plausible.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: 1-2 days
+
+forbidden:
+  - claiming any lever, or running an experiment that would advance one - this packet audits, it does not compete
+  - modifying the frozen surface or the shared report contract; propose changes, do not make them
+  - launching a GPU job, pushing a kernel, or making a submission
+  - editing .claude/settings.json, .gitignore, or any registry file
+  - reporting a clean result without naming what was actually exercised and how
+
+outputs:
+  evidence: C:/temp/audit_assoc/ and _evidence/audit/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null

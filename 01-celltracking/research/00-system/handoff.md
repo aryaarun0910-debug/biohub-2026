@@ -12,6 +12,48 @@ record_kind: state
 
 # Current handoff
 
+> ## 2026-08-29 (evening) — the cycle is PARTITIONED: three learned surfaces, one report contract, and the fold-1 blocker is in flight
+>
+> **What is running.** Two GPU sessions, which is the `FACT-0061` ceiling — no third may start. `P33`
+> (PKT-0029 Gate 1 feature parity) and `P34` (`EXP-0039`, the passive fold-1 candidate acquisition, pushed
+> this evening). Submission 55871868 (`EXP-0038`, PKT-0028) is still scoring; **do not poll it.** The identity
+> replay continues on local CPU, immutable.
+>
+> **Why P34 exists, and it is not a nicety.** `FACT-0381` measured that fold 1's candidate surface is
+> single-parent by construction, so parent top-1 there is **1.0 for every model**. A cross-fitted ranker
+> cannot be evaluated on a metric that cannot fail. P34 manufactures the fold-1 surface on which a held-out
+> ranker claim becomes possible at all. It is built as a **pure superset** of the P28 fold-1 control — zero
+> deleted lines in every cell — with split-1 weights re-declared explicitly, both treatment variables unset
+> and absent, and the pre-ILP export shipped in the same run so the node-id audit is self-consistent rather
+> than assuming the stability it exists to prove. No submission.
+>
+> **The partition is mechanical, not a convention.** `LEVER-0039` (learned parent discrimination) and
+> `LEVER-0040` (false-fork verifier) are open, and R6 now shows one owner per live lever: `PKT-0029` HOCT
+> (LEVER-0034, primary), `PKT-0031` association baselines (agent A), `PKT-0032` division verifier (agent B),
+> `PKT-0033` adversarial audit (**no lever by design** — an auditor that owns a hypothesis has a stake in the
+> answer). `PKT-0030` also holds no lever: it is a substrate acquisition, and claiming LEVER-0039 for it would
+> have taken that lever out of agent A's reach.
+>
+> **Nothing is promoted on a summary `scripts/win_bet/assoc_report.py` did not produce.** It reads the
+> scorer's own weights and splits the adjusted-edge-Jaccard delta into what better **association** bought and
+> what the **node count** bought, flagging `count_adjustment_artifact` when the adjusted figure rises while
+> the raw channel does not — the exact shape that killed LEVER-0036 (`FACT-0375`) and, mirrored, LEVER-0037
+> (`FACT-0376`). Division TP/FP/FN are reported separately at every gate; an association gain is never read as
+> division recovery (`FACT-0371`).
+>
+> **Sizing, and do not conflate the two.** `FACT-0368` says perfect association over *all* edges is 87% of the
+> fold-0 gap. `FACT-0381` says the *parent-ranking task* headroom is **691 contested targets** — deployed
+> top-1 is 0.8338 on the 21.4% of targets that are contested. Both are true; they measure different things,
+> and quoting the ceiling as this task's headroom overstates a ranker's reach substantially. The bar is
+> two-sided: beat 0.8338 on contested targets **without** losing the 78.6% correct by construction.
+>
+> **Next.** When P34 lands: audits A–D plus the cross-run node-ordering check, then the fold-1 contested
+> census — including the outcome where fold 1 is still too thin to falsify a ranker, which `PKT-0030`
+> falsifier (e) names in advance. When P33 passes, the two full feature-cache runs may proceed. Standing rules
+> unchanged: detector frozen, no node-count or candidate-widening work, one seam-calibration submission
+> available only to a genuinely new learned scorer after the fold-0 full-chain gate.
+
+
 > ## 2026-08-29 — CPU full-chain blocker removed; LEVER-0036 survives, but is not promoted
 >
 > PKT-0026 is done without GPU use or submissions. The predicted raw-image blocker was false: the complete

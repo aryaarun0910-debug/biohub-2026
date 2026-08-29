@@ -1,0 +1,79 @@
+id: PKT-0031
+title: "AGENT A - learnability baselines for parent discrimination on the frozen surface"
+lever: LEVER-0039
+owner: agent-a-association
+lock: claimed
+opened: '2026-08-29'
+
+claim: >-
+  A linear model and a tree/listwise ranker, trained on the nine representation-free features already
+  available in scripts/win_bet/assoc_parent_dataset.py and evaluated held-out by crop, beat the deployed
+  argmax on CONTESTED fold-0 targets without losing the single-candidate population - establishing whether
+  the EXISTING representation already separates true parents.
+
+falsifier: >-
+  Inherited verbatim from LEVER-0039, and none of it may be relaxed after seeing a result:
+  (a) held-out contested top-1 does not beat the deployed 0.8338 (FACT-0381);
+  (b) it beats it while losing single-candidate targets, so overall top-1 does not rise;
+  (c) top-1 rises without net parent-choice CONVERSION, the FACT-0376 quantity;
+  (d) the apparent gain is a count-adjustment artifact (FACT-0375);
+  (e) it does not cross-fit between folds.
+  A CLEAN (a) FAILURE IS A RESULT, NOT A DEAD END. If simple models cannot beat the deployed probability on
+  its own surface, the existing representation is not the limit and richer node context is justified - which
+  is precisely the question PKT-0029's HOCT lane needs answered. Report it as such, do not go hunting for a
+  feature that rescues it.
+
+prediction: >-
+  Stated before training. The deployed probability is itself a learned edge model's output, so a model given
+  that probability plus rank, margin and geometry is being asked to beat a strong feature using mostly
+  side-information. I expect a SMALL gain at best on contested top-1 - on the order of one to three points,
+  and quite possibly none - with the tree model ahead of the linear one. The likelier informative outcome is
+  that geometry adds little once probability and margin are in, which would be evidence that the
+  representation, not the head, is the constraint.
+
+inputs:
+  facts: [FACT-0381, FACT-0376, FACT-0369, FACT-0370, FACT-0375, FACT-0371]
+  artifacts:
+    - C:/temp/assoc/f0.parquet          # 19,444 decidable fold-0 targets, 4,157 contested
+    - C:/temp/assoc/f0.json
+    - C:/temp/p30_f0/preilp_split0.parquet
+    - C:/temp/p30_f0/ecb/               # the richer fold-0 candidate surface
+  code:
+    - scripts/win_bet/assoc_parent_dataset.py    # the FROZEN surface and label contract
+    - scripts/win_bet/assoc_report.py            # the ONLY summary a model may be promoted on
+    - scripts/win_bet/p28_full_chain_replay.py
+    - scripts/win_bet/p28_full_chain_panel.py
+
+method: >-
+  CPU only. Train on the frozen surface, never rebuild it. Splits are GROUPED BY CROP - a random row split
+  leaks, because candidates for one target share a target and targets in one crop share a movie, and
+  neighbouring frames of one embryo are not independent samples. Report through assoc_report.py and nothing
+  else. Stages: (1) reproduce the deployed baseline on the surface as a self-check - if the harness does not
+  reproduce FACT-0381's 0.8338 exactly, stop and say so; (2) fit the linear model and the tree ranker with
+  grouped cross-validation, reporting contested top-1, single-candidate retention, margin and calibration;
+  (3) report parent CONVERSIONS - gained, lost, net and churn - never a net figure alone; (4) only a model
+  that clears the two-sided bar goes to a full-chain replay, and it is the primary agent, not this packet,
+  that runs it.
+
+budget:
+  gpu_sessions: 0   # both concurrent slots are held by P33 and P34; this packet is CPU-bound by design
+  submissions: 0
+  wall_clock: 1-2 days
+
+forbidden:
+  - claiming LEVER-0034, LEVER-0037 or LEVER-0040, or investigating them - other packets hold them
+  - modifying the frozen surface, the label contract, or the ambiguity rules in assoc_parent_dataset.py
+  - reporting any summary not produced by assoc_report.py
+  - any fold-1 ranker accuracy claim before PKT-0030 lands - fold 1 is degenerate for ranking today
+    (FACT-0381) and top-1 there is 1.0 for every model
+  - training on fold-0 rows and evaluating on fold-0 rows without a crop-grouped split
+  - launching a GPU job, pushing a kernel, or making a submission
+  - editing .claude/settings.json, .gitignore, or any registry file other than by reporting back
+
+outputs:
+  evidence: C:/temp/assoc_baselines/ and _evidence/assoc/baselines/
+  facts_added: []   # facts are written by the primary agent from this packet's evidence
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null
