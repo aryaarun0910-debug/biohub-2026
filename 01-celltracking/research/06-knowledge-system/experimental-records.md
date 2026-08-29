@@ -5180,3 +5180,34 @@ contested targets *without* losing the 78.6% that are correct by construction.
 
 **Gates.** `pytest -q` 1153 passed / 136 skipped; `validate_registry.py`, `validate_research_tree.py` and
 `claims_table.py --check` all clean.
+
+### PKT-0033 — adversarial audit of the cycle's own instruments (2026-08-29, agent-c-auditor, CPU only)
+
+**Method.** Seven fail-closed probes in `scripts/win_bet/audit_assoc_contract.py` (heartbeat
+`ASSOC_CONTRACT_AUDIT_COMPLETE`, withheld unless every declared probe reports `executed`), plus an
+identity-level decomposition of the LEVER-0037 conversion in `scripts/win_bet/audit_identity_conversion.py`
+(heartbeat `IDENTITY_CONVERSION_AUDIT_COMPLETE`, withheld unless every crop's identity net reproduces both
+the scorer's own `edge_tp` delta and the retained per-crop `delta_edge_tp`). Evidence in `_evidence/audit/`.
+
+**Exact decisive results.** (1) `FACT-0376`'s net +28 IS decomposable from retained artifacts — the
+identity replay's l37 graphs reproduce the original l37 payloads exactly, and the control it must be paired
+against (the champion submission, already on disk) is the one `lever37_conversion.py` used. Partial, 12 of
+71 crops in name order, NOT a fold-0 figure: gained 57, lost 37, churn 94, net 20, with 34 of 37 losses
+attributable to a genuinely wrong predicted parent rather than node-match churn. The "28 gained and none
+lost" branch was already excluded without any re-run: the retained per-crop deltas alone bound gained ≥ 81
+and lost ≥ 53 over all 71 crops. (2) Pairing the identity graphs against the *replayed* control instead
+disagrees with the retained per-crop delta on 5 of 14 crops (+9 edge TP over the first 10) even though
+`control_exact: true` — that flag compares 15 stage counters, not edge identity. (3) At the DEPLOYED
+candidate floor the fold-0 parent surface is degenerate too: max 1 candidate per target, contested 0,
+top-1 1.0. All 691 contested errors have a true parent below 0.5. Contested top-1 slides 0.8338 → 1.0 as
+the floor moves 0.1 → 0.5, and that floor was chosen on fold-0 GT reach (`FACT-0374`). (4) The frozen
+contract's stated tie-break (lower source index) is not implemented — `evaluate()` breaks ties by row
+position and runs with the `source` column dropped; latent today (zero ties on `prob`), live for any tree
+ranker. (5) Two-predecessor GT cells are silently resolved to the LAST edge, not dropped; latent — 0 such
+cells in all 199 GT movies (133,318 nodes, 128,883 edges).
+
+**Verdict.** Audit target 5 resolves to RECOVERABLE, not unrecoverable. No lever claimed, no GPU, no
+submission, no registry file edited.
+
+**Gates.** `pytest -q` 1174 passed / 136 skipped; `validate_registry.py`, `validate_research_tree.py` and
+`claims_table.py --check` all clean.

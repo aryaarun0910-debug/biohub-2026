@@ -194,7 +194,13 @@ def evaluate(table: pl.DataFrame, score_col: str) -> dict:
     for _key, group in decidable.group_by("crop", "target"):
         s = group[score_col].to_numpy()
         y = group["is_true_parent"].to_numpy()
-        order = np.argsort(-s, kind="stable")
+        # The frozen contract, rule 4: ties break by LOWER SOURCE INDEX. A stable argsort on
+        # score alone breaks them by ROW ORDER instead, which is not a contract - it makes the
+        # answer depend on how the table was assembled. Latent for the deployed probability,
+        # which has no ties, and live the moment a TREE ranker emits identical leaf scores, which
+        # is exactly the model PKT-0031 is building. Lexsort applies the last key first.
+        src = group["source"].to_numpy()
+        order = np.lexsort((src, -s))
         chosen = order[0]
         hit = bool(y[chosen] == 1)
         top1 += int(hit)

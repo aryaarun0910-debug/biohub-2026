@@ -124,13 +124,33 @@ def decompose_adjusted(control: list[dict], candidate: list[dict]) -> dict:
     }
 
 
+CONVERSION_KEYS = ("targets", "gained", "lost", "net", "held_correct", "churn")
+
+
+def _edge_counts(rows: list[dict]) -> dict:
+    """FINAL-GRAPH edge counts, summed from the per-crop metric rows.
+
+    This is the genuine FACT-0376 quantity - true edges recovered through the COMPLETE chain -
+    and it is deliberately computed here from the rows rather than read out of a caller's
+    ``summarise``, because not every summariser in this tree returns the count columns.
+    """
+    return {k: int(sum(r[k] for r in rows)) for k in ("edge_tp", "edge_fp", "edge_fn")}
+
+
 def parent_conversions(before: dict, after: dict) -> dict:
-    """Parent-choice movement on the FROZEN surface, stated so a wash cannot look like a win.
+    """Parent-choice movement on the FROZEN PRE-ILP surface, so a wash cannot look like a win.
 
     ``before``/``after`` are per-target correctness maps keyed by (crop, target): 1 correct, 0 not.
     A net top-1 delta alone hides the trade - FACT-0376's 28 net true edges could have been 28
     gained and none lost, or hundreds gained and nearly as many displaced, and PKT-0027 rule (5)
     exists precisely because that distinction was not recoverable after the fact.
+
+    STAGE WARNING, AND IT IS NOT PEDANTRY. What this measures is CANDIDATE RANKING BEFORE THE
+    SOLVER. It is NOT the FACT-0376 quantity, which is a final-graph edge-TP delta, and the two
+    can disagree completely: FACT-0364 established that ``motion_relink_edges`` replaces the whole
+    edge list downstream, covering a median 99.9% of the solver's raw edges with zero fallbacks,
+    so a better pre-ILP ranking survives only as a scoring prior. The final-graph quantity is
+    reported separately in the ``final_graph_edges`` channel and it is the one promotion turns on.
     """
     keys = set(before) & set(after)
     if len(keys) != len(before) or len(keys) != len(after):
@@ -142,6 +162,7 @@ def parent_conversions(before: dict, after: dict) -> dict:
     lost = sum(1 for k in keys if before[k] and not after[k])
     held = sum(1 for k in keys if before[k] and after[k])
     return {
+        "stage": "pre_ILP_candidate_ranking",   # NOT the final-graph FACT-0376 quantity
         "targets": len(keys),
         "gained": gained,
         "lost": lost,
@@ -168,7 +189,10 @@ def paired_bootstrap_score(control: list[dict], candidate: list[dict], summarise
     return {
         "mean": float(values.mean()), "ci95": [lo, hi],
         "draws": draws, "seed": seed,
+        # `excludes_zero` is the two-sided FACT: significant in EITHER direction. A significantly
+        # WORSE candidate satisfies it, so promotion reads `favourable`, which is directional.
         "excludes_zero": bool(lo > 0 or hi < 0),
+        "favourable": bool(lo > 0),
     }
 
 
@@ -176,11 +200,21 @@ def build_report(*, model: str, fold: int, control: list[dict], candidate: list[
                  conversions: dict | None = None, notes: str = "",
                  draws: int = 2000, seed: int = 20260829) -> dict:
     """The only summary a learned surface may be promoted on."""
+    if conversions is not None:
+        # A bare {"net": 28} - the exact figure FACT-0376 could NOT decompose - must not satisfy
+        # the gained/lost/churn contract just because `verdict` happens to read only one key.
+        missing = [k for k in CONVERSION_KEYS if k not in conversions]
+        if missing:
+            raise ValueError(
+                f"conversions is missing {missing}: a net figure alone does not satisfy the "
+                "gained/lost/churn contract. Build it with parent_conversions()."
+            )
     ctrl, cand = summarise(control), summarise(candidate)
     decomposition = decompose_adjusted(control, candidate)
     boot = paired_bootstrap_score(control, candidate, summarise, draws, seed)
     delta_score = float(cand["score"] - ctrl["score"])
     delta_div_j = float(cand["division_jaccard"] - ctrl["division_jaccard"])
+    edges_ctrl, edges_cand = _edge_counts(control), _edge_counts(candidate)
 
     report = {
         "schema_version": 1,
@@ -195,6 +229,21 @@ def build_report(*, model: str, fold: int, control: list[dict], candidate: list[
                 "delta": float(cand["edge_jaccard"] - ctrl["edge_jaccard"]),
             },
             "count_adjustment": decomposition,
+            # THE genuine FACT-0376 quantity: net true edges through the COMPLETE chain. Kept
+            # distinct from `parent_conversions`, which is a pre-ILP candidate-ranking figure and
+            # survives the solver only as a scoring prior (FACT-0364).
+            "final_graph_edges": {
+                "control": edges_ctrl,
+                "candidate": edges_cand,
+                "delta_tp": edges_cand["edge_tp"] - edges_ctrl["edge_tp"],
+                "delta_fp": edges_cand["edge_fp"] - edges_ctrl["edge_fp"],
+                "delta_fn": edges_cand["edge_fn"] - edges_ctrl["edge_fn"],
+                "added_fp_per_gained_tp": (
+                    (edges_cand["edge_fp"] - edges_ctrl["edge_fp"])
+                    / (edges_cand["edge_tp"] - edges_ctrl["edge_tp"])
+                    if edges_cand["edge_tp"] != edges_ctrl["edge_tp"] else None
+                ),
+            },
             "parent_conversions": conversions,
             "node_recall": {
                 "control": float(ctrl["node_recall"]),
@@ -235,8 +284,14 @@ def verdict(report: dict) -> dict:
       - RAW association must actually improve - the seam-calibration precondition;
       - division TP must not decline, so an association gain is never banked as division
         recovery (FACT-0371);
-      - the paired interval must exclude zero;
-      - parent choice must CONVERT, which is the FACT-0376 quantity.
+      - the paired interval must be FAVOURABLE, not merely significant - a significantly WORSE
+        candidate also excludes zero;
+      - opportunity must CONVERT into net true edges through the COMPLETE chain, which is the
+        genuine FACT-0376 quantity. The pre-ILP parent-conversion figure is required as evidence
+        of MECHANISM but is not sufficient on its own, because motion relink replaces the
+        solver's edge list downstream (FACT-0364);
+      - the score identity must hold, or the two arms were not scored by the same scorer and no
+        channel in the report can be trusted.
     """
     ch = report["channels"]
     blockers = []
@@ -246,12 +301,19 @@ def verdict(report: dict) -> dict:
         blockers.append("raw edge Jaccard did not improve")
     if ch["division_counts"]["delta_tp"] < 0:
         blockers.append("division true positives declined")
-    if not report["paired_bootstrap"]["excludes_zero"]:
-        blockers.append("paired bootstrap interval includes zero")
+    if not report["paired_bootstrap"]["favourable"]:
+        blockers.append("paired bootstrap interval is not favourable (lower bound not above zero)")
+    if ch["final_graph_edges"]["delta_tp"] <= 0:
+        blockers.append("no net true-edge conversion through the complete chain (the FACT-0376 quantity)")
     if ch["parent_conversions"] is None:
-        blockers.append("parent conversions not reported")
+        blockers.append("pre-ILP parent conversions not reported")
     elif ch["parent_conversions"]["net"] <= 0:
-        blockers.append("no net parent-choice conversion")
+        blockers.append("no net pre-ILP parent-choice conversion")
+    if abs(ch["score"]["identity_check"]) > 1e-6:
+        blockers.append(
+            f"score identity violated by {ch['score']['identity_check']:.2e}: the arms were not "
+            "scored by the same scorer"
+        )
     return {"promotable": not blockers, "blockers": blockers}
 
 
@@ -268,9 +330,13 @@ def write(report: dict, out: Path) -> None:
         f" + count {ch['count_adjustment']['count_channel']:+.5f}"
         f" + resid {ch['count_adjustment']['residual']:+.5f}\n"
         f"  node recall           {ch['node_recall']['delta']:+.5f}\n"
+        f"  final-graph edges     TP {ch['final_graph_edges']['delta_tp']:+d} / "
+        f"FP {ch['final_graph_edges']['delta_fp']:+d} / "
+        f"FN {ch['final_graph_edges']['delta_fn']:+d}   <- the FACT-0376 quantity\n"
         f"  division TP/FP/FN     {ch['division_counts']['delta_tp']:+d} / "
         f"{ch['division_counts']['delta_fp']:+d} / {ch['division_counts']['delta_fn']:+d}\n"
-        f"  parent conversions    {ch['parent_conversions']}\n"
+        f"  parent conv (pre-ILP) {ch['parent_conversions']}\n"
+        f"  score identity        {ch['score']['identity_check']:+.2e}\n"
         f"  SCORE                 {ch['score']['delta']:+.5f}  "
         f"ci95={report['paired_bootstrap']['ci95']}\n"
         f"  verdict               {report['verdict']}",

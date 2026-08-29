@@ -2,7 +2,7 @@ id: PKT-0033
 title: "AGENT C - adversarial audit of the learned-association cycle's own instruments"
 lever: null              # an auditor holds no hypothesis - see `why_no_lever`
 owner: agent-c-auditor
-lock: claimed
+lock: done
 opened: '2026-08-29'
 
 why_no_lever: >-
@@ -100,4 +100,54 @@ outputs:
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  DONE 2026-08-29. The packet succeeded on its own inverted terms - it found things, and it named what it ran
+  for each. Fourteen findings, five decision-changing. Acted on immediately by the primary agent:
+
+  (1) THE HEADLINE, now FACT-0382. The contested parent-choice population is an artifact of the ACQUISITION
+  FLOOR, not a property of the deployed pipeline: at the deployed floor of 0.5 fold 0 has ZERO contested
+  targets and one candidate per target, exactly like fold 1, and all 691 contested errors have their true
+  parent BELOW that threshold (median 0.2679). Re-derived independently by the primary agent before recording.
+  FACT-0381's numbers stand; its framing that fold 1 was uniquely degenerate did not. LEVER-0039 gained
+  falsifier (f) requiring the full-chain comparison to be (widened surface + ranker) against the DEPLOYED
+  control.
+
+  (2) THREE DEFECTS IN assoc_report.py, all fixed and all now covered by tests that fail without the fix: a
+  bare {"net": 28} satisfied the gained/lost/churn contract (the exact figure FACT-0376 could not decompose);
+  the bootstrap gate was non-directional, so a significantly WORSE candidate passed it; and identity_check was
+  computed, written and read by nobody. Promotion now reads a directional `favourable` and blocks on a broken
+  score identity.
+
+  (3) THE STAGE MISLABEL. parent_conversions measures PRE-ILP candidate ranking and was gating promotion as if
+  it were FACT-0376's final-graph edge-TP delta, which FACT-0364 says it cannot be - motion relink replaces the
+  solver's edge list downstream. The channel is now labelled `stage: pre_ILP_candidate_ranking` and a separate
+  `final_graph_edges` channel carries the real quantity and holds the gate.
+
+  (4) THE TIE-BREAK. evaluate() broke score ties by ROW ORDER while the frozen contract declares lower source
+  index. Latent for the deployed probability, which has no ties; live for a tree ranker's identical leaf
+  scores, which is exactly the model PKT-0031 is building. Fixed to np.lexsort((src, -s)); FACT-0381
+  reproduces unchanged and the result is now row-order independent. Agent A was told mid-run to re-score.
+
+  (5) CONVERSION ACCOUNTING RESOLVES TO RECOVERABLE, not unrecoverable, and "28 gained, 0 lost" was already
+  refuted from artifacts on disk: per-crop deltas alone give gained >= 81, lost >= 53, churn >= 134. The
+  identity replay corroborates the ranking-failure mechanism on a partial sample and must be paired against
+  the CHAMPION CSV, not the replayed control - `control_exact` compares fifteen stage COUNTERS, never edge
+  identity, and the replayed control differs from the champion by +9 edge TP over ten crops.
+
+  HOST DECISION TAKEN, since finding 4 said the window was closing. The identity replay will NOT be re-run
+  for stage attribution and BOTH ARMS ARE LEFT UNTOUCHED. The atlas is therefore THREE-way (gained /
+  displaced / wrong parent), not the five-way originally named. Reason: FACT-0364 measured motion relink
+  replacing the whole edge list on all 128 crops at median 99.9% coverage with zero fallbacks, so
+  "ILP-rejected versus relink-overwritten" is near-degenerate for edges - relink overwrites essentially
+  everything - while re-running would cost the completed 71-crop control arm and 9 crops of l37 progress to
+  recover a category FACT-0364 already fixes. Recorded here rather than left implicit so nobody later reads
+  the atlas as five-way.
+
+  NOT ACTED ON, deliberately, and left as open reading: finding 6 (five things PKT-0029 Gate 1 would not
+  prove, notably that the parity check exercises no serialised cache and never compares the sub-0.5 band
+  where all 691 contested errors live) belongs to PKT-0029's owner and is queued for when P33 lands; finding
+  11 (crop-grouped is not embryo-held-out - both folds are single-embryo) has no remedy until P34 delivers a
+  second surface; finding 12 (HOCT checkpoint provenance unestablished, the FACT-0378 class) is a real gap in
+  PKT-0029 and is recorded there rather than here; finding 13 is PLAUSIBLE, not confirmed, and is relayed to
+  PKT-0032 as distribution shift rather than leakage.
+

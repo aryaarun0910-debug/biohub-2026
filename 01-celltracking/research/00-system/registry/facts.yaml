@@ -5302,5 +5302,79 @@ facts:
       losing the 78.6% that are already correct. That is a hard target for a linear or tree model on nine
       representation-free features, which is precisely what the learnability baseline is for - if simple models
       cannot beat it, the existing representation is not the limit and richer node context is justified.
+      FRAMING CORRECTED 2026-08-29 BY FACT-0382 - READ IT BEFORE CITING THIS FACT. Every number above stands
+      as measured, but consequence (1) is stated too narrowly. Fold 1 is not uniquely degenerate: at the
+      DEPLOYED candidate floor of 0.5 fold 0 has zero contested targets too, and fold 0 looks different here
+      only because it has the widened P30 acquisition that fold 1 lacks. All 691 contested errors have their
+      true parent BELOW the deployed threshold, so no ranker on the deployed surface can convert any of them,
+      and the bar in (3) is necessary but not sufficient - realising the headroom means consuming the widened
+      surface, whose cost under the unchanged scorer is FACT-0376's -0.00906.
     date: '2026-08-29'
     tags: [association, parent-ranking, frozen-surface, headroom, degenerate-metric, measured]
+
+  - id: FACT-0382
+    statement: >-
+      The contested parent-choice population is a property of the ACQUISITION FLOOR, not of the deployed
+      pipeline, and at the deployed floor BOTH folds are degenerate. Restricting the fold-0 frozen surface to
+      the deployed candidate rule (edge probability > 0.5) leaves a maximum of ONE candidate per target and
+      ZERO contested targets - identical to fold 1 - so deployed parent top-1 is 1.0 by arithmetic on the
+      surface the pipeline actually consumes. The 4,157 contested targets of FACT-0381 exist only because the
+      P30 export widened the surface to floor 0.1; the count falls monotonically with the floor
+      (0.10 -> 4,157; 0.20 -> 1,800; 0.30 -> 757; 0.40 -> 268; 0.50 -> 0). Decisively, ALL 691 of the
+      contested errors have their true parent at probability <= 0.5, median 0.2679, so not one of them is
+      offered to the deployed pipeline at all
+    value: 0
+    unit: contested_fold0_targets_at_the_deployed_candidate_floor
+    scope:
+      fold: 0
+      crops: 71
+      surface: C:/temp/assoc/f0.parquet
+      deployed_floor: 0.5
+      floor_sweep:
+        '0.10': {decidable: 19444, contested: 4157, max_candidates_per_target: 4}
+        '0.20': {decidable: 19207, contested: 1800, max_candidates_per_target: 4}
+        '0.30': {decidable: 18990, contested: 757, max_candidates_per_target: 3}
+        '0.40': {decidable: 18788, contested: 268, max_candidates_per_target: 2}
+        '0.50': {decidable: 18466, contested: 0, max_candidates_per_target: 1}
+      contested_errors:
+        n: 691
+        true_parent_prob_at_or_below_deployed_floor: 691
+        share: 1.0
+        true_parent_prob_median: 0.2679
+        winning_wrong_parent_above_floor: 526
+        both_below_floor: 165
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Computed over the complete fold-0 frozen surface, all 71 crops, from the same committed table
+      (C:/temp/assoc/f0.parquet) that produced FACT-0381, by filtering on the deployed rule verified at source
+      in FACT-0369. It uses no new matcher, no new label contract and no new candidate export, so it cannot
+      disagree with FACT-0381 about anything except the framing it corrects.
+    instrument: >-
+      scripts/win_bet/assoc_parent_dataset.py evaluate() plus the candidate-floor sweep recorded in
+      _evidence/assoc/f{0,1}.json; found by the PKT-0033 adversarial audit, re-derived independently by the
+      primary agent before being recorded
+    experiment: EXP-0035
+    note: >-
+      THIS CORRECTS THE FRAMING OF FACT-0381, NOT ITS NUMBERS - every figure there stands as measured. What
+      changes is what they mean. FACT-0381 said fold 1 was degenerate for ranking and fold 0 was not; the
+      truth is that BOTH folds are degenerate on the deployed surface, and fold 0 looks different only
+      because it HAS the widened acquisition that fold 1 lacks. That also restates what P34 (EXP-0039) does:
+      it does not make fold 1 comparable to some natural fold-0 richness, it gives fold 1 the same widened
+      surface fold 0 was given.
+      THE CONSEQUENCE FOR LEVER-0039, AND IT RAISES THE BAR. Because every one of the 691 contested errors
+      has its true parent below the deployed threshold, NO ranker operating on the deployed candidate surface
+      can convert a single one. Realising any of that headroom requires the pipeline to CONSUME the widened
+      surface, and FACT-0376 measured what that costs under the unchanged scorer: -0.00906 with a bootstrap
+      interval excluding zero. So a learned ranker is not competing against the deployed control from a
+      standing start - it must beat the widened-surface arm, and the honest full-chain comparison is
+      (widened surface + learned ranker) against the deployed control.
+      THIS IS NOT A FIXED DEBT AND MUST NOT BE QUOTED AS ONE. FACT-0376's own host scope precision says the
+      -0.00906 is the cost of widening UNDER THE DEPLOYED ARGMAX, and that a candidate rule paired with a
+      better scorer is untouched by that evidence. A better ranker is precisely the thing that might not pay
+      it. The correction here is that the comparison must be stated and gated, not that the lever is dead.
+      The learnability question - can simple models separate true parents on the existing representation -
+      is unaffected and remains worth answering, because it is evidence about the REPRESENTATION rather than
+      about deployment.
+    date: '2026-08-29'
+    tags: [association, parent-ranking, degenerate-metric, candidate-floor, scope-correction, headline]

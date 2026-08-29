@@ -140,7 +140,84 @@ def test_missing_conversions_blocks_promotion():
     candidate = [crop(940, 30, 30, 1000, 1000)] * 4
     report = ar.build_report(model="no-conv", fold=0, control=control, candidate=candidate,
                              summarise=fake_summarise, conversions=None, draws=50)
-    assert "parent conversions not reported" in report["verdict"]["blockers"]
+    assert "pre-ILP parent conversions not reported" in report["verdict"]["blockers"]
+
+
+def test_a_bare_net_figure_is_refused_as_a_conversion_contract():
+    """{"net": 28} is the exact figure FACT-0376 could not decompose. It must not satisfy the gate."""
+    control = [crop(900, 50, 50, 1000, 1000)] * 4
+    candidate = [crop(940, 30, 30, 1000, 1000)] * 4
+    with pytest.raises(ValueError, match="a net figure alone does not satisfy"):
+        ar.build_report(model="bare-net", fold=0, control=control, candidate=candidate,
+                        summarise=fake_summarise, conversions={"net": 28}, draws=50)
+
+
+def test_a_significantly_worse_candidate_is_not_promotable():
+    """`excludes_zero` is two-sided; promotion must read the directional `favourable` instead."""
+    control = [crop(940, 30, 30, 1000, 1000)] * 6
+    candidate = [crop(860, 70, 70, 1000, 1000)] * 6
+    report = ar.build_report(
+        model="worse-arm", fold=0, control=control, candidate=candidate,
+        summarise=fake_summarise,
+        conversions=ar.parent_conversions({("c", 1): 0}, {("c", 1): 1}), draws=200,
+    )
+    assert report["paired_bootstrap"]["excludes_zero"] is True, "it IS significant - the wrong way"
+    assert report["paired_bootstrap"]["favourable"] is False
+    assert report["verdict"]["promotable"] is False
+
+
+def test_final_graph_edge_conversion_is_the_gated_quantity():
+    """A pre-ILP ranking win with no final-graph edge gain must not promote (FACT-0364)."""
+    control = [crop(900, 50, 50, 1000, 1000)] * 4
+    candidate = [crop(900, 45, 50, 1000, 1000)] * 4      # FP down, TP unchanged
+    report = ar.build_report(
+        model="no-edge-conversion", fold=0, control=control, candidate=candidate,
+        summarise=fake_summarise,
+        conversions=ar.parent_conversions({("c", i): 0 for i in range(10)},
+                                          {("c", i): 1 for i in range(10)}),
+        draws=50,
+    )
+    assert report["channels"]["final_graph_edges"]["delta_tp"] == 0
+    assert report["channels"]["parent_conversions"]["net"] == 10, "pre-ILP ranking clearly improved"
+    assert any("FACT-0376 quantity" in b for b in report["verdict"]["blockers"])
+
+
+def test_parent_conversions_is_labelled_pre_ilp():
+    conv = ar.parent_conversions({("c", 1): 0}, {("c", 1): 1})
+    assert conv["stage"] == "pre_ILP_candidate_ranking"
+
+
+def test_a_broken_score_identity_blocks_promotion():
+    """A mismatched scorer must not pass silently into the JSON - finding 9."""
+    control = [crop(900, 50, 50, 1000, 1000)] * 4
+    candidate = [crop(940, 30, 30, 1000, 1000)] * 4
+
+    def wrong_summarise(rows):
+        out = fake_summarise(rows)
+        out["score"] = out["score"] + 0.01      # a scorer that does not match its own channels
+        return out
+
+    report = ar.build_report(
+        model="mismatched-scorer", fold=0, control=control, candidate=candidate,
+        summarise=wrong_summarise,
+        conversions=ar.parent_conversions({("c", 1): 0}, {("c", 1): 1}), draws=50,
+    )
+    assert report["channels"]["score"]["identity_check"] == pytest.approx(0.0, abs=1e-9), (
+        "a constant offset cancels in the delta"
+    )
+
+    def scaling_summarise(rows):
+        out = fake_summarise(rows)
+        out["score"] = out["score"] * 1.5
+        return out
+
+    report = ar.build_report(
+        model="scaling-scorer", fold=0, control=control, candidate=candidate,
+        summarise=scaling_summarise,
+        conversions=ar.parent_conversions({("c", 1): 0}, {("c", 1): 1}), draws=50,
+    )
+    assert abs(report["channels"]["score"]["identity_check"]) > 1e-6
+    assert any("score identity violated" in b for b in report["verdict"]["blockers"])
 
 
 def test_score_identity_holds():

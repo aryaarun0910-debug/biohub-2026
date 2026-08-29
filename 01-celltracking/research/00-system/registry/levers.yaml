@@ -1138,11 +1138,20 @@ levers:
       rises but does not CONVERT: net true edges through the complete chain do not increase, which is exactly
       the FACT-0376 failure one stage earlier. (d) The gain is a count-adjustment artifact - adjusted edge
       Jaccard up with the raw channel flat or negative (FACT-0375). (e) It does not cross-fit: a ranker
-      trained on one fold does not transfer to the other on its contested population. Any of these kills the
-      SIMPLE-FEATURE version of this lever; (a) failing specifically is informative rather than merely
-      negative, because it says the existing representation is not the limit and richer node context is
-      justified.
-    supporting: [FACT-0381, FACT-0376, FACT-0369, FACT-0370, FACT-0368]
+      trained on one fold does not transfer to the other on its contested population.
+      (f) ADDED 2026-08-29 ON FACT-0382, AND IT IS THE HARDEST OF THE SIX. The contested population exists
+      only on the WIDENED acquisition surface: at the deployed floor of 0.5 fold 0 has ZERO contested targets
+      and all 691 contested errors have their true parent below that threshold. So no gain here is realisable
+      unless the pipeline CONSUMES the widened surface, and the honest full-chain comparison is therefore
+      (widened surface + learned ranker) against the DEPLOYED control - never against the widened control,
+      which would flatter the ranker with a baseline nobody deploys. Killed if it cannot win that comparison.
+      Note what this does NOT say: FACT-0376's -0.00906 is the cost of widening under the deployed ARGMAX,
+      and FACT-0376's own scope precision states that a candidate rule paired with a better scorer is
+      untouched by that evidence. The bar is that this comparison must be RUN, not that the loss is inherited.
+      Any of these kills the SIMPLE-FEATURE version of this lever; (a) failing specifically is informative
+      rather than merely negative, because it says the existing representation is not the limit and richer
+      node context is justified - a question about the REPRESENTATION, which (f) does not touch.
+    supporting: [FACT-0381, FACT-0382, FACT-0376, FACT-0369, FACT-0370, FACT-0368]
     note: >-
       The direct successor to LEVER-0037's kill. FACT-0376 established that availability is not the binding
       constraint - offering the true parent raised reach by 924 edges and the pipeline took 28 while taking
@@ -1154,7 +1163,9 @@ levers:
       division false positives to ZERO - the coupling, not the edge count alone, is what makes this the
       shortest credible route. Cross-fitting REQUIRES the fold-1 candidate export (PKT-0030): fold 1's
       surface is single-parent by construction, so top-1 there is 1.0 for any model and a metric that cannot
-      fail is not evidence. Every report goes through scripts/win_bet/assoc_report.py; no other summary counts.
+      fail is not evidence - and FACT-0382 sharpens that, because fold 0 is equally degenerate at the
+      deployed floor and differs only in HAVING the widened acquisition. P34 gives fold 1 the same widened
+      surface; it does not reveal a natural richness fold 1 was hiding. Every report goes through scripts/win_bet/assoc_report.py; no other summary counts.
     priority: 1
 
   - id: LEVER-0040
