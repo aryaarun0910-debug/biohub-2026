@@ -38,13 +38,19 @@ def main() -> int:
     parser.add_argument("--results-dir", type=Path, required=True)
     parser.add_argument("--train-dir", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--pattern", default="candidate_3p0_*.json",
+        help=("glob for ONE arm's replay JSONs. Each arm is paired against the same "
+              "champion control and never against the other arm, so the two levers "
+              "stay independent."),
+    )
     parser.add_argument("--draws", type=int, default=2000)
     parser.add_argument("--seed", type=int, default=20260828)
     args = parser.parse_args()
 
-    result_paths = sorted(args.results_dir.glob("candidate_3p0_*.json"))
+    result_paths = sorted(args.results_dir.glob(args.pattern))
     if not result_paths:
-        raise SystemExit("no candidate_3p0 replay JSONs found")
+        raise SystemExit(f"no replay JSONs matching {args.pattern!r} in {args.results_dir}")
     candidate_json = [json.loads(path.read_text(encoding="utf-8")) for path in result_paths]
     crops = [item["crop"] for item in candidate_json]
     if len(crops) != len(set(crops)):
