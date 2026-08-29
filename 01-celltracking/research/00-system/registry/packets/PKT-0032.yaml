@@ -2,7 +2,7 @@ id: PKT-0032
 title: "AGENT B - the division-verifier dataset, its leakage contract and its metric adapter"
 lever: LEVER-0040
 owner: agent-b-division
-lock: claimed
+lock: done
 opened: '2026-08-29'
 
 claim: >-
@@ -39,8 +39,8 @@ inputs:
     - C:/temp/p30_f0/preilp_split0.parquet
     - C:/temp/preilp_f1_v2/preilp_split1.parquet
     - C:/temp/p28_f0/loeo_split0_champion.csv.gz
-    - _evidence/retention/divloc_f0.parquet
-    - _evidence/retention/divloc_f1.parquet
+    - C:/temp/retention/divloc_f0.parquet   # PREMISE CORRECTED: this packet named
+    - C:/temp/retention/divloc_f1.parquet   # _evidence/retention/, where only the .json live
   code:
     - scripts/win_bet/division_localisation.py
     - scripts/win_bet/div_reach_steal.py       # official division matching and scoring path
@@ -81,4 +81,52 @@ outputs:
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  DONE 2026-08-29. FALSIFIER (a) FIRES; (b), (c) and (d) do not. Facts recorded as FACT-0383, FACT-0384 and
+  FACT-0385. The deliverable - an honest dataset, a proven adapter and a leakage contract - exists and is
+  reusable; what it proved is that the lane is data-limited on our own substrate.
+
+  (a) FIRES, and by more than expected. The usable positive class is not the 151 annotated divisions but the
+  19 EMITTED TRUE FORKS - 5 on fold 0, 14 on fold 1 - against HOCT's 110 (FACT-0362). The packet predicted a
+  "tight, low-hundreds" population and was wrong by an order of magnitude in the unfavourable direction. The
+  prediction that the abundant negative class would carry it was half right: it carries the in-fold fit and
+  not the cross-fold calibration.
+
+  (b) DOES NOT FIRE. The leakage contract held mechanically - one selector, an assertion that raises on a
+  judged-fold row, on the held-out embryo when the fold column lies, and on any identifier reaching the
+  feature list, with a counterfactual built from a fold-0 crop correctly treated AS a fold-0 row. No feature
+  uses a fold-wide statistic.
+
+  (c) DOES NOT FIRE, and this is the packet's strongest deliverable. The adapter reproduces the deployed
+  fold-0 division counts EXACTLY at 5 / 67 / 21 and agrees with exact re-scoring on 142 of 142 fold-0 and 256
+  of 256 fold-1 crop-rungs. It was proven against a known number rather than asserted, which is what makes
+  FACT-0384's ceiling citable.
+
+  (d) DOES NOT FIRE. Counterfactual negatives are strongly separable - parent_midpoint_um reaches 0.932
+  inverted against cf_wrong_parent - so the surface does carry division signal. The honest caveat the packet
+  volunteered stands: cf_temporal_* are trivially separable by frame gap and are a sanity floor, not a class.
+
+  THREE THINGS THE PACKET FOUND THAT WERE NOT ASKED FOR, and they matter more than the verdict.
+  (1) THE METRIC IGNORES 98.7% OF EMITTED FORKS. Fold 0 emits 5,656 and only 72 are charged. A globally
+  applied verifier therefore spends almost all its decisions where nothing is paid, and training on the
+  charged population instead of pooling GT tuples moved the deployment AUC 0.5254 to 0.6299 - the single
+  largest improvement measured, and it came from choosing the right population rather than a better model.
+  (2) IT AUDITED ITS OWN DESIGN AND FOUND IT INFLATING. Pooling GT-derived tuples with emitted forks gave an
+  unseen-fold AUC of 0.8006 against a deployment view of 0.5254, because out_degree and competing_parents
+  read the CONSTRUCTION ROUTE rather than the physics. Catching that unprompted is the behaviour the
+  adversarial packet exists to force, arriving here without it.
+  (3) THE ZEBRAHUB PLANK IS NOT USABLE AS DRAWN. 1,425,493 rows and 2,587 positives are ANTI-ALIGNED with our
+  surface at pooled AUC 0.179, and mixing collapsed an in-domain fit from 0.80 to 0.21. This contradicts an
+  assumption carried in both LEVER-0040 and FACT-0362 that external triples are the asset that changes the
+  count. LEVER-0040 now forbids their use until the alignment is solved.
+
+  A PREMISE ERROR IN THIS PACKET, corrected in `inputs` above: it named
+  _evidence/retention/divloc_f{0,1}.parquet, where only the .json exist; the parquets are under
+  C:/temp/retention/. Recorded rather than silently fixed.
+
+  LEVER-0040 STAYS OPEN on a narrowed claim with a successor falsifier written before the next attempt. Its
+  original falsifier is left verbatim: (a) was REFUTED, not confirmed - 14 false positives cut at zero
+  true-positive cost - and (b) fired on fold 1 only, which is an INVERSION between embryos rather than a
+  transfer collapse. The prize is larger than the lever was opened for: +0.01416 measured, against the ~+0.006
+  it assumed, with raw edge Jaccard RISING.
+

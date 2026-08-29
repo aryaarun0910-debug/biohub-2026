@@ -5211,3 +5211,93 @@ submission, no registry file edited.
 
 **Gates.** `pytest -q` 1174 passed / 136 skipped; `validate_registry.py`, `validate_research_tree.py` and
 `claims_table.py --check` all clean.
+
+### PKT-0032 — the division-verifier substrate: census, leakage contract, counterfactuals, metric adapter (2026-08-29, agent-b-division, CPU only)
+
+**Method.** Two new committed instruments, both fail-closed.
+`scripts/win_bet/divverify_dataset.py` (heartbeats `DIVVERIFY_CENSUS_COMPLETE`,
+`DIVVERIFY_CROSSFIT_MAP`, `DIVVERIFY_EXTERNAL_COMPLETE`, `DIVVERIFY_VIABILITY_COMPLETE`) enumerates the
+division populations through the OFFICIAL scorer — `score_divisions` for the per-GT outcome and the
+`tp_forks`/`fp_forks` sets that ARE the metric's tally, `_pred_division_fork_sets` for the FP taxonomy,
+`_match_full` at 7 um for the pred/GT correspondence — and RAISES per crop unless it reconciles with
+`tracking_cellmot.metrics.evaluate`. No second matcher was written.
+`scripts/win_bet/divverify_adapter.py` (heartbeat `DIVVERIFY_ADAPTER_PROOF_COMPLETE`) is the metric
+adapter, with an accounting path and an exact re-scoring path that are compared on every crop.
+Evidence in `_evidence/divverify/` and `C:/temp/divverify/`; 16 contract tests in
+`tests/test_divverify_contract.py`.
+
+**Census, both directions separately (complete folds, champion controls).** Fold 0 (71 crops,
+`C:/temp/p28_f0/loeo_split0_champion.csv.gz`) reproduces `FACT-0375`'s scope exactly: 26 annotated
+divisions, 5 TP / 67 FP / 21 FN. Fold 1 on the COMPLETE 128 crops (`p28_f1`, where the registry only
+carries a stride-4 32-crop figure in `FACT-0371`): 125 annotated divisions, 14 TP / **349** FP / 111 FN.
+The GT-derived fully-matched tuple counts — 22 (f0) and 71 (f1) — reproduce `FACT-0359` through the
+SCORER's own matcher rather than `division_localisation.py`'s, an independent corroboration.
+**The structural finding is the ignored population.** Fold 0 emits **5,656** predicted forks of which only
+**72 are charged by the metric** (5,584 ignored, 98.7%); fold 1 emits 5,582 of which 363 are charged. A
+fork is charged only when its matched GT node is annotated with a child, so a globally applied verifier
+would act overwhelmingly on forks worth nothing and could only lose edges. Fold-0 FP taxonomy is
+homogeneous — all 67 `evaluable`, zero cross-component, zero malformed; fold 1 is 346 / 6 / 0.
+
+**The adapter is PROVED, and its accounting is exact.** Rung 1 (zero rejections) reproduces the deployed
+fold-0 division counts EXACTLY — 5 / 67 / 21 — together with edge 18784/1369/1042 and score 0.907859, all
+matching `FACT-0375`'s control arm. The accounting path (`tp' = tp - |rejected & tp_forks|` etc.) agreed
+with exact re-scoring on **142 of 142** fold-0 crop-rungs and **256 of 256** fold-1 crop-rungs, including
+the aggressive all-FP suppression. **PKT-0032 falsifier (c) does not fire.**
+
+**Rung 2, the perfect-verifier ceiling (ORACLE selection, GT-free `weakest_child` edit).** Fold 0: FP
+67 to 0 with TP held at 5, division Jaccard 0.05376 to 0.19231, score 0.90786 to 0.92202, **+0.01416** — and
+the edge term does not pay for it, raw edge Jaccard 0.88625 to 0.88656 (28 true edges lost, 39 false ones
+removed). Fold 1: FP 349 to 0, division Jaccard 0.02954 to 0.11200, score 0.70924 to 0.71741, **+0.00817**,
+edge Jaccard flat at -0.00008. `LEVER-0040`'s own note sized the prize at roughly +0.006 by cutting FPs to
+~20; the measured fold-0 ceiling is **2.4x that**, and the deleted child edges are net-negative on the edge
+term rather than a cost.
+
+**Leakage contract.** Fold 0 holds out 44b6, fold 1 holds out 6bba (`FACT-0378` scope). Judging fold F fits
+only on rows with `fold != F` plus external. Two mechanical guards, not a written promise:
+`training_rows_for()` is the only selector, and `assert_no_leak()` raises on a judged-fold row, on the
+held-out embryo even when the fold column disagrees, and on any identifier reaching `FEATURES`. A
+counterfactual built from a fold-0 crop is a fold-0 row and is excluded as such — asserted by test. Every
+feature is a function of ONE crop's own node cloud and edges; there is no fold-wide statistic anywhere.
+**Falsifier (b) does not fire.**
+
+**Counterfactual negatives.** 270 on fold 0, 850 on fold 1, four constructions, all through the same
+`triple_features` so nothing marks a row as synthetic: `cf_wrong_parent` (50/160), `cf_wrong_sister`
+(100/304), `cf_temporal_skip` (50/160), `cf_temporal_same` (50/160). They are strongly separable, and in
+the physically expected direction: against `cf_wrong_parent`, `parent_midpoint_um` reaches AUC 0.068 / 0.071
+(0.93 inverted) and `daughter_angle` 0.129 / 0.109, while `sister_um` is exactly 0.5000 — which is what its
+construction predicts, since that class keeps both real daughters. **Falsifier (d) does not fire.** Caveat
+recorded rather than buried: `cf_temporal_*` are trivially separable by the frame gap alone (dt AUC 1.0 /
+0.0), so they are a sanity floor, not a hard class.
+
+**Viability, honestly, and it is falsifier (a) that bites.** The class that matters is not the GT-division
+count but the EMITTED true forks a verifier must not reject: **5** on fold 0 and **14** on fold 1, against
+HOCT's 110 (`FACT-0362`). Cross-fitted on matched provenance (emitted forks only), a logistic probe scores
+deployment AUC 0.630 judging fold 0 and 0.640 judging fold 1, and can reject only **14 of 67** fold-0 FPs
+before losing the first of 5 TPs, and **5 of 349** on fold 1 — against random-ordering expectations of 11.2
+and 23.3. Fold 1 is BELOW chance. Worth roughly +0.001 of score against the +0.01416 ceiling. The signal is
+nevertheless real in-fold: on the deployment population `sister_um` alone scores AUC 0.854 (f0) and 0.793
+(f1) in the same direction, with `pd1_um` 0.924 / 0.601 and `cos_split_vs_flow` 0.881 / 0.624. So the
+surface separates; the cross-fold CALIBRATION does not, on 5 and 14 positives.
+
+**Two traps found in our own dataset design.** (1) Pooling GT-derived tuples with emitted forks inflates the
+headline — pooled cross-fit AUC 0.8006 against 0.5254 on the same model's deployment view — because
+`out_degree` (AUC 0.100 / 0.113) and `competing_parents` (0.800 / 0.763) read the CONSTRUCTION ROUTE, not
+the physics. The deployment-only per-feature view was added for exactly this reason. (2) The external
+Zebrahub positives (`FACT-0296`, 1,425,493 rows / 2,587 positives mapped into this schema) are ANTI-aligned
+with our surface: trained on them alone the probe scores pooled AUC 0.179 / 0.174, and mixing them collapses
+the in-domain fit from 0.80 to 0.21. The measured scale gap is not the single ~1.6x factor `FACT-0296`
+records — per-feature median ratios run 0.345 (`parent_midpoint_um`) to 3.719 (`bdist_um`), so a per-embryo
+scalar cannot align them. Our own true divisions are far worse localised than Zebrahub's (median
+parent-midpoint 3.60 um vs 1.24), which is `FACT-0380` showing up in the external plank.
+
+**Premise correction.** `PKT-0032`'s input list names `_evidence/retention/divloc_f{0,1}.parquet`; only the
+`.json` are there. The parquets are at `C:/temp/retention/divloc_f{0,1}.parquet`.
+
+**Verdict.** Falsifiers (b), (c) and (d) do NOT fire — the dataset is honest, the adapter is proved against
+a known number, and the surface carries division signal. **(a) FIRES for the deployment positive class**:
+5 and 14 emitted true forks is below any count a cross-fold calibration has survived here, and that, not
+architecture, is what caps the lane. No lever closed on this — the packet's deliverable was the substrate,
+and `LEVER-0040` itself is decided by whether a verifier trained on this substrate transfers.
+
+**Gates.** `validate_registry.py`, `validate_research_tree.py` and `claims_table.py --check` all clean; no
+GPU job, no kernel push, no submission, no registry file edited.

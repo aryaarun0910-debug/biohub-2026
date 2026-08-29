@@ -1183,7 +1183,35 @@ levers:
       safe-division post-processing and motion relink both rewrite forks after the solver. (d) The gain is
       real but the combined-score effect is inside noise on a paired interval. Note (a) and (c) are the ones
       expected to bite.
-    supporting: [FACT-0375, FACT-0380, FACT-0371, FACT-0362, FACT-0359]
+    supporting: [FACT-0375, FACT-0380, FACT-0371, FACT-0362, FACT-0359, FACT-0383, FACT-0384, FACT-0385]
+    outcome_2026_08_29: >-
+      FIRST ATTEMPT MEASURED (PKT-0032). The falsifier above is left EXACTLY as written, because rewriting one
+      after seeing a result is how a lever survives evidence it should not. What it says, read literally:
+      (a) DID NOT FIRE, it was REFUTED - a cross-fitted model cut 14 of 67 fold-0 false positives at ZERO
+      true-positive cost, so false positives are not one-for-one with true ones (FACT-0385).
+      (b) FIRED ON FOLD 1 ONLY - 5 of 349, below the random expectation of 23.3 - while fold 0 was above
+      chance. That is an INVERSION between embryos, not a transfer collapse, and pooling would have hidden it.
+      (c) and (d) were not reached, because the achievable effect is about +0.001 against a measured ceiling
+      of +0.01416 (FACT-0384) and nothing that small survives the full chain as a distinguishable result.
+      WHAT ACTUALLY BINDS is a quantity the falsifier did not anticipate: the usable positive class is 19
+      EMITTED TRUE FORKS across both folds, not the 151 annotated divisions, because the metric charges only
+      72 of fold 0's 5,656 emitted forks (FACT-0383). PKT-0032's falsifier (a) fires on that.
+      THE LEVER STAYS OPEN ON A NARROWED CLAIM, and the prize is BIGGER than it was opened for: +0.01416, and
+      the oracle's edits RAISE raw edge Jaccard rather than trading it away, so this is not a division-versus-
+      edges compromise. The next attempt is a different experiment, and its falsifier is stated here BEFORE it
+      runs.
+    successor_falsifier: >-
+      For the next attempt only, and written before it starts. The successor must (1) train on the CHARGED
+      fork population rather than pooling GT-derived tuples - the one change already measured to help,
+      deployment AUC 0.5254 to 0.6299 (FACT-0385); (2) increase the emitted-true-fork count beyond 19, since
+      that and not the head is what binds; and (3) be judged on BOTH folds separately with the inversion as an
+      explicit gate. It is killed if, with a larger positive population, fold 1 still rejects false positives
+      at or below chance - that would mean the signal is embryo-specific rather than a property of false forks,
+      and no amount of data fixes it. It is ALSO killed if the achievable effect stays under +0.003 through the
+      complete chain, which is the bar LEVER-0036 failed on and there is no reason to hold this lever to less.
+      Zebrahub is NOT an admissible source of the extra positives until its anti-alignment is solved: pooled
+      AUC 0.179, per-feature median ratios 0.345 to 3.719, and our divisions localised at 3.60 um against
+      their 1.24 (FACT-0385). Pooling those rows collapsed an in-domain fit from 0.80 to 0.21.
     note: >-
       Sized from our own arithmetic, not from ambition: fold 0 emits 67 division FPs against 26 annotated
       divisions, so cutting FPs to about 20 takes divJ from 0.0538 to about 0.109 - roughly +0.006 of score,

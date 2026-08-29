@@ -5378,3 +5378,161 @@ facts:
       about deployment.
     date: '2026-08-29'
     tags: [association, parent-ranking, degenerate-metric, candidate-floor, scope-correction, headline]
+
+  - id: FACT-0383
+    statement: >-
+      The division population, measured through the OFFICIAL scorer on both complete folds, is far smaller
+      than the emitted fork population and almost all of it is invisible to the metric. Fold 0 emits 5,656
+      predicted forks of which the metric charges only 72 - 5 true positives and 67 false - so 98.7% are
+      ignored; fold 1 emits 5,582 of which 363 are charged. The complete fold-1 census, never previously
+      measured (FACT-0371 used a 32-crop subset), is 125 annotated divisions with 14 TP / 349 FP / 111 FN.
+      The class a verifier must actually learn is therefore EMITTED TRUE FORKS - 5 on fold 0 and 14 on
+      fold 1, nineteen in total - not the 26 and 125 annotated divisions
+    value: 0.9873
+    unit: share_of_f0_emitted_forks_the_metric_ignores
+    scope:
+      f0:
+        crops: 71
+        official: {gt_divisions: 26, division_tp: 5, division_fp: 67, division_fn: 21}
+        forks: {emitted: 5656, charged: 72, ignored: 5584, ignored_share: 0.9873}
+        fp_taxonomy: {evaluable: 67, cross_component: 0, malformed: 0}
+        gt_tuples: {gt_divisions: 26, fully_matched: 22, scored: 5}
+      f1:
+        crops: 128
+        official: {gt_divisions: 125, division_tp: 14, division_fp: 349, division_fn: 111}
+        forks: {emitted: 5582, charged: 363, ignored: 5219, ignored_share: 0.9350}
+        fp_taxonomy: {evaluable: 346, cross_component: 6, malformed: 0}
+        gt_tuples: {gt_divisions: 125, fully_matched: 71, scored: 14}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Both folds complete - 71 and 128 crops - through the scorer's OWN matcher rather than a second one:
+      populations come from score_divisions (whose fp_forks IS the metric's false-positive tally),
+      _pred_division_fork_sets and _match_full at 7 um, and every crop RAISES unless it reconciles with
+      tracking_cellmot.metrics.evaluate. The fold-0 counts reproduce FACT-0375's control arm exactly, which
+      is an independent check that this census and the deployed scorer count the same events.
+    instrument: >-
+      scripts/win_bet/divverify_dataset.py census; outputs _evidence/divverify/census_f0.json and
+      census_f1.json plus C:/temp/divverify/rows_f0.parquet and rows_f1.parquet
+    experiment: EXP-0035
+    note: >-
+      TWO CONSEQUENCES, AND THE FIRST REDIRECTS THE LEVER. (1) A GLOBALLY APPLIED VERIFIER SPENDS 98.7% OF ITS
+      DECISIONS WHERE THE METRIC PAYS NOTHING. Division false positives are charged only on annotated cells,
+      so the overwhelming majority of emitted forks are unscored, and a verifier acting on all of them is
+      mostly editing a graph for no metric reward. That is the reason the training population must be the
+      CHARGED forks rather than every fork the pipeline emits, and it was measured rather than argued:
+      training on emitted forks only, instead of pooling GT-derived tuples, moved the deployment-view AUC
+      from 0.5254 to 0.6299 (FACT-0385). (2) THE POSITIVE CLASS IS NOT THE ANNOTATED DIVISIONS. It is
+      nineteen emitted true forks across both folds. FACT-0362 concluded the division lane is data-limited
+      from HOCT's 110 positives; our own number is 19, the same conclusion measured on our own substrate and
+      roughly six times worse.
+      The complete fold-1 census also corrects an impression left by FACT-0371's 32-crop subset: fold 1 is
+      not proportionally worse than fold 0 on divisions, it is proportionally similar and simply larger.
+    date: '2026-08-29'
+    tags: [division, census, fork-population, verifier, both-folds, headline]
+
+  - id: FACT-0384
+    statement: >-
+      A PERFECT false-fork verifier is worth +0.01416 of score on fold 0 and +0.00817 on fold 1 - 2.4x the
+      prize LEVER-0040 estimated - and its edits are net-POSITIVE on the edge term rather than a cost.
+      Rejecting every fold-0 fork the official scorer calls a false positive, deleting the weakest child edge
+      of each, takes division false positives 67 to 0 with true positives held at 5, division Jaccard 0.0538
+      to 0.1923, and RAW edge Jaccard UP from 0.886247 to 0.886557 because 39 false edges go with the 28 true
+      ones. The adapter that measures this reproduces the deployed division counts EXACTLY at 5 / 67 / 21 and
+      agrees with exact re-scoring on 142 of 142 fold-0 and 256 of 256 fold-1 crop-rungs
+    value: 0.01416236257517689
+    unit: perfect_false_fork_verifier_score_ceiling_f0
+    scope:
+      f0:
+        crops: 71
+        control: {score: 0.9078586, division_jaccard: 0.0537634, division_tp: 5, division_fp: 67, division_fn: 21, edge_tp: 18784, edge_fp: 1369, edge_fn: 1042, edge_jaccard: 0.8862468, adj_edge_jaccard: 0.9024823}
+        ceiling: {score: 0.9220210, division_jaccard: 0.1923077, division_tp: 5, division_fp: 0, division_fn: 21, edge_tp: 18756, edge_fp: 1330, edge_fn: 1070, edge_jaccard: 0.8865570, adj_edge_jaccard: 0.9027902}
+        delta_score: 0.0141624
+      f1: {crops: 128, delta_score: 0.00817, division_fp_before_after: [349, 0], edge_jaccard_change: flat}
+      adapter_proof: {rung1_exact_match: true, crop_rungs_checked_f0: 142, disagreements_f0: 0, crop_rungs_checked_f1: 256, disagreements_f1: 0}
+      is_an_oracle: true
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The SELECTION is an oracle - it uses the scorer's own verdict about which forks are false - so this is a
+      CEILING and never a result. The division counts and the edge cost it reports are real, computed by the
+      official scorer over the complete folds. The adapter's credential is that it reproduces a known number:
+      rung 1, with zero rejections, returns the deployed 5 / 67 / 21 exactly, so the machinery that measures
+      the ceiling is the machinery that reproduces the control.
+    instrument: >-
+      scripts/win_bet/divverify_adapter.py prove; outputs _evidence/divverify/adapter_proof_f0.json and
+      adapter_proof_f1.json plus C:/temp/divverify/adapter_control_f0.parquet and adapter_ceiling_f0.parquet
+    experiment: EXP-0035
+    note: >-
+      LEVER-0040 sized the prize at about +0.006 from FACT-0380's arithmetic, which cut false positives to
+      roughly 20 rather than to zero; at zero the measured value is +0.01416, so the lever's own estimate was
+      conservative and the lane is worth more than it was opened for. The finding that matters beyond the
+      number is that RAW EDGE JACCARD RISES. Deleting the weakest child edge of a false fork removes 39 false
+      edges for 28 true ones, so the verifier does not trade edge quality for division quality - a trade this
+      pipeline's history would have predicted, and which does not occur. Both embryo directions are reported
+      separately per the standing rule; fold 1's ceiling is smaller and its edge term flat.
+      This is a CEILING. FACT-0385 records what an honest cross-fitted model actually reaches, which is about
+      7% of it.
+    date: '2026-08-29'
+    tags: [division, verifier, ceiling, oracle, adapter-proof, both-folds]
+
+  - id: FACT-0385
+    statement: >-
+      A cross-fitted false-fork verifier is DATA-LIMITED, not architecture-limited, and it INVERTS between
+      embryos. Trained on fold 1's emitted forks - 14 positives - and judged on the fold it never saw, it
+      rejects 14 of 67 fold-0 false positives before losing a single true positive, a deployment-view AUC of
+      0.6299 worth roughly +0.001 of score against FACT-0384's +0.01416 ceiling. The same protocol judged on
+      fold 1 rejects only 5 of 349 before the first true-positive loss, BELOW the random expectation of 23.3.
+      Two design traps were found and disarmed: pooling GT-derived tuples with emitted forks inflates the
+      unseen-fold AUC to 0.8006 while the deployment view is 0.5254, because out_degree and competing_parents
+      read the CONSTRUCTION ROUTE rather than the physics; and the Zebrahub external positives are
+      ANTI-ALIGNED with our surface at pooled AUC 0.179, collapsing an in-domain fit from 0.80 to 0.21
+    value: 14
+    unit: f0_false_forks_rejected_before_the_first_true_positive_loss
+    scope:
+      protocol: {judge_fold_0_trains_on: [fold 1, external], judge_fold_1_trains_on: [fold 0, external], external_fold_id: -1}
+      judge_f0:
+        in_domain_emitted_forks_only: {train_rows: 363, train_positives: 14, auc_unseen_fold: 0.8901, deployment_auc: 0.6299, fp_rejected_before_tp_loss: 14, of_fp: 67}
+        in_domain_only_pooled: {train_rows: 1213, train_positives: 80, auc_unseen_fold: 0.8006, deployment_auc: 0.5254, fp_rejected_before_tp_loss: 6}
+        emitted_plus_counterfactual: {train_positives: 14, auc_unseen_fold: 0.1696, deployment_auc: 0.5701, fp_rejected_before_tp_loss: 11}
+        in_domain_plus_external: {train_rows: 1426706, train_positives: 2667, auc_unseen_fold: 0.2149, deployment_auc: 0.6239, fp_rejected_before_tp_loss: 9}
+        external_only: {train_rows: 1425493, train_positives: 2587, auc_unseen_fold: 0.1785}
+      judge_f1: {deployment_auc: 0.640, fp_rejected_before_tp_loss: 5, of_fp: 349, random_expectation: 23.3, below_chance: true}
+      random_expectation_f0: 11.2
+      counterfactuals: {f0: 270, f1: 850, kinds: [cf_wrong_parent, cf_wrong_sister, cf_temporal_skip, cf_temporal_same]}
+      separability_against_cf_wrong_parent: {parent_midpoint_um_auc: [0.068, 0.071], daughter_angle_auc: [0.129, 0.109], reading: "0.068 is 0.932 inverted - strongly separable"}
+      in_fold_signal: {sister_um_auc_deployment_view: [0.854, 0.793]}
+    provenance: MEASURED
+    validity: SUSPECT
+    validity_reason: >-
+      The NEGATIVE is solid and the protocol is sound - the cross-fit is enforced mechanically by a single
+      selector with an assertion that raises on a judged-fold row, on the held-out embryo when the fold column
+      lies, and on any identifier reaching the feature list. What makes it SUSPECT rather than VALID is sample
+      size in the only place it matters: the fold-0 result rests on 5 true positives and 67 false ones, so
+      14-of-67 carries very wide sampling error, and the fold-1 arm rests on 14 positives. A result built on
+      nineteen positives across both folds is not a stable estimate of anything.
+    instrument: >-
+      scripts/win_bet/divverify_dataset.py viability probe, with training_rows_for and assert_no_leak;
+      output _evidence/divverify/viability.json
+    experiment: EXP-0035
+    note: >-
+      PKT-0032's falsifier (a) FIRES: the usable positive population is 19 emitted true forks across both
+      folds against HOCT's 110 (FACT-0362), so the division lane is data-limited on our own substrate and by
+      roughly six times more than the external evidence suggested. But read what did NOT fire, because it
+      decides whether the lane stays open. THE MECHANISM WORKS: 14 false positives were cut at ZERO
+      true-positive cost, so LEVER-0040's own falsifier (a) - that false positives cannot be cut without
+      losing true positives roughly one for one - is REFUTED rather than confirmed. In-fold signal is strong,
+      sister_um alone reaching 0.854 on the deployment view, and the counterfactual negatives are strongly
+      separable. It is the cross-fold CALIBRATION that fails, on nineteen positives.
+      THE INVERSION IS THE STANDING-RULE FINDING. Fold 0 rejects 14 of 67 above chance while fold 1 rejects 5
+      of 349 BELOW chance. Pooling these would have reported a modest positive and hidden a complete
+      directional disagreement - exactly the failure AGENTS.md requires both embryo directions be reported
+      separately to prevent.
+      THE ZEBRAHUB PLANK IS NOT USABLE AS DRAWN, and this contradicts the assumption carried in LEVER-0040 and
+      FACT-0362 that external triples are the asset that changes the count. At 1,425,493 rows and 2,587
+      positives it is anti-aligned with our surface, and the gap is not one scalar: per-feature median ratios
+      run 0.345 to 3.719, with our own divisions far worse localised than Zebrahub's, 3.60 um against 1.24,
+      which is FACT-0380 reappearing inside the external data. Any future use of Zebrahub for divisions must
+      solve that alignment first rather than pooling rows.
+    date: '2026-08-29'
+    tags: [division, verifier, cross-fit, data-limited, fold-inversion, zebrahub, negative, headline]
