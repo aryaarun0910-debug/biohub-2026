@@ -4730,5 +4730,13 @@ facts:
       suggests, but capturing the division half needs positive division examples - Zebrahub triples
       (FACT-0296) - rather than another edge-scoring architecture. The 67 fold-0 division false positives are
       also a target in their own right: they are charged against a base of 26 annotated divisions.
+      HOST CAUTION, 2026-08-29 - READ THIS BEFORE CITING THE NUMBER. This is an ORACLE ceiling and it is NOT
+      evidence that ordinary association improvement automatically recovers divisions. What it establishes is
+      narrower and still valuable: the CURRENT NODE SET already contains the division topology, so the
+      information is present and neither detection nor node selection blocks it. Recovering it still requires
+      COORDINATED DAUGHTER EDGES - two sibling links agreeing on one parent - which a per-edge scorer that
+      optimises each pair independently has no mechanism to guarantee. HOCT is the standing empirical warning
+      (FACT-0347: association gains, zero division recall). Therefore division recovery is always reported
+      SEPARATELY from the edge term and never folded into an association headline.
     date: '2026-08-29'
     tags: [division, association, ceiling, allocation, headline]

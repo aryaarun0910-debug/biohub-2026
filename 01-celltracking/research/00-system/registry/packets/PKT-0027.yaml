@@ -1,0 +1,77 @@
+id: PKT-0027
+title: "One passive fold-0 acquisition run serving LEVER-0036 and LEVER-0037, replayed separately on CPU"
+lever: LEVER-0037
+owner: primary
+lock: claimed
+opened: '2026-08-29'
+
+claim: >-
+  A single passive fold-0 Kaggle run can acquire BOTH missing substrates at once - the honest pre-ILP candidate
+  graph that LEVER-0036 needs for its promotion gate, and the richer candidate-probability surface that
+  LEVER-0037 needs - while reproducing the P28 fold-0 control output bit-for-bit, so that the two levers are
+  then tested as independent CPU replays rather than as one confounded GPU treatment.
+
+falsifier: >-
+  Any of: (a) the run's submission/graph output is not bit-identical to the P28 fold-0 control (EXP-0030), which
+  would mean the acquisition changed the thing it is supposed to observe and the control is destroyed; (b) the
+  edge-candidate patch does not report its ECB_PATCH_APPLIED heartbeat, or reports a sidecar count of zero, or
+  its fail-closed assertion fires - any of which means the primary candidate path was not patched and the
+  acquisition is void; (c) the exported sidecars do not reconstruct the DEPLOYED candidate set exactly when
+  filtered at the deployed threshold, which would mean the export is not a superset of what the pipeline used
+  and no reachability claim from it is safe.
+
+prediction: >-
+  Stated before the run. The deployed candidate reconstruction will hold exactly, because the export and the
+  deployed list come from the same `probs` matrix in the same call. Fold-0 reachability at the deployed
+  threshold is expected NEAR the fold-1 figure (FACT-0370, 82.7% of detectable GT edges) since the rule is
+  shared code, but the RATE may differ because fold 0 is the better-associated fold; a fold-0 reachability
+  materially ABOVE fold 1's would shrink LEVER-0037's headroom on the gate fold and should be reported plainly
+  rather than framed as a null.
+
+inputs:
+  facts: [FACT-0368, FACT-0369, FACT-0370, FACT-0367, FACT-0345, FACT-0364, FACT-0261, FACT-0310]
+  artifacts:
+    - notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb   # base, sha in spec
+    - C:/temp/p28_f0/                                                                # the control to match
+  code:
+    - scripts/kaggle_edits/edge_candidate_budget.py     # LEVER-0037 acquisition surface (new)
+    - scripts/kaggle_edits/pre_ilp_export.py            # LEVER-0036 substrate
+    - scripts/kaggle_edits/pre_ilp_rollup.py
+    - scripts/win_bet/p28_full_chain_replay.py          # the CPU replay both treatments use
+    - scripts/win_bet/association_reachability.py
+
+method: >-
+  ACQUISITION (one GPU session, passive). Build the P28 fold-0 control with three additions: the pre-ILP
+  candidate-graph export, its parquet roll-up, and the edge-candidate budget patch configured in EXPORT MODE
+  ONLY (BIOHUB_EDGE_CANDIDATE_EXPORT_* set; the treatment variables BIOHUB_EDGE_CANDIDATE_THRESHOLD and
+  BIOHUB_EDGE_CANDIDATE_TOPK deliberately UNSET). Verify before push that the built notebook still carries the
+  P28 control configuration. After fetch, audit against the P28 fold-0 control for bit-identity and check the
+  three falsifier conditions.
+  REPLAY (CPU, two independent experiments, neither licensed to submit by this packet).
+  (1) LEVER-0036: the tightened ILP selector through the complete chain on the honest fold-0 substrate, paired
+  against the P28 control, reporting raw edge Jaccard, the adjusted score and the DIVISION term separately.
+  (2) LEVER-0037: first as CANDIDATE REACH on fold 0 - the FACT-0370 three-way split recomputed on the richer
+  surface - and only then as full-chain association, again with divisions reported separately.
+  The two treatments are never combined in one graph until each has been measured alone.
+
+budget:
+  gpu_sessions: 1   # acquisition only; host has authorised GPU use
+  submissions: 0    # no submission is licensed by this packet
+  wall_clock: 1-2 days
+
+forbidden:
+  - setting BIOHUB_EDGE_CANDIDATE_THRESHOLD or BIOHUB_EDGE_CANDIDATE_TOPK on the acquisition run
+  - combining the LEVER-0036 and LEVER-0037 graph changes in a single measurement before each is measured alone
+  - reporting a division gain folded into an association headline (FACT-0371 host caution)
+  - promoting on fold 1, which is association-degraded (FACT-0261)
+  - float-coordinate export (FACT-0344)
+  - any submission
+  - .claude/settings.json
+
+outputs:
+  evidence: C:/temp/ecb_f0/ and _evidence/ecb/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md per completed gate
+
+result: null

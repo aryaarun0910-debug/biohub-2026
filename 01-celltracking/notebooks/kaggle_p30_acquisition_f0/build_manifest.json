@@ -1,0 +1,53 @@
+{
+  "name": "p30_acquisition_f0",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p30_acquisition_f0.json",
+  "base_notebook": "notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb",
+  "base_sha256": "6d54240b85eb563faa6015761cb348fb2ad4df801218077fbf7c6480c8194f8a",
+  "built_notebook": "notebooks\\kaggle_p30_acquisition_f0\\biohub-p30-acquisition-f0.ipynb",
+  "built_sha256": "7064f9d238224f098858bc2402d9ecd0b5b062e14134d41fa2e58193ae4ed74f",
+  "config_hash": "d08803e940c8",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "72b22abab8727c083dbf14ff18c5edc9a5f9067f789d1a19566915c8db75df30"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "25b152dd6ad0fa59716e0a05c20541996da5914367800de1a674431b0044d1f2"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "f92725c536a51d77a2f7065aa50b975bbbf62d430a3e10d33cf51b9f66b8bf0c"
+    },
+    {
+      "kind": "insert_after",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "c6a8a862fea6927b5993468702f1a4025e806aa9a617570b4be4bf40dc6db608"
+    },
+    {
+      "kind": "insert_after",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "f2915eeda14e4a6793f1d6dcc2891f42b6716c4e19892afa0320b5b3cb89ca53"
+    }
+  ],
+  "declared_slug": "biohub-p30-acquisition-f0",
+  "title": "Biohub P30 Acquisition F0",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "name": "p30_acquisition_f0",
+  "slug": "biohub-p30-acquisition-f0",
+  "title": "Biohub P30 Acquisition F0",
+  "code_file": "biohub-p30-acquisition-f0.ipynb",
+  "out_dir": "notebooks/kaggle_p30_acquisition_f0",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": false,
+  "artifact_role": "diagnostic",
+  "diagnostic_reason": "PKT-0027 acquisition. Two passive exports on top of the P28 fold-0 control: the pre-ILP candidate graph (LEVER-0036) and the richer candidate-probability sidecars (LEVER-0037). No treatment variable is set, the consumed graph is unchanged, and no submission is produced.",
+  "base_notebook": "notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb",
+  "base_sha256": "6d54240b85eb563faa6015761cb348fb2ad4df801218077fbf7c6480c8194f8a",
+  "purpose": "ONE passive fold-0 acquisition run serving TWO levers that are then replayed independently on CPU (PKT-0027). It adds (1) the pre-ILP candidate-graph export plus its parquet roll-up, giving LEVER-0036 the honest fold-0 substrate its promotion gate requires - fold 0 is the gate because fold 1 is association-degraded (FACT-0261); and (2) the LEVER-0037 edge-candidate budget patch in EXPORT MODE ONLY, writing per-crop sidecars of every candidate above a 0.02 floor capped at 8 parents per target. FACT-0369 is why that surface does not already exist: the deployed rule softmaxes over the SOURCE axis and thresholds at 0.5, so at most one parent per target can survive - measured in-degree maximum is exactly 1 across all 2,162,040 fold-1 candidate edges - and FACT-0370 prices it at 15.6% of fold-1 GT edges never offered to any scorer. The treatment variables BIOHUB_EDGE_CANDIDATE_THRESHOLD and BIOHUB_EDGE_CANDIDATE_TOPK are deliberately UNSET so the consumed candidate list, the emitted graph and every downstream stage stay bit-identical to the P28 fold-0 control (EXP-0030) - the acquisition must not change the thing it observes, and bundling both levers' graph changes into one GPU treatment would confound them. No submission.",
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_EDGE_CANDIDATE_EXPORT_THRESHOLD": "0.02",
+        "BIOHUB_EDGE_CANDIDATE_EXPORT_TOPK": "8",
+        "BIOHUB_EDGE_CANDIDATE_EXPORT_DIR": "/kaggle/working/ecb"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "available_gpu_count = _torch.cuda.device_count()",
+      "cell_match": "available_gpu_count = _torch.cuda.device_count()",
+      "code_file": "scripts/kaggle_edits/pre_ilp_export.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "available_gpu_count = _torch.cuda.device_count()",
+      "cell_match": "available_gpu_count = _torch.cuda.device_count()",
+      "code_file": "scripts/kaggle_edits/edge_candidate_budget.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_after",
+      "anchor": "print(f\"Found {len(geffs)} prediction graphs\")",
+      "cell_match": "print(f\"Found {len(geffs)} prediction graphs\")",
+      "code_file": "scripts/kaggle_edits/pre_ilp_rollup.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_after",
+      "anchor": "_LOEO_KEEP |= set(globals().get(\"_SWEEP_KEEP\", []))",
+      "cell_match": "_LOEO_KEEP = {",
+      "code": "\n_LOEO_KEEP |= {\"ecb\", f\"preilp_split{LOEO_FOLD}.parquet\"}\n",
+      "expect": 1
+    }
+  ]
+}
