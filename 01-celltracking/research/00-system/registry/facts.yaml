@@ -5251,3 +5251,56 @@ facts:
       one that resembles ours.
     date: '2026-08-29'
     tags: [division, localisation, external-corroboration, competitor-calibration, measured]
+
+  - id: FACT-0381
+    statement: >-
+      The parent-discrimination task, measured on the frozen target-wise surface over the honest fold, is far
+      smaller and far harder than the aggregate suggests. Of 19,444 fold-0 decidable targets - those whose true
+      parent is actually among the candidates - only 4,157 (21.4%) are CONTESTED, i.e. offered more than one
+      candidate parent; on the other 78.6% top-1 is 1.0 by construction. Deployed top-1 is 0.9645 overall but
+      0.8338 on contested targets, leaving 691 wrong parent choices as the entire learnable headroom of this
+      task on fold 0. The equivalent fold-1 figure is DEGENERATE and must not be quoted: without a richer
+      candidate export that fold has exactly one candidate per target (FACT-0369), so its top-1 is 1.0 by
+      arithmetic
+    value: 0.8338
+    unit: deployed_parent_top1_on_contested_targets_f0
+    scope:
+      fold: 0
+      candidate_surface: {source: P30 ECB sidecars, floor: 0.1, rank_cap: 4}
+      decidable_targets: 19444
+      single_candidate: {n: 15287, share: 0.786, top1: 1.0, note: "1.0 by construction, not skill"}
+      contested: {n: 4157, share: 0.214, top1: 0.8338, errors: 691}
+      overall_top1: 0.9645
+      margin_on_contested: {median: 0.4854, share_negative: 0.166}
+      targets_true_parent_never_offered: 216
+      fold1_degenerate: {decidable: 81053, candidates_per_target_max: 1, top1: 1.0, usable: false,
+                         reason: "no fold-1 ECB export; deployed rule admits one parent per target (FACT-0369)"}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Complete fold 0, all 71 crops, through the frozen label contract in
+      scripts/win_bet/assoc_parent_dataset.py - one-to-one 7 um matching shared with
+      FACT-0354/0355/0357, targets whose true parent was never offered scored separately rather than charged to
+      the scorer. The task is measured only on ANNOTATED targets with ANNOTATED parents, which is what the
+      metric rewards; edges among unannotated cells are outside it by construction.
+    instrument: >-
+      scripts/win_bet/assoc_parent_dataset.py over C:/temp/p30_f0/{preilp_split0.parquet,ecb/} and
+      C:/temp/preilp_f1_v2/preilp_split1.parquet; outputs _evidence/assoc/f{0,1}.json
+    experiment: EXP-0035
+    note: >-
+      Three consequences, and the first is a warning about our own instrument. (1) A CROSS-FITTED PARENT RANKER
+      CANNOT BE EVALUATED ON FOLD 1 TODAY. Its candidate surface is single-parent by construction, so any
+      accuracy measured there is 1.0 regardless of the model - a metric that cannot fail is not evidence.
+      Cross-fitting the ranker therefore REQUIRES a fold-1 candidate export, which is a GPU acquisition, and no
+      fold-1 ranker claim may be made before it exists.
+      (2) THE HEADROOM IS 691 TARGETS, not 87% of the gap. FACT-0368's association ceiling replaced EVERY edge,
+      including those among unannotated cells and the division structure; this task only covers picking a
+      parent among offered candidates for annotated cells. Both are true and they measure different things -
+      quoting the ceiling as if it were this task's headroom would overstate a learned ranker's reach
+      substantially.
+      (3) THE TASK IS STILL WORTH DOING and the bar is now explicit: beat 0.8338 on contested targets without
+      losing the 78.6% that are already correct. That is a hard target for a linear or tree model on nine
+      representation-free features, which is precisely what the learnability baseline is for - if simple models
+      cannot beat it, the existing representation is not the limit and richer node context is justified.
+    date: '2026-08-29'
+    tags: [association, parent-ranking, frozen-surface, headroom, degenerate-metric, measured]
