@@ -79,11 +79,17 @@ harness_gates:
   g1_feature_parity: >-
     Cache frozen-trunk node features and prove the DEPLOYED head, re-run from the cache alone,
     reproduces the candidate edges and probabilities already recorded in the P30 pre-ILP export.
-    Built as scripts/win_bet/assoc_feature_cache.py. MEASURED CONSTRAINT 2026-08-29: this gate
-    cannot run on CPU. tracking_cellmot.io.open_dataset calls pin_memory() during image
+    Built as scripts/win_bet/assoc_feature_cache.py. IMPLEMENTATION CONSTRAINT, NOT A SCIENTIFIC ONE
+    (host correction 2026-08-29): tracking_cellmot.io.open_dataset calls pin_memory() during image
     preprocessing and raises "Cannot access accelerator device when none is available" even when
-    passed device='cpu', so the cache must be built on GPU. Reading the zarr directly instead would
-    bypass the deployed normalisation and defeat the parity the gate exists to prove.
+    passed device='cpu'. pin_memory is a HOST-TO-DEVICE TRANSPORT optimisation, not numerical
+    preprocessing, so this does NOT establish that the pipeline is intrinsically GPU-only - only
+    that this code path refuses to run without an accelerator. The harness is therefore NOT
+    redesigned around it. The parity smoke runs on GPU for a second and better reason: CPU and GPU
+    floating-point paths can differ by more than the 1e-4 probability tolerance, so running the
+    smoke on CPU would confound a numeric-backend difference with a genuine cache error - exactly
+    the ambiguity the gate exists to remove. Reading the zarr directly would additionally bypass the
+    deployed normalisation and defeat the parity being proven.
   g2_label_contract: >-
     Match predicted nodes to GT ONCE, define parent targets and an explicit abstain/null class, and
     FREEZE the ambiguity rules before any training. Ambiguity rules decided after seeing results are

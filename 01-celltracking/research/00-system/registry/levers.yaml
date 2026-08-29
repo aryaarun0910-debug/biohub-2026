@@ -22,6 +22,31 @@ updated: '2026-08-27'
 
 levers:
 
+# ---------------------------------------------------------------------------------------------
+# STANDING SUBMISSION POLICY - SEAM-CALIBRATION EXCEPTION (host, 2026-08-29)
+#
+# WHY IT EXISTS. Our offline instruments have repeatedly failed to predict leaderboard DIRECTION
+# and MAGNITUDE for this pipeline: DeepCenter read +0.0009 offline against +0.003 on the LB
+# (FACT-0345, a 3-4x under-read) and icom read +0.002 offline and scored -0.014 (FACT-0344). More
+# offline rigor cannot fix a seam; only a submission measures it. For a genuinely NEW model class
+# the risk is that a fortnight of both-fold work is spent before learning whether the offline proxy
+# tracks the LB for that kind of change at all.
+#
+# THE EXCEPTION. A genuinely new LEARNED ASSOCIATION MODEL may receive ONE calibration submission
+# after passing the honest FOLD-0 full-chain gate, BEFORE fold 1 is complete. Every condition binds:
+#   - it is a new learned SCORER, not another threshold, candidate rule or post-processing change;
+#   - RAW association improves through the complete chain, not merely the adjusted score;
+#   - opportunity CONVERTS into net true edges (the FACT-0376 quantity);
+#   - node recall stays acceptable AND division TP does not decline (FACT-0371 caution);
+#   - the artifact is audited, submitted STANDALONE, and preregistered with a band;
+#   - ONE slot, no stacking and no rapid follow-up;
+#   - FOLD 1 IS STILL REQUIRED before the model becomes established campaign evidence.
+#
+# THIS IS SEAM CALIBRATION, NOT PROMOTION. It does not weaken any gate for ordinary levers, and it
+# is not available to node-count manipulation, candidate widening, threshold nudges or
+# public-bundle micro-ablation - those remain excluded from submissions entirely.
+# ---------------------------------------------------------------------------------------------
+
   - id: LEVER-0001
     claim: >-
       Smoothing node positions along a tracklet before the linker recovers association

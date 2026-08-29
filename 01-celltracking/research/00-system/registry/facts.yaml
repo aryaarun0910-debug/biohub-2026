@@ -5187,3 +5187,60 @@ facts:
       manipulation no longer receives GPU without new discriminatory information.
     date: '2026-08-29'
     tags: [hoct, upstream-contract, pool-kernel, corrects-fact-0361, verified]
+
+  - id: FACT-0380
+    statement: >-
+      Division tuples are systematically WORSE LOCALISED than ordinary matched cells on both folds,
+      reproducing a competitor's independent observation. On fold 0, 45.5% of GT division tuples have a member
+      beyond 3 um while all members pass the official 7 um matcher, against 12.0% of all matched cells - a
+      3.8x enrichment; on fold 1 it is 74.6% against 37.3%. Median worst-member residual is 2.841 um (f0) and
+      3.723 um (f1) against 1.675 and 2.298 for matched cells generally. Kaggle user kevin park reported 39%
+      of their division nodes outside 3 um while passing 7 um; our fold-0 figure is 45.5%
+    value: 0.455
+    unit: share_of_f0_division_tuples_with_a_member_beyond_3um
+    scope:
+      f0:
+        all_matched_cells: {n: 20107, median_um: 1.675, share_over_3um: 0.120}
+        division_divider_nodes: {n: 26, median_um: 2.071, share_over_3um: 0.077}
+        division_tuple_worst_member: {n: 22, median_um: 2.841, share_over_3um: 0.455}
+        enrichment_vs_all_cells: 3.8
+      f1:
+        all_matched_cells: {n: 103151, median_um: 2.298, share_over_3um: 0.373}
+        division_divider_nodes: {n: 108, median_um: 2.799, share_over_3um: 0.472}
+        division_tuple_worst_member: {n: 71, median_um: 3.723, share_over_3um: 0.746}
+        enrichment_vs_all_cells: 2.0
+      external_reference: {source: "kaggle discussion, user kevin park", claim: "39% of division nodes outside 3 um while all pass 7 um"}
+      competitor_score_composition:
+        kevin_park: {detection_recall: 0.9945, adj_edge_jaccard: 0.9212, division_jaccard: 0.1176, implied_score: 0.9330}
+        lime1123: {adj_edge_jaccard: 0.89, division_jaccard: 0.28, implied_score: 0.918}
+        ours_f0_offline: {adj_edge_jaccard: 0.9025, division_jaccard: 0.0538}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The localisation figures are our own, computed from committed instruments over the complete folds, and
+      the fold-0 division sample is small (22 fully-matched tuples) so its RATE carries real sampling error
+      even though the enrichment direction is clear on both folds. The competitor numbers are EXTERNAL and
+      unverified - forum-reported, no artifact - and their adjJ/divJ are on their own validation, not the same
+      folds as ours, so they calibrate the shape of a frontier score and must not be compared to our offline
+      numbers as if measured alike.
+    instrument: >-
+      scripts/win_bet/division_localisation.py and scripts/win_bet/lost_cell_atlas.py outputs
+      (_evidence/retention/divloc_f{0,1}.parquet, atlas_f{0,1}.parquet); 2026-08-29
+    note: >-
+      This is the FOURTH independent attestation of the 3 um division-localisation effect - Lime1123
+      (FACT-0348), our own recovery-versus-residual measurement (FACT-0360), kevin park's node census, and now
+      this residual-distribution measurement, which is the first to quantify the ENRICHMENT against a baseline.
+      TWO CORRECTIONS TO THE OBVIOUS READING, both arithmetic on our own numbers.
+      (1) LOCALISATION IS WORTH LESS THAN IT LOOKS HERE. FACT-0360 puts recovery at 0.333 under 3 um against
+      0.143 over. Moving all 22 fold-0 tuples under 3 um would recover roughly 2 more divisions, taking divJ
+      from 5/93 = 0.0538 to about 7/93 = 0.0753 - a score gain near +0.002, because divJ enters at 0.1 weight.
+      (2) THE FALSE POSITIVES ARE THE BIGGER DIVISION LEVER. Fold 0 emits 67 division FPs against just 26
+      annotated divisions (FACT-0375). Cutting those to ~20 would take divJ to about 0.109, roughly +0.006 of
+      score - about three times the localisation prize - and FACT-0371 already showed perfect edges drive
+      division FP to ZERO. So the discussion's implied lever is real but secondary for us.
+      Tang's ordering advice - detection, then linking, then division - does NOT transfer to our system:
+      FACT-0354 shows our detection is already at budget and FACT-0368 puts 87% of the fold-0 gap in
+      association. kevin park's position (detection recall 0.9945, "basically all my score is edges") is the
+      one that resembles ours.
+    date: '2026-08-29'
+    tags: [division, localisation, external-corroboration, competitor-calibration, measured]
