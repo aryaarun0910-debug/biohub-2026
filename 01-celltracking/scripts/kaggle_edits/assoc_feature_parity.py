@@ -48,8 +48,12 @@ try:
         raise FileNotFoundError("pre-ILP parity target not found in the mounted inputs")
 
     _afp_dev = _afp_torch.device("cuda" if _afp_torch.cuda.is_available() else "cpu")
-    _afp_weights = _AfpPath(WEIGHTS_RELATIVE) if "WEIGHTS_RELATIVE" in dir() else None
-    _afp_model, _afp_W, _afp_ds = _AFP.load_model(_afp_primary_weights_path, _afp_dev)
+    # WEIGHTS_RELATIVE and TEST_DIR are the notebook's own symbols, verified present in the P28
+    # control base; predict_cmd passes exactly these to the deployed predictor.
+    _afp_weights = _AfpPath(WEIGHTS_RELATIVE)
+    if not _afp_weights.is_absolute():
+        _afp_weights = _AfpPath(REPO_DIR) / WEIGHTS_RELATIVE
+    _afp_model, _afp_W, _afp_ds = _AFP.load_model(_afp_weights, _afp_dev)
     _afp_cfg = _AFP.PredictConfig(det_threshold=float(os.environ.get("BIOHUB_DET_THRESHOLD", "0.96875")))
     _afp_dsarr = _afp_np.asarray(_afp_ds, dtype=_afp_np.float32)
     _afp_dsarr_t = _afp_torch.tensor(_afp_dsarr, device=_afp_dev)

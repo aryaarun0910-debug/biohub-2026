@@ -5238,6 +5238,13 @@ facts:
       annotated divisions (FACT-0375). Cutting those to ~20 would take divJ to about 0.109, roughly +0.006 of
       score - about three times the localisation prize - and FACT-0371 already showed perfect edges drive
       division FP to ZERO. So the discussion's implied lever is real but secondary for us.
+      THE +0.002 IS A PRIORITISATION ESTIMATE, NOT A CAUSAL CEILING (host, 2026-08-29). It holds the rest of
+      the pipeline fixed and applies FACT-0360's recovery rates to the tuples currently beyond 3 um. Moving
+      residuals can change one-to-one MATCHING and association JOINTLY - a better-localised node may also be
+      matched differently and linked differently - so the true effect is not bounded by that arithmetic in
+      either direction. Localisation stays SECONDARY and is explicitly NOT killed; it becomes a conditional
+      layer applied where a division verifier flags division-sensitive uncertainty, never a global coordinate
+      rewrite.
       Tang's ordering advice - detection, then linking, then division - does NOT transfer to our system:
       FACT-0354 shows our detection is already at budget and FACT-0368 puts 87% of the fold-0 gap in
       association. kevin park's position (detection recall 0.9945, "basically all my score is edges") is the
