@@ -504,3 +504,24 @@ experiments:
       base retains BIOHUB_LOEO_WEIGHTS_GLOB=split_1. Launch only after EXP-0032 passes; no submission.
       FETCHED and AUDITED 2026-08-28: detection bit-identical on all 128 crops; 127 of 128 crops reproduce the
       champion graph exactly and the single divergence is confined to stages after detection (FACT-0352).
+
+  - id: EXP-0035
+    title: P30 fold-0 acquisition - passive pre-ILP substrate (LEVER-0036) plus richer candidate surface (LEVER-0037)
+    spec: scripts/kaggle_specs/p30_acquisition_f0.json
+    kernel: aryaarun07/biohub-p30-acquisition-f0
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-29'
+    facts: [FACT-0345, FACT-0369, FACT-0370, FACT-0367, FACT-0261]
+    note: >-
+      PKT-0027. ONE passive run on the P28 fold-0 champion control base that acquires BOTH missing substrates:
+      the pre-ILP candidate graph the LEVER-0036 promotion gate needs on the honest fold, and per-crop sidecars
+      of the richer candidate surface (floor 0.02, at most 8 parents per target) that LEVER-0037 needs. The
+      edge-candidate treatment variables are deliberately UNSET, so the consumed candidate list, the emitted
+      graph and every downstream stage stay bit-identical to EXP-0030 - the acquisition must not change what it
+      observes, and bundling both levers' graph changes into one GPU treatment would confound them. The two
+      levers are replayed independently on CPU afterwards. Verified before push: both patches compose and
+      compile on the vendored predictor, the treatment variables are absent from the built notebook, and the
+      P28 control configuration is preserved. No submission.
