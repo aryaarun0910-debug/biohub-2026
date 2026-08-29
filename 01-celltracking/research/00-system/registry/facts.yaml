@@ -4280,6 +4280,9 @@ facts:
       plus its candidate gating (15 um, 64 neighbours) - no model porting, no training. The one detector-side
       difference, pool_kernel_um 5.0 vs our 3.0, changes the local-max NMS radius and therefore the node set the
       head was trained against; it must be reconciled before their held-out numbers are expected to transfer.
+      CORRECTED 2026-08-29 BY FACT-0379: that blocker is NOT REAL. load_model reads config.json but never
+      applies pool_kernel_um, so inference runs at the dataclass default 3.0 on BOTH sides - the 5.0 is an
+      inert config field. The upstream node contract matches and this is one fewer confound, not a blocker.
       Their reported gains also sit on a WEAKER baseline than ours (their official fold-0-direction reference is
       0.7147 against our P28 fold-0 of FACT-0345), so their deltas are not additive to the champion and must be
       re-measured on our substrate.
@@ -5134,3 +5137,50 @@ facts:
       enabling it in a LOEO arm.
     date: '2026-08-29'
     tags: [leak, secondary, protocol, defect, lever-0034, verified]
+
+  - id: FACT-0379
+    statement: >-
+      The pool_kernel_um mismatch recorded as LEVER-0034's integration blocker is NOT REAL. `load_model` reads
+      config.json - including its pool_kernel_um 5.0 - but returns only (model, window_size, downsample) and
+      never applies that field, so peak extraction runs at the PredictConfig dataclass default of 3.0 on every
+      run of this predictor. Our deployed fold-0 log confirms it prints pool_kernel_um=3.0 while the loaded
+      pack config says 5.0. Because HOCT's model card states it used the fixed OFFICIAL predicted nodes from
+      this same codebase, its training node surface was extracted at 3.0 as well: the upstream node contract
+      MATCHES ours
+    value: 3.0
+    unit: effective_pool_kernel_um_at_inference
+    scope:
+      config_json_value: 5.0
+      dataclass_default: 3.0
+      effective_value: 3.0
+      source: "vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py:70 (default), :162-200 (load_model returns model/window_size/downsample only), :335 (pool_k built from cfg.pool_kernel_um)"
+      observed_in_deployed_log: "Fold 0: ... window_size=2 | pool_kernel_um=3.0 (C:/temp/p30_f0 kernel log, four shards)"
+      configs_declaring_5um: [tracking-support-pack, seed314159 secondary, HOCT fold0/fold1]
+      hoct_node_source: "model card - fixed official predicted nodes, i.e. this same pipeline"
+      corrects: FACT-0361
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Established at source and confirmed in a deployed run log, which is the strongest pairing available. The
+      inference for HOCT is one step weaker but well grounded: their own model card says they scored edges over
+      fixed official predicted nodes from this codebase, and this codebase cannot apply a 5.0 pool at
+      inference. It would be falsified if HOCT turned out to have regenerated nodes with a patched predictor,
+      which nothing in the published artifacts suggests.
+    instrument: >-
+      source read of predict_unet_transformer.py load_model and PredictConfig; grep of pool_kernel_um across
+      local configs; the P30 fold-0 kernel log; 2026-08-29
+    experiment: EXP-0035
+    note: >-
+      PKT-0029 safeguard (f) asked for upstream compatibility to be checked BEFORE the contract search, on the
+      grounds that pooling, coordinate scaling, neighbourhood construction and normalisation might matter more
+      than the unknown feature slots. It did matter - by removing an obstacle rather than adding one. The
+      node-surface contract is shared, so the HOCT identification experiment reduces to the 3 node extras, 4
+      pair extras and 13 relation features, with one fewer confound.
+      A SEPARATE OBSERVATION worth its own lever some day, deliberately NOT acted on here: every checkpoint in
+      this lineage was TRAINED with a config declaring 5.0 while inference has always extracted peaks at 3.0.
+      That is a train/inference mismatch in the public baseline itself, inherited by our champion. It is not a
+      defect we introduced and changing it would alter the node surface the whole campaign is calibrated on
+      (FACT-0345), so it is recorded and left alone - the host's rule stands that node-surface manipulation no
+      longer receives GPU without new discriminatory information.
+    date: '2026-08-29'
+    tags: [hoct, upstream-contract, pool-kernel, corrects-fact-0361, verified]
