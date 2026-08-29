@@ -4,7 +4,7 @@
   "base_notebook": "notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb",
   "base_sha256": "6d54240b85eb563faa6015761cb348fb2ad4df801218077fbf7c6480c8194f8a",
   "built_notebook": "notebooks\\kaggle_p30_acquisition_f0\\biohub-p30-acquisition-f0.ipynb",
-  "built_sha256": "7064f9d238224f098858bc2402d9ecd0b5b062e14134d41fa2e58193ae4ed74f",
+  "built_sha256": "20436b87d26e88213748f98846cab2d69dcfc60e4bafd55aa4b78bcde8417bcb",
   "config_hash": "d08803e940c8",
   "n_cells": 11,
   "edits": [
@@ -49,5 +49,6 @@
   "defect_gate": {
     "ledger": "scripts\\core\\experiment_defects.json",
     "passed": []
-  }
+  },
+  "pushed_slug": "biohub-p30-acquisition-f0"
 }

@@ -157,17 +157,22 @@ _ecb_ret_new = """    coords = coords.astype(np.int16)
             np.concatenate(_ECB_BUFFER) if _ECB_BUFFER else np.empty((0, 3), dtype=np.float64)
         )
         _ecb_tmp = _ecb_out / f"{ds_path.stem}.npz.tmp"
-        np.savez_compressed(
-            _ecb_tmp,
-            source_id=_ecb_rows[:, 0].astype(np.int64),
-            target_id=_ecb_rows[:, 1].astype(np.int64),
-            edge_prob=_ecb_rows[:, 2].astype(np.float32),
-            deployed_threshold=np.float64(cfg.threshold),
-            export_threshold=np.float64(_ECB_EXPORT_THRESHOLD),
-            export_topk=np.int64(_ECB_EXPORT_TOPK),
-            deployed_candidate_count=np.int64(_ECB_CROP["pairs"]),
-            frame_pairs=np.int64(_ECB_CROP["frame_pairs"]),
-        )
+        # NOTE the file HANDLE. np.savez_compressed appends '.npz' to a path that does not
+        # already end in it, so passing `_ecb_tmp` would write '<crop>.npz.tmp.npz' and the
+        # rename below would then fail on a file that never existed. Handing it an open file
+        # suppresses that rewriting entirely.
+        with open(_ecb_tmp, "wb") as _ecb_fh:
+            np.savez_compressed(
+                _ecb_fh,
+                source_id=_ecb_rows[:, 0].astype(np.int64),
+                target_id=_ecb_rows[:, 1].astype(np.int64),
+                edge_prob=_ecb_rows[:, 2].astype(np.float32),
+                deployed_threshold=np.float64(cfg.threshold),
+                export_threshold=np.float64(_ECB_EXPORT_THRESHOLD),
+                export_topk=np.int64(_ECB_EXPORT_TOPK),
+                deployed_candidate_count=np.int64(_ECB_CROP["pairs"]),
+                frame_pairs=np.int64(_ECB_CROP["frame_pairs"]),
+            )
         _ecb_tmp.replace(_ecb_out / f"{ds_path.stem}.npz")
         _ECB_TOTAL["crops"] += 1
         _ECB_TOTAL["pairs"] += _ECB_CROP["pairs"]

@@ -195,21 +195,56 @@ def test_out_of_range_configuration_raises_rather_than_silently_clamping(tmp_pat
         patch_and_load(tmp_path, {"BIOHUB_EDGE_CANDIDATE_TOPK": "0"})
 
 
-def test_sidecar_write_is_atomic_across_the_process_boundary(tmp_path):
-    """The predictor runs in two GPU subprocesses over disjoint crop slices (FACT-0351).
+def test_sidecar_flush_actually_produces_a_readable_npz(tmp_path):
+    """EXECUTE the generated flush, do not merely grep it.
 
-    The flush writes `<crop>.npz.tmp` and renames, so a reader never observes a partial file
-    and a crash cannot leave a truncated sidecar that would silently under-report candidates.
+    An earlier version of this test asserted the tmp-write/rename pattern appeared in the
+    source and passed, while the real flush crashed every Kaggle run: np.savez_compressed
+    APPENDS '.npz' to a path that lacks it, so it wrote '<crop>.npz.tmp.npz' and the rename
+    of '<crop>.npz.tmp' raised FileNotFoundError. A string check cannot see that; running the
+    code can. The flush is extracted from the patched source and executed against real arrays.
     """
     target = apply_patch(tmp_path, {
         "BIOHUB_EDGE_CANDIDATE_EXPORT_THRESHOLD": "0.05",
         "BIOHUB_EDGE_CANDIDATE_EXPORT_DIR": str(tmp_path / "ecb"),
     })
     source = target.read_text(encoding="utf-8")
-    assert '_ecb_tmp = _ecb_out / f"{ds_path.stem}.npz.tmp"' in source
-    assert '_ecb_tmp.replace(_ecb_out / f"{ds_path.stem}.npz")' in source
-    # and the write must happen before the rename
-    assert source.index("np.savez_compressed(") < source.index("_ecb_tmp.replace(")
+    start = source.index("    if _ECB_EXPORT_ON:\n        from pathlib import Path as _EcbPath")
+    end = source.index("    return coords, all_edges", start)
+    block = "\n".join(
+        line[4:] if line.startswith("    ") else line
+        for line in source[start:end].split("\n")
+    )
+
+    class _DsPath:
+        stem = "44b6_testcrop"
+
+    ns = {
+        "np": np,
+        "_ECB_EXPORT_ON": True,
+        "_ECB_EXPORT_DIR": str(tmp_path / "ecb"),
+        "_ECB_EXPORT_THRESHOLD": 0.05,
+        "_ECB_EXPORT_TOPK": 8,
+        "_ECB_BUFFER": [np.array([[1.0, 2.0, 0.9], [3.0, 4.0, 0.6]])],
+        "_ECB_CROP": {"pairs": 7, "frame_pairs": 3},
+        "_ECB_TOTAL": {"pairs": 0, "exported": 0, "crops": 0},
+        "cfg": type("C", (), {"threshold": 0.5})(),
+        "ds_path": _DsPath(),
+    }
+    exec(compile(block, "<flush>", "exec"), ns)
+
+    written = tmp_path / "ecb" / "44b6_testcrop.npz"
+    assert written.exists(), sorted(p.name for p in (tmp_path / "ecb").iterdir())
+    assert not list((tmp_path / "ecb").glob("*.tmp*")), "temporary file left behind"
+    with np.load(written) as z:
+        assert z["source_id"].tolist() == [1, 3]
+        assert z["target_id"].tolist() == [2, 4]
+        assert float(z["deployed_threshold"]) == 0.5
+        assert int(z["deployed_candidate_count"]) == 7
+    # per-crop state must be cleared for the next crop
+    assert ns["_ECB_BUFFER"] == []
+    assert ns["_ECB_CROP"] == {"pairs": 0, "frame_pairs": 0}
+    assert ns["_ECB_TOTAL"]["crops"] == 1
 
 
 def test_per_crop_counters_reset_so_the_heartbeat_is_not_cumulative(tmp_path):
