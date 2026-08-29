@@ -868,7 +868,8 @@ levers:
       disappearance weight to about 3.0 yields a SMALLER, more selective node set at unchanged node recall, and
       that node set - the only part of the solver's output the champion keeps - raises the score through the
       FULL post-processing chain on both folds
-    status: open
+    status: killed
+    closed_by: [FACT-0375]
     falsifier: >-
       The tightened node set must be scored through the COMPLETE champion chain (motion relink, gap closure,
       DeepCenter vetoes, safe division, short-track filter, line fit), not the ILP stage alone, and must beat
@@ -906,6 +907,14 @@ levers:
       its +0.003 fold-0 bar, and it must never be promoted on an adjusted gain whose raw counterpart is near
       zero.
 
+      KILLED 2026-08-29 ON ITS OWN FOLD-0 GATE (FACT-0375). All 71 fold-0 crops through the complete chain:
+      score +0.00288 against a +0.003 bar, a bootstrap interval of [-0.0018, +0.0077] that includes zero, and
+      RAW edge Jaccard NEGATIVE at -0.00084 while the adjusted figure is +0.00264. The falsifier named this
+      exactly - "killed if it is a count-adjustment artifact" - and it is one: the whole apparent gain is the
+      under-production bonus of a smaller node set. Node recall falls 0.9868 to 0.9782, the edge trade is
+      slightly adverse (132 true lost against 129 false removed), and division true positives do not move.
+      Closed on evidence about itself, not by inheritance from FACT-0372, which only predicted it.
+
       CPU FEASIBILITY RESOLVED 2026-08-29 (FACT-0367): exact control replays prove the complete P28 chain is
       replayable from local assets, and a fixed fold-1 panel stays positive through the official scorer. This
       removes the full-chain tooling blocker but does not waive the both-fold gate; the panel is heterogeneous
@@ -927,7 +936,9 @@ levers:
       crop-bootstrap CI excluding zero and >= +0.003 on fold 0, reporting raw edge Jaccard beside the adjusted
       score. Killed if the extra candidates are absorbed by the relink with no score change, if precision losses
       cancel the recall gain, or if the count adjustment (FACT-0191) is doing the work.
-    supporting: [FACT-0368, FACT-0369, FACT-0370, FACT-0361, FACT-0364, FACT-0357]
+    status: killed
+    closed_by: [FACT-0376]
+    supporting: [FACT-0376, FACT-0374, FACT-0368, FACT-0369, FACT-0370, FACT-0361, FACT-0364, FACT-0357]
     note: >-
       This is the lever the ceiling decomposition points at most directly. FACT-0368 measured association at 87%
       of the fold-0 gap; FACT-0370 splits that into about five sixths winnable by a better SCORER on existing
@@ -943,6 +954,21 @@ levers:
       on CPU. `cfg.threshold` is already env-reachable as BIOHUB_DUAL_SEED_EDGE_THRESHOLD but only on the
       secondary-model code path, so a small patch is needed to make it apply unconditionally. Pair it with the
       honest fold-0 pre-ILP export that LEVER-0036 already needs, so one GPU session serves both.
+
+      KILLED AS A WIDENING LEVER 2026-08-29 (FACT-0376), and it is the most informative negative of the cycle.
+      On the complete fold 0 at its own best setting - floor 0.1, rank 2, chosen from that fold's reach surface
+      and therefore biased IN THE LEVER'S FAVOUR - widening raised GT-edge reach by 924 pairs at 1.45x the
+      candidates, and the chain converted 28 of them into net true edges (3.0%) while adding 113 false
+      positives, about four wrong edges per right one. The score FELL 0.0091 with an interval excluding zero,
+      raw edge Jaccard fell, and division true positives dropped 5 to 4.
+      WHAT THIS SETTLES: FACT-0368 measured association at 87% of the fold-0 gap but could not say whether that
+      gap is bounded by WHICH PAIRS ARE OFFERED or WHICH PAIR IS CHOSEN. It is the latter. Candidate generation
+      is NOT the binding constraint on the honest fold and further widening is contraindicated. The lane is the
+      SCORER's discrimination - which is precisely LEVER-0034's HOCT head, a differently-trained edge head on
+      an architecturally identical trunk (FACT-0361).
+      The node-retention mechanism is real and separable: extra candidates DO retain nodes (+0.0032 recall),
+      but that spends the under-production bonus, which is why the adjusted loss exceeds the raw loss - the
+      exact mirror of LEVER-0036.
     priority: 1
 
   - id: LEVER-0029

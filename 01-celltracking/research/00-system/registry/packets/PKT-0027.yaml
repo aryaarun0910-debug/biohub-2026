@@ -2,7 +2,7 @@ id: PKT-0027
 title: "One passive fold-0 acquisition run serving LEVER-0036 and LEVER-0037, replayed separately on CPU"
 lever: LEVER-0037
 owner: primary
-lock: claimed
+lock: done
 opened: '2026-08-29'
 
 claim: >-
@@ -70,7 +70,7 @@ forbidden:
 
 outputs:
   evidence: C:/temp/ecb_f0/ and _evidence/ecb/
-  facts_added: []
+  facts_added: [FACT-0373, FACT-0374, FACT-0375, FACT-0376]
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md per completed gate
 
@@ -91,4 +91,35 @@ interpretation_rules_preregistered: >-
   cautiously preregistered LB test - not automatic promotion.
   (6) The unreachable-edge percentage is NOT a score ceiling and may not be quoted as one.
 
-result: null
+closed: '2026-08-29'
+
+result: >-
+  CLOSED. Both levers are dead on their own fold-0 evidence, and the second death is the useful one. One GPU
+  session, zero submissions.
+
+  ACQUISITION passed all four audits (FACT-0373), including the host's node-ID check: the graph is identical
+  to the P28 fold-0 control, the patch heartbeat fired on all 71 crops with treatment variables unset, all
+  1,973,714 deployed edges reappear in the export, and every exported candidate addresses a valid pre-ILP node
+  id across consecutive frames. One GPU run served both levers as intended.
+
+  LEVER-0036 FAILS its own fold-0 gate (FACT-0375) - rule (1) applied. Score +0.00288 against a +0.003 bar,
+  interval including zero, and RAW edge Jaccard NEGATIVE while the adjusted figure is positive. Its falsifier
+  named this outcome exactly: a count-adjustment artifact. Node recall falls, the edge trade is slightly
+  adverse, division TP does not move.
+
+  LEVER-0037 IS A RANKING FAILURE (FACT-0376) - rule (3) applied, and rule (4) independently. At its own best
+  setting, chosen from this fold's reach surface and therefore biased in its favour, widening raised reach by
+  924 GT edges at 1.45x candidates; the chain converted 28 into net true edges (3.0%) while adding 113 false
+  positives. Score fell 0.0091 with an interval excluding zero; division TP fell 5 to 4. Node retention DID
+  improve as predicted (+0.0032 recall, +156,408 nodes), so the mechanism works and the linker still cannot
+  choose. Rule (6) observed throughout: the unreachable-edge percentage was never quoted as a score ceiling.
+
+  WHAT THE PACKET BOUGHT. FACT-0368 put 87% of the fold-0 gap in association but could not say whether the
+  bound is which pairs are OFFERED or which pair is CHOSEN. This settles it: offering more does not help, so
+  the constraint is discrimination. Candidate widening is contraindicated on the honest fold and the lane is
+  the edge scorer - LEVER-0034's HOCT head on an architecturally identical trunk (FACT-0361).
+
+  RULE (5) TRIGGERED: net conversion is small (28 against a 924 opportunity), so the identity-level
+  attribution - whether those 28 are 28 gained or hundreds gained and nearly as many displaced - requires a
+  graph-persisting re-run before the ranking mechanism is treated as established. The promotion decision does
+  not wait on it; the mechanism claim does.

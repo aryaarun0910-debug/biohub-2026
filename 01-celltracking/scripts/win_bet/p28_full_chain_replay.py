@@ -396,6 +396,11 @@ def main() -> int:
     parser.add_argument("--candidate-floor", type=float, default=0.1)
     parser.add_argument("--candidate-rank", type=int, default=2)
     parser.add_argument("--out", type=Path, required=True)
+    # PKT-0027 rule (5): a small NET conversion cannot distinguish "few edges gained" from
+    # "many gained and nearly as many displaced". Persisting the final graph makes that
+    # attribution possible; it is off by default so ordinary replays stay cheap.
+    parser.add_argument("--save-graph", type=Path,
+                        help="write the final per-crop graph as parquet for identity-level analysis")
     args = parser.parse_args()
 
     module = load_p28_module(args.notebook, args.train_dir, args.checkpoint)
@@ -455,6 +460,9 @@ def main() -> int:
         nodes, edges, dataset=args.crop, deepcenter_bundle=detector
     )
     final_frame = submission_frame(args.crop, final_nodes, final_edges)
+    if args.save_graph is not None:
+        args.save_graph.mkdir(parents=True, exist_ok=True)
+        final_frame.write_parquet(args.save_graph / f"{args.crop}.parquet")
     from scripts.win_bet import div_reach_steal as drs
 
     score = drs.score_crop(

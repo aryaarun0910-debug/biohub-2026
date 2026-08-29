@@ -4899,3 +4899,98 @@ facts:
       +0.047 reach for 1.4x candidates - and it is tested through the complete chain before any claim.
     date: '2026-08-29'
     tags: [lever-0037, reach, fold-inversion, candidate-generation, measured]
+
+  - id: FACT-0375
+    statement: >-
+      LEVER-0036 FAILS its own preregistered fold-0 gate on every criterion. Across all 71 fold-0 crops through
+      the complete champion chain, the tightened ILP selector scores +0.00288 - below the +0.003 bar - with a
+      paired bootstrap interval of [-0.0018, +0.0077] that INCLUDES ZERO, and its RAW edge Jaccard is
+      NEGATIVE at -0.00084 while the adjusted figure is +0.00264. The entire apparent gain is the node-count
+      adjustment. Node recall falls 0.9868 to 0.9782 and division true positives are unchanged at 5
+    value: 0.0028771828701325
+    unit: full_chain_score_delta_f0_complete
+    scope:
+      fold: 0
+      crops: 71
+      arm: "ILP disappearance 3.0 vs deployed 1.5, complete champion chain"
+      control: {score: 0.90786, adj_edge_jaccard: 0.90248, edge_jaccard: 0.88625, node_recall: 0.98679, edge_tp: 18784, edge_fp: 1369, edge_fn: 1042, division_tp: 5, division_fp: 67, division_fn: 21, division_jaccard: 0.05376}
+      candidate: {score: 0.91074, adj_edge_jaccard: 0.90512, edge_jaccard: 0.88541, node_recall: 0.97821, edge_tp: 18652, edge_fp: 1240, edge_fn: 1174, division_tp: 5, division_fp: 63, division_fn: 21, division_jaccard: 0.05618}
+      delta: {score: 0.00288, adj_edge_jaccard: 0.00264, edge_jaccard_raw: -0.00084, node_recall: -0.00857, division_tp: 0, division_fp: -4}
+      paired_bootstrap: {mean: 0.00294, ci95: [-0.00181, 0.00773], draws: 2000, seed: 20260828, excludes_zero: false}
+      crop_signs: {positive: 48, negative: 23}
+      gate: {bar: 0.003, met: false, ci_excludes_zero: false, raw_association_positive: false}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The complete honest fold, all 71 crops, zero failed crops, on the P30 substrate whose four audits passed
+      (FACT-0373) and through a chain whose fold-0 deployed controls replay exactly. This closes LEVER-0036 on
+      evidence ABOUT ITSELF, as the one-lever-one-evidence rule requires - not by inheritance from the fold-1
+      result (FACT-0372), which merely predicted it.
+    instrument: >-
+      scripts/win_bet/p28_full_chain_replay.py over all 71 fold-0 crops at disappearance 3.0, paired by
+      scripts/win_bet/p28_full_chain_panel.py against C:/temp/p28_f0/loeo_split0_champion.csv.gz;
+      output _evidence/ecb/panel_l36_f0.json
+    experiment: EXP-0035
+    note: >-
+      The lever's own falsifier named this outcome exactly: "killed if it is a count-adjustment artifact". It
+      is. Raw edge Jaccard goes DOWN while the adjusted score goes up, because a 12.5% smaller node set collects
+      a larger under-production bonus (FACT-0191/0192). The edge trade is one-for-one and slightly adverse - 132
+      true edges lost against 129 false ones removed - and node recall drops. Division true positives do not
+      move at all; the small division-Jaccard gain is four fewer false positives. Fold 1 (FACT-0372) predicted
+      this and fold 0 confirms it independently. The node-budget theme is now closed in BOTH directions on the
+      gate fold: LEVER-0028 died at the detector, LEVER-0035 at the solver's premise, and LEVER-0036 here on
+      the count adjustment.
+    date: '2026-08-29'
+    tags: [lever-0036, killed, fold-0-gate, count-adjustment, complete-fold]
+
+  - id: FACT-0376
+    statement: >-
+      LEVER-0037 is a RANKING FAILURE, not a candidate-generation win. Widening the fold-0 candidate set to
+      floor 0.1 with at most two parents per target raised GT-edge reach from 18,466 to 19,390 of 19,665
+      detectable edges - 924 newly reachable pairs at 1.45x the candidates - and the complete chain converted
+      only 28 of them into net true edges, a 3.0% conversion, while adding 113 false-positive edges. The score
+      FALLS 0.00906 with a bootstrap interval of [-0.0154, -0.0034] that excludes zero, raw edge Jaccard falls
+      0.00339, and division true positives drop from 5 to 4. Node retention DID improve as the mechanism
+      predicted (recall 0.9868 to 0.9900, +156,408 nodes) - the extra edges do retain nodes, but the linker
+      cannot pick the right parents from the wider set
+    value: 0.0303
+    unit: newly_reachable_gt_edge_conversion_rate_f0
+    scope:
+      fold: 0
+      crops: 71
+      treatment: {floor: 0.1, rank: 2, deployed_floor: 0.5}
+      opportunity: {gt_detectable: 19665, reached_deployed: 18466, reached_treatment: 19390, newly_reachable: 924, candidates_deployed: 1973714, candidates_treatment: 2860610, multiple: 1.45}
+      realised: {delta_edge_tp: 28, delta_edge_fp: 113, delta_division_tp: -1, delta_nodes: 156408, node_recall: [0.98679, 0.99003]}
+      conversion_rate: 0.0303
+      added_edge_fp_to_tp_ratio: 4.04
+      panel: {score_delta: -0.00906, adj_edge_jaccard_delta: -0.00794, raw_edge_jaccard_delta: -0.00339, division_jaccard_delta: -0.01121, ci95: [-0.01537, -0.00336], excludes_zero: true, crop_signs: {positive: 23, negative: 48}}
+    provenance: MEASURED
+    validity: SUSPECT
+    validity_reason: >-
+      The NEGATIVE result is solid - complete fold 0, 71 crops, interval excluding zero, and the treatment was
+      selected to be favourable to the lever, so a loss under its own best setting is strong evidence. Two
+      limits on the MECHANISM claim. (1) delta_edge_tp is a NET count: the replay retains per-crop metrics and
+      not final graphs, so 28 net could be 28 gained and 0 lost, or hundreds gained and nearly as many
+      displaced. PKT-0027 rule (5) triggers an identity-level re-run that persists graphs before the ranking
+      diagnosis is treated as established. (2) The floor and rank were chosen on this same fold's GT reach
+      (FACT-0374), so this is treatment characterisation; that selection bias worked IN THE LEVER'S FAVOUR,
+      which makes the negative result more, not less, credible.
+    instrument: >-
+      scripts/win_bet/lever37_conversion.py and scripts/win_bet/p28_full_chain_panel.py over the 71 fold-0
+      l37 replays; outputs _evidence/ecb/{conversion_l37.json,panel_l37_f0.json}
+    experiment: EXP-0035
+    note: >-
+      This is the most informative negative of the cycle, because it separates two explanations that FACT-0368
+      could not. Association is 87% of the fold-0 gap, and the question was whether that gap is bounded by
+      WHICH PAIRS ARE OFFERED or by WHICH PAIR IS CHOSEN. The answer is the latter: offering the true parent
+      raised reach by 924 edges and the pipeline took 28 of them while taking 113 wrong ones - roughly four
+      false positives per true one recovered. Candidate generation is therefore NOT the binding constraint on
+      the honest fold, and further widening is contraindicated. The lane is the SCORER's discrimination, which
+      is exactly what LEVER-0034's HOCT head is - a differently-trained edge head on an architecturally
+      identical trunk (FACT-0361). Two secondary readings. The node-retention mechanism is real and separable:
+      extra candidates do retain nodes (+0.0032 recall), but that pushes N_pred up and spends the
+      under-production bonus, which is why the adjusted loss (-0.0079) exceeds the raw loss (-0.0034) - the
+      exact mirror of LEVER-0036 (FACT-0375). And division recovery got WORSE, so rule (4) applies
+      independently: non-promotional whatever the pooled score did.
+    date: '2026-08-29'
+    tags: [lever-0037, ranking-failure, association, conversion, negative, headline]
