@@ -1140,6 +1140,31 @@ levers:
       chain is explicit and serial: EXP-0041 (Gate 1 parity) must pass before the two fold feature caches
       launch, and the caches then launch WITH NO ADDITIONAL MODEL CHANGES, so a later result is attributable
       to the head rather than to a bundled edit.
+      ---
+      2026-08-29 (PKT-0029 STEP 1). THE FEATURE CONTRACT IS NO LONGER INFERRED, IT IS READ. The premise that
+      the publisher shipped weights and a config but NO model code is FALSE: their own LICENSES.md names the
+      dataset rudispresence/biohub-stabledet-hoct-code, which exists and ships
+      repo_overlay/methods/stabledet_hoct_fork/hoct_edge_transformer.py under the MIT licence. Their class
+      StableDetHOCTFork(feature_dim=32) strict-loads BOTH published checkpoints at 447,376 parameters, so the
+      published source is the producing source, and our reimplementation now reproduces its edge and quiet
+      logits BIT-EXACTLY on both folds. Two consequences bind this lever from here.
+      (1) THE INTEGRATION BLOCKER RECORDED IN THIS NOTE IS FULLY DEAD, AND NOT FOR THE RECORDED REASON.
+      FACT-0379 correctly concluded that HOCT's node contract matches ours but reasoned that their
+      pool_kernel_um was dropped by the same load_model quirk as ours. It is not - their cache script
+      re-injects it explicitly. It is inert because the model-card configuration supplies node COORDINATES
+      from a node graph, which overrides peak extraction entirely, and peak extraction is the only consumer
+      of pool_kernel_um and det_threshold. The conclusion survives on stronger evidence than the one recorded.
+      (2) A NEW AND LARGER UPSTREAM MISMATCH REPLACES IT, and it is about the CANDIDATE SURFACE, not the
+      detector. HOCT's candidate rule is a purely geometric 15 um ball over every source, uncapped and
+      unfiltered; ours admits at most ONE parent per target by arithmetic (FACT-0369) and the widened P30
+      surface at most four. The head was trained to discriminate among competitors our pipeline never offers,
+      so it cannot be run as a reranker of OUR candidate list - it must be given its own 15 um graph rebuilt
+      from node coordinates. That rebuild is CPU-cheap and is implemented; what remains GPU-bound is only the
+      32-channel node features. A THIRD RISK IS NEWLY IDENTIFIED AND UNRESOLVED: which trunk produced those
+      features is a CLI argument, absent from the checkpoint, and feeding official-trunk features to a head
+      trained on StableDet-trunk features would look exactly like a wrong contract. Both trunks must be
+      cached and compared in the SAME session. Licence question in this note is ANSWERED: code MIT, weights
+      CC BY 4.0 with a required attribution string.
     priority: 3
 
   - id: LEVER-0039

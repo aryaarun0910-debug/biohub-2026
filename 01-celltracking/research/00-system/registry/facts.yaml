@@ -5690,3 +5690,248 @@ facts:
       actually executes.
     date: '2026-08-29'
     tags: [pkt-0029, gate-1, process-boundary, harness-failure, fail-closed-worked, hoct]
+
+  - id: FACT-0388
+    statement: >-
+      The fold-1 candidate acquisition INVERTS which fold holds the parent-ranking headroom. On the widened
+      surface P34 delivered, fold 1 has 91,410 decidable targets of which 26,601 are CONTESTED - a 29.1%
+      contested share against fold 0's 21.4% - with deployed contested top-1 of only 0.7084 and 7,757 wrong
+      parent choices. That is 6.4x fold 0's contested population and 11.2x its errors, at a materially LOWER
+      deployed accuracy. PKT-0030's falsifier (e), that fold 1 might remain too degenerate to falsify a
+      ranker, does NOT fire; the opposite is true and fold 1 is now the richer evaluation surface
+    value: 0.7083944212623585
+    unit: deployed_parent_top1_on_contested_targets_f1_widened
+    scope:
+      fold: 1
+      crops: 128
+      candidate_surface: {source: P34 ECB sidecars, floor: 0.1, rank_cap: 4, rows: 3704355}
+      decidable_targets: 91410
+      overall_top1: 0.9151405754293841
+      contested: {n: 26601, share: 0.2910075484082704, top1: 0.7083944212623585, errors: 7757}
+      single_candidate: {n: 64809, share: 0.7089924515917295, top1: 1.0}
+      margin_on_contested: {mean: 0.21533450492006204, median: 0.3175673484802246}
+      targets_true_parent_never_offered: 6637
+      versus_fold0:
+        contested: {f0: 4157, f1: 26601, ratio: 6.40}
+        errors: {f0: 691, f1: 7757, ratio: 11.23}
+        contested_top1: {f0: 0.8337743565070964, f1: 0.7083944212623585}
+        contested_share: {f0: 0.2138, f1: 0.2910}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Complete fold 1, all 128 crops, produced by the SAME committed instrument that produced FACT-0381 and
+      FACT-0386 - scripts/win_bet/assoc_parent_dataset.py through its frozen label contract - so the two
+      folds are directly comparable rather than merely adjacent. The substrate passed audits B, C and D on
+      all 128 crops before the census was computed, and its pre-ILP export is byte-identical to the
+      2026-08-19 preilp_f1_v2 parquet with the sha256 recomputed in-run rather than inherited.
+    instrument: >-
+      scripts/win_bet/assoc_parent_dataset.py over C:/temp/p34_f1/{preilp_split1.parquet,ecb/};
+      output _evidence/audit/receipts/f1_p34.json. Audited under PKT-0036 before use.
+    experiment: EXP-0039
+    note: >-
+      THE PREREGISTERED PREDICTION HIT, AND IT MATTERS THAT IT WAS WRITTEN FIRST. PKT-0030 predicted a
+      contested share BROADER than fold 0's 21.4% on the reasoning that fold 1 is the association-degraded
+      fold with roughly five times the matched cells, so more crowded frames would offer more plausible
+      parents. Measured 29.1%. The naive expectation - that the acquisition would simply make fold 1
+      resemble fold 0 - was wrong in a way the packet anticipated.
+      WHAT THIS CHANGES FOR THE RANKING LANE. Cross-fitting is now possible in BOTH directions, which was
+      the entire purpose of the acquisition (FACT-0381). More importantly the evaluation surface should
+      probably be fold 1 rather than fold 0: 7,757 errors against 691 is not a marginal difference in
+      statistical power, and fold 0's 691 was already small enough that FACT-0386's best arm moved only 12
+      of them with churn 40. A ranker that cannot be distinguished from noise on fold 0 may be measurable on
+      fold 1.
+      THE FACT-0382 FRAMING CARRIES OVER UNCHANGED AND MUST NOT BE DROPPED. This population also exists only
+      at the 0.1 acquisition floor. Nothing here says the deployed pipeline is offered these choices; it says
+      a ranker operating on a widened fold-1 surface has far more to work with. The full-chain comparison
+      remains (widened surface + ranker) against the DEPLOYED control on both folds.
+      Fold 0 remains the promotion gate (FACT-0261). Fold 1 becomes the better DEVELOPMENT surface. Those are
+      different roles and conflating them would reintroduce exactly the selection problem the folds exist to
+      prevent.
+    date: '2026-08-30'
+    tags: [association, parent-ranking, fold-1, contested, acquisition, headline, prediction-hit]
+
+  - id: FACT-0389
+    statement: >-
+      The P34 fold-1 acquisition reproduces the P28 champion control on 127 of 128 crops and diverges on
+      exactly one - 6bba_e16ffc58 at +5 nodes and +4 edges - and the acquisition is NOT the cause. The same
+      crop with the same deltas was recorded by FACT-0352 under a completely different patch, and P34's
+      decompressed graph is BYTE-IDENTICAL to P29's, so two independently patched runs agree with each other
+      and disagree with P28. The mechanism is ILP degeneracy amplified by a filter threshold: detection is
+      bit-identical everywhere, raw ILP edges differ on 5 crops, and on this crop the extra edge changes
+      which components fall under OUTPUT_MIN_TRACK_LEN 6, moving short_track_components_removed from 61 to 62
+    value: 1
+    unit: crops_of_128_where_p34_diverges_from_the_p28_fold1_control
+    scope:
+      fold: 1
+      crops: 128
+      identical_to_p28: 127
+      divergent_crop: {name: 6bba_e16ffc58, delta_nodes: 5, delta_edges: 4}
+      identical_to_p29: 128
+      prior_observation: FACT-0352
+      mechanism:
+        raw_nodes: identical on all crops
+        raw_ilp_edges_differ_on: 5
+        short_track_components_removed: {p28: 61, p34: 62}
+        filter: OUTPUT_MIN_TRACK_LEN 6
+      audits: {A_control_parity: false, B_patch_heartbeat: true, C_deployed_reconstruction: true, D_node_id_stability: true}
+      export_scale: {deployed_edges: 2162040, exported_candidates: 7157163, multiple: 3.31}
+      crossrun_stability: {crops: 128, node_identity_failures: 0, candidate_edge_differences: 0, joinable: true}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The attribution is what makes this VALID rather than merely observed: it was tested against a THIRD
+      run. If the acquisition had caused the divergence, P34 would differ from P29 as well as from P28; it
+      is byte-identical to P29, which leaves P28's own solver draw as the only common factor. The
+      per-stage run_stats then name the mechanism rather than leaving it inferred.
+    instrument: >-
+      scripts/win_bet/audit_p30_acquisition.py and audit_graph_parity_attribution.py under PKT-0036;
+      receipts _evidence/audit/receipts/{p34_audit_ABCD.json,p34_parity_attribution_vs_p28.json,
+      p34_parity_attribution_vs_p29.json,p34_crossrun_stability.json}
+    experiment: EXP-0039
+    note: >-
+      FACT-0363's NOISE FLOOR UNDERSTATES THE FINAL-GRAPH EFFECT, and that is the correction to carry
+      forward. FACT-0363 measured the ILP's multiple optima as roughly a 2-edge jitter at the SOLVER stage,
+      with nodes held exactly. This shows the same degeneracy amplified DOWNSTREAM to 5 nodes and 4 edges in
+      the final graph on about one crop in 128, because a short-track filter with a hard length threshold
+      turns a one-edge difference into a whole component being kept or dropped. A jitter that is negligible
+      where it originates is not necessarily negligible where it is scored.
+      OPERATIONAL CONSEQUENCE, BINDING ON EVERY FOLD-1 PAIRED COMPARISON: any paired delta against the P28
+      fold-1 control must either EXCLUDE 6bba_e16ffc58 or declare it, because on that crop the control is
+      not a stable reference. This is a small effect - one crop in 128 - and stating it is cheaper than
+      re-deriving it the next time a fold-1 panel produces an unexplained sign.
+      AUDIT A IS THEREFORE RECORDED AS FAILING AS SPECIFIED rather than as a defect in the acquisition. The
+      packet demanded bit-identical parity and did not get it; the honest reading is that the demand assumed
+      a determinism the solver does not have - the same specification error FACT-0363 already documented
+      once - and the acquisition itself is clean on every check that tests it.
+    date: '2026-08-30'
+    tags: [p34, graph-parity, ilp-degeneracy, attribution, fold-1, acquisition]
+
+  - id: FACT-0390
+    statement: >-
+      PKT-0029's central premise was FALSE - the HOCT publisher DID ship model code, so the feature contract
+      is READ rather than inferred. Their own LICENSES.md names the dataset
+      rudispresence/biohub-stabledet-hoct-code, which exists and ships
+      repo_overlay/methods/stabledet_hoct_fork/hoct_edge_transformer.py under MIT. Their class
+      StableDetHOCTFork(feature_dim=32) strict-loads BOTH published checkpoints at 447,376 parameters, and
+      our rebuilt module now reproduces its edge and quiet logits at a maximum absolute delta of EXACTLY
+      0.000e+00 on both folds. The two-fold GPU contract-ranking tournament the packet planned is not needed
+    value: 0.0
+    unit: max_abs_logit_delta_between_our_module_and_the_publisher_class
+    scope:
+      folds: [0, 1]
+      checkpoints: [fold0_hoct_hard_negative_9294.pt, fold1_hoct_hard_negative_fold1_9294.pt]
+      params_strict_loaded: 447376
+      candidate_edges_compared: 127
+      max_abs_edge_logit_delta: 0.0
+      max_abs_quiet_logit_delta: 0.0
+      tolerance: 1.0e-05
+      publisher_source: C:/temp/hoct/code/hoct_edge_transformer.py
+      licence: {code: MIT, weights: CC BY 4.0, attribution_string_required: true}
+      undetermined_slots_resolved: {node_extras: 3, pair_extras: 4, relation_features: 13}
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Re-derived this cycle by running both modules on the same inputs and differencing their logits, not by
+      reading either. The delta is exactly zero rather than merely small, on both folds and on both output
+      heads, which is what distinguishes "we found the producing source" from "we found something that scores
+      similarly". The publisher source and the licence file are on disk at the named paths.
+    instrument: >-
+      scripts/win_bet/hoct_head.py equivalence command; evidence C:/temp/hoct/equivalence.json and
+      C:/temp/hoct/code/
+    experiment: EXP-0035
+    note: >-
+      THE LESSON IS ABOUT PREMISE-CHECKING, and it is the same one AGENTS.md already charges for. PKT-0029
+      wrote "the publisher shipped weights and a config but NO model code" and built an entire
+      identifiability experiment on it - a frozen contract list, a permutation null, a multiple-comparisons
+      correction, two GPU sessions. The premise was checkable in the bundle's own LICENSES.md. Verifying it
+      at source cost minutes and removed the experiment.
+      WHAT REMAINS BLOCKED IS NOT THE CONTRACT. The head cannot be scored without the 32-channel UNet node
+      features, which are GPU-bound, so the packet's terminal outcomes do NOT fire in either direction:
+      `identified` needs a top-1 measurement that has not been made, and declaring `not_identifiable` would
+      kill published-weight reuse on absent evidence. The correct state is CONTRACT_DETERMINED, with STEP 2
+      still gated on Gate 1.
+    date: '2026-08-30'
+    tags: [hoct, lever-0034, contract, premise-false, verified, headline]
+
+  - id: FACT-0391
+    statement: >-
+      A strict state-dict load is NECESSARY AND DEMONSTRABLY NOT SUFFICIENT to recover a model. The earlier
+      HOCT reconstruction strict-loaded both checkpoints at exactly the right parameter count and still
+      computed the WRONG FUNCTION in three independent ways, none of which changes any tensor shape and so
+      none of which strict=True can see: ReLU where the publisher uses GELU, norm_first False where the
+      publisher uses True, and a 3-D rotary position embedding applied to queries and keys at edge midpoints
+      OMITTED ENTIRELY - the last being invisible to any checkpoint because its frequencies are a
+      persistent=False buffer that is never serialised
+    value: 3
+    unit: silent_function_divergences_surviving_a_strict_load
+    scope:
+      divergences:
+        - {kind: activation, ours_was: ReLU, publisher: GELU, shape_change: false}
+        - {kind: norm_order, ours_was: norm_first False, publisher: norm_first True, shape_change: false}
+        - {kind: rope_3d_on_qk_at_edge_midpoints, ours_was: omitted, publisher: applied, shape_change: false,
+           reason_invisible: "frequencies are a persistent=False buffer, absent from every checkpoint"}
+      after_correction: {max_abs_edge_logit_delta: 0.0, folds: [0, 1]}
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Established by construction rather than by argument: with the three divergences present the module
+      strict-loaded and produced different logits; with them corrected it reproduces the publisher exactly on
+      both folds. The claim is pinned by a named test rather than left as prose.
+    instrument: >-
+      tests/test_hoct_head.py::test_a_strict_load_cannot_see_the_trunk_contract; scripts/win_bet/hoct_head.py
+    experiment: EXP-0035
+    note: >-
+      PKT-0029's falsifier (b) predicted exactly this class - "a wrong ordering loads cleanly and scores
+      garbage, a silent failure" - and named feature ORDERING as the risk. The realised failure was adjacent
+      and worse: not the ordering of inputs but the ARCHITECTURE'S OWN OPERATIONS, which no amount of
+      feature-order search would have found. Had the GPU tournament run against the uncorrected module, every
+      contract would have scored near chance and the honest reading would have been `not_identifiable` -
+      killing published-weight reuse on an artifact of our own reimplementation.
+      GENERALISES BEYOND HOCT: any future port of a published checkpoint must demonstrate OUTPUT equivalence
+      against the producing source, not merely a strict load. A parameter-count match is a necessary
+      condition that this project has now seen pass while the function was wrong.
+    date: '2026-08-30'
+    tags: [hoct, reconstruction, strict-load-insufficient, silent-failure, verified, methodology]
+
+  - id: FACT-0392
+    statement: >-
+      The binding HOCT integration mismatch is the CANDIDATE SURFACE, not the detector, and it is larger than
+      the pool-kernel blocker it replaces. HOCT's candidate rule is a purely geometric 15 um ball over every
+      source, uncapped and unfiltered; our deployed rule admits at most ONE parent per target by arithmetic
+      (FACT-0369) and the widened P30 surface at most four. The head was trained to discriminate among
+      competitors our pipeline never offers, so it CANNOT be run as a reranker of our candidate list - it
+      must be given its own 15 um graph rebuilt from node coordinates. Its probabilities also carry an
+      abstain mass ours lacks, so only WITHIN-TARGET RANKING is comparable and absolute levels never are
+    value: 15.0
+    unit: hoct_candidate_gate_um_uncapped_vs_our_one_parent_rule
+    scope:
+      hoct: {rule: geometric ball, gate_um: 15.0, capped: false, filtered: false, source: "cache_official_hoct_features.py:62-74"}
+      ours_deployed: {max_parents_per_target: 1, mechanism: "softmax over source axis then threshold 0.5", fact: FACT-0369}
+      ours_widened_p30: {max_parents_per_target: 4, floor: 0.1}
+      abstain_mass: {hoct: present, ours: absent, source: "infer_stabledet_hoct.py:320-324"}
+      comparability: {within_target_ranking: true, absolute_levels: false}
+      rebuild_cost: {cpu_cheap: true, implemented: true, still_gpu_bound: "32-channel UNet node features"}
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Both rules were read at named file:line in the publisher's own code and in ours, rather than inferred
+      from behaviour. The consequence - that within-target ranking is the only comparable quantity - follows
+      from the abstain mass being present on one side and absent on the other, which is also read at source.
+    instrument: >-
+      PKT-0029 upstream audit, C:/temp/hoct/upstream_audit.json (12 items); publisher sources under
+      C:/temp/hoct/code/
+    experiment: EXP-0035
+    note: >-
+      THIS REPLACES THE BLOCKER FACT-0361 NAMED AND FACT-0379 CLEARED. The pool_kernel_um 5.0 question is
+      settled and stays settled, but FACT-0379's recorded MECHANISM is amended by this audit: HOCT does not
+      inherit our load_model quirk - their cache script re-injects pool_kernel_um explicitly. It is inert for
+      them because the model-card configuration supplies node COORDINATES from a node graph, which overrides
+      peak extraction entirely, and peak extraction is the only consumer of pool_kernel_um and det_threshold.
+      The conclusion survives on stronger evidence than the one recorded.
+      A THIRD RISK IS NEWLY IDENTIFIED AND UNRESOLVED, and it must be closed inside a single session rather
+      than across two: WHICH TRUNK produced the 32-dim features is a --weights command-line argument, absent
+      from the checkpoint. Feeding official-trunk features to a head trained on StableDet-trunk features
+      would look exactly like a wrong contract. Any feature-cache run for this lever must therefore cache
+      BOTH trunks and compare them in the same session, or a null result is uninterpretable.
+    date: '2026-08-30'
+    tags: [hoct, lever-0034, candidate-surface, integration, upstream, verified]

@@ -1,0 +1,62 @@
+{
+  "name": "assoc_harness_f0",
+  "fold": 0,
+  "no_claim": false,
+  "note": "PREPARED, NOT LAUNCHED. Fold 0 (embryo 44b6) is the honest fold and the only one with a contested population today (FACT-0381). Every arm here is refused until the `cache` section's licence exists, which requires Gate 1 (EXP-0041) to pass first - a head trained on an unlicensed cache measures the cache (FACT-0387). Crop-grouped folds are WITHIN-embryo: this spec makes no cross-embryo transfer claim.",
+  "table": "C:/temp/assoc/f0.parquet",
+  "cache": {
+    "dir": "C:/temp/assoc_harness/cache_f0",
+    "receipt": "C:/temp/assoc_harness/assoc_feature_parity.json",
+    "licence": "C:/temp/assoc_harness/licence_f0.json",
+    "preilp": "C:/temp/p30_f0/preilp_split0.parquet",
+    "ecb_dir": "C:/temp/p30_f0/ecb",
+    "reproducer": "receipt",
+    "crops": null
+  },
+  "cv": {"kind": "GroupKFold", "n_splits": 5},
+  "preserve_single_candidate": true,
+  "allow_degenerate": false,
+  "models": [
+    {
+      "tag": "alldec.all_nine.linear",
+      "class": "linear",
+      "features": ["prob", "rank", "margin_to_best", "n_candidates", "dist_um", "dz_um", "dy_um", "dx_um", "src_out_degree"],
+      "abstain": {"kind": "none"},
+      "population": "alldec"
+    },
+    {
+      "tag": "alldec.all_nine.tree",
+      "class": "tree",
+      "features": ["prob", "rank", "margin_to_best", "n_candidates", "dist_um", "dz_um", "dy_um", "dx_um", "src_out_degree"],
+      "abstain": {"kind": "none"},
+      "population": "alldec"
+    },
+    {
+      "tag": "alldec.context.linear",
+      "class": "contextual",
+      "contract": {
+        "name": "frozen_trunk_node_features",
+        "dim": "from_cache",
+        "pair_builder": "concat_diff",
+        "extra_features": ["prob", "dist_um"],
+        "has_null_head": false
+      },
+      "abstain": {"kind": "none"},
+      "population": "alldec"
+    },
+    {
+      "tag": "alldec.context.linear.abstain",
+      "class": "contextual",
+      "contract": {
+        "name": "frozen_trunk_node_features",
+        "dim": "from_cache",
+        "pair_builder": "concat_diff",
+        "extra_features": ["prob", "dist_um"],
+        "has_null_head": false
+      },
+      "abstain": {"kind": "train_quantile", "q": 0.05},
+      "population": "alldec"
+    }
+  ],
+  "out_dir": "C:/temp/assoc_harness/f0"
+}

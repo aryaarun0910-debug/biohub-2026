@@ -95,4 +95,97 @@ outputs:
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md per audited artifact
 
-result: null
+result: >-
+  INTERIM 2026-08-30, P33 STILL RUNNING. The receipt harness is built, self-tested and dry-run; P34 is
+  fully audited; P33's audit is now a single command waiting on the kernel.
+
+  P34 (EXP-0039) - USABLE, with one named exception. Audits B, C and D PASS on all 128 crops
+  (heartbeat on 128 distinct crops with both treatment variables unset, all 2,162,040 deployed edges
+  contained in a 7,157,163-candidate export at 3.31x, zero unknown ids, zero non-adjacent edges,
+  128/128 sidecars present). Audit A FAILS AS SPECIFIED and the acquisition is NOT the cause: 127 of
+  128 crops are byte-identical to the P28 fold-1 control and the divergent crop is 6bba_e16ffc58 at
+  +5 nodes / +4 edges - the SAME crop and the SAME deltas FACT-0352 recorded under a completely
+  different patch. P34's decompressed graph is byte-identical to P29's, so two independently patched
+  runs agree with each other and disagree with P28; the common factor is P28's draw. Mechanism, from
+  run_stats: raw_nodes identical everywhere (detection bit-identical), ILP raw_edges differ on 5 crops
+  (FACT-0363 degeneracy), and on this one crop the extra edge changes which components fall under
+  OUTPUT_MIN_TRACK_LEN=6 (short_track_components_removed 61 vs 62). CONSEQUENCE: FACT-0363's "~2 edge"
+  noise floor understates the FINAL-graph amplification, which reaches 5 nodes / 4 edges on ~1 crop in
+  128, and any paired fold-1 delta against the P28 control must exclude that crop or declare it.
+
+  The pre-ILP export is BYTE-IDENTICAL to the 2026-08-19 preilp_f1_v2 parquet, and the kernel log shows
+  the roll-up computing that sha256 in-run, so it was re-derived rather than inherited (FACT-0350
+  satisfied). Cross-run stability passes on all 128 crops with zero node-identity failures and zero
+  edge differences: every fold-1 analysis keyed to that parquet stays joinable.
+
+  FOLD-1 CONTESTED CENSUS - PKT-0030 falsifier (e) DOES NOT FIRE. On the widened surface fold 1 has
+  91,410 decidable targets, 26,601 contested (29.1%) with deployed contested top-1 0.7084 and 7,757
+  errors, against fold 0's 4,157 / 0.8338 / 691. Fold 1 is now the RICHER surface by 6.4x in contested
+  targets and 11.2x in errors, at a materially lower deployed top-1. The FACT-0382 framing carries over
+  unchanged: this population exists only at the 0.1 acquisition floor, so a ranker must be scored as
+  (widened surface + ranker) against the DEPLOYED control through the full chain.
+
+  LEAKAGE. Three findings, ranked. (1) The EXP-0019 guard has a HOLE: test_loeo_weights_hygiene derives
+  the fold from BIOHUB_LOEO_FOLD in the spec env, so a fold-1 spec that inherits its fold from a fold-1
+  BASE NOTEBOOK is skipped - measured, 12 specs checked and 54 skipped, P34 among the skipped. P34 sets
+  the split_1 glob correctly anyway, and no fold-1 spec in the tree is missing it, but the fold-1
+  feature-cache run will be built exactly this way and the guard would not catch its omission.
+  (2) HOCT checkpoint provenance, PKT-0033 finding 12, is RESOLVED from the checkpoints themselves:
+  fold0_toql and fold0_pqlt carry an explicit cache_files list of 128 crop stems, ALL 6bba, and
+  fold0_hoct_hard_negative reports training_files 128 while fold1_hoct_hard_negative reports 71 - the
+  exact crop counts of the two embryos. HOCT's fold labels name the HELD-OUT fold, matching our
+  convention, so fold0_* is clean for our fold 0 and fold1_* for our fold 1, and crossing them is an
+  EXP-0019-class leak. But fold0_edge_predictor_best.pth is a BARE state_dict with no provenance at all
+  and there is no fold-1 base predictor in the inventory, so a fold-1 HOCT evaluation has no clean trunk
+  to use. (3) The PKT-0032 crossfit map still declares train_external true on Zebrahub, which PKT-0035's
+  own `forbidden` prohibits until the FACT-0385 anti-alignment is solved.
+
+  Agent 2's harness guards were EXERCISED, not read: assert_group_integrity refuses a straddling target,
+  a shared crop and an empty side while accepting a legal split; verify_licence refuses a missing
+  licence, a mutated cache and an uncovered crop and accepts an intact one; write_licence refuses a
+  failed gate. P33's Gate-1 fail-closed behaviour is exercised by its own 8 subprocess tests, which pass.
+
+  VERSION COHERENCE PASSES for both kernels by NON-DESTRUCTIVE REBUILD - the build manifest hashes the
+  edit SPEC, not the code_file bytes, so only a rebuild binds the patch source to the notebook that ran.
+  P33's built notebook is unchanged from commit 7c15b23, confirming EXP-0041's claim. Named gap: fetch
+  and log bind no kernel version, so a diagnostic run's recorded version stays an assertion.
+
+  P33 (EXP-0041) IS PENDING. scripts/win_bet/audit_p33_gate1.py enforces all six conditions, rejects
+  attempt 1 on all six as a dry run, and its self-test catches seven mutations INCLUDING two the
+  kernel's own all_passed reports true for: a one-crop run, and a band A that compared nothing - the
+  kernel imposes a non-zero floor on band B only, so a vacuous band A would make conditions (3) and (4)
+  pass having verified nothing. Until it returns PASS, no feature cache and no head training is licensed.
+
+  Instruments added: scripts/win_bet/audit_p33_gate1.py, audit_version_coherence.py,
+  audit_split_leakage.py, audit_result_completeness.py, audit_graph_parity_attribution.py, and
+  tests/test_audit_receipt_harness.py (13 tests). Receipts in _evidence/audit/receipts/ and
+  C:/temp/audit_receipts/. Zero GPU, zero submissions, no model implementation or foreign packet touched.
+  REGISTRY COLLISION - DETECTED, SCOPED, AND NOW REPAIRED; THE VETO IS LIFTED. Found by the closing gate
+  run: validate_registry.py exited 1 and 9 tests in tests/test_registry_validity.py failed, because
+  facts.yaml and experiments.yaml had been ROUND-TRIPPED THROUGH A YAML DUMPER - all 113 and 29 comment
+  lines destroyed - while levers.yaml, hand-edited, kept its 52. Established with yaml.safe_load of
+  `git show HEAD:<path>` against the worktree entry by entry, never from the diff. No entry was added or
+  lost (34 experiments, 195 facts both sides) but three semantic fields moved that no packet authorised:
+  EXP-0009 deployed -> void, which R8 propagated onto FACT-0001; FACT-0130 lost its validity_reason; and
+  FACT-0131 lost BOTH its validity: INVALID and its reason, silently undoing a leak retraction.
+
+  A SECOND, WORSE DEFECT APPEARED DURING THE REPAIR AND WAS CAUGHT BEFORE IT SETTLED. The dumper wrote the
+  facts sequence at column 0; the coordinator's re-appended FACT-0388 and FACT-0389 used the original
+  2-space indent; and YAML then parsed BOTH as items 6 and 7 of FACT-0387's `tags` LIST rather than as
+  facts. The file parsed, the validator passed, `yaml.safe_load` returned 195 entries ending at FACT-0387,
+  and the two new facts did not exist while also corrupting their host's tags. A silent no-op that looks
+  exactly like success - the AGENTS.md class - and no rule-based check can see it, because the rules only
+  run over entries that parsed as entries.
+
+  STATE AT CLOSE, RE-VERIFIED AFTER THE RESTORE SETTLED: facts.yaml 197 entries with all 113 comments,
+  experiments.yaml 34 entries with all 29, EXP-0009 back to `deployed`, FACT-0130 and FACT-0131 carrying
+  their validity_reason again (262 and 420 chars), FACT-0387's tags six clean scalars, FACT-0388 and
+  FACT-0389 present as real VALID entries. validate_registry.py exits 0 "registry OK" and all 16
+  registry-validity tests pass. levers.yaml's LEVER-0034 note and the PKT-0029 / PKT-0034 / PKT-0036
+  result blocks are intact - the collision touched none of them.
+
+  STANDING WARNING: a further `git checkout` of facts.yaml would now DESTROY FACT-0388 and FACT-0389,
+  which exist only in the working tree. This packet ran a load-then-dump on no shared file at any point
+  and holds no such code: its five instruments contain no yaml.dump or yaml.safe_dump, and the sixth,
+  scripts/win_bet/audit_registry_drift.py, reads with read_text, never serialises YAML, and refuses an
+  --out path inside the registry. Registry-wide changes are routed to the coordinator, not to the file.

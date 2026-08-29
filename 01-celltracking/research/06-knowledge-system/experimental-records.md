@@ -3,7 +3,7 @@ id: 06-knowledge-system/experimental-records
 title: Experimental Records
 area: 06-knowledge-system
 status: active
-updated: '2026-08-16'
+updated: '2026-08-29'
 owner: biohub
 links: []
 tags:
@@ -5419,3 +5419,183 @@ makes ILP-rejected-versus-relink-overwritten near-degenerate at 99.9% relink cov
 cost the completed 71-crop control arm.
 
 **Gates.** `pytest -q` 1179 passed / 136 skipped; registry, research-tree and claims-table clean throughout.
+
+---
+
+## 2026-08-29 (night) — PKT-0034 / LEVER-0041: the one association training harness, and it is gated shut
+
+**Deliverable, not a result.** `scripts/win_bet/assoc_train_harness.py` is the single training and
+evaluation surface all three parent-scorer classes are fitted and reported through — calibrated
+linear, tree, and a contextual head whose feature contract is DECLARED rather than invented here
+(`LEVER-0034` owns identifying it). `tests/test_assoc_train_harness.py` EXECUTES it against
+synthetic caches written to disk, never greps it. Fold specs are prepared and NOT launched at
+`scripts/win_bet/assoc_specs/harness_f{0,1}.json`; one real-cache smoke command sits in the module
+docstring. **Zero GPU, zero submissions, nothing trained on a real cache, nothing staged to git.**
+
+**The cache gate is a refusal, not a warning, and it has three parts that claim different things.**
+(i) CPU coordinate and per-frame node-count parity of the cache against the recorded pre-ILP nodes —
+`node_id` is a positional index into `coords_so_far`, so this catches stale caches, wrong crops,
+index remaps and truncated detections without a GPU, and it says openly that it cannot check float
+feature values. (ii) Two-band candidate/probability reproduction through a declared reproducer —
+band B, the sub-0.5 surface, is mandatory because `FACT-0382` puts every contested error below the
+deployed floor, so a band-A-only pass validates the band the task does not use. (iii) The Gate-1
+receipt, which is the ONLY admissible proof of probability parity for a GPU-written cache; the
+payload says so in a `probability_parity_proof` field rather than only in prose. The receipt is
+bound to BYTES by a licence of sha256 digests re-verified at training time, because a receipt naming
+a file licenses nothing if the file can be edited afterwards. There is no `--force`.
+
+**Single-candidate preservation, which `PKT-0034` predicted would be the hard part, is answered on
+both sides.** `FACT-0386` recorded that the 1.0000 retention was arithmetic — a non-abstaining argmax
+cannot lose those targets — and abstention makes 78.6% of the fold-0 surface losable for the first
+time. With preservation ON the null is structurally unavailable to single-candidate targets AND the
+harness still computes the SHADOW set: the identity of every single-candidate target the model would
+have abstained on. Preservation therefore PRICES the constraint instead of reinstating the blind
+spot. With preservation OFF every regression is listed by `(crop, target, source)`, and
+`SingleCandidateLedger.summary()` raises when a count and its identity list disagree — a netted
+figure is unemittable by construction, not by convention.
+
+**Two honesty items recorded rather than left for a reader to notice.** Crop-grouped folds are NOT
+embryo-held-out: fold 0 is entirely `44b6` and fold 1 entirely `6bba`, so every fold is
+within-embryo and the payload reports `embryo_held_out: false`. And `harness_f1.json` carries
+`no_claim: true` with `allow_degenerate: false`, so the harness REFUSES fold 1 outright
+(`FACT-0381`, `FACT-0382`) rather than emitting a top-1 that cannot fail.
+
+**Protocol continuity with the killed `LEVER-0039` arms is by import, not by imitation** — the
+harness takes `LINEAR_KW`, `TREE_KW`, the seed, the calibration block and the crop-paired bootstrap
+from `assoc_baseline_rankers`, and asserts at runtime that with abstention off its decision is
+identical, per target, to the frozen `assoc_parent_dataset.evaluate`. Neither frozen module was
+modified.
+
+## 2026-08-29 (night) — PKT-0029 / LEVER-0034 STEP 1: the feature contract is READ, not inferred; the packet's own premise was false
+
+**One-line outcome: `CONTRACT_DETERMINED`. NOT `identified`, NOT `not_identifiable`. Published-weight
+reuse is NOT killed and must not be recorded as killed.** CPU only, no GPU launched, no submission.
+
+**The premise died before the experiment started.** `PKT-0029` falsifier (b) and the STEP 1 design both
+rest on "the publisher shipped weights and a config but NO model code", so the 3 node extras, 4 pair
+extras and 13 relation features had to be recovered by ranking candidate orderings. The bundle's own
+`LICENSES.md` names a second Kaggle dataset, `rudispresence/biohub-stabledet-hoct-code`. It exists —
+825 MB, 154 downloads — and ships
+`repo_overlay/methods/stabledet_hoct_fork/hoct_edge_transformer.py` **under the MIT licence**. The
+publisher's class `StableDetHOCTFork(feature_dim=32)` strict-loads BOTH checkpoints at exactly 447,376
+parameters, so the published source IS the producing source. This is AGENTS.md's "check whether it is
+already on disk" and "verify a premise at `file:line`" firing on our own packet, and it converts a
+two-fold GPU ranking tournament into a source read.
+
+**The frozen manifest was written first anyway** (`C:/temp/hoct/contract_manifest.json`,
+2026-08-29T22:29:22Z, before any scoring) and records the counterfactual candidate list that was NOT
+scored, so the multiple-comparisons claim is auditable rather than convenient. **Correction: Bonferroni
+over contracts SCORED, N = 1, so the bar stays α = 0.05.** Determining the contract from source
+collapses N from the inferred-candidate count to one; the counterfactual N = 24 (bar 0.00208) is
+recorded beside it.
+
+**Falsifier (b) was vindicated from an unexpected direction, and this is the transferable lesson.** The
+previous reconstruction strict-loaded both checkpoints **and computed the wrong function**, three ways,
+none of which changes a parameter shape and so none of which `strict=True` can see: ReLU where the
+publisher uses GELU, `norm_first=False` where it uses True, and the 3-D RoPE on `q`/`k` at edge
+midpoints omitted entirely — its frequencies are a `persistent=False` buffer, so no checkpoint carries
+them. **A clean strict load is necessary and demonstrably not sufficient.** The rebuilt module now
+reproduces the publisher's edge and quiet logits at max abs delta **0.000e+00 on both folds**, and
+`tests/test_hoct_head.py` asserts a defective node encoder diverges so the point cannot be forgotten.
+
+**The ranking experiment was built and its POWER measured**, because "no contract cleared the bar" must
+be distinguishable from "the bar could never have been cleared". On real fold-0 geometry (220×218 nodes,
+1,385 candidates at HOCT's own 15 µm gate) with the real trained weights, permuting a slot group moves
+the argmax parent on — fold0/fold1 checkpoints, which agree — pair extras **0.932 / 0.927**, relation
+**0.061 / 0.041**, node extras **0.004 / 0.003** (all three perturbed identically, by
+reordering the weight columns that read the slot, so they are comparable). So the specified experiment would have had strong
+power on the pair extras, weak power on the relation block, and **essentially none on the node extras**:
+a `not_identifiable` verdict there would have been a statement about the instrument, not the weights.
+Stated confound: node features are synthetic N(0,1) because the UNet features are GPU-bound, so the
+node-extra number is conditional on that feature scale. It is a power measurement; **no top-1 accuracy
+is reported from it.**
+
+**Why neither terminal outcome fires.** `identified` requires clearing the corrected bar on a selection
+fold and transferring frozen to the other, as parent top-1 and margin through the frozen
+`assoc_parent_dataset.evaluate`. That cannot run on CPU: the *only* missing input is the 32-channel UNet
+node features, and `cache_official_hoct_features.py:554` refuses without CUDA. Everything else is now
+CPU-reconstructible and is — the 15 µm candidate graph, the 64-slot neighbourhood, the coordinates and
+all three feature blocks. Declaring `not_identifiable` would kill published-weight reuse on absent
+evidence; declaring `identified` would claim a number nobody measured.
+
+**Upstream audit, twelve items at `file:line` (`C:/temp/hoct/upstream_audit.json`). Three matter.**
+1. **`FACT-0379` re-verified, with its stated mechanism corrected.** Our `load_model`
+   (`vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py:162-199`) does read `config.json`
+   and never applies `pool_kernel_um` — confirmed. But HOCT does *not* inherit that quirk:
+   `cache_official_hoct_features.py:561-568` re-injects the config value explicitly. It is inert for
+   them because `--node-graphs-dir` supplies node **coordinates** that override peak extraction
+   (`predict_unet_transformer.py:545-559` in their overlay), and peak extraction at `:508` is the only
+   consumer of `pool_kernel_um` and `det_threshold`. **Right conclusion, stronger mechanism.**
+2. **The real upstream mismatch is the CANDIDATE SURFACE, and it is bigger than the one this packet
+   carried.** HOCT's rule is a geometric 15 µm ball over every source, uncapped and unfiltered
+   (`cache_official_hoct_features.py:62-74`); ours admits at most **one** parent per target by
+   arithmetic (`FACT-0369`) and the widened P30 surface at most four. The head cannot be run as a
+   reranker of *our* candidate list — it needs its own graph, which is CPU-cheap and is implemented. Its
+   probabilities also carry an explicit abstain mass (`infer_stabledet_hoct.py:320-324`) ours has no
+   counterpart for, so **only the within-target ranking is comparable, never the levels**.
+3. **A risk the packet never named.** Which detector trunk produced the 32-dim features is a `--weights`
+   CLI argument, absent from the checkpoint. The default points at the official LOEO fold-0 detector and
+   the model card says "fixed official predicted nodes", but the bundle ships its own detector whose
+   weights differ (`FACT-0361`). Feeding official-trunk features to a head trained on StableDet-trunk
+   features **would look exactly like a wrong contract**, so both must be cached and compared in the
+   same session.
+
+**Two favourable findings.** The checkpoints record
+`hard_negative_objective = parental_nll_plus_top1_pairwise_logistic` with
+`frozen_except_edge_head = true` — the publisher optimised **top-1 parent choice directly**, which is
+this packet's own criterion and the one `FACT-0381`/`FACT-0386` are measured on. And fold naming aligns
+with no inversion: their fold0 trained on `6bba`, held out `44b6`, 71 samples — our fold 0.
+**Licence resolved:** publisher code MIT, checkpoints CC BY 4.0 with a required attribution string, so
+`LEVER-0034`'s "licence/prize check required" is answered for use and modification.
+
+**Gate 1 is unchanged and still binds.** No feature-cache session may start until it passes. What
+changed is what a cache must now produce — features from **both** candidate trunks, so risk 3 is
+resolved in-session rather than left to confound the read.
+
+**One verification that cost no GPU and is worth more than the tests.** The harness was run on the
+real fold-0 frozen surface — a TARGET TABLE, not a cache, so no licence is implicated and the
+payload reports `cache_gate: NOT_REQUIRED` loudly — with two of the killed `LEVER-0039` arms. It
+reproduces `FACT-0386`'s best arm EXACTLY through an independent code path: identical contested
+top-1, identical gained/lost/net/churn, identical crop-paired interval, still not favourable. It
+also printed `SURFACE_EQUIVALENT` on all 19,444 decidable targets — the runtime assertion that with
+abstention off the harness's decision IS the frozen `evaluate`, per target. The new harness and the
+arms it must be compared against are therefore one protocol, not two. Evidence:
+`_evidence/assoc/harness/protocol_check_f0.json`.
+
+## 2026-08-30 — PKT-0036 (agent 4, adversarial audit and launch control): P34 cleared, P33 pending, registry VETOED
+
+**P34 / `EXP-0039`.** Audits B, C, D pass on all 128 crops; audit A fails as specified and the acquisition
+is not the cause — 127 of 128 crops are byte-identical to the P28 fold-1 control and the divergent crop is
+`6bba_e16ffc58` at +5 nodes / +4 edges, the same crop and the same deltas `FACT-0352` recorded under a
+different patch. P34's decompressed graph is byte-identical to P29's, so two independently patched runs
+agree and P28 is the singleton. `run_stats` pins the mechanism: detection bit-identical everywhere, ILP
+`raw_edges` differ on 5 crops (`FACT-0363`), and on that one crop the extra edge changes which components
+fall under the short-track filter. So `FACT-0363`'s edge noise floor understates the FINAL-graph
+amplification, which reaches 5 nodes / 4 edges on ~1 crop in 128. The pre-ILP export is byte-identical to
+the 2026-08-19 `preilp_f1_v2` parquet and the log shows the roll-up computing that digest in-run, so it was
+re-derived, not inherited (`FACT-0350` satisfied), and every analysis keyed to that parquet stays joinable.
+
+**Fold-1 contested census — `PKT-0030` falsifier (e) does NOT fire.** On the widened surface fold 1 has
+26,601 contested targets with deployed contested top-1 0.7084 and 7,757 errors, against fold 0's 4,157 /
+0.8338 / 691. Fold 1 is now the richer surface by 6.4x in targets and 11.2x in errors. `FACT-0382`'s framing
+carries over unchanged: the population exists only at the 0.1 acquisition floor.
+
+**Leakage.** The `EXP-0019` guard has a hole — `test_loeo_weights_hygiene` reads the fold from the spec env,
+so a fold-1 spec inheriting its fold from a fold-1 base notebook is skipped (12 checked, 54 skipped, P34
+among them). HOCT checkpoint provenance (`PKT-0033` finding 12) is RESOLVED from the checkpoints: `fold0_*`
+lists 128 `6bba` training stems and `fold1_*` reports 71, so the fold labels name the held-out fold as ours
+do — but `fold0_edge_predictor_best.pth` is a bare state dict with no provenance and there is no fold-1 base
+predictor. The `PKT-0032` crossfit map still declares `train_external: true` on Zebrahub, which `PKT-0035`
+forbids.
+
+**Registry collision — detected, scoped, repaired; veto lifted.** `validate_registry.py` exited 1 and 9
+tests in `test_registry_validity.py` failed: `facts.yaml` and `experiments.yaml` had been round-tripped
+through a YAML dumper (113 and 29 comment lines destroyed) and three semantic fields moved — `EXP-0009`
+`deployed → void`, `FACT-0130` lost its `validity_reason`, `FACT-0131` lost its `validity: INVALID`
+entirely, undoing a leak retraction. A second defect surfaced mid-repair and was caught before it settled:
+the dumper wrote the sequence at column 0, the re-appended `FACT-0388`/`FACT-0389` used the original
+2-space indent, and YAML parsed both as items of `FACT-0387`'s `tags` list — the file parsed, the validator
+passed, and the two facts did not exist. Re-verified after the restore: 197 facts, all comments back,
+`EXP-0009` `deployed`, both reasons present, `FACT-0387`'s tags clean, registry OK, 16/16 validity tests
+pass. Standing warning: a further `git checkout` of `facts.yaml` would destroy `FACT-0388`/`FACT-0389`,
+which exist only in the working tree. Receipts: `_evidence/audit/receipts/`.

@@ -1,0 +1,49 @@
+{
+  "name": "assoc_harness_f1",
+  "fold": 1,
+  "no_claim": true,
+  "note": "PREPARED, NOT LAUNCHED, AND NO ACCURACY CLAIM MAY BE MADE FROM IT. FACT-0381 measured that fold 1's candidate surface is single-parent by construction, so parent top-1 there is 1.0 for every model and a metric that cannot fail is not evidence; FACT-0382 then showed the same is true of fold 0 at the deployed floor, i.e. fold 1 is not uniquely degenerate, it simply lacks the widened acquisition. `allow_degenerate` is false on purpose: the harness will REFUSE this spec until P34 (EXP-0039) lands a widened fold-1 surface AND that surface passes Agent 4's audit. Do not set it true to make the run go through.",
+  "table": "C:/temp/assoc/f1.parquet",
+  "cache": {
+    "dir": "C:/temp/assoc_harness/cache_f1",
+    "receipt": "C:/temp/assoc_harness/assoc_feature_parity_f1.json",
+    "licence": "C:/temp/assoc_harness/licence_f1.json",
+    "preilp": "C:/temp/preilp_f1_v2/preilp_split1.parquet",
+    "ecb_dir": null,
+    "reproducer": "receipt",
+    "crops": null
+  },
+  "cv": {"kind": "GroupKFold", "n_splits": 5},
+  "preserve_single_candidate": true,
+  "allow_degenerate": false,
+  "models": [
+    {
+      "tag": "alldec.all_nine.linear",
+      "class": "linear",
+      "features": ["prob", "rank", "margin_to_best", "n_candidates", "dist_um", "dz_um", "dy_um", "dx_um", "src_out_degree"],
+      "abstain": {"kind": "none"},
+      "population": "alldec"
+    },
+    {
+      "tag": "alldec.all_nine.tree",
+      "class": "tree",
+      "features": ["prob", "rank", "margin_to_best", "n_candidates", "dist_um", "dz_um", "dy_um", "dx_um", "src_out_degree"],
+      "abstain": {"kind": "none"},
+      "population": "alldec"
+    },
+    {
+      "tag": "alldec.context.linear",
+      "class": "contextual",
+      "contract": {
+        "name": "frozen_trunk_node_features",
+        "dim": "from_cache",
+        "pair_builder": "concat_diff",
+        "extra_features": ["prob", "dist_um"],
+        "has_null_head": false
+      },
+      "abstain": {"kind": "none"},
+      "population": "alldec"
+    }
+  ],
+  "out_dir": "C:/temp/assoc_harness/f1"
+}

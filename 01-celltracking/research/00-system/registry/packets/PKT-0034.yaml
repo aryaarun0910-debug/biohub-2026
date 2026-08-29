@@ -79,4 +79,47 @@ outputs:
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  HARNESS DELIVERED, NOTHING TRAINED ON A REAL CACHE - and that second half is the point, not a
+  shortfall. scripts/win_bet/assoc_train_harness.py is committed with 35 tests in
+  tests/test_assoc_train_harness.py that EXECUTE it against synthetic caches written to disk
+  (a real pre-ILP parquet, real ECB sidecars, a real Gate-1 receipt, real npz caches whose
+  recorded probabilities a declared reproducer re-derives from the cache alone), so every contract
+  is proven without a GPU. Fold-specific specs are PREPARED and NOT LAUNCHED at
+  scripts/win_bet/assoc_specs/harness_f{0,1}.json, and one real-cache smoke command is written into
+  the module docstring.
+  ON THE FOUR FALSIFIERS. (a) holds mechanically: the gate is three parts - CPU coordinate and
+  node-count parity against the recorded pre-ILP nodes, two-band candidate/probability reproduction
+  through a declared reproducer, and the Gate-1 receipt, which is the ONLY admissible proof of
+  probability parity for the real cache because CPU and GPU float paths differ by more than the
+  1e-4 tolerance. The receipt is bound to BYTES by a licence of sha256 digests, re-verified at
+  training time, so a cache edited after licensing is refused. There is no --force. (b) holds: both
+  the crop condition and the (crop, target) condition are asserted on every fold and BOTH are
+  reported when they fire. Stated honestly and reported in the payload: crop-grouped folds are NOT
+  embryo-held-out, since fold 0 is entirely 44b6 and fold 1 entirely 6bba. (c) is the risk this
+  packet predicted and it is answered on both sides rather than one: with preservation on, the null
+  is structurally unavailable to single-candidate targets AND the harness still computes the SHADOW
+  set - the identity of every single-candidate target the model would have abstained on - so the
+  constraint is priced instead of hiding the blind spot FACT-0386 named; with preservation off,
+  every regression is listed by (crop, target, source) and SingleCandidateLedger.summary() raises
+  if a count and its identity list disagree, which makes a netted figure unemittable. (d) holds:
+  all three classes run through one payload with identical channel keys, asserted by a test that
+  runs all three, and through assoc_report.build_report when full-chain arms are supplied.
+  WHAT IS NOT ESTABLISHED, EXPLICITLY. No accuracy claim of any kind. No cache has passed Gate 1
+  (EXP-0040 failed at a process boundary, FACT-0387), so nothing has been trained on a licensed
+  cache and the harness refuses to. No fold-1 claim: harness_f1.json carries no_claim: true and
+  allow_degenerate: false, so the harness will refuse it until a widened fold-1 surface exists and
+  passes audit (FACT-0381, FACT-0382). Zero GPU, zero submissions, nothing staged to git.
+  LEVER-0041 therefore stays OPEN and this packet keeps holding it: the training half is gated on
+  EXP-0041 and must not be duplicated in the meantime.
+  ONE VERIFICATION WORTH MORE THAN THE TESTS, AND IT COST NO GPU. The harness was run on the real
+  fold-0 frozen surface (C:/temp/assoc/f0.parquet - a target table, NOT a cache, so no licence is
+  implicated and cache_gate reports NOT_REQUIRED loudly) with two of the killed LEVER-0039 arms.
+  It reproduces FACT-0386's best arm EXACTLY through an independent code path: contested top-1
+  0.8366610536444551, gained 26 / lost 14 / net +12 / churn 40, crop-paired ci95
+  [-0.0005127538232518083, 0.006439651696616524], favourable false - every figure identical to the
+  recorded value. It also printed SURFACE_EQUIVALENT on all 19,444 decidable targets, which is the
+  runtime assertion that with abstention off the harness's decision IS the frozen
+  assoc_parent_dataset.evaluate, per target. So the new harness and the arms it must be compared
+  against are demonstrably one protocol rather than two. Evidence:
+  _evidence/assoc/harness/protocol_check_f0.json.

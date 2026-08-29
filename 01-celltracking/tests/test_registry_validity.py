@@ -19,8 +19,13 @@ RECOVERS - a rule that only ever passes has not been shown to fire.
 
 from __future__ import annotations
 
+import hashlib
+import os
 import subprocess
 import sys
+import tempfile
+import time
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
@@ -55,28 +60,96 @@ def facts_by_id() -> dict[str, dict]:
     return {f["id"]: f for f in load(FACTS)["facts"]}
 
 
+# The lock lives in the OS temp dir, not the repo: .gitignore is protected by the project
+# contract, so an in-repo lockfile would have to be either committed or silently ignored.
+# It is keyed by the checkout path so two different worktrees do not block each other.
+LOCK = Path(tempfile.gettempdir()) / (
+    "biohub-registry-planting-" + hashlib.sha256(str(REPO).encode()).hexdigest()[:16] + ".lock"
+)
+LOCK_TIMEOUT_S = 600
+LOCK_STALE_S = 900
+
+
+@contextmanager
+def registry_planting_lock():
+    """Serialise planting across PROCESSES, not just within one.
+
+    WHY THIS EXISTS, measured on 2026-08-30. `Planted` restores original bytes on exit, which is
+    correct within a single process and useless across two. Four agents shared one worktree, two
+    `pytest -q` runs overlapped, and the loser's restore wrote its stale snapshot over the winner's
+    file. The damage was silent and survived three green gate runs: every comment in facts.yaml and
+    experiments.yaml was flattened, EXP-0009 flipped `deployed` to `void`, and FACT-0130 and
+    FACT-0131 lost the validity fields that RECORD THE EXP-0019 RETRACTION - so the leak cohort this
+    very module exists to guard read as untainted again.
+
+    An advisory rule not to run the suite concurrently would be a convention someone has to
+    remember. This is the lock, and it is mechanical.
+    """
+    deadline = time.time() + LOCK_TIMEOUT_S
+    while True:
+        try:
+            fd = os.open(str(LOCK), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, f"{os.getpid()} {time.time()}".encode())
+            os.close(fd)
+            break
+        except FileExistsError:
+            # A crashed run must not block the suite for ever, but a LIVE holder must not be
+            # stolen from either - so staleness is generous and measured from mtime.
+            try:
+                if time.time() - LOCK.stat().st_mtime > LOCK_STALE_S:
+                    LOCK.unlink(missing_ok=True)
+                    continue
+            except FileNotFoundError:
+                continue
+            if time.time() > deadline:
+                raise RuntimeError(
+                    f"registry planting lock held for over {LOCK_TIMEOUT_S}s ({LOCK}). "
+                    "Another pytest run is planting into the live registry; wait for it or "
+                    "remove the lock if that process is gone."
+                )
+            time.sleep(0.25)
+    try:
+        yield
+    finally:
+        LOCK.unlink(missing_ok=True)
+
+
 class Planted:
     """Rewrite a registry file, run the gate, then restore the file byte-for-byte.
 
     Restoring the ORIGINAL BYTES rather than re-serialising matters: facts.yaml is
     hand-formatted with load-bearing comments, and a yaml round-trip would silently
     flatten them.
+
+    On exit it also verifies that the bytes on disk are still the ones IT wrote. If they are not,
+    somebody else wrote to the file while it was planted, and restoring the snapshot would destroy
+    their work - so it RAISES instead. A silent clobber is worse than a crash, and this class
+    caused one before that check existed.
     """
 
     def __init__(self, path: Path):
         self.path = path
         self.original = path.read_bytes()
+        self.written: bytes | None = None
 
     def __enter__(self) -> "Planted":
         return self
 
     def write(self, doc: dict) -> None:
-        self.path.write_text(
-            yaml.safe_dump(doc, sort_keys=False, allow_unicode=True), encoding="utf-8"
-        )
+        payload = yaml.safe_dump(doc, sort_keys=False, allow_unicode=True)
+        self.path.write_text(payload, encoding="utf-8")
+        self.written = self.path.read_bytes()
 
     def __exit__(self, *exc) -> None:
+        current = self.path.read_bytes() if self.path.exists() else b""
         self.path.write_bytes(self.original)
+        if self.written is not None and current != self.written:
+            raise RuntimeError(
+                f"{self.path.name} was modified by another process while planted. The original "
+                "bytes have been restored, but that other write is now lost - re-run it. This is "
+                "the concurrent-pytest race of 2026-08-30; the planting lock should have "
+                "prevented it, so investigate why it did not hold."
+            )
 
 
 @pytest.fixture(scope="module")
@@ -90,6 +163,18 @@ def clean_gate() -> subprocess.CompletedProcess:
     result = run_gate()
     assert result.returncode == 0, f"registry is not clean as committed:\n{result.stdout}"
     return result
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _serialise_planting_across_processes():
+    """Hold the inter-process lock for the whole module, before anything is planted.
+
+    Module scope and autouse on purpose: the race is between PROCESSES, so the lock must be taken
+    before the first plant and held past the last restore, including the clean_gate bookends - a
+    per-test lock would leave gaps in which another run could plant.
+    """
+    with registry_planting_lock():
+        yield
 
 
 @pytest.fixture(scope="module", autouse=True)

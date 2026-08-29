@@ -201,8 +201,132 @@ terminal_outcomes:
 
 outputs:
   evidence: C:/temp/hoct/ and _evidence/hoct/
-  facts_added: []
+  facts_added: []   # STEP 1 findings are pending id allocation by the primary - four agents share
+                    # this worktree and concurrent edits to facts.yaml would collide on ids
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md per gate
 
-result: null
+result:
+  step_1_status: CONTRACT_DETERMINED   # neither `identified` nor `not_identifiable` - see below
+  date: '2026-08-29'
+  headline: >-
+    STEP 1 DID NOT NEED TO BE RUN AS AN EXPERIMENT. Its premise - falsifier (b)'s "the publisher
+    shipped weights and a config but NO model code" - is FALSE, and was falsified from the bundle's
+    own LICENSES.md, which names a second Kaggle dataset,
+    rudispresence/biohub-stabledet-hoct-code. That dataset exists (825 MB, 154 downloads) and ships
+    repo_overlay/methods/stabledet_hoct_fork/hoct_edge_transformer.py under the MIT licence. The
+    publisher's class StableDetHOCTFork(feature_dim=32) STRICT-LOADS BOTH published checkpoints at
+    exactly 447,376 parameters, so the published source IS the source that produced the weights and
+    the 3 node extras, 4 pair extras and 13 relation features are READ, not inferred. This is the
+    AGENTS.md standing rule "check whether it is already on disk" and "verify a premise at file:line
+    before building on it", firing on our own packet.
+  the_determined_contract:
+    node_extras_3: "(coords_um - center)/gate_um in (z,y,x); center is the mean over the source AND
+      target frames POOLED, not per frame. The frame tag is ADDED via frame_embedding.weight[0]/[1],
+      not concatenated, so it consumes none of the 35 slots."
+    pair_extras_4: "displacement (3) = (target_um[edge_target] - source_um[edge_source])/gate_um,
+      THEN distance (1) = its L2 norm. 96 + 96 + 3 + 1 = 196."
+    relation_13: "(n_mid-q_mid)/gate (3), (n_start-q_start)/gate (3), (n_end-q_end)/gate (3),
+      cosine, line_distance/gate, shared_source, shared_target."
+    frozen_manifest: "C:/temp/hoct/contract_manifest.json, written 2026-08-29T22:29:22Z BEFORE any
+      scoring, and recording the counterfactual candidate list that was NOT scored."
+  falsifier_a_strict_load: PASS - both folds, exact shapes, 447,376 params each.
+  falsifier_b_feature_contract: >-
+    RESOLVED BY EVIDENCE RATHER THAN BY EXPERIMENT, and the falsifier's own warning was vindicated
+    from an unexpected direction. The previous reconstruction strict-loaded both checkpoints AND
+    COMPUTED THE WRONG FUNCTION, in three ways that change no parameter shape and are therefore
+    invisible to strict=True: the node encoder used ReLU where the publisher uses GELU, used
+    norm_first=False where the publisher uses True, and omitted the 3-D RoPE applied to q and k at
+    edge midpoints entirely - its frequencies are a persistent=False buffer, so no checkpoint carries
+    them. A clean strict load is necessary and demonstrably not sufficient. Our reimplementation now
+    reproduces the publisher's edge and quiet logits with max abs delta 0.000e+00 on BOTH folds
+    (C:/temp/hoct/equivalence.json), and tests/test_hoct_head.py asserts a defective node encoder
+    diverges so the point cannot be forgotten.
+  multiple_comparisons_correction: >-
+    Bonferroni over the number of contracts SCORED: alpha_corrected = alpha / N. N = 1, because
+    determining the contract from publisher source before scoring collapses N from the
+    inferred-candidate count to one, so the bar stays alpha = 0.05.
+    The counterfactual N = 72 - a contract is a full assignment of all three slot
+    groups, so 6 x 4 x 3 - gives a bar of 0.000694 and is recorded in the frozen manifest so the
+    N = 1 claim is auditable rather than convenient. The manifest carries an explicit `amendments`
+    entry: the value written at freeze time was 24, which matched neither the cross product nor
+    the sum of its own enumerated list. It is corrected in the open rather than silently, and it
+    affects no result, because N = 1 is the number actually used.
+  permutation_power_counterfactual: >-
+    The ranking experiment was BUILT and its POWER measured, because "no contract cleared the bar"
+    must be distinguishable from "the bar could never have been cleared". On real fold-0 node
+    geometry (220 x 218 nodes, 1,385 candidate edges at HOCT's own 15 um gate) with the real trained
+    weights, permuting a contract slot group moves the argmax parent on this fraction of contested
+    targets - fold0 / fold1 checkpoints, and the two agree: pair_extras 0.932 / 0.927,
+    relation 0.061 / 0.041, node_extras 0.004 / 0.003. All three groups are perturbed the SAME way,
+    by reordering the weight columns that read the slot, so the three are comparable; an earlier
+    version permuted the coordinate AXES for node_extras, which is an isometry that also relabels
+    the displacement and relation channels and therefore measured a different question. The fix
+    did not change the conclusion (node_extras moved 0.001 -> 0.004 on fold 0).
+    SO THE EXPERIMENT AS SPECIFIED WOULD HAVE HAD STRONG POWER ON THE 4 PAIR EXTRAS, WEAK POWER ON
+    THE 13 RELATION FEATURES, AND ESSENTIALLY NONE ON THE 3 NODE EXTRAS. A `not_identifiable` verdict
+    on the node extras would have been a statement about the instrument, not about the weights.
+    Stated confound: node features are synthetic N(0,1) because the 32-channel UNet features are
+    GPU-bound, so the node-extra sensitivity is conditional on that feature scale - three coordinate
+    channels compete against 32 feature channels, and a different real feature magnitude would move
+    the number. This is a power measurement, not a performance claim, and no top-1 accuracy is
+    reported from it.
+  why_not_terminal_either_way: >-
+    `identified` as this packet defines it requires clearing the corrected bar on a selection fold
+    AND transferring frozen to the other, measured as parent top-1 and margin through
+    assoc_parent_dataset.evaluate. That CANNOT be run on CPU: the only missing input is the 32-channel
+    UNet node features, and cache_official_hoct_features.py:554 refuses to run without CUDA. Every
+    other input is CPU-reconstructible and now is - the 15 um candidate graph, the 64-slot
+    neighbourhood, the coordinates and all three feature blocks. So the honest terminal state is
+    CONTRACT_DETERMINED with scoring BLOCKED on the gated feature cache. Declaring
+    `not_identifiable` here would KILL published-weight reuse on absent evidence, which is not a
+    result; declaring `identified` would claim a held-out number nobody has measured.
+  upstream_audit: >-
+    C:/temp/hoct/upstream_audit.json, twelve items, each at file:line. Three matter.
+    (1) FACT-0379 RE-VERIFIED at vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py:70
+    and :162-199 - our load_model does read config.json and never applies pool_kernel_um. But its
+    stated REASON for HOCT is wrong: cache_official_hoct_features.py:561-568 re-injects the config
+    value explicitly, so it is not dropped for them. It is inert because --node-graphs-dir supplies
+    node COORDINATES that override peak extraction (overlay predict_unet_transformer.py:545-559),
+    and peak extraction at :508 is the only consumer of pool_kernel_um and det_threshold. Right
+    conclusion, stronger mechanism.
+    (2) THE REAL UPSTREAM MISMATCH IS THE CANDIDATE SURFACE, and it is larger than the one this
+    packet was carrying. HOCT's rule is a geometric 15 um ball over every source, uncapped and
+    unfiltered (cache_official_hoct_features.py:62-74); ours admits at most ONE parent per target by
+    arithmetic (FACT-0369) and the widened P30 surface at most four. The head cannot be evaluated as
+    a reranker of OUR candidate list - it needs its own graph, which is CPU-cheap and implemented.
+    Its probabilities also carry an explicit abstain mass (infer_stabledet_hoct.py:320-324) that ours
+    has no counterpart for, so only the WITHIN-TARGET RANKING is comparable, never the levels.
+    (3) A RISK THIS PACKET NEVER NAMED. Which detector trunk produced the 32-dim features is a
+    --weights CLI argument, absent from the checkpoint. The default points at the OFFICIAL LOEO
+    fold-0 detector and the model card says "fixed official predicted nodes", but the bundle also
+    ships its own detector whose weights differ (FACT-0361). Feeding official-trunk features to a
+    head trained on StableDet-trunk features would look EXACTLY like a wrong contract, so both must
+    be cached and compared in the SAME session.
+    Also resolved: licence. Publisher code is MIT, checkpoints CC BY 4.0 with a required attribution
+    string, so LEVER-0034's "licence/prize check required" is answered for use and modification.
+  favourable_finding: >-
+    The checkpoint metadata records hard_negative_objective = parental_nll_plus_top1_pairwise_logistic
+    with frozen_except_edge_head = True. The publisher optimised TOP-1 PARENT CHOICE DIRECTLY, which
+    is this packet's safeguard (d) criterion and the criterion FACT-0381 and FACT-0386 are measured
+    on. Fold naming also aligns with no inversion: their fold0 trained on 6bba / held out 44b6, 71
+    samples, which is our fold 0.
+  instruments:
+    - scripts/win_bet/hoct_head.py    # determined contract, forward pass, equivalence and power gates
+    - tests/test_hoct_head.py         # 14 tests, including that a strict load cannot see the trunk
+  evidence_files:
+    - C:/temp/hoct/contract_manifest.json      # FROZEN before scoring
+    - C:/temp/hoct/equivalence.json            # 0.000e+00 both folds
+    - C:/temp/hoct/permutation_power_fold0.json
+    - C:/temp/hoct/permutation_power_fold1.json
+    - C:/temp/hoct/upstream_audit.json
+    - C:/temp/hoct/code/                       # publisher sources, MIT
+  next_action: >-
+    UNCHANGED BY THIS RESULT AND STILL SERIAL: Gate 1 (g1) must pass before any feature-cache session.
+    What changed is what a cache must now produce - features from BOTH candidate trunks so item (3)
+    above is resolved in-session rather than left to confound the read - and that the head running on
+    them is no longer a guess. No GPU was launched and no submission was made by this packet.
+  boundary_with_pkt_0034: >-
+    NOT crossed. The `not_identifiable` handover to LEVER-0041 was NOT triggered, because the contract
+    was determined rather than failed. Published-weight reuse is NOT killed and must not be recorded
+    as killed.
