@@ -5301,3 +5301,121 @@ and `LEVER-0040` itself is decided by whether a verifier trained on this substra
 
 **Gates.** `validate_registry.py`, `validate_research_tree.py` and `claims_table.py --check` all clean; no
 GPU job, no kernel push, no submission, no registry file edited.
+
+### PKT-0031 — learnability baselines for parent discrimination on the frozen surface (2026-08-29, agent-a-association, CPU only)
+
+**Method.** One new committed instrument, `scripts/win_bet/assoc_baseline_rankers.py` (heartbeat
+`ASSOC_BASELINE_RANKERS_COMPLETE`), fitting a calibrated linear model and a gradient-boosted tree on the
+nine representation-free features in `assoc_parent_dataset.FEATURES` and scoring them through
+`assoc_parent_dataset.evaluate` and `assoc_report.parent_conversions` and nothing else. sklearn was not in
+the venv and was added (`scikit-learn`, `joblib`, `narwhals`; `numpy`/`scipy`/`polars` untouched). Every
+split is grouped by CROP with a mechanical `_assert_disjoint` leak guard, out-of-fold predictions only, and
+five further fail-closed guards: the stage-0 self-check, a proof that the decidable-subset surface is
+per-target identical to the full table, a constant-score guard, a no-unscored-row guard, and a sha256 pin
+of the three modules the numbers were produced against. Hyperparameters are library defaults with the
+tree's internal early stopping switched OFF (its default would carve a RANDOM validation split out of a
+training fold). Two training populations and five feature sets were declared before running and all 22 arms
+are reported, so no arm could be selected after the fact. Evidence in `_evidence/assoc/baselines/` and
+`C:/temp/assoc_baselines/`.
+
+**Stage-0 self-check.** The surface reproduces `FACT-0381` exactly — 19,444 decidable, 4,157 contested at
+top-1 `0.8337743565070964`, 691 errors, 15,287 single-candidate, overall `0.9644620448467394` — both before
+and after the tie-break correction landed mid-run, and the whole grid was re-run against the corrected
+surface. Two independent runs agree on all 22 arms with zero disagreements.
+
+**Result, against the two-sided bar.** The LINEAR model never beats the deployed argmax on any feature set:
+its best is exactly the baseline and on the nine features it is −0.0014 (net −6, churn 48), −0.0024 under
+leave-one-crop-out. The TREE beats it by +0.0029 on the nine features — contested 0.8367, gained 26, lost
+14, **net +12, churn 40**, McNemar p 0.081, crop-paired ci95 [−0.0005, +0.0064] — and +0.0031 under LOCO
+(net +13, churn 43, ci95 [+0.0000, +0.0065]). **No arm of the 22 has a favourable interval**, the standard
+`assoc_report.verdict` applies. Net +12 is 1.7% of the 691-target headroom, and the churn is more than three
+times the net. Single-candidate retention is 1.0000 everywhere, but that is arithmetic, not skill: the
+frozen `evaluate` argmaxes without abstention, so side (b) of the bar cannot fire on a model that does not
+abstain and is untestable here. Overall top-1 moves +0.0006 at best. The tree is better calibrated than the
+linear model (Brier 0.0444 vs 0.0460, ECE 0.0070 vs 0.0126) — but a monotone recalibration cannot move a
+within-target argmax, so calibration is descriptive here and never a source of top-1.
+
+**Feature attribution — the question the HOCT lane asked.** Geometry is the only block that adds anything,
+and what it adds is 10 targets. On the tree: rank + margin + n_candidates over probability alone is
+**−0.0017 (−7 targets)** — they are deterministic functions of `prob` within a target and carry no
+information the argmax did not already have; geometry over that is **+0.0024 (+10 targets)**;
+`src_out_degree` a further **+0.0007 (+3)**. Geometry ALONE is catastrophic (−0.0310, net −129, churn 369),
+so it is a weak complement to the probability, never a substitute, and it helps only non-linearly — added to
+the linear model it makes it worse.
+
+**Scope correction, verified independently in `scope_check` before it was relied on.** The contested
+population is a property of the P30 acquisition surface, not of the deployed pipeline. Sweeping the floor
+back up: 0.10 → 4,157 contested, 0.20 → 1,800, 0.30 → 757, 0.40 → 268, **0.50 → 0 with max 1 candidate per
+target** — at the deployed floor fold 0 is exactly as degenerate for ranking as `FACT-0381` found fold 1.
+All **691/691** contested errors have their true parent at or below the deployed floor (median 0.268, max
+0.4912); on 526 of them the pipeline commits to a wrong parent above 0.5 and on the other 165 it emits no
+edge at all. So beating 0.8338 is necessary but NOT sufficient: realising any of it requires the pipeline to
+consume the widened surface, whose measured cost under the unchanged scorer is `FACT-0376`. This is evidence
+about the REPRESENTATION's separability. It is not a score gain and must not be extrapolated to the chain —
+`parent_conversions` reports `stage: pre_ILP_candidate_ranking`, which is not the `FACT-0376` quantity.
+
+**Verdict.** Falsifier **(a) FIRES.** The linear model fails outright; the tree's point estimate clears the
+bar but no arm produces a favourable interval, so the bar is not cleared with evidence. (b) is untestable on
+non-abstaining models and did not fire. (c) is not testable at this stage and was not claimed — no
+full-chain replay was run. (d) is moot at a fixed node set and is deferred with (c). (e) is UNTESTABLE
+today: fold 1 is single-parent by construction (`FACT-0381`) and no fold-1 claim was made; leave-one-crop-out
+is reported as the strictest available grouped proxy and it agrees with the 5-fold result. Under the
+packet's own terms this clean (a) failure is the informative outcome: nine representation-free features,
+including the deployed probability itself, do not separate true parents on the deployed model's own surface,
+so the existing representation — not the head — is the constraint, and richer node context is justified.
+No lever closed, no GPU job, no kernel push, no submission, no registry file edited.
+
+**Gates.** `pytest -q` 1179 passed / 136 skipped; `validate_registry.py`, `validate_research_tree.py` and
+`claims_table.py --check` all clean.
+
+## 2026-08-29 (late) — three agents return: two levers closed, one redirected, and Gate 1 fails at a process boundary
+
+**The cycle's verdict in one line.** On the parent-choice task the HEAD is not the constraint, the
+REPRESENTATION is — and the contested population everyone was optimising against turns out to be an artifact
+of our own acquisition floor.
+
+**`FACT-0382`, the reframe.** At the DEPLOYED candidate floor of 0.5, fold 0 has **zero** contested targets
+and one candidate per target — exactly as degenerate as fold 1 — and all **691/691** contested errors have
+their true parent BELOW that threshold, median 0.268. The deployed pipeline is never offered one of them.
+`FACT-0381`'s numbers stand; its framing that fold 1 was uniquely degenerate did not. This also restates what
+P34 does: it gives fold 1 the same widened surface fold 0 was given, rather than revealing a hidden richness.
+
+**`LEVER-0039` killed on its own evidence (`FACT-0386`), scoped at the moment of death.** Twenty-two
+preregistered crop-grouped arms, all reported: the linear model never beats 0.8338; the best tree reaches
+0.8367 with a paired interval including zero; **no arm of the 22 is favourable**. The packet measured its own
+NOISE FLOOR rather than assuming one — a tree given only the deployed probability, which cannot in principle
+beat an argmax over that scalar, still posts +0.0014 and net +6 from quantile binning — so the best arm's +12
+is about twice a pure artifact. What is killed is the SIMPLE-FEATURE form; the scope precision was written
+into the kill rather than added afterwards, as LEVER-0037's had to be. Falsifier (f) — the widened-surface
+comparison `FACT-0382` forces — was handed forward to `LEVER-0034` so it did not die with the lever.
+
+**`LEVER-0040` stays open, worth more and starved harder.** A perfect verifier is worth **+0.01416** on fold 0
+(`FACT-0384`), 2.4× what the lever was opened for, and its edits RAISE raw edge Jaccard rather than trading it
+away. But the metric charges only **72 of fold 0's 5,656 emitted forks** (`FACT-0383`), so the class to learn
+is **19 emitted true forks across both folds** against HOCT's 110. Cross-fitted, the mechanism works — 14 of
+67 false positives cut at ZERO true-positive cost, which *refutes* the lever's own falsifier (a) — but it
+INVERTS between embryos: fold 1 rejects 5 of 349, below chance (`FACT-0385`). Zebrahub is now inadmissible
+here until its anti-alignment is solved; pooling it collapsed an in-domain fit from 0.80 to 0.21.
+
+**The adversarial packet paid for itself four times over.** It found, and I fixed with tests that fail without
+the fix: a bare `{"net": 28}` satisfying the conversion contract; a non-directional bootstrap gate that a
+significantly WORSE candidate passed; an `identity_check` read by nobody; and `parent_conversions` gating
+promotion as a final-graph quantity when `FACT-0364` says it cannot be. Plus the tie-break — `evaluate()` broke
+score ties by ROW ORDER against a contract declaring lower source index, latent for the deployed probability
+and live for a tree ranker's identical leaf scores. Agent A re-ran its entire 22-arm grid after that fix and
+both runs agree with zero disagreements.
+
+**`P33` / `EXP-0040`: Gate 1 FAILED at a process boundary (`FACT-0387`).** `import predict_unet_transformer`
+raised ModuleNotFoundError; zero crops compared. The deployed predictor is never imported into the notebook
+process — it runs as a SUBPROCESS, and every patch here that works reaches it by rewriting that file's source
+text. Third recorded instance of this class. The fail-closed heartbeat refused to report a pass, so the two
+feature-cache sessions it would have licensed were not spent. It will not be repaired with a `sys.path` line:
+three conditions now bind the redesign, two of which the audit had already established before the run
+returned.
+
+**Decision recorded rather than left implicit.** The identity replay is NOT re-run for stage attribution and
+both arms are untouched, so the atlas is THREE-way (gained / displaced / wrong parent), not five — `FACT-0364`
+makes ILP-rejected-versus-relink-overwritten near-degenerate at 99.9% relink coverage, and re-running would
+cost the completed 71-crop control arm.
+
+**Gates.** `pytest -q` 1179 passed / 136 skipped; registry, research-tree and claims-table clean throughout.

@@ -614,3 +614,24 @@ experiments:
       (node-id stability) can only be self-consistent if both artifacts come from one run - joining new
       sidecars to the 2026-08-19 preilp_f1_v2 parquet would assume the stability D exists to prove. No
       submission.
+
+  - id: EXP-0040
+    title: P33 association feature-parity smoke, PKT-0029 Gate 1
+    spec: scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json
+    kernel: aryaarun07/biohub-p33-assoc-feature-parity-smoke
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: failed
+    date: '2026-08-29'
+    facts: [FACT-0387]
+    note: >-
+      FAILED at a process boundary, not on parity - see FACT-0387. The patch imported
+      predict_unet_transformer into the NOTEBOOK process, where it does not exist: the deployed predictor is
+      launched as a subprocess with the repo directory as cwd, and every patch in this tree that works reaches
+      it by rewriting that file's source text. Zero crops compared, all_passed false. The fail-closed
+      heartbeat is what makes this cheap: it refused to report a pass, so the two full feature-cache sessions
+      it would have licensed were not spent. The gate is NOT to be re-pushed with a sys.path fix - the
+      PKT-0033 audit established independently that it exercises no serialised cache and never compares the
+      sub-0.5 band where FACT-0382 puts all 691 contested errors, so it needs redesign, not repair. One GPU
+      session spent, no submission, deployed output unchanged.

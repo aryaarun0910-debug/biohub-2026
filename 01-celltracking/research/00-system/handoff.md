@@ -12,6 +12,76 @@ record_kind: state
 
 # Current handoff
 
+> ## 2026-08-29 (late) — THE CYCLE'S VERDICT: the head is not the constraint, the representation is. Two levers closed, one redirected, and the contested population turns out to be our own knob
+>
+> Three partitioned agents returned. **Champion unchanged (`FACT-0341`), no submission, no GPU beyond the two
+> already in flight.** Read `FACT-0382` before citing anything about parent ranking.
+>
+> **1. The finding that reframes the lane — `FACT-0382`.** The 4,157 contested fold-0 targets are an artifact
+> of our own **acquisition floor**, not a property of the deployed pipeline. At the deployed floor of 0.5,
+> fold 0 has **zero** contested targets and one candidate per target — exactly as degenerate as fold 1 — and
+> **all 691/691 contested errors have their true parent BELOW that threshold** (median 0.268). The deployed
+> pipeline is never offered one of them. `FACT-0381`'s numbers stand; its framing that fold 1 was uniquely
+> degenerate did not. This also restates what **P34** does: it gives fold 1 the same widened surface fold 0
+> was given, rather than revealing a richness fold 1 was hiding.
+>
+> **2. `LEVER-0039` KILLED on its own evidence (`FACT-0386`), and the kill is scoped at the moment of death.**
+> Twenty-two preregistered crop-grouped arms: the linear model never beats the deployed 0.8338; the best tree
+> reaches 0.8367 with a paired interval including zero; **no arm of the 22 is favourable.** The packet
+> measured its own **noise floor** rather than assuming one — a tree given *only* the deployed probability,
+> which cannot in principle beat an argmax over that scalar, still posts +0.0014 and net +6 from quantile
+> binning — so the best arm's +12 is roughly twice a pure artifact. What is killed is the **simple-feature
+> form**; this is NOT a finding that no learned ranker can win, and must never be cited as one. Its positive
+> content is the answer `PKT-0029` needed: **the head is not the constraint, the representation is.**
+> Falsifier (f) was handed forward to `LEVER-0034` as an inherited deployment gate so it dies with nothing.
+>
+> **3. `LEVER-0040` stays OPEN, worth more and starved harder.** A perfect false-fork verifier is worth
+> **+0.01416** on fold 0 (`FACT-0384`), 2.4× what the lever was opened for, and its edits **raise** raw edge
+> Jaccard rather than trading it away. But the metric charges only **72 of fold 0's 5,656 emitted forks**
+> (`FACT-0383`), so the class to learn is **19 emitted true forks across both folds**, against HOCT's 110.
+> Cross-fitted, the mechanism works — 14 of 67 false positives cut at **zero** true-positive cost, which
+> *refutes* the lever's own falsifier (a) — but it **inverts between embryos**: fold 1 rejects 5 of 349,
+> below chance (`FACT-0385`). Pooling would have hidden that. **Zebrahub is now inadmissible** for this lever
+> until its anti-alignment is solved (pooled AUC 0.179; mixing collapsed an in-domain fit 0.80 → 0.21),
+> which contradicts an assumption both `LEVER-0040` and `FACT-0362` were carrying.
+>
+> **4. The audit found four defects in this cycle's own instruments**, all fixed with tests that fail without
+> the fix: a bare `{"net": 28}` satisfied the conversion contract; the bootstrap gate was non-directional, so
+> a significantly *worse* candidate passed; `identity_check` was read by nobody; and `parent_conversions` was
+> gating promotion as a final-graph quantity when `FACT-0364` says it cannot be. Separately, `evaluate()`
+> broke score ties by **row order** against a contract declaring lower source index — latent for the deployed
+> probability, live for a tree ranker's identical leaf scores. Agent A re-ran its entire grid after the fix.
+>
+> **5. `P33` came back and GATE 1 FAILED — at a process boundary, not on parity (`FACT-0387`, `EXP-0040`).**
+> `import predict_unet_transformer` raised ModuleNotFoundError; **zero crops compared**, `all_passed: false`.
+> The deployed predictor is never imported into the notebook process — it is launched as a **subprocess** with
+> the repo directory as cwd, and every patch in this tree that works reaches it by **rewriting that file's
+> source text**. This is the third recorded instance of the process/thread/replica-boundary class AGENTS.md
+> names (after autocast-into-DataParallel and `FACT-0060`). The fail-closed heartbeat is what made it cheap:
+> it refused to report a pass, so the two feature-cache sessions it would have licensed were **not spent**.
+>
+> **Do NOT fix it with `sys.path` and re-push.** Three conditions now bind the redesign in PKT-0029, and two
+> of them came from the audit *before* this run returned, so they are not post-hoc: (i) run inside the
+> predictor's own process by source rewriting; (ii) actually **serialise the cache to disk and reload it** —
+> attempt 1 wrote and read features in one process, exercising no cache at all; (iii) compare the **sub-0.5
+> band**, since `FACT-0382` puts all 691 contested errors below the deployed threshold, i.e. attempt 1
+> validated exactly the band the task does not use. **No feature-cache session may start until a Gate 1
+> attempt passes** — one free slot is not a reason to spend it.
+>
+> **In flight.** `P34` (`EXP-0039`) RUNNING; `P33` complete and failed. Submission 55871868 still scoring;
+> **do not poll.** Identity replay
+> advancing on local CPU; it will **not** be re-run for stage attribution, so the atlas is **three-way**
+> (gained / displaced / wrong parent), not five — `FACT-0364` makes ILP-rejected-versus-relink-overwritten
+> near-degenerate at 99.9% coverage, and re-running would cost the completed 71-crop control arm.
+>
+> **Next.** `LEVER-0034` now carries the association question alone, and its Gate 1 is CPU work before it is
+> GPU work: redesign the parity harness against conditions (i)-(iii), prove it locally as far as the
+> accelerator refusal allows, and only then push. When P34 lands: audits A-D, the cross-run node-ordering
+> check, then the fold-1 contested census — including the outcome where fold 1 is still too thin to falsify
+> a ranker, which `PKT-0030` falsifier (e) named in advance. `LEVER-0040`'s successor falsifier is written
+> and waiting on a larger positive population, with Zebrahub inadmissible until its alignment is solved.
+
+
 > ## 2026-08-29 (evening) — the cycle is PARTITIONED: three learned surfaces, one report contract, and the fold-1 blocker is in flight
 >
 > **What is running.** Two GPU sessions, which is the `FACT-0061` ceiling — no third may start. `P33`

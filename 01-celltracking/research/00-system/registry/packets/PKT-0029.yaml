@@ -90,6 +90,33 @@ harness_gates:
     smoke on CPU would confound a numeric-backend difference with a genuine cache error - exactly
     the ambiguity the gate exists to remove. Reading the zarr directly would additionally bypass the
     deployed normalisation and defeat the parity being proven.
+    ---
+    ATTEMPT 1 FAILED 2026-08-29 (EXP-0040, FACT-0387) AND THE GATE IS BEING REDESIGNED, NOT REPAIRED.
+    It raised ModuleNotFoundError on `import predict_unet_transformer`, compared ZERO crops and
+    reported all_passed false. The cause is a PROCESS BOUNDARY: the deployed predictor is never
+    imported into the notebook process - it is launched as a subprocess with the repo directory as
+    cwd - and every patch in this tree that works reaches it by REWRITING THAT FILE'S SOURCE TEXT.
+    The fail-closed design is what made this cheap; it refused to report a pass, so the two full
+    feature-cache sessions it would have licensed were not spent.
+    THREE CONDITIONS NOW BIND THE REDESIGN, and a re-push satisfying fewer than all three is not
+    Gate 1. The last two come from the PKT-0033 audit and were established BEFORE this run returned,
+    so they are not rationalisation after a failure:
+    (i) IT RUNS INSIDE THE PREDICTOR'S OWN PROCESS, by source rewriting like every working patch.
+        Adding sys.path and re-importing would produce a gate that runs and still observes the head
+        somewhere other than where it executes.
+    (ii) IT SERIALISES THE CACHE TO DISK AND RELOADS IT. Attempt 1 wrote _afp_feats[t] and read it
+        back in the same process, so it exercised NO cache at all - every dtype, layout, index-remap
+        and staleness error a real cache can carry went untested, while the gate's stated purpose is
+        to prove the head can be re-run FROM THE CACHE ALONE.
+    (iii) IT COMPARES THE SUB-0.5 PROBABILITY BAND. Attempt 1 populated its comparison only above the
+        deployed threshold, and FACT-0382 measured that ALL 691 fold-0 contested errors have their
+        true parent BELOW that threshold - so it validated precisely the band the learnable task does
+        not use.
+    Two further audit observations to address while redesigning, neither of which alone blocks the
+    gate: it asserts no per-frame node-count parity, so a short detection would silently shrink the
+    comparison denominator; and a head trained from cached node features also needs the scaled
+    coordinates and the position features whose frame index is rewritten to window-local 0/1, which
+    a node-feature cache does not carry.
   g2_label_contract: >-
     Match predicted nodes to GT ONCE, define parent targets and an explicit abstain/null class, and
     FREEZE the ambiguity rules before any training. Ambiguity rules decided after seeing results are
@@ -105,6 +132,11 @@ budget:
   gpu_sessions: 2   # G1 feature cache is GPU-bound (see g1 note); then the two fold-specific heads
   submissions: 0
   wall_clock: 2-4 days
+  spent: >-
+    1 GPU session on EXP-0040, which failed at the import boundary and licensed nothing. The next
+    Gate 1 attempt is CPU work first - the redesign under g1 conditions (i)-(iii) - and only then a
+    push. NO FEATURE-CACHE SESSION MAY START UNTIL A GATE 1 ATTEMPT PASSES; that is the whole point
+    of the gate, and one slot being free is not a reason to spend it.
 
 forbidden:
   - inheriting HOCT's division conclusion in either direction, or enabling its fork head

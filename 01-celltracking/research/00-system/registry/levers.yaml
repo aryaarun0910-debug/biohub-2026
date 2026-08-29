@@ -1122,6 +1122,17 @@ levers:
       1st on Fluo-N3DH-CE but with no zebrafish mention; rudispresence/biohub-stabledet-hoct-hard-negative-checkpoints
       is CC-BY. Licence/prize check required. This is also the strongest ASSOCIATION candidate (query-lineage
       transformers) - the harder-association-gate the route-to-0.950 asks for. Integrate public weights before training.
+      INHERITED DEPLOYMENT GATE, added 2026-08-29 when LEVER-0039 was killed (FACT-0386) and its falsifier (f)
+      was handed here rather than lost with it. FACT-0386's positive content is that on the parent-choice task
+      the HEAD is not the constraint and the REPRESENTATION is - which is this lever's association half, and
+      the reason it now carries the question. The gate: any ranker from this lane that beats the deployed
+      argmax must be compared as (WIDENED candidate surface + the new ranker) against the DEPLOYED control,
+      never against a widened control. FACT-0382 is why - all 691 fold-0 contested errors have their true
+      parent BELOW the deployed threshold, so the errors are only visible on a surface the pipeline does not
+      currently consume, and consuming it costs FACT-0376's -0.00906 under the unchanged scorer. That cost is
+      not an inherited debt, since FACT-0376's own scope precision exempts a candidate rule paired with a
+      better scorer; the gate is that the comparison must be RUN and reported through
+      scripts/win_bet/assoc_report.py.
     priority: 3
 
   - id: LEVER-0039
@@ -1129,7 +1140,9 @@ levers:
       A learned TARGET-WISE parent ranker over the frozen candidate surface chooses better parents than the
       deployed argmax, converting contested wrong-parent choices into net true edges through the complete
       unchanged chain
-    status: open
+    status: killed
+    closed_by: [FACT-0386, FACT-0382]
+    closed_date: '2026-08-29'
     falsifier: >-
       Any of, in the order they bite. (a) On held-out contested fold-0 targets the ranker does not beat the
       deployed 0.8338 (FACT-0381). (b) It beats it but LOSES part of the 78.6% single-candidate population,
@@ -1165,7 +1178,29 @@ levers:
       surface is single-parent by construction, so top-1 there is 1.0 for any model and a metric that cannot
       fail is not evidence - and FACT-0382 sharpens that, because fold 0 is equally degenerate at the
       deployed floor and differs only in HAVING the widened acquisition. P34 gives fold 1 the same widened
-      surface; it does not reveal a natural richness fold 1 was hiding. Every report goes through scripts/win_bet/assoc_report.py; no other summary counts.
+      surface; it does not reveal a natural richness fold 1 was hiding.
+      OUTCOME 2026-08-29 (PKT-0031), AND READ THE SCOPE PRECISION BELOW BEFORE CITING THIS KILL ANYWHERE.
+      Falsifier (a) FIRED on evidence about this lever itself. Twenty-two preregistered crop-grouped arms:
+      the linear model never beats the deployed 0.8338 at any feature set, the best tree reaches 0.8367 with
+      a paired interval including zero, and NO arm of the 22 is favourable. The harness measured its own
+      noise floor rather than assuming one - a tree given only the deployed probability, which cannot beat an
+      argmax over that same scalar, still posts +0.0014 and net +6 from quantile binning - so the best arm's
+      +12 is about twice a pure-binning artifact (FACT-0386).
+      SCOPE PRECISION, written at the moment of the kill because LEVER-0037's had to be added afterwards.
+      What is killed is the SIMPLE-FEATURE FORM: linear and tree models over the nine representation-free
+      features, on the frozen fold-0 surface. This is NOT a finding that no learned ranker can beat the
+      deployed argmax, and it must never be cited as one. Falsifiers (c), (d) and (f) were never reached -
+      nothing was replayed through the chain - and (b) is UNTESTABLE against a non-abstaining model because
+      the frozen evaluate() argmaxes without abstention.
+      WHERE THE SURVIVING HYPOTHESIS LIVES, and why that is not a closure-by-association. This lever is
+      closed by its own evidence; the pointer that follows is about where the REMAINING question is worked,
+      not the basis of the kill. FACT-0386's positive content is that the HEAD is not the constraint and the
+      REPRESENTATION is, which is precisely LEVER-0034's association half. Keeping this lever open alongside
+      it would put two packets on one lane, which the R6 lock exists to prevent.
+      FALSIFIER (f) IS NOT DISCHARGED AND IS HANDED FORWARD. Any ranker that eventually beats the deployed
+      argmax still has to be compared as (widened surface + ranker) against the DEPLOYED control, because
+      FACT-0382 showed all 691 contested errors sit below the deployed threshold. That condition now binds
+      LEVER-0034 at deployment and is recorded in its entry. Every report goes through scripts/win_bet/assoc_report.py; no other summary counts.
     priority: 1
 
   - id: LEVER-0040

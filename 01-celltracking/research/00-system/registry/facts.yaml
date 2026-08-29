@@ -5536,3 +5536,143 @@ facts:
       solve that alignment first rather than pooling rows.
     date: '2026-08-29'
     tags: [division, verifier, cross-fit, data-limited, fold-inversion, zebrahub, negative, headline]
+
+  - id: FACT-0386
+    statement: >-
+      Simple models on the existing representation-free features CANNOT beat the deployed edge probability at
+      choosing parents, and the small apparent gain is mostly a discretisation artifact. Across 22
+      preregistered crop-grouped arms on the complete fold-0 frozen surface, the LINEAR model never beats the
+      deployed 0.8338 on contested targets at any feature set, and the best TREE arm reaches 0.8367 - a point
+      gain of +0.0029, net +12 targets of the 691 available with churn 40 - with a crop-paired interval of
+      [-0.00051, +0.00644] that includes zero and McNemar p = 0.081. NO ARM OF THE 22 HAS A FAVOURABLE
+      INTERVAL. The noise floor was measured rather than assumed: a tree given ONLY the deployed probability,
+      which cannot in principle beat an argmax over that same scalar, still posts +0.0014 and net +6 because
+      the learner bins each feature into at most 255 quantile bins and 41 contested targets have candidates
+      colliding in a bin - so the best arm's +12 is roughly twice a pure-binning floor of +6
+    value: 0.8366610536444551
+    unit: best_tree_contested_parent_top1_f0_oof
+    scope:
+      fold: 0
+      crops: 71
+      surface: {source: C:/temp/assoc/f0.parquet, floor: 0.1, rank_cap: 4, decidable: 19444, contested: 4157}
+      deployed_bar: {contested_top1: 0.8337743565070964, errors: 691}
+      arms_run: 22
+      arms_with_favourable_interval: 0
+      best_arm:
+        tag: alldec.all_nine.tree
+        contested_top1: 0.8366610536444551
+        delta: 0.0028867
+        gained: 26
+        lost: 14
+        net: 12
+        churn: 40
+        mcnemar_exact_p: 0.0806904677519924
+        crop_paired_ci95: [-0.0005127538232518083, 0.006439651696616524]
+        favourable: false
+        n_crops_with_contested: 68
+      linear_best: {tag: alldec.score_context.linear, contested_top1: 0.8337743565070964, delta: 0.0}
+      loco_strictest: {tag: alldec.all_nine.tree.LOCO, contested_top1: 0.8369, net: 13, favourable: false}
+      noise_floor:
+        prob_only_tree: {contested_top1: 0.8352, delta: 0.0014, gained: 22, lost: 16, net: 6, churn: 38}
+        prob_only_linear: {contested_top1: 0.8337743565070964, delta: 0.0, churn: 0}
+        mechanism: "HistGradientBoosting bins each feature into <=255 quantile bins; 41 contested targets (1.0%) have candidates colliding in a bin"
+      feature_attribution_on_the_tree:
+        rank_margin_ncand_over_prob: -0.0017
+        geometry_over_that: 0.0024
+        src_out_degree_further: 0.0007
+        geometry_alone: -0.0310
+      calibration: {tree: {brier: 0.04442, ece_10bin: 0.00696}, linear: {brier: 0.0460, ece_10bin: 0.0126}}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Complete fold 0, all 71 crops, out-of-fold only, splits GROUPED BY CROP so no target contributes to its
+      own training fold, with leave-one-crop-out reported as the strictest available proxy and agreeing with
+      the 5-fold result. All 22 arms were preregistered and ALL 22 are reported, so there is no
+      best-of-many selection. The harness carries its own internal control: a LINEAR model on the probability
+      alone returns exactly the deployed number with churn 0, which is what a monotone transform of a single
+      feature must do to an argmax - so the tree's +0.0014 on the same input is demonstrably binning and not
+      skill. The run was repeated end to end after the tie-break correction landed and both runs agree on all
+      22 arms with zero disagreements.
+    instrument: >-
+      scripts/win_bet/assoc_baseline_rankers.py, heartbeat ASSOC_BASELINE_RANKERS_COMPLETE, with six
+      fail-closed guards including a crop-leak assertion and a sha256 pin of the modules the numbers came
+      from; scored through scripts/win_bet/assoc_parent_dataset.py evaluate() and
+      scripts/win_bet/assoc_report.py parent_conversions(); outputs
+      _evidence/assoc/baselines/baselines_f0.json and C:/temp/assoc_baselines/
+    experiment: EXP-0035
+    note: >-
+      THIS IS THE INFORMATIVE NEGATIVE THE BASELINE WAS COMMISSIONED FOR, and it answers PKT-0029's question
+      directly: the HEAD is not the constraint, the REPRESENTATION is. If a gradient-boosted tree on the
+      deployed probability plus rank, margin and geometry cannot separate true parents on the surface the
+      deployed model itself produced, then richer node context - which is exactly what LEVER-0034's HOCT
+      trunk supplies - is justified rather than speculative.
+      THREE READINGS THAT WOULD BE WRONG. (1) Do not read the single-candidate retention of 1.0000 as a
+      passed test. The frozen evaluate() argmaxes without abstention, so side (b) of the two-sided bar cannot
+      fire on a non-abstaining model and is UNTESTED here, not satisfied. (2) Do not read the tree's better
+      calibration (Brier 0.0444 against 0.0460) as progress on this task: a monotone recalibration cannot
+      move a within-target argmax, so calibration is descriptive only. (3) Do not read the +0.0029 as a score
+      gain. FACT-0382 established that the contested population exists only on the widened surface, so
+      converting any of it requires the pipeline to consume that surface at FACT-0376's measured cost; this
+      is evidence about representational separability and nothing was replayed through the chain.
+      WHAT GEOMETRY ACTUALLY BUYS is 10 targets, and only non-linearly - added to the linear model it makes
+      it WORSE. Rank, margin and candidate count subtract 7, which is what they should do: within a target
+      they are deterministic functions of the probability and carry nothing the argmax did not already have.
+    date: '2026-08-29'
+    tags: [association, parent-ranking, learnability-baseline, negative, noise-floor, representation, headline]
+
+  - id: FACT-0387
+    statement: >-
+      PKT-0029 Gate 1 FAILED, and it failed at a PROCESS BOUNDARY rather than on parity. The feature-parity
+      smoke raised ModuleNotFoundError on `import predict_unet_transformer`, compared ZERO crops, and reported
+      all_passed false. The cause is structural, not a typo: the deployed edge predictor is never imported
+      into the notebook process at all - it is launched as a SUBPROCESS, `/usr/bin/python3
+      scripts/predict_unet_transformer.py`, with the repo directory as its working directory, and every patch
+      in this tree that has ever worked reaches it by REWRITING THAT FILE'S SOURCE TEXT rather than importing
+      the module. The parity patch was the only one that tried to import it, from a process where its
+      directory is not on sys.path
+    value: 0
+    unit: crops_compared_by_the_gate_1_parity_smoke
+    scope:
+      kernel: aryaarun07/biohub-p33-assoc-feature-parity-smoke
+      kernel_version: 1
+      status: COMPLETE
+      report: {gate: feature_parity, crops: 0, all_passed: false, error: "ModuleNotFoundError: No module named 'predict_unet_transformer'"}
+      failing_line: "scripts/kaggle_edits/assoc_feature_parity.py:37 import predict_unet_transformer as _AFP"
+      deployed_invocation: "/usr/bin/python3 scripts/predict_unet_transformer.py --data-dir ... (subprocess, cwd=REPO_DIR)"
+      module_location: "REPO_DIR/scripts/predict_unet_transformer.py, materialised at runtime from the support pack"
+      working_patch_pattern: "_ps = REPO_DIR/'scripts'/'predict_unet_transformer.py'; _ps.read_text() ... _ps.write_text()"
+      cost: {gpu_sessions: 1, submissions: 0, deployed_output_changed: false}
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Re-derived at file:line from the fetched kernel log and the retained gate report, not inferred: the
+      traceback names the import, the report records zero crops with all_passed false, and the same log shows
+      the pipeline immediately afterwards launching the module as a subprocess with a relative path. The
+      contrast with the patches that DO work - pre_ilp_export.py and edge_candidate_budget.py, both of which
+      ran cleanly in P30 - is visible in their source: they never import, they rewrite.
+    instrument: >-
+      scripts/core/kaggle_factory.py log/fetch on scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json;
+      artifacts C:/temp/p33/kernel.log and C:/temp/p33/assoc_feature_parity.json
+    experiment: EXP-0040
+    note: >-
+      THE FAIL-CLOSED DESIGN WORKED AND THAT IS THE ONE GOOD OUTCOME HERE. The gate said all_passed false and
+      compared zero crops instead of quietly reporting nothing to compare. Had it defaulted to a pass, two
+      full feature-cache GPU sessions would have been spent on an unlicensed cache.
+      THIS IS THE PROCESS-BOUNDARY CLASS AGENTS.md NAMES, and it is the third instance recorded: torch.autocast
+      not reaching DataParallel replica threads, parent-process builtins not reaching the prediction subprocess
+      (FACT-0060), and now a notebook-process import of a module that only ever exists inside a subprocess.
+      The standing question - does this state cross a process, thread or replica boundary - was not asked at
+      build time.
+      DO NOT FIX THIS BY ADDING sys.path AND RE-PUSHING. That would produce a gate which runs but still proves
+      the wrong thing, for two reasons established independently by the PKT-0033 audit before this result came
+      back. (1) It exercises NO SERIALISED CACHE: features are written to _afp_feats[t] and read back in the
+      same process, so every dtype, layout, index-remap and staleness error a real cache can carry goes
+      untested - while the gate's stated purpose is to prove the head can be re-run FROM THE CACHE ALONE.
+      (2) It never compares the sub-0.5 probability band, because _afp_got is populated only above the
+      deployed threshold - and FACT-0382 measured that ALL 691 fold-0 contested errors have their true parent
+      below that threshold, so the gate validates precisely the band the learnable task does not use.
+      Running it in the predictor's own process, by source rewriting, additionally fixes a third problem the
+      import approach would never have surfaced: it is the only way to observe the deployed head where it
+      actually executes.
+    date: '2026-08-29'
+    tags: [pkt-0029, gate-1, process-boundary, harness-failure, fail-closed-worked, hoct]

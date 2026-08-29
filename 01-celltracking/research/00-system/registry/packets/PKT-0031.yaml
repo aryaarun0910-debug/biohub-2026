@@ -2,7 +2,7 @@ id: PKT-0031
 title: "AGENT A - learnability baselines for parent discrimination on the frozen surface"
 lever: LEVER-0039
 owner: agent-a-association
-lock: claimed
+lock: done
 opened: '2026-08-29'
 
 claim: >-
@@ -76,4 +76,53 @@ outputs:
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  DONE 2026-08-29. FALSIFIER (a) FIRES, cleanly and informatively. Recorded as FACT-0386; LEVER-0039 is
+  killed on it with an explicit scope precision, and the surviving hypothesis - richer node context - was
+  handed to LEVER-0034 as an inherited deployment gate rather than left to die with the lever.
+
+  THE RESULT. Twenty-two preregistered crop-grouped arms, all reported, out-of-fold only. The LINEAR model
+  never beats the deployed 0.8338 at any feature set. The best TREE arm reaches 0.8367 - net +12 of the 691
+  available targets, churn 40, McNemar p = 0.081, crop-paired interval [-0.00051, +0.00644] including zero.
+  NO ARM OF THE 22 IS FAVOURABLE, which is the standard assoc_report.verdict already applies to every model
+  in this cycle.
+
+  THE PART THAT MAKES IT INTERPRETABLE, and it was not asked for. The packet measured its own NOISE FLOOR: a
+  tree given ONLY the deployed probability - which cannot in principle beat an argmax over that same scalar -
+  still posts +0.0014 and net +6, because the learner bins each feature into at most 255 quantile bins and 41
+  contested targets have candidates colliding in a bin. So the best arm's +12 is roughly twice a pure
+  discretisation artifact. The harness carries its own control confirming this: a LINEAR model on the
+  probability alone returns exactly the deployed number with churn 0, which is what a monotone transform of
+  one feature must do to an argmax. Without that floor the +0.0029 would have looked like a small real gain.
+
+  STAGE 0 PASSED EXACTLY - the surface reproduced FACT-0381 to the digit, both before and after the tie-break
+  correction landed mid-run. The packet killed its own in-flight run and re-ran the entire grid against the
+  corrected surface; the two runs agree on all 22 arms with zero disagreements.
+
+  STAGE 3, THE QUESTION THAT DECIDES THE NEXT LANE. Geometry is the only thing that adds anything, and what
+  it adds is 10 targets, non-linearly - added to the linear model it makes it worse. Rank, margin and
+  candidate count SUBTRACT 7, which is what they should do: within a target they are deterministic functions
+  of the probability and carry nothing the argmax lacked. Geometry alone is catastrophic (-0.0310). So the
+  existing representation is a weak complement to the deployed probability and never a substitute.
+
+  THREE HONEST NEGATIVES THE PACKET VOLUNTEERED, each of which would have been easy to bank as a win.
+  (1) Single-candidate retention is 1.0000 everywhere, but that is ARITHMETIC, not skill - the frozen
+  evaluate() argmaxes without abstention, so side (b) of the two-sided bar cannot fire on a non-abstaining
+  model and is UNTESTED rather than passed. (2) The tree calibrates better (Brier 0.0444 against 0.0460) but
+  a monotone recalibration cannot move a within-target argmax, so calibration is descriptive only.
+  (3) The +0.0029 is not a score gain and was not extrapolated to the chain; conversions are reported with
+  stage: pre_ILP_candidate_ranking.
+
+  FALSIFIERS: (a) FIRES. (b) UNTESTABLE against a non-abstaining model. (c) and (d) NOT REACHED - no
+  full-chain replay was run, correctly, since nothing cleared the bar to justify one. (e) UNTESTABLE today
+  because fold 1 is single-parent by construction; leave-one-crop-out is reported as the strictest available
+  grouped proxy and agrees with the 5-fold result.
+
+  ENVIRONMENT CHANGE TO BE AWARE OF: scikit-learn was installed into .venv via `uv pip install` (it was
+  absent and the venv has no pip). The resolution was additive - joblib, narwhals, scikit-learn - with
+  numpy, scipy and polars unchanged, and the full suite passes at 1179 tests afterwards.
+
+  A NOTE ON THE PACKET'S OWN CONDUCT, worth recording because it is the behaviour the partition was designed
+  to produce: it declined to stage anything, on the correct reasoning that three agents shared one worktree
+  and staged files would be swept into another packet's commit.
+
