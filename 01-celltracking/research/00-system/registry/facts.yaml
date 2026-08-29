@@ -5018,9 +5018,11 @@ facts:
       kernel_id_no: 131761963
       notebook_sha256_prefix: b998e582e41d5ea8
       datasets: [biohub-deepcenter-unet3d-center-prior-v1, biohub-temporal-unet3d-seed314159-v1, biohub-tracking-support-pack-50ep-v1]
-      diffs_from_our_champion:
-        secondary_model: {ours: "OFF", theirs: "ON, edge_weight 0.15, link_mode low_margin_consensus, low_margin_max 0.35, detection_weight 0.475, dual_seed_edge_threshold 0.48"}
-        bidirectional: {ours: "OFF", theirs: "BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT 0.15, fusion harmonic_probability"}
+      diffs_from_our_champion_AS_FIRST_WRITTEN_AND_WRONG:
+        secondary_model: {claimed_ours: "OFF", actually_ours: "ON and identical", theirs: "ON"}
+      corrected_diffs:
+        secondary_consensus: {ours: "ON, identical parameters", theirs: "ON", differs: false}
+        bidirectional_fusion: {ours: "plain linear blend, weight 0.20, no harmonic code present", theirs: "harmonic_probability, weight 0.15", differs: true}
         ilp_disappearance: {ours: 1.5, theirs: 2.0}
         ilp_division: {ours: 1.0, theirs: 1.2}
         det_threshold: {ours: 0.96875, theirs: 0.965}
@@ -5036,7 +5038,18 @@ facts:
     provenance: EXTERNAL
     validity: SUSPECT
     validity_reason: >-
-      The CONFIGURATION is VERIFIED - read directly from the pulled notebook source at
+      MATERIALLY CORRECTED 2026-08-29, SAME DAY, BEFORE ANY RUN WAS READ. The claim that the secondary
+      low_margin_consensus is an addition "our champion leaves switched off" is WRONG. The deployed P24
+      champion ALREADY runs it, with identical parameters - link mode low_margin_consensus, edge weight 0.15,
+      low-margin max 0.35, detection weight 0.475, dual-seed edge threshold 0.48 - verified in
+      notebooks/kaggle_p24_deepcenter_best_veto/. The LOEO controls (P28) only appear to lack it because the
+      harness applies a contamination cut for the champion arm (FACT-0378); the DEPLOYED artifact has it on.
+      THE ACTUAL DIFF between P24 (0.928) and the public 0.931 is therefore narrower and is listed under
+      scope.corrected_diffs. The one genuine association-side difference is the bidirectional FUSION MODE:
+      P24 uses a plain linear blend at weight 0.20 and contains no harmonic_probability code at all, while the
+      public kernel uses harmonic-probability fusion at 0.15. Everything else that differs is solver, detector
+      threshold, or post-processing.
+      The CONFIGURATION of the public kernel remains VERIFIED - read directly from the pulled notebook source at
       C:/temp/intel/sn931/code.py, and the corresponding code paths are confirmed present in our own P28
       control notebook. The SCORE 0.931 is the host's report of the public leaderboard and has not been
       independently reproduced by us; it is also a public-LB number, so the usual public/private caveat applies.
@@ -5047,7 +5060,10 @@ facts:
       source read of C:/temp/intel/sn931/code.py; presence check of every referenced code path in
       notebooks/kaggle_p28_champion_control_f0/; 2026-08-29
     note: >-
-      This is the most actionable intel of the campaign and it CONVERGES with our own evidence rather than
+      READ THE CORRECTION IN validity_reason FIRST. The headline that survives is narrower but still useful:
+      a public artifact in our own lineage scores above our champion using a configuration reachable from our
+      base, and the single association-side difference is the bidirectional FUSION RULE, not the consensus.
+      This is intel that CONVERGES with our own evidence rather than
       contradicting it. FACT-0368 put 87% of the fold-0 gap in association; FACT-0376 then showed the binding
       constraint is DISCRIMINATION rather than candidate availability. Both of this kernel's substantive
       additions are discrimination mechanisms operating on the existing candidate set: low-margin consensus
@@ -5061,3 +5077,60 @@ facts:
       any submission is contemplated.
     date: '2026-08-29'
     tags: [intel, external, association, discrimination, secondary-consensus, headline]
+
+  - id: FACT-0378
+    statement: >-
+      The secondary model used by the FACT-0377 public configuration exists ONLY as split_0 - the
+      biohub-temporal-unet3d-seed314159-v1 pack manifest contains two split_0 references and zero split_1 - and
+      the notebook hardcodes SECONDARY_WEIGHTS_PATH to unet_transformer/split_0/edge_predictor_best.pth.
+      Because our LOEO protocol treats pack split_0 as CLEAN for fold 0, that model trained on 6bba; fold 1
+      holds 6bba out. Enabling the secondary consensus on fold 1 therefore LEAKS the held-out embryo, and no
+      honest fold-1 secondary exists to substitute
+    value: 0
+    unit: honest_loeo_folds_for_the_secondary_checkpoint
+    scope:
+      pack: pilkwang/biohub-temporal-unet3d-seed314159-v1
+      manifest_split_0_references: 2
+      manifest_split_1_references: 0
+      hardcoded_path: "SECONDARY_WEIGHTS_ROOT/unet_transformer/split_0/edge_predictor_best.pth"
+      harness_contamination_cut: 'if LOEO_ARM in {strict, hybrid, champion}: BIOHUB_SECONDARY_WEIGHTS = "" ("secondary all-199-train mode")'
+      secondary_training_scope: all 199 movies
+      fold0: {held_out: 44b6, leaky: true}
+      fold1: {held_out: 6bba, leaky: true}
+      leaderboard_legitimacy: "valid - the hidden test movies are not among the 199"
+      affected_run: {experiment: EXP-0037, kernel: aryaarun07/biohub-p31-public931-replica-f1, version: 1, verdict: INVALID}
+      secondary_pack_pool_kernel_um: 5.0
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Established two ways: the pack's ARTIFACT_MANIFEST.json has no split_1 entry at all, and the base
+      notebook's hardcoded path is read at source. The leak direction follows from our own protocol
+      (FACT-0345), which uses pack split_0 as the CLEAN fold-0 primary and OOF split_1 for fold 1 precisely to
+      keep that guard - so pack split_0 is a model that saw 6bba.
+    instrument: >-
+      python -m kaggle datasets files/download of the pack ARTIFACT_MANIFEST.json to
+      C:/temp/intel/secmanifest; source read of SECONDARY_WEIGHTS_PATH in the P28 control notebook; 2026-08-29
+    note: >-
+      SUPERSEDED IN SCOPE, SAME DAY, BY A STRONGER FINDING - the leak is not fold-1-specific. Our own LOEO
+      harness carries an explicit "arm-specific contamination cut" that disables the secondary for the strict,
+      hybrid and champion arms, printing "secondary all-199-train mode": the secondary is trained on ALL 199
+      movies, so it has seen the held-out embryo on BOTH folds. It is legitimate on the leaderboard, whose test
+      movies are not in the 199, and it is un-measurable by any LOEO control we can build. Consequently the
+      consensus component of FACT-0377 cannot be validated offline at all with this checkpoint, and BOTH P31
+      arms had to be rebuilt without it. The fold-0 build had the additional defect that the harness's cut ran
+      AFTER the arming block, so last-write-wins had already disabled the secondary there - the fold-0 kernel
+      as launched was silently measuring the bundle MINUS the mechanism it was built to test.
+      Caught BEFORE any number was read, which is the only reason this is a defect and not a contaminated
+      result. EXP-0037 version 1 is void and its score must never be quoted. Three consequences.
+      (1) The full public bundle can be measured honestly on FOLD 0 ONLY. Fold 0 is the promotion gate
+      (FACT-0261), so the gate itself is unaffected - but the consensus component will have NO honest second
+      fold, and a one-fold result is exactly the configuration that has misled this campaign before
+      (FACT-0031's lever inversion).
+      (2) The fold-1 arm is rebuilt WITHOUT the secondary, which makes it a DIFFERENT bundle - bidirectional
+      fusion, the tighter ILP, gap-2 recovery and short-track rescue - and it must be labelled as such rather
+      than reported as the same treatment on another fold.
+      (3) This is a general trap in the public lineage, not a one-off: any public single-split auxiliary model
+      is honest on at most one of our folds. Check the split coverage of EVERY auxiliary checkpoint before
+      enabling it in a LOEO arm.
+    date: '2026-08-29'
+    tags: [leak, secondary, protocol, defect, lever-0034, verified]

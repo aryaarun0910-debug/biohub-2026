@@ -1,7 +1,7 @@
 {
-  "id": "aryaarun07/biohub-p31-public931-replica-f0",
-  "title": "Biohub P31 Public931 Replica F0 NoSecondary",
-  "code_file": "biohub-p31-public931-replica-f0.ipynb",
+  "id": "aryaarun07/biohub-p32-public931-exact",
+  "title": "Biohub P32 Public931 Exact",
+  "code_file": "biohub-p32-public931-exact.ipynb",
   "language": "python",
   "kernel_type": "notebook",
   "is_private": true,
@@ -14,9 +14,7 @@
   "dataset_sources": [
     "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
     "pilkwang/biohub-temporal-unet3d-seed314159-v1",
-    "pilkwang/biohub-tracking-support-pack-50ep-v1",
-    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
-    "thtennant/taaf-kaggle-source-share-fork"
+    "pilkwang/biohub-tracking-support-pack-50ep-v1"
   ],
   "kernel_sources": [],
   "competition_sources": [

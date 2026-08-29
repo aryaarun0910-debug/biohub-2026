@@ -4,8 +4,8 @@
   "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
   "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
   "built_notebook": "notebooks\\kaggle_p31_public931_replica_f0\\biohub-p31-public931-replica-f0.ipynb",
-  "built_sha256": "ba449772f1ca39df568e04b388cae9e5b8b1afb01f9f0ebb2ca778e5f678c9a6",
-  "config_hash": "d1de45f35203",
+  "built_sha256": "1b5c7234c40c284690b4d0594e511ed50d6c53fa4a11fb44e7082da7385d2c34",
+  "config_hash": "ea7df2fdcb0c",
   "n_cells": 11,
   "edits": [
     {
@@ -56,20 +56,12 @@
         7
       ],
       "payload_sha256": "32582192ed21aa95de8f1e718d0e31f8e6f85568f6d0579a0a13180ece9c3f09"
-    },
-    {
-      "kind": "insert_after",
-      "cells": [
-        4
-      ],
-      "payload_sha256": "224b6c298045d67a7893d1e19c806f09178f67f35d5d3b3f0b7e097d45e14616"
     }
   ],
   "declared_slug": "biohub-p31-public931-replica-f0",
-  "title": "Biohub P31 Public931 Replica F0",
+  "title": "Biohub P31 Public931 Replica F0 NoSecondary",
   "defect_gate": {
     "ledger": "scripts\\core\\experiment_defects.json",
     "passed": []
-  },
-  "pushed_slug": "biohub-p31-public931-replica-f0"
+  }
 }

@@ -1,7 +1,7 @@
 {
   "name": "p31_public931_replica_f0",
   "slug": "biohub-p31-public931-replica-f0",
-  "title": "Biohub P31 Public931 Replica F0",
+  "title": "Biohub P31 Public931 Replica F0 NoSecondary",
   "code_file": "biohub-p31-public931-replica-f0.ipynb",
   "out_dir": "notebooks/kaggle_p31_public931_replica_f0",
   "datasets": [
@@ -20,7 +20,7 @@
   "expects_submission": false,
   "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
   "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
-  "purpose": "FACT-0377: the public kernel reported at 0.931 is our code lineage and differs from the P24/P28 champion by ENVIRONMENT ONLY - every path it uses is already in our P28 control notebook. Its two substantive additions are association-DISCRIMINATION mechanisms our champion leaves off: a secondary model blended by low_margin_consensus (consulted only where the primary is uncertain AND the two agree on the top parent) and bidirectional harmonic-probability fusion at 0.15. It also runs a tighter ILP (disappearance 2.0, division 1.2) with gap-2 recovery and adaptive short-track rescue on. This replicates that configuration as a LOEO control on the honest folds so it can be compared against the P28 champion baselines (FACT-0345) BEFORE any submission is considered. It converges with our own evidence: FACT-0368 puts 87% of the fold-0 gap in association and FACT-0376 shows the binding constraint is discrimination rather than candidate availability - which is exactly what both added mechanisms change. No submission.",
+  "purpose": "FOLD-0 ARM of the FACT-0377 public-0.931 bundle, WITHOUT the secondary consensus (FACT-0378). The secondary checkpoint is trained on all 199 movies - our own LOEO harness disables it for the champion arm under an explicit contamination cut - so it has seen the held-out embryo on BOTH folds and cannot be measured by any LOEO control we can build. It is legitimate on the leaderboard, whose test movies are not among the 199, so the consensus component is judgeable only by submission, never offline. Version 1 of this kernel was launched with an arming block that the harness's cut then overrode, so it was silently measuring this same reduced bundle while claiming otherwise; this version makes the reduction explicit. What IS measured here, honestly and on the promotion fold: bidirectional harmonic fusion at 0.15, ILP disappearance 2.0 and division 1.2, det threshold 0.965, gap-2 recovery, adaptive short-track rescue, and the epoch-500 DeepCenter with the safe-division veto off - paired against the P28 champion control (FACT-0345). Diagnostic only; no submission.",
   "provenance": {
     "base": "deployed P3 harmonic built notebook, sha256 70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8, public LB 0.915",
     "public_sources": [
@@ -130,13 +130,6 @@
       "cell_match": "_LOEO_KEEP = {",
       "old": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\"}",
       "new": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\"}\n_LOEO_KEEP |= set(globals().get(\"_SWEEP_KEEP\", []))",
-      "expect": 1
-    },
-    {
-      "kind": "insert_after",
-      "anchor": "print(\"Secondary SHA256:\", _secondary_actual_sha256)",
-      "cell_match": "print(\"Secondary SHA256:\", _secondary_actual_sha256)",
-      "code": "\n# --- FACT-0377: the 0.931 public configuration's association-discrimination block ---\n# Set here rather than in the env cell because BIOHUB_SECONDARY_WEIGHTS must reference\n# SECONDARY_WEIGHTS_PATH, which is only resolved above this point.\nos.environ[\"BIOHUB_SECONDARY_WEIGHTS\"] = str(SECONDARY_WEIGHTS_PATH)\nos.environ[\"BIOHUB_SECONDARY_EDGE_WEIGHT\"] = \"0.15\"\nos.environ[\"BIOHUB_SECONDARY_DETECTION_WEIGHT\"] = \"0.475\"\nos.environ[\"BIOHUB_SECONDARY_LINK_MODE\"] = \"low_margin_consensus\"\nos.environ[\"BIOHUB_SECONDARY_MIX_TEMPERATURE\"] = \"1\"\nos.environ[\"BIOHUB_SECONDARY_LOW_MARGIN_MAX\"] = \"0.35\"\nos.environ[\"BIOHUB_DUAL_SEED_EDGE_THRESHOLD\"] = \"0.48\"\nprint(\"P31 secondary consensus armed:\", os.environ[\"BIOHUB_SECONDARY_LINK_MODE\"],\n      \"| edge weight\", os.environ[\"BIOHUB_SECONDARY_EDGE_WEIGHT\"],\n      \"| low-margin max\", os.environ[\"BIOHUB_SECONDARY_LOW_MARGIN_MAX\"], flush=True)\n",
       "expect": 1
     }
   ],
