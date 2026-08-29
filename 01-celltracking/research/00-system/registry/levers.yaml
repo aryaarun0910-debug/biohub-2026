@@ -897,10 +897,14 @@ levers:
       hid, each visible only because the terms are reported separately: RAW edge Jaccard moves only +0.0013, so
       78% of the adjusted gain is the node-count adjustment (FACT-0191/0192); node recall FALLS 0.8636 to
       0.8359; and division true positives DROP 14 to 12, the divJ gain being a false-positive reduction rather
-      than better recovery. FACT-0368 independently caps the entire node-selection slice at 5.9% of the fold-0
-      gap. The lever stays open only because fold 0 is the gate and is unmeasured, but it should now be
-      EXPECTED TO FAIL its +0.003 fold-0 bar, and it must never be promoted on an adjusted gain whose raw
-      counterpart is near zero.
+      than better recovery. FACT-0372 is the load-bearing reason for pessimism, precisely because it SEPARATES
+      the count adjustment from genuine tracking quality. FACT-0368's 5.9% is a weaker and narrower bound and
+      must not be over-read: its shares are computed on RAW edge Jaccard, so it caps what better node SELECTION
+      can contribute to the raw association gap and says nothing about gains manufactured by the metric's
+      count multiplier, which moves on an entirely different channel and leaves raw Jaccard untouched. The
+      lever stays open only because fold 0 is the gate and is unmeasured, but it should now be EXPECTED TO FAIL
+      its +0.003 fold-0 bar, and it must never be promoted on an adjusted gain whose raw counterpart is near
+      zero.
 
       CPU FEASIBILITY RESOLVED 2026-08-29 (FACT-0367): exact control replays prove the complete P28 chain is
       replayable from local assets, and a fixed fold-1 panel stays positive through the official scorer. This

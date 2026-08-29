@@ -4788,9 +4788,105 @@ facts:
       false ones removed. (3) IT RECOVERS FEWER REAL DIVISIONS: division TP falls 14 to 12 and FN rises, so the
       division-Jaccard gain is a false-positive reduction, not better division recovery - exactly why the host
       required the division term to be reported separately rather than folded into an association headline
-      (FACT-0371 caution). Read with FACT-0368, which bounds the whole node-selection slice at 5.9% of the
-      fold-0 gap, the honest expectation for the fold-0 gate is now SMALL. The subsampling lesson is general: a
+      (FACT-0371 caution). THIS fact, not FACT-0368, is the load-bearing reason the fold-0 expectation is now
+      SMALL - because it is the one that separates the count adjustment from tracking quality. FACT-0368's 5.9%
+      node-selection share is a narrower bound and must not be cited as if it capped this lever: those shares
+      are computed on RAW edge Jaccard, so they bound what better node SELECTION contributes to the raw
+      association gap and say nothing about gains produced by the metric's count multiplier, which does not
+      touch raw Jaccard at all. The subsampling lesson is general: a
       size-stratified 20-crop panel overstated a full-fold effect by 3.4x and flipped its CI, so panels size
       instruments and do not decide levers.
     date: '2026-08-29'
     tags: [lever-0036, full-chain, complete-fold, count-adjustment, division, negative]
+
+  - id: FACT-0373
+    statement: >-
+      The P30 fold-0 acquisition passed all four preregistered audits: it reproduced the P28 fold-0 control
+      graph exactly (3,736,342 rows, byte-for-byte identical columns), the edge-candidate patch reported its
+      heartbeat on all 71 crops with both treatment variables unset, every one of the 1,973,714 deployed edges
+      reappears in the export above the deployed threshold, and every exported candidate references a valid
+      pre-ILP node id joining strictly consecutive frames. The acquisition surface is 6,630,491 candidates,
+      3.36x the deployed edge set
+    value: true
+    unit: p30_acquisition_audit_passed
+    scope:
+      kernel: aryaarun07/biohub-p30-acquisition-f0
+      kernel_version: 2
+      A_control_parity: {p30_rows: 3736342, control_rows: 3736342, graph_identical: true}
+      B_patch_heartbeat: {applied: true, crops: 71, expected_crops: 71, treatment_variables_unset: true, crops_with_zero_exported: 0, assertion_fired: false}
+      C_deployed_reconstruction: {deployed_edges_missing_from_export: 0}
+      D_node_id_stability: {unknown_ids: 0, edges_not_frame_adjacent: 0}
+      exported_candidates: 6630491
+      deployed_edges: 1973714
+      expansion_factor: 3.36
+      export_config: {floor: 0.02, topk_per_target: 8}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Every check is fail-closed and each was declared in PKT-0027 before the run. Check A is the one that
+      matters most for reuse: because the graph is identical to EXP-0030's, the P28 fold-0 control remains a
+      valid pairing partner for both replays, and the acquisition did not change what it observes. Check D was
+      added by the host precisely because counts and heartbeats can pass while an id-remapping boundary
+      corrupts the surface; it is verified here on P30's own artifacts rather than inherited from the fold-1
+      observation that pre-ILP node k is the k-th surviving detector peak.
+    instrument: >-
+      scripts/win_bet/audit_p30_acquisition.py over C:/temp/p30_f0/ against
+      C:/temp/p28_f0/loeo_split0_champion.csv.gz; output _evidence/ecb/audit_f0.json
+    experiment: EXP-0035
+    note: >-
+      Version 1 of this kernel ERRORED and the cause was a defect in our own patch, not the pipeline:
+      np.savez_compressed appends '.npz' to a path that lacks it, so the atomic flush wrote
+      '<crop>.npz.tmp.npz' and the rename raised FileNotFoundError. The test written for that behaviour had
+      matched the tmp-write/rename PATTERN in the generated source instead of executing it, and passed while
+      every run crashed. It was replaced by a functional test that runs the generated flush against real arrays
+      and reads the file back, verified to fail on the reintroduced defect. The general rule earned here: a
+      test that greps generated code for a pattern is not a test of that code's behaviour.
+    date: '2026-08-29'
+    tags: [acquisition, audit, node-id, lever-0036, lever-0037, verified]
+
+  - id: FACT-0374
+    statement: >-
+      Candidate reach on the honest fold is far higher than fold 1 suggested, so LEVER-0037's headroom on the
+      promotion fold is about a third of what FACT-0370 implied. Across all 71 fold-0 crops and 19,665
+      detectable GT edges, the DEPLOYED rule already offers 93.9% of them, against 82.7% on fold 1. The true
+      parent sits at rank 1 for 95.7% of edges and within rank 2 for 99.3%, so rank beyond 2 buys almost
+      nothing. The smallest expansion that materially improves reach is floor 0.1 with at most 2 parents per
+      target: 98.6% reach for 1.4x the candidate count
+    value: 0.939
+    unit: deployed_candidate_reach_f0
+    scope:
+      fold: 0
+      crops: 71
+      detectable_gt_edges: 19665
+      deployed_edges: 1973714
+      reach_by_floor_at_rank_2: {"0.5": 0.939, "0.3": 0.966, "0.2": 0.976, "0.1": 0.986, "0.05": 0.989, "0.02": 0.990}
+      candidate_multiple_at_rank_2: {"0.5": 1.0, "0.3": 1.1, "0.2": 1.2, "0.1": 1.4, "0.05": 1.7, "0.02": 2.0}
+      reach_at_floor_0p02: {rank_1: 0.954, rank_2: 0.990, rank_3: 0.995, rank_4: 0.996, rank_6: 0.997, rank_8: 0.997}
+      true_parent_rank_cdf: {"1": 0.957, "2": 0.993, "3": 0.998, "4": 0.999, "6": 1.000, "8": 1.000}
+      selected_treatment: {floor: 0.1, rank: 2, reach: 0.986, reach_gain: 0.047, candidate_multiple: 1.4}
+      fold1_reference: FACT-0370
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Complete fold 0, all 71 crops, on the P30 acquisition whose four audits passed (FACT-0373) - including
+      the node-id check that guarantees these candidates address the same nodes the pre-ILP graph consumes.
+      Reach is an UPPER BOUND: it counts GT edges whose true pair is OFFERED, not chosen. A scorer still has to
+      pick the right parent out of the widened set, and widening necessarily hands the linker more ways to be
+      wrong, so the realised gain will be smaller and could be negative.
+    instrument: >-
+      scripts/win_bet/candidate_reach_curve.py over C:/temp/p30_f0/{preilp_split0.parquet,ecb/};
+      output _evidence/ecb/reach_f0.json
+    experiment: EXP-0035
+    note: >-
+      This is the fold inversion FACT-0031 warned about, appearing again: a lever sized on fold 1 shrinks by a
+      factor of three on the fold that gates promotion. The unreachable share falls from 17.3% of detectable
+      edges (fold 1) to 6.1% (fold 0), which is consistent with fold 1 being the association-degraded
+      configuration (FACT-0261) rather than with the candidate rule behaving differently - the rule is shared
+      code (FACT-0369). Two design conclusions for the treatment. (1) RANK 2 IS ENOUGH: 99.3% of true parents
+      are within rank 2, so the deployed one-parent-per-target limit costs most of its recall at the SECOND
+      parent, not deeper - a large top-k is pure precision cost. (2) THE FLOOR DOES THE WORK: at rank 2, reach
+      climbs 0.939 to 0.986 as the floor drops 0.5 to 0.1, then flattens, so 0.1 is the knee and floors below
+      0.05 buy 0.004 reach for 40% more candidates. The chosen treatment is therefore floor 0.1, rank 2 -
+      +0.047 reach for 1.4x candidates - and it is tested through the complete chain before any claim.
+    date: '2026-08-29'
+    tags: [lever-0037, reach, fold-inversion, candidate-generation, measured]
