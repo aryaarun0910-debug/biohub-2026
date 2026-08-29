@@ -4992,6 +4992,13 @@ facts:
       under-production bonus, which is why the adjusted loss (-0.0079) exceeds the raw loss (-0.0034) - the
       exact mirror of LEVER-0036 (FACT-0375). And division recovery got WORSE, so rule (4) applies
       independently: non-promotional whatever the pooled score did.
+      SCOPE PRECISION (host, 2026-08-29) - READ BEFORE CITING THIS AGAINST ANY FUTURE LEVER. What is killed is
+      the TESTED MECHANISM: globally widening to the selected top-two surface under an UNCHANGED scorer and
+      solver. This is NOT proof that candidate generation can never matter. What it proves is narrower and
+      sharper - once those alternatives are exposed, AVAILABILITY IS NOT THE CURRENTLY BINDING CONSTRAINT. A
+      candidate-generation idea paired with a better scorer, or one selecting candidates by a different
+      principle than global probability rank, is untouched by this evidence and needs its own lever and its
+      own falsifier.
     date: '2026-08-29'
     tags: [lever-0037, ranking-failure, association, conversion, negative, headline]
 
