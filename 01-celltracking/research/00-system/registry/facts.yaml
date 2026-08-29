@@ -4994,3 +4994,63 @@ facts:
       independently: non-promotional whatever the pooled score did.
     date: '2026-08-29'
     tags: [lever-0037, ranking-failure, association, conversion, negative, headline]
+
+  - id: FACT-0377
+    statement: >-
+      The public kernel stephennedumpally/pls-upvote-share-higher-scoring-ideas, reported at 0.931 and
+      therefore ABOVE our 0.928 champion, is the SAME code lineage as ours and differs from the P24/P28
+      champion by ENVIRONMENT VARIABLES ONLY - every code path it exercises is already present in our P28
+      control notebook. Its two substantive additions are association-DISCRIMINATION mechanisms our champion
+      leaves switched off: a secondary model blended through `low_margin_consensus`, and bidirectional
+      harmonic-probability fusion at weight 0.15. It also runs a tighter ILP (disappearance 2.0, division 1.2)
+      and turns on gap-2 recovery and adaptive short-track rescue
+    value: 0.931
+    unit: reported_public_lb_score
+    scope:
+      kernel: stephennedumpally/pls-upvote-share-higher-scoring-ideas
+      kernel_id_no: 131761963
+      notebook_sha256_prefix: b998e582e41d5ea8
+      datasets: [biohub-deepcenter-unet3d-center-prior-v1, biohub-temporal-unet3d-seed314159-v1, biohub-tracking-support-pack-50ep-v1]
+      diffs_from_our_champion:
+        secondary_model: {ours: "OFF", theirs: "ON, edge_weight 0.15, link_mode low_margin_consensus, low_margin_max 0.35, detection_weight 0.475, dual_seed_edge_threshold 0.48"}
+        bidirectional: {ours: "OFF", theirs: "BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT 0.15, fusion harmonic_probability"}
+        ilp_disappearance: {ours: 1.5, theirs: 2.0}
+        ilp_division: {ours: 1.0, theirs: 1.2}
+        det_threshold: {ours: 0.96875, theirs: 0.965}
+        deepcenter: {ours: "best.pt epoch 2, safe_div_veto ON", theirs: "epoch 500, safe_div_veto OFF"}
+        gap2_recovery: {ours: 0, theirs: 1}
+        adaptive_short_track_rescue: {ours: 0, theirs: "1, min_len 4, min_mean_edge_prob 0.88, max_mean_edge_dist 3.0 um, caps 0.012 frac / 120 abs"}
+        safe_div: {ours: "max 8.0 um, sister 11.0", theirs: "max 7.0 um, sister 12.0"}
+      low_margin_consensus_mechanism: >-
+        Per target, primary and scale-calibrated secondary softmax over sources; take top-2 of each. Blend
+        weight = secondary_edge_weight * clamp((low_margin_max - primary_margin)/low_margin_max, 0, 1), applied
+        ONLY where primary and secondary agree on the top parent, and zero where they disagree. The secondary
+        is therefore consulted exactly where the primary is UNCERTAIN and corroborated.
+    provenance: EXTERNAL
+    validity: SUSPECT
+    validity_reason: >-
+      The CONFIGURATION is VERIFIED - read directly from the pulled notebook source at
+      C:/temp/intel/sn931/code.py, and the corresponding code paths are confirmed present in our own P28
+      control notebook. The SCORE 0.931 is the host's report of the public leaderboard and has not been
+      independently reproduced by us; it is also a public-LB number, so the usual public/private caveat applies.
+      No claim here is that their configuration will score 0.931 on OUR substrate - that is what the paired
+      offline runs are for.
+    instrument: >-
+      python -m kaggle kernels pull stephennedumpally/pls-upvote-share-higher-scoring-ideas; env extraction and
+      source read of C:/temp/intel/sn931/code.py; presence check of every referenced code path in
+      notebooks/kaggle_p28_champion_control_f0/; 2026-08-29
+    note: >-
+      This is the most actionable intel of the campaign and it CONVERGES with our own evidence rather than
+      contradicting it. FACT-0368 put 87% of the fold-0 gap in association; FACT-0376 then showed the binding
+      constraint is DISCRIMINATION rather than candidate availability. Both of this kernel's substantive
+      additions are discrimination mechanisms operating on the existing candidate set: low-margin consensus
+      consults a second model precisely where the primary is unsure, and harmonic bidirectional fusion demands
+      mutual forward/backward support. Neither adds candidates; both change WHICH parent is chosen.
+      Two of our own facts need re-reading in this light, and neither is contradicted. FACT-0331 killed the
+      SECONDARY_DETECTION_WEIGHT knob (0.475 -> 0.60) - a DETECTION-side scalar - and says nothing about the
+      secondary EDGE consensus path, which we have never tested. FACT-0330/0324's icom work is unrelated.
+      What makes this cheap is that no code is needed: the entire configuration is reachable from our verified
+      P28 base by environment variables, so it can be measured as a paired LOEO control on both folds before
+      any submission is contemplated.
+    date: '2026-08-29'
+    tags: [intel, external, association, discrimination, secondary-consensus, headline]

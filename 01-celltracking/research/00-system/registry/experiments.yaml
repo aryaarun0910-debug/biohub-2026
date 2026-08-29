@@ -525,3 +525,47 @@ experiments:
       levers are replayed independently on CPU afterwards. Verified before push: both patches compose and
       compile on the vendored predictor, the treatment variables are absent from the built notebook, and the
       P28 control configuration is preserved. No submission.
+
+  - id: EXP-0036
+    title: P31 public-0.931 configuration replica, LOEO fold 0
+    spec: scripts/kaggle_specs/p31_public931_replica_f0.json
+    kernel: aryaarun07/biohub-p31-public931-replica-f0
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-29'
+    facts: [FACT-0377, FACT-0345, FACT-0368, FACT-0376, FACT-0261]
+    note: >-
+      FACT-0377: the public kernel reported at 0.931 is our own code lineage and differs from the P24/P28
+      champion by ENVIRONMENT ONLY. This replays that exact configuration as a LOEO control on fold 0 -
+      the honest promotion fold - so it can be compared against the P28 champion baseline (FACT-0345) on our own substrate before
+      any submission is contemplated. The two substantive additions are association-DISCRIMINATION mechanisms
+      the champion leaves off - a secondary model blended by low_margin_consensus, consulted only where the
+      primary is uncertain AND both agree on the top parent, and bidirectional harmonic-probability fusion -
+      which is exactly the lane FACT-0368 sizes at 87% of the fold-0 gap and FACT-0376 identifies as
+      discrimination-bound rather than availability-bound. Also carries a tighter ILP (disappearance 2.0,
+      division 1.2), det threshold 0.965, gap-2 recovery and adaptive short-track rescue on, and the pack's
+      epoch-500 DeepCenter with the safe-division veto OFF. Diagnostic only; no submission.
+
+  - id: EXP-0037
+    title: P31 public-0.931 configuration replica, LOEO fold 1
+    spec: scripts/kaggle_specs/p31_public931_replica_f1.json
+    kernel: aryaarun07/biohub-p31-public931-replica-f1
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-29'
+    facts: [FACT-0377, FACT-0345, FACT-0368, FACT-0376, FACT-0261]
+    note: >-
+      FACT-0377: the public kernel reported at 0.931 is our own code lineage and differs from the P24/P28
+      champion by ENVIRONMENT ONLY. This replays that exact configuration as a LOEO control on fold 1 -
+      the association-degraded diagnostic fold - so it can be compared against the P28 champion baseline (FACT-0345) on our own substrate before
+      any submission is contemplated. The two substantive additions are association-DISCRIMINATION mechanisms
+      the champion leaves off - a secondary model blended by low_margin_consensus, consulted only where the
+      primary is uncertain AND both agree on the top parent, and bidirectional harmonic-probability fusion -
+      which is exactly the lane FACT-0368 sizes at 87% of the fold-0 gap and FACT-0376 identifies as
+      discrimination-bound rather than availability-bound. Also carries a tighter ILP (disappearance 2.0,
+      division 1.2), det threshold 0.965, gap-2 recovery and adaptive short-track rescue on, and the pack's
+      epoch-500 DeepCenter with the safe-division veto OFF. Diagnostic only; no submission.
