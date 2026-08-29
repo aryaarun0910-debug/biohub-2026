@@ -4,7 +4,7 @@
   "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
   "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
   "built_notebook": "notebooks\\kaggle_p33_assoc_feature_parity_smoke\\biohub-p33-assoc-feature-parity-smoke.ipynb",
-  "built_sha256": "17e6ae85b13036a33d3ff8bad5e5141cca96d4f2f1483b859e0593bb4a56840a",
+  "built_sha256": "fdb087473e8e8bb85f9c4c2b5b369ea060bf0da6beabc3d96a2417777ffac92d",
   "config_hash": "88f6d6a6db4c",
   "n_cells": 11,
   "edits": [
@@ -77,6 +77,5 @@
   "defect_gate": {
     "ledger": "scripts\\core\\experiment_defects.json",
     "passed": []
-  },
-  "pushed_slug": "biohub-p33-assoc-feature-parity-smoke"
+  }
 }

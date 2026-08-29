@@ -117,6 +117,42 @@ harness_gates:
     comparison denominator; and a head trained from cached node features also needs the scaled
     coordinates and the position features whose frame index is rewritten to window-local 0/1, which
     a node-feature cache does not carry.
+    ---
+    ATTEMPT 2 BUILT 2026-08-29, NOT YET PUSHED. scripts/kaggle_edits/assoc_feature_parity.py now
+    writes a standalone worker and runs it as TWO SEPARATE SUBPROCESSES with cwd=REPO_DIR:
+    phase `cache` builds coords and frozen-trunk features and writes .npz to disk, then exits;
+    phase `verify` starts as a fresh interpreter, loads ONLY those files, and reproduces the edges.
+    Each condition is met by construction rather than by intent:
+    (i) cwd=REPO_DIR makes `import predict_unet_transformer` resolve exactly as it does for the
+        deployed shards, and it imports the PATCHED source, which is what actually ran;
+    (ii) the verifier cannot see the writer's memory, so "from the cache alone" is enforced by the
+        operating system - the defect that made attempt 1 hollow cannot recur silently;
+    (iii) the full probability matrix is retained rather than only pairs above 0.5, and band B is
+        checked against the ECB sidecars down to 0.02 - the band FACT-0382 shows the task uses.
+        The sidecars are ALREADY MOUNTED: aryaarun07/biohub-identity-replay-f0 carries both
+        meta/preilp_split0.parquet and ecb/ for all 71 fold-0 crops. If they do not resolve the
+        patch RAISES, because a band-A-only pass is not Gate 1.
+    Both audit extras are addressed: per-frame node-count parity is asserted, and the cache carries
+    coords and image shape as well as features so the verifier reconstructs the scaled coordinates
+    and the window-local position features rather than assuming them.
+    TESTED BY RUNNING, NOT BY READING. tests/test_assoc_feature_parity.py extracts the real worker
+    from the real patch and executes both phases as genuine subprocesses against a stubbed
+    predictor: a faithful cache passes, a cache perturbed by 0.05 FAILS, a node-count mismatch
+    FAILS, a missing cache file refuses to run, and band B is asserted to compare a non-zero number
+    of sub-threshold pairs. That last assertion is the one that would have caught attempt 1's
+    hollowness before a GPU session was spent.
+    ONE KNOWN BLIND SPOT, FOUND BY THAT TEST SUITE AND RECORDED RATHER THAN LEFT TO BE REDISCOVERED.
+    The gate compares probabilities AFTER a softmax over the SOURCE axis, and softmax is invariant
+    to a constant offset along the axis it normalises - so a cache error that shifts EVERY SOURCE IN
+    A FRAME by the same amount is mathematically invisible to it, not merely undetected in practice.
+    The first version of the corruption test perturbed a whole frame and PASSED, which is how this
+    was found; it now perturbs a single node and fails as it should, and a second test asserts the
+    uniform case passes so the limitation cannot be quietly forgotten. Errors that are not uniform
+    across the source axis - a single node's features wrong, an index remap, a dtype change, a stale
+    frame - all show up. Closing the blind spot entirely would mean comparing PRE-softmax logits,
+    and neither the pre-ILP export nor the ECB sidecars record logits, so that is a new acquisition
+    rather than a change to this gate. Not worth one on current evidence, but it is the honest
+    boundary of what a Gate 1 pass will license.
   g2_label_contract: >-
     Match predicted nodes to GT ONCE, define parent targets and an explicit abstain/null class, and
     FREEZE the ambiguity rules before any training. Ambiguity rules decided after seeing results are
