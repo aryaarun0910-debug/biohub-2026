@@ -575,9 +575,9 @@ experiments:
     spec: scripts/kaggle_specs/p32_public931_exact.json
     kernel: aryaarun07/biohub-p32-public931-exact
     kernel_version: 1
-    submission: null
+    submission: 55871868
     lb: null
-    status: running
+    status: submitted_pending
     date: '2026-08-29'
     facts: [FACT-0377, FACT-0378, FACT-0341]
     note: >-

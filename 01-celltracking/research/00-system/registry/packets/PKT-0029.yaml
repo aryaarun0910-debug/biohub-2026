@@ -45,11 +45,28 @@ method: >-
   STEP 0 (architecture): reconstruct the module from the state dict - Linear(35->96), Embedding(2,96) frame
   embedding, a 2-layer node TransformerEncoder (d_model 96, ffn 192), edge projection Linear(196->96) with
   norm, the edge blocks, and the edge head. Require strict=True load with exact shapes for BOTH folds.
-  STEP 1 (feature contract, THE GATE): pin down the 3 node extras and 4 edge extras. Try the documented
-  sources first - the publisher's model card, any public notebook, the pack's config.json - and only then
-  dimensional inference. Whatever is chosen must be DEMONSTRATED by a discriminative signal, not assumed:
-  candidate orderings are ranked by parent-choice accuracy on fold-0 held-out crops, and the winner must beat
-  the alternatives by a margin that random feature permutation does not produce.
+  STEP 1 (feature contract) IS AN IDENTIFIABILITY EXPERIMENT, NOT FEATURE-ORDER TUNING. Host safeguards,
+  binding:
+  (a) CANDIDATE CONTRACTS ARE DEFINED FROM EVIDENCE BEFORE ANY SCORING - the checkpoint metadata (gate_um
+  15.0, edge_neighbors 64, feature_dim 32/33), the fold configs (downsample [1,4,4], window_size 2,
+  pool_kernel_um 5.0) and the tensor shapes. The list is frozen and written down before the first score;
+  contracts are not invented in response to results.
+  (b) SELECT ON ONE FOLD, APPLY THE FROZEN WINNER TO THE OTHER. A contract that wins on fold 0 and does not
+  transfer to fold 1 is not identified - it is fitted to a fold.
+  (c) THE PERMUTATION THRESHOLD IS CORRECTED FOR THE NUMBER OF CONTRACTS TESTED. Testing many orderings and
+  keeping the best is a multiple-comparisons problem; the null is random feature permutation and the
+  acceptance bar rises with the count.
+  (d) THE CRITERION IS PARENT TOP-1 ACCURACY AND MARGIN, NOT LOSS. A lower loss with unchanged ranking is not
+  evidence of a recovered contract.
+  (e) `not_identifiable` IS AN EXPLICIT TERMINAL OUTCOME, not a failure to report. If no contract clears the
+  corrected bar on selection AND transfers, that is the finding.
+  (f) UPSTREAM COMPATIBILITY IS CHECKED FIRST, because it may matter more than the unknown slots: HOCT's
+  pooling/NMS (pool_kernel_um 5.0 against our 3.0), coordinate scaling, neighbourhood construction (gate_um
+  15.0, 64 neighbours against our softmax-threshold rule, FACT-0369) and feature normalisation. A mismatch
+  there makes every contract look wrong.
+  (g) IF NO CONTRACT TRANSFERS, REUSE OF THE PUBLISHED WEIGHTS IS KILLED and the architecture is retained as a
+  TRAIN-FROM-KNOWN-CONTRACT lane - we own the contract when we train it, and the 447k-parameter head is small
+  enough to train on the association task alone with the detector frozen.
   STEP 2 (output-contract smoke): on a small fold-0 crop set with the OFFICIAL node surface unchanged, compare
   top-1 parent accuracy against our deployed edge predictor on the same pairs.
   STEP 3 (association measurement): only if STEP 2 passes, score through the complete chain on the honest fold
@@ -71,6 +88,15 @@ forbidden:
   - reconciling the pool_kernel_um mismatch by changing OUR detector (theirs is 5.0, ours 3.0 - FACT-0361);
     if it matters, it is measured, not silently aligned
   - .claude/settings.json
+
+terminal_outcomes:
+  identified: >-
+    A single contract clears the permutation bar corrected for the number tested on the selection fold AND
+    transfers frozen to the other fold, improving parent top-1 accuracy and margin. STEP 2 then runs.
+  not_identifiable: >-
+    No contract clears both. Published-weight reuse is KILLED. The architecture survives as a
+    train-from-known-contract lane with the detector frozen, which is a different and cleaner experiment
+    because the feature contract becomes ours by construction.
 
 outputs:
   evidence: C:/temp/hoct/ and _evidence/hoct/
