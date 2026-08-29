@@ -4517,11 +4517,16 @@ facts:
     provenance: MEASURED
     validity: SUSPECT
     validity_reason: >-
-      This establishes transfer through the full chain and refutes the specific FACT-0365 concern that motion
-      relink necessarily erases the gain. It is not a promotion result: fold 1 only, the panel is deliberately
-      size-stratified rather than the complete fold or a random sample, crop signs are maximally heterogeneous,
-      and FACT-0261 makes fold 0 the promotion gate. The old pre-ILP artifact is licensed for plumbing and
-      mechanism measurement only, not leaderboard projection.
+      MAGNITUDE SUPERSEDED BY FACT-0372. The complete 128-crop fold-1 replay measured +0.0058 with a bootstrap
+      interval INCLUDING zero, so this panel overstated the effect about 3.4x and its interval did not survive.
+      Do not cite this fact's delta, its interval, or its edge TP/FP counts for anything. What still stands is
+      the FEASIBILITY finding - the chain is CPU-replayable and the five deployed controls reproduced every
+      predeclared stage count exactly - and the qualitative refutation of the FACT-0365 concern that motion
+      relink necessarily erases any pre-relink gain.
+      It was never a promotion result: fold 1 only, the panel deliberately size-stratified rather than the
+      complete fold or a random sample, crop signs maximally heterogeneous, and FACT-0261 makes fold 0 the
+      promotion gate. The old pre-ILP artifact is licensed for plumbing and mechanism measurement only, not
+      leaderboard projection.
     instrument: >-
       scripts/win_bet/p28_full_chain_replay.py and scripts/win_bet/p28_full_chain_panel.py over
       C:/temp/preilp_f1_v2/preilp_split1.parquet, C:/temp/p28_f1/loeo_split1_champion.csv.gz,
@@ -4740,3 +4745,52 @@ facts:
       SEPARATELY from the edge term and never folded into an association headline.
     date: '2026-08-29'
     tags: [division, association, ceiling, allocation, headline]
+
+  - id: FACT-0372
+    statement: >-
+      The COMPLETE fold-1 full-chain replay does not reproduce the 20-crop panel: the tightened ILP selector
+      (disappearance 3.0) scores +0.0058 over the P28 control across all 128 crops with a paired crop-bootstrap
+      CI of [-0.0005, +0.0124] that INCLUDES ZERO, against the panel's +0.0195 with a CI excluding it -
+      an overstatement of about 3.4x. Reported term by term as required: the RAW edge Jaccard gain is only
+      +0.0013 while the adjusted gain is +0.0056, so 78% of the headline is the node-count adjustment and not
+      tracking quality; node recall FALLS 0.8636 to 0.8359; and division true positives DROP from 14 to 12, the
+      small division-Jaccard gain of +0.0015 coming entirely from 87 fewer false positives
+    value: 0.005761347426969654
+    unit: full_chain_score_delta_f1_complete
+    scope:
+      fold: 1
+      crops: 128
+      arm: "ILP disappearance 3.0 vs deployed 1.5, complete champion chain"
+      control: {score: 0.7092370, adj_edge_jaccard: 0.7062834, edge_jaccard: 0.7004382, node_recall: 0.8635663, edge_tp: 86156, edge_fp: 13946, edge_fn: 22901, division_tp: 14, division_fp: 349, division_fn: 111, division_jaccard: 0.0295359}
+      candidate: {score: 0.7149984, adj_edge_jaccard: 0.7118976, edge_jaccard: 0.7017005, node_recall: 0.8358970, edge_tp: 84510, edge_fp: 11379, edge_fn: 24547, division_tp: 12, division_fp: 262, division_fn: 113, division_jaccard: 0.0310078}
+      delta: {score: 0.0057613, adj_edge_jaccard: 0.0056142, edge_jaccard_raw: 0.0012623, division_jaccard: 0.0014719, edge_tp: -1646, edge_fp: -2567, edge_fn: 1646, node_recall: -0.0276693}
+      paired_bootstrap: {mean: 0.0057518, ci95: [-0.0005109, 0.0123942], draws: 2000, seed: 20260828, excludes_zero: false}
+      crop_signs: {positive: 68, negative: 60, zero: 0}
+      count_adjustment_share_of_adjusted_gain: 0.78
+      panel_20_crop_reference: FACT-0367
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      This is the complete fold, all 128 crops, through the same AST-extracted chain whose deployed controls
+      reproduced exactly (FACT-0367), with zero failed crops. It supersedes the 20-crop panel's MAGNITUDE, not
+      its feasibility finding. Fold 1 remains association-degraded (FACT-0261) and is diagnostic rather than the
+      promotion gate, so this neither promotes nor kills LEVER-0036 - only the honest fold-0 replay can.
+    instrument: >-
+      scripts/win_bet/p28_full_chain_replay.py over all 128 fold-1 crops plus
+      scripts/win_bet/p28_full_chain_panel.py; outputs C:/temp/full_chain_replay/panel_full_f1.json,
+      _evidence/full_chain_replay/panel_full_f1.json
+    experiment: EXP-0033
+    note: >-
+      Three things the 20-crop panel hid, each visible only because the terms are reported separately. (1) THE
+      GAIN IS MOSTLY COUNT ARITHMETIC: raw edge Jaccard moves +0.0013 while the adjusted score moves +0.0056,
+      because a smaller node set collects a larger under-production bonus (FACT-0191/0192). (2) IT COSTS NODE
+      RECALL: 0.8636 to 0.8359, and the edge trade is nearly one-for-one - 1,646 true edges lost against 2,567
+      false ones removed. (3) IT RECOVERS FEWER REAL DIVISIONS: division TP falls 14 to 12 and FN rises, so the
+      division-Jaccard gain is a false-positive reduction, not better division recovery - exactly why the host
+      required the division term to be reported separately rather than folded into an association headline
+      (FACT-0371 caution). Read with FACT-0368, which bounds the whole node-selection slice at 5.9% of the
+      fold-0 gap, the honest expectation for the fold-0 gate is now SMALL. The subsampling lesson is general: a
+      size-stratified 20-crop panel overstated a full-fold effect by 3.4x and flipped its CI, so panels size
+      instruments and do not decide levers.
+    date: '2026-08-29'
+    tags: [lever-0036, full-chain, complete-fold, count-adjustment, division, negative]
