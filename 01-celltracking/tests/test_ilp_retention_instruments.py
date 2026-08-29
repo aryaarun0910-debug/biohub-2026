@@ -114,3 +114,69 @@ def test_atlas_deciding_split_counts_zero_candidate_cells():
     assert got["deciding_split"]["lost_with_no_candidate_edge"] == 1
     assert got["deciding_split"]["lost_with_candidate_edge"] == 2
     assert got["deciding_split"]["share_unrescuable_by_solver"] == pytest.approx(1 / 3)
+
+
+def test_oracle_edge_set_is_maximal_and_matches_only_matched_endpoints():
+    """The ceiling ladder's rung 1 must add every GT edge whose endpoints are BOTH matched,
+    and nothing else. Adding an unmatched endpoint would invent a node; dropping a matched
+    pair would understate the association ceiling that FACT-0368 reports."""
+    from scripts.win_bet.ceiling_ladder import oracle_edges_for
+
+    gt_edges = [(0, 1), (1, 2), (2, 3)]
+    mapping = {0: 10, 1: 11, 2: 12}          # GT node 3 is unmatched
+    assert oracle_edges_for(gt_edges, mapping) == [(10, 11), (11, 12)]
+    assert oracle_edges_for(gt_edges, {}) == []
+
+
+def test_association_reachability_separates_missing_candidate_from_missing_node():
+    """FACT-0370's three-way split is the whole point: an edge a better SCORER could win, an
+    edge no scorer can win because the pair is never offered, and one that is not an
+    association problem at all. Collapsing any two would misdirect the lane."""
+    import numpy as np
+    import polars as pl
+
+    from scripts.win_bet.association_reachability import crop_reachability
+
+    # Two frames, three GT cells; the pre-ILP export offers only one of the two GT links.
+    pre = pl.DataFrame({
+        "dataset": ["c"] * 5,
+        "row_type": ["node", "node", "node", "node", "edge"],
+        "node_id": [0, 1, 2, 3, -1],
+        "t": [0, 0, 1, 1, -1],
+        "z": [0.0, 40.0, 0.0, 40.0, -1.0],
+        "y": [0.0, 0.0, 0.0, 0.0, -1.0],
+        "x": [0.0, 0.0, 0.0, 0.0, -1.0],
+        "source_id": [None, None, None, None, 0],
+        "target_id": [None, None, None, None, 2],
+        "edge_prob": [None, None, None, None, 0.9],
+    })
+    import types
+
+    fake_nodes = types.SimpleNamespace(to_pandas=lambda: __import__("pandas").DataFrame({
+        "node_id": [100, 101, 102, 103],
+        "t": [0, 0, 1, 1],
+        "z": [0.0, 40.0, 0.0, 40.0],
+        "y": [0.0, 0.0, 0.0, 0.0],
+        "x": [0.0, 0.0, 0.0, 0.0],
+    }))
+    fake_edges = types.SimpleNamespace(to_pandas=lambda: __import__("pandas").DataFrame({
+        "source_id": [100, 101],
+        "target_id": [102, 103],
+    }))
+    fake_graph = types.SimpleNamespace(
+        node_attrs=lambda: fake_nodes, edge_attrs=lambda: fake_edges
+    )
+
+    import scripts.win_bet.association_reachability as AR
+    import biotrack.metric as M
+    original = M.load_graph
+    M.load_graph = lambda *a, **k: fake_graph
+    try:
+        got = AR.crop_reachability("c", __import__("pathlib").Path("unused.geff"), pre)
+    finally:
+        M.load_graph = original
+
+    assert got["gt_edges"] == 2
+    assert got["reachable"] == 1                    # 100->102 has a candidate
+    assert got["unreachable_no_candidate"] == 1     # 101->103 does not
+    assert got.get("undetected_endpoint", 0) == 0

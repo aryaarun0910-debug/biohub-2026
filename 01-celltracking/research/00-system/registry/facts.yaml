@@ -4536,3 +4536,152 @@ facts:
       the predeclared fold-0 threshold before any submission.
     date: '2026-08-29'
     tags: [ilp, full-chain, cpu-replay, selectivity, lever-0036, fold-1, suspect]
+
+  - id: FACT-0368
+    statement: >-
+      The ceiling ladder decomposes the remaining gap on the P28 substrate and ASSOCIATION DOMINATES BOTH FOLDS,
+      overwhelmingly on the honest promotion fold. Holding the deployed node set fixed and replacing only the
+      edges with the best set those nodes admit raises raw edge Jaccard from 0.8862 to 0.9852 on all 71 fold-0
+      crops - 87.0% of the entire distance to a perfect graph - while perfect node SELECTION adds 5.9% and
+      perfect DETECTION only 7.1%. Fold 1 gives the same ordering less extremely: association 54.0%, node
+      selection 13.5%, detection 32.5%. Because rung 1 preserves the node count exactly, its ADJUSTED gain is
+      count-fair: +0.1008 on fold 0 and +0.1591 on fold 1
+    value: 0.870
+    unit: association_share_of_raw_jaccard_gap_f0
+    scope:
+      f0:
+        crops: 71
+        deployed: {raw_edge_jaccard: 0.8862, adj_edge_jaccard: 0.9025, node_recall: 0.9868, nodes: 1905264}
+        oracle_edges: {raw_edge_jaccard: 0.9852, adj_edge_jaccard: 1.0033, nodes: 1905264, count_fair: true}
+        oracle_nodes: {raw_edge_jaccard: 0.9919, count_bonus_inflated: true}
+        oracle_detection: {raw_edge_jaccard: 1.0000, count_bonus_inflated: true}
+        shares: {association: 0.870, node_selection: 0.059, detection: 0.071}
+        count_fair_association_headroom_adj: 0.1008
+      f1:
+        crops: 32
+        stride: 4
+        deployed: {raw_edge_jaccard: 0.7082, adj_edge_jaccard: 0.7156, node_recall: 0.8626, nodes: 459007}
+        oracle_edges: {raw_edge_jaccard: 0.8658, adj_edge_jaccard: 0.8747, nodes: 459007, count_fair: true}
+        oracle_nodes: {raw_edge_jaccard: 0.9051, count_bonus_inflated: true}
+        oracle_detection: {raw_edge_jaccard: 1.0000, count_bonus_inflated: true}
+        shares: {association: 0.540, node_selection: 0.135, detection: 0.325}
+        count_fair_association_headroom_adj: 0.1591
+      harness_check: {rung3_raw_edge_jaccard: 1.0000, both_folds: true}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Fold 0 is the COMPLETE fold (71 of 71 crops); fold 1 is a stride-4 sample of 32 of 128. The harness
+      verifies itself - perfect nodes with perfect edges score raw edge Jaccard exactly 1.0000 on both folds -
+      so the rungs measure what they claim. Two limits on interpretation, both structural rather than
+      statistical. (1) THE DECOMPOSITION IS SEQUENTIAL: the shares are attributed along one path (edges, then
+      node selection, then detection) and a different order would apportion the overlap differently; the
+      robust, order-independent reading is the association rung alone, which is measured against the deployed
+      node set. (2) Rungs 2 and 3 restrict the prediction to ANNOTATED cells, which is far fewer nodes than the
+      crop contains, so their ADJUSTED scores collect an under-production bonus (FACT-0191) that no real method
+      can earn - they are read on raw edge Jaccard only, and the instrument flags them.
+    instrument: >-
+      scripts/win_bet/ceiling_ladder.py over the P28 champion exports and the P29 DetPeak sidecars; official
+      tracking_cellmot evaluate/per_sample_metrics/summarise; one-to-one 7 um matching shared with
+      FACT-0354/0355/0357; outputs _evidence/ceiling/ladder_f{0,1}.json
+    experiment: EXP-0033
+    note: >-
+      This is the quantitative answer to the 2026-08-29 reframe from "beat the top-3 boundary" to "reach this
+      machine's ceiling", and it settles the effort allocation that FACT-0335 argued for qualitatively. On the
+      fold that gates promotion, 87% of everything still available is in deciding WHICH detected cells connect
+      to which - not in finding more cells, and not in choosing better ones. Three consequences. (1) The
+      association lanes are the campaign's main line: LEVER-0034 (HOCT, a head swap on an identical trunk per
+      FACT-0361) and LEVER-0027 (RoPE-4D). (2) Detector work is worth at most 7.1% of the fold-0 gap, which
+      independently supports leaving the retrain blocked behind recipe parity (FACT-0339) rather than treating
+      it as the lane sized for the gap. (3) It bounds LEVER-0036: the whole node-selection slice on fold 0 is
+      5.9% of the gap, so the tightened-selector result (FACT-0367) cannot be large there however it lands -
+      which is consistent with the fold-1 panel being heterogeneous and with fold 0 remaining the missing gate.
+      These are CEILINGS. FACT-0334 measured a division oracle at +0.019 and FACT-0337 then found its GT-free
+      form scored negative; nothing here forecasts what a real association model will capture.
+    date: '2026-08-29'
+    tags: [ceiling, association, decomposition, allocation, oracle, headline]
+
+  - id: FACT-0369
+    statement: >-
+      The deployed candidate-edge rule admits AT MOST ONE parent per target by construction, and this is
+      verified both at source and in the data. `predict_unet_transformer.py` takes softmax over the SOURCE axis
+      of the source-by-target logit matrix and keeps pairs above cfg.threshold = 0.5; since a softmax over
+      sources sums to one, at most one source can exceed 0.5 for any target. Measured across all 2,162,040
+      fold-1 candidate edges the in-degree maximum is exactly 1 with zero exceptions, the minimum edge
+      probability is exactly 0.5000, and only 85.7% of nodes have any candidate parent at all
+    value: 1
+    unit: max_candidate_parents_per_target
+    scope:
+      fold: 1
+      candidate_edges: 2162040
+      candidate_nodes: 2523479
+      in_degree: {max: 1, mean: 1.000, count_above_1: 0}
+      out_degree: {max: 6, mean: 1.096, count_at_least_2: 176835}
+      nodes_with_any_candidate_parent: 0.8568
+      edge_prob: {min: 0.5000, p1: 0.5103, median: 0.8924, count_at_or_below_threshold: 0}
+      deployed_rule: {activation: "softmax over source axis", threshold: 0.5, max_parents_per_node: 1, max_children_per_node: 2}
+      source: "vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py:455-480"
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The mechanism is read at source and the consequence is independently confirmed in the exported candidate
+      graph, which is the strongest available pairing. The degree census is fold 1 because that is the fold with
+      a pre-ILP export, but the RULE is code shared by both folds, so the structural claim is not fold-specific;
+      only the rates are.
+    instrument: >-
+      source read of extract/predict edge construction in predict_unet_transformer.py, plus a degree and
+      probability census of C:/temp/preilp_f1_v2/preilp_split1.parquet; 2026-08-29
+    note: >-
+      This reframes what the ILP and every downstream stage are actually doing. The candidate graph is not a
+      set of competing hypotheses to be resolved - it is a PARTIAL FUNCTIONAL ASSIGNMENT in which the edge model
+      has already committed to one parent per target, or abstained. Three consequences follow. (1) The solver
+      cannot choose between competing parents because none are offered, which independently explains why motion
+      relink can discard the ILP's edge list wholesale at little cost (FACT-0364). (2) Swapping in a stronger
+      association head such as HOCT (FACT-0361) WITHOUT changing this rule would still leave it emitting one
+      commitment per target; HOCT's own gate is geometric and much wider (15 um, 64 neighbours), which is a
+      different regime, not a tuning difference. (3) It gives the missing edges of FACT-0370 a mechanism: in a
+      dense neighbourhood the softmax mass splits across plausible sources and the true parent clears no
+      threshold, which is why those misses are SHORT-range rather than long.
+    date: '2026-08-29'
+    tags: [association, candidate-generation, structure, verified, headline]
+
+  - id: FACT-0370
+    statement: >-
+      Most but not all of the association ceiling is reachable by re-scoring today's candidate edges. Of the
+      109,057 fold-1 GT edges, 74.3% have a candidate edge between their matched endpoints and would be
+      recovered by a perfect scorer on the existing candidate set; 15.6% have BOTH endpoints detected yet no
+      candidate edge at all; and 10.1% have an endpoint that was never detected. Restricted to GT edges whose
+      endpoints are both detected, 82.7% are candidate-reachable. The unreachable ones are SHORT - median GT
+      displacement 2.26 um - so they are missed by candidate SELECTION, not by any distance limit
+    value: 0.827
+    unit: share_of_detectable_gt_edges_that_are_candidate_reachable_f1
+    scope:
+      fold: 1
+      crops: 128
+      gt_edges: 109057
+      reachable: {n: 81053, share_of_all: 0.7432}
+      unreachable_no_candidate: {n: 17003, share_of_all: 0.1559}
+      undetected_endpoint: {n: 11001, share_of_all: 0.1009}
+      share_reachable_of_both_endpoints_detected: 0.8266
+      unreachable_gt_displacement_um: {per_crop_median_p25: 1.82, per_crop_median_p50: 2.26, per_crop_median_p75: 3.49, per_crop_p90_median: 5.88}
+      reachable_candidate_prob_median: 0.9722
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Complete fold-1 measurement, all 128 crops, using the official one-to-one 7 um matching shared with
+      FACT-0354/0355/0357. Fold 0 has no pre-ILP export so the RATES are fold 1's; the candidate-generation rule
+      they characterise (FACT-0369) is shared code, so the qualitative split is expected to hold on fold 0 while
+      the numbers are not transferable to it.
+    instrument: >-
+      scripts/win_bet/association_reachability.py on C:/temp/preilp_f1_v2/preilp_split1.parquet against
+      data/train/*.geff; output _evidence/ceiling/reach_f1.json
+    note: >-
+      This splits the association lane that FACT-0368 sized, and it says BOTH halves are real. About five sixths
+      of the detectable association can be won by a better SCORER on the candidates we already build - the
+      cheapest version of which is the HOCT head swap (FACT-0361), since the trunk is architecturally identical.
+      The remaining sixth cannot be won that way at all, because the pairs are never offered; that share needs a
+      wider candidate rule, and FACT-0369 explains why widening a RADIUS would not help - the misses are at a
+      median 2.26 um, well inside any plausible gate. What excludes them is the one-parent-per-target softmax
+      threshold. The natural experiment is therefore a candidate re-export at a lower edge threshold or with
+      top-k parents per target, which is a GPU action and is not taken here.
+    date: '2026-08-29'
+    tags: [association, ceiling, candidate-generation, reachability, measured]

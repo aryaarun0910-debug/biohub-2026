@@ -897,6 +897,39 @@ levers:
       and the honest fold-0 pre-ILP artifact is still absent.
     priority: 1
 
+  - id: LEVER-0037
+    claim: >-
+      The deployed candidate-edge rule - softmax over sources with a 0.5 threshold - offers AT MOST ONE parent
+      per target and no candidate at all for 14.3% of nodes (FACT-0369), so it discards 15.6% of GT edges before
+      any scorer or solver sees them (FACT-0370). Re-exporting candidates with a lower edge threshold, or top-k
+      parents per target, puts those pairs on the table and raises the pooled objective through the full chain
+      on both folds
+    status: open
+    falsifier: >-
+      A candidate re-export that offers more parents per target must (a) actually raise candidate reachability
+      on the honest fold, and (b) beat the deployed configuration through the COMPLETE champion chain - motion
+      relink, gap closure, DeepCenter, safe division, short-track, line fit - on both folds, with a clean fold-0
+      crop-bootstrap CI excluding zero and >= +0.003 on fold 0, reporting raw edge Jaccard beside the adjusted
+      score. Killed if the extra candidates are absorbed by the relink with no score change, if precision losses
+      cancel the recall gain, or if the count adjustment (FACT-0191) is doing the work.
+    supporting: [FACT-0368, FACT-0369, FACT-0370, FACT-0361, FACT-0364, FACT-0357]
+    note: >-
+      This is the lever the ceiling decomposition points at most directly. FACT-0368 measured association at 87%
+      of the fold-0 gap; FACT-0370 splits that into about five sixths winnable by a better SCORER on existing
+      candidates and one sixth that no scorer can reach because the pair is never proposed. This lever is the
+      second half, and FACT-0369 is why it is a real structural limit rather than a tuning detail: a softmax
+      over the source axis with a 0.5 threshold can admit at most one parent per target by arithmetic, so the
+      edge model is deployed as a hard argmax with abstention rather than as a ranker.
+      RELATION TO THE NODE-BUDGET FAMILY: this is an EDGE budget, not a node budget, and the two have opposite
+      signs. LEVER-0028 and LEVER-0035 died because the metric pays for predicting FEWER nodes (FACT-0191/0192);
+      nothing in that evidence bears on offering MORE candidate edges, whose cost is precision at the linking
+      stage rather than node count. Do not cite the node-budget kills against this.
+      COST AND SEQUENCING: this requires a candidate re-export, which is a GPU action, so it cannot be settled
+      on CPU. `cfg.threshold` is already env-reachable as BIOHUB_DUAL_SEED_EDGE_THRESHOLD but only on the
+      secondary-model code path, so a small patch is needed to make it apply unconditionally. Pair it with the
+      honest fold-0 pre-ILP export that LEVER-0036 already needs, so one GPU session serves both.
+    priority: 1
+
   - id: LEVER-0029
     claim: >-
       Self-supervised / representation pretraining on the UNLABELLED volumes (masked-autoencoding or contrastive on
