@@ -5176,11 +5176,14 @@ facts:
       than the unknown feature slots. It did matter - by removing an obstacle rather than adding one. The
       node-surface contract is shared, so the HOCT identification experiment reduces to the 3 node extras, 4
       pair extras and 13 relation features, with one fewer confound.
-      A SEPARATE OBSERVATION worth its own lever some day, deliberately NOT acted on here: every checkpoint in
-      this lineage was TRAINED with a config declaring 5.0 while inference has always extracted peaks at 3.0.
-      That is a train/inference mismatch in the public baseline itself, inherited by our champion. It is not a
-      defect we introduced and changing it would alter the node surface the whole campaign is calibrated on
-      (FACT-0345), so it is recorded and left alone - the host's rule stands that node-surface manipulation no
-      longer receives GPU without new discriminatory information.
+      WHAT THIS FACT DOES NOT ESTABLISH (host correction, 2026-08-29). The configs in this lineage DECLARE
+      pool_kernel_um 5.0 while inference extracts at 3.0. That is a METADATA/RUNTIME mismatch and it is all
+      that is verified. It is NOT evidence of a train/inference mismatch: that would additionally require
+      showing the TRAINING extractor actually consumed the declared 5.0, which nothing here demonstrates - the
+      training code may well have used the same 3.0 default. The stronger causal claim stays UNVERIFIED and
+      must not be repeated as if established.
+      Either way it is a DEAD-CONFIG DEFECT, not a live lever, and is left alone by host direction: changing
+      it would alter the node surface the whole campaign is calibrated on (FACT-0345), and node-surface
+      manipulation no longer receives GPU without new discriminatory information.
     date: '2026-08-29'
     tags: [hoct, upstream-contract, pool-kernel, corrects-fact-0361, verified]

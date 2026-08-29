@@ -75,8 +75,28 @@ method: >-
   training pairs (FACT-0362), and PKT-0027 rule (4) plus the FACT-0371 caution both forbid reading an
   association gain as division recovery.
 
+harness_gates:
+  g1_feature_parity: >-
+    Cache frozen-trunk node features and prove the DEPLOYED head, re-run from the cache alone,
+    reproduces the candidate edges and probabilities already recorded in the P30 pre-ILP export.
+    Built as scripts/win_bet/assoc_feature_cache.py. MEASURED CONSTRAINT 2026-08-29: this gate
+    cannot run on CPU. tracking_cellmot.io.open_dataset calls pin_memory() during image
+    preprocessing and raises "Cannot access accelerator device when none is available" even when
+    passed device='cpu', so the cache must be built on GPU. Reading the zarr directly instead would
+    bypass the deployed normalisation and defeat the parity the gate exists to prove.
+  g2_label_contract: >-
+    Match predicted nodes to GT ONCE, define parent targets and an explicit abstain/null class, and
+    FREEZE the ambiguity rules before any training. Ambiguity rules decided after seeing results are
+    a tuning knob, not a contract.
+  g3_listwise_evaluation: >-
+    Held-out embryo only, and never training loss: parent top-1, true-parent margin, opportunity
+    conversion (the FACT-0376 quantity), and calibration.
+  g4_full_chain: >-
+    Predictions through the UNCHANGED ILP and post-processing, reporting raw association, node
+    recall and division TP SEPARATELY (FACT-0371 caution).
+
 budget:
-  gpu_sessions: 0   # CPU reconstruction and smoke first; a GPU arm only after STEP 2 passes
+  gpu_sessions: 2   # G1 feature cache is GPU-bound (see g1 note); then the two fold-specific heads
   submissions: 0
   wall_clock: 2-4 days
 
