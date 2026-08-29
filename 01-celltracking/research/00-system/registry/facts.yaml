@@ -4873,6 +4873,15 @@ facts:
       Reach is an UPPER BOUND: it counts GT edges whose true pair is OFFERED, not chosen. A scorer still has to
       pick the right parent out of the widened set, and widening necessarily hands the linker more ways to be
       wrong, so the realised gain will be smaller and could be negative.
+      SELECTION DEPENDENCY (host red-team, 2026-08-29): the treatment floor and rank were CHOSEN from this
+      fold-0 GT reach surface, and LEVER-0037 is then scored on that same fold. The resulting replay is
+      TREATMENT CHARACTERISATION, not an independent confirmation, and no fold-0 number from it may be
+      presented as out-of-sample. A positive result licenses a frozen fold-1 acquisition and replay, or - if
+      submission economics warrant it - one cautiously preregistered leaderboard test. It does not license
+      automatic promotion.
+      NOT A SCORE CEILING: the unreachable-edge percentage is a share of DETECTABLE GT EDGES, not a bound on
+      the score. It must never be reinterpreted as one - the score passes through the linker, the count
+      adjustment and the division term, none of which this quantity touches.
     instrument: >-
       scripts/win_bet/candidate_reach_curve.py over C:/temp/p30_f0/{preilp_split0.parquet,ecb/};
       output _evidence/ecb/reach_f0.json

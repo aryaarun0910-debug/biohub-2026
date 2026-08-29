@@ -74,4 +74,21 @@ outputs:
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md per completed gate
 
+interpretation_rules_preregistered: >-
+  Written 2026-08-29 BEFORE either fold-0 arm returned, at host direction, so the outcome cannot be
+  rationalised afterwards.
+  (1) LEVER-0036 is KILLED if it fails its own fold-0 gate. It is closed on evidence about itself, not by
+  association with the fold-1 result (FACT-0372) - a lever may only be closed by evidence about itself.
+  (2) LEVER-0037 is reported on four quantities SEPARATELY, never as one headline: reachable GT edges actually
+  CONVERTED to true edges, raw and adjusted association, node retention, and division true positives.
+  (3) ADDED REACH WITHOUT CONVERTED TRUE EDGES IS A RANKING FAILURE, not a null. If the widened candidate set
+  offers the true parent and the pipeline still does not select it, that is evidence about the edge model and
+  the solver's discrimination, and it should redirect effort to the scorer rather than to further widening.
+  (4) RAW IMPROVEMENT WITH DIVISION-TP LOSS IS NON-PROMOTIONAL. A gain in the edge term that costs recovered
+  divisions does not promote, whatever the pooled score does.
+  (5) The LEVER-0037 setting was selected on fold-0 GT reach and is scored on fold 0, so this replay is
+  treatment characterisation. A positive result licenses a frozen fold-1 acquisition and replay, or one
+  cautiously preregistered LB test - not automatic promotion.
+  (6) The unreachable-edge percentage is NOT a score ceiling and may not be quoted as one.
+
 result: null
