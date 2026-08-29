@@ -1,7 +1,7 @@
 {
   "name": "p31_public931_replica_f0",
   "slug": "biohub-p31-public931-replica-f0",
-  "title": "Biohub P31 Public931 Replica F0 NoSecondary",
+  "title": "Biohub P31 Public931 Replica F0",
   "code_file": "biohub-p31-public931-replica-f0.ipynb",
   "out_dir": "notebooks/kaggle_p31_public931_replica_f0",
   "datasets": [
@@ -134,5 +134,6 @@
     }
   ],
   "artifact_role": "diagnostic",
-  "diagnostic_reason": "Paired LOEO measurement of the FACT-0377 public 0.931 configuration on our own substrate. No submission; the point is a both-fold offline comparison against the P28 champion controls."
+  "diagnostic_reason": "Paired LOEO measurement of the FACT-0377 public 0.931 configuration on our own substrate. No submission; the point is a both-fold offline comparison against the P28 champion controls.",
+  "parked": "PARKED 2026-08-29 (host). Once the contaminated secondary was removed (FACT-0378) this became a confounded residual-bundle test with limited ceiling. Retained as a later ablation; do not push without a fresh decision."
 }

@@ -971,6 +971,24 @@ levers:
       exact mirror of LEVER-0036.
     priority: 1
 
+  - id: LEVER-0038
+    claim: >-
+      The public configuration reported at 0.931 (FACT-0377) transfers to our deployment and scores above the
+      P24 champion, relocating the campaign's baseline
+    status: open
+    falsifier: >-
+      The one preregistered submission scores at or below the 0.928 champion. Because the notebook is run
+      byte-identical, a miss is a fact about the configuration or the leaderboard, not about our transcription,
+      and the correct response is to stop treating that lineage as our baseline - NOT to sweep its knobs.
+    supporting: [FACT-0377, FACT-0378, FACT-0341]
+    note: >-
+      A BRIDGE lever, deliberately bounded. It calibrates transfer and relocates the starting point; it does
+      not advance the association capability the ceiling analysis says the route to 0.950 requires
+      (FACT-0368). Host direction 2026-08-29: no follow-up knob sweeps, no stacking, no incremental squeezing
+      of this lineage whatever the result. It also cannot be judged offline - its secondary is trained on all
+      199 movies (FACT-0378) - which is why a submission is the instrument.
+    priority: 3
+
   - id: LEVER-0029
     claim: >-
       Self-supervised / representation pretraining on the UNLABELLED volumes (masked-autoencoding or contrastive on

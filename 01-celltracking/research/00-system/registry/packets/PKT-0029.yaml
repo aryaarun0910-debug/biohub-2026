@@ -1,0 +1,81 @@
+id: PKT-0029
+title: "LEVER-0034: reconstruct the HOCT association head onto our identical trunk and measure parent choice"
+lever: LEVER-0034
+owner: primary
+lock: claimed
+opened: '2026-08-29'
+
+claim: >-
+  The published HOCT association head, reconstructed from its state dict and run on our architecturally
+  identical trunk over the UNCHANGED node surface, chooses better parents than our deployed edge predictor -
+  measured as an increase in true edges recovered on the honest fold with no node-set change.
+
+falsifier: >-
+  Any of, in order of when they bite:
+  (a) the reconstructed module does not load the published state dict with strict=True and exact shapes - the
+  architecture is then not what the tensors describe and nothing downstream is interpretable;
+  (b) the FEATURE CONTRACT cannot be pinned down. The publisher shipped weights and a config but NO model
+  code, so the 3 extra node inputs (35 = 32 UNet channels + 3) and the 4 extra edge inputs (196 = 2 x 96 + 4)
+  are inferred. A wrong ordering loads cleanly and scores garbage - a silent failure - so the contract must be
+  demonstrated, not assumed;
+  (c) the head fails an output-contract smoke: on fold-0 held-out crops with the official node set, its
+  parent-choice accuracy does not exceed our deployed predictor's on the same pairs;
+  (d) it improves top-1 parent choice but does not raise true edges recovered through the complete chain on
+  the honest fold.
+
+prediction: >-
+  Stated before any run. Reconstruction and strict load will succeed - the tensor names are standard
+  torch.nn.TransformerEncoder and Sequential patterns. THE FEATURE CONTRACT IS THE REAL RISK and is where I
+  expect to spend the effort; dimensional analysis narrows it but does not determine it. On association itself
+  the publisher's own held-out numbers are the honest prior: they report the official baseline improving from
+  0.7147 to 0.7315 in our fold-0 direction, a gain on a baseline far weaker than our champion, so expect the
+  transferred gain on OUR substrate to be SMALLER than theirs, possibly much smaller.
+
+inputs:
+  facts: [FACT-0361, FACT-0362, FACT-0368, FACT-0371, FACT-0376, FACT-0347]
+  artifacts:
+    - C:/temp/arch_inventory/hoct/weights/        # fold0 HN, v1, pqlt, toql, edge predictor, configs
+    - C:/temp/p30_f0/preilp_split0.parquet        # the honest fold-0 node and candidate surface
+    - C:/temp/p28_f0/loeo_split0_champion.csv.gz  # the control to beat
+  code:
+    - scripts/win_bet/p28_full_chain_replay.py
+    - scripts/win_bet/lever37_conversion.py
+
+method: >-
+  STEP 0 (architecture): reconstruct the module from the state dict - Linear(35->96), Embedding(2,96) frame
+  embedding, a 2-layer node TransformerEncoder (d_model 96, ffn 192), edge projection Linear(196->96) with
+  norm, the edge blocks, and the edge head. Require strict=True load with exact shapes for BOTH folds.
+  STEP 1 (feature contract, THE GATE): pin down the 3 node extras and 4 edge extras. Try the documented
+  sources first - the publisher's model card, any public notebook, the pack's config.json - and only then
+  dimensional inference. Whatever is chosen must be DEMONSTRATED by a discriminative signal, not assumed:
+  candidate orderings are ranked by parent-choice accuracy on fold-0 held-out crops, and the winner must beat
+  the alternatives by a margin that random feature permutation does not produce.
+  STEP 2 (output-contract smoke): on a small fold-0 crop set with the OFFICIAL node surface unchanged, compare
+  top-1 parent accuracy against our deployed edge predictor on the same pairs.
+  STEP 3 (association measurement): only if STEP 2 passes, score through the complete chain on the honest fold
+  with the node surface preserved, reporting raw association, node recall and division TP SEPARATELY.
+  The fork head is IGNORED throughout. Its published division recall is zero (FACT-0347) on 110 positive
+  training pairs (FACT-0362), and PKT-0027 rule (4) plus the FACT-0371 caution both forbid reading an
+  association gain as division recovery.
+
+budget:
+  gpu_sessions: 0   # CPU reconstruction and smoke first; a GPU arm only after STEP 2 passes
+  submissions: 0
+  wall_clock: 2-4 days
+
+forbidden:
+  - inheriting HOCT's division conclusion in either direction, or enabling its fork head
+  - changing the node surface - this lever is about parent CHOICE, and a node change would confound it
+  - reporting an association gain as division recovery (FACT-0371 host caution)
+  - assuming a feature ordering that merely loads; a clean strict load is necessary and not sufficient
+  - reconciling the pool_kernel_um mismatch by changing OUR detector (theirs is 5.0, ours 3.0 - FACT-0361);
+    if it matters, it is measured, not silently aligned
+  - .claude/settings.json
+
+outputs:
+  evidence: C:/temp/hoct/ and _evidence/hoct/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md per gate
+
+result: null

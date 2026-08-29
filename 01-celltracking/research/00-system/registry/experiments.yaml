@@ -569,3 +569,26 @@ experiments:
       discrimination-bound rather than availability-bound. Also carries a tighter ILP (disappearance 2.0,
       division 1.2), det threshold 0.965, gap-2 recovery and adaptive short-track rescue on, and the pack's
       epoch-500 DeepCenter with the safe-division veto OFF. Diagnostic only; no submission.
+
+  - id: EXP-0038
+    title: P32 exact public-0.931 configuration, verbatim, one preregistered submission
+    spec: scripts/kaggle_specs/p32_public931_exact.json
+    kernel: aryaarun07/biohub-p32-public931-exact
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-29'
+    facts: [FACT-0377, FACT-0378, FACT-0341]
+    note: >-
+      PKT-0028, the BRIDGE experiment - calibration, not the campaign's centre. The public notebook is run
+      BYTE-IDENTICAL, with attribution to its author, because the one genuine association-side difference from
+      our champion is the bidirectional fusion rule (harmonic-probability at 0.15 against our plain linear
+      blend at 0.20) and no notebook in our tree implements it; reconstructing it would re-derive the mechanism
+      under test. This configuration CANNOT be judged offline - its secondary is trained on all 199 movies,
+      legitimate against a hidden test set but un-measurable by any LOEO control we can build (FACT-0378) - so
+      one submission is the only instrument and exactly one is authorised. Preregistered band 0.925-0.932,
+      central 0.929, falsifier at or below the 0.928 champion. Attribution is to the whole bundle only; every
+      knob is confounded, and a positive result relocates the baseline without advancing the association
+      capability FACT-0368 says is needed. No follow-up knob sweeps or stacking on this lineage.
+
