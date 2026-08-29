@@ -4685,3 +4685,50 @@ facts:
       top-k parents per target, which is a GPU action and is not taken here.
     date: '2026-08-29'
     tags: [association, ceiling, candidate-generation, reachability, measured]
+
+  - id: FACT-0371
+    statement: >-
+      Divisions are not a separate capability axis - they are downstream of association. Perfecting ONLY the
+      edges on the deployed fold-0 node set takes the division Jaccard from 0.0538 to 0.8462 (5 true positives
+      and 67 false positives become 22 and 0) without touching detection or node selection. The full count-fair
+      value of perfect association on today's nodes is therefore +0.1800 of SCORE on fold 0 - +0.1008 from the
+      edge term and +0.0792 from the division term - and +0.2180 on fold 1. The deployed pipeline emits 67 false
+      divisions on fold 0 against only 26 annotated ones
+    value: 0.1800
+    unit: count_fair_score_headroom_from_perfect_association_f0
+    scope:
+      f0:
+        crops: 71
+        deployed: {score: 0.9079, adj_edge_jaccard: 0.9025, division_jaccard: 0.0538, div_tp: 5, div_fp: 67, div_fn: 21}
+        oracle_edges: {score: 1.0879, adj_edge_jaccard: 1.0033, division_jaccard: 0.8462, div_tp: 22, div_fp: 0, div_fn: 4}
+        headroom: {total_score: 0.1800, edge_term: 0.1008, division_term: 0.0792, division_share: 0.44}
+      f1:
+        crops: 32
+        deployed: {score: 0.7200, adj_edge_jaccard: 0.7156, division_jaccard: 0.0442, div_tp: 5, div_fp: 83, div_fn: 25}
+        oracle_edges: {score: 0.9380, adj_edge_jaccard: 0.8747, division_jaccard: 0.6333, div_tp: 19, div_fp: 0, div_fn: 11}
+        headroom: {total_score: 0.2180, edge_term: 0.1591, division_term: 0.0589, division_share: 0.27}
+      division_weight_in_score: 0.1
+      node_set: unchanged from deployed in both arms (count-fair)
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Same instrument and scope as FACT-0368 - complete fold 0, stride-4 fold 1 - with the harness verified by
+      its own rung 3. The arm holds the node set fixed, so both the adjusted edge term and the division term are
+      directly comparable to deployed with no count-adjustment artifact. It is an ORACLE: the edges come from
+      the ground truth, so correct fork topology is true by construction rather than learned.
+    instrument: scripts/win_bet/ceiling_ladder.py; outputs _evidence/ceiling/ladder_f{0,1}.json
+    experiment: EXP-0033
+    note: >-
+      This corrects the natural reading of FACT-0359 without contradicting it. Division failure IS
+      topology-dominant - the members are detected and matched - and this fact adds that the topology in question
+      is just the edge set: fix the edges and 22 of 26 fold-0 divisions recover for free, and all 67 false
+      divisions disappear. In principle no separate division representation is required. In PRACTICE the caveat
+      is sharp and it is the deciding one for LEVER-0034: HOCT improves association measurably yet reported ZERO
+      division recall (FACT-0347), and its fork head was trained on 110 positive pairs (FACT-0362). So the
+      available association asset delivers the edge half of this headroom and demonstrably not the division
+      half. Read together: association is the main line and it is worth roughly double what the edge term alone
+      suggests, but capturing the division half needs positive division examples - Zebrahub triples
+      (FACT-0296) - rather than another edge-scoring architecture. The 67 fold-0 division false positives are
+      also a target in their own right: they are charged against a base of 26 annotated divisions.
+    date: '2026-08-29'
+    tags: [division, association, ceiling, allocation, headline]

@@ -15,7 +15,25 @@ record_kind: state
 
 > The single objective we optimise, the win condition, and the constraints that bound it.
 
-## Mission
+## Mission reframed, 2026-08-29 (host)
+
+**The objective is no longer a rank or a boundary score. It is the machine's own attainable
+ceiling.** The host's direction: pursue the maximum this system can reach, agnostically and for the
+science, on the view that the work matters beyond the standing of any entry. A leaderboard position
+is now a by-product of that pursuit, not the target it is measured against.
+
+This is a better-posed objective because it is measurable offline rather than by inference from
+other teams. The yardstick is the **ceiling ladder**: perfect one stage at a time and score each
+rung through the official metric (`scripts/win_bet/ceiling_ladder.py`). As measured on the complete
+fold 0, the remaining distance decomposes as association 87.0%, node selection 5.9%, detection 7.1%
+(`FACT-0368`), and perfect association on today's node set is worth +0.180 of score once the
+division term is counted (`FACT-0371`). Effort is allocated against those shares.
+
+The top-3 framing below is **retained as history and as a calibration reference** - `FACT-0332` is
+still the live boundary reading, and the deadline and submission constraints are unchanged and still
+binding. What changed is which number the campaign is trying to move.
+
+## Mission (original framing, retained for provenance)
 
 Climb the Biohub Cell Tracking public leaderboard to **top-3** (private-set-honest), from a
 reproducible **0.925** system (P9 coupled division, FACT-0001). Leader **0.962**

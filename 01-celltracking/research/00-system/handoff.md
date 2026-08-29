@@ -30,6 +30,63 @@ record_kind: state
 This file is the live entry point. Full direction: [directional-updates.md](../01-research-direction/directional-updates.md).
 System map: [README.md](../README.md); architecture: [system-design.md](system-design.md); contract: [CLAUDE.md](../../CLAUDE.md).
 
+> ## 🎯 2026-08-29 — TARGET REFRAMED to the machine's own ceiling, and the ceiling is now MEASURED: association is 87% of the fold-0 gap
+>
+> **Host reframe:** the goal is no longer the top-3 boundary (`FACT-0332`). It is to close the distance between
+> this system and its own attainable maximum, chased agnostically for the science. That is a better-posed
+> question and it is answerable offline, so it was answered. CPU only — **no GPU, no submission, champion
+> unchanged.**
+>
+> **The ceiling ladder (`FACT-0368`, `FACT-0371`).** Perfect one stage at a time, score every rung through the
+> official metric. On **all 71 fold-0 crops**, holding the deployed node set fixed and replacing only the edges:
+>
+> | rung | raw edge J | share of gap |
+> |---|---|---|
+> | deployed | 0.8862 | — |
+> | + perfect association | 0.9852 | **87.0%** |
+> | + perfect node selection | 0.9919 | 5.9% |
+> | + perfect detection | 1.0000 | 7.1% |
+>
+> Fold 1 gives the same ordering less extremely (54.0 / 13.5 / 32.5). The harness verifies itself: perfect nodes
+> with perfect edges score raw Jaccard **exactly 1.0000** on both folds.
+>
+> **Divisions are downstream of association, not a separate axis (`FACT-0371`).** Perfecting only the edges takes
+> fold-0 divJ from 0.0538 to 0.8462 — 5 TP / 67 FP becomes 22 TP / **0 FP** — with no detection or node change.
+> So perfect association on today's nodes is worth **+0.180 of score on fold 0** (+0.1008 edge term, +0.0792
+> division term) and +0.218 on fold 1. Association pays roughly **double** what the edge term alone suggests.
+> The sharp caveat, and it decides `LEVER-0034`: HOCT improves association yet reported **zero** division recall
+> (`FACT-0347`) on a fork head trained with 110 positives (`FACT-0362`) — the available asset delivers the edge
+> half and demonstrably not the division half.
+>
+> **Why the ceiling is not reachable by re-scoring alone (`FACT-0369`, `FACT-0370`).** Verified at source and
+> confirmed in the data: the candidate rule takes softmax over the **source** axis and thresholds at 0.5, so **at
+> most one parent per target can exist by arithmetic**. Across all 2,162,040 fold-1 candidate edges the in-degree
+> maximum is exactly 1, zero exceptions; minimum probability exactly 0.5000; **14.3% of nodes get no candidate
+> parent at all.** The edge model is deployed as a hard argmax with abstention, not a ranker — which
+> independently explains why motion relink can discard the ILP's edges wholesale (`FACT-0364`). Consequently, of
+> 109,057 fold-1 GT edges: **74.3% candidate-reachable, 15.6% both endpoints detected but no candidate offered,
+> 10.1% undetected endpoint.** Those misses are **short** (median 2.26 µm), so a wider radius is not the fix.
+>
+> **`LEVER-0037` opened (priority 1)** — the candidate-edge budget. Note explicitly: the node-budget kills
+> (`LEVER-0028`, `LEVER-0035`) do **not** apply. That family died because the metric pays for predicting fewer
+> *nodes* (`FACT-0191`/`FACT-0192`); offering more candidate *edges* has a different cost (linking precision) and
+> the opposite sign.
+>
+> **Ranked, with the ceiling as the yardstick:**
+> 1. **`LEVER-0037` candidate-edge budget** — unlocks the 15.6% no scorer can reach. Needs a GPU re-export;
+>    `cfg.threshold` is env-reachable only on the secondary-model path, so a small patch is required.
+> 2. **`LEVER-0034` HOCT head swap** — five sixths of detectable association, on an architecturally identical
+>    trunk (`FACT-0361`). Blocker: their `pool_kernel_um` 5.0 vs our 3.0.
+> 3. **Division positives** — the +0.079 fold-0 division half needs examples, not architecture (`FACT-0362`);
+>    Zebrahub triples (`FACT-0296`) are the only asset that changes the count.
+> 4. **`LEVER-0036`** — real but bounded: the whole node-selection slice is 5.9% of the fold-0 gap.
+> 5. **Detector work** — at most 7.1% of the fold-0 gap, which independently supports leaving the retrain behind
+>    recipe parity (`FACT-0339`).
+>
+> **In flight at this note:** the complete fold-1 full-chain replay for `LEVER-0036` (the half that needs no GPU)
+> is running on CPU. **Still the missing gate: an honest fold-0 pre-ILP export.** One GPU session can serve both
+> `LEVER-0036` and `LEVER-0037` if the candidate threshold is patched first.
+
 > ## 🔵 2026-08-28 (night) — PKT-0025: the node-budget theme INVERTS. LEVER-0035 killed, LEVER-0036 opened. Zero GPU, zero submissions
 >
 > Host directed six items; all six ran. **Champion stays P24 (`FACT-0341`); nothing was submitted and no GPU was spent.**
