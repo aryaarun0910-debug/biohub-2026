@@ -1,0 +1,98 @@
+id: PKT-0036
+title: "AGENT 4 - landing audits and launch control, with veto over every downstream launch"
+lever: null              # an auditor holds no hypothesis - see `why_no_lever`
+owner: agent-4-auditor
+lock: claimed
+opened: '2026-08-29'
+
+why_no_lever: >-
+  Same reason PKT-0033 held none: an auditor that owns a hypothesis has a stake in the answer. R6 permits a
+  null lever, which is also the mechanical reason this packet cannot collide with PKT-0029 (LEVER-0034),
+  PKT-0034 (LEVER-0041) or PKT-0035 (LEVER-0040).
+
+authority: >-
+  VETO OVER DOWNSTREAM LAUNCHES (host, 2026-08-29). No feature cache, no fold-1 surface materialisation and
+  no training run proceeds on an artifact this packet has not passed. A veto is exercised by recording a
+  FAIL receipt naming the condition and the evidence; it is not a matter of opinion and it is not overridden
+  by a passing heartbeat elsewhere. The authority runs one way - this packet can stop a launch, and cannot
+  authorise one that a gate did not license.
+
+claim: >-
+  Every artifact this cycle consumes carries a pass/fail receipt naming the condition it met, the evidence
+  that shows it, and the commit it was produced at - so no scientific claim downstream rests on an artifact
+  whose provenance was assumed.
+
+falsifier: >-
+  Inverted, as PKT-0033's was: this packet fails if it issues a PASS without having exercised the named
+  condition, or if it reports a clean audit without saying what it ran that would have caught a failure.
+  "The heartbeat was present" is not an audit of the thing the heartbeat describes. An empty grep is not
+  evidence - ripgrep -E means --encoding, and _evidence/ and artifacts/ are gitignored and skipped silently
+  by default.
+
+audit_targets:
+  p33_gate1: >-
+    EXP-0041, on landing. All six preregistered conditions, and the crop-count requirement is EXTERNAL by
+    construction: the kernel's all_passed does NOT assert two crops, so a report with a crop count other
+    than 2 is a FAIL regardless of what all_passed says. Also confirm the verify phase ran as a separate
+    process, that band B compared a non-zero number of sub-threshold pairs, and that node-count mismatches
+    are empty. Record the known blind spot - a uniform per-frame source shift is invisible to this gate - as
+    a limit on what the PASS licenses, not as a failure.
+  p34_acquisition: >-
+    EXP-0039, on landing. Champion graph parity against the P28 fold-1 control; ECB patch heartbeat with one
+    export line per crop and no zero-export crop; deployed candidate reconstruction; stable node IDs;
+    cross-run node ordering against the 2026-08-19 preilp_f1_v2 export via
+    scripts/win_bet/preilp_crossrun_stability.py; then the fold-1 contested census, INCLUDING the outcome
+    where fold 1 remains too thin to falsify a ranker, which PKT-0030 falsifier (e) named in advance.
+  leakage: >-
+    Independently verify every training split and cache manifest produced by PKT-0034 and PKT-0035 for
+    embryo leakage. Trace the subtle routes, not only the declared ones: fold-wide statistics reaching a
+    feature, hyperparameters selected on the judged fold, and checkpoints whose provenance is not
+    split-specific. FACT-0378 is the precedent.
+  version_coherence: >-
+    Confirm no running or landed artifact mixes commits or code versions - that the built notebook, the spec,
+    the patch sources and the committed tree agree, and that a fetched result names the kernel version it
+    came from.
+  report_completeness: >-
+    REJECT any model result missing raw association, the count-adjustment contribution, node recall, or
+    division TP/FP/FN. A summary not produced by scripts/win_bet/assoc_report.py is not a result.
+
+inputs:
+  facts: [FACT-0387, FACT-0382, FACT-0373, FACT-0378, FACT-0381, FACT-0364, FACT-0376]
+  artifacts:
+    - C:/temp/p33/           # attempt 1 evidence, for contrast with attempt 2
+    - C:/temp/p30_f0/
+    - C:/temp/preilp_f1_v2/preilp_split1.parquet
+  code:
+    - scripts/win_bet/audit_p30_acquisition.py
+    - scripts/win_bet/preilp_crossrun_stability.py
+    - scripts/win_bet/audit_assoc_contract.py
+    - scripts/core/kaggle_factory.py
+
+method: >-
+  CPU only, read-and-run. Build the receipt harness NOW against attempt 1's retained artifacts and the P30
+  fold-0 evidence, so that the moment P33 or P34 lands the audit is a command rather than a design exercise.
+  Verify every premise at file:line or by rerunning committed code. Where a check needs a script it goes in
+  scripts/win_bet/ and fails closed, with a positive heartbeat whose ABSENCE is the alarm.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: continuous through the cycle
+
+forbidden:
+  - editing any model implementation - this packet audits, it does not compete
+  - claiming any lever, or editing PKT-0029, PKT-0034 or PKT-0035
+  - polling submission 55871868 or touching PKT-0028 - audit it only after the score arrives through the
+    established path
+  - issuing a PASS on a condition it did not exercise
+  - launching a GPU job, pushing a kernel, or making a submission
+  - staging or committing to git - the primary agent commits explicit paths per packet
+  - .claude/settings.json
+
+outputs:
+  evidence: C:/temp/audit_receipts/ and _evidence/audit/receipts/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md per audited artifact
+
+result: null

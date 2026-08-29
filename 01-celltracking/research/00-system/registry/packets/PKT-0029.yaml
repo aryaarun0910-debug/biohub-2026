@@ -1,7 +1,7 @@
 id: PKT-0029
 title: "LEVER-0034: reconstruct the HOCT association head onto our identical trunk and measure parent choice"
 lever: LEVER-0034
-owner: primary
+owner: agent-1-hoct
 lock: claimed
 opened: '2026-08-29'
 
@@ -163,6 +163,13 @@ harness_gates:
   g4_full_chain: >-
     Predictions through the UNCHANGED ILP and post-processing, reporting raw association, node
     recall and division TP SEPARATELY (FACT-0371 caution).
+
+ownership_transfer: >-
+  2026-08-29: reassigned from `primary` to `agent-1-hoct`. This packet and LEVER-0034 are that agent's
+  exclusive territory - no other packet in this cycle may edit either record. The boundary with LEVER-0041
+  is stated in that lever: PKT-0029 owns PUBLISHED-WEIGHT REUSE and contract identification, PKT-0034 owns
+  the harness and training from a known contract, and they meet at exactly one handover - this packet's
+  `not_identifiable` terminal outcome.
 
 budget:
   gpu_sessions: 2   # G1 feature cache is GPU-bound (see g1 note); then the two fold-specific heads

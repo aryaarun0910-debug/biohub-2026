@@ -1,0 +1,86 @@
+id: PKT-0035
+title: "AGENT 3 - the cross-fold division verifier, built on the population PKT-0032 measured"
+lever: LEVER-0040
+owner: agent-3-division
+lock: claimed
+opened: '2026-08-29'
+
+why_this_is_not_a_second_lock: >-
+  PKT-0032 holds LEVER-0040 with `lock: done`, and R6 counts only `claimed` and `running`, so this is the
+  lever's ONLY live lock rather than a duplicate. It is a new packet rather than a reopening because
+  PKT-0032's result is already written and closed on its own falsifiers; overwriting a recorded outcome to
+  continue the work would destroy the audit trail the registry exists to keep.
+
+claim: >-
+  A calibrated verifier trained ONLY on the opposite embryo and external positives can reject emitted false
+  forks on the fold it never saw while preserving every true fork, and its effect can be measured through the
+  official division metric and the raw edge term together.
+
+falsifier: >-
+  (a) TRUE FORKS ARE NOT PRESERVED. This is the primary constraint, not a tie-breaker: at 5 true forks on
+      fold 0 and 14 on fold 1 (FACT-0383), losing even one is a large fraction of the recoverable signal, so
+      any operating point that costs a true fork is reported as a failure of that operating point.
+  (b) The positive population remains insufficient - PKT-0032 already fired this once at 19 emitted true
+      forks against HOCT's 110, and if the enlarged construction does not move it materially the terminal
+      outcome is INSUFFICIENT POSITIVES and the lever is parked on data rather than pursued on architecture.
+  (c) The embryo inversion persists - fold 0 rejecting above chance while fold 1 rejects at or below it
+      (FACT-0385) - which would mean the signal is embryo-specific rather than a property of false forks.
+  (d) Division gains do not survive the raw edge accounting. Removing a fork REMOVES EDGES, so a division
+      improvement bought with a raw edge loss is not a gain and must be reported as the trade it is.
+
+prediction: >-
+  Stated before the work. (a) is where I expect the difficulty: FACT-0384's oracle held true positives at 5
+  while driving false positives to zero, so preservation is achievable in principle, but that was an oracle
+  selection. (b) is the likeliest terminal outcome on current evidence and naming it in advance is the point
+  - PKT-0032 fired it, and enlarging the negative classes does not by itself create positives. (d) is the
+  one I expect NOT to fire, because FACT-0384 measured raw edge Jaccard RISING under the oracle: 39 false
+  edges left with 28 true ones.
+
+inputs:
+  facts: [FACT-0383, FACT-0384, FACT-0385, FACT-0375, FACT-0380, FACT-0371, FACT-0362, FACT-0359]
+  artifacts:
+    - C:/temp/divverify/                  # PKT-0032's census, rows and adapter outputs
+    - _evidence/divverify/
+    - C:/temp/p28_f0/loeo_split0_champion.csv.gz
+    - C:/temp/p28_f1/loeo_split1_champion.csv.gz
+    - C:/temp/retention/divloc_f0.parquet
+    - C:/temp/retention/divloc_f1.parquet
+  code:
+    - scripts/win_bet/divverify_dataset.py    # extend; do not fork
+    - scripts/win_bet/divverify_adapter.py    # already proven against the deployed counts
+    - scripts/win_bet/assoc_report.py
+
+method: >-
+  CPU only, extending PKT-0032's instruments rather than forking them, so the census that reconciles with
+  the official scorer stays the single source. Negative classes: emitted false forks; correct mother with a
+  wrong sister; wrong mother with plausible daughters; geometrically plausible but temporally incoherent
+  forks; and high-confidence association mistakes, which are new here and connect this lever to the
+  association lane. Features extend the existing set with daughter association MARGINS, forward and backward
+  agreement, sister geometry, trajectory divergence, localisation confidence (FACT-0380) and temporal
+  context. Baselines are calibrated linear and tree first. Every operating point reports division TP/FP/FN
+  AND the raw edge delta, because a rejected fork is a deleted edge. Both embryo directions are reported
+  separately - never pooled, since pooling would have hidden the FACT-0385 inversion entirely.
+
+budget:
+  gpu_sessions: 0   # LEVER-0040 is explicitly off the primary GPU lane until its positives improve
+  submissions: 0
+  wall_clock: 1-2 days
+
+forbidden:
+  - any training or tuning that sees the gate fold, including hyperparameters selected on it
+  - claiming LEVER-0034 or LEVER-0041, or editing PKT-0029, PKT-0034 or PKT-0036
+  - overwriting PKT-0032's recorded result
+  - pooling the two embryo directions into a single headline
+  - using Zebrahub rows until the FACT-0385 anti-alignment is solved and the solution is demonstrated
+  - reporting a division gain without its raw edge cost
+  - launching a GPU job, pushing a kernel, or making a submission
+  - staging or committing to git - the primary agent commits explicit paths per packet
+  - .claude/settings.json
+
+outputs:
+  evidence: C:/temp/divverify2/ and _evidence/divverify/v2/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null

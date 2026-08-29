@@ -1277,3 +1277,42 @@ levers:
       a conditional layer where this verifier flags division-sensitive uncertainty, never a global coordinate
       rewrite.
     priority: 1
+
+  - id: LEVER-0041
+    claim: >-
+      A parent scorer trained on CACHED CONTEXTUAL node features with EXPLICIT ABSTENTION, fitted group-wise
+      over targets rather than over individual edges, beats the deployed argmax through the complete
+      unchanged chain - where the representation-free rerankers of LEVER-0039 could not
+    status: open
+    falsifier: >-
+      Written before any training. (a) On held-out contested targets the scorer does not beat the deployed
+      0.8338 with a favourable paired interval - the bar LEVER-0039 failed, and it is not relaxed here.
+      (b) It beats contested top-1 while REGRESSING single-candidate targets, which abstention makes possible
+      for the first time: LEVER-0039 could not lose them because a non-abstaining argmax cannot, so this
+      side of the two-sided bar becomes live and every single-candidate regression must be reported
+      individually rather than netted away. (c) It improves parent choice but does not convert into net true
+      edges through the COMPLETE chain - the genuine FACT-0376 quantity, not the pre-ILP proxy. (d) The gain
+      is a count-adjustment artifact (FACT-0375). (e) It does not transfer between folds on their contested
+      populations. (f) The FACT-0382 condition inherited from LEVER-0039: the full-chain comparison is
+      (widened surface + scorer) against the DEPLOYED control, never against a widened control.
+      TERMINAL AND EXPLICIT - if a contextual head with abstention also fails (a), then the association lane
+      is not head-limited at all on this node surface, and the remaining explanations are the node surface
+      itself or the metric's structure. That is a finding, not a failure to report.
+    supporting: [FACT-0386, FACT-0382, FACT-0376, FACT-0368, FACT-0369, FACT-0371]
+    note: >-
+      OPENED 2026-08-29 AS THE SUCCESSOR TO THE KILLED LEVER-0039, and the two differ by mechanism rather
+      than by ambition, which is what the reopening rule requires. LEVER-0039 tested REPRESENTATION-FREE
+      rerankers without abstention over nine features and died on FACT-0386; this lever tests CONTEXTUAL
+      features from the frozen-trunk cache WITH abstention, fitted group-wise over targets. FACT-0386's
+      positive content is precisely the warrant: the head was not the constraint, so the representation is
+      where the next attempt must differ.
+      BOUNDARY WITH LEVER-0034, STATED SO TWO PACKETS NEVER WORK ONE LANE. LEVER-0034 owns PUBLISHED-WEIGHT
+      REUSE and the contract-identification experiment - can the shipped HOCT tensors be made to mean
+      something on our trunk. LEVER-0041 owns THE HARNESS AND TRAINING FROM A KNOWN CONTRACT - once a
+      contract is ours by construction, can a head trained on it win. They meet at exactly one handover:
+      LEVER-0034's `not_identifiable` terminal outcome hands the architecture to this lever as a
+      train-from-known-contract lane. Until that handover or a successful identification, neither packet
+      touches the other's records.
+      GATED ON THE CACHE. No training claim may be made from a cache that has not passed Gate 1 (EXP-0041);
+      a head trained on an unlicensed cache measures the cache, which is the whole reason the gate exists.
+    priority: 1
