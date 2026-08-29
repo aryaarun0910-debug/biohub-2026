@@ -5935,3 +5935,54 @@ facts:
       BOTH trunks and compare them in the same session, or a null result is uninterpretable.
     date: '2026-08-30'
     tags: [hoct, lever-0034, candidate-surface, integration, upstream, verified]
+
+  - id: FACT-0393
+    statement: >-
+      The PKT-0028 bridge submission scored 0.931 on the public leaderboard, above the 0.928 P24 champion
+      (FACT-0341) and at the top of its preregistered 0.925-0.932 band. The falsifier - a score at or below
+      0.928 - did NOT fire, so the public lineage reproduces on our account and the campaign's baseline
+      relocates from 0.928 to 0.931. This is BASELINE RELOCATION AND NOT NEW CAPABILITY, which PKT-0028's
+      interpretation rule (2) preregistered before the run: the configuration is run byte-identical, every
+      knob in it is confounded, and nothing about our own association or division capability changed
+    value: 0.931
+    unit: public_lb_score_of_the_exact_public_configuration
+    scope:
+      submission: 55871868
+      kernel: aryaarun07/biohub-p32-public931-exact
+      status: COMPLETE
+      date: '2026-08-29'
+      preregistered: {band: [0.925, 0.932], central: 0.929, falsifier: "at or below 0.928"}
+      outcome: {scored: 0.931, band_hit: true, falsifier_fired: false, position_in_band: top}
+      prior_champion: {score: 0.928, fact: FACT-0341, submission: 55820202}
+      delta_vs_champion: 0.003
+      remaining_gap_to_0950: 0.019
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Read from the official leaderboard through the established submissions path, status COMPLETE, on a
+      notebook run byte-identical to the public source. The number is the competition's own, not ours.
+      What it does NOT establish is anything about mechanism - see the note.
+    instrument: >-
+      python -m kaggle competitions submissions -c biohub-cell-tracking-during-development;
+      spec scripts/kaggle_specs/p32_public931_exact.json
+    experiment: EXP-0038
+    note: >-
+      THE PREREGISTERED READING HOLDS AND MUST NOT BE LOOSENED NOW THAT IT PAID. PKT-0028 fixed four
+      interpretation rules before the score existed, and the result satisfying the band does not license
+      relaxing any of them.
+      (1) ATTRIBUTION IS TO THE WHOLE BUNDLE ONLY. Bidirectional fusion rule and weight, ILP disappearance and
+      division weights, detector threshold, gap-2 recovery, adaptive short-track rescue, safe-division radii,
+      and the DeepCenter checkpoint/veto pair are all confounded. No knob may be credited, and the standing
+      host direction of no follow-up knob sweeps on this lineage stands.
+      (2) IT RELOCATES THE STARTING POINT, IT DOES NOT ADVANCE THE CAPABILITY. FACT-0368 put 87% of the
+      fold-0 gap in association and nothing here touched association. The remaining distance to 0.950 is
+      0.019, and it must still come from learned discrimination, not from further bundle transfer.
+      (3) DIVISION IS REPORTED SEPARATELY and this gain is NOT read as division recovery.
+      (4) THIS CONFIGURATION CANNOT BE VALIDATED OFFLINE AT ALL. Its secondary is trained on all 199 movies
+      (FACT-0378), legitimate against a hidden test set and un-measurable by any LOEO control we can build.
+      That is why one submission was the only instrument, and it is also why this baseline cannot be used as
+      an offline control for anything. OFFLINE WORK CONTINUES AGAINST THE P28 LOEO CONTROLS.
+      CHAMPION TRANSITION IS CONDITIONAL on the PKT-0036 release receipt binding notebook, weights, manifest,
+      graph and score together. Until that receipt exists the deployed champion of record stays P24.
+    date: '2026-08-30'
+    tags: [submission, bridge, baseline-relocation, lever-0038, public-lineage, headline]

@@ -1,7 +1,7 @@
 id: PKT-0036
 title: "AGENT 4 - landing audits and launch control, with veto over every downstream launch"
 lever: null              # an auditor holds no hypothesis - see `why_no_lever`
-owner: agent-4-auditor
+owner: agent-4-release-auditor
 lock: claimed
 opened: '2026-08-29'
 
@@ -9,6 +9,17 @@ why_no_lever: >-
   Same reason PKT-0033 held none: an auditor that owns a hypothesis has a stake in the answer. R6 permits a
   null lever, which is also the mechanical reason this packet cannot collide with PKT-0029 (LEVER-0034),
   PKT-0034 (LEVER-0041) or PKT-0035 (LEVER-0040).
+
+scope_extension_2026_08_30: >-
+  EXTENDED to RELEASE AUDITING, keeping the pending P33 audit. Added: bind every submission artifact into a
+  receipt joining notebook, weights, manifest, graph and predicted score; detect row-order dependence, empty-
+  band success, graph-id drift, cross-fold leakage and code-version mixing; and ENFORCE THE SEAM-CALIBRATION
+  EXCEPTION - exactly one standalone submission for the first genuinely new model class that passes the
+  honest fold-0 gate. That slot is this packet's to release and no other packet's to spend.
+  FIRST DUTY: the champion transition. FACT-0393 records submission 55871868 at 0.931, above the 0.928 P24
+  champion, but the champion of record stays P24 until this packet issues a release receipt binding the
+  artifact together. Baseline relocation is not capability, and the receipt is what makes the relocation
+  auditable rather than assumed.
 
 authority: >-
   VETO OVER DOWNSTREAM LAUNCHES (host, 2026-08-29). No feature cache, no fold-1 surface materialisation and

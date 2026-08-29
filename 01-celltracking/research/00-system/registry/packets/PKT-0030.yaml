@@ -2,7 +2,7 @@ id: PKT-0030
 title: "One passive fold-1 candidate acquisition, so a parent ranker can be cross-fitted at all"
 lever: null              # DELIBERATELY UNCLAIMED - see `why_no_lever` below
 owner: primary
-lock: claimed
+lock: done
 opened: '2026-08-29'
 
 why_no_lever: >-
@@ -90,4 +90,19 @@ outputs:
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  DONE 2026-08-30. All four falsifiers answered, and (e) answered in the direction opposite to the one
+  feared. (a) FAILS AS SPECIFIED but not because of the acquisition: 127 of 128 crops are byte-identical to
+  the P28 fold-1 control, and the single divergent crop is byte-identical to P29's, so P28's own solver
+  draw is the singleton (FACT-0389). The packet demanded bit-identical parity from a solver FACT-0363
+  already showed to have multiple optima - the specification assumed a determinism that does not exist.
+  (b), (c) and (d) PASS on all 128 crops: heartbeat on 128 distinct crops with both treatment variables
+  unset, every one of 2,162,040 deployed edges contained in a 7,157,163-candidate export, zero unknown ids,
+  zero non-adjacent edges. The pre-ILP export is byte-identical to the 2026-08-19 preilp_f1_v2 parquet with
+  its digest recomputed in-run, and cross-run stability passes 128/128, so every prior fold-1 analysis keyed
+  to that parquet stays joinable.
+  (e) DOES NOT FIRE, and this is the packet's real result. Fold 1 is not too thin - it is RICHER: 26,601
+  contested targets at deployed contested top-1 0.7084 with 7,757 errors, against fold 0's 4,157 / 0.8338 /
+  691 (FACT-0388). The preregistered prediction of a BROADER contested share than fold 0's 21.4% was correct
+  at 29.1%. Fold 1 becomes the development surface; fold 0 remains the promotion gate, and conflating those
+  roles would reintroduce the selection problem the folds exist to prevent.

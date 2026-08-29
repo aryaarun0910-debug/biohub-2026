@@ -1,0 +1,95 @@
+id: PKT-0038
+title: "AGENT 3 - the association model tournament, trained from a contract we own. The primary 0.950 lane"
+lever: LEVER-0041
+owner: agent-3-tournament
+lock: claimed
+opened: '2026-08-30'
+
+why_this_is_not_a_second_lock: >-
+  PKT-0034 held LEVER-0041 and closed `done` on 2026-08-30, having delivered the harness rather than run the
+  experiment. R6 counts only `claimed` and `running`, so this is the lever's only live lock. The split is
+  deliberate: one packet built the instrument, this one runs the tournament through it, and the instrument's
+  untested falsifier (a) - the cache gate - is inherited here because this is the packet that first uses a
+  real cache.
+
+claim: >-
+  A parent scorer trained from a feature contract we own, selected on fold 1 and applied FROZEN to fold 0,
+  beats the deployed argmax on contested targets and converts that into net true edges through the complete
+  unchanged chain.
+
+falsifier: >-
+  Inherited from LEVER-0041 and not relaxed. (a) It does not beat the deployed contested top-1 with a
+  favourable paired interval on the DISCOVERY fold. (b) It beats contested top-1 while regressing
+  single-candidate targets, which abstention makes possible for the first time. (c) Ranking improves but net
+  true edges through the COMPLETE chain do not - the genuine FACT-0376 quantity, not the pre-ILP proxy.
+  (d) The gain is a count-adjustment artifact. (e) The frozen model does not transfer to fold 0.
+  (f) The FACT-0382 condition: the full-chain comparison is (widened surface + scorer) against the DEPLOYED
+  control, never against a widened control.
+  ADDED HERE, AND IT IS THE ONE MOST LIKELY TO BITE: (g) the tournament produces a winner by SELECTION
+  RATHER THAN SKILL. Five model classes with hard-negative mining over one discovery fold is a large search,
+  and the whole point of freezing on fold 1 and applying to fold 0 is that fold 0 then measures what
+  survived selection. If the fold-0 result is materially worse than the fold-1 result, the honest reading is
+  that the tournament fitted the discovery fold - not that fold 0 is unlucky.
+
+prediction: >-
+  Stated before any training. FACT-0386 measured representation-free rerankers capturing about 2% of the
+  contested-parent ceiling, and its positive content is that the representation, not the head, was the
+  constraint - so contextual features should do better than that or the diagnosis was wrong. I expect the
+  contextual head to beat the linear and tree controls on fold 1, and I expect the honest fold-0 transfer to
+  be SMALLER than the fold-1 figure, because that is what selection on one surface usually costs. The
+  quantity I most expect to disappoint is (c): FACT-0364 says motion relink replaces the solver's edge list
+  wholesale, so a better pre-ILP ranking has a documented history of not surviving to the final graph.
+
+inputs:
+  facts: [FACT-0388, FACT-0386, FACT-0382, FACT-0376, FACT-0364, FACT-0371, FACT-0392, FACT-0378]
+  artifacts:
+    - C:/temp/p34_f1/                       # the audited fold-1 substrate - the discovery surface
+    - C:/temp/p30_f0/                       # the fold-0 promotion gate
+    - _evidence/audit/receipts/f1_p34.json
+  code:
+    - scripts/win_bet/assoc_train_harness.py    # the harness; use it, do not fork it
+    - scripts/win_bet/assoc_parent_dataset.py   # the frozen surface and label contract
+    - scripts/win_bet/assoc_report.py           # the only promotable summary
+
+method: >-
+  FOLD 1 IS THE DISCOVERY SURFACE, FOLD 0 IS THE GATE, and they are never swapped. FACT-0388 is the reason:
+  fold 1 carries 7,757 contested errors against fold 0's 691, so an effect that is invisible on fold 0 can
+  be measured on fold 1 - and fold 0's 691 was already small enough that FACT-0386's best arm moved 12 with
+  churn 40 and no favourable interval.
+  TOURNAMENT, all five on the SAME data contract so the comparison is real: calibrated linear/listwise
+  control, tree ranker, contextual transformer/HOCT-style head, bidirectional head, and an alternate-seed
+  secondary head. The last two exist so CONSENSUS becomes cleanly measurable later under FACT-0378 - the
+  public configuration's secondary saw all 199 movies and is therefore un-validatable offline, so a
+  consensus claim needs fold-specific secondary heads of our own.
+  Explicit null/abstain class throughout. Hard negatives mined ITERATIVELY - wrong nearby parents,
+  high-confidence substitutions, motion-consistent errors, and division-producing mistakes - with each
+  round's mining set recorded so the curriculum is reproducible rather than emergent.
+  SELECTION DISCIPLINE: freeze architecture AND calibration on fold 1, then apply unchanged to fold 0. No
+  refitting, no threshold nudging, no per-fold calibration. Models are compared by CONVERTED TRUE EDGES and
+  full-chain raw association, never by training loss.
+
+budget:
+  gpu_sessions: 2   # Slot A fold-1 cache then training; Slot B fold-0 cache then the complementary head
+  submissions: 0    # the seam-calibration slot is PKT-0036's to release, not this packet's to spend
+  wall_clock: 3-5 days
+
+forbidden:
+  - launching any GPU job before PKT-0037 certifies the foundations AND Gate 1 passes with a PKT-0036 receipt
+  - training on any cache whose manifest does not bind trunk, fold, embryo, normalisation, node ordering,
+    candidate parameters and commit
+  - refitting or recalibrating on fold 0 after freezing on fold 1 - that destroys the only honest transfer
+    measurement this packet has
+  - reporting any summary not produced by scripts/win_bet/assoc_report.py
+  - reading an association gain as division recovery (FACT-0371)
+  - claiming LEVER-0034 or LEVER-0040, or editing PKT-0029, PKT-0035, PKT-0036 or PKT-0037
+  - making or requesting a submission
+  - .claude/settings.json or .gitignore
+  - staging or committing to git - the primary agent commits explicit paths per packet
+
+outputs:
+  evidence: C:/temp/assoc_tournament/ and _evidence/assoc/tournament/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null

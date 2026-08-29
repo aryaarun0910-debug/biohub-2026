@@ -1,0 +1,93 @@
+id: PKT-0037
+title: "AGENT 1 - upstream foundations: no cache launches until a null could be interpretable"
+lever: null              # infrastructure, not a hypothesis
+owner: agent-1-foundations
+lock: claimed
+opened: '2026-08-30'
+
+why_no_lever: >-
+  This packet moves no score and tests no hypothesis. It removes the ambiguities that would make a NULL
+  RESULT uninterpretable downstream - which is the expensive failure, because a null from an ambiguous cache
+  cannot distinguish "the head does not work" from "we fed it the wrong features". R6 permits a null lever.
+
+authority: >-
+  TERMINAL GATE ON GPU. No feature cache launches until this packet certifies that every ambiguity capable
+  of making a null uninterpretable has been removed. That is a hard precondition on Slot A and Slot B, and
+  it sits upstream of PKT-0036's release veto rather than replacing it.
+
+claim: >-
+  Every cache this campaign trains on can be bound, after the fact and by an independent command, to the
+  trunk that produced it, the fold and embryo it belongs to, the normalisation and candidate rule it used,
+  and the exact notebook and commit that ran - so that a null result is attributable to the model rather
+  than to the substrate.
+
+falsifier: >-
+  (a) The band-A non-vacuity fix does not actually fire - if a crop with zero shared band-A pairs still
+      passes the in-kernel gate, the fix is decorative and the gate can still certify nothing;
+  (b) the fold-hygiene fix does not close the inherited-setting route - if a fold-1 spec that inherits its
+      fold from a base notebook is still skipped rather than checked, the hole Agent 4 measured (12 checked,
+      54 skipped) remains and the fold-1 cache run is built through it;
+  (c) the dual-trunk acquisition cannot be made to produce both trunks in ONE session - if it cannot, then
+      FACT-0392's third risk stands and any HOCT null remains confounded with trunk identity;
+  (d) the independent audit command does not FAIL on a deliberately swapped trunk, reordered nodes, an empty
+      probability band, or wrong-fold weights. A checker that has not been shown to reject is not a checker.
+
+prediction: >-
+  Stated before the work. (a) and (b) are small and I expect them to hold. (d) is where the real work is and
+  where I expect the surprises, because each of the four mutations has to be MANUFACTURED to prove the
+  checker rejects it - and manufacturing a convincing swapped-trunk cache is harder than checking one.
+  (c) is the one that could genuinely fail on cost rather than correctness: two trunks in one session
+  doubles the feature pass, and if that does not fit the session budget the honest answer is to say so and
+  propose the sequential alternative with its confound stated, not to quietly cache one.
+
+inputs:
+  facts: [FACT-0387, FACT-0390, FACT-0391, FACT-0392, FACT-0382, FACT-0378, FACT-0369]
+  artifacts:
+    - C:/temp/p33_v2/                       # Gate 1 attempt 2 output, when it lands
+    - C:/temp/p30_f0/                       # the fold-0 reproduction target
+    - C:/temp/p34_f1/                       # the fold-1 substrate, audited
+    - C:/temp/hoct/code/                    # publisher source, for the candidate rule
+  code:
+    - scripts/kaggle_edits/assoc_feature_parity.py
+    - tests/test_loeo_weights_hygiene.py
+    - scripts/win_bet/audit_p33_gate1.py
+    - scripts/win_bet/assoc_train_harness.py
+
+method: >-
+  CPU only, and in this order because each step gates the next.
+  (1) BAND-A NON-VACUITY IN-KERNEL. The gate currently floors band B only, so a crop whose band A compared
+  nothing passes conditions (3) and (4) having verified nothing. The floor is per-crop, so an uncapped run
+  is not immune. Add it, and prove it fires.
+  (2) FOLD HYGIENE. tests/test_loeo_weights_hygiene.py reads the fold from the spec env, so a spec inheriting
+  its fold from a base notebook is skipped. Resolve the EFFECTIVE fold - spec env first, then the base
+  notebook - and check every spec rather than the ones that happen to declare it.
+  (3) DUAL-TRUNK ACQUISITION in one session, so trunk identity is never confounded with contract error.
+  (4) CACHE BINDING. Every cache carries, in a manifest beside it: trunk checkpoint sha256 and provenance,
+  fold and embryo, feature normalisation, node ordering and ids, candidate-graph parameters, and the notebook
+  and source commit that produced it.
+  (5) THE INDEPENDENT AUDIT COMMAND, which must be shown to REJECT a swapped trunk, reordered nodes, an
+  empty band and wrong-fold weights - each demonstrated by mutation, not asserted.
+
+budget:
+  gpu_sessions: 0   # this packet does not launch; it decides whether launching is interpretable
+  submissions: 0
+  wall_clock: 1 day
+
+forbidden:
+  - launching a GPU job, pushing a kernel, or making a submission
+  - modifying scripts/kaggle_edits/assoc_feature_parity.py WHILE P33 v2 IS RUNNING - that would break the
+    version-coherence chain PKT-0036 verified, and the running kernel's code would no longer be the
+    committed code. Prepare the fix; apply it only once P33 has landed and been audited.
+  - claiming any lever, or editing PKT-0029, PKT-0035, PKT-0036 or PKT-0038
+  - running pytest concurrently with another agent - see the 2026-08-30 registry race; the planting lock
+    now serialises the registry suite, but confirm before assuming
+  - .claude/settings.json or .gitignore
+  - staging or committing to git - the primary agent commits explicit paths per packet
+
+outputs:
+  evidence: C:/temp/foundations/ and _evidence/foundations/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null

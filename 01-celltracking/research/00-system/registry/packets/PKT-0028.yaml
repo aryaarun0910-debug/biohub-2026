@@ -2,7 +2,7 @@ id: PKT-0028
 title: "One preregistered submission of the exact public-0.931 configuration, as the transfer control"
 lever: LEVER-0038
 owner: primary
-lock: claimed
+lock: done
 opened: '2026-08-29'
 
 claim: >-
@@ -77,4 +77,17 @@ interpretation_rules_preregistered: >-
   (4) IF IT LOSES, the public lineage is not our baseline and the campaign continues from P24 unchanged. That
   is an informative outcome and costs one slot.
 
-result: null
+result: >-
+  DONE 2026-08-30. THE CLAIM HELD AND THE FALSIFIER DID NOT FIRE. Submission 55871868 scored 0.931 - the
+  TOP of the preregistered 0.925-0.932 band, against a falsifier set at or below 0.928 (FACT-0393). The
+  public lineage reproduces on our account and the campaign baseline relocates from 0.928 to 0.931,
+  leaving 0.019 to 0.950. Exactly one submission was spent, as budgeted.
+  ALL FOUR INTERPRETATION RULES STAND, and the win is precisely when they matter most. (1) Attribution is
+  to the whole bundle only; no knob is credited and no follow-up sweep is authorised. (2) It relocates the
+  starting point and advances no capability - FACT-0368 puts 87% of the fold-0 gap in association and
+  nothing here touched association. (3) Division is not credited. (4) This configuration remains
+  UN-VALIDATABLE OFFLINE because its secondary saw all 199 movies (FACT-0378), so it is a leaderboard
+  baseline and must never be used as an offline control; offline work continues against the P28 LOEO
+  controls.
+  CHAMPION TRANSITION IS NOT AUTOMATIC and is deliberately left to PKT-0036: the deployed champion of
+  record stays P24 until a release receipt binds notebook, weights, manifest, graph and score together.

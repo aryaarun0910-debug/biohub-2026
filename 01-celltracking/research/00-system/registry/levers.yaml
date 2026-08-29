@@ -1000,7 +1000,22 @@ levers:
     claim: >-
       The public configuration reported at 0.931 (FACT-0377) transfers to our deployment and scores above the
       P24 champion, relocating the campaign's baseline
-    status: open
+    # The claim was CONFIRMED, not refuted - but `confirmed` is not in this file's status
+    # vocabulary (open|running|killed|closed|parked), and inventing a sixth value to record a win
+    # would break the one thing the vocabulary is for. `closed` is correct on its own terms: the
+    # lane is shut for a stated structural reason - the host authorises no further work on this
+    # lineage - and `outcome_2026_08_30` records that the claim held.
+    status: closed
+    closed_by: [FACT-0393]
+    closed_date: '2026-08-30'
+    outcome_2026_08_30: >-
+      CONFIRMED at 0.931 - the top of the preregistered 0.925-0.932 band, with the falsifier at or below
+      0.928 not firing. The lineage transfers and the baseline relocates by +0.003, leaving 0.019 to 0.950.
+      The lever's own note bounded this in advance and that bound is now load-bearing rather than decorative:
+      it calibrates transfer and does NOT advance the association capability the route to 0.950 requires.
+      No follow-up knob sweeps, no stacking, no incremental squeezing of this lineage - and note the harder
+      constraint the win does not remove, that this configuration cannot be validated offline at all because
+      its secondary saw all 199 movies (FACT-0378). It is a leaderboard baseline, not an offline control.
     falsifier: >-
       The one preregistered submission scores at or below the 0.928 champion. Because the notebook is run
       byte-identical, a miss is a fact about the configuration or the leaderboard, not about our transcription,
