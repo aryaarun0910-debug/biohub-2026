@@ -635,3 +635,43 @@ experiments:
       PKT-0033 audit established independently that it exercises no serialised cache and never compares the
       sub-0.5 band where FACT-0382 puts all 691 contested errors, so it needs redesign, not repair. One GPU
       session spent, no submission, deployed output unchanged.
+
+  - id: EXP-0041
+    title: P33 v2 association feature-parity smoke, PKT-0029 Gate 1 attempt 2
+    spec: scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json
+    kernel: aryaarun07/biohub-p33-assoc-feature-parity-smoke
+    kernel_version: 2
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-29'
+    facts: [FACT-0387, FACT-0382, FACT-0369, FACT-0373]
+    note: >-
+      The redesigned gate, pushed UNCHANGED from the committed build at 7c15b23 - a rebuild before pushing was
+      byte-identical to the commit, so what runs is what was tested. It is now the SINGLE LICENSING
+      EXPERIMENT for LEVER-0034 (host, 2026-08-29): if it passes, the two fold feature caches launch with no
+      additional model changes; if it fails, nothing downstream is licensed. Concurrent with P34 (EXP-0039),
+      which is within the FACT-0061 cap of two. No submission.
+      HOST PASS CRITERIA, PREREGISTERED BEFORE THE RESULT - all six bind, and where the kernel does not
+      enforce one the audit does:
+      (1) both crop heartbeats appear - ENFORCED AT AUDIT, not in-kernel. The report's all_passed requires a
+          non-empty crop list with every entry passing, but does not assert the count is 2, so a run that
+          silently processed one crop would still report all_passed true. The kernel was pushed unchanged as
+          directed, so this one criterion is checked when the result is read, and a crop count other than 2
+          is a FAIL regardless of what all_passed says.
+      (2) the fresh reader uses only persisted cache artifacts - enforced by construction: the verify phase is
+          a separate process and cannot see the writer's memory.
+      (3) node ordering and identities reconstruct exactly - enforced transitively and stated as such. The
+          per-frame node-count assertion is direct; ordering and identity are proven by band A matching
+          exactly, since a reordering would change which positional index each recorded edge names.
+      (4) deployed candidates match exactly - band A: zero missing, zero extra, max probability delta <= 1e-4.
+      (5) the richer probability band matches within the frozen tolerance - band B against the ECB sidecars
+          down to 0.02, every recorded sub-threshold pair reproduced, max delta <= 1e-4. Extras beyond the
+          sidecar's top-k cap are expected and are not failures.
+      (6) missing or empty cache output fails closed - the verify phase raises FileNotFoundError on a missing
+          cache file and requires a non-zero band-B comparison count; both are covered by tests that run the
+          worker as real subprocesses.
+      KNOWN LIMIT OF A PASS, recorded so the licence it grants is not over-read: the gate compares
+      post-softmax probabilities over the SOURCE axis, so a cache error shifting every source in a frame
+      equally is mathematically invisible to it. Non-uniform errors - a single node, an index remap, a dtype
+      change, a stale frame - all show up.

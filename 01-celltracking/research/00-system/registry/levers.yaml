@@ -1133,6 +1133,13 @@ levers:
       not an inherited debt, since FACT-0376's own scope precision exempts a candidate rule paired with a
       better scorer; the gate is that the comparison must be RUN and reported through
       scripts/win_bet/assoc_report.py.
+      PRIORITY RAISED 2026-08-29 (host). FACT-0386 killed representation-free reranking on this surface -
+      linear and tree models over nine features could not beat the deployed argmax, and the apparent gain was
+      mostly quantile binning - which is direct evidence that the HEAD is not the constraint and CONTEXTUAL
+      REPRESENTATIONS are the lane. This lever now carries the association question alone. Its licensing
+      chain is explicit and serial: EXP-0041 (Gate 1 parity) must pass before the two fold feature caches
+      launch, and the caches then launch WITH NO ADDITIONAL MODEL CHANGES, so a later result is attributable
+      to the head rather than to a bundled edit.
     priority: 3
 
   - id: LEVER-0039
@@ -1247,6 +1254,12 @@ levers:
       Zebrahub is NOT an admissible source of the extra positives until its anti-alignment is solved: pooled
       AUC 0.179, per-feature median ratios 0.345 to 3.719, and our divisions localised at 3.60 um against
       their 1.24 (FACT-0385). Pooling those rows collapsed an in-domain fit from 0.80 to 0.21.
+      RESOURCE POLICY (host, 2026-08-29). This lever stays SCIENTIFICALLY OPEN and is explicitly NOT killed -
+      its ceiling is real at +0.01416 (FACT-0384) and its mechanism was refuted in the lever's favour. But it
+      MUST NOT CONSUME THE PRIMARY GPU LANE until its positive and calibration population improves beyond the
+      19 emitted true forks that bind it today. Work on it is CPU-side dataset and population work; the GPU
+      lane belongs to LEVER-0034 while that lane is live. This is a sequencing decision about scarce compute,
+      not a judgement about the lever's merit, and it weakens none of its gates.
     note: >-
       Sized from our own arithmetic, not from ambition: fold 0 emits 67 division FPs against 26 annotated
       divisions, so cutting FPs to about 20 takes divJ from 0.0538 to about 0.109 - roughly +0.006 of score,

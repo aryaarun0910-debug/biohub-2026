@@ -4395,6 +4395,14 @@ facts:
       motion_relink_replaced_raw_edges/raw_edges ratio over all 128 fold-1 crops of C:/temp/p28_f1
     experiment: EXP-0033
     note: >-
+      STANDING DECISION (host, 2026-08-29): DO NOT RERUN THE IDENTITY ATLAS to manufacture a five-way
+      classification this pipeline's structure cannot reliably distinguish. Because motion relink replaces
+      the whole edge list at a median 99.9% coverage with zero fallbacks, "ILP-rejected" against
+      "relink-overwritten" is near-degenerate for edges - relink overwrites essentially everything - so a
+      five-way atlas would report a distinction the mechanism does not support. The atlas is THREE-WAY:
+      gained, displaced, wrong parent. That is computable from what the replay already persists, and the
+      control arm is complete at 71 of 71 crops; re-running both arms to chase the other two categories
+      would spend that work for a split the structure cannot carry.
       This is a structural constraint on a whole class of ideas, not a detail. It says the ILP is, in the
       deployed configuration, a NODE SELECTOR whose linking is provisional. Read with FACT-0353 (the ILP is
       where 15-20% of detected peaks are discarded) the picture is consistent: the solver's job in this pipeline
@@ -5002,6 +5010,12 @@ facts:
       candidate-generation idea paired with a better scorer, or one selecting candidates by a different
       principle than global probability rank, is untouched by this evidence and needs its own lever and its
       own falsifier.
+      HOST RULE ADDED 2026-08-29 ON FACT-0382, AND IT IS NOW THE STANDING TEST FOR THIS FAMILY: candidate
+      WIDENING IS PERMITTED ONLY WHEN COUPLED TO GENUINELY NEW DISCRIMINATION. FACT-0382 is why the coupling
+      is not optional rather than merely advisable - all 691 fold-0 contested errors sit BELOW the deployed
+      threshold, so widening is the only way to expose them and is simultaneously a measured loss under the
+      unchanged scorer. A widening proposal that does not arrive with a new scorer is therefore asking to pay
+      FACT-0376's cost for nothing, and is refused without needing its own experiment.
     date: '2026-08-29'
     tags: [lever-0037, ranking-failure, association, conversion, negative, headline]
 

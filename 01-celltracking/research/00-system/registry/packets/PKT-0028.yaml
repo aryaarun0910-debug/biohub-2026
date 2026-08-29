@@ -52,6 +52,11 @@ forbidden:
   - treating a positive result as validating the secondary consensus specifically, which our champion
     already deploys identically (FACT-0377 as corrected)
   - a second submission of this configuration to chase variance
+  - >-
+    POLLING THE SUBMISSION. Reaffirmed by the host on 2026-08-29 - this packet stays untouched and unpolled
+    while it scores. Scoring takes hours, polling changes nothing, and a partial reading invites the band to
+    be re-interpreted before the result exists, which is exactly what preregistering it was for.
+  - any Colab action
   - .claude/settings.json
 
 outputs:
