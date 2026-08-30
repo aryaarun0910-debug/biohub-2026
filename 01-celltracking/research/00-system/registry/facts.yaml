@@ -5986,3 +5986,94 @@ facts:
       graph and score together. Until that receipt exists the deployed champion of record stays P24.
     date: '2026-08-30'
     tags: [submission, bridge, baseline-relocation, lever-0038, public-lineage, headline]
+
+  - id: FACT-0394
+    statement: >-
+      Gate 1's in-kernel pass condition is VACUOUS ON BAND A, so a crop that compared zero deployed-band
+      pairs is reported as passing. The gate floors band B at a non-zero comparison count but floors band A at
+      nothing, so with no recorded band-A edge in scope the three band-A conditions - no missing, no extra,
+      delta within tolerance - are all satisfied trivially. The defect did not need manufacturing to
+      demonstrate: the repository's own GREEN test test_gate_passes_when_the_cache_is_faithful already ran a
+      crop whose band A compared ZERO pairs and asserted all_passed True, so the band-A comparison path was
+      never exercised by the suite that was meant to prove it
+    value: 0
+    unit: band_a_pairs_compared_by_a_crop_the_committed_gate_reports_as_passing
+    scope:
+      file: scripts/kaggle_edits/assoc_feature_parity.py
+      lines: 232-262
+      committed_worker: {all_passed: true, band_a_recorded: 0, band_a_reproduced: 0, band_a_checked: "not counted", band_b_checked: 27}
+      patched_worker: {all_passed: false, band_a_recorded: 0, band_a_reproduced: 0, band_a_checked: 0, band_b_checked: 27}
+      refusal_is_band_a: true
+      per_crop: true
+      affects_uncapped_runs: true
+      status_2026_08_30: "patch written, tested, PROVEN by mutation, deliberately UNAPPLIED while P33 v2 runs"
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Demonstrated by running BOTH workers against one identical fixture rather than by reading either. Band B
+      still compares 27 pairs under the patched worker, which is what proves the refusal is the band-A floor
+      and not a collateral band-B failure. The committed worker's behaviour is not inferred from the source -
+      it was executed.
+    instrument: >-
+      PKT-0037 mutation harness; evidence _evidence/foundations/band_a_floor_mutation.json and the pending
+      change set at _evidence/foundations/pending/
+    note: >-
+      THIS IS A DEFECT IN OUR OWN GATE AND IT WAS FOUND BY THE PACKET WHOSE JOB IS TO DOUBT IT. Two readings
+      matter more than the fix. (1) The gate exists to license two full feature-cache GPU sessions. A crop
+      passing on a vacuous band A would certify nothing about the DEPLOYED band while appearing to certify
+      everything, and the floor is PER-CROP, so a full uncapped run is not immune - one bad crop passes
+      silently inside an otherwise real result. (2) The test suite is the sharper lesson: a green test that
+      asserts a pass while the thing under test compared nothing is worse than no test, because it converts an
+      untested path into a documented one. This project has now recorded that failure twice - once as a test
+      that grepped source instead of running it, and now as a test that ran the code but not the branch.
+      THE PATCH IS NOT APPLIED, ON PURPOSE. P33 v2 (EXP-0041) was RUNNING at every check, and editing the
+      patch source mid-flight would break the version-coherence chain that makes the running kernel auditable
+      against its commit. The EXTERNAL audit (scripts/win_bet/audit_p33_gate1.py) enforces band-A non-vacuity
+      for this run, so the gate is sound AS AUDITED; the in-kernel floor ships in the next build, before any
+      cache session.
+      A FIXTURE CORRECTION TRAVELS WITH THE PATCH AND IS LOAD-BEARING: the stub features must vary between
+      nodes of a frame, with a spread of 0.1 and NOT 1.0 - at 1.0 the source-axis softmax saturates and
+      swallows the 0.05 perturbation the corruption test depends on, turning that test green for the wrong
+      reason. Found by running it, not by reasoning about it.
+    date: '2026-08-30'
+    tags: [gate-1, vacuous-pass, own-defect, test-quality, pkt-0037, verified, headline]
+
+  - id: FACT-0395
+    statement: >-
+      The fold-hygiene guard was blind to specs that INHERIT their fold from a base notebook, and the blind
+      spot covered the fold-1 acquisition we just consumed. kaggle_factory.apply_edit APPENDS a spec's env
+      block after the base notebook's existing text, so any os.environ the base carries stays in force unless
+      the spec names the same key - and the guard read the fold from the spec env alone. Resolving the
+      EFFECTIVE fold takes fold-1 coverage from 12 specs to 14 and fold-0 from 19 to 22. Both newly visible
+      fold-1 specs, p29_p28_detpeak_export_f1 and p34_acquisition_f1, are CLEAN, so this closes a hole rather
+      than retracting a result
+    value: 14
+    unit: fold1_specs_checked_by_the_hygiene_guard_after_resolving_the_effective_fold
+    scope:
+      root_cause: {file: scripts/core/kaggle_factory.py, lines: 499-508, mechanism: "apply_edit appends env; base-notebook env survives unless the spec names the same key"}
+      before: {fold1_checked: 12, fold0_checked: 19, skipped: 54}
+      after: {fold1_checked: 14, fold0_checked: 22, skipped: 52}
+      newly_visible_fold1: [p29_p28_detpeak_export_f1, p34_acquisition_f1]
+      base_notebook: notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb
+      both_clean: true
+      guard_fails_closed_on_missing_base: true
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The before-figures reproduce the independent PKT-0036 measurement of 12 checked and 54 skipped exactly,
+      which is what makes the after-figures a like-for-like closure rather than a differently-counted set.
+      Seven mutation tests reach the EXP-0019 defect through the inheritance route specifically and require
+      the guard to fire on each.
+    instrument: >-
+      tests/test_loeo_weights_hygiene.py, effective-fold resolution with a positive heartbeat naming the
+      inherited specs; PKT-0037
+    note: >-
+      THE HOLE MATTERED BECAUSE THE FOLD-1 FEATURE-CACHE RUN WOULD HAVE BEEN BUILT THROUGH IT. P34, whose
+      substrate FACT-0388 and FACT-0389 rest on, was one of the two invisible specs - it sets the split-1
+      glob correctly, so nothing is retracted, but nothing was CHECKING that it did. EXP-0019 is the reason
+      this guard exists at all: fold 1 scored with weights trained on fold 1, +0.203 of inflated score and 25
+      of 26 manufactured division true positives, with every gate in the repo green throughout.
+      The guard now FAILS CLOSED when a declared base notebook is absent, so the inheritance route cannot be
+      re-opened by deleting a file.
+    date: '2026-08-30'
+    tags: [fold-hygiene, leakage-guard, exp-0019-class, pkt-0037, verified, hole-closed]

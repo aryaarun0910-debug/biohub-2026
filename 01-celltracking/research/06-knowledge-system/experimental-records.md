@@ -5599,3 +5599,97 @@ passed, and the two facts did not exist. Re-verified after the restore: 197 fact
 `EXP-0009` `deployed`, both reasons present, `FACT-0387`'s tags clean, registry OK, 16/16 validity tests
 pass. Standing warning: a further `git checkout` of `facts.yaml` would destroy `FACT-0388`/`FACT-0389`,
 which exist only in the working tree. Receipts: `_evidence/audit/receipts/`.
+
+**`PKT-0037` upstream foundations (2026-08-30, CPU only, no GPU / push / submission) — the GPU gate is
+NOT released, and one mechanical item is why.** Four of five tasks landed green; the fifth is written,
+tested and deliberately unapplied because P33 v2 was RUNNING at every status check, and patching
+`assoc_feature_parity.py` mid-run would break the version-coherence chain. **Band-A non-vacuity:** the gate
+floors band B at `b_checked > 0` and nothing floors band A
+(`scripts/kaggle_edits/assoc_feature_parity.py:257-262`), so a crop that compared nothing satisfies every
+band-A condition trivially. The defect needed no manufacturing — the repo's own green
+`test_gate_passes_when_the_cache_is_faithful` already runs a crop whose band A compares ZERO pairs (all stub
+probabilities are 1/3, nothing clears 0.5) and asserts `all_passed is True`. Both workers were run against
+the identical fixture: committed passes with band A recorded 0 / reproduced 0; the prepared patch fails with
+`a_checked=0` while band B still checked 27, so the refusal is band A's floor. Patch and tests at
+`_evidence/foundations/pending/`; the fixture correction is load-bearing (feature spread 0.1, not 1.0 — at
+1.0 the source-axis softmax saturates and silently turns the *corruption* test green for the wrong reason).
+**Fold hygiene, fixed:** `apply_edit` appends a spec's env after the base notebook's text
+(`kaggle_factory.py:499-508`), so an inherited `BIOHUB_LOEO_FOLD` stays in force; the guard now resolves the
+EFFECTIVE fold and fails closed on an unreadable base. Fold-1 coverage 12→14 checked (54→52 skipped),
+fold-0 19→22, and the two specs that were invisible are genuinely fold 1 — `p29_p28_detpeak_export_f1` and
+`p34_acquisition_f1`, both on the f1 champion-control base. Both are clean, so a hole closed, not a result
+retracted. **Dual trunk fits one session:** from the two pre-ILP exports and the two kernel logs, f0 is 71
+crops / 2,332,346 nodes at 86.65 min prediction and f1 128 / 2,523,479 at 139.27 min; a feature pass is a
+strict subset of that work, so dual trunk is ≤ 2.89 h (f0) and ≤ 4.64 h (f1) plus 1.36 h measured overhead,
+with a 0.61 / 0.66 GB cache. Partition by FOLD, not by trunk — `FACT-0392`'s confound is *between trunks*, so
+splitting by trunk is exactly what puts the resolving comparison across a session boundary; two fold
+sessions also sit at the `FACT-0061` cap. The sequential alternative is recorded WITH its confound (two
+sessions share no detector pass unless the node set is carried, and `FACT-0363` says run-to-run identity is
+not free). **Binding + auditor:** `scripts/win_bet/audit_feature_cache.py` binds trunk sha256/role/
+provenance, fold + embryo + crops, normalisation, node-id convention with separate coordinate and feature
+digests, the candidate rule with per-band counts, and notebook/spec/commit — and `self-test` shows 12/12
+rejections, each fired by the check designed for it rather than merely fired: `features_unchanged` for a
+swapped trunk on an unchanged node set, `node_order_unchanged` for a within-frame coordinate permutation,
+`learnable_band_is_not_empty` for an empty sub-0.5 band, `fold1_does_not_use_the_leaky_pack_weights` and
+`embryo_matches_fold` for wrong-fold weights, plus `audit-pair` for the dual-trunk shape. The first version
+rejected the swapped trunk with a *reorder* message — one digest was split into two so the message names the
+right repair. **Two fail-closed refusals to design around before the cache run is built:** a cache without
+its frame partition is unauditable, and one without its candidate surface cannot be checked for an empty
+band — and `assoc_feature_cache.py --cache-out` currently writes exactly that first shape. Registry,
+research-tree and claims gates green; evidence in `_evidence/foundations/`.
+
+## 2026-08-30 (later) — PKT-0036 continued: the champion transition is RELEASED, and the fold-1 harness points at the surface that cannot fail
+
+**Champion transition — RELEASED.** `scripts/win_bet/audit_release_receipt.py` (new, 19 self-tests, 16
+planted defects each caught by its own named condition) binds notebook, weights, manifest, graph and score
+into one receipt. P32 / `EXP-0038` / submission 55871868 passes **26 of 26** conditions, so the baseline
+relocates from P24 to P32 (`FACT-0393`, `FACT-0341` stays true of P24). The strongest single condition was
+not on the list the packet inherited: a **fresh pull of the public source kernel today** has cell sources
+byte-identical to the executed notebook (`de60a4f0…`, `id_no` 131761963 unchanged), which re-establishes the
+verbatim claim that the build itself had destroyed. The score was independently re-derived through the
+submissions path, and the preregistered band is written into the submission description itself, so Kaggle
+timestamps the preregistration before the score existed.
+
+**The outgoing champion FAILS the same receipt**, at `graph_fetched`: P24 has no `submission.csv`, no
+structural audit and no version-bound audit receipt on disk, and `FACT-0341` cites
+`notebooks/kaggle_p24_deepcenter_best_veto/_out/` — a directory that does not exist, because
+`notebooks/**/_out/` is gitignored and its absence is silent. The transition therefore moves the baseline
+from an **unbound** artifact to a **bound** one. Five exceptions are named rather than papered over: the P32
+spec sets `base_notebook == built_notebook`, so the build overwrote its own base and `kaggle_factory build`
+on it now aborts (and `cmd_verify` is vacuous for the same reason); the manifest's `pushed_slug` line is
+uncommitted; dataset sources carry no version pin; and `FACT-0378`'s `leaderboard_legitimacy` sub-claim has
+no instrument — measured here, all four **visible** test movies are also train movies, and the hidden set
+cannot be inspected.
+
+**A live veto: the fold-1 harness surface cannot falsify a ranker.**
+`scripts/win_bet/assoc_specs/harness_f1.json` names `C:/temp/assoc/f1.parquet`, which is the **deployed**
+surface — 2,162,040 rows, 2,162,040 targets, **max 1 candidate per target, contested share 0.0000**, minimum
+probability exactly 0.5 (`FACT-0369`'s set). Its `cache.preilp` and `cache.ecb_dir` are pre-P34 paths. The
+widened fold-1 surface `FACT-0388` was measured on is 3,704,355 rows at 38.1% contested. The harness's own
+refusal was **exercised, not read**: `run_harness(allow_degenerate=False)` raises `HarnessRefusal` on a
+synthetic single-candidate table and runs clean on a two-candidate one, so the spec cannot silently produce
+a degenerate number — the residual hazard is `allow_degenerate: true`, and a fold-1 result carrying it is
+vetoed as evidence. **Scoped the same session:** Agent 3's `tournament_context_f1.json`, which appeared
+mid-audit, points at the widened table and the `C:/temp/p34_f1/` cache and supersedes `harness_f1.json`,
+so the veto attaches to the stale spec, not to the fold-1 lane. One new risk in its place — that spec
+reads its evaluation table from `C:/temp/audit_receipts/f1_p34.parquet`, inside this packet's own audit
+scratch, so an auditor's clean-up would silently destroy the tournament's evaluation surface.
+
+**Open items re-checked.** (a) Agent 1's effective-fold resolver is verified by independent
+re-implementation over all 66 specs: fold-1 visibility rises 12 → 14, the two newly visible specs are
+exactly `p29_p28_detpeak_export_f1` and `p34_acquisition_f1`, and no spec has an unreadable base notebook.
+Residual limit, measured not assumed: the regex cannot see `setdefault`, `update`, a trailing comment,
+`str(1)` or an f-string — latent today, since the only `setdefault` key anywhere in `notebooks/` is
+`POLARS_PREFER_PKG`. The fix is **uncommitted**. (b) Still open, and sharper: the StableDet trunk Agent 2
+will cache is byte-identical to HOCT's bare `fold0_edge_predictor_best.pth`; all three trunks in play are
+bare 136-tensor state dicts with zero non-tensor keys, and `primary` is now identified by hash as our
+**deployed** edge predictor via the P34 kernel log. Fold-1 HOCT stays vetoed. (c) Unchanged — the PKT-0032
+crossfit map still declares `train_external: true` on Zebrahub. (d) The in-kernel gate still floors band B
+only, so a vacuous band A would pass; the external check enforces it. **The registry planting lock was
+exercised across two processes** — the waiter blocked 5.13 s and acquired only after release.
+
+**P33 / `EXP-0041` is still RUNNING at close, so the feature-cache veto stands.** Instruments added:
+`scripts/win_bet/audit_release_receipt.py`, `tests/test_audit_release_receipt.py`. Receipts in
+`_evidence/audit/receipts/{release_p32,release_p24,champion_transition,launch_control,p32_version_coherence}.json`.
+Zero GPU, zero submissions, no model implementation or foreign packet touched. Registry, research-tree and
+claims gates green.

@@ -90,4 +90,113 @@ outputs:
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  FOUNDATIONS ARE **NOT YET** CERTIFIED, AND EXACTLY ONE ITEM REMAINS - APPLYING A PATCH THAT IS
+  ALREADY WRITTEN, TESTED AND PROVEN BY MUTATION. Tasks 2, 3, 4 and 5 are complete and green;
+  task 1 is complete as a change set but is deliberately UNAPPLIED because P33 v2 was still
+  RUNNING at every check this session (kaggle_factory status, 2026-08-30). Applying it would have
+  broken the version-coherence chain this packet forbids breaking.
+
+  (1) BAND-A NON-VACUITY - PREPARED, PROVEN, NOT APPLIED. The gate floors band B at
+  b_checked > 0 but nothing floors band A, so a crop whose band A compared nothing satisfies
+  every band-A condition trivially and is reported passed
+  (scripts/kaggle_edits/assoc_feature_parity.py:232-262). The defect is not hypothetical and did
+  not need manufacturing: the repo own green test
+  tests/test_assoc_feature_parity.py::test_gate_passes_when_the_cache_is_faithful ALREADY runs a
+  crop whose band A compares ZERO pairs - every stub probability is 1/3, nothing clears the
+  deployed 0.5, and the pre-ILP fixture therefore records no band-A edge - and asserts
+  all_passed is True. Measured by running both workers against the identical fixture: committed
+  all_passed=True with band A recorded 0 and reproduced 0; prepared patch all_passed=False with
+  a_checked=0 while band B still checked 27 pairs, so the refusal is the band-A floor and not a
+  collateral band-B failure (_evidence/foundations/band_a_floor_mutation.json). The prepared test
+  additions FAIL against the committed worker and PASS 9/9 against the patched one. The change
+  set is a four-hunk diff plus a fixture correction, at _evidence/foundations/pending/ and
+  C:/temp/foundations/pending/.
+  NOTE FOR WHOEVER APPLIES IT: the fixture correction is NOT optional and NOT cosmetic. The
+  patched worker fails the existing happy-path test until the stub features vary between nodes
+  of a frame, and the spread must be 0.1 rather than 1.0 - at 1.0 the source-axis softmax
+  saturates and swallows the 0.05 perturbation that test_a_corrupted_cache_fails_the_gate
+  depends on, turning the corruption test green for the wrong reason. That was found by running
+  it, not by reading it.
+
+  (2) FOLD HYGIENE - APPLIED AND GREEN. kaggle_factory.apply_edit APPENDS a spec env block after
+  the base notebook existing text (scripts/core/kaggle_factory.py:499-508), so every
+  os.environ assignment the base already carries stays in force unless the spec names the same
+  key. tests/test_loeo_weights_hygiene.py read the fold from the spec env alone and therefore
+  SKIPPED every spec built by inheritance. It now resolves the EFFECTIVE fold - base notebook
+  first, spec env overriding - and fails closed on a base notebook that is not on disk. Coverage
+  measured before and after: the fold-1 guard goes from 12 checked / 54 skipped to 14 / 52,
+  reproducing the PKT-0036 audit numbers exactly, and the fold-0 guard from 19 to 22; 36 of 66
+  specs now have a resolvable fold against 31. Five specs were invisible and TWO OF THEM ARE
+  REALLY FOLD 1: p29_p28_detpeak_export_f1 and p34_acquisition_f1, both built on
+  notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb, which bakes in
+  BIOHUB_LOEO_FOLD = 1. Both happen to be clean, so this closes a hole rather than retracting a
+  result - but the fold-1 feature-cache run is built exactly that way. Seven mutation tests
+  manufacture the defect through the inheritance route and require the guard to fire, including
+  a positive heartbeat that names the two inherited specs so a future refactor cannot silently
+  skip everything again (_evidence/foundations/fold_hygiene_resolver.json).
+
+  (3) DUAL-TRUNK IN ONE SESSION - IT FITS, AND THE PARTITION SHOULD BE BY FOLD, NOT BY TRUNK.
+  Computed from artifacts on disk rather than estimated: fold 0 is 71 crops / 2,332,346 nodes /
+  1,973,714 candidate edges with a measured prediction pass of 86.65 min on T4x2
+  (C:/temp/p30_f0/biohub-p30-acquisition-f0.log); fold 1 is 128 crops / 2,523,479 nodes /
+  2,162,040 edges at 139.27 min (C:/temp/p34_f1/kernel.log). A feature pass is a strict SUBSET of
+  that work - no ILP solve, no post-ILP chain - so doubling it for two trunks is a genuine upper
+  bound and over-counts twice, since the detector pass and the candidate graph are shared. Dual
+  trunk is then at most 2.89 h (f0) and 4.64 h (f1) of prediction, plus 1.36 h of measured
+  non-prediction kernel overhead: 4.25 h and 6.00 h per fold. At 32 float32 per node the dual
+  trunk cache is 0.61 GB (f0) and 0.66 GB (f1) uncompressed. Everything in ONE session is 8.89 h
+  upper bound, which also fits, but one session PER FOLD with BOTH TRUNKS inside is the right
+  shape: the FACT-0392 confound is between TRUNKS, and splitting by trunk is precisely what puts
+  the resolving comparison across a session boundary, whereas splitting by fold introduces no new
+  confound because the contract already forbids pooling the embryo directions. Two fold sessions
+  also sit exactly at the FACT-0061 cap.
+  ONE HARD PRECONDITION INSIDE THE SESSION: both trunk passes must index ONE detector pass, so
+  the two caches differ ONLY in the 32-dim features. That is available rather than aspirational -
+  the PKT-0029 upstream audit item U1 establishes that the HOCT configuration takes node
+  coordinates from a node-graph provider and that peak extraction does not determine the node set
+  at all. audit_feature_cache.py audit-pair REFUSES a pair whose coordinate digests disagree and
+  equally refuses one whose feature digests AGREE.
+  THE SEQUENTIAL ALTERNATIVE, WITH ITS CONFOUND STATED because the packet requires it be stated
+  rather than quietly taken: four (fold, trunk) sessions, two at a time. Two sessions do not share
+  a detector pass unless the node set is carried between them as a fixed input, and FACT-0363
+  already measured that run-to-run identity is not free on this pipeline. Without that carry a
+  trunk-to-trunk difference is confounded with a node-set difference and no HOCT null may be read
+  as evidence about the head. Not recommended; recorded so the choice is visible.
+  UNREGISTERED NUMBER, FLAGGED RATHER THAN USED: the 12 h Kaggle single-session limit is a
+  platform figure that is NOT in facts.yaml. The longest run we have our own evidence for is
+  2.81 h. Every margin above is stated against that unverified 12, so if the primary wants the
+  headroom claim to be load-bearing it should be measured and registered first.
+
+  (4) CACHE BINDING - BUILT. scripts/win_bet/audit_feature_cache.py bind writes a manifest beside
+  the cache carrying trunk checkpoint sha256 plus bytes, role and provenance; fold and held-out
+  embryo and crop list; the feature normalisation and its statistics; the node-id convention with
+  the frame partition and SEPARATE coordinate and feature digests; the candidate rule with floor,
+  cap, gate, det threshold, pool kernel, softmax axis and abstain mass together with the per-band
+  pair counts; and the notebook sha256, spec, kernel and git commit.
+
+  (5) THE INDEPENDENT AUDIT COMMAND - BUILT AND SHOWN TO REJECT, 12/12 BY MUTATION. audit
+  re-derives the binding from disk alone; audit-pair checks a dual-trunk pair; self-test
+  manufactures the defects and requires rejection. Each of the four the packet names is rejected
+  BY THE CHECK DESIGNED FOR IT, which is a stronger claim than that it rejected: a swapped trunk
+  on an unchanged node set fires features_unchanged; a swapped checkpoint fires
+  trunk_checkpoint_sha256; a within-frame coordinate permutation that changes no shape, count or
+  feature value fires node_order_unchanged; a cache with nothing at or below the deployed 0.5
+  floor fires learnable_band_is_not_empty; split_0 weights on fold 1 fire
+  fold1_does_not_use_the_leaky_pack_weights; and a fold declared over the other embryo fires
+  embryo_matches_fold. Two accept controls and three dual-trunk cases are included, because an
+  auditor that rejects everything checks nothing. Getting there required splitting one digest
+  into two - the first version rejected the swapped trunk with a REORDER message, which would
+  have sent an operator to the wrong repair. 17 tests in tests/test_audit_feature_cache.py.
+  Two fail-closed refusals worth knowing BEFORE the cache run is built: a cache without its frame
+  partition is unauditable because node ids are not provable, and a cache without its candidate
+  surface cannot be checked for an empty band - and
+  scripts/win_bet/assoc_feature_cache.py --cache-out currently writes exactly that first shape.
+  The cache-writing run must emit coords, frames, starts, ends, feat_frames, feat_t, source_id,
+  target_id and edge_prob, or the auditor will refuse it.
+
+  VERDICT: NOT CERTIFIED. One item remains and it is mechanical: when P33 v2 lands and PKT-0036
+  has audited it, apply _evidence/foundations/pending/*.diff, confirm
+  tests/test_assoc_feature_parity.py is 9/9, and the gate on GPU is released. Nothing else in
+  this packet blocks. No GPU job, kernel push or submission was made; the registry, research-tree
+  and claims gates are green.
