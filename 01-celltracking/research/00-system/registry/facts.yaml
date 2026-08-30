@@ -6519,8 +6519,10 @@ facts:
 
   - id: FACT-0403
     statement: >-
-      Gate 1 attempt 4 (P36, the passive tap) RAN AND MEASURED for the first time in four attempts, and
-      failed for a reason that is NOT a cache defect. The tap captured both expected crops with real deployed
+      Gate 1 attempt 4 (P36, the passive tap) RAN AND MEASURED for the first time in four attempts. It is
+      NOT a failed cache: passivity is PROVEN, the pair-and-role schema is PROVEN, structural integrity is
+      PROVEN, and the parity verdict is INVALID rather than negative - because the reference quantity it
+      compared against was downstream of secondary fusion. The tap captured both expected crops with real deployed
       quantities - feat_dim 32, pos_dim 32, downsample (1,4,4), real per-crop quantiles - passivity verified
       both statically and in-kernel, integrity failures ZERO, positional features round-tripping EXACTLY at
       0.0, and both probability bands non-vacuous on both crops (band A 1,703 and 2,496 checked; band B 998
@@ -6584,3 +6586,55 @@ facts:
       NO PATCH AND NO RELAUNCH WAS MADE on this finding, per the standing instruction.
     date: '2026-08-30'
     tags: [gate-1, p36, passive-tap, secondary-blend, comparison-target, first-evidence, verified, headline]
+
+  - id: FACT-0404
+    statement: >-
+      The public 0.933 notebook differs from our released 0.931 champion by EXACTLY TWO ENVIRONMENT VALUES
+      and nothing else. Cell-by-cell over all ten cells, the only substantive differences are
+      BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT 0.15 -> 0.30 and BIOHUB_SECONDARY_DETECTION_WEIGHT 0.475 -> 0.80,
+      each appearing twice because both are re-asserted in a guard block that the notebook checks against
+      itself. No code, no model, no threshold, no candidate rule and no post-processing differs. The author's
+      own comment states the single change against THEIR fork was the detection weight, which places the
+      bidirectional 0.30 in the fork they started from rather than in their contribution
+    value: 2
+    unit: environment_values_separating_the_public_0933_from_our_0931
+    scope:
+      theirs: {kernel_id: 132471639, notebook_sha256: c7cdda0a, cells: 10, accelerator: T4 GPU}
+      ours: {notebook: notebooks/kaggle_p32_public931_exact/, sha256: 856451d8, cells: 10}
+      differences:
+        BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT: {ours: 0.15, theirs: 0.30, also_in_guard: true}
+        BIOHUB_SECONDARY_DETECTION_WEIGHT: {ours: 0.475, theirs: 0.80, also_in_guard: true}
+      cells_differing: 4
+      cells_differing_substantively: 2
+      author_comment: "SINGLE change vs that fork: BIOHUB_SECONDARY_DETECTION_WEIGHT 0.475 -> 0.80, our independently-swept dual-seed detection-fusion peak (+0.003 on our lineage)"
+      delta_vs_our_champion: 0.002
+    provenance: VERIFIED
+    validity: SUSPECT
+    validity_reason: >-
+      The DIFF is verified - it is a cell-by-cell comparison of two notebooks on disk and it is exact. What
+      is SUSPECT is any causal reading of the 0.933. It is an EXTERNAL leaderboard number on someone else's
+      account, unreproduced by us, and two knobs moved together, so neither is attributable on this evidence.
+      The author's claimed +0.003 for the detection weight is measured on THEIR lineage, not ours, and we
+      have no control arm for it.
+    instrument: >-
+      cell-by-cell notebook diff of C:/temp/public_kernels/rishabhr0y_933_biohub_bidir30/933-biohub-bidir30.ipynb
+      against notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb
+    note: >-
+      WHY THIS IS WORTH RECORDING AND WHY IT IS NOT YET A PLAN. It is the cleanest external delta this
+      campaign has seen: two environment values on an otherwise byte-identical configuration, against a base
+      we have already released and bound with a receipt. That makes it cheap to test and unusually easy to
+      attribute IF tested one knob at a time.
+      IT DOES NOT REACH THE TARGET. 0.933 is +0.002 on our 0.931, against a 0.940 objective. Adopting it
+      wholesale buys a fraction of the distance and buys no capability - the same category as FACT-0393's
+      bridge, which relocated a baseline without advancing association.
+      THREE STANDING RULES CONSTRAIN WHAT MAY BE DONE WITH IT, and they were written before this appeared.
+      (1) PKT-0028 rule (1) forbids crediting any individual knob of the public bundle; both of these are
+      knobs of that bundle. (2) LEVER-0042's lane is capped at ONE submission and ENDS either way, so this
+      cannot ride on it. (3) FACT-0378 still holds: this lineage cannot be validated offline at all, so no
+      offline check can rank these two knobs before a submission is spent.
+      CONSEQUENCE: testing this needs its own lever, its own preregistration and its own submission budget,
+      and the honest design tests ONE knob at a time or accepts that a win is unattributable. A two-knob
+      exchange that wins tells us only that the pair is better, which is exactly the confounding PKT-0028 was
+      written to prevent.
+    date: '2026-08-30'
+    tags: [public-lineage, 0933, bidirectional-weight, secondary-detection-weight, external, suspect]

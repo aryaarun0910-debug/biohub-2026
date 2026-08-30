@@ -741,14 +741,17 @@ experiments:
     kernel_version: 1
     submission: null
     lb: null
-    status: failed
+    status: invalid
     date: '2026-08-30'
     facts: [FACT-0403, FACT-0402, FACT-0400]
     note: >-
       The replacement for P33, which is superseded (EXP-0040, EXP-0041). Launched only after the class-aware
       CPU preflight returned PASS with failed=[] and skipped=[] on the exact committed artifact, its receipt
       signature verified and its notebook_sha256 matching the live file - the launch gate the host set.
-      IT FAILED, AND IT IS THE FIRST GATE-1 RUN THAT PRODUCED EVIDENCE. Three previous attempts compared
+      NOT A FAILED CACHE - AN INVALID PARITY VERDICT. Recorded as the host directed: passivity PROVEN,
+      pair/role schema PROVEN, structural integrity PROVEN, and the parity verdict INVALID because the
+      reference quantity was downstream of secondary fusion. It is also the first Gate-1 run that produced
+      evidence. Three previous attempts compared
       ZERO pairs; this compared 4,199 band-A and 9,907 band-B pairs across both expected crops, on real
       32-dimensional features at the deployed downsample, with passivity proved statically and re-proved
       in-kernel. Positional features round-trip at exactly 0.0 and integrity failures are zero, so the cache
