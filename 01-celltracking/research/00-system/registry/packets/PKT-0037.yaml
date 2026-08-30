@@ -10,6 +10,26 @@ why_no_lever: >-
   RESULT uninterpretable downstream - which is the expensive failure, because a null from an ambiguous cache
   cannot distinguish "the head does not work" from "we fed it the wrong features". R6 permits a null lever.
 
+scope_rescope_2026_08_30: >-
+  RESCOPED BY THE HOST AFTER A SECOND GPU SESSION WAS LOST TO ENVIRONMENT DISCOVERY (FACT-0397). This packet
+  is no longer "upstream foundations" in general; it owns LAUNCH INFRASTRUCTURE, and its deliverable is ONE
+  REUSABLE PREFLIGHT SYSTEM that runs before every Kaggle GPU job:
+    - a CENTRAL bounded dataset resolver, so no experiment ever carries its own mount path again;
+    - a Kaggle CPU PREFLIGHT using the exact datasets, notebook, patches and subprocess command;
+    - verification of imports, file discovery, EXPECTED CROP COUNT, schemas, writable output, model paths
+      and patch heartbeats;
+    - the worker run in --preflight-only mode THROUGH THE REAL SUBPROCESS BOUNDARY, because both Gate 1
+      failures lived at boundaries a same-process check cannot see;
+    - a signed receipt carrying resolved paths, input hashes, crop names, code commit and expected GPU
+      outputs;
+    - EXACT POSITIVE COUNTS - "non-empty" is insufficient, and FACT-0394 is why: a band that compared
+      nothing passed every non-empty test it had;
+    - unified queue-fetch and factory-output artifact discovery, with P24 and P32 regression fixtures for
+      BOTH conventions - the two-convention split is what produced the false FAIL corrected in FACT-0396.
+  P33 attempt 3 receives GPU ONLY after this preflight passes against the exact built notebook. One
+  environment failure after that stops the mechanism until it is reproduced locally. No fourth speculative
+  kernel.
+
 authority: >-
   TERMINAL GATE ON GPU. No feature cache launches until this packet certifies that every ambiguity capable
   of making a null uninterpretable has been removed. That is a hard precondition on Slot A and Slot B, and

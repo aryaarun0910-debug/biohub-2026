@@ -1,0 +1,72 @@
+id: PKT-0039
+title: "AGENT 2 - one capped exploitation of the 0.931 base: the P24 DeepCenter/veto bundle, and then the lane ends"
+lever: LEVER-0042
+owner: agent-2-exploitation
+lock: claimed
+opened: '2026-08-30'
+
+claim: >-
+  Exchanging ONLY the collapsed DeepCenter/veto configuration in the public 0.931 base for the P24
+  best-checkpoint plus safe-division-veto bundle scores above 0.931, establishing an intermediate baseline
+  without touching the association capability the 0.950 route depends on.
+
+falsifier: >-
+  The one preregistered submission scores at or below 0.931. Because exactly one component is exchanged on
+  an otherwise byte-identical base, a miss is a fact about that component ON THIS BASE - not an invitation to
+  sweep its neighbours. THE LANE ENDS EITHER WAY. There is no second exploitation experiment, no follow-up
+  tuning, and no stacking, whatever the score.
+
+prediction: >-
+  MUST BE WRITTEN BEFORE THE BUILD, with the low band promoted per packet convention, and it must be placed
+  in the SUBMISSION DESCRIPTION as well as here - FACT-0396 established that this makes Kaggle itself
+  timestamp the preregistration as earlier than the score, which is stronger provenance than this repository
+  can give. Reason the band honestly from FACT-0341 (this bundle was worth +0.003 on our own lineage) and
+  FACT-0345 (the offline instrument under-read it three to four times), while noting that the two bases are
+  different and the component may not be additive on a configuration that already carries its own
+  DeepCenter settings.
+
+inputs:
+  facts: [FACT-0393, FACT-0341, FACT-0345, FACT-0377, FACT-0378, FACT-0396]
+  artifacts:
+    - notebooks/kaggle_p32_public931_exact/       # the 0.931 base, released champion
+    - C:/temp/queue/p24_deepcenter_best_veto/     # the P24 artifact, receipt-passing
+  code:
+    - scripts/kaggle_specs/p32_public931_exact.json
+    - scripts/core/kaggle_factory.py
+    - scripts/win_bet/audit_release_receipt.py
+
+method: >-
+  ONE controlled treatment, in this order and no other. (1) Preregister the band and falsifier HERE and in
+  the submission description. (2) Build the treatment on the P32 base with exactly one component exchanged -
+  the DeepCenter checkpoint and safe-division-veto pair - and nothing else touched. (3) CPU PREFLIGHT, which
+  is now mandatory before any GPU push (standing rule, head of levers.yaml): the exact built notebook, the
+  exact datasets, the real subprocess boundary. (4) ONE GPU build. (5) Audit through
+  scripts/win_bet/audit_release_receipt.py, which must bind notebook, weights, manifest, graph and score.
+  (6) Submit STANDALONE, never stacked. Then stop.
+  NOTE THE BUILD TRAP THIS BASE CARRIES, recorded as exception E1 of FACT-0396: the P32 spec sets
+  base_notebook == built_notebook, so a rebuild consumed its own base and kaggle_factory build on that spec
+  now ABORTS. The treatment spec must name a base that still exists, or restore one, before anything is
+  built. Do not work around this by pointing the spec at its own output.
+
+budget:
+  gpu_sessions: 1   # Slot A
+  submissions: 1    # exactly one, and PKT-0036 releases it
+  wall_clock: 1 day
+
+forbidden:
+  - any second submission on this lane, whatever the first one scores
+  - threshold changes, candidate widening, rescue changes, or stacking of any kind
+  - crediting any individual knob of the public bundle - PKT-0028 rule (1) still binds (FACT-0377)
+  - pushing to GPU before the CPU preflight passes on the exact built notebook (standing rule)
+  - claiming LEVER-0041 or LEVER-0034, or editing PKT-0036, PKT-0037 or PKT-0040
+  - treating an offline check as a score prediction - this base cannot be validated offline at all (FACT-0378)
+  - .claude/settings.json or .gitignore
+  - staging or committing to git - the primary agent commits explicit paths per packet
+
+outputs:
+  evidence: C:/temp/exploit931/ and _evidence/exploit931/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null

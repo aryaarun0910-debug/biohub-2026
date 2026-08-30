@@ -47,6 +47,34 @@ levers:
 # public-bundle micro-ablation - those remain excluded from submissions entirely.
 # ---------------------------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------------------------
+# STANDING GPU RULE (host, 2026-08-30) - EVERY SESSION MUST PRODUCE AN ASSET
+#
+# WHY IT EXISTS. Two consecutive GPU sessions were spent on Gate 1 and it never compared a single
+# crop. Attempt 1 died on a process boundary (FACT-0387); attempt 2 died on a dataset mount root
+# (FACT-0397) that this repository had already hit, diagnosed and written up on 2026-08-01 in a
+# file the failing notebook LOADS. Neither was a scientific result. Both were environment
+# discovery paid for at GPU rates.
+#
+# THE RULE. Every GPU session must produce ONE of:
+#   - a reusable feature dataset;
+#   - a trained model checkpoint;
+#   - a full-fold scientific result;
+#   - a leaderboard artifact.
+# GPU is NEVER used to discover mounts, imports, filenames, subprocess boundaries or empty inputs.
+# Those are CPU preflight questions and they are answered on CPU, against the exact built notebook,
+# the exact datasets and the real subprocess boundary, before a kernel is pushed.
+#
+# ONE ENVIRONMENT FAILURE AFTER THE PREFLIGHT EXISTS STOPS THE MECHANISM until it is reproduced
+# locally. There is no fourth speculative kernel.
+#
+# DAILY ATTRITION CONTRACT. Every 24-hour cycle ends with at least one of: an audited leaderboard
+# score; a reusable full-fold feature cache; a trained model checkpoint; a complete full-chain
+# model comparison; or a model family killed on committed evidence. A cycle that ends with only a
+# new harness, packet or audit rule is INCOMPLETE - unless that harness demonstrably prevented an
+# already-scheduled GPU launch, which is the one case where infrastructure counts as output.
+# ---------------------------------------------------------------------------------------------
+
   - id: LEVER-0001
     claim: >-
       Smoothing node positions along a tracklet before the linker recovers association
@@ -1356,3 +1384,32 @@ levers:
       GATED ON THE CACHE. No training claim may be made from a cache that has not passed Gate 1 (EXP-0041);
       a head trained on an unlicensed cache measures the cache, which is the whole reason the gate exists.
     priority: 1
+
+  - id: LEVER-0042
+    claim: >-
+      Replacing ONLY the collapsed DeepCenter/veto configuration in the public 0.931 base with the P24
+      best-checkpoint plus safe-division-veto bundle - the one inherited component independently measured
+      positive on our own lineage - scores above 0.931
+    status: open
+    falsifier: >-
+      The single preregistered submission scores at or below 0.931. Because exactly one component is
+      exchanged and the rest of the public configuration is untouched, a miss is a fact about that component
+      ON THIS BASE and not an invitation to sweep its neighbours. THE LANE ENDS EITHER WAY - win or lose,
+      there is no second exploitation experiment and no follow-up tuning of the public lineage.
+    supporting: [FACT-0393, FACT-0341, FACT-0345, FACT-0377]
+    note: >-
+      OPENED 2026-08-30 as the ONLY inherited-component exploitation experiment, deliberately capped at one
+      submission. Its purpose is to establish an intermediate baseline quickly, NOT to pursue 0.950 - that is
+      LEVER-0041's job, and this lane must not consume effort from it.
+      WHY THIS COMPONENT AND NO OTHER. The DeepCenter best.pt + safe-division-veto bundle is the single knob
+      in the public lineage that we have measured POSITIVELY AND INDEPENDENTLY on our own substrate:
+      FACT-0341 records it as the P24 A/B that took us to 0.928, and FACT-0345 records the offline
+      instrument UNDER-reading its leaderboard contribution by three to four times. Every other difference
+      in the public bundle is confounded (FACT-0377) and PKT-0028's rule (1) forbids crediting any of them.
+      WHAT THIS IS NOT. It is not a knob sweep, not candidate widening, not a threshold change, not a rescue
+      change and not stacking. Those remain excluded from submissions entirely. The exchange is one component
+      for one component on an otherwise byte-identical base.
+      A CAUTION THAT APPLIES EVEN IF IT WINS. The 0.931 configuration cannot be validated offline at all -
+      its secondary saw all 199 movies (FACT-0378) - so this experiment's offline preflight can check that
+      the artifact is well-formed and CANNOT predict its score. The band is a prior, not a measurement.
+    priority: 2

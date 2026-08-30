@@ -68,6 +68,21 @@ method: >-
   refitting, no threshold nudging, no per-fold calibration. Models are compared by CONVERTED TRUE EDGES and
   full-chain raw association, never by training loss.
 
+host_direction_2026_08_30: >-
+  THIS IS THE PRIMARY SCORING LANE AND IT MUST DELIVER CHECKPOINTS AND FULL-FOLD RESULTS, NOT ANOTHER
+  ARCHITECTURE REPORT. Four constraints added by the host:
+  (1) DO NOT WAIT ON PUBLIC HOCT WEIGHT COMPATIBILITY. PKT-0029 is a parallel compatibility test, not a
+      dependency. Train from a contract we own.
+  (2) CACHE BOTH PLAUSIBLE TRUNKS IN EACH FOLD ACQUISITION, so trunk provenance can never invalidate a null
+      (FACT-0392's third risk).
+  (3) PIPELINE, DO NOT BATCH. Training begins as soon as the FIRST usable fold cache lands - do not wait for
+      every downstream document, and do not spend both GPU slots on acquisition simultaneously if that
+      leaves nothing training behind them.
+  (4) ITERATE ON REPRESENTATION, NOT THRESHOLD GRIDS. FACT-0386 already established that the head is not the
+      constraint; a threshold sweep would re-answer a question that is closed.
+  The first genuinely new model passing the honest fold-0 gate receives the standing seam-calibration
+  submission BEFORE further polishing - PKT-0036 releases it.
+
 budget:
   gpu_sessions: 2   # Slot A fold-1 cache then training; Slot B fold-0 cache then the complementary head
   submissions: 0    # the seam-calibration slot is PKT-0036's to release, not this packet's to spend
