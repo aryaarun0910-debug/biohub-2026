@@ -6822,3 +6822,99 @@ facts:
       a skipped test is the quietest way to test nothing.
     date: '2026-08-30'
     tags: [defect-8, wrong-program, vendored-vs-deployed, fixture-differs-from-production, verified]
+
+  - id: FACT-0409
+    statement: >-
+      The feature-cache contract moved from 1 to 2 by a delta VERIFIED by ast-diff rather than by hand:
+      52 keys to 79, exactly THREE removed and THIRTY added. The three removed are the unqualified
+      probability fields band_a_prob, band_b_prob and edge_prob - no field named merely "probability"
+      survives. Two further contracts the migration brief did not name were found by reading the tap and
+      locked as well: the per-band selection surface, where bands A and B are selected on
+      deployed_probs_postblend while band P is selected on primary_probs_preblend, and the contract version
+      itself. The drift lock is exact set equality in BOTH directions, so a new key on either side fails on
+      CPU
+    value: 79
+    unit: required_cache_keys_under_contract_2
+    scope:
+      before: 52
+      after: 79
+      removed: [band_a_prob, band_b_prob, edge_prob]
+      removed_count: 3
+      added_count: 30
+      optional_still: [role_pos]
+      band_surface: {a: deployed_probs_postblend, b: deployed_probs_postblend, p: primary_probs_preblend}
+      contract_version: 2
+      drift_lock: {kind: exact set equality both directions, file: tests/test_audit_feature_cache.py, line: 94}
+      no_fusion_identity: {preblend_vs_postblend_max_delta_no_stage: 0.0,
+                           preblend_vs_postblend_max_delta_secondary_at_0_15: 0.313,
+                           band_p_vs_band_a_rows_no_stage: [19, 19],
+                           band_p_vs_band_a_rows_secondary_on: [19, 8]}
+      suites: {audit_feature_cache: 82, assoc_feature_tap: 41, auditor_selftest: "38/38"}
+      capacity_worst_case_bytes_per_node: 1580
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The delta was computed by ast-parsing the tap's own _AFT_SCHEMA_REQUIRED and set-differencing against
+      the auditor's list, not by transcribing a brief - and the brief turned out to be correct in every
+      entry, which is only knowable because it was checked. The no-fusion identity is measured on the real
+      deployed predictor in both directions: exactly 0.0 with no stage, 0.313 with a secondary at 0.15, so
+      the conditions that rest on it are not vacuous.
+    instrument: >-
+      tests/test_audit_feature_cache.py::test_the_auditor_required_keys_are_exactly_the_tap_schema and the
+      real_cache / real_cache_with_fusion fixtures over the deployed support pack
+    experiment: EXP-0043
+    note: >-
+      THE CHECK THAT MATTERS MOST IS THE ONE THAT CAN SEE THE LOGIT COLUMN. band_x_logit_and_probability_
+      disagree rests on both deployed activations being strictly increasing in the logit at fixed target, so
+      the two columns must rank identically within a (pair, target). That is the only condition able to
+      exercise the pre-softmax logits at all - the very column added to close the blind spot FACT-0403
+      recorded as unclosable without a new acquisition. It is closed, and by a check rather than an assertion.
+      ONE STATE IS DELIBERATELY NOT A DEFECT: a non-zero secondary_edge_weight beside secondary_enabled
+      false. That is exactly P36's state (FACT-0407) - the setup cell sets the weight, loeo_retarget then
+      disables the model - and rejecting it would refuse the artifact the correction was built from. It is
+      pinned as an ACCEPT rather than left to chance.
+      DEFECT 8 RECURRED IN THE AUDITOR'S OWN FIXTURE and is not a new defect number: that suite also built
+      from vendor/kaggle-cell-tracking, which has no fusion code at all, so a contract-2 auditor tested there
+      would have been green and blind in precisely the dimension under test. Found and fixed on CPU before
+      any GPU spend. The fixture now pins the deployed pack by sha256 and runs a SECOND cache with the
+      secondary enabled, so every "when no stage ran" condition has a counterpart proving it is neither
+      vacuous nor a tripwire.
+    date: '2026-08-30'
+    tags: [contract-2, schema-delta, drift-lock, blind-spot-closed, defect-8-recurrence, verified]
+
+  - id: FACT-0410
+    statement: >-
+      The archived P36 cache is CONTRACT 1 and is now rejected for training under the named condition
+      cache_contract_1. It keeps its full EVIDENTIARY value - it is the artifact FACT-0403, FACT-0406 and
+      FACT-0407 were measured on - and loses only its LICENCE value. No legacy read-only mode is admitted,
+      because contract 1 stored ONE probability column and the pre-fusion surface it never held cannot be
+      recovered by any rewrite of those bytes
+    value: 1
+    unit: contract_version_of_the_archived_p36_cache
+    scope:
+      artifact: C:/temp/p36/aft_cache.tar.gz
+      sha256: 2ccae55e7945
+      rejected_under: cache_contract_1
+      retains: [evidentiary value for FACT-0403, FACT-0406, FACT-0407]
+      loses: [training licence]
+      legacy_mode_admitted: false
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The rejection was observed on both crops of the real archived artifact, and the reasoning against a
+      legacy mode is not a preference: FACT-0407 recovered the pre-fusion surface by RE-RUNNING the primary
+      head against real pack weights, not by reading the cache, which demonstrates directly that the
+      information is absent from those bytes.
+    instrument: scripts/win_bet/audit_feature_cache.py contract check over C:/temp/p36/aft_cache.tar.gz
+    experiment: EXP-0043
+    note: >-
+      A LEGACY READ-ONLY MODE WOULD HAVE TO DO ONE OF TWO BAD THINGS, which is why it is refused outright.
+      Either fabricate primary_prob_preblend from deployed_prob_postblend - which is the P36 defect restated
+      as a feature, since those are precisely the two quantities that differ - or leave it absent, at which
+      point every contract-2 condition is silently skipped. FACT-0408's lesson applies directly: a skipped
+      test is the quietest way to test nothing.
+      CONSEQUENCE FOR THE HARNESS: its three P36-based tests must be retired or re-pointed at a contract-2
+      capture rather than accommodated, and its fixture must move to contract 2 before any licence path can
+      be exercised at all. Until then a full-fold cache would arrive with no consumer able to read it.
+    date: '2026-08-30'
+    tags: [p36, contract-1, no-legacy-mode, evidentiary-vs-licence, verified]

@@ -48,6 +48,36 @@ THE THREE DEFECT-6 CONDITIONS, WHICH ARE NOT THE SAME CHECK
 The third is the one a shape check cannot see, and it is the form the defect would take if the
 tap were ever "repaired" by someone who had only read the schema.
 
+CONTRACT 2 - AND WHY AN UNQUALIFIED PROBABILITY IS NOW A REJECT (`FACT-0403`, `FACT-0407`)
+------------------------------------------------------------------------------------------
+Contract 1 recorded ONE probability per band row, named `band_a_prob` / `band_b_prob` with an
+`edge_prob` union, and took it from the deployed ``probs`` - AFTER every fusion stage. P36's gate
+then compared a PRIMARY-ONLY replay against it and disagreed by up to 0.43. The cache was
+faultless: re-derived on CPU from P36's own archived bytes, the primary-only arm reproduces the
+recorded GPU gap to seven digits, and applying the deployed bidirectional harmonic at weight 0.20
+collapses it to 1.1e-06 with band-A membership going to zero missing and zero extra on both crops
+(`FACT-0407`). What failed was a NAME: a two-stage quantity that read as a one-stage one.
+
+So this auditor now polices THREE NAMED SURFACES per band row - ``primary_logit_preblend``,
+``primary_prob_preblend``, ``deployed_prob_postblend`` - a THIRD BAND (``p``) selected on the
+pre-fusion surface, and the FUSION PROVENANCE the tap reads from the predictor's own locals. Four
+new conditions follow directly from that record, and each one is a mechanism, not a preference:
+
+``cache_contract_1``                     the retired naming itself, refused by name rather than
+                                         as thirty missing keys.
+``band_{x}_selected_on_is_wrong``        a band that mislabels which surface chose its rows. The
+                                         mislabel IS the contract-1 defect, wearing a v2 header.
+``fusion_record_is_internally_wrong``    stages, weights and the reproducibility claim must agree
+                                         with each other. A cache claiming it can reproduce its
+                                         own deployed surface while a SECOND MODEL contributed to
+                                         it is claiming something arithmetically false.
+``no_fusion_but_*``                      when the record says NO stage ran, pre- and post-fusion
+                                         are the same tensor: the two columns must be equal and
+                                         band P's membership must be band A's. Measured on the
+                                         real tap: with no fusion the delta is EXACTLY 0.0 and
+                                         the two key sets are identical; with a secondary at
+                                         0.15 they part by 0.31 and 19 rows become 8.
+
 WHAT THE MANIFEST BINDS
 -----------------------
 ==========================  ==========================================================
@@ -125,26 +155,60 @@ TRUNK_ROLES = {
 PKT0029_REQUIRED_TRUNK_ROLES = ("official", "stabledet")
 
 # --------------------------------------------------------------------------------------------
-# THE CACHE SCHEMA. Mirrored from assoc_feature_tap.py's own `_AFT_SCHEMA_REQUIRED` declaration.
-# It is mirrored rather than imported because the tap is a PATCH SCRIPT: importing it executes a
-# source rewrite against a `_ps` global. tests/test_audit_feature_cache.py parses the tap's
-# literal with `ast` and fails on drift, the same anti-drift lock sync_tap_worker.py provides
-# between the replay worker and the kernel patch.
+# THE CACHE SCHEMA - CONTRACT 2. Mirrored from assoc_feature_tap.py's own `_AFT_SCHEMA_REQUIRED`
+# declaration. It is mirrored rather than imported because the tap is a PATCH SCRIPT: importing
+# it executes a source rewrite against a `_ps` global. tests/test_audit_feature_cache.py parses
+# the tap's literal with `ast` and fails on drift, the same anti-drift lock sync_tap_worker.py
+# provides between the replay worker and the kernel patch. The lock is EXACT SET EQUALITY in both
+# directions, so no key can be added on either side without this list moving with it.
+#
+# WHY THE KEYS CHANGED - CONTRACT 1'S PROBABILITY COLUMN NAMED NO SURFACE (`FACT-0403`, `FACT-0407`)
 # --------------------------------------------------------------------------------------------
+# Contract 1 wrote ONE column per band, `band_a_prob` / `band_b_prob`, plus an unqualified
+# `edge_prob` union - taken from the deployed `probs`, i.e. AFTER every fusion stage. A replay of
+# the PRIMARY head alone was then compared against it, and the two disagreed by up to 0.43 on
+# P36. Nothing was wrong with the cache: re-derived on CPU from P36's own archived bytes, the
+# primary-only arm reproduces the recorded GPU gap to seven digits and applying the deployed
+# bidirectional harmonic collapses it to 1.1e-06, inside the gate's own 1e-4 tolerance by two
+# orders of magnitude (`FACT-0407`). The defect was the NAME: a post-fusion quantity readable as
+# a pre-fusion one.
+#
+# Contract 2 therefore admits NO unqualified probability. Every probability and every logit ends
+# in `_preblend` or `_postblend`, the tap enforces that on itself at flush
+# (assoc_feature_tap.py:493-506), and three named surfaces replace the one:
+#     primary_logit_preblend      predict_edges output, BEFORE any fusion stage
+#     primary_prob_preblend       the deployed activation of that, and nothing else
+#     deployed_prob_postblend     `probs`, AFTER every fusion stage that ran
+# It also adds BAND P - the same threshold rule applied to the PRE-fusion surface - and records
+# WHICH FUSION STAGES RAN from the predictor's own locals rather than from a log header, which is
+# how `FACT-0403` misattributed its own root cause in the first place.
+# --------------------------------------------------------------------------------------------
+CACHE_CONTRACT_VERSION = 2
+
 REQUIRED_KEYS = (
+    "schema_version", "contract_version", "primary_surface", "deployed_surface",
     "crop", "window", "downsample", "voxel_size", "pool_kernel", "q_low", "q_high",
     "image_shape", "det_threshold", "det_tta", "edge_threshold", "edge_activation",
     "band_b_floor", "band_b_topk", "feat_dtype", "feat_dim", "pos_dim", "node_count",
+    "fusion_stages", "fusion_bidirectional_weight", "fusion_secondary_enabled",
+    "fusion_secondary_edge_weight", "fusion_secondary_link_mode",
+    "fusion_secondary_mix_temperature", "fusion_reproducible_from_primary_cache",
     "coords", "frames", "starts", "ends",
     "pair_f_idx", "pair_t_src", "pair_t_tgt", "pair_src_ptr", "pair_src_n",
     "pair_tgt_ptr", "pair_tgt_n", "pair_window_shape",
     "role_pair", "role_role", "role_gid", "role_feat", "role_coord_scaled",
     "role_coord_rel", "role_mask",
-    "band_a_pair", "band_a_source_id", "band_a_target_id", "band_a_i", "band_a_j",
-    "band_a_prob",
-    "band_b_pair", "band_b_source_id", "band_b_target_id", "band_b_i", "band_b_j",
-    "band_b_prob",
-    "source_id", "target_id", "edge_prob",
+    "band_a_selected_on", "band_a_pair", "band_a_source_id", "band_a_target_id",
+    "band_a_i", "band_a_j", "band_a_primary_logit_preblend",
+    "band_a_primary_prob_preblend", "band_a_deployed_prob_postblend",
+    "band_b_selected_on", "band_b_pair", "band_b_source_id", "band_b_target_id",
+    "band_b_i", "band_b_j", "band_b_primary_logit_preblend",
+    "band_b_primary_prob_preblend", "band_b_deployed_prob_postblend",
+    "band_p_selected_on", "band_p_pair", "band_p_source_id", "band_p_target_id",
+    "band_p_i", "band_p_j", "band_p_primary_logit_preblend",
+    "band_p_primary_prob_preblend", "band_p_deployed_prob_postblend",
+    "source_id", "target_id",
+    "deployed_edge_prob_postblend", "primary_edge_prob_preblend",
 )
 # The tap calls this optional (BIOHUB_AFT_STORE_POS). This auditor does NOT: the positional
 # features are a head INPUT, and a cache that omits them forces the gate to trust a
@@ -156,12 +220,43 @@ POSITIONAL_KEY = "role_pos"
 FRAME_KEYED_MARKERS = ("feat_frames",)
 FRAME_FEAT_RE = re.compile(r"^feat_-?\d+$")
 
-BAND_A, BAND_B = "a", "b"
+# The CONTRACT-1 markers. A contract-1 cache is missing thirty keys, so the generic
+# `cache_schema_incomplete` message would send the operator looking for a truncated write when
+# the real answer is that its one probability column is a POST-FUSION quantity under a
+# pre-fusion-sounding name. Named for the same reason the frame-keyed markers are, and refused
+# in the same place the replay worker refuses it (assoc_tap_replay.py:130-150).
+CONTRACT_1_MARKERS = ("band_a_prob", "band_b_prob", "edge_prob")
+
+BAND_A, BAND_B, BAND_P = "a", "b", "p"
+BANDS = (BAND_A, BAND_B, BAND_P)
 ROLE_SRC, ROLE_TGT = 0, 1
 
-# Per-band-row bytes at the tap's own dtypes: five int64 index columns plus one float64
-# probability, and the auditor-facing union carries source_id/target_id int64 + edge_prob float32.
-BAND_ROW_BYTES = 5 * 8 + 8 + (8 + 8 + 4)
+# WHICH SURFACE SELECTED EACH BAND. Mirrored from the tap's own `_AFT_BAND_SURFACE`, and locked
+# against it by the same ast drift test that locks the key list. Bands A and B keep their
+# contract-1 membership - they are what the DEPLOYED candidate rule selected, on the deployed
+# post-fusion surface - so their membership is a property of the deployment, not of the cache.
+# Band P is the pre-fusion analogue and carries the parity property the gate needs.
+BAND_SURFACE = {
+    BAND_A: "deployed_probs_postblend",
+    BAND_B: "deployed_probs_postblend",
+    BAND_P: "primary_probs_preblend",
+}
+# surface name -> the per-row column holding that surface's value.
+SURFACE_COLUMN = {
+    "deployed_probs_postblend": "deployed_prob_postblend",
+    "primary_probs_preblend": "primary_prob_preblend",
+}
+BAND_COLUMNS = ("pair", "source_id", "target_id", "i", "j",
+                "primary_logit_preblend", "primary_prob_preblend", "deployed_prob_postblend")
+# The auditor-facing union is bands A and B only - the DEPLOYED candidate surface. Band P is a
+# gate instrument, not a deployed candidate set, and the tap deliberately leaves it out.
+UNION_BANDS = (BAND_A, BAND_B)
+
+# Per-band-row bytes at the tap's own dtypes: five int64 index columns plus THREE float64 surface
+# columns (contract 1 had one).
+BAND_ROW_BYTES = 5 * 8 + 3 * 8
+# The union carries source_id/target_id int64 plus both named probability columns as float32.
+UNION_ROW_BYTES = 8 + 8 + 4 + 4
 # Per-role-node bytes that do NOT depend on feat_dim/pos_dim: role_pair int64, role_role int8,
 # role_gid int64, role_coord_scaled 3x float32, role_coord_rel 4x int32, role_mask bool.
 ROLE_FIXED_BYTES = 8 + 1 + 8 + 3 * 4 + 4 * 4 + 1
@@ -236,6 +331,29 @@ def load_cache(path: Path) -> dict:
             "cache with a defect - it is undefined, and no head may be trained on it.",
         )
 
+    # CONTRACT 1, refused by name and BEFORE the missing-key list, for the reason the frame-keyed
+    # check comes first: a contract-1 cache is missing thirty keys, and "missing thirty keys"
+    # sends the operator to look for a truncated write. The real answer is that its single
+    # `band_a_prob` column holds the POST-FUSION deployed probability, so any primary-side
+    # comparison against it reproduces exactly the defect that invalidated P36's verdict
+    # (`FACT-0403`, corrected by `FACT-0407`). There is NO legacy read mode: a cache whose
+    # probability column names no surface cannot be interpreted, only guessed at.
+    if "contract_version" not in files and any(k in files for k in CONTRACT_1_MARKERS):
+        _reject(
+            "cache_contract_1", name,
+            f"the cache carries the contract-1 columns "
+            f"{sorted(k for k in CONTRACT_1_MARKERS if k in files)} and no contract_version. "
+            "Contract 1 wrote ONE probability per band, taken from the deployed `probs` AFTER "
+            "every fusion stage, under a name that claims no surface. Comparing a primary-side "
+            "quantity against it is the defect FACT-0403 recorded and FACT-0407 re-derived: the "
+            "P36 cache was FAITHFUL and its verdict was still invalid, because the reference "
+            "column was post-fusion while the replay was pre-fusion. Contract 2 records "
+            "primary_logit_preblend / primary_prob_preblend / deployed_prob_postblend "
+            "separately, and there is no rewrite of a contract-1 file that recovers the "
+            "pre-fusion surface it never stored. Re-run the tap at contract "
+            f"{CACHE_CONTRACT_VERSION}.",
+        )
+
     missing = [k for k in REQUIRED_KEYS if k not in files]
     if missing:
         _reject(
@@ -244,6 +362,22 @@ def load_cache(path: Path) -> dict:
             "assoc_feature_tap.py declares in _AFT_SCHEMA_REQUIRED and assoc_tap_replay.py "
             "reads by name; without them the pair, role and node identity of every feature row "
             "is unprovable.",
+        )
+    contract = int(z["contract_version"])
+    if contract != CACHE_CONTRACT_VERSION:
+        _reject(
+            "cache_contract_version_unknown", name,
+            f"contract_version {contract} != {CACHE_CONTRACT_VERSION}. Every column's MEANING is "
+            "a property of the contract that wrote it - contract 1's `band_a_prob` and contract "
+            "2's `band_a_deployed_prob_postblend` hold the same numbers under different claims - "
+            "so a contract this auditor has not been written against cannot be read by guessing.",
+        )
+    schema = int(z["schema_version"])
+    if schema != SCHEMA_VERSION:
+        _reject(
+            "cache_schema_version_unknown", name,
+            f"schema_version {schema} != {SCHEMA_VERSION}. Schema 1 keyed features BY FRAME, "
+            "which FACT-0402 measured to be undefined at the deployed window.",
         )
     if POSITIONAL_KEY not in files:
         _reject(
@@ -521,7 +655,69 @@ def _validate_roles(crop: str, data: dict, frames, starts, ends) -> dict:
     }
 
 
-def _validate_bands(crop: str, data: dict) -> dict:
+def _validate_fusion(crop: str, data: dict) -> dict:
+    """WHICH FUSION STAGES RAN, and whether the record is internally consistent.
+
+    This is the column contract 1 did not have, and its absence is the whole reason P36's verdict
+    was invalid. `FACT-0403` blamed a secondary-model blend at 0.15 because a setup-cell log
+    header said so; `loeo_retarget.py:128` had disabled the secondary three lines later and the
+    stage that actually ran was the bidirectional harmonic at 0.20 (`FACT-0407`). A LOG HEADER
+    RECORDS AN INTENTION AT THE MOMENT IT PRINTED, NOT WHAT RAN. The tap now reads this from the
+    predictor's own locals (assoc_feature_tap.py:241-274, :568-586), so the auditor's job is to
+    refuse a record that contradicts itself rather than to re-infer the stages.
+
+    NOTE what is deliberately NOT a defect: a non-zero `secondary_edge_weight` with
+    `secondary_enabled` False. That is exactly the P36 state - a weight configured and the model
+    then disabled - and recording both is the point.
+    """
+    raw = str(data["fusion_stages"])
+    recorded = [] if raw == "none" else [s for s in raw.split(",") if s]
+    bidirectional = float(data["fusion_bidirectional_weight"])
+    secondary_enabled = bool(data["fusion_secondary_enabled"])
+    secondary_weight = float(data["fusion_secondary_edge_weight"])
+    reproducible = bool(data["fusion_reproducible_from_primary_cache"])
+
+    _require(np.isfinite([bidirectional, secondary_weight]).all(),
+             "fusion_weight_is_not_finite", crop,
+             f"bidirectional {bidirectional}, secondary {secondary_weight}")
+    _require(0.0 <= bidirectional < 1.0, "fusion_bidirectional_weight_out_of_range", crop,
+             f"bidirectional weight {bidirectional} outside [0, 1). The harmonic mixes "
+             "(1-w)/p_forward + w/p_reverse, so a weight at or above 1 does not blend, it "
+             "replaces the forward surface with the reverse one")
+
+    expected = []
+    if bidirectional > 0.0:
+        expected.append("bidirectional_harmonic")
+    if secondary_enabled:
+        expected.append("secondary_logit_blend")
+    _require(recorded == expected, "fusion_stages_disagree_with_the_recorded_weights", crop,
+             f"fusion_stages {raw!r} but bidirectional_weight {bidirectional} and "
+             f"secondary_enabled {secondary_enabled} imply {expected or ['none']}. The stage "
+             "list is what a reader uses to decide whether the deployed surface is "
+             "reconstructible; a list that disagrees with its own weights is worse than none")
+    # The tap's own definition, at assoc_feature_tap.py:262-265: the bidirectional stage re-runs
+    # the SAME primary model on the SAME cached tensors with the roles swapped, so a replay
+    # reproduces it exactly from this cache; the secondary stage needs a SECOND MODEL's features,
+    # which this cache does not and must not carry.
+    _require(reproducible == (not secondary_enabled),
+             "fusion_reproducibility_claim_is_wrong", crop,
+             f"fusion_reproducible_from_primary_cache {reproducible} with secondary_enabled "
+             f"{secondary_enabled}. A cache cannot reconstruct a surface a second model "
+             "contributed to, and it always can reconstruct one only the primary produced")
+    return {
+        "stages": recorded,
+        "stages_recorded": raw,
+        "bidirectional_weight": bidirectional,
+        "secondary_enabled": secondary_enabled,
+        "secondary_edge_weight": secondary_weight,
+        "secondary_link_mode": str(data["fusion_secondary_link_mode"]),
+        "secondary_mix_temperature": float(data["fusion_secondary_mix_temperature"]),
+        "reproducible_from_primary_cache": reproducible,
+        "deployed_surface_is_the_primary_surface": not recorded,
+    }
+
+
+def _validate_bands(crop: str, data: dict, fusion: dict) -> dict:
     n_pairs = int(data["pair_f_idx"].shape[0])
     threshold = float(data["edge_threshold"])
     floor_b = float(data["band_b_floor"])
@@ -541,24 +737,47 @@ def _validate_bands(crop: str, data: dict) -> dict:
              "0 < floor < threshold < 1")
     _require(topk >= 1, "band_b_topk_invalid", crop, f"band_b_topk {topk}")
 
+    empty_because = {
+        BAND_A: "nothing in this crop can be checked against the DEPLOYED surface, so a pass "
+                "here certifies nothing",
+        BAND_B: "the cache holds none of the learnable population - FACT-0382 measured that ALL "
+                "691 fold-0 contested errors have their true parent at or below the deployed "
+                "threshold",
+        BAND_P: "band P is the PARITY surface. Bands A and B are selected on the post-fusion "
+                "probabilities, so their membership is a property of the deployment and cannot "
+                "be re-derived from a primary-only replay without changing what they mean. Band "
+                "P is the only band whose membership a replay may reproduce, so an empty one "
+                "leaves the gate with no membership property at all (FACT-0403)",
+    }
+
     out = {}
     keysets = {}
-    for name in (BAND_A, BAND_B):
-        cols = {c: np.asarray(data[f"band_{name}_{c}"])
-                for c in ("pair", "source_id", "target_id", "i", "j", "prob")}
+    for name in BANDS:
+        cols = {c: np.asarray(data[f"band_{name}_{c}"]) for c in BAND_COLUMNS}
         lens = {c: int(v.shape[0]) for c, v in cols.items()}
         _require(len(set(lens.values())) == 1, f"band_{name}_torn", crop,
                  f"band {name} column lengths {lens} disagree")
         n = lens["pair"]
-        _require(n > 0, f"band_{name}_is_empty", crop,
-                 "zero rows. Band A empty means nothing in this crop can be checked against the "
-                 "deployed surface; band B empty means the cache holds none of the learnable "
-                 "population - FACT-0382 measured that ALL 691 fold-0 contested errors have "
-                 "their true parent at or below the deployed threshold")
+        _require(n > 0, f"band_{name}_is_empty", crop, f"zero rows. {empty_because[name]}")
+
+        # WHICH SURFACE SELECTED THIS BAND, taken from the artifact and not assumed. A mislabel
+        # here IS the contract-1 defect: a post-fusion population read as a pre-fusion one.
+        surface = str(data[f"band_{name}_selected_on"])
+        _require(surface == BAND_SURFACE[name], f"band_{name}_selected_on_is_wrong", crop,
+                 f"band {name} declares it was selected on {surface!r}; the tap selects it on "
+                 f"{BAND_SURFACE[name]!r} (assoc_feature_tap.py _AFT_BAND_SURFACE). A band whose "
+                 "recorded selection surface is not the one that chose it is exactly the "
+                 "confusion that invalidated P36's verdict, with a contract-2 header on it")
+
         pair = cols["pair"].astype(np.int64)
         i = cols["i"].astype(np.int64)
         j = cols["j"].astype(np.int64)
-        prob = cols["prob"].astype(np.float64)
+        logit_pre = cols["primary_logit_preblend"].astype(np.float64)
+        prob_pre = cols["primary_prob_preblend"].astype(np.float64)
+        prob_post = cols["deployed_prob_postblend"].astype(np.float64)
+        # `prob` below is THE SURFACE THAT SELECTED THIS BAND, never "the probability".
+        prob = {"primary_prob_preblend": prob_pre,
+                "deployed_prob_postblend": prob_post}[SURFACE_COLUMN[surface]]
         _require(bool(np.all((pair >= 0) & (pair < n_pairs))), f"band_{name}_pair_out_of_range",
                  crop, f"a band {name} row names a pair outside [0, {n_pairs})")
         _require(bool(np.all((i >= 0) & (i < src_n[pair]))), f"band_{name}_source_index_outside_block",
@@ -578,12 +797,31 @@ def _validate_bands(crop: str, data: dict) -> dict:
                       and np.all((cols["target_id"] >= 0) & (cols["target_id"] < node_count))),
                  f"band_{name}_id_out_of_range", crop,
                  f"a band {name} global id is outside [0, {node_count})")
+        # THE SELECTING surface must lie in (0, 1]; the OTHER surface only in [0, 1]. That
+        # asymmetry is measured, not cautious: with a secondary blend at 0.15 on the real tap a
+        # band-A row's `primary_prob_preblend` reached down to 0.4568 and a band-B row's to
+        # 0.0088, both far outside their own band's window. A softmax can also underflow to
+        # exactly 0.0 on the non-selecting axis, so a strict lower bound there would reject a
+        # faithful cache.
         _require(bool(np.all((prob > 0.0) & (prob <= 1.0))), f"band_{name}_prob_out_of_range",
-                 crop, f"band {name} probabilities outside (0, 1]")
+                 crop, f"band {name} {SURFACE_COLUMN[surface]} outside (0, 1]")
+        for label, arr in (("primary_prob_preblend", prob_pre),
+                           ("deployed_prob_postblend", prob_post)):
+            _require(bool(np.all((arr >= 0.0) & (arr <= 1.0))),
+                     f"band_{name}_{label}_out_of_range", crop,
+                     f"band {name} {label} outside [0, 1]")
+        _require(bool(np.isfinite(logit_pre).all()), f"band_{name}_logit_not_finite", crop,
+                 f"band {name} primary_logit_preblend holds a NaN or an Inf")
+
         if name == BAND_A:
             _require(bool(np.all(prob > threshold)), "band_a_below_the_deployed_threshold", crop,
                      f"a band A row sits at or below the deployed threshold {threshold}; band A "
                      "is defined as probs > threshold at the deployed site")
+        elif name == BAND_P:
+            _require(bool(np.all(prob > threshold)), "band_p_below_the_deployed_threshold", crop,
+                     f"a band P row sits at or below {threshold}. Band P applies the SAME "
+                     "threshold rule to the PRE-fusion surface; a row below it was not selected "
+                     "by that rule")
         else:
             _require(bool(np.all((prob > floor_b) & (prob <= threshold))),
                      "band_b_outside_its_acquisition_window", crop,
@@ -596,21 +834,74 @@ def _validate_bands(crop: str, data: dict) -> dict:
             _require(worst <= topk, "band_b_exceeds_its_rank_cap", crop,
                      f"a target holds {worst} band-B rows, above the recorded cap {topk}; the "
                      "cache does not have the membership the ECB sidecars would record")
+
+        # THE LOGIT COLUMN IS NOT DECORATION, AND THIS IS WHAT AUDITS IT. `primary_prob_preblend`
+        # is the DEPLOYED activation of `primary_logit_preblend` and nothing else
+        # (assoc_feature_tap.py:329-333). Both deployed activations - a source-axis softmax and a
+        # sigmoid - are strictly increasing in the logit at fixed target, so within one
+        # (pair, target) the two columns must induce the SAME ORDER. This is the only check that
+        # can see a torn logit column, and the logits exist precisely to close the blind spot
+        # where a per-target constant offset is invisible after the softmax.
+        order = np.lexsort((logit_pre, j, pair))
+        same_target = (pair[order][1:] == pair[order][:-1]) & (j[order][1:] == j[order][:-1])
+        inverted = same_target & (np.diff(prob_pre[order]) < -1e-12)
+        _require(not bool(inverted.any()), f"band_{name}_logit_and_probability_disagree", crop,
+                 f"{int(inverted.sum())} band {name} row pairs share a (pair, target) and rank "
+                 "differently by primary_logit_preblend than by primary_prob_preblend. The "
+                 "probability is the deployed activation of that logit, and both deployed "
+                 "activations are strictly increasing in it, so one of the two columns is torn")
+
+        # WHEN NO FUSION STAGE RAN, `probs` IS the primary activation - the same tensor through
+        # the same op - so the two columns are BITWISE equal. Measured on the real tap: exactly
+        # 0.0 with no stage, and 0.31 with a secondary at 0.15.
+        if fusion["deployed_surface_is_the_primary_surface"]:
+            _require(bool(np.array_equal(prob_pre, prob_post)),
+                     f"no_fusion_but_band_{name}_surfaces_differ", crop,
+                     f"fusion_stages records no stage, yet band {name}'s "
+                     f"primary_prob_preblend and deployed_prob_postblend differ by up to "
+                     f"{float(np.abs(prob_pre - prob_post).max()):.6g}. With no stage the "
+                     "deployed probability IS the primary activation, so either a stage ran and "
+                     "was not recorded - the FACT-0403 failure exactly - or a column is torn")
+
         keysets[name] = set(zip(pair.tolist(), i.tolist(), j.tolist()))
         out[f"band_{name}"] = {
-            "rows": n, "min_prob": float(prob.min()), "max_prob": float(prob.max()),
+            "rows": n,
+            "selected_on": surface,
+            "min_selected_prob": float(prob.min()), "max_selected_prob": float(prob.max()),
+            "max_abs_preblend_postblend_delta": float(np.abs(prob_pre - prob_post).max()),
             "digest": _digest(pair, i, j, cols["source_id"].astype(np.int64),
-                              cols["target_id"].astype(np.int64), prob),
+                              cols["target_id"].astype(np.int64),
+                              logit_pre, prob_pre, prob_post),
         }
     overlap = keysets[BAND_A] & keysets[BAND_B]
     _require(not overlap, "bands_overlap", crop,
              f"{len(overlap)} (pair, i, j) keys appear in BOTH bands; the tap removes band A's "
              "members from band B, so an overlap means the two were built from different runs")
 
-    # The auditor-facing union the tap writes for exactly this check.
-    for col, parts, cast in (("source_id", ("band_a_source_id", "band_b_source_id"), np.int64),
-                             ("target_id", ("band_a_target_id", "band_b_target_id"), np.int64),
-                             ("edge_prob", ("band_a_prob", "band_b_prob"), np.float32)):
+    # THE MEMBERSHIP STATEMENT THE PARITY BAND EXISTS TO MAKE. With no fusion stage, band A's rule
+    # (post-fusion > threshold) and band P's rule (pre-fusion > threshold) are applied to the same
+    # numbers, so their memberships are IDENTICAL. Measured on the real tap: identical with no
+    # stage; 19 rows became 8 with a secondary at 0.15.
+    if fusion["deployed_surface_is_the_primary_surface"]:
+        _require(keysets[BAND_P] == keysets[BAND_A], "no_fusion_but_band_p_is_not_band_a", crop,
+                 f"fusion_stages records no stage, but band P holds {len(keysets[BAND_P])} rows "
+                 f"and band A {len(keysets[BAND_A])}, differing on "
+                 f"{len(keysets[BAND_P] ^ keysets[BAND_A])} keys. Two thresholdings of the same "
+                 "numbers cannot select different rows")
+
+    # The auditor-facing union the tap writes for exactly this check. BAND P IS NOT IN IT: it is a
+    # gate instrument, not a deployed candidate set, and folding it in would inflate the deployed
+    # candidate surface by the rows the deployment never saw.
+    union_parts = {col: tuple(f"band_{b}_{col}" for b in UNION_BANDS) for col in
+                   ("source_id", "target_id")}
+    for col, parts, cast in (
+        ("source_id", union_parts["source_id"], np.int64),
+        ("target_id", union_parts["target_id"], np.int64),
+        ("deployed_edge_prob_postblend",
+         tuple(f"band_{b}_deployed_prob_postblend" for b in UNION_BANDS), np.float32),
+        ("primary_edge_prob_preblend",
+         tuple(f"band_{b}_primary_prob_preblend" for b in UNION_BANDS), np.float32),
+    ):
         want = np.concatenate([np.asarray(data[p]) for p in parts]).astype(cast)
         got = np.asarray(data[col]).astype(cast)
         _require(got.shape == want.shape and bool(np.array_equal(got, want)),
@@ -618,18 +909,21 @@ def _validate_bands(crop: str, data: dict) -> dict:
                  f"{col} is not the concatenation of {parts}; the candidate surface and the "
                  "bands it is made of have drifted apart")
 
-    prob = np.asarray(data["edge_prob"]).astype(np.float64)
+    deployed = np.asarray(data["deployed_edge_prob_postblend"]).astype(np.float64)
     out.update({
         "deployed_threshold": threshold,
         "band_b_floor": floor_b,
         "band_b_topk": topk,
         "edge_activation": activation,
-        "above_threshold": int((prob > threshold).sum()),
-        "sub_threshold": int((prob <= threshold).sum()),
-        "total": int(prob.shape[0]),
-        "surface_digest": _digest(np.asarray(data["source_id"]).astype(np.int64),
-                                  np.asarray(data["target_id"]).astype(np.int64),
-                                  np.asarray(data["edge_prob"]).astype(np.float32)),
+        "union_bands": list(UNION_BANDS),
+        "above_threshold": int((deployed > threshold).sum()),
+        "sub_threshold": int((deployed <= threshold).sum()),
+        "total": int(deployed.shape[0]),
+        "surface_digest": _digest(
+            np.asarray(data["source_id"]).astype(np.int64),
+            np.asarray(data["target_id"]).astype(np.int64),
+            np.asarray(data["deployed_edge_prob_postblend"]).astype(np.float32),
+            np.asarray(data["primary_edge_prob_preblend"]).astype(np.float32)),
     })
     return out
 
@@ -648,7 +942,8 @@ def crop_binding(crop: str, data: dict, deployed_floor: float,
     frames, starts, ends = _validate_partition(crop, data)
     n_pairs = _validate_pairs(crop, data)
     roles = _validate_roles(crop, data, frames, starts, ends)
-    bands = _validate_bands(crop, data)
+    fusion = _validate_fusion(crop, data)
+    bands = _validate_bands(crop, data, fusion)
 
     coords = np.asarray(data["coords"])
     role_feat = np.asarray(data["role_feat"])
@@ -658,7 +953,10 @@ def crop_binding(crop: str, data: dict, deployed_floor: float,
         "uncompressed_bytes": uncompressed,
         "compression_ratio": (float(bytes_on_disk) / uncompressed
                               if bytes_on_disk is not None and uncompressed else None),
-        "band_rows": int(bands["band_a"]["rows"] + bands["band_b"]["rows"]),
+        # Band rows now count all THREE bands, because all three occupy BAND_ROW_BYTES on disk;
+        # the union carries only the two the deployed candidate surface is made of.
+        "band_rows": int(sum(bands[f"band_{b}"]["rows"] for b in BANDS)),
+        "union_rows": int(sum(bands[f"band_{b}"]["rows"] for b in UNION_BANDS)),
         "role_nodes": roles["role_nodes"],
     }
     if bytes_on_disk is not None:
@@ -699,6 +997,10 @@ def crop_binding(crop: str, data: dict, deployed_floor: float,
                 roles["dual_role_max_elementwise_relative_delta"],
         },
         "bands": dict(bands, deployed_floor=deployed_floor),
+        # WHICH FUSION STAGES PRODUCED THE `deployed_prob_postblend` COLUMN. Bound here so a
+        # consumer never has to infer it - and never from a log header (FACT-0407).
+        "fusion": fusion,
+        "contract_version": int(data["contract_version"]),
         "storage": storage,
         "feature_stats": {
             "dtype": str(role_feat.dtype),
@@ -778,6 +1080,21 @@ def build_manifest(args) -> dict:
         raise Reject(f"the caches disagree about the window size: {sorted(windows)}")
     window = windows.pop()
 
+    # ONE FUSION CONFIGURATION PER CACHE SET. The tap already refuses a configuration that
+    # changes part way through a crop (assoc_feature_tap.py:268-274); this is the same statement
+    # one level up. A directory mixing configurations holds two different
+    # `deployed_prob_postblend` surfaces under one name, and a head trained across it would be
+    # fed a column whose meaning changes by crop.
+    fusions = {json.dumps(c["fusion"], sort_keys=True) for c in crops}
+    if len(fusions) != 1:
+        raise Reject(
+            "the caches disagree about the fusion configuration: "
+            f"{[json.loads(f)['stages_recorded'] for f in sorted(fusions)]}. Every crop in one "
+            "manifest must have been produced under one deployment configuration, or the "
+            "recorded deployed surfaces are not comparable"
+        )
+    fusion = crops[0]["fusion"]
+
     notebook = Path(args.notebook) if args.notebook else None
     return {
         "schema_version": SCHEMA_VERSION,
@@ -785,6 +1102,14 @@ def build_manifest(args) -> dict:
         "packet": "PKT-0037",
         "layout": "pair_and_role",
         "cache_dir": str(cache_dir),
+        "cache_contract_version": CACHE_CONTRACT_VERSION,
+        # THE FUSION PROVENANCE, BOUND. `deployed_prob_postblend` is only meaningful beside the
+        # list of stages that produced it: P36's verdict was invalid because a post-fusion column
+        # was compared against a pre-fusion replay, and the stage was misattributed from a log
+        # header (`FACT-0403`, corrected by `FACT-0407`). `reproducible_from_primary_cache` is
+        # the consumer-facing consequence: false means the deployed surface cannot be rebuilt
+        # from this cache alone, because a second model contributed to it.
+        "fusion": fusion,
         "trunk": {
             "role": args.trunk_role,
             "path": str(trunk),
@@ -843,6 +1168,7 @@ def build_manifest(args) -> dict:
             "nodes": sum(c["nodes"] for c in crops),
             "role_nodes": sum(c["storage"]["role_nodes"] for c in crops),
             "band_rows": sum(c["storage"]["band_rows"] for c in crops),
+            "union_rows": sum(c["storage"]["union_rows"] for c in crops),
         },
         "provenance": {
             "notebook": str(notebook) if notebook else None,
@@ -877,6 +1203,19 @@ def audit(cache_dir: Path, manifest_path: Path, *, trunk: Path | None = None,
         )
     if m.get("layout") != "pair_and_role":
         raise Reject(f"manifest layout {m.get('layout')!r} != 'pair_and_role'")
+    if m.get("cache_contract_version") != CACHE_CONTRACT_VERSION:
+        raise Reject(
+            f"manifest cache_contract_version {m.get('cache_contract_version')!r} != "
+            f"{CACHE_CONTRACT_VERSION}. A contract-1 manifest binds a cache whose single "
+            "probability column named no surface, so its digests describe an artifact this "
+            "auditor cannot interpret (FACT-0403, FACT-0407)."
+        )
+    if not isinstance(m.get("fusion"), dict):
+        raise Reject(
+            "the manifest binds no fusion record. `deployed_prob_postblend` is meaningless "
+            "without the list of stages that produced it - reading a stage off a log header is "
+            "how FACT-0403 misattributed its own root cause."
+        )
 
     checks: list[dict] = []
 
@@ -1007,6 +1346,21 @@ def audit(cache_dir: Path, manifest_path: Path, *, trunk: Path | None = None,
               "zero pairs in the sub-threshold band. FACT-0382 measured that ALL 691 fold-0 "
               "contested errors have their true parent below the deployed threshold, so a cache "
               "with an empty band B holds none of the learnable population")
+        check(f"{crop}:parity_band_is_not_empty", got["bands"]["band_p"]["rows"] > 0,
+              "zero pairs in band P. Bands A and B are selected on the POST-fusion surface, so "
+              "their membership belongs to the deployment and a primary-only replay may not "
+              "re-derive it; band P is the only band whose membership carries the parity "
+              "property, and an empty one leaves the gate nothing to check (FACT-0403)")
+        check(f"{crop}:fusion_unchanged", got["fusion"] == rec.get("fusion"),
+              f"the crop records fusion {got['fusion'].get('stages_recorded')!r} "
+              f"(bidirectional {got['fusion'].get('bidirectional_weight')}, secondary "
+              f"{got['fusion'].get('secondary_enabled')}) but was bound as "
+              f"{(rec.get('fusion') or {}).get('stages_recorded')!r}. The stage list decides "
+              "what deployed_prob_postblend MEANS, so a change to it changes the artifact")
+        check(f"{crop}:fusion_matches_the_manifest", got["fusion"] == m["fusion"],
+              "this crop's fusion configuration is not the one the manifest binds for the whole "
+              "cache; a directory mixing configurations holds two different deployed surfaces "
+              "under one column name")
         check(f"{crop}:features_are_window_dependent",
               got["window_dependence"]["dual_role_nodes"] == 0
               or got["window_dependence"]["max_abs_delta"] > 0.0,
@@ -1034,9 +1388,11 @@ def audit(cache_dir: Path, manifest_path: Path, *, trunk: Path | None = None,
 
     return {"passed": True, "checks": checks, "crops": len(on_disk), "fold": fold,
             "trunk_role": tr["role"], "trunk_sha256": tr["sha256"],
+            "fusion": m["fusion"],
             "measured": [{"crop": c["crop"], "nodes": c["nodes"],
                           "role_nodes": c["storage"]["role_nodes"],
                           "band_rows": c["storage"]["band_rows"],
+                          "union_rows": c["storage"]["union_rows"],
                           "bytes_on_disk": c["storage"]["bytes_on_disk"],
                           "uncompressed_bytes": c["storage"]["uncompressed_bytes"],
                           "compression_ratio": c["storage"]["compression_ratio"],
@@ -1144,17 +1500,28 @@ def schema_bytes_per_node(feat_dim: int, pos_dim: int, band_b_topk: int) -> dict
                     (dim=0, :590-600), so each column sums to 1 and at most one entry per column
                     can exceed a threshold >= 0.5. This is the arithmetic behind FACT-0369.
     band B rows     <= band_b_topk per TARGET node, by the tap's own rank cap.
+    band P rows     <= 1 per TARGET node, by the SAME softmax argument - band P applies the same
+                    threshold to `primary_probs_preblend`, which is the source-axis activation of
+                    the pre-fusion logits and therefore also sums to 1 down each column. This is
+                    the contract-2 term; contract 1 had no third band.
+    union rows      = band A + band B rows. Band P is deliberately NOT in the union.
     coords          exactly 1 row per node.
     pair + partition rows  <= 1 per node, since pairs <= frames <= nodes.
     """
     role = ROLE_FIXED_BYTES + 4 * int(feat_dim) + 4 * int(pos_dim)
+    band_rows = 1 + int(band_b_topk) + 1          # A + B + P
+    union_rows = 1 + int(band_b_topk)             # A + B
+    band_bytes = band_rows * BAND_ROW_BYTES + union_rows * UNION_ROW_BYTES
     return {
         "role_bytes": 2 * role,
-        "band_bytes": (1 + int(band_b_topk)) * BAND_ROW_BYTES,
+        "band_bytes": band_bytes,
         "node_side_bytes": NODE_SIDE_BYTES,
-        "total": 2 * role + (1 + int(band_b_topk)) * BAND_ROW_BYTES + NODE_SIDE_BYTES,
+        "total": 2 * role + band_bytes + NODE_SIDE_BYTES,
         "per_role_row_bytes": role,
         "per_band_row_bytes": BAND_ROW_BYTES,
+        "per_union_row_bytes": UNION_ROW_BYTES,
+        "band_rows_per_node": band_rows,
+        "union_rows_per_node": union_rows,
     }
 
 
@@ -1222,13 +1589,15 @@ def project_full_fold(measured: list[dict], node_counts: dict[str, int], *,
     m_nodes = int(sum(m["nodes"] for m in measured))
     m_role = int(sum(m["role_nodes"] for m in measured))
     m_band = int(sum(m["band_rows"] for m in measured))
+    m_union = int(sum(m["union_rows"] for m in measured))
     ratio = m_disk / m_unc if m_unc else 1.0
     # Per-crop fixed overhead: whatever the on-disk file costs beyond its variable rows. Taken as
     # the WORST observed, and floored at zero so a well-compressing fixture cannot buy credit.
     overheads = []
     for m in measured:
         variable = (m["role_nodes"] * (ROLE_FIXED_BYTES + 4 * m["feature_dim"] + 4 * m["pos_dim"])
-                    + m["band_rows"] * BAND_ROW_BYTES + m["nodes"] * NODE_SIDE_BYTES)
+                    + m["band_rows"] * BAND_ROW_BYTES + m["union_rows"] * UNION_ROW_BYTES
+                    + m["nodes"] * NODE_SIDE_BYTES)
         overheads.append(max(int(m["uncompressed_bytes"]) - variable, 0))
     overhead = max(overheads)
 
@@ -1249,6 +1618,7 @@ def project_full_fold(measured: list[dict], node_counts: dict[str, int], *,
             "uncompressed_bytes": m_unc,
             "compression_ratio": ratio,
             "nodes": m_nodes, "role_nodes": m_role, "band_rows": m_band,
+            "union_rows": m_union,
             "bytes_on_disk_per_node": m_disk / m_nodes if m_nodes else None,
             "bytes_on_disk_per_role_node": m_disk / m_role if m_role else None,
             "bytes_on_disk_per_band_row": m_disk / m_band if m_band else None,
@@ -1289,8 +1659,14 @@ def _synth_cache(path: Path, *, crop: str, trunk_seed: int, n_frames: int = 4,
                  duplicate_role: bool = False, frame_keyed_features: bool = False,
                  bad_mask: bool = False, torn_scaled: bool = False,
                  wrong_relative_time: bool = False, band_b_over_cap: bool = False,
-                 torn_union: bool = False, reordered_roles: bool = False) -> None:
+                 torn_union: bool = False, reordered_roles: bool = False,
+                 mutate=None) -> None:
     """Manufacture ONE crop cache in the tap's exact production layout.
+
+    `mutate` receives the finished payload dict and may edit it in place. The contract-2
+    conditions are one-line payload edits - a mislabelled `selected_on`, a fusion record that
+    contradicts its own weights - so a hook is a smaller and more honest surface for them than
+    another seven boolean parameters.
 
     The coordinate grid is a property of the DETECTOR and is identical across trunks here; only
     the features depend on `trunk_seed`. That makes the swapped-trunk mutation a pure feature
@@ -1454,18 +1830,41 @@ def _synth_cache(path: Path, *, crop: str, trunk_seed: int, n_frames: int = 4,
             if len(pair_l) else np.empty(0, dtype=np.int64)
         tgt = gid_all[np.asarray([p_tp[p] for p in pair_l], dtype=np.int64) + j_a] \
             if len(pair_l) else np.empty(0, dtype=np.int64)
-        return pair_a, src, tgt, i_a, j_a, np.asarray(p_l, dtype=np.float64)
+        prob = np.asarray(p_l, dtype=np.float64)
+        # NO FUSION STAGE RUNS IN THIS FIXTURE, so the pre- and post-fusion surfaces are the SAME
+        # ARRAY - which is what the real tap emits with no stage, measured at exactly 0.0. The
+        # logit is log(p): monotone in the probability, which is all the rank check requires.
+        logit = np.log(np.clip(prob, 1e-12, None))
+        return pair_a, src, tgt, i_a, j_a, logit, prob, prob.copy()
 
     a = band_arrays(a_pair, a_i, a_j, a_p)
     b = band_arrays(b_pair, b_i, b_j, b_p)
+    # BAND P: the same threshold rule on the PRE-fusion surface. With no fusion stage the two
+    # surfaces are the same numbers, so band P's membership is band A's - the property
+    # _validate_bands checks and the property FACT-0407 used as its control arm.
+    p = band_arrays(a_pair, a_i, a_j, a_p)
 
     union_src = np.concatenate([a[1], b[1]])
     union_tgt = np.concatenate([a[2], b[2]])
-    union_p = np.concatenate([a[5], b[5]]).astype(np.float32)
+    union_post = np.concatenate([a[7], b[7]]).astype(np.float32)
+    union_pre = np.concatenate([a[6], b[6]]).astype(np.float32)
     if torn_union:
-        union_p = union_p[::-1].copy()
+        union_post = union_post[::-1].copy()
 
     payload = {
+        "schema_version": np.int64(SCHEMA_VERSION),
+        "contract_version": np.int64(CACHE_CONTRACT_VERSION),
+        "primary_surface": np.str_("primary: model.predict_edges forward output, before fusion"),
+        "deployed_surface": np.str_("deployed: probs after every fusion stage that ran"),
+        # NO STAGE RAN. A synthetic fixture must not claim one, because the claim is what
+        # _validate_bands checks the two surface columns against.
+        "fusion_stages": np.str_("none"),
+        "fusion_bidirectional_weight": np.float64(0.0),
+        "fusion_secondary_enabled": np.bool_(False),
+        "fusion_secondary_edge_weight": np.float64(0.0),
+        "fusion_secondary_link_mode": np.str_(""),
+        "fusion_secondary_mix_temperature": np.float64(1.0),
+        "fusion_reproducible_from_primary_cache": np.bool_(True),
         "crop": np.str_(crop),
         "window": np.int64(window),
         "downsample": down,
@@ -1495,16 +1894,28 @@ def _synth_cache(path: Path, *, crop: str, trunk_seed: int, n_frames: int = 4,
         "role_coord_scaled": cat(r_scaled, np.float32),
         "role_coord_rel": cat(r_rel, np.int32),
         "role_mask": cat(r_mask, bool), "role_pos": cat(r_pos, np.float32),
-        "source_id": union_src, "target_id": union_tgt, "edge_prob": union_p,
+        "source_id": union_src, "target_id": union_tgt,
+        "deployed_edge_prob_postblend": union_post,
+        "primary_edge_prob_preblend": union_pre,
     }
-    for name, cols in (("a", a), ("b", b)):
+    for name, cols in ((BAND_A, a), (BAND_B, b), (BAND_P, p)):
+        payload[f"band_{name}_selected_on"] = np.str_(BAND_SURFACE[name])
         payload[f"band_{name}_pair"] = cols[0]
         payload[f"band_{name}_source_id"] = cols[1]
         payload[f"band_{name}_target_id"] = cols[2]
         payload[f"band_{name}_i"] = cols[3]
         payload[f"band_{name}_j"] = cols[4]
-        payload[f"band_{name}_prob"] = cols[5]
+        payload[f"band_{name}_primary_logit_preblend"] = cols[5]
+        payload[f"band_{name}_primary_prob_preblend"] = cols[6]
+        payload[f"band_{name}_deployed_prob_postblend"] = cols[7]
     assert n_role == payload["role_pair"].shape[0]
+    assert set(payload) == set(REQUIRED_KEYS) | {POSITIONAL_KEY}, (
+        "the self-test fixture no longer emits the schema it is meant to exercise: extra "
+        f"{sorted(set(payload) - set(REQUIRED_KEYS) - {POSITIONAL_KEY})}, missing "
+        f"{sorted(set(REQUIRED_KEYS) - set(payload))}"
+    )
+    if mutate is not None:
+        mutate(payload)
     np.savez_compressed(path, **payload)
 
 
@@ -1624,6 +2035,105 @@ def self_test(out: Path | None) -> int:
         record("union_surface_torn_from_its_bands", True,
                lambda: bind_crop_file(tu / f"{crop0}.npz", 0.5),
                want="union_surface_disagrees_with_its_bands")
+
+        # --- CONTRACT 2: THE NAMED SURFACES AND THE FUSION RECORD -----------------------------
+        # Every one of these is the FACT-0403 failure in a form contract 1 could not express:
+        # a probability whose surface is misdeclared, or a fusion record that does not describe
+        # what produced the column beside it.
+        def _contract1(payload):
+            """Down-convert to contract 1: one unqualified probability per band."""
+            for band in BANDS:
+                for suffix in ("selected_on", "primary_logit_preblend", "primary_prob_preblend"):
+                    payload.pop(f"band_{band}_{suffix}")
+                payload[f"band_{band}_prob"] = payload.pop(f"band_{band}_deployed_prob_postblend")
+            for key in ("schema_version", "contract_version", "primary_surface",
+                        "deployed_surface", "primary_edge_prob_preblend"):
+                payload.pop(key)
+            for key in [k for k in payload if k.startswith("fusion_")]:
+                payload.pop(key)
+            payload["edge_prob"] = payload.pop("deployed_edge_prob_postblend")
+
+        c1 = build("contract_1", trunk_seed=1, mutate=_contract1)
+        record("contract_1_cache_is_refused_by_name", True,
+               lambda: bind_crop_file(c1 / f"{crop0}.npz", 0.5), want="cache_contract_1")
+
+        ver = build("contract_3", trunk_seed=1,
+                    mutate=lambda p: p.__setitem__("contract_version", np.int64(3)))
+        record("unknown_contract_version_is_refused", True,
+               lambda: bind_crop_file(ver / f"{crop0}.npz", 0.5),
+               want="cache_contract_version_unknown")
+
+        mis = build("mislabelled_surface", trunk_seed=1,
+                    mutate=lambda p: p.__setitem__(
+                        "band_p_selected_on", np.str_("deployed_probs_postblend")))
+        record("band_p_declares_the_wrong_selection_surface", True,
+               lambda: bind_crop_file(mis / f"{crop0}.npz", 0.5),
+               want="band_p_selected_on_is_wrong")
+
+        def _no_parity_band(payload):
+            for col in ("pair", "source_id", "target_id", "i", "j"):
+                payload[f"band_p_{col}"] = np.empty(0, dtype=np.int64)
+            for col in ("primary_logit_preblend", "primary_prob_preblend",
+                        "deployed_prob_postblend"):
+                payload[f"band_p_{col}"] = np.empty(0, dtype=np.float64)
+
+        nop = build("no_parity_band", trunk_seed=1, mutate=_no_parity_band)
+        record("empty_parity_band", True, lambda: bind_crop_file(nop / f"{crop0}.npz", 0.5),
+               want="band_p_is_empty")
+
+        def _claims_reproducible_with_a_secondary(payload):
+            payload["fusion_stages"] = np.str_("secondary_logit_blend")
+            payload["fusion_secondary_enabled"] = np.bool_(True)
+            payload["fusion_secondary_edge_weight"] = np.float64(0.15)
+            # the lie: a second model contributed, and the cache says it can rebuild the surface
+            payload["fusion_reproducible_from_primary_cache"] = np.bool_(True)
+
+        fr = build("fusion_repro_lie", trunk_seed=1,
+                   mutate=_claims_reproducible_with_a_secondary)
+        record("fusion_claims_reproducibility_it_cannot_have", True,
+               lambda: bind_crop_file(fr / f"{crop0}.npz", 0.5),
+               want="fusion_reproducibility_claim_is_wrong")
+
+        fs = build("fusion_stage_unrecorded", trunk_seed=1,
+                   mutate=lambda p: p.__setitem__(
+                       "fusion_bidirectional_weight", np.float64(0.20)))
+        record("a_fusion_stage_ran_and_was_not_listed", True,
+               lambda: bind_crop_file(fs / f"{crop0}.npz", 0.5),
+               want="fusion_stages_disagree_with_the_recorded_weights")
+
+        def _postblend_moved(payload):
+            arr = payload["band_a_deployed_prob_postblend"].copy()
+            arr[0] = min(float(arr[0]) + 0.05, 0.999)
+            payload["band_a_deployed_prob_postblend"] = arr
+            payload["deployed_edge_prob_postblend"] = np.concatenate(
+                [arr, payload["band_b_deployed_prob_postblend"]]).astype(np.float32)
+
+        pb = build("postblend_without_a_stage", trunk_seed=1, mutate=_postblend_moved)
+        record("post_fusion_column_moved_with_no_stage_recorded", True,
+               lambda: bind_crop_file(pb / f"{crop0}.npz", 0.5),
+               want="no_fusion_but_band_a_surfaces_differ")
+
+        def _parity_band_shrunk(payload):
+            keep = np.ones(payload["band_p_pair"].shape[0], dtype=bool)
+            keep[0] = False
+            for col in ("pair", "source_id", "target_id", "i", "j",
+                        "primary_logit_preblend", "primary_prob_preblend",
+                        "deployed_prob_postblend"):
+                payload[f"band_p_{col}"] = payload[f"band_p_{col}"][keep]
+
+        pp = build("parity_band_shrunk", trunk_seed=1, mutate=_parity_band_shrunk)
+        record("parity_band_membership_differs_with_no_stage", True,
+               lambda: bind_crop_file(pp / f"{crop0}.npz", 0.5),
+               want="no_fusion_but_band_p_is_not_band_a")
+
+        def _torn_logits(payload):
+            payload["band_b_primary_logit_preblend"] = \
+                payload["band_b_primary_logit_preblend"][::-1].copy()
+
+        tl = build("torn_logits", trunk_seed=1, n_per_frame=8, mutate=_torn_logits)
+        record("logit_column_torn_from_its_probability", True,
+               lambda: bind_crop_file(tl / f"{crop0}.npz", 0.5),
+               want="band_b_logit_and_probability_disagree")
 
         # --- TRUNK AND FOLD ------------------------------------------------------------------
         swapped = build("swapped", trunk_seed=2)
