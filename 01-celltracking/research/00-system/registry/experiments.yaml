@@ -675,3 +675,45 @@ experiments:
       post-softmax probabilities over the SOURCE axis, so a cache error shifting every source in a frame
       equally is mathematically invisible to it. Non-uniform errors - a single node, an index remap, a dtype
       change, a stale frame - all show up.
+
+  - id: EXP-0042
+    title: P35 DeepCenter/veto exchange on the released 0.931 base, one capped exploitation
+    spec: scripts/kaggle_specs/p35_dcveto_on_931.json
+    kernel: aryaarun07/biohub-p35-dcveto-on-931
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-30'
+    facts: [FACT-0393, FACT-0341, FACT-0345, FACT-0377, FACT-0378]
+    note: >-
+      PKT-0039 / LEVER-0042, Slot A, the ONLY inherited-component exploitation experiment and capped at one
+      submission whatever it scores. Launched under the four host conditions, each satisfied and evidenced
+      rather than asserted.
+      (1) THE EXACT COMMITTED ARTIFACT went through the class-aware preflight - the working tree was clean
+      for both the spec and the notebook at launch.
+      (2) AN ACTUAL ACCEPT RECEIPT, not an expectation: verdict PASS with failed=[], signature verified,
+      artifact class `submission` decided from spec.expects_submission. Its notebook_sha256
+      c2ecc3988880d485... matches the live built notebook EXACTLY, so the receipt binds the artifact that was
+      pushed rather than one like it. Five checks SKIP as out-of-class (PF03/05/06/07/10 are gate-smoke
+      checks); under the corrected profile gating a skip is recorded and excluded from the verdict, never
+      counted as a pass, and a class that should carry a check but has no profile fails closed.
+      (3) THE CONTRACT IS BOUND. Band 0.927-0.935 and falsifier "at or below 0.931" appear in the packet AND
+      verbatim in the submission description, so Kaggle timestamps the preregistration ahead of the score
+      (FACT-0396). The prereg file was hashed at 09:19:17Z with "no treatment built yet" recorded beside it,
+      an hour before the build. The treatment is ONE cell of ten, +293 characters, three os.environ lines and
+      ZERO deletions - exactly the vars of P24's single env edit.
+      (4) NO VETO OUTSTANDING. PKT-0036's recorded position was that the artifact is clean and it found
+      nothing to veto; its only blocker was the shared preflight returning FAIL, which was Gate-1 checks
+      applied to a submission notebook and is resolved by the class gating.
+      WHAT THE PREFLIGHT LICENSES AND WHAT IT DOES NOT. It licenses that the artifact is well formed and that
+      the single declared component takes effect on the deployed code path under both mount conventions. It
+      licenses NOTHING about the score: this configuration cannot be validated offline at all because its
+      secondary saw all 199 movies (FACT-0378), so the band is a prior and not a measurement. The notebook's
+      PROXY_SCORE over the four visible movies is not a selection signal.
+      THE MECHANISM UNDER TEST, read from the base's own scoring log: the released 0.931 configuration
+      resolves its DeepCenter file to best.pt, REJECTS it on an epoch-500 assertion against the checkpoint's
+      actual epoch 2, falls back to a collapsed checkpoint_last.pt whose recorded best_score is -0.045, and
+      runs with the safe-division veto off - so deepcenter_rejected=0 on all eight movies across 664
+      geometric candidates. The base holds the good checkpoint in hand and declines it. This experiment
+      removes exactly that and nothing else.
