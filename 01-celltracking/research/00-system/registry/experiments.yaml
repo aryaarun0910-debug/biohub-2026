@@ -625,6 +625,14 @@ experiments:
     status: failed
     date: '2026-08-29'
     facts: [FACT-0387]
+    superseded_by: EXP-0043
+    superseded_reason: >-
+      P33's INDEPENDENT-WORKER design is retired 2026-08-30, not merely this attempt 1. Six distinct
+      defects across three attempts all share one cause - the worker REIMPLEMENTED the deployed
+      computation instead of reusing it - and the sixth (FACT-0402) shows the frame-keyed cache was
+      scientifically undefined, so a fourth run would have FAILED on the instrument rather than the
+      cache. P36 replaces it with a passive tap inside the deployed predict_video. THE FAILURE
+      EVIDENCE BELOW IS RETAINED DELIBERATELY: it is the record of what two GPU sessions bought.
     note: >-
       FAILED at a process boundary, not on parity - see FACT-0387. The patch imported
       predict_unet_transformer into the NOTEBOOK process, where it does not exist: the deployed predictor is
@@ -646,6 +654,14 @@ experiments:
     status: failed
     date: '2026-08-29'
     facts: [FACT-0387, FACT-0382, FACT-0369, FACT-0373]
+    superseded_by: EXP-0043
+    superseded_reason: >-
+      P33's INDEPENDENT-WORKER design is retired 2026-08-30, not merely this attempt 2. Six distinct
+      defects across three attempts all share one cause - the worker REIMPLEMENTED the deployed
+      computation instead of reusing it - and the sixth (FACT-0402) shows the frame-keyed cache was
+      scientifically undefined, so a fourth run would have FAILED on the instrument rather than the
+      cache. P36 replaces it with a passive tap inside the deployed predict_video. THE FAILURE
+      EVIDENCE BELOW IS RETAINED DELIBERATELY: it is the record of what two GPU sessions bought.
     note: >-
       The redesigned gate, pushed UNCHANGED from the committed build at 7c15b23 - a rebuild before pushing was
       byte-identical to the commit, so what runs is what was tested. It is now the SINGLE LICENSING
@@ -681,9 +697,9 @@ experiments:
     spec: scripts/kaggle_specs/p35_dcveto_on_931.json
     kernel: aryaarun07/biohub-p35-dcveto-on-931
     kernel_version: 1
-    submission: null
+    submission: 55888865
     lb: null
-    status: running
+    status: submitted_pending
     date: '2026-08-30'
     facts: [FACT-0393, FACT-0341, FACT-0345, FACT-0377, FACT-0378]
     note: >-

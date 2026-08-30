@@ -6396,8 +6396,123 @@ facts:
       cache. THE GATE'S OWN DOCSTRING ALREADY ARGUED THIS and then did not follow it: it warns that reading
       the zarr directly "would bypass the deployed normalisation and defeat the parity being proven", while
       the worker takes a DIFFERENT normalisation by default, which is worse than the failure it warned about.
+      LEDGER SUPERSEDED 2026-08-30 BY FACT-0402: the count is SIX, not five. The sixth defect - trunk
+      features are WINDOW-DEPENDENT, so a frame-keyed cache is undefined - condemns the whole
+      reimplementation approach rather than a line of it, and P33's design is retired in favour of P36's
+      passive tap. The five recorded here stand as measured.
       IMPLICATION FOR THE STANDING GPU RULE: attempt 4 must NOT be pushed on the strength of the four fixes
       applied so far. This defect was found after those fixes were in place, which is itself evidence that
       the remaining unknown count is not zero.
     date: '2026-08-30'
     tags: [gate-1, pkt-0029, image-pipeline, silent-defect, reimplementation, pattern, verified, headline]
+
+  - id: FACT-0401
+    statement: >-
+      The P35 exploitation treatment is PREREGISTERED at a central of 0.931, band 0.927 to 0.935, with the
+      falsifier at a score AT OR BELOW 0.931 - and the central estimate therefore SITS ON the falsifier,
+      which is deliberate. The kernel is COMPLETE and the treatment is confirmed live in its own log: the
+      run loaded best.pt at epoch 2 rather than skipping it, ran with the safe-division veto ON, and
+      deepcenter_rejected is NON-ZERO across movies (11, 36, 0, 67, 3, 29, 1, 27) where the released 0.931
+      base recorded exactly zero on all eight. The detector now decides; on the base it decided nothing
+    value: 0.931
+    unit: preregistered_central_for_the_p35_dcveto_exchange
+    scope:
+      experiment: EXP-0042
+      kernel: aryaarun07/biohub-p35-dcveto-on-931
+      kernel_version: 1
+      preregistered: {band: [0.927, 0.935], central: 0.931, falsifier: "at or below 0.931"}
+      preregistered_at: '2026-08-30T09:19:17Z'
+      prereg_hash_file: _evidence/exploit931/prereg_before_build.sha256
+      written_before_build: true
+      also_in_submission_description: true
+      treatment: {cells_changed: 1, of: 10, chars_added: 293, deletions: 0,
+                  vars: [BIOHUB_DEEPCENTER_CHECKPOINT, BIOHUB_DEEPCENTER_EXPECTED_EPOCH, BIOHUB_DEEPCENTER_SAFE_DIV_VETO]}
+      treatment_confirmed_live:
+        base: {checkpoint_loaded: checkpoint_last.pt, epoch_asserted: 500, safe_div_veto: false, deepcenter_rejected_per_movie: 0}
+        treatment: {checkpoint_loaded: best.pt, epoch: 2, safe_div_veto: true,
+                    deepcenter_rejected_per_movie: [11, 36, 0, 67, 3, 29, 1, 27]}
+      structural_audit: {verdict: PASS, checks: 13, in_degree_max: 1, out_degree_max: 2, fractional: 0}
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The BAND is a stated prior and not a measurement - this configuration cannot be validated offline at
+      all because its secondary saw all 199 movies (FACT-0378), so nothing here predicts the score. What is
+      VERIFIED is the preregistration itself and the treatment's effect: the prereg file was hashed at
+      09:19:17Z with "no treatment built yet" recorded beside it, an hour before the build, and the
+      per-movie deepcenter_rejected counts are read from the run's own fetched log.
+    instrument: >-
+      scripts/core/kaggle_factory.py audit (13/13 PASS) and scripts/win_bet/audit_release_receipt.py;
+      artifacts C:/temp/exploit931/p35/{kernel.log,submission.csv,audit_receipt.json}
+    experiment: EXP-0042
+    note: >-
+      THE CENTRAL ESTIMATE SITS ON THE FALSIFIER ON PURPOSE. The modal outcome expected is NO CHANGE, and
+      saying so before the score removes the option of reinterpreting a null as a near-miss afterwards. The
+      naive estimate - base plus the full FACT-0341 delta, 0.934 - was rejected as optimistic.
+      WHAT MAKES THE MECHANISM WORTH ONE SUBMISSION is not the prior but the base's own behaviour: it
+      resolves its DeepCenter file to best.pt, REJECTS it on an epoch-500 assertion against the checkpoint's
+      actual epoch 2, falls back to a collapsed checkpoint whose recorded best_score is negative, and runs
+      its veto off - so it paid for a detector that decided nothing. The treatment removes exactly that and
+      nothing else, and the log confirms the detector now rejects candidates on seven of eight movies.
+      THE LANE ENDS EITHER WAY. Win or lose there is no second exploitation experiment, no follow-up tuning
+      and no stacking, per LEVER-0042's falsifier.
+    date: '2026-08-30'
+    tags: [p35, lever-0042, preregistration, exploitation, deepcenter, verified]
+
+  - id: FACT-0402
+    statement: >-
+      A trunk node feature is WINDOW-DEPENDENT, so a frame-keyed feature cache is scientifically undefined
+      and every previous Gate 1 design was measuring the wrong object. TemporalUNet3D contains
+      _TemporalAttention, which mixes across the window's time axis, so unet_out[:, i] depends on EVERY frame
+      in the window. At the deployed window_size 2 with stride W-1 = 1, an interior frame t is the TARGET of
+      the pair (t-1, t) from window [t-1, t] and the SOURCE of the pair (t, t+1) from window [t, t+1] - two
+      different forward passes and two different feature vectors for the same node. Measured on the real
+      deployed path, 66 of 173 role-nodes carry two vectors, with a maximum absolute delta of 0.0123 and a
+      maximum relative delta of 3.5%, median relative 1.0% - 2.1 ORDERS OF MAGNITUDE above the gate's own
+      1e-4 tolerance. The error is not uniform across the source axis, so the documented blind spot would
+      NOT have hidden it
+    value: 0.0123
+    unit: max_abs_feature_delta_between_a_nodes_source_role_and_target_role_vectors
+    scope:
+      mechanism: {class: TemporalUNet3D, component: _TemporalAttention,
+                  source: "C:/temp/p7/tracking_repo/src/biohub_tracking/models/temporal_unet.py:30-48 and :125-131"}
+      deployed_window: {window_size: 2, stride: 1, source: "predict_unet_transformer.py:154-159"}
+      old_worker_defect: {file: scripts/kaggle_edits/assoc_feature_parity.py, lines: 138-147,
+                          behaviour: "cached feats[t] once at first sight and reused it for both roles"}
+      measured: {role_nodes_with_two_vectors: 66, of: 173, max_abs_delta: 0.0123,
+                 max_relative_delta: 0.035, median_relative_delta: 0.010, gate_tolerance: 1.0e-04,
+                 orders_of_magnitude_above_tolerance: 2.1}
+      uniform_across_source_axis: false
+      defect_ledger_now: 6
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Measured on the real deployed path with the real class rather than read from source or inferred from a
+      stub - which matters here, because the previous suite's stub could not have exhibited window mixing at
+      all. The delta is two orders of magnitude above the tolerance the gate itself declares, so this is not
+      a marginal effect that a looser bound would absorb.
+    instrument: >-
+      _evidence/foundations/defect6_measurement.json and
+      tests/test_assoc_feature_tap.py::test_the_cache_is_keyed_by_pair_and_role_not_by_frame
+    experiment: EXP-0041
+    note: >-
+      THIS SUPERSEDES FACT-0400's DEFECT LEDGER AT FIVE. The count is now SIX, and the sixth is the one that
+      condemns the whole approach rather than a line of it:
+        1. attempt 1 - import in the notebook process (FACT-0387) - 1 GPU session
+        2. attempt 2 - hardcoded dataset mount root (FACT-0397) - 1 GPU session
+        3. attempt 3 - no env= on the launcher, PYTHONPATH unset (FACT-0399) - caught on CPU
+        4. attempt 3 - model.detection_head does not exist; it is detect_head - caught on CPU
+        5. attempt 3 - image pipeline not reproduced (FACT-0400) - caught on CPU
+        6. attempt 3 - frame-keyed cache is undefined; features are window-dependent - caught on CPU
+      A fourth GPU session would have ended in a FAIL caused ENTIRELY by the gate's own reimplementation, and
+      the failure would have looked like a genuine cache error. That is the worst available outcome: a
+      correct pipeline condemned by a broken instrument.
+      THE DESIGN CONSEQUENCE IS NOT A KEY CHANGE. A cache keyed by (pair, role) is necessary but the reason
+      the six defects happened is that the worker REIMPLEMENTED the deployed computation. P36 captures the
+      exact tensors handed to model.predict_edges inside the deployed predict_video by source rewriting, so
+      there is nothing left to reimplement - and the defect class disappears rather than being patched.
+      A CORRECTION TO OUR OWN RECORDED BLIND SPOT, which was stated imprecisely wherever it appears: the
+      invariance is a PER-TARGET CONSTANT OFFSET IN THE LOGITS, not "a uniform per-frame source shift". The
+      head is not affine in the source features, so a uniform feature shift does not in general produce the
+      invariant logit offset. The precise form is asserted in both directions in tests/test_assoc_feature_tap.py.
+    date: '2026-08-30'
+    tags: [gate-1, defect-6, window-dependence, pair-and-role, supersedes-ledger, verified, headline]

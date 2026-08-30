@@ -5920,3 +5920,55 @@ BOTH plausible trunks on both folds (six specs), and needs a Gate-1 receipt with
 per-crop cache on the `CACHE_KEYS` contract, a sha256 licence, a manifest binding trunk/fold/embryo/
 normalisation/node ordering/candidate parameters/commit, and a passing `audit_dual_trunk` pair. No GPU job,
 kernel push or submission was made.
+
+## 2026-08-30 (evening) — PKT-0037 (agent 1, foundations): Gate 1 rebuilt as passive instrumentation, and the sixth defect is found before the fourth session
+
+**The order, and why.** The host stopped the repair loop. Three attempts at Gate 1 produced five defects
+(`FACT-0387`, `FACT-0397`, `FACT-0399`, the `detection_head` name, and `FACT-0400`) and every one was a
+REIMPLEMENTATION of the deployed path from a reading of it. The instruction was to stop patching the
+independent worker and instrument the deployed predictor instead.
+
+**A sixth defect, found while designing the replacement, and it is the same class.** The deployed node
+feature is not a per-frame quantity. `TemporalUNet3D` mixes across the window's time axis
+(`src/biohub_tracking/models/temporal_unet.py:30-48`, `:125-131`), so with the deployed `window_size` 2 and
+stride 1 an interior frame is the TARGET of one window and the SOURCE of the next — two forward passes, two
+feature vectors. The old worker cached one vector per frame at first sight and used it for both roles
+(`scripts/kaggle_edits/assoc_feature_parity.py:138-147`). Measured on the real path, not read: 66 of 173
+role-nodes carry two vectors, differing by up to 0.0123 absolute and 3.5% relative — 2.1 orders of magnitude
+above the gate's own 1e-4 tolerance (`_evidence/foundations/defect6_measurement.json`). The error is not
+uniform across the source axis, so the documented softmax blind spot would not have hidden it: a fourth GPU
+session would have failed on the gate's own arithmetic.
+
+**What was built.** `scripts/kaggle_edits/assoc_feature_tap.py` injects a passive tap into `predict_video`
+by source rewriting — the pattern `pre_ilp_export.py` and `edge_candidate_budget.py` already use — and
+records the exact tensors handed to `model.predict_edges` plus the deployed probabilities computed one line
+later. `scripts/win_bet/assoc_tap_replay.py` reloads the cache in a fresh process and re-runs only the head.
+Nothing recomputes the image pipeline, so the whole `FACT-0400` class is removed rather than repaired. The
+two-band contract and both non-vacuity floors are unchanged; what changed is that both bands now come from
+the SAME run, which also drops a cross-run assumption `FACT-0363` warns against.
+
+**Passivity is proved twice.** Statically, insertion is the only edit and stripping the marked spans must
+restore the pre-patch bytes — asserted by the patch and re-proved from disk by the kernel. Dynamically, the
+CPU suite runs the real `predict_video` pristine versus tapped over a real zarr and requires bit-identical
+`coords` and `edges`.
+
+**One correction to a standing statement.** The blind spot is a per-target constant offset in the LOGITS,
+not "a uniform per-frame source shift" — the head is not affine in the source features, so those are not
+equivalent. The precise form is asserted in both directions.
+
+**Tests: 22 passed**, in production layout (module in `<repo>/scripts`, worker in `<working>`, real
+subprocess boundary) against the real class surface with no stub anywhere — which is what let
+`model.detection_head` survive a green suite. Rejections proved by mutation: the per-frame cache, a single
+perturbed node, a within-frame permutation, a torn window-shape record, an empty band A, an empty band B, an
+empty cache directory; with a lossless round trip and the as-built launcher as accept controls.
+
+**Preflight.** A second Gate-1 profile was added so the redesigned spec is classified rather than skipped.
+On the rebuilt notebook (`p36_assoc_feature_tap_smoke`): 9 of 10 applicable checks PASS, nothing skipped,
+and the single FAIL is `PF01` because the new patch files are uncommitted — this packet may not stage. A
+pre-existing selftest failure was also found and fixed: `M6` borrowed its defect from the live P33 notebook
+and stopped proving anything once that notebook was repaired. Selftest is now **25/25**.
+
+**Unproven until GPU:** nothing ran on T4x2 or against the real 50-epoch weights; the 1e-4 tolerance is
+unverified for the real model; full-fold cache size is estimated; and `audit_feature_cache.py` still expects
+the per-frame layout and will refuse the new cache until its schema moves. No GPU job, kernel push or
+submission was made.

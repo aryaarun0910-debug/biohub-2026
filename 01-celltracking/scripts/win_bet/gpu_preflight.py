@@ -178,6 +178,9 @@ def parse_mount_path(p: str) -> tuple[str | None, str, str] | None:
 # silently passed. Determining the class wrongly is the dangerous case, so an undetermined class
 # runs everything.
 CLASSES = ("submission", "gate_smoke", "feature_cache", "generic")
+# Gate-1 PROFILES with an implementing check set. A gate_smoke spec outside these still
+# fails closed rather than passing on another experiment's inputs.
+GATE_PROFILES = ("assoc_feature_parity", "assoc_feature_tap")
 
 
 def classify(spec: dict, code_files: list[str]) -> tuple[str, str]:
@@ -186,7 +189,7 @@ def classify(spec: dict, code_files: list[str]) -> tuple[str, str]:
     for cf in code_files:
         if cf.endswith("assoc_feature_cache.py"):
             return "feature_cache", f"spec injects {cf}"
-        if cf.endswith("assoc_feature_parity.py"):
+        if cf.endswith(("assoc_feature_parity.py", "assoc_tap_gate.py")):
             return "gate_smoke", f"spec injects {cf}"
     return "generic", "no submission and no recognised gate patch"
 
@@ -207,9 +210,17 @@ def load_context(spec_path: Path, sandbox: Path) -> Ctx:
     ctx.facts["code_files"] = code_files
     # The GATE PATCH is the experiment's own patch: the last code_file the factory injects.
     ctx.facts["gate_patch"] = code_files[-1] if code_files else None
-    ctx.facts["profile"] = ("assoc_feature_parity"
-                            if any(c.endswith("assoc_feature_parity.py") for c in code_files)
-                            else "generic")
+    # PROFILE, not just CLASS. Two Gate-1 designs now exist and they consume DIFFERENT things:
+    # the parity worker reads a previous run's pre-ILP parquet and ECB sidecars, while the
+    # passive tap consumes nothing external at all - its bands are recorded by the same deployed
+    # run that produces the cache. A check written for one is not evidence about the other, which
+    # is exactly the failure mode the artifact-class split was introduced to stop.
+    if any(c.endswith(("assoc_feature_tap.py", "assoc_tap_gate.py")) for c in code_files):
+        ctx.facts["profile"] = "assoc_feature_tap"
+    elif any(c.endswith("assoc_feature_parity.py") for c in code_files):
+        ctx.facts["profile"] = "assoc_feature_parity"
+    else:
+        ctx.facts["profile"] = "generic"
     ctx.facts["class"], ctx.facts["class_reason"] = classify(spec, code_files)
     return ctx
 
@@ -243,10 +254,10 @@ def _unsupported(cid: str, title: str, ctx: Ctx, needs: str) -> Check:
 
 def _gate_guard(cid: str, title: str, ctx: Ctx) -> Check | None:
     """Skip for classes that never carry a Gate-1 worker; fail closed for classes that should."""
-    if ctx.facts.get("profile") == "assoc_feature_parity":
+    if ctx.facts.get("profile") in GATE_PROFILES:
         return None
     if ctx.facts.get("class") in ("gate_smoke", "feature_cache"):
-        return _unsupported(cid, title, ctx, "assoc_feature_parity")
+        return _unsupported(cid, title, ctx, " or ".join(GATE_PROFILES))
     return _skip(cid, title, ctx,
                  f"artifact class {ctx.facts.get('class')!r} carries no Gate-1 feature-parity "
                  f"worker, so there is nothing here to examine")
@@ -353,9 +364,203 @@ def check_mount_resolvers(ctx: Ctx) -> Check:
                  "attempt 2; the `datasets` convention stops resolving (selftest M1)")
 
 
+
+# ---------------------------------------------------------------- passive-tap profile helpers
+def _tap_worker_source(ctx: Ctx) -> str | None:
+    """The replay worker AS EMBEDDED IN THE BUILT NOTEBOOK - the artifact that will actually run.
+
+    Read from the notebook rather than from the repository on purpose: the built artifact and its
+    patch source have diverged before (PKT-0037, 2026-08-30), and a check that reads the repo
+    would certify a file the kernel never sees.
+    """
+    m = re.search(r"_AFTG_WORKER = r'''(.*?)'''", ctx.nb_source, re.S)
+    return m.group(1) if m else None
+
+
+def _tap_declared_schema(ctx: Ctx) -> tuple[set[str], set[str]]:
+    """The cache schema the tap DECLARES, parsed out of the built notebook."""
+    out = []
+    for name in ("_AFT_SCHEMA_REQUIRED", "_AFT_SCHEMA_OPTIONAL"):
+        m = re.search(rf"^{name} = (\(.*?\))\n", ctx.nb_source, re.S | re.M)
+        out.append(set(ast.literal_eval(m.group(1))) if m else set())
+    return out[0], out[1]
+
+
+def _tap_cache_keys_read(worker_src: str) -> set[str]:
+    """Every literal cache key the worker reads, resolved from its AST, not grepped.
+
+    A slice can be a conditional expression, so every string constant inside the subscript counts.
+    The per-band keys the worker builds with an f-string are expanded explicitly rather than
+    ignored - an unexpanded dynamic key is a hole, not an absence.
+    """
+    def _literals(node):
+        """String constants in a subscript, EXCLUDING f-string fragments.
+
+        An f-string's literal parts ("band_", "_prob") are Constants too, and counting them
+        produced seven phantom keys the first time this ran. The dynamic keys are expanded
+        explicitly below instead - a fragment is neither a key nor an absence.
+        """
+        if isinstance(node, ast.JoinedStr):
+            return set()
+        if isinstance(node, ast.Constant):
+            return {node.value} if isinstance(node.value, str) else set()
+        out: set[str] = set()
+        for child in ast.iter_child_nodes(node):
+            out |= _literals(child)
+        return out
+
+    read: set[str] = set()
+    for node in ast.walk(ast.parse(worker_src)):
+        if isinstance(node, ast.Subscript) and getattr(node.value, "id", None) == "cache":
+            read |= _literals(node.slice)
+    for band in ("a", "b"):
+        for field in ("pair", "i", "j", "source_id", "target_id", "prob"):
+            read.add(f"band_{band}_{field}")
+    return read
+
+
+def _tap_run_scope(ctx: Ctx) -> tuple[list[str], dict]:
+    """The crops the DEPLOYED prediction will run, under the notebook's own retarget rule.
+
+    Under passive instrumentation the cache is written by the deployed run itself, so the gate's
+    scope IS the prediction's scope - there is no separate crop list to get wrong, and no
+    previous run's artifact to disagree with.
+    """
+    stems = json.loads(ctx.env.get("BIOHUB_LOEO_STEMS", "[]"))
+    limit = int(ctx.env.get("BIOHUB_LOEO_LIMIT", "0") or 0)
+    crops = stems[:limit] if limit > 0 else list(stems)
+    wanted = [c for c in ctx.env.get("BIOHUB_AFT_CROPS", "").split(",") if c.strip()]
+    detail = {
+        "fold": ctx.env.get("BIOHUB_LOEO_FOLD"), "arm": ctx.env.get("BIOHUB_LOEO_ARM"),
+        "declared_stems": len(stems), "loeo_limit": limit,
+        "selection_rule": "LOEO_STEMS[:BIOHUB_LOEO_LIMIT] when the limit is > 0",
+        "selection_rule_present_in_notebook": "LOEO_STEMS = LOEO_STEMS[:LOEO_LIMIT]"
+                                              in ctx.nb_source,
+        "tap_crop_filter": wanted or "all crops in the run scope",
+        "tap_crop_filter_inside_run_scope": all(c in crops for c in wanted),
+    }
+    return crops, detail
+
+
+def _tap_frame_pairs(crops: list[str]) -> dict:
+    out = {}
+    for crop in crops:
+        z = LOCAL_TRAIN / f"{crop}.zarr"
+        if not z.exists():
+            out[crop] = None
+            continue
+        try:
+            import zarr
+            out[crop] = int(zarr.open_group(str(z), mode="r")["0"].shape[0]) - 1
+        except Exception as exc:                                          # noqa: BLE001
+            out[crop] = f"unreadable: {type(exc).__name__}"
+    return out
+
+
+def check_expected_crops_tap(ctx: Ctx) -> Check:
+    """PF03 for the passive tap: the exact crops, and that each can produce a frame PAIR."""
+    crops, detail = _tap_run_scope(ctx)
+    pairs = _tap_frame_pairs(crops)
+    per_crop = {c: {"train_zarr": (LOCAL_TRAIN / f"{c}.zarr").exists(),
+                    "frame_pairs": pairs.get(c)} for c in crops}
+    ev = {"expected_crops": crops, "expected_crop_count": len(crops),
+          "per_crop": per_crop, **detail,
+          "why_no_external_parity_target": "the tap records band A and band B at the deployed "
+                                           "site in THIS run, so no previous run's parquet or "
+                                           "sidecar is an input and none can be stale"}
+    ok = bool(crops) and detail["selection_rule_present_in_notebook"] and all(
+        v["train_zarr"] and isinstance(v["frame_pairs"], int) and v["frame_pairs"] >= 1
+        for v in per_crop.values()
+    ) and detail["tap_crop_filter_inside_run_scope"]
+    ctx.facts["crops"] = crops
+    return Check("PF03", "expected crop COUNT and the exact crop NAMES are known before launch",
+                 ok, ev,
+                 "point BIOHUB_AFT_CROPS at a crop outside the run scope, or name a stem with no "
+                 "train zarr; both reject")
+
+
+def check_schemas_tap(ctx: Ctx) -> Check:
+    """PF05 for the passive tap: the cache schema, cross-referenced end to end.
+
+    The old profile checked a previous run's parquet columns and sidecar keys. Those are no
+    longer inputs. The schema that CAN still be wrong is the one the tap writes and the replay
+    reads, and both halves are taken from the BUILT NOTEBOOK, so this checks the artifact that
+    will run rather than the repository it was built from.
+    """
+    worker = _tap_worker_source(ctx)
+    if worker is None:
+        return Check("PF05", "the cache schema the tap writes is exactly the one the replay reads",
+                     False, {"error": "no _AFTG_WORKER literal in the built notebook"},
+                     "delete the worker literal; extraction fails closed")
+    required, optional = _tap_declared_schema(ctx)
+    read = _tap_cache_keys_read(worker)
+    unknown = sorted(read - required - optional)
+    ev = {"declared_required_keys": sorted(required), "declared_optional_keys": sorted(optional),
+          "keys_the_replay_reads": sorted(read),
+          "read_but_never_written": unknown,
+          "declared_in": "the tap patch's _AFT_SCHEMA_REQUIRED, as embedded in the notebook",
+          "runtime_enforcement": "the flush raises on schema drift before writing a file"}
+    ok = bool(required) and bool(read) and not unknown
+    return Check("PF05", "the cache schema the tap writes is exactly the one the replay reads",
+                 ok, ev,
+                 "rename one key in _AFT_SCHEMA_REQUIRED; the read-but-never-written list "
+                 "becomes non-empty and the check rejects")
+
+
+def check_exact_positive_counts_tap(ctx: Ctx) -> Check:
+    """PF06 for the passive tap: the non-vacuity FLOORS, and a scope that can satisfy them.
+
+    STATED PLAINLY: under same-run instrumentation the exact per-band pair counts CANNOT be known
+    before the run, because the run produces them. The old profile predicted them from a previous
+    run's artifact, which is the cross-run assumption FACT-0363 warns is not free. What replaces
+    the prediction is enforcement: the in-kernel floors refuse a crop that compared nothing
+    (FACT-0394), and the CPU fixture proves by mutation that they fire. This check verifies the
+    floors are present IN THE ARTIFACT THAT WILL RUN and that the scope can produce a frame pair.
+    """
+    worker = _tap_worker_source(ctx)
+    if worker is None:
+        return Check("PF06", "the in-kernel non-vacuity floors are present and satisfiable",
+                     False, {"error": "no _AFTG_WORKER literal in the built notebook"},
+                     "delete the worker literal; extraction fails closed")
+    floors = {"band_a": False, "band_b": False}
+    for node in ast.walk(ast.parse(worker)):
+        if isinstance(node, ast.Compare) and isinstance(node.ops[0], ast.Gt):
+            text = ast.unparse(node)
+            if text == "a['checked'] > 0":
+                floors["band_a"] = True
+            if text == "b['checked'] > 0":
+                floors["band_b"] = True
+    crops, _detail = _tap_run_scope(ctx)
+    pairs = _tap_frame_pairs(crops)
+    fixture = ROOT / "tests" / "test_assoc_feature_tap.py"
+    mutations = ("test_the_gate_refuses_an_empty_band_a",
+                 "test_the_gate_refuses_an_empty_band_b",
+                 "test_the_gate_refuses_an_empty_cache_directory",
+                 "test_a_per_frame_feature_cache_fails_the_gate")
+    fixture_txt = fixture.read_text(encoding="utf-8") if fixture.is_file() else ""
+    ev = {"in_kernel_floors_present": floors,
+          "frame_pairs_available_per_crop": pairs,
+          "exact_counts_predictable_before_launch": False,
+          "why_not": "the bands are recorded by the deployed run itself; predicting them from a "
+                     "previous run would be the cross-run assumption FACT-0363 warns against",
+          "enforcement_instead": "per-crop a_checked>0 and b_checked>0 in the shipped worker",
+          "mutation_evidence": {m: (m in fixture_txt) for m in mutations},
+          "mutation_evidence_file": str(fixture)}
+    ok = (all(floors.values()) and bool(pairs)
+          and all(isinstance(v, int) and v >= 1 for v in pairs.values())
+          and all(ev["mutation_evidence"].values()))
+    return Check("PF06", "the in-kernel non-vacuity floors are present in the shipped worker and "
+                         "the run scope can satisfy them",
+                 ok, ev,
+                 "strip `a['checked'] > 0` from the worker's pass expression; the floor check "
+                 "rejects")
+
+
 # ------------------------------------------------------------------------------------ PF03/04
 def check_expected_crops(ctx: Ctx) -> Check:
     """The EXACT crop names, from the real parquet, under the notebook's own selection rule."""
+    if ctx.facts.get("profile") == "assoc_feature_tap":
+        return check_expected_crops_tap(ctx)
     guard = _gate_guard("PF03", "expected crop COUNT and the exact crop NAMES are known before launch", ctx)
     if guard is not None:
         return guard
@@ -390,6 +595,8 @@ def check_expected_crops(ctx: Ctx) -> Check:
 # ------------------------------------------------------------------------------------ PF05
 def check_schemas(ctx: Ctx) -> Check:
     """Every column and key the worker reads, by name and dtype, on the real uploaded bytes."""
+    if ctx.facts.get("profile") == "assoc_feature_tap":
+        return check_schemas_tap(ctx)
     guard = _gate_guard("PF05", "input schemas match what the worker reads, column by column", ctx)
     if guard is not None:
         return guard
@@ -428,6 +635,8 @@ def check_exact_positive_counts(ctx: Ctx) -> Check:
     `b_checked > 0` floors can be satisfied at the configured frame cap. If either band is empty
     in scope, the GPU session is already known to produce a refusal rather than a result.
     """
+    if ctx.facts.get("profile") == "assoc_feature_tap":
+        return check_exact_positive_counts_tap(ctx)
     guard = _gate_guard("PF06", "EXACT positive pair counts per band per crop, strictly greater than zero", ctx)
     if guard is not None:
         return guard
@@ -581,14 +790,22 @@ step("model_class_exposes_every_method_the_worker_calls", _model_class)
 
 
 def _argv():
+    """Parse and dispatch for real; stub ONLY the GPU-bound bodies, named by the caller.
+
+    The stub names come from cfg rather than being hardcoded, because two Gate-1 worker designs
+    now exist with different phase functions. A hardcoded name would silently stub nothing and
+    then run the real body - which on a preflight is the worst possible outcome.
+    """
     mod = worker_mod.get("m")
     if mod is None:
         raise RuntimeError("worker module never imported")
     seen = []
-    mod.phase_cache = lambda a: seen.append(("cache", vars(a))) or 0
-    mod.phase_verify = lambda a: seen.append(("verify", vars(a))) or 0
+    for name in cfg["stubs"]:
+        if not hasattr(mod, name):
+            raise AttributeError("worker has no %r to stub" % name)
+        setattr(mod, name, (lambda n: (lambda a: seen.append((n, vars(a))) or 0))(name))
     for argv in cfg["argvs"]:
-        sys.argv = ["afp_gate1.py"] + argv
+        sys.argv = [cfg.get("worker_name", "worker.py")] + argv
         rc = mod.main()
         if rc != 0:
             raise RuntimeError("main() returned %r for %r" % (rc, argv[:4]))
@@ -655,15 +872,21 @@ def check_worker_subprocess_boundary(ctx: Ctx) -> Check:
     if guard is not None:
         return guard
     src = ctx.nb_source
-    m = re.search(r"_AFP_WORKER = r'''(.*?)'''", src, re.S)
+    # PROFILE-AWARE. Two Gate-1 designs ship different workers under different literals and
+    # different launchers; reading the wrong one would report a boundary that does not exist.
+    tap = ctx.facts.get("profile") == "assoc_feature_tap"
+    literal = "_AFTG_WORKER" if tap else "_AFP_WORKER"
+    launcher = "_aftg_sub" if tap else "_afp_sub"
+    worker_name = "assoc_tap_replay.py" if tap else "afp_gate1.py"
+    m = re.search(literal + r" = r'''(.*?)'''", src, re.S)
     if not m:
         return Check("PF07", "worker crosses the real subprocess boundary", False,
-                     {"error": "no _AFP_WORKER literal found in the built notebook"},
+                     {"error": f"no {literal} literal found in the built notebook"},
                      "delete the worker literal; extraction fails closed")
     worker_src = m.group(1)
 
     # How does the notebook actually launch it?
-    launch = re.search(r"_afp_sub\.run\((.*?)\)\n", src, re.S)
+    launch = re.search(launcher + r"\.run\((.*?)\)\n", src, re.S)
     launch_txt = launch.group(1) if launch else ""
     passes_env = "env=" in launch_txt
     cwd_expr = (re.search(r"cwd=([^,\)]+)", launch_txt) or [None, "<none>"])[1]
@@ -679,7 +902,7 @@ def check_worker_subprocess_boundary(ctx: Ctx) -> Check:
     if pack_ok:
         shutil.copytree(LOCAL_PACK / "scripts", repo / "scripts")
         shutil.copytree(LOCAL_PACK / "src", repo / "src")
-    worker = working / "afp_gate1.py"
+    worker = working / worker_name
     worker.write_text(worker_src, encoding="utf-8")
     probe = working / "afp_gate1_preflight_probe.py"
     probe.write_text(_PROBE, encoding="utf-8")
@@ -687,17 +910,26 @@ def check_worker_subprocess_boundary(ctx: Ctx) -> Check:
     afp_attrs = sorted(set(re.findall(r"\bAFP\.(\w+)", worker_src)))
     model_attrs = sorted(set(re.findall(r"\bmodel\.(\w+)", worker_src))
                          - {"unet"}) + ["unet"]
-    common = ["--weights", str(repo / "weights" / "edge_predictor_best.pth"),
-              "--test-dir", str(box / "test"), "--cache-dir", str(box / "cache"),
-              "--max-frames", ctx.env.get("BIOHUB_AFP_MAX_FRAMES", "8"),
-              "--crops", *ctx.facts.get("crops", ["a", "b"])]
-    argvs = [["--phase", "cache"] + common,
-             ["--phase", "verify"] + common
-             + ["--preilp", str(ctx.facts.get("parquet", "x.parquet")),
-                "--ecb-dir", str(ctx.facts.get("ecb_dir", "ecb")),
-                "--out", str(box / "out.json")]]
-    cfg = {"worker": str(worker), "afp_attrs": afp_attrs,
-           "model_attrs": sorted(set(model_attrs)), "argvs": argvs}
+    weights = str(repo / "weights" / "edge_predictor_best.pth")
+    if tap:
+        # The passive replay has ONE phase and no external inputs: weights, the cache the tapped
+        # run wrote, and where the report goes.
+        argvs = [["--weights", weights, "--cache-dir", str(box / "cache"),
+                  "--out", str(box / "out.json"), "--tol", "1e-4"]]
+        stubs = ["verify"]
+    else:
+        common = ["--weights", weights,
+                  "--test-dir", str(box / "test"), "--cache-dir", str(box / "cache"),
+                  "--max-frames", ctx.env.get("BIOHUB_AFP_MAX_FRAMES", "8"),
+                  "--crops", *ctx.facts.get("crops", ["a", "b"])]
+        argvs = [["--phase", "cache"] + common,
+                 ["--phase", "verify"] + common
+                 + ["--preilp", str(ctx.facts.get("parquet", "x.parquet")),
+                    "--ecb-dir", str(ctx.facts.get("ecb_dir", "ecb")),
+                    "--out", str(box / "out.json")]]
+        stubs = ["phase_cache", "phase_verify"]
+    cfg = {"worker": str(worker), "afp_attrs": afp_attrs, "worker_name": worker_name,
+           "model_attrs": sorted(set(model_attrs)), "argvs": argvs, "stubs": stubs}
 
     # KAGGLE FIDELITY: the notebook process on Kaggle has no PYTHONPATH pointing into REPO_DIR -
     # REPO_DIR is created at runtime under /kaggle/working - so the inherited env is stripped of
@@ -719,6 +951,7 @@ def check_worker_subprocess_boundary(ctx: Ctx) -> Check:
         "how_that_was_determined": pp_how,
         "notebook_cwd_expression": cwd_expr.strip(),
         "deployed_shards_use_pythonpath": sorted(set(deployed_env)) or None,
+        "profile": ctx.facts.get("profile"), "worker_literal": literal,
         "sandbox_repo": str(repo), "worker": str(worker),
         "support_pack_mirror_present": pack_ok,
         "afp_attributes_required_by_worker": afp_attrs,
@@ -1142,26 +1375,24 @@ def _selftest(sandbox: Path) -> int:
     ctx3.facts["crops"] = ctx.facts["crops"]
     ctx3.facts["parquet"] = ctx.facts["parquet"]
     ctx3.facts["ecb_dir"] = ctx.facts["ecb_dir"]
+    # THE DEFECT IS MANUFACTURED, NOT BORROWED. The first version of this mutation used the LIVE
+    # P33 notebook as its defective fixture, on the assumption that its launcher would keep
+    # omitting `env=`. When that notebook was rebuilt with the fix, the mutation started reporting
+    # FAIL for a reason that had nothing to do with the checker - and a selftest that cries wolf
+    # teaches a reader to ignore the one time it is right. A mutation must manufacture its own
+    # defect, exactly like every other one here.
     as_built = check_worker_subprocess_boundary(ctx3)
-    probe_dir = box / "subprocess" / "working"
-    repo = probe_dir / "tracking_repo"
-    fixed = subprocess.run(
-        [sys.executable, str(probe_dir / "afp_gate1_preflight_probe.py"),
-         _canonical({"worker": str(probe_dir / "afp_gate1.py"),
-                     "afp_attrs": as_built.evidence.get("afp_attributes_required_by_worker", []),
-                     "model_attrs": ["predict_edges", "_index_features", "unet",
-                                     "detection_head"],
-                     "argvs": []})],
-        cwd=str(repo), text=True, capture_output=True, timeout=600,
-        env={**{k: v for k, v in os.environ.items() if k != "PYTHONPATH"},
-             "PYTHONPATH": "scripts" + os.pathsep + "src"})
-    fixed_ok = "PREFLIGHT_PROBE_JSON" in fixed.stdout and json.loads(
-        fixed.stdout.split("PREFLIGHT_PROBE_JSON ", 1)[1])["steps"][
-        "import_predict_unet_transformer"]["ok"]
-    rec("M6 PF07 rejects the as-built launcher and accepts the same worker with PYTHONPATH "
-        "=scripts+src (FACT-0387 boundary)",
-        (not as_built.passed) and fixed_ok,
-        f"as_built_passed={as_built.passed} with_pythonpath_import_ok={fixed_ok}")
+    ctx3b = load_context(spec_path, box / "m6_stripped")
+    ctx3b.facts.update({"crops": ctx.facts["crops"], "parquet": ctx.facts["parquet"],
+                        "ecb_dir": ctx.facts["ecb_dir"]})
+    ctx3b.nb_source = re.sub(r",\s*\n\s*env=_afp_env", "", ctx3.nb_source)
+    stripped = check_worker_subprocess_boundary(ctx3b)
+    rec("M6 PF07 rejects a launcher with env= stripped and accepts the as-built one "
+        "(FACT-0387/FACT-0399 boundary)",
+        as_built.passed and not stripped.passed,
+        f"as_built_passed={as_built.passed} "
+        f"stripped_pythonpath={stripped.evidence.get('pythonpath_the_launcher_passes')!r} "
+        f"stripped_passed={stripped.passed}")
 
     # --- M7 PF01: one edited byte in the built notebook breaks the binding -------------------
     ctx4 = load_context(spec_path, box)
@@ -1319,6 +1550,48 @@ def _selftest(sandbox: Path) -> int:
         "agent's dirt", empty_q == [], f"whole_worktree_leak={len(empty_q)}")
     rec("M16 PF01 still rejects a spec whose OWN patch file is uncommitted",
         bool(own_dirty), f"{own_dirty[:1]}")
+
+    # --- M17-M19 / A5 the PASSIVE-TAP profile ------------------------------------------------
+    tap_spec = ROOT / "scripts" / "kaggle_specs" / "p36_assoc_feature_tap_smoke.json"
+    if tap_spec.is_file() and (ROOT / json.loads(tap_spec.read_text(encoding="utf-8"))["out_dir"]
+                               / json.loads(tap_spec.read_text(encoding="utf-8"))["code_file"]
+                               ).is_file():
+        tctx = load_context(tap_spec, box / "tap")
+        rec("A5 ACCEPT the passive-tap spec classifies as gate_smoke with an implementing profile",
+            tctx.facts["class"] == "gate_smoke"
+            and tctx.facts["profile"] == "assoc_feature_tap",
+            f"class={tctx.facts['class']} profile={tctx.facts['profile']}")
+
+        # M17 PF07: the same boundary defect, in the tap launcher.
+        t_ok = check_worker_subprocess_boundary(load_context(tap_spec, box / "tap_ok"))
+        tctx_bad = load_context(tap_spec, box / "tap_noenv")
+        tctx_bad.nb_source = re.sub(r",\s*\n\s*env=_aftg_env", "", tctx_bad.nb_source)
+        t_bad = check_worker_subprocess_boundary(tctx_bad)
+        rec("M17 PF07 rejects the tap launcher with env= stripped and accepts the as-built one",
+            t_ok.passed and not t_bad.passed,
+            f"as_built={t_ok.passed} stripped={t_bad.passed}")
+
+        # M18 PF05: a renamed cache key is read but never written.
+        t_ok5 = check_schemas_tap(load_context(tap_spec, box / "tap_s_ok"))
+        tctx_s = load_context(tap_spec, box / "tap_s_bad")
+        tctx_s.nb_source = tctx_s.nb_source.replace('"role_feat",', '"role_features",')
+        t_bad5 = check_schemas_tap(tctx_s)
+        rec("M18 PF05 rejects a cache key the replay reads but the tap never writes",
+            t_ok5.passed and not t_bad5.passed,
+            f"unknown={t_bad5.evidence.get('read_but_never_written')}")
+
+        # M19 PF06: the band-A non-vacuity floor stripped from the shipped worker.
+        t_ok6 = check_exact_positive_counts_tap(load_context(tap_spec, box / "tap_f_ok"))
+        tctx_f = load_context(tap_spec, box / "tap_f_bad")
+        tctx_f.nb_source = tctx_f.nb_source.replace("and a[\"checked\"] > 0", "and True")
+        t_bad6 = check_exact_positive_counts_tap(tctx_f)
+        rec("M19 PF06 rejects a worker whose band-A non-vacuity floor has been removed "
+            "(FACT-0394)",
+            t_ok6.passed and not t_bad6.passed,
+            f"floors={t_bad6.evidence.get('in_kernel_floors_present')}")
+    else:
+        rec("A5/M17/M18/M19 the passive-tap profile is exercised", False,
+            "p36 spec or its built notebook is missing - the tap profile was NOT proved")
 
     total = len(results)
     bad = [n for n, ok, _ in results if not ok]
