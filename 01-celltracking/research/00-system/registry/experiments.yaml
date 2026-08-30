@@ -733,3 +733,29 @@ experiments:
       runs with the safe-division veto off - so deepcenter_rejected=0 on all eight movies across 664
       geometric candidates. The base holds the good checkpoint in hand and declines it. This experiment
       removes exactly that and nothing else.
+
+  - id: EXP-0043
+    title: P36 passive feature-tap parity smoke, Gate 1 attempt 4 - the redesign
+    spec: scripts/kaggle_specs/p36_assoc_feature_tap_smoke.json
+    kernel: aryaarun07/biohub-p36-assoc-feature-tap-smoke
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: failed
+    date: '2026-08-30'
+    facts: [FACT-0403, FACT-0402, FACT-0400]
+    note: >-
+      The replacement for P33, which is superseded (EXP-0040, EXP-0041). Launched only after the class-aware
+      CPU preflight returned PASS with failed=[] and skipped=[] on the exact committed artifact, its receipt
+      signature verified and its notebook_sha256 matching the live file - the launch gate the host set.
+      IT FAILED, AND IT IS THE FIRST GATE-1 RUN THAT PRODUCED EVIDENCE. Three previous attempts compared
+      ZERO pairs; this compared 4,199 band-A and 9,907 band-B pairs across both expected crops, on real
+      32-dimensional features at the deployed downsample, with passivity proved statically and re-proved
+      in-kernel. Positional features round-trip at exactly 0.0 and integrity failures are zero, so the cache
+      structure, node ordering and role keying are sound and defect 6 does not recur.
+      The failure is a COMPARISON-TARGET defect, not a cache defect: the deployed probability is computed
+      after a secondary-model logit blend at weight 0.15, while the replay re-runs the primary head alone
+      (FACT-0403). Per the standing instruction, the failing artifacts were persisted and the mismatch
+      reproduced offline; nothing was patched and nothing relaunched.
+      The session also satisfies the standing GPU rule on its own terms: it produced a reusable artifact, the
+      1.6 MB archived pair-and-role cache, which is the first cache of the correct schema this campaign has.

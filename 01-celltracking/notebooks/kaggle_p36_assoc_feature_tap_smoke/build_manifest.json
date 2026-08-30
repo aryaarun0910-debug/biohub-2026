@@ -84,5 +84,6 @@
   "defect_gate": {
     "ledger": "scripts\\core\\experiment_defects.json",
     "passed": []
-  }
+  },
+  "pushed_slug": "biohub-p36-assoc-feature-tap-smoke"
 }

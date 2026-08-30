@@ -6516,3 +6516,71 @@ facts:
       invariant logit offset. The precise form is asserted in both directions in tests/test_assoc_feature_tap.py.
     date: '2026-08-30'
     tags: [gate-1, defect-6, window-dependence, pair-and-role, supersedes-ledger, verified, headline]
+
+  - id: FACT-0403
+    statement: >-
+      Gate 1 attempt 4 (P36, the passive tap) RAN AND MEASURED for the first time in four attempts, and
+      failed for a reason that is NOT a cache defect. The tap captured both expected crops with real deployed
+      quantities - feat_dim 32, pos_dim 32, downsample (1,4,4), real per-crop quantiles - passivity verified
+      both statically and in-kernel, integrity failures ZERO, positional features round-tripping EXACTLY at
+      0.0, and both probability bands non-vacuous on both crops (band A 1,703 and 2,496 checked; band B 998
+      and 8,909). The replay nevertheless disagrees by up to 0.43 because THE COMPARISON TARGET IS WRONG: the
+      deployed probs are computed AFTER a secondary-model logit blend at weight 0.15, while the replay
+      re-runs the PRIMARY HEAD ONLY from cache
+    value: 0.4286353588104248
+    unit: max_abs_prob_delta_between_primary_only_replay_and_blended_deployed_probs
+    scope:
+      kernel: aryaarun07/biohub-p36-assoc-feature-tap-smoke
+      kernel_version: 1
+      status: COMPLETE
+      crops_expected: [44b6_0113de3b, 44b6_0b24845f]
+      crops_captured: 2
+      per_crop:
+        44b6_0113de3b: {pairs: 8, nodes: 26169, role_nodes: 3521, band_a_checked: 1703, band_a_missing: 12,
+                        band_a_extra: 0, band_a_delta: 0.2288, band_b_checked: 998, band_b_missing: 0,
+                        band_b_delta: 0.2377, integrity_failures: 0, pos_feature_max_abs_delta: 0.0}
+        44b6_0b24845f: {pairs: 8, nodes: 33432, role_nodes: 6465, band_a_checked: 2496, band_a_missing: 109,
+                        band_a_extra: 39, band_a_delta: 0.4286, band_b_checked: 8909, band_b_missing: 0,
+                        band_b_delta: 0.3322, integrity_failures: 0, pos_feature_max_abs_delta: 0.0}
+      passivity: {static_pure_insertion: true, in_kernel_stripped_equals_pre: true, sha256: 25b3ebfd8849}
+      deployed_quantities: {feat_dim: 32, pos_dim: 32, downsample: [1, 4, 4], window: 2}
+      cache_archived: {bytes: 1609797, crops: 2, sha256: 2ccae55e7945}
+      root_cause:
+        deployed: "edge_logits_pair = (1-w)*primary + w*secondary, then optional temperature, then softmax - predict_unet_transformer.py:748-762"
+        secondary_active: true
+        secondary_edge_logit_weight: 0.15
+        secondary_sha256: 9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f
+        replay: "primary head only, from cache"
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Diagnosed from the run's own fetched log and the deployed source at named lines, without opening the
+      archived cache and without modifying anything - the host's instruction after a gate failure is to
+      persist and reproduce offline before touching the mechanism. The attribution is not inferred from the
+      magnitude: the log records "Secondary edge-logit weight: 0.15" and the deployed source computes probs
+      from the blended logits, so the reference the tap recorded is by construction a two-model quantity.
+    instrument: >-
+      scripts/kaggle_edits/assoc_feature_tap.py and scripts/win_bet/assoc_tap_replay.py under
+      scripts/kaggle_edits/assoc_tap_gate.py; artifacts C:/temp/p36/{kernel.log,
+      assoc_feature_tap_gate.json,aft_cache.tar.gz,aft_patch_receipt.json}
+    experiment: EXP-0043
+    note: >-
+      THIS IS THE FIRST GATE-1 RUN THAT PRODUCED EVIDENCE, and the passive design is why. The three previous
+      attempts compared zero pairs; this one compared 4,199 band-A pairs and 9,907 band-B pairs across the
+      two expected crops, on real 32-dimensional features at the deployed downsample, with the tap proved
+      passive both statically and in-kernel. It also satisfies the standing GPU rule: the session produced a
+      reusable artifact, the 1.6 MB archived cache.
+      WHAT IS EXONERATED BY THE NUMBERS RATHER THAN BY ARGUMENT. Positional features round-trip at EXACTLY
+      0.0 and integrity failures are ZERO, so the cache's structure, node ordering, role keying and
+      positional reconstruction are all sound. Defect 6 does not recur. The band-A missing and extra counts
+      are downstream of the same cause: a shifted probability crosses the 0.5 threshold in either direction.
+      THE DEFECT IS THE COMPARISON TARGET, NOT THE CACHE. The deployed pipeline blends a SECOND model's edge
+      logits at weight 0.15 before the softmax, so what the tap recorded as "the deployed probability" is a
+      two-model quantity while the replay reproduces one model. A feature-cache gate should be asking whether
+      the PRIMARY head, re-run from cache, reproduces what the PRIMARY head produced in-run - the secondary
+      blend is a deployment step downstream of the cache's purpose. Either the tap records the pre-blend
+      primary probabilities as the reference, or the cache must also carry the secondary logits so the replay
+      can reproduce the blend. The first is correct for what a training cache must guarantee.
+      NO PATCH AND NO RELAUNCH WAS MADE on this finding, per the standing instruction.
+    date: '2026-08-30'
+    tags: [gate-1, p36, passive-tap, secondary-blend, comparison-target, first-evidence, verified, headline]
