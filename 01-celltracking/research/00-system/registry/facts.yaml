@@ -7440,6 +7440,14 @@ facts:
       makes the second arm a CONTROL, not a claim. A control must be a DIFFERENT trunk over the SAME node set;
       it need not be fold-legitimate. What it must never be is READ AS A RESULT. The claim arm must be
       fold-legitimate and currently, in every declared pair, none is.
+      UPDATE 2026-08-30 - TWO COMMITTED INSTRUMENTS NOW DISAGREE AND MUST BE RECONCILED BEFORE ANY
+      DUAL-TRUNK CACHE IS BUILT. audit_feature_cache.PKT0029_REQUIRED_TRUNK_ROLES is still
+      ('official','stabledet'), so `audit-pair --require-roles` would REFUSE the honest pair and ACCEPT
+      the pair with no legitimate arm; meanwhile the new gpu_protection_contract DATA-3 clause
+      independently REFUSES an illegitimate role even when the spec declares it legitimate (FACT-0431).
+      Two guards on the same question returning opposite verdicts is worse than one wrong guard, because
+      whichever runs last appears authoritative. This is a launch blocker on Phase 3 dual-trunk caching,
+      not on the single-trunk contract-2 smoke.
     date: '2026-08-30'
     tags: [dual-trunk, fold-legitimacy, provenance-retraction, gitignored-artifacts, verified, launch-blocker]
 
@@ -8048,3 +8056,113 @@ facts:
       the auditor was tasked to prevent.
     date: '2026-08-30'
     tags: [ledger, category-2, node-selection, association, reconciliation, measured]
+
+  - id: FACT-0431
+    statement: >-
+      THE GPU PROTECTION CONTRACT EXISTS AS A FAIL-CLOSED INSTRUMENT RATHER THAN A CHECKLIST: 17 clauses
+      across CODE, DATA, PROCESS and ARTIFACT, with 22 of 22 mutations caught and 21 tests passing, and
+      signing REFUSES outright when the built notebook is absent. Two accept-controls pass, so it is not a
+      reject-everything guard. The contract-2 smoke artifact signs 17 of 17. The clause that would have
+      caught this cycle's own worst near-miss is the capacity guard: a 14-million-node run that the
+      SUPERSEDED 128 bytes-per-node constant WOULD HAVE PASSED is refused, and the test asserts that premise
+      so a regression to the old constant fails loudly rather than silently
+    value: 17
+    unit: fail_closed_clauses_in_the_pre_launch_gpu_protection_contract
+    scope:
+      sections: {CODE: true, DATA: true, PROCESS: true, ARTIFACT: true}
+      clauses: 17
+      mutations_caught: 22
+      of_mutations: 22
+      tests_passing: 21
+      accept_controls: 2
+      signing_refuses_when: built notebook absent
+      p37_signs: '17/17'
+      mutations_include:
+        - a generated file edited without re-rendering its source
+        - the FACT-0418 dual-trunk pair
+        - an illegitimate trunk role EVEN WHEN THE SPEC DECLARES IT LEGITIMATE
+        - a 14M-node run that the superseded 128 B/node constant would have passed
+      named_limit: >-
+        P37 declares no trunk, so DATA-2 and DATA-3 pass as OUT OF SCOPE rather than as satisfied, and the
+        receipt RECORDS that distinction instead of hiding it
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Every clause is proved by a MUTATION that fails without it, not by an assertion that it passes, and two
+      accept-controls establish the instrument is not simply refusing everything - the pairing is what makes
+      either half meaningful. The named limit is recorded in the receipt rather than papered over, which is
+      the distinction FACT-0410 identified as the difference between a skipped check and a satisfied one.
+    instrument: >-
+      scripts/win_bet/gpu_protection_contract.py; contracts tests/test_gpu_protection_contract.py
+    note: >-
+      THIS IS THE ONE CASE WHERE INFRASTRUCTURE COUNTS AS A CYCLE'S OUTPUT under the standing GPU rule's
+      attrition contract - it demonstrably constrains an already-scheduled launch. It sits UNDER the standing
+      GPU rule rather than beside it: that rule says every session must produce an asset, this says what must
+      be signed before a session may start.
+      THE CAPACITY CLAUSE IS THE ONE TO WATCH. FACT-0416 corrected the storage constant by 12.3x in the
+      direction that makes a launch look affordable, and the mutation test now pins the CORRECTED premise, so
+      a silent regression to the old number is a loud failure rather than an oversubscribed session.
+    date: '2026-08-30'
+    tags: [gpu-protection-contract, launch-gate, mutation-tested, fail-closed, verified]
+
+  - id: FACT-0432
+    statement: >-
+      TWO DEFECTS WOULD HAVE MADE A LEVER-0044 GATE B NULL UNINTERPRETABLE, AND BOTH WERE FOUND BY EXERCISING
+      THE CODE RATHER THAN READING IT. (1) THE WIDENED-CONTROL GAP IS LIVE: assoc_report.verdict() was called
+      on a report where every channel is favourable and the ONLY defect is the control's identity, and it
+      returned promotable true with blockers empty - build_report validates `control` in no way, and it
+      arrives as an arbitrary spec-supplied path at assoc_train_harness.py:1628. (2) THE COVERAGE HAZARD IS
+      WORSE THAN THE RANGE HAZARD IT WAS MISTAKEN FOR: at notebook line 1652
+      learned_edge_probs.get((source_id, target_id), 0.0) gives an UNCOVERED pair the WORST score rather than
+      a neutral one, so partial coverage over a widened surface actively penalises every uncovered candidate
+      and an arm fails on COVERAGE while its mechanism is sound. The sigmoid at :1659-1661 that was flagged
+      instead is LATENT, because predict_proba already returns values in range
+    value: 0.0
+    unit: default_score_given_to_a_pair_the_learned_map_does_not_cover_at_notebook_line_1652
+    scope:
+      defect_1:
+        name: widened-control substitution unguarded
+        exercised: >-
+          verdict() called on an all-favourable report whose only defect is control identity;
+          returned promotable true, blockers []
+        no_validation_in: build_report
+        control_arrives_at: 'scripts/win_bet/assoc_train_harness.py:1628'
+        mechanism: 'json.loads(Path(v["control"]).read_text()) - an arbitrary spec-supplied path'
+        governing_fact: FACT-0382
+        first_real_caller: LEVER-0044 Gate B, the first arm to supply full-chain arms
+      defect_2:
+        name: uncovered pair defaults to the worst score
+        at: 'biohub-p3-harmonic.ipynb:1652'
+        expression: 'learned_edge_probs.get((source_id, target_id), 0.0)'
+        why_it_bites: >-
+          Gate B combines a learned score with the WIDENED surface, so every candidate the score does not
+          cover is penalised rather than ignored, and the arm fails on coverage rather than on mechanism
+        related_but_latent: {at: ':1659-1661', effect: silent sigmoid and clip of out-of-range scores,
+                             latent_because: 'predict_proba already returns [0,1]'}
+        compounded_by: >-
+          FACT-0427 - learned_edge_probs is assembled only from edges that SURVIVED THE ILP, so a widened
+          candidate the solver dropped is absent rather than merely unscored
+      both_found: pre-emptively, before Gate B produced any result
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Defect 1 was EXERCISED rather than read - a report was constructed whose only flaw was the control's
+      identity and the verdict function passed it - which is the difference between "no guard is visible in
+      the source" and "the guard does not exist". Defect 2 was read at the named deployed line and its
+      supposed sibling, the range hazard, was checked and found LATENT, so the two are correctly ranked
+      instead of both being reported as live.
+    instrument: >-
+      scripts/win_bet/assoc_report.py and scripts/win_bet/assoc_train_harness.py read at the named lines;
+      verdict() exercised directly; receipts under _evidence/audit/receipts/
+    note: >-
+      THE SECOND DEFECT IS THE MORE INSTRUCTIVE AND IT NEARLY CAUSED A FALSE KILL. The coordinator warned the
+      running agent about the SIGMOID; the auditor checked and found the sigmoid cannot fire, while the line
+      immediately above it silently assigns the worst possible score to anything uncovered. A warning aimed
+      one line off would have left the real hazard in place, and LEVER-0044 could have been killed by
+      incomplete coverage of a widened surface rather than by its mechanism - on a lever whose entire purpose
+      is to test that mechanism.
+      CONSEQUENCE, BINDING ON GATE B: coverage must be measured and REPORTED as a first-class number per fold
+      and per crop, an uncovered pair must not inherit 0.0, and control provenance must be ASSERTED in the
+      arm rather than trusted from a spec path. Both conditions are now written into LEVER-0044's protocol.
+    date: '2026-08-30'
+    tags: [defect, widened-control, coverage, false-kill-risk, lever-0044, gate-b, exercised, verified]

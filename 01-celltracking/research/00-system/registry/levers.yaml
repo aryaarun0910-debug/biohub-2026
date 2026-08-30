@@ -1629,8 +1629,21 @@ levers:
       under the official scorer. (d) Net true edges at or below zero - the genuine FACT-0376 quantity, never
       the pre-ILP proxy. (e) Node recall or division true positives decline on either fold (FACT-0371).
       (f) An adjusted improvement with flat or negative RAW association is REJECTED, not reported as a win.
+      (g) RESTORED 2026-08-30 - see falsifier_restoration below. The fold-0 arm reproduces FACT-0414's exact
+          zero AT THE FULL-CHAIN STAGE. That is a distinct outcome from (c): it would mean the fold-0
+          substrate cannot resolve THIS intervention either, in which case the honest gate has to move rather
+          than the model, and it must be reported explicitly rather than folded into a null.
       PROTOCOL BINDING BOTH GATES. The deployed bonus value must reproduce the control EXACTLY before any
-      treatment is read - a control that does not reproduce is a hard refusal. Report raw AND adjusted edge
+      treatment is read - a control that does not reproduce is a hard refusal. The CROP-PAIRED INTERVAL
+      requirement is retained and is not optional: assoc_report's verdict() enforces it at :304-305 whatever
+      the prose says, and under the revised promotion gate fold 1 must show a favourable crop-paired interval
+      while fold 0 must be non-inferior with a positive point estimate. CONTROL PROVENANCE MUST BE ASSERTED,
+      not supplied: build_report validates `control` in no way and it arrives as an arbitrary spec-supplied
+      path (assoc_train_harness.py:1628), so a report whose only defect is a widened control returns
+      promotable true with no blockers - exercised, not inferred. COVERAGE MUST BE REPORTED: learned_edge_probs
+      defaults an uncovered pair to 0.0, the WORST score rather than a neutral one (notebook :1652), so
+      partial coverage over a widened surface penalises every uncovered candidate and an arm can fail on
+      coverage while the mechanism is sound. Report raw AND adjusted edge
       Jaccard separately, edge TP/FP/FN, node recall, division TP/FP/FN, assignment churn, the
       count-adjustment contribution, and results BY FOLD and pooled. Select the SMALLEST value on a winning
       PLATEAU, never the numerically best isolated point - an isolated optimum on a coarse grid is a
@@ -1645,6 +1658,21 @@ levers:
       Jaccard is flat through the COMPLETE chain on fold 0 under the official scorer. (d) Net true edges
       through the complete chain are at or below zero. (e) Node recall or division true positives decline on
       either fold. (f) The fold-0 arm reproduces FACT-0414's exact zero at the FULL-CHAIN stage."
+    falsifier_restoration_2026_08_30: >-
+      TWO CONDITIONS WERE DROPPED BY THE AMENDMENT WITHOUT BEING MENTIONED, AND THE AUDITOR CAUGHT IT. They
+      are restored above, still before any data was taken.
+      (1) The original clause (f) - the fold-0 arm reproducing FACT-0414's exact zero at the FULL-CHAIN stage
+      - disappeared when the letter (f) was reused for the adjusted-versus-raw condition. It is NOT subsumed
+      by the Gate A narrowing, because it binds precisely the stage Gate B tests, and it is now (g).
+      (2) The crop-paired interval requirement vanished from the prose while assoc_report's verdict() went on
+      enforcing it, so the text and the instrument disagreed.
+      NET EFFECT: the lever is HARDER than either the original or the first amendment, and every change to
+      this falsifier - the host's and this one - has moved in that direction. The record is kept in three
+      pieces on purpose: falsifier (live), falsifier_original_2026_08_30 (verbatim), and the two reason
+      fields, so any reader can reconstruct what changed and when without trusting a summary.
+      Two additional protocol conditions were added at the same time, from auditor vetoes V4 and V5, and both
+      are about making a NULL interpretable rather than about the bar: control provenance must be asserted,
+      and score coverage must be reported.
     falsifier_amendment_reason: >-
       THE ORIGINAL (a) CONTAINED A LOGICAL FLAW AND THE HOST CAUGHT IT BEFORE IT COST ANYTHING. It proposed
       to kill the entire final-edge thesis on a sweep of the DEPLOYED probability - but FACT-0421 measured

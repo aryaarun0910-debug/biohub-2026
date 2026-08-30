@@ -443,3 +443,73 @@ result: >-
   PHASE 2 VERDICT: BLOCKED, on VETO 1 alone. Everything else about the contract-2 smoke cleared.
   Zero GPU, zero submissions, no kernel pushed, no model implementation touched, no foreign packet
   edited, nothing staged or committed.
+  CYCLE 2026-08-30d - TWO DELIVERABLES. Receipts: _evidence/audit/receipts/
+  {a4_cycle_2026_08_30d, a4_p37_gpu_contract, a4_p37_preflight_pass}.json and C:/temp/audit_receipts/a4d/.
+
+  MY OWN V1 IS DISCHARGED, AND I RE-RAN IT RATHER THAN ACCEPTING THE CLEARANCE. gpu_preflight on the
+  P37 spec now returns VERDICT PASS, failed=[], skipped=[] - all eleven checks exercised. Both
+  assoc_tap_gate.py and assoc_tap_replay.py are git-clean at 07c4366, and the larger commit set was
+  NECESSARY: tests/test_assoc_feature_tap.py locks sync_tap_worker.rendered() to assoc_tap_gate.py, so
+  committing the file my veto named ALONE would have left HEAD failing its own drift lock. That trap is
+  now clause CODE-2.
+
+  DELIVERABLE 1 - THE GPU PROTECTION CONTRACT IS AN INSTRUMENT, NOT A CHECKLIST.
+  scripts/win_bet/gpu_protection_contract.py with tests/test_gpu_protection_contract.py. Seventeen
+  clauses across CODE, DATA, PROCESS and ARTIFACT, all failing closed; a clause that cannot be
+  evaluated is a FAILURE and never a skip, and signing REFUSES outright when the built notebook is
+  absent. Proved by MUTATION, not assertion: 22/22 mutations caught and 21 tests pass. Rejections
+  exercised include a generated file edited without re-rendering, two specs sharing slug and out_dir,
+  the vendored predictor against the deployed pin, the FACT-0418 pair with no fold-legitimate arm, an
+  illegitimate role EVEN WHEN the spec declares fold_legitimate true, a crop count absent or
+  disagreeing with the run limit, an env that never reaches the subprocess, and a capacity guard with
+  no denominator. Critically ART-2 refuses a 14M-node run that the SUPERSEDED 128 B/node would have
+  passed, and the test asserts that premise so a regression to the old constant fails loudly instead
+  of silently disarming the guard. TWO ACCEPT-CONTROLS pass - the honest fold-1 trunk pair and a
+  correct notebook - so it is not a reject-everything guard. P37 SIGNS 17 of 17.
+  NAMED LIMIT OF THAT SIGNATURE: P37 declares no trunk, so DATA-2 and DATA-3 pass as OUT OF SCOPE and
+  the receipt records that in evidence rather than hiding it. A trunk-bearing run gets the full DATA
+  section and does not inherit this signature.
+
+  DELIVERABLE 2 - PKT-0042. TWO NEW VETOES, BOTH PRE-EMPTIVE.
+  V4 THE WIDENED-CONTROL SUBSTITUTION IS NOW LIVE AND STILL UNGUARDED, and I exercised it rather than
+  reading it: assoc_report.verdict() on a report whose every channel is favourable and whose ONLY
+  defect is the identity of the control returns promotable TRUE with blockers []. build_report performs
+  no validation of `control`, and the control arrives at assoc_train_harness.py:1628 as an ARBITRARY
+  spec-supplied file path. Gate B is the first arm to supply chain_arms, so last cycle's latent V2 now
+  has a real caller. No Gate B full-chain result may be read until the control is ASSERTED to be the
+  DEPLOYED control.
+  V5 learned_prob SILENTLY TRANSFORMS TWO THINGS, and the second is the larger hazard. At
+  biohub-p3-harmonic.ipynb:1659-1661 an out-of-range score is sigmoided and clipped with no warning,
+  no counter and no refusal. At :1652 a pair the scorer does not cover silently receives 0.0 - the
+  WORST score, not a neutral one. Gate B combines the score with the WIDENED surface, so partial
+  coverage actively penalises every uncovered candidate and the arm would fail on coverage rather than
+  on mechanism. Range is latent (predict_proba is already in [0,1]); coverage is not.
+
+  THE LEVER-0044 AMENDMENT IS LEGITIMATE, PRE-DATA, AND TWO THINGS WERE ALSO DROPPED. Preservation is
+  clean: falsifier_original_2026_08_30 is its own 906-character key beside the 2,112-character live
+  falsifier, and the preserved text carries no 'AMENDED', no 'GATE B' and no 'narrows' - the same
+  beside-not-inside shape as the LEVER-0043 edit. PRE-DATA on both available tests: the HEAD copy at
+  07c4366 already carries the preserved original, so the lever was BORN amended and no pre-amendment
+  version exists to have been edited away; and a finished search found NO Gate A or Gate B artifact
+  anywhere, with PKT-0042 result None. The change genuinely narrows and adds - Gate A is explicitly
+  barred from killing the lever, Gate B is new, and original clauses (b) through (e) survive verbatim.
+  BUT original clause (f), the fold-0 arm reproducing FACT-0414's exact zero AT THE FULL-CHAIN STAGE,
+  is gone from the live text and the amendment reason does not mention it; it is NOT subsumed by the
+  Gate A narrowing, because it binds the very stage Gate B tests. The crop-paired interval requirement
+  was dropped too, though assoc_report.verdict() still enforces it at :304-305. Routed as R8 and R9
+  rather than vetoed: the net effect is a harder lever and both omissions are recoverable in text.
+
+  ROUTED, NOT WRITTEN HERE. R8 original clause (f) dropped without mention. R9 the interval
+  requirement dropped from the text but still enforced by the instrument. R10 FACT-0418's
+  PKT0029_REQUIRED_TRUNK_ROLES is unchanged and would still REFUSE the honest pair while ACCEPTING the
+  pair with no legitimate arm - my DATA-3 now refuses that pair independently, so two instruments
+  disagree about what a legal pair is and must be reconciled before any dual-trunk cache is built.
+
+  PRE-REGISTERED VETO CONDITIONS FOR PKT-0042, written before its data exists: a negative Gate A read
+  as evidence against LEVER-0044; a Gate B control that is not the DEPLOYED control; an isolated grid
+  optimum reported instead of the smallest value on a winning plateau; an unasserted range or coverage
+  on the score written into the edge_prob slot; and a control that does not reproduce EXACTLY, which I
+  will re-derive rather than read.
+
+  PHASE 2 IS CLEARED FROM MY SIDE. Zero GPU, zero submissions, no kernel pushed, no model
+  implementation touched, no foreign packet edited, nothing staged or committed.
