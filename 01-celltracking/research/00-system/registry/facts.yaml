@@ -6967,3 +6967,56 @@ facts:
       foreign-contract cache is refused at load rather than at check.
     date: '2026-08-30'
     tags: [contract-2, no-usable-cache, p36-retired, fixture-in-kind, verified, launch-blocker]
+
+  - id: FACT-0412
+    statement: >-
+      The P35 DeepCenter/veto exchange scored 0.932, clearing its falsifier by the SMALLEST DISTINGUISHABLE
+      MARGIN. The preregistered central was 0.931 with a band of 0.927 to 0.935 and a falsifier at or below
+      0.931; 0.932 is +0.001 on the base and did not fire it. The claim is therefore confirmed and the
+      confirmation is weak: the packet's own reasoning (h), written before the run, states that public-LB
+      variance alone is of the order of the effect under test, so a single +0.001 submission cannot separate
+      a real component gain from leaderboard noise. LEVER-0042 closes and the lane ENDS, as preregistered,
+      whatever the score
+    value: 0.932
+    unit: public_lb_score_of_the_deepcenter_veto_exchange_on_the_0931_base
+    scope:
+      submission: 55888865
+      experiment: EXP-0042
+      kernel_version: 1
+      preregistered: {band: [0.927, 0.935], central: 0.931, falsifier: "at or below 0.931"}
+      outcome: {scored: 0.932, falsifier_fired: false, delta_vs_base: 0.001, position_in_band: "lower half"}
+      prior_baseline: {score: 0.931, fact: FACT-0393, submission: 55871868}
+      mechanism_confirmed_live: {checkpoint: best.pt, epoch: 2, safe_div_veto: true,
+                                 deepcenter_rejected_per_movie: [11, 36, 0, 67, 3, 29, 1, 27]}
+      remaining_gap_to_0940: 0.008
+      remaining_gap_to_0950: 0.018
+    provenance: MEASURED
+    validity: SUSPECT
+    validity_reason: >-
+      The SCORE is the competition's own number and is not in doubt. What is SUSPECT is the ATTRIBUTION of
+      +0.001 to the component: one submission at the resolution of the leaderboard's own variance cannot
+      distinguish a real effect from noise, and the packet said so before the run rather than after. The
+      falsifier was a hard threshold and it did not fire - that is the honest reading, and it is weaker than
+      "the component works".
+    instrument: >-
+      python -m kaggle competitions submissions; kernel log C:/temp/exploit931/p35/kernel.log;
+      structural audit 13/13 PASS
+    experiment: EXP-0042
+    note: >-
+      WHAT IS SOLID HERE IS THE MECHANISM, NOT THE MAGNITUDE. The run's own log shows the treatment doing
+      exactly what it was built to do: best.pt loaded at epoch 2 instead of being skipped on the base's
+      epoch-500 assertion, the veto ON, and deepcenter_rejected non-zero on seven of eight movies where the
+      base recorded zero everywhere. The detector now decides. Whether deciding is worth 0.001 or 0.000 on
+      the hidden set is not answerable from one submission.
+      THE LANE ENDS. LEVER-0042 forbids a second exploitation experiment, follow-up tuning or stacking,
+      whatever the score, and a marginal pass is exactly the situation where that rule earns its keep - the
+      temptation after +0.001 is to sweep the neighbours, which PKT-0028 rule (1) also forbids.
+      THE STRATEGIC CONSEQUENCE IS ARITHMETIC AND IT IS NOT ENCOURAGING FOR KNOB WORK. Baseline moves
+      0.931 to 0.932, leaving 0.008 to 0.940. The only other identified inherited-knob candidate is
+      FACT-0404's public 0.933, worth about +0.002 on ITS base - and that base does NOT carry the DeepCenter
+      component now in our champion, so the two are not known to be additive and their interaction is
+      untested. Even a fully additive stack lands near 0.934. INHERITED KNOBS CANNOT REACH 0.940; the
+      distance has to come from capability, which is LEVER-0041's territory and currently sits at +0.0538
+      contested top-1 on fold 1 against -0.0166 transferring to fold 0.
+    date: '2026-08-30'
+    tags: [p35, lever-0042, marginal-confirmation, lb-noise, baseline-0932, knobs-exhausted, headline]

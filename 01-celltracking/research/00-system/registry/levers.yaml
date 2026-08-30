@@ -1390,7 +1390,20 @@ levers:
       Replacing ONLY the collapsed DeepCenter/veto configuration in the public 0.931 base with the P24
       best-checkpoint plus safe-division-veto bundle - the one inherited component independently measured
       positive on our own lineage - scores above 0.931
-    status: open
+    # CLOSED, not killed: the claim held. `closed` is the vocabulary's term for a lane shut on a stated
+    # structural reason, and the reason is the lever's own cap - one submission, ends either way.
+    status: closed
+    closed_by: [FACT-0412]
+    closed_date: '2026-08-30'
+    outcome_2026_08_30: >-
+      SCORED 0.932. The falsifier - at or below 0.931 - did NOT fire, so the claim is confirmed, and it is
+      confirmed by the smallest distinguishable margin. Reason (h) of the preregistration, written before the
+      run, says public-LB variance alone is of the order of the effect under test; one +0.001 submission
+      cannot separate the component from noise. What IS solid is the mechanism: the log shows best.pt loaded
+      at epoch 2 rather than skipped, the veto on, and deepcenter_rejected non-zero on seven of eight movies
+      where the base recorded zero everywhere.
+      THE LANE ENDS AS WRITTEN. No second exploitation experiment, no follow-up tuning, no stacking - and a
+      marginal pass is precisely when that rule matters, because +0.001 invites sweeping the neighbours.
     falsifier: >-
       The single preregistered submission scores at or below 0.931. Because exactly one component is
       exchanged and the rest of the public configuration is untouched, a miss is a fact about that component
