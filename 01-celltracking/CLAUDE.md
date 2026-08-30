@@ -50,8 +50,12 @@ mechanism and a stated falsification test.
 ## Active code surface
 
 - `notebooks/kaggle_<name>/biohub-<name>.ipynb`: **the deployed artifact and the one that must
-  be audited.** Built by `kaggle_factory` from `scripts/kaggle_specs/*.json`; the live platform is
-  `notebooks/kaggle_p3_harmonic/`. Any claim about deployed behaviour is verified here, at
+  be audited.** Built by `kaggle_factory` from `scripts/kaggle_specs/*.json`. The CHAMPION of record is
+  `notebooks/kaggle_p35_dcveto_on_931/` (`FACT-0412`); `notebooks/kaggle_p3_harmonic/` is the older
+  harmonic platform and is **not** the champion. Corrected 2026-08-30 — they differ in two ACTIVE
+  post-processing flags (`GAP2_RECOVERY`, `ADAPTIVE_SHORT_TRACK_RESCUE`), so an agent sent to audit
+  `p3_harmonic` reads the wrong chain configuration. Verify against the notebook the claim is about,
+  and say which one. Any claim about deployed behaviour is verified in a built notebook, at
   `file:line`, and nowhere else.
 - `src/biotrack/`: immutable scorer/graph core, plus a **partial** wrapper mirror — it is NOT the
   deployed program. Measured 2026-08-22: `DEEPCENTER` 0x in `wrapper.py` vs 73x in the built

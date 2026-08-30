@@ -1075,6 +1075,70 @@ def test_the_gate_refuses_an_empty_cache_directory(sandbox: Sandbox, tmp_path: P
     assert "the tap wrote nothing" in report["error"]
 
 
+def test_the_gate_refuses_a_run_that_captured_fewer_crops_than_expected(sandbox: Sandbox,
+                                                                        tapped_cache):
+    """The crop COUNT is external, and `all_passed` cannot see a crop that never ran.
+
+    `all_passed` is an ALL over the crops that exist, so a run that captured one of two crops -
+    or whose second crop raised before the flush - satisfies it exactly as well as a complete
+    run. PKT-0036 measured that: a one-crop run passed. The expectation therefore has to be
+    carried IN from the spec, and this proves the floor fires rather than assuming it does.
+    """
+    cache_dir, _ = tapped_cache
+    _res, report = sandbox.replay(cache_dir, "gate_expect_2.json",
+                                  extra_args=["--expect-crops", "2"])
+    assert len(report["crops"]) == 1
+    assert report["all_passed"] is False
+    assert report["crop_count"]["captured"] == 1
+    assert report["crop_count"]["expected"] == 2
+    assert "expected 2 crops" in report["crop_count"]["error"]
+    # ...and every per-crop verdict is still a pass, so the refusal is the COUNT and nothing else.
+    assert all(c["passed"] for c in report["crops"])
+
+
+def test_the_gate_accepts_the_crop_count_it_was_told_to_expect(sandbox: Sandbox, tapped_cache):
+    """ACCEPT control. A floor that refuses every count is not a floor, it is an outage."""
+    cache_dir, _ = tapped_cache
+    _res, report = sandbox.replay(cache_dir, "gate_expect_1.json",
+                                  extra_args=["--expect-crops", "1"])
+    assert report["crop_count"] == {
+        "captured": 1, "expected": 1, "asserted": True,
+        "why_external": report["crop_count"]["why_external"],
+    }
+    assert report["all_passed"] is True
+
+
+def test_a_torn_coordinate_rescale_fails_the_gate(sandbox: Sandbox, tapped_cache):
+    """FACT-0405 defect 7, manufactured on the DEPLOYED downsample rather than on (1,1,1).
+
+    The tap flushes between the coordinate concatenate and the deployed rescale
+    (predict_unet_transformer.py:798-802), so `coords` holds the downsampled grid and
+    `role_coord_scaled` holds `coords[:, 1:] * downsample`. Defect 7 survived because a harness
+    fixture used downsample (1,1,1), where that multiplication is the identity and the step under
+    test silently disappears. This fixture runs at the deployed (1,4,4), so writing the
+    UN-rescaled coordinates into the scaled column is a real change - which is exactly what the
+    check must see.
+    """
+    cache_dir, _ = tapped_cache
+    with np.load(sandbox.cache_path(cache_dir), allow_pickle=False) as cache:
+        assert [int(d) for d in cache["downsample"]] == [1, 4, 4], (
+            "this mutation is vacuous at downsample (1,1,1) - the fixture must differ from "
+            "production in cost, never in kind"
+        )
+
+    def unscale(data: dict) -> None:
+        data["role_coord_scaled"] = (
+            data["coords"][data["role_gid"]][:, 1:].astype(np.float32)
+        )
+
+    mutated = _mutated_dir(sandbox, cache_dir, "cache_unrescaled", unscale)
+    _res, report = sandbox.replay(mutated, "gate_unrescaled.json")
+    row = report["crops"][0]
+    assert report["all_passed"] is False
+    assert any("coords[:, 1:] * downsample" in f.get("why", "")
+               for f in row["integrity_failures"]), row["integrity_failures"]
+
+
 # ---------------------------------------------------------------------------------------------
 # 7. ACCEPT controls - an auditor that rejects everything checks nothing
 # ---------------------------------------------------------------------------------------------

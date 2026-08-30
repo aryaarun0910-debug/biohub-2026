@@ -653,7 +653,7 @@ def run_fold(table: pl.DataFrame, fold: int, arms: list[dict], out: Path, label:
         table=table,
         models=[ModelSpec.from_dict(a) for a in arms],
         fold=fold, cv_kind="GroupKFold", n_splits=5,
-        preserve_single=preserve_single, cache_gate=None, node_feat_by_crop=None,
+        preserve_single=preserve_single, cache_gate=None, role_index_by_crop=None,
         chain_arms=None, summarise=None, allow_degenerate=False,
     )
     # FAIL CLOSED on the curriculum. A mining arm that records nothing is indistinguishable in the

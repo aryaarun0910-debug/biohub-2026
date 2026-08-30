@@ -386,19 +386,93 @@ def _tap_declared_schema(ctx: Ctx) -> tuple[set[str], set[str]]:
     return out[0], out[1]
 
 
-def _tap_cache_keys_read(worker_src: str) -> set[str]:
-    """Every literal cache key the worker reads, resolved from its AST, not grepped.
+def _tap_bands(worker_src: str) -> list[str]:
+    """The band ids the worker ITSELF declares, read from its own `BANDS` tuple.
+
+    Contract 1 had two bands and contract 2 has three, so any list written here would be a
+    contract-1 constant pretending to be a fact about the artifact under test. That is defect
+    class (iv) - the probe that hardcoded `TemporalUNet3D` and reported four phantom misses.
+    """
+    tree = ast.parse(worker_src)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and any(
+            isinstance(t, ast.Name) and t.id == "BANDS" for t in node.targets
+        ):
+            try:
+                return [str(v) for v in ast.literal_eval(node.value)]
+            except (ValueError, SyntaxError):
+                return []
+    # FALLBACK, for a worker that declares no constant: resolve the literal iterable of whatever
+    # loop binds the variable the cache f-strings interpolate. Contract 1 spells it
+    # `for name in ("a", "b")` inline. Reading the values is still resolution; assuming them is
+    # not.
+    interpolated = {
+        piece.value.id
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Subscript) and getattr(node.value, "id", None) == "cache"
+        for sub in ast.walk(node.slice) if isinstance(sub, ast.JoinedStr)
+        for piece in sub.values
+        if isinstance(piece, ast.FormattedValue) and isinstance(piece.value, ast.Name)
+    }
+    # Module-level string constants, so `for name in (BAND_A, BAND_B)` resolves as readily as a
+    # tuple of literals. Contract 1 spells it with named constants; refusing to follow them would
+    # report a fully resolvable worker as unresolvable.
+    consts: dict[str, str] = {}
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 \
+                and isinstance(node.targets[0], ast.Name) \
+                and isinstance(node.value, ast.Constant) \
+                and isinstance(node.value.value, str):
+            consts[node.targets[0].id] = node.value.value
+
+    def _strings(iterable):
+        if isinstance(iterable, ast.Name):
+            return None
+        if not isinstance(iterable, (ast.Tuple, ast.List)):
+            try:
+                out = ast.literal_eval(iterable)
+            except (ValueError, SyntaxError):
+                return None
+            return list(out) if isinstance(out, (list, tuple)) \
+                and all(isinstance(v, str) for v in out) else None
+        out = []
+        for el in iterable.elts:
+            if isinstance(el, ast.Constant) and isinstance(el.value, str):
+                out.append(el.value)
+            elif isinstance(el, ast.Name) and el.id in consts:
+                out.append(consts[el.id])
+            else:
+                return None
+        return out
+
+    found: list[str] = []
+    for node in ast.walk(tree):
+        gens = getattr(node, "generators", None)
+        pairs = ([(g.target, g.iter) for g in gens] if gens else
+                 [(node.target, node.iter)] if isinstance(node, ast.For) else [])
+        for target, iterable in pairs:
+            if not (isinstance(target, ast.Name) and target.id in interpolated):
+                continue
+            values = _strings(iterable)
+            if values:
+                found.extend(v for v in values if v not in found)
+    return found
+
+
+def _tap_cache_keys_read(worker_src: str, bands: list[str]) -> tuple[set[str], list[str]]:
+    """Every cache key the worker reads, RESOLVED from its AST - dynamic keys included.
 
     A slice can be a conditional expression, so every string constant inside the subscript counts.
-    The per-band keys the worker builds with an f-string are expanded explicitly rather than
-    ignored - an unexpanded dynamic key is a hole, not an absence.
+    The per-band keys the worker builds with an f-string are EXPANDED over the worker's own
+    `BANDS`, so a contract change to either the band set or the field names is followed rather
+    than assumed. An f-string this cannot resolve is returned as unresolved and fails the check -
+    an unexpanded dynamic key is a hole, not an absence.
     """
     def _literals(node):
         """String constants in a subscript, EXCLUDING f-string fragments.
 
-        An f-string's literal parts ("band_", "_prob") are Constants too, and counting them
-        produced seven phantom keys the first time this ran. The dynamic keys are expanded
-        explicitly below instead - a fragment is neither a key nor an absence.
+        An f-string's literal parts ("band_", "_pair") are Constants too, and counting them
+        produced seven phantom keys the first time this ran. Dynamic keys are expanded below.
         """
         if isinstance(node, ast.JoinedStr):
             return set()
@@ -409,14 +483,33 @@ def _tap_cache_keys_read(worker_src: str) -> set[str]:
             out |= _literals(child)
         return out
 
+    def _template(node):
+        """An f-string as a template with \\0 where a single Name is interpolated."""
+        parts = []
+        for piece in node.values:
+            if isinstance(piece, ast.Constant) and isinstance(piece.value, str):
+                parts.append(piece.value)
+            elif isinstance(piece, ast.FormattedValue) and isinstance(piece.value, ast.Name):
+                parts.append("\0")
+            else:
+                return None
+        return "".join(parts)
+
     read: set[str] = set()
+    unresolved: list[str] = []
     for node in ast.walk(ast.parse(worker_src)):
-        if isinstance(node, ast.Subscript) and getattr(node.value, "id", None) == "cache":
-            read |= _literals(node.slice)
-    for band in ("a", "b"):
-        for field in ("pair", "i", "j", "source_id", "target_id", "prob"):
-            read.add(f"band_{band}_{field}")
-    return read
+        if not (isinstance(node, ast.Subscript)
+                and getattr(node.value, "id", None) == "cache"):
+            continue
+        for sub in ast.walk(node.slice):
+            if isinstance(sub, ast.JoinedStr):
+                tmpl = _template(sub)
+                if tmpl is None or not bands:
+                    unresolved.append(ast.unparse(sub))
+                else:
+                    read |= {tmpl.replace("\0", b) for b in bands}
+        read |= _literals(node.slice)
+    return read, sorted(set(unresolved))
 
 
 def _tap_run_scope(ctx: Ctx) -> tuple[list[str], dict]:
@@ -493,18 +586,74 @@ def check_schemas_tap(ctx: Ctx) -> Check:
                      False, {"error": "no _AFTG_WORKER literal in the built notebook"},
                      "delete the worker literal; extraction fails closed")
     required, optional = _tap_declared_schema(ctx)
-    read = _tap_cache_keys_read(worker)
+    bands = _tap_bands(worker)
+    read, unresolved = _tap_cache_keys_read(worker, bands)
     unknown = sorted(read - required - optional)
     ev = {"declared_required_keys": sorted(required), "declared_optional_keys": sorted(optional),
+          "declared_key_count": len(required),
+          "bands_the_worker_declares": bands,
           "keys_the_replay_reads": sorted(read),
           "read_but_never_written": unknown,
+          "dynamic_keys_this_check_could_not_resolve": unresolved,
           "declared_in": "the tap patch's _AFT_SCHEMA_REQUIRED, as embedded in the notebook",
           "runtime_enforcement": "the flush raises on schema drift before writing a file"}
-    ok = bool(required) and bool(read) and not unknown
+    ok = bool(required) and bool(read) and bool(bands) and not unknown and not unresolved
     return Check("PF05", "the cache schema the tap writes is exactly the one the replay reads",
                  ok, ev,
                  "rename one key in _AFT_SCHEMA_REQUIRED; the read-but-never-written list "
                  "becomes non-empty and the check rejects")
+
+
+def _empty_band_mutation_cover(fixture_txt: str) -> tuple[list[str], set[str]]:
+    """Which bands the empty-band mutation actually covers, resolved from the fixture's AST.
+
+    Contract 1 wrote two functions with the band in the NAME; contract 2 writes one function
+    parametrised over the suite's own `BANDS`. And the decorator's argument is a NAME, not a
+    literal, so a regex over the decorator text finds nothing and reports a fully covered suite
+    as uncovered. Both spellings are resolved here, and a module-level constant is followed to
+    its assignment.
+    """
+    try:
+        tree = ast.parse(fixture_txt)
+    except SyntaxError:
+        return [], set()
+    consts: dict[str, list[str]] = {}
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 \
+                and isinstance(node.targets[0], ast.Name):
+            try:
+                value = ast.literal_eval(node.value)
+            except (ValueError, SyntaxError):
+                continue
+            if isinstance(value, (list, tuple)) and all(isinstance(v, str) for v in value):
+                consts[node.targets[0].id] = [str(v) for v in value]
+    names: list[str] = []
+    bands: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        if not node.name.startswith("test_the_gate_refuses_an_empty_band"):
+            continue
+        names.append(node.name)
+        suffix = node.name[len("test_the_gate_refuses_an_empty_band"):].lstrip("_")
+        if suffix:
+            bands.add(suffix)
+        for dec in node.decorator_list:
+            if not (isinstance(dec, ast.Call)
+                    and getattr(dec.func, "attr", None) == "parametrize"
+                    and len(dec.args) >= 2):
+                continue
+            argnames, values = dec.args[0], dec.args[1]
+            if not (isinstance(argnames, ast.Constant) and argnames.value == "band"):
+                continue
+            if isinstance(values, ast.Name):
+                bands |= set(consts.get(values.id, []))
+            else:
+                try:
+                    bands |= {str(v) for v in ast.literal_eval(values)}
+                except (ValueError, SyntaxError):
+                    pass
+    return sorted(names), bands
 
 
 def check_exact_positive_counts_tap(ctx: Ctx) -> Check:
@@ -522,33 +671,85 @@ def check_exact_positive_counts_tap(ctx: Ctx) -> Check:
         return Check("PF06", "the in-kernel non-vacuity floors are present and satisfiable",
                      False, {"error": "no _AFTG_WORKER literal in the built notebook"},
                      "delete the worker literal; extraction fails closed")
-    floors = {"band_a": False, "band_b": False}
-    for node in ast.walk(ast.parse(worker)):
-        if isinstance(node, ast.Compare) and isinstance(node.ops[0], ast.Gt):
-            text = ast.unparse(node)
-            if text == "a['checked'] > 0":
-                floors["band_a"] = True
-            if text == "b['checked'] > 0":
-                floors["band_b"] = True
+    # THE FLOORS ARE RESOLVED, NOT MATCHED. Contract 1 floored each band with its own literal
+    # (`a['checked'] > 0`); contract 2 floors every band in one comprehension over its own BANDS
+    # tuple. A checker keyed to the literal FORM reports a correct notebook as unfloored, which
+    # is the "read the code / resolve the code" defect this instrument has already been corrected
+    # for five times. What is asked instead is the invariant: for every band the worker declares,
+    # a `<something>["checked"] > 0` comparison must guard the pass expression.
+    bands = _tap_bands(worker) or ["a", "b"]
+    floors = {f"band_{b}": False for b in bands}
+    floor_form = None
+    tree = ast.parse(worker)
+    # Everything lexically inside a loop or comprehension that iterates the worker's OWN `BANDS`.
+    # A generic `x["checked"] > 0` only covers every band if it is evaluated for every band, and
+    # that is a structural property, not a spelling.
+    over_bands: set[int] = set()
+    for node in ast.walk(tree):
+        gens = getattr(node, "generators", None)
+        iters = ([g.iter for g in gens] if gens else
+                 [node.iter] if isinstance(node, ast.For) else [])
+        if any(getattr(it, "id", None) == "BANDS" for it in iters):
+            for sub in ast.walk(node):
+                over_bands.add(id(sub))
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Compare) and isinstance(node.ops[0], ast.Gt)):
+            continue
+        left, right = node.left, node.comparators[0]
+        if not (isinstance(right, ast.Constant) and right.value == 0):
+            continue
+        if not (isinstance(left, ast.Subscript) and isinstance(left.slice, ast.Constant)
+                and left.slice.value == "checked"):
+            continue
+        target = left.value
+        hit: list[str] = []
+        if isinstance(target, ast.Name):                       # contract 1: a["checked"] > 0
+            hit = [f"band_{target.id}"]
+        elif isinstance(target, ast.Subscript) and isinstance(target.slice, ast.Constant) \
+                and isinstance(target.slice.value, str):       # result["band_a"]["checked"] > 0
+            named = target.slice.value
+            hit = [named if named.startswith("band_") else f"band_{named}"]
+        elif id(node) in over_bands:                           # contract 2: generic over BANDS
+            hit = list(floors)
+        for key in hit:
+            if key in floors:
+                floors[key] = True
+                floor_form = floor_form or ast.unparse(node)
     crops, _detail = _tap_run_scope(ctx)
     pairs = _tap_frame_pairs(crops)
     fixture = ROOT / "tests" / "test_assoc_feature_tap.py"
-    mutations = ("test_the_gate_refuses_an_empty_band_a",
-                 "test_the_gate_refuses_an_empty_band_b",
-                 "test_the_gate_refuses_an_empty_cache_directory",
-                 "test_a_per_frame_feature_cache_fails_the_gate")
     fixture_txt = fixture.read_text(encoding="utf-8") if fixture.is_file() else ""
+    # MUTATION EVIDENCE, RESOLVED THE SAME WAY. The empty-band mutation was two functions under
+    # contract 1 and is one parametrised function under contract 2; requiring the old names is
+    # the same stale-constant defect one level up. Any test whose name starts with the concept
+    # counts, and the parametrised case must still cover every band the worker declares.
+    empty_band, param_bands = _empty_band_mutation_cover(fixture_txt)
+    band_cover = {
+        b: (f"test_the_gate_refuses_an_empty_band_{b}" in empty_band)
+           or (bool(empty_band) and b in param_bands)
+        for b in bands or ["a", "b"]
+    }
+    mutations = ("test_the_gate_refuses_an_empty_cache_directory",
+                 "test_a_per_frame_feature_cache_fails_the_gate")
+    mutation_evidence = {m: (m in fixture_txt) for m in mutations}
     ev = {"in_kernel_floors_present": floors,
+          "floor_expression_found": floor_form,
+          "bands_the_worker_declares": bands,
           "frame_pairs_available_per_crop": pairs,
           "exact_counts_predictable_before_launch": False,
           "why_not": "the bands are recorded by the deployed run itself; predicting them from a "
                      "previous run would be the cross-run assumption FACT-0363 warns against",
-          "enforcement_instead": "per-crop a_checked>0 and b_checked>0 in the shipped worker",
-          "mutation_evidence": {m: (m in fixture_txt) for m in mutations},
+          "enforcement_instead": "a per-crop checked>0 floor on EVERY declared band in the "
+                                 "shipped worker",
+          "empty_band_mutation_tests": empty_band,
+          "empty_band_mutation_parametrised_over": sorted(param_bands),
+          "empty_band_mutation_covers_each_declared_band": band_cover,
+          "mutation_evidence": mutation_evidence,
           "mutation_evidence_file": str(fixture)}
-    ok = (all(floors.values()) and bool(pairs)
+    ok = (all(floors.values()) and bool(floors) and bool(pairs)
           and all(isinstance(v, int) and v >= 1 for v in pairs.values())
-          and all(ev["mutation_evidence"].values()))
+          and all(band_cover.values())
+          and all(mutation_evidence.values()))
     return Check("PF06", "the in-kernel non-vacuity floors are present in the shipped worker and "
                          "the run scope can satisfy them",
                  ok, ev,
@@ -1181,6 +1382,80 @@ CHECKS = (check_notebook_binds_to_spec, check_mount_resolvers, check_expected_cr
 
 
 # ------------------------------------------------------------------------------------ receipt
+def _input_hashes(ctx: Ctx) -> dict:
+    """Every input whose bytes can change what the GPU run does, hashed by path."""
+    out: dict[str, str | None] = {}
+
+    def add(label: str, path) -> None:
+        if not path:
+            return
+        p = Path(path)
+        out[label] = _sha256_file(p) if p.is_file() else None
+
+    add(str(ctx.spec_path), ctx.spec_path)
+    add(str(ctx.notebook), ctx.notebook)
+    base = ctx.spec.get("base_notebook")
+    if base:
+        add(base, ROOT / base)
+    for edit in ctx.spec.get("edits", []):
+        cf = edit.get("code_file")
+        if cf:
+            add(cf, ROOT / cf)
+    if ctx.facts.get("parquet"):
+        add(str(ctx.facts["parquet"]), ctx.facts["parquet"])
+    pack = LOCAL_PACK / "scripts" / "predict_unet_transformer.py"
+    add(f"{pack} (deployed predictor - NOT vendor/kaggle-cell-tracking, FACT-0408)", pack)
+    return out
+
+
+def _expected_outputs(ctx: Ctx, checks: list) -> dict:
+    """What the fetched run MUST show, resolved from the checks rather than spelled here.
+
+    The post-run audit reads this block, so a constant list here is worse than none: it was
+    hardcoded to the contract-1 assoc_feature_parity worker, which meant a passive-tap run was
+    told to require tokens it never prints and told nothing about the tokens it does. A checker
+    that cries wolf teaches a reader to ignore the one time it is right.
+    """
+    ev = {c.id: c.evidence for c in checks}
+    artifacts = sorted(set(ev.get("PF08", {}).get("expected_outputs", [])))
+    # EVERY patch that can report itself, not only the gate patch. The tap patch's own
+    # AFT_TAP heartbeat is the one whose absence means the instrument recorded nothing, which is
+    # precisely the failure three GPU sessions had to be spent to discover.
+    tokens = set(ev.get("PF10", {}).get("expected_log_tokens", []))
+    for per in ev.get("PF10", {}).get("per_patch", {}).values():
+        tokens |= set(per.get("present_in_built_notebook", []))
+    tokens = sorted(tokens)
+    # A token naming a failure is the INVERSE alarm: its presence is the alarm, not its absence.
+    bad = tuple(("FAIL", "ERROR", "EMPTY", "BROKEN"))
+    required = [t for t in tokens if not any(w in t for w in bad)]
+    forbidden = [t for t in tokens if any(w in t for w in bad)]
+    crops = ctx.facts.get("crops", [])
+    counts = ev.get("PF06", {})
+    per_crop = {
+        c: {"band_a": v["band_a_pairs_in_scope"],
+            "band_b": v["band_b_pairs_in_scope_at_or_below_0.5"]}
+        for c, v in counts.get("per_crop", {}).items()
+    }
+    return {
+        "kaggle_working": artifacts,
+        "log_tokens_required": required,
+        "log_tokens_whose_presence_is_the_alarm": forbidden,
+        "terminal_heartbeat": ev.get("PF10", {}).get("terminal_heartbeat", []),
+        "gate_report_must_contain": {"crops": len(crops), "crop_names": crops,
+                                     "all_passed": True},
+        "crop_count_is_external": (
+            "all_passed is an ALL over the crops that exist and cannot see a crop that never "
+            "ran, so the count above is asserted by this receipt and by the kernel's own "
+            "--expect-crops floor, never by all_passed alone"
+        ),
+        "per_crop_minimum_checked_pairs": per_crop,
+        "exact_counts_predictable_before_launch":
+            counts.get("exact_counts_predictable_before_launch", None),
+        "why_not": counts.get("why_not"),
+        "enforcement_instead": counts.get("enforcement_instead"),
+    }
+
+
 def sign(body: dict) -> dict:
     """Tamper-evident content signature.
 
@@ -1246,23 +1521,17 @@ def run_preflight(spec_path: Path, sandbox: Path) -> dict:
             "train_root": str(LOCAL_TRAIN),
             "sandbox": str(sandbox),
         },
-        "input_hashes": {
-            str(ctx.facts.get("parquet")): _sha256_file(ctx.facts["parquet"])
-            if ctx.facts.get("parquet") else None,
-        },
+        # EVERY INPUT THAT CAN CHANGE THE RUN, HASHED. This field used to hold a single entry
+        # keyed on the string "None" whenever a profile had no parquet input - a null wearing the
+        # name of a hash. A receipt is only tamper-evident about what it actually records.
+        "input_hashes": _input_hashes(ctx),
         "crop_names": ctx.facts.get("crops", []),
-        "expected_gpu_outputs": {
-            "kaggle_working": ["assoc_feature_parity.json", "loeo_manifest.json", "run_stats.csv"],
-            "log_tokens_required": ["AFP_PHASE cache", "AFP_PHASE verify", "AFP_CACHE crop=",
-                                    "AFP crop=", "ASSOC_FEATURE_PARITY_COMPLETE"],
-            "gate_report_must_contain": {"crops": len(ctx.facts.get("crops", [])),
-                                         "all_passed": True},
-            "per_crop_minimum_checked_pairs": {
-                c: {"band_a": v["band_a_pairs_in_scope"],
-                    "band_b": v["band_b_pairs_in_scope_at_or_below_0.5"]}
-                for c, v in (next((ch.evidence.get("per_crop", {}) for ch in checks
-                                   if ch.id == "PF06"), {})).items()},
-        },
+        # RESOLVED FROM THE CHECKS, NOT SPELLED HERE. This block was hardcoded to the contract-1
+        # assoc_feature_parity worker, so a passive-tap run was told to require AFP_PHASE and
+        # ASSOC_FEATURE_PARITY_COMPLETE - tokens a correct tap run never prints, and none of the
+        # AFT tokens it does print. The post-run audit reads THIS, so the hardcoding would have
+        # failed a good run and, worse, said nothing about a tap that never fired.
+        "expected_gpu_outputs": _expected_outputs(ctx, checks),
         "artifact_class": ctx.facts.get("class"),
         "artifact_class_reason": ctx.facts.get("class_reason"),
         "profile": ctx.facts.get("profile"),
@@ -1551,47 +1820,112 @@ def _selftest(sandbox: Path) -> int:
     rec("M16 PF01 still rejects a spec whose OWN patch file is uncommitted",
         bool(own_dirty), f"{own_dirty[:1]}")
 
-    # --- M17-M19 / A5 the PASSIVE-TAP profile ------------------------------------------------
-    tap_spec = ROOT / "scripts" / "kaggle_specs" / "p36_assoc_feature_tap_smoke.json"
-    if tap_spec.is_file() and (ROOT / json.loads(tap_spec.read_text(encoding="utf-8"))["out_dir"]
-                               / json.loads(tap_spec.read_text(encoding="utf-8"))["code_file"]
-                               ).is_file():
-        tctx = load_context(tap_spec, box / "tap")
-        rec("A5 ACCEPT the passive-tap spec classifies as gate_smoke with an implementing profile",
+    # --- M17-M20 / A5-A6 the PASSIVE-TAP profile, ON EVERY CONTRACT ---------------------------
+    # THE FIXTURE IS NOT PINNED TO ONE NOTEBOOK ANY MORE. This block used only the archived P36
+    # build, which is CONTRACT 1 - a program that stores one unqualified probability column and
+    # floors its bands with two named literals. A contract-2 defect cannot exist in it, so
+    # proving PF05/PF06 there proves them on a program that cannot fail the way the live one can
+    # (FACT-0408's rule, one level up: a fixture may differ from production in COST, never in
+    # KIND). Every tap spec with a built notebook on disk is exercised, and the mutation is
+    # DERIVED from each artifact rather than spelled for one of them.
+    tap_specs = []
+    for cand in sorted((ROOT / "scripts" / "kaggle_specs").glob("*.json")):
+        try:
+            body = json.loads(cand.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        files = [e.get("code_file", "") for e in body.get("edits", [])]
+        if not any(str(f).endswith(("assoc_feature_tap.py", "assoc_tap_gate.py")) for f in files):
+            continue
+        if (ROOT / body.get("out_dir", "") / body.get("code_file", "")).is_file():
+            tap_specs.append(cand)
+    if not tap_specs:
+        rec("A5/M17/M18/M19 the passive-tap profile is exercised", False,
+            "no tap spec with a built notebook - the tap profile was NOT proved")
+    contracts_seen = set()
+    for tap_spec in tap_specs:
+        tag = tap_spec.stem
+        tctx = load_context(tap_spec, box / f"tap_{tag}")
+        worker = _tap_worker_source(tctx) or ""
+        contract = 2 if "_preblend" in worker else 1
+        contracts_seen.add(contract)
+        rec(f"A5 ACCEPT {tag} (contract {contract}) classifies as gate_smoke with an "
+            "implementing profile",
             tctx.facts["class"] == "gate_smoke"
             and tctx.facts["profile"] == "assoc_feature_tap",
             f"class={tctx.facts['class']} profile={tctx.facts['profile']}")
 
         # M17 PF07: the same boundary defect, in the tap launcher.
-        t_ok = check_worker_subprocess_boundary(load_context(tap_spec, box / "tap_ok"))
-        tctx_bad = load_context(tap_spec, box / "tap_noenv")
+        t_ok = check_worker_subprocess_boundary(load_context(tap_spec, box / f"ok7_{tag}"))
+        tctx_bad = load_context(tap_spec, box / f"bad7_{tag}")
         tctx_bad.nb_source = re.sub(r",\s*\n\s*env=_aftg_env", "", tctx_bad.nb_source)
         t_bad = check_worker_subprocess_boundary(tctx_bad)
-        rec("M17 PF07 rejects the tap launcher with env= stripped and accepts the as-built one",
+        rec(f"M17 PF07 rejects the {tag} launcher with env= stripped and accepts the as-built one",
             t_ok.passed and not t_bad.passed,
             f"as_built={t_ok.passed} stripped={t_bad.passed}")
 
         # M18 PF05: a renamed cache key is read but never written.
-        t_ok5 = check_schemas_tap(load_context(tap_spec, box / "tap_s_ok"))
-        tctx_s = load_context(tap_spec, box / "tap_s_bad")
+        t_ok5 = check_schemas_tap(load_context(tap_spec, box / f"ok5_{tag}"))
+        tctx_s = load_context(tap_spec, box / f"bad5_{tag}")
         tctx_s.nb_source = tctx_s.nb_source.replace('"role_feat",', '"role_features",')
         t_bad5 = check_schemas_tap(tctx_s)
-        rec("M18 PF05 rejects a cache key the replay reads but the tap never writes",
+        rec(f"M18 PF05 rejects a cache key {tag}'s replay reads but its tap never writes",
             t_ok5.passed and not t_bad5.passed,
+            f"bands={t_ok5.evidence.get('bands_the_worker_declares')} "
             f"unknown={t_bad5.evidence.get('read_but_never_written')}")
 
-        # M19 PF06: the band-A non-vacuity floor stripped from the shipped worker.
-        t_ok6 = check_exact_positive_counts_tap(load_context(tap_spec, box / "tap_f_ok"))
-        tctx_f = load_context(tap_spec, box / "tap_f_bad")
-        tctx_f.nb_source = tctx_f.nb_source.replace("and a[\"checked\"] > 0", "and True")
+        # M19 PF06: the non-vacuity floor stripped from the shipped worker. The expression is
+        # taken from the check's own resolution, so this mutation follows a rewrite instead of
+        # going quietly inert against it - which is how M6 stopped proving anything once the
+        # artifact it borrowed its defect from was repaired.
+        t_ok6 = check_exact_positive_counts_tap(load_context(tap_spec, box / f"ok6_{tag}"))
+        expr = t_ok6.evidence.get("floor_expression_found")
+        tctx_f = load_context(tap_spec, box / f"bad6_{tag}")
+        if expr:
+            for spelling in (expr, expr.replace("'", '"')):
+                tctx_f.nb_source = tctx_f.nb_source.replace(spelling, "True")
         t_bad6 = check_exact_positive_counts_tap(tctx_f)
-        rec("M19 PF06 rejects a worker whose band-A non-vacuity floor has been removed "
-            "(FACT-0394)",
-            t_ok6.passed and not t_bad6.passed,
-            f"floors={t_bad6.evidence.get('in_kernel_floors_present')}")
-    else:
-        rec("A5/M17/M18/M19 the passive-tap profile is exercised", False,
-            "p36 spec or its built notebook is missing - the tap profile was NOT proved")
+        rec(f"M19 PF06 rejects {tag} with its resolved non-vacuity floor removed (FACT-0394)",
+            bool(expr) and t_ok6.passed and not t_bad6.passed,
+            f"stripped={expr!r} floors={t_bad6.evidence.get('in_kernel_floors_present')}")
+
+        # M20 PF06: a floor that covers SOME bands only. The generic form must not be read as
+        # covering every band just because it is generic - that would be the permissive twin of
+        # the literal-matching defect this check was rewritten to remove.
+        if contract == 2:
+            tctx_p = load_context(tap_spec, box / f"bad6p_{tag}")
+            tctx_p.nb_source = tctx_p.nb_source.replace(
+                'and result[f"band_{name}"]["checked"] > 0',
+                'and (result["band_a"]["checked"] > 0 if name == "a" else True)')
+            t_bad6p = check_exact_positive_counts_tap(tctx_p)
+            rec(f"M20 PF06 rejects {tag} when only band A keeps a floor",
+                not t_bad6p.passed,
+                f"floors={t_bad6p.evidence.get('in_kernel_floors_present')}")
+    rec("A6 ACCEPT the profile is proved on a CONTRACT-2 artifact, not only the archived "
+        "contract-1 build", 2 in contracts_seen, f"contracts_exercised={sorted(contracts_seen)}")
+
+    # --- M21/M22 THE RECEIPT ITSELF, which the POST-RUN audit reads -----------------------------
+    # The receipt's expected-output block was a hardcoded contract-1 list, so a passive-tap run
+    # was told to require AFP_PHASE and ASSOC_FEATURE_PARITY_COMPLETE - tokens a correct tap run
+    # never prints - and told nothing about AFT_TAP, whose absence is the only sign the
+    # instrument recorded nothing. That is the checker-cries-wolf failure aimed at the one
+    # artifact nobody re-derives.
+    for tap_spec in tap_specs:
+        body = run_preflight(tap_spec, box / f"receipt_{tap_spec.stem}")["body"]
+        exp = body.get("expected_gpu_outputs", {})
+        req = set(exp.get("log_tokens_required", []))
+        alarm = set(exp.get("log_tokens_whose_presence_is_the_alarm", []))
+        rec(f"M21 the receipt for {tap_spec.stem} names the TAP's heartbeats, not the parity "
+            "worker's",
+            "AFT_TAP" in req and not any(t.startswith("AFP") for t in req | alarm)
+            and exp.get("gate_report_must_contain", {}).get("crops") == 2
+            and all(any(w in t for w in ("FAIL", "ERROR", "EMPTY")) for t in alarm),
+            f"required={sorted(req)}")
+        hashes = body.get("input_hashes", {})
+        rec(f"M22 the receipt for {tap_spec.stem} hashes real inputs and carries no null-named "
+            "entry", bool(hashes) and "None" not in hashes
+            and all(v for v in hashes.values()) and len(hashes) >= 5,
+            f"n={len(hashes)} null_keyed={'None' in hashes}")
 
     total = len(results)
     bad = [n for n, ok, _ in results if not ok]

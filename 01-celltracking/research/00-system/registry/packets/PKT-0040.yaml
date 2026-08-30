@@ -1,0 +1,403 @@
+id: PKT-0040
+title: >-
+  Final-edge survival audit - where a learned parent score can still be overwritten in the
+  deployed program, and the precise stage boundaries for ledger categories 2 and 5
+lever: null
+why_no_lever: >-
+  This is an ARCHITECTURE AUDIT of the deployed program, not a hypothesis about the score. It
+  claims no LEVER-####, spends no GPU and no submission slot, and changes nothing in the
+  deployed path. R6 permits a null lever, and taking one here would have been the anti-pattern
+  AGENTS.md section 2 warns about - locking a live hypothesis behind work that cannot move it.
+  Its output is a MAP and a MEASUREMENT that any association lever must be read against, plus
+  the falsifier for the successor lever it recommends.
+owner: agent-3-final-edge-survival
+lock: claimed
+opened: '2026-08-30'
+
+claim: >-
+  A learned association score consumed ONLY at pre-ILP candidate ranking is discarded before the
+  emitted graph exists, because exactly one operation - motion_relink_edges - chooses every
+  surviving parent edge, and it reads the learned score only as a bounded bonus on pairs the ILP
+  already kept. The correct place to spend the next GPU session is therefore a scorer that
+  reaches that operation, not a better pre-ILP ranker.
+
+falsifier: >-
+  A forced change to the pre-ILP parent choice SURVIVES into the emitted graph at a high rate -
+  say above 0.60 of the perturbed targets whose node survives to emission - on both folds. That
+  would mean the relink largely honours the upstream choice, the pre-ILP stage is the effective
+  decision point, FACT-0364's structural warning does not bind a re-ranker, and the campaign's
+  existing pre-ILP numbers (FACT-0413, FACT-0414) could be read as capability rather than as
+  measurements at a stage that is thrown away.
+  SECOND FALSIFIER, on the map rather than the measurement: any operation after
+  motion_relink_edges is found at deployed file:line to reassign a parent that a target already
+  had. That would make categories 2 and 5 non-disjoint and this packet's ledger definitions
+  wrong.
+
+prediction: >-
+  Stated before the replay was run. The survival rate of a pre-ILP-only parent change, over
+  targets whose node survives to emission, lands BELOW 0.35 on both folds, and the dominant
+  failure mode is REVERSION - the relink re-selects the original parent on geometry - rather
+  than reassignment to a third node. Mechanism: MOTION_RELINK_LEARNED_BONUS is 1.0 while the
+  relink cost is a distance in micrometres, so a bonus of at most 1.0 cannot move a pair whose
+  geometric disadvantage is larger than that.
+
+inputs:
+  facts:
+    - FACT-0364      # motion relink replaces the whole edge list - category 5's mechanism
+    - FACT-0369      # at most one candidate parent per target at the deployed floor
+    - FACT-0370      # bounds ledger categories 1 and 3
+    - FACT-0368      # association is the dominant share of the gap; bounds category 4
+    - FACT-0371      # divisions are downstream of association; bounds category 6
+    - FACT-0376      # SUSPECT. Used only for its structural reading - widening under an
+                     # unchanged scorer loses - never for a magnitude.
+    - FACT-0382      # all fold-0 contested errors sit below the deployed floor
+    - FACT-0387      # the predictor runs as a subprocess; patches rewrite its source text
+    - FACT-0408      # the vendored predictor is a DIFFERENT program from the deployed one
+    - FACT-0413      # the fold-1 ranker gain, at stage pre_ILP_candidate_ranking
+    - FACT-0414      # the fold-0 gate; falsifier (e) fires
+  artifacts:
+    - C:/temp/p7/tracking_repo/scripts/predict_unet_transformer.py   # the DEPLOYED predictor
+    - notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb
+    - notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb
+    - notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb
+    - notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb
+    - C:/temp/p30_f0/preilp_split0.parquet
+    - C:/temp/p30_f0/ecb/
+    - C:/temp/p30_f0/graphs_ctl/
+    - C:/temp/p34_f1/preilp_split1.parquet
+    - C:/temp/p34_f1/ecb/
+    - C:/temp/p28_f0/run_stats.csv
+    - C:/temp/p28_f1/run_stats.csv
+    - C:/temp/biohub_deepcenter_p10_audit/best.pt
+  code:
+    - scripts/win_bet/p28_full_chain_replay.py          # the deployed chain, extracted by ast
+    - scripts/win_bet/ilp_replay.py                     # build_graph_from_frame + solve
+    - scripts/win_bet/assoc_preilp_survival.py          # NEW - the perturbation instrument
+    - scripts/win_bet/assoc_preilp_survival_panel.py    # NEW - the per-fold aggregation
+
+method: >-
+  Three parts, none of which spends GPU.
+  (1) STAGE MAP at deployed file:line. Read the deployed support-pack predictor - verified by
+  sha256 to be the 1047-line program, not the 677-line vendored one (FACT-0408) - and the built
+  notebook's own filter_output_graph. For every stage record what it reads, what it writes,
+  whether it can overwrite a parent choice made upstream, and whether any learned score reaches
+  it. Cross-check the chain across four built notebooks by hashing each function body, so a
+  claim about "the deployed chain" is not a claim about one build.
+  (2) DEMONSTRATION. Perturb ONLY the pre-ILP parent choice - promote the P30/P34 candidate
+  sidecar's runner-up source to be the parent, carrying the deployed edge's own probability, so
+  the ILP objective and the relink bonus both see an equally confident commitment - then replay
+  the COMPLETE deployed chain on CPU and inspect the emitted graph. The control arm must
+  reproduce the kernel's own run_stats exactly on the fifteen columns p28_full_chain_replay
+  compares, or the run is refused. Attribute every forced choice to exactly one bucket, node
+  loss first so category 2 and category 5 cannot both claim it.
+  (3) SUCCESSOR FALSIFIER, written before any successor work begins.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: one CPU session
+
+forbidden:
+  - .claude/settings.json
+  - .gitignore
+  - research/00-system/registry/facts.yaml        # candidate facts are handed to the coordinator
+  - research/00-system/registry/levers.yaml
+  - research/00-system/registry/experiments.yaml
+  - research/00-system/registry/packets/PKT-0029.yaml
+  - research/00-system/registry/packets/PKT-0035.yaml
+  - research/00-system/registry/packets/PKT-0036.yaml
+  - research/00-system/registry/packets/PKT-0037.yaml
+  - research/00-system/registry/packets/PKT-0038.yaml
+  - any deployed file - notebooks/**, scripts/kaggle_edits/**, scripts/kaggle_specs/**
+  - a second lost-edge ledger; AGENT 1 (PKT-0038) owns the instrument and this packet hands it
+    definitions and counts only
+
+outputs:
+  evidence: _evidence/assoc/survival/
+  facts_added: []
+  record: >-
+    One compact row appended to research/06-knowledge-system/experimental-records.md
+
+result:
+  status: complete
+  lock_note: >-
+    Set `lock: done` by the coordinator once the candidate facts below are entered. This packet
+    wrote nothing to facts.yaml, levers.yaml or experiments.yaml by design.
+  falsifier_fired: false
+  falsifier_detail: >-
+    The stated falsifier required survival above 0.60 on BOTH folds. Measured 0.1542 (fold 0)
+    and 0.3030 (fold 1) over targets whose node survived to emission. The prediction - below
+    0.35 on both folds with REVERSION dominant - held on both counts: reverted is the largest
+    non-surviving bucket on both folds (fold 0 3056 category-5 losses of which 2438 reverted;
+    fold 1 1477 of which 1063 reverted).
+    The SECOND falsifier, on the map, also did not fire: no operation after motion_relink_edges
+    was found to reassign a parent a target already had.
+
+  finding_1_the_final_parent_selecting_operation: >-
+    It is `motion_relink_edges`, defined at biohub-p28-champion-control-f1.ipynb code line 1823,
+    deciding at line 1890 `row_ind, col_ind = linear_sum_assignment(cost)` on the cost built at
+    line 1889, and installed over the solver's edge list at line 3073 `edges = motion_edges`.
+    (Code line numbers address the concatenation of all code cells, exactly as produced by
+    scripts/win_bet/p28_full_chain_replay._code_source.) Its body is BYTE-IDENTICAL - sha256_12
+    269758b0115d - across biohub-p3-harmonic, both P28 champion controls, and P35, so this is a
+    property of the deployed program and not of one build.
+    It is the ONLY operation in the deployed post-ILP chain that can change a target's already
+    assigned parent. Verified at source, stage by stage, and confirmed by the chain's own
+    counters: close_single_frame_gaps (definition 1943, mutation 2210), recover_strict_gap2
+    (2227, mutation 2374) and add_safe_divisions_postlink (live definition 2552, mutation 2735)
+    are all ADD-ONLY and all draw their targets from `starts_by_t` - nodes with NO incoming
+    edge - so none of them can overwrite a parent. The division geometry filter (3123) and the
+    single-child repair (3088) are OFF in every deployed env block. The single-parent repair
+    (3077) is a measured no-op: `dropped_multi_parent_edges` is 0, because the relink's
+    one-to-one assignment already guarantees in-degree <= 1. prune_isolated (3157) and
+    filter_short_track_components (3165) remove NODES, never reassign parents.
+    P35 differs from P28 only by print statements, two extra safe-division counters, the removal
+    of the assert_degree_invariants calls, and two extra ACTIVE flags - gap2 recovery and the
+    adaptive short-track rescue - both of which are ADD-only or category-2-reducing.
+
+  finding_2_the_learned_channel_is_singular_and_bounded: >-
+    Exactly ONE learned quantity crosses from the predictor subprocess into the notebook process:
+    `edge_prob`, written at predict_unet_transformer.py build_graph (114-146) and carried on the
+    .geff edge attribute. It is consumed at only two places - the ILP objective
+    (predict_unet_transformer.py:926-927) and the relink bonus (notebook 3058-3069 assembling
+    `learned_edge_probs`, read back at 1889). Any pair the ILP did not keep scores 0.0 in the
+    relink (learned_prob, 1833-1842), so a learned score on a discarded pair is worth nothing.
+    THE BOUND IS THE POINT. Line 1889 is
+    `cost[i, j] = motion + 0.05 * raw - MOTION_RELINK_LEARNED_BONUS * prob`, a cost in
+    MICROMETRES against a bonus of at most MOTION_RELINK_LEARNED_BONUS - 1.0 in every deployed
+    env block (p28f1:22, p35:7, p3h:22), 0.75 by notebook default. A perfectly confident learned
+    score can therefore move a parent choice only when the two candidates are within about
+    1.0 um of each other in relink cost.
+    No learned score reaches gap repair, gap2, division handling, prune_isolated or smoothing at
+    all; the edges those stages add carry `edge_prob: None`.
+
+  finding_3_the_measurement: >-
+    Perturbing ONLY the pre-ILP parent choice - promoting the P30/P34 sidecar runner-up and
+    carrying the deployed edge's own probability, so the ILP objective and the relink bonus both
+    see an equally confident commitment - and then replaying the COMPLETE deployed chain on CPU.
+    The control arm reproduces the kernel's own run_stats exactly on all fifteen compared
+    columns, and a mismatch is a hard refusal.
+    FOLD 0 (movie 44b6, 12 crops, 4,800 forced changes): 3,056 of 3,613 forced choices whose
+    target node survived to emission are NOT in the emitted graph - a category-5 rate of 0.8458.
+    Survival is 0.1542. FOLD 1 (movie 6bba, 8 crops, 3,200 forced changes): 1,477 of 2,119,
+    category-5 rate 0.6970, survival 0.3030.
+    THE COUNTERFACTUAL IS WHAT MAKES IT INTERPRETABLE. On the SAME targets in the unperturbed
+    control, the pre-ILP parent is the emitted parent for 4,092 of 4,198 node-survivors on fold
+    0 (0.9747) and 2,401 of 2,529 on fold 1 (0.9494). So the deployed pipeline agrees with its
+    own pre-ILP choice about 95-97% of the time, and honours a CHANGED choice 15-30% of the
+    time. The relink does not follow the pre-ILP ranking; it agrees with it, because both are
+    usually reporting the nearest plausible cell.
+
+  finding_4_the_mechanism_is_a_geometric_gate_with_a_bounded_override: >-
+    Survival falls monotonically with the geometric handicap the promoted parent carries. Fold 0
+    / fold 1, survived over n, binned by (forced distance - deployed distance) in um:
+    closer than -1: 36/49 and 32/41; (-1,0]: 32/62 and 48/64; (0,1]: 36/74 and 49/84;
+    (1,2]: 51/156 and 73/124; (2,3]: 55/279 and 95/188; (3,5]: 177/968 and 198/535;
+    (5,8]: 156/1462 and 138/629; beyond 8: 14/563 and 9/454.
+    Within the 1.0 um bonus the survival rate is 0.5622 (fold 0) and 0.6825 (fold 1); outside it
+    0.1321 and 0.2658 - a 4.3x and 2.6x difference across exactly the boundary line 1889
+    predicts. This is the quantitative confirmation that the relink is a geometric assignment
+    with a learned override worth about one micrometre, and it is the single most actionable
+    number in this packet.
+    CAVEAT, STATED SO IT IS NOT DROPPED. The perturbation promotes the sidecar RUNNER-UP, whose
+    median displacement is far larger than the deployed parent's. FACT-0370 measured that the
+    GT edges a better scorer would actually want are SHORT. So the pooled survival rates are a
+    LOWER bound for a well-aimed re-ranker, and the in-band rate is the relevant one for one
+    that promotes a geometrically comparable parent.
+
+  finding_5_ledger_categories_2_and_5: >-
+    CATEGORY 2 - endpoint detected but removed by node selection or filtering - is exactly three
+    operations: the ILP solution's node subset (predict_unet_transformer.py:925-933),
+    OUTPUT_PRUNE_ISOLATED (notebook 3157-3163), and filter_short_track_components (3165,
+    definition 2738-2861). The DeepCenter gap veto (2176-2181) removes only synthetic nodes it
+    itself added, so it contributes nothing to this category.
+    CATEGORY 5 - correct edge selected then overwritten - is exactly one operation,
+    motion_relink_edges (3070-3073), with the single-parent repair (3077-3086) listed only
+    because it is the relink's fallback path and is a measured no-op.
+    DISJOINTNESS IS BY ORDER: category 2 is tested first. If the target node is absent from the
+    emitted graph there is no emitted parent to compare, so the loss cannot also be a category-5
+    overwrite. Category 5 is defined only over targets whose node survived, which is why its
+    denominator is 3,613 and not 4,800 on fold 0.
+    RECONCILIATION the coordinator and AGENT 1 should read. FACT-0370's "endpoint detected" pool
+    is the PRE-ILP node set, which is upstream of all three category-2 operations. Measured here
+    on the unperturbed control over every pre-ILP parent choice: 38,839 of 385,249 fold-0
+    targets (0.1008) and 22,729 of 165,735 fold-1 targets (0.1371) lose their node before
+    emission. That mass is category 2 and must NOT be left inside FACT-0370's 74.3% reachable
+    share when the ledger is assembled, or category 4 will absorb it.
+
+  finding_6_the_folds_differ_structurally_at_this_stage: >-
+    This is the part that bears on the transfer failure blocking the campaign. Fold 1 is roughly
+    TWICE as permeable to a pre-ILP ranking change as fold 0 - survival 0.3030 against 0.1542,
+    category-5 rate 0.6970 against 0.8458 - and it simultaneously loses more nodes, 0.1371
+    against 0.1008 on the baseline. A ranking gain measured on fold 1 therefore has about double
+    the chance of reaching the emitted graph that the same gain has on fold 0.
+    That is a MECHANISM for the FACT-0413 / FACT-0414 disagreement which is not model
+    overfitting, and it is stated as a candidate explanation, not a demonstration: nothing here
+    measures FACT-0413's model through the chain. What it does establish is that "the same
+    ranking delta means the same thing on both folds" is false in the deployed pipeline.
+
+  finding_7_doc_drift_for_the_coordinator: >-
+    CLAUDE.md says "the live platform is notebooks/kaggle_p3_harmonic/". The current champion is
+    P35 (notebooks/kaggle_p35_dcveto_on_931/), which differs from p3_harmonic in two ACTIVE
+    chain flags - BIOHUB_OUTPUT_GAP2_RECOVERY and BIOHUB_ADAPTIVE_SHORT_TRACK_RESCUE, both 1 in
+    P35 and 0 in p3_harmonic. The final parent selector is byte-identical across both, so no
+    conclusion in this packet moves; but an agent told to audit p3_harmonic will read the wrong
+    post-processing configuration. Not edited here - CLAUDE.md is not this packet's to change.
+
+  the_minimal_design: >-
+    DESIGN ONLY. NOT IMPLEMENTED, NOT TUNED. It touches ONE deployed file plus one constant.
+    Because `edge_prob` is the single learned channel and is ALREADY read by both the ILP
+    objective and the relink bonus, the minimal design is not to add a channel - it is to
+    OVERWRITE `edge_prob` with the learned association score inside the predictor, before
+    build_graph. One patch in the existing scripts/kaggle_edits/ style, rewriting the
+    predictor's SOURCE TEXT (never importing it - FACT-0387), at the candidate-emission block
+    predict_unet_transformer.py:758-792: lower cfg.threshold to the acquisition floor and raise
+    max_parents_per_node so the widened surface is offered (required - FACT-0382 says every
+    fold-0 contested error's true parent sits below the deployed floor); score each offered pair
+    with the learned head from features already in scope there; write that score into the `prob`
+    slot of `all_edges`; re-apply top-1-per-target at emission so the ILP receives the deployed
+    SHAPE with the LEARNED parent. No notebook edit, no new stage, no re-architecture, and the
+    same number reaches the ILP and the relink for free.
+    IT NEEDS A SECOND COMPONENT, AND THE MEASUREMENT IS WHY. With the bonus at its deployed 1.0
+    the learned score can only move a parent within about one micrometre of relink cost, and
+    only 5.1% (fold 0) / 8.9% (fold 1) of the alternatives tested fell inside that band. So the
+    patch must also raise BIOHUB_MOTION_RELINK_LEARNED_BONUS - one line in the notebook env
+    block, a constant that already exists and is already read at notebook line 136.
+    COST. One GPU session to re-export the widened surface with the learned score already in
+    edge_prob - the same acquisition shape as P30/P34, so the cost is known. Zero new notebook
+    stages. Crucially, the bonus sweep needs NO GPU at all: p28_full_chain_replay sets
+    MOTION_RELINK_LEARNED_BONUS from its own P28_ENV, so the sweep runs on CPU over committed
+    assets and should be run BEFORE the feature cache is built.
+    RISKS, EACH NAMED. (1) Raising the bonus changes the relink for EVERY edge, not only the
+    ones the scorer disagrees with - a global change under new discrimination, which is the
+    exact shape FACT-0376 measured a loss for, so it must be swept against the deployed control
+    and reported per fold. (2) learned_prob (1833-1842) silently sigmoids anything outside
+    [0,1], so an uncalibrated score is squashed with no error - a silent no-op class, and the
+    patch must assert its range. (3) FACT-0369's one-parent-per-target shape must be re-applied
+    at emission or the ILP receives a graph it was never tuned for. (4) NOTHING in this design
+    reaches divisions: add_safe_divisions_postlink sees no learned score at all, so FACT-0371's
+    division half is untouched and must be reported separately. (5) The patch must rewrite
+    source text, never import - FACT-0387.
+
+  successor_lever_falsifier: >-
+    For a "FINAL-EDGE SCORER" lever - a learned association score that reaches
+    motion_relink_edges with enough weight to change its assignment. Written before any such
+    work begins. ANY ONE of these kills it.
+    (a) THE CHEAP ONE, CPU ONLY, RUN FIRST, NO NEW MODEL. Sweeping
+    MOTION_RELINK_LEARNED_BONUS alone on the existing full-chain replay over complete fold 0,
+    with the DEPLOYED edge_prob unchanged, yields no bonus value at which the pooled score beats
+    the deployed control with a crop-paired bootstrap interval excluding zero. If the relink
+    cannot be moved profitably by the score it already has, a better score delivered through the
+    same channel has no mechanism, and the lever dies for zero GPU.
+    (b) At the best bonus from (a), fewer than 1% of relink assignments change - the channel is
+    saturated by geometry and no scorer can reach the metric through it.
+    (c) With the learned score written into edge_prob and the bonus at its best swept value, RAW
+    edge Jaccard does not improve through the COMPLETE chain on fold 0, all 71 crops, official
+    patched scorer, both embryo directions reported separately.
+    (d) Opportunity does not convert: net true edges through the complete chain - the FACT-0376
+    quantity - is <= 0 on fold 0.
+    (e) Node recall falls or division true positives decline (FACT-0371 caution). Non-promotional
+    whatever the pooled score did.
+    (f) The fold-0 arm reproduces FACT-0414's signature - a refit that reshuffles targets and
+    nets exactly zero - at the FULL-CHAIN stage rather than the ranking stage. That would say the
+    SUBSTRATE and not the STAGE is the constraint, and the association lane needs re-framing
+    rather than a new consumer.
+    ORDERING IS PART OF THE FALSIFIER: (a) is CPU-only on committed assets and must be run
+    before any GPU session is scheduled.
+
+  handed_to_agent_1: >-
+    PKT-0038 owns the lost-edge ledger instrument. Handed over, and NOT duplicated here: the
+    category 2 and category 5 stage boundaries at deployed file:line
+    (_evidence/assoc/survival/stage_map.json, `ledger_category_boundaries`), the disjointness
+    rule (category 2 tested first), the category-5 counts and denominators per movie and per
+    fold (_evidence/assoc/survival/survival_panel.json), and the baseline category-2 drain that
+    FACT-0370's reachable share must have removed from it before category 4 is computed.
+
+  what_is_not_established: >-
+    (1) This measures the SURVIVAL of a parent change, not the SCORE. No arm here is scored
+    through the official patched scorer as a treatment-versus-control comparison, and no claim
+    about the leaderboard or the pooled objective is made.
+    (2) The perturbation promotes the sidecar runner-up, which is systematically further away
+    than the true parents FACT-0370 says a good scorer would target; the pooled survival rate is
+    therefore a LOWER bound and the in-band rate is the one to quote for a well-aimed re-ranker.
+    (3) It is 12 of 71 fold-0 crops and 8 of 128 fold-1 crops, not a complete fold. The crops are
+    the first in each committed crop list, not a random sample, so the per-fold rates are
+    estimates; the STRUCTURAL claims - which operation can overwrite a parent, and that the
+    override is bounded at line 1889 - are read at source and do not depend on the sample.
+    (4) FACT-0413's actual model was not run through the chain. Whether ITS particular gain
+    survives is unmeasured, and this packet does not assert it.
+    (5) Nothing here is read as division recovery (FACT-0371).
+
+  candidate_facts_for_the_coordinator: >-
+    Five candidates, for the coordinator to enter into facts.yaml. This packet did not write
+    them. Every one is MEASURED or VERIFIED with a committed instrument, scope stated, and both
+    embryo directions reported separately.
+
+    CANDIDATE A - VERIFIED. In the deployed program exactly ONE operation can change a target's
+    already-assigned parent: motion_relink_edges, defined at
+    notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb code line 1823,
+    deciding at 1890, installed at 3073. Its body is byte-identical (sha256_12 269758b0115d)
+    across biohub-p3-harmonic, both P28 champion controls and P35. Every later edge-mutating
+    stage is ADD-ONLY to targets with no incoming edge (close_single_frame_gaps mutation 2210,
+    recover_strict_gap2 mutation 2374, add_safe_divisions_postlink mutation 2735) or removes
+    whole nodes (prune_isolated 3157, filter_short_track_components 3165); the single-parent
+    repair at 3077 is a measured no-op (dropped_multi_parent_edges 0). Instrument: source read at
+    the cited lines plus per-function body hashing across four built notebooks; corroborated by
+    the deployed chain's own counters in _evidence/assoc/survival/crops/. Scope: the deployed
+    post-ILP chain, all four built notebooks named. Suggested tags: [pipeline-structure,
+    motion-relink, final-edge, verified, headline].
+
+    CANDIDATE B - VERIFIED. The learned association score reaches the final parent selection
+    only as a bonus bounded by MOTION_RELINK_LEARNED_BONUS, deployed 1.0 (notebook env line 22
+    on p28f1, 7 on p35, 22 on p3h; default 0.75 at notebook line 136), subtracted from a cost
+    measured in micrometres at notebook line 1889
+    `cost[i, j] = motion + 0.05 * raw - MOTION_RELINK_LEARNED_BONUS * prob`. Its only input is
+    `learned_edge_probs`, assembled at 3058-3069 from edge_prob on edges that SURVIVED the ILP,
+    so any pair the solver dropped scores 0.0 (learned_prob 1833-1842). edge_prob is the ONLY
+    learned quantity that crosses the predictor subprocess boundary
+    (predict_unet_transformer.py build_graph 114-146, deployed sha256
+    25b3ebfd8849dcf5abeff9ed3f0d57269a4b979365c989d6f78db1e5002d5219, the sha the repo's own
+    tests/test_assoc_feature_tap.py pins). Instrument: source read at the cited lines.
+    Suggested tags: [association, motion-relink, learned-channel, verified, headline].
+
+    CANDIDATE C - MEASURED. A change made ONLY at pre-ILP candidate ranking is discarded before
+    the emitted graph exists, and the two folds differ. Fold 0 (movie 44b6, 12 crops, 4,800
+    forced parent changes): 3,056 of 3,613 forced choices whose target node survived to emission
+    are absent from the emitted graph - category-5 rate 0.8458, survival 0.1542. Fold 1 (movie
+    6bba, 8 crops, 3,200 forced changes): 1,477 of 2,119, rate 0.6970, survival 0.3030. The
+    counterfactual on the SAME targets unperturbed: the pre-ILP parent IS the emitted parent for
+    4,092 of 4,198 fold-0 node-survivors (0.9747) and 2,401 of 2,529 fold-1 (0.9494). Instrument:
+    scripts/win_bet/assoc_preilp_survival.py over scripts/win_bet/p28_full_chain_replay.py, with
+    the control arm asserted exact against the kernel run_stats on all fifteen compared columns;
+    aggregated by scripts/win_bet/assoc_preilp_survival_panel.py; payloads
+    _evidence/assoc/survival/{survival_panel.json,crops/}. Validity: VALID but note the sample is
+    12 of 71 and 8 of 128 crops, taken in committed-list order rather than at random, and the
+    promoted alternative is the sidecar runner-up, which FACT-0370 implies is further away than
+    the parents a well-aimed scorer would promote - so the rates are a LOWER bound. Suggested
+    tags: [association, motion-relink, pre-ilp, survival, category-5, fold-transfer, headline].
+
+    CANDIDATE D - MEASURED. Survival of a forced pre-ILP parent change falls monotonically with
+    the promoted parent's geometric handicap, and the break is at the bonus. Within 1.0 um of the
+    deployed parent survival is 104/185 = 0.5622 on fold 0 and 129/189 = 0.6825 on fold 1;
+    outside it 453/3428 = 0.1321 and 513/1930 = 0.2658 - 4.3x and 2.6x across exactly the
+    boundary notebook line 1889 predicts. Full curve in the panel's
+    `survival_by_geometric_handicap_um`. Only 5.1% (fold 0) and 8.9% (fold 1) of tested
+    alternatives fall inside the band. Same instrument and payloads as CANDIDATE C. Suggested
+    tags: [motion-relink, geometric-gate, learned-bonus, association, measured].
+
+    CANDIDATE E - MEASURED. The category-2 drain that must be removed from FACT-0370's reachable
+    share before category 4 is computed: of every pre-ILP parent choice in the unperturbed
+    control, 38,839 of 385,249 fold-0 targets (0.1008) and 22,729 of 165,735 fold-1 targets
+    (0.1371) lose their node before emission, to the ILP's node subset, prune_isolated, or the
+    short-track filter. Emitted-parent agreement with the pre-ILP choice over all such targets is
+    0.8854 (fold 0) and 0.8414 (fold 1). Same instrument and scope caveat as CANDIDATE C.
+    Suggested tags: [ledger, category-2, node-selection, association, measured].
+
+  compliance: >-
+    CPU only. No GPU session, no kernel push, no submission. Nothing in the deployed path was
+    edited - the only files created are two instruments under scripts/win_bet/, this packet, and
+    evidence under _evidence/assoc/survival/. No lever claimed. facts.yaml, levers.yaml and
+    experiments.yaml untouched. PKT-0029/0035/0036/0037/0038 untouched. No git add, commit,
+    stash or checkout. .claude/settings.json and .gitignore untouched. The full pytest suite was
+    NOT run and tests/test_registry_validity.py was NOT run; scripts/core/validate_registry.py
+    passes with this packet present.

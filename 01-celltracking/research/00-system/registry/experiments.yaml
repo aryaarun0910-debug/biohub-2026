@@ -762,3 +762,40 @@ experiments:
       reproduced offline; nothing was patched and nothing relaunched.
       The session also satisfies the standing GPU rule on its own terms: it produced a reusable artifact, the
       1.6 MB archived pair-and-role cache, which is the first cache of the correct schema this campaign has.
+
+  - id: EXP-0044
+    title: P37 contract-2 passive feature-tap smoke - the first cache a training run could consume
+    spec: scripts/kaggle_specs/p37_assoc_feature_tap_c2_smoke.json
+    kernel: null
+    kernel_version: null
+    submission: null
+    lb: null
+    status: prepared
+    date: '2026-08-30'
+    facts: [FACT-0416, FACT-0417, FACT-0418]
+    note: >-
+      A NEW EXPERIMENT, NOT P36 RE-VERSIONED. FACT-0410 and FACT-0411 required this: the archived P36 cache
+      is contract 1, keeps its full evidentiary value and loses its training licence, and no legacy
+      read-only mode is admitted because contract 1 never held the pre-fusion surface. New spec, new out_dir,
+      new slug, new kernel id.
+      SCOPE IS DELIBERATELY NARROW. FACT-0407 already proved the P36 cache faithful to about 1e-6 on CPU
+      against real pack weights, so this smoke's remaining job is only the CPU/GPU float boundary on real
+      weights plus the contract-2 surfaces P36 never recorded - the pre-blend primary and post-blend deployed
+      columns as separate quantities, which is the distinction that invalidated P36's verdict.
+      NOT LAUNCHED AT THIS ENTRY. Built notebook sha256
+      48d68bfbde052ecbb852ae583563a62852f9255b5924ff4c128003b1680f3c1f, 11 cells, two expected crops
+      44b6_0113de3b and 44b6_0b24845f, single trunk on the support pack's split_0 primary
+      (sha256 12f6881ee3620a83) by design - it claims no dual-trunk pair. The class-aware CPU preflight
+      returns FAIL on PF01 alone, 9 of 10 applicable checks passing with NOTHING skipped, because the
+      injected patch scripts/kaggle_edits/assoc_tap_gate.py is uncommitted and the built notebook therefore
+      embeds code that exists at no commit. That is the whole blocker and it is cleared by a commit and a
+      plain rebuild, which reproduces the same notebook sha256 - verified twice, since the built notebook is
+      a pure function of the base notebook, the spec and the patch bytes.
+      THE COMMIT SET IS LARGER THAN THE FILE THE AUDIT NAMED, and this is the reason the entry records it:
+      assoc_tap_gate.py is GENERATED from scripts/win_bet/assoc_tap_replay.py by sync_tap_worker.py, which
+      embeds the worker's text in the patch's _AFTG_WORKER literal, and a drift-lock test fails the moment
+      the two disagree. Committing the named file alone would have left HEAD green on the preflight and RED
+      on the suite.
+      Preflight receipt _evidence/foundations/preflight_receipt_p37.json, signature verified, recording ten
+      input sha256s including the deployed 1047-line predictor 25b3ebfd8849 and never the vendored tree
+      (FACT-0408).

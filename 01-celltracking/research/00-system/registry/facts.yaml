@@ -7020,3 +7020,1031 @@ facts:
       contested top-1 on fold 1 against -0.0166 transferring to fold 0.
     date: '2026-08-30'
     tags: [p35, lever-0042, marginal-confirmation, lb-noise, baseline-0932, knobs-exhausted, headline]
+
+  - id: FACT-0413
+    statement: >-
+      ON THE DISCOVERY FOLD A CONTEXTUAL PARENT SCORER BEATS THE DEPLOYED ARGMAX, AND THE GAIN IS NOT
+      BINNING. On the complete widened P34 fold-1 surface - all 128 crops, all 91,410 decidable targets,
+      crop-grouped 5-fold, out-of-fold only - six of seven preregistered arms beat the deployed contested
+      top-1 of FACT-0388 with a crop-paired ci95 excluding zero on the favourable side. The best arm
+      A4.bidir.tree reaches contested top-1 0.762227, delta +0.053833, gained 2,316 / lost 884 / net +1,432
+      with churn 3,200 and ci95 [+0.046868, +0.061500]. The ladder is monotone in REPRESENTATION rather than
+      in head class - linear +0.027330 < tree +0.041841 < bidirectional +0.053833 - which is the direction
+      FACT-0386 predicted when it found the head was not the constraint. The binning floor was MEASURED on
+      this surface rather than inherited and it is NEGATIVE: a tree given only the deployed probability posts
+      delta -0.001391, net -37, churn 315, so no part of +0.053833 is the quantile-binning artifact that
+      halved FACT-0386's fold-0 arm
+    value: 0.05383256268561332
+    unit: contested_parent_top1_delta_over_deployed_f1_widened_oof
+    scope:
+      fold: 1
+      crops: 128
+      surface:
+        table: C:/temp/p34_f1/assoc_targets_split1.parquet
+        table_sha256_16: 798e17cd7e2d7df7
+        built_from: {preilp: C:/temp/p34_f1/preilp_split1.parquet, ecb_dir: C:/temp/p34_f1/ecb,
+                     floor: 0.1, rank_cap: 4}
+      deployed_bar: {contested_top1: 0.7083944212623585, contested: 26601, errors: 7757, fact: FACT-0388}
+      best_arm:
+        tag: A4.bidir.tree
+        contested_top1: 0.7622269839479718
+        delta: 0.05383256268561332
+        gained: 2316
+        lost: 884
+        net: 1432
+        churn: 3200
+        crop_paired_ci95: [0.046868111114120224, 0.06150036473312976]
+        n_crops_with_contested: 128
+        draws: 2000
+        excludes_zero: true
+        favourable: true
+        all_decidable_top1_after: 0.9308062575210589
+        calibration: {brier: 0.07506172494956241, ece_10bin: 0.0007258780214752223}
+      ladder:
+        A1.linear.nine: {contested_top1: 0.7357242208939514, delta: 0.027329799631592877}
+        A2.tree.nine: {contested_top1: 0.7502349535731739, delta: 0.041840532310815415}
+        A4.bidir.tree: {contested_top1: 0.7622269839479718, delta: 0.05383256268561332}
+      noise_floor_measured_here:
+        N0.prob_only.linear: {contested_top1: 0.7083944212623585, delta: 0.0, churn: 0}
+        N0.prob_only.tree: {contested_top1: 0.7070034961091688, delta: -0.001390925153189726,
+                            net: -37, churn: 315}
+        sign: negative
+      hard_negative_mining_rejected:
+        A2m_vs_A2: -0.001128
+        A4m_vs_A4: -0.000827
+        churn_mined: 3944
+        churn_unmined: 3200
+      arms_run: 7
+      arms_favourable: 6
+      blocked_arms: [A3.context.hoct_style]
+      stage: pre_ILP_candidate_ranking
+      full_chain_measured: false
+      delta_derivation: >-
+        Every `delta` in this entry is DERIVED as (arm contested top-1 minus deployed contested top-1)
+        from the two literals the payload does store; the payload stores no delta column of its own, so
+        no delta here can be found by searching it. Recomputed from the payloads on 2026-08-30 after the
+        PKT-0036 audit found the first transcription off by 6.0e-14. Do not confuse any of these with the
+        crop-paired bootstrap MEAN, a different quantity the payload does store (0.053990452018356595 for
+        the best arm) - the interval is built around that mean, not around the point delta.
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Complete fold 1, all 128 crops, out-of-fold only, splits GROUPED BY CROP so no target contributes to
+      its own training fold, on a surface whose sha256 is recorded in the payload and which was materialised
+      out of PKT-0036's audit scratch into the acquisition's own directory and verified byte-identical before
+      use. The harness carries its own internal control and REFUSES rather than reports if it fails: a linear
+      model on the probability alone returns the deployed contested top-1 to all sixteen digits with churn 0,
+      which is the only arithmetically possible outcome for a correct protocol. The run was repeated end to
+      end after two module-identity defects were fixed and both runs agree bit-for-bit on every arm's top-1,
+      gained/lost/net/churn, interval and calibration, differing only by two 1-ulp float-summation drifts in
+      a descriptive margin mean. WHAT THIS DOES NOT ESTABLISH is stated in the note and is large.
+    instrument: >-
+      scripts/win_bet/assoc_tournament.py over scripts/win_bet/assoc_train_harness.py; payloads
+      _evidence/assoc/tournament/discovery_fold1.json and noisefloor_fold1.json; contracts
+      tests/test_assoc_tournament.py
+    note: >-
+      THIS IS A DISCOVERY-FOLD NUMBER AND IT IS NOT A RESULT ABOUT THE SCORE. Three limits bind it and none
+      may be dropped when it is quoted.
+      (1) IT IS PRE-ILP. The stage is candidate ranking; FACT-0364 says motion relink replaces the solver's
+      whole edge list at a median 99.9% coverage, so the FACT-0376 quantity - net true edges through the
+      complete chain - is UNMEASURED here and the payload's own verdict carries promotable false.
+      (2) IT IS ON THE WIDENED SURFACE. FACT-0382 applies unchanged: this contested population exists only at
+      the 0.1 acquisition floor and the deployed pipeline is never offered it, so any full-chain claim must be
+      (widened surface + scorer) against the DEPLOYED control, never against a widened control.
+      (3) IT DID NOT TRANSFER TO FOLD 0. FACT-0414 records the fold-0 gate, which fires falsifier (e), and
+      this entry must not be quoted without it.
+      AMENDED 2026-08-30, AND THE AMENDMENT MATTERS: an earlier draft of this note said that quoting this
+      number without FACT-0414 "states a selection artifact as a capability". THAT IS NOW WRONG.
+      FACT-0419 completed the 2x2 matrix and a head fitted on FOLD 0, selected on nothing, beats the
+      deployed argmax on fold 1 with a favourable interval - so PKT-0038's falsifier (g) does NOT fire and
+      this gain is NOT a selection artifact. FACT-0420 gives the actual mechanism for the fold-0 null: an
+      out-of-fold power collapse on a surface carrying about ten contested errors per crop. The caution
+      stands in its corrected form - cite FACT-0419 and FACT-0420 alongside this entry - but the
+      selection-artifact reading is retired.
+      THE POSITIVE CONTENT THAT SURVIVES ALL THREE is the LADDER, not the magnitude: the bidirectional
+      CONTEXT columns are worth more than the head class, on the same data contract, with a measured negative
+      binning floor. Iterative hard-negative mining is REJECTED on this surface - it moves far more targets
+      and nets slightly fewer on both bases - which is why the successor design does not open with it.
+    date: '2026-08-30'
+    tags: [association, parent-ranking, fold-1, discovery, contextual, negative-noise-floor, lever-0041,
+           pre-ilp, headline]
+
+  - id: FACT-0414
+    statement: >-
+      THE FOLD-0 GATE REFUSED THE FOLD-1 WINNER TWICE, AND THE TWO REFUSALS DISAGREE IN A WAY NEITHER
+      READING EXPLAINS. LEVER-0041 falsifier (e) fires as written. GATE_B, weight transfer with the fold-1
+      fit applied and NO fold-0 fitting of any kind, returns contested top-1 0.817176, delta -0.016599,
+      gained 133 / lost 202 / net -69, ci95 [-0.026989, -0.005860] - an interval EXCLUDING ZERO ON THE WRONG
+      SIDE, which is negative transfer and strictly stronger than no transfer. GATE_A, architecture transfer
+      with the IDENTICAL recipe refitted out of fold on fold 0's own crop-grouped splits so no
+      cross-checkpoint difference can exist, returns contested top-1 0.8337743565070964 - the deployed value
+      to all sixteen digits - with delta EXACTLY 0.000000, gained 36 / lost 36, churn 72, ci95
+      [-0.003546, +0.003465]. It genuinely reshuffled 72 targets and netted precisely nothing
+    value: 0.0
+    unit: gate_a_refit_contested_parent_top1_delta_f0_widened_oof
+    scope:
+      fold: 0
+      crops: 71
+      surface: {table: C:/temp/assoc/f0.parquet, table_sha256_16: b15ee733774c2614,
+                built_from: {preilp: C:/temp/p30_f0/preilp_split0.parquet, ecb_dir: C:/temp/p30_f0/ecb,
+                             floor: 0.1, rank_cap: 4}}
+      deployed_bar: {contested_top1: 0.8337743565070964, contested: 4157, decidable: 19444, errors: 691}
+      gate_a_architecture_transfer:
+        recipe: identical to A4.bidir.tree, REFITTED out of fold on fold 0
+        contested_top1: 0.8337743565070964
+        delta: 0.0
+        gained: 36
+        lost: 36
+        net: 0
+        churn: 72
+        crop_paired_ci95: [-0.003546117787020966, 0.0034652658586730657]
+        bootstrap_mean: 3.614956241083943e-05
+        n_crops_with_contested: 68
+        favourable: false
+        calibration: {brier: 0.04408624892812373, ece_10bin: 0.004957821081653763}
+      gate_b_weight_transfer:
+        recipe: the fold-1 fit applied frozen; FrozenTransferHead.fit is a counted no-op
+        contested_top1: 0.8171758479672842
+        delta: -0.016598508539812262
+        gained: 133
+        lost: 202
+        net: -69
+        churn: 335
+        crop_paired_ci95: [-0.02698911778254068, -0.0058600450301666916]
+        excludes_zero: true
+        favourable: false
+        calibration: {brier: 0.04844687332386485, ece_10bin: 0.01153260894472726}
+      cross_boundary_verified_at_source:
+        f0_acquisition_weights: split_0/edge_predictor_best.pth
+        f0_log: C:/temp/p30_f0/biohub-p30-acquisition-f0.log
+        f1_acquisition_weights: loeo_weights/edge_predictor.pth built from split_1.pth sha256 2e4ebf616b3d4fb5
+        f1_log: C:/temp/p34_f1/kernel.log
+        consequence: >-
+          the dominant prob feature is emitted by a DIFFERENT checkpoint on each fold, so GATE_B is
+          cross-embryo AND cross-edge-predictor by construction of the LOEO protocol
+      freezing_discipline: {frozen_before_fold0_touched: true,
+                            checkpoint: _evidence/assoc/tournament/frozen_fold1_model.pkl,
+                            sha256_pinned_in: _evidence/assoc/tournament/frozen_selection.json}
+      falsifier_e_fires: true
+      falsifier_g_not_excluded: true
+      stage: pre_ILP_candidate_ranking
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Both arms ran on the complete fold-0 widened surface, all 71 crops, out-of-fold, crop-grouped, through
+      the SAME committed harness that produced FACT-0413 and FACT-0386, so the three are directly comparable
+      rather than merely adjacent. The freeze is mechanical rather than declared: the fold-1 winner was
+      pickled and sha256-pinned before fold 0 was read, and the transfer head's `fit` CANNOT modify the
+      model: it increments a counter and returns self without touching `model_`
+      (scripts/win_bet/assoc_tournament.py:480-482), while the constructor re-hashes the pickle and
+      REFUSES if the bytes moved since the freeze was recorded (:471-476). GATE_A removes the checkpoint
+      difference entirely by refitting, which is what makes the pair interpretable at all.
+      CORRECTED 2026-08-30 by the PKT-0036 audit: an earlier draft of this reason claimed a silent refit
+      "would be visible in the payload". That was FALSE and is not how the freeze is enforced -
+      `n_fit_calls_` is incremented and read by NOTHING, serialised into no payload and asserted in no
+      test, so the counter is decorative. The guarantee is structural rather than observational, which is
+      stronger, but the claim as first written was unsupported and would have sent a reader to a payload
+      key that does not exist.
+    instrument: >-
+      scripts/win_bet/assoc_tournament.py gate arms over scripts/win_bet/assoc_train_harness.py; payload
+      _evidence/assoc/tournament/gate_fold0.json; contracts tests/test_assoc_tournament.py
+    note: >-
+      THE EXPERIMENT CANNOT SEPARATE THE TWO AVAILABLE READINGS, AND SAYING SO IS THE FINDING.
+      (i) THE TOURNAMENT FITTED THE DISCOVERY FOLD - falsifier (g), named in PKT-0038 before any training,
+      which predicted the fold-0 figure would be SMALLER than fold 1's because that is what selection on one
+      surface usually costs.
+      (ii) THE FOLDS ARE INCOMPARABLE SUBSTRATES - the transfer crosses more boundaries than the packet
+      named, verified at source above rather than inferred.
+      NEITHER READING EXPLAINS GATE_A. Reading (i) predicts a smaller positive delta on a refit, not exactly
+      zero; reading (ii) is removed by construction when the recipe is refitted on fold 0's own data, so it
+      cannot produce zero either. A refit that reshuffles 72 targets and nets 0 is the quantity to explain,
+      and it is not explained.
+      RESOLVED 2026-08-30 BY FACT-0419 AND FACT-0420, and the resolution is a THIRD mechanism that this
+      entry's two readings did not contain. Reading (i) is retired: a head fitted on fold 0 and selected on
+      nothing beats the deployed argmax on FOLD 1 with a favourable interval, which selection on the
+      discovery fold cannot produce. Reading (ii) is not the answer either. GATE_A is the OUT-OF-FOLD
+      COLLAPSE of a wholly optimistic in-sample signal: the refit changes the argmax on only 81 of 4,157
+      contested targets, all in the lowest primary-margin quartile, and zero per cent of an apparent
+      +0.024 survives honest holding-out, against 81.6% surviving on fold 1. The gating question this note
+      posed is therefore ANSWERED, and the answer is about the fold-0 SURFACE rather than about the model:
+      fold 0 cannot measure a parent scorer at all.
+      WHAT IS NOT ESTABLISHED. Falsifiers (c), (d) and (f) are UNMEASURED and no CPU work can measure them -
+      parent_conversions is PRE-ILP and FACT-0364 governs. Every verdict in the payload carries
+      promotable false and the seam-calibration slot is NOT earned: it requires passing the honest fold-0
+      gate, and fold 0 fails at the ranking stage before the chain is ever reached. Nothing here is read as
+      division recovery (FACT-0371).
+    date: '2026-08-30'
+    tags: [association, parent-ranking, fold-0, gate, negative-transfer, exact-cancellation, lever-0041,
+           falsifier-e-fires, headline]
+
+  - id: FACT-0415
+    statement: >-
+      TWO INDEPENDENTLY-SEEDED HEADS OF OUR OWN MAKE ALMOST THE SAME ERRORS, SO THE CONSENSUS ROUTE IS
+      DIVERSITY-LIMITED RATHER THAN RULE-LIMITED. An alternate-seed secondary - different seed, 0.7 row
+      bootstrap - lands at contested top-1 0.762189 against the primary's 0.762227 and the two agree on
+      97.95% of the 26,601 contested fold-1 targets: both correct 20,003, both wrong 6,053, primary-only 273,
+      secondary-only 272. The oracle of the two reaches 0.772452, so a PERFECT consensus rule could buy at
+      most +0.010 over the primary, and top-1 where they agree is 0.767693 against 0.762227 pooled - making
+      agreement a usable abstention trigger but a weak one
+    value: 0.9795120484192323
+    unit: contested_target_agreement_rate_between_two_independently_seeded_heads_f1
+    scope:
+      fold: 1
+      contested: 26601
+      primary: {tag: A4.bidir.tree, contested_top1: 0.7622269839479718}
+      secondary: {tag: A5.secondary.seed, contested_top1: 0.7621893913762641,
+                  difference: different seed and 0.7 row bootstrap}
+      breakdown: {both_correct: 20003, both_wrong: 6053, primary_only: 273, secondary_only: 272}
+      oracle_of_the_two: 0.7724521634525018
+      headroom_over_primary_if_perfect_rule: 0.010225179504530012
+      top1_where_they_agree: 0.7676926619588579
+      promotable: false
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Computed over the complete contested fold-1 population through the same committed harness, with both
+      heads fitted out of fold on the same crop-grouped splits, so the agreement rate is not inflated by one
+      head having seen targets the other had not.
+    instrument: >-
+      scripts/win_bet/assoc_tournament.py consensus arm; payload
+      _evidence/assoc/tournament/consensus_fold1.json
+    note: >-
+      WHY THIS WAS WORTH MEASURING AT ALL. FACT-0378 makes the public configuration's secondary
+      un-validatable offline - it saw all 199 movies - so a consensus claim needs fold-specific secondary
+      heads of our own before it can be assessed. It now can be, and the answer is discouraging for the cheap
+      version of the route.
+      THE ORACLE IS A CEILING AND NOT A RESULT - it is chosen with the label, and it is reported here only to
+      bound what any rule could reach. About +0.010 is the whole prize for a PERFECT rule over two heads that
+      agree 98% of the time; a real rule gets a fraction of it.
+      THE DESIGN CONSEQUENCE, and it is why the successor lane does not open with an ensemble: ALTERNATE
+      SEEDS ARE NOT DIVERSITY. Genuine diversity has to come from different association VIEWS - a different
+      representation, a different stage, a different physical prior - not from re-seeding one head on one
+      contract. Note also that this is measured on the surface FACT-0414 shows did not transfer, so the
+      agreement structure itself is a discovery-fold quantity.
+    date: '2026-08-30'
+    tags: [association, consensus, diversity, fold-1, diagnostic, lever-0041, seeds-are-not-diversity]
+
+  - id: FACT-0416
+    statement: >-
+      Contract-2 worst-case cache storage is 1,580 BYTES PER DETECTED NODE, re-derived from the tap's own
+      declared dtypes in the built notebook rather than inherited - role row 302 B at feat_dim 32 and pos_dim
+      32 bounded at 2 rows per node, band row 64 B at 10 rows, union row 24 B at 9 rows, node-side 120 B - and
+      independently reproduced by the auditor's own constant. Full fold, uncompressed: fold 0 at 2,332,346
+      nodes needs 3.43 GiB single trunk and 6.86 GiB dual; fold 1 at 2,523,479 nodes needs 3.71 and 7.43 GiB.
+      THIS SUPERSEDES PKT-0037's EARLIER 0.61/0.66 GB DUAL-TRUNK ESTIMATE, which assumed 128 B/node and was
+      12.3x LOW
+    value: 1580
+    unit: worst_case_contract_2_cache_bytes_per_detected_node
+    scope:
+      derivation: {role_row_bytes: 302, role_rows_per_node_max: 2, band_row_bytes: 64, band_rows: 10,
+                   union_row_bytes: 24, union_rows: 9, node_side_bytes: 120}
+      assumptions: {run: uncapped, role_pos_stored: true, band_b_topk: 8, compression: none}
+      fold_0: {crops: 71, nodes: 2332346, single_trunk_gib: 3.43, dual_trunk_gib: 6.86}
+      fold_1: {crops: 128, nodes: 2523479, single_trunk_gib: 3.71, dual_trunk_gib: 7.43}
+      supersedes: {earlier_estimate_bytes_per_node: 128, earlier_dual_gb: [0.61, 0.66], factor_low: 12.3}
+      node_table_caveat: >-
+        The node counts come from the acquisition logs, which tie EXACTLY to P36's recorded per-crop counts
+        on both smoke crops (26,169 and 33,432, FACT-0403). The pre-ILP run_stats.csv tables give 25,639 and
+        22,830 for the same crops and sum to 1,978,105 - a DIFFERENT quantity that must not be substituted
+        into a capacity projection.
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Computed from the dtypes the built notebook itself declares, not from a design document, and reproduced
+      independently by a second instrument that arrived at the same constant. The fold-0 node table was tied
+      to P36's own recorded per-crop counts before being used, which is what distinguishes it from the
+      pre-ILP table that would have understated the requirement by about 15%.
+    instrument: >-
+      scripts/win_bet/gpu_preflight.py and scripts/win_bet/audit_feature_cache.py schema_bytes_per_node;
+      evidence _evidence/foundations/p37_launch_plan.json
+    experiment: EXP-0044
+    note: >-
+      THE PRACTICAL CONSEQUENCE IS THAT DUAL-TRUNK FULL-FOLD CACHING IS A ~7 GiB ARTIFACT PER FOLD, not a
+      sub-gigabyte one, and every plan built on the superseded figure needs re-checking against Kaggle
+      dataset limits and session wall-clock before a cache run is scheduled. The error was 12.3x and it was
+      in the direction that makes a launch look affordable.
+    date: '2026-08-30'
+    tags: [contract-2, storage, capacity, supersedes-estimate, measured, launch-planning]
+
+  - id: FACT-0417
+    statement: >-
+      FIVE MORE DEFECTS, ALL IN THE LAUNCH-PREFLIGHT INSTRUMENT ITSELF AND ALL CAUGHT ON CPU, taking the
+      running ledger of this lineage from eight to THIRTEEN: a hardcoded contract-1 band-field list; a floor
+      detector matching a literal expression form rather than the behaviour; stale mutation-test names; the
+      signed RECEIPT's expected_gpu_outputs hardcoded to the contract-1 parity worker; and input_hashes keyed
+      on the string "None". Each produced a FALSE FAIL or a FALSE PASS against a CORRECT contract-2 notebook.
+      The receipt defect is the most dangerous of the five because the POST-RUN AUDIT READS THAT FILE and
+      nobody re-derives it - a correct tap run would have been failed, and a tap that recorded nothing would
+      have passed unnoticed
+    value: 13
+    unit: cumulative_distinct_defects_in_the_gate_1_cache_and_launch_lineage
+    scope:
+      new_instances: 5
+      prior_total: 8
+      prior_total_fact: FACT-0408
+      numbering_caution: >-
+        PKT-0037 numbered these locally as its own instances 6 through 10. That is a PACKET-LOCAL count and
+        must not be read against FACT-0402/FACT-0405/FACT-0408, whose ledger reached 8. The cumulative figure
+        recorded here is 13.
+      defects:
+        - {id: PF05, defect: hardcoded contract-1 band fields, effect: false FAIL on a correct notebook}
+        - {id: PF06, defect: floor detector matched a literal expression form, effect: false FAIL}
+        - {id: PF06, defect: stale mutation-test names, effect: mutations not actually exercised}
+        - {id: receipt, defect: expected_gpu_outputs hardcoded to the contract-1 parity worker,
+           effect: "false FAIL on a correct run AND false PASS on a run that recorded nothing",
+           read_by: the post-run audit, re_derived_by: nobody}
+        - {id: input_hashes, defect: keyed on the string "None", effect: hashes silently unbound}
+      also_caught: spec title would have slugified away from the declared slug, diverging the push
+      selftest: 35/35
+      suite: {command: "pytest tests/test_gpu_preflight.py tests/test_audit_feature_cache.py tests/test_assoc_feature_tap.py",
+              passed: 146}
+      caught_before_any_gpu_spend: true
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Each defect is pinned by a MUTATION that fails without the fix rather than by an assertion that it is
+      gone, and all five were found against the real contract-2 artifact rather than a fixture. The receipt
+      defect was demonstrated in BOTH directions - a correct run failing and an empty run passing - which is
+      what establishes it as a false-pass hazard and not only a false-fail nuisance.
+    instrument: scripts/win_bet/gpu_preflight.py selftest; tests/test_gpu_preflight.py
+    experiment: EXP-0044
+    note: >-
+      THE SIGNATURE IS UNCHANGED ACROSS ALL THIRTEEN AND IT HAS NOW MOVED UP A LEVEL. Defects 1-8 were in the
+      thing being tested or in its fixtures; these five are in THE INSTRUMENT THAT DECIDES WHETHER TO SPEND A
+      GPU SESSION. The rule still holds and still explains every instance - a fixture may differ from
+      production in COST, never in KIND - but the corollary is new and worth stating: an instrument that
+      gates a launch is itself production, and it needs the same mutation discipline as the code it guards.
+      Two in-kernel additions were made on the same reasoning, each proved by mutation: a crop-count floor,
+      because the kernel's own all_passed cannot see a crop that never ran, and a coordinate-rescale
+      integrity check whose fixture asserts the deployed downsample BEFORE mutating it (FACT-0405's lesson
+      applied prospectively rather than retrospectively).
+    date: '2026-08-30'
+    tags: [defect-ledger, preflight, instrument-is-production, false-pass, mutation-tested, verified]
+
+  - id: FACT-0418
+    statement: >-
+      NO DECLARED DUAL-TRUNK PAIR HAS A FOLD-LEGITIMATE ARM ON EITHER FOLD. Every dual_trunk_pair in
+      scripts/win_bet/assoc_specs/ is ['official','stabledet'] and both roles are marked fold_legitimate
+      false on BOTH folds, while the only legitimate trunks - pack_split0 on fold 0 and our own OOF split_1
+      on fold 1 - appear in no declared pair. Worse, audit_feature_cache.PKT0029_REQUIRED_TRUNK_ROLES is
+      ('official','stabledet'), so the audit would REFUSE the honest pair and ACCEPT the pair with no
+      legitimate arm. Separately, the 'official' role's provenance is RETRACTED to UNVERIFIED:
+      C:/temp/hoct/trunks/official_f0/edge_predictor_best.pth is BYTE-IDENTICAL (sha256 d3e89eb361eeadef) to
+      our own OOF split_0, not the HOCT publisher default it was recorded as
+    value: 0
+    unit: declared_dual_trunk_pairs_with_a_fold_legitimate_arm_on_either_fold
+    scope:
+      declared_pair: [official, stabledet]
+      fold_legitimate_on_either_fold: false
+      legitimate_trunks:
+        fold_0: [pack_split0, oof_split0]
+        fold_1: [oof_split1]
+      honest_shape:
+        fold_1: {claim_arm: oof_split1, control_arm: stabledet,
+                 why_not_official: "official is byte-identical to our split_0, which is LEAKY on fold 1 (the EXP-0019 defect)"}
+        fold_0: {claim_arm: pack_split0, control_arm: stabledet}
+      oof_split1_located: {sha256_16: 2e4ebf616b3d4fb5, bytes: 8357783,
+                           path: artifacts/kaggle/weights_dataset/edge_predictor_best_split_1.pth,
+                           kaggle_dataset: aryaarun07/biohub-oof-weights,
+                           resolved_by: "scripts/kaggle_edits/loeo_retarget.py:105-124 BIOHUB_LOEO_WEIGHTS_GLOB"}
+      audit_constant_encoding_the_wrong_assumption:
+        symbol: audit_feature_cache.PKT0029_REQUIRED_TRUNK_ROLES
+        value: [official, stabledet]
+        consequence: refuses the honest pair, accepts a pair with no legitimate arm
+      official_role_provenance: RETRACTED_TO_UNVERIFIED
+      official_f0_sha256_16: d3e89eb361eeadef
+      spec_path_defects:
+        harness_f0.json: "names official_f0.pth; the artifact is a DIRECTORY official_f0/edge_predictor_best.pth"
+        harness_f1.json: "names official_f1.pth, which exists in no form - every trunk under C:/temp/hoct/trunks/ is an _f0 trunk"
+        fold_legitimate_field: absent from both
+      not_a_blocker_for: EXP-0044, which is single-trunk on pack_split0 by design and claims no pair
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Established by HASHING THE BYTES rather than reading the documented role, which is precisely how the
+      retraction arose - the earlier record asserted the publisher's documented provenance for a file that is
+      byte-identical to one of our own checkpoints. The located fold-1 trunk was verified in two places, on
+      disk and as an attached Kaggle dataset, and its resolver was read at named lines.
+    instrument: >-
+      scripts/win_bet/gpu_preflight.py trunk inventory; evidence
+      _evidence/foundations/p37_trunk_inventory.json
+    experiment: EXP-0044
+    note: >-
+      A NEAR MISS THAT WOULD HAVE INVERTED THIS ENTRY, RECORDED BECAUSE THE TRAP IS THE PROJECT'S OLDEST. A
+      `find` over C:/temp returns NOTHING for split_1, and on that evidence the fold-1 trunk would have been
+      reported MISSING and the fold-1 dual-trunk lane declared impossible. The file lives in the repository's
+      own `artifacts/` tree, which is gitignored and skipped silently by default - the exact class AGENTS.md
+      names and the same shape as FACT-0396's unfinished glob. An empty search is not evidence.
+      WHY THIS IS NOT AUTOMATICALLY FATAL, so the fix is not over-scoped: the dual-trunk pair exists to remove
+      FACT-0392's confound, since trunk identity is a CLI argument recorded nowhere in the checkpoint. That
+      makes the second arm a CONTROL, not a claim. A control must be a DIFFERENT trunk over the SAME node set;
+      it need not be fold-legitimate. What it must never be is READ AS A RESULT. The claim arm must be
+      fold-legitimate and currently, in every declared pair, none is.
+    date: '2026-08-30'
+    tags: [dual-trunk, fold-legitimacy, provenance-retraction, gitignored-artifacts, verified, launch-blocker]
+
+  - id: FACT-0419
+    statement: >-
+      THE FOLD-1 ASSOCIATION GAIN IS NOT A SELECTION ARTIFACT, AND PKT-0038's FALSIFIER (g) DOES NOT FIRE.
+      The 2x2 train/test matrix is complete and the previously missing cell WINS: a head fitted on fold 0 -
+      never selected on anything, never having seen a fold-1 crop, embryo or edge-predictor checkpoint -
+      beats the deployed argmax on fold-1 contested targets by +0.006616, gained 473 / lost 297, with a
+      crop-paired ci95 of [+0.00443, +0.00876] that EXCLUDES ZERO FAVOURABLY. Selection on the discovery fold
+      cannot explain a gain produced by a model that was never selected
+    value: 0.006616292620578168
+    unit: contested_parent_top1_delta_of_a_fold0_fitted_head_evaluated_on_fold_1
+    scope:
+      matrix:
+        train_f1_test_f1: {top1: 0.7622269839479718, delta: 0.05383256268561332, gained: 2316, lost: 884,
+                           ci95: [0.046868111114120224, 0.06150036473312976], verdict: favourable}
+        train_f1_test_f0: {top1: 0.8171758479672842, delta: -0.016598508539812262, gained: 133, lost: 202,
+                           ci95: [-0.02698911778254068, -0.0058600450301666916], verdict: negative}
+        train_f0_test_f0: {top1: 0.8337743565070964, delta: 0.0, gained: 36, lost: 36,
+                           ci95: [-0.003546117787020966, 0.0034652658586730657], verdict: null_result}
+        train_f0_test_f1: {top1: 0.7150107138829367, delta: 0.006616292620578168, gained: 473, lost: 297,
+                           ci95: [0.00443, 0.00876], verdict: favourable}
+      protocol: crop-grouped out-of-fold throughout
+      three_cells_asserted_against_registry_before_the_fourth_was_written: true
+      falsifier_g_fires: false
+      classification_of_the_lane: unresolved
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The three known cells were ASSERTED against FACT-0413 and FACT-0414 and all three checks passed BEFORE
+      the fourth cell was computed, so the new number was produced by a pipeline already demonstrated to
+      reproduce the registry rather than by one tuned until it did. The new cell is crop-grouped
+      out-of-fold like the other three, and its head saw no fold-1 data of any kind.
+    instrument: >-
+      scripts/win_bet/assoc_fold_pathology.py; evidence _evidence/assoc/pathology/matrix_2x2.json and
+      gate_fold0_REPRODUCTION.json; contracts tests/test_assoc_fold_pathology.py
+    note: >-
+      THIS RETIRES ONE OF THE TWO READINGS FACT-0414 COULD NOT SEPARATE. Reading (i), that the tournament
+      fitted the discovery fold, predicted the fold-0 result would be a SMALLER positive delta and cannot
+      explain a fold-0-fitted head winning on fold 1. What remains is not reading (ii) either - see
+      FACT-0420, which establishes the actual mechanism for Gate A and which the preregistration did not name.
+      THE CLASSIFICATION IS `unresolved` AND IT IS BOUNDED RATHER THAN EVASIVE: all four preregistered
+      explanations are individually EXCLUDED BY THEIR OWN PREREGISTERED OBSERVABLES, and the mechanism that is
+      established is a fifth one. `representation_inversion` is explicitly NOT the verdict, so the cached-head
+      form of LEVER-0041 MUST NOT be closed on this evidence.
+      READ THE SHAPE OF THE MATRIX AND NOT ONLY ITS CELLS. Both models gain on fold 1; neither gains on fold
+      0. That is a statement about the two SURFACES, not about the two models.
+    date: '2026-08-30'
+    tags: [association, fold-transfer, 2x2-matrix, falsifier-g-does-not-fire, lever-0041, headline]
+
+  - id: FACT-0420
+    statement: >-
+      GATE A's EXACT ZERO IS THE OUT-OF-FOLD COLLAPSE OF A WHOLLY OPTIMISTIC IN-SAMPLE SIGNAL, AND IT IS
+      LOCALISED NOTHING RATHER THAN CANCELLATION OR UNIFORM NOTHING. Measured at the ARGMAX rather than at
+      correctness - churn is blind to wrong-for-wrong swaps - the fold-0 refit picks a different parent on
+      only 81 of 4,157 contested targets, ALL 81 in the LOWEST primary-margin quartile, with agreement
+      EXACTLY 1.0000 on the other 3,118; of the 81, 36 gained, 36 lost and 9 were wrong-for-wrong. The
+      apparent-versus-out-of-fold ceiling explains the null directly: fold 0 goes from an apparent +0.024056
+      to an out-of-fold +0.000000, so ZERO PER CENT of the in-sample signal survives, while fold 1 goes from
+      +0.065975 to +0.053833 and 81.6% survives. Fold 0 carries about ten contested errors per crop
+    value: 0.0
+    unit: share_of_the_apparent_fold0_contested_gain_surviving_out_of_fold
+    scope:
+      fold_0:
+        contested: 4157
+        argmax_changed: 81
+        argmax_changed_all_in_lowest_margin_quartile: true
+        agreement_exactly_1_0000_on: 3118
+        of_the_81: {gained: 36, lost: 36, wrong_for_wrong: 9}
+        apparent_delta: 0.024056
+        oof_delta: 0.0
+        share_surviving: 0.0
+        contested_errors_per_crop: ~10
+      fold_1:
+        contested: 26601
+        argmax_changed: 3333
+        quartiles_touched: all four
+        apparent_delta: 0.065975
+        oof_delta: 0.05383256268561332
+        share_surviving: 0.816
+      mixture_decomposition: {kitagawa_share_explained_by_mixture: 0.112, within_stratum: 0.888}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Measured at the ARGMAX rather than at correctness, which is the distinction that makes the finding
+      possible at all: gained/lost/churn cannot see a swap from one wrong parent to another, and 9 of the 81
+      changed targets are exactly that. The strata are the preregistered ones and the quartile concentration
+      is a property of the data rather than a chosen cut.
+    instrument: >-
+      scripts/win_bet/assoc_fold_pathology.py; evidence _evidence/assoc/pathology/strata_gate_a.json,
+      argmax_agreement.json and apparent_ceiling.json
+    note: >-
+      THIS IS THE FIFTH MECHANISM, AND THE PREREGISTRATION DID NOT NAME IT - which is why the classification
+      is `unresolved` rather than one of the four. It is not calibration shift, not candidate-mixture shift
+      (Kitagawa puts only 11.2% on mixture), not representation inversion and not an implementation defect.
+      It is a POWER failure specific to the fold-0 surface: at roughly ten contested errors per crop, an
+      in-sample gain of +0.024 leaves nothing at all once the model is honestly held out.
+      THE CONSEQUENCE FOR THE CAMPAIGN IS BLUNT AND IT IS NOT ABOUT THE MODEL. Fold 0 - the promotion gate -
+      CANNOT MEASURE A PARENT SCORER. A null there is not evidence that a scorer does not work; it is
+      evidence that the surface cannot resolve one. Any future gate design that requires a favourable fold-0
+      contested-ranking interval is asking for something this substrate has been measured unable to supply,
+      and FACT-0261's rule that fold 0 is the promotion gate now collides with that measurement.
+    date: '2026-08-30'
+    tags: [association, gate-a, statistical-power, out-of-fold-collapse, localised-nothing, lever-0041, headline]
+
+  - id: FACT-0421
+    statement: >-
+      THE RAW DEPLOYED PROBABILITY IS THE NON-TRANSFERRING COMPONENT, AND REMOVING IT MAKES THE SCORER
+      TRANSFER IN BOTH DIRECTIONS. Deleting the raw probability column swings the frozen transfer arm by
+      +0.0197: the full recipe transfers fold 1 to fold 0 at -0.016599, while the PROBABILITY-FREE CONTEXTUAL
+      recipe transfers at +0.003127 fold 1 to fold 0 and +0.001842 fold 0 to fold 1, favourable. Louder
+      still, pure GEOMETRY beats the deployed argmax on fold 1 by +0.045788 out of fold while LOSING 0.031032
+      on fold 0 - so the deployed `prob` carries different SKILL on the two folds, which is a property of the
+      feature and not of any head fitted on it
+    value: 0.0197
+    unit: swing_in_the_frozen_fold1_to_fold0_transfer_from_deleting_the_raw_probability_column
+    scope:
+      arms:
+        full_recipe: {f1_to_f0: -0.016598508539812262}
+        probability_free_context: {f1_to_f0: 0.003127, f0_to_f1: 0.001842, both_favourable: true}
+        geometry_only: {f1_oof: 0.045788, f0_oof: -0.031032}
+        raw_probability_only: {see: FACT-0413 noise_floor_measured_here}
+      swing: 0.0197
+      protocol: crop-grouped out-of-fold, both folds, same data contract
+      reconciliations_first_run_and_exact:
+        FACT-0386_binning_floor: {gained: 22, lost: 16, net: 6, churn: 38}
+        FACT-0386_geometry_alone: -0.0310
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The ablations run on the same crop-grouped out-of-fold protocol and the same data contract as the arms
+      they are compared against, so the swing is attributable to the deleted column rather than to a protocol
+      difference. Two independent reconciliations with FACT-0386 landed EXACTLY on the first run - the binning
+      floor's gained/lost/net/churn and the geometry-alone figure - which is what licenses reading the new
+      ablations as commensurable with that earlier work.
+    instrument: >-
+      scripts/win_bet/assoc_fold_pathology.py ablation arms; evidence
+      _evidence/assoc/pathology/ablations.json and standardised_margin.json
+    note: >-
+      THIS IS THE MOST ACTIONABLE RESULT OF THE CYCLE AND IT NAMES THE FIX RATHER THAN ONLY THE FAULT. The
+      dominant feature is the one that does not transfer, which is consistent at source with FACT-0414's
+      recorded checkpoint crossing - the `prob` column is emitted by a different edge-predictor checkpoint on
+      each fold by construction of the LOEO protocol. A successor scorer built on TARGET-RELATIVE and
+      PROBABILITY-FREE CONTEXTUAL features transfers in both directions where the raw-scale recipe does not.
+      DO NOT OVER-READ THE MAGNITUDES. The transferring quantities are small - about +0.003 and +0.002 -
+      against a non-transferring +0.054, and FACT-0420 explains why the fold-0 numbers are small in a way
+      that is about the surface rather than the model. What is established is the DIRECTION and the
+      MECHANISM, not that a probability-free head is worth deploying.
+    date: '2026-08-30'
+    tags: [association, ablation, transfer, raw-probability, target-relative, lever-0041, actionable, headline]
+
+  - id: FACT-0422
+    statement: >-
+      THE UNIFIED LOST-EDGE LEDGER PUTS THE PARENT-RESCORING PRIZE FAR BELOW THE NEVER-OFFERED PRIZE ON BOTH
+      FOLDS. Attributing every recoverable miss to the stage responsible, in six mutually exclusive
+      first-match-wins categories, through the official matcher, with exhaustiveness ASSERTED rather than
+      reported: fold 0 of 19,826 GT edges gives endpoint-absent 161, endpoint-removed 198, NEVER-OFFERED
+      1,110, WRONG-PARENT 240, overwritten-downstream 73 (provisional), division-topology 0, recovered
+      18,044; fold 1 of 109,057 gives 11,001 / 5,717 / NEVER-OFFERED 14,007 / WRONG-PARENT 1,735 /
+      overwritten 537 (provisional) / 0 / recovered 76,060. Never-offered exceeds wrong-parent by 4.6x on
+      fold 0 and 8.1x on fold 1
+    value: 240
+    unit: fold0_gt_edges_lost_to_wrong_parent_selection_the_entire_parent_rescoring_prize
+    scope:
+      fold_0:
+        gt_edges: 19826
+        cat1_endpoint_absent: 161
+        cat2_endpoint_removed: 198
+        cat3_never_offered: 1110
+        cat4_wrong_parent: 240
+        cat5_overwritten_downstream: 73
+        cat6_division_topology: 0
+        recovered: 18044
+        cat4_share_of_lost: 0.148
+      fold_1:
+        gt_edges: 109057
+        cat1_endpoint_absent: 11001
+        cat2_endpoint_removed: 5717
+        cat3_never_offered: 14007
+        cat4_wrong_parent: 1735
+        cat5_overwritten_downstream: 537
+        cat6_division_topology: 0
+        recovered: 76060
+        cat4_share_of_lost: 0.079
+      ratio_never_offered_to_wrong_parent: {fold_0: 4.6, fold_1: 8.1}
+      cat5_status: PROVISIONAL - pending the PKT-0040 survival measurement
+      exhaustiveness: asserted by the instrument, per movie and per fold, on all 71 and all 128 crops
+      reconciles_with: [FACT-0370, FACT-0376, FACT-0371, FACT-0080]
+      matcher: official
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The six categories are ordered and first-match-wins, so no lost edge is counted twice, and the
+      instrument ASSERTS closure - the six counts plus recovered edges must sum to the GT total - rather than
+      reporting it. The assertion was exercised by the auditor against dropped mass, double-counted mass and
+      category 6 absorbing category 4. Reconciliation with FACT-0370, FACT-0376, FACT-0371 and FACT-0080 held
+      on the FIRST run, which is the strongest available evidence that the partition is the same one the
+      earlier facts measured.
+    instrument: >-
+      scripts/win_bet/assoc_lost_edge_ledger.py; evidence
+      _evidence/assoc/pathology/lost_edge_ledger_f0.json and lost_edge_ledger_f1.json
+    note: >-
+      THE HOST'S STRUCTURAL HYPOTHESIS IS REFUTED, WITH THE SIGN REVERSED, AND THAT IS WORTH STATING PLAINLY.
+      The proposal was that fold 1's gain might live in wrong-parent selection while fold 0's errors live in
+      endpoint removal or downstream overwrite, which would make the transfer failure structural. It does not:
+      fold 0's wrong-parent share of lost edges is 14.8%, NEARLY DOUBLE fold 1's 7.9%. Fold 0 is
+      proportionally MORE parent-limited, not less. The transfer failure is explained by FACT-0420's power
+      collapse instead.
+      THE STRATEGIC CONSEQUENCE IS LARGER THAN THE TRANSFER QUESTION THAT PROMPTED THE LEDGER. The COMPLETE
+      deployed-chain prize for perfect parent re-scoring is 240 edges on fold 0 and 1,735 on fold 1. Against
+      that, 1,110 and 14,007 true edges are NEVER OFFERED to any scorer at all. A parent scorer cannot reach
+      them by construction (FACT-0369: at most one parent per target by arithmetic). This does not reopen
+      LEVER-0037, which was killed for widening the surface under the UNCHANGED scorer at a measured cost -
+      but FACT-0376's own scope exempts a candidate rule PAIRED WITH a better scorer, and this ledger sizes
+      why that pairing is the only version of the lane with the mass to matter.
+      CATEGORY 5 IS PROVISIONAL and must not be quoted as settled until the PKT-0040 survival measurement
+      lands; it is recorded as provisional rather than folded into category 4, which is the failure the
+      auditor was specifically tasked to prevent.
+    date: '2026-08-30'
+    tags: [lost-edge-ledger, association, never-offered, candidate-surface, host-hypothesis-refuted,
+           strategic, headline]
+
+  - id: FACT-0423
+    statement: >-
+      FOCUS-3D IS ADMISSIBLE UNDER THE COMPETITION'S OWN RULE TEXT, AND THREE LICENCES BIND AN INTEGRATION
+      RATHER THAN THE TWO ADVERTISED. Rule 2.6.b states that external data and models are acceptable unless
+      specifically prohibited by the Host, subject to being reasonably accessible to all and of minimal cost;
+      no Host prohibition exists, and the Reasonableness Standard is about EXCESSIVE COST excluding
+      participants, its worked example being a licence costing more than the prize - which a free
+      auto-approved gate is not. Rule 2.5.a.3 is stronger still and is incoherent unless pretrained models are
+      permitted. The licences are BSD-3-Clause code, a SEPARATE MIT Copyright (c) 2022 Meta, Inc. inside
+      src/focus3d/segmentation/FOCUS3D/ from the Mask2Former lineage which the top-level badge hides, and
+      Apache-2.0 weights asserted in ONE README SENTENCE with no LICENSE file and no card metadata
+    value: 3
+    unit: distinct_licences_binding_a_focus3d_integration
+    scope:
+      admissibility: ADMISSIBLE
+      deciding_clauses: ['2.6.b', '2.5.a.3']
+      reasonableness_standard: about excessive cost excluding participants, not about gating
+      host_prohibition: none
+      licences:
+        code: {spdx: BSD-3-Clause, holder: Qinghua Zhang, artifact: top-level LICENSE}
+        vendored: {spdx: MIT, holder: "Meta, Inc.", year: 2022, lineage: Mask2Former,
+                   path: src/focus3d/segmentation/FOCUS3D/LICENSE,
+                   note: hidden by the top-level badge, found only by reading the tree}
+        weights: {spdx_asserted: Apache-2.0, artifact: one README sentence,
+                  license_file: absent, card_metadata: null, tags: ['region:us']}
+      rules_source_authenticated: >-
+        The rules page is a JS SPA; the 36 KB markdown was obtained via text extraction and AUTHENTICATED
+        before quoting - its competition-specific values (7 prizes / $60,000, MIT winner licence, CC0 data,
+        5 submissions per day) match the GetCompetition RPC payload exactly, so it is this competition's
+        rules and not boilerplate
+      gate_state: {gated: auto, already_accepted_on_host_account: true}
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The admissibility verdict rests on QUOTED rule text whose provenance was authenticated against an
+      independent RPC payload before it was relied on, rather than on a summary of the rules. The third
+      licence was found by reading the source tree rather than the advertised badge, which is the only way it
+      could have been found. What remains weak is stated rather than smoothed over: the weights grant is one
+      README sentence with no LICENSE artifact - a real grant from the rights holder, but a thin one.
+    instrument: >-
+      scripts/win_bet/focus3d_probe.py; evidence under _evidence/focus3d/ including the archived rules
+      markdown and the model-card snapshot
+    note: >-
+      THE HOST'S AUTHORISATION AND THIS FINDING ANSWER DIFFERENT QUESTIONS AND BOTH WERE NEEDED. The host
+      settled our right to use the asset; this settles whether the competition's own rules permit a submission
+      built on it. LEVER-0043's falsifier (a) is now discharged on both axes rather than only the authority
+      one. The attribution obligations of all THREE licences must be carried into any released artifact - the
+      Meta MIT notice in particular, because nothing in the repository's advertised licensing surfaces it.
+    date: '2026-08-30'
+    tags: [focus3d, admissibility, licensing, lever-0043, rules-authenticated, verified]
+
+  - id: FACT-0424
+    statement: >-
+      NO OVERLAP WAS FOUND BETWEEN FOCUS-3D's PUBLISHED DATA INVENTORY AND THIS COMPETITION's SOURCES, SO
+      LEVER-0043 IS NOT RESTRICTED TO SUBMISSION-ONLY JUDGEMENT. The only published inventory is the
+      project's dataset portal - 14 families, 82 volumes, 400,000+ instances, sourced to the Schier lab,
+      Keller lab, Hufnagel group, Cell Tracking Challenge, Allen Institute and their own collection. CZI
+      Biohub, Zebrahub and the Royer lab appear NOWHERE, and no listed volume carries our z-ratio of 4.0
+      (theirs are 5, 5.86 and 8). The FACT-0378 trap therefore does not fire and offline evaluation of these
+      embeddings stays interpretable
+    value: 0
+    unit: overlapping_data_sources_found_between_focus3d_and_this_competition
+    scope:
+      inventory: {families: 14, volumes: 82, instances: '400000+',
+                  sources: [Schier lab, Keller lab, Hufnagel group, Cell Tracking Challenge,
+                            Allen Institute, own collection]}
+      absent: [CZI Biohub, Zebrahub, Royer lab]
+      z_ratio: {ours: 4.0, theirs: [5, 5.86, 8]}
+      restricted_to_submission_only_judgement: false
+    provenance: EXTERNAL
+    validity: SUSPECT
+    validity_reason: >-
+      THIS IS NEGATIVE EVIDENCE FROM A SOURCE THAT IS NOT A TRAINING MANIFEST, and it is labelled accordingly
+      rather than promoted. The portal is a "gold-standard datasets" listing, not a stated train/test split,
+      and there is no paper. Absence from a curated showcase is not proof of absence from a training set. The
+      verdict is "no overlap found", which is weaker than "no overlap exists", and it must be quoted in that
+      form.
+    instrument: scripts/win_bet/focus3d_probe.py; evidence _evidence/focus3d/ inventory snapshot
+    note: >-
+      WHY THIS MATTERED ENOUGH TO CHECK BEFORE ANY NUMBER WAS PRODUCED. Had it overlapped, the weights would
+      still have been legitimate to USE while their offline evaluation became un-interpretable by any LOEO
+      control we can build - exactly FACT-0378, where a secondary trained on all 199 movies is legitimate
+      against a hidden test set and un-measurable by us. That would have converted this lever into a
+      submission-only lane and changed its cost entirely. The check is cheap and was run first for that
+      reason.
+      IF A TRAINING MANIFEST OR A PAPER APPEARS, THIS FACT MUST BE RE-DERIVED AGAINST IT rather than carried
+      forward on the portal listing.
+    date: '2026-08-30'
+    tags: [focus3d, contamination, negative-evidence, external, suspect, lever-0043]
+
+  - id: FACT-0425
+    statement: >-
+      THE NAMED PACKAGING BLOCKER FOR FOCUS-3D IS DEAD, AND IT WAS KILLED BY RUNNING THE GRAPH RATHER THAN BY
+      READING IT. The upstream repository does ship a compiled CUDA op, so the risk was genuine, but the
+      publisher already solved it for inference: adapter_modules.py:134 defines MSDeformAttn3D_PyTorch on
+      F.grid_sample at :285, instantiated at :447 and :513, and the packaged runtime ships no ops/ directory
+      at all, grepping zero for every compiled-op marker. The complete 411.6M-parameter graph BUILDS AND
+      FORWARDS END TO END ON CPU in this repository's own venv, returning pred_masks of shape
+      [300, 32, 96, 96]. No bespoke T4 / CC 7.5 wheel is required and the requirement reduces to Kaggle's
+      stock torch
+    value: 411638146
+    unit: focus3d_parameters_in_the_instantiated_architecture_NOT_from_released_tensors
+    scope:
+      compiled_op_risk: RESOLVED
+      pytorch_fallback: {class: MSDeformAttn3D_PyTorch, defined_at: 'adapter_modules.py:134',
+                         mechanism: 'F.grid_sample at :285', instantiated_at: [':447', ':513']}
+      packaged_runtime_ships_ops_dir: false
+      forward_pass: {device: cpu, completed: true, output: pred_masks, shape: [300, 32, 96, 96]}
+      wheel_required: false
+      cpu_throughput_s_per_patch: 20.2
+      gpu_throughput: UNMEASURED
+      weights_fp32_gib: 1.647
+      checkpoint_blob_gb: 4.469
+      blob_to_model_ratio: 2.71
+      blob_interpretation: the signature of a training checkpoint carrying optimizer state; ship the extracted state_dict
+      geometry_fit: {our_z_ratio: 4.0, our_cell_radius_xy_px: 12.0, model_reference_radius: 15}
+      parameter_count_provenance_ceiling: UNVERIFIED
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The blocker was retired by BUILDING AND FORWARDING the real graph on CPU, not by reading the source and
+      inferring that the fallback would work - which matters because a source read cannot show that every
+      instantiation path actually avoids the compiled op. The parameter count is separately and explicitly
+      NOT verified: it was taken from an architecture instantiated with RANDOM weights and is numerically
+      indistinguishable from a count off the released tensors, so its provenance ceiling is UNVERIFIED and
+      the probe hard-codes that ceiling into its own output.
+    instrument: >-
+      scripts/win_bet/focus3d_probe.py, whose payloads carry an `evidence_source` field and whose `arch` mode
+      hard-codes provenance_ceiling UNVERIFIED; only its `ckpt` mode, which requires a real file and records
+      its sha256, can support VERIFIED
+    note: >-
+      TWO HAZARDS BIND ANY STEP-4 DESIGN AND BOTH ARE THE PROJECT'S OWN RECURRING SHAPES.
+      (1) THE PUBLISHER'S LOADER IS A SILENT NO-OP: load_state_dict(strict=False) with its missing- and
+      unexpected-key prints COMMENTED OUT. A key mismatch runs on random weights and would look exactly like
+      LEVER-0043's falsifier (d) - a foreign model that will not join. Our wrapper must assert both counts and
+      FAIL CLOSED. This is AGENTS.md's "a silent no-op is worse than a crash" against a loader that was built
+      to be silent.
+      (2) THE GEOMETRY FIT WAS NEARLY MEASURED ON THE WRONG SURFACE. Cell radius was taken on the DENSE
+      deployed surface at 12.0 XY px; the GT version returned 22-37 um because the GT is sparse (FACT-0354's
+      validity note) and was discarded. The FACT-0040 calibration guard was passed at 1.8168 um before
+      anything derived from the geometry was trusted, per the AGENTS.md rule that a derived quantity is
+      calibrated against an independently known value first.
+      GPU THROUGHPUT IS UNMEASURED AND WAS NOT INVENTED. CPU is 20.2 s/patch; the proposed two-crop scope is
+      about 1,200 patches, which spans 4 to 40 minutes on a T4 for any plausible per-patch time - too wide to
+      plan against, so the job must open with a short timing probe that aborts and banks its own result if it
+      overruns.
+    date: '2026-08-30'
+    tags: [focus3d, packaging, compiled-op-resolved, silent-no-op-loader, unverified-param-count,
+           lever-0043, verified]
+
+  - id: FACT-0426
+    statement: >-
+      IN THE DEPLOYED PROGRAM EXACTLY ONE OPERATION CAN CHANGE A TARGET'S ALREADY-ASSIGNED PARENT:
+      motion_relink_edges, defined at built-notebook code line 1823, deciding at 1890 via
+      linear_sum_assignment, installed at 3073. Its body is BYTE-IDENTICAL (sha256_12 269758b0115d) across
+      biohub-p3-harmonic, both P28 champion controls and P35. Every later edge-mutating stage is ADD-ONLY to
+      targets with no incoming edge - close_single_frame_gaps, recover_strict_gap2, add_safe_divisions_postlink
+      - or removes whole NODES rather than re-parenting them (prune_isolated, filter_short_track_components);
+      the single-parent repair at 3077 is a MEASURED no-op with dropped_multi_parent_edges zero
+    value: 1
+    unit: deployed_operations_able_to_change_an_already_assigned_parent
+    scope:
+      operation: motion_relink_edges
+      defined_at: 'notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb code line 1823'
+      decides_at: 'code line 1890, linear_sum_assignment(cost)'
+      cost_built_at: 'code line 1889'
+      installed_at: 'code line 3073, edges = motion_edges'
+      body_sha256_12: 269758b0115d
+      identical_across: [biohub-p3-harmonic, p28 champion control f0, p28 champion control f1, p35]
+      add_only_stages:
+        close_single_frame_gaps: {mutation: 2210, targets: starts_by_t, edge_prob: null}
+        recover_strict_gap2: {mutation: 2374}
+        add_safe_divisions_postlink: {mutation: 2735, note: "candidate_ids excludes incoming"}
+      node_removing_stages: {prune_isolated: 3157, filter_short_track_components: 3165}
+      measured_no_op: {single_parent_repair: 3077, dropped_multi_parent_edges: 0}
+      off_in_every_deployed_env: [single_child_repair, division_geometry_filter]
+      line_numbering: >-
+        Line numbers address the concatenation of all code cells exactly as
+        scripts/win_bet/p28_full_chain_replay.py _code_source produces it
+      predictor: {path: 'C:/temp/p7/tracking_repo/scripts/predict_unet_transformer.py', lines: 1047,
+                  sha256_16: 25b3ebfd8849dcf5,
+                  pinned_by: 'tests/test_assoc_feature_tap.py:80',
+                  not: 'the 677-line vendored program, FACT-0408'}
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Read at the cited deployed lines and then corroborated two ways rather than asserted: each stage's
+      function BODY was hashed across four independently built notebooks and found identical, and the
+      deployed chain's own counters in the replay evidence confirm the single-parent repair does nothing.
+      The audit was performed against the 1047-line deployed support-pack predictor pinned by the
+      repository's own test, never the vendored 677-line program that FACT-0408 records as a different
+      program entirely.
+    instrument: >-
+      scripts/win_bet/assoc_preilp_survival.py and scripts/win_bet/p28_full_chain_replay.py; evidence
+      _evidence/assoc/survival/stage_map.json and _evidence/assoc/survival/crops/
+    note: >-
+      THIS IS THE STAGE MAP THE CAMPAIGN HAS BEEN MISSING. Every association number this project holds is
+      measured at PRE-ILP candidate ranking, and until now nothing established where - or whether - such a
+      ranking is consumed. It is consumed in exactly one place, and that place re-solves the assignment from
+      scratch rather than accepting what came before.
+    date: '2026-08-30'
+    tags: [pipeline-structure, motion-relink, final-edge, stage-map, verified, headline]
+
+  - id: FACT-0427
+    statement: >-
+      THE LEARNED ASSOCIATION SCORE REACHES THE FINAL PARENT SELECTION ONLY AS A BONUS BOUNDED BY 1.0,
+      SUBTRACTED FROM A COST MEASURED IN MICROMETRES. At built-notebook line 1889 the deployed cost is
+      `cost[i, j] = motion + 0.05 * raw - MOTION_RELINK_LEARNED_BONUS * prob`, with the bonus deployed at 1.0
+      in every live env block and defaulting to 0.75. Its only input is learned_edge_probs, assembled at
+      3058-3069 from edge_prob on edges that SURVIVED THE ILP, so any pair the solver dropped scores exactly
+      0.0. edge_prob is the ONLY learned quantity that crosses the predictor subprocess boundary at all
+    value: 1.0
+    unit: deployed_motion_relink_learned_bonus_the_entire_weight_of_the_learned_channel
+    scope:
+      cost_expression: 'cost[i, j] = motion + 0.05 * raw - MOTION_RELINK_LEARNED_BONUS * prob'
+      cost_line: 1889
+      cost_units: micrometres
+      bonus_deployed: {p28_f1: 'env line 22', p35: 'env line 7', p3_harmonic: 'env line 22', value: 1.0}
+      bonus_default: {value: 0.75, at: 'notebook line 136'}
+      learned_input: {symbol: learned_edge_probs, assembled_at: '3058-3069',
+                      source: edge_prob on ILP-SURVIVING edges only,
+                      dropped_pairs_score: 0.0, helper: 'learned_prob 1833-1842'}
+      only_learned_quantity_crossing_the_subprocess_boundary: edge_prob
+      boundary_source: 'predict_unet_transformer.py build_graph 114-146'
+      hazard: 'learned_prob 1833-1842 silently sigmoids out-of-range scores'
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Read at the cited deployed lines in the built notebook and the deployed predictor, with the bonus value
+      confirmed in three separate live env blocks rather than inferred from the default. The claim that
+      edge_prob is the only learned quantity crossing the boundary is a source read of the whole build_graph
+      surface, not an absence argument from grep.
+    instrument: >-
+      source read at the cited lines; recorded in _evidence/assoc/survival/stage_map.json
+    note: >-
+      THE ARITHMETIC IS THE FINDING. A bonus capped at 1.0 is subtracted from a cost denominated in
+      MICROMETRES, so the learned channel can only overturn a geometric preference when the competing parents
+      are within roughly a micrometre of each other. FACT-0428 measures what that costs in practice, and
+      FACT-0429 measures how rarely the band is even reached. This is also why a better pre-ILP scorer is not
+      automatically a better graph: the solver's own output is re-decided by an operation that reads the
+      learned signal at a weight chosen for a different purpose.
+      A SECOND CONSEQUENCE THAT BOUNDS ANY FUTURE DESIGN: pairs the ILP dropped score 0.0, so the relink
+      cannot rescue an edge the solver never kept, no matter how confident a scorer is about it.
+    date: '2026-08-30'
+    tags: [association, motion-relink, learned-channel, bonus, verified, headline]
+
+  - id: FACT-0428
+    statement: >-
+      A CHANGE MADE ONLY AT PRE-ILP CANDIDATE RANKING IS MOSTLY DISCARDED BEFORE THE EMITTED GRAPH EXISTS,
+      AND THE TWO FOLDS DIFFER BY ROUGHLY TWO-FOLD. Forcing the sidecar runner-up as the parent and replaying
+      the COMPLETE deployed chain: on fold 0, 3,056 of 3,613 forced choices whose target survived to emission
+      are absent from the emitted graph - an overwrite rate of 0.8458 and a survival of 0.1542; on fold 1,
+      1,477 of 2,119, overwrite 0.6970 and survival 0.3030. The counterfactual on the SAME targets
+      unperturbed is decisive about what this means: the pre-ILP parent IS the emitted parent for 4,092 of
+      4,198 fold-0 survivors (0.9747) and 2,401 of 2,529 fold-1 (0.9494). THE PIPELINE AGREES WITH ITS
+      PRE-ILP RANKING; IT DOES NOT FOLLOW IT
+    value: 0.1542
+    unit: survival_rate_of_a_pre_ilp_only_parent_change_into_the_emitted_graph_fold0
+    scope:
+      fold_0: {movie: 44b6, crops: 12, forced: 4800, evaluable: 3613, overwritten: 3056,
+               category_5_rate: 0.8458, survival: 0.1542}
+      fold_1: {movie: 6bba, crops: 8, forced: 3200, evaluable: 2119, overwritten: 1477,
+               category_5_rate: 0.6970, survival: 0.3030}
+      counterfactual_unperturbed:
+        fold_0: {agree: 4092, of: 4198, rate: 0.9747}
+        fold_1: {agree: 2401, of: 2529, rate: 0.9494}
+      control_arm: asserted exact against the kernel's own run_stats on all fifteen compared columns
+      sample: {fold_0: '12 of 71 crops', fold_1: '8 of 128 crops', selection: committed-list order, not random}
+      lower_bound_reason: >-
+        the promoted alternative is the sidecar RUNNER-UP, which FACT-0370 implies sits further away than the
+        parents a well-aimed scorer would promote, so these rates UNDERSTATE what a good re-ranker would achieve
+      do_not_conflate_with: >-
+        FACT-0422's ledger category 5 (73 fold-0 and 537 fold-1 GT edges correctly selected then overwritten).
+        That counts GT edges lost to overwrite in the UNPERTURBED pipeline; this measures the survival of a
+        FORCED change. Different objects, different denominators, and neither substitutes for the other
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The control arm was asserted EXACT against the kernel's own run_stats across all fifteen compared
+      columns before any perturbed arm was read, with a mismatch configured as a hard refusal - so the replay
+      is demonstrated to reproduce the deployed chain rather than assumed to. The sample and its
+      non-randomness are stated rather than smoothed over, and the direction of the resulting bias is named:
+      these are a LOWER bound on what a well-aimed re-ranker would see.
+    instrument: >-
+      scripts/win_bet/assoc_preilp_survival.py over scripts/win_bet/p28_full_chain_replay.py, aggregated by
+      scripts/win_bet/assoc_preilp_survival_panel.py; payloads
+      _evidence/assoc/survival/survival_panel.json and _evidence/assoc/survival/crops/
+    note: >-
+      "AGREES WITH BUT DOES NOT FOLLOW" IS THE WHOLE RESULT AND IT RESOLVES AN APPARENT CONTRADICTION.
+      Unperturbed agreement of 95-97% looks like a pipeline that honours its ranking; a survival of 15-30%
+      under perturbation shows it does not. Both are true because the relink usually re-derives the same
+      answer from GEOMETRY - so when the ranking agrees with geometry it appears to be followed, and when it
+      disagrees it is overruled. A scorer's gains live precisely in the disagreements, which is exactly the
+      population that does not survive.
+      THE CONSEQUENCE FOR PLANNING IS BLUNT. Combined with FACT-0422's ceiling of 240 wrong-parent GT edges on
+      fold 0, a pre-ILP-only parent scorer's realisable prize on fold 0 is of order 240 x 0.1542, i.e. a few
+      dozen edges. That is not a lane worth a GPU feature cache on its own.
+      FOLD 1 IS ABOUT TWICE AS PERMEABLE TO A RANKING CHANGE AS FOLD 0 (0.3030 against 0.1542). Offered as a
+      CANDIDATE structural mechanism for the FACT-0413 / FACT-0414 transfer failure, not as a demonstration
+      of it - it is consistent with FACT-0420's power collapse rather than a replacement for it.
+    date: '2026-08-30'
+    tags: [association, motion-relink, pre-ilp, survival, category-5, fold-transfer, measured, headline]
+
+  - id: FACT-0429
+    statement: >-
+      SURVIVAL OF A FORCED PRE-ILP PARENT CHANGE FALLS MONOTONICALLY WITH THE PROMOTED PARENT'S GEOMETRIC
+      HANDICAP, AND THE BREAK IS EXACTLY WHERE THE BONUS ARITHMETIC PREDICTS. Within 1.0 um of the deployed
+      parent, survival is 104/185 = 0.5622 on fold 0 and 129/189 = 0.6825 on fold 1; outside it, 453/3,428 =
+      0.1321 and 513/1,930 = 0.2658 - ratios of 4.3x and 2.6x across precisely the boundary that a bonus of
+      1.0 against a micrometre-denominated cost implies. Only 5.1% of tested alternatives on fold 0 and 8.9%
+      on fold 1 fall inside that band at all
+    value: 0.051
+    unit: share_of_tested_alternative_parents_inside_the_band_where_the_learned_bonus_can_act_fold0
+    scope:
+      band_um: 1.0
+      inside_band: {fold_0: {survived: 104, of: 185, rate: 0.5622},
+                    fold_1: {survived: 129, of: 189, rate: 0.6825}}
+      outside_band: {fold_0: {survived: 453, of: 3428, rate: 0.1321},
+                     fold_1: {survived: 513, of: 1930, rate: 0.2658}}
+      ratio_inside_over_outside: {fold_0: 4.3, fold_1: 2.6}
+      share_inside_band: {fold_0: 0.051, fold_1: 0.089}
+      predicted_by: 'FACT-0427 - a bonus capped at 1.0 against a cost in micrometres'
+      full_curve: survival_by_geometric_handicap_um in the panel payload
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The boundary was PREDICTED from the deployed cost expression before it was measured, and the measured
+      break lands there on both folds independently. That is a prediction meeting data rather than a cut
+      chosen after inspecting the curve, which is what distinguishes this from a post-hoc threshold.
+    instrument: >-
+      scripts/win_bet/assoc_preilp_survival.py and assoc_preilp_survival_panel.py; payload
+      _evidence/assoc/survival/survival_panel.json
+    note: >-
+      THIS IS THE MECHANISM BEHIND FACT-0428 AND IT NAMES A FREE EXPERIMENT. The learned channel can only act
+      inside a roughly one-micrometre band, and only about one alternative in twenty on fold 0 is inside it.
+      Raising MOTION_RELINK_LEARNED_BONUS widens the band, and the replay reads that constant FROM ITS OWN
+      ENVIRONMENT - so the entire sweep is CPU-only and costs no GPU session. That is the cheapest available
+      test of whether the final-edge consumption point, rather than the scorer, is what has been binding.
+      A CAUTION THAT COMES WITH IT: the bonus is GLOBAL, so raising it trades geometric coherence everywhere
+      for learned influence everywhere - the FACT-0376 shape, where a change that helps the targeted
+      population is charged against the rest. The sweep must be scored through the complete chain and the
+      official scorer, never on the relink's own objective.
+    date: '2026-08-30'
+    tags: [motion-relink, geometric-gate, learned-bonus, association, free-experiment, measured]
+
+  - id: FACT-0430
+    statement: >-
+      THE CATEGORY-2 DRAIN THAT MUST BE REMOVED FROM FACT-0370's REACHABLE SHARE BEFORE CATEGORY 4 IS
+      COMPUTED: of every pre-ILP parent choice in the unperturbed control, 38,839 of 385,249 fold-0 targets
+      (0.1008) and 22,729 of 165,735 fold-1 targets (0.1371) LOSE THEIR NODE before emission - to the ILP's
+      node subset, to prune_isolated, or to the short-track filter. FACT-0370's "endpoint detected" pool is
+      the PRE-ILP node set, upstream of all three of those operations, so that mass is inside its reachable
+      share and outside the emitted graph
+    value: 0.1008
+    unit: share_of_pre_ilp_parent_choices_whose_target_node_is_gone_before_emission_fold0
+    scope:
+      fold_0: {drained: 38839, of: 385249, rate: 0.1008}
+      fold_1: {drained: 22729, of: 165735, rate: 0.1371}
+      drained_to: [the ILP node subset, prune_isolated, filter_short_track_components]
+      emitted_parent_agreement_over_surviving_targets: {fold_0: 0.8854, fold_1: 0.8414}
+      upstream_fact: FACT-0370
+      why_it_matters: >-
+        FACT-0370's pool is the PRE-ILP node set. Category 2 of the lost-edge ledger removes exactly this
+        mass. If it is not removed, category 4 absorbs it and the parent-scoring prize is overstated
+      sample_caveat: same as FACT-0428 - 12 of 71 and 8 of 128 crops, committed-list order
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Measured on the UNPERTURBED control arm of the same replay whose control was asserted exact against the
+      kernel's own run_stats, so the drain is a property of the deployed chain rather than of the
+      perturbation. The stage boundaries it attributes to were read at deployed file:line in FACT-0426 before
+      the counting, so the three draining operations are named rather than inferred from a residual.
+    instrument: >-
+      scripts/win_bet/assoc_preilp_survival.py; payload _evidence/assoc/survival/survival_panel.json;
+      boundaries in _evidence/assoc/survival/stage_map.json ledger_category_boundaries
+    note: >-
+      THIS IS A RECONCILIATION REQUIREMENT ON FACT-0422 RATHER THAN A CONTRADICTION OF IT, and it is recorded
+      so the ledger is not quoted past its warrant. FACT-0422's categories were computed against GT edges and
+      close exactly; this fact measures a different denominator - all pre-ILP parent choices - and identifies
+      mass that sits inside FACT-0370's reachable share while never reaching the emitted graph. The two must
+      be joined before any statement of the form "the parent-scoring prize is X" is made from the reachable
+      share, because the failure mode is precisely category 4 absorbing category 2, which is the absorption
+      the auditor was tasked to prevent.
+    date: '2026-08-30'
+    tags: [ledger, category-2, node-selection, association, reconciliation, measured]

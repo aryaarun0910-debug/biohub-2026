@@ -5972,3 +5972,219 @@ and stopped proving anything once that notebook was repaired. Selftest is now **
 unverified for the real model; full-fold cache size is estimated; and `audit_feature_cache.py` still expects
 the per-frame layout and will refuse the new cache until its schema moves. No GPU job, kernel push or
 submission was made.
+
+### 2026-08-30 - PKT-0037: the contract-2 GPU smoke is built, preflighted and HELD (CPU only)
+
+A **new experiment**, not a re-version of P36 - `FACT-0410` and `FACT-0411` retire contract 1 outright, and
+no legacy read-only mode is admitted. New spec, out_dir, slug and kernel id; the EXP id is requested from
+the coordinator. Build sha256 `48d68bfb...`
+(`notebooks/kaggle_p37_assoc_feature_tap_c2_smoke/`).
+
+**Scope is narrow on purpose.** `FACT-0407` already proved the P36 cache faithful on CPU against the real
+pack weights, so faithfulness is settled. What is left is the CPU/GPU float boundary on the real 50-epoch
+trunk, and the contract-2 surfaces P36 never recorded.
+
+**Confirmed in the BUILT artifact at `cell:line`,** not in the spec or the patch source: separate pre-blend
+and post-blend columns with zero unqualified probability names; pair-and-role keying with no frame-keyed
+column; contract 2 with exactly 79 required keys and an in-kernel exact-set-equality guard; one positive
+heartbeat per crop; eleven fail-closed sites; and the deployed coordinate rescale applied, recorded and now
+**checked** in-kernel at the deployed `(1,4,4)`.
+
+**Two in-kernel additions, both proved by mutation.** A crop-count floor, because `all_passed` is an ALL over
+the crops that exist and cannot see a crop that never ran (PKT-0036 measured a one-crop pass); and a
+coordinate-rescale integrity check whose fixture asserts the downsample is `(1,4,4)` before mutating - the
+`(1,1,1)` fixture is what let defect 7 through. Both were written into the single-source worker and
+re-embedded, after the repo's own drift lock caught an edit made to the embedded copy.
+
+**Preflight: 9 of 10 applicable checks PASS, nothing skipped;** the single FAIL is `PF01` because a patch
+file is uncommitted and this packet may not stage. Receipt at
+`_evidence/foundations/preflight_receipt_p37.json`, signature verified, naming ten input hashes, the exact
+crops `44b6_0113de3b` and `44b6_0b24845f`, and the tokens whose absence - and whose presence - is the alarm.
+
+**Five instrument defects found and fixed, all one class** (read the code where the fix is resolve the code):
+PF05's hardcoded contract-1 band fields, PF06's literal-form floor detector, PF06's stale mutation-test
+names, the receipt's hardcoded contract-1 expected outputs, and `input_hashes` keyed on the string `"None"`.
+Every one produced a false verdict on a *correct* notebook; the receipt one is the worst, because the
+post-run audit reads it and nobody re-derives it. A spec title that would have slugified away from its
+declared slug was also caught before the build. Selftest 35/35; 146 tests pass across the three suites.
+
+**Storage re-derived, not inherited:** 1580 B/node worst case from the tap's own dtypes, reproduced
+independently by the auditor. Fold 0 (71 crops) projects 3.43 GiB single trunk and 6.86 GiB dual; fold 1
+(128 crops) 3.71 and 7.43 GiB. This packet's earlier 0.61/0.66 GB dual-trunk estimate was 128 B/node and is
+**12.3x low**. The fold-0 node table is calibrated - it ties exactly to P36's own per-crop counts on both
+smoke crops, which the pre-ILP `run_stats.csv` tables do not.
+
+**Dual-trunk manifest prepared.** Both trunks located and sha256-pinned; the mechanism and its rejections
+exist and are proved, the artifact does not. The smoke is single-trunk by design and does not close
+`FACT-0411`'s third blocker.
+
+**Not exercised on CPU, named rather than skipped:** the CPU/GPU float boundary; the real trunk's resolution
+inside the kernel; T4x2/DataParallel capture; the actual per-band counts (not predictable under same-run
+instrumentation - enforcement replaces prediction); full-fold storage and wall clock (not applicable at
+smoke scale); dual-trunk acquisition (not applicable to this artifact class).
+
+No kernel push, no GPU job, no submission, no lever claimed.
+
+## 2026-08-30 (evening) - PKT-0038 / LEVER-0041 (agent 1, fold-transfer pathology): the exact zero is explained, and the ledger says the prize is not where the lane is looking
+
+**Reproduction is bit-exact.** Re-running the committed `apply` arm from the committed frozen checkpoint
+reproduced `_evidence/assoc/tournament/gate_fold0.json` with three non-scientific differences: wall clock,
+the record path, and the harness digest, which moved only because another packet renamed
+`node_feat_by_crop` to `role_index_by_crop` (verified at source to be a pure rename on the non-contextual
+path, `assoc_train_harness.py:1336-1341,1444,1479`). E4's first observable is refuted.
+**The committed `assoc_tournament.py` at HEAD passes the OLD kwarg and cannot run against the committed
+harness** - the working tree carries the one-line fix and it needs staging.
+
+**The 2x2 is complete and the missing cell reframes the lane.** train f1 -> f1 `+0.053833`;
+train f1 -> f0 `-0.016599`; train f0 -> f0 `+0.000000`; **train f0 -> f1 `+0.006616`, gained 473 / lost
+297, ci95 `[+0.004430,+0.008762]`, FAVOURABLE.** A model fitted on all of fold 0 - never selected on
+anything, never having seen a fold-1 crop, embryo or checkpoint - beats the deployed argmax on fold 1.
+The fold-1 gain is therefore NOT a five-arm selection artifact; it is a property of the fold-1 surface.
+
+**The exact zero is LOCALISED nothing, not cancellation and not uniform nothing.** Binned by primary
+margin, the fold-0 refit has exactly zero churn in three of four quartiles - identical to the deployed
+argmax on 3,118 of 4,157 contested targets - and all 72 moved targets sit in the lowest quartile, where
+it gains 36 and loses 36. Measured at the ARGMAX rather than only at the outcome (churn is blind to a
+wrong-for-wrong swap): the fold-0 refit picks a different parent on **81 of 4,157** contested targets, all
+81 in that same quartile, with agreement **exactly 1.0000** on the other 3,118; fold 1 changes 3,333 of
+26,601 across all four quartiles. 72 distinct moved targets across 39 crops. The apparent-fit ceiling settles what that
+means: fold 0 apparent `+0.024056` -> out of fold `+0.000000` (**0% survives**); fold 1 apparent
+`+0.065975` -> `+0.053833` (**81.6% survives**). Fold 0's contested errors are separable in sample and
+none of it generalises across crops, at roughly ten contested errors per crop.
+
+**Which information class transfers.** Deleting the raw probability column swings the weight-transfer arm
+by `+0.0197`: the full recipe transfers f1->f0 at `-0.016599`, the probability-free contextual class at
+`+0.003127` (and f0->f1 at `+0.001842`, favourable). Louder still, **pure geometry with no probability at
+any remove beats the deployed argmax on fold 1 by `+0.045788` out of fold with a favourable interval,
+while losing `0.031032` on fold 0** - the deployed edge probability is worth more than displacement on one
+fold and less on the other. Two exact reconciliations with `FACT-0386` fell out on a from-scratch
+instrument (binning floor 22/16/+6/churn 38; geometry-alone `-0.0310`).
+
+**Mixture is excluded quantitatively.** Kitagawa on common absolute margin bins: composition `+0.006002`
+(11.2%), within-stratum `+0.047830` (88.8%). Covariate marginals overlap almost exactly across folds; the
+label conditional does not.
+
+**The unified lost-edge ledger (host addition), both folds, per movie, official matcher, deployed
+candidate set, exhaustiveness asserted per crop and pooled.** Fold 0 (71 movies, 19,826 GT edges): cat1
+161, cat2 198, cat3 1,110, cat4 240, cat5 73 (provisional), cat6 0, recovered 18,044. Fold 1 (128 movies,
+109,057 GT edges): cat1 11,001, cat2 5,717, cat3 14,007, cat4 1,735, cat5 537 (provisional), cat6 0,
+recovered 76,060. **Reconciles first-run and exactly with `FACT-0370` (81,053 / 17,003 / 11,001),
+`FACT-0376` (18,466 reached, 19,665 detectable), `FACT-0371` (26 fold-0 divisions) and `FACT-0080` (125
+fold-1 divisions).** The host's E2b stage-mixture sub-hypothesis is refuted with the sign reversed:
+fold 0's category-4 share of recoverable misses (14.8%) is nearly double fold 1's (7.9%).
+**The dominant recoverable loss on BOTH folds is category 3, the true edge was never offered** (68.5% and
+63.7% of recoverable misses). Parent re-scoring on the deployed chain is bounded by 240 edges on fold 0
+and 1,735 on fold 1.
+
+**Verdict: `unresolved`, bounded.** implementation_defect, mixture_shift and representation_inversion are
+each excluded by their own preregistered observables; calibration_shift is confirmed for the weight-transfer
+arm only and cannot explain a refit that never crosses a fold. The mechanism that IS established for GATE_A -
+100% optimism collapsing out of fold - is a fifth one the preregistration did not name.
+**Representation inversion is explicitly NOT the verdict, so the cached-head form of `LEVER-0041` must not
+be closed on this evidence.**
+
+CPU only. No GPU job, no kernel push, no submission, no lever claimed, no fact written, nothing selected on
+fold 0. Instruments: `scripts/win_bet/assoc_fold_pathology.py`, `scripts/win_bet/assoc_lost_edge_ledger.py`,
+`tests/test_assoc_fold_pathology.py` (13 contracts). Payloads: `_evidence/assoc/pathology/`.
+
+**Auditor findings answered (same cycle).** The trunk inventory was resolved by sha256 and two things
+changed. The file registered under the role `official` is **byte-identical to our own OOF `split_0`**, so
+that role's documented provenance is retracted as unverified. And fold 1 **does** have a fold-legitimate
+trunk — our OOF `split_1` — which a `find` over `C:/temp` missed because it lives in the gitignored
+`artifacts/` tree, the exact skip `AGENTS.md` warns about and one that would have inverted the verdict. The
+real problem is broader than routed: every declared `dual_trunk_pair` is `['official','stabledet']` and both
+are marked fold-illegitimate on **both** folds, so no declared pair has a legitimate arm — and
+`PKT0029_REQUIRED_TRUNK_ROLES` would refuse a pair that did. Two harness specs also name trunk paths that do
+not exist; they were reported with corrected values rather than edited, because PKT-0038 is live on one of
+them.
+
+### 2026-08-30 — PKT-0041 / LEVER-0043 — FOCUS-3D admissibility, contamination and packaging (CPU)
+
+Steps 1-3 of the FOCUS-3D packet, all CPU, no compute spent on the lever's science. **All three gates pass
+and the lane's named cost-killer is dead.** (a) The competition rules were retrieved at source through a
+text-extraction proxy (the page is a JS SPA and every RPC name tried returns no rule text) and
+authenticated against the `GetCompetition` payload before being quoted; §2.6.b is permissive by default
+and §2.5.a.3 explicitly contemplates a winning solution built on incompatibly-licensed pretrained models,
+so nothing forbids this asset — the residual question is only whether an auto-approved, free Hugging Face
+gate satisfies §2.6.a's "equally accessible ... at no cost", and public re-hosting makes it moot. Three
+licences bind an integration, not two: BSD-3-Clause code, an inner **Meta MIT** notice inherited from the
+Mask2Former lineage that the top-level badge hides, and Apache-2.0 weights asserted only as one sentence in
+a gated README with no LICENSE file. (b) The publisher's dataset portal names Schier lab, Keller lab, the
+Hufnagel group, the Cell Tracking Challenge, the Allen Institute and its own collection — **no CZI Biohub,
+no Zebrahub, no Royer lab**, and no listed volume carries our z-ratio of 4.0. Offline evaluation stays
+interpretable and the `FACT-0378` trap does not fire; but no training manifest is published, so this is
+negative evidence and stays `EXTERNAL`. (c) **The Detectron2 / compiled-deformable-attention blocker does
+not fire.** The upstream repo does ship `ms_deform_attn_cuda.cu`, but the packaged inference runtime
+replaces it with a pure-PyTorch `F.grid_sample` implementation, and the complete 411.6M-parameter graph was
+**built and forwarded end to end on CPU** in this repo's venv. No bespoke T4/CC-7.5 wheel is needed; the
+requirement reduces to Kaggle's stock torch.
+
+Two findings that bind step 4. Our data sits close to the model's native scale — `z_ratio` exactly 4.0 and a
+cell radius of 12.0 XY px against its reference of 15, measured on the **dense** deployed surface after the
+GT version returned 22-37 µm because the GT is sparse (`FACT-0354`'s validity note); the FACT-0040
+calibration guard passed at 1.8168 µm before that was trusted. And the publisher's loader is a **silent
+no-op**: `load_state_dict(strict=False)` with its missing/unexpected prints commented out, so a key
+mismatch runs on random weights and would counterfeit falsifier (d).
+
+**Auditor veto V3 accepted in full.** The parameter count was labelled `MEASURED` when it came from an
+architecture instantiation with random weights — numerically indistinguishable from a count off the real
+tensors, the `FACT-0043` shape. Relabelled `UNVERIFIED`, and `scripts/win_bet/focus3d_probe.py` now makes
+the distinction mechanical: every payload carries `evidence_source`, `arch` hard-codes
+`provenance_ceiling: UNVERIFIED` in its own output, and only `ckpt` — which requires a real file and
+records its sha256 — can support `VERIFIED`. The checkpoint download was attempted three ways and refused
+by the permission system, so the tensor-level facts remain unmeasured.
+
+CPU only. No GPU job, no kernel push, no submission, no fact written, no threshold or node-surface touched.
+Instrument: `scripts/win_bet/focus3d_probe.py` (`arch` / `ckpt` / `radius`, heartbeat
+`FOCUS3D_PROBE_COMPLETE`). Verdict: **proceed to step 4**, but behind the contract-2 smoke — this job has no
+measured GPU throughput and its two build inputs are not yet staged.
+
+---
+
+### 2026-08-30 (night) — PKT-0040 (agent 3, final-edge survival): a pre-ILP-only parent change is overwritten, and the override is worth one micrometre
+
+**The question, and why it was worth a CPU session before a GPU one.** Every association number the
+campaign holds is measured at `stage: pre_ILP_candidate_ranking` (`FACT-0413`, `FACT-0414`), and
+`FACT-0364` says motion relink replaces the solver's whole edge list. If a learned parent score is
+consumed only at candidate ranking it may never reach the metric. This packet claimed no lever, spent no
+GPU and no submission, and changed nothing in the deployed path.
+
+**The map.** Read at deployed `file:line` against the 1047-line support-pack predictor — sha256
+`25b3ebfd8849dcf5…`, the sha `tests/test_assoc_feature_tap.py` itself pins, not the 677-line vendored
+program (`FACT-0408`) — and against the built notebook's own `filter_output_graph`. Exactly ONE operation
+in the deployed post-ILP chain can change a target's already-assigned parent: `motion_relink_edges`,
+defined at notebook code line 1823, deciding at 1890, installed over the solver's edges at 3073. Its body
+is byte-identical across `biohub-p3-harmonic`, both P28 champion controls and P35. Gap close, gap2 and
+safe divisions are all ADD-ONLY and all draw targets from `starts_by_t` — nodes with no incoming edge — so
+none can overwrite; the single-parent repair is a measured no-op (`dropped_multi_parent_edges` 0); prune
+isolated and the short-track filter remove NODES. That makes ledger categories 2 and 5 disjoint by
+construction, with category 2 tested first.
+
+**The bound, which is the actionable part.** Line 1889 is
+`cost[i, j] = motion + 0.05 * raw - MOTION_RELINK_LEARNED_BONUS * prob` — a cost in micrometres against a
+bonus of at most 1.0 in every deployed env block. `edge_prob` is the only learned quantity that crosses the
+predictor subprocess boundary, and the relink sees it only for pairs the ILP kept.
+
+**The measurement.** Perturb ONLY the pre-ILP parent choice — promote the P30/P34 sidecar runner-up
+carrying the deployed edge's own probability — then replay the complete deployed chain on CPU, control arm
+asserted exact against the kernel's own `run_stats`. Fold 0 (movie 44b6, 12 crops, 4,800 forced changes):
+3,056 of 3,613 forced choices whose node survived to emission are absent from the emitted graph. Fold 1
+(movie 6bba, 8 crops, 3,200 forced): 1,477 of 2,119. The counterfactual makes it interpretable — on the
+SAME targets unperturbed, the pre-ILP parent IS the emitted parent for 4,092 of 4,198 and 2,401 of 2,529.
+The pipeline agrees with its own ranking; it does not follow it. Survival falls monotonically with the
+promoted parent's geometric handicap and breaks exactly at the bonus: within 1.0 um, 104/185 and 129/189;
+outside, 453/3428 and 513/1930.
+
+**Two consequences.** Fold 1 is about twice as permeable to a ranking change as fold 0, which is a
+mechanism for the `FACT-0413`/`FACT-0414` disagreement that is not model overfitting — stated as a
+candidate explanation, not a demonstration. And the minimal design is not a new channel: `edge_prob` is
+already read by both the ILP objective and the relink, so ONE predictor source-rewrite patch plus ONE
+env constant reaches both stages. The successor lever's first falsifier is CPU-only and needs no model at
+all — sweep `MOTION_RELINK_LEARNED_BONUS` on the existing replay and see whether the relink can be moved
+profitably by the score it already has. It must be run before any feature-cache GPU session.
+
+CPU only. No GPU job, no kernel push, no submission, no lever claimed, no fact written — five candidate
+facts are routed to the coordinator in `PKT-0040.yaml`. Instruments:
+`scripts/win_bet/assoc_preilp_survival.py` (heartbeat `ASSOC_PREILP_SURVIVAL_COMPLETE`) and
+`assoc_preilp_survival_panel.py`; evidence `_evidence/assoc/survival/`. Category 2 and 5 stage definitions
+and counts handed to AGENT 1 (PKT-0038), who owns the ledger; no second ledger was built.

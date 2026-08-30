@@ -261,6 +261,33 @@ def replay_crop(AFP, model, cache, device, tol, logit_tol, reconstruct):
         integrity.append({"why": "a cached mask slot is False; the deployed site builds "
                                  "torch.ones and never pads",
                           "false_slots": int((~cache["role_mask"]).sum())})
+    # THE DEPLOYED COORDINATE RESCALE, EXERCISED ON THE REAL DOWNSAMPLE RATHER THAN ASSUMED.
+    # The tap flushes BETWEEN the coordinate concatenate and the rescale
+    # (predict_unet_transformer.py:798-802), so `coords` holds the DOWNSAMPLED grid the model
+    # indexed while `role_coord_scaled` holds `coords[:, 1:] * downsample` - the tensor the head
+    # was actually fed, built from the same `ds_arr` at :336-337. Defect 7 (FACT-0405) survived
+    # because a fixture used downsample (1,1,1), where that multiplication is the identity. This
+    # runs on the deployed (1,4,4) against real data, so the step under test cannot be deleted by
+    # the fixture that is supposed to check it.
+    ds_vec = np.asarray(cache["downsample"]).astype(np.float32)
+    gid_all = cache["role_gid"]
+    n_coords = int(cache["coords"].shape[0])
+    if gid_all.size and (int(gid_all.min()) < 0 or int(gid_all.max()) >= n_coords):
+        integrity.append({"why": "a role node id is outside the deployed coord table",
+                          "role_gid_max": int(gid_all.max()), "coords": n_coords})
+    else:
+        expect_scaled = cache["coords"][gid_all][:, 1:].astype(np.float32) * ds_vec
+        got_scaled = cache["role_coord_scaled"].astype(np.float32)
+        if got_scaled.shape != expect_scaled.shape or not np.array_equal(got_scaled,
+                                                                        expect_scaled):
+            bad = (int(np.argmax(np.abs(got_scaled - expect_scaled).max(axis=1)))
+                   if got_scaled.shape == expect_scaled.shape and got_scaled.size else -1)
+            integrity.append({
+                "why": "role_coord_scaled is not coords[:, 1:] * downsample - the deployed "
+                       "rescale at predict_unet_transformer.py:798-802 (FACT-0405 defect 7)",
+                "downsample": [int(d) for d in ds_vec],
+                "role_slots": int(got_scaled.shape[0]), "first_bad_slot": bad,
+            })
     for name in BANDS:
         declared = str(cache[f"band_{name}_selected_on"])
         expected = "primary_probs_preblend" if name == "p" else "deployed_probs_postblend"
@@ -572,7 +599,30 @@ def verify(args) -> int:
             flush=True,
         )
 
-    report["all_passed"] = bool(report["crops"]) and all(c["passed"] for c in report["crops"])
+    # THE CROP COUNT IS AN EXTERNAL CONDITION AND MUST BE STATED BY THE CALLER. `all_passed` is
+    # an ALL over the crops that happened to exist, so a run that captured ONE crop - or a run
+    # whose second crop raised before the flush - satisfies it exactly as well as a run that
+    # captured both. PKT-0036 measured that: a one-crop run passed. The expectation therefore
+    # comes in from the spec (BIOHUB_AFT_EXPECT_CROPS) and is enforced here, in the same
+    # fail-closed report, instead of being left to a human reading the receipt afterwards.
+    expected = int(args.expect_crops or 0)
+    report["crop_count"] = {
+        "captured": len(report["crops"]), "expected": expected or None,
+        "asserted": bool(expected),
+        "why_external": "all_passed is an ALL over the crops that exist; it cannot see a crop "
+                        "that never ran",
+    }
+    count_ok = (not expected) or len(report["crops"]) == expected
+    if not count_ok:
+        report["crop_count"]["error"] = (
+            f"expected {expected} crops, captured {len(report['crops'])}"
+        )
+        print(f"AFT_CROP_COUNT_FAILED {report['crop_count']['error']}", flush=True)
+    else:
+        print(f"AFT_CROP_COUNT_OK captured={len(report['crops'])} expected="
+              f"{expected or 'unasserted'}", flush=True)
+    report["all_passed"] = bool(report["crops"]) and count_ok and all(
+        c["passed"] for c in report["crops"])
     Path(args.out).write_text(json.dumps(report, indent=2), encoding="utf-8")
     return 0 if report["all_passed"] else 2
 
@@ -584,6 +634,9 @@ def main(argv=None) -> int:
     ap.add_argument("--cache-dir", required=True, help="directory of per-crop tap .npz files")
     ap.add_argument("--out", required=True, help="where the gate report JSON is written")
     ap.add_argument("--crops", nargs="*", default=None)
+    ap.add_argument("--expect-crops", type=int, default=0,
+                    help="how many crops this run MUST have captured. 0 leaves it unasserted, "
+                         "which is what let a one-crop run pass all_passed.")
     ap.add_argument("--tol", type=float, default=1e-4,
                     help="max |replay primary probability - recorded primary probability|")
     ap.add_argument("--logit-tol", type=float, default=1e-3,
@@ -650,6 +703,10 @@ try:
         "--out", _aftg_out,
         "--tol", _aftg_os.environ.get("BIOHUB_AFT_TOL", "1e-4"),
         "--logit-tol", _aftg_os.environ.get("BIOHUB_AFT_LOGIT_TOL", "1e-3"),
+        # EXTERNAL, from the spec. The kernel cannot derive how many crops it OUGHT to have
+        # captured from the crops it did capture, so the number is carried in rather than
+        # inferred. Absent, it stays unasserted and says so in the report.
+        "--expect-crops", _aftg_os.environ.get("BIOHUB_AFT_EXPECT_CROPS", "0") or "0",
     ]
     # PYTHONPATH IS THE WHOLE IMPORT FIX AND IT IS NOT OPTIONAL. The deployed shards launch with
     # env={**os.environ, "PYTHONPATH": "src"}; copying that alone would STILL raise

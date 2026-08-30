@@ -1426,3 +1426,154 @@ levers:
       its secondary saw all 199 movies (FACT-0378) - so this experiment's offline preflight can check that
       the artifact is well-formed and CANNOT predict its score. The band is a prior, not a measurement.
     priority: 2
+
+  - id: LEVER-0043
+    claim: >-
+      A FOREIGN INSTANCE-QUERY REPRESENTATION, frozen and used as a THIRD TRUNK, carries nucleus shape and
+      morphology information that our point-centric trunk lacks, and adding it to the association scorer
+      improves contested-parent ranking ON THE HONEST FOLD - and/or its instance centroids improve
+      division-sensitive localisation without damaging node recall. The candidate is FOCUS-3D, a query-based
+      3D instance segmenter (MAE3D / ViT-Adapter backbone, 3D deformable pixel decoder, Mask2Former-style
+      decoder, hundreds of object queries per patch) with a nuclei-specific checkpoint
+    status: open
+    falsifier: >-
+      Written before any download, any packaging and any GPU. Any of these kills or closes the lever, and
+      which one fires decides whether it dies as a KILL (evidence about itself) or a CLOSE (a structural
+      reason).
+      (a) LICENCE / PRIZE RULES - the gated checkpoint's access conditions make it inadmissible under the
+          competition's external-data and pretrained-weights rules. CLOSES the lever; it is not evidence
+          about the science. This is checked FIRST, before compute is spent, because it can end the lane on
+          its own.
+      (b) TRAINING-DATA CONTAMINATION - if its published training inventory overlaps the competition movies
+          or their sources, then embeddings derived from it may be legitimate to USE while being
+          un-validatable OFFLINE, exactly the FACT-0378 trap. Fires as a scope restriction rather than a
+          kill, and if it fires the lever may only ever be judged by submission, which changes its cost
+          entirely and must be stated before anyone builds on it.
+      (c) IT WILL NOT RUN OFFLINE inside a packageable Kaggle environment within the session budget -
+          Detectron2 and the 3D deformable-attention components are the named risks. CLOSES on cost.
+      (d) ITS INSTANCES WILL NOT JOIN TO OUR NODE SURFACE. If matched-node recall against the official
+          predicted nodes is too low to attach an embedding to most nodes, no representation claim is
+          reachable at all and the lever dies on its own evidence.
+      (e) THE ASSOCIATION BAR, NOT RELAXED - the frozen embeddings do not beat the deployed contested top-1
+          with a favourable crop-paired interval on the HONEST fold. This is the bar LEVER-0039 failed
+          (FACT-0386) and LEVER-0041 has not yet cleared (FACT-0414).
+      (f) THE DIAGNOSTIC FALSIFIER, AND IT IS THE ONE THIS LEVER EXISTS FOR - the FOCUS embeddings improve
+          the DISCOVERY fold and fail to transfer to the honest fold, reproducing the FACT-0414 pattern on a
+          representation architecturally unrelated to ours. That REFUTES "our trunk causes the inversion"
+          and is a genuine finding, not a failure to report: it would relocate the cause to the fold
+          substrate, the label contract or the metric's structure, and it would do so more cheaply than any
+          further head work.
+      (g) THE LOCALISATION HALF - the centroids do not improve the FACT-0380 division-sensitive localisation
+          quantity, or improve it while damaging node recall.
+    supporting: [FACT-0354, FACT-0368, FACT-0386, FACT-0380, FACT-0413, FACT-0414, FACT-0415, FACT-0378]
+    note: >-
+      OPENED 2026-08-30 (host). WHAT THIS LEVER IS NOT, STATED FIRST BECAUSE IT IS THE OBVIOUS
+      MISREADING: it is NOT a detector replacement and it does NOT touch the node surface. FACT-0354 shows
+      the detection-threshold curve has almost no recall headroom on fold 0, and FACT-0368 puts the large
+      majority of the fold-0 gap in ASSOCIATION, so replacing the node surface would buy little while
+      creating merge / split / count risk against a metric that taxes over-prediction. If FOCUS-3D is ever
+      proposed as the NODE SOURCE that is a different lever in the LEVER-0031 decomposition, and it must
+      carry that family's split_0 detection-parity gate. Nothing here licenses smuggling a node-surface
+      replacement in under a representation claim.
+      THREE REGISTRY BOUNDARIES, SO TWO PACKETS NEVER WORK ONE LANE.
+      (1) vs LEVER-0034, which owns PUBLISHED-WEIGHT REUSE for association. That lever's asset is the
+          StableDet/HOCT stack - a tracking-specific head trained on its own candidate surface, which is
+          why its blocker is a candidate-rule mismatch. FOCUS-3D ships no association head at all; it is a
+          segmentation backbone, so the mechanism, the asset and the failure modes are different.
+      (2) vs LEVER-0041, which owns TRAINING A HEAD FROM A CONTRACT WE OWN and is held by PKT-0038. This
+          lever owns whether a FOREIGN frozen representation adds information ours lacks. They meet at
+          exactly one handover: if the embeddings clear (a)-(d), LEVER-0041's harness consumes them as an
+          ADDITIONAL trunk. This lever never trains the deployed scorer itself.
+      (3) vs LEVER-0029, which owns pretraining OUR OWN representation on the unlabelled volumes. Reusing a
+          foreign one is a different cost and a different kind of evidence.
+      WHY IT IS WORTH OPENING NOW RATHER THAN LATER, and it is not novelty. FACT-0386 killed
+      representation-free ranking and its positive content was that the REPRESENTATION is the constraint.
+      FACT-0413 then found a contextual gain on the discovery fold that FACT-0414 could not transfer, by
+      either of two readings the experiment cannot separate. A representation architecturally unrelated to
+      ours is the cheapest available probe of whether that inversion is a property of OUR TRUNK or of the
+      folds themselves - see falsifier (f). FACT-0415 adds the second motive: alternate seeds are not
+      diversity, so the consensus lane needs a genuinely different association VIEW, and an instance-query
+      representation is one.
+      THE EVIDENCE STATUS OF EVERY CLAIM ABOUT IT IS `EXTERNAL` UNTIL WE MEASURE IT. The project is
+      pre-alpha, has no published paper and no reproducible benchmark table, and its own documentation says
+      publication details are forthcoming. AGENTS.md is explicit that EXTERNAL means a third party asserted
+      it and we have NOT checked it. Its architecture, its licence terms, its parameter count, its
+      preprocessing and its training inventory are all to be read off the artifact, never off the model
+      card.
+      GATED, IN THIS ORDER, AND THE ORDER IS THE POINT: licence and prize-rules check, then contamination
+      check, then offline packaging, then ONE two-crop passive GPU diagnostic that must itself produce a
+      reusable asset under the standing GPU rule, then CPU-side association testing on BOTH folds. No
+      full-fold run, no detector replacement, no threshold sweep and no submission at any stage of this
+      lever without a new preregistration.
+    priority: 2
+    host_authorisation_2026_08_30: >-
+      THE HOST GRANTED AUTHORITY TO USE FOCUS-3D on 2026-08-30: "I give the go for FOCUS-3D - we have
+      authority to use." THE FALSIFIER ABOVE IS NOT REWRITTEN - it is left exactly as first written, because
+      rewriting a falsifier after the fact is how a lever survives evidence it should not. What changed is
+      not the test but which axis of (a) is still live, and the split is recorded here rather than edited
+      into the text.
+      (a) IS RELEASED ON THE AUTHORITY AXIS. The question "may we use this asset" is answered by the host and
+      is not reopened. Acquisition, offline experimentation and every step of the method are unblocked.
+      (a) IS RETAINED ON THE COMPETITION-RULES AXIS, DEMOTED FROM A GATE TO A SUBMISSION PRECONDITION. Host
+      authority settles our right to use the asset; it cannot change what the competition's external-data and
+      pretrained-weights rules say, and those govern whether a SUBMISSION built on this asset is valid rather
+      than whether the science may proceed. The finding is still recorded, it no longer blocks any offline
+      work, and it attaches to the submission decision if this lever ever reaches one.
+      (b) IS ENTIRELY UNAFFECTED AND REMAINS THE SHARPEST RISK. Authority to USE is not the same as offline
+      evaluation being INTERPRETABLE. If the training inventory overlaps the competition movies or their
+      sources, FACT-0378's situation applies exactly - legitimate weights whose offline measurement no LOEO
+      control we can build is able to validate. That restriction is recorded before any number is produced.
+      (c) THROUGH (g) ARE UNAFFECTED. They are about the artifact and the science, and no authorisation
+      touches them.
+
+  - id: LEVER-0044
+    claim: >-
+      THE CONSUMPTION POINT, NOT THE SCORER, IS WHAT BINDS. A learned association score consumed at the FINAL
+      parent-selecting operation - motion_relink_edges - rather than only at pre-ILP candidate ranking
+      converts ranking skill into emitted edges, where a pre-ILP-only change is discarded 85% of the time on
+      fold 0 and 70% on fold 1
+    status: open
+    falsifier: >-
+      Written before any work, and note that (a) is CPU-only, needs NO model, and must run before any
+      feature-cache GPU session is scheduled.
+      (a) THE FREE TEST. Sweeping MOTION_RELINK_LEARNED_BONUS alone on the existing replay over COMPLETE fold
+          0, with the deployed edge_prob unchanged, produces no bonus that beats the deployed control with a
+          crop-paired interval excluding zero on the favourable side. If that is the outcome the lever dies
+          for ZERO GPU, because widening the band the learned channel acts in is a strictly easier
+          intervention than replacing what fills it.
+      (b) Fewer than 1% of assignments change across the whole sweep - the knob is inert rather than harmful.
+      (c) Raw edge Jaccard is flat through the COMPLETE chain on fold 0 under the official scorer.
+      (d) Net true edges through the complete chain are at or below zero - the genuine FACT-0376 quantity.
+      (e) Node recall or division true positives decline on either fold (FACT-0371).
+      (f) The fold-0 arm reproduces FACT-0414's exact zero at the FULL-CHAIN stage, which would mean the
+          fold-0 substrate cannot resolve this intervention either and the honest gate has to move rather
+          than the model.
+    supporting: [FACT-0426, FACT-0427, FACT-0428, FACT-0429, FACT-0422, FACT-0420, FACT-0364, FACT-0376]
+    note: >-
+      OPENED 2026-08-30. THIS IS NOT A RESTATEMENT OF LEVER-0041 AND THE BOUNDARY IS MECHANICAL. LEVER-0041
+      asks whether a better SCORER can be built and consumed at pre-ILP candidate ranking; it stays OPEN and
+      is NOT closed by this lever, because FACT-0419 retired the selection-artifact reading and FACT-0420
+      classified the fold-0 null as a power collapse rather than a representation failure. This lever asks a
+      different question with a different intervention: whether the score is CONSUMED where it can act.
+      WHY IT IS OPENED NOW, ON EVIDENCE ABOUT ITSELF. FACT-0426 establishes that exactly one deployed
+      operation can change an already-assigned parent, and every later edge-mutating stage is add-only or
+      node-removing. FACT-0427 reads the deployed cost expression: the learned channel enters as a bonus
+      capped at 1.0 subtracted from a cost in MICROMETRES, and pairs the ILP dropped score exactly zero.
+      FACT-0429 measures the consequence - the band where the bonus can act reaches only 5.1% of alternatives
+      on fold 0 - and FACT-0428 measures the cost of that: a pre-ILP-only change survives 15.4% of the time on
+      fold 0. Combined with FACT-0422's ceiling of 240 wrong-parent GT edges on fold 0, the realisable prize
+      for a pre-ILP-only scorer is of order a few dozen edges, which is not a lane worth a GPU cache on its
+      own.
+      THE SEQUENCING CONSEQUENCE IS THE POINT OF THE LEVER. Falsifier (a) is a CPU sweep on an existing
+      replay that reads the constant from its own environment, so it costs no GPU session and it can kill or
+      validate the whole final-edge thesis before the ~7 GiB dual-trunk caches of FACT-0416 are built. Under
+      the standing GPU rule this is the correct order: the cheapest thing that can end the lane runs first.
+      TWO CAUTIONS CARRIED IN AT BIRTH. The bonus is GLOBAL, so raising it trades geometric coherence
+      everywhere for learned influence everywhere - the FACT-0376 shape, where a change that helps the
+      targeted population is charged against the rest, and it must therefore be scored through the complete
+      chain and the official scorer and never on the relink's own objective. And learned_prob at notebook
+      lines 1833-1842 SILENTLY SIGMOIDS out-of-range scores, so any future scorer writing into that slot must
+      assert its range rather than trust it - a silent no-op is worse than a crash.
+      DIVISIONS GET NOTHING FROM THIS LEVER. add_safe_divisions_postlink is add-only and its candidate set
+      excludes incoming edges, so no division claim may be read from any result here (FACT-0371).
+    priority: 1

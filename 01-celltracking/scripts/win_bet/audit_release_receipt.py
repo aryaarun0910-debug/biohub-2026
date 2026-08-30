@@ -139,7 +139,7 @@ def _parse_fractional(structural: list) -> int | None:
 
 
 def audit_release(spec_path: Path, experiment_id: str, reference_nb: Path | None,
-                  at_commit: str | None) -> dict:
+                  at_commit: str | None, fetched_dir: Path | None = None) -> dict:
     checks: dict[str, dict] = {}
 
     def check(name: str, passed: bool, **detail) -> None:
@@ -161,7 +161,21 @@ def audit_release(spec_path: Path, experiment_id: str, reference_nb: Path | None
     nb = nb_dir / spec["code_file"]
     manifest_p = nb_dir / "build_manifest.json"
     meta_p = nb_dir / "kernel-metadata.json"
-    out_dir = nb_dir / "_out"
+    # WHERE THE FETCHED ARTIFACT ACTUALLY LIVES - a false FAIL this instrument produced
+    # on its first run. `kaggle_factory fetch` writes to <out_dir>/_out/, but
+    # `kaggle_queue.py` writes to C:/temp/queue/<spec name>/ instead. Auditing only the
+    # factory path reported the P24 CHAMPION as having no submission artifact when a
+    # complete, passing one was on disk the whole time. Both known locations are searched,
+    # an explicit --fetched-dir overrides, and the location used is RECORDED so a future
+    # reader can see which convention produced the evidence.
+    candidates = [fetched_dir] if fetched_dir else [
+        nb_dir / "_out",
+        Path("C:/temp/queue") / str(spec.get("name", "")),
+    ]
+    out_dir = next(
+        (d for d in candidates if d and (d / "audit_receipt.json").is_file()),
+        candidates[0],
+    )
     receipt_p = out_dir / "audit_receipt.json"
     csv_p = out_dir / "submission.csv"
     structural_p = out_dir / "structural_audit.json"
@@ -232,13 +246,15 @@ def audit_release(spec_path: Path, experiment_id: str, reference_nb: Path | None
 
     # ---- C5 the graph ---------------------------------------------------------------------
     if not (csv_p.is_file() and structural_p.is_file() and receipt_p.is_file()):
-        check("graph_fetched", False, expected=[str(csv_p), str(structural_p), str(receipt_p)],
+        check("graph_fetched", False, searched=[str(d) for d in candidates if d],
+              expected=[str(csv_p), str(structural_p), str(receipt_p)],
               reason="no fetched submission artifact on disk: there is no graph to audit and no "
                      "version-bound audit receipt. notebooks/**/_out/ is gitignored, so absence "
                      "here means the artifact was never fetched or was deleted.")
         out["passed"] = all(c["passed"] for c in checks.values())
         return out
-    check("graph_fetched", True)
+    check("graph_fetched", True, fetched_from=str(out_dir),
+          searched=[str(d) for d in candidates if d])
 
     receipt = json.loads(receipt_p.read_text(encoding="utf-8"))
     structural = json.loads(structural_p.read_text(encoding="utf-8"))
@@ -302,20 +318,35 @@ def audit_release(spec_path: Path, experiment_id: str, reference_nb: Path | None
           registry_spec=exp.get("spec"), registry_kernel=exp.get("kernel"),
           registry_status=exp.get("status"))
 
-    score_facts = [f for f in facts if f.get("experiment") == experiment_id
-                   and isinstance((f.get("scope") or {}).get("preregistered"), dict)]
+    # TWO PREREGISTRATION SHAPES EXIST IN facts.yaml AND BOTH ARE REAL PREREGISTRATIONS.
+    # FACT-0393 nests them under scope.preregistered / scope.outcome; FACT-0341 (the outgoing
+    # champion) uses the older flat scope.band_prereg / central_prereg / falsifier / fired. Reading
+    # only the new shape reported the champion as never having preregistered a band, which is false
+    # - it declared 0.921-0.929 before the run. Normalise, do not FAIL on a schema difference.
+    def _prereg(f: dict) -> tuple[dict, dict] | None:
+        sc = f.get("scope") or {}
+        if isinstance(sc.get("preregistered"), dict):
+            return sc["preregistered"], (sc.get("outcome") or {})
+        if isinstance(sc.get("band_prereg"), list):
+            return ({"band": sc["band_prereg"], "central": sc.get("central_prereg"),
+                     "falsifier": sc.get("falsifier"), "_shape": "legacy_flat"},
+                    {"scored": f.get("value"), "falsifier_fired": sc.get("fired")})
+        return None
+
+    score_facts = [f for f in facts
+                   if f.get("experiment") == experiment_id and _prereg(f) is not None]
     if not score_facts:
         check("score_fact_present", False, experiment=experiment_id,
               reason="no fact for this experiment carries a preregistered band")
         out["passed"] = all(c["passed"] for c in checks.values())
         return out
     sf = score_facts[-1]
-    pre = sf["scope"]["preregistered"]
-    outcome = sf["scope"].get("outcome") or {}
+    pre, outcome = _prereg(sf)
     lo, hi = (pre.get("band") or [None, None])[:2]
     scored = outcome.get("scored", sf.get("value"))
     check("score_fact_present", True, fact=sf["id"], value=sf.get("value"),
-          provenance=sf.get("provenance"), validity=sf.get("validity"))
+          provenance=sf.get("provenance"), validity=sf.get("validity"),
+          preregistration_shape=pre.get("_shape", "scope.preregistered"))
     check("score_matches_registry_experiment", scored == exp.get("lb"),
           fact_score=scored, experiment_lb=exp.get("lb"))
     check("score_inside_preregistered_band",
@@ -356,13 +387,17 @@ def main() -> int:
     ap.add_argument("--experiment", required=True, help="EXP-#### this artifact was run as")
     ap.add_argument("--at-commit", default=None,
                     help="commit the built notebook must be identical to")
+    ap.add_argument("--fetched-dir", type=Path, default=None,
+                    help="where the fetched submission artifact lives, if neither "
+                         "<out_dir>/_out/ nor C:/temp/queue/<name>/")
     ap.add_argument("--reference-notebook", type=Path, default=None,
                     help="upstream source this artifact claims to reproduce, for cell-source equality")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
     spec = args.spec if args.spec.is_absolute() else ROOT / args.spec
-    res = audit_release(spec, args.experiment, args.reference_notebook, args.at_commit)
+    res = audit_release(spec, args.experiment, args.reference_notebook, args.at_commit,
+                        args.fetched_dir)
     res["schema_version"] = 1
     res["head_commit"] = _git("rev-parse", "HEAD")
     args.out.parent.mkdir(parents=True, exist_ok=True)

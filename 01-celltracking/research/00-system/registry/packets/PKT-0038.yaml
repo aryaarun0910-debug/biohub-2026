@@ -1,7 +1,7 @@
 id: PKT-0038
 title: "AGENT 3 - the association model tournament, trained from a contract we own. The primary 0.950 lane"
 lever: LEVER-0041
-owner: agent-3-tournament
+owner: agent-1-fold-transfer-pathologist   # took over from agent-3-tournament on 2026-08-30; the lever lock is unchanged
 lock: claimed
 opened: '2026-08-30'
 
@@ -82,6 +82,59 @@ host_direction_2026_08_30: >-
       constraint; a threshold sweep would re-answer a question that is closed.
   The first genuinely new model passing the honest fold-0 gate receives the standing seam-calibration
   submission BEFORE further polishing - PKT-0036 releases it.
+
+pathology_preregistration_2026_08_30: >-
+  AGENT 1 (fold-transfer pathologist) takes over PKT-0038 to explain ONE thing: GATE_A's EXACT
+  cancellation (FACT-0414) - a refit of the identical recipe on fold 0's own crop-grouped splits
+  that reshuffles 72 targets and nets precisely zero. Neither available reading explains it.
+  Reading (i), the tournament fitted the discovery fold (falsifier g), predicts a SMALLER POSITIVE
+  delta on a refit, not zero. Reading (ii), incomparable substrates, is removed by construction
+  when the recipe is refitted on fold 0's own data.
+  WRITTEN BEFORE ANY RUN. Four explanations, each with the observable that would CONFIRM it, plus
+  one host-added sub-hypothesis. FOLD 0 IS A DIAGNOSTIC SURFACE ONLY - no arm, threshold, feature
+  set or hyperparameter is selected on a fold-0 number, and the 2x2's fold-0-fitted cell is fitted
+  on ALL of fold 0 and tested on fold 1, which is the mirror of GATE_B and not a selection.
+  E1 TARGET-RELATIVE CALIBRATION SHIFT. The head's scores are comparable WITHIN a target on one
+     fold and not on the other, so a globally-fitted decision surface lands in a different place
+     per fold. CONFIRMED IF: the target-relative ablation (rank/margin/within-target normalised,
+     no raw scale) transfers or refits positively where the raw-scale ablation does not, AND the
+     per-target score-margin scale differs materially between folds at the same recipe.
+     REFUTED IF: raw-scale and target-relative ablations behave the same way on both folds.
+  E2 CANDIDATE-MIXTURE SHIFT. The fold-0 and fold-1 contested populations differ in composition
+     (n_candidates, distance, margin_to_best, target density, division involvement), so the same
+     model meets a different mixture. CONFIRMED IF: the fold-0 Gate-A strata show heterogeneous
+     signs that sum to zero (some strata genuinely win, others genuinely lose) AND the strata where
+     fold 1 wins are rare or absent in fold 0's mixture.
+     REFUTED IF: every stratum is individually null - uniform nothing everywhere.
+  E2b STAGE-MIXTURE SHIFT (host addition, 2026-08-30, and it is a STRONGER form of E2). The two
+     folds' recoverable misses sit at DIFFERENT STAGES, so a parent scorer has different amounts of
+     reachable work per fold. CONFIRMED IF the unified lost-edge ledger shows fold 1's recoverable
+     mass concentrated in category 4 (true edge offered, wrong parent selected) while fold 0's sits
+     primarily in category 2 (endpoint removed by node selection) or category 5 (downstream
+     overwrite) - i.e. fold 0 has little category-4 mass left to win, which would let a refit
+     reshuffle 72 targets and net exactly nothing.
+     REFUTED IF both folds carry comparable category-4 shares of their recoverable misses.
+  E3 FEATURE-SIGN / DOMAIN INVERSION. One or more features - the six bidirectional columns are the
+     prime suspects, since they are what lifted fold 1 above the tree - carry opposite or
+     incomparable sign or scale between folds. CONFIRMED IF: a bidirectional column's
+     univariate association with is_true_parent has OPPOSITE SIGN across folds, or its
+     distribution is disjoint between folds, and dropping it removes the GATE_B negative transfer.
+     REFUTED IF: every column's sign agrees across folds and the domains overlap.
+  E4 LABEL / JOIN / ADAPTER ERROR. The fold-0 surface, its labels, its group keys or the harness's
+     join is defective, so the refit is asked an ill-posed question. THIS IS LIVE, NOT A FORMALITY -
+     exactly-zero net with churn 72 is a shape a defect can produce. CONFIRMED IF: the reproduction
+     does not reproduce gate_fold0.json; or the fold-0 gained set and lost set are the SAME
+     targets, or trivially paired; or a group key collides; or the fold-0 label rate, candidate
+     ordering or tie-break differs from fold 1's under the same committed code.
+     REFUTED IF: bit-level reproduction succeeds and the 36 gained and 36 lost are distinct,
+     scattered targets in different crops.
+  THE DISCRIMINATING CELL, DECLARED BEFORE IT RUNS: train fold 0 -> test fold 1 is the missing cell
+  of the 2x2 and it is preregistered as follows. If a fold-0-fitted model ALSO FAILS on fold 1, the
+  problem is fold 0's substrate or labels (E4/E2). If a fold-0-fitted model WINS on fold 1, the
+  fold-1 gain is a property of the FOLD-1 SURFACE and not of the learned head, which reframes
+  LEVER-0041 entirely.
+  CLASSIFICATION IS EXACTLY ONE OF: implementation_defect | calibration_shift | mixture_shift |
+  representation_inversion | unresolved. `unresolved` is an acceptable and honest answer.
 
 budget:
   gpu_sessions: 2   # Slot A fold-1 cache then training; Slot B fold-0 cache then the complementary head
@@ -216,3 +269,236 @@ result: >-
   consensus_fold1.json, gate_fold0.json, blocked_arms.json. Instruments:
   scripts/win_bet/assoc_tournament.py (driver, uses the PKT-0034 harness and does not fork it),
   tests/test_assoc_tournament.py (30 contracts, each planting the violation it guards).
+
+
+pathology_result_2026_08_30: >-
+  AGENT 1, THE FOLD-TRANSFER PATHOLOGIST. CPU only, zero GPU, zero submissions, nothing selected on
+  fold 0. CLASSIFICATION: **unresolved** - and the word is doing real work here, because all four
+  preregistered explanations are individually EXCLUDED by their own preregistered observables while
+  the mechanism that IS established is a fifth one the preregistration did not name. What is no
+  longer in doubt is the campaign question underneath it: the fold-1 gain of FACT-0413 is NOT a
+  selection artifact, and the honest gate fold has almost nothing for a parent scorer to win.
+
+  1. REPRODUCTION IS BIT-EXACT, SO E4 IS DEAD AT ITS FIRST OBSERVABLE. Re-running the committed
+  `apply` arm from the committed frozen checkpoint reproduced `gate_fold0.json` with THREE
+  differences in the whole payload and none of them scientific: wall-clock, the record path, and
+  the `assoc_train_harness.py` digest - which moved because another packet renamed
+  `node_feat_by_crop` to `role_index_by_crop` (commits 5847b64, 7f92b0e). That rename is verified
+  at source to be a pure rename on the non-contextual path (assoc_train_harness.py:1336-1341,
+  1444, 1479), so the arms this packet runs are byte-unchanged in behaviour. Every contested
+  top-1, gained/lost/net/churn, interval and calibration figure of FACT-0414 is reproduced to all
+  sixteen digits. NOTE FOR THE COORDINATOR: the committed `assoc_tournament.py` at HEAD passes the
+  OLD kwarg name and therefore cannot run against the committed harness; the working tree carries
+  the one-line fix and it needs staging or the instrument is broken at HEAD.
+
+  2. THE 2x2 IS COMPLETE AND THE MISSING CELL REFRAMES THE LANE. All four cells were recomputed
+  through ONE code path whose three published cells are ASSERTED against FACT-0413 and FACT-0414
+  before the fourth is written (`matrix` REFUSES otherwise; all three checks passed).
+    train f1 -> test f1   contested top-1 0.762227  delta +0.053833  g 2316 / l 884  ci95 [+0.04687,+0.06150]  FAVOURABLE
+    train f1 -> test f0   contested top-1 0.817176  delta -0.016599  g  133 / l 202  ci95 [-0.02699,-0.00586]  negative
+    train f0 -> test f0   contested top-1 0.833774  delta +0.000000  g   36 / l  36  ci95 [-0.00355,+0.00347]  null
+    train f0 -> test f1   contested top-1 0.715011  delta +0.006616  g  473 / l 297  ci95 [+0.00443,+0.00876]  FAVOURABLE
+  THE FOURTH CELL WINS. A model fitted on ALL of fold 0 - which has never seen a fold-1 crop, a
+  fold-1 embryo or a fold-1 checkpoint - beats the deployed argmax on fold 1 with a crop-paired
+  interval excluding zero on the favourable side. That is the outcome the preregistration named as
+  reframing the lever: the fold-1 gain is a property of THE FOLD-1 SURFACE rather than of the
+  learned head, and it cannot be a five-arm selection artifact, because the fold-0 fit was never
+  selected on anything.
+
+  3. THE EXACT ZERO IS NEITHER CANCELLATION NOR UNIFORM NOTHING. It is LOCALISED nothing, and the
+  strata say so unambiguously. Binned by primary margin (the gap between the best and second-best
+  candidate probability within a target), the fold-0 refit has EXACTLY ZERO CHURN in three of four
+  quartiles, and all 72 moved targets sit in the lowest-margin quartile (margin < 0.3204), where it
+  gains 36 and loses 36.
+  ZERO CHURN IS A CORRECTNESS STATISTIC AND IS BLIND TO A WRONG-FOR-WRONG PARENT SWAP, so the
+  stronger quantity was measured directly rather than inferred: which SOURCE each rule actually
+  picks. On fold 0 the refitted model picks a different parent from the deployed argmax on only 81
+  of 4,157 contested targets, and EVERY ONE of the 81 is in the lowest-margin quartile - agreement
+  is EXACTLY 1.0000 on all 3,118 targets of the other three quartiles, identical choices and not
+  merely identical outcomes. Of the 81 changes, 36 fix an error, 36 break a correct answer and 9
+  swap one wrong parent for another. On fold 1 the same recipe changes 3,333 of 26,601 (12.5%),
+  spread across all four quartiles (2181 / 747 / 311 / 94). Fold 1 under the identical recipe moves in ALL four quartiles with a
+  monotone gradient (+0.1445 / +0.0466 / +0.0188 / +0.0054). The exactness of the zero is
+  unremarkable arithmetic: 72 moves at an even rate land on 36/36 about 9% of the time, and the
+  bootstrap mean is 3.6e-05. What is informative is the localisation, not the coincidence.
+  The other facets cancel across heterogeneous strata but at trivial magnitude - candidate count
+  -2/+5/-3, target density +5/0/-7/+2, distance quartile 0/0/-2/+2 - and the movement is scattered,
+  not paired: 72 distinct targets across 39 distinct crops, 28 crops carrying a gain, 25 a loss, 14
+  both. Nothing in that shape is what a join or label defect produces.
+
+  4. WHICH INFORMATION CLASS TRANSFERS - AND THE RAW PROBABILITY SCALE IS WHAT BREAKS TRANSFER.
+  Four preregistered classes, identical protocol on both folds, crop-grouped OOF refit plus a
+  full-fold fit transferred frozen in BOTH directions.
+    raw_prob_only        refit f0 +0.001443 (g22/l16/net+6/churn38)   refit f1 -0.001391 (net -37, churn 315)
+    target_relative      refit f0 +0.000481                            refit f1 -0.000677
+    geometry_only        refit f0 -0.031032                            refit f1 +0.045788 FAVOURABLE
+    prob_free_context    refit f0 -0.002646                            refit f1 +0.017556 FAVOURABLE
+    prob_free_context    transfer f1->f0 +0.003127                     transfer f0->f1 +0.001842 FAVOURABLE
+  TWO RECONCILIATIONS FELL OUT EXACTLY AND THEY LICENSE THE REST: `raw_prob_only` on fold 0
+  reproduces FACT-0386's measured binning floor to the individual target (gained 22, lost 16, net
+  +6, churn 38) and `geometry_only` on fold 0 reproduces FACT-0386's geometry-alone figure
+  (-0.0310) to four decimals, on an instrument written from scratch this cycle.
+  THE FINDING: deleting the RAW PROBABILITY COLUMN turns GATE_B's negative transfer into a positive
+  one - the full recipe transfers f1->f0 at -0.016599 with an interval excluding zero on the wrong
+  side, while the probability-free contextual class transfers f1->f0 at +0.003127 and f0->f1 at
+  +0.001842 with a favourable interval. A 0.0197 swing from removing one column. The bidirectional
+  CONTEXT transfers between folds; the raw deployed scalar does not, and it drags the head with it.
+  That is E1's first conjunct confirmed. Its SECOND conjunct fails: the per-target margin scale is
+  NOT materially different between folds (margin_to_best mean 0.241 against 0.217, median 0.080
+  against 0.077), so E1 as written is not confirmed and calibration_shift is not the classification.
+  THE SECOND FINDING IS LOUDER. On fold 1, PURE GEOMETRY with no probability at any remove beats the
+  deployed argmax by +0.045788 out of fold with a favourable interval - four fifths of the whole
+  bidirectional gain - while the same class on fold 0 LOSES 0.031032. The deployed edge probability
+  is worth more than displacement on fold 0 and less than displacement on fold 1. That is a
+  difference in the SKILL of the `prob` feature between folds, which is exactly the cross-checkpoint
+  boundary FACT-0414 verified at source, and it is not a sign inversion of anything.
+
+  5. E2 IS EXCLUDED QUANTITATIVELY, NOT BY EYEBALL. Re-binning both folds on ONE set of absolute
+  margin edges and running the Kitagawa decomposition of (delta_f1 - delta_f0): COMPOSITION
+  +0.006002 (11.2%), WITHIN-STRATUM +0.047830 (88.8%). The mixtures barely differ - every feature's
+  marginal distribution overlaps almost exactly across folds (prob mean 0.428 against 0.420, p05/p50/p95
+  0.110/0.379/0.826 against 0.112/0.376/0.835) - and what differs is the CONDITIONAL: inside the
+  same absolute margin bin, fold 0's model converts 30.6% / 7.9% / 0.7% / 0.0% / 0.0% / 0.0% of the
+  deployed errors while fold 1's converts 59.9% / 52.5% / 38.4% / 19.0% / 11.0% / 2.1%. Above margin
+  0.30 the fold-0 model converts LITERALLY NOTHING. Same covariates, different label conditional.
+
+  6. THE APPARENT-FIT CEILING SETTLES WHAT THE OOF NULL MEANS, AND IT IS THE SINGLE MOST USEFUL
+  NUMBER THIS PACKET PRODUCED. In-fold (memorisation) fits, identity columns stripped, reported
+  ONLY to separate a variance null from a separability null and never as performance:
+    fold 0 full recipe  apparent +0.024056 (g112/l12/net+100)  ->  out of fold  +0.000000   0% survives
+    fold 1 full recipe  apparent +0.065975 (g2522/l767/net+1755) -> out of fold +0.053833  81.6% survives
+  Fold 0's contested errors ARE separable in sample - the representation can express +0.024 there -
+  and NONE of it generalises across crops. Fold 1 keeps four fifths of its apparent gain. With 691
+  contested errors spread over 68 crops, roughly ten per crop, that is precisely the shape of a fold
+  too thin to learn a rule that survives a crop-grouped split, which is what FACT-0388 argued and is
+  now MEASURED rather than asserted. GATE_A's exact zero is therefore the out-of-fold collapse of a
+  wholly optimistic in-sample signal, expressed as identity outside near-ties plus a coin flip inside
+  them.
+
+  7. THE UNIFIED LOST-EDGE LEDGER (host addition), and it reconciles with four existing facts on the
+  first run. Six mutually exclusive categories, first match wins, applied literally, per movie and
+  per fold, through the official one-to-one 7 um matcher, on the DEPLOYED candidate set. The six
+  categories plus recovered are ASSERTED to sum to the GT edge total on every crop and on the pooled
+  total; the instrument REFUSES rather than reports.
+    FOLD 0 (44b6, 71 movies, 19,826 GT edges): cat1 undetected endpoint 161; cat2 endpoint removed by
+      node selection 198; cat3 true edge never offered 1,110; cat4 WRONG PARENT SELECTED 240;
+      cat5 offered then dropped downstream 73 (PROVISIONAL); cat6 0; recovered 18,044 (0.9101).
+    FOLD 1 (6bba, 128 movies, 109,057 GT edges): cat1 11,001; cat2 5,717; cat3 14,007; cat4 1,735;
+      cat5 537 (PROVISIONAL); cat6 0; recovered 76,060 (0.6974).
+    SHARES OF RECOVERABLE MISSES (categories 2-5): fold 0 - cat3 68.5%, cat4 14.8%, cat2 12.2%,
+      cat5 4.5%. Fold 1 - cat3 63.7%, cat2 26.0%, cat4 7.9%, cat5 2.4%.
+  RECONCILIATION, ALL EXACT, ALL FIRST-RUN: fold 1's three-way split reproduces FACT-0370 to the edge
+  (81,053 / 17,003 / 11,001 over 109,057) and the instrument REFUSES to write if it does not; fold
+  0's reachable count is FACT-0376's `reached_deployed` exactly (18,466) and its GT total minus the
+  undetected endpoints is FACT-0376's `gt_detectable` exactly (19,826 - 161 = 19,665); the division
+  denominator returns 26 GT division events on fold 0 (FACT-0371's annotated count) and 125 on fold 1
+  (FACT-0080's denominator).
+  THE HOST'S E2b SUB-HYPOTHESIS IS REFUTED, AND CLEANLY. E2b predicted fold 1's gain living in
+  category 4 while fold 0's misses sit in category 2 or 5. The opposite holds: fold 0's category-4
+  SHARE of its recoverable misses (14.8%) is nearly DOUBLE fold 1's (7.9%), and category 2 is a
+  larger share on FOLD 1 (26.0%) than on fold 0 (12.2%). There is no stage-mixture explanation for
+  the transfer failure.
+  WHAT THE LEDGER DOES SAY, AND IT IS THE most consequential thing in this report: on the DEPLOYED
+  chain the dominant recoverable loss on BOTH folds is category 3 - the true edge was never OFFERED -
+  at 68.5% and 63.7% of recoverable misses. Wrong-parent-selected is 240 edges on fold 0 and 1,735 on
+  fold 1, i.e. 1.2% and 1.6% of all GT edges. A better parent SCORER on the deployed candidate set is
+  bounded by those two numbers. This is FACT-0382 restated at the final-graph level and measured
+  there for the first time.
+  CATEGORY 5 IS PROVISIONAL AND ITS MASS IS NOT FOLDED INTO CATEGORY 4. Separating ILP rejection from
+  motion-relink overwrite needs the solver's edge list BEFORE FACT-0364's replacement and no
+  committed artifact carries it; PKT-0040 owns that boundary. This ledger separates 4 from 5 by an
+  OBSERVABLE - does the child end with a parent at all - and labels 5 provisional. When Agent 3's
+  stage definitions land, category 5 should be re-derived to them rather than reconciled against this
+  one. CATEGORY 6 IS EXACTLY 0 ON THE EDGE DENOMINATOR BY THE ORDERING, which is correct and vacuous,
+  so the division measurement is reported on its OWN denominator and the two are never added
+  (fold 0: 26 events, 2 fully recovered, 24 partial, 0 wholly lost; fold 1: 125 events, 9 fully
+  recovered, 85 partial, 31 wholly lost). Nothing here is read as division recovery (FACT-0371).
+
+  8. THE CLASSIFICATION, AND WHY THE OTHER FOUR ARE EXCLUDED.
+    implementation_defect - EXCLUDED. Bit-exact reproduction of all three published cells through an
+      independently written code path, plus five first-run reconciliations against FACT-0386
+      (binning floor to the individual target AND geometry-alone), FACT-0370 (to the edge),
+      FACT-0376 (to the edge) and FACT-0371/FACT-0080 (division denominators). The moved targets are
+      72 distinct targets in 39 distinct crops, not a paired or degenerate set.
+    mixture_shift - EXCLUDED. Kitagawa composition carries 11.2% of the fold difference against
+      88.8% within-stratum; covariate marginals overlap almost exactly; and the host's stronger
+      stage-mixture form is refuted with the sign reversed by the ledger.
+    representation_inversion - EXCLUDED AS WRITTEN, AND I SAY SO DELIBERATELY BECAUSE OF WHAT IT
+      WOULD TRIGGER. Not one feature's label-correlation sign inverts between folds except dx_um,
+      whose fold-0 correlation is +0.0002, i.e. noise; every bidirectional column agrees in sign on
+      both folds and their domains overlap. What inverts is which information class DOMINATES
+      (geometry beats probability on fold 1 and loses on fold 0), and that is a difference in the
+      deployed probability's skill, not in the representation's sign or scale. THE CAMPAIGN SHOULD
+      NOT CLOSE THE CACHED-HEAD FORM OF LEVER-0041 ON MY EVIDENCE.
+    calibration_shift - CONFIRMED FOR GATE_B ONLY, AND IT CANNOT BE THE ANSWER TO THE QUESTION ASKED.
+      Removing the raw probability column swings the weight-transfer arm by +0.0197 and makes it
+      transfer positively in both directions. But GATE_A refits on fold 0 and never crosses a fold
+      boundary, so no cross-fold calibration statement can explain it; and E1's second preregistered
+      conjunct - a materially different per-target margin scale - fails on measurement.
+    SO: unresolved, in a bounded and specific sense. The four named mechanisms are excluded. The
+      mechanism that IS established for GATE_A - fold 0's apparent separability is 100% optimism and
+      collapses out of fold to identity-outside-near-ties plus a coin flip - is a fifth one, and it is
+      a POWER-AND-GENERALISATION failure of the fold rather than a defect, a mixture, a calibration or
+      an inversion. Manufacturing one of the four to avoid the word would misdescribe it.
+  WHAT WOULD HAVE CHANGED MY MIND, stated because it was stated in advance: a reproduction that
+  diverged anywhere scientific (E4); a gained set and a lost set concentrated in the same crops or
+  trivially paired (E4); a composition term carrying most of the Kitagawa difference (E2); a
+  bidirectional column whose sign flipped between folds (E3); a fold-0 apparent ceiling near zero,
+  which would have made the fold-0 null a REPRESENTATION verdict rather than a power one.
+
+  9. THE SENTENCE THE COORDINATOR ASKED FOR. Build the GPU feature cache only if the successor is a
+  scorer that changes WHICH PAIRS ARE OFFERED or is evaluated where the errors actually are - because
+  the fold-1 gain is real capability rather than a selection artifact (a fold-0-fitted head wins on
+  fold 1 with a favourable interval, and preregistered geometry-only wins +0.0458 there out of fold),
+  but the honest gate fold cannot measure a parent scorer at all (100% of its apparent signal is
+  optimism over ~10 contested errors per crop) and the ledger bounds the whole deployed-chain prize
+  for parent re-scoring at 240 edges on fold 0 and 1,735 on fold 1 against 1,110 and 14,007 true edges
+  that are never offered in the first place.
+
+  CANDIDATE FACTS FOR THE COORDINATOR - this packet may not write facts.yaml. All MEASURED by
+  committed code, complete folds, out-of-fold and crop-grouped where a fit is involved, payloads under
+  _evidence/assoc/pathology/. The five worth recording:
+  (A) THE COMPLETED 2x2 TRANSFER MATRIX. Scope: A4.bidir.tree recipe, both widened surfaces
+      (C:/temp/assoc/f0.parquet sha16 b15ee733774c2614; C:/temp/p34_f1/assoc_targets_split1.parquet
+      sha16 798e17cd7e2d7df7), GroupKFold(5) by crop, preserve_single on, 2000-draw crop-paired
+      bootstrap at seed 20260829. Headline value: train f0 -> test f1 delta +0.006616, gained 473 /
+      lost 297 / net +176 / churn 770, ci95 [+0.004430, +0.008762], FAVOURABLE, contested top-1
+      0.7150111. The other three cells reproduce FACT-0413 and FACT-0414 exactly.
+      Instrument: scripts/win_bet/assoc_fold_pathology.py matrix; payload matrix_2x2.json.
+  (B) THE APPARENT-FIT CEILING AND THE OPTIMISM SHARE. Fold 0 apparent +0.024056 against out-of-fold
+      +0.000000 (0% survives); fold 1 apparent +0.065975 against +0.053833 (81.6% survives). Scope:
+      in-fold fits, META identity columns stripped, complete folds, NOT a performance number.
+      Instrument: scripts/win_bet/assoc_fold_pathology.py ceiling; payload apparent_ceiling.json.
+  (C) THE LOCALISATION OF GATE_A, MEASURED AT THE ARGMAX AND NOT ONLY AT THE OUTCOME. The fold-0
+      refit picks a different parent from the deployed argmax on 81 of 4,157 contested targets, ALL
+      of them in the lowest primary-margin quartile (< 0.3204); agreement is exactly 1.0000 on the
+      3,118 targets of the other three quartiles. Of the 81: 36 gained, 36 lost, 9 wrong-for-wrong.
+      Fold 1 under the identical recipe changes 3,333 of 26,601 across all four quartiles. Moved
+      targets are 72 distinct targets across 39 crops. Kitagawa composition share of the fold
+      difference 11.2%. Instruments: assoc_fold_pathology.py strata, standardise and argmax;
+      payloads strata_gate_a.json, standardised_margin.json, argmax_agreement.json.
+  (D) THE ABLATION LADDER AND THE RAW-SCALE TRANSFER DEFECT. geometry_only refit f1 +0.045788
+      FAVOURABLE against refit f0 -0.031032; prob_free_context transfers f1->f0 at +0.003127 and
+      f0->f1 at +0.001842 FAVOURABLE where the full recipe transfers f1->f0 at -0.016599. Contains
+      two exact reconciliations with FACT-0386 (binning floor 22/16/+6/38 and geometry-alone -0.0310).
+      Instrument: assoc_fold_pathology.py ablate; payload ablations.json.
+  (E) THE UNIFIED LOST-EDGE LEDGER, BOTH FOLDS, PER MOVIE. Counts in section 7 above. Exhaustiveness
+      asserted per crop and pooled; fold-1 reconciliation against FACT-0370 asserted and passed;
+      category 5 provisional pending PKT-0040; category 6 structurally 0 on the edge denominator with
+      divisions reported on their own. Instrument: scripts/win_bet/assoc_lost_edge_ledger.py;
+      payloads lost_edge_ledger_f0.json, lost_edge_ledger_f1.json.
+
+  WHAT IS NOT ESTABLISHED. Everything in sections 1-6 is PRE-ILP candidate ranking on the WIDENED 0.1
+  surface, so FACT-0364 and FACT-0382 both bind and nothing here is the FACT-0376 final-graph
+  quantity. The LEDGER is final-graph and per-movie, but it is a decomposition of the DEPLOYED
+  chain's losses, not a measurement of any candidate model through the chain - falsifiers (c), (d)
+  and (f) of this packet remain UNMEASURED. Category 5 is provisional by construction. Arm 3, the
+  contextual/HOCT-style head, has still never run. No verdict here is promotable and the
+  seam-calibration slot is not earned.
+
+  INSTRUMENTS ADDED THIS CYCLE. scripts/win_bet/assoc_fold_pathology.py (matrix / strata / ablate /
+  census / standardise / ceiling / argmax), scripts/win_bet/assoc_lost_edge_ledger.py (the unified
+  ledger, fail-closed, with the FACT-0370 fold-1 and FACT-0376 fold-0 reconciliations ASSERTED
+  rather than reported - both passed on the first run), tests/test_assoc_fold_pathology.py (13
+  contracts, each planting the violation it guards - including the coordinator's named failure mode,
+  a category absorbing another's mass).

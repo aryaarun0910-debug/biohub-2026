@@ -317,3 +317,95 @@ def test_no_commit_named_is_a_failure_not_a_skip(sandbox):
     res = sandbox["mod"].audit_release(sandbox["spec_path"], "EXP-9999", None, None)
     assert res["passed"] is False
     assert res["checks"]["notebook_identical_to_commit"]["passed"] is False
+
+
+# --- THE FALSE FAIL THIS INSTRUMENT PRODUCED, PINNED SO IT CANNOT RETURN ----------------------
+# First run, the auditor looked only in <out_dir>/_out/ and reported the P24 CHAMPION as having no
+# submission artifact. A complete, passing one was on disk at C:/temp/queue/<spec name>/, where
+# kaggle_queue.py fetches. An auditor's false negative is the failure PKT-0036's own falsifier
+# names, so both conventions are now searched and the resolved location is recorded.
+
+
+def _move_out_to(sandbox, dest: Path) -> None:
+    dest.mkdir(parents=True, exist_ok=True)
+    for f in list(sandbox["out"].iterdir()):
+        f.rename(dest / f.name)
+
+
+def test_artifact_fetched_by_the_queue_runner_is_found(sandbox, tmp_path, monkeypatch):
+    """The regression: artifacts outside <out_dir>/_out/ must still be audited, not declared absent."""
+    queue_dir = tmp_path / "queue" / "demo"
+    _move_out_to(sandbox, queue_dir)
+    monkeypatch.setattr(sandbox["mod"], "Path", Path)
+    res = sandbox["mod"].audit_release(sandbox["spec_path"], "EXP-9999", sandbox["ref"], "HEAD",
+                                       queue_dir)
+    assert res["checks"]["graph_fetched"]["passed"] is True
+    assert res["checks"]["graph_fetched"]["fetched_from"] == str(queue_dir)
+    assert res["passed"] is True
+
+
+def test_the_resolved_fetch_location_is_recorded_not_assumed(sandbox):
+    """A receipt must say WHERE its evidence came from; two conventions exist in this repo."""
+    res = _run(sandbox)
+    got = res["checks"]["graph_fetched"]
+    assert got["passed"] is True
+    assert got["fetched_from"].endswith("_out")
+    assert len(got["searched"]) >= 2
+
+
+def test_a_genuinely_absent_artifact_still_fails(sandbox, tmp_path):
+    """The fix must not turn the FAIL into a pass-by-default: with the artifact gone from every
+    searched location, graph_fetched must still fail and must name what it searched."""
+    for f in list(sandbox["out"].iterdir()):
+        f.unlink()
+    res = sandbox["mod"].audit_release(sandbox["spec_path"], "EXP-9999", sandbox["ref"], "HEAD",
+                                       tmp_path / "nowhere")
+    assert res["passed"] is False
+    assert res["checks"]["graph_fetched"]["passed"] is False
+    assert res["checks"]["graph_fetched"]["searched"]
+
+
+def test_the_legacy_flat_preregistration_shape_is_accepted(sandbox):
+    """FACT-0341 preregisters via scope.band_prereg / central_prereg / falsifier / fired, not the
+    scope.preregistered dict FACT-0393 uses. Reading only the new shape reported the outgoing
+    champion as never having preregistered a band - false, and a FAIL on a schema difference."""
+    reg = sandbox["root"] / "research" / "00-system" / "registry" / "facts.yaml"
+    reg.write_text(
+        "facts:\n"
+        "  - id: FACT-9999\n"
+        "    statement: demo\n"
+        "    value: 0.931\n"
+        "    provenance: MEASURED\n"
+        "    validity: VALID\n"
+        "    experiment: EXP-9999\n"
+        "    scope:\n"
+        "      submission: 12345\n"
+        "      band_prereg: [0.925, 0.932]\n"
+        "      central_prereg: 0.929\n"
+        "      falsifier: at or below 0.928\n"
+        "      fired: false\n", encoding="utf-8")
+    res = _run(sandbox)
+    assert res["passed"] is True, [k for k, v in res["checks"].items() if not v["passed"]]
+    assert res["checks"]["score_fact_present"]["preregistration_shape"] == "legacy_flat"
+    assert res["checks"]["score_inside_preregistered_band"]["passed"] is True
+
+
+def test_the_legacy_shape_still_catches_a_fired_falsifier(sandbox):
+    """Accepting the old shape must not make it unfalsifiable."""
+    reg = sandbox["root"] / "research" / "00-system" / "registry" / "facts.yaml"
+    reg.write_text(
+        "facts:\n"
+        "  - id: FACT-9999\n"
+        "    statement: demo\n"
+        "    value: 0.931\n"
+        "    provenance: MEASURED\n"
+        "    validity: VALID\n"
+        "    experiment: EXP-9999\n"
+        "    scope:\n"
+        "      submission: 12345\n"
+        "      band_prereg: [0.925, 0.932]\n"
+        "      falsifier: at or below 0.928\n"
+        "      fired: true\n", encoding="utf-8")
+    res = _run(sandbox)
+    assert res["passed"] is False
+    assert res["checks"]["falsifier_did_not_fire"]["passed"] is False

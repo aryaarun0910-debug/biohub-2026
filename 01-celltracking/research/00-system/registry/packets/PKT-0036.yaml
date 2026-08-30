@@ -363,3 +363,83 @@ result: >-
   STANDING: the known blind spot of any FUTURE pass is unchanged and must be recorded with it - the
   gate compares post-softmax probabilities over the SOURCE axis, so a uniform per-frame source shift
   is mathematically invisible to it.
+  CYCLE 2026-08-30c - ADVERSARIAL AUDIT OF FOUR CONCURRENT AGENTS. Three vetoes, thirty-one verified
+  non-vetoes, seven findings routed to the coordinator. Receipts: _evidence/audit/receipts/
+  {a4_cycle_2026_08_30c, a4_repro_gate_f0, a4_repro_gate_a_refit, a4_repro_mirror_f0_to_f1,
+  a4_refusals_exercised, a4_ledger_refusals_exercised, a4_p37_preflight}.json and C:/temp/audit_receipts/a4c/.
+
+  VETO 1 - PHASE 2 IS BLOCKED, ON ITS OWN PREFLIGHT. gpu_preflight run against the P37 spec returns
+  VERDICT FAIL, failed=[PF01], skipped=[]. The evidence key is
+  body.checks[PF01].evidence.uncommitted_patch_files = ["M scripts/kaggle_edits/assoc_tap_gate.py"].
+  Confirmed independently: of the six code_file patch sources P37 injects, five are byte-identical to
+  HEAD after LF-normalisation and git-clean; assoc_tap_gate.py alone differs in CONTENT. The built
+  notebook therefore embeds code with no commit. Nothing else about the artifact failed and nothing was
+  skipped. Remedy is one commit and a rebuild; this packet does not stage or commit.
+
+  VETO 2 - THE WIDENED-CONTROL TRAP IS UNGUARDED IN THE ONLY PROMOTABLE SUMMARY. assoc_report.py:199-276
+  takes `control` as a caller-supplied list with no provenance binding, and verdict() at :279-317 applies
+  eight conditions, none of which binds control to the DEPLOYED arm. A finished grep for
+  widened|deployed control|control_provenance|FACT-0382 over assoc_report.py and test_assoc_report.py
+  returns ZERO hits in both. Latent, not fired - full_chain is None in every payload in flight. Scoped to
+  full-chain promotion; it does NOT block Phase 2.
+
+  VETO 3 - THE FOCUS-3D ACQUISITION RECORD CANNOT CARRY VERIFIED OR MEASURED. A FINISHED search across
+  C:/temp, ~/.cache and ~/Downloads for model_final* returns ZERO hits; no .pth over 100 MB exists in
+  C:/temp; the HF cache blobs/ directory is EMPTY and its snapshot holds one file, README.md. Yet
+  paramcount.json states 411,638,146 parameters, 886 state-dict entries and a per-module breakdown with
+  NO sha256, and `find scripts -iname "*focus*"` shows no committed instrument produced it. AGENTS.md
+  requires a named artifact and committed code for MEASURED, re-derivation for VERIFIED; neither exists,
+  which is FACT-0043's precedent verbatim. I cannot distinguish a count read off the released TENSORS from
+  one taken on a randomly-initialised instantiation of the architecture, and that is the whole claim. Two
+  licence facts ARE artifact-derived and may stand as VERIFIED: weights Apache-2.0 from the downloaded
+  README, code BSD-style from LICENSE at GitHub 184fc5f - they genuinely differ.
+
+  WHAT WAS REPRODUCED RATHER THAN READ. GATE_B was re-derived OUTSIDE the harness by unpickling the frozen
+  model and predicting once, with no fit() anywhere in the script: contested top-1 0.8171758479672842,
+  gained 133 / lost 202 / churn 335 - identical to FACT-0414 in all sixteen digits. GATE_A was
+  independently refitted: delta EXACTLY 0.0, gained 36 / lost 36, churn 72 - the exact cancellation is
+  REAL and reproducible, and tie-breaking is not the mechanism (ties-at-top are ZERO on all three arms).
+  The NEW 2x2 cell, the one with no published counterpart, reproduces exactly: 0.7150107138829367,
+  +0.006616292620578168, gained 473 / lost 297 / churn 770. Both surfaces carry exactly one true parent
+  per decidable target (19,444/19,444 and 91,410/91,410), zero duplicate candidate rows, zero join loss;
+  the folds are embryo-disjoint with an EMPTY crop intersection.
+
+  CONTRACT 2 IS REAL IN THE ARTIFACT THAT WOULD RUN, not only in the repo: the schema AST-extracted from
+  cell 5 of the built P37 notebook is 79 keys with exact set equality against the auditor in BOTH
+  directions, contract version 2, band P on primary_probs_preblend, and ZERO contract-1 markers in the
+  schema. The deployed-pack pin holds at 1,047 lines and 181 'secondary' against the vendored 677 and
+  ZERO, so FACT-0408's counts reproduce.
+
+  THE LOST-EDGE LEDGER PASSES, AND ITS CONTRACT WAS EXERCISED. Exhaustive on both folds pooled AND on
+  every one of 71 and 128 crops; assert_exhaustive REFUSES dropped mass, double-counted mass and cat6
+  absorbing cat4, and ACCEPTS a closing ledger. FACT-0370 reconciles exactly on all four fold-1 counts as
+  a code assertion, and fold 0's reachable 18,466 independently equals FACT-0382's floor sweep at 0.50.
+  The floor is declared DEPLOYED, cat5 is flagged provisional, and divisions are carried on their own
+  denominator.
+
+  THE LEVER-0043 FALSIFIER WAS NOT REWRITTEN, AND THE LIMIT OF THAT FINDING IS STATED. The authorisation
+  is a SIBLING KEY, host_authorisation_2026_08_30; all eleven authorisation probe tokens are ABSENT from
+  the falsifier scalar; clause (a) retains its full original gate force verbatim; the edit added one lever,
+  changed ZERO pre-existing ones and preserved all 86 comment lines. BUT no baseline exists - LEVER-0043
+  is in neither HEAD nor this packet's 00:21 snapshot - so byte-level non-modification is NOT provable.
+  The cross-source witness is PKT-0041, written earlier and carrying no authorisation field, whose
+  independent restatement of (a) and (f) agrees with the current text.
+
+  PRIOR VETO CLOSED BY EXERCISE. load_surface REFUSES C:/temp/audit_receipts/ by name and ACCEPTS the
+  relocated table (3,704,355 rows), so it is not a blanket guard; the two copies are byte-identical at
+  798e17cd7e2d7df7. run_harness REFUSES the degenerate deployed fold-1 surface before any fit, and I
+  measured that surface myself at 2,162,040 rows, 81,053 decidable, ZERO contested, prob_min 0.5000002.
+
+  ROUTED TO THE COORDINATOR, NOT WRITTEN HERE - this packet writes no registry file. R1 FACT-0413's
+  recorded value appears in neither payload (6.0e-14 from the emitted figure). R2 surface_sha256_16 hashes
+  WORKTREE bytes, so under core.autocrlf=true one commit yields two stamps and a payload cannot be bound
+  to a commit. R3 FACT-0414's "a silent refit would be visible in the payload" is false - n_fit_calls_
+  reaches no payload; the conclusion stands on the no-op itself. R4 harness_f0/f1.json name trunk .pth
+  files that do not exist and declare no fold_legitimate. R5 the fold-1 dual-trunk pair contains only
+  fold-ILLEGITIMATE trunks. R6 FACT-0370 is a DEPLOYED-floor partition - now satisfied by the ledger.
+  R7 the host authorisation is on the lever but NOT on PKT-0041, whose forbidden block still bars the
+  acquisition it now permits.
+
+  PHASE 2 VERDICT: BLOCKED, on VETO 1 alone. Everything else about the contract-2 smoke cleared.
+  Zero GPU, zero submissions, no kernel pushed, no model implementation touched, no foreign packet
+  edited, nothing staged or committed.

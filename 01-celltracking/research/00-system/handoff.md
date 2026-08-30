@@ -3,7 +3,7 @@ id: 00-system/handoff
 title: Handoff
 area: 00-system
 status: active
-updated: '2026-08-29'
+updated: '2026-08-30'
 owner: biohub
 links: []
 tags: [handoff, entry-point]
@@ -11,6 +11,101 @@ record_kind: state
 ---
 
 # Current handoff
+
+> ## 2026-08-30 — THE CLINICAL PIVOT. Inherited knobs are exhausted by arithmetic, the primary lane has one unexplained number blocking it, and the cycle is a six-hour CPU lockdown before any GPU is spent
+>
+> **Position.** The champion is the P35 DeepCenter/veto exchange (`FACT-0412`, submission 55888865) on the
+> public-lineage base relocated by `FACT-0393`. Both GPU slots are free. No submission is pending. Two levers
+> closed this cycle — `LEVER-0042` on `FACT-0412`, as preregistered, whatever the score.
+>
+> **1. INHERITED KNOBS CANNOT REACH THE TARGET, AND THIS IS ARITHMETIC RATHER THAN JUDGEMENT.** `FACT-0412`
+> states the remaining gaps. The only other identified inherited-knob candidate is the public configuration
+> diffed in `FACT-0404` — two environment values on an otherwise byte-identical notebook — worth about
+> `FACT-0404`'s `delta_vs_our_champion` on **its** base, and that base does **not** carry the DeepCenter
+> component now in our champion, so the two are not known to be additive and their interaction is untested.
+> Even a fully additive stack lands short. Three standing rules independently forbid riding it: PKT-0028
+> rule (1) forbids crediting any individual knob of the public bundle, `LEVER-0042`'s lane is capped at one
+> submission and has ENDED, and `FACT-0378` means this lineage cannot be validated offline at all. **The
+> distance has to come from capability.** The host's decision is to stop manufacturing the target from
+> inherited knobs and make the pivot now: the next submission is the current champion plus exactly ONE
+> learned association treatment, and no public-knob stacking.
+>
+> **2. THE ONE QUESTION THAT GATES EVERYTHING — read `FACT-0414` before planning any GPU spend.** The
+> tournament's discovery fold said yes (`FACT-0413`): six of seven preregistered arms beat the deployed
+> contested top-1 with a favourable crop-paired interval, the ladder is monotone in REPRESENTATION rather
+> than head class, and the binning floor that halved `FACT-0386`'s fold-0 arm was measured on this surface
+> and is NEGATIVE. The gate said no twice (`FACT-0414`). Weight transfer is NEGATIVE with an interval
+> excluding zero on the wrong side — strictly stronger than no transfer. And **architecture transfer, the
+> identical recipe refitted out of fold on fold 0's own crop-grouped splits, returned a delta of exactly
+> zero while genuinely reshuffling 72 targets.** Falsifier (e) fires as written; (g) cannot be excluded.
+> **Neither available reading explains that.** Selection on the discovery fold predicts a SMALLER positive
+> delta on a refit, not exactly zero. Incomparable substrates — verified at source, the two acquisitions ran
+> different edge-predictor checkpoints, so the dominant `prob` feature is emitted by a different model per
+> fold — is removed by construction when you refit on fold 0's own data. Until that number is explained we
+> do not know whether the discovery-fold gain is capability or a selection artifact, **and a feature cache
+> built on the latter is wasted GPU.**
+>
+> **3. Contract 2 leaves ZERO usable caches, and the reason is a defect ledger now at eight.** `FACT-0411`:
+> every contract-2 cache in existence is a CPU smoke fixture; the only deployed-scale artifact is P36's
+> archive, which is contract 1 and is refused for training under its own named condition (`FACT-0410`) while
+> keeping full evidentiary value. No legacy read-only mode is admitted, because the pre-fusion surface
+> contract 1 never held cannot be recovered by any rewrite of those bytes. The three launch blockers are
+> named in `FACT-0411`: a contract-2 GPU smoke as a NEW experiment (P36 is not to be re-versioned),
+> `project_full_fold` re-run against that cache, and dual-trunk provenance which no manifest yet carries.
+> **What the smoke's remaining job actually is, narrowly:** `FACT-0407` already proved the P36 cache
+> faithful to microscopic tolerance on CPU against real pack weights, so only the CPU/GPU float boundary on
+> real weights and the contract-2 surfaces P36 never recorded are still open.
+>
+> **4. The defect signature has not changed once in eight instances, and it is not about any one file.**
+> `FACT-0402`, `FACT-0405`, `FACT-0408`, `FACT-0409`: a stubbed method the real class never had; an
+> approximated image pipeline; a cache key the architecture makes undefined; a downsample at which the
+> deployed transform is the identity; a suite pointed at the organizer's vendored predictor instead of the
+> deployed one; and that same defect RECURRING in a second file. Every one was GREEN while wrong. **The
+> rule it earns: a fixture may differ from production in COST, never in KIND.** Related, and it cost a
+> misattributed root cause: a log header records an intention at the moment it printed, not what ran
+> (`FACT-0407`).
+>
+> **5. THIS CYCLE IS A SIX-HOUR CPU LOCKDOWN. No GPU and no submission during it.** Four agents, partitioned
+> so no two hold one lever. (i) **Fold-transfer pathologist** (`PKT-0038`, `LEVER-0041`) — reproduce the
+> transfer result from committed artifacts and explain the exact cancellation, against four preregistered
+> explanations only, ending in exactly one classification; `unresolved` is an admissible answer. It may
+> DIAGNOSE on fold 0 and may not SELECT on it. (ii) **Contract-2 launch engineer** (`PKT-0037`) — prepare
+> but do NOT push the smoke, against the deployed pack pinned by sha256, with the preflight run against the
+> exact built notebook through the real subprocess boundary. (iii) **Final-edge survival engineer**
+> (`PKT-0040`, no lever) — trace at deployed `file:line` whether a learned parent score survives to the
+> final graph at all, because `FACT-0364` says motion relink replaces the solver's edge list wholesale and
+> every ranking number we hold is pre-ILP. (iv) **Adversarial auditor** (`PKT-0036`, no lever, holds the
+> veto).
+>
+> **6. NEW STANDING REPORTING CONTRACT — the unified LOST-EDGE LEDGER (host, 2026-08-30).** Every
+> association experiment now attributes every recoverable miss to the stage responsible, in six mutually
+> exclusive first-match-wins categories: endpoint absent from the detector peak set; endpoint detected but
+> removed by node selection or filtering; both endpoints survive but the true edge was never OFFERED; true
+> edge offered but the wrong parent selected; correct edge selected then OVERWRITTEN downstream; division
+> topology failure. Per complete movie, per fold, through the official patched scorer, both embryo
+> directions separately. It must CLOSE — the six counts plus recovered edges sum to the total, asserted
+> rather than reported — and it must reconcile with `FACT-0370` on the first and third categories and with
+> `FACT-0368` and `FACT-0371` on the fourth and sixth. **Its first job is diagnostic and it may decide the
+> gating question:** if the discovery fold's gain lives in "wrong parent selected" while fold 0's errors
+> live in endpoint removal or downstream overwrite, the transfer failure is STRUCTURAL — different stages
+> are responsible in the two folds — and not model overfitting.
+>
+> **Phase 2 launches ONE GPU smoke, and only if all four hold:** the pathologist has ruled out an
+> implementation or label-contract defect (or repaired it and reproduced the original control); the
+> launch engineer's exact-artifact preflight passes with no skip applicable to this artifact class; the
+> auditor has no unresolved veto; and a single next model contract is FROZEN before launch. If it fails,
+> archive and diagnose — there is no fifth patch-and-pray attempt. If it passes, audit the artifact and
+> issue a training licence BEFORE launching both caches.
+>
+> **The next-submission gate is stricter than the seam-calibration exception**, deliberately, because the
+> host asked for the strongest shot at the target rather than another information-gathering submission.
+> Architecture and calibration frozen before fold 0; full-chain RAW association improving on both folds;
+> the fold-0 paired interval excluding zero favourably; the fold-0 full-objective gain at least the deficit
+> recorded in `FACT-0412`; division true positives not decreasing on either fold; node recall not materially
+> regressing; the gain not produced by the count adjustment; the comparison widened-surface-plus-new-scorer
+> against the DEPLOYED control (`FACT-0382`); and release receipt, provenance, graph validity and integer
+> export all passing.
+
 
 > ## 2026-08-29 (late) — THE CYCLE'S VERDICT: the head is not the constraint, the representation is. Two levers closed, one redirected, and the contested population turns out to be our own knob
 >
