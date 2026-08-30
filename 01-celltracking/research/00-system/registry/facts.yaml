@@ -6638,3 +6638,88 @@ facts:
       written to prevent.
     date: '2026-08-30'
     tags: [public-lineage, 0933, bidirectional-weight, secondary-detection-weight, external, suspect]
+
+  - id: FACT-0405
+    statement: >-
+      DEFECT 7, and it is the same signature as five of the six before it. The training harness's own
+      structural gate compared cached coordinates to the pre-ILP export RAW, but the tap flushes BEFORE the
+      deployed rescale - predict_unet_transformer.py:798-802 multiplies coords[:, 1:] by the downsample
+      factor after the concatenate - so the cache holds the DOWNSAMPLED grid while the export records the
+      original resolution. At the deployed downsample (1,4,4) the check rejects EVERY real cache. It passed
+      only because its fixture used downsample (1,1,1), where the rescale is the identity. Calibrated
+      against the real P36 artifact: WITH the rescale, zero parity failures across all 26,169 and 33,432
+      nodes of both crops; WITHOUT it, failure on both
+    value: 7
+    unit: distinct_defects_found_in_the_gate_1_and_cache_lineage
+    scope:
+      defect: harness structural gate omitted the deployed coordinate rescale
+      deployed_source: "C:/temp/p7/tracking_repo/scripts/predict_unet_transformer.py:798-802"
+      hidden_by: "a test fixture using downsample (1,1,1), where the rescale is the identity"
+      deployed_downsample: [1, 4, 4]
+      calibration:
+        44b6_0113de3b: {nodes: 26169, with_rescale_failures: 0, without_rescale_failures: 1}
+        44b6_0b24845f: {nodes: 33432, with_rescale_failures: 0, without_rescale_failures: 1}
+      fixed_at: "scripts/win_bet/assoc_train_harness.py _preilp_parity"
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Read at the named deployed lines and then CALIBRATED against the real archived P36 cache in both
+      directions - with the rescale it passes on every node of both crops, without it it fails on both. A
+      one-directional check would not have distinguished a correct rescale from a vacuous comparison.
+    instrument: >-
+      scripts/win_bet/assoc_train_harness.py _preilp_parity; evidence
+      _evidence/assoc/harness/p36_downsample_calibration.json
+    experiment: EXP-0043
+    note: >-
+      THE SIGNATURE IS NOW UNMISTAKEABLE AND IT IS NOT ABOUT ANY ONE FILE. Defect 4 survived because a stub
+      defined a method the real class has never had. Defect 5 was an image pipeline approximated rather than
+      reused. Defect 6 was a cache key that the real architecture makes undefined. This one survived because
+      a fixture chose the one downsample value at which the deployed transform is the identity. In every
+      case a test was GREEN while the thing it named was wrong, and in every case the fixture differed from
+      production in exactly the dimension that mattered.
+      THE RULE THIS EARNS: a fixture must differ from production only in COST, never in KIND. A downsample of
+      (1,1,1) is not a cheaper (1,4,4) - it is a different transform, and it silently deleted the step under
+      test.
+      Found on CPU, before any GPU session, by an agent migrating the harness rather than by the gate that
+      was supposed to catch it.
+    date: '2026-08-30'
+    tags: [defect-7, coordinate-rescale, fixture-differs-from-production, harness, verified]
+
+  - id: FACT-0406
+    statement: >-
+      At FULL capture on real 32-dimensional features, window dependence is an order of magnitude larger than
+      the smoke measurement suggested: 1,539 of 3,521 role-nodes on one P36 crop and 2,786 of 6,465 on the
+      other carry two distinct feature vectors, with maximum absolute deltas of 0.3001 and 0.8958. This must
+      NOT be conflated with FACT-0402's 0.0123, which was measured over 66 of 173 role-nodes under a
+      different normalisation on the CPU smoke trunk
+    value: 0.8958
+    unit: max_abs_role_feature_delta_at_full_capture_p36
+    scope:
+      crops:
+        44b6_0113de3b: {role_nodes: 3521, dual_role: 1539, max_abs_delta: 0.3001, band_edges_resolved: 2701}
+        44b6_0b24845f: {role_nodes: 6465, dual_role: 2786, max_abs_delta: 0.8958, band_edges_resolved: 11405}
+      feature_dim: 32
+      window: 2
+      downsample: [1, 4, 4]
+      do_not_conflate_with: {fact: FACT-0402, value: 0.0123, role_nodes: 66, of: 173,
+                             why: "different normalisation, CPU smoke trunk, feature_dim 8"}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Measured on the real archived P36 cache through the migrated harness's own role index, with every
+      recorded band edge resolving through that index (2,701 and 11,405) - so the dual-role population is
+      counted over the same edges the head was actually fed, not over a synthetic surface.
+    instrument: >-
+      scripts/win_bet/assoc_train_harness.py schema; evidence _evidence/assoc/harness/p36_schema.json
+    experiment: EXP-0043
+    note: >-
+      THIS STRENGTHENS FACT-0402 RATHER THAN RESTATING IT. The smoke measured the effect at feature_dim 8 on
+      a randomly initialised trunk and found 0.0123 - already two orders above the 1e-4 tolerance. At the
+      deployed 32 dimensions with real weights the maximum reaches 0.8958, and roughly 43% of role-nodes are
+      dual rather than 38%. A frame-keyed cache would not have been slightly wrong; on nearly half the nodes
+      it would have fed the head a vector the head never saw.
+      THE NUMBERS ARE KEPT SEPARATE ON PURPOSE. Quoting 0.8958 as if it were FACT-0402's quantity would
+      compare a real-weight full-dimension capture against a smoke fixture, which is exactly the kind of
+      cross-substrate conflation this registry exists to prevent.
+    date: '2026-08-30'
+    tags: [window-dependence, pair-and-role, p36, full-capture, measured, do-not-conflate]

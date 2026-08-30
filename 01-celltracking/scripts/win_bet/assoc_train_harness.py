@@ -15,21 +15,49 @@ either: that is ``assoc_report``. What it owns is everything between the two.
 THE FOUR CONTRACTS, AND WHY EACH ONE IS A REFUSAL RATHER THAN A WARNING
 ----------------------------------------------------------------------
 
+0. THE FEATURE CACHE IS KEYED BY (PAIR, ROLE), NEVER BY FRAME - SCHEMA V2 (``FACT-0402``).
+   This harness previously required ``feat_frames`` and per-frame ``feat_{t}`` blocks and scattered
+   them into ONE ``(n_nodes, dim)`` matrix. That object does not exist. ``TemporalUNet3D`` contains
+   ``_TemporalAttention``, which mixes across the window's time axis, so ``unet_out[:, i]`` depends
+   on EVERY frame in the window; at the deployed ``window_size`` 2 with stride ``W-1 = 1`` an
+   interior frame ``t`` is the TARGET of pair ``(t-1, t)`` and the SOURCE of pair ``(t, t+1)`` -
+   two forward passes, two different vectors for one node. Measured on the real deployed path: 66
+   of 173 role-nodes carry two vectors, max abs delta 0.0123, 2.1 ORDERS OF MAGNITUDE above this
+   harness's own 1e-4 tolerance, and NOT uniform across the source axis.
+
+   So a candidate edge, not a node, is what selects a feature: its source sits at ``t`` and its
+   target at ``t + 1``, which names the deployed pair and therefore names which vector the head was
+   fed. ``RoleFeatureIndex.rows_for_edges`` is that lookup and ``node_features`` is a tombstone
+   that refuses under ``frame_keyed_consumption``. A frame-keyed ARTIFACT is refused one layer
+   earlier, on load, under ``frame_keyed_cache``.
+
+   The reader and the structural validation are ``scripts/win_bet/audit_feature_cache.py``'s -
+   IMPORTED, not reimplemented. Five of the six Gate-1 defects were reimplementations of a
+   deployed step; a seventh was found in this file while migrating it (see (a) below).
+
 1. THE CACHE IS GATED BEFORE ANY FIT. ``FACT-0387`` is the reason: Gate 1 attempt 1 compared zero
    crops and would have licensed two feature-cache sessions had its heartbeat not refused to report
    a pass. A head trained on an unlicensed cache measures the CACHE, not the head, and every number
    downstream is then uninterpretable. So ``CacheGate`` runs first and raises ``HarnessRefusal``;
    there is no ``--force``, no warn-and-continue, and no code path that trains past a failed gate.
 
-   The gate has THREE parts and states honestly what each can and cannot prove:
+   The gate has FOUR parts and states honestly what each can and cannot prove:
 
-     (a) STRUCTURAL + COORDINATE PARITY, computed on CPU from the cache bytes alone. The pre-ILP
-         export's ``node_id`` is a positional index into ``coords_so_far`` (``FACT-0373`` check D),
-         so the cache's own ``coords`` must reproduce the recorded ``(t, z, y, x)`` of every node,
-         in order, exactly - plus per-frame node-count parity, contiguous frame blocks, feature
-         blocks whose row counts match their frame, and finite values. This catches stale caches,
-         wrong crops, index remaps and truncated detections, which is most of what a cache can get
-         wrong. It cannot check float VALUES of features, and does not pretend to.
+     (a) SCHEMA + STRUCTURE + COORDINATE PARITY, computed on CPU from the cache bytes alone.
+         ``audit_feature_cache`` proves the cache is internally coherent: frame partition tiling,
+         pair stride, role-block tiling, ROLE MULTIPLICITY (a dual-role node must appear twice),
+         DUAL-ROLE CONTENT (its two vectors must actually differ), node ordering against the
+         deployed frame slice, masks, positional and feature widths, band membership. What it
+         cannot do is check the cache against an EXTERNAL artifact, so this harness adds pre-ILP
+         parity: ``node_id`` is a positional index into ``coords_so_far`` (``FACT-0373`` check D),
+         so the cache's ``coords`` must reproduce the recorded ``(t, z, y, x)`` of every node.
+         THE DOWNSAMPLE IS PART OF THAT, and the schema-1 check got it wrong: the tap flushes
+         BEFORE the deployed rescale, so the cache holds the downsampled grid while the pre-ILP
+         export holds ``coords[:, 1:] * downsample``
+         (``predict_unet_transformer.py:798-802``). The old comparison was raw and passed only
+         because its fixture used downsample (1,1,1); at the deployed (1,4,4) it rejects every
+         real cache. Re-measured on the archived P36 cache: raw parity False, rescaled parity
+         True on all 26,169 and 33,432 nodes of both crops.
      (b) CANDIDATE-AND-PROBABILITY REPRODUCTION, through a declared ``reproducer``. Two bands, the
          same two ``assoc_feature_parity`` uses: band A is the deployed edges above 0.5, band B the
          sub-threshold ECB surface where parent ranking is actually learned (``FACT-0382`` puts all
@@ -40,10 +68,18 @@ THE FOUR CONTRACTS, AND WHY EACH ONE IS A REFUSAL RATHER THAN A WARNING
          because CPU and GPU floating-point paths can differ by more than the 1e-4 tolerance and a
          CPU re-derivation would confound a numeric-backend difference with a genuine cache error.
          Stated plainly: this harness does not re-do Gate 1, it REFUSES TO TRAIN WITHOUT IT.
+     (d) THE TRUNK IS BOUND BY HASH. ``FACT-0392``: which trunk produced the 32-dim features is a
+         ``--weights`` argument recorded NOWHERE in the checkpoint - every candidate trunk is a
+         bare state dict of 136 tensors with zero non-tensor keys, and ``official_f0`` and
+         ``stabledet_f0`` have an IDENTICAL byte size (8,357,783) with different sha256. So size
+         cannot discriminate them and a manifest is mandatory. The gate refuses without one under
+         ``trunk_not_bound``, and ``verify_licence`` re-hashes the checkpoint at training time and
+         refuses a swap under ``trunk_sha256_changed`` - saying so explicitly when the sizes match,
+         because that is the case a size check would have waved through.
 
    The receipt is bound to bytes, not to a filename. ``gate`` writes a LICENCE recording the sha256
-   of every cache file it passed; ``train`` recomputes those digests and refuses if one moved. A
-   receipt that says "the cache passed" is worthless if the cache can be edited afterwards.
+   of every cache file it passed AND of the trunk; ``train`` recomputes both and refuses if either
+   moved. A receipt that says "the cache passed" is worthless if the cache can be edited afterwards.
 
 2. TARGETS ARE GROUPS, AND CROP-GROUPED IS NOT EMBRYO-HELD-OUT. A random row split leaks twice: a
    target's own positive and negatives would straddle the boundary, and neighbouring frames of one
@@ -102,7 +138,8 @@ Nothing below trains on an unlicensed cache; the gate is the first thing that ru
     set PYTHONIOENCODING=utf-8 && set PYTHONUTF8=1 && .venv\Scripts\python.exe ^
       scripts\win_bet\assoc_train_harness.py gate ^
         --cache-dir C:/temp/assoc_harness/cache_f0 ^
-        --receipt   C:/temp/assoc_harness/assoc_feature_parity.json ^
+        --manifest  C:/temp/assoc_harness/cache_f0/cache_manifest.json ^
+        --receipt   C:/temp/assoc_harness/assoc_feature_tap_gate.json ^
         --preilp    C:/temp/p30_f0/preilp_split0.parquet ^
         --ecb-dir   C:/temp/p30_f0/ecb ^
         --licence   C:/temp/assoc_harness/licence_f0.json ^
@@ -113,11 +150,26 @@ and then, only if that prints ``ASSOC_CACHE_GATE_PASSED``:
     .venv\Scripts\python.exe scripts\win_bet\assoc_train_harness.py train ^
       --spec scripts/win_bet/assoc_specs/harness_f0.json
 
-Two operational notes so the command is runnable rather than aspirational. The cache is written on
-Kaggle by the Gate-1 kernel, so ``cache_f0`` and the receipt must be FETCHED to the paths above
-first; and the spec's ``cache.crops`` is null, meaning every crop in the table needs a cache file -
-set it to the two crops the gate actually covered to smoke a subset. A crop with no cache file is a
-refusal, not a skip.
+Three operational notes so the command is runnable rather than aspirational. The cache is written
+on Kaggle by the Gate-1 kernel, so ``cache_f0`` and the receipt must be FETCHED to the paths above
+first; the manifest is built by ``scripts/win_bet/audit_feature_cache.py bind`` and is MANDATORY,
+because the trunk is otherwise unnamed (``FACT-0392``); and the spec's ``cache.crops`` is null,
+meaning every crop in the table needs a cache file - set it to the crops the gate actually covered
+to smoke a subset. A crop with no cache file is a refusal, not a skip.
+
+SCHEMA VALIDATION, WHICH IS NOT A LICENCE AND MUST NEVER BECOME ONE
+------------------------------------------------------------------
+    .venv\Scripts\python.exe scripts\win_bet\assoc_train_harness.py schema ^
+      --cache-dir C:/temp/assoc_tournament/schema_v2/aft_cache
+
+reads a tapped cache, validates the pair-and-role schema and exercises this harness's own role
+lookup on every recorded band edge. It prints ``TRAINING_LICENCE=NOT_GRANTED`` and its report
+carries NO ``passed`` key, so ``write_licence`` refuses it structurally. ``FACT-0403`` is why the
+distinction is load-bearing: the archived P36 cache has PROVEN structure - passivity, pair-and-role
+schema, zero integrity failures, positional features round-tripping at exactly 0.0 - and an INVALID
+parity verdict, because the deployed probabilities it recorded as a reference are computed AFTER a
+secondary-model logit blend at weight 0.15 while the replay re-runs the primary head only. It
+therefore proves structure and NOTHING about learned quantities. No head may be trained on it.
 """
 from __future__ import annotations
 
@@ -136,6 +188,7 @@ ROOT = next(p for p in Path(__file__).resolve().parents if (p / "pyproject.toml"
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import audit_feature_cache as AFC  # noqa: E402  the schema-v2 reference reader (PKT-0037)
 from assoc_baseline_rankers import (  # noqa: E402  protocol continuity with the LEVER-0039 arms
     LINEAR_KW,
     SEED,
@@ -147,8 +200,27 @@ from assoc_parent_dataset import FEATURES, evaluate  # noqa: E402  the FROZEN su
 from assoc_report import parent_conversions  # noqa: E402
 
 PROB_TOL = 1e-4
-CACHE_KEYS = ("coords", "frames", "starts", "ends", "feat_frames",
-              "image_shape", "window", "downsample")
+
+# SCHEMA V2 - PAIR AND ROLE. The key list is IMPORTED from the auditor rather than restated here,
+# because a third copy of a schema is a third place for it to drift: the tap DECLARES it
+# (`_AFT_SCHEMA_REQUIRED`), the auditor mirrors it under an ast-parsing anti-drift test, and this
+# harness now reads the auditor's mirror. `role_pos` is optional to the tap and REQUIRED here, for
+# the auditor's reason - the positional features are a head INPUT, so a cache without them forces
+# a re-derivation in place of an artifact.
+CACHE_SCHEMA_VERSION = AFC.SCHEMA_VERSION
+CACHE_KEYS = AFC.REQUIRED_KEYS + (AFC.POSITIONAL_KEY,)
+ROLE_SRC, ROLE_TGT = AFC.ROLE_SRC, AFC.ROLE_TGT
+
+# THE NAMED CONDITIONS THIS MODULE REFUSES UNDER. Named, because "the harness raised" is not a
+# diagnosis: FACT-0402 was found only because the failure could be attributed to a mechanism.
+FRAME_KEYED_CACHE = "frame_keyed_cache"                  # the retired artifact, rejected on load
+FRAME_KEYED_CONSUMPTION = "frame_keyed_consumption"      # the retired ACCESS PATTERN, tombstoned
+CANDIDATE_NOT_A_DEPLOYED_PAIR = "candidate_is_not_a_deployed_frame_pair"
+NO_CACHED_PAIR = "no_cached_pair_covers_this_candidate"
+ROLE_LOOKUP_DISAGREES = "role_lookup_disagrees_with_the_role_table"
+TRUNK_NOT_BOUND = "trunk_not_bound"
+TRUNK_SHA_CHANGED = "trunk_sha256_changed"
+
 DEPLOYED_FLOOR = 0.5          # FACT-0369, verified at source; not a tunable
 NEVER = -np.inf               # the null score that makes abstention impossible
 
@@ -166,100 +238,200 @@ def cache_digest(path: Path) -> str:
 
 
 def load_cache(path: Path) -> dict:
-    """Load one crop's cache npz and check it carries the keys the Gate-1 writer emits."""
+    """Load one crop's SCHEMA-V2 cache, through the auditor's reader rather than a second one.
+
+    The reader is `audit_feature_cache.load_cache`, not a reimplementation of it. That choice is
+    the whole lesson of this lane: six defects in three Gate-1 attempts, every one of them a
+    worker approximating a path instead of reusing it (`FACT-0402`'s ledger). Its refusals are
+    re-raised as `HarnessRefusal` with the CONDITION NAME preserved verbatim, so a caller can
+    still tell `frame_keyed_cache` from `cache_schema_incomplete` - which matters, because those
+    two want opposite responses: retire the artifact, or go looking for a truncated write.
+    """
     path = Path(path)
     if not path.is_file():
         raise HarnessRefusal(f"cache missing: {path}")
-    with np.load(path, allow_pickle=False) as z:
-        missing = [k for k in CACHE_KEYS if k not in z.files]
-        if missing:
-            raise HarnessRefusal(
-                f"{path.name}: cache is missing {missing} - this is not the Gate-1 cache contract"
-            )
-        out = {k: z[k] for k in CACHE_KEYS}
-        out["features"] = {int(t): z[f"feat_{int(t)}"] for t in z["feat_frames"].tolist()}
-    return out
+    try:
+        return AFC.load_cache(path)
+    except AFC.Reject as exc:
+        raise HarnessRefusal(str(exc)) from exc
 
 
 def node_features(cache: dict) -> np.ndarray:
-    """Scatter the per-frame feature blocks into one (n_nodes, dim) matrix indexed by node_id.
+    """RETIRED. A node does not have "a" feature vector, so this cannot return one.
 
-    ``node_id`` is a positional index into ``coords_so_far`` (FACT-0373 check D), and the cache
-    records the ``[start, end)`` span of every frame, so the scatter is exact rather than inferred.
-    A node whose frame carries no features is a refusal: silently leaving a zero row would train a
-    head on a feature vector the deployed path never produced.
+    Kept as a loud tombstone rather than deleted. It was the schema-1 access pattern - scatter the
+    per-frame blocks into one ``(n_nodes, dim)`` matrix indexed by ``node_id`` - and the object it
+    returned does not exist: ``TemporalUNet3D._TemporalAttention`` mixes across the window's time
+    axis, so at the deployed ``window_size`` 2 an interior frame ``t`` is the TARGET of pair
+    ``(t-1, t)`` and the SOURCE of pair ``(t, t+1)`` and carries TWO vectors (`FACT-0402`: 66 of
+    173 role-nodes, max abs delta 0.0123, 2.1 orders of magnitude above the 1e-4 gate tolerance).
+    Deleting it would leave a caller with an ``AttributeError`` and no diagnosis; this names the
+    mechanism and points at the replacement.
     """
-    coords = cache["coords"]
-    frames = cache["frames"].tolist()
-    starts, ends = cache["starts"].tolist(), cache["ends"].tolist()
-    feats = cache["features"]
-    dims = {v.shape[1] for v in feats.values()}
-    if len(dims) != 1:
-        raise HarnessRefusal(f"cache feature width is not constant across frames: {sorted(dims)}")
-    dim = dims.pop()
-    out = np.full((len(coords), dim), np.nan, dtype=np.float32)
-    for t, s, e in zip(frames, starts, ends):
-        if t in feats:
-            out[s:e] = feats[t]
-    return out
+    raise HarnessRefusal(
+        f"{FRAME_KEYED_CONSUMPTION}: node_features() scattered one feature vector per node, which "
+        "is the retired schema-1 access pattern and is UNDEFINED at the deployed window - a "
+        "trunk feature belongs to a (pair, role), never to a frame (FACT-0402). Use "
+        "role_features(cache) and address features through RoleFeatureIndex.rows_for_edges(), "
+        "which resolves the SOURCE-role vector and the TARGET-role vector of the pair each "
+        "candidate edge actually belongs to."
+    )
 
 
-def _structural(crop: str, cache: dict, pre_nodes: pl.DataFrame) -> list[str]:
-    """CPU-only parity of the cache against the recorded node surface. Returns failure reasons."""
+@dataclass
+class RoleFeatureIndex:
+    """Role-specific node features, addressed by (frame pair, role, node id) - never by frame.
+
+    WHY THIS SHAPE. A candidate edge is not an arbitrary pair of nodes: its source sits at frame
+    ``t`` and its target at ``t + 1``, so the edge NAMES the deployed frame pair it belongs to,
+    and therefore names which of a node's vectors the head was fed. That makes the lookup exact
+    rather than a choice - which is precisely what the frame-keyed layout destroyed, because it
+    had one vector to offer and had to guess.
+
+    Every arithmetic step below is a deployed invariant the auditor has already checked on this
+    cache, so nothing here re-derives anything:
+      * a role block is exactly ``arange(starts[k], ends[k])`` - the deployed
+        ``idx_src = np.arange(s_src, e_src)`` (``predict_unet_transformer.py:572-573``), asserted
+        by ``role_node_order_is_not_the_deployed_frame_slice``;
+      * so the row of node ``g`` in a block is ``ptr + (g - start_of_its_frame)``;
+      * and pairs are consecutive frames, asserted by ``pair_stride_is_not_one_frame``.
+    The identity is nevertheless RE-CHECKED against ``role_gid`` on every lookup. It costs one
+    comparison and it is the difference between a computed row and a verified one.
+    """
+
+    crop: str
+    feat: np.ndarray                 # (n_role, feat_dim) - role rows, NOT node rows
+    dim: int
+    node_count: int
+    role_gid: np.ndarray
+    _frame_of_node: np.ndarray       # (node_count,) absolute frame index per node id
+    _start_by_frame: np.ndarray      # frame -> block start, -1 where the frame is absent
+    _pair_by_t_src: np.ndarray       # source frame -> pair index, -1 where no pair was recorded
+    _src_ptr: np.ndarray
+    _tgt_ptr: np.ndarray
+
+    def rows_for_edges(self, src: np.ndarray, tgt: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Role rows for candidate edges. Every failure is a named refusal, never a zero row."""
+        src = np.asarray(src, dtype=np.int64)
+        tgt = np.asarray(tgt, dtype=np.int64)
+        if np.any((src < 0) | (src >= self.node_count) | (tgt < 0) | (tgt >= self.node_count)):
+            raise HarnessRefusal(
+                f"{self.crop}: a candidate names a node outside [0, {self.node_count}) - the "
+                "surface and the cache do not describe the same crop"
+            )
+        t_src = self._frame_of_node[src]
+        t_tgt = self._frame_of_node[tgt]
+        bad = np.nonzero(t_tgt != t_src + 1)[0]
+        if bad.size:
+            i = int(bad[0])
+            raise HarnessRefusal(
+                f"{CANDIDATE_NOT_A_DEPLOYED_PAIR}: {self.crop}: {int(bad.size)} candidate(s) span "
+                f"frames that are not consecutive, e.g. {int(src[i])}@t={int(t_src[i])} -> "
+                f"{int(tgt[i])}@t={int(t_tgt[i])}. The deployed loop only ever scores consecutive "
+                "frame_indices, so such an edge has no (pair, role) and no cached features exist "
+                "for it - a frame-keyed cache would have silently served some vector anyway"
+            )
+        pair = self._pair_by_t_src[t_src]
+        missing = np.nonzero(pair < 0)[0]
+        if missing.size:
+            i = int(missing[0])
+            raise HarnessRefusal(
+                f"{NO_CACHED_PAIR}: {self.crop}: {int(missing.size)} candidate(s) fall in frame "
+                f"pairs this cache never recorded, e.g. t={int(t_src[i])} -> {int(t_tgt[i])}. A "
+                "partially tapped cache (BIOHUB_AFT_MAX_PAIRS) covers only the pairs it captured; "
+                "training over the rest would be training on features that were never computed"
+            )
+        src_row = self._src_ptr[pair] + (src - self._start_by_frame[t_src])
+        tgt_row = self._tgt_ptr[pair] + (tgt - self._start_by_frame[t_tgt])
+        if not (np.array_equal(self.role_gid[src_row], src)
+                and np.array_equal(self.role_gid[tgt_row], tgt)):
+            raise HarnessRefusal(
+                f"{ROLE_LOOKUP_DISAGREES}: {self.crop}: a computed role row does not carry the "
+                "node id it was computed for. The role block is no longer the deployed frame "
+                "slice in the deployed order, so every feature row would be filed under the "
+                "wrong cell"
+            )
+        return src_row, tgt_row
+
+
+def role_features(cache: dict, crop: str | None = None) -> RoleFeatureIndex:
+    """Build the (pair, role) address book for one licensed cache."""
+    frames = np.asarray(cache["frames"]).astype(np.int64)
+    starts = np.asarray(cache["starts"]).astype(np.int64)
+    ends = np.asarray(cache["ends"]).astype(np.int64)
+    role_feat = np.asarray(cache["role_feat"])
+    role_gid = np.asarray(cache["role_gid"]).astype(np.int64)
+    t_src = np.asarray(cache["pair_t_src"]).astype(np.int64)
+    node_count = int(cache["node_count"])
+    hi = int(max(int(frames.max()), int(t_src.max())) + 2) if frames.size else 2
+
+    start_by_frame = np.full(hi, -1, dtype=np.int64)
+    start_by_frame[frames] = starts
+    pair_by_t_src = np.full(hi, -1, dtype=np.int64)
+    pair_by_t_src[t_src] = np.arange(t_src.shape[0], dtype=np.int64)
+    return RoleFeatureIndex(
+        crop=str(crop if crop is not None else cache["crop"]),
+        feat=role_feat,
+        dim=int(role_feat.shape[1]),
+        node_count=node_count,
+        role_gid=role_gid,
+        _frame_of_node=np.repeat(frames, (ends - starts)),
+        _start_by_frame=start_by_frame,
+        _pair_by_t_src=pair_by_t_src,
+        _src_ptr=np.asarray(cache["pair_src_ptr"]).astype(np.int64),
+        _tgt_ptr=np.asarray(cache["pair_tgt_ptr"]).astype(np.int64),
+    )
+
+
+def _preilp_parity(crop: str, cache: dict, pre_nodes: pl.DataFrame) -> list[str]:
+    """Tie the cache to the EXTERNAL artifact every downstream id is addressed against.
+
+    The auditor already proves the cache is internally coherent - partition tiling, role
+    multiplicity, node ordering, masks, positional width, band membership. What it cannot do is
+    check the cache against the pre-ILP export, because it never sees one. That is this
+    function's whole job, and it is the harness's own value-add rather than a second copy of a
+    check that already exists.
+
+    THE DOWNSAMPLE IS NOT OPTIONAL, AND GETTING IT WRONG WAS A LIVE DEFECT HERE. The tap flushes
+    BEFORE the deployed coordinate rescale, so the cache carries the DOWNSAMPLED grid the model
+    indexed, while ``predict_video`` returns - and the pre-ILP export therefore records -
+    ``coords[:, 1:] * downsample`` cast to int16 (``predict_unet_transformer.py:798-802``). The
+    schema-1 check compared the two RAW and passed only because its fixture used downsample
+    (1,1,1); at the deployed (1,4,4) it would have rejected every real cache. Re-measured on the
+    archived P36 cache: raw parity False, rescaled parity True on all 26,169 and 33,432 nodes of
+    both crops.
+    """
     fail: list[str] = []
-    coords = cache["coords"]
-    frames = cache["frames"].tolist()
-    starts, ends = cache["starts"].tolist(), cache["ends"].tolist()
-    if not (len(frames) == len(starts) == len(ends)):
-        return [f"{crop}: frames/starts/ends lengths disagree"]
-    if not frames:
-        return [f"{crop}: cache covers zero frames"]
-    if starts[0] != 0 or ends[-1] != len(coords):
-        fail.append(f"{crop}: frame spans do not tile coords [0, {len(coords)})")
-    for a, b in zip(ends[:-1], starts[1:]):
-        if a != b:
-            fail.append(f"{crop}: frame spans are not contiguous ({a} -> {b})")
-            break
+    coords = np.asarray(cache["coords"])
+    frames = np.asarray(cache["frames"]).astype(np.int64)
+    downsample = np.asarray(cache["downsample"]).astype(np.float32)
 
     rec = (pre_nodes.filter(pl.col("dataset") == crop)
                     .sort("node_id")
                     .select(["node_id", "t", "z", "y", "x"]))
     if rec.height == 0:
         return [f"{crop}: no recorded nodes in the pre-ILP export"]
-    ids = rec["node_id"].to_numpy()
-    if not np.array_equal(ids, np.arange(rec.height)):
+    if not np.array_equal(rec["node_id"].to_numpy(), np.arange(rec.height)):
         fail.append(f"{crop}: recorded node_id is not the 0..N-1 positional index")
     rec_t = rec["t"].to_numpy().astype(np.int64)
     rec_zyx = rec.select(["z", "y", "x"]).to_numpy().astype(np.float64)
 
     # Per-frame node-count parity: without it a short detection silently shrinks the comparison.
-    for t, s, e in zip(frames, starts, ends):
+    for t, s, e in zip(frames.tolist(), cache["starts"].tolist(), cache["ends"].tolist()):
         n_rec = int((rec_t == t).sum())
         if n_rec != e - s:
             fail.append(f"{crop}: frame {t} node count cached {e - s} vs recorded {n_rec}")
-        block_t = coords[s:e, 0]
-        if len(block_t) and not np.all(block_t == t):
-            fail.append(f"{crop}: frame {t} block carries foreign frame indices")
 
-    # COORDINATE PARITY - the strong CPU reproduction, over exactly the frames the cache covers.
-    sel = np.nonzero(np.isin(rec_t, np.asarray(frames, dtype=np.int64)))[0]
+    sel = np.nonzero(np.isin(rec_t, frames))[0]
     if len(sel) != len(coords):
         fail.append(f"{crop}: cached coords {len(coords)} vs recorded {len(sel)} over cached frames")
-    elif len(sel):
-        if not np.array_equal(coords[:, 0].astype(np.int64), rec_t[sel]):
-            fail.append(f"{crop}: cached frame indices disagree with the recorded nodes")
-        if not np.array_equal(coords[:, 1:].astype(np.float64), rec_zyx[sel]):
-            fail.append(f"{crop}: cached coordinates disagree with the recorded nodes")
-
-    for t, block in cache["features"].items():
-        span = {f: (s, e) for f, s, e in zip(frames, starts, ends)}.get(int(t))
-        if span is None:
-            fail.append(f"{crop}: feature block for frame {t} has no coordinate span")
-        elif block.shape[0] != span[1] - span[0]:
-            fail.append(f"{crop}: feature block {t} has {block.shape[0]} rows, span is "
-                        f"{span[1] - span[0]}")
-        if not np.all(np.isfinite(block)):
-            fail.append(f"{crop}: feature block {t} contains non-finite values")
+        return fail
+    if not np.array_equal(coords[:, 0].astype(np.int64), rec_t[sel]):
+        fail.append(f"{crop}: cached frame indices disagree with the recorded nodes")
+    rescaled = (coords[:, 1:].astype(np.float32) * downsample).astype(np.int16)
+    if not np.array_equal(rescaled.astype(np.float64), rec_zyx[sel]):
+        fail.append(f"{crop}: cached coordinates disagree with the recorded nodes after the "
+                    f"deployed downsample rescale {tuple(int(d) for d in downsample)}")
     return fail
 
 
@@ -302,12 +474,21 @@ def resolve_callable(spec: str):
 
 
 def gate_cache(*, cache_dir: Path, preilp: Path, ecb_dir: Path | None, crops: list[str] | None,
-               receipt: Path | None, reproducer: str = "receipt") -> dict:
+               receipt: Path | None, reproducer: str = "receipt",
+               manifest: Path | None = None, expect_trunk_sha: str | None = None,
+               expect_fold: str | None = None, expect_trunk_role: str | None = None) -> dict:
     """Run the cache gate. Returns a report; a failure is reported, never raised away.
 
     ``reproducer`` is ``"receipt"`` (the Gate-1 GPU proof, the only admissible probability parity
     for the real cache) or ``"callable:module:function"`` taking ``(crop, cache)`` and returning
     ``{(source_id, target_id): prob}``.
+
+    ``manifest`` is MANDATORY and binds the TRUNK. `FACT-0392`: which trunk produced the features
+    is a ``--weights`` argument recorded nowhere in the checkpoint, every candidate trunk is a
+    bare state dict of 136 tensors with zero non-tensor keys, and ``official_f0`` and
+    ``stabledet_f0`` have the SAME byte size with different sha256 - so size cannot discriminate
+    them and provenance can only come from the manifest. Without it, a null result cannot be told
+    apart from "we fed it the wrong features", which is the expensive failure on this lane.
     """
     cache_dir = Path(cache_dir)
     pre = pl.read_parquet(preilp)
@@ -315,13 +496,16 @@ def gate_cache(*, cache_dir: Path, preilp: Path, ecb_dir: Path | None, crops: li
     available = sorted(p.stem for p in cache_dir.glob("*.npz"))
     crops = list(crops) if crops else available
     report: dict = {
-        "schema_version": 1,
+        "schema_version": CACHE_SCHEMA_VERSION,
+        "layout": "pair_and_role",
         "heartbeat": "ASSOC_CACHE_GATE_COMPLETE",
         "cache_dir": str(cache_dir),
         "preilp": str(preilp),
         "ecb_dir": str(ecb_dir) if ecb_dir else None,
         "reproducer": reproducer,
         "receipt": str(receipt) if receipt else None,
+        "manifest": str(manifest) if manifest else None,
+        "trunk": None,
         # Said in the artifact, not only in the docstring, so a reader of the payload can never
         # mistake an in-process reproduction for the GPU-side numeric proof.
         "probability_parity_proof": (
@@ -337,6 +521,42 @@ def gate_cache(*, cache_dir: Path, preilp: Path, ecb_dir: Path | None, crops: li
     if not crops:
         report["refusals"].append("no cache files found - a gate that compares nothing is not a gate")
         return report
+
+    # --- THE TRUNK BINDING, AND THE WHOLE SCHEMA-V2 STRUCTURAL AUDIT, IN ONE CALL -------------
+    # `audit_feature_cache.audit` is the committed reference: it re-derives the manifest binding
+    # AND runs the per-crop pair-and-role validation (partition tiling, pair stride, role
+    # multiplicity, dual-role content, node ordering, masks, positional and feature widths, band
+    # membership). Calling it is how this harness avoids owning a second copy of those checks.
+    if manifest is None:
+        report["refusals"].append(
+            f"{TRUNK_NOT_BOUND}: no cache manifest. Trunk identity is a command-line argument "
+            "recorded nowhere in the checkpoint, and official_f0 and stabledet_f0 share a byte "
+            "size with different sha256 (FACT-0392) - so an unbound cache cannot distinguish "
+            "'the head does not work' from 'we fed it the wrong features', and is not licensed"
+        )
+        return report
+    try:
+        binding = AFC.audit(cache_dir, Path(manifest), expect_trunk_sha=expect_trunk_sha,
+                            expect_fold=expect_fold, expect_role=expect_trunk_role)
+    except AFC.Reject as exc:
+        report["refusals"].append(f"cache manifest binding failed: {exc}")
+        return report
+    man = json.loads(Path(manifest).read_text(encoding="utf-8"))
+    report["trunk"] = {
+        "role": binding["trunk_role"],
+        "sha256": binding["trunk_sha256"],
+        "path": man["trunk"]["path"],
+        "bytes": man["trunk"]["bytes"],
+        "provenance": man["trunk"]["provenance"],
+        "identified_by": "sha256 of the checkpoint bytes, recorded in the manifest",
+        "why_not_size": (
+            "official_f0 and stabledet_f0 have an IDENTICAL byte size and different sha256 "
+            "(FACT-0392), so a size match is not an identity"
+        ),
+    }
+    report["manifest_checks"] = len(binding["checks"])
+    report["fold"] = binding["fold"]
+    report["schema_measured"] = {m["crop"]: m for m in binding["measured"]}
 
     receipt_crops: dict[str, dict] = {}
     if reproducer == "receipt":
@@ -372,7 +592,20 @@ def gate_cache(*, cache_dir: Path, preilp: Path, ecb_dir: Path | None, crops: li
         report["cache_sha256"][crop] = cache_digest(path)
         entry["nodes"] = int(len(cache["coords"]))
         entry["frames"] = int(len(cache["frames"]))
-        entry["reasons"].extend(_structural(crop, cache, pre_nodes))
+        # The pair-and-role facts the auditor measured, restated per crop so the gate payload
+        # carries them rather than pointing at another artifact.
+        meas = report["schema_measured"].get(crop, {})
+        entry["role_nodes"] = meas.get("role_nodes")
+        entry["dual_role_nodes"] = meas.get("dual_role_nodes")
+        entry["dual_role_max_abs_delta"] = meas.get("dual_role_max_abs_delta")
+        entry["feat_dim"] = meas.get("feature_dim")
+        entry["pos_dim"] = meas.get("pos_dim")
+        entry["pairs"] = int(np.asarray(cache["pair_f_idx"]).shape[0])
+        if crop not in report["schema_measured"]:
+            entry["reasons"].append(
+                f"{crop}: the manifest binding did not cover this crop, so its pair-and-role "
+                "structure was never audited")
+        entry["reasons"].extend(_preilp_parity(crop, cache, pre_nodes))
 
         band_a, band_b = _bands(crop, cache, pre, ecb_dir)
         entry["band_a_recorded"] = len(band_a)
@@ -431,16 +664,32 @@ def gate_cache(*, cache_dir: Path, preilp: Path, ecb_dir: Path | None, crops: li
 
 
 def write_licence(gate_report: dict, out: Path) -> dict:
-    """Pin the cache BYTES the gate passed. A receipt naming a file licenses nothing."""
+    """Pin the cache BYTES and the TRUNK the gate passed. A receipt naming a file licenses nothing.
+
+    A schema-only report (``schema_report``) deliberately carries no ``passed`` key, so it cannot
+    reach this function: proving that a cache is well formed is not the same as proving it may be
+    trained on, and `FACT-0403` is the live example - P36's structure is sound and its parity
+    verdict is INVALID.
+    """
     if not gate_report.get("passed"):
         raise HarnessRefusal("refusing to write a licence for a cache gate that did not pass")
+    trunk = gate_report.get("trunk") or {}
+    if not trunk.get("sha256"):
+        raise HarnessRefusal(
+            f"{TRUNK_NOT_BOUND}: the gate report carries no trunk sha256, so a licence written "
+            "from it would pin the cache bytes and leave the producing trunk unnamed - the exact "
+            "ambiguity FACT-0392 records"
+        )
     licence = {
-        "schema_version": 1,
+        "schema_version": CACHE_SCHEMA_VERSION,
+        "layout": "pair_and_role",
         "heartbeat": "ASSOC_CACHE_LICENCE",
         "cache_dir": gate_report["cache_dir"],
         "reproducer": gate_report["reproducer"],
         "probability_parity_proof": gate_report.get("probability_parity_proof"),
         "receipt": gate_report.get("receipt"),
+        "manifest": gate_report.get("manifest"),
+        "trunk": trunk,
         "cache_sha256": gate_report["cache_sha256"],
     }
     Path(out).parent.mkdir(parents=True, exist_ok=True)
@@ -448,8 +697,15 @@ def write_licence(gate_report: dict, out: Path) -> dict:
     return licence
 
 
-def verify_licence(licence_path: Path, cache_dir: Path, crops: list[str]) -> dict:
-    """Re-verify the pinned digests at training time. A moved byte is a refusal."""
+def verify_licence(licence_path: Path, cache_dir: Path, crops: list[str],
+                   trunk: Path | None = None) -> dict:
+    """Re-verify the pinned digests at training time. A moved byte is a refusal.
+
+    TWO digests, not one. The cache bytes answer "is this the file that was gated"; the TRUNK
+    sha256 answers "is this the checkpoint that produced it", and neither substitutes for the
+    other. The trunk check is by CONTENT HASH and never by size, because the two trunks this
+    campaign must tell apart share a byte size exactly (`FACT-0392`).
+    """
     p = Path(licence_path)
     if not p.is_file():
         raise HarnessRefusal(
@@ -457,6 +713,12 @@ def verify_licence(licence_path: Path, cache_dir: Path, crops: list[str]) -> dic
             "unlicensed cache measures the cache (FACT-0387)."
         )
     lic = json.loads(p.read_text(encoding="utf-8"))
+    if int(lic.get("schema_version", 1)) != CACHE_SCHEMA_VERSION:
+        raise HarnessRefusal(
+            f"cache licence schema {lic.get('schema_version')!r} != {CACHE_SCHEMA_VERSION}. "
+            "Schema 1 licensed a FRAME-KEYED cache, a layout FACT-0402 measured to be undefined "
+            "at the deployed window; it cannot license a pair-and-role cache"
+        )
     pinned = lic.get("cache_sha256", {})
     bad, absent = [], []
     for crop in crops:
@@ -470,7 +732,147 @@ def verify_licence(licence_path: Path, cache_dir: Path, crops: list[str]) -> dic
         raise HarnessRefusal(f"crops not covered by the cache licence: {absent[:5]}")
     if bad:
         raise HarnessRefusal(f"cache bytes changed since the licence was issued: {bad[:5]}")
-    return {"licence": str(p), "crops_pinned": len(pinned), "verified": len(crops)}
+
+    lic_trunk = lic.get("trunk") or {}
+    if not lic_trunk.get("sha256"):
+        raise HarnessRefusal(
+            f"{TRUNK_NOT_BOUND}: the licence pins cache bytes but names no trunk sha256"
+        )
+    tpath = Path(trunk) if trunk else Path(lic_trunk["path"])
+    if not tpath.is_file():
+        raise HarnessRefusal(
+            f"{TRUNK_NOT_BOUND}: the licensed trunk {tpath} is not on disk, so the checkpoint "
+            "that produced these features cannot be re-verified (FACT-0392)"
+        )
+    got = AFC.sha256_file(tpath)
+    if got != lic_trunk["sha256"]:
+        size_note = (
+            " Its byte size MATCHES the licensed one, which is exactly why size is not the test: "
+            "official_f0 and stabledet_f0 are the same size with different sha256 (FACT-0392)."
+            if int(tpath.stat().st_size) == int(lic_trunk.get("bytes", -1)) else
+            f" Size {tpath.stat().st_size} against licensed {lic_trunk.get('bytes')}."
+        )
+        raise HarnessRefusal(
+            f"{TRUNK_SHA_CHANGED}: {tpath} hashes {got[:16]}..., the licence pins "
+            f"{lic_trunk['sha256'][:16]}... for role {lic_trunk.get('role')!r}.{size_note}"
+        )
+    return {"licence": str(p), "crops_pinned": len(pinned), "verified": len(crops),
+            "trunk_role": lic_trunk.get("role"), "trunk_sha256": lic_trunk["sha256"],
+            "trunk_verified_by": "sha256"}
+
+
+# ======================================================================================
+# 1b. SCHEMA VALIDATION ONLY - which is NOT a licence, and must never become one
+# ======================================================================================
+
+def schema_report(cache_dir: Path, crops: list[str] | None = None) -> dict:
+    """Validate the pair-and-role SCHEMA of a tapped cache. This licenses NOTHING.
+
+    WHY THIS EXISTS SEPARATELY FROM THE GATE. `FACT-0403` measured the exact case it is for: the
+    archived P36 cache has PROVEN structure - passivity, pair-and-role schema, zero integrity
+    failures, positional features round-tripping at exactly 0.0 - and an INVALID parity verdict,
+    because the reference it was compared against was downstream of a secondary-model logit blend
+    at weight 0.15. Structure is therefore established and learned quantities are not. Reading
+    such a cache to check that this harness can address it is legitimate; training on it is not.
+
+    The report deliberately carries NO ``passed`` key. ``write_licence`` requires one, so a
+    schema check cannot be laundered into a training licence by a caller who passes the wrong
+    dict - the refusal is structural rather than a convention.
+    """
+    cache_dir = Path(cache_dir)
+    names = list(crops) if crops else sorted(p.stem for p in cache_dir.glob("*.npz"))
+    out: dict = {
+        "heartbeat": "ASSOC_CACHE_SCHEMA_ONLY",
+        "schema_version": CACHE_SCHEMA_VERSION,
+        "layout": "pair_and_role",
+        "cache_dir": str(cache_dir),
+        "licenses_training": False,
+        "why_not_a_licence": (
+            "Schema validation proves STRUCTURE and nothing about learned quantities. It does "
+            "not run the deployed head, does not bind a trunk and does not establish probability "
+            "parity - FACT-0403 records a cache with sound structure whose parity verdict is "
+            "INVALID. Training requires `gate` with a manifest and a Gate-1 receipt."
+        ),
+        "crops": [],
+        "schema_ok": False,
+        "refusals": [],
+    }
+    if not names:
+        out["refusals"].append(
+            "no cache files found - a schema check that reads nothing is not a check (FACT-0387)")
+        return out
+    for crop in names:
+        path = cache_dir / f"{crop}.npz"
+        row: dict = {"crop": crop, "ok": False, "reasons": []}
+        try:
+            data = load_cache(path)
+            binding = AFC.crop_binding(crop, data, DEPLOYED_FLOOR,
+                                       bytes_on_disk=path.stat().st_size)
+            index = role_features(data, crop)
+            row.update({
+                "ok": True,
+                "nodes": binding["nodes"],
+                "pairs": binding["pairs"],
+                "frames": len(binding["frames"]),
+                "window": binding["window"],
+                "role_nodes": binding["storage"]["role_nodes"],
+                "feat_dim": binding["feature_dim"],
+                "pos_dim": binding["pos_dim"],
+                "downsample": binding["downsample"],
+                "band_a_rows": binding["bands"]["band_a"]["rows"],
+                "band_b_rows": binding["bands"]["band_b"]["rows"],
+                "window_dependence": binding["window_dependence"],
+                # The harness's OWN addressing, exercised rather than assumed: resolve every
+                # recorded band edge through the (pair, role) index and require the role rows to
+                # carry the ids they were computed for.
+                "role_lookup": _exercise_role_lookup(data, index),
+            })
+        except HarnessRefusal as exc:
+            row["reasons"].append(str(exc))
+        except AFC.Reject as exc:
+            row["reasons"].append(str(exc))
+        out["crops"].append(row)
+    out["schema_ok"] = bool(out["crops"]) and all(c["ok"] for c in out["crops"])
+    return out
+
+
+def _exercise_role_lookup(cache: dict, index: RoleFeatureIndex) -> dict:
+    """Resolve every recorded band edge through the role index, and prove the roles differ.
+
+    The second half is the part a shape check cannot do. If a node appears in both roles, the two
+    vectors the index hands back MUST differ - ``_TemporalAttention`` mixes across the window, so
+    they come from different forward passes (`FACT-0402`). Identical vectors would mean
+    frame-keyed CONTENT inside a pair-and-role container.
+    """
+    src = np.concatenate([np.asarray(cache["band_a_source_id"]),
+                          np.asarray(cache["band_b_source_id"])]).astype(np.int64)
+    tgt = np.concatenate([np.asarray(cache["band_a_target_id"]),
+                          np.asarray(cache["band_b_target_id"])]).astype(np.int64)
+    s_rows, t_rows = index.rows_for_edges(src, tgt)
+    role = np.asarray(cache["role_role"]).astype(np.int64)
+    if not (np.all(role[s_rows] == ROLE_SRC) and np.all(role[t_rows] == ROLE_TGT)):
+        raise HarnessRefusal(
+            f"{ROLE_LOOKUP_DISAGREES}: {index.crop}: an edge resolved to a role row filed under "
+            "the opposite role, so the head would be fed a target vector as a source"
+        )
+    # Nodes served in BOTH roles somewhere in this cache, and by how much the vectors differ.
+    src_row_of = dict(zip(index.role_gid[s_rows].tolist(), s_rows.tolist()))
+    tgt_row_of = dict(zip(index.role_gid[t_rows].tolist(), t_rows.tolist()))
+    both = sorted(set(src_row_of) & set(tgt_row_of))
+    delta = 0.0
+    if both:
+        lhs = index.feat[[src_row_of[g] for g in both]].astype(np.float64)
+        rhs = index.feat[[tgt_row_of[g] for g in both]].astype(np.float64)
+        delta = float(np.abs(lhs - rhs).max())
+        if delta == 0.0:
+            raise HarnessRefusal(
+                f"{FRAME_KEYED_CACHE}: {index.crop}: every node served in both roles returns a "
+                "BIT-IDENTICAL vector in each. A temporal-attention trunk cannot do that "
+                "(FACT-0402); a frame-keyed writer wearing this schema does exactly that"
+            )
+    return {"edges_resolved": int(src.shape[0]),
+            "nodes_served_in_both_roles": len(both),
+            "max_abs_delta_between_the_two_roles": delta}
 
 
 # ======================================================================================
@@ -761,35 +1163,44 @@ class ContextContract:
         mult = {"concat_src_tgt": 2, "diff": 1, "concat_diff": 3}[self.pair_builder]
         return mult * self.dim + len(self.extra_features)
 
-    def validate_against_cache(self, feats: np.ndarray) -> None:
+    def validate_against_cache(self, index: "RoleFeatureIndex") -> None:
         if self.dim is None:
-            self.dim = int(feats.shape[1])
+            self.dim = int(index.dim)
             return
-        if feats.shape[1] != self.dim:
+        if int(index.dim) != self.dim:
             raise HarnessRefusal(
                 f"contract {self.name!r} declares dim {self.dim} but the licensed cache carries "
-                f"{feats.shape[1]} - the declaration does not describe this cache"
+                f"{index.dim} - the declaration does not describe this cache"
             )
 
-    def build(self, node_feat_by_crop: dict, table: pl.DataFrame) -> np.ndarray:
+    def build(self, role_index_by_crop: dict, table: pl.DataFrame) -> np.ndarray:
+        """Assemble the pair features, taking each node's ROLE-SPECIFIC vector.
+
+        The source vector comes from the SOURCE role of the pair the candidate belongs to and the
+        target vector from that same pair's TARGET role. Under the retired layout there was one
+        vector per node and this line silently picked the wrong one for every source in every
+        pair (t, t+1) with t >= 1 - `FACT-0402`, measured at 66 of 173 role-nodes and a max abs
+        delta of 0.0123 against a 1e-4 tolerance.
+        """
         crops = table["crop"].to_numpy()
         src = table["source"].to_numpy().astype(np.int64)
         tgt = table["target"].to_numpy().astype(np.int64)
         for crop in np.unique(crops):
-            feats = node_feat_by_crop.get(str(crop))
-            if feats is None:
+            index = role_index_by_crop.get(str(crop))
+            if index is None:
                 raise HarnessRefusal(f"no licensed cache features for crop {crop!r}")
-            self.validate_against_cache(feats)
+            self.validate_against_cache(index)
         out = np.empty((table.height, self.width()), dtype=np.float32)
         extra = (table.select(self.extra_features).to_numpy().astype(np.float32)
                  if self.extra_features else np.empty((table.height, 0), dtype=np.float32))
         for crop in np.unique(crops):
-            feats = node_feat_by_crop[str(crop)]
+            index = role_index_by_crop[str(crop)]
             m = crops == crop
-            fs, ft = feats[src[m]], feats[tgt[m]]
+            s_rows, t_rows = index.rows_for_edges(src[m], tgt[m])
+            fs, ft = index.feat[s_rows], index.feat[t_rows]
             if not (np.all(np.isfinite(fs)) and np.all(np.isfinite(ft))):
                 raise HarnessRefusal(
-                    f"{crop}: a candidate references a node whose frame carries no cached features"
+                    f"{crop}: a candidate resolves to a role row holding a non-finite feature"
                 )
             if self.pair_builder == "concat_src_tgt":
                 block = np.concatenate([fs, ft], axis=1)
@@ -919,15 +1330,15 @@ def _winning_per_target(crops: np.ndarray, targets: np.ndarray, scores: np.ndarr
 
 def run_model(dec: pl.DataFrame, spec: ModelSpec, splitter, baseline_map: dict,
               contested_keys: set, preserve_single: bool,
-              node_feat_by_crop: dict | None) -> dict:
+              role_index_by_crop: dict | None) -> dict:
     """One model, fitted out of fold and scored through the harness surface."""
     if spec.model_class == "contextual":
         contract = ContextContract.from_dict(spec.contract)
-        if node_feat_by_crop is None:
+        if role_index_by_crop is None:
             raise HarnessRefusal(
                 f"{spec.tag}: a contextual model needs the licensed cache and none was gated"
             )
-        x_all = contract.build(node_feat_by_crop, dec)
+        x_all = contract.build(role_index_by_crop, dec)
         contract_block = {"name": contract.name, "dim": contract.dim,
                           "dim_declared": "from_cache" if contract.dim_from_cache else contract.dim,
                           "pair_builder": contract.pair_builder,
@@ -1026,7 +1437,7 @@ def harness_verdict(model_result: dict, deployed_contested_top1: float | None,
 def run_harness(*, table: pl.DataFrame, models: list[ModelSpec], fold: int,
                 cv_kind: str = "GroupKFold", n_splits: int = 5,
                 preserve_single: bool = True, cache_gate: dict | None = None,
-                node_feat_by_crop: dict | None = None,
+                role_index_by_crop: dict | None = None,
                 chain_arms: dict | None = None, summarise=None,
                 allow_degenerate: bool = False) -> dict:
     """Fit and report every declared model into ONE comparable payload."""
@@ -1061,7 +1472,7 @@ def run_harness(*, table: pl.DataFrame, models: list[ModelSpec], fold: int,
     results, per_target_maps = [], {}
     for spec in models:
         r = run_model(dec, spec, splitter, baseline_map, contested_keys, preserve_single,
-                      node_feat_by_crop)
+                      role_index_by_crop)
         per_target_maps[spec.tag] = r.pop("per_target_correct")
         if chain_arms and spec.tag in chain_arms:
             from assoc_report import build_report
@@ -1113,15 +1524,49 @@ def _load_spec(path: Path) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
-def cmd_gate(args) -> int:
-    report = gate_cache(cache_dir=args.cache_dir, preilp=args.preilp, ecb_dir=args.ecb_dir,
-                        crops=args.crops, receipt=args.receipt, reproducer=args.reproducer)
+def cmd_schema(args) -> int:
+    """Validate a cache's pair-and-role SCHEMA. Prints, loudly, that it licenses nothing."""
+    report = schema_report(Path(args.cache_dir), args.crops)
     if args.out:
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.out).write_text(json.dumps(report, indent=2, default=float), encoding="utf-8")
     for c in report["crops"]:
+        if c["ok"]:
+            rl = c["role_lookup"]
+            print(f"  {c['crop']:<20s} nodes={c['nodes']:>7,} pairs={c['pairs']:>4} "
+                  f"role_nodes={c['role_nodes']:>7,} feat_dim={c['feat_dim']} "
+                  f"pos_dim={c['pos_dim']} window={c['window']} "
+                  f"dual_role={c['window_dependence']['dual_role_nodes']:>6,} "
+                  f"dual_delta={c['window_dependence']['max_abs_delta']:.4g} "
+                  f"edges_resolved={rl['edges_resolved']:,} "
+                  f"both_roles={rl['nodes_served_in_both_roles']:,} "
+                  f"role_delta={rl['max_abs_delta_between_the_two_roles']:.4g}", flush=True)
+        else:
+            print(f"  {c['crop']:<20s} REJECTED <- " + "; ".join(c["reasons"][:2]), flush=True)
+    for r in report["refusals"]:
+        print(f"  REFUSAL: {r}", flush=True)
+    print("ASSOC_CACHE_SCHEMA_OK" if report["schema_ok"] else "ASSOC_CACHE_SCHEMA_REJECTED",
+          flush=True)
+    print("  TRAINING_LICENCE=NOT_GRANTED - " + report["why_not_a_licence"], flush=True)
+    return 0 if report["schema_ok"] else 2
+
+
+def cmd_gate(args) -> int:
+    report = gate_cache(cache_dir=args.cache_dir, preilp=args.preilp, ecb_dir=args.ecb_dir,
+                        crops=args.crops, receipt=args.receipt, reproducer=args.reproducer,
+                        manifest=args.manifest, expect_trunk_sha=args.expect_trunk_sha,
+                        expect_fold=args.expect_fold, expect_trunk_role=args.expect_trunk_role)
+    if args.out:
+        Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.out).write_text(json.dumps(report, indent=2, default=float), encoding="utf-8")
+    if report.get("trunk"):
+        t = report["trunk"]
+        print(f"  trunk      role={t['role']} sha256={t['sha256'][:16]}... "
+              f"bytes={t['bytes']:,} (identity is the HASH, never the size)", flush=True)
+    for c in report["crops"]:
         print(f"  {c['crop']:<20s} nodes={c.get('nodes', 0):>7,} "
-              f"frames={c.get('frames', 0):>4} passed={c['passed']}"
+              f"frames={c.get('frames', 0):>4} role_nodes={c.get('role_nodes') or 0:>7,} "
+              f"passed={c['passed']}"
               + ("" if c["passed"] else "  <- " + "; ".join(c["reasons"][:3])), flush=True)
     for r in report["refusals"]:
         print(f"  REFUSAL: {r}", flush=True)
@@ -1141,22 +1586,35 @@ def cmd_train(args) -> int:
     models = [ModelSpec.from_dict(m) for m in spec["models"]]
     crops = sorted(table["crop"].unique().to_list())
 
-    gate, node_feat = None, None
+    gate, role_index = None, None
     cache_cfg = spec.get("cache")
     if any(m.needs_cache() for m in models) or cache_cfg:
         if not cache_cfg:
             raise HarnessRefusal("a contextual model was declared with no `cache` section")
+        if not cache_cfg.get("manifest"):
+            raise HarnessRefusal(
+                f"{TRUNK_NOT_BOUND}: the spec's `cache` section names no `manifest`, so the "
+                "producing trunk would be unnamed. Build one with "
+                "`audit_feature_cache.py bind` (FACT-0392)"
+            )
         cache_crops = cache_cfg.get("crops") or crops
-        verify_licence(Path(cache_cfg["licence"]), Path(cache_cfg["dir"]), cache_crops)
+        licence = verify_licence(Path(cache_cfg["licence"]), Path(cache_cfg["dir"]), cache_crops,
+                                 trunk=Path(cache_cfg["trunk"]) if cache_cfg.get("trunk") else None)
         gate = gate_cache(cache_dir=Path(cache_cfg["dir"]), preilp=Path(cache_cfg["preilp"]),
                           ecb_dir=Path(cache_cfg["ecb_dir"]) if cache_cfg.get("ecb_dir") else None,
                           crops=cache_crops, receipt=Path(cache_cfg["receipt"]),
-                          reproducer=cache_cfg.get("reproducer", "receipt"))
+                          reproducer=cache_cfg.get("reproducer", "receipt"),
+                          manifest=Path(cache_cfg["manifest"]),
+                          # The licence's trunk is the expectation, so a cache rebound to a
+                          # different trunk after licensing is refused rather than adopted.
+                          expect_trunk_sha=licence["trunk_sha256"],
+                          expect_fold=cache_cfg.get("fold"),
+                          expect_trunk_role=cache_cfg.get("trunk_role"))
         if not gate["passed"]:
             print("ASSOC_CACHE_GATE_FAILED", json.dumps(gate["refusals"]), flush=True)
             raise HarnessRefusal("cache gate failed at training time - nothing was fitted")
-        node_feat = {c: node_features(load_cache(Path(cache_cfg["dir"]) / f"{c}.npz"))
-                     for c in cache_crops}
+        role_index = {c: role_features(load_cache(Path(cache_cfg["dir"]) / f"{c}.npz"), c)
+                      for c in cache_crops}
         table = table.filter(pl.col("crop").is_in(cache_crops))
 
     summarise = None
@@ -1172,7 +1630,7 @@ def cmd_train(args) -> int:
         cv_kind=spec.get("cv", {}).get("kind", "GroupKFold"),
         n_splits=int(spec.get("cv", {}).get("n_splits", 5)),
         preserve_single=bool(spec.get("preserve_single_candidate", True)),
-        cache_gate=gate, node_feat_by_crop=node_feat,
+        cache_gate=gate, role_index_by_crop=role_index,
         chain_arms=chain_arms, summarise=summarise,
         allow_degenerate=bool(spec.get("allow_degenerate", False)),
     )
@@ -1210,12 +1668,23 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
 
+    s = sub.add_parser("schema", help="validate a cache's pair-and-role schema; licenses NOTHING")
+    s.add_argument("--cache-dir", type=Path, required=True)
+    s.add_argument("--crops", nargs="*")
+    s.add_argument("--out", type=Path)
+    s.set_defaults(func=cmd_schema)
+
     g = sub.add_parser("gate", help="gate a feature cache; writes the licence training requires")
     g.add_argument("--cache-dir", type=Path, required=True)
     g.add_argument("--preilp", type=Path, required=True)
     g.add_argument("--ecb-dir", type=Path)
     g.add_argument("--receipt", type=Path)
     g.add_argument("--reproducer", default="receipt")
+    g.add_argument("--manifest", type=Path,
+                   help="the audit_feature_cache manifest binding the producing TRUNK by sha256")
+    g.add_argument("--expect-trunk-sha")
+    g.add_argument("--expect-trunk-role")
+    g.add_argument("--expect-fold")
     g.add_argument("--crops", nargs="*")
     g.add_argument("--licence", type=Path)
     g.add_argument("--out", type=Path)
