@@ -120,7 +120,12 @@ def phase_cache(args):
             ten = torch.from_numpy(vol.astype(np.float32)).to(device)
             with torch.no_grad():
                 unet_out = model.unet(ten)
-                det = model.detection_head(unet_out)
+                # detect_head, NOT detection_head. UNetNodeTransformer defines self.detect_head
+                # (train_unet_transformer.py:437, used at :487 and :503); `detection_head` appears
+                # ZERO times in the support pack. The wrong name would have raised AttributeError on
+                # the FIRST crop - a fourth session with zero crops - and was caught on CPU by the
+                # preflight's model probe, not by any test of mine.
+                det = model.detect_head(unet_out)
             for fi, t in enumerate(frames):
                 if t in seen:
                     continue

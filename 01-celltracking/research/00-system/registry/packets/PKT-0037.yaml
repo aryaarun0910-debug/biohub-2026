@@ -215,8 +215,169 @@ result: >-
   The cache-writing run must emit coords, frames, starts, ends, feat_frames, feat_t, source_id,
   target_id and edge_prob, or the auditor will refuse it.
 
-  VERDICT: NOT CERTIFIED. One item remains and it is mechanical: when P33 v2 lands and PKT-0036
-  has audited it, apply _evidence/foundations/pending/*.diff, confirm
-  tests/test_assoc_feature_parity.py is 9/9, and the gate on GPU is released. Nothing else in
-  this packet blocks. No GPU job, kernel push or submission was made; the registry, research-tree
-  and claims gates are green.
+  VERDICT (first pass): NOT CERTIFIED. One item remained and it was mechanical: apply
+  _evidence/foundations/pending/*.diff once P33 v2 had landed. THAT IS NOW DONE - the band-A
+  floor is committed at scripts/kaggle_edits/assoc_feature_parity.py:271 (`and a_checked > 0`,
+  commit 43d770a) and tests/test_assoc_feature_parity.py is green.
+
+result_preflight_2026_08_30: >-
+  THE PREFLIGHT SYSTEM IS BUILT AND PROVEN, AND ITS FIRST VERDICT ON P33 ATTEMPT 3 IS **FAIL** -
+  ON THE SAME PROCESS-BOUNDARY DEFECT THAT KILLED ATTEMPT 1 (FACT-0387). Caught on CPU in
+  seconds. This is the one case the standing GPU rule names where infrastructure counts as the
+  cycle's output: the harness demonstrably prevented an already-scheduled GPU launch.
+
+  INSTRUMENTS (all new; nothing existing was modified, so the built notebook under audit is
+  untouched):
+    scripts/kaggle_edits/kaggle_mount_ladder.py  the ONE central bounded dataset resolver,
+      written as an INJECTABLE snippet so a kernel patch embeds this text instead of writing a
+      fourth private ladder. Bounded depth ladder, never `**`. Fails closed with a listing of
+      what IS mounted. Positive heartbeat MOUNT_RESOLVED on every hit.
+    scripts/win_bet/kaggle_mounts.py  the CPU face. It does NOT re-implement the ladder - it
+      execs that file, so the resolver the preflight proves and the resolver the kernel runs are
+      the same characters (test: resolve.__code__.co_filename == the ladder path). Also carries
+      simulate_mount_tree (flat / datasets / competitions) and rebase_and_exec, which lifts a
+      resolver OUT OF THE BUILT NOTEBOOK, re-points it at a sandbox and CALLS it. Execution, not
+      a regex over the text.
+    scripts/win_bet/kaggle_artifacts.py  unified queue-fetch / factory-output discovery with role
+      aliases, recording WHICH convention produced the hit and, on a miss, every root searched.
+    scripts/win_bet/gpu_preflight.py  the driver: 10 checks, a signed receipt, and --selftest.
+    tests/test_gpu_preflight.py  20 tests, 20 pass.
+
+  P33 ATTEMPT 3 VERDICT: FAIL, one check, and it is not cosmetic. PF07 launches the built
+  notebook's own worker across the REAL subprocess boundary, in preflight-only mode (argparse and
+  phase dispatch execute; only the GPU-bound phase bodies are stubbed), reproducing the
+  notebook's own launch kwargs. The notebook calls
+  `_afp_sub.run(_afp_cmd, cwd=str(REPO_DIR), text=True, capture_output=True)` with NO `env=`
+  (built notebook cell 5; source scripts/kaggle_edits/assoc_feature_parity.py:399). The worker
+  file lives at /kaggle/working/afp_gate1.py, so sys.path[0] is /kaggle/working, NOT
+  REPO_DIR/scripts - and cwd is not on sys.path for a script invocation. Measured in the probe:
+  sys_path0=<working>, PYTHONPATH=<unset>, and
+  `ModuleNotFoundError: No module named 'predict_unet_transformer'` - FACT-0387 verbatim, one
+  process over. A second, independent break rides with it: biohub_tracking is unresolvable too,
+  because the DEPLOYED shards are launched with env={**os.environ, "PYTHONPATH": "src"} (cell 5,
+  two call sites) and the gate's launcher omits it. The worker's own comment,
+  "resolves because cwd is the repo root", is false.
+  THE FIX IS ONE LINE, and it is proven rather than proposed: the same worker, same sandbox, same
+  probe, with env={**os.environ, "PYTHONPATH": "scripts" + os.pathsep + "src"} imports cleanly
+  and runs on to load_model (selftest M6). "src" alone is NOT enough - the worker is not inside
+  scripts/, which is why copying the deployed shards' env would still fail.
+
+  WHAT THE OTHER NINE CHECKS ESTABLISHED (all PASS):
+    PF01 built notebook sha256 e826a682 == build_manifest.built_sha256; slug, datasets and
+      competition sources agree with the spec; every patch file is committed clean.
+    PF02 both resolvers this spec injects (_afp_find, _loeo_find) were EXECUTED against simulated
+      mounts and resolve under BOTH conventions; no resolver in the notebook can `**`-walk.
+      Recorded finding: SIX independent ladders coexist in this one notebook, each with its own
+      depth ceiling. That is the FACT-0397 generator, and it is why the ladder is now central.
+    PF03 EXACT crops, not a count: ['44b6_0113de3b', '44b6_0b24845f'] - the notebook's own
+      selection rule evaluated against the real uploaded parquet; both are in the fold-0 stem
+      list and both have a train .zarr.
+    PF05 parquet columns and dtypes and every ECB sidecar key the worker reads.
+    PF06 EXACT POSITIVE COUNTS at the 8-frame cap, which is the FACT-0394 lesson applied BEFORE
+      the spend rather than after: 44b6_0113de3b band A 1488 / band B 835; 44b6_0b24845f band A
+      2174 / band B 7585. Every pair is frame-consecutive, node ids are contiguous and
+      time-ordered, and the sidecar's in-scope >0.5 count equals the pre-ILP band-A count exactly
+      (1488 and 2174) - an independent cross-artifact tie on node identity. So the in-kernel
+      a_checked>0 / b_checked>0 floors CAN be satisfied; the gate will not refuse for emptiness.
+    PF08 the gate report is written outside the try block and is in _LOEO_KEEP, so it survives
+      the export sweep.
+    PF09 WEIGHTS_RELATIVE is repo-relative and joined to REPO_DIR; the DeepCenter checkpoint,
+      which the spec env hardcodes as /kaggle/input/<slug>/..., has a datasets/ fallback in cell 6
+      and resolves under both conventions. STATED LIMIT: the pack's edge_predictor_best.pth is not
+      mirrored locally, so only the path SHAPE is checked - recorded, not silently passed.
+    PF10 heartbeat tokens the fetched log MUST carry, named in the receipt so their absence is the
+      alarm. Reported but NOT blocking: scripts/kaggle_edits/coupled_division_transplant.py
+      contains ZERO print calls and cannot prove it fired.
+    PF11 P24 resolves by the queue convention (C:/temp/queue/p24_deepcenter_best_veto) and P32 by
+      the factory convention (notebooks/kaggle_p32_public931_exact/_out) - the two artifacts whose
+      split produced the false FAIL corrected in FACT-0396, now regression fixtures in both the
+      selftest and the test suite.
+
+  PROVED BY MUTATION, 15/15, EVERY CHECK REJECTED BY ITS OWN CONDITION: M1 hardcoded flat mount
+  (finds under flat, misses under datasets); M2 a `**` walk; M3 a 1-frame cap that makes both
+  bands compare nothing; M4 a sidecar torn off the pre-ILP band-A tie; M5 a factory-only search
+  that misses the queue champion; M6 the as-built launcher vs the same worker with
+  PYTHONPATH=scripts+src; M7 one byte added to the built notebook; M8 a receipt edited after
+  signing; M9 a gate patch that cannot say it ran; M10 a selected crop absent from the fold stem
+  list; M11 a sidecar missing edge_prob; M12 the gate report dropped from the keep set; M13
+  weights pinned to an absolute mount path. TWO ACCEPT CONTROLS (A1 the central ladder under all
+  three conventions, A2 P32 by the factory convention), because an auditor that rejects
+  everything checks nothing.
+  ONE CHECKER BUG THE MUTATIONS FOUND, worth recording: the first is_bounded read `**` anywhere in
+  the text and therefore condemned _loeo_find for the sentence in its own docstring explaining why
+  it does NOT use `**`. It now parses glob call arguments with ast.
+
+  RECEIPT: _evidence/foundations/preflight_receipt_p33.json (also C:/temp/foundations/), carrying
+  resolved paths, input sha256s, the exact crop names, the code commit, the expected GPU outputs
+  and the per-crop minimum pair counts. Tamper-evident, NOT authenticated - no secret exists in
+  this repository, and claiming otherwise would be the decorative check this packet exists to
+  remove. `verify-receipt` rejects an edited body and a changed instrument.
+
+  VERDICT: PREFLIGHT SYSTEM CERTIFIED; P33 ATTEMPT 3 IS **NOT CLEARED FOR GPU**. See the
+  correction block below for the final state, which is stronger than this first pass.
+
+result_preflight_corrected_2026_08_30: >-
+  CORRECTED AFTER A FALSE NEGATIVE WAS REPORTED FROM THE FIELD, AND THE CORRECTION FOUND A THIRD
+  KERNEL DEFECT. Agent 2 ran gpu_preflight against a SUBMISSION notebook and PF09 failed on
+  arithmetic of its own: it split /kaggle/input/datasets/<owner>/<slug>/... positionally, took
+  "datasets" for the slug and left the slug inside the "relative" remainder, then mounted that
+  under <owner>/<slug>/ again - `datasets/pilkwang/datasets/pilkwang/...`. The notebook was fine.
+  A checker that cries wolf is worse than none: it teaches a reader to ignore the one time it is
+  right. FIVE bugs of that ONE class were then found in this instrument, all of them "read the
+  code" where the fix is "resolve the code", and every one is now fixed and pinned by a mutation:
+    (i)   PF09 path split -> parse_mount_path(), which handles flat, datasets/<owner>/<slug> and
+          competitions/<slug>, and every probe asserts no duplicated slug segment. Proved in BOTH
+          directions, which the packet's own standard requires: A3 the correct nested root must
+          PASS; M14 a checkpoint under a slug that is not mounted must FAIL.
+    (ii)  PF01 called git status with an EMPTY pathspec when a spec had no code_file edits, which
+          reports the WHOLE worktree - so any such spec failed on another agent's open files.
+          A4 proves the empty question now has an empty answer; M16 proves an uncommitted patch of
+          the spec's OWN is still rejected.
+    (iii) PF07 read the launcher's PYTHONPATH with a regex over the CALL text. When the launcher
+          was rewritten to build a NAMED env dict, the regex saw an env= it could not read and
+          passed none - reproducing a failure the notebook no longer had. It now parses and
+          evaluates the assignment (ast, supporting os.pathsep concatenation).
+    (iv)  PF07's model probe HARDCODED TemporalUNet3D - the UNet, which is a CONSTRUCTOR ARGUMENT
+          - and reported all four of the worker's model calls missing. load_model in fact returns
+          UNetNodeTransformer. The probe now resolves the class from load_model's own source and
+          checks __init__ assignments as well as class attributes.
+    (v)   is_bounded read `**` anywhere in the text and condemned _loeo_find for the sentence in
+          its own docstring explaining why it does not use `**`. It now parses glob arguments.
+
+  ARTIFACT CLASS, added on Agent 2's second point. A submission notebook has no Gate-1 report and
+  never will, so failing it for lacking one is noise - and noise is how a real FAIL gets ignored.
+  Each spec is now classified (submission / gate_smoke / feature_cache / generic) and each check
+  declares the classes it applies to. Out-of-class checks are SKIPPED, named in the receipt, and
+  EXCLUDED from the verdict - never counted as a PASS. The dangerous half is guarded too: a class
+  that SHOULD carry a check but has no implementing profile FAILS CLOSED (M15b), because the
+  original defect here was PF05 and PF06 reporting PASS on P32 while reading P33's dataset. With
+  this, P32 and P24 both preflight to PASS on their five applicable checks.
+
+  THE THIRD KERNEL DEFECT, found only because bug (iv) was fixed rather than worked around. The
+  Gate-1 worker's CACHE phase calls `model.detection_head(unet_out)` (built notebook cell 5, line
+  647; source scripts/kaggle_edits/assoc_feature_parity.py). The class load_model returns,
+  UNetNodeTransformer, has NO such attribute - it is `detect_head`
+  (scripts/train_unet_transformer.py:437, and used as self.detect_head at :487 and :503). The
+  string "detection_head" appears in the support pack ZERO times and in the whole built notebook
+  exactly ONCE, inside the AFP worker. Confirmed against FIVE independently materialised copies of
+  the pack (C:/temp/p7, p7b, lonnie_gap2_output, h1r_edge_s5_smoke_v2 and vendor/) - all say
+  detect_head. So the cache phase would raise AttributeError on the FIRST crop, and a third GPU
+  session would end with zero crops compared. This is exactly the failure the preflight exists to
+  price on CPU.
+
+  WHAT ELSE MOVED WHILE THIS RAN. scripts/kaggle_edits/assoc_feature_parity.py now carries the
+  PYTHONPATH fix diagnosed above (uncommitted at the time of writing, applied by another agent).
+  That is the right fix and the as-if-rebuilt probe confirms it: with it, import
+  predict_unet_transformer succeeds, every AFP attribute the worker uses resolves, and the
+  worker's argparse accepts and dispatches BOTH phases. But the BUILT notebook predates the edit,
+  so PF01 now fails as well - correctly. The built artifact and its patch source have diverged.
+
+  FINAL VERDICT ON P33 ATTEMPT 3: **FAIL - DO NOT PUSH.** Two failing checks, one cause each.
+  PF01: the built notebook no longer matches its patch source. PF07: that notebook still carries
+  the pre-fix launcher, and separately calls model.detection_head, which does not exist.
+  REQUIRED BEFORE GPU, in order: (1) rename detection_head -> detect_head in the worker;
+  (2) rebuild via kaggle_factory; (3) commit the patch and the built notebook; (4) re-run
+  `gpu_preflight run --spec scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json` and require
+  PASS with an empty `failed`. The PYTHONPATH half is already done and already verified.
+  No GPU job, kernel push or submission was made by this packet.
+  SELFTEST: 21/21, every check rejected by its own condition, with four ACCEPT controls.

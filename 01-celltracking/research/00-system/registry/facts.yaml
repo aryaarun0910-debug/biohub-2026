@@ -6339,3 +6339,65 @@ facts:
       that session did leave a reusable artifact behind even though its gate compared nothing.
     date: '2026-08-30'
     tags: [gate-1, pkt-0029, import-boundary, preflight-worked, test-layout, verified]
+
+  - id: FACT-0400
+    statement: >-
+      The Gate 1 worker does not reproduce the deployed IMAGE PIPELINE, and this is a silent defect that
+      would have made the gate measure its own preprocessing rather than the cache. The deployed
+      predict_video opens the dataset with normalize=False and load_image=False, reads the zarr group "0"
+      directly, and normalises using the dataset's own recorded quantiles 0.001 and 0.999 - raising if they
+      are absent - while carrying downsample (1, 4, 4) into both the array and the voxel size. The Gate 1
+      worker instead calls open_dataset(path).image with NO arguments, taking normalize=True by default and
+      no downsample at all, so it feeds the trunk a differently normalised image at a different spatial
+      resolution. Combined with the four defects already found, five separate faults have been identified in
+      three attempts at this gate
+    value: 5
+    unit: distinct_defects_found_in_the_gate_1_worker
+    scope:
+      deployed_call: 'open_dataset(ds_path, normalize=False, load_image=False, downsample=downsample)'
+      deployed_normalisation: 'zarr.open_group(ds.zarr_path)["0"] with q_low=quantiles["0.001"], q_high=quantiles["0.999"], raising if absent'
+      deployed_downsample: [1, 4, 4]
+      deployed_voxel: 'tuple(s * d for s, d in zip(ds.scale, downsample))'
+      worker_call: 'AFP.open_dataset(test_dir / f"{crop}.zarr").image'
+      worker_defaults_taken: {normalize: true, downsample: null, load_image: true}
+      source: C:/temp/p7/tracking_repo/scripts/predict_unet_transformer.py lines 297-341
+      defect_ledger:
+        1: {attempt: 1, defect: "import in the notebook process", fact: FACT-0387, cost: 1 GPU session}
+        2: {attempt: 2, defect: "hardcoded dataset mount root", fact: FACT-0397, cost: 1 GPU session}
+        3: {attempt: 3, defect: "no env= on the worker launcher, PYTHONPATH unset", fact: FACT-0399, cost: 0, caught_on_cpu: true}
+        4: {attempt: 3, defect: "model.detection_head does not exist; it is detect_head", cost: 0, caught_on_cpu: true}
+        5: {attempt: 3, defect: "image pipeline not reproduced - normalisation and downsample", cost: 0, caught_on_cpu: true}
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Read at named lines in the deployed predictor and in the io module's signature, and compared against
+      the worker's own call. The normalisation difference is not a matter of degree: the deployed path
+      explicitly disables open_dataset's normalisation and substitutes a quantile scheme of its own, so the
+      two paths cannot agree by coincidence. The downsample difference changes the spatial resolution the
+      trunk sees, which changes every feature it produces.
+    instrument: >-
+      source read of the materialised support pack at
+      C:/temp/p7/tracking_repo/scripts/predict_unet_transformer.py:297-341 and
+      C:/temp/p7/tracking_repo/src/biohub_tracking/io.py:37-44 - both OUTSIDE this repository, which is
+      the point: the deployed pipeline lives in the vendored pack, not in our tree - compared against
+      scripts/kaggle_edits/assoc_feature_parity.py, which is committed
+    experiment: EXP-0041
+    note: >-
+      THE PATTERN IS THE FINDING, NOT THE FIFTH DEFECT. Three attempts at one gate have produced five
+      distinct faults, and every one shares a cause: the worker was written to APPROXIMATE the deployed path
+      from its own reading, rather than to REUSE it. Each fix addressed the symptom that had surfaced and
+      left the next one intact - import, then mount root, then PYTHONPATH, then an attribute name, now the
+      image pipeline. Two of the five were paid for at GPU rates; the last three were caught on CPU by the
+      preflight and an auditor's execution, which is the mechanism working as intended.
+      THE STRUCTURAL FIX IS NOT ANOTHER PATCH. A parity gate that reimplements the pipeline it is checking
+      can only ever be as correct as its reimplementation, and this one has been wrong five times. The gate
+      must CALL the deployed preprocessing - the same open_dataset arguments, the same zarr group, the same
+      quantile normalisation, the same downsample - or the comparison measures the worker rather than the
+      cache. THE GATE'S OWN DOCSTRING ALREADY ARGUED THIS and then did not follow it: it warns that reading
+      the zarr directly "would bypass the deployed normalisation and defeat the parity being proven", while
+      the worker takes a DIFFERENT normalisation by default, which is worse than the failure it warned about.
+      IMPLICATION FOR THE STANDING GPU RULE: attempt 4 must NOT be pushed on the strength of the four fixes
+      applied so far. This defect was found after those fixes were in place, which is itself evidence that
+      the remaining unknown count is not zero.
+    date: '2026-08-30'
+    tags: [gate-1, pkt-0029, image-pipeline, silent-defect, reimplementation, pattern, verified, headline]

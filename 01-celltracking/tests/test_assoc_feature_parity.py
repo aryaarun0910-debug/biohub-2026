@@ -98,7 +98,11 @@ STUB = textwrap.dedent(
         def unet(self, x):
             return torch.zeros(1, 2, FEAT_DIM, 4, 4)
 
-        def detection_head(self, x):
+        def detect_head(self, x):
+            # detect_head, matching UNetNodeTransformer:437. The stub previously defined
+            # `detection_head`, which does not exist on the real class - so the suite validated a
+            # method the deployed model has never had (FACT-0400 defect 4).
+
             return torch.zeros(1, 2, 1, 4, 4)
 
         def _index_features(self, x, pc, pm):
