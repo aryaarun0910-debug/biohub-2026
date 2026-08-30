@@ -3537,7 +3537,16 @@ facts:
       top3_boundary: 0.955
       gap_to_top3: 0.027
     provenance: MEASURED
-    instrument: kaggle submission 55820202 (aryaarun07/biohub-p24-deepcenter-best-veto v1); audit receipt notebooks/kaggle_p24_deepcenter_best_veto/_out/
+    instrument: >-
+      kaggle submission 55820202 (aryaarun07/biohub-p24-deepcenter-best-veto v1). AUDIT RECEIPT CORRECTED
+      2026-08-30 by the PKT-0036 release audit: the receipt path this fact cited,
+      notebooks/kaggle_p24_deepcenter_best_veto/_out/, DOES NOT EXIST and there is no evidence it ever did.
+      notebooks/**/_out/ is gitignored, so a missing directory is indistinguishable from an untracked one and
+      the absence went undetected for as long as this fact has existed. The P24 graph was never fetched -
+      no submission.csv, no structural audit, no version-bound receipt on disk - and P24 therefore FAILS the
+      release receipt that P32 passes 26 of 26 (FACT-0396). THE LEADERBOARD SCORE BELOW STANDS: it is the
+      competition's own number, read from the submissions path. What is NOT bound is the artifact that
+      produced it.
     experiment: EXP-0025
     note: >-
       CONFIRMS LEVER-0024 and FACT-0331: the 0.927 public lineage's edge over P9 is its DeepCenter bundle, not the
@@ -5114,6 +5123,13 @@ facts:
       secondary_training_scope: all 199 movies
       fold0: {held_out: 44b6, leaky: true}
       fold1: {held_out: 6bba, leaky: true}
+      # AMENDED 2026-08-30 (PKT-0036): the assertion below has NO INSTRUMENT and is not covered by this
+      # fact's validity_reason - it rides on a VERIFIED fact without being verified itself. What was
+      # actually measured is narrower: all four VISIBLE test movies are also train movies. The hidden set
+      # cannot be inspected, so the claim about it is an inference from the competition's design, not a
+      # measurement. It bounds interpretation rather than blocking anything, and FACT-0393 rule (2) already
+      # states the operative consequence - that configuration is un-validatable offline whatever the
+      # hidden set contains.
       leaderboard_legitimacy: "valid - the hidden test movies are not among the 199"
       affected_run: {experiment: EXP-0037, kernel: aryaarun07/biohub-p31-public931-replica-f1, version: 1, verdict: INVALID}
       secondary_pack_pool_kernel_um: 5.0
@@ -6077,3 +6093,58 @@ facts:
       re-opened by deleting a file.
     date: '2026-08-30'
     tags: [fold-hygiene, leakage-guard, exp-0019-class, pkt-0037, verified, hole-closed]
+
+  - id: FACT-0396
+    statement: >-
+      The champion transition from P24 to P32 is RELEASED on a bound receipt, 26 of 26 conditions, and the
+      audit's sharpest finding is that the OUTGOING champion fails the same receipt. P32 binds notebook
+      856451d8, submission graph e7ee404d, upstream cell-source de60a4f0, kernel version 1, with the public
+      source kernel re-pulled today and its ten cell sources byte-identical to the executed notebook. P24
+      fails at graph_fetched: it has no submission.csv, no structural audit and no version-bound receipt on
+      disk, and FACT-0341 cites notebooks/kaggle_p24_deepcenter_best_veto/_out/, a directory that does not
+      exist because notebooks/**/_out/ is gitignored and its absence is therefore silent. The transition
+      moves the baseline from an UNBOUND artifact to a BOUND one
+    value: 26
+    unit: release_receipt_conditions_passed_by_p32_of_26
+    scope:
+      incoming: {kernel_version: 1, notebook_sha256: 856451d8, notebook_lf_sha256: 933829b1, commit: 4cce909,
+                 submission: 55871868, graph_sha256: e7ee404d, upstream_cell_source_sha256: de60a4f0,
+                 upstream_kernel_id: 131761963, conditions_passed: 26, of: 26}
+      outgoing: {champion: P24, fact: FACT-0341, failed_condition: graph_fetched,
+                 missing: [submission.csv, structural audit, version-bound receipt]}
+      selftest: {defects_planted: 16, tests: 19, all_caught_by_their_own_condition: true}
+      exceptions_named:
+        E1: "the P32 spec sets base_notebook == built_notebook, so the build overwrote its own base; base_sha256 b998e582 exists nowhere in the worktree or git history and kaggle_factory build on this spec now aborts"
+        E2: "build_manifest.json was uncommitted at audit time"
+        E3: "cmd_verify is vacuous for this spec, for the same base==built reason"
+        E4: "attached datasets carry no version pin"
+        E5: "FACT-0378 scope.leaderboard_legitimacy has no instrument - see its own amendment"
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Every condition was exercised rather than asserted: the receipt harness plants 16 defects across 19
+      tests - float coordinates, illegal in-degree, mutated graph, notebook edited after build, slug
+      divergence, smuggled dataset, spec edited after audit, score outside band, fired falsifier, registry
+      disagreement, upstream divergence, an applicable defect rule not recorded, and four fail-closed cases -
+      and each is caught by its OWN named condition rather than by a generic failure.
+    instrument: >-
+      scripts/win_bet/audit_release_receipt.py with tests/test_audit_release_receipt.py; receipts
+      _evidence/audit/receipts/{release_p32,release_p24,champion_transition,p32_version_coherence}.json
+    experiment: EXP-0038
+    note: >-
+      THE STRONGEST CONDITION WAS NOT ON THE SPECIFIED LIST, and it is the one worth keeping. PKT-0028's whole
+      claim was that the public configuration ran VERBATIM - but the build process overwrote its own base
+      notebook (exception E1), destroying the evidence for that claim. Re-pulling the public source kernel
+      today and finding its cell sources byte-identical to the executed notebook RE-ESTABLISHES the verbatim
+      claim from the outside. An audit that had only checked the inherited list would have passed the
+      submission while its central claim was unevidenced.
+      THE OUTGOING CHAMPION FAILING THE SAME RECEIPT IS NOT AN ARGUMENT AGAINST THE TRANSITION - it is the
+      argument for it, and it is also a standing warning about gitignored evidence. FACT-0341 has cited a
+      path that does not exist for as long as it has existed, and nothing detected that, because a missing
+      gitignored directory looks exactly like a directory whose contents are simply not tracked. Any fact
+      whose instrument names a path under notebooks/**/_out/, _evidence/ or artifacts/ carries that risk.
+      The preregistered band was written into the SUBMISSION DESCRIPTION, so Kaggle itself timestamps the
+      preregistration as earlier than the score. That is a stronger provenance for a prediction than our own
+      repository can provide, and it is worth doing deliberately on every future preregistered submission.
+    date: '2026-08-30'
+    tags: [champion, release-receipt, p32, baseline-relocation, audit, gitignored-evidence, verified]

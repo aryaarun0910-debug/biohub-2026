@@ -200,3 +200,93 @@ result: >-
   and holds no such code: its five instruments contain no yaml.dump or yaml.safe_dump, and the sixth,
   scripts/win_bet/audit_registry_drift.py, reads with read_text, never serialises YAML, and refuses an
   --out path inside the registry. Registry-wide changes are routed to the coordinator, not to the file.
+
+  CONTINUED 2026-08-30 (later). CHAMPION TRANSITION RELEASED; P33 STILL RUNNING SO THE FEATURE-CACHE
+  VETO STANDS.
+
+  RELEASE RECEIPT ISSUED for P32 / EXP-0038 / submission 55871868 (FACT-0393): 26 of 26 conditions
+  pass. The new instrument scripts/win_bet/audit_release_receipt.py joins notebook, weights, manifest,
+  graph and score in one artifact, and tests/test_audit_release_receipt.py plants 16 defects - float
+  coordinates, an illegal in-degree, a mutated graph, a notebook edited after build, slug divergence,
+  a smuggled dataset, a spec edited after audit, a score outside its band, a fired falsifier, a
+  registry disagreement, an upstream divergence, an applicable defect rule not recorded, and four
+  fail-closed cases - each caught by its own named condition. The strongest condition was not on the
+  inherited list: a FRESH PULL of stephennedumpally/pls-upvote-share-higher-scoring-ideas today has
+  cell sources byte-identical to the executed notebook (de60a4f0..., id_no 131761963), which
+  re-establishes the verbatim claim the build itself had destroyed. The score was re-derived through
+  the submissions path, and the preregistered band 0.925-0.932 is written into the submission
+  DESCRIPTION, so Kaggle timestamps the preregistration before the score existed.
+
+  THE OUTGOING CHAMPION FAILS THE SAME RECEIPT, at graph_fetched. P24 has no submission.csv, no
+  structural audit and no version-bound audit receipt on disk; FACT-0341 cites
+  notebooks/kaggle_p24_deepcenter_best_veto/_out/ and that directory does not exist, because
+  notebooks/**/_out/ is gitignored and the absence is silent. The transition moves the baseline from
+  an UNBOUND artifact to a BOUND one. Five exceptions are named rather than papered over: (E1) the
+  P32 spec sets base_notebook == built_notebook, so cmd_build overwrote its own base - spec/manifest
+  base_sha256 b998e582 exists nowhere in the worktree or in git history and `build` now aborts on
+  this spec; (E2) build_manifest.json is uncommitted, the only change being the push read-back
+  pushed_slug line; (E3) cmd_verify is VACUOUS for this spec for the same base==built reason; (E4)
+  dataset_sources carry no version pin; (E5) FACT-0378's scope.leaderboard_legitimacy - "the hidden
+  test movies are not among the 199" - has no instrument and is not covered by that fact's
+  validity_reason. Measured here: all four VISIBLE test movies ARE train movies, and the hidden set
+  cannot be inspected. It does not block the transition and it does bound the interpretation.
+
+  A LIVE VETO FOUND THIS SESSION. scripts/win_bet/assoc_specs/harness_f1.json names
+  C:/temp/assoc/f1.parquet, which is the DEPLOYED surface - 2,162,040 rows, 2,162,040 targets, max 1
+  candidate per target, contested share 0.0000, minimum probability exactly 0.5, i.e. FACT-0369's
+  set. Its cache.preilp and cache.ecb_dir are pre-P34 paths. The widened surface FACT-0388 was
+  measured on holds 3,704,355 rows at 38.1% contested. The harness's refusal was EXERCISED rather
+  than read: run_harness(allow_degenerate=False) raises HarnessRefusal on a synthetic
+  single-candidate table and runs clean on a two-candidate one, so nothing degenerate can be emitted
+  silently. Residual hazard: allow_degenerate true. A fold-1 ranker result carrying it is vetoed.
+
+  OPEN ITEMS RE-CHECKED. (a) Agent 1's effective-fold resolver verified by INDEPENDENT
+  re-implementation over all 66 specs - fold-1 visibility 12 -> 14, newly visible exactly
+  p29_p28_detpeak_export_f1 and p34_acquisition_f1, zero unreadable base notebooks, 78 passed /
+  131 skipped. Residual limit measured not assumed: the regex cannot see setdefault, update, a
+  trailing comment, str(1) or an f-string; latent today because the only setdefault key in
+  notebooks/ is POLARS_PREFER_PKG. THE FIX IS UNCOMMITTED. And the P34 kernel log independently
+  shows "LOEO primary weights OVERRIDDEN -> ...edge_predictor_best_split_1.pth", so the hole did not
+  bite on the one run it could have. (b) Still open and sharper: trunks/stabledet_f0 is
+  byte-identical (32d80486) to HOCT's bare fold0_edge_predictor_best.pth; all three trunks in play
+  are bare 136-tensor state dicts at 2,077,996 params with ZERO non-tensor keys; trunks/primary is
+  now identified by hash (12f6881e) as our DEPLOYED edge predictor via the P34 kernel log's own
+  "Weight sha256" line. Fold-1 HOCT stays vetoed; hoct_compat.py already scopes itself to fold 0.
+  (c) Unchanged - the PKT-0032 crossfit map still declares train_external true on Zebrahub. (d) The
+  in-kernel gate still floors band B only; the external audit's band-A floor stays binding.
+
+  FACT-0350 DISCHARGED BY MEASUREMENT: C:/temp/preilp_f1_v2/preilp_split1.parquet and
+  C:/temp/p34_f1/preilp_split1.parquet are both b94bb1fb..., and the P34 kernel log shows the
+  roll-up computing that digest in-run. The inherited path is admissible because the bytes are the
+  same, not because inheriting was permitted.
+
+  THE PLANTING LOCK HOLDS, EXERCISED ACROSS TWO PROCESSES: the holder held 8 s, a second process
+  attempting acquisition 2.9 s in blocked 5.13 s and acquired only after release, then the lock file
+  was gone. Cross-process mutual exclusion is real.
+
+  SEAM-CALIBRATION SLOT: UNSPENT, held here. No genuinely new learned association model has passed
+  the honest fold-0 full-chain gate - LEVER-0039's simple-feature form is killed (FACT-0386),
+  LEVER-0034's Gate 1 is still running, and the HOCT CPU reconstruction is explicitly not a Gate 1
+  pass.
+
+  P33 / EXP-0041 remains RUNNING at close (status read three times). No feature cache and no head
+  training is licensed. audit_p33_gate1.py --selftest re-exercised today: 7/7 mutations caught,
+  including the one-crop run and the vacuous band A the kernel's own all_passed reports true for.
+  Known limit of a future PASS, recorded so the licence is not over-read: the gate compares
+  post-softmax probabilities over the SOURCE axis, so a uniform per-frame source shift is
+  mathematically invisible to it.
+
+  Instruments added: scripts/win_bet/audit_release_receipt.py, tests/test_audit_release_receipt.py.
+  Receipts: _evidence/audit/receipts/{release_p32,release_p24,champion_transition,launch_control,
+  p32_version_coherence}.json and C:/temp/audit_receipts/. Zero GPU, zero submissions, no model
+  implementation and no foreign packet touched; nothing staged or committed.
+
+  SCOPE CORRECTION, SAME SESSION, ON THE F1 VETO. scripts/win_bet/assoc_specs/tournament_context_f0.json
+  and tournament_context_f1.json appeared in the worktree mid-audit and were read rather than assumed:
+  the fold-1 one points at C:/temp/audit_receipts/f1_p34.parquet (the WIDENED table) with
+  cache.preilp C:/temp/p34_f1/preilp_split1.parquet and cache.ecb_dir C:/temp/p34_f1/ecb,
+  allow_degenerate false and no_claim true. It supersedes harness_f1.json, so the veto attaches to
+  that STALE SPEC and not to the fold-1 lane. ONE NEW RISK REPLACES IT: the tournament reads its
+  evaluation table out of THIS PACKET'S OWN AUDIT SCRATCH, so an auditor clean-up would silently
+  destroy the fold-1 evaluation surface. Materialise the widened fold-1 table under C:/temp/p34_f1/
+  or C:/temp/assoc/ and repoint the spec before the tournament runs.
