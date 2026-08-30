@@ -643,7 +643,7 @@ experiments:
     kernel_version: 2
     submission: null
     lb: null
-    status: running
+    status: failed
     date: '2026-08-29'
     facts: [FACT-0387, FACT-0382, FACT-0369, FACT-0373]
     note: >-

@@ -290,3 +290,76 @@ result: >-
   evaluation table out of THIS PACKET'S OWN AUDIT SCRATCH, so an auditor clean-up would silently
   destroy the fold-1 evaluation surface. Materialise the widened fold-1 table under C:/temp/p34_f1/
   or C:/temp/assoc/ and repoint the spec before the tournament runs.
+
+  CORRECTION ISSUED AGAINST THIS PACKET'S OWN RECEIPT, SAME SESSION. The champion-transition receipt
+  schema_version 1 recorded the OUTGOING champion P24 as having no fetched submission artifact. THAT
+  WAS AN AUDITOR ERROR, not a finding. audit_release_receipt.py searched only <out_dir>/_out/, the
+  kaggle_factory fetch location, but P24 was run by kaggle_queue.py, which fetches to
+  C:/temp/queue/<spec name>/ - where a complete and PASSING artifact set had been on disk since
+  2026-08-27: audit_receipt.json verdict PASS at kernel version 1, submission.csv sha256 1f5c5900...,
+  structural_audit.json verdict PASS, 122,184 nodes / 117,944 edges / 309 divisions, fractional 0,
+  in-degree 1, out-degree 2. It was found only by FINISHING a search that had been started and
+  killed; the first pass used a depth-1 glob that cannot see /c/temp/queue/p24_*. An unfinished
+  search must never become a verified negative - the AGENTS.md "check whether it is already on disk"
+  class, and this packet's falsifier names precisely this failure. A SECOND false FAIL from the same
+  run: score_fact_present reported that P24 had preregistered no band, when FACT-0341 simply uses the
+  older flat scope.band_prereg / central_prereg / falsifier / fired shape instead of FACT-0393's
+  nested scope.preregistered. P24 declared 0.921-0.929 before its run.
+
+  CORRECTED RESULT: P24 passes 25 of 25 and P32 passes 26 of 26. The transition is between TWO FULLY
+  BOUND ARTIFACTS, not from an unbound baseline to a bound one. The release verdict is unchanged -
+  RELEASED - but its reasoning is not, and the earlier reasoning must not be quoted.
+
+  THE FINDING THAT SURVIVES, and it is narrower: FACT-0341's `instrument` field cites
+  "notebooks/kaggle_p24_deepcenter_best_veto/_out/", a path that does NOT exist. The registry points
+  at the wrong location for the champion's own evidence, and notebooks/**/_out/ is gitignored so the
+  absence is silent. That is what sent the auditor to an empty directory. PROPOSED REGISTRY CHANGE:
+  amend FACT-0341's instrument to C:/temp/queue/p24_deepcenter_best_veto/ and normalise its
+  preregistration fields to the scope.preregistered / scope.outcome shape.
+
+  INSTRUMENT REPAIRED AND PINNED. audit_release_receipt.py now searches both fetch conventions,
+  accepts --fetched-dir, RECORDS which location produced the evidence, and normalises both
+  preregistration shapes. Five new tests: the queue artifact is found; the resolved location is
+  recorded; a genuinely absent artifact still FAILS so the fix is not a pass-by-default; the legacy
+  preregistration shape is accepted; and the legacy shape still catches a fired falsifier. Suite for
+  this packet's instruments: 37 passed.
+
+  P33 / EXP-0041 LANDED WHILE THIS PACKET WAS CLOSING. GATE 1 FAILED AGAIN AND THE FEATURE-CACHE
+  VETO IS CONFIRMED, NOT LIFTED. Kernel version 2, status COMPLETE, fetched to C:/temp/p33_v2.
+  The report is crops: [] with all_passed false and error "FileNotFoundError: pre-ILP parity target
+  not found in the mounted inputs", raised at t=238 s; audit_p33_gate1.py returns verdict FAIL with
+  all six conditions failing. ZERO CROPS COMPARED, for the second attempt running.
+
+  ROOT CAUSE, READ OUT OF THE RUN'S OWN LOG RATHER THAN INFERRED. assoc_feature_parity.py:310-319
+  hardcodes /kaggle/input/biohub-identity-replay-f0/meta/preilp_split0.parquet and one sibling. In
+  this environment every dataset mounts at /kaggle/input/datasets/<owner>/<slug>/ - visible in this
+  kernel's log for all three pilkwang datasets, and in the P34 log for the support pack. The string
+  "identity" never appears anywhere in the P33 log. The dataset itself is correct and was attached:
+  aryaarun07/biohub-identity-replay-f0, 75,029,747 bytes, last updated 2026-08-29 17:02, and its
+  file list enumerated through the API is exactly 71 ecb/*.npz plus meta/preilp_split0.parquet and
+  meta/run_stats.csv. THE RELATIVE PATH IS RIGHT AND ONLY THE MOUNT ROOT IS WRONG - a one-line fix,
+  not a redesign.
+
+  AND THE TRAP WAS ALREADY WRITTEN DOWN IN THE SAME DIRECTORY, TWICE, IN A FILE THE NOTEBOOK ALREADY
+  LOADS. scripts/kaggle_edits/loeo_retarget.py:88-100 records it verbatim from 2026-08-01 - "a
+  fold-1 kernel died at t=628 s because the declared glob was /kaggle/input/*/<file> while datasets
+  were mounted at /kaggle/input/datasets/<owner>/<slug>/<file>" - and ships the fix, _loeo_find, a
+  bounded depth ladder on the basename. h1r_edge_kernel_run.py:35-42 implements the same defence
+  independently and ranker_block.py:209 hardcodes the correct owner-qualified form. This is the
+  premise-check rule in AGENTS.md section 4, against a premise already documented in the patch
+  directory the author was editing.
+
+  RECOMMENDED REPAIR, NOT APPLIED - THIS IS PKT-0029'S CODE AND THIS PACKET AUDITS IT: route the
+  lookup through the resolver already present in the notebook (_loeo_find or _find_input) rather
+  than a hardcoded candidate list, and assert the resolved path exists BEFORE any GPU work so the
+  failure lands at t~0 instead of t=238 s. The authority here runs one way - this packet can stop a
+  launch and cannot license one.
+
+  THE FAIL-CLOSED DESIGN PAID FOR ITSELF A SECOND TIME. AFP_FAILED printed, the report recorded zero
+  crops rather than silence, ASSOC_FEATURE_PARITY_COMPLETE all_passed= False was emitted, and the
+  two feature-cache sessions this gate would have unlocked were again NOT spent. Cost of the failure:
+  one GPU session, no submission, deployed output unchanged.
+
+  STANDING: the known blind spot of any FUTURE pass is unchanged and must be recorded with it - the
+  gate compares post-softmax probabilities over the SOURCE axis, so a uniform per-frame source shift
+  is mathematically invisible to it.

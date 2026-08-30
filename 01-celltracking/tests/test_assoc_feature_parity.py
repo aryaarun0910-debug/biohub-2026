@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 import subprocess
 import sys
 import textwrap
@@ -47,7 +48,10 @@ STUB = textwrap.dedent(
     import numpy as np
     import torch
 
+    import os
+
     N_PER_FRAME, FEAT_DIM = 3, 6
+    FLAT_FEATURES = os.environ.get("AFP_STUB_FLAT_FEATURES") == "1"
 
 
     class _Cfg:
@@ -100,7 +104,17 @@ STUB = textwrap.dedent(
         def _index_features(self, x, pc, pm):
             n = pc.shape[1]
             # Features depend ONLY on the coordinates, so the cache round-trip is checkable.
+            # The second coordinate varies BETWEEN nodes of a frame, so the source-axis softmax
+            # is non-uniform and some pair clears the deployed 0.5 - i.e. band A actually has
+            # something to compare. Under FLAT_FEATURES it is dropped, every source in a frame
+            # becomes identical, no probability can exceed 1/N_PER_FRAME, and band A is VACUOUS.
             base = pc[0, :, 0].reshape(n, 1).float()
+            if not FLAT_FEATURES:
+                # 0.1, not 1.0: the source-axis softmax must be non-uniform enough that some
+                # pair clears 0.5, yet NOT saturated - a saturated softmax would swallow the
+                # 0.05 feature perturbation test_a_corrupted_cache_fails_the_gate relies on and
+                # silently turn the corruption test green for the wrong reason.
+                base = base + 0.1 * pc[0, :, 1].reshape(n, 1).float()
             return (base + torch.arange(FEAT_DIM).float().reshape(1, FEAT_DIM)).unsqueeze(0)
 
         def predict_edges(self, fs, ft, pcs, pct, pps, ppt, ms, mt):
@@ -118,7 +132,8 @@ STUB = textwrap.dedent(
 )
 
 
-def build_env(tmp_path: Path, *, node_count_shift: int = 0, corrupt_cache: str | None = None):
+def build_env(tmp_path: Path, *, node_count_shift: int = 0, corrupt_cache: str | None = None,
+              flat_features: bool = False):
     """Lay out a fake repo, run the CACHE phase, then build the parity targets from its output."""
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -133,9 +148,14 @@ def build_env(tmp_path: Path, *, node_count_shift: int = 0, corrupt_cache: str |
         "--max-frames", str(N_FRAMES),
         "--crops", "cropA",
     ]
+    env = dict(os.environ)
+    if flat_features:
+        env["AFP_STUB_FLAT_FEATURES"] = "1"
+    else:
+        env.pop("AFP_STUB_FLAT_FEATURES", None)
     run = subprocess.run(
         [sys.executable, str(worker), "--phase", "cache", *common],
-        cwd=str(repo), text=True, capture_output=True,
+        cwd=str(repo), text=True, capture_output=True, env=env,
     )
     assert run.returncode == 0, run.stderr
     assert "AFP_CACHE crop=cropA" in run.stdout
@@ -203,35 +223,67 @@ def build_env(tmp_path: Path, *, node_count_shift: int = 0, corrupt_cache: str |
         data[f"feat_{first}"] = bumped
         np.savez_compressed(cache / "cropA.npz", **data)
 
-    return repo, worker, common, preilp, ecb
+    return repo, worker, common, preilp, ecb, env
 
 
-def run_verify(repo, worker, common, preilp, ecb, out):
+def run_verify(repo, worker, common, preilp, ecb, out, env=None):
     return subprocess.run(
         [sys.executable, str(worker), "--phase", "verify", *common,
          "--preilp", str(preilp), "--ecb-dir", str(ecb), "--out", str(out)],
-        cwd=str(repo), text=True, capture_output=True,
+        cwd=str(repo), text=True, capture_output=True, env=env or dict(os.environ),
     )
 
 
 def test_gate_passes_when_the_cache_is_faithful(tmp_path):
-    repo, worker, common, preilp, ecb = build_env(tmp_path)
+    repo, worker, common, preilp, ecb, env = build_env(tmp_path)
     out = tmp_path / "report.json"
-    run = run_verify(repo, worker, common, preilp, ecb, out)
+    run = run_verify(repo, worker, common, preilp, ecb, out, env)
     assert run.returncode == 0, run.stderr
     report = json.loads(out.read_text(encoding="utf-8"))
     assert report["all_passed"] is True
     crop = report["crops"][0]
     assert crop["band_a"]["missing"] == 0 and crop["band_a"]["extra"] == 0
+    assert crop["band_a"]["checked"] > 0, "band A must actually compare something"
     assert crop["band_b"]["checked"] > 0, "band B must actually compare something"
     assert crop["node_count_mismatches"] == []
 
 
+def test_a_crop_whose_band_a_compares_nothing_fails_the_gate(tmp_path):
+    """Band A must be floored for non-vacuity exactly as band B is.
+
+    THE DEFECT THIS PINS. Before the floor, `a_missing`, `a_extra` and `a_delta` were all
+    trivially satisfied when a crop's band A compared zero pairs, so the crop was reported
+    `passed` having verified nothing about the deployed band. The floor is PER CROP, so an
+    uncapped full run was not immune - one such crop certified a cache nobody checked.
+
+    The vacuum is not contrived. With flat features every source in a frame is identical, the
+    source-axis softmax is uniform at 1/N, no probability clears the deployed 0.5, and the
+    pre-ILP fixture consequently records no band-A edge. Band B still compares 27 pairs here,
+    so a refusal can only be band A's floor.
+    """
+    repo, worker, common, preilp, ecb, env = build_env(tmp_path, flat_features=True)
+    out = tmp_path / "report.json"
+    run = run_verify(repo, worker, common, preilp, ecb, out, env)
+    assert run.returncode == 0, run.stderr
+    report = json.loads(out.read_text(encoding="utf-8"))
+    crop = report["crops"][0]
+    assert crop["band_a"]["checked"] == 0, "the fixture must actually empty band A"
+    assert crop["band_b"]["checked"] > 0, (
+        "band B must still compare something, or this test would prove nothing about band A"
+    )
+    assert crop["band_a"]["missing"] == 0 and crop["band_a"]["extra"] == 0, (
+        "and every other band-A condition must be trivially SATISFIED - that is the point"
+    )
+    assert report["all_passed"] is False, (
+        "a crop that compared nothing in the deployed band must not certify the cache"
+    )
+
+
 def test_a_corrupted_cache_fails_the_gate(tmp_path):
     """The whole point: features that load cleanly but are subtly wrong must not pass."""
-    repo, worker, common, preilp, ecb = build_env(tmp_path, corrupt_cache="node")
+    repo, worker, common, preilp, ecb, env = build_env(tmp_path, corrupt_cache="node")
     out = tmp_path / "report.json"
-    run = run_verify(repo, worker, common, preilp, ecb, out)
+    run = run_verify(repo, worker, common, preilp, ecb, out, env)
     assert run.returncode == 0, run.stderr
     report = json.loads(out.read_text(encoding="utf-8"))
     assert report["all_passed"] is False
@@ -247,9 +299,9 @@ def test_uniform_source_shift_is_a_known_blind_spot(tmp_path):
     test_a_corrupted_cache_fails_the_gate pins. This test found the property before a GPU session
     was spent believing the gate was total.
     """
-    repo, worker, common, preilp, ecb = build_env(tmp_path, corrupt_cache="uniform")
+    repo, worker, common, preilp, ecb, env = build_env(tmp_path, corrupt_cache="uniform")
     out = tmp_path / "report.json"
-    run = run_verify(repo, worker, common, preilp, ecb, out)
+    run = run_verify(repo, worker, common, preilp, ecb, out, env)
     assert run.returncode == 0, run.stderr
     report = json.loads(out.read_text(encoding="utf-8"))
     assert report["all_passed"] is True, (
@@ -260,9 +312,9 @@ def test_uniform_source_shift_is_a_known_blind_spot(tmp_path):
 
 def test_node_count_mismatch_fails_the_gate(tmp_path):
     """A short detection must not silently shrink the comparison denominator."""
-    repo, worker, common, preilp, ecb = build_env(tmp_path, node_count_shift=-1)
+    repo, worker, common, preilp, ecb, env = build_env(tmp_path, node_count_shift=-1)
     out = tmp_path / "report.json"
-    run = run_verify(repo, worker, common, preilp, ecb, out)
+    run = run_verify(repo, worker, common, preilp, ecb, out, env)
     assert run.returncode == 0, run.stderr
     report = json.loads(out.read_text(encoding="utf-8"))
     assert report["all_passed"] is False
@@ -271,7 +323,7 @@ def test_node_count_mismatch_fails_the_gate(tmp_path):
 
 def test_verify_refuses_to_run_without_a_cache_on_disk(tmp_path):
     """`from the cache alone` is enforced by the process boundary, so a missing cache must raise."""
-    repo, worker, common, preilp, ecb = build_env(tmp_path)
+    repo, worker, common, preilp, ecb, env = build_env(tmp_path)
     for stale in (tmp_path / "cache").glob("*.npz"):
         stale.unlink()
     run = run_verify(repo, worker, common, preilp, ecb, tmp_path / "report.json")
@@ -281,9 +333,9 @@ def test_verify_refuses_to_run_without_a_cache_on_disk(tmp_path):
 
 def test_the_verify_phase_retains_the_full_probability_matrix(tmp_path):
     """Band B only exists if sub-0.5 pairs survive into the comparison (FACT-0382)."""
-    repo, worker, common, preilp, ecb = build_env(tmp_path)
+    repo, worker, common, preilp, ecb, env = build_env(tmp_path)
     out = tmp_path / "report.json"
-    run_verify(repo, worker, common, preilp, ecb, out)
+    run_verify(repo, worker, common, preilp, ecb, out, env)
     crop = json.loads(out.read_text(encoding="utf-8"))["crops"][0]
     assert crop["band_b"]["recorded_sub_threshold"] > 0
     assert crop["band_b"]["missing"] == 0, (

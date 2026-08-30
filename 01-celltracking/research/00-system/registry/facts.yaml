@@ -6096,22 +6096,21 @@ facts:
 
   - id: FACT-0396
     statement: >-
-      The champion transition from P24 to P32 is RELEASED on a bound receipt, 26 of 26 conditions, and the
-      audit's sharpest finding is that the OUTGOING champion fails the same receipt. P32 binds notebook
-      856451d8, submission graph e7ee404d, upstream cell-source de60a4f0, kernel version 1, with the public
-      source kernel re-pulled today and its ten cell sources byte-identical to the executed notebook. P24
-      fails at graph_fetched: it has no submission.csv, no structural audit and no version-bound receipt on
-      disk, and FACT-0341 cites notebooks/kaggle_p24_deepcenter_best_veto/_out/, a directory that does not
-      exist because notebooks/**/_out/ is gitignored and its absence is therefore silent. The transition
-      moves the baseline from an UNBOUND artifact to a BOUND one
+      The champion transition from P24 to P32 is RELEASED on a bound receipt, 26 of 26 conditions, and it is
+      a transition between TWO FULLY BOUND ARTIFACTS. P32 binds notebook 856451d8, submission graph
+      e7ee404d, upstream cell-source de60a4f0, kernel version 1, with the public source kernel re-pulled and
+      its ten cell sources byte-identical to the executed notebook. P24 passes its own receipt 25 of 25 from
+      C:/temp/queue/p24_deepcenter_best_veto/, where a complete passing set has sat since 2026-08-27
     value: 26
     unit: release_receipt_conditions_passed_by_p32_of_26
     scope:
       incoming: {kernel_version: 1, notebook_sha256: 856451d8, notebook_lf_sha256: 933829b1, commit: 4cce909,
                  submission: 55871868, graph_sha256: e7ee404d, upstream_cell_source_sha256: de60a4f0,
                  upstream_kernel_id: 131761963, conditions_passed: 26, of: 26}
-      outgoing: {champion: P24, fact: FACT-0341, failed_condition: graph_fetched,
-                 missing: [submission.csv, structural audit, version-bound receipt]}
+      outgoing: {champion: P24, fact: FACT-0341, conditions_passed: 25, of: 25,
+                 artifact_root: C:/temp/queue/p24_deepcenter_best_veto/, kernel_version: 1,
+                 submission_sha256: 1f5c5900, nodes: 122184, edges: 117944, divisions: 309, fractional: 0,
+                 band_prereg: [0.921, 0.929]}
       selftest: {defects_planted: 16, tests: 19, all_caught_by_their_own_condition: true}
       exceptions_named:
         E1: "the P32 spec sets base_notebook == built_notebook, so the build overwrote its own base; base_sha256 b998e582 exists nowhere in the worktree or git history and kaggle_factory build on this spec now aborts"
@@ -6138,13 +6137,83 @@ facts:
       today and finding its cell sources byte-identical to the executed notebook RE-ESTABLISHES the verbatim
       claim from the outside. An audit that had only checked the inherited list would have passed the
       submission while its central claim was unevidenced.
-      THE OUTGOING CHAMPION FAILING THE SAME RECEIPT IS NOT AN ARGUMENT AGAINST THE TRANSITION - it is the
-      argument for it, and it is also a standing warning about gitignored evidence. FACT-0341 has cited a
-      path that does not exist for as long as it has existed, and nothing detected that, because a missing
-      gitignored directory looks exactly like a directory whose contents are simply not tracked. Any fact
-      whose instrument names a path under notebooks/**/_out/, _evidence/ or artifacts/ carries that risk.
+      CORRECTED 2026-08-30, AND THE CORRECTION IS THE MORE INSTRUCTIVE HALF. This fact was first recorded
+      claiming the OUTGOING champion FAILED the same receipt and that the transition moved from an unbound
+      artifact to a bound one. THAT WAS FALSE. P24's artifact exists and passes 25 of 25; it lives at
+      C:/temp/queue/p24_deepcenter_best_veto/, the kaggle_queue.py fetch location, rather than the
+      kaggle_factory <out_dir>/_out/ convention the instrument searched - and the search that missed it used
+      a depth-1 glob that could not reach it. AN UNFINISHED SEARCH BECAME A VERIFIED NEGATIVE, which is
+      exactly the failure class AGENTS.md names, committed by the packet whose own falsifier forbids it. A
+      second false FAIL came from the same run: P24 was reported as preregistering no band, when FACT-0341
+      simply uses the older flat scope.band_prereg shape and did declare 0.921-0.929.
+      WHAT SURVIVES AS A REAL FINDING, and it is what sent the audit to an empty directory: FACT-0341's
+      instrument cites notebooks/kaggle_p24_deepcenter_best_veto/_out/, a path that does not exist. The
+      registry points at the wrong location for the champion's own evidence, and because notebooks/**/_out/
+      is gitignored the absence is silent. Any fact whose instrument names a path under notebooks/**/_out/,
+      _evidence/ or artifacts/ carries that risk. The underlying defect is that TWO FETCH CONVENTIONS coexist
+      in this repo with no fact recording which produced which artifact.
       The preregistered band was written into the SUBMISSION DESCRIPTION, so Kaggle itself timestamps the
       preregistration as earlier than the score. That is a stronger provenance for a prediction than our own
       repository can provide, and it is worth doing deliberately on every future preregistered submission.
     date: '2026-08-30'
     tags: [champion, release-receipt, p32, baseline-relocation, audit, gitignored-evidence, verified]
+
+  - id: FACT-0397
+    statement: >-
+      Gate 1 attempt 2 (EXP-0041, kernel version 2) FAILED at t=238 s with ZERO crops compared, for the
+      second attempt running, and the cause was a hardcoded dataset mount root. The patch looked up
+      /kaggle/input/biohub-identity-replay-f0/... while Kaggle mounted the dataset at
+      /kaggle/input/datasets/<owner>/<slug>/... - the string "identity" appears ZERO times in the run's log.
+      The dataset itself was correct and attached. THE TRAP AND ITS FIX WERE ALREADY WRITTEN DOWN IN THE SAME
+      DIRECTORY, in a file this very notebook loads: scripts/kaggle_edits/loeo_retarget.py:86-101 records the
+      identical failure from 2026-08-01, where a fold-1 kernel died at t=628 s for the same reason, and ships
+      the bounded depth ladder that fixes it
+    value: 0
+    unit: crops_compared_by_gate_1_attempt_2
+    scope:
+      experiment: EXP-0041
+      kernel: aryaarun07/biohub-p33-assoc-feature-parity-smoke
+      kernel_version: 2
+      status: COMPLETE
+      report: {crops: [], all_passed: false, error: "FileNotFoundError: pre-ILP parity target not found in the mounted inputs"}
+      failed_at_seconds: 238
+      audit: {conditions_failed: 6, of: 6, instrument: scripts/win_bet/audit_p33_gate1.py}
+      root_cause: {file: scripts/kaggle_edits/assoc_feature_parity.py, hardcoded_root: /kaggle/input/<slug>, actual_root: /kaggle/input/datasets/<owner>/<slug>}
+      log_evidence: {occurrences_of_identity_in_log: 0}
+      dataset_was_fine: {attached: true, size_mb: 75, contents: [meta/preilp_split0.parquet, meta/run_stats.csv, "71 x ecb/*.npz"]}
+      precedent_already_in_repo:
+        - {file: scripts/kaggle_edits/loeo_retarget.py, lines: 86-101, dated: '2026-08-01', ships_fix: _loeo_find, loaded_by_this_notebook: true}
+        - {file: scripts/win_bet/h1r_edge_kernel_run.py, lines: 35-42}
+        - {file: scripts/kaggle_edits/ranker_block.py, line: 209, form: hardcoded_correct}
+      cost: {gpu_sessions: 1, submissions: 0, deployed_output_changed: false}
+      cumulative_gate1_cost: {gpu_sessions: 2, crops_ever_compared: 0}
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Read from the fetched run's own report and log rather than inferred: the report records zero crops with
+      all_passed false, the traceback names the raise, and a grep of the log finds the dataset slug zero
+      times while the three pilkwang datasets appear at the nested root. The precedent files were read at the
+      named lines.
+    instrument: >-
+      scripts/core/kaggle_factory.py log/fetch; scripts/win_bet/audit_p33_gate1.py;
+      artifacts C:/temp/p33_v2/{kernel.log,assoc_feature_parity.json};
+      receipt _evidence/audit/receipts/p33_gate1_v2.json
+    experiment: EXP-0041
+    note: >-
+      TWO GPU SESSIONS HAVE NOW BEEN SPENT ON THIS GATE AND IT HAS NEVER COMPARED A SINGLE CROP. Attempt 1
+      failed at a process boundary (FACT-0387); attempt 2 failed at a path convention. Both are harness
+      defects, neither is a scientific result, and the pattern is the same underneath: the code was written
+      against an ASSUMED environment rather than the one this repository has already documented.
+      THE AGGRAVATING FACT IS THE PRECEDENT. This is not an unknowable environment quirk - it is a trap this
+      project hit on 2026-08-01, diagnosed, fixed, and wrote up verbatim in a file the failing notebook
+      LOADS. Three separate files in the tree defend against it. The lesson is not "resolve mount paths"; it
+      is that the repository's own recorded traps must be consulted when writing a kernel patch, because the
+      cost of not doing so is a GPU session per lesson re-learned.
+      WHAT WORKED, AGAIN, AND IS THE ONLY REASON THIS WAS CHEAP: the fail-closed heartbeat reported zero
+      crops instead of silence, so the two full feature-cache sessions this gate would have licensed were not
+      spent - for the second time. A gate that defaults to passing would have licensed them twice.
+      THE FIX SHIPS WITH A SECOND CHANGE: failure now lands at t~0 rather than t=238 s, and the error lists
+      what IS mounted two levels down, so a future miss is a diagnosis rather than a bare absence. Applied
+      together with the band-A floor (FACT-0394), which could not be applied while this run was in flight.
+    date: '2026-08-30'
+    tags: [gate-1, pkt-0029, harness-failure, mount-path, repeated-trap, fail-closed-worked, verified]

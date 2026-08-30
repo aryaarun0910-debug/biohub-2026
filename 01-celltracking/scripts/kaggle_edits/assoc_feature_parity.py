@@ -232,6 +232,16 @@ def phase_verify(args):
         a_missing = sorted(set(band_a) - set(got_a))
         a_extra = sorted(set(got_a) - set(band_a))
         a_shared = set(band_a) & set(got_a)
+        # NON-VACUITY, BAND A. Band B already floors `b_checked > 0`; band A did not, and the
+        # asymmetry is not cosmetic. If a crop's band A compares nothing - no recorded deployed
+        # edge in scope, or none reproduced - then `a_missing`, `a_extra` and `a_delta` are all
+        # trivially satisfied and the crop passes having VERIFIED NOTHING about the deployed band.
+        # The floor is PER CROP, so an uncapped full run is not immune: one such crop is enough to
+        # certify a cache nobody checked. Same principle as band B's floor and as FACT-0387's
+        # zero-crop failure - a gate that can quietly compare nothing looks exactly like a gate
+        # that passed. Measured: the repo's own green happy-path test ran a crop with band A at
+        # zero and asserted a pass (FACT-0394).
+        a_checked = len(a_shared)
         a_delta = max((abs(got_a[k] - band_a[k]) for k in a_shared), default=0.0)
 
         # --- BAND B: the sub-threshold surface the learnable task uses ------------------
@@ -258,6 +268,7 @@ def phase_verify(args):
             not a_missing and not a_extra and a_delta <= TOL
             and not b_missing and b_delta <= TOL
             and not count_mismatch
+            and a_checked > 0
             and b_checked > 0
         )
         report["crops"].append({
@@ -265,13 +276,15 @@ def phase_verify(args):
             "node_count_mismatches": count_mismatch,
             "band_a": {"recorded": len(band_a), "reproduced": len(got_a),
                        "missing": len(a_missing), "extra": len(a_extra),
+                       "checked": a_checked,
                        "max_abs_prob_delta": a_delta},
             "band_b": {"recorded_sub_threshold": len(band_b), "checked": b_checked,
                        "missing": len(b_missing), "max_abs_prob_delta": b_delta},
             "passed": passed,
         })
         print(f"AFP crop={crop} frames={len(offset)} nodes={len(coords)} "
-              f"A[rec={len(band_a)} miss={len(a_missing)} extra={len(a_extra)} d={a_delta:.3e}] "
+              f"A[rec={len(band_a)} checked={a_checked} miss={len(a_missing)} "
+              f"extra={len(a_extra)} d={a_delta:.3e}] "
               f"B[rec={len(band_b)} checked={b_checked} miss={len(b_missing)} d={b_delta:.3e}] "
               f"ncount_mismatch={len(count_mismatch)} passed={passed}", flush=True)
 
@@ -307,23 +320,45 @@ try:
     _afp_worker_path = _AfpPath("/kaggle/working/afp_gate1.py")
     _afp_worker_path.write_text(_AFP_WORKER, encoding="utf-8")
 
-    _afp_preilp = None
-    for _cand in (
-        _AfpPath("/kaggle/input/biohub-identity-replay-f0/meta/preilp_split0.parquet"),
-        _AfpPath("/kaggle/input/biohub-identity-replay-f0/preilp_split0.parquet"),
-    ):
-        if _cand.is_file():
-            _afp_preilp = _cand
-            break
+    # MOUNT ROOT IS NOT /kaggle/input/<slug>. Attempt 2 (EXP-0041 v2) died at t=238s with zero crops
+    # because these paths were hardcoded: Kaggle mounted the dataset at
+    # /kaggle/input/datasets/<owner>/<slug>/... and the string "identity" never appeared in the log.
+    # The trap and its fix were ALREADY IN THIS DIRECTORY, in a file this notebook loads -
+    # scripts/kaggle_edits/loeo_retarget.py:86-101 records the identical failure from 2026-08-01 and
+    # ships `_loeo_find`, a bounded depth ladder. Bounded and never recursive on purpose: a `**` walk
+    # over /kaggle/input would descend the 79 GB competition zarr tree.
+    def _afp_find(relative):
+        """Resolve one dataset-relative path at whatever depth Kaggle mounted it."""
+        for _root in (
+            _AfpPath("/kaggle/input/biohub-identity-replay-f0"),
+            _AfpPath("/kaggle/input/datasets/aryaarun07/biohub-identity-replay-f0"),
+        ):
+            _hit = _root / relative if relative else _root
+            if _hit.exists():
+                return _hit
+        _base = _AfpPath("/kaggle/input")
+        for _depth in (1, 2, 3, 4):
+            for _cand in _base.glob("/".join(["*"] * _depth) + "/" + relative):
+                if _cand.exists():
+                    return _cand
+        return None
+
+    _afp_preilp = _afp_find("meta/preilp_split0.parquet") or _afp_find("preilp_split0.parquet")
     if _afp_preilp is None:
-        raise FileNotFoundError("pre-ILP parity target not found in the mounted inputs")
+        # FAIL AT t~0, NOT t=238s. Listing what IS mounted turns "not found" into a diagnosis;
+        # attempt 2 reported only that the path was absent, which said nothing about where to look.
+        _afp_seen = sorted(str(x) for x in _AfpPath("/kaggle/input").glob("*/*"))[:40]
+        raise FileNotFoundError(
+            "pre-ILP parity target not found in the mounted inputs. Mounted two levels down: "
+            + repr(_afp_seen)
+        )
 
     _afp_ecb = None
     for _cand in (
-        _AfpPath("/kaggle/input/biohub-identity-replay-f0/ecb"),
-        _AfpPath("/kaggle/input/biohub-identity-replay-f0"),
+        _afp_find("ecb"),
+        _afp_find(""),
     ):
-        if _cand.is_dir() and any(_cand.glob("*.npz")):
+        if _cand is not None and _cand.is_dir() and any(_cand.glob("*.npz")):
             _afp_ecb = _cand
             break
     if _afp_ecb is None:

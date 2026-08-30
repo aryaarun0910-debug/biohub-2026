@@ -5650,11 +5650,29 @@ verbatim claim that the build itself had destroyed. The score was independently 
 submissions path, and the preregistered band is written into the submission description itself, so Kaggle
 timestamps the preregistration before the score existed.
 
-**The outgoing champion FAILS the same receipt**, at `graph_fetched`: P24 has no `submission.csv`, no
-structural audit and no version-bound audit receipt on disk, and `FACT-0341` cites
-`notebooks/kaggle_p24_deepcenter_best_veto/_out/` — a directory that does not exist, because
-`notebooks/**/_out/` is gitignored and its absence is silent. The transition therefore moves the baseline
-from an **unbound** artifact to a **bound** one. Five exceptions are named rather than papered over: the P32
+**The auditor's own false FAIL, found and corrected the same session — this is the load-bearing
+correction.** The receipt first reported the outgoing champion P24 as having *no* fetched artifact. That was
+wrong. The instrument searched only `<out_dir>/_out/`, the `kaggle_factory fetch` location, while
+`kaggle_queue.py` — which is what actually ran P24 — fetches to `C:/temp/queue/<spec name>/`, where a
+complete, **passing** artifact set had been sitting since 2026-08-27 (`audit_receipt.json` verdict PASS,
+kernel version 1, `submission.csv` `1f5c5900…`, structural PASS, 122,184 nodes / 117,944 edges / 309
+divisions, `fractional=0`). It was found only by finishing a search that had been started and killed: the
+first pass used `ls -d /c/temp/*p24*`, which is depth 1 and cannot see `/c/temp/queue/p24_…`. **An
+unfinished search must never become a verified negative** — the exact class AGENTS.md names as "check
+whether it is already on disk". A second false FAIL from the same run: `score_fact_present` claimed P24 had
+preregistered no band, when `FACT-0341` simply uses the older flat `scope.band_prereg` / `central_prereg` /
+`falsifier` / `fired` shape rather than `FACT-0393`'s nested `scope.preregistered`. P24 declared 0.921–0.929
+before its run. **Corrected result: P24 passes 25 of 25 and P32 passes 26 of 26 — the transition is between
+two fully bound artifacts.** The instrument now searches both fetch conventions, records which one produced
+the evidence, and normalises both preregistration shapes; five tests pin it, including that a genuinely
+absent artifact still FAILS so the fix is not a pass-by-default, and that the legacy shape still catches a
+fired falsifier.
+
+**What survives as a real finding:** `FACT-0341`'s `instrument` field cites
+`notebooks/kaggle_p24_deepcenter_best_veto/_out/`, a path that does not exist — the registry points at the
+wrong location for the champion's own evidence, and `notebooks/**/_out/` is gitignored so the absence is
+silent. That is what sent the auditor to an empty directory. Five exceptions are named rather than papered
+over: the P32
 spec sets `base_notebook == built_notebook`, so the build overwrote its own base and `kaggle_factory build`
 on it now aborts (and `cmd_verify` is vacuous for the same reason); the manifest's `pushed_slug` line is
 uncommitted; dataset sources carry no version pin; and `FACT-0378`'s `leaderboard_legitimacy` sub-claim has
@@ -5693,3 +5711,25 @@ exercised across two processes** — the waiter blocked 5.13 s and acquired only
 `_evidence/audit/receipts/{release_p32,release_p24,champion_transition,launch_control,p32_version_coherence}.json`.
 Zero GPU, zero submissions, no model implementation or foreign packet touched. Registry, research-tree and
 claims gates green.
+
+**P33 / `EXP-0041` LANDED DURING THIS AUDIT AND GATE 1 FAILED AGAIN — at an INPUT-MOUNT boundary, and
+again not on parity.** Kernel version 2, status COMPLETE, report `crops: []`, `all_passed: false`,
+`FileNotFoundError: pre-ILP parity target not found in the mounted inputs`, thrown at t=238 s. All six
+conditions FAIL. **The veto on the two feature-cache GPU sessions is CONFIRMED, not lifted.** Root cause,
+read out of the run's own log: `assoc_feature_parity.py:310-319` hardcodes
+`/kaggle/input/biohub-identity-replay-f0/…`, while every dataset in this environment mounts at
+`/kaggle/input/datasets/<owner>/<slug>/…` — confirmed in this kernel's log and in P34's. The dataset itself
+is fine: `aryaarun07/biohub-identity-replay-f0`, 75 MB, attached in the spec, containing exactly
+`meta/preilp_split0.parquet`, `meta/run_stats.csv` and 71 `ecb/*.npz`. **The relative path is right; only
+the mount root is wrong** — a one-line fix, not a redesign.
+
+**What makes it worse than a typo: the trap was already written down in the same directory, twice, and the
+notebook already loads one of them.** `scripts/kaggle_edits/loeo_retarget.py:88-100` records it verbatim
+from 2026-08-01 — "a fold-1 kernel died at t=628 s because the declared glob was `/kaggle/input/*/<file>`
+while datasets were mounted at `/kaggle/input/datasets/<owner>/<slug>/<file>`" — and ships `_loeo_find`, a
+bounded depth ladder, as the fix; `h1r_edge_kernel_run.py:35-42` implements the same defence independently;
+`ranker_block.py:209` hardcodes the correct owner-qualified form. Recommended repair (**not applied — this
+is PKT-0029's code**): route the lookup through the resolver already in the notebook, and assert the
+resolved path exists *before* any GPU work so the failure lands at t≈0 rather than t=238 s.
+**The fail-closed heartbeat paid for itself a second time:** `AFP_FAILED` printed, the report recorded zero
+crops rather than silence, and the two sessions this gate would have unlocked were again not spent.
