@@ -5733,3 +5733,83 @@ is PKT-0029's code**): route the lookup through the resolver already in the note
 resolved path exists *before* any GPU work so the failure lands at t≈0 rather than t=238 s.
 **The fail-closed heartbeat paid for itself a second time:** `AFP_FAILED` printed, the report recorded zero
 crops rather than silence, and the two sessions this gate would have unlocked were again not spent.
+
+## 2026-08-30 — PKT-0039 / LEVER-0042 (agent 2, exploitation): the 0.931 base already holds the good checkpoint and declines it
+
+One controlled treatment prepared and preflighted on CPU, **not pushed** — the push decision is the primary
+agent's and the single submission is PKT-0036's. Preregistration was written and hashed **before** the build
+(`_evidence/exploit931/prereg_before_build.sha256`) and is repeated verbatim in the submission description so
+Kaggle timestamps it earlier than the score (`FACT-0396`): central **0.931** with the low band promoted, band
+0.927–0.935, falsifier at or below 0.931 — a central estimate that deliberately **sits on its own falsifier**.
+
+`scripts/kaggle_specs/p35_dcveto_on_931.json` builds `notebooks/kaggle_p35_dcveto_on_931/` from the released
+P32 notebook (`856451d8`, the artifact its release receipt binds to the scoring submission), so `base !=
+built` and the `FACT-0396` exception E1 trap that aborts a rebuild of the P32 spec is not re-armed. `verify`:
+10 cells in, 10 out, **one** cell changed, +293 characters, three appended `os.environ` lines — exactly the
+`vars` of P24's single env edit. Every other DeepCenter variable was already identical between the two
+configurations, so three is the whole component rather than a selection from it.
+
+**The finding is in the base, not the treatment.** The fetched kernel logs of both scoring runs
+(`_evidence/exploit931/p32_kernel.log`, `p24_kernel.log`) show the released 0.931 configuration loading a
+DeepCenter model that **decides nothing on the division path** — `deepcenter_rejected=0` on all eight movies
+across 664 geometric candidates, its safe-division veto off — while its gap veto runs on the collapsed
+epoch-500 prior. Its own integrity block resolves the file to `best.pt` and rewrites the checkpoint variable
+to it; the loader then **skips that file** because epoch 2 fails the base's declared expected epoch 500, and
+falls back to `checkpoint_last.pt`. The base carries the good checkpoint in hand and declines it on an
+assertion. The treatment removes exactly that and nothing else.
+
+`scripts/win_bet/preflight_p35_dcveto.py` passes **10 of 10**, and its planted-defect self-test passes **8 of
+8** — the self-test earned its keep, catching a real crash-instead-of-fail bug in one condition. It uses
+Agent 1's central resolver `scripts/win_bet/kaggle_mounts.py` rather than writing a second ladder, executes
+the built notebook's **own** candidate ladder against a simulated mount holding the real dataset bytes, and
+**refuses to predict until it has reproduced both scored runs**; the treatment then resolves to `best.pt`
+epoch 2 under both observed mount conventions. Both logs also confirm the real mount root is
+`/kaggle/input/datasets/<owner>/<slug>/` and that the `/kaggle/input/<slug>/` form P24 hardcoded never
+existed — `FACT-0397`'s class, independently re-derived.
+
+**What none of this licenses:** the score. This configuration cannot be validated offline at all
+(`FACT-0378`, `FACT-0393` rule 4); the band is a prior, and the notebook's `PROXY_SCORE` over the four
+visible movies is not a selection signal. No knob of the public bundle is credited (`FACT-0377`, PKT-0028
+rule 1). The lane ends on its one submission, win or lose.
+
+## 2026-08-30 — PKT-0037 (agent 1, foundations): the preflight exists, and its first verdict stops GPU session 3
+
+**The deliverable.** One reusable CPU preflight that runs before every Kaggle GPU job, built after two
+consecutive sessions produced zero crops on environment questions (`FACT-0387`, `FACT-0397`). Four new
+instruments, nothing existing modified: `scripts/kaggle_edits/kaggle_mount_ladder.py` (the ONE central
+bounded dataset resolver, written as an injectable snippet so no patch writes a fourth private ladder),
+`scripts/win_bet/kaggle_mounts.py` (execs that same file, so the resolver proved on CPU and the resolver
+the kernel runs are the same characters; plus `rebase_and_exec`, which lifts a resolver out of the BUILT
+notebook and CALLS it against a simulated mount), `scripts/win_bet/kaggle_artifacts.py` (unified
+queue-fetch / factory-output discovery that records which convention hit), and
+`scripts/win_bet/gpu_preflight.py` (10 checks, signed receipt, `--selftest`). 20/20 in
+`tests/test_gpu_preflight.py`.
+
+**P33 attempt 3: FAIL, and the failure is FACT-0387 one process over.** PF07 runs the built notebook's own
+worker across the REAL subprocess boundary in preflight-only mode. The notebook launches it with
+`cwd=REPO_DIR` and no `env=`, while the worker file sits in `/kaggle/working` — so `sys.path[0]` is not
+`REPO_DIR/scripts` and `PYTHONPATH` is unset. Measured, not read:
+`ModuleNotFoundError: No module named 'predict_unet_transformer'`, with `biohub_tracking` broken alongside
+it because the deployed shards' `PYTHONPATH="src"` is never passed. The one-line fix
+(`PYTHONPATH="scripts" + os.pathsep + "src"`) is proven by the same probe, not proposed; `"src"` alone is
+not enough. Left unapplied on purpose — this packet forbids editing that patch while the version-coherence
+chain is live, and applying it would invalidate the notebook under certification.
+
+**What the preflight established before the spend.** Exact crops (`44b6_0113de3b`, `44b6_0b24845f`) from the
+notebook's own selection rule against the real uploaded parquet; and EXACT positive counts at the 8-frame
+cap — band A 1488 / 2174, band B 835 / 7585, every pair frame-consecutive, with the sidecar's in-scope
+above-threshold count equal to the pre-ILP band-A count exactly. That is `FACT-0394`'s lesson applied
+before the launch rather than after it: the in-kernel `a_checked>0` / `b_checked>0` floors can be satisfied.
+
+**Proved by mutation, 15/15, each check rejected by its OWN condition** — hardcoded flat mount, a `**` walk,
+a frame cap that makes both bands compare nothing, a torn sidecar tie, a factory-only artifact search
+(`FACT-0396`'s false FAIL, with P24-queue and P32-factory as regression fixtures), the as-built launcher, a
+tampered notebook, an edited receipt, a silent gate patch, an out-of-fold crop, a sidecar missing
+`edge_prob`, a dropped keep-set entry, absolute weights — plus two ACCEPT controls, because an auditor that
+rejects everything checks nothing. One checker bug the mutations caught: the first boundedness test read
+`**` anywhere in the text and condemned `_loeo_find` for the docstring explaining why it does not use `**`.
+
+**Findings for the primary, not blocking:** six independent mount ladders coexist in this one notebook, each
+with its own depth ceiling — that is the `FACT-0397` generator; and
+`scripts/kaggle_edits/coupled_division_transplant.py` contains zero `print` calls, so it cannot prove it
+fired. No GPU job, kernel push or submission was made. Registry, research-tree and claims gates green.
