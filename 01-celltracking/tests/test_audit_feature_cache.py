@@ -1140,10 +1140,26 @@ def _sibling(bench, *, seed, role="stabledet", fold="0", scale=1.0):
 
 
 def test_a_well_formed_dual_trunk_pair_is_accepted(bench):
+    """The bench cache declares role 'official'; a pair needs a fold-legitimate CLAIM arm, so the
+    accept control is built from the honest fold-0 pack trunk (FACT-0418)."""
+    claim = _sibling(bench, seed=3, role="pack_split0", scale=2.5)
     other = _sibling(bench, seed=7, scale=1.5)
-    report = A.audit_dual_trunk(bench["cache"], other, require_roles=True)
+    report = A.audit_dual_trunk(claim, other, require_roles=True)
     assert report["passed"] is True
-    assert set(report["roles"]) == set(A.PKT0029_REQUIRED_TRUNK_ROLES)
+    assert set(report["roles"]) == {"pack_split0", "stabledet"}
+    assert report["fold_legitimacy_policy"]["legitimate_claim_roles"] == ["oof_split0",
+                                                                         "pack_split0"]
+
+
+def test_the_fact_0418_pair_is_rejected_where_it_used_to_be_the_accept_control(bench):
+    """['official','stabledet'] on fold 0 has no arm that may be read as a result.
+
+    This exact pair was this file's accept control until FACT-0418 measured that the constant
+    behind it - PKT0029_REQUIRED_TRUNK_ROLES - would REFUSE the honest pair and ACCEPT this one.
+    """
+    other = _sibling(bench, seed=7, scale=1.5)
+    with pytest.raises(A.Reject, match="pair_has_no_fold_legitimate_claim_arm"):
+        A.audit_dual_trunk(bench["cache"], other, require_roles=True)
 
 
 def test_one_trunk_written_twice_is_not_a_pair(bench):
@@ -1159,11 +1175,25 @@ def test_a_pair_across_folds_is_rejected(bench):
         A.audit_dual_trunk(bench["cache"], other)
 
 
-def test_a_pair_that_does_not_carry_both_pkt0029_roles_is_rejected(bench):
-    """PKT-0029 item (3): the official and StableDet trunks must be cached and compared in the
-    SAME session, or a null cannot separate 'the head does not work' from 'wrong trunk'."""
+def test_the_pkt0029_mechanism_survives_but_its_role_list_does_not(bench):
+    """PKT-0029 item (3) asked for TWO trunks over ONE node set in ONE session, so that a null
+    can be told apart from a wrong feature contract (FACT-0392 risk three). That mechanism is
+    intact. What FACT-0418 refuted is the extra clause that the two had to be `official` and
+    `stabledet` specifically - which refused the honest pair and accepted the pair with no
+    legitimate arm. `pack_split0` + `official` on fold 0 satisfies the real requirement: two
+    different checkpoints, one detector pass, and an arm that may be read as a result.
+    """
     other = _sibling(bench, seed=7, role="pack_split0", scale=1.5)
-    with pytest.raises(A.Reject, match="dual_trunk_missing_a_required_role"):
+    report = A.audit_dual_trunk(bench["cache"], other, require_roles=True)
+    assert report["passed"] is True
+    assert set(report["roles"]) == {"official", "pack_split0"}
+    assert report["a"] != report["b"], "still two DIFFERENT checkpoints - the mechanism is intact"
+
+
+def test_a_pair_whose_arms_are_one_role_is_still_rejected(bench):
+    """The structural requirements are untouched by the policy: two arms, two roles."""
+    other = _sibling(bench, seed=7, role="official", scale=1.5)
+    with pytest.raises(A.Reject, match="dual_trunk_roles_differ"):
         A.audit_dual_trunk(bench["cache"], other, require_roles=True)
 
 
@@ -1264,9 +1294,15 @@ def test_the_self_test_command_passes(tmp_path):
             "post_fusion_column_moved_with_no_stage_recorded",
             "parity_band_membership_differs_with_no_stage",
             "logit_column_torn_from_its_probability"} <= planted
-    assert {"control_clean_cache", "control_valid_dual_trunk_pair",
+    assert {"dual_trunk_fact0418_pair_has_no_legitimate_arm",
+            "fold_swap_split1_claim_arm_on_fold0",
+            "fold_swap_split0_claim_arm_on_fold1"} <= planted, (
+        "the fold swap must be planted in BOTH directions, or the policy is untested one way")
+    assert {"control_clean_cache", "control_honest_fold0_pair_is_accepted",
+            "control_honest_fold1_pair_is_accepted",
             "control_projection_inside_budget"} <= accepted, (
-        "an auditor with no accept control checks nothing")
+        "an auditor with no accept control checks nothing - and it needs one on EACH fold, "
+        "because the whole subject here is that the folds are not symmetric")
     # every planted defect must have been rejected under the condition it was planted for
     for row in payload["results"]:
         if row["expected"] == "reject" and row["condition"]:

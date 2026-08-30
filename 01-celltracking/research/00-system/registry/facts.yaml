@@ -7448,6 +7448,11 @@ facts:
       Two guards on the same question returning opposite verdicts is worse than one wrong guard, because
       whichever runs last appears authoritative. This is a launch blocker on Phase 3 dual-trunk caching,
       not on the single-trunk contract-2 smoke.
+      RESOLVED 2026-08-31 BY FACT-0434. The divergence is gone and it was repaired by RETIRING the old
+      symbols rather than correcting them, so a regression is a NameError instead of a silent
+      disagreement. Both guards now consume one shared policy, agree on all twelve fold-by-pair cells,
+      and reject both fold-swap directions. The Phase-3 blocker recorded above is DISCHARGED; the
+      dual-trunk acquisition remains subject to every other gate.
     date: '2026-08-30'
     tags: [dual-trunk, fold-legitimacy, provenance-retraction, gitignored-artifacts, verified, launch-blocker]
 
@@ -8164,5 +8169,196 @@ facts:
       CONSEQUENCE, BINDING ON GATE B: coverage must be measured and REPORTED as a first-class number per fold
       and per crop, an uncovered pair must not inherit 0.0, and control provenance must be ASSERTED in the
       arm rather than trusted from a spec path. Both conditions are now written into LEVER-0044's protocol.
+      STATUS 2026-08-31, AND THE TWO DEFECTS HAVE DIVERGED - DO NOT CITE THIS FACT AS IF BOTH WERE SETTLED.
+      DEFECT 1 IS CLOSED by FACT-0433: the guard now lives in verdict() where the defect was demonstrated,
+      not only in build_report, and four constructed rejecting worlds each carry favourable metrics.
+      DEFECT 2 REMAINS LIVE. The uncovered-pair default is in PKT-0042's own treatment path and is fixed
+      only when that packet lands its coverage assertion; until then a Gate B verdict can still fail on
+      coverage while its mechanism is sound.
     date: '2026-08-30'
     tags: [defect, widened-control, coverage, false-kill-risk, lever-0044, gate-b, exercised, verified]
+
+  - id: FACT-0433
+    statement: >-
+      THE WIDENED-CONTROL GAP IS CLOSED, AND THE CLOSURE IS PROVED IN THE EXACT SHAPE THAT DEFEATED THE OLD
+      GUARD. assoc_report.verdict() now fails closed on control identity - placed in verdict() and not only
+      in build_report, because FACT-0432 defect 1 was established by calling verdict() DIRECTLY on a
+      hand-built all-favourable report, so a check confined to build_report would have left that path open.
+      Five worlds were CONSTRUCTED rather than asserted, and in all FOUR rejecting worlds every metric
+      channel still reads favourable while promotable is False: the deployed control passes; a byte-identical
+      copy at a different path passes, so the binding is to CONTENT not path; a widened control with
+      favourable metrics FAILS; a tampered control FAILS, including a variant that forges the original
+      sha256; and a missing receipt or any one of the four identity fields FAILS
+    value: 5
+    unit: constructed_control_binding_worlds_four_of_which_must_reject
+    scope:
+      worlds:
+        deployed_control: {bound: true, promotable: true, role: the accept control}
+        byte_identical_copy: {bound: true, promotable: true,
+                              also_tested: the registered file deleted, binding is on content not path}
+        widened_control: {bound: false, promotable: false,
+                          registered_as: refused, plus: "an unregistered one declaring surface widened / floor 0.1"}
+        tampered_control: {bound: false, promotable: false,
+                           variants: [one metric edited, forged original sha256, tampered graph under untouched rows]}
+        missing_receipt_or_identity: {bound: false, promotable: false,
+                                      variants: [receipt unlinked, each of four identity fields dropped singly, no identity at all]}
+      all_rejecting_worlds_have_favourable_metrics: true
+      requires: [experiment and fold identity, artifact/graph/receipt digests RECOMPUTED FROM THE BYTES,
+                 content match against the deployed-control manifest, explicit widened refusal,
+                 missing identity fails closed]
+      declared_digest_contradicting_the_recomputed_one: is itself a refusal
+      widened_refusal_basis: [registered digest, any declared surface or candidate floor below the deployed 0.5]
+      wired_at: 'scripts/win_bet/assoc_train_harness.py:1628'
+      thresholds_or_falsifiers_touched: none
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Every world is CONSTRUCTED and exercised rather than asserted, and the accept controls (worlds 1 and 2)
+      are what establish this is not a reject-everything guard. The decisive design choice is testable and was
+      tested: the four rejecting worlds each carry FAVOURABLE metrics on every channel, so the only thing
+      producing the refusal is control identity - which is precisely the configuration that returned
+      promotable true before the fix.
+    instrument: >-
+      scripts/win_bet/control_binding.py and scripts/win_bet/deployed_controls.json; contracts
+      tests/test_control_binding.py; evidence _evidence/audit/control_binding/five_worlds.json
+    note: >-
+      THIS SUPERSEDES THE "UNGUARDED" HALF OF FACT-0432 DEFECT 1. Defect 2 of that fact - the coverage
+      hazard, where an uncovered pair inherits 0.0 rather than a neutral score - is UNTOUCHED here and remains
+      live until PKT-0042 lands its treatment-path fix. Do not read this entry as closing both.
+      THE PLACEMENT IS THE LESSON. A guard installed where the defect was DEMONSTRATED, rather than where it
+      seemed to belong, is the difference between closing a path and appearing to. FACT-0417's receipt defect
+      was the same shape one level up: a field claiming a value that the consumer reads and nobody re-derives.
+      Here a declared digest that contradicts the recomputed one is itself a refusal, so the claim cannot
+      outrank the bytes.
+    date: '2026-08-31'
+    tags: [control-binding, widened-control, fact-0382, five-worlds, exercised, verified, headline]
+
+  - id: FACT-0434
+    statement: >-
+      THE TWO TRUNK-LEGITIMACY GUARDS NOW AGREE FROM ONE SOURCE, ACROSS A 12-CELL FOLD-BY-PAIR MATRIX WITH
+      EVERY CELL AGREEING. The divergence was repaired by RETIRING the old symbols rather than correcting
+      them - PKT0029_REQUIRED_TRUNK_ROLES, INVALID_PAIR and LEGITIMATE_TRUNKS are gone and a test asserts
+      their absence - and replacing them with one shared policy both audit_feature_cache and
+      gpu_protection_contract consume. Both fold-swap directions are rejected by BOTH guards, and in the
+      fold-0 direction the mutation deliberately uses the fold-0 weights glob so the pre-existing glob check
+      CANNOT fire and the policy is the only thing rejecting. A monkeypatch of the policy alone moves both
+      guards, which is what separates one shared source from two coincidentally-equal constants
+    value: 12
+    unit: fold_by_pair_cells_where_both_guards_return_the_same_verdict
+    scope:
+      all_cells_agree: true
+      retired_symbols: [PKT0029_REQUIRED_TRUNK_ROLES, INVALID_PAIR, LEGITIMATE_TRUNKS]
+      retirement_asserted_by_test: true
+      policy:
+        fold_0: {claim_arm: pack_split0, comparison_only: stabledet}
+        fold_1: {claim_arm: oof_split1, forbidden: "no split_0 checkpoint in EITHER arm"}
+        official_role: never a claim arm; provenance stays at FACT-0418's retraction
+        roles_bound_by: [sha256, fold, embryo, provenance]
+      fold_swap_mutations: {oof_split1_to_fold_0: rejected by both, pack_split0_to_fold_1: rejected by both,
+                            fold_0_direction_uses_the_fold_0_glob_so_the_glob_check_cannot_fire: true}
+      shared_source_proof: a monkeypatch of the policy alone moves both guards
+      suites: {audit_feature_cache_selftest: '41/41', gpu_protection_contract: '28/28 (was 22/22)'}
+      old_accept_control_now_a_planted_rejection: "['official','stabledet']"
+      accept_controls_now_exist_on: both folds
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The agreement is demonstrated over a complete 12-cell matrix rather than on the one pair that
+      previously diverged, and the single-source claim is proved by INTERVENTION - patching the policy alone
+      moves both guards - which is the only evidence that distinguishes a shared source from two constants
+      that happen to be equal. The fold-0 mutation was deliberately constructed so a pre-existing check could
+      not take the credit.
+    instrument: >-
+      scripts/win_bet/provenance_policy.py; contracts tests/test_provenance_policy.py; evidence
+      _evidence/foundations/provenance_policy/policy_agreement_matrix.json
+    note: >-
+      THIS RESOLVES THE PHASE-3 LAUNCH BLOCKER recorded in FACT-0418's 2026-08-30 update and the instrument
+      divergence FACT-0431 named. The dual-trunk acquisition is no longer blocked by two guards contradicting
+      each other; it remains subject to every other gate.
+      THE HOST FORBADE THE CHEAP FIX AND WAS RIGHT TO. Editing one constant until the two guards agreed would
+      have produced agreement by coincidence and left the next divergence invisible. Retiring the symbols
+      makes a regression a NameError rather than a silent disagreement.
+    date: '2026-08-31'
+    tags: [provenance-policy, dual-trunk, guards-agree, fold-legitimacy, blocker-resolved, verified, headline]
+
+  - id: FACT-0435
+    statement: >-
+      FOUR TRUNK CHECKPOINT DIGESTS RE-DERIVED IN FULL FROM THE BYTES, where the registry had held only
+      16-hex prefixes. oof_split0 is
+      d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f at 8,357,783 bytes and is THE SAME
+      BYTES as C:/temp/hoct/trunks/official_f0/edge_predictor_best.pth, independently re-confirming
+      FACT-0418's provenance retraction; oof_split1 is
+      2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de at 8,357,783 bytes; stabledet is
+      32d8048692aeb95fecd0245758a6b5b68889a84af4c4afc610414ae6fccb6fe4; and pack_split0 is
+      12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771 at 8,363,159 bytes - a DIFFERENT byte
+      size, so it is a genuinely different checkpoint rather than a re-hash of the same one
+    value: 4
+    unit: trunk_checkpoints_with_full_sha256_re_derived_from_the_bytes
+    scope:
+      oof_split0: {sha256: d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f,
+                   bytes: 8357783, provenance: VERIFIED, hashed_this_cycle_from: artifacts/kaggle/weights_dataset/,
+                   identical_to: 'C:/temp/hoct/trunks/official_f0/edge_predictor_best.pth'}
+      oof_split1: {sha256: 2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de,
+                   bytes: 8357783, provenance: VERIFIED, hashed_this_cycle_from: artifacts/kaggle/weights_dataset/}
+      stabledet: {sha256: 32d8048692aeb95fecd0245758a6b5b68889a84af4c4afc610414ae6fccb6fe4,
+                  provenance: MEASURED, carried_from: _evidence/foundations/p37_trunk_inventory.json}
+      pack_split0: {sha256: 12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771,
+                    bytes: 8363159, provenance: MEASURED,
+                    carried_from: _evidence/foundations/p37_trunk_inventory.json,
+                    note: different byte size from the OOF pair, so a genuinely different checkpoint}
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The first two were hashed from the bytes this cycle and are VERIFIED; the last two are carried from the
+      P37 trunk inventory and are MEASURED, and the distinction is preserved rather than levelled up. The
+      byte-size difference on pack_split0 is what rules out the possibility that it is the OOF checkpoint
+      under another name - a check that matters here precisely because two of the four DID turn out to be the
+      same bytes under different names.
+    instrument: scripts/win_bet/provenance_policy.py KNOWN_CHECKPOINTS
+    note: >-
+      WHY FULL DIGESTS RATHER THAN PREFIXES. The registry has been carrying 16-hex prefixes, which are fine
+      for reading and inadequate for binding: the control binding (FACT-0433) refuses a declared digest that
+      contradicts the recomputed one, and that comparison needs the full value. This entry is the source the
+      policy binds against.
+    date: '2026-08-31'
+    tags: [trunk-provenance, sha256, checkpoints, verified]
+
+  - id: FACT-0436
+    statement: >-
+      A COMMITTED TEST IS INVERTED BY THE NEW POLICY AND IT IS RECORDED SO IT IS NEVER READ AS AN UNNOTICED
+      LOOSENING: on fold 0 the trunk pair (pack_split0, official) is now ACCEPTED, where the retired constant
+      refused it. The PKT-0029 mechanism is intact - what FACT-0392's third risk actually requires is TWO
+      DIFFERENT CHECKPOINTS over ONE detector pass in ONE session, so trunk identity can never be confounded
+      with contract error - and what was dropped is only the extra clause demanding the two be named
+      'official' and 'stabledet' specifically
+    value: 1
+    unit: committed_tests_whose_verdict_is_inverted_by_the_shared_provenance_policy
+    scope:
+      pair: [pack_split0, official]
+      fold: 0
+      old_verdict: refused by PKT0029_REQUIRED_TRUNK_ROLES
+      new_verdict: accepted
+      what_survives: two DIFFERENT checkpoints over ONE detector pass in ONE session (FACT-0392 risk three)
+      what_was_dropped: the clause requiring the two roles be named 'official' and 'stabledet'
+      caveat: >-
+        `official` is byte-identical to our OOF split_0 (FACT-0435) and its documented provenance stays
+        RETRACTED to UNVERIFIED (FACT-0418), so accepting it as a COMPARISON arm is not an endorsement of what
+        that file is
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The inversion is stated by the packet that caused it rather than discovered later by someone reading a
+      changed test, which is the only reason it is safe: an inverted assertion that nobody announces is
+      indistinguishable from a guard quietly relaxed. Both inverted assertions were re-stated AS inversions in
+      the test file.
+    instrument: >-
+      scripts/win_bet/provenance_policy.py; tests/test_audit_feature_cache.py, where the two inverted
+      assertions are stated as such
+    note: >-
+      THE DISTINCTION THIS PRESERVES. The dual-trunk requirement exists to remove FACT-0392's confound, since
+      trunk identity is a CLI argument recorded nowhere in the checkpoint. That needs two DIFFERENT
+      checkpoints; it never needed two PARTICULAR ones. The old constant encoded the second, stricter and
+      wrong condition, which is what made it refuse the honest pair while accepting a pair with no legitimate
+      arm (FACT-0418).
+    date: '2026-08-31'
+    tags: [provenance-policy, inverted-test, fact-0392, no-silent-loosening, verified]

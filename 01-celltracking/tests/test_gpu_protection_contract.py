@@ -68,10 +68,14 @@ def test_the_honest_fold1_trunk_pair_is_accepted():
 
 
 def test_the_fact_0418_pair_with_no_legitimate_arm_is_rejected():
-    bad = dict(HONEST_F1, dual_trunk_pair=list(G.INVALID_PAIR))
+    """The pairing is refused BY NAME, and the name comes from the shared policy, not from a
+    constant this module keeps - that duplication is what FACT-0431 recorded going wrong."""
+    bad = dict(HONEST_F1, dual_trunk_pair=["official", "stabledet"])
     c = _clause(G.section_data(F1, bad), "DATA-3")
     assert not c["passed"]
-    assert c["evidence"]["is_the_fact_0418_invalid_pair"] is True
+    assert any("FACT-0418 pairing" in r for r in c["evidence"]["refusals"]), c["evidence"]
+    assert not hasattr(G, "INVALID_PAIR"), "the local table must be gone, not merely corrected"
+    assert not hasattr(G, "LEGITIMATE_TRUNKS")
 
 
 def test_an_illegitimate_trunk_role_is_rejected_even_when_the_spec_declares_it_legitimate():

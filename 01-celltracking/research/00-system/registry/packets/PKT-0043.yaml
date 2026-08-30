@@ -2,7 +2,7 @@ id: PKT-0043
 title: "Control binding and one fold-aware provenance policy: the two guards that decide whether a result may be read"
 lever: null              # shared instrument infrastructure, not a hypothesis
 owner: agent-7-provenance-guards
-lock: claimed
+lock: done
 opened: '2026-08-30'
 
 why_no_lever: >-
@@ -80,7 +80,131 @@ forbidden:
 outputs:
   evidence: _evidence/audit/control_binding/ and _evidence/foundations/provenance_policy/
   facts_added: []
+  code:
+    - scripts/win_bet/control_binding.py            # NEW - task 1
+    - scripts/win_bet/deployed_controls.json        # NEW - the registry-bound manifest, empty and refusing
+    - scripts/win_bet/provenance_policy.py          # NEW - task 2, the ONE policy
+    - scripts/win_bet/assoc_report.py               # verdict() fails closed on control identity
+    - scripts/win_bet/assoc_train_harness.py        # binds the control at the :1628 call site
+    - scripts/win_bet/audit_feature_cache.py        # retired constant -> the shared policy
+    - scripts/win_bet/gpu_protection_contract.py    # retired tables -> the shared policy
+    - tests/test_control_binding.py                 # NEW - the five worlds
+    - tests/test_provenance_policy.py               # NEW - the agreement matrix and the fold swap
+    - tests/test_audit_feature_cache.py             # two inverted assertions, both stated as such
+    - tests/test_gpu_protection_contract.py         # reads the shared policy's refusals
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  BOTH GUARDS SHIPPED, AND EACH IS DEMONSTRATED TO REJECT BY MUTATION. CPU only; no GPU job, no kernel
+  push, no submission, no lever claimed, no fact written. The falsifier is inverted and is NOT met: no
+  guard here is shipped unrejecting.
+
+  TASK 1 - THE CONTROL IS CRYPTOGRAPHICALLY BOUND (GREEN; PKT-0042's Gate B rerun may proceed).
+  New scripts/win_bet/control_binding.py plus the registry-bound manifest scripts/win_bet/
+  deployed_controls.json. assoc_report.build_report takes control_binding=, and assoc_report.verdict()
+  reads it - deliberately in verdict() and not only in build_report, because FACT-0432 defect 1 was
+  established by calling verdict() DIRECTLY on a hand-built all-favourable report, and a check confined
+  to build_report would have left that path open. The binding requires: experiment and fold identity;
+  artifact, graph and receipt digests RECOMPUTED FROM THE BYTES, with a declared digest that contradicts
+  the recomputed one being itself a refusal (FACT-0417's lesson - a field claiming a value the auditor
+  reads and nobody re-derives); a content match against the deployed-control manifest; EXPLICIT refusal
+  of the widened control by registered digest AND by any declared surface or candidate floor below the
+  deployed 0.5 (FACT-0369, FACT-0382); and missing identity failing CLOSED.
+  FIVE WORLDS, EACH CONSTRUCTED, in _evidence/audit/control_binding/five_worlds.json:
+    1 deployed control                       bound=True   promotable=True
+    2 byte-identical copy at another path     bound=True   promotable=True   (content, not path)
+    3 widened control, favourable metrics     bound=False  promotable=False  (the live FACT-0382 case)
+    4 tampered control (also forging its sha) bound=False  promotable=False
+    5 missing receipt / missing identity      bound=False  promotable=False
+  In all four rejecting worlds EVERY metric channel still reads favourable - the exact FACT-0432 shape.
+  tests/test_control_binding.py, 21 tests. NO promotion threshold, falsifier or gate condition was
+  touched: this changes what may be READ, never what counts as a win.
+  The shipped manifest registers ZERO controls, which is the correct fail-closed state and not an
+  oversight - no committed spec declares chain_arms, so no full-chain control artifact exists yet.
+
+  TASK 2 - ONE FOLD-AWARE PROVENANCE POLICY, CONSUMED BY BOTH GUARDS.
+  New scripts/win_bet/provenance_policy.py. audit_feature_cache.PKT0029_REQUIRED_TRUNK_ROLES and
+  gpu_protection_contract.INVALID_PAIR / LEGITIMATE_TRUNKS are RETIRED, not corrected - a test asserts
+  the symbols are GONE, because correcting them would have bought agreement by coincidence. Fold 0: a
+  legitimate claim arm from the split_0 trunks (pack_split0, oof_split0), StableDet as the declared
+  comparison arm only. Fold 1: oof_split1 only, and NO split_0 checkpoint in EITHER arm, since split_0
+  is leaky there (the EXP-0019 defect class). 'official' is never a claim arm on either fold and its
+  provenance is left at FACT-0418's retraction. Every role is bound by SHA, fold, embryo and provenance.
+  EVIDENCE OF AGREEMENT, which is the property the repair had to have: a 12-cell (fold x pair) matrix in
+  _evidence/foundations/provenance_policy/policy_agreement_matrix.json where both guards return the SAME
+  verdict on every cell. THE FOLD SWAP IS PLANTED IN BOTH DIRECTIONS AND REJECTED BY BOTH GUARDS -
+  oof_split1 relabelled onto fold 0, and pack_split0 relabelled onto fold 1 - and in the fold-0 direction
+  the mutation is built so the pre-existing weights-glob check CANNOT fire, so the policy is the only
+  thing rejecting it. A monkeypatch of the policy alone moves BOTH guards' verdicts, which is what
+  distinguishes one shared source from two constants that coincide.
+  audit_feature_cache self-test 41/41 (its old accept control for ['official','stabledet'] is now a
+  planted rejection, and there is now an accept control on EACH fold); gpu_protection_contract selftest
+  28/28 (was 22/22); tests/test_provenance_policy.py 21 tests.
+
+  SUITES RUN (targeted, by explicit path - the full suite was NOT run while PKT-0042 is live, and
+  tests/test_registry_validity.py was not run at all): test_control_binding.py 21 passed;
+  test_provenance_policy.py 21 passed; test_assoc_report.py 15 passed; test_gpu_protection_contract.py
+  21 passed; test_audit_feature_cache.py 82 passed; test_assoc_train_harness.py 64 passed.
+  scripts/core/validate_registry.py OK.
+
+  GUARDS I COULD NOT DEMONSTRATE TO REJECT: none. Every clause added or changed here has a mutation that
+  fails without it. Two LIMITS are named rather than hidden. (a) The digest-aliasing check
+  (role_contradicts_its_bytes) is exercised with the REAL recorded digests through both guards' call
+  sites, but only guard 2 end-to-end through a spec field; guard 1 reaches it through the manifest's
+  trunk sha256, which in a synthetic fixture is a synthetic digest, so its aliasing path is proved at the
+  policy function both guards call rather than with a manufactured collision - a file with a chosen
+  sha256 cannot be constructed. (b) provenance_policy binds roles by digest for the FOUR trunks whose
+  bytes are known; an unrecognised digest is RECORDED, not refused, so that legitimate new trunks and
+  test fixtures are not blocked. Refusing unknown digests outright would be strictly safer and is a
+  deliberate non-choice, named here so the next agent decides it rather than discovers it.
+
+  NOT DONE ON PURPOSE: scripts/win_bet/finaledge_gates.py (PKT-0042's LIVE Gate A/B instrument) was NOT
+  edited - a concurrent write to another packet's running file is the race this project has paid for.
+  Its _control_provenance() already hashes the notebook code, the pre-ILP export and run_stats, and
+  records not_a_widened_only_control: true, which is a SELF-DECLARED boolean of exactly the kind the
+  binding refuses to trust. THE THREE-LINE INTEGRATION PKT-0042 NEEDS, once, per fold:
+    (1) control_binding.py register --experiment EXP-#### --fold {0,1}
+          --control <the ordered per-crop control payloads>  --graph <preilp export>
+          --receipt <run_stats.csv> --provenance "<what this artifact is>"
+        bind_control accepts a LIST for --control, so the per-crop payload set binds as ONE identity and
+        a single tampered crop moves the digest (tested).
+    (2) b = control_binding.bind_control(control_path=[...payloads...], identity={"experiment":...,
+          "fold": str(fold), "graph": <preilp>, "receipt": <run_stats>}, n_rows=len(control))
+    (3) pass control_binding=b to both build_report calls in build_panel (:792 and :828).
+  Until then their panel reports build normally and carry a REFUSING binding block with the reason
+  recorded, which is the intended fail-closed behaviour rather than a crash.
+
+  CANDIDATE FACTS FOR THE COORDINATOR (I wrote no registry file):
+  CF1. THE WIDENED-CONTROL GAP IS CLOSED, AND THE CLOSURE IS PROVED IN THE SHAPE THAT DEFEATED THE OLD
+       GUARD. assoc_report.verdict() now blocks on control identity; five constructed worlds, and in the
+       four rejecting ones every metric channel is favourable and promotable is False.
+       value 5 (worlds), scope {deployed: pass, byte_identical_copy: pass, widened: fail, tampered: fail,
+       missing_identity: fail; binding is on CONTENT not path; digests recomputed from bytes}.
+       provenance VERIFIED (exercised, not read). instrument scripts/win_bet/control_binding.py;
+       tests/test_control_binding.py; evidence _evidence/audit/control_binding/five_worlds.json.
+       Supersedes the "NOT CLOSED" half of FACT-0432 defect 1; defect 2 (coverage) is untouched here.
+  CF2. THE TWO GUARDS NOW AGREE FROM ONE SOURCE, ON A 12-CELL MATRIX. value 12, unit
+       fold_x_pair_cells_where_both_guards_return_the_same_verdict; all_agree true; both fold-swap
+       directions rejected by both guards; PKT0029_REQUIRED_TRUNK_ROLES, INVALID_PAIR and
+       LEGITIMATE_TRUNKS are retired symbols and a test asserts their absence. provenance VERIFIED.
+       instrument scripts/win_bet/provenance_policy.py; tests/test_provenance_policy.py; evidence
+       _evidence/foundations/provenance_policy/policy_agreement_matrix.json. This RESOLVES the
+       launch-blocker clause in FACT-0418's 2026-08-30 update and the divergence FACT-0431 recorded.
+  CF3. FOUR TRUNK DIGESTS RE-DERIVED IN FULL FROM THE BYTES, where the registry holds 16-hex prefixes:
+       oof_split0 d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f (8,357,783 B, and the
+       same bytes as C:/temp/hoct/trunks/official_f0/edge_predictor_best.pth - FACT-0418's retraction
+       re-confirmed independently); oof_split1
+       2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de (8,357,783 B); stabledet
+       32d8048692aeb95fecd0245758a6b5b68889a84af4c4afc610414ae6fccb6fe4; pack_split0
+       12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771 (8,363,159 B - a different byte
+       size, so it is a genuinely different checkpoint). The first two were hashed from
+       artifacts/kaggle/weights_dataset/ this cycle; the last two are carried from
+       _evidence/foundations/p37_trunk_inventory.json. provenance VERIFIED (first two) / MEASURED (last
+       two). instrument scripts/win_bet/provenance_policy.KNOWN_CHECKPOINTS.
+  CF4. A CONSEQUENCE WORTH RECORDING BECAUSE IT INVERTS A COMMITTED TEST: on fold 0 the pair
+       (pack_split0, official) is now ACCEPTED, where the retired constant refused it. The PKT-0029
+       mechanism is intact - two DIFFERENT checkpoints over ONE detector pass in ONE session, which is
+       what FACT-0392 risk three actually requires - and what was dropped is the extra clause that the
+       two had to be 'official' and 'stabledet' specifically. Named so it is not read later as a
+       loosening nobody noticed.

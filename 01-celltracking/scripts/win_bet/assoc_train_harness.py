@@ -1485,6 +1485,9 @@ def run_harness(*, table: pl.DataFrame, models: list[ModelSpec], fold: int,
                 model=spec.tag, fold=fold, control=arm["control"], candidate=arm["candidate"],
                 summarise=summarise, conversions=r["conversions"]["all_decidable"],
                 notes=arm.get("notes", ""),
+                # An arm that supplies no binding is not "unconstrained": build_report writes a
+                # refusing block and the verdict blocks on it (FACT-0432).
+                control_binding=arm.get("control_binding"),
             )
         else:
             r["full_chain"] = None
@@ -1625,9 +1628,29 @@ def cmd_train(args) -> int:
     chain_arms = spec.get("chain_arms")
     if chain_arms:
         summarise = resolve_callable(spec["summariser"])
-        chain_arms = {k: {"control": json.loads(Path(v["control"]).read_text(encoding="utf-8")),
-                          "candidate": json.loads(Path(v["candidate"]).read_text(encoding="utf-8")),
-                          "notes": v.get("notes", "")} for k, v in chain_arms.items()}
+        # THE CONTROL IS BOUND BEFORE IT IS READ. `v["control"]` is still a spec-supplied path -
+        # that is unavoidable, something has to name the file - but the path no longer confers
+        # identity. `control_binding.bind_control` re-hashes the artifact, the graph it was scored
+        # from and its receipt, and matches them against the registry-bound deployed fold control
+        # (FACT-0382). An arm that declares no `control_identity` binds to nothing and its verdict
+        # is blocked; it is NOT refused here, because a report that records WHY it was refused is
+        # worth more than a traceback (FACT-0432).
+        import control_binding as _cb
+        resolved = {}
+        for k, v in chain_arms.items():
+            rows = json.loads(Path(v["control"]).read_text(encoding="utf-8"))
+            resolved[k] = {
+                "control": rows,
+                "candidate": json.loads(Path(v["candidate"]).read_text(encoding="utf-8")),
+                "notes": v.get("notes", ""),
+                "control_binding": _cb.bind_control(
+                    control_path=Path(v["control"]),
+                    identity=v.get("control_identity"),
+                    manifest=Path(v["control_manifest"]) if v.get("control_manifest") else None,
+                    n_rows=len(rows),
+                ),
+            }
+        chain_arms = resolved
 
     payload = run_harness(
         table=table, models=models, fold=int(spec["fold"]),

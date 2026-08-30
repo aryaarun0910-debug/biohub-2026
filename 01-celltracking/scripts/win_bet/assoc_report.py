@@ -198,8 +198,15 @@ def paired_bootstrap_score(control: list[dict], candidate: list[dict], summarise
 
 def build_report(*, model: str, fold: int, control: list[dict], candidate: list[dict], summarise,
                  conversions: dict | None = None, notes: str = "",
+                 control_binding: dict | None = None,
                  draws: int = 2000, seed: int = 20260829) -> dict:
-    """The only summary a learned surface may be promoted on."""
+    """The only summary a learned surface may be promoted on.
+
+    ``control_binding`` is the block ``control_binding.bind_control`` returns: the control's
+    identity, bound to the registry's deployed fold control by digests RECOMPUTED from the bytes.
+    Omitting it is not neutral - the report is built, and its verdict is blocked, because
+    ``FACT-0432`` measured that an unbound control is invisible in every other channel.
+    """
     if conversions is not None:
         # A bare {"net": 28} - the exact figure FACT-0376 could NOT decompose - must not satisfy
         # the gained/lost/churn contract just because `verdict` happens to read only one key.
@@ -270,10 +277,48 @@ def build_report(*, model: str, fold: int, control: list[dict], candidate: list[
             },
         },
         "paired_bootstrap": boot,
+        # WHAT THE CONTROL ACTUALLY IS. Recorded at the top level rather than inside `channels`
+        # because it is not a measurement - it is the precondition for reading the measurements.
+        "control_binding": control_binding if control_binding is not None else {
+            "heartbeat": "CONTROL_BINDING_REFUSED", "bound": False,
+            "refusals": ["identity_missing: build_report was called with no control_binding, so "
+                         "the control is an arbitrary spec-supplied path (FACT-0432). Missing "
+                         "identity FAILS CLOSED"],
+            "fold": None, "artifact_sha256": None, "graph_sha256": None, "receipt_sha256": None,
+        },
         "notes": notes,
     }
     report["verdict"] = verdict(report)
     return report
+
+
+CONTROL_BINDING_HEARTBEAT = "CONTROL_BOUND_TO_DEPLOYED_MANIFEST"
+
+
+def control_binding_blockers(report: dict) -> list[str]:
+    """FAIL CLOSED on the control's identity, for any report - including one built by hand.
+
+    This lives in ``verdict`` rather than in ``build_report`` on purpose. ``FACT-0432`` defect 1
+    was established by calling ``verdict()`` DIRECTLY on a constructed all-favourable report; a
+    check that only ran inside ``build_report`` would have left that exact path open.
+    """
+    binding = report.get("control_binding")
+    if not isinstance(binding, dict):
+        return ["control identity not bound: the report carries no `control_binding` block, so "
+                "the control is an arbitrary path (FACT-0432). Missing identity fails CLOSED"]
+    out = []
+    if binding.get("heartbeat") != CONTROL_BINDING_HEARTBEAT or not binding.get("bound"):
+        why = "; ".join(binding.get("refusals") or ["no reason recorded"])
+        out.append(f"control is not bound to the registry's deployed fold control: {why}")
+    for key in ("artifact_sha256", "graph_sha256", "receipt_sha256"):
+        if not binding.get(key):
+            out.append(f"control binding carries no {key}: a control whose bytes were never "
+                       "hashed is not bound to anything")
+    bound_fold = binding.get("fold")
+    if bound_fold is not None and str(bound_fold) != str(report.get("fold")):
+        out.append(f"control binding is for fold {bound_fold!r} but this report is fold "
+                   f"{report.get('fold')!r} - a different experiment wearing the right filename")
+    return out
 
 
 def verdict(report: dict) -> dict:
@@ -291,10 +336,13 @@ def verdict(report: dict) -> dict:
         of MECHANISM but is not sufficient on its own, because motion relink replaces the
         solver's edge list downstream (FACT-0364);
       - the score identity must hold, or the two arms were not scored by the same scorer and no
-        channel in the report can be trusted.
+        channel in the report can be trusted;
+      - and BEFORE any of those are read at all, the CONTROL must be cryptographically bound to
+        the registry's deployed fold control (FACT-0382, FACT-0432). This adds no bar to what
+        counts as a win; it decides whether the win was measured against the right thing.
     """
     ch = report["channels"]
-    blockers = []
+    blockers = control_binding_blockers(report)
     if ch["count_adjustment"]["count_adjustment_artifact"]:
         blockers.append("count_adjustment_artifact: adjusted rose while the raw channel did not")
     if ch["edge_jaccard_raw"]["delta"] <= 0:
@@ -321,9 +369,13 @@ def write(report: dict, out: Path) -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2, default=float), encoding="utf-8")
     ch = report["channels"]
+    cb = report.get("control_binding") or {}
+    sha = cb.get("artifact_sha256")
     print(
         f"\n{report['heartbeat']} model={report['model']} fold={report['fold']} "
         f"crops={report['n_crops']}\n"
+        f"  control binding       {cb.get('heartbeat', 'ABSENT')}"
+        f" artifact={(sha[:16] + '...') if sha else 'UNHASHED'}\n"
         f"  raw edge Jaccard      {ch['edge_jaccard_raw']['delta']:+.5f}\n"
         f"  adjusted (total)      {ch['count_adjustment']['delta_adj']:+.5f}"
         f"   = raw {ch['count_adjustment']['raw_channel']:+.5f}"

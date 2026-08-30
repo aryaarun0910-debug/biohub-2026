@@ -6188,3 +6188,48 @@ facts are routed to the coordinator in `PKT-0040.yaml`. Instruments:
 `scripts/win_bet/assoc_preilp_survival.py` (heartbeat `ASSOC_PREILP_SURVIVAL_COMPLETE`) and
 `assoc_preilp_survival_panel.py`; evidence `_evidence/assoc/survival/`. Category 2 and 5 stage definitions
 and counts handed to AGENT 1 (PKT-0038), who owns the ledger; no second ledger was built.
+
+### 2026-08-30 (night) — PKT-0043 (agent 7, provenance guards): the two guards that decide whether a result may be read
+
+No lever, no score, no GPU. Two committed guards did not guard, and both are now demonstrated REJECTING
+by mutation rather than asserted to work.
+
+**Task 1 — the control is cryptographically bound.** `FACT-0432` defect 1 was live: `verdict()` returned
+`promotable: true, blockers: []` on a report whose only defect was the control's identity, because
+`build_report` validated `control` in no way and it arrived as an arbitrary spec-supplied path at
+`assoc_train_harness.py:1628`. New `scripts/win_bet/control_binding.py` binds a control to the
+registry-bound DEPLOYED fold control (`FACT-0382`): identity (experiment, fold, graph, receipt); artifact,
+graph and receipt digests RECOMPUTED FROM THE BYTES, with a declared digest that disagrees being itself a
+refusal (`FACT-0417`'s lesson); a match against `scripts/win_bet/deployed_controls.json`; the widened
+control refused BY NAME by registered digest and by any declared surface or floor below the deployed one
+(`FACT-0369`); and missing identity failing CLOSED. `verdict()` — not only `build_report` — reads the
+binding, because the defect was found by calling `verdict()` directly on a hand-built report. Five worlds,
+each constructed: the deployed control PASSES; a byte-identical copy at another path PASSES (content, not
+path); a widened control whose every metric channel is favourable FAILS; a tampered control FAILS,
+including one that forges the original digest; a missing receipt or missing identity FAILS. In all four
+rejecting worlds every metric channel still reads favourable and the report is not promotable — the
+`FACT-0432` shape, end to end. No promotion threshold or falsifier was touched: this changes what may be
+READ, never what counts as a win. `_evidence/audit/control_binding/five_worlds.json`;
+`tests/test_control_binding.py` (21).
+
+**Task 2 — one fold-aware provenance policy, consumed by both guards.** `FACT-0418` and `FACT-0431`:
+`audit_feature_cache.PKT0029_REQUIRED_TRUNK_ROLES` would have REFUSED the honest pair and ACCEPTED the
+pair with no legitimate arm, while `gpu_protection_contract` DATA-3 answered the same question the other
+way. Both local tables are RETIRED — not corrected — into `scripts/win_bet/provenance_policy.py`, which
+both guards import. Fold 0: a legitimate claim arm from the split_0 trunks, StableDet as the declared
+comparison arm only. Fold 1: `oof_split1` only, and NO split_0 checkpoint in either arm, since split_0 is
+leaky there (the EXP-0019 defect class). `official` is never a claim arm on either fold, its provenance
+left at the retraction. Every role is bound by SHA, fold, embryo and provenance, with the four trunk
+digests re-derived from the bytes this cycle. A 12-cell agreement matrix over (fold × pair) has both
+guards returning the same verdict on every cell, and the FOLD SWAP is planted in BOTH directions and
+rejected by BOTH guards. A monkeypatch of the policy alone moves both guards' verdicts, which is what
+distinguishes one shared source from two constants that happen to coincide.
+`audit_feature_cache` self-test 41/41 (was 39/39, and its old accept control for
+`['official','stabledet']` is now a planted rejection); `gpu_protection_contract` selftest 28/28 (was
+22/22); `tests/test_provenance_policy.py` (21).
+
+CPU only. No GPU job, no kernel push, no submission, no lever claimed, no fact written — candidate facts
+routed to the coordinator in `PKT-0043.yaml`. Evidence `_evidence/audit/control_binding/` and
+`_evidence/foundations/provenance_policy/`. `finaledge_gates.py` (PKT-0042, live) was NOT edited: the
+three-line integration it needs is recorded in the packet result instead of written into another packet's
+running instrument.

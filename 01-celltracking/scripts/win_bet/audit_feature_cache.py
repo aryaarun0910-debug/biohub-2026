@@ -142,17 +142,18 @@ FOLD_EMBRYO = {"0": "44b6", "1": "6bba"}
 # LEAKY on fold 1 - the EXP-0019 defect. Mirrored from tests/test_loeo_weights_hygiene.py.
 PACK_WEIGHTS_TOKEN = "split_0"
 
-TRUNK_ROLES = {
-    "pack_split0",     # support-pack primary, legitimate on fold 0 only
-    "oof_split1",      # our out-of-fold split_1, required on fold 1
-    "official",        # HOCT publisher DEFAULT_WEIGHTS, loeo_official_f0_e3/split_0
-    "stabledet",       # the StableDet trunk shipped in the HOCT bundle
-}
+# THE ROLE TABLE AND EVERY FOLD-LEGITIMACY QUESTION LIVE IN ONE PLACE, WHICH IS NOT THIS FILE.
+# `PKT0029_REQUIRED_TRUNK_ROLES = ('official', 'stabledet')` used to live here, and FACT-0418
+# measured what it did: `audit-pair --require-roles` would have REFUSED the honest pair and
+# ACCEPTED the pair with no fold-legitimate arm on either fold, while the newer
+# gpu_protection_contract DATA-3 clause answered the SAME question the other way (FACT-0431). Two
+# guards disagreeing is worse than one wrong guard, because whichever runs last looks
+# authoritative. The constant is RETIRED rather than corrected: correcting it would have bought
+# agreement by coincidence and left the next divergence invisible.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import provenance_policy as PP  # noqa: E402
 
-# PKT-0029 item (3): "Feeding official-trunk features to a head trained on StableDet-trunk
-# features would look EXACTLY like a wrong contract, so both must be cached and compared in the
-# SAME session." A dual-trunk pair that does not carry both roles does not answer that risk.
-PKT0029_REQUIRED_TRUNK_ROLES = ("official", "stabledet")
+TRUNK_ROLES = set(PP.TRUNK_ROLES)
 
 # --------------------------------------------------------------------------------------------
 # THE CACHE SCHEMA - CONTRACT 2. Mirrored from assoc_feature_tap.py's own `_AFT_SCHEMA_REQUIRED`
@@ -1049,7 +1050,9 @@ def state_dict_shape(path: Path) -> dict:
 # --------------------------------------------------------------------------------------------
 # bind
 # --------------------------------------------------------------------------------------------
-PLACEHOLDER_PROVENANCE = {"", "-", "n/a", "na", "none", "null", "unknown", "tbd", "todo", "?"}
+# One list, in the policy both guards read - a second copy here would be a new drift point of
+# exactly the kind PKT-0043 exists to remove.
+PLACEHOLDER_PROVENANCE = PP.PLACEHOLDER_PROVENANCE
 
 
 def build_manifest(args) -> dict:
@@ -1423,6 +1426,13 @@ def audit_dual_trunk(dir_a: Path, dir_b: Path, man_a: Path | None = None,
         DIFFERENT trunks     distinct checkpoint hashes and distinct declared roles.
 
     Both caches must independently pass `audit` first. A pair of broken caches is not a pair.
+
+    ``require_roles`` adds FOLD LEGITIMACY, and it reads ``provenance_policy`` - the SAME module
+    ``gpu_protection_contract`` DATA-2/DATA-3 read. One arm must be readable as a result on this
+    fold, the other is the declared comparison arm, and no leaky checkpoint may be present in
+    either arm. The retired ``PKT0029_REQUIRED_TRUNK_ROLES`` asked a different question
+    (`is the pair literally official+stabledet?`) and FACT-0418 measured that it answered the
+    real one backwards.
     """
     man_a = man_a or dir_a / "cache_manifest.json"
     man_b = man_b or dir_b / "cache_manifest.json"
@@ -1437,20 +1447,29 @@ def audit_dual_trunk(dir_a: Path, dir_b: Path, man_a: Path | None = None,
         )
     if ma["trunk"]["role"] == mb["trunk"]["role"]:
         raise Reject(f"dual_trunk_roles_differ: both caches declare role {ma['trunk']['role']!r}")
-    if require_roles:
-        roles = {ma["trunk"]["role"], mb["trunk"]["role"]}
-        if not set(PKT0029_REQUIRED_TRUNK_ROLES) <= roles:
-            raise Reject(
-                f"dual_trunk_missing_a_required_role: PKT-0029 requires "
-                f"{list(PKT0029_REQUIRED_TRUNK_ROLES)} cached and compared in the SAME session; "
-                f"this pair carries {sorted(roles)}"
-            )
     if str(ma["fold"]["fold"]) != str(mb["fold"]["fold"]):
         raise Reject(
             f"dual_trunk_same_fold: fold {ma['fold']['fold']} against fold {mb['fold']['fold']}. "
             "Comparing trunks across folds confounds trunk identity with the embryo direction, "
             "which the contract requires be reported separately in the first place"
         )
+    # THE SHARED POLICY, AND NOTHING LOCAL. Evaluated after the fold check, because a pair whose
+    # two arms disagree about the fold has no fold to be legitimate ON.
+    policy = None
+    if require_roles:
+        fold = str(ma["fold"]["fold"])
+        refusals = PP.pair_refusals(
+            fold, (ma["trunk"]["role"], mb["trunk"]["role"]),
+            digests={ma["trunk"]["role"]: ma["trunk"].get("sha256"),
+                     mb["trunk"]["role"]: mb["trunk"].get("sha256")})
+        for m in (ma, mb):
+            refusals += PP.role_binding_refusals(
+                m["trunk"]["role"], m["trunk"].get("sha256"), fold=fold,
+                embryo=m["fold"].get("held_out_embryo"),
+                provenance=m["trunk"].get("provenance"))
+        if refusals:
+            raise Reject("dual_trunk_fold_legitimacy: " + "; ".join(dict.fromkeys(refusals)))
+        policy = PP.describe(fold)
 
     a_crops = {c["crop"]: c for c in ma["crops"]}
     b_crops = {c["crop"]: c for c in mb["crops"]}
@@ -1482,7 +1501,10 @@ def audit_dual_trunk(dir_a: Path, dir_b: Path, man_a: Path | None = None,
             )
     return {"passed": True, "fold": str(ma["fold"]["fold"]),
             "roles": [ma["trunk"]["role"], mb["trunk"]["role"]],
-            "crops": len(a_crops), "a": rep_a["trunk_sha256"], "b": rep_b["trunk_sha256"]}
+            "crops": len(a_crops), "a": rep_a["trunk_sha256"], "b": rep_b["trunk_sha256"],
+            # Recorded rather than implied: a receipt that does not say WHICH policy passed the
+            # pair cannot be re-checked against the policy that has since moved.
+            "fold_legitimacy_policy": policy}
 
 
 # --------------------------------------------------------------------------------------------
@@ -2188,11 +2210,22 @@ def self_test(out: Path | None) -> int:
         record("schema_1_manifest_is_refused", True, lambda: audit(clean, man_v1),
                want="manifest schema")
 
-        # --- DUAL TRUNK ----------------------------------------------------------------------
+        # --- DUAL TRUNK, AND THE ONE FOLD-AWARE PROVENANCE POLICY ----------------------------
         pair_b = build("pair_b", trunk_seed=7)
         manifest_for(pair_b, trunk_b, role="stabledet")
-        record("control_valid_dual_trunk_pair", False,
-               lambda: audit_dual_trunk(clean, pair_b, require_roles=True))
+
+        # ACCEPT CONTROL: the HONEST fold-0 pair - a legitimate CLAIM arm plus the declared
+        # comparison arm. Without this the rejections below prove only that the guard refuses.
+        pack0 = build("pack0", trunk_seed=1)
+        manifest_for(pack0, trunk_a, role="pack_split0")
+        record("control_honest_fold0_pair_is_accepted", False,
+               lambda: audit_dual_trunk(pack0, pair_b, require_roles=True))
+
+        # THE FACT-0418 PAIR. `clean` declares role 'official' on fold 0, so this is
+        # ['official','stabledet'] - and it was THIS FILE'S ACCEPT CONTROL until now.
+        record("dual_trunk_fact0418_pair_has_no_legitimate_arm", True,
+               lambda: audit_dual_trunk(clean, pair_b, require_roles=True),
+               want="pair_has_no_fold_legitimate_claim_arm")
 
         same = build("pair_same", trunk_seed=1)
         manifest_for(same, trunk_b, role="stabledet")
@@ -2204,11 +2237,38 @@ def self_test(out: Path | None) -> int:
         record("dual_trunk_node_sets_disagree", True,
                lambda: audit_dual_trunk(clean, diffnodes), want="dual_trunk_shares_the_node_set")
 
-        wrong_role = build("pair_wrongrole", trunk_seed=7)
-        manifest_for(wrong_role, trunk_b, role="pack_split0")
-        record("dual_trunk_missing_a_pkt0029_role", True,
-               lambda: audit_dual_trunk(clean, wrong_role, require_roles=True),
-               want="dual_trunk_missing_a_required_role")
+        # THE FOLD SWAP, BOTH DIRECTIONS. Each mutation takes an HONEST pair and relabels it onto
+        # the other fold, where its claim arm becomes a leaky checkpoint.
+        # The glob is the fold-0 one and passes `fold0_does_not_load_split1_weights`; only the
+        # ROLE is swapped. So this mutation is caught by the POLICY and by nothing else, which is
+        # the point - the pre-existing glob checks do not see a role/fold leak.
+        swap_a = build("swap_split1_on_fold0", trunk_seed=1)
+        manifest_for(swap_a, trunk_a, fold="0", role="oof_split1",
+                     glob="/kaggle/input/*/split_0/edge_predictor_best.pth")
+        record("fold_swap_split1_claim_arm_on_fold0", True,
+               lambda: audit_dual_trunk(swap_a, pair_b, require_roles=True),
+               want="leaky_checkpoint_in_the_fold")
+
+        f1_pack = root / "swap_split0_on_fold1"; f1_pack.mkdir()
+        _synth_cache(f1_pack / "6bba_bbbbbbbb.npz", crop="6bba_bbbbbbbb", trunk_seed=1)
+        manifest_for(f1_pack, trunk_a, fold="1", role="pack_split0",
+                     glob="/kaggle/input/*/edge_predictor_best_split_1.pth")
+        f1_ctrl = root / "swap_f1_control"; f1_ctrl.mkdir()
+        _synth_cache(f1_ctrl / "6bba_bbbbbbbb.npz", crop="6bba_bbbbbbbb", trunk_seed=7)
+        manifest_for(f1_ctrl, trunk_b, fold="1", role="stabledet",
+                     glob="/kaggle/input/*/edge_predictor_best_split_1.pth")
+        record("fold_swap_split0_claim_arm_on_fold1", True,
+               lambda: audit_dual_trunk(f1_pack, f1_ctrl, require_roles=True),
+               want="leaky_checkpoint_in_the_fold")
+
+        # ACCEPT CONTROL on the other fold: the honest fold-1 pair, which the RETIRED constant
+        # would have refused (FACT-0418).
+        f1_claim = root / "honest_f1_claim"; f1_claim.mkdir()
+        _synth_cache(f1_claim / "6bba_bbbbbbbb.npz", crop="6bba_bbbbbbbb", trunk_seed=1)
+        manifest_for(f1_claim, trunk_a, fold="1", role="oof_split1",
+                     glob="/kaggle/input/*/edge_predictor_best_split_1.pth")
+        record("control_honest_fold1_pair_is_accepted", False,
+               lambda: audit_dual_trunk(f1_claim, f1_ctrl, require_roles=True))
 
         # --- PROJECTION AND THE CAPACITY GUARD ------------------------------------------------
         rep = audit(clean, man)
@@ -2283,8 +2343,12 @@ def main() -> int:
     d.add_argument("--cache-b", required=True)
     d.add_argument("--manifest-a")
     d.add_argument("--manifest-b")
-    d.add_argument("--require-pkt0029-roles", action="store_true",
-                   help=f"require both of {list(PKT0029_REQUIRED_TRUNK_ROLES)}")
+    d.add_argument("--require-fold-legitimate-roles", "--require-pkt0029-roles",
+                   dest="require_fold_legitimate_roles", action="store_true",
+                   help="require the pair to satisfy provenance_policy for its own fold: one "
+                        "legitimate CLAIM arm, the other a permitted comparison arm, and no leaky "
+                        "checkpoint in either (FACT-0418). The old spelling is kept as an alias "
+                        "so a committed invocation does not silently stop guarding")
     d.add_argument("--out")
 
     p = sub.add_parser(
@@ -2322,7 +2386,7 @@ def main() -> int:
                 Path(args.cache_a), Path(args.cache_b),
                 Path(args.manifest_a) if args.manifest_a else None,
                 Path(args.manifest_b) if args.manifest_b else None,
-                require_roles=args.require_pkt0029_roles)
+                require_roles=args.require_fold_legitimate_roles)
         except Reject as err:
             emit({"passed": False, "reject": str(err)}, args.out)
             print("DUAL-TRUNK PAIR REJECTED", file=sys.stderr)

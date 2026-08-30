@@ -19,9 +19,11 @@ CODE      A built notebook embedding uncommitted code cannot be bound to a sourc
           ``scripts/win_bet/assoc_tap_replay.py`` by ``sync_tap_worker.py``, and
           ``tests/test_assoc_feature_tap.py`` locks the two together.
 DATA      ``FACT-0418``: every declared ``dual_trunk_pair`` was ``['official','stabledet']`` with
-          NO fold-legitimate arm on either fold, while ``PKT0029_REQUIRED_TRUNK_ROLES`` would have
-          REFUSED the honest pair and ACCEPTED the pair with no legitimate arm. A trunk section
-          that only checks "a pair is declared" is exactly the check that passed that state.
+          NO fold-legitimate arm on either fold, while ``audit_feature_cache``'s own constant would
+          have REFUSED the honest pair and ACCEPTED the pair with no legitimate arm. A trunk
+          section that only checks "a pair is declared" is exactly the check that passed that
+          state. Both guards now read ONE table, ``provenance_policy`` - the divergence
+          ``FACT-0431`` recorded was two instruments each keeping their own.
 PROCESS   ``FACT-0387`` and ``FACT-0399``: state that does not cross the subprocess boundary. And
           the kernel's own ``all_passed`` CANNOT see a crop that never ran, so the crop COUNT is
           asserted externally or it is not asserted at all.
@@ -60,9 +62,14 @@ HEARTBEAT = "GPU_PROTECTION_CONTRACT_COMPLETE"
 # regression to it is refused BY VALUE rather than going unnoticed.
 BYTES_PER_NODE = 1580
 SUPERSEDED_BYTES_PER_NODE = 128
-# FACT-0418: the pairing that has no fold-legitimate arm on either fold.
-INVALID_PAIR = ("official", "stabledet")
-LEGITIMATE_TRUNKS = {"0": {"pack_split0", "oof_split0"}, "1": {"oof_split1"}}
+# THE FOLD-LEGITIMACY TABLE IS NOT HERE. `INVALID_PAIR` and `LEGITIMATE_TRUNKS` used to be local
+# constants, and audit_feature_cache kept its own - which is how two committed guards came to
+# answer one question in opposite directions (FACT-0418, FACT-0431). Both now read
+# `provenance_policy`, and neither keeps a table of its own, so the next divergence cannot happen
+# quietly: it becomes an edit to a file both of them import.
+sys.path.insert(0, str(REPO / "scripts" / "win_bet"))
+import provenance_policy as PP  # noqa: E402
+
 DEPLOYED_PREDICTOR_SHA256 = "25b3ebfd8849dcf5abeff9ed3f0d57269a4b979365c989d6f78db1e5002d5219"
 # Patch sources that are GENERATED. Mapping: generated file -> module exposing rendered().
 GENERATED_PATCHES = {"scripts/kaggle_edits/assoc_tap_gate.py": "sync_tap_worker"}
@@ -201,42 +208,57 @@ def section_data(spec: dict, trunk: dict | None) -> list[dict]:
         return out
 
     role = trunk.get("role")
-    legit = LEGITIMATE_TRUNKS.get(str(fold), set())
-    declared_ok = bool(trunk.get("fold_legitimate")) and role in legit
+    # THE SHARED POLICY, and the spec's own declaration is checked AGAINST it rather than trusted:
+    # a spec that declares `fold_legitimate: true` on an illegitimate role is the mutation
+    # FACT-0431 records this clause catching.
+    claim_refusals = PP.claim_arm_refusals(fold, role)
+    if not trunk.get("fold_legitimate"):
+        claim_refusals = claim_refusals + [
+            "fold_legitimate_not_declared: the spec does not claim this trunk is legitimate, so "
+            "nothing in it may be read as a result"]
     out.append(_clause(
         "DATA-2", "the trunk this run trains on is FOLD-LEGITIMATE for its own fold, by role AND "
         "by explicit declaration - FACT-0418 retracted 'official' to UNVERIFIED after it proved "
         "byte-identical to our own split_0",
-        declared_ok,
+        not claim_refusals,
         {"fold": fold, "role": role, "fold_legitimate_declared": trunk.get("fold_legitimate"),
-         "legitimate_roles_for_this_fold": sorted(legit)},
-        "set role to 'official' on fold 1; the role leaves the legitimate set"))
+         "refusals": claim_refusals, "policy": PP.describe(fold)},
+        "set role to 'official' on fold 1; the role leaves the policy's claim set"))
 
     pair = tuple(trunk.get("dual_trunk_pair") or ())
     if pair:
-        has_legit = any(r in legit for r in pair)
-        is_invalid = tuple(pair) == INVALID_PAIR
+        pair_refusals = PP.pair_refusals(fold, pair)
         out.append(_clause(
-            "DATA-3", "any declared dual_trunk_pair has at least one FOLD-LEGITIMATE arm - the "
-            "FACT-0418 pairing ['official','stabledet'] has none on EITHER fold",
-            has_legit and not is_invalid,
-            {"pair": list(pair), "has_fold_legitimate_arm": has_legit,
-             "is_the_fact_0418_invalid_pair": is_invalid,
-             "legitimate_roles_for_this_fold": sorted(legit)},
-            "declare ['official','stabledet']; the clause rejects it by name"))
+            "DATA-3", "any declared dual_trunk_pair is fold-legitimate under provenance_policy - "
+            "one arm readable as a result, the other a permitted comparison arm, and no leaky "
+            "checkpoint in either. The FACT-0418 pairing ['official','stabledet'] has no "
+            "legitimate arm on EITHER fold",
+            not pair_refusals,
+            {"pair": list(pair), "refusals": pair_refusals, "policy": PP.describe(fold)},
+            "declare ['official','stabledet'], or swap the pair onto the other fold; both reject"))
     else:
         out.append(_clause(
             "DATA-3", "any declared dual_trunk_pair has at least one FOLD-LEGITIMATE arm", True,
             {"pair": None, "note": "single-trunk by design, claims no pair"},
             "declare the FACT-0418 pair; the clause rejects"))
 
+    sha = trunk.get("checkpoint_sha256")
+    bind_refusals = PP.role_binding_refusals(role, sha, fold=fold,
+                                             embryo=trunk.get("held_out_embryo"),
+                                             provenance=trunk.get("provenance"))
+    if not trunk.get("contamination"):
+        bind_refusals = bind_refusals + ["contamination_status_not_declared"]
+    if not sha:
+        bind_refusals = bind_refusals + ["checkpoint_sha256_missing: the binding is gone"]
     out.append(_clause(
-        "DATA-4", "contamination status is declared and the checkpoint is bound by hash - a "
-        "checkpoint whose provenance is not split-specific is the EXP-0019 defect",
-        bool(trunk.get("contamination")) and bool(trunk.get("checkpoint_sha256")),
-        {"contamination": trunk.get("contamination"),
-         "checkpoint_sha256": trunk.get("checkpoint_sha256")},
-        "drop checkpoint_sha256; the binding is gone and the clause rejects"))
+        "DATA-4", "contamination status is declared and the checkpoint is bound by hash, and the "
+        "hash must AGREE with the declared role - a checkpoint whose provenance is not "
+        "split-specific is the EXP-0019 defect, and FACT-0418 was found by hashing the bytes of a "
+        "file whose documented role said something else",
+        not bind_refusals,
+        {"contamination": trunk.get("contamination"), "checkpoint_sha256": sha,
+         "refusals": bind_refusals},
+        "drop checkpoint_sha256, or declare a role the bytes contradict; both reject"))
     return out
 
 
@@ -431,6 +453,33 @@ def _selftest(sandbox: Path) -> int:
           not [c for c in section_data(f1, no_hash) if c["id"] == "DATA-4"][0]["passed"])
     check("DATA-1 mutation: the fold cannot be resolved",
           not [c for c in section_data({"edits": []}, None) if c["id"] == "DATA-1"][0]["passed"])
+
+    # --- THE FOLD SWAP, BOTH DIRECTIONS, THROUGH THE SHARED POLICY ---------------------
+    # Each takes an HONEST pair and relabels it onto the other fold, where its claim arm becomes a
+    # leaky checkpoint. audit_feature_cache runs the SAME two mutations against its own guard;
+    # they must agree, and the only way to make them agree is that they read one table.
+    f0 = {"edits": [{"vars": {"BIOHUB_LOEO_FOLD": "0"}}]}
+    good_f0 = {"role": "pack_split0", "fold_legitimate": True,
+               "dual_trunk_pair": ["pack_split0", "stabledet"], "contamination": "none",
+               "checkpoint_sha256": "12f6881ee3620a83"}
+    d0 = section_data(f0, good_f0)
+    check("DATA control: the HONEST fold-0 pair is ACCEPTED",
+          all(c["passed"] for c in d0), json.dumps([c["id"] for c in d0 if not c["passed"]]))
+    swapped_to_f0 = dict(good, dual_trunk_pair=["oof_split1", "stabledet"])
+    d = section_data(f0, swapped_to_f0)
+    check("DATA-2 fold swap: the fold-1 claim arm relabelled onto fold 0",
+          not [c for c in d if c["id"] == "DATA-2"][0]["passed"])
+    check("DATA-3 fold swap: the fold-1 PAIR relabelled onto fold 0",
+          not [c for c in d if c["id"] == "DATA-3"][0]["passed"])
+    swapped_to_f1 = dict(good_f0, dual_trunk_pair=["pack_split0", "stabledet"])
+    d = section_data(f1, swapped_to_f1)
+    check("DATA-2 fold swap: the fold-0 claim arm relabelled onto fold 1 (the EXP-0019 defect)",
+          not [c for c in d if c["id"] == "DATA-2"][0]["passed"])
+    check("DATA-3 fold swap: the fold-0 PAIR relabelled onto fold 1",
+          not [c for c in d if c["id"] == "DATA-3"][0]["passed"])
+    aliased = dict(good, checkpoint_sha256="d3e89eb361eeadef")
+    check("DATA-4 mutation: the declared role contradicts the checkpoint's own bytes",
+          not [c for c in section_data(f1, aliased) if c["id"] == "DATA-4"][0]["passed"])
 
     # --- PROCESS ----------------------------------------------------------------------
     good_nb = ('env = dict(os.environ)\nenv["PYTHONPATH"] = "scripts"\nprint("AFT_GATE ok")\n'

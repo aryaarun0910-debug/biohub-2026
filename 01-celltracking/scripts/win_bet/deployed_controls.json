@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "kind": "deployed_control_manifest",
+  "why": "FACT-0382: the honest full-chain comparison is (widened surface + scorer + final consumer) against the DEPLOYED control, never against a widened-only control. FACT-0432 defect 1 measured that nothing enforced this - assoc_report.verdict() returned promotable true on a report whose only defect was the control's identity. Every entry here is matched on RECOMPUTED digests, so a byte-identical copy at another path binds and a tampered copy does not.",
+  "governing_facts": ["FACT-0382", "FACT-0432", "FACT-0369", "FACT-0376", "FACT-0417"],
+  "how_to_add_an_entry": "scripts/win_bet/control_binding.py register --experiment EXP-#### --fold {0,1} --control <rows.json> --graph <graph> --receipt <receipt.json> --provenance '<what this artifact is and where it came from>'. Every digest is recomputed there from the bytes; none is copied from a field.",
+  "why_this_list_is_empty": "NO deployed fold control has been registered yet, and that is the correct fail-closed state rather than an oversight: no committed spec declares chain_arms, so no full-chain control artifact exists to bind. An empty list refuses every control, which is the answer that cannot be wrong. The first agent to run a full-chain arm registers the deployed control it actually scored, with its provenance, before its report can be read.",
+  "deployed_controls": [],
+  "refused_controls": []
+}
