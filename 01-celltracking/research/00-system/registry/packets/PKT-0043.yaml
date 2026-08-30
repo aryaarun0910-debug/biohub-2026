@@ -1,0 +1,86 @@
+id: PKT-0043
+title: "Control binding and one fold-aware provenance policy: the two guards that decide whether a result may be read"
+lever: null              # shared instrument infrastructure, not a hypothesis
+owner: agent-7-provenance-guards
+lock: claimed
+opened: '2026-08-30'
+
+why_no_lever: >-
+  This packet tests no hypothesis and moves no score. It exists because two guards this campaign relies on do
+  not guard: assoc_report accepts any file called a control (FACT-0432), and two committed instruments return
+  OPPOSITE verdicts on trunk legitimacy (FACT-0418, FACT-0431). R6 permits a null lever.
+  IT IS DELIBERATELY NOT PKT-0042's WORK. An agent that edits the instrument judging its own experiment has a
+  stake in the answer - the same reason PKT-0033 and PKT-0036 hold no lever. PKT-0042 runs the gates; this
+  packet decides whether their output may be read at all.
+
+claim: >-
+  A full-chain result cannot be reported unless its control is cryptographically bound to the registry's
+  deployed fold control, and no dual-trunk cache can be built unless BOTH guards agree, from ONE policy, that
+  every trunk role is fold-legitimate.
+
+falsifier: >-
+  Inverted, as an infrastructure packet's must be. This packet FAILS if it ships a guard it has not shown to
+  REJECT. Specifically: if the control binding passes a widened control whose other metrics are favourable;
+  if it passes a tampered control; if it passes when identity is missing rather than failing closed; or if
+  the provenance policy is satisfied by editing ONE constant so the two guards agree by coincidence rather
+  than by consuming a single shared source of truth. A checker that has not been demonstrated to reject is
+  not a checker.
+
+inputs:
+  facts: [FACT-0432, FACT-0418, FACT-0431, FACT-0382, FACT-0417, FACT-0392, FACT-0378]
+  artifacts:
+    - _evidence/audit/receipts/
+    - _evidence/foundations/p37_trunk_inventory.json
+  code:
+    - scripts/win_bet/assoc_report.py
+    - scripts/win_bet/assoc_train_harness.py
+    - scripts/win_bet/audit_feature_cache.py
+    - scripts/win_bet/gpu_protection_contract.py
+
+method: >-
+  TASK 1 - CRYPTOGRAPHICALLY BIND THE CONTROL. assoc_report must FAIL unless the control is the
+  REGISTRY-BOUND DEPLOYED FOLD CONTROL, not merely a path named "control". It arrives today at
+  assoc_train_harness.py:1628 as json.loads(Path(v["control"]).read_text()) - an arbitrary spec-supplied path
+  that build_report validates in no way. Require: fold and experiment identity; artifact and graph SHA
+  RECOMPUTED FROM THE BYTES rather than read from a field; a match against the expected deployed-control
+  manifest; EXPLICIT rejection of the widened control; and missing identity failing CLOSED.
+  Five tests must PROVE it, each by construction rather than assertion: the deployed control PASSES; a
+  BYTE-IDENTICAL COPY passes (so the binding is to content, not to a path); a WIDENED control with otherwise
+  FAVOURABLE metrics FAILS (this is the live FACT-0382 violation and the exact case the auditor exercised to
+  a promotable-true verdict); a TAMPERED control FAILS; a MISSING receipt or identity FAILS.
+  TASK 2 - ONE FOLD-AWARE PROVENANCE POLICY, CONSUMED BY BOTH GUARDS. Do NOT merely change one constant until
+  the two agree - that produces agreement by coincidence and leaves the next divergence undetected. Create a
+  SINGLE policy both audit_feature_cache and gpu_protection_contract consume:
+    fold 0 - legitimate claim arm from the legitimate fold-0 pack; StableDet may serve ONLY as the declared
+             comparison arm, never read as a result;
+    fold 1 - legitimate OOF split-1 arm; NO split-0 checkpoint may appear, since split_0 is leaky on fold 1;
+    every role bound by SHA, fold, embryo and provenance.
+  MUTATION TESTS MUST SWAP THE FOLDS AND PROVE BOTH GUARDS REJECT THE LEAK. One guard rejecting is not
+  enough - the failure being repaired is precisely that two guards disagreed, and whichever ran last looked
+  authoritative.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: under 1 day - PKT-0042's Gate B rerun is BLOCKED on task 1
+
+forbidden:
+  - launching a GPU job, pushing a kernel, or making a submission
+  - relaxing any promotion threshold or falsifier while touching assoc_report - this packet changes what may
+    be READ, never what counts as a win
+  - claiming any lever, or editing PKT-0029, PKT-0035, PKT-0036, PKT-0037, PKT-0038, PKT-0040, PKT-0041,
+    PKT-0042
+  - satisfying task 2 by editing one constant so the guards coincide rather than by one shared policy
+  - shipping any guard not demonstrated to REJECT by mutation
+  - writing facts.yaml, levers.yaml or experiments.yaml - route to the coordinator
+  - running the full pytest suite while PKT-0042 is live, or tests/test_registry_validity.py at any time
+  - staging or committing to git
+  - .claude/settings.json or .gitignore
+
+outputs:
+  evidence: _evidence/audit/control_binding/ and _evidence/foundations/provenance_policy/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null
