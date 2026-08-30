@@ -6548,11 +6548,18 @@ facts:
       deployed_quantities: {feat_dim: 32, pos_dim: 32, downsample: [1, 4, 4], window: 2}
       cache_archived: {bytes: 1609797, crops: 2, sha256: 2ccae55e7945}
       root_cause:
-        deployed: "edge_logits_pair = (1-w)*primary + w*secondary, then optional temperature, then softmax - predict_unet_transformer.py:748-762"
-        secondary_active: true
-        secondary_edge_logit_weight: 0.15
-        secondary_sha256: 9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f
+        CORRECTED_2026_08_30: >-
+          The attribution below was WRONG and is superseded by FACT-0407. The secondary was DISABLED in this
+          run. The stage that actually ran is the BIDIRECTIONAL HARMONIC at weight 0.20.
+        secondary_active: false
+        secondary_disabled_at: "scripts/kaggle_edits/loeo_retarget.py:128 sets BIOHUB_SECONDARY_WEIGHTS = ''"
+        log_says: {line_133: "LOEO: secondary all-199-train model DISABLED", line_144: "secondary_enabled: false"}
+        actual_stage: {name: bidirectional_harmonic, weight: 0.20, log_line: 130}
         replay: "primary head only, from cache"
+        my_error: >-
+          I read "Secondary edge-logit weight: 0.15" at log line 125 and attributed the mismatch to it. That
+          header is printed by the SETUP cell, BEFORE loeo_retarget.py disables the secondary three lines
+          later. A log header is not evidence of what ran.
     provenance: VERIFIED
     validity: VALID
     validity_reason: >-
@@ -6576,9 +6583,11 @@ facts:
       0.0 and integrity failures are ZERO, so the cache's structure, node ordering, role keying and
       positional reconstruction are all sound. Defect 6 does not recur. The band-A missing and extra counts
       are downstream of the same cause: a shifted probability crosses the 0.5 threshold in either direction.
-      THE DEFECT IS THE COMPARISON TARGET, NOT THE CACHE. The deployed pipeline blends a SECOND model's edge
-      logits at weight 0.15 before the softmax, so what the tap recorded as "the deployed probability" is a
-      two-model quantity while the replay reproduces one model. A feature-cache gate should be asking whether
+      THE DEFECT IS THE COMPARISON TARGET, NOT THE CACHE - that conclusion STANDS, and only the named stage
+      was wrong. The deployed pipeline applies a BIDIRECTIONAL HARMONIC fusion at weight 0.20 before the
+      recorded probability, so what the tap captured is a post-fusion quantity while the replay reproduces
+      the pre-fusion primary head. (This fact originally named a secondary-model blend at 0.15; the secondary
+      was disabled in this run and that attribution is corrected by FACT-0407.) A feature-cache gate should be asking whether
       the PRIMARY head, re-run from cache, reproduces what the PRIMARY head produced in-run - the secondary
       blend is a deployment step downstream of the cache's purpose. Either the tap records the pre-blend
       primary probabilities as the reference, or the cache must also carry the secondary logits so the replay
@@ -6723,3 +6732,93 @@ facts:
       cross-substrate conflation this registry exists to prevent.
     date: '2026-08-30'
     tags: [window-dependence, pair-and-role, p36, full-capture, measured, do-not-conflate]
+
+  - id: FACT-0407
+    statement: >-
+      THE P36 CACHE WAS FAITHFUL AND WOULD HAVE PASSED A CORRECTLY-TARGETED GATE. Re-derived on CPU from
+      P36's own archived cache: a primary-only replay reproduces the GPU verdict to seven digits - band-A
+      max delta 0.22877353 against the recorded 0.22877401, and 0.42863509 against 0.42863536 - and applying
+      the BIDIRECTIONAL HARMONIC at weight 0.20 collapses it to 6.56e-07 and 1.13e-06, with band-A
+      membership going from 12 missing / 0 extra and 109 / 39 to ZERO on both crops. That is inside the
+      gate's own 1e-4 tolerance by two orders of magnitude. The secondary model was DISABLED in this run,
+      not active at 0.15 as FACT-0403 first recorded
+    value: 1.1324882507324219e-06
+    unit: max_abs_band_a_delta_after_reproducing_the_deployed_bidirectional_fusion
+    scope:
+      crops:
+        44b6_0113de3b: {checked_a: 1703, checked_b: 998, primary_only_a: 0.22877353, bidirectional_a: 6.5565e-07,
+                        membership_primary_only: {missing: 12, extra: 0}, membership_bidirectional: {missing: 0, extra: 0}}
+        44b6_0b24845f: {checked_a: 2496, checked_b: 8909, primary_only_a: 0.42863509, bidirectional_a: 1.1325e-06,
+                        membership_primary_only: {missing: 109, extra: 39}, membership_bidirectional: {missing: 0, extra: 0}}
+      gate_tolerance: 1.0e-04
+      actual_stage: {name: bidirectional_harmonic, weight: 0.20}
+      secondary_enabled: false
+      secondary_disabled_at: "scripts/kaggle_edits/loeo_retarget.py:128, BIOHUB_SECONDARY_WEIGHTS = ''"
+      stale_header_that_misled: {log_line: 125, text: "Secondary edge-logit weight: 0.15", printed_by: "the setup cell, before loeo_retarget disables it"}
+      predictor_sha256_verified_identical_to_the_tapped_source: 25b3ebfd8849
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Computed on CPU from the archived P36 cache and the real pack weights located by sha256, not inferred.
+      The primary-only arm REPRODUCES the GPU verdict to seven significant digits, which is what makes the
+      second arm interpretable: the same code path that recovers the known-wrong number also recovers the
+      right one when the fusion is applied. The predictor used was verified byte-identical to the source the
+      tap patched.
+    instrument: >-
+      _evidence/foundations/p36_blend_attribution.py and p36_blend_attribution.json, over
+      C:/temp/p36/aft_cache.tar.gz
+    experiment: EXP-0043
+    note: >-
+      THIS UPGRADES P36 FROM "STRUCTURE PROVEN" TO "CACHE PROVEN FAITHFUL". The pair-and-role cache carries
+      everything needed to reproduce the deployed pre-fusion computation to 1e-6, and the deployed
+      post-fusion surface is exactly reconstructible from it when the secondary is off. The only thing P36
+      lacked was a gate that asked the right question.
+      HOW I GOT THE ATTRIBUTION WRONG, because the mechanism matters more than the correction. I read
+      "Secondary edge-logit weight: 0.15" from the run log and attributed the mismatch to a secondary blend.
+      That header is printed by the SETUP cell; loeo_retarget.py then sets BIOHUB_SECONDARY_WEIGHTS to empty,
+      and the same log says "secondary all-199-train model DISABLED" and "secondary_enabled: false" a few
+      lines later. I read the first mention rather than the last state. A LOG HEADER RECORDS AN INTENTION AT
+      THE MOMENT IT PRINTED, NOT WHAT RAN - and the corrected tap now reads fusion provenance from the
+      predictor's own locals so this attribution can never again come from a print statement.
+      The conclusion FACT-0403 drew was right for the wrong stage: the comparison target was post-fusion
+      while the replay was pre-fusion. Only the name of the fusion was wrong.
+    date: '2026-08-30'
+    tags: [p36, cache-faithful, attribution-corrected, bidirectional-harmonic, measured, headline]
+
+  - id: FACT-0408
+    statement: >-
+      DEFECT 8. The Gate-1 CPU suite was testing the WRONG PROGRAM. It built its sandbox from
+      vendor/kaggle-cell-tracking - the organizer's public repository - while the kernel materialises the
+      support pack into /kaggle/working/tracking_repo and runs that. The vendored predictor is 677 lines with
+      ZERO occurrences of "secondary"; the deployed one is 1047 lines and contains BOTH fusion stages. A
+      green suite was therefore structurally incapable of catching any fusion defect, including the one that
+      invalidated P36's verdict
+    value: 0
+    unit: occurrences_of_secondary_in_the_vendored_predictor_the_suite_tested
+    scope:
+      suite_used: vendor/kaggle-cell-tracking
+      kernel_uses: "/kaggle/working/tracking_repo, materialised from the support pack (built notebook cell 3)"
+      vendored: {lines: 677, occurrences_of_secondary: 0}
+      deployed: {lines: 1047, fusion_stages: [bidirectional_harmonic, secondary_blend]}
+      fixed_by: "_deployed_pack(), sha256-pinned, failing rather than skipping when the pack is absent"
+      defect_ledger_now: 8
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Both files were read and counted. The distinction is not stylistic: a 677-line predictor with no
+      secondary code cannot exhibit a fusion defect at all, so every test in that suite was passing on a
+      program that could not fail the way the real one did.
+    instrument: tests/test_assoc_feature_tap.py _deployed_pack; source counts over both trees
+    experiment: EXP-0043
+    note: >-
+      THE LEDGER IS NOW EIGHT AND THE PATTERN HAS NOT CHANGED ONCE. Defect 4 stubbed a method the real class
+      never had. Defect 5 approximated the image pipeline. Defect 6 keyed a cache the architecture makes
+      undefined. Defect 7 chose the one downsample at which the deployed transform is the identity. Defect 8
+      pointed the whole suite at a different program. Every one is a fixture differing from production in
+      exactly the dimension under test, and every one was GREEN while wrong.
+      THE RULE, RESTATED BECAUSE IT KEEPS EARNING ITS KEEP: a fixture may differ from production in COST,
+      never in KIND. A smaller pack is a cheaper test; a DIFFERENT pack is a different experiment. The
+      corrected suite pins the deployed pack by sha256 and FAILS rather than skips when it is absent, because
+      a skipped test is the quietest way to test nothing.
+    date: '2026-08-30'
+    tags: [defect-8, wrong-program, vendored-vs-deployed, fixture-differs-from-production, verified]
