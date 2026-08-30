@@ -826,6 +826,22 @@ def make_estimator(model_class: str, head: str | None = None):
         if head:
             return resolve_callable(head)()
         return Pipeline([("scale", StandardScaler()), ("lr", LogisticRegression(**LINEAR_KW))])
+    if model_class == "declared":
+        # ADDITIVE, PKT-0038. A scorer whose FITTING PROCEDURE is the thing under test - an
+        # iterative hard-negative curriculum, an alternate-seed secondary, or a model frozen on
+        # one fold and applied unchanged to another - cannot be expressed by `linear`/`tree`,
+        # whose hyperparameters are fixed constants, and must NOT be routed through `contextual`,
+        # which means "cache-derived representation" and is cache-gated for that reason. So this
+        # class carries a DECLARED estimator factory and no cache claim: `needs_cache()` stays
+        # False and every existing path above is byte-unchanged. The head is a `module:function`
+        # entrypoint resolved through the same refusal-not-fallback rule as the contextual head,
+        # so an unresolvable declaration stops the run instead of silently fitting something else.
+        if not head:
+            raise HarnessRefusal(
+                "model class 'declared' requires a `head` entrypoint - an undeclared fitting "
+                "procedure is not a comparable arm"
+            )
+        return resolve_callable(head)()
     raise HarnessRefusal(f"unknown model class {model_class!r}")
 
 

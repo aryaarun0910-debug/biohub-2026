@@ -5809,7 +5809,114 @@ tampered notebook, an edited receipt, a silent gate patch, an out-of-fold crop, 
 rejects everything checks nothing. One checker bug the mutations caught: the first boundedness test read
 `**` anywhere in the text and condemned `_loeo_find` for the docstring explaining why it does not use `**`.
 
+**Corrected the same day, and the correction found a third defect.** Agent 2 reported PF09 failing on
+arithmetic of its own — it split `/kaggle/input/datasets/<owner>/<slug>/...` positionally, took `datasets`
+for the slug, and mounted the remainder under the owner again. Five bugs of that one class were then found
+in this instrument, all "read the code" where the fix is "resolve the code": PF09's path split, PF01 calling
+`git status` with an empty pathspec (which reports the whole worktree, so any spec with no patch files failed
+on another agent's open files), PF07 reading the launcher's `PYTHONPATH` by regex over the call text, PF07's
+model probe hardcoding `TemporalUNet3D` when `load_model` returns `UNetNodeTransformer`, and `is_bounded`
+condemning `_loeo_find` for the `**` in its own docstring. Each is fixed and pinned by a mutation, now
+**21/21 with four ACCEPT controls** — because a checker not shown to ACCEPT a correct input is a checker
+nobody will trust. Specs are also classified now (submission / gate_smoke / feature_cache / generic); a
+submission notebook SKIPS the Gate-1 checks and they are excluded from the verdict rather than counted as
+passes, while a class that should carry a check but has no implementing profile FAILS CLOSED. P24 and P32
+both preflight to PASS on their applicable checks.
+
+**The third kernel defect, found only because the model probe was fixed rather than worked around.** The
+worker's cache phase calls `model.detection_head(unet_out)`; the class `load_model` returns has no such
+attribute — it is `detect_head`. The string `detection_head` appears zero times in the support pack and
+exactly once in the built notebook, inside the worker, confirmed against five independently materialised
+copies of the pack. The cache phase would raise `AttributeError` on the first crop.
+
+**Final verdict on P33 attempt 3: FAIL, do not push.** PF07 (pre-fix launcher plus the `detection_head`
+call) and PF01 (the built notebook now predates the `PYTHONPATH` fix another agent applied to the patch
+source, so artifact and source have diverged). Required before GPU: rename `detection_head` → `detect_head`,
+rebuild, commit both, re-run the preflight and require an empty `failed`.
+
 **Findings for the primary, not blocking:** six independent mount ladders coexist in this one notebook, each
 with its own depth ceiling — that is the `FACT-0397` generator; and
 `scripts/kaggle_edits/coupled_division_transplant.py` contains zero `print` calls, so it cannot prove it
 fired. No GPU job, kernel push or submission was made. Registry, research-tree and claims gates green.
+
+## 2026-08-30 — PKT-0038 / LEVER-0041 (agent 3, the association tournament): fold 1 says yes by a wide margin, fold 0 says no twice
+
+**Delivered: a checkpoint and full-fold results on both folds, CPU only.** Seven arms on ONE data contract
+through the PKT-0034 harness (used, not forked), complete fold 1 (128 crops, 91,410 decidable targets),
+crop-grouped 5-fold, out-of-fold only.
+
+| stage | arm | contested top-1 | delta | gained / lost / net | churn | crop-paired ci95 | favourable |
+|---|---|---|---|---|---|---|---|
+| discovery f1 | linear, nine features | 0.735724 | +0.027330 | 1237 / 510 / +727 | 1747 | [+0.02181, +0.03265] | yes |
+| discovery f1 | tree, nine features | 0.750235 | +0.041841 | 1642 / 529 / +1113 | 2171 | [+0.03622, +0.04806] | yes |
+| discovery f1 | tree + mining curriculum | 0.749107 | +0.040713 | 1987 / 904 / +1083 | 2891 | [+0.03389, +0.04820] | yes |
+| discovery f1 | **bidirectional tree (winner)** | **0.762227** | **+0.053833** | 2316 / 884 / **+1432** | 3200 | [+0.04687, +0.06150] | yes |
+| discovery f1 | bidirectional + mining | 0.761400 | +0.053006 | 2677 / 1267 / +1410 | 3944 | [+0.04430, +0.06212] | yes |
+| discovery f1 | alternate-seed secondary | 0.762189 | +0.053795 | 2316 / 885 / +1431 | 3201 | [+0.04647, +0.06162] | yes |
+| **noise floor f1** | prob-only tree | 0.707003 | **−0.001391** | 139 / 176 / −37 | 315 | [−0.00271, −0.00004] | no |
+| **gate A f0** | same recipe, REFIT out of fold | 0.8337743565070964 | **±0.000000** | 36 / 36 / 0 | 72 | [−0.00355, +0.00347] | no |
+| **gate B f0** | frozen f1 weights, applied unchanged | 0.817176 | **−0.016599** | 133 / 202 / **−69** | 335 | [−0.02699, −0.00586] | no |
+
+**The ladder is a representation result, which is the direction `FACT-0386` pointed.** linear < tree <
+bidirectional: the six label-free reverse-competition columns are worth more than the head class. The
+iterative hard-negative curriculum is REJECTED on both bases — it churns far more targets and nets slightly
+fewer. Each round's mining set is recorded, so that rejection is reproducible rather than emergent.
+
+**The binning floor was measured on this surface, not inherited, and it is NEGATIVE.** `FACT-0386`'s fold-0
+caution was that a tree given only the deployed probability still posted a gain roughly half its best arm's
+net, purely from quantile binning. Re-run on fold 1 the same control loses: −0.001391, net −37. So none of
+the winner's +0.053833 is binning. Its paired instrument check passed exactly — a linear model on the
+probability alone returned the deployed contested top-1 to all 16 digits with churn 0, the only
+arithmetically possible outcome for a correct protocol, and the command REFUSES if it does not.
+
+**Falsifier (e) fires, and (g) cannot be excluded.** The winner was frozen on fold 1 by the declared rule
+before fold 0 was touched, pickled, pinned by sha256 and applied with `fit` a counted no-op. Gate A refits
+the identical recipe on fold 0's own splits — the `FACT-0386` protocol — and reshuffles 72 contested targets
+to net exactly zero. Gate B, the real transfer measurement, is significantly NEGATIVE. Two readings this
+experiment cannot separate, which is itself the finding: the tournament fitted the discovery fold, or the
+transfer crosses more boundaries than the packet named. On the second — VERIFIED by source read of the two
+acquisition logs — P30 fold 0 ran `split_0/edge_predictor_best.pth` while P34 fold 1 ran
+`loeo_weights/edge_predictor.pth` from `split_1.pth`, so `prob`, the dominant feature, is emitted by a
+DIFFERENT checkpoint on each fold and gate B is cross-embryo *and* cross-edge-predictor by construction of
+the LOEO protocol. That does not rescue the arm: gate A removes the checkpoint difference by refitting and
+still returns zero.
+
+**Side (b) of the two-sided bar was made LIVE and does not fire.** With preservation off — the only mode in
+which the null is available to single-candidate targets — the abstaining arm abstained on 4,741 contested
+targets and ZERO of 64,809 single-candidate targets, 0 regressions listed. The entire cost of abstention
+lands where it should.
+
+**Consensus is now measurable and the headroom is thin.** `FACT-0378` makes the public secondary
+un-validatable offline, so fold-specific secondaries of our own were the precondition. Ours agree on 97.95%
+of contested targets (both correct 20,003, both wrong 6,053, primary-only 273, secondary-only 272); the
+oracle of the two is 0.772452, so a *perfect* consensus rule buys at most ≈+0.010. Diversity, not the rule,
+is the binding constraint.
+
+**Unmeasured, explicitly:** falsifiers (c), (d) and (f). `parent_conversions` is PRE-ILP; `FACT-0364` says
+motion relink replaces the solver's whole edge list, and the genuine `FACT-0376` quantity needs a replay.
+Every verdict carries `promotable: false`, the seam-calibration slot is NOT earned — it requires the honest
+fold-0 gate, and fold 0 fails at the ranking stage before the chain is reached — and nothing here is read as
+division recovery (`FACT-0371`).
+
+**Two defects in our own driver, and they were one defect twice.** The harness resolves a declared head by
+importing this driver BY NAME, so a scripted run holds two module objects with two sets of state. Silently,
+the mining curriculum was written to one copy and serialised from the other — the first payload carried an
+empty curriculum while claiming to record it. Loudly, `bind_frozen_model` bound one class object while the
+harness constructed the other, and `apply` refused; the fail-closed constructor is the only reason that
+surfaced as a refusal rather than a transfer arm that quietly refit itself, which would have destroyed the
+one honest measurement the packet exists to make. Both now route through one helper, an empty curriculum is
+a refusal, and both are planted and caught by tests. The re-run after the fix reproduced the pre-fix payload
+bit-for-bit on every decision-relevant figure.
+
+**Two inherited corrections closed.** The fold-1 surface was being read from another packet's audit scratch;
+it is now in the acquisition's own directory, verified byte-identical, recorded by sha256 into every payload,
+and the loader REFUSES any `audit_receipts` path. And `assoc_specs/harness_f1.json` named the deployed
+surface — re-measured before repointing: zero contested targets, max one candidate per target, prob_min
+exactly 0.5000, so its metric could not fail. It now names the widened surface, and the harness's refusal
+fires before any fit.
+
+**Blocked, with the conditions written down:** the contextual/HOCT-style head has never run. It is wired for
+BOTH plausible trunks on both folds (six specs), and needs a Gate-1 receipt with band-B > 0, a serialised
+per-crop cache on the `CACHE_KEYS` contract, a sha256 licence, a manifest binding trunk/fold/embryo/
+normalisation/node ordering/candidate parameters/commit, and a passing `audit_dual_trunk` pair. No GPU job,
+kernel push or submission was made.

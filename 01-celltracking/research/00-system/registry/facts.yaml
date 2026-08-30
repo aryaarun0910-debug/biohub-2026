@@ -3538,8 +3538,10 @@ facts:
       gap_to_top3: 0.027
     provenance: MEASURED
     instrument: >-
-      kaggle submission 55820202 (aryaarun07/biohub-p24-deepcenter-best-veto v1). AUDIT RECEIPT CORRECTED
-      2026-08-30 by the PKT-0036 release audit: the receipt path this fact cited,
+      kaggle submission 55820202 (aryaarun07/biohub-p24-deepcenter-best-veto v1); audit receipt
+      C:/temp/queue/p24_deepcenter_best_veto/ - the kaggle_queue.py fetch location, where a complete
+      receipt-passing set (25/25) has sat since 2026-08-27. CORRECTED TWICE, and the second correction
+      matters more than the first. 2026-08-30 by the PKT-0036 release audit: the receipt path this fact cited,
       notebooks/kaggle_p24_deepcenter_best_veto/_out/, DOES NOT EXIST and there is no evidence it ever did.
       notebooks/**/_out/ is gitignored, so a missing directory is indistinguishable from an untracked one and
       the absence went undetected for as long as this fact has existed. The P24 graph was never fetched -
@@ -6217,3 +6219,123 @@ facts:
       together with the band-A floor (FACT-0394), which could not be applied while this run was in flight.
     date: '2026-08-30'
     tags: [gate-1, pkt-0029, harness-failure, mount-path, repeated-trap, fail-closed-worked, verified]
+
+  - id: FACT-0398
+    statement: >-
+      A learned contextual parent ranker BEATS the deployed argmax decisively on fold 1 and FAILS to transfer
+      to fold 0 - LEVER-0041's falsifier (e) fires. On the complete widened fold-1 surface, out-of-fold and
+      crop-grouped, the bidirectional tree reaches contested top-1 0.762227 against the deployed 0.708394, a
+      gain of +0.053833 with 2,316 gained against 884 lost for net +1,432 and a paired interval of
+      [+0.04687, +0.06150] that excludes zero favourably. The ladder is monotone in representation - linear
+      +0.0273, tree +0.0418, bidirectional +0.0538 - and the noise floor MEASURED ON THIS SURFACE is
+      NEGATIVE at -0.001391, so none of the gain is quantile binning. Frozen and applied unchanged to fold 0
+      it scores 0.817176, a delta of -0.016599 whose interval [-0.02699, -0.00586] excludes zero ON THE
+      WRONG SIDE: negative transfer, not merely absent
+    value: -0.016599
+    unit: frozen_fold1_model_contested_top1_delta_on_fold0
+    scope:
+      discovery_fold: 1
+      discovery_surface: {crops: 128, decidable_targets: 91410, cv: crop-grouped 5-fold, oof_only: true}
+      deployed_baseline_f1_contested_top1: 0.708394
+      arms:
+        linear_nine: {top1: 0.735724, delta: 0.027330, gained: 1237, lost: 510, net: 727, churn: 1747, ci95: [0.02181, 0.03265], favourable: true}
+        tree_nine: {top1: 0.750235, delta: 0.041841, gained: 1642, lost: 529, net: 1113, churn: 2171, ci95: [0.03622, 0.04806], favourable: true}
+        tree_mining: {top1: 0.749107, delta: 0.040713, gained: 1987, lost: 904, net: 1083, churn: 2891, favourable: true}
+        bidirectional_tree_WINNER: {top1: 0.762227, delta: 0.053833, gained: 2316, lost: 884, net: 1432, churn: 3200, ci95: [0.04687, 0.06150], favourable: true}
+        bidir_mining: {top1: 0.761400, delta: 0.053006, net: 1410, churn: 3944, favourable: true}
+        alt_seed_secondary: {top1: 0.762189, delta: 0.053795, net: 1431, favourable: true}
+        noise_floor_prob_only_tree: {top1: 0.707003, delta: -0.001391, net: -37, churn: 315, favourable: false}
+      gate_fold_0:
+        gate_a_refit_same_recipe: {top1: 0.8337743565070964, delta: 0.0, gained: 36, lost: 36, churn: 72, ci95: [-0.00355, 0.00347]}
+        gate_b_frozen_transfer: {top1: 0.817176, delta: -0.016599, net: -69, ci95: [-0.02699, -0.00586], excludes_zero: true, direction: adverse}
+      side_b_abstention: {contested_targets_abstained: 4741, single_candidate_regressions: 0, of: 64809}
+      consensus: {two_head_agreement_on_contested: 0.9795, oracle_of_two_top1: 0.772452, headroom_of_a_perfect_rule: 0.010}
+      confound_named: {p30_fold0_weights: split_0/edge_predictor_best.pth, p34_fold1_weights: loeo_weights from split_1.pth,
+                       consequence: "prob, the dominant feature, comes from a different checkpoint per fold; gate B is cross-embryo AND cross-edge-predictor"}
+      checkpoint: {path: _evidence/assoc/tournament/frozen_fold1_model.pkl, sha256: 45614a7c0982759b}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Complete fold-1 surface, out-of-fold only, crop-grouped, with the model FROZEN by sha256 on fold 1
+      before fold 0 was touched - so gate B measures transfer rather than fit. The noise floor was measured
+      on THIS surface rather than inherited from FACT-0386, and its paired instrument check passed exactly:
+      a linear model on the probability alone reproduces the deployed contested top-1 to all sixteen digits
+      with churn zero, and the instrument refuses to report if it does not.
+    instrument: >-
+      scripts/win_bet/assoc_train_harness.py through scripts/win_bet/assoc_report.py; payloads
+      _evidence/assoc/tournament/{discovery_fold1,noisefloor_fold1,sideb_fold1,consensus_fold1,gate_fold0,
+      frozen_selection}.json
+    experiment: EXP-0035
+    note: >-
+      THE FOLD-1 RESULT IS THE FIRST REAL CONTEXTUAL ASSOCIATION GAIN THIS CAMPAIGN HAS MEASURED, and the
+      fold-0 result is why it is not yet a capability. Both must be quoted together.
+      WHAT THE LADDER MEANS. linear < tree < bidirectional is a REPRESENTATION result and it points exactly
+      where FACT-0386 said to look: that fact killed representation-free reranking and concluded the head was
+      not the constraint. On a surface with 11x the errors, richer context buys +0.0538 where nine flat
+      features bought nothing measurable.
+      TWO READINGS OF GATE B THAT THIS EXPERIMENT CANNOT SEPARATE, which is itself the finding. (1) The model
+      fitted the discovery fold - PKT-0038's falsifier (g), which the packet named in advance precisely
+      because five arms plus mining is a large search. (2) The folds are not comparable substrates: verified
+      at source, P30 fold 0 ran split_0 weights while P34 fold 1 ran split_1, so `prob` - the dominant
+      feature - comes from a DIFFERENT CHECKPOINT on each fold and gate B is cross-embryo AND
+      cross-edge-predictor by LOEO construction. THE CONFOUND DOES NOT RESCUE THE ARM: gate A removes the
+      checkpoint difference by refitting the identical recipe on fold 0 and returns delta EXACTLY zero, with
+      36 gained against 36 lost. A recipe that buys +0.0538 on one fold and precisely nothing on the other,
+      even when refitted, is not yet a transferable capability.
+      SIDE (b) IS NOW LIVE AND DOES NOT FIRE, which retires FACT-0386's blind spot: abstention was available
+      and cost ZERO of 64,809 single-candidate targets.
+      CONSENSUS IS THINNER THAN HOPED. The two heads agree on 97.95% of contested targets and a PERFECT
+      selector between them would buy about +0.010. Diversity, not the combination rule, is the binding
+      constraint - so a consensus programme needs genuinely different models, not a better vote.
+      NOT MEASURED, EXPLICITLY: falsifiers (c), (d) and (f). Every quantity here is PRE-ILP, and FACT-0364
+      says motion relink replaces the solver's edge list wholesale. No verdict is promotable and the
+      seam-calibration slot is NOT earned.
+    date: '2026-08-30'
+    tags: [association, lever-0041, contextual, fold-1, transfer-failure, representation, headline]
+
+  - id: FACT-0399
+    statement: >-
+      Gate 1 attempt 3 carried a LIVE RECURRENCE of FACT-0387 and was stopped on CPU before it consumed a
+      third GPU session. Fixing the dataset mount root left the import boundary broken: the worker launcher
+      passed no env, so PYTHONPATH was unset, and the worker's own comment asserted it would "resolve because
+      cwd is the repo root" - which is false, because sys.path[0] is the SCRIPT's directory
+      (/kaggle/working), not the working directory. Executed rather than read, three ways: as built it raises
+      ModuleNotFoundError; with the deployed shards' own PYTHONPATH=src it STILL raises, because
+      predict_unet_transformer lives in scripts/ and not src/; only scripts+src resolves it
+    value: 3
+    unit: consecutive_gate1_attempts_carrying_an_import_or_path_defect
+    scope:
+      notebook_sha256: e826a682
+      commit: 43d770a
+      launcher: {file: scripts/kaggle_edits/assoc_feature_parity.py, defect: "subprocess.run(..., cwd=REPO_DIR) with no env="}
+      deployed_shards_use: 'env={**os.environ, "PYTHONPATH": "src"}'
+      required: "PYTHONPATH=scripts + os.pathsep + src"
+      executed_reproduction: {as_built: ModuleNotFoundError, with_src_only: ModuleNotFoundError, with_scripts_and_src: import_succeeds}
+      caught_by: [PKT-0036 independent execution, PKT-0037 gpu_preflight PF07]
+      gpu_sessions_saved: 1
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Established by EXECUTION on CPU - the worker was lifted verbatim from the built notebook, the Kaggle
+      layout was mirrored, and it was launched the way the notebook launches it - not by reading the source.
+      Two independent instruments agreed: an auditor's reproduction and the preflight's PF07.
+    instrument: >-
+      scripts/win_bet/gpu_preflight.py PF07 and the PKT-0036 independent reproduction; receipt
+      _evidence/audit/receipts/a4_cycle_2026_08_30b.json
+    experiment: EXP-0041
+    note: >-
+      THE PREFLIGHT PAID FOR ITSELF ON ITS FIRST DAY, and this is the one case the standing GPU rule names
+      where infrastructure counts as output: it stopped an already-scheduled launch. Two sessions had already
+      been spent on this gate for zero crops; this would have been the third.
+      WHY THE TEST SUITE MISSED IT, WHICH IS THE DURABLE LESSON. The suite ran the worker as a real
+      subprocess - the right shape - but its fixture wrote the worker and the stub module into ONE directory.
+      sys.path[0] then contained the module and every import succeeded. Production separates them: the worker
+      is written to /kaggle/working and the module lives at REPO_DIR/scripts/. A test can execute the real
+      code through the real boundary and still prove nothing if its LAYOUT does not mirror production. The
+      fixture now reproduces the production layout and a regression asserts all three cases - no PYTHONPATH
+      fails, src-only fails, scripts+src succeeds.
+      RECORDED ALSO BY THE AUDIT: the P33 v2 session was not entirely wasted. After AFP_FAILED it ran the
+      full fold-0 champion export to completion and C:/temp/p33_v2/loeo_split0_champion.csv.gz is on disk, so
+      that session did leave a reusable artifact behind even though its gate compared nothing.
+    date: '2026-08-30'
+    tags: [gate-1, pkt-0029, import-boundary, preflight-worked, test-layout, verified]

@@ -135,10 +135,18 @@ STUB = textwrap.dedent(
 def build_env(tmp_path: Path, *, node_count_shift: int = 0, corrupt_cache: str | None = None,
               flat_features: bool = False):
     """Lay out a fake repo, run the CACHE phase, then build the parity targets from its output."""
+    # MIRROR THE PRODUCTION LAYOUT. The previous fixture put the stub and the worker in ONE
+    # directory, so sys.path[0] - the SCRIPT's directory - happened to hold the module and every
+    # import succeeded. On Kaggle the worker is written to /kaggle/working while the module lives at
+    # REPO_DIR/scripts/, so cwd=REPO_DIR alone never resolves it. That mismatch is exactly why this
+    # suite was green while attempt 3 would have burned a third GPU session on ModuleNotFoundError.
     repo = tmp_path / "repo"
-    repo.mkdir()
-    (repo / "predict_unet_transformer.py").write_text(STUB, encoding="utf-8")
-    worker = repo / "afp_gate1.py"
+    (repo / "scripts").mkdir(parents=True)
+    (repo / "src").mkdir()
+    (repo / "scripts" / "predict_unet_transformer.py").write_text(STUB, encoding="utf-8")
+    working = tmp_path / "working"
+    working.mkdir()
+    worker = working / "afp_gate1.py"
     worker.write_text(worker_source(), encoding="utf-8")
     cache = tmp_path / "cache"
     common = [
@@ -153,6 +161,7 @@ def build_env(tmp_path: Path, *, node_count_shift: int = 0, corrupt_cache: str |
         env["AFP_STUB_FLAT_FEATURES"] = "1"
     else:
         env.pop("AFP_STUB_FLAT_FEATURES", None)
+    env["PYTHONPATH"] = "scripts" + os.pathsep + "src"   # what the launcher sets
     run = subprocess.run(
         [sys.executable, str(worker), "--phase", "cache", *common],
         cwd=str(repo), text=True, capture_output=True, env=env,
@@ -226,12 +235,36 @@ def build_env(tmp_path: Path, *, node_count_shift: int = 0, corrupt_cache: str |
     return repo, worker, common, preilp, ecb, env
 
 
-def run_verify(repo, worker, common, preilp, ecb, out, env=None):
+def run_verify(repo, worker, common, preilp, ecb, out, env=None, pythonpath="scripts:src"):
+    if env is None:
+        env = dict(os.environ)
+        env["PYTHONPATH"] = pythonpath.replace(":", os.pathsep)
     return subprocess.run(
         [sys.executable, str(worker), "--phase", "verify", *common,
          "--preilp", str(preilp), "--ecb-dir", str(ecb), "--out", str(out)],
-        cwd=str(repo), text=True, capture_output=True, env=env or dict(os.environ),
+        cwd=str(repo), text=True, capture_output=True, env=env,
     )
+
+
+def test_the_worker_cannot_import_without_pythonpath(tmp_path):
+    """THE REGRESSION THAT WOULD HAVE STOPPED ATTEMPT 3, asserted in both directions.
+
+    cwd=REPO_DIR does NOT put the repo on sys.path - sys.path[0] is the SCRIPT's directory. The
+    deployed shards' own "src" is also insufficient, because predict_unet_transformer lives in
+    scripts/. Only scripts+src resolves it. Attempt 1 (FACT-0387) died here, and attempt 3 would
+    have died here for a third GPU session had an auditor not executed it on CPU first.
+    """
+    repo, worker, common, preilp, ecb, _env = build_env(tmp_path)
+    out = tmp_path / "report.json"
+    bare = run_verify(repo, worker, common, preilp, ecb, out, pythonpath="")
+    assert bare.returncode != 0 and "predict_unet_transformer" in bare.stderr, (
+        "with no PYTHONPATH the import MUST fail - if this passes, the fixture is co-locating the "
+        "worker and the module again and the suite is not testing the production layout"
+    )
+    src_only = run_verify(repo, worker, common, preilp, ecb, out, pythonpath="src")
+    assert src_only.returncode != 0, "the deployed shards' own PYTHONPATH=src is not sufficient"
+    good = run_verify(repo, worker, common, preilp, ecb, out)
+    assert good.returncode == 0, good.stderr
 
 
 def test_gate_passes_when_the_cache_is_faithful(tmp_path):

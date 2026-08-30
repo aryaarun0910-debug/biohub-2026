@@ -86,7 +86,11 @@ import numpy as np
 import polars as pl
 import torch
 
-import predict_unet_transformer as AFP   # resolves because cwd is the repo root
+# Resolves via PYTHONPATH, which the LAUNCHER sets - NOT via cwd. sys.path[0] is the directory of
+# THIS SCRIPT (/kaggle/working), not the working directory, so cwd=REPO_DIR alone never made this
+# import work. The comment here previously claimed it did; that claim was false and cost a GPU
+# session (FACT-0387, and again in attempt 3 before it was caught on CPU).
+import predict_unet_transformer as AFP
 
 VOXEL = np.asarray([1.625, 0.40625, 0.40625], dtype=np.float32)
 TOL = 1e-4
@@ -396,7 +400,15 @@ try:
     ):
         _afp_cmd = [_afp_sys.executable, str(_afp_worker_path), "--phase", _phase] + _afp_common + _extra
         print(f"AFP_PHASE {_phase}: {' '.join(_afp_cmd[:6])} ...", flush=True)
-        _afp_res = _afp_sub.run(_afp_cmd, cwd=str(REPO_DIR), text=True, capture_output=True)
+        # PYTHONPATH IS THE WHOLE FIX AND IT IS NOT OPTIONAL. The deployed shards launch with
+        # env={**os.environ, "PYTHONPATH": "src"} (see the shard launcher in this same notebook);
+        # that alone is NOT enough here, because predict_unet_transformer lives in scripts/, not
+        # src/. Both go on the path. Verified by execution on CPU, three ways: as built ->
+        # ModuleNotFoundError; with "src" -> still ModuleNotFoundError; with scripts+src -> imports.
+        _afp_env = {**_afp_os.environ,
+                    "PYTHONPATH": "scripts" + _afp_os.pathsep + "src"}
+        _afp_res = _afp_sub.run(_afp_cmd, cwd=str(REPO_DIR), text=True, capture_output=True,
+                                env=_afp_env)
         print((_afp_res.stdout or "")[-4000:], flush=True)
         if _afp_res.returncode != 0:
             print((_afp_res.stderr or "")[-4000:], flush=True)
