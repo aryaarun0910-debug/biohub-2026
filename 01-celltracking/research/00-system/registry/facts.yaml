@@ -6918,3 +6918,52 @@ facts:
       be exercised at all. Until then a full-fold cache would arrive with no consumer able to read it.
     date: '2026-08-30'
     tags: [p36, contract-1, no-legacy-mode, evidentiary-vs-licence, verified]
+
+  - id: FACT-0411
+    statement: >-
+      Contract 2 leaves ZERO usable feature caches on disk. Every contract-2 cache in existence is a CPU
+      smoke fixture at feature dimension 8; the only deployed-scale artifact, P36's archive, is contract 1
+      and is now refused under the named condition cache_contract_1 rather than the generic
+      cache_schema_incomplete. Three harness tests that used it as a schema fixture were RETIRED rather than
+      accommodated, and replaced by one asserting the opposite - that both archived crops are refused, with
+      the condition name preserved and a freshly built contract-2 world as the accept control
+    value: 0
+    unit: deployed_scale_contract_2_caches_available
+    scope:
+      contract_2_caches_on_disk: {cpu_smoke_fixtures: "feature dimension 8", deployed_scale: 0}
+      p36_archive: {contract: 1, refused_under: cache_contract_1, not: cache_schema_incomplete}
+      harness_tests: {retired: 3, replacement: 1, parked_outside_git: C:/temp/assoc_tournament/retired_p36_tests.py.bak}
+      harness_suite: {before: "4 failed, 41 errors, 21 passed of 66", after: "64 passed, 0 failed, 0 errors"}
+      fixture_vs_auditor: {passed: true, checks: 130}
+      before_full_cache_launch:
+        - a contract-2 GPU smoke, as a NEW experiment rather than P36 re-versioned
+        - project_full_fold re-run against that cache, since every measured input today is smoke-scale
+        - dual-trunk provenance, which no manifest yet carries
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The refusal was observed on both archived crops through the harness's own entry points, and the
+      distinction between the two condition names was asserted rather than assumed - thirty missing keys
+      reported as cache_schema_incomplete would send an operator hunting a truncated write instead of a
+      contract change.
+    instrument: >-
+      tests/test_assoc_train_harness.py::test_the_archived_p36_cache_is_refused_as_contract_1_and_says_which_contract
+    experiment: EXP-0043
+    note: >-
+      THE FIXTURE RULE WAS APPLIED WITHOUT BEING ASKED, AND IT IS THE RIGHT INSTINCT. The fixture stores the
+      REAL dot-product pre-activation logits rather than log(p), on the reasoning that the auditor's
+      logit-versus-probability check exists to see a TORN logit column - and a logit derived from the
+      probability it is checked against cannot be torn independently of it. That would have been a fixture
+      differing from production in KIND, which is the shape of five of the eight defects. Emitting log(p)
+      would have produced a green check that could never fail.
+      THE NAMED TRAP WAS AVOIDED AND DOCUMENTED IN CODE. The pre-ILP export and ECB sidecar keep their own
+      edge_prob, unrenamed and unrelated to the cache column; only which CACHE column feeds them changed, to
+      the post-fusion surface that contract 1's band_a_prob had held all along under a name claiming no
+      surface. Both call sites now carry a comment, so the next reader meets the distinction before the
+      rename rather than after.
+      ONE APPARENT GAP IS ALREADY CLOSED and is recorded here so it is not re-opened: the training licence
+      does not pin the cache contract version, which looks like an omission. It is not - verify_licence
+      re-reads through load_cache, which enforces contract_version == 2, so a stale licence over a
+      foreign-contract cache is refused at load rather than at check.
+    date: '2026-08-30'
+    tags: [contract-2, no-usable-cache, p36-retired, fixture-in-kind, verified, launch-blocker]

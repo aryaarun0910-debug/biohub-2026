@@ -244,8 +244,12 @@ def load_cache(path: Path) -> dict:
     the whole lesson of this lane: six defects in three Gate-1 attempts, every one of them a
     worker approximating a path instead of reusing it (`FACT-0402`'s ledger). Its refusals are
     re-raised as `HarnessRefusal` with the CONDITION NAME preserved verbatim, so a caller can
-    still tell `frame_keyed_cache` from `cache_schema_incomplete` - which matters, because those
-    two want opposite responses: retire the artifact, or go looking for a truncated write.
+    still tell the three retirement conditions apart, and they want three different responses:
+    `frame_keyed_cache` - retire the artifact, its addressing is undefined; `cache_contract_1` -
+    the artifact is readable but its one probability column names no surface, so RE-RUN THE TAP
+    at contract 2 (`FACT-0407`: the archived P36 cache is faithful and still unusable for
+    training, because the pre-fusion surface it never stored cannot be rewritten into it);
+    `cache_schema_incomplete` - go looking for a truncated write.
     """
     path = Path(path)
     if not path.is_file():

@@ -17,6 +17,15 @@ two different vectors. Every rejection below is PROVEN BY MUTATION - the defect 
 a production-layout cache and the harness must refuse it under its own NAMED condition - and every
 mutation has an ACCEPT CONTROL, because a harness that refuses everything checks nothing.
 
+CONTRACT 2 - THE SECOND MIGRATION THESE TESTS ENFORCE (`FACT-0407`, `FACT-0408`). Schema 2 fixed
+the KEY (pair-and-role, not frame). Contract 2 fixes the NAME: contract 1's one probability column
+per band held the deployed POST-fusion value under a name that claimed no surface, so a
+primary-side replay compared against it was measuring two different stages. The harness inherits
+the key list from the auditor (`assoc_train_harness.py:211`), so this suite's fixture had to move
+with it. THE ARCHIVED P36 CACHE IS CONTRACT 1 AND IS NOW REFUSED; see
+`test_the_archived_p36_cache_is_refused_as_contract_1_and_says_which_contract` for what was
+retired and why no legacy read mode exists.
+
 These are SOFTWARE contract tests. They decide nothing scientific.
 """
 from __future__ import annotations
@@ -42,8 +51,14 @@ from assoc_parent_dataset import evaluate  # noqa: E402
 CROPS = W.CROPS
 DIM = W.DIM
 
-# The archived P36 cache: the only REAL artifact this suite can reach on CPU. FACT-0403 - its
-# structure is proven and its parity verdict is INVALID, so it is a SCHEMA fixture and nothing else.
+# The archived P36 cache: the only REAL artifact this suite can reach on CPU, and it is a
+# CONTRACT-1 file. `FACT-0407` proved it FAITHFUL - a primary-only replay reproduces the recorded
+# GPU verdict to seven digits and the deployed bidirectional harmonic collapses the gap to inside
+# the gate's own tolerance - but faithful is not readable: contract 1 stored ONE probability
+# column per band, and the pre-fusion surface it never held cannot be recovered by rewriting these
+# bytes. It keeps its EVIDENTIARY value (it is the artifact FACT-0403, FACT-0406 and FACT-0407
+# were measured on) and has lost its SCHEMA-FIXTURE and TRAINING-LICENCE value. The one test that
+# still reads it asserts that it is REFUSED, by name.
 P36_CACHE = Path("C:/temp/assoc_tournament/schema_v2/aft_cache")
 P36_RECEIPT = Path("C:/temp/p36/assoc_feature_tap_gate.json")
 needs_p36 = pytest.mark.skipif(
@@ -106,6 +121,25 @@ def _gate(world, **kw):
 
 def _role_index(world):
     return {c: H.role_features(H.load_cache(world["cache_dir"] / f"{c}.npz"), c) for c in CROPS}
+
+
+def _rebuild_union(payload: dict) -> None:
+    """Re-derive the auditor-facing union after a mutation edits the bands it is made of.
+
+    Driven by ``AFC.UNION_BANDS`` rather than a literal ``("a", "b")``: band P is a gate
+    instrument and is deliberately NOT in the deployed candidate surface, and a mutation that
+    quietly folded it in would inflate that surface by rows the deployment never saw. A mutation
+    that leaves the union stale fails under ``union_surface_disagrees_with_its_bands``, which is
+    a different defect from the one each caller is manufacturing.
+    """
+    payload["source_id"] = np.concatenate(
+        [payload[f"band_{b}_source_id"] for b in AFC.UNION_BANDS])
+    payload["target_id"] = np.concatenate(
+        [payload[f"band_{b}_target_id"] for b in AFC.UNION_BANDS])
+    payload["deployed_edge_prob_postblend"] = np.concatenate(
+        [payload[f"band_{b}_deployed_prob_postblend"] for b in AFC.UNION_BANDS]).astype(np.float32)
+    payload["primary_edge_prob_preblend"] = np.concatenate(
+        [payload[f"band_{b}_primary_prob_preblend"] for b in AFC.UNION_BANDS]).astype(np.float32)
 
 
 def _synth(dir_: Path, name: str = "44b6_aaaaaaaa", **kw) -> Path:
@@ -233,15 +267,10 @@ def test_a_sub_threshold_band_over_its_rank_cap_is_rejected(tmp_path):
     def over_cap(payload):
         i = 0                                    # duplicate one band-B row past the cap
         rep = 9
-        for col in ("pair", "i", "j", "source_id", "target_id", "prob"):
+        for col in AFC.BAND_COLUMNS:
             arr = payload[f"band_b_{col}"]
             payload[f"band_b_{col}"] = np.concatenate([arr, np.repeat(arr[i:i + 1], rep)])
-        payload["source_id"] = np.concatenate([payload["band_a_source_id"],
-                                               payload["band_b_source_id"]])
-        payload["target_id"] = np.concatenate([payload["band_a_target_id"],
-                                               payload["band_b_target_id"]])
-        payload["edge_prob"] = np.concatenate([payload["band_a_prob"],
-                                               payload["band_b_prob"]]).astype(np.float32)
+        _rebuild_union(payload)
 
     d = tmp_path / "overcap"
     W.write_v2_cache(d / f"{CROPS[0]}.npz", CROPS[0], mutate=over_cap)
@@ -333,16 +362,13 @@ def test_a_candidate_in_a_pair_the_cache_never_recorded_is_refused(tmp_path, wor
         for key in ("role_pair", "role_role", "role_gid", "role_feat", "role_coord_scaled",
                     "role_coord_rel", "role_mask", "role_pos"):
             payload[key] = payload[key][:keep_rows]
-        for name in ("a", "b"):
+        # ALL THREE bands are truncated, band P included: it is the pre-fusion analogue of band
+        # A over the same pairs, so leaving it whole would name pairs the cache no longer holds.
+        for name in AFC.BANDS:
             m = payload[f"band_{name}_pair"] < 2
-            for col in ("pair", "i", "j", "source_id", "target_id", "prob"):
+            for col in AFC.BAND_COLUMNS:
                 payload[f"band_{name}_{col}"] = payload[f"band_{name}_{col}"][m]
-        payload["source_id"] = np.concatenate([payload["band_a_source_id"],
-                                               payload["band_b_source_id"]])
-        payload["target_id"] = np.concatenate([payload["band_a_target_id"],
-                                               payload["band_b_target_id"]])
-        payload["edge_prob"] = np.concatenate([payload["band_a_prob"],
-                                               payload["band_b_prob"]]).astype(np.float32)
+        _rebuild_union(payload)
 
     d = tmp_path / "partial"
     W.write_v2_cache(d / f"{CROPS[0]}.npz", CROPS[0], mutate=keep_two_pairs)
@@ -600,71 +626,56 @@ def test_a_schema_check_that_reads_nothing_refuses(tmp_path):
 
 
 @needs_p36
-def test_the_archived_p36_cache_loads_and_validates_under_schema_v2():
-    """THE REAL ARTIFACT. FACT-0403: structure proven, parity verdict INVALID - schema use only."""
-    r = H.schema_report(P36_CACHE)
-    assert r["schema_ok"], [c["reasons"] for c in r["crops"] if not c["ok"]]
-    assert {c["crop"] for c in r["crops"]} == {"44b6_0113de3b", "44b6_0b24845f"}
-    for c in r["crops"]:
-        assert c["window"] == 2 and c["feat_dim"] == 32 and c["pos_dim"] == 32
-        assert c["downsample"] == [1, 4, 4] and c["pairs"] == 8
-        # every recorded band edge resolves through the harness's own (pair, role) index
-        assert c["role_lookup"]["edges_resolved"] == c["band_a_rows"] + c["band_b_rows"]
-        # and the window dependence is REAL on the deployed path, not a fixture artifact
-        assert c["role_lookup"]["nodes_served_in_both_roles"] > 0
-        assert c["role_lookup"]["max_abs_delta_between_the_two_roles"] > 1e-4
-        assert c["window_dependence"]["max_abs_delta"] > 1e-4
-    assert r["licenses_training"] is False
+def test_the_archived_p36_cache_is_refused_as_contract_1_and_says_which_contract(tmp_path):
+    """THE ARCHIVED P36 CACHE'S FATE ON ITS OWN BYTES - the replacement for three retired tests.
 
+    THREE TESTS WERE RETIRED HERE, NOT ACCOMMODATED. They read this artifact as a CONTRACT-2
+    schema fixture: that it validates under the pair-and-role schema, that its role index refuses
+    an untapped pair, and that a frame-keyed down-conversion of it is rejected with the original
+    bytes as accept control. Contract 2 makes every one of those claims unmakeable on this file,
+    and correctly so. Contract 1 stored ONE probability column per band, taken from the deployed
+    `probs` AFTER every fusion stage, under a name that claimed no surface; the pre-fusion surface
+    it never held cannot be recovered by rewriting these bytes. `FACT-0407` recovered it by
+    re-running the primary head against the real pack weights, NOT by reading the cache. A legacy
+    read-only mode would therefore have to either fabricate `primary_prob_preblend` from
+    `deployed_prob_postblend` - which is the P36 defect restated as a feature - or leave it absent
+    and silently skip every contract-2 check, which is the quietest way to test nothing.
 
-@needs_p36
-def test_the_p36_cache_covers_only_the_pairs_it_tapped_and_says_so(tmp_path):
-    """8 pairs of 100 frames: a surface over the rest is a refusal, not a silently served vector."""
-    crop = "44b6_0113de3b"
-    idx = H.role_features(H.load_cache(P36_CACHE / f"{crop}.npz"), crop)
-    with np.load(P36_CACHE / f"{crop}.npz", allow_pickle=False) as z:
-        starts, ends = z["starts"], z["ends"]
-        assert int(z["pair_f_idx"].shape[0]) == 8 and int(z["frames"].shape[0]) == 100
-    idx.rows_for_edges([int(starts[0])], [int(starts[1])])            # a tapped pair
-    with pytest.raises(H.HarnessRefusal, match=H.NO_CACHED_PAIR):
-        idx.rows_for_edges([int(starts[50])], [int(starts[51])])      # an untapped one
-    assert int(ends[-1]) == int(np.load(P36_CACHE / f"{crop}.npz")["node_count"])
+    RE-POINTING WAS NOT AVAILABLE. A contract-2 capture can only come from re-running the tap, and
+    no such artifact exists on disk; this agent is CPU-only and launched no GPU session. When one
+    exists, the retired coverage returns against it - the schema, role-index and down-conversion
+    claims are all still worth making, just not on a contract-1 file.
 
+    THE ARTIFACT KEEPS ITS EVIDENTIARY VALUE AND LOSES ONLY ITS TRAINING-LICENCE VALUE. It is
+    still the file `FACT-0403`, `FACT-0406` and `FACT-0407` were measured on. What this test locks
+    is the one claim that is still true of it and still worth a lock: it is refused BY NAME, as
+    `cache_contract_1`, and NOT as a generic missing-key message - thirty keys are absent, and
+    "missing thirty keys" sends the operator looking for a truncated write.
 
-@needs_p36
-def test_the_real_p36_cache_rewritten_frame_keyed_is_rejected(tmp_path):
-    """THE MUTATION PROOF ON THE REAL ARTIFACT, with the unmutated original as accept control.
-
-    Down-convert the archived cache to the retired layout the way a frame-keyed writer would - one
-    vector per node, first sight wins, exactly `assoc_feature_parity.py`'s `feats[t]` behaviour -
-    and require the harness to refuse it under `frame_keyed_cache`. The information the
-    down-conversion throws away is measured on the way out: it is the second vector of every
-    dual-role node, which is what makes the layout undefined rather than lossy.
+    `tests/test_audit_feature_cache.py::test_a_contract_1_cache_is_rejected_and_named_as_contract_1`
+    proves the same rejection by DOWN-CONVERTING a synthetic contract-2 cache. This one proves it
+    on the real archived bytes, through the harness's own refusal wrapper, which is a different
+    claim: that the condition NAME survives `HarnessRefusal` verbatim.
     """
-    crop = "44b6_0113de3b"
-    with np.load(P36_CACHE / f"{crop}.npz", allow_pickle=False) as z:
-        gid, feat = z["role_gid"], z["role_feat"]
-        legacy = {"coords": z["coords"], "frames": z["frames"], "starts": z["starts"],
-                  "ends": z["ends"], "feat_frames": z["frames"],
-                  "image_shape": z["image_shape"], "window": z["window"],
-                  "downsample": z["downsample"]}
-        first: dict[int, int] = {}
-        for row, g in enumerate(gid.tolist()):
-            first.setdefault(int(g), row)
-        for k, (s, e) in enumerate(zip(z["starts"].tolist(), z["ends"].tolist())):
-            rows = [first[g] for g in range(s, e) if g in first]
-            if rows:
-                legacy[f"feat_{int(z['frames'][k])}"] = feat[rows]
-    d = tmp_path / "downconverted"
-    d.mkdir()
-    np.savez_compressed(d / f"{crop}.npz", **legacy)
+    for crop in ("44b6_0113de3b", "44b6_0b24845f"):
+        with pytest.raises(H.HarnessRefusal) as exc:
+            H.load_cache(P36_CACHE / f"{crop}.npz")
+        text = str(exc.value)
+        assert "cache_contract_1" in text, f"refused for the wrong reason: {text}"
+        assert "cache_schema_incomplete" not in text
+        assert "FACT-0403" in text and "FACT-0407" in text
 
-    with pytest.raises(H.HarnessRefusal) as exc:
-        H.load_cache(d / f"{crop}.npz")
-    assert H.FRAME_KEYED_CACHE in str(exc.value)
-    assert not H.schema_report(d)["schema_ok"]
-    # ACCEPT CONTROL: the original bytes, unmutated, are accepted for schema validation.
-    assert H.schema_report(P36_CACHE, crops=[crop])["schema_ok"]
+    r = H.schema_report(P36_CACHE)
+    assert not r["schema_ok"] and r["licenses_training"] is False
+    assert {c["crop"] for c in r["crops"]} == {"44b6_0113de3b", "44b6_0b24845f"}
+    assert all(not c["ok"] for c in r["crops"])
+    assert all(any("cache_contract_1" in reason for reason in c["reasons"]) for c in r["crops"])
+
+    # ACCEPT CONTROL, because a harness that refuses everything checks nothing: the SAME two
+    # entry points accept a contract-2 cache in the production layout.
+    control = W.build_world(tmp_path / "control", crops=[CROPS[0]])
+    assert H.load_cache(control["cache_dir"] / f"{CROPS[0]}.npz")["role_feat"].shape[0] > 0
+    assert H.schema_report(control["cache_dir"])["schema_ok"]
 
 
 @pytest.mark.skipif(not P36_RECEIPT.is_file(), reason="the P36 gate receipt is not on disk")
