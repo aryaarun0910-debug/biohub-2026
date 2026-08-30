@@ -2,7 +2,7 @@ id: PKT-0039
 title: "AGENT 2 - one capped exploitation of the 0.931 base: the P24 DeepCenter/veto bundle, and then the lane ends"
 lever: LEVER-0042
 owner: agent-2-exploitation
-lock: claimed
+lock: done
 opened: '2026-08-30'
 
 claim: >-
@@ -167,4 +167,19 @@ central_preflight_adjudication: >-
   pattern. It is pre-existing public-base code and it completed in BOTH scored runs, so it is a cost, not a
   blocker - and removing it would be a second change.
 
-result: null
+result: >-
+  DONE 2026-08-30, SCORED 0.932, LANE ENDED. The falsifier - at or below 0.931 - did NOT fire, so the claim
+  is confirmed, by the smallest margin the leaderboard can display (FACT-0412). Reason (h) of this packet's
+  own preregistration, written before the run, states that public-LB variance alone is of the order of the
+  effect under test; +0.001 from one submission cannot separate the component from noise, which is why the
+  fact is recorded SUSPECT on attribution while the score itself is not in doubt.
+  THE MECHANISM IS SOLID EVEN WHERE THE MAGNITUDE IS NOT. The run's log shows best.pt loaded at epoch 2
+  rather than skipped on the base's epoch-500 assertion, the safe-division veto ON, and deepcenter_rejected
+  non-zero on seven of eight movies where the base recorded zero on all eight. The detector decides now; it
+  decided nothing before.
+  EXACTLY ONE SUBMISSION SPENT, as budgeted, and the lane ends here: no second exploitation experiment, no
+  follow-up tuning, no stacking, whatever the score. A marginal pass is precisely the case that rule exists
+  for - +0.001 invites sweeping the neighbours, which PKT-0028 rule (1) independently forbids.
+  WHAT IT SETTLES STRATEGICALLY: inherited knobs cannot reach 0.940. Baseline 0.932 leaves 0.008, and the
+  only other identified candidate is FACT-0404's public 0.933 at about +0.002 on a base that lacks the
+  component now in our champion. Even fully additive that is 0.934.
