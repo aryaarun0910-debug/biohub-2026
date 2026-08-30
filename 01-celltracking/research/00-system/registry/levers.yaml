@@ -75,6 +75,69 @@ levers:
 # already-scheduled GPU launch, which is the one case where infrastructure counts as output.
 # ---------------------------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------------------------
+# THE WINNING FUNCTION AND THE REVISED PROMOTION GATE (host, 2026-08-30)
+#
+# THE FUNCTION. Offer the correct parent  x  discriminate it correctly  x  ensure the final relink
+# CONSUMES that score. We have separately failed each partial version - LEVER-0037 offered without
+# discriminating and was killed; LEVER-0039 discriminated without offering and was killed; LEVER-0041
+# discriminated on a widened surface and its output is discarded 85% of the time on fold 0
+# (FACT-0428). It is the COUPLED system that is the route past the public frontier, and it must be
+# tested coupled.
+#
+# WHY THE OLD FOLD-0 RANKING GATE IS RETIRED. Every prior gate required a favourable fold-0 paired
+# interval on contested parent ranking. FACT-0420 MEASURED that fold 0 cannot supply one: an apparent
+# +0.024 leaves exactly 0.000 out of fold, the refit moves 81 of 4,157 targets and all 81 sit in the
+# lowest margin quartile, at roughly ten contested errors per crop. Keeping that gate would prohibit
+# EVERY parent scorer regardless of merit - it demands a resolution the substrate does not have. This
+# is not a relaxation; it is the removal of an impossible condition and its replacement by five that
+# are each answerable.
+#
+# THE REPLACEMENT GATE. All five bind.
+#   RANKING     probability-free CONTEXTUAL scoring transfers positively in BOTH embryo directions.
+#               FACT-0421 currently supplies that premise and it must be re-established, not assumed,
+#               for any new scorer.
+#   CONSUMPTION the FROZEN scorer and bonus improve COMPLETE-CHAIN raw association on BOTH folds.
+#   STATISTICAL fold 1 shows a favourable crop-paired interval; fold 0 must be NON-INFERIOR with a
+#               POSITIVE POINT ESTIMATE. Do not demand an interval the surface cannot resolve.
+#   SAFETY      neither node recall nor division TP declines on either fold (FACT-0371).
+#   METRIC      an ADJUSTED improvement with flat or negative RAW association is REJECTED. This is the
+#               shape that killed LEVER-0036 (FACT-0375) and, mirrored, LEVER-0037 (FACT-0376).
+#   COMPARISON  widened surface + scorer + FINAL CONSUMER, against the DEPLOYED control - never against
+#               a widened-only control (FACT-0382).
+#
+# RECORDED BEFORE GATE B RUNS, as the host required, so it cannot be tuned to a result.
+# ---------------------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------------------
+# GPU PROTECTION CONTRACT (host, 2026-08-30) - FOUR SIGNED SECTIONS BEFORE EVERY LAUNCH
+#
+# This sits UNDER the standing GPU rule, not beside it: that rule says every session must produce an
+# asset, this one says what must be signed before a session may start. Four sections, each signed,
+# each failing CLOSED.
+#
+#   CODE      clean scoped tree; explicit staged paths; reproducible notebook SHA; unique slug and
+#             out_dir; deployed support-pack SHA pinned. A built notebook embedding uncommitted code
+#             is refused - and note the trap that produced this clause: the injected patch may be
+#             GENERATED, so committing the file the check names can still leave HEAD failing its own
+#             drift lock.
+#   DATA      a FOLD-LEGITIMATE trunk - explicitly NOT the invalid pairing FACT-0418 exposed, where
+#             every declared dual_trunk_pair had no legitimate arm on either fold and the audit
+#             constant would have refused the honest pair - plus contamination status and checkpoint
+#             hashes.
+#   PROCESS   exact environment propagation INTO the predictor subprocess; a positive heartbeat whose
+#             ABSENCE is the alarm; a crop-count assertion, because the kernel's own all_passed cannot
+#             see a crop that never ran; a timing probe with early abort that banks its own result.
+#   ARTIFACT  atomic output; capacity guard against the RE-DERIVED storage figure (FACT-0416, after a
+#             12.3x-low estimate); independent post-run reconstruction; and expected outputs
+#             RE-DERIVED FROM THE BUILT NOTEBOOK rather than trusted from the receipt - FACT-0417
+#             records the receipt's own expected-outputs field hardcoded to the wrong worker, which
+#             would have failed a correct run and passed a run that recorded nothing.
+#
+# NO GPU IS SPENT until the free coupled CPU experiment (LEVER-0044 Gate B) shows the learned signal
+# can reach the final graph at all.
+# ---------------------------------------------------------------------------------------------
+
   - id: LEVER-0001
     claim: >-
       Smoothing node positions along a tracklet before the linker recovers association
@@ -1435,7 +1498,22 @@ levers:
       division-sensitive localisation without damaging node recall. The candidate is FOCUS-3D, a query-based
       3D instance segmenter (MAE3D / ViT-Adapter backbone, 3D deformable pixel decoder, Mask2Former-style
       decoder, hundreds of object queries per patch) with a nuclei-specific checkpoint
-    status: open
+    status: parked
+    parked_date: '2026-08-30'
+    reopen_when: >-
+      HOST DECISION 2026-08-30. FOCUS-3D is a strong research candidate and it is NOT pivotal today. Its
+      admissibility, contamination and packaging risks are largely cleared (FACT-0423, FACT-0424, FACT-0425),
+      but the campaign's BINDING failure is downstream CONSUMPTION (FACT-0426 through FACT-0429), and a third
+      representation cannot fix a stage that discards the score it is given. Parking is a sequencing decision
+      about scarce attention and compute; it weakens none of this lever's gates and kills nothing.
+      REOPEN ON ANY ONE OF THREE TRIGGERS:
+        (1) LEVER-0044 Gate B WORKS but the existing representation lacks enough discrimination to convert it;
+        (2) probability-free contextual transfer (FACT-0421) COLLAPSES after full-chain integration, so the
+            representation rather than the consumption point becomes binding again;
+        (3) an architecturally independent MORPHOLOGY representation is needed for genuine diversity - which
+            FACT-0415 already establishes alternate seeds cannot supply.
+      UNTIL THEN: no checkpoint download, no GPU, no Kaggle dataset staging. The host authorisation recorded
+      in host_authorisation_2026_08_30 REMAINS VALID and does not need re-granting when a trigger fires.
     falsifier: >-
       Written before any download, any packaging and any GPU. Any of these kills or closes the lever, and
       which one fires decides whether it dies as a KILL (evidence about itself) or a CLOSE (a structural
@@ -1534,20 +1612,52 @@ levers:
       fold 0 and 70% on fold 1
     status: open
     falsifier: >-
-      Written before any work, and note that (a) is CPU-only, needs NO model, and must run before any
-      feature-cache GPU session is scheduled.
-      (a) THE FREE TEST. Sweeping MOTION_RELINK_LEARNED_BONUS alone on the existing replay over COMPLETE fold
-          0, with the deployed edge_prob unchanged, produces no bonus that beats the deployed control with a
-          crop-paired interval excluding zero on the favourable side. If that is the outcome the lever dies
-          for ZERO GPU, because widening the band the learned channel acts in is a strictly easier
-          intervention than replacing what fills it.
-      (b) Fewer than 1% of assignments change across the whole sweep - the knob is inert rather than harmful.
-      (c) Raw edge Jaccard is flat through the COMPLETE chain on fold 0 under the official scorer.
-      (d) Net true edges through the complete chain are at or below zero - the genuine FACT-0376 quantity.
-      (e) Node recall or division true positives decline on either fold (FACT-0371).
-      (f) The fold-0 arm reproduces FACT-0414's exact zero at the FULL-CHAIN stage, which would mean the
-          fold-0 substrate cannot resolve this intervention either and the honest gate has to move rather
-          than the model.
+      AMENDED BY THE HOST ON 2026-08-30 BEFORE ANY DATA WAS TAKEN - see falsifier_original_2026_08_30 below,
+      which is preserved verbatim, and falsifier_amendment_reason for why. TWO CPU GATES, and only the second
+      can kill this lever.
+      GATE A - CONSUMPTION CALIBRATION. Sweep MOTION_RELINK_LEARNED_BONUS over the preregistered coarse grid
+      [0, 0.5, 1, 2, 4, 8] with the DEPLOYED edge_prob unchanged, all crops of BOTH folds, through the
+      complete chain and the official scorer. A LOSS HERE KILLS ONLY "AMPLIFY THE DEPLOYED SCORE". It does
+      NOT kill this lever, and reading it as if it did would be a logical error - see the amendment reason.
+      GATE B - THE DECISIVE MECHANISM TEST, and the only one that can kill LEVER-0044. Place the existing
+      PROBABILITY-FREE CONTEXTUAL score (FACT-0421) into the edge_prob slot, combine it with the WIDENED
+      candidate surface, and consume it inside motion_relink_edges at the winning or preregistered bonus. If
+      that COMPLETE COUPLED INTERVENTION cannot improve RAW association through the full chain, the
+      final-edge scorer mechanism is dead and no feature cache may be built.
+      SUPPORTING CONDITIONS, applying to both gates. (b) Fewer than 1% of assignments change across the whole
+      sweep - the knob is inert rather than harmful. (c) Raw edge Jaccard flat through the COMPLETE chain
+      under the official scorer. (d) Net true edges at or below zero - the genuine FACT-0376 quantity, never
+      the pre-ILP proxy. (e) Node recall or division true positives decline on either fold (FACT-0371).
+      (f) An adjusted improvement with flat or negative RAW association is REJECTED, not reported as a win.
+      PROTOCOL BINDING BOTH GATES. The deployed bonus value must reproduce the control EXACTLY before any
+      treatment is read - a control that does not reproduce is a hard refusal. Report raw AND adjusted edge
+      Jaccard separately, edge TP/FP/FN, node recall, division TP/FP/FN, assignment churn, the
+      count-adjustment contribution, and results BY FOLD and pooled. Select the SMALLEST value on a winning
+      PLATEAU, never the numerically best isolated point - an isolated optimum on a coarse grid is a
+      selection artifact.
+    falsifier_original_2026_08_30: >-
+      PRESERVED VERBATIM. The text this lever opened with, before the host's amendment and before any data:
+      "(a) THE FREE TEST. Sweeping MOTION_RELINK_LEARNED_BONUS alone on the existing replay over COMPLETE
+      fold 0, with the deployed edge_prob unchanged, produces no bonus that beats the deployed control with a
+      crop-paired interval excluding zero on the favourable side. If that is the outcome the lever dies for
+      ZERO GPU, because widening the band the learned channel acts in is a strictly easier intervention than
+      replacing what fills it. (b) Fewer than 1% of assignments change across the whole sweep. (c) Raw edge
+      Jaccard is flat through the COMPLETE chain on fold 0 under the official scorer. (d) Net true edges
+      through the complete chain are at or below zero. (e) Node recall or division true positives decline on
+      either fold. (f) The fold-0 arm reproduces FACT-0414's exact zero at the FULL-CHAIN stage."
+    falsifier_amendment_reason: >-
+      THE ORIGINAL (a) CONTAINED A LOGICAL FLAW AND THE HOST CAUGHT IT BEFORE IT COST ANYTHING. It proposed
+      to kill the entire final-edge thesis on a sweep of the DEPLOYED probability - but FACT-0421 measured
+      that the deployed probability is precisely the NON-TRANSFERRING feature, the one component whose
+      deletion makes the scorer transfer in both directions. Amplifying a poor score at the correct stage can
+      still lose, while a better score at that same stage might win. So a negative Gate A is evidence about
+      the deployed probability, not about the consumption point, and the original falsifier would have
+      retired a live mechanism on evidence that cannot address it - the exact "closed by association" error
+      AGENTS.md section 2 names as this project's second most expensive mistake.
+      THE AMENDMENT IS RECORDED BEFORE ANY DATA WAS TAKEN, which is what makes it legitimate rather than
+      rationalisation. It does not relax the lever's bar: it NARROWS what Gate A is permitted to conclude and
+      ADDS Gate B, a strictly harder coupled test, as the only thing that can kill the lever. The original
+      text is preserved above so the change is auditable rather than silent.
     supporting: [FACT-0426, FACT-0427, FACT-0428, FACT-0429, FACT-0422, FACT-0420, FACT-0364, FACT-0376]
     note: >-
       OPENED 2026-08-30. THIS IS NOT A RESTATEMENT OF LEVER-0041 AND THE BOUNDARY IS MECHANICAL. LEVER-0041

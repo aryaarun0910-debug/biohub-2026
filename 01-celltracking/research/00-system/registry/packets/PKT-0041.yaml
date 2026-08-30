@@ -2,7 +2,7 @@ id: PKT-0041
 title: "AGENT 5 - FOCUS-3D as a bounded THIRD REPRESENTATION TRUNK, admissibility first and compute last"
 lever: LEVER-0043
 owner: agent-5-focus3d-integration
-lock: claimed
+lock: done
 opened: '2026-08-30'
 
 host_authorisation_2026_08_30:

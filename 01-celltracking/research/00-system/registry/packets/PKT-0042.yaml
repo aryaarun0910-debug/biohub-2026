@@ -1,0 +1,106 @@
+id: PKT-0042
+title: "The coupled final-edge experiment: two CPU gates, zero GPU, and the only thing that can kill LEVER-0044"
+lever: LEVER-0044
+owner: agent-6-final-edge-gates
+lock: claimed
+opened: '2026-08-30'
+
+the_winning_function: >-
+  Stated first because it is the reason this packet exists and the reason it is COUPLED rather than
+  sequential. Offer the correct parent x discriminate it correctly x ensure the final relink CONSUMES that
+  score. Each partial version has already failed on its own: LEVER-0037 offered without discriminating and
+  was killed; LEVER-0039 discriminated without offering and was killed (FACT-0386); LEVER-0041 discriminated
+  on a widened surface and its output is discarded 85% of the time on fold 0 (FACT-0428). Testing any factor
+  alone re-runs an experiment this project has already lost. Gate B tests the product.
+
+claim: >-
+  A probability-free contextual score, offered on the widened candidate surface and CONSUMED inside
+  motion_relink_edges at a bonus large enough to act, improves complete-chain RAW association on both folds -
+  where each factor alone has failed.
+
+falsifier: >-
+  Inherited from LEVER-0044 as AMENDED BY THE HOST on 2026-08-30, and not relaxed here. Two gates, and only
+  the second can kill the lever.
+  GATE A - CONSUMPTION CALIBRATION. Sweep MOTION_RELINK_LEARNED_BONUS over the preregistered grid
+  [0, 0.5, 1, 2, 4, 8] with the DEPLOYED edge_prob unchanged. A LOSS HERE KILLS ONLY "amplify the deployed
+  score" and says NOTHING about this lever - because FACT-0421 established that the deployed probability is
+  precisely the NON-TRANSFERRING feature. Reporting a negative Gate A as a refutation of the final-edge
+  thesis would be the closed-by-association error AGENTS.md section 2 names.
+  GATE B - THE DECISIVE MECHANISM TEST. The probability-free contextual score (FACT-0421) written into the
+  edge_prob slot, combined with the WIDENED candidate surface, consumed inside motion_relink_edges at the
+  winning or preregistered bonus. IF THAT COMPLETE COUPLED INTERVENTION CANNOT IMPROVE RAW ASSOCIATION
+  THROUGH THE FULL CHAIN, THE FINAL-EDGE SCORER MECHANISM IS DEAD AND NO FEATURE CACHE MAY BE BUILT.
+  Supporting conditions on both gates: fewer than 1% of assignments changing means the knob is inert; raw
+  edge Jaccard flat through the complete chain; net true edges at or below zero (the genuine FACT-0376
+  quantity, never the pre-ILP proxy); node recall or division TP declining on either fold (FACT-0371); and an
+  ADJUSTED improvement with flat or negative RAW association is REJECTED rather than reported as a win.
+
+prediction: >-
+  Stated before any run. GATE A: I expect it to be NEGATIVE OR INERT, and that expectation is the reason the
+  host's amendment matters - amplifying a score whose skill differs by fold (FACT-0421 measured geometry-only
+  at +0.0458 on fold 1 against -0.0310 on fold 0) should trade one fold against the other, and at bonus 8 the
+  band widens far enough that geometric coherence is likely charged for it globally, the FACT-0376 shape.
+  GATE B: genuinely uncertain, which is why it is worth running. The mechanism is sound - FACT-0429 shows
+  survival inside the 1.0 um band is 4.3x that outside it, so widening the band demonstrably changes what
+  survives - but FACT-0422 bounds the whole fold-0 wrong-parent population at 240 GT edges, so even a large
+  proportional win may be small in absolute score. The outcome I consider most likely is a small positive on
+  fold 1 and a non-inferior fold 0, which under the revised gate LICENSES contract 2 without earning a
+  submission.
+
+inputs:
+  facts: [FACT-0426, FACT-0427, FACT-0428, FACT-0429, FACT-0430, FACT-0421, FACT-0422, FACT-0420,
+          FACT-0419, FACT-0364, FACT-0376, FACT-0382, FACT-0371]
+  artifacts:
+    - _evidence/assoc/survival/          # the stage map and survival panel
+    - _evidence/assoc/pathology/         # the ablations that produced the probability-free score
+    - C:/temp/full_chain_replay/
+  code:
+    - scripts/win_bet/p28_full_chain_replay.py       # the control; do not fork it
+    - scripts/win_bet/assoc_preilp_survival.py
+    - scripts/win_bet/assoc_fold_pathology.py        # the probability-free contextual arm
+    - scripts/win_bet/assoc_report.py                # the only promotable summary
+    - scripts/win_bet/assoc_lost_edge_ledger.py
+
+method: >-
+  CPU ONLY, BOTH GATES, ALL CROPS OF BOTH FOLDS. The bonus is read from the replay's own environment, so the
+  sweep costs no GPU session.
+  CONTROL FIRST AND IT IS A HARD REFUSAL: the deployed bonus value must reproduce the control EXACTLY before
+  any treatment is read. A control that does not reproduce halts the packet - this is the discipline that
+  made FACT-0428 interpretable.
+  GRID: [0, 0.5, 1, 2, 4, 8], preregistered and coarse on purpose. SELECT THE SMALLEST VALUE ON A WINNING
+  PLATEAU, never the numerically best isolated point - an isolated optimum on a coarse grid is a selection
+  artifact, and this project has already measured one (FACT-0386's quantile binning).
+  REPORT, for every arm, through the OFFICIAL patched scorer: raw AND adjusted edge Jaccard SEPARATELY, edge
+  TP/FP/FN, node recall, division TP/FP/FN, assignment churn, the count-adjustment contribution, and results
+  BY FOLD and pooled. Both embryo directions separately, never pooled alone (AGENTS.md section 4). Emit the
+  unified lost-edge ledger for every arm so category 5 stops being provisional.
+  GATE B ADDITIONALLY: widen the candidate surface, write the probability-free contextual score into the
+  edge_prob slot, and consume it at the selected bonus. The comparison is (widened surface + scorer + final
+  consumer) against the DEPLOYED control, NEVER against a widened-only control (FACT-0382).
+
+budget:
+  gpu_sessions: 0    # the whole point - this packet decides whether a GPU session is worth spending
+  submissions: 0
+  wall_clock: 1-2 days
+
+forbidden:
+  - launching a GPU job, pushing a kernel, or making a submission
+  - reading a negative GATE A as evidence against LEVER-0044 - it is evidence about the deployed probability
+    only, and the amendment reason in levers.yaml says why
+  - selecting the numerically best isolated grid point instead of the smallest value on a plateau
+  - comparing against a widened-only control (FACT-0382)
+  - reporting any summary scripts/win_bet/assoc_report.py did not produce
+  - reading an association gain as division recovery (FACT-0371)
+  - forking p28_full_chain_replay.py, or editing the deployed notebooks
+  - claiming another lever, or editing PKT-0029, PKT-0035, PKT-0036, PKT-0037, PKT-0038, PKT-0040, PKT-0041
+  - writing facts.yaml, levers.yaml or experiments.yaml - route to the coordinator
+  - staging or committing to git
+  - .claude/settings.json or .gitignore
+
+outputs:
+  evidence: _evidence/assoc/finaledge/ and C:/temp/finaledge/
+  facts_added: []          # routed to the coordinator under CANDIDATE FACTS in `result`
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null
