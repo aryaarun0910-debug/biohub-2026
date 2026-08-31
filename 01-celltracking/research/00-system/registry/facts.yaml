@@ -9144,6 +9144,22 @@ facts:
       THAT SPEC ONLY and not the schema. The schema carrier is DEFERRED, not forgotten: the harness files
       are live under a concurrent Gate B run and editing beneath a running experiment is how a shared
       worktree corrupted the registry once.
+      THE REMEDIATION IS SPECIFIED IN ADVANCE (host, 2026-08-31) so it cannot drift while it waits. FOUR
+      FAIL-CLOSED RULES AT THE SCHEMA BOUNDARY:
+        (1) IDENTIFY RESTRICTED CHECKPOINTS BY ARTIFACT HASH, never by the mutable role name
+            `general_v1` - a role can be renamed over identical bytes, and FACT-0435 already records
+            one checkpoint living at two paths under two role names.
+        (2) REQUIRE every association spec to DECLARE binding_restriction.offline_scoreable. Omission is
+            a refusal, not a default - an absent field is how a restriction silently stops applying.
+        (3) DERIVE false for restricted hashes and REJECT any attempt to override it. A submitter must
+            not be able to mark its own arm scoreable, which is the same principle that made
+            gpu_contract_skip inert in submission_run_v1.
+        (4) THE VERDICT LAYER MUST REFUSE PROMOTION, not merely label the report, when
+            offline_scoreable is false. A label on a payload nobody blocks on is prose again.
+      MUTATION COVERAGE REQUIRED, each proving a rejection rather than asserting one: omission of the
+      field; a false-to-true override; a ROLE RENAME OVER THE SAME HASH; and the harness DROPPING the
+      field from its output. That last one is the FACT-0417 shape - a consumer trusting a field its
+      producer stopped emitting.
       RE-DERIVE THIS FACT IF A TRAINING MANIFEST OR A SUCCESSOR PAPER EVER APPEARS.
     date: '2026-08-31'
     tags: [hoct, general-v1, training-provenance, cannot-be-established, submission-only, fact-0378-shape,
