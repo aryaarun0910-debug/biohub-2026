@@ -1,0 +1,37 @@
+{
+  "name": "p38_relink_bonus_b2",
+  "slug": "biohub-p38-relink-bonus-b2",
+  "title": "Biohub P38 Relink Bonus B2",
+  "code_file": "biohub-p38-relink-bonus-b2.ipynb",
+  "out_dir": "notebooks/kaggle_p38_relink_bonus_b2",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1"
+  ],
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb",
+  "base_sha256": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
+  "purpose": "PKT-0045 / LB CALIBRATION LOOK ONE OF TWO on the Gate A finding of PKT-0042 (LEVER-0044). EXACTLY ONE environment value is exchanged on the P35 champion (FACT-0412, submission 55888865): BIOHUB_MOTION_RELINK_LEARNED_BONUS 1.0 -> 2.0. Nothing else is touched - no threshold, candidate, rescue, detector, stacking or post-processing change. WHY 2.0 AND NOT THE NUMERICALLY BEST 8.0, which is rule-derived rather than preference: (a) the preregistered rule is the SMALLEST value on a winning plateau and fold 0 wins at the contiguous 2/4/8; (b) b2 is the ONLY grid value that satisfies eligibility at all, because fold-1 division TP declines at b4 and b8 and trips the FACT-0371 safety condition while b2 leaves division TP flat on BOTH folds; (c) the bonus is GLOBAL (the FACT-0376 shape), so the smallest effective perturbation minimises hidden-set risk. MEASURED OFFLINE, complete chain, official patched scorer, both folds separately, from _evidence/assoc/finaledge/panel_gateA.json arm gateA_b2: fold 0 combined score +0.0026589 with crop-paired ci95 [+0.000787, +0.005171] excluding zero favourably, raw edge Jaccard +0.0029463, adjusted +0.0029781 with a count channel of -6.7e-06 and count_adjustment_artifact FALSE, edge TP +31 / FP -35 / FN -31, node recall +0.0009361, division TP flat at 5 and division Jaccard -0.0031915 on +6 division false positives; fold 1 combined score -0.0001583 with ci95 [-0.000872, +0.000512] spanning zero, node recall +0.0001527, division TP flat at 14 and division Jaccard -0.0000614. THE DIVISION-JACCARD REGRESSION IS PROMINENT AND NOT BURIED: b2 improves ordinary association while INCREASING FALSE FORKS. That bounds the mechanism claim. It does not block eligibility, because the combined objective already charges the division term and the net remains positive after paying it. PREREGISTERED BAND AND FALSIFIER are in PKT-0045 and repeated verbatim in the submission description so Kaggle timestamps them before the score exists (FACT-0396). THE BAND IS A PRIOR, NOT A MEASUREMENT: FACT-0345 records our offline instrument under-reading the leaderboard three to four times and FACT-0344 records it inverting, so no offline check licenses any part of it.",
+  "provenance": {
+    "base": "The P35 champion, built notebook sha256 c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257, which produced submission 55888865 at 0.932 (FACT-0412).",
+    "base_trap_E1_handled": "FACT-0396 exception E1 recorded that the P32 spec set base_notebook == built_notebook, so cmd_build overwrote its own base and the base_sha256 exists nowhere in the tree. This spec sets base_notebook to the P35 champion and out_dir to a NEW directory, so the base is never overwritten and remains independently hashable.",
+    "treatment": "one environment assignment, cell 0, BIOHUB_MOTION_RELINK_LEARNED_BONUS 1.0 -> 2.0",
+    "consumers_of_the_variable": "read at cell 2 line 68 (env read, default 0.75), recorded into run_stats at cell 2 line 174, and consumed in the deployed relink cost at cell 5 line 485 - cost[i,j] = motion + 0.05*raw - MOTION_RELINK_LEARNED_BONUS * prob (FACT-0427). The run_stats write is the in-kernel positive heartbeat proving the treatment was LIVE rather than assumed.",
+    "evidence": "_evidence/assoc/finaledge/panel_gateA.json arm gateA_b2; gateA_grid.md; scores_f0.meta.json and scores_f1.meta.json"
+  },
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_MOTION_RELINK_LEARNED_BONUS": "2.0"
+      },
+      "expect": 1
+    }
+  ]
+}
