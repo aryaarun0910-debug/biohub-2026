@@ -2,8 +2,9 @@ id: PKT-0048
 title: "Mask-aware association groundwork: the 19-feature coverage report, the FOCUS mask adapter, and the T=2 correspondence design"
 lever: null
 owner: agent-11-mask-groundwork
-lock: claimed
+lock: done
 opened: '2026-08-31'
+closed: '2026-08-31'
 
 why_no_lever: >-
   CPU groundwork for a co-designed route, claiming nothing. LEVER-0034 is held by PKT-0029; LEVER-0043
@@ -28,7 +29,7 @@ falsifier: >-
   zero-filled one; if it builds a mask adapter it has not shown would REJECT a wrong-scale or wrong-convention
   input; if it designs a T=2 dataset whose deformation magnitudes are not calibrated against the real motion
   distribution; or if it lets any offline number be produced from general_v1 without the FACT-0451
-  submission-only restriction attached.
+  submission-only restriction attached mechanically.
 
 tasks: >-
   (1) THE 19-FEATURE COVERAGE REPORT, FAIL-CLOSED. FACT-0454: 15 of 19 HOCT inputs need INSTANCE MASKS the
@@ -83,4 +84,279 @@ outputs:
   facts_added: []
   record: One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+instruments_added:
+  - scripts/win_bet/hoct_feature_contract.py
+  - scripts/win_bet/hoct_scale_gate.py
+  - scripts/win_bet/mask_node_adapter.py
+  - scripts/win_bet/assoc_specs/t2_correspondence_v1.json
+  - tests/test_pkt0048_maskassoc.py
+
+result: >-
+  DELIVERED ON CPU. NO LEVER CLAIMED, LEVER-0043 STILL PARKED, NO GPU AND NO SUBMISSION. Three
+  instruments, one spec, 22 committed tests and a verdict. general_v1 was never executed - not
+  torch.jit.load, not pickle.load - so FACT-0451's submission-only restriction is not merely
+  attached, it is vacuously satisfied: no offline number from those weights exists to misread.
+  Evidence _evidence/maskassoc/ (feature_contract.json, adapter_selftest.json, fixture_f0.json,
+  fixture_f1.json, scale_gate_f0.json, scale_gate_f1.json); working set C:/temp/maskassoc/.
+  Publisher line numbers are pinned to royerlab/hoct 2ccc5040 (v0.2.0), local copy under
+  C:/temp/hoct_official/meta/src/.
+  .
+  =================== (1) THE 19-FEATURE COVERAGE REPORT ===================
+  Instrument scripts/win_bet/hoct_feature_contract.py.
+  .
+  THE SLOT MAP IS PROVED, NOT ASSUMED. The 19 columns are t, z, y, x, equivalent_diameter_area,
+  intensity_{min,max,mean,std}, inertia_tensor[0..8] row-major, border_dist - from _batching.py:195-200
+  selecting (T, *spatial_cols, *properties) with properties = REGIONPROPS (_api.py:178 and :188) and
+  unpack_array_attrs flattening the 3x3. That source reading is then CHECKED against the publisher's
+  own shipped _MEAN/_STD (_api.py:18-60), four ways, all passing: width 19/19/19; slots 9..17 are
+  EXACTLY symmetric as a 3x3 in mean AND in std (max asymmetry 0.0 in both); slots 5..8 satisfy
+  0 <= min 0.276 <= mean 0.574 <= max 0.966 <= 1 with std 0.162, which no permutation of the four
+  intensity names survives; and the perpendicular-axis theorem holds on the inertia means, I_zz 167.81
+  against I_yy + I_xx 170.707, a 1.7% miss.
+  .
+  A CORRECTION TO FACT-0454: FOURTEEN OF 19 NEED MASKS, NOT FIFTEEN. border_dist is REMOVED from the
+  regionprops request at graph.py:172-173 (and again at graph.py:276-281) and computed from z, y, x
+  plus the volume shape by features.py:156-189. It is points-only. Blocked set =
+  equivalent_diameter_area (1) + intensities (4) + inertia_tensor (9) = 14; available set =
+  t, z, y, x, border_dist = 5. The blocker is unchanged in kind; only the count moves.
+  .
+  THE REFUSAL IS DEMONSTRATED BY MUTATION, FOUR ARMS, ALL CORRECT: unmutated matrix -> PASS; intensity
+  block zero-filled as at graph.py:184-187 -> REFUSE naming all four; two slots filled AFTER
+  Standardize -> REFUSE naming both; builder handed points-only columns -> FeatureRefusal naming 14.
+  The third arm is the one that matters. Standardize (_transforms.py:204-211) runs after the fill, so
+  a zero-filled slot reaches the network as the CONSTANT -mean/std: -1.4052 for
+  equivalent_diameter_area, -0.2473 for inertia_tensor[0,0]. A shape check, a NaN check and a
+  "contains no zeros" check all pass on that matrix; only a degeneracy check catches it. The audit
+  therefore reads the ARRAY and no provenance, so correct bookkeeping over wrong data cannot fool it.
+  .
+  THE AUDITOR CAUGHT THREE DEFECTS IN MY OWN FIXTURE, which is the strongest evidence it works. The
+  first mask self-test was ONE frame of FLAT-intensity INTERIOR instances; the auditor refused it and
+  named t, intensity_std and border_dist. Each was a way the fixture differed from production in KIND -
+  a single time point, a flat fill giving std exactly 0, and no border-adjacent instances - and none
+  was visible by inspection. Fixed; recorded in the payload under auditor_found.
+  .
+  =============== (2) THE MASK ADAPTER AND THE TINY FIXTURE ================
+  Instrument scripts/win_bet/mask_node_adapter.py.
+  .
+  THE FIXTURE REPRODUCES THE REGISTRY TO THE LAST DIGIT before any new number is read, on COMPLETE
+  folds, through ceiling_ladder.match_gt_to_pred - the same matcher that produced FACT-0368, FACT-0371
+  and FACT-0447: unmatched GT cells 223 (f0) and 14,970 (f1), EXACTLY FACT-0447's insertion counts;
+  emitted node count 1,905,264 and 1,931,622, EXACTLY FACT-0449; division worst-member share over 3 um
+  0.45455 (10 of 22) and 0.74648 (53 of 71) against FACT-0380's 0.455 and 0.746; GT division tuples 26
+  and 125, matching FACT-0380's 26 and FACT-0080's 125. The GT-identity self-check returns recall
+  1.000000 and residual 0.0 on both folds.
+  ONE DEFINITION WARNING, RECORDED RATHER THAN SMOOTHED: our matched-node COVERAGE is 0.98896 (f0) and
+  0.86766 (f1) against FACT-0447's node recall 0.98679 / 0.86357. Different quantities - ours is
+  coverage under the official one-to-one 7 um matcher, theirs is tracking_cellmot.node_recall. They
+  agree to 0.2/0.4 pp and must not be substituted; the exact counts are the anchors that bind.
+  Likewise our localisation figure is a median of per-crop medians, not FACT-0380's pooled median.
+  .
+  WHAT THE DEPLOYED DETECTOR LOOKS LIKE AT THE EMITTED GRAPH, both directions separately.
+  fold 0: 20,197 GT against 1,905,264 predicted; 5,674 annotated cells (28.1%) have MORE THAN ONE
+  predicted node within the official 7 um; 450 predicted nodes carry more than one annotated cell;
+  200,736 predicted pairs sit within 7 um of each other; 204 annotated cells have none.
+  fold 1: 113,121 GT against 1,931,622 predicted; 21,147 over-covered (18.7%); 253 merged; 195,866
+  duplicate pairs; 14,928 with none.
+  Read beside FACT-0449 (N_pred/N_est 0.7275 and 0.9171 on the emitted graph) this is a specific,
+  actionable shape and the two do not conflict: the chain UNDER-produces globally while LOCALLY
+  over-covering roughly one in four annotated cells. A mask source's value would show up here first,
+  as fewer duplicates per annotated cell at equal or better coverage - and that is measurable on CPU
+  for zero GPU the moment any instance source exists.
+  .
+  THE ADAPTER. instances_to_nodes() takes an instance label volume and returns the HOCT node columns.
+  It has NO DEFAULT UNIT CONVENTION - the caller names one from hoct_scale_gate.CONVENTIONS or it
+  refuses, because FACT-0454 blocker 1 is precisely a unit that was never stated and never applied.
+  Self-test: 48 instances over two frames, full 19-vector built and audited PASS; centroid recovery
+  median error 0.0142 um; with no intensity image the builder REFUSES the four intensity slots rather
+  than filling them. THE ANISOTROPY WITNESS returns I_zz / mean(I_yy, I_xx) = 0.0616 against the 0.0625
+  expected for a physically spherical nucleus, a 1.5% miss. A fixture that had drawn spheres in INDEX
+  space would return 1.0 there, so the witness is what proves the fixture differs from production in
+  COST and not in KIND.
+  AND THE TRAP IT WAS BUILT AGAINST IS NAMED AND EXECUTED: the deployed detector runs on a (1, 4, 4)
+  grid and (1.625, 0.40625, 0.40625) * (1, 4, 4) = (1.625, 1.625, 1.625). The deployed detector's own
+  grid is THE ONE DOWNSAMPLE AT WHICH THE VOXEL IS ISOTROPIC. assert_not_the_identity_downsample() runs
+  in every payload rather than being remembered.
+  .
+  FOCUS-3D IS RECORDED AS REFUSED, NOT SKIPPED, because a silently missing arm is invisible in a panel.
+  No weights exist on this machine - C:/temp/focus3d/hfcache holds only the HuggingFace README.
+  FACT-0425's hazard is re-confirmed at file:line: inference_win.py:141 is
+  load_state_dict(state_dict, strict=False) with its missing/unexpected prints commented out at
+  :143-149. load_focus3d_strict() fails closed on three separate grounds - absent file, nonzero missing
+  keys, nonzero unexpected keys - each with its own reason and both budgets defaulting to zero.
+  .
+  ============= (3) THE SCALE GATE, AND WHAT DECIDES THE ROUTE =============
+  Instrument scripts/win_bet/hoct_scale_gate.py.
+  .
+  TAU WAS RE-DERIVED FROM THE ARTIFACT, NOT QUOTED FROM THE PAPER, AND WITHOUT EXECUTING IT. Reading
+  the archived TorchScript as TEXT out of the zip, EdgeModel.forward contains
+  dist_mask = logical_or(lt(elem_pdist, 90000.), isinf(...)) where elem_pdist is the SQUARED pairwise
+  distance - twice, once over node_pos and once over edge_pos. sqrt(90000) = 300. Separately the
+  archive's constants/0..3 storages, read as raw 8-byte values after a pickletools disassembly of
+  constants.pkl for their dtypes, are 300.0, 1, 1.7320508075688772 (= sqrt 3), 2 - and the compiled
+  RoPE computes node_pos / CONSTANTS.c0 then divides by CONSTANTS.c2.
+  SO 300 IS NOT A THRESHOLD, IT IS THE MODEL'S COORDINATE UNIT. It fixes the attention radius AND the
+  wavelength of every positional frequency, in whatever units node_pos arrives in, and no argument
+  changes it - which is a materially stronger statement than "the paper says tau = 300 pixels".
+  FACT-0453's orphan zero was re-derived in the same read: output 3 is torch.new_zeros(x, [B, N, 1]).
+  .
+  PART A, METRIC FIDELITY AGAINST FACT-0040, complete folds, both directions reported separately:
+  fold 1 (6bba, 128 crops, 109,057 GT edges) anisotropic 1.8168 um - the FACT-0040 anchor - and
+  isotropic-1.625 5.1387 um, which reproduces FACT-0447's recorded discriminator 5.13870 exactly;
+  fold 0 (44b6, 71 crops, 19,826 GT edges) anisotropic 1.7236 um, isotropic-1.625 4.5962 um. Raw
+  voxels declared on the xy pitch give 1.2847 / 1.1490 um and FAIL - they under-weight z fourfold.
+  PART A DISCRIMINATES: three of five candidate conventions are rejected on measurement.
+  .
+  PART B, RECEPTIVE FIELD against the compiled 300, on the (100, 64, 256, 256) crop that all 199 train
+  crops turn out to be (measured this cycle):
+  microns - crop diagonal 178.7 units = 0.60 tau, so THE CUTOFF NEVER FIRES and a mechanism the model
+  was trained with is silently switched off. REJECT.
+  raw voxels - diagonal 366.1 = 1.22 tau, but the 300-ball reaches 487.5 um in z against 121.9 um in
+  xy, a 4.0x distorted neighbourhood for an isotropic RoPE and an isotropic learned distance prior.
+  REJECT. isotropic-1.625 - diagonal 594.9, anisotropy 4.0. REJECT.
+  xy-voxel isotropic (z x 4.0) - diagonal 439.9 = 1.47 tau, anisotropy 1.00. ADMISSIBLE, the only one.
+  .
+  PART C, WHERE OUR COORDINATES LAND IN THE SHIPPED STANDARDISATION - the decisive part. The position
+  columns enter TWICE: raw into the attention geometry, standardized into feature slots 1..3. The
+  shipped z statistics are mean 2.938, std 7.600; our GT z fills [1, 62]. Worst-case z sigma is
+  13.08 (microns), 7.90 (raw voxels), 32.77 (xy-voxel isotropic), 13.08 (isotropic-1.625).
+  THE TWO PATHS WANT OPPOSITE CORRECTIONS: the only convention Part B admits is the worst on Part C by
+  a factor of four. NO CONVENTION SURVIVES ALL THREE PARTS. The 3-sigma bar is a STATED CONVENTION and
+  is labelled as such inside the payload - it is not a measured failure threshold, and the sigma
+  figures, not the boolean, are the result.
+  .
+  ONE FREE MOVE EXISTS AND IS MEASURED. RoPE is applied identically to q and k and is followed by a
+  Householder reflection that is also identical, so attention logits depend on position DIFFERENCES
+  only: a pure TRANSLATION of node_pos is free in the geometry while it does move slots 1..3.
+  Recentring z onto the shipped mean (offset -27.86 voxels on fold 1) cuts the worst z excursion from
+  7.90 to 4.24 sigma at zero geometric cost. It does not rescue the route; it is the cheapest available
+  mitigation and it is recorded so nobody rediscovers it.
+  .
+  WHY THE SHIPPED Z DISTRIBUTION IS WHAT IT IS - INFERENCE FROM CONSTANTS, LABELLED AS SUCH. The
+  perpendicular-axis theorem holding on the inertia means to 1.7% is the signature of a corpus
+  dominated by masks that are FLAT IN Z, and graph.py:16-40 (convert_to_3d) assigns z = 0.0 to every 2D
+  input, which is exactly the mechanism that produces mean 2.938 / std 7.600. This is a statement about
+  SHIPPED NORMALISATION CONSTANTS, not a training manifest, and it neither weakens nor strengthens
+  FACT-0451, which stands as "cannot be established".
+  .
+  ============ (4) THE T=2 EXACT-CORRESPONDENCE DESIGN, NOT BUILT ==========
+  scripts/win_bet/assoc_specs/t2_correspondence_v1.json - no_claim true, built false. Points are
+  DEPLOYED DETECTOR PEAKS from the P28 export with FACT-0449's stage warning attached in the spec;
+  positives are exact images under a known warp, so the label has no matcher and no threshold anywhere
+  in it; hard negatives are the eight nearest OTHER warped points measured in microns; the two frames
+  receive INDEPENDENT photometric transforms, with a SHARED-photometric control arm whose entire job is
+  to detect the interpolation-artifact shortcut - if the shared arm is not clearly easier, the corpus
+  is void; a dropout channel deletes the true source so the abstain head has something to learn, which
+  matters because FACT-0453 established general_v1's own orphan logit is a constant; lineage ids
+  survive every deformation; and THE SPLIT IS ASSIGNED BEFORE GENERATION as a capability boundary
+  rather than a filter, with a post-generation audit that must be seeded with a deliberate cross-split
+  pair and shown to reject it.
+  DEFORMATION MAGNITUDES ARE CALIBRATED, PER FOLD AND PER AXIS, against the distribution measured this
+  cycle by the same instrument that reproduced FACT-0040: fold 0 median 1.7236 um and p99 7.1988 um;
+  fold 1 median 1.8168 um and p99 8.4925 um; per-axis medians recorded in the spec, including z median
+  0.0 on both folds because GT z motion is quantised to whole 1.625 um voxels. Pooling is forbidden -
+  fold 1's p99 is 18% larger and its z tail twice as long. The model contract is OURS, not HOCT's 19
+  slots, which is the direct consequence of sections 1 and 3.
+  .
+  ==================== (5) THE FIVE LAUNCH CONDITIONS ======================
+  SCALE - NOT SATISFIED, and now for a MEASURED reason rather than an unknown. The gate exists,
+  discriminates, and rejects all five candidate conventions. Any smoke must either exhibit a sixth
+  convention that passes all three parts, or declare which part it is knowingly violating and why.
+  FEATURE COVERAGE - INSTRUMENT SATISFIED, DATA NOT. The contract refuses rather than zero-fills and
+  the refusal is demonstrated by mutation, but 14 of 19 slots stay uncomputable because no
+  instance-mask source exists on this machine. A smoke producing a 19-vector must pass
+  hoct_feature_contract.audit_matrix on REAL nodes, not on a fixture.
+  OUTPUT INTERPRETATION - SATISFIED, AND SHARPER THAN RECORDED. Output 3 is torch.new_zeros(x,[B,N,1]),
+  re-derived from the archive without executing it; _predict.py:359 then exponentiates it, so
+  orphan_exp == 1.0 for EVERY node and the abstain mass at _predict.py:426-428 is a hard-coded logit-0
+  reference: orphan_prob is exactly 1/(sum of edge sim_exp + 1). An adapter reading it as a learned
+  score reads a deterministic function of the edge logits. Any adapter must assert this at load time.
+  PROVENANCE - SATISFIED FOR THE ARTIFACT, PERMANENTLY UNSATISFIABLE FOR THE DATA. FACT-0451:
+  general_v1's training data CANNOT BE ESTABLISHED and overlap with the competition movies cannot be
+  excluded. Every payload this packet writes carries binding_restriction.offline_scoreable = false
+  mechanically. No offline number from general_v1 was produced, and none could be interpreted if it
+  were.
+  INDEPENDENT AUDITABILITY - SATISFIED. Three instruments, 22 committed tests, every registry anchor
+  re-derived rather than restated, and the two artifact-level facts (tau, the orphan zero) read from
+  the checkpoint's own bytes without loading it.
+  VERDICT: TWO OF FIVE SATISFIED. A MASK/HOCT SMOKE DOES NOT LAUNCH.
+  .
+  ============= IS THE ROUTE WORTH CLAIMING? MY ANSWER IS NO, ==============
+  ================= AND THE REASON IS CHEAP, NEW AND NAMED =================
+  The route as written - a mask generator feeding OFFICIAL general_v1 - should not be claimed, and the
+  blocker is NOT the 14 features. Masks fix those; the adapter that computes them is committed and
+  tested. The blocker is that 300 is the model's COORDINATE UNIT and our crop geometry admits no unit
+  choice that is simultaneously metrically honest (Part A), inside the model's receptive-field regime
+  (Part B) and inside its shipped input distribution (Part C). Add FACT-0451, which makes every offline
+  number from those weights uninterpretable by any LOEO control we can build, and the arm could only
+  ever be judged by spending a submission slot - on a model whose input distribution we have measured
+  our data to sit 8 to 33 sigma outside of in z.
+  WHAT IS NOT KILLED, AND I AM EXPLICIT BECAUSE THIS CAMPAIGN HAS OVER-CLOSED BEFORE. Nothing here says
+  anything about MASKS AS A REPRESENTATION. The 14 slots a mask source unlocks are real; the fixture
+  that would price an instance source against the deployed detector reproduces the registry exactly and
+  runs on CPU in minutes. The coherent successor is the one section 4 specifies: our contract, our head,
+  masks as features - which needs neither general_v1's coordinate unit nor its provenance. LEVER-0043
+  stays PARKED; nothing here unparks it; no node-only detector work was done or is implied (FACT-0447).
+  .
+  ============ CANDIDATE FACTS FOR THE COORDINATOR - honest provenance =====
+  =========== NOT written to facts.yaml; route or discard as you judge =====
+  CF-A  CORRECTION TO FACT-0454. FOURTEEN of 19 HOCT input features require instance masks, not 15.
+  border_dist is removed from the regionprops request at graph.py:172-173 and graph.py:276-281 and
+  computed from z, y, x and the volume shape at features.py:156-189; the points-only set is
+  t, z, y, x, border_dist. PROVENANCE VERIFIED at the cited lines of the local v0.2.0 copy.
+  INSTRUMENT scripts/win_bet/hoct_feature_contract.py.
+  .
+  CF-B  THE HOCT 19-SLOT ORDER IS ESTABLISHED AND INDEPENDENTLY CROSS-CHECKED: t, z, y, x,
+  equivalent_diameter_area, intensity_{min,max,mean,std}, inertia_tensor[0..8] row-major, border_dist.
+  Confirmed against the publisher's shipped _MEAN/_STD by exact 3x3 symmetry in BOTH statistics, by the
+  intensity ordering constraint, and by the perpendicular-axis theorem holding to 1.7%. PROVENANCE
+  VERIFIED. INSTRUMENT hoct_feature_contract.prove_slot_map().
+  .
+  CF-C  TAU = 300 IS COMPILED INTO general_v1 TWICE AND IS THE MODEL'S COORDINATE UNIT, NOT A
+  THRESHOLD - as the squared attention cutoff 90000 over node_pos and edge_pos, and as the RoPE
+  positional normaliser CONSTANTS.c0 = 300.0 with c2 = sqrt 3. Read from the TorchScript archive as
+  text and as raw bytes; torch.jit.load and pickle.load were never called. PROVENANCE VERIFIED.
+  INSTRUMENT hoct_scale_gate.read_compiled_tau(). This strengthens FACT-0454's "the paper says tau =
+  300 PIXELS" from a paper claim into an artifact fact, and changes its meaning.
+  .
+  CF-D  NO UNIT CONVENTION FOR OUR 4:1:1 DATA SATISFIES ALL THREE PARTS OF THE SCALE GATE. Microns
+  disable the compiled cutoff (crop diagonal 0.60 tau); raw voxels and isotropic-1.625 distort the
+  300-ball 4.0x in z; the only geometrically admissible convention, xy-voxel isotropic, puts our z at
+  32.77 sigma of the shipped standardisation. Best available is raw voxels with z recentred - 7.90
+  sigma falling to 4.24 at zero geometric cost, because RoPE plus a Householder reflection make the
+  attention logits translation-invariant. PROVENANCE MEASURED on complete folds, 19,826 (f0) and
+  109,057 (f1) GT edges; the 3-sigma bar is a stated convention, not a measured failure threshold.
+  INSTRUMENT scripts/win_bet/hoct_scale_gate.py.
+  .
+  CF-E  general_v1's SHIPPED NORMALISATION CONSTANTS INDICATE A TRAINING CORPUS DOMINATED BY MASKS THAT
+  ARE FLAT IN Z: the inertia means satisfy I_zz = I_yy + I_xx to 1.7% (the perpendicular-axis theorem,
+  exact for planar objects) and the z statistics are mean 2.938 / std 7.600, which is what
+  graph.py:16-40's z := 0.0 for 2D input produces. PROVENANCE: INFERENCE FROM SHIPPED CONSTANTS -
+  explicitly NOT a training manifest. It does not weaken or strengthen FACT-0451, which stands as
+  "cannot be established".
+  .
+  CF-F  general_v1 HAS NO LEARNED ABSTENTION. Output 3 is torch.new_zeros; _predict.py:359
+  exponentiates it to a constant 1.0 per node; so the abstain mass at _predict.py:426-428 is
+  orphan_prob = 1/(sum of edge sim_exp + 1), a deterministic function of the edge logits against a
+  hard-coded logit-0 reference. This SHARPENS FACT-0392's "abstain mass ours lacks" - theirs is not a
+  learned quantity either. PROVENANCE VERIFIED from the archived source without execution.
+  .
+  CF-G  THE DEPLOYED EMITTED GRAPH LOCALLY OVER-COVERS WHILE GLOBALLY UNDER-PRODUCING. On complete
+  folds, 5,674 of 20,197 annotated cells on fold 0 (28.1%) and 21,147 of 113,121 on fold 1 (18.7%) have
+  MORE THAN ONE predicted node within the official 7 um; 200,736 (f0) and 195,866 (f1) predicted pairs
+  sit within 7 um of each other; while only 450 (f0) and 253 (f1) predicted nodes carry more than one
+  annotated cell. Read beside FACT-0449 (N_pred/N_est 0.7275 and 0.9171) these do not conflict and
+  neither may be substituted for the other. PROVENANCE MEASURED. INSTRUMENT
+  scripts/win_bet/mask_node_adapter.py; EVIDENCE _evidence/maskassoc/fixture_f0.json and fixture_f1.json.
+  .
+  CF-H  THE FIXTURE'S OWN VALIDATION, offered as the provenance for CF-G: it reproduces FACT-0447's
+  unmatched-GT counts EXACTLY (223 and 14,970), FACT-0449's emitted node counts EXACTLY (1,905,264 and
+  1,931,622), FACT-0380's division share (0.45455 and 0.74648 against 0.455 and 0.746) and FACT-0080's
+  125 fold-1 GT divisions, with a GT-identity self-check returning recall 1.000000 and residual 0.0 on
+  both folds. NOTE THE DEFINITION DIFFERENCE: our matched-node coverage (0.98896 and 0.86766) is NOT
+  tracking_cellmot.node_recall (FACT-0447's 0.98679 and 0.86357), and our localisation figure is a
+  median of per-crop medians rather than a pooled median.
+  .
+  NOT DONE, DELIBERATELY: no GPU, no kernel push, no submission; no lever claimed; LEVER-0043 still
+  PARKED; no node-only detector work; facts.yaml, levers.yaml and experiments.yaml untouched; nothing
+  staged or committed; scripts/win_bet/finaledge_* untouched (Gate B is running concurrently) and the
+  full pytest suite not run, per FACT-0440.

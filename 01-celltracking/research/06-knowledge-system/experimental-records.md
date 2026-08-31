@@ -6440,3 +6440,46 @@ default on our 4:1:1 data; and 15 of its 19 features need instance masks the dep
 not produce, while the one points-only entry point is an exported stub that returns `None`. No fact,
 lever or experiment written - six candidate facts routed to the coordinator in `PKT-0047.yaml`.
 Evidence `_evidence/hoct_official/`, `C:/temp/hoct_official/`.
+
+### 2026-08-31 - PKT-0048 (agent 11, mask/HOCT groundwork): the features are not the blocker, the coordinate unit is
+
+**No lever claimed, `LEVER-0043` still PARKED, zero GPU, zero submissions, `general_v1` never executed.**
+Three instruments (`hoct_feature_contract.py`, `hoct_scale_gate.py`, `mask_node_adapter.py`), one spec
+(`assoc_specs/t2_correspondence_v1.json`, `built: false`) and 22 committed tests. Evidence
+`_evidence/maskassoc/`.
+
+**The 19-feature contract refuses rather than zero-fills, and the refusal is demonstrated by mutation.**
+The slot order is proved against the publisher's own shipped `_MEAN`/`_STD` rather than against a source
+read - the inertia block is exactly symmetric as a 3x3 in both statistics, and the intensity block obeys
+`min <= mean <= max` inside `[0,1]`. **A correction to `FACT-0454`: it is FOURTEEN of 19 that need instance
+masks, not fifteen** - `border_dist` is removed from the regionprops request at `graph.py:172-173` and
+computed from `z,y,x` plus the volume shape. The mutation arm that matters is the post-`Standardize` fill:
+a zero-filled slot reaches the network as the constant `-mean/std` (`-1.4052`, `-0.2473`), on which a shape
+check, a NaN check and a "no zeros" check all pass. The auditor then caught three defects in the packet's
+own fixture - one time point, a flat intensity fill, no border-adjacent instances - none visible by
+inspection.
+
+**The scale gate rejects every candidate convention, and the reason is stronger than the paper's.** Read
+out of the TorchScript archive as text and raw bytes, without ever loading it, `300` appears twice: as the
+squared attention cutoff `90000` over `node_pos` and `edge_pos`, and as the RoPE positional normaliser
+`CONSTANTS.c0 = 300.0`. **It is the model's coordinate unit, not a tunable radius.** Microns put our crop
+diagonal at 0.60 tau so the cutoff never fires; raw voxels and isotropic-1.625 distort the 300-ball 4.0x in
+z; the one geometrically admissible convention puts our z at 32.77 sigma of the shipped standardisation.
+The gate reproduces `FACT-0040` at 1.8168 um on fold 1 and reproduces `FACT-0447`'s isotropic discriminator
+at 5.1387 um. A free mitigation exists and is measured - RoPE plus a Householder reflection make the logits
+translation-invariant, so recentring z costs nothing geometrically and moves 7.90 sigma to 4.24.
+
+**The node/mask fixture reproduces the registry exactly before reading anything new** - `FACT-0447`'s
+unmatched-GT counts 223 / 14,970, `FACT-0449`'s node counts 1,905,264 / 1,931,622, `FACT-0380`'s division
+share 0.455 / 0.746 and `FACT-0080`'s 125 fold-1 divisions - and then measures a new shape: the emitted
+graph **locally over-covers while globally under-producing**, with 28.1% (f0) and 18.7% (f1) of annotated
+cells carrying more than one predicted node inside the official 7 um. FOCUS-3D is recorded as REFUSED, not
+skipped: no weights on disk, and `FACT-0425`'s `strict=False` loader is re-confirmed at
+`inference_win.py:141`.
+
+**Verdict: two of the five launch conditions are satisfied; a mask/HOCT smoke does not launch.** The route
+as written - masks feeding official `general_v1` - is not worth claiming, and the blocker is not the
+features. **What is explicitly NOT killed is masks as a representation**; the coherent successor is our own
+contract and head with masks as features, which needs neither `general_v1`'s coordinate unit nor its
+provenance (`FACT-0451`). Eight candidate facts routed to the coordinator in `PKT-0048.yaml`; no fact,
+lever or experiment written.

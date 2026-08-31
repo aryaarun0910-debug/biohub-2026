@@ -1,0 +1,118 @@
+{
+  "name": "t2_correspondence_v1",
+  "packet": "PKT-0048",
+  "status": "SPECIFIED, NOT BUILT",
+  "no_claim": true,
+  "built": false,
+  "lever": null,
+  "note": "A T=2 EXACT-CORRESPONDENCE PRETRAINING SET. It is preferred over pseudo-tracking masks as the FIRST substrate because its labels are EXACT - a positive is a point and its own image under a known warp, not a segmentation decision composed with a tracking decision. Compounded error is what makes a pseudo-label corpus unreadable when the model underperforms: you cannot tell a weak model from a noisy label. This spec is written BEFORE any generation so its splits, magnitudes and negatives cannot be tuned to a result, and it is deliberately not built - PKT-0048 claims no lever.",
+
+  "why_it_exists": "THE WINNING FUNCTION IS A PRODUCT (levers.yaml standing block, 2026-08-31): rich object representation -> discriminative candidate scoring with abstention -> a consumer that preserves the gain. Improving one factor alone has produced a zero or a bound five times. This substrate targets the SECOND factor - a scorer with a real abstain head - on a representation we own, and it is the only route in the portfolio that does not depend on general_v1, whose training data CANNOT BE ESTABLISHED (FACT-0451).",
+
+  "source_of_points": {
+    "what": "DEPLOYED DETECTOR PEAKS, not GT nodes",
+    "why": "the model must learn to associate the objects our pipeline actually emits. Training on GT nodes teaches association on a population 1.9M nodes smaller than the one it will be asked about (FACT-0449: n_pred is 1,905,264 on fold 0 against 20,197 annotated cells), and it would inherit the annotation's sparsity as a prior.",
+    "artifact": "C:/temp/revladder/slices/f{fold}_{crop}.parquet, row_type == 'node'",
+    "artifact_provenance": "the P28 champion export, the same substrate FACT-0447/0448/0449 were measured on",
+    "stage_warning": "these are FINAL EMITTED GRAPH nodes, not detection-surface peaks. FACT-0449 records that the two ratios differ (0.7275 post-chain against FACT-0354's 0.8906 at detection) and NEITHER MAY BE SUBSTITUTED FOR THE OTHER. If the intended consumer sits before the ILP, regenerate from the pre-ILP surface instead and say so in the spec name.",
+    "forbidden": "sampling GT nodes as the point source, or mixing the two populations in one corpus"
+  },
+
+  "labels": {
+    "positive": "a point at t and its EXACT image under the applied warp at t+1. The correspondence is known by construction to floating-point precision; there is no matcher and no threshold anywhere in label generation.",
+    "hard_negative": "for each positive target, the K nearest OTHER warped points, by physical distance in microns at (1.625, 0.40625, 0.40625). K = 8.",
+    "why_hard_negatives": "FACT-0392: HOCT's candidate rule is an uncapped 15 um geometric ball while our deployed rule admits at most ONE parent per target. A scorer trained against easy negatives learns the geometry it was handed, not discrimination. The negative set must be at least as dense as the surface the scorer will face.",
+    "abstain_label": "a target whose true source was REMOVED by the dropout channel below. It has no correct parent, and that is the label. This is the channel FACT-0448's scope correction leaves open - abstention on unmatched-node edges is NOT capped by the sixteen.",
+    "lineage": "every point carries a stable synthetic lineage id through every deformation, so a later division-aware head can be trained on the same corpus without regenerating it"
+  },
+
+  "deformation": {
+    "composition": "global anisotropic affine, then a smooth elastic field, then per-point Brownian jitter",
+    "applied_in": "PHYSICAL MICRON SPACE, then converted back to the target unit convention. Warping in index space would apply a 4x larger displacement in z than in y or x for the same nominal magnitude - the anisotropy mistake AGENTS.md section 4 records twice.",
+    "calibration": {
+      "binding_rule": "the induced inter-frame displacement distribution must match the REAL one before any point is written. A generator whose magnitudes are not calibrated here is PKT-0048's own falsifier.",
+      "instrument": "scripts/win_bet/hoct_scale_gate.py part_a_metric_fidelity.real_motion_per_axis_um",
+      "evidence": ["_evidence/maskassoc/scale_gate_f0.json", "_evidence/maskassoc/scale_gate_f1.json"],
+      "anchor_fact": "FACT-0040",
+      "targets_measured_this_cycle": {
+        "fold_0_44b6": {
+          "n_gt_edges": 19826,
+          "displacement_median_um": 1.7236,
+          "displacement_p99_um": 7.1988,
+          "per_axis_um": {
+            "z": {"median": 0.0, "p95": 3.25, "p99": 3.25, "max": 11.375},
+            "y": {"median": 0.40625, "p95": 2.4375, "p99": 4.875, "max": 13.8125},
+            "x": {"median": 0.8125, "p95": 2.4375, "p99": 4.46875, "max": 15.4375}
+          }
+        },
+        "fold_1_6bba": {
+          "n_gt_edges": 109057,
+          "displacement_median_um": 1.8168,
+          "displacement_p99_um": 8.4925,
+          "per_axis_um": {
+            "z": {"median": 0.0, "p95": 3.25, "p99": 6.5, "max": 60.125},
+            "y": {"median": 0.8125, "p95": 3.25, "p99": 5.28125, "max": 25.59375},
+            "x": {"median": 0.8125, "p95": 3.25, "p99": 5.6875, "max": 17.875}
+          }
+        }
+      },
+      "acceptance": [
+        "generated displacement median within +/- 0.15 um of the fold's own measured median - the same tolerance the committed nearest_parent_oracle calibration gate uses",
+        "generated p99 within +/- 20% of the fold's own measured p99",
+        "per-axis medians match per axis, not only in the 3D norm - a generator can hit the norm with the wrong anisotropy",
+        "BOTH FOLDS CALIBRATED SEPARATELY. fold 1's p99 is 18% larger than fold 0's and its z tail is twice as long; pooling has hidden a full inversion before (FACT-0031)"
+      ],
+      "refuse_if": "the generator cannot reproduce the measured median AND the per-axis medians AND the p99 simultaneously. Do not widen the tolerance to admit the generator."
+    },
+    "why_z_median_is_zero": "GT z displacements are quantised to whole voxels of 1.625 um and the median is 0 on both folds. A generator drawing continuous z motion will produce a distribution that is smoother than the real one but not larger; that is acceptable and must be RECORDED, because it is a way the synthetic corpus differs from the real one in kind, not only in cost."
+  },
+
+  "photometric": {
+    "rule": "the two frames receive INDEPENDENT photometric transforms",
+    "channels": ["gaussian noise", "gaussian blur with independent sigma", "global intensity gain and offset", "per-instance intensity jitter"],
+    "why": "if both frames are rendered from one source with one interpolation, the model can key on shared interpolation artifacts and score perfectly without learning association at all. The failure would be invisible: the metric would look excellent and would not transfer.",
+    "control_arm_that_detects_it": "a SHARED-photometric arm, trained and evaluated identically. If the independent arm is not clearly worse in training loss than the shared arm, the shared arm is being solved by the artifact and the corpus is void.",
+    "renormalisation": "each frame is normalised independently by features.py:55-85's rule (min and the 0.999 quantile), because that is what the consumer does. Normalising the pair jointly reintroduces the shared statistic through the back door."
+  },
+
+  "splits": {
+    "rule": "SPLIT BY SOURCE MOVIE BEFORE GENERATION",
+    "why": "a transformed sibling of a training point is not a held-out example. Splitting after generation puts the same physical nucleus, under two warps, on both sides of the fold - and its leak is undetectable downstream because both rows look like ordinary independent samples. This project has already paid for one leak of this shape (FACT-0160 invalidated FACT-0130/0131).",
+    "mechanism": "assign each of the 199 crops to a split by its embryo prefix and crop id BEFORE the generator is invoked; the generator takes a split name and can only see that split's crops. It is a capability boundary, not a filter applied afterwards.",
+    "cross_embryo": "the outer split is EMBRYO (44b6 / 6bba), so the pretraining evaluation is cross-embryo like the campaign's own folds. An inner crop-grouped split may be used inside an embryo for early stopping and must be labelled as within-embryo.",
+    "check_that_must_run": "a post-generation audit that recomputes, for every generated pair, the source crop of both endpoints and asserts a single split. It must be able to FAIL - seed it with one deliberately cross-split pair and confirm the audit rejects."
+  },
+
+  "dropout_channel": {
+    "what": "with probability p the true source of a target is deleted from frame t",
+    "p": 0.15,
+    "why": "without it every target has a correct parent and the abstain head has nothing to learn but a constant. FACT-0453 records that general_v1's own orphan output is torch.new_zeros - a CONSTANT ZERO the publisher calls 'orphan logits' - so the official model has no learned abstention at all. That is precisely the gap this corpus exists to fill and it must not be reproduced.",
+    "calibration": "p should be set from the real unmatched rate at the intended consumer's stage, not chosen. 0.15 is a placeholder and is marked as such."
+  },
+
+  "model_contract": {
+    "input": "OURS, not HOCT's 19-slot vector. A point-native contract we own - coordinates in a stated unit convention plus whatever representation the accompanying detector produces.",
+    "why_not_hoct_19": "hoct_feature_contract.py refuses 14 of the 19 slots without instance masks, and hoct_scale_gate.py finds no unit convention that places our z inside general_v1's shipped input distribution. Training our own head on our own contract is the route that does not inherit either blocker.",
+    "output": "per-candidate logit PLUS a real per-target abstain logit. Not a constant.",
+    "consumer": "UNSPECIFIED HERE ON PURPOSE. FACT-0428 measured that only 15%/30% of a pre-ILP ranking survives to the final graph and FACT-0447 measured exactly zero edges moved at a frozen consumer. A pretraining corpus is the first factor; whoever claims the lever must name the consumer in the same packet, or the standing block predicts a zero."
+  },
+
+  "what_would_falsify_the_substrate": [
+    "the shared-photometric control arm is not clearly easier than the independent arm - the corpus is being solved by interpolation artifacts",
+    "the split audit finds any pair whose endpoints come from different splits",
+    "the generated displacement distribution cannot be calibrated to both folds simultaneously without widening the stated tolerance",
+    "a model trained to convergence on T=2 transfers no better than its own random initialisation to real consecutive frames - which would say exact-correspondence pretraining does not reach the real task, and is a clean kill"
+  ],
+
+  "cost": {
+    "gpu_sessions_to_specify": 0,
+    "gpu_sessions_to_build_and_train": "NOT ESTIMATED HERE. The standing GPU rule requires every session to produce an asset; a generation run produces a reusable feature dataset and would qualify, but the estimate belongs to the packet that claims the lever."
+  },
+
+  "forbidden": [
+    "generating before the split assignment exists",
+    "using general_v1 anywhere in the loop - FACT-0451 restricts it to submission-only judgement and any offline number from it must carry offline_scoreable: false mechanically",
+    "sampling GT nodes as the point source",
+    "reading a number off this corpus as evidence about real association without the transfer arm"
+  ]
+}
