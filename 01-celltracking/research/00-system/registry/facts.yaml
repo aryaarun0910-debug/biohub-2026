@@ -9130,6 +9130,20 @@ facts:
       using general_v1 would emit a figure indistinguishable in form from a valid one and interpretable as
       neither. That is why the adapter must carry an `offline_scoreable: false` flag rather than relying on
       an operator to remember.
+      ENFORCEMENT STATUS 2026-08-31, HALF MECHANICAL - DO NOT READ THIS REQUIREMENT AS SATISFIED.
+      A finished search (11 hits, exit 0) established that before PKT-0048 this token existed ONLY as
+      PROSE - here and at PKT-0047:393. No .py, no spec schema and no harness implemented it.
+      NOW MECHANICAL ON INSTRUMENT PAYLOADS: hoct_feature_contract.py:549, hoct_scale_gate.py:504 and
+      mask_node_adapter.py:691 are the first carriers, and all six payloads under _evidence/maskassoc/
+      carry binding_restriction.offline_scoreable false.
+      STILL ABSENT ON THE SPEC SCHEMA, which is the surface PKT-0047's requirement was written against.
+      Neither scripts/win_bet/assoc_specs/*.json nor any harness enforces it, so A FUTURE general_v1 ARM
+      ROUTED THROUGH THE SPEC PATH WOULD STILL EMIT AN UNMARKED NUMBER - indistinguishable in form from a
+      valid one, which is the exact failure this requirement exists to prevent.
+      assoc_specs/t2_correspondence_v1.json forbids general_v1 outright in its `forbidden` list, closing
+      THAT SPEC ONLY and not the schema. The schema carrier is DEFERRED, not forgotten: the harness files
+      are live under a concurrent Gate B run and editing beneath a running experiment is how a shared
+      worktree corrupted the registry once.
       RE-DERIVE THIS FACT IF A TRAINING MANIFEST OR A SUCCESSOR PAPER EVER APPEARS.
     date: '2026-08-31'
     tags: [hoct, general-v1, training-provenance, cannot-be-established, submission-only, fact-0378-shape,
