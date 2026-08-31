@@ -35,5 +35,6 @@
   "defect_gate": {
     "ledger": "scripts\\core\\experiment_defects.json",
     "passed": []
-  }
+  },
+  "pushed_slug": "biohub-p38-relink-bonus-b2"
 }

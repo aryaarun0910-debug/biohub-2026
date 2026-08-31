@@ -598,6 +598,85 @@ def _churn(control: pl.DataFrame, arm: pl.DataFrame) -> dict:
     }
 
 
+def edge_population(crop: str, gt_geff: Path, final: pl.DataFrame) -> dict:
+    """Split this arm's emitted edges into the populations FACT-0448 made load-bearing.
+
+    WHY THIS EXISTS. FACT-0448 measured that of 1,369 fold-0 false-positive edges only SIXTEEN
+    are wrong links between two ANNOTATED cells. That sixteen caps ONE population - correcting a
+    wrong link where both endpoints are annotated - and caps nothing else. A scorer that abstains
+    on edges touching an unmatched node, that removes bad edges, or that recovers a missing true
+    edge is acting on different mass entirely. So a Gate B gain must be attributed to the
+    population it actually came from, not reported as one number against a ceiling that does not
+    bind it.
+
+    The matcher is the ledger's own - detpeak_curve.match_one_to_one_pairs, official one-to-one
+    within 7 um per frame - so this split is commensurable with assoc_lost_edge_ledger and with
+    FACT-0370/0422 rather than merely adjacent to them.
+    """
+    from assoc_lost_edge_ledger import _match_per_frame, SCALE
+    from biotrack.metric import load_graph
+
+    nodes = final.filter(pl.col("row_type") == "node")
+    edges = final.filter(pl.col("row_type") == "edge")
+    emitted = {(int(a), int(b)) for a, b in zip(edges["source_id"], edges["target_id"])}
+
+    gt = load_graph(gt_geff)
+    gtn = gt.node_attrs().to_pandas()
+    gt_ids = gtn["node_id"].to_numpy().astype(np.int64)
+    gt_row = {int(v): i for i, v in enumerate(gt_ids)}
+    gt_tzyx = gtn[["t", "z", "y", "x"]].to_numpy().astype(np.float64)
+    gte = gt.edge_attrs().to_pandas()
+
+    to_final = _match_per_frame(
+        gt_tzyx,
+        nodes["t"].to_numpy().astype(np.int64),
+        nodes.select(["z", "y", "x"]).to_numpy().astype(np.float64) * SCALE,
+        nodes["node_id"].to_numpy().astype(np.int64))
+    annotated = set(to_final.values())          # predicted nodes that ARE an annotated cell
+
+    wanted = set()                              # GT edges expressed in predicted ids
+    gt_edges = both_endpoints_matched = 0
+    for a, b in zip(gte["source_id"], gte["target_id"]):
+        su, tv = gt_row.get(int(a)), gt_row.get(int(b))
+        if su is None or tv is None:
+            continue
+        gt_edges += 1
+        if su in to_final and tv in to_final:
+            both_endpoints_matched += 1
+            wanted.add((to_final[su], to_final[tv]))
+
+    tp = emitted & wanted
+    fp = emitted - wanted
+    fp_both_annotated = {(a, b) for a, b in fp if a in annotated and b in annotated}
+    parent_of = {t: s for s, t in emitted}
+    missing = wanted - emitted
+    missing_target_has_other_parent = {(a, b) for a, b in missing if b in parent_of}
+
+    return {
+        "matcher": "official one-to-one 7 um per frame (detpeak_curve.match_one_to_one_pairs)",
+        "NOT_THE_SCORERS_COUNTS": (
+            "This is a POPULATION split over the emitted edge set, not a re-derivation of the "
+            "official metric. `tp` reproduces the scorer's edge_tp exactly, but the counts below "
+            "it do NOT equal the scorer's edge_fp / edge_fn, because the official metric leaves "
+            "edges touching unannotated nodes free. The promotable numbers stay the scorer's, in "
+            "`metrics`; this block only says WHICH POPULATION a change came from."),
+        "gt_edges": gt_edges,
+        "gt_edges_with_both_endpoints_in_the_emitted_graph": both_endpoints_matched,
+        "emitted_edges": len(emitted),
+        "tp": len(tp),
+        "emitted_edges_not_backed_by_a_gt_edge": len(fp),
+        # THE FACT-0448 POPULATION, and the ONLY one that fact's sixteen caps.
+        "wrong_links_between_two_annotated_cells": len(fp_both_annotated),
+        # Everything the annotation says nothing about - a scorer that ABSTAINS here, or that
+        # removes an edge here, is acting on mass FACT-0448 does not bound.
+        "edges_touching_an_unmatched_node": len(fp) - len(fp_both_annotated),
+        "gt_edges_wanted_but_missing": len(missing),
+        "missing_target_has_a_different_parent": len(missing_target_has_other_parent),
+        "missing_target_has_no_parent": len(missing) - len(missing_target_has_other_parent),
+        "_edges": sorted(emitted),
+    }
+
+
 def run_crop(fold: int, crop: str, out: Path, scores_path: Path | None,
              bonuses: tuple[float, ...], gateb_ranks: tuple[int, ...],
              gateb_bonuses: tuple[float, ...], ledger: bool) -> dict:
@@ -765,6 +844,28 @@ def run_crop(fold: int, crop: str, out: Path, scores_path: Path | None,
     # --- churn and ledger, per arm ------------------------------------------------------------
     for name, arm in arms.items():
         arm["churn_vs_control"] = _churn(frames["control"], frames[name])
+    # FACT-0448: attribute each arm's edges to the population they belong to, and DIFF the
+    # populations against the control, so a gain is never reported against a ceiling that does
+    # not bind it.
+    pops = {}
+    for name in arms:
+        pops[name] = edge_population(crop, gt, frames[name])
+    ctl_edges = set(map(tuple, pops["control"].pop("_edges")))
+    for name, arm in arms.items():
+        pop = pops[name]
+        mine = set(map(tuple, pop.pop("_edges"))) if "_edges" in pop else ctl_edges
+        ctl = pops["control"]
+        arm["edge_population"] = pop
+        arm["edge_population_delta_vs_control"] = {
+            k: pop[k] - ctl[k] for k in
+            ("tp", "emitted_edges", "emitted_edges_not_backed_by_a_gt_edge",
+             "wrong_links_between_two_annotated_cells", "edges_touching_an_unmatched_node",
+             "gt_edges_wanted_but_missing", "missing_target_has_a_different_parent",
+             "missing_target_has_no_parent")
+        }
+        arm["edge_population_delta_vs_control"]["edges_added_vs_control"] = len(mine - ctl_edges)
+        arm["edge_population_delta_vs_control"]["edges_removed_vs_control"] = len(ctl_edges - mine)
+
     if ledger:
         from assoc_lost_edge_ledger import crop_ledger
         pre_nodes = nodes_frame
