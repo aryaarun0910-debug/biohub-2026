@@ -472,3 +472,37 @@ result: >-
   staging; no touch of .claude/settings.json or .gitignore. Per the coordinator's instruction the
   full pytest suite was NOT run (memory contention, FACT-0440); the three registry/tree/claims
   validators were.
+  .
+  ===================== ADDENDUM 2026-08-31, POST-HARVEST CORROBORATION OF FACT-0451 =====================
+  .
+  A completed repo-wide search (it had been left running) surfaced an asset already on disk that this
+  packet did not know about, and it closes the last place a training manifest could have hidden. The
+  2026-08-07 snapshot of HOCT's README taken by this project's own earlier research run -
+  `_evidence/agent_runs/v7_diagnostic_20260807/researchR3/sources/hoct_README.md`, integrity confirmed
+  because its recorded digest 7def7cc11340fe8ddf220174fb2de8b1263bd78409f2f599941ba6c9251b1eb7
+  reproduces exactly from the bytes - contains `general_v1` ZERO times, `ctc_v0` ZERO times, and
+  `general_v0` twice.
+  .
+  TWO CONSEQUENCES, both strengthening FACT-0451 without changing its verdict.
+  (1) The eight-weeks-into-the-competition timing no longer rests only on GitHub's own timestamps: on
+  2026-08-07 the published registry offered general_v0 alone, and general_v1 did not exist publicly.
+  That is corroborated by OUR dated, hash-verified evidence, taken before this lane opened.
+  (2) The stronger point. That snapshot's "Pre-trained models" section names NO models at all - it
+  describes only the download-and-verify mechanism. Every per-model description we have
+  ("the model trained for Cell Tracking Challenge datasets", "the default model for general datasets")
+  was ADDED BY PR #4 ON 2026-08-24, the same commit that registered general_v1. So nothing was ever
+  removed: the publisher has NEVER, at any point in the repository's history, described the training
+  data of any "general" checkpoint. The residual "perhaps an earlier README said more and it was
+  dropped" is now a CHECKED negative rather than an unexamined one.
+  .
+  REGISTRY STATE CONFIRMED CLEAN, not assumed: the coordinator harvested this packet into FACT-0451
+  (EXTERNAL / SUSPECT, the provenance verdict and the submission-only restriction), FACT-0452, FACT-0453
+  and FACT-0454, and amended FACT-0445's `parameter_count` from PENDING to 6,294,081 with FACT-0453
+  named as its discharge. Nothing was promoted beyond its evidence - CF-B kept the EXTERNAL / SUSPECT
+  labels and the "cannot be established" wording this packet required.
+  .
+  ONE CORRECTION REMAINS UNAPPLIED AND IS ROUTED, NOT ACTIONED. CF-F's over-read is still live at
+  research/06-knowledge-system/internal-reports/architecture_training_2026-08-19.md lines 90, 530 and
+  1005, which record HOCT as "code and weights MIT". FACT-0452 now carries the true position. This
+  packet does not edit that report: it is a dated historical record, and the registry is the source of
+  truth for the claim. Flagged for the coordinator rather than silently rewritten.

@@ -9100,8 +9100,20 @@ facts:
       silent - but a completed search of public surfaces cannot establish what a model was trained on. It is
       WEAKER evidence than FACT-0424's, not stronger: there a curated inventory existed to check against,
       here there is none.
+      STRENGTHENED 2026-08-31 BY OUR OWN DATED EVIDENCE, which converts the residual from unexamined to
+      CHECKED. This project snapshotted HOCT's README on 2026-08-07 - seventeen days BEFORE general_v1
+      shipped and before this lane existed - at
+      _evidence/agent_runs/v7_diagnostic_20260807/researchR3/sources/hoct_README.md, digest 7def7cc1,
+      reproducing exactly from the bytes. In it general_v1 has ZERO mentions, ctc_v0 ZERO, general_v0 two.
+      Decisively, its Pre-trained models section names NO MODELS AT ALL - only the download-and-verify
+      mechanism - and every per-model description, including "the default model for general datasets",
+      was ADDED BY PR 4 on 2026-08-24, the same commit that registered general_v1. So NOTHING WAS EVER
+      DELETED: the publisher has never, at any point in the repository's history, described the training
+      data of any general checkpoint. The "perhaps an earlier README said more" residual is now a
+      checked negative, and the release timing no longer rests on GitHub's own timestamps alone.
     instrument: >-
       GitHub REST API reads over royerlab/hoct releases, PRs, commits, tree and issues; arXiv 2607.11754v1;
+      our own dated snapshot _evidence/agent_runs/v7_diagnostic_20260807/researchR3/sources/hoct_README.md;
       zip-directory read of the checkpoint without execution; evidence _evidence/hoct_official/
     note: >-
       QUOTE THIS AS "CANNOT BE ESTABLISHED", NEVER AS "NO OVERLAP FOUND". The two are different claims and

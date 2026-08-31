@@ -1,5 +1,16 @@
 # Architecture and training: what produces a calibrated abstention signal, and a linker that uses it — 2026-08-19
 
+> **CORRECTION 2026-08-31 — READ BEFORE THE HOCT LICENCE CLAIMS BELOW.** This report states in three
+> places (lines 90, 530, 1005) that HOCT is "code and weights MIT". **That is not accurate and must not
+> be carried forward.** The MIT licence is asserted over the *repository's software*; **no document
+> anywhere asserts any licence over the released checkpoints**, and the `general_v1.pt` artifact
+> additionally embeds TorchScript-compiled `timm` under Apache-2.0, surfaced nowhere by the publisher.
+> The use remains defensible and competition rule 2.5.a.3 explicitly covers an absent or incompatible
+> grant on pretrained models. See `FACT-0452` for the current position and its attribution obligations.
+> The original text below is left **unaltered on purpose**: this is a dated record of what was believed
+> on 2026-08-19, and rewriting it would falsify the history rather than correct the claim. The registry
+> is the source of truth.
+
 Mandate: answer, with evidence, the question our own work converged on — **what architecture or
 training change actually produces a calibrated abstention signal, and what linker change consumes
 it?** Target: the 0.036 gap between our 0.915 and the leader's 0.951, on the deployed
@@ -87,7 +98,7 @@ progressively undo it. Nothing in the MOTR family is affordable at 45 GPU-h/week
 8×V100 × 2.5 days ≈ **480 V100-hours** for one run). **Do not spend a single Colab hour here.**
 
 The frontier that *is* relevant is **HOCT** (Bragantini, Theodoro, Royer — the Ultrack authors —
-arXiv:2607.11754, 13 Jul 2026, code+weights MIT at `royerlab/hoct`): an **edge-centric**
+arXiv:2607.11754, 13 Jul 2026, code+weights MIT at `royerlab/hoct`): an **edge-centric**  <!-- CORRECTED 2026-08-31: see banner; FACT-0452 -->
 transformer, hand-crafted geometric features only, **no image encoder**, rank 1 on the CTC linking
 benchmark overall and on Fluo-N3DH-CE, and it **reads and writes GEFF** — our own export format.
 It is a two-stage linker, not a joint model. §4.3 costs a T4-sized port.
@@ -527,7 +538,7 @@ newborn-suppression pathology would be actively counterproductive.
 ### 4.3 The frontier that IS relevant: HOCT
 
 **HOCT** — Bragantini, Theodoro & Royer, [arXiv:2607.11754](https://arxiv.org/abs/2607.11754),
-13 Jul 2026; code + weights `github.com/royerlab/hoct`. **Licence: MIT (code/weights); paper text
+13 Jul 2026; code + weights `github.com/royerlab/hoct`. **Licence: MIT (code/weights); paper text  <!-- CORRECTED 2026-08-31: see banner; FACT-0452 -->
 CC BY-NC-ND 4.0.** Same lab as Ultrack, i.e. the same institutional lineage as this competition's
 data and scorer.
 
@@ -1002,7 +1013,7 @@ linker-side implementation specified.**
 
 ## 8. Licence tags (factual, one line each; nothing excluded or deranked on licence)
 
-- **HOCT** — code and weights **MIT** (`royerlab/hoct`); paper text CC BY-NC-ND 4.0.
+- **HOCT** — code and weights **MIT** (`royerlab/hoct`); paper text CC BY-NC-ND 4.0.  <!-- CORRECTED 2026-08-31: see banner; FACT-0452 -->
 - **Trackastra** — **BSD-3-Clause** (verified from the repo LICENSE in a prior session; this
   *corrects* the Apache-2.0 claim still standing in `edge_training_frontier` §8's body text).
 - **Ultrack** — CC BY 4.0 (paper); code at `royerlab/ultrack`.
