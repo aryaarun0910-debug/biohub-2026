@@ -1,0 +1,86 @@
+id: PKT-0048
+title: "Mask-aware association groundwork: the 19-feature coverage report, the FOCUS mask adapter, and the T=2 correspondence design"
+lever: null
+owner: agent-11-mask-groundwork
+lock: claimed
+opened: '2026-08-31'
+
+why_no_lever: >-
+  CPU groundwork for a co-designed route, claiming nothing. LEVER-0034 is held by PKT-0029; LEVER-0043
+  (FOCUS-3D) is PARKED and this packet does not unpark it; LEVER-0029 (SSL/pretraining) is open and untouched.
+  This packet builds the instruments and contracts that a later, properly-claimed experiment would need, and
+  it is explicitly allowed to conclude that the route is not worth claiming.
+
+why_it_exists: >-
+  THE WINNING FUNCTION IS A PRODUCT (standing block, 2026-08-31): rich object representation ->
+  discriminative candidate scoring with abstention -> a consumer that preserves the gain. Improving ONE
+  factor while freezing the other two has produced a zero or a bound FIVE times - LEVER-0037, LEVER-0039,
+  LEVER-0045 (FACT-0442), FACT-0447's exact zero, FACT-0428's 15/30% survival. P38 tests the third factor on
+  the leaderboard. This packet prepares the FIRST TWO TOGETHER, which is the only untested combination.
+
+claim: >-
+  The 19-feature HOCT contract, a FOCUS nuclei-mask adapter, and an exact-correspondence T=2 dataset can each
+  be specified and instrumented on CPU such that a later mask/HOCT smoke either satisfies all five launch
+  conditions or is refused for a named reason.
+
+falsifier: >-
+  Inverted. This packet FAILS if it ships a coverage report that cannot distinguish a computed feature from a
+  zero-filled one; if it builds a mask adapter it has not shown would REJECT a wrong-scale or wrong-convention
+  input; if it designs a T=2 dataset whose deformation magnitudes are not calibrated against the real motion
+  distribution; or if it lets any offline number be produced from general_v1 without the FACT-0451
+  submission-only restriction attached.
+
+tasks: >-
+  (1) THE 19-FEATURE COVERAGE REPORT, FAIL-CLOSED. FACT-0454: 15 of 19 HOCT inputs need INSTANCE MASKS the
+  deployed notebook does not produce, the points-only entry point create_graph_from_points is an exported
+  STUB returning None (_api.py:133-134), and missing intensity features are SILENTLY ZERO-FILLED - yielding a
+  correctly-shaped 19-vector that is 15/19 constant. Audit the official implementation feature by feature and
+  emit a report that names, for each of the 19, its source, whether we can currently compute it, and what it
+  would take. IT MUST REFUSE rather than zero-fill, and the refusal must be demonstrated by mutation.
+  (2) THE FOCUS NUCLEI-MASK ADAPTER plus a TINY node/mask evaluation fixture. Instances to centroids at the
+  correct ANISOTROPIC scale - full-res (z,y,x) at (1.625, 0.40625, 0.40625), NOT isotropic. Compare against
+  the deployed detector on localisation, matched-node coverage, duplicate/merge/split rates and the
+  division-sensitive residual (FACT-0380). The fixture must be small enough to iterate on CPU and must
+  differ from production in COST, never in KIND.
+  (3) THE SCALE GATE. FACT-0454: `scale` NEVER REACHES the model - `scaled_` occurs once at graph.py:182 into
+  a discarded frame, graph.py:143 defaults it to 1.0, metadata is written at graph.py:212 AFTER DistanceEdges
+  runs at :191, and _frame_dataset.py:54 feeds raw z,y,x. The paper says tau = 300 PIXELS. HOCT is
+  VOXEL-NATIVE. Establish which unit convention is correct for our 4:1:1 data and CALIBRATE it against
+  FACT-0040's 1.817 um anchor before any number is read.
+  (4) THE T=2 EXACT-CORRESPONDENCE DESIGN, specified not built. Sample DEPLOYED DETECTOR PEAKS; apply a known
+  anisotropic affine/elastic field; positives are EXACT transformed correspondences; nearby points are hard
+  negatives; apply INDEPENDENT photometric noise/blur/intensity transforms so the model cannot key on shared
+  interpolation artifacts; calibrate deformation magnitudes against the real motion distribution anchored by
+  FACT-0040; preserve lineage identity through every deformation; SPLIT BY SOURCE MOVIE BEFORE GENERATION so
+  transformed siblings cannot cross folds. Preferred over pseudo-tracking masks initially because the
+  correspondence labels are EXACT rather than compounded segmentation-plus-tracking error.
+  (5) THE FIVE LAUNCH CONDITIONS a mask/HOCT smoke must prove before any GPU: SCALE, FEATURE COVERAGE, OUTPUT
+  INTERPRETATION (FACT-0453: output 3 is a CONSTANT ZERO the publisher calls "orphan logits" - an adapter
+  reading it as a learned score reads a constant), PROVENANCE, and INDEPENDENT AUDITABILITY. All five, or it
+  does not launch.
+
+binding_restriction: >-
+  FACT-0451: general_v1's training data CANNOT BE ESTABLISHED and overlap with the competition movies cannot
+  be excluded. It is RESTRICTED TO SUBMISSION-ONLY JUDGEMENT. Any offline arm using it must carry
+  `offline_scoreable: false` MECHANICALLY, not by an operator remembering - because such an arm would emit a
+  number indistinguishable in form from a valid one.
+
+budget: {gpu_sessions: 0, submissions: 0, wall_clock: 2 days}
+
+forbidden:
+  - launching a GPU job, pushing a kernel, or making a submission
+  - claiming LEVER-0034, LEVER-0043, LEVER-0029 or any lever; LEVER-0043 stays PARKED
+  - producing any offline number from general_v1 without the FACT-0451 restriction attached mechanically
+  - zero-filling an absent feature - refuse instead
+  - any node-only detector work; that thesis is dead permanently (FACT-0447)
+  - writing facts.yaml, levers.yaml or experiments.yaml - route to the coordinator
+  - editing PKT-0029, PKT-0042, PKT-0045, PKT-0046 or PKT-0047
+  - staging or committing to git
+  - .claude/settings.json or .gitignore
+
+outputs:
+  evidence: _evidence/maskassoc/ and C:/temp/maskassoc/
+  facts_added: []
+  record: One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null
