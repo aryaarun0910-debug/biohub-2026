@@ -8935,9 +8935,14 @@ facts:
       or any path where a detector changes node FEATURES or candidate AVAILABILITY rather than membership. The
       localisation arm freezes topology by construction, so it prices only the MATCHING consequence of
       localisation error and leaves the relinking claim untouched.
-      THE PRACTICAL CONSEQUENCE IS BLUNT: a detector that finds more cells buys nothing on its own. It has to
+      THE PRACTICAL CONSEQUENCE IS BLUNT: a detector that finds more cells buys nothing ON ITS OWN. It has to
       arrive with the edges for those cells, and FACT-0442 already killed the temporal candidate generator
       that would have supplied them. Any surviving detector proposal must say which of the two it solves.
+      SCOPE CORRECTION 2026-08-31 (host), AGAINST AN OVER-READING IN AN EARLIER DRAFT OF THIS NOTE. This
+      arm HOLDS TOPOLOGY FIXED BY DESIGN. It therefore CANNOT bound a detector that produces new FEATURES,
+      MASKS, CANDIDATES and ASSOCIATIONS JOINTLY - only one that adds nodes to a frozen consumer. What is
+      killed permanently is the NODE-ONLY detector thesis and any GPU spend on it. The broader
+      detector/representation portfolio is NOT closed by this entry and must not be cited as if it were.
     date: '2026-08-31'
     tags: [reversed-ladder, detector-lane, disqualified, order-dependence, orphan-nodes, zero-gpu,
            measured, headline]
@@ -8975,6 +8980,11 @@ facts:
       is dominated by links into cells the annotation does not cover, which is a property of SPARSE GROUND
       TRUTH as much as of the pipeline - and FACT-0449 shows the pipeline is simultaneously UNDER-producing
       nodes overall, so the two must not be conflated into "predict fewer nodes".
+      SCOPE CORRECTION 2026-08-31 (host). THIS CAPS ONE OPERATION ONLY: CORRECTING WRONG LINKS WHERE BOTH
+      ENDPOINTS ARE ANNOTATED. It does NOT cap a scorer that ABSTAINS on unmatched-node edges, that REMOVES
+      bad edges, or that RECOVERS missing true edges - those act on different populations and are bounded
+      by FACT-0422's categories, not by this sixteen. An earlier draft of this note read the bound as
+      applying to parent re-ranking in general; it does not.
     date: '2026-08-31'
     tags: [false-positives, sparse-ground-truth, association-bound, parent-reranking, measured, headline]
 
@@ -9005,8 +9015,11 @@ facts:
       fold 0 it emits barely three quarters of the estimated cells.
       IT ALSO CLOSES OFF THE OBVIOUS MISREADING OF FACT-0448. Because the pipeline UNDER-produces at the
       emitted graph, the ~1.88M unmatched nodes are overwhelmingly real unannotated cells rather than
-      spurious detections, so "delete the unannotated nodes" is not an available operation and a better
-      detector would emit MORE of them, not fewer. That is why the perfect-membership-full arm clears +0.02
+      spurious detections, so BROAD deletion is not an available operation and a better detector would
+      emit MORE of them, not fewer.
+      SCOPE CORRECTION 2026-08-31 (host): this makes BROAD node deletion EXPENSIVE; it does NOT make
+      SELECTIVE deletion impossible. A targeted arm remains admissible and must pay through the COMPLETE
+      objective - raw association, division TP and node recall together - rather than being ruled out here. That is why the perfect-membership-full arm clears +0.02
       on paper and is rejected: it recovers ZERO true edges, its entire movement is FP suppression, and it
       declines division TP on both folds.
     date: '2026-08-31'
