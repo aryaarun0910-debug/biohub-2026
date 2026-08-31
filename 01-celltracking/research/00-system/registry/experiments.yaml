@@ -799,3 +799,147 @@ experiments:
       Preflight receipt _evidence/foundations/preflight_receipt_p37.json, signature verified, recording ten
       input sha256s including the deployed 1047-line predictor 25b3ebfd8849 and never the vendored tree
       (FACT-0408).
+
+  # ---------------------------------------------------------------------------------------------
+  # RETRO-BINDING OF SIX LEGACY SUBMISSIONS (2026-08-31). FACT-0444 measured the gap: Kaggle held 18
+  # scored submissions and experiments.yaml bound 12. These six are the remainder. They predate the
+  # release-receipt harness, so NO RECEIPT EXISTS FOR ANY OF THEM and none is fabricated. Four of the
+  # six artifacts were RECOVERED and hash-verified on disk by finishing a search rather than assuming
+  # they were gone - the AGENTS.md "check whether it is already on disk" class, which has now cost this
+  # project three false absences. Two remain unrecovered and say so.
+  # ---------------------------------------------------------------------------------------------
+
+  - id: EXP-0045
+    title: "P0A clean 0.913 reproduction (legacy, retro-bound)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55136759'
+    lb: 0.913
+    status: scored
+    date: '2026-07-31'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. Artifact RECOVERED and hash-verified: C:/temp/lbcal/p0a/submission.csv,
+      sha256 prefix 8c1605b5944d25e4, matching the sha256 the submission description itself declared.
+      Receipt ABSENT - this predates the release-receipt harness and none is fabricated. Description:
+      "P0A clean 0.913 reproduction; out sha256 8c1605b5944d25e4; structural audit PASS 10/10". The SCORE
+      is from Kaggle's own submissions endpoint and is authoritative; the artifact binding is verified by
+      digest; the spec and kernel that produced it are not recorded and are not reconstructed here.
+
+  - id: EXP-0046
+    title: "P0B clean base + source-locked reverse-time w=0.20 (legacy, retro-bound)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55136908'
+    lb: 0.914
+    status: scored
+    date: '2026-07-31'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. Artifact RECOVERED and hash-verified: sha256 prefix 4c285cae0c220a11, present
+      at TWO paths with identical bytes - C:/temp/lbcal/p0b/submission.csv and
+      C:/temp/lbcal/armb_base/submission.csv. Receipt ABSENT, none fabricated. Description: "P0B clean 0.913
+      base + source-locked reverse-time w=0.20; out sha256 4c285cae0c220a11; audit PASS; delta vs P0A: nodes
+      +64 edges +103 div -9, 749 parent reassignments". The two-path identity is recorded because a future
+      reader finding the same digest under a different experiment name should not conclude they are
+      different artifacts.
+
+  - id: EXP-0047
+    title: "P0-CR: v122 base + source-locked reverse-time + line-fit volume guard (legacy, retro-bound)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55147215'
+    lb: 0.906
+    status: scored
+    date: '2026-07-31'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. Artifact RECOVERED and hash-verified: C:/temp/lbcal/p0cr/submission.csv,
+      sha256 prefix 435bf5d19d85563c. Receipt ABSENT, none fabricated. Description: "P0-CR: v122 base +
+      source-locked reverse-time w=0.20 + line-fit volume guard; out sha256 435bf5d19d85563c; structural
+      audit PASS 10/10 (A1-A10, outside=0); causal question: is reverse-time's effect base-dependent
+      (clean-913 base gave +0.001, divisions -9; v122 base moves divisions +10)". This is the lowest-scoring
+      of the six at 0.906 and its own description frames it as a causal probe rather than a candidate.
+
+  - id: EXP-0048
+    title: "Arm B solo: flow-compensated motion-relink gate (legacy, retro-bound)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55181562'
+    lb: 0.914
+    status: scored
+    date: '2026-08-02'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. Artifact RECOVERED and hash-verified: C:/temp/lbcal/armb_solo/submission.csv,
+      sha256 prefix 83498f9e27d44532. Receipt ABSENT, none fabricated. Description: "Arm B solo: P0-B plus
+      flow-compensated motion-relink gate; corrected safe-division outdegree invariant; baseline byte
+      parity; audit PASS 10/10; sha256 83498f9e27d44532".
+
+  - id: EXP-0049
+    title: "P3 + arm-B motion-gate (legacy, retro-bound, ARTIFACT NOT RECOVERED)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55585140'
+    lb: 0.915
+    status: scored
+    date: '2026-08-17'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. ARTIFACT UNKNOWN and RECEIPT ABSENT - neither is fabricated. Its description
+      declares no sha256, so there is nothing to search for by digest and the finished search over
+      C:/temp and notebooks/ found no candidate that could be bound with confidence. Description in full:
+      "P3 + arm-B motion-gate (LOEO +0.0144/+0.0090, paired deployment substrate)". WHAT IS AUTHORITATIVE
+      HERE IS THE SCORE AND THE DATE, read from Kaggle's own submissions endpoint. Everything about which
+      bytes produced it is UNVERIFIED, and this entry exists so that absence is recorded rather than
+      leaving the submission unbound and invisible.
+
+  - id: EXP-0050
+    title: "P3 + ILP division economics, division_weight 0.55 (legacy, retro-bound, ARTIFACT NOT RECOVERED)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55616685'
+    lb: 0.915
+    status: scored
+    date: '2026-08-19'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. ARTIFACT UNKNOWN and RECEIPT ABSENT - neither is fabricated. Its description
+      declares no sha256. Description in full: "P3 + ILP division economics: division_weight 0.55 +
+      safe-div patch OFF + L3 restore (703 ILP divisions re-admitted, 0 from patch); pre-ILP audit measured
+      29/125 GT divisions offered to the solver at median edge_prob 0.9188; audit PASS 10/10". The score
+      and date are authoritative from Kaggle; the producing bytes are UNVERIFIED.
+
+  - id: EXP-0051
+    title: "P38 relink bonus b2: the first submission under the Q2 leaderboard-calibration policy"
+    spec: scripts/kaggle_specs/p38_relink_bonus_b2.json
+    kernel: aryaarun07/biohub-p38-relink-bonus-b2
+    kernel_version: 1
+    submission: '55915569'
+    lb: null
+    status: submitted
+    date: '2026-08-31'
+    facts: [FACT-0446]
+    note: >-
+      SCORE PENDING and the reading is SEALED IN ADVANCE by PKT-0045, committed at 77e41ca BEFORE the
+      artifact existed: at or below 0.930 kills the tested GLOBAL b2 amplification ON THE HIDDEN SUBSTRATE
+      and is NOT a claim that the hidden set resembles fold 1; at or above 0.935 is positive transfer FOR
+      THIS SETTING and is NOT confirmation of the consumption thesis, which is Gate B's unresolved question;
+      0.931 to 0.934 is UNINFORMATIVE, declared in advance, and licenses nothing.
+      TREATMENT: exactly one environment value on the P35 champion, BIOHUB_MOTION_RELINK_LEARNED_BONUS
+      1.0 -> 2.0. The other fifteen changed lines are PASSIVE instrumentation - atomic submission write plus
+      a completion heartbeat - required by gpu_protection_contract submission_run_v1 after the auditor's
+      VETO 6, and they alter no graph, score, threshold, candidate or post-processing behaviour.
+      ARTIFACT PROVABLY COMPLETE RATHER THAN ASSUMED: the in-kernel heartbeat reported rows 237,716,
+      bytes 12,373,010 and sha256 786ccf1b, and the fetched file's size and digest match it exactly.
+      Treatment verified LIVE in the immutable log at motion_relink_learned_bonus 2.0. Structural audit
+      PASS 10 of 10; receipt 0d56e564; protection contract SIGNED with failed empty.
+      LOOK ONE OF TWO on this lever family. An identical artifact hash is never resubmitted - Kaggle scoring
+      is deterministic, so that would spend a look and measure nothing. The plateau interior at bonus 4 and 8
+      is INELIGIBLE without new safety evidence, because fold-1 division TP declines there.

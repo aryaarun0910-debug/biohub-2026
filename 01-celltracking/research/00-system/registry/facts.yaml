@@ -8741,8 +8741,14 @@ facts:
       superseded_statement: {claim: '+0.004 per 26 days', what_it_actually_was: the last three submissions,
                              error_factor: 4.75, corrected_here: true}
       registry_binding_gap: >-
-        Kaggle holds 18 scored submissions; experiments.yaml binds 12. Six are unbound - 55616685, 55585140,
-        55181562, 55147215, 55136908, 55136759
+        CLOSED 2026-08-31. Kaggle holds 18 scored submissions; experiments.yaml bound 12. The six unbound -
+        55616685, 55585140, 55181562, 55147215, 55136908, 55136759 - are now retro-bound as EXP-0045 to
+        EXP-0050. FOUR of the six artifacts were RECOVERED AND HASH-VERIFIED on disk under C:/temp/lbcal/
+        by finishing a search rather than assuming they were gone, each matching the sha256 its own
+        submission description declared; one of those digests is present at two paths with identical bytes.
+        TWO could not be recovered - 55585140 and 55616685 declare no sha256 - and are recorded with
+        artifact unknown and provenance UNVERIFIED. NO RECEIPT EXISTS FOR ANY OF THE SIX and none was
+        fabricated: all predate the release-receipt harness
     provenance: MEASURED
     validity: VALID
     validity_reason: >-
