@@ -111,6 +111,14 @@ A packet is a dossier, not a to-do. It states, before any work begins:
   crash on the first non-ASCII character in any report.
 - Kaggle CLI is **`python -m kaggle`** — the `.exe` is blocked by Windows App Control. The
   factory's generated `submitcmd` names `kaggle.exe`; substitute.
+- **THIS COMPETITION IS NOTEBOOK-ONLY. A local CSV CANNOT BE SUBMITTED.** A submission must bind
+  the kernel and version: `competitions submit -c <comp> -k <owner/slug> -v <version> -f
+  submission.csv -m "..."`. Uploading the file directly returns HTTP 400 from `CreateSubmission`
+  after a fully successful upload, which looks like a size or format problem and is not.
+  **Read `kaggle_factory.py submitcmd` and use what it prints** — it states this in a comment and
+  carries the receipt and artifact hashes. Measured 2026-08-31: two attempts lost to improvising
+  past it. A failed `CreateSubmission` spends NO submission slot, but verify that against the
+  submissions list before retrying rather than assuming it.
 - Kaggle only. Colab is declined (host decision). Deadline **2026-09-29**.
 - Hardware is deterministically **T4x2, CC 7.5**, so fp16 + `GradScaler` is correct and the
   DataParallel/autocast trap is guaranteed on every run: `torch.autocast` is thread-local

@@ -1,0 +1,62 @@
+id: PKT-0047
+title: "HOCT official-release provenance audit and detector-adapter preparation, read-only, no execution"
+lever: null
+owner: agent-10-hoct-provenance
+lock: claimed
+opened: '2026-08-31'
+
+why_no_lever: >-
+  Provenance and preparation only. LEVER-0034 is held by PKT-0029; LEVER-0032/0033 are not claimed here and
+  must not be. This packet establishes whether the official HOCT release is ADMISSIBLE and what an adapter
+  would have to satisfy - it tests no hypothesis and moves no score. R6 permits a null lever.
+
+claim: >-
+  The official royerlab/hoct release can be bound by provenance, licence and competition eligibility, and a
+  production-faithful adapter contract for it can be specified before any execution or GPU spend.
+
+falsifier: >-
+  Inverted, as an infrastructure packet's must be. This packet FAILS if it asserts admissibility on a model
+  card, a README or a release note rather than on the artifact and the competition's own rule text; if it
+  executes the checkpoint before eligibility is established; or if it specifies an adapter it has not shown
+  would FAIL on a wrong-fold, wrong-scale or wrong-contract input.
+
+method: >-
+  READ-ONLY. NO EXECUTION, NO INSTALL, NO INTEGRATION until training provenance and competition eligibility
+  are both settled.
+  (1) BIND THE ARTIFACT. FACT-0445 already records the release tag, source URL, measured sha256, byte size,
+  MIT licence and TorchScript-JIT type, and records that it is NOT identical to any checkpoint on disk. Do
+  not re-derive; EXTEND it - the declared-versus-measured digest, the full asset inventory of the release,
+  and the repository commit the LICENSE was read at.
+  (2) TRAINING PROVENANCE. HOCT is the ORGANIZER LAB's model. Establish what it was trained on. If that
+  overlaps the competition movies or their sources, FACT-0378 applies exactly: legitimate to use, and its
+  offline evaluation becomes un-interpretable by any LOEO control we can build. Record that restriction
+  BEFORE any number is produced, not after.
+  (3) COMPETITION ELIGIBILITY. Against the archived rule text (FACT-0423's authenticated markdown), not a
+  summary.
+  (4) PARAMETER COUNT AND STRUCTURE. Only after (2) and (3) settle, because reading a TorchScript archive
+  requires torch.jit.load, which EXECUTES the archived graph.
+  (5) ADAPTER CONTRACT, SPECIFIED NOT BUILT. What a production-faithful adapter must satisfy: exact
+  preprocessing, coordinate scale and anisotropy (full-res z,y,x at 1.625/0.40625/0.40625, NOT isotropic),
+  weight hash, mount resolution through the CENTRAL bounded resolver, process-boundary heartbeat, passive
+  candidate export, and the parity checks a foreign detector must pass before its result means anything.
+  Each requirement must name the check that would REJECT a violation.
+
+budget: {gpu_sessions: 0, submissions: 0, wall_clock: 1 day}
+
+forbidden:
+  - executing, installing or integrating the checkpoint before eligibility and provenance are settled
+  - torch.jit.load, or any load that executes the archived graph, before step (4) is unlocked
+  - claiming LEVER-0034, LEVER-0032, LEVER-0033 or any lever
+  - asserting admissibility from a model card, README or release note rather than the artifact and rule text
+  - launching a GPU job, pushing a kernel, or making a submission
+  - writing facts.yaml, levers.yaml or experiments.yaml - route to the coordinator
+  - editing PKT-0029, PKT-0042, PKT-0043, PKT-0044, PKT-0045 or PKT-0046
+  - staging or committing to git
+  - .claude/settings.json or .gitignore
+
+outputs:
+  evidence: _evidence/hoct_official/ and C:/temp/hoct_official/
+  facts_added: []
+  record: One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null

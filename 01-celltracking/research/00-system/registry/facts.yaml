@@ -8715,3 +8715,150 @@ facts:
       it re-parents a target and can dissolve a fork that was correct.
     date: '2026-08-31'
     tags: [divisions, fact-0371, oracle, safety-condition, structural-cost, lever-0045, measured]
+
+  - id: FACT-0444
+    statement: >-
+      THE CAMPAIGN'S SUBMISSION-SCORE TRAJECTORY, REGISTERED ONCE SO IT CANNOT BE QUOTED AMBIGUOUSLY AGAIN.
+      Across 18 scored submissions from 2026-07-31 to 2026-08-30 the public score moved 0.913 to 0.932: +0.019
+      over 30 days. The climb is STEP-SHAPED, not linear - 0.915 held flat for roughly 19 days before
+      0.925 / 0.928 / 0.931 / 0.932 arrived in the final week. THIS SUPERSEDES THE RECENT-WINDOW STATEMENT of
+      "+0.004 per 26 days", which was the last THREE submissions presented as the campaign rate and is wrong
+      by about 4.75x
+    value: 0.019
+    unit: public_score_gained_over_the_whole_campaign_2026_07_31_to_2026_08_30
+    scope:
+      first: {date: '2026-07-31', score: 0.913, ref: 55136759}
+      last: {date: '2026-08-30', score: 0.932, ref: 55888865}
+      span_days: 30
+      submissions_scored: 18
+      trajectory: [0.913, 0.914, 0.906, 0.914, 0.915, 0.915, 0.915, 0.883, 0.912, 0.925, 0.906, 0.922,
+                   0.924, 0.925, 0.928, 0.914, 0.931, 0.932]
+      shape: step, with a ~19-day plateau at 0.915
+      superseded_statement: {claim: '+0.004 per 26 days', what_it_actually_was: the last three submissions,
+                             error_factor: 4.75, corrected_here: true}
+      registry_binding_gap: >-
+        Kaggle holds 18 scored submissions; experiments.yaml binds 12. Six are unbound - 55616685, 55585140,
+        55181562, 55147215, 55136908, 55136759
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Read directly from the competition's own submissions endpoint, which is the authority for scores, rather
+      than assembled from packet prose. The correction was found by pulling the full list instead of the tail,
+      and it is recorded with BOTH the right number and the wrong one so neither can be cited without the
+      other.
+    instrument: "python -m kaggle competitions submissions -c biohub-cell-tracking-during-development"
+    note: >-
+      WHAT SURVIVES THE CORRECTION IS MOST OF THE ARGUMENT, AND WHAT DOES NOT MUST BE DROPPED. The forward
+      rate is NOT the backward rate: FACT-0393 records the 0.931 as BASELINE RELOCATION rather than
+      capability, and FACT-0412 records the inherited-knob mechanism that produced the final steps as
+      EXHAUSTED. So the portfolio still needs a lane with large measured full-chain headroom. But the claim
+      that the campaign was "5x too slow" was an artefact of a recent window and must not be repeated - the
+      justification for changing the portfolio is FACT-0393 and FACT-0412, not an extrapolated rate.
+    date: '2026-08-31'
+    tags: [campaign-rate, submissions, supersedes-recent-window, registry-binding-gap, measured, headline]
+
+  - id: FACT-0445
+    statement: >-
+      THE OFFICIAL HOCT RELEASE IS NOT ANY CHECKPOINT WE HOLD, AND IT IS A DIFFERENT ARTIFACT CLASS. The
+      royerlab/hoct release `weights-v1` (published 2026-08-24) ships `general_v1.pt` at 25,496,698 bytes,
+      sha256 5bd836dfcb15ad796ea79a9595841a3e73b650a71c4acba3fc66aac65d745b33, under an MIT licence
+      (Copyright 2026 Jordao Bragantini and the HOCT contributors). It is a TORCHSCRIPT JIT ARCHIVE - a zip of
+      528 entries including a `code/` tree - whereas every HOCT-family checkpoint on our disk is a plain
+      state-dict of about 8.36 MB. The "is the public checkpoint identical to one we already have" question
+      therefore resolves NO
+    value: 25496698
+    unit: bytes_of_the_official_hoct_general_v1_checkpoint
+    scope:
+      release: {repo: royerlab/hoct, tag: weights-v1, published: '2026-08-24T21:13:04Z',
+                asset: general_v1.pt,
+                url: https://github.com/royerlab/hoct/releases/download/weights-v1/general_v1.pt}
+      measured_sha256: 5bd836dfcb15ad796ea79a9595841a3e73b650a71c4acba3fc66aac65d745b33
+      licence: {spdx: MIT, holder: "Jordao Bragantini and the HOCT contributors", year: 2026,
+                source: raw LICENSE from the repository main branch}
+      checkpoint_type: {is_zip: true, torchscript_jit: true, zip_entries: 528}
+      parameter_count: PENDING
+      parameter_count_why_pending: >-
+        reading it requires torch.jit.load, which EXECUTES the archived graph. The host directive is no
+        install, execute or integrate until training provenance and competition eligibility are checked, so
+        the count is deliberately not taken
+      our_checkpoints_for_contrast:
+        12f6881ee3620a83: {bytes: 8363159, role: support-pack split_0 primary, appears_at_two_paths: true}
+        d3e89eb361eeadef: {bytes: 8357783, role: official_f0, note: byte-identical to our OOF split_0 (FACT-0435)}
+        32d8048692aeb95f: {bytes: 8357783, role: stabledet_f0}
+      identical_to_anything_we_hold: false
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The file was downloaded read-only and hashed, and its type was determined by inspecting the ZIP
+      directory WITHOUT loading it - so the classification rests on the bytes rather than on the release
+      notes. The negative identity conclusion is arithmetic, not inference: 25,496,698 bytes cannot be the
+      same artifact as an 8.36 MB state dict.
+    instrument: >-
+      curl read-only fetch to C:/temp/hoct_official/; sha256sum; zipfile inspection without torch.jit.load
+    note: >-
+      WHY THIS MATTERS BEYOND THE IDENTITY QUESTION. FACT-0390 and FACT-0391 record the cost of working from
+      the rudispresence Kaggle fork's bare state dicts - a reconstruction that strict-loaded at the right
+      parameter count and still could not be trusted. A self-contained TorchScript archive carries its own
+      graph, which is precisely what removes the feature-slot reverse-engineering problem that blocked that
+      lane. THAT IS A REASON TO AUDIT IT, NOT A LICENCE TO USE IT: training provenance and competition
+      eligibility are unchecked, and HOCT is the ORGANIZER LAB's model, so the FACT-0378 hidden-overlap
+      ambiguity applies to anything validated on its weights.
+    date: '2026-08-31'
+    tags: [hoct, official-release, torchscript, provenance, mit, not-identical, verified]
+
+  - id: FACT-0446
+    statement: >-
+      THE FIRST SUBMISSION UNDER THE NEW POLICY IS BOUND AND ITS ARTIFACT IS PROVABLY COMPLETE RATHER THAN
+      ASSUMED COMPLETE. Kaggle reference 55915569, submitted 2026-08-31 12:39:40 from kernel
+      aryaarun07/biohub-p38-relink-bonus-b2 version 1. The in-kernel heartbeat reported
+      rows=237716 bytes=12373010 sha256=786ccf1b72a65bb0ec7a1ce21390a5fe30edd952d9bae701d9b48d23964cf12a and
+      the fetched file's byte count and sha256 MATCH IT EXACTLY, so the atomic-write instrumentation the
+      auditor required demonstrably worked. The treatment is confirmed LIVE in the immutable log at
+      motion_relink_learned_bonus 2.0, not the base 1.0. Structural audit PASS 10 of 10
+    value: 55915569
+    unit: kaggle_submission_reference_of_the_first_submission_under_the_q2_policy
+    scope:
+      kernel: {slug: aryaarun07/biohub-p38-relink-bonus-b2, version: 1}
+      built_notebook_sha256: dad9cdf00372dd08b5da8a61ebe39b955cb594d69eb9f9c4329d322b3f112347
+      base: {notebook: P35 champion, sha256: c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257}
+      artifact: {name: submission.csv, bytes: 12373010,
+                 sha256: 786ccf1b72a65bb0ec7a1ce21390a5fe30edd952d9bae701d9b48d23964cf12a}
+      heartbeat_matches_fetched_artifact: true
+      treatment_verified_live_in_log: {symbol: motion_relink_learned_bonus, value: 2.0, base_value: 1.0}
+      structural_audit: {verdict: PASS, checks: '10/10', fractional: 0, max_in_degree: 1, max_out_degree: 2,
+                         rows: 237716, nodes: 120925, edges: 116791, divisions: 233, datasets: 4}
+      receipt_sha256: 0d56e56430754cf9a3b20e76b9bc08f48f95e413961b5c7f5b3ff77ce54e9a7d
+      protection_contract: {profile: submission_run_v1, verdict: SIGNED, failed: [], out_of_scope: 12}
+      preregistration: {packet: PKT-0045, committed: 77e41ca, before_artifact_existed: true,
+                        description_committed: e9d77db}
+      score: PENDING
+      submission_path_correction: >-
+        Two attempts to upload the CSV as a LOCAL FILE returned HTTP 400. This is a NOTEBOOK-ONLY
+        competition: a submission must bind the kernel and version (-k slug -v version). The factory's own
+        submitcmd states this explicitly. Verified after the first failure that no submission had been
+        created, so no slot was spent and the family cap is intact at look one of two
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Every element is bound to bytes rather than asserted: the artifact's sha256 is reported by the kernel
+      itself and independently recomputed on the fetched file and they agree; the treatment is read from the
+      immutable log rather than from the spec that requested it; and the preregistration was committed to git
+      BEFORE the artifact existed, so the band cannot have been fitted to a result that did not yet exist.
+      The SCORE is deliberately PENDING - this entry records the submission, not its outcome.
+    instrument: >-
+      scripts/core/kaggle_factory.py fetch/audit/submitcmd; python -m kaggle competitions submit -k -v;
+      artifacts notebooks/kaggle_p38_relink_bonus_b2/_out/ and C:/temp/p38/
+    note: >-
+      THE INSTRUMENTATION EARNED ITS KEEP ON THE FIRST RUN. Before the auditor's VETO 6 this notebook wrote
+      submission.csv through a direct truncating open() with no atomic swap and emitted no completion
+      heartbeat, so a killed kernel would have left a TRUNCATED CSV THAT STILL PARSES and we would have had
+      no way to tell. Because both were fixed, the artifact's completeness is now a checked fact.
+      A CORRECTION AGAINST THIS SUBMISSION'S OWN SPEC: the spec's provenance claimed the live value is
+      recorded in run_stats.csv. That column is ABSENT; the value appears in the kernel log as JSON. The
+      evidence is stronger for being in the immutable log, but the claim as written was false.
+      THE READING IS SEALED IN ADVANCE (PKT-0045): at or below 0.930 kills the tested GLOBAL b2 amplification
+      on the hidden substrate and is NOT a claim that the hidden set resembles fold 1; at or above 0.935 is
+      positive transfer FOR THIS SETTING and is NOT confirmation of the consumption thesis; 0.931 to 0.934 is
+      UNINFORMATIVE and licenses nothing.
+    date: '2026-08-31'
+    tags: [submission, p38, lever-0044, q2-policy, atomic-write, heartbeat, notebook-only, measured, headline]
