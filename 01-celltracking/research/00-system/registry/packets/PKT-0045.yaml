@@ -116,4 +116,7 @@ outputs:
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md
 
+submission_description_recorded_before_submit: >-
+  PREREGISTERED before the artifact existed (PKT-0045, committed 77e41ca). LB CALIBRATION look 1 of 2 on PKT-0042 Gate A. Treatment = P35 champion (0.932, sub 55888865) with EXACTLY ONE env value changed: BIOHUB_MOTION_RELINK_LEARNED_BONUS 1.0->2.0. The other 15 changed lines are PASSIVE instrumentation (atomic submission write + completion heartbeat) required by the GPU protection contract; no graph, score, threshold, candidate or post-processing logic altered. b2 chosen BY RULE: smallest value on the winning plateau, and the ONLY grid value leaving division TP flat on BOTH folds. OFFLINE, not a prediction: fold0 combined score +0.0026589 ci95[+0.00079,+0.00517] excluding zero; fold1 -0.0001583, interval spans zero; fold0 division Jaccard -0.0032 on +6 division FPs - DISCLOSED, the mechanism increases false forks. CENTRAL 0.932. BAND 0.928-0.938. FALSIFIER: at or below 0.930 kills the tested global b2 amplification on the hidden substrate (NOT a claim the hidden set behaves like fold 1). At or above 0.935 = positive transfer FOR THIS SETTING (not confirmation of the consumption thesis). 0.931-0.934 = UNINFORMATIVE, declared in advance, licenses nothing and closes nothing. Look 1 of 2; identical hashes never resubmitted; plateau interior b4/b8 ineligible on fold-1 division safety.
+
 result: null
