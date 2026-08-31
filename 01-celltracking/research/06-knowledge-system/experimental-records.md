@@ -6340,3 +6340,103 @@ candidate facts routed to the coordinator in `PKT-0044.yaml`. Evidence
 `_evidence/assoc/reach/reach_oracle_f{0,1}.json` and `frozen_rule.{pkl,json}`; logs
 `C:/temp/reach_oracle/f{0,1}.log`. **Verdict: LEVER-0045 FALSIFIER 0 FIRES. Its own branch logic says
 "ORACLE REACH FAILS: CLOSE this route BEFORE any GPU."**
+
+### 2026-08-31 — PKT-0046 (agent 9, the reversed ceiling ladder): perfect nodes on today's edges are worth exactly nothing, and the detector lane is disqualified for zero GPU
+
+Calibration ran first and passed, and it was built to DISCRIMINATE rather than merely pass: the GT
+inter-frame displacement median is 1.81681 um over all 109,057 fold-1 GT edges on the non-isotropic
+full-res convention, against the `FACT-0040` anchor, while the isotropic convention that has twice
+been used by mistake in this project gives 5.13870 um and fails the same gate. The instrument then
+calibrated itself — perfect nodes with perfect edges score raw edge Jaccard exactly 1.000000 on both
+folds, which is what `FACT-0368`'s harness scores that rung at — and only then was the control read.
+The control reproduces the `FACT-0368` / `FACT-0371` anchor artifact to 1e-9 on every float and
+exactly on every count, on all 71 fold-0 crops and on the 32 stride-4 crops the fold-1 anchor scored.
+Three further registry cross-checks landed unprompted: GT edge totals equal `FACT-0422`'s 19,826 and
+109,057 exactly; fold-0 control edge TP/FP/FN equals `FACT-0384`'s control block exactly at
+18,784 / 1,369 / 1,042; fold-1 control division FP equals its recorded 349.
+
+**The order was the whole experiment.** `FACT-0368` perfects association FIRST and then nodes, so
+every newly correct node is handed a ready-made perfect edge — which is why its fold-0 detection rung
+reads 7.1%. Measured in the order a real detector swap actually occurs, nodes corrected at TODAY's
+association under the FROZEN consumer, that rung is worth nothing at all. **Inserting every annotated
+GT cell the deployed pipeline misses — 223 on fold 0 and 14,970 on fold 1, taking node recall from
+0.98679 to 1.00000 and from 0.86357 to 1.00000 — changes NOT ONE EDGE: d_edge_tp, d_edge_fp and
+d_edge_fn are all exactly zero on both folds.** Under a frozen consumer a newly detected cell arrives
+as an orphan, so detection recall converts to score at a rate of zero. Perfect LOCALISATION of
+already-matched nodes with topology frozen is slightly NEGATIVE — −0.000392 raw / −0.000364
+count-fair score on fold 0 and −0.000045 / −0.000043 on fold 1, moving 3 and 2 true edges into
+errors, because moving nodes onto their GT coordinates reshuffles the one-to-one assignment.
+
+One arm does clear the bar and it does not count, for measured reasons rather than an argument. The
+maximally generous membership arm — delete every unmatched predicted node, insert every missing GT
+cell, transport today's edges — reads +0.061803 and +0.093522 count-fair. But it recovers **zero**
+true edges (`d_edge_tp = +0`, `d_edge_fn = +0`, both folds); its entire movement is false-positive
+suppression, −1,353 and −13,860. The operation is unavailable to a detector: measured on the emitted
+graph, `N_pred/N_est` is 0.7275 on fold 0 and 0.9171 on fold 1, so the pipeline already emits FEWER
+nodes than the crop is estimated to hold and the 1.885M / 1.833M unmatched nodes are overwhelmingly
+real cells the sparse annotation does not label — a better detector emits more of them, not fewer.
+(Stage stated explicitly: `FACT-0354`'s 0.8906 is the DETECTION surface; this is the post-chain graph
+after the ILP drops nodes per `FACT-0353`. Different stages, not a contradiction.) It also declines
+division TP on both folds, 5→2 and 14→9, which is the `FACT-0371` caution the gate encodes.
+
+A by-product worth its own entry: **of 1,369 fold-0 false-positive edges only 16 are wrong links
+between two ANNOTATED cells; 1,353 run from an annotated cell into an unannotated one** (fold 1:
+86 of 13,946). That bounds what any method re-ranking parents among annotated cells can remove.
+
+Fold 1 was run COMPLETE at 128 crops — the first complete fold-1 ladder on this substrate, where
+`FACT-0368`'s was a stride-4 sample of 32. Both folds are reported separately and agree in sign and
+shape on every arm, so pooling hides nothing here — worth recording given `FACT-0437` is the standing
+example of pooling erasing a real fold split. Every summary was produced by `assoc_report.build_report`;
+the count-fair headline is assembled only from that report's own channels via the identity the module
+documents, which is the `FACT-0371` construction. 48 of 128 fold-1 payloads were regenerated under a
+different worker count and the panel came back identical.
+
+Throughput: 199 crop-arms across both complete folds in ~8 minutes at three workers with every native
+library pinned to one thread — ~1,235 crops/hour on fold 0, ~1,726 on fold 1, free RAM never below
+4.5 GB. A fourth worker was tested as a controlled A/B on one fixed 48-crop set and bought ~9%
+(93 s against 101 s) without paging; it was not adopted. Unlike the full-chain replay `FACT-0440`
+measured, this workload is not memory-bound — export surgery plus the official scorer, no ILP and no
+DeepCenter heatmaps — so that three-worker ceiling is a property of that replay, not of this tree's
+CPU work in general.
+
+CPU only. Zero GPU sessions, zero submissions, no kernel push, no lever claimed. No fact, lever or
+experiment written — four candidate facts routed to the coordinator in `PKT-0046.yaml`. Evidence
+`_evidence/assoc/revladder/panel_f{0,1}.json`, `C:/temp/revladder/`. **Verdict: the falsifier FIRES.
+Perfect node correction under the frozen consumer does NOT clear +0.02 on the honest fold — it
+delivers +0.000000 — so detector integration cannot be the ≥ +0.02 node-improvement lane. SCOPE
+LIMIT, BINDING: this kills the node-only thesis and NOT detector-derived representations or
+candidate-generation effects, which this packet does not touch.**
+
+### 2026-08-31 - PKT-0047 (agent 10, HOCT official-release audit): admissible, structurally read without ever loading it, and restricted to submission-only judgement
+
+Read-only, CPU only, zero GPU sessions, zero submissions, no kernel push, no lever claimed.
+`torch.jit.load` was never called: the parameter count was taken from the bytes by pickle-opcode
+disassembly and an inert-stub unpickler, giving 132 tensors and 6,294,081 elements, calibrated
+against an independent derivation - the 25,176,324 raw storage bytes are exactly 4x that count.
+The binding of `FACT-0445` was extended rather than re-derived: the declared digest agrees with the
+measured one across three independent declarations, the repository ships 4 releases and 6 assets
+(including an earlier `weights-v0` carrying a second, undocumented `ctc_v0.pt`), and the LICENSE is
+pinned to its single commit `8166ca9e` and shown byte-identical there, at `main` HEAD and locally.
+One binding trap found: the `weights-v1` TAG resolves to a commit ten weeks OLDER than its own
+asset, so the tag does not date the artifact.
+
+**Eligibility: ADMISSIBLE**, decided against the rule text re-obtained and re-authenticated this
+cycle against a freshly fetched RPC payload - clauses 2.6.a, 2.6.b and 2.5.a.3 as for FOCUS-3D, plus
+3.6.c, which FOCUS-3D did not need and which MIT clears. The FOCUS-3D third-licence pattern repeats,
+but inside the ARTIFACT rather than the repository: the checkpoint embeds TorchScript-compiled
+`timm` (Apache-2.0) that nothing in the publisher's licensing surface reveals, and no document
+anywhere asserts any licence over the weights themselves - which corrects our own
+`architecture_training_2026-08-19.md:1005` claim of "code and weights MIT".
+
+**Training provenance: CANNOT BE ESTABLISHED, and this is the decisive result.** The paper's 16 CTC
+datasets describe the PAPER's models, not this one; `general_v1` is covered by no manifest, model
+card, release note, pull request, commit message or issue, and its producing package
+`slot_cell_tracking` is unpublished - while the publisher is the organizer lab and the asset landed
+eight weeks into the competition. Recorded BEFORE any number: **`general_v1` is restricted to
+SUBMISSION-ONLY JUDGEMENT** (`FACT-0378` shape), the mirror image of `FACT-0424`. Two further
+adapter blockers were verified at `file:line`: HOCT v0.2.0 is VOXEL-NATIVE - `scaled_` occurs once
+in the whole package, into a frame that is discarded - so neither microns nor voxels is safe by
+default on our 4:1:1 data; and 15 of its 19 features need instance masks the deployed notebook does
+not produce, while the one points-only entry point is an exported stub that returns `None`. No fact,
+lever or experiment written - six candidate facts routed to the coordinator in `PKT-0047.yaml`.
+Evidence `_evidence/hoct_official/`, `C:/temp/hoct_official/`.

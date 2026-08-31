@@ -7731,8 +7731,12 @@ facts:
       could have been found. What remains weak is stated rather than smoothed over: the weights grant is one
       README sentence with no LICENSE artifact - a real grant from the rights holder, but a thin one.
     instrument: >-
-      scripts/win_bet/focus3d_probe.py; evidence under _evidence/focus3d/ including the archived rules
-      markdown and the model-card snapshot
+      scripts/win_bet/focus3d_probe.py. CORRECTED 2026-08-31: this entry originally cited evidence under
+      _evidence/focus3d/, WHICH DOES NOT EXIST - PKT-0041's working set lives under C:/temp/ and its 36 KB
+      rules markdown was never persisted into the repository. That is the FACT-0043 class, an instrument
+      naming a path a reader cannot open. The rules were independently RE-OBTAINED and RE-AUTHENTICATED on
+      2026-08-31 and are archived in-repo at _evidence/hoct_official/rules_2026-08-31.md (36,552 bytes,
+      sha256 6d025a6e), which is the citable copy for both this fact and FACT-0452
     note: >-
       THE HOST'S AUTHORISATION AND THIS FINDING ANSWER DIFFERENT QUESTIONS AND BOTH WERE NEEDED. The host
       settled our right to use the asset; this settles whether the competition's own rules permit a submission
@@ -8776,8 +8780,18 @@ facts:
       licence: {spdx: MIT, holder: "Jordao Bragantini and the HOCT contributors", year: 2026,
                 source: raw LICENSE from the repository main branch}
       checkpoint_type: {is_zip: true, torchscript_jit: true, zip_entries: 528}
-      parameter_count: PENDING
-      parameter_count_why_pending: >-
+      parameter_count: 6294081   # DISCHARGED 2026-08-31 by FACT-0453, taken WITHOUT torch.jit.load
+      declared_vs_measured_digest: >-
+        MATCH across THREE independent declarations - the GitHub API asset digest, the release body, and
+        the MODELS registry in src/hoct/_models.py - so no refusal. The publisher's own loader is
+        hash-verifying (pooch.retrieve with known_hash)
+      release_inventory: {releases: 4, assets: 6,
+                          weights_v0_carries_two: [ctc_v0.pt 25505802 b9be3d97, general_v0.pt 25510490 024c2e46],
+                          weights_v0_body_names_only_one: true}
+      tag_does_not_date_the_artifact: >-
+        the weights-v1 TAG resolves to commit cabe8fd4 dated 2026-06-15, the same commit as v0.1.0rc0 and
+        TEN WEEKS OLDER than its own asset, uploaded 2026-08-24. Pin to a commit sha, never to the tag
+      parameter_count_original_reason_for_pending: >-
         reading it requires torch.jit.load, which EXECUTES the archived graph. The host directive is no
         install, execute or integrate until training provenance and competition eligibility are checked, so
         the count is deliberately not taken
@@ -8862,3 +8876,392 @@ facts:
       UNINFORMATIVE and licenses nothing.
     date: '2026-08-31'
     tags: [submission, p38, lever-0044, q2-policy, atomic-write, heartbeat, notebook-only, measured, headline]
+
+  - id: FACT-0447
+    statement: >-
+      THE REVERSED CEILING LADDER: NODE CORRECTION AT TODAY'S ASSOCIATION IS WORTH EXACTLY ZERO FULL-CHAIN
+      SCORE ON BOTH FOLDS. Inserting every annotated GT cell the deployed pipeline misses - 223 on fold 0 and
+      14,970 on fold 1 - takes node recall from 0.98679 to 1.00000 and from 0.86357 to 1.00000 while changing
+      edge TP, FP and FN by EXACTLY ZERO on both folds; count-fair delta score is +0.000000 on both. Under a
+      frozen consumer a newly detected cell arrives as an ORPHAN, so detection recall converts to score at a
+      rate of ZERO. Perfect LOCALISATION of already-matched nodes under frozen topology is slightly NEGATIVE:
+      -0.000364 count-fair score on fold 0 and -0.000043 on fold 1, moving 3 and 2 true edges into errors
+    value: 0.0
+    unit: count_fair_score_delta_from_perfect_node_membership_at_frozen_association_both_folds
+    scope:
+      fold_0: {crops: 71, gt_cells_inserted: 223, node_recall: [0.98679, 1.0],
+               d_edge_tp: 0, d_edge_fp: 0, d_edge_fn: 0, d_score_count_fair: 0.0}
+      fold_1: {crops: 128, gt_cells_inserted: 14970, node_recall: [0.86357, 1.0],
+               d_edge_tp: 0, d_edge_fp: 0, d_edge_fn: 0, d_score_count_fair: 0.0}
+      perfect_localisation_arm: {f0_raw: -0.000392, f0_count_fair: -0.000364,
+                                 f1_raw: -0.000045, f1_count_fair: -0.000043,
+                                 true_edges_lost: {f0: 3, f1: 2}, topology: frozen}
+      substrate: P28 champion exports
+      consumer: frozen deployed emitted edge set
+      matcher: official one-to-one 7 um
+      calibration_passed_before_any_arm_was_read:
+        coordinate: {gt_displacement_median_um: 1.81681, anchor: FACT-0040, edges: 109057,
+                     discriminating: "the isotropic convention gives 5.13870 um and FAILS the same gate"}
+        instrument_self_check: {perfect_nodes_plus_perfect_edges_raw_j: 1.000000, both_folds: true}
+        control_reproduces: {anchors: [FACT-0368, FACT-0371], floats: 1e-9, counts: exact}
+        unprompted_cross_checks: {gt_edges: "19,826 / 109,057 equals FACT-0422",
+                                  f0_control_edge_tp_fp_fn: "18,784 / 1,369 / 1,042 equals FACT-0384",
+                                  f1_division_fp: "349 equals FACT-0385"}
+      fold_1_completeness: >-
+        run COMPLETE at 128 crops - the first complete fold-1 ladder on this substrate. FACT-0368's fold-1
+        ladder was stride-4 over 32 crops, so its fold-1 rungs are a SUBSAMPLE and this is not
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Three calibration gates passed BEFORE any arm was read, and the coordinate gate was built to
+      DISCRIMINATE rather than merely to pass - the isotropic convention that has twice been used by mistake
+      in this project fails it at 5.13870 um against the FACT-0040 anchor. The instrument's own
+      perfect-nodes-plus-perfect-edges arm returns exactly 1.000000 on both folds, matching FACT-0368's
+      harness, and the control reproduces the FACT-0368 / FACT-0371 anchors to 1e-9 on floats and exactly on
+      counts, with three further registry cross-checks landing unprompted.
+    instrument: >-
+      scripts/win_bet/revladder.py, revladder_batch.py, revladder_panel.py and revladder_calibrate.py,
+      reusing the official-scorer path byte-for-byte; summaries by assoc_report.build_report; evidence
+      _evidence/assoc/revladder/panel_f0.json and panel_f1.json
+    note: >-
+      THE ORDER WAS THE WHOLE EXPERIMENT, AND IT DISQUALIFIES A LANE THE CAMPAIGN HAD JUST MADE ITS PRIMARY
+      BET. FACT-0368's 7.1% detection rung is an ORDER-DEPENDENT increment measured AFTER association is
+      already perfect, which hands every corrected node a ready-made perfect edge. In the order a detector
+      swap actually occurs - nodes corrected at TODAY's association - that rung is worth NOTHING. Quoting
+      FACT-0368's detection share as the value of a detector swap is a category error and this entry is the
+      correctly-ordered counterpart to FACT-0371.
+      WHAT IS DISQUALIFIED AND WHAT IS NOT, AND THE LIMIT IS BINDING. This bounds NODE CORRECTION UNDER THE
+      FROZEN CONSUMER only. It does NOT kill detector-derived representations, candidate-generation effects,
+      or any path where a detector changes node FEATURES or candidate AVAILABILITY rather than membership. The
+      localisation arm freezes topology by construction, so it prices only the MATCHING consequence of
+      localisation error and leaves the relinking claim untouched.
+      THE PRACTICAL CONSEQUENCE IS BLUNT: a detector that finds more cells buys nothing on its own. It has to
+      arrive with the edges for those cells, and FACT-0442 already killed the temporal candidate generator
+      that would have supplied them. Any surviving detector proposal must say which of the two it solves.
+    date: '2026-08-31'
+    tags: [reversed-ladder, detector-lane, disqualified, order-dependence, orphan-nodes, zero-gpu,
+           measured, headline]
+
+  - id: FACT-0448
+    statement: >-
+      NEARLY EVERY FALSE-POSITIVE EDGE THIS PIPELINE EMITS POINTS AT AN UNANNOTATED NODE. Of 1,369 fold-0
+      false-positive edges only SIXTEEN are wrong links between two ANNOTATED cells; the other 1,353 - 98.8%
+      - run from an annotated cell into an unannotated one. On fold 1 it is 86 of 13,946, or 0.6%, with
+      13,860 running into unannotated nodes
+    value: 16
+    unit: fold0_false_positive_edges_between_two_annotated_cells
+    scope:
+      fold_0: {crops: 71, edge_fp_total: 1369, between_two_annotated: 16, into_unannotated: 1353,
+               share_into_unannotated: 0.988}
+      fold_1: {crops: 128, edge_fp_total: 13946, between_two_annotated: 86, into_unannotated: 13860,
+               share_into_unannotated: 0.994}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Falls directly out of the perfect-membership arm, which by construction retains every edge whose
+      endpoints both match an annotated cell - so the residual is exactly the between-annotated population
+      and is counted rather than estimated. Measured on complete folds through the official one-to-one 7 um
+      matcher.
+    instrument: >-
+      scripts/win_bet/revladder.py perfect_membership arm; evidence
+      _evidence/assoc/revladder/panel_f0.json and panel_f1.json
+    note: >-
+      THIS BOUNDS EVERY PARENT-RERANKING METHOD THIS CAMPAIGN HAS PURSUED, AND THE BOUND IS SIXTEEN EDGES ON
+      FOLD 0. A scorer that only re-ranks parents AMONG ANNOTATED CELLS cannot remove more than 16 false
+      positives on fold 0, because that is all there are. It explains why deleting unannotated nodes looks
+      like a large win and is not one, and it should be read beside FACT-0422's ceiling of 240 wrong-parent
+      GT edges: the association lane's total movable mass is small from BOTH directions.
+      DO NOT READ THIS AS "THE FALSE POSITIVES ARE FREE". They are charged by the metric. It says the FP term
+      is dominated by links into cells the annotation does not cover, which is a property of SPARSE GROUND
+      TRUTH as much as of the pipeline - and FACT-0449 shows the pipeline is simultaneously UNDER-producing
+      nodes overall, so the two must not be conflated into "predict fewer nodes".
+    date: '2026-08-31'
+    tags: [false-positives, sparse-ground-truth, association-bound, parent-reranking, measured, headline]
+
+  - id: FACT-0449
+    statement: >-
+      THE DEPLOYED CHAIN UNDER-PRODUCES NODES AT THE EMITTED GRAPH, NOT ONLY AT THE DETECTION SURFACE:
+      N_pred/N_est is 0.7275 on fold 0 and 0.9171 on fold 1, measured on the FINAL EMITTED GRAPH over
+      complete folds - 1,905,264 of 2,618,970 and 1,931,622 of 2,106,147
+    value: 0.7275
+    unit: n_pred_over_n_est_on_the_emitted_graph_fold_0
+    scope:
+      fold_0: {n_pred: 1905264, n_est: 2618970, ratio: 0.7275, crops: 71}
+      fold_1: {n_pred: 1931622, n_est: 2106147, ratio: 0.9171, crops: 128}
+      stage: final emitted graph, post-chain
+      n_est_source: recovered per crop from the scorer's own total_node_ratio
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Measured on the emitted graph over complete folds with N_est taken from the scorer's own quantity
+      rather than reconstructed, so it is the ratio the metric actually applies.
+    instrument: >-
+      scripts/win_bet/revladder.py; evidence _evidence/assoc/revladder/panel_f0.json and panel_f1.json
+    note: >-
+      STAGE WARNING, AND IT IS THE WHOLE VALUE OF THIS ENTRY. FACT-0354's 0.8906 and 1.1981 are
+      DETECTION-SURFACE peak-set ratios. These are POST-CHAIN, after the ILP drops nodes (FACT-0353). They do
+      not contradict each other and NEITHER MAY BE SUBSTITUTED FOR THE OTHER - a plan that reads the
+      detection-surface figure as the emitted-graph one will conclude the pipeline over-produces when on
+      fold 0 it emits barely three quarters of the estimated cells.
+      IT ALSO CLOSES OFF THE OBVIOUS MISREADING OF FACT-0448. Because the pipeline UNDER-produces at the
+      emitted graph, the ~1.88M unmatched nodes are overwhelmingly real unannotated cells rather than
+      spurious detections, so "delete the unannotated nodes" is not an available operation and a better
+      detector would emit MORE of them, not fewer. That is why the perfect-membership-full arm clears +0.02
+      on paper and is rejected: it recovers ZERO true edges, its entire movement is FP suppression, and it
+      declines division TP on both folds.
+    date: '2026-08-31'
+    tags: [node-count, n-pred-n-est, stage-warning, emitted-graph, do-not-conflate, measured]
+
+  - id: FACT-0450
+    statement: >-
+      THE REVERSED-LADDER HARNESS IS CHEAP AND FACT-0440's THREE-WORKER CEILING IS NOT A BLANKET MACHINE
+      LIMIT: 199 crop-arms across both complete folds in about 8 minutes of wall clock at three workers -
+      roughly 1,235 crops/hour on fold 0 and 1,726 on fold 1 - with free RAM never below 4.5 GB and zero
+      refusals. A fourth worker, tested as a controlled A/B on one fixed 48-crop set, bought only about 9%
+      (93 s against 101 s) without paging, and was NOT adopted
+    value: 3
+    unit: workers_used_for_the_delivered_reversed_ladder_result
+    scope:
+      machine: {logical_cores: 8, physical_cores: 4, ram_gb: 16}
+      throughput: {fold_0_crops_per_hour: 1235, fold_1_crops_per_hour: 1726, wall_clock_min: 8,
+                   crop_arms: 199, refusals: 0}
+      free_ram_floor_gb: 4.5
+      fourth_worker_ab: {set: one fixed 48-crop set, three_workers_s: 101, four_workers_s: 93,
+                         gain: 0.09, paging: none, adopted: false}
+      determinism: 48 of 128 payloads regenerated under a different worker count, identical panel
+      native_library_threads: all pinned to 1
+      confound: a second agent was running concurrently
+      why_not_memory_bound: export surgery plus the official scorer; no ILP, no DeepCenter heatmaps
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The fourth-worker question was settled by a CONTROLLED A/B on one fixed crop set rather than by
+      comparing two different workloads, and determinism was confirmed by regenerating a subset under a
+      different worker count and getting an identical panel. The concurrent second agent is named as a
+      confound rather than ignored.
+    instrument: >-
+      scripts/win_bet/revladder_batch.py; benchmark evidence C:/temp/revladder/bench/
+    note: >-
+      THIS SCOPES FACT-0440 RATHER THAN CONTRADICTING IT. That entry measured the FULL-CHAIN REPLAY, which
+      carries the ILP and the DeepCenter heatmaps and does page above three workers. This workload does not,
+      and quoting the three-worker ceiling as a blanket limit would over-price cheap instruments like this
+      one by a large factor. Match the worker policy to the WORKLOAD, and measure it rather than inheriting
+      it.
+    date: '2026-08-31'
+    tags: [throughput, worker-policy, scopes-fact-0440, controlled-ab, determinism, measured]
+
+  - id: FACT-0451
+    statement: >-
+      THE TRAINING DATA OF HOCT's general_v1.pt CANNOT BE ESTABLISHED, AND OVERLAP WITH THE COMPETITION
+      MOVIES OR THEIR SOURCES CANNOT BE EXCLUDED. The paper documents 16 named Cell Tracking Challenge
+      datasets, none zebrafish - but for THE PAPER's models; general_v1 is not one of them, the paper predates
+      it by six weeks and names no "general" model, and it is described only as "for general datasets". No
+      manifest, model card, release note, pull request, commit message, repo tree entry or issue names its
+      data, and its producing package `slot_cell_tracking` is unpublished. The prior is ADVERSE: the
+      publisher is the ORGANIZER LAB and the asset was released eight weeks into the competition.
+      CONSEQUENCE, recorded before any number exists: general_v1 is RESTRICTED TO SUBMISSION-ONLY JUDGEMENT
+    value: false
+    unit: whether_overlap_with_competition_data_can_be_excluded_for_hoct_general_v1
+    scope:
+      asset: {name: general_v1.pt, sha256_16: 5bd836dfcb15ad79, release: weights-v1}
+      paper: {arxiv: 2607.11754v1, datasets: 16 named CTC, zebrafish: none,
+              covers: the paper's models, not general_v1, predates_asset_by_weeks: 6}
+      searched_and_empty:
+        - manifest
+        - model card
+        - release body
+        - 'pull requests, including PR 4 which registers the model'
+        - commit messages
+        - 'repo tree, 58 blobs'
+        - issues
+      producing_package: {name: slot_cell_tracking, published: false}
+      adverse_prior: {publisher: organizer lab, contact: jordao.bragantini@czbiohub.org,
+                      released: eight weeks into the competition}
+      restriction: SUBMISSION_ONLY_JUDGEMENT
+      comparison: mirror image of FACT-0424, where the equivalent restriction did NOT fire
+    provenance: EXTERNAL
+    validity: SUSPECT
+    validity_reason: >-
+      THIS IS THE ABSENCE OF EVIDENCE AND IT IS LABELLED AS SUCH. The search was finished rather than
+      abandoned - manifest, card, release body, PRs, commits, tree and issues were all checked and all are
+      silent - but a completed search of public surfaces cannot establish what a model was trained on. It is
+      WEAKER evidence than FACT-0424's, not stronger: there a curated inventory existed to check against,
+      here there is none.
+    instrument: >-
+      GitHub REST API reads over royerlab/hoct releases, PRs, commits, tree and issues; arXiv 2607.11754v1;
+      zip-directory read of the checkpoint without execution; evidence _evidence/hoct_official/
+    note: >-
+      QUOTE THIS AS "CANNOT BE ESTABLISHED", NEVER AS "NO OVERLAP FOUND". The two are different claims and
+      only the first is supported.
+      WHAT THE RESTRICTION MEANS IN PRACTICE, and it is the FACT-0378 shape exactly: the weights stay
+      LEGITIMATE TO USE, and any offline number computed with them is UN-MEASURABLE by any LOEO control we
+      can build - because we cannot show the held-out fold was held out of THEIR training. So a LOEO arm
+      using general_v1 would emit a figure indistinguishable in form from a valid one and interpretable as
+      neither. That is why the adapter must carry an `offline_scoreable: false` flag rather than relying on
+      an operator to remember.
+      RE-DERIVE THIS FACT IF A TRAINING MANIFEST OR A SUCCESSOR PAPER EVER APPEARS.
+    date: '2026-08-31'
+    tags: [hoct, general-v1, training-provenance, cannot-be-established, submission-only, fact-0378-shape,
+           external, suspect, headline]
+
+  - id: FACT-0452
+    statement: >-
+      HOCT's general_v1.pt IS ADMISSIBLE UNDER THIS COMPETITION'S OWN RULE TEXT, AND NO DOCUMENT ANYWHERE
+      ASSERTS A LICENCE OVER THE WEIGHTS. The rules were re-obtained and re-authenticated this cycle - 36,552
+      bytes, sha256 6d025a6e, matched field by field against a freshly fetched GetCompetition RPC - and the
+      deciding clauses are 2.6.a, 2.6.b and 2.5.a.3 as for FOCUS-3D, plus 3.6.c which FOCUS-3D did not need:
+      an OSI-approved licence that does not limit commercial use, which MIT satisfies and the fork bundle's
+      CC BY 4.0 weights do not. The repository has exactly ONE licence artifact, but the CHECKPOINT embeds
+      TorchScript-compiled timm under Apache-2.0, surfaced nowhere by the publisher
+    value: 3
+    unit: licence_obligations_binding_a_hoct_general_v1_integration
+    scope:
+      admissibility: ADMISSIBLE
+      deciding_clauses: ['2.6.a', '2.6.b', '2.5.a.3', '3.6.c']
+      clause_3_6_c: requires OSI-approved licences not limiting commercial use
+      mit_clears_3_6_c: true
+      fork_bundle_ccby_does_not: true
+      rules_reauthenticated: {bytes: 36552, sha256_16: 6d025a6e, against: a freshly fetched GetCompetition RPC,
+                              matched: [prizes 7 / $60,000 with ladder, MIT winner licence, CC0 data,
+                                        5 submissions/day, 2 finals, deadline]}
+      licences:
+        repository_code: {spdx: MIT, single_commit: 8166ca9ed6ee5b21383728c9d48e4803388e39a8,
+                          byte_identical_at: [that commit, main HEAD 2ccc5040, local copy]}
+        embedded_in_artifact: {package: timm, spdx: Apache-2.0, surfaced_by_publisher: false}
+        the_weights_themselves: NO LICENCE ASSERTED BY ANY DOCUMENT
+      attribution_required: [the HOCT MIT notice, an Apache-2.0 NOTICE for timm]
+      finals_selectable: 2
+      residual_limit: >-
+        a Host prohibition OUTSIDE the rules text could not be re-verified - the extractor returns empty
+        bodies for client-rendered pages - so FACT-0423's finding on that point is carried, not re-derived
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The rules were re-authenticated against an independent RPC payload BEFORE being quoted, rather than
+      trusted from a page fetch, and the licence position was read from the repository's single LICENSE
+      commit and from the artifact's own embedded package rather than from a badge. The negative - that no
+      document asserts a licence over the weights - is the result of a finished search, and it is recorded as
+      a gap rather than resolved by assumption.
+    instrument: >-
+      GitHub REST API; archived rules at _evidence/hoct_official/rules_2026-08-31.md; zip-directory read of
+      the checkpoint
+    note: >-
+      A CORRECTION TO OUR OWN RECORD, AND IT MUST NOT BE CARRIED FORWARD.
+      research/06-knowledge-system/internal-reports/architecture_training_2026-08-19.md:1005 records HOCT as
+      "code and weights MIT". The MIT licence is asserted over the repository's SOFTWARE; NO artifact
+      anywhere asserts a licence over the released checkpoints. The use remains defensible and rule 2.5.a.3
+      explicitly covers an absent or incompatible grant on pretrained models - but "weights MIT" is not a
+      fact and must stop being repeated.
+      THE THIRD-LICENCE PRECEDENT REPEATED, ONE LEVEL DEEPER. For FOCUS-3D a hidden third licence was found
+      by reading the source TREE rather than the advertised badge (FACT-0423). Here the tree is clean and the
+      hidden obligation is INSIDE THE ARTIFACT, compiled into the TorchScript archive. Reading the badge, or
+      even the repository, would have missed it both times.
+      NOTED FOR THE STANDING UNKNOWN: this rules read records TWO selectable final submissions, which is the
+      question left open at the macro review and it bounds the exploration policy.
+    date: '2026-08-31'
+    tags: [hoct, admissibility, licensing, timm, weights-unlicensed, corrects-our-record, two-finals,
+           verified, headline]
+
+  - id: FACT-0453
+    statement: >-
+      HOCT's general_v1.pt IS A SELF-CONTAINED EDGE MODEL THAT NEEDS NO TRUNK, AND ITS PARAMETER COUNT WAS
+      TAKEN WITHOUT EVER EXECUTING IT. By pickle-opcode disassembly and an inert-stub unpickler it is
+      slot_cell_tracking.modules.edge_model.EdgeModel with 132 tensors and 6,294,081 elements - calibrated
+      independently, since its 25,176,324 raw storage bytes are exactly four times that count. C=288, four
+      heads, four node and four edge blocks, two Linear(19->288) inputs, timm RmsNorm, RoPE at edge
+      midpoints, a LEARNED SOFTPLUS DISTANCE PRIOR added to the attention mask, head Linear(288->1). It is a
+      DIFFERENT MODEL from FACT-0390's 447,376-parameter fork head, and because it needs no trunk,
+      FACT-0392's GPU-bound trunk-feature blocker and its trunk-identity confound DO NOT APPLY
+    value: 6294081
+    unit: parameter_elements_in_hoct_general_v1
+    scope:
+      class: slot_cell_tracking.modules.edge_model.EdgeModel
+      tensors: 132
+      elements: 6294081
+      calibration: {raw_storage_bytes: 25176324, ratio_to_elements: 4.0, exact: true}
+      architecture: {C: 288, heads: 4, node_blocks: 4, edge_blocks: 4,
+                     inputs: two Linear(19->288), norm: timm RmsNorm, pos: RoPE at edge midpoints,
+                     distance_prior: learned softplus added to the attention mask, head: Linear(288->1)}
+      interface: forward(node_features, node_pos, edge_pos, edge_indices, node_mask, edge_mask)
+      traced_shapes: ['(1,12,19)', '(1,12,3)', '(1,32,3)', '(1,32,2)', '(1,12)', '(1,32)']
+      output_3: {value: torch.new_zeros, publisher_name: orphan logits, note: a constant zero}
+      needs_trunk: false
+      distinct_from: {fact: FACT-0390, params: 447376, role: fork head}
+      taken_without_torch_jit_load: true
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Read by pickle-opcode disassembly and an inert-stub unpickler, so the archived TorchScript graph was
+      never EXECUTED - which was the binding constraint while training provenance and eligibility were
+      unsettled. The count is not a single reading: it is calibrated against the raw storage size, which is
+      exactly four bytes per element, so a mis-parse would not have produced an exact ratio.
+    instrument: >-
+      pickle-opcode disassembly plus inert-stub unpickler over C:/temp/hoct_official/general_v1.pt;
+      evidence _evidence/hoct_official/
+    note: >-
+      THIS DISCHARGES FACT-0445's PARAMETER_COUNT PENDING, and it does so without ever running the file -
+      which is the part worth keeping. A TorchScript archive carries executable code; the count was obtained
+      from the pickle stream instead.
+      THE STRATEGICALLY IMPORTANT PART IS "NO TRUNK". FACT-0392 recorded that trunk identity is a CLI
+      argument absent from the checkpoint, which forced the dual-trunk acquisition design and its GPU cost.
+      A self-contained edge model that consumes node features and positions directly is not subject to that
+      confound at all.
+      THE ORPHAN-LOGIT ZERO IS A TRAP TO GUARD, NOT A CURIOSITY. Output 3 is a constant zero the publisher's
+      own code calls "orphan logits". Any adapter that reads it as a learned score will read a constant, and
+      a constant is exactly the kind of value that produces a plausible, wrong result rather than a crash.
+    date: '2026-08-31'
+    tags: [hoct, general-v1, edge-model, no-trunk, parameter-count, no-execution, orphan-logits, verified]
+
+  - id: FACT-0454
+    statement: >-
+      TWO ADAPTER BLOCKERS FOR HOCT v0.2.0, BOTH VERIFIED AT file:line AND BOTH SILENT. FIRST, THE `scale`
+      ARGUMENT NEVER REACHES THE MODEL: `scaled_` occurs exactly once in the whole package, at graph.py:182,
+      into a local frame that is discarded; graph.py:143 defaults it to 1.0; graph.py:212 records it in
+      metadata only AFTER DistanceEdges has already run at graph.py:191; and _frame_dataset.py:54 feeds the
+      raw z,y,x columns. The paper corroborates with "tau = 300 PIXELS". HOCT IS VOXEL-NATIVE, so on our
+      4:1:1 anisotropic data neither microns nor raw voxels is safe by default. SECOND, 15 OF THE 19 INPUT
+      FEATURES REQUIRE INSTANCE MASKS the deployed notebook does not produce, and the one published
+      points-only entry point is an unimplemented stub that is nonetheless exported
+    value: 15
+    unit: of_19_hoct_input_features_requiring_instance_masks_we_do_not_have
+    scope:
+      commit: royerlab/hoct 2ccc5040
+      blocker_1_scale:
+        symbol_occurrences: {scaled_: 1, at: 'graph.py:182', into: a discarded local frame}
+        default: 'graph.py:143 -> 1.0'
+        metadata_written_after_use: {metadata: 'graph.py:212', distance_edges_ran_at: 'graph.py:191'}
+        raw_columns_fed_at: '_frame_dataset.py:54'
+        paper_corroboration: tau = 300 PIXELS
+        consequence: voxel-native; our data is anisotropic 4:1:1 (1.625 / 0.40625 / 0.40625)
+        required_before_any_number: calibrate the unit choice against FACT-0040's 1.817 um anchor
+      blocker_2_features:
+        features_total: 19
+        require_instance_masks: 15
+        deployed_notebook_produces_masks: false
+        evidence_of_absence: zero occurrences of regionprops, label(, segmentation, mask; detection is by
+          cfg.det_threshold at lines 216 and 222
+        points_only_entry_point: {name: create_graph_from_points, state: unimplemented stub `pass`,
+                                  at: '_api.py:133-134', exported_in_all: true}
+        failure_mode: missing intensity features are SILENTLY ZERO-FILLED
+        result_of_that_failure: a correctly-shaped 19-vector that is 15/19 constant
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Both were read at named lines in the published package at a pinned commit, and each was established by
+      a finished search rather than a single grep - the scale finding rests on the SOLE occurrence of the
+      symbol in the entire package plus the ordering of three call sites, and the mask finding on the
+      absence of every segmentation idiom in the deployed notebook together with the stub's own body.
+    instrument: source read at the cited lines of royerlab/hoct 2ccc5040; evidence _evidence/hoct_official/
+    note: >-
+      BOTH BLOCKERS FAIL SILENTLY, WHICH IS WHY THEY ARE RECORDED AS FACTS RATHER THAN AS TODO ITEMS. Passing
+      a `scale` that is never applied produces a model run at the wrong geometry with no error. Zero-filling
+      15 of 19 features produces a correctly-shaped input that carries almost no information, and a head fed
+      a mostly-constant vector returns a plausible number. Either would look exactly like "the foreign model
+      does not transfer" - the false-kill shape this campaign has now met three times (FACT-0432's coverage
+      default, FACT-0425's strict=False loader, and here).
+      THE ADAPTER MUST THEREFORE ASSERT, NOT ASSUME: the unit convention calibrated against FACT-0040 before
+      any number is read, and named-order feature identity with a refusal when a required feature is absent
+      rather than a zero fill.
+    date: '2026-08-31'
+    tags: [hoct, adapter, voxel-native, anisotropy, instance-masks, silent-failure, stub-entry-point,
+           verified, headline]

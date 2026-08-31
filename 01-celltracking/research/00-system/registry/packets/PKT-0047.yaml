@@ -2,7 +2,7 @@ id: PKT-0047
 title: "HOCT official-release provenance audit and detector-adapter preparation, read-only, no execution"
 lever: null
 owner: agent-10-hoct-provenance
-lock: claimed
+lock: done
 opened: '2026-08-31'
 
 why_no_lever: >-
@@ -59,4 +59,416 @@ outputs:
   facts_added: []
   record: One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  COMPLETE, READ-ONLY, NO EXECUTION OF THE ARCHIVED GRAPH. torch.jit.load was never called; the
+  parameter count was taken from the bytes instead (see step 4). Evidence:
+  _evidence/hoct_official/pkt0047_audit.json (machine-readable, every number below),
+  _evidence/hoct_official/rules_2026-08-31.md (36,552 B, sha256 6d025a6e255ab8d1...),
+  plus the release/tree/RPC payloads beside them and the working set at C:/temp/hoct_official/.
+  Source line numbers below are pinned to royerlab/hoct commit
+  2ccc5040823bc944ab67790abd1f56eea7cd4f05 (hoct v0.2.0), NOT to the weights-v1 tag - see (1c).
+  .
+  ===================== (1) ARTIFACT BINDING, EXTENDED =====================
+  .
+  (1a) DECLARED VS MEASURED: three INDEPENDENT declarations of the digest all agree with the
+  recomputed one, so there is no refusal to record. The GitHub API asset field
+  (digest: sha256:5bd836df...), the release body text, and the MODELS registry literal in
+  src/hoct/_models.py all state
+  5bd836dfcb15ad796ea79a9595841a3e73b650a71c4acba3fc66aac65d745b33; re-hashing the local file
+  reproduces it at 25,496,698 bytes, and the API's declared `size` matches byte for byte. The
+  publisher also verifies the hash at download time (pooch.retrieve known_hash), so the
+  distribution channel is self-checking.
+  .
+  (1b) FULL ASSET INVENTORY OF THE REPOSITORY, not just of weights-v1: FOUR releases, SIX assets.
+  weights-v0 (2026-06-15T17:21:18Z) carries TWO checkpoints - ctc_v0.pt 25,505,802 B
+  sha256 b9be3d976e2d51ae9461...944000 and general_v0.pt 25,510,490 B
+  sha256 024c2e4606275c966679...ef8e4a - while its release BODY names only general_v0, so
+  ctc_v0.pt is undocumented in its own release note. weights-v1 (2026-08-24T21:13:04Z) carries
+  the single asset we hold. v0.1.0rc0 and v0.2.0 carry wheels and sdists only.
+  .
+  (1c) THE TAG DOES NOT DATE THE ASSET, and this is the trap in the binding. The weights-v1 TAG
+  resolves to commit cabe8fd4bd1ccc3a18edc2b82b1e6501e396f357 - the SAME commit as tag v0.1.0rc0,
+  dated 2026-06-15T23:52:21Z - while the asset was uploaded 2026-08-24T21:13:02Z and the release
+  record was published 2026-08-24T21:13:04Z. The tag is TEN WEEKS older than the file it ships.
+  Anything read "at the weights-v1 tag" is therefore code that predates the checkpoint. Pin source
+  reads to a commit sha; never to this tag.
+  .
+  (1d) THE LICENSE COMMIT, which the previous read took from the moving `main`: LICENSE has exactly
+  ONE commit in its whole history - 8166ca9ed6ee5b21383728c9d48e4803388e39a8, 2026-06-15T17:35:06Z,
+  "Review pass: DRY properties, add LICENSE, fix docs". Its content at that commit is BYTE-IDENTICAL
+  to its content at main HEAD 2ccc5040823bc944ab67790abd1f56eea7cd4f05 (2026-08-24T21:21:39Z) and to
+  the local copy at C:/temp/hoct_official/LICENSE. MIT, Copyright (c) 2026 Jordao Bragantini and the
+  HOCT contributors. The moving-target risk is real but did not bite: the text has not changed.
+  .
+  ===================== (2) TRAINING PROVENANCE - THE BINDING RESULT =====================
+  .
+  VERDICT: CANNOT BE ESTABLISHED. Overlap with the competition movies or their sources CANNOT BE
+  EXCLUDED. RESTRICTION RECORDED BEFORE ANY NUMBER IS PRODUCED: general_v1.pt is restricted to
+  SUBMISSION-ONLY JUDGEMENT. It stays legitimate to USE - eligibility is settled independently in
+  (3) and does not depend on training data - and its offline evaluation is un-interpretable by any
+  LOEO control we can build. This is the FACT-0378 shape exactly, and it is the OPPOSITE of what
+  FACT-0424 found for FOCUS-3D, where the restriction was false.
+  .
+  (2a) WHAT THE PUBLISHER DOES DOCUMENT, and it is not this file. arXiv 2607.11754v1 (Bragantini,
+  Theodoro, Royer; affiliation Biohub) gives a closed training manifest for THE PAPER's models: 16
+  named CTC datasets, sequence 01 train / 02 validation, 32 sequences, two cross-validation splits,
+  50k steps. The 16 are BF-C2DL-HSC, BF-C2DL-MuSC, DIC-C2DH-HeLa, Fluo-C2DL-MSC, Fluo-C3DH-A549,
+  Fluo-C3DH-A549-SIM, Fluo-C3DH-H157, Fluo-C3DL-MDA231, Fluo-N2DH-GOWT1, Fluo-N2DH-SIM+,
+  Fluo-N2DL-HeLa, Fluo-N3DH-CE, Fluo-N3DH-CHO, Fluo-N3DH-SIM+, PhC-C2DH-U373, PhC-C2DL-PSC. NONE is
+  zebrafish; Zebrahub, CZI Biohub and Royer-lab movies appear nowhere in it.
+  .
+  (2b) BUT general_v1 IS NOT THAT MODEL. The paper is v1 of 2026-07-13; the asset was uploaded
+  2026-08-24; the paper contains ZERO mentions of any "general" model. The README distinguishes
+  ctc_v0 ("the model trained for Cell Tracking Challenge datasets") from general_v1 ("the default
+  model for general datasets"), naming no data for the latter. "General" is defined by the
+  publisher only by CONTRAST with CTC, so by their own wording it is trained on something BEYOND
+  the documented set - and that something is nowhere described.
+  .
+  (2c) THE SEARCH WAS FINISHED, and it is empty for a stated reason rather than by accident. No
+  training manifest, model card, dataset list or paper covers general_v1 in: all four release
+  bodies; all four pull requests including #4 "Use general v1 as the default pretrained model",
+  which registers it and says nothing about its data; the registering commit
+  3d85b10851cf86b848691ad678470b394f3c3b81; the complete 58-entry repository tree at main HEAD;
+  and the issue list, which holds four items, all of them the pull requests. Further, the PRODUCING
+  CODEBASE is a package named `slot_cell_tracking` - read from the archive's own zip directory
+  WITHOUT executing it - which is not in royerlab/hoct and which a GitHub repository search does not
+  find under royerlab. The training code cannot be inspected because it is not published.
+  .
+  (2d) THE PRIOR IS ADVERSE IN A WAY FOCUS-3D's WAS NOT, which is why "no manifest" cannot be read
+  as "probably clean". The publisher IS the organizer lab (paper affiliation Biohub; pyproject.toml
+  author email jordao.bragantini@czbiohub.org at the pinned commit); the same GitHub org publishes
+  royerlab/kaggle-cell-tracking-competition, this competition's own baseline; and the asset was
+  uploaded 2026-08-24, eight weeks into a competition that opened 2026-06-29 and closes 2026-09-29.
+  .
+  (2e) DISCIPLINE, copied from FACT-0424 and applied more strictly because the evidence is weaker.
+  For FOCUS-3D there was at least a curated inventory to check against, and that was still labelled
+  negative evidence, EXTERNAL / SUSPECT. Here there is NO inventory at all, so this is weaker than
+  that, not stronger. The verdict is "cannot be established" and must be quoted in that form; it may
+  never be paraphrased as "no overlap found", still less as "no overlap". If a training manifest or
+  a paper covering general_v1 appears, this must be RE-DERIVED against it.
+  .
+  (2f) THE USEFUL ASYMMETRY. ctc_v0 (sha256 b9be3d97..., release weights-v0) DOES carry a positive
+  publisher claim tied to a published manifest, and that manifest contains no zebrafish. If a
+  documented-provenance HOCT checkpoint is ever wanted, ctc_v0 is the one with a checkable claim -
+  still EXTERNAL, but checkable. general_v1 has none.
+  .
+  ===================== (3) COMPETITION ELIGIBILITY =====================
+  .
+  VERDICT: ADMISSIBLE. Judged against the archived rule text, re-obtained and RE-AUTHENTICATED this
+  cycle rather than carried. The rules page returns a 5,720-byte JS SPA shell containing zero
+  occurrences of "reasonableness"; the 36,552-byte markdown was obtained by text extraction and
+  authenticated BEFORE being quoted, against a GetCompetition RPC payload re-fetched this cycle:
+  7 prizes, $60,000 with the ladder 18/12/8/6/6/5/5k, MIT winner licence, CC0 data, 5 submissions
+  per day, 2 final submissions, team size 5, deadline 2026-09-29T23:59:00Z - every one matching.
+  The RPC differs from PKT-0043's copy only in volatile counters (totalTeams, totalCompetitors,
+  totalSubmissions, totalJoinedUsers, category counts); every rule-bearing field is identical.
+  .
+  (3a) THE CLAUSES THAT DECIDE IT. 2.6.b: "The use of external data and models is acceptable unless
+  specifically prohibited by the Host ... their use must be 'reasonably accessible to all' and of
+  'minimal cost'", with the worked example that a licence costing more than the prize is not
+  reasonable - a $0 public download is the opposite case, and no Host prohibition appears anywhere
+  in the rules. 2.6.a additionally requires External Data be "publicly available and equally
+  accessible ... at no cost to the other Participants": an UNAUTHENTICATED GitHub release asset with
+  a published SHA256 and a pip-installable, hash-verifying loader satisfies this DIRECTLY, and more
+  cleanly than FOCUS-3D, which needed an auto-approved Hugging Face gate. 2.5.a.3 - "In the event
+  that input data or pretrained models with an incompatible license are used to generate your
+  winning solution, you do not need to grant an open source license ... for that data and/or
+  model(s)" - is incoherent unless pretrained models are permitted.
+  .
+  (3b) ONE CLAUSE FOCUS-3D DID NOT NEED, and it is the one that would bite a different asset. 3.6.c
+  (Use of Open Source): "you must only use open source code licensed under an Open Source
+  Initiative-approved license ... that in no event limits commercial use". MIT is OSI-approved and
+  does not limit commercial use, so HOCT clears it, and 2.5.a.1's MIT winner licence needs no
+  carve-out. Note the contrast: the Kaggle-fork bundle we already hold carries CC BY 4.0 weights
+  (FACT-0390), which is NOT OSI-approved - 2.5.a.3 is the clause that covers that case, and it
+  should be cited when that bundle is used.
+  2.7.a (Eligibility) is about PERSONS, not assets: HOCT's authors being Sponsor employees restricts
+  their prize eligibility, not our use of their public model.
+  .
+  (3c) THE FOCUS-3D "THIRD LICENCE" PRECEDENT, APPLIED - and it repeats, just not where it did last
+  time. Reading the source tree at a pinned commit rather than the advertised badge: royerlab/hoct
+  has EXACTLY ONE licence artifact across 58 blobs at main HEAD, the top-level MIT LICENSE, with no
+  vendored LICENSE anywhere and pyproject.toml declaring license={text="MIT"} plus the OSI MIT
+  classifier. So the hidden-vendored-licence pattern does not repeat INSIDE THE REPOSITORY. It
+  repeats INSIDE THE ARTIFACT, which is the only place it could have been found: the checkpoint's
+  compiled namespace embeds `__torch__.timm.layers.norm.RmsNorm`, i.e. TorchScript-compiled timm
+  (pytorch-image-models, Apache-2.0, Ross Wightman), and neither the LICENSE, the release body nor
+  the README mentions timm - while Apache-2.0 carries attribution/NOTICE obligations. The archive's
+  code/ tree is likewise compiled from `slot_cell_tracking`, which is not royerlab/hoct's software
+  and is published and licensed nowhere.
+  .
+  (3d) AND THE WEIGHTS THEMSELVES CARRY NO GRANT AT ALL. No weights LICENSE file, no model card, and
+  a release body that says only "Pretrained general v1 model weights for HOCT" plus the SHA256. That
+  is THINNER than FOCUS-3D's weights position, which at least had one README sentence. THIS
+  CORRECTS ONE OF OUR OWN DOCUMENTS: research/06-knowledge-system/internal-reports/
+  architecture_training_2026-08-19.md:1005 states "code and weights MIT". MIT is asserted over the
+  repository's SOFTWARE; nothing asserts it over the released checkpoint. The practical position
+  stays defensible - the copyright holder distributes the asset from the MIT-licensed repository,
+  and 2.5.a.3 covers an incompatible or absent grant - but the claim must not be restated as fact.
+  ATTRIBUTION TO CARRY INTO ANY RELEASED ARTIFACT: the MIT notice for Jordao Bragantini and the HOCT
+  contributors, AND an Apache-2.0 NOTICE for timm, which nothing in the publisher's own licensing
+  surface reveals.
+  .
+  (3e) RESIDUAL, STATED RATHER THAN SMOOTHED OVER. Whether the Host published a prohibition OUTSIDE
+  the rules text - on the Overview page or in a forum post - could NOT be re-verified this cycle:
+  the text extractor returns an EMPTY body for /competitions/<slug> and /data, both client-rendered,
+  and three GetCompetition* RPC name variants return 404. That is a known-cause negative, not a clean
+  one, and an empty result is not evidence. FACT-0423's competition-wide "no Host prohibition"
+  finding is CARRIED here, not re-derived.
+  .
+  ===================== (4) PARAMETER COUNT AND STRUCTURE =====================
+  .
+  Taken only after (2) and (3) both returned recorded verdicts. TAKEN WITHOUT EXECUTING THE ARCHIVED
+  GRAPH: torch.jit.load was never called. The pickles were read by pickletools.genops opcode
+  disassembly and by a pickle.Unpickler whose find_class returns inert LOCAL stub classes, so only
+  our own code ever ran; the code/ tree was read as text. This is strictly safer than the route the
+  packet gated, and it yields more.
+  .
+  ROOT MODULE `__torch__.slot_cell_tracking.modules.edge_model.EdgeModel`. 132 tensors,
+  6,294,081 total elements (parameters + buffers). CALIBRATED AGAINST AN INDEPENDENT DERIVATION, as
+  the standing rule requires: the raw data/ storage records total 25,176,324 bytes, which is exactly
+  4 x 6,294,081. Two unrelated routes agree to the element, which also proves single-dtype float32
+  with no shared or oversized storage. FACT-0445's `parameter_count: PENDING` is discharged.
+  .
+  STRUCTURE: width C=288, 4 heads, head_dim 72, MLP hidden 576; 4 node blocks + 4 edge blocks = 8
+  AttnBlocks; TWO Linear(19 -> 288) input projections (input_proj for nodes, edge_input_proj); timm
+  RmsNorm inside blocks and LayerNorm at the head; GELU; RoPEmbedding applied at EDGE MIDPOINTS
+  (buffers (1,4,1,1) and (1,4,1,12,1)); a per-block LEARNED distance prior - dist_scaling and
+  dist_scaling_head_direction pushed through softplus and ADDED to the attention mask; head =
+  LayerNorm -> Dropout -> Linear(288 -> 1); an EdgeGatherer that gathers source/target node
+  embeddings by edge_indices, concatenates to 576 and MLPs them. Shape census:
+  (288,)x46, (576,288)x24, (288,288)x9, (288,576)x9, (1,4,1,1)x8, (1,4,1,12,1)x8, (4,72)x8,
+  (576,)x8, (72,72)x8, (288,19)x2, (1,288)x1, (1,)x1.
+  .
+  INTERFACE: forward(node_features, node_pos, edge_pos, edge_indices, node_mask, edge_mask) ->
+  Tuple[Tensor, Tensor, Tensor, Tensor]. The archive ships traced_inputs.pkl, so the exact traced
+  shapes are known: node_features (1,12,19), node_pos (1,12,3), edge_pos (1,32,3), edge_indices
+  (1,32,2), node_mask (1,12), edge_mask (1,32) - 12 nodes, 32 candidate edges, 19 node features,
+  3-D coordinates, (source,target) index pairs.
+  .
+  OUTPUT 3 IS A TRAP AND IT IS THE SINGLE MOST DANGEROUS THING IN THIS ARTIFACT. The graph returns
+  `torch.new_zeros(...)` in slot 3 - an identically ZERO tensor - while
+  src/hoct/inference/_predict.py names that slot "orphan logits" (oph_logits) and slices it by
+  node_mask. An adapter that reads output[3] as an abstain or orphan score consumes a constant zero
+  and sees no error anywhere.
+  .
+  RELATION TO WHAT WE HOLD: this is a DIFFERENT model from the Kaggle-fork head of FACT-0390
+  (StableDetHOCTFork, 447,376 params, feature_dim 32 over UNet trunk features). general_v1 is
+  6,294,081 elements over 19 HAND-CRAFTED features and needs NO trunk, so FACT-0392's "still
+  GPU-bound on 32-channel UNet node features" blocker does not apply to it, and neither does that
+  fact's third risk - trunk identity as an unrecorded CLI argument - because there is no trunk.
+  .
+  ===================== (5) ADAPTER CONTRACT - SPECIFIED, NOT BUILT =====================
+  .
+  Each requirement names the check that REJECTS a violation, and says plainly whether that check is
+  ALREADY COMMITTED AND DEMONSTRATED or MUST BE BUILT. Nothing below is claimed as guarded when it
+  is not. Source line numbers pin to hoct commit 2ccc504.
+  .
+  R1 WEIGHT IDENTITY. Bind by the full sha256 5bd836df...5d745b33, never by filename and never by
+  the weights-v1 tag (1c). REJECTING CHECK - COMMITTED: provenance_policy.role_binding_refusals()
+  with known_identity(), MIN_DIGEST_PREFIX=16 and PLACEHOLDER_PROVENANCE, enforced at launch by
+  gpu_protection_contract clauses SDATA-2 ("model and data inputs are declared AND hash-bound") and
+  DATA-4 ("contamination status and checkpoint hash are bound"). DEMONSTRATED REJECTION, available
+  today with no code change: general_v1 is absent from provenance_policy.KNOWN_CHECKPOINTS, so
+  known_identity() returns (None, None) and the _unknown() path refuses it. The artifact is
+  FAIL-CLOSED right now; a code change is needed for the ACCEPT, not for the reject. Second failing
+  input: declare role general_v1 while supplying a fork digest (d3e89eb3... or 12f6881e...) - the
+  declared-versus-recomputed comparison refuses.
+  .
+  R2 FOLD LEGITIMACY AND THE (2) RESTRICTION. Because training provenance CANNOT BE ESTABLISHED,
+  general_v1 must be refused as a CLAIM arm on BOTH folds - the same standing as the FACT-0378
+  all-199 secondary. REJECTING CHECK - COMMITTED for the fold half: gpu_protection_contract DATA-1
+  (the run declares its fold), DATA-2 (the trunk is fold-legitimate for its own fold), DATA-3 (any
+  dual_trunk_pair has a fold-legitimate arm), backed by provenance_policy.claim_arm_refusals() and
+  comparison_arm_refusals(); the committed self-test already demonstrates "DATA-2 mutation: an
+  illegitimate role DECLARED legitimate", "DATA-3 mutation: the FACT-0418 pair with no
+  fold-legitimate arm" and "DATA-2 OOS: no trunk declared is OUT_OF_SCOPE, not a PASS". MUST BE
+  BUILT for the provenance half: a `provenance_unknown` marker on the ROLES entry so
+  claim_arm_refusals() returns a refusal on EVERY fold rather than only on the wrong one. Until it
+  exists, R1's _unknown() path is what keeps this fail-closed, and that is a weaker guard than it
+  looks - it fails for the wrong reason and would silently stop refusing the moment the digest is
+  registered. Failing input to encode: general_v1 declared as the fold-0 claim arm.
+  .
+  R3 MOUNT RESOLUTION - never a hardcoded path (FACT-0397 cost a GPU session to exactly this).
+  REJECTING CHECK - COMMITTED AND DEMONSTRATED: the central bounded resolver is
+  scripts/win_bet/kaggle_mounts.py resolve() over CONVENTIONS=("flat","datasets","competitions"),
+  with is_bounded(). gpu_preflight --selftest already asserts "M1 PF02 rejects the hardcoded flat
+  mount root (FACT-0397)" on the literal /kaggle/input/<slug>/... form, "M2 PF02 rejects a `**` walk
+  as unbounded", and the ACCEPT control "A1 ACCEPT central ladder resolves under
+  flat/datasets/competitions". The adapter resolves the checkpoint through resolve(); a literal path
+  is refused by M1 and an unbounded `**` by M2.
+  .
+  R4 COORDINATE SCALE AND ANISOTROPY - and the naive requirement INVERTS here, which is why this is
+  the requirement most likely to produce a wrong number. FINDING, verified across the whole package
+  (all 15 modules fetched and searched): `scaled_` occurs EXACTLY ONCE, at graph.py:182, where
+  scaled_t/z/y/x are computed into a LOCAL polars frame and never written back to the graph;
+  graph.py:143 defaults scale to (1.0,)*ndim; graph.py:212 records scale in graph.metadata only
+  AFTER DistanceEdges has already run at graph.py:191; and _frame_dataset.py:54 feeds the model the
+  RAW "z","y","x" columns. The paper corroborates independently - "distance threshold tau = 300
+  PIXELS". So HOCT v0.2.0 is VOXEL-NATIVE and its --scale flag is inert on the model path. Handing
+  it physical microns is therefore NOT automatically the right move: our 1.625/0.40625/0.40625
+  (z:y:x = 4:1:1) in microns puts coordinates roughly 4x outside the distribution its RoPE, its
+  learned dist_scaling and its standardisation constants were fitted on (_MEAN[1]=2.938 for z is a
+  thin-stack statistic), while raw voxels make one z step physically worth four y/x steps.
+  REJECTING CHECK - MUST BE BUILT, none exists: (i) the spec must DECLARE the coordinate unit, and
+  an absent declaration is OUT_OF_SCOPE, not a pass - the v1 false-pass lesson; (ii) a FACT-0040
+  calibration gate - the adapter's own distance function must reproduce the fold-1 GT median
+  inter-frame displacement of 1.817 um against the committed oracle
+  scripts/win_bet/nearest_parent_oracle.py calibrate_displacement() before ANY HOCT number is read.
+  FAILING INPUTS THAT MUST BE SHOWN TO BE REJECTED: an isotropic-1.625 convention, and a raw-voxel
+  array read as microns. Both are silent today.
+  .
+  R5 EXACT PREPROCESSING - three separable pieces, each with its own silent failure, none of them in
+  the checkpoint. (a) Image normalisation: features.py normalize_image - subtract the min, divide by
+  (0.999 quantile - min + 1e-7), float32, clip=False, applied PER TIMEPOINT via rechunk((1, *shape))
+  and map_blocks. (b) The 19-dim node vector in EXACTLY this order, assembled at _batching.py:195-214
+  as select(T, *spatial_cols, *properties) then unpack_array_attrs, with the property order fixed by
+  features/constants.py REGIONPROPS: [t, z, y, x, equivalent_diameter_area, intensity_min,
+  intensity_max, intensity_mean, intensity_std, inertia_tensor (3x3, 9 values), border_dist] =
+  1 + 3 + 15 = 19. (c) Standardisation: _transforms.py:204 Standardize(mean=_MEAN, std=_STD) with the
+  19-element constants literal at _api.py:18-59 - in the PACKAGE, not the checkpoint, so a hand-rolled
+  adapter that omits them feeds unstandardised features and the model still runs.
+  REJECTING CHECK - MUST BE BUILT: assert len(_MEAN)==len(_STD)==19==node_features.shape[-1] AND a
+  frozen NAMED-ORDER assertion on the 19 columns, refusing on any reorder; plus a shape/dtype
+  contract gate against the archive's OWN traced_inputs shapes ((1,12,19), (1,12,3), (1,32,3),
+  (1,32,2), (1,12), (1,32)), which refuses any adapter whose tensor layout disagrees. FAILING INPUT
+  THAT MUST BE REJECTED: swap intensity_min with intensity_max. It is shape-preserving, so only the
+  named-order assertion catches it - and FACT-0391 is precisely the lesson that a shape-correct load
+  can compute the wrong function.
+  .
+  R6 THE FEATURE SUBSTRATE - the binding blocker, named before any GPU is discussed. FIFTEEN of the
+  19 features are region properties requiring an INSTANCE MASK per cell. Our deployed pipeline has
+  none: notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb contains ZERO occurrences of
+  regionprops, label(, segmentation or a whole-word mask, and detects by thresholding a heatmap
+  (cfg.det_threshold at lines 216 and 222). And the ONE published entry point that would accept bare
+  points, hoct.create_graph_from_points, is an UNIMPLEMENTED STUB - "# TODO: Implement using
+  tracksdata - waiting for user guidance" at _api.py:133 followed by `pass` at _api.py:134 - while
+  still being exported in __all__ at _api.py:15. Calling it returns None.
+  REJECTING CHECK - MUST BE BUILT, and it refuses TODAY, which is the point: (i) assert
+  create_graph_from_points(...) returns a graph and not None; (ii) a feature-availability gate that
+  refuses if any of the 15 mask-derived features is filled with the package's zero default -
+  graph.py:184-187 adds every intensity property as pl.Float32 default 0.0 when images is None, and
+  _batching.py:202-211 warns only on nulls and NaNs, so a mask-free adapter yields a
+  fully-populated, correctly-shaped 19-vector that is 15/19 CONSTANT and then standardised into
+  large negative z-scores. This is the easiest violation in the whole contract to make silently.
+  .
+  R7 PROCESS-BOUNDARY HEARTBEAT. REJECTING CHECK - COMMITTED: gpu_protection_contract PROC-1 (an
+  EXPLICIT environment reaches the predictor subprocess), PROC-2 (a positive gate heartbeat whose
+  ABSENCE is the alarm), PROC-3 (the expected CROP COUNT is asserted and equals the run limit),
+  PROC-4 (a TIME budget with an early abort). FACT-0387 binds specifically: the deployed predictor
+  runs as a SUBPROCESS and every patch in this tree that has ever worked reaches it by REWRITING
+  scripts/predict_unet_transformer.py's source text, never by importing it. FAILING INPUTS ALREADY
+  REJECTED: an adapter whose only evidence of running is the absence of an exception fails PROC-2; a
+  run reporting zero crops fails PROC-3 - which is exactly how FACT-0387 and FACT-0397 were caught
+  cheaply instead of licensing two feature-cache sessions.
+  .
+  R8 PASSIVE CANDIDATE EXPORT. The first armed run must not change the deployed graph. REJECTING
+  CHECK - PARTLY COMMITTED: ART-1 (atomic output surviving the export sweep), ART-3 (independent
+  post-run cache reconstruction), ART-4 (expected outputs RE-DERIVED from the built notebook rather
+  than trusted from the receipt - FACT-0417's hardcoded-wrong-worker defect). MUST BE BUILT: a
+  deployed-output-invariance assertion - with the adapter armed in passive mode the produced
+  submission must be BYTE-IDENTICAL to the control. Failing input: an adapter that mutates any edge
+  score while declaring itself passive.
+  .
+  R9 PARITY A FOREIGN SCORER MUST CLEAR BEFORE ITS OUTPUT MEANS ANYTHING.
+  (a) CANDIDATE SURFACE, the FACT-0392 lesson repeated for this artifact: HOCT builds its own graph -
+  DistanceEdges(distance_threshold=300.0, n_neighbors=5, delta_t=3, neighbors_per_frame=True) at
+  graph.py:191 with the _api.predict defaults - uncapped per target, while our deployed rule admits
+  at most ONE parent per target (FACT-0369) and the widened P30 surface at most four. general_v1
+  CANNOT be run as a reranker of our candidate list; it must be given its own graph. Comparability is
+  WITHIN-TARGET RANKING only. REJECTING CHECK - MUST BE BUILT: refuse any comparison that reports an
+  absolute probability level across the two surfaces. Failing input: a mean-probability comparison.
+  (b) OUTPUT EQUIVALENCE, the FACT-0391 lesson: a shape-correct load is necessary and NOT sufficient.
+  Because the producing graph SHIPS INSIDE this artifact, any re-implementation must reproduce the
+  ARCHIVE's own outputs at 0.0 max-abs delta on the archive's own traced_inputs. If we consume the
+  archive directly there is nothing to reproduce - and that, precisely, is the one respect in which
+  this artifact is genuinely cheaper than the FACT-0390/FACT-0391 reconstruction.
+  (c) OUTPUT-3 ZERO GUARD: assert output[3].abs().max() == 0 on the first run and refuse any code
+  path that thresholds it as an orphan or abstain score. MUST BE BUILT; failing input is any such
+  path, and nothing currently errors.
+  (d) SAFETY, unchanged: neither node recall nor division TP may decline (FACT-0371). Enforced by the
+  promotion gate, not by code.
+  .
+  R10 THE (2) RESTRICTION MUST BE MECHANICAL, NOT REMEMBERED - the highest-value CPU-only item here.
+  The spec schema must carry offline_scoreable:false for this role, and any harness that emits a LOEO
+  score with it armed must REFUSE. MUST BE BUILT; no equivalent exists. Failing input: a LOEO arm
+  configured with general_v1 - today it would produce a number, and that number would be
+  un-interpretable while looking exactly like every other number in the registry. This is the
+  requirement a well-meaning agent six cycles from now is most likely to violate.
+  .
+  ===================== CANDIDATE FACTS FOR THE COORDINATOR =====================
+  .
+  CF-A (extends FACT-0445; VERIFIED). The declared digest agrees with the measured one across THREE
+  independent declarations - the GitHub API asset digest, the release body, and the MODELS registry
+  in src/hoct/_models.py - at 25,496,698 bytes; no refusal. The repository ships 4 releases and 6
+  assets, including an earlier weights-v0 carrying BOTH ctc_v0.pt (25,505,802 B, b9be3d97...) and
+  general_v0.pt (25,510,490 B, 024c2e46...), of which the release body names only one. The
+  weights-v1 TAG resolves to commit cabe8fd4 dated 2026-06-15, ten weeks BEFORE its own asset was
+  uploaded on 2026-08-24, so the tag does not date the artifact. LICENSE has exactly one commit ever,
+  8166ca9e (2026-06-15), and is byte-identical there, at main HEAD 2ccc5040, and locally.
+  Instrument: GitHub REST API reads + sha256 of the bytes; evidence _evidence/hoct_official/.
+  .
+  CF-B (the load-bearing one; EXTERNAL / SUSPECT). The training data of general_v1.pt CANNOT BE
+  ESTABLISHED and overlap with the competition movies or their sources CANNOT BE EXCLUDED. The paper
+  documents 16 named CTC datasets for THE PAPER's models, none of them zebrafish; general_v1 is not
+  that model, is described only as "for general datasets", and is covered by no manifest, model card,
+  release note, pull request, commit message or issue. Its producing package, `slot_cell_tracking`,
+  is unpublished. The publisher is the organizer lab and the asset was released eight weeks into the
+  competition. CONSEQUENCE, recorded before any number: general_v1 is RESTRICTED TO SUBMISSION-ONLY
+  JUDGEMENT (FACT-0378 shape) - legitimate to use, un-measurable by any LOEO control we can build.
+  This is the mirror image of FACT-0424, where the restriction was false. Quote as "cannot be
+  established", never as "no overlap found". Re-derive if a manifest ever appears.
+  .
+  CF-C (VERIFIED). general_v1.pt is ADMISSIBLE under this competition's own rule text, re-obtained
+  and re-authenticated this cycle (36,552 B, sha256 6d025a6e..., matched field-by-field against a
+  freshly fetched GetCompetition RPC payload). Deciding clauses 2.6.a, 2.6.b and 2.5.a.3 as for
+  FOCUS-3D, plus 3.6.c which FOCUS-3D did not need: MIT is OSI-approved and does not limit commercial
+  use. Unlike FOCUS-3D the repository has exactly ONE licence artifact - but the ARTIFACT embeds
+  TorchScript-compiled timm (Apache-2.0), surfaced nowhere by the publisher, and NO document anywhere
+  asserts any licence over the weights themselves. Attribution obligations: the HOCT MIT notice AND
+  an Apache-2.0 NOTICE for timm.
+  .
+  CF-D (VERIFIED; discharges FACT-0445's parameter_count PENDING). general_v1.pt is
+  slot_cell_tracking.modules.edge_model.EdgeModel with 132 tensors and 6,294,081 elements, taken
+  WITHOUT torch.jit.load - by pickle-opcode disassembly and an inert-stub unpickler - and calibrated
+  against an independent derivation, the 25,176,324 raw storage bytes being exactly 4x that count.
+  C=288, 4 heads, 4 node + 4 edge blocks, two Linear(19->288) inputs, timm RmsNorm, RoPE at edge
+  midpoints, a learned softplus distance prior added to the attention mask, head Linear(288->1).
+  Interface forward(node_features, node_pos, edge_pos, edge_indices, node_mask, edge_mask) with
+  traced shapes (1,12,19)/(1,12,3)/(1,32,3)/(1,32,2)/(1,12)/(1,32). OUTPUT 3 IS torch.new_zeros - a
+  constant zero that the publisher's own inference code names "orphan logits". It is a DIFFERENT
+  model from FACT-0390's 447,376-parameter fork head and needs NO trunk, so FACT-0392's GPU-bound
+  trunk-feature blocker and its trunk-identity confound do not apply to it.
+  .
+  CF-E (VERIFIED at royerlab/hoct commit 2ccc5040). In hoct v0.2.0 the `scale` argument NEVER REACHES
+  the model: `scaled_` occurs exactly once in the entire package, at graph.py:182, into a local frame
+  that is discarded; graph.py:143 defaults it to 1.0; graph.py:212 records it in metadata only AFTER
+  DistanceEdges runs at graph.py:191; and _frame_dataset.py:54 feeds the raw z,y,x columns. The paper
+  corroborates - "tau = 300 PIXELS". HOCT is VOXEL-NATIVE, so for our 4:1:1 anisotropic data neither
+  microns nor raw voxels is safe by default and the choice must be calibrated against FACT-0040's
+  1.817 um anchor before any number is read. Separately: 15 of the 19 input features need INSTANCE
+  MASKS, which the deployed notebook does not produce (zero regionprops/label/segmentation/mask
+  occurrences), and the one published points-only entry point, create_graph_from_points, is an
+  unimplemented stub (`pass`, _api.py:134) that is nonetheless exported in __all__.
+  .
+  CF-F (VERIFIED, a correction to our own record). research/06-knowledge-system/internal-reports/
+  architecture_training_2026-08-19.md:1005 records HOCT as "code and weights MIT". The MIT LICENSE is
+  asserted over the repository's software; no artifact anywhere asserts a licence over the released
+  checkpoints. The use remains defensible and rule 2.5.a.3 covers an absent or incompatible grant,
+  but "weights MIT" should not be carried forward as a fact.
+  .
+  ===================== HYGIENE =====================
+  .
+  A gap worth one line: FACT-0423's `instrument` names evidence under `_evidence/focus3d/`, which
+  does not exist on disk; that packet's working set is at C:/temp/focus3d/ and C:/temp/focus3d_comp.json,
+  and the 36 KB rules markdown it quotes was never persisted. This packet re-obtained and
+  re-authenticated the rules independently and archived them in-repo at
+  _evidence/hoct_official/rules_2026-08-31.md rather than relying on that path.
+  .
+  Forbidden list honoured in full: no execution, install or integration of the checkpoint; no
+  torch.jit.load at any point; no lever claimed; admissibility rests on the artifact and the
+  authenticated rule text, never on the model card, README or release note; no GPU, kernel push or
+  submission; no write to facts.yaml, levers.yaml or experiments.yaml; no other packet edited; no git
+  staging; no touch of .claude/settings.json or .gitignore. Per the coordinator's instruction the
+  full pytest suite was NOT run (memory contention, FACT-0440); the three registry/tree/claims
+  validators were.

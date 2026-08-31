@@ -2,7 +2,7 @@ id: PKT-0046
 title: "The reversed ceiling ladder: the CPU disqualifier for the detector lane, run before any GPU"
 lever: null
 owner: agent-9-reversed-ladder
-lock: claimed
+lock: done
 opened: '2026-08-31'
 
 why_no_lever: >-
@@ -79,4 +79,217 @@ outputs:
   facts_added: []
   record: One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+result:
+  heartbeat: REVLADDER_PANEL_COMPLETE
+  status: >-
+    FALSIFIER FIRES. The node-only detector thesis is DISQUALIFIED on both folds. Every arm that a
+    detector could actually deliver moves the full-chain score by 0.000 or less; the bar was +0.02.
+  cpu_only: true
+  gpu_sessions_used: 0
+  submissions_used: 0
+  levers_claimed: none
+
+  gates:
+    calibration_coordinates: >-
+      PASS. GT inter-frame displacement median 1.81681 um over all 109,057 fold-1 GT edges on the
+      non-isotropic full-res convention (1.625, 0.40625, 0.40625), against the FACT-0040 anchor.
+      The gate is shown to DISCRIMINATE rather than merely pass: the isotropic convention that has
+      twice been used by mistake gives 5.13870 um and fails. Evidence C:/temp/revladder/calibration_f1.json.
+    instrument_self_calibration: >-
+      PASS on BOTH folds. The perfect-nodes-plus-perfect-edges arm scores raw edge Jaccard exactly
+      1.000000, which is what FACT-0368's harness scores it at. Checked before any other arm was read.
+    control_reproduction: >-
+      PASS on BOTH folds, to 1e-9 on every float field and exactly on every count. Fold 0 reproduces
+      the FACT-0368 / FACT-0371 anchor artifact on all 71 crops; fold 1 reproduces it on the 32
+      stride-4 crops the anchor actually scored. Three further registry cross-checks landed
+      unprompted: GT edge totals equal FACT-0422's per-fold gt_edges exactly (19,826 / 109,057);
+      fold-0 control edge TP/FP/FN equals FACT-0384's control block exactly (18,784 / 1,369 / 1,042);
+      fold-1 control division FP equals FACT-0384's recorded 349.
+    determinism: >-
+      48 of 128 fold-1 crop payloads were regenerated under a DIFFERENT worker count and the panel
+      is identical.
+
+  four_arms:
+    note: >-
+      Every summary was produced by scripts/win_bet/assoc_report.py build_report. COUNT-FAIR score is
+      assembled only from that report's own channels via the identity assoc_report documents
+      (raw_channel + DIV_WEIGHT * division_jaccard_delta) - the FACT-0371 construction. It is the
+      honest headline wherever an arm changes the node count.
+    fold_0:
+      crops: 71
+      control: {raw_edge_jaccard: 0.886247, adj_edge_jaccard: 0.902482, score: 0.907859,
+                division_jaccard: 0.0538, division_tp: 5, division_fp: 67, division_fn: 21,
+                node_recall: 0.98679, nodes: 1905264, edge_tp: 18784, edge_fp: 1369, edge_fn: 1042}
+      perfect_localisation: {d_raw: -0.000392, d_adj: -0.000400, count_channel: 0.000000,
+                             d_score: -0.000400, d_score_count_fair: -0.000364,
+                             d_edge_tp: -3, d_edge_fp: 6, d_edge_fn: 3,
+                             division_tp: '5 -> 5', node_recall: '0.98679 -> 0.98686',
+                             ci95: [-0.00103, 0.00000]}
+      perfect_membership_additive: {d_raw: 0.000000, d_adj: -0.000012, count_channel: -0.000012,
+                                    d_score: -0.000012, d_score_count_fair: 0.000000,
+                                    d_edge_tp: 0, d_edge_fp: 0, d_edge_fn: 0,
+                                    division_tp: '5 -> 5', node_recall: '0.98679 -> 1.00000',
+                                    nodes: 1905487, gt_cells_inserted: 223,
+                                    ci95: [-0.000015, -0.000008]}
+      perfect_membership_full: {d_raw: 0.060432, d_adj: 0.137531, count_channel: 0.071141,
+                                d_score: 0.139562, d_score_count_fair: 0.061803,
+                                d_edge_tp: 0, d_edge_fp: -1353, d_edge_fn: 0,
+                                division_tp: '5 -> 2', division_fp: '67 -> 1', division_fn: '21 -> 24',
+                                node_recall: '0.98679 -> 1.00000', nodes: 20197,
+                                ci95: [0.12784, 0.15166], count_bonus_inflated: true}
+      calibration_perfect: {raw_edge_jaccard: 1.000000, d_edge_tp: 1042, d_edge_fp: -1369,
+                            division_tp: '5 -> 26', nodes: 20197, count_bonus_inflated: true}
+    fold_1:
+      crops: 128
+      first_complete_fold_1_ladder: true
+      control: {raw_edge_jaccard: 0.700438, adj_edge_jaccard: 0.706283, score: 0.709237,
+                division_jaccard: 0.0295, division_tp: 14, division_fp: 349, division_fn: 111,
+                node_recall: 0.86357, nodes: 1931622, edge_fp: 13946}
+      perfect_localisation: {d_raw: -0.000045, d_adj: -0.000045, count_channel: 0.000000,
+                             d_score: -0.000045, d_score_count_fair: -0.000043,
+                             d_edge_tp: -2, d_edge_fp: 5, d_edge_fn: 2,
+                             division_tp: '14 -> 14', ci95: [-0.00012, 0.00000]}
+      perfect_membership_additive: {d_raw: 0.000000, d_adj: -0.000590, count_channel: -0.000590,
+                                    d_score: -0.000590, d_score_count_fair: 0.000000,
+                                    d_edge_tp: 0, d_edge_fp: 0, d_edge_fn: 0,
+                                    division_tp: '14 -> 14', node_recall: '0.86357 -> 1.00000',
+                                    gt_cells_inserted: 14970, ci95: [-0.00069, -0.00050]}
+      perfect_membership_full: {d_raw: 0.088948, d_adj: 0.154430, count_channel: 0.057445,
+                                d_score: 0.158677, d_score_count_fair: 0.093522,
+                                d_edge_tp: 0, d_edge_fp: -13860, d_edge_fn: 0,
+                                division_tp: '14 -> 9', division_fp: '349 -> 0',
+                                node_recall: '0.86357 -> 1.00000', nodes: 113121,
+                                ci95: [0.14863, 0.16862], count_bonus_inflated: true}
+      calibration_perfect: {raw_edge_jaccard: 1.000000, d_edge_tp: 22901, d_edge_fp: -13946,
+                            division_tp: '14 -> 125', nodes: 113121, count_bonus_inflated: true}
+    pooled_is_reported_but_never_alone: >-
+      Both folds are given separately above per AGENTS.md section 4. They agree in SIGN and SHAPE on
+      every arm here, so pooling hides nothing in this particular result - which is itself worth
+      recording, because FACT-0437 is the standing example of pooling erasing a real fold split.
+
+  why_the_one_passing_arm_does_not_count: >-
+    perfect_membership_full clears +0.02 count-fair on both folds (+0.061803 / +0.093522) and it must
+    NOT be read as detector headroom, for three measured reasons rather than an argument.
+    (1) IT RECOVERS ZERO TRUE EDGES. d_edge_tp = +0 and d_edge_fn = +0 on BOTH folds, exactly. Its
+        entire movement is false-positive suppression: -1,353 and -13,860 FP edges. Nothing about
+        finding or choosing the right cells is doing any work.
+    (2) THE OPERATION IS NOT AVAILABLE TO A DETECTOR. The gain comes from DELETING every unmatched
+        predicted node. Measured on this substrate at the END of the deployed chain, N_pred/N_est is
+        0.7275 on fold 0 and 0.9171 on fold 1 - the pipeline already emits FEWER nodes than the crop
+        is estimated to contain. So the 1,885,290 and 1,833,471 unmatched nodes are overwhelmingly
+        real cells the sparse annotation does not label, not spurious detections. A better detector
+        emits MORE of them, not fewer. (Stage matters and is stated: FACT-0354's 0.8906 is the
+        DETECTION-surface ratio; this is the post-chain emitted graph, after the ILP drops nodes per
+        FACT-0353. The two are different stages and do not contradict.)
+    (3) IT VIOLATES THE STANDING SAFETY CONDITION. Division true positives DECLINE on both folds,
+        5 -> 2 and 14 -> 9, which is exactly the FACT-0371 caution the promotion gate encodes.
+
+  verdict: >-
+    DISQUALIFIED, and the disqualification is clean. Perfect node correction under the frozen consumer
+    does NOT clear +0.02 full-chain score on the honest fold. On fold 0 the two arms a detector could
+    actually deliver are worth -0.000364 (perfect localisation of already-matched nodes) and exactly
+    +0.000000 (perfect node membership, additive), against a +0.02 bar. Fold 1 agrees: -0.000043 and
+    +0.000000. The single most striking number in the packet is that inserting every missing annotated
+    cell - 223 on fold 0 and 14,970 on fold 1, taking node recall to 1.00000 on both folds - changes
+    NOT ONE EDGE: d_edge_tp, d_edge_fp and d_edge_fn are all exactly zero. Under a frozen consumer a
+    newly detected cell arrives as an orphan, so detection recall converts to score at a rate of zero.
+    THE ORDER WAS THE WHOLE POINT. FACT-0368's forward ladder reports a 7.1% fold-0 detection rung
+    because it perfects ASSOCIATION FIRST, which hands every newly correct node a ready-made perfect
+    edge. Measured in the order a real detector swap would occur - nodes corrected at TODAY's
+    association - that rung is worth nothing. FACT-0368's rungs must not be quoted as the value of a
+    detector swap, and this packet is the measurement that shows why.
+  scope_limit_restated_because_it_is_binding: >-
+    This bounds NODE CORRECTION UNDER THE FROZEN CONSUMER only. A real detector also changes
+    LOCALISATION, NODE FEATURES, CANDIDATE AVAILABILITY and ASSOCIATION DECISIONS. This result does
+    NOT kill detector-derived representations and does NOT kill candidate-generation effects; both are
+    untouched by it. What it kills is the specific proposition that better NODES, consumed by today's
+    association, can be the >= +0.02 lane. Note also that arm 2 freezes topology by construction, so
+    it prices only the matching consequence of localisation error and cannot price relinking - the
+    FACT-0270 claim survives this packet.
+
+  CANDIDATE FACTS FOR THE COORDINATOR:
+    - candidate: F-A
+      statement: >-
+        THE REVERSED CEILING LADDER: node correction at TODAY's association is worth ZERO full-chain
+        score on both folds. Inserting every annotated GT cell the deployed pipeline misses - 223 on
+        fold 0, 14,970 on fold 1 - takes node recall from 0.98679 to 1.00000 and from 0.86357 to
+        1.00000 while changing edge TP, FP and FN by EXACTLY ZERO on both folds; count-fair delta
+        score is +0.000000 on both. Perfect LOCALISATION of already-matched nodes under frozen
+        topology is slightly NEGATIVE: -0.000392 raw and -0.000364 count-fair score on fold 0,
+        -0.000045 and -0.000043 on fold 1, moving 3 and 2 true edges into errors.
+      value: 0.0
+      unit: count_fair_score_delta_from_perfect_node_membership_at_frozen_association_both_folds
+      scope: {f0: {crops: 71}, f1: {crops: 128}, substrate: P28 champion exports,
+              consumer: frozen deployed emitted edge set, matcher: official one-to-one 7 um}
+      provenance: MEASURED
+      instrument: >-
+        scripts/win_bet/revladder.py + revladder_batch.py + revladder_panel.py, reusing
+        ceiling_ladder.py's official-scorer path byte-for-byte; summaries by assoc_report.build_report;
+        evidence _evidence/assoc/revladder/panel_f{0,1}.json
+      why_it_matters: >-
+        It is the correctly-ordered counterpart to FACT-0371 and it disqualifies the node-only reading
+        of the detector lane for zero GPU. It also fixes a live misreading: FACT-0368's 7.1% detection
+        rung is an order-dependent increment measured AFTER association is perfect and is not the
+        value of a detector swap.
+    - candidate: F-B
+      statement: >-
+        NEARLY EVERY FALSE-POSITIVE EDGE THIS PIPELINE EMITS POINTS AT AN UNANNOTATED NODE. Of 1,369
+        fold-0 false-positive edges only 16 are wrong links BETWEEN TWO ANNOTATED CELLS; the other
+        1,353 (98.8%) run from an annotated cell into an unannotated one. Fold 1: 86 of 13,946 (0.6%)
+        between two annotated cells, 13,860 into unannotated nodes.
+      value: 16
+      unit: fold0_false_positive_edges_between_two_annotated_cells
+      scope: {f0: {crops: 71, edge_fp: 1369}, f1: {crops: 128, edge_fp: 13946}}
+      provenance: MEASURED
+      instrument: same as F-A; falls directly out of the perfect_membership_full arm, which retains
+        every edge whose endpoints both match an annotated cell
+      why_it_matters: >-
+        It explains why deleting unannotated nodes looks like a large win and is not one, and it bounds
+        how much any method that only re-ranks parents AMONG ANNOTATED CELLS can remove from the FP
+        term - 16 edges on fold 0.
+    - candidate: F-C
+      statement: >-
+        THE DEPLOYED CHAIN UNDER-PRODUCES NODES AT THE EMITTED GRAPH, NOT ONLY AT THE DETECTION
+        SURFACE: N_pred/N_est is 0.7275 on fold 0 and 0.9171 on fold 1 measured on the final emitted
+        graph over complete folds.
+      value: 0.7275
+      unit: n_pred_over_n_est_on_the_emitted_graph_fold_0
+      scope: {f0: {n_pred: 1905264, n_est: 2618970, crops: 71},
+              f1: {n_pred: 1931622, n_est: 2106147, crops: 128}}
+      provenance: MEASURED
+      instrument: same as F-A; N_est recovered per crop from the scorer's own total_node_ratio
+      stage_warning: >-
+        This is the POST-CHAIN emitted graph. FACT-0354's 0.8906 / 1.1981 are the DETECTION-surface
+        peak-set ratios. Different stages, measured after the ILP drops nodes (FACT-0353) - they do
+        not contradict, and neither may be substituted for the other.
+    - candidate: F-D
+      statement: >-
+        THE REVERSED-LADDER HARNESS IS A CHEAP CPU INSTRUMENT: 199 crop-arms across both complete folds
+        in about 8 minutes of wall clock at three workers, ~1,235 crops/hour on fold 0 and ~1,726 on
+        fold 1, with free RAM never below 4.5 GB. Unlike the full-chain replay that FACT-0440 measured,
+        this workload is NOT memory-bound - it does export surgery plus the official scorer, with no
+        ILP and no DeepCenter heatmaps - so a fourth worker did not page. It bought only about +9%
+        (48 crops in 93 s against 101 s) and was not adopted.
+      value: 3
+      unit: workers_used_for_the_delivered_result
+      provenance: MEASURED
+      scope: {machine: {logical_cores: 8, ram_gb: 16}, confound: a second agent was running concurrently}
+      why_it_matters: >-
+        FACT-0440's three-worker ceiling is a property of the FULL-CHAIN REPLAY, not of every CPU
+        workload in this tree. Quoting it as a blanket machine limit would over-price cheap
+        instruments like this one by a large factor.
+
+  evidence:
+    - _evidence/assoc/revladder/panel_f0.json
+    - _evidence/assoc/revladder/panel_f1.json
+    - C:/temp/revladder/calibration_f1.json
+    - C:/temp/revladder/f0/ and C:/temp/revladder/f1/ (199 per-crop payloads, 0 refusals)
+    - C:/temp/revladder/bench/ (three- against four-worker A/B on one fixed 48-crop set)
+  instruments_added:
+    - scripts/win_bet/revladder_calibrate.py
+    - scripts/win_bet/revladder.py
+    - scripts/win_bet/revladder_batch.py
+    - scripts/win_bet/revladder_panel.py
+  what_a_pass_would_have_licensed_and_did_not: >-
+    Not reached. Had the honest fold passed, the packet's preregistered asymmetry allowed exactly ONE
+    capped protected smoke and no capability claim.
