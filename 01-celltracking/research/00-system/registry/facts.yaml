@@ -7556,6 +7556,12 @@ facts:
       evidence that the surface cannot resolve one. Any future gate design that requires a favourable fold-0
       contested-ranking interval is asking for something this substrate has been measured unable to supply,
       and FACT-0261's rule that fold 0 is the promotion gate now collides with that measurement.
+      SCOPE NARROWED 2026-08-31 BY FACT-0438, AND THE NARROWING MATTERS. This entry is about CONTESTED
+      PARENT RANKING ON THE WIDENED PRE-ILP SURFACE, where fold 0 carries roughly ten contested errors per
+      crop. It is NOT a general statement that fold 0 cannot measure anything: at the FULL CHAIN, over all
+      71 crops, the fold-0 arm produces favourable crop-paired intervals at three separate bonus values
+      and moves net true edges off zero at every treated point. Do not cite this fact to argue that a
+      full-chain fold-0 gate is unattainable - it is attainable and has been attained.
     date: '2026-08-30'
     tags: [association, gate-a, statistical-power, out-of-fold-collapse, localised-nothing, lever-0041, headline]
 
@@ -8362,3 +8368,183 @@ facts:
       arm (FACT-0418).
     date: '2026-08-31'
     tags: [provenance-policy, inverted-test, fact-0392, no-silent-loosening, verified]
+
+  - id: FACT-0437
+    statement: >-
+      GATE A IS NEGATIVE ON THE BOTH-FOLDS REQUIREMENT, AND THE TWO FOLDS DISAGREE MONOTONICALLY IN OPPOSITE
+      DIRECTIONS. Sweeping MOTION_RELINK_LEARNED_BONUS over the preregistered grid [0, 0.5, 1, 2, 4, 8] with
+      the DEPLOYED edge_prob and DEPLOYED surface unchanged, through the complete deployed chain and the
+      official patched scorer, on ALL 71 fold-0 and ALL 128 fold-1 crops with zero refusals: fold 0 improves
+      MONOTONICALLY with the bonus while fold 1 improves at no value. At bonus 8 fold 0 gains +0.005125 RAW
+      edge Jaccard, +51 net true edges, 64 FEWER false positives and +0.001262 node recall, with a crop-paired
+      interval [+0.00223, +0.00821] excluding zero favourably; fold 1 at the same value loses 0.000743 raw
+      with an interval spanning zero and division TP down 1. NO bonus wins on both folds, so selected_bonus is
+      null. Per the host's amendment recorded before any data, this kills ONLY "amplify the deployed score"
+      and says NOTHING about LEVER-0044
+    value: 0.005125
+    unit: fold0_raw_edge_jaccard_delta_at_bonus_8_the_best_single_fold_arm
+    scope:
+      grid: [0, 0.5, 1, 2, 4, 8]
+      deployed_bonus: 1.0
+      crops: {fold_0: 71, fold_1: 128, refusals: 0}
+      fold_0_raw_delta: {b0: -0.004136, b0.5: -0.001315, b1: 0.0, b2: 0.002946, b4: 0.004188, b8: 0.005125}
+      fold_1_raw_delta: {b0: -0.000005, b0.5: 0.000082, b1: 0.0, b2: -0.000146, b4: -0.000430, b8: -0.000743}
+      fold_0_net_true_edges: {b0: -36, b0.5: -10, b2: 31, b4: 42, b8: 51}
+      fold_1_net_true_edges: {b0: 5, b0.5: 10, b2: -6, b4: -26, b8: -42}
+      fold_0_false_positives: {b2: -35, b4: -52, b8: -64}
+      fold_0_ci95: {b2: [0.0008, 0.0052], b4: [0.0016, 0.0070], b8: [0.00223, 0.00821]}
+      fold_1_ci95_spans_zero_at_every_grid_point: true
+      fold_0_wins_alone_at: [2, 4, 8]
+      fold_1_division_tp_declines_at: [4, 8]
+      selected_bonus: null
+      not_a_count_artifact: count channel at most 0.000015 absolute at every point; raw and adjusted move together
+      churn: {fold_0: '1.06%-1.75%', fold_1: '1.06%-1.75%', condition_b_fires: false}
+      pooled_at_b8: 0.000032
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Complete grid, complete both folds, zero refusals, through the OFFICIAL patched scorer at the FULL
+      CHAIN rather than a pre-ILP proxy - so this is the genuine FACT-0376 quantity and not the proxy that
+      every prior association number in this campaign was measured at. The deployed bonus reproduces the
+      control exactly by construction, which is what makes the treated arms interpretable. Raw and adjusted
+      channels move together with a count contribution at most 1.5e-05, so the shape that killed LEVER-0036
+      and LEVER-0037 is measured absent rather than assumed absent.
+    instrument: >-
+      scripts/win_bet/finaledge_gates.py and finaledge_batch.py over scripts/win_bet/p28_full_chain_replay.py;
+      evidence _evidence/assoc/finaledge/ and C:/temp/finaledge/
+    note: >-
+      THE FOLD SPLIT IS PREDICTED BY FACT-0421 AND THAT IS THE MOST IMPORTANT THING HERE. The deployed
+      probability carries DIFFERENT SKILL on the two folds - geometry-only scores +0.0458 on fold 1 against
+      -0.0310 on fold 0 - so amplifying that probability should help where it is good and hurt where it is
+      weak. That is exactly what happened, monotonically, in both directions. Gate A therefore CONFIRMS the
+      reasoning behind the host's amendment through an independent route: the thing being amplified is the
+      non-transferring feature, which is precisely why a loss here cannot condemn the consumption point.
+      IT ALSO STRENGTHENS THE CASE FOR GATE B RATHER THAN WEAKENING IT. The channel is NOT inert - churn is
+      1.06% to 1.75% at every treated point, tens of thousands of changed parents - so the final consumer
+      demonstrably ACTS on what it is given. What failed is the CONTENT, not the channel. Gate B supplies
+      transferable content to the same channel, and that is now a sharper experiment than it was before.
+      POOLING ERASES THE ENTIRE EFFECT: +0.000032 pooled at bonus 8 against fold 0's +0.005125 and fold 1's
+      -0.000743, every pooled interval spanning zero. AGENTS.md section 4 reproduced exactly, on the largest
+      full-chain sweep this campaign has run.
+      DO NOT PROMOTE THE FOLD-0 ARM. It wins alone, fold 1 declines including division TP, and a single-fold
+      win is what the both-folds requirement exists to refuse.
+    date: '2026-08-31'
+    tags: [gate-a, motion-relink, bonus-sweep, fold-inversion, full-chain, lever-0044, negative, headline]
+
+  - id: FACT-0438
+    statement: >-
+      FOLD 0 CAN RESOLVE AN INTERVENTION AT THE FULL-CHAIN STAGE, SO FACT-0420's POWER COLLAPSE IS A PROPERTY
+      OF THE PRE-ILP CONTESTED-RANKING MEASUREMENT AND NOT OF THE FOLD-0 SURFACE ITSELF. LEVER-0044's restored
+      clause (g) - that the fold-0 arm would reproduce FACT-0414's exact zero at the full chain - DOES NOT
+      FIRE. Only the deployed bonus nets exactly zero, which it must by construction; every treated arm moves
+      fold-0 net true edges away from zero at -36, -10, +31, +42 and +51, and three of the five carry
+      crop-paired intervals excluding zero favourably
+    value: false
+    unit: whether_the_fold0_full_chain_arm_reproduces_the_exact_zero_of_fact_0414
+    scope:
+      clause: LEVER-0044 falsifier (g), restored 2026-08-30 after the auditor found it dropped
+      fold_0_net_true_edges_by_bonus: {b0: -36, b0.5: -10, b1: 0, b2: 31, b4: 42, b8: 51}
+      only_exact_zero: the deployed bonus, which is the control and must be zero by construction
+      favourable_intervals_at: [2, 4, 8]
+      stage: complete deployed chain, official patched scorer
+      contrast_with: {fact: FACT-0420, stage: pre_ILP_contested_ranking,
+                      finding: 'apparent +0.024 collapsing to exactly 0.000 out of fold'}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Measured on the same complete fold-0 surface, all 71 crops, that produced FACT-0420's null - so the
+      difference is the STAGE and not the sample. The clause was restored by an adversarial auditor BEFORE
+      this run and it is answered by it, which is the sequence that makes the answer worth something.
+    instrument: >-
+      scripts/win_bet/finaledge_gates.py; evidence _evidence/assoc/finaledge/ panel_gateA.json
+    note: >-
+      THIS REFINES THE REVISED PROMOTION GATE AND THE REFINEMENT IS FAVOURABLE. That gate was rewritten
+      because FACT-0420 showed fold 0 could not power a parent-ranking interval, so it asks only for fold-0
+      NON-INFERIORITY WITH A POSITIVE POINT ESTIMATE while fold 1 carries the interval. That was the right
+      call for a PRE-ILP RANKING claim and it remains so. But at the FULL CHAIN, fold 0 does produce
+      favourable intervals - three of them here - so a full-chain claim MAY be held to the stronger standard
+      on fold 0, and a future gate that asks for one is asking for something the surface can supply.
+      THE TWO STATEMENTS ARE NOT IN CONFLICT AND MUST NOT BE COLLAPSED. FACT-0420 is about contested parent
+      ranking on the widened pre-ILP surface, where fold 0 carries roughly ten contested errors per crop.
+      This is about the emitted graph over all 71 crops, where the quantity is net true edges through the
+      official scorer. Different populations, different stages, different statistical power. Citing either as
+      "fold 0 can / cannot measure things" is wrong in both directions.
+    date: '2026-08-31'
+    tags: [fold-0, statistical-power, full-chain, clause-g, promotion-gate, scope-correction, measured]
+
+  - id: FACT-0439
+    statement: >-
+      LEDGER CATEGORY 5 IS NO LONGER PROVISIONAL AND THE BONUS IS THE LEVER ON IT, WHILE CATEGORY 3 IS
+      IMMOVABLE BY THIS MECHANISM. An independent replay reproduces FACT-0422's fold-0 partition EXACTLY -
+      161 / 198 / 1,110 / 240 / 73 / 0 / 18,044 - and under the bonus sweep fold-0 category 5 falls
+      73 -> 66 -> 60 -> 56 while category 4 falls 240 -> 226 -> 221 -> 216 and CATEGORY 3 DOES NOT MOVE AT
+      ALL. Category 5 IS the motion_relink overwrite, confirming the stage attribution of FACT-0426, and the
+      never-offered population is untouchable by any change to the final consumer
+    value: 0
+    unit: change_in_ledger_category_3_under_the_entire_bonus_sweep
+    scope:
+      control_partition_reproduced_exactly: [161, 198, 1110, 240, 73, 0, 18044]
+      reproduced_by: an independent replay, not the run that produced FACT-0422
+      fold_0_category_5_by_bonus: [73, 66, 60, 56]
+      fold_0_category_4_by_bonus: [240, 226, 221, 216]
+      fold_0_category_3: fixed at 1110 throughout
+      confirms: {fact: FACT-0426, claim: motion_relink is the operation that overwrites}
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The control partition was reproduced EXACTLY by an independent replay before any treated arm was read,
+      which is what licenses reading the treated partitions as the same measurement rather than an adjacent
+      one. Category 3 holding fixed across the entire sweep is a strong internal control: a mechanism that
+      changes only the final selector cannot change what was never offered, and if category 3 had moved the
+      ledger would have been wrong.
+    instrument: >-
+      scripts/win_bet/assoc_lost_edge_ledger.py under scripts/win_bet/finaledge_gates.py; evidence
+      _evidence/assoc/finaledge/
+    note: >-
+      THIS DRAWS THE BOUNDARY BETWEEN LEVER-0044 AND LEVER-0045 EMPIRICALLY RATHER THAN BY ARGUMENT, which is
+      the strongest form available. The final consumer can move categories 4 and 5 and CANNOT move category
+      3 - 1,110 fold-0 true edges that no change to the relink will ever reach, because they are never
+      offered to it. LEVER-0045 exists precisely for that population and this measurement sizes why the two
+      levers cannot substitute for one another.
+      IT ALSO PRICES THE CONSUMPTION LANE HONESTLY. The whole movable mass on fold 0 is category 4 plus
+      category 5 - 313 GT edges at the control - against 1,110 in category 3 alone. Even a perfect final
+      consumer is bounded by that.
+    date: '2026-08-31'
+    tags: [lost-edge-ledger, category-5, category-3, motion-relink, lever-boundary, measured, headline]
+
+  - id: FACT-0440
+    statement: >-
+      THE FULL-CHAIN REPLAY IS MEMORY-BOUND, NOT CORE-BOUND, ON THIS MACHINE: the 16 GB box PAGES above THREE
+      concurrent workers, and eight workers cut throughput to ONE FIFTH. Naive core-count parallelism is
+      therefore actively harmful here. A cross-run DeepCenter heatmap cache, validated byte-identical, cuts
+      per-crop replay from 604 s to 175 s - a 3.45x saving that is available without any additional hardware
+    value: 3
+    unit: maximum_concurrent_full_chain_replay_workers_before_this_16gb_machine_pages
+    scope:
+      machine: {logical_cores: 8, ram_gb: 16}
+      workers_before_paging: 3
+      throughput_at_8_workers: one fifth
+      deepcenter_heatmap_cache: {before_s: 604, after_s: 175, speedup: 3.45,
+                                 validated: byte-identical across runs}
+      implication_for_planning: >-
+        the cost model for a sweep is (arms x crops x per-crop seconds) / 3, not / 8, and the cache is the
+        larger single lever
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Measured on the real workload on this machine rather than inferred from core count, and the cache
+      saving was validated byte-identical rather than assumed lossless - which matters because a cache that
+      changed the result would have been a silent contamination of every arm downstream of it.
+    instrument: scripts/win_bet/finaledge_batch.py; timings recorded in C:/temp/finaledge/
+    note: >-
+      WHY THIS IS A REGISTRY FACT AND NOT A FOOTNOTE. The obvious response to a slow sweep is more workers,
+      and on this machine that makes it FIVE TIMES WORSE. Any future plan that budgets wall-clock from core
+      count will be wrong by a large factor in the direction that makes a schedule look feasible - the same
+      class of error as FACT-0416's 12.3x-low storage estimate.
+      THE GPU IS NOT THE ANSWER TO THIS WORKLOAD, and that is worth recording because it will be proposed
+      again. The post-ILP chain contains no neural forward pass: the hot operations are
+      scipy.optimize.linear_sum_assignment, branchy graph repair and the official scorer, none of which a T4
+      accelerates. Spending one of the two concurrent GPU sessions (FACT-0061) here would leave the
+      accelerator idle while consuming the scarce resource the caches need.
+    date: '2026-08-31'
+    tags: [throughput, memory-bound, parallelism, replay-cost, planning, gpu-is-not-the-answer, measured]

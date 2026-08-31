@@ -103,4 +103,268 @@ outputs:
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+result:
+  status: GATE A COMPLETE AND NEGATIVE. GATE B RUNNING, NOT COMPLETE - NO GATE B VERDICT IS ISSUED.
+  lock_note: >-
+    Leave `lock: claimed`. Gate B is the only thing that can kill LEVER-0044 and it has not finished, so
+    this packet is not done. Set `lock: done` only when Gate B has all 71 fold-0 and all 128 fold-1 crops.
+  gpu_sessions_spent: 0
+  submissions_spent: 0
+
+  headline: >-
+    THE BONUS IS NOT INERT AND THE TWO FOLDS DISAGREE ABOUT IT. Sweeping MOTION_RELINK_LEARNED_BONUS over
+    the preregistered grid with the DEPLOYED edge_prob unchanged, through the COMPLETE deployed chain and
+    the official patched scorer, on ALL 71 fold-0 and ALL 128 fold-1 crops with zero refusals: fold 0
+    improves MONOTONICALLY with the bonus and fold 1 does not improve at any value. At bonus 8 fold 0 gains
+    +0.005125 RAW edge Jaccard, +51 net true edges, 64 FEWER false positives and +0.001262 node recall,
+    with a crop-paired interval of [+0.00223, +0.00821] that excludes zero favourably; fold 1 at the same
+    value loses 0.000743 raw with an interval spanning zero. NO bonus wins on BOTH folds, so GATE A IS
+    NEGATIVE and, per the host amendment recorded before any data was taken, that kills ONLY "amplify the
+    deployed score" and says NOTHING about LEVER-0044.
+
+  gate_a:
+    verdict: >-
+      NEGATIVE on the both-folds requirement. selected_bonus = null: there is no plateau of adjacent grid
+      values that wins on both folds, and no isolated winner was promoted in its place.
+    scope: all 71 fold-0 crops (44b6 held out) and all 128 fold-1 crops (6bba held out); zero refusals
+    grid_fold_0_raw_edge_jaccard_delta: {b0: -0.004136, b0.5: -0.001315, b1: 0.0, b2: 0.002946,
+                                         b4: 0.004188, b8: 0.005125}
+    grid_fold_1_raw_edge_jaccard_delta: {b0: -0.000005, b0.5: 0.000082, b1: 0.0, b2: -0.000146,
+                                         b4: -0.000430, b8: -0.000743}
+    fold_0_wins_alone_at: [2, 4, 8]
+    fold_0_win_detail: >-
+      Each of bonus 2, 4 and 8 passes EVERY condition the lever names, on fold 0 alone: raw edge Jaccard up,
+      crop-paired interval favourable, net true edges up, false positives DOWN, node recall up, division TP
+      flat at zero change, and no count-adjustment artifact. At b2 / b4 / b8 the net true-edge counts are
+      +31 / +42 / +51 and the false positives move -35 / -52 / -64. The adjusted and raw channels move
+      TOGETHER (count channel at most 0.000015 in absolute value at every point), so this is association and
+      not the node-count multiplier - the shape that killed LEVER-0036 and LEVER-0037 does NOT appear here.
+    fold_1_at_those_values: >-
+      Null to marginally negative: -0.000146 / -0.000430 / -0.000743 raw, net true edges -6 / -26 / -42, and
+      the crop-paired interval spans zero at every grid point. Division TP declines by 1 at b4 and b8, which
+      fires the FACT-0371 safety condition independently.
+    supporting_condition_b_does_not_fire: >-
+      "Fewer than 1% of assignments change" is FALSE. Assignment churn is 1.06% to 1.75% of shared targets
+      at every treated grid point on both folds - 21,807 to 31,960 changed parents on fold 0 and 19,441 to
+      28,994 on fold 1. The knob ACTS; it simply does not pay on fold 1. This matters for the lever, because
+      an inert channel and an acting-but-unprofitable one have different consequences for a better scorer.
+    pooling_hides_it_completely: >-
+      Pooled over both embryo directions the whole effect vanishes: +0.000032 raw at bonus 8 against fold
+      0's +0.005125 and fold 1's -0.000743, with every pooled interval spanning zero. AGENTS.md section 4's
+      warning, reproduced exactly. The pooled arm's control binding is deliberately REFUSED because a pooled
+      arm spans both embryo directions and has no single fold identity to bind.
+    restored_clause_g_does_not_fire: >-
+      The fold-0 arm does NOT reproduce FACT-0414's exact zero at the FULL-CHAIN stage. Only the deployed
+      bonus itself nets exactly zero, which it must by construction; every treated arm moves fold-0 net true
+      edges away from zero (-36, -10, +31, +42, +51). So the fold-0 SURFACE can resolve this intervention at
+      the full-chain stage, and FACT-0420's power collapse is a property of the pre-ILP CONTESTED-RANKING
+      measurement rather than of the full chain. This is the clause the auditor restored, and it is answered.
+
+  gate_b:
+    status: RUNNING, NOT COMPLETE. NO VERDICT, IN EITHER DIRECTION.
+    why_no_verdict: >-
+      The lever's Gate B is defined over the complete chain on both folds. A partial Gate B is not a weak
+      result, it is not a result - and reading one would be the precise error the launch decision tree's
+      branch (1) forbids. At the time of writing it has 8 of 71 fold-0 crops and 0 of 128 fold-1, so nothing
+      about the coupled mechanism is asserted here, favourable or otherwise.
+    bonus: >-
+      1.0, the PREREGISTERED deployed value (FACT-0427), selected by the rule and not by a person: Gate A
+      completed and selected NO bonus, so there is no winning bonus to carry, and the fallback is the
+      preregistered one. The value is read out of panel_gateA.json by code before any Gate B number exists;
+      the reasoning is written into C:/temp/finaledge/gateB/WHY_BONUS_1.txt.
+    arms: >-
+      Two, both against the DEPLOYED control recomputed inside the same crop payload and never against a
+      widened-only control (FACT-0382): r1 = top-1 parent per target chosen BY THE LEARNED SCORE from the
+      floor-0.1 acquisition, which reproduces the deployed one-parent-per-target SHAPE (FACT-0369) with the
+      learned parent, and r2 = top-2. In both, the probability-free contextual score is written into the
+      edge_prob slot, so the same number reaches the ILP objective and the relink bonus, which is the only
+      learned channel that crosses the predictor boundary at all (FACT-0427).
+    coverage_contract_green_on_every_crop_run_so_far: >-
+      Measured, not assumed: declared 24,502 pairs = scored 24,502, missing 0, extra 0, duplicate keys 0,
+      unknown node ids 0 on the first fold-0 crop, and the same shape on every crop since. The declaration
+      is the crop's slice of the fold's own ACQUISITION surface and the cover is the score artifact, so the
+      assertion can actually fail - deriving the declaration from the score table, as an earlier version of
+      this instrument did, made `missing` zero by construction and the check vacuous.
+    relink_reach_measured_per_arm: >-
+      Of the offered surface, the share that survives the ILP to reach the relink at all: 0.9245 on fold 0
+      and 0.8485 on fold 1 for the DEPLOYED surface, 0.9177 for the widened r1 and 0.7511 for r2 on the
+      first fold-0 crop. Pairs the solver drops score exactly 0.0 in the relink (FACT-0427), so this bounds
+      what any widening can deliver and it is reported rather than assumed.
+    resume: >-
+      .venv/Scripts/python.exe scripts/win_bet/finaledge_batch.py --fold {0,1}
+      --out-dir C:/temp/finaledge/gateB --claim --scores C:/temp/finaledge/scores_f{0,1}.parquet
+      --bonuses 1 --gateb-ranks 1,2 --gateb-bonuses 1
+      with BIOHUB_FINALEDGE_DCCACHE=C:/temp/finaledge/dccache and AT MOST THREE CONCURRENT WORKERS - see
+      the throughput finding below. It is resumable: completed crops are skipped and in-flight crops are
+      claimed, so a killed run loses at most one crop per worker. Then
+      `finaledge_gates.py register --fold F --results-dir C:/temp/finaledge/gateB` and
+      `finaledge_gates.py panel --results-dir C:/temp/finaledge/gateB --out panel_gateB.json`.
+
+  instrument:
+    new: >-
+      scripts/win_bet/finaledge_gates.py (the driver), scripts/win_bet/finaledge_batch.py (a resumable
+      claim-based runner with no science of its own), tests/test_finaledge_gates.py (17 tests, every
+      fail-closed contract exercised by PLANTING the violation).
+    forked_nothing: >-
+      p28_full_chain_replay (the deployed post-ILP chain, extracted from the built notebook by ast),
+      ilp_replay (the deployed solver), div_reach_steal.score_crop (the official patched scorer),
+      assoc_lost_edge_ledger.crop_ledger, assoc_report.build_report, assoc_fold_pathology.ABLATIONS and
+      assoc_tournament.MinedRanker are all IMPORTED. No deployed notebook was edited.
+    control_binding_wired: >-
+      PKT-0043's guard is consumed, not re-implemented. `control_identity()` calls
+      control_binding.bind_control on the ORDERED per-crop payload set, so one tampered crop moves the
+      digest, and the self-declared `not_a_widened_only_control: true` boolean the old provenance block
+      carried is RETIRED - it asserted a property nobody re-derived, which is the FACT-0432 shape. Both
+      folds are registered in scripts/win_bet/deployed_controls.json (fold 0 to EXP-0030, 71 crops, sha256
+      32fc92e82dffbfe1...; fold 1 to EXP-0031, 128 crops, sha256 0b36ee15a0d7843f...) and both bind GREEN
+      with zero refusals. Round-trip verified with three planted mutations, each REFUSED: one crop swapped
+      out of the set, a declared widened surface at floor 0.1, and the wrong fold.
+
+  reproductions_of_the_registry_before_any_new_number_was_read:
+    - >-
+      FACT-0421's TRANSFER arms reproduced EXACTLY on the first run, and they are the arm this packet uses:
+      fold 1 to fold 0 contested top-1 delta +0.003127 with gained 43 / lost 30 / net +13 / churn 73, and
+      fold 0 to fold 1 +0.001842 with gained 382 / lost 333 / net +49 / churn 715.
+    - >-
+      FACT-0421's within-fold refit_f0 arm also reproduced exactly: -0.002646, gained 35 / lost 46 /
+      net -11 / churn 81. It is NOT the arm used, because the gate's premise names the transfer pair.
+    - >-
+      FACT-0414's deployed fold-0 contested top-1 bar reproduced to all printed digits: 0.8337743565070964.
+    - >-
+      FACT-0422's fold-0 lost-edge ledger reproduced EXACTLY, category by category, from an independent
+      full-chain replay: 161 / 198 / 1110 / 240 / 73 / 0 and 18,044 recovered against 19,826 GT edges.
+    - >-
+      FACT-0426 and FACT-0427's cited deployed lines re-read and confirmed on both builds: on the f1
+      control, motion_relink_edges defined 1823, cost expression 1889, linear_sum_assignment 1890, install
+      3073, the learned_edge_probs.get default at 1834 and the silent sigmoid at 1842; the f0 build is the
+      same program offset by two lines.
+
+  candidate_facts_for_the_coordinator: >-
+    SIX candidates. This packet wrote NOTHING to facts.yaml, levers.yaml or experiments.yaml. Every one is
+    MEASURED or VERIFIED by committed code, with scope, instrument and both embryo directions stated.
+
+    CANDIDATE A - MEASURED, HEADLINE. AMPLIFYING THE DEPLOYED PROBABILITY AT THE FINAL CONSUMPTION POINT
+    PAYS ON FOLD 0 AND NOT ON FOLD 1, SO GATE A IS NEGATIVE ON THE BOTH-FOLDS REQUIREMENT. Sweeping
+    MOTION_RELINK_LEARNED_BONUS over [0, 0.5, 1, 2, 4, 8] with the deployed edge_prob and the deployed
+    candidate surface unchanged, through the COMPLETE deployed chain and the official patched scorer, all 71
+    fold-0 and all 128 fold-1 crops, zero refusals. Fold 0 raw edge Jaccard delta -0.004136 / -0.001315 /
+    0 / +0.002946 / +0.004188 / +0.005125; fold 1 -0.000005 / +0.000082 / 0 / -0.000146 / -0.000430 /
+    -0.000743. At bonus 8 on fold 0: net true edges +51, false positives -64, false negatives -51, node
+    recall +0.001262, division TP +0, crop-paired ci95 [+0.00223, +0.00821] favourable, count channel
+    -0.000015 so the adjusted gain is association and not the node-count multiplier. Fold 1 at bonus 8:
+    net true edges -42, division TP -1, ci95 spanning zero. value 0.005125, unit
+    fold0_raw_edge_jaccard_gain_from_the_bonus_alone_at_8. Instrument scripts/win_bet/finaledge_gates.py
+    (crop + panel) over p28_full_chain_replay, summarised by assoc_report.build_report; evidence
+    _evidence/assoc/finaledge/panel_gateA.json, gateA_grid.md and crops/. Validity VALID; the control is
+    registry-BOUND on both folds and every crop's control was asserted against the kernel's own run_stats
+    BEFORE any treatment was read. Tags: [association, motion-relink, learned-bonus, gate-a, fold-transfer,
+    measured, headline].
+
+    CANDIDATE B - MEASURED, HEADLINE. FACT-0421's NON-TRANSFER SURVIVES TO THE EMITTED GRAPH. FACT-0421
+    measured that the deployed probability is the non-transferring component at PRE-ILP candidate ranking.
+    Candidate A shows the same asymmetry at the FINAL parent-selecting operation and through the official
+    scorer: the identical global constant change is worth +0.005125 raw edge Jaccard on fold 0 and
+    -0.000743 on fold 1. The asymmetry is therefore a property of the deployed probability itself and not
+    of a head fitted on it, and it is not confined to the ranking stage. value 0.005868, unit
+    fold0_minus_fold1_raw_edge_jaccard_gap_at_bonus_8. Same instrument and evidence as CANDIDATE A. Tags:
+    [association, fold-transfer, raw-probability, motion-relink, measured, headline].
+
+    CANDIDATE C - MEASURED. THE LEARNED CHANNEL IS NOT INERT: THE BONUS MOVES 1.06% TO 1.75% OF ASSIGNMENTS
+    ON BOTH FOLDS. Assignment churn against the deployed control, over targets present in both graphs:
+    fold 0 ranges 21,807 to 31,960 changed parents of about 1.83M shared targets across the treated grid,
+    and fold 1 ranges 19,441 to 28,994 of about 1.84M. LEVER-0044's supporting condition (b) - "fewer than
+    1% of assignments change across the whole sweep" - therefore does NOT fire, on either fold, at any grid
+    point. value 0.01752, unit fold0_share_of_shared_targets_whose_parent_changed_at_bonus_8. Same
+    instrument and evidence. Tags: [motion-relink, learned-bonus, churn, association, measured].
+
+    CANDIDATE D - MEASURED, and it makes FACT-0422's category 5 NON-PROVISIONAL. THE UNIFIED LOST-EDGE
+    LEDGER, EMITTED PER ARM ON THE COMPLETE DEPLOYED CHAIN, AND CATEGORY 5 RESPONDS MONOTONICALLY TO THE
+    BONUS. The unperturbed control ledger reproduces FACT-0422's fold-0 partition EXACTLY - 161 / 198 /
+    1110 / 240 / 73 / 0 / 18,044 of 19,826 GT edges - from an independent full-chain replay rather than
+    from the same artifact. Under the bonus sweep on fold 0, category 5 (correct edge selected then
+    overwritten) falls from 73 in the control to 66 / 60 / 56 at bonuses 2 / 4 / 8, and category 4 (wrong
+    parent) falls from 240 to 226 / 221 / 216, while category 3 (never offered) is fixed at 1,110 plus or
+    minus 2 as it must be when nothing widens the surface. That is direct mechanistic confirmation that
+    category 5 IS the motion_relink overwrite and that MOTION_RELINK_LEARNED_BONUS is the lever on it.
+    Fold 1's control ledger is 11,001 / 5,768 / 14,019 / 1,670 / 536 / 0 / 76,063 against FACT-0422's
+    published 11,001 / 5,717 / 14,007 / 1,735 / 537 / 0 / 76,060; the differences sit in the
+    boundary-sensitive categories and are attributable to the coordinate representation the ledger module
+    itself flags - FACT-0422's fold-1 final graph is the INTEGER-coordinate champion export while this
+    replay carries float coordinates, a rounding of at most half a voxel against a 7 um gate. Both
+    partitions close exactly on 109,057. value 73, unit
+    fold0_category_5_gt_edges_overwritten_downstream_now_measured_not_provisional. Instrument
+    assoc_lost_edge_ledger.crop_ledger called per arm from finaledge_gates.run_crop; evidence
+    _evidence/assoc/finaledge/panel_gateA.json and crops/. Tags: [lost-edge-ledger, category-5,
+    motion-relink, association, measured, headline].
+
+    CANDIDATE E - MEASURED. THE FOLD-0 NULL DOES NOT REAPPEAR AT THE FULL-CHAIN STAGE. LEVER-0044's
+    restored clause (g) asks whether the fold-0 arm reproduces FACT-0414's exact zero at the full chain
+    rather than at ranking. It does not: every treated bonus moves fold-0 net true edges off zero (-36, -10,
+    +31, +42, +51) with crop-paired intervals excluding zero at bonuses 0, 0.5, 2, 4 and 8. FACT-0420's
+    power collapse is therefore a property of the pre-ILP CONTESTED-RANKING measurement, not of the fold-0
+    substrate as such, and a full-chain measurement on fold 0 CAN resolve an intervention of this size.
+    value 0, unit clause_g_fires_false. Same instrument and evidence. Tags: [association, gate-a,
+    statistical-power, full-chain, clause-g, measured].
+
+    CANDIDATE F - VERIFIED, an instrument fact worth recording because it cost a wrong conclusion once
+    already. THE FIFTEEN-COLUMN CONTROL PARITY IS SATISFIABLE ON FOURTEEN COLUMNS AND NOT ON raw_edges.
+    Asserting all fifteen exactly refused 3 of 128 fold-1 crops on raw_edges ALONE, each by 1 to 2 edges
+    (measured: 3,871 against 3,870, 0.026% of that crop's edges) with every other column including
+    raw_nodes and the FINAL nodes and edges exact - which is FACT-0363's measured signature, and FACT-0363
+    already records that PKT-0025's demand for exact node AND edge parity "is UNSATISFIABLE as written,
+    because the target itself is not unique". With FACT-0363's own envelope (edge_jitter_max_abs 2) applied
+    to raw_edges alone, 124 of 128 fold-1 crops are exact on all fifteen and 4 use the tolerance at
+    absolute delta at most 2; all 71 fold-0 crops are exact on all fifteen with zero tolerance use. A
+    fourth fold-1 crop refused on a DIFFERENT signature - raw counts exact but the emitted graph differing
+    by 5 nodes and 4 edges - and reproduced the kernel exactly on a re-solve, which is the same degeneracy
+    expressed at equal edge COUNT and different edge SET. value 4, unit
+    fold1_crops_of_128_needing_the_FACT_0363_raw_edges_tolerance. Instrument
+    finaledge_gates._control_parity; the tolerance applies to raw_edges only and every use is counted per
+    fold in the panel. Tags: [ilp, determinism, degeneracy, replay, control-parity, verified].
+
+  what_is_not_established: >-
+    (1) NOTHING ABOUT LEVER-0044. Gate A is the amplification test and its negative is, by the host
+    amendment recorded before any data was taken, evidence about the DEPLOYED probability only. Gate B is
+    incomplete and no coupled-mechanism claim is made in either direction.
+    (2) The fold-0 gain is NOT promotable and is not proposed for submission. It is a global constant with
+    no fold-1 support, the decision tree's item (6) explicitly excludes "the bonus-only knob" unless its
+    measured gain is independently large enough against FACT-0412's deficit, and the fold-0 control's
+    absolute level is contaminated by the in-sample DeepCenter checkpoint (FACT-0310, EXP-0030's own
+    caveat), so only PAIRED deltas are read here.
+    (3) No division claim is read from any arm. add_safe_divisions_postlink sees no learned score at all
+    (FACT-0371); division TP is reported separately and it DECLINES by 1 on fold 1 at bonuses 4 and 8.
+    (4) assoc_report.verdict marks every Gate A arm non-promotable with the blocker "no net pre-ILP
+    parent-choice conversion". That is CORRECT and structural, not a failure: Gate A changes nothing before
+    the ILP, so its pre-ILP conversion figure is an honest zero by construction. A post-ILP-only
+    intervention can never satisfy the shared contract's pre-ILP mechanism requirement, and it should not
+    be promoted on the strength of one fold in any case.
+    (5) The fold-1 ledger differs slightly from FACT-0422's published fold-1 counts for the coordinate
+    reason named in CANDIDATE D. The fold-0 ledger reproduces exactly, so the instrument is not in doubt.
+
+  throughput_finding_for_the_next_agent: >-
+    Recorded because it cost hours and will cost them again. This box has 15.8 GB of RAM. Eight concurrent
+    full-chain workers drove free memory to 0.5 GB and collapsed throughput to about a fifth of nominal -
+    the run was paging, not computing, and four workers were no better. THREE workers is what fits, and the
+    per-crop parquet reads are now lazy scans rather than full materialisations for the same reason. Two
+    further measured facts about cost: the DeepCenter heatmap pass dominates a crop (the first arm costs
+    about 400-500 s and each later arm 20-80 s, because the in-process cache is already filled), so
+    BIOHUB_FINALEDGE_DCCACHE memoises heatmaps ACROSS runs by (dataset, t, checkpoint digest) - validated by
+    re-running a completed crop and requiring byte-identical metrics, stats and ledger, which cut it from
+    604 s to 175 s; and static sharding is a trap here because crop cost varies from 137 s to 4,181 s, so
+    the runner claims crops dynamically instead.
+
+  compliance: >-
+    CPU only. NO GPU job, NO kernel push, NO submission - budget was zero for both and zero was spent.
+    p28_full_chain_replay.py was NOT forked; no deployed notebook, kernel spec or kernel edit was touched.
+    facts.yaml, levers.yaml and experiments.yaml were NOT written - all six numbers are routed here as
+    candidate facts. No other packet was edited. No git add, commit, stash or checkout. .claude/settings.json
+    and .gitignore untouched. The full pytest suite was NOT run and tests/test_registry_validity.py was NOT
+    run; tests/test_finaledge_gates.py (17 tests) was run by explicit path. scripts/core/validate_registry.py,
+    validate_research_tree.py and claims_table.py --check all pass. Files created: scripts/win_bet/
+    finaledge_gates.py, scripts/win_bet/finaledge_batch.py, tests/test_finaledge_gates.py, evidence under
+    _evidence/assoc/finaledge/, and two entries appended to scripts/win_bet/deployed_controls.json - the
+    manifest PKT-0043 shipped empty precisely so the first agent to run a full-chain arm would register the
+    control it actually scored.
+    QUARANTINE HONOURED: one pre-fix Gate B smoke payload sits in C:/temp/finaledge/QUARANTINE_gateB_prefix/
+    marked INVALID with its reason, is aggregated into no panel, and its metrics were never read. The Gate B
+    rerun writes to C:/temp/finaledge/gateB/, a directory that has never held a pre-fix payload.

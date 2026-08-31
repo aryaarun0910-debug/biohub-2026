@@ -6233,3 +6233,51 @@ routed to the coordinator in `PKT-0043.yaml`. Evidence `_evidence/audit/control_
 `_evidence/foundations/provenance_policy/`. `finaledge_gates.py` (PKT-0042, live) was NOT edited: the
 three-line integration it needs is recorded in the packet result instead of written into another packet's
 running instrument.
+
+
+### 2026-08-31 — PKT-0042 / LEVER-0044 (agent 6, the final-edge gates): the bonus is not inert, and the two folds disagree about it
+
+CPU only, zero GPU, zero submissions. **GATE A is COMPLETE and NEGATIVE. GATE B is running and is NOT
+complete, so no Gate B verdict is written in either direction.**
+
+**Gate A.** `MOTION_RELINK_LEARNED_BONUS` swept over the preregistered grid [0, 0.5, 1, 2, 4, 8] with the
+DEPLOYED `edge_prob` and the deployed candidate surface unchanged, through the COMPLETE deployed chain and
+the official patched scorer, on **all 71 fold-0 and all 128 fold-1 crops with zero refusals**. Fold 0
+improves monotonically with the bonus and fold 1 does not improve anywhere. At bonus 8, fold 0 gains
++0.005125 RAW edge Jaccard, +51 net true edges, 64 FEWER false positives and +0.001262 node recall, with a
+crop-paired interval [+0.00223, +0.00821] excluding zero favourably; fold 1 loses 0.000743 with an interval
+spanning zero and division TP down 1. Bonuses 2, 4 and 8 each pass every condition the lever names **on
+fold 0 alone** — a three-value plateau on one fold — and none wins on both, so `selected_bonus = null` and
+Gate B runs at the preregistered deployed 1.0 (`FACT-0427`), chosen by code before any Gate B number
+existed. Per the host amendment recorded before any data was taken, this kills only "amplify the deployed
+score" and says **nothing** about LEVER-0044.
+
+**Three things the sweep settles beyond its own verdict.** Supporting condition (b) does NOT fire: churn is
+1.06%–1.75% of assignments at every treated grid point on both folds, so the learned channel ACTS and
+simply does not pay on fold 1. Restored clause (g) does NOT fire: every treated fold-0 arm moves net true
+edges off zero, so `FACT-0420`'s power collapse belongs to the pre-ILP contested-ranking measurement and not
+to the fold-0 substrate at the full chain. And pooling erases the entire result — +0.000032 pooled at bonus
+8 against fold 0's +0.005125 — which is `AGENTS.md` section 4 reproduced exactly.
+
+**The ledger makes `FACT-0422`'s category 5 non-provisional.** The unperturbed control ledger reproduces
+`FACT-0422`'s fold-0 partition EXACTLY from an independent full-chain replay, and under the sweep fold-0
+category 5 falls 73 → 66 → 60 → 56 at bonuses 2/4/8 while category 4 falls 240 → 226 → 221 → 216 and
+category 3 stays fixed. Category 5 is the `motion_relink` overwrite, and the bonus is the lever on it.
+
+**Guards.** PKT-0043's control binding is wired in and consumed, not re-implemented: both folds' deployed
+controls are registered in `deployed_controls.json` (fold 0 → EXP-0030, 71 crops; fold 1 → EXP-0031, 128
+crops) and both bind GREEN, with three planted mutations refused (a swapped crop, a declared widened
+surface, the wrong fold). The self-declared `not_a_widened_only_control: true` boolean is retired. The V5
+coverage contract is non-vacuous by construction — the declaration comes from the acquisition surface and
+the cover from the score artifact, so `missing` can actually be non-zero — and it is green on every Gate B
+crop run so far. `tests/test_finaledge_gates.py` has 17 tests, each planting the violation it guards.
+
+**Two instrument findings recorded so they are not rediscovered.** Asserting all fifteen control-parity
+columns exactly is unsatisfiable on `raw_edges`, exactly as `FACT-0363` already says; with that fact's own
+±2 envelope on `raw_edges` alone, 124/128 fold-1 crops are exact on all fifteen and 71/71 fold-0 crops are.
+And this 16 GB box pages badly above three concurrent full-chain workers — eight drove free memory to
+0.5 GB and throughput to a fifth of nominal.
+
+Evidence `_evidence/assoc/finaledge/` (panel, grid, 199 crop payloads). Candidate facts — six — routed to
+the coordinator in `PKT-0042.yaml`; `facts.yaml`, `levers.yaml` and `experiments.yaml` untouched. Packet
+stays `lock: claimed` until Gate B completes.
