@@ -1737,3 +1737,119 @@ levers:
       DIVISIONS GET NOTHING FROM THIS LEVER. add_safe_divisions_postlink is add-only and its candidate set
       excludes incoming edges, so no division claim may be read from any result here (FACT-0371).
     priority: 1
+
+  - id: LEVER-0045
+    claim: >-
+      A TRACKLET-CONDITIONED CANDIDATE GENERATOR trained with high-confidence PSEUDO-LINEAGES increases
+      category-3 reach - the true edges never offered to any scorer - and a MULTI-FRAME edge scorer converts
+      that reach into complete-chain RAW association without node or division loss.
+    status: open
+    mechanism: >-
+      temporal tracklet proposal + manufactured labels + learned discrimination + final consumption. All four,
+      coupled. This is the only version of the lane with the mass to matter.
+    falsifier: >-
+      WRITTEN BEFORE ANY WORK. FALSIFIER 0 IS A CPU ORACLE AND IT RUNS FIRST, BESIDE LEVER-0044's GATE B.
+      THE VACUOUS VERSION IS EXPLICITLY FORBIDDEN. Do NOT measure whether a true edge "exists inside an
+      eight-frame window" - both endpoints already exist in ADJACENT frames, so that measurement is nearly
+      vacuous and would pass regardless of merit.
+      THE PROPOSAL RULE IS FROZEN BEFORE GT IS CONSULTED, and it is GT-FREE by construction:
+        - context lengths 2, 5 and 8 frames;
+        - tracklets built from DEPLOYED predicted edges only;
+        - tracklet motion EXTRAPOLATED to the target frame;
+        - previous-frame parents nominated by PHYSICAL DISTANCE to the extrapolated position;
+        - a FIXED candidate cap and physical gate, identical across both embryos;
+        - ADJACENT-FRAME candidates only. Longer gaps supply CONTEXT, never illegal scored edges.
+      THEN, ON LEDGER CATEGORY 3 ONLY, report: newly reachable GT edges; true-parent RANK; candidate
+      MULTIPLIER per target; coverage by crop AND embryo; the ORACLE official-score delta if those newly
+      reachable edges were selected perfectly; and OVERLAP with the endpoint-removal (category 2) and
+      downstream-overwrite (category 5) populations.
+      KILL THRESHOLD, PREREGISTERED WITH A SAFETY MARGIN RATHER THAN AN EXACT FIT: the oracle score
+      contribution must exceed TWICE the remaining gap to 0.950 recorded in FACT-0412. A bare pass at one
+      times the deficit is a KILL, not a marginal pass. The margin is not arbitrary - this campaign has
+      measured its oracle-to-real conversion and it is poor: FACT-0384 priced a PERFECT false-fork verifier at
+      +0.01416 while the achievable effect came in near +0.001, roughly a fourteen-fold haircut. A route that
+      only just clears the deficit under a perfect-selection oracle will not clear it in deployment.
+      SUBSEQUENT FALSIFIERS, in order of when they can fire.
+      (1) PSEUDO-LABEL FIDELITY. Consensus pseudo-edge precision, measured on our ANNOTATED movies by EDGE
+          IDENTITY through the OFFICIAL matcher - never by nearest-track distance - is too low to train on.
+      (2) ASSOCIATION-RECIPE PARITY ON REAL LABELS fails before any pseudo-label is introduced. If we cannot
+          reproduce the deployed association head's quality on real supervision, a pseudo-label result is
+          uninterpretable. FACT-0339 is the precedent and it is why this gate exists.
+      (3) The multi-frame scorer does not convert the reach into COMPLETE-CHAIN raw association, both folds,
+          official scorer.
+      (4) NODE RECALL or DIVISION TP declines on either fold (FACT-0371).
+      (5) The gain is a count-adjustment artifact, or adjusted improves while RAW is flat or negative.
+      (6) The comparison is not (new candidate surface + scorer + final consumer) against the DEPLOYED
+          control (FACT-0382).
+    supporting: [FACT-0422, FACT-0370, FACT-0369, FACT-0362, FACT-0412, FACT-0426, FACT-0427, FACT-0428,
+                 FACT-0430, FACT-0368, FACT-0339]
+    boundary_with_other_levers: >-
+      STATED FIRST BECAUSE THREE COLLISIONS ARE PLAUSIBLE AND ALL THREE ARE REAL LEVERS.
+      (1) vs LEVER-0044. That lever asks whether our DEPLOYED FINAL CONSUMER uses learned evidence
+      effectively. This lever asks whether multi-frame context and manufactured supervision can NOMINATE the
+      large population of true edges currently never offered. Different question, different intervention,
+      different failure mode. They meet at the consumption point and the branch logic below states exactly how.
+      (2) vs the KILLED LEVER-0037, and this is the one that must not be fudged. LEVER-0037 died widening the
+      candidate rule - threshold and radius - on a TWO-FRAME surface under the UNCHANGED scorer, at a measured
+      cost. This lever changes the PROPOSAL MECHANISM, not its width: tracklet motion extrapolated over a
+      temporal context, which is a different object. FACT-0370 is the independent reason the distinction is
+      real rather than semantic - the never-offered misses are SHORT, median 2.26 um, so a wider radius is
+      demonstrably not the fix and only a temporal mechanism can reach them. This is a new mechanism with a
+      stated falsification test, which is what AGENTS.md requires; it is NOT a reopening of LEVER-0037.
+      (3) vs LEVER-0043 (FOCUS-3D, parked) and LEVER-0029 (SSL pretraining, open). FOCUS-3D was parked as a
+      REPRESENTATION trunk; it re-enters here only if dense segmentation QUALITY becomes the bottleneck in
+      manufacturing labels, at which point it is a DATA-PRODUCTION component and not a detector replacement.
+      ASCENT is a representation/pretraining reference belonging to LEVER-0029's lane: its released models
+      target C. elegans NEURON tracking with embedding similarity plus Hungarian matching, which is a
+      DOMAIN-TRANSFER hypothesis and not a ready solution here.
+    label_manufacture_policy: >-
+      BEGINS ONLY IF THE ORACLE PASSES, and it needs no GPU to begin.
+      (1) Pseudo-tracks from AT LEAST TWO INDEPENDENT trackers.
+      (2) Only CONSENSUS edges are accepted as positives.
+      (3) Disagreements are UNCERTAIN, never automatic negatives - a disagreement is missing information, and
+          treating it as a negative teaches the model the trackers' shared blind spots.
+      (4) Synthetic two-frame pairs by affine and elastic deformation, CALIBRATED against registry facts on
+          displacement, density, localisation residual and division frequency. An uncalibrated deformation
+          generates a distribution the deployed data does not contain.
+      (5) EXACT lineage identities preserved through every deformation.
+      (6) SPLIT BY SOURCE MOVIE BEFORE GENERATION, so transformed siblings cannot cross folds. Doing this
+          after generation is the leak.
+      (7) Pseudo-label precision measured on our ANNOTATED movies by EDGE IDENTITY through the OFFICIAL
+          matcher - never nearest-track distance, which measures spatial proximity and not association
+          correctness.
+    training_policy: >-
+      THE DETECTOR IS NOT RETRAINED. Association-only, detector frozen.
+      Prove ASSOCIATION-RECIPE PARITY ON REAL LABELS first; introduce pseudo-labels only after. Use
+      edge/tracklet representations at the context length the CPU oracle selects. Produce CALIBRATED
+      ADJACENT-EDGE probabilities. Consume them at the final selector LEVER-0044 establishes. Score COMPLETE
+      MOVIES through the official scorer.
+      HOCT architecture and code may be used where useful - it is MIT and its design is the relevant
+      reference, combining edge-centric attention with a multi-frame parental softmax and a tracklet-level
+      ILP rather than merely enlarging a two-frame transformer, and it reports rapid adaptation from limited
+      corrections, which is direct support for manufactured supervision. BUT VALIDATION MUST NOT REST ON
+      ORGANIZER CHECKPOINTS WITHOUT A TRAINING MANIFEST: HOCT is the organizer lab's model, so the FACT-0378
+      hidden-overlap ambiguity applies to any claim validated on its weights. Training our own head from an
+      explicit contract avoids that entirely, and that is the reason to do it.
+    branch_logic_on_lever_0044: >-
+      FIVE BRANCHES, FIXED BEFORE EITHER RESULT EXISTS.
+      - GATE B PASSES: use its PROVEN final consumer for the pseudo-trained temporal scorer.
+      - GATE B FAILS because the deployed consumer cannot convert good evidence: THIS LEVER STAYS ALIVE but
+        must bring its OWN final selector, and HOCT's multi-frame parental-softmax / tracklet-ILP design is
+        the relevant successor.
+      - ORACLE REACH FAILS: CLOSE this route BEFORE any GPU.
+      - ORACLE REACH PASSES BUT PSEUDO-LABEL FIDELITY FAILS: keep the TEMPORAL CANDIDATE GENERATOR and abandon
+        MANUFACTURED SUPERVISION. Those are separable and must not die together.
+      - BOTH PASS: this becomes the PRIMARY HIGH-CEILING LANE, ahead of contract-2 image-feature caching.
+    note: >-
+      OPENED 2026-08-31 (host). WHY NOW AND WHY THIS SHAPE. Our own ledger measured the parent-rescoring prize
+      at 240 fold-0 GT edges against 1,110 fold-0 and 14,007 fold-1 true edges NEVER OFFERED to any scorer
+      (FACT-0422), and FACT-0369 shows the deployed rule admits at most one parent per target by arithmetic,
+      so no rescoring can reach them. FACT-0362 independently established that the division lane is DATA
+      limited rather than architecture limited. This lever attacks both of those and nothing else does.
+      A COMPETITOR ARRIVED AT THE SAME DIAGNOSIS INDEPENDENTLY, which is corroboration rather than evidence -
+      the public demonstration shows NEAREST-TRACK DISTANCE, which measures spatial proximity and not the
+      edge-level quantity the metric charges, and no score accompanies it. Treated accordingly: the direction
+      is corroborated, the magnitude is not.
+      THIS IS THE 0.970-SCALE PROGRAM. Attack the never-offered mass, manufacture the supervision needed to
+      learn it, and ensure the learned evidence controls the final graph.
+    priority: 1

@@ -1,0 +1,96 @@
+id: PKT-0044
+title: "FALSIFIER 0 - the CPU reach oracle: can temporal proposal nominate the never-offered mass at all"
+lever: LEVER-0045
+owner: agent-8-reach-oracle
+lock: claimed
+opened: '2026-08-31'
+
+concurrency: >-
+  RUNS BESIDE PKT-0042's Gate B, not ahead of it and not behind it (host, 2026-08-31). The two answer
+  different questions and neither result changes the other's method: LEVER-0044 asks whether the deployed
+  final consumer USES learned evidence, this asks whether a temporal proposal rule can NOMINATE edges no
+  scorer is currently offered. Both are CPU. Their outcomes combine through LEVER-0045's branch logic, which
+  is fixed in levers.yaml before either reports.
+
+claim: >-
+  A GT-free tracklet-conditioned proposal rule, frozen before ground truth is consulted, makes enough of the
+  never-offered true-edge population reachable that perfect selection over the newly reachable edges would
+  contribute an official-score delta comfortably exceeding the campaign's remaining deficit.
+
+falsifier: >-
+  Inherited verbatim from LEVER-0045 FALSIFIER 0 and NOT relaxed. The kill threshold is preregistered: the
+  oracle score contribution must exceed TWICE the remaining gap to 0.950 recorded in FACT-0412. A BARE PASS
+  AT ONE TIMES THE DEFICIT IS A KILL, not a marginal pass.
+  THE VACUOUS MEASUREMENT IS FORBIDDEN AND IS THE MAIN WAY THIS PACKET COULD FAIL DISHONESTLY: do NOT report
+  whether a true edge "exists inside an eight-frame window". Both endpoints already exist in ADJACENT frames
+  (FACT-0370), so that number is near-vacuous and would pass regardless of merit. What is measured is whether
+  the FROZEN, GT-FREE PROPOSAL RULE nominates the true parent - not whether the true parent was in principle
+  present.
+
+prediction: >-
+  Stated before the run. I expect reach to improve materially from context 2 to 5 and to show DIMINISHING or
+  NEGATIVE returns from 5 to 8, because extrapolation error grows with the extrapolation horizon while the
+  never-offered misses are SHORT (FACT-0370, median 2.26 um) - a longer context buys better velocity
+  estimation, not a longer reach, and past some horizon the velocity estimate degrades. I expect the
+  candidate multiplier to be the binding cost: nominating more parents per target is exactly what FACT-0376
+  charged, so a reach gain bought at a large multiplier may be worthless even if the oracle likes it. The
+  quantity I most expect to disappoint is the OVERLAP check - a meaningful share of category-3 edges may have
+  an endpoint that category 2 removes downstream anyway, in which case reaching them buys nothing.
+
+inputs:
+  facts: [FACT-0422, FACT-0430, FACT-0370, FACT-0369, FACT-0412, FACT-0368, FACT-0376, FACT-0382,
+          FACT-0428, FACT-0040]
+  artifacts:
+    - _evidence/assoc/pathology/lost_edge_ledger_f0.json
+    - _evidence/assoc/pathology/lost_edge_ledger_f1.json
+    - _evidence/assoc/survival/stage_map.json
+    - C:/temp/p30_f0/
+    - C:/temp/p34_f1/
+  code:
+    - scripts/win_bet/assoc_lost_edge_ledger.py      # the category definitions; do not fork them
+    - scripts/win_bet/p28_full_chain_replay.py
+    - scripts/win_bet/assoc_report.py
+
+method: >-
+  CPU ONLY. FREEZE THE PROPOSAL RULE AND WRITE IT DOWN BEFORE CONSULTING GT - the rule is GT-free by
+  construction and the freeze must be demonstrable, not asserted.
+  THE RULE: build tracklets from DEPLOYED PREDICTED EDGES ONLY; extrapolate tracklet motion to the target
+  frame; nominate previous-frame parents by PHYSICAL DISTANCE to the extrapolated position; apply a FIXED
+  candidate cap and physical gate, IDENTICAL across both embryos; emit ADJACENT-FRAME candidates ONLY -
+  longer gaps supply context, never illegal scored edges. Context lengths 2, 5 and 8.
+  CALIBRATE BEFORE TRUSTING ANYTHING DERIVED. Distance code must reproduce the GT displacement median
+  (FACT-0040) before its output is used; atlas coords are full-res (z,y,x) at (1.625, 0.40625, 0.40625) and
+  are NOT isotropic. Two of three distance analyses in one day once started wrong.
+  THEN, ON LEDGER CATEGORY 3 ONLY, report per context length: newly reachable GT edges; the TRUE-PARENT RANK
+  within the nominated set; the CANDIDATE MULTIPLIER per target; coverage by CROP and by EMBRYO separately;
+  the ORACLE official-score delta if the newly reachable edges were selected PERFECTLY; and the OVERLAP with
+  category 2 (endpoint removed) and category 5 (overwritten downstream), because an edge whose endpoint is
+  removed downstream is not worth reaching.
+  BOTH EMBRYO DIRECTIONS SEPARATELY, never pooled alone (AGENTS.md section 4).
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: 1 day
+
+forbidden:
+  - measuring mere existence of an edge within a window - the vacuous form the falsifier names
+  - consulting GT before the proposal rule is frozen and written down
+  - emitting non-adjacent scored edges; longer context is CONTEXT, not extra edges
+  - tuning the cap, gate or context length against the oracle result - that would fit the rule to the answer
+  - reading this as a reopening of the killed LEVER-0037; the mechanism is temporal, not a wider radius
+  - claiming another lever, or editing PKT-0029, PKT-0035, PKT-0036, PKT-0037, PKT-0038, PKT-0040, PKT-0041,
+    PKT-0042, PKT-0043
+  - writing facts.yaml, levers.yaml or experiments.yaml - route to the coordinator
+  - launching a GPU job, pushing a kernel, or making a submission
+  - running the full pytest suite while PKT-0042 is live; never tests/test_registry_validity.py
+  - staging or committing to git
+  - .claude/settings.json or .gitignore
+
+outputs:
+  evidence: _evidence/assoc/reach/ and C:/temp/reach_oracle/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: null
