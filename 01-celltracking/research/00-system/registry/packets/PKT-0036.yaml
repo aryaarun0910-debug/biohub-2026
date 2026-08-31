@@ -513,3 +513,119 @@ result: >-
 
   PHASE 2 IS CLEARED FROM MY SIDE. Zero GPU, zero submissions, no kernel pushed, no model
   implementation touched, no foreign packet edited, nothing staged or committed.
+  CYCLE 2026-08-31a - HOST DIRECTIVE: GENERALISE THE CONTRACT, THEN ADJUDICATE THE P38 SUBMISSION.
+  Receipts: _evidence/audit/receipts/{a4_cycle_2026_08_31a, a4_p38_submission_contract,
+  a4_p38_contract_v1_for_contrast, a4_p37_contract_v2_corrected}.json and C:/temp/audit_receipts/a4e/.
+
+  THE CONTRACT WAS NOT A GPU CONTRACT; IT WAS A FEATURE-CACHE CONTRACT WEARING ONE. Pointed at a
+  submission it produced six wrong-class FAILs and - far worse - THREE FALSE PASSES, each measured on
+  the real candidate rather than imagined. ART-3 passed on the token "tar.gz", which at notebook line
+  500 is ("*.whl", "*.tar.gz", "*.zip") - a WHEEL-INSTALL glob - while its own evidence named
+  audit_feature_cache.py as the auditor: a cache-reconstruction check reporting green on an artifact
+  with aft_cache 0 hits and cache_manifest 0 hits. PROC-4 passed on the word BUDGET, matching
+  short_track_rescue_budget, an ILP rescue NODE budget with no temporal meaning, in a notebook with
+  zero occurrences of abort, deadline or elapsed. DATA-2 and DATA-3 reported PASS while their own
+  evidence said "no trunk declared". A false PASS is worse than a FAIL because nobody looks at it.
+
+  THE AMENDMENT. schema 2, profile-driven. The SPEC SELECTS A PROFILE and can decide nothing else;
+  every clause returns PASS, FAIL or OUT_OF_SCOPE; every OOS reason is written in the contract's own
+  OOS_REASONS table and never supplied by the submitting agent; an unknown profile RAISES rather than
+  defaulting; and sign() REFUSES outright if any inapplicable clause lacks a recorded reason, so a
+  clause cannot be dropped silently. submission_run_v1 enforces hidden-test scope with no LOEO claim,
+  hash-bound inputs, the live-treatment heartbeat (the spec's value must WIN the last write, be read
+  back, and be RECORDED in run_stats), a submission completion heartbeat, RUNTIME reconciliation of
+  discovered inputs against emitted outputs rather than a predetermined crop count, atomic
+  preservation of submission.csv, a submission-specific size/row guard, expected output re-derived as
+  submission.csv, and independent release-receipt reconstruction. All five CODE clauses remain
+  applicable to both profiles.
+
+  CROSS-CLASS LAUNDERING IS CLOSED, AND THAT IS THE CHECK THAT MATTERED. A notebook full of AFT/cache
+  tokens that satisfies every clause of its own class satisfies ZERO submission clauses; the mirror
+  holds. 31/31 mutations caught, 36 tests pass. One mutation initially MISSED and found a defect in MY
+  OWN clause: SART-4 accepted the variable NAME `_guard_digest`, so `_guard_digest = 0` would have
+  satisfied "the submission is hashed in-kernel". It now requires a sha256 over the submission BYTES.
+
+  VETO 6 - THE CANDIDATE IS REFUSED, ON TWO GENUINE DEFECTS AND NOTHING ELSE. failed=['SPROC-2',
+  'SART-1'], 12 out of scope. SART-1: submission.csv is written by a DIRECT TRUNCATING open at line
+  3005 with zero occurrences of os.replace, so a kernel killed mid-write leaves a truncated CSV that
+  still parses - and that file is the run's entire product. SPROC-2: there is no completion heartbeat
+  of any kind, so a truncated run and a complete one are indistinguishable in the fetched log. I
+  weakened nothing to reach this: six of the eight v1 failures were wrong-class and are now
+  OUT_OF_SCOPE with contract-owned reasons, and the two that remain are real.
+
+  WHAT THE CANDIDATE GETS RIGHT, VERIFIED NOT ASSUMED. The treatment is LIVE: the base sets the bonus
+  to 1.0 at line 6, the spec's edit sets 2.0 at line 55 and WINS the last write, it is read back at
+  169 and RECORDED into run_stats at 275 - exactly one env var exchanged, matching the one-variable
+  claim. Runtime reconciliation is real at lines 2994-2997, raising on any mismatch between discovered
+  test stems and emitted graphs. The row assertion at 3097, the post-write re-read at 3127-3131 and
+  the in-kernel digest at 3235 are all present. PKT-0045 is committed at 77e41ca, one commit BEFORE
+  the build at 718d5f8, so the preregistration genuinely precedes the artifact.
+
+  A CORRECTION AGAINST THIS PACKET'S OWN PRIOR RECEIPT, AND IT IS THE SECOND TIME. I reported last
+  cycle that P37 signed 17 of 17. THAT SIGNATURE RESTED IN PART ON THE SAME PROC-4 FALSE PASS. P37's
+  two time.time() calls are elapsed-time REPORTING; abort, deadline and elapsed have ZERO occurrences;
+  its BUDGET hits are edge_candidate_budget.py, a CANDIDATE budget. Under the amended contract P37 is
+  REFUSED, failed=['PROC-4']. I am not relaxing the clause to restore my earlier verdict - the host's
+  own PROCESS section requires a timing probe with early abort that banks its own result, and P37
+  lacks it. MY PHASE-2 CONTRACT SIGNATURE IS WITHDRAWN; the gpu_preflight PASS is a separate
+  instrument and still stands on its own re-run.
+
+  INSTRUMENTATION REQUIRED, PASSIVE AND SEPARABLE FROM THE TREATMENT. P38 SART-1: write to
+  SUBMISSION_PATH.with_suffix('.csv.part') and os.replace() it into place at line 3005. P38 SPROC-2:
+  print a terminal SUBMISSION_COMPLETE token, with rows and sha256, as the last statement after the
+  file is durably in place. P37 PROC-4: a wall-clock deadline checked between crops that banks the
+  partial result instead of dying at the platform limit. None of these touches the relink bonus or any
+  scientific parameter, so the one-variable claim survives. After the change: rebuild, update the
+  artifact hash, repeat the exact-diff audit, and I will re-sign FROM THE COMMITTED BYTES.
+
+  Zero GPU, zero submissions, no kernel pushed, no model implementation touched, no foreign packet
+  edited, nothing staged or committed.
+  CYCLE 2026-08-31b - THE INSTRUMENTED CANDIDATE IS RE-SIGNED FROM THE COMMITTED BYTES. Receipts:
+  _evidence/audit/receipts/{a4_cycle_2026_08_31b, a4_p38_submission_SIGNED}.json and
+  C:/temp/audit_receipts/a4f/.
+
+  VERDICT: submission_run_v1 SIGNS dad9cdf0..., failed=[], 11 clauses PASS and 12 OUT_OF_SCOPE with
+  contract-owned reasons. I recomputed both the candidate and the P35 base hashes myself and both
+  match; the spec and notebook directory are git-clean at 9d7f0cd, so the audited bytes are the bytes
+  that would push.
+
+  BOTH DEFECTS ARE FIXED BY MECHANISM, NOT BY TOKEN, AND I CHECKED WHICH. SART-1: line 3005 derives
+  _SUB_TMP from SUBMISSION_PATH.with_suffix, 3006 writes to it, 3101 os.replace(_SUB_TMP,
+  SUBMISSION_PATH) - and the direct truncating open on SUBMISSION_PATH is GONE. The ordering is right:
+  reconciliation raise 2994 < row assertions 3098 < swap 3101 < heartbeat 3109. SPROC-2: the heartbeat
+  at 3108-3114 computes its sha256 from _sub_bytes = SUBMISSION_PATH.read_bytes() at 3107 - FROM THE
+  FILE, after the swap - not from the in-memory buffer, and flushes.
+
+  I FOUND A RESIDUAL FALSE-PASS SHAPE IN MY OWN SART-1 AND CLOSED IT. Mutating the real candidate,
+  a comment plus a bare assignment of the string SUBMISSION_TMP still PASSED, because the clause
+  alternation accepted the token. That is precisely the ART-3 wheel-glob shape reappearing in the
+  clause I wrote to replace it. SART-1 now requires an os.replace() whose arguments name the
+  submission path; all three token-only mutations FAIL and the real candidate still passes. The
+  regression is pinned as a test.
+
+  THE SEPARATION CLAIM IS CONFIRMED INDEPENDENTLY, AND THE 228-LINE DIFF IS A SHIFT ARTIFACT. A
+  cell-by-cell SEMANTIC diff against the P35 champion gives 18 changed lines, +17/-1, exactly as
+  asserted. EIGHT OF TEN CELLS ARE BYTE-IDENTICAL to the champion; only cells 0 and 5 differ. Cell 0
+  carries three lines of which ONE is functional - the bonus set to 2.0, which WINS the last write
+  over the base value of 1.0 at line 6 - plus a comment and a blank. Cell 5 carries fifteen, all
+  inside the submission-writing region. NO node, edge, score, threshold, candidate-rule, division,
+  rescue or post-processing line appears anywhere in the diff. And the bytes written are identical BY
+  CONSTRUCTION: the seventeen lines after the open() - the DictWriter over the same CSV_COLUMNS, the
+  writeheader and the whole per-geff loop - are line-for-line identical, and the single deleted line
+  is the open() target itself. The one-variable claim survives the instrumentation.
+
+  THE THREE V1 FALSE PASSES CANNOT RECUR, ON TWO INDEPENDENT GROUNDS. Run DIRECTLY on this notebook
+  ART-3 now returns FAIL (the wheel glob no longer satisfies it) and PROC-4 returns FAIL (the ILP node
+  budget no longer satisfies it), so the shapes are dead on their own merits. And under
+  submission_run_v1 the applicable set contains NONE of ART-3, PROC-4, DATA-2 or DATA-3 - all four are
+  OUT_OF_SCOPE and cannot contribute to a signature at all.
+
+  ON THE CONSEQUENCE THE HOST FLAGGED: a failed run now leaving NO submission.csv is the INTENDED
+  reading, not a side effect. A truncated CSV still parses and would be scored as though it were the
+  honest output, spending a slot on a meaningless number; an absent file is an unambiguous failure
+  that costs no slot. The residual window - a run that dies between the last assertion and the swap -
+  is a few statements wide and is the correct place for it.
+
+  P37 remains REFUSED on PROC-4, deferred by the host, and I have not relaxed that clause to restore
+  my withdrawn signature. 37 tests pass, 31/31 mutations caught. Zero GPU, zero submissions, no
+  kernel pushed, no registry file written, nothing staged or committed.

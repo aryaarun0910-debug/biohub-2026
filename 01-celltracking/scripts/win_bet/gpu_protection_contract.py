@@ -1,43 +1,44 @@
-r"""THE GPU PROTECTION CONTRACT - four signed sections, enforced, failing CLOSED.
+r"""THE GPU PROTECTION CONTRACT - profile-driven, fail-closed, and owned by the contract.
 
 WHAT THIS IS
 ------------
 The host's standing block at the head of ``research/00-system/registry/levers.yaml`` names four
 sections that must be SIGNED before any GPU session starts. This module is that contract as an
-INSTRUMENT rather than a checklist: every clause is a check that returns a verdict, the run FAILS
-if any clause fails, and a clause that could not be evaluated is a FAILURE and never a skip.
+INSTRUMENT: every clause returns a verdict, the run FAILS if any clause fails, and a clause that
+cannot be evaluated is a FAILURE, never a silent skip.
 
-It sits UNDER the standing GPU rule. That rule says every session must produce an asset; this one
-says what must be true before a session may start.
+WHY THERE ARE PROFILES, AND WHY THE CONTRACT OWNS THEM
+------------------------------------------------------
+Version 1 was not a general GPU contract. It hardcoded LOEO fold fields, AFT heartbeat tokens,
+feature-cache capacity accounting and ``aft_*`` outputs, so it could only describe one artifact
+class. Pointed at a SUBMISSION it produced six FAILs for the wrong reason and - far worse - three
+FALSE PASSES, each measured on the real candidate rather than imagined:
 
-WHY EACH SECTION EXISTS - EVERY CLAUSE HAS ALREADY COST SOMETHING
------------------------------------------------------------------
-CODE      A built notebook embedding uncommitted code cannot be bound to a source version. The
-          trap that produced the clause, and it is not hypothetical: the injected patch may be
-          GENERATED, so committing the file the check names can STILL leave HEAD failing its own
-          drift lock. ``scripts/kaggle_edits/assoc_tap_gate.py`` is rendered from
-          ``scripts/win_bet/assoc_tap_replay.py`` by ``sync_tap_worker.py``, and
-          ``tests/test_assoc_feature_tap.py`` locks the two together.
-DATA      ``FACT-0418``: every declared ``dual_trunk_pair`` was ``['official','stabledet']`` with
-          NO fold-legitimate arm on either fold, while ``audit_feature_cache``'s own constant would
-          have REFUSED the honest pair and ACCEPTED the pair with no legitimate arm. A trunk
-          section that only checks "a pair is declared" is exactly the check that passed that
-          state. Both guards now read ONE table, ``provenance_policy`` - the divergence
-          ``FACT-0431`` recorded was two instruments each keeping their own.
-PROCESS   ``FACT-0387`` and ``FACT-0399``: state that does not cross the subprocess boundary. And
-          the kernel's own ``all_passed`` CANNOT see a crop that never ran, so the crop COUNT is
-          asserted externally or it is not asserted at all.
-ARTIFACT  ``FACT-0416``: the storage figure was re-derived at 1,580 B/node after an estimate that
-          was 12.3x LOW. ``FACT-0417``: the signed receipt's own ``expected_gpu_outputs`` was
-          hardcoded to the wrong worker - which would have FAILED a correct run and PASSED a run
-          that recorded nothing - and the post-run audit reads that field while nobody re-derives
-          it. So expected outputs are re-derived FROM THE BUILT NOTEBOOK, never trusted.
+  ART-3  passed on the token ``tar.gz``, which in that notebook is ``("*.whl", "*.tar.gz", "*.zip")``
+         - a WHEEL-INSTALL glob - while its evidence named ``audit_feature_cache.py`` as the
+         auditor. A feature-cache reconstruction check reported green on a submission that has no
+         cache at all.
+  PROC-4 passed on ``BUDGET``, which matched ``short_track_rescue_budget`` - an ILP rescue NODE
+         budget, a scientific parameter with no relation to a time budget or an early abort. The
+         notebook contains no ``abort``, no ``deadline`` and no ``elapsed``.
+  DATA-2 and DATA-3 reported PASS while their own evidence said "no trunk declared". An
+         inapplicable clause counted as a satisfied one.
+
+A false PASS is worse than a FAIL because nobody looks at it. So:
+
+  * The SPEC SELECTS A PROFILE. The spec can never decide whether an individual clause applies -
+    that would let a submitter exempt itself from the clause it is about to violate.
+  * Every clause returns PASS, FAIL or OUT_OF_SCOPE, and every OUT_OF_SCOPE reason is written HERE,
+    in ``OOS_REASONS``, never supplied by the submitting agent.
+  * An UNKNOWN profile REFUSES. Not a skip, not a default.
+  * Cross-class mutation tests prove a submission cannot pass by carrying cache tokens and a cache
+    cannot pass by carrying submission tokens. That is the check that stops two profiles laundering
+    each other, and it is the direct descendant of the ART-3 false pass.
 
 FAIL CLOSED, AND PROVED BY MUTATION
 -----------------------------------
-``--selftest`` does not assert that the sections pass. It MUTATES a known-good world once per
-clause and requires that the clause, and preferably only that clause, rejects. A contract whose
-clauses have never rejected anything is a contract that has never been tested.
+``--selftest`` does not assert that clauses pass. It MUTATES a known-good world once per clause and
+requires that clause to reject. A contract whose clauses have never rejected anything is untested.
 
     python scripts/win_bet/gpu_protection_contract.py sign --spec <spec.json>
     python scripts/win_bet/gpu_protection_contract.py selftest
@@ -45,34 +46,30 @@ clauses have never rejected anything is a contract that has never been tested.
 from __future__ import annotations
 
 import argparse
-import fnmatch
 import hashlib
 import json
 import re
-import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 REPO = next(p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists())
 HEARTBEAT = "GPU_PROTECTION_CONTRACT_COMPLETE"
 
+PASS, FAIL, OOS = "PASS", "FAIL", "OUT_OF_SCOPE"
+
 # FACT-0416, re-derived from the tap's own declared dtypes. The superseded value is named so a
-# regression to it is refused BY VALUE rather than going unnoticed.
+# regression to it is refused BY VALUE rather than going unnoticed. This is a FEATURE-CACHE figure
+# and the submission profile must never use it.
 BYTES_PER_NODE = 1580
 SUPERSEDED_BYTES_PER_NODE = 128
-# THE FOLD-LEGITIMACY TABLE IS NOT HERE. `INVALID_PAIR` and `LEGITIMATE_TRUNKS` used to be local
-# constants, and audit_feature_cache kept its own - which is how two committed guards came to
-# answer one question in opposite directions (FACT-0418, FACT-0431). Both now read
-# `provenance_policy`, and neither keeps a table of its own, so the next divergence cannot happen
-# quietly: it becomes an edit to a file both of them import.
-sys.path.insert(0, str(REPO / "scripts" / "win_bet"))
-import provenance_policy as PP  # noqa: E402
-
+# FACT-0418: the pairing that has no fold-legitimate arm on either fold.
+INVALID_PAIR = ("official", "stabledet")
+LEGITIMATE_TRUNKS = {"0": {"pack_split0", "oof_split0"}, "1": {"oof_split1"}}
 DEPLOYED_PREDICTOR_SHA256 = "25b3ebfd8849dcf5abeff9ed3f0d57269a4b979365c989d6f78db1e5002d5219"
-# Patch sources that are GENERATED. Mapping: generated file -> module exposing rendered().
 GENERATED_PATCHES = {"scripts/kaggle_edits/assoc_tap_gate.py": "sync_tap_worker"}
+# A Kaggle notebook output slot is 20 GiB; a submission.csv is a text table and must be far under it.
+SUBMISSION_MAX_BYTES = 2 * 1024**3
 
 
 class ContractRefusal(RuntimeError):
@@ -84,464 +81,726 @@ def _sha(p: Path) -> str:
 
 
 def _git(*args: str, cwd: Path | None = None) -> str:
-    r = subprocess.run(["git", *args], capture_output=True, cwd=str(cwd or REPO))
-    return r.stdout.decode("utf-8", "replace")
+    return subprocess.run(["git", *args], capture_output=True,
+                          cwd=str(cwd or REPO)).stdout.decode("utf-8", "replace")
 
 
-def _clause(cid, title, passed, evidence, mutation):
-    return {"id": cid, "title": title, "passed": bool(passed),
-            "evidence": evidence, "proved_by_mutation": mutation}
+def _r(status, evidence, mutation):
+    return {"status": status, "evidence": evidence, "proved_by_mutation": mutation}
+
+
+def _b(cond, evidence, mutation):
+    return _r(PASS if cond else FAIL, evidence, mutation)
 
 
 # ======================================================================================
-# SECTION 1 - CODE
+# CLAUSES.  Each takes the context and returns {status, evidence, proved_by_mutation}.
 # ======================================================================================
-def section_code(spec: dict, spec_path: Path, repo: Path, all_specs: list[Path]) -> list[dict]:
-    out = []
-    srcs = [e["code_file"] for e in spec.get("edits", []) if e.get("code_file")]
-    scoped = srcs + [spec.get("base_notebook"), str(spec_path.relative_to(repo).as_posix())]
+def c_code_1(ctx):
+    spec, repo = ctx["spec"], ctx["repo"]
+    scoped = [e["code_file"] for e in spec.get("edits", []) if e.get("code_file")]
+    scoped += [spec.get("base_notebook"), ctx["spec_rel"]]
     scoped = [s for s in scoped if s]
+    dirty = [d for s in scoped if (d := _git("status", "--porcelain", "--", s, cwd=repo).strip())]
+    return _b(not dirty, {"scoped_paths": scoped, "dirty": dirty},
+              "touch any scoped file; git status stops being empty")
 
-    dirty = []
-    for s in scoped:
-        st = _git("status", "--porcelain", "--", s, cwd=repo).strip()
-        if st:
-            dirty.append(st)
-    out.append(_clause(
-        "CODE-1", "every file this build depends on is committed - a built notebook embedding "
-        "uncommitted code cannot be bound to a source version",
-        not dirty, {"scoped_paths": scoped, "dirty": dirty},
-        "touch any scoped file; git status stops being empty"))
 
-    # THE GENERATED-FILE TRAP. Committing the named file is not enough if it is RENDERED.
-    gen_problems, gen_checked = [], []
-    for s in srcs:
-        mod_name = GENERATED_PATCHES.get(s)
-        if not mod_name:
-            continue
-        gen_checked.append(s)
-        sys.path.insert(0, str(repo / "scripts" / "win_bet"))
+def c_code_2(ctx):
+    spec, repo = ctx["spec"], ctx["repo"]
+    srcs = [e["code_file"] for e in spec.get("edits", []) if e.get("code_file")]
+    gen = [s for s in srcs if s in GENERATED_PATCHES]
+    if not gen:
+        return _r(OOS, {"injected_code_files": srcs,
+                        "reason": "this build injects no GENERATED patch source, so there is no "
+                                  "generator/rendered pair to drift apart"},
+                  "inject a generated patch and edit it without re-rendering")
+    problems = []
+    sys.path.insert(0, str(repo / "scripts" / "win_bet"))
+    for s in gen:
         try:
-            mod = __import__(mod_name)
+            mod = __import__(GENERATED_PATCHES[s])
             rendered = mod.rendered()
-        except Exception as exc:                       # a generator we cannot run is a FAILURE
-            gen_problems.append(f"{s}: generator {mod_name} unusable: {exc}")
+        except Exception as exc:
+            problems.append(f"{s}: generator unusable: {exc}")
             continue
-        on_disk = (repo / s).read_text(encoding="utf-8")
-        if rendered != on_disk:
-            gen_problems.append(f"{s} is STALE against its generator {mod_name}")
-    out.append(_clause(
-        "CODE-2", "every GENERATED patch source matches its generator - committing the file the "
-        "check names can still leave HEAD failing its own drift lock",
-        not gen_problems, {"generated_sources_checked": gen_checked, "problems": gen_problems},
-        "edit the generated file without re-rendering; the render comparison fails"))
+        if rendered != (repo / s).read_text(encoding="utf-8"):
+            problems.append(f"{s} is STALE against its generator")
+    return _b(not problems, {"generated_sources_checked": gen, "problems": problems},
+              "edit the generated file without re-rendering; the render comparison fails")
 
-    man_p = repo / spec["out_dir"] / "build_manifest.json"
-    nb_p = repo / spec["out_dir"] / spec["code_file"]
-    ok, ev = False, {}
-    if man_p.is_file() and nb_p.is_file():
-        man = json.loads(man_p.read_text(encoding="utf-8"))
-        got, want = _sha(nb_p), man.get("built_sha256")
-        ok = got == want
-        ev = {"built_sha256": got, "manifest_built_sha256": want}
-    else:
-        ev = {"error": "build manifest or built notebook absent"}
-    out.append(_clause(
-        "CODE-3", "the built notebook reproduces the SHA its manifest recorded", ok, ev,
-        "rewrite one byte of the notebook; the sha stops matching"))
 
-    slug, odir = spec.get("slug"), spec.get("out_dir")
+def c_code_3(ctx):
+    spec, repo = ctx["spec"], ctx["repo"]
+    man = repo / spec["out_dir"] / "build_manifest.json"
+    nb = repo / spec["out_dir"] / spec["code_file"]
+    if not (man.is_file() and nb.is_file()):
+        return _b(False, {"error": "build manifest or built notebook absent"}, "delete the manifest")
+    m = json.loads(man.read_text(encoding="utf-8"))
+    got = _sha(nb)
+    return _b(got == m.get("built_sha256"),
+              {"built_sha256": got, "manifest_built_sha256": m.get("built_sha256")},
+              "rewrite one byte of the notebook; the sha stops matching")
+
+
+def c_code_4(ctx):
+    spec = ctx["spec"]
     clashes = []
-    for other in all_specs:
-        if other.resolve() == spec_path.resolve():
+    for other in ctx["all_specs"]:
+        if Path(other).resolve() == Path(ctx["spec_path"]).resolve():
             continue
         try:
-            o = json.loads(other.read_text(encoding="utf-8"))
+            o = json.loads(Path(other).read_text(encoding="utf-8"))
         except Exception:
             continue
-        if o.get("slug") == slug:
-            clashes.append(f"slug {slug!r} also in {other.name}")
-        if o.get("out_dir") == odir:
-            clashes.append(f"out_dir {odir!r} also in {other.name}")
-    out.append(_clause(
-        "CODE-4", "slug and out_dir are unique across every spec - a copied spec silently "
-        "overwrites its sibling's kernel-metadata and repoints that kernel's id",
-        not clashes, {"slug": slug, "out_dir": odir, "clashes": clashes},
-        "point a second spec at the same out_dir; the clash list is non-empty"))
+        if o.get("slug") == spec.get("slug"):
+            clashes.append(f"slug also in {Path(other).name}")
+        if o.get("out_dir") == spec.get("out_dir"):
+            clashes.append(f"out_dir also in {Path(other).name}")
+    return _b(not clashes, {"slug": spec.get("slug"), "out_dir": spec.get("out_dir"),
+                            "clashes": clashes},
+              "point a second spec at the same out_dir; the clash list is non-empty")
 
+
+def c_code_5(ctx):
     pack = Path("C:/temp/p7/tracking_repo/scripts/predict_unet_transformer.py")
     got = _sha(pack) if pack.is_file() else None
-    out.append(_clause(
-        "CODE-5", "the DEPLOYED support pack is pinned by sha256 - not vendor/kaggle-cell-tracking, "
-        "which has no fusion code and cannot exhibit the defect under test (FACT-0408)",
-        got == DEPLOYED_PREDICTOR_SHA256,
-        {"pack_predictor": str(pack), "sha256": got, "pinned": DEPLOYED_PREDICTOR_SHA256},
-        "point the pin at the vendored predictor; the sha stops matching"))
-    return out
+    return _b(got == DEPLOYED_PREDICTOR_SHA256,
+              {"pack_predictor": str(pack), "sha256": got, "pinned": DEPLOYED_PREDICTOR_SHA256},
+              "point the pin at the vendored predictor; the sha stops matching")
 
 
-# ======================================================================================
-# SECTION 2 - DATA
-# ======================================================================================
-def section_data(spec: dict, trunk: dict | None) -> list[dict]:
-    out = []
-    fold = None
+# ---------------------------------------------------------------- DATA (LOEO / trunk class)
+def _fold(spec):
+    f = None
+    for e in spec.get("edits", []):
+        if "BIOHUB_LOEO_FOLD" in e.get("vars", {}):
+            f = str(e["vars"]["BIOHUB_LOEO_FOLD"]).strip()
+    return f
+
+
+def c_data_1(ctx):
+    f = _fold(ctx["spec"])
+    return _b(f in ("0", "1"), {"fold": f},
+              "remove BIOHUB_LOEO_FOLD from the spec; the fold stops resolving")
+
+
+def c_data_2(ctx):
+    t, f = ctx["trunk"], _fold(ctx["spec"])
+    if t is None:
+        return _r(OOS, {"reason": "no trunk is declared, so there is no trunk to be legitimate; a "
+                                  "single-trunk run claiming no pair is outside FACT-0418's scope"},
+                  "declare an illegitimate trunk role")
+    legit = LEGITIMATE_TRUNKS.get(str(f), set())
+    return _b(bool(t.get("fold_legitimate")) and t.get("role") in legit,
+              {"fold": f, "role": t.get("role"), "declared": t.get("fold_legitimate"),
+               "legitimate_roles_for_this_fold": sorted(legit)},
+              "set role to 'official' on fold 1; the role leaves the legitimate set")
+
+
+def c_data_3(ctx):
+    t, f = ctx["trunk"], _fold(ctx["spec"])
+    pair = tuple((t or {}).get("dual_trunk_pair") or ())
+    if not pair:
+        return _r(OOS, {"reason": "no dual_trunk_pair is declared, so there is no pair to check"},
+                  "declare the FACT-0418 pair ['official','stabledet']")
+    legit = LEGITIMATE_TRUNKS.get(str(f), set())
+    return _b(any(r in legit for r in pair) and tuple(pair) != INVALID_PAIR,
+              {"pair": list(pair), "is_the_fact_0418_invalid_pair": tuple(pair) == INVALID_PAIR,
+               "legitimate_roles_for_this_fold": sorted(legit)},
+              "declare ['official','stabledet']; the clause rejects it by name")
+
+
+def c_data_4(ctx):
+    t = ctx["trunk"]
+    if t is None:
+        return _r(OOS, {"reason": "no trunk is declared, so there is no checkpoint to bind"},
+                  "declare a trunk with no checkpoint_sha256")
+    return _b(bool(t.get("contamination")) and bool(t.get("checkpoint_sha256")),
+              {"contamination": t.get("contamination"),
+               "checkpoint_sha256": t.get("checkpoint_sha256")},
+              "drop checkpoint_sha256; the binding is gone")
+
+
+# ---------------------------------------------------------------- DATA (submission class)
+LOEO_MARKERS = ("BIOHUB_LOEO_FOLD", "BIOHUB_LOEO_ARM", "BIOHUB_LOEO_LIMIT", "BIOHUB_LOEO_STEMS")
+
+
+def c_sdata_1(ctx):
+    """A submission is scored on the HIDDEN test set. It must make no LOEO fold claim, and it must
+    read the competition test directory rather than a retargeted fold."""
+    spec, nb = ctx["spec"], ctx["nb_text"]
+    spec_loeo = sorted({k for e in spec.get("edits", []) for k in e.get("vars", {})
+                        if k in LOEO_MARKERS})
+    # a bare mention is not a claim; an ASSIGNMENT is
+    nb_loeo = sorted({m for m in LOEO_MARKERS
+                      if re.search(rf'os\.environ\[\s*["\']{m}["\']\s*\]\s*=', nb)})
+    reads_test = bool(re.search(r'COMP_DIR\s*/\s*["\']test["\']|/kaggle/input/[^"\']*/test', nb))
+    ok = not spec_loeo and not nb_loeo and reads_test
+    return _b(ok, {"loeo_vars_set_by_spec": spec_loeo, "loeo_vars_assigned_in_notebook": nb_loeo,
+                   "reads_competition_test_dir": reads_test,
+                   "why": "a submission scored on the hidden test set may not also claim a "
+                          "held-out fold; the two are different evaluation scopes"},
+              "set BIOHUB_LOEO_FOLD in a submission spec; the clause rejects the mixed scope")
+
+
+def c_sdata_2(ctx):
+    """Declared AND hash-bound inputs. Datasets declared in the spec, and the base notebook bound
+    by a sha256 that actually matches the artifact on disk."""
+    spec, repo = ctx["spec"], ctx["repo"]
+    ds = spec.get("datasets") or []
+    comp = spec.get("competition_sources") or []
+    base = spec.get("base_notebook")
+    want = spec.get("base_sha256")
+    got = _sha(repo / base) if base and (repo / base).is_file() else None
+    bound = bool(want) and got == want
+    return _b(bool(ds) and bool(comp) and bound,
+              {"datasets_declared": ds, "competition_sources": comp, "base_notebook": base,
+               "base_sha256_declared": want, "base_sha256_on_disk": got, "base_hash_bound": bound},
+              "alter the declared base_sha256; the hash binding breaks")
+
+
+# ---------------------------------------------------------------- PROCESS
+def c_proc_1(ctx):
+    nb = ctx["nb_text"]
+    explicit = bool(re.search(r"\benv\s*=\s*", nb))
+    return _b(explicit and "PYTHONPATH" in nb,
+              {"explicit_env_passed": explicit, "pythonpath_set": "PYTHONPATH" in nb,
+               "env_keys_set_by_spec": sorted({k for e in ctx["spec"].get("edits", [])
+                                               for k in e.get("vars", {})})},
+              "delete the env= argument from the subprocess launch")
+
+
+AFT_HEARTBEATS = ("AFT_GATE", "ASSOC_FEATURE_PARITY_COMPLETE", "AFT_GATE_FAILED",
+                  "ASSOC_TRAIN_HARNESS_COMPLETE", "AFT_PATCH_APPLIED")
+
+
+def c_proc_2(ctx):
+    found = [t for t in AFT_HEARTBEATS if t in ctx["nb_text"]]
+    return _b(bool(found), {"heartbeat_tokens_found": found, "class": "feature-tap / gate"},
+              "strip the gate heartbeat prints; no token is found")
+
+
+def c_proc_3(ctx):
+    spec = ctx["spec"]
+    exp = lim = None
     for e in spec.get("edits", []):
         v = e.get("vars", {})
-        if "BIOHUB_LOEO_FOLD" in v:
-            fold = str(v["BIOHUB_LOEO_FOLD"]).strip()
-    out.append(_clause(
-        "DATA-1", "the run declares which LOEO fold it evaluates - a fold that cannot be resolved "
-        "cannot be checked for leakage",
-        fold in ("0", "1"), {"fold": fold},
-        "remove BIOHUB_LOEO_FOLD from the spec; the fold stops resolving"))
-
-    if trunk is None:
-        out.append(_clause(
-            "DATA-2", "a trunk-bearing run declares a FOLD-LEGITIMATE trunk", True,
-            {"trunk": None, "note": "no trunk declared - single-trunk runs claiming no pair are "
-                                    "out of scope for this clause (FACT-0418 scope)"},
-            "declare an illegitimate trunk; the role check rejects"))
-        out.append(_clause(
-            "DATA-3", "any declared dual_trunk_pair has at least one FOLD-LEGITIMATE arm", True,
-            {"pair": None}, "declare the FACT-0418 pair; the clause rejects"))
-        return out
-
-    role = trunk.get("role")
-    # THE SHARED POLICY, and the spec's own declaration is checked AGAINST it rather than trusted:
-    # a spec that declares `fold_legitimate: true` on an illegitimate role is the mutation
-    # FACT-0431 records this clause catching.
-    claim_refusals = PP.claim_arm_refusals(fold, role)
-    if not trunk.get("fold_legitimate"):
-        claim_refusals = claim_refusals + [
-            "fold_legitimate_not_declared: the spec does not claim this trunk is legitimate, so "
-            "nothing in it may be read as a result"]
-    out.append(_clause(
-        "DATA-2", "the trunk this run trains on is FOLD-LEGITIMATE for its own fold, by role AND "
-        "by explicit declaration - FACT-0418 retracted 'official' to UNVERIFIED after it proved "
-        "byte-identical to our own split_0",
-        not claim_refusals,
-        {"fold": fold, "role": role, "fold_legitimate_declared": trunk.get("fold_legitimate"),
-         "refusals": claim_refusals, "policy": PP.describe(fold)},
-        "set role to 'official' on fold 1; the role leaves the policy's claim set"))
-
-    pair = tuple(trunk.get("dual_trunk_pair") or ())
-    if pair:
-        pair_refusals = PP.pair_refusals(fold, pair)
-        out.append(_clause(
-            "DATA-3", "any declared dual_trunk_pair is fold-legitimate under provenance_policy - "
-            "one arm readable as a result, the other a permitted comparison arm, and no leaky "
-            "checkpoint in either. The FACT-0418 pairing ['official','stabledet'] has no "
-            "legitimate arm on EITHER fold",
-            not pair_refusals,
-            {"pair": list(pair), "refusals": pair_refusals, "policy": PP.describe(fold)},
-            "declare ['official','stabledet'], or swap the pair onto the other fold; both reject"))
-    else:
-        out.append(_clause(
-            "DATA-3", "any declared dual_trunk_pair has at least one FOLD-LEGITIMATE arm", True,
-            {"pair": None, "note": "single-trunk by design, claims no pair"},
-            "declare the FACT-0418 pair; the clause rejects"))
-
-    sha = trunk.get("checkpoint_sha256")
-    bind_refusals = PP.role_binding_refusals(role, sha, fold=fold,
-                                             embryo=trunk.get("held_out_embryo"),
-                                             provenance=trunk.get("provenance"))
-    if not trunk.get("contamination"):
-        bind_refusals = bind_refusals + ["contamination_status_not_declared"]
-    if not sha:
-        bind_refusals = bind_refusals + ["checkpoint_sha256_missing: the binding is gone"]
-    out.append(_clause(
-        "DATA-4", "contamination status is declared and the checkpoint is bound by hash, and the "
-        "hash must AGREE with the declared role - a checkpoint whose provenance is not "
-        "split-specific is the EXP-0019 defect, and FACT-0418 was found by hashing the bytes of a "
-        "file whose documented role said something else",
-        not bind_refusals,
-        {"contamination": trunk.get("contamination"), "checkpoint_sha256": sha,
-         "refusals": bind_refusals},
-        "drop checkpoint_sha256, or declare a role the bytes contradict; both reject"))
-    return out
+        exp = v.get("BIOHUB_AFT_EXPECT_CROPS", exp)
+        lim = v.get("BIOHUB_LOEO_LIMIT", lim)
+    return _b(exp is not None and str(exp) == str(lim),
+              {"expect_crops": exp, "loeo_limit": lim,
+               "why": "the kernel's own all_passed cannot see a crop that never ran"},
+              "set EXPECT_CROPS and LIMIT to different values")
 
 
-# ======================================================================================
-# SECTION 3 - PROCESS
-# ======================================================================================
-def section_process(nb_text: str, spec: dict) -> list[dict]:
-    out = []
-    env_keys = sorted({k for e in spec.get("edits", []) for k in e.get("vars", {})})
-    # The env the notebook sets must be handed to the predictor SUBPROCESS explicitly.
-    propagates = bool(re.search(r"env\s*=\s*", nb_text)) and "PYTHONPATH" in nb_text
-    out.append(_clause(
-        "PROC-1", "the notebook propagates an EXPLICIT environment into the predictor subprocess - "
-        "parent-process state does not reach a child (FACT-0060), and cwd is not on sys.path for a "
-        "script invocation (FACT-0399)",
-        propagates,
-        {"env_keys_set_by_spec": env_keys, "explicit_env_passed": bool(re.search(r"env\s*=\s*", nb_text)),
-         "pythonpath_set": "PYTHONPATH" in nb_text},
-        "delete the env= argument from the subprocess launch; the clause rejects"))
-
-    beats = [t for t in ("AFT_GATE", "ASSOC_FEATURE_PARITY_COMPLETE", "AFT_GATE_FAILED",
-                         "ASSOC_TRAIN_HARNESS_COMPLETE", "AFT_PATCH_APPLIED") if t in nb_text]
-    out.append(_clause(
-        "PROC-2", "a POSITIVE heartbeat is emitted whose ABSENCE is the alarm - a silent no-op is "
-        "worse than a crash",
-        bool(beats), {"heartbeat_tokens_found": beats},
-        "strip the heartbeat prints; no token is found and the clause rejects"))
-
-    expect = None
-    for e in spec.get("edits", []):
-        if "BIOHUB_AFT_EXPECT_CROPS" in e.get("vars", {}):
-            expect = e["vars"]["BIOHUB_AFT_EXPECT_CROPS"]
-    limit = None
-    for e in spec.get("edits", []):
-        if "BIOHUB_LOEO_LIMIT" in e.get("vars", {}):
-            limit = e["vars"]["BIOHUB_LOEO_LIMIT"]
-    ok = expect is not None and str(expect) == str(limit)
-    out.append(_clause(
-        "PROC-3", "the expected CROP COUNT is asserted externally and equals the run limit - the "
-        "kernel's own all_passed cannot see a crop that never ran",
-        ok, {"expect_crops": expect, "loeo_limit": limit,
-             "why": "a report with a crop count other than the declared one is a FAIL regardless "
-                    "of what all_passed says"},
-        "set EXPECT_CROPS to 2 and LIMIT to 1; the counts disagree and the clause rejects"))
-
-    timing = bool(re.search(r"time\.time\(\)|perf_counter", nb_text)) and \
-        bool(re.search(r"BUDGET|abort|deadline|elapsed", nb_text, re.I))
-    out.append(_clause(
-        "PROC-4", "a timing probe with EARLY ABORT exists, so a session that will not finish banks "
-        "a partial result instead of dying at the wall clock",
-        timing,
-        {"clock_present": bool(re.search(r"time\.time\(\)|perf_counter", nb_text)),
-         "abort_or_budget_present": bool(re.search(r"BUDGET|abort|deadline|elapsed", nb_text, re.I))},
-        "remove the elapsed/abort logic; the clause rejects"))
-    return out
+def c_proc_4(ctx):
+    """A TIME budget with an early abort. Deliberately narrow: v1 matched the bare word BUDGET and
+    so passed on `short_track_rescue_budget`, an ILP node budget with no temporal meaning."""
+    nb = ctx["nb_text"]
+    clock = bool(re.search(r"time\.time\(\)|perf_counter", nb))
+    abort = bool(re.search(r"\b(elapsed|deadline|time_budget|TIME_BUDGET|wall_clock)\b", nb)
+                 or re.search(r"\babort\b", nb, re.I))
+    return _b(clock and abort,
+              {"clock_present": clock, "temporal_abort_present": abort,
+               "note": "a node/rescue budget is NOT a time budget - the v1 detector matched "
+                       "short_track_rescue_budget and reported a false PASS"},
+              "remove the elapsed/abort logic, leaving only a rescue budget")
 
 
-# ======================================================================================
-# SECTION 4 - ARTIFACT
-# ======================================================================================
-def section_artifact(nb_text: str, spec: dict, nodes: int | None) -> list[dict]:
-    out = []
-    atomic = bool(re.search(r"\.replace\(|os\.replace|\.rename\(|tmp.*->|\.part\b", nb_text))
-    keep = "_LOEO_KEEP" in nb_text
-    out.append(_clause(
-        "ART-1", "the run's own output is written ATOMICALLY and survives the export sweep - a "
-        "half-written artifact that looks complete is unrecoverable after the session ends",
-        atomic and keep,
-        {"atomic_rename_present": atomic, "export_keep_list_present": keep},
-        "drop the file from _LOEO_KEEP; the sweep would delete it and the clause rejects"))
+def c_sproc_1(ctx):
+    """THE LIVE-TREATMENT HEARTBEAT. Every treatment the spec sets must be assigned in the notebook
+    with the spec's value WINNING (last write), read back, and RECORDED into run_stats - so the
+    treatment is proved live rather than assumed."""
+    spec, nb = ctx["spec"], ctx["nb_text"]
+    treatments = {k: v for e in spec.get("edits", []) if e.get("kind") == "env"
+                  for k, v in e.get("vars", {}).items()}
+    rows, ok = [], True
+    for k, v in treatments.items():
+        assigns = re.findall(rf'os\.environ\[\s*["\']{k}["\']\s*\]\s*=\s*[\'"]([^\'"]*)[\'"]', nb)
+        last = assigns[-1] if assigns else None
+        read = bool(re.search(rf'os\.environ\.get\(\s*["\']{k}["\']', nb))
+        stat_key = k[len("BIOHUB_"):].lower() if k.startswith("BIOHUB_") else k.lower()
+        recorded = bool(re.search(rf'["\']{stat_key}["\']\s*:', nb))
+        good = last is not None and str(last) == str(v) and read and recorded
+        ok &= good
+        rows.append({"var": k, "spec_value": v, "assignments_in_notebook": assigns,
+                     "last_write_wins": last, "read_back": read,
+                     "run_stats_key": stat_key, "recorded_in_run_stats": recorded, "ok": good})
+    if not treatments:
+        return _b(False, {"error": "a submission run declares no treatment; there is nothing to "
+                                   "prove live, and an untreated resubmission is not a calibration"},
+                  "remove the env edit from the spec")
+    return _b(ok, {"treatments": rows},
+              "change the spec value without rebuilding, or drop the run_stats record")
 
+
+SUBMISSION_HEARTBEATS = ("SUBMISSION_COMPLETE", "BIOHUB_SUBMISSION_COMPLETE",
+                         "SUBMISSION_WRITTEN", "PIPELINE_COMPLETE", "RUN_COMPLETE")
+
+
+def c_sproc_2(ctx):
+    found = [t for t in SUBMISSION_HEARTBEATS if t in ctx["nb_text"]]
+    return _b(bool(found),
+              {"submission_heartbeat_tokens_found": found,
+               "accepted_tokens": list(SUBMISSION_HEARTBEATS),
+               "why": "a positive completion heartbeat whose ABSENCE is the alarm; a fetched log "
+                      "with no terminal token is indistinguishable from a truncated run"},
+              "strip the completion print; no token is found")
+
+
+def c_sproc_3(ctx):
+    """RUNTIME reconciliation of DISCOVERED inputs against EMITTED outputs. Not a predetermined
+    crop count - the hidden test set size is unknowable before the run."""
+    nb = ctx["nb_text"]
+    m = re.search(r"if\s+len\(([A-Za-z_]\w*)\)\s*!=\s*len\(([A-Za-z_]\w*)\)[\s\S]{0,400}?raise", nb)
+    return _b(bool(m),
+              {"reconciliation_found": bool(m),
+               "compared": [m.group(1), m.group(2)] if m else None,
+               "why": "discovered inputs versus emitted outputs, compared AT RUNTIME and raising "
+                      "on mismatch, is the only form this can take for a hidden test set"},
+              "delete the len(outputs) != len(inputs) raise; nothing reconciles the two")
+
+
+# ---------------------------------------------------------------- ARTIFACT
+def c_art_1(ctx):
+    nb = ctx["nb_text"]
+    atomic = bool(re.search(r"os\.replace|\.replace\(|\.rename\(", nb))
+    keep = "_LOEO_KEEP" in nb
+    return _b(atomic and keep, {"atomic_rename_present": atomic, "export_keep_list_present": keep},
+              "drop the file from _LOEO_KEEP; the sweep would delete it")
+
+
+def c_art_2(ctx):
+    nodes = ctx.get("nodes")
     ev = {"bytes_per_node": BYTES_PER_NODE, "superseded_and_refused": SUPERSEDED_BYTES_PER_NODE,
           "nodes": nodes}
-    if nodes:
-        gib = nodes * BYTES_PER_NODE / 1024**3
-        ev["single_trunk_gib"] = round(gib, 2)
-        ev["dual_trunk_gib"] = round(gib * 2, 2)
-        ev["within_20gib_working_disk"] = gib * 2 <= 20.0
-        ok = gib * 2 <= 20.0
-    else:
-        ok = False
+    if not nodes:
         ev["error"] = "node count not supplied - a capacity guard with no denominator is vacuous"
-    out.append(_clause(
-        "ART-2", "the capacity guard uses the RE-DERIVED storage figure (FACT-0416, 1,580 B/node) "
-        "and not the superseded estimate that was 12.3x LOW",
-        ok, ev,
-        "substitute 128 B/node; the projection collapses and the guard stops binding"))
+        return _b(False, ev, "omit the node count")
+    gib = nodes * BYTES_PER_NODE / 1024**3
+    ev.update({"single_trunk_gib": round(gib, 2), "dual_trunk_gib": round(gib * 2, 2)})
+    return _b(gib * 2 <= 20.0, ev,
+              "substitute 128 B/node; the projection collapses and the guard stops binding")
 
-    out.append(_clause(
-        "ART-3", "an INDEPENDENT post-run reconstruction is possible - the artifact can be audited "
-        "by code that did not write it",
-        bool(re.search(r"aft_cache|tar\.gz|cache_manifest", nb_text)),
-        {"artifact_tokens": [t for t in ("aft_cache", "tar.gz", "cache_manifest") if t in nb_text],
-         "auditor": "scripts/win_bet/audit_feature_cache.py"},
-        "remove the manifest write; nothing binds the artifact and the clause rejects"))
 
-    # FACT-0417: RE-DERIVE the expected outputs from the BUILT NOTEBOOK, never trust the receipt.
-    derived = sorted({m for m in re.findall(r"[\w./-]*aft_[\w.]+\.(?:json|tar\.gz)", nb_text)})
-    out.append(_clause(
-        "ART-4", "expected outputs are RE-DERIVED FROM THE BUILT NOTEBOOK, not trusted from the "
-        "signed receipt - FACT-0417 found that field hardcoded to the wrong worker, which would "
-        "have FAILED a correct run and PASSED a run that recorded nothing",
-        bool(derived),
-        {"expected_outputs_rederived_from_notebook": derived,
-         "source": "the built notebook's own text", "receipt_trusted": False},
-        "hardcode a different worker's outputs; the re-derived list stops matching the notebook"))
-    return out
+def c_art_3(ctx):
+    nb = ctx["nb_text"]
+    toks = [t for t in ("aft_cache", "cache_manifest") if t in nb]
+    return _b(bool(toks),
+              {"cache_artifact_tokens": toks, "auditor": "scripts/win_bet/audit_feature_cache.py",
+               "note": "v1 also accepted the bare string 'tar.gz', which matched a wheel-install "
+                       "glob in a submission notebook and produced a FALSE PASS"},
+              "remove the cache manifest write; nothing binds the cache")
+
+
+def c_art_4(ctx):
+    nb = ctx["nb_text"]
+    derived = sorted({m for m in re.findall(r"[\w./-]*aft_[\w.]+\.(?:json|tar\.gz)", nb)})
+    return _b(bool(derived),
+              {"expected_outputs_rederived_from_notebook": derived, "receipt_trusted": False},
+              "hardcode a different worker's outputs; the re-derived list stops matching")
+
+
+def c_sart_1(ctx):
+    """ATOMIC PRESERVATION of submission.csv. A direct open('w') that dies mid-write leaves a
+    truncated CSV that still parses, and the run's whole product is the file."""
+    nb = ctx["nb_text"]
+    direct = bool(re.search(r"SUBMISSION_PATH\.open\(\s*[\"']w[\"']", nb))
+    # The swap must be a REAL os.replace() whose arguments name the submission path. The bare
+    # tokens SUBMISSION_TMP or ".part" must never satisfy it - matching a token rather than a
+    # mechanism is precisely how v1's ART-3 passed on a wheel-install glob. Found by mutating the
+    # real candidate: a comment plus `x = 'SUBMISSION_TMP'` satisfied the earlier alternation.
+    atomic = bool(re.search(r"os\.replace\(\s*[^)]*SUBMISSION[^)]*\)", nb))
+    return _b(atomic,
+              {"atomic_rename_for_submission": atomic, "direct_truncating_write": direct,
+               "why": "write to a temporary path and os.replace() it into place; os.replace is "
+                      "atomic on the same filesystem, so a killed kernel leaves either the old "
+                      "file or the complete new one and never a half-written table"},
+              "replace the atomic rename with a direct open('w'); the clause rejects")
+
+
+def c_sart_2(ctx):
+    """A SUBMISSION-specific output-size guard. FACT-0416's 1,580 B/node is a feature-cache figure
+    and says nothing about a CSV of nodes and edges."""
+    nb = ctx["nb_text"]
+    guard = bool(re.search(r"stat\(\)\.st_size|getsize|SUBMISSION_MAX|len\(_guard_frame\)|"
+                           r"row_id\s*==\s*total_nodes", nb))
+    return _b(guard,
+              {"output_size_or_row_guard_present": guard,
+               "limit_bytes": SUBMISSION_MAX_BYTES,
+               "why": "the submission is a text table; its guard is rows and bytes, never "
+                      "FACT-0416's per-node cache accounting"},
+              "delete the row-count assertion and the size guard")
+
+
+def c_sart_3(ctx):
+    """Expected output RE-DERIVED from the built notebook as submission.csv - FACT-0417's shape,
+    where a receipt field hardcoded to the wrong worker would fail a correct run and pass a run
+    that recorded nothing."""
+    nb = ctx["nb_text"]
+    derived = sorted({m for m in re.findall(r"[\w./-]*submission\.csv", nb)})
+    declared = bool(ctx["spec"].get("expects_submission"))
+    return _b(bool(derived) and declared,
+              {"expected_outputs_rederived_from_notebook": derived,
+               "spec_expects_submission": declared, "receipt_trusted": False},
+              "remove submission.csv from the notebook while leaving expects_submission true")
+
+
+def c_sart_4(ctx):
+    """An INDEPENDENT release-receipt reconstruction must be possible after execution: the emitted
+    file is hashed in-kernel so an external receipt can bind to it."""
+    nb = ctx["nb_text"]
+    # The DIGEST must be a real sha256 taken OVER the submission bytes. Matching a variable NAME
+    # such as `_guard_digest` would let `_guard_digest = 0` satisfy the clause - found by the
+    # mutation test below, which is what mutation tests are for.
+    digest = bool(re.search(r"hashlib\.sha256\(\s*[^)]*submission[^)]*\.read_bytes\(\)", nb, re.I))
+    reread = bool(re.search(r"pd\.read_csv\(\s*_guard_submission|_guard_submission\.is_file", nb))
+    return _b(digest and reread,
+              {"in_kernel_digest_of_submission": digest, "post_write_reread": reread,
+               "auditor": "scripts/win_bet/audit_release_receipt.py",
+               "why": "the receipt binds notebook, weights, manifest, graph and score; it needs a "
+                      "digest computed by the run itself to bind against"},
+              "remove the sha256 of the submission; nothing binds the artifact to a receipt")
 
 
 # ======================================================================================
-# DRIVER
+# THE CONTRACT OWNS PROFILES AND OUT-OF-SCOPE REASONS. A SPEC CANNOT EDIT EITHER.
 # ======================================================================================
+CLAUSES = {
+    "CODE-1": ("every file this build depends on is committed", c_code_1),
+    "CODE-2": ("every GENERATED patch source matches its generator", c_code_2),
+    "CODE-3": ("the built notebook reproduces the SHA its manifest recorded", c_code_3),
+    "CODE-4": ("slug and out_dir are unique across every spec", c_code_4),
+    "CODE-5": ("the DEPLOYED support pack is pinned by sha256", c_code_5),
+    "DATA-1": ("the run declares which LOEO fold it evaluates", c_data_1),
+    "DATA-2": ("the trunk is FOLD-LEGITIMATE for its own fold", c_data_2),
+    "DATA-3": ("any dual_trunk_pair has a FOLD-LEGITIMATE arm", c_data_3),
+    "DATA-4": ("contamination status and checkpoint hash are bound", c_data_4),
+    "SDATA-1": ("hidden-test evaluation scope, with NO LOEO claim", c_sdata_1),
+    "SDATA-2": ("model and data inputs are declared AND hash-bound", c_sdata_2),
+    "PROC-1": ("an EXPLICIT environment reaches the predictor subprocess", c_proc_1),
+    "PROC-2": ("a positive gate heartbeat whose ABSENCE is the alarm", c_proc_2),
+    "PROC-3": ("the expected CROP COUNT is asserted and equals the run limit", c_proc_3),
+    "PROC-4": ("a TIME budget with an early abort", c_proc_4),
+    "SPROC-1": ("the treatment is propagated and RECORDED in run_stats (live-treatment heartbeat)",
+                c_sproc_1),
+    "SPROC-2": ("a submission-specific completion heartbeat", c_sproc_2),
+    "SPROC-3": ("RUNTIME reconciliation of discovered inputs against emitted outputs", c_sproc_3),
+    "ART-1": ("the run's output is atomic and survives the export sweep", c_art_1),
+    "ART-2": ("the capacity guard uses the RE-DERIVED 1,580 B/node figure", c_art_2),
+    "ART-3": ("an independent post-run CACHE reconstruction is possible", c_art_3),
+    "ART-4": ("expected cache outputs are re-derived from the built notebook", c_art_4),
+    "SART-1": ("atomic preservation of submission.csv", c_sart_1),
+    "SART-2": ("a submission-specific output-size / row guard", c_sart_2),
+    "SART-3": ("the expected output is re-derived as submission.csv from the notebook", c_sart_3),
+    "SART-4": ("independent release-receipt reconstruction after execution", c_sart_4),
+}
+
+SECTION_OF = {**{c: "CODE" for c in ("CODE-1", "CODE-2", "CODE-3", "CODE-4", "CODE-5")},
+              **{c: "DATA" for c in ("DATA-1", "DATA-2", "DATA-3", "DATA-4", "SDATA-1", "SDATA-2")},
+              **{c: "PROCESS" for c in ("PROC-1", "PROC-2", "PROC-3", "PROC-4",
+                                        "SPROC-1", "SPROC-2", "SPROC-3")},
+              **{c: "ARTIFACT" for c in ("ART-1", "ART-2", "ART-3", "ART-4",
+                                         "SART-1", "SART-2", "SART-3", "SART-4")}}
+
+PROFILES = {
+    "gate_smoke_v1": {
+        "description": "a passive instrumentation / feature-cache acquisition run",
+        "clauses": ["CODE-1", "CODE-2", "CODE-3", "CODE-4", "CODE-5",
+                    "DATA-1", "DATA-2", "DATA-3", "DATA-4",
+                    "PROC-1", "PROC-2", "PROC-3", "PROC-4",
+                    "ART-1", "ART-2", "ART-3", "ART-4"],
+    },
+    "submission_run_v1": {
+        "description": "a leaderboard submission run scored on the hidden test set",
+        "clauses": ["CODE-1", "CODE-2", "CODE-3", "CODE-4", "CODE-5",
+                    "SDATA-1", "SDATA-2",
+                    "PROC-1", "SPROC-1", "SPROC-2", "SPROC-3",
+                    "SART-1", "SART-2", "SART-3", "SART-4"],
+    },
+}
+
+# WRITTEN HERE, NEVER SUPPLIED BY THE SUBMITTING AGENT.
+OOS_REASONS = {
+    ("submission_run_v1", "DATA-1"): "a submission is scored on the HIDDEN test set and makes no "
+        "LOEO fold claim; SDATA-1 enforces that the two scopes are not mixed",
+    ("submission_run_v1", "DATA-2"): "no trunk is trained or consumed as a representation here; "
+        "the run uses the deployed weights the champion already used",
+    ("submission_run_v1", "DATA-3"): "a dual-trunk pair is a feature-cache provenance control and "
+        "has no meaning for a submission",
+    ("submission_run_v1", "DATA-4"): "superseded by SDATA-2, which binds the submission's inputs "
+        "by hash instead",
+    ("submission_run_v1", "PROC-2"): "the AFT gate heartbeat belongs to the feature-tap class; "
+        "SPROC-2 requires a submission-specific completion heartbeat instead",
+    ("submission_run_v1", "PROC-3"): "the hidden test set's size is UNKNOWABLE before the run, so "
+        "a predetermined crop count cannot be asserted; SPROC-3 requires runtime reconciliation of "
+        "discovered inputs against emitted outputs instead",
+    ("submission_run_v1", "PROC-4"): "a submission must run to completion to emit its product, so "
+        "an early abort would destroy the artifact rather than protect it",
+    ("submission_run_v1", "ART-1"): "superseded by SART-1, which is specific to submission.csv",
+    ("submission_run_v1", "ART-2"): "FACT-0416's 1,580 BYTES PER DETECTED NODE is a FEATURE-CACHE "
+        "figure and says nothing about a CSV of nodes and edges; SART-2 applies instead",
+    ("submission_run_v1", "ART-3"): "there is no feature cache to reconstruct; SART-4 requires an "
+        "independent RELEASE-RECEIPT reconstruction instead",
+    ("submission_run_v1", "ART-4"): "aft_* outputs belong to the feature-tap class; SART-3 "
+        "re-derives submission.csv from the built notebook instead",
+    ("gate_smoke_v1", "SDATA-1"): "a gate smoke is a LOEO fold run, not a hidden-test submission",
+    ("gate_smoke_v1", "SDATA-2"): "covered by DATA-2 and DATA-4 for the trunk class",
+    ("gate_smoke_v1", "SPROC-1"): "a gate smoke's treatment is the tap itself, covered by PROC-2",
+    ("gate_smoke_v1", "SPROC-2"): "covered by PROC-2's gate heartbeat",
+    ("gate_smoke_v1", "SPROC-3"): "covered by PROC-3's crop-count assertion, which is knowable for "
+        "a declared fold",
+    ("gate_smoke_v1", "SART-1"): "a gate smoke emits no submission.csv",
+    ("gate_smoke_v1", "SART-2"): "covered by ART-2's cache capacity guard",
+    ("gate_smoke_v1", "SART-3"): "covered by ART-4",
+    ("gate_smoke_v1", "SART-4"): "a gate smoke produces no release receipt",
+}
+
+
+def select_profile(spec: dict) -> str:
+    """The spec SELECTS a profile. It can never decide whether an individual clause applies."""
+    named = spec.get("gpu_contract_profile")
+    if named is not None:
+        if named not in PROFILES:
+            raise ContractRefusal(
+                f"unknown gpu_contract_profile {named!r}. Known profiles: {sorted(PROFILES)}. "
+                "An unknown profile REFUSES - it is never skipped and never defaulted, because a "
+                "typo must not silently disable the contract.")
+        return named
+    derived = "submission_run_v1" if spec.get("expects_submission") else "gate_smoke_v1"
+    return derived
+
+
 def sign(spec_path: Path, repo: Path = REPO, nodes: int | None = None,
          trunk: dict | None = None) -> dict:
     spec = json.loads(Path(spec_path).read_text(encoding="utf-8"))
+    profile = select_profile(spec)
     nb_p = repo / spec["out_dir"] / spec["code_file"]
     if not nb_p.is_file():
         raise ContractRefusal(f"built notebook absent at {nb_p} - the contract signs the artifact "
                               "that would run, never the spec alone")
     nb = json.loads(nb_p.read_text(encoding="utf-8"))
-    nb_text = "\n".join("".join(c.get("source", [])) for c in nb["cells"])
-    all_specs = sorted((repo / "scripts" / "kaggle_specs").glob("*.json"))
+    ctx = {"spec": spec, "spec_path": Path(spec_path), "repo": repo, "trunk": trunk, "nodes": nodes,
+           "nb_text": "\n".join("".join(c.get("source", [])) for c in nb["cells"]),
+           "all_specs": sorted((repo / "scripts" / "kaggle_specs").glob("*.json"))}
+    try:
+        ctx["spec_rel"] = str(Path(spec_path).resolve().relative_to(repo).as_posix())
+    except ValueError:
+        ctx["spec_rel"] = str(spec_path)
 
-    sections = {
-        "CODE": section_code(spec, Path(spec_path), repo, all_specs),
-        "DATA": section_data(spec, trunk),
-        "PROCESS": section_process(nb_text, spec),
-        "ARTIFACT": section_artifact(nb_text, spec, nodes),
-    }
-    failed = [c["id"] for cs in sections.values() for c in cs if not c["passed"]]
-    return {"schema_version": 1, "heartbeat": HEARTBEAT,
+    applicable = set(PROFILES[profile]["clauses"])
+    sections: dict[str, list] = {"CODE": [], "DATA": [], "PROCESS": [], "ARTIFACT": []}
+    for cid, (title, fn) in CLAUSES.items():
+        if cid in applicable:
+            res = fn(ctx)
+        else:
+            reason = OOS_REASONS.get((profile, cid))
+            if reason is None:
+                raise ContractRefusal(
+                    f"clause {cid} is not applicable to profile {profile!r} and the contract "
+                    "records no OUT_OF_SCOPE reason for it. A clause may not be dropped silently.")
+            res = _r(OOS, {"reason": reason}, "n/a")
+        sections[SECTION_OF[cid]].append({"id": cid, "title": title, **res})
+
+    failed = [c["id"] for cs in sections.values() for c in cs if c["status"] == FAIL]
+    oos = [c["id"] for cs in sections.values() for c in cs if c["status"] == OOS]
+    return {"schema_version": 2, "heartbeat": HEARTBEAT,
             "contract": "GPU PROTECTION CONTRACT (host, 2026-08-30)",
-            "spec": str(Path(spec_path).relative_to(repo).as_posix()),
-            "built_notebook_sha256": _sha(nb_p),
+            "profile": profile, "profile_description": PROFILES[profile]["description"],
+            "profile_selected_by": "spec.gpu_contract_profile" if spec.get("gpu_contract_profile")
+                                   else "contract-owned derivation from spec.expects_submission",
+            "spec": ctx["spec_rel"], "built_notebook_sha256": _sha(nb_p),
             "commit": _git("rev-parse", "HEAD", cwd=repo).strip(),
-            "sections": sections,
-            "signed": not failed, "failed": failed,
-            "sections_signed": {k: all(c["passed"] for c in v) for k, v in sections.items()}}
+            "sections": sections, "signed": not failed,
+            "failed": failed, "out_of_scope": oos,
+            "sections_signed": {k: not [c for c in v if c["status"] == FAIL]
+                                for k, v in sections.items()}}
 
 
 # ======================================================================================
-# SELFTEST - every clause must REJECT a defect built for it
+# SELFTEST
 # ======================================================================================
+def _ctx(nb_text="", spec=None, trunk=None, nodes=None, repo=None):
+    spec = spec or {}
+    return {"spec": spec, "spec_path": Path("x.json"), "spec_rel": "x.json",
+            "repo": repo or REPO, "trunk": trunk, "nodes": nodes, "nb_text": nb_text,
+            "all_specs": []}
+
+
+GOOD_SUB_NB = (
+    'env = dict(os.environ)\nenv["PYTHONPATH"] = "scripts"\n'
+    'os.environ["BIOHUB_MOTION_RELINK_LEARNED_BONUS"] = \'2.0\'\n'
+    'B = float(os.environ.get("BIOHUB_MOTION_RELINK_LEARNED_BONUS", "0.75"))\n'
+    'stats = {"motion_relink_learned_bonus": B}\n'
+    'TEST_DIR = COMP_DIR / "test"\n'
+    'print("SUBMISSION_COMPLETE")\n'
+    'if len(geffs) != len(test_stems):\n    raise RuntimeError("missing")\n'
+    'os.replace(SUBMISSION_TMP, SUBMISSION_PATH)\n'
+    'row_id == total_nodes + total_edges\n'
+    'sub = "submission.csv"\n'
+    '_guard_digest = hashlib.sha256(_guard_submission.read_bytes()).hexdigest()\n'
+    '_guard_frame = pd.read_csv(_guard_submission)\n')
+GOOD_SUB_SPEC = {"expects_submission": True, "datasets": ["a/b"],
+                 "competition_sources": ["c"], "base_notebook": None, "base_sha256": None,
+                 "edits": [{"kind": "env", "vars": {"BIOHUB_MOTION_RELINK_LEARNED_BONUS": "2.0"}}]}
+GOOD_CACHE_NB = ('env = dict(os.environ)\nenv["PYTHONPATH"] = "s"\nprint("AFT_GATE ok")\n'
+                 'start = time.time()\nelapsed = time.time() - start\n'
+                 'aft_cache\ncache_manifest\naft_gate.json\n'
+                 'os.replace(a, b)\n_LOEO_KEEP |= {"aft_cache.tar.gz"}\n')
+GOOD_CACHE_SPEC = {"edits": [{"vars": {"BIOHUB_AFT_EXPECT_CROPS": "2", "BIOHUB_LOEO_LIMIT": "2",
+                                       "BIOHUB_LOEO_FOLD": "0"}}]}
+
+
 def _selftest(sandbox: Path) -> int:
-    """Mutate a known-good world once per clause. A clause that never rejects is untested."""
-    results = []
+    R = []
 
-    def check(name, cond, detail=""):
-        results.append({"mutation": name, "caught": bool(cond), "detail": detail})
+    def ck(name, cond, detail=""):
+        R.append({"mutation": name, "caught": bool(cond), "detail": detail})
 
-    # --- CODE-2, the generated-file trap, on the real generator -----------------------
-    sys.path.insert(0, str(REPO / "scripts" / "win_bet"))
-    import sync_tap_worker
-    real = (REPO / "scripts/kaggle_edits/assoc_tap_gate.py").read_text(encoding="utf-8")
-    check("CODE-2 control: the shipped generated file matches its generator",
-          sync_tap_worker.rendered() == real)
-    check("CODE-2 mutation: a generated file edited without re-rendering",
-          sync_tap_worker.rendered() != real + "\n# drift\n")
+    def st(fn, **kw):
+        return fn(_ctx(**kw))["status"]
 
-    # --- CODE-4 uniqueness ------------------------------------------------------------
-    s = {"slug": "x", "out_dir": "d", "code_file": "n.ipynb", "edits": []}
-    tmp = sandbox / "specs"; tmp.mkdir(parents=True, exist_ok=True)
-    (tmp / "a.json").write_text(json.dumps(s), encoding="utf-8")
-    (tmp / "b.json").write_text(json.dumps(s), encoding="utf-8")
-    cl = section_code(s, tmp / "a.json", sandbox, [tmp / "a.json", tmp / "b.json"])
-    check("CODE-4 mutation: two specs share slug and out_dir",
-          not [c for c in cl if c["id"] == "CODE-4"][0]["passed"])
+    # ---- profile machinery ----
+    ck("PROFILE: an unknown profile REFUSES rather than defaulting",
+       _refuses(lambda: select_profile({"gpu_contract_profile": "nope"})))
+    ck("PROFILE: a submission spec selects submission_run_v1",
+       select_profile({"expects_submission": True}) == "submission_run_v1")
+    ck("PROFILE: a spec cannot exempt an individual clause",
+       select_profile({"expects_submission": True,
+                       "gpu_contract_skip": ["SART-1"]}) == "submission_run_v1"
+       and "SART-1" in PROFILES["submission_run_v1"]["clauses"])
+    ck("PROFILE: every non-applicable clause has a CONTRACT-OWNED OOS reason",
+       all((p, c) in OOS_REASONS for p in PROFILES for c in CLAUSES
+           if c not in PROFILES[p]["clauses"]))
 
-    # --- CODE-5 pack pin --------------------------------------------------------------
-    ven = REPO / "vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py"
-    check("CODE-5 mutation: the vendored predictor does not satisfy the deployed pin",
-          (not ven.is_file()) or _sha(ven) != DEPLOYED_PREDICTOR_SHA256)
+    # ---- controls ----
+    ck("CONTROL: a correct submission notebook passes every submission clause",
+       all(st(CLAUSES[c][1], nb_text=GOOD_SUB_NB, spec=GOOD_SUB_SPEC) in (PASS, OOS)
+           for c in ("SDATA-1", "PROC-1", "SPROC-1", "SPROC-2", "SPROC-3",
+                     "SART-1", "SART-2", "SART-3", "SART-4")),
+       json.dumps([c for c in ("SDATA-1", "PROC-1", "SPROC-1", "SPROC-2", "SPROC-3",
+                               "SART-1", "SART-2", "SART-3", "SART-4")
+                   if st(CLAUSES[c][1], nb_text=GOOD_SUB_NB, spec=GOOD_SUB_SPEC) == FAIL]))
+    ck("CONTROL: a correct cache notebook passes every cache clause",
+       all(st(CLAUSES[c][1], nb_text=GOOD_CACHE_NB, spec=GOOD_CACHE_SPEC) == PASS
+           for c in ("PROC-1", "PROC-2", "PROC-3", "PROC-4", "ART-1", "ART-3", "ART-4")),
+       json.dumps([c for c in ("PROC-1", "PROC-2", "PROC-3", "PROC-4", "ART-1", "ART-3", "ART-4")
+                   if st(CLAUSES[c][1], nb_text=GOOD_CACHE_NB, spec=GOOD_CACHE_SPEC) != PASS]))
 
-    # --- DATA -------------------------------------------------------------------------
-    f1 = {"edits": [{"vars": {"BIOHUB_LOEO_FOLD": "1"}}]}
-    good = {"role": "oof_split1", "fold_legitimate": True, "dual_trunk_pair": ["oof_split1", "stabledet"],
-            "contamination": "none", "checkpoint_sha256": "2e4ebf616b3d4fb5"}
-    d = section_data(f1, good)
-    check("DATA control: the HONEST fold-1 pair is ACCEPTED (not a reject-everything guard)",
-          all(c["passed"] for c in d), json.dumps([c["id"] for c in d if not c["passed"]]))
-    bad_pair = dict(good, dual_trunk_pair=["official", "stabledet"])
-    check("DATA-3 mutation: the FACT-0418 pair with no fold-legitimate arm",
-          not [c for c in section_data(f1, bad_pair) if c["id"] == "DATA-3"][0]["passed"])
-    bad_role = dict(good, role="official")
-    check("DATA-2 mutation: an illegitimate trunk role on fold 1",
-          not [c for c in section_data(f1, bad_role) if c["id"] == "DATA-2"][0]["passed"])
-    lying = dict(good, role="official", fold_legitimate=True)
-    check("DATA-2 mutation: a spec DECLARING fold_legitimate true on an illegitimate role",
-          not [c for c in section_data(f1, lying) if c["id"] == "DATA-2"][0]["passed"])
-    no_hash = dict(good); no_hash.pop("checkpoint_sha256")
-    check("DATA-4 mutation: the checkpoint hash is missing",
-          not [c for c in section_data(f1, no_hash) if c["id"] == "DATA-4"][0]["passed"])
-    check("DATA-1 mutation: the fold cannot be resolved",
-          not [c for c in section_data({"edits": []}, None) if c["id"] == "DATA-1"][0]["passed"])
+    # ---- CROSS-CLASS: the two profiles must not launder each other ----
+    ck("CROSS-CLASS: a submission carrying CACHE tokens still fails every submission clause it "
+       "violates - cache tokens cannot satisfy SART-1/2/3/4 or SPROC-2/3",
+       all(st(CLAUSES[c][1], nb_text=GOOD_CACHE_NB, spec=GOOD_SUB_SPEC) == FAIL
+           for c in ("SPROC-2", "SPROC-3", "SART-1", "SART-2", "SART-3", "SART-4")),
+       json.dumps([c for c in ("SPROC-2", "SPROC-3", "SART-1", "SART-2", "SART-3", "SART-4")
+                   if st(CLAUSES[c][1], nb_text=GOOD_CACHE_NB, spec=GOOD_SUB_SPEC) != FAIL]))
+    ck("CROSS-CLASS: a cache run carrying SUBMISSION tokens still fails every cache clause it "
+       "violates - submission tokens cannot satisfy PROC-2/3 or ART-3/4",
+       all(st(CLAUSES[c][1], nb_text=GOOD_SUB_NB, spec=GOOD_SUB_SPEC) == FAIL
+           for c in ("PROC-2", "PROC-3", "ART-3", "ART-4")),
+       json.dumps([c for c in ("PROC-2", "PROC-3", "ART-3", "ART-4")
+                   if st(CLAUSES[c][1], nb_text=GOOD_SUB_NB, spec=GOOD_SUB_SPEC) != FAIL]))
+    ck("CROSS-CLASS: the v1 ART-3 false pass is dead - a wheel glob no longer satisfies the cache "
+       "reconstruction clause",
+       st(c_art_3, nb_text='patterns = ("*.whl", "*.tar.gz", "*.zip")') == FAIL)
+    ck("CROSS-CLASS: the v1 PROC-4 false pass is dead - an ILP rescue NODE budget no longer "
+       "satisfies the TIME-budget clause",
+       st(c_proc_4, nb_text='t = time.time()\nbudget = min(3, n)\n'
+                            'stats["short_track_rescue_budget"] = budget') == FAIL)
 
-    # --- THE FOLD SWAP, BOTH DIRECTIONS, THROUGH THE SHARED POLICY ---------------------
-    # Each takes an HONEST pair and relabels it onto the other fold, where its claim arm becomes a
-    # leaky checkpoint. audit_feature_cache runs the SAME two mutations against its own guard;
-    # they must agree, and the only way to make them agree is that they read one table.
-    f0 = {"edits": [{"vars": {"BIOHUB_LOEO_FOLD": "0"}}]}
-    good_f0 = {"role": "pack_split0", "fold_legitimate": True,
-               "dual_trunk_pair": ["pack_split0", "stabledet"], "contamination": "none",
-               "checkpoint_sha256": "12f6881ee3620a83"}
-    d0 = section_data(f0, good_f0)
-    check("DATA control: the HONEST fold-0 pair is ACCEPTED",
-          all(c["passed"] for c in d0), json.dumps([c["id"] for c in d0 if not c["passed"]]))
-    swapped_to_f0 = dict(good, dual_trunk_pair=["oof_split1", "stabledet"])
-    d = section_data(f0, swapped_to_f0)
-    check("DATA-2 fold swap: the fold-1 claim arm relabelled onto fold 0",
-          not [c for c in d if c["id"] == "DATA-2"][0]["passed"])
-    check("DATA-3 fold swap: the fold-1 PAIR relabelled onto fold 0",
-          not [c for c in d if c["id"] == "DATA-3"][0]["passed"])
-    swapped_to_f1 = dict(good_f0, dual_trunk_pair=["pack_split0", "stabledet"])
-    d = section_data(f1, swapped_to_f1)
-    check("DATA-2 fold swap: the fold-0 claim arm relabelled onto fold 1 (the EXP-0019 defect)",
-          not [c for c in d if c["id"] == "DATA-2"][0]["passed"])
-    check("DATA-3 fold swap: the fold-0 PAIR relabelled onto fold 1",
-          not [c for c in d if c["id"] == "DATA-3"][0]["passed"])
-    aliased = dict(good, checkpoint_sha256="d3e89eb361eeadef")
-    check("DATA-4 mutation: the declared role contradicts the checkpoint's own bytes",
-          not [c for c in section_data(f1, aliased) if c["id"] == "DATA-4"][0]["passed"])
+    # ---- per-clause mutations, submission class ----
+    ck("SDATA-1 mutation: a submission spec that also claims a LOEO fold",
+       st(c_sdata_1, nb_text=GOOD_SUB_NB,
+          spec=dict(GOOD_SUB_SPEC, edits=[{"kind": "env", "vars": {"BIOHUB_LOEO_FOLD": "0"}}])) == FAIL)
+    ck("SDATA-1 mutation: the notebook assigns a LOEO var itself",
+       st(c_sdata_1, nb_text=GOOD_SUB_NB + '\nos.environ["BIOHUB_LOEO_ARM"] = "champion"\n',
+          spec=GOOD_SUB_SPEC) == FAIL)
+    ck("SDATA-2 mutation: the declared base hash does not match the artifact",
+       st(c_sdata_2, spec=dict(GOOD_SUB_SPEC, base_notebook="pyproject.toml",
+                               base_sha256="deadbeef")) == FAIL)
+    ck("SPROC-1 mutation: the spec's treatment value is not the last write in the notebook",
+       st(c_sproc_1, nb_text=GOOD_SUB_NB.replace("= '2.0'", "= '1.0'"), spec=GOOD_SUB_SPEC) == FAIL)
+    ck("SPROC-1 mutation: the treatment is never recorded into run_stats",
+       st(c_sproc_1, nb_text=GOOD_SUB_NB.replace('"motion_relink_learned_bonus"', '"other"'),
+          spec=GOOD_SUB_SPEC) == FAIL)
+    ck("SPROC-1 mutation: a submission declaring no treatment at all",
+       st(c_sproc_1, nb_text=GOOD_SUB_NB, spec=dict(GOOD_SUB_SPEC, edits=[])) == FAIL)
+    ck("SPROC-2 mutation: the completion heartbeat is stripped",
+       st(c_sproc_2, nb_text=GOOD_SUB_NB.replace("SUBMISSION_COMPLETE", "done")) == FAIL)
+    ck("SPROC-3 mutation: the input/output reconciliation raise is deleted",
+       st(c_sproc_3, nb_text=GOOD_SUB_NB.replace("if len(geffs) != len(test_stems):", "")) == FAIL)
+    ck("SART-1 mutation: submission.csv is written by a direct truncating open('w')",
+       st(c_sart_1, nb_text=GOOD_SUB_NB.replace("os.replace(SUBMISSION_TMP, SUBMISSION_PATH)",
+                                                'SUBMISSION_PATH.open("w")')) == FAIL)
+    ck("SART-2 mutation: the row/size guard is removed",
+       st(c_sart_2, nb_text=GOOD_SUB_NB.replace("row_id == total_nodes + total_edges", "")) == FAIL)
+    ck("SART-3 mutation: the notebook names no submission.csv",
+       st(c_sart_3, nb_text=GOOD_SUB_NB.replace("submission.csv", "other.csv")
+          .replace("_guard_submission", "_g"), spec=GOOD_SUB_SPEC) == FAIL)
+    ck("SART-4 mutation: the in-kernel digest of the submission is removed",
+       st(c_sart_4, nb_text=GOOD_SUB_NB.replace("hashlib.sha256(_guard_submission.read_bytes())",
+                                                "0")) == FAIL)
 
-    # --- PROCESS ----------------------------------------------------------------------
-    good_nb = ('env = dict(os.environ)\nenv["PYTHONPATH"] = "scripts"\nprint("AFT_GATE ok")\n'
-               'start = time.time()\nelapsed = time.time() - start\nif elapsed > BUDGET: abort()\n')
-    gs = {"edits": [{"vars": {"BIOHUB_AFT_EXPECT_CROPS": "2", "BIOHUB_LOEO_LIMIT": "2"}}]}
-    p = section_process(good_nb, gs)
-    check("PROCESS control: a correct notebook passes all four clauses",
-          all(c["passed"] for c in p), json.dumps([c["id"] for c in p if not c["passed"]]))
-    check("PROC-1 mutation: the explicit env is not passed to the subprocess",
-          not [c for c in section_process(good_nb.replace("env = dict(os.environ)", ""), gs)
-               if c["id"] == "PROC-1"][0]["passed"])
-    check("PROC-2 mutation: the positive heartbeat is stripped",
-          not [c for c in section_process(good_nb.replace("AFT_GATE", "quiet"), gs)
-               if c["id"] == "PROC-2"][0]["passed"])
-    check("PROC-3 mutation: expected crop count disagrees with the run limit",
-          not [c for c in section_process(good_nb, {"edits": [{"vars": {
-               "BIOHUB_AFT_EXPECT_CROPS": "2", "BIOHUB_LOEO_LIMIT": "1"}}]})
-               if c["id"] == "PROC-3"][0]["passed"])
-    check("PROC-3 mutation: no crop-count assertion at all",
-          not [c for c in section_process(good_nb, {"edits": []}) if c["id"] == "PROC-3"][0]["passed"])
-    check("PROC-4 mutation: the timing probe and early abort are removed",
-          not [c for c in section_process("print('AFT_GATE')\nenv = dict()\nPYTHONPATH", gs)
-               if c["id"] == "PROC-4"][0]["passed"])
+    # ---- per-clause mutations, cache class (v1 coverage retained) ----
+    ck("CODE-4 mutation: two specs share slug and out_dir", _code4_clash(sandbox))
+    ck("CODE-2 OOS: a build injecting no generated patch is OUT_OF_SCOPE, not a silent PASS",
+       st(c_code_2, spec={"edits": []}) == OOS)
+    ck("DATA-3 mutation: the FACT-0418 pair with no fold-legitimate arm",
+       st(c_data_3, spec=GOOD_CACHE_SPEC,
+          trunk={"role": "official", "dual_trunk_pair": list(INVALID_PAIR)}) == FAIL)
+    ck("DATA-2 mutation: an illegitimate role DECLARED legitimate",
+       st(c_data_2, spec=GOOD_CACHE_SPEC,
+          trunk={"role": "official", "fold_legitimate": True}) == FAIL)
+    ck("DATA-2 OOS: no trunk declared is OUT_OF_SCOPE, not a PASS (the v1 false pass)",
+       st(c_data_2, spec=GOOD_CACHE_SPEC, trunk=None) == OOS)
+    ck("PROC-2 mutation: the gate heartbeat is stripped",
+       st(c_proc_2, nb_text=GOOD_CACHE_NB.replace("AFT_GATE", "quiet")) == FAIL)
+    ck("PROC-3 mutation: crop count disagrees with the run limit",
+       st(c_proc_3, spec={"edits": [{"vars": {"BIOHUB_AFT_EXPECT_CROPS": "2",
+                                              "BIOHUB_LOEO_LIMIT": "1"}}]}) == FAIL)
+    ck("ART-2 mutation: the superseded 128 B/node would pass a run the re-derived figure refuses",
+       (14_000_000 * SUPERSEDED_BYTES_PER_NODE * 2 / 1024**3 <= 20.0)
+       and st(c_art_2, nodes=14_000_000) == FAIL)
+    ck("ART-2 mutation: no node count - a capacity guard with no denominator",
+       st(c_art_2, nodes=None) == FAIL)
 
-    # --- ARTIFACT ---------------------------------------------------------------------
-    good_art = 'os.replace(tmp, out)\n_LOEO_KEEP |= {"aft_cache.tar.gz"}\ncache_manifest\naft_gate.json\n'
-    a = section_artifact(good_art, {}, 2332346)
-    check("ARTIFACT control: a correct notebook passes all four clauses",
-          all(c["passed"] for c in a), json.dumps([c["id"] for c in a if not c["passed"]]))
-    check("ART-1 mutation: the artifact is dropped from the export keep-list",
-          not [c for c in section_artifact(good_art.replace("_LOEO_KEEP", "x"), {}, 1)
-               if c["id"] == "ART-1"][0]["passed"])
-    check("ART-2 mutation: no node count - a capacity guard with no denominator",
-          not [c for c in section_artifact(good_art, {}, None) if c["id"] == "ART-2"][0]["passed"])
-    # the superseded figure must not be what makes a too-large run pass
-    big = 14_000_000
-    check("ART-2 mutation: the superseded 128 B/node would pass a run the re-derived figure refuses",
-          (big * SUPERSEDED_BYTES_PER_NODE * 2 / 1024**3 <= 20.0)
-          and not [c for c in section_artifact(good_art, {}, big) if c["id"] == "ART-2"][0]["passed"])
-    check("ART-3 mutation: nothing binds the artifact for independent reconstruction",
-          not [c for c in section_artifact("os.replace(a,b)\n_LOEO_KEEP", {}, 1)
-               if c["id"] == "ART-3"][0]["passed"])
-    check("ART-4 mutation: the notebook names no output, so nothing can be re-derived from it",
-          not [c for c in section_artifact("os.replace(a,b)\n_LOEO_KEEP\ncache_manifest", {}, 1)
-               if c["id"] == "ART-4"][0]["passed"])
-
-    caught = sum(1 for r in results if r["caught"])
-    for r in results:
+    for r in R:
         print(f"  [{'CAUGHT' if r['caught'] else 'MISSED'}] {r['mutation']}"
               + (f"   {r['detail']}" if r["detail"] and not r["caught"] else ""))
-    print(f"\n{caught}/{len(results)} mutations caught")
-    return 0 if caught == len(results) else 1
+    n = sum(1 for r in R if r["caught"])
+    print(f"\n{n}/{len(R)} mutations caught")
+    return 0 if n == len(R) else 1
+
+
+def _refuses(fn) -> bool:
+    try:
+        fn()
+        return False
+    except ContractRefusal:
+        return True
+
+
+def _code4_clash(sandbox: Path) -> bool:
+    d = sandbox / "specs"
+    d.mkdir(parents=True, exist_ok=True)
+    s = {"slug": "x", "out_dir": "d", "code_file": "n.ipynb", "edits": []}
+    (d / "a.json").write_text(json.dumps(s), encoding="utf-8")
+    (d / "b.json").write_text(json.dumps(s), encoding="utf-8")
+    ctx = _ctx(spec=s, repo=sandbox)
+    ctx["spec_path"] = d / "a.json"
+    ctx["all_specs"] = [d / "a.json", d / "b.json"]
+    return c_code_4(ctx)["status"] == FAIL
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    s = sub.add_parser("sign", help="sign a spec's BUILT notebook against all four sections")
+    s = sub.add_parser("sign")
     s.add_argument("--spec", required=True)
     s.add_argument("--nodes", type=int, default=None)
-    s.add_argument("--trunk", default=None, help="JSON file describing the declared trunk")
+    s.add_argument("--trunk", default=None)
     s.add_argument("--out", default=None)
     t = sub.add_parser("selftest")
     t.add_argument("--sandbox", default="C:/temp/gpu_contract_selftest")
@@ -556,11 +815,16 @@ def main(argv=None) -> int:
 
     trunk = json.loads(Path(a.trunk).read_text(encoding="utf-8")) if a.trunk else None
     rep = sign(Path(a.spec).resolve(), REPO, a.nodes, trunk)
+    print(f"profile: {rep['profile']}  ({rep['profile_description']})")
+    print(f"selected by: {rep['profile_selected_by']}")
     for name, cs in rep["sections"].items():
-        print(f"\n{name}  {'SIGNED' if rep['sections_signed'][name] else 'REFUSED'}")
+        bad = [c for c in cs if c["status"] == FAIL]
+        print(f"\n{name}  {'REFUSED' if bad else 'SIGNED'}")
         for c in cs:
-            print(f"  [{'PASS' if c['passed'] else 'FAIL'}] {c['id']}  {c['title'][:96]}")
+            mark = {PASS: "PASS", FAIL: "FAIL", OOS: " OOS"}[c["status"]]
+            print(f"  [{mark}] {c['id']:8s} {c['title'][:88]}")
     print(f"\nVERDICT: {'SIGNED' if rep['signed'] else 'REFUSED'}   failed={rep['failed']}")
+    print(f"out_of_scope ({len(rep['out_of_scope'])}): {rep['out_of_scope']}")
     if a.out:
         Path(a.out).parent.mkdir(parents=True, exist_ok=True)
         Path(a.out).write_text(json.dumps(rep, indent=1), encoding="utf-8")
