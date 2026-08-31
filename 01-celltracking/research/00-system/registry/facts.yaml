@@ -7677,7 +7677,16 @@ facts:
       why that pairing is the only version of the lane with the mass to matter.
       CATEGORY 5 IS PROVISIONAL and must not be quoted as settled until the PKT-0040 survival measurement
       lands; it is recorded as provisional rather than folded into category 4, which is the failure the
-      auditor was specifically tasked to prevent.
+      auditor was specifically tasked to prevent. (SETTLED 2026-08-31 by FACT-0439 - category 5 is
+      confirmed as the motion_relink overwrite and is no longer provisional.)
+      FRAMING CORRECTED 2026-08-31 BY FACT-0441, AND THE STRATEGIC READING ABOVE IS THE PART THAT WAS
+      WRONG. The counts here are arithmetically correct and they partition the CANDIDATE SURFACE, not
+      the emitted graph. An edge never offered to the SCORER can still be emitted by the RELINK, which
+      is not a scorer and does not consult the candidate list: 713 of the 1,110 fold-0 and 9,522 of the
+      14,007 fold-1 never-offered edges ARE ALREADY IN THE DEPLOYED OUTPUT. Genuinely lost mass is 397
+      and 4,485, so the never-offered prize is 1.65x the wrong-parent prize on fold 0 and 2.58x on fold
+      1 - NOT the 4.6x and 8.1x this note states. Any argument of the form 'N true edges are never
+      offered, so the candidate lane is worth N' must be re-derived from FACT-0441.
     date: '2026-08-30'
     tags: [lost-edge-ledger, association, never-offered, candidate-surface, host-hypothesis-refuted,
            strategic, headline]
@@ -8502,10 +8511,16 @@ facts:
       _evidence/assoc/finaledge/
     note: >-
       THIS DRAWS THE BOUNDARY BETWEEN LEVER-0044 AND LEVER-0045 EMPIRICALLY RATHER THAN BY ARGUMENT, which is
-      the strongest form available. The final consumer can move categories 4 and 5 and CANNOT move category
-      3 - 1,110 fold-0 true edges that no change to the relink will ever reach, because they are never
-      offered to it. LEVER-0045 exists precisely for that population and this measurement sizes why the two
-      levers cannot substitute for one another.
+      the strongest form available. The final consumer can move categories 4 and 5 and cannot move the
+      category-3 COUNT, because that count is a property of the candidate surface and the bonus does not
+      change the candidate surface.
+      CORRECTED 2026-08-31 BY FACT-0441 - AND THE CORRECTION IS AGAINST THE CAUSAL CLAIM, NOT THE
+      MEASUREMENT. An earlier draft of this note said category 3 is '1,110 fold-0 true edges that no
+      change to the relink will ever reach, because they are never offered to it'. THAT IS FALSE.
+      motion_relink_edges assigns over ALL NODE PAIRS in a 6.0 um gate rather than over candidate edges,
+      so it already emits 713 of those 1,110. The category-3 COUNT is immovable by the bonus; the
+      category-3 EDGES are substantially already recovered. Those are different statements and only the
+      first is what this fact measured.
       IT ALSO PRICES THE CONSUMPTION LANE HONESTLY. The whole movable mass on fold 0 is category 4 plus
       category 5 - 313 GT edges at the control - against 1,110 in category 3 alone. Even a perfect final
       consumer is bounded by that.
@@ -8548,3 +8563,155 @@ facts:
       accelerator idle while consuming the scarce resource the caches need.
     date: '2026-08-31'
     tags: [throughput, memory-bound, parallelism, replay-cost, planning, gpu-is-not-the-answer, measured]
+
+  - id: FACT-0441
+    statement: >-
+      TWO THIRDS OF LEDGER CATEGORY 3 IS ALREADY IN THE EMITTED GRAPH, SO THE NEVER-OFFERED PRIZE IS FAR
+      SMALLER THAN FACT-0422 IMPLIED. 713 of 1,110 fold-0 (64.2%) and 9,522 of 14,007 fold-1 (68.0%)
+      never-offered GT edges are PRESENT in the deployed emitted graph. The mechanism is verified at deployed
+      source: motion_relink_edges assigns over ALL NODE PAIRS inside a 6.0 um gate rather than over candidate
+      edges, so it routinely emits pairs the candidate rule never proposed. Category 3 therefore describes the
+      CANDIDATE SURFACE, not the emitted graph. Genuinely lost never-offered mass is 397 on fold 0 and 4,485
+      on fold 1 - so on fold 0 the never-offered prize is 1.65x the wrong-parent prize, NOT 4.6x, and on fold
+      1 it is 2.58x, not 8.1x
+    value: 397
+    unit: genuinely_lost_never_offered_gt_edges_fold_0_after_removing_those_already_emitted
+    scope:
+      fold_0: {category_3_total: 1110, already_emitted: 713, already_emitted_share: 0.6423,
+               genuinely_lost: 397, wrong_parent_cat4: 240, corrected_ratio: 1.65, superseded_ratio: 4.6}
+      fold_1: {category_3_total: 14007, already_emitted: 9522, already_emitted_share: 0.6798,
+               genuinely_lost: 4485, wrong_parent_cat4: 1735, corrected_ratio: 2.58, superseded_ratio: 8.1}
+      mechanism: motion_relink_edges assigns over all node pairs in a 6.0 um gate, not over candidate edges
+      mechanism_verified_at: >-
+        notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb code lines 1642, 1665-1666, 1691-1709, 1732
+        (concatenated-code addressing, p28_full_chain_replay._code_source)
+      matching: official one-to-one 7 um
+      substrates: [C:/temp/p30_f0, C:/temp/p34_f1]
+      independent_corroboration:
+        official_scorer_control_edge_fn: {fold_0: 1008, fold_1: 22901}
+        ledger_lost: {fold_0: 1782, fold_1: 32997}
+        reconcile_to_within: {fold_0: 61, fold_1: 574}
+        residual_cause: the two independent matchings
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Established two independent ways that agree. The mechanism was read at named deployed lines rather than
+      inferred from the counts, and the counts were then cross-checked against the OFFICIAL SCORER'S OWN
+      control edge_fn - which reconciles to within 61 and 574 edges once the already-emitted mass is removed,
+      the residual being the two independent matchings. A count-only finding would have been much weaker; a
+      mechanism-only reading would not have given the magnitude.
+    instrument: >-
+      scripts/win_bet/reach_oracle.py; payloads _evidence/assoc/reach/reach_oracle_f0.json and
+      reach_oracle_f1.json
+    note: >-
+      THIS CORRECTS A NUMBER THE CAMPAIGN HAD ALREADY BUILT STRATEGY ON, AND IT WAS FOUND BY THE PACKET SENT
+      TO EXPLOIT IT. FACT-0422's category-3 counts are ARITHMETICALLY CORRECT and its framing was not: it
+      partitions the candidate surface, and a candidate never offered to the SCORER can still be emitted by
+      the RELINK, which is not a scorer and does not consult the candidate list. Every statement of the form
+      "N true edges are never offered, so the candidate lane is worth N" overstates the prize by roughly
+      three-fold and must be re-derived from this entry instead.
+      THE DISTINCTION IS NOT PEDANTIC, IT IS THE WHOLE VERDICT. Reaching an edge the pipeline already emits
+      buys exactly nothing, and an oracle scored over the unpartitioned category 3 would have claimed
+      headroom for 713 fold-0 edges that are already there. That is the difference between a route that looks
+      fundable and one that does not - see FACT-0442, where even the corrected figure kills the lane.
+      THE PARTITION IS NOW STRUCTURAL RATHER THAN A CONVENTION: the instrument refuses if an already-emitted
+      edge reaches the oracle surgery, and the crop, context and fold totals fail closed unless the partition
+      is exhaustive and disjoint.
+    date: '2026-08-31'
+    tags: [lost-edge-ledger, category-3, scope-correction, motion-relink, never-offered, measured, headline]
+
+  - id: FACT-0442
+    statement: >-
+      LEVER-0045's FALSIFIER 0 FIRES AND THE ROUTE CLOSES BEFORE ANY GPU. A GT-free tracklet-conditioned
+      proposal rule, frozen and hashed BEFORE ground truth was read, reaches 0.4181 of genuinely lost
+      category-3 edges on fold 0 (context 5) and 0.3677 on fold 1 (context 8) at candidate multipliers of
+      1.28x and 1.38x - but the oracle score contribution under PERFECT selection is only +0.015207 on fold 0
+      and +0.020375 on fold 1, which is 0.84x and 1.13x the remaining deficit against a preregistered
+      threshold of 2x. ALL SIX CELLS KILL. The best cell reaches 57% of the threshold and the honest
+      promotion fold does not clear even the bare-pass line that was itself preregistered as a kill
+    value: 0.84
+    unit: fold0_oracle_contribution_as_a_multiple_of_the_remaining_deficit_against_a_threshold_of_2
+    scope:
+      threshold: 2x the FACT-0412 remaining gap to 0.950; a bare pass at 1x preregistered as a KILL
+      fold_0: {control_raw_j: 0.912051, ctx2: 0.013169, ctx5: 0.014182, ctx8: 0.015207,
+               ctx8_as_multiple_of_deficit: 0.84}
+      fold_1: {control_raw_j: 0.709237, ctx2: 0.017867, ctx5: 0.019893, ctx8: 0.020375,
+               ctx8_as_multiple_of_deficit: 1.13}
+      cells_killing: 6
+      of_cells: 6
+      best_cell_share_of_threshold: 0.57
+      reach_on_genuinely_lost: {fold_0: [0.3804, 0.4181, 0.4131], fold_1: [0.3222, 0.3603, 0.3677]}
+      candidate_multiplier: {fold_0: [1.288, 1.278, 1.286], fold_1: [1.354, 1.362, 1.377]}
+      after_measured_survival: {fold_0: 0.0023, fold_1: 0.0061, applying: FACT-0428}
+      frozen_rule: {pickle_sha256_16: 58252510152dd0d8, gate_um: 6.0, cap_k: 3, reads_edge_prob: false,
+                    gate_provenance: the deployed motion-relink tight gate at code line 118,
+                    cap_provenance: smallest cap strictly beyond the setting FACT-0376 already killed}
+      calibration_passed_first: {fold_1_gt_displacement_median_um: 1.8617, anchor: FACT-0040}
+      crop_coverage: {fold_0: '54 of 71 crops contain any genuinely lost cat-3 edge, 10 zero-reach',
+                      fold_1: '128 of 128, 2 zero-reach'}
+      rank_1_nominee_is_the_deployed_parent: {fold_0: '289/640', fold_1: '3091/6995'}
+      prediction_held: material gain from context 2 to 5, then flat or reversing
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      The rule was frozen and HASHED before ground truth was read, with the hash recorded in the packet
+      before the measurement module existed and re-checked on every run - so this is not a rule fitted to the
+      answer. The gate and cap were taken from deployed source and from the setting a killed lever already
+      used, not chosen; the distance code passed the FACT-0040 calibration anchor BEFORE anything derived
+      from it was trusted; and the kill threshold with its 2x margin was preregistered with a stated
+      justification. Complete folds, official scorer.
+    instrument: >-
+      scripts/win_bet/reach_rule.py and scripts/win_bet/reach_oracle.py; payloads
+      _evidence/assoc/reach/; contracts tests/test_reach_oracle_partition.py
+    note: >-
+      THIS IS AN ORACLE, WHICH MAKES THE KILL STRONGER RATHER THAN WEAKER. The figures assume PERFECT
+      selection over every newly reached edge - no scorer, no errors, no cost. A real model gets a fraction,
+      and applying FACT-0428's MEASURED survival leaves +0.0023 and +0.0061. A route whose PERFECT-oracle
+      ceiling sits below the bar cannot be rescued by a better model.
+      IT IS NOT LEVER-0037 IN DISGUISE, AND THAT WAS CHECKED RATHER THAN ASSERTED. The rule never reads
+      edge_prob, it reaches short misses that a wider radius cannot (FACT-0370), and it does so at a SMALLER
+      candidate multiplier than the 1.45x FACT-0376 charged. The mechanism is genuinely different and it
+      still does not pay - which is a cleaner result than a kill on a mechanism nobody had separated.
+      THE RULE MOSTLY RE-PROPOSES WHAT THE SOFTMAX ALREADY CHOSE: the rank-1 nominee is the target's DEPLOYED
+      candidate parent in 289 of 640 fold-0 cases and 3,091 of 6,995 fold-1 cases. That is a useful negative
+      about temporal extrapolation on this data, not only about this lever.
+      SUBSTRATE CAUTION: the fold-0 control here is C:/temp/p30_f0/graphs_ctl at raw edge Jaccard 0.890414,
+      the substrate the committed ledger uses - NOT the 0.8862468 P28 champion export of FACT-0368 and
+      FACT-0384. The DELTA is within one substrate so the verdict does not depend on it, but this control
+      level must never be quoted as the champion's.
+    date: '2026-08-31'
+    tags: [lever-0045, falsifier-0, reach-oracle, kill, frozen-rule, pre-gpu, measured, headline]
+
+  - id: FACT-0443
+    statement: >-
+      DIVISION JACCARD FALLS ON FOLD 1 UNDER PERFECT NEVER-OFFERED SELECTION, so FACT-0371's safety condition
+      fails AT THE ORACLE rather than merely in deployment: -0.0144, -0.0163 and -0.0160 at contexts 2, 5 and
+      8. The mechanism is structural - re-parenting a target STRIPS A CHILD EDGE from its previous source, so
+      inserting a correct parent edge can destroy a correct fork
+    value: -0.0163
+    unit: fold1_division_jaccard_delta_at_context_5_under_perfect_selection
+    scope:
+      fold_1_div_jaccard_delta: {ctx2: -0.0144, ctx5: -0.0163, ctx8: -0.0160}
+      mechanism: re-parenting a target removes a child edge from its previous source
+      fails_at: the ORACLE, i.e. under perfect selection, not only under an imperfect model
+      governing_condition: FACT-0371
+      related_measurement: >-
+        144 of 165 fold-0 and 1,397 of 1,616 fold-1 insertions DISPLACE an existing wrong parent, removing a
+        false positive as well as adding a true positive - so the edge-term accounting is favourable while
+        the division term is not
+    provenance: MEASURED
+    validity: VALID
+    validity_reason: >-
+      Measured through the official scorer's own division term on complete folds, under the same oracle that
+      produced FACT-0442, so the edge gain and the division loss are computed on identical edits rather than
+      on separately-optimised ones. That is what makes them comparable and what makes the safety failure
+      attributable to the insertions themselves.
+    instrument: scripts/win_bet/reach_oracle.py; payloads _evidence/assoc/reach/
+    note: >-
+      AN INDEPENDENT REASON TO CLOSE THE ROUTE, AND IT WOULD HAVE BOUND EVEN IF THE HEADROOM HAD CLEARED.
+      FACT-0371 forbids a gain that costs division true positives, and here the cost appears under PERFECT
+      selection - there is no better model that avoids it, because the loss is a property of the edit and not
+      of the chooser. Any successor that inserts parent edges must price this: an inserted edge is not free,
+      it re-parents a target and can dissolve a fork that was correct.
+    date: '2026-08-31'
+    tags: [divisions, fact-0371, oracle, safety-condition, structural-cost, lever-0045, measured]

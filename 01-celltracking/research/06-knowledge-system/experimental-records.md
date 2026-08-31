@@ -6281,3 +6281,62 @@ And this 16 GB box pages badly above three concurrent full-chain workers — eig
 Evidence `_evidence/assoc/finaledge/` (panel, grid, 199 crop payloads). Candidate facts — six — routed to
 the coordinator in `PKT-0042.yaml`; `facts.yaml`, `levers.yaml` and `experiments.yaml` untouched. Packet
 stays `lock: claimed` until Gate B completes.
+
+### 2026-08-31 — PKT-0044 / LEVER-0045 FALSIFIER 0 (agent 8, the CPU reach oracle): the route closes before GPU, and two thirds of the never-offered mass was never lost
+
+The proposal rule was frozen and hashed BEFORE any label was read. `scripts/win_bet/reach_rule.py`
+holds the rule and nothing else, refuses to write its own freeze if its body mentions the ground
+truth, and its pickle sha256 `58252510…cb807eb` went into `PKT-0044.yaml` before the measurement
+module existed. `reach_oracle.py` re-checks that hash on every run and refuses on mismatch, so the
+rule that produced these numbers is provably the one declared in advance. Gate 6.0 um is the
+DEPLOYED motion-relink tight gate (`biohub-p3-harmonic.ipynb` code line 118); cap 3 is the smallest
+cap strictly beyond the setting `FACT-0376` already killed. Neither was re-chosen afterwards.
+Calibration ran first and passed: fold-1 GT inter-frame displacement median 1.8617 um over 10,200
+edges against the `FACT-0040` anchor, on the non-isotropic full-res convention.
+
+**The correction is bigger than the lever.** `FACT-0422`'s category 3 describes the CANDIDATE
+SURFACE, not the emitted graph. Measured here on complete folds: **713 of 1,110 fold-0 (0.6423) and
+9,522 of 14,007 fold-1 (0.6798) never-offered GT edges are ALREADY IN THE DEPLOYED EMITTED GRAPH.**
+`motion_relink_edges` rebuilds the whole edge list by Hungarian assignment over ALL node pairs in a
+6.0 um gate — verified at `biohub-p3-harmonic.ipynb` code lines 1642, 1665-1666, 1691-1709, 1732 —
+so it routinely emits pairs the candidate rule never proposed. The genuinely lost never-offered mass
+is **397 and 4,485**. The official scorer corroborates independently: control `edge_fn` 1,008 and
+22,901 against ledger lost totals 1,782 and 32,997 reconcile to within 61 and 574 edges once the
+already-present mass is removed, the residual being the two independent matchings.
+
+**Reach on the genuinely lost subset**, both directions separately, contexts 2/5/8:
+fold 0 `0.3804 / 0.4181 / 0.4131`; fold 1 `0.3222 / 0.3603 / 0.3677`. The pre-registered prediction
+held — material gain from 2 to 5, then flat or reversing. Candidate multiplier 1.278–1.288x (fold 0)
+and 1.354–1.377x (fold 1), cheaper than `FACT-0376`'s 1.45x. True-parent rank is the quiet kill: at
+context 5 the true parent is rank 1 for only 49/166 fold-0 and 815/1,616 fold-1 nominations, and the
+rank-1 nominee is the target's DEPLOYED candidate parent 289/640 and 3,091/6,995 times — the rule
+mostly re-proposes what the softmax already chose, and where it does surface the truth it ranks it
+below a decoy.
+
+**The oracle, official scorer, perfect selection over the newly reachable edges only.** Fold 0
+control 0.912051: `+0.013169 / +0.014182 / +0.015207`. Fold 1 control 0.709237:
+`+0.017867 / +0.019893 / +0.020375`. The preregistered threshold is TWICE `FACT-0412`'s remaining
+gap to 0.950, and a bare pass at one times it is already declared a KILL. **Best cell in the whole
+experiment is 1.13x the deficit (fold 1, context 8); the honest promotion fold's best is 0.84x — it
+does not clear even the bare-pass line. All six fold-by-context cells KILL, the largest reaching 57%
+of the threshold.** Fold 1's division Jaccard FALLS at every context (-0.0144/-0.0163/-0.0160)
+because re-parenting strips a child edge from its previous source, so `FACT-0371`'s safety condition
+fails at the ORACLE. Applying `FACT-0428`'s measured survival of a pre-ILP-only change leaves
++0.0023 and +0.0061.
+
+Category-2 overlap is ZERO by the committed ordering — category 2 is tested before category 3, so the
+`FACT-0430` drain is already netted out (1,199→1,110 on fold 0, 17,003→14,007 on fold 1). Category-5
+overlap is ZERO by construction. The measurable relation runs the other way: 144/165 and 1,397/1,616
+oracle insertions displace an existing WRONG parent, removing a false positive as well as adding a
+true one — already priced into the deltas.
+
+Category definitions were not forked: every crop's six categories plus recovered plus `gt_edges` were
+asserted equal to the committed `lost_edge_ledger_f{0,1}.json`, and both folds agree exactly. The
+oracle harness proves itself on every crop — the parent-map representation must round-trip the
+deployed edge set before anything is inserted.
+
+CPU only. Zero GPU sessions, zero submissions, no kernel push. No fact, lever or experiment written —
+candidate facts routed to the coordinator in `PKT-0044.yaml`. Evidence
+`_evidence/assoc/reach/reach_oracle_f{0,1}.json` and `frozen_rule.{pkl,json}`; logs
+`C:/temp/reach_oracle/f{0,1}.log`. **Verdict: LEVER-0045 FALSIFIER 0 FIRES. Its own branch logic says
+"ORACLE REACH FAILS: CLOSE this route BEFORE any GPU."**

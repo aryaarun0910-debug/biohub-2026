@@ -2,7 +2,7 @@ id: PKT-0044
 title: "FALSIFIER 0 - the CPU reach oracle: can temporal proposal nominate the never-offered mass at all"
 lever: LEVER-0045
 owner: agent-8-reach-oracle
-lock: claimed
+lock: done
 opened: '2026-08-31'
 
 concurrency: >-
@@ -68,6 +68,44 @@ method: >-
   removed downstream is not worth reaching.
   BOTH EMBRYO DIRECTIONS SEPARATELY, never pooled alone (AGENTS.md section 4).
 
+frozen_rule:
+  recorded: '2026-08-31 BEFORE any ground truth was read by this packet'
+  why_here: >-
+    LEVER-0045 requires the proposal rule to be frozen before GT is consulted, and the tournament's
+    frozen-model precedent requires the freeze to be DEMONSTRABLE rather than asserted: pickle it,
+    hash it, record the hash. This block is written before scripts/win_bet/reach_oracle.py - the only
+    module in this packet that opens data/train - exists.
+  code: scripts/win_bet/reach_rule.py
+  gt_free_guard: >-
+    reach_rule.assert_gt_free() scans its own source body for 'geff', 'data/train', 'ground truth'
+    and 'gt edges' and REFUSES to write the freeze if any appears. It is run by freeze(), so the
+    pickle below cannot exist unless the guard passed.
+  rule_pickle_sha256: 58252510152dd0d8d15792b54ee92bb8bbc965e6d426a06c3051f8594cb807eb
+  rule_pickle_bytes: 1629
+  reach_rule_py_sha256: 78d34b1c390e8a90a20c1a1ff23585efe7030719f99018409deb2954a5ab3ed1
+  artifact: _evidence/assoc/reach/frozen_rule.pkl and frozen_rule.json
+  parameters:
+    context_lengths: [2, 5, 8]
+    gate_um: 6.0
+    gate_provenance: >-
+      the DEPLOYED motion-relink TIGHT gate, read at _evidence/assoc/survival/stage_map.json
+      stages[3]. Taken from the deployed final parent selector rather than invented.
+    cap_k: 3
+    cap_provenance: >-
+      FACT-0369 puts the deployed cap at 1 by arithmetic; FACT-0376's killed LEVER-0037 setting was
+      2. 3 is the SMALLEST cap strictly beyond the setting that was already killed.
+    identical_across_embryos: true
+    per_fold_tuning: NONE
+    reads_edge_prob: false
+  rule: >-
+    Build tracklets by walking BACKWARD along the unique deployed pre-ILP candidate parent, following
+    a link only when the parent frame is exactly one less. Fit a degree-1 least-squares model of
+    position in um against frame index over the up-to-L walk positions and evaluate it at the TARGET
+    frame f = f_src + 1; a walk of length 1 extrapolates with zero velocity. For every node at frame
+    f, nominate the cap_k nearest frame-(f-1) nodes by Euclidean um distance between the target's own
+    position and the source's EXTRAPOLATED position, keeping only distances <= gate_um. Sources at
+    f-1 and targets at f ONLY - longer context never produces a longer edge.
+
 budget:
   gpu_sessions: 0
   submissions: 0
@@ -88,9 +126,152 @@ forbidden:
   - .claude/settings.json or .gitignore
 
 outputs:
-  evidence: _evidence/assoc/reach/ and C:/temp/reach_oracle/
+  evidence: >-
+    _evidence/assoc/reach/reach_oracle_f0.json, _evidence/assoc/reach/reach_oracle_f1.json,
+    _evidence/assoc/reach/frozen_rule.pkl, _evidence/assoc/reach/frozen_rule.json;
+    logs C:/temp/reach_oracle/f0.log and f1.log
   facts_added: []
   record: >-
     One compact row in research/06-knowledge-system/experimental-records.md
 
-result: null
+result: >-
+  THE ROUTE CLOSES BEFORE GPU. FALSIFIER 0 FIRES ON BOTH EMBRYO DIRECTIONS. The frozen rule reaches a
+  real and non-trivial share of the never-offered population, and the oracle over that reach is still
+  less than half the preregistered threshold on the honest fold. Complete folds, official scorer,
+  CPU only, zero GPU sessions and zero submissions spent.
+
+  THE FREEZE HELD. reach_rule.py's pickle sha256 58252510152dd0d8d15792b54ee92bb8bbc965e6d426a06c3051f8594cb807eb
+  was recorded above before scripts/win_bet/reach_oracle.py existed; the measurement module re-checks
+  it on every run and REFUSES on mismatch, so the rule that produced these numbers is provably the
+  rule declared before any label was read. The gate (6.0 um) and cap (3) were never re-chosen.
+
+  CALIBRATION PASSED FIRST. Fold-1 GT inter-frame displacement median 1.8617 um over 10,200 edges
+  against the FACT-0040 anchor at the committed +/-0.15 tolerance, on the non-isotropic
+  (1.625, 0.40625, 0.40625) full-res convention, before a single proposal distance was read.
+
+  THE CATEGORY DEFINITIONS WERE NOT FORKED. Every crop's six categories plus recovered plus gt_edges
+  were asserted equal to the committed lost_edge_ledger payloads; both folds agree exactly
+  (1,110 and 14,007), so this result is directly comparable with FACT-0422.
+
+  THE HEADLINE CORRECTION, AND IT IS LARGER THAN THE LEVER. FACT-0422's category 3 is a statement
+  about the CANDIDATE SURFACE, not about the emitted graph, and the two are very different. Measured
+  here for the first time: 713 of 1,110 fold-0 category-3 edges (0.6423) and 9,522 of 14,007 fold-1
+  (0.6798) ARE ALREADY PRESENT IN THE DEPLOYED EMITTED GRAPH. The deployed motion relink rebuilds the
+  whole edge list by Hungarian assignment over ALL node pairs inside a 6.0 um gate - verified at
+  biohub-p3-harmonic.ipynb code lines 1642, 1665-1666, 1691-1709, 1732 - so it routinely emits pairs
+  the candidate rule never proposed. The GENUINELY LOST never-offered mass is therefore 397 on fold 0
+  and 4,485 on fold 1, not 1,110 and 14,007. On fold 0 that makes the never-offered prize 1.65x the
+  wrong-parent prize, not the 4.6x FACT-0422 reports. Independent corroboration: the official scorer's
+  own control edge_fn is 1,008 (fold 0) and 22,901 (fold 1) against a ledger lost total of 1,782 and
+  32,997; subtracting the already-present mass reconciles to within 61 and 574 edges, the residual
+  being the two independent matchings (peak-set vs emitted-set, with line-fit smoothing between them).
+  That residual points the same way, so 397 and 4,485 are if anything slight OVERSTATEMENTS.
+
+  REACH, ON GENUINELY LOST CATEGORY-3 EDGES, BOTH DIRECTIONS SEPARATELY.
+    fold 0 (44b6, 71/71 crops): context 2 151/397 = 0.3804; context 5 166/397 = 0.4181;
+      context 8 164/397 = 0.4131.
+    fold 1 (6bba, 128/128 crops): context 2 1,445/4,485 = 0.3222; context 5 1,616/4,485 = 0.3603;
+      context 8 1,649/4,485 = 0.3677.
+  The prediction written before the run is CONFIRMED: reach improves materially from context 2 to 5
+  and then flattens or reverses (fold 0 goes 0.4181 -> 0.4131), because extrapolation error grows with
+  the horizon while the misses are short.
+
+  TRUE-PARENT RANK, and this is the quiet kill. At context 5 on the genuinely lost subset the true
+  parent is rank 1 for only 49 of 166 nominations on fold 0 (0.295) and 815 of 1,616 on fold 1 (0.504).
+  Over ALL reached category-3 edges the rank-1 nominee is the target's DEPLOYED candidate parent 289 of
+  640 times on fold 0 and 3,091 of 6,995 on fold 1. So the temporal rule mostly re-proposes the parent
+  the deployed softmax already chose, and where it does surface the true parent it usually ranks it
+  BELOW a decoy. A downstream scorer would have to win those comparisons, and FACT-0382 says every one
+  of them sits on a surface the deployed pipeline is measured to lose on.
+
+  CANDIDATE MULTIPLIER. 1.278x to 1.288x on fold 0 and 1.354x to 1.377x on fold 1 - cheaper than the
+  1.45x FACT-0376 charged for the killed LEVER-0037 widening, but bought with 549,178 to 815,971 new
+  pairs per fold for a few hundred to a few thousand true edges.
+
+  COVERAGE BY CROP. Fold 0: only 54 of 71 crops contain any genuinely lost category-3 edge at all;
+  median per-crop reach 0.414 at context 5 with 10 crops at zero. Fold 1: all 128 crops, median 0.359
+  at context 5, 2 crops at zero. The fold-0 mass is thin and unevenly spread.
+
+  THE ORACLE, official scorer, complete folds, perfect selection over the newly reachable edges only.
+    fold 0 control score 0.912051 (rawJ 0.890414, edges 18,818/1,308/1,008, divisions 5/68/21):
+      context 2 +0.013169   context 5 +0.014182   context 8 +0.015207
+    fold 1 control score 0.709237 (rawJ 0.700438, edges 86,156/13,946/22,901, divisions 14/349/111):
+      context 2 +0.017867   context 5 +0.019893   context 8 +0.020375
+  Node recall is unchanged on both folds by construction (the oracle re-parents, it never adds nodes).
+
+  THE PREREGISTERED KILL THRESHOLD, APPLIED. FACT-0412's remaining gap to 0.950 is the deficit; the
+  threshold is TWICE it, and a bare pass at one times it is a KILL. The best oracle in the whole
+  experiment is fold 1 at context 8, which is 1.13x the deficit. The honest promotion fold's best is
+  0.84x - it does not clear even the bare-pass line the falsifier already declares insufficient. Every
+  one of the six fold-by-context cells is a KILL, and none is close: the largest is 57% of the
+  threshold.
+
+  IT IS WORSE THAN THE ORACLE NUMBERS LOOK, FOR TWO INDEPENDENT REASONS.
+  (1) FACT-0384's measured oracle-to-real haircut on this campaign is roughly fourteen-fold, which is
+      the reason the margin was set at two.
+  (2) FACT-0428 measured that a pre-ILP-only parent change survives into the emitted graph at 0.1542
+      on fold 0 and 0.3030 on fold 1. Applying that alone to the best cells gives +0.0023 and +0.0061.
+  (3) DIVISION SAFETY ALREADY FAILS AT THE ORACLE. Fold 1's division Jaccard FALLS at every context
+      (-0.0144, -0.0163, -0.0160) because re-parenting a target removes a child edge from whatever
+      source held it. FACT-0371's caution therefore fires against the PERFECT version of this
+      intervention, before any real selector exists.
+
+  OVERLAP WITH CATEGORY 2 AND CATEGORY 5 - the packet's own stated worry, answered.
+  CATEGORY 2 OVERLAP IS ZERO BY THE COMMITTED ORDERING, and the drain FACT-0430 warns about is already
+  netted out upstream: category 2 is tested BEFORE category 3, so every category-3 edge has BOTH
+  endpoints present in the emitted graph. The size of that already-removed drain is readable from the
+  ledger's own FACT-0370 reconciliation - fold 0 1,199 pre-ILP never-offered against 1,110 category 3,
+  so 89 (7.4%) were drained; fold 1 17,003 against 14,007, so 2,996 (17.6%). Neither is a further
+  haircut on the numbers above.
+  CATEGORY 5 OVERLAP IS ZERO BY CONSTRUCTION: category 5 requires the edge to have been OFFERED and a
+  category-3 edge never was. The measurable relation is the target's emitted state, and it is the
+  opposite of the packet's worry - 144 of 165 fold-0 and 1,397 of 1,616 fold-1 oracle insertions at
+  context 5 DISPLACE an existing wrong parent, so they remove a false positive as well as adding a
+  true one. That is already priced into the oracle deltas above.
+
+  THIS IS NOT LEVER-0037 IN DISGUISE, AND THE EVIDENCE SAYS SO RATHER THAN THE LABEL. The rule never
+  reads edge_prob; it re-ORDERS the frame-(f-1) pool by motion extrapolation. It does reach edges a
+  radius cannot (FACT-0370's misses are short), and it reaches them at a smaller multiplier than
+  FACT-0376's widening. The mechanism is genuinely different and it still does not pay.
+
+  CANDIDATE FACTS FOR THE COORDINATOR
+  (A) CATEGORY 3 OF THE LOST-EDGE LEDGER IS TWO THIRDS RECOVERED DOWNSTREAM AND FACT-0422 MUST BE READ
+      WITH THAT SCOPE. 713 of 1,110 fold-0 (0.6423) and 9,522 of 14,007 fold-1 (0.6798) never-offered
+      GT edges are PRESENT in the deployed emitted graph, because motion_relink_edges assigns over all
+      node pairs rather than over candidate edges. Genuinely lost never-offered mass is 397 and 4,485.
+      Scope: complete folds, official one-to-one 7 um matching, deployed substrates
+      C:/temp/p30_f0 and C:/temp/p34_f1. Provenance MEASURED.
+      Instrument: scripts/win_bet/reach_oracle.py; payloads _evidence/assoc/reach/reach_oracle_f{0,1}.json;
+      mechanism verified at notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb code lines 1642,
+      1665-1666, 1691-1709, 1732 (concatenated-code line addressing, p28_full_chain_replay._code_source).
+      Reconciles with the official scorer's own control edge_fn (1,008 fold 0, 22,901 fold 1) to within
+      61 and 574 edges, the residual being the two independent matchings.
+  (B) THE FROZEN TEMPORAL PROPOSAL ORACLE IS 0.84x (fold 0) AND 1.13x (fold 1) THE REMAINING DEFICIT,
+      AGAINST A THRESHOLD OF 2x. Best cells: fold 0 context 8 +0.015207 on a control of 0.912051;
+      fold 1 context 8 +0.020375 on a control of 0.709237. Reach on genuinely lost category-3 edges
+      0.4181 (fold 0, context 5) and 0.3677 (fold 1, context 8) at a candidate multiplier of 1.28x and
+      1.38x. Rule frozen and hashed before GT (pickle sha256 58252510...cb807eb). Provenance MEASURED.
+      Instrument: scripts/win_bet/reach_rule.py + scripts/win_bet/reach_oracle.py, official
+      tracking_cellmot scorer, complete folds.
+  (C) DIVISION JACCARD FALLS ON FOLD 1 UNDER PERFECT NEVER-OFFERED SELECTION: -0.0144, -0.0163, -0.0160
+      at contexts 2, 5, 8, because re-parenting a target strips a child edge from its previous source.
+      FACT-0371's safety condition fails at the ORACLE, not merely in deployment. Provenance MEASURED,
+      same instrument.
+
+  WHAT THIS DOES NOT KILL. LEVER-0045's FALSIFIER 0 branch logic says "ORACLE REACH FAILS: CLOSE this
+  route BEFORE any GPU", and that is the recommendation. It is a statement about the TEMPORAL
+  CANDIDATE GENERATOR reaching the never-offered mass. It says nothing about LEVER-0044's consumption
+  question, and nothing about manufactured supervision applied to a different target.
+
+  NOTE FOR THE COORDINATOR, RECORDED RATHER THAN SMOOTHED OVER. Partway through this packet another
+  process added `partition_reached_cat3`, `_cat3_identity` and tests/test_reach_oracle_partition.py to
+  scripts/win_bet/reach_oracle.py and renamed the reach keys. The change is an improvement - it makes
+  the genuinely-lost / already-recovered split structural and refuses if an already-recovered edge
+  reaches the oracle surgery - and it does not alter any value, since the previous code already skipped
+  already-present edges. Both folds were RESTARTED from scratch on the post-change code so the
+  instrument and the payloads agree; the partial pre-change runs were discarded. Its 9 tests pass.
+
+  SUBSTRATE NOTE. The fold-0 control here is C:/temp/p30_f0/graphs_ctl, the substrate the committed
+  ledger uses, whose control raw edge Jaccard is 0.890414 - NOT the 0.8862468 P28 champion export of
+  FACT-0368 and FACT-0384. The oracle DELTA is measured within one substrate, so the verdict does not
+  depend on the difference, but the control level must not be quoted as the champion's.

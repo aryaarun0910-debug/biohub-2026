@@ -388,11 +388,27 @@ def test_5g_a_fabricated_binding_block_without_digests_is_blocked():
 # =============================================================================================
 # the shipped manifest, and the registration path PKT-0042 uses
 # =============================================================================================
-def test_the_shipped_manifest_is_empty_and_therefore_refuses(tmp_path):
-    """The committed manifest registers no control yet. That state must REFUSE, not wave through."""
+def test_an_unregistered_control_is_refused_against_the_shipped_manifest(tmp_path):
+    """A control the SHIPPED manifest does not register must REFUSE, not wave through.
+
+    REWRITTEN 2026-08-31. The original asserted ``deployed_controls == []`` - a fact about
+    CAMPAIGN STATE, not about the guard - and it broke the moment PKT-0042 legitimately
+    registered EXP-0030 and EXP-0031. A guard test that fails because the campaign made
+    progress is testing the wrong thing, and worse, the obvious "fix" is to delete the
+    registrations. What must hold for the life of the project is the BEHAVIOUR: an identity
+    absent from the manifest is refused however many identities are present. The shipped
+    manifest is still read - so this exercises the real file and not a fixture - but only its
+    well-formedness is asserted, and every entry it does hold must itself be well formed.
+    """
     man = cb.load_manifest(cb.MANIFEST_PATH)
     assert man["kind"] == "deployed_control_manifest"
-    assert man["deployed_controls"] == []
+    assert isinstance(man["deployed_controls"], list)
+    for entry in man["deployed_controls"]:
+        for field in ("experiment", "fold"):
+            assert entry.get(field), f"shipped manifest entry missing {field!r}: {entry}"
+    assert not any(e.get("experiment") == "EXP-0044" for e in man["deployed_controls"]), (
+        "EXP-0044 must remain unregistered for this test to exercise a refusal"
+    )
     rows = tmp_path / "rows.json"
     rows.write_text(json.dumps(DEPLOYED_ROWS), encoding="utf-8")
     graph = tmp_path / "g.bin"; graph.write_bytes(b"g")

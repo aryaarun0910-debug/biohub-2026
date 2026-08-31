@@ -1743,7 +1743,47 @@ levers:
       A TRACKLET-CONDITIONED CANDIDATE GENERATOR trained with high-confidence PSEUDO-LINEAGES increases
       category-3 reach - the true edges never offered to any scorer - and a MULTI-FRAME edge scorer converts
       that reach into complete-chain RAW association without node or division loss.
-    status: open
+    status: killed
+    closed_by: [FACT-0442, FACT-0441, FACT-0443]
+    closed_date: '2026-08-31'
+    outcome_2026_08_31: >-
+      FALSIFIER 0 FIRED ON ITS OWN EVIDENCE AND THE ROUTE CLOSED BEFORE ANY GPU WAS SPENT - which is exactly
+      what the falsifier was written to do. All SIX cells kill: the oracle contribution is 0.84x the
+      remaining deficit on fold 0 and 1.13x on fold 1 against a preregistered threshold of 2x, and the best
+      cell reaches 57% of it. The honest promotion fold does not clear even the bare-pass line that was
+      itself preregistered as a kill (FACT-0442).
+      THE KILL IS STRONGER THAN A NULL BECAUSE IT IS AN ORACLE. The figures assume PERFECT selection over
+      every newly reached edge - no scorer, no errors, no cost - so no better model can rescue the route.
+      Applying FACT-0428's measured survival leaves +0.0023 and +0.0061.
+      AN INDEPENDENT SECOND REASON, WHICH WOULD HAVE BOUND EVEN IF THE HEADROOM HAD CLEARED: fold-1 division
+      Jaccard FALLS at every context under perfect selection (FACT-0443), because re-parenting a target
+      strips a child edge from its previous source. FACT-0371's safety condition fails at the oracle, and the
+      loss is a property of the edit rather than of the chooser.
+      IT WAS NOT LEVER-0037 IN DISGUISE, AND THAT WAS CHECKED RATHER THAN ASSERTED. The frozen rule never
+      reads edge_prob, reaches short misses a wider radius cannot (FACT-0370), and does so at a SMALLER
+      candidate multiplier than the 1.45x FACT-0376 charged. A genuinely different mechanism, tested on its
+      own terms, that still does not pay.
+      THE LARGEST RESULT IS NOT THE VERDICT. The packet sent to exploit the never-offered mass MEASURED THAT
+      THE MASS IS TWO THIRDS SMALLER THAN THE REGISTRY BELIEVED (FACT-0441): motion_relink_edges assigns over
+      all node pairs in a 6.0 um gate, so 713 of 1,110 fold-0 and 9,522 of 14,007 fold-1 never-offered edges
+      are ALREADY EMITTED. Category 3 partitions the candidate surface, not the output. That correction
+      outlives this lever and re-prices every candidate-side argument in the campaign.
+    what_this_does_not_kill: >-
+      SCOPED DELIBERATELY, because closing by association is this project's second most expensive recorded
+      mistake and a coupled lever is the easiest place to do it.
+      (1) It says NOTHING about LEVER-0044's consumption question, which is measured separately and remains
+          open on Gate B.
+      (2) It does NOT kill MANUFACTURED SUPERVISION as such. What was tested is a temporal PROPOSAL rule
+          against the never-offered mass; no pseudo-label was ever generated, so falsifiers (1) and (2) never
+          ran. Manufactured supervision aimed at a DIFFERENT target - notably the division data limit
+          FACT-0362 records, where the binding constraint is positives and not proposals - is untested here
+          and would need its own lever and its own falsifier.
+      (3) It does not condemn multi-frame context in a SCORER. What failed is multi-frame context as a
+          CANDIDATE GENERATOR; a scorer consuming temporal context over the existing surface is a different
+          claim.
+      A USEFUL NEGATIVE WORTH CARRYING FORWARD: the rule's rank-1 nominee is the target's DEPLOYED candidate
+      parent in 289 of 640 fold-0 and 3,091 of 6,995 fold-1 cases, so temporal extrapolation on this data
+      mostly re-proposes what the softmax already chose. That is a fact about the data, not about the lever.
     mechanism: >-
       temporal tracklet proposal + manufactured labels + learned discrimination + final consumption. All four,
       coupled. This is the only version of the lane with the mass to matter.
