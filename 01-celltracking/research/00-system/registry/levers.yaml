@@ -110,6 +110,44 @@ levers:
 # ---------------------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------------------------
+# THE WINNING FUNCTION, SHARPENED (host, 2026-08-31) - after the reversed ladder and the reach oracle
+#
+#   RICH OBJECT REPRESENTATION -> DISCRIMINATIVE CANDIDATE SCORING WITH ABSTENTION -> A CONSUMER THAT
+#   PRESERVES THE GAIN
+#
+# WHY IT IS STATED AS A PRODUCT. Improving ANY ONE factor while freezing the other two has now produced
+# a zero or a bound five times, measured rather than argued:
+#   LEVER-0037  offered without discriminating        -> killed
+#   LEVER-0039  discriminated without offering        -> killed (FACT-0386)
+#   LEVER-0045  temporal proposal, frozen scorer      -> killed at 0.84x/1.13x the bar (FACT-0442)
+#   reversed ladder: nodes at a frozen consumer       -> EXACTLY ZERO edges moved (FACT-0447)
+#   pre-ILP ranking at a frozen consumer              -> only 15%/30% survives (FACT-0428)
+# The factors are not additive and not separately testable. Co-design, or expect a zero.
+#
+# WHERE THE FACTORS STAND. P38 (Kaggle 55915569) tests the THIRD factor on the leaderboard now.
+# FOCUS-3D -> HOCT targets the FIRST TWO together and is the most coherent currently identified
+# co-designed route - but NOT the only one. Still open: other mask generators feeding official HOCT;
+# a POINT-NATIVE HOCT trained from a contract we own; synthetic-correspondence T=2 pretraining
+# followed by cross-fitted association training; and a detector and consumer integrated TOGETHER.
+#
+# THREE SCOPE LIMITS THAT MUST TRAVEL WITH THE KILLS, so the board is not over-closed:
+#   FACT-0448's sixteen caps CORRECTING WRONG LINKS BETWEEN TWO ANNOTATED CELLS. It does not cap a
+#     scorer that ABSTAINS on unmatched-node edges, REMOVES bad edges, or RECOVERS missing true ones.
+#   FACT-0449 makes BROAD node deletion expensive. SELECTIVE deletion stays admissible and must pay
+#     through the COMPLETE objective.
+#   FACT-0447 holds TOPOLOGY FIXED by design. It cannot bound a detector producing new features,
+#     masks, candidates and associations JOINTLY. What is dead is the NODE-ONLY thesis.
+#
+# COMPUTE POLICY THAT FOLLOWS.
+#   Node-only detector GPU spend: HELD PERMANENTLY.
+#   Unprotected FOCUS/HOCT GPU execution: HELD until its adapter passes.
+#   CPU preparation and Gate B: NOT held for P38 - P38 decides whether the EXISTING consumer
+#     amplification transfers, not whether mask-aware association is valuable.
+#   GPU goes to the FIRST mask/HOCT smoke whose contract proves SCALE, FEATURE COVERAGE, OUTPUT
+#     INTERPRETATION, PROVENANCE and INDEPENDENT AUDITABILITY - all five, or it does not launch.
+# ---------------------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------------------
 # GPU PROTECTION CONTRACT (host, 2026-08-30) - FOUR SIGNED SECTIONS BEFORE EVERY LAUNCH
 #
 # This sits UNDER the standing GPU rule, not beside it: that rule says every session must produce an
