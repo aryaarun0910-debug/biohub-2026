@@ -122,7 +122,12 @@ levers:
 #   LEVER-0045  temporal proposal, frozen scorer      -> killed at 0.84x/1.13x the bar (FACT-0442)
 #   reversed ladder: nodes at a frozen consumer       -> EXACTLY ZERO edges moved (FACT-0447)
 #   pre-ILP ranking at a frozen consumer              -> only 15%/30% survives (FACT-0428)
-# The factors are not additive and not separately testable. Co-design, or expect a zero.
+#   Gate A: consumer moved, score frozen              -> paid on ONE fold only (FACT-0437)
+# That is SIX instances and they cover all three factors from both sides: LEVER-0037/0045 and the
+# reversed ladder move the OFFER with the scorer frozen; LEVER-0039 and FACT-0428 move the SCORER with
+# the offer and consumer frozen; Gate A moves the CONSUMER with the score frozen. Every one returned a
+# zero, a bound, or a single-fold result. The factors are not additive and not separately testable.
+# Co-design, or expect a zero.
 #
 # WHERE THE FACTORS STAND. P38 (Kaggle 55915569) tests the THIRD factor on the leaderboard now.
 # FOCUS-3D -> HOCT targets the FIRST TWO together and is the most coherent currently identified

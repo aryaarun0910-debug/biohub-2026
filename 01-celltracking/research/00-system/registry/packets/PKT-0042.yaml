@@ -161,44 +161,78 @@ result:
       measurement rather than of the full chain. This is the clause the auditor restored, and it is answered.
 
   gate_b:
-    status: RUNNING, NOT COMPLETE. NO VERDICT, IN EITHER DIRECTION.
+    status: >-
+      RUNNING in a FRESH directory (C:/temp/finaledge/gateB_v2/), NOT COMPLETE. NO VERDICT, IN EITHER
+      DIRECTION. Resumed 2026-08-31 on coordinator instruction; it is explicitly NOT held for P38, which
+      asks whether the EXISTING consumer amplification transfers to the hidden set and does not decide
+      this question.
     why_no_verdict: >-
-      The lever's Gate B is defined over the complete chain on both folds. A partial Gate B is not a weak
-      result, it is not a result - and reading one would be the precise error the launch decision tree's
-      branch (1) forbids. At the time of writing it has 8 of 71 fold-0 crops and 0 of 128 fold-1, so nothing
-      about the coupled mechanism is asserted here, favourable or otherwise.
+      The lever's Gate B is defined over the complete chain on BOTH folds. A partial Gate B is not a weak
+      result, it is not a result, and reading one is what the launch decision tree's branch (1) forbids.
+    quarantine: >-
+      The eight fold-0 payloads produced by the earlier Gate B run were moved UNREAD to
+      C:/temp/finaledge/QUARANTINE_gateB_prefix_f0/ with their reason, on coordinator order, and the rerun
+      writes to a directory that has never held a payload from any earlier code. They predate the
+      FACT-0448 population attribution, and a payload that cannot make that split is not comparable with
+      one that can - mixing them in one panel would look complete while being unreadable.
     bonus: >-
       1.0, the PREREGISTERED deployed value (FACT-0427), selected by the rule and not by a person: Gate A
-      completed and selected NO bonus, so there is no winning bonus to carry, and the fallback is the
-      preregistered one. The value is read out of panel_gateA.json by code before any Gate B number exists;
-      the reasoning is written into C:/temp/finaledge/gateB/WHY_BONUS_1.txt.
+      completed and selected NO bonus, so there is no winning bonus to carry and the fallback is the
+      preregistered one. Read out of panel_gateA.json by code before any Gate B number existed; the
+      reasoning is written into gateB_v2/WHY_BONUS_1.txt.
     arms: >-
       Two, both against the DEPLOYED control recomputed inside the same crop payload and never against a
       widened-only control (FACT-0382): r1 = top-1 parent per target chosen BY THE LEARNED SCORE from the
-      floor-0.1 acquisition, which reproduces the deployed one-parent-per-target SHAPE (FACT-0369) with the
-      learned parent, and r2 = top-2. In both, the probability-free contextual score is written into the
-      edge_prob slot, so the same number reaches the ILP objective and the relink bonus, which is the only
-      learned channel that crosses the predictor boundary at all (FACT-0427).
+      floor-0.1 acquisition, reproducing the deployed one-parent-per-target SHAPE (FACT-0369) with the
+      learned parent, and r2 = top-2. In both, the probability-free contextual score (FACT-0421's TRANSFER
+      arm, reproduced exactly) is written into the edge_prob slot, so the same number reaches the ILP
+      objective and the relink bonus - the only learned channel that crosses the predictor boundary at all
+      (FACT-0427).
+    fact_0448_population_attribution_added_before_the_rerun: >-
+      NEW, and it is why the rerun was worth restarting rather than resuming. FACT-0448 measured that of
+      1,369 fold-0 false-positive edges only SIXTEEN are wrong links between two ANNOTATED cells. That
+      sixteen caps ONE population and caps nothing else, so every arm now reports which population its
+      edges belong to, diffed against the control: `wrong_links_between_two_annotated_cells` (the capped
+      one), `edges_touching_an_unmatched_node` (mass FACT-0448 does not bound, where a scorer may abstain
+      or remove), `gt_edges_wanted_but_missing` split by whether the target ended with a DIFFERENT parent
+      or with NO parent, and edges added/removed against the control. The block reproduces the official
+      scorer's edge_tp EXACTLY and is explicitly labelled NOT a re-derivation of the scorer's FP/FN, which
+      leave edges touching unannotated nodes free - the promotable numbers stay the scorer's.
+      FIRST OBSERVATION, on one fold-1 crop and therefore NOT a result: the control has ZERO wrong links
+      between two annotated cells, and both Gate B arms add zero of them while adding 52 and 224 edges
+      touching an unmatched node. If that shape holds, this arm is not acting on FACT-0448's capped
+      population at all, and the sixteen is the wrong ceiling to read it against - which is precisely the
+      distinction the host asked to be made explicit.
     coverage_contract_green_on_every_crop_run_so_far: >-
-      Measured, not assumed: declared 24,502 pairs = scored 24,502, missing 0, extra 0, duplicate keys 0,
-      unknown node ids 0 on the first fold-0 crop, and the same shape on every crop since. The declaration
-      is the crop's slice of the fold's own ACQUISITION surface and the cover is the score artifact, so the
-      assertion can actually fail - deriving the declaration from the score table, as an earlier version of
-      this instrument did, made `missing` zero by construction and the check vacuous.
+      Measured, not assumed: declared pairs = scored pairs, missing 0, extra 0, duplicate keys 0, unknown
+      node ids 0 on every crop. The declaration is the crop's slice of the fold's own ACQUISITION surface
+      and the cover is the score artifact, so the assertion CAN fail - deriving the declaration from the
+      score table, as an earlier version did, made `missing` zero by construction and the check vacuous.
+      A missing treatment score is an instrument failure, never a bad learned score, and no neutral
+      fallback is supplied.
     relink_reach_measured_per_arm: >-
-      Of the offered surface, the share that survives the ILP to reach the relink at all: 0.9245 on fold 0
-      and 0.8485 on fold 1 for the DEPLOYED surface, 0.9177 for the widened r1 and 0.7511 for r2 on the
-      first fold-0 crop. Pairs the solver drops score exactly 0.0 in the relink (FACT-0427), so this bounds
-      what any widening can deliver and it is reported rather than assumed.
+      Of the offered surface, the share surviving the ILP to reach the relink: 0.9245 fold 0 / 0.8485
+      fold 1 for the DEPLOYED surface, 0.9177 for widened r1 and 0.7511 for r2 on the first fold-0 crop.
+      Pairs the solver drops score exactly 0.0 in the relink (FACT-0427), so this bounds what any widening
+      can deliver and it is reported rather than assumed.
+    read_it_in_the_sharpened_frame: >-
+      The standing winning function - rich representation, discriminative scoring with abstention, a
+      consumer that preserves the gain - records that improving ONE factor while freezing the other two has
+      returned a zero or a bound five times, and FACT-0447 is the newest instance (inserting every missed GT
+      cell at a frozen consumer moves EXACTLY zero edges). Gate A is itself a sixth instance of that shape
+      from the other side: the consumer was moved while the score was frozen, and it paid on one fold only.
+      Gate B is the one experiment here that couples TWO of the three - transferable content AND the proven
+      consumption point - which is why it, and not Gate A, is the test that can kill this lever.
     resume: >-
-      .venv/Scripts/python.exe scripts/win_bet/finaledge_batch.py --fold {0,1}
-      --out-dir C:/temp/finaledge/gateB --claim --scores C:/temp/finaledge/scores_f{0,1}.parquet
+      .venv/Scripts/python.exe scripts/win_bet/finaledge_batch.py --fold {1,0}
+      --out-dir C:/temp/finaledge/gateB_v2 --claim --scores C:/temp/finaledge/scores_f{0,1}.parquet
       --bonuses 1 --gateb-ranks 1,2 --gateb-bonuses 1
-      with BIOHUB_FINALEDGE_DCCACHE=C:/temp/finaledge/dccache and AT MOST THREE CONCURRENT WORKERS - see
-      the throughput finding below. It is resumable: completed crops are skipped and in-flight crops are
-      claimed, so a killed run loses at most one crop per worker. Then
-      `finaledge_gates.py register --fold F --results-dir C:/temp/finaledge/gateB` and
-      `finaledge_gates.py panel --results-dir C:/temp/finaledge/gateB --out panel_gateB.json`.
+      with BIOHUB_FINALEDGE_DCCACHE=C:/temp/finaledge/dccache, OMP/MKL/OPENBLAS/NUMEXPR pinned to 2, and
+      AT MOST THREE CONCURRENT WORKERS (FACT-0440 as scoped by FACT-0450 binds this workload). Resumable:
+      completed crops are skipped, in-flight crops are claimed. Measured cost per crop with three workers:
+      37 s when the DeepCenter heatmaps are cached, 165-221 s when not, on fold 1; fold 0 is several times
+      heavier. Then `register --fold F --results-dir C:/temp/finaledge/gateB_v2` and
+      `panel --results-dir C:/temp/finaledge/gateB_v2 --out panel_gateB.json`.
 
   instrument:
     new: >-
