@@ -1,0 +1,170 @@
+{
+  "recorded_digests": {
+    "notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb": {
+      "build_manifest_built_sha256": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
+      "spec_base_sha256_referencing_it": [
+        {
+          "spec": "p38_relink_bonus_b2.json",
+          "base_sha256": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257"
+        }
+      ]
+    },
+    "notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb": {
+      "build_manifest_built_sha256": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c",
+      "spec_base_sha256_referencing_it": [
+        {
+          "spec": "p32_public931_exact.json",
+          "base_sha256": "b998e582e41d5ea8986572370c71ced39cba3233a02e536a9f4a9fee3f9bf307"
+        },
+        {
+          "spec": "p35_dcveto_on_931.json",
+          "base_sha256": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c"
+        }
+      ]
+    },
+    "notebooks/kaggle_p38_relink_bonus_b2/biohub-p38-relink-bonus-b2.ipynb": {
+      "build_manifest_built_sha256": "dad9cdf00372dd08b5da8a61ebe39b955cb594d69eb9f9c4329d322b3f112347",
+      "spec_base_sha256_referencing_it": []
+    }
+  },
+  "arms": {
+    "A_current": {
+      "attributes_added": null,
+      "probes": {
+        "notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb": {
+          "blob_sha256": "c6e25574e94c4d30ddfcb0b9f43f29e896748d18d59d8766bd7a34e31b3ddc7c",
+          "blob_bytes": 209789,
+          "windows_worktree_sha256": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
+          "windows_worktree_bytes": 210213,
+          "nonwindows_checkout_sha256": "c6e25574e94c4d30ddfcb0b9f43f29e896748d18d59d8766bd7a34e31b3ddc7c",
+          "nonwindows_checkout_bytes": 209789,
+          "windows_equals_nonwindows": false,
+          "recorded_digest": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
+          "recorded_resolves_on_windows": true,
+          "recorded_resolves_off_windows": false
+        },
+        "notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb": {
+          "blob_sha256": "933829b113f968b37e49123c48d3f7b9eae2e91d5422046074241d8811ee4a74",
+          "blob_bytes": 209057,
+          "windows_worktree_sha256": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c",
+          "windows_worktree_bytes": 209427,
+          "nonwindows_checkout_sha256": "933829b113f968b37e49123c48d3f7b9eae2e91d5422046074241d8811ee4a74",
+          "nonwindows_checkout_bytes": 209057,
+          "windows_equals_nonwindows": false,
+          "recorded_digest": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c",
+          "recorded_resolves_on_windows": true,
+          "recorded_resolves_off_windows": false
+        },
+        "notebooks/kaggle_p38_relink_bonus_b2/biohub-p38-relink-bonus-b2.ipynb": {
+          "blob_sha256": "ae0e3efebb04804bed09415e0a4957dca03ecd2a6569d146f186fec91f799910",
+          "blob_bytes": 223673,
+          "windows_worktree_sha256": "dad9cdf00372dd08b5da8a61ebe39b955cb594d69eb9f9c4329d322b3f112347",
+          "windows_worktree_bytes": 225780,
+          "nonwindows_checkout_sha256": "ae0e3efebb04804bed09415e0a4957dca03ecd2a6569d146f186fec91f799910",
+          "nonwindows_checkout_bytes": 223673,
+          "windows_equals_nonwindows": false,
+          "recorded_digest": "dad9cdf00372dd08b5da8a61ebe39b955cb594d69eb9f9c4329d322b3f112347",
+          "recorded_resolves_on_windows": true,
+          "recorded_resolves_off_windows": false
+        }
+      },
+      "renormalize_changes_tracked_files": 0,
+      "renormalize_changed_ipynb": [],
+      "renormalize_changed_ipynb_count": 0,
+      "all_recorded_resolve_on_windows": true,
+      "all_recorded_resolve_off_windows": false
+    },
+    "B_binary": {
+      "attributes_added": "*.ipynb -text\n",
+      "probes": {
+        "notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb": {
+          "blob_sha256": "c6e25574e94c4d30ddfcb0b9f43f29e896748d18d59d8766bd7a34e31b3ddc7c",
+          "blob_bytes": 209789,
+          "windows_worktree_sha256": "c6e25574e94c4d30ddfcb0b9f43f29e896748d18d59d8766bd7a34e31b3ddc7c",
+          "windows_worktree_bytes": 209789,
+          "nonwindows_checkout_sha256": "c6e25574e94c4d30ddfcb0b9f43f29e896748d18d59d8766bd7a34e31b3ddc7c",
+          "nonwindows_checkout_bytes": 209789,
+          "windows_equals_nonwindows": true,
+          "recorded_digest": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
+          "recorded_resolves_on_windows": false,
+          "recorded_resolves_off_windows": false
+        },
+        "notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb": {
+          "blob_sha256": "933829b113f968b37e49123c48d3f7b9eae2e91d5422046074241d8811ee4a74",
+          "blob_bytes": 209057,
+          "windows_worktree_sha256": "933829b113f968b37e49123c48d3f7b9eae2e91d5422046074241d8811ee4a74",
+          "windows_worktree_bytes": 209057,
+          "nonwindows_checkout_sha256": "933829b113f968b37e49123c48d3f7b9eae2e91d5422046074241d8811ee4a74",
+          "nonwindows_checkout_bytes": 209057,
+          "windows_equals_nonwindows": true,
+          "recorded_digest": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c",
+          "recorded_resolves_on_windows": false,
+          "recorded_resolves_off_windows": false
+        },
+        "notebooks/kaggle_p38_relink_bonus_b2/biohub-p38-relink-bonus-b2.ipynb": {
+          "blob_sha256": "ae0e3efebb04804bed09415e0a4957dca03ecd2a6569d146f186fec91f799910",
+          "blob_bytes": 223673,
+          "windows_worktree_sha256": "ae0e3efebb04804bed09415e0a4957dca03ecd2a6569d146f186fec91f799910",
+          "windows_worktree_bytes": 223673,
+          "nonwindows_checkout_sha256": "ae0e3efebb04804bed09415e0a4957dca03ecd2a6569d146f186fec91f799910",
+          "nonwindows_checkout_bytes": 223673,
+          "windows_equals_nonwindows": true,
+          "recorded_digest": "dad9cdf00372dd08b5da8a61ebe39b955cb594d69eb9f9c4329d322b3f112347",
+          "recorded_resolves_on_windows": false,
+          "recorded_resolves_off_windows": false
+        }
+      },
+      "renormalize_changes_tracked_files": 0,
+      "renormalize_changed_ipynb": [],
+      "renormalize_changed_ipynb_count": 0,
+      "all_recorded_resolve_on_windows": false,
+      "all_recorded_resolve_off_windows": false
+    },
+    "C_eol_crlf": {
+      "attributes_added": "*.ipynb text eol=crlf\n",
+      "probes": {
+        "notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb": {
+          "blob_sha256": "c6e25574e94c4d30ddfcb0b9f43f29e896748d18d59d8766bd7a34e31b3ddc7c",
+          "blob_bytes": 209789,
+          "windows_worktree_sha256": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
+          "windows_worktree_bytes": 210213,
+          "nonwindows_checkout_sha256": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
+          "nonwindows_checkout_bytes": 210213,
+          "windows_equals_nonwindows": true,
+          "recorded_digest": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
+          "recorded_resolves_on_windows": true,
+          "recorded_resolves_off_windows": true
+        },
+        "notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb": {
+          "blob_sha256": "933829b113f968b37e49123c48d3f7b9eae2e91d5422046074241d8811ee4a74",
+          "blob_bytes": 209057,
+          "windows_worktree_sha256": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c",
+          "windows_worktree_bytes": 209427,
+          "nonwindows_checkout_sha256": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c",
+          "nonwindows_checkout_bytes": 209427,
+          "windows_equals_nonwindows": true,
+          "recorded_digest": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c",
+          "recorded_resolves_on_windows": true,
+          "recorded_resolves_off_windows": true
+        },
+        "notebooks/kaggle_p38_relink_bonus_b2/biohub-p38-relink-bonus-b2.ipynb": {
+          "blob_sha256": "ae0e3efebb04804bed09415e0a4957dca03ecd2a6569d146f186fec91f799910",
+          "blob_bytes": 223673,
+          "windows_worktree_sha256": "dad9cdf00372dd08b5da8a61ebe39b955cb594d69eb9f9c4329d322b3f112347",
+          "windows_worktree_bytes": 225780,
+          "nonwindows_checkout_sha256": "dad9cdf00372dd08b5da8a61ebe39b955cb594d69eb9f9c4329d322b3f112347",
+          "nonwindows_checkout_bytes": 225780,
+          "windows_equals_nonwindows": true,
+          "recorded_digest": "dad9cdf00372dd08b5da8a61ebe39b955cb594d69eb9f9c4329d322b3f112347",
+          "recorded_resolves_on_windows": true,
+          "recorded_resolves_off_windows": true
+        }
+      },
+      "renormalize_changes_tracked_files": 0,
+      "renormalize_changed_ipynb": [],
+      "renormalize_changed_ipynb_count": 0,
+      "all_recorded_resolve_on_windows": true,
+      "all_recorded_resolve_off_windows": true
+    }
+  }
+}

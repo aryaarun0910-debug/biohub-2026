@@ -1,0 +1,56 @@
+{
+  "generated_by": "scripts/core/reproducibility_evidence.py",
+  "heartbeat": "REPRODUCIBILITY_EVIDENCE_OK",
+  "counts": {
+    "worktree": 1946,
+    "clean_clone": 1893,
+    "clean_clone_with_vendor_bootstrapped": 1919
+  },
+  "arithmetic": "1919 (clone + vendor) + 27 (worktree-only) = 1946 (worktree)",
+  "arithmetic_closes": true,
+  "nodes_in_clone_but_missing_from_worktree": [],
+  "no_node_is_lost_by_the_worktree": true,
+  "differences": [
+    {
+      "file": "tests/test_divverify_contract.py",
+      "nodes": 18,
+      "tracked": true,
+      "worktree_status": "M",
+      "recovered_by_vendor_bootstrap": false,
+      "protects": "unfinished",
+      "why": "division-verifier contract. TRACKED but MODIFIED in the worktree; the extra nodes exist only in the dirty copy, and its subject divverify_verifier.py is untracked.",
+      "intended_commit": "the divverify session's own commit"
+    },
+    {
+      "file": "tests/test_hoct_compat.py",
+      "nodes": 9,
+      "tracked": false,
+      "worktree_status": "??",
+      "recovered_by_vendor_bootstrap": false,
+      "protects": "unfinished",
+      "why": "HOCT head compatibility shim. UNTRACKED, alongside an untracked scripts/win_bet/hoct_compat.py.",
+      "intended_commit": "the hoct session's own commit"
+    },
+    {
+      "file": "tests/test_h1r_edge_train.py",
+      "nodes": 16,
+      "tracked": true,
+      "worktree_status": "clean",
+      "recovered_by_vendor_bootstrap": true,
+      "protects": "experimental",
+      "why": "S5 association edge trainer. Imports from the pinned external checkout vendor/kaggle-cell-tracking, absent from a bare clone by design.",
+      "intended_commit": "none - recovered by scripts/core/bootstrap_vendor.py --apply"
+    },
+    {
+      "file": "tests/test_h1r_rope4d.py",
+      "nodes": 10,
+      "tracked": true,
+      "worktree_status": "clean",
+      "recovered_by_vendor_bootstrap": true,
+      "protects": "experimental",
+      "why": "4-D RoPE option for the same trainer; same vendor dependency.",
+      "intended_commit": "none - recovered by the bootstrap"
+    }
+  ],
+  "conclusion": "The whole gap is explained and NONE of it is production code that HEAD ships. The vendor-dependent nodes return the moment the pinned checkout is materialised, proved by copying the local vendor tree into a clone (no network) and re-collecting. The remainder belongs to two concurrent sessions' unfinished work and is theirs to commit."
+}
