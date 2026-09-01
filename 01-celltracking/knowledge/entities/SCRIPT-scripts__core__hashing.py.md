@@ -2,7 +2,7 @@
 id: SCRIPT-scripts__core__hashing.py
 kind: SCRIPT
 tags: [script]
-lifecycle: untracked-concurrent
+lifecycle: supporting
 ---
 
 > [!info] Generated navigation. Do not edit.
@@ -11,7 +11,7 @@ lifecycle: untracked-concurrent
 
 
 **Path / name:** `scripts/core/hashing.py`
-**Lifecycle:** untracked-concurrent — present but not in git
+**Lifecycle:** supporting — imported by another script
 **Tests:** 4
 
 ## incoming

@@ -2,7 +2,7 @@
 id: SCRIPT-scripts__core__digest_inventory.py
 kind: SCRIPT
 tags: [script]
-lifecycle: untracked-concurrent
+lifecycle: unknown
 ---
 
 > [!info] Generated navigation. Do not edit.
@@ -11,7 +11,7 @@ lifecycle: untracked-concurrent
 
 
 **Path / name:** `scripts/core/digest_inventory.py`
-**Lifecycle:** untracked-concurrent — present but not in git
+**Lifecycle:** unknown — no packet, fact or importer found
 **Tests:** 1
 
 ## incoming

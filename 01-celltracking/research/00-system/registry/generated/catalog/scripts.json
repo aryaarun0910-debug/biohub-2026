@@ -2,11 +2,11 @@
  "schema_version": "catalog_v1",
  "scripts": {
   "scripts/core/baseline_contract.py": {
-   "bytes": 13252,
    "callers": [
     "scripts/d1/gt_division_gates.py",
     "scripts/win_bet/constant_audit.py"
    ],
+   "canonical_bytes": 13252,
    "covered_by_tests": [
     "tests/test_baseline_roles.py",
     "tests/test_lineage_degree_invariants.py"
@@ -14,9 +14,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -58,10 +56,10 @@
    "tracked": true
   },
   "scripts/core/bootstrap_vendor.py": {
-   "bytes": 10773,
    "callers": [
     "scripts/core/validate_registry.py"
    ],
+   "canonical_bytes": 10532,
    "covered_by_tests": [
     "tests/test_div_reach_steal_adversarial.py",
     "tests/test_fresh_clone_reproducibility.py",
@@ -71,9 +69,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 241,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -119,22 +115,20 @@
    "tracked": true
   },
   "scripts/core/catalog.py": {
-   "bytes": 30325,
    "callers": [],
+   "canonical_bytes": 30194,
    "covered_by_tests": [
     "tests/test_catalog.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 657,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
     "hash_kind": "CANONICAL_TEXT_SHA256",
-    "measured_sha256": "9d0cfacab7fab7d1bd45701e0d64928047e36edfe938fc1e4d9dfdc87df5f036",
+    "measured_sha256": "22719437d1673d566369dd3718283a91124dd07d379f1b7c10e0d8f97871ab42",
     "source_path": "scripts/core/catalog.py"
    },
    "dynamic_import": true,
@@ -177,17 +171,15 @@
    "tracked": true
   },
   "scripts/core/claims_table.py": {
-   "bytes": 20921,
    "callers": [],
+   "canonical_bytes": 20568,
    "covered_by_tests": [
     "tests/test_claims_table.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 353,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -226,15 +218,13 @@
    "tracked": true
   },
   "scripts/core/colab_cli.py": {
-   "bytes": 13974,
    "callers": [],
+   "canonical_bytes": 13974,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -289,15 +279,13 @@
    "tracked": true
   },
   "scripts/core/colab_factory.py": {
-   "bytes": 36716,
    "callers": [],
+   "canonical_bytes": 36716,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -350,15 +338,13 @@
    "tracked": true
   },
   "scripts/core/colab_relay.json": {
-   "bytes": 98,
    "callers": [],
+   "canonical_bytes": 94,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 4,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -390,11 +376,11 @@
    "tracked": true
   },
   "scripts/core/colab_relay.py": {
-   "bytes": 14637,
    "callers": [
     "scripts/core/colab_cli.py",
     "scripts/core/colab_factory.py"
    ],
+   "canonical_bytes": 14637,
    "covered_by_tests": [
     "tests/test_colab_cli.py",
     "tests/test_colab_relay.py"
@@ -402,9 +388,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -448,15 +432,13 @@
    "tracked": true
   },
   "scripts/core/colab_vm_bootstrap.py": {
-   "bytes": 7913,
    "callers": [],
+   "canonical_bytes": 7913,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -499,22 +481,20 @@
    "tracked": true
   },
   "scripts/core/digest_inventory.py": {
-   "bytes": 9421,
    "callers": [],
+   "canonical_bytes": 11137,
    "covered_by_tests": [
     "tests/test_cross_checkout_identity.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
     "hash_kind": "CANONICAL_TEXT_SHA256",
-    "measured_sha256": "035aee10d027841e7487269e352c9f1e74e4c4e2db882f7726304440f68c54ff",
+    "measured_sha256": "fbf424d918cbd3afa9aa81238a3476737480d17217e50ef27619061c2d1f39c6",
     "source_path": "scripts/core/digest_inventory.py"
    },
    "dynamic_import": false,
@@ -543,8 +523,8 @@
     "hashing"
    ],
    "kind": "py",
-   "lifecycle": "untracked-concurrent",
-   "lifecycle_basis": "present but not in git",
+   "lifecycle": "unknown",
+   "lifecycle_basis": "no packet, fact or importer found",
    "measures_facts": [],
    "named_by_tests": [],
    "owning_packets": [],
@@ -553,18 +533,16 @@
    "reads_temp_paths": [],
    "subprocess_boundary": true,
    "test_coverage": "imported-by-test",
-   "tracked": false
+   "tracked": true
   },
   "scripts/core/experiment_defects.json": {
-   "bytes": 6340,
    "callers": [],
+   "canonical_bytes": 6152,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 188,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -596,15 +574,13 @@
    "tracked": true
   },
   "scripts/core/fetch.py": {
-   "bytes": 4602,
    "callers": [],
+   "canonical_bytes": 4484,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 118,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -641,14 +617,15 @@
    "tracked": true
   },
   "scripts/core/hashing.py": {
-   "bytes": 11132,
    "callers": [
     "scripts/core/catalog.py",
     "scripts/core/digest_inventory.py",
     "scripts/core/receipt_envelope.py",
+    "scripts/d1/assemble_p3_d1_smoke_spec.py",
     "scripts/win_bet/gpu_preflight.py",
     "scripts/win_bet/kaggle_mounts.py"
    ],
+   "canonical_bytes": 11961,
    "covered_by_tests": [
     "tests/test_cross_checkout_identity.py",
     "tests/test_d1_v6_export.py",
@@ -658,14 +635,12 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
     "hash_kind": "CANONICAL_TEXT_SHA256",
-    "measured_sha256": "087569a0892672efdafd32aadec14857e13ecfb2051fbc2000e19aa9bc5ca3f2",
+    "measured_sha256": "1891884d04cd713c91dbf375594da28889dfbf14bab04aea9bd37654e9af11b4",
     "source_path": "scripts/core/hashing.py"
    },
    "dynamic_import": false,
@@ -689,8 +664,8 @@
    ],
    "imports_first_party": [],
    "kind": "py",
-   "lifecycle": "untracked-concurrent",
-   "lifecycle_basis": "present but not in git",
+   "lifecycle": "supporting",
+   "lifecycle_basis": "imported by another script",
    "measures_facts": [],
    "named_by_tests": [],
    "owning_packets": [],
@@ -699,14 +674,14 @@
    "reads_temp_paths": [],
    "subprocess_boundary": false,
    "test_coverage": "imported-by-test",
-   "tracked": false
+   "tracked": true
   },
   "scripts/core/kaggle_factory.py": {
-   "bytes": 43070,
    "callers": [
     "scripts/core/kaggle_queue.py",
     "scripts/win_bet/audit_version_coherence.py"
    ],
+   "canonical_bytes": 43070,
    "covered_by_tests": [
     "tests/test_d1_factorial_smoke.py",
     "tests/test_experiment_defect_gate.py",
@@ -716,9 +691,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -773,17 +746,15 @@
    "tracked": true
   },
   "scripts/core/kaggle_queue.py": {
-   "bytes": 12931,
    "callers": [],
+   "canonical_bytes": 12931,
    "covered_by_tests": [
     "tests/test_kaggle_queue.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -833,15 +804,13 @@
    "tracked": true
   },
   "scripts/core/knowledge.py": {
-   "bytes": 25208,
    "callers": [],
+   "canonical_bytes": 24711,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 497,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -906,15 +875,13 @@
    "tracked": true
   },
   "scripts/core/lineending_experiment.py": {
-   "bytes": 7828,
    "callers": [],
+   "canonical_bytes": 7660,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 168,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -959,17 +926,15 @@
    "tracked": true
   },
   "scripts/core/rag_index.py": {
-   "bytes": 18654,
    "callers": [],
+   "canonical_bytes": 18274,
    "covered_by_tests": [
     "tests/test_rag_index.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 380,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1011,22 +976,20 @@
    "tracked": true
   },
   "scripts/core/receipt_envelope.py": {
-   "bytes": 12199,
    "callers": [],
+   "canonical_bytes": 12274,
    "covered_by_tests": [
     "tests/test_receipt_envelope.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 257,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
     "hash_kind": "CANONICAL_TEXT_SHA256",
-    "measured_sha256": "a858abac49fa3870469998ad834ea4d634687136c3d201a891d440a9cecef1fc",
+    "measured_sha256": "000efe8e70eacdd68da4c7c97f1f98706c601b5f43cc6cc2285c7b8039dfa247",
     "source_path": "scripts/core/receipt_envelope.py"
    },
    "dynamic_import": false,
@@ -1067,15 +1030,13 @@
    "tracked": true
   },
   "scripts/core/reproducibility_evidence.py": {
-   "bytes": 6719,
    "callers": [],
+   "canonical_bytes": 6719,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1116,15 +1077,13 @@
    "tracked": true
   },
   "scripts/core/score_loeo_submission.py": {
-   "bytes": 7812,
    "callers": [],
+   "canonical_bytes": 7627,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 185,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1195,15 +1154,13 @@
    "tracked": true
   },
   "scripts/core/score_oof.py": {
-   "bytes": 2905,
    "callers": [],
+   "canonical_bytes": 2839,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 66,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1242,15 +1199,13 @@
    "tracked": true
   },
   "scripts/core/score_submission_nonumba.py": {
-   "bytes": 5782,
    "callers": [],
+   "canonical_bytes": 5782,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1291,17 +1246,15 @@
    "tracked": true
   },
   "scripts/core/validate_registry.py": {
-   "bytes": 25951,
    "callers": [],
+   "canonical_bytes": 25436,
    "covered_by_tests": [
     "tests/test_fresh_clone_reproducibility.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 515,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1352,17 +1305,15 @@
    "tracked": true
   },
   "scripts/core/validate_research_tree.py": {
-   "bytes": 4873,
    "callers": [],
+   "canonical_bytes": 4751,
    "covered_by_tests": [
     "tests/test_research_tree.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 122,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1401,17 +1352,15 @@
    "tracked": true
   },
   "scripts/d1/assemble_d1_factorial.py": {
-   "bytes": 13621,
    "callers": [],
+   "canonical_bytes": 13356,
    "covered_by_tests": [
     "tests/test_assemble_d1_factorial.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 265,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1456,11 +1405,11 @@
    "tracked": true
   },
   "scripts/d1/assemble_p3_d1_smoke_spec.py": {
-   "bytes": 32727,
    "callers": [
     "scripts/d1/assemble_d1_factorial.py",
     "scripts/d1/gate_p3_d1_smoke.py"
    ],
+   "canonical_bytes": 33239,
    "covered_by_tests": [
     "tests/test_assemble_d1_factorial.py",
     "tests/test_d1_factorial_smoke.py"
@@ -1468,14 +1417,12 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 590,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
     "hash_kind": "CANONICAL_TEXT_SHA256",
-    "measured_sha256": "16c1b166ac9a05bbb661cfb36361b61cdc80775a84602ae30a77aacd07a0c301",
+    "measured_sha256": "6792991b284ec6dc0161eebd82aa8c83f7f267df016526179e02fb4b9342d97c",
     "source_path": "scripts/d1/assemble_p3_d1_smoke_spec.py"
    },
    "dynamic_import": false,
@@ -1489,13 +1436,16 @@
    "imports": [
     "__future__",
     "argparse",
+    "hashing",
     "hashlib",
     "json",
     "pathlib",
     "re",
     "sys"
    ],
-   "imports_first_party": [],
+   "imports_first_party": [
+    "hashing"
+   ],
    "kind": "py",
    "lifecycle": "supporting",
    "lifecycle_basis": "imported by another script",
@@ -1510,17 +1460,15 @@
    "tracked": true
   },
   "scripts/d1/audit_submission_structure.py": {
-   "bytes": 20275,
    "callers": [],
+   "canonical_bytes": 20275,
    "covered_by_tests": [
     "tests/test_submission_structure_audit.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1562,17 +1510,15 @@
    "tracked": true
   },
   "scripts/d1/build_d1_factorial_manifests.py": {
-   "bytes": 42239,
    "callers": [],
+   "canonical_bytes": 41306,
    "covered_by_tests": [
     "tests/test_d1_factorial.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 933,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1615,15 +1561,13 @@
    "tracked": true
   },
   "scripts/d1/build_splits.py": {
-   "bytes": 2499,
    "callers": [],
+   "canonical_bytes": 2434,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 65,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1660,17 +1604,15 @@
    "tracked": true
   },
   "scripts/d1/d1_candidate_gate.py": {
-   "bytes": 14781,
    "callers": [],
+   "canonical_bytes": 14781,
    "covered_by_tests": [
     "tests/test_d1_candidate_gate.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1709,8 +1651,8 @@
    "tracked": true
   },
   "scripts/d1/d1_postprocess.py": {
-   "bytes": 52416,
    "callers": [],
+   "canonical_bytes": 51376,
    "covered_by_tests": [
     "tests/test_d1_postprocess.py",
     "tests/test_d1f_probe.py"
@@ -1718,9 +1660,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 1040,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1775,10 +1715,10 @@
    "tracked": true
   },
   "scripts/d1/d1f_probe.py": {
-   "bytes": 147275,
    "callers": [
     "scripts/d1/assemble_d1_factorial.py"
    ],
+   "canonical_bytes": 144442,
    "covered_by_tests": [
     "tests/test_assemble_d1_factorial.py",
     "tests/test_d1f_probe.py"
@@ -1786,9 +1726,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 2833,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1831,15 +1769,13 @@
    "tracked": true
   },
   "scripts/d1/detection_preflight.py": {
-   "bytes": 8742,
    "callers": [],
+   "canonical_bytes": 8530,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 212,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1885,15 +1821,13 @@
    "tracked": true
   },
   "scripts/d1/gate_p3_d1_smoke.py": {
-   "bytes": 11597,
    "callers": [],
+   "canonical_bytes": 11374,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 223,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1935,15 +1869,13 @@
    "tracked": true
   },
   "scripts/d1/gen_d1_inject.py": {
-   "bytes": 4690,
    "callers": [],
+   "canonical_bytes": 4577,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 113,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1979,15 +1911,13 @@
    "tracked": true
   },
   "scripts/d1/gt_division_gates.py": {
-   "bytes": 6833,
    "callers": [],
+   "canonical_bytes": 6687,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 146,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2030,15 +1960,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/armb_flow_gate.py": {
-   "bytes": 5601,
    "callers": [],
+   "canonical_bytes": 5601,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2070,15 +1998,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/armb_provenance.py": {
-   "bytes": 8452,
    "callers": [],
+   "canonical_bytes": 8288,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 164,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2118,15 +2044,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/assoc_feature_parity.py": {
-   "bytes": 24513,
    "callers": [],
+   "canonical_bytes": 24079,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 434,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2182,15 +2106,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/assoc_feature_tap.py": {
-   "bytes": 36220,
    "callers": [],
+   "canonical_bytes": 36220,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2239,15 +2161,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/assoc_tap_gate.py": {
-   "bytes": 41083,
    "callers": [],
+   "canonical_bytes": 41083,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2305,15 +2225,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/coupled_division_transplant.py": {
-   "bytes": 10625,
    "callers": [],
+   "canonical_bytes": 10625,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2351,15 +2269,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/d1_aggregate.py": {
-   "bytes": 6563,
    "callers": [],
+   "canonical_bytes": 6442,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 121,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2394,15 +2310,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/d1_inject.py": {
-   "bytes": 85748,
    "callers": [],
+   "canonical_bytes": 84776,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 972,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2438,15 +2352,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/d1_response_audit.py": {
-   "bytes": 50183,
    "callers": [],
+   "canonical_bytes": 49355,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 828,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2489,15 +2401,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/degree_invariants.py": {
-   "bytes": 1873,
    "callers": [],
+   "canonical_bytes": 1873,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2529,15 +2439,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/detpeak_export.py": {
-   "bytes": 11943,
    "callers": [],
+   "canonical_bytes": 11943,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2577,15 +2485,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/edge_candidate_budget.py": {
-   "bytes": 10593,
    "callers": [],
+   "canonical_bytes": 10385,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 208,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2628,8 +2534,8 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_adabn_detection_only.py": {
-   "bytes": 12218,
    "callers": [],
+   "canonical_bytes": 12218,
    "covered_by_tests": [
     "tests/test_h1r_adabn_detection_only.py",
     "tests/test_p13_p9_adabn_detection_only.py"
@@ -2637,9 +2543,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2678,17 +2582,15 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_appearance_patch.py": {
-   "bytes": 16335,
    "callers": [],
+   "canonical_bytes": 16335,
    "covered_by_tests": [
     "tests/test_h1r_appearance_patch.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2727,15 +2629,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_candidate_export_patch.py": {
-   "bytes": 11867,
    "callers": [],
+   "canonical_bytes": 11867,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2773,17 +2673,15 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_det_deploy_weights.py": {
-   "bytes": 3160,
    "callers": [],
+   "canonical_bytes": 3160,
    "covered_by_tests": [
     "tests/test_h1r_det_deploy_weights.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2820,15 +2718,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_det_kernel_run.py": {
-   "bytes": 2088,
    "callers": [],
+   "canonical_bytes": 2088,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2867,17 +2763,15 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_det_train.py": {
-   "bytes": 33369,
    "callers": [],
+   "canonical_bytes": 33369,
    "covered_by_tests": [
     "tests/test_h1r_det_train.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2921,10 +2815,10 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_edge_data.py": {
-   "bytes": 17496,
    "callers": [
     "scripts/kaggle_edits/h1r_edge_train.py"
    ],
+   "canonical_bytes": 17496,
    "covered_by_tests": [
     "tests/test_h1r_edge_data.py",
     "tests/test_h1r_edge_train.py",
@@ -2933,9 +2827,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2979,15 +2871,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_edge_kernel_run.py": {
-   "bytes": 6122,
    "callers": [],
+   "canonical_bytes": 5979,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 143,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3033,8 +2923,8 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_edge_loss_patch.py": {
-   "bytes": 27237,
    "callers": [],
+   "canonical_bytes": 27237,
    "covered_by_tests": [
     "tests/test_h1r_appearance_patch.py",
     "tests/test_h1r_edge_loss_inference.py"
@@ -3042,9 +2932,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3083,8 +2971,8 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_edge_train.py": {
-   "bytes": 33739,
    "callers": [],
+   "canonical_bytes": 33151,
    "covered_by_tests": [
     "tests/test_h1r_edge_train.py",
     "tests/test_h1r_rope4d.py"
@@ -3092,9 +2980,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 588,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3149,19 +3035,17 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_rope4d.py": {
-   "bytes": 17010,
    "callers": [
     "scripts/kaggle_edits/h1r_edge_train.py"
    ],
+   "canonical_bytes": 17010,
    "covered_by_tests": [
     "tests/test_h1r_rope4d.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3205,17 +3089,15 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_rope4d_inference_patch.py": {
-   "bytes": 23213,
    "callers": [],
+   "canonical_bytes": 22775,
    "covered_by_tests": [
     "tests/test_h1r_rope4d.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 438,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3255,17 +3137,15 @@
    "tracked": true
   },
   "scripts/kaggle_edits/h1r_trainer_patch.py": {
-   "bytes": 11997,
    "callers": [],
+   "canonical_bytes": 11997,
    "covered_by_tests": [
     "tests/test_h1r_appearance_patch.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3302,15 +3182,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/icom_refine.py": {
-   "bytes": 4484,
    "callers": [],
+   "canonical_bytes": 4484,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3348,15 +3226,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/kaggle_mount_ladder.py": {
-   "bytes": 6328,
    "callers": [],
+   "canonical_bytes": 6328,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3395,15 +3271,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/loeo_export.py": {
-   "bytes": 6167,
    "callers": [],
+   "canonical_bytes": 6042,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 125,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3443,15 +3317,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/loeo_pregraph_export.py": {
-   "bytes": 5981,
    "callers": [],
+   "canonical_bytes": 5981,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3487,15 +3359,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/loeo_retarget.py": {
-   "bytes": 8697,
    "callers": [],
+   "canonical_bytes": 8697,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3534,15 +3404,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/node_budget_stage.py": {
-   "bytes": 4280,
    "callers": [],
+   "canonical_bytes": 4280,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3574,15 +3442,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/p11_xhhuang_edge_swap.py": {
-   "bytes": 13867,
    "callers": [],
+   "canonical_bytes": 13867,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3619,15 +3485,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/p12_forward_acceleration_lookahead.py": {
-   "bytes": 10045,
    "callers": [],
+   "canonical_bytes": 10045,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3664,15 +3528,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/pre_ilp_export.py": {
-   "bytes": 2942,
    "callers": [],
+   "canonical_bytes": 2942,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3707,15 +3569,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/pre_ilp_rollup.py": {
-   "bytes": 5267,
    "callers": [],
+   "canonical_bytes": 5267,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3753,15 +3613,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/ranker_block.py": {
-   "bytes": 19045,
    "callers": [],
+   "canonical_bytes": 18664,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 381,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3799,15 +3657,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/relink_sweep.py": {
-   "bytes": 6659,
    "callers": [],
+   "canonical_bytes": 6659,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3841,15 +3697,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/restore_learned_divisions.py": {
-   "bytes": 4733,
    "callers": [],
+   "canonical_bytes": 4733,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3881,15 +3735,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/subvoxel_refine.py": {
-   "bytes": 2009,
    "callers": [],
+   "canonical_bytes": 1969,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 40,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3921,15 +3773,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/swap_edge_weights.py": {
-   "bytes": 3582,
    "callers": [],
+   "canonical_bytes": 3582,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3963,15 +3813,13 @@
    "tracked": true
   },
   "scripts/kaggle_edits/volume_guard_linefit.py": {
-   "bytes": 2445,
    "callers": [],
+   "canonical_bytes": 2397,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 48,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4003,15 +3851,13 @@
    "tracked": true
   },
   "scripts/kaggle_preflight/dryrun_predict.py": {
-   "bytes": 1704,
    "callers": [],
+   "canonical_bytes": 1704,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4051,15 +3897,13 @@
    "tracked": true
   },
   "scripts/kaggle_preflight/dryrun_train.py": {
-   "bytes": 1637,
    "callers": [],
+   "canonical_bytes": 1637,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4099,15 +3943,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/deploy_h1r_adabn_detection_only.json": {
-   "bytes": 3134,
    "callers": [],
+   "canonical_bytes": 3134,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4139,15 +3981,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/deploy_h1r_det_s1.json": {
-   "bytes": 1634,
    "callers": [],
+   "canonical_bytes": 1634,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4179,15 +4019,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/deploy_h1r_edge_s5_loeo_f0.json": {
-   "bytes": 5283,
    "callers": [],
+   "canonical_bytes": 5198,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 85,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4230,15 +4068,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/deploy_h1r_edge_s5_rope4d_loeo_f0.json": {
-   "bytes": 6281,
    "callers": [],
+   "canonical_bytes": 6189,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 92,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4279,15 +4115,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/h1r_det_s1.json": {
-   "bytes": 2799,
    "callers": [],
+   "canonical_bytes": 2799,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4321,15 +4155,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/h1r_det_s1_adabn_control.json": {
-   "bytes": 3463,
    "callers": [],
+   "canonical_bytes": 3463,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4361,15 +4193,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/h1r_det_s1_smoke.json": {
-   "bytes": 2684,
    "callers": [],
+   "canonical_bytes": 2684,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4401,15 +4231,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/h1r_edge_s5.json": {
-   "bytes": 3831,
    "callers": [],
+   "canonical_bytes": 3745,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 86,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4447,15 +4275,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/h1r_edge_s5_rope4d.json": {
-   "bytes": 4164,
    "callers": [],
+   "canonical_bytes": 4076,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 88,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4491,15 +4317,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/h1r_edge_s5_rope4d_smoke.json": {
-   "bytes": 3432,
    "callers": [],
+   "canonical_bytes": 3355,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 77,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4533,15 +4357,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/h1r_edge_s5_smoke.json": {
-   "bytes": 3138,
    "callers": [],
+   "canonical_bytes": 3064,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 74,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4575,15 +4397,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/live_p0b.json": {
-   "bytes": 1156,
    "callers": [],
+   "canonical_bytes": 1156,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4615,15 +4435,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p10_deepcenter_best.json": {
-   "bytes": 3542,
    "callers": [],
+   "canonical_bytes": 3542,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4657,15 +4475,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p11_xhhuang_edge_swap.json": {
-   "bytes": 5671,
    "callers": [],
+   "canonical_bytes": 5671,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4697,15 +4513,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p12_forward_acceleration_lookahead.json": {
-   "bytes": 3991,
    "callers": [],
+   "canonical_bytes": 3991,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4737,15 +4551,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p13_p9_adabn_detection_only.json": {
-   "bytes": 3406,
    "callers": [],
+   "canonical_bytes": 3406,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4777,15 +4589,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p15_forkfree_probe.json": {
-   "bytes": 2550,
    "callers": [],
+   "canonical_bytes": 2550,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4817,15 +4627,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p16_det090.json": {
-   "bytes": 2821,
    "callers": [],
+   "canonical_bytes": 2821,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4857,15 +4665,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p17_det094.json": {
-   "bytes": 2821,
    "callers": [],
+   "canonical_bytes": 2821,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4897,15 +4703,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p18_relink_division.json": {
-   "bytes": 5984,
    "callers": [],
+   "canonical_bytes": 5904,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 80,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4939,15 +4743,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p19_relink_sweep_f1.json": {
-   "bytes": 10041,
    "callers": [],
+   "canonical_bytes": 9921,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 120,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4981,15 +4783,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p20_relink_sweep_f0.json": {
-   "bytes": 8724,
    "callers": [],
+   "canonical_bytes": 8607,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 117,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5023,15 +4823,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p21_colab_parity_f0.json": {
-   "bytes": 9101,
    "callers": [],
+   "canonical_bytes": 8983,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 118,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5069,15 +4867,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p22_sdw060.json": {
-   "bytes": 3742,
    "callers": [],
+   "canonical_bytes": 3668,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 74,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5111,15 +4907,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p23_icom155.json": {
-   "bytes": 4624,
    "callers": [],
+   "canonical_bytes": 4527,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 97,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5156,15 +4950,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p24_deepcenter_best_veto.json": {
-   "bytes": 4095,
    "callers": [],
+   "canonical_bytes": 4095,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5209,15 +5001,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p25_recipe_parity_loeo_f0.json": {
-   "bytes": 8049,
    "callers": [],
+   "canonical_bytes": 7955,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 94,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5261,15 +5051,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p27_champion_icom.json": {
-   "bytes": 5357,
    "callers": [],
+   "canonical_bytes": 5253,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 104,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5308,15 +5096,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p28_champion_control_f0.json": {
-   "bytes": 6573,
    "callers": [],
+   "canonical_bytes": 6467,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 106,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5351,15 +5137,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p28_champion_control_f1.json": {
-   "bytes": 7857,
    "callers": [],
+   "canonical_bytes": 7748,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 109,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5394,15 +5178,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p29_p28_detpeak_export_f0.json": {
-   "bytes": 1942,
    "callers": [],
+   "canonical_bytes": 1942,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5436,15 +5218,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p29_p28_detpeak_export_f1.json": {
-   "bytes": 2066,
    "callers": [],
+   "canonical_bytes": 2066,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5478,15 +5258,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p29_p28_detpeak_smoke_f0.json": {
-   "bytes": 1947,
    "callers": [],
+   "canonical_bytes": 1947,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5520,15 +5298,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p30_acquisition_f0.json": {
-   "bytes": 3818,
    "callers": [],
+   "canonical_bytes": 3818,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5571,15 +5347,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p31_public931_replica_f0.json": {
-   "bytes": 9127,
    "callers": [],
+   "canonical_bytes": 8988,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 139,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5616,15 +5390,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p31_public931_replica_f1.json": {
-   "bytes": 10205,
    "callers": [],
+   "canonical_bytes": 10063,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 142,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5660,15 +5432,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p32_public931_exact.json": {
-   "bytes": 3020,
    "callers": [],
+   "canonical_bytes": 2989,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 31,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5706,15 +5476,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json": {
-   "bytes": 8154,
    "callers": [],
+   "canonical_bytes": 8029,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 125,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5752,15 +5520,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p34_acquisition_f1.json": {
-   "bytes": 4393,
    "callers": [],
+   "canonical_bytes": 4393,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5802,15 +5568,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p35_dcveto_on_931.json": {
-   "bytes": 5694,
    "callers": [],
+   "canonical_bytes": 5694,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5857,15 +5621,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p36_assoc_feature_tap_smoke.json": {
-   "bytes": 8807,
    "callers": [],
+   "canonical_bytes": 8807,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5906,15 +5668,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p37_assoc_feature_tap_c2_smoke.json": {
-   "bytes": 9749,
    "callers": [],
+   "canonical_bytes": 9614,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 135,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5959,15 +5719,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p38_relink_bonus_b2.json": {
-   "bytes": 6560,
    "callers": [],
+   "canonical_bytes": 6506,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 54,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6012,15 +5770,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_armb.json": {
-   "bytes": 13082,
    "callers": [],
+   "canonical_bytes": 12948,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 134,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6052,15 +5808,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_armb_loeo_f0.json": {
-   "bytes": 15146,
    "callers": [],
+   "canonical_bytes": 14990,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 156,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6092,15 +5846,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_armb_loeo_f0_smoke.json": {
-   "bytes": 15065,
    "callers": [],
+   "canonical_bytes": 14909,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 156,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6132,15 +5884,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_armb_loeo_f1.json": {
-   "bytes": 16430,
    "callers": [],
+   "canonical_bytes": 16271,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 159,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6172,15 +5922,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_base_loeo_f0.json": {
-   "bytes": 15106,
    "callers": [],
+   "canonical_bytes": 14949,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 157,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6212,15 +5960,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_base_loeo_f1.json": {
-   "bytes": 16390,
    "callers": [],
+   "canonical_bytes": 16230,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 160,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6252,15 +5998,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_d1_pilot_f0.json": {
-   "bytes": 29797,
    "callers": [],
+   "canonical_bytes": 29420,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 377,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6292,15 +6036,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_d1_pilot_f0_src.json": {
-   "bytes": 29915,
    "callers": [],
+   "canonical_bytes": 29536,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 379,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6332,15 +6074,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_d1_pilot_f1.json": {
-   "bytes": 29896,
    "callers": [],
+   "canonical_bytes": 29517,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 379,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6372,15 +6112,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_d1_pilot_f1_src.json": {
-   "bytes": 29816,
    "callers": [],
+   "canonical_bytes": 29439,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 377,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6412,15 +6150,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_d1_smoke_f0.json": {
-   "bytes": 29025,
    "callers": [],
+   "canonical_bytes": 28664,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 361,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6452,15 +6188,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_d1_smoke_f0_src.json": {
-   "bytes": 29143,
    "callers": [],
+   "canonical_bytes": 28780,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 363,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6492,15 +6226,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_d1_smoke_f1.json": {
-   "bytes": 29124,
    "callers": [],
+   "canonical_bytes": 28761,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 363,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6532,15 +6264,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_d1_smoke_f1_src.json": {
-   "bytes": 29044,
    "callers": [],
+   "canonical_bytes": 28683,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 361,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6572,15 +6302,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_harmonic.json": {
-   "bytes": 11392,
    "callers": [],
+   "canonical_bytes": 11290,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 102,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6612,15 +6340,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_subvoxel_loeo_f0.json": {
-   "bytes": 16955,
    "callers": [],
+   "canonical_bytes": 16793,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 162,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6652,15 +6378,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_subvoxel_loeo_f0_smoke.json": {
-   "bytes": 16944,
    "callers": [],
+   "canonical_bytes": 16782,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 162,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6692,15 +6416,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p3_subvoxel_loeo_f1.json": {
-   "bytes": 18239,
    "callers": [],
+   "canonical_bytes": 18074,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 165,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6732,15 +6454,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p4_detpeak_smoke_f0.json": {
-   "bytes": 16174,
    "callers": [],
+   "canonical_bytes": 16003,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 171,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6772,15 +6492,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p4_detsweep_export_f0.json": {
-   "bytes": 16039,
    "callers": [],
+   "canonical_bytes": 16039,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6812,15 +6530,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p4_detsweep_export_f1.json": {
-   "bytes": 17320,
    "callers": [],
+   "canonical_bytes": 17320,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6852,15 +6568,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p4_preilp_loeo_f1.json": {
-   "bytes": 20683,
    "callers": [],
+   "canonical_bytes": 20506,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 177,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6892,15 +6606,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p5_divfix.json": {
-   "bytes": 12587,
    "callers": [],
+   "canonical_bytes": 12455,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 132,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6932,15 +6644,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p6_control_degraded.json": {
-   "bytes": 11578,
    "callers": [],
+   "canonical_bytes": 11469,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 109,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6972,15 +6682,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p7_cleanedge.json": {
-   "bytes": 15327,
    "callers": [],
+   "canonical_bytes": 15219,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 108,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7012,15 +6720,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p8_loosefilter.json": {
-   "bytes": 12369,
    "callers": [],
+   "canonical_bytes": 12248,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 121,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7052,15 +6758,13 @@
    "tracked": true
   },
   "scripts/kaggle_specs/p9_coupled_division.json": {
-   "bytes": 3636,
    "callers": [],
+   "canonical_bytes": 3636,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7092,15 +6796,13 @@
    "tracked": true
   },
   "scripts/kaggle_templates/loeo_pregraph_edits.json": {
-   "bytes": 1712,
    "callers": [],
+   "canonical_bytes": 1712,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7132,15 +6834,13 @@
    "tracked": true
   },
   "scripts/metric/pooled_bootstrap.py": {
-   "bytes": 9439,
    "callers": [],
+   "canonical_bytes": 9243,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 196,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7187,17 +6887,15 @@
    "tracked": true
   },
   "scripts/metric/validate_metric_parity.py": {
-   "bytes": 4586,
    "callers": [],
+   "canonical_bytes": 4485,
    "covered_by_tests": [
     "tests/test_metric_parity.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 101,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7237,15 +6935,13 @@
    "tracked": true
   },
   "scripts/metric/validate_numpy_metric.py": {
-   "bytes": 5023,
    "callers": [],
+   "canonical_bytes": 4913,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 110,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7285,15 +6981,13 @@
    "tracked": true
   },
   "scripts/metric/verify_gt_collision_parity.py": {
-   "bytes": 4275,
    "callers": [],
+   "canonical_bytes": 4162,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 113,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7345,15 +7039,13 @@
    "tracked": true
   },
   "scripts/metric/verify_pooled_objective.py": {
-   "bytes": 9031,
    "callers": [],
+   "canonical_bytes": 8840,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 191,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7392,20 +7084,18 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_baseline_rankers.py": {
-   "bytes": 22748,
    "callers": [
     "scripts/win_bet/assoc_fold_pathology.py",
     "scripts/win_bet/assoc_tournament.py",
     "scripts/win_bet/assoc_train_harness.py",
     "scripts/win_bet/finaledge_gates.py"
    ],
+   "canonical_bytes": 22324,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 424,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7468,15 +7158,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_feature_cache.py": {
-   "bytes": 12343,
    "callers": [],
+   "canonical_bytes": 12343,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7522,19 +7210,17 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_fold_pathology.py": {
-   "bytes": 52452,
    "callers": [
     "scripts/win_bet/finaledge_gates.py"
    ],
+   "canonical_bytes": 51490,
    "covered_by_tests": [
     "tests/test_assoc_fold_pathology.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 962,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7612,20 +7298,18 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_lost_edge_ledger.py": {
-   "bytes": 22448,
    "callers": [
     "scripts/win_bet/finaledge_gates.py",
     "scripts/win_bet/reach_oracle.py"
    ],
+   "canonical_bytes": 22010,
    "covered_by_tests": [
     "tests/test_assoc_fold_pathology.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 438,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7696,7 +7380,6 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_parent_dataset.py": {
-   "bytes": 15392,
    "callers": [
     "scripts/win_bet/assoc_baseline_rankers.py",
     "scripts/win_bet/assoc_fold_pathology.py",
@@ -7706,6 +7389,7 @@
     "scripts/win_bet/finaledge_gates.py",
     "scripts/win_bet/hoct_compat.py"
    ],
+   "canonical_bytes": 15392,
    "covered_by_tests": [
     "tests/test_assoc_fold_pathology.py",
     "tests/test_assoc_train_harness.py",
@@ -7714,9 +7398,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7781,15 +7463,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_preilp_survival.py": {
-   "bytes": 14351,
    "callers": [],
+   "canonical_bytes": 14351,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7850,15 +7530,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_preilp_survival_panel.py": {
-   "bytes": 9954,
    "callers": [],
+   "canonical_bytes": 9954,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7901,7 +7579,6 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_report.py": {
-   "bytes": 20352,
    "callers": [
     "scripts/win_bet/assoc_baseline_rankers.py",
     "scripts/win_bet/assoc_fold_pathology.py",
@@ -7912,6 +7589,7 @@
     "scripts/win_bet/hoct_compat.py",
     "scripts/win_bet/revladder_panel.py"
    ],
+   "canonical_bytes": 20352,
    "covered_by_tests": [
     "tests/test_assoc_report.py",
     "tests/test_assoc_train_harness.py",
@@ -7921,9 +7599,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -7990,15 +7666,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_specs/harness_f0.json": {
-   "bytes": 3900,
    "callers": [],
+   "canonical_bytes": 3791,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 109,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8048,15 +7722,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_specs/harness_f1.json": {
-   "bytes": 3752,
    "callers": [],
+   "canonical_bytes": 3662,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 90,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8115,15 +7787,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_specs/t2_correspondence_v1.json": {
-   "bytes": 12743,
    "callers": [],
+   "canonical_bytes": 12593,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 150,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8174,15 +7844,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_specs/tournament_context_f0_official.json": {
-   "bytes": 4522,
    "callers": [],
+   "canonical_bytes": 4443,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 79,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8234,15 +7902,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_specs/tournament_context_f0_pack_split0.json": {
-   "bytes": 4554,
    "callers": [],
+   "canonical_bytes": 4475,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 79,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8295,15 +7961,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_specs/tournament_context_f0_stabledet.json": {
-   "bytes": 4533,
    "callers": [],
+   "canonical_bytes": 4454,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 79,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8355,15 +8019,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_specs/tournament_context_f1_official.json": {
-   "bytes": 4541,
    "callers": [],
+   "canonical_bytes": 4462,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 79,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8415,15 +8077,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_specs/tournament_context_f1_oof_split1.json": {
-   "bytes": 4562,
    "callers": [],
+   "canonical_bytes": 4483,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 79,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8476,15 +8136,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_specs/tournament_context_f1_stabledet.json": {
-   "bytes": 4552,
    "callers": [],
+   "canonical_bytes": 4473,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 79,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8536,15 +8194,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_tap_replay.py": {
-   "bytes": 32769,
    "callers": [],
+   "canonical_bytes": 32769,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8602,11 +8258,11 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_tournament.py": {
-   "bytes": 67551,
    "callers": [
     "scripts/win_bet/assoc_fold_pathology.py",
     "scripts/win_bet/finaledge_gates.py"
    ],
+   "canonical_bytes": 66311,
    "covered_by_tests": [
     "tests/test_assoc_fold_pathology.py",
     "tests/test_assoc_tournament.py"
@@ -8614,9 +8270,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 1240,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8715,13 +8369,13 @@
    "tracked": true
   },
   "scripts/win_bet/assoc_train_harness.py": {
-   "bytes": 97632,
    "callers": [
     "scripts/win_bet/assoc_fold_pathology.py",
     "scripts/win_bet/assoc_tournament.py",
     "scripts/win_bet/audit_split_leakage.py",
     "scripts/win_bet/finaledge_gates.py"
    ],
+   "canonical_bytes": 95859,
    "covered_by_tests": [
     "tests/test_assoc_fold_pathology.py",
     "tests/test_assoc_tournament.py",
@@ -8731,9 +8385,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 1773,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8841,17 +8493,15 @@
    "tracked": true
   },
   "scripts/win_bet/association_reachability.py": {
-   "bytes": 8713,
    "callers": [],
+   "canonical_bytes": 8514,
    "covered_by_tests": [
     "tests/test_ilp_retention_instruments.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 199,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8904,15 +8554,13 @@
    "tracked": true
   },
   "scripts/win_bet/audit_assoc_contract.py": {
-   "bytes": 19737,
    "callers": [],
+   "canonical_bytes": 19737,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -8973,17 +8621,15 @@
    "tracked": true
   },
   "scripts/win_bet/audit_detpeak_full_export.py": {
-   "bytes": 14235,
    "callers": [],
+   "canonical_bytes": 14235,
    "covered_by_tests": [
     "tests/test_audit_detpeak_full_export.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9031,10 +8677,10 @@
    "tracked": true
   },
   "scripts/win_bet/audit_feature_cache.py": {
-   "bytes": 145205,
    "callers": [
     "scripts/win_bet/assoc_train_harness.py"
    ],
+   "canonical_bytes": 142741,
    "covered_by_tests": [
     "tests/assoc_v2_world.py",
     "tests/test_assoc_train_harness.py",
@@ -9045,9 +8691,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 2464,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9117,15 +8761,13 @@
    "tracked": true
   },
   "scripts/win_bet/audit_graph_parity_attribution.py": {
-   "bytes": 5956,
    "callers": [],
+   "canonical_bytes": 5956,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9167,15 +8809,13 @@
    "tracked": true
   },
   "scripts/win_bet/audit_identity_conversion.py": {
-   "bytes": 12721,
    "callers": [],
+   "canonical_bytes": 12474,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 247,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9231,18 +8871,16 @@
    "tracked": true
   },
   "scripts/win_bet/audit_p30_acquisition.py": {
-   "bytes": 11072,
    "callers": [
     "scripts/win_bet/candidate_reach_curve.py",
     "scripts/win_bet/lever37_conversion.py"
    ],
+   "canonical_bytes": 11072,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9291,17 +8929,15 @@
    "tracked": true
   },
   "scripts/win_bet/audit_p33_gate1.py": {
-   "bytes": 19930,
    "callers": [],
+   "canonical_bytes": 19930,
    "covered_by_tests": [
     "tests/test_audit_receipt_harness.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9353,15 +8989,13 @@
    "tracked": true
   },
   "scripts/win_bet/audit_registry_drift.py": {
-   "bytes": 10035,
    "callers": [],
+   "canonical_bytes": 10035,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9402,15 +9036,13 @@
    "tracked": true
   },
   "scripts/win_bet/audit_release_receipt.py": {
-   "bytes": 21978,
    "callers": [],
+   "canonical_bytes": 21562,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 416,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9465,17 +9097,15 @@
    "tracked": true
   },
   "scripts/win_bet/audit_result_completeness.py": {
-   "bytes": 9525,
    "callers": [],
+   "canonical_bytes": 9525,
    "covered_by_tests": [
     "tests/test_audit_receipt_harness.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9527,15 +9157,13 @@
    "tracked": true
   },
   "scripts/win_bet/audit_split_leakage.py": {
-   "bytes": 20740,
    "callers": [],
+   "canonical_bytes": 20345,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 395,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9591,17 +9219,15 @@
    "tracked": true
   },
   "scripts/win_bet/audit_version_coherence.py": {
-   "bytes": 9993,
    "callers": [],
+   "canonical_bytes": 9792,
    "covered_by_tests": [
     "tests/test_audit_receipt_harness.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 201,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9645,15 +9271,13 @@
    "tracked": true
   },
   "scripts/win_bet/biohubx/__init__.py": {
-   "bytes": 263,
    "callers": [],
+   "canonical_bytes": 263,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9689,15 +9313,13 @@
    "tracked": true
   },
   "scripts/win_bet/biohubx/ckpt_keys.py": {
-   "bytes": 12152,
    "callers": [],
+   "canonical_bytes": 12152,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9745,19 +9367,17 @@
    "tracked": false
   },
   "scripts/win_bet/biohubx/contract.py": {
-   "bytes": 46752,
    "callers": [
     "scripts/win_bet/biohubx/model.py",
     "scripts/win_bet/biohubx/synthetic_t2.py",
     "scripts/win_bet/biohubx/training.py"
    ],
+   "canonical_bytes": 46752,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9812,17 +9432,15 @@
    "tracked": true
   },
   "scripts/win_bet/biohubx/hf_xet_digest.py": {
-   "bytes": 4540,
    "callers": [],
+   "canonical_bytes": 4540,
    "covered_by_tests": [
     "tests/test_hf_xet_digest.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9865,17 +9483,15 @@
    "tracked": true
   },
   "scripts/win_bet/biohubx/model.py": {
-   "bytes": 21135,
    "callers": [
     "scripts/win_bet/biohubx/training.py"
    ],
+   "canonical_bytes": 21135,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9923,17 +9539,15 @@
    "tracked": true
   },
   "scripts/win_bet/biohubx/synthetic_t2.py": {
-   "bytes": 20395,
    "callers": [],
+   "canonical_bytes": 20395,
    "covered_by_tests": [
     "tests/test_biohubx_synthetic_t2.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -9979,15 +9593,13 @@
    "tracked": true
   },
   "scripts/win_bet/biohubx/training.py": {
-   "bytes": 8998,
    "callers": [],
+   "canonical_bytes": 8998,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10033,17 +9645,15 @@
    "tracked": true
   },
   "scripts/win_bet/candidate_gate_eval.py": {
-   "bytes": 9095,
    "callers": [],
+   "canonical_bytes": 9095,
    "covered_by_tests": [
     "tests/test_candidate_gate_eval.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10087,17 +9697,15 @@
    "tracked": true
   },
   "scripts/win_bet/candidate_reach_curve.py": {
-   "bytes": 9566,
    "callers": [
     "scripts/win_bet/lever37_conversion.py"
    ],
+   "canonical_bytes": 9566,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10154,17 +9762,15 @@
    "tracked": true
   },
   "scripts/win_bet/candidate_threshold_sweep.py": {
-   "bytes": 7149,
    "callers": [],
+   "canonical_bytes": 7149,
    "covered_by_tests": [
     "tests/test_candidate_threshold_sweep.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10205,20 +9811,18 @@
    "tracked": true
   },
   "scripts/win_bet/ceiling_ladder.py": {
-   "bytes": 14126,
    "callers": [
     "scripts/win_bet/mask_node_adapter.py",
     "scripts/win_bet/revladder.py"
    ],
+   "canonical_bytes": 13817,
    "covered_by_tests": [
     "tests/test_ilp_retention_instruments.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 309,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10272,17 +9876,15 @@
    "tracked": true
   },
   "scripts/win_bet/checkpoint_inventory.py": {
-   "bytes": 1949,
    "callers": [],
+   "canonical_bytes": 1949,
    "covered_by_tests": [
     "tests/test_checkpoint_inventory.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10323,15 +9925,13 @@
    "tracked": true
   },
   "scripts/win_bet/colab_parity_check.py": {
-   "bytes": 5525,
    "callers": [],
+   "canonical_bytes": 5525,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10371,17 +9971,15 @@
    "tracked": true
   },
   "scripts/win_bet/compare_substrate_sentinel.py": {
-   "bytes": 2139,
    "callers": [],
+   "canonical_bytes": 2139,
    "covered_by_tests": [
     "tests/test_compare_substrate_sentinel.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10420,15 +10018,13 @@
    "tracked": true
   },
   "scripts/win_bet/constant_audit.py": {
-   "bytes": 17046,
    "callers": [],
+   "canonical_bytes": 16684,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 362,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10473,15 +10069,13 @@
    "tracked": true
   },
   "scripts/win_bet/constant_audit_pred.py": {
-   "bytes": 10597,
    "callers": [],
+   "canonical_bytes": 10597,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10522,20 +10116,18 @@
    "tracked": true
   },
   "scripts/win_bet/control_binding.py": {
-   "bytes": 23166,
    "callers": [
     "scripts/win_bet/assoc_train_harness.py",
     "scripts/win_bet/finaledge_gates.py"
    ],
+   "canonical_bytes": 23166,
    "covered_by_tests": [
     "tests/test_control_binding.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10582,15 +10174,13 @@
    "tracked": true
   },
   "scripts/win_bet/dc_checkpoint_audit.py": {
-   "bytes": 5693,
    "callers": [],
+   "canonical_bytes": 5693,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10640,15 +10230,13 @@
    "tracked": true
   },
   "scripts/win_bet/dc_subvoxel_refine.py": {
-   "bytes": 38552,
    "callers": [],
+   "canonical_bytes": 38552,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10713,15 +10301,13 @@
    "tracked": true
   },
   "scripts/win_bet/deployed_controls.json": {
-   "bytes": 16552,
    "callers": [],
+   "canonical_bytes": 16307,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 245,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10767,7 +10353,6 @@
    "tracked": true
   },
   "scripts/win_bet/detpeak_curve.py": {
-   "bytes": 10198,
    "callers": [
     "scripts/win_bet/assoc_lost_edge_ledger.py",
     "scripts/win_bet/assoc_parent_dataset.py",
@@ -10781,15 +10366,14 @@
     "scripts/win_bet/mask_node_adapter.py",
     "scripts/win_bet/reach_oracle.py"
    ],
+   "canonical_bytes": 9982,
    "covered_by_tests": [
     "tests/test_ilp_retention_instruments.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 216,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10836,17 +10420,15 @@
    "tracked": true
   },
   "scripts/win_bet/detpeak_fold_curve.py": {
-   "bytes": 8431,
    "callers": [
     "scripts/win_bet/detpeak_retention.py"
    ],
+   "canonical_bytes": 8431,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10895,15 +10477,13 @@
    "tracked": true
   },
   "scripts/win_bet/detpeak_retention.py": {
-   "bytes": 6302,
    "callers": [],
+   "canonical_bytes": 6302,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -10952,15 +10532,13 @@
    "tracked": true
   },
   "scripts/win_bet/div_proposal_funnel.py": {
-   "bytes": 9940,
    "callers": [],
+   "canonical_bytes": 9940,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11004,17 +10582,15 @@
    "tracked": true
   },
   "scripts/win_bet/div_reach_steal.py": {
-   "bytes": 27442,
    "callers": [
     "scripts/win_bet/audit_identity_conversion.py"
    ],
+   "canonical_bytes": 27442,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11084,15 +10660,13 @@
    "tracked": true
   },
   "scripts/win_bet/div_steal_rule.py": {
-   "bytes": 55393,
    "callers": [],
+   "canonical_bytes": 54380,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 1013,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11158,15 +10732,13 @@
    "tracked": true
   },
   "scripts/win_bet/division_localisation.py": {
-   "bytes": 10224,
    "callers": [],
+   "canonical_bytes": 10224,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11225,15 +10797,13 @@
    "tracked": true
   },
   "scripts/win_bet/division_loss_diff.py": {
-   "bytes": 5048,
    "callers": [],
+   "canonical_bytes": 5048,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11280,17 +10850,15 @@
    "tracked": true
   },
   "scripts/win_bet/divverify_adapter.py": {
-   "bytes": 26920,
    "callers": [],
+   "canonical_bytes": 26920,
    "covered_by_tests": [
     "tests/test_divverify_contract.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11354,19 +10922,17 @@
    "tracked": true
   },
   "scripts/win_bet/divverify_dataset.py": {
-   "bytes": 79527,
    "callers": [
     "scripts/win_bet/divverify_verifier.py"
    ],
+   "canonical_bytes": 78069,
    "covered_by_tests": [
     "tests/test_divverify_contract.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 1458,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11443,17 +11009,15 @@
    "tracked": true
   },
   "scripts/win_bet/divverify_verifier.py": {
-   "bytes": 38281,
    "callers": [],
+   "canonical_bytes": 37561,
    "covered_by_tests": [
     "tests/test_divverify_contract.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 720,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11514,15 +11078,13 @@
    "tracked": false
   },
   "scripts/win_bet/e0_replay.py": {
-   "bytes": 5226,
    "callers": [],
+   "canonical_bytes": 5102,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 124,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11565,15 +11127,13 @@
    "tracked": true
   },
   "scripts/win_bet/e0c_parity.py": {
-   "bytes": 3420,
    "callers": [],
+   "canonical_bytes": 3333,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 87,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11612,15 +11172,13 @@
    "tracked": true
   },
   "scripts/win_bet/e0c_run.py": {
-   "bytes": 8283,
    "callers": [],
+   "canonical_bytes": 8097,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 186,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11667,15 +11225,13 @@
    "tracked": true
   },
   "scripts/win_bet/e0c_score.py": {
-   "bytes": 7224,
    "callers": [],
+   "canonical_bytes": 7066,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 158,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11724,15 +11280,13 @@
    "tracked": true
   },
   "scripts/win_bet/ea_abstain.py": {
-   "bytes": 8619,
    "callers": [],
+   "canonical_bytes": 8619,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11771,15 +11325,13 @@
    "tracked": true
   },
   "scripts/win_bet/ea_analyze.py": {
-   "bytes": 13625,
    "callers": [],
+   "canonical_bytes": 13346,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 279,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11819,15 +11371,13 @@
    "tracked": true
   },
   "scripts/win_bet/ea_atlas.py": {
-   "bytes": 8977,
    "callers": [],
+   "canonical_bytes": 8977,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11907,15 +11457,13 @@
    "tracked": true
   },
   "scripts/win_bet/ea_features.py": {
-   "bytes": 10279,
    "callers": [],
+   "canonical_bytes": 10279,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -11958,15 +11506,13 @@
    "tracked": true
   },
   "scripts/win_bet/ea_solver_gap.py": {
-   "bytes": 6626,
    "callers": [],
+   "canonical_bytes": 6626,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12005,17 +11551,15 @@
    "tracked": true
   },
   "scripts/win_bet/extract_node_estimates.py": {
-   "bytes": 1632,
    "callers": [],
+   "canonical_bytes": 1632,
    "covered_by_tests": [
     "tests/test_extract_node_estimates.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12055,15 +11599,13 @@
    "tracked": true
   },
   "scripts/win_bet/finaledge_batch.py": {
-   "bytes": 6133,
    "callers": [],
+   "canonical_bytes": 6001,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 132,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12114,19 +11656,17 @@
    "tracked": true
   },
   "scripts/win_bet/finaledge_gates.py": {
-   "bytes": 78194,
    "callers": [
     "scripts/win_bet/finaledge_batch.py"
    ],
+   "canonical_bytes": 76706,
    "covered_by_tests": [
     "tests/test_finaledge_gates.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 1488,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12235,17 +11775,15 @@
    "tracked": true
   },
   "scripts/win_bet/focus3d_probe.py": {
-   "bytes": 22908,
    "callers": [],
+   "canonical_bytes": 22908,
    "covered_by_tests": [
     "tests/test_focus3d_probe_state_contract.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12311,15 +11849,13 @@
    "tracked": true
   },
   "scripts/win_bet/fp_endpoint_dedup.py": {
-   "bytes": 22341,
    "callers": [],
+   "canonical_bytes": 22341,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12382,17 +11918,15 @@
    "tracked": true
   },
   "scripts/win_bet/gpu_preflight.py": {
-   "bytes": 107673,
    "callers": [],
+   "canonical_bytes": 105670,
    "covered_by_tests": [
     "tests/test_gpu_preflight.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 2003,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12468,8 +12002,8 @@
    "tracked": true
   },
   "scripts/win_bet/gpu_protection_contract.py": {
-   "bytes": 48836,
    "callers": [],
+   "canonical_bytes": 48836,
    "covered_by_tests": [
     "tests/test_gpu_protection_contract.py",
     "tests/test_provenance_policy.py",
@@ -12478,9 +12012,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12536,7 +12068,6 @@
    "tracked": true
   },
   "scripts/win_bet/gt_collision.py": {
-   "bytes": 1321,
    "callers": [
     "scripts/metric/verify_gt_collision_parity.py",
     "scripts/win_bet/phaseb_d0p_proposer.py",
@@ -12545,15 +12076,14 @@
     "scripts/win_bet/phaseb_h1a_census.py",
     "scripts/win_bet/phaseb_oracle_d0prime.py"
    ],
+   "canonical_bytes": 1289,
    "covered_by_tests": [
     "tests/test_gt_collision.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 32,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12587,15 +12117,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1r_fetch_imaging.py": {
-   "bytes": 4768,
    "callers": [],
+   "canonical_bytes": 4768,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12638,15 +12166,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1r_l1_scale_audit.py": {
-   "bytes": 10307,
    "callers": [],
+   "canonical_bytes": 10307,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12688,15 +12214,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1r_resample_iso.py": {
-   "bytes": 6600,
    "callers": [],
+   "canonical_bytes": 6600,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12736,15 +12260,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1r_subvoxel_refine.py": {
-   "bytes": 3629,
    "callers": [],
+   "canonical_bytes": 3629,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12779,15 +12301,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1r_train_smoke.py": {
-   "bytes": 6364,
    "callers": [],
+   "canonical_bytes": 6364,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12828,15 +12348,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1r_zh001r_audit.py": {
-   "bytes": 11883,
    "callers": [],
+   "canonical_bytes": 11883,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12876,15 +12394,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1r_zh001r_register.py": {
-   "bytes": 14262,
    "callers": [],
+   "canonical_bytes": 14262,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12926,15 +12442,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1r_zh001r_smoke.py": {
-   "bytes": 6451,
    "callers": [],
+   "canonical_bytes": 6451,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -12974,15 +12488,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1t_appearance_probe.py": {
-   "bytes": 9182,
    "callers": [],
+   "canonical_bytes": 8975,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 207,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13031,15 +12543,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1t_conditional_ranker.py": {
-   "bytes": 14333,
    "callers": [],
+   "canonical_bytes": 14006,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 327,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13088,15 +12598,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1t_export_kaggle.py": {
-   "bytes": 4657,
    "callers": [],
+   "canonical_bytes": 4559,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 98,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13143,20 +12651,18 @@
    "tracked": true
   },
   "scripts/win_bet/h1t_external_critic.py": {
-   "bytes": 17877,
    "callers": [
     "scripts/win_bet/h1t_appearance_probe.py",
     "scripts/win_bet/h1t_conditional_ranker.py",
     "scripts/win_bet/h1t_export_kaggle.py",
     "scripts/win_bet/h1t_h0c_learned.py"
    ],
+   "canonical_bytes": 17485,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 392,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13203,15 +12709,13 @@
    "tracked": true
   },
   "scripts/win_bet/h1t_h0c_learned.py": {
-   "bytes": 10317,
    "callers": [],
+   "canonical_bytes": 10111,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 206,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13267,18 +12771,16 @@
    "tracked": true
   },
   "scripts/win_bet/h1t_zebrahub_events.py": {
-   "bytes": 22233,
    "callers": [
     "scripts/win_bet/h1t_export_kaggle.py",
     "scripts/win_bet/h1t_h0c_learned.py"
    ],
+   "canonical_bytes": 21759,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 474,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13327,15 +12829,13 @@
    "tracked": true
   },
   "scripts/win_bet/h4_ssl_gate_replay.py": {
-   "bytes": 10241,
    "callers": [],
+   "canonical_bytes": 10031,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 210,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13385,17 +12885,15 @@
    "tracked": true
   },
   "scripts/win_bet/hoct_compat.py": {
-   "bytes": 37419,
    "callers": [],
+   "canonical_bytes": 37419,
    "covered_by_tests": [
     "tests/test_hoct_compat.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13463,20 +12961,18 @@
    "tracked": false
   },
   "scripts/win_bet/hoct_feature_contract.py": {
-   "bytes": 27160,
    "callers": [
     "scripts/win_bet/hoct_scale_gate.py",
     "scripts/win_bet/mask_node_adapter.py"
    ],
+   "canonical_bytes": 27160,
    "covered_by_tests": [
     "tests/test_pkt0048_maskassoc.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13528,10 +13024,10 @@
    "tracked": true
   },
   "scripts/win_bet/hoct_head.py": {
-   "bytes": 34965,
    "callers": [
     "scripts/win_bet/hoct_compat.py"
    ],
+   "canonical_bytes": 34965,
    "covered_by_tests": [
     "tests/test_hoct_compat.py",
     "tests/test_hoct_head.py"
@@ -13539,9 +13035,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13599,19 +13093,17 @@
    "tracked": true
   },
   "scripts/win_bet/hoct_scale_gate.py": {
-   "bytes": 26763,
    "callers": [
     "scripts/win_bet/mask_node_adapter.py"
    ],
+   "canonical_bytes": 26763,
    "covered_by_tests": [
     "tests/test_pkt0048_maskassoc.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13673,20 +13165,18 @@
    "tracked": true
   },
   "scripts/win_bet/ilp_replay.py": {
-   "bytes": 13153,
    "callers": [
     "scripts/win_bet/assoc_preilp_survival.py",
     "scripts/win_bet/finaledge_gates.py",
     "scripts/win_bet/ilp_sweep.py",
     "scripts/win_bet/p28_full_chain_replay.py"
    ],
+   "canonical_bytes": 12865,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 288,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13740,15 +13230,13 @@
    "tracked": true
   },
   "scripts/win_bet/ilp_sweep.py": {
-   "bytes": 10991,
    "callers": [],
+   "canonical_bytes": 10991,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13797,19 +13285,17 @@
    "tracked": true
   },
   "scripts/win_bet/kaggle_artifacts.py": {
-   "bytes": 5643,
    "callers": [
     "scripts/win_bet/gpu_preflight.py"
    ],
+   "canonical_bytes": 5643,
    "covered_by_tests": [
     "tests/test_gpu_preflight.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13856,11 +13342,11 @@
    "tracked": true
   },
   "scripts/win_bet/kaggle_mounts.py": {
-   "bytes": 8652,
    "callers": [
     "scripts/win_bet/gpu_preflight.py",
     "scripts/win_bet/preflight_p35_dcveto.py"
    ],
+   "canonical_bytes": 8468,
    "covered_by_tests": [
     "tests/test_cross_checkout_identity.py",
     "tests/test_gpu_preflight.py"
@@ -13868,9 +13354,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 184,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13915,15 +13399,13 @@
    "tracked": true
   },
   "scripts/win_bet/lever37_conversion.py": {
-   "bytes": 9356,
    "callers": [],
+   "canonical_bytes": 9356,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -13978,17 +13460,15 @@
    "tracked": true
   },
   "scripts/win_bet/lost_cell_atlas.py": {
-   "bytes": 12755,
    "callers": [],
+   "canonical_bytes": 12755,
    "covered_by_tests": [
     "tests/test_ilp_retention_instruments.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14044,17 +13524,15 @@
    "tracked": true
   },
   "scripts/win_bet/mask_node_adapter.py": {
-   "bytes": 36278,
    "callers": [],
+   "canonical_bytes": 36278,
    "covered_by_tests": [
     "tests/test_pkt0048_maskassoc.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14123,15 +13601,13 @@
    "tracked": true
   },
   "scripts/win_bet/nearest_parent_oracle.py": {
-   "bytes": 13680,
    "callers": [],
+   "canonical_bytes": 13680,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14180,15 +13656,13 @@
    "tracked": true
   },
   "scripts/win_bet/node_budget_policy.py": {
-   "bytes": 5212,
    "callers": [],
+   "canonical_bytes": 5212,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14226,15 +13700,13 @@
    "tracked": true
   },
   "scripts/win_bet/p28_full_chain_panel.py": {
-   "bytes": 5527,
    "callers": [],
+   "canonical_bytes": 5402,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 125,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14285,20 +13757,18 @@
    "tracked": true
   },
   "scripts/win_bet/p28_full_chain_replay.py": {
-   "bytes": 20679,
    "callers": [
     "scripts/win_bet/assoc_preilp_survival.py",
     "scripts/win_bet/finaledge_gates.py"
    ],
+   "canonical_bytes": 20163,
    "covered_by_tests": [
     "tests/test_p28_full_chain_replay.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 516,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14374,7 +13844,6 @@
    "tracked": true
   },
   "scripts/win_bet/phaseb_d0p_proposer.py": {
-   "bytes": 23145,
    "callers": [
     "scripts/metric/verify_gt_collision_parity.py",
     "scripts/win_bet/h1t_appearance_probe.py",
@@ -14390,13 +13859,12 @@
     "scripts/win_bet/phaseb_node_budget.py",
     "scripts/win_bet/phaseb_pooled_breakeven.py"
    ],
+   "canonical_bytes": 22673,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 472,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14450,17 +13918,15 @@
    "tracked": true
   },
   "scripts/win_bet/phaseb_h0b_rankcompress.py": {
-   "bytes": 11796,
    "callers": [
     "scripts/metric/verify_gt_collision_parity.py"
    ],
+   "canonical_bytes": 11545,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 251,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14513,7 +13979,6 @@
    "tracked": true
   },
   "scripts/win_bet/phaseb_h0c_replay.py": {
-   "bytes": 13226,
    "callers": [
     "scripts/metric/verify_gt_collision_parity.py",
     "scripts/win_bet/h1t_conditional_ranker.py",
@@ -14527,13 +13992,12 @@
     "scripts/win_bet/phaseb_h2a_hybrid_oracle.py",
     "scripts/win_bet/phaseb_pooled_breakeven.py"
    ],
+   "canonical_bytes": 12968,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 258,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14587,17 +14051,15 @@
    "tracked": true
   },
   "scripts/win_bet/phaseb_h0d_livefilter.py": {
-   "bytes": 34487,
    "callers": [
     "scripts/win_bet/phaseb_h2a_hybrid_oracle.py"
    ],
+   "canonical_bytes": 33797,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 690,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14652,17 +14114,15 @@
    "tracked": true
   },
   "scripts/win_bet/phaseb_h1a_census.py": {
-   "bytes": 9302,
    "callers": [
     "scripts/metric/verify_gt_collision_parity.py"
    ],
+   "canonical_bytes": 9115,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 187,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14715,15 +14175,13 @@
    "tracked": true
   },
   "scripts/win_bet/phaseb_h1g_features.py": {
-   "bytes": 8566,
    "callers": [],
+   "canonical_bytes": 8380,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 186,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14770,15 +14228,13 @@
    "tracked": true
   },
   "scripts/win_bet/phaseb_h2a_hybrid_oracle.py": {
-   "bytes": 36387,
    "callers": [],
+   "canonical_bytes": 35697,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 690,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14834,15 +14290,13 @@
    "tracked": true
   },
   "scripts/win_bet/phaseb_node_budget.py": {
-   "bytes": 9882,
    "callers": [],
+   "canonical_bytes": 9658,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 224,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14889,17 +14343,15 @@
    "tracked": true
   },
   "scripts/win_bet/phaseb_oracle_d0prime.py": {
-   "bytes": 15272,
    "callers": [
     "scripts/metric/verify_gt_collision_parity.py"
    ],
+   "canonical_bytes": 14948,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 324,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -14948,15 +14400,13 @@
    "tracked": true
   },
   "scripts/win_bet/phaseb_pooled_breakeven.py": {
-   "bytes": 11713,
    "callers": [],
+   "canonical_bytes": 11452,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 261,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15008,15 +14458,13 @@
    "tracked": true
   },
   "scripts/win_bet/preflight_p35_dcveto.py": {
-   "bytes": 30567,
    "callers": [],
+   "canonical_bytes": 30567,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15084,17 +14532,15 @@
    "tracked": true
   },
   "scripts/win_bet/preilp_crossrun_stability.py": {
-   "bytes": 6718,
    "callers": [],
+   "canonical_bytes": 6718,
    "covered_by_tests": [
     "tests/test_preilp_crossrun_stability.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15139,15 +14585,13 @@
    "tracked": true
   },
   "scripts/win_bet/preilp_div_audit.py": {
-   "bytes": 7702,
    "callers": [],
+   "canonical_bytes": 7702,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15188,11 +14632,11 @@
    "tracked": true
   },
   "scripts/win_bet/provenance_policy.py": {
-   "bytes": 16029,
    "callers": [
     "scripts/win_bet/audit_feature_cache.py",
     "scripts/win_bet/gpu_protection_contract.py"
    ],
+   "canonical_bytes": 16029,
    "covered_by_tests": [
     "tests/test_provenance_policy.py",
     "tests/test_provenance_policy_single_source.py"
@@ -15200,9 +14644,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15255,17 +14697,15 @@
    "tracked": true
   },
   "scripts/win_bet/reach_oracle.py": {
-   "bytes": 39411,
    "callers": [],
+   "canonical_bytes": 38875,
    "covered_by_tests": [
     "tests/test_reach_oracle_partition.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 536,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15332,17 +14772,15 @@
    "tracked": true
   },
   "scripts/win_bet/reach_rule.py": {
-   "bytes": 10961,
    "callers": [
     "scripts/win_bet/reach_oracle.py"
    ],
+   "canonical_bytes": 10961,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15395,18 +14833,16 @@
    "tracked": true
   },
   "scripts/win_bet/revladder.py": {
-   "bytes": 12276,
    "callers": [
     "scripts/win_bet/revladder_batch.py",
     "scripts/win_bet/revladder_panel.py"
    ],
+   "canonical_bytes": 12276,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15462,17 +14898,15 @@
    "tracked": true
   },
   "scripts/win_bet/revladder_batch.py": {
-   "bytes": 4956,
    "callers": [
     "scripts/win_bet/revladder_panel.py"
    ],
+   "canonical_bytes": 4956,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15522,15 +14956,13 @@
    "tracked": true
   },
   "scripts/win_bet/revladder_calibrate.py": {
-   "bytes": 4728,
    "callers": [],
+   "canonical_bytes": 4728,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15574,15 +15006,13 @@
    "tracked": true
   },
   "scripts/win_bet/revladder_panel.py": {
-   "bytes": 13887,
    "callers": [],
+   "canonical_bytes": 13887,
    "covered_by_tests": [],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15635,19 +15065,17 @@
    "tracked": true
   },
   "scripts/win_bet/spec_restriction.py": {
-   "bytes": 14682,
    "callers": [
     "scripts/win_bet/assoc_train_harness.py"
    ],
+   "canonical_bytes": 14682,
    "covered_by_tests": [
     "tests/test_spec_restriction.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15695,8 +15123,8 @@
    "tracked": true
   },
   "scripts/win_bet/sync_tap_worker.py": {
-   "bytes": 2749,
    "callers": [],
+   "canonical_bytes": 2749,
    "covered_by_tests": [
     "tests/test_assoc_feature_tap.py",
     "tests/test_gpu_protection_contract.py"
@@ -15704,9 +15132,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -15744,17 +15170,15 @@
    "tracked": true
   },
   "scripts/win_bet/validate_detpeak_export.py": {
-   "bytes": 3168,
    "callers": [],
+   "canonical_bytes": 3168,
    "covered_by_tests": [
     "tests/test_validate_detpeak_export.py"
    ],
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",

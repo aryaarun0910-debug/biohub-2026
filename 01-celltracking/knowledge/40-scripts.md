@@ -188,10 +188,11 @@ generated: true
 - `scripts/win_bet/revladder_batch.py` — **no test**
 - `scripts/win_bet/validate_detpeak_export.py` — tests: 1
 
-## supporting (16)
+## supporting (17)
 
 - `scripts/core/baseline_contract.py` — tests: 2
 - `scripts/core/bootstrap_vendor.py` — tests: 4
+- `scripts/core/hashing.py` — tests: 4
 - `scripts/d1/assemble_p3_d1_smoke_spec.py` — tests: 2
 - `scripts/d1/d1f_probe.py` — tests: 2
 - `scripts/kaggle_edits/h1r_edge_data.py` — tests: 3
@@ -207,11 +208,12 @@ generated: true
 - `scripts/win_bet/phaseb_h1a_census.py` — **no test**
 - `scripts/win_bet/phaseb_oracle_d0prime.py` — **no test**
 
-## unknown (104)
+## unknown (105)
 
 - `scripts/core/catalog.py` — tests: 1
 - `scripts/core/claims_table.py` — tests: 1
 - `scripts/core/colab_vm_bootstrap.py` — **no test**
+- `scripts/core/digest_inventory.py` — tests: 1
 - `scripts/core/fetch.py` — **no test**
 - `scripts/core/kaggle_queue.py` — tests: 1
 - `scripts/core/knowledge.py` — **no test**
@@ -288,12 +290,9 @@ generated: true
 - `scripts/win_bet/ea_abstain.py` — **no test**
 - `scripts/win_bet/ea_analyze.py` — **no test**
 - `scripts/win_bet/ea_features.py` — **no test**
-- `scripts/win_bet/ea_solver_gap.py` — **no test**
 
-## untracked-concurrent (5)
+## untracked-concurrent (3)
 
-- `scripts/core/digest_inventory.py` — tests: 1
-- `scripts/core/hashing.py` — tests: 4
 - `scripts/win_bet/biohubx/ckpt_keys.py` — **no test**
 - `scripts/win_bet/divverify_verifier.py` — tests: 1
 - `scripts/win_bet/hoct_compat.py` — tests: 1

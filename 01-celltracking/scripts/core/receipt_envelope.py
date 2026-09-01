@@ -122,10 +122,13 @@ def envelope_for(nb_dir: Path, by_kernel: dict) -> dict:
         "hash_kinds": {"notebook_sha256": H.RAW,
                        "notebook_canonical_sha256": H.CANONICAL,
                        "artifact_sha256": H.RAW,
-                       "manifest_sha256": H.RAW,
+                       "manifest_sha256": H.CANONICAL,
                        "spec_sha256": H.RAW,
                        "audit_tool_sha256": H.RAW},
-        "manifest_sha256": _sha(man),
+        # CANONICAL: the manifest is tracked repository metadata. Its raw digest differed
+        # between an LF worktree and a CRLF checkout, so the tracked envelope disagreed with
+        # itself in a clone - measured, and it was one of the last three clean-clone failures.
+        "manifest_sha256": (H.canonical_text_sha256(man) if man.is_file() else None),
         "artifact_sha256": None, "spec_sha256": None,
         "audit_tool_version": None, "audit_tool_sha256": None,
         "kernel_slug": None, "kernel_version": None,

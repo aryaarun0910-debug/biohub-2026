@@ -47,6 +47,17 @@ import yaml  # noqa: E402
 import hashing as H  # noqa: E402  the ONE hashing module (Phase 1.5)
 
 
+def _canonical_len(path: Path) -> int | None:
+    """Byte length AFTER canonicalisation - checkout-invariant for text, raw size for binary."""
+    try:
+        return len(H.canonicalize_text(path.read_bytes())[0].encode("utf-8"))
+    except (H.HashRefusal, OSError):
+        try:
+            return path.stat().st_size
+        except OSError:
+            return None
+
+
 def _digest(path: Path, kind: str) -> dict:
     """A hash-bearing field, with its KIND declared.
 
@@ -243,8 +254,10 @@ def build_scripts(reg: dict, tracked: set[str], ov: dict) -> dict:
             "purpose": doc,
             "tracked": r in tracked,
             # source under scripts/ - canonical, so the catalog is the same in any checkout
-            "digest": _digest(p, H.CANONICAL if p.suffix == ".py" else H.CANONICAL),
-            "bytes": p.stat().st_size,
+            "digest": _digest(p, H.CANONICAL),
+            # CANONICAL length, not the on-disk size: a CRLF checkout of the same content is
+            # larger, so `st_size` made the catalog disagree with itself across checkouts.
+            "canonical_bytes": _canonical_len(p),
             "imports": imports,
             "imports_first_party": [m for m in imports if m.split(".")[0] in stem_index
                                     or m.startswith("scripts.")],

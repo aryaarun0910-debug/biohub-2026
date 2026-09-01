@@ -107,6 +107,10 @@ ROUTING_KEYS = (
 )
 
 
+import sys as _sys
+_sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "core"))
+import hashing as _HASHING  # noqa: E402  the ONE hashing module
+
 def sha_file(p: pathlib.Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
@@ -536,6 +540,16 @@ def build(shard: dict, tier: str = "smoke") -> dict:
                 "loeo_source": LOEO_OUTPUT_PROVENANCE,
             "imported_edit_sha256": imported_sha,
             "d1_inject_sha256": sha_file(ROOT / "scripts/kaggle_edits/d1_inject.py"),
+            # LEFT RAW DELIBERATELY, and this is the ONE digest Phase 1.5 could not migrate.
+            # MEASURED 2026-09-01: scripts/kaggle_edits/d1_response_audit.py has MIXED line
+            # endings - 828 CRLF in this worktree, 903 in a fresh checkout - so the committed
+            # value ec9666f7 is this worktree's mixed form and is reproducible in NO other
+            # checkout. Its canonical form (899daee1) IS stable in both, but adopting it would
+            # change the recorded value in four generated specs, the runtime drift constant
+            # embedded in scripts/kaggle_edits/d1_inject.py:906, and therefore the bytes of every
+            # notebook that injects it - which cascades into built-notebook digests and their
+            # pins. That is a MIGRATION, not a repair, and Phase 1.5 is explicitly not permitted
+            # to begin one. Routed to the Phase 2 migration manifest with this measurement.
             "d1_block_sha256": sha_file(ROOT / "scripts/kaggle_edits/d1_response_audit.py"),
             "checkpoint_sha256": rec["checkpoint_sha256"],
             "stems": stems,

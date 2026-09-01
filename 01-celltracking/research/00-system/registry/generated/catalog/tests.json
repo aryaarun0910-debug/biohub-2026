@@ -6,9 +6,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -50,9 +48,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 10,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -86,9 +82,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 256,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -147,9 +141,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 405,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -200,9 +192,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -295,9 +285,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 343,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -358,9 +346,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 231,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -417,9 +403,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 434,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -494,9 +478,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 1103,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -615,9 +597,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -659,9 +639,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -798,9 +776,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -853,9 +829,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -922,9 +896,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 239,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -976,9 +948,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1067,9 +1037,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1105,9 +1073,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1153,9 +1119,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1205,9 +1169,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1249,9 +1211,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1296,9 +1256,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1337,9 +1295,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 183,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1395,9 +1351,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1435,9 +1389,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 56,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1477,9 +1429,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1522,9 +1472,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1576,9 +1524,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1617,9 +1563,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1688,9 +1632,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 216,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1746,9 +1688,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1796,18 +1736,16 @@
     "scripts/win_bet/kaggle_mounts.py"
    ],
    "skip_reasons": [],
-   "state": "untracked-concurrent",
+   "state": "active",
    "test_class": "unit",
-   "tracked": false
+   "tracked": true
   },
   "tests/test_d1_candidate_gate.py": {
    "blocking_scope": "cpu",
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1848,9 +1786,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 603,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -1963,9 +1899,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 584,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2044,9 +1978,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2090,9 +2022,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2141,9 +2071,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 1392,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2284,9 +2212,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 181,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2335,9 +2261,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 941,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2426,9 +2350,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 1701,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2647,9 +2569,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2691,9 +2611,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2739,9 +2657,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 92,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2779,9 +2695,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2824,9 +2738,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2863,9 +2775,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2911,9 +2821,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 514,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -2975,9 +2883,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 223,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3027,9 +2933,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3067,9 +2971,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 427,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3148,9 +3050,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 285,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3205,9 +3105,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3262,9 +3160,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3307,9 +3203,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3351,9 +3245,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 171,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3416,9 +3308,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3461,9 +3351,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3509,9 +3397,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3563,9 +3449,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 213,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3632,9 +3516,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3714,9 +3596,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3759,9 +3639,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 331,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3812,9 +3690,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3862,9 +3738,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3906,9 +3780,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3950,9 +3822,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -3998,9 +3868,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4046,9 +3914,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4086,9 +3952,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 108,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4138,9 +4002,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4197,9 +4059,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 338,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4252,9 +4112,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4295,9 +4153,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4352,9 +4208,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4413,9 +4267,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4473,9 +4325,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4526,9 +4376,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4579,9 +4427,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4627,9 +4473,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4670,9 +4514,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 309,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4937,9 +4779,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 42,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -4979,9 +4819,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5021,9 +4859,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5062,9 +4898,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5106,9 +4940,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5150,9 +4982,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5204,9 +5034,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 204,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5259,9 +5087,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 168,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5303,9 +5129,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5349,9 +5173,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5408,9 +5230,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5449,9 +5269,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5518,9 +5336,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 144,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5563,9 +5379,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5609,9 +5423,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5676,9 +5488,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5736,9 +5546,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 127,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5783,9 +5591,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5827,9 +5633,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5879,14 +5683,12 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 134,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
     "hash_kind": "CANONICAL_TEXT_SHA256",
-    "measured_sha256": "7da81a1adb7997541269990b837d4270bed9b1a42b427894277be423277ececc",
+    "measured_sha256": "6ad4adc90450b7abc0e221c043ac77f9bee3fb5d05cc2a53dafb5d16f1376d00",
     "source_path": "tests/test_receipt_envelope.py"
    },
    "fixture_parity": "not declared",
@@ -5926,9 +5728,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -5975,9 +5775,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 406,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6051,9 +5849,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6135,9 +5931,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 15,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6175,9 +5969,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6218,9 +6010,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6281,9 +6071,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6391,9 +6179,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6467,9 +6253,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
@@ -6507,9 +6291,7 @@
    "digest": {
     "canonicalization_notes": {
      "bom_stripped": false,
-     "crlf_count": 0,
-     "encoding": "utf-8",
-     "lone_cr_count": 0
+     "encoding": "utf-8"
     },
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",

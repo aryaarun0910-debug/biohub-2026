@@ -28,7 +28,10 @@ question.
 THE FOUR KINDS
 --------------
     RAW_ARTIFACT_SHA256        exact bytes - built notebooks as shipped, weights, fetched
-                               submissions, manifests, release artifacts
+                               submissions, release artifacts. NOT build manifests: those are
+                               tracked repository metadata and are CANONICAL (Phase 1.5
+                               correction); the artifact a manifest describes stays bound by the
+                               raw  recorded inside it
     CANONICAL_TEXT_SHA256      source identity, invariant to CRLF/LF checkout conversion
     STRUCTURED_CONTENT_SHA256  an EXISTING convention only. `kaggle_factory:575` and
                                `assemble_p3_d1_smoke_spec:130` already define it as
@@ -175,7 +178,13 @@ def hash_record(path: str | Path, kind: str, *, encoding: str = "utf-8",
         data = p.read_bytes()
         _, notes = canonicalize_text(data, encoding=encoding)
         rec["measured_sha256"] = canonical_text_sha256_bytes(data, encoding=encoding)
-        rec["canonicalization_notes"] = notes
+        # A STORED RECORD MUST NOT CARRY A CHECKOUT CENSUS. `crlf_count` and `lone_cr_count`
+        # describe the CHECKOUT the record was generated in, so including them made a
+        # canonical record checkout-dependent - the exact defect this module exists to remove,
+        # reproduced inside it. They stay available from `canonicalize_text` for diagnostics.
+        # `encoding` and `bom_stripped` are properties of the CONTENT and survive conversion.
+        rec["canonicalization_notes"] = {"encoding": notes["encoding"],
+                                         "bom_stripped": notes["bom_stripped"]}
     elif kind == STRUCTURED:
         rec["canonicalization_version"] = STRUCTURED_VERSION
         rec["measured_sha256"] = structured_sha256(json.loads(p.read_text(encoding=encoding)))

@@ -43,6 +43,18 @@ OUT = REPO / "research" / "00-system" / "registry" / "generated" / "digest_inven
 _HEX = re.compile(r"\b[0-9a-f]{64}\b")
 SCAN_SUFFIX = (".py", ".json", ".yaml", ".yml", ".md")
 
+#: The inventory must NOT scan its own output. The generated tree contains digests the inventory
+#: itself produced, so including it made every regeneration discover more digests than the last -
+#: the count grew 826 -> 966 in one cycle and the drift lock could never settle. An inventory of
+#: SOURCE digests is what has meaning; a generated file's digests are derived.
+SCAN_EXCLUDE = ("research/00-system/registry/generated/", "knowledge/")
+
+#: Artifacts legitimately NOT tracked - release receipts, fetched submissions, weights. Their
+#: digests must still be classifiable, so the resolver looks for them on disk too. Without this
+#: they fell through to LEGACY for the wrong reason and RAW_ARTIFACT_SHA256 counted ZERO, which
+#: is precisely the classification the raw kind exists to carry.
+UNTRACKED_PROBE_GLOBS = ("notebooks/*/_out/*.json", "weights/*", "artifacts/kaggle/**/*.pth")
+
 # ==============================================================================================
 # THE DECLARATION TABLE. This is the reviewable judgement; everything else is derived.
 # Order matters - the first matching rule wins.
@@ -54,9 +66,11 @@ DECLARATIONS: list[dict] = [
     {"match": r"\.(pth|pt|ckpt|safetensors|bin)$", "kind": H.RAW,
      "why": "downloaded weights, bound against a publisher's declared digest (FACT-0460, "
             "FACT-0461). Normalising here would make the binding uncheckable"},
-    {"match": r"^notebooks/[^/]+/build_manifest\.json$", "kind": H.RAW,
-     "why": "a build manifest records what the factory SHIPPED; drift is judged against the "
-            "artifact as built"},
+    {"match": r"^notebooks/[^/]+/build_manifest\.json$", "kind": H.CANONICAL,
+     "why": "CORRECTED in Phase 1.5. A build manifest is TRACKED REPOSITORY METADATA, not a "
+            "shipped artifact - the artifact it describes is bound separately by the "
+            "`built_sha256` value RECORDED inside it, which stays raw. Classifying the manifest "
+            "FILE as raw made every consumer of its digest checkout-dependent"},
     {"match": r"^notebooks/.*\.ipynb$", "kind": "DUAL",
      "why": "a built notebook needs BOTH: raw for what was pushed to Kaggle, canonical for source "
             "comparison across checkouts"},
@@ -121,10 +135,22 @@ def build() -> dict:
             except H.HashRefusal:
                 pass
 
+    # UNTRACKED BUT PRESENT artifacts, so a gitignored release receipt or checkpoint still gets a
+    # RAW classification instead of falling through to LEGACY for the wrong reason.
+    for pattern in UNTRACKED_PROBE_GLOBS:
+        for q in REPO.glob(pattern):
+            if q.is_file():
+                try:
+                    raw_map.setdefault(hashlib.sha256(q.read_bytes()).hexdigest(),
+                                       q.relative_to(REPO).as_posix())
+                except OSError:
+                    pass
+
     seen: dict[str, dict] = {}
     for rel in tracked:
         p = REPO / rel
-        if p.suffix.lower() not in SCAN_SUFFIX or "__pycache__" in rel or not p.is_file():
+        if (p.suffix.lower() not in SCAN_SUFFIX or "__pycache__" in rel or not p.is_file()
+                or any(rel.startswith(x) for x in SCAN_EXCLUDE)):
             continue
         text = p.read_text(encoding="utf-8", errors="replace")
         for i, line in enumerate(text.splitlines(), 1):
