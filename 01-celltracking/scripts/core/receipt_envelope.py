@@ -47,6 +47,7 @@ REPO = next(p for p in Path(__file__).resolve().parents if (p / "pyproject.toml"
 sys.path.insert(0, str(REPO / "scripts" / "core"))
 
 import yaml  # noqa: E402
+import hashing as H  # noqa: E402  the ONE hashing module
 
 SCHEMA_VERSION = "receipt_envelope_v1"
 HEARTBEAT_OK = "RECEIPT_ENVELOPE_OK"
@@ -110,7 +111,20 @@ def envelope_for(nb_dir: Path, by_kernel: dict) -> dict:
         "raw_receipt_tracked": False,      # notebooks/**/_out/ is gitignored (.gitignore:20)
         "schema_version": SCHEMA_VERSION,
         "redaction_status": "allow-listed: only the enumerated fields are copied",
+        # RAW artifact identity: the bytes that were built and pushed. This is what FACT-0446
+        # pins and what the Kaggle submission was made from - it must not be canonicalised.
         "notebook_sha256": _sha(nbs[0]) if nbs else None,
+        # CANONICAL source identity: equal across an LF and a CRLF checkout, so a clone can still
+        # tell whether it holds the SAME NOTEBOOK SOURCE even though its raw bytes differ.
+        "notebook_canonical_sha256": (
+            H.canonical_text_sha256(nbs[0]) if nbs else None),
+        "canonicalization_version": H.CANONICALIZATION_VERSION,
+        "hash_kinds": {"notebook_sha256": H.RAW,
+                       "notebook_canonical_sha256": H.CANONICAL,
+                       "artifact_sha256": H.RAW,
+                       "manifest_sha256": H.RAW,
+                       "spec_sha256": H.RAW,
+                       "audit_tool_sha256": H.RAW},
         "manifest_sha256": _sha(man),
         "artifact_sha256": None, "spec_sha256": None,
         "audit_tool_version": None, "audit_tool_sha256": None,
@@ -151,6 +165,10 @@ def envelope_for(nb_dir: Path, by_kernel: dict) -> dict:
         env["submission_reference"] = next(
             (e.get("submission") for e in matches if e.get("submission")), None)
 
+    # A CLONE MUST NOT BE TOLD THE RAW RECEIPT EXISTS. `raw_receipt_available_here` is a
+    # statement about THIS machine and is recomputed on read; `state` is derived from it, so an
+    # envelope generated here reports `bound_envelope_only` when read in a clone rather than
+    # claiming an audit bundle the clone does not have.
     if env["raw_receipt_available_here"] and env["experiments"]:
         env["state"] = "fully_bound_raw_available"
         env["binding_strength"] = "receipt + experiment"

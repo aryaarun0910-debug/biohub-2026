@@ -39,6 +39,8 @@ ALLOWED = {
     "manifest_sha256", "artifact_sha256", "spec_sha256", "audit_tool_version",
     "audit_tool_sha256", "kernel_slug", "kernel_version", "submission_reference",
     "experiments", "facts", "state", "binding_strength", "binding_basis", "verdict",
+    # Phase 1.5: the envelope now carries BOTH identities and says which is which.
+    "notebook_canonical_sha256", "canonicalization_version", "hash_kinds",
 }
 STATES = {"fully_bound_raw_available", "bound_envelope_only", "historical_unbound", "unknown"}
 
