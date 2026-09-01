@@ -1,0 +1,247 @@
+id: PKT-0049
+title: "BIOHUB-X: freeze the I/O contract, acquire the representation, and own the emitted graph"
+lever: LEVER-0046
+owner: coordinator-biohubx
+lock: claimed
+opened: '2026-08-31'
+
+the_winning_function: >-
+  Stated first, because it is why this packet exists and why it is a SYSTEM rather than a component.
+  RICH OBJECT REPRESENTATION -> DISCRIMINATIVE CANDIDATE SCORING WITH ABSTENTION -> A CONSUMER THAT
+  PRESERVES THE GAIN. Six moves have improved exactly one factor while freezing the others and every
+  one returned a zero or a bound: LEVER-0037 and LEVER-0045 (FACT-0442) moved the OFFER; LEVER-0039
+  (FACT-0386) and FACT-0428 moved the SCORER; Gate A (FACT-0437) moved the CONSUMER; FACT-0447 moved
+  the NODES and moved EXACTLY ZERO edges. The factors are not additive and not separately testable.
+  This packet holds none of them fixed.
+
+claim: >-
+  A standalone graph-owning tracker can be specified, contracted and integrated end to end - raw
+  frames to centers and instance representation to candidates with explicit abstention to
+  continuation/division/neither to a FINAL EMITTED GRAPH written without the incumbent relink - and
+  the contract can be shown to REFUSE every silent-failure mode this campaign has already paid for.
+
+falsifier: >-
+  Inherited from LEVER-0046 unchanged, and clause (a) is the one this packet can fire on its own.
+  If a Biohub-X artifact cannot satisfy `biohubx_io_v1` on ONE preregistered crop from EACH fold,
+  this route reports STILL INTEGRATING at the seven-day checkpoint, which the host has defined as
+  FAILURE.
+  INVERTED FALSIFIER FOR THE CONTRACT ITSELF, because an infrastructure deliverable must have one:
+  this packet FAILS if it ships a contract it has not SHOWN would refuse a wrong-scale input, a
+  constant head, an uncovered candidate pair, a float export or the incumbent consumer. Each refusal
+  is proved by mutation - a clean artifact that passes, one thing broken, the refusal demonstrated -
+  never asserted. A suite in which everything refuses is not evidence that the refusals are aimed.
+
+prediction: >-
+  Stated before any model exists. INTEGRATION: I expect the FOCUS mask smoke to pass the coordinate
+  and instance-label clauses and to be MARGINAL on duplicate nodes per instance, because FACT-0458
+  measured that 28.1% of fold-0 and 18.7% of fold-1 annotated cells already carry more than one
+  predicted node within 7 um - a richer detector arrives into a locally over-covered field, so
+  DEDUPLICATION rather than recall is the binding constraint at stage A. SCIENCE: genuinely
+  uncertain and that is why it is worth running; the honest prior is that the graph-owning consumer
+  is necessary and not sufficient, and the most likely outcome is a fold-1 positive with a fold-0
+  non-inferior - which under the revised gate licenses continuation without earning a submission.
+
+inputs:
+  facts: [FACT-0428, FACT-0447, FACT-0448, FACT-0449, FACT-0458, FACT-0442, FACT-0437, FACT-0422,
+          FACT-0412, FACT-0446, FACT-0423, FACT-0424, FACT-0425, FACT-0451, FACT-0454, FACT-0455,
+          FACT-0456, FACT-0457, FACT-0459, FACT-0040, FACT-0061, FACT-0344, FACT-0380, FACT-0440]
+  artifacts:
+    - C:/temp/focus3d/                       # publisher source, config, tree; weights under /weights
+    - C:/temp/revladder/slices/              # the P28 champion export the T=2 spec samples from
+    - _evidence/maskassoc/                   # PKT-0048's contracts, scale gate and node fixtures
+    - _evidence/assoc/revladder/             # FACT-0447/0448/0449 panels
+  code:
+    - scripts/win_bet/biohubx/contract.py    # THE FROZEN CONTRACT - written before any model
+    - scripts/win_bet/biohubx/synthetic_t2.py
+    - scripts/win_bet/biohubx/model.py
+    - scripts/win_bet/biohubx/training.py
+    - scripts/win_bet/spec_restriction.py    # FACT-0451 at the schema boundary
+    - scripts/win_bet/mask_node_adapter.py   # PKT-0048's mask -> centroid adapter
+    - scripts/win_bet/hoct_scale_gate.py     # the unit-convention calibration
+    - scripts/win_bet/focus3d_probe.py       # ckpt mode: the strict-match guard FACT-0425 needs
+    - scripts/win_bet/assoc_specs/t2_correspondence_v1.json
+
+method: >-
+  FOUR PHASES. Each ends in an artifact or a named refusal; none of them is allowed to end in a plan.
+  .
+  PHASE 1 - FREEZE THE CONTRACT (done in this packet, before anything else). `biohubx_io_v1` fixes:
+  physical coordinates on the full-res anisotropic convention (1.625, 0.40625, 0.40625) with a
+  round-trip assertion against the voxel columns; INTEGER instance labels unique within a frame;
+  exactly ONE explicit no-parent row per target so abstention is a CLASS and not a threshold; a
+  three-way continuation/division/neither that sums to one over the SAME pair; candidate coverage
+  that REFUSES rather than fills; and a final graph whose declared consumer chain must not contain
+  the incumbent relink. Frozen constants are asserted by a test so a later result cannot move them.
+  .
+  PHASE 2 - ACQUIRE THE REPRESENTATION. Bind the FOCUS-3D release by URL, pinned revision, declared
+  and MEASURED sha256, byte size, licence and exact model ROLE. Then run `focus3d_probe.py ckpt`,
+  which exists precisely because the publisher's loader is `strict=False` with its two reporting
+  prints COMMENTED OUT (FACT-0425): a key mismatch loads silently onto random weights, and on a
+  300-query segmenter that is indistinguishable from "the foreign model does not transfer". ASSERT
+  KEY COUNTS AND FAIL CLOSED.
+  .
+  PHASE 3 - THE PROTECTED SMOKE, on ONE preregistered crop from EACH fold, chosen and written down
+  BEFORE any output is read. Measure SEPARATELY, never pooled: matched-node recall and localisation;
+  duplicate nodes per instance; merge and split behaviour; division-tuple localisation (FACT-0380);
+  coverage of HOCT's mask-derived features; and the coordinate round-trip against FACT-0040's
+  anchor with the isotropic decoy shown to FAIL. A MASK SMOKE IS INTEGRATION EVIDENCE, NOT
+  SCIENTIFIC PROMOTION, and this packet may not report it as anything else.
+  .
+  PHASE 4 - ONE REUSABLE EXPORT, TWO INDEPENDENT CONSUMERS. Build the mask/center/embedding export
+  once; then (a) Trackastra owning the COMPLETE graph - which is LEVER-0005 and belongs to PKT-0050,
+  not to this packet - and (b) a minimal Biohub-X association head with explicit abstention and
+  division classes. Train (b) from `t2_correspondence_v1`: exact affine/elastic correspondences,
+  INDEPENDENT photometric corruption so interpolation artifacts cannot identify pairs, hard nearby
+  negatives, parent dropout to teach abstention, and ASCENT-style contrastive invariance. SPLIT BY
+  SOURCE MOVIE BEFORE GENERATION. DO NOT START AT TEMPORAL WINDOW 5 OR 8 - establish a valid T=2
+  system first; FACT-0442 already killed temporal extrapolation as a proposal mechanism on this data.
+
+gpu_policy: >-
+  UNDER the standing GPU rule and the four-section protection contract, both of which bind unchanged.
+  SLOT A is for FOCUS/CELLECT inference and reusable representation acquisition, and it does not
+  launch until the CPU preflight has run against the exact artifact through the real subprocess
+  boundary. SLOT B is HELD until slot A passes its structural smoke. GPU is NEVER used to discover
+  mounts, imports, filenames or subprocess boundaries (FACT-0387, FACT-0397). Gate B (PKT-0042) is
+  CPU and continues unaffected; FACT-0061 caps concurrent batch sessions at 2 and this packet may use
+  at most one at a time.
+
+budget:
+  gpu_sessions: 1          # slot A only; slot B is held pending the structural smoke
+  submissions: 0           # this packet earns none; a calibration submission is a separate decision
+  wall_clock: 7 days to the checkpoint
+
+forbidden:
+  - feeding any Biohub-X score into the incumbent motion relink - the contract refuses it, and
+    doing it in a fork would re-run the experiment FACT-0428 already lost
+  - any node-only detector work; that thesis is dead permanently (FACT-0447)
+  - producing any offline number from general_v1 without the FACT-0451 restriction attached
+    MECHANICALLY, and using any such number to select anything (FACT-0451, FACT-0456)
+  - zero-filling an absent feature anywhere in the chain - refuse instead (FACT-0459)
+  - pooling the two embryo directions into a single reported result (AGENTS.md section 4)
+  - reading a contract pass or a mask smoke as scientific promotion
+  - starting at temporal window 5 or 8 before a valid T=2 system exists
+  - claiming LEVER-0005 - that is PKT-0050's, and one lever has one owner
+  - editing PKT-0042 while Gate B is running, or any file Gate B imports at worker start
+  - launching a GPU job, pushing a kernel, or making a submission without an explicit host decision
+  - .claude/settings.json or .gitignore
+
+outputs:
+  evidence: _evidence/biohubx/ and C:/temp/biohubx/
+  facts_added: []          # routed through the coordinator under CANDIDATE FACTS in `result`
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result:
+  status: >-
+    PHASE 1 COMPLETE and hardened across stages A/B/CD/E/P/X. The point-native T=2 software path
+    is connected end to end and the transformer DEPTH ladder D=4/6/8/10 forwards and backpropagates
+    on one sparse offered surface. PHASE 2 checkpoint/runtime identity PASSES (FACT-0460). PHASE 3
+    remains BLOCKED before GPU on the production raw-volume -> FOCUS mask/embedding -> node adapter
+    and exact preregistered real crop IDs. This is integration progress, not scientific promotion.
+  lock_note: >-
+    Leave `lock: claimed`. The lever is not decided; only the contract is frozen.
+  gpu_sessions_spent: 0
+  submissions_spent: 0
+
+  cpu_t2_foundation:
+    commit: 6d7ae4d
+    generator: scripts/win_bet/biohubx/synthetic_t2.py
+    matcher: scripts/win_bet/biohubx/model.py
+    training_adapter: scripts/win_bet/biohubx/training.py
+    temporal_window: 2
+    transformer_depth_arms: [4, 6, 8, 10]
+    sparse_candidate_surface: true
+    graph_owner: scripts.win_bet.biohubx.model.BiohubXMatcher.emit_graph
+    incumbent_consumer_called: false
+    scope: >-
+      Software integration only. The synthetic representation is identity-free point geometry and
+      is explicitly not a replacement for FOCUS masks or a real-video scientific result. The T=2
+      generator fabricates no division positives, so it cannot support a division-capability claim.
+
+  phase_2_checkpoint_gate:
+    fact: FACT-0460
+    evidence: _evidence/biohubx/focus3d_nuclei_ckpt_contract.json
+    verdict: PASS
+    raw_strict_load: >-
+      False only because the inference runtime intentionally omits the training criterion buffer;
+      the exception is source/config/value-bound and every inference key, shape and dtype matches.
+
+  phase_3_gpu_readiness:
+    verdict: NOT_YET_LICENSED
+    blockers:
+      - production raw-volume -> FOCUS masks/embeddings -> biohubx_io_v1 node adapter absent
+      - one exact crop ID from each fold not yet preregistered
+      - no built Kaggle spec or protection receipt for the production path
+    decision: >-
+      Spend no GPU until all three blockers are cleared on CPU. The packet budget remains one
+      protected smoke session and zero submissions.
+
+  phase_1_contract_frozen:
+    artifact: scripts/win_bet/biohubx/contract.py (biohubx_io_v1)
+    tests: tests/test_biohubx_contract.py
+    written_before_any_model: true
+    clauses_and_the_defect_each_refuses:
+      coordinate_round_trip: >-
+        Physical (z, y, x) must round-trip from the voxel columns at (1.625, 0.40625, 0.40625).
+        Refuses an isotropic convention and a transposed axis order, neither of which changes a
+        shape. AGENTS.md section 4 records two of three distance analyses in one day starting wrong.
+      calibration_gate_must_discriminate: >-
+        Reproduces FACT-0040's 1.81681 um anchor AND requires the isotropic decoy at 5.13870 um to
+        FAIL. A gate that cannot fail is not a gate; FACT-0447 ran exactly this pair.
+      integer_instance_labels: >-
+        Refuses a float label and a zero label. A float instance id is an interpolated average of
+        two instances; 0 is background.
+      non_constant_heads: >-
+        Refuses a constant center confidence, division probability or abstain mass. FACT-0457 is an
+        output slot that is `torch.new_zeros` read as a learned score; FACT-0459 is a fill that
+        arrives as the finite constant -mean/std and passes shape, NaN and no-zeros checks together.
+      per_dimension_embedding_check: >-
+        Refuses individual dead embedding dimensions rather than a whole-array statistic, because a
+        14-of-19 fill (FACT-0454) passes a whole-array check comfortably.
+      explicit_no_parent_row: >-
+        Exactly one per target. Abstention is a CLASS the model emits, not a threshold a caller
+        applies afterwards - which is what FACT-0457 found HOCT's to be.
+      three_way_sums_to_one: >-
+        Refuses three independent sigmoids, which cannot express "this pair, but as a division".
+      coverage_refuses_never_fills: >-
+        FACT-0432: an uncovered pair inherited 0.0 - the WORST score, not a neutral one.
+      pair_uniqueness: >-
+        A pair scored twice means the consumer's choice is an accident of row order.
+      integer_export: >-
+        FACT-0344: the float export scored 0.914 against 0.928, a -0.014 leaderboard reversal.
+      lineage_invariants: >-
+        In-degree 1 by construction, out-degree at most 2, no dangling parent, every edge spanning
+        exactly one frame.
+      forbidden_consumer_chain: >-
+        THE CLAUSE THE LEVER TURNS ON. A graph declaring the incumbent relink in its consumer chain
+        is REFUSED, case-insensitively. FACT-0428 measured that a score handed to that consumer
+        survives only 15.42% (fold 0) and 30.30% (fold 1) of forced changes.
+    mutation_coverage: >-
+      32 tests. Clean artifacts pass first, then one defect at a time is proved to refuse: isotropic
+      coordinates, transposed axes, float labels, zero volume, a constant division head, a
+      post-standardisation constant that is NOT zero, duplicate labels, a partially dead embedding
+      behind a varying array, an all-zero embedding row, a missing no-parent row, a duplicated
+      abstain row, a pair scored twice, three independent sigmoids, an uncovered offered pair, a
+      coverage check run on the wrong key shape, the incumbent relink named plainly and named behind
+      a case change, an empty consumer chain, a float export, out-degree 3, a frame-skipping edge and
+      a dangling parent. A legal division at out-degree 2 is proved to PASS, so the invariant is not
+      merely restrictive.
+
+  phase_2_representation_acquisition:
+    status: IN PROGRESS
+    focus3d_binding: >-
+      Repository Qinghua-thu/FOCUS-3D, revision pinned to 528455a03493d12f170c03384974318248b1774c
+      rather than `main` - PKT-0047 recorded a release tag ten weeks older than the file it shipped,
+      so a moving reference is not an identity. The HuggingFace gate is `auto` and clears with the
+      account token. Three assets, each 4.4-4.5 GB, and the two 4,468,804,784-byte files differ by
+      hash, so SIZE IS NOT IDENTITY here either. Fetch is resumable and hash-verifying and writes no
+      receipt on a mismatch.
+    role_caution: >-
+      `model_final_nuclei.pth` is the role LEVER-0046 needs. `model_final.pth` carries NO published
+      role statement and must not be assumed to be a nuclei model because it is the same size.
+    the_loader_trap_that_must_be_checked_before_any_number: >-
+      FACT-0425: `inference_win.build_predictor` calls `load_state_dict(..., strict=False)` and the
+      two prints that would report missing and unexpected key counts are COMMENTED OUT in the
+      released source. A key mismatch therefore loads SILENTLY onto random weights on a 411.6M
+      parameter, 300-query segmenter, which is indistinguishable from a foreign model that does not
+      transfer. `focus3d_probe.py ckpt` reports both counts and fails closed; it must run before any
+      mask is looked at.

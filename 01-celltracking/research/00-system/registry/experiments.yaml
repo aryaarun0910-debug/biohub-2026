@@ -922,8 +922,8 @@ experiments:
     kernel: aryaarun07/biohub-p38-relink-bonus-b2
     kernel_version: 1
     submission: '55915569'
-    lb: null
-    status: submitted
+    lb: 0.932
+    status: scored
     date: '2026-08-31'
     facts: [FACT-0446]
     note: >-

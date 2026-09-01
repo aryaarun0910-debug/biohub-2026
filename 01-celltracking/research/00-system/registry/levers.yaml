@@ -1936,3 +1936,84 @@ levers:
       THIS IS THE 0.970-SCALE PROGRAM. Attack the never-offered mass, manufacture the supervision needed to
       learn it, and ensure the learned evidence controls the final graph.
     priority: 1
+
+  - id: LEVER-0046
+    claim: >-
+      A STANDALONE GRAPH-OWNING TRACKER - one system that produces the instance representation, the
+      candidate parents WITH an explicit no-parent class, the continuation / division / neither
+      decision AND the FINAL EMITTED LINEAGE GRAPH - improves complete-chain RAW association on both
+      folds, where every move that improved ONE of those factors against a frozen consumer has
+      returned a zero or a bound.
+    status: open
+    opened: '2026-08-31'
+    falsifier: >-
+      PREREGISTERED BEFORE ANY MODEL EXISTS, five clauses, and (a) is deliberately the cheapest.
+      (a) INTEGRATION. If a Biohub-X artifact cannot satisfy the frozen `biohubx_io_v1` contract on
+      ONE preregistered crop from EACH fold - coordinate round-trip against FACT-0040, no constant
+      head, exactly one explicit no-parent row per target, complete candidate coverage with no fill,
+      and a graph passing the lineage invariants whose declared consumer chain contains no incumbent
+      relink - then at the seven-day checkpoint this route reports STILL INTEGRATING, which the host
+      has defined as FAILURE. A contract pass is INTEGRATION evidence and is explicitly NOT
+      scientific promotion.
+      (b) CONSUMPTION AND STATISTICS. With the complete chain owned end to end, on ALL 71 fold-0 and
+      ALL 128 fold-1 crops through the OFFICIAL patched scorer: fold 1 must show a favourable
+      crop-paired interval on RAW edge Jaccard and fold 0 must be NON-INFERIOR with a POSITIVE POINT
+      ESTIMATE. Failing that kills the graph-owning thesis AS BUILT, and the kill is strong precisely
+      because this system removes the one excuse the previous six failures could offer - a consumer
+      that discards the score (FACT-0428).
+      (c) SAFETY. Node recall or division true positives declining on either fold (FACT-0371).
+      (d) METRIC SHAPE. An ADJUSTED improvement with flat or negative RAW association is REJECTED,
+      not reported as a win. That shape killed LEVER-0036 (FACT-0375) and, mirrored, LEVER-0037
+      (FACT-0376).
+      (e) SCOPE LIMIT THAT MUST TRAVEL WITH THE KILL. A kill under (b) kills THE SYSTEM AS BUILT. It
+      does not separately kill mask-derived representation, learned abstention, or graph ownership,
+      and the closing packet MUST name which factor failed - mask quality, training parity, graph
+      consumption, or transfer - or the closure is inadmissible. Closing this by association is the
+      error AGENTS.md section 2 records costing weeks on the Trackastra lane.
+    supporting: [FACT-0428, FACT-0447, FACT-0442, FACT-0437, FACT-0448, FACT-0449, FACT-0422,
+                 FACT-0412, FACT-0446, FACT-0423, FACT-0424, FACT-0425, FACT-0457, FACT-0459,
+                 FACT-0040, FACT-0380]
+    note: >-
+      OPENED 2026-08-31 (host) AS A RADICAL PIVOT. THE INHERITED NOTEBOOK IS FROZEN AS THE CONTROL.
+      .
+      WHY THIS IS NOT A REOPENED LEVER. Six single-factor moves returned a zero or a bound and they
+      cover all three factors from both sides: LEVER-0037 and LEVER-0045 (FACT-0442) moved the OFFER
+      with the scorer frozen; LEVER-0039 (FACT-0386) and FACT-0428 moved the SCORER with the offer
+      and consumer frozen; Gate A (FACT-0437) moved the CONSUMER with the score frozen; and the
+      reversed ladder (FACT-0447) moved the NODES with the consumer frozen, moving EXACTLY ZERO
+      edges. Every one of those held at least one factor of the product fixed. This lever is the
+      first that holds NONE of them fixed, so it is a new mechanism rather than a retry, and the
+      three standing scope limits explicitly leave it open: FACT-0448 caps only wrong links between
+      two ANNOTATED cells; FACT-0449 makes BROAD node deletion expensive and leaves SELECTIVE
+      deletion admissible; FACT-0447 holds TOPOLOGY FIXED BY DESIGN and cannot bound a detector
+      producing new features, masks, candidates and associations JOINTLY - what is dead is the
+      NODE-ONLY thesis.
+      .
+      THE FOURTH ARROW IS THE POINT AND IT IS THE ONE PREVIOUS ATTEMPTS DID NOT CROSS. FACT-0428
+      measured that a change made only at pre-ILP ranking is overwritten on most forced changes,
+      while the unperturbed pre-ILP parent IS the emitted parent almost always - the pipeline AGREES
+      WITH its ranking and does not FOLLOW it, because the relink re-derives the same answer from
+      geometry and overrules the score exactly where the score disagrees. A scorer's gains live in
+      the disagreements. So a better scorer fed to that consumer is not a partially-realised win, it
+      is a structurally suppressed one, and the only way to test the scorer is to give it the graph.
+      .
+      THE CONTRACT IS FROZEN FIRST, ON PURPOSE. `scripts/win_bet/biohubx/contract.py`
+      (`biohubx_io_v1`) and `tests/test_biohubx_contract.py` were written and committed BEFORE any
+      model, so no result can be obtained and then have the interface adjusted to fit it. Every
+      clause is tied to a measured silent failure rather than to taste - the coordinate round-trip to
+      FACT-0040, the non-constant head checks to FACT-0457 and FACT-0459, the coverage refusal to
+      FACT-0432, the integer export to FACT-0344, and the forbidden consumer list to FACT-0428.
+      .
+      WHAT IS KEPT AND WHAT IS REPLACED. KEEP: the champion (FACT-0412) as the control; official
+      scoring; graph and integer-export audits; release receipts; registry and experiment discipline.
+      REPLACE: detector representation, candidate semantics, association objective, division
+      handling, and the final graph consumer.
+      .
+      THE HONEST FRAME, RECORDED SO A LATER READER IS NOT MISLED BY THE AMBITION. Nothing on the
+      board has measured full-chain headroom of at least +0.02 that survives its own gates, and this
+      lever does not have one either. What it has is the only proposed system that attacks EVERY
+      factor the campaign has independently found to be binding. FOCUS-3D into official HOCT depends
+      too heavily on an unvalidated external checkpoint, and the HOCT half of it is blocked
+      independently by FACT-0456 (no admissible unit convention for our 4:1:1 geometry) and
+      FACT-0451 (submission-only judgement).
+    priority: 1

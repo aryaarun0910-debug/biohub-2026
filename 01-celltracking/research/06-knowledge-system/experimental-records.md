@@ -6483,3 +6483,12 @@ features. **What is explicitly NOT killed is masks as a representation**; the co
 contract and head with masks as features, which needs neither `general_v1`'s coordinate unit nor its
 provenance (`FACT-0451`). Eight candidate facts routed to the coordinator in `PKT-0048.yaml`; no fact,
 lever or experiment written.
+
+### 2026-09-01 — Biohub-X T=2 foundation and FOCUS checkpoint gate (PKT-0049)
+
+Committed the standalone sparse T=2 generator/matcher/training/graph-owner path at `6d7ae4d` and
+proved its complete A/B/CD/E/P/X software contract across transformer depths D=4/6/8/10. The
+released nuclei checkpoint clears the source-bound inference-state gate (`FACT-0460`). No GPU or
+submission was spent: the real two-crop smoke remains blocked on the production volume-to-mask
+adapter, exact crop preregistration and a signed Kaggle artifact. The repository-wide suite has 16
+failures confined to concurrent association/provenance work; the Biohub-X focused suite is clean.

@@ -8851,7 +8851,21 @@ facts:
       protection_contract: {profile: submission_run_v1, verdict: SIGNED, failed: [], out_of_scope: 12}
       preregistration: {packet: PKT-0045, committed: 77e41ca, before_artifact_existed: true,
                         description_committed: e9d77db}
-      score: PENDING
+      score: 0.932
+      outcome: UNINFORMATIVE_BAND
+      outcome_detail: >-
+        0.932 against a champion of 0.932 - a delta of ZERO at the leaderboard's three-decimal
+        resolution. The preregistered three-way falsifier put 0.931 to 0.934 in the UNINFORMATIVE band,
+        declared in advance as licensing no follow-up and closing nothing. It is therefore neither a
+        win nor a kill, and THE SECOND LOOK OF THE FAMILY CAP IS NOT AVAILABLE - only a result at or
+        above 0.935 unlocked it. LEVER-0044's consumption question is NOT answered by the leaderboard
+        and Gate B remains the only route to answering it.
+      what_it_does_bound: >-
+        A display of 0.932 means the true delta lies within roughly plus or minus 0.0005, against an
+        offline fold-0 measurement of +0.0026589. So the fold-0 gain did NOT transfer at magnitude.
+        That bound is real, but it is NOT a licence to reinterpret the band as a kill - the
+        preregistration named this outcome before the score existed precisely so it could not be
+        rationalised afterwards in either direction.
       submission_path_correction: >-
         Two attempts to upload the CSV as a LOCAL FILE returned HTTP 400. This is a NOTEBOOK-ONLY
         competition: a submission must bind the kernel and version (-k slug -v version). The factory's own
@@ -9544,3 +9558,42 @@ facts:
       supplied is not evidence that features were computed.
     date: '2026-08-31'
     tags: [silent-fill, standardisation, mutation-tested, coverage-guard, defect-class, verified, headline]
+
+  - id: FACT-0460
+    statement: >-
+      THE RELEASED FOCUS-3D NUCLEI CHECKPOINT MATCHES EVERY INFERENCE-RUNTIME STATE KEY, SHAPE AND
+      DTYPE. The raw strict comparison has exactly one checkpoint-only tensor,
+      `criterion.empty_weight`; the publisher source registers that exact training-only buffer,
+      the inference builder explicitly omits the criterion, and the tensor values exactly match
+      `NUM_CLASSES` and `NO_OBJECT_WEIGHT` from the pinned config. The checkpoint/runtime contract
+      therefore passes without accepting a wildcard or hiding a missing inference parameter.
+    value: true
+    unit: checkpoint_runtime_contract_clean
+    scope:
+      checkpoint_role: FOCUS-3D model_final_nuclei.pth
+      checkpoint_sha256: b14a7bd272f824adb1a1073bc3f2af17a95919d5a0c3f1d9011a8d82378d8f3a
+      inference_missing_keys: 0
+      inference_shape_mismatches: 0
+      inference_dtype_mismatches: 0
+      raw_unexpected_keys: [criterion.empty_weight]
+      training_only_buffer_source_attested: true
+      training_only_buffer_value_matches_config: true
+      raw_strict_load_clean: false
+      evidence_sha256: 7d6d7b845aeb7769336598720694bfbb15fb5449fd31ae48ae3eba02858d36b1
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Re-derived after commit 6d7ae4d from the released tensor file and the pinned publisher
+      runtime. The instrument separately checks key presence, tensor shapes and dtypes, then binds
+      the sole allowlisted extra to source bytes and config-derived values. Mutation tests reject
+      missing, arbitrary-extra, shape, dtype, source and value drift independently.
+    instrument: >-
+      scripts/win_bet/focus3d_probe.py; evidence
+      _evidence/biohubx/focus3d_nuclei_ckpt_contract.json; tests/test_focus3d_probe_state_contract.py
+    note: >-
+      This clears FACT-0425's random-weight risk for the nuclei checkpoint. It does not establish
+      mask quality, node quality, transfer, or leaderboard value. The downloaded Windows runtime
+      cannot instantiate its training criterion because it omits `utils.misc_win`; the instrument
+      does not patch that package or pretend a full training-model strict load occurred.
+    date: '2026-09-01'
+    tags: [focus3d, checkpoint, inference-contract, source-bound, verified]
