@@ -1031,6 +1031,12 @@ def test_cli_schema_then_gate_then_train_runs_the_whole_path(tmp_path, world, su
                     "contract": {"name": "declared_v1", "dim": DIM,
                                  "extra_features": ["prob", "dist_um"]}}],
         "out_dir": str(tmp_path / "out"),
+        # FACT-0451 rule 2: omission is a REFUSAL at the schema boundary, so a fixture without
+        # this block no longer reaches the harness at all. Declared true and re-derived at load
+        # from the sha256 of every checkpoint the spec names - this synthetic trunk is not a
+        # restricted artifact, and if it ever became one the derivation would override the
+        # declaration rather than trusting it.
+        "binding_restriction": {"fact": "FACT-0451", "offline_scoreable": True},
     }), encoding="utf-8")
     assert H.main(["train", "--spec", str(spec)]) == 0
     payload = json.loads((tmp_path / "out" / "harness_f0.json").read_text(encoding="utf-8"))
@@ -1052,6 +1058,10 @@ def test_cli_train_refuses_without_a_licence_and_without_a_manifest(tmp_path, wo
             "models": [{"tag": "ctx", "class": "contextual",
                         "contract": {"name": "d", "dim": DIM}}],
             "out_dir": str(tmp_path / "out"),
+            # FACT-0451 rule 2 - see the note on the fixture above. These specs are expected to
+            # be refused for CACHE reasons, so the restriction block has to be present or they
+            # would be refused for the wrong reason and the test would prove nothing.
+            "binding_restriction": {"fact": "FACT-0451", "offline_scoreable": True},
         }), encoding="utf-8")
         return p
 

@@ -17,22 +17,49 @@
     "reproducer": "receipt",
     "crops": null
   },
-  "cv": {"kind": "GroupKFold", "n_splits": 5},
+  "cv": {
+    "kind": "GroupKFold",
+    "n_splits": 5
+  },
   "preserve_single_candidate": true,
   "allow_degenerate": false,
   "models": [
     {
       "tag": "alldec.all_nine.linear",
       "class": "linear",
-      "features": ["prob", "rank", "margin_to_best", "n_candidates", "dist_um", "dz_um", "dy_um", "dx_um", "src_out_degree"],
-      "abstain": {"kind": "none"},
+      "features": [
+        "prob",
+        "rank",
+        "margin_to_best",
+        "n_candidates",
+        "dist_um",
+        "dz_um",
+        "dy_um",
+        "dx_um",
+        "src_out_degree"
+      ],
+      "abstain": {
+        "kind": "none"
+      },
       "population": "alldec"
     },
     {
       "tag": "alldec.all_nine.tree",
       "class": "tree",
-      "features": ["prob", "rank", "margin_to_best", "n_candidates", "dist_um", "dz_um", "dy_um", "dx_um", "src_out_degree"],
-      "abstain": {"kind": "none"},
+      "features": [
+        "prob",
+        "rank",
+        "margin_to_best",
+        "n_candidates",
+        "dist_um",
+        "dz_um",
+        "dy_um",
+        "dx_um",
+        "src_out_degree"
+      ],
+      "abstain": {
+        "kind": "none"
+      },
       "population": "alldec"
     },
     {
@@ -42,10 +69,15 @@
         "name": "frozen_trunk_node_features",
         "dim": "from_cache",
         "pair_builder": "concat_diff",
-        "extra_features": ["prob", "dist_um"],
+        "extra_features": [
+          "prob",
+          "dist_um"
+        ],
         "has_null_head": false
       },
-      "abstain": {"kind": "none"},
+      "abstain": {
+        "kind": "none"
+      },
       "population": "alldec"
     },
     {
@@ -55,12 +87,23 @@
         "name": "frozen_trunk_node_features",
         "dim": "from_cache",
         "pair_builder": "concat_diff",
-        "extra_features": ["prob", "dist_um"],
+        "extra_features": [
+          "prob",
+          "dist_um"
+        ],
         "has_null_head": false
       },
-      "abstain": {"kind": "train_quantile", "q": 0.05},
+      "abstain": {
+        "kind": "train_quantile",
+        "q": 0.05
+      },
       "population": "alldec"
     }
   ],
-  "out_dir": "C:/temp/assoc_harness/f0"
+  "out_dir": "C:/temp/assoc_harness/f0",
+  "binding_restriction": {
+    "fact": "FACT-0451",
+    "offline_scoreable": true,
+    "why": "Declared true: no artifact restricted by FACT-0451 reaches this spec. The claim is CHECKED at load, not trusted - spec_restriction.enforce_spec re-derives it from the sha256 of every checkpoint this spec names, and a restricted hash overrides a true declaration however the file is named (rule 3). Omission would be a refusal (rule 2)."
+  }
 }

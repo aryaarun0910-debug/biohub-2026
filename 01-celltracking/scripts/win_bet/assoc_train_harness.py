@@ -198,6 +198,9 @@ from assoc_baseline_rankers import (  # noqa: E402  protocol continuity with the
 )
 from assoc_parent_dataset import FEATURES, evaluate  # noqa: E402  the FROZEN surface
 from assoc_report import parent_conversions  # noqa: E402
+import spec_restriction  # noqa: E402  FACT-0451 at the schema boundary; rules 1-3 at load, 4 at
+#                                      the verdict. Imported at module scope so a missing module
+#                                      is a startup error, never a silently skipped guard.
 
 PROB_TOL = 1e-4
 
@@ -1527,8 +1530,47 @@ def run_harness(*, table: pl.DataFrame, models: list[ModelSpec], fold: int,
 # 6. CLI
 # ======================================================================================
 
+def apply_restriction_to_payload(payload: dict, resolution: dict | None) -> dict:
+    """FACT-0451 rule 4 - the VERDICT LAYER refuses promotion; it does not merely label a report.
+
+    A label on a payload nobody blocks on is prose again, which is the state FACT-0451 found on
+    this exact surface. So the resolution travels INTO the payload - a downstream reader cannot
+    receive the number without the mark - and every model verdict is forced non-promotable when
+    the arm is restricted.
+
+    It is a named function rather than eight lines inside ``cmd_train`` so the rule can be proved
+    by a test without building a whole harness run. An unproved gate is the thing being repaired.
+    """
+    payload["binding_restriction"] = resolution
+    if resolution is None or resolution.get(spec_restriction.FIELD, False):
+        return payload
+    names = ", ".join(sorted({str(h.get("name_at_registration", "?"))
+                              for h in resolution.get("restricted_hits", [])})) or "unknown"
+    blocker = (
+        f"offline_scoreable is FALSE ({names}, FACT-0451): no LOEO control we can build can show "
+        f"the held-out fold was held out of THEIR training, so this number is interpretable as "
+        f"neither a pass nor a fail. SUBMISSION-ONLY JUDGEMENT."
+    )
+    for m in payload.get("models", []):
+        verdict = m.setdefault("verdict", {})
+        verdict["promotable"] = False
+        verdict["blockers"] = [blocker] + list(verdict.get("blockers", []))
+    return payload
+
+
 def _load_spec(path: Path) -> dict:
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+    """Read a spec AND enforce the FACT-0451 restriction at the schema boundary.
+
+    This is the surface FACT-0451 named as still-absent: without it, an arm using a checkpoint
+    whose training data cannot be established emits an offline number carrying no mark, which is
+    indistinguishable in form from a valid one. Rules 1-3 fire here (identity by hash, mandatory
+    declaration, non-overridable derivation); rule 4 - refusing PROMOTION - fires wherever the
+    resolution is consumed, which is why the resolution is stashed on the returned dict rather
+    than discarded.
+    """
+    spec = json.loads(Path(path).read_text(encoding="utf-8"))
+    spec["_fact_0451_resolution"] = spec_restriction.enforce_spec(spec, path=path)
+    return spec
 
 
 def cmd_schema(args) -> int:
@@ -1661,6 +1703,8 @@ def cmd_train(args) -> int:
         chain_arms=chain_arms, summarise=summarise,
         allow_degenerate=bool(spec.get("allow_degenerate", False)),
     )
+    apply_restriction_to_payload(payload, spec.get("_fact_0451_resolution"))
+
     out_dir = Path(spec.get("out_dir", "C:/temp/assoc_harness"))
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / f"harness_f{spec['fold']}.json"

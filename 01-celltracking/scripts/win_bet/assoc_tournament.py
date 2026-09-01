@@ -1155,6 +1155,16 @@ def context_spec(fold: int, role: str, table: str, preilp: str, ecb: str) -> dic
              "abstain": {"kind": "train_quantile", "q": ABSTAIN_Q}},
         ],
         "out_dir": f"C:/temp/assoc_tournament/context_{stem}",
+        # FACT-0451 rule 2: omission is a REFUSAL at load, so the generator must emit the field or
+        # every spec it writes is dead on arrival. Declared true and CHECKED - spec_restriction
+        # re-derives it from the sha256 of every checkpoint the spec names, and a restricted hash
+        # overrides a true declaration however the file has been renamed (rule 3).
+        "binding_restriction": {
+            "fact": "FACT-0451",
+            "offline_scoreable": True,
+            "why": "no artifact restricted by FACT-0451 reaches this spec; re-derived at load by "
+                   "spec_restriction.enforce_spec rather than trusted",
+        },
     }
 
 

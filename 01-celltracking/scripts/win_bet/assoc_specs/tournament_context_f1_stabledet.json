@@ -70,5 +70,10 @@
       }
     }
   ],
-  "out_dir": "C:/temp/assoc_tournament/context_f1_stabledet"
+  "out_dir": "C:/temp/assoc_tournament/context_f1_stabledet",
+  "binding_restriction": {
+    "fact": "FACT-0451",
+    "offline_scoreable": true,
+    "why": "Declared true: no artifact restricted by FACT-0451 reaches this spec. The claim is CHECKED at load, not trusted - spec_restriction.enforce_spec re-derives it from the sha256 of every checkpoint this spec names, and a restricted hash overrides a true declaration however the file is named (rule 3). Omission would be a refusal (rule 2)."
+  }
 }
