@@ -45,6 +45,49 @@ HEARTBEAT_MISSING = "BOOTSTRAP_VENDOR_MISSING"
 #: chance to go stale, which is the whole reason this repository cites ids instead of values.
 PIN_SOURCES = ("config/requirements.txt", "config/requirements.lock.txt")
 
+#: External assets that are NOT reproducible by this tool. `vendor/` has a pin and a clone URL;
+#: the competition dataset does not - it is obtained from Kaggle by the operator, is not
+#: redistributable, and an agent is explicitly forbidden from fetching it. Declared anyway so a
+#: test that needs it can REFUSE WITH A NAMED REASON rather than raising FileNotFoundError, and so
+#: "why does a clean clone fail here" has a written answer.
+OPERATOR_ASSETS = {
+    "data/train": {
+        "what": "the competition training movies (*.geff), gitignored at .gitignore:2",
+        "obtained_by": "the operator, from the Kaggle competition page",
+        "not_bootstrappable_because": "the data is not redistributable and no agent may call "
+                                      "Kaggle; there is no pin that could reproduce it",
+        "sentinel_glob": "*.geff",
+    },
+    "data/test": {
+        "what": "the competition test volumes",
+        "obtained_by": "the operator, from the Kaggle competition page",
+        "not_bootstrappable_because": "as above",
+        "sentinel_glob": "*",
+    },
+    "notebooks/**/_out": {
+        "what": "release receipts and fetched submissions, gitignored at .gitignore:20",
+        "obtained_by": "produced locally by kaggle_factory fetch/audit",
+        "not_bootstrappable_because": "a machine-local audit product; its BINDING is tracked "
+                                      "instead, in generated/receipts.json",
+        "sentinel_glob": "audit_receipt.json",
+    },
+}
+
+
+def operator_asset_present(name: str) -> bool:
+    spec = OPERATOR_ASSETS[name]
+    root = REPO / name.replace("/**", "")
+    if not root.is_dir():
+        return False
+    return any(root.rglob(spec["sentinel_glob"]))
+
+
+def operator_asset_diagnostic(name: str) -> str:
+    spec = OPERATOR_ASSETS[name]
+    return (f"{name} is absent. {spec['what']}. It is obtained by {spec['obtained_by']} and is "
+            f"NOT bootstrappable here: {spec['not_bootstrappable_because']}.")
+
+
 CHECKOUTS = {
     "vendor/kaggle-cell-tracking": {
         "url": "https://github.com/royerlab/kaggle-cell-tracking-competition.git",

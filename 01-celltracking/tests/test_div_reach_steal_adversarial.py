@@ -15,6 +15,7 @@ from __future__ import annotations
 import functools
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -24,6 +25,16 @@ SPEC = importlib.util.spec_from_file_location(
     "div_reach_steal", ROOT / "scripts" / "win_bet" / "div_reach_steal.py")
 drs = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(drs)
+
+sys.path.insert(0, str(ROOT / "scripts" / "core"))
+import bootstrap_vendor as _BV  # noqa: E402
+
+# The scoring tests read the competition GT movies from data/train, which is gitignored and is not
+# obtainable by an agent. Unguarded they raised FileNotFoundError in every clean clone - four of
+# the ten clean-clone failures measured on 2026-09-01. A refusal that names the asset and says why
+# it cannot be fetched is a diagnostic; a bare FileNotFoundError is not.
+if not _BV.operator_asset_present("data/train"):
+    pytest.skip(_BV.operator_asset_diagnostic("data/train"), allow_module_level=True)
 
 td = pytest.importorskip("tracksdata")
 pl = pytest.importorskip("polars")
