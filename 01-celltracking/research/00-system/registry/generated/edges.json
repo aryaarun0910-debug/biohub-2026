@@ -6638,9 +6638,21 @@
   },
   {
    "basis": "test imports source",
+   "dst": "SCRIPT-scripts__core__rag_index.py",
+   "rel": "protects",
+   "src": "TEST-tests__test_rag_index.py"
+  },
+  {
+   "basis": "test imports source",
    "dst": "SCRIPT-scripts__win_bet__reach_oracle.py",
    "rel": "protects",
    "src": "TEST-tests__test_reach_oracle_partition.py"
+  },
+  {
+   "basis": "test imports source",
+   "dst": "SCRIPT-scripts__core__receipt_envelope.py",
+   "rel": "protects",
+   "src": "TEST-tests__test_receipt_envelope.py"
   },
   {
    "basis": "test imports source",

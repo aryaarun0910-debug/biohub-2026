@@ -12,6 +12,44 @@ record_kind: state
 
 # Current handoff
 
+> ## 2026-09-01 (later) - PHASE 1: ONE CANONICAL CATALOG, AN OBSIDIAN GRAPH AND A LOCAL RAG INDEX
+>
+> **Start here now: `knowledge/00-command-center.md`.** Open the REPOSITORY ROOT as an Obsidian
+> vault. The canonical documents did not move; `knowledge/` only navigates, and it is generated.
+>
+> **One catalog, many views.** `scripts/core/catalog.py` emits
+> `research/00-system/registry/generated/catalog/` covering every notebook, spec, script, test
+> file and node, research document and registry entity. Obsidian and RAG are both generated FROM
+> it, so they cannot disagree - the FACT-0431 shape, avoided by construction rather than by care.
+> Every generator has a `--check` drift lock enforced by the suite.
+>
+> **The registry remains the only source of truth for numbers.** The catalog links by
+> FACT/EXP/LEVER/PKT id and copies no value; lever claim prose is deliberately not copied because
+> it quotes scores. A test scans the emitted JSON for score-valued fields.
+>
+> **Receipt bindings are now durable without exposing raw receipts.** All release receipts are
+> gitignored, so a clone had none. `generated/receipts.json` is an ALLOW-LISTED envelope carrying
+> the artifact/notebook/spec/manifest digests, kernel, submission and EXP/FACT binding. An
+> envelope NEVER upgrades provenance: 70 of 74 notebook directories are `historical_unbound` with
+> no bindings, and a test keeps them that way.
+>
+> **THE CLEAN-CLONE SUITE STILL FAILS, and the cause is now precisely located.** Bare clone: 36
+> failed / 42 errors. With the pinned vendor checkout materialised: 10 failed. The residue is NOT
+> missing assets - it is that **303 of 820 tracked files (37%) differ between this working tree
+> and a fresh checkout by LINE ENDINGS ALONE**. The worktree is LF; a checkout is CRLF. Any
+> recorded sha256 of a tracked text file is therefore checkout-dependent, and the notebook digest
+> problem was one instance of a repository-wide condition. The 4 genuine content differences are
+> exactly the known dirty set.
+>
+> **The line-ending contract is measured and routed, not applied.** `*.ipynb text eol=crlf` makes
+> every platform resolve the recorded digests and rewrites zero tracked blobs; `-text` breaks them
+> everywhere including here. `.gitattributes` is unchanged - the repository-wide scope makes this
+> a Phase 2 migration decision, not a repair.
+>
+> **Phase 1 acceptance is therefore INCOMPLETE on one criterion** (full clean-clone suite) and met
+> on the rest. Phase 2 migration remains blocked pending the adversarial audit.
+
+
 > ## 2026-09-01 - RESUME: GATE B LIVE; XET IDENTITY DURABLE; TRACKASTRA OWNS A SEPARATE ARM
 >
 > **Gate B is resumed, not restarted.** The driver at `C:/temp/finaledge/gateB_v2/` is live

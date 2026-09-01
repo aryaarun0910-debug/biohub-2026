@@ -123,8 +123,8 @@
    ],
    "imports_first_party": [],
    "kind": "py",
-   "lifecycle": "untracked-concurrent",
-   "lifecycle_basis": "present but not in git",
+   "lifecycle": "unknown",
+   "lifecycle_basis": "no packet, fact or importer found",
    "measures_facts": [],
    "named_by_tests": [],
    "owning_packets": [],
@@ -134,7 +134,7 @@
    "sha256": "7c008648415222c0a4212f1da888477db1d76dd36268475abad6ef3c1f5a8e3b",
    "subprocess_boundary": true,
    "test_coverage": "imported-by-test",
-   "tracked": false
+   "tracked": true
   },
   "scripts/core/claims_table.py": {
    "bytes": 20921,
@@ -554,6 +554,67 @@
    "test_coverage": "imported-by-test",
    "tracked": true
   },
+  "scripts/core/knowledge.py": {
+   "bytes": 22448,
+   "callers": [],
+   "covered_by_tests": [],
+   "dynamic_import": false,
+   "id": "SCRIPT:scripts/core/knowledge.py",
+   "ids_mentioned": {
+    "experiments": [],
+    "facts": [
+     "FACT-0380",
+     "FACT-0412",
+     "FACT-0423",
+     "FACT-0424",
+     "FACT-0425",
+     "FACT-0428",
+     "FACT-0451",
+     "FACT-0453",
+     "FACT-0454",
+     "FACT-0455",
+     "FACT-0456",
+     "FACT-0460"
+    ],
+    "levers": [
+     "LEVER-0005",
+     "LEVER-0044",
+     "LEVER-0046"
+    ],
+    "packets": [
+     "PKT-0049",
+     "PKT-0050"
+    ]
+   },
+   "imports": [
+    "__future__",
+    "argparse",
+    "collections",
+    "json",
+    "pathlib",
+    "re",
+    "shutil",
+    "sys",
+    "tempfile",
+    "yaml"
+   ],
+   "imports_first_party": [],
+   "kind": "py",
+   "lifecycle": "unknown",
+   "lifecycle_basis": "no packet, fact or importer found",
+   "measures_facts": [],
+   "named_by_tests": [],
+   "owning_packets": [],
+   "path": "scripts/core/knowledge.py",
+   "purpose": "Generate the Obsidian navigation layer from the canonical catalog. Nothing is copied.",
+   "reads_temp_paths": [
+    "C:/temp/finaledge/gateB_v2/RESUME_STATE.md"
+   ],
+   "sha256": "3a8498c9b775b3d2dc0266dcaabda7ee341cbe5d6cb60bf952c1496fcce0ee91",
+   "subprocess_boundary": false,
+   "test_coverage": "none",
+   "tracked": true
+  },
   "scripts/core/lineending_experiment.py": {
    "bytes": 7828,
    "callers": [],
@@ -579,8 +640,8 @@
    ],
    "imports_first_party": [],
    "kind": "py",
-   "lifecycle": "untracked-concurrent",
-   "lifecycle_basis": "present but not in git",
+   "lifecycle": "unknown",
+   "lifecycle_basis": "no packet, fact or importer found",
    "measures_facts": [],
    "named_by_tests": [],
    "owning_packets": [],
@@ -593,7 +654,123 @@
    "sha256": "a6b0b69a9164f23575a5fc25d9d2fdd6359226df2df1b8d03a11e8c9b851e4b6",
    "subprocess_boundary": true,
    "test_coverage": "none",
+   "tracked": true
+  },
+  "scripts/core/rag_index.py": {
+   "bytes": 18654,
+   "callers": [],
+   "covered_by_tests": [
+    "tests/test_rag_index.py"
+   ],
+   "dynamic_import": false,
+   "id": "SCRIPT:scripts/core/rag_index.py",
+   "ids_mentioned": {
+    "experiments": [],
+    "facts": [],
+    "levers": [],
+    "packets": []
+   },
+   "imports": [
+    "__future__",
+    "argparse",
+    "collections",
+    "json",
+    "math",
+    "pathlib",
+    "re",
+    "sys",
+    "yaml"
+   ],
+   "imports_first_party": [],
+   "kind": "py",
+   "lifecycle": "untracked-concurrent",
+   "lifecycle_basis": "present but not in git",
+   "measures_facts": [],
+   "named_by_tests": [],
+   "owning_packets": [],
+   "path": "scripts/core/rag_index.py",
+   "purpose": "Local, deterministic RAG over the canonical catalog. Artifacts live in `.claude/rag/`.",
+   "reads_temp_paths": [],
+   "sha256": "d633e5838028dfa02fd95a88f14377bb847ac876f6cc413e1be9214f6101b2ff",
+   "subprocess_boundary": false,
+   "test_coverage": "imported-by-test",
    "tracked": false
+  },
+  "scripts/core/receipt_envelope.py": {
+   "bytes": 10700,
+   "callers": [],
+   "covered_by_tests": [
+    "tests/test_receipt_envelope.py"
+   ],
+   "dynamic_import": false,
+   "id": "SCRIPT:scripts/core/receipt_envelope.py",
+   "ids_mentioned": {
+    "experiments": [],
+    "facts": [],
+    "levers": [],
+    "packets": []
+   },
+   "imports": [
+    "__future__",
+    "argparse",
+    "hashlib",
+    "json",
+    "pathlib",
+    "re",
+    "sys",
+    "yaml"
+   ],
+   "imports_first_party": [],
+   "kind": "py",
+   "lifecycle": "unknown",
+   "lifecycle_basis": "no packet, fact or importer found",
+   "measures_facts": [],
+   "named_by_tests": [],
+   "owning_packets": [],
+   "path": "scripts/core/receipt_envelope.py",
+   "purpose": "SANITIZED, TRACKED RECEIPT ENVELOPES. The raw receipts stay ignored.",
+   "reads_temp_paths": [],
+   "sha256": "b44ac738263341c6ec22cee51fef2df2b0237238c359e946f9b65146f4e063eb",
+   "subprocess_boundary": false,
+   "test_coverage": "imported-by-test",
+   "tracked": true
+  },
+  "scripts/core/reproducibility_evidence.py": {
+   "bytes": 6719,
+   "callers": [],
+   "covered_by_tests": [],
+   "dynamic_import": false,
+   "id": "SCRIPT:scripts/core/reproducibility_evidence.py",
+   "ids_mentioned": {
+    "experiments": [],
+    "facts": [
+     "FACT-0043"
+    ],
+    "levers": [],
+    "packets": []
+   },
+   "imports": [
+    "__future__",
+    "argparse",
+    "collections",
+    "json",
+    "pathlib",
+    "subprocess"
+   ],
+   "imports_first_party": [],
+   "kind": "py",
+   "lifecycle": "unknown",
+   "lifecycle_basis": "no packet, fact or importer found",
+   "measures_facts": [],
+   "named_by_tests": [],
+   "owning_packets": [],
+   "path": "scripts/core/reproducibility_evidence.py",
+   "purpose": "Explain why the working tree collects more pytest nodes than a clean clone.",
+   "reads_temp_paths": [],
+   "sha256": "62b048250d2c9c3bcb756dc879c2f607e7310fbb7bd674d70d7a1e3e502ecad4",
+   "subprocess_boundary": true,
+   "test_coverage": "none",
+   "tracked": true
   },
   "scripts/core/score_loeo_submission.py": {
    "bytes": 7812,

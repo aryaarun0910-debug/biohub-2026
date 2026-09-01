@@ -243,6 +243,46 @@ def write_mocs(out: Path, edges: list[dict]) -> int:
         (out / fname).write_text("\n".join(body) + "\n", encoding="utf-8")
         written += 1
 
+    page("README.md", "Knowledge layer - how to use this", [
+        "This directory is GENERATED. Do not edit it; edit the registry or the code it describes",
+        "and regenerate. Everything here is a VIEW over "
+        "`research/00-system/registry/generated/catalog/`.",
+        "",
+        "## Obsidian",
+        "1. Open the REPOSITORY ROOT as an Obsidian vault (not this folder).",
+        "2. Start at " + link("00-command-center") + ".",
+        "3. Entity notes live in `knowledge/entities/` and are named for their STABLE ID, so a",
+        "   renamed display title cannot break an edge.",
+        "4. Note bodies carry NO VALUES. A fact note gives provenance and validity and points at",
+        "   `facts.yaml`, which is the only source of truth for numbers.",
+        "",
+        "## Regenerate everything",
+        "```",
+        "python scripts/core/catalog.py            # the canonical catalog",
+        "python scripts/core/receipt_envelope.py   # sanitized receipt envelopes",
+        "python scripts/core/knowledge.py          # this layer",
+        "python scripts/core/rag_index.py --build  # the local RAG index",
+        "```",
+        "Each has a `--check` mode used by the test suite as a drift lock.",
+        "",
+        "## Ask the index a question",
+        "```",
+        'python scripts/core/rag_index.py --query "what is the operational base"',
+        "python scripts/core/rag_index.py --validate    # the standing validation queries",
+        "```",
+        "",
+        "## Compare two notebooks",
+        "```",
+        "python -c \"import json;c=json.load(open('research/00-system/registry/generated/"
+        "catalog/notebooks.json'))['notebooks'];print(c['kaggle_p38_relink_bonus_b2']"
+        "['delta_from_parent'])\"",
+        "```",
+        "",
+        "## Script lifecycle and test ownership",
+        "See " + link("40-scripts") + " and " + link("50-tests") + ", both generated from the",
+        "catalog's `lifecycle` / `test_class` fields.",
+    ], "[moc, readme]")
+
     # --- command center
     live = [p for p, v in reg["packets"].items() if v["lock"] in ("claimed", "running")]
     openlv = [l for l, v in reg["levers"].items() if v["status"] == "open"]

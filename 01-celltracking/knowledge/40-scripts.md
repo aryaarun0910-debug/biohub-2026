@@ -207,12 +207,17 @@ generated: true
 - `scripts/win_bet/phaseb_h1a_census.py` — **no test**
 - `scripts/win_bet/phaseb_oracle_d0prime.py` — **no test**
 
-## unknown (98)
+## unknown (103)
 
+- `scripts/core/catalog.py` — tests: 1
 - `scripts/core/claims_table.py` — tests: 1
 - `scripts/core/colab_vm_bootstrap.py` — **no test**
 - `scripts/core/fetch.py` — **no test**
 - `scripts/core/kaggle_queue.py` — tests: 1
+- `scripts/core/knowledge.py` — **no test**
+- `scripts/core/lineending_experiment.py` — **no test**
+- `scripts/core/receipt_envelope.py` — tests: 1
+- `scripts/core/reproducibility_evidence.py` — **no test**
 - `scripts/core/score_oof.py` — **no test**
 - `scripts/core/score_submission_nonumba.py` — **no test**
 - `scripts/core/validate_registry.py` — tests: 1
@@ -284,16 +289,10 @@ generated: true
 - `scripts/win_bet/ea_features.py` — **no test**
 - `scripts/win_bet/ea_solver_gap.py` — **no test**
 - `scripts/win_bet/extract_node_estimates.py` — tests: 1
-- `scripts/win_bet/h1r_fetch_imaging.py` — **no test**
-- `scripts/win_bet/h1r_l1_scale_audit.py` — **no test**
-- `scripts/win_bet/h1r_resample_iso.py` — **no test**
-- `scripts/win_bet/h1r_subvoxel_refine.py` — **no test**
-- `scripts/win_bet/h1r_train_smoke.py` — **no test**
 
-## untracked-concurrent (5)
+## untracked-concurrent (4)
 
-- `scripts/core/catalog.py` — tests: 1
-- `scripts/core/lineending_experiment.py` — **no test**
+- `scripts/core/rag_index.py` — tests: 1
 - `scripts/win_bet/biohubx/ckpt_keys.py` — **no test**
 - `scripts/win_bet/divverify_verifier.py` — tests: 1
 - `scripts/win_bet/hoct_compat.py` — tests: 1

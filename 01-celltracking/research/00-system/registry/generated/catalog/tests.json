@@ -1122,9 +1122,9 @@
    ],
    "sha256": "54f0f45f1a09f1b6bb23c991741359163853642e26dd446bc355174d88bcd832",
    "skip_reasons": [],
-   "state": "untracked-concurrent",
+   "state": "active",
    "test_class": "provenance",
-   "tracked": false
+   "tracked": true
   },
   "tests/test_checkpoint_inventory.py": {
    "blocking_scope": "cpu",
@@ -4538,6 +4538,41 @@
    "test_class": "provenance",
    "tracked": true
   },
+  "tests/test_rag_index.py": {
+   "blocking_scope": "cpu",
+   "fixture_parity": "not declared",
+   "has_skip_guard": false,
+   "id": "TEST:tests/test_rag_index.py",
+   "ids_mentioned": {
+    "experiments": [],
+    "facts": [],
+    "levers": [],
+    "packets": []
+   },
+   "n_nodes": 8,
+   "names_scripts_without_importing": [],
+   "needs_data_dir": false,
+   "needs_vendor": false,
+   "node_ids": [
+    "tests/test_rag_index.py::test_every_chunk_carries_provenance_metadata_and_an_id",
+    "tests/test_rag_index.py::test_identifier_tokens_are_split_so_prose_queries_can_reach_them",
+    "tests/test_rag_index.py::test_invalid_facts_rank_below_valid_ones",
+    "tests/test_rag_index.py::test_no_binary_or_notebook_body_is_indexed",
+    "tests/test_rag_index.py::test_superseded_content_is_demoted_and_carries_a_refusal",
+    "tests/test_rag_index.py::test_the_corpus_indexes_every_entity_class",
+    "tests/test_rag_index.py::test_the_operational_base_query_returns_the_manifest_not_prose_about_it",
+    "tests/test_rag_index.py::test_the_validation_queries_all_resolve"
+   ],
+   "path": "tests/test_rag_index.py",
+   "protects_scripts": [
+    "scripts/core/rag_index.py"
+   ],
+   "sha256": "d186c301c0ffbf5c29d1b90d8744eda8b8a5d5f733f3fd3334869aacc5545283",
+   "skip_reasons": [],
+   "state": "untracked-concurrent",
+   "test_class": "provenance",
+   "tracked": false
+  },
   "tests/test_ranker_block.py": {
    "blocking_scope": "release",
    "fixture_parity": "not declared",
@@ -4608,6 +4643,41 @@
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
+   "tracked": true
+  },
+  "tests/test_receipt_envelope.py": {
+   "blocking_scope": "release",
+   "fixture_parity": "not declared",
+   "has_skip_guard": false,
+   "id": "TEST:tests/test_receipt_envelope.py",
+   "ids_mentioned": {
+    "experiments": [],
+    "facts": [],
+    "levers": [],
+    "packets": []
+   },
+   "n_nodes": 8,
+   "names_scripts_without_importing": [],
+   "needs_data_dir": false,
+   "needs_vendor": false,
+   "node_ids": [
+    "tests/test_receipt_envelope.py::test_binding_comes_from_the_registry_not_from_the_envelopes_existence",
+    "tests/test_receipt_envelope.py::test_every_envelope_states_one_of_the_four_states_and_says_why",
+    "tests/test_receipt_envelope.py::test_no_machine_local_path_reaches_the_tracked_envelope",
+    "tests/test_receipt_envelope.py::test_only_allow_listed_fields_are_present",
+    "tests/test_receipt_envelope.py::test_the_allow_list_refuses_a_local_path",
+    "tests/test_receipt_envelope.py::test_the_champion_binding_survives_without_the_raw_receipt",
+    "tests/test_receipt_envelope.py::test_the_envelope_file_has_no_drift",
+    "tests/test_receipt_envelope.py::test_the_envelope_is_tracked_and_the_raw_receipts_are_not"
+   ],
+   "path": "tests/test_receipt_envelope.py",
+   "protects_scripts": [
+    "scripts/core/receipt_envelope.py"
+   ],
+   "sha256": "c75e318e8fe068a70f777012ce1b0142a71181079ca7be1214f2a1a014aab4ce",
+   "skip_reasons": [],
+   "state": "active",
+   "test_class": "provenance",
    "tracked": true
   },
   "tests/test_registry_gate.py": {

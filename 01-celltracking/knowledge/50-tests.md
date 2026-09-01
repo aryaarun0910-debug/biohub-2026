@@ -44,7 +44,7 @@ generated: true
 - `tests/test_pooled_objective.py` — protects 0 script(s), 5 node(s), blocks `cpu`
 - `tests/test_validate_detpeak_export.py` — protects 1 script(s), 1 node(s), blocks `cpu`
 
-## provenance (20)
+## provenance (22)
 
 - `tests/test_assemble_d1_factorial.py` — protects 3 script(s), 20 node(s), blocks `gpu`
 - `tests/test_assoc_tournament.py` — protects 2 script(s), 28 node(s), blocks `release`
@@ -64,6 +64,8 @@ generated: true
 - `tests/test_p24_deepcenter_best_veto.py` — protects 0 script(s), 3 node(s), blocks `release`
 - `tests/test_provenance_policy.py` — protects 3 script(s), 21 node(s), blocks `gpu`
 - `tests/test_provenance_policy_single_source.py` — protects 3 script(s), 10 node(s), blocks `release`
+- `tests/test_rag_index.py` — protects 1 script(s), 8 node(s), blocks `cpu`
+- `tests/test_receipt_envelope.py` — protects 1 script(s), 8 node(s), blocks `release`
 - `tests/test_registry_gate.py` — protects 0 script(s), 8 node(s), blocks `cpu`
 - `tests/test_registry_validity.py` — protects 0 script(s), 16 node(s), blocks `gpu`
 
