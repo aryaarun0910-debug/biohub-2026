@@ -1,0 +1,23 @@
+# Shortlisted research primitives.
+#
+# A primitive may enter this list ONLY when a live Biohub-X component consumes
+# it, and the entry must name that component. Membership of
+# research/primitives-dossier.md confers no standing: the dossier is
+# reference_only.
+#
+# Required per entry:
+#   id           primitive identifier
+#   name         what it is
+#   component    the live SYSTEM.md component that consumes it
+#   role         champion | challenger
+#   why          the specific bottleneck it is claimed to attack
+#   experiment   experiment id in registry/experiments.yaml that tests it
+#   provenance   code licence, weight licence, training data, eligibility
+#
+# At Phase 0 no component exists, therefore this list is empty by construction.
+# Its length is a measure of how much system exists, not of how much has been
+# read.
+
+schema_version: 1
+
+shortlist: []

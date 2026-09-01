@@ -1,0 +1,35 @@
+# Environments and build output
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Machine-local artifacts. Weights, volumes and exported graphs are never
+# committed. Run manifests are local run evidence and are NOT committed: they
+# record the absolute path of whatever external input a command was pointed at,
+# which is correct provenance but machine-specific. The durable, portable record
+# is registry/.
+artifacts/*
+!artifacts/manifests/
+artifacts/manifests/*
+!artifacts/manifests/.gitkeep
+
+# Local data roots. There is no default data path in this repository.
+data/
+
+# Model and volume formats
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.h5
+*.zarr/
+*.n5/
+
+# Competition output
+submission.csv

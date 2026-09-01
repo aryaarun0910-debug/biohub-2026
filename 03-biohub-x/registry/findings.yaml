@@ -1,0 +1,55 @@
+# Findings registry: one measured claim per entry.
+#
+# Required per finding:
+#   id            stable identifier
+#   claim         a single measured statement
+#   instrument    the code that measured it
+#   evidence      how to reproduce, and what was observed
+#   validity      scope, and the conditions under which the claim holds
+#   superseded_by finding id that replaces this one, or null
+#
+# A number that is not here is not a result. Numbers are never restated in
+# prose; prose references the finding id.
+
+schema_version: 1
+
+findings:
+  - id: F-0001
+    claim: >-
+      Biohub-X is a standalone Git repository with no ancestor repository; no
+      tracked file names a quarantined prior-campaign repository; no tracked
+      file carries an absolute filesystem path outside the allow-listed
+      provenance records; and no import-path entry resolves outside the
+      repository, its virtual environment and the standard library.
+    instrument: tests/contracts/test_repository_isolation.py
+    evidence:
+      command: uv run pytest tests/contracts/test_repository_isolation.py
+      observed: 14 passed
+      note: >-
+        The content scans read the Git index, so they pass vacuously on an empty
+        index; the instrument asserts the index is non-empty, and both the
+        absolute-path detector and the quarantine scan carry negative controls
+        that plant the exact shape of a leak and require it to be flagged.
+    validity:
+      scope: repository_integrity
+      holds_while: >-
+        the instrument runs in CI on a full clone and the two allow-lists are
+        not extended. Extending either allow-list narrows this claim.
+    superseded_by: null
+
+  - id: F-0002
+    claim: >-
+      The two content identities separate platform drift from content change: a
+      CRLF rewrite of a configuration file breaks its raw identity and leaves
+      its canonical identity intact, while a single-character content edit
+      breaks both.
+    instrument: tests/mutation/test_line_ending_drift.py
+    evidence:
+      command: uv run pytest tests/mutation/test_line_ending_drift.py
+      observed: 5 passed
+    validity:
+      scope: content_identity
+      holds_while: >-
+        CANONICALIZATION_VERSION is v1. Bumping it invalidates every recorded
+        canonical digest and supersedes this finding.
+    superseded_by: null

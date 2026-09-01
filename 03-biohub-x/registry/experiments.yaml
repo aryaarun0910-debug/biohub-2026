@@ -1,0 +1,26 @@
+# Experiment registry: one entry per experiment, declared BEFORE it runs.
+#
+# Required at declaration time:
+#   id                 stable identifier
+#   component          system or component under test (see SYSTEM.md)
+#   hypothesis         what is claimed
+#   falsifier          the observation that would kill it
+#   inputs             artifact ids from registry/artifacts.yaml
+#   split              data split scheme and fold
+#   model_config       config path plus its canonical_text digest
+#   budget             compute the experiment is allowed
+#   expected_outputs   artifact ids it will produce
+#   forbidden_changes  what must not move while it runs
+#   promotion_metric   the official metric field that decides it
+#   runtime_ceiling    wall clock it may not exceed
+#   provenance_status  from registry/artifacts.yaml
+#
+# Required at completion, exactly one:
+#   status: promoted | challenger | killed | invalid | integration_only
+#
+# "implemented" and "interesting" are not statuses. Scores are referenced by
+# finding id from registry/findings.yaml, never restated here or in prose.
+
+schema_version: 1
+
+experiments: []

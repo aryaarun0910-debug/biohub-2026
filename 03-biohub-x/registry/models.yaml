@@ -1,0 +1,19 @@
+# Model registry: every model that could reach the emitted graph.
+#
+# Required per model:
+#   id             stable identifier
+#   architecture   what it is
+#   role           which SYSTEM.md component it serves
+#   source         repository plus pinned commit or release
+#   license        code licence AND weight licence, recorded separately
+#   training_data  provenance of the data the weights saw
+#   checkpoint     artifact id from registry/artifacts.yaml
+#   status         candidate | champion | challenger | retired | blocked
+#
+# No model is added on the strength of a code licence alone. Code licence,
+# weight licence, training-data provenance and competition eligibility are four
+# separate questions.
+
+schema_version: 1
+
+models: []

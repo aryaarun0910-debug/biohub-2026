@@ -1,0 +1,40 @@
+name: ci
+
+# main must always be installable and testable (AGENTS.md section 8).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The isolation and hygiene contracts read the Git index, and a
+          # shallow clone with a partial index would let them pass vacuously.
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install locked environment
+        run: uv sync --all-groups --locked
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format
+        run: uv run ruff format --check .
+
+      - name: Types
+        run: uv run mypy
+
+      - name: Tests
+        run: uv run pytest
+
+      - name: Artifact identities still hold
+        run: uv run biohubx artifacts verify

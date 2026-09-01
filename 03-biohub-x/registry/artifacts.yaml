@@ -1,0 +1,42 @@
+# Artifact registry: every content identity Biohub-X asserts.
+#
+# Verified by `uv run biohubx artifacts verify`, which re-derives each digest
+# from the bytes on disk and exits non-zero on any mismatch.
+#
+# Required per artifact:
+#   id           stable identifier, referenced from other registries
+#   kind         what sort of thing this is
+#   path         repository-relative; absolute paths and `..` are refused
+#   schema       how to read it
+#   digests      mapping of slot -> typed digest token
+#                  raw            -> raw_artifact_sha256:sha256:<hex>
+#                  canonical_text -> canonical_text_sha256:sha256/v1:<hex>
+#   produced_by  experiment id from registry/experiments.yaml, or null
+#   provenance   status plus whatever the status requires
+#
+# Digest tokens are the only permitted form. A bare hex string is refused.
+
+schema_version: 1
+
+artifacts:
+  - id: research.primitives_dossier.2026-09-01
+    kind: document
+    path: research/primitives-dossier.md
+    schema: markdown
+    digests:
+      raw: raw_artifact_sha256:sha256:06f81d9ce9bc4ec174ca1c5ad5ea1f34bb99f80c3bc7a8e256a8d103e149d16c
+      canonical_text: canonical_text_sha256:sha256/v1:06f81d9ce9bc4ec174ca1c5ad5ea1f34bb99f80c3bc7a8e256a8d103e149d16c
+    produced_by: null
+    provenance:
+      status: reference_only
+      imported_utc: 2026-09-01T00:00:00Z
+      original_path: C:/Users/aryaa/Downloads/biohub_hypercompetitive_research_primitives_dossier.md
+      source_digest: raw_artifact_sha256:sha256:06f81d9ce9bc4ec174ca1c5ad5ea1f34bb99f80c3bc7a8e256a8d103e149d16c
+      competition_eligible: null
+      note: >-
+        Human-supplied research input, copied byte-exact (70738 bytes, LF only,
+        no BOM, valid UTF-8), which is why the raw and canonical digests
+        coincide. Marked `-text` in .gitattributes so Git never normalises it.
+        Status reference_only: it is read as input and confers no standing on
+        any primitive it lists. Nothing here is imported or believed without an
+        independent Biohub-X measurement.
