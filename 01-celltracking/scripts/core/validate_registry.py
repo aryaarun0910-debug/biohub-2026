@@ -60,6 +60,33 @@ from pathlib import Path
 import yaml
 
 REPO = Path(__file__).resolve().parents[2]
+
+# ---------------------------------------------------------------------------------------------
+# PINNED EXTERNAL CHECKOUTS. Imported, never re-declared: a second copy of the checkout list is a
+# second chance to disagree, which is the defect FACT-0431 records between two guards.
+# ---------------------------------------------------------------------------------------------
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+try:
+    import bootstrap_vendor as BV
+except Exception:                                  # noqa: BLE001 - a broken bootstrap must not
+    BV = None                                      # silently relax R3; see _external_checkout_for
+
+
+def _external_checkout_for(cited: str) -> str | None:
+    """Which declared external checkout, if any, owns this cited path?"""
+    if BV is None:
+        return None
+    for name in BV.CHECKOUTS:
+        if cited == name or cited.startswith(name.rstrip("/") + "/"):
+            return name
+    return None
+
+
+def _checkout_ready(name: str) -> bool:
+    try:
+        return BV.is_ok(name)
+    except Exception:                              # noqa: BLE001 - unknown state is NOT ready
+        return False
 REG = REPO / "research" / "00-system" / "registry"
 
 ID_PATTERNS = {
@@ -228,11 +255,31 @@ def main() -> int:
             continue
         if prov in STRONG_PROVENANCE and instrument:
             for cited in repo_path.findall(str(instrument)):
-                if not (REPO / cited).exists():
-                    errors.append(
-                        f"R3 {f['id']}: instrument cites {cited}, which does not exist. "
-                        "A MEASURED fact must be reproducible from committed code."
+                if (REPO / cited).exists():
+                    continue
+                # A PINNED EXTERNAL CHECKOUT IS NOT MISSING COMMITTED CODE. `vendor/` is
+                # gitignored by design and reproduced from a commit pinned in config/, so on a
+                # fresh clone these paths are absent for a reason that has a repair. Reporting
+                # them as R3 errors made this gate exit 1 on every clean checkout while passing
+                # on the development machine - green here, red everywhere else, which is the
+                # exact failure R3 exists to catch. The distinction is mechanical: absent AND
+                # covered by a declared pin is a NOTE naming the bootstrap; absent and NOT
+                # covered by a pin is still an error, and a checkout that IS present but lacks
+                # the file is still an error, because then the pin has been satisfied and the
+                # instrument genuinely is not there.
+                owner = _external_checkout_for(cited)
+                if owner is not None and not _checkout_ready(owner):
+                    notes.append(
+                        f"R3 {f['id']}: instrument cites {cited}, absent because the PINNED "
+                        f"EXTERNAL CHECKOUT {owner} is not materialised. Run "
+                        f"scripts/core/bootstrap_vendor.py --apply. This is not missing "
+                        f"committed code and does not fail the gate."
                     )
+                    continue
+                errors.append(
+                    f"R3 {f['id']}: instrument cites {cited}, which does not exist. "
+                    "A MEASURED fact must be reproducible from committed code."
+                )
 
     # ---- R4 a killed lever needs reproducible evidence --------------------------------
     prov_of = {f["id"]: f.get("provenance") for f in facts}

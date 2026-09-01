@@ -22,7 +22,17 @@ import torch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts" / "kaggle_edits"))
+sys.path.insert(0, str(ROOT / "scripts" / "core"))
 sys.path.insert(0, str(ROOT / "vendor" / "kaggle-cell-tracking" / "scripts"))
+
+# See the note in tests/test_h1r_edge_train.py: this module imports from the PINNED EXTERNAL
+# CHECKOUT `vendor/kaggle-cell-tracking`, absent from a fresh clone by design. Unguarded it broke
+# COLLECTION and interrupted the entire suite. The skip reason names the repair, not the symptom.
+import bootstrap_vendor as BV  # noqa: E402
+
+if not BV.is_ok("vendor/kaggle-cell-tracking"):
+    pytest.skip(BV.diagnostic("vendor/kaggle-cell-tracking"), allow_module_level=True)
+
 import h1r_edge_data as D  # noqa: E402
 import h1r_edge_train as E  # noqa: E402
 import h1r_rope4d as R  # noqa: E402

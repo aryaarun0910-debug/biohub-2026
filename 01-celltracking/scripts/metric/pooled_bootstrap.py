@@ -46,7 +46,44 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from private_split_simulator import SYSTEMS, load, score, score_batch  # noqa: E402
+
+# ==============================================================================================
+# RETIRED - HISTORICAL. This module has no runnable dependency and must not acquire a fake one.
+# ==============================================================================================
+# `scripts/private_split_simulator.py` (416 lines) was DELIBERATELY deleted by commit 7143ef0,
+# "Lean active execution surface around D1 calibration", which retired a large batch of historical
+# notebooks and scripts in one pass. This caller was not deleted with it, so it has imported a
+# module that does not exist ever since.
+#
+# The evidence for "historical" rather than "accidentally deleted", recorded so the next reader
+# does not have to re-derive it:
+#   * the deletion was intentional and part of a named lean-out commit, not an incidental drop;
+#   * nothing calls `pooled_bootstrap` anywhere in scripts/, tests/ or research/ - the only
+#     surviving mention is a lab-notebook line recording the day it was ADDED;
+#   * no successor module was introduced by that commit or since.
+#
+# So it fails with a NAMED RETIREMENT STATUS rather than an opaque ModuleNotFoundError, and it
+# does NOT get a compatibility stub. A stub here would return plausible bootstrap intervals with
+# no simulator behind them - the silent-fill class this campaign has paid for five times
+# (FACT-0432, FACT-0425, FACT-0454, FACT-0457, FACT-0459). A wrong confidence interval that looks
+# right is worse than an import error.
+#
+# To revive it: restore the simulator from `git show 7143ef0^:scripts/private_split_simulator.py`
+# and state, in a packet, what question it is being revived to answer.
+RETIREMENT_STATUS = "historical"
+RETIREMENT_REASON = (
+    "scripts/metric/pooled_bootstrap.py is RETIRED (historical). Its only dependency, "
+    "scripts/private_split_simulator.py, was deliberately deleted by commit 7143ef0 and has no "
+    "successor; nothing in the active surface calls this module. Recover the dependency with "
+    "`git show 7143ef0^:scripts/private_split_simulator.py` if the question it answered is live "
+    "again - and open a packet saying which question that is. It is deliberately NOT stubbed: a "
+    "stub would emit plausible intervals with no simulator behind them."
+)
+
+try:
+    from private_split_simulator import SYSTEMS, load, score, score_batch  # noqa: E402
+except ModuleNotFoundError as _exc:                # noqa: F841 - re-raised with the status
+    raise ModuleNotFoundError(RETIREMENT_REASON) from _exc
 
 DEFAULT_OUT = Path(r"C:\Users\aryaa\Documents\Biohub-CellTracking-2026\_evidence"
                    r"\agent_runs\laneE\pooled_bootstrap.json")

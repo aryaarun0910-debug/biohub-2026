@@ -7,9 +7,27 @@ from pathlib import Path
 import numpy as np
 import torch
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts" / "kaggle_edits"))
+sys.path.insert(0, str(ROOT / "scripts" / "core"))
 sys.path.insert(0, str(ROOT / "vendor" / "kaggle-cell-tracking" / "scripts"))
+
+# This module imports from the PINNED EXTERNAL CHECKOUT `vendor/kaggle-cell-tracking`, which is
+# gitignored by design and absent from a fresh clone. Left unguarded it raised ModuleNotFoundError
+# at COLLECTION, which interrupted the whole run: `pytest --collect-only` exited 2 on a clean
+# clone of e5db190 and no test ran at all. A refusal that stops the suite and names only
+# "No module named 'train_unet_transformer'" is not a diagnostic.
+#
+# Skipping is the weaker half of a trade this repository is right to distrust - a skip and a pass
+# are the same colour. So the reason names the exact repair rather than the symptom, and the
+# mechanical path (`bootstrap_vendor.py --apply`) exists alongside it.
+import bootstrap_vendor as BV  # noqa: E402
+
+if not BV.is_ok("vendor/kaggle-cell-tracking"):
+    pytest.skip(BV.diagnostic("vendor/kaggle-cell-tracking"), allow_module_level=True)
+
 import h1r_edge_data as D  # noqa: E402
 import h1r_edge_train as E  # noqa: E402
 import train_unet_transformer as T  # noqa: E402
