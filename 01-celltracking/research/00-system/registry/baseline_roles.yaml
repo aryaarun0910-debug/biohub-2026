@@ -1,0 +1,137 @@
+# BASELINE ROLES - the machine-readable answer to "what is the champion?"
+#
+# WHY THREE ROLES AND NOT ONE `champion:` FIELD
+# ---------------------------------------------
+# Measured 2026-09-01: no `champion` key existed anywhere in the registry, the only experiment
+# with `status: deployed` was EXP-0009 (many generations stale), and the prose disagreed four
+# ways - CLAUDE.md named P35, research/README.md named P9, directional-updates.md named P24, and
+# experiments.yaml named P9. An agent starting from any one of them audited a different notebook.
+#
+# A single `champion` field would not have fixed that, because the word was doing three
+# incompatible jobs at once: the best SCORE, the artifact new work is BUILT ON, and the artifact
+# causal deltas are MEASURED AGAINST. Those genuinely differ here, and collapsing them is how the
+# wrong control gets used. They are separated, and each binds its own evidence.
+#
+# NO SCORE VALUE APPEARS IN THIS FILE. Scores live in facts.yaml and are cited by id (AGENTS.md
+# section 1). A second copy of a number is a second chance to go stale.
+#
+# SCORE VALIDITY AND MECHANISM ATTRIBUTION ARE SEPARATE AXES, and this file keeps them apart.
+# FACT-0412 is `validity: SUSPECT` because its CAUSAL ATTRIBUTION is weak - the packet's own
+# reasoning says public-LB variance is of the order of the effect under test. That does not
+# retract the measured leaderboard result, and the submission is bound independently below.
+#
+# Drift is enforced by tests/test_baseline_roles.py.
+
+schema_version: 1
+updated: '2026-09-01'
+
+# ---------------------------------------------------------------------------------------------
+# SELECTION RULES, stated before the selections so they cannot be fitted to them.
+# ---------------------------------------------------------------------------------------------
+selection_rules:
+  leaderboard_champion: >-
+    The highest scored submission among experiments with `status: scored` whose score fact is not
+    INVALID. TIES RESOLVE TO THE EARLIER SUBMISSION: a later submission that merely equals the
+    incumbent has not displaced it. EXP-0042 and EXP-0051 are tied, and EXP-0051's own
+    preregistration (FACT-0446) reads its result as the UNINFORMATIVE band, licensing nothing -
+    so the tie-break rule and the preregistration agree rather than the rule being chosen to
+    produce a preferred answer.
+  operational_base: >-
+    The built notebook that the most recent treatment spec declares as its `base`, verified by
+    `base_sha256` against the notebook on disk. It is read from the SPEC GRAPH, not chosen.
+  scientific_control: >-
+    The artifact a causal delta is measured against. It MAY be older than the operational base,
+    and when it is, `comparable_because` must say why the comparison is still valid.
+
+# ---------------------------------------------------------------------------------------------
+# A. LEADERBOARD CHAMPION - the best measured public result
+# ---------------------------------------------------------------------------------------------
+leaderboard_champion:
+  experiment: EXP-0042
+  score_fact: FACT-0412
+  submission: 55888865
+  kernel: aryaarun07/biohub-p35-dcveto-on-931
+  kernel_version: 1
+  notebook: notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb
+  notebook_sha256: c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257
+  spec: scripts/kaggle_specs/p35_dcveto_on_931.json
+  release_receipt: notebooks/kaggle_p35_dcveto_on_931/_out/audit_receipt.json
+  score_validity: VALID
+  score_validity_note: >-
+    The SCORE is a measured leaderboard result and stands on its own. Its FACT carries
+    `validity: SUSPECT`, which is a statement about MECHANISM ATTRIBUTION, not about the number.
+  mechanism_attribution: SUSPECT
+  mechanism_attribution_note: >-
+    FACT-0412 clears its preregistered falsifier by the smallest distinguishable margin, and the
+    packet's own reasoning (h) - written before the run - states that public-LB variance alone is
+    of the order of the effect under test. So a single submission cannot separate a real
+    component gain from leaderboard noise. The mechanism is confirmed LIVE in the kernel log
+    (checkpoint loaded at the intended epoch, veto on, rejections non-zero on seven of eight
+    movies); what is not established is its MAGNITUDE.
+  tied_with:
+    experiment: EXP-0051
+    submission: 55915569
+    why_it_does_not_displace: >-
+      FACT-0446 preregistered the reading before the artifact existed: this band is UNINFORMATIVE
+      and licenses nothing. An equal score under a preregistration that calls it uninformative is
+      not a new champion.
+
+# ---------------------------------------------------------------------------------------------
+# B. OPERATIONAL BASE - what a new treatment is built on
+# ---------------------------------------------------------------------------------------------
+operational_base:
+  notebook: notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb
+  notebook_sha256: c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257
+  spec: scripts/kaggle_specs/p35_dcveto_on_931.json
+  build_manifest: notebooks/kaggle_p35_dcveto_on_931/build_manifest.json
+  parent_notebook: notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb
+  parent_sha256: 856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c
+  established_by: >-
+    Read from the spec graph, not chosen: scripts/kaggle_specs/p38_relink_bonus_b2.json declares
+    this notebook as its `base` and pins `base_sha256` to the digest above. No spec declares P38
+    as a base, so P38 is a leaf and the operational base is unchanged by it.
+  feature_contract: research/00-system/registry/generated/operational_base_contract.json
+  digest_convention_warning: >-
+    The recorded sha256 is the CRLF working-tree digest. `core.autocrlf=true` comes from the
+    system git config here, so a clone on this machine reproduces it; a Linux/macOS/CI checkout or
+    `git archive` would produce the LF blob digest instead and this pin would not resolve. See
+    tests/test_baseline_roles.py, which states the exposure rather than papering over it.
+
+# ---------------------------------------------------------------------------------------------
+# C. SCIENTIFIC CONTROL - what a causal delta is measured against
+# ---------------------------------------------------------------------------------------------
+scientific_control:
+  substrate: P28 champion exports
+  evidence_paths:
+    - C:/temp/p28_f0/
+    - C:/temp/p28_f1/
+  established_by: FACT-0345
+  used_by_facts: [FACT-0447, FACT-0448, FACT-0449, FACT-0458]
+  differs_from_operational_base: true
+  comparable_because: >-
+    The substrate carries the SAME DeepCenter best-checkpoint plus safe-division veto bundle that
+    the operational base deploys (FACT-0345), so the treatment under test is present in both. The
+    promotable quantity is the PAIRED DELTA, never the absolute level - FACT-0345 records the
+    fold-0 absolute as contaminated by in-sample DeepCenter and admits paired deltas only.
+  do_not_substitute: >-
+    FACT-0382: a treatment must be compared against the DEPLOYED control, never against a
+    widened-only control. FACT-0442 additionally names C:/temp/p30_f0/graphs_ctl as the fold-0
+    control the committed lost-edge ledger uses; it is a DIFFERENT substrate from the P28 exports
+    and the two must not be interchanged in one comparison.
+  caution: >-
+    This substrate is older than the operational base. Any experiment reporting a full-chain
+    delta must say which control it used, and a delta measured here may not be quoted as a delta
+    against the leaderboard champion.
+
+# ---------------------------------------------------------------------------------------------
+# WHAT THIS FILE DOES NOT CLAIM
+# ---------------------------------------------------------------------------------------------
+not_claimed:
+  - >-
+    That the leaderboard champion is the best POSSIBLE artifact. It is the best MEASURED one.
+  - >-
+    That the operational base is scientifically superior to its parent. It is what the most
+    recent treatment declared as its base, which is a fact about the spec graph.
+  - >-
+    Any binding for the 34 of 69 notebooks with no experiment. Those are `unbound-historical` and
+    are not given retrospective EXP or receipt bindings here.

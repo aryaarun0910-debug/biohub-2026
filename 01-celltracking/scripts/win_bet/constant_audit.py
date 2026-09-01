@@ -34,6 +34,18 @@ import zarr
 SCALE = np.array([1.625, 0.40625, 0.40625])  # z, y, x um per level-0 voxel
 
 
+# THE DEPLOYED SAFE-DIVISION GEOMETRY, READ FROM THE OPERATIONAL BASE.
+# These were hard-coded as 4.66 / 7.65 / 8.5 and labelled "DEPLOYED". That is `p3_harmonic`'s
+# geometry - the notebook CLAUDE.md says is NOT the champion - so every row of this audit was
+# comparing GT distributions against a superseded configuration while calling it deployed.
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "core"))
+import baseline_contract as _BC  # noqa: E402
+
+_SD = _BC.safe_division()
+
+
 def load_geff(path: Path):
     g = zarr.open(str(path), mode="r")
     nid = np.asarray(g["nodes/ids"][:]).astype(np.int64)
@@ -238,10 +250,10 @@ def main() -> None:
         ("GAP_CLOSE_UM x2 (t->t+2 gate)", "two_frame_um",     11.6,   "BIOHUB_GAP_CLOSE_UM"),
         ("GAP_CLOSE_REUSE_UM",            "mid_offset_um",     3.2,   "BIOHUB_GAP_CLOSE_REUSE_UM"),
         ("GAP_REFINE_MAX_SHIFT_UM",       "linefit_resid_um",  3.2,   "BIOHUB_GAP_REFINE_MAX_SHIFT_UM"),
-        ("SAFE_DIV_MAX_UM (far daughter)","div_far_daughter_um", 4.66, "BIOHUB_SAFE_DIV_MAX_UM"),
-        ("SAFE_DIV_MAX_UM (both pooled)", "div_parent_um",     4.66,  "BIOHUB_SAFE_DIV_MAX_UM"),
-        ("SAFE_DIV_EXIST_CHILD (near)",   "div_near_daughter_um", 7.65, "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM"),
-        ("SAFE_DIV_SISTER_MAX_UM",        "div_sister_um",     8.5,   "BIOHUB_SAFE_DIV_SISTER_MAX_UM"),
+        ("SAFE_DIV_MAX_UM (far daughter)","div_far_daughter_um", _SD["BIOHUB_SAFE_DIV_MAX_UM"], "BIOHUB_SAFE_DIV_MAX_UM"),
+        ("SAFE_DIV_MAX_UM (both pooled)", "div_parent_um",     _SD["BIOHUB_SAFE_DIV_MAX_UM"],  "BIOHUB_SAFE_DIV_MAX_UM"),
+        ("SAFE_DIV_EXIST_CHILD (near)",   "div_near_daughter_um", _SD["BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM"], "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM"),
+        ("SAFE_DIV_SISTER_MAX_UM",        "div_sister_um",     _SD["BIOHUB_SAFE_DIV_SISTER_MAX_UM"],   "BIOHUB_SAFE_DIV_SISTER_MAX_UM"),
         ("GAP_DENSITY_REFERENCE_UM (GT)", "nn_spacing_um",     6.5,   "BIOHUB_GAP_DENSITY_REFERENCE_UM"),
     ]
 
@@ -313,7 +325,7 @@ def main() -> None:
     near = np.array(sum((acc[p]["div_near_daughter_um"] for p in prefixes), []), dtype=np.float64)
     sis = np.array(sum((acc[p]["div_sister_um"] for p in prefixes), []), dtype=np.float64)
     combos = [
-        ("DEPLOYED", 4.66, 7.65, 8.5),
+        ("DEPLOYED", _SD["BIOHUB_SAFE_DIV_MAX_UM"], _SD["BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM"], _SD["BIOHUB_SAFE_DIV_SISTER_MAX_UM"]),
         ("public 0.923", 12.0, 12.0, 15.0),
         ("+1 step", 6.0, 8.0, 10.0),
         ("+2 step", 8.0, 10.0, 12.0),
@@ -334,8 +346,8 @@ def main() -> None:
     # one-at-a-time relaxation from the deployed point
     print("\n  one-at-a-time relaxation from DEPLOYED (4.66 / 7.65 / 8.5):")
     for lab, i in (("parent", 0), ("child", 1), ("sister", 2)):
-        for v in (4.66, 6.0, 8.0, 10.0, 12.0, 14.0, 1e9):
-            g = [4.66, 7.65, 8.5]
+        for v in (_SD["BIOHUB_SAFE_DIV_MAX_UM"], 6.0, 8.0, 10.0, 12.0, 14.0, 1e9):
+            g = [_SD["BIOHUB_SAFE_DIV_MAX_UM"], _SD["BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM"], _SD["BIOHUB_SAFE_DIV_SISTER_MAX_UM"]]
             g[i] = v
             ok = (far <= g[0]) & (near <= g[1]) & (sis <= g[2])
             print(f"    {lab:7s}={v:8.2f} -> {int(ok.sum()):3d}/{ok.size} admissible "

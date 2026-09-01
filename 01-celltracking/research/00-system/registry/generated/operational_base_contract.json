@@ -1,0 +1,177 @@
+{
+  "defined_at": {
+    "BIOHUB_ADAPTIVE_SHORT_TRACK_RESCUE": "cell 0 line 27",
+    "BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT": "cell 0 line 42",
+    "BIOHUB_BIDIRECTIONAL_FUSION_MODE": "cell 0 line 43",
+    "BIOHUB_DEEPCENTER_CHECKPOINT": "cell 3 line 561",
+    "BIOHUB_DEEPCENTER_EXPECTED_EPOCH": "cell 0 line 52",
+    "BIOHUB_DEEPCENTER_GAP_CONFIRM_MIN_SPAN_UM": "cell 0 line 36",
+    "BIOHUB_DEEPCENTER_GAP_THRESHOLD": "cell 0 line 39",
+    "BIOHUB_DEEPCENTER_GAP_VETO": "cell 0 line 38",
+    "BIOHUB_DEEPCENTER_SAFE_DIV_VETO": "cell 0 line 53",
+    "BIOHUB_DET_THRESHOLD": "cell 0 line 6",
+    "BIOHUB_DIAGNOSTIC_ARM": "cell 0 line 45",
+    "BIOHUB_DUAL_SEED_EDGE_THRESHOLD": "cell 3 line 655",
+    "BIOHUB_DUAL_SEED_MIN_CANDIDATE_RETENTION": "cell 4 line 85",
+    "BIOHUB_GAP_CLOSE_MAX_GAP": "cell 0 line 10",
+    "BIOHUB_GAP_CLOSE_UM": "cell 0 line 11",
+    "BIOHUB_GAP_DENSITY_ADAPTIVE": "cell 0 line 12",
+    "BIOHUB_GAP_DENSITY_GAIN": "cell 0 line 14",
+    "BIOHUB_GAP_DENSITY_MAX_STEP_DELTA_UM": "cell 0 line 15",
+    "BIOHUB_GAP_DENSITY_NEIGHBORS": "cell 0 line 16",
+    "BIOHUB_GAP_DENSITY_REFERENCE_UM": "cell 0 line 13",
+    "BIOHUB_ILP_APPEARANCE_WEIGHT": "cell 0 line 8",
+    "BIOHUB_ILP_DISAPPEARANCE_WEIGHT": "cell 0 line 9",
+    "BIOHUB_ILP_DIVISION_WEIGHT": "cell 0 line 26",
+    "BIOHUB_MOTION_RELINK_LEARNED_BONUS": "cell 0 line 7",
+    "BIOHUB_OUTPUT_FILTER_SHORT_TRACKS": "cell 0 line 5",
+    "BIOHUB_OUTPUT_GAP2_RECOVERY": "cell 0 line 19",
+    "BIOHUB_OUTPUT_KEEP_DIVISION_COMPONENTS": "cell 0 line 18",
+    "BIOHUB_OUTPUT_MIN_TRACK_LEN": "cell 0 line 17",
+    "BIOHUB_REQUIRE_DEEPCENTER_VETO": "cell 0 line 34",
+    "BIOHUB_RUN_OUTPUT_DIAGNOSTICS": "cell 0 line 41",
+    "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM": "cell 0 line 22",
+    "BIOHUB_SAFE_DIV_FRAME_FRAC_CAP": "cell 0 line 23",
+    "BIOHUB_SAFE_DIV_GLOBAL_FRAC_CAP": "cell 0 line 24",
+    "BIOHUB_SAFE_DIV_MAX_UM": "cell 0 line 20",
+    "BIOHUB_SAFE_DIV_SISTER_MAX_UM": "cell 0 line 21",
+    "BIOHUB_SECONDARY_DETECTION_WEIGHT": "cell 3 line 651",
+    "BIOHUB_SECONDARY_EDGE_WEIGHT": "cell 3 line 645",
+    "BIOHUB_SECONDARY_LINK_MODE": "cell 3 line 652",
+    "BIOHUB_SECONDARY_LOW_MARGIN_MAX": "cell 3 line 654",
+    "BIOHUB_SECONDARY_MIX_TEMPERATURE": "cell 3 line 653",
+    "BIOHUB_SECONDARY_WEIGHTS": "cell 3 line 644",
+    "BIOHUB_SHORT_TRACK_RESCUE_MAX_MEAN_EDGE_DIST_UM": "cell 0 line 30",
+    "BIOHUB_SHORT_TRACK_RESCUE_MAX_NODES_ABS": "cell 0 line 32",
+    "BIOHUB_SHORT_TRACK_RESCUE_MAX_NODES_FRAC": "cell 0 line 31",
+    "BIOHUB_SHORT_TRACK_RESCUE_MIN_LEN": "cell 0 line 28",
+    "BIOHUB_SHORT_TRACK_RESCUE_MIN_MEAN_EDGE_PROB": "cell 0 line 29",
+    "BIOHUB_USE_DEEPCENTER_VETO": "cell 0 line 33"
+  },
+  "do_not_edit": "Generated. Edit the notebook or the spec, then regenerate; --check locks this file against hand edits.",
+  "extractor_self_check": {
+    "all_documented_flags_differ": true,
+    "differing_names": [
+      "BIOHUB_ADAPTIVE_SHORT_TRACK_RESCUE",
+      "BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT",
+      "BIOHUB_DEEPCENTER_CHECKPOINT",
+      "BIOHUB_DEEPCENTER_EXPECTED_EPOCH",
+      "BIOHUB_DEEPCENTER_SAFE_DIV_VETO",
+      "BIOHUB_DET_THRESHOLD",
+      "BIOHUB_ILP_DISAPPEARANCE_WEIGHT",
+      "BIOHUB_OUTPUT_GAP2_RECOVERY",
+      "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM",
+      "BIOHUB_SAFE_DIV_MAX_UM",
+      "BIOHUB_SAFE_DIV_SISTER_MAX_UM"
+    ],
+    "only_in_operational_base": [
+      "BIOHUB_BIDIRECTIONAL_FUSION_MODE",
+      "BIOHUB_DIAGNOSTIC_ARM",
+      "BIOHUB_ILP_DIVISION_WEIGHT",
+      "BIOHUB_SHORT_TRACK_RESCUE_MAX_MEAN_EDGE_DIST_UM",
+      "BIOHUB_SHORT_TRACK_RESCUE_MAX_NODES_ABS",
+      "BIOHUB_SHORT_TRACK_RESCUE_MAX_NODES_FRAC",
+      "BIOHUB_SHORT_TRACK_RESCUE_MIN_LEN",
+      "BIOHUB_SHORT_TRACK_RESCUE_MIN_MEAN_EDGE_PROB"
+    ],
+    "self_check": {
+      "BIOHUB_ADAPTIVE_SHORT_TRACK_RESCUE": {
+        "comparison": "0",
+        "differs": true,
+        "operational_base": "1"
+      },
+      "BIOHUB_OUTPUT_GAP2_RECOVERY": {
+        "comparison": "0",
+        "differs": true,
+        "operational_base": "1"
+      }
+    },
+    "shared_variables": 39,
+    "shared_variables_differing": 11
+  },
+  "generated_by": "scripts/core/baseline_contract.py",
+  "groups": {
+    "association": {
+      "BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT": "0.15",
+      "BIOHUB_BIDIRECTIONAL_FUSION_MODE": "harmonic_probability",
+      "BIOHUB_DUAL_SEED_EDGE_THRESHOLD": "0.48",
+      "BIOHUB_MOTION_RELINK_LEARNED_BONUS": "1.0",
+      "BIOHUB_SECONDARY_EDGE_WEIGHT": "0.15",
+      "BIOHUB_SHORT_TRACK_RESCUE_MAX_MEAN_EDGE_DIST_UM": "3.0",
+      "BIOHUB_SHORT_TRACK_RESCUE_MIN_MEAN_EDGE_PROB": "0.88"
+    },
+    "deepcenter_veto": {
+      "BIOHUB_DEEPCENTER_CHECKPOINT": {
+        "__unparsed__": "str("
+      },
+      "BIOHUB_DEEPCENTER_EXPECTED_EPOCH": "2",
+      "BIOHUB_DEEPCENTER_GAP_CONFIRM_MIN_SPAN_UM": "8.5",
+      "BIOHUB_DEEPCENTER_GAP_THRESHOLD": "0.25",
+      "BIOHUB_DEEPCENTER_GAP_VETO": "1",
+      "BIOHUB_REQUIRE_DEEPCENTER_VETO": "1",
+      "BIOHUB_USE_DEEPCENTER_VETO": "1"
+    },
+    "detection": {
+      "BIOHUB_DET_THRESHOLD": "0.965",
+      "BIOHUB_SECONDARY_DETECTION_WEIGHT": "0.475"
+    },
+    "diagnostics": {
+      "BIOHUB_DIAGNOSTIC_ARM": "harmonic_association_production"
+    },
+    "export": {},
+    "gap_recovery_filter": {
+      "BIOHUB_ADAPTIVE_SHORT_TRACK_RESCUE": "1",
+      "BIOHUB_GAP_CLOSE_MAX_GAP": "2",
+      "BIOHUB_GAP_CLOSE_UM": "5.8",
+      "BIOHUB_GAP_DENSITY_ADAPTIVE": "1",
+      "BIOHUB_GAP_DENSITY_GAIN": "0.040",
+      "BIOHUB_GAP_DENSITY_MAX_STEP_DELTA_UM": "0.125",
+      "BIOHUB_GAP_DENSITY_NEIGHBORS": "3",
+      "BIOHUB_GAP_DENSITY_REFERENCE_UM": "6.5",
+      "BIOHUB_OUTPUT_FILTER_SHORT_TRACKS": "1",
+      "BIOHUB_OUTPUT_GAP2_RECOVERY": "1",
+      "BIOHUB_OUTPUT_KEEP_DIVISION_COMPONENTS": "1",
+      "BIOHUB_OUTPUT_MIN_TRACK_LEN": "6",
+      "BIOHUB_RUN_OUTPUT_DIAGNOSTICS": "0",
+      "BIOHUB_SHORT_TRACK_RESCUE_MAX_NODES_ABS": "120",
+      "BIOHUB_SHORT_TRACK_RESCUE_MAX_NODES_FRAC": "0.012",
+      "BIOHUB_SHORT_TRACK_RESCUE_MIN_LEN": "4"
+    },
+    "ilp": {
+      "BIOHUB_ILP_APPEARANCE_WEIGHT": "0.0",
+      "BIOHUB_ILP_DISAPPEARANCE_WEIGHT": "2",
+      "BIOHUB_ILP_DIVISION_WEIGHT": "1.2"
+    },
+    "loeo": {},
+    "other": {
+      "BIOHUB_DUAL_SEED_MIN_CANDIDATE_RETENTION": "0.90",
+      "BIOHUB_SECONDARY_LINK_MODE": "low_margin_consensus",
+      "BIOHUB_SECONDARY_LOW_MARGIN_MAX": "0.35",
+      "BIOHUB_SECONDARY_MIX_TEMPERATURE": "1",
+      "BIOHUB_SECONDARY_WEIGHTS": {
+        "__unparsed__": "str(SECONDARY_WEIGHTS_PATH)"
+      }
+    },
+    "safe_division": {
+      "BIOHUB_DEEPCENTER_SAFE_DIV_VETO": "1",
+      "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM": "10.0",
+      "BIOHUB_SAFE_DIV_FRAME_FRAC_CAP": "0.0076",
+      "BIOHUB_SAFE_DIV_GLOBAL_FRAC_CAP": "0.00375",
+      "BIOHUB_SAFE_DIV_MAX_UM": "7.0",
+      "BIOHUB_SAFE_DIV_SISTER_MAX_UM": "12.0"
+    }
+  },
+  "multiply_assigned": {
+    "BIOHUB_DEEPCENTER_CHECKPOINT": 3,
+    "BIOHUB_DEEPCENTER_EXPECTED_EPOCH": 2,
+    "BIOHUB_DEEPCENTER_SAFE_DIV_VETO": 2,
+    "BIOHUB_DUAL_SEED_MIN_CANDIDATE_RETENTION": 2
+  },
+  "n_variables": 47,
+  "operational_base": {
+    "notebook": "notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb",
+    "notebook_sha256": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
+    "spec": "scripts/kaggle_specs/p35_dcveto_on_931.json"
+  },
+  "parsing_rule": "os.environ assignments, LAST ASSIGNMENT WINS in (cell, line) order - the factory appends spec overrides to the end of the matched cell, so an overridden knob is assigned more than once and the first hit is a value the process never holds."
+}

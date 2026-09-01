@@ -5,9 +5,13 @@ passed BEFORE any sister-gate work is funded.
 
 The three live gates in `add_safe_divisions_postlink` (deployment values from cell02):
 
-    SAFE_DIV_MAX_UM                = 4.66   parent -> NEW daughter
-    SAFE_DIV_EXISTING_CHILD_MAX_UM = 7.65   parent -> EXISTING child
-    SAFE_DIV_SISTER_MAX_UM         = 8.50   daughter <-> daughter
+    SAFE_DIV_MAX_UM                parent -> NEW daughter
+    SAFE_DIV_EXISTING_CHILD_MAX_UM parent -> EXISTING child
+    SAFE_DIV_SISTER_MAX_UM         daughter <-> daughter
+
+Their VALUES are read from the operational base at import time via
+`scripts/core/baseline_contract.py` and are deliberately not written here - the numbers this
+docstring used to quote were `p3_harmonic`'s, not the champion's.
 
 NOTE the gate that correction 6 killed is a DIFFERENT constant: `DIV_SISTER_MAX_UM = 8.0`
 inside `OUTPUT_DIVISION_GEOMETRY_FILTER`, which defaults "0" and is never enabled. Designing
@@ -24,9 +28,22 @@ REPO = pathlib.Path(r"c:\Users\aryaa\Documents\Biohub-CellTracking-2026")
 sys.path.insert(0, str(REPO / "src"))
 
 SCALE = (1.625, 0.40625, 0.40625)
-G_PARENT_NEW = 4.66
-G_PARENT_EXISTING = 7.65
-G_SISTER = 8.50
+# THE THREE LIVE GATES, READ FROM THE OPERATIONAL BASE - not copied.
+# These were 4.66 / 7.65 / 8.50, which is `p3_harmonic`'s geometry and NOT the champion's
+# (CLAUDE.md names p3_harmonic as explicitly not the champion). The same stale triple was
+# independently hard-coded in constant_audit.py and tests/test_lineage_degree_invariants.py.
+# Three copies, three chances to go stale, all three taken. baseline_contract regenerates
+# from the built notebook and has a --check drift lock, so there is now one copy and it moves
+# when the notebook moves.
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "core"))
+import baseline_contract as _BC  # noqa: E402
+
+_GEOM = _BC.safe_division()
+G_PARENT_NEW = _GEOM["BIOHUB_SAFE_DIV_MAX_UM"]
+G_PARENT_EXISTING = _GEOM["BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM"]
+G_SISTER = _GEOM["BIOHUB_SAFE_DIV_SISTER_MAX_UM"]
 
 
 def main():

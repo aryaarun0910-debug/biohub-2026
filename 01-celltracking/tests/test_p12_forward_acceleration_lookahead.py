@@ -34,10 +34,42 @@ def p12(monkeypatch):
     monkeypatch.setattr(
         module,
         "_position_um",
+        # identity map: this fixture reasons in UNIT coordinates, not deployed microns.
+        # See ISOTROPIC_UNIT_FIXTURE_SCALE below for why that is named rather than implied.
         lambda node: np.asarray([node["z"], node["y"], node["x"]], dtype=float),
         raising=False,
     )
     return module
+
+
+# ==============================================================================================
+# ISOTROPIC UNIT FIXTURE - NOT PRODUCTION GEOMETRY, AND NAMED SO IT CANNOT BE MISTAKEN FOR IT
+# ==============================================================================================
+# The deployed convention is FULL-RES (z, y, x) at (1.625, 0.40625, 0.40625) um - a 4:1:1
+# anisotropy. AGENTS.md section 4 records two of three distance analyses in one day starting with
+# the isotropic convention by mistake, and FACT-0447 records the discriminating figure: the
+# fold-1 GT inter-frame displacement median is 1.81681 um on the correct convention and 5.13870 um
+# on the isotropic one.
+#
+# The identity scale below is DELIBERATE and is not a bug: these tests exercise graph LOGIC -
+# degree invariants, relink ordering - where a unit scale makes the arithmetic legible and the
+# anisotropy is irrelevant. What was wrong is that it was an unnamed literal, indistinguishable
+# on sight from a fixture claiming to represent production data. It is named now, and
+# `test_the_unit_fixture_is_not_production_geometry` asserts the two differ, so this fixture can
+# never be quoted as evidence about deployed distances.
+ISOTROPIC_UNIT_FIXTURE_SCALE = (1.0, 1.0, 1.0)
+DEPLOYED_ANISOTROPIC_SCALE = (1.625, 0.40625, 0.40625)
+
+
+def test_the_unit_fixture_is_not_production_geometry():
+    assert ISOTROPIC_UNIT_FIXTURE_SCALE != DEPLOYED_ANISOTROPIC_SCALE, (
+        "the unit fixture has silently become the deployed convention, so tests written against "
+        "it would start reading as production evidence"
+    )
+    assert DEPLOYED_ANISOTROPIC_SCALE[0] / DEPLOYED_ANISOTROPIC_SCALE[1] == 4.0, (
+        "the deployed z:y ratio is 4:1; if this assertion moves, every distance instrument "
+        "calibrated against FACT-0040 needs rechecking"
+    )
 
 
 def node(t, z=0.0, y=0.0, x=0.0):

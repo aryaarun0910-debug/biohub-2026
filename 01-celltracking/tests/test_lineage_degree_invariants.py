@@ -27,27 +27,32 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 
+sys.path.insert(0, str(ROOT / "scripts" / "core"))
+import baseline_contract as BC  # noqa: E402
+
+
 @pytest.fixture(scope="module")
 def wrapper():
-    for key, value in {
-        "BIOHUB_SAFE_DIV_MAX_UM": "4.66",
-        "BIOHUB_SAFE_DIV_SISTER_MAX_UM": "8.5",
-        "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM": "7.65",
-        "BIOHUB_SAFE_DIV_FRAME_FRAC_CAP": "0.0076",
-        "BIOHUB_SAFE_DIV_GLOBAL_FRAC_CAP": "0.00375",
-    }.items():
-        os.environ[key] = value
+    """Configured from the OPERATIONAL BASE, read out of the built notebook.
+
+    This fixture used to hard-code 4.66 / 8.5 / 7.65 - `p3_harmonic`'s geometry, which CLAUDE.md
+    explicitly says is NOT the champion. Two other committed places held the same stale triple
+    (`constant_audit.py`, `scripts/d1/gt_division_gates.py`) and nothing anywhere encoded the
+    operational base's 7.0 / 12.0 / 10.0. Three independent copies, three independent chances to
+    go stale, and all three took it. So the numbers are no longer written here at all: they come
+    from `baseline_contract`, which regenerates from the notebook and has a --check drift lock.
+
+    The two frac caps were NOT stale, and that is worth noticing rather than glossing - a fixture
+    can be half-current, which is harder to spot than one that is wholly wrong.
+    """
+    geometry = BC.safe_division()
+    for key, value in geometry.items():
+        os.environ[key] = repr(value) if not isinstance(value, float) else f"{value}"
     from biotrack import wrapper as mod
 
-    for name, value in {
-        "SAFE_DIV_MAX_UM": 4.66,
-        "SAFE_DIV_SISTER_MAX_UM": 8.5,
-        "SAFE_DIV_EXISTING_CHILD_MAX_UM": 7.65,
-        "SAFE_DIV_FRAME_FRAC_CAP": 0.0076,
-        "SAFE_DIV_GLOBAL_FRAC_CAP": 0.00375,
-        "OUTPUT_SAFE_DIVISIONS": True,
-    }.items():
-        setattr(mod, name, value)
+    for key, value in geometry.items():
+        setattr(mod, key.removeprefix("BIOHUB_"), value)
+    setattr(mod, "OUTPUT_SAFE_DIVISIONS", True)
     return mod
 
 
