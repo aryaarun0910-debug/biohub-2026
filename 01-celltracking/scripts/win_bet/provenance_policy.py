@@ -274,6 +274,47 @@ def pair_refusals(fold, roles, digests=None) -> list[str]:
     return out
 
 
+POLICY_VERSION = "provenance_policy_v1"
+
+
+def policy_digest() -> str:
+    """A sha256 over the policy's SEMANTIC CONTENT, not over the file's bytes.
+
+    Hashing the file would move on a comment edit and, worse, would NOT move when the policy is
+    changed in memory - so two guards reading a mutated policy could still report matching
+    "versions" while acting on it. Hashing the decision tables makes the stamp a statement about
+    what was ENFORCED. Both guards embed it, so a receipt pair that disagrees is detectable
+    without re-running either guard.
+    """
+    import hashlib
+    import json as _json
+
+    payload = {
+        "version": POLICY_VERSION,
+        "fold_embryo": dict(sorted(FOLD_EMBRYO.items())),
+        "roles": {
+            role: {
+                "split": spec["split"],
+                "claim_folds": sorted(spec["claim_folds"]),
+                "permitted_folds": sorted(spec["permitted_folds"]),
+            }
+            for role, spec in sorted(ROLES.items())
+        },
+        "known_checkpoints": {
+            sha: rec["identity"] for sha, rec in sorted(KNOWN_CHECKPOINTS.items())
+        },
+    }
+    return hashlib.sha256(
+        _json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
+def policy_stamp() -> dict:
+    """The identity of the policy that actually ran. Required in BOTH guards' receipts."""
+    return {"policy_version": POLICY_VERSION, "policy_sha256": policy_digest(),
+            "policy_module": "scripts/win_bet/provenance_policy.py"}
+
+
 def describe(fold) -> dict:
     """What the policy says about one fold, for a receipt."""
     f = str(fold).strip()
@@ -285,4 +326,5 @@ def describe(fold) -> dict:
         "excluded_roles": sorted(set(ROLES) - permitted_roles(f)),
         "source": "scripts/win_bet/provenance_policy.py - the ONE policy both "
                   "audit_feature_cache and gpu_protection_contract consume (FACT-0418, FACT-0431)",
+        **policy_stamp(),
     }

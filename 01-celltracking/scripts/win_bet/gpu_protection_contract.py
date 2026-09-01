@@ -54,6 +54,12 @@ import sys
 from pathlib import Path
 
 REPO = next(p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists())
+if str(REPO / "scripts" / "win_bet") not in sys.path:
+    sys.path.insert(0, str(REPO / "scripts" / "win_bet"))
+
+import provenance_policy as PP  # noqa: E402  the ONE fold/trunk legitimacy policy (FACT-0418,
+#                                             FACT-0431). Module scope so its ABSENCE crashes.
+
 HEARTBEAT = "GPU_PROTECTION_CONTRACT_COMPLETE"
 
 PASS, FAIL, OOS = "PASS", "FAIL", "OUT_OF_SCOPE"
@@ -63,9 +69,17 @@ PASS, FAIL, OOS = "PASS", "FAIL", "OUT_OF_SCOPE"
 # and the submission profile must never use it.
 BYTES_PER_NODE = 1580
 SUPERSEDED_BYTES_PER_NODE = 128
-# FACT-0418: the pairing that has no fold-legitimate arm on either fold.
-INVALID_PAIR = ("official", "stabledet")
-LEGITIMATE_TRUNKS = {"0": {"pack_split0", "oof_split0"}, "1": {"oof_split1"}}
+# FACT-0418 / FACT-0431: `INVALID_PAIR` and `LEGITIMATE_TRUNKS` USED TO LIVE HERE, and that is
+# exactly what went wrong. `audit_feature_cache` kept its own table too, the two answered the
+# fold-legitimacy question differently, and whichever guard ran last looked authoritative. They
+# are RETIRED rather than corrected: correcting them would have bought agreement by coincidence
+# and hidden the next divergence. The single answer now lives in `provenance_policy` and is
+# consumed by both guards; `tests/test_provenance_policy.py` mutates the policy and asserts BOTH
+# guards move, which a local table could not satisfy.
+#
+# The import is at MODULE SCOPE on purpose. A missing policy must crash this module on import,
+# never leave a clause silently unchecked - a guard that quietly stops guarding is the failure
+# class this whole contract exists to prevent.
 DEPLOYED_PREDICTOR_SHA256 = "25b3ebfd8849dcf5abeff9ed3f0d57269a4b979365c989d6f78db1e5002d5219"
 GENERATED_PATCHES = {"scripts/kaggle_edits/assoc_tap_gate.py": "sync_tap_worker"}
 # A Kaggle notebook output slot is 20 GiB; a submission.csv is a text table and must be far under it.
@@ -186,40 +200,78 @@ def c_data_1(ctx):
 
 
 def c_data_2(ctx):
+    """Is the CLAIM ARM readable as a result on its own fold? Answered by the policy, not here.
+
+    The spec's own ``fold_legitimate`` declaration is recorded as evidence and is NOT consulted as
+    a decision: a spec asserting its own legitimacy is the override the policy exists to refuse.
+    """
     t, f = ctx["trunk"], _fold(ctx["spec"])
     if t is None:
         return _r(OOS, {"reason": "no trunk is declared, so there is no trunk to be legitimate; a "
                                   "single-trunk run claiming no pair is outside FACT-0418's scope"},
                   "declare an illegitimate trunk role")
-    legit = LEGITIMATE_TRUNKS.get(str(f), set())
-    return _b(bool(t.get("fold_legitimate")) and t.get("role") in legit,
-              {"fold": f, "role": t.get("role"), "declared": t.get("fold_legitimate"),
-               "legitimate_roles_for_this_fold": sorted(legit)},
-              "set role to 'official' on fold 1; the role leaves the legitimate set")
+    refusals = PP.claim_arm_refusals(f, t.get("role"))
+    return _b(not refusals,
+              {"fold": f, "role": t.get("role"),
+               "fold_legitimate_declared": bool(t.get("fold_legitimate")),
+               "declaration_is_evidence_not_a_decision": True,
+               "legitimate_claim_roles_for_this_fold": sorted(PP.legitimate_claim_roles(f)),
+               "refusals": refusals, **PP.policy_stamp()},
+              "set role to 'official' on fold 1; the policy removes it from the claim set")
 
 
 def c_data_3(ctx):
+    """Does the dual-trunk PAIR hold up on this fold? One policy call, no local table."""
     t, f = ctx["trunk"], _fold(ctx["spec"])
     pair = tuple((t or {}).get("dual_trunk_pair") or ())
     if not pair:
         return _r(OOS, {"reason": "no dual_trunk_pair is declared, so there is no pair to check"},
                   "declare the FACT-0418 pair ['official','stabledet']")
-    legit = LEGITIMATE_TRUNKS.get(str(f), set())
-    return _b(any(r in legit for r in pair) and tuple(pair) != INVALID_PAIR,
-              {"pair": list(pair), "is_the_fact_0418_invalid_pair": tuple(pair) == INVALID_PAIR,
-               "legitimate_roles_for_this_fold": sorted(legit)},
-              "declare ['official','stabledet']; the clause rejects it by name")
+    refusals = PP.pair_refusals(f, pair)
+    return _b(not refusals,
+              {"pair": list(pair), "fold": f,
+               "legitimate_claim_roles_for_this_fold": sorted(PP.legitimate_claim_roles(f)),
+               "permitted_roles_for_this_fold": sorted(PP.permitted_roles(f)),
+               "refusals": refusals, **PP.policy_stamp()},
+              "declare ['official','stabledet']; the policy rejects it by name")
 
 
 def c_data_4(ctx):
-    t = ctx["trunk"]
+    """Bind the declared ROLE to its BYTES. A role its digest contradicts is refused by name."""
+    t, f = ctx["trunk"], _fold(ctx["spec"])
     if t is None:
         return _r(OOS, {"reason": "no trunk is declared, so there is no checkpoint to bind"},
                   "declare a trunk with no checkpoint_sha256")
-    return _b(bool(t.get("contamination")) and bool(t.get("checkpoint_sha256")),
-              {"contamination": t.get("contamination"),
-               "checkpoint_sha256": t.get("checkpoint_sha256")},
-              "drop checkpoint_sha256; the binding is gone")
+    sha = t.get("checkpoint_sha256")
+    refusals = PP.role_binding_refusals(t.get("role"), sha, provenance=t.get("provenance"))
+    bound = bool(t.get("contamination")) and bool(sha)
+    if not bound:
+        refusals = list(refusals) + [
+            "trunk_binding_incomplete: contamination status and checkpoint_sha256 must BOTH be "
+            "declared; a role with no bytes behind it cannot be contradicted by them"]
+    return _b(not refusals,
+              {"contamination": t.get("contamination"), "checkpoint_sha256": sha,
+               "role": t.get("role"), "refusals": refusals, **PP.policy_stamp()},
+              "declare role 'official' with our OOF split_0 digest; the bytes contradict the role")
+
+
+def section_data(spec: dict, trunk: dict | None) -> list[dict]:
+    """The DATA clauses as a plain list, for callers that hold a spec and a trunk and no build.
+
+    ``run`` needs a built notebook on disk before it will sign anything, which is right for a
+    launch receipt and useless for asking "would this pair be accepted?". This accessor answers
+    the fold/trunk question alone, through the SAME clause functions the receipt uses, so the two
+    cannot drift apart. It is deliberately not a second implementation.
+    """
+    ctx = {"spec": spec, "trunk": trunk}
+    out = []
+    for cid in ("DATA-1", "DATA-2", "DATA-3", "DATA-4"):
+        title, fn = CLAUSES[cid]
+        res = fn(ctx)
+        out.append({"id": cid, "title": title, "status": res["status"],
+                    "passed": res["status"] == PASS, "evidence": res["evidence"],
+                    "proved_by_mutation": res["proved_by_mutation"]})
+    return out
 
 
 # ---------------------------------------------------------------- DATA (submission class)
@@ -748,7 +800,11 @@ def _selftest(sandbox: Path) -> int:
        st(c_code_2, spec={"edits": []}) == OOS)
     ck("DATA-3 mutation: the FACT-0418 pair with no fold-legitimate arm",
        st(c_data_3, spec=GOOD_CACHE_SPEC,
-          trunk={"role": "official", "dual_trunk_pair": list(INVALID_PAIR)}) == FAIL)
+          trunk={"role": "official",
+                 "dual_trunk_pair": ["official", "stabledet"]}) == FAIL)
+    ck("DATA-3 single source: the verdict follows provenance_policy, not a local table",
+       not hasattr(sys.modules[__name__], "LEGITIMATE_TRUNKS")
+       and not hasattr(sys.modules[__name__], "INVALID_PAIR"))
     ck("DATA-2 mutation: an illegitimate role DECLARED legitimate",
        st(c_data_2, spec=GOOD_CACHE_SPEC,
           trunk={"role": "official", "fold_legitimate": True}) == FAIL)

@@ -199,9 +199,18 @@ def test_the_generated_patch_matches_its_generator():
 
 
 def test_the_fact_0418_pair_with_no_legitimate_arm_is_rejected():
-    trunk = {"role": "official", "dual_trunk_pair": list(G.INVALID_PAIR)}
+    """The pair is named LITERALLY here, not read from the guard.
+
+    It used to be `list(G.INVALID_PAIR)`, which made the test agree with the guard by
+    construction: reintroducing a wrong table would have moved the test with it. The retired
+    constant is gone (FACT-0431), and the refusal now has to come from `provenance_policy`.
+    """
+    trunk = {"role": "official", "dual_trunk_pair": ["official", "stabledet"]}
     c = G.c_data_3(ctx(spec=CACHE_SPEC, trunk=trunk))
-    assert c["status"] == FAIL and c["evidence"]["is_the_fact_0418_invalid_pair"] is True
+    assert c["status"] == FAIL
+    assert any("pair_has_no_fold_legitimate_claim_arm" in r
+               for r in c["evidence"]["refusals"]), c["evidence"]["refusals"]
+    assert c["evidence"]["policy_version"] == "provenance_policy_v1"
 
 
 def test_an_illegitimate_role_declared_legitimate_is_rejected():
