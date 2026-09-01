@@ -171,9 +171,37 @@ result:
       - production raw-volume -> FOCUS masks/embeddings -> biohubx_io_v1 node adapter absent
       - one exact crop ID from each fold not yet preregistered
       - no built Kaggle spec or protection receipt for the production path
+      - full suite remains red outside the Biohub-X import boundary (FACT-0462); no waiver licenses GPU
     decision: >-
-      Spend no GPU until all three blockers are cleared on CPU. The packet budget remains one
+      Spend no GPU until every blocker is cleared on CPU. The packet budget remains one
       protected smoke session and zero submissions.
+
+  temporary_test_isolation:
+    fact: FACT-0462
+    status: CPU_WORK_ONLY_GPU_BLOCKED
+    exact_failures:
+      association_harness:
+        - test_cli_schema_then_gate_then_train_runs_the_whole_path
+        - test_cli_train_refuses_without_a_licence_and_without_a_manifest
+      provenance_policy:
+        - 'test_both_guards_return_the_same_verdict[0-pack_split0+stabledet]'
+        - 'test_both_guards_return_the_same_verdict[1-oof_split1+stabledet]'
+        - 'test_both_guards_return_the_same_verdict[0-official+stabledet]'
+        - 'test_both_guards_return_the_same_verdict[1-official+stabledet]'
+        - 'test_both_guards_return_the_same_verdict[0-oof_split1+stabledet]'
+        - 'test_both_guards_return_the_same_verdict[1-pack_split0+stabledet]'
+        - 'test_both_guards_return_the_same_verdict[1-oof_split1+official]'
+        - 'test_both_guards_return_the_same_verdict[0-oof_split0+stabledet]'
+        - test_fold_swap_split1_onto_fold0_is_rejected_by_both_guards
+        - test_fold_swap_split0_onto_fold1_is_rejected_by_both_guards
+        - test_the_swap_survives_the_specs_own_declaration_of_legitimacy
+        - test_the_two_local_tables_are_retired_not_corrected
+        - test_mutating_the_policy_moves_both_guards
+        - test_guard2_data4_refuses_a_role_its_digest_contradicts
+    mechanical_boundary: tests/test_biohubx_import_isolation.py
+    resolution: >-
+      Do not edit Gate B's live files beneath its workers. Once Gate B releases them, reconcile the
+      fixtures and guards, run the full suite green, and only then reconsider the protected smoke.
 
   phase_1_contract_frozen:
     artifact: scripts/win_bet/biohubx/contract.py (biohubx_io_v1)

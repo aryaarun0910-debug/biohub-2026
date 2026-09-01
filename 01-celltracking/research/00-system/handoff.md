@@ -3,7 +3,7 @@ id: 00-system/handoff
 title: Handoff
 area: 00-system
 status: active
-updated: '2026-08-30'
+updated: '2026-09-01'
 owner: biohub
 links: []
 tags: [handoff, entry-point]
@@ -11,6 +11,27 @@ record_kind: state
 ---
 
 # Current handoff
+
+> ## 2026-09-01 - RESUME: GATE B LIVE; XET IDENTITY DURABLE; TRACKASTRA OWNS A SEPARATE ARM
+>
+> **Gate B is resumed, not restarted.** The driver at `C:/temp/finaledge/gateB_v2/` is live
+> with three fold-1 workers claiming the existing atomic work queue. Its imported files remain
+> frozen until the driver releases them. This CPU lane spends no Kaggle quota.
+>
+> **The Xet false-refusal trap is now mechanical and durable (`FACT-0461`).** Download identity
+> comes only from the pinned Hugging Face API tree `lfs.oid`; Xet/HTTP headers are recorded but can
+> never become the expected file digest. The repair preserves the digest guard instead of weakening
+> it.
+>
+> **The red-suite boundary is explicit, not waived (`FACT-0462`).** A committed AST test proves
+> Biohub-X imports none of the failing Gate B/provenance surfaces, so CPU work may continue without
+> modifying the live run. The protected phase-3 smoke remains unlicensed until the repository-wide
+> suite is green. The exact failing tests and the deferred repair are frozen in `PKT-0049`.
+>
+> **Trackastra is now a second consumer, not a synonym for Biohub-X.** `PKT-0050` claims reopened
+> `LEVER-0005` solely as a COMPLETE graph owner over PKT-0049's one reusable FOCUS export. It may not
+> prune an incumbent graph, reuse the incumbent relink, reacquire the representation, exceed T=2
+> before a valid T=2 owner exists, or spend GPU/submissions under its current budget.
 
 > ## 2026-09-01 — BIOHUB-X FOUNDATION IS REAL; THE GPU SMOKE IS NOT YET LICENSED
 >

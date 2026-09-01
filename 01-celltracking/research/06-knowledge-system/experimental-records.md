@@ -6492,3 +6492,12 @@ released nuclei checkpoint clears the source-bound inference-state gate (`FACT-0
 submission was spent: the real two-crop smoke remains blocked on the production volume-to-mask
 adapter, exact crop preregistration and a signed Kaggle artifact. The repository-wide suite has 16
 failures confined to concurrent association/provenance work; the Biohub-X focused suite is clean.
+
+### 2026-09-01 - Biohub-X resume boundary and Trackastra ownership split
+
+Gate B resumed from its atomic CPU work queue with three workers and its live imports frozen. The
+FOCUS download identity rule is now committed and bound to the pinned API-tree `lfs.oid`
+(`FACT-0461`). The repository-wide failures are mechanically outside the Biohub-X import boundary
+but remain a GPU launch blocker (`FACT-0462`). `PKT-0050` separately claims `LEVER-0005` as a
+complete Trackastra graph owner over PKT-0049's reusable export; zero GPU sessions and zero
+submissions were spent.

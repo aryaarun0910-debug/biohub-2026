@@ -317,14 +317,28 @@ levers:
     claim: >-
       Trackastra OWNING re-association with its background class live, replacing the
       geometric LAP rather than filtering its output
-    status: parked
+    status: open
+    priority: 1
+    reopened_date: '2026-09-01'
+    reopened_by: PKT-0050
+    new_mechanism: >-
+      Consume the reusable FOCUS mask/center/embedding export as a COMPLETE graph owner with
+      Trackastra's background class live. This is not the killed pruning mechanism: no incumbent
+      graph, geometric LAP, motion relink or downstream re-parenter is retained.
+    falsifier: >-
+      Kill the graph-owning route if it cannot satisfy biohubx_io_v1 on one preregistered real crop
+      from each fold, or if its complete-fold emitted graph fails to improve raw association on fold
+      0 with division TP preserved and fold 1 non-catastrophic. An adjusted-only gain, a result that
+      depends on pruning an incumbent graph, or failure to establish a valid T=2 owner by the packet
+      checkpoint also kills the tested mechanism.
     reopen_when: >-
       A cheaper lever is exhausted, or the p15 reading shows the deficit is edges not
       divisions.
     note: >-
       A DIFFERENT mechanism from LEVER-0004 and explicitly NOT closed by it. The prior on it
       should drop given the pruning result, but the two are not the same experiment and the
-      distinction must not be collapsed.
+      distinction must not be collapsed. Reopened only for PKT-0050's complete graph-owner arm over
+      the same reusable export as PKT-0049; no GPU or submission is licensed by reopening it.
 
   - id: LEVER-0006
     claim: The remaining gap is divisions rather than edges

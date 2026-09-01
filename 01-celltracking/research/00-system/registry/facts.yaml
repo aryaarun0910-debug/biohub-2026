@@ -9597,3 +9597,76 @@ facts:
       does not patch that package or pretend a full training-model strict load occurred.
     date: '2026-09-01'
     tags: [focus3d, checkpoint, inference-contract, source-bound, verified]
+
+  - id: FACT-0461
+    statement: >-
+      ON THE PINNED XET-BACKED FOCUS-3D RELEASE, `x-linked-etag` IS NOT THE SHA-256 OF THE
+      DOWNLOADED BYTES. The pinned Hugging Face API tree's `lfs.oid` matches the measured file
+      digest and is the authoritative identity. Comparing downloaded bytes to the Xet header
+      falsely refuses a correct complete artifact; loosening digest verification to make that
+      refusal disappear would remove the real guard.
+    value: false
+    unit: x_linked_etag_equals_downloaded_file_sha256
+    scope:
+      repository: Qinghua-thu/FOCUS-3D
+      revision: 528455a03493d12f170c03384974318248b1774c
+      artifact: model_final_nuclei.pth
+      api_tree_lfs_oid: b14a7bd272f824adb1a1073bc3f2af17a95919d5a0c3f1d9011a8d82378d8f3a
+      measured_file_sha256: b14a7bd272f824adb1a1073bc3f2af17a95919d5a0c3f1d9011a8d82378d8f3a
+      x_linked_etag: d150fc228d231a470cccafd6be58851a379fa15657d4367e8cc8ee0098cae8b9
+      digest_authority: pinned API tree lfs.oid only
+      instrument_commit: b3dfcdf
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      Re-derived from the pinned release receipt and made mechanical at commit b3dfcdf. Mutation
+      tests accept a valid file when the Xet header differs, refuse a missing or malformed lfs.oid
+      even when the header looks like a SHA-256, refuse wrong bytes, and refuse an ambiguous API
+      tree match.
+    instrument: >-
+      scripts/win_bet/biohubx/hf_xet_digest.py; tests/test_hf_xet_digest.py;
+      C:/temp/focus3d/weights/receipt_model_final_nuclei.json
+    note: >-
+      This is a FALSE REFUSAL, the inverse of the campaign's silent-pass failures. The repair is
+      source selection, not weaker verification: preserve the digest check and bind it to lfs.oid.
+    date: '2026-09-01'
+    tags: [focus3d, huggingface, xet, digest, false-refusal, verified]
+
+  - id: FACT-0462
+    statement: >-
+      THE CURRENT FULL-SUITE FAILURES ARE OUTSIDE THE BIOHUB-X RUNTIME IMPORT BOUNDARY, BUT THEY
+      STILL BLOCK A GPU SMOKE. Two failures are stale association-harness fixtures missing the new
+      mandatory restriction field; the remainder exercise the separate provenance-policy guard.
+      A committed AST instrument proves that no Biohub-X module imports either live Gate B surface
+      or the failing provenance/restriction modules. This is an explicit temporary isolation record,
+      not a claim that a red full suite is acceptable.
+    value: 16
+    unit: full_suite_failures_at_biohubx_phase_2_boundary
+    scope:
+      association_fixture_failures: 2
+      provenance_policy_failures: 14
+      biohubx_import_offenders: 0
+      gate_b_files_edited: false
+      gpu_smoke_licensed: false
+      exact_test_modules:
+        - tests/test_assoc_train_harness.py
+        - tests/test_provenance_policy.py
+      isolation_test: tests/test_biohubx_import_isolation.py
+      instrument_commit: b3dfcdf
+    provenance: VERIFIED
+    validity: VALID
+    validity_reason: >-
+      The full suite identified exactly these two test modules; the focused Biohub-X/FOCUS/Xet
+      suite passes, and the committed AST test parses every Biohub-X module without importing it
+      and refuses any dependency on the named association, Gate B, restriction, or protection
+      surfaces. The suite remains a launch gate: phase 3 cannot consume GPU until it is green.
+    instrument: >-
+      pytest full-suite result at commit 37f30c9; tests/test_biohubx_import_isolation.py at
+      commit b3dfcdf; focused tests under tests/test_biohubx_*.py,
+      tests/test_focus3d_probe_state_contract.py and tests/test_hf_xet_digest.py
+    note: >-
+      Exact failing tests are recorded in PKT-0049. The isolation result permits CPU work on the
+      package while Gate B owns its live files; it does not waive AGENTS.md section 6 and does not
+      self-license a smoke.
+    date: '2026-09-01'
+    tags: [biohubx, test-isolation, red-suite, gpu-blocker, verified]
