@@ -14,6 +14,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -47,6 +48,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -80,6 +82,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -113,6 +116,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -146,6 +150,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -179,6 +184,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -212,6 +218,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -245,6 +252,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -278,6 +286,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -311,6 +320,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -344,6 +354,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -377,6 +388,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -410,6 +422,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": false,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -443,6 +456,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -476,6 +490,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -509,6 +524,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -542,6 +558,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -575,6 +592,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -608,6 +626,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -641,6 +660,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -674,6 +694,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -707,6 +728,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -740,6 +762,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -773,6 +796,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -806,6 +830,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -844,6 +869,7 @@
     "FACT-0001",
     "FACT-0331"
    ],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -854,7 +880,7 @@
    },
    "kernel_slug": "aryaarun07/biohub-p22-sdw060",
    "kernel_version": 1,
-   "manifest_sha256": "1830f99f464c42f4fb04e2302ec87dcdfd2d8b9c5d053a44f25e7de9e3331133",
+   "manifest_sha256": "5f99559543592af53c333aa333d2e8caf19a2c95e781fbad7e528aeee7812edc",
    "notebook_canonical_sha256": "8d8fd5a1107102690ed2ff30ec00675321688782187a98909a17ea5d3046d1c2",
    "notebook_dir": "notebooks/kaggle_p22_sdw060",
    "notebook_sha256": "b78a4659d4f554a246e55ad25062617724a5fb8a9fa34453bbafa39e65884496",
@@ -862,6 +888,8 @@
    "raw_receipt_location": "notebooks/kaggle_p22_sdw060/_out/audit_receipt.json",
    "raw_receipt_tracked": false,
    "receipt_id": "RECEIPT:kaggle_p22_sdw060",
+   "receipt_recorded_manifest_sha256": "1830f99f464c42f4fb04e2302ec87dcdfd2d8b9c5d053a44f25e7de9e3331133",
+   "receipt_recorded_notebook_sha256": "b78a4659d4f554a246e55ad25062617724a5fb8a9fa34453bbafa39e65884496",
    "redaction_status": "allow-listed: only the enumerated fields are copied",
    "schema_version": "receipt_envelope_v1",
    "spec_sha256": "51578eddaafaffde04a9b9697468431844cdb54eb66160f14e2895eafbcc26bc",
@@ -878,6 +906,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -911,6 +940,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -944,6 +974,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -977,6 +1008,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1010,6 +1042,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1043,6 +1076,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1076,6 +1110,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1109,6 +1144,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1142,6 +1178,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1175,6 +1212,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1208,6 +1246,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1241,6 +1280,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1280,6 +1320,7 @@
     "FACT-0377",
     "FACT-0378"
    ],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1290,7 +1331,7 @@
    },
    "kernel_slug": "aryaarun07/biohub-p32-public931-exact",
    "kernel_version": 1,
-   "manifest_sha256": "7f1bd01effe5115887276c7cd09cff30750ee2ef8edee888a5ea605d773d9138",
+   "manifest_sha256": "c0e322c9f7a729d66ca064617a41a1798f21a751de1ca1c01cf30014a431197b",
    "notebook_canonical_sha256": "933829b113f968b37e49123c48d3f7b9eae2e91d5422046074241d8811ee4a74",
    "notebook_dir": "notebooks/kaggle_p32_public931_exact",
    "notebook_sha256": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c",
@@ -1298,6 +1339,8 @@
    "raw_receipt_location": "notebooks/kaggle_p32_public931_exact/_out/audit_receipt.json",
    "raw_receipt_tracked": false,
    "receipt_id": "RECEIPT:kaggle_p32_public931_exact",
+   "receipt_recorded_manifest_sha256": "7f1bd01effe5115887276c7cd09cff30750ee2ef8edee888a5ea605d773d9138",
+   "receipt_recorded_notebook_sha256": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c",
    "redaction_status": "allow-listed: only the enumerated fields are copied",
    "schema_version": "receipt_envelope_v1",
    "spec_sha256": "837ab989d4c2c5e8ebf978420bfd238a4b86f2fea322ab847703361e8a50f78a",
@@ -1314,6 +1357,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1347,6 +1391,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1388,6 +1433,7 @@
     "FACT-0378",
     "FACT-0393"
    ],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1398,7 +1444,7 @@
    },
    "kernel_slug": "aryaarun07/biohub-p35-dcveto-on-931",
    "kernel_version": 1,
-   "manifest_sha256": "9ec0678c08d7a89f52bdabef4a6dc1cdaf15b69cece350d81ae03ba244579a4c",
+   "manifest_sha256": "14067c6eebe26f6fbaa29cdd4e62458cc20b54ff95dfe02def0d0f7c8fe2345d",
    "notebook_canonical_sha256": "c6e25574e94c4d30ddfcb0b9f43f29e896748d18d59d8766bd7a34e31b3ddc7c",
    "notebook_dir": "notebooks/kaggle_p35_dcveto_on_931",
    "notebook_sha256": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
@@ -1406,6 +1452,8 @@
    "raw_receipt_location": "notebooks/kaggle_p35_dcveto_on_931/_out/audit_receipt.json",
    "raw_receipt_tracked": false,
    "receipt_id": "RECEIPT:kaggle_p35_dcveto_on_931",
+   "receipt_recorded_manifest_sha256": "9ec0678c08d7a89f52bdabef4a6dc1cdaf15b69cece350d81ae03ba244579a4c",
+   "receipt_recorded_notebook_sha256": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
    "redaction_status": "allow-listed: only the enumerated fields are copied",
    "schema_version": "receipt_envelope_v1",
    "spec_sha256": "2b41cf00cfa0468e0959e47cf56be109fc569f4482890482ba157d22c463ee2b",
@@ -1422,6 +1470,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1455,6 +1504,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1492,6 +1542,7 @@
    "facts": [
     "FACT-0446"
    ],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1502,7 +1553,7 @@
    },
    "kernel_slug": "aryaarun07/biohub-p38-relink-bonus-b2",
    "kernel_version": 1,
-   "manifest_sha256": "9b02a02947f32cf4ae8c299ae7236d0b0977653c323575bc5fc77351539068eb",
+   "manifest_sha256": "c8e2cf92b190bc09a5bbe19d39c7d1f953d4ea41ef9a1fa47b58963529ddb0be",
    "notebook_canonical_sha256": "ae0e3efebb04804bed09415e0a4957dca03ecd2a6569d146f186fec91f799910",
    "notebook_dir": "notebooks/kaggle_p38_relink_bonus_b2",
    "notebook_sha256": "dad9cdf00372dd08b5da8a61ebe39b955cb594d69eb9f9c4329d322b3f112347",
@@ -1510,6 +1561,8 @@
    "raw_receipt_location": "notebooks/kaggle_p38_relink_bonus_b2/_out/audit_receipt.json",
    "raw_receipt_tracked": false,
    "receipt_id": "RECEIPT:kaggle_p38_relink_bonus_b2",
+   "receipt_recorded_manifest_sha256": "9b02a02947f32cf4ae8c299ae7236d0b0977653c323575bc5fc77351539068eb",
+   "receipt_recorded_notebook_sha256": "dad9cdf00372dd08b5da8a61ebe39b955cb594d69eb9f9c4329d322b3f112347",
    "redaction_status": "allow-listed: only the enumerated fields are copied",
    "schema_version": "receipt_envelope_v1",
    "spec_sha256": "299004111c349946d70d3a9ee436d59c3f7a01b53d019221fd867e549133254e",
@@ -1526,6 +1579,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1559,6 +1613,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1592,6 +1647,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": false,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1625,6 +1681,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1658,6 +1715,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": false,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1691,6 +1749,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": false,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1724,6 +1783,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1757,6 +1817,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1790,6 +1851,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1823,6 +1885,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1856,6 +1919,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1889,6 +1953,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1922,6 +1987,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1955,6 +2021,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": false,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -1988,6 +2055,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": false,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2021,6 +2089,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": false,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2054,6 +2123,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2087,6 +2157,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2120,6 +2191,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2153,6 +2225,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2186,6 +2259,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2219,6 +2293,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2252,6 +2327,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2285,6 +2361,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2318,6 +2395,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": true,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2351,6 +2429,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": false,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2384,6 +2463,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": false,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2417,6 +2497,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": false,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",
@@ -2450,6 +2531,7 @@
    "canonicalization_version": "canon_text_v1",
    "experiments": [],
    "facts": [],
+   "git_reproducible": false,
    "hash_kinds": {
     "artifact_sha256": "RAW_ARTIFACT_SHA256",
     "audit_tool_sha256": "RAW_ARTIFACT_SHA256",

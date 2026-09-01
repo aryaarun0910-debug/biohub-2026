@@ -2,7 +2,7 @@
  "research_docs": {
   "research/00-system/handoff.md": {
    "area": "00-system",
-   "bytes": 114161,
+   "canonical_bytes": 112659,
    "certified_by_validator": true,
    "doc_id": "00-system/handoff",
    "entity_links": {
@@ -211,6 +211,7 @@
      "PKT-0050"
     ]
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 32,
    "id": "DOC:research/00-system/handoff.md",
@@ -227,7 +228,7 @@
   },
   "research/00-system/system-design.md": {
    "area": "00-system",
-   "bytes": 9042,
+   "canonical_bytes": 8859,
    "certified_by_validator": true,
    "doc_id": "00-system/system-design",
    "entity_links": {
@@ -238,6 +239,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 15,
    "id": "DOC:research/00-system/system-design.md",
@@ -254,7 +256,7 @@
   },
   "research/01-research-direction/directional-updates.md": {
    "area": "01-research-direction",
-   "bytes": 15338,
+   "canonical_bytes": 15170,
    "certified_by_validator": true,
    "doc_id": "01-research-direction/directional-updates",
    "entity_links": {
@@ -286,6 +288,7 @@
     ],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 8,
    "id": "DOC:research/01-research-direction/directional-updates.md",
@@ -302,7 +305,7 @@
   },
   "research/01-research-direction/evaluation.md": {
    "area": "01-research-direction",
-   "bytes": 776,
+   "canonical_bytes": 742,
    "certified_by_validator": true,
    "doc_id": "01-research-direction/evaluation",
    "entity_links": {
@@ -311,6 +314,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/01-research-direction/evaluation.md",
@@ -327,7 +331,7 @@
   },
   "research/01-research-direction/portfolio-management.md": {
    "area": "01-research-direction",
-   "bytes": 800,
+   "canonical_bytes": 766,
    "certified_by_validator": true,
    "doc_id": "01-research-direction/portfolio-management",
    "entity_links": {
@@ -336,6 +340,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/01-research-direction/portfolio-management.md",
@@ -352,7 +357,7 @@
   },
   "research/01-research-direction/prioritisation.md": {
    "area": "01-research-direction",
-   "bytes": 1354,
+   "canonical_bytes": 1317,
    "certified_by_validator": true,
    "doc_id": "01-research-direction/prioritisation",
    "entity_links": {
@@ -363,6 +368,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/01-research-direction/prioritisation.md",
@@ -379,7 +385,7 @@
   },
   "research/01-research-direction/research-bets.md": {
    "area": "01-research-direction",
-   "bytes": 4995,
+   "canonical_bytes": 4924,
    "certified_by_validator": true,
    "doc_id": "01-research-direction/research-bets",
    "entity_links": {
@@ -388,6 +394,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 3,
    "id": "DOC:research/01-research-direction/research-bets.md",
@@ -404,7 +411,7 @@
   },
   "research/01-research-direction/research-landscape.md": {
    "area": "01-research-direction",
-   "bytes": 2984,
+   "canonical_bytes": 2924,
    "certified_by_validator": true,
    "doc_id": "01-research-direction/research-landscape",
    "entity_links": {
@@ -413,6 +420,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 6,
    "id": "DOC:research/01-research-direction/research-landscape.md",
@@ -429,7 +437,7 @@
   },
   "research/01-research-direction/research-themes.md": {
    "area": "01-research-direction",
-   "bytes": 1401,
+   "canonical_bytes": 1361,
    "certified_by_validator": true,
    "doc_id": "01-research-direction/research-themes",
    "entity_links": {
@@ -438,6 +446,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 6,
    "id": "DOC:research/01-research-direction/research-themes.md",
@@ -454,7 +463,7 @@
   },
   "research/01-research-direction/scientific-mission.md": {
    "area": "01-research-direction",
-   "bytes": 3420,
+   "canonical_bytes": 3351,
    "certified_by_validator": true,
    "doc_id": "01-research-direction/scientific-mission",
    "entity_links": {
@@ -472,6 +481,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 7,
    "id": "DOC:research/01-research-direction/scientific-mission.md",
@@ -488,7 +498,7 @@
   },
   "research/01-research-direction/scientific-questions.md": {
    "area": "01-research-direction",
-   "bytes": 1690,
+   "canonical_bytes": 1651,
    "certified_by_validator": true,
    "doc_id": "01-research-direction/scientific-questions",
    "entity_links": {
@@ -497,6 +507,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/01-research-direction/scientific-questions.md",
@@ -513,7 +524,7 @@
   },
   "research/02-theory/abstractions.md": {
    "area": "02-theory",
-   "bytes": 732,
+   "canonical_bytes": 698,
    "certified_by_validator": true,
    "doc_id": "02-theory/abstractions",
    "entity_links": {
@@ -522,6 +533,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/02-theory/abstractions.md",
@@ -538,7 +550,7 @@
   },
   "research/02-theory/assumptions.md": {
    "area": "02-theory",
-   "bytes": 693,
+   "canonical_bytes": 659,
    "certified_by_validator": true,
    "doc_id": "02-theory/assumptions",
    "entity_links": {
@@ -547,6 +559,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/02-theory/assumptions.md",
@@ -563,7 +576,7 @@
   },
   "research/02-theory/comparisons-with-evidence.md": {
    "area": "02-theory",
-   "bytes": 701,
+   "canonical_bytes": 667,
    "certified_by_validator": true,
    "doc_id": "02-theory/comparisons-with-evidence",
    "entity_links": {
@@ -572,6 +585,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/02-theory/comparisons-with-evidence.md",
@@ -588,7 +602,7 @@
   },
   "research/02-theory/competing-explanations.md": {
    "area": "02-theory",
-   "bytes": 744,
+   "canonical_bytes": 710,
    "certified_by_validator": true,
    "doc_id": "02-theory/competing-explanations",
    "entity_links": {
@@ -597,6 +611,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/02-theory/competing-explanations.md",
@@ -613,7 +628,7 @@
   },
   "research/02-theory/concepts-and-definitions.md": {
    "area": "02-theory",
-   "bytes": 3937,
+   "canonical_bytes": 3822,
    "certified_by_validator": true,
    "doc_id": "02-theory/concepts-and-definitions",
    "entity_links": {
@@ -622,6 +637,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 6,
    "id": "DOC:research/02-theory/concepts-and-definitions.md",
@@ -638,7 +654,7 @@
   },
   "research/02-theory/derivations.md": {
    "area": "02-theory",
-   "bytes": 687,
+   "canonical_bytes": 653,
    "certified_by_validator": true,
    "doc_id": "02-theory/derivations",
    "entity_links": {
@@ -647,6 +663,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/02-theory/derivations.md",
@@ -663,7 +680,7 @@
   },
   "research/02-theory/existing-knowledge.md": {
    "area": "02-theory",
-   "bytes": 2232,
+   "canonical_bytes": 2186,
    "certified_by_validator": true,
    "doc_id": "02-theory/existing-knowledge",
    "entity_links": {
@@ -674,6 +691,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/02-theory/existing-knowledge.md",
@@ -690,7 +708,7 @@
   },
   "research/02-theory/falsifiability.md": {
    "area": "02-theory",
-   "bytes": 1480,
+   "canonical_bytes": 1450,
    "certified_by_validator": true,
    "doc_id": "02-theory/falsifiability",
    "entity_links": {
@@ -699,6 +717,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 2,
    "id": "DOC:research/02-theory/falsifiability.md",
@@ -715,7 +734,7 @@
   },
   "research/02-theory/mathematical-models.md": {
    "area": "02-theory",
-   "bytes": 719,
+   "canonical_bytes": 685,
    "certified_by_validator": true,
    "doc_id": "02-theory/mathematical-models",
    "entity_links": {
@@ -724,6 +743,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/02-theory/mathematical-models.md",
@@ -740,7 +760,7 @@
   },
   "research/02-theory/mechanisms.md": {
    "area": "02-theory",
-   "bytes": 1987,
+   "canonical_bytes": 1940,
    "certified_by_validator": true,
    "doc_id": "02-theory/mechanisms",
    "entity_links": {
@@ -749,6 +769,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 6,
    "id": "DOC:research/02-theory/mechanisms.md",
@@ -765,7 +786,7 @@
   },
   "research/02-theory/new-theory.md": {
    "area": "02-theory",
-   "bytes": 660,
+   "canonical_bytes": 626,
    "certified_by_validator": true,
    "doc_id": "02-theory/new-theory",
    "entity_links": {
@@ -774,6 +795,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/02-theory/new-theory.md",
@@ -790,7 +812,7 @@
   },
   "research/02-theory/predictions.md": {
    "area": "02-theory",
-   "bytes": 739,
+   "canonical_bytes": 705,
    "certified_by_validator": true,
    "doc_id": "02-theory/predictions",
    "entity_links": {
@@ -799,6 +821,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/02-theory/predictions.md",
@@ -815,7 +838,7 @@
   },
   "research/02-theory/simulations-and-computation.md": {
    "area": "02-theory",
-   "bytes": 739,
+   "canonical_bytes": 705,
    "certified_by_validator": true,
    "doc_id": "02-theory/simulations-and-computation",
    "entity_links": {
@@ -824,6 +847,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/02-theory/simulations-and-computation.md",
@@ -840,7 +864,7 @@
   },
   "research/02-theory/theory-revision.md": {
    "area": "02-theory",
-   "bytes": 707,
+   "canonical_bytes": 673,
    "certified_by_validator": true,
    "doc_id": "02-theory/theory-revision",
    "entity_links": {
@@ -849,6 +873,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/02-theory/theory-revision.md",
@@ -865,7 +890,7 @@
   },
   "research/03-experimentation/data-collection.md": {
    "area": "03-experimentation",
-   "bytes": 716,
+   "canonical_bytes": 682,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/data-collection",
    "entity_links": {
@@ -874,6 +899,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/03-experimentation/data-collection.md",
@@ -890,7 +916,7 @@
   },
   "research/03-experimentation/execution.md": {
    "area": "03-experimentation",
-   "bytes": 740,
+   "canonical_bytes": 706,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/execution",
    "entity_links": {
@@ -899,6 +925,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/03-experimentation/execution.md",
@@ -915,7 +942,7 @@
   },
   "research/03-experimentation/experimental-design.md": {
    "area": "03-experimentation",
-   "bytes": 1253,
+   "canonical_bytes": 1217,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/experimental-design",
    "entity_links": {
@@ -924,6 +951,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/03-experimentation/experimental-design.md",
@@ -940,7 +968,7 @@
   },
   "research/03-experimentation/experimental-iteration.md": {
    "area": "03-experimentation",
-   "bytes": 721,
+   "canonical_bytes": 687,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/experimental-iteration",
    "entity_links": {
@@ -949,6 +977,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/03-experimentation/experimental-iteration.md",
@@ -965,7 +994,7 @@
   },
   "research/03-experimentation/experimental-materials.md": {
    "area": "03-experimentation",
-   "bytes": 757,
+   "canonical_bytes": 723,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/experimental-materials",
    "entity_links": {
@@ -974,6 +1003,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/03-experimentation/experimental-materials.md",
@@ -990,7 +1020,7 @@
   },
   "research/03-experimentation/experimental-question.md": {
    "area": "03-experimentation",
-   "bytes": 756,
+   "canonical_bytes": 722,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/experimental-question",
    "entity_links": {
@@ -999,6 +1029,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/03-experimentation/experimental-question.md",
@@ -1015,7 +1046,7 @@
   },
   "research/03-experimentation/failure-analysis.md": {
    "area": "03-experimentation",
-   "bytes": 705,
+   "canonical_bytes": 671,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/failure-analysis",
    "entity_links": {
@@ -1024,6 +1055,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/03-experimentation/failure-analysis.md",
@@ -1040,7 +1072,7 @@
   },
   "research/03-experimentation/hypothesis-translation.md": {
    "area": "03-experimentation",
-   "bytes": 745,
+   "canonical_bytes": 711,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/hypothesis-translation",
    "entity_links": {
@@ -1049,6 +1081,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/03-experimentation/hypothesis-translation.md",
@@ -1065,7 +1098,7 @@
   },
   "research/03-experimentation/instrumentation.md": {
    "area": "03-experimentation",
-   "bytes": 2192,
+   "canonical_bytes": 2192,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/instrumentation",
    "entity_links": {
@@ -1074,6 +1107,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/03-experimentation/instrumentation.md",
@@ -1090,7 +1124,7 @@
   },
   "research/03-experimentation/protocol.md": {
    "area": "03-experimentation",
-   "bytes": 1289,
+   "canonical_bytes": 1253,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/protocol",
    "entity_links": {
@@ -1099,6 +1133,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/03-experimentation/protocol.md",
@@ -1115,7 +1150,7 @@
   },
   "research/03-experimentation/quality-control.md": {
    "area": "03-experimentation",
-   "bytes": 16771,
+   "canonical_bytes": 16502,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/quality-control",
    "entity_links": {
@@ -1124,6 +1159,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 9,
    "id": "DOC:research/03-experimentation/quality-control.md",
@@ -1140,7 +1176,7 @@
   },
   "research/03-experimentation/replication.md": {
    "area": "03-experimentation",
-   "bytes": 738,
+   "canonical_bytes": 704,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/replication",
    "entity_links": {
@@ -1149,6 +1185,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/03-experimentation/replication.md",
@@ -1165,7 +1202,7 @@
   },
   "research/03-experimentation/statistical-power.md": {
    "area": "03-experimentation",
-   "bytes": 754,
+   "canonical_bytes": 720,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/statistical-power",
    "entity_links": {
@@ -1174,6 +1211,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/03-experimentation/statistical-power.md",
@@ -1190,7 +1228,7 @@
   },
   "research/03-experimentation/variables.md": {
    "area": "03-experimentation",
-   "bytes": 734,
+   "canonical_bytes": 700,
    "certified_by_validator": true,
    "doc_id": "03-experimentation/variables",
    "entity_links": {
@@ -1199,6 +1237,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/03-experimentation/variables.md",
@@ -1215,7 +1254,7 @@
   },
   "research/04-data/cleaning.md": {
    "area": "04-data",
-   "bytes": 666,
+   "canonical_bytes": 632,
    "certified_by_validator": true,
    "doc_id": "04-data/cleaning",
    "entity_links": {
@@ -1224,6 +1263,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/04-data/cleaning.md",
@@ -1240,7 +1280,7 @@
   },
   "research/04-data/data-acquisition.md": {
    "area": "04-data",
-   "bytes": 2220,
+   "canonical_bytes": 2176,
    "certified_by_validator": true,
    "doc_id": "04-data/data-acquisition",
    "entity_links": {
@@ -1249,6 +1289,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/04-data/data-acquisition.md",
@@ -1265,7 +1306,7 @@
   },
   "research/04-data/data-governance.md": {
    "area": "04-data",
-   "bytes": 1378,
+   "canonical_bytes": 1344,
    "certified_by_validator": true,
    "doc_id": "04-data/data-governance",
    "entity_links": {
@@ -1276,6 +1317,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/04-data/data-governance.md",
@@ -1292,7 +1334,7 @@
   },
   "research/04-data/databases.md": {
    "area": "04-data",
-   "bytes": 1514,
+   "canonical_bytes": 1472,
    "certified_by_validator": true,
    "doc_id": "04-data/databases",
    "entity_links": {
@@ -1301,6 +1343,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/04-data/databases.md",
@@ -1317,7 +1360,7 @@
   },
   "research/04-data/metadata.md": {
    "area": "04-data",
-   "bytes": 8085,
+   "canonical_bytes": 7925,
    "certified_by_validator": true,
    "doc_id": "04-data/metadata",
    "entity_links": {
@@ -1326,6 +1369,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 10,
    "id": "DOC:research/04-data/metadata.md",
@@ -1342,7 +1386,7 @@
   },
   "research/04-data/storage.md": {
    "area": "04-data",
-   "bytes": 1339,
+   "canonical_bytes": 1302,
    "certified_by_validator": true,
    "doc_id": "04-data/storage",
    "entity_links": {
@@ -1351,6 +1395,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/04-data/storage.md",
@@ -1367,7 +1412,7 @@
   },
   "research/04-data/versioning.md": {
    "area": "04-data",
-   "bytes": 690,
+   "canonical_bytes": 656,
    "certified_by_validator": true,
    "doc_id": "04-data/versioning",
    "entity_links": {
@@ -1376,6 +1421,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/04-data/versioning.md",
@@ -1392,7 +1438,7 @@
   },
   "research/05-analysis/error-uncertainty-analysis.md": {
    "area": "05-analysis",
-   "bytes": 744,
+   "canonical_bytes": 710,
    "certified_by_validator": true,
    "doc_id": "05-analysis/error-uncertainty-analysis",
    "entity_links": {
@@ -1401,6 +1447,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/05-analysis/error-uncertainty-analysis.md",
@@ -1417,7 +1464,7 @@
   },
   "research/05-analysis/machine-learning-deep-learning.md": {
    "area": "05-analysis",
-   "bytes": 1421,
+   "canonical_bytes": 1385,
    "certified_by_validator": true,
    "doc_id": "05-analysis/machine-learning-deep-learning",
    "entity_links": {
@@ -1426,6 +1473,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/05-analysis/machine-learning-deep-learning.md",
@@ -1442,7 +1490,7 @@
   },
   "research/05-analysis/mathematical-analysis.md": {
    "area": "05-analysis",
-   "bytes": 729,
+   "canonical_bytes": 695,
    "certified_by_validator": true,
    "doc_id": "05-analysis/mathematical-analysis",
    "entity_links": {
@@ -1451,6 +1499,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/05-analysis/mathematical-analysis.md",
@@ -1467,7 +1516,7 @@
   },
   "research/05-analysis/simulation.md": {
    "area": "05-analysis",
-   "bytes": 686,
+   "canonical_bytes": 652,
    "certified_by_validator": true,
    "doc_id": "05-analysis/simulation",
    "entity_links": {
@@ -1476,6 +1525,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/05-analysis/simulation.md",
@@ -1492,7 +1542,7 @@
   },
   "research/05-analysis/statistics.md": {
    "area": "05-analysis",
-   "bytes": 700,
+   "canonical_bytes": 666,
    "certified_by_validator": true,
    "doc_id": "05-analysis/statistics",
    "entity_links": {
@@ -1501,6 +1551,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/05-analysis/statistics.md",
@@ -1517,7 +1568,7 @@
   },
   "research/05-analysis/visualisation.md": {
    "area": "05-analysis",
-   "bytes": 687,
+   "canonical_bytes": 653,
    "certified_by_validator": true,
    "doc_id": "05-analysis/visualisation",
    "entity_links": {
@@ -1526,6 +1577,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/05-analysis/visualisation.md",
@@ -1542,7 +1594,7 @@
   },
   "research/06-knowledge-system/claims-table.md": {
    "area": null,
-   "bytes": 10457,
+   "canonical_bytes": 10316,
    "certified_by_validator": true,
    "doc_id": null,
    "entity_links": {
@@ -1551,6 +1603,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 15,
    "id": "DOC:research/06-knowledge-system/claims-table.md",
@@ -1567,7 +1620,7 @@
   },
   "research/06-knowledge-system/experimental-records.md": {
    "area": "06-knowledge-system",
-   "bytes": 439875,
+   "canonical_bytes": 439875,
    "certified_by_validator": true,
    "doc_id": "06-knowledge-system/experimental-records",
    "entity_links": {
@@ -1787,6 +1840,7 @@
      "PKT-0050"
     ]
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 325,
    "id": "DOC:research/06-knowledge-system/experimental-records.md",
@@ -1803,7 +1857,7 @@
   },
   "research/06-knowledge-system/failed-experiments.md": {
    "area": "06-knowledge-system",
-   "bytes": 1521,
+   "canonical_bytes": 1481,
    "certified_by_validator": true,
    "doc_id": "06-knowledge-system/failed-experiments",
    "entity_links": {
@@ -1812,6 +1866,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/06-knowledge-system/failed-experiments.md",
@@ -1828,7 +1883,7 @@
   },
   "research/06-knowledge-system/institutional-memory.md": {
    "area": "06-knowledge-system",
-   "bytes": 1381,
+   "canonical_bytes": 1341,
    "certified_by_validator": true,
    "doc_id": "06-knowledge-system/institutional-memory",
    "entity_links": {
@@ -1837,6 +1892,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/06-knowledge-system/institutional-memory.md",
@@ -1853,7 +1909,7 @@
   },
   "research/06-knowledge-system/internal-reports.md": {
    "area": "06-knowledge-system",
-   "bytes": 5908,
+   "canonical_bytes": 5879,
    "certified_by_validator": true,
    "doc_id": "06-knowledge-system/internal-reports",
    "entity_links": {
@@ -1880,6 +1936,7 @@
     ],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/06-knowledge-system/internal-reports.md",
@@ -1896,7 +1953,7 @@
   },
   "research/06-knowledge-system/internal-reports/architecture_training_2026-08-19.md": {
    "area": null,
-   "bytes": 73381,
+   "canonical_bytes": 73381,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -1907,6 +1964,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 42,
    "id": "DOC:research/06-knowledge-system/internal-reports/architecture_training_2026-08-19.md",
@@ -1923,7 +1981,7 @@
   },
   "research/06-knowledge-system/internal-reports/audit_config_2026-08-22.md": {
    "area": null,
-   "bytes": 31401,
+   "canonical_bytes": 31401,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -1932,6 +1990,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 17,
    "id": "DOC:research/06-knowledge-system/internal-reports/audit_config_2026-08-22.md",
@@ -1948,7 +2007,7 @@
   },
   "research/06-knowledge-system/internal-reports/audit_constants_2026-08-22.md": {
    "area": null,
-   "bytes": 16684,
+   "canonical_bytes": 16684,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -1957,6 +2016,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 18,
    "id": "DOC:research/06-knowledge-system/internal-reports/audit_constants_2026-08-22.md",
@@ -1973,7 +2033,7 @@
   },
   "research/06-knowledge-system/internal-reports/audit_deadcode_2026-08-22.md": {
    "area": null,
-   "bytes": 35996,
+   "canonical_bytes": 35996,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -1982,6 +2042,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 29,
    "id": "DOC:research/06-knowledge-system/internal-reports/audit_deadcode_2026-08-22.md",
@@ -1998,7 +2059,7 @@
   },
   "research/06-knowledge-system/internal-reports/audit_synthesis_2026-08-22.md": {
    "area": null,
-   "bytes": 40365,
+   "canonical_bytes": 39837,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2007,6 +2068,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 26,
    "id": "DOC:research/06-knowledge-system/internal-reports/audit_synthesis_2026-08-22.md",
@@ -2023,7 +2085,7 @@
   },
   "research/06-knowledge-system/internal-reports/audit_vendordrift_2026-08-22.md": {
    "area": null,
-   "bytes": 32000,
+   "canonical_bytes": 31562,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2032,6 +2094,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 19,
    "id": "DOC:research/06-knowledge-system/internal-reports/audit_vendordrift_2026-08-22.md",
@@ -2048,7 +2111,7 @@
   },
   "research/06-knowledge-system/internal-reports/bet_consolidation_2026-08-18.md": {
    "area": null,
-   "bytes": 50448,
+   "canonical_bytes": 50448,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2057,6 +2120,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 24,
    "id": "DOC:research/06-knowledge-system/internal-reports/bet_consolidation_2026-08-18.md",
@@ -2073,7 +2137,7 @@
   },
   "research/06-knowledge-system/internal-reports/biology_priors_2026-08-19.md": {
    "area": null,
-   "bytes": 40356,
+   "canonical_bytes": 40356,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2082,6 +2146,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 21,
    "id": "DOC:research/06-knowledge-system/internal-reports/biology_priors_2026-08-19.md",
@@ -2098,7 +2163,7 @@
   },
   "research/06-knowledge-system/internal-reports/competitive_frontier_2026-08-16.md": {
    "area": null,
-   "bytes": 5302,
+   "canonical_bytes": 5302,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2107,6 +2172,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 8,
    "id": "DOC:research/06-knowledge-system/internal-reports/competitive_frontier_2026-08-16.md",
@@ -2123,7 +2189,7 @@
   },
   "research/06-knowledge-system/internal-reports/competitive_refresh_2026-08-17.md": {
    "area": null,
-   "bytes": 13045,
+   "canonical_bytes": 13045,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2132,6 +2198,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 7,
    "id": "DOC:research/06-knowledge-system/internal-reports/competitive_refresh_2026-08-17.md",
@@ -2148,7 +2215,7 @@
   },
   "research/06-knowledge-system/internal-reports/cross_embryo_gap_2026-08-18.md": {
    "area": null,
-   "bytes": 23623,
+   "canonical_bytes": 23623,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2157,6 +2224,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 24,
    "id": "DOC:research/06-knowledge-system/internal-reports/cross_embryo_gap_2026-08-18.md",
@@ -2173,7 +2241,7 @@
   },
   "research/06-knowledge-system/internal-reports/cross_synthesis_2026-08-19.md": {
    "area": null,
-   "bytes": 47434,
+   "canonical_bytes": 47434,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2182,6 +2250,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 20,
    "id": "DOC:research/06-knowledge-system/internal-reports/cross_synthesis_2026-08-19.md",
@@ -2198,7 +2267,7 @@
   },
   "research/06-knowledge-system/internal-reports/detection_threshold_2026-08-18.md": {
    "area": null,
-   "bytes": 25393,
+   "canonical_bytes": 25393,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2207,6 +2276,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 24,
    "id": "DOC:research/06-knowledge-system/internal-reports/detection_threshold_2026-08-18.md",
@@ -2223,7 +2293,7 @@
   },
   "research/06-knowledge-system/internal-reports/division_lane_2026-08-18.md": {
    "area": null,
-   "bytes": 35155,
+   "canonical_bytes": 35155,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2232,6 +2302,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 27,
    "id": "DOC:research/06-knowledge-system/internal-reports/division_lane_2026-08-18.md",
@@ -2248,7 +2319,7 @@
   },
   "research/06-knowledge-system/internal-reports/edge_loss_structure_2026-08-18.md": {
    "area": null,
-   "bytes": 38308,
+   "canonical_bytes": 38308,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2257,6 +2328,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 27,
    "id": "DOC:research/06-knowledge-system/internal-reports/edge_loss_structure_2026-08-18.md",
@@ -2273,7 +2345,7 @@
   },
   "research/06-knowledge-system/internal-reports/edge_training_frontier_2026-08-18.md": {
    "area": null,
-   "bytes": 33249,
+   "canonical_bytes": 32791,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2282,6 +2354,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 27,
    "id": "DOC:research/06-knowledge-system/internal-reports/edge_training_frontier_2026-08-18.md",
@@ -2298,7 +2371,7 @@
   },
   "research/06-knowledge-system/internal-reports/endgame_strategy_2026-08-18.md": {
    "area": null,
-   "bytes": 35489,
+   "canonical_bytes": 35489,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2307,6 +2380,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 24,
    "id": "DOC:research/06-knowledge-system/internal-reports/endgame_strategy_2026-08-18.md",
@@ -2323,7 +2397,7 @@
   },
   "research/06-knowledge-system/internal-reports/error_atlas_2026-08-19.md": {
    "area": null,
-   "bytes": 28164,
+   "canonical_bytes": 27668,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2332,6 +2406,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 19,
    "id": "DOC:research/06-knowledge-system/internal-reports/error_atlas_2026-08-19.md",
@@ -2348,7 +2423,7 @@
   },
   "research/06-knowledge-system/internal-reports/foundation_models_2026-08-17.md": {
    "area": null,
-   "bytes": 33481,
+   "canonical_bytes": 33481,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2357,6 +2432,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 20,
    "id": "DOC:research/06-knowledge-system/internal-reports/foundation_models_2026-08-17.md",
@@ -2373,7 +2449,7 @@
   },
   "research/06-knowledge-system/internal-reports/h1_execution_spec_2026-08-18.md": {
    "area": null,
-   "bytes": 52255,
+   "canonical_bytes": 52255,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2382,6 +2458,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 36,
    "id": "DOC:research/06-knowledge-system/internal-reports/h1_execution_spec_2026-08-18.md",
@@ -2398,7 +2475,7 @@
   },
   "research/06-knowledge-system/internal-reports/instrument_repair_2026-08-18.md": {
    "area": null,
-   "bytes": 25323,
+   "canonical_bytes": 25323,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2407,6 +2484,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 25,
    "id": "DOC:research/06-knowledge-system/internal-reports/instrument_repair_2026-08-18.md",
@@ -2423,7 +2501,7 @@
   },
   "research/06-knowledge-system/internal-reports/kaggle_winners_playbook_2026-08-17.md": {
    "area": null,
-   "bytes": 43373,
+   "canonical_bytes": 42823,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2432,6 +2510,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 21,
    "id": "DOC:research/06-knowledge-system/internal-reports/kaggle_winners_playbook_2026-08-17.md",
@@ -2448,7 +2527,7 @@
   },
   "research/06-knowledge-system/internal-reports/linker_division_capacity_2026-08-18.md": {
    "area": null,
-   "bytes": 33020,
+   "canonical_bytes": 33020,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2457,6 +2536,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 21,
    "id": "DOC:research/06-knowledge-system/internal-reports/linker_division_capacity_2026-08-18.md",
@@ -2473,7 +2553,7 @@
   },
   "research/06-knowledge-system/internal-reports/live_surface_2026-08-18.md": {
    "area": null,
-   "bytes": 15261,
+   "canonical_bytes": 15261,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2482,6 +2562,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 9,
    "id": "DOC:research/06-knowledge-system/internal-reports/live_surface_2026-08-18.md",
@@ -2498,7 +2579,7 @@
   },
   "research/06-knowledge-system/internal-reports/loeo_lb_gap_2026-08-18.md": {
    "area": null,
-   "bytes": 23320,
+   "canonical_bytes": 23320,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2507,6 +2588,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 19,
    "id": "DOC:research/06-knowledge-system/internal-reports/loeo_lb_gap_2026-08-18.md",
@@ -2523,7 +2605,7 @@
   },
   "research/06-knowledge-system/internal-reports/methods_frontier_2026-08-16.md": {
    "area": null,
-   "bytes": 5990,
+   "canonical_bytes": 5990,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2532,6 +2614,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 9,
    "id": "DOC:research/06-knowledge-system/internal-reports/methods_frontier_2026-08-16.md",
@@ -2548,7 +2631,7 @@
   },
   "research/06-knowledge-system/internal-reports/metric_forensics_2026-08-17.md": {
    "area": null,
-   "bytes": 33467,
+   "canonical_bytes": 33467,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2557,6 +2640,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 21,
    "id": "DOC:research/06-knowledge-system/internal-reports/metric_forensics_2026-08-17.md",
@@ -2573,7 +2657,7 @@
   },
   "research/06-knowledge-system/internal-reports/novel_crossdomain_2026-08-17.md": {
    "area": null,
-   "bytes": 18119,
+   "canonical_bytes": 18119,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2582,6 +2666,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 13,
    "id": "DOC:research/06-knowledge-system/internal-reports/novel_crossdomain_2026-08-17.md",
@@ -2598,7 +2683,7 @@
   },
   "research/06-knowledge-system/internal-reports/operating_point_2026-08-18.md": {
    "area": null,
-   "bytes": 27352,
+   "canonical_bytes": 26918,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2607,6 +2692,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 17,
    "id": "DOC:research/06-knowledge-system/internal-reports/operating_point_2026-08-18.md",
@@ -2623,7 +2709,7 @@
   },
   "research/06-knowledge-system/internal-reports/proprietary_incumbents_2026-08-17.md": {
    "area": null,
-   "bytes": 41182,
+   "canonical_bytes": 41182,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2632,6 +2718,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 19,
    "id": "DOC:research/06-knowledge-system/internal-reports/proprietary_incumbents_2026-08-17.md",
@@ -2648,7 +2735,7 @@
   },
   "research/06-knowledge-system/internal-reports/public_code_teardown_2026-08-19.md": {
    "area": null,
-   "bytes": 56338,
+   "canonical_bytes": 56338,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2657,6 +2744,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 38,
    "id": "DOC:research/06-knowledge-system/internal-reports/public_code_teardown_2026-08-19.md",
@@ -2673,7 +2761,7 @@
   },
   "research/06-knowledge-system/internal-reports/quickwins_internal_2026-08-17.md": {
    "area": null,
-   "bytes": 12218,
+   "canonical_bytes": 12218,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2682,6 +2770,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 9,
    "id": "DOC:research/06-knowledge-system/internal-reports/quickwins_internal_2026-08-17.md",
@@ -2698,7 +2787,7 @@
   },
   "research/06-knowledge-system/internal-reports/redteam_blindspots_2026-08-17.md": {
    "area": null,
-   "bytes": 18896,
+   "canonical_bytes": 18896,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2707,6 +2796,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 9,
    "id": "DOC:research/06-knowledge-system/internal-reports/redteam_blindspots_2026-08-17.md",
@@ -2723,7 +2813,7 @@
   },
   "research/06-knowledge-system/internal-reports/retrain_recipes_2026-08-17.md": {
    "area": null,
-   "bytes": 49433,
+   "canonical_bytes": 48791,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2732,6 +2822,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 15,
    "id": "DOC:research/06-knowledge-system/internal-reports/retrain_recipes_2026-08-17.md",
@@ -2748,7 +2839,7 @@
   },
   "research/06-knowledge-system/internal-reports/scientific_incumbents_2026-08-17.md": {
    "area": null,
-   "bytes": 43384,
+   "canonical_bytes": 43384,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2757,6 +2848,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 23,
    "id": "DOC:research/06-knowledge-system/internal-reports/scientific_incumbents_2026-08-17.md",
@@ -2773,7 +2865,7 @@
   },
   "research/06-knowledge-system/internal-reports/tier_reverse_engineering_2026-08-18.md": {
    "area": null,
-   "bytes": 29897,
+   "canonical_bytes": 29897,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2782,6 +2874,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 20,
    "id": "DOC:research/06-knowledge-system/internal-reports/tier_reverse_engineering_2026-08-18.md",
@@ -2798,7 +2891,7 @@
   },
   "research/06-knowledge-system/internal-reports/zebrahub_data_engineering_2026-08-18.md": {
    "area": null,
-   "bytes": 23158,
+   "canonical_bytes": 23158,
    "certified_by_validator": false,
    "doc_id": null,
    "entity_links": {
@@ -2807,6 +2900,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": false,
    "headings": 26,
    "id": "DOC:research/06-knowledge-system/internal-reports/zebrahub_data_engineering_2026-08-18.md",
@@ -2823,7 +2917,7 @@
   },
   "research/06-knowledge-system/lab-notebooks.md": {
    "area": "06-knowledge-system",
-   "bytes": 313201,
+   "canonical_bytes": 308830,
    "certified_by_validator": true,
    "doc_id": "06-knowledge-system/lab-notebooks",
    "entity_links": {
@@ -2832,6 +2926,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 125,
    "id": "DOC:research/06-knowledge-system/lab-notebooks.md",
@@ -2848,7 +2943,7 @@
   },
   "research/06-knowledge-system/papers.md": {
    "area": "06-knowledge-system",
-   "bytes": 1517,
+   "canonical_bytes": 1489,
    "certified_by_validator": true,
    "doc_id": "06-knowledge-system/papers",
    "entity_links": {
@@ -2857,6 +2952,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 1,
    "id": "DOC:research/06-knowledge-system/papers.md",
@@ -2873,7 +2969,7 @@
   },
   "research/06-knowledge-system/results.md": {
    "area": "06-knowledge-system",
-   "bytes": 1363,
+   "canonical_bytes": 1328,
    "certified_by_validator": true,
    "doc_id": "06-knowledge-system/results",
    "entity_links": {
@@ -2884,6 +2980,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 3,
    "id": "DOC:research/06-knowledge-system/results.md",
@@ -2900,7 +2997,7 @@
   },
   "research/07-outputs/deployed-artifacts.md": {
    "area": "07-outputs",
-   "bytes": 1619,
+   "canonical_bytes": 1581,
    "certified_by_validator": true,
    "doc_id": "07-outputs/deployed-artifacts",
    "entity_links": {
@@ -2911,6 +3008,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 3,
    "id": "DOC:research/07-outputs/deployed-artifacts.md",
@@ -2927,7 +3025,7 @@
   },
   "research/07-outputs/figures.md": {
    "area": "07-outputs",
-   "bytes": 642,
+   "canonical_bytes": 608,
    "certified_by_validator": true,
    "doc_id": "07-outputs/figures",
    "entity_links": {
@@ -2936,6 +3034,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/07-outputs/figures.md",
@@ -2952,7 +3051,7 @@
   },
   "research/07-outputs/leaderboard.md": {
    "area": "07-outputs",
-   "bytes": 917,
+   "canonical_bytes": 886,
    "certified_by_validator": true,
    "doc_id": "07-outputs/leaderboard",
    "entity_links": {
@@ -2964,6 +3063,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 4,
    "id": "DOC:research/07-outputs/leaderboard.md",
@@ -2980,7 +3080,7 @@
   },
   "research/07-outputs/manuscript.md": {
    "area": "07-outputs",
-   "bytes": 631,
+   "canonical_bytes": 597,
    "certified_by_validator": true,
    "doc_id": "07-outputs/manuscript",
    "entity_links": {
@@ -2989,6 +3089,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 5,
    "id": "DOC:research/07-outputs/manuscript.md",
@@ -3005,7 +3106,7 @@
   },
   "research/07-outputs/submissions.md": {
    "area": "07-outputs",
-   "bytes": 60810,
+   "canonical_bytes": 59834,
    "certified_by_validator": true,
    "doc_id": "07-outputs/submissions",
    "entity_links": {
@@ -3018,6 +3119,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 50,
    "id": "DOC:research/07-outputs/submissions.md",
@@ -3034,7 +3136,7 @@
   },
   "research/README.md": {
    "area": "00-system",
-   "bytes": 6557,
+   "canonical_bytes": 6443,
    "certified_by_validator": false,
    "doc_id": "00-system/readme",
    "entity_links": {
@@ -3046,6 +3148,7 @@
     "levers": [],
     "packets": []
    },
+   "git_reproducible": true,
    "has_frontmatter": true,
    "headings": 8,
    "id": "DOC:research/README.md",

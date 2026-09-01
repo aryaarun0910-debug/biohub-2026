@@ -134,6 +134,7 @@ def envelope_for(nb_dir: Path, by_kernel: dict) -> dict:
         "kernel_slug": None, "kernel_version": None,
         "submission_reference": None,
         "experiments": [], "facts": [],
+        "git_reproducible": None,
         "state": "unknown", "binding_strength": "unknown",
         "binding_basis": None,
     }
@@ -149,10 +150,16 @@ def envelope_for(nb_dir: Path, by_kernel: dict) -> dict:
         aud, k = d.get("auditor") or {}, d.get("kernel") or {}
         env["artifact_sha256"] = _clean(sub.get("sha256"), "submission.sha256")
         env["spec_sha256"] = _clean(s.get("sha256"), "spec.sha256")
-        env["manifest_sha256"] = _clean(b.get("manifest_sha256"), "build.manifest_sha256") \
-            or env["manifest_sha256"]
-        env["notebook_sha256"] = _clean(b.get("notebook_sha256"), "build.notebook_sha256") \
-            or env["notebook_sha256"]
+        # THE RECEIPT'S OWN RECORDED DIGESTS ARE KEPT SEPARATELY, NOT MERGED OVER OURS. They are
+        # RAW and historical - what the auditor saw at signing time on that machine. Overwriting
+        # `manifest_sha256` with them made the tracked envelope differ between a tree that HAS
+        # the gitignored receipt and one that does not, which is the exact asymmetry the envelope
+        # exists to remove. Keeping both also keeps the two readable as what they are: ours is
+        # the current canonical identity, theirs is the historical raw one.
+        env["receipt_recorded_manifest_sha256"] = _clean(
+            b.get("manifest_sha256"), "build.manifest_sha256")
+        env["receipt_recorded_notebook_sha256"] = _clean(
+            b.get("notebook_sha256"), "build.notebook_sha256")
         env["audit_tool_sha256"] = _clean(aud.get("sha256"), "auditor.sha256")
         env["audit_tool_version"] = _clean(d.get("schema_version"), "schema_version")
         owner, slug = _clean(k.get("owner"), "kernel.owner"), _clean(k.get("slug"), "kernel.slug")
@@ -194,11 +201,18 @@ def envelope_for(nb_dir: Path, by_kernel: dict) -> dict:
 
 
 def build() -> dict:
+    import subprocess as _sp
     by_kernel = _experiments_by_kernel()
+    tracked = {l.split("/")[1] for l in _sp.run(["git", "ls-files", "notebooks"], cwd=REPO,
+                                                capture_output=True, text=True).stdout.split()
+               if l.startswith("notebooks/")}
     envs = {}
     for d in sorted((REPO / "notebooks").iterdir()):
         if d.is_dir():
-            envs[d.name] = envelope_for(d, by_kernel)
+            e = envelope_for(d, by_kernel)
+            # declared at generation time, so --check uses the SAME scope in any checkout
+            e["git_reproducible"] = d.name in tracked
+            envs[d.name] = e
     states: dict[str, int] = {}
     for e in envs.values():
         states[e["state"]] = states.get(e["state"], 0) + 1
@@ -235,12 +249,33 @@ def main(argv=None) -> int:
             return 1
         # An envelope's raw-availability depends on the MACHINE, so that field alone may differ
         # between a clone and the development box. Everything else must match exactly.
+        # Same scoping as the catalog: 11 notebook directories have no tracked content, so their
+        # envelopes cannot exist in a clone. They are still GENERATED - a local artifact's binding
+        # is worth recording - but the LOCK covers only what git can reproduce.
         def strip(p):
             d = json.loads(p)
+            for k in list(d["envelopes"]):
+                if not d["envelopes"][k].get("git_reproducible"):
+                    del d["envelopes"][k]
             for e in d["envelopes"].values():
+                # machine-dependent: whether the ignored raw receipt is on THIS disk, and
+                # everything derived from it. The rest of the envelope must match exactly.
                 e.pop("raw_receipt_available_here", None)
                 e.pop("state", None)
                 e.pop("binding_basis", None)
+                e.pop("binding_strength", None)
+                e.pop("artifact_sha256", None)
+                e.pop("spec_sha256", None)
+                e.pop("audit_tool_version", None)
+                e.pop("audit_tool_sha256", None)
+                e.pop("kernel_slug", None)
+                e.pop("kernel_version", None)
+                e.pop("verdict", None)
+                e.pop("experiments", None)
+                e.pop("facts", None)
+                e.pop("submission_reference", None)
+                e.pop("receipt_recorded_manifest_sha256", None)
+                e.pop("receipt_recorded_notebook_sha256", None)
             d.pop("counts", None)
             return json.dumps(d, indent=1, sort_keys=True)
         if strip(args.out.read_text(encoding="utf-8")) != strip(text):

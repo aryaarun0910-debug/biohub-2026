@@ -23,6 +23,7 @@
     "source_path": "scripts/core/baseline_contract.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/baseline_contract.py",
    "ids_mentioned": {
     "experiments": [],
@@ -78,6 +79,7 @@
     "source_path": "scripts/core/bootstrap_vendor.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/bootstrap_vendor.py",
    "ids_mentioned": {
     "experiments": [],
@@ -116,7 +118,7 @@
   },
   "scripts/core/catalog.py": {
    "callers": [],
-   "canonical_bytes": 30194,
+   "canonical_bytes": 34932,
    "covered_by_tests": [
     "tests/test_catalog.py"
    ],
@@ -128,10 +130,11 @@
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
     "hash_kind": "CANONICAL_TEXT_SHA256",
-    "measured_sha256": "22719437d1673d566369dd3718283a91124dd07d379f1b7c10e0d8f97871ab42",
+    "measured_sha256": "9fd89d02864eabc5c8a84559291589597f1a6449306442c503ba611b7e456d8b",
     "source_path": "scripts/core/catalog.py"
    },
    "dynamic_import": true,
+   "git_reproducible": false,
    "id": "SCRIPT:scripts/core/catalog.py",
    "ids_mentioned": {
     "experiments": [],
@@ -188,6 +191,7 @@
     "source_path": "scripts/core/claims_table.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/claims_table.py",
    "ids_mentioned": {
     "experiments": [],
@@ -233,6 +237,7 @@
     "source_path": "scripts/core/colab_cli.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/colab_cli.py",
    "ids_mentioned": {
     "experiments": [],
@@ -294,6 +299,7 @@
     "source_path": "scripts/core/colab_factory.py"
    },
    "dynamic_import": true,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/colab_factory.py",
    "ids_mentioned": {
     "experiments": [],
@@ -353,6 +359,7 @@
     "source_path": "scripts/core/colab_relay.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/colab_relay.json",
    "ids_mentioned": {
     "experiments": [],
@@ -397,6 +404,7 @@
     "source_path": "scripts/core/colab_relay.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/colab_relay.py",
    "ids_mentioned": {
     "experiments": [],
@@ -447,6 +455,7 @@
     "source_path": "scripts/core/colab_vm_bootstrap.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/colab_vm_bootstrap.py",
    "ids_mentioned": {
     "experiments": [],
@@ -498,6 +507,7 @@
     "source_path": "scripts/core/digest_inventory.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/digest_inventory.py",
    "ids_mentioned": {
     "experiments": [],
@@ -551,6 +561,7 @@
     "source_path": "scripts/core/experiment_defects.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/experiment_defects.json",
    "ids_mentioned": {
     "experiments": [],
@@ -589,6 +600,7 @@
     "source_path": "scripts/core/fetch.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/fetch.py",
    "ids_mentioned": {
     "experiments": [],
@@ -644,6 +656,7 @@
     "source_path": "scripts/core/hashing.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/hashing.py",
    "ids_mentioned": {
     "experiments": [],
@@ -700,6 +713,7 @@
     "source_path": "scripts/core/kaggle_factory.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/kaggle_factory.py",
    "ids_mentioned": {
     "experiments": [],
@@ -763,6 +777,7 @@
     "source_path": "scripts/core/kaggle_queue.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/kaggle_queue.py",
    "ids_mentioned": {
     "experiments": [],
@@ -819,6 +834,7 @@
     "source_path": "scripts/core/knowledge.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/knowledge.py",
    "ids_mentioned": {
     "experiments": [],
@@ -890,6 +906,7 @@
     "source_path": "scripts/core/lineending_experiment.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/lineending_experiment.py",
    "ids_mentioned": {
     "experiments": [],
@@ -943,6 +960,7 @@
     "source_path": "scripts/core/rag_index.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/rag_index.py",
    "ids_mentioned": {
     "experiments": [],
@@ -977,7 +995,7 @@
   },
   "scripts/core/receipt_envelope.py": {
    "callers": [],
-   "canonical_bytes": 12274,
+   "canonical_bytes": 14503,
    "covered_by_tests": [
     "tests/test_receipt_envelope.py"
    ],
@@ -989,10 +1007,11 @@
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
     "hash_kind": "CANONICAL_TEXT_SHA256",
-    "measured_sha256": "000efe8e70eacdd68da4c7c97f1f98706c601b5f43cc6cc2285c7b8039dfa247",
+    "measured_sha256": "4b985a580f72db9a6fec57e9461ef6c2c27c2c8dfdd141e2719f3fbc2f6644cb",
     "source_path": "scripts/core/receipt_envelope.py"
    },
    "dynamic_import": false,
+   "git_reproducible": false,
    "id": "SCRIPT:scripts/core/receipt_envelope.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1010,6 +1029,7 @@
     "json",
     "pathlib",
     "re",
+    "subprocess",
     "sys",
     "yaml"
    ],
@@ -1025,7 +1045,7 @@
    "path": "scripts/core/receipt_envelope.py",
    "purpose": "SANITIZED, TRACKED RECEIPT ENVELOPES. The raw receipts stay ignored.",
    "reads_temp_paths": [],
-   "subprocess_boundary": false,
+   "subprocess_boundary": true,
    "test_coverage": "imported-by-test",
    "tracked": true
   },
@@ -1045,6 +1065,7 @@
     "source_path": "scripts/core/reproducibility_evidence.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/reproducibility_evidence.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1092,6 +1113,7 @@
     "source_path": "scripts/core/score_loeo_submission.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/score_loeo_submission.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1169,6 +1191,7 @@
     "source_path": "scripts/core/score_oof.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/score_oof.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1214,6 +1237,7 @@
     "source_path": "scripts/core/score_submission_nonumba.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/score_submission_nonumba.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1263,6 +1287,7 @@
     "source_path": "scripts/core/validate_registry.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/validate_registry.py",
    "ids_mentioned": {
     "experiments": [
@@ -1322,6 +1347,7 @@
     "source_path": "scripts/core/validate_research_tree.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/validate_research_tree.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1369,6 +1395,7 @@
     "source_path": "scripts/d1/assemble_d1_factorial.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/assemble_d1_factorial.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1426,6 +1453,7 @@
     "source_path": "scripts/d1/assemble_p3_d1_smoke_spec.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/assemble_p3_d1_smoke_spec.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1477,6 +1505,7 @@
     "source_path": "scripts/d1/audit_submission_structure.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/audit_submission_structure.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1527,6 +1556,7 @@
     "source_path": "scripts/d1/build_d1_factorial_manifests.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/build_d1_factorial_manifests.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1576,6 +1606,7 @@
     "source_path": "scripts/d1/build_splits.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/build_splits.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1621,6 +1652,7 @@
     "source_path": "scripts/d1/d1_candidate_gate.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/d1_candidate_gate.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1669,6 +1701,7 @@
     "source_path": "scripts/d1/d1_postprocess.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/d1_postprocess.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1735,6 +1768,7 @@
     "source_path": "scripts/d1/d1f_probe.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/d1f_probe.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1784,6 +1818,7 @@
     "source_path": "scripts/d1/detection_preflight.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/detection_preflight.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1836,6 +1871,7 @@
     "source_path": "scripts/d1/gate_p3_d1_smoke.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/gate_p3_d1_smoke.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1884,6 +1920,7 @@
     "source_path": "scripts/d1/gen_d1_inject.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/gen_d1_inject.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1926,6 +1963,7 @@
     "source_path": "scripts/d1/gt_division_gates.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/d1/gt_division_gates.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1975,6 +2013,7 @@
     "source_path": "scripts/kaggle_edits/armb_flow_gate.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/armb_flow_gate.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2013,6 +2052,7 @@
     "source_path": "scripts/kaggle_edits/armb_provenance.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/armb_provenance.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2059,6 +2099,7 @@
     "source_path": "scripts/kaggle_edits/assoc_feature_parity.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/assoc_feature_parity.py",
    "ids_mentioned": {
     "experiments": [
@@ -2121,6 +2162,7 @@
     "source_path": "scripts/kaggle_edits/assoc_feature_tap.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/assoc_feature_tap.py",
    "ids_mentioned": {
     "experiments": [
@@ -2176,6 +2218,7 @@
     "source_path": "scripts/kaggle_edits/assoc_tap_gate.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/assoc_tap_gate.py",
    "ids_mentioned": {
     "experiments": [
@@ -2240,6 +2283,7 @@
     "source_path": "scripts/kaggle_edits/coupled_division_transplant.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/coupled_division_transplant.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2284,6 +2328,7 @@
     "source_path": "scripts/kaggle_edits/d1_aggregate.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/d1_aggregate.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2325,6 +2370,7 @@
     "source_path": "scripts/kaggle_edits/d1_inject.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/d1_inject.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2367,6 +2413,7 @@
     "source_path": "scripts/kaggle_edits/d1_response_audit.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/d1_response_audit.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2416,6 +2463,7 @@
     "source_path": "scripts/kaggle_edits/degree_invariants.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/degree_invariants.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2454,6 +2502,7 @@
     "source_path": "scripts/kaggle_edits/detpeak_export.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/detpeak_export.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2500,6 +2549,7 @@
     "source_path": "scripts/kaggle_edits/edge_candidate_budget.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/edge_candidate_budget.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2552,6 +2602,7 @@
     "source_path": "scripts/kaggle_edits/h1r_adabn_detection_only.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_adabn_detection_only.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2599,6 +2650,7 @@
     "source_path": "scripts/kaggle_edits/h1r_appearance_patch.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_appearance_patch.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2644,6 +2696,7 @@
     "source_path": "scripts/kaggle_edits/h1r_candidate_export_patch.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_candidate_export_patch.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2690,6 +2743,7 @@
     "source_path": "scripts/kaggle_edits/h1r_det_deploy_weights.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_det_deploy_weights.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2733,6 +2787,7 @@
     "source_path": "scripts/kaggle_edits/h1r_det_kernel_run.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_det_kernel_run.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2780,6 +2835,7 @@
     "source_path": "scripts/kaggle_edits/h1r_det_train.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_det_train.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2836,6 +2892,7 @@
     "source_path": "scripts/kaggle_edits/h1r_edge_data.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_edge_data.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2886,6 +2943,7 @@
     "source_path": "scripts/kaggle_edits/h1r_edge_kernel_run.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_edge_kernel_run.py",
    "ids_mentioned": {
     "experiments": [
@@ -2941,6 +2999,7 @@
     "source_path": "scripts/kaggle_edits/h1r_edge_loss_patch.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_edge_loss_patch.py",
    "ids_mentioned": {
     "experiments": [],
@@ -2989,6 +3048,7 @@
     "source_path": "scripts/kaggle_edits/h1r_edge_train.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_edge_train.py",
    "ids_mentioned": {
     "experiments": [
@@ -3054,6 +3114,7 @@
     "source_path": "scripts/kaggle_edits/h1r_rope4d.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_rope4d.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3106,6 +3167,7 @@
     "source_path": "scripts/kaggle_edits/h1r_rope4d_inference_patch.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_rope4d_inference_patch.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3154,6 +3216,7 @@
     "source_path": "scripts/kaggle_edits/h1r_trainer_patch.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/h1r_trainer_patch.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3197,6 +3260,7 @@
     "source_path": "scripts/kaggle_edits/icom_refine.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/icom_refine.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3241,6 +3305,7 @@
     "source_path": "scripts/kaggle_edits/kaggle_mount_ladder.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/kaggle_mount_ladder.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3286,6 +3351,7 @@
     "source_path": "scripts/kaggle_edits/loeo_export.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/loeo_export.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3332,6 +3398,7 @@
     "source_path": "scripts/kaggle_edits/loeo_pregraph_export.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/loeo_pregraph_export.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3374,6 +3441,7 @@
     "source_path": "scripts/kaggle_edits/loeo_retarget.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/loeo_retarget.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3419,6 +3487,7 @@
     "source_path": "scripts/kaggle_edits/node_budget_stage.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/node_budget_stage.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3457,6 +3526,7 @@
     "source_path": "scripts/kaggle_edits/p11_xhhuang_edge_swap.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/p11_xhhuang_edge_swap.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3500,6 +3570,7 @@
     "source_path": "scripts/kaggle_edits/p12_forward_acceleration_lookahead.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/p12_forward_acceleration_lookahead.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3543,6 +3614,7 @@
     "source_path": "scripts/kaggle_edits/pre_ilp_export.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/pre_ilp_export.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3584,6 +3656,7 @@
     "source_path": "scripts/kaggle_edits/pre_ilp_rollup.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/pre_ilp_rollup.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3628,6 +3701,7 @@
     "source_path": "scripts/kaggle_edits/ranker_block.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/ranker_block.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3672,6 +3746,7 @@
     "source_path": "scripts/kaggle_edits/relink_sweep.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/relink_sweep.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3712,6 +3787,7 @@
     "source_path": "scripts/kaggle_edits/restore_learned_divisions.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/restore_learned_divisions.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3750,6 +3826,7 @@
     "source_path": "scripts/kaggle_edits/subvoxel_refine.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/subvoxel_refine.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3788,6 +3865,7 @@
     "source_path": "scripts/kaggle_edits/swap_edge_weights.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/swap_edge_weights.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3828,6 +3906,7 @@
     "source_path": "scripts/kaggle_edits/volume_guard_linefit.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_edits/volume_guard_linefit.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3866,6 +3945,7 @@
     "source_path": "scripts/kaggle_preflight/dryrun_predict.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_preflight/dryrun_predict.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3912,6 +3992,7 @@
     "source_path": "scripts/kaggle_preflight/dryrun_train.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_preflight/dryrun_train.py",
    "ids_mentioned": {
     "experiments": [],
@@ -3958,6 +4039,7 @@
     "source_path": "scripts/kaggle_specs/deploy_h1r_adabn_detection_only.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/deploy_h1r_adabn_detection_only.json",
    "ids_mentioned": {
     "experiments": [],
@@ -3996,6 +4078,7 @@
     "source_path": "scripts/kaggle_specs/deploy_h1r_det_s1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/deploy_h1r_det_s1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4034,6 +4117,7 @@
     "source_path": "scripts/kaggle_specs/deploy_h1r_edge_s5_loeo_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/deploy_h1r_edge_s5_loeo_f0.json",
    "ids_mentioned": {
     "experiments": [
@@ -4083,6 +4167,7 @@
     "source_path": "scripts/kaggle_specs/deploy_h1r_edge_s5_rope4d_loeo_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/deploy_h1r_edge_s5_rope4d_loeo_f0.json",
    "ids_mentioned": {
     "experiments": [
@@ -4130,6 +4215,7 @@
     "source_path": "scripts/kaggle_specs/h1r_det_s1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/h1r_det_s1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4170,6 +4256,7 @@
     "source_path": "scripts/kaggle_specs/h1r_det_s1_adabn_control.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/h1r_det_s1_adabn_control.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4208,6 +4295,7 @@
     "source_path": "scripts/kaggle_specs/h1r_det_s1_smoke.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/h1r_det_s1_smoke.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4246,6 +4334,7 @@
     "source_path": "scripts/kaggle_specs/h1r_edge_s5.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/h1r_edge_s5.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4290,6 +4379,7 @@
     "source_path": "scripts/kaggle_specs/h1r_edge_s5_rope4d.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/h1r_edge_s5_rope4d.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4332,6 +4422,7 @@
     "source_path": "scripts/kaggle_specs/h1r_edge_s5_rope4d_smoke.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/h1r_edge_s5_rope4d_smoke.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4372,6 +4463,7 @@
     "source_path": "scripts/kaggle_specs/h1r_edge_s5_smoke.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/h1r_edge_s5_smoke.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4412,6 +4504,7 @@
     "source_path": "scripts/kaggle_specs/live_p0b.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/live_p0b.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4450,6 +4543,7 @@
     "source_path": "scripts/kaggle_specs/p10_deepcenter_best.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p10_deepcenter_best.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4490,6 +4584,7 @@
     "source_path": "scripts/kaggle_specs/p11_xhhuang_edge_swap.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p11_xhhuang_edge_swap.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4528,6 +4623,7 @@
     "source_path": "scripts/kaggle_specs/p12_forward_acceleration_lookahead.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p12_forward_acceleration_lookahead.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4566,6 +4662,7 @@
     "source_path": "scripts/kaggle_specs/p13_p9_adabn_detection_only.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p13_p9_adabn_detection_only.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4604,6 +4701,7 @@
     "source_path": "scripts/kaggle_specs/p15_forkfree_probe.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p15_forkfree_probe.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4642,6 +4740,7 @@
     "source_path": "scripts/kaggle_specs/p16_det090.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p16_det090.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4680,6 +4779,7 @@
     "source_path": "scripts/kaggle_specs/p17_det094.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p17_det094.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4718,6 +4818,7 @@
     "source_path": "scripts/kaggle_specs/p18_relink_division.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p18_relink_division.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4758,6 +4859,7 @@
     "source_path": "scripts/kaggle_specs/p19_relink_sweep_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p19_relink_sweep_f1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4798,6 +4900,7 @@
     "source_path": "scripts/kaggle_specs/p20_relink_sweep_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p20_relink_sweep_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4838,6 +4941,7 @@
     "source_path": "scripts/kaggle_specs/p21_colab_parity_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p21_colab_parity_f0.json",
    "ids_mentioned": {
     "experiments": [
@@ -4882,6 +4986,7 @@
     "source_path": "scripts/kaggle_specs/p22_sdw060.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p22_sdw060.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4922,6 +5027,7 @@
     "source_path": "scripts/kaggle_specs/p23_icom155.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p23_icom155.json",
    "ids_mentioned": {
     "experiments": [],
@@ -4965,6 +5071,7 @@
     "source_path": "scripts/kaggle_specs/p24_deepcenter_best_veto.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p24_deepcenter_best_veto.json",
    "ids_mentioned": {
     "experiments": [
@@ -5016,6 +5123,7 @@
     "source_path": "scripts/kaggle_specs/p25_recipe_parity_loeo_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p25_recipe_parity_loeo_f0.json",
    "ids_mentioned": {
     "experiments": [
@@ -5066,6 +5174,7 @@
     "source_path": "scripts/kaggle_specs/p27_champion_icom.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p27_champion_icom.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5111,6 +5220,7 @@
     "source_path": "scripts/kaggle_specs/p28_champion_control_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p28_champion_control_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5152,6 +5262,7 @@
     "source_path": "scripts/kaggle_specs/p28_champion_control_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p28_champion_control_f1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5193,6 +5304,7 @@
     "source_path": "scripts/kaggle_specs/p29_p28_detpeak_export_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p29_p28_detpeak_export_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5233,6 +5345,7 @@
     "source_path": "scripts/kaggle_specs/p29_p28_detpeak_export_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p29_p28_detpeak_export_f1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5273,6 +5386,7 @@
     "source_path": "scripts/kaggle_specs/p29_p28_detpeak_smoke_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p29_p28_detpeak_smoke_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5313,6 +5427,7 @@
     "source_path": "scripts/kaggle_specs/p30_acquisition_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p30_acquisition_f0.json",
    "ids_mentioned": {
     "experiments": [
@@ -5362,6 +5477,7 @@
     "source_path": "scripts/kaggle_specs/p31_public931_replica_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p31_public931_replica_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5405,6 +5521,7 @@
     "source_path": "scripts/kaggle_specs/p31_public931_replica_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p31_public931_replica_f1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5447,6 +5564,7 @@
     "source_path": "scripts/kaggle_specs/p32_public931_exact.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p32_public931_exact.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5491,6 +5609,7 @@
     "source_path": "scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5535,6 +5654,7 @@
     "source_path": "scripts/kaggle_specs/p34_acquisition_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p34_acquisition_f1.json",
    "ids_mentioned": {
     "experiments": [
@@ -5583,6 +5703,7 @@
     "source_path": "scripts/kaggle_specs/p35_dcveto_on_931.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p35_dcveto_on_931.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5636,6 +5757,7 @@
     "source_path": "scripts/kaggle_specs/p36_assoc_feature_tap_smoke.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p36_assoc_feature_tap_smoke.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5683,6 +5805,7 @@
     "source_path": "scripts/kaggle_specs/p37_assoc_feature_tap_c2_smoke.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p37_assoc_feature_tap_c2_smoke.json",
    "ids_mentioned": {
     "experiments": [
@@ -5734,6 +5857,7 @@
     "source_path": "scripts/kaggle_specs/p38_relink_bonus_b2.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p38_relink_bonus_b2.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5785,6 +5909,7 @@
     "source_path": "scripts/kaggle_specs/p3_armb.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_armb.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5823,6 +5948,7 @@
     "source_path": "scripts/kaggle_specs/p3_armb_loeo_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_armb_loeo_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5861,6 +5987,7 @@
     "source_path": "scripts/kaggle_specs/p3_armb_loeo_f0_smoke.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_armb_loeo_f0_smoke.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5899,6 +6026,7 @@
     "source_path": "scripts/kaggle_specs/p3_armb_loeo_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_armb_loeo_f1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5937,6 +6065,7 @@
     "source_path": "scripts/kaggle_specs/p3_base_loeo_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_base_loeo_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -5975,6 +6104,7 @@
     "source_path": "scripts/kaggle_specs/p3_base_loeo_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_base_loeo_f1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6013,6 +6143,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_pilot_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_d1_pilot_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6051,6 +6182,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_pilot_f0_src.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_d1_pilot_f0_src.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6089,6 +6221,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_pilot_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_d1_pilot_f1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6127,6 +6260,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_pilot_f1_src.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_d1_pilot_f1_src.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6165,6 +6299,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_smoke_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_d1_smoke_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6203,6 +6338,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_smoke_f0_src.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_d1_smoke_f0_src.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6241,6 +6377,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_smoke_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_d1_smoke_f1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6279,6 +6416,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_smoke_f1_src.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_d1_smoke_f1_src.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6317,6 +6455,7 @@
     "source_path": "scripts/kaggle_specs/p3_harmonic.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_harmonic.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6355,6 +6494,7 @@
     "source_path": "scripts/kaggle_specs/p3_subvoxel_loeo_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_subvoxel_loeo_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6393,6 +6533,7 @@
     "source_path": "scripts/kaggle_specs/p3_subvoxel_loeo_f0_smoke.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_subvoxel_loeo_f0_smoke.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6431,6 +6572,7 @@
     "source_path": "scripts/kaggle_specs/p3_subvoxel_loeo_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p3_subvoxel_loeo_f1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6469,6 +6611,7 @@
     "source_path": "scripts/kaggle_specs/p4_detpeak_smoke_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p4_detpeak_smoke_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6507,6 +6650,7 @@
     "source_path": "scripts/kaggle_specs/p4_detsweep_export_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p4_detsweep_export_f0.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6545,6 +6689,7 @@
     "source_path": "scripts/kaggle_specs/p4_detsweep_export_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p4_detsweep_export_f1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6583,6 +6728,7 @@
     "source_path": "scripts/kaggle_specs/p4_preilp_loeo_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p4_preilp_loeo_f1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6621,6 +6767,7 @@
     "source_path": "scripts/kaggle_specs/p5_divfix.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p5_divfix.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6659,6 +6806,7 @@
     "source_path": "scripts/kaggle_specs/p6_control_degraded.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p6_control_degraded.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6697,6 +6845,7 @@
     "source_path": "scripts/kaggle_specs/p7_cleanedge.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p7_cleanedge.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6735,6 +6884,7 @@
     "source_path": "scripts/kaggle_specs/p8_loosefilter.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p8_loosefilter.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6773,6 +6923,7 @@
     "source_path": "scripts/kaggle_specs/p9_coupled_division.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_specs/p9_coupled_division.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6811,6 +6962,7 @@
     "source_path": "scripts/kaggle_templates/loeo_pregraph_edits.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/kaggle_templates/loeo_pregraph_edits.json",
    "ids_mentioned": {
     "experiments": [],
@@ -6849,6 +7001,7 @@
     "source_path": "scripts/metric/pooled_bootstrap.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/metric/pooled_bootstrap.py",
    "ids_mentioned": {
     "experiments": [],
@@ -6904,6 +7057,7 @@
     "source_path": "scripts/metric/validate_metric_parity.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/metric/validate_metric_parity.py",
    "ids_mentioned": {
     "experiments": [],
@@ -6950,6 +7104,7 @@
     "source_path": "scripts/metric/validate_numpy_metric.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/metric/validate_numpy_metric.py",
    "ids_mentioned": {
     "experiments": [],
@@ -6996,6 +7151,7 @@
     "source_path": "scripts/metric/verify_gt_collision_parity.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/metric/verify_gt_collision_parity.py",
    "ids_mentioned": {
     "experiments": [],
@@ -7054,6 +7210,7 @@
     "source_path": "scripts/metric/verify_pooled_objective.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/metric/verify_pooled_objective.py",
    "ids_mentioned": {
     "experiments": [],
@@ -7104,6 +7261,7 @@
     "source_path": "scripts/win_bet/assoc_baseline_rankers.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_baseline_rankers.py",
    "ids_mentioned": {
     "experiments": [],
@@ -7173,6 +7331,7 @@
     "source_path": "scripts/win_bet/assoc_feature_cache.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_feature_cache.py",
    "ids_mentioned": {
     "experiments": [],
@@ -7229,6 +7388,7 @@
     "source_path": "scripts/win_bet/assoc_fold_pathology.py"
    },
    "dynamic_import": true,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_fold_pathology.py",
    "ids_mentioned": {
     "experiments": [],
@@ -7318,6 +7478,7 @@
     "source_path": "scripts/win_bet/assoc_lost_edge_ledger.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_lost_edge_ledger.py",
    "ids_mentioned": {
     "experiments": [],
@@ -7407,6 +7568,7 @@
     "source_path": "scripts/win_bet/assoc_parent_dataset.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_parent_dataset.py",
    "ids_mentioned": {
     "experiments": [],
@@ -7478,6 +7640,7 @@
     "source_path": "scripts/win_bet/assoc_preilp_survival.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_preilp_survival.py",
    "ids_mentioned": {
     "experiments": [],
@@ -7545,6 +7708,7 @@
     "source_path": "scripts/win_bet/assoc_preilp_survival_panel.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_preilp_survival_panel.py",
    "ids_mentioned": {
     "experiments": [],
@@ -7608,6 +7772,7 @@
     "source_path": "scripts/win_bet/assoc_report.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_report.py",
    "ids_mentioned": {
     "experiments": [],
@@ -7681,6 +7846,7 @@
     "source_path": "scripts/win_bet/assoc_specs/harness_f0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_specs/harness_f0.json",
    "ids_mentioned": {
     "experiments": [
@@ -7737,6 +7903,7 @@
     "source_path": "scripts/win_bet/assoc_specs/harness_f1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_specs/harness_f1.json",
    "ids_mentioned": {
     "experiments": [
@@ -7802,6 +7969,7 @@
     "source_path": "scripts/win_bet/assoc_specs/t2_correspondence_v1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_specs/t2_correspondence_v1.json",
    "ids_mentioned": {
     "experiments": [],
@@ -7859,6 +8027,7 @@
     "source_path": "scripts/win_bet/assoc_specs/tournament_context_f0_official.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_specs/tournament_context_f0_official.json",
    "ids_mentioned": {
     "experiments": [
@@ -7917,6 +8086,7 @@
     "source_path": "scripts/win_bet/assoc_specs/tournament_context_f0_pack_split0.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_specs/tournament_context_f0_pack_split0.json",
    "ids_mentioned": {
     "experiments": [
@@ -7976,6 +8146,7 @@
     "source_path": "scripts/win_bet/assoc_specs/tournament_context_f0_stabledet.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_specs/tournament_context_f0_stabledet.json",
    "ids_mentioned": {
     "experiments": [
@@ -8034,6 +8205,7 @@
     "source_path": "scripts/win_bet/assoc_specs/tournament_context_f1_official.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_specs/tournament_context_f1_official.json",
    "ids_mentioned": {
     "experiments": [
@@ -8092,6 +8264,7 @@
     "source_path": "scripts/win_bet/assoc_specs/tournament_context_f1_oof_split1.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_specs/tournament_context_f1_oof_split1.json",
    "ids_mentioned": {
     "experiments": [
@@ -8151,6 +8324,7 @@
     "source_path": "scripts/win_bet/assoc_specs/tournament_context_f1_stabledet.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_specs/tournament_context_f1_stabledet.json",
    "ids_mentioned": {
     "experiments": [
@@ -8209,6 +8383,7 @@
     "source_path": "scripts/win_bet/assoc_tap_replay.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_tap_replay.py",
    "ids_mentioned": {
     "experiments": [
@@ -8279,6 +8454,7 @@
     "source_path": "scripts/win_bet/assoc_tournament.py"
    },
    "dynamic_import": true,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_tournament.py",
    "ids_mentioned": {
     "experiments": [
@@ -8394,6 +8570,7 @@
     "source_path": "scripts/win_bet/assoc_train_harness.py"
    },
    "dynamic_import": true,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/assoc_train_harness.py",
    "ids_mentioned": {
     "experiments": [
@@ -8510,6 +8687,7 @@
     "source_path": "scripts/win_bet/association_reachability.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/association_reachability.py",
    "ids_mentioned": {
     "experiments": [],
@@ -8569,6 +8747,7 @@
     "source_path": "scripts/win_bet/audit_assoc_contract.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_assoc_contract.py",
    "ids_mentioned": {
     "experiments": [],
@@ -8638,6 +8817,7 @@
     "source_path": "scripts/win_bet/audit_detpeak_full_export.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_detpeak_full_export.py",
    "ids_mentioned": {
     "experiments": [],
@@ -8700,6 +8880,7 @@
     "source_path": "scripts/win_bet/audit_feature_cache.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_feature_cache.py",
    "ids_mentioned": {
     "experiments": [
@@ -8776,6 +8957,7 @@
     "source_path": "scripts/win_bet/audit_graph_parity_attribution.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_graph_parity_attribution.py",
    "ids_mentioned": {
     "experiments": [],
@@ -8824,6 +9006,7 @@
     "source_path": "scripts/win_bet/audit_identity_conversion.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_identity_conversion.py",
    "ids_mentioned": {
     "experiments": [],
@@ -8889,6 +9072,7 @@
     "source_path": "scripts/win_bet/audit_p30_acquisition.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_p30_acquisition.py",
    "ids_mentioned": {
     "experiments": [],
@@ -8946,6 +9130,7 @@
     "source_path": "scripts/win_bet/audit_p33_gate1.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_p33_gate1.py",
    "ids_mentioned": {
     "experiments": [
@@ -9004,6 +9189,7 @@
     "source_path": "scripts/win_bet/audit_registry_drift.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_registry_drift.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9051,6 +9237,7 @@
     "source_path": "scripts/win_bet/audit_release_receipt.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_release_receipt.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9114,6 +9301,7 @@
     "source_path": "scripts/win_bet/audit_result_completeness.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_result_completeness.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9172,6 +9360,7 @@
     "source_path": "scripts/win_bet/audit_split_leakage.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_split_leakage.py",
    "ids_mentioned": {
     "experiments": [
@@ -9236,6 +9425,7 @@
     "source_path": "scripts/win_bet/audit_version_coherence.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/audit_version_coherence.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9286,6 +9476,7 @@
     "source_path": "scripts/win_bet/biohubx/__init__.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/biohubx/__init__.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9328,6 +9519,7 @@
     "source_path": "scripts/win_bet/biohubx/ckpt_keys.py"
    },
    "dynamic_import": false,
+   "git_reproducible": false,
    "id": "SCRIPT:scripts/win_bet/biohubx/ckpt_keys.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9386,6 +9578,7 @@
     "source_path": "scripts/win_bet/biohubx/contract.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/biohubx/contract.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9449,6 +9642,7 @@
     "source_path": "scripts/win_bet/biohubx/hf_xet_digest.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/biohubx/hf_xet_digest.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9500,6 +9694,7 @@
     "source_path": "scripts/win_bet/biohubx/model.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/biohubx/model.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9556,6 +9751,7 @@
     "source_path": "scripts/win_bet/biohubx/synthetic_t2.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/biohubx/synthetic_t2.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9608,6 +9804,7 @@
     "source_path": "scripts/win_bet/biohubx/training.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/biohubx/training.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9662,6 +9859,7 @@
     "source_path": "scripts/win_bet/candidate_gate_eval.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/candidate_gate_eval.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9714,6 +9912,7 @@
     "source_path": "scripts/win_bet/candidate_reach_curve.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/candidate_reach_curve.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9779,6 +9978,7 @@
     "source_path": "scripts/win_bet/candidate_threshold_sweep.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/candidate_threshold_sweep.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9831,6 +10031,7 @@
     "source_path": "scripts/win_bet/ceiling_ladder.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/ceiling_ladder.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9893,6 +10094,7 @@
     "source_path": "scripts/win_bet/checkpoint_inventory.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/checkpoint_inventory.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9940,6 +10142,7 @@
     "source_path": "scripts/win_bet/colab_parity_check.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/colab_parity_check.py",
    "ids_mentioned": {
     "experiments": [],
@@ -9988,6 +10191,7 @@
     "source_path": "scripts/win_bet/compare_substrate_sentinel.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/compare_substrate_sentinel.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10033,6 +10237,7 @@
     "source_path": "scripts/win_bet/constant_audit.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/constant_audit.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10084,6 +10289,7 @@
     "source_path": "scripts/win_bet/constant_audit_pred.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/constant_audit_pred.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10136,6 +10342,7 @@
     "source_path": "scripts/win_bet/control_binding.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/control_binding.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10189,6 +10396,7 @@
     "source_path": "scripts/win_bet/dc_checkpoint_audit.py"
    },
    "dynamic_import": true,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/dc_checkpoint_audit.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10245,6 +10453,7 @@
     "source_path": "scripts/win_bet/dc_subvoxel_refine.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/dc_subvoxel_refine.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10316,6 +10525,7 @@
     "source_path": "scripts/win_bet/deployed_controls.json"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/deployed_controls.json",
    "ids_mentioned": {
     "experiments": [
@@ -10382,6 +10592,7 @@
     "source_path": "scripts/win_bet/detpeak_curve.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/detpeak_curve.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10437,6 +10648,7 @@
     "source_path": "scripts/win_bet/detpeak_fold_curve.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/detpeak_fold_curve.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10492,6 +10704,7 @@
     "source_path": "scripts/win_bet/detpeak_retention.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/detpeak_retention.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10547,6 +10760,7 @@
     "source_path": "scripts/win_bet/div_proposal_funnel.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/div_proposal_funnel.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10599,6 +10813,7 @@
     "source_path": "scripts/win_bet/div_reach_steal.py"
    },
    "dynamic_import": true,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/div_reach_steal.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10675,6 +10890,7 @@
     "source_path": "scripts/win_bet/div_steal_rule.py"
    },
    "dynamic_import": true,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/div_steal_rule.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10747,6 +10963,7 @@
     "source_path": "scripts/win_bet/division_localisation.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/division_localisation.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10812,6 +11029,7 @@
     "source_path": "scripts/win_bet/division_loss_diff.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/division_loss_diff.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10867,6 +11085,7 @@
     "source_path": "scripts/win_bet/divverify_adapter.py"
    },
    "dynamic_import": true,
+   "git_reproducible": false,
    "id": "SCRIPT:scripts/win_bet/divverify_adapter.py",
    "ids_mentioned": {
     "experiments": [],
@@ -10941,6 +11160,7 @@
     "source_path": "scripts/win_bet/divverify_dataset.py"
    },
    "dynamic_import": true,
+   "git_reproducible": false,
    "id": "SCRIPT:scripts/win_bet/divverify_dataset.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11026,6 +11246,7 @@
     "source_path": "scripts/win_bet/divverify_verifier.py"
    },
    "dynamic_import": false,
+   "git_reproducible": false,
    "id": "SCRIPT:scripts/win_bet/divverify_verifier.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11093,6 +11314,7 @@
     "source_path": "scripts/win_bet/e0_replay.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/e0_replay.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11142,6 +11364,7 @@
     "source_path": "scripts/win_bet/e0c_parity.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/e0c_parity.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11187,6 +11410,7 @@
     "source_path": "scripts/win_bet/e0c_run.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/e0c_run.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11240,6 +11464,7 @@
     "source_path": "scripts/win_bet/e0c_score.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/e0c_score.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11295,6 +11520,7 @@
     "source_path": "scripts/win_bet/ea_abstain.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/ea_abstain.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11340,6 +11566,7 @@
     "source_path": "scripts/win_bet/ea_analyze.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/ea_analyze.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11386,6 +11613,7 @@
     "source_path": "scripts/win_bet/ea_atlas.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/ea_atlas.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11472,6 +11700,7 @@
     "source_path": "scripts/win_bet/ea_features.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/ea_features.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11521,6 +11750,7 @@
     "source_path": "scripts/win_bet/ea_solver_gap.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/ea_solver_gap.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11568,6 +11798,7 @@
     "source_path": "scripts/win_bet/extract_node_estimates.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/extract_node_estimates.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11614,6 +11845,7 @@
     "source_path": "scripts/win_bet/finaledge_batch.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/finaledge_batch.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11675,6 +11907,7 @@
     "source_path": "scripts/win_bet/finaledge_gates.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/finaledge_gates.py",
    "ids_mentioned": {
     "experiments": [
@@ -11792,6 +12025,7 @@
     "source_path": "scripts/win_bet/focus3d_probe.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/focus3d_probe.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11864,6 +12098,7 @@
     "source_path": "scripts/win_bet/fp_endpoint_dedup.py"
    },
    "dynamic_import": true,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/fp_endpoint_dedup.py",
    "ids_mentioned": {
     "experiments": [],
@@ -11935,6 +12170,7 @@
     "source_path": "scripts/win_bet/gpu_preflight.py"
    },
    "dynamic_import": true,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/gpu_preflight.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12021,6 +12257,7 @@
     "source_path": "scripts/win_bet/gpu_protection_contract.py"
    },
    "dynamic_import": true,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/gpu_protection_contract.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12092,6 +12329,7 @@
     "source_path": "scripts/win_bet/gt_collision.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/gt_collision.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12132,6 +12370,7 @@
     "source_path": "scripts/win_bet/h1r_fetch_imaging.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1r_fetch_imaging.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12181,6 +12420,7 @@
     "source_path": "scripts/win_bet/h1r_l1_scale_audit.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1r_l1_scale_audit.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12229,6 +12469,7 @@
     "source_path": "scripts/win_bet/h1r_resample_iso.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1r_resample_iso.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12275,6 +12516,7 @@
     "source_path": "scripts/win_bet/h1r_subvoxel_refine.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1r_subvoxel_refine.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12316,6 +12558,7 @@
     "source_path": "scripts/win_bet/h1r_train_smoke.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1r_train_smoke.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12363,6 +12606,7 @@
     "source_path": "scripts/win_bet/h1r_zh001r_audit.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1r_zh001r_audit.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12409,6 +12653,7 @@
     "source_path": "scripts/win_bet/h1r_zh001r_register.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1r_zh001r_register.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12457,6 +12702,7 @@
     "source_path": "scripts/win_bet/h1r_zh001r_smoke.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1r_zh001r_smoke.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12503,6 +12749,7 @@
     "source_path": "scripts/win_bet/h1t_appearance_probe.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1t_appearance_probe.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12558,6 +12805,7 @@
     "source_path": "scripts/win_bet/h1t_conditional_ranker.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1t_conditional_ranker.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12613,6 +12861,7 @@
     "source_path": "scripts/win_bet/h1t_export_kaggle.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1t_export_kaggle.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12671,6 +12920,7 @@
     "source_path": "scripts/win_bet/h1t_external_critic.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1t_external_critic.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12724,6 +12974,7 @@
     "source_path": "scripts/win_bet/h1t_h0c_learned.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1t_h0c_learned.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12789,6 +13040,7 @@
     "source_path": "scripts/win_bet/h1t_zebrahub_events.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h1t_zebrahub_events.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12844,6 +13096,7 @@
     "source_path": "scripts/win_bet/h4_ssl_gate_replay.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/h4_ssl_gate_replay.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12902,6 +13155,7 @@
     "source_path": "scripts/win_bet/hoct_compat.py"
    },
    "dynamic_import": false,
+   "git_reproducible": false,
    "id": "SCRIPT:scripts/win_bet/hoct_compat.py",
    "ids_mentioned": {
     "experiments": [],
@@ -12981,6 +13235,7 @@
     "source_path": "scripts/win_bet/hoct_feature_contract.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/hoct_feature_contract.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13044,6 +13299,7 @@
     "source_path": "scripts/win_bet/hoct_head.py"
    },
    "dynamic_import": true,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/hoct_head.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13112,6 +13368,7 @@
     "source_path": "scripts/win_bet/hoct_scale_gate.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/hoct_scale_gate.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13185,6 +13442,7 @@
     "source_path": "scripts/win_bet/ilp_replay.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/ilp_replay.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13245,6 +13503,7 @@
     "source_path": "scripts/win_bet/ilp_sweep.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/ilp_sweep.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13304,6 +13563,7 @@
     "source_path": "scripts/win_bet/kaggle_artifacts.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/kaggle_artifacts.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13363,6 +13623,7 @@
     "source_path": "scripts/win_bet/kaggle_mounts.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/kaggle_mounts.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13414,6 +13675,7 @@
     "source_path": "scripts/win_bet/lever37_conversion.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/lever37_conversion.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13477,6 +13739,7 @@
     "source_path": "scripts/win_bet/lost_cell_atlas.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/lost_cell_atlas.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13541,6 +13804,7 @@
     "source_path": "scripts/win_bet/mask_node_adapter.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/mask_node_adapter.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13616,6 +13880,7 @@
     "source_path": "scripts/win_bet/nearest_parent_oracle.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/nearest_parent_oracle.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13671,6 +13936,7 @@
     "source_path": "scripts/win_bet/node_budget_policy.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/node_budget_policy.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13715,6 +13981,7 @@
     "source_path": "scripts/win_bet/p28_full_chain_panel.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/p28_full_chain_panel.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13777,6 +14044,7 @@
     "source_path": "scripts/win_bet/p28_full_chain_replay.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/p28_full_chain_replay.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13873,6 +14141,7 @@
     "source_path": "scripts/win_bet/phaseb_d0p_proposer.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/phaseb_d0p_proposer.py",
    "ids_mentioned": {
     "experiments": [],
@@ -13935,6 +14204,7 @@
     "source_path": "scripts/win_bet/phaseb_h0b_rankcompress.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/phaseb_h0b_rankcompress.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14006,6 +14276,7 @@
     "source_path": "scripts/win_bet/phaseb_h0c_replay.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/phaseb_h0c_replay.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14068,6 +14339,7 @@
     "source_path": "scripts/win_bet/phaseb_h0d_livefilter.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/phaseb_h0d_livefilter.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14131,6 +14403,7 @@
     "source_path": "scripts/win_bet/phaseb_h1a_census.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/phaseb_h1a_census.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14190,6 +14463,7 @@
     "source_path": "scripts/win_bet/phaseb_h1g_features.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/phaseb_h1g_features.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14243,6 +14517,7 @@
     "source_path": "scripts/win_bet/phaseb_h2a_hybrid_oracle.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/phaseb_h2a_hybrid_oracle.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14305,6 +14580,7 @@
     "source_path": "scripts/win_bet/phaseb_node_budget.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/phaseb_node_budget.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14360,6 +14636,7 @@
     "source_path": "scripts/win_bet/phaseb_oracle_d0prime.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/phaseb_oracle_d0prime.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14415,6 +14692,7 @@
     "source_path": "scripts/win_bet/phaseb_pooled_breakeven.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/phaseb_pooled_breakeven.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14473,6 +14751,7 @@
     "source_path": "scripts/win_bet/preflight_p35_dcveto.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/preflight_p35_dcveto.py",
    "ids_mentioned": {
     "experiments": [
@@ -14549,6 +14828,7 @@
     "source_path": "scripts/win_bet/preilp_crossrun_stability.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/preilp_crossrun_stability.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14600,6 +14880,7 @@
     "source_path": "scripts/win_bet/preilp_div_audit.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/preilp_div_audit.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14653,6 +14934,7 @@
     "source_path": "scripts/win_bet/provenance_policy.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/provenance_policy.py",
    "ids_mentioned": {
     "experiments": [
@@ -14714,6 +14996,7 @@
     "source_path": "scripts/win_bet/reach_oracle.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/reach_oracle.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14789,6 +15072,7 @@
     "source_path": "scripts/win_bet/reach_rule.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/reach_rule.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14851,6 +15135,7 @@
     "source_path": "scripts/win_bet/revladder.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/revladder.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14915,6 +15200,7 @@
     "source_path": "scripts/win_bet/revladder_batch.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/revladder_batch.py",
    "ids_mentioned": {
     "experiments": [],
@@ -14971,6 +15257,7 @@
     "source_path": "scripts/win_bet/revladder_calibrate.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/revladder_calibrate.py",
    "ids_mentioned": {
     "experiments": [],
@@ -15021,6 +15308,7 @@
     "source_path": "scripts/win_bet/revladder_panel.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/revladder_panel.py",
    "ids_mentioned": {
     "experiments": [],
@@ -15084,6 +15372,7 @@
     "source_path": "scripts/win_bet/spec_restriction.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/spec_restriction.py",
    "ids_mentioned": {
     "experiments": [],
@@ -15141,6 +15430,7 @@
     "source_path": "scripts/win_bet/sync_tap_worker.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/sync_tap_worker.py",
    "ids_mentioned": {
     "experiments": [],
@@ -15187,6 +15477,7 @@
     "source_path": "scripts/win_bet/validate_detpeak_export.py"
    },
    "dynamic_import": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/win_bet/validate_detpeak_export.py",
    "ids_mentioned": {
     "experiments": [],

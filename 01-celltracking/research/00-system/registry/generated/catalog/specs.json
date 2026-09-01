@@ -17,6 +17,7 @@
     "source_path": "scripts/kaggle_specs/deploy_h1r_adabn_detection_only.json"
    },
    "edits": 1,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/deploy_h1r_adabn_detection_only.json",
    "name": "deploy_h1r_adabn_detection_only",
    "out_dir": "notebooks/kaggle_deploy_h1r_adabn_detection_only",
@@ -40,6 +41,7 @@
     "source_path": "scripts/kaggle_specs/deploy_h1r_det_s1.json"
    },
    "edits": 1,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/deploy_h1r_det_s1.json",
    "name": "deploy_h1r_det_s1",
    "out_dir": "notebooks/kaggle_deploy_h1r_det_s1",
@@ -63,6 +65,7 @@
     "source_path": "scripts/kaggle_specs/deploy_h1r_edge_s5_loeo_f0.json"
    },
    "edits": 5,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/deploy_h1r_edge_s5_loeo_f0.json",
    "name": "deploy_h1r_edge_s5_loeo_f0",
    "out_dir": "notebooks/kaggle_deploy_h1r_edge_s5_loeo_f0",
@@ -86,6 +89,7 @@
     "source_path": "scripts/kaggle_specs/deploy_h1r_edge_s5_rope4d_loeo_f0.json"
    },
    "edits": 6,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/deploy_h1r_edge_s5_rope4d_loeo_f0.json",
    "name": "deploy_h1r_edge_s5_rope4d_loeo_f0",
    "out_dir": "notebooks/kaggle_deploy_h1r_edge_s5_rope4d_loeo_f0",
@@ -109,6 +113,7 @@
     "source_path": "scripts/kaggle_specs/h1r_det_s1.json"
    },
    "edits": 4,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/h1r_det_s1.json",
    "name": "h1r_det_s1",
    "out_dir": "notebooks/kaggle_h1r_det_s1",
@@ -132,6 +137,7 @@
     "source_path": "scripts/kaggle_specs/h1r_det_s1_adabn_control.json"
    },
    "edits": 4,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/h1r_det_s1_adabn_control.json",
    "name": "h1r_det_s1_adabn_control",
    "out_dir": "notebooks/kaggle_h1r_det_s1_adabn_control",
@@ -155,6 +161,7 @@
     "source_path": "scripts/kaggle_specs/h1r_det_s1_smoke.json"
    },
    "edits": 4,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/h1r_det_s1_smoke.json",
    "name": "h1r_det_s1_smoke",
    "out_dir": "notebooks/kaggle_h1r_det_s1_smoke",
@@ -178,6 +185,7 @@
     "source_path": "scripts/kaggle_specs/h1r_edge_s5.json"
    },
    "edits": 5,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/h1r_edge_s5.json",
    "name": "h1r_edge_s5",
    "out_dir": "notebooks/kaggle_h1r_edge_s5",
@@ -201,6 +209,7 @@
     "source_path": "scripts/kaggle_specs/h1r_edge_s5_rope4d.json"
    },
    "edits": 5,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/h1r_edge_s5_rope4d.json",
    "name": "h1r_edge_s5_rope4d",
    "out_dir": "notebooks/kaggle_h1r_edge_s5_rope4d",
@@ -224,6 +233,7 @@
     "source_path": "scripts/kaggle_specs/h1r_edge_s5_rope4d_smoke.json"
    },
    "edits": 5,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/h1r_edge_s5_rope4d_smoke.json",
    "name": "h1r_edge_s5_rope4d_smoke",
    "out_dir": "notebooks/kaggle_h1r_edge_s5_rope4d_smoke",
@@ -247,6 +257,7 @@
     "source_path": "scripts/kaggle_specs/h1r_edge_s5_smoke.json"
    },
    "edits": 5,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/h1r_edge_s5_smoke.json",
    "name": "h1r_edge_s5_smoke",
    "out_dir": "notebooks/kaggle_h1r_edge_s5_smoke",
@@ -270,6 +281,7 @@
     "source_path": "scripts/kaggle_specs/live_p0b.json"
    },
    "edits": 0,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/live_p0b.json",
    "name": "live_p0b",
    "out_dir": "notebooks/kaggle_p0b_clean913_revtime",
@@ -293,6 +305,7 @@
     "source_path": "scripts/kaggle_specs/p10_deepcenter_best.json"
    },
    "edits": 1,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p10_deepcenter_best.json",
    "name": "p10_deepcenter_best",
    "out_dir": "notebooks/kaggle_p10_deepcenter_best",
@@ -316,6 +329,7 @@
     "source_path": "scripts/kaggle_specs/p11_xhhuang_edge_swap.json"
    },
    "edits": 1,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p11_xhhuang_edge_swap.json",
    "name": "p11_xhhuang_edge_swap",
    "out_dir": "notebooks/kaggle_p11_xhhuang_edge_swap",
@@ -339,6 +353,7 @@
     "source_path": "scripts/kaggle_specs/p12_forward_acceleration_lookahead.json"
    },
    "edits": 2,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p12_forward_acceleration_lookahead.json",
    "name": "p12_forward_acceleration_lookahead",
    "out_dir": "notebooks/kaggle_p12_forward_acceleration",
@@ -362,6 +377,7 @@
     "source_path": "scripts/kaggle_specs/p13_p9_adabn_detection_only.json"
    },
    "edits": 1,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p13_p9_adabn_detection_only.json",
    "name": "p13_p9_adabn_detection_only",
    "out_dir": "notebooks/kaggle_p13_p9_adabn_detection_only",
@@ -385,6 +401,7 @@
     "source_path": "scripts/kaggle_specs/p15_forkfree_probe.json"
    },
    "edits": 2,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p15_forkfree_probe.json",
    "name": "p15_forkfree_probe",
    "out_dir": "notebooks/kaggle_p15_forkfree_probe",
@@ -408,6 +425,7 @@
     "source_path": "scripts/kaggle_specs/p16_det090.json"
    },
    "edits": 2,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p16_det090.json",
    "name": "p16_det090",
    "out_dir": "notebooks/kaggle_p16_det090",
@@ -431,6 +449,7 @@
     "source_path": "scripts/kaggle_specs/p17_det094.json"
    },
    "edits": 2,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p17_det094.json",
    "name": "p17_det094",
    "out_dir": "notebooks/kaggle_p17_det094",
@@ -454,6 +473,7 @@
     "source_path": "scripts/kaggle_specs/p18_relink_division.json"
    },
    "edits": 4,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p18_relink_division.json",
    "name": "p18_relink_division",
    "out_dir": "notebooks/kaggle_p18_relink_division",
@@ -477,6 +497,7 @@
     "source_path": "scripts/kaggle_specs/p19_relink_sweep_f1.json"
    },
    "edits": 9,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p19_relink_sweep_f1.json",
    "name": "p19_relink_sweep_f1",
    "out_dir": "notebooks/kaggle_p19_relink_sweep_f1",
@@ -500,6 +521,7 @@
     "source_path": "scripts/kaggle_specs/p20_relink_sweep_f0.json"
    },
    "edits": 9,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p20_relink_sweep_f0.json",
    "name": "p20_relink_sweep_f0",
    "out_dir": "notebooks/kaggle_p20_relink_sweep_f0",
@@ -523,6 +545,7 @@
     "source_path": "scripts/kaggle_specs/p21_colab_parity_f0.json"
    },
    "edits": 9,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p21_colab_parity_f0.json",
    "name": "p21_colab_parity_f0",
    "out_dir": "notebooks/kaggle_p21_colab_parity_f0",
@@ -546,6 +569,7 @@
     "source_path": "scripts/kaggle_specs/p22_sdw060.json"
    },
    "edits": 3,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p22_sdw060.json",
    "name": "p22_sdw060",
    "out_dir": "notebooks/kaggle_p22_sdw060",
@@ -569,6 +593,7 @@
     "source_path": "scripts/kaggle_specs/p23_icom155.json"
    },
    "edits": 7,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p23_icom155.json",
    "name": "p23_icom155",
    "out_dir": "notebooks/kaggle_p23_icom155",
@@ -592,6 +617,7 @@
     "source_path": "scripts/kaggle_specs/p24_deepcenter_best_veto.json"
    },
    "edits": 1,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p24_deepcenter_best_veto.json",
    "name": "p24_deepcenter_best_veto",
    "out_dir": "notebooks/kaggle_p24_deepcenter_best_veto",
@@ -615,6 +641,7 @@
     "source_path": "scripts/kaggle_specs/p25_recipe_parity_loeo_f0.json"
    },
    "edits": 5,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p25_recipe_parity_loeo_f0.json",
    "name": "p25_recipe_parity_loeo_f0",
    "out_dir": "notebooks/kaggle_p25_recipe_parity_loeo_f0",
@@ -638,6 +665,7 @@
     "source_path": "scripts/kaggle_specs/p27_champion_icom.json"
    },
    "edits": 7,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p27_champion_icom.json",
    "name": "p27_champion_icom",
    "out_dir": "notebooks/kaggle_p27_champion_icom",
@@ -661,6 +689,7 @@
     "source_path": "scripts/kaggle_specs/p28_champion_control_f0.json"
    },
    "edits": 7,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p28_champion_control_f0.json",
    "name": "p28_champion_control_f0",
    "out_dir": "notebooks/kaggle_p28_champion_control_f0",
@@ -684,6 +713,7 @@
     "source_path": "scripts/kaggle_specs/p28_champion_control_f1.json"
    },
    "edits": 7,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p28_champion_control_f1.json",
    "name": "p28_champion_control_f1",
    "out_dir": "notebooks/kaggle_p28_champion_control_f1",
@@ -707,6 +737,7 @@
     "source_path": "scripts/kaggle_specs/p29_p28_detpeak_export_f0.json"
    },
    "edits": 2,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p29_p28_detpeak_export_f0.json",
    "name": "p29_p28_detpeak_export_f0",
    "out_dir": "notebooks/kaggle_p29_p28_detpeak_export_f0",
@@ -730,6 +761,7 @@
     "source_path": "scripts/kaggle_specs/p29_p28_detpeak_export_f1.json"
    },
    "edits": 2,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p29_p28_detpeak_export_f1.json",
    "name": "p29_p28_detpeak_export_f1",
    "out_dir": "notebooks/kaggle_p29_p28_detpeak_export_f1",
@@ -753,6 +785,7 @@
     "source_path": "scripts/kaggle_specs/p29_p28_detpeak_smoke_f0.json"
    },
    "edits": 3,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p29_p28_detpeak_smoke_f0.json",
    "name": "p29_p28_detpeak_smoke_f0",
    "out_dir": "notebooks/kaggle_p29_p28_detpeak_smoke_f0",
@@ -776,6 +809,7 @@
     "source_path": "scripts/kaggle_specs/p30_acquisition_f0.json"
    },
    "edits": 5,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p30_acquisition_f0.json",
    "name": "p30_acquisition_f0",
    "out_dir": "notebooks/kaggle_p30_acquisition_f0",
@@ -799,6 +833,7 @@
     "source_path": "scripts/kaggle_specs/p31_public931_replica_f0.json"
    },
    "edits": 7,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p31_public931_replica_f0.json",
    "name": "p31_public931_replica_f0",
    "out_dir": "notebooks/kaggle_p31_public931_replica_f0",
@@ -822,6 +857,7 @@
     "source_path": "scripts/kaggle_specs/p31_public931_replica_f1.json"
    },
    "edits": 7,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p31_public931_replica_f1.json",
    "name": "p31_public931_replica_f1",
    "out_dir": "notebooks/kaggle_p31_public931_replica_f1",
@@ -845,6 +881,7 @@
     "source_path": "scripts/kaggle_specs/p32_public931_exact.json"
    },
    "edits": 0,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p32_public931_exact.json",
    "name": "p32_public931_exact",
    "out_dir": "notebooks/kaggle_p32_public931_exact",
@@ -868,6 +905,7 @@
     "source_path": "scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json"
    },
    "edits": 9,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json",
    "name": "p33_assoc_feature_parity_smoke",
    "out_dir": "notebooks/kaggle_p33_assoc_feature_parity_smoke",
@@ -891,6 +929,7 @@
     "source_path": "scripts/kaggle_specs/p34_acquisition_f1.json"
    },
    "edits": 5,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p34_acquisition_f1.json",
    "name": "p34_acquisition_f1",
    "out_dir": "notebooks/kaggle_p34_acquisition_f1",
@@ -914,6 +953,7 @@
     "source_path": "scripts/kaggle_specs/p35_dcveto_on_931.json"
    },
    "edits": 1,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p35_dcveto_on_931.json",
    "name": "p35_dcveto_on_931",
    "out_dir": "notebooks/kaggle_p35_dcveto_on_931",
@@ -937,6 +977,7 @@
     "source_path": "scripts/kaggle_specs/p36_assoc_feature_tap_smoke.json"
    },
    "edits": 10,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p36_assoc_feature_tap_smoke.json",
    "name": "p36_assoc_feature_tap_smoke",
    "out_dir": "notebooks/kaggle_p36_assoc_feature_tap_smoke",
@@ -960,6 +1001,7 @@
     "source_path": "scripts/kaggle_specs/p37_assoc_feature_tap_c2_smoke.json"
    },
    "edits": 10,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p37_assoc_feature_tap_c2_smoke.json",
    "name": "p37_assoc_feature_tap_c2_smoke",
    "out_dir": "notebooks/kaggle_p37_assoc_feature_tap_c2_smoke",
@@ -983,6 +1025,7 @@
     "source_path": "scripts/kaggle_specs/p38_relink_bonus_b2.json"
    },
    "edits": 3,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p38_relink_bonus_b2.json",
    "name": "p38_relink_bonus_b2",
    "out_dir": "notebooks/kaggle_p38_relink_bonus_b2",
@@ -1006,6 +1049,7 @@
     "source_path": "scripts/kaggle_specs/p3_armb.json"
    },
    "edits": 15,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_armb.json",
    "name": "p3_armb",
    "out_dir": "notebooks/kaggle_p3_armb",
@@ -1029,6 +1073,7 @@
     "source_path": "scripts/kaggle_specs/p3_armb_loeo_f0.json"
    },
    "edits": 18,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_armb_loeo_f0.json",
    "name": "p3_armb_loeo_f0",
    "out_dir": "notebooks/kaggle_p3_armb_loeo_f0",
@@ -1052,6 +1097,7 @@
     "source_path": "scripts/kaggle_specs/p3_armb_loeo_f0_smoke.json"
    },
    "edits": 18,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_armb_loeo_f0_smoke.json",
    "name": "p3_armb_loeo_f0_smoke",
    "out_dir": "notebooks/kaggle_p3_armb_loeo_f0_smoke",
@@ -1075,6 +1121,7 @@
     "source_path": "scripts/kaggle_specs/p3_armb_loeo_f1.json"
    },
    "edits": 18,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_armb_loeo_f1.json",
    "name": "p3_armb_loeo_f1",
    "out_dir": "notebooks/kaggle_p3_armb_loeo_f1",
@@ -1098,6 +1145,7 @@
     "source_path": "scripts/kaggle_specs/p3_base_loeo_f0.json"
    },
    "edits": 18,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_base_loeo_f0.json",
    "name": "p3_base_loeo_f0",
    "out_dir": "notebooks/kaggle_p3_base_loeo_f0",
@@ -1121,6 +1169,7 @@
     "source_path": "scripts/kaggle_specs/p3_base_loeo_f1.json"
    },
    "edits": 18,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_base_loeo_f1.json",
    "name": "p3_base_loeo_f1",
    "out_dir": "notebooks/kaggle_p3_base_loeo_f1",
@@ -1144,6 +1193,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_pilot_f0.json"
    },
    "edits": 20,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_d1_pilot_f0.json",
    "name": "p3_d1_pilot_f0",
    "out_dir": "notebooks/kaggle_p3_d1_pilot_f0",
@@ -1167,6 +1217,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_pilot_f0_src.json"
    },
    "edits": 20,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_d1_pilot_f0_src.json",
    "name": "p3_d1_pilot_f0_src",
    "out_dir": "notebooks/kaggle_p3_d1_pilot_f0_src",
@@ -1190,6 +1241,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_pilot_f1.json"
    },
    "edits": 20,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_d1_pilot_f1.json",
    "name": "p3_d1_pilot_f1",
    "out_dir": "notebooks/kaggle_p3_d1_pilot_f1",
@@ -1213,6 +1265,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_pilot_f1_src.json"
    },
    "edits": 20,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_d1_pilot_f1_src.json",
    "name": "p3_d1_pilot_f1_src",
    "out_dir": "notebooks/kaggle_p3_d1_pilot_f1_src",
@@ -1236,6 +1289,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_smoke_f0.json"
    },
    "edits": 20,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_d1_smoke_f0.json",
    "name": "p3_d1_smoke_f0",
    "out_dir": "notebooks/kaggle_p3_d1_smoke_f0",
@@ -1259,6 +1313,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_smoke_f0_src.json"
    },
    "edits": 20,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_d1_smoke_f0_src.json",
    "name": "p3_d1_smoke_f0_src",
    "out_dir": "notebooks/kaggle_p3_d1_smoke_f0_src",
@@ -1282,6 +1337,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_smoke_f1.json"
    },
    "edits": 20,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_d1_smoke_f1.json",
    "name": "p3_d1_smoke_f1",
    "out_dir": "notebooks/kaggle_p3_d1_smoke_f1",
@@ -1305,6 +1361,7 @@
     "source_path": "scripts/kaggle_specs/p3_d1_smoke_f1_src.json"
    },
    "edits": 20,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_d1_smoke_f1_src.json",
    "name": "p3_d1_smoke_f1_src",
    "out_dir": "notebooks/kaggle_p3_d1_smoke_f1_src",
@@ -1328,6 +1385,7 @@
     "source_path": "scripts/kaggle_specs/p3_harmonic.json"
    },
    "edits": 10,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_harmonic.json",
    "name": "p3_harmonic",
    "out_dir": "notebooks/kaggle_p3_harmonic",
@@ -1351,6 +1409,7 @@
     "source_path": "scripts/kaggle_specs/p3_subvoxel_loeo_f0.json"
    },
    "edits": 19,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_subvoxel_loeo_f0.json",
    "name": "p3_subvoxel_loeo_f0",
    "out_dir": "notebooks/kaggle_p3_subvoxel_loeo_f0",
@@ -1374,6 +1433,7 @@
     "source_path": "scripts/kaggle_specs/p3_subvoxel_loeo_f0_smoke.json"
    },
    "edits": 19,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_subvoxel_loeo_f0_smoke.json",
    "name": "p3_subvoxel_loeo_f0_smoke",
    "out_dir": "notebooks/kaggle_p3_subvoxel_loeo_f0_smoke",
@@ -1397,6 +1457,7 @@
     "source_path": "scripts/kaggle_specs/p3_subvoxel_loeo_f1.json"
    },
    "edits": 19,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p3_subvoxel_loeo_f1.json",
    "name": "p3_subvoxel_loeo_f1",
    "out_dir": "notebooks/kaggle_p3_subvoxel_loeo_f1",
@@ -1420,6 +1481,7 @@
     "source_path": "scripts/kaggle_specs/p4_detpeak_smoke_f0.json"
    },
    "edits": 20,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p4_detpeak_smoke_f0.json",
    "name": "p4_detpeak_smoke_f0",
    "out_dir": "notebooks/kaggle_p4_detpeak_smoke_f0",
@@ -1443,6 +1505,7 @@
     "source_path": "scripts/kaggle_specs/p4_detsweep_export_f0.json"
    },
    "edits": 20,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p4_detsweep_export_f0.json",
    "name": "p4_detsweep_export_f0",
    "out_dir": "notebooks/kaggle_p4_detsweep_export_f0",
@@ -1466,6 +1529,7 @@
     "source_path": "scripts/kaggle_specs/p4_detsweep_export_f1.json"
    },
    "edits": 20,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p4_detsweep_export_f1.json",
    "name": "p4_detsweep_export_f1",
    "out_dir": "notebooks/kaggle_p4_detsweep_export_f1",
@@ -1489,6 +1553,7 @@
     "source_path": "scripts/kaggle_specs/p4_preilp_loeo_f1.json"
    },
    "edits": 21,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p4_preilp_loeo_f1.json",
    "name": "p4_preilp_loeo_f1",
    "out_dir": "notebooks/kaggle_p4_preilp_loeo_f1",
@@ -1512,6 +1577,7 @@
     "source_path": "scripts/kaggle_specs/p5_divfix.json"
    },
    "edits": 14,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p5_divfix.json",
    "name": "p5_divfix",
    "out_dir": "notebooks/kaggle_p5_divfix",
@@ -1535,6 +1601,7 @@
     "source_path": "scripts/kaggle_specs/p6_control_degraded.json"
    },
    "edits": 11,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p6_control_degraded.json",
    "name": "p6_control_degraded",
    "out_dir": "notebooks/kaggle_p6_control_degraded",
@@ -1558,6 +1625,7 @@
     "source_path": "scripts/kaggle_specs/p7_cleanedge.json"
    },
    "edits": 11,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p7_cleanedge.json",
    "name": "p7_cleanedge",
    "out_dir": "notebooks/kaggle_p7_cleanedge",
@@ -1581,6 +1649,7 @@
     "source_path": "scripts/kaggle_specs/p8_loosefilter.json"
    },
    "edits": 12,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p8_loosefilter.json",
    "name": "p8_loosefilter",
    "out_dir": "notebooks/kaggle_p8_loosefilter",
@@ -1604,6 +1673,7 @@
     "source_path": "scripts/kaggle_specs/p9_coupled_division.json"
    },
    "edits": 2,
+   "git_reproducible": true,
    "id": "SPEC:scripts/kaggle_specs/p9_coupled_division.json",
    "name": "p9_coupled_division",
    "out_dir": "notebooks/kaggle_p9_coupled_division",

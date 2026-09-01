@@ -109,7 +109,10 @@ def test_release_artifacts_and_weights_are_declared_raw():
     import digest_inventory as DI
     for path, expect in [("notebooks/kaggle_p35_dcveto_on_931/_out/audit_receipt.json", H.RAW),
                          ("weights/model.pth", H.RAW),
-                         ("notebooks/kaggle_p35_dcveto_on_931/build_manifest.json", H.RAW),
+                         # CORRECTED in Phase 1.5: a build manifest is tracked repository
+                         # metadata, not a shipped artifact. Declaring it RAW made every consumer
+                         # of its digest checkout-dependent.
+                         ("notebooks/kaggle_p35_dcveto_on_931/build_manifest.json", H.CANONICAL),
                          ("scripts/kaggle_specs/p35_dcveto_on_931.json", H.CANONICAL),
                          ("scripts/win_bet/kaggle_mounts.py", H.CANONICAL)]:
         kind, why = DI.declared_kind(path)

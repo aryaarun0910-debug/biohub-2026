@@ -486,8 +486,10 @@ def build_notebooks(reg: dict, tracked: set[str], roles: dict) -> tuple[dict, di
             "facts": sorted({f for e in exps for f in reg["experiments"][e]["facts"]}),
             "submissions": [reg["experiments"][e]["submission"] for e in exps
                             if reg["experiments"][e].get("submission")],
-            "release_receipt": rel(d / "_out" / "audit_receipt.json")
-                               if (d / "_out" / "audit_receipt.json").is_file() else None,
+            # the PATH is derived from the directory name and is the same everywhere; whether
+            # the file is here is a property of the machine and is excluded from the drift lock.
+            "release_receipt": rel(d / "_out" / "audit_receipt.json"),
+            "release_receipt_present_here": (d / "_out" / "audit_receipt.json").is_file(),
             "release_receipt_tracked": False,   # _out/ is gitignored - see PHASE 1C envelopes
             "environment": _nb_env(nbs[0]) if nbs else {},
             "roles": nb_roles,
@@ -557,7 +559,7 @@ def build_research(tracked: set[str]) -> dict:
             "superseded_by": fm.get("superseded_by"),
             "entity_links": ids_in(text),
             "headings": len(re.findall(r"^#{1,6} ", text, flags=re.M)),
-            "bytes": p.stat().st_size,
+            "canonical_bytes": _canonical_len(p),
         }
     return out
 
@@ -584,6 +586,7 @@ def build(node_ids: list[str] | None = None) -> dict:
     if node_ids is None:
         node_ids = collect_node_ids()
     tracked = git_tracked()
+    dirty = _dirty_paths()
     ov = overrides()
     roles = yaml.safe_load(read_text(REGISTRY / "baseline_roles.yaml")) or {}
     reg = build_registry()
@@ -591,6 +594,19 @@ def build(node_ids: list[str] | None = None) -> dict:
     tests = build_tests(scripts, tracked, node_ids)
     notebooks, specs = build_notebooks(reg, tracked, roles)
     docs = build_research(tracked)
+    # EACH ENTRY DECLARES WHETHER GIT CAN REPRODUCE IT, at generation time. Recomputing this at
+    # --check time was the bug: the working tree excluded 15 dirty/untracked paths and a fresh
+    # clone excluded 0, so the two sides compared different sets and the lock could never pass in
+    # a clone. The committed artifact now carries its own lock scope, so both sides agree.
+    for group, keyfn in ((scripts, lambda k, v: v["path"]), (tests, lambda k, v: v["path"]),
+                         (docs, lambda k, v: v["path"]),
+                         (specs, lambda k, v: v["path"])):
+        for k, v in group.items():
+            v["git_reproducible"] = bool(v.get("tracked")) and keyfn(k, v) not in dirty
+    for k, v in notebooks.items():
+        nb = v.get("notebook")
+        v["git_reproducible"] = bool(nb) and nb in tracked and nb not in dirty
+
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_by": "scripts/core/catalog.py",
@@ -606,6 +622,21 @@ def build(node_ids: list[str] | None = None) -> dict:
         "registry": reg, "scripts": scripts, "tests": tests,
         "notebooks": notebooks, "specs": specs, "research_docs": docs,
     }
+
+
+def _dirty_paths() -> set[str]:
+    """Paths with uncommitted changes, plus untracked ones. A clone cannot reproduce these."""
+    out = subprocess.run(["git", "status", "--porcelain"], cwd=REPO,
+                         capture_output=True, text=True, timeout=180)
+    return {line[3:].strip().replace("\\", "/") for line in out.stdout.splitlines()
+            if line.strip()}
+
+
+def _untracked_notebook_dirs() -> set[str]:
+    """Notebook directories with NO tracked content - present here, absent from any clone."""
+    tracked = {line.split("/")[1] for line in git_tracked() if line.startswith("notebooks/")}
+    return {d.name for d in (REPO / NOTEBOOK_ROOT).iterdir()
+            if d.is_dir() and d.name not in tracked}
 
 
 def canonical(payload: dict) -> str:
@@ -643,19 +674,58 @@ def main(argv=None) -> int:
     payload = build(nodes)
 
     if args.check:
+        # THE LOCK'S SCOPE IS STATED, NOT ASSUMED. 11 notebook directories exist on this disk with
+        # NO tracked content - 6 gitignored explicitly at .gitignore:33-38 and 5 never added - so
+        # a payload enumerating the filesystem can never be reproducible from git and the lock
+        # could never pass in a clone. The CATALOG still covers all 74, because a local artifact
+        # is worth knowing about; the DRIFT LOCK covers the subset git can reproduce, and the
+        # excluded entries are named in the output rather than silently dropped.
         drift = []
+        # FIELDS THE LOCK CANNOT COVER, each for a stated reason rather than convenience:
+        #   *_present_here / *_available_here  properties of THIS machine
+        #   git_reproducible                   the scope marker itself
+        #   callers / covered_by_tests /
+        #   named_by_tests                     CROSS-REFERENCES. A tracked script's caller list
+        #                                      changes when an UNTRACKED file references it, so
+        #                                      it is derived from entries the lock already
+        #                                      excludes. The referenced entries are still locked.
+        #   node_ids / n_nodes                 pytest collection, which depends on operator
+        #                                      assets: test_div_reach_steal_adversarial collects
+        #                                      16 nodes here and 0 in a clone with no data/train.
+        excluded_fields = {"release_receipt_present_here", "raw_receipt_available_here",
+                           "git_reproducible", "callers", "covered_by_tests", "named_by_tests",
+                           "node_ids", "n_nodes"}
+        n_excluded = 0
         for key in ("registry", "scripts", "tests", "notebooks", "specs", "research_docs"):
             p = args.out / f"{key}.json"
             if not p.is_file():
                 drift.append(f"{p.name} missing")
                 continue
-            want = canonical({"schema_version": SCHEMA_VERSION, key: payload[key]})
-            if p.read_text(encoding="utf-8") != want:
+            have = json.loads(p.read_text(encoding="utf-8"))[key]
+            want_all = payload[key]
+            def _scrub(d):
+                return {k: {f: v for f, v in e.items() if f not in excluded_fields}
+                        if isinstance(e, dict) else e for k, e in d.items()}
+
+            if key in ("scripts", "tests", "research_docs", "specs", "notebooks"):
+                pass
+            if key in ("scripts", "tests", "research_docs", "specs", "notebooks"):
+                # SCOPE COMES FROM THE COMMITTED ARTIFACT, not from this machine.
+                inscope = {k for k, v in have.items()
+                           if isinstance(v, dict) and v.get("git_reproducible")}
+                n_excluded += len(have) - len(inscope)
+                have = _scrub({k: v for k, v in have.items() if k in inscope})
+                want = _scrub({k: v for k, v in want_all.items() if k in inscope})
+            else:
+                want = want_all
+            if canonical({"schema_version": SCHEMA_VERSION, key: have}) !=                canonical({"schema_version": SCHEMA_VERSION, key: want}):
                 drift.append(f"{p.name} differs from a fresh generation")
         if drift:
             print(HEARTBEAT_DRIFT + " " + "; ".join(drift))
             return 1
         print(f"  catalog in sync: {payload['counts']}")
+        print(f"  lock scope: {n_excluded} entr(ies) excluded as not git-reproducible "
+              f"(untracked, dirty, or local-only) - declared in the artifact, not recomputed")
         print(HEARTBEAT_OK)
         return 0
 

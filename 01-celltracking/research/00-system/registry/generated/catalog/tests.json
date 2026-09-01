@@ -15,6 +15,7 @@
     "source_path": "tests/assoc_v2_world.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/assoc_v2_world.py",
    "ids_mentioned": {
@@ -57,6 +58,7 @@
     "source_path": "tests/conftest.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/conftest.py",
    "ids_mentioned": {
@@ -91,6 +93,7 @@
     "source_path": "tests/test_assemble_d1_factorial.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_assemble_d1_factorial.py",
    "ids_mentioned": {
@@ -150,6 +153,7 @@
     "source_path": "tests/test_assoc_feature_parity.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_assoc_feature_parity.py",
    "ids_mentioned": {
@@ -201,6 +205,7 @@
     "source_path": "tests/test_assoc_feature_tap.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_assoc_feature_tap.py",
    "ids_mentioned": {
@@ -294,6 +299,7 @@
     "source_path": "tests/test_assoc_fold_pathology.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_assoc_fold_pathology.py",
    "ids_mentioned": {
@@ -355,6 +361,7 @@
     "source_path": "tests/test_assoc_report.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_assoc_report.py",
    "ids_mentioned": {
@@ -412,6 +419,7 @@
     "source_path": "tests/test_assoc_tournament.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_assoc_tournament.py",
    "ids_mentioned": {
@@ -487,6 +495,7 @@
     "source_path": "tests/test_assoc_train_harness.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_assoc_train_harness.py",
    "ids_mentioned": {
@@ -606,6 +615,7 @@
     "source_path": "tests/test_audit_detpeak_full_export.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_audit_detpeak_full_export.py",
    "ids_mentioned": {
@@ -648,6 +658,7 @@
     "source_path": "tests/test_audit_feature_cache.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_audit_feature_cache.py",
    "ids_mentioned": {
@@ -785,6 +796,7 @@
     "source_path": "tests/test_audit_receipt_harness.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_audit_receipt_harness.py",
    "ids_mentioned": {
@@ -838,6 +850,7 @@
     "source_path": "tests/test_audit_release_receipt.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_audit_release_receipt.py",
    "ids_mentioned": {
@@ -905,6 +918,7 @@
     "source_path": "tests/test_baseline_roles.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_baseline_roles.py",
    "ids_mentioned": {
@@ -957,6 +971,7 @@
     "source_path": "tests/test_biohubx_contract.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_biohubx_contract.py",
    "ids_mentioned": {
@@ -1046,6 +1061,7 @@
     "source_path": "tests/test_biohubx_import_isolation.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_biohubx_import_isolation.py",
    "ids_mentioned": {
@@ -1082,6 +1098,7 @@
     "source_path": "tests/test_biohubx_model.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_biohubx_model.py",
    "ids_mentioned": {
@@ -1128,6 +1145,7 @@
     "source_path": "tests/test_biohubx_synthetic_t2.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_biohubx_synthetic_t2.py",
    "ids_mentioned": {
@@ -1178,6 +1196,7 @@
     "source_path": "tests/test_biohubx_training.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_biohubx_training.py",
    "ids_mentioned": {
@@ -1220,6 +1239,7 @@
     "source_path": "tests/test_candidate_gate_eval.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_candidate_gate_eval.py",
    "ids_mentioned": {
@@ -1265,6 +1285,7 @@
     "source_path": "tests/test_candidate_threshold_sweep.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_candidate_threshold_sweep.py",
    "ids_mentioned": {
@@ -1304,6 +1325,7 @@
     "source_path": "tests/test_catalog.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_catalog.py",
    "ids_mentioned": {
@@ -1360,6 +1382,7 @@
     "source_path": "tests/test_checkpoint_inventory.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_checkpoint_inventory.py",
    "ids_mentioned": {
@@ -1398,6 +1421,7 @@
     "source_path": "tests/test_claims_table.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_claims_table.py",
    "ids_mentioned": {
@@ -1438,6 +1462,7 @@
     "source_path": "tests/test_colab_cli.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_colab_cli.py",
    "ids_mentioned": {
@@ -1481,6 +1506,7 @@
     "source_path": "tests/test_colab_relay.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_colab_relay.py",
    "ids_mentioned": {
@@ -1533,6 +1559,7 @@
     "source_path": "tests/test_compare_substrate_sentinel.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_compare_substrate_sentinel.py",
    "ids_mentioned": {
@@ -1572,6 +1599,7 @@
     "source_path": "tests/test_control_binding.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_control_binding.py",
    "ids_mentioned": {
@@ -1641,6 +1669,7 @@
     "source_path": "tests/test_coupled_division_transplant.py"
    },
    "fixture_parity": "declared-unit-geometry",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_coupled_division_transplant.py",
    "ids_mentioned": {
@@ -1693,10 +1722,11 @@
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
     "hash_kind": "CANONICAL_TEXT_SHA256",
-    "measured_sha256": "5a8989ef359cea4d89df4477fcdb91e714f05698159db1e1386b6c135845c651",
+    "measured_sha256": "dac48a851eae0830d3016b44c51c11764db10de3c7c690af6f86de469d0cd773",
     "source_path": "tests/test_cross_checkout_identity.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": false,
    "has_skip_guard": false,
    "id": "TEST:tests/test_cross_checkout_identity.py",
    "ids_mentioned": {
@@ -1754,6 +1784,7 @@
     "source_path": "tests/test_d1_candidate_gate.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_d1_candidate_gate.py",
    "ids_mentioned": {
@@ -1795,6 +1826,7 @@
     "source_path": "tests/test_d1_factorial.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_d1_factorial.py",
    "ids_mentioned": {
@@ -1908,6 +1940,7 @@
     "source_path": "tests/test_d1_factorial_smoke.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_d1_factorial_smoke.py",
    "ids_mentioned": {
@@ -1987,6 +2020,7 @@
     "source_path": "tests/test_d1_manifest_aggregation.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_d1_manifest_aggregation.py",
    "ids_mentioned": {
@@ -2031,6 +2065,7 @@
     "source_path": "tests/test_d1_partition.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_d1_partition.py",
    "ids_mentioned": {
@@ -2080,6 +2115,7 @@
     "source_path": "tests/test_d1_postprocess.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_d1_postprocess.py",
    "ids_mentioned": {
@@ -2221,6 +2257,7 @@
     "source_path": "tests/test_d1_structural.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_d1_structural.py",
    "ids_mentioned": {
@@ -2270,6 +2307,7 @@
     "source_path": "tests/test_d1_v6_export.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_d1_v6_export.py",
    "ids_mentioned": {
@@ -2359,6 +2397,7 @@
     "source_path": "tests/test_d1f_probe.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_d1f_probe.py",
    "ids_mentioned": {
@@ -2578,6 +2617,7 @@
     "source_path": "tests/test_dc_snap.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_dc_snap.py",
    "ids_mentioned": {
@@ -2620,6 +2660,7 @@
     "source_path": "tests/test_dc_subvoxel_refine.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_dc_subvoxel_refine.py",
    "ids_mentioned": {
@@ -2666,6 +2707,7 @@
     "source_path": "tests/test_decision_kernel.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_decision_kernel.py",
    "ids_mentioned": {
@@ -2704,6 +2746,7 @@
     "source_path": "tests/test_detpeak_curve.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_detpeak_curve.py",
    "ids_mentioned": {
@@ -2747,6 +2790,7 @@
     "source_path": "tests/test_detpeak_export_contract.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_detpeak_export_contract.py",
    "ids_mentioned": {
@@ -2784,6 +2828,7 @@
     "source_path": "tests/test_div_reach_steal.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_div_reach_steal.py",
    "ids_mentioned": {
@@ -2830,6 +2875,7 @@
     "source_path": "tests/test_div_reach_steal_adversarial.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_div_reach_steal_adversarial.py",
    "ids_mentioned": {
@@ -2892,6 +2938,7 @@
     "source_path": "tests/test_div_steal_rule.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_div_steal_rule.py",
    "ids_mentioned": {
@@ -2942,6 +2989,7 @@
     "source_path": "tests/test_division_metric.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_division_metric.py",
    "ids_mentioned": {
@@ -2980,6 +3028,7 @@
     "source_path": "tests/test_divverify_contract.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": false,
    "has_skip_guard": false,
    "id": "TEST:tests/test_divverify_contract.py",
    "ids_mentioned": {
@@ -3059,6 +3108,7 @@
     "source_path": "tests/test_edge_candidate_budget.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_edge_candidate_budget.py",
    "ids_mentioned": {
@@ -3114,6 +3164,7 @@
     "source_path": "tests/test_experiment_defect_gate.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_experiment_defect_gate.py",
    "ids_mentioned": {
@@ -3169,6 +3220,7 @@
     "source_path": "tests/test_external_api_contract.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_external_api_contract.py",
    "ids_mentioned": {
@@ -3212,6 +3264,7 @@
     "source_path": "tests/test_extract_node_estimates.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_extract_node_estimates.py",
    "ids_mentioned": {
@@ -3254,6 +3307,7 @@
     "source_path": "tests/test_finaledge_gates.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_finaledge_gates.py",
    "ids_mentioned": {
@@ -3317,6 +3371,7 @@
     "source_path": "tests/test_focus3d_probe_state_contract.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_focus3d_probe_state_contract.py",
    "ids_mentioned": {
@@ -3360,6 +3415,7 @@
     "source_path": "tests/test_fp_endpoint_dedup.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_fp_endpoint_dedup.py",
    "ids_mentioned": {
@@ -3406,6 +3462,7 @@
     "source_path": "tests/test_fresh_clone_reproducibility.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_fresh_clone_reproducibility.py",
    "ids_mentioned": {
@@ -3458,6 +3515,7 @@
     "source_path": "tests/test_gpu_preflight.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_gpu_preflight.py",
    "ids_mentioned": {
@@ -3525,6 +3583,7 @@
     "source_path": "tests/test_gpu_protection_contract.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_gpu_protection_contract.py",
    "ids_mentioned": {
@@ -3605,6 +3664,7 @@
     "source_path": "tests/test_gt_collision.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_gt_collision.py",
    "ids_mentioned": {
@@ -3648,6 +3708,7 @@
     "source_path": "tests/test_h1r_adabn_detection_only.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_adabn_detection_only.py",
    "ids_mentioned": {
@@ -3699,6 +3760,7 @@
     "source_path": "tests/test_h1r_appearance_patch.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_appearance_patch.py",
    "ids_mentioned": {
@@ -3747,6 +3809,7 @@
     "source_path": "tests/test_h1r_candidate_export_patch.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_candidate_export_patch.py",
    "ids_mentioned": {
@@ -3789,6 +3852,7 @@
     "source_path": "tests/test_h1r_det_deploy_weights.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_det_deploy_weights.py",
    "ids_mentioned": {
@@ -3831,6 +3895,7 @@
     "source_path": "tests/test_h1r_det_train.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_det_train.py",
    "ids_mentioned": {
@@ -3877,6 +3942,7 @@
     "source_path": "tests/test_h1r_edge_data.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_edge_data.py",
    "ids_mentioned": {
@@ -3923,6 +3989,7 @@
     "source_path": "tests/test_h1r_edge_loss_inference.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_edge_loss_inference.py",
    "ids_mentioned": {
@@ -3961,6 +4028,7 @@
     "source_path": "tests/test_h1r_edge_s5_oof_init.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_edge_s5_oof_init.py",
    "ids_mentioned": {
@@ -4011,6 +4079,7 @@
     "source_path": "tests/test_h1r_edge_train.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_edge_train.py",
    "ids_mentioned": {
@@ -4068,6 +4137,7 @@
     "source_path": "tests/test_h1r_rope4d.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_rope4d.py",
    "ids_mentioned": {
@@ -4121,6 +4191,7 @@
     "source_path": "tests/test_hf_xet_digest.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_hf_xet_digest.py",
    "ids_mentioned": {
@@ -4162,6 +4233,7 @@
     "source_path": "tests/test_hoct_compat.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": false,
    "has_skip_guard": false,
    "id": "TEST:tests/test_hoct_compat.py",
    "ids_mentioned": {
@@ -4217,6 +4289,7 @@
     "source_path": "tests/test_hoct_head.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_hoct_head.py",
    "ids_mentioned": {
@@ -4276,6 +4349,7 @@
     "source_path": "tests/test_ilp_retention_instruments.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_ilp_retention_instruments.py",
    "ids_mentioned": {
@@ -4334,6 +4408,7 @@
     "source_path": "tests/test_kaggle_factory_release_receipt.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_kaggle_factory_release_receipt.py",
    "ids_mentioned": {
@@ -4385,6 +4460,7 @@
     "source_path": "tests/test_kaggle_queue.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_kaggle_queue.py",
    "ids_mentioned": {
@@ -4436,6 +4512,7 @@
     "source_path": "tests/test_lineage_degree_invariants.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_lineage_degree_invariants.py",
    "ids_mentioned": {
@@ -4482,6 +4559,7 @@
     "source_path": "tests/test_linefit_volume_guard.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_linefit_volume_guard.py",
    "ids_mentioned": {
@@ -4523,6 +4601,7 @@
     "source_path": "tests/test_loeo_weights_hygiene.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_loeo_weights_hygiene.py",
    "ids_mentioned": {
@@ -4788,6 +4867,7 @@
     "source_path": "tests/test_metric_parity.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_metric_parity.py",
    "ids_mentioned": {
@@ -4828,6 +4908,7 @@
     "source_path": "tests/test_no_family_routing.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_no_family_routing.py",
    "ids_mentioned": {
@@ -4868,6 +4949,7 @@
     "source_path": "tests/test_node_budget_policy.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_node_budget_policy.py",
    "ids_mentioned": {
@@ -4907,6 +4989,7 @@
     "source_path": "tests/test_numpy_metric.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_numpy_metric.py",
    "ids_mentioned": {
@@ -4949,6 +5032,7 @@
     "source_path": "tests/test_p10_deepcenter_best.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_p10_deepcenter_best.py",
    "ids_mentioned": {
@@ -4991,6 +5075,7 @@
     "source_path": "tests/test_p11_xhhuang_edge_swap.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_p11_xhhuang_edge_swap.py",
    "ids_mentioned": {
@@ -5043,6 +5128,7 @@
     "source_path": "tests/test_p12_forward_acceleration_lookahead.py"
    },
    "fixture_parity": "declared-unit-geometry",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_p12_forward_acceleration_lookahead.py",
    "ids_mentioned": {
@@ -5096,6 +5182,7 @@
     "source_path": "tests/test_p13_p9_adabn_detection_only.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_p13_p9_adabn_detection_only.py",
    "ids_mentioned": {
@@ -5138,6 +5225,7 @@
     "source_path": "tests/test_p24_deepcenter_best_veto.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_p24_deepcenter_best_veto.py",
    "ids_mentioned": {
@@ -5182,6 +5270,7 @@
     "source_path": "tests/test_p25_recipe_parity.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_p25_recipe_parity.py",
    "ids_mentioned": {
@@ -5239,6 +5328,7 @@
     "source_path": "tests/test_p28_full_chain_replay.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_p28_full_chain_replay.py",
    "ids_mentioned": {
@@ -5278,6 +5368,7 @@
     "source_path": "tests/test_pkt0048_maskassoc.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_pkt0048_maskassoc.py",
    "ids_mentioned": {
@@ -5345,6 +5436,7 @@
     "source_path": "tests/test_pooled_objective.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_pooled_objective.py",
    "ids_mentioned": {
@@ -5388,6 +5480,7 @@
     "source_path": "tests/test_preilp_crossrun_stability.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_preilp_crossrun_stability.py",
    "ids_mentioned": {
@@ -5432,6 +5525,7 @@
     "source_path": "tests/test_provenance_policy.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_provenance_policy.py",
    "ids_mentioned": {
@@ -5497,6 +5591,7 @@
     "source_path": "tests/test_provenance_policy_single_source.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_provenance_policy_single_source.py",
    "ids_mentioned": {
@@ -5555,6 +5650,7 @@
     "source_path": "tests/test_rag_index.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_rag_index.py",
    "ids_mentioned": {
@@ -5600,6 +5696,7 @@
     "source_path": "tests/test_ranker_block.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_ranker_block.py",
    "ids_mentioned": {
@@ -5642,6 +5739,7 @@
     "source_path": "tests/test_reach_oracle_partition.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_reach_oracle_partition.py",
    "ids_mentioned": {
@@ -5688,10 +5786,11 @@
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
     "hash_kind": "CANONICAL_TEXT_SHA256",
-    "measured_sha256": "6ad4adc90450b7abc0e221c043ac77f9bee3fb5d05cc2a53dafb5d16f1376d00",
+    "measured_sha256": "2b80c0fd6b67849b8eab505d2924abed0f8a951071cf8d0ade11092db6a0e7c3",
     "source_path": "tests/test_receipt_envelope.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": false,
    "has_skip_guard": false,
    "id": "TEST:tests/test_receipt_envelope.py",
    "ids_mentioned": {
@@ -5737,6 +5836,7 @@
     "source_path": "tests/test_registry_gate.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_registry_gate.py",
    "ids_mentioned": {
@@ -5784,6 +5884,7 @@
     "source_path": "tests/test_registry_validity.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_registry_validity.py",
    "ids_mentioned": {
@@ -5858,6 +5959,7 @@
     "source_path": "tests/test_relink_division.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_relink_division.py",
    "ids_mentioned": {
@@ -5940,6 +6042,7 @@
     "source_path": "tests/test_research_tree.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_research_tree.py",
    "ids_mentioned": {
@@ -5978,6 +6081,7 @@
     "source_path": "tests/test_scoring.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_scoring.py",
    "ids_mentioned": {
@@ -6019,6 +6123,7 @@
     "source_path": "tests/test_spec_restriction.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_spec_restriction.py",
    "ids_mentioned": {
@@ -6080,6 +6185,7 @@
     "source_path": "tests/test_spec_slug_contract.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": true,
    "id": "TEST:tests/test_spec_slug_contract.py",
    "ids_mentioned": {
@@ -6188,6 +6294,7 @@
     "source_path": "tests/test_submission_structure_audit.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_submission_structure_audit.py",
    "ids_mentioned": {
@@ -6262,6 +6369,7 @@
     "source_path": "tests/test_validate_detpeak_export.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_validate_detpeak_export.py",
    "ids_mentioned": {
@@ -6300,6 +6408,7 @@
     "source_path": "tests/test_wrapper_density.py"
    },
    "fixture_parity": "not declared",
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_wrapper_density.py",
    "ids_mentioned": {
