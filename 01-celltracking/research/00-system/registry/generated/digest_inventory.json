@@ -4969,6 +4969,6 @@
  },
  "generated_by": "scripts/core/digest_inventory.py",
  "hash_algorithm": "sha256",
- "n_producer_call_sites": 136,
+ "n_producer_call_sites": 137,
  "structured_version": "json_sort_keys_v1"
 }

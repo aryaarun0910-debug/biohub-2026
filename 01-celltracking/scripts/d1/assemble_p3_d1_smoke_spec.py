@@ -121,6 +121,24 @@ def sha_lf(p: pathlib.Path) -> str:
     return hashlib.sha256(p.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
+def sha_embedded_block() -> str:
+    """sha256 of the audit block AS EMBEDDED in d1_inject.py - the bytes the notebook executes.
+
+    Checkout-invariant by construction: a base64 literal inside a source file is not touched by
+    any line-ending filter, so this answers the same way in every checkout.
+    """
+    import base64
+    import re as _re
+    text = (ROOT / "scripts" / "kaggle_edits" / "d1_inject.py").read_text(encoding="utf-8")
+    b64 = "".join(_re.findall(r'^\s*"([A-Za-z0-9+/=]+)"\s*$', text, flags=_re.M))
+    if not b64:
+        raise RuntimeError(
+            "no embedded audit block found in d1_inject.py. Refusing to fall back to hashing the "
+            "file on disk - that is the checkout-dependent binding this replaced."
+        )
+    return hashlib.sha256(base64.b64decode(b64)).hexdigest()
+
+
 def sha_edit(e: dict) -> str:
     return hashlib.sha256(json.dumps(e, sort_keys=True).encode()).hexdigest()
 
@@ -540,17 +558,18 @@ def build(shard: dict, tier: str = "smoke") -> dict:
                 "loeo_source": LOEO_OUTPUT_PROVENANCE,
             "imported_edit_sha256": imported_sha,
             "d1_inject_sha256": sha_file(ROOT / "scripts/kaggle_edits/d1_inject.py"),
-            # LEFT RAW DELIBERATELY, and this is the ONE digest Phase 1.5 could not migrate.
-            # MEASURED 2026-09-01: scripts/kaggle_edits/d1_response_audit.py has MIXED line
-            # endings - 828 CRLF in this worktree, 903 in a fresh checkout - so the committed
-            # value ec9666f7 is this worktree's mixed form and is reproducible in NO other
-            # checkout. Its canonical form (899daee1) IS stable in both, but adopting it would
-            # change the recorded value in four generated specs, the runtime drift constant
-            # embedded in scripts/kaggle_edits/d1_inject.py:906, and therefore the bytes of every
-            # notebook that injects it - which cascades into built-notebook digests and their
-            # pins. That is a MIGRATION, not a repair, and Phase 1.5 is explicitly not permitted
-            # to begin one. Routed to the Phase 2 migration manifest with this measurement.
-            "d1_block_sha256": sha_file(ROOT / "scripts/kaggle_edits/d1_response_audit.py"),
+            # HASH WHAT THE NOTEBOOK ACTUALLY RUNS, not the file on disk.
+            # d1_inject.py carries the audit block as a base64 literal, and THOSE are the bytes
+            # the injected notebook executes. Hashing scripts/kaggle_edits/d1_response_audit.py
+            # instead was checkout-dependent - measured 2026-09-01, that file has MIXED line
+            # endings (828 CRLF in the development worktree, 903 in a fresh checkout), so the
+            # recorded value reproduced on exactly one machine and this was the last of the ten
+            # clean-clone failures.
+            # The embedded bytes are identical in both trees (50,183 B) and hash to the value
+            # already recorded, so NOTHING CHANGES except which source is read - no spec value,
+            # no notebook, no runtime constant. It is also the more honest binding: the spec now
+            # records the digest of the code that runs, not of a file that merely resembles it.
+            "d1_block_sha256": sha_embedded_block(),
             "checkpoint_sha256": rec["checkpoint_sha256"],
             "stems": stems,
             "routing_source": (

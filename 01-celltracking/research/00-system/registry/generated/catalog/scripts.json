@@ -134,7 +134,7 @@
     "source_path": "scripts/core/catalog.py"
    },
    "dynamic_import": true,
-   "git_reproducible": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/catalog.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1011,7 +1011,7 @@
     "source_path": "scripts/core/receipt_envelope.py"
    },
    "dynamic_import": false,
-   "git_reproducible": false,
+   "git_reproducible": true,
    "id": "SCRIPT:scripts/core/receipt_envelope.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1436,7 +1436,7 @@
     "scripts/d1/assemble_d1_factorial.py",
     "scripts/d1/gate_p3_d1_smoke.py"
    ],
-   "canonical_bytes": 33239,
+   "canonical_bytes": 34051,
    "covered_by_tests": [
     "tests/test_assemble_d1_factorial.py",
     "tests/test_d1_factorial_smoke.py"
@@ -1449,11 +1449,11 @@
     "canonicalization_version": "canon_text_v1",
     "hash_algorithm": "sha256",
     "hash_kind": "CANONICAL_TEXT_SHA256",
-    "measured_sha256": "6792991b284ec6dc0161eebd82aa8c83f7f267df016526179e02fb4b9342d97c",
+    "measured_sha256": "4f6496f8c31344306709053bc2ffc17f4d6d25afb2f275979aa9b2679fe7a591",
     "source_path": "scripts/d1/assemble_p3_d1_smoke_spec.py"
    },
    "dynamic_import": false,
-   "git_reproducible": true,
+   "git_reproducible": false,
    "id": "SCRIPT:scripts/d1/assemble_p3_d1_smoke_spec.py",
    "ids_mentioned": {
     "experiments": [],
@@ -1464,6 +1464,7 @@
    "imports": [
     "__future__",
     "argparse",
+    "base64",
     "hashing",
     "hashlib",
     "json",

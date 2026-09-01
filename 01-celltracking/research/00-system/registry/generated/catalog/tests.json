@@ -1726,7 +1726,7 @@
     "source_path": "tests/test_cross_checkout_identity.py"
    },
    "fixture_parity": "not declared",
-   "git_reproducible": false,
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_cross_checkout_identity.py",
    "ids_mentioned": {
@@ -5790,7 +5790,7 @@
     "source_path": "tests/test_receipt_envelope.py"
    },
    "fixture_parity": "not declared",
-   "git_reproducible": false,
+   "git_reproducible": true,
    "has_skip_guard": false,
    "id": "TEST:tests/test_receipt_envelope.py",
    "ids_mentioned": {
