@@ -12,6 +12,36 @@ record_kind: state
 
 # Current handoff
 
+> ## 2026-09-01 — BIOHUB-X FOUNDATION IS REAL; THE GPU SMOKE IS NOT YET LICENSED
+>
+> **Campaign state.** P38 landed in its preregistered uninformative band (`FACT-0446`), so it
+> licenses no neighbour look. The radical standalone tracker is `LEVER-0046`, owned by
+> `PKT-0049`; the inherited notebook remains the control and the new system must own its final
+> graph rather than feed scores into the incumbent consumer (`FACT-0428`).
+>
+> **What exists now.** Commit `6d7ae4d` contains the frozen A/B/CD/E/P/X contract, a calibrated
+> exact-correspondence T=2 generator, a sparse graph-owning matcher with a learned no-parent head,
+> and the training adapter. Transformer depth and temporal extent are mechanically separate:
+> D=4/6/8/10 all forward and backpropagate at T=2; longer temporal windows remain forbidden until
+> the real T=2 smoke passes. Source dropout physically removes source tokens before compaction, so
+> abstention cannot be solved through contextual leakage.
+>
+> **FOCUS checkpoint gate.** The released nuclei checkpoint now passes a source/config/value-bound
+> inference-state contract (`FACT-0460`). This clears the silent-random-weight risk in
+> `FACT-0425`; it says nothing about mask quality or transfer.
+>
+> **The next gate, and no shortcut around it.** Before spending PKT-0049's single GPU session,
+> build the production raw-volume -> FOCUS masks/embeddings -> `biohubx_io_v1` node adapter,
+> preregister one exact crop ID from each fold, build the Kaggle spec, and obtain an independent
+> protection receipt. Only then run one serial two-crop smoke. Do not launch D-depth sweeps, T>2,
+> Trackastra, full-fold caches or a submission first.
+>
+> **Validation boundary.** The focused Biohub-X suite passes. The repository-wide suite currently
+> fails only in concurrent association/provenance work: old harness fixtures omit the newly
+> mandatory `FACT-0451` restriction field, and provenance-policy tests expect a protection API not
+> present in the checked-out module. Those files are live under Gate B and were not modified from
+> PKT-0049. Registry, research-tree and claims validators pass.
+
 > ## 2026-08-30 — THE CLINICAL PIVOT. Inherited knobs are exhausted by arithmetic, the primary lane has one unexplained number blocking it, and the cycle is a six-hour CPU lockdown before any GPU is spent
 >
 > **Position.** The champion is the P35 DeepCenter/veto exchange (`FACT-0412`, submission 55888865) on the
