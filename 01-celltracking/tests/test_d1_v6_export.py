@@ -30,6 +30,10 @@ import numpy as np
 import pytest
 import torch
 
+import sys as _sys
+_sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[1] / "scripts" / "core"))
+import hashing as _HASHING  # noqa: E402
+
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 AUDIT_SRC = ROOT / "scripts" / "kaggle_edits" / "d1_response_audit.py"
 INJECT_SRC = ROOT / "scripts" / "kaggle_edits" / "d1_inject.py"
@@ -690,7 +694,12 @@ def test_embedded_block_is_the_current_audit_source():
     text = INJECT_SRC.read_text(encoding="utf-8")
     b64 = "".join(re.findall(r'^\s*"([A-Za-z0-9+/=]+)"\s*$', text, flags=re.M))
     raw = base64.b64decode(b64)
-    assert raw == AUDIT_SRC.read_bytes(), "embedded audit block is stale"
+    # CANONICAL comparison. The block was base64-encoded from the LF form of the audit source, so
+    # a raw comparison passes in an LF worktree and fails in any CRLF checkout - measured, and it
+    # was one of the ten clean-clone failures. What the test is actually asserting is that the
+    # embedded CONTENT is current, and content is what canonicalisation preserves.
+    assert (_HASHING.canonical_text_sha256_bytes(raw)
+            == _HASHING.canonical_text_sha256(AUDIT_SRC)), "embedded audit block is stale"
     sha = hashlib.sha256(raw).hexdigest()
     assert sha in text, "declared sha256 does not match the embedded block"
 

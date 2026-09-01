@@ -2,7 +2,7 @@
 id: SCRIPT-scripts__kaggle_specs__p10_deepcenter_best.json
 kind: SCRIPT
 tags: [script]
-lifecycle: active-experiment
+lifecycle: historical
 ---
 
 > [!info] Generated navigation. Do not edit.
@@ -11,7 +11,7 @@ lifecycle: active-experiment
 
 
 **Path / name:** `scripts/kaggle_specs/p10_deepcenter_best.json`
-**Lifecycle:** active-experiment — named by packet(s) ['PKT-0020']
+**Lifecycle:** historical — named by packet(s) ['PKT-0020']
 **Tests:** 0
 
 ## incoming

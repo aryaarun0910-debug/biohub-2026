@@ -3,6 +3,19 @@
  "tests": {
   "tests/assoc_v2_world.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "9f209f5994f9b6b329bf25062474e21f2530fc0a2b6f974197df77f4a9f07adf",
+    "source_path": "tests/assoc_v2_world.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/assoc_v2_world.py",
@@ -27,7 +40,6 @@
    "protects_scripts": [
     "scripts/win_bet/audit_feature_cache.py"
    ],
-   "sha256": "9f209f5994f9b6b329bf25062474e21f2530fc0a2b6f974197df77f4a9f07adf",
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -35,6 +47,19 @@
   },
   "tests/conftest.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 10,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "0d973e03842f4be04a260bfc98bbf0c8e68ca764702bd5b67ce4682355f3b4e1",
+    "source_path": "tests/conftest.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/conftest.py",
@@ -51,7 +76,6 @@
    "node_ids": [],
    "path": "tests/conftest.py",
    "protects_scripts": [],
-   "sha256": "1c3559ef357d798d28cbc68d1d30a56dee2909fba7a82781fb2399ab39d23b74",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -59,6 +83,19 @@
   },
   "tests/test_assemble_d1_factorial.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 256,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "ffe6d46ce5314481a65e49ff84074d428e44756b7e0db3c484bdf47730480530",
+    "source_path": "tests/test_assemble_d1_factorial.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_assemble_d1_factorial.py",
@@ -100,7 +137,6 @@
     "scripts/d1/assemble_p3_d1_smoke_spec.py",
     "scripts/d1/d1f_probe.py"
    ],
-   "sha256": "3533d1812f42a6403087091c8819e8a60cf8c7dc8f3b6a3868ddaa2eefce45d0",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -108,6 +144,19 @@
   },
   "tests/test_assoc_feature_parity.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 405,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "3a63776bd295ed9ae261f718a13f1bdb0a2134502a3a4794c36be3f4cabe88b9",
+    "source_path": "tests/test_assoc_feature_parity.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_assoc_feature_parity.py",
@@ -141,7 +190,6 @@
    ],
    "path": "tests/test_assoc_feature_parity.py",
    "protects_scripts": [],
-   "sha256": "0cebd1cf080b0b0ea552a48a698f538fa859df575b0fa6e9282b6343b07b28dd",
    "skip_reasons": [],
    "state": "active",
    "test_class": "parity",
@@ -149,6 +197,19 @@
   },
   "tests/test_assoc_feature_tap.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "4bf80f90138c18fdee78c98520fe1c6acebb66df2351e86aa524acada1343620",
+    "source_path": "tests/test_assoc_feature_tap.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_assoc_feature_tap.py",
@@ -224,7 +285,6 @@
    "protects_scripts": [
     "scripts/win_bet/sync_tap_worker.py"
    ],
-   "sha256": "4bf80f90138c18fdee78c98520fe1c6acebb66df2351e86aa524acada1343620",
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -232,6 +292,19 @@
   },
   "tests/test_assoc_fold_pathology.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 343,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "cf6cbe5b45325f93cdf1901e6719f24960e5b67e899badcc58d11e77de94e0f1",
+    "source_path": "tests/test_assoc_fold_pathology.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_assoc_fold_pathology.py",
@@ -273,7 +346,6 @@
     "scripts/win_bet/assoc_tournament.py",
     "scripts/win_bet/assoc_train_harness.py"
    ],
-   "sha256": "92cd6a8f659aa41a269f786f1524cd51b3b09caba104c9df11fa758813432196",
    "skip_reasons": [
     "gate_fold0.json not present in this checkout\")"
    ],
@@ -283,6 +355,19 @@
   },
   "tests/test_assoc_report.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 231,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "7325142f0df6137d4919fae997eeeafbf8b502b711df7179b79936ca079b3c03",
+    "source_path": "tests/test_assoc_report.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_assoc_report.py",
@@ -322,7 +407,6 @@
    "protects_scripts": [
     "scripts/win_bet/assoc_report.py"
    ],
-   "sha256": "f5306c661beac97583a83a199a8c71634311043c8f6970560e7a0bc6978755d3",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -330,6 +414,19 @@
   },
   "tests/test_assoc_tournament.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 434,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "ee62c82f35542e0e468b34dbefad575c1dc0109919934e7f31548fe3f1c99657",
+    "source_path": "tests/test_assoc_tournament.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_assoc_tournament.py",
@@ -387,7 +484,6 @@
     "scripts/win_bet/assoc_tournament.py",
     "scripts/win_bet/assoc_train_harness.py"
    ],
-   "sha256": "5dd4365b3e08538744e911d04f7627713f42d8575f6be6987d4764eff62f98c3",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -395,6 +491,19 @@
   },
   "tests/test_assoc_train_harness.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 1103,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "33a6d01475e4119a15ca054675b905835f32bf5ed1ebe7ac01300d9b4559c2af",
+    "source_path": "tests/test_assoc_train_harness.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_assoc_train_harness.py",
@@ -496,7 +605,6 @@
     "scripts/win_bet/assoc_train_harness.py",
     "scripts/win_bet/audit_feature_cache.py"
    ],
-   "sha256": "9acd0d63134de3c11ab7f7f889fe0b4f0e9c60a1b0fd42e79dcaef9034ee241b",
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -504,6 +612,19 @@
   },
   "tests/test_audit_detpeak_full_export.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "04b373eee51c5f6bfc8dba1c955b41348eedfa00dac729d3b0e4ed794234e861",
+    "source_path": "tests/test_audit_detpeak_full_export.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_audit_detpeak_full_export.py",
@@ -528,7 +649,6 @@
    "protects_scripts": [
     "scripts/win_bet/audit_detpeak_full_export.py"
    ],
-   "sha256": "04b373eee51c5f6bfc8dba1c955b41348eedfa00dac729d3b0e4ed794234e861",
    "skip_reasons": [],
    "state": "active",
    "test_class": "parity",
@@ -536,6 +656,19 @@
   },
   "tests/test_audit_feature_cache.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "126efa7efd603ed5892a7f7c239b3fe23044a2a9b254716a2ad41634df84ced5",
+    "source_path": "tests/test_audit_feature_cache.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_audit_feature_cache.py",
@@ -655,7 +788,6 @@
    "protects_scripts": [
     "scripts/win_bet/audit_feature_cache.py"
    ],
-   "sha256": "126efa7efd603ed5892a7f7c239b3fe23044a2a9b254716a2ad41634df84ced5",
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -663,6 +795,19 @@
   },
   "tests/test_audit_receipt_harness.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "e14f73ede6b0841efd284eecb243d62b82434ea97ac73539cb99c68dcb5e6bd5",
+    "source_path": "tests/test_audit_receipt_harness.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_audit_receipt_harness.py",
@@ -698,7 +843,6 @@
     "scripts/win_bet/audit_result_completeness.py",
     "scripts/win_bet/audit_version_coherence.py"
    ],
-   "sha256": "e14f73ede6b0841efd284eecb243d62b82434ea97ac73539cb99c68dcb5e6bd5",
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -706,6 +850,19 @@
   },
   "tests/test_audit_release_receipt.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "1fdf37c66c95885a0b85b6ff5e9f62980ace26312924357cc73947d600feecf9",
+    "source_path": "tests/test_audit_release_receipt.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_audit_release_receipt.py",
@@ -755,7 +912,6 @@
    ],
    "path": "tests/test_audit_release_receipt.py",
    "protects_scripts": [],
-   "sha256": "1fdf37c66c95885a0b85b6ff5e9f62980ace26312924357cc73947d600feecf9",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -763,6 +919,19 @@
   },
   "tests/test_baseline_roles.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 239,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "841e2a9dbc82a8b01bc6b845da43357a46fc8094048c6e6fd49e451bc57045ac",
+    "source_path": "tests/test_baseline_roles.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_baseline_roles.py",
@@ -797,7 +966,6 @@
    "protects_scripts": [
     "scripts/core/baseline_contract.py"
    ],
-   "sha256": "1b85239c219ac4b75d44d12fd81e2d6a66bd4b0770c5c3845a12802956161df6",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -805,6 +973,19 @@
   },
   "tests/test_biohubx_contract.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "d32f117d0dfa5ecfac3c3e7eac5c324119003eebc33eecd2608c81e09cc8761d",
+    "source_path": "tests/test_biohubx_contract.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_biohubx_contract.py",
@@ -876,7 +1057,6 @@
    ],
    "path": "tests/test_biohubx_contract.py",
    "protects_scripts": [],
-   "sha256": "d32f117d0dfa5ecfac3c3e7eac5c324119003eebc33eecd2608c81e09cc8761d",
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -884,6 +1064,19 @@
   },
   "tests/test_biohubx_import_isolation.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "cee382728d416c830845a0c85c00295b7e338b0d8790bc056688086d97b2cf9d",
+    "source_path": "tests/test_biohubx_import_isolation.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_biohubx_import_isolation.py",
@@ -902,7 +1095,6 @@
    ],
    "path": "tests/test_biohubx_import_isolation.py",
    "protects_scripts": [],
-   "sha256": "cee382728d416c830845a0c85c00295b7e338b0d8790bc056688086d97b2cf9d",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -910,6 +1102,19 @@
   },
   "tests/test_biohubx_model.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "bdbb89ad2b5b84dc3b14669636ff71a729204cd28fd989c0eaf4f34fec574c8a",
+    "source_path": "tests/test_biohubx_model.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_biohubx_model.py",
@@ -938,7 +1143,6 @@
    ],
    "path": "tests/test_biohubx_model.py",
    "protects_scripts": [],
-   "sha256": "bdbb89ad2b5b84dc3b14669636ff71a729204cd28fd989c0eaf4f34fec574c8a",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -946,6 +1150,19 @@
   },
   "tests/test_biohubx_synthetic_t2.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "0e7569f5eb72f691e7504ab2f7bf87f53cc28300ac964041edbfe73ef4725531",
+    "source_path": "tests/test_biohubx_synthetic_t2.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_biohubx_synthetic_t2.py",
@@ -978,7 +1195,6 @@
    "protects_scripts": [
     "scripts/win_bet/biohubx/synthetic_t2.py"
    ],
-   "sha256": "0e7569f5eb72f691e7504ab2f7bf87f53cc28300ac964041edbfe73ef4725531",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -986,6 +1202,19 @@
   },
   "tests/test_biohubx_training.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "c2b75c2591d2b5a6fe91c7b49e76b9ff1511b41989e3e42bcae0c947dc5864e9",
+    "source_path": "tests/test_biohubx_training.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_biohubx_training.py",
@@ -1010,7 +1239,6 @@
    ],
    "path": "tests/test_biohubx_training.py",
    "protects_scripts": [],
-   "sha256": "c2b75c2591d2b5a6fe91c7b49e76b9ff1511b41989e3e42bcae0c947dc5864e9",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -1018,6 +1246,19 @@
   },
   "tests/test_candidate_gate_eval.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "89184453302ec101223028fb662e7dbe7fdbe7aaf9aa586c3dd4d81a5ffe174e",
+    "source_path": "tests/test_candidate_gate_eval.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_candidate_gate_eval.py",
@@ -1045,7 +1286,6 @@
    "protects_scripts": [
     "scripts/win_bet/candidate_gate_eval.py"
    ],
-   "sha256": "89184453302ec101223028fb662e7dbe7fdbe7aaf9aa586c3dd4d81a5ffe174e",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -1053,6 +1293,19 @@
   },
   "tests/test_candidate_threshold_sweep.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "8a0e7cf8b16e2c53dab83bd057d6b126e6d12dc6ed7e86c3f99636773b077c5b",
+    "source_path": "tests/test_candidate_threshold_sweep.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_candidate_threshold_sweep.py",
@@ -1074,7 +1327,6 @@
    "protects_scripts": [
     "scripts/win_bet/candidate_threshold_sweep.py"
    ],
-   "sha256": "8a0e7cf8b16e2c53dab83bd057d6b126e6d12dc6ed7e86c3f99636773b077c5b",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -1082,6 +1334,19 @@
   },
   "tests/test_catalog.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 183,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "8642a7063a9e452d708ff578f82d7fd986dde6f37410377100f517a828982461",
+    "source_path": "tests/test_catalog.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_catalog.py",
@@ -1120,7 +1385,6 @@
    "protects_scripts": [
     "scripts/core/catalog.py"
    ],
-   "sha256": "54f0f45f1a09f1b6bb23c991741359163853642e26dd446bc355174d88bcd832",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -1128,6 +1392,19 @@
   },
   "tests/test_checkpoint_inventory.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "a90a3033be9bce515236e8787f488790e54b74c9a04f5c2016105754954f44b6",
+    "source_path": "tests/test_checkpoint_inventory.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_checkpoint_inventory.py",
@@ -1148,7 +1425,6 @@
    "protects_scripts": [
     "scripts/win_bet/checkpoint_inventory.py"
    ],
-   "sha256": "a90a3033be9bce515236e8787f488790e54b74c9a04f5c2016105754954f44b6",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -1156,6 +1432,19 @@
   },
   "tests/test_claims_table.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 56,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "1f36277c4a323e8c3fd151be9d80c37945a11c0be514731d67e54f8a39b2a309",
+    "source_path": "tests/test_claims_table.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_claims_table.py",
@@ -1178,7 +1467,6 @@
    "protects_scripts": [
     "scripts/core/claims_table.py"
    ],
-   "sha256": "2c07c8f1a2e24c8262ab569b86ae9b85b1b7ad76937c6836eafb355a67b99804",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -1186,6 +1474,19 @@
   },
   "tests/test_colab_cli.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "6527b98fa11a9e7a2509d2513da3cda38d4ae527b0f47ae26d7d4c73cdcaf696",
+    "source_path": "tests/test_colab_cli.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_colab_cli.py",
@@ -1211,7 +1512,6 @@
    "protects_scripts": [
     "scripts/core/colab_relay.py"
    ],
-   "sha256": "6527b98fa11a9e7a2509d2513da3cda38d4ae527b0f47ae26d7d4c73cdcaf696",
    "skip_reasons": [],
    "state": "active",
    "test_class": "parity",
@@ -1219,6 +1519,19 @@
   },
   "tests/test_colab_relay.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "a19fe9668e36be973d47fd43b54e9fc226ea84e2d683c6b8a149f622f89974bb",
+    "source_path": "tests/test_colab_relay.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_colab_relay.py",
@@ -1253,7 +1566,6 @@
    "protects_scripts": [
     "scripts/core/colab_relay.py"
    ],
-   "sha256": "a19fe9668e36be973d47fd43b54e9fc226ea84e2d683c6b8a149f622f89974bb",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -1261,6 +1573,19 @@
   },
   "tests/test_compare_substrate_sentinel.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "8667a5e0cc6589724aebd69a656d90f5a57ddd3775180843ae59d44d11ce7316",
+    "source_path": "tests/test_compare_substrate_sentinel.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_compare_substrate_sentinel.py",
@@ -1282,7 +1607,6 @@
    "protects_scripts": [
     "scripts/win_bet/compare_substrate_sentinel.py"
    ],
-   "sha256": "8667a5e0cc6589724aebd69a656d90f5a57ddd3775180843ae59d44d11ce7316",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -1290,6 +1614,19 @@
   },
   "tests/test_control_binding.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "1b1f337828a10e4feeb146f7a5fa520395c521868691f2bd38f9a96116a4145e",
+    "source_path": "tests/test_control_binding.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_control_binding.py",
@@ -1341,7 +1678,6 @@
     "scripts/win_bet/assoc_report.py",
     "scripts/win_bet/control_binding.py"
    ],
-   "sha256": "1b1f337828a10e4feeb146f7a5fa520395c521868691f2bd38f9a96116a4145e",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -1349,6 +1685,19 @@
   },
   "tests/test_coupled_division_transplant.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 216,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "68c5ae621ef29a6a3983d566a80f35e95ebc7f66dd35886d3b2bde71f493e34f",
+    "source_path": "tests/test_coupled_division_transplant.py"
+   },
    "fixture_parity": "declared-unit-geometry",
    "has_skip_guard": true,
    "id": "TEST:tests/test_coupled_division_transplant.py",
@@ -1385,7 +1734,6 @@
    ],
    "path": "tests/test_coupled_division_transplant.py",
    "protects_scripts": [],
-   "sha256": "e4918279ed7ddee4c93e1b032f0b5091858cac364e93261deb0ddbd4b63d476e",
    "skip_reasons": [
     "run kaggle_factory build first\")"
    ],
@@ -1393,8 +1741,80 @@
    "test_class": "provenance",
    "tracked": true
   },
+  "tests/test_cross_checkout_identity.py": {
+   "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "5a8989ef359cea4d89df4477fcdb91e714f05698159db1e1386b6c135845c651",
+    "source_path": "tests/test_cross_checkout_identity.py"
+   },
+   "fixture_parity": "not declared",
+   "has_skip_guard": false,
+   "id": "TEST:tests/test_cross_checkout_identity.py",
+   "ids_mentioned": {
+    "experiments": [],
+    "facts": [],
+    "levers": [],
+    "packets": []
+   },
+   "n_nodes": 18,
+   "names_scripts_without_importing": [],
+   "needs_data_dir": false,
+   "needs_vendor": false,
+   "node_ids": [
+    "tests/test_cross_checkout_identity.py::test_canonical_digests_match_the_git_blob_for_lf_normalised_files",
+    "tests/test_cross_checkout_identity.py::test_canonical_hashes_agree_across_every_line_ending_arm[scripts/core/hashing.py]",
+    "tests/test_cross_checkout_identity.py::test_canonical_hashes_agree_across_every_line_ending_arm[scripts/kaggle_edits/d1_response_audit.py]",
+    "tests/test_cross_checkout_identity.py::test_canonical_hashes_agree_across_every_line_ending_arm[scripts/kaggle_edits/h1r_adabn_detection_only.py]",
+    "tests/test_cross_checkout_identity.py::test_canonical_hashes_agree_across_every_line_ending_arm[scripts/kaggle_edits/kaggle_mount_ladder.py]",
+    "tests/test_cross_checkout_identity.py::test_canonical_hashes_agree_across_every_line_ending_arm[scripts/kaggle_specs/p35_dcveto_on_931.json]",
+    "tests/test_cross_checkout_identity.py::test_canonical_hashing_refuses_binary_input",
+    "tests/test_cross_checkout_identity.py::test_every_declared_kind_is_a_known_kind",
+    "tests/test_cross_checkout_identity.py::test_raw_hashes_differ_where_line_endings_differ[scripts/core/hashing.py]",
+    "tests/test_cross_checkout_identity.py::test_raw_hashes_differ_where_line_endings_differ[scripts/kaggle_edits/d1_response_audit.py]",
+    "tests/test_cross_checkout_identity.py::test_raw_hashes_differ_where_line_endings_differ[scripts/kaggle_edits/h1r_adabn_detection_only.py]",
+    "tests/test_cross_checkout_identity.py::test_raw_hashes_differ_where_line_endings_differ[scripts/kaggle_edits/kaggle_mount_ladder.py]",
+    "tests/test_cross_checkout_identity.py::test_raw_hashes_differ_where_line_endings_differ[scripts/kaggle_specs/p35_dcveto_on_931.json]",
+    "tests/test_cross_checkout_identity.py::test_release_artifacts_and_weights_are_declared_raw",
+    "tests/test_cross_checkout_identity.py::test_the_catalog_declares_a_hash_kind_for_every_digest_it_records",
+    "tests/test_cross_checkout_identity.py::test_the_champion_notebook_carries_both_identities_and_they_differ",
+    "tests/test_cross_checkout_identity.py::test_the_ladder_digest_is_canonical_and_survives_conversion",
+    "tests/test_cross_checkout_identity.py::test_the_notebook_catalog_carries_both_kinds"
+   ],
+   "path": "tests/test_cross_checkout_identity.py",
+   "protects_scripts": [
+    "scripts/core/digest_inventory.py",
+    "scripts/core/hashing.py",
+    "scripts/win_bet/kaggle_mounts.py"
+   ],
+   "skip_reasons": [],
+   "state": "untracked-concurrent",
+   "test_class": "unit",
+   "tracked": false
+  },
   "tests/test_d1_candidate_gate.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "47acea12f812f5ad05ce83b672734e925c6c92a299d96d0712b2895f1857d7b3",
+    "source_path": "tests/test_d1_candidate_gate.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_d1_candidate_gate.py",
@@ -1418,7 +1838,6 @@
    "protects_scripts": [
     "scripts/d1/d1_candidate_gate.py"
    ],
-   "sha256": "47acea12f812f5ad05ce83b672734e925c6c92a299d96d0712b2895f1857d7b3",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -1426,6 +1845,19 @@
   },
   "tests/test_d1_factorial.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 603,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "5cbe982fd56e955cd185a4b123fa2cbe1ef52f8c45366e14cfdde9b35344001a",
+    "source_path": "tests/test_d1_factorial.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_d1_factorial.py",
@@ -1519,7 +1951,6 @@
    "protects_scripts": [
     "scripts/d1/build_d1_factorial_manifests.py"
    ],
-   "sha256": "5f8b4f73709919aac37e83323b6a2b0c51b9e43d8515769b5871b2d22bd8024f",
    "skip_reasons": [
     "LOEO checkpoints not reachable from this checkout\")"
    ],
@@ -1529,6 +1960,19 @@
   },
   "tests/test_d1_factorial_smoke.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 584,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "fb60d4375879d373e828c0731ebdc085eb80ae5cdeb45a76b46caa0e1470681e",
+    "source_path": "tests/test_d1_factorial_smoke.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_d1_factorial_smoke.py",
@@ -1590,7 +2034,6 @@
     "scripts/core/kaggle_factory.py",
     "scripts/d1/assemble_p3_d1_smoke_spec.py"
    ],
-   "sha256": "487087158daea338c0fc3f2225e34b92e36fb1841f63d8485a427eacbf32a299",
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -1598,6 +2041,19 @@
   },
   "tests/test_d1_manifest_aggregation.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "f5fa167b88fd759dcbc50b05e765fa00d64f14ec9758e621ff1fc4ce06e6b1ef",
+    "source_path": "tests/test_d1_manifest_aggregation.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_d1_manifest_aggregation.py",
@@ -1624,7 +2080,6 @@
    ],
    "path": "tests/test_d1_manifest_aggregation.py",
    "protects_scripts": [],
-   "sha256": "f5fa167b88fd759dcbc50b05e765fa00d64f14ec9758e621ff1fc4ce06e6b1ef",
    "skip_reasons": [],
    "state": "active",
    "test_class": "regression",
@@ -1632,6 +2087,19 @@
   },
   "tests/test_d1_partition.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "21fde6fe35d7d2d66801f4b484fc50362fd7b6c5e03d4fff047e31ba9c2e978d",
+    "source_path": "tests/test_d1_partition.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_d1_partition.py",
@@ -1663,7 +2131,6 @@
    ],
    "path": "tests/test_d1_partition.py",
    "protects_scripts": [],
-   "sha256": "21fde6fe35d7d2d66801f4b484fc50362fd7b6c5e03d4fff047e31ba9c2e978d",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -1671,6 +2138,19 @@
   },
   "tests/test_d1_postprocess.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 1392,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "a27b65cf169c78c5be16d4f26b2232517f4a8a18f99e223163801331292794ac",
+    "source_path": "tests/test_d1_postprocess.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_d1_postprocess.py",
@@ -1792,7 +2272,6 @@
    "protects_scripts": [
     "scripts/d1/d1_postprocess.py"
    ],
-   "sha256": "687ed39c5d4498b814051ce35f0c6b7f10dc85491b17eb8b0a05e9ee1aa29173",
    "skip_reasons": [
     "v5 pull or data/train not present\")"
    ],
@@ -1802,6 +2281,19 @@
   },
   "tests/test_d1_structural.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 181,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "5b826fa16151cab599db185dabc61d2fb0cd9fc855096964d8ada4b2d25a7513",
+    "source_path": "tests/test_d1_structural.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_d1_structural.py",
@@ -1829,7 +2321,6 @@
    ],
    "path": "tests/test_d1_structural.py",
    "protects_scripts": [],
-   "sha256": "ba2eef6ddccb7d38bc1eb483446aee74f160e8e58649d62899eca36e03ab3f48",
    "skip_reasons": [
     "torch\")",
     "torch\")",
@@ -1841,6 +2332,19 @@
   },
   "tests/test_d1_v6_export.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 941,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "d8e60aacd0711294b2143ff23f41aff8071153b55ef942d9c8ca58b139b8201b",
+    "source_path": "tests/test_d1_v6_export.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_d1_v6_export.py",
@@ -1909,8 +2413,9 @@
     "tests/test_d1_v6_export.py::test_wrong_view_members_raise_even_at_the_right_count"
    ],
    "path": "tests/test_d1_v6_export.py",
-   "protects_scripts": [],
-   "sha256": "9537e530335dfc1f42b5629e9de041f401d2f37fdc03f340122e77d462d81246",
+   "protects_scripts": [
+    "scripts/core/hashing.py"
+   ],
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -1918,6 +2423,19 @@
   },
   "tests/test_d1f_probe.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 1701,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "e7f6d5b49471d531f1200b3c4c3277ae8a87e036b092db22196abd8817fe5a02",
+    "source_path": "tests/test_d1f_probe.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_d1f_probe.py",
@@ -2116,7 +2634,6 @@
     "scripts/d1/d1_postprocess.py",
     "scripts/d1/d1f_probe.py"
    ],
-   "sha256": "382573215ebc90cc6fa97f7b7627613be3821d2ecc8eb772d5bc0fe7adbb35ae",
    "skip_reasons": [
     "data/d1_factorial manifests absent\")",
     "data/d1_factorial manifests absent\")"
@@ -2127,6 +2644,19 @@
   },
   "tests/test_dc_snap.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "29a0f3d095bc30705123899f88dfaf7c15dc44b15a6504e6f9cdb79a0d4ccdff",
+    "source_path": "tests/test_dc_snap.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_dc_snap.py",
@@ -2151,7 +2681,6 @@
    ],
    "path": "tests/test_dc_snap.py",
    "protects_scripts": [],
-   "sha256": "29a0f3d095bc30705123899f88dfaf7c15dc44b15a6504e6f9cdb79a0d4ccdff",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2159,6 +2688,19 @@
   },
   "tests/test_dc_subvoxel_refine.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "7b5304f814189682c50a23aa3c7060892d1a5fe963f913f42036d11d5b646c40",
+    "source_path": "tests/test_dc_subvoxel_refine.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_dc_subvoxel_refine.py",
@@ -2187,7 +2729,6 @@
    ],
    "path": "tests/test_dc_subvoxel_refine.py",
    "protects_scripts": [],
-   "sha256": "7b5304f814189682c50a23aa3c7060892d1a5fe963f913f42036d11d5b646c40",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2195,6 +2736,19 @@
   },
   "tests/test_decision_kernel.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 92,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "608371b7b5a24ccce13dff1c20186b70f57202d35c50244f0ebb5b48f82f95e9",
+    "source_path": "tests/test_decision_kernel.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_decision_kernel.py",
@@ -2215,7 +2769,6 @@
    ],
    "path": "tests/test_decision_kernel.py",
    "protects_scripts": [],
-   "sha256": "49d0c76735f094878d3426abaa95f9da255b4bd07bed6fdd04abff6abd883498",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2223,6 +2776,19 @@
   },
   "tests/test_detpeak_curve.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "0190415a1e4168ef0a58d884a612889c7c950b2b6773caaff9df4c44079c075d",
+    "source_path": "tests/test_detpeak_curve.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_detpeak_curve.py",
@@ -2248,7 +2814,6 @@
    ],
    "path": "tests/test_detpeak_curve.py",
    "protects_scripts": [],
-   "sha256": "0190415a1e4168ef0a58d884a612889c7c950b2b6773caaff9df4c44079c075d",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2256,6 +2821,19 @@
   },
   "tests/test_detpeak_export_contract.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "af399eabd1d6fceea648905731c9a43f260f7dccfa1a86deb10b71ddc7e6aa88",
+    "source_path": "tests/test_detpeak_export_contract.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_detpeak_export_contract.py",
@@ -2275,7 +2853,6 @@
    ],
    "path": "tests/test_detpeak_export_contract.py",
    "protects_scripts": [],
-   "sha256": "af399eabd1d6fceea648905731c9a43f260f7dccfa1a86deb10b71ddc7e6aa88",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2283,6 +2860,19 @@
   },
   "tests/test_div_reach_steal.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "881c2bc9178204b6a72195c91fd5760e976ec86f5916b0a75375f4299949999e",
+    "source_path": "tests/test_div_reach_steal.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_div_reach_steal.py",
@@ -2311,7 +2901,6 @@
    ],
    "path": "tests/test_div_reach_steal.py",
    "protects_scripts": [],
-   "sha256": "881c2bc9178204b6a72195c91fd5760e976ec86f5916b0a75375f4299949999e",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2319,6 +2908,19 @@
   },
   "tests/test_div_reach_steal_adversarial.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 514,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "d92731b599ba9607db554849a3497d38810f8d4713e2cc4ceaa3eebdc0e6ef08",
+    "source_path": "tests/test_div_reach_steal_adversarial.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_div_reach_steal_adversarial.py",
@@ -2336,8 +2938,8 @@
    },
    "n_nodes": 16,
    "names_scripts_without_importing": [],
-   "needs_data_dir": false,
-   "needs_vendor": false,
+   "needs_data_dir": true,
+   "needs_vendor": true,
    "node_ids": [
     "tests/test_div_reach_steal_adversarial.py::test_a_fork_with_no_children_gets_both_daughters_and_two_steals",
     "tests/test_div_reach_steal_adversarial.py::test_control_arm_equals_the_atlas_rows_and_the_registry_control_row",
@@ -2357,8 +2959,9 @@
     "tests/test_div_reach_steal_adversarial.py::test_window_admissible_daughter_from_another_gt_component_is_planned_but_rejected_by_the_scorer"
    ],
    "path": "tests/test_div_reach_steal_adversarial.py",
-   "protects_scripts": [],
-   "sha256": "8901cac42ba6bfc0d16a5f64ad7ed74489efb818b3ad1a977228e52a6c174c6c",
+   "protects_scripts": [
+    "scripts/core/bootstrap_vendor.py"
+   ],
    "skip_reasons": [
     "tracksdata\")",
     "polars\")"
@@ -2369,6 +2972,19 @@
   },
   "tests/test_div_steal_rule.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 223,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "0fb78edd34e68b9ecf358281563114b6225e9c2322c029b0f00ef5a9e1409f11",
+    "source_path": "tests/test_div_steal_rule.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_div_steal_rule.py",
@@ -2401,7 +3017,6 @@
    ],
    "path": "tests/test_div_steal_rule.py",
    "protects_scripts": [],
-   "sha256": "78802357b8d5d9c611742a6043da36f216f181449d7e92a0427498e3d2684f35",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2409,6 +3024,19 @@
   },
   "tests/test_division_metric.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "e1a8685a2919c4df3e912713728e537b121643d7ca13257b69b09ae398c9a60f",
+    "source_path": "tests/test_division_metric.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_division_metric.py",
@@ -2429,7 +3057,6 @@
    ],
    "path": "tests/test_division_metric.py",
    "protects_scripts": [],
-   "sha256": "e1a8685a2919c4df3e912713728e537b121643d7ca13257b69b09ae398c9a60f",
    "skip_reasons": [],
    "state": "active",
    "test_class": "regression",
@@ -2437,6 +3064,19 @@
   },
   "tests/test_divverify_contract.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 427,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "ae18d131c214039a83ac45bc1cd6418f92e13cc51f3b505e2f0fda649d26eaba",
+    "source_path": "tests/test_divverify_contract.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_divverify_contract.py",
@@ -2498,7 +3138,6 @@
     "scripts/win_bet/divverify_dataset.py",
     "scripts/win_bet/divverify_verifier.py"
    ],
-   "sha256": "f86e9d20d8fe9343f4b0900250e573c39c5ba7ce6fb071fb8c00c0ee1bf14ea8",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2506,6 +3145,19 @@
   },
   "tests/test_edge_candidate_budget.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 285,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "f3a3f6511cc969074fae6f69f7d159b3339218cc40bc6f634a8efeebef53e1cd",
+    "source_path": "tests/test_edge_candidate_budget.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_edge_candidate_budget.py",
@@ -2543,7 +3195,6 @@
    ],
    "path": "tests/test_edge_candidate_budget.py",
    "protects_scripts": [],
-   "sha256": "7418df1d3a2aeea046364b29bc9cf4a187e9796886318a3a402d73b39771b093",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2551,6 +3202,19 @@
   },
   "tests/test_experiment_defect_gate.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "c5ddb45c8e2b776aa8ca5b0578800c70d0f5441189a08b8a6461308d5138967f",
+    "source_path": "tests/test_experiment_defect_gate.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_experiment_defect_gate.py",
@@ -2588,7 +3252,6 @@
    "protects_scripts": [
     "scripts/core/kaggle_factory.py"
    ],
-   "sha256": "c5ddb45c8e2b776aa8ca5b0578800c70d0f5441189a08b8a6461308d5138967f",
    "skip_reasons": [],
    "state": "active",
    "test_class": "regression",
@@ -2596,6 +3259,19 @@
   },
   "tests/test_external_api_contract.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "2603a0c0a7b4e04e8b57a683ecd887aca5c267d23db6a0a4fab8b9e7f6a4ebfe",
+    "source_path": "tests/test_external_api_contract.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_external_api_contract.py",
@@ -2619,7 +3295,6 @@
    ],
    "path": "tests/test_external_api_contract.py",
    "protects_scripts": [],
-   "sha256": "2603a0c0a7b4e04e8b57a683ecd887aca5c267d23db6a0a4fab8b9e7f6a4ebfe",
    "skip_reasons": [
     "no GT geff available\")"
    ],
@@ -2629,6 +3304,19 @@
   },
   "tests/test_extract_node_estimates.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "6237b2177b11b57738182f7706868b36c786d067ce141bb4edd63fa8110c6336",
+    "source_path": "tests/test_extract_node_estimates.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_extract_node_estimates.py",
@@ -2653,7 +3341,6 @@
    "protects_scripts": [
     "scripts/win_bet/extract_node_estimates.py"
    ],
-   "sha256": "6237b2177b11b57738182f7706868b36c786d067ce141bb4edd63fa8110c6336",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2661,6 +3348,19 @@
   },
   "tests/test_finaledge_gates.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 171,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "43ad37e08b616823972bb50c4dbbb87b28ccb4d97f5c3c34e1d3949844bd8305",
+    "source_path": "tests/test_finaledge_gates.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_finaledge_gates.py",
@@ -2706,7 +3406,6 @@
    "protects_scripts": [
     "scripts/win_bet/finaledge_gates.py"
    ],
-   "sha256": "88cfdc7a0d34841d91aff9a091b95e0beb80d31eea4d711474115071c7a74319",
    "skip_reasons": [],
    "state": "active",
    "test_class": "parity",
@@ -2714,6 +3413,19 @@
   },
   "tests/test_focus3d_probe_state_contract.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "1154fc0e27db6d567cd0c4d8b88abcfd96f12d248ccfb5719b1bf6073011db24",
+    "source_path": "tests/test_focus3d_probe_state_contract.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_focus3d_probe_state_contract.py",
@@ -2739,7 +3451,6 @@
    "protects_scripts": [
     "scripts/win_bet/focus3d_probe.py"
    ],
-   "sha256": "1154fc0e27db6d567cd0c4d8b88abcfd96f12d248ccfb5719b1bf6073011db24",
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -2747,6 +3458,19 @@
   },
   "tests/test_fp_endpoint_dedup.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "a1a01095d023c720cf926fe5a67c3944b3a6bfd64ff0bd67401ff768289db215",
+    "source_path": "tests/test_fp_endpoint_dedup.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_fp_endpoint_dedup.py",
@@ -2775,7 +3499,6 @@
    ],
    "path": "tests/test_fp_endpoint_dedup.py",
    "protects_scripts": [],
-   "sha256": "a1a01095d023c720cf926fe5a67c3944b3a6bfd64ff0bd67401ff768289db215",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2783,6 +3506,19 @@
   },
   "tests/test_fresh_clone_reproducibility.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "9260d8fd7eecf7b7eb9517bf7c3a5b58c6ac66f492c84362bb598f7f92b05275",
+    "source_path": "tests/test_fresh_clone_reproducibility.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_fresh_clone_reproducibility.py",
@@ -2817,7 +3553,6 @@
     "scripts/core/bootstrap_vendor.py",
     "scripts/core/validate_registry.py"
    ],
-   "sha256": "9260d8fd7eecf7b7eb9517bf7c3a5b58c6ac66f492c84362bb598f7f92b05275",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -2825,6 +3560,19 @@
   },
   "tests/test_gpu_preflight.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 213,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "c89a6f5fc4302e6cf87767d768fe877e3a4ca49f95a5146583588d3fd4e41742",
+    "source_path": "tests/test_gpu_preflight.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_gpu_preflight.py",
@@ -2872,7 +3620,6 @@
     "scripts/win_bet/kaggle_artifacts.py",
     "scripts/win_bet/kaggle_mounts.py"
    ],
-   "sha256": "88934869faf701eb85fdd2248fd45ee8e390b5afffd9925fa1a780388914ab21",
    "skip_reasons": [
     "p33 spec absent\")"
    ],
@@ -2882,6 +3629,19 @@
   },
   "tests/test_gpu_protection_contract.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "704da574b9c05acaa5a98e0c9c363fab85974c87a3b00917e194aa8bca4e5c8c",
+    "source_path": "tests/test_gpu_protection_contract.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_gpu_protection_contract.py",
@@ -2944,7 +3704,6 @@
     "scripts/win_bet/gpu_protection_contract.py",
     "scripts/win_bet/sync_tap_worker.py"
    ],
-   "sha256": "704da574b9c05acaa5a98e0c9c363fab85974c87a3b00917e194aa8bca4e5c8c",
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -2952,6 +3711,19 @@
   },
   "tests/test_gt_collision.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "2addb2db2a34eb9eaf54500e1422e67722e53cf610cd1eb2c4802381eb71dfd5",
+    "source_path": "tests/test_gt_collision.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_gt_collision.py",
@@ -2977,7 +3749,6 @@
    "protects_scripts": [
     "scripts/win_bet/gt_collision.py"
    ],
-   "sha256": "2addb2db2a34eb9eaf54500e1422e67722e53cf610cd1eb2c4802381eb71dfd5",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -2985,6 +3756,19 @@
   },
   "tests/test_h1r_adabn_detection_only.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 331,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "a731bc386856c50a31e73c5fbe20f254bc2918c268034b8ed1c0988595833ab6",
+    "source_path": "tests/test_h1r_adabn_detection_only.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_adabn_detection_only.py",
@@ -3015,9 +3799,9 @@
    ],
    "path": "tests/test_h1r_adabn_detection_only.py",
    "protects_scripts": [
+    "scripts/core/hashing.py",
     "scripts/kaggle_edits/h1r_adabn_detection_only.py"
    ],
-   "sha256": "121d0326c95cedc6462c9a22e151a0b33cfd4f9ac278c166de649c436ce71c57",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -3025,6 +3809,19 @@
   },
   "tests/test_h1r_appearance_patch.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "9ac616ed4e4d80ef255d6ae275314242799b2f0cad1e1c8d339fc9997d4eb675",
+    "source_path": "tests/test_h1r_appearance_patch.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_appearance_patch.py",
@@ -3055,7 +3852,6 @@
     "scripts/kaggle_edits/h1r_edge_loss_patch.py",
     "scripts/kaggle_edits/h1r_trainer_patch.py"
    ],
-   "sha256": "9ac616ed4e4d80ef255d6ae275314242799b2f0cad1e1c8d339fc9997d4eb675",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3063,6 +3859,19 @@
   },
   "tests/test_h1r_candidate_export_patch.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "9918d4c6b1444651edcc01bc71eedd1ba29fb5d8dfb0cf35de12966843d5ffb0",
+    "source_path": "tests/test_h1r_candidate_export_patch.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_candidate_export_patch.py",
@@ -3087,7 +3896,6 @@
    ],
    "path": "tests/test_h1r_candidate_export_patch.py",
    "protects_scripts": [],
-   "sha256": "9918d4c6b1444651edcc01bc71eedd1ba29fb5d8dfb0cf35de12966843d5ffb0",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3095,6 +3903,19 @@
   },
   "tests/test_h1r_det_deploy_weights.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "faf8f87352dbadb08de6c33ebb0d1ae88d7327368999b14125f4775fd2b94a37",
+    "source_path": "tests/test_h1r_det_deploy_weights.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_det_deploy_weights.py",
@@ -3119,7 +3940,6 @@
    "protects_scripts": [
     "scripts/kaggle_edits/h1r_det_deploy_weights.py"
    ],
-   "sha256": "faf8f87352dbadb08de6c33ebb0d1ae88d7327368999b14125f4775fd2b94a37",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3127,6 +3947,19 @@
   },
   "tests/test_h1r_det_train.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "929304c61bdde81a4a96e6dfc1437298cb17918e562b3b93fa8d8de4828f4d1a",
+    "source_path": "tests/test_h1r_det_train.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_det_train.py",
@@ -3155,7 +3988,6 @@
    "protects_scripts": [
     "scripts/kaggle_edits/h1r_det_train.py"
    ],
-   "sha256": "929304c61bdde81a4a96e6dfc1437298cb17918e562b3b93fa8d8de4828f4d1a",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3163,6 +3995,19 @@
   },
   "tests/test_h1r_edge_data.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "36c56466875c4875dee346deb919f71b05e49b391f6a2b5ad2c55d608fcc2826",
+    "source_path": "tests/test_h1r_edge_data.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_edge_data.py",
@@ -3191,7 +4036,6 @@
    "protects_scripts": [
     "scripts/kaggle_edits/h1r_edge_data.py"
    ],
-   "sha256": "36c56466875c4875dee346deb919f71b05e49b391f6a2b5ad2c55d608fcc2826",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3199,6 +4043,19 @@
   },
   "tests/test_h1r_edge_loss_inference.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "4b640c014b817d0ebe171d8ec21691858f02e892c8ae0629d0cac6cc839efe96",
+    "source_path": "tests/test_h1r_edge_loss_inference.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_edge_loss_inference.py",
@@ -3219,7 +4076,6 @@
    "protects_scripts": [
     "scripts/kaggle_edits/h1r_edge_loss_patch.py"
    ],
-   "sha256": "4b640c014b817d0ebe171d8ec21691858f02e892c8ae0629d0cac6cc839efe96",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3227,6 +4083,19 @@
   },
   "tests/test_h1r_edge_s5_oof_init.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 108,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "c42fc6f59664251461dff59831edfb452e5660ddaf07d55b94dcb61b8a824d76",
+    "source_path": "tests/test_h1r_edge_s5_oof_init.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_edge_s5_oof_init.py",
@@ -3259,7 +4128,6 @@
    ],
    "path": "tests/test_h1r_edge_s5_oof_init.py",
    "protects_scripts": [],
-   "sha256": "cfc87572dd069e639dd216f03dcb825b1548caf6deda3e94c8165e75f0843d3d",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3267,6 +4135,19 @@
   },
   "tests/test_h1r_edge_train.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "8bdce05aef1aceb39768f708b155efc402a6c74b748ac33a47bb471707c17c86",
+    "source_path": "tests/test_h1r_edge_train.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_edge_train.py",
@@ -3306,7 +4187,6 @@
     "scripts/kaggle_edits/h1r_edge_data.py",
     "scripts/kaggle_edits/h1r_edge_train.py"
    ],
-   "sha256": "8bdce05aef1aceb39768f708b155efc402a6c74b748ac33a47bb471707c17c86",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3314,6 +4194,19 @@
   },
   "tests/test_h1r_rope4d.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 338,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "81eca7fc49641f8f9234cbbcabf76a46a75d4f66056d46633afe60b43bb30ad6",
+    "source_path": "tests/test_h1r_rope4d.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_h1r_rope4d.py",
@@ -3349,7 +4242,6 @@
     "scripts/kaggle_edits/h1r_rope4d.py",
     "scripts/kaggle_edits/h1r_rope4d_inference_patch.py"
    ],
-   "sha256": "4624b92f734ae64c07219f073c15ed0332a3da3d6942e6e4a56c1e2278615bd0",
    "skip_reasons": [],
    "state": "active",
    "test_class": "parity",
@@ -3357,6 +4249,19 @@
   },
   "tests/test_hf_xet_digest.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "70e32495f8f71dd2db835b36420516e29a847fcdcf71a80e244a1ab924d8ee49",
+    "source_path": "tests/test_hf_xet_digest.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_hf_xet_digest.py",
@@ -3380,7 +4285,6 @@
    "protects_scripts": [
     "scripts/win_bet/biohubx/hf_xet_digest.py"
    ],
-   "sha256": "70e32495f8f71dd2db835b36420516e29a847fcdcf71a80e244a1ab924d8ee49",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3388,6 +4292,19 @@
   },
   "tests/test_hoct_compat.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "120e9e309e06ab5d304f15bf1d045574265e910073384aaf68efe0e2a036abde",
+    "source_path": "tests/test_hoct_compat.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_hoct_compat.py",
@@ -3425,7 +4342,6 @@
     "scripts/win_bet/hoct_compat.py",
     "scripts/win_bet/hoct_head.py"
    ],
-   "sha256": "120e9e309e06ab5d304f15bf1d045574265e910073384aaf68efe0e2a036abde",
    "skip_reasons": [],
    "state": "untracked-concurrent",
    "test_class": "parity",
@@ -3433,6 +4349,19 @@
   },
   "tests/test_hoct_head.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "f2fa77e4f2f74c9325f28055e8764071427bd66fe26db78398c15b4ede5037c1",
+    "source_path": "tests/test_hoct_head.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_hoct_head.py",
@@ -3474,7 +4403,6 @@
    "protects_scripts": [
     "scripts/win_bet/hoct_head.py"
    ],
-   "sha256": "f2fa77e4f2f74c9325f28055e8764071427bd66fe26db78398c15b4ede5037c1",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3482,6 +4410,19 @@
   },
   "tests/test_ilp_retention_instruments.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "510cd1fbfd41e1ade74872be11aaa878279b5b2250443a4278fbad3787e62dba",
+    "source_path": "tests/test_ilp_retention_instruments.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_ilp_retention_instruments.py",
@@ -3522,7 +4463,6 @@
     "scripts/win_bet/detpeak_curve.py",
     "scripts/win_bet/lost_cell_atlas.py"
    ],
-   "sha256": "510cd1fbfd41e1ade74872be11aaa878279b5b2250443a4278fbad3787e62dba",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3530,6 +4470,19 @@
   },
   "tests/test_kaggle_factory_release_receipt.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "175f60e1ff448b9f7504c7e0c26009ae2457ff2e5e5464137fa1c7d2f59631eb",
+    "source_path": "tests/test_kaggle_factory_release_receipt.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_kaggle_factory_release_receipt.py",
@@ -3563,7 +4516,6 @@
    "protects_scripts": [
     "scripts/core/kaggle_factory.py"
    ],
-   "sha256": "175f60e1ff448b9f7504c7e0c26009ae2457ff2e5e5464137fa1c7d2f59631eb",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3571,6 +4523,19 @@
   },
   "tests/test_kaggle_queue.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "3ed89fb44d77ced6fa33e7e893dd6b82bde923ce2b382b6bea900bd532d63de7",
+    "source_path": "tests/test_kaggle_queue.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_kaggle_queue.py",
@@ -3604,7 +4569,6 @@
     "scripts/core/kaggle_factory.py",
     "scripts/core/kaggle_queue.py"
    ],
-   "sha256": "3ed89fb44d77ced6fa33e7e893dd6b82bde923ce2b382b6bea900bd532d63de7",
    "skip_reasons": [],
    "state": "active",
    "test_class": "parity",
@@ -3612,6 +4576,19 @@
   },
   "tests/test_lineage_degree_invariants.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "eece15c820a483189799b35c07910ab94e30e6a76d91e891b9bfc41f96e7f056",
+    "source_path": "tests/test_lineage_degree_invariants.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_lineage_degree_invariants.py",
@@ -3640,7 +4617,6 @@
    "protects_scripts": [
     "scripts/core/baseline_contract.py"
    ],
-   "sha256": "eece15c820a483189799b35c07910ab94e30e6a76d91e891b9bfc41f96e7f056",
    "skip_reasons": [],
    "state": "active",
    "test_class": "regression",
@@ -3648,6 +4624,19 @@
   },
   "tests/test_linefit_volume_guard.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "482084a50b6c2c911e2886a235037d65fa1d41bf6a21b22640e8fb3301b017d6",
+    "source_path": "tests/test_linefit_volume_guard.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_linefit_volume_guard.py",
@@ -3671,7 +4660,6 @@
    ],
    "path": "tests/test_linefit_volume_guard.py",
    "protects_scripts": [],
-   "sha256": "482084a50b6c2c911e2886a235037d65fa1d41bf6a21b22640e8fb3301b017d6",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3679,6 +4667,19 @@
   },
   "tests/test_loeo_weights_hygiene.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 309,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "851c8cb64a75061d045336e86f1988a691fadcd98488dc5dbac96f4581be2d33",
+    "source_path": "tests/test_loeo_weights_hygiene.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_loeo_weights_hygiene.py",
@@ -3921,7 +4922,6 @@
    ],
    "path": "tests/test_loeo_weights_hygiene.py",
    "protects_scripts": [],
-   "sha256": "039c0cc5283f632cded5e2efa20f5efe2524a65ac7a2c258fa71ab756ee72a28",
    "skip_reasons": [
     "not a fold-1 LOEO spec\")",
     "not a fold-0 LOEO spec\")",
@@ -3934,6 +4934,19 @@
   },
   "tests/test_metric_parity.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 42,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "8ed34dbfd2ac6ccd8be1388ffc4ebf49ff1dcd440e053c92389f17b38279983a",
+    "source_path": "tests/test_metric_parity.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_metric_parity.py",
@@ -3954,7 +4967,6 @@
    "protects_scripts": [
     "scripts/metric/validate_metric_parity.py"
    ],
-   "sha256": "e35ef62fc6b1a5fe4587e0d7c27e5c25d4c518fff7011be075d769bb041f2f8a",
    "skip_reasons": [
     "needs canonical OOF prediction\")"
    ],
@@ -3964,6 +4976,19 @@
   },
   "tests/test_no_family_routing.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "5b91693889309857c7df7d5316b2ad3ba3cf10a8616248fd84f1835b34398fb0",
+    "source_path": "tests/test_no_family_routing.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_no_family_routing.py",
@@ -3986,7 +5011,6 @@
    ],
    "path": "tests/test_no_family_routing.py",
    "protects_scripts": [],
-   "sha256": "5b91693889309857c7df7d5316b2ad3ba3cf10a8616248fd84f1835b34398fb0",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -3994,6 +5018,19 @@
   },
   "tests/test_node_budget_policy.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "2f0aa8d8652cb94e2933dc4742971f47599f62e505e391ede981b715f0fad549",
+    "source_path": "tests/test_node_budget_policy.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_node_budget_policy.py",
@@ -4015,7 +5052,6 @@
    ],
    "path": "tests/test_node_budget_policy.py",
    "protects_scripts": [],
-   "sha256": "2f0aa8d8652cb94e2933dc4742971f47599f62e505e391ede981b715f0fad549",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -4023,6 +5059,19 @@
   },
   "tests/test_numpy_metric.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "57174b1e5df9b95f10f9e3b5448ed3f8f35e2db340dadf5ff902625c707310c1",
+    "source_path": "tests/test_numpy_metric.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_numpy_metric.py",
@@ -4047,7 +5096,6 @@
    ],
    "path": "tests/test_numpy_metric.py",
    "protects_scripts": [],
-   "sha256": "57174b1e5df9b95f10f9e3b5448ed3f8f35e2db340dadf5ff902625c707310c1",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -4055,6 +5103,19 @@
   },
   "tests/test_p10_deepcenter_best.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "e47fd8ce3e796d74c0905de5df540a15e12d1ebd263e8a8cada37c569e995cd1",
+    "source_path": "tests/test_p10_deepcenter_best.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_p10_deepcenter_best.py",
@@ -4076,7 +5137,6 @@
    ],
    "path": "tests/test_p10_deepcenter_best.py",
    "protects_scripts": [],
-   "sha256": "e47fd8ce3e796d74c0905de5df540a15e12d1ebd263e8a8cada37c569e995cd1",
    "skip_reasons": [
     "run kaggle_factory build first\")",
     "run kaggle_factory build first\")"
@@ -4087,6 +5147,19 @@
   },
   "tests/test_p11_xhhuang_edge_swap.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "87cc25aa49723836d8004e3e26865b5634783b403e4eb44af2bbd0729d5c4b88",
+    "source_path": "tests/test_p11_xhhuang_edge_swap.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_p11_xhhuang_edge_swap.py",
@@ -4117,7 +5190,6 @@
    ],
    "path": "tests/test_p11_xhhuang_edge_swap.py",
    "protects_scripts": [],
-   "sha256": "87cc25aa49723836d8004e3e26865b5634783b403e4eb44af2bbd0729d5c4b88",
    "skip_reasons": [
     "run kaggle_factory build first\")",
     "run kaggle_factory build first\")",
@@ -4129,6 +5201,19 @@
   },
   "tests/test_p12_forward_acceleration_lookahead.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 204,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "7cdec097773b9fc01c5cff0cd68527d842ef563620e80abbaf87e89b1b9afc10",
+    "source_path": "tests/test_p12_forward_acceleration_lookahead.py"
+   },
    "fixture_parity": "declared-unit-geometry",
    "has_skip_guard": true,
    "id": "TEST:tests/test_p12_forward_acceleration_lookahead.py",
@@ -4161,7 +5246,6 @@
    ],
    "path": "tests/test_p12_forward_acceleration_lookahead.py",
    "protects_scripts": [],
-   "sha256": "fe699501e1b94c114fd88c7d0784128fe5c52cab8768e341c4f20513440cd0b4",
    "skip_reasons": [
     "run kaggle_factory build first\")",
     "run kaggle_factory build first\")"
@@ -4172,6 +5256,19 @@
   },
   "tests/test_p13_p9_adabn_detection_only.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 168,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "41e0427271dde6fd3b8226c8e8f74de93ace0e434636179cc2d3b292df8da1a6",
+    "source_path": "tests/test_p13_p9_adabn_detection_only.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_p13_p9_adabn_detection_only.py",
@@ -4193,9 +5290,9 @@
    ],
    "path": "tests/test_p13_p9_adabn_detection_only.py",
    "protects_scripts": [
+    "scripts/core/hashing.py",
     "scripts/kaggle_edits/h1r_adabn_detection_only.py"
    ],
-   "sha256": "a372c76dc887b716e82d79b6e5d36ff65835e8f2b0e3cb1a7be6b39e9ed47b69",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -4203,6 +5300,19 @@
   },
   "tests/test_p24_deepcenter_best_veto.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "2f83c5920fdb687e73bd8a1cd1e29e55c433015a136850826761b7736ca7b4a0",
+    "source_path": "tests/test_p24_deepcenter_best_veto.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_p24_deepcenter_best_veto.py",
@@ -4227,7 +5337,6 @@
    ],
    "path": "tests/test_p24_deepcenter_best_veto.py",
    "protects_scripts": [],
-   "sha256": "2f83c5920fdb687e73bd8a1cd1e29e55c433015a136850826761b7736ca7b4a0",
    "skip_reasons": [
     "run kaggle_factory build first\")"
    ],
@@ -4237,6 +5346,19 @@
   },
   "tests/test_p25_recipe_parity.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "9aa6e3348208560e23d791bcb2da30138ea0d2369d044c544cf8cd420972cedc",
+    "source_path": "tests/test_p25_recipe_parity.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_p25_recipe_parity.py",
@@ -4274,7 +5396,6 @@
    ],
    "path": "tests/test_p25_recipe_parity.py",
    "protects_scripts": [],
-   "sha256": "9aa6e3348208560e23d791bcb2da30138ea0d2369d044c544cf8cd420972cedc",
    "skip_reasons": [
     "run kaggle_factory build first\")"
    ],
@@ -4284,6 +5405,19 @@
   },
   "tests/test_p28_full_chain_replay.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "79da680a925d4acc22172dc4c87ae4d6ffda0e0927bd86fdcbe495886ba3c5b8",
+    "source_path": "tests/test_p28_full_chain_replay.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_p28_full_chain_replay.py",
@@ -4305,7 +5439,6 @@
    "protects_scripts": [
     "scripts/win_bet/p28_full_chain_replay.py"
    ],
-   "sha256": "79da680a925d4acc22172dc4c87ae4d6ffda0e0927bd86fdcbe495886ba3c5b8",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -4313,6 +5446,19 @@
   },
   "tests/test_pkt0048_maskassoc.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "69363da63498e3b3c5feff9f10b7e20d67acc99f6c4e0f97b98a3dc19e81c18c",
+    "source_path": "tests/test_pkt0048_maskassoc.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_pkt0048_maskassoc.py",
@@ -4362,7 +5508,6 @@
     "scripts/win_bet/hoct_scale_gate.py",
     "scripts/win_bet/mask_node_adapter.py"
    ],
-   "sha256": "69363da63498e3b3c5feff9f10b7e20d67acc99f6c4e0f97b98a3dc19e81c18c",
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -4370,6 +5515,19 @@
   },
   "tests/test_pooled_objective.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 144,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "0a07be92d0c7975f10cdca44a3c67c95c53f5cbc7a26781f7b018a3a66a3e9c1",
+    "source_path": "tests/test_pooled_objective.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_pooled_objective.py",
@@ -4392,7 +5550,6 @@
    ],
    "path": "tests/test_pooled_objective.py",
    "protects_scripts": [],
-   "sha256": "d062a64e226263ff25d9c6a4eca8a15253cd7a9cf6f612ff5269612cb02597fb",
    "skip_reasons": [
     "coupled per-crop cache not present\")",
     "pooled_objective_parity.json absent\")"
@@ -4403,6 +5560,19 @@
   },
   "tests/test_preilp_crossrun_stability.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "8f854317af57f7aa4ae3deef1f405d43efba5abea14424c63eb53fc990644d89",
+    "source_path": "tests/test_preilp_crossrun_stability.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_preilp_crossrun_stability.py",
@@ -4429,7 +5599,6 @@
    "protects_scripts": [
     "scripts/win_bet/preilp_crossrun_stability.py"
    ],
-   "sha256": "8f854317af57f7aa4ae3deef1f405d43efba5abea14424c63eb53fc990644d89",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -4437,6 +5606,19 @@
   },
   "tests/test_provenance_policy.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "f134e38af3491605c2a799eb5ac2e7e48d2c3facc639032c372e512f61accf54",
+    "source_path": "tests/test_provenance_policy.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_provenance_policy.py",
@@ -4484,7 +5666,6 @@
     "scripts/win_bet/gpu_protection_contract.py",
     "scripts/win_bet/provenance_policy.py"
    ],
-   "sha256": "f134e38af3491605c2a799eb5ac2e7e48d2c3facc639032c372e512f61accf54",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -4492,6 +5673,19 @@
   },
   "tests/test_provenance_policy_single_source.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "16be0937cb7c84caa0e96c230ad0123bc11036da7d01e6d93a2c2faf7c834b13",
+    "source_path": "tests/test_provenance_policy_single_source.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_provenance_policy_single_source.py",
@@ -4532,7 +5726,6 @@
     "scripts/win_bet/gpu_protection_contract.py",
     "scripts/win_bet/provenance_policy.py"
    ],
-   "sha256": "16be0937cb7c84caa0e96c230ad0123bc11036da7d01e6d93a2c2faf7c834b13",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -4540,6 +5733,19 @@
   },
   "tests/test_rag_index.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 127,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "5dc4e6b203531d2a9f20ea55181fde001360c6a92ac3afdb76969723beccbbaa",
+    "source_path": "tests/test_rag_index.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_rag_index.py",
@@ -4567,7 +5773,6 @@
    "protects_scripts": [
     "scripts/core/rag_index.py"
    ],
-   "sha256": "d186c301c0ffbf5c29d1b90d8744eda8b8a5d5f733f3fd3334869aacc5545283",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -4575,6 +5780,19 @@
   },
   "tests/test_ranker_block.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "ea8d062d2e844208d64135e230ac65304f0671e56d4d4cae549fa4e4520f75dc",
+    "source_path": "tests/test_ranker_block.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_ranker_block.py",
@@ -4599,7 +5817,6 @@
    ],
    "path": "tests/test_ranker_block.py",
    "protects_scripts": [],
-   "sha256": "ea8d062d2e844208d64135e230ac65304f0671e56d4d4cae549fa4e4520f75dc",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -4607,6 +5824,19 @@
   },
   "tests/test_reach_oracle_partition.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "1724372fbd95a6e3ad5edf7fb22c65784eb81f8c9cb131cb8082c528feb17082",
+    "source_path": "tests/test_reach_oracle_partition.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_reach_oracle_partition.py",
@@ -4639,7 +5869,6 @@
    "protects_scripts": [
     "scripts/win_bet/reach_oracle.py"
    ],
-   "sha256": "1724372fbd95a6e3ad5edf7fb22c65784eb81f8c9cb131cb8082c528feb17082",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -4647,6 +5876,19 @@
   },
   "tests/test_receipt_envelope.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 134,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "7da81a1adb7997541269990b837d4270bed9b1a42b427894277be423277ececc",
+    "source_path": "tests/test_receipt_envelope.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_receipt_envelope.py",
@@ -4674,7 +5916,6 @@
    "protects_scripts": [
     "scripts/core/receipt_envelope.py"
    ],
-   "sha256": "c75e318e8fe068a70f777012ce1b0142a71181079ca7be1214f2a1a014aab4ce",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -4682,6 +5923,19 @@
   },
   "tests/test_registry_gate.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "ccfd58e5f2ce8d021b19eb22117364f6dbabdbc02864dfb3dc4f70a2ed05b258",
+    "source_path": "tests/test_registry_gate.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_registry_gate.py",
@@ -4709,7 +5963,6 @@
    ],
    "path": "tests/test_registry_gate.py",
    "protects_scripts": [],
-   "sha256": "ccfd58e5f2ce8d021b19eb22117364f6dbabdbc02864dfb3dc4f70a2ed05b258",
    "skip_reasons": [
     "no held packet to collide with\")"
    ],
@@ -4719,6 +5972,19 @@
   },
   "tests/test_registry_validity.py": {
    "blocking_scope": "gpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 406,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "eaf389d039f616abc3a4a89ee9ded3a7a1df47e1021d912029f5c5b4c2eea860",
+    "source_path": "tests/test_registry_validity.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_registry_validity.py",
@@ -4775,7 +6041,6 @@
    ],
    "path": "tests/test_registry_validity.py",
    "protects_scripts": [],
-   "sha256": "bf9fafd8e7ed77dd36d1329c1ae936cb1446eb5f19846d0f859978b3afd641a5",
    "skip_reasons": [],
    "state": "active",
    "test_class": "provenance",
@@ -4783,6 +6048,19 @@
   },
   "tests/test_relink_division.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "53fa94c03e5479a91c5defce7941be1d37024ab41c8b8769ec7d22c9d9e8c54c",
+    "source_path": "tests/test_relink_division.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_relink_division.py",
@@ -4847,7 +6125,6 @@
    ],
    "path": "tests/test_relink_division.py",
    "protects_scripts": [],
-   "sha256": "53fa94c03e5479a91c5defce7941be1d37024ab41c8b8769ec7d22c9d9e8c54c",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -4855,6 +6132,19 @@
   },
   "tests/test_research_tree.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 15,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "66236648112c9d2bc293068e9b86f8a306649344af26182fc900d688dade3637",
+    "source_path": "tests/test_research_tree.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_research_tree.py",
@@ -4875,7 +6165,6 @@
    "protects_scripts": [
     "scripts/core/validate_research_tree.py"
    ],
-   "sha256": "79282fd46c68122521bc80cbf65b719319254d8e7d4c5b6edde80e6f84f2019c",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -4883,6 +6172,19 @@
   },
   "tests/test_scoring.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "95b1742ee1f9807ec47f76370ede7162c49f427aea03ee991576bf20c1c22ee8",
+    "source_path": "tests/test_scoring.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_scoring.py",
@@ -4904,7 +6206,6 @@
    ],
    "path": "tests/test_scoring.py",
    "protects_scripts": [],
-   "sha256": "95b1742ee1f9807ec47f76370ede7162c49f427aea03ee991576bf20c1c22ee8",
    "skip_reasons": [
     "need >=2 local train geffs\")"
    ],
@@ -4914,6 +6215,19 @@
   },
   "tests/test_spec_restriction.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "bfd77385495bc96dc71f5950449246f730beacb4db0d24b8b2fe3b2b95a588d6",
+    "source_path": "tests/test_spec_restriction.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_spec_restriction.py",
@@ -4957,7 +6271,6 @@
     "scripts/win_bet/assoc_train_harness.py",
     "scripts/win_bet/spec_restriction.py"
    ],
-   "sha256": "bfd77385495bc96dc71f5950449246f730beacb4db0d24b8b2fe3b2b95a588d6",
    "skip_reasons": [],
    "state": "active",
    "test_class": "mutation",
@@ -4965,6 +6278,19 @@
   },
   "tests/test_spec_slug_contract.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "3c614c077481af57c044f30e3536726d1e64878d1cc4a488780277b5dde7ae54",
+    "source_path": "tests/test_spec_slug_contract.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": true,
    "id": "TEST:tests/test_spec_slug_contract.py",
@@ -5053,7 +6379,6 @@
    ],
    "path": "tests/test_spec_slug_contract.py",
    "protects_scripts": [],
-   "sha256": "3c614c077481af57c044f30e3536726d1e64878d1cc4a488780277b5dde7ae54",
    "skip_reasons": [
     "spec declares no title/slug pair\")"
    ],
@@ -5063,6 +6388,19 @@
   },
   "tests/test_submission_structure_audit.py": {
    "blocking_scope": "release",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "d6211b9d8069bf2ed64c045687f2f31b0cb4d3da57093364ba30b48a8d432c77",
+    "source_path": "tests/test_submission_structure_audit.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_submission_structure_audit.py",
@@ -5119,7 +6457,6 @@
    "protects_scripts": [
     "scripts/d1/audit_submission_structure.py"
    ],
-   "sha256": "d6211b9d8069bf2ed64c045687f2f31b0cb4d3da57093364ba30b48a8d432c77",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",
@@ -5127,6 +6464,19 @@
   },
   "tests/test_validate_detpeak_export.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "45f3bda17c15e34c572b9817b0729ddb330a1b64f8f744af4cc3b5aaf4b8952d",
+    "source_path": "tests/test_validate_detpeak_export.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_validate_detpeak_export.py",
@@ -5147,7 +6497,6 @@
    "protects_scripts": [
     "scripts/win_bet/validate_detpeak_export.py"
    ],
-   "sha256": "45f3bda17c15e34c572b9817b0729ddb330a1b64f8f744af4cc3b5aaf4b8952d",
    "skip_reasons": [],
    "state": "active",
    "test_class": "parity",
@@ -5155,6 +6504,19 @@
   },
   "tests/test_wrapper_density.py": {
    "blocking_scope": "cpu",
+   "digest": {
+    "canonicalization_notes": {
+     "bom_stripped": false,
+     "crlf_count": 0,
+     "encoding": "utf-8",
+     "lone_cr_count": 0
+    },
+    "canonicalization_version": "canon_text_v1",
+    "hash_algorithm": "sha256",
+    "hash_kind": "CANONICAL_TEXT_SHA256",
+    "measured_sha256": "ceff7c077112c51f9808dcf9cb6685627ccfff5b259480fee415ea4ec9b8d629",
+    "source_path": "tests/test_wrapper_density.py"
+   },
    "fixture_parity": "not declared",
    "has_skip_guard": false,
    "id": "TEST:tests/test_wrapper_density.py",
@@ -5173,7 +6535,6 @@
    ],
    "path": "tests/test_wrapper_density.py",
    "protects_scripts": [],
-   "sha256": "ceff7c077112c51f9808dcf9cb6685627ccfff5b259480fee415ea4ec9b8d629",
    "skip_reasons": [],
    "state": "active",
    "test_class": "unit",

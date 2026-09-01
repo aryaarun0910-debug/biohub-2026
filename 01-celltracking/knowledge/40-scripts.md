@@ -11,14 +11,13 @@ generated: true
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-## active-experiment (44)
+## active-experiment (40)
 
 - `scripts/core/colab_cli.py` — **no test**
 - `scripts/core/kaggle_factory.py` — tests: 4
 - `scripts/core/score_loeo_submission.py` — **no test**
 - `scripts/kaggle_edits/assoc_feature_parity.py` — **no test**
 - `scripts/kaggle_edits/coupled_division_transplant.py` — **no test**
-- `scripts/kaggle_edits/detpeak_export.py` — **no test**
 - `scripts/kaggle_edits/h1r_rope4d.py` — tests: 1
 - `scripts/kaggle_edits/h1r_rope4d_inference_patch.py` — tests: 1
 - `scripts/kaggle_specs/deploy_h1r_edge_s5_rope4d_loeo_f0.json` — **no test**
@@ -27,8 +26,6 @@ generated: true
 - `scripts/kaggle_specs/h1r_edge_s5_rope4d.json` — **no test**
 - `scripts/kaggle_specs/h1r_edge_s5_rope4d_smoke.json` — **no test**
 - `scripts/kaggle_specs/h1r_edge_s5_smoke.json` — **no test**
-- `scripts/kaggle_specs/p10_deepcenter_best.json` — **no test**
-- `scripts/kaggle_specs/p24_deepcenter_best_veto.json` — **no test**
 - `scripts/win_bet/assoc_fold_pathology.py` — tests: 1
 - `scripts/win_bet/assoc_lost_edge_ledger.py` — tests: 1
 - `scripts/win_bet/assoc_parent_dataset.py` — tests: 3
@@ -44,7 +41,6 @@ generated: true
 - `scripts/win_bet/biohubx/model.py` — **no test**
 - `scripts/win_bet/biohubx/synthetic_t2.py` — tests: 1
 - `scripts/win_bet/biohubx/training.py` — **no test**
-- `scripts/win_bet/detpeak_curve.py` — tests: 1
 - `scripts/win_bet/div_reach_steal.py` — **no test**
 - `scripts/win_bet/divverify_adapter.py` — tests: 1
 - `scripts/win_bet/divverify_dataset.py` — tests: 1
@@ -133,11 +129,14 @@ generated: true
 - `scripts/win_bet/assoc_specs/tournament_context_f1_stabledet.json` — **no test**
 - `scripts/win_bet/deployed_controls.json` — **no test**
 
-## historical (14)
+## historical (18)
 
+- `scripts/kaggle_edits/detpeak_export.py` — **no test**
 - `scripts/kaggle_edits/edge_candidate_budget.py` — **no test**
 - `scripts/kaggle_edits/pre_ilp_export.py` — **no test**
 - `scripts/kaggle_edits/pre_ilp_rollup.py` — **no test**
+- `scripts/kaggle_specs/p10_deepcenter_best.json` — **no test**
+- `scripts/kaggle_specs/p24_deepcenter_best_veto.json` — **no test**
 - `scripts/kaggle_specs/p32_public931_exact.json` — **no test**
 - `scripts/kaggle_specs/p34_acquisition_f1.json` — **no test**
 - `scripts/win_bet/assoc_baseline_rankers.py` — **no test**
@@ -146,6 +145,7 @@ generated: true
 - `scripts/win_bet/audit_feature_cache.py` — tests: 5
 - `scripts/win_bet/audit_release_receipt.py` — **no test**
 - `scripts/win_bet/dc_subvoxel_refine.py` — **no test**
+- `scripts/win_bet/detpeak_curve.py` — tests: 1
 - `scripts/win_bet/division_localisation.py` — **no test**
 - `scripts/win_bet/gpu_protection_contract.py` — tests: 3
 - `scripts/win_bet/p28_full_chain_panel.py` — **no test**
@@ -191,7 +191,7 @@ generated: true
 ## supporting (16)
 
 - `scripts/core/baseline_contract.py` — tests: 2
-- `scripts/core/bootstrap_vendor.py` — tests: 3
+- `scripts/core/bootstrap_vendor.py` — tests: 4
 - `scripts/d1/assemble_p3_d1_smoke_spec.py` — tests: 2
 - `scripts/d1/d1f_probe.py` — tests: 2
 - `scripts/kaggle_edits/h1r_edge_data.py` — tests: 3
@@ -199,7 +199,7 @@ generated: true
 - `scripts/win_bet/h1t_external_critic.py` — **no test**
 - `scripts/win_bet/h1t_zebrahub_events.py` — **no test**
 - `scripts/win_bet/kaggle_artifacts.py` — tests: 1
-- `scripts/win_bet/kaggle_mounts.py` — tests: 1
+- `scripts/win_bet/kaggle_mounts.py` — tests: 2
 - `scripts/win_bet/phaseb_d0p_proposer.py` — **no test**
 - `scripts/win_bet/phaseb_h0b_rankcompress.py` — **no test**
 - `scripts/win_bet/phaseb_h0c_replay.py` — **no test**
@@ -290,8 +290,10 @@ generated: true
 - `scripts/win_bet/ea_features.py` — **no test**
 - `scripts/win_bet/ea_solver_gap.py` — **no test**
 
-## untracked-concurrent (3)
+## untracked-concurrent (5)
 
+- `scripts/core/digest_inventory.py` — tests: 1
+- `scripts/core/hashing.py` — tests: 4
 - `scripts/win_bet/biohubx/ckpt_keys.py` — **no test**
 - `scripts/win_bet/divverify_verifier.py` — tests: 1
 - `scripts/win_bet/hoct_compat.py` — tests: 1

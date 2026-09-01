@@ -27,16 +27,12 @@ generated: true
 - Genuinely free to claim: [[LEVER-0029]], [[LEVER-0030]], [[LEVER-0032]], [[LEVER-0033]]
 
 ## Live packets
-- [[PKT-0001]] `running` -> [[LEVER-0003]]
 - [[PKT-0002]] `running` -> [[LEVER-0006]]
 - [[PKT-0012]] `running` -> [[LEVER-0011]]
 - [[PKT-0013]] `running` -> [[LEVER-0019]]
 - [[PKT-0014]] `running` -> _no lever_
-- [[PKT-0015]] `running` -> [[LEVER-0002]]
 - [[PKT-0016]] `running` -> [[LEVER-0020]]
-- [[PKT-0018]] `claimed` -> [[LEVER-0022]]
 - [[PKT-0019]] `claimed` -> [[LEVER-0023]]
-- [[PKT-0020]] `claimed` -> [[LEVER-0024]]
 - [[PKT-0021]] `claimed` -> [[LEVER-0025]]
 - [[PKT-0022]] `claimed` -> [[LEVER-0026]]
 - [[PKT-0023]] `claimed` -> [[LEVER-0027]]

@@ -44,6 +44,24 @@ sys.path.insert(0, str(REPO / "scripts" / "core"))
 
 import yaml  # noqa: E402
 
+import hashing as H  # noqa: E402  the ONE hashing module (Phase 1.5)
+
+
+def _digest(path: Path, kind: str) -> dict:
+    """A hash-bearing field, with its KIND declared.
+
+    Bare `sha256` fields made this catalog checkout-dependent: 232 of the repository's 816
+    recorded digests matched the WORKTREE bytes only, and the catalog was one of the places
+    recording them. Source now carries CANONICAL_TEXT_SHA256, which is equal across an LF and a
+    CRLF checkout; artifacts whose identity IS their bytes keep RAW_ARTIFACT_SHA256.
+    """
+    try:
+        if kind == "DUAL":
+            return H.dual_record(path, repo_root=REPO)
+        return H.hash_record(path, kind, repo_root=REPO)
+    except (H.HashRefusal, OSError) as exc:
+        return {"hash_kind": None, "refused": str(exc)[:180]}
+
 SCHEMA_VERSION = "catalog_v1"
 HEARTBEAT_OK = "CATALOG_OK"
 HEARTBEAT_DRIFT = "CATALOG_DRIFT"
@@ -224,7 +242,8 @@ def build_scripts(reg: dict, tracked: set[str], ov: dict) -> dict:
             "id": "SCRIPT:" + r, "path": r, "kind": p.suffix.lstrip("."),
             "purpose": doc,
             "tracked": r in tracked,
-            "sha256": sha256_file(p),
+            # source under scripts/ - canonical, so the catalog is the same in any checkout
+            "digest": _digest(p, H.CANONICAL if p.suffix == ".py" else H.CANONICAL),
             "bytes": p.stat().st_size,
             "imports": imports,
             "imports_first_party": [m for m in imports if m.split(".")[0] in stem_index
@@ -313,7 +332,7 @@ def build_tests(scripts: dict, tracked: set[str], node_ids: list[str] | None) ->
         skip_reasons = re.findall(r"skip\(\s*[\"'](.{0,90})", text)
         out[r] = {
             "id": "TEST:" + r, "path": r, "tracked": r in tracked,
-            "sha256": sha256_file(p),
+            "digest": _digest(p, H.CANONICAL),
             "node_ids": sorted(nodes_by_file.get(r, [])),
             "n_nodes": len(nodes_by_file.get(r, [])),
             "protects_scripts": protects,
@@ -381,7 +400,7 @@ def build_notebooks(reg: dict, tracked: set[str], roles: dict) -> tuple[dict, di
             continue
         specs[rel(p)] = {
             "id": "SPEC:" + rel(p), "path": rel(p), "tracked": rel(p) in tracked,
-            "sha256": sha256_file(p), "name": s.get("name"), "slug": s.get("slug"),
+            "digest": _digest(p, H.CANONICAL), "name": s.get("name"), "slug": s.get("slug"),
             "out_dir": s.get("out_dir"),
             "base_notebook": str(s.get("base_notebook") or s.get("base") or "").replace("\\", "/")
                              or None,
@@ -433,6 +452,9 @@ def build_notebooks(reg: dict, tracked: set[str], roles: dict) -> tuple[dict, di
         entry = {
             "id": "NOTEBOOK:" + d.name, "dir": rel(d), "notebook": nb_path,
             "tracked": (nb_path in tracked) if nb_path else False,
+            # a built notebook needs BOTH: RAW is what was pushed to Kaggle and scored,
+            # CANONICAL is what a cross-checkout source comparison is about.
+            "digest": _digest(nbs[0], "DUAL") if nbs else None,
             "notebook_sha256": sha256_file(nbs[0]) if nbs else None,
             "producing_spec": spec_rel,
             "spec_sha256": specs.get(spec_rel, {}).get("sha256") if spec_rel else None,
@@ -440,6 +462,8 @@ def build_notebooks(reg: dict, tracked: set[str], roles: dict) -> tuple[dict, di
                              if spec_rel else manifest.get("base_notebook"),
             "base_sha256": (specs.get(spec_rel, {}) or {}).get("base_sha256")
                            if spec_rel else manifest.get("base_sha256"),
+            # a manifest records what the factory SHIPPED - raw
+            "build_manifest_digest": _digest(man, H.RAW) if man.is_file() else None,
             "build_manifest_sha256": sha256_file(man) if man.is_file() else None,
             "built_sha256_recorded": manifest.get("built_sha256"),
             "built_sha256_matches_disk": (

@@ -1,8 +1,8 @@
 ---
-id: SCRIPT-scripts__win_bet__kaggle_mounts.py
+id: SCRIPT-scripts__core__digest_inventory.py
 kind: SCRIPT
 tags: [script]
-lifecycle: supporting
+lifecycle: untracked-concurrent
 ---
 
 > [!info] Generated navigation. Do not edit.
@@ -10,10 +10,9 @@ lifecycle: supporting
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path / name:** `scripts/win_bet/kaggle_mounts.py`
-**Lifecycle:** supporting — imported by another script
-**Tests:** 2
+**Path / name:** `scripts/core/digest_inventory.py`
+**Lifecycle:** untracked-concurrent — present but not in git
+**Tests:** 1
 
 ## incoming
 - `protects` <- [[TEST-tests__test_cross_checkout_identity.py]]  <sub>test imports source</sub>
-- `protects` <- [[TEST-tests__test_gpu_preflight.py]]  <sub>test imports source</sub>

@@ -56,6 +56,10 @@ import kaggle_mounts as KM             # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 HEARTBEAT = "GPU_PREFLIGHT_COMPLETE"
+import sys as _sys
+_sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "core"))
+import hashing as _HASHING  # noqa: E402  the ONE hashing module
+
 INSTRUMENTS = (
     "scripts/win_bet/gpu_preflight.py",
     "scripts/win_bet/kaggle_mounts.py",
@@ -96,6 +100,19 @@ class Ctx:
     sandbox: Path
     env: dict[str, str] = field(default_factory=dict)
     facts: dict = field(default_factory=dict)      # values later checks reuse
+
+
+def _instrument_sha256(p: Path) -> str:
+    """CANONICAL text for the instrument signature.
+
+    INSTRUMENTS are all source `.py`. Signing them by RAW bytes made the receipt's tamper-evidence
+    checkout-dependent: an LF worktree and a CRLF checkout of the same commit produced different
+    signatures, so a receipt earned here could never be verified elsewhere. Measured 2026-09-01 -
+    this was the cause of two clean-clone failures. Canonical text answers the question the
+    signature is actually asking ("is this the same instrument?") and answers it the same way
+    everywhere.
+    """
+    return _HASHING.canonical_text_sha256(p)
 
 
 def _sha256_file(p: Path) -> str:
@@ -1467,7 +1484,8 @@ def sign(body: dict) -> dict:
     return {
         "algorithm": "sha256(canonical-json(body))",
         "body_sha256": hashlib.sha256(_canonical(body).encode("utf-8")).hexdigest(),
-        "instruments": {p: _sha256_file(ROOT / p) for p in INSTRUMENTS if (ROOT / p).is_file()},
+        "instruments": {p: _instrument_sha256(ROOT / p)
+                        for p in INSTRUMENTS if (ROOT / p).is_file()},
         "guarantee": "tamper-evident, NOT authenticated; no secret exists in this repository",
     }
 
@@ -1480,7 +1498,7 @@ def verify(receipt: dict) -> tuple[bool, list[str]]:
         problems.append(f"body_sha256 mismatch: recomputed {recomputed[:16]} "
                         f"vs receipt {str(sig.get('body_sha256'))[:16]}")
     for p, want in (sig.get("instruments") or {}).items():
-        have = _sha256_file(ROOT / p) if (ROOT / p).is_file() else None
+        have = _instrument_sha256(ROOT / p) if (ROOT / p).is_file() else None
         if have != want:
             problems.append(f"instrument {p} changed since the receipt was signed")
     return (not problems), problems

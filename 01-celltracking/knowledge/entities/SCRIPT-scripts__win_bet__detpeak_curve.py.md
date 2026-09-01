@@ -2,7 +2,7 @@
 id: SCRIPT-scripts__win_bet__detpeak_curve.py
 kind: SCRIPT
 tags: [script]
-lifecycle: active-experiment
+lifecycle: historical
 ---
 
 > [!info] Generated navigation. Do not edit.
@@ -11,7 +11,7 @@ lifecycle: active-experiment
 
 
 **Path / name:** `scripts/win_bet/detpeak_curve.py`
-**Lifecycle:** active-experiment — named by packet(s) ['PKT-0001']
+**Lifecycle:** historical — named by packet(s) ['PKT-0001']
 **Tests:** 1
 
 ## outgoing

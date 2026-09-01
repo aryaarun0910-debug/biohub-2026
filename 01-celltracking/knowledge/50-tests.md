@@ -21,7 +21,7 @@ generated: true
 - `tests/test_biohubx_contract.py` — protects 0 script(s), 44 node(s), blocks `release`
 - `tests/test_d1_factorial_smoke.py` — protects 2 script(s), 41 node(s), blocks `release`
 - `tests/test_d1_postprocess.py` — protects 1 script(s), 102 node(s), blocks `release`
-- `tests/test_d1_v6_export.py` — protects 0 script(s), 52 node(s), blocks `gpu`
+- `tests/test_d1_v6_export.py` — protects 1 script(s), 52 node(s), blocks `gpu`
 - `tests/test_d1f_probe.py` — protects 2 script(s), 178 node(s), blocks `gpu`
 - `tests/test_focus3d_probe_state_contract.py` — protects 1 script(s), 6 node(s), blocks `release`
 - `tests/test_gpu_preflight.py` — protects 3 script(s), 20 node(s), blocks `release`
@@ -56,11 +56,11 @@ generated: true
 - `tests/test_coupled_division_transplant.py` — protects 0 script(s), 16 node(s), blocks `cpu`
 - `tests/test_d1_factorial.py` — protects 1 script(s), 74 node(s), blocks `gpu`
 - `tests/test_fresh_clone_reproducibility.py` — protects 2 script(s), 12 node(s), blocks `gpu`
-- `tests/test_h1r_adabn_detection_only.py` — protects 1 script(s), 13 node(s), blocks `cpu`
+- `tests/test_h1r_adabn_detection_only.py` — protects 2 script(s), 13 node(s), blocks `cpu`
 - `tests/test_p10_deepcenter_best.py` — protects 0 script(s), 4 node(s), blocks `cpu`
 - `tests/test_p11_xhhuang_edge_swap.py` — protects 0 script(s), 13 node(s), blocks `gpu`
 - `tests/test_p12_forward_acceleration_lookahead.py` — protects 0 script(s), 12 node(s), blocks `cpu`
-- `tests/test_p13_p9_adabn_detection_only.py` — protects 1 script(s), 4 node(s), blocks `release`
+- `tests/test_p13_p9_adabn_detection_only.py` — protects 2 script(s), 4 node(s), blocks `release`
 - `tests/test_p24_deepcenter_best_veto.py` — protects 0 script(s), 3 node(s), blocks `release`
 - `tests/test_provenance_policy.py` — protects 3 script(s), 21 node(s), blocks `gpu`
 - `tests/test_provenance_policy_single_source.py` — protects 3 script(s), 10 node(s), blocks `release`
@@ -76,7 +76,7 @@ generated: true
 - `tests/test_experiment_defect_gate.py` — protects 1 script(s), 18 node(s), blocks `cpu`
 - `tests/test_lineage_degree_invariants.py` — protects 1 script(s), 9 node(s), blocks `release`
 
-## unit (55)
+## unit (56)
 
 - `tests/conftest.py` — protects 0 script(s), 0 node(s), blocks `cpu`
 - `tests/test_assoc_fold_pathology.py` — protects 5 script(s), 13 node(s), blocks `cpu`
@@ -90,6 +90,7 @@ generated: true
 - `tests/test_claims_table.py` — protects 1 script(s), 3 node(s), blocks `cpu`
 - `tests/test_colab_relay.py` — protects 1 script(s), 15 node(s), blocks `release`
 - `tests/test_compare_substrate_sentinel.py` — protects 1 script(s), 2 node(s), blocks `cpu`
+- `tests/test_cross_checkout_identity.py` — protects 3 script(s), 18 node(s), blocks `release`
 - `tests/test_d1_candidate_gate.py` — protects 1 script(s), 4 node(s), blocks `cpu`
 - `tests/test_d1_partition.py` — protects 0 script(s), 14 node(s), blocks `cpu`
 - `tests/test_d1_structural.py` — protects 0 script(s), 10 node(s), blocks `gpu`
@@ -99,7 +100,7 @@ generated: true
 - `tests/test_detpeak_curve.py` — protects 0 script(s), 8 node(s), blocks `cpu`
 - `tests/test_detpeak_export_contract.py` — protects 0 script(s), 2 node(s), blocks `cpu`
 - `tests/test_div_reach_steal.py` — protects 0 script(s), 7 node(s), blocks `cpu`
-- `tests/test_div_reach_steal_adversarial.py` — protects 0 script(s), 16 node(s), blocks `release`
+- `tests/test_div_reach_steal_adversarial.py` — protects 1 script(s), 16 node(s), blocks `release`
 - `tests/test_div_steal_rule.py` — protects 0 script(s), 11 node(s), blocks `cpu`
 - `tests/test_divverify_contract.py` — protects 3 script(s), 34 node(s), blocks `cpu`
 - `tests/test_edge_candidate_budget.py` — protects 0 script(s), 14 node(s), blocks `gpu`

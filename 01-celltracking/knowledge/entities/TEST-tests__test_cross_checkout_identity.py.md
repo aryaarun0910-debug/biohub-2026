@@ -1,8 +1,8 @@
 ---
-id: TEST-tests__test_p13_p9_adabn_detection_only.py
+id: TEST-tests__test_cross_checkout_identity.py
 kind: TEST
 tags: [test]
-test_class: provenance
+test_class: unit
 ---
 
 > [!info] Generated navigation. Do not edit.
@@ -10,11 +10,12 @@ test_class: provenance
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path / name:** `tests/test_p13_p9_adabn_detection_only.py`
-**Class:** provenance
-**Nodes:** 4
+**Path / name:** `tests/test_cross_checkout_identity.py`
+**Class:** unit
+**Nodes:** 18
 **Blocks:** release
 
 ## outgoing
+- `protects` -> [[SCRIPT-scripts__core__digest_inventory.py]]  <sub>test imports source</sub>
 - `protects` -> [[SCRIPT-scripts__core__hashing.py]]  <sub>test imports source</sub>
-- `protects` -> [[SCRIPT-scripts__kaggle_edits__h1r_adabn_detection_only.py]]  <sub>test imports source</sub>
+- `protects` -> [[SCRIPT-scripts__win_bet__kaggle_mounts.py]]  <sub>test imports source</sub>

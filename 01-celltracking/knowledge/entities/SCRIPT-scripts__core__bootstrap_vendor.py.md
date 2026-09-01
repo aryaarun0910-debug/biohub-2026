@@ -12,9 +12,10 @@ lifecycle: supporting
 
 **Path / name:** `scripts/core/bootstrap_vendor.py`
 **Lifecycle:** supporting — imported by another script
-**Tests:** 3
+**Tests:** 4
 
 ## incoming
+- `protects` <- [[TEST-tests__test_div_reach_steal_adversarial.py]]  <sub>test imports source</sub>
 - `protects` <- [[TEST-tests__test_fresh_clone_reproducibility.py]]  <sub>test imports source</sub>
 - `protects` <- [[TEST-tests__test_h1r_edge_train.py]]  <sub>test imports source</sub>
 - `protects` <- [[TEST-tests__test_h1r_rope4d.py]]  <sub>test imports source</sub>

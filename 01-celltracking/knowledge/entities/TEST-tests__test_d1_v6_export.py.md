@@ -1,8 +1,8 @@
 ---
-id: TEST-tests__test_h1r_adabn_detection_only.py
+id: TEST-tests__test_d1_v6_export.py
 kind: TEST
 tags: [test]
-test_class: provenance
+test_class: mutation
 ---
 
 > [!info] Generated navigation. Do not edit.
@@ -10,11 +10,10 @@ test_class: provenance
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path / name:** `tests/test_h1r_adabn_detection_only.py`
-**Class:** provenance
-**Nodes:** 13
-**Blocks:** cpu
+**Path / name:** `tests/test_d1_v6_export.py`
+**Class:** mutation
+**Nodes:** 52
+**Blocks:** gpu
 
 ## outgoing
 - `protects` -> [[SCRIPT-scripts__core__hashing.py]]  <sub>test imports source</sub>
-- `protects` -> [[SCRIPT-scripts__kaggle_edits__h1r_adabn_detection_only.py]]  <sub>test imports source</sub>

@@ -13,6 +13,10 @@ from scripts.kaggle_edits.h1r_adabn_detection_only import (
 )
 
 
+import sys as _sys
+_sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[1] / "scripts" / "core"))
+import hashing as _HASHING  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 SPEC_PATH = ROOT / "scripts/kaggle_specs/p13_p9_adabn_detection_only.json"
 P9_SPEC_PATH = ROOT / "scripts/kaggle_specs/p9_coupled_division.json"
@@ -153,9 +157,9 @@ def test_p13_reciprocal_contract_hashes_and_defect_gate() -> None:
     assert spec["kernel_sources"] == [
         "aryaarun07/biohub-h1r-detector-s1-adabn-control"
     ]
-    assert spec["provenance"]["consumer_patch_sha256"] == hashlib.sha256(
-        PATCH_PATH.read_bytes()
-    ).hexdigest()
+    # CANONICAL - see the note in test_h1r_adabn_detection_only. Recorded value unchanged.
+    assert (spec["provenance"]["consumer_patch_sha256"]
+            == _HASHING.canonical_text_sha256(PATCH_PATH))
     assert spec["provenance"]["expected_built_notebook_sha256"] == hashlib.sha256(
         P13_NOTEBOOK.read_bytes()
     ).hexdigest()

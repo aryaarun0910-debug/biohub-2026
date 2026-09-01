@@ -4866,7 +4866,7 @@
     ],
     "kind": "PKT",
     "lever": "LEVER-0003",
-    "lock": "running",
+    "lock": "done",
     "opened": "2026-08-25",
     "owner": "primary"
    },
@@ -5157,7 +5157,7 @@
     ],
     "kind": "PKT",
     "lever": "LEVER-0002",
-    "lock": "running",
+    "lock": "done",
     "opened": "2026-08-26",
     "owner": "rnd-agent"
    },
@@ -5238,7 +5238,7 @@
     ],
     "kind": "PKT",
     "lever": "LEVER-0022",
-    "lock": "claimed",
+    "lock": "done",
     "opened": "2026-08-27",
     "owner": "primary"
    },
@@ -5294,7 +5294,7 @@
     ],
     "kind": "PKT",
     "lever": "LEVER-0024",
-    "lock": "claimed",
+    "lock": "done",
     "opened": "2026-08-27",
     "owner": "primary"
    },

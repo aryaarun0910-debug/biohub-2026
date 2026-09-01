@@ -38,11 +38,25 @@ LADDER_PATH = ROOT / "scripts" / "kaggle_edits" / "kaggle_mount_ladder.py"
 #   flat:          /kaggle/input/<slug>/...                   (what patches keep hardcoding)
 CONVENTIONS = ("flat", "datasets", "competitions")
 
+import sys as _sys
+from pathlib import Path as _P
+_sys.path.insert(0, str(_P(__file__).resolve().parents[1] / "core"))
+import hashing as _HASHING  # noqa: E402  the ONE hashing module
+
 if not LADDER_PATH.is_file():                                  # fail closed, loudly
     raise FileNotFoundError(f"central mount ladder missing: {LADDER_PATH}")
 
 LADDER_SOURCE = LADDER_PATH.read_text(encoding="utf-8")
-LADDER_SHA256 = hashlib.sha256(LADDER_SOURCE.encode("utf-8")).hexdigest()
+
+# CANONICAL TEXT, not raw bytes. `read_text` already collapses CRLF to LF on read, but the digest
+# was previously taken over whatever the checkout produced, so it differed between an LF worktree
+# and a CRLF checkout - measured 2026-09-01, this exact constant was the cause of two
+# clean-clone failures in test_gpu_preflight. The ladder is SOURCE; its line endings carry no
+# meaning. `canon_text_v1` states the normalisation explicitly instead of relying on a side
+# effect of how the file happened to be read.
+LADDER_SHA256 = _HASHING.canonical_text_sha256_bytes(LADDER_SOURCE.encode("utf-8"))
+LADDER_SHA256_KIND = _HASHING.CANONICAL
+LADDER_SHA256_CANONICALIZATION = _HASHING.CANONICALIZATION_VERSION
 
 _ns: dict = {}
 exec(compile(LADDER_SOURCE, str(LADDER_PATH), "exec"), _ns)     # noqa: S102 - see docstring

@@ -22,6 +22,10 @@ from scripts.kaggle_edits.h1r_adabn_detection_only import (
 )
 
 
+import sys as _sys
+_sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[1] / "scripts" / "core"))
+import hashing as _HASHING  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = ROOT / "scripts" / "kaggle_specs" / "deploy_h1r_adabn_detection_only.json"
 PRODUCER = ROOT / "scripts" / "kaggle_specs" / "h1r_det_s1_adabn_control.json"
@@ -310,9 +314,12 @@ def test_specs_pin_reciprocal_mode_and_exact_completed_artifacts() -> None:
     assert provenance["producer_config_sha256"] == CONFIG_SHA256
     assert provenance["producer_summary_sha256"] == SUMMARY_SHA256
     assert provenance["producer_training_audit_sha256"] == AUDIT_SHA256
-    patch_sha = hashlib.sha256((
-        ROOT / "scripts" / "kaggle_edits" / "h1r_adabn_detection_only.py"
-    ).read_bytes()).hexdigest()
+    # CANONICAL: the patch is SOURCE, and its recorded digest was taken from an LF worktree.
+    # A raw comparison passes here and fails in any CRLF checkout - measured, and it was one of
+    # the ten clean-clone failures. The recorded value in the spec is UNCHANGED; only the
+    # computation is canonicalised, because canonicalising an LF file is a no-op.
+    patch_sha = _HASHING.canonical_text_sha256(
+        ROOT / "scripts" / "kaggle_edits" / "h1r_adabn_detection_only.py")
     assert provenance["consumer_patch_sha256"] == patch_sha
     built_sha = hashlib.sha256((
         ROOT / "notebooks" / "kaggle_deploy_h1r_adabn_detection_only"

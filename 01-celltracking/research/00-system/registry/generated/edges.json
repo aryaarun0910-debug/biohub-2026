@@ -6254,6 +6254,24 @@
   },
   {
    "basis": "test imports source",
+   "dst": "SCRIPT-scripts__core__digest_inventory.py",
+   "rel": "protects",
+   "src": "TEST-tests__test_cross_checkout_identity.py"
+  },
+  {
+   "basis": "test imports source",
+   "dst": "SCRIPT-scripts__core__hashing.py",
+   "rel": "protects",
+   "src": "TEST-tests__test_cross_checkout_identity.py"
+  },
+  {
+   "basis": "test imports source",
+   "dst": "SCRIPT-scripts__win_bet__kaggle_mounts.py",
+   "rel": "protects",
+   "src": "TEST-tests__test_cross_checkout_identity.py"
+  },
+  {
+   "basis": "test imports source",
    "dst": "SCRIPT-scripts__d1__d1_candidate_gate.py",
    "rel": "protects",
    "src": "TEST-tests__test_d1_candidate_gate.py"
@@ -6284,6 +6302,12 @@
   },
   {
    "basis": "test imports source",
+   "dst": "SCRIPT-scripts__core__hashing.py",
+   "rel": "protects",
+   "src": "TEST-tests__test_d1_v6_export.py"
+  },
+  {
+   "basis": "test imports source",
    "dst": "SCRIPT-scripts__d1__d1_postprocess.py",
    "rel": "protects",
    "src": "TEST-tests__test_d1f_probe.py"
@@ -6293,6 +6317,12 @@
    "dst": "SCRIPT-scripts__d1__d1f_probe.py",
    "rel": "protects",
    "src": "TEST-tests__test_d1f_probe.py"
+  },
+  {
+   "basis": "test imports source",
+   "dst": "SCRIPT-scripts__core__bootstrap_vendor.py",
+   "rel": "protects",
+   "src": "TEST-tests__test_div_reach_steal_adversarial.py"
   },
   {
    "basis": "test imports source",
@@ -6383,6 +6413,12 @@
    "dst": "SCRIPT-scripts__win_bet__gt_collision.py",
    "rel": "protects",
    "src": "TEST-tests__test_gt_collision.py"
+  },
+  {
+   "basis": "test imports source",
+   "dst": "SCRIPT-scripts__core__hashing.py",
+   "rel": "protects",
+   "src": "TEST-tests__test_h1r_adabn_detection_only.py"
   },
   {
    "basis": "test imports source",
@@ -6563,6 +6599,12 @@
    "dst": "SCRIPT-scripts__metric__validate_metric_parity.py",
    "rel": "protects",
    "src": "TEST-tests__test_metric_parity.py"
+  },
+  {
+   "basis": "test imports source",
+   "dst": "SCRIPT-scripts__core__hashing.py",
+   "rel": "protects",
+   "src": "TEST-tests__test_p13_p9_adabn_detection_only.py"
   },
   {
    "basis": "test imports source",

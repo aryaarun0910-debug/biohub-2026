@@ -147,7 +147,22 @@ def test_real_champion_artifacts_resolve_by_their_own_convention(spec_name, expe
     spec_path = ROOT / "scripts" / "kaggle_specs" / f"{spec_name}.json"
     if not spec_path.is_file():
         pytest.skip(f"{spec_name} spec absent")
-    d = KA.discover(KA.load_spec(spec_path), roles=("receipt",), hash_files=False)
+    spec = KA.load_spec(spec_path)
+    # THE FIXTURE IS ABOUT PRECEDENCE, so it needs the artifact the precedence is about. In a
+    # clone `notebooks/<dir>/_out/` is gitignored and absent, discovery falls through to a
+    # C:/temp scratch path that DOES exist (it is outside the repository and shared), and the
+    # test compared a convention it was never asking about. Measured 2026-09-01: this reported
+    # 'scratch_short' vs 'factory' in a clean clone. Guard on the factory artifact itself.
+    # Only the FACTORY case needs the repo-local artifact; the queue case legitimately resolves
+    # elsewhere, and guarding it too would skip a check that can still be made.
+    factory_receipt = ROOT / spec["out_dir"] / "_out" / "audit_receipt.json"
+    if expected == "factory" and not factory_receipt.is_file():
+        pytest.skip(
+            f"{spec_name}: the factory receipt {factory_receipt.relative_to(ROOT).as_posix()} is "
+            f"gitignored (.gitignore:20 notebooks/**/_out/) and absent here, so factory-vs-queue "
+            f"precedence cannot be observed. Its BINDING survives in "
+            f"research/00-system/registry/generated/receipts.json")
+    d = KA.discover(spec, roles=("receipt",), hash_files=False)
     if not d.found:
         pytest.skip(f"{spec_name} artifact not on this machine (gitignored evidence)")
     assert d.convention == expected
