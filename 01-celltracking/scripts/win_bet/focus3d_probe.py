@@ -95,7 +95,101 @@ def _load_runtime(runtime: Path, config: Path):
     return build_maskformer_model_from_cfg(cfg).eval()
 
 
-def _emit(payload: dict) -> None:
+def _state_compatibility(model_state: dict, checkpoint_state: dict) -> dict:
+    """Compare names, shapes and dtypes without letting ``strict=False`` hide a mismatch."""
+    model_keys = set(model_state)
+    checkpoint_keys = set(checkpoint_state)
+    shared = sorted(model_keys & checkpoint_keys)
+    shape_mismatch = [
+        key for key in shared
+        if tuple(model_state[key].shape) != tuple(checkpoint_state[key].shape)
+    ]
+    dtype_mismatch = [
+        key for key in shared
+        if getattr(model_state[key], "dtype", None) != getattr(checkpoint_state[key], "dtype", None)
+    ]
+    return {
+        "missing": sorted(model_keys - checkpoint_keys),
+        "unexpected": sorted(checkpoint_keys - model_keys),
+        "shape_mismatch": shape_mismatch,
+        "dtype_mismatch": dtype_mismatch,
+        "shared": len(shared),
+    }
+
+
+def _attest_training_only_criterion_buffer(runtime: Path, config: Path,
+                                            checkpoint_state: dict) -> dict:
+    """Bind the sole inference-excluded tensor to publisher source and config values.
+
+    The downloaded Windows runtime cannot instantiate its training criterion because it omits
+    ``utils.misc_win``.  We therefore do not pretend a full-model strict load ran.  Instead this
+    attestation proves the narrower fact needed by inference: the exact extra key is registered by
+    the publisher's criterion source, the inference builder explicitly omits that criterion, and
+    the released tensor equals ``ones(num_classes + 1)`` with the configured no-object weight in
+    its last slot.  Any second extra key, source drift, shape drift, or value drift refuses.
+    """
+    import torch
+    import yaml
+
+    runtime = runtime.resolve()
+    criterion_hits = list(runtime.rglob("criterion_win.py"))
+    model_hits = list(runtime.rglob("maskformer_model_win.py"))
+    if len(criterion_hits) != 1 or len(model_hits) != 1:
+        raise RuntimeError(
+            "training-only buffer attestation requires exactly one criterion_win.py and "
+            "maskformer_model_win.py")
+    criterion_path, model_path = criterion_hits[0], model_hits[0]
+    criterion_text = criterion_path.read_text(encoding="utf-8")
+    model_text = model_path.read_text(encoding="utf-8")
+    required_criterion = "self.register_buffer('empty_weight', empty_weight)"
+    if required_criterion not in criterion_text:
+        raise RuntimeError("publisher source no longer registers criterion.empty_weight")
+    if "if build_criterion:" not in model_text or "criterion = None" not in model_text:
+        raise RuntimeError("publisher inference source no longer makes criterion omission explicit")
+
+    cfg = yaml.safe_load(config.read_text(encoding="utf-8"))
+    num_classes = int(cfg["MODEL"]["SEM_SEG_HEAD"]["NUM_CLASSES"])
+    no_object_weight = float(cfg["MODEL"]["MASK_FORMER"]["NO_OBJECT_WEIGHT"])
+    key = "criterion.empty_weight"
+    if key not in checkpoint_state:
+        raise RuntimeError(f"released checkpoint is missing the attested {key}")
+    value = checkpoint_state[key]
+    expected = torch.ones(num_classes + 1, dtype=value.dtype, device=value.device)
+    expected[-1] = no_object_weight
+    if tuple(value.shape) != (num_classes + 1,) or not torch.equal(value, expected):
+        raise RuntimeError(
+            f"{key} does not equal the publisher source/config construction; "
+            f"shape={tuple(value.shape)}, expected_shape={(num_classes + 1,)}")
+    return {
+        "key": key,
+        "shape": list(value.shape),
+        "values": value.detach().cpu().tolist(),
+        "num_classes": num_classes,
+        "no_object_weight": no_object_weight,
+        "criterion_source": str(criterion_path),
+        "criterion_source_sha256": _sha256(criterion_path),
+        "inference_builder_source": str(model_path),
+        "inference_builder_source_sha256": _sha256(model_path),
+        "source_registers_buffer": True,
+        "inference_explicitly_omits_criterion": True,
+        "value_matches_config": True,
+    }
+
+
+def _write_payload(path: str | None, payload: dict) -> None:
+    """Persist evidence atomically; stdout alone is not a registry-grade artifact."""
+    if not path:
+        return
+    output = Path(path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    tmp = output.with_name(output.name + ".tmp")
+    tmp.write_text(json.dumps({**payload, "heartbeat": HEARTBEAT}, indent=2, default=str),
+                   encoding="utf-8")
+    tmp.replace(output)
+
+
+def _emit(payload: dict, output: str | None = None) -> None:
+    _write_payload(output, payload)
     print(json.dumps(payload, indent=2, default=str))
     print(HEARTBEAT)
 
@@ -134,7 +228,7 @@ def cmd_arch(args: argparse.Namespace) -> None:
         "state_dict_numel": int(sum(v.numel() for v in state.values())),
         "fp32_weight_bytes": total * 4,
         "per_second_level_module": dict(sorted(per_module.items(), key=lambda kv: -kv[1])[:12]),
-    })
+    }, getattr(args, "output", None))
 
 
 # ---------------------------------------------------------------------------------------------
@@ -201,6 +295,7 @@ def cmd_ckpt(args: argparse.Namespace) -> None:
             if key.startswith("model."):
                 key = key[len("model."):]
             cleaned[key] = value
+        comparison = _state_compatibility(model.state_dict(), cleaned)
         missing, unexpected = model.load_state_dict(cleaned, strict=False)
         payload["built_model_state_dict_entries"] = len(model.state_dict())
         payload["missing_keys_count"] = len(missing)
@@ -208,19 +303,49 @@ def cmd_ckpt(args: argparse.Namespace) -> None:
         payload["missing_keys_sample"] = list(missing)[:15]
         payload["unexpected_keys_sample"] = list(unexpected)[:15]
         payload["strict_load_clean"] = (not missing) and (not unexpected)
+        payload["shape_mismatch_count"] = len(comparison["shape_mismatch"])
+        payload["dtype_mismatch_count"] = len(comparison["dtype_mismatch"])
+        payload["shape_mismatch_sample"] = comparison["shape_mismatch"][:15]
+        payload["dtype_mismatch_sample"] = comparison["dtype_mismatch"][:15]
+
+        # Inference deliberately omits the loss criterion.  This is an allowlist, not a wildcard:
+        # all inference keys must exist with identical shape and dtype, and the only permitted
+        # checkpoint-only key is the criterion's registered class-weight buffer.  The attestation
+        # below binds that exception to the publisher source and config; it is not a wildcard.
+        allowed_training_only = {"criterion.empty_weight"}
+        unexpected_set = set(comparison["unexpected"])
+        payload["training_only_unexpected_keys"] = sorted(
+            unexpected_set & allowed_training_only)
+        payload["inference_state_clean"] = bool(
+            not comparison["missing"]
+            and not comparison["shape_mismatch"]
+            and not comparison["dtype_mismatch"]
+            and unexpected_set <= allowed_training_only
+            and getattr(model, "criterion", None) is None
+        )
+
+        payload["training_only_buffer_attestation"] = \
+            _attest_training_only_criterion_buffer(
+                Path(args.runtime), Path(args.config), cleaned)
+        payload["training_only_buffer_attested"] = True
         payload["why_this_check_exists"] = (
             "inference_win.build_predictor loads with strict=False and its missing/unexpected "
             "prints are commented out, so a key mismatch runs on random weights SILENTLY and "
             "counterfeits LEVER-0043 falsifier (d)."
         )
-        if args.fail_on_mismatch and not payload["strict_load_clean"]:
-            _emit(payload)
+        payload["checkpoint_runtime_contract_clean"] = bool(
+            payload["inference_state_clean"] and payload["training_only_buffer_attested"])
+        if args.fail_on_mismatch and not payload["checkpoint_runtime_contract_clean"]:
+            _emit(payload, getattr(args, "output", None))
             raise SystemExit(
-                "REFUSED: checkpoint does not strict-match the built model "
-                f"(missing={len(missing)}, unexpected={len(unexpected)})."
+                "REFUSED: checkpoint does not match the inference projection and full training "
+                "buffer attestation "
+                f"(inference_missing={len(missing)}, inference_unexpected={len(unexpected)}, "
+                f"shape_mismatch={len(comparison['shape_mismatch'])}, "
+                f"dtype_mismatch={len(comparison['dtype_mismatch'])})."
             )
 
-    _emit(payload)
+    _emit(payload, getattr(args, "output", None))
 
 
 # ---------------------------------------------------------------------------------------------
@@ -317,7 +442,7 @@ def cmd_radius(args: argparse.Namespace) -> None:
             "27-46 px, which is wrong. Only the dense predicted surface answers this."
         ),
     })
-    _emit(payload)
+    _emit(payload, getattr(args, "output", None))
 
 
 # ---------------------------------------------------------------------------------------------
@@ -328,6 +453,7 @@ def main() -> None:
     p_arch = sub.add_parser("arch", help="architecture shape from the config; RANDOM weights")
     p_arch.add_argument("--runtime", required=True)
     p_arch.add_argument("--config", required=True)
+    p_arch.add_argument("--output")
     p_arch.set_defaults(func=cmd_arch)
 
     p_ckpt = sub.add_parser("ckpt", help="read the RELEASED tensors; the only VERIFIED-capable mode")
@@ -335,6 +461,7 @@ def main() -> None:
     p_ckpt.add_argument("--runtime")
     p_ckpt.add_argument("--config")
     p_ckpt.add_argument("--fail-on-mismatch", action="store_true")
+    p_ckpt.add_argument("--output")
     p_ckpt.set_defaults(func=cmd_ckpt)
 
     p_rad = sub.add_parser("radius", help="cell_radius from OUR dense deployed node surface")
@@ -342,6 +469,7 @@ def main() -> None:
     p_rad.add_argument("--geff-dir", help="run the FACT-0040 calibration guard first")
     p_rad.add_argument("--min-nodes", type=int, default=20)
     p_rad.add_argument("--max-groups", type=int, default=40)
+    p_rad.add_argument("--output")
     p_rad.set_defaults(func=cmd_radius)
 
     args = parser.parse_args()
