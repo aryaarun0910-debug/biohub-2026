@@ -149,6 +149,11 @@ def write_entities(out: Path, edges: list[dict]) -> int:
     d = out / "entities"
     d.mkdir(parents=True, exist_ok=True)
     n = 0
+    # Track what THIS run emitted. Reading the directory instead made the generator
+    # non-idempotent: a rerun into a populated knowledge/ saw stale notes as "already emitted"
+    # and skipped them, so the output depended on what was there before. --check builds into an
+    # empty temp directory, which is what exposed it.
+    emitted: set[str] = set()
 
     def emit(nid: str, front: dict, lines: list[str]):
         nonlocal n
@@ -200,7 +205,6 @@ def write_entities(out: Path, edges: list[dict]) -> int:
               f"**Status basis:** {nb['status_basis']}",
               f"**Environment variables:** {len(nb.get('environment', {}))}"])
 
-    emitted = {q.stem for q in d.glob("*.md")}
     endpoints = {e["src"] for e in edges} | {e["dst"] for e in edges}
     scripts_cat, tests_cat = load("scripts"), load("tests")
     for nid in sorted(endpoints - emitted):
@@ -257,6 +261,10 @@ def write_mocs(out: Path, edges: list[dict]) -> int:
         "   `facts.yaml`, which is the only source of truth for numbers.",
         "",
         "## Regenerate everything",
+        "ORDER MATTERS. The catalog catalogues these generators, and `knowledge.py` reads the",
+        "catalog - so after editing any generator, run `catalog.py` FIRST, then `knowledge.py`,",
+        "then `catalog.py` again to pick up the generator's own new digest. Running the pair twice",
+        "reaches the fixed point; the `--check` drift locks fail until it does.",
         "```",
         "python scripts/core/catalog.py            # the canonical catalog",
         "python scripts/core/receipt_envelope.py   # sanitized receipt envelopes",

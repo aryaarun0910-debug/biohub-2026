@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p9_coupled_division
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb`
-**Spec:** `scripts/kaggle_specs/p9_coupled_division.json`
-**Status basis:** bound to ['EXP-0009']
-**Environment variables:** 40
+**Path / name:** `kaggle_p9_coupled_division`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

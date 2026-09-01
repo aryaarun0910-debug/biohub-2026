@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p7_cleanedge
 kind: NOTEBOOK
-status: unbound-historical
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p7_cleanedge/biohub-p7-cleanedge.ipynb`
-**Spec:** `scripts/kaggle_specs/p7_cleanedge.json`
-**Status basis:** no experiment references its spec; provenance is NOT invented retrospectively
-**Environment variables:** 39
+**Path / name:** `kaggle_p7_cleanedge`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p0b_clean913_revtime]]  <sub>spec base_notebook</sub>

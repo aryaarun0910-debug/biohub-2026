@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p33_assoc_feature_parity_smoke
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p33_assoc_feature_parity_smoke/biohub-p33-assoc-feature-parity-smoke.ipynb`
-**Spec:** `scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json`
-**Status basis:** bound to ['EXP-0040', 'EXP-0041']
-**Environment variables:** 46
+**Path / name:** `kaggle_p33_assoc_feature_parity_smoke`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

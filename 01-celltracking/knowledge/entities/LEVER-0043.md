@@ -1,8 +1,7 @@
 ---
 id: LEVER-0043
 kind: LEVER
-status: parked
-tags: [registry, lever, lever-parked]
+tags: [lever]
 ---
 
 > [!info] Generated navigation. Do not edit.
@@ -10,7 +9,7 @@ tags: [registry, lever, lever-parked]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Claim lives in** `research/00-system/registry/levers.yaml` - not copied here.
+**Path / name:** `0043`
 
 ## incoming
 - `claims` <- [[PKT-0041]]  <sub>packet lever field</sub>

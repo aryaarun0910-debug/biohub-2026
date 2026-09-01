@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p20_relink_sweep_f0
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p20_relink_sweep_f0/biohub-p20-relink-sweep-loeo-f0.ipynb`
-**Spec:** `scripts/kaggle_specs/p20_relink_sweep_f0.json`
-**Status basis:** bound to ['EXP-0022']
-**Environment variables:** 45
+**Path / name:** `kaggle_p20_relink_sweep_f0`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

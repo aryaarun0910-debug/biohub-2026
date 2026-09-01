@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-colab_worker
 kind: NOTEBOOK
-status: unbound-historical
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/colab_worker/biohub-colab-worker.ipynb`
-**Spec:** `None`
-**Status basis:** no experiment references its spec; provenance is NOT invented retrospectively
-**Environment variables:** 2
+**Path / name:** `colab_worker`
 
 ## outgoing
 - `enables` -> [[FEATURE-KAGGLE_API_TOKEN]]  <sub>notebook environment</sub>

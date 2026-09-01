@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p4_detpeak_smoke_f0
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p4_detpeak_smoke_f0/biohub-p4-detpeak-smoke-f0.ipynb`
-**Spec:** `scripts/kaggle_specs/p4_detpeak_smoke_f0.json`
-**Status basis:** bound to ['EXP-0004S']
-**Environment variables:** 47
+**Path / name:** `kaggle_p4_detpeak_smoke_f0`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p0b_clean913_revtime]]  <sub>spec base_notebook</sub>

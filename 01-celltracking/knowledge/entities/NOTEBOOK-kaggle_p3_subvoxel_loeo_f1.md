@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p3_subvoxel_loeo_f1
 kind: NOTEBOOK
-status: unbound-historical
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p3_subvoxel_loeo_f1/biohub-p3-subvoxel-loeo-f1.ipynb`
-**Spec:** `scripts/kaggle_specs/p3_subvoxel_loeo_f1.json`
-**Status basis:** no experiment references its spec; provenance is NOT invented retrospectively
-**Environment variables:** 46
+**Path / name:** `kaggle_p3_subvoxel_loeo_f1`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p0b_clean913_revtime]]  <sub>spec base_notebook</sub>

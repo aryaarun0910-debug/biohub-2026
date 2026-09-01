@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p32_public931_exact
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb`
-**Spec:** `scripts/kaggle_specs/p32_public931_exact.json`
-**Status basis:** bound to ['EXP-0038']
-**Environment variables:** 47
+**Path / name:** `kaggle_p32_public931_exact`
 
 ## outgoing
 - `enables` -> [[FEATURE-BIOHUB_ADAPTIVE_SHORT_TRACK_RESCUE]]  <sub>notebook environment</sub>

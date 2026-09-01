@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p27_champion_icom
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p27_champion_icom/biohub-p27-champion-icom.ipynb`
-**Spec:** `scripts/kaggle_specs/p27_champion_icom.json`
-**Status basis:** bound to ['EXP-0029']
-**Environment variables:** 40
+**Path / name:** `kaggle_p27_champion_icom`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

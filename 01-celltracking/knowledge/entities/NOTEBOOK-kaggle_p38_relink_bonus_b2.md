@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p38_relink_bonus_b2
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p38_relink_bonus_b2/biohub-p38-relink-bonus-b2.ipynb`
-**Spec:** `scripts/kaggle_specs/p38_relink_bonus_b2.json`
-**Status basis:** bound to ['EXP-0051']
-**Environment variables:** 47
+**Path / name:** `kaggle_p38_relink_bonus_b2`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p35_dcveto_on_931]]  <sub>spec base_notebook</sub>

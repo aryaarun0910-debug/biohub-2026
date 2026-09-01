@@ -555,7 +555,7 @@
    "tracked": true
   },
   "scripts/core/knowledge.py": {
-   "bytes": 22448,
+   "bytes": 25208,
    "callers": [],
    "covered_by_tests": [],
    "dynamic_import": false,
@@ -610,7 +610,7 @@
    "reads_temp_paths": [
     "C:/temp/finaledge/gateB_v2/RESUME_STATE.md"
    ],
-   "sha256": "3a8498c9b775b3d2dc0266dcaabda7ee341cbe5d6cb60bf952c1496fcce0ee91",
+   "sha256": "3b44ebb6c1e07d29c43e8109f850cc2490e92eef9262578cf25921f51c14bb50",
    "subprocess_boundary": false,
    "test_coverage": "none",
    "tracked": true
@@ -683,8 +683,8 @@
    ],
    "imports_first_party": [],
    "kind": "py",
-   "lifecycle": "untracked-concurrent",
-   "lifecycle_basis": "present but not in git",
+   "lifecycle": "unknown",
+   "lifecycle_basis": "no packet, fact or importer found",
    "measures_facts": [],
    "named_by_tests": [],
    "owning_packets": [],
@@ -694,7 +694,7 @@
    "sha256": "d633e5838028dfa02fd95a88f14377bb847ac876f6cc413e1be9214f6101b2ff",
    "subprocess_boundary": false,
    "test_coverage": "imported-by-test",
-   "tracked": false
+   "tracked": true
   },
   "scripts/core/receipt_envelope.py": {
    "bytes": 10700,

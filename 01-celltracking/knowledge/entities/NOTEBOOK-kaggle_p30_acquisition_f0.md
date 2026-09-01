@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p30_acquisition_f0
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p30_acquisition_f0/biohub-p30-acquisition-f0.ipynb`
-**Spec:** `scripts/kaggle_specs/p30_acquisition_f0.json`
-**Status basis:** bound to ['EXP-0035']
-**Environment variables:** 47
+**Path / name:** `kaggle_p30_acquisition_f0`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p28_champion_control_f0]]  <sub>spec base_notebook</sub>

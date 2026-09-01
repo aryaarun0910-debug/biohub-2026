@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_h1r_edge_s5_rope4d_smoke
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_h1r_edge_s5_rope4d_smoke/biohub-h1r-edge-s5-rope4d-smoke.ipynb`
-**Spec:** `scripts/kaggle_specs/h1r_edge_s5_rope4d_smoke.json`
-**Status basis:** bound to ['EXP-0028']
-**Environment variables:** 53
+**Path / name:** `kaggle_h1r_edge_s5_rope4d_smoke`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p0b_clean913_revtime]]  <sub>spec base_notebook</sub>

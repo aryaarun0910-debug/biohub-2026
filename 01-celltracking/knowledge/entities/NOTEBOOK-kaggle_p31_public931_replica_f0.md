@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p31_public931_replica_f0
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p31_public931_replica_f0/biohub-p31-public931-replica-f0.ipynb`
-**Spec:** `scripts/kaggle_specs/p31_public931_replica_f0.json`
-**Status basis:** bound to ['EXP-0036']
-**Environment variables:** 51
+**Path / name:** `kaggle_p31_public931_replica_f0`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p28_champion_control_f1
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb`
-**Spec:** `scripts/kaggle_specs/p28_champion_control_f1.json`
-**Status basis:** bound to ['EXP-0031']
-**Environment variables:** 46
+**Path / name:** `kaggle_p28_champion_control_f1`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

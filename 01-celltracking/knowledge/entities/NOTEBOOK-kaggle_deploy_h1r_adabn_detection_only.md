@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_deploy_h1r_adabn_detection_only
 kind: NOTEBOOK
-status: unbound-historical
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_deploy_h1r_adabn_detection_only/biohub-h1r-adabn-detection-only.ipynb`
-**Spec:** `scripts/kaggle_specs/deploy_h1r_adabn_detection_only.json`
-**Status basis:** no experiment references its spec; provenance is NOT invented retrospectively
-**Environment variables:** 40
+**Path / name:** `kaggle_deploy_h1r_adabn_detection_only`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

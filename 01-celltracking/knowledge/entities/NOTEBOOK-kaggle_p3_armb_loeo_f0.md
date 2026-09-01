@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p3_armb_loeo_f0
 kind: NOTEBOOK
-status: unbound-historical
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p3_armb_loeo_f0/biohub-p3-armb-loeo-f0.ipynb`
-**Spec:** `scripts/kaggle_specs/p3_armb_loeo_f0.json`
-**Status basis:** no experiment references its spec; provenance is NOT invented retrospectively
-**Environment variables:** 44
+**Path / name:** `kaggle_p3_armb_loeo_f0`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p0b_clean913_revtime]]  <sub>spec base_notebook</sub>

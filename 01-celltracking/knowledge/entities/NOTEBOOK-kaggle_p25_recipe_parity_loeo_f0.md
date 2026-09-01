@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p25_recipe_parity_loeo_f0
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p25_recipe_parity_loeo_f0/biohub-p25-recipe-parity-loeo-f0.ipynb`
-**Spec:** `scripts/kaggle_specs/p25_recipe_parity_loeo_f0.json`
-**Status basis:** bound to ['EXP-0026']
-**Environment variables:** 46
+**Path / name:** `kaggle_p25_recipe_parity_loeo_f0`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

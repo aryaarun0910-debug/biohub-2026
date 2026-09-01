@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p17_det094
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p17_det094/biohub-p17-det094.ipynb`
-**Spec:** `scripts/kaggle_specs/p17_det094.json`
-**Status basis:** bound to ['EXP-0017']
-**Environment variables:** 40
+**Path / name:** `kaggle_p17_det094`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

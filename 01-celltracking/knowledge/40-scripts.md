@@ -207,7 +207,7 @@ generated: true
 - `scripts/win_bet/phaseb_h1a_census.py` — **no test**
 - `scripts/win_bet/phaseb_oracle_d0prime.py` — **no test**
 
-## unknown (103)
+## unknown (104)
 
 - `scripts/core/catalog.py` — tests: 1
 - `scripts/core/claims_table.py` — tests: 1
@@ -216,6 +216,7 @@ generated: true
 - `scripts/core/kaggle_queue.py` — tests: 1
 - `scripts/core/knowledge.py` — **no test**
 - `scripts/core/lineending_experiment.py` — **no test**
+- `scripts/core/rag_index.py` — tests: 1
 - `scripts/core/receipt_envelope.py` — tests: 1
 - `scripts/core/reproducibility_evidence.py` — **no test**
 - `scripts/core/score_oof.py` — **no test**
@@ -288,11 +289,9 @@ generated: true
 - `scripts/win_bet/ea_analyze.py` — **no test**
 - `scripts/win_bet/ea_features.py` — **no test**
 - `scripts/win_bet/ea_solver_gap.py` — **no test**
-- `scripts/win_bet/extract_node_estimates.py` — tests: 1
 
-## untracked-concurrent (4)
+## untracked-concurrent (3)
 
-- `scripts/core/rag_index.py` — tests: 1
 - `scripts/win_bet/biohubx/ckpt_keys.py` — **no test**
 - `scripts/win_bet/divverify_verifier.py` — tests: 1
 - `scripts/win_bet/hoct_compat.py` — tests: 1

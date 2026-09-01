@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p23_icom155
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p23_icom155/biohub-p23-icom155.ipynb`
-**Spec:** `scripts/kaggle_specs/p23_icom155.json`
-**Status basis:** bound to ['EXP-0027']
-**Environment variables:** 40
+**Path / name:** `kaggle_p23_icom155`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

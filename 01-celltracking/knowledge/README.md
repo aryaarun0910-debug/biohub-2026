@@ -23,6 +23,10 @@ and regenerate. Everything here is a VIEW over `research/00-system/registry/gene
    `facts.yaml`, which is the only source of truth for numbers.
 
 ## Regenerate everything
+ORDER MATTERS. The catalog catalogues these generators, and `knowledge.py` reads the
+catalog - so after editing any generator, run `catalog.py` FIRST, then `knowledge.py`,
+then `catalog.py` again to pick up the generator's own new digest. Running the pair twice
+reaches the fixed point; the `--check` drift locks fail until it does.
 ```
 python scripts/core/catalog.py            # the canonical catalog
 python scripts/core/receipt_envelope.py   # sanitized receipt envelopes

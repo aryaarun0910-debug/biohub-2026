@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p35_dcveto_on_931
 kind: NOTEBOOK
-status: leaderboard_champion+operational_base
-roles: ["leaderboard_champion", "operational_base"]
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb`
-**Spec:** `scripts/kaggle_specs/p35_dcveto_on_931.json`
-**Status basis:** declared in baseline_roles.yaml
-**Environment variables:** 47
+**Path / name:** `kaggle_p35_dcveto_on_931`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p32_public931_exact]]  <sub>spec base_notebook</sub>

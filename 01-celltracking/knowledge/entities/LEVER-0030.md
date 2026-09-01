@@ -1,8 +1,7 @@
 ---
 id: LEVER-0030
 kind: LEVER
-status: open
-tags: [registry, lever, lever-open]
+tags: [lever]
 ---
 
 > [!info] Generated navigation. Do not edit.
@@ -10,7 +9,7 @@ tags: [registry, lever, lever-open]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Claim lives in** `research/00-system/registry/levers.yaml` - not copied here.
+**Path / name:** `0030`
 
 ## incoming
 - `supports` <- [[FACT-0331]]  <sub>levers.yaml supporting</sub>

@@ -4569,9 +4569,9 @@
    ],
    "sha256": "d186c301c0ffbf5c29d1b90d8744eda8b8a5d5f733f3fd3334869aacc5545283",
    "skip_reasons": [],
-   "state": "untracked-concurrent",
+   "state": "active",
    "test_class": "provenance",
-   "tracked": false
+   "tracked": true
   },
   "tests/test_ranker_block.py": {
    "blocking_scope": "release",

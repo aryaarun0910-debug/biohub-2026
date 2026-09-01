@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p24_deepcenter_best_veto
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p24_deepcenter_best_veto/biohub-p24-deepcenter-best-veto.ipynb`
-**Spec:** `scripts/kaggle_specs/p24_deepcenter_best_veto.json`
-**Status basis:** bound to ['EXP-0025']
-**Environment variables:** 40
+**Path / name:** `kaggle_p24_deepcenter_best_veto`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p9_coupled_division]]  <sub>spec base_notebook</sub>

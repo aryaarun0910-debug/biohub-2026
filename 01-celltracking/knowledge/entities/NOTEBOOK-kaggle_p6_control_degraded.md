@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p6_control_degraded
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p6_control_degraded/biohub-p6-control-degraded.ipynb`
-**Spec:** `scripts/kaggle_specs/p6_control_degraded.json`
-**Status basis:** bound to ['EXP-0006']
-**Environment variables:** 39
+**Path / name:** `kaggle_p6_control_degraded`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p0b_clean913_revtime]]  <sub>spec base_notebook</sub>

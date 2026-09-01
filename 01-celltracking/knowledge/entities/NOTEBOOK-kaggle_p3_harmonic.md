@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p3_harmonic
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb`
-**Spec:** `scripts/kaggle_specs/p3_harmonic.json`
-**Status basis:** bound to ['EXP-0003']
-**Environment variables:** 39
+**Path / name:** `kaggle_p3_harmonic`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p0b_clean913_revtime]]  <sub>spec base_notebook</sub>

@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p36_assoc_feature_tap_smoke
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p36_assoc_feature_tap_smoke/biohub-p36-assoc-feature-tap-smoke.ipynb`
-**Spec:** `scripts/kaggle_specs/p36_assoc_feature_tap_smoke.json`
-**Status basis:** bound to ['EXP-0043']
-**Environment variables:** 49
+**Path / name:** `kaggle_p36_assoc_feature_tap_smoke`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

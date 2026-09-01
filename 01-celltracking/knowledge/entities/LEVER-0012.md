@@ -1,8 +1,7 @@
 ---
 id: LEVER-0012
 kind: LEVER
-status: killed
-tags: [registry, lever, lever-killed]
+tags: [lever]
 ---
 
 > [!info] Generated navigation. Do not edit.
@@ -10,7 +9,7 @@ tags: [registry, lever, lever-killed]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Claim lives in** `research/00-system/registry/levers.yaml` - not copied here.
+**Path / name:** `0012`
 
 ## incoming
 - `refutes` <- [[FACT-0323]]  <sub>levers.yaml closed_by</sub>

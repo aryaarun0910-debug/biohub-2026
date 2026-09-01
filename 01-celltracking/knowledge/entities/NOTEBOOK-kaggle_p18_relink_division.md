@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p18_relink_division
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p18_relink_division/biohub-p18-relink-division.ipynb`
-**Spec:** `scripts/kaggle_specs/p18_relink_division.json`
-**Status basis:** bound to ['EXP-0018']
-**Environment variables:** 41
+**Path / name:** `kaggle_p18_relink_division`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

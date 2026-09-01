@@ -2,7 +2,7 @@
  "research_docs": {
   "research/00-system/handoff.md": {
    "area": "00-system",
-   "bytes": 110115,
+   "bytes": 114161,
    "certified_by_validator": true,
    "doc_id": "00-system/handoff",
    "entity_links": {
@@ -152,6 +152,7 @@
      "FACT-0414",
      "FACT-0425",
      "FACT-0428",
+     "FACT-0431",
      "FACT-0446",
      "FACT-0451",
      "FACT-0460",

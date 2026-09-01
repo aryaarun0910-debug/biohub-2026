@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p4_detsweep_export_f1
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p4_detsweep_export_f1/biohub-p4-detsweep-export-f1.ipynb`
-**Spec:** `scripts/kaggle_specs/p4_detsweep_export_f1.json`
-**Status basis:** bound to ['EXP-0004B']
-**Environment variables:** 49
+**Path / name:** `kaggle_p4_detsweep_export_f1`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p0b_clean913_revtime]]  <sub>spec base_notebook</sub>

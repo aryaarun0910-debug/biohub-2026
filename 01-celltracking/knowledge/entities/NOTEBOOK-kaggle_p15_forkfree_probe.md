@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p15_forkfree_probe
 kind: NOTEBOOK
-status: candidate
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p15_forkfree_probe/biohub-p15-forkfree-probe.ipynb`
-**Spec:** `scripts/kaggle_specs/p15_forkfree_probe.json`
-**Status basis:** bound to ['EXP-0015']
-**Environment variables:** 41
+**Path / name:** `kaggle_p15_forkfree_probe`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p3_harmonic]]  <sub>spec base_notebook</sub>

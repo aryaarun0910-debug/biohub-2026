@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p11_xhhuang_edge_swap
 kind: NOTEBOOK
-status: unbound-historical
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p11_xhhuang_edge_swap/biohub-p11-xhhuang-edge-swap.ipynb`
-**Spec:** `scripts/kaggle_specs/p11_xhhuang_edge_swap.json`
-**Status basis:** no experiment references its spec; provenance is NOT invented retrospectively
-**Environment variables:** 40
+**Path / name:** `kaggle_p11_xhhuang_edge_swap`
 
 ## outgoing
 - `descends_from` -> [[NOTEBOOK-kaggle_p9_coupled_division]]  <sub>spec base_notebook</sub>

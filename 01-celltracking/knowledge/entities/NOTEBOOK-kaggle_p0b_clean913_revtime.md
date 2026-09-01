@@ -1,8 +1,6 @@
 ---
 id: NOTEBOOK-kaggle_p0b_clean913_revtime
 kind: NOTEBOOK
-status: unbound-historical
-roles: []
 tags: [notebook]
 ---
 
@@ -11,10 +9,7 @@ tags: [notebook]
 > only source of truth for numbers; every value below is a LINK, never a copy.
 
 
-**Path:** `notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb`
-**Spec:** `scripts/kaggle_specs/live_p0b.json`
-**Status basis:** no experiment references its spec; provenance is NOT invented retrospectively
-**Environment variables:** 39
+**Path / name:** `kaggle_p0b_clean913_revtime`
 
 ## outgoing
 - `enables` -> [[FEATURE-BIOHUB_ADAPTIVE_SHORT_TRACK_RESCUE]]  <sub>notebook environment</sub>
