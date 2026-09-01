@@ -56,6 +56,16 @@ leaderboard_champion:
   notebook_sha256: c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257
   spec: scripts/kaggle_specs/p35_dcveto_on_931.json
   release_receipt: notebooks/kaggle_p35_dcveto_on_931/_out/audit_receipt.json
+  release_receipt_tracked: false
+  release_receipt_note: >-
+    THE RECEIPT DOES NOT SURVIVE A FRESH CLONE. `.gitignore:20` ignores `notebooks/**/_out/`, so
+    every release receipt in the repository is a LOCAL artifact. Measured 2026-09-01: only 4 of 69
+    notebooks have a receipt at all, and all four are ignored, so a clone has none. The champion's
+    submission is still bound by the experiment, the submission id and the notebook digest, which
+    ARE tracked - what is lost is the audit bundle that proves the artifact was structurally
+    checked before submission. Recorded here rather than repaired: `.gitignore` is out of scope
+    for this cycle, and the fix (tracking receipts, or relocating them outside the ignored tree)
+    is a migration decision, not a repair.
   score_validity: VALID
   score_validity_note: >-
     The SCORE is a measured leaderboard result and stands on its own. Its FACT carries

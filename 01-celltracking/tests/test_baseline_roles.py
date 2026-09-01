@@ -131,9 +131,43 @@ def test_the_operational_base_notebook_hash_matches_the_manifest():
     )
 
 
-def test_the_release_receipt_named_by_the_champion_exists():
-    p = ROOT / ROLES["leaderboard_champion"]["release_receipt"]
-    assert p.is_file(), f"the champion names a release receipt that is absent: {p}"
+def test_the_release_receipt_is_honestly_declared_and_agrees_when_present():
+    """The receipt is GITIGNORED, so `is_file()` is not the question worth asking.
+
+    The first version of this test asserted the file exists and passed on the development machine
+    while failing on every clone - the exact green-here-red-everywhere shape this cycle exists to
+    remove. `.gitignore:20` ignores `notebooks/**/_out/`, so all four release receipts in the
+    repository are local artifacts and a clone has none.
+
+    So the manifest must DECLARE that, and where the receipt IS present the test checks something
+    stronger than existence: that it agrees with the notebook digest the role binds.
+    """
+    lc = ROLES["leaderboard_champion"]
+    assert lc.get("release_receipt_tracked") is False, (
+        "the manifest claims the release receipt is tracked; it is under a gitignored `_out/` "
+        "tree and does not survive a clone")
+    assert lc.get("release_receipt_note", "").strip(), (
+        "an untracked receipt must say so in the manifest, or its absence in a clone looks like "
+        "an error rather than a known property")
+    p = ROOT / lc["release_receipt"]
+    if not p.is_file():
+        pytest.skip(f"{p.relative_to(ROOT).as_posix()} is gitignored and absent here - declared")
+    receipt = json.loads(p.read_text("utf-8"))
+    found = [v for v in _walk_strings(receipt) if v == lc["notebook_sha256"]]
+    assert found, (
+        f"the release receipt at {p.name} does not mention the notebook digest the role binds "
+        f"({lc['notebook_sha256'][:16]}...), so it is a receipt for a different artifact")
+
+
+def _walk_strings(obj):
+    if isinstance(obj, dict):
+        for v in obj.values():
+            yield from _walk_strings(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _walk_strings(v)
+    elif isinstance(obj, str):
+        yield obj
 
 
 # ------------------------------------------------------------------------------------------
