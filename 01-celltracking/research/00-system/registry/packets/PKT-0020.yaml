@@ -2,7 +2,7 @@ id: PKT-0020
 title: "LEVER-0024: DeepCenter best.pt + safe-division veto ON, env-only on the P9 champion (p24) - built, pre-registered, awaiting host go"
 lever: LEVER-0024
 owner: primary
-lock: claimed
+lock: done
 opened: '2026-08-27'
 
 claim: >-
@@ -60,3 +60,11 @@ result: >-
   the 0.927 lineage's edge is the DeepCenter best.pt + safe-div veto bundle (confirms FACT-0331). P24 is the new
   best config and should be SELECTED as a final leaderboard submission. Pure post-processing - no retrain, no new
   weights - and it matches mikelou1's from-scratch 0.928. Next submissions should build on the P24 base, not P9.
+
+reconciliation:
+  date: '2026-09-01'
+  audit: Phase 1.5 packet-lock reconciliation
+  verdict: COMPLETE
+  why: >-
+    the packet's own result is recorded above - it WON and closed its lever positively on FACT-0341. The work is finished and the lock is released. Its lever LEVER-0024 is closed on FACT-0341. No scientific claim is added, removed or
+    reinterpreted here - only the lock state is corrected.

@@ -2,7 +2,7 @@ id: PKT-0015
 title: "Raise the division ceiling and size the triple scorer"
 lever: LEVER-0002
 owner: rnd-agent
-lock: running
+lock: done
 opened: '2026-08-26'
 
 claim: >-
@@ -40,4 +40,9 @@ outputs:
   facts_added: []
   record: one row in experimental-records.md once integrated
 
-result: null
+result: >-
+  RECONCILED 2026-09-01 (Phase 1.5 packet-lock audit). NO RESULT WAS EVER PRODUCED BY THIS PACKET. Its lever was closed the day after the packet opened, by evidence this packet did not generate, and nothing was written here afterwards. Recorded as overtaken, not completed.
+  .
+  LOCK RELEASED. It was `running` while LEVER-0002 had already been closed by FACT-0290, FACT-0291, FACT-0293, FACT-0294 on 2026-08-26, so the
+  anti-duplication lock was reserving a lever that was no longer available to claim - the opposite
+  of the failure AGENTS.md section 2 built it for. The lever is NOT reopened to preserve the lock.

@@ -2,7 +2,7 @@ id: PKT-0001
 title: Buy the whole [0.5,1.0] detection-threshold curve offline from the peak superset
 lever: LEVER-0003
 owner: primary
-lock: running
+lock: done
 opened: '2026-08-25'
 
 claim: >-
@@ -40,4 +40,9 @@ outputs:
   facts_added: []
   record: one row in experimental-records.md
 
-result: null
+result: >-
+  RECONCILED 2026-09-01 (Phase 1.5 packet-lock audit). NO RESULT WAS EVER PRODUCED BY THIS PACKET. Its lever was killed the SAME DAY the packet opened, by evidence this packet did not generate (FACT-0102, FACT-0111), and nothing was written here afterwards. Recorded honestly as a packet that was overtaken rather than completed - the lever's kill stands on its own evidence and is not affected either way.
+  .
+  LOCK RELEASED. It was `running` while LEVER-0003 had already been closed by FACT-0102, FACT-0111 on 2026-08-25, so the
+  anti-duplication lock was reserving a lever that was no longer available to claim - the opposite
+  of the failure AGENTS.md section 2 built it for. The lever is NOT reopened to preserve the lock.

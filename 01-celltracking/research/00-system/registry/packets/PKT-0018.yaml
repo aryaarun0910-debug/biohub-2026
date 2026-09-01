@@ -2,7 +2,7 @@ id: PKT-0018
 title: "LEVER-0022: intensity-centroid re-localisation (the 0.927 lineage's refine_centroids) on the clean champion exports"
 lever: LEVER-0022
 owner: primary
-lock: claimed
+lock: done
 opened: '2026-08-27'
 
 claim: >-
@@ -60,3 +60,11 @@ result: >-
   built; prediction record: the pilot band (+0.001..+0.004 f1 full) was HIT (+0.0024); the promotion bar was mis-set
   by the pilots' optimism. DEPLOYMENT PENDING: the inherited queue's p23 kernel completed before the runner died.
   Host authorisation and the public-LB band above license fetch -> audit -> one submission on resume.
+
+reconciliation:
+  date: '2026-09-01'
+  audit: Phase 1.5 packet-lock reconciliation
+  verdict: COMPLETE
+  why: >-
+    the packet's own result is recorded above and its lever was subsequently KILLED by FACT-0344 (the float-icom leaderboard reversal). The work is finished and the lock is released. Its lever LEVER-0022 is closed on FACT-0344. No scientific claim is added, removed or
+    reinterpreted here - only the lock state is corrected.

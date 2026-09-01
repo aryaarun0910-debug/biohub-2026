@@ -28,6 +28,8 @@ R8  a fact produced by a ``void`` or ``cancelled`` experiment may not stay VALID
 R9  a lever may not be closed or supported by an INVALID fact
 R10 adoption notes, not failures: an experiment-derived fact should name its experiment,
     and a held-out-fold fact should name its evaluation ``protocol``
+R11 a claimed/running packet may not hold a killed or closed lever - the lock was reserving
+    levers that were already DECIDED, which is the opposite of what R6 was built for
 
 THE SECOND AXIS - why R7-R10 exist
 ----------------------------------
@@ -357,6 +359,31 @@ def main() -> int:
                 )
             else:
                 held[lv] = p.get("id", "?")
+
+    # ---- R11 a live packet may not hold a DECIDED lever --------------------------------
+    # The anti-duplication lock was doing the opposite of its job. Measured 2026-09-01: four
+    # packets were `claimed`/`running` on levers already `killed` or `closed`, so agents were
+    # told those levers were taken when they were actually DECIDED - and only 4 of 15 nominally
+    # open levers were genuinely free. R6 could not see it, because R6 only asks whether TWO
+    # packets hold ONE lever.
+    #
+    # THE NARROW EXCEPTION, and it is narrow on purpose: a packet doing follow-up work that
+    # CLAIMS NOTHING - writing up a result, archiving evidence - may keep its lock by declaring
+    # `administrative_hold` with a reason. It must still not be reopening the lever, and the
+    # declaration is visible in the packet rather than inferred from silence.
+    decided = {l["id"] for l in levers if l.get("status") in ("killed", "closed")}
+    for p in packets:
+        lv, lock = p.get("lever"), p.get("lock")
+        if lock in ("claimed", "running") and lv in decided:
+            hold = p.get("administrative_hold")
+            if not (isinstance(hold, dict) and str(hold.get("reason", "")).strip()):
+                errors.append(
+                    f"R11 {p.get('id')} is {lock} on {lv}, which is already "
+                    f"{[l['status'] for l in levers if l['id'] == lv][0]}. A live packet holding a "
+                    f"decided lever reserves work nobody may do. Set `lock: done` with the "
+                    f"packet's ACTUAL result, or declare `administrative_hold: {{reason: ...}}` "
+                    f"for follow-up that claims nothing. Never reopen the lever to keep the lock."
+                )
 
     # ---- R7 the validity vocabulary, and a reason whenever it is not VALID -------------
     # "INVALID" with no reason is a dead end for whoever reads it next: they cannot tell
