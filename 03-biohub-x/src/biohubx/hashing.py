@@ -78,6 +78,13 @@ file inside it does.
 5. Sort the records by their UTF-8 encoded path.
 6. Join with LF, append one trailing LF, encode UTF-8, and take the SHA-256.
 
+The tree must be quiescent for the whole pass. A digest is an assertion about a
+state the tree was actually in, and hashing a tree that is still being written
+produces one describing a state that never existed as a whole: some files read
+before a change and some after, with anything created midway missing entirely.
+The structure is therefore snapshotted before and after the pass and the digest
+is refused if it moved.
+
 A path containing a line feed or a null byte is refused rather than escaped: the
 listing is a line format, and such names are pathological rather than expected.
 
@@ -103,6 +110,15 @@ class NotTextError(ValueError):
 
 class NotATreeError(ValueError):
     """A tree digest was requested for something that is not a walkable directory."""
+
+
+class TreeNotQuiescentError(ValueError):
+    """The tree changed while it was being hashed.
+
+    Deliberately a different error from :class:`NotATreeError`, because it calls
+    for a different response: the tree is not malformed, it is still moving, and
+    the answer is to wait for the writer to finish rather than to fix anything.
+    """
 
 
 class DigestKind(StrEnum):
@@ -339,6 +355,49 @@ def _walk_tree(root: Path) -> tuple[list[Path], list[Path]]:
     return files, empty_directories
 
 
+def _structure_snapshot(
+    root: Path, files: list[Path], empty_directories: list[Path]
+) -> dict[str, tuple[str, int, int]]:
+    """Cheap fingerprint of the tree's shape: path, size and modification time.
+
+    Stat only, no content, so it costs nothing next to the hashing pass it
+    brackets. Comparing one taken before with one taken after detects a file
+    that appeared, vanished or was rewritten while the digest was being computed.
+
+    It cannot detect a change that is reverted inside the window, nor two writes
+    that leave both size and modification time identical. Those are not the
+    realistic case here, which is a writer that has not finished yet.
+    """
+    snapshot: dict[str, tuple[str, int, int]] = {}
+    for path in files:
+        try:
+            status = path.stat()
+        except OSError as exc:
+            raise TreeNotQuiescentError(
+                f"{_relative_posix(root, path)} vanished while the tree was being read"
+            ) from exc
+        snapshot[_relative_posix(root, path)] = ("f", status.st_size, status.st_mtime_ns)
+    for path in empty_directories:
+        snapshot[_relative_posix(root, path)] = ("d", 0, 0)
+    return snapshot
+
+
+def _describe_movement(
+    before: dict[str, tuple[str, int, int]], after: dict[str, tuple[str, int, int]]
+) -> str:
+    appeared = sorted(set(after) - set(before))
+    vanished = sorted(set(before) - set(after))
+    modified = sorted(key for key in set(before) & set(after) if before[key] != after[key])
+    parts = []
+    if appeared:
+        parts.append(f"appeared: {appeared[:10]}")
+    if vanished:
+        parts.append(f"vanished: {vanished[:10]}")
+    if modified:
+        parts.append(f"modified: {modified[:10]}")
+    return "; ".join(parts)
+
+
 def _relative_posix(root: Path, path: Path) -> str:
     relative = path.relative_to(root).as_posix()
     if "\n" in relative or "\x00" in relative:
@@ -359,6 +418,10 @@ def tree_digest(
 
     ``on_file`` receives ``(files_done, bytes_done)`` after each file, so a
     caller can emit a heartbeat rather than appearing to hang.
+
+    Refuses with :class:`TreeNotQuiescentError` if the tree changed during the
+    pass, because a digest computed over a moving tree describes a state that
+    never existed as a whole.
     """
     if not root.exists():
         raise NotATreeError(f"tree root does not exist: {root}")
@@ -372,6 +435,7 @@ def tree_digest(
         raise NotATreeError(f"tree root is not a directory: {root}")
 
     file_paths, empty_directory_paths = _walk_tree(root)
+    before = _structure_snapshot(root, file_paths, empty_directory_paths)
 
     records: list[TreeRecord] = [
         TreeRecord(
@@ -387,19 +451,39 @@ def tree_digest(
     total_bytes = 0
 
     for path in sorted(file_paths, key=lambda item: item.as_posix()):
-        size = path.stat().st_size
+        try:
+            size = path.stat().st_size
+            content = raw_digest_file(path).hexdigest
+        except OSError as exc:
+            # A file that disappears or locks mid-pass means a writer is still
+            # working. That is the quiescence failure, not an unreadable tree,
+            # and the caller needs to be told to wait rather than to investigate.
+            raise TreeNotQuiescentError(
+                f"{_relative_posix(root, path)} became unreadable while the tree was being "
+                "hashed, so something is still writing to it. Wait for the writer to finish "
+                "and hash it again"
+            ) from exc
         records.append(
             TreeRecord(
                 kind="f",
                 relative_path=_relative_posix(root, path),
                 size_bytes=size,
-                content_sha256=raw_digest_file(path).hexdigest,
+                content_sha256=content,
             )
         )
         files += 1
         total_bytes += size
         if on_file is not None:
             on_file(files, total_bytes)
+
+    after_files, after_empty = _walk_tree(root)
+    after = _structure_snapshot(root, after_files, after_empty)
+    if before != after:
+        raise TreeNotQuiescentError(
+            f"{root} changed while it was being hashed, so the digest would describe a state the "
+            f"tree was never in. {_describe_movement(before, after)}. Wait for the writer to "
+            "finish and hash it again"
+        )
 
     records.sort(key=lambda record: record.relative_path.encode("utf-8"))
     listing = "".join(f"{record.line}\n" for record in records)

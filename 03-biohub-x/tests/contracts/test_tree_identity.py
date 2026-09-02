@@ -23,6 +23,7 @@ from biohubx.hashing import (
     Digest,
     DigestKind,
     NotATreeError,
+    TreeNotQuiescentError,
     _reparse_kind,
     digest_file,
     tree_digest,
@@ -386,3 +387,102 @@ def test_the_refusal_happens_during_traversal_not_during_hashing(tmp_path: Path)
     finally:
         monkeypatch.undo()
     assert hashed == [], "no file may be read once the tree is refused"
+
+
+# --- quiescence: the tree must not move during the pass ---------------------
+#
+# A digest is an assertion about a state the tree was actually in. Hashing a
+# tree that is still being written produces one describing a state that never
+# existed as a whole: some files read before a change and some after, with
+# anything created midway missing entirely. On a large dataset the pass is long
+# enough for that to be the realistic failure rather than an exotic one.
+
+
+def settled_tree(root: Path, count: int = 4) -> Path:
+    root.mkdir(parents=True)
+    for index in range(count):
+        (root / f"chunk{index}").write_bytes(b"original")
+    return root
+
+
+def test_a_quiescent_tree_is_hashed_normally(tmp_path: Path) -> None:
+    # The positive control. Without it the refusals below could pass against an
+    # implementation that refused everything.
+    root = settled_tree(tmp_path / "a.zarr")
+    assert tree_digest(root).file_count == 4
+
+
+def test_a_file_modified_during_the_pass_is_refused(tmp_path: Path) -> None:
+    root = settled_tree(tmp_path / "a.zarr")
+
+    def meddle(files: int, _bytes: int) -> None:
+        if files == 1:
+            (root / "chunk3").write_bytes(b"rewritten midway")
+
+    with pytest.raises(TreeNotQuiescentError, match="modified"):
+        tree_digest(root, on_file=meddle)
+
+
+def test_a_file_appearing_during_the_pass_is_refused(tmp_path: Path) -> None:
+    """The case a post-hoc content check alone would miss.
+
+    The new file is not in the walk, so nothing hashes it and nothing notices
+    it, and the digest silently describes a tree that is missing a member.
+    """
+    root = settled_tree(tmp_path / "a.zarr")
+
+    def meddle(files: int, _bytes: int) -> None:
+        if files == 1:
+            (root / "chunk9").write_bytes(b"appeared midway")
+
+    with pytest.raises(TreeNotQuiescentError, match="appeared"):
+        tree_digest(root, on_file=meddle)
+
+
+def test_a_file_removed_during_the_pass_is_refused_by_name(tmp_path: Path) -> None:
+    # This one surfaces as an unreadable file rather than a shape change, and
+    # must still be reported as a quiescence failure so the caller is told to
+    # wait rather than to investigate a corrupt tree.
+    root = settled_tree(tmp_path / "a.zarr")
+
+    def meddle(files: int, _bytes: int) -> None:
+        if files == 1:
+            (root / "chunk3").unlink()
+
+    with pytest.raises(TreeNotQuiescentError, match="became unreadable"):
+        tree_digest(root, on_file=meddle)
+
+
+def test_a_quiescence_failure_is_a_distinct_error_from_a_malformed_tree(tmp_path: Path) -> None:
+    # Different failures needing different responses: one says wait for the
+    # writer, the other says the tree is not something that can be hashed.
+    assert not issubclass(TreeNotQuiescentError, NotATreeError)
+    assert not issubclass(NotATreeError, TreeNotQuiescentError)
+
+
+def test_the_refusal_names_what_moved(tmp_path: Path) -> None:
+    root = settled_tree(tmp_path / "a.zarr")
+
+    def meddle(files: int, _bytes: int) -> None:
+        if files == 1:
+            (root / "chunk2").write_bytes(b"rewritten")
+            (root / "chunk8").write_bytes(b"appeared")
+
+    with pytest.raises(TreeNotQuiescentError) as caught:
+        tree_digest(root, on_file=meddle)
+    message = str(caught.value)
+    assert "chunk8" in message
+    assert "chunk2" in message
+    assert "Wait for the writer to finish" in message
+
+
+def test_an_empty_directory_appearing_during_the_pass_is_refused(tmp_path: Path) -> None:
+    # Empty directories are part of the identity, so they are part of quiescence.
+    root = settled_tree(tmp_path / "a.zarr")
+
+    def meddle(files: int, _bytes: int) -> None:
+        if files == 1:
+            (root / "late").mkdir()
+
+    with pytest.raises(TreeNotQuiescentError, match="appeared"):
+        tree_digest(root, on_file=meddle)

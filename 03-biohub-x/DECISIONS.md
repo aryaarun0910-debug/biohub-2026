@@ -284,3 +284,18 @@ reports False for one while `is_dir()` reports True, and a junction needs no
 special privilege to create. That combination is why this was a live hole rather
 than a theoretical one, and why the junction case is covered by a real test
 rather than only a mocked one.
+
+**The tree must also be quiescent for the whole pass.** A digest is an assertion
+about a state the tree was actually in. Hashing a tree that is still being
+written produces one describing a state that never existed as a whole: some
+files read before a change and some after, with anything created midway missing
+from the walk entirely and therefore invisible to any content check. The
+structure is snapshotted before and after the pass and the digest is refused if
+it moved, with a distinct error, because the response is to wait for the writer
+rather than to investigate a malformed tree.
+
+The snapshot compares path, size and modification time. It cannot detect a
+change reverted inside the window, nor two writes leaving both size and
+modification time identical. Those are not the realistic case, which is a writer
+that has not finished. This is why registration waits for extraction to be
+complete rather than merely for a download to reach its final byte.

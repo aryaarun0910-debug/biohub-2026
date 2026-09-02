@@ -162,7 +162,9 @@ into it; refuse any reparse point at the root or below it, whether a symlink, a
 Windows directory junction, or any other reparse tag, and refuse anything that
 is neither a regular file nor a real directory; record each file as its relative
 POSIX path, size and content digest, and each EMPTY directory as itself; sort by
-path; join with LF. Paths are relative to the root, so moving or renaming an artifact
+path; join with LF. The tree must be quiescent for the whole pass: its structure
+is snapshotted before and after, and a digest computed over a moving tree is
+refused rather than reported. Paths are relative to the root, so moving or renaming an artifact
 does not change what the data is, while moving a chunk inside it does. The text
 and tree canonicalization versions are independent and are not interchangeable,
 which is why the kind is part of the token rather than implied by the version.
