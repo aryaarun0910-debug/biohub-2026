@@ -494,6 +494,96 @@ def artifacts_clear(
     typer.echo(json.dumps({"cleared": len(cleared), "eligibility": eligibility.value}, sort_keys=True))
 
 
+@artifacts_app.command("revoke")
+def artifacts_revoke(
+    reason: Annotated[
+        str,
+        typer.Option("--reason", help="Why the review is being withdrawn. Recorded on each record."),
+    ],
+    id_prefix: Annotated[
+        str,
+        typer.Option("--id-prefix", help="Revoke artifacts whose id starts with this."),
+    ],
+    registry: Annotated[
+        Path | None,
+        typer.Option("--registry", help="Artifact registry. Defaults to the repository registry."),
+    ] = None,
+) -> None:
+    """Withdraw a recorded terms review, returning artifacts to uncleared.
+
+    Used when a clearance turns out to rest on something that was not
+    established: an attestation from someone not in a position to give it, terms
+    that were paraphrased rather than read, a reviewer who did not review.
+
+    Returning to `external_uncleared` is the honest end state, not
+    `not-eligible`. Recording not-eligible would assert that a review happened
+    and reached a negative conclusion. Uncleared asserts only that no review
+    stands, which is what is actually true after a withdrawal.
+
+    The reason is written onto every affected record, so the registry shows that
+    a clearance was attempted and withdrawn rather than looking as though none
+    was ever made.
+    """
+    command_name = "artifacts revoke"
+    root = repository_root()
+    registry_path = registry if registry is not None else root / ARTIFACT_REGISTRY_PATH
+    heartbeat(command_name, "start", f"id_prefix={id_prefix!r}")
+
+    try:
+        loaded = load_artifact_registry(registry_path)
+    except (FileNotFoundError, ValueError) as exc:
+        heartbeat(command_name, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    selected = [record for record in loaded.artifacts if record.id.startswith(id_prefix)]
+    if not selected:
+        heartbeat(command_name, "refused", f"no artifact id starts with {id_prefix!r}")
+        raise typer.Exit(code=2)
+
+    withdrawn: list[str] = []
+    records: list[ArtifactRecord] = []
+    for record in loaded.artifacts:
+        if not record.id.startswith(id_prefix):
+            records.append(record)
+            continue
+        provenance = record.provenance.model_dump(exclude_none=True)
+        # Every field that was part of the review claim goes. What the artifact
+        # IS survives untouched; only what anyone said about its terms is removed.
+        for field in (
+            "source_url",
+            "data_license",
+            "code_license",
+            "weight_license",
+            "access_restrictions",
+            "competition_eligible",
+            "reviewed_by",
+            "reviewed_utc",
+        ):
+            provenance.pop(field, None)
+        provenance["status"] = ProvenanceStatus.EXTERNAL_UNCLEARED.value
+        existing = strip_provisional_review_note(provenance.get("note"))
+        stamp = datetime.now(UTC).isoformat()
+        withdrawal = f"Terms review withdrawn {stamp}: {reason}"
+        provenance["note"] = f"{existing} {withdrawal}".strip() if existing else withdrawal
+
+        updated = record.model_dump(by_alias=True, exclude_none=True)
+        updated["provenance"] = provenance
+        records.append(ArtifactRecord.model_validate(updated))
+        withdrawn.append(record.id)
+
+    merged = ArtifactRegistry(schema_version=1, artifacts=records)
+    document = {
+        "schema_version": merged.schema_version,
+        "artifacts": [
+            record.model_dump(mode="json", by_alias=True, exclude_none=True) for record in merged.artifacts
+        ],
+    }
+    atomic_write_text(registry_path, yaml.safe_dump(document, sort_keys=False, width=100))
+    _write_manifest(command_name, {"id_prefix": id_prefix, "withdrawn": len(withdrawn), "reason": reason})
+    heartbeat(command_name, "done", f"withdrawn={len(withdrawn)} status=external_uncleared")
+    typer.echo(json.dumps({"withdrawn": len(withdrawn), "reason": reason}, sort_keys=True))
+
+
 @official_app.command("verify-source")
 def official_verify_source() -> None:
     """Verify every typed identity in the official-source lock."""

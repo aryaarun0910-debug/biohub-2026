@@ -107,41 +107,52 @@ def test_ground_truth_is_a_vanishing_fraction_of_the_volumes() -> None:
     )
 
 
-def test_every_competition_artifact_carries_a_completed_terms_review() -> None:
-    """The invariant that replaced "nothing is cleared yet".
+def test_no_competition_artifact_is_cleared_for_use() -> None:
+    """The gate, restored after a clearance was withdrawn.
 
-    The review has now happened, so the line this holds moves: any dataset
-    registered from here on must carry its own clearance rather than inheriting
-    the assumption that the corpus was reviewed once. A newly added artifact
-    with no review fails this.
+    A review was recorded on 2026-09-02 and withdrawn the same day: the
+    eligibility confirmation had not come from a person able to join the
+    competition, and the access restrictions had been paraphrased rather than
+    read from the rules page. Uncleared is the honest state, because it asserts
+    only that no review stands rather than asserting a negative conclusion
+    nobody reached.
     """
-    artifacts = competition_artifacts()
-    for record in artifacts:
-        provenance = record.provenance
-        assert provenance.status.value == "external_cleared", f"{record.id} is not cleared"
-        assert provenance.reviewed_by, f"{record.id} names no accountable reviewer"
-        assert provenance.data_license, f"{record.id} records no data licence"
-        assert provenance.access_restrictions, f"{record.id} records no access restrictions"
-        assert provenance.competition_eligible is not None, f"{record.id} has no eligibility decision"
+    uncleared = {"external_uncleared"}
+    statuses = {a.provenance.status.value for a in competition_artifacts()}
+    assert statuses == uncleared, (
+        f"a competition artifact claims a status other than external_uncleared: {sorted(statuses)}"
+    )
 
 
-def test_the_corpus_is_eligible_for_competition_use() -> None:
-    # Recorded from a human review, not inferred here. If a later review decides
-    # otherwise, this fails and every experiment reading the corpus stops.
-    ineligible = [a.id for a in competition_artifacts() if a.provenance.competition_eligible is not True]
-    assert not ineligible, f"artifacts recorded as not eligible for competition use: {ineligible}"
+def test_no_artifact_claims_eligibility_without_a_named_reviewer() -> None:
+    """The invariant that holds in both states, cleared or not.
 
-
-def test_no_provenance_note_contradicts_its_own_status() -> None:
-    # Prose does not update when a field does. This catches the specific way the
-    # two came apart before: a cleared record still carrying the sentence that
-    # said its review had not happened.
-    from biohubx.artifacts import PROVISIONAL_REVIEW_NOTE
-
-    contradictory = [
+    Whatever the gate says today, an eligibility decision may never exist
+    without a person attached to it. This is the check that would have caught
+    the withdrawn clearance had the attestation been absent rather than
+    misattributed.
+    """
+    offenders = [
         a.id
         for a in competition_artifacts()
-        if a.provenance.status.value == "external_cleared"
-        and PROVISIONAL_REVIEW_NOTE in (a.provenance.note or "")
+        if a.provenance.competition_eligible is not None and not a.provenance.reviewed_by
     ]
-    assert not contradictory, f"cleared records whose note denies the clearance: {contradictory}"
+    assert not offenders, f"eligibility recorded with no accountable reviewer: {offenders}"
+
+
+def test_the_withdrawal_is_visible_on_the_record() -> None:
+    # The registry must not look as though no clearance was ever attempted. A
+    # silent revert would lose the fact that a wrong claim was once recorded.
+    withdrawn = [a for a in competition_artifacts() if "withdrawn" in (a.provenance.note or "")]
+    assert len(withdrawn) == len(competition_artifacts()), (
+        "the withdrawn review is not recorded on every affected artifact"
+    )
+
+
+def test_identity_survived_the_withdrawal() -> None:
+    # Withdrawing a review changes what was said about the terms, never what the
+    # artifact is. Every record still carries its tree digest and shape.
+    for record in competition_artifacts():
+        assert record.is_tree
+        assert record.digests["tree"].startswith("tree_sha256:sha256/v1:")
+        assert record.shape is not None and record.shape.file_count > 0
