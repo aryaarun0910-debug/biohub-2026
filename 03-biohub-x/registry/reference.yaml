@@ -245,7 +245,7 @@ references:
           dataset_id: 10999845
           licence: CC0-1.0
           files: 87
-          total_bytes: 355616000
+          total_bytes: 424449
           weight_bytes: 33432810
           wheel_bytes: 322000000
         - slug: pilkwang/biohub-temporal-unet3d-seed314159-v1
@@ -771,8 +771,28 @@ approval_packet:
         stop_condition: report both scores and stop
 
   gate_4_e03_smoke:
-    state: awaiting_re_approval
+    state: awaiting_fresh_authorisation_after_a_failed_run
     revised_after: E03-MASK-AUDIT full-corpus pass, the local package smoke, and two pre-push defects
+    prior_attempt: >-
+      One authorised push was spent. The kernel errored before executing any
+      packaged code because the generated notebook failed nbformat validation, so
+      no guard ran and no heartbeat printed. Recorded as E03-SMOKE with status
+      invalid, its log registered at raw_artifact_sha256:sha256:cec04e32b04cf2d0d
+      b31d0162d7b246b86fd8dc4fad2335a7c342be791a18ecb. The failed kernel is left
+      in place, neither deleted nor replaced.
+    pre_push_gate:
+      mandatory: true
+      nbformat_validated: true
+      nbconvert_converted: true
+      converted_bytes: 301505
+      required_metadata_present: true
+      entry_point_exercised: true
+      heartbeat_lines: 14
+      stages_seen: ["environment", "inputs", "fold", "verify", "guard", "model", "epoch-start", "epoch-end", "checkpoint", "done"]
+      runs_before_any_network_action: true
+      note: >-
+        The same libraries Kaggle uses, run locally first. A build that cannot
+        convert or cannot speak now fails here instead of on a GPU.
     why_re_approval: >-
       The authorisation named digest 2ffb5ad1. That package pinned commit 85c3dd9
       while shipping e4508a0's source, because it was built from a dirty tree, and
@@ -789,13 +809,13 @@ approval_packet:
       built_locally: true
       pushed: false
       path: artifacts\kaggle-package
-      manifest_digest: canonical_text_sha256:sha256/v1:928065d6f7f5b71b72b4e291152a814fcd89353f174dc77799271a325ef04c73
-      file_count: 48
+      manifest_digest: canonical_text_sha256:sha256/v1:fd29ebae26ef2943456f1a4880fd9891a902f1cc06789225403d1009190d7b48
+      file_count: 49
       total_bytes: 414461
       contains_competition_bytes: false
       contains_external_weights: false
-      pinned_commit: b871da852aca80141d3584144d32ab54afce2a8c
-      kernel_id: aryaarunkaggle/biohubx-e03-fold-44b6
+      pinned_commit: 16216fb755e0751920654f47ae6de8e5c6789d68
+      kernel_id: aryaarun07/biohub-x-e03-fold-44b6
       pushable: true
       push_command: kaggle kernels push -p artifacts\kaggle-package
       note: >-

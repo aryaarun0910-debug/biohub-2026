@@ -243,7 +243,7 @@ Implemented:
 - `biohubx evaluate slice [--graph PATH]`
 - `biohubx evaluate retention [--root PATH] [--retentions LIST] [--seed N]`
 - `biohubx evaluate mask-audit [--root PATH] [--max-frames N] [--compare-maxpool]`
-- `biohubx package kaggle [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--smoke-local]`
+- `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--allow-dirty]`
 - `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--peak-quantile F] [--learning-rate F]`
 
 `infer synthetic` writes the emitted graph and a stage-by-stage report
@@ -320,6 +320,14 @@ cost. It is the instrument that falsified the band ([[F-0020]]) and forced
 the positive-unlabelled objective ([[D-0024]]). Bands are selected per fold
 from the training embryo alone; the evaluation embryo measures failure
 afterwards and never selects the rule.
+
+`package kaggle` runs a mandatory pre-push gate before it finishes: the generated
+notebook must pass `nbformat.validate`, convert through nbconvert, carry every
+required kernelspec and cell field, and the packaged entry point must run locally
+and emit at least one heartbeat. All of it happens before any network call,
+because a notebook that fails on Kaggle costs a whole GPU session and produces
+nothing to read ([[D-0026]]). The kernel id is derived from the title so the two
+cannot disagree.
 
 `package kaggle` stages a fold for a machine this repository cannot watch, and
 sends nothing. The guards travel with it: the package pins the commit and the
