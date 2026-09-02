@@ -261,3 +261,52 @@ def test_the_registry_stays_loadable_and_verifiable(registered: tuple[Path, Path
     document = yaml.safe_load(registry.read_text(encoding="utf-8"))
     assert document["schema_version"] == 1
     assert runner.invoke(app, ["artifacts", "verify", "--registry", str(registry)]).exit_code == 0
+
+
+# --- prose must not outlive the fact it described --------------------------
+
+
+def test_clearing_removes_a_note_that_says_the_review_is_outstanding(
+    registered: tuple[Path, Path],
+) -> None:
+    """The defect this closes, reproduced and then prevented.
+
+    Earlier fingerprint runs wrote the review status into the note as well as
+    into the status field. Prose does not update, so once a clearance was
+    recorded the note contradicted the record carrying it, and a reader could
+    believe the sentence over the field.
+    """
+    from biohubx.artifacts import PROVISIONAL_REVIEW_NOTE
+
+    _, registry = registered
+    document = yaml.safe_load(registry.read_text(encoding="utf-8"))
+    for record in document["artifacts"]:
+        record["provenance"]["note"] = f"Some description. {PROVISIONAL_REVIEW_NOTE}"
+    registry.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+
+    assert clear(registry, "--eligibility", "eligible") == 0
+    for record in load_artifact_registry(registry).artifacts:
+        note = record.provenance.note or ""
+        assert PROVISIONAL_REVIEW_NOTE not in note
+        assert "Some description." in note, "the rest of the note must survive"
+
+
+def test_a_fingerprint_note_no_longer_duplicates_the_status(
+    registered: tuple[Path, Path],
+) -> None:
+    # The status field already answers whether the terms were reviewed. Saying
+    # it twice is how the two came to disagree.
+    from biohubx.artifacts import PROVISIONAL_REVIEW_NOTE
+
+    _, registry = registered
+    for record in load_artifact_registry(registry).artifacts:
+        assert PROVISIONAL_REVIEW_NOTE not in (record.provenance.note or "")
+        assert record.provenance.status is ProvenanceStatus.EXTERNAL_UNCLEARED
+
+
+def test_stripping_a_note_that_was_only_the_stale_sentence_leaves_nothing() -> None:
+    from biohubx.artifacts import PROVISIONAL_REVIEW_NOTE, strip_provisional_review_note
+
+    assert strip_provisional_review_note(PROVISIONAL_REVIEW_NOTE) is None
+    assert strip_provisional_review_note(None) is None
+    assert strip_provisional_review_note("kept") == "kept"

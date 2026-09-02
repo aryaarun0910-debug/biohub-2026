@@ -42,6 +42,24 @@ from biohubx.hashing import (
     tree_shape,
 )
 
+PROVISIONAL_REVIEW_NOTE = "Licence and competition-eligibility review not yet recorded."
+"""A sentence earlier fingerprint runs wrote into the note field.
+
+It duplicated what ``status`` already said, and prose does not update, so once a
+clearance was recorded the note contradicted the record carrying it. New records
+do not get it; :func:`strip_provisional_review_note` removes it from records
+written before the fix.
+"""
+
+
+def strip_provisional_review_note(note: str | None) -> str | None:
+    """Remove the stale review sentence, keeping whatever else the note said."""
+    if not note:
+        return None
+    remainder = note.replace(PROVISIONAL_REVIEW_NOTE, "").strip()
+    return remainder or None
+
+
 ARTIFACT_REGISTRY_PATH = Path("registry/artifacts.yaml")
 MANIFEST_DIR = Path("artifacts/manifests")
 

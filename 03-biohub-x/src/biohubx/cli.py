@@ -42,6 +42,7 @@ from biohubx.artifacts import (
     ProvenanceStatus,
     atomic_write_text,
     load_artifact_registry,
+    strip_provisional_review_note,
     summarise_checks,
     verify_registry,
 )
@@ -435,6 +436,14 @@ def artifacts_clear(
             records.append(record)
             continue
         provenance = record.provenance.model_dump(exclude_none=True)
+        # Records written before the note was fixed carry a sentence saying the
+        # review has not happened. Leaving it on a cleared record would let a
+        # reader believe the prose over the status.
+        stripped = strip_provisional_review_note(provenance.get("note"))
+        if stripped is None:
+            provenance.pop("note", None)
+        else:
+            provenance["note"] = stripped
         provenance.update(
             {
                 "status": ProvenanceStatus.EXTERNAL_CLEARED.value,
@@ -870,10 +879,12 @@ def data_fingerprint(
                     "provenance": {
                         "status": "external_uncleared",
                         "original_path": str(path),
+                        # Describes the dataset only. Whether the terms have
+                        # been reviewed is what `status` is for, and saying it
+                        # twice is how the two came to disagree.
                         "note": (
                             f"Competition dataset {manifest.dataset_id!r}, split "
-                            f"{manifest.split!r}, role {manifest.split_role}. Licence and "
-                            "competition-eligibility review not yet recorded."
+                            f"{manifest.split!r}, role {manifest.split_role}."
                         ),
                     },
                 }
