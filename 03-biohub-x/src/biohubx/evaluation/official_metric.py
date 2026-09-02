@@ -32,6 +32,21 @@ OFFICIAL_SOURCE_COMMIT = "075fc5f5a52d11077f9dc2b074644618f26939e2"
 OFFICIAL_MAX_DISTANCE_UM = 7.0
 
 
+class UnscorablePredictionError(ValueError):
+    """The prediction cannot be scored through the official path.
+
+    Raised for a prediction that contains no edges. The official ``evaluate``
+    returns early for an edgeless graph without applying its matching, and its
+    own ``node_recall`` helper documents that it requires an already-matched
+    graph, so calling the two in sequence raises from deep inside the dependency
+    instead of producing a number.
+
+    Biohub-X refuses first and says why. A system that abstains everywhere is a
+    real possible output, and the person looking at it needs to be told that the
+    harness cannot score it, not handed a key error about an attribute name.
+    """
+
+
 class NodeCountProvenance(StrEnum):
     """Where the metric's ``n_total`` came from.
 
@@ -156,6 +171,18 @@ def evaluate_graph(
         raise FileNotFoundError("ground-truth graph artifact is required; evaluated crop set cannot shrink")
     if prediction.dataset != ground_truth.dataset:
         raise ValueError("prediction and ground truth belong to different datasets")
+    if not prediction.edges:
+        raise UnscorablePredictionError(
+            f"prediction for {prediction.dataset.value!r} contains "
+            f"{len(prediction.nodes)} nodes and no edges; the official scorer cannot "
+            "report node recall for an unmatched graph, so this is refused rather "
+            "than reported as a score of zero"
+        )
+    if not ground_truth.edges:
+        raise UnscorablePredictionError(
+            f"ground truth for {ground_truth.dataset.value!r} contains no edges; "
+            "there is nothing for an edge Jaccard to measure"
+        )
 
     pred_graph = _to_official_graph(prediction)
     gt_graph = _to_official_graph(ground_truth)

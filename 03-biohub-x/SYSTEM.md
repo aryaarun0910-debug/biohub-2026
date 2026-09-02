@@ -4,7 +4,7 @@ Architecture, contracts, and the honest current state of Biohub-X.
 
 ## 1. Current state
 
-**Phase 1 complete. The system can judge a lineage graph but cannot produce one.**
+**Phase 2 complete. The system detects, associates and emits its own legal lineage graph, on a synthetic fixture only.**
 
 What exists:
 
@@ -18,16 +18,26 @@ What exists:
 | Pinned official metric | `biohubx._vendor.official_competition` | vendored byte-identical, digests locked |
 | Metric adapter | `biohubx.evaluation.official_metric` | implemented, fifteen calibration fixtures |
 | Read-only data validation | `biohubx.data.validation` | implemented, refuses ambiguity |
+| Synthetic fixture | `biohubx.data.synthetic` | deterministic movie with a known lineage |
+| Instance, representation, candidate, prediction contracts | `biohubx.contracts.*` | implemented, one mutation test per rule |
+| Classical detector | `biohubx.proposals.classical` | deterministic, physical-radius suppression |
+| Geometry representation | `biohubx.representation.geometry` | implemented, no defaulted channel |
+| Candidate graph and reach | `biohubx.tracking.candidate_graph` | implemented, reach measured not assumed |
+| Untrained matcher | `biohubx.tracking.matcher` | explicit no-parent option, hand-set constants |
+| Constrained decoder | `biohubx.tracking.graph_decoder` | greedy, emits a legal graph |
+| Vertical slice | `biohubx.tracking.pipeline` | detect to score, one owner |
 
-What does not exist yet: proposals, representation, candidate graph,
-association, division, decoder, training, deployment. Those directories are
-absent from `src/biohubx/`, not stubbed. A module is created when its first real
-consumer exists.
+What does not exist yet: any trained model, any learned representation, any
+division model, temporal context beyond one frame, alternative decoders, and
+deployment. Those modules are absent from `src/biohubx/`, not stubbed. A module
+is created when its first real consumer exists.
 
 No score has been measured on competition data. No model has been trained or
-downloaded. No GPU has been used. No Kaggle notebook exists. The only numbers
-this repository has produced are the synthetic calibration fixtures, whose whole
-purpose is to characterise the scorer rather than to evaluate a system.
+downloaded. No GPU has been used. No Kaggle notebook exists. Every number this
+repository has produced comes from synthetic fixtures whose purpose is to
+characterise the scorer and to prove the software owns its graph. The matcher is
+an untrained rule with hand-set constants, so its score is a property of those
+constants and of a fixture far easier than real data.
 
 ### 1.1 What Phase 1 established
 
@@ -51,6 +61,28 @@ refuses them at construction instead, so an illegal edge can never reach the
 scorer and be quietly forgiven. The same holds for backward edges, in-degree
 above one, out-degree above two, dangling endpoints, cross-dataset edges,
 duplicate identities and non-integer identities.
+
+### 1.2 What Phase 2 established
+
+The whole chain runs without competition data, a GPU or any external artifact:
+
+```
+synthetic volume -> candidate instances -> representation -> sparse T=2
+candidate graph -> scored options including no-parent -> legal lineage graph
+-> official score
+```
+
+Three properties are enforced rather than hoped for. Candidate generation and
+candidate scoring are separate contracts, and the candidate graph reports how
+many true edges it actually offered, so a low score can be attributed to the
+detector, the radius or the matcher rather than blamed on whichever is nearest.
+Abstention is a scored row competing on the same axis as the parents, computed
+from the evidence of the target itself, so it can express that a cell is new
+rather than only that the best parent is not good enough. The decoder returns a
+`LineageGraph`, which makes legality a type rather than a convention.
+
+The constants in the untrained matcher live in one named object, so the learned
+matcher that replaces them has a contract to satisfy and a baseline to beat.
 
 ## 2. Target pipeline
 
@@ -154,15 +186,22 @@ negative identities and frames, and an edge whose declared kind disagrees with
 the topology at its source. Division is a set of two daughters, so daughter
 order does not change the export.
 
-### 4.4 Instances, representation, candidates, predictions (not implemented)
+### 4.4 Instances, representation, candidates, predictions (implemented)
 
-Specified in the mission and written when their first consumer exists. Two rules
-already bind them:
+- `CandidateInstance` carries both coordinate systems and validates that they
+  agree, plus the detector that proposed it and that detector's confidence.
+- `InstanceFeatures` names every channel and defaults none. A missing feature
+  raises, because a zero-filled channel is indistinguishable from a genuine
+  measurement of zero.
+- `CandidateGraph` separates generation from scoring and carries a `ReachReport`
+  whose counts must add up, distinguishing a detector miss from a radius miss.
+  An absent reach report is absent, not a reach of zero.
+- `TargetPrediction` requires a no-parent score alongside the parent scores, and
+  abstention wins ties. The no-parent state is structurally explicit here. It is
+  not yet learned, and the constants that fill it are not evidence.
 
-- Candidate generation and candidate scoring are separate contracts, and the
-  graph reports true-edge reach so a scorer is never blamed for an edge it was
-  never offered.
-- The no-parent state is a learned output, not a threshold on the best edge.
+Still to come: appearance and morphology embeddings, and the learned weights
+that make the hand-set matcher constants unnecessary.
 
 ### 4.5 CLI (partially implemented)
 
@@ -178,6 +217,13 @@ Implemented:
 - `biohubx official verify-source`
 - `biohubx evaluate fixture`
 - `biohubx data validate {--root PATH | --synthetic}`
+- `biohubx infer synthetic [--seed N] [--noise F] [--annotated-fraction F]`
+- `biohubx evaluate slice [--graph PATH]`
+
+`infer synthetic` writes the emitted graph and a stage-by-stage report
+atomically and records the raw digest of the graph. `evaluate slice` refuses a
+stored graph that does not match a fresh run of the same configuration, so a
+stale artifact is never scored against a freshly generated ground truth.
 
 `data validate` takes an explicit root or the single named environment variable
 `BIOHUB_DATA_ROOT`, and refuses when neither is given. It never guesses a
@@ -185,7 +231,7 @@ location, never writes into the data, and refuses an ambiguous layout rather
 than picking one.
 
 Planned, absent until a consumer exists: `data make-splits`, `proposals infer`,
-`representation acquire`, `train`, `infer`, `evaluate run`, `package kaggle`.
+`representation acquire`, `train`, `infer real`, `package kaggle`.
 
 ## 5. Evaluation policy
 
@@ -206,8 +252,8 @@ They cannot promote anything on their own.
 | --- | --- | --- |
 | 0 | repository foundation, identity contract, registries, CLI heartbeat, contract tests | done |
 | 1 | official metric from its authoritative source, pinned revision, adapter, synthetic graphs with known scores, coordinate and lineage contracts | done |
-| 2 | end-to-end software vertical slice: fixture to candidate instances to representation to sparse T=2 graph to minimal matcher to legal final graph to official scorer | next |
-| 3 | real representation smoke, CPU preflight, one protected GPU smoke, stop and report before launch | not started |
+| 2 | end-to-end software vertical slice: fixture to candidate instances to representation to sparse T=2 graph to minimal matcher to legal final graph to official scorer | done |
+| 3 | real representation smoke, CPU preflight, one protected GPU smoke, stop and report before launch | next |
 | 4 | T=2 learning, depth ladder D = 4/6/8/10 as controlled arms, select one depth | not started |
 | 5 | System A against System B on identical frozen inputs, error complementarity | not started |
 | 6 | temporal context ladder, coordinated division learning, uncertainty routing once earned | not started |

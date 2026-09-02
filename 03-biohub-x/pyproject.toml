@@ -8,6 +8,7 @@ license = { text = "Proprietary" }
 dependencies = [
     # Kept minimal on purpose. A dependency is added when a module that needs it
     # has a named consumer, not in anticipation of one.
+    "numpy>=2.0",
     "pydantic>=2.7",
     "polars==1.43.2",
     "pyyaml>=6.0",

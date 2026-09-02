@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from biohubx import __version__
@@ -91,3 +92,51 @@ def test_verify_fails_when_a_recorded_identity_no_longer_holds(tmp_path: Path) -
     )
     result = runner.invoke(app, ["artifacts", "verify", "--registry", str(registry)])
     assert result.exit_code == 1
+
+
+def test_infer_synthetic_emits_a_graph_and_records_its_digest() -> None:
+    result = runner.invoke(app, ["infer", "synthetic"])
+    assert result.exit_code == 0, result.output
+
+    graph_path = REPO_ROOT / "artifacts/slice-graph.json"
+    assert graph_path.is_file()
+    graph = json.loads(graph_path.read_text(encoding="utf-8"))
+    assert graph["nodes"] and graph["edges"]
+
+    manifest = json.loads(
+        (REPO_ROOT / "artifacts/manifests/infer-synthetic.json").read_text(encoding="utf-8")
+    )
+    # The manifest records the digest of the bytes actually written, so a later
+    # command can tell whether it is scoring this run or a stale artifact.
+    assert manifest["emitted_graph_digest"].startswith("raw_artifact_sha256:sha256:")
+    assert manifest["config"]["seed"] == 0
+
+
+@pytest.mark.parametrize("fraction", ["0", "1.5", "-0.2"])
+def test_infer_synthetic_refuses_an_impossible_annotation_fraction(fraction: str) -> None:
+    # A refusal the CLI can actually reach. The edgeless-graph refusal lives at
+    # the pipeline boundary and is tested there, because no CLI flag produces it.
+    result = runner.invoke(app, ["infer", "synthetic", "--annotated-fraction", fraction])
+    assert result.exit_code == 2
+
+
+def test_evaluate_slice_scores_the_emitted_graph() -> None:
+    assert runner.invoke(app, ["infer", "synthetic"]).exit_code == 0
+    result = runner.invoke(app, ["evaluate", "slice"])
+    assert result.exit_code == 0, result.output
+    payload = json.loads((REPO_ROOT / "artifacts/slice-score.json").read_text(encoding="utf-8"))
+    assert payload["official"]["edge_tp"] > 0
+
+
+def test_evaluate_slice_refuses_a_missing_graph(tmp_path: Path) -> None:
+    result = runner.invoke(app, ["evaluate", "slice", "--graph", str(tmp_path / "absent.json")])
+    assert result.exit_code == 2
+
+
+def test_evaluate_slice_refuses_a_stale_graph(tmp_path: Path) -> None:
+    # Scoring an artifact from different settings against a freshly generated
+    # ground truth would silently compare two different runs.
+    stale = tmp_path / "stale.json"
+    stale.write_text('{"nodes": [], "edges": []}', encoding="utf-8")
+    result = runner.invoke(app, ["evaluate", "slice", "--graph", str(stale)])
+    assert result.exit_code == 2

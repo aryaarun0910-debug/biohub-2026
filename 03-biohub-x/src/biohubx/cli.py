@@ -51,10 +51,12 @@ artifacts_app = typer.Typer(name="artifacts", help="Artifact identity and proven
 official_app = typer.Typer(name="official", help="Pinned official competition source.", no_args_is_help=True)
 evaluate_app = typer.Typer(name="evaluate", help="Authoritative metric calibration.", no_args_is_help=True)
 data_app = typer.Typer(name="data", help="Read-only dataset validation.", no_args_is_help=True)
+infer_app = typer.Typer(name="infer", help="Emit a lineage graph.", no_args_is_help=True)
 app.add_typer(artifacts_app)
 app.add_typer(official_app)
 app.add_typer(evaluate_app)
 app.add_typer(data_app)
+app.add_typer(infer_app)
 
 
 def repository_root() -> Path:
@@ -327,6 +329,116 @@ def data_validate(
     _write_manifest(command, {"mode": mode, "dataset_count": len(datasets)})
     heartbeat(command, "done", f"datasets={len(datasets)} report=artifacts/data-validation.json")
     typer.echo(json.dumps(report, sort_keys=True))
+
+
+SLICE_GRAPH_PATH = Path("artifacts/slice-graph.json")
+
+
+@infer_app.command("synthetic")
+def infer_synthetic(
+    noise: Annotated[float, typer.Option("--noise", help="Fixture noise standard deviation.")] = 0.01,
+    seed: Annotated[int, typer.Option("--seed", help="Fixture seed.")] = 0,
+    annotated_fraction: Annotated[
+        float,
+        typer.Option("--annotated-fraction", help="Fraction of cells a sparse annotator labelled."),
+    ] = 1.0,
+) -> None:
+    """Run the whole slice on the deterministic fixture and emit a legal graph.
+
+    Writes the emitted graph and the stage-by-stage report atomically, and
+    records the graph's raw digest so that `evaluate slice` scores exactly the
+    bytes this command produced. No competition data, no GPU, no network.
+    """
+    command = "infer synthetic"
+    from biohubx.evaluation.official_metric import UnscorablePredictionError
+    from biohubx.tracking.pipeline import SliceConfig, run_slice
+
+    heartbeat(command, "start", f"seed={seed} noise={noise} annotated_fraction={annotated_fraction}")
+    try:
+        result = run_slice(SliceConfig(seed=seed, noise=noise, annotated_fraction=annotated_fraction))
+    except (ValueError, UnscorablePredictionError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    heartbeat(command, "detected", f"instances={len(result.instances.instances)}")
+    reach = result.candidates.reach
+    if reach is not None:
+        heartbeat(command, "candidates", f"edges={len(result.candidates.edges)} reach={reach.reach:.3f}")
+    heartbeat(
+        command,
+        "decoded",
+        f"nodes={result.decode_report.nodes} edges={result.decode_report.edges} "
+        f"divisions={result.decode_report.divisions} abstentions={result.decode_report.abstentions}",
+    )
+
+    root = repository_root()
+    graph_path = root / SLICE_GRAPH_PATH
+    atomic_write_text(
+        graph_path,
+        json.dumps(result.emitted.integer_export(), indent=2, sort_keys=True) + "\n",
+    )
+    report = result.report()
+    report_path = root / "artifacts/slice-report.json"
+    atomic_write_text(report_path, json.dumps(report, indent=2, sort_keys=True) + "\n")
+
+    digest = digest_file(graph_path, DigestKind.RAW_ARTIFACT)
+    _write_manifest(
+        command,
+        {
+            "config": result.config.to_dict(),
+            "emitted_graph": str(SLICE_GRAPH_PATH),
+            "emitted_graph_digest": digest.token,
+            "report": "artifacts/slice-report.json",
+        },
+    )
+    heartbeat(command, "done", f"graph={SLICE_GRAPH_PATH} digest={digest.token[:38]}...")
+    typer.echo(json.dumps(report, sort_keys=True))
+
+
+@evaluate_app.command("slice")
+def evaluate_slice(
+    graph: Annotated[
+        Path | None,
+        typer.Option("--graph", help="Emitted graph to score. Defaults to the repository artifact."),
+    ] = None,
+) -> None:
+    """Score a previously emitted slice graph against the fixture it came from.
+
+    Refuses when the graph on disk does not match the configuration that
+    produced it: scoring a stale artifact against a freshly generated ground
+    truth would silently compare two different runs.
+    """
+    command = "evaluate slice"
+    from biohubx.tracking.pipeline import run_slice
+
+    root = repository_root()
+    graph_path = graph if graph is not None else root / SLICE_GRAPH_PATH
+    heartbeat(command, "start", f"graph={graph_path}")
+    if not graph_path.is_file():
+        heartbeat(
+            command, "refused", f"no emitted graph at {graph_path}; run `biohubx infer synthetic` first"
+        )
+        raise typer.Exit(code=2)
+
+    stored = json.loads(graph_path.read_text(encoding="utf-8"))
+    result = run_slice()
+    regenerated = result.emitted.integer_export()
+    if stored != regenerated:
+        heartbeat(
+            command,
+            "refused",
+            "the stored graph does not match a fresh run of the default configuration; "
+            "it came from different settings or a different revision",
+        )
+        raise typer.Exit(code=2)
+
+    payload = {"schema_version": 1, "graph": str(SLICE_GRAPH_PATH), "official": result.score.to_dict()}
+    atomic_write_text(
+        root / "artifacts/slice-score.json", json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    )
+    _write_manifest(command, payload)
+    heartbeat(command, "done", f"score={result.score.score:.6f}")
+    typer.echo(json.dumps(payload, sort_keys=True))
 
 
 if __name__ == "__main__":

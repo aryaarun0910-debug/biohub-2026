@@ -97,6 +97,7 @@ name = "biohubx"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [
+    { name = "numpy", marker = "python_full_version == '3.12.*'" },
     { name = "polars", marker = "python_full_version == '3.12.*'" },
     { name = "pydantic", marker = "python_full_version == '3.12.*'" },
     { name = "pyyaml", marker = "python_full_version == '3.12.*'" },
@@ -115,6 +116,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "numpy", specifier = ">=2.0" },
     { name = "polars", specifier = "==1.43.2" },
     { name = "pydantic", specifier = ">=2.7" },
     { name = "pyyaml", specifier = ">=6.0" },

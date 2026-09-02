@@ -135,3 +135,101 @@ findings:
         the official source pin holds and LineageGraph keeps its one-frame edge
         rule.
     superseded_by: null
+
+  - id: F-0006
+    claim: >-
+      A complete detect-to-score chain can be run on a deterministic synthetic
+      fixture with no competition data, no GPU and no external artifact, and the
+      graph it emits is legal by construction. On the default fixture the chain
+      detects 14 instances, offers 37 candidate edges at a 12 micrometre radius,
+      reaches every true edge, decodes 11 edges including the one division, and
+      scores 1.1 under the official metric.
+    instrument: tests/end_to_end/test_vertical_slice.py
+    evidence:
+      command: uv run pytest tests/end_to_end
+      observed: 19 passed
+      note: >-
+        The matcher is an untrained deterministic rule with hand-set constants.
+        The score is a property of the fixture and those constants, not evidence
+        about the competition, and the fixture is far easier than real data.
+        What the number demonstrates is causal ownership: every stage is reached
+        only through the one in front of it and every intermediate is a
+        validated contract.
+    validity:
+      scope: software_vertical_slice
+      holds_while: >-
+        the synthetic fixture, the classical detector and the untrained matcher
+        are unchanged. Any of them changing supersedes the specific counts.
+    superseded_by: null
+
+  - id: F-0007
+    claim: >-
+      Candidate reach is a real ceiling on the edge Jaccard and its two failure
+      modes are separately attributable. Narrowing the candidate radius to 1
+      micrometre, below the fixture's one-to-two micrometre true displacements,
+      dropped reach to 0.182 with 9 true edges unreachable outside the radius and
+      0 unreachable for a missing endpoint, and the edge Jaccard equalled the
+      reach at 0.182. Raising the detection threshold to 0.99 instead dropped
+      reach to 0.273 with 8 true edges unreachable for a missing endpoint and 0
+      outside the radius.
+    instrument: tests/end_to_end/test_vertical_slice.py
+    evidence:
+      command: uv run pytest tests/end_to_end
+      observed: 19 passed
+      note: >-
+        The two knobs produce the same symptom, a low score, through different
+        stages. Reporting them apart is what stops the next experiment being
+        aimed at the wrong component.
+    validity:
+      scope: software_vertical_slice
+      holds_while: the synthetic fixture and the classical detector are unchanged.
+    superseded_by: null
+
+  - id: F-0008
+    claim: >-
+      The node-count lever measured on hand-built graphs in F-0003 and F-0004
+      reproduces through a whole running pipeline. Between fixture noise 0.06 and
+      0.15 the detector went from 15 to 189 instances while the raw edge Jaccard
+      stayed at 0.9091 and edge false positives stayed at 0; the node-count ratio
+      rose from +0.071 to +12.500 and the adjusted edge Jaccard fell from 0.9026
+      to 0.0000.
+    instrument: tests/end_to_end/test_vertical_slice.py
+    evidence:
+      command: uv run pytest tests/end_to_end
+      observed: 19 passed
+      note: >-
+        The spurious detections match no annotated node, so they cost nothing in
+        edge terms and everything through the adjustment. This makes the lever a
+        property of a system rather than of an equation, and is the direct
+        justification for the deferral recorded in D-0011.
+    validity:
+      scope: software_vertical_slice_and_official_metric_behaviour
+      holds_while: >-
+        the official source pin holds and the fixture and detector are unchanged.
+    superseded_by: null
+
+  - id: F-0009
+    claim: >-
+      A prediction that abstains on every target emits a graph with nodes and no
+      edges, and the pinned official scorer cannot score it: `evaluate` returns
+      early for an edgeless graph without applying its matching, so the
+      `node_recall` helper it documents as requiring a matched graph raises a
+      KeyError from inside tracksdata rather than returning a number. Biohub-X
+      refuses such a prediction with a named error instead.
+    instrument: tests/end_to_end/test_vertical_slice.py
+    evidence:
+      command: uv run pytest tests/end_to_end
+      observed: 19 passed
+      note: >-
+        Found by driving the matcher's abstention weight to an extreme while
+        testing that no feature channel is inert. A system that abstains
+        everywhere is a real possible output, so the failure is reported as a
+        refusal that says why, not as a score of zero and not as a dependency's
+        key error.
+    validity:
+      scope: official_metric_behaviour
+      holds_while: >-
+        registry/official_source.yaml pins commit
+        075fc5f5a52d11077f9dc2b074644618f26939e2 and tracksdata stays at the
+        pinned commit.
+    superseded_by: null
