@@ -38,7 +38,11 @@ def test_every_recorded_digest_still_holds(registry: ArtifactRegistry) -> None:
 
 
 def test_every_digest_is_a_typed_token(registry: ArtifactRegistry) -> None:
-    slot_kind = {"raw": DigestKind.RAW_ARTIFACT, "canonical_text": DigestKind.CANONICAL_TEXT}
+    slot_kind = {
+        "raw": DigestKind.RAW_ARTIFACT,
+        "canonical_text": DigestKind.CANONICAL_TEXT,
+        "tree": DigestKind.TREE,
+    }
     for record in registry.artifacts:
         for slot, token in record.digests.items():
             digest = Digest.parse(token)

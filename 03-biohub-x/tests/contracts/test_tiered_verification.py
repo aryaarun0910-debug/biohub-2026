@@ -226,6 +226,8 @@ def test_the_repository_registry_is_still_verified_deeply() -> None:
     # cheap tier by the arrival of a kind of artifact that needs it.
     loaded = load_artifact_registry(REPO_ROOT / ARTIFACT_REGISTRY_PATH)
     checks = verify_registry(loaded, REPO_ROOT)
-    assert checks
-    assert all(check.depth is VerificationDepth.DEEP for check in checks)
-    assert all(check.ok for check in checks)
+    repository_ids = {record.id for record in loaded.artifacts if record.path is not None}
+    repository_checks = [check for check in checks if check.artifact_id in repository_ids]
+    assert repository_checks
+    assert all(check.depth is VerificationDepth.DEEP for check in repository_checks)
+    assert all(check.ok for check in repository_checks)
