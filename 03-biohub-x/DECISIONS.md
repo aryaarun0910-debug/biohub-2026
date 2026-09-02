@@ -736,3 +736,38 @@ an id with no owner. The owner itself still cannot be verified offline: the
 slug, and on this machine it was not. A future request states the owner as the
 slug from the account's own URL, and the discrepancy is recorded rather than
 guessed at.
+
+## D-0027 - The notebook carries its own package and imports from nowhere else
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+The generated notebook used to begin `sys.path.insert(0,
+"/kaggle/input/biohubx-package/src")`. Nothing supplies that package. Kaggle
+documents `/kaggle/input` for attached inputs and `/kaggle/working` as the
+writable runtime directory, and the CLI uploads the kernel folder without
+promising to mount it under an input path. The package declares no dataset or
+model sources at all, deliberately, so the path could not have existed.
+
+It would have been found only by spending another GPU session, which is how the
+last one was spent.
+
+So the tested source travels inside the notebook as a deterministic archive:
+entries sorted, timestamps fixed, permissions normalised, so the same tree always
+yields the same bytes and a digest recorded at build time means something at run
+time. The notebook verifies that digest before extracting anything, refuses
+entries that escape their root, extracts under `/kaggle/working`, imports from
+there, and then asserts the imported module actually came from the verified tree.
+
+The payload carries source and nothing else, checked by reading the archive
+rather than trusting the filter that wrote it.
+
+The gate proves this by running the notebook's own code as a subprocess from a
+temporary directory, with the interpreter isolated and `PYTHONPATH` removed.
+That is not ceremony: `biohubx` is installed in this environment, so any weaker
+check would pass whether or not the bootstrap worked. The run must also announce
+the whole stage sequence, from `bootstrap-verify` to `done`, as a subsequence.
+
+**The general rule this turn earns: a packaged run may not depend on any path the
+package itself does not create or verify.** Two GPU sessions have now been lost
+to assumptions about someone else's filesystem.

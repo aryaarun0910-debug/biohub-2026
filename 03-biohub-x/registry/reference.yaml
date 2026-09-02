@@ -245,7 +245,7 @@ references:
           dataset_id: 10999845
           licence: CC0-1.0
           files: 87
-          total_bytes: 424449
+          total_bytes: 991289
           weight_bytes: 33432810
           wheel_bytes: 322000000
         - slug: pilkwang/biohub-temporal-unet3d-seed314159-v1
@@ -780,16 +780,40 @@ approval_packet:
       invalid, its log registered at raw_artifact_sha256:sha256:cec04e32b04cf2d0d
       b31d0162d7b246b86fd8dc4fad2335a7c342be791a18ecb. The failed kernel is left
       in place, neither deleted nor replaced.
+    bootstrap:
+      self_contained: true
+      embedded_payload_digest: raw_artifact_sha256:sha256:c24db880462b202943669e459e0f2d1fb322e5e7223e7165a64b3a8d01b8acf9
+      embedded_payload_bytes: 383602
+      embedded_file_count: 44
+      extracts_to: /kaggle/working/biohubx-package
+      imports_from_kaggle_input: false
+      why: >-
+        The earlier notebook did sys.path.insert on
+        /kaggle/input/biohubx-package/src. No dataset or model source supplies
+        that package, and Kaggle documents /kaggle/input for attached inputs and
+        /kaggle/working as the writable runtime directory; the CLI uploads the
+        kernel folder but does not promise to mount it under an input path. The
+        package now travels inside the notebook, is verified against a digest
+        recorded at build time, extracts under /kaggle/working, and the notebook
+        asserts the imported module came from the verified tree.
+      payload_contents: source only; competition bytes, checkpoints and weights are refused by reading the archive
     pre_push_gate:
       mandatory: true
       nbformat_validated: true
       nbconvert_converted: true
-      converted_bytes: 301505
+      converted_bytes: 927357
       required_metadata_present: true
       entry_point_exercised: true
-      heartbeat_lines: 14
-      stages_seen: ["environment", "inputs", "fold", "verify", "guard", "model", "epoch-start", "epoch-end", "checkpoint", "done"]
+      heartbeat_lines: 20
+      stages_seen: ["bootstrap-verify", "bootstrap-extract", "bootstrap-import", "start", "pinned", "environment", "inputs", "fold", "verify", "guard", "model", "epoch-start", "epoch-end", "checkpoint", "done"]
       runs_before_any_network_action: true
+      bootstrap_ran_isolated_from_the_repository: true
+      expected_stage_sequence_seen: true
+      isolation_note: >-
+        The notebook's own code runs as a subprocess from a temporary directory
+        with the interpreter isolated and PYTHONPATH removed. biohubx is installed
+        in this environment, so a weaker check would pass whether or not the
+        bootstrap worked.
       note: >-
         The same libraries Kaggle uses, run locally first. A build that cannot
         convert or cannot speak now fails here instead of on a GPU.
@@ -809,12 +833,12 @@ approval_packet:
       built_locally: true
       pushed: false
       path: artifacts\kaggle-package
-      manifest_digest: canonical_text_sha256:sha256/v1:fd29ebae26ef2943456f1a4880fd9891a902f1cc06789225403d1009190d7b48
+      manifest_digest: canonical_text_sha256:sha256/v1:265c10fc60b34c0342b9c1225bfebdb0930dc8c8a20b3c2c23b291767fdd793c
       file_count: 49
       total_bytes: 414461
       contains_competition_bytes: false
       contains_external_weights: false
-      pinned_commit: 16216fb755e0751920654f47ae6de8e5c6789d68
+      pinned_commit: 6cb640e1ce5bb191848407508f6a8c7e650423b7
       kernel_id: aryaarun07/biohub-x-e03-fold-44b6
       pushable: true
       push_command: kaggle kernels push -p artifacts\kaggle-package
