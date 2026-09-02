@@ -16,7 +16,11 @@ from biohubx.packaging.kaggle import (
     FoldSpec,
     PackageSpec,
     PackagingError,
+    archive_digest,
+    archive_inventory,
     build_notebook,
+    check_payload_contents,
+    deterministic_archive,
     forbidden_content,
     guard_report,
     kernel_id_for,
@@ -41,6 +45,10 @@ SPEC = PackageSpec(
 )
 
 REGISTERED = {"44b6_a.zarr": "tree_sha256:sha256/v1:" + "b" * 64}
+
+
+def repo_source() -> Path:
+    return Path(__file__).resolve().parents[2] / "src" / "biohubx"
 
 
 def report(**overrides: Any) -> dict[str, Any]:
@@ -140,7 +148,7 @@ def test_the_kernel_metadata_disables_internet_and_ships_no_datasets() -> None:
 
 def test_the_notebook_embeds_the_spec_and_carries_no_model_logic() -> None:
     shipped = {**SPEC.to_dict(), "input_digests": REGISTERED}
-    notebook = build_notebook(SPEC, shipped=shipped)
+    notebook = build_notebook(SPEC, shipped=shipped, payload=deterministic_archive(repo_source()))
     assert len(notebook["cells"]) == 1
     source = "".join(notebook["cells"][0]["source"])
     assert "run_fold" in source
@@ -185,7 +193,11 @@ def test_the_notebook_carries_the_fields_nbformat_validates_before_running() -> 
     That is the worst possible failure: a GPU session spent, no heartbeat, no
     result, and nothing measured. It happened once.
     """
-    notebook = build_notebook(SPEC, shipped={**SPEC.to_dict(), "input_digests": REGISTERED})
+    notebook = build_notebook(
+        SPEC,
+        shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
+        payload=deterministic_archive(repo_source()),
+    )
 
     kernelspec = notebook["metadata"]["kernelspec"]
     for required in ("display_name", "language", "name"):
@@ -253,7 +265,11 @@ def test_the_generated_notebook_validates_and_converts() -> None:
     )
     pytest.importorskip("nbconvert", reason="the package-gate dependency group is not installed")
 
-    notebook = build_notebook(SPEC, shipped={**SPEC.to_dict(), "input_digests": REGISTERED})
+    notebook = build_notebook(
+        SPEC,
+        shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
+        payload=deterministic_archive(repo_source()),
+    )
     prepush.check_required_metadata(notebook)
     prepush.validate_notebook(notebook)
     assert prepush.convert_notebook(notebook) > 0
@@ -272,3 +288,77 @@ def test_a_gate_report_with_no_heartbeat_does_not_pass() -> None:
         stage_lines_seen=0,
     )
     assert not silent.passed
+
+
+# --- the notebook carries its own package -----------------------------------
+
+
+def test_the_archive_is_byte_identical_across_builds() -> None:
+    """A payload whose digest moves cannot be verified at runtime against a recorded one."""
+    first = deterministic_archive(repo_source())
+    second = deterministic_archive(repo_source())
+    assert first == second
+    assert archive_digest(first) == archive_digest(second)
+    assert archive_digest(first).startswith("raw_artifact_sha256:sha256:")
+
+
+def test_the_payload_carries_source_and_nothing_else() -> None:
+    payload = deterministic_archive(repo_source())
+    inventory = archive_inventory(payload)
+    assert inventory, "an empty payload could not import anything"
+    assert all(name.endswith(".py") for name in inventory)
+    assert not any("__pycache__" in name for name in inventory)
+    check_payload_contents(payload)
+
+
+def test_a_payload_holding_a_checkpoint_is_refused(tmp_path: Path) -> None:
+    import io
+    import zipfile
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("biohubx/__init__.py", "x = 1")
+        archive.writestr("weights/best.pth", "0")
+    with pytest.raises(PackagingError, match="non-source content"):
+        check_payload_contents(buffer.getvalue())
+
+
+def test_the_notebook_never_imports_from_the_unmounted_input_path() -> None:
+    """No dataset or model source supplies the package, so that path is not promised."""
+    notebook = build_notebook(
+        SPEC,
+        shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
+        payload=deterministic_archive(repo_source()),
+    )
+    source = "".join(notebook["cells"][0]["source"])
+    assert "/kaggle/input/biohubx-package" not in source
+    assert "/kaggle/working/biohubx-package" in source
+    assert "hashlib.sha256" in source, "the notebook must verify its payload before extracting"
+
+
+def test_a_notebook_without_a_payload_is_refused() -> None:
+    with pytest.raises(PackagingError, match="could not import anything"):
+        build_notebook(SPEC, shipped=SPEC.to_dict(), payload=None)
+
+
+def test_the_embedded_cell_is_valid_python() -> None:
+    import ast
+
+    notebook = build_notebook(
+        SPEC,
+        shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
+        payload=deterministic_archive(repo_source()),
+    )
+    ast.parse("".join(notebook["cells"][0]["source"]))
+
+
+def test_the_expected_stage_sequence_is_checked_as_a_subsequence() -> None:
+    prepush = pytest.importorskip(
+        "biohubx.packaging.prepush", reason="the package-gate dependency group is not installed"
+    )
+    complete = list(prepush.EXPECTED_STAGES)
+    assert prepush.missing_from_sequence(complete) == ()
+    assert prepush.missing_from_sequence([*complete, "extra"]) == ()
+    without_done = [name for name in complete if name != "done"]
+    assert "done" in prepush.missing_from_sequence(without_done)
+    assert prepush.missing_from_sequence(list(reversed(complete)))

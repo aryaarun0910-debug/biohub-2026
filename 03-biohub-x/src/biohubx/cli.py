@@ -1983,7 +1983,11 @@ def package_kaggle(
         FoldSpec,
         PackageSpec,
         PackagingError,
+        archive_digest,
+        archive_inventory,
         build_notebook,
+        check_payload_contents,
+        deterministic_archive,
         forbidden_content,
         kernel_id_for,
         kernel_metadata,
@@ -2175,7 +2179,22 @@ def package_kaggle(
     from biohubx.packaging.entry import EntryRefusal
     from biohubx.packaging.prepush import PrePushError
 
-    notebook = build_notebook(spec, shipped=shipped)
+    # The package travels inside the notebook. Nothing is imported from
+    # /kaggle/input, because no dataset or model source supplies it.
+    try:
+        archive_bytes = deterministic_archive(root_path / "src/biohubx")
+        check_payload_contents(archive_bytes)
+    except PackagingError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    inventory = archive_inventory(archive_bytes)
+    payload_token = archive_digest(archive_bytes)
+    heartbeat(
+        command,
+        "payload",
+        f"bytes={len(archive_bytes)} files={len(inventory)} digest={payload_token[:46]}",
+    )
+    notebook = build_notebook(spec, shipped=shipped, payload=archive_bytes)
     try:
         data_root = competition_root(root)
     except CompetitionLayoutError as exc:
@@ -2187,7 +2206,7 @@ def package_kaggle(
     os.environ["BIOHUBX_OUTPUT"] = str(gate_out)
     heartbeat(command, "pre-push", "validating, converting and exercising before any network action")
     try:
-        gate = prepush.run_all(notebook, shipped, data_root=data_root)
+        gate = prepush.run_all(notebook, shipped, data_root=data_root, interpreter=sys.executable)
     except (PrePushError, EntryRefusal, PackagingError) as exc:
         heartbeat(command, "refused", f"pre-push gate failed, nothing was sent: {exc}")
         raise typer.Exit(code=2) from exc
@@ -2198,6 +2217,14 @@ def package_kaggle(
         f"{gate.stage_lines_seen} heartbeat lines across {len(gate.stage_names)} stages",
     )
     payload["pre_push_gate"] = gate.to_dict()
+    payload["bootstrap"] = {
+        "embedded_payload_digest": payload_token,
+        "embedded_payload_bytes": len(archive_bytes),
+        "embedded_file_count": len(inventory),
+        "inventory": inventory,
+        "extracts_to": "/kaggle/working/biohubx-package",
+        "imports_from_kaggle_input": False,
+    }
     smoke_manifest = gate_out / f"result-{spec.fold.fold_id}.json"
     if smoke_manifest.is_file():
         payload["local_smoke"] = json.loads(smoke_manifest.read_text(encoding="utf-8"))
