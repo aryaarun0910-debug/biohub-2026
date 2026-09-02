@@ -267,5 +267,20 @@ data an experiment used is the data that was registered. The listing is kept
 alongside the digest so a later mismatch names the file that changed rather than
 only reporting that something did.
 
-Symlinks inside a tree are refused. Following one could leave the tree and
-skipping one would lose information, so neither happens silently.
+Any reparse point is refused, at the root and at every descendant: a symlink, a
+Windows directory junction, or anything else carrying the reparse-point
+attribute. Following one could leave the artifact and record foreign files under
+relative paths that look local, and skipping one would lose information, so
+neither happens silently.
+
+Checking the predicate is not sufficient on its own; the traversal order matters
+as much. An implementation built on `rglob` enumerates the whole tree before a
+caller can inspect any of it, so a junction is already followed and its contents
+already listed by the time any check could run. The walk is therefore explicit
+and judges every entry before descending into it.
+
+On Windows a directory junction is invisible to the obvious test: `is_symlink()`
+reports False for one while `is_dir()` reports True, and a junction needs no
+special privilege to create. That combination is why this was a live hole rather
+than a theoretical one, and why the junction case is covered by a real test
+rather than only a mocked one.

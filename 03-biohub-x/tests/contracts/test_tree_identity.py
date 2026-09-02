@@ -11,16 +11,19 @@ when nothing does, and it must be independent of the machine that computed it.
 
 from __future__ import annotations
 
+import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
+from biohubx import hashing
 from biohubx.hashing import (
     TREE_CANONICALIZATION_VERSION,
     Digest,
     DigestKind,
     NotATreeError,
+    _reparse_kind,
     digest_file,
     tree_digest,
 )
@@ -229,11 +232,157 @@ def test_an_empty_tree_has_an_identity_rather_than_an_error(tmp_path: Path) -> N
     assert manifest.digest.kind is DigestKind.TREE
 
 
+# --- reparse points: the boundary of the artifact ---------------------------
+#
+# A reparse point inside a tree can redirect traversal outside it. That is not
+# only a wrong digest: the foreign files are recorded under relative paths that
+# look like they belong to the artifact, so the listing reads as innocent. On
+# Windows a directory junction is invisible to the obvious check, because
+# `is_symlink()` reports False for one while `is_dir()` reports True.
+
+
+def _make_junction(link: Path, target: Path) -> bool:
+    """Create a real Windows directory junction. Returns False if unavailable.
+
+    A junction needs no special privilege, unlike a symlink, which is why it is
+    the case that actually reaches most machines.
+    """
+    if sys.platform != "win32":
+        return False
+    result = subprocess.run(
+        ["cmd", "/c", "mklink", "/J", str(link), str(target)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return result.returncode == 0 and link.exists()
+
+
+def test_the_reparse_detector_recognises_an_ordinary_entry(tmp_path: Path) -> None:
+    # The negative half: the detector must not refuse everything, or the tests
+    # below would pass against a digest that never works at all.
+    root = build(tmp_path / "a.zarr")
+    assert _reparse_kind(root) is None
+    assert _reparse_kind(root / "zarr.json") is None
+
+
+def test_a_mocked_reparse_point_is_refused_on_every_platform(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Platform-neutral cover for the refusal, independent of the host.
+
+    The real cases below are each available on only one platform, so without
+    this the refusal path would go untested wherever the suite happens to run.
+    """
+    root = build(tmp_path / "a.zarr")
+    planted = root / "0" / "c" / "0.0.1"
+
+    real = hashing._reparse_kind
+
+    def pretend(path: Path) -> str | None:
+        return "reparse point (tag 0xa0000003)" if path == planted else real(path)
+
+    monkeypatch.setattr(hashing, "_reparse_kind", pretend)
+    with pytest.raises(NotATreeError, match="reparse point"):
+        tree_digest(root)
+
+
+def test_a_real_windows_junction_inside_the_tree_is_refused(tmp_path: Path) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "leaked.txt").write_bytes(b"not part of the artifact")
+    root = build(tmp_path / "a.zarr")
+    if not _make_junction(root / "link", outside):
+        pytest.skip("directory junctions are a Windows feature")
+
+    with pytest.raises(NotATreeError, match="directory junction"):
+        tree_digest(root)
+
+
+def test_a_junction_would_otherwise_have_leaked_a_foreign_file(tmp_path: Path) -> None:
+    """The failure this prevents, stated as the thing that must not happen.
+
+    Without the check the walk descends through the junction and records
+    `link/leaked.txt`, a file outside the artifact, under a relative path that
+    looks local.
+    """
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "leaked.txt").write_bytes(b"not part of the artifact")
+    root = build(tmp_path / "a.zarr")
+    if not _make_junction(root / "link", outside):
+        pytest.skip("directory junctions are a Windows feature")
+
+    # The junction is genuinely traversable, so the danger is real rather than
+    # theoretical: an unguarded walk would find the foreign file.
+    assert (root / "link" / "leaked.txt").is_file()
+    assert not (root / "link").is_symlink()
+    assert (root / "link").is_dir()
+
+    with pytest.raises(NotATreeError):
+        tree_digest(root)
+
+
+def test_a_junction_given_as_the_root_is_refused(tmp_path: Path) -> None:
+    # Otherwise the identity would describe wherever it points, under a name
+    # that claims to be the artifact.
+    outside = build(tmp_path / "real.zarr")
+    link = tmp_path / "pointer.zarr"
+    if not _make_junction(link, outside):
+        pytest.skip("directory junctions are a Windows feature")
+    with pytest.raises(NotATreeError, match="tree root is a directory junction"):
+        tree_digest(link)
+
+
 @pytest.mark.skipif(sys.platform == "win32", reason="creating symlinks needs privilege on Windows")
 def test_a_symlink_inside_the_tree_is_refused(tmp_path: Path) -> None:
-    # Following it could leave the tree; skipping it would lose information.
-    # Neither happens silently.
     root = build(tmp_path / "a.zarr")
     (root / "link").symlink_to(root / "zarr.json")
-    with pytest.raises(NotATreeError, match="symlink inside the tree"):
+    with pytest.raises(NotATreeError, match="symlink"):
         tree_digest(root)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="creating symlinks needs privilege on Windows")
+def test_a_symlink_given_as_the_root_is_refused(tmp_path: Path) -> None:
+    root = build(tmp_path / "a.zarr")
+    link = tmp_path / "pointer.zarr"
+    link.symlink_to(root, target_is_directory=True)
+    with pytest.raises(NotATreeError, match="tree root is a symlink"):
+        tree_digest(link)
+
+
+def test_the_refusal_happens_during_traversal_not_during_hashing(tmp_path: Path) -> None:
+    """Order matters, not just the predicate.
+
+    An implementation that enumerated the whole tree first would already have
+    followed a junction and listed its contents before any check could run, and
+    the foreign files would carry relative paths that look local. The refusal
+    therefore has to come from the walk itself, and no byte of any file may have
+    been read by the time it fires.
+    """
+    outside = tmp_path / "outside"
+    (outside / "deep").mkdir(parents=True)
+    (outside / "deep" / "leaked.txt").write_bytes(b"foreign")
+    root = build(tmp_path / "a.zarr")
+    if not _make_junction(root / "link", outside):
+        pytest.skip("directory junctions are a Windows feature")
+
+    # The walk refuses on its own, before any hashing stage exists to reach.
+    with pytest.raises(NotATreeError, match="directory junction"):
+        hashing._walk_tree(root)
+
+    hashed: list[str] = []
+    original = hashing.raw_digest_file
+
+    def record(path: Path) -> Digest:
+        hashed.append(path.as_posix())
+        return original(path)
+
+    monkeypatch = pytest.MonkeyPatch()
+    monkeypatch.setattr(hashing, "raw_digest_file", record)
+    try:
+        with pytest.raises(NotATreeError):
+            tree_digest(root)
+    finally:
+        monkeypatch.undo()
+    assert hashed == [], "no file may be read once the tree is refused"

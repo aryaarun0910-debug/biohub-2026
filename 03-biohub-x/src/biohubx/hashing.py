@@ -30,7 +30,9 @@ anywhere in this repository: it does not say what it is the digest *of*.
 from __future__ import annotations
 
 import hashlib
+import os
 import re
+import stat
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
@@ -61,9 +63,12 @@ The listing is built from the tree root, and every path is recorded relative to
 it, so moving or renaming the root does not change the identity while moving a
 file inside it does.
 
-1. Walk the tree. Only regular files and directories are permitted; a symlink,
-   device node or anything else raises, because following one could leave the
-   tree and not following one would silently lose information.
+1. Walk the tree, checking every entry BEFORE descending into it. Only regular
+   files and real directories are permitted. Any reparse point raises: a
+   symlink, a Windows directory junction, or anything else carrying the
+   reparse-point attribute. Following one could leave the tree and record
+   foreign files under innocent-looking relative paths; not following one would
+   silently lose information. Neither is done quietly.
 2. Record each relative path with forward slashes, encoded as UTF-8.
 3. A regular file contributes ``f <sha256> <size> <path>``, where the digest is
    the raw identity of its bytes.
@@ -82,6 +87,9 @@ DECISIONS.md entry.
 
 _BOM = "\ufeff"
 _READ_CHUNK = 1 << 20
+
+_FILE_ATTRIBUTE_REPARSE_POINT = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+"""Windows marks every reparse point with this attribute, whatever its tag."""
 
 _TOKEN_RE = re.compile(
     r"^(?P<kind>[a-z0-9_]+):(?P<algorithm>[a-z0-9]+)"
@@ -261,6 +269,76 @@ class TreeManifest:
         return "".join(f"{record.line}\n" for record in self.records)
 
 
+def _reparse_kind(path: Path) -> str | None:
+    """Name the reparse point at ``path``, or return None for an ordinary entry.
+
+    Three checks, because no single one covers every case on every platform:
+
+    * ``is_symlink`` catches POSIX symlinks and Windows symlinks.
+    * ``is_junction`` catches Windows directory junctions, which are NOT
+      symlinks. ``is_symlink`` reports False for a junction, and ``is_dir``
+      reports True, so a junction is invisible to the obvious check and is
+      traversed like an ordinary directory.
+    * The reparse-point attribute catches every remaining tag, including ones
+      this interpreter has no named predicate for.
+    """
+    if path.is_symlink():
+        return "symlink"
+    is_junction = getattr(path, "is_junction", None)
+    if is_junction is not None:
+        try:
+            if is_junction():
+                return "directory junction"
+        except OSError:
+            return None
+    try:
+        status = os.lstat(path)
+    except OSError:
+        return None
+    attributes = getattr(status, "st_file_attributes", 0)
+    if attributes & _FILE_ATTRIBUTE_REPARSE_POINT:
+        tag = getattr(status, "st_reparse_tag", 0)
+        return f"reparse point (tag {tag:#x})"
+    return None
+
+
+def _walk_tree(root: Path) -> tuple[list[Path], list[Path]]:
+    """Collect regular files and empty directories, refusing reparse points.
+
+    An explicit walk rather than ``rglob``, and the difference is not stylistic.
+    ``rglob`` enumerates the whole tree before a caller can inspect any of it,
+    so a junction would already have been followed and its contents already
+    listed under relative paths that look like they belong to the artifact, by
+    the time any check could run. Here every entry is judged before it is
+    descended into.
+    """
+    files: list[Path] = []
+    empty_directories: list[Path] = []
+    pending = [root]
+    while pending:
+        directory = pending.pop()
+        children = sorted(directory.iterdir(), key=lambda item: item.name)
+        if not children:
+            if directory != root:
+                empty_directories.append(directory)
+            continue
+        for child in children:
+            reparse = _reparse_kind(child)
+            if reparse is not None:
+                raise NotATreeError(
+                    f"{reparse} inside the tree at {_relative_posix(root, child)}. Following it "
+                    "could leave the artifact and record foreign files under paths that look "
+                    "local, and skipping it would lose information, so neither is done"
+                )
+            if child.is_dir():
+                pending.append(child)
+            elif child.is_file():
+                files.append(child)
+            else:
+                raise NotATreeError(f"neither a regular file nor a directory: {_relative_posix(root, child)}")
+    return files, empty_directories
+
+
 def _relative_posix(root: Path, path: Path) -> str:
     relative = path.relative_to(root).as_posix()
     if "\n" in relative or "\x00" in relative:
@@ -284,34 +362,31 @@ def tree_digest(
     """
     if not root.exists():
         raise NotATreeError(f"tree root does not exist: {root}")
-    if root.is_symlink() or not root.is_dir():
+    root_reparse = _reparse_kind(root)
+    if root_reparse is not None:
+        raise NotATreeError(
+            f"tree root is a {root_reparse}: {root}. The identity would describe wherever it "
+            "points rather than the artifact itself"
+        )
+    if not root.is_dir():
         raise NotATreeError(f"tree root is not a directory: {root}")
 
-    records: list[TreeRecord] = []
+    file_paths, empty_directory_paths = _walk_tree(root)
+
+    records: list[TreeRecord] = [
+        TreeRecord(
+            kind="d",
+            relative_path=_relative_posix(root, directory),
+            size_bytes=None,
+            content_sha256=None,
+        )
+        for directory in empty_directory_paths
+    ]
     files = 0
-    empty_directories = 0
+    empty_directories = len(empty_directory_paths)
     total_bytes = 0
 
-    for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
-        if path.is_symlink():
-            raise NotATreeError(
-                f"symlink inside the tree: {_relative_posix(root, path)}. Following it could leave "
-                "the tree and skipping it would lose information, so neither is done silently"
-            )
-        if path.is_dir():
-            if not any(path.iterdir()):
-                records.append(
-                    TreeRecord(
-                        kind="d",
-                        relative_path=_relative_posix(root, path),
-                        size_bytes=None,
-                        content_sha256=None,
-                    )
-                )
-                empty_directories += 1
-            continue
-        if not path.is_file():
-            raise NotATreeError(f"neither a regular file nor a directory: {_relative_posix(root, path)}")
+    for path in sorted(file_paths, key=lambda item: item.as_posix()):
         size = path.stat().st_size
         records.append(
             TreeRecord(

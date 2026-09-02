@@ -157,10 +157,12 @@ canonical_text_sha256:sha256/v1:<64 hex>
 tree_sha256:sha256/v1:<64 hex>
 ```
 
-Tree canonicalization `v1`: walk the tree; refuse symlinks and anything that is
-neither a regular file nor a directory; record each file as its relative POSIX
-path, size and content digest, and each EMPTY directory as itself; sort by path;
-join with LF. Paths are relative to the root, so moving or renaming an artifact
+Tree canonicalization `v1`: walk the tree, judging every entry before descending
+into it; refuse any reparse point at the root or below it, whether a symlink, a
+Windows directory junction, or any other reparse tag, and refuse anything that
+is neither a regular file nor a real directory; record each file as its relative
+POSIX path, size and content digest, and each EMPTY directory as itself; sort by
+path; join with LF. Paths are relative to the root, so moving or renaming an artifact
 does not change what the data is, while moving a chunk inside it does. The text
 and tree canonicalization versions are independent and are not interchangeable,
 which is why the kind is part of the token rather than implied by the version.
