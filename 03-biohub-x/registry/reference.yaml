@@ -390,6 +390,90 @@ references:
         the other two models settle it, but it means the primary weight cannot
         be described as clean either.
       - The run's division Jaccard, for the reason recorded above.
+  - id: R-0003
+    status: reference_only
+    title: G-02 selective weight acquisition, verified and quarantined
+    source:
+      kind: kaggle_selective_file_download
+      authorised_by: Arya Arun
+      authorisation: >-
+        Two weight files only, approximately 17 MB. No DeepCenter, no figures
+        dataset, no training checkpoints, no wheels, no whole datasets. Verify
+        both SHA-256 identities before loading. No GPU, no kernel push, no
+        submission. Quarantine both as reference_only: permitted uses are digest
+        verification, CPU loading and format checks, reproducing the proposal
+        interface, and informing clean fold-specific retraining. They may not
+        support a held-out finding, and any 0.950 claim needs two newly trained
+        leave-one-embryo-out models.
+      performed_utc: '2026-09-02T00:00:00Z'
+
+    observed:
+      downloaded:
+        files: 2
+        total_bytes: 16726318
+        avoided_bytes: 448323000
+        note: >-
+          Selective download took 3.6 percent of what the three datasets weigh
+          together. checkpoint_last, the 322 MB wheel set and the DeepCenter
+          weights were all left on Kaggle.
+      identity_verification:
+        support_pack_edge_predictor_best.pth:
+          bytes: 8363159
+          expected: 12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771
+          recomputed: 12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771
+          verdict: MATCH
+          attested_by: the pack's own ARTIFACT_MANIFEST and the reference run log, both predating the download
+        temporal_edge_predictor_best.pth:
+          bytes: 8363159
+          expected: 9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f
+          recomputed: 9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f
+          verdict: MATCH
+          attested_by: the pack's own SNAPSHOT_MANIFEST and the reference run log, both predating the download
+        same_size_different_content: >-
+          Both files are exactly 8363159 bytes and their digests differ, so they
+          are genuinely two models rather than one file published twice.
+        registry_check: >-
+          Both are recorded in registry/artifacts.yaml with status reference_only
+          and re-derived through `artifacts verify --deep`: 2 checked, 0 failed.
+
+      format_check:
+        method: >-
+          Read as Zip archives with a restricted unpickler that refuses to
+          execute any torch class and captures the rebuild calls instead. No
+          torch, no CPU inference, no tensor materialised. This establishes what
+          the files contain and nothing about what they do.
+        both_checkpoints:
+          zip_entries: 142
+          state_dict_entries: 136
+          parameters: 2077996
+          identical_key_sets: true
+          identical_shapes: true
+        architecture_recovered:
+          encoder: unet.encoder_blocks 0 to 2, first conv (32, 1, 3, 3, 3), so a single-channel 3D input
+          temporal: unet.temporal_blocks 1 and 2, each a MultiheadAttention with layer norm
+          decoder: unet.decoder_blocks 0 and 1
+          unet_head: (32, 32, 1, 1, 1) producing a 32-channel feature volume
+          detect_head: (1, 32, 1, 1, 1) plus one bias, a 1x1x1 convolution to a single logit per voxel
+          edge_predictor: >-
+            transformer.proj (128, 64), four cross-attention blocks, and
+            pair_mlp ending (1, 64) to a single edge logit.
+        what_this_settles: >-
+          The reference's proposal source is a dense per-voxel detection
+          heatmap, one logit for every voxel of the UNet feature volume, and the
+          notebook turns it into nodes with a threshold. That is architectural
+          confirmation of what the emitted node counts in R-0001 already implied:
+          the system detects every cell it can and never targets the annotated
+          ones. It also means its node budget is set by a scalar threshold,
+          which is the knob a retention policy would act on.
+        model_size_note: >-
+          2.08 million parameters across both, which is small. The reference's
+          strength is not model capacity.
+
+    unresolved:
+      - Whether either checkpoint loads and runs under a Biohub-X-owned model
+        definition. That needs torch, which this repository does not depend on,
+        and a decision about which torch build to add.
+      - The primary weight's training split, carried forward from R-0002.
 
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
@@ -412,7 +496,11 @@ approval_packet:
       for.
 
   gate_2_weight_downloads:
-    state: awaiting_approval
+    state: PERFORMED for the two required files; DeepCenter still deferred, figures dropped
+    outcome: >-
+      Both identities verified against digests declared before the download,
+      both registered reference_only and quarantined, and both structurally
+      indexed without torch (R-0003). 16,726,318 bytes taken.
     purpose: >-
       Reproduce the reference once to establish what it emits, not to establish
       what it scores. Its public score is contaminated (R-0002), so reproduction

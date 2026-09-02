@@ -16,4 +16,57 @@
 
 schema_version: 1
 
-models: []
+models:
+  - id: reference.unet_node_transformer.support_pack_50ep
+    architecture: >-
+      TemporalUNet3D encoder plus a node transformer edge predictor. Its config
+      records unet_out_channels 32, unet_layers [32, 64, 128], downsample
+      [1, 4, 4], window_size 2 and pool_kernel_um 5.0, though the reference
+      notebook runs it at pool_kernel_um 3.0.
+    role: >-
+      Reference only. It is the primary graph generator of the notebook Biohub-X
+      reads for engineering detail. It serves no SYSTEM.md component.
+    source:
+      dataset: pilkwang/biohub-tracking-support-pack-50ep-v1
+      dataset_id: 10999845
+      pinned_by: raw_artifact_sha256 of the weight file, since Kaggle exposes no version for a file
+    license:
+      code: CC0-1.0
+      weight: CC0-1.0
+    training_data: >-
+      UNKNOWN. No split manifest accompanies this weight; the pack calls it a
+      public learned baseline artifact repackaged locally (R-0002).
+    checkpoint: reference.pilkwang.support_pack_50ep.edge_predictor_best
+    status: blocked
+    blocked_reason: >-
+      Quarantined at download. Permitted uses are digest verification, CPU
+      loading and format checks, studying the proposal interface, and informing
+      clean retraining. It may not produce a held-out finding and no score
+      obtained with it may be promoted, because provenance that is unknown is
+      not provenance that is clean.
+
+  - id: reference.unet_node_transformer.temporal_seed314159
+    architecture: >-
+      Same family and same inference grid as the model above; the notebook
+      refuses to blend them if window size or downsample disagree.
+    role: >-
+      Reference only. Second seed in the notebook's dual-seed detection and edge
+      fusion, at detection weight 0.80 and edge weight 0.15.
+    source:
+      dataset: pilkwang/biohub-temporal-unet3d-seed314159-v1
+      dataset_id: 11184174
+      pinned_by: raw_artifact_sha256 of the weight file
+      snapshot: epoch 400, best epoch 381, base seed 314159
+    license:
+      code: CC0-1.0
+      weight: CC0-1.0
+    training_data: >-
+      CONTAMINATED. Trained on all 199 annotated movies, which include the four
+      ids byte-identical to the public-test volumes (F-0010, R-0002).
+    checkpoint: reference.pilkwang.temporal_seed314159.edge_predictor_best
+    status: blocked
+    blocked_reason: >-
+      Quarantined more tightly than its sibling. Having trained on all 199
+      movies it has no clean fold anywhere in the corpus, so it may never be
+      evaluated against any split carved from the training data. Format and
+      interface study only.

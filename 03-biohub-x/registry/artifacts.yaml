@@ -10870,3 +10870,72 @@ artifacts:
       2026-09-02T13:20:53.573057+00:00: the eligibility confirmation did not come from a person able to
       join the competition, and the recorded access restrictions were a paraphrase recorded as if read
       from the rules page'
+- id: reference.pilkwang.support_pack_50ep.edge_predictor_best
+  kind: external_model_weights
+  external_path: C:/Users/aryaa/.cache/kagglehub/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1/edge_predictor_best.pth
+  schema: torch-state-dict/unet-node-transformer
+  digests:
+    raw: raw_artifact_sha256:sha256:12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771
+  provenance:
+    status: reference_only
+    imported_utc: '2026-09-02T00:00:00Z'
+    original_path: kaggle datasets download pilkwang/biohub-tracking-support-pack-50ep-v1 -f weights/unet_transformer/split_0/edge_predictor_best.pth
+    source_url: https://www.kaggle.com/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1
+    weight_license: CC0-1.0
+    code_license: CC0-1.0
+    training_data: >-
+      UNKNOWN. The pack records no split manifest for this weight and its
+      ARTIFACT_MANIFEST describes itself only as a public learned baseline
+      artifact repackaged locally (R-0002). Unknown provenance is not clean
+      provenance.
+    access_restrictions: >-
+      Quarantined by the download authorisation. It may be used for digest
+      verification, CPU loading and format checks, reproducing the reference's
+      proposal interface, and informing clean retraining. It may not support any
+      held-out finding, and no score obtained with it may be promoted.
+    competition_eligible: null
+    reviewed_by: Arya Arun
+    reviewed_utc: '2026-09-02T00:00:00Z'
+    note: >-
+      Downloaded selectively at Arya Arun's explicit authorisation: this file
+      only, 8363159 bytes, no checkpoint_last, no wheels, no whole dataset. The
+      recorded digest was declared by the pack's own ARTIFACT_MANIFEST and by
+      the reference run log before the download, and recomputed identically
+      after it. Status reference_only rather than external_cleared: the licence
+      is settled but the training-data provenance is not, and competition
+      eligibility is left null rather than guessed, because a decision nobody
+      made is not a decision.
+- id: reference.pilkwang.temporal_seed314159.edge_predictor_best
+  kind: external_model_weights
+  external_path: C:/Users/aryaa/.cache/kagglehub/datasets/pilkwang/biohub-temporal-unet3d-seed314159-v1/edge_predictor_best.pth
+  schema: torch-state-dict/unet-node-transformer
+  digests:
+    raw: raw_artifact_sha256:sha256:9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f
+  provenance:
+    status: reference_only
+    imported_utc: '2026-09-02T00:00:00Z'
+    original_path: kaggle datasets download pilkwang/biohub-temporal-unet3d-seed314159-v1 -f weights/unet_transformer/split_0/edge_predictor_best.pth
+    source_url: https://www.kaggle.com/datasets/pilkwang/biohub-temporal-unet3d-seed314159-v1
+    weight_license: CC0-1.0
+    code_license: CC0-1.0
+    training_data: >-
+      CONTAMINATED. Its own split_manifest.json records method
+      unet_transformer_alltrain_seed314159_v1 trained on all 199 annotated
+      movies, which include the four ids whose volumes are byte-identical to the
+      public-test volumes (F-0010, R-0002). It has seen every movie Biohub-X
+      would hold out.
+    access_restrictions: >-
+      Quarantined by the download authorisation, and more tightly than its
+      sibling: because it trained on all 199 movies it has no clean fold at all.
+      Digest verification, CPU loading, format checks and interface study only.
+      No held-out finding, no promotion, and it may never be evaluated against
+      any split carved from the training corpus.
+    competition_eligible: null
+    reviewed_by: Arya Arun
+    reviewed_utc: '2026-09-02T00:00:00Z'
+    note: >-
+      Downloaded selectively at Arya Arun's explicit authorisation: this file
+      only, 8363159 bytes. Digest declared by the pack's own SNAPSHOT_MANIFEST
+      and by the reference run log before the download, recomputed identically
+      after it. Identical in size to the support-pack weight and different in
+      content, so the two are genuinely distinct models.
