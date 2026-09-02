@@ -632,3 +632,46 @@ annotated ones, there would be no argument that the two populations look alike.
 The cost is real and taken deliberately: supervision on bright non-cell
 structure is given up, which the published objective did have. A detector
 trained to call 393 real cells background is the worse trade.
+## D-0024 - There is no background class, because the data will not support one
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+[[D-0023]] replaced the published objective's implicit background with an
+intensity band, on the strength of a single window where the band contained
+every annotated cell. E03-MASK-AUDIT measured the same band at every annotated
+node in the corpus and it does not survive ([[F-0020]]).
+
+The numbers are not marginal. The band this repository had adopted would call a
+fifth of 44b6's annotated cells and a seventh of 6bba's background. Selecting per
+fold from training data alone, 6bba admits no band in the set at all, and the one
+44b6 admits withholds half the volume from supervision while still misfiring on
+the held-out embryo. Max-pooling instead of striding makes it slightly worse, so
+the dim annotated cells are real rather than an artefact of sampling every fourth
+voxel.
+
+Widening the band until it stops contradicting anything would be fitting the rule
+to the complaint. **So the negative class is removed.** Voxels are positive or
+unlabelled. The unlabelled ones are modelled as a mixture whose positive share is
+the dataset's own recorded `estimated_number_of_nodes`, which is official
+metadata rather than a tuned constant, and the risk is the non-negative
+positive-unlabelled form so that the clamp firing is visible rather than silent.
+
+Three consequences bind later work.
+
+`build_detection_target` and its masked loss are deleted from `main` rather than
+left behind a flag. They are a falsified implementation, and AGENTS.md keeps
+those in history, not in production files. The band survives only as the audit
+that rejected it, because a rejected rule is worth being able to re-measure.
+
+The remaining uncertainty is named rather than resolved. Biohub-X does not know
+how many dim unannotated cells exist, only that annotated ones reach percentile
+0.09. The class prior counts every cell the dataset estimates, so if that
+estimate is itself biased against dim cells the prior is too low and the
+detector will under-predict. That is E03's stated open risk, not a solved
+problem.
+
+A finer grid is the one route that could bring a background class back. At
+(1, 4, 4) a cell centre can fall between sampled voxels; at full resolution it
+cannot. If a later experiment trains at a finer grid, [[F-0020]] must be
+re-measured there before any band is reconsidered.

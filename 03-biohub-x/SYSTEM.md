@@ -242,7 +242,8 @@ Implemented:
 - `biohubx infer reference --weights PATH [--dataset ID] [--root PATH] [--split S] [--first-frame N] [--frames N] [--crop-z A:B] [--crop-y A:B] [--crop-x A:B] [--detection-threshold F]`
 - `biohubx evaluate slice [--graph PATH]`
 - `biohubx evaluate retention [--root PATH] [--retentions LIST] [--seed N]`
-- `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--ignore-quantile F] [--peak-quantile F] [--learning-rate F]`
+- `biohubx evaluate mask-audit [--root PATH] [--max-frames N]`
+- `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--peak-quantile F] [--learning-rate F]`
 
 `infer synthetic` writes the emitted graph and a stage-by-stage report
 atomically and records the raw digest of the graph. `evaluate slice` refuses a
@@ -311,6 +312,13 @@ estimate is prorated and therefore `declared`, never official metadata.
 
 `evaluate retention` reads ground-truth graphs only, never the four
 duplicated public-test fixtures, and never a volume.
+
+`evaluate mask-audit` measures the intensity percentile of every annotated
+cell in the corpus and reports what each candidate background band would
+cost. It is the instrument that falsified the band ([[F-0020]]) and forced
+the positive-unlabelled objective ([[D-0024]]). Bands are selected per fold
+from the training embryo alone; the evaluation embryo measures failure
+afterwards and never selects the rule.
 
 `train preflight` proves the E03 loop runs before a GPU is asked for: forward,
 masked loss, backward, optimizer step, atomic checkpoint, strict reload,

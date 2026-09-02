@@ -772,48 +772,91 @@ approval_packet:
 
   gate_4_e03_training:
     state: awaiting_approval
+    revised_after: E03-MASK-AUDIT
+    what_the_audit_changed: >-
+      The objective. The packet previously trained against an intensity band;
+      F-0020 falsified every band on this corpus and D-0024 removed the negative
+      class, so E03 now trains a non-negative positive-unlabelled risk in which
+      no voxel is supervised as background. The folds, seeds and falsifier are
+      unchanged.
     purpose: >-
       Two clean leave-one-embryo-out detectors, the first models in this project
       whose numbers could be promoted. Nothing here reproduces the reference.
-    platform: >-
-      Kaggle T4. The competition data already resides there, so no restricted
-      data crosses a new boundary. Colab stays out of scope until its
-      data-processing terms are separately cleared against rule 2.4.b.
-    forbidden_throughout:
-      - initialising, supervising, selecting or tuning from either quarantined checkpoint
-      - reading the public-test directory
-      - using the public leaderboard as validation
-      - reporting a pooled result in place of per-fold results
-      - local CUDA dependencies; the model-cpu group stays CPU-only
 
-    inputs:
-      competition_data:
-        registered_artifacts: the 199 annotated train .zarr and .geff pairs
-        verification: >-
-          `artifacts verify` covers all 402 competition artifacts by shape and
-          the two quarantined weights deeply; the tree digests are recorded in
-          registry/artifacts.yaml and re-derivable with --deep.
-      configuration:
-        path: configs/e03-clean-folds.yaml
-        canonical_text: canonical_text_sha256:sha256/v1:e2204e7728694bc0a122d29a9fd3f12ec35ea40fbfbc4af6a25332eaf62e6ffc
-      code: this repository at the commit recorded in the run manifest
-      weights_carried_in: none
+    platform:
+      choice: Kaggle, accelerator "GPU T4 x2"
+      why: >-
+        The competition data already resides on Kaggle, so no restricted data
+        crosses a new boundary. Two T4s are requested rather than one because
+        the two folds are independent and can be sharded across devices exactly
+        as the reference did, halving wall clock for the same quota.
+      gpu_shape_in_metadata: '"enable_gpu": true with accelerator "nvidiaTeslaT4"; the
+        notebook asserts torch.cuda.device_count() and refuses if it is not what
+        was requested'
+      colab: >-
+        Out of scope for E03. See colab_tracking_assessment below; the blocker is
+        verification, not access.
+
+    submission_mechanism:
+      how: >-
+        `kaggle kernels push -p <dir>` with a kernel-metadata.json naming this
+        repository's packaged notebook, the competition as a data source, and no
+        dataset sources at all, since E03 uses no external weights.
+      kernel_metadata:
+        enable_gpu: true
+        enable_internet: false
+        accelerator: nvidiaTeslaT4
+        competition_sources: [biohub-cell-tracking-during-development]
+        dataset_sources: []
+        kernel_type: notebook
+      notebook_content: >-
+        Generated from the tested package, never hand-authored (AGENTS.md
+        section 3). The notebook installs nothing and contains no model logic; it
+        imports biohubx and calls one command.
+      status: >-
+        NOT BUILT. `package kaggle` remains an unimplemented command in
+        SYSTEM.md, and building it is part of executing this gate rather than
+        preparing it.
+
+    preflight_evidence_that_this_is_worth_gpu_time:
+      loop_integrity: >-
+        All ten stages run on CPU under the new objective (F-0019 as amended):
+        forward, risk, backward, optimizer step, atomic checkpoint, strict
+        reload, identical output, peaks, suppression, legal graph.
+      signal_present: >-
+        One optimizer step from random initialisation moved node recall from
+        0.269 to 0.346 and candidate reach from 0.227 to 0.273 against the same
+        window, and the official score from 0.0999 to 0.1818. One step is not
+        training and this is integration_only, but the gradient points the right
+        way rather than nowhere.
+      cost_measured: 32.6 seconds and 1.52 GB resident for 12 frames at 32x32x32
+      honest_caveat: >-
+        None of this establishes that twenty epochs will beat F-0017 on a
+        held-out embryo. That is exactly what the falsifier is for, and it is
+        why the smoke runs before the folds.
 
     run_1_smoke:
       id: E03-SMOKE
-      name: tiny protected training smoke
       scope: one fold, two movies from the training embryo, two epochs
       seed: 4460
       batch_size: 2
       expected_runtime_minutes: 20
       storage: one checkpoint, under 40 MB
-      outputs: loss curve, target class counts per batch, one checkpoint, strict reload
+      heartbeat_required: true
+      outputs:
+        - per-epoch loss with both positive-unlabelled risk terms
+        - whether the non-negative clamp fired, per epoch
+        - positives seen per batch
+        - one checkpoint, written atomically and reloaded strict
       failure_conditions:
-        - the masked loss does not decrease across the two epochs
-        - any batch reports zero positive or zero negative voxels
+        - the risk does not decrease across the two epochs
+        - any batch reports zero positive voxels
+        - the negative-risk clamp fires in every epoch, which means the model is
+          memorising positives rather than learning
         - the checkpoint does not reload with strict=True
-        - peak GPU memory exceeds the T4's 16 GB
+        - peak GPU memory exceeds 14 GB on a 16 GB T4
         - wall clock exceeds 40 minutes
+        - torch.cuda.device_count() differs from the requested accelerator
       stop_condition: report and stop; the full runs do not start automatically
 
     run_2_full_folds:
@@ -826,7 +869,7 @@ approval_packet:
       batch_size: 2
       learning_rate: 1.0e-4
       expected_runtime_hours: up to 6 per fold
-      storage: two checkpoints, under 40 MB each, plus per-fold metric reports
+      storage: two checkpoints under 40 MB each, plus per-fold metric reports
       mandatory_outputs:
         - node recall per fold
         - candidate reach per fold
@@ -841,11 +884,59 @@ approval_packet:
         Report both folds separately and stop. Promotion is a separate decision
         and requires both folds to improve independently.
 
+    inputs:
+      competition_data: the 199 annotated train .zarr and .geff pairs, already on Kaggle
+      configuration:
+        path: configs/e03-clean-folds.yaml
+        canonical_text: canonical_text_sha256:sha256/v1:c31428ecad168ed5553965fad500ea75326491220c1b39abd5510b073ffc7117
+      code: this repository at the commit recorded in the run manifest
+      weights_carried_in: none
+
+    forbidden_throughout:
+      - initialising, supervising, selecting or tuning from either quarantined checkpoint
+      - reading the public-test directory
+      - using the public leaderboard as validation
+      - reporting a pooled result in place of per-fold results
+      - local CUDA dependencies; the model-cpu group stays CPU-only
+
+    colab_tracking_assessment:
+      question: >-
+        Whether a Colab L4 run could be tracked as securely as a Kaggle one,
+        given that kagglehub.competition_download makes the data reachable there.
+      access: not the blocker; the data is reachable from Colab with a login.
+      blocker: verification, in three parts.
+      detail:
+        - >-
+          Biohub-X verifies inputs by tree digest through `artifacts verify`
+          against registry/artifacts.yaml. A Colab session's copy of the data has
+          no registered identity on this machine, so nothing here can assert the
+          bytes it trained on were the bytes recorded.
+        - >-
+          Nothing produced in a Colab session enters this repository's provenance
+          chain unless the session writes a manifest and digests back, and a
+          manifest the session writes about itself is a claim, not a check. A
+          Kaggle kernel has the same weakness, which is why the packet requires
+          the notebook to be generated from the tested package rather than
+          hand-authored; a Colab notebook edited in a browser has no equivalent.
+        - >-
+          Competition rule 2.4.b requires reasonable measures to prevent access
+          by anyone who has not agreed to the rules. Moving the data into a
+          third-party notebook environment has not been assessed against that
+          obligation by a person who can make that call.
+      what_would_make_it_trackable: >-
+        A Colab run that clones this repository at a named commit, verifies the
+        downloaded corpus against the recorded tree digests before training,
+        emits a run manifest carrying those digests plus the config digest, and
+        returns checkpoints whose raw digests are registered on return. That is
+        buildable and it is not built. Until it is, Colab can carry synthetic or
+        cleared external pretraining and not competition data.
+
     what_this_gate_does_not_authorise:
       - any submission
       - any kernel push beyond the two runs above
       - reproducing the reference pipeline
       - a CUDA dependency in this repository
+      - any Colab run on competition data
 
   what_G-01_changed_about_the_plan:
     - >-

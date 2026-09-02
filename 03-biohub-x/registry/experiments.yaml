@@ -150,7 +150,7 @@ experiments:
     model_config:
       path: configs/e03-clean-folds.yaml
       section: E03
-      canonical_text: canonical_text_sha256:sha256/v1:e2204e7728694bc0a122d29a9fd3f12ec35ea40fbfbc4af6a25332eaf62e6ffc
+      canonical_text: canonical_text_sha256:sha256/v1:c31428ecad168ed5553965fad500ea75326491220c1b39abd5510b073ffc7117
       note: >-
         A separate file from configs/phase3-cpu.yaml, because that file's digest
         is recorded against E01 and E02 as an assertion about what ran and
@@ -178,3 +178,13 @@ experiments:
       that a later filter must clear. It is not a label, not a loss term and not
       something E03 optimises. Confusing the two would train a detector to
       predict its own evaluation.
+    objective: >-
+      Non-negative positive-unlabelled. No voxel is supervised as background,
+      because F-0020 falsified every candidate band on this corpus and D-0024
+      removed the negative class rather than widening it.
+    stated_uncertainty: >-
+      The number of dim unannotated cells is unknown. Annotated cells reach
+      intensity percentile 0.09, and the class prior counts every cell the
+      dataset estimates, so a prior biased against dim cells makes the detector
+      under-predict. E03 reports this with its results and does not claim to
+      have resolved it.

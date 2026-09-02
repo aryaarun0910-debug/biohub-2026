@@ -35,16 +35,26 @@ E03:
       - copying any threshold the reference tuned against the public leaderboard
       - selecting a checkpoint against anything the reference produced
 
-  target:
-    kind: three_valued
+  objective:
+    kind: non_negative_positive_unlabelled
     positive: annotated node voxels on the strided grid
-    ignore: voxels at or above the intensity quantile that are not positives
-    negative: everything below the quantile
-    ignore_quantile: 0.90
+    unlabelled: every other voxel
+    background: none; no voxel is supervised as background
+    class_prior: >-
+      Each dataset's own estimated_number_of_nodes divided by its grid voxels.
+      Official metadata, not a tuned constant, and fixed before the fold starts.
     rationale: >-
-      Unannotated cells live in the bright band and Biohub-X cannot tell which
-      bright voxel is one, so the band is ignored rather than supervised as
-      background. Frozen for the run: changing it mid-fold changes the objective.
+      E03-MASK-AUDIT measured every candidate band at every annotated node in
+      the corpus and none survives: 6bba admits no band at all and the tightest
+      one 44b6 admits withholds half the volume and still misfires on the
+      held-out embryo (F-0020, D-0024). Max-pooling instead of striding does not
+      rescue it. Widening the band would be fitting the rule to the complaint.
+    stated_uncertainty: >-
+      How many dim unannotated cells exist is unknown. Annotated ones reach
+      percentile 0.09, and the prior counts every cell the dataset estimates, so
+      if that estimate is itself biased against dim cells the prior is too low
+      and the detector will under-predict. This is E03's open risk, carried
+      deliberately and reported with its results, not a solved problem.
 
   model:
     architecture: vendored CC0 TemporalUNet3D plus detect_head
@@ -60,7 +70,21 @@ E03:
     learning_rate: 1.0e-4
     batch_size: 2
     epochs: 20
-    loss: masked balanced BCE over supervised voxels only
+    loss: non-negative positive-unlabelled risk; see the objective block above
+
+  heartbeat:
+    required: true
+    stages:
+      - environment and GPU shape confirmed
+      - input digests verified
+      - fold membership asserted, with the evaluation embryo named
+      - per epoch: loss, both risk terms, whether the clamp fired, positives seen
+      - checkpoint written and reloaded strict
+      - evaluation started, per-fold metrics emitted
+    rationale: >-
+      A GPU run that fails silently costs the whole budget. Every stage prints
+      before it starts and after it ends, so a stall is visible in the log
+      rather than inferred from a missing result.
 
   proposal_extraction:
     peak_threshold: absolute, calibrated on the training fold only

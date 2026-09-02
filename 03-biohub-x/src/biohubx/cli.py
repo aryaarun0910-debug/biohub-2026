@@ -28,7 +28,7 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 import yaml
@@ -1237,9 +1237,6 @@ def train_preflight(
     crop_y: Annotated[str, typer.Option("--crop-y", help="Half-open voxel range start:stop.")] = "128:256",
     crop_x: Annotated[str, typer.Option("--crop-x", help="Half-open voxel range start:stop.")] = "128:256",
     seed: Annotated[int, typer.Option("--seed", help="Deterministic initialisation seed.")] = 0,
-    ignore_quantile: Annotated[
-        float, typer.Option("--ignore-quantile", help="Intensity quantile above which voxels are ignored.")
-    ] = 0.90,
     peak_quantile: Annotated[
         float,
         typer.Option(
@@ -1278,9 +1275,11 @@ def train_preflight(
     from biohubx.reference.architecture import REFERENCE_DOWNSAMPLE, ReferenceEdgeModel, ReferenceSpec
     from biohubx.tracking.pipeline import SliceConfig, run_chain
     from biohubx.training.targets import (
+        PriorError,
         TargetConstructionError,
-        build_detection_target,
-        masked_detection_loss,
+        class_prior_from_estimate,
+        positive_mask,
+        positive_unlabelled_loss,
     )
 
     def span(text: str, name: str) -> tuple[int, int]:
@@ -1304,7 +1303,7 @@ def train_preflight(
         x_start=x0,
         x_stop=x1,
     )
-    heartbeat(command, "start", f"dataset={dataset} seed={seed} ignore_quantile={ignore_quantile}")
+    heartbeat(command, "start", f"dataset={dataset} seed={seed} objective=positive-unlabelled")
     started = time.perf_counter()
 
     try:
@@ -1313,22 +1312,23 @@ def train_preflight(
         heartbeat(command, "refused", str(exc))
         raise typer.Exit(code=2) from exc
 
+    dz, dy, dx = REFERENCE_DOWNSAMPLE
+    grid_np = window.volume[:, ::dz, ::dy, ::dx]
+    grid_voxels = int(np.prod(grid_np.shape))
     try:
-        target = build_detection_target(
-            window.volume,
-            window.annotated,
-            downsample=REFERENCE_DOWNSAMPLE,
-            ignore_quantile=ignore_quantile,
+        positives, placed = positive_mask(
+            tuple(grid_np.shape), window.annotated, downsample=REFERENCE_DOWNSAMPLE
         )
-    except TargetConstructionError as exc:
+        prior = class_prior_from_estimate(window.window_estimated_total_nodes, grid_voxels)
+    except (TargetConstructionError, PriorError) as exc:
         heartbeat(command, "refused", str(exc))
         raise typer.Exit(code=2) from exc
     heartbeat(
         command,
         "target",
-        f"positive={target.positives} negative={target.negatives} ignored={target.ignored} "
-        f"({target.ignored / (target.positives + target.negatives + target.ignored):.1%}) "
-        f"threshold={target.ignore_threshold:.4f} unplaceable={target.unplaceable_nodes}",
+        f"positive={placed} unlabelled={grid_voxels - placed} prior={prior:.3e} "
+        f"unplaceable={len(window.annotated.nodes) - placed} "
+        "(no voxel called background; F-0020 falsified the band)",
     )
 
     # Deterministic random initialisation. Nothing from a published checkpoint.
@@ -1344,15 +1344,14 @@ def train_preflight(
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-    dz, dy, dx = REFERENCE_DOWNSAMPLE
-    grid = torch.from_numpy(window.volume[:, ::dz, ::dy, ::dx]).unsqueeze(0)
+    grid = torch.from_numpy(grid_np).unsqueeze(0)
 
-    # Stage 1-2: forward and masked loss.
+    # Stage 1-2: forward and positive-unlabelled risk.
     _, logits = model.detect(grid)
     flat = logits[0, :, 0]
     try:
-        loss = masked_detection_loss(flat, target)
-    except TargetConstructionError as exc:
+        loss, risk_terms = positive_unlabelled_loss(flat, positives, prior=prior)
+    except (TargetConstructionError, PriorError) as exc:
         heartbeat(command, "refused", str(exc))
         raise typer.Exit(code=2) from exc
     loss_before = float(loss.item())
@@ -1368,11 +1367,14 @@ def train_preflight(
     optimizer.step()
     with torch.no_grad():
         _, stepped = model.detect(grid)
-        loss_after = float(masked_detection_loss(stepped[0, :, 0], target).item())
+        after, after_terms = positive_unlabelled_loss(stepped[0, :, 0], positives, prior=prior)
+        loss_after = float(after.item())
     heartbeat(
         command,
         "step",
-        f"loss {loss_before:.6f} -> {loss_after:.6f} grad_norm={grad_norm:.4e}",
+        f"loss {loss_before:.8f} -> {loss_after:.8f} grad_norm={grad_norm:.4e} "
+        f"negative_risk={after_terms['negative_risk']:.6f} "
+        f"clamped={bool(after_terms['negative_risk_clamped'])}",
     )
 
     # Stage 5: atomic checkpoint. A partially written checkpoint that still loads
@@ -1460,7 +1462,18 @@ def train_preflight(
         "seed": seed,
         "initialisation": "deterministic random; no published checkpoint touched it",
         "window": window.to_dict(),
-        "target": target.to_dict(),
+        "target": {
+            "objective": "non-negative positive-unlabelled",
+            "positive_voxels": placed,
+            "unlabelled_voxels": int(np.prod(grid_np.shape)) - placed,
+            "class_prior": prior,
+            "prior_source": "the dataset's own estimated_number_of_nodes, prorated to the window",
+            "unplaceable_nodes": len(window.annotated.nodes) - placed,
+            "no_voxel_called_background": True,
+            "why": "F-0020 falsified every intensity band on this corpus",
+            "risk_terms_before": risk_terms,
+            "risk_terms_after": after_terms,
+        },
         "training_step": {
             "loss_before": loss_before,
             "loss_after": loss_after,
@@ -1580,6 +1593,225 @@ def evaluate_retention(
         )
     heartbeat(command, "done", "report=artifacts/retention-oracle.json")
     typer.echo(json.dumps({"crossover": crossings}, sort_keys=True))
+
+
+@evaluate_app.command("mask-audit")
+def evaluate_mask_audit(
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    max_frames: Annotated[
+        int,
+        typer.Option("--max-frames", help="Frames sampled per dataset. 0 reads every annotated frame."),
+    ] = 0,
+) -> None:
+    """Measure what a confident-background band would cost, at every annotated node.
+
+    E03-MASK-AUDIT. For each annotated cell this reads the image where the cell
+    is and records its intensity percentile within its own frame, whether it is a
+    local maximum, and how it would fare under each candidate band. A node below
+    a band is a node that band would have called background: the falsifier for
+    `confident_background`, counted rather than argued about.
+
+    Bands are selected per fold from the TRAINING embryo alone. The evaluation
+    embryo's nodes are measured under the resulting rule afterwards, as a
+    false-negative proxy, and never used to choose it.
+
+    CPU only. Reads training volumes and never the public-test directory.
+    """
+    command = "evaluate mask-audit"
+    import numpy as np
+
+    from biohubx.data.competition import CompetitionLayoutError, competition_root, load_ground_truth
+    from biohubx.training.targets import CANDIDATE_BANDS, report_bands, select_band
+
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    train_dir = data_root / "train"
+    datasets = sorted(path.stem for path in train_dir.glob("*.geff"))
+    if not datasets:
+        heartbeat(command, "refused", f"no annotated training datasets under {train_dir}")
+        raise typer.Exit(code=2)
+    heartbeat(command, "start", f"datasets={len(datasets)} max_frames={max_frames or 'all'}")
+
+    started = time.perf_counter()
+    per_dataset: list[dict[str, object]] = []
+    by_embryo: dict[str, list[float]] = {}
+    by_embryo_frame_norm: dict[str, list[float]] = {}
+    local_max_hits: dict[str, list[int]] = {}
+
+    for index, dataset_id in enumerate(datasets):
+        truth = load_ground_truth(data_root, dataset_id)
+        volume = _open_volume(data_root / "train" / f"{dataset_id}.zarr")
+        frames: dict[int, list[tuple[int, int, int]]] = {}
+        for node in truth.lineage.nodes:
+            frames.setdefault(node.frame, []).append(
+                (int(node.voxel.z), int(node.voxel.y) // 4, int(node.voxel.x) // 4)
+            )
+        chosen = sorted(frames)
+        if max_frames:
+            step = max(1, len(chosen) // max_frames)
+            chosen = chosen[::step][:max_frames]
+
+        ranks: list[float] = []
+        frame_ranks: list[float] = []
+        is_local_max: list[int] = []
+        for frame in chosen:
+            full = np.asarray(volume[frame], dtype=np.float32)
+            grid = full[:, ::4, ::4]
+            # Max-pooling instead of striding is the obvious suspect for a dim
+            # annotated node: striding samples every fourth voxel and can miss a
+            # cell centre entirely. Measuring both settles whether dim nodes are
+            # a property of the cells or an artefact of the grid.
+            depth, height, width = full.shape
+            pooled = (
+                full[:, : (height // 4) * 4, : (width // 4) * 4]
+                .reshape(depth, height // 4, 4, width // 4, 4)
+                .max(axis=(2, 4))
+            )
+            flat = np.sort(grid.reshape(-1))
+            flat_pooled = np.sort(pooled.reshape(-1))
+            for z, y, x in frames[frame]:
+                if not (0 <= z < grid.shape[0] and 0 <= y < grid.shape[1] and 0 <= x < grid.shape[2]):
+                    continue
+                value = float(grid[z, y, x])
+                # Percentile rank is invariant to any monotonic normalisation, so
+                # this number does not move if the intensity scaling changes.
+                rank = float(np.searchsorted(flat, value, side="left")) / flat.size
+                ranks.append(rank)
+                if y < pooled.shape[1] and x < pooled.shape[2]:
+                    frame_ranks.append(
+                        float(np.searchsorted(flat_pooled, float(pooled[z, y, x]), side="left"))
+                        / flat_pooled.size
+                    )
+                z0, z1 = max(0, z - 1), min(grid.shape[0], z + 2)
+                y0, y1 = max(0, y - 1), min(grid.shape[1], y + 2)
+                x0, x1 = max(0, x - 1), min(grid.shape[2], x + 2)
+                is_local_max.append(int(value >= float(grid[z0:z1, y0:y1, x0:x1].max())))
+
+        if not ranks:
+            continue
+        array = np.array(ranks, dtype=np.float64)
+        by_embryo.setdefault(truth.embryo, []).extend(ranks)
+        by_embryo_frame_norm.setdefault(truth.embryo, []).extend(frame_ranks)
+        local_max_hits.setdefault(truth.embryo, []).extend(is_local_max)
+        per_dataset.append(
+            {
+                "dataset": dataset_id,
+                "embryo": truth.embryo,
+                "frames_read": len(chosen),
+                "nodes_measured": int(array.size),
+                "percentile_min": float(array.min()),
+                "percentile_p01": float(np.quantile(array, 0.01)),
+                "percentile_median": float(np.median(array)),
+                "local_maximum_fraction": float(np.mean(is_local_max)),
+                "maxpool_percentile_min": float(np.min(frame_ranks)) if frame_ranks else None,
+                "maxpool_percentile_median": float(np.median(frame_ranks)) if frame_ranks else None,
+            }
+        )
+        if (index + 1) % 25 == 0:
+            heartbeat(command, "scanned", f"{index + 1}/{len(datasets)} datasets")
+
+    heartbeat(command, "scanned", f"{len(per_dataset)}/{len(datasets)} datasets with measurable nodes")
+
+    embryos = sorted(by_embryo)
+    embryo_reports = {
+        embryo: [report.to_dict() for report in report_bands(np.array(by_embryo[embryo]), CANDIDATE_BANDS)]
+        for embryo in embryos
+    }
+
+    folds = []
+    for train_embryo in embryos:
+        evaluate_embryo = [e for e in embryos if e != train_embryo]
+        band = select_band(np.array(by_embryo[train_embryo]), CANDIDATE_BANDS, required_coverage=1.0)
+        entry: dict[str, object] = {
+            "fold": f"train_{train_embryo}",
+            "train_embryo": train_embryo,
+            "evaluate_embryo": evaluate_embryo[0] if evaluate_embryo else None,
+            "selected_band": band,
+            "selected_using": f"{train_embryo} annotations only",
+            "evaluation_data_used_for_selection": False,
+        }
+        if band is None:
+            entry["verdict"] = (
+                "no band covers every training annotation; a negative loss cannot be "
+                "justified on this fold and a positive-unlabelled objective is required"
+            )
+        elif evaluate_embryo:
+            held = np.array(by_embryo[evaluate_embryo[0]])
+            below = int((held < band).sum())
+            entry["false_negative_proxy_on_evaluation_embryo"] = {
+                "embryo": evaluate_embryo[0],
+                "nodes": int(held.size),
+                "would_be_called_background": below,
+                "rate": below / held.size if held.size else 0.0,
+                "note": "measured after the band was fixed; it did not select the band",
+            }
+        folds.append(entry)
+
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "measured",
+        "experiment": "E03-MASK-AUDIT",
+        "datasets_scanned": len(per_dataset),
+        "nodes_measured": sum(len(v) for v in by_embryo.values()),
+        "bands_evaluated": list(CANDIDATE_BANDS),
+        "by_embryo": {
+            embryo: {
+                "nodes": len(by_embryo[embryo]),
+                "percentile_min": float(np.min(by_embryo[embryo])),
+                "percentile_p01": float(np.quantile(by_embryo[embryo], 0.01)),
+                "percentile_median": float(np.median(by_embryo[embryo])),
+                "local_maximum_fraction": float(np.mean(local_max_hits[embryo])),
+                "maxpool_percentile_min": float(np.min(by_embryo_frame_norm[embryo])),
+                "maxpool_percentile_p01": float(np.quantile(by_embryo_frame_norm[embryo], 0.01)),
+                "maxpool_bands": [
+                    report.to_dict()
+                    for report in report_bands(np.array(by_embryo_frame_norm[embryo]), CANDIDATE_BANDS)
+                ],
+                "bands": embryo_reports[embryo],
+            }
+            for embryo in embryos
+        },
+        "folds": folds,
+        "grid_reduction_sensitivity": (
+            "Every node is measured twice, once on the strided grid the reference "
+            "uses and once on a max-pooled grid of the same shape. If striding were "
+            "discarding cell centres the two would disagree; the report records "
+            "whether they do."
+        ),
+        "normalisation_sensitivity": (
+            "Percentile rank within a frame is invariant to any monotonic intensity "
+            "normalisation, so every number here is unchanged by the choice of "
+            "quantile scaling. What a normalisation can move is the absolute "
+            "threshold a band maps to, never which nodes fall inside it."
+        ),
+        "per_dataset": per_dataset,
+        "runtime_seconds": round(time.perf_counter() - started, 3),
+    }
+    report_path = repository_root() / "artifacts/mask-audit.json"
+    atomic_write_text(report_path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    _write_manifest(command, {"report": "artifacts/mask-audit.json", "datasets": len(per_dataset)})
+    for embryo in embryos:
+        worst = float(np.min(by_embryo[embryo]))
+        heartbeat(command, "embryo", f"{embryo} nodes={len(by_embryo[embryo])} worst_percentile={worst:.4f}")
+    for entry in folds:
+        heartbeat(command, "fold", f"{entry['fold']} band={entry['selected_band']}")
+    heartbeat(command, "done", "report=artifacts/mask-audit.json")
+    typer.echo(json.dumps({"folds": folds, "by_embryo": payload["by_embryo"]}, sort_keys=True))
+
+
+def _open_volume(path: Path) -> Any:
+    """Open a competition volume array, narrowing zarr's loose union once."""
+    import zarr
+
+    group: Any = zarr.open(str(path), mode="r")
+    return group["0"]
 
 
 @data_app.command("fingerprint")

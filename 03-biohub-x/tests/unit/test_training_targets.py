@@ -1,12 +1,13 @@
-"""The ignore contract, and the peak path that turns a heatmap into proposals.
+"""The positive-unlabelled objective, the band audit that rejected the band, and peaks.
 
-The load-bearing claim is that an unlabelled cell is never supervised as
-background. These check it on constructed volumes where the answer is known, and
-on the real preflight window where the answer is what justifies the design.
+The load-bearing claim is that no voxel is ever supervised as background. These
+check it directly, check the audit that forced it, and check that a heatmap
+becomes proposals on the right grid.
 """
 
 from __future__ import annotations
 
+import json
 import pathlib
 
 import numpy as np
@@ -24,12 +25,14 @@ from biohubx.contracts.lineage import (  # noqa: E402
 )
 from biohubx.proposals.peaks import HeatmapProposalError, instances_from_heatmap  # noqa: E402
 from biohubx.training.targets import (  # noqa: E402
-    IGNORE,
-    NEGATIVE,
-    POSITIVE,
+    CANDIDATE_BANDS,
+    PriorError,
     TargetConstructionError,
-    build_detection_target,
-    masked_detection_loss,
+    class_prior_from_estimate,
+    positive_mask,
+    positive_unlabelled_loss,
+    report_bands,
+    select_band,
 )
 
 DATASET = DatasetIdentity(value="target-fixture")
@@ -38,129 +41,132 @@ DOWNSAMPLE = (1, 4, 4)
 
 def graph(coords: list[tuple[int, float, float, float]]) -> LineageGraph:
     nodes = tuple(
-        LineageNode(
-            dataset=DATASET,
-            node_id=index,
-            frame=frame,
-            voxel=VoxelCoordinateZYX(z=z, y=y, x=x),
-        )
-        for index, (frame, z, y, x) in enumerate(coords)
+        LineageNode(dataset=DATASET, node_id=i, frame=f, voxel=VoxelCoordinateZYX(z=z, y=y, x=x))
+        for i, (f, z, y, x) in enumerate(coords)
     )
     edges = tuple(
         LineageEdge(
             source_dataset=DATASET,
-            source=index,
+            source=i,
             target_dataset=DATASET,
-            target=index + 1,
+            target=i + 1,
             kind=EdgeKind.CONTINUATION,
         )
-        for index in range(len(coords) - 1)
-        if coords[index + 1][0] == coords[index][0] + 1
+        for i in range(len(coords) - 1)
+        if coords[i + 1][0] == coords[i][0] + 1
     )
     return LineageGraph(dataset=DATASET, nodes=nodes, edges=edges)
 
 
-def volume_with_bright_spots(spots: list[tuple[int, int, int, int]]) -> np.ndarray:
-    """Dim textured background with a few bright spots on it.
-
-    The background is varied on purpose. A uniform volume has no meaningful
-    intensity quantile, so every voxel would land in the ignore band and the
-    test would be measuring nothing.
-    """
-    rng = np.random.default_rng(0)
-    volume = rng.uniform(0.0, 0.05, size=(2, 4, 16, 16)).astype(np.float32)
-    for frame, z, y, x in spots:
-        volume[frame, z, y, x] = 1.0
-    return volume
+TRACK = [(0, 1.0, 0.0, 0.0), (1, 1.0, 0.0, 0.0)]
 
 
-def test_a_bright_unlabelled_voxel_is_ignored_never_background() -> None:
-    """The whole point. Two bright spots, one annotated; the other must not be a negative."""
-    volume = volume_with_bright_spots([(0, 1, 0, 0), (0, 1, 0, 4)])
-    annotated = graph([(0, 1, 0, 0), (1, 1, 0, 0)])
-
-    target = build_detection_target(volume, annotated, downsample=DOWNSAMPLE, ignore_quantile=0.90)
-    labels = target.labels
-
-    assert labels[0, 1, 0, 0] == POSITIVE, "the annotated cell is a positive"
-    assert labels[0, 1, 0, 1] == IGNORE, "the unannotated bright cell is ignored, not background"
-    assert labels[0, 0, 3, 3] == NEGATIVE, "empty space is still supervised as background"
+# --- no voxel is ever background --------------------------------------------
 
 
-def test_ignored_voxels_contribute_no_loss() -> None:
-    volume = volume_with_bright_spots([(0, 1, 0, 0), (0, 1, 0, 4)])
-    annotated = graph([(0, 1, 0, 0), (1, 1, 0, 0)])
-    target = build_detection_target(volume, annotated, downsample=DOWNSAMPLE, ignore_quantile=0.90)
-
-    quiet = torch.zeros((2, 4, 4, 4), dtype=torch.float32)
-    baseline = masked_detection_loss(quiet, target)
-
-    shouting = quiet.clone()
-    shouting[target.labels == IGNORE] = 50.0
-    assert torch.isclose(masked_detection_loss(shouting, target), baseline), (
-        "an arbitrarily confident prediction on an ignored voxel changed the loss"
-    )
-
-    wrong = quiet.clone()
-    wrong[target.labels == POSITIVE] = -50.0
-    assert masked_detection_loss(wrong, target) > baseline
+def test_only_annotated_voxels_are_positive_and_nothing_is_background() -> None:
+    mask, placed = positive_mask((2, 4, 4, 4), graph(TRACK), downsample=DOWNSAMPLE)
+    assert placed == 2
+    assert int(mask.sum()) == 2
+    # Everything else is unlabelled. There is no third state to check, which is
+    # the point: this objective cannot express "background" at all.
+    assert mask.dtype == torch.bool
 
 
-def test_positives_and_negatives_are_balanced_against_each_other() -> None:
-    """26 positives against 350,000 negatives must not be drowned."""
-    volume = volume_with_bright_spots([(0, 1, 0, 0)])
-    annotated = graph([(0, 1, 0, 0), (1, 1, 0, 0)])
-    target = build_detection_target(volume, annotated, downsample=DOWNSAMPLE, ignore_quantile=0.90)
+def test_the_class_prior_comes_from_the_dataset_not_a_constant() -> None:
+    prior = class_prior_from_estimate(3783, 100 * 64 * 64 * 64)
+    assert prior == pytest.approx(3783 / (100 * 64 * 64 * 64))
+    with pytest.raises(PriorError, match="not a probability"):
+        class_prior_from_estimate(10, 5)
+    with pytest.raises(PriorError, match="grid must have voxels"):
+        class_prior_from_estimate(10, 0)
 
-    missing_one_positive = torch.zeros((2, 4, 4, 4), dtype=torch.float32)
-    missing_one_positive[target.labels == POSITIVE] = -20.0
-    positive_cost = float(masked_detection_loss(missing_one_positive, target))
 
-    one_false_positive = torch.zeros((2, 4, 4, 4), dtype=torch.float32)
-    first_negative = (target.labels == NEGATIVE).nonzero()[0].tolist()
-    one_false_positive[tuple(first_negative)] = 20.0
-    negative_cost = float(masked_detection_loss(one_false_positive, target))
+def test_confident_predictions_on_unlabelled_voxels_still_cost_something() -> None:
+    """Unlabelled is not ignored. It is a mixture, and the risk knows it."""
+    logits = torch.zeros((2, 4, 4, 4))
+    mask, _ = positive_mask((2, 4, 4, 4), graph(TRACK), downsample=DOWNSAMPLE)
+    baseline, _ = positive_unlabelled_loss(logits, mask, prior=1e-3)
 
-    assert positive_cost > negative_cost, (
-        "missing an annotated cell must cost more than one spurious voxel, or the "
-        "detector learns to predict nothing"
+    shouting = logits.clone()
+    shouting[~mask] = 10.0
+    louder, _ = positive_unlabelled_loss(shouting, mask, prior=1e-3)
+    assert float(louder) > float(baseline), (
+        "calling every unlabelled voxel a cell must cost more than staying neutral"
     )
 
 
-def test_a_target_with_no_placeable_node_is_refused() -> None:
-    volume = volume_with_bright_spots([(0, 1, 0, 0)])
+def test_finding_the_annotated_cells_lowers_the_risk() -> None:
+    logits = torch.zeros((2, 4, 4, 4))
+    mask, _ = positive_mask((2, 4, 4, 4), graph(TRACK), downsample=DOWNSAMPLE)
+    baseline, _ = positive_unlabelled_loss(logits, mask, prior=1e-3)
+
+    found = logits.clone()
+    found[mask] = 6.0
+    better, terms = positive_unlabelled_loss(found, mask, prior=1e-3)
+    assert float(better) < float(baseline)
+    assert terms["risk_positive"] < 0.01
+
+
+def test_the_negative_risk_clamp_is_reported_when_it_fires() -> None:
+    logits = torch.zeros((2, 4, 4, 4))
+    mask, _ = positive_mask((2, 4, 4, 4), graph(TRACK), downsample=DOWNSAMPLE)
+    confident = logits.clone()
+    confident[mask] = 40.0
+    _, terms = positive_unlabelled_loss(confident, mask, prior=0.9)
+    assert terms["negative_risk"] < 0
+    assert terms["negative_risk_clamped"] == 1.0
+
+
+def test_a_risk_with_no_positive_or_no_unlabelled_voxel_is_refused() -> None:
+    logits = torch.zeros((2, 2, 2, 2))
+    with pytest.raises(TargetConstructionError, match="needs at least one positive"):
+        positive_unlabelled_loss(logits, torch.zeros_like(logits, dtype=torch.bool), prior=1e-3)
+    with pytest.raises(TargetConstructionError, match="nothing to contrast against"):
+        positive_unlabelled_loss(logits, torch.ones_like(logits, dtype=torch.bool), prior=1e-3)
+    with pytest.raises(TargetConstructionError, match="differ"):
+        positive_unlabelled_loss(logits, torch.ones((3, 3, 3, 3), dtype=torch.bool), prior=1e-3)
+
+
+def test_a_node_outside_the_grid_is_refused_rather_than_clamped() -> None:
     outside = graph([(0, 99.0, 99.0, 99.0), (1, 99.0, 99.0, 99.0)])
     with pytest.raises(TargetConstructionError, match="no annotated node landed"):
-        build_detection_target(volume, outside, downsample=DOWNSAMPLE)
+        positive_mask((2, 4, 4, 4), outside, downsample=DOWNSAMPLE)
 
 
-def test_a_loss_with_only_one_class_is_refused() -> None:
-    volume = np.ones((2, 4, 16, 16), dtype=np.float32)
-    annotated = graph([(0, 1, 0, 0), (1, 1, 0, 0)])
-    # Everything is equally bright, so the quantile puts every voxel in ignore.
-    target = build_detection_target(volume, annotated, downsample=DOWNSAMPLE, ignore_quantile=0.001)
-    with pytest.raises(TargetConstructionError, match="needs both classes"):
-        masked_detection_loss(torch.zeros((2, 4, 4, 4), dtype=torch.float32), target)
+# --- the audit that rejected the band ---------------------------------------
 
 
-def test_a_mismatched_grid_is_refused() -> None:
-    volume = volume_with_bright_spots([(0, 1, 0, 0)])
-    annotated = graph([(0, 1, 0, 0), (1, 1, 0, 0)])
-    target = build_detection_target(volume, annotated, downsample=DOWNSAMPLE)
-    with pytest.raises(TargetConstructionError, match="different grids"):
-        masked_detection_loss(torch.zeros((2, 4, 8, 8), dtype=torch.float32), target)
+def test_a_band_is_contradicted_by_any_annotated_node_below_it() -> None:
+    reports = {r.quantile: r for r in report_bands(np.array([0.99, 0.95, 0.40]), CANDIDATE_BANDS)}
+    assert reports[0.90].contradicted_nodes == 1
+    assert reports[0.90].coverage == pytest.approx(2 / 3)
+    assert reports[0.50].contradicted_nodes == 1
+    assert reports[0.90].worst_node_percentile == pytest.approx(0.40)
+
+
+def test_select_band_returns_none_when_no_band_covers_every_node() -> None:
+    """The answer that forced the objective change."""
+    assert select_band(np.array([0.99, 0.95, 0.05])) is None
+    assert select_band(np.array([0.999, 0.995])) == 0.99
+
+
+def test_select_band_prefers_the_tightest_band_that_still_covers() -> None:
+    assert select_band(np.array([0.92, 0.97])) == 0.90
+
+
+def test_an_empty_population_is_refused() -> None:
+    with pytest.raises(TargetConstructionError, match="no annotated node percentiles"):
+        report_bands(np.array([]))
 
 
 # --- heatmap to proposals ---------------------------------------------------
 
 
 def test_peaks_are_returned_in_full_resolution_coordinates() -> None:
-    """A proposal read off the strided grid must be placed on the original one."""
     heatmap = np.zeros((1, 4, 8, 8), dtype=np.float32)
     heatmap[0, 2, 3, 5] = 0.99
-
     instances = instances_from_heatmap(heatmap, dataset=DATASET, downsample=DOWNSAMPLE, threshold=0.5)
-
     assert len(instances.instances) == 1
     voxel = instances.instances[0].voxel
     assert (voxel.z, voxel.y, voxel.x) == (2.0, 12.0, 20.0)
@@ -169,8 +175,7 @@ def test_peaks_are_returned_in_full_resolution_coordinates() -> None:
 def test_adjacent_peaks_are_suppressed_into_one() -> None:
     heatmap = np.zeros((1, 4, 8, 8), dtype=np.float32)
     heatmap[0, 2, 3, 5] = 0.99
-    heatmap[0, 2, 3, 6] = 0.98  # 1.625 um away on the strided grid, inside the 4 um radius
-
+    heatmap[0, 2, 3, 6] = 0.98
     instances = instances_from_heatmap(heatmap, dataset=DATASET, downsample=DOWNSAMPLE, threshold=0.5)
     assert len(instances.instances) == 1
     assert instances.instances[0].confidence == pytest.approx(0.99, abs=1e-6)
@@ -196,46 +201,25 @@ def test_a_threshold_outside_the_unit_interval_is_refused() -> None:
         )
 
 
-# --- the design claim, on the real window -----------------------------------
+# --- the corpus measurement that decided it ---------------------------------
 
 
-def test_the_ignore_band_contains_every_annotated_cell_in_the_preflight_window() -> None:
-    """The reason to believe the band protects unannotated cells.
+def test_the_recorded_audit_shows_no_band_survives_on_both_embryos() -> None:
+    """Instrument for F-0020, read back from the run that produced it.
 
-    Instrument for F-0019. If the intensity band that hides unannotated cells did
-    not also contain the annotated ones, there would be no argument that the two
-    populations look alike, and the ignore mask would be guesswork.
+    Kept as a test so the conclusion cannot quietly drift from the artifact. If a
+    later audit does find a band covering every annotated cell, this fails and
+    the objective decision gets revisited on purpose rather than by accident.
     """
-    from biohubx.artifacts import ARTIFACT_REGISTRY_PATH, load_artifact_registry
-    from biohubx.data.competition import WindowSelection, load_window
+    report = pathlib.Path(__file__).resolve().parents[2] / "artifacts/mask-audit.json"
+    if not report.is_file():
+        pytest.skip("run `biohubx evaluate mask-audit` on a machine holding the corpus")
+    audit = json.loads(report.read_text(encoding="utf-8"))
 
-    repo = pathlib.Path(__file__).resolve().parents[2]
-    registry = load_artifact_registry(repo / ARTIFACT_REGISTRY_PATH)
-    record = next((a for a in registry.artifacts if a.id == "competition.train.6bba_2540cd90.zarr"), None)
-    if record is None or record.external_path is None:
-        pytest.skip("the preflight dataset is not registered on this machine")
-    root = pathlib.Path(record.external_path).parent.parent
-    if not root.is_dir():
-        pytest.skip("the competition corpus is not on this machine")
-
-    window = load_window(
-        root, WindowSelection("6bba_2540cd90", 0, 12, 0, 32, 128, 256, 128, 256), split="train"
+    folds = {entry["fold"]: entry for entry in audit["folds"]}
+    assert folds["train_6bba"]["selected_band"] is None, (
+        "a band now covers every 6bba annotation; the positive-unlabelled decision needs revisiting"
     )
-    target = build_detection_target(
-        window.volume, window.annotated, downsample=DOWNSAMPLE, ignore_quantile=0.90
-    )
-
-    assert target.unplaceable_nodes == 0
-    dz, dy, dx = DOWNSAMPLE
-    grid = window.volume[:, ::dz, ::dy, ::dx]
-    above = sum(
-        1
-        for node in window.annotated.nodes
-        if grid[node.frame, int(node.voxel.z) // dz, int(node.voxel.y) // dy, int(node.voxel.x) // dx]
-        >= target.ignore_threshold
-    )
-    assert above == len(window.annotated.nodes), (
-        f"only {above} of {len(window.annotated.nodes)} annotated cells sit in the ignore band; "
-        "the band cannot be argued to hide unannotated cells"
-    )
-    assert target.ignored / (target.positives + target.negatives + target.ignored) < 0.15
+    for embryo, stats in audit["by_embryo"].items():
+        q90 = next(b for b in stats["bands"] if b["quantile"] == 0.90)
+        assert q90["contradicted_nodes"] > 0, f"q90 no longer contradicts any {embryo} annotation"

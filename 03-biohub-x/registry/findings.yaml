@@ -520,6 +520,43 @@ findings:
     validity:
       scope: training_boundaries_on_real_data
       holds_while: >-
-        the E01 window in configs/phase3-cpu.yaml is unchanged, the official
-        source pin holds, and the ignore quantile stays at 0.90.
+        the E01 window in configs/phase3-cpu.yaml is unchanged and the official
+        source pin holds. Its loop-integrity half still stands; its band half
+        does not.
+    superseded_by: F-0020
+  - id: F-0020
+    claim: >-
+      No intensity band can call any voxel background without contradicting
+      annotated cells, and the failure is not a grid artefact. Measuring the
+      intensity percentile of 5,291 annotated nodes across all 199 training
+      movies, the dimmest annotated cell sits at percentile 0.5263 on 44b6 and
+      0.0917 on 6bba. The q90 band this repository had adopted would call 179 of
+      856 44b6 nodes (20.9 percent) and 671 of 4,435 6bba nodes (15.1 percent)
+      background. Selecting per fold from the training embryo alone, 44b6 admits
+      only q50, which withholds half the volume from supervision and still
+      misclassifies 46 of 4,435 held-out 6bba nodes (1.04 percent); 6bba admits
+      no band at all, since even q50 contradicts 46 of its own. Replacing the
+      reference's striding with max-pooling over the same 4x4 block makes it
+      slightly worse, not better: the dimmest node moves to 0.4961 on 44b6 and
+      0.0894 on 6bba, and q90 coverage falls from 0.791 to 0.758 and from 0.849
+      to 0.840. Annotated cells are also rarely local intensity maxima on this
+      grid: 14.8 percent on 44b6 and 5.8 percent on 6bba.
+    instrument: biohubx evaluate mask-audit
+    evidence:
+      command: biohubx evaluate mask-audit --max-frames 4
+      observed: artifacts/mask-audit.json, 199 datasets, 5,291 nodes, 124 seconds
+      note: >-
+        Percentile rank within a frame is invariant to any monotonic intensity
+        normalisation, so none of these numbers move if the scaling changes;
+        what a normalisation moves is the absolute value a band maps to, never
+        which nodes fall inside it. Band selection used only each fold's
+        training embryo, and the evaluation embryo was measured afterwards as a
+        false-negative proxy that could not influence the choice. This finding
+        supersedes the single-window result in F-0019 that appeared to bless
+        q90: one window of one bright movie is not the corpus.
+    validity:
+      scope: competition_corpus_and_supervision
+      holds_while: >-
+        the registered corpus is unchanged and the model grid stays (1, 4, 4).
+        A finer grid would need re-measuring, and might change the answer.
     superseded_by: null
