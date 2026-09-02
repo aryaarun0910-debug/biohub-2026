@@ -19,6 +19,7 @@ from biohubx.packaging.kaggle import (
     build_notebook,
     forbidden_content,
     guard_report,
+    kernel_id_for,
     kernel_metadata,
     slug_of,
 )
@@ -212,3 +213,62 @@ def test_a_title_that_does_not_slugify_to_the_id_is_refused() -> None:
 def test_a_kernel_id_without_an_owner_is_refused() -> None:
     with pytest.raises(PackagingError, match="owner/slug"):
         kernel_metadata(SPEC, slug="biohubx-e03-fold-44b6", title="biohubx e03 fold 44b6")
+
+
+# --- the pre-push gate ------------------------------------------------------
+
+
+def test_the_kernel_id_is_derived_from_the_title_so_they_cannot_disagree() -> None:
+    assert kernel_id_for("aryaarun07", "Biohub-X E03 fold 44b6") == "aryaarun07/biohub-x-e03-fold-44b6"
+    with pytest.raises(PackagingError, match="bare Kaggle account slug"):
+        kernel_id_for("owner/extra", "t")
+    with pytest.raises(PackagingError, match="bare Kaggle account slug"):
+        kernel_id_for("", "t")
+
+
+def test_the_gate_rejects_the_notebook_that_failed_on_kaggle() -> None:
+    """The exact shape E03-SMOKE pushed must now fail locally, before any network call."""
+    prepush = pytest.importorskip(
+        "biohubx.packaging.prepush", reason="the package-gate dependency group is not installed"
+    )
+    pytest.importorskip("nbformat", reason="the package-gate dependency group is not installed")
+
+    broken = {
+        "cells": [
+            {"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [], "source": "x = 1"}
+        ],
+        "metadata": {"kernelspec": {"language": "python", "name": "python3"}},
+        "nbformat": 4,
+        "nbformat_minor": 5,
+    }
+    with pytest.raises(prepush.PrePushError, match="kernelspec is missing"):
+        prepush.check_required_metadata(broken)
+    with pytest.raises(prepush.PrePushError, match="rejected the generated notebook"):
+        prepush.validate_notebook(broken)
+
+
+def test_the_generated_notebook_validates_and_converts() -> None:
+    prepush = pytest.importorskip(
+        "biohubx.packaging.prepush", reason="the package-gate dependency group is not installed"
+    )
+    pytest.importorskip("nbconvert", reason="the package-gate dependency group is not installed")
+
+    notebook = build_notebook(SPEC, shipped={**SPEC.to_dict(), "input_digests": REGISTERED})
+    prepush.check_required_metadata(notebook)
+    prepush.validate_notebook(notebook)
+    assert prepush.convert_notebook(notebook) > 0
+
+
+def test_a_gate_report_with_no_heartbeat_does_not_pass() -> None:
+    prepush = pytest.importorskip(
+        "biohubx.packaging.prepush", reason="the package-gate dependency group is not installed"
+    )
+    silent = prepush.PrePushReport(
+        nbformat_validated=True,
+        nbconvert_converted=True,
+        converted_bytes=1,
+        metadata_fields_present=True,
+        entry_point_exercised=True,
+        stage_lines_seen=0,
+    )
+    assert not silent.passed

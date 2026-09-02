@@ -108,6 +108,18 @@ def slug_of(title: str) -> str:
     return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", title.lower())).strip("-")
 
 
+def kernel_id_for(owner: str, title: str) -> str:
+    """``owner/slug`` with the slug derived from the title, so they cannot disagree.
+
+    Kaggle slugifies the title and prefers the result over any id it was given,
+    with a warning. E03-SMOKE was pushed to an address nobody named because that
+    warning was treated as noise. Deriving the slug removes the possibility.
+    """
+    if not owner or "/" in owner:
+        raise PackagingError(f"owner must be a bare Kaggle account slug, got {owner!r}")
+    return f"{owner}/{slug_of(title)}"
+
+
 def kernel_metadata(spec: PackageSpec, *, slug: str, title: str) -> dict[str, Any]:
     """The Kaggle kernel manifest, with internet off and no dataset sources.
 

@@ -42,6 +42,14 @@ dev = [
 model-cpu = [
     "torch==2.10.0+cpu",
 ]
+# The pre-push gate validates and converts the generated notebook with the same
+# libraries Kaggle runs, because a notebook that fails conversion costs a whole
+# authorised GPU session and produces no output at all (D-0026). A separate group
+# so that nothing in the training path depends on Jupyter.
+package-gate = [
+    "nbformat>=5.10",
+    "nbconvert>=7.16",
+]
 
 [build-system]
 requires = ["hatchling"]

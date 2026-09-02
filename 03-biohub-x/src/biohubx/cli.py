@@ -1932,7 +1932,7 @@ def package_kaggle(
         str,
         typer.Option(
             "--owner",
-            help="Kaggle account owning the kernel. A kernel id is owner/slug, so this is required.",
+            help="Kaggle account slug owning the kernel, as it appears in the account URL.",
         ),
     ],
     fold: Annotated[
@@ -1952,9 +1952,6 @@ def package_kaggle(
     runtime_ceiling: Annotated[
         int, typer.Option("--runtime-ceiling", help="Seconds after which the run refuses to continue.")
     ] = 2400,
-    smoke_local: Annotated[
-        bool, typer.Option("--smoke-local", help="Run the package's own entry point here, on CPU.")
-    ] = False,
     allow_dirty: Annotated[
         bool,
         typer.Option(
@@ -1963,7 +1960,11 @@ def package_kaggle(
         ),
     ] = False,
     root: Annotated[
-        Path | None, typer.Option("--root", help="Competition data root, for --smoke-local only.")
+        Path | None, typer.Option("--root", help="Competition data root, for the pre-push gate.")
+    ] = None,
+    expect_kernel: Annotated[
+        str | None,
+        typer.Option("--expect-kernel", help="Refuse unless the build would create exactly this kernel id."),
     ] = None,
 ) -> None:
     """Stage a Kaggle package for one fold, and optionally run its entry point on CPU.
@@ -1977,12 +1978,14 @@ def package_kaggle(
     import shutil
     import subprocess
 
+    from biohubx.packaging import prepush
     from biohubx.packaging.kaggle import (
         FoldSpec,
         PackageSpec,
         PackagingError,
         build_notebook,
         forbidden_content,
+        kernel_id_for,
         kernel_metadata,
     )
 
@@ -2038,6 +2041,21 @@ def package_kaggle(
     )
     heartbeat(command, "start", f"fold={spec.fold.fold_id} commit={commit[:12]} dirty={bool(dirty)}")
 
+    kernel_title = f"Biohub-X E03 {spec.fold.fold_id.replace('_', ' ')}"
+    try:
+        kernel_id = kernel_id_for(owner, kernel_title)
+    except PackagingError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    if expect_kernel and kernel_id != expect_kernel:
+        heartbeat(
+            command,
+            "refused",
+            f"the kernel this build would create is {kernel_id}, not the expected {expect_kernel}",
+        )
+        raise typer.Exit(code=2)
+    heartbeat(command, "kernel", f"id={kernel_id} title={kernel_title!r}")
+
     staging = out if out is not None else root_path / "artifacts/kaggle-package"
     if staging.exists():
         shutil.rmtree(staging)
@@ -2086,11 +2104,7 @@ def package_kaggle(
     atomic_write_text(
         staging / "kernel-metadata.json",
         json.dumps(
-            kernel_metadata(
-                spec,
-                slug=f"{owner}/biohubx-e03-{spec.fold.fold_id.replace('_', '-')}",
-                title=f"biohubx e03 {spec.fold.fold_id.replace('_', ' ')}",
-            ),
+            kernel_metadata(spec, slug=kernel_id, title=kernel_title),
             indent=2,
             sort_keys=True,
         )
@@ -2153,24 +2167,40 @@ def package_kaggle(
         "spec": spec.to_dict(),
     }
 
-    if smoke_local:
-        from biohubx.data.competition import CompetitionLayoutError, competition_root
-        from biohubx.packaging.entry import EntryRefusal, run_fold
+    # The pre-push gate. Not optional: a package that has not proved it converts
+    # and speaks is a package that can spend a GPU session on a stack trace,
+    # which is exactly what E03-SMOKE did (D-0026). Everything here runs before
+    # any network call, and nothing below this point contacts Kaggle.
+    from biohubx.data.competition import CompetitionLayoutError, competition_root
+    from biohubx.packaging.entry import EntryRefusal
+    from biohubx.packaging.prepush import PrePushError
 
-        try:
-            data_root = competition_root(root)
-        except CompetitionLayoutError as exc:
-            heartbeat(command, "refused", str(exc))
-            raise typer.Exit(code=2) from exc
-        smoke_out = staging.parent / "kaggle-smoke"
-        smoke_out.mkdir(parents=True, exist_ok=True)
-        os.environ["BIOHUBX_OUTPUT"] = str(smoke_out)
-        heartbeat(command, "smoke", f"running the package entry point on CPU, output={smoke_out.name}")
-        try:
-            payload["local_smoke"] = run_fold(shipped, data_root=data_root)
-        except (EntryRefusal, PackagingError) as exc:
-            heartbeat(command, "refused", f"the package refused its own smoke: {exc}")
-            raise typer.Exit(code=2) from exc
+    notebook = build_notebook(spec, shipped=shipped)
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    gate_out = staging.parent / "kaggle-smoke"
+    gate_out.mkdir(parents=True, exist_ok=True)
+    os.environ["BIOHUBX_OUTPUT"] = str(gate_out)
+    heartbeat(command, "pre-push", "validating, converting and exercising before any network action")
+    try:
+        gate = prepush.run_all(notebook, shipped, data_root=data_root)
+    except (PrePushError, EntryRefusal, PackagingError) as exc:
+        heartbeat(command, "refused", f"pre-push gate failed, nothing was sent: {exc}")
+        raise typer.Exit(code=2) from exc
+    heartbeat(
+        command,
+        "pre-push",
+        f"nbformat ok, nbconvert produced {gate.converted_bytes} bytes, "
+        f"{gate.stage_lines_seen} heartbeat lines across {len(gate.stage_names)} stages",
+    )
+    payload["pre_push_gate"] = gate.to_dict()
+    smoke_manifest = gate_out / f"result-{spec.fold.fold_id}.json"
+    if smoke_manifest.is_file():
+        payload["local_smoke"] = json.loads(smoke_manifest.read_text(encoding="utf-8"))
 
     report = root_path / "artifacts/kaggle-package.json"
     atomic_write_text(report, json.dumps(payload, indent=2, sort_keys=True) + "\n")
