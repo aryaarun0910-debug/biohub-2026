@@ -2101,10 +2101,23 @@ def package_kaggle(
         "digests",
         f"shipped identities for {len(input_digests)} {spec.fold.train_embryo} artifacts",
     )
-    atomic_write_text(
-        staging / "run.ipynb",
-        json.dumps(build_notebook(spec, shipped=shipped), indent=1, sort_keys=True) + "\n",
+    # The package travels inside the notebook. Nothing is imported from
+    # /kaggle/input, because no dataset or model source supplies it.
+    try:
+        archive_bytes = deterministic_archive(root_path / "src/biohubx")
+        check_payload_contents(archive_bytes)
+    except PackagingError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    inventory = archive_inventory(archive_bytes)
+    payload_token = archive_digest(archive_bytes)
+    heartbeat(
+        command,
+        "payload",
+        f"bytes={len(archive_bytes)} files={len(inventory)} digest={payload_token[:46]}",
     )
+    notebook = build_notebook(spec, shipped=shipped, payload=archive_bytes)
+    atomic_write_text(staging / "run.ipynb", json.dumps(notebook, indent=1, sort_keys=True) + chr(10))
     atomic_write_text(
         staging / "kernel-metadata.json",
         json.dumps(
@@ -2179,22 +2192,6 @@ def package_kaggle(
     from biohubx.packaging.entry import EntryRefusal
     from biohubx.packaging.prepush import PrePushError
 
-    # The package travels inside the notebook. Nothing is imported from
-    # /kaggle/input, because no dataset or model source supplies it.
-    try:
-        archive_bytes = deterministic_archive(root_path / "src/biohubx")
-        check_payload_contents(archive_bytes)
-    except PackagingError as exc:
-        heartbeat(command, "refused", str(exc))
-        raise typer.Exit(code=2) from exc
-    inventory = archive_inventory(archive_bytes)
-    payload_token = archive_digest(archive_bytes)
-    heartbeat(
-        command,
-        "payload",
-        f"bytes={len(archive_bytes)} files={len(inventory)} digest={payload_token[:46]}",
-    )
-    notebook = build_notebook(spec, shipped=shipped, payload=archive_bytes)
     try:
         data_root = competition_root(root)
     except CompetitionLayoutError as exc:
