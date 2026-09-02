@@ -1928,6 +1928,13 @@ def _open_volume(path: Path) -> Any:
 
 @package_app.command("kaggle")
 def package_kaggle(
+    owner: Annotated[
+        str,
+        typer.Option(
+            "--owner",
+            help="Kaggle account owning the kernel. A kernel id is owner/slug, so this is required.",
+        ),
+    ],
     fold: Annotated[
         str, typer.Option("--fold", help="Fold id from configs/e03-clean-folds.yaml.")
     ] = "fold_44b6",
@@ -1947,6 +1954,13 @@ def package_kaggle(
     ] = 2400,
     smoke_local: Annotated[
         bool, typer.Option("--smoke-local", help="Run the package's own entry point here, on CPU.")
+    ] = False,
+    allow_dirty: Annotated[
+        bool,
+        typer.Option(
+            "--allow-dirty",
+            help="Build from an uncommitted tree. The package records it and is not pushable.",
+        ),
     ] = False,
     root: Annotated[
         Path | None, typer.Option("--root", help="Competition data root, for --smoke-local only.")
@@ -1994,6 +2008,14 @@ def package_kaggle(
     dirty = subprocess.run(
         ["git", "status", "--porcelain"], cwd=root_path, capture_output=True, text=True, check=False
     ).stdout.strip()
+    if dirty and not allow_dirty:
+        heartbeat(
+            command,
+            "refused",
+            "the working tree is dirty, so the commit this package would pin does not describe "
+            "the bytes it ships; commit first, or pass --allow-dirty for an unpushable build",
+        )
+        raise typer.Exit(code=2)
 
     spec = PackageSpec(
         commit=commit,
@@ -2066,7 +2088,7 @@ def package_kaggle(
         json.dumps(
             kernel_metadata(
                 spec,
-                slug=f"biohubx-e03-{spec.fold.fold_id.replace('_', '-')}",
+                slug=f"{owner}/biohubx-e03-{spec.fold.fold_id.replace('_', '-')}",
                 title=f"Biohub-X E03 {spec.fold.fold_id}",
             ),
             indent=2,
@@ -2097,6 +2119,7 @@ def package_kaggle(
             "contains_competition_bytes": False,
             "contains_external_weights": False,
             "repository_clean_at_build": not dirty,
+            "pushable": not dirty,
         },
         indent=2,
         sort_keys=True,

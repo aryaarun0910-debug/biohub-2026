@@ -124,6 +124,9 @@ def test_the_wrong_number_of_gpus_is_refused() -> None:
 
 def test_the_kernel_metadata_disables_internet_and_ships_no_datasets() -> None:
     meta = kernel_metadata(SPEC, slug="user/kernel", title="t")
+    assert "/" in str(meta["id"]), (
+        "a Kaggle kernel id is owner/slug; without an owner a push addresses nothing"
+    )
     assert meta["enable_internet"] is False
     assert meta["enable_gpu"] is True
     assert meta["accelerator"] == "nvidiaTeslaT4"
