@@ -300,4 +300,81 @@ findings:
     validity:
       scope: competition_corpus
       holds_while: the registered corpus is unchanged.
+    superseded_by: F-0013
+
+  - id: F-0013
+    claim: >-
+      Annotation density varies by two orders of magnitude across the corpus and
+      differs systematically between the two embryos. Across 199 annotated
+      datasets there are 133,318 annotated nodes and 128,883 annotated edges
+      against a summed estimated_number_of_nodes of 4,725,117, so 2.821 percent
+      overall. Per dataset the annotated fraction ranges from 0.13 to 20.21
+      percent with a median of 3.56. Embryo 44b6 has a median density of 0.77
+      percent across 71 movies; embryo 6bba has 9.71 percent across 128.
+    instrument: artifacts/corpus-annotation-survey.json
+    evidence:
+      command: >-
+        read every train .geff, count nodes and edges, and read
+        estimated_number_of_nodes from the geff metadata extra
+      observed: 199 datasets surveyed, all carrying an estimate
+      note: >-
+        The two leave-one-embryo-out folds are therefore not merely different
+        embryos, they are different annotation regimes differing about
+        twelvefold in density. A result that holds on one says little about the
+        other, and reporting the folds pooled would hide that.
+    validity:
+      scope: competition_corpus
+      holds_while: the registered corpus is unchanged.
+    superseded_by: null
+
+  - id: F-0014
+    claim: >-
+      Division supervision is extremely scarce. The corpus contains 151
+      annotated divisions in total, and 112 of the 199 datasets contain none at
+      all. The median dataset has zero and the maximum has five. Embryo 44b6
+      holds 26 divisions and embryo 6bba holds 125, so a leave-one-embryo-out
+      fold trains a division model on either 26 or 125 examples.
+    instrument: artifacts/corpus-annotation-survey.json
+    evidence:
+      command: count nodes with out-degree of two or more in every train .geff
+      observed: 151 divisions across 199 datasets
+      note: >-
+        This bounds the joint division scorer proposed as experiment E04 far
+        more tightly than the 0.1 metric weight suggests. Twenty-six positive
+        examples in the smaller fold is not enough to fit a learned triple
+        scorer with any confidence, so synthetic fork pretraining or a
+        geometric prior is likely necessary rather than optional.
+    validity:
+      scope: competition_corpus
+      holds_while: the registered corpus is unchanged.
+    superseded_by: null
+
+  - id: F-0015
+    claim: >-
+      The official node-count adjustment offers roughly a ten percent uplift on
+      the raw edge Jaccard to a system that predicts the annotated node count
+      rather than the true cell count. Using each dataset's own
+      estimated_number_of_nodes, the multiplier 1 - 0.1 * (N_pred - N_total) /
+      N_total has a median of 1.0000 when predicting the estimated total and
+      1.0964 when predicting the annotated count, ranging 1.0798 to 1.0999. It
+      is 1.0992 for embryo 44b6 and 1.0903 for embryo 6bba.
+    instrument: artifacts/corpus-annotation-survey.json
+    evidence:
+      command: >-
+        evaluate the pinned metric's adjustment formula against each dataset's
+        recorded estimated_number_of_nodes under four node-count policies
+      observed: 199 datasets, medians 1.0000 / 1.0929 / 1.0964 / 1.0982
+      note: >-
+        This quantifies the lever established abstractly in F-0004 against the
+        real corpus. It is a ceiling, not a strategy: the uplift is only
+        realised if the nodes predicted are the annotated ones, since an edge
+        scores nothing unless both endpoints match ground truth within 7
+        micrometres. The multiplier is nearly flat between predicting half the
+        annotated count and twice it, so precision in node count matters far
+        less than which nodes are chosen.
+    validity:
+      scope: official_metric_behaviour_and_competition_corpus
+      holds_while: >-
+        the official source pin holds, ADJUSTMENT_ALPHA remains 0.1, and the
+        registered corpus is unchanged.
     superseded_by: null

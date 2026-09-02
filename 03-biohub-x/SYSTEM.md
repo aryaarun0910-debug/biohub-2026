@@ -345,9 +345,22 @@ Splits are grouped by embryo, so leave-one-embryo-out yields exactly two folds
 and every cross-embryo claim rests on n=2 ([[F-0011]], D-0016). The 199 annotated
 datasets are fields of view, not independent subjects.
 
-Annotation is sparse by orders of magnitude, around 0.0027 percent of the corpus
-by bytes ([[F-0012]]). No component may assume most cells carry a label, and the
-node-count behaviour in [[F-0004]] should be read against that sparsity.
+Annotation is sparse and unevenly so. Across the 199 annotated datasets there
+are 133,318 nodes and 128,883 edges against 4,725,117 estimated cells, 2.821
+percent overall, ranging 0.13 to 20.21 percent per dataset ([[F-0013]], which
+supersedes the earlier byte-ratio proxy [[F-0012]]). The two embryos differ about
+twelvefold in density, so the two folds are different annotation regimes and not
+merely different subjects.
+
+Division supervision is scarcer still: 151 annotated divisions in the whole
+corpus, with 112 of 199 datasets containing none, split 26 and 125 between the
+embryos ([[F-0014]]). This bounds any learned division model far more tightly
+than the metric's 0.1 weight suggests.
+
+The node-count adjustment offers roughly a ten percent uplift on the raw edge
+Jaccard to a system predicting the annotated count rather than the true cell
+count, and is nearly flat between half and twice that count ([[F-0015]]). Which
+nodes are predicted therefore matters far more than how many.
 
 ## 6. Phase gates
 
