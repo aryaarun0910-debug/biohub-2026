@@ -36,8 +36,11 @@ from biohubx import __version__
 from biohubx.artifacts import (
     ARTIFACT_REGISTRY_PATH,
     MANIFEST_DIR,
+    ArtifactRecord,
+    ArtifactRegistry,
     atomic_write_text,
     load_artifact_registry,
+    summarise_checks,
     verify_registry,
 )
 from biohubx.hashing import CANONICALIZATION_VERSION, DigestKind, NotTextError, digest_file
@@ -148,8 +151,17 @@ def artifacts_verify(
         Path | None,
         typer.Option("--registry", help="Artifact registry. Defaults to the repository registry."),
     ] = None,
+    deep: Annotated[
+        bool,
+        typer.Option("--deep", help="Re-derive tree digests by reading every byte. Slow."),
+    ] = False,
 ) -> None:
-    """Re-derive every digest in the artifact registry from the bytes on disk.
+    """Check every recorded identity, at the depth each artifact warrants.
+
+    Files inside the repository are always re-derived from their bytes. Dataset
+    trees are outside the repository and take minutes to read, so by default
+    they are checked for presence and shape and are reported as not deeply
+    verified. ``--deep`` re-derives them.
 
     Exits non-zero if any recorded identity no longer holds. This is the command
     that makes a recorded hash an assertion rather than a note.
@@ -165,16 +177,17 @@ def artifacts_verify(
         heartbeat(command, "refused", str(exc))
         raise typer.Exit(code=2) from exc
 
-    heartbeat(command, "loaded", f"artifacts={len(loaded.artifacts)}")
-    checks = verify_registry(loaded, root)
+    heartbeat(command, "loaded", f"artifacts={len(loaded.artifacts)} deep={deep}")
+    checks = verify_registry(loaded, root, deep=deep)
     for check in checks:
         status = "ok" if check.ok else "FAIL"
-        detail = f"id={check.artifact_id} slot={check.slot}"
+        detail = f"id={check.artifact_id} slot={check.slot} depth={check.depth.value}"
         if check.detail:
             detail = f"{detail} {check.detail}"
         heartbeat(command, status, detail)
 
     failed = [check for check in checks if not check.ok]
+    totals = summarise_checks(checks)
     # An in-repository registry is recorded relatively so the manifest stays
     # portable; an external one is recorded absolutely because that IS the
     # provenance. Manifests are therefore local evidence and are not committed.
@@ -185,18 +198,137 @@ def artifacts_verify(
         command,
         {
             "registry_path": recorded_registry,
-            "checked": len(checks),
-            "failed": len(failed),
+            **totals,
             "checks": [check.model_dump() for check in checks],
+        },
+    )
+    summary = (
+        f"checked={totals['checked']} failed={totals['failed']} "
+        f"deep={totals['deep']} shape_only={totals['shape_only']} absent={totals['absent']}"
+    )
+    heartbeat(command, "done", f"{summary} manifest={manifest_path.relative_to(root)}")
+    if totals["shape_only"] and not deep:
+        # Stated rather than left to be inferred from a count: a shape check is
+        # not an identity check, and a reader must not take the pass for one.
+        heartbeat(
+            command,
+            "note",
+            f"{totals['shape_only']} tree artifact(s) were checked by shape only; "
+            "re-run with --deep to re-derive their identities",
+        )
+    if failed:
+        raise typer.Exit(code=1)
+
+
+@artifacts_app.command("register")
+def artifacts_register(
+    source: Annotated[
+        Path,
+        typer.Option("--from", help="A data-fingerprint report to register."),
+    ],
+    registry: Annotated[
+        Path | None,
+        typer.Option("--registry", help="Artifact registry. Defaults to the repository registry."),
+    ] = None,
+) -> None:
+    """Merge fingerprinted dataset identities into the artifact registry.
+
+    Registration is a command rather than a hand edit so that no digest is ever
+    retyped. An id already present with a different identity is a conflict and
+    is refused: that means the data changed under a name the registry already
+    claims, and only a person can decide whether that is a re-download or a
+    problem.
+    """
+    command = "artifacts register"
+    root = repository_root()
+    registry_path = registry if registry is not None else root / ARTIFACT_REGISTRY_PATH
+    heartbeat(command, "start", f"from={source} registry={registry_path}")
+
+    if not source.is_file():
+        heartbeat(command, "refused", f"no fingerprint report at {source}")
+        raise typer.Exit(code=2)
+    report = json.loads(source.read_text(encoding="utf-8"))
+    if report.get("status") != "fingerprinted":
+        heartbeat(
+            command,
+            "refused",
+            f"report status is {report.get('status')!r}; only a completed fingerprint carries "
+            "identities, and a plan carries none",
+        )
+        raise typer.Exit(code=2)
+
+    try:
+        loaded = load_artifact_registry(registry_path)
+    except (FileNotFoundError, ValueError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    existing = {record.id: record for record in loaded.artifacts}
+    added: list[str] = []
+    unchanged: list[str] = []
+    conflicts: list[str] = []
+    records = list(loaded.artifacts)
+
+    for entry in report["entries"]:
+        record = ArtifactRecord.model_validate(
+            {
+                "id": entry["artifact_id"],
+                "kind": entry["kind"],
+                "external_path": entry["external_path"],
+                "schema": entry["schema"],
+                "digests": {"tree": entry["tree_digest"]},
+                "shape": {
+                    "file_count": entry["file_count"],
+                    "empty_directory_count": entry["empty_directory_count"],
+                    "total_bytes": entry["total_bytes"],
+                },
+                "provenance": entry["provenance"],
+            }
+        )
+        previous = existing.get(record.id)
+        if previous is None:
+            records.append(record)
+            added.append(record.id)
+        elif previous.digests == record.digests and previous.shape == record.shape:
+            unchanged.append(record.id)
+        else:
+            conflicts.append(
+                f"{record.id}: recorded {previous.digests.get('tree')} now {record.digests['tree']}"
+            )
+
+    if conflicts:
+        for conflict in conflicts:
+            heartbeat(command, "FAIL", conflict)
+        heartbeat(
+            command,
+            "refused",
+            f"{len(conflicts)} artifact id(s) already record a different identity; nothing written",
+        )
+        raise typer.Exit(code=1)
+
+    merged = ArtifactRegistry(schema_version=1, artifacts=records)
+    document = {
+        "schema_version": merged.schema_version,
+        "artifacts": [
+            record.model_dump(mode="json", by_alias=True, exclude_none=True) for record in merged.artifacts
+        ],
+    }
+    atomic_write_text(registry_path, yaml.safe_dump(document, sort_keys=False, width=100))
+    _write_manifest(
+        command,
+        {
+            "source": str(source.relative_to(root)) if source.is_relative_to(root) else str(source),
+            "added": added,
+            "unchanged": unchanged,
+            "registry_size": len(records),
         },
     )
     heartbeat(
         command,
         "done",
-        f"checked={len(checks)} failed={len(failed)} manifest={manifest_path.relative_to(root)}",
+        f"added={len(added)} unchanged={len(unchanged)} registry_artifacts={len(records)}",
     )
-    if failed:
-        raise typer.Exit(code=1)
+    typer.echo(json.dumps({"added": added, "unchanged": unchanged}, sort_keys=True))
 
 
 @official_app.command("verify-source")
@@ -564,18 +696,32 @@ def data_fingerprint(
                 heartbeat(command_name, "refused", f"{artifact.name}: {exc}")
                 raise typer.Exit(code=2) from exc
             hashed_bytes += tree.total_bytes
+            suffix = artifact.name.rsplit(".", 1)[-1]
             entries.append(
                 {
-                    "artifact_id": f"competition.{manifest.split}.{manifest.dataset_id}"
-                    f".{artifact.name.rsplit('.', 1)[-1]}",
+                    "artifact_id": f"competition.{manifest.split}.{manifest.dataset_id}.{suffix}",
                     "dataset_id": manifest.dataset_id,
                     "split": manifest.split,
                     "split_role": manifest.split_role,
                     "artifact": artifact.name,
+                    "kind": f"competition_dataset_{suffix}",
+                    "schema": manifest.schema,
+                    # Machine-local evidence of where the bytes were read from.
+                    # The digest is the part that travels between machines.
+                    "external_path": str(path),
                     "tree_digest": tree.digest.token,
                     "file_count": tree.file_count,
                     "empty_directory_count": tree.empty_directory_count,
                     "total_bytes": tree.total_bytes,
+                    "provenance": {
+                        "status": "external_uncleared",
+                        "original_path": str(path),
+                        "note": (
+                            f"Competition dataset {manifest.dataset_id!r}, split "
+                            f"{manifest.split!r}, role {manifest.split_role}. Licence and "
+                            "competition-eligibility review not yet recorded."
+                        ),
+                    },
                 }
             )
             heartbeat(

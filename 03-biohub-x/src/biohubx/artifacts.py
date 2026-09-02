@@ -5,9 +5,17 @@ verify``).
 
 An artifact is anything whose identity Biohub-X asserts: a hash-bound research
 snapshot, an exported candidate graph, a checkpoint, a built notebook, a
-submission. The registry at ``registry/artifacts.yaml`` is the only place those
-assertions live, and every digest in it is a typed token (see
-:mod:`biohubx.hashing`).
+submission, a competition dataset. The registry at ``registry/artifacts.yaml``
+is the only place those assertions live, and every digest in it is a typed token
+(see :mod:`biohubx.hashing`).
+
+Verification is tiered, because the artifacts are not alike. A file inside the
+repository is re-derived from its bytes on every run: it is small, always
+present, and the repository must contain what it claims. A dataset tree is
+outside the repository, is machine-local, and takes minutes to read, so by
+default it is checked for presence and shape only and is REPORTED as not deeply
+verified. ``--deep`` re-derives it. Nothing is ever skipped silently; a check
+that was not made says so.
 """
 
 from __future__ import annotations
@@ -21,9 +29,18 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Annotated, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from biohubx.hashing import Digest, DigestKind, NotTextError, digest_file
+from biohubx.hashing import (
+    Digest,
+    DigestKind,
+    NotATreeError,
+    NotTextError,
+    TreeNotQuiescentError,
+    digest_file,
+    tree_digest,
+    tree_shape,
+)
 
 ARTIFACT_REGISTRY_PATH = Path("registry/artifacts.yaml")
 MANIFEST_DIR = Path("artifacts/manifests")
@@ -47,12 +64,40 @@ class ProvenanceStatus(StrEnum):
 
 DigestToken = Annotated[str, Field(pattern=r"^[a-z0-9_]+:[a-z0-9]+(?:/v\d+)?:[0-9a-f]{64}$")]
 
-DigestSlot = Literal["raw", "canonical_text"]
+DigestSlot = Literal["raw", "canonical_text", "tree"]
 
 _SLOT_KIND: dict[str, DigestKind] = {
     "raw": DigestKind.RAW_ARTIFACT,
     "canonical_text": DigestKind.CANONICAL_TEXT,
+    "tree": DigestKind.TREE,
 }
+
+
+class VerificationDepth(StrEnum):
+    """How thoroughly one recorded identity was checked on this run."""
+
+    DEEP = "deep"
+    """Re-derived from the bytes. The recorded identity either holds or it does not."""
+
+    SHAPE = "shape"
+    """Presence, file count and total size only. Says nothing about a flipped byte."""
+
+    ABSENT = "absent"
+    """The artifact is not on this machine. Reported, never counted as verified."""
+
+
+class ArtifactShape(BaseModel):
+    """What a tree artifact contains, for the cheap tier of verification.
+
+    Recorded alongside a tree digest so a shape check has something to compare
+    against. Matching shape is not identity, and the report never says it is.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    file_count: Annotated[int, Field(ge=0)]
+    empty_directory_count: Annotated[int, Field(ge=0)]
+    total_bytes: Annotated[int, Field(ge=0)]
 
 
 class ArtifactProvenance(BaseModel):
@@ -80,15 +125,49 @@ class ArtifactRecord(BaseModel):
 
     id: str = Field(min_length=1)
     kind: str = Field(min_length=1)
-    path: str = Field(min_length=1)
+    path: str | None = Field(default=None, min_length=1)
+    """Repository-relative location. Set for artifacts the repository contains."""
+
+    external_path: str | None = Field(default=None, min_length=1)
+    """Machine-local location for an artifact the repository does not contain.
+
+    Evidence, not identity. The digest is what travels between machines; this
+    only says where the bytes happened to be when they were read.
+    """
+
     schema_: str = Field(alias="schema", min_length=1)
     digests: dict[DigestSlot, DigestToken] = Field(min_length=1)
+    shape: ArtifactShape | None = None
     produced_by: str | None = None
     provenance: ArtifactProvenance
 
+    @model_validator(mode="after")
+    def _one_location_and_a_matching_identity(self) -> ArtifactRecord:
+        if (self.path is None) == (self.external_path is None):
+            raise ValueError(
+                f"artifact {self.id!r} must record exactly one location: `path` for something the "
+                "repository contains, or `external_path` for something it does not"
+            )
+        if "tree" in self.digests:
+            if len(self.digests) != 1:
+                raise ValueError(
+                    f"artifact {self.id!r} mixes a tree digest with file digests; a directory has "
+                    "no single-file identity and a file has no tree identity"
+                )
+            if self.shape is None:
+                raise ValueError(
+                    f"artifact {self.id!r} records a tree digest with no shape, so it could never "
+                    "be checked without reading every byte"
+                )
+        elif self.shape is not None:
+            raise ValueError(f"artifact {self.id!r} records a shape but is not a tree artifact")
+        return self
+
     @field_validator("path")
     @classmethod
-    def _refuse_absolute(cls, value: str) -> str:
+    def _refuse_absolute(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         # Both path flavours are checked, because `pathlib` only understands the
         # host convention: a POSIX-rooted path is not absolute to a Windows
         # interpreter, and a drive-letter path is not absolute to a POSIX one.
@@ -102,6 +181,17 @@ class ArtifactRecord(BaseModel):
 
     def digest(self, slot: DigestSlot) -> Digest:
         return Digest.parse(self.digests[slot])
+
+    @property
+    def is_tree(self) -> bool:
+        return "tree" in self.digests
+
+    def locate(self, root: Path) -> Path:
+        """Where to look for this artifact on this machine."""
+        if self.path is not None:
+            return root / self.path
+        assert self.external_path is not None
+        return Path(self.external_path)
 
 
 class ArtifactRegistry(BaseModel):
@@ -133,6 +223,7 @@ class DigestCheck(BaseModel):
     expected: str
     observed: str | None
     ok: bool
+    depth: VerificationDepth
     detail: str | None = None
 
 
@@ -146,69 +237,197 @@ def load_artifact_registry(path: Path) -> ArtifactRegistry:
     return ArtifactRegistry.model_validate(document)
 
 
-def verify_registry(registry: ArtifactRegistry, root: Path) -> list[DigestCheck]:
-    """Re-derive every recorded digest from the bytes on disk.
+def _check(
+    record: ArtifactRecord,
+    slot: str,
+    token: str,
+    *,
+    observed: str | None,
+    ok: bool,
+    depth: VerificationDepth,
+    detail: str | None = None,
+) -> DigestCheck:
+    return DigestCheck(
+        artifact_id=record.id,
+        slot=slot,
+        expected=token,
+        observed=observed,
+        ok=ok,
+        depth=depth,
+        detail=detail,
+    )
 
-    A missing file, an unreadable file, a mismatched digest or a digest filed
-    under the wrong slot is a failed check. Nothing is skipped and nothing falls
-    back to a default location.
+
+def _verify_tree(record: ArtifactRecord, target: Path, token: str, *, deep: bool) -> DigestCheck:
+    """Check a directory artifact, deeply or by shape.
+
+    A shape check compares file count, empty-directory count and total size. It
+    is minutes cheaper and it is NOT identity: it cannot see a flipped byte. The
+    depth travels with the result so a caller can never read one as the other.
+    """
+    if not target.is_dir():
+        # An external artifact that is not on this machine is reported, not
+        # failed: the repository must contain what it claims, but a machine need
+        # not hold every dataset. An in-repository tree that is missing IS a
+        # failure, because the repository did claim it.
+        if record.external_path is not None:
+            return _check(
+                record,
+                "tree",
+                token,
+                observed=None,
+                ok=True,
+                depth=VerificationDepth.ABSENT,
+                detail=f"not on this machine: {target}",
+            )
+        return _check(
+            record,
+            "tree",
+            token,
+            observed=None,
+            ok=False,
+            depth=VerificationDepth.ABSENT,
+            detail=f"directory not found: {target}",
+        )
+
+    assert record.shape is not None  # enforced by ArtifactRecord
+    try:
+        if deep:
+            observed = tree_digest(target).digest.token
+            return _check(
+                record,
+                "tree",
+                token,
+                observed=observed,
+                ok=observed == token,
+                depth=VerificationDepth.DEEP,
+                detail=None if observed == token else "tree digest mismatch",
+            )
+        shape = tree_shape(target)
+    except (NotATreeError, TreeNotQuiescentError, OSError) as exc:
+        return _check(
+            record,
+            "tree",
+            token,
+            observed=None,
+            ok=False,
+            depth=VerificationDepth.SHAPE,
+            detail=str(exc),
+        )
+
+    differences = [
+        f"{name}: recorded {expected}, found {found}"
+        for name, expected, found in (
+            ("file_count", record.shape.file_count, shape.file_count),
+            (
+                "empty_directory_count",
+                record.shape.empty_directory_count,
+                shape.empty_directory_count,
+            ),
+            ("total_bytes", record.shape.total_bytes, shape.total_bytes),
+        )
+        if expected != found
+    ]
+    summary = f"files={shape.file_count} bytes={shape.total_bytes}"
+    return _check(
+        record,
+        "tree",
+        token,
+        observed=summary,
+        ok=not differences,
+        depth=VerificationDepth.SHAPE,
+        detail="; ".join(differences) if differences else "shape only; not deeply verified",
+    )
+
+
+def verify_registry(registry: ArtifactRegistry, root: Path, *, deep: bool = False) -> list[DigestCheck]:
+    """Check every recorded identity, at the depth each artifact warrants.
+
+    File artifacts inside the repository are always re-derived from their bytes.
+    Tree artifacts are re-derived only when ``deep`` is set, and are otherwise
+    checked for presence and shape, with the depth recorded on every result so
+    that a shape check is never read as an identity check.
+
+    A missing file, a mismatched digest, a digest filed under the wrong slot or
+    a changed shape is a failure. Nothing is skipped, and a check that was not
+    made says which one it was.
     """
     checks: list[DigestCheck] = []
     for record in registry.artifacts:
-        target = root / record.path
+        target = record.locate(root)
         for slot, token in record.digests.items():
             expected = Digest.parse(token)
             kind = _SLOT_KIND[slot]
             if expected.kind is not kind:
                 checks.append(
-                    DigestCheck(
-                        artifact_id=record.id,
-                        slot=slot,
-                        expected=token,
+                    _check(
+                        record,
+                        slot,
+                        token,
                         observed=None,
                         ok=False,
+                        depth=VerificationDepth.DEEP,
                         detail=f"slot {slot} holds a {expected.kind.value} digest",
                     )
                 )
                 continue
+
+            if kind is DigestKind.TREE:
+                checks.append(_verify_tree(record, target, token, deep=deep))
+                continue
+
             if not target.is_file():
                 checks.append(
-                    DigestCheck(
-                        artifact_id=record.id,
-                        slot=slot,
-                        expected=token,
+                    _check(
+                        record,
+                        slot,
+                        token,
                         observed=None,
                         ok=False,
-                        detail=f"file not found: {record.path}",
+                        depth=VerificationDepth.ABSENT,
+                        detail=f"file not found: {target}",
                     )
                 )
                 continue
             try:
-                observed = digest_file(target, kind)
-            except NotTextError as exc:
+                observed_digest = digest_file(target, kind)
+            except (NotTextError, NotATreeError) as exc:
                 checks.append(
-                    DigestCheck(
-                        artifact_id=record.id,
-                        slot=slot,
-                        expected=token,
+                    _check(
+                        record,
+                        slot,
+                        token,
                         observed=None,
                         ok=False,
+                        depth=VerificationDepth.DEEP,
                         detail=str(exc),
                     )
                 )
                 continue
-            matched = observed.token == token
+            matched = observed_digest.token == token
             checks.append(
-                DigestCheck(
-                    artifact_id=record.id,
-                    slot=slot,
-                    expected=token,
-                    observed=observed.token,
+                _check(
+                    record,
+                    slot,
+                    token,
+                    observed=observed_digest.token,
                     ok=matched,
+                    depth=VerificationDepth.DEEP,
                     detail=None if matched else "digest mismatch",
                 )
             )
     return checks
+
+
+def summarise_checks(checks: list[DigestCheck]) -> dict[str, int]:
+    """Count results by depth, so a report states what was actually established."""
+    return {
+        "checked": len(checks),
+        "failed": sum(1 for check in checks if not check.ok),
+        "deep": sum(1 for check in checks if check.depth is VerificationDepth.DEEP),
+        "shape_only": sum(1 for check in checks if check.depth is VerificationDepth.SHAPE),
+        "absent": sum(1 for check in checks if check.depth is VerificationDepth.ABSENT),
+    }
 
 
 def atomic_write_bytes(path: Path, data: bytes) -> None:

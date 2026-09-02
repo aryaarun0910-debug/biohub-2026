@@ -52,6 +52,10 @@ ABSOLUTE_PATH_ALLOWLIST = frozenset(
         "research/primitives-dossier.md",
         "tests/contracts/test_repository_isolation.py",
         "tests/contracts/test_artifact_registry.py",
+        # An external artifact is one whose location is a machine-local absolute
+        # path, so the tests proving such a record is representable must contain
+        # one. The registry field itself is exercised, not a real machine path.
+        "tests/contracts/test_tiered_verification.py",
     }
 )
 

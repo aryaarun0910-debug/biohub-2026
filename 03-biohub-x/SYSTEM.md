@@ -230,7 +230,8 @@ default data path.
 Implemented:
 
 - `biohubx artifacts digest PATH --kind {raw_artifact_sha256,canonical_text_sha256}`
-- `biohubx artifacts verify [--registry PATH]`
+- `biohubx artifacts verify [--registry PATH] [--deep]`
+- `biohubx artifacts register --from REPORT [--registry PATH]`
 - `biohubx official verify-source`
 - `biohubx evaluate fixture`
 - `biohubx data validate {--root PATH | --synthetic}`
@@ -251,6 +252,19 @@ each volume with its ground truth, `test/` is unannotated by design, and ground
 truth appearing in `test/` is refused rather than assumed to be a layout change.
 Every dataset records whether its role was declared by an official split name or
 inferred from a leaf directory's contents.
+
+`artifacts verify` is tiered. Files inside the repository are always re-derived
+from their bytes. Dataset trees live outside it and take minutes to read, so
+they are checked for presence, file count and total size, and the report says
+how many results were deep, shape-only or absent. A shape check is not identity:
+a byte flipped in place changes neither count nor size, and only `--deep` sees
+it. Absence fails for an in-repository artifact, because the repository claimed
+it, and is merely reported for an external one, because a machine need not hold
+every dataset.
+
+`artifacts register` merges a completed fingerprint report into the registry
+atomically, so no digest is ever retyped. It is idempotent and refuses an id
+that already records a different identity, writing nothing.
 
 `data validate` establishes layout integrity only. `data fingerprint` establishes
 content identity, by computing a `tree_sha256` for every dataset artifact. The

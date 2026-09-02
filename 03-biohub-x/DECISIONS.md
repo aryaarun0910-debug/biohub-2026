@@ -299,3 +299,59 @@ change reverted inside the window, nor two writes leaving both size and
 modification time identical. Those are not the realistic case, which is a writer
 that has not finished. This is why registration waits for extraction to be
 complete rather than merely for a download to reach its final byte.
+
+---
+
+## D-0013 - One registry, verification tiered by what each artifact is
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+Competition datasets are registered in `registry/artifacts.yaml` alongside
+everything else, keeping the four-registry rule intact. They differ from every
+other artifact in three ways at once: they live outside the repository, their
+location is machine-local, and reading one takes minutes rather than
+milliseconds.
+
+Verification is therefore tiered, and the tier is recorded on every result.
+A file inside the repository is always re-derived from its bytes. A dataset tree
+is checked for presence, file count and total size by default, and re-derived
+only under `--deep`. The report states how many results were deep, how many were
+shape-only and how many were absent, and prints a line naming the shape-only
+count when it is not zero.
+
+**The shape tier is not identity, and nothing pretends otherwise.** A byte
+flipped in place changes neither the file count nor the total size, so the cheap
+tier passes it and only `--deep` catches it. There is a test asserting exactly
+that divergence, so the limitation is a measured property rather than a caveat
+in prose.
+
+**Rejected alternatives:**
+
+- *A second registry for datasets.* Cleanest separation, but it adds a fifth
+  registry file against the explicit four-registry design, and it would split
+  the answer to "what identities does this repository assert" across two places.
+- *Registering everything at one depth.* Deep everywhere makes the gate read
+  81 GiB on every run. Shallow everywhere silently weakens the guarantee for the
+  in-repository artifacts that can afford the strong one.
+- *Skipping datasets during the ordinary gate.* A skipped check that is not
+  reported is indistinguishable from a passing one, which is the failure this
+  repository is built to avoid.
+
+**Absence is reported, not failed, for external artifacts only.** The repository
+must contain what it claims, so a missing in-repository artifact is a broken
+claim. A machine need not hold every dataset, so a missing external one is a
+fact about the machine. The two are distinguished by which location field the
+record carries.
+
+**Registration is a command.** `biohubx artifacts register --from <report>`
+merges a completed fingerprint into the registry atomically. Hand-editing would
+mean retyping digests, which is the manual duplication forbidden elsewhere. It
+is idempotent, it preserves records it did not add, and an id already present
+with a different identity is refused with nothing written: that means the data
+changed under a name the registry already claims, and only a person can decide
+whether that is a re-download or a problem.
+
+Registration records `external_uncleared`. Fingerprinting establishes identity,
+not licence or competition eligibility, and the record must not imply a review
+nobody has done.
