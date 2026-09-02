@@ -140,3 +140,81 @@ def test_evaluate_slice_refuses_a_stale_graph(tmp_path: Path) -> None:
     stale.write_text('{"nodes": [], "edges": []}', encoding="utf-8")
     result = runner.invoke(app, ["evaluate", "slice", "--graph", str(stale)])
     assert result.exit_code == 2
+
+
+def _official_root(base: Path) -> Path:
+    train = base / "train"
+    (train / "d1.zarr" / "0").mkdir(parents=True)
+    (train / "d1.zarr" / "0" / "chunk").write_bytes(b"volume-bytes")
+    (train / "d1.geff" / "nodes").mkdir(parents=True)
+    (train / "d1.geff" / "nodes" / "ids").write_bytes(b"node-ids")
+    test = base / "test"
+    (test / "d2.zarr" / "0").mkdir(parents=True)
+    (test / "d2.zarr" / "0" / "chunk").write_bytes(b"held-out")
+    return base
+
+
+def test_data_fingerprint_records_a_typed_tree_identity_per_artifact(tmp_path: Path) -> None:
+    result = runner.invoke(app, ["data", "fingerprint", "--root", str(_official_root(tmp_path))])
+    assert result.exit_code == 0, result.output
+
+    report = json.loads((REPO_ROOT / "artifacts/data-fingerprint.json").read_text(encoding="utf-8"))
+    entries = {entry["artifact"]: entry for entry in report["entries"]}
+    assert set(entries) == {"d1.zarr", "d1.geff", "d2.zarr"}
+    for entry in entries.values():
+        # A typed token, not a bare hex string, and not a directory size.
+        assert entry["tree_digest"].startswith("tree_sha256:sha256/v1:")
+        assert entry["file_count"] >= 1
+    assert entries["d2.zarr"]["split_role"] == "unannotated"
+    assert entries["d1.zarr"]["split_role"] == "annotated"
+
+
+def test_data_fingerprint_changes_when_a_single_byte_changes(tmp_path: Path) -> None:
+    root = _official_root(tmp_path)
+
+    def digest_of(artifact: str) -> str:
+        assert runner.invoke(app, ["data", "fingerprint", "--root", str(root)]).exit_code == 0
+        report = json.loads((REPO_ROOT / "artifacts/data-fingerprint.json").read_text(encoding="utf-8"))
+        return str(next(e["tree_digest"] for e in report["entries"] if e["artifact"] == artifact))
+
+    before = digest_of("d1.zarr")
+    (root / "train" / "d1.zarr" / "0" / "chunk").write_bytes(b"volume-bytes-EDITED")
+    assert digest_of("d1.zarr") != before
+
+
+def test_data_fingerprint_can_target_one_dataset(tmp_path: Path) -> None:
+    result = runner.invoke(
+        app, ["data", "fingerprint", "--root", str(_official_root(tmp_path)), "--dataset", "d2"]
+    )
+    assert result.exit_code == 0, result.output
+    report = json.loads((REPO_ROOT / "artifacts/data-fingerprint.json").read_text(encoding="utf-8"))
+    assert {entry["dataset_id"] for entry in report["entries"]} == {"d2"}
+
+
+def test_data_fingerprint_refuses_an_unknown_dataset(tmp_path: Path) -> None:
+    result = runner.invoke(
+        app, ["data", "fingerprint", "--root", str(_official_root(tmp_path)), "--dataset", "absent"]
+    )
+    assert result.exit_code == 2
+
+
+def test_data_fingerprint_refuses_without_an_explicit_root() -> None:
+    result = runner.invoke(app, ["data", "fingerprint"])
+    assert result.exit_code == 2
+
+
+def test_data_fingerprint_refuses_an_invalid_layout(tmp_path: Path) -> None:
+    # It validates the layout before reading a single byte, so a wrong root
+    # fails in a second rather than after hashing a partial tree.
+    (tmp_path / "loose.zarr").mkdir()
+    (tmp_path / "other.geff").mkdir()
+    result = runner.invoke(app, ["data", "fingerprint", "--root", str(tmp_path)])
+    assert result.exit_code == 2
+
+
+def test_data_fingerprint_does_not_modify_the_data(tmp_path: Path) -> None:
+    root = _official_root(tmp_path)
+    before = sorted((p.as_posix(), p.stat().st_size if p.is_file() else -1) for p in root.rglob("*"))
+    assert runner.invoke(app, ["data", "fingerprint", "--root", str(root)]).exit_code == 0
+    after = sorted((p.as_posix(), p.stat().st_size if p.is_file() else -1) for p in root.rglob("*"))
+    assert after == before

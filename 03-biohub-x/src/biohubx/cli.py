@@ -441,5 +441,115 @@ def evaluate_slice(
     typer.echo(json.dumps(payload, sort_keys=True))
 
 
+@data_app.command("fingerprint")
+def data_fingerprint(
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Explicit data root. BIOHUB_DATA_ROOT is the only environment fallback."),
+    ] = None,
+    dataset: Annotated[
+        str | None,
+        typer.Option("--dataset", help="Fingerprint one dataset id only. Repeat the command for more."),
+    ] = None,
+) -> None:
+    """Compute a typed tree identity for every dataset artifact under a root.
+
+    Layout validation answers whether something is the right shape. This answers
+    whether it is the same data, by reading every byte of every chunk file once
+    and recording a tree digest per artifact.
+
+    That is the only thing strong enough to bind an experiment to its inputs
+    here. The archive a download produced is normally deleted after extraction,
+    and a competition slug is a mutable name rather than an identity, so neither
+    can stand in for the content of the tree that experiments actually read.
+
+    Writes a report whose entries are ready to register in
+    registry/artifacts.yaml. It never modifies the data.
+    """
+    command_name = "data fingerprint"
+    from biohubx.data.validation import validate_data_root
+    from biohubx.hashing import tree_digest
+
+    env_root = os.environ.get("BIOHUB_DATA_ROOT")
+    resolved = root if root is not None else (Path(env_root) if env_root else None)
+    if resolved is None:
+        heartbeat(command_name, "refused", "provide --root or BIOHUB_DATA_ROOT")
+        raise typer.Exit(code=2)
+
+    heartbeat(command_name, "start", f"root={resolved} dataset={dataset or 'all'}")
+    try:
+        manifests = validate_data_root(resolved)
+    except (FileNotFoundError, OSError, ValueError) as exc:
+        heartbeat(command_name, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    selected = [item for item in manifests if dataset is None or item.dataset_id == dataset]
+    if not selected:
+        known = sorted(item.dataset_id for item in manifests)
+        heartbeat(command_name, "refused", f"no dataset {dataset!r} under this root; known: {known}")
+        raise typer.Exit(code=2)
+
+    heartbeat(command_name, "validated", f"datasets={len(selected)} of {len(manifests)}")
+
+    entries: list[dict[str, object]] = []
+    hashed_bytes = 0
+    for manifest in selected:
+        split_dir = resolved if manifest.relative_path == "." else resolved / manifest.relative_path
+        for artifact in manifest.artifacts:
+            path = split_dir / artifact.name
+            heartbeat(command_name, "hashing", f"{manifest.split}/{artifact.name}")
+
+            def progress(files: int, total: int, name: str = artifact.name) -> None:
+                if files % 20000 == 0:
+                    heartbeat(command_name, "hashing", f"{name} files={files} bytes={total}")
+
+            try:
+                tree = tree_digest(path, on_file=progress)
+            except (OSError, ValueError) as exc:
+                heartbeat(command_name, "refused", f"{artifact.name}: {exc}")
+                raise typer.Exit(code=2) from exc
+            hashed_bytes += tree.total_bytes
+            entries.append(
+                {
+                    "artifact_id": f"competition.{manifest.split}.{manifest.dataset_id}"
+                    f".{artifact.name.rsplit('.', 1)[-1]}",
+                    "dataset_id": manifest.dataset_id,
+                    "split": manifest.split,
+                    "split_role": manifest.split_role,
+                    "artifact": artifact.name,
+                    "tree_digest": tree.digest.token,
+                    "file_count": tree.file_count,
+                    "empty_directory_count": tree.empty_directory_count,
+                    "total_bytes": tree.total_bytes,
+                }
+            )
+            heartbeat(
+                command_name,
+                "hashed",
+                f"{artifact.name} files={tree.file_count} bytes={tree.total_bytes} "
+                f"{tree.digest.token[:34]}...",
+            )
+
+    report: dict[str, object] = {
+        "schema_version": 1,
+        "mode": "real-read-only",
+        "status": "fingerprinted",
+        "entries": entries,
+    }
+    output = repository_root() / "artifacts/data-fingerprint.json"
+    atomic_write_text(output, json.dumps(report, indent=2, sort_keys=True) + "\n")
+    _write_manifest(
+        command_name,
+        {
+            "root": str(resolved),
+            "entries": len(entries),
+            "total_bytes": hashed_bytes,
+            "report": "artifacts/data-fingerprint.json",
+        },
+    )
+    heartbeat(command_name, "done", f"entries={len(entries)} report=artifacts/data-fingerprint.json")
+    typer.echo(json.dumps(report, sort_keys=True))
+
+
 if __name__ == "__main__":
     app()

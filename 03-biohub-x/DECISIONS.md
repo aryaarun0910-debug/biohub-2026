@@ -231,3 +231,41 @@ whichever way it came out.
 
 **Revisit when:** the node-count experiment reports, at which point this either
 becomes a specific calibration decision or is superseded.
+
+---
+
+## D-0012 - Dataset identity is a tree digest, not a name or a size
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+A dataset artifact is a Zarr-backed directory of many thousands of chunk files,
+so it has no single-file digest. `tree_sha256` under canonicalization `v1` is
+the SHA-256 over a canonical listing of every file's relative path, size and
+content digest, plus every empty directory. No extracted data may enter an
+experiment without one.
+
+**Rejected alternatives, and why each is not enough:**
+
+- *The competition slug.* A mutable name chosen by the host. It says where data
+  was meant to come from, not what arrived.
+- *The downloaded archive's digest.* The tool that fetches it normally deletes
+  the archive after extracting, so the identity would name something that no
+  longer exists and that nothing later reads.
+- *Directory kinds and entry counts.* These establish layout integrity, which is
+  a different question. They cannot detect a flipped byte in a chunk.
+- *Paths and sizes without content.* Same objection: a same-size corruption is
+  invisible.
+- *A digest over file contents alone.* Would call two trees identical after two
+  files swapped contents, and would miss a chunk moved to the wrong path. The
+  path is part of the identity because a chunk in the wrong place is different
+  data.
+
+**Consequence:** registration reads every byte once, which on a large dataset is
+the dominant cost. That is accepted, because it buys the ability to say that the
+data an experiment used is the data that was registered. The listing is kept
+alongside the digest so a later mismatch names the file that changed rather than
+only reporting that something did.
+
+Symlinks inside a tree are refused. Following one could leave the tree and
+skipping one would lose information, so neither happens silently.

@@ -17,7 +17,8 @@ What exists:
 | Legal-lineage contract | `biohubx.contracts.lineage` | implemented, one mutation test per required refusal |
 | Pinned official metric | `biohubx._vendor.official_competition` | vendored byte-identical, digests locked |
 | Metric adapter | `biohubx.evaluation.official_metric` | implemented, fifteen calibration fixtures |
-| Read-only data validation | `biohubx.data.validation` | implemented, refuses ambiguity |
+| Read-only data validation | `biohubx.data.validation` | implemented, understands the official split layout |
+| Dataset content identity | `biohubx.hashing` (tree digest) | implemented, contract-tested |
 | Synthetic fixture | `biohubx.data.synthetic` | deterministic movie with a known lineage |
 | Instance, representation, candidate, prediction contracts | `biohubx.contracts.*` | implemented, one mutation test per rule |
 | Classical detector | `biohubx.proposals.classical` | deterministic, physical-radius suppression |
@@ -131,13 +132,16 @@ consumes it.
 
 ### 4.1 Content identity (implemented)
 
-Two identities, never interchangeable:
+Three identities, never interchangeable:
 
 - `raw_artifact_sha256` - SHA-256 of the exact bytes on disk. The identity of
   weights, exported graphs, built notebooks, submissions, and hash-bound
   snapshots.
 - `canonical_text_sha256` - SHA-256 after canonicalization `v1`. The identity
   used for source and configuration drift.
+- `tree_sha256` - SHA-256 over a canonical listing of a whole directory tree
+  under tree canonicalization `v1`. The identity of a dataset artifact, which is
+  a directory of many thousands of chunk files and has no single-file digest.
 
 Canonicalization `v1`: strict UTF-8 decode, strip BOM, CRLF and lone CR to LF,
 append one trailing LF if the text is non-empty and lacks one. Trailing
@@ -150,7 +154,16 @@ one applies:
 ```
 raw_artifact_sha256:sha256:<64 hex>
 canonical_text_sha256:sha256/v1:<64 hex>
+tree_sha256:sha256/v1:<64 hex>
 ```
+
+Tree canonicalization `v1`: walk the tree; refuse symlinks and anything that is
+neither a regular file nor a directory; record each file as its relative POSIX
+path, size and content digest, and each EMPTY directory as itself; sort by path;
+join with LF. Paths are relative to the root, so moving or renaming an artifact
+does not change what the data is, while moving a chunk inside it does. The text
+and tree canonicalization versions are independent and are not interchangeable,
+which is why the kind is part of the token rather than implied by the version.
 
 A bare hexadecimal string is not an identity and is refused by
 `biohubx.hashing.Digest.parse`.
@@ -217,6 +230,7 @@ Implemented:
 - `biohubx official verify-source`
 - `biohubx evaluate fixture`
 - `biohubx data validate {--root PATH | --synthetic}`
+- `biohubx data fingerprint --root PATH [--dataset ID]`
 - `biohubx infer synthetic [--seed N] [--noise F] [--annotated-fraction F]`
 - `biohubx evaluate slice [--graph PATH]`
 
@@ -228,7 +242,16 @@ stale artifact is never scored against a freshly generated ground truth.
 `data validate` takes an explicit root or the single named environment variable
 `BIOHUB_DATA_ROOT`, and refuses when neither is given. It never guesses a
 location, never writes into the data, and refuses an ambiguous layout rather
-than picking one.
+than picking one. It understands the official split layout: `train/` must pair
+each volume with its ground truth, `test/` is unannotated by design, and ground
+truth appearing in `test/` is refused rather than assumed to be a layout change.
+Every dataset records whether its role was declared by an official split name or
+inferred from a leaf directory's contents.
+
+`data validate` establishes layout integrity only. `data fingerprint` establishes
+content identity, by computing a `tree_sha256` for every dataset artifact. The
+two answer different questions and neither substitutes for the other: a correct
+shape says nothing about a flipped byte.
 
 Planned, absent until a consumer exists: `data make-splits`, `proposals infer`,
 `representation acquire`, `train`, `infer real`, `package kaggle`.
