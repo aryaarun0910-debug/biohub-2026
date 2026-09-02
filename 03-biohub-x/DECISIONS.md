@@ -811,3 +811,33 @@ log rather than in a screenshot afterwards.
 Both failures share a shape worth naming: a check that looks adjacent to the
 thing that matters. Device count next to device model, local imports next to
 remote imports. Neither is a substitute for the other.
+
+## D-0029 - The target environment gets measured before it gets depended on
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+Two remote runs have failed for reasons that had nothing to do with the science.
+Both were assumptions about a machine this repository cannot see: a notebook
+format, then an import path, then a missing package. The pre-push gate closed the
+first two by running the real conversion and the real bootstrap locally. It
+cannot close the third, because it runs on a machine that has every dependency
+installed, so it is structurally blind to a gap that exists only over there.
+
+So the environment becomes an input, and inputs get measured. `package audit`
+stages a CPU-only diagnostic with no accelerator, no internet and no sources,
+which reports the interpreter, the platform tag, the ABI, every installed
+distribution, the importability of the whole runtime closure, and whether the
+target can decode the competition's actual blosc/zstd/bitshuffle codec.
+
+Two properties make it a diagnostic rather than another guess. It imports no part
+of Biohub-X, so it runs on an image where Biohub-X cannot. And every probe is
+wrapped in BaseException, so one absence is reported rather than ending the run;
+a diagnostic that stops at the first gap measures only that gap.
+
+**A wheelhouse is not designed from a traceback.** A wheel is matched to a Python
+version, a platform tag and an ABI, and until those are measured any wheel set is
+a guess with a download attached. The provisional plan is a minimal Biohub-X-owned
+wheelhouse locked to the measured ABI, with source, version, licence, SHA-256 and
+named consumer recorded per wheel, and internet still disabled. That plan is not
+started, because its first input does not exist yet.

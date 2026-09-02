@@ -913,6 +913,60 @@ approval_packet:
       - a CUDA dependency in this repository
       - any Colab run on competition data
 
+  gate_5_environment_audit:
+    state: awaiting_authorisation
+    audit_id: E03-ENV-AUDIT-01
+    purpose: >-
+      Measure the Kaggle runtime instead of inferring it. E03-SMOKE-02 proved
+      zarr is absent and proved nothing about the Python version, platform tag or
+      ABI a wheel would have to match. A wheelhouse built on one traceback is a
+      third wasted session waiting to happen.
+    package:
+      path: artifacts/kaggle-audit
+      manifest_digest: canonical_text_sha256:sha256/v1:78e171dd46d4b47c61c9d1a405883f751f63ddf3b88798022d08f0c84ad41fb2
+      pinned_commit: 58ad4a3a9dc5d159650c4bb17b0c478b2fe3e6e9
+      kernel: aryaarun07/biohub-x-environment-audit
+      file_count: 3
+      total_bytes: 9075
+      push_command: kaggle kernels push -p artifacts\kaggle-audit
+      pushed: false
+    scope:
+      accelerator: none; enable_gpu false
+      internet: disabled
+      dataset_sources: []
+      model_sources: []
+      competition_sources: []
+      runtime_ceiling_seconds: 300
+      reads_competition_data: false
+      trains: false
+      imports_biohubx: false
+    what_it_measures:
+      - interpreter version, implementation, platform, machine, architecture, libc, platform tag and SOABI
+      - every installed distribution with its exact version
+      - importability and version for each of the 28 names in the runtime closure
+      - a blosc/zstd/bitshuffle decode of a buffer encoded with the competition's own codec
+      - zarr version and whether its v3 BloscCodec exists
+      - torch version and CUDA build metadata, only if torch is present
+    failure_handling: >-
+      Every probe is wrapped in BaseException, because a missing compiled
+      extension raises things that are not ImportError. An absent package is
+      reported and the audit continues. Verified locally: crc32c and zstandard
+      are both missing on the build machine, both were reported, and the run
+      still reached its manifest.
+    pre_push_gate:
+      nbformat_validated: true
+      nbconvert_converted: true
+      converted_bytes: 308605
+      ran_isolated_from_the_repository: true
+      heartbeat_lines: 41
+      stages_seen: ["audit-start", "probe-interpreter", "probe-distributions", "probe-imports", "probe-import", "probe-codec", "probe-torch", "manifest", "done"]
+      expected_stage_sequence_seen: true
+    what_this_does_not_authorise:
+      - any GPU run
+      - any wheelhouse download or construction
+      - another training push
+      - reading competition data
+
   what_G-01_changed_about_the_plan:
     - >-
       Reproducing 0.936 is now a lower priority than it was. It anchors

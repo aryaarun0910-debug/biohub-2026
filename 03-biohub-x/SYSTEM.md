@@ -243,6 +243,7 @@ Implemented:
 - `biohubx evaluate slice [--graph PATH]`
 - `biohubx evaluate retention [--root PATH] [--retentions LIST] [--seed N]`
 - `biohubx evaluate mask-audit [--root PATH] [--max-frames N] [--compare-maxpool]`
+- `biohubx package audit [--out PATH] [--expect-kernel ID] [--allow-dirty]`
 - `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--allow-dirty]`
 - `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--peak-quantile F] [--learning-rate F]`
 
@@ -320,6 +321,14 @@ cost. It is the instrument that falsified the band ([[F-0020]]) and forced
 the positive-unlabelled objective ([[D-0024]]). Bands are selected per fold
 from the training embryo alone; the evaluation embryo measures failure
 afterwards and never selects the rule.
+
+`package audit` stages a CPU-only diagnostic that measures the Kaggle runtime:
+no accelerator, no internet, no dataset, model or competition sources, and no
+Biohub-X import, so it runs on an image where Biohub-X cannot. It reports the
+interpreter, platform tag and ABI, every installed distribution, the runtime
+closure's importability, and whether the target decodes the competition's own
+blosc codec. Every probe is wrapped, so an absent package is reported rather
+than ending the run ([[D-0029]]).
 
 `package kaggle` runs a mandatory pre-push gate before it finishes: the generated
 notebook must pass `nbformat.validate`, convert through nbconvert, carry every
