@@ -26,6 +26,7 @@ import time
 from collections.abc import Callable
 from dataclasses import asdict
 from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path
 from typing import Annotated
 
@@ -38,6 +39,7 @@ from biohubx.artifacts import (
     MANIFEST_DIR,
     ArtifactRecord,
     ArtifactRegistry,
+    ProvenanceStatus,
     atomic_write_text,
     load_artifact_registry,
     summarise_checks,
@@ -329,6 +331,158 @@ def artifacts_register(
         f"added={len(added)} unchanged={len(unchanged)} registry_artifacts={len(records)}",
     )
     typer.echo(json.dumps({"added": added, "unchanged": unchanged}, sort_keys=True))
+
+
+class Eligibility(StrEnum):
+    """An explicit competition-eligibility decision. There is no default."""
+
+    ELIGIBLE = "eligible"
+    NOT_ELIGIBLE = "not-eligible"
+
+
+@artifacts_app.command("clear")
+def artifacts_clear(
+    reviewed_by: Annotated[
+        str,
+        typer.Option("--reviewed-by", help="Name of the person who read the terms. Required."),
+    ],
+    source_url: Annotated[str, typer.Option("--source-url", help="Where the terms were read.")],
+    access_restrictions: Annotated[
+        str,
+        typer.Option("--access-restrictions", help="What the holder may not do, licence aside."),
+    ],
+    eligibility: Annotated[
+        Eligibility,
+        typer.Option("--eligibility", help="Explicit competition-eligibility decision."),
+    ],
+    id_prefix: Annotated[
+        str,
+        typer.Option("--id-prefix", help="Clear artifacts whose id starts with this."),
+    ],
+    data_license: Annotated[
+        str | None, typer.Option("--data-license", help="Licence on the data itself.")
+    ] = None,
+    code_license: Annotated[
+        str | None, typer.Option("--code-license", help="Licence on accompanying code.")
+    ] = None,
+    weight_license: Annotated[
+        str | None, typer.Option("--weight-license", help="Licence on model weights.")
+    ] = None,
+    note: Annotated[str | None, typer.Option("--note", help="Anything else the review found.")] = None,
+    registry: Annotated[
+        Path | None,
+        typer.Option("--registry", help="Artifact registry. Defaults to the repository registry."),
+    ] = None,
+) -> None:
+    """Record a completed terms review against artifacts already registered.
+
+    Clearance is a human act. This command writes down a review that has
+    happened; it does not perform one, and it cannot judge eligibility. Every
+    piece of evidence is a required option precisely so that none of it can be
+    left to a default.
+
+    The selected artifacts are verified before anything is written. A clearance
+    says that someone read the terms covering THESE bytes, so applying one to an
+    artifact whose recorded identity no longer holds would attach a real review
+    to data it was never about.
+    """
+    command_name = "artifacts clear"
+    root = repository_root()
+    registry_path = registry if registry is not None else root / ARTIFACT_REGISTRY_PATH
+    heartbeat(command_name, "start", f"id_prefix={id_prefix!r} reviewed_by={reviewed_by!r}")
+
+    if not (data_license or code_license or weight_license):
+        heartbeat(command_name, "refused", "a clearance needs at least one licence recorded")
+        raise typer.Exit(code=2)
+
+    try:
+        loaded = load_artifact_registry(registry_path)
+    except (FileNotFoundError, ValueError) as exc:
+        heartbeat(command_name, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    selected = [record for record in loaded.artifacts if record.id.startswith(id_prefix)]
+    if not selected:
+        heartbeat(command_name, "refused", f"no artifact id starts with {id_prefix!r}")
+        raise typer.Exit(code=2)
+    heartbeat(command_name, "selected", f"artifacts={len(selected)} of {len(loaded.artifacts)}")
+
+    # A review is about specific bytes. Verify before attaching it to them.
+    subset = ArtifactRegistry(schema_version=1, artifacts=selected)
+    checks = verify_registry(subset, root)
+    failed = [check for check in checks if not check.ok]
+    if failed:
+        for check in failed[:10]:
+            heartbeat(command_name, "FAIL", f"id={check.artifact_id} {check.detail}")
+        heartbeat(
+            command_name,
+            "refused",
+            f"{len(failed)} selected artifact(s) no longer match their recorded identity; "
+            "a review cannot be attached to bytes it was not about",
+        )
+        raise typer.Exit(code=1)
+    totals = summarise_checks(checks)
+    heartbeat(
+        command_name,
+        "verified",
+        f"deep={totals['deep']} shape_only={totals['shape_only']} absent={totals['absent']}",
+    )
+
+    cleared: list[str] = []
+    records: list[ArtifactRecord] = []
+    for record in loaded.artifacts:
+        if not record.id.startswith(id_prefix):
+            records.append(record)
+            continue
+        provenance = record.provenance.model_dump(exclude_none=True)
+        provenance.update(
+            {
+                "status": ProvenanceStatus.EXTERNAL_CLEARED.value,
+                "source_url": source_url,
+                "access_restrictions": access_restrictions,
+                "competition_eligible": eligibility is Eligibility.ELIGIBLE,
+                "reviewed_by": reviewed_by,
+                "reviewed_utc": datetime.now(UTC),
+            }
+        )
+        for field, value in (
+            ("data_license", data_license),
+            ("code_license", code_license),
+            ("weight_license", weight_license),
+            ("note", note),
+        ):
+            if value:
+                provenance[field] = value
+        updated = record.model_dump(by_alias=True, exclude_none=True)
+        updated["provenance"] = provenance
+        records.append(ArtifactRecord.model_validate(updated))
+        cleared.append(record.id)
+
+    merged = ArtifactRegistry(schema_version=1, artifacts=records)
+    document = {
+        "schema_version": merged.schema_version,
+        "artifacts": [
+            record.model_dump(mode="json", by_alias=True, exclude_none=True) for record in merged.artifacts
+        ],
+    }
+    atomic_write_text(registry_path, yaml.safe_dump(document, sort_keys=False, width=100))
+    _write_manifest(
+        command_name,
+        {
+            "id_prefix": id_prefix,
+            "cleared": len(cleared),
+            "reviewed_by": reviewed_by,
+            "source_url": source_url,
+            "access_restrictions": access_restrictions,
+            "competition_eligible": eligibility is Eligibility.ELIGIBLE,
+        },
+    )
+    heartbeat(
+        command_name,
+        "done",
+        f"cleared={len(cleared)} eligibility={eligibility.value} reviewed_by={reviewed_by!r}",
+    )
+    typer.echo(json.dumps({"cleared": len(cleared), "eligibility": eligibility.value}, sort_keys=True))
 
 
 @official_app.command("verify-source")

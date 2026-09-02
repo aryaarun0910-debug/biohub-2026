@@ -232,6 +232,7 @@ Implemented:
 - `biohubx artifacts digest PATH --kind {raw_artifact_sha256,canonical_text_sha256}`
 - `biohubx artifacts verify [--registry PATH] [--deep]`
 - `biohubx artifacts register --from REPORT [--registry PATH]`
+- `biohubx artifacts clear --reviewed-by NAME --source-url URL --access-restrictions TEXT --eligibility {eligible,not-eligible} --id-prefix PREFIX [--data-license L] [--code-license L] [--weight-license L]`
 - `biohubx official verify-source`
 - `biohubx evaluate fixture`
 - `biohubx data validate {--root PATH | --synthetic}`
@@ -274,6 +275,13 @@ eligibility decision and a named reviewer. Licence, restrictions and eligibility
 are three fields because they are three facts: data can be permissively licensed
 and still carry a rule against passing it on, and neither settles whether a
 competition allows its use. A recorded clearance survives re-registration.
+
+`artifacts clear` writes down a review that has already happened. It does not
+perform one and cannot judge eligibility, so every piece of evidence is a
+required option with no default, and the eligibility decision must be stated
+explicitly rather than implied by omission. It verifies the selected artifacts
+before writing: a clearance says someone read the terms covering those bytes, so
+it may not be attached to an artifact whose recorded identity no longer holds.
 
 `data validate` establishes layout integrity only. `data fingerprint` establishes
 content identity, by computing a `tree_sha256` for every dataset artifact. The
