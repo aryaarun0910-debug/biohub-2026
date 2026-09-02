@@ -233,3 +233,71 @@ findings:
         075fc5f5a52d11077f9dc2b074644618f26939e2 and tracksdata stays at the
         pinned commit.
     superseded_by: null
+
+  - id: F-0010
+    claim: >-
+      The local test split is not a held-out evaluation set. It contains four
+      volumes and no ground truth at all, and every one of the four is
+      byte-identical to a train volume carrying the same dataset id, confirmed
+      by matching tree digests over 456,757,564 to 547,662,847 bytes each. It is
+      a format example for the submission pipeline; the genuinely held-out data
+      is the hidden set swapped in at rerun.
+    instrument: tests/contracts/test_competition_corpus.py
+    evidence:
+      command: uv run pytest tests/contracts/test_competition_corpus.py
+      observed: 6 passed
+      note: >-
+        Any score computed against the local test split is a score on training
+        data. All held-out evaluation must therefore be carved out of the 199
+        annotated train datasets. The duplication is recorded structure, not
+        permission to score train labels against the test directory.
+    validity:
+      scope: competition_corpus
+      holds_while: >-
+        registry/artifacts.yaml records the corpus onboarded on 2026-09-02. A
+        genuine held-out test set arriving supersedes this finding, and the
+        instrument fails loudly if it does.
+    superseded_by: null
+
+  - id: F-0011
+    claim: >-
+      The supervised corpus spans two embryos, not 199 independent subjects.
+      Dataset ids are {embryo}_{field_of_view}, and the 199 annotated train
+      datasets divide into embryo 6bba with 128 fields of view and embryo 44b6
+      with 71.
+    instrument: tests/contracts/test_competition_corpus.py
+    evidence:
+      command: uv run pytest tests/contracts/test_competition_corpus.py
+      observed: 6 passed
+      note: >-
+        Leave-one-embryo-out yields exactly two folds, each training on a single
+        embryo. Any claim that a result holds across embryos rests on n=2, and
+        199 is a count of fields of view rather than of independent subjects.
+        Fields of view from one embryo are not independent of each other, so a
+        random split over the 199 would leak.
+    validity:
+      scope: competition_corpus
+      holds_while: the registered corpus is unchanged.
+    superseded_by: null
+
+  - id: F-0012
+    claim: >-
+      Annotation is sparse by orders of magnitude. Across the 199 annotated
+      train datasets the ground truth totals 2,353,863 bytes against
+      87,607,537,865 bytes of volume, which is 0.0027 percent. Per dataset the
+      median ground truth is 11,713 bytes against a median volume of
+      411,186,738 bytes.
+    instrument: tests/contracts/test_competition_corpus.py
+    evidence:
+      command: uv run pytest tests/contracts/test_competition_corpus.py
+      observed: 6 passed
+      note: >-
+        Byte ratios are a proxy for annotation density, not a measurement of it,
+        because the two formats differ in what they store. The order of
+        magnitude is what matters here: no component may be written assuming
+        most cells carry a label. Converting this into a node count needs the
+        estimated_number_of_nodes metadata and is not established yet.
+    validity:
+      scope: competition_corpus
+      holds_while: the registered corpus is unchanged.
+    superseded_by: null

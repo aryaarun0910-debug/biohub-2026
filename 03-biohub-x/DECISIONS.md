@@ -390,3 +390,46 @@ licence is the licence that matters.
 erase a completed review during a routine re-run. Registration leaves an
 unchanged artifact alone, and a test now holds that property rather than leaving
 it to be an accident of how the comparison happens to be written.
+
+---
+
+## D-0015 - The local test split is never evaluated against
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+Measured in [[F-0010]]: the local test split holds four volumes, carries no
+ground truth, and every one of the four is byte-identical to a train volume of
+the same dataset id. It is a format example for the submission pipeline. The
+genuinely held-out data is the hidden set Kaggle swaps in at rerun.
+
+No Biohub-X component may compute a score against it. Doing so would be scoring
+training data, and because the duplication is exact the result would look
+plausible rather than obviously wrong, which is the dangerous kind of mistake.
+The test split is used only to exercise the shape of the inference and export
+path.
+
+All held-out evaluation is carved out of the 199 annotated train datasets.
+
+## D-0016 - Splits are grouped by embryo, and the fold count is two
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+Measured in [[F-0011]]: dataset ids are `{embryo}_{field_of_view}` and the corpus
+spans two embryos, 6bba with 128 fields of view and 44b6 with 71.
+
+Splits are grouped by embryo. Fields of view from one embryo share its biology,
+its imaging session and its annotator, so a random split over the 199 would put
+near-siblings on both sides and report a generalisation number that is really a
+memorisation number.
+
+**The honest consequence is that leave-one-embryo-out yields exactly two folds,
+each training on a single embryo.** Every cross-embryo claim this project can
+make rests on n=2. That is a property of the data, not something a better
+experiment design can fix, and it is recorded here so that no later report
+describes 199 movies as 199 independent observations.
+
+Where a finer split is needed, grouping by field of view within an embryo is
+permitted for model selection, but a result obtained that way may never be
+described as evidence of holding up on a new embryo.

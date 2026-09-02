@@ -303,6 +303,24 @@ its own.
 Retrieval@k, AUROC, t-SNE, UMAP, PHATE and segmentation IoU are diagnostics.
 They cannot promote anything on their own.
 
+### 5.1 What the corpus permits
+
+The registered corpus constrains evaluation more tightly than the movie count
+suggests, and all three constraints are measured rather than assumed.
+
+The local test split is not an evaluation set. It holds four volumes, carries no
+ground truth, and each volume is byte-identical to a train volume of the same
+dataset id. Nothing is ever scored against it ([[F-0010]], D-0015).
+
+The corpus spans two embryos, 6bba with 128 fields of view and 44b6 with 71.
+Splits are grouped by embryo, so leave-one-embryo-out yields exactly two folds
+and every cross-embryo claim rests on n=2 ([[F-0011]], D-0016). The 199 annotated
+datasets are fields of view, not independent subjects.
+
+Annotation is sparse by orders of magnitude, around 0.0027 percent of the corpus
+by bytes ([[F-0012]]). No component may assume most cells carry a label, and the
+node-count behaviour in [[F-0004]] should be read against that sparsity.
+
 ## 6. Phase gates
 
 | Phase | Gate | State |
