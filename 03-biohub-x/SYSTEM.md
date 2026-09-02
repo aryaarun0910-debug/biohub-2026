@@ -311,6 +311,23 @@ its own.
 Retrieval@k, AUROC, t-SNE, UMAP, PHATE and segmentation IoU are diagnostics.
 They cannot promote anything on their own.
 
+### 5.0 Provenance gate
+
+Cleared on 2026-09-02. All 402 competition artifacts record `external_cleared`
+with a data licence of CC0, the access restrictions read from the official rules
+page, an explicit eligibility decision of eligible, and Arya Arun as the
+accountable reviewer. The eligibility rests on that reviewer's confirmation of
+having formally joined the competition and accepted its rules; it was not
+inferred from the licence.
+
+The restrictions bind this repository: the data may not be transmitted,
+duplicated, published, redistributed or made available to anyone who has not
+agreed to the competition rules. Nothing derived from it may be published in a
+form that would carry the data itself.
+
+Phase 3 is unblocked. A newly registered dataset does not inherit this review; a
+contract test requires every competition artifact to carry its own.
+
 ### 5.1 What the corpus permits
 
 The registered corpus constrains evaluation more tightly than the movie count

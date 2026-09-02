@@ -107,10 +107,41 @@ def test_ground_truth_is_a_vanishing_fraction_of_the_volumes() -> None:
     )
 
 
-def test_no_competition_artifact_claims_a_clearance_yet() -> None:
-    # Identity is established; terms are not. This holds the line until a real
-    # licence, access-restriction and eligibility review has been recorded.
-    statuses = {a.provenance.status.value for a in competition_artifacts()}
-    assert statuses == {"external_uncleared"}, (
-        f"a competition artifact claims a status other than external_uncleared: {sorted(statuses)}"
-    )
+def test_every_competition_artifact_carries_a_completed_terms_review() -> None:
+    """The invariant that replaced "nothing is cleared yet".
+
+    The review has now happened, so the line this holds moves: any dataset
+    registered from here on must carry its own clearance rather than inheriting
+    the assumption that the corpus was reviewed once. A newly added artifact
+    with no review fails this.
+    """
+    artifacts = competition_artifacts()
+    for record in artifacts:
+        provenance = record.provenance
+        assert provenance.status.value == "external_cleared", f"{record.id} is not cleared"
+        assert provenance.reviewed_by, f"{record.id} names no accountable reviewer"
+        assert provenance.data_license, f"{record.id} records no data licence"
+        assert provenance.access_restrictions, f"{record.id} records no access restrictions"
+        assert provenance.competition_eligible is not None, f"{record.id} has no eligibility decision"
+
+
+def test_the_corpus_is_eligible_for_competition_use() -> None:
+    # Recorded from a human review, not inferred here. If a later review decides
+    # otherwise, this fails and every experiment reading the corpus stops.
+    ineligible = [a.id for a in competition_artifacts() if a.provenance.competition_eligible is not True]
+    assert not ineligible, f"artifacts recorded as not eligible for competition use: {ineligible}"
+
+
+def test_no_provenance_note_contradicts_its_own_status() -> None:
+    # Prose does not update when a field does. This catches the specific way the
+    # two came apart before: a cleared record still carrying the sentence that
+    # said its review had not happened.
+    from biohubx.artifacts import PROVISIONAL_REVIEW_NOTE
+
+    contradictory = [
+        a.id
+        for a in competition_artifacts()
+        if a.provenance.status.value == "external_cleared"
+        and PROVISIONAL_REVIEW_NOTE in (a.provenance.note or "")
+    ]
+    assert not contradictory, f"cleared records whose note denies the clearance: {contradictory}"
