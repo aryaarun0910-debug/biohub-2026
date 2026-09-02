@@ -509,3 +509,40 @@ forbids the third option, a script.
 
 One experiment configuration was added, `configs/phase3-cpu.yaml`, holding both
 E01 and E02, so the budget was met there.
+## D-0020 - The public leaderboard is not a target, and the reference score is not evidence
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+G-01 acquired the reference notebook's source and its weight packs' provenance
+manifests without downloading a weight. Two of the three models it blends record
+their own training splits, and both splits contain all four public-test movie
+ids: the secondary seed trained on all 199 annotated movies, and the centre-prior
+model split them 71 against 128, which is the embryo split, holding none of the
+four out of both sides (R-0002).
+
+Because each public-test volume is byte-identical to a train volume carrying
+ground truth ([[F-0010]]), those models were fitted and selected on the public
+test set. The reference's public score is therefore not evidence that its method
+generalises, and neither is any score built on the same weights.
+
+Three consequences bind future work.
+
+No Biohub-X target is defined against the public leaderboard. The 0.950 goal is
+restated as a score on a held-out split carved from the 199 annotated train
+movies under [[D-0016]], and a public-leaderboard number may be reported as an
+observation but never as a promotion criterion.
+
+Reproducing the reference is now an engineering exercise, not a validation one.
+It may establish node counts, runtime, memory and stage behaviour, and it may not
+establish that the approach works. The experiment that reproduces it must say so
+in its hypothesis.
+
+Where the reference's constants disagree with its own runtime receipt, the
+notebook's environment block is authoritative. The receipt is stale in at least
+three fields and describes the notebook's parent fork rather than the run that
+produced the graphs (R-0002).
+
+This does not make the reference worthless. Its training code is CC0 and it
+describes a proposal source, which [[F-0017]] identifies as the thing Biohub-X
+does not yet have.

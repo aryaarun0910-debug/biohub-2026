@@ -203,113 +203,298 @@ references:
       - What is the run's division Jaccard? The four public movies hold three
         annotated divisions between them, so the division term is decided by
         three events and the log reports none of them.
+  - id: R-0002
+    status: reference_only
+    title: G-01 metadata-only acquisition, which resolves every R-0001 uncertainty
+    supersedes_unresolved_in: R-0001
+    source:
+      kind: kaggle_api_metadata_and_source
+      retrieved_by: Arya Arun's credentials, via the Kaggle CLI
+      retrieved_utc: '2026-09-02T00:00:00Z'
+      scope: >-
+        Notebook source, dataset file listings, dataset licences and the small
+        JSON provenance manifests only. 523,502 bytes across 18 files. No model
+        weight was downloaded, no GPU was used, no kernel was pushed and nothing
+        was submitted.
+
+    acquired:
+      notebook:
+        id: nusrati/0-936
+        id_no: 131795286
+        title: '0.936'
+        last_run_utc: '2026-09-01T16:54:59Z'
+        source_sha256: 4b86c247ea653d585278e0b3321ef7455f3f35451c08d4cb9212901637036883
+        source_bytes: 196891
+        enable_internet: false
+        enable_gpu: true
+        machine_shape: NvidiaTeslaT4
+        docker_image: gcr.io/kaggle-private-byod/python@sha256:37c64f7dd9c54116ecd1bcc88817c5469b88387388fade02bfa8bf3fc647d461
+        dataset_sources:
+          - pilkwang/biohub-deepcenter-unet3d-center-prior-v1
+          - pilkwang/biohub-temporal-unet3d-seed314159-v1
+          - pilkwang/biohub-tracking-support-pack-50ep-v1
+          - pilkwang/pilkwang-public-dataset-for-notebooks-figures
+        competition_sources:
+          - biohub-cell-tracking-during-development
+        note: >-
+          The Kaggle API exposes no version number for a kernel, so the pin is
+          the source digest plus the last-run timestamp above.
+
+      datasets:
+        - slug: pilkwang/biohub-tracking-support-pack-50ep-v1
+          dataset_id: 10999845
+          licence: CC0-1.0
+          files: 87
+          total_bytes: 355616000
+          weight_bytes: 33432810
+          wheel_bytes: 322000000
+        - slug: pilkwang/biohub-temporal-unet3d-seed314159-v1
+          dataset_id: 11184174
+          licence: CC0-1.0
+          weight_bytes: 33433706
+        - slug: pilkwang/biohub-deepcenter-unet3d-center-prior-v1
+          dataset_id: 11061989
+          licence: CC0-1.0
+          weight_bytes: 75795832
+        - slug: pilkwang/pilkwang-public-dataset-for-notebooks-figures
+          licence: CC0-1.0
+          contents: >-
+            PNG figures for the author's BirdCLEF, Maze Crawler and ROGII
+            notebooks. Nothing in it relates to this competition and the
+            notebook never reads from it.
+
+      manifest_digests:
+        support_pack_ARTIFACT_MANIFEST.json: bc20f1f04cfb682af3b27a836ce9a57f44a2fe27508dc59039200b2a23188103
+        support_pack_build_script.py: 01a895ece59fd842bd80e936104d6a22be3c498cd87c7b8bf280a1f8367e1556
+        support_pack_weight_config.json: e9b4e396c58081bca08adf8275bd0bd1c2d3fd6eb091a1912a5116cb6de7b50a
+        deepcenter_SNAPSHOT_MANIFEST.json: e7d791b1500610602f33a1e0576f04804a734762df306ff008226b9f2c608d6e
+        deepcenter_split_manifest.json: c1cc5b597fa9bc647390920affdd5bc4cb27ee1ea84e1cedb59d108a68c2a845
+        temporal_SNAPSHOT_MANIFEST.json: 11a09cf761999695f5da2dd06d7a7ad32886dc7617d3fde3c8efe081041c9fd2
+        temporal_split_manifest.json: cbe8ace34ffc157172280538441454b60250f0188faa063d1a9eadfb1ac55c0b
+        temporal_training_config.json: 4f29349439e133ad41846dec14b30f5cdbe2b7bb20908c5d0d3d205b5d71a87b
+
+      digest_corroboration: >-
+        Four files carry a sha256 declared inside a manifest that the same
+        packaging run wrote, and all four recomputed identically here:
+        build_biohub_support_pack.py, the weight config.json, the temporal
+        split_manifest.json and the temporal training_config.json. The declared
+        digests in these packs are therefore trustworthy as declarations. That
+        is not the same as verifying a weight file, which needs the weight.
+
+    resolutions:
+      public_test_contamination:
+        verdict: >-
+          CONTAMINATED. All four public-test movie ids were used in fitting or
+          model selection for at least two of the three models the notebook
+          blends, so the 0.936 public leaderboard score cannot be read as
+          evidence of generalisation.
+        evidence:
+          temporal_seed_model: >-
+            split_manifest.json records method
+            unet_transformer_alltrain_seed314159_v1 with train listing all 199
+            annotated movies, which includes 44b6_0113de3b, 44b6_0b24845f,
+            6bba_05b6850b and 6bba_05db0fb1. Its 40-movie validation list
+            contains 44b6_0113de3b and 44b6_0b24845f as well.
+          deepcenter_model: >-
+            split_manifest.json records train of 71 stems containing
+            44b6_0113de3b and 44b6_0b24845f, and val of 128 stems containing
+            6bba_05b6850b and 6bba_05db0fb1. The 71/128 division is the
+            44b6/6bba embryo split, so no public-test movie was held out of both.
+          primary_support_pack_weights: >-
+            Unrecorded. The pack carries no split manifest and its
+            ARTIFACT_MANIFEST describes itself only as a public learned baseline
+            artifact repackaged locally. Its training split remains unknown, but
+            the two models above settle the ensemble.
+          why_it_matters: >-
+            F-0010 established that each public-test volume is byte-identical to
+            a train volume of the same id, and those train volumes carry ground
+            truth. Training on them is training on the public test set.
+        kaggle_test_splits_50ep.json: >-
+          Not a training record and not in any dataset. The notebook writes it at
+          inference time as [{"split": 0, "train": [], "test": test_stems}] with
+          an empty train list, where test_stems is a directory listing of the
+          competition test folder. It is an inference manifest. The question was
+          answered by the two weight packs' own split manifests instead.
+
+      name_mismatch:
+        verdict: >-
+          RESOLVED, and not a defect in the weights. build_biohub_support_pack.py
+          sets artifact_name from the local output directory name, so
+          biohub-tracking-support-pack-400ep-snapshot-v1 is the author's staging
+          folder on their own machine and carries no claim about training length.
+          The Kaggle slug is a separate argument to the same script. The
+          authoritative binding is the weight sha256, which is identical across
+          the manifest, the run log and the file listing.
+
+      licences:
+        verdict: >-
+          RESOLVED. All four datasets are CC0-1.0 and public, each tagged
+          pre-trained model. Competition rule 2.6 permits external data and
+          models that are public, equally accessible and of minimal cost, which
+          these are. Code licence, weight licence and training-data provenance
+          are still three questions: the licence is settled, and the
+          training-data provenance is settled as contaminated above.
+
+      configuration_versus_receipt:
+        verdict: >-
+          RESOLVED, and the receipt is the unreliable one. Cell 0 sets the run's
+          values as environment variables, and those are what executed:
+          BIOHUB_DET_THRESHOLD 0.965, BIOHUB_ILP_DISAPPEARANCE_WEIGHT 2 and
+          BIOHUB_SECONDARY_DETECTION_WEIGHT 0.80. The runtime integrity receipt
+          reports 0.96875, 1.5 and 0.475. The 0.475 is the parent fork's value,
+          which cell 0's own comment names as the single constant this notebook
+          changed. The receipt describes the ancestor, not the run.
+        instruction_for_reproduction: >-
+          Trust the cell-0 environment block. Do not configure a reproduction
+          from the runtime integrity receipt.
+
+      notebook_lineage:
+        verdict: >-
+          RESOLVED, and four deep. Cell 0 declares this notebook a fork of the
+          public notebook pls-upvote-share-higher-scoring-ideas by
+          stephennedumpally at LB 0.931, with one constant changed and a claimed
+          gain of +0.003 on that lineage. The run log separately credits its
+          harmonic association rule to the CC0 notebook
+          yusuketogashi/no-hack-biohub-cell-another-approch-3rd v18, and names a
+          fixed-90 dual-seed baseline at LB 0.913 beneath that. The weights come
+          from pilkwang. No single author owns the result.
+
+      division_jaccard_of_the_run:
+        verdict: >-
+          UNRESOLVABLE from any artifact. The notebook computes no division
+          Jaccard on the test split because no test ground truth exists, and the
+          leaderboard reports only the combined score. It stays open, and the
+          four public movies hold three annotated divisions between them, so the
+          term is decided by three events whichever way the split falls.
+
+    corrections_to_R-0001:
+      - >-
+        R-0001 recorded the DeepCenter checkpoint as epoch 2 with best_score
+        -0.045, taken from the run log, and this repository described it as a
+        barely-trained two-epoch checkpoint. That description was wrong. Its own
+        SNAPSHOT_MANIFEST records snapshot_epoch 500 against a configured 1000
+        epochs, with best_score_so_far -0.04500306242456039, which is the same
+        number the log printed. BIOHUB_DEEPCENTER_EXPECTED_EPOCH=2 in the
+        notebook is an assertion about a different field of the checkpoint.
+      - >-
+        R-0001 listed the figures dataset's role as unresolved. It is a generic
+        figure store for the author's unrelated notebooks and is not an input to
+        anything. It is dropped from the download packet.
+      - >-
+        R-0001 treated the runtime integrity receipt as a description of the run.
+        It is not; see configuration_versus_receipt above.
+
+    unresolved:
+      - The primary support-pack weights' training split, which no artifact in
+        the pack records. It does not change the contamination verdict, since
+        the other two models settle it, but it means the primary weight cannot
+        be described as clean either.
+      - The run's division Jaccard, for the reason recorded above.
 
 # ---------------------------------------------------------------------------
-# Approval gate. Nothing below has been performed. Each item requires an
-# explicit human go-ahead per AGENTS.md section 7, and the two are separate
-# decisions: the download may be approved without the GPU runs.
+# Approval gate, revised after G-01. The metadata gate is spent; what remains
+# is weights and GPU. Both still require an explicit human go-ahead per
+# AGENTS.md section 7.
 # ---------------------------------------------------------------------------
 
 approval_packet:
   prepared_utc: '2026-09-02T00:00:00Z'
-  prepared_against: R-0001
+  prepared_against: R-0002
+  supersedes: the pre-G-01 packet, whose four-dataset download is no longer what is being asked for
   state: awaiting_human_approval
 
-  gate_1_downloads:
+  gate_1_metadata:
+    state: PERFORMED
+    outcome: >-
+      Every R-0001 uncertainty except two is resolved, at a cost of 523,502
+      bytes and no weight download. The headline result is that the reference's
+      leaderboard score is contaminated, which changes what a reproduction is
+      for.
+
+  gate_2_weight_downloads:
+    state: awaiting_approval
     purpose: >-
-      Turn R-0001 from a transcribed log into verifiable artifacts, so that the
-      reference can be reproduced once and decomposed. Nothing enters main; each
-      download is registered external_uncleared and digested before it is read.
-    actor: Arya Arun, who holds the competition entry
-    mechanism: kagglehub dataset_download, pinned to the exact version resolved at download time
-    destination_root: >-
-      The kagglehub cache root, which is machine-specific and therefore never
-      written down here. Every destination below is relative to it, and the
-      absolute path enters the repository only through a fingerprint report's
-      provenance record, the one place allowed to carry one.
+      Reproduce the reference once to establish what it emits, not to establish
+      what it scores. Its public score is contaminated (R-0002), so reproduction
+      is an engineering reference for node counts, runtime and behaviour, and is
+      no longer evidence that 0.936 generalises.
+    licence_position: all CC0-1.0, public, competition rule 2.6 satisfied
     items:
       - slug: pilkwang/biohub-tracking-support-pack-50ep-v1
-        url: https://www.kaggle.com/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1
+        required: true
+        files_needed:
+          - weights/unet_transformer/split_0/edge_predictor_best.pth
+          - repo/
         expected_digest:
-          weights/unet_transformer/split_0/edge_predictor_best.pth: 12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771
-          python_manifest: 978b626d1fd1e7397435a437dfe68691defe1572fc3c20e61012d7c9b52ed029
-        licence: unresolved; read the dataset's declared licence before use
-        size_bytes: unknown until download; the register step records the measured tree size
-        destination: datasets/pilkwang/biohub-tracking-support-pack-50ep-v1, beneath the kagglehub cache root
-        purpose: primary weights, the splits file that answers the contamination question, offline wheels
-        blocking_precondition: >-
-          The 50ep slug and the 400ep manifest name must be reconciled. If the
-          downloaded manifest still disagrees with the slug, the artifact is
-          registered but not cleared, and no run may depend on it.
+          edge_predictor_best.pth: 12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771
+        bytes_if_selective: 8512000
+        bytes_if_whole_dataset: 355616000
+        note: >-
+          checkpoint_last.pth (25 MB) is training state and is not needed for
+          inference. The wheels directory is 322 MB of offline dependencies that
+          a local CPU or GPU run does not need, because this repository already
+          pins its own environment. Selective file download avoids 97 percent of
+          the bytes.
       - slug: pilkwang/biohub-temporal-unet3d-seed314159-v1
-        url: https://www.kaggle.com/datasets/pilkwang/biohub-temporal-unet3d-seed314159-v1
+        required: true
+        files_needed:
+          - weights/unet_transformer/split_0/edge_predictor_best.pth
         expected_digest:
-          unet_transformer/split_0/edge_predictor_best.pth: 9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f
-        licence: unresolved
-        size_bytes: unknown until download
-        destination: datasets/pilkwang/biohub-temporal-unet3d-seed314159-v1, beneath the kagglehub cache root
-        purpose: the second seed the dual-seed blend needs
+          edge_predictor_best.pth: 9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f
+        bytes_if_selective: 8363159
+        note: corroborated by the pack's own SNAPSHOT_MANIFEST, whose other declared digests all verified
       - slug: pilkwang/biohub-deepcenter-unet3d-center-prior-v1
-        url: https://www.kaggle.com/datasets/pilkwang/biohub-deepcenter-unet3d-center-prior-v1
+        required: false
+        files_needed:
+          - weights/full_frame_center/best.pt
         expected_digest:
-          weights/full_frame_center/best.pt: 8040999a92f6b7bbd98fa8cf458141e045c0f9ad7c936bdb3b18e1f7edafe2a0
-        licence: unresolved
-        size_bytes: unknown until download
-        destination: datasets/pilkwang/biohub-deepcenter-unet3d-center-prior-v1, beneath the kagglehub cache root
-        purpose: the add-only division veto gate; a two-epoch checkpoint, not a detector
+          best.pt: 8040999a92f6b7bbd98fa8cf458141e045c0f9ad7c936bdb3b18e1f7edafe2a0
+        bytes_if_selective: 37876911
+        note: >-
+          Attested only by the run log; unlike the other two, no in-dataset
+          manifest declares this digest. It serves only as an add-only veto on
+          proposed divisions, and F-0016 shows spurious divisions on unmatched
+          nodes are nearly free, so its contribution to the score is small.
+          Defer it unless the reproduction misses its division counts.
       - slug: pilkwang/pilkwang-public-dataset-for-notebooks-figures
-        url: https://www.kaggle.com/datasets/pilkwang/pilkwang-public-dataset-for-notebooks-figures
-        expected_digest: {}
-        licence: unresolved
-        size_bytes: unknown until download
-        destination: datasets/pilkwang/pilkwang-public-dataset-for-notebooks-figures, beneath the kagglehub cache root
-        purpose: unresolved; recommend deferring this one until a consumer exists
-    on_completion:
-      - biohubx data fingerprint over each downloaded tree
-      - biohubx artifacts register, which records external_uncleared
-      - a human clearance recording code licence, weight licence, training-data
-        provenance and competition eligibility as four separate answers
-      - read kaggle_test_splits_50ep.json and answer the contamination question
+        required: false
+        dropped: true
+        reason: unrelated PNG figures; the notebook never reads from it
 
-  gate_2_gpu_runs:
-    purpose: establish what the reference actually scores, and whether the measured retention policy survives a real detector
-    forbidden_without_approval: kernel push, submission, weight download, any use of the public leaderboard as validation
+  gate_3_gpu_runs:
+    state: awaiting_approval
     runs:
-      - id: G-01
-        name: faithful reproduction of the pinned reference, unchanged
+      - id: G-02
+        name: faithful reproduction of nusrati/0-936, unchanged
         hardware: Kaggle notebook, 2 x Tesla T4
         expected_runtime_minutes: 30
-        storage: the four downloaded datasets plus the competition data, no new outputs beyond the submission graph
-        input_digests: the four digests recorded in gate_1_downloads, verified before the run starts
-        changes_permitted: none; a single edited constant makes this a different experiment
-        outputs: per-movie node and edge counts, per-movie division counts, runtime, the emitted graphs
+        configure_from: >-
+          The cell-0 environment block, never the runtime integrity receipt,
+          which R-0002 shows is stale in at least three fields.
         falsifier: >-
-          The reproduction fails if its emitted node and edge counts differ from
-          the counts recorded in R-0001 by more than one percent per movie. A
-          reference that does not reproduce cannot anchor a target.
-        stop_condition: stop and report after the run; do not submit, do not tune, do not iterate
-      - id: G-02
-        name: protected smoke of the winning retention policy on the preregistered tiny window
-        hardware: one T4, or CPU if the policy proves cheap enough
-        expected_runtime_minutes: 10
-        storage: none beyond the existing window
-        input_digests: the E01 window recorded in registry/experiments.yaml
+          Fails if emitted node and edge counts differ from R-0001's recorded
+          per-movie counts by more than one percent.
+        what_it_may_conclude: >-
+          Node counts, runtime, memory and stage behaviour. It may NOT conclude
+          anything about generalisation, because the models saw the public test
+          movies.
+        stop_condition: report and stop; no submission, no tuning
+      - id: G-03
+        name: protected smoke of a real retention policy on the preregistered window
         preconditions:
-          - E02 must have produced a policy that wins on both embryo folds
-          - if E02 produced a challenger rather than a promotion, this run does not happen
-        outputs: official score under the policy and under the dense baseline, on identical frozen inputs
-        falsifier: >-
-          The policy is killed if it does not reproduce its oracle direction on a
-          real detector's output, that is, if raising the node budget improves the
-          adjusted edge Jaccard.
+          - a real proposal source exists whose confidence a filter can act on
+          - E02's oracle threshold of 0.94 correct-edge retention is the bar it must clear
+        falsifier: the policy is killed if raising the node budget improves the adjusted edge Jaccard
         stop_condition: report both scores and stop
 
-  compute_policy_restated:
-    cpu: scorer experiments, audits, graph decoding, oracle studies, cached-output analysis
-    kaggle_t4: faithful reproduction and final runtime-compatible runs only
-    colab_l4: >-
-      No competition data. Rule 2.4.b requires reasonable measures to prevent
-      access by anyone who has not agreed to the rules, and moving the data
-      through a third-party notebook environment has not been assessed against
-      that obligation by a human. L4 may be proposed for synthetic or cleared
-      external pretraining only.
+  what_G-01_changed_about_the_plan:
+    - >-
+      Reproducing 0.936 is now a lower priority than it was. It anchors
+      engineering behaviour, not a score worth chasing, because the score is
+      contaminated.
+    - >-
+      The 0.950 target must be defined against a clean held-out split of the 199
+      train movies under D-0016, never against the public leaderboard.
+    - >-
+      The reference's own training scripts are in hand as CC0 code. They describe
+      a proposal source, which F-0017 identifies as exactly what Biohub-X lacks.

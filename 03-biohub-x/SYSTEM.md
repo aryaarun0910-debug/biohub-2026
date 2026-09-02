@@ -343,6 +343,12 @@ form that carries the data itself.
 A dataset registered later does not inherit this review; a contract test
 requires every competition artifact to carry its own.
 
+The public leaderboard is not a validation signal either. The reference system
+Biohub-X reads for engineering detail was fitted and selected on movies that are
+byte-identical to the public test volumes, so its public score measures
+memorisation as much as method ([[D-0020]], R-0002). Every Biohub-X target is
+defined on a held-out split of the 199 annotated train movies.
+
 ### 5.1 What the corpus permits
 
 The registered corpus constrains evaluation more tightly than the movie count
