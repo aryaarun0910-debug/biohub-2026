@@ -274,3 +274,84 @@ def test_a_backward_edge_is_also_refused_by_the_contract() -> None:
 
     with pytest.raises(ValidationError, match="advance exactly one frame"):
         LineageGraph(dataset=DATASET, nodes=(node(0, 0), node(1, 1)), edges=(edge(1, 0),))
+
+
+# --- F4: the division counter shares the unmatched-prediction exemption ----
+
+
+def annotated_division() -> LineageGraph:
+    """One annotated division: a parent in frame 0 with two daughters in frame 1."""
+    return LineageGraph(
+        dataset=DATASET,
+        nodes=(node(0, 0), node(1, 1, y=1.0), node(2, 1, y=-1.0)),
+        edges=(edge(0, 1, EdgeKind.DIVISION), edge(0, 2, EdgeKind.DIVISION)),
+    )
+
+
+def test_an_unmatched_fork_adds_no_division_false_positive() -> None:
+    """A fork invented where the annotations do not reach costs no division penalty.
+
+    F1 measured this exemption for edges. The division counter turns out to
+    share it: a predicted fork is only chargeable once its own node matches a
+    ground-truth node, so a fork built entirely from unmatched nodes is not
+    counted at all. Division TP, FP and FN are unchanged and the division
+    Jaccard stays at 1.0.
+
+    As with F1, free of division penalty is not free of consequence. The three
+    extra nodes still enter the node-count adjustment, which is the only term
+    that moves here.
+    """
+    gt = annotated_division()
+    baseline = score(gt, gt, estimate=3.0)
+    assert (baseline.division_tp, baseline.division_fp, baseline.division_fn) == (1, 0, 0)
+
+    # 100 voxels along y is 40.6 um, far outside the 7 um matching radius, so
+    # neither the fork nor either of its daughters can match a ground-truth node.
+    with_spurious_fork = LineageGraph(
+        dataset=DATASET,
+        nodes=(*gt.nodes, node(10, 0, y=100.0), node(11, 1, y=100.0, x=1.0), node(12, 1, y=100.0, x=-1.0)),
+        edges=(*gt.edges, edge(10, 11, EdgeKind.DIVISION), edge(10, 12, EdgeKind.DIVISION)),
+    )
+    measured = score(with_spurious_fork, gt, estimate=3.0)
+
+    # The invented division is uncharged, and so are its two edges.
+    assert (measured.division_tp, measured.division_fp, measured.division_fn) == (1, 0, 0)
+    assert measured.division_jaccard == 1.0
+    assert (measured.edge_tp, measured.edge_fp, measured.edge_fn) == (2, 0, 0)
+    assert measured.edge_jaccard == baseline.edge_jaccard == 1.0
+
+    # The node count is the only thing that moved: 3 predicted nodes became 6.
+    assert baseline.num_pred_nodes == 3
+    assert measured.num_pred_nodes == 6
+    assert measured.adjusted_edge_jaccard < baseline.adjusted_edge_jaccard
+
+
+def test_a_fork_on_an_annotated_cell_is_a_division_false_positive() -> None:
+    """The exemption ends where the annotations begin, exactly as it does for edges.
+
+    Against a ground truth holding no divisions at all, a fork whose own node
+    matches an annotated cell is evaluable and is charged. That single false
+    positive takes the division Jaccard from undefined to zero, and the spurious
+    branch is charged a second time as an edge false positive.
+    """
+    gt = LineageGraph(
+        dataset=DATASET,
+        nodes=(node(0, 0), node(1, 1), node(2, 2)),
+        edges=(edge(0, 1), edge(1, 2)),
+    )
+    baseline = score(gt, gt, estimate=3.0)
+    # No divisions anywhere means the division term is dropped, not scored zero.
+    assert (baseline.division_tp, baseline.division_fp, baseline.division_fn) == (0, 0, 0)
+    assert baseline.division_jaccard is None
+
+    # The fork sits on node 0, which matches an annotated cell that has a successor.
+    forked = LineageGraph(
+        dataset=DATASET,
+        nodes=(node(0, 0), node(1, 1), node(2, 2), node(3, 1, y=2.0)),
+        edges=(edge(0, 1, EdgeKind.DIVISION), edge(0, 3, EdgeKind.DIVISION), edge(1, 2)),
+    )
+    measured = score(forked, gt, estimate=3.0)
+
+    assert (measured.division_tp, measured.division_fp, measured.division_fn) == (0, 1, 0)
+    assert measured.division_jaccard == 0.0
+    assert measured.edge_fp == 1

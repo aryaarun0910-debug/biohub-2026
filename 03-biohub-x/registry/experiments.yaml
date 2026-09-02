@@ -31,4 +31,81 @@
 
 schema_version: 1
 
-experiments: []
+experiments:
+  - id: E01
+    component: vertical_slice
+    hypothesis: >-
+      The Phase-2 chain runs end to end on real competition bytes and produces a
+      score through the pinned official scorer, without the synthetic fixture.
+    falsifier: >-
+      Any stage refuses real data, or the run produces a number the official
+      adapter will not accept. A poor score does not falsify this; an
+      unreachable score does.
+    inputs:
+      - competition.train.6bba_2540cd90.zarr
+      - competition.train.6bba_2540cd90.geff
+    split:
+      scheme: single_window
+      note: >-
+        One window of one training movie. Not a fold and not an evaluation set.
+        Nothing here may be compared with a fold result.
+    model_config:
+      path: configs/phase3-cpu.yaml
+      section: E01
+      canonical_text: canonical_text_sha256:sha256/v1:adbafd25957c7873211061fee7f80940ce5507bdf3b236855921e651c7e5be9e
+    budget: CPU only, no GPU, no network, no download
+    expected_outputs:
+      - artifacts/real-preflight.json
+      - artifacts/real-preflight-graph.json
+    forbidden_changes:
+      - the window, once a score exists
+      - the pinned official source
+    promotion_metric: none
+    runtime_ceiling: 600 seconds
+    provenance_status: external_cleared
+    status: integration_only
+    result: F-0017
+  - id: E02
+    component: graph_policy
+    hypothesis: >-
+      Emitting roughly the annotated node count rather than roughly every cell
+      raises the official adjusted edge Jaccard, and the gain survives the
+      correct edges a real filter would destroy reaching that node count.
+    falsifier: >-
+      Killed if the filtered policy fails to match the dense baseline on either
+      embryo fold at a retention a real filter could plausibly achieve.
+    inputs:
+      - the 199 annotated competition.train .geff artifacts
+    split:
+      scheme: leave_one_embryo_out
+      folds: [44b6, 6bba]
+      excluded: the four duplicated public-test fixtures, per D-0015
+    model_config:
+      path: configs/phase3-cpu.yaml
+      section: E02
+      canonical_text: canonical_text_sha256:sha256/v1:adbafd25957c7873211061fee7f80940ce5507bdf3b236855921e651c7e5be9e
+    budget: CPU only, no GPU, no network, no download
+    expected_outputs:
+      - artifacts/retention-oracle.json
+    forbidden_changes:
+      - the pinned official scorer and its aggregation
+      - each dataset's own estimated_number_of_nodes as the denominator
+    promotion_metric: adjusted_edge_jaccard per embryo fold, never pooled
+    runtime_ceiling: 3600 seconds
+    provenance_status: external_cleared
+    declaration_note: >-
+      Declared late. The configuration file was written while the sweep was
+      already running, from the invocation that was passed. The run is
+      deterministic in its recorded seed and retention list, so the declaration
+      names exactly what executed, but the ordering AGENTS.md section 4 requires
+      was not followed and is recorded rather than concealed.
+    status: challenger
+    result: F-0018
+    status_reasoning: >-
+      The direction wins on both embryo folds, which the promotion rule would
+      normally reward. It is recorded as challenger and not promoted because the
+      experiment measured the metric's own trade curve using ground truth, not a
+      filter. There is no implementation to promote, and main holds promoted
+      implementations rather than promoted intentions. It becomes promotable when
+      a real filter is shown to retain at least 0.94 of its correct edges at the
+      annotated node count on both folds.

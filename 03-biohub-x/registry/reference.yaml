@@ -1,0 +1,315 @@
+# Reference registry: external work Biohub-X reads but does not believe.
+#
+# Nothing here is a Biohub-X result. Every entry is `status: reference_only`,
+# which means it may inform a hypothesis and may never support a claim. A number
+# recorded here is an observation about someone else's run, not a measurement;
+# Biohub-X measurements live in registry/findings.yaml and nowhere else.
+#
+# Required per entry:
+#   id            stable identifier
+#   status        reference_only
+#   source        where the observation came from, exactly
+#   observed      what the source states
+#   unresolved    what the source does not settle, stated as questions
+#
+# An unresolved item is never quietly dropped. It is either answered by a later
+# observation, which supersedes the entry, or it stays here as a known gap.
+
+schema_version: 1
+
+references:
+  - id: R-0001
+    status: reference_only
+    title: The 0.936-class reference notebook, as far as its own run log establishes
+    source:
+      kind: kaggle_kernel_run_log
+      provided_by: Arya Arun
+      transcribed_utc: '2026-09-02T00:00:00Z'
+      note: >-
+        A run log pasted into the working session. Biohub-X has not downloaded,
+        executed or verified any part of the notebook or its inputs. Every value
+        below is what the log printed, not what Biohub-X measured.
+
+    observed:
+      identity:
+        experiment_tag: selected_101_dual_seed_near_balanced_center_confirmed_synthetic_gap
+        preset: harmonic_v3_division_wide
+        score_axis: wide safe_div + gap2 + short_track_rescue + harmonic 0.15
+        experiment: harmonic_bidirectional_association_v1
+        parent_experiment: paired_bidirectional_primary_weight020_vs_forward_v1
+        stated_baseline: fixed-90 dual-seed clean pipeline, public LB 0.913
+        single_change_from_baseline: harmonic mutual-support association fusion
+        method_attribution_in_log: >-
+          fixed-90 dual-seed baseline with harmonic mutual-support association
+          fusion, rule credited to public CC0 notebook
+          yusuketogashi/no-hack-biohub-cell-another-approch-3rd v18
+
+      inputs:
+        - slug: pilkwang/biohub-tracking-support-pack-50ep-v1
+          role: primary weights, inference repository, offline wheels, split definition
+          declared_digests:
+            primary_weights_sha256: 12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771
+            python_manifest_sha256: 978b626d1fd1e7397435a437dfe68691defe1572fc3c20e61012d7c9b52ed029
+          weight_path: weights/unet_transformer/split_0/edge_predictor_best.pth
+          splits_file: kaggle_test_splits_50ep.json
+          entry_point: scripts/predict_unet_transformer.py
+          offline_wheels:
+            - polars
+            - tracksdata
+            - zarr
+            - pyscipopt
+            - geff
+            - geff_spec
+            - ilpy
+            - imagecodecs
+            - rustworkx
+            - numcodecs
+            - donfig
+            - bidict
+          name_mismatch: >-
+            The dataset slug says 50ep. The pack's own ARTIFACT_MANIFEST reports
+            `Artifact name: biohub-tracking-support-pack-400ep-snapshot-v1`. The
+            log also prints `deepcenter_expected_epoch: 2` while the pack claims
+            400 epochs somewhere in its lineage. Until the slug, the manifest
+            name and the training length agree, this artifact's identity is not
+            established and it may not be registered as cleared.
+
+        - slug: pilkwang/biohub-temporal-unet3d-seed314159-v1
+          role: secondary seed weights for dual-seed blending
+          declared_digests:
+            secondary_weights_sha256: 9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f
+          weight_path: unet_transformer/split_0/edge_predictor_best.pth
+
+        - slug: pilkwang/biohub-deepcenter-unet3d-center-prior-v1
+          role: add-only veto gate on proposed divisions and gap closures
+          declared_digests:
+            checkpoint_sha256: 8040999a92f6b7bbd98fa8cf458141e045c0f9ad7c936bdb3b18e1f7edafe2a0
+          weight_path: weights/full_frame_center/best.pt
+          checkpoint_state: epoch 2, best_score -0.04500306242456039
+
+        - slug: pilkwang/pilkwang-public-dataset-for-notebooks-figures
+          role: unresolved; the log never reads from it
+          declared_digests: {}
+
+        - slug: competition dataset (biohub-cell-tracking-during-development)
+          role: test volumes read from /kaggle/input/competitions
+          declared_digests: {}
+
+      detection_stage:
+        family: UNet3D detector followed by a node transformer
+        detector_threshold_config: 0.965
+        detector_threshold_runtime_receipt: 0.96875
+        secondary_detection_weight_runtime: 0.800
+        secondary_detection_weight_receipt: 0.475
+        secondary_link_mode: low_margin_consensus
+        secondary_low_margin_max: 0.35
+        candidate_retention_guard: 0.90, per-frame fallback to the primary model
+        unet_batch_size: 4
+
+      association_stage:
+        edge_candidate_threshold: 0.48
+        secondary_edge_weight: 0.15
+        bidirectional_primary_weight: 0.3
+        reverse_time_association_weight: 0.200
+        solver: ILP
+        ilp_edge_weight: -1.0
+        ilp_appearance_weight: 0.0
+        ilp_disappearance_weight_config: 2.0
+        ilp_disappearance_weight_receipt: 1.5
+        ilp_division_weight: 1.2
+        motion_relink_tight_um: 6.0
+        motion_relink_relaxed_um: 10.0
+        window_size: 2
+        pool_kernel_um: 3.0
+
+      node_retention_logic:
+        filter_short_tracks: true
+        min_track_len: 6
+        prune_isolated: true
+        enforce_next_frame: true
+        output_edge_max_um: 14.0
+        gap_close_um: 5.8
+        gap_close_max_gap: 2
+        gap2_max_step_um: 4.4
+        gap2_max_total_um: 10.2
+        short_track_rescue_min_mean_edge_prob: 0.88
+        short_track_rescue_max_mean_edge_dist_um: 3.0
+        linefit_smoothing: window 2, weight 0.8
+
+      division_repair:
+        safe_divisions: true
+        safe_div_threshold: 0.12
+        safe_div_max_um: 7.0
+        div_parent_max_um: 10.5
+        div_sister_max_um: 8.0
+        safe_div_frame_frac_cap: 0.0076
+        safe_div_global_frac_cap: 0.00375
+        deepcenter_add_only_gate: true
+        observed_additions_by_movie:
+          44b6_0113de3b: 66
+          44b6_0b24845f: 52
+          6bba_05b6850b: 9
+          6bba_05db0fb1: 88
+
+      declared_node_count_strategy: >-
+        None. The configuration contains no target node count and no reference
+        to the metric's node-count adjustment. The emitted counts are therefore
+        a consequence of the detector threshold and the retention filters rather
+        than a decision.
+
+      emitted_graph_sizes:
+        44b6_0113de3b: 25479 nodes, 24776 edges
+        44b6_0b24845f: 18586 nodes, 17397 edges
+        6bba_05b6850b: 6056 nodes, 5858 edges
+        6bba_05db0fb1: 69305 nodes, 67234 edges
+        submission_rows: 234691 (119426 node rows, 115265 edge rows)
+
+      runtime_and_hardware:
+        gpus: 2 x Tesla T4, video-sharded across CUDA_VISIBLE_DEVICES 0 and 1
+        prediction_minutes: 9.65
+        total_log_seconds: 1665
+        network: none; dependencies installed from offline wheels with --no-deps
+
+      configuration_provenance:
+        leaderboard_feedback_used_for_configuration: true
+        organizer_labels_used_for_configuration: false
+        public_output_used: false
+        metric_hack_used: false
+        note: >-
+          The run declares that its configuration was tuned against public
+          leaderboard feedback. Biohub-X may not use that leaderboard as
+          validation, so no threshold in this entry may be adopted as a prior.
+
+    unresolved:
+      - Which Kaggle notebook and which version scored 0.936? The log states a
+        0.913 baseline and does not print its own leaderboard score. The slug
+        offered in session was nusrati/0-936, every input is under pilkwang, and
+        the association rule is credited to yusuketogashi. Three accounts appear
+        and none is confirmed as the 0.936 author.
+      - What licence does each pilkwang dataset declare? Competition rule 2.6
+        permits external data and models that are public, equally accessible and
+        of minimal cost, and rule 3.6.b deems publicly shared Competition Code
+        OSI-licensed. Neither settles the licence a weights dataset declares, and
+        code licence is not weight licence.
+      - Were the four public-test movies excluded from training? The run passes
+        `--splits kaggle_test_splits_50ep.json --split 0`. The four test volumes
+        are byte-identical to train volumes of the same ids, so if those ids sit
+        in the training split the leaderboard score measures memorisation. The
+        splits file is inside the support pack and cannot be read without it.
+      - Which artifact is real, the 50ep slug or the 400ep manifest name?
+      - Why do the configuration and the runtime receipt disagree on the detector
+        threshold, the secondary detection weight and the ILP disappearance
+        weight? One of the two is not describing the run that produced the graph.
+      - What is the run's division Jaccard? The four public movies hold three
+        annotated divisions between them, so the division term is decided by
+        three events and the log reports none of them.
+
+# ---------------------------------------------------------------------------
+# Approval gate. Nothing below has been performed. Each item requires an
+# explicit human go-ahead per AGENTS.md section 7, and the two are separate
+# decisions: the download may be approved without the GPU runs.
+# ---------------------------------------------------------------------------
+
+approval_packet:
+  prepared_utc: '2026-09-02T00:00:00Z'
+  prepared_against: R-0001
+  state: awaiting_human_approval
+
+  gate_1_downloads:
+    purpose: >-
+      Turn R-0001 from a transcribed log into verifiable artifacts, so that the
+      reference can be reproduced once and decomposed. Nothing enters main; each
+      download is registered external_uncleared and digested before it is read.
+    actor: Arya Arun, who holds the competition entry
+    mechanism: kagglehub dataset_download, pinned to the exact version resolved at download time
+    destination_root: >-
+      The kagglehub cache root, which is machine-specific and therefore never
+      written down here. Every destination below is relative to it, and the
+      absolute path enters the repository only through a fingerprint report's
+      provenance record, the one place allowed to carry one.
+    items:
+      - slug: pilkwang/biohub-tracking-support-pack-50ep-v1
+        url: https://www.kaggle.com/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1
+        expected_digest:
+          weights/unet_transformer/split_0/edge_predictor_best.pth: 12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771
+          python_manifest: 978b626d1fd1e7397435a437dfe68691defe1572fc3c20e61012d7c9b52ed029
+        licence: unresolved; read the dataset's declared licence before use
+        size_bytes: unknown until download; the register step records the measured tree size
+        destination: datasets/pilkwang/biohub-tracking-support-pack-50ep-v1, beneath the kagglehub cache root
+        purpose: primary weights, the splits file that answers the contamination question, offline wheels
+        blocking_precondition: >-
+          The 50ep slug and the 400ep manifest name must be reconciled. If the
+          downloaded manifest still disagrees with the slug, the artifact is
+          registered but not cleared, and no run may depend on it.
+      - slug: pilkwang/biohub-temporal-unet3d-seed314159-v1
+        url: https://www.kaggle.com/datasets/pilkwang/biohub-temporal-unet3d-seed314159-v1
+        expected_digest:
+          unet_transformer/split_0/edge_predictor_best.pth: 9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f
+        licence: unresolved
+        size_bytes: unknown until download
+        destination: datasets/pilkwang/biohub-temporal-unet3d-seed314159-v1, beneath the kagglehub cache root
+        purpose: the second seed the dual-seed blend needs
+      - slug: pilkwang/biohub-deepcenter-unet3d-center-prior-v1
+        url: https://www.kaggle.com/datasets/pilkwang/biohub-deepcenter-unet3d-center-prior-v1
+        expected_digest:
+          weights/full_frame_center/best.pt: 8040999a92f6b7bbd98fa8cf458141e045c0f9ad7c936bdb3b18e1f7edafe2a0
+        licence: unresolved
+        size_bytes: unknown until download
+        destination: datasets/pilkwang/biohub-deepcenter-unet3d-center-prior-v1, beneath the kagglehub cache root
+        purpose: the add-only division veto gate; a two-epoch checkpoint, not a detector
+      - slug: pilkwang/pilkwang-public-dataset-for-notebooks-figures
+        url: https://www.kaggle.com/datasets/pilkwang/pilkwang-public-dataset-for-notebooks-figures
+        expected_digest: {}
+        licence: unresolved
+        size_bytes: unknown until download
+        destination: datasets/pilkwang/pilkwang-public-dataset-for-notebooks-figures, beneath the kagglehub cache root
+        purpose: unresolved; recommend deferring this one until a consumer exists
+    on_completion:
+      - biohubx data fingerprint over each downloaded tree
+      - biohubx artifacts register, which records external_uncleared
+      - a human clearance recording code licence, weight licence, training-data
+        provenance and competition eligibility as four separate answers
+      - read kaggle_test_splits_50ep.json and answer the contamination question
+
+  gate_2_gpu_runs:
+    purpose: establish what the reference actually scores, and whether the measured retention policy survives a real detector
+    forbidden_without_approval: kernel push, submission, weight download, any use of the public leaderboard as validation
+    runs:
+      - id: G-01
+        name: faithful reproduction of the pinned reference, unchanged
+        hardware: Kaggle notebook, 2 x Tesla T4
+        expected_runtime_minutes: 30
+        storage: the four downloaded datasets plus the competition data, no new outputs beyond the submission graph
+        input_digests: the four digests recorded in gate_1_downloads, verified before the run starts
+        changes_permitted: none; a single edited constant makes this a different experiment
+        outputs: per-movie node and edge counts, per-movie division counts, runtime, the emitted graphs
+        falsifier: >-
+          The reproduction fails if its emitted node and edge counts differ from
+          the counts recorded in R-0001 by more than one percent per movie. A
+          reference that does not reproduce cannot anchor a target.
+        stop_condition: stop and report after the run; do not submit, do not tune, do not iterate
+      - id: G-02
+        name: protected smoke of the winning retention policy on the preregistered tiny window
+        hardware: one T4, or CPU if the policy proves cheap enough
+        expected_runtime_minutes: 10
+        storage: none beyond the existing window
+        input_digests: the E01 window recorded in registry/experiments.yaml
+        preconditions:
+          - E02 must have produced a policy that wins on both embryo folds
+          - if E02 produced a challenger rather than a promotion, this run does not happen
+        outputs: official score under the policy and under the dense baseline, on identical frozen inputs
+        falsifier: >-
+          The policy is killed if it does not reproduce its oracle direction on a
+          real detector's output, that is, if raising the node budget improves the
+          adjusted edge Jaccard.
+        stop_condition: report both scores and stop
+
+  compute_policy_restated:
+    cpu: scorer experiments, audits, graph decoding, oracle studies, cached-output analysis
+    kaggle_t4: faithful reproduction and final runtime-compatible runs only
+    colab_l4: >-
+      No competition data. Rule 2.4.b requires reasonable measures to prevent
+      access by anyone who has not agreed to the rules, and moving the data
+      through a third-party notebook environment has not been assessed against
+      that obligation by a human. L4 may be proposed for synthetic or cleared
+      external pretraining only.

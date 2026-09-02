@@ -850,6 +850,227 @@ def evaluate_slice(
     typer.echo(json.dumps(payload, sort_keys=True))
 
 
+@infer_app.command("real")
+def infer_real(
+    dataset: Annotated[str, typer.Option("--dataset", help="Registered competition dataset id.")],
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    split: Annotated[str, typer.Option("--split", help="Official split holding the dataset.")] = "train",
+    first_frame: Annotated[int, typer.Option("--first-frame", help="First frame of the window.")] = 0,
+    frames: Annotated[int, typer.Option("--frames", help="Number of frames in the window.")] = 12,
+    crop_z: Annotated[str, typer.Option("--crop-z", help="Half-open voxel range start:stop.")] = "0:32",
+    crop_y: Annotated[str, typer.Option("--crop-y", help="Half-open voxel range start:stop.")] = "128:256",
+    crop_x: Annotated[str, typer.Option("--crop-x", help="Half-open voxel range start:stop.")] = "128:256",
+    detection_threshold: Annotated[
+        float, typer.Option("--detection-threshold", help="Normalised intensity threshold.")
+    ] = 0.70,
+) -> None:
+    """Run the whole slice on one preregistered window of real competition data.
+
+    CPU only, no GPU, no network and no download. The window is bounded
+    explicitly rather than defaulted to a whole movie, because a preflight whose
+    cost is unknown before it starts is not a preflight. Scores against the
+    dataset's own annotated ground truth restricted to the same window.
+    """
+    command = "infer real"
+    from biohubx.data.competition import (
+        CompetitionLayoutError,
+        WindowSelection,
+        competition_root,
+        load_window,
+    )
+    from biohubx.evaluation.official_metric import EstimatedTotalNodes, UnscorablePredictionError
+    from biohubx.tracking.pipeline import SliceConfig, run_chain
+
+    def span(text: str, name: str) -> tuple[int, int]:
+        parts = text.split(":")
+        if len(parts) != 2:
+            heartbeat(command, "refused", f"{name} must be start:stop, got {text!r}")
+            raise typer.Exit(code=2)
+        return int(parts[0]), int(parts[1])
+
+    z0, z1 = span(crop_z, "--crop-z")
+    y0, y1 = span(crop_y, "--crop-y")
+    x0, x1 = span(crop_x, "--crop-x")
+    selection = WindowSelection(
+        dataset_id=dataset,
+        first_frame=first_frame,
+        frames=frames,
+        z_start=z0,
+        z_stop=z1,
+        y_start=y0,
+        y_stop=y1,
+        x_start=x0,
+        x_stop=x1,
+    )
+    last = first_frame + frames - 1
+    heartbeat(command, "start", f"dataset={dataset} split={split} frames={first_frame}..{last}")
+
+    started = time.monotonic()
+    try:
+        window = load_window(competition_root(root), selection, split=split)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    heartbeat(
+        command,
+        "loaded",
+        f"volume={tuple(window.volume.shape)} annotated_nodes={len(window.annotated.nodes)} "
+        f"annotated_edges={len(window.annotated.edges)}",
+    )
+
+    settings = SliceConfig(detection_threshold=detection_threshold)
+    try:
+        outcome = run_chain(
+            window.volume,
+            dataset=window.annotated.dataset,
+            annotated=window.annotated,
+            scale=window.scale,
+            estimate=EstimatedTotalNodes.declared(window.window_estimated_total_nodes),
+            settings=settings,
+        )
+    except (ValueError, UnscorablePredictionError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    heartbeat(command, "detected", f"instances={len(outcome.instances.instances)}")
+    reach = outcome.candidates.reach
+    if reach is None:
+        heartbeat(command, "refused", "the run measured no candidate reach")
+        raise typer.Exit(code=2)
+    heartbeat(command, "candidates", f"edges={len(outcome.candidates.edges)} reach={reach.reach:.3f}")
+    heartbeat(
+        command,
+        "decoded",
+        f"nodes={outcome.decode_report.nodes} edges={outcome.decode_report.edges} "
+        f"divisions={outcome.decode_report.divisions}",
+    )
+
+    root_path = repository_root()
+    graph_path = root_path / "artifacts/real-preflight-graph.json"
+    atomic_write_text(
+        graph_path, json.dumps(outcome.emitted.integer_export(), indent=2, sort_keys=True) + "\n"
+    )
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "window": window.to_dict(),
+        "config": settings.to_dict(),
+        "detection": {"instances": len(outcome.instances.instances)},
+        "candidates": {
+            "radius_um": outcome.candidates.radius_um,
+            "edges": len(outcome.candidates.edges),
+            "reach": {
+                "true_edges": reach.true_edges,
+                "reachable_true_edges": reach.reachable_true_edges,
+                "unreachable_missing_endpoint": reach.unreachable_missing_endpoint,
+                "unreachable_outside_radius": reach.unreachable_outside_radius,
+                "fraction": reach.reach,
+            },
+        },
+        "decode": outcome.decode_report.to_dict(),
+        "official": outcome.score.to_dict(),
+        "runtime_seconds": round(time.monotonic() - started, 3),
+    }
+    report_path = root_path / "artifacts/real-preflight.json"
+    atomic_write_text(report_path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    _write_manifest(
+        command,
+        {
+            "emitted_graph": "artifacts/real-preflight-graph.json",
+            "emitted_graph_digest": digest_file(graph_path, DigestKind.RAW_ARTIFACT).token,
+            "report": "artifacts/real-preflight.json",
+        },
+    )
+    heartbeat(command, "done", f"score={outcome.score.score:.6f}")
+    typer.echo(json.dumps(payload, sort_keys=True))
+
+
+@evaluate_app.command("retention")
+def evaluate_retention(
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    retentions: Annotated[
+        str,
+        typer.Option("--retentions", help="Comma-separated edge-retention values to sweep."),
+    ] = "1.0,0.98,0.96,0.94,0.92,0.90,0.88,0.85",
+    seed: Annotated[int, typer.Option("--seed", help="Seed selecting which edges survive.")] = 0,
+) -> None:
+    """Measure what the node-count adjustment is worth against the edges it costs.
+
+    Runs on the annotated training corpus only. The four duplicated public-test
+    fixtures are never read, because each is byte-identical to a train volume
+    (D-0015) and scoring against them would be scoring against training data.
+
+    Every number comes from the pinned official scorer aggregated the official
+    way, and each embryo fold is reported on its own.
+    """
+    command = "evaluate retention"
+    from biohubx.data.competition import CompetitionLayoutError, competition_root, load_ground_truth
+    from biohubx.evaluation.retention import crossover, sweep, verify_decoys_are_free
+
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    train_dir = data_root / "train"
+    train = sorted(path.stem for path in train_dir.glob("*.geff"))
+    if not train:
+        heartbeat(command, "refused", f"no annotated training datasets under {train_dir}")
+        raise typer.Exit(code=2)
+    heartbeat(command, "start", f"datasets={len(train)} seed={seed}")
+
+    started = time.monotonic()
+    corpus = []
+    for index, dataset_id in enumerate(train):
+        corpus.append(load_ground_truth(data_root, dataset_id))
+        if (index + 1) % 50 == 0:
+            heartbeat(command, "loaded", f"{index + 1}/{len(train)}")
+    heartbeat(command, "loaded", f"{len(corpus)}/{len(train)} ground-truth graphs")
+
+    guard = verify_decoys_are_free(corpus[0])
+    if not guard["counts_unchanged"]:
+        heartbeat(command, "refused", "decoy nodes changed edge or division counts on real data")
+        raise typer.Exit(code=2)
+    heartbeat(command, "verified", f"decoys free on {guard['dataset']}")
+
+    values = tuple(float(item) for item in retentions.split(","))
+    points = sweep(corpus, retentions=values, seed=seed)
+    heartbeat(command, "swept", f"points={len(points)}")
+
+    embryos = sorted({point.embryo for point in points})
+    crossings = [crossover(points, embryo) for embryo in embryos]
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "oracle_upper_bound",
+        "datasets": len(corpus),
+        "seed": seed,
+        "retentions": list(values),
+        "decoy_guard": guard,
+        "points": [point.to_dict() for point in points],
+        "crossover": crossings,
+        "runtime_seconds": round(time.monotonic() - started, 3),
+    }
+    report_path = repository_root() / "artifacts/retention-oracle.json"
+    atomic_write_text(report_path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    _write_manifest(command, {"report": "artifacts/retention-oracle.json", "datasets": len(corpus)})
+    for entry in crossings:
+        heartbeat(
+            command,
+            "crossover",
+            f"embryo={entry['embryo']} dense_adj={entry['dense_adjusted_edge_jaccard']:.4f} "
+            f"breakeven={entry['lowest_retention_that_matches_dense']}",
+        )
+    heartbeat(command, "done", "report=artifacts/retention-oracle.json")
+    typer.echo(json.dumps({"crossover": crossings}, sort_keys=True))
+
+
 @data_app.command("fingerprint")
 def data_fingerprint(
     root: Annotated[

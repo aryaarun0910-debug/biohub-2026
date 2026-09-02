@@ -378,3 +378,111 @@ findings:
         the official source pin holds, ADJUSTMENT_ALPHA remains 0.1, and the
         registered corpus is unchanged.
     superseded_by: null
+
+  - id: F-0016
+    claim: >-
+      The official division counter shares the unmatched-prediction exemption
+      that F-0003 measured for edges. A predicted fork built entirely from
+      unmatched nodes is not charged: added to a perfect single-division
+      prediction it left division TP, FP, FN at 1, 0, 0 and the division
+      Jaccard at 1.0, while raising num_pred_nodes from 3 to 6 and lowering the
+      adjusted edge Jaccard from 1.0 to 0.9. The exemption ends at the annotated
+      cells: against a ground truth holding no divisions, a fork whose own node
+      matched an annotated cell with a successor was charged as one division
+      false positive, taking the division Jaccard from undefined to 0.0, and was
+      charged again as one edge false positive.
+    instrument: tests/contracts/test_official_scorer_behaviour.py
+    evidence:
+      command: uv run pytest tests/contracts/test_official_scorer_behaviour.py
+      observed: 13 passed
+      note: >-
+        A predicted fork enters the false-positive set only through
+        `considered`, `evaluable_forks` or `invalid_forks`. A fork on an
+        unmatched node is local to no ground-truth division window, is excluded
+        from `evaluable_forks` because that set requires the fork node to carry
+        a match, and supplies no cross-component branch evidence. Spurious
+        division repair on unannotated cells is therefore nearly free, and the
+        cost of an aggressive division policy is paid in the node count rather
+        than in the division term.
+    validity:
+      scope: official_metric_behaviour
+      holds_while: >-
+        registry/official_source.yaml pins commit
+        075fc5f5a52d11077f9dc2b074644618f26939e2 and its digests verify. Moving
+        the pin supersedes this finding until the instrument is re-run.
+    superseded_by: null
+
+  - id: F-0017
+    claim: >-
+      The Phase-2 chain runs end to end on real competition bytes and scores
+      0.082121 through the pinned official scorer, and detection rather than
+      association is what limits it. On a 12-frame, 32x128x128 window of
+      6bba_2540cd90 holding 26 annotated nodes and 22 annotated edges, the
+      classical local-maximum detector proposed 65 instances at node recall
+      0.269. Candidate reach was 0.182: of 18 unreachable annotated edges, all
+      18 were unreachable because an endpoint was never detected and 0 because
+      the 12 micrometre candidate radius was too small. Edge TP, FP, FN were
+      2, 2, 20 for a raw edge Jaccard of 0.083333; 65 predicted nodes against a
+      declared window estimate of 56.745 gave a node ratio of +0.145 and an
+      adjusted edge Jaccard of 0.082121. The window holds no annotated
+      divisions, and all 4 predicted divisions were uncharged.
+    instrument: biohubx infer real
+    evidence:
+      command: >-
+        biohubx infer real --dataset 6bba_2540cd90 --first-frame 0 --frames 12
+        --crop-z 0:32 --crop-y 128:256 --crop-x 128:256 --detection-threshold 0.70
+      observed: artifacts/real-preflight.json, 0.39 seconds of chain runtime
+      note: >-
+        integration_only. This measures that the chain runs on real data and
+        where its first bottleneck is, not that the approach works. The split
+        of unreachable edges is the load-bearing part: association had nothing
+        to fix, because the endpoints it needed did not exist. The window's
+        node-count estimate is prorated from the movie's official estimate by
+        frame and voxel fraction, which assumes uniform cell density, so it is
+        DECLARED rather than official metadata and the adjusted figure is not
+        comparable with a whole-movie one.
+    validity:
+      scope: vertical_slice_on_real_data
+      holds_while: >-
+        the window in configs/phase3-cpu.yaml section E01 is unchanged, the
+        official source pin holds, and the classical detector is unchanged.
+    superseded_by: null
+  - id: F-0018
+    claim: >-
+      Emitting the annotated node count instead of the estimated cell count is
+      worth about nine percent of the adjusted edge Jaccard, and it stops paying
+      once a filter destroys more than about eight percent of the correct edges
+      to get there. Across all 199 annotated training datasets, a dense
+      prediction padded to each dataset's own estimated_number_of_nodes scored an
+      adjusted edge Jaccard of exactly 1.0000 on both embryo folds, because its
+      node ratio is zero by construction. The same edges emitted at the annotated
+      node count scored 1.0986 on 44b6 and 1.0905 on 6bba. Sweeping the fraction
+      of correct edges the filtered policy retains, both folds break even at 0.92
+      and both fall behind the dense baseline at 0.90, by 0.0114 on 44b6 and
+      0.0184 on 6bba. Reaching 0.014 above the dense baseline, which is the step
+      from a 0.936 system to 0.950 with the division term held fixed, requires a
+      retention of 0.94 on both folds: 0.0327 on 44b6 and 0.0251 on 6bba.
+    instrument: biohubx evaluate retention
+    evidence:
+      command: >-
+        biohubx evaluate retention --seed 0
+        --retentions 1.0,0.98,0.96,0.94,0.92,0.90,0.88,0.85
+      observed: artifacts/retention-oracle.json, 199 datasets, 1180 seconds
+      note: >-
+        An oracle upper bound, not a strategy. Every retained edge is correct by
+        construction, so a real filter at the same node count scores no higher
+        than this and almost certainly lower. The command re-measured F-0003 and
+        F-0016 on real data before relying on them: padding 44b6_0113de3b from 52
+        nodes to its estimated 25,755 left every edge and division count
+        identical and moved the adjusted edge Jaccard from 1.0998 to 1.0000.
+        The crossover is independent of association quality while no false
+        positive is charged, since both policies scale linearly in the fraction
+        of correct edges, and that independence ends as soon as a system emits
+        wrong edges on annotated cells, which F-0003 shows are charged.
+    validity:
+      scope: official_metric_behaviour_and_competition_corpus
+      holds_while: >-
+        the official source pin holds, ADJUSTMENT_ALPHA remains 0.1, and the
+        registered corpus is unchanged. The four duplicated public-test fixtures
+        were not read.
+    superseded_by: null

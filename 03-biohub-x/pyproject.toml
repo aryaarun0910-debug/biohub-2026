@@ -15,6 +15,10 @@ dependencies = [
     "scipy==1.18.0",
     "tracksdata @ git+https://github.com/royerlab/tracksdata@7bfeaf845ceb951226f19b72fe5b80e01601018a",
     "typer>=0.12",
+    # Both the competition volumes and the GEFF ground truth are Zarr stores.
+    # It arrived transitively with tracksdata; `biohubx.data.competition` imports
+    # it directly, so it is declared directly rather than relied on by accident.
+    "zarr>=3.0",
 ]
 
 [project.scripts]

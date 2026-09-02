@@ -433,3 +433,79 @@ describes 199 movies as 199 independent observations.
 Where a finer split is needed, grouping by field of view within an embryo is
 permitted for model selection, but a result obtained that way may never be
 described as evidence of holding up on a new embryo.
+
+## D-0017 - External work is registered as reference, never as finding
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+A run log from a competitor's notebook arrived carrying a great deal of usable
+detail: thresholds, weight digests, emitted node counts, hardware, runtime. None
+of it is a Biohub-X measurement, and `registry/findings.yaml` exists precisely to
+hold measurements this repository can reproduce from its own instruments.
+
+Putting a third party's numbers there would make them indistinguishable from
+measured ones at a glance, which is the failure `AGENTS.md` section 2 is written
+to prevent. Leaving them only in prose would violate the rule that a number
+outside a registry is not a result, and would lose them.
+
+So they go in `registry/reference.yaml`, a third registry whose every entry is
+`status: reference_only` and whose schema requires an `unresolved` list. The
+distinction it enforces is between what a source states and what Biohub-X knows.
+A reference entry may motivate an experiment; it may never support a claim, and
+no threshold recorded in one may be adopted as a prior.
+
+The first entry records that the run's configuration was tuned against public
+leaderboard feedback. That alone disqualifies every constant in it from being
+copied, because Biohub-X does not use that leaderboard as validation.
+
+## D-0018 - The node-count trade is measured as an oracle before it is engineered
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+The official node-count adjustment rewards a system that emits roughly the
+annotated cell count over one that emits roughly every cell. Acting on that
+means building a filter, and a filter that removes predictions also removes
+correct edges. Whether the trade is worth making is a question about the metric,
+not about any particular filter, so it is answered without building one.
+
+`biohubx evaluate retention` constructs predictions from each dataset's own
+ground truth under two node budgets, scores them through the pinned official
+scorer, and reports where the curves cross. Retained edges are correct by
+construction, so the result is an upper bound: it establishes the retention a
+real filter would have to beat, and cannot establish that such a filter exists.
+Every report of it must carry that limit.
+
+Three choices inside it constrain later work.
+
+The decisive quantity is the adjusted edge Jaccard, not the combined score. The
+division term is additive and independent of the node budget, so folding it in
+would attribute division behaviour to a retention decision.
+
+The dense budget is reached by padding with isolated nodes placed far outside
+any annotated coordinate. That is only legitimate because [[F-0003]] and
+[[F-0016]] establish that unmatched predictions are free of edge and division
+penalty, and the command re-checks it on real data before the sweep relies on
+it. If that guard ever fails, the sweep refuses rather than reporting.
+
+Folds are reported separately and never pooled, per [[D-0016]] and [[F-0013]].
+
+## D-0019 - Two subcommands were added where the brief allowed one
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+Recorded as a deviation rather than left implicit. The turn's anti-sprawl budget
+allowed one new CLI subcommand. Two were added: `infer real`, which runs the
+chain on a bounded window of real data, and `evaluate retention`, which measures
+the node-count trade across the corpus.
+
+They were not merged because they share no input. One reads volume bytes for a
+single window; the other reads ground-truth graphs for 199 movies and reads no
+volume at all. A single command spanning both would take a mode flag and two
+disjoint option sets, which is worse than two commands. `AGENTS.md` section 3
+forbids the third option, a script.
+
+One experiment configuration was added, `configs/phase3-cpu.yaml`, holding both
+E01 and E02, so the budget was met there.

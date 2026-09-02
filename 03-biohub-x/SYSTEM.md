@@ -238,7 +238,9 @@ Implemented:
 - `biohubx data validate {--root PATH | --synthetic}`
 - `biohubx data fingerprint --root PATH [--dataset ID] [--plan]`
 - `biohubx infer synthetic [--seed N] [--noise F] [--annotated-fraction F]`
+- `biohubx infer real --dataset ID [--root PATH] [--split S] [--first-frame N] [--frames N] [--crop-z A:B] [--crop-y A:B] [--crop-x A:B] [--detection-threshold F]`
 - `biohubx evaluate slice [--graph PATH]`
+- `biohubx evaluate retention [--root PATH] [--retentions LIST] [--seed N]`
 
 `infer synthetic` writes the emitted graph and a stage-by-stage report
 atomically and records the raw digest of the graph. `evaluate slice` refuses a
@@ -296,7 +298,17 @@ Every report names the selection it covers, so a single-dataset run is never
 read later as a claim about the whole root.
 
 Planned, absent until a consumer exists: `data make-splits`, `proposals infer`,
-`representation acquire`, `train`, `infer real`, `package kaggle`.
+`representation acquire`, `train`, `package kaggle`.
+
+`infer real` runs the same chain as `infer synthetic` on a bounded window of
+one registered training movie. The window is explicit in every dimension
+because a preflight whose cost is unknown before it starts is not a
+preflight, and the shared `run_chain` means a stage that behaves differently
+on real data behaves differently in exactly one place. Its node-count
+estimate is prorated and therefore `declared`, never official metadata.
+
+`evaluate retention` reads ground-truth graphs only, never the four
+duplicated public-test fixtures, and never a volume.
 
 ## 5. Evaluation policy
 
@@ -362,6 +374,29 @@ Jaccard to a system predicting the annotated count rather than the true cell
 count, and is nearly flat between half and twice that count ([[F-0015]]). Which
 nodes are predicted therefore matters far more than how many.
 
+### 5.2 What the node-count adjustment is worth
+
+The adjustment is a real lever and a bounded one, and both halves are measured.
+
+A system emitting roughly every cell receives a multiplier of one. The same
+edges emitted at the annotated node count receive about nine percent more, and
+that gain survives only while a filter destroys less than about eight percent of
+the correct edges reaching it ([[F-0018]]). Both embryo folds agree on the
+break-even point and on the retention needed to buy the step from a 0.936 system
+to 0.950. The measurement is an oracle: retained edges are correct by
+construction, so it states the retention a real filter must beat, not that such
+a filter exists ([[D-0018]]).
+
+The lever is cheap to over-claim, because unmatched predictions cost nothing in
+edge terms ([[F-0003]]) and nothing in division terms either ([[F-0016]]). What
+they cost is the node count, and that is the whole trade.
+
+Nothing filters yet. The first real chain on competition bytes is limited by
+detection rather than association: every annotated edge it could not reach was
+unreachable because an endpoint was never proposed, not because the candidate
+radius was too small ([[F-0017]]). A retention policy has nothing to filter
+until proposals exist that are worth keeping.
+
 ## 6. Phase gates
 
 | Phase | Gate | State |
@@ -369,7 +404,7 @@ nodes are predicted therefore matters far more than how many.
 | 0 | repository foundation, identity contract, registries, CLI heartbeat, contract tests | done |
 | 1 | official metric from its authoritative source, pinned revision, adapter, synthetic graphs with known scores, coordinate and lineage contracts | done |
 | 2 | end-to-end software vertical slice: fixture to candidate instances to representation to sparse T=2 graph to minimal matcher to legal final graph to official scorer | done |
-| 3 | real representation smoke, CPU preflight, one protected GPU smoke, stop and report before launch | next |
+| 3 | real representation smoke, CPU preflight, one protected GPU smoke, stop and report before launch | CPU preflight done ([[F-0017]]); GPU smoke awaiting approval |
 | 4 | T=2 learning, depth ladder D = 4/6/8/10 as controlled arms, select one depth | not started |
 | 5 | System A against System B on identical frozen inputs, error complementarity | not started |
 | 6 | temporal context ladder, coordinated division learning, uncertainty routing once earned | not started |

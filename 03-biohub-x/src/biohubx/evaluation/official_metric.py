@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import math
 import warnings
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from typing import Any
@@ -184,6 +185,46 @@ def evaluate_graph(
             "there is nothing for an edge Jaccard to measure"
         )
 
+    row = metric_row(prediction, ground_truth, estimated_total_nodes=estimated_total_nodes, scale=scale)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        summary = authoritative.summarise([row])
+
+    division = float(summary["division_jaccard"])
+    return OfficialMetricResult(
+        edge_tp=int(row["edge_tp"]),
+        edge_fp=int(row["edge_fp"]),
+        edge_fn=int(row["edge_fn"]),
+        division_tp=int(row["division_tp"]),
+        division_fp=int(row["division_fp"]),
+        division_fn=int(row["division_fn"]),
+        num_pred_nodes=int(row["num_pred_nodes"]),
+        annotated_gt_nodes=len(ground_truth.nodes),
+        estimated_total_nodes=estimated_total_nodes.value,
+        node_count_provenance=estimated_total_nodes.provenance.value,
+        total_node_ratio=float(row["total_node_ratio"]),
+        node_recall=float(summary["node_recall"]),
+        edge_jaccard=float(summary["edge_jaccard"]),
+        adjusted_edge_jaccard=float(summary["adj_edge_jaccard"]),
+        division_jaccard=None if math.isnan(division) else division,
+        score=float(summary["score"]),
+    )
+
+
+def metric_row(
+    prediction: LineageGraph,
+    ground_truth: LineageGraph,
+    *,
+    estimated_total_nodes: EstimatedTotalNodes,
+    scale: VoxelScaleZYX = OFFICIAL_VOXEL_SCALE,
+) -> dict[str, Any]:
+    """One dataset's raw authoritative metric row, before any aggregation.
+
+    Exposed because the official run-level score is a weighted aggregate over
+    datasets, not a mean of per-dataset scores. A caller comparing policies
+    across a fold has to hand whole rows to :func:`summarise_fold`; averaging
+    finished scores would silently use the wrong weights.
+    """
     pred_graph = _to_official_graph(prediction)
     gt_graph = _to_official_graph(ground_truth)
     with warnings.catch_warnings():
@@ -195,26 +236,39 @@ def evaluate_graph(
             max_distance=OFFICIAL_MAX_DISTANCE_UM,
         )
         recall = authoritative.node_recall(pred_graph, gt_graph)
-        row = authoritative.per_sample_metrics(counts, estimated_total_nodes.value, recall)
-        summary = authoritative.summarise([row])
+        row: dict[str, Any] = authoritative.per_sample_metrics(counts, estimated_total_nodes.value, recall)
+    return row
 
+
+@dataclass(frozen=True, slots=True)
+class FoldScore:
+    """The official run-level score over a set of datasets, aggregated its way."""
+
+    datasets: int
+    edge_jaccard: float
+    adjusted_edge_jaccard: float
+    division_jaccard: float | None
+    node_recall: float
+    score: float
+
+    def to_dict(self) -> dict[str, int | float | None]:
+        return asdict(self)
+
+
+def summarise_fold(rows: Sequence[dict[str, Any]]) -> FoldScore:
+    """Aggregate raw metric rows exactly as the pinned official source does."""
+    if not rows:
+        raise ValueError("a fold summary needs at least one dataset row")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        summary = authoritative.summarise(list(rows))
     division = float(summary["division_jaccard"])
-    return OfficialMetricResult(
-        edge_tp=counts.edge_tp,
-        edge_fp=counts.edge_fp,
-        edge_fn=counts.edge_fn,
-        division_tp=counts.division_tp,
-        division_fp=counts.division_fp,
-        division_fn=counts.division_fn,
-        num_pred_nodes=counts.num_pred_nodes,
-        annotated_gt_nodes=len(ground_truth.nodes),
-        estimated_total_nodes=estimated_total_nodes.value,
-        node_count_provenance=estimated_total_nodes.provenance.value,
-        total_node_ratio=float(row["total_node_ratio"]),
-        node_recall=float(summary["node_recall"]),
+    return FoldScore(
+        datasets=int(summary["n"]),
         edge_jaccard=float(summary["edge_jaccard"]),
         adjusted_edge_jaccard=float(summary["adj_edge_jaccard"]),
         division_jaccard=None if math.isnan(division) else division,
+        node_recall=float(summary["node_recall"]),
         score=float(summary["score"]),
     )
 

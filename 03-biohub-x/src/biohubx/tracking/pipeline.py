@@ -17,8 +17,9 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from biohubx.contracts.candidates import CandidateGraph
+from biohubx.contracts.coordinates import VoxelScaleZYX
 from biohubx.contracts.instances import InstanceSet
-from biohubx.contracts.lineage import LineageGraph
+from biohubx.contracts.lineage import DatasetIdentity, LineageGraph
 from biohubx.contracts.predictions import AssociationPrediction
 from biohubx.contracts.representation import RepresentationSet
 from biohubx.data.synthetic import SyntheticTruth, build_synthetic_truth
@@ -71,6 +72,61 @@ class SliceConfig:
                 "birth_border_reference_um": self.weights.birth_border_reference_um,
             },
         }
+
+
+@dataclass(frozen=True, slots=True)
+class ChainOutcome:
+    """Everything the chain produced from one volume and one annotated graph.
+
+    Shared by the synthetic fixture and by real competition windows so that the
+    two cannot drift apart: a stage that behaves differently on real data
+    behaves differently in exactly one place.
+    """
+
+    instances: InstanceSet
+    representation: RepresentationSet
+    candidates: CandidateGraph
+    prediction: AssociationPrediction
+    emitted: LineageGraph
+    decode_report: DecodeReport
+    score: OfficialMetricResult
+
+
+def run_chain(
+    volume: Any,
+    *,
+    dataset: DatasetIdentity,
+    annotated: LineageGraph,
+    scale: VoxelScaleZYX,
+    estimate: EstimatedTotalNodes,
+    settings: SliceConfig,
+) -> ChainOutcome:
+    """volume -> instances -> representation -> candidates -> graph -> official score."""
+    instances = detect_instances(
+        volume,
+        dataset=dataset,
+        threshold=settings.detection_threshold,
+        suppression_radius_um=settings.suppression_radius_um,
+        scale=scale,
+    )
+    representation = describe_instances(
+        instances, volume, density_radius_um=settings.density_radius_um, scale=scale
+    )
+    candidates = build_candidate_graph(
+        instances, radius_um=settings.candidate_radius_um, ground_truth=annotated, scale=scale
+    )
+    prediction = score_candidates(candidates, representation, weights=settings.weights)
+    emitted, decode_report = decode(prediction, instances)
+    score = evaluate_graph(emitted, annotated, estimated_total_nodes=estimate)
+    return ChainOutcome(
+        instances=instances,
+        representation=representation,
+        candidates=candidates,
+        prediction=prediction,
+        emitted=emitted,
+        decode_report=decode_report,
+        score=score,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -138,45 +194,30 @@ def run_slice(config: SliceConfig | None = None) -> SliceResult:
         annotated_fraction=settings.annotated_fraction,
         estimated_total_nodes=settings.estimated_total_nodes,
     )
-    instances = detect_instances(
-        truth.volume,
-        dataset=truth.lineage.dataset,
-        threshold=settings.detection_threshold,
-        suppression_radius_um=settings.suppression_radius_um,
-        scale=truth.scale,
-    )
-    representation = describe_instances(
-        instances,
-        truth.volume,
-        density_radius_um=settings.density_radius_um,
-        scale=truth.scale,
-    )
-    candidates = build_candidate_graph(
-        instances,
-        radius_um=settings.candidate_radius_um,
-        ground_truth=truth.annotated,
-        scale=truth.scale,
-    )
-    prediction = score_candidates(candidates, representation, weights=settings.weights)
-    emitted, decode_report = decode(prediction, instances)
-
     estimate = (
         EstimatedTotalNodes.from_complete_synthetic_ground_truth(truth.annotated)
         if settings.annotated_fraction == 1.0 and settings.estimated_total_nodes is None
         else EstimatedTotalNodes.declared(truth.estimated_total_nodes)
     )
-    score = evaluate_graph(emitted, truth.annotated, estimated_total_nodes=estimate)
+    outcome = run_chain(
+        truth.volume,
+        dataset=truth.lineage.dataset,
+        annotated=truth.annotated,
+        scale=truth.scale,
+        estimate=estimate,
+        settings=settings,
+    )
     if settings.annotated_fraction < 1.0:
-        assert score.node_count_provenance == NodeCountProvenance.DECLARED.value
+        assert outcome.score.node_count_provenance == NodeCountProvenance.DECLARED.value
 
     return SliceResult(
         config=settings,
         truth=truth,
-        instances=instances,
-        representation=representation,
-        candidates=candidates,
-        prediction=prediction,
-        emitted=emitted,
-        decode_report=decode_report,
-        score=score,
+        instances=outcome.instances,
+        representation=outcome.representation,
+        candidates=outcome.candidates,
+        prediction=outcome.prediction,
+        emitted=outcome.emitted,
+        decode_report=outcome.decode_report,
+        score=outcome.score,
     )

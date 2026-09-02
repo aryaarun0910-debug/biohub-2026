@@ -104,6 +104,7 @@ dependencies = [
     { name = "scipy", marker = "python_full_version == '3.12.*'" },
     { name = "tracksdata", marker = "python_full_version == '3.12.*'" },
     { name = "typer", marker = "python_full_version == '3.12.*'" },
+    { name = "zarr", marker = "python_full_version == '3.12.*'" },
 ]
 
 [package.dev-dependencies]
@@ -123,6 +124,7 @@ requires-dist = [
     { name = "scipy", specifier = "==1.18.0" },
     { name = "tracksdata", git = "https://github.com/royerlab/tracksdata?rev=7bfeaf845ceb951226f19b72fe5b80e01601018a" },
     { name = "typer", specifier = ">=0.12" },
+    { name = "zarr", specifier = ">=3.0" },
 ]
 
 [package.metadata.requires-dev]

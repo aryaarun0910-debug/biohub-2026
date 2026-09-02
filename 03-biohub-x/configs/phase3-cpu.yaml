@@ -1,0 +1,84 @@
+# Phase-3 CPU experiment configuration.
+#
+# One file, two experiments, declared before either ran. Every value a run reads
+# is here, so the canonical_text digest of this file pins what was executed. A
+# knob that is not here is not a knob the experiment was allowed to move.
+
+schema_version: 1
+
+E01:
+  name: first real end-to-end slice
+  component: vertical_slice
+  window:
+    dataset_id: 6bba_2540cd90
+    split: train
+    first_frame: 0
+    frames: 12
+    crop_z: [0, 32]
+    crop_y: [128, 256]
+    crop_x: [128, 256]
+    selection_rationale: >-
+      Chosen before the run from the corpus survey, not after seeing a score.
+      Smallest estimated_number_of_nodes among datasets carrying more than two
+      hundred annotated nodes, fully covered across its frames, so the window is
+      cheap on CPU and still contains annotated edges to score. The crop is the
+      octant with the most annotated nodes at a tractable above-threshold voxel
+      count; it holds 26 annotated nodes and 22 annotated edges.
+  chain:
+    detection_threshold: 0.70
+    suppression_radius_um: 4.0
+    density_radius_um: 12.0
+    candidate_radius_um: 12.0
+  node_count_estimate:
+    provenance: declared
+    derivation: >-
+      The movie's official estimated_number_of_nodes prorated by the fraction of
+      frames and the fraction of voxels the window covers. Proration assumes
+      cells are uniformly distributed, which is an assumption rather than a
+      measurement, which is why the estimate is declared and not official.
+  forbidden_changes:
+    - the window, once the run has produced a score
+    - the pinned official source
+    - the detection threshold, within this experiment
+  runtime_ceiling_seconds: 600
+  promotion_metric: none; this experiment cannot promote anything
+  expected_status: integration_only
+
+E02:
+  name: node-retention oracle, CPU portion
+  component: graph_policy
+  hypothesis: >-
+    Emitting roughly the annotated node count rather than roughly every cell
+    raises the official adjusted edge Jaccard, and the gain survives the correct
+    edges a real filter would destroy reaching that node count.
+  falsifier: >-
+    Killed if the filtered policy fails to match the dense baseline's adjusted
+    edge Jaccard on either embryo fold at any retention at or above the level a
+    real filter could plausibly achieve. Marked challenger if it wins on one
+    fold and loses on the other.
+  split:
+    scheme: leave_one_embryo_out
+    folds: [44b6, 6bba]
+    excluded: >-
+      The four public-test fixtures are never read. Each is byte-identical to a
+      train volume of the same id (D-0015), so scoring on them would be scoring
+      on training data, and the public leaderboard is never used as validation.
+  policies:
+    dense_baseline:
+      node_budget: estimated_total
+      edge_retention: 1.0
+    annotated_count_filtered:
+      node_budget: annotated
+      edge_retention_sweep: [1.0, 0.98, 0.96, 0.94, 0.92, 0.90, 0.88, 0.85]
+  seed: 0
+  frozen:
+    - the pinned official scorer and its aggregation
+    - each dataset's own estimated_number_of_nodes as the denominator
+    - the decoy construction, which must leave edge and division counts untouched
+  promotion_metric: adjusted_edge_jaccard, reported per embryo fold, never pooled
+  runtime_ceiling_seconds: 3600
+  limits: >-
+    This is an oracle. Retained edges are correct by construction, so the
+    measured curve is an upper bound on what any real filter achieves at the
+    same node count. It establishes the retention a real filter must beat, not
+    that a real filter exists.
