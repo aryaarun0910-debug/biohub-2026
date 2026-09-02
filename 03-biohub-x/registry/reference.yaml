@@ -474,6 +474,142 @@ references:
         definition. That needs torch, which this repository does not depend on,
         and a decision about which torch build to add.
       - The primary weight's training split, carried forward from R-0002.
+  - id: R-0004
+    status: reference_only
+    title: G-03 vendored CC0 architecture, strict loading, and the CPU smoke
+    source:
+      kind: kaggle_selective_source_download_and_local_cpu_run
+      authorised_by: Arya Arun
+      authorisation: >-
+        CPU-only PyTorch 2.10 wheel in a pinned model-cpu dependency group, not a
+        core dependency. No CUDA libraries and no system Python. Build the
+        minimum Biohub-X-owned compatibility definition for the CC0 reference
+        architecture, preserving attribution and binding the vendored source
+        identity, with one named consumer. Load both quarantined weights with
+        strict=True. One synthetic CPU forward pass and one no-gradient proposal
+        smoke on the preregistered E01 crop, classified integration_only. No
+        corpus-wide inference, no training, no GPU, no kernel push, no submission.
+      performed_utc: '2026-09-02T00:00:00Z'
+
+    dependency:
+      package: torch
+      version: 2.10.0+cpu
+      index: https://download.pytorch.org/whl/cpu
+      group: model-cpu
+      verified:
+        cuda_compiled_in: null
+        cuda_available: false
+        nvidia_packages_installed: 0
+      rationale: >-
+        A group rather than a core dependency, so that `artifacts verify`, the
+        official metric, the retention oracle and every other non-model command
+        keep running without importing 200 MB they never use. The CUDA build
+        stays a separate decision belonging to training our own folds.
+
+    vendored_source:
+      upstream_dataset: pilkwang/biohub-tracking-support-pack-50ep-v1
+      upstream_directory: repo/src/biohub_tracking/models/
+      license: CC0-1.0
+      vendored_into: src/biohubx/_vendor/reference_baseline/
+      note: >-
+        Copied byte-exact. Both files were already LF with no BOM, so raw and
+        canonical identity coincide and `.gitattributes` needed no change, which
+        matters because changing it is itself a gated action. An architecture
+        retyped from a description is a different architecture, and strict
+        loading against it would either fail or silently succeed on wrong shapes.
+      files:
+        - path: temporal_unet.py
+          bytes: 5112
+          raw: raw_artifact_sha256:sha256:d809c35d42f504161074ddeaaa7aee5b407e5bca7f9b4e1d5f9b2ff345666cac
+          canonical_text: canonical_text_sha256:sha256/v1:d809c35d42f504161074ddeaaa7aee5b407e5bca7f9b4e1d5f9b2ff345666cac
+        - path: simple_node_transformer.py
+          bytes: 7229
+          raw: raw_artifact_sha256:sha256:b97209edeb03840e80d903e3e2a8c81c520641c8ef343f6ca2904d0f80db064e
+          canonical_text: canonical_text_sha256:sha256/v1:b97209edeb03840e80d903e3e2a8c81c520641c8ef343f6ca2904d0f80db064e
+
+    biohubx_owned:
+      module: src/biohubx/reference/architecture.py
+      consumer: biohubx infer reference
+      supplies: >-
+        The composition the checkpoints imply and the vendored files do not
+        contain: a TemporalUNet3D, a 1x1x1 detect_head convolution, and a
+        SimpleNodeTransformer, plus a strict loader that freezes the weights and
+        puts them in eval mode.
+      derived_not_assumed: >-
+        pos_feat_dim appears in no published config. It is read from the
+        checkpoint as the projection width minus the UNet channel count, so a
+        checkpoint built with a different positional embedding is refused here
+        rather than at a shape error deep inside inference. Both published
+        weights derive 32, which matches the upstream constant of four times
+        eight.
+
+    strict_loading:
+      both_checkpoints:
+        strict: true
+        parameters: 2076706
+        buffers: 1290
+        total_tensors: 2077996
+        exact_key_coverage: true
+        exact_shape_match: true
+        eval_mode: true
+        gradients_disabled: true
+      cross_check: >-
+        The torch-free structural index in R-0003 counted 2,077,996 tensor
+        entries. The loaded model reports 2,076,706 parameters plus 1,290
+        buffers, which is the same number reached two independent ways.
+      derived_spec:
+        unet_out_channels: 32
+        unet_layers: [32, 64, 128]
+        pos_feat_dim: 32
+        window_size: 2
+        downsample: [1, 4, 4]
+
+    synthetic_forward_pass:
+      input_shape: [1, 2, 8, 16, 16]
+      feature_shape: [1, 2, 32, 8, 16, 16]
+      logit_shape: [1, 2, 1, 8, 16, 16]
+      finite: true
+      seconds: 0.041
+
+    real_proposal_smoke:
+      status: integration_only
+      window: E01, 6bba_2540cd90 frames 0 to 11, crop z 0:32 y 128:256 x 128:256
+      checkpoint: reference.pilkwang.support_pack_50ep.edge_predictor_best
+      volume_shape: [12, 32, 128, 128]
+      strided_shape: [12, 32, 32, 32]
+      striding_note: >-
+        The reference downsamples by striding, not pooling, so the smoke strides
+        identically. Its quantile normalisation at 0.1 and 99.9 percent is the
+        same normalisation Biohub-X already applies when reading a window, so no
+        second convention was introduced.
+      feature_shape: [1, 2, 32, 32, 32, 32]
+      logit_shape: [1, 2, 1, 32, 32, 32]
+      finite: true
+      detection_threshold: 0.965
+      voxels_per_frame: 32768
+      voxels_above_threshold_total: 3992
+      voxels_above_threshold_per_frame: [298, 328, 322, 344, 337, 353, 368, 366, 345, 345, 296, 290]
+      fraction_of_voxels_above_threshold: 0.010152
+      seconds: 3.018
+      peak_rss_bytes: 371568640
+      what_this_is_not: >-
+        A voxel above threshold is not a node. The reference still runs peak
+        finding and suppression over this heatmap before it has proposals, so
+        3,992 is an upper bound on what the detector offers this window and not
+        a node count. Against 26 annotated nodes and a prorated window estimate
+        of 56.7 cells, the gap between the heatmap and a node set is where the
+        reference's proposal logic lives, and Biohub-X has not reproduced it.
+      why_it_cannot_support_a_finding: >-
+        The checkpoint is quarantined and this window comes from the training
+        corpus the reference's sibling weight trained on. integration_only means
+        the chain runs, nothing more.
+
+    unresolved:
+      - Whether Biohub-X can reproduce the reference's peak finding and
+        suppression, which is what turns this heatmap into the node counts
+        recorded in R-0001. Until then the proposal interface is loadable but
+        not reproduced.
+      - The primary weight's training split, carried forward from R-0002.
 
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains

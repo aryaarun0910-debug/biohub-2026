@@ -31,6 +31,17 @@ dev = [
     "mypy>=1.11",
     "types-PyYAML>=6.0",
 ]
+# Deliberately NOT a core dependency. Torch is needed only to instantiate the
+# reference architecture and load its quarantined weights; every other Biohub-X
+# operation, including the whole metric and retention path, runs without it.
+# Keeping it in a group means `uv run biohubx artifacts verify` does not pay for
+# a 200 MB import it never uses.
+#
+# CPU-only and pinned. The CUDA build is a separate, later decision that belongs
+# to training our own folds, not to reading someone else's checkpoint.
+model-cpu = [
+    "torch==2.10.0+cpu",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -44,6 +55,14 @@ packages = ["src/biohubx"]
 # own matching and graph library; a version range would let the authoritative
 # behaviour drift underneath a recorded score.
 allow-direct-references = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [tool.uv]
 # Phase-1's reproducible development lock targets the interpreter pinned by

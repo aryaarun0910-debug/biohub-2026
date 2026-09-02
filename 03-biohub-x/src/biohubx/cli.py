@@ -988,6 +988,237 @@ def infer_real(
     typer.echo(json.dumps(payload, sort_keys=True))
 
 
+def _peak_rss_bytes() -> int | None:
+    """Best-effort peak resident set size, or None where the platform will not say.
+
+    Reported as evidence about cost, never as a measurement that gates anything,
+    which is why an unavailable value is None rather than a zero that would read
+    as a real number.
+    """
+    if sys.platform != "win32":
+        import resource
+
+        return int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) * 1024
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        # Signatures must be declared. Left to ctypes' defaults, GetCurrentProcess
+        # returns a truncated 32-bit int on 64-bit Windows and the call fails
+        # silently, which is how a real measurement becomes a quiet None.
+        class _Counters(ctypes.Structure):
+            _fields_ = [
+                ("cb", wintypes.DWORD),
+                ("PageFaultCount", wintypes.DWORD),
+                ("PeakWorkingSetSize", ctypes.c_size_t),
+                ("WorkingSetSize", ctypes.c_size_t),
+                ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                ("PagefileUsage", ctypes.c_size_t),
+                ("PeakPagefileUsage", ctypes.c_size_t),
+            ]
+
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+        kernel32.GetCurrentProcess.argtypes = []
+        kernel32.K32GetProcessMemoryInfo.restype = wintypes.BOOL
+        kernel32.K32GetProcessMemoryInfo.argtypes = [
+            wintypes.HANDLE,
+            ctypes.POINTER(_Counters),
+            wintypes.DWORD,
+        ]
+        counters = _Counters()
+        counters.cb = ctypes.sizeof(_Counters)
+        if not kernel32.K32GetProcessMemoryInfo(
+            kernel32.GetCurrentProcess(), ctypes.byref(counters), counters.cb
+        ):
+            return None
+        return int(counters.PeakWorkingSetSize)
+    except Exception:
+        return None
+
+
+@infer_app.command("reference")
+def infer_reference(
+    weights: Annotated[Path, typer.Option("--weights", help="Quarantined reference checkpoint.")],
+    dataset: Annotated[
+        str, typer.Option("--dataset", help="Registered competition dataset id.")
+    ] = "6bba_2540cd90",
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    split: Annotated[str, typer.Option("--split", help="Official split holding the dataset.")] = "train",
+    first_frame: Annotated[int, typer.Option("--first-frame", help="First frame of the window.")] = 0,
+    frames: Annotated[int, typer.Option("--frames", help="Number of frames in the window.")] = 12,
+    crop_z: Annotated[str, typer.Option("--crop-z", help="Half-open voxel range start:stop.")] = "0:32",
+    crop_y: Annotated[str, typer.Option("--crop-y", help="Half-open voxel range start:stop.")] = "128:256",
+    crop_x: Annotated[str, typer.Option("--crop-x", help="Half-open voxel range start:stop.")] = "128:256",
+    detection_threshold: Annotated[
+        float,
+        typer.Option("--detection-threshold", help="Sigmoid threshold on the detection logits."),
+    ] = 0.965,
+) -> None:
+    """Load a quarantined reference checkpoint on CPU and count what it proposes.
+
+    Two runs. First a synthetic forward pass, which checks the architecture
+    produces finite output of the expected shape before any real byte is read.
+    Then a no-gradient detection pass over the preregistered E01 window.
+
+    integration_only. Both published checkpoints are quarantined: one trained on
+    all 199 annotated movies and the other has no recorded training split, so
+    nothing measured here may support a held-out finding (D-0020). CPU only, no
+    training, no GPU, no corpus-wide inference.
+    """
+    command = "infer reference"
+    import torch
+
+    from biohubx.data.competition import (
+        CompetitionLayoutError,
+        WindowSelection,
+        competition_root,
+        load_window,
+    )
+    from biohubx.reference.architecture import ReferenceArchitectureError, load_reference_model
+
+    def span(text: str, name: str) -> tuple[int, int]:
+        parts = text.split(":")
+        if len(parts) != 2:
+            heartbeat(command, "refused", f"{name} must be start:stop, got {text!r}")
+            raise typer.Exit(code=2)
+        return int(parts[0]), int(parts[1])
+
+    heartbeat(command, "start", f"weights={weights.name} threshold={detection_threshold}")
+    torch.set_grad_enabled(False)
+    try:
+        model, spec = load_reference_model(weights)
+    except ReferenceArchitectureError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    parameters = sum(p.numel() for p in model.parameters())
+    buffers = sum(b.numel() for b in model.buffers())
+    heartbeat(command, "loaded", f"strict=True params={parameters} buffers={buffers} spec={spec.to_dict()}")
+
+    # Run 1: synthetic. Cheap, deterministic, and it fails before real data is read.
+    synthetic_started = time.perf_counter()
+    synthetic_in = torch.zeros((1, spec.window_size, 8, 16, 16), dtype=torch.float32)
+    synthetic_features, synthetic_logits = model.detect(synthetic_in)
+    synthetic_seconds = time.perf_counter() - synthetic_started
+    synthetic_finite = bool(torch.isfinite(synthetic_logits).all())
+    expected_logits = (1, spec.window_size, 1, 8, 16, 16)
+    if tuple(synthetic_logits.shape) != expected_logits or not synthetic_finite:
+        heartbeat(
+            command,
+            "refused",
+            f"synthetic forward produced {tuple(synthetic_logits.shape)} finite={synthetic_finite}, "
+            f"expected {expected_logits} finite=True",
+        )
+        raise typer.Exit(code=2)
+    heartbeat(
+        command,
+        "synthetic",
+        f"in={tuple(synthetic_in.shape)} features={tuple(synthetic_features.shape)} "
+        f"logits={tuple(synthetic_logits.shape)} finite=True {synthetic_seconds:.3f}s",
+    )
+
+    z0, z1 = span(crop_z, "--crop-z")
+    y0, y1 = span(crop_y, "--crop-y")
+    x0, x1 = span(crop_x, "--crop-x")
+    selection = WindowSelection(
+        dataset_id=dataset,
+        first_frame=first_frame,
+        frames=frames,
+        z_start=z0,
+        z_stop=z1,
+        y_start=y0,
+        y_stop=y1,
+        x_start=x0,
+        x_stop=x1,
+    )
+    try:
+        window = load_window(competition_root(root), selection, split=split)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    # The reference downsamples by striding, not pooling, so the smoke strides too.
+    dz, dy, dx = spec.downsample
+    strided = window.volume[:, ::dz, ::dy, ::dx]
+    heartbeat(
+        command,
+        "loaded",
+        f"volume={tuple(window.volume.shape)} strided={tuple(strided.shape)} "
+        f"annotated_nodes={len(window.annotated.nodes)}",
+    )
+
+    real_started = time.perf_counter()
+    proposals_per_frame: list[int] = []
+    feature_shape: tuple[int, ...] = ()
+    logit_shape: tuple[int, ...] = ()
+    all_finite = True
+    for index in range(0, strided.shape[0] - spec.window_size + 1, spec.window_size):
+        chunk = torch.from_numpy(strided[index : index + spec.window_size]).unsqueeze(0)
+        features, logits = model.detect(chunk)
+        feature_shape = tuple(features.shape)
+        logit_shape = tuple(logits.shape)
+        all_finite &= bool(torch.isfinite(logits).all())
+        above = (torch.sigmoid(logits) >= detection_threshold).sum(dim=(2, 3, 4, 5))
+        proposals_per_frame.extend(int(v) for v in above[0])
+    real_seconds = time.perf_counter() - real_started
+
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "quarantine": (
+            "The checkpoint is reference_only. One published weight trained on all 199 annotated "
+            "movies and the other records no training split, so no number here may support a "
+            "held-out finding."
+        ),
+        "checkpoint": {
+            "path_name": weights.name,
+            "raw_digest": digest_file(weights, DigestKind.RAW_ARTIFACT).token,
+            "strict_load": True,
+            "parameters": parameters,
+            "buffers": buffers,
+            "spec": spec.to_dict(),
+        },
+        "synthetic_forward": {
+            "input_shape": list(synthetic_in.shape),
+            "feature_shape": list(synthetic_features.shape),
+            "logit_shape": list(synthetic_logits.shape),
+            "finite": synthetic_finite,
+            "seconds": round(synthetic_seconds, 4),
+        },
+        "real_smoke": {
+            "window": window.to_dict(),
+            "volume_shape": list(window.volume.shape),
+            "strided_shape": list(strided.shape),
+            "feature_shape": list(feature_shape),
+            "logit_shape": list(logit_shape),
+            "finite": all_finite,
+            "detection_threshold": detection_threshold,
+            "voxels_per_frame": int(strided.shape[1] * strided.shape[2] * strided.shape[3]),
+            "proposal_voxels_per_frame": proposals_per_frame,
+            "proposal_voxels_total": sum(proposals_per_frame),
+            "seconds": round(real_seconds, 3),
+        },
+        "peak_rss_bytes": _peak_rss_bytes(),
+    }
+    report_path = repository_root() / "artifacts/reference-smoke.json"
+    atomic_write_text(report_path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    _write_manifest(command, {"report": "artifacts/reference-smoke.json", "checkpoint": weights.name})
+    heartbeat(
+        command,
+        "smoke",
+        f"features={feature_shape} logits={logit_shape} finite={all_finite} "
+        f"above_threshold={sum(proposals_per_frame)} in {real_seconds:.2f}s",
+    )
+    heartbeat(command, "done", "report=artifacts/reference-smoke.json")
+    typer.echo(json.dumps(payload, sort_keys=True))
+
+
 @evaluate_app.command("retention")
 def evaluate_retention(
     root: Annotated[

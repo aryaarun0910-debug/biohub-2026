@@ -546,3 +546,34 @@ produced the graphs (R-0002).
 This does not make the reference worthless. Its training code is CC0 and it
 describes a proposal source, which [[F-0017]] identifies as the thing Biohub-X
 does not yet have.
+## D-0021 - Torch is an optional group, and the reference definition is a boundary not a framework
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+Loading the reference checkpoints needs Torch. Making it a core dependency would
+have made every Biohub-X operation pay for it: `artifacts verify`, the official
+metric, the retention oracle and the whole data path do not touch a tensor, and
+none of them should import two hundred megabytes to prove it.
+
+So Torch lives in a `model-cpu` dependency group, pinned to `2.10.0+cpu` from
+the PyTorch CPU index. The build is verified CPU-only in R-0004: no CUDA, no
+NVIDIA packages. Whether to add a CUDA build is a separate decision that belongs
+to training our own folds, and keeping the two apart is the point of the group.
+
+The architecture itself is vendored byte-exact from CC0 source, for the same
+reason the official metric is vendored: an architecture retyped from a
+description is a different architecture, and `strict=True` would either fail
+against it or, worse, succeed against the wrong shapes.
+
+What Biohub-X owns is only the composition the checkpoints imply and the
+vendored files do not contain, plus a strict loader. That module has one named
+consumer and must not acquire a second without a decision. **It is not a
+reference-model framework and must not become one.** When Biohub-X trains its
+own folds, those models get their own definitions and their own registry
+entries; they do not go here.
+
+One detail is worth keeping. The positional embedding width appears in no
+published configuration, so the loader derives it from the checkpoint rather
+than hardcoding the upstream constant. A checkpoint built differently is refused
+at load instead of failing somewhere inside inference.

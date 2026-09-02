@@ -239,6 +239,7 @@ Implemented:
 - `biohubx data fingerprint --root PATH [--dataset ID] [--plan]`
 - `biohubx infer synthetic [--seed N] [--noise F] [--annotated-fraction F]`
 - `biohubx infer real --dataset ID [--root PATH] [--split S] [--first-frame N] [--frames N] [--crop-z A:B] [--crop-y A:B] [--crop-x A:B] [--detection-threshold F]`
+- `biohubx infer reference --weights PATH [--dataset ID] [--root PATH] [--split S] [--first-frame N] [--frames N] [--crop-z A:B] [--crop-y A:B] [--crop-x A:B] [--detection-threshold F]`
 - `biohubx evaluate slice [--graph PATH]`
 - `biohubx evaluate retention [--root PATH] [--retentions LIST] [--seed N]`
 
@@ -309,6 +310,13 @@ estimate is prorated and therefore `declared`, never official metadata.
 
 `evaluate retention` reads ground-truth graphs only, never the four
 duplicated public-test fixtures, and never a volume.
+
+`infer reference` loads a quarantined external checkpoint on CPU and runs its
+detection path only. It needs the optional `model-cpu` dependency group;
+every other command runs without Torch, which is why the group exists. Both
+published weights are `reference_only`, so everything this command reports is
+`integration_only` and none of it may support a held-out finding ([[D-0020]],
+[[D-0021]]).
 
 ## 5. Evaluation policy
 
