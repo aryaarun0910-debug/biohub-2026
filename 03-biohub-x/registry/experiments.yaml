@@ -15,11 +15,19 @@
 #   runtime_ceiling    wall clock it may not exceed
 #   provenance_status  from registry/artifacts.yaml
 #
+# An experiment is pre-registered only once its inputs, its configuration file
+# and that file's canonical_text digest all exist. Declaring one earlier would
+# record intentions rather than a runnable experiment, and the declaration is
+# only binding if it names the exact thing that will run.
+#
 # Required at completion, exactly one:
 #   status: promoted | challenger | killed | invalid | integration_only
 #
-# "implemented" and "interesting" are not statuses. Scores are referenced by
-# finding id from registry/findings.yaml, never restated here or in prose.
+# There is no `pending`. A declared but unfinished experiment carries no status
+# key at all: a status is a result, and a placeholder result is indistinguishable
+# from a real one at a glance. "implemented" and "interesting" are not statuses
+# either. Scores are referenced by finding id from registry/findings.yaml, never
+# restated here or in prose.
 
 schema_version: 1
 

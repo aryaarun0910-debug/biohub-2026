@@ -134,3 +134,100 @@ provides.
 **Revisit when:** the competition runtime image is inspected in Phase 7. The
 declared range is a guess about the target environment and has not been measured
 against it.
+
+---
+
+## D-0008 - The metric is vendored and pinned, never reimplemented
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+`src/biohubx/_vendor/official_competition/` holds a byte-identical copy of the
+official scorer at one commit, with typed digests in
+`registry/official_source.yaml`. `biohubx.evaluation.official_metric` validates
+Biohub-X contracts, converts to the official graph type, and calls the official
+functions. It computes no metric arithmetic of its own. The vendored copy is
+excluded from lint and format so that a tidying pass cannot silently fork the
+authority, and its digests are re-derived by `biohubx official verify-source`.
+
+**Rejected alternative:** reimplementing the metric from its documentation. A
+reimplementation agrees with the original exactly until the day it does not, and
+the disagreement would surface as an unexplained gap between local and
+leaderboard scores, at which point every earlier promotion decision becomes
+suspect.
+
+**Consequence:** moving the pin is a stop-and-report action. It supersedes every
+finding whose validity names the pin, until the instruments are re-run.
+
+---
+
+## D-0009 - The node-count denominator is explicit and provenance-tagged
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+The official adjusted Jaccard divides by a coarse estimate of *every* cell,
+which on real data is the dataset's `estimated_number_of_nodes`. Annotations are
+sparse, so the annotated count is a different and smaller number.
+`EstimatedTotalNodes` carries the value together with where it came from, has no
+default, and every evaluation records the annotated count, the estimate and
+their ratio side by side.
+
+**Rejected alternative:** defaulting to the annotated ground-truth count. The
+adapter did exactly that before this decision. It is not a harmless
+approximation: it pins `total_node_ratio` at zero regardless of the true
+sparsity, which silently deletes the whole node-count term and reports an
+adjusted Jaccard that is not comparable with the competition's. Measured in
+[[F-0004]]: the effect is invisible on a complete ground truth and worth 0.09 of
+adjusted Jaccard at a tenfold sparsity on the same graph.
+
+**Consequence:** using the annotated count remains available for a fixture whose
+ground truth is complete by construction, but the call site has to say so.
+
+---
+
+## D-0010 - Illegal graph structure is refused, never left to the scorer's silence
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+`LineageGraph` refuses at construction every structural defect the mission
+names. This is deliberately stricter than the official scorer, which was
+measured in [[F-0005]] to drop a frame-skipping edge rather than charge it: such
+an edge is neither rewarded nor penalised, while the annotated edge it failed to
+reproduce still counts as a false negative.
+
+**Rejected alternative:** emitting whatever the decoder produces and relying on
+the scorer to clean it up. Leniency that is silent is worse than leniency that
+is loud, because a system tuned against it learns to depend on behaviour that no
+document promises and that the organisers can change without notice. The metric
+was already patched once, in July 2026, to close an exploit of exactly this kind.
+
+**Consequence:** Biohub-X can score lower than a system that games the scorer's
+silences, and that is accepted.
+
+---
+
+## D-0011 - Node count is a measured quantity before it is an architecture choice
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+[[F-0003]] and [[F-0004]] together show that the number of nodes a system emits
+has two separate consequences: unmatched nodes carry no edge penalty, and the
+node-count adjustment moves the score in both directions with no upper clamp. No
+component whose purpose is to change how many nodes are emitted is added to
+`main` until that lever has been measured on real data with an experiment that
+declares its falsifier.
+
+This binds proposal banks, rescue detectors, threshold sweeps and minimum track
+lengths equally. It is not a judgement about any of them.
+
+**Rejected alternative:** adding a multi-hypothesis proposal bank first, on the
+argument that recall is the ceiling. Recall is a ceiling on edges, but the same
+extra proposals move the adjustment, and the two effects have opposite signs.
+Adding the bank before measuring the trade would make the result uninterpretable
+whichever way it came out.
+
+**Revisit when:** the node-count experiment reports, at which point this either
+becomes a specific calibration decision or is superseded.
