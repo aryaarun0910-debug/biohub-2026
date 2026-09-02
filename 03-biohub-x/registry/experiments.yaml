@@ -184,7 +184,33 @@ experiments:
       removed the negative class rather than widening it.
     stated_uncertainty: >-
       The number of dim unannotated cells is unknown. Annotated cells reach
-      intensity percentile 0.09, and the class prior counts every cell the
+      intensity percentile 0.063, and the class prior counts every cell the
       dataset estimates, so a prior biased against dim cells makes the detector
       under-predict. E03 reports this with its results and does not claim to
       have resolved it.
+    assumptions:
+      - id: SCAR
+        statement: >-
+          nnPU is unbiased only if labelled positives are Selected Completely At
+          Random from all positives.
+        status: MEASURED AND NOT SUPPORTED. F-0022 finds annotation density
+          correlates with annotated-cell brightness at r = +0.354 across the 199
+          datasets, so labelling is not independent of the feature the detector
+          reads.
+        consequence: >-
+          E03 may not describe its estimator as unbiased (D-0025). The residual
+          bias is unmeasured in direction and magnitude and is reported with the
+          results.
+        falsifier: >-
+          The assumption is already violated. It is recorded so that a result
+          depending on it cannot be read as if it were not. Independently, if a
+          fold's detector recovers annotated cells markedly better than
+          unannotated ones at matched intensity, that is the bias showing up in
+          the outputs and the fold is reported as compromised rather than
+          promoted.
+      - id: PRIOR_VALIDITY
+        statement: The class prior is a probability at every scale the pipeline uses.
+        status: MEASURED AND HOLDS. F-0021 records 1.443e-4 to 3.000e-3 per grid
+          voxel across 199 datasets, all inside the open unit interval, with zero
+          grid collisions so positive voxels equal annotated nodes exactly.
+        falsifier: any dataset whose prior leaves the open unit interval at any scale.

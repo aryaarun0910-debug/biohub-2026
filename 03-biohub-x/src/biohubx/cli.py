@@ -60,12 +60,14 @@ evaluate_app = typer.Typer(name="evaluate", help="Authoritative metric calibrati
 data_app = typer.Typer(name="data", help="Read-only dataset validation.", no_args_is_help=True)
 infer_app = typer.Typer(name="infer", help="Emit a lineage graph.", no_args_is_help=True)
 train_app = typer.Typer(name="train", help="Train a Biohub-X model.", no_args_is_help=True)
+package_app = typer.Typer(name="package", help="Build a runnable package.", no_args_is_help=True)
 app.add_typer(artifacts_app)
 app.add_typer(official_app)
 app.add_typer(evaluate_app)
 app.add_typer(data_app)
 app.add_typer(infer_app)
 app.add_typer(train_app)
+app.add_typer(package_app)
 
 
 def repository_root() -> Path:
@@ -1605,6 +1607,13 @@ def evaluate_mask_audit(
         int,
         typer.Option("--max-frames", help="Frames sampled per dataset. 0 reads every annotated frame."),
     ] = 0,
+    compare_maxpool: Annotated[
+        bool,
+        typer.Option(
+            "--compare-maxpool/--no-compare-maxpool",
+            help="Also measure a max-pooled grid. Reads full resolution, so 16x the bytes.",
+        ),
+    ] = False,
 ) -> None:
     """Measure what a confident-background band would cost, at every annotated node.
 
@@ -1640,6 +1649,14 @@ def evaluate_mask_audit(
     heartbeat(command, "start", f"datasets={len(datasets)} max_frames={max_frames or 'all'}")
 
     started = time.perf_counter()
+    totals: dict[str, int] = {
+        "annotated_nodes": 0,
+        "frames_total": 0,
+        "frames_read": 0,
+        "nodes_in_read_frames": 0,
+        "nodes_measured": 0,
+        "collisions": 0,
+    }
     per_dataset: list[dict[str, object]] = []
     by_embryo: dict[str, list[float]] = {}
     by_embryo_frame_norm: dict[str, list[float]] = {}
@@ -1661,21 +1678,29 @@ def evaluate_mask_audit(
         ranks: list[float] = []
         frame_ranks: list[float] = []
         is_local_max: list[int] = []
+        nodes_in_chosen = sum(len(frames[f]) for f in chosen)
+        collisions = 0
+        seen: set[tuple[int, int, int, int]] = set()
         for frame in chosen:
-            full = np.asarray(volume[frame], dtype=np.float32)
-            grid = full[:, ::4, ::4]
+            if compare_maxpool:
+                full = np.asarray(volume[frame], dtype=np.float32)
+                grid = full[:, ::4, ::4]
+            else:
+                full = None
+                grid = np.asarray(volume[frame, ::1, ::4, ::4], dtype=np.float32)
             # Max-pooling instead of striding is the obvious suspect for a dim
             # annotated node: striding samples every fourth voxel and can miss a
             # cell centre entirely. Measuring both settles whether dim nodes are
             # a property of the cells or an artefact of the grid.
-            depth, height, width = full.shape
-            pooled = (
-                full[:, : (height // 4) * 4, : (width // 4) * 4]
-                .reshape(depth, height // 4, 4, width // 4, 4)
-                .max(axis=(2, 4))
-            )
+            if full is not None:
+                depth, height, width = full.shape
+                pooled = (
+                    full[:, : (height // 4) * 4, : (width // 4) * 4]
+                    .reshape(depth, height // 4, 4, width // 4, 4)
+                    .max(axis=(2, 4))
+                )
+                flat_pooled = np.sort(pooled.reshape(-1))
             flat = np.sort(grid.reshape(-1))
-            flat_pooled = np.sort(pooled.reshape(-1))
             for z, y, x in frames[frame]:
                 if not (0 <= z < grid.shape[0] and 0 <= y < grid.shape[1] and 0 <= x < grid.shape[2]):
                     continue
@@ -1684,7 +1709,15 @@ def evaluate_mask_audit(
                 # this number does not move if the intensity scaling changes.
                 rank = float(np.searchsorted(flat, value, side="left")) / flat.size
                 ranks.append(rank)
-                if y < pooled.shape[1] and x < pooled.shape[2]:
+                # Two annotated cells can land on the same grid voxel once y and x
+                # are divided by four. Both become one positive, so the count the
+                # class prior is compared against is not the annotated count.
+                key = (frame, z, y, x)
+                if key in seen:
+                    collisions += 1
+                else:
+                    seen.add(key)
+                if full is not None and y < pooled.shape[1] and x < pooled.shape[2]:
                     frame_ranks.append(
                         float(np.searchsorted(flat_pooled, float(pooled[z, y, x]), side="left"))
                         / flat_pooled.size
@@ -1700,18 +1733,35 @@ def evaluate_mask_audit(
         by_embryo.setdefault(truth.embryo, []).extend(ranks)
         by_embryo_frame_norm.setdefault(truth.embryo, []).extend(frame_ranks)
         local_max_hits.setdefault(truth.embryo, []).extend(is_local_max)
+        grid_voxels_movie = truth.frames * volume.shape[1] * (volume.shape[2] // 4) * (volume.shape[3] // 4)
+        movie_voxels = truth.frames * volume.shape[1] * volume.shape[2] * volume.shape[3]
+        prior_grid = truth.estimated_total_nodes / grid_voxels_movie
+        prior_full = truth.estimated_total_nodes / movie_voxels
+        totals["annotated_nodes"] += len(truth.lineage.nodes)
+        totals["frames_total"] += len(frames)
+        totals["frames_read"] += len(chosen)
+        totals["nodes_in_read_frames"] += nodes_in_chosen
+        totals["nodes_measured"] += int(array.size)
+        totals["collisions"] += collisions
         per_dataset.append(
             {
                 "dataset": dataset_id,
                 "embryo": truth.embryo,
+                "frames_total": len(frames),
                 "frames_read": len(chosen),
+                "annotated_nodes": len(truth.lineage.nodes),
+                "nodes_in_read_frames": nodes_in_chosen,
                 "nodes_measured": int(array.size),
+                "grid_collisions": collisions,
+                "annotated_density": len(truth.lineage.nodes) / truth.estimated_total_nodes,
+                "class_prior_grid": prior_grid,
+                "class_prior_full_resolution": prior_full,
+                "prior_within_bounds": bool(0.0 < prior_grid < 1.0 and 0.0 < prior_full < 1.0),
                 "percentile_min": float(array.min()),
                 "percentile_p01": float(np.quantile(array, 0.01)),
                 "percentile_median": float(np.median(array)),
                 "local_maximum_fraction": float(np.mean(is_local_max)),
                 "maxpool_percentile_min": float(np.min(frame_ranks)) if frame_ranks else None,
-                "maxpool_percentile_median": float(np.median(frame_ranks)) if frame_ranks else None,
             }
         )
         if (index + 1) % 25 == 0:
@@ -1754,11 +1804,68 @@ def evaluate_mask_audit(
             }
         folds.append(entry)
 
+    def column(name: str) -> list[float]:
+        return [float(str(row[name])) for row in per_dataset]
+
+    densities = column("annotated_density")
+    medians = column("percentile_median")
+    correlation = float(np.corrcoef(densities, medians)[0, 1]) if len(densities) > 2 else float("nan")
+    priors = column("class_prior_grid")
     payload = {
         "schema_version": 1,
         "provenance_status": "measured",
         "experiment": "E03-MASK-AUDIT",
         "datasets_scanned": len(per_dataset),
+        "population_reconciliation": {
+            "annotated_nodes_in_corpus": totals["annotated_nodes"],
+            "annotated_frames_in_corpus": totals["frames_total"],
+            "frames_read": totals["frames_read"],
+            "nodes_in_read_frames": totals["nodes_in_read_frames"],
+            "nodes_measured": totals["nodes_measured"],
+            "excluded_by_frame_sampling": totals["annotated_nodes"] - totals["nodes_in_read_frames"],
+            "excluded_by_falling_outside_grid": (totals["nodes_in_read_frames"] - totals["nodes_measured"]),
+            "coverage_of_corpus": (
+                totals["nodes_measured"] / totals["annotated_nodes"] if totals["annotated_nodes"] else 0.0
+            ),
+            "grid_collisions": totals["collisions"],
+            "note": (
+                "excluded_by_frame_sampling is the only exclusion under the operator's "
+                "control: it is zero when --max-frames is 0. Nodes outside the grid are "
+                "nodes whose coordinates fall beyond the strided array, which is a "
+                "property of the data. Collisions are annotated cells that share a grid "
+                "voxel after dividing y and x by four; they are measured, not excluded."
+            ),
+        },
+        "class_prior_audit": {
+            "units": (
+                "cells per voxel of the grid the model predicts on. A movie is "
+                "(T, Z, Y, X); the model sees (T, Z, Y/4, X/4), so the grid prior is "
+                "sixteen times the full-resolution prior. A crop prorates the movie "
+                "estimate by its frame and voxel fraction before dividing."
+            ),
+            "grid_prior_min": min(priors) if priors else None,
+            "grid_prior_max": max(priors) if priors else None,
+            "grid_prior_median": float(np.median(priors)) if priors else None,
+            "all_within_open_unit_interval": all(0.0 < p < 1.0 for p in priors),
+            "datasets_out_of_bounds": [
+                row["dataset"] for row in per_dataset if not row["prior_within_bounds"]
+            ],
+        },
+        "selection_bias_probe": {
+            "question": (
+                "nnPU assumes labelled positives are Selected Completely At Random "
+                "from all positives (SCAR). If annotators reached for bright cells "
+                "first, sparsely annotated datasets should show brighter annotations "
+                "than densely annotated ones."
+            ),
+            "pearson_density_vs_median_percentile": correlation,
+            "datasets": len(per_dataset),
+            "reading": (
+                "A correlation near zero is consistent with SCAR and does not prove it. "
+                "A negative correlation means sparser annotation picks brighter cells, "
+                "which violates SCAR and biases the prior."
+            ),
+        },
         "nodes_measured": sum(len(v) for v in by_embryo.values()),
         "bands_evaluated": list(CANDIDATE_BANDS),
         "by_embryo": {
@@ -1768,12 +1875,17 @@ def evaluate_mask_audit(
                 "percentile_p01": float(np.quantile(by_embryo[embryo], 0.01)),
                 "percentile_median": float(np.median(by_embryo[embryo])),
                 "local_maximum_fraction": float(np.mean(local_max_hits[embryo])),
-                "maxpool_percentile_min": float(np.min(by_embryo_frame_norm[embryo])),
-                "maxpool_percentile_p01": float(np.quantile(by_embryo_frame_norm[embryo], 0.01)),
-                "maxpool_bands": [
-                    report.to_dict()
-                    for report in report_bands(np.array(by_embryo_frame_norm[embryo]), CANDIDATE_BANDS)
-                ],
+                "maxpool_percentile_min": (
+                    float(np.min(by_embryo_frame_norm[embryo])) if by_embryo_frame_norm.get(embryo) else None
+                ),
+                "maxpool_bands": (
+                    [
+                        report.to_dict()
+                        for report in report_bands(np.array(by_embryo_frame_norm[embryo]), CANDIDATE_BANDS)
+                    ]
+                    if by_embryo_frame_norm.get(embryo)
+                    else None
+                ),
                 "bands": embryo_reports[embryo],
             }
             for embryo in embryos
@@ -1812,6 +1924,236 @@ def _open_volume(path: Path) -> Any:
 
     group: Any = zarr.open(str(path), mode="r")
     return group["0"]
+
+
+@package_app.command("kaggle")
+def package_kaggle(
+    fold: Annotated[
+        str, typer.Option("--fold", help="Fold id from configs/e03-clean-folds.yaml.")
+    ] = "fold_44b6",
+    out: Annotated[
+        Path | None,
+        typer.Option("--out", help="Where to stage the package. Defaults to artifacts/kaggle-package."),
+    ] = None,
+    epochs: Annotated[int, typer.Option("--epochs", help="Training epochs.")] = 2,
+    batch_size: Annotated[int, typer.Option("--batch-size", help="Movies per optimizer step.")] = 2,
+    learning_rate: Annotated[float, typer.Option("--learning-rate", help="Optimizer step size.")] = 1e-4,
+    max_movies: Annotated[
+        int, typer.Option("--max-movies", help="Cap training movies. 0 uses the whole training embryo.")
+    ] = 2,
+    gpus: Annotated[int, typer.Option("--gpus", help="GPUs the run expects and asserts.")] = 1,
+    runtime_ceiling: Annotated[
+        int, typer.Option("--runtime-ceiling", help="Seconds after which the run refuses to continue.")
+    ] = 2400,
+    smoke_local: Annotated[
+        bool, typer.Option("--smoke-local", help="Run the package's own entry point here, on CPU.")
+    ] = False,
+    root: Annotated[
+        Path | None, typer.Option("--root", help="Competition data root, for --smoke-local only.")
+    ] = None,
+) -> None:
+    """Stage a Kaggle package for one fold, and optionally run its entry point on CPU.
+
+    The package carries code and constants: no competition bytes, no external
+    weights. Its entry point re-verifies mounted input identity, asserts fold
+    membership, refuses public-test paths and quarantined checkpoints, and emits
+    a heartbeat at every stage. Building is local and pushes nothing.
+    """
+    command = "package kaggle"
+    import shutil
+    import subprocess
+
+    from biohubx.packaging.kaggle import (
+        FoldSpec,
+        PackageSpec,
+        PackagingError,
+        build_notebook,
+        forbidden_content,
+        kernel_metadata,
+    )
+
+    root_path = repository_root()
+    config_path = root_path / "configs/e03-clean-folds.yaml"
+    if not config_path.is_file():
+        heartbeat(command, "refused", f"no fold configuration at {config_path}")
+        raise typer.Exit(code=2)
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8"))["E03"]
+    match = [item for item in config["folds"] if item["id"] == fold]
+    if not match:
+        heartbeat(command, "refused", f"unknown fold {fold!r}; known: {[i['id'] for i in config['folds']]}")
+        raise typer.Exit(code=2)
+    entry = match[0]
+
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root_path, capture_output=True, text=True, check=False
+    )
+    if revision.returncode != 0:
+        heartbeat(command, "refused", "cannot resolve the repository commit; a package must pin one")
+        raise typer.Exit(code=2)
+    commit = revision.stdout.strip()
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain"], cwd=root_path, capture_output=True, text=True, check=False
+    ).stdout.strip()
+
+    spec = PackageSpec(
+        commit=commit,
+        config_path="configs/e03-clean-folds.yaml",
+        config_digest=digest_file(config_path, DigestKind.CANONICAL_TEXT).token,
+        fold=FoldSpec(
+            fold_id=entry["id"],
+            train_embryo=entry["train_embryo"],
+            evaluate_embryo=entry["evaluate_embryo"],
+            seed=entry["seed"],
+        ),
+        epochs=epochs,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        accelerator="nvidiaTeslaT4",
+        expected_gpu_count=gpus,
+        smoke=True,
+        max_movies=max_movies or None,
+        runtime_ceiling_seconds=runtime_ceiling,
+    )
+    heartbeat(command, "start", f"fold={spec.fold.fold_id} commit={commit[:12]} dirty={bool(dirty)}")
+
+    staging = out if out is not None else root_path / "artifacts/kaggle-package"
+    if staging.exists():
+        shutil.rmtree(staging)
+    (staging / "src").mkdir(parents=True)
+    shutil.copytree(
+        root_path / "src/biohubx",
+        staging / "src/biohubx",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
+    shutil.copy2(config_path, staging / "e03-clean-folds.yaml")
+
+    # The package ships the registry's tree digests for exactly the artifacts
+    # this fold will read. Without them the entry point refuses, because an
+    # identity check over an empty set verifies nothing.
+    registry = load_artifact_registry(root_path / ARTIFACT_REGISTRY_PATH)
+    prefix = f"competition.train.{spec.fold.train_embryo}_"
+    input_digests = {
+        record.id.removeprefix("competition.train."): record.digests["tree"]
+        for record in registry.artifacts
+        if record.id.startswith(prefix) and "tree" in record.digests
+    }
+    if not input_digests:
+        heartbeat(command, "refused", f"no registered train artifacts for embryo {spec.fold.train_embryo}")
+        raise typer.Exit(code=2)
+    input_shapes = {
+        record.id.removeprefix("competition.train."): [
+            record.shape.file_count,
+            record.shape.empty_directory_count,
+            record.shape.total_bytes,
+        ]
+        for record in registry.artifacts
+        if record.id.startswith(prefix) and record.shape is not None
+    }
+    shipped: dict[str, object] = dict(spec.to_dict())
+    shipped["input_digests"] = input_digests
+    shipped["input_shapes"] = input_shapes
+    heartbeat(
+        command,
+        "digests",
+        f"shipped identities for {len(input_digests)} {spec.fold.train_embryo} artifacts",
+    )
+    atomic_write_text(
+        staging / "run.ipynb",
+        json.dumps(build_notebook(spec, shipped=shipped), indent=1, sort_keys=True) + "\n",
+    )
+    atomic_write_text(
+        staging / "kernel-metadata.json",
+        json.dumps(
+            kernel_metadata(
+                spec,
+                slug=f"biohubx-e03-{spec.fold.fold_id.replace('_', '-')}",
+                title=f"Biohub-X E03 {spec.fold.fold_id}",
+            ),
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+    )
+    atomic_write_text(staging / "spec.json", json.dumps(shipped, indent=2, sort_keys=True) + "\n")
+
+    offenders = forbidden_content(staging)
+    if offenders:
+        heartbeat(command, "refused", f"package would ship forbidden content: {offenders[:5]}")
+        raise typer.Exit(code=2)
+
+    files = sorted(p for p in staging.rglob("*") if p.is_file())
+    total_bytes = sum(p.stat().st_size for p in files)
+    listing = {
+        str(p.relative_to(staging)).replace("\\", "/"): digest_file(p, DigestKind.RAW_ARTIFACT).token
+        for p in files
+    }
+    manifest_text = json.dumps(
+        {
+            "schema_version": 1,
+            "spec": spec.to_dict(),
+            "files": listing,
+            "file_count": len(files),
+            "total_bytes": total_bytes,
+            "contains_competition_bytes": False,
+            "contains_external_weights": False,
+            "repository_clean_at_build": not dirty,
+        },
+        indent=2,
+        sort_keys=True,
+    )
+    atomic_write_text(staging / "PACKAGE_MANIFEST.json", manifest_text + "\n")
+    package_digest = digest_file(staging / "PACKAGE_MANIFEST.json", DigestKind.CANONICAL_TEXT)
+    heartbeat(
+        command,
+        "staged",
+        f"files={len(files)} bytes={total_bytes} digest={package_digest.token[:52]}",
+    )
+
+    push_command = (
+        f"kaggle kernels push -p {staging.relative_to(root_path)}"
+        if staging.is_relative_to(root_path)
+        else f"kaggle kernels push -p {staging}"
+    )
+    payload: dict[str, object] = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "package": {
+            "path": str(staging.relative_to(root_path))
+            if staging.is_relative_to(root_path)
+            else str(staging),
+            "manifest_digest": package_digest.token,
+            "file_count": len(files),
+            "total_bytes": total_bytes,
+            "push_command": push_command,
+            "pushed": False,
+        },
+        "spec": spec.to_dict(),
+    }
+
+    if smoke_local:
+        from biohubx.data.competition import CompetitionLayoutError, competition_root
+        from biohubx.packaging.entry import EntryRefusal, run_fold
+
+        try:
+            data_root = competition_root(root)
+        except CompetitionLayoutError as exc:
+            heartbeat(command, "refused", str(exc))
+            raise typer.Exit(code=2) from exc
+        smoke_out = staging.parent / "kaggle-smoke"
+        smoke_out.mkdir(parents=True, exist_ok=True)
+        os.environ["BIOHUBX_OUTPUT"] = str(smoke_out)
+        heartbeat(command, "smoke", f"running the package entry point on CPU, output={smoke_out.name}")
+        try:
+            payload["local_smoke"] = run_fold(shipped, data_root=data_root)
+        except (EntryRefusal, PackagingError) as exc:
+            heartbeat(command, "refused", f"the package refused its own smoke: {exc}")
+            raise typer.Exit(code=2) from exc
+
+    report = root_path / "artifacts/kaggle-package.json"
+    atomic_write_text(report, json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    _write_manifest(command, {"report": "artifacts/kaggle-package.json", "fold": spec.fold.fold_id})
+    heartbeat(command, "done", f"NOT PUSHED. push with: {push_command}")
+    typer.echo(json.dumps(payload, sort_keys=True))
 
 
 @data_app.command("fingerprint")

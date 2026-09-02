@@ -81,7 +81,10 @@ target-version = "py311"
 # The vendored official source is byte-identical upstream code whose digests are
 # recorded in registry/official_source.yaml. Formatting or linting it would be a
 # silent fork of the authority, so it is excluded from both.
-extend-exclude = ["src/biohubx/_vendor"]
+# `artifacts/` holds build output, including a staged copy of this package.
+# Linting a copy of the source is noise, and reformatting it would silently
+# invalidate the package manifest that recorded its digests.
+extend-exclude = ["src/biohubx/_vendor", "artifacts"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF", "ANN", "PTH"]
@@ -98,4 +101,4 @@ warn_unreachable = true
 # A silently ignored missing import is how an optional dependency becomes a
 # hidden runtime failure. Every ignore must be declared here explicitly.
 ignore_missing_imports = false
-exclude = ["src/biohubx/_vendor/"]
+exclude = ["src/biohubx/_vendor/", "artifacts/"]

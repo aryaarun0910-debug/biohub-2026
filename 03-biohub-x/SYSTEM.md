@@ -242,7 +242,8 @@ Implemented:
 - `biohubx infer reference --weights PATH [--dataset ID] [--root PATH] [--split S] [--first-frame N] [--frames N] [--crop-z A:B] [--crop-y A:B] [--crop-x A:B] [--detection-threshold F]`
 - `biohubx evaluate slice [--graph PATH]`
 - `biohubx evaluate retention [--root PATH] [--retentions LIST] [--seed N]`
-- `biohubx evaluate mask-audit [--root PATH] [--max-frames N]`
+- `biohubx evaluate mask-audit [--root PATH] [--max-frames N] [--compare-maxpool]`
+- `biohubx package kaggle [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--smoke-local]`
 - `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--peak-quantile F] [--learning-rate F]`
 
 `infer synthetic` writes the emitted graph and a stage-by-stage report
@@ -301,7 +302,7 @@ Every report names the selection it covers, so a single-dataset run is never
 read later as a claim about the whole root.
 
 Planned, absent until a consumer exists: `data make-splits`, `proposals infer`,
-`representation acquire`, `train fold`, `package kaggle`.
+`representation acquire`, `train fold`.
 
 `infer real` runs the same chain as `infer synthetic` on a bounded window of
 one registered training movie. The window is explicit in every dimension
@@ -319,6 +320,14 @@ cost. It is the instrument that falsified the band ([[F-0020]]) and forced
 the positive-unlabelled objective ([[D-0024]]). Bands are selected per fold
 from the training embryo alone; the evaluation embryo measures failure
 afterwards and never selects the rule.
+
+`package kaggle` stages a fold for a machine this repository cannot watch, and
+sends nothing. The guards travel with it: the package pins the commit and the
+configuration digest, ships the registry's tree digests and shapes for its
+training embryo, and its entry point re-verifies mounted identity, asserts fold
+membership, refuses public-test paths and quarantined checkpoints, checks the
+GPU count, heartbeats every stage and writes an atomic checkpoint with a typed
+digest. `--smoke-local` runs that exact entry point here on CPU first.
 
 `train preflight` proves the E03 loop runs before a GPU is asked for: forward,
 masked loss, backward, optimizer step, atomic checkpoint, strict reload,

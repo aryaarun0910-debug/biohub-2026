@@ -559,4 +559,62 @@ findings:
       holds_while: >-
         the registered corpus is unchanged and the model grid stays (1, 4, 4).
         A finer grid would need re-measuring, and might change the answer.
+    superseded_by: F-0021
+  - id: F-0021
+    claim: >-
+      Audited over every annotated node in the corpus rather than a sample, no
+      intensity band survives on either fold, the class prior is valid at every
+      scale, and no annotated cell is lost to the model grid. All 133,318
+      annotated nodes across 18,933 annotated frames were measured, with zero
+      excluded by sampling and zero falling outside the strided grid, so
+      coverage is exact. The dimmest annotated cell sits at percentile 0.2987 on
+      44b6 and 0.0628 on 6bba, so band selection returns nothing for BOTH folds,
+      not only 6bba: the q50 band that appeared to survive on 44b6 under
+      four-frame sampling does not survive the full population. The q90 band
+      would call 4,877 of 20,197 44b6 nodes (24.1 percent) and 16,336 of 113,121
+      6bba nodes (14.4 percent) background. Grid collisions are zero, so the
+      count of positive voxels equals the annotated node count exactly. The class
+      prior spans 1.443e-4 to 3.000e-3 per grid voxel with a median of 6.832e-4,
+      every dataset inside the open unit interval. Annotated cells are local
+      intensity maxima for 12.0 percent of 44b6 and 6.1 percent of 6bba.
+    instrument: biohubx evaluate mask-audit
+    evidence:
+      command: biohubx evaluate mask-audit --max-frames 0 --no-compare-maxpool
+      observed: artifacts/mask-audit.json, 199 datasets, 133,318 nodes, 1699 seconds
+      note: >-
+        This supersedes F-0020, whose 5,291 nodes came from sampling four frames
+        per dataset. The sampling excluded 128,027 nodes and nothing else; no
+        node was ever dropped for falling outside the grid. The correction
+        matters in one direction: the full population is harsher, and it removes
+        the last band that appeared usable.
+    validity:
+      scope: competition_corpus_and_supervision
+      holds_while: >-
+        the registered corpus is unchanged and the model grid stays (1, 4, 4).
+    superseded_by: null
+
+  - id: F-0022
+    claim: >-
+      The SCAR assumption that nnPU relies on is not supported by this corpus.
+      Across the 199 training datasets, annotation density correlates with the
+      median intensity percentile of the annotated cells at Pearson r = +0.354.
+      Labelling is therefore not independent of the feature the detector reads,
+      and the direction is that densely annotated movies carry brighter
+      annotations, not dimmer ones.
+    instrument: biohubx evaluate mask-audit
+    evidence:
+      command: biohubx evaluate mask-audit --max-frames 0 --no-compare-maxpool
+      observed: artifacts/mask-audit.json, selection_bias_probe, 199 datasets
+      note: >-
+        The probe cannot separate density from embryo. 6bba is both the denser
+        embryo and the one with brighter annotations at the median, 0.9883
+        against 0.9651, so the correlation may be an embryo effect rather than a
+        density effect. What it cannot be read as is evidence FOR SCAR. A
+        near-zero correlation would have been consistent with SCAR without
+        proving it; +0.354 is not even that. nnPU's unbiasedness result assumes
+        SCAR, so E03 may not claim an unbiased estimator, and the direction of
+        the residual bias is unmeasured.
+    validity:
+      scope: competition_corpus_and_supervision
+      holds_while: the registered corpus is unchanged.
     superseded_by: null

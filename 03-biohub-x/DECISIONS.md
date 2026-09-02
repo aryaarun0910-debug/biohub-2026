@@ -675,3 +675,34 @@ A finer grid is the one route that could bring a background class back. At
 (1, 4, 4) a cell centre can fall between sampled voxels; at full resolution it
 cannot. If a later experiment trains at a finer grid, [[F-0020]] must be
 re-measured there before any band is reconsidered.
+## D-0025 - nnPU is used without claiming it is unbiased
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+The positive-unlabelled objective [[D-0024]] adopted is unbiased only under
+SCAR: labelled positives must be selected completely at random from all
+positives. [[F-0022]] measured that assumption and it does not hold. Annotation
+density correlates with the brightness of the annotated cells at r = +0.354
+across the corpus, so labelling is not independent of the feature the detector
+reads.
+
+The estimator is kept, because the alternatives are worse. A negative class is
+falsified outright on both folds ([[F-0021]]). Estimating a per-dataset labelling
+propensity would need a model of how the annotators chose, which this project
+does not have and cannot validate. What changes is the claim, not the code:
+**E03 states nnPU as a bias-bounded choice, never as an unbiased one**, and the
+residual bias is an open risk carried into its results rather than a footnote.
+
+Two consequences are binding.
+
+E03's contract lists SCAR as an explicit assumption with its own falsifier, so a
+result that depends on it cannot be read as if it did not. The falsifier is
+recorded alongside the fold falsifier and is checked with it.
+
+The class prior is per dataset, from that dataset's own recorded cell estimate,
+and it is valid at every scale the pipeline uses ([[F-0021]]): 1.443e-4 to
+3.000e-3 per grid voxel, every dataset inside the open unit interval. A single
+corpus-wide prior would have been wrong by up to twentyfold on individual
+movies, and the per-dataset form is what keeps the misspecification bounded even
+where SCAR fails.
