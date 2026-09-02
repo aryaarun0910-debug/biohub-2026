@@ -188,13 +188,19 @@ def run_all(
     *,
     data_root: Any,
     interpreter: str,
+    expected: tuple[str, ...] = EXPECTED_STAGES,
+    needs_data: bool = True,
 ) -> PrePushReport:
     """Every check, cheapest first. Raises on the first failure, before any network call."""
     check_required_metadata(notebook)
     validate_notebook(notebook)
     converted = convert_notebook(notebook)
     stage_lines, stage_names, missing = exercise_bootstrap(
-        notebook, data_root=data_root, interpreter=interpreter
+        notebook,
+        data_root=data_root,
+        interpreter=interpreter,
+        expected=expected,
+        needs_data=needs_data,
     )
     return PrePushReport(
         nbformat_validated=True,
@@ -226,6 +232,8 @@ def exercise_bootstrap(
     *,
     data_root: Any,
     interpreter: str,
+    expected: tuple[str, ...] = EXPECTED_STAGES,
+    needs_data: bool = True,
 ) -> tuple[int, tuple[str, ...], tuple[str, ...]]:
     """Run the notebook's own code in a clean directory with no repository on the path.
 
@@ -252,7 +260,12 @@ def exercise_bootstrap(
         environment.pop("PYTHONPATH", None)
         environment["BIOHUBX_PACKAGE_ROOT"] = str(workdir / "package")
         environment["BIOHUBX_OUTPUT"] = str(workdir / "out")
-        environment["BIOHUB_DATA_ROOT"] = str(data_root)
+        if needs_data:
+            environment["BIOHUB_DATA_ROOT"] = str(data_root)
+        else:
+            # A diagnostic that can reach the corpus is not a diagnostic of a
+            # machine that cannot.
+            environment.pop("BIOHUB_DATA_ROOT", None)
         # -I isolates the interpreter: no user site, no cwd on sys.path, no
         # PYTHONPATH. If the notebook can still import biohubx, it is because it
         # extracted and verified it, which is exactly the claim under test.
@@ -271,7 +284,7 @@ def exercise_bootstrap(
         raise PrePushError(
             f"the notebook failed when run isolated from the repository (exit {completed.returncode}): {tail}"
         )
-    missing = missing_from_sequence(names)
+    missing = missing_from_sequence(names, expected)
     if missing:
         raise PrePushError(f"the isolated run never reached these stages: {list(missing)}")
     return len(lines), tuple(dict.fromkeys(names)), missing

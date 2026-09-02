@@ -47,6 +47,7 @@ from biohubx.artifacts import (
     verify_registry,
 )
 from biohubx.hashing import CANONICALIZATION_VERSION, DigestKind, NotTextError, digest_file
+from biohubx.packaging.audit import AUDIT_KERNEL
 
 app = typer.Typer(
     name="biohubx",
@@ -2236,6 +2237,195 @@ def package_kaggle(
     _write_manifest(command, {"report": "artifacts/kaggle-package.json", "fold": spec.fold.fold_id})
     heartbeat(command, "done", f"NOT PUSHED. push with: {push_command}")
     typer.echo(json.dumps(payload, sort_keys=True))
+
+
+@package_app.command("audit")
+def package_audit(
+    out: Annotated[
+        Path | None,
+        typer.Option("--out", help="Where to stage the audit. Defaults to artifacts/kaggle-audit."),
+    ] = None,
+    expect_kernel: Annotated[
+        str, typer.Option("--expect-kernel", help="Refuse unless the build targets exactly this kernel id.")
+    ] = AUDIT_KERNEL,
+    allow_dirty: Annotated[
+        bool,
+        typer.Option(
+            "--allow-dirty", help="Build from an uncommitted tree. The package records it and is unpushable."
+        ),
+    ] = False,
+) -> None:
+    """Stage a CPU-only diagnostic that measures the Kaggle runtime, and push nothing.
+
+    One traceback established that zarr is absent. It did not establish the
+    Python version, platform tag or ABI a wheel would have to match, and a
+    wheelhouse built on inference is a second wasted session waiting to happen.
+
+    The diagnostic reads no competition data, trains nothing, requests no
+    accelerator and imports no part of Biohub-X, so it runs on a bare image. It
+    goes through the same conversion and isolated-execution gate as the training
+    package before it is allowed to exist as a pushable artifact.
+    """
+    command = "package audit"
+    import shutil
+    import subprocess
+
+    from biohubx.packaging import prepush
+    from biohubx.packaging.audit import (
+        AUDIT_ID,
+        AUDIT_RUNTIME_CEILING_SECONDS,
+        EXPECTED_AUDIT_STAGES,
+        AuditError,
+        AuditSpec,
+        audit_kernel_metadata,
+        build_audit_notebook,
+    )
+    from biohubx.packaging.kaggle import forbidden_content
+    from biohubx.packaging.prepush import PrePushError
+
+    root_path = repository_root()
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root_path, capture_output=True, text=True, check=False
+    )
+    if revision.returncode != 0:
+        heartbeat(command, "refused", "cannot resolve the repository commit; a package must pin one")
+        raise typer.Exit(code=2)
+    commit = revision.stdout.strip()
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain"], cwd=root_path, capture_output=True, text=True, check=False
+    ).stdout.strip()
+    if dirty and not allow_dirty:
+        heartbeat(
+            command,
+            "refused",
+            "the working tree is dirty, so the commit this audit would pin does not describe "
+            "the bytes it ships; commit first, or pass --allow-dirty for an unpushable build",
+        )
+        raise typer.Exit(code=2)
+
+    spec = AuditSpec(
+        audit_id=AUDIT_ID,
+        commit=commit,
+        kernel=expect_kernel,
+        runtime_ceiling_seconds=AUDIT_RUNTIME_CEILING_SECONDS,
+    )
+    heartbeat(command, "start", f"audit={spec.audit_id} kernel={spec.kernel} commit={commit[:12]}")
+
+    try:
+        notebook = build_audit_notebook(spec)
+    except AuditError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    metadata = audit_kernel_metadata(kernel=spec.kernel)
+    if metadata["enable_gpu"] or metadata["enable_internet"]:
+        heartbeat(command, "refused", "the audit must be CPU only with internet disabled")
+        raise typer.Exit(code=2)
+    if any(metadata[key] for key in ("dataset_sources", "model_sources", "competition_sources")):
+        heartbeat(command, "refused", "the audit must attach no sources of any kind")
+        raise typer.Exit(code=2)
+
+    staging = out if out is not None else root_path / "artifacts/kaggle-audit"
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True)
+    atomic_write_text(staging / "run.ipynb", json.dumps(notebook, indent=1, sort_keys=True) + chr(10))
+    atomic_write_text(
+        staging / "kernel-metadata.json", json.dumps(metadata, indent=2, sort_keys=True) + chr(10)
+    )
+    atomic_write_text(
+        staging / "audit-spec.json", json.dumps(spec.to_dict(), indent=2, sort_keys=True) + chr(10)
+    )
+
+    offenders = forbidden_content(staging)
+    if offenders:
+        heartbeat(command, "refused", f"the audit would ship forbidden content: {offenders[:5]}")
+        raise typer.Exit(code=2)
+
+    heartbeat(command, "pre-push", "validating, converting and running isolated before any network action")
+    try:
+        gate = prepush.run_all(
+            notebook,
+            spec.to_dict(),
+            data_root=root_path,
+            interpreter=sys.executable,
+            expected=EXPECTED_AUDIT_STAGES,
+            needs_data=False,
+        )
+    except PrePushError as exc:
+        heartbeat(command, "refused", f"pre-push gate failed, nothing was sent: {exc}")
+        raise typer.Exit(code=2) from exc
+    heartbeat(
+        command,
+        "pre-push",
+        f"nbformat ok, nbconvert produced {gate.converted_bytes} bytes, "
+        f"{gate.stage_lines_seen} heartbeat lines across {len(gate.stage_names)} stages",
+    )
+
+    files = sorted(path for path in staging.rglob("*") if path.is_file())
+    total_bytes = sum(path.stat().st_size for path in files)
+    listing = {
+        str(path.relative_to(staging)).replace(chr(92), "/"): digest_file(path, DigestKind.RAW_ARTIFACT).token
+        for path in files
+    }
+    manifest_text = json.dumps(
+        {
+            "schema_version": 1,
+            "audit": spec.to_dict(),
+            "kernel_metadata": metadata,
+            "files": listing,
+            "file_count": len(files),
+            "total_bytes": total_bytes,
+            "contains_competition_bytes": False,
+            "contains_external_weights": False,
+            "imports_biohubx": False,
+            "repository_clean_at_build": not dirty,
+            "pushable": not dirty,
+        },
+        indent=2,
+        sort_keys=True,
+    )
+    atomic_write_text(staging / "AUDIT_MANIFEST.json", manifest_text + chr(10))
+    package_digest = digest_file(staging / "AUDIT_MANIFEST.json", DigestKind.CANONICAL_TEXT)
+
+    push_command = (
+        f"kaggle kernels push -p {staging.relative_to(root_path)}"
+        if staging.is_relative_to(root_path)
+        else f"kaggle kernels push -p {staging}"
+    )
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "audit": spec.to_dict(),
+        "package": {
+            "path": str(staging.relative_to(root_path)),
+            "manifest_digest": package_digest.token,
+            "file_count": len(files),
+            "total_bytes": total_bytes,
+            "push_command": push_command,
+            "pushed": False,
+        },
+        "kernel_metadata": metadata,
+        "pre_push_gate": gate.to_dict(),
+        "probes": list(prepush_closure()),
+    }
+    report = root_path / "artifacts/kaggle-audit.json"
+    atomic_write_text(report, json.dumps(payload, indent=2, sort_keys=True) + chr(10))
+    _write_manifest(command, {"report": "artifacts/kaggle-audit.json", "audit": spec.audit_id})
+    heartbeat(
+        command,
+        "staged",
+        f"files={len(files)} bytes={total_bytes} digest={package_digest.token[:52]}",
+    )
+    heartbeat(command, "done", f"NOT PUSHED. push with: {push_command}")
+    typer.echo(json.dumps(payload, sort_keys=True))
+
+
+def prepush_closure() -> tuple[str, ...]:
+    """The import names the audit probes, surfaced so the report lists them."""
+    from biohubx.packaging.audit import RUNTIME_CLOSURE
+
+    return RUNTIME_CLOSURE
 
 
 @data_app.command("fingerprint")
