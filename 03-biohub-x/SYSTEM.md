@@ -234,7 +234,7 @@ Implemented:
 - `biohubx official verify-source`
 - `biohubx evaluate fixture`
 - `biohubx data validate {--root PATH | --synthetic}`
-- `biohubx data fingerprint --root PATH [--dataset ID]`
+- `biohubx data fingerprint --root PATH [--dataset ID] [--plan]`
 - `biohubx infer synthetic [--seed N] [--noise F] [--annotated-fraction F]`
 - `biohubx evaluate slice [--graph PATH]`
 
@@ -256,6 +256,13 @@ inferred from a leaf directory's contents.
 content identity, by computing a `tree_sha256` for every dataset artifact. The
 two answer different questions and neither substitutes for the other: a correct
 shape says nothing about a flipped byte.
+
+`data fingerprint --plan` performs the same walk with the same refusals and reads
+nothing, so the cost of a large pass is known before committing to it and a
+layout or reparse problem surfaces in seconds rather than after minutes of
+reading. Its report states no identity, because it has not looked at the bytes.
+Every report names the selection it covers, so a single-dataset run is never
+read later as a claim about the whole root.
 
 Planned, absent until a consumer exists: `data make-splits`, `proposals infer`,
 `representation acquire`, `train`, `infer real`, `package kaggle`.

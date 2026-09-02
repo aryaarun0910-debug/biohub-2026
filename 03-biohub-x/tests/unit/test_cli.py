@@ -10,6 +10,7 @@ from typer.testing import CliRunner
 
 from biohubx import __version__
 from biohubx.cli import app, repository_root
+from biohubx.hashing import Digest
 
 runner = CliRunner()
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -218,3 +219,83 @@ def test_data_fingerprint_does_not_modify_the_data(tmp_path: Path) -> None:
     assert runner.invoke(app, ["data", "fingerprint", "--root", str(root)]).exit_code == 0
     after = sorted((p.as_posix(), p.stat().st_size if p.is_file() else -1) for p in root.rglob("*"))
     assert after == before
+
+
+def test_data_fingerprint_plan_measures_without_reading_any_file(tmp_path: Path) -> None:
+    """The plan pass must not read content, or it is not a cheap preview.
+
+    Sizing an 81 GiB pass is only useful if the sizing itself is quick, so this
+    asserts no file digest is taken rather than trusting the flag's name.
+    """
+    from biohubx import hashing
+
+    root = _official_root(tmp_path)
+    read: list[str] = []
+    original = hashing.raw_digest_file
+    monkeypatch = pytest.MonkeyPatch()
+
+    def record(path: Path) -> Digest:
+        read.append(path.as_posix())
+        return original(path)
+
+    monkeypatch.setattr(hashing, "raw_digest_file", record)
+    try:
+        result = runner.invoke(app, ["data", "fingerprint", "--root", str(root), "--plan"])
+    finally:
+        monkeypatch.undo()
+
+    assert result.exit_code == 0, result.output
+    assert read == [], "the plan pass read file contents"
+
+    report = json.loads((REPO_ROOT / "artifacts/data-fingerprint-plan.json").read_text(encoding="utf-8"))
+    assert report["status"] == "planned"
+    assert sum(int(entry["total_bytes"]) for entry in report["entries"]) > 0
+    # A plan states no identity: it has not looked at the bytes.
+    assert all("tree_digest" not in entry for entry in report["entries"])
+
+
+def test_the_plan_and_the_hash_agree_on_what_is_there(tmp_path: Path) -> None:
+    root = _official_root(tmp_path)
+    assert runner.invoke(app, ["data", "fingerprint", "--root", str(root), "--plan"]).exit_code == 0
+    planned = json.loads((REPO_ROOT / "artifacts/data-fingerprint-plan.json").read_text(encoding="utf-8"))
+    assert runner.invoke(app, ["data", "fingerprint", "--root", str(root)]).exit_code == 0
+    hashed = json.loads((REPO_ROOT / "artifacts/data-fingerprint.json").read_text(encoding="utf-8"))
+
+    def sizes(report: dict[str, object]) -> dict[str, int]:
+        entries = report["entries"]
+        assert isinstance(entries, list)
+        return {str(e["artifact"]): int(e["total_bytes"]) for e in entries}
+
+    assert sizes(planned) == sizes(hashed)
+
+
+def test_the_plan_refuses_the_same_things_the_hash_would(tmp_path: Path) -> None:
+    # A plan that succeeded where the real pass would fail would be worse than
+    # no plan, because it would license the expensive run.
+    (tmp_path / "loose.zarr").mkdir()
+    (tmp_path / "other.geff").mkdir()
+    assert runner.invoke(app, ["data", "fingerprint", "--root", str(tmp_path), "--plan"]).exit_code == 2
+
+
+def test_a_report_names_the_selection_it_covers(tmp_path: Path) -> None:
+    """A one-dataset run must not read later as a claim about the whole root."""
+    root = _official_root(tmp_path)
+    assert runner.invoke(app, ["data", "fingerprint", "--root", str(root), "--dataset", "d2"]).exit_code == 0
+    report = json.loads((REPO_ROOT / "artifacts/data-fingerprint.json").read_text(encoding="utf-8"))
+    assert report["selection"] == "d2"
+    assert report["datasets_selected"] == 1
+    assert report["datasets_available"] == 2
+
+    assert runner.invoke(app, ["data", "fingerprint", "--root", str(root)]).exit_code == 0
+    full = json.loads((REPO_ROOT / "artifacts/data-fingerprint.json").read_text(encoding="utf-8"))
+    assert full["selection"] == "all"
+    assert full["datasets_selected"] == full["datasets_available"] == 2
+
+
+def test_the_plan_report_does_not_overwrite_the_hash_report(tmp_path: Path) -> None:
+    root = _official_root(tmp_path)
+    assert runner.invoke(app, ["data", "fingerprint", "--root", str(root)]).exit_code == 0
+    assert runner.invoke(app, ["data", "fingerprint", "--root", str(root), "--plan"]).exit_code == 0
+    hashed = json.loads((REPO_ROOT / "artifacts/data-fingerprint.json").read_text(encoding="utf-8"))
+    assert hashed["status"] == "fingerprinted"
+    assert all("tree_digest" in entry for entry in hashed["entries"])

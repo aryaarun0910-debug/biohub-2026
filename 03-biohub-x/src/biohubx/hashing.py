@@ -405,6 +405,51 @@ def _relative_posix(root: Path, path: Path) -> str:
     return relative
 
 
+@dataclass(frozen=True, slots=True)
+class TreeShape:
+    """What a tree contains, without reading any of it.
+
+    The cheap half of a tree digest: the same walk, with the same refusal of
+    reparse points, but stat only. It exists so the cost of a hashing pass can
+    be known before committing to it, and so a layout or reparse problem
+    surfaces in seconds rather than after minutes of reading.
+    """
+
+    file_count: int
+    empty_directory_count: int
+    total_bytes: int
+
+
+def tree_shape(root: Path) -> TreeShape:
+    """Walk a tree and measure it without hashing anything.
+
+    Refuses exactly what :func:`tree_digest` refuses, so a plan that succeeds
+    means the subsequent digest will not fail on the tree's shape.
+    """
+    if not root.exists():
+        raise NotATreeError(f"tree root does not exist: {root}")
+    root_reparse = _reparse_kind(root)
+    if root_reparse is not None:
+        raise NotATreeError(f"tree root is a {root_reparse}: {root}")
+    if not root.is_dir():
+        raise NotATreeError(f"tree root is not a directory: {root}")
+
+    files, empty_directories = _walk_tree(root)
+    total = 0
+    for path in files:
+        try:
+            total += path.stat().st_size
+        except OSError as exc:
+            raise TreeNotQuiescentError(
+                f"{_relative_posix(root, path)} vanished while the tree was being measured"
+            ) from exc
+    return TreeShape(
+        file_count=len(files),
+        empty_directory_count=len(empty_directories),
+        total_bytes=total,
+    )
+
+
 def tree_digest(
     root: Path,
     *,

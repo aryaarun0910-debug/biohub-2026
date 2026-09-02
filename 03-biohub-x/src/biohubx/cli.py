@@ -23,6 +23,7 @@ import os
 import platform
 import sys
 import time
+from collections.abc import Callable
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -331,6 +332,29 @@ def data_validate(
     typer.echo(json.dumps(report, sort_keys=True))
 
 
+HEARTBEAT_INTERVAL_SECONDS = 15.0
+"""How often a long-running read reports progress."""
+
+
+def _periodic_progress(command: str, label: str) -> Callable[[int, int], None]:
+    """A progress hook that reports on elapsed time rather than file count.
+
+    A Zarr array here is chunked one timepoint per file, so an artifact holds on
+    the order of a hundred files. A count-based trigger would never fire during
+    a multi-minute read, and the command would look hung, which is the one thing
+    every command here promises not to do.
+    """
+    last = [time.monotonic()]
+
+    def progress(files: int, total_bytes: int) -> None:
+        now = time.monotonic()
+        if now - last[0] >= HEARTBEAT_INTERVAL_SECONDS:
+            last[0] = now
+            heartbeat(command, "hashing", f"{label} files={files} bytes={total_bytes}")
+
+    return progress
+
+
 SLICE_GRAPH_PATH = Path("artifacts/slice-graph.json")
 
 
@@ -451,6 +475,10 @@ def data_fingerprint(
         str | None,
         typer.Option("--dataset", help="Fingerprint one dataset id only. Repeat the command for more."),
     ] = None,
+    plan: Annotated[
+        bool,
+        typer.Option("--plan", help="Measure the work without hashing anything, and exit."),
+    ] = False,
 ) -> None:
     """Compute a typed tree identity for every dataset artifact under a root.
 
@@ -463,12 +491,17 @@ def data_fingerprint(
     and a competition slug is a mutable name rather than an identity, so neither
     can stand in for the content of the tree that experiments actually read.
 
+    ``--plan`` performs the same walk with the same refusals but reads nothing,
+    so the cost of the real pass is known before committing to it and a layout
+    or reparse problem surfaces in seconds rather than after minutes of reading.
+
     Writes a report whose entries are ready to register in
-    registry/artifacts.yaml. It never modifies the data.
+    registry/artifacts.yaml, naming the selection it covers so a partial run is
+    never mistaken for a complete one. It never modifies the data.
     """
     command_name = "data fingerprint"
     from biohubx.data.validation import validate_data_root
-    from biohubx.hashing import tree_digest
+    from biohubx.hashing import tree_digest, tree_shape
 
     env_root = os.environ.get("BIOHUB_DATA_ROOT")
     resolved = root if root is not None else (Path(env_root) if env_root else None)
@@ -476,7 +509,8 @@ def data_fingerprint(
         heartbeat(command_name, "refused", "provide --root or BIOHUB_DATA_ROOT")
         raise typer.Exit(code=2)
 
-    heartbeat(command_name, "start", f"root={resolved} dataset={dataset or 'all'}")
+    mode = "plan" if plan else "hash"
+    heartbeat(command_name, "start", f"root={resolved} dataset={dataset or 'all'} mode={mode}")
     try:
         manifests = validate_data_root(resolved)
     except (FileNotFoundError, OSError, ValueError) as exc:
@@ -497,14 +531,35 @@ def data_fingerprint(
         split_dir = resolved if manifest.relative_path == "." else resolved / manifest.relative_path
         for artifact in manifest.artifacts:
             path = split_dir / artifact.name
-            heartbeat(command_name, "hashing", f"{manifest.split}/{artifact.name}")
+            label = f"{manifest.split}/{artifact.name}"
 
-            def progress(files: int, total: int, name: str = artifact.name) -> None:
-                if files % 20000 == 0:
-                    heartbeat(command_name, "hashing", f"{name} files={files} bytes={total}")
+            if plan:
+                try:
+                    shape = tree_shape(path)
+                except (OSError, ValueError) as exc:
+                    heartbeat(command_name, "refused", f"{artifact.name}: {exc}")
+                    raise typer.Exit(code=2) from exc
+                hashed_bytes += shape.total_bytes
+                entries.append(
+                    {
+                        "dataset_id": manifest.dataset_id,
+                        "split": manifest.split,
+                        "artifact": artifact.name,
+                        "file_count": shape.file_count,
+                        "empty_directory_count": shape.empty_directory_count,
+                        "total_bytes": shape.total_bytes,
+                    }
+                )
+                heartbeat(
+                    command_name,
+                    "measured",
+                    f"{label} files={shape.file_count} bytes={shape.total_bytes}",
+                )
+                continue
 
+            heartbeat(command_name, "hashing", label)
             try:
-                tree = tree_digest(path, on_file=progress)
+                tree = tree_digest(path, on_file=_periodic_progress(command_name, label))
             except (OSError, ValueError) as exc:
                 heartbeat(command_name, "refused", f"{artifact.name}: {exc}")
                 raise typer.Exit(code=2) from exc
@@ -533,21 +588,32 @@ def data_fingerprint(
     report: dict[str, object] = {
         "schema_version": 1,
         "mode": "real-read-only",
-        "status": "fingerprinted",
+        "status": "planned" if plan else "fingerprinted",
+        # Naming the selection is what stops a one-dataset run being read later
+        # as a statement about the whole root.
+        "selection": dataset or "all",
+        "datasets_selected": len(selected),
+        "datasets_available": len(manifests),
         "entries": entries,
     }
-    output = repository_root() / "artifacts/data-fingerprint.json"
+    name = "data-fingerprint-plan.json" if plan else "data-fingerprint.json"
+    output = repository_root() / "artifacts" / name
     atomic_write_text(output, json.dumps(report, indent=2, sort_keys=True) + "\n")
     _write_manifest(
-        command_name,
+        f"{command_name} {mode}",
         {
             "root": str(resolved),
+            "selection": dataset or "all",
             "entries": len(entries),
             "total_bytes": hashed_bytes,
-            "report": "artifacts/data-fingerprint.json",
+            "report": f"artifacts/{name}",
         },
     )
-    heartbeat(command_name, "done", f"entries={len(entries)} report=artifacts/data-fingerprint.json")
+    heartbeat(
+        command_name,
+        "done",
+        f"mode={mode} entries={len(entries)} bytes={hashed_bytes} report=artifacts/{name}",
+    )
     typer.echo(json.dumps(report, sort_keys=True))
 
 
