@@ -53,3 +53,85 @@ findings:
         CANONICALIZATION_VERSION is v1. Bumping it invalidates every recorded
         canonical digest and supersedes this finding.
     superseded_by: null
+
+  - id: F-0003
+    claim: >-
+      Under the pinned official scorer, a predicted node that matches no
+      ground-truth node adds no edge false positive. Adding one isolated,
+      unmatched node to a perfect two-node prediction left edge TP, FP, FN at
+      1, 0, 0 and the raw edge Jaccard at 1.0. An edge between two mutually
+      unmatched predicted nodes is likewise uncharged. The exemption ends at
+      the annotated cells: an edge whose source matches a ground-truth node
+      that has a ground-truth successor, but which points elsewhere, was
+      charged as one false positive.
+    instrument: tests/contracts/test_official_scorer_behaviour.py
+    evidence:
+      command: uv run pytest tests/contracts/test_official_scorer_behaviour.py
+      observed: 11 passed
+      note: >-
+        This is edge accounting only. The same unmatched node still enters the
+        node-count adjustment: holding the estimated total at 2, it raised
+        num_pred_nodes from 2 to 3, total_node_ratio from 0.0 to 0.5, and
+        lowered the adjusted edge Jaccard from 1.0 to 0.95 while the raw
+        Jaccard did not move. Free of edge penalty is not free of consequence.
+    validity:
+      scope: official_metric_behaviour
+      holds_while: >-
+        registry/official_source.yaml pins commit
+        075fc5f5a52d11077f9dc2b074644618f26939e2 and its digests verify. Moving
+        the pin supersedes this finding until the instrument is re-run.
+    superseded_by: null
+
+  - id: F-0004
+    claim: >-
+      The official node-count adjustment multiplies the edge Jaccard by
+      1 - 0.1 * (N_pred - N_total) / N_total and is clamped only at zero, so the
+      multiplier exceeds one whenever fewer nodes are predicted than the
+      estimated total. With 2 predicted nodes, a declared estimated total of 20
+      and a raw edge Jaccard of 1.0, total_node_ratio was -0.9 and the adjusted
+      edge Jaccard was 1.09.
+    instrument: tests/contracts/test_official_scorer_behaviour.py
+    evidence:
+      command: uv run pytest tests/contracts/test_official_scorer_behaviour.py
+      observed: 11 passed
+      note: >-
+        Demonstrating an adjusted Jaccard above one requires an estimated total
+        larger than the annotated ground-truth count. On a complete synthetic
+        ground truth the two coincide, total_node_ratio is 0.0 and the adjusted
+        Jaccard equals the raw one, which is why the estimate is a required,
+        provenance-tagged argument rather than a default. Whether the real
+        datasets are sparse enough for this to be exploitable is not measured
+        here and needs competition data.
+    validity:
+      scope: official_metric_behaviour
+      holds_while: >-
+        the official source pin holds and ADJUSTMENT_ALPHA remains 0.1 in the
+        vendored implementation.
+    superseded_by: null
+
+  - id: F-0005
+    claim: >-
+      The two boundaries around a multi-frame edge behave differently and were
+      measured separately. The Biohub-X lineage contract refuses an edge that
+      does not advance exactly one frame at construction, so such an edge cannot
+      reach evaluation. The pinned official scorer, called directly on a graph
+      built beneath that contract, drops a frame-skipping edge instead of
+      charging it: a prediction whose only edge ran from frame 0 to frame 2
+      produced edge TP 0, FP 0 and FN 2 against a ground truth of two
+      consecutive edges.
+    instrument: tests/contracts/test_official_scorer_behaviour.py
+    evidence:
+      command: uv run pytest tests/contracts/test_official_scorer_behaviour.py
+      observed: 11 passed
+      note: >-
+        The official behaviour is silence rather than penalty, which is the
+        reason the contract refuses rather than relies on it: an illegal edge
+        would neither be rewarded nor charged, while the annotated edge it
+        failed to reproduce still counts against the system. Backward and
+        same-frame edges are refused by the same contract rule.
+    validity:
+      scope: official_metric_behaviour_and_lineage_contract
+      holds_while: >-
+        the official source pin holds and LineageGraph keeps its one-frame edge
+        rule.
+    superseded_by: null
