@@ -81,6 +81,7 @@ def run_fold(spec_dict: dict[str, Any], *, data_root: Path | None = None) -> dic
         accelerator=spec_dict["accelerator"],
         expected_gpu_count=spec_dict["expected_gpu_count"],
         smoke=spec_dict["smoke"],
+        expected_device_substring=spec_dict.get("expected_device_substring", "T4"),
         max_movies=spec_dict["max_movies"],
         runtime_ceiling_seconds=spec_dict["runtime_ceiling_seconds"],
     )
@@ -90,7 +91,11 @@ def run_fold(spec_dict: dict[str, Any], *, data_root: Path | None = None) -> dic
 
     gpu_count = torch.cuda.device_count()
     device = "cuda" if gpu_count else "cpu"
-    stage("environment", f"torch={torch.__version__} gpus={gpu_count} device={device}")
+    device_name = torch.cuda.get_device_name(0) if gpu_count else "cpu"
+    stage(
+        "environment",
+        f"torch={torch.__version__} gpus={gpu_count} device={device} name={device_name!r}",
+    )
 
     root = data_root or Path(
         os.environ.get(
@@ -162,6 +167,7 @@ def run_fold(spec_dict: dict[str, Any], *, data_root: Path | None = None) -> dic
         reachable_paths=reachable,
         opened_paths=opened,
         gpu_count=gpu_count if not spec.smoke else spec.expected_gpu_count,
+        device_name=device_name if gpu_count else spec.expected_device_substring,
     )
     for line in report["failures"]:
         stage("guard-failed", line)

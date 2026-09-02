@@ -324,6 +324,44 @@ experiments:
       slug and pushing creates a new version rather than a new kernel. Attempt
       identity lives in this registry, not in the remote name, which is why the
       two must not share a record id.
-    status_pending: >-
-      No status key, because a status is a result and nothing has run. Attempt 2
-      has not been pushed and is not authorised.
+    status: invalid
+    immutable: true
+    outcome: >-
+      Pushed once as kernel version 2 and ran. The bootstrap worked exactly as
+      designed: the embedded payload verified against its recorded digest, 44
+      files extracted to /kaggle/working/biohubx-package, and biohubx imported
+      from that verified tree. Nine of the fifteen stages appeared, through
+      bootstrap-verify, bootstrap-extract, bootstrap-import, start, pinned,
+      environment and inputs. It then died on `import zarr`.
+      ModuleNotFoundError. The Kaggle image does not carry zarr and the kernel
+      runs with internet disabled, so nothing could install it. No epoch ran, no
+      risk was computed, no checkpoint or result manifest exists.
+    status_reasoning: >-
+      invalid rather than killed, for the same reason as attempt 1: the
+      hypothesis was never tested. What differs is where it stopped. Attempt 1
+      died before executing a line; attempt 2 executed, verified its own payload
+      and reached the data reader. The packaging problem is solved and an
+      environment problem is now visible underneath it.
+    retrieved:
+      kernel_log: artifacts/e03-smoke-02/kernel.log
+      kernel_log_digest: raw_artifact_sha256:sha256:056b2c28279adf10d67e64d7a299e9ca0f159e27a7ac8d5c16e5bdb801ce1ab1
+      result_manifest: not produced
+      checkpoint: not produced
+      extracted_payload_digest_returned_by_the_kernel: raw_artifact_sha256:sha256:c24db880462b202943669e459e0f2d1fb322e5e7223e7165a64b3a8d01b8acf9
+      round_trip: >-
+        The kernel returned the tree it had extracted, and re-archiving it here
+        reproduces the embedded digest exactly. The bootstrap is verified end to
+        end by evidence from the remote machine, not by local simulation.
+    deviations_from_authorisation:
+      - >-
+        The authorisation named one Kaggle T4. Kaggle allocated a P100, shown in
+        the kernel UI as "Version #2 with GPU P100". kernel-metadata.json
+        requested accelerator nvidiaTeslaT4 and that did not take effect. The
+        packaged guard checks torch.cuda.device_count(), which was 1 and passed,
+        and never checked the device model, so the run proceeded on hardware
+        nobody approved. The guard gap is mine; the allocation is Kaggle's.
+        Nothing about the failure depends on which GPU it was, since the run died
+        before any tensor work, but the scope was still exceeded.
+    blocks_further_attempts_until:
+      - a dependency strategy is chosen for zarr and the rest of the stack
+      - the GPU-model guard exists, so an unapproved accelerator refuses rather than proceeds

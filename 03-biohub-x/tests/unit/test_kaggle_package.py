@@ -39,6 +39,7 @@ SPEC = PackageSpec(
     learning_rate=1e-4,
     accelerator="nvidiaTeslaT4",
     expected_gpu_count=1,
+    expected_device_substring="T4",
     smoke=True,
     max_movies=2,
     runtime_ceiling_seconds=2400,
@@ -59,6 +60,7 @@ def report(**overrides: Any) -> dict[str, Any]:
         "reachable_paths": ["/kaggle/input/competitions/x/train", "/kaggle/input/competitions/x/test"],
         "opened_paths": ["/kaggle/input/competitions/x/train/44b6_a.zarr"],
         "gpu_count": 1,
+        "device_name": "Tesla T4",
     }
     kwargs.update(overrides)
     return guard_report(SPEC, **kwargs)
@@ -362,3 +364,17 @@ def test_the_expected_stage_sequence_is_checked_as_a_subsequence() -> None:
     without_done = [name for name in complete if name != "done"]
     assert "done" in prepush.missing_from_sequence(without_done)
     assert prepush.missing_from_sequence(list(reversed(complete)))
+
+
+def test_an_unapproved_gpu_model_is_refused() -> None:
+    """Counting devices is not checking hardware.
+
+    Attempt 2 was authorised for a T4, Kaggle allocated a P100, device_count was
+    1, and the count guard passed while the run proceeded on hardware nobody
+    approved.
+    """
+    assert report(device_name="Tesla T4")["passed"]
+
+    wrong = report(device_name="Tesla P100-PCIE-16GB")
+    assert not wrong["passed"]
+    assert any("did not take effect" in f for f in wrong["failures"])

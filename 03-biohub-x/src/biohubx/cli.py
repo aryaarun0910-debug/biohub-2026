@@ -1962,6 +1962,10 @@ def package_kaggle(
     root: Annotated[
         Path | None, typer.Option("--root", help="Competition data root, for the pre-push gate.")
     ] = None,
+    expect_device: Annotated[
+        str,
+        typer.Option("--expect-device", help="Substring the allocated GPU name must contain."),
+    ] = "T4",
     expect_kernel: Annotated[
         str | None,
         typer.Option("--expect-kernel", help="Refuse unless the build would create exactly this kernel id."),
@@ -2039,6 +2043,7 @@ def package_kaggle(
         learning_rate=learning_rate,
         accelerator="nvidiaTeslaT4",
         expected_gpu_count=gpus,
+        expected_device_substring=expect_device,
         smoke=True,
         max_movies=max_movies or None,
         runtime_ceiling_seconds=runtime_ceiling,

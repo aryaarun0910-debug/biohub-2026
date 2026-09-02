@@ -777,3 +777,37 @@ the notebook died before executing a line, and it was found locally afterwards
 rather than by spending a second session. An earlier revision of this record said
 two, which overstated the cost and would have made the history unreadable later.
 The distinction matters: one assumption was paid for and one was caught.
+
+## D-0028 - The Kaggle image is an input, and it was never checked
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+E03-SMOKE-02 ran. The bootstrap worked exactly as designed: the payload verified
+against its recorded digest, extracted, and imported from the verified tree, and
+the kernel returned that tree so the round trip could be confirmed here rather
+than assumed. Then it died on `import zarr`.
+
+The Kaggle image does not carry zarr, and the kernel runs with internet disabled
+by design, so nothing could install it. The reference notebook shipped 322 MB of
+offline wheels for exactly this reason, and this repository looked at that list
+and recorded that a local run "does not need" them. That was true of a local run
+and irrelevant to a Kaggle one.
+
+**The environment a package runs in is an input, and inputs get verified.** The
+pre-push gate checks the notebook and the bootstrap against this machine, which
+has every dependency installed, so it cannot see a gap that only exists over
+there. Nothing in the gate models the target image at all.
+
+The same run exceeded its authorised scope in a second, unrelated way. It was
+approved for one T4; Kaggle allocated a P100. `kernel-metadata.json` requested
+`nvidiaTeslaT4` and that did not take effect. The packaged guard checked
+`torch.cuda.device_count()`, which was 1 and passed, and never looked at the
+device model. Counting devices is not checking hardware. The guard now compares
+`torch.cuda.get_device_name(0)` against an expected substring and refuses
+otherwise, and the run prints the name it found so a mismatch is visible in the
+log rather than in a screenshot afterwards.
+
+Both failures share a shape worth naming: a check that looks adjacent to the
+thing that matters. Device count next to device model, local imports next to
+remote imports. Neither is a substitute for the other.

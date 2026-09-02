@@ -37,20 +37,30 @@ def test_the_failed_attempt_keeps_its_own_row_and_its_outcome() -> None:
     assert "never executed" in entry["outcome"] or "before executing" in entry["outcome"]
 
 
-def test_the_retry_is_a_separate_row_with_no_status_until_it_runs() -> None:
+def test_the_retry_keeps_its_own_row_and_its_own_outcome() -> None:
+    """Both attempts have now run and failed. Neither may absorb the other."""
     registry = experiments()
     assert RETRY in registry, "the retry must have its own identity"
     retry = registry[RETRY]
     assert retry["attempt"] == 2
-    assert "status" not in retry, "a status is a result; the retry has not run"
     assert retry["id"] != registry[FIRST_ATTEMPT]["id"]
+    assert retry["immutable"] is True
+    assert retry["status"] == "invalid"
+    # Same verdict, different reason. Collapsing them would lose the only thing
+    # the second attempt established: the packaging problem is solved.
+    assert "zarr" in retry["outcome"]
+    assert "zarr" not in registry[FIRST_ATTEMPT]["outcome"]
 
 
 def test_the_two_attempts_share_a_kernel_slug_and_nothing_else() -> None:
     """The remote name is not an identity. Two attempts, one slug, two records."""
     registry = experiments()
     assert registry[RETRY]["kernel"] == "aryaarun07/biohub-x-e03-fold-44b6"
-    assert registry[FIRST_ATTEMPT].get("status") != registry[RETRY].get("status")
+    first, second = registry[FIRST_ATTEMPT], registry[RETRY]
+    assert first["retrieved"]["kernel_log"] != second["retrieved"]["kernel_log"]
+    assert first["retrieved"]["kernel_log_digest"] != second["retrieved"]["kernel_log_digest"], (
+        "two runs cannot share one piece of evidence"
+    )
 
 
 def test_the_registered_log_of_the_failed_attempt_still_matches_its_bytes() -> None:
@@ -65,10 +75,19 @@ def test_the_registered_log_of_the_failed_attempt_still_matches_its_bytes() -> N
     assert actual == RECORDED_LOG_DIGEST, "the registered log no longer matches the file"
 
 
-def test_the_failed_attempt_produced_no_checkpoint_to_claim() -> None:
-    entry = experiments()[FIRST_ATTEMPT]
-    assert entry["retrieved"]["checkpoint"] == "not produced"
-    assert entry["retrieved"]["result_manifest"] == "not produced"
+def test_neither_attempt_claims_a_checkpoint_it_did_not_produce() -> None:
+    for name in (FIRST_ATTEMPT, RETRY):
+        retrieved = experiments()[name]["retrieved"]
+        assert retrieved["checkpoint"] == "not produced", name
+        assert retrieved["result_manifest"] == "not produced", name
+
+
+def test_the_second_attempt_proved_its_bootstrap_against_remote_evidence() -> None:
+    """The one thing attempt 2 did establish, kept where it cannot be lost."""
+    retrieved = experiments()[RETRY]["retrieved"]
+    assert retrieved["extracted_payload_digest_returned_by_the_kernel"] == (
+        "raw_artifact_sha256:sha256:c24db880462b202943669e459e0f2d1fb322e5e7223e7165a64b3a8d01b8acf9"
+    )
 
 
 def test_the_decision_record_states_one_lost_run_not_two() -> None:

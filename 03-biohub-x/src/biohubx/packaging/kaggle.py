@@ -94,6 +94,7 @@ class PackageSpec:
     learning_rate: float
     accelerator: str
     expected_gpu_count: int
+    expected_device_substring: str
     smoke: bool
     max_movies: int | None
     runtime_ceiling_seconds: int
@@ -109,6 +110,7 @@ class PackageSpec:
             "learning_rate": self.learning_rate,
             "accelerator": self.accelerator,
             "expected_gpu_count": self.expected_gpu_count,
+            "expected_device_substring": self.expected_device_substring,
             "smoke": self.smoke,
             "max_movies": self.max_movies,
             "runtime_ceiling_seconds": self.runtime_ceiling_seconds,
@@ -181,6 +183,7 @@ def guard_report(
     reachable_paths: list[str],
     opened_paths: list[str],
     gpu_count: int,
+    device_name: str = "",
 ) -> dict[str, Any]:
     """Run every guard and report each one, refusing on the first real failure.
 
@@ -238,6 +241,14 @@ def guard_report(
         failures.append(
             f"requested {spec.expected_gpu_count} GPU(s) and found {gpu_count}; "
             "the run would not cost what was approved"
+        )
+    # Counting devices is not checking hardware. Attempt 2 was authorised for a
+    # T4, Kaggle allocated a P100, device_count was 1, and the count guard passed
+    # while the run proceeded on hardware nobody approved.
+    if gpu_count and spec.expected_device_substring not in device_name:
+        failures.append(
+            f"approved hardware was {spec.expected_device_substring!r} and this machine reports "
+            f"{device_name!r}; the accelerator request did not take effect"
         )
 
     return {
