@@ -101,7 +101,18 @@ class ArtifactShape(BaseModel):
 
 
 class ArtifactProvenance(BaseModel):
-    """Where an artifact came from. Absent provenance is a hard failure."""
+    """Where an artifact came from, and whether anyone has checked the terms.
+
+    Absent provenance is a hard failure. So is a clearance with no evidence: see
+    the validator below. Licence, access restrictions and eligibility are three
+    separate questions and are recorded in three separate fields, because a
+    permissive licence on the bytes says nothing about who is allowed to hold
+    them or about whether using them is within a competition's rules.
+
+    None of this is established by hashing. Byte identity answers what the data
+    is; clearance answers whether it may be used, and the two are recorded
+    independently so that neither can be mistaken for the other.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -113,9 +124,53 @@ class ArtifactProvenance(BaseModel):
     source_digest: DigestToken | None = None
     code_license: str | None = None
     weight_license: str | None = None
+    data_license: str | None = None
+    """Terms on the data itself. For a dataset this is the licence that matters;
+    neither a code licence nor a weight licence is a substitute for it."""
+
+    access_restrictions: str | None = None
+    """What the holder may not do, independently of the licence.
+
+    Competition data can be permissively licensed and still carry a rule against
+    redistributing it to non-participants. A licence field alone would record
+    the first and silently lose the second.
+    """
+
     training_data: str | None = None
     competition_eligible: bool | None = None
+    reviewed_by: str | None = None
+    reviewed_utc: datetime | None = None
     note: str | None = None
+
+    @model_validator(mode="after")
+    def _clearance_needs_evidence(self) -> ArtifactProvenance:
+        """A cleared status must name what was checked.
+
+        Without this the status is decorative: anything could be marked cleared
+        with no licence, no restrictions and no eligibility decision recorded,
+        and a later reader would have no way to tell a real review from a
+        forgotten default.
+        """
+        if self.status is not ProvenanceStatus.EXTERNAL_CLEARED:
+            return self
+        missing: list[str] = []
+        if not self.source_url:
+            missing.append("source_url")
+        if not (self.code_license or self.weight_license or self.data_license):
+            missing.append("a licence (code_license, weight_license or data_license)")
+        if not self.access_restrictions:
+            missing.append("access_restrictions")
+        if self.competition_eligible is None:
+            missing.append("competition_eligible")
+        if not self.reviewed_by:
+            missing.append("reviewed_by")
+        if missing:
+            raise ValueError(
+                "external_cleared asserts that someone checked the terms, so it requires "
+                f"the evidence of that check. Missing: {missing}. Use external_uncleared "
+                "until the review has actually happened"
+            )
+        return self
 
 
 class ArtifactRecord(BaseModel):

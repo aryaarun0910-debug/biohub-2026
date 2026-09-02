@@ -266,6 +266,15 @@ every dataset.
 atomically, so no digest is ever retyped. It is idempotent and refuses an id
 that already records a different identity, writing nothing.
 
+Identity and clearance are separate. Fingerprinting and registration always
+record `external_uncleared`, because they read bytes and check no terms.
+`external_cleared` is entered separately by a person and requires the evidence of
+a real review: a source, a licence, the access restrictions, an explicit
+eligibility decision and a named reviewer. Licence, restrictions and eligibility
+are three fields because they are three facts: data can be permissively licensed
+and still carry a rule against passing it on, and neither settles whether a
+competition allows its use. A recorded clearance survives re-registration.
+
 `data validate` establishes layout integrity only. `data fingerprint` establishes
 content identity, by computing a `tree_sha256` for every dataset artifact. The
 two answer different questions and neither substitutes for the other: a correct

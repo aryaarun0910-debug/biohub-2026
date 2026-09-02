@@ -355,3 +355,38 @@ whether that is a re-download or a problem.
 Registration records `external_uncleared`. Fingerprinting establishes identity,
 not licence or competition eligibility, and the record must not imply a review
 nobody has done.
+
+---
+
+## D-0014 - Clearance is a separate act from identity, and must name its evidence
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+Byte identity answers what the data is. Clearance answers whether it may be
+used. Nothing about a digest establishes the second, so the two are recorded
+independently and neither can be mistaken for the other.
+
+Fingerprinting and registration always record `external_uncleared`. They read
+bytes; they check no terms. A cleared status is entered separately, by a person,
+after an actual review.
+
+`external_cleared` now requires the evidence of that review: a source, a licence,
+the access restrictions, an explicit eligibility decision, and the name of who
+reviewed it. Without this the status was decorative, and anything could be marked
+cleared with every terms field empty. A later reader had no way to tell a real
+review from a forgotten default.
+
+**Licence, access restrictions and eligibility are three separate fields because
+they are three separate facts.** Competition data can be permissively licensed
+and still carry a rule against redistributing it to non-participants, and neither
+of those says whether a competition's own rules allow a particular use. A single
+licence field would record the first and silently lose the other two.
+`data_license` exists because for a dataset neither a code licence nor a weight
+licence is the licence that matters.
+
+**A recorded clearance survives re-registration.** A fingerprint always reports
+`external_uncleared`, so merging one into a record that had been cleared would
+erase a completed review during a routine re-run. Registration leaves an
+unchanged artifact alone, and a test now holds that property rather than leaving
+it to be an accident of how the comparison happens to be written.
