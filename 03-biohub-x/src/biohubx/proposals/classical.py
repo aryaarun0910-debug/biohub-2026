@@ -9,7 +9,8 @@ Suppression happens in micrometres, not voxels. On this grid a z voxel is four
 times a y or x voxel, so a voxel-radius neighbourhood would suppress four times
 too aggressively along z and let duplicates through in the plane.
 
-Consumer: ``biohubx infer synthetic``.
+Consumers: ``biohubx infer synthetic``, and ``biohubx.proposals.peaks`` for the
+suppression it shares.
 """
 
 from __future__ import annotations
@@ -53,8 +54,11 @@ def detect_instances(
     instances: list[CandidateInstance] = []
     next_id = 0
     for frame in range(volume.shape[0]):
-        for centre, peak in _suppressed_maxima(
-            volume[frame], threshold=threshold, radius_um=suppression_radius_um, scale=scale
+        for centre, peak in suppressed_maxima(
+            volume[frame],
+            threshold=threshold,
+            radius_um=suppression_radius_um,
+            spacing_um=scale.values,
         ):
             instances.append(
                 CandidateInstance.from_voxel(
@@ -73,14 +77,24 @@ def detect_instances(
     return InstanceSet(dataset=dataset, instances=tuple(instances))
 
 
-def _suppressed_maxima(
+def suppressed_maxima(
     frame: np.ndarray,
     *,
     threshold: float,
     radius_um: float,
-    scale: VoxelScaleZYX,
+    spacing_um: tuple[float, float, float],
 ) -> list[tuple[tuple[float, float, float], float]]:
-    """Greedy physical-radius suppression over voxels above the threshold."""
+    """Greedy physical-radius suppression over voxels above the threshold.
+
+    Takes a spacing rather than a :class:`VoxelScaleZYX` because it suppresses on
+    whatever grid it is handed, and a learned detector's strided grid is not the
+    official voxel grid. On this data the reference's (1, 4, 4) striding makes
+    that grid isotropic at 1.625 um, which the coordinate contract refuses to
+    represent, and rightly: that contract exists to stop an isotropic scale being
+    substituted for the anisotropic official one. Here the isotropy is a real
+    property of a derived grid, not a substitution, so the spacing travels as
+    plain micrometres and the contract keeps guarding what it was written for.
+    """
     above = np.argwhere(frame >= threshold)
     if above.size == 0:
         return []
@@ -90,7 +104,7 @@ def _suppressed_maxima(
     # not depend on the order argwhere happened to return.
     order = np.lexsort((above[:, 2], above[:, 1], above[:, 0], -values))
 
-    spacing = np.array(scale.values, dtype=np.float64)
+    spacing = np.array(spacing_um, dtype=np.float64)
     accepted_physical: list[np.ndarray] = []
     accepted: list[tuple[tuple[float, float, float], float]] = []
     for index in order:

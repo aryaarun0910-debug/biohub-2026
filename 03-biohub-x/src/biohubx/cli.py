@@ -59,11 +59,13 @@ official_app = typer.Typer(name="official", help="Pinned official competition so
 evaluate_app = typer.Typer(name="evaluate", help="Authoritative metric calibration.", no_args_is_help=True)
 data_app = typer.Typer(name="data", help="Read-only dataset validation.", no_args_is_help=True)
 infer_app = typer.Typer(name="infer", help="Emit a lineage graph.", no_args_is_help=True)
+train_app = typer.Typer(name="train", help="Train a Biohub-X model.", no_args_is_help=True)
 app.add_typer(artifacts_app)
 app.add_typer(official_app)
 app.add_typer(evaluate_app)
 app.add_typer(data_app)
 app.add_typer(infer_app)
+app.add_typer(train_app)
 
 
 def repository_root() -> Path:
@@ -1216,6 +1218,284 @@ def infer_reference(
         f"above_threshold={sum(proposals_per_frame)} in {real_seconds:.2f}s",
     )
     heartbeat(command, "done", "report=artifacts/reference-smoke.json")
+    typer.echo(json.dumps(payload, sort_keys=True))
+
+
+@train_app.command("preflight")
+def train_preflight(
+    dataset: Annotated[
+        str, typer.Option("--dataset", help="Registered competition dataset id.")
+    ] = "6bba_2540cd90",
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    split: Annotated[str, typer.Option("--split", help="Official split holding the dataset.")] = "train",
+    first_frame: Annotated[int, typer.Option("--first-frame", help="First frame of the window.")] = 0,
+    frames: Annotated[int, typer.Option("--frames", help="Number of frames in the window.")] = 12,
+    crop_z: Annotated[str, typer.Option("--crop-z", help="Half-open voxel range start:stop.")] = "0:32",
+    crop_y: Annotated[str, typer.Option("--crop-y", help="Half-open voxel range start:stop.")] = "128:256",
+    crop_x: Annotated[str, typer.Option("--crop-x", help="Half-open voxel range start:stop.")] = "128:256",
+    seed: Annotated[int, typer.Option("--seed", help="Deterministic initialisation seed.")] = 0,
+    ignore_quantile: Annotated[
+        float, typer.Option("--ignore-quantile", help="Intensity quantile above which voxels are ignored.")
+    ] = 0.90,
+    peak_quantile: Annotated[
+        float,
+        typer.Option(
+            "--peak-quantile",
+            help="Heatmap quantile used as the peak threshold; an untrained detector is uncalibrated.",
+        ),
+    ] = 0.999,
+    learning_rate: Annotated[float, typer.Option("--learning-rate", help="Optimizer step size.")] = 1e-4,
+) -> None:
+    """Prove the E03 training loop runs end to end on CPU before any GPU is asked for.
+
+    Ten stages, each of which has failed silently in someone's pipeline before:
+    forward, masked loss, backward, optimizer step, atomic checkpoint, strict
+    reload, bit-identical output after reload, peak extraction, suppression, and
+    a legal proposal graph.
+
+    The detector starts from deterministic random initialisation. No quarantined
+    checkpoint initialises, supervises, selects or tunes it (D-0021, D-0022). The
+    architecture is the vendored CC0 definition; the weights are Biohub-X's own
+    and begin as noise.
+
+    integration_only. CPU only, one tiny window, no fold, no promotion.
+    """
+    command = "train preflight"
+    import numpy as np
+    import torch
+
+    from biohubx.data.competition import (
+        CompetitionLayoutError,
+        WindowSelection,
+        competition_root,
+        load_window,
+    )
+    from biohubx.evaluation.official_metric import UnscorablePredictionError
+    from biohubx.proposals.peaks import HeatmapProposalError, instances_from_heatmap
+    from biohubx.reference.architecture import REFERENCE_DOWNSAMPLE, ReferenceEdgeModel, ReferenceSpec
+    from biohubx.tracking.pipeline import SliceConfig, run_chain
+    from biohubx.training.targets import (
+        TargetConstructionError,
+        build_detection_target,
+        masked_detection_loss,
+    )
+
+    def span(text: str, name: str) -> tuple[int, int]:
+        parts = text.split(":")
+        if len(parts) != 2:
+            heartbeat(command, "refused", f"{name} must be start:stop, got {text!r}")
+            raise typer.Exit(code=2)
+        return int(parts[0]), int(parts[1])
+
+    z0, z1 = span(crop_z, "--crop-z")
+    y0, y1 = span(crop_y, "--crop-y")
+    x0, x1 = span(crop_x, "--crop-x")
+    selection = WindowSelection(
+        dataset_id=dataset,
+        first_frame=first_frame,
+        frames=frames,
+        z_start=z0,
+        z_stop=z1,
+        y_start=y0,
+        y_stop=y1,
+        x_start=x0,
+        x_stop=x1,
+    )
+    heartbeat(command, "start", f"dataset={dataset} seed={seed} ignore_quantile={ignore_quantile}")
+    started = time.perf_counter()
+
+    try:
+        window = load_window(competition_root(root), selection, split=split)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    try:
+        target = build_detection_target(
+            window.volume,
+            window.annotated,
+            downsample=REFERENCE_DOWNSAMPLE,
+            ignore_quantile=ignore_quantile,
+        )
+    except TargetConstructionError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    heartbeat(
+        command,
+        "target",
+        f"positive={target.positives} negative={target.negatives} ignored={target.ignored} "
+        f"({target.ignored / (target.positives + target.negatives + target.ignored):.1%}) "
+        f"threshold={target.ignore_threshold:.4f} unplaceable={target.unplaceable_nodes}",
+    )
+
+    # Deterministic random initialisation. Nothing from a published checkpoint.
+    torch.manual_seed(seed)
+    spec = ReferenceSpec(
+        unet_out_channels=32,
+        unet_layers=(32, 64, 128),
+        pos_feat_dim=32,
+        window_size=2,
+        downsample=REFERENCE_DOWNSAMPLE,
+    )
+    model = ReferenceEdgeModel(spec)
+    model.train()
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+    dz, dy, dx = REFERENCE_DOWNSAMPLE
+    grid = torch.from_numpy(window.volume[:, ::dz, ::dy, ::dx]).unsqueeze(0)
+
+    # Stage 1-2: forward and masked loss.
+    _, logits = model.detect(grid)
+    flat = logits[0, :, 0]
+    try:
+        loss = masked_detection_loss(flat, target)
+    except TargetConstructionError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    loss_before = float(loss.item())
+
+    # Stage 3-4: backward and one optimizer step.
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()  # type: ignore[no-untyped-call]
+    squared = [(p.grad**2).sum() for p in model.parameters() if p.grad is not None]
+    if not squared:
+        heartbeat(command, "refused", "the backward pass produced no gradient at all")
+        raise typer.Exit(code=2)
+    grad_norm = float(torch.sqrt(torch.stack(squared).sum()))
+    optimizer.step()
+    with torch.no_grad():
+        _, stepped = model.detect(grid)
+        loss_after = float(masked_detection_loss(stepped[0, :, 0], target).item())
+    heartbeat(
+        command,
+        "step",
+        f"loss {loss_before:.6f} -> {loss_after:.6f} grad_norm={grad_norm:.4e}",
+    )
+
+    # Stage 5: atomic checkpoint. A partially written checkpoint that still loads
+    # is worse than one that does not exist.
+    root_path = repository_root()
+    checkpoint_path = root_path / "artifacts/preflight-detector.pt"
+    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+    staged = checkpoint_path.with_suffix(".pt.partial")
+    torch.save(model.state_dict(), staged)
+    staged.replace(checkpoint_path)
+
+    # Stage 6-7: strict reload, and identical output from the reloaded weights.
+    model.eval()
+    with torch.no_grad():
+        _, reference_logits = model.detect(grid)
+    reloaded = ReferenceEdgeModel(spec)
+    reloaded.load_state_dict(torch.load(checkpoint_path, map_location="cpu", weights_only=True), strict=True)
+    reloaded.eval()
+    with torch.no_grad():
+        _, reloaded_logits = reloaded.detect(grid)
+    identical = bool(torch.equal(reference_logits, reloaded_logits))
+    if not identical:
+        heartbeat(command, "refused", "the reloaded checkpoint did not reproduce its own output")
+        raise typer.Exit(code=2)
+    heartbeat(command, "checkpoint", f"strict reload OK, output identical, {checkpoint_path.name}")
+
+    # Stage 8-9: peak extraction and suppression.
+    with torch.no_grad():
+        heatmap = torch.sigmoid(reloaded_logits)[0, :, 0].numpy()
+    # One optimizer step from noise leaves the detector uncalibrated: it has
+    # correctly learned that almost everything is negative, and no voxel reaches
+    # any fixed probability. A quantile threshold exercises extraction and
+    # suppression on their own terms. E03 uses an absolute threshold, once there
+    # is a trained detector whose scale means something.
+    peak_threshold = float(np.quantile(heatmap, peak_quantile))
+    heatmap_max = float(heatmap.max())
+    try:
+        instances = instances_from_heatmap(
+            heatmap,
+            dataset=window.annotated.dataset,
+            downsample=REFERENCE_DOWNSAMPLE,
+            threshold=peak_threshold,
+            scale=window.scale,
+        )
+    except HeatmapProposalError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    heartbeat(
+        command,
+        "proposals",
+        f"instances={len(instances.instances)} threshold={peak_threshold:.6f} "
+        f"(quantile {peak_quantile}) heatmap_max={heatmap_max:.6f}",
+    )
+
+    # Stage 10: a legal proposal graph, scored through the pinned official path.
+    from biohubx.evaluation.official_metric import EstimatedTotalNodes
+
+    try:
+        outcome = run_chain(
+            window.volume,
+            dataset=window.annotated.dataset,
+            annotated=window.annotated,
+            scale=window.scale,
+            estimate=EstimatedTotalNodes.declared(window.window_estimated_total_nodes),
+            settings=SliceConfig(),
+            instances=instances,
+        )
+    except (ValueError, UnscorablePredictionError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    reach = outcome.candidates.reach
+    if reach is None:
+        heartbeat(command, "refused", "the run measured no candidate reach")
+        raise typer.Exit(code=2)
+    heartbeat(
+        command,
+        "graph",
+        f"nodes={outcome.decode_report.nodes} edges={outcome.decode_report.edges} "
+        f"reach={reach.reach:.3f} node_recall={outcome.score.node_recall:.3f}",
+    )
+
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "seed": seed,
+        "initialisation": "deterministic random; no published checkpoint touched it",
+        "window": window.to_dict(),
+        "target": target.to_dict(),
+        "training_step": {
+            "loss_before": loss_before,
+            "loss_after": loss_after,
+            "gradient_norm": grad_norm,
+            "learning_rate": learning_rate,
+        },
+        "checkpoint": {
+            "path": "artifacts/preflight-detector.pt",
+            "written_atomically": True,
+            "strict_reload": True,
+            "output_identical_after_reload": identical,
+        },
+        "proposals": {
+            "peak_quantile": peak_quantile,
+            "peak_threshold": peak_threshold,
+            "heatmap_max_probability": heatmap_max,
+            "instances": len(instances.instances),
+            "note": (
+                "An untrained detector has no calibrated probability scale, so the preflight "
+                "thresholds by quantile. E03 uses an absolute threshold."
+            ),
+        },
+        "graph": {
+            "nodes": outcome.decode_report.nodes,
+            "edges": outcome.decode_report.edges,
+            "reach": reach.reach,
+        },
+        "official": outcome.score.to_dict(),
+        "runtime_seconds": round(time.perf_counter() - started, 3),
+        "peak_rss_bytes": _peak_rss_bytes(),
+    }
+    report_path = root_path / "artifacts/train-preflight.json"
+    atomic_write_text(report_path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    _write_manifest(command, {"report": "artifacts/train-preflight.json", "seed": seed})
+    heartbeat(command, "done", f"score={outcome.score.score:.6f} report=artifacts/train-preflight.json")
     typer.echo(json.dumps(payload, sort_keys=True))
 
 

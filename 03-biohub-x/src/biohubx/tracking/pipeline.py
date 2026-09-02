@@ -100,15 +100,23 @@ def run_chain(
     scale: VoxelScaleZYX,
     estimate: EstimatedTotalNodes,
     settings: SliceConfig,
+    instances: InstanceSet | None = None,
 ) -> ChainOutcome:
-    """volume -> instances -> representation -> candidates -> graph -> official score."""
-    instances = detect_instances(
-        volume,
-        dataset=dataset,
-        threshold=settings.detection_threshold,
-        suppression_radius_um=settings.suppression_radius_um,
-        scale=scale,
-    )
+    """volume -> instances -> representation -> candidates -> graph -> official score.
+
+    ``instances`` lets a caller supply proposals from somewhere other than the
+    classical detector, which is how a learned heatmap enters the same chain
+    rather than growing a parallel one. The volume is still required, because
+    every later stage reads intensity from it.
+    """
+    if instances is None:
+        instances = detect_instances(
+            volume,
+            dataset=dataset,
+            threshold=settings.detection_threshold,
+            suppression_radius_um=settings.suppression_radius_um,
+            scale=scale,
+        )
     representation = describe_instances(
         instances, volume, density_radius_um=settings.density_radius_um, scale=scale
     )

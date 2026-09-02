@@ -577,3 +577,58 @@ One detail is worth keeping. The positional embedding width appears in no
 published configuration, so the loader derives it from the checkpoint rather
 than hardcoding the upstream constant. A checkpoint built differently is refused
 at load instead of failing somewhere inside inference.
+## D-0022 - The reference is an engineering interface, not a performance baseline
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+The contaminated 0.936 pipeline will not be reproduced end to end.
+
+Two of the three models it blends were fitted or selected on movies that are
+byte-identical to the public-test volumes (R-0002), so reproducing it would
+confirm that Biohub-X can run someone else's contaminated pipeline and would
+establish no baseline anything could honestly improve on. The work it would take
+is not small, and what it buys is a number that already exists and does not mean
+what it appears to mean.
+
+What the reference remains is useful and bounded: a loadable proposal interface
+(R-0004), a CC0 training script whose objective can be audited, and a record of
+what a dense detector emits. It informs hypotheses. It is never a target, never a
+baseline, and never evidence.
+
+**The campaign target is 0.950 on each embryo fold separately**, measured on the
+held-out fold under [[D-0016]], never pooled and never against the public
+leaderboard ([[D-0020]]). The first honest number this project produces will be
+lower than 0.936, and it will be the first one that means anything.
+
+## D-0023 - Unlabelled cells are ignored, and the published objective is rejected
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+The CC0 trainer builds its detection target as `torch.zeros_like(logits)`, marks
+the annotated node voxels positive, and lightly penalises every other voxel. Its
+own docstring says so. There is no ignore class.
+
+Against this corpus that is not a small approximation. On `44b6_0c582fdc` it
+supervises 71 cells as positive and 27,887 visually identical cells as
+background, and the ratio spans 4x to 393x across the sample, tracking the
+twelvefold density difference in [[F-0013]]. The two folds would not be solving
+the same problem. AGENTS.md section 5 forbids it outright: unlabelled and ignore
+regions are respected, never treated as background.
+
+So Biohub-X does not copy it. The target is three-valued. Positives are the
+annotated node voxels. Negatives are voxels the image says are empty. Everything
+bright but unlabelled is ignored, because that is where the unannotated cells
+are and nothing in the data says which of them is one.
+
+The band is set by intensity quantile on the volume being trained, not by a
+tuned constant, and the reason to believe it is measured rather than asserted:
+at the ninetieth percentile it covers about a tenth of voxels and contains every
+annotated cell in the preflight window ([[F-0019]]). A contract test holds that
+claim, because if the band that hides unannotated cells did not also contain the
+annotated ones, there would be no argument that the two populations look alike.
+
+The cost is real and taken deliberately: supervision on bright non-cell
+structure is given up, which the published objective did have. A detector
+trained to call 393 real cells background is the worse trade.

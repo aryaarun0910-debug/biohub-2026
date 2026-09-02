@@ -486,3 +486,40 @@ findings:
         registered corpus is unchanged. The four duplicated public-test fixtures
         were not read.
     superseded_by: null
+  - id: F-0019
+    claim: >-
+      A three-valued detection target with an intensity-quantile ignore band
+      keeps every annotated cell supervised while refusing to call unannotated
+      cells background, and the whole E03 training loop runs on CPU. On the E01
+      window at the ninetieth percentile the target was 26 positive, 353,632
+      negative and 39,558 ignored voxels, 10.06 percent ignored, at an intensity
+      threshold of 0.0976, with 0 annotated nodes unplaceable and all 26 inside
+      the ignore band. From deterministic random initialisation one Adam step at
+      1e-4 moved the masked loss from 1.110484 to 0.859316 at a gradient norm of
+      14.08. The checkpoint wrote atomically, reloaded with strict=True and
+      reproduced its output bit-identically. Peak extraction and suppression
+      yielded 133 proposals, which decoded to a legal graph of 133 nodes and 114
+      edges at candidate reach 0.227 and node recall 0.269, scoring 0.099879
+      through the pinned official metric. The run took 24.8 seconds and 1.52 GB
+      peak resident.
+    instrument: biohubx train preflight, tests/unit/test_training_targets.py
+    evidence:
+      command: biohubx train preflight --seed 0
+      observed: artifacts/train-preflight.json, 11 passed
+      note: >-
+        integration_only. One tiny window, one optimizer step, no fold and no
+        promotion; the score is what an untrained detector produces and means
+        nothing beyond the loop being wired correctly. Two things are worth
+        keeping. The ignore band containing all 26 annotated cells is the
+        evidence for D-0023, since a band that hid unannotated cells without
+        containing annotated ones would be guesswork. And peak extraction had to
+        threshold by quantile: one step from noise leaves the detector
+        uncalibrated, its maximum probability reached only 0.4929, so no
+        absolute threshold would have fired. E03 uses an absolute threshold once
+        a trained detector's scale means something.
+    validity:
+      scope: training_boundaries_on_real_data
+      holds_while: >-
+        the E01 window in configs/phase3-cpu.yaml is unchanged, the official
+        source pin holds, and the ignore quantile stays at 0.90.
+    superseded_by: null

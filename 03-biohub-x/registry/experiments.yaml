@@ -109,3 +109,72 @@ experiments:
       implementations rather than promoted intentions. It becomes promotable when
       a real filter is shown to retain at least 0.94 of its correct edges at the
       annotated node count on both folds.
+  - id: E03
+    component: proposal_detector
+    hypothesis: >-
+      A detector trained on one embryo, with unlabelled cells ignored rather
+      than supervised as background, proposes the annotated cells of the other
+      embryo well enough to raise node recall and candidate reach above the
+      classical detector measured in F-0017.
+    falsifier: >-
+      Killed if node recall or candidate reach fails to improve over F-0017 on
+      either fold. Not promoted unless BOTH folds improve independently; a gain
+      on one fold and a loss on the other is a challenger, never a promotion. A
+      pooled-only result is not a result at all.
+    inputs:
+      - the 199 annotated competition.train .geff and .zarr artifacts
+      - configs/e03-clean-folds.yaml
+    split:
+      scheme: leave_one_embryo_out
+      folds:
+        - id: fold_44b6
+          train: 44b6, 71 movies
+          evaluate: 6bba, 128 movies
+        - id: fold_6bba
+          train: 6bba, 128 movies
+          evaluate: 44b6, 71 movies
+      never_read: >-
+        The public-test directory. Not once, for any purpose. Every artifact
+        E03 touches is a registered train artifact (D-0015).
+    initialisation:
+      scheme: deterministic random, seeded per fold
+      forbidden: >-
+        Neither quarantined checkpoint may initialise, supervise, select or tune
+        a clean-fold model. No distillation, no warm start, no threshold copied
+        from the reference's tuning, no model selection against anything the
+        reference produced (D-0021, D-0022).
+      architecture_note: >-
+        The vendored CC0 architecture is reused with fresh random weights. The
+        code is CC0 and carries no training; reusing a published architecture is
+        not reusing a published model.
+    model_config:
+      path: configs/e03-clean-folds.yaml
+      section: E03
+      canonical_text: canonical_text_sha256:sha256/v1:e2204e7728694bc0a122d29a9fd3f12ec35ea40fbfbc4af6a25332eaf62e6ffc
+      note: >-
+        A separate file from configs/phase3-cpu.yaml, because that file's digest
+        is recorded against E01 and E02 as an assertion about what ran and
+        editing it would break both.
+    budget: Kaggle T4, gated. Nothing runs until the smoke in the packet passes.
+    expected_outputs:
+      - one checkpoint per fold
+      - node recall, candidate reach and the official metric, per fold, separately
+    forbidden_changes:
+      - the pinned official scorer
+      - the ignore quantile, once a fold has started
+      - the fold definition
+    promotion_metric: >-
+      node_recall and candidate reach as the falsifier; the official combined
+      score, per held-out embryo, as the promotion criterion. Never pooled.
+    mandatory_outputs:
+      - node recall
+      - candidate reach
+      - official combined score
+      - each fold reported on its own
+    runtime_ceiling: 6 hours per fold
+    provenance_status: external_cleared
+    not_a_training_target: >-
+      The 94 percent retention crossover in F-0018 is a property of the metric
+      that a later filter must clear. It is not a label, not a loss term and not
+      something E03 optimises. Confusing the two would train a detector to
+      predict its own evaluation.

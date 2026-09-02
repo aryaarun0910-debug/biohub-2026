@@ -610,6 +610,65 @@ references:
         recorded in R-0001. Until then the proposal interface is loadable but
         not reproduced.
       - The primary weight's training split, carried forward from R-0002.
+  - id: R-0005
+    status: reference_only
+    title: Audit of the CC0 trainer's detection objective, before copying any of it
+    source:
+      kind: cc0_source_read
+      file: repo/scripts/train_unet_transformer.py
+      sha256: c4f6317736bb3bb1ec8f3f6e9a6d935a463e3f0f1f685481b2d13218d35dc9ea
+      function: compute_detection_loss
+      note: Read locally from the copy acquired in G-01. Nothing was downloaded for this audit.
+
+    observed:
+      target_construction: >-
+        `target = torch.zeros_like(logits)`, then the annotated node voxels are
+        set to 1.0. Every other voxel is a negative, weighted by neg_weight. The
+        docstring states it plainly: "GT node voxels are positive, all others
+        lightly penalised."
+      ignore_class: none
+      weighting: >-
+        Positives normalised by their count to total weight 1.0, negatives by
+        theirs to total weight neg_weight, published as 0.01 in the temporal
+        seed's training_config.json.
+      it_does_warn_about: >-
+        Nodes that collapse to the same voxel after downsampling, which it calls
+        undetectable. It warns about losing a labelled cell and says nothing
+        about supervising an unlabelled one as background.
+
+    measured_consequence:
+      method: >-
+        Each dataset's annotated node count against its own official
+        estimated_number_of_nodes, for four movies spanning both embryos.
+      unannotated_cells_supervised_as_background_per_annotated_cell:
+        44b6_0c582fdc: 393
+        44b6_0db75fae: 97
+        6bba_2540cd90: 6
+        6bba_5f89039d: 4
+      fraction_of_negatives_that_are_really_cells:
+        44b6_0c582fdc: 0.0010638
+        6bba_2540cd90: 0.0001241
+      reading: >-
+        Per voxel the contamination is small, which is why the objective trains
+        at all. Per cell it is not: on 44b6_0c582fdc the objective asserts that
+        71 cells are cells and 27,887 visually identical cells are not. The
+        ratio spans two orders of magnitude across the embryos, tracking the
+        twelvefold density difference in F-0013, so the two folds would not be
+        optimising the same thing.
+
+    verdict: >-
+      REJECTED for Biohub-X. AGENTS.md section 5 requires unlabelled and ignore
+      regions to be respected rather than treated as background, and this
+      objective does the opposite by construction. D-0023 records the
+      replacement. The audit is kept because knowing exactly how the reference
+      was trained explains its dense output, and because a later comparison
+      between the two objectives is a real experiment.
+
+    unresolved:
+      - Whether the reference's dense node counts are partly an artefact of this
+        objective rather than a deliberate strategy. Its configuration contains
+        no node-count target (R-0001), and an objective that penalises every
+        unlabelled cell would push toward exactly the behaviour R-0003 found.
 
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
@@ -686,7 +745,7 @@ approval_packet:
         reason: unrelated PNG figures; the notebook never reads from it
 
   gate_3_gpu_runs:
-    state: awaiting_approval
+    state: RETIRED by D-0022; the reference will not be reproduced end to end
     runs:
       - id: G-02
         name: faithful reproduction of nusrati/0-936, unchanged
@@ -710,6 +769,83 @@ approval_packet:
           - E02's oracle threshold of 0.94 correct-edge retention is the bar it must clear
         falsifier: the policy is killed if raising the node budget improves the adjusted edge Jaccard
         stop_condition: report both scores and stop
+
+  gate_4_e03_training:
+    state: awaiting_approval
+    purpose: >-
+      Two clean leave-one-embryo-out detectors, the first models in this project
+      whose numbers could be promoted. Nothing here reproduces the reference.
+    platform: >-
+      Kaggle T4. The competition data already resides there, so no restricted
+      data crosses a new boundary. Colab stays out of scope until its
+      data-processing terms are separately cleared against rule 2.4.b.
+    forbidden_throughout:
+      - initialising, supervising, selecting or tuning from either quarantined checkpoint
+      - reading the public-test directory
+      - using the public leaderboard as validation
+      - reporting a pooled result in place of per-fold results
+      - local CUDA dependencies; the model-cpu group stays CPU-only
+
+    inputs:
+      competition_data:
+        registered_artifacts: the 199 annotated train .zarr and .geff pairs
+        verification: >-
+          `artifacts verify` covers all 402 competition artifacts by shape and
+          the two quarantined weights deeply; the tree digests are recorded in
+          registry/artifacts.yaml and re-derivable with --deep.
+      configuration:
+        path: configs/e03-clean-folds.yaml
+        canonical_text: canonical_text_sha256:sha256/v1:e2204e7728694bc0a122d29a9fd3f12ec35ea40fbfbc4af6a25332eaf62e6ffc
+      code: this repository at the commit recorded in the run manifest
+      weights_carried_in: none
+
+    run_1_smoke:
+      id: E03-SMOKE
+      name: tiny protected training smoke
+      scope: one fold, two movies from the training embryo, two epochs
+      seed: 4460
+      batch_size: 2
+      expected_runtime_minutes: 20
+      storage: one checkpoint, under 40 MB
+      outputs: loss curve, target class counts per batch, one checkpoint, strict reload
+      failure_conditions:
+        - the masked loss does not decrease across the two epochs
+        - any batch reports zero positive or zero negative voxels
+        - the checkpoint does not reload with strict=True
+        - peak GPU memory exceeds the T4's 16 GB
+        - wall clock exceeds 40 minutes
+      stop_condition: report and stop; the full runs do not start automatically
+
+    run_2_full_folds:
+      id: E03-FOLDS
+      precondition: E03-SMOKE passed and was reported
+      runs:
+        - fold_44b6, train 44b6 (71 movies), evaluate 6bba (128 movies), seed 4460
+        - fold_6bba, train 6bba (128 movies), evaluate 44b6 (71 movies), seed 6660
+      epochs: 20
+      batch_size: 2
+      learning_rate: 1.0e-4
+      expected_runtime_hours: up to 6 per fold
+      storage: two checkpoints, under 40 MB each, plus per-fold metric reports
+      mandatory_outputs:
+        - node recall per fold
+        - candidate reach per fold
+        - official combined score per fold
+        - never a pooled number in place of these
+      failure_conditions:
+        - node recall or candidate reach fails to beat F-0017 on either fold, which kills E03
+        - a fold's evaluation touches any movie from its own training embryo
+        - the public-test directory is read
+        - wall clock exceeds the 6 hour ceiling per fold
+      stop_condition: >-
+        Report both folds separately and stop. Promotion is a separate decision
+        and requires both folds to improve independently.
+
+    what_this_gate_does_not_authorise:
+      - any submission
+      - any kernel push beyond the two runs above
+      - reproducing the reference pipeline
+      - a CUDA dependency in this repository
 
   what_G-01_changed_about_the_plan:
     - >-

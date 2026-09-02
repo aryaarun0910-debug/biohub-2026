@@ -242,6 +242,7 @@ Implemented:
 - `biohubx infer reference --weights PATH [--dataset ID] [--root PATH] [--split S] [--first-frame N] [--frames N] [--crop-z A:B] [--crop-y A:B] [--crop-x A:B] [--detection-threshold F]`
 - `biohubx evaluate slice [--graph PATH]`
 - `biohubx evaluate retention [--root PATH] [--retentions LIST] [--seed N]`
+- `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--ignore-quantile F] [--peak-quantile F] [--learning-rate F]`
 
 `infer synthetic` writes the emitted graph and a stage-by-stage report
 atomically and records the raw digest of the graph. `evaluate slice` refuses a
@@ -299,7 +300,7 @@ Every report names the selection it covers, so a single-dataset run is never
 read later as a claim about the whole root.
 
 Planned, absent until a consumer exists: `data make-splits`, `proposals infer`,
-`representation acquire`, `train`, `package kaggle`.
+`representation acquire`, `train fold`, `package kaggle`.
 
 `infer real` runs the same chain as `infer synthetic` on a bounded window of
 one registered training movie. The window is explicit in every dimension
@@ -310,6 +311,12 @@ estimate is prorated and therefore `declared`, never official metadata.
 
 `evaluate retention` reads ground-truth graphs only, never the four
 duplicated public-test fixtures, and never a volume.
+
+`train preflight` proves the E03 loop runs before a GPU is asked for: forward,
+masked loss, backward, optimizer step, atomic checkpoint, strict reload,
+identical output, peak extraction, suppression and a legal graph. Its detector
+starts from deterministic random weights and no quarantined checkpoint touches
+it ([[D-0022]], [[D-0023]], [[F-0019]]).
 
 `infer reference` loads a quarantined external checkpoint on CPU and runs its
 detection path only. It needs the optional `model-cpu` dependency group;

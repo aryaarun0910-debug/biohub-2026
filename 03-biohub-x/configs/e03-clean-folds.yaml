@@ -1,0 +1,89 @@
+# E03: two clean leave-one-embryo-out detectors.
+#
+# A separate file from configs/phase3-cpu.yaml on purpose. That file's canonical
+# digest is recorded against E01 and E02 as an assertion about what ran; editing
+# it to hold E03 would break both.
+
+schema_version: 1
+
+E03:
+  name: clean-fold proposal detector
+  component: proposal_detector
+
+  folds:
+    - id: fold_44b6
+      train_embryo: 44b6
+      train_movies: 71
+      evaluate_embryo: 6bba
+      evaluate_movies: 128
+      seed: 4460
+    - id: fold_6bba
+      train_embryo: 6bba
+      train_movies: 128
+      evaluate_embryo: 44b6
+      evaluate_movies: 71
+      seed: 6660
+
+  never_read:
+    - the public-test directory, for any purpose
+
+  initialisation:
+    scheme: deterministic random
+    forbidden:
+      - initialising from either quarantined checkpoint
+      - distillation or pseudo-labels from either quarantined checkpoint
+      - copying any threshold the reference tuned against the public leaderboard
+      - selecting a checkpoint against anything the reference produced
+
+  target:
+    kind: three_valued
+    positive: annotated node voxels on the strided grid
+    ignore: voxels at or above the intensity quantile that are not positives
+    negative: everything below the quantile
+    ignore_quantile: 0.90
+    rationale: >-
+      Unannotated cells live in the bright band and Biohub-X cannot tell which
+      bright voxel is one, so the band is ignored rather than supervised as
+      background. Frozen for the run: changing it mid-fold changes the objective.
+
+  model:
+    architecture: vendored CC0 TemporalUNet3D plus detect_head
+    unet_out_channels: 32
+    unet_layers: [32, 64, 128]
+    downsample: [1, 4, 4]
+    window_size: 2
+    note: >-
+      Architecture reused, weights not. The CC0 code carries no training.
+
+  optimisation:
+    optimizer: adam
+    learning_rate: 1.0e-4
+    batch_size: 2
+    epochs: 20
+    loss: masked balanced BCE over supervised voxels only
+
+  proposal_extraction:
+    peak_threshold: absolute, calibrated on the training fold only
+    suppression_radius_um: 4.0
+    note: >-
+      The preflight thresholded by quantile because an untrained detector has no
+      calibrated scale (F-0019). E03 does not; calibrating on the evaluation
+      fold would be leakage.
+
+  mandatory_outputs:
+    - node_recall
+    - candidate_reach
+    - official combined score
+    - every one of them per fold, never pooled
+
+  falsifier:
+    kill_if: node recall or candidate reach fails to improve over F-0017 on either fold
+    promote_only_if: both folds improve independently
+    challenger_if: one fold improves and the other does not
+    invalid_if: only a pooled number is produced
+
+  not_a_training_target: >-
+    The 94 percent retention crossover in F-0018 is a later filter's target. It
+    is not a label, not a loss term, and E03 does not optimise it.
+
+  runtime_ceiling_seconds: 21600
