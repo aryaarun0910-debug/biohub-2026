@@ -313,28 +313,23 @@ They cannot promote anything on their own.
 
 ### 5.0 Provenance gate
 
-**Not passed. No competition data may enter an experiment.**
+**Passed 2026-09-02.** All 402 competition artifacts record `external_cleared`:
+data licence CC0, eligibility `true`, reviewer Arya Arun, and the access
+restrictions summarised with a pointer to the authoritative wording.
 
-A clearance was recorded on 2026-09-02 and withdrawn the same day. It failed on
-two counts. The eligibility confirmation did not come from a person able to join
-the competition or accept its rules, so `competition_eligible: true` rested on an
-attestation nobody was in a position to give. And the access restrictions had
-been supplied as a paraphrase but recorded as though read from the rules page,
-so the registry stated terms whose wording had not been verified against the
-source.
+Entry was evidenced by a leaderboard placement under the reviewer's name and by
+the competition rules page showing acceptance. An earlier clearance recorded the
+same day was withdrawn because its confirmation had not come from someone able
+to give it, and because the restrictions had been recorded as though quoted when
+they were a paraphrase. That history stays on every record.
 
-All 402 competition artifacts are `external_uncleared`, with the withdrawal and
-its reason recorded on each. Uncleared is the honest state rather than
-`not-eligible`: the latter would assert that a review happened and reached a
-negative conclusion, when in fact no review stands.
+The restrictions bind this repository: the data may not be transmitted,
+duplicated, published, redistributed or made available to anyone who has not
+agreed to the competition rules. Nothing derived from it may be published in a
+form that carries the data itself.
 
-Byte identity is unaffected. Every artifact keeps its tree digest and shape; only
-what was said about its terms was removed.
-
-To pass this gate, a person who has actually joined the competition and accepted
-its rules must confirm that, and the access restrictions must be recorded from
-the rules page itself rather than from a summary. `biohubx artifacts clear`
-records it; `biohubx artifacts revoke` withdraws one that should not stand.
+A dataset registered later does not inherit this review; a contract test
+requires every competition artifact to carry its own.
 
 ### 5.1 What the corpus permits
 

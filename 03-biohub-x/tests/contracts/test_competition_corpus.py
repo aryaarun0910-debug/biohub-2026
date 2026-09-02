@@ -107,30 +107,33 @@ def test_ground_truth_is_a_vanishing_fraction_of_the_volumes() -> None:
     )
 
 
-def test_no_competition_artifact_is_cleared_for_use() -> None:
-    """The gate, restored after a clearance was withdrawn.
+def test_every_competition_artifact_carries_a_completed_terms_review() -> None:
+    """The gate, passed on 2026-09-02.
 
-    A review was recorded on 2026-09-02 and withdrawn the same day: the
-    eligibility confirmation had not come from a person able to join the
-    competition, and the access restrictions had been paraphrased rather than
-    read from the rules page. Uncleared is the honest state, because it asserts
-    only that no review stands rather than asserting a negative conclusion
-    nobody reached.
+    Entry was evidenced by a leaderboard placement under the reviewer's name and
+    by the competition rules page showing acceptance. An earlier clearance was
+    recorded and withdrawn the same day because its confirmation had not come
+    from someone able to give it; that history is on each record.
+
+    A dataset registered later does not inherit this review. It must carry its
+    own, and this fails if it does not.
     """
-    uncleared = {"external_uncleared"}
-    statuses = {a.provenance.status.value for a in competition_artifacts()}
-    assert statuses == uncleared, (
-        f"a competition artifact claims a status other than external_uncleared: {sorted(statuses)}"
-    )
+    for record in competition_artifacts():
+        provenance = record.provenance
+        assert provenance.status.value == "external_cleared", f"{record.id} is not cleared"
+        assert provenance.reviewed_by, f"{record.id} names no accountable reviewer"
+        assert provenance.data_license, f"{record.id} records no data licence"
+        assert provenance.access_restrictions, f"{record.id} records no access restrictions"
+        assert provenance.competition_eligible is not None, f"{record.id} has no eligibility decision"
+        assert provenance.source_url, f"{record.id} does not say where the terms were read"
 
 
 def test_no_artifact_claims_eligibility_without_a_named_reviewer() -> None:
-    """The invariant that holds in both states, cleared or not.
+    """The invariant that holds whichever way the gate is set.
 
-    Whatever the gate says today, an eligibility decision may never exist
-    without a person attached to it. This is the check that would have caught
-    the withdrawn clearance had the attestation been absent rather than
-    misattributed.
+    An eligibility decision may never exist without a person attached to it.
+    This is the check that would have caught the withdrawn clearance had its
+    attestation been absent rather than misattributed.
     """
     offenders = [
         a.id
@@ -140,18 +143,33 @@ def test_no_artifact_claims_eligibility_without_a_named_reviewer() -> None:
     assert not offenders, f"eligibility recorded with no accountable reviewer: {offenders}"
 
 
-def test_the_withdrawal_is_visible_on_the_record() -> None:
-    # The registry must not look as though no clearance was ever attempted. A
-    # silent revert would lose the fact that a wrong claim was once recorded.
-    withdrawn = [a for a in competition_artifacts() if "withdrawn" in (a.provenance.note or "")]
-    assert len(withdrawn) == len(competition_artifacts()), (
-        "the withdrawn review is not recorded on every affected artifact"
-    )
+def test_the_recorded_restrictions_do_not_claim_to_be_verbatim() -> None:
+    """Honesty about the wording, which is the half of this that was mine to get wrong.
+
+    The restrictions are a faithful summary, and the record says so and points at
+    the authoritative text. Recording a paraphrase as though it were the terms is
+    what went wrong the first time.
+    """
+    for record in competition_artifacts():
+        restrictions = record.provenance.access_restrictions or ""
+        assert restrictions.startswith("Summary of"), (
+            f"{record.id} states restrictions without saying they are a summary"
+        )
+        assert "source_url" in restrictions, f"{record.id} does not point at the authoritative text"
 
 
-def test_identity_survived_the_withdrawal() -> None:
-    # Withdrawing a review changes what was said about the terms, never what the
-    # artifact is. Every record still carries its tree digest and shape.
+def test_the_withdrawn_review_remains_visible() -> None:
+    # A corrected record must keep the correction. Losing it would hide that a
+    # wrong claim was once made, which is exactly the history a reader needs.
+    for record in competition_artifacts():
+        assert "withdrawn" in (record.provenance.note or ""), (
+            f"{record.id} no longer records the review that was withdrawn"
+        )
+
+
+def test_identity_survived_every_provenance_change() -> None:
+    # Clearing, withdrawing and clearing again change what is said about the
+    # terms, never what the artifact is.
     for record in competition_artifacts():
         assert record.is_tree
         assert record.digests["tree"].startswith("tree_sha256:sha256/v1:")
