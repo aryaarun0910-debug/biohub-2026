@@ -706,3 +706,33 @@ and it is valid at every scale the pipeline uses ([[F-0021]]): 1.443e-4 to
 corpus-wide prior would have been wrong by up to twentyfold on individual
 movies, and the per-dataset form is what keeps the misspecification bounded even
 where SCAR fails.
+## D-0026 - A generated notebook is validated before it is allowed to cost a GPU
+
+**Date:** 2026-09-02
+**Status:** accepted
+
+E03-SMOKE was authorised, pushed once, and produced nothing. The generated
+notebook failed `nbformat` validation before a single line of packaged code ran:
+the kernelspec had no `display_name` and the cell had no `id`. Every guard the
+package carried, every heartbeat, every falsifier, was irrelevant, because none
+of them executed.
+
+That is the worst shape a failure can take here. A guard that refuses is cheap
+and informative. A run that dies before the guards do is a spent GPU session with
+nothing to read.
+
+Two rules follow.
+
+The notebook's own structure is now part of what the builder checks, not
+something discovered on the far side of a push. A test asserts the fields
+`nbformat` requires, because the cost of that assertion is nothing and the cost
+of omitting it was a whole authorised run.
+
+The kernel address is checked at build time. Kaggle derives a slug from the title
+and prefers it over the requested id, so a title that does not slugify to its own
+id silently relocates the kernel; `kernel_metadata` now refuses that, and refuses
+an id with no owner. The owner itself still cannot be verified offline: the
+`username` field of a local credentials file is not necessarily the account's URL
+slug, and on this machine it was not. A future request states the owner as the
+slug from the account's own URL, and the discrepancy is recorded rather than
+guessed at.

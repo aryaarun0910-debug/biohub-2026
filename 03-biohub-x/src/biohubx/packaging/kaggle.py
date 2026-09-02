@@ -96,6 +96,18 @@ class PackageSpec:
         }
 
 
+def slug_of(title: str) -> str:
+    """How Kaggle derives a kernel slug from a title.
+
+    Lowercased, non-alphanumerics collapsed to single hyphens, trimmed. If the
+    title does not slugify to the requested id, Kaggle warns and uses the title's
+    slug instead, so the kernel that gets created is not the one that was named.
+    """
+    import re
+
+    return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", title.lower())).strip("-")
+
+
 def kernel_metadata(spec: PackageSpec, *, slug: str, title: str) -> dict[str, Any]:
     """The Kaggle kernel manifest, with internet off and no dataset sources.
 
@@ -104,6 +116,14 @@ def kernel_metadata(spec: PackageSpec, *, slug: str, title: str) -> dict[str, An
     because E03 uses no external weights at all, and an empty list is a claim a
     reviewer can check at a glance.
     """
+    owner, _, name = slug.rpartition("/")
+    if not owner:
+        raise PackagingError(f"a Kaggle kernel id is owner/slug; got {slug!r}")
+    if slug_of(title) != name:
+        raise PackagingError(
+            f"title {title!r} slugifies to {slug_of(title)!r}, not {name!r}; Kaggle would create a "
+            "kernel at a different address than the one named"
+        )
     return {
         "id": slug,
         "title": title,
@@ -233,9 +253,14 @@ def build_notebook(spec: PackageSpec, *, shipped: dict[str, Any] | None = None) 
     notebook cannot quietly change what the run checks.
     """
     source = NOTEBOOK_CELL.replace("__SPEC_JSON__", json.dumps(shipped or spec.to_dict(), sort_keys=True))
+    # nbformat 4.5 validates before anything executes, and it requires a cell
+    # `id` and a kernelspec `display_name`. Omitting either fails the notebook at
+    # conversion, which costs a GPU session and produces no guard output at all,
+    # because the packaged code never runs. Learned the expensive way.
     return {
         "cells": [
             {
+                "id": "biohubx-entry",
                 "cell_type": "code",
                 "execution_count": None,
                 "metadata": {},
@@ -243,7 +268,14 @@ def build_notebook(spec: PackageSpec, *, shipped: dict[str, Any] | None = None) 
                 "source": source.splitlines(keepends=True),
             }
         ],
-        "metadata": {"kernelspec": {"language": "python", "name": "python3"}},
+        "metadata": {
+            "kernelspec": {
+                "display_name": "Python 3",
+                "language": "python",
+                "name": "python3",
+            },
+            "language_info": {"name": "python"},
+        },
         "nbformat": 4,
         "nbformat_minor": 5,
     }

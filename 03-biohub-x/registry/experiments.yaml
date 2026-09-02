@@ -214,3 +214,63 @@ experiments:
           voxel across 199 datasets, all inside the open unit interval, with zero
           grid collisions so positive voxels equal annotated nodes exactly.
         falsifier: any dataset whose prior leaves the open unit interval at any scale.
+  - id: E03-SMOKE
+    component: proposal_detector
+    parent: E03
+    hypothesis: >-
+      The packaged fold runs on a Kaggle T4 with every guard intact, so the full
+      folds can be requested on evidence rather than hope.
+    falsifier: >-
+      Any guard failing, or the risk not decreasing across the two epochs.
+    inputs:
+      - the Kaggle package at canonical_text_sha256:sha256/v1:928065d6f7f5b71b72b4e291152a814fcd89353f174dc77799271a325ef04c73
+    split:
+      scheme: leave_one_embryo_out
+      fold: fold_44b6, two movies from 44b6
+    model_config:
+      path: configs/e03-clean-folds.yaml
+      section: E03
+    budget: one Kaggle T4, 2400 second ceiling
+    expected_outputs:
+      - artifacts/e03-smoke/result-fold_44b6.json
+      - one checkpoint under 40 MB
+    forbidden_changes:
+      - any guard or falsifier in the package
+    promotion_metric: none; this experiment cannot promote anything
+    runtime_ceiling: 2400 seconds
+    provenance_status: external_cleared
+    status: invalid
+    result: none produced
+    outcome: >-
+      The kernel errored before executing any packaged code. nbformat validation
+      rejected the generated notebook for a missing kernelspec display_name and
+      missing cell ids, so conversion failed at import time. The log contains
+      zero BIOHUBX_STAGE lines: no guard ran, no falsifier fired, no epoch
+      started, and no checkpoint or result manifest exists to retrieve.
+    status_reasoning: >-
+      invalid rather than killed. Nothing about the hypothesis was tested. A run
+      whose code never executed measures neither success nor failure of what it
+      was meant to measure, and recording it as killed would misrepresent a
+      packaging defect as a scientific result.
+    retrieved:
+      kernel_log: artifacts/e03-smoke/kernel.log
+      kernel_log_digest: raw_artifact_sha256:sha256:cec04e32b04cf2d0db31d0162d7b246b86fd8dc4fad2335a7c342be791a18ecb
+      result_manifest: not produced
+      checkpoint: not produced
+    deviations_from_authorisation:
+      - >-
+        The kernel was created at aryaarun07/biohub-x-e03-fold-44b6, not the
+        authorised aryaarunkaggle/biohubx-e03-fold-44b6. Two causes, both in the
+        package. The owner in the metadata came from the username field of the
+        local credentials file, which is not the account's URL slug, and Kaggle
+        used the authenticated account instead. And the title slugified to
+        biohub-x-e03-fold-44b6, which Kaggle preferred over the requested id,
+        with a warning. The package content pushed was byte-for-byte the
+        authorised package; only its address differed.
+    repairs_made:
+      note: >-
+        No repair run and no second push. The defects are fixed in the builder so
+        a future authorised attempt cannot repeat them, and both are bound by
+        tests: the notebook now carries a kernelspec display_name and cell ids,
+        and kernel_metadata refuses a title that does not slugify to its own id
+        or an id without an owner.

@@ -15,10 +15,12 @@ import pytest
 from biohubx.packaging.kaggle import (
     FoldSpec,
     PackageSpec,
+    PackagingError,
     build_notebook,
     forbidden_content,
     guard_report,
     kernel_metadata,
+    slug_of,
 )
 
 FOLD = FoldSpec(fold_id="fold_44b6", train_embryo="44b6", evaluate_embryo="6bba", seed=4460)
@@ -123,7 +125,7 @@ def test_the_wrong_number_of_gpus_is_refused() -> None:
 
 
 def test_the_kernel_metadata_disables_internet_and_ships_no_datasets() -> None:
-    meta = kernel_metadata(SPEC, slug="user/kernel", title="t")
+    meta = kernel_metadata(SPEC, slug="user/kernel", title="kernel")
     assert "/" in str(meta["id"]), (
         "a Kaggle kernel id is owner/slug; without an owner a push addresses nothing"
     )
@@ -171,3 +173,42 @@ def test_the_staged_package_from_the_last_build_shipped_nothing_forbidden() -> N
     if not staged.is_dir():
         pytest.skip("the staged package is not on this machine")
     assert forbidden_content(staged) == []
+
+
+# --- the two defects that cost a GPU session --------------------------------
+
+
+def test_the_notebook_carries_the_fields_nbformat_validates_before_running() -> None:
+    """A missing display_name or cell id fails at conversion, before any guard runs.
+
+    That is the worst possible failure: a GPU session spent, no heartbeat, no
+    result, and nothing measured. It happened once.
+    """
+    notebook = build_notebook(SPEC, shipped={**SPEC.to_dict(), "input_digests": REGISTERED})
+
+    kernelspec = notebook["metadata"]["kernelspec"]
+    for required in ("display_name", "language", "name"):
+        assert required in kernelspec, f"nbformat requires kernelspec.{required}"
+    assert notebook["nbformat"] == 4
+    assert notebook["nbformat_minor"] >= 5
+    for cell in notebook["cells"]:
+        assert cell.get("id"), "nbformat 4.5 requires every cell to carry an id"
+        for required in ("cell_type", "metadata", "source"):
+            assert required in cell
+
+
+def test_a_title_that_does_not_slugify_to_the_id_is_refused() -> None:
+    """Kaggle slugifies the title and uses that, so a mismatch silently relocates the kernel."""
+    assert slug_of("biohubx e03 fold 44b6") == "biohubx-e03-fold-44b6"
+    assert slug_of("Biohub-X E03 fold_44b6") == "biohub-x-e03-fold-44b6"
+
+    with pytest.raises(PackagingError, match="slugifies to"):
+        kernel_metadata(SPEC, slug="owner/biohubx-e03-fold-44b6", title="Biohub-X E03 fold_44b6")
+
+    ok = kernel_metadata(SPEC, slug="owner/biohubx-e03-fold-44b6", title="biohubx e03 fold 44b6")
+    assert ok["id"] == "owner/biohubx-e03-fold-44b6"
+
+
+def test_a_kernel_id_without_an_owner_is_refused() -> None:
+    with pytest.raises(PackagingError, match="owner/slug"):
+        kernel_metadata(SPEC, slug="biohubx-e03-fold-44b6", title="biohubx e03 fold 44b6")

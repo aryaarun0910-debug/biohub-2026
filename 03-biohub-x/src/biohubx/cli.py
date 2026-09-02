@@ -2089,7 +2089,7 @@ def package_kaggle(
             kernel_metadata(
                 spec,
                 slug=f"{owner}/biohubx-e03-{spec.fold.fold_id.replace('_', '-')}",
-                title=f"Biohub-X E03 {spec.fold.fold_id}",
+                title=f"biohubx e03 {spec.fold.fold_id.replace('_', ' ')}",
             ),
             indent=2,
             sort_keys=True,
