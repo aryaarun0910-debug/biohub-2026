@@ -241,6 +241,82 @@ def test_governing_documents_exist() -> None:
         assert (REPO_ROOT / "registry" / f"{name}.yaml").is_file(), f"missing registry: {name}.yaml"
 
 
+def test_every_package_module_is_tracked_by_git() -> None:
+    """A module that exists locally but is ignored is absent from every clone.
+
+    This caught a real defect: an unanchored `data/` line in .gitignore, meant
+    for a local data root, also matched the source package src/biohubx/data/.
+    The CLI imported it and worked on the machine that wrote it, while a fresh
+    clone would have failed at import. Presence on disk is not evidence.
+    """
+    tracked = set(tracked_files())
+    on_disk = {
+        str(path.relative_to(REPO_ROOT)).replace("\\", "/")
+        for path in (REPO_ROOT / "src" / "biohubx").rglob("*.py")
+        if "__pycache__" not in path.parts
+    }
+    untracked = sorted(on_disk - tracked)
+    assert not untracked, (
+        "package modules exist on disk but are not tracked by git, so a clone "
+        "would not have them:\n" + "\n".join(untracked)
+    )
+
+
+def _ignored_under(directory: Path) -> list[str]:
+    """Ask git which files under a directory its ignore rules exclude.
+
+    Asking git directly rather than parsing patterns: the question is what the
+    rules actually do, and only git can answer that.
+    """
+    candidates = [
+        str(path.relative_to(REPO_ROOT)).replace("\\", "/")
+        for path in directory.rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts
+    ]
+    if not candidates:
+        return []
+    result = subprocess.run(
+        ["git", "check-ignore", "--stdin"],
+        cwd=REPO_ROOT,
+        input="\n".join(candidates),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    # Exit 0 means something matched, 1 means nothing did; anything else is an error.
+    assert result.returncode in (0, 1), f"git check-ignore failed: {result.stderr.strip()}"
+    return [line for line in result.stdout.splitlines() if line.strip()]
+
+
+def test_no_ignore_rule_excludes_source_or_tests() -> None:
+    """No ignore rule may exclude a file under src/ or tests/.
+
+    An unanchored directory pattern matches at every depth. That is how a rule
+    meant for a local data root removed a source package while leaving it on
+    disk, so the pattern text is not the thing to check: the effect is.
+    """
+    offenders = _ignored_under(REPO_ROOT / "src") + _ignored_under(REPO_ROOT / "tests")
+    assert not offenders, (
+        "ignore rules exclude files that must be in every clone; anchor the rule "
+        "with a leading slash or narrow it:\n" + "\n".join(offenders)
+    )
+
+
+def test_the_ignore_check_actually_fires() -> None:
+    # The check above currently finds nothing, which is indistinguishable from a
+    # check that cannot find anything. A file matching a real rule must be seen.
+    probe = REPO_ROOT / "src" / "biohubx" / "__pycache__"
+    result = subprocess.run(
+        ["git", "check-ignore", "--stdin"],
+        cwd=REPO_ROOT,
+        input=str((probe / "probe.pyc").relative_to(REPO_ROOT)).replace("\\", "/"),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0 and result.stdout.strip(), "git check-ignore reports nothing as ignored"
+
+
 def test_there_is_no_general_purpose_scripts_directory() -> None:
     # AGENTS.md section 3 and DECISIONS.md D-0004: operations are CLI
     # subcommands, because a scripts drawer is where untested branching logic,

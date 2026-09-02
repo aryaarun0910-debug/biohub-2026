@@ -20,7 +20,10 @@ artifacts/manifests/*
 !artifacts/manifests/.gitkeep
 
 # Local data roots. There is no default data path in this repository.
-data/
+# Anchored with a leading slash: an unanchored `data/` also matches the source
+# package src/biohubx/data/, which would silently drop a module from every clone
+# while leaving it present on the machine that wrote it.
+/data/
 
 # Model and volume formats
 *.pt

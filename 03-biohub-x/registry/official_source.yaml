@@ -1,0 +1,49 @@
+# Authoritative official competition source lock. No score values belong here.
+schema_version: 1
+
+repository:
+  url: https://github.com/royerlab/kaggle-cell-tracking-competition
+  commit: 075fc5f5a52d11077f9dc2b074644618f26939e2
+  fetched_utc: 2026-09-01T00:00:00Z
+  license: BSD-3-Clause
+  distribution: vendored
+
+runtime_dependencies:
+  tracksdata:
+    source: https://github.com/royerlab/tracksdata
+    commit: 7bfeaf845ceb951226f19b72fe5b80e01601018a
+    version: 0.1.0rc9.dev4+g7bfeaf845
+    license: BSD-3-Clause
+    role: official graph representation and distance matching
+  polars:
+    version: 1.43.2
+    role: official metric table operations
+  scipy:
+    version: 1.18.0
+    role: official sparse matching operations
+
+sources:
+  - upstream_path: LICENSE
+    vendored_path: src/biohubx/_vendor/official_competition/LICENSE
+    role: retained license notice
+    digests:
+      raw: raw_artifact_sha256:sha256:3910a8b578783928cbbf981c1b204591ab3368e70017dc695d6536f71d272796
+      canonical_text: canonical_text_sha256:sha256/v1:3910a8b578783928cbbf981c1b204591ab3368e70017dc695d6536f71d272796
+  - upstream_path: src/tracking_cellmot/__init__.py
+    vendored_path: src/biohubx/_vendor/official_competition/tracking_cellmot/__init__.py
+    role: upstream package notice
+    digests:
+      raw: raw_artifact_sha256:sha256:f9df2098dd85934d0b0d48d477420b1f9ed20a9a55ca6294a1874b964e9166e6
+      canonical_text: canonical_text_sha256:sha256/v1:f9df2098dd85934d0b0d48d477420b1f9ed20a9a55ca6294a1874b964e9166e6
+  - upstream_path: src/tracking_cellmot/metrics.py
+    vendored_path: src/biohubx/_vendor/official_competition/tracking_cellmot/metrics.py
+    role: authoritative edge, node-count adjustment, aggregation, and combined score
+    digests:
+      raw: raw_artifact_sha256:sha256:cfdd596e3f8909cca14db0682889738b19ff75c3808b3773175aba9367ca7444
+      canonical_text: canonical_text_sha256:sha256/v1:cfdd596e3f8909cca14db0682889738b19ff75c3808b3773175aba9367ca7444
+  - upstream_path: src/tracking_cellmot/division_metrics.py
+    vendored_path: src/biohubx/_vendor/official_competition/tracking_cellmot/division_metrics.py
+    role: authoritative division matching and counts
+    digests:
+      raw: raw_artifact_sha256:sha256:0635c38621a38f1eb4b55a302b4a817a88e9094930dfc2dab16faeeee60f4dc9
+      canonical_text: canonical_text_sha256:sha256/v1:0635c38621a38f1eb4b55a302b4a817a88e9094930dfc2dab16faeeee60f4dc9

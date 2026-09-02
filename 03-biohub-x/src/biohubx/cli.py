@@ -19,14 +19,17 @@ implemented, and an unimplemented command is absent rather than stubbed.
 from __future__ import annotations
 
 import json
+import os
 import platform
 import sys
 import time
+from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
 
 import typer
+import yaml
 
 from biohubx import __version__
 from biohubx.artifacts import (
@@ -45,7 +48,13 @@ app = typer.Typer(
     add_completion=False,
 )
 artifacts_app = typer.Typer(name="artifacts", help="Artifact identity and provenance.", no_args_is_help=True)
+official_app = typer.Typer(name="official", help="Pinned official competition source.", no_args_is_help=True)
+evaluate_app = typer.Typer(name="evaluate", help="Authoritative metric calibration.", no_args_is_help=True)
+data_app = typer.Typer(name="data", help="Read-only dataset validation.", no_args_is_help=True)
 app.add_typer(artifacts_app)
+app.add_typer(official_app)
+app.add_typer(evaluate_app)
+app.add_typer(data_app)
 
 
 def repository_root() -> Path:
@@ -185,6 +194,139 @@ def artifacts_verify(
     )
     if failed:
         raise typer.Exit(code=1)
+
+
+@official_app.command("verify-source")
+def official_verify_source() -> None:
+    """Verify every typed identity in the official-source lock."""
+    command = "official verify-source"
+    root = repository_root()
+    lock_path = root / "registry/official_source.yaml"
+    heartbeat(command, "start", "lock=registry/official_source.yaml")
+    if not lock_path.is_file():
+        heartbeat(command, "refused", "official source lock is missing")
+        raise typer.Exit(code=2)
+    try:
+        document = yaml.safe_load(lock_path.read_text(encoding="utf-8"))
+        sources = document["sources"]
+        commit = document["repository"]["commit"]
+        if commit != "075fc5f5a52d11077f9dc2b074644618f26939e2":
+            raise ValueError("official source commit differs from the adapter pin")
+        checks: list[dict[str, object]] = []
+        for source in sources:
+            path = root / source["vendored_path"]
+            for slot, token in source["digests"].items():
+                expected_kind = DigestKind.RAW_ARTIFACT if slot == "raw" else DigestKind.CANONICAL_TEXT
+                observed = digest_file(path, expected_kind).token
+                checks.append(
+                    {
+                        "path": source["vendored_path"],
+                        "slot": slot,
+                        "expected": token,
+                        "observed": observed,
+                        "ok": observed == token,
+                    }
+                )
+    except (FileNotFoundError, KeyError, TypeError, ValueError, NotTextError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    failed = [check for check in checks if not check["ok"]]
+    payload: dict[str, object] = {
+        "schema_version": 1,
+        "status": "verified" if not failed else "failed",
+        "source_commit": commit,
+        "checked": len(checks),
+        "failed": len(failed),
+        "checks": checks,
+    }
+    report = root / "artifacts/official-source-verify.json"
+    atomic_write_text(report, json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    _write_manifest(command, payload)
+    heartbeat(command, "done", f"checked={len(checks)} failed={len(failed)}")
+    typer.echo(json.dumps(payload, sort_keys=True))
+    if failed:
+        raise typer.Exit(code=1)
+
+
+@evaluate_app.command("fixture")
+def evaluate_fixture() -> None:
+    """Run all deterministic Phase-1 fixtures through the official adapter."""
+    command = "evaluate fixture"
+    heartbeat(command, "start", "fixtures=15")
+    from biohubx.evaluation.official_metric import evaluate_calibration_fixtures
+
+    try:
+        fixtures = evaluate_calibration_fixtures()
+    except (FileNotFoundError, RuntimeError, ValueError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    payload: dict[str, object] = {
+        "schema_version": 1,
+        "status": "calibrated",
+        "fixtures": fixtures,
+    }
+    root = repository_root()
+    report = root / "artifacts/evaluate-fixture.json"
+    atomic_write_text(report, json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    _write_manifest(command, {"fixture_count": len(fixtures), "report": "artifacts/evaluate-fixture.json"})
+    heartbeat(command, "done", f"fixtures={len(fixtures)} report=artifacts/evaluate-fixture.json")
+    typer.echo(json.dumps(payload, sort_keys=True))
+
+
+@data_app.command("validate")
+def data_validate(
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Explicit data root. BIOHUB_DATA_ROOT is the only environment fallback."),
+    ] = None,
+    synthetic: Annotated[
+        bool,
+        typer.Option("--synthetic", help="Validate the dry in-memory fixture; never accesses real data."),
+    ] = False,
+) -> None:
+    """Validate an explicit data root without copying or modifying it."""
+    command = "data validate"
+    from biohubx.data.validation import (
+        synthetic_validation_report,
+        validate_data_root,
+        write_validation_report,
+    )
+
+    env_root = os.environ.get("BIOHUB_DATA_ROOT")
+    if synthetic and (root is not None or env_root is not None):
+        heartbeat(command, "refused", "synthetic mode cannot be combined with a real root")
+        raise typer.Exit(code=2)
+    if synthetic:
+        heartbeat(command, "start", "mode=synthetic")
+        report = synthetic_validation_report()
+    else:
+        resolved = root if root is not None else (Path(env_root) if env_root else None)
+        if resolved is None:
+            heartbeat(command, "refused", "provide --root or BIOHUB_DATA_ROOT")
+            raise typer.Exit(code=2)
+        heartbeat(command, "start", "mode=explicit-read-only")
+        try:
+            manifests = validate_data_root(resolved)
+        except (FileNotFoundError, OSError, ValueError) as exc:
+            heartbeat(command, "refused", str(exc))
+            raise typer.Exit(code=2) from exc
+        report = {
+            "schema_version": 1,
+            "mode": "real-read-only",
+            "status": "valid",
+            "datasets": [asdict(manifest) for manifest in manifests],
+        }
+
+    datasets = report["datasets"]
+    assert isinstance(datasets, list)
+    mode = report["mode"]
+
+    output = repository_root() / "artifacts/data-validation.json"
+    write_validation_report(output, report)
+    _write_manifest(command, {"mode": mode, "dataset_count": len(datasets)})
+    heartbeat(command, "done", f"datasets={len(datasets)} report=artifacts/data-validation.json")
+    typer.echo(json.dumps(report, sort_keys=True))
 
 
 if __name__ == "__main__":

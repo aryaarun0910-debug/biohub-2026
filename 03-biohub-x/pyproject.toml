@@ -9,7 +9,10 @@ dependencies = [
     # Kept minimal on purpose. A dependency is added when a module that needs it
     # has a named consumer, not in anticipation of one.
     "pydantic>=2.7",
+    "polars==1.43.2",
     "pyyaml>=6.0",
+    "scipy==1.18.0",
+    "tracksdata @ git+https://github.com/royerlab/tracksdata@7bfeaf845ceb951226f19b72fe5b80e01601018a",
     "typer>=0.12",
 ]
 
@@ -31,6 +34,17 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/biohubx"]
 
+[tool.hatch.metadata]
+# tracksdata is pinned to an exact commit because it is the official metric's
+# own matching and graph library; a version range would let the authoritative
+# behaviour drift underneath a recorded score.
+allow-direct-references = true
+
+[tool.uv]
+# Phase-1's reproducible development lock targets the interpreter pinned by
+# .python-version. The project metadata retains its wider eventual-runtime range.
+environments = ["python_version == '3.12'"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers --strict-config"
@@ -40,6 +54,10 @@ xfail_strict = true
 line-length = 110
 src = ["src", "tests"]
 target-version = "py311"
+# The vendored official source is byte-identical upstream code whose digests are
+# recorded in registry/official_source.yaml. Formatting or linting it would be a
+# silent fork of the authority, so it is excluded from both.
+extend-exclude = ["src/biohubx/_vendor"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF", "ANN", "PTH"]
@@ -56,3 +74,4 @@ warn_unreachable = true
 # A silently ignored missing import is how an optional dependency becomes a
 # hidden runtime failure. Every ignore must be declared here explicitly.
 ignore_missing_imports = false
+exclude = ["src/biohubx/_vendor/"]
