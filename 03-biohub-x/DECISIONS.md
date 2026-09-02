@@ -769,5 +769,11 @@ check would pass whether or not the bootstrap worked. The run must also announce
 the whole stage sequence, from `bootstrap-verify` to `done`, as a subsequence.
 
 **The general rule this turn earns: a packaged run may not depend on any path the
-package itself does not create or verify.** Two GPU sessions have now been lost
-to assumptions about someone else's filesystem.
+package itself does not create or verify.**
+
+One remote run has been lost, not two. E03-SMOKE was pushed once and errored
+during notebook conversion; the unmounted import path was never reached, because
+the notebook died before executing a line, and it was found locally afterwards
+rather than by spending a second session. An earlier revision of this record said
+two, which overstated the cost and would have made the history unreadable later.
+The distinction matters: one assumption was paid for and one was caught.

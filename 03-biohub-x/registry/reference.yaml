@@ -773,8 +773,17 @@ approval_packet:
   gate_4_e03_smoke:
     state: awaiting_fresh_authorisation_after_a_failed_run
     revised_after: E03-MASK-AUDIT full-corpus pass, the local package smoke, and two pre-push defects
+    attempt_identity:
+      this_request: E03-SMOKE-02
+      prior: E03-SMOKE-01, status invalid, immutable
+      note: >-
+        Both attempts address the same Kaggle slug, because a push creates a new
+        version of a kernel rather than a new kernel. Attempt identity lives in
+        registry/experiments.yaml so the retry's outcome cannot overwrite the
+        first one's, and a contract test holds that.
     prior_attempt: >-
-      One authorised push was spent. The kernel errored before executing any
+      One authorised push was spent. Exactly one: every other build recorded
+      pushed=false, and the account holds exactly one kernel for this fold. The kernel errored before executing any
       packaged code because the generated notebook failed nbformat validation, so
       no guard ran and no heartbeat printed. Recorded as E03-SMOKE with status
       invalid, its log registered at raw_artifact_sha256:sha256:cec04e32b04cf2d0d

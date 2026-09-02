@@ -214,7 +214,13 @@ experiments:
           voxel across 199 datasets, all inside the open unit interval, with zero
           grid collisions so positive voxels equal annotated nodes exactly.
         falsifier: any dataset whose prior leaves the open unit interval at any scale.
-  - id: E03-SMOKE
+  - id: E03-SMOKE-01
+    attempt: 1
+    superseded_identity: >-
+      Recorded as E03-SMOKE before a retry existed. Renamed once, to give the
+      retry a distinct identity that cannot overwrite this outcome. The remote
+      run, its status and its log digest are unchanged and must stay so.
+    immutable: true
     component: proposal_detector
     parent: E03
     hypothesis: >-
@@ -274,3 +280,50 @@ experiments:
         tests: the notebook now carries a kernelspec display_name and cell ids,
         and kernel_metadata refuses a title that does not slugify to its own id
         or an id without an owner.
+  - id: E03-SMOKE-02
+    attempt: 2
+    component: proposal_detector
+    parent: E03
+    supersedes_nothing: >-
+      E03-SMOKE-01 stands on its own record. This attempt does not replace it,
+      correct it, or inherit its identity; a failed attempt that can be
+      overwritten by a later one is not a record.
+    hypothesis: >-
+      The packaged fold runs on a Kaggle T4 with every guard intact, so the full
+      folds can be requested on evidence rather than hope.
+    falsifier: >-
+      Any guard failing, or the risk not decreasing across the two epochs.
+    what_changed_since_attempt_1:
+      - the notebook carries kernelspec display_name and cell ids, so nbformat validates it
+      - the notebook carries its own source and imports from /kaggle/working, not /kaggle/input
+      - a mandatory pre-push gate validates, converts, and runs the bootstrap isolated from this repository
+      - the kernel id is derived from its own title, and --expect-kernel pins the address
+      - the builder refuses a dirty tree, so the pinned commit describes the shipped bytes
+    inputs:
+      - the Kaggle package at canonical_text_sha256:sha256/v1:265c10fc60b34c0342b9c1225bfebdb0930dc8c8a20b3c2c23b291767fdd793c
+      - the embedded source payload at raw_artifact_sha256:sha256:c24db880462b202943669e459e0f2d1fb322e5e7223e7165a64b3a8d01b8acf9
+    split:
+      scheme: leave_one_embryo_out
+      fold: fold_44b6, two movies from 44b6
+    model_config:
+      path: configs/e03-clean-folds.yaml
+      section: E03
+    budget: one Kaggle T4, 2400 second ceiling
+    expected_outputs:
+      - a result manifest carrying a typed checkpoint digest
+      - one checkpoint under 40 MB
+    forbidden_changes:
+      - any guard or falsifier in the package
+      - the recorded outcome of E03-SMOKE-01
+    promotion_metric: none; this experiment cannot promote anything
+    runtime_ceiling: 2400 seconds
+    provenance_status: external_cleared
+    kernel: aryaarun07/biohub-x-e03-fold-44b6
+    kernel_note: >-
+      The same kernel slug as attempt 1, because Kaggle addresses a kernel by
+      slug and pushing creates a new version rather than a new kernel. Attempt
+      identity lives in this registry, not in the remote name, which is why the
+      two must not share a record id.
+    status_pending: >-
+      No status key, because a status is a result and nothing has run. Attempt 2
+      has not been pushed and is not authorised.
