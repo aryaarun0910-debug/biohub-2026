@@ -2967,7 +2967,7 @@ def package_transport(
     import re
     import subprocess
 
-    from biohubx.packaging.kaggle import QUARANTINED_ARTIFACT_PREFIX
+    from biohubx.packaging.kaggle import forbidden_content
     from biohubx.packaging.preflight import WHEELHOUSE_SLUG
 
     root_path = repository_root()
@@ -3029,10 +3029,14 @@ def package_transport(
     for quarantined in quarantined_names:
         if quarantined in text_blob:
             failures.append(f"a quarantined name appears in the staged package: {quarantined}")
-    if QUARANTINED_ARTIFACT_PREFIX in text_blob:
-        failures.append("an external checkpoint source appears in the staged package")
-    if any(marker in text_blob for marker in ("edge_predictor_best.pth", "best.pt")):
-        failures.append("an external checkpoint filename appears in the staged package")
+    # An external checkpoint is refused as a FILE and as an attached SOURCE, never
+    # as a mentioned string. The package legitimately ships the guard code that
+    # names `reference.pilkwang` and refuses `.pth`, so scanning text for those
+    # names flags the very thing protecting the run. That is the adjacent check
+    # again: the name is not the artifact.
+    staged_offenders = forbidden_content(staging)
+    if staged_offenders:
+        failures.append(f"the package stages forbidden content: {staged_offenders[:5]}")
 
     metadata = json.loads((staging / "kernel-metadata.json").read_text(encoding="utf-8"))
     if metadata.get("dataset_sources") != [WHEELHOUSE_SLUG]:
@@ -3041,6 +3045,10 @@ def package_transport(
         failures.append(f"competition sources are {metadata.get('competition_sources')}")
     if metadata.get("model_sources") or metadata.get("kernel_sources"):
         failures.append("model or kernel sources are attached and none is approved")
+    attached = list(metadata.get("dataset_sources", [])) + list(metadata.get("model_sources", []))
+    external_weights = sorted(name for name in attached if name != WHEELHOUSE_SLUG)
+    if external_weights:
+        failures.append(f"an unapproved external source is attached: {external_weights[:3]}")
     if metadata.get("enable_internet") is not False:
         failures.append("internet is not disabled")
     if "docker_image" in metadata:
