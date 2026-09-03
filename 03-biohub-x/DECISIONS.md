@@ -841,3 +841,37 @@ a guess with a download attached. The provisional plan is a minimal Biohub-X-own
 wheelhouse locked to the measured ABI, with source, version, licence, SHA-256 and
 named consumer recorded per wheel, and internet still disabled. That plan is not
 started, because its first input does not exist yet.
+
+## D-0030 - Environment measurements are facts, and still not evidence
+
+**Date:** 2026-09-03
+**Status:** accepted
+
+E03-ENV-AUDIT-01 ran and produced what three tracebacks could not: the target is
+CPython 3.12.13 on Linux x86_64 with glibc 2.35, platform tag `linux-x86_64`,
+SOABI `cpython-312-x86_64-linux-gnu`, carrying 874 distributions. Nine of the
+twenty-eight names in the runtime closure are absent. That is a real measurement,
+made by this repository's own instrument on the machine in question.
+
+It is not scientific evidence, and the registry now says so in a way that cannot
+be misread. `registry/reference.yaml` gains a second status,
+`measured_environment`, for facts Biohub-X measured about an external system.
+Such an entry may inform a plan and may never appear in `registry/findings.yaml`
+or support a promotion, because what a runtime contains says nothing about cell
+tracking.
+
+The measurement narrows the wheelhouse sharply. The smoke path imports
+`data.competition`, `reference.architecture` and `training.targets`; only the
+first reaches beyond torch and the standard library, and it imports zarr alone.
+It never touches the official metric, so tracksdata, geff, rustworkx, bidict and
+imagecodecs are not needed to make a smoke run. zarr pulls numcodecs, donfig and
+crc32c. Four wheels against the reference's 322 MB bundle, and the difference is
+entirely because the requirement was measured rather than copied.
+
+One probe was weaker than it looked, and it is recorded as such. blosc2 is
+present at 4.1.2, but the audit only reported its version; it never asked it to
+decode the Blosc1 fixture. Blosc2 is a different container format, so whether the
+image can read competition chunks without numcodecs is still open in both
+directions. A probe that reports a version where a decode was needed is a probe
+that answers an adjacent question, which is the same shape of mistake as counting
+devices where the model mattered.

@@ -1,6 +1,12 @@
 # Reference registry: external work Biohub-X reads but does not believe.
 #
-# Nothing here is a Biohub-X result. Every entry is `status: reference_only`,
+# Two statuses. `reference_only` is a claim someone else made, which may inform a
+# hypothesis and may never support one. `measured_environment` is a fact Biohub-X
+# measured about an external system with its own instrument: real, reproducible,
+# and still not scientific evidence, because it says nothing about cell tracking
+# and may not appear in registry/findings.yaml or support a promotion.
+#
+# Nothing here is a Biohub-X scientific result. A `reference_only` entry is
 # which means it may inform a hypothesis and may never support a claim. A number
 # recorded here is an observation about someone else's run, not a measurement;
 # Biohub-X measurements live in registry/findings.yaml and nowhere else.
@@ -669,6 +675,95 @@ references:
         objective rather than a deliberate strategy. Its configuration contains
         no node-count target (R-0001), and an objective that penalises every
         unlabelled cell would push toward exactly the behaviour R-0003 found.
+  - id: R-0006
+    status: measured_environment
+    title: The Kaggle CPU runtime, measured rather than inferred
+    source:
+      kind: biohubx_diagnostic_kernel
+      audit_id: E03-ENV-AUDIT-01
+      kernel: aryaarun07/biohub-x-environment-audit
+      pinned_commit: 58ad4a3a9dc5d159650c4bb17b0c478b2fe3e6e9
+      authorised_by: Arya Arun
+      scope: CPU only, no accelerator, internet disabled, no dataset, model or competition sources
+      elapsed_seconds: 9.184
+      note: >-
+        Measured by Biohub-X's own instrument on the target machine, so it is a
+        fact rather than a claim. It is still not scientific evidence: it says
+        what the runtime contains, nothing about cell tracking, and it may not
+        support a promotion or appear in a findings entry.
+
+    retrieved:
+      kernel_log: artifacts/env-audit/kernel.log
+      kernel_log_digest: raw_artifact_sha256:sha256:893ecbdef09c1f58226771bdfbfa1ab15fc3fbcb71ea76c9109f614f0f48ed85
+      environment_manifest: artifacts/env-audit/environment-audit.json
+      environment_manifest_digest: raw_artifact_sha256:sha256:bd0e46599a58d62c46d6aafc6fac9d09ad4ac950c66cf81a93cf7a4ec55278e1
+      self_identification: >-
+        The manifest carries the audit id and pinned commit it was built with,
+        and both match the staged package, so the measurement is bound to the
+        artifact that produced it.
+
+    abi_target:
+      python: 3.12.13
+      implementation: CPython
+      platform: Linux-6.12.90+-x86_64-with-glibc2.35
+      machine: x86_64
+      libc: glibc 2.35
+      platform_tag: linux-x86_64
+      soabi: cpython-312-x86_64-linux-gnu
+      wheel_tag_implied: cp312-cp312-manylinux_2_35_x86_64
+      note: >-
+        These five fields are what a wheel has to match and what no traceback
+        could have told us. glibc 2.35 means a manylinux_2_17 or manylinux_2_28
+        wheel is also compatible; the tag above is the tightest one.
+
+    installed_distributions: 874
+
+    missing_from_the_runtime_closure: ["bidict", "crc32c", "donfig", "geff", "imagecodecs", "numcodecs", "rustworkx", "tracksdata", "zarr"]
+
+    present_and_usable:
+      numpy: "2.0.2"
+      scipy: "1.16.3"
+      polars: "1.35.2"
+      pydantic: "2.12.3"
+      PyYAML: "6.0.3"
+      typer: "0.24.2"
+      torch: "2.10.0+cpu"
+      blosc2: "4.1.2"
+      zstandard: "0.25.0"
+      note: >-
+        Biohub-X pins polars==1.43.2 and scipy==1.18.0 locally; the image carries
+        1.35.2 and 1.16.3. A package that ships neither takes what is there, and
+        whether that difference matters is unmeasured.
+
+    codec:
+      numcodecs_blosc_decode: "failed: numcodecs is absent"
+      zarr: absent
+      blosc2_version: "4.1.2"
+      zstandard_version: "0.25.0"
+      probe_gap: >-
+        The fixture is Blosc1, which is what zarr v3's blosc codec writes and what
+        numcodecs decodes. blosc2 is present at 4.1.2 but was only reported, not
+        asked to decode the fixture, and blosc2 is a different container format
+        from Blosc1. So the image's ability to read competition chunks without
+        numcodecs is not established either way. A later audit should decode the
+        fixture through blosc2 before anyone counts on it.
+
+    what_the_smoke_actually_needs: >-
+      The E03 smoke path imports data.competition, reference.architecture and
+      training.targets. Of those only data.competition reaches outside the
+      standard library and torch, and it imports zarr alone. It never touches the
+      official metric, so tracksdata, geff, rustworkx, bidict and imagecodecs are
+      not needed to make the smoke run. zarr pulls numcodecs, donfig and crc32c.
+      Four wheels, not the reference's 322 MB bundle. A full fold that scores
+      through the official metric needs the rest.
+
+    unresolved:
+      - Whether blosc2 alone can decode a Blosc1 chunk, which decides whether numcodecs is required at all.
+      - The GPU image's torch build. This audit was CPU-only by authorisation and
+        measured torch 2.10.0+cpu; a GPU kernel will carry a CUDA build that has
+        not been measured.
+      - Whether the image's polars 1.35.2 and scipy 1.16.3 behave identically to
+        the versions this repository pins.
 
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
@@ -914,7 +1009,12 @@ approval_packet:
       - any Colab run on competition data
 
   gate_5_environment_audit:
-    state: awaiting_authorisation
+    state: PERFORMED
+    outcome: >-
+      Pushed once, ran CPU-only, completed in 9.184 seconds and produced its
+      manifest. The measurement is R-0006. Nine of the twenty-eight runtime
+      closure imports are absent, and the ABI a wheelhouse must target is now
+      known rather than guessed.
     audit_id: E03-ENV-AUDIT-01
     purpose: >-
       Measure the Kaggle runtime instead of inferring it. E03-SMOKE-02 proved
