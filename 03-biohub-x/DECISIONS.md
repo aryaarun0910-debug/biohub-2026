@@ -875,3 +875,58 @@ image can read competition chunks without numcodecs is still open in both
 directions. A probe that reports a version where a decode was needed is a probe
 that answers an adjacent question, which is the same shape of mistake as counting
 devices where the model mattered.
+
+## D-0031 - A published dataset has two identities, and recording one is how they get confused
+
+**Date:** 2026-09-03
+**Status:** accepted
+
+A wheelhouse is uploaded as a directory and published as a dataset, and those are
+not the same tree. The Kaggle CLI reads `dataset-metadata.json` to learn what to
+create and does not keep it among the data, so the published dataset holds one
+file fewer than the bundle that produced it.
+
+Only one digest was recorded, over the upload bundle, and the authorisation
+therefore named 8 files and 9,304,348 bytes. The dataset holds 7 files and
+9,304,073 bytes. The gap is exactly that 275-byte configuration file, but a single
+recorded identity gave nobody a way to say so: with one digest, a benign platform
+behaviour and a substituted file look identical, and the only available response
+to a differing inventory is to stop. Stopping was correct. Having to reason about
+it in prose was not.
+
+So both trees are recorded, and they are named apart. The **upload bundle** is
+what this machine sends and can re-derive from its own staging directory. The
+**published payload** is what a kernel mounts, and it is therefore the identity an
+authorisation names and the only one a running package could ever check.
+
+Three consequences bind later work.
+
+`biohubx package wheelhouse` computes both from one walk of one directory, because
+recording an identity is an operation and AGENTS.md section 3 puts operations in
+the CLI. The wheelhouse had been assembled and digested outside it, which is how a
+digest came to exist with no instrument that could reproduce or extend it.
+
+**The published payload is digested as a tree in its own right, never by deleting
+a line from the bundle's canonical listing.** Subtraction is wrong in general:
+removing the last file from a directory turns it into an empty directory, which
+tree canonicalization `v1` records in its own right, so an edited listing can
+describe a tree that could not exist. The payload is staged and walked with the
+same contract-tested walk every other tree identity uses.
+
+Verification of a published dataset is by content, not by inventory. Kaggle
+reports filenames and sizes, and a same-size substitution changes neither those
+nor the file count, so `--remote` compares relative path, size and content digest
+and then the tree digest. This is the same distinction D-0013 draws between the
+shape tier and identity, applied to a tree this repository published rather than
+one it was given.
+
+**What this does not fix.** The preflight mounts the published payload and does
+not verify it. It reads only `wheels/` and `requirements-offline.txt`, so it
+carries no upload-bundle expectation and meets a seven-file mount correctly, and
+`pip --require-hashes` refuses any wheel the requirements file does not list. But
+the requirements file arrives with the wheels, and the tree's own identity is
+never checked, which leaves the same shape of gap D-0027 closed for the notebook's
+payload and this package still has for its mount. Closing it means embedding the
+published tree digest and checking it before installing. That changes the package
+and needs its own authorisation, so it is recorded as an open gap rather than
+quietly accepted.

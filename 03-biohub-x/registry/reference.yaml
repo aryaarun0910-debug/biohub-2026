@@ -1071,28 +1071,80 @@ approval_packet:
     state: awaiting_authorisation
     scope_performed: >-
       Four wheels downloaded from the URLs uv.lock records and verified against
-      the SHA-256 uv.lock records. Nothing else was downloaded, no dataset was
-      created or uploaded, and no kernel was pushed.
+      the SHA-256 uv.lock records. The private dataset was created from them. The
+      published dataset was then downloaded once, on Arya's instruction, and
+      compared against the published payload by path, size and content. No kernel
+      has been pushed and nothing else has been downloaded.
 
     dataset:
       slug: aryaarun07/biohubx-wheelhouse-zarr-cp312-linux
       state: CREATED, PRIVATE, VERIFIED
       created_utc: '2026-09-03T06:09:52Z'
-      remote_inventory:
-        files: 7
-        bytes: 9304073
-        every_file_byte_identical_to_staged: true
-        every_wheel_matches_uv_lock: true
-        nothing_present_that_was_not_staged: true
-      inventory_discrepancy: >-
-        The authorisation named 8 files and 9,304,348 bytes. The dataset holds 7
-        files and 9,304,073 bytes. The difference is exactly
-        dataset-metadata.json, 275 bytes, which Kaggle consumes as configuration
-        when creating a dataset and does not store as data. Every substantive
-        file is present and byte-identical, all four wheel digests still match
-        uv.lock, and nothing extra appeared. The preflight push was stopped
-        anyway, because the authorisation lists a differing inventory as a stop
-        condition and the difference is real even though its cause is benign.
+      instrument: biohubx package wheelhouse
+      report: artifacts/wheelhouse-identity.json
+
+      why_two_identities: >-
+        A wheelhouse is uploaded as a directory and published as a dataset, and
+        those are not the same tree. Recording one digest named a tree that
+        exists on neither side, which is what surfaced as an inventory difference
+        and stopped the push ([[D-0031]]). Both are now recorded, so the two can
+        be named apart rather than reconciled in prose.
+
+      upload_bundle:
+        what: what this machine sends, staged at artifacts/wheelhouse
+        tree_digest: tree_sha256:sha256/v1:32688f0520b25e314f677f46a8c843fe684890f951bffc643dbb2ea9180b6040
+        file_count: 8
+        total_bytes: 9304348
+        kaggle_configuration_included:
+          relative_path: dataset-metadata.json
+          size_bytes: 275
+          raw_sha256: 4398b85ba837a276c393e811d7f04b16c4e8c603db282f26e99318fe588eba6c
+
+      published_payload:
+        what: what a Kaggle kernel mounts, and therefore the identity an authorisation names
+        tree_digest: tree_sha256:sha256/v1:4c7474376ba70a4772babee4c8fca8d13d829066686f8672cd1b9f23a10ee3ed
+        file_count: 7
+        total_bytes: 9304073
+        excludes: >-
+          dataset-metadata.json and nothing else. Kaggle reads it to create the
+          dataset and does not keep it among the data, so the published tree
+          holds exactly one file fewer than the bundle that produced it.
+        derivation: >-
+          Computed by staging the payload as a tree of its own and walking it
+          with the same contract-tested walk every other tree identity uses, not
+          by deleting a line from the bundle's canonical listing. Subtraction is
+          wrong in general, because removing the last file from a directory turns
+          it into an empty directory that canonicalization v1 records in its own
+          right, so an edited listing can describe a tree that could not exist.
+
+      published_dataset_verified:
+        downloaded_and_compared: true
+        method: >-
+          The published dataset was downloaded from Kaggle and compared with the
+          published payload by relative path, size and content digest, then by
+          tree digest over the whole tree.
+        differences: none
+        tree_digest_matches_published_payload: true
+        remote_file_count: 7
+        remote_total_bytes: 9304073
+        wheels_verified_against: >-
+          uv.lock and requirements-offline.txt, all four, by filename rather than
+          by package name, since one package resolves to many platform wheels and
+          only the file on disk is the staged one.
+        note: >-
+          Content, not shape. A same-size substitution changes neither the file
+          count nor the total bytes, so the inventory listing Kaggle reports could
+          not have established this on its own.
+
+      inventory_discrepancy_resolved: >-
+        The authorisation named 8 files and 9,304,348 bytes, which is the upload
+        bundle. The dataset holds 7 files and 9,304,073 bytes, which is the
+        published payload. The difference is exactly dataset-metadata.json at 275
+        bytes, and both trees now carry their own recorded identity. The stop
+        condition was real and the cause was benign, and recording only one of two
+        identities is what made a benign platform behaviour indistinguishable from
+        a substituted file.
+
       upload_note: >-
         Uploaded with --dir-mode zip because the CLI's default skips
         subdirectories entirely, which would have dropped every wheel. Kaggle
@@ -1101,18 +1153,17 @@ approval_packet:
         A first create with a relative -p path failed inside the CLI on a
         mixed-separator temp path and created nothing; the retry used an
         absolute path. No partial dataset was left behind.
-      tree_digest: tree_sha256:sha256/v1:32688f0520b25e314f677f46a8c843fe684890f951bffc643dbb2ea9180b6040
-      file_count: 8
-      total_bytes: 9304348
       contents:
-        - wheels/zarr-3.3.0-py3-none-any.whl
-        - wheels/numcodecs-0.15.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-        - wheels/donfig-0.8.1.post1-py3-none-any.whl
-        - wheels/google_crc32c-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl
-        - requirements-offline.txt
-        - WHEELHOUSE.json
-        - README.md
-        - dataset-metadata.json
+        published:
+          - wheels/zarr-3.3.0-py3-none-any.whl
+          - wheels/numcodecs-0.15.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+          - wheels/donfig-0.8.1.post1-py3-none-any.whl
+          - wheels/google_crc32c-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl
+          - requirements-offline.txt
+          - WHEELHOUSE.json
+          - README.md
+        configuration_only:
+          - dataset-metadata.json
       licences:
         zarr: MIT
         numcodecs: MIT
@@ -1139,8 +1190,38 @@ approval_packet:
 
     preflight:
       preflight_id: E03-WHEELHOUSE-PREFLIGHT-01
-      state: STAGED, NOT PUSHED, HELD ON THE INVENTORY DISCREPANCY
+      state: STAGED, NOT PUSHED, AWAITING RE-AUTHORISATION AGAINST THE PUBLISHED IDENTITY
       package_digest: canonical_text_sha256:sha256/v1:6dcdf87f1c74a146fdf58404f6a2d7e168aff0ea80602aaae1aad1d2ba770ce5
+      package_unchanged_by_the_identity_work: >-
+        Not rebuilt. The manifest digest above was re-derived from the staged
+        bytes after the two identities were recorded and is unchanged, so the
+        package awaiting authorisation is the same package that was staged.
+      mounts:
+        expects: >-
+          The published payload,
+          tree_sha256:sha256/v1:4c7474376ba70a4772babee4c8fca8d13d829066686f8672cd1b9f23a10ee3ed.
+          It carries no upload-bundle expectation.
+        reads_from_the_mount:
+          - wheels/*.whl
+          - requirements-offline.txt
+        verified_how: >-
+          Checked mechanically against the staged notebook rather than by reading
+          it. The source contains no reference to dataset-metadata.json, no file
+          count, no byte total and no tree digest, so nothing in it can disagree
+          with a seven-file mount.
+        integrity_it_enforces: >-
+          pip --require-hashes against requirements-offline.txt, which refuses any
+          wheel whose hash that file does not list. That covers the four wheels,
+          9,297,804 of the 9,304,073 published bytes.
+        integrity_it_does_not_enforce: >-
+          The identity of the tree it mounts. README.md, WHEELHOUSE.json and
+          requirements-offline.txt itself are read unverified, and the hash check
+          is only as good as the requirements file that arrives with the wheels.
+          Closing this means embedding the published tree digest and checking it
+          before installing, which changes the package and needs its own
+          authorisation. Recorded as an open gap rather than quietly accepted,
+          because a check that is absent is the failure shape this gate exists to
+          stop repeating.
       pinned_commit: 8227221c20d4ad805c9b0195dd35052bdca841ac
       kernel: aryaarun07/biohub-x-wheelhouse-preflight
       enable_gpu: false

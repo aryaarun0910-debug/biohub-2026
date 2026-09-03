@@ -245,6 +245,8 @@ Implemented:
 - `biohubx evaluate mask-audit [--root PATH] [--max-frames N] [--compare-maxpool]`
 - `biohubx package audit [--out PATH] [--expect-kernel ID] [--allow-dirty]`
 - `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--allow-dirty]`
+- `biohubx package preflight [--out PATH] [--wheelhouse PATH] [--allow-dirty]`
+- `biohubx package wheelhouse [--path PATH] [--remote PATH] [--out PATH]`
 - `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--peak-quantile F] [--learning-rate F]`
 
 `infer synthetic` writes the emitted graph and a stage-by-stage report
@@ -345,6 +347,27 @@ training embryo, and its entry point re-verifies mounted identity, asserts fold
 membership, refuses public-test paths and quarantined checkpoints, checks the
 GPU count, heartbeats every stage and writes an atomic checkpoint with a typed
 digest. `--smoke-local` runs that exact entry point here on CPU first.
+
+`package preflight` stages the wheelhouse installation and readability check, and
+sends nothing. It asks two questions in order: does the wheelhouse install offline
+on the measured image, and can the result decode a real competition chunk. It
+imports no part of Biohub-X, so it runs on an image where Biohub-X cannot, and its
+notebook is validated and converted at build time but never executed, because it
+installs packages and reads the corpus.
+
+`package wheelhouse` records what a wheelhouse is, as the two different trees it
+actually is. Kaggle consumes `dataset-metadata.json` as configuration rather than
+storing it, so the upload bundle this machine sends and the published payload a
+kernel mounts differ by exactly that file, and one recorded digest names neither
+tree ([[D-0031]]). Both are computed from one walk of one directory. The published
+payload is staged and walked as a tree in its own right rather than derived by
+deleting a line from the bundle's listing, because removing the last file from a
+directory turns it into an empty directory that canonicalization `v1` records,
+so an edited listing can describe a tree that could not exist. `--remote` compares
+a downloaded copy of the published dataset with the published payload by relative
+path, size and content digest, then by tree digest, and refuses on any difference.
+Content rather than inventory: a same-size substitution moves neither the file
+count nor the total bytes.
 
 `train preflight` proves the E03 loop runs before a GPU is asked for: forward,
 masked loss, backward, optimizer step, atomic checkpoint, strict reload,

@@ -2599,6 +2599,225 @@ def package_preflight(
     typer.echo(json.dumps(payload, sort_keys=True))
 
 
+@package_app.command("wheelhouse")
+def package_wheelhouse(
+    path: Annotated[
+        Path | None,
+        typer.Option("--path", help="The staged wheelhouse. Defaults to artifacts/wheelhouse."),
+    ] = None,
+    remote: Annotated[
+        Path | None,
+        typer.Option(
+            "--remote",
+            help="A downloaded copy of the published dataset, checked against the published payload.",
+        ),
+    ] = None,
+    out: Annotated[
+        Path | None,
+        typer.Option("--out", help="Report path. Defaults to artifacts/wheelhouse-identity.json."),
+    ] = None,
+) -> None:
+    """Record what the wheelhouse is, as the two different trees it actually is.
+
+    The upload bundle is what this machine sends. The published payload is what a
+    kernel mounts. Kaggle consumes ``dataset-metadata.json`` as configuration
+    instead of storing it, so the two differ by exactly that file and one digest
+    would name neither tree. Both are computed here from one walk of one
+    directory, so an inventory difference reads as the platform behaviour it is
+    rather than being investigated as a substitution.
+
+    With ``--remote``, a downloaded copy of the published dataset is compared with
+    the published payload by name, size and content, and any difference refuses.
+    """
+    command = "package wheelhouse"
+    import tempfile
+
+    from biohubx.hashing import tree_digest
+    from biohubx.packaging.wheelhouse import (
+        KAGGLE_CONFIGURATION_FILENAME,
+        WheelhouseError,
+        canonical_package_name,
+        compare_manifests,
+        locked_wheels,
+        published_relative_paths,
+        requirement_hashes,
+        stage_published_payload,
+    )
+
+    root_path = repository_root()
+    house = path if path is not None else root_path / "artifacts/wheelhouse"
+    if not house.is_dir():
+        heartbeat(command, "refused", f"no wheelhouse directory at {house}")
+        raise typer.Exit(code=2)
+
+    wheels_dir = house / "wheels"
+    wheel_paths = sorted(wheels_dir.glob("*.whl")) if wheels_dir.is_dir() else []
+    if not wheel_paths:
+        heartbeat(command, "refused", f"no wheels under {wheels_dir}; there is nothing to identify")
+        raise typer.Exit(code=2)
+    sdists = [item.name for item in house.rglob("*") if item.suffix in {".gz", ".zip"} and item.is_file()]
+    if sdists:
+        heartbeat(command, "refused", f"the wheelhouse contains source distributions: {sdists[:3]}")
+        raise typer.Exit(code=2)
+
+    requirements_path = house / "requirements-offline.txt"
+    if not requirements_path.is_file():
+        heartbeat(command, "refused", f"no {requirements_path.name}; nothing states what pip would enforce")
+        raise typer.Exit(code=2)
+
+    heartbeat(command, "start", f"path={house} wheels={len(wheel_paths)}")
+
+    bundle = tree_digest(house, on_file=_periodic_progress(command, "upload bundle"))
+    heartbeat(
+        command,
+        "upload-bundle",
+        f"files={bundle.file_count} bytes={bundle.total_bytes} {bundle.digest.token}",
+    )
+
+    configuration = [
+        record
+        for record in bundle.records
+        if record.kind == "f" and record.relative_path == KAGGLE_CONFIGURATION_FILENAME
+    ]
+    if not configuration:
+        heartbeat(
+            command,
+            "refused",
+            f"{KAGGLE_CONFIGURATION_FILENAME} is absent from the root, so this is not an upload "
+            "bundle and the two identities would name one tree",
+        )
+        raise typer.Exit(code=2)
+
+    relative_paths = published_relative_paths(bundle)
+    with tempfile.TemporaryDirectory(prefix="biohubx-published-") as scratch:
+        staged = Path(scratch) / "payload"
+        staged.mkdir()
+        stage_published_payload(house, staged, relative_paths)
+        published = tree_digest(staged, on_file=_periodic_progress(command, "published payload"))
+    heartbeat(
+        command,
+        "published-payload",
+        f"files={published.file_count} bytes={published.total_bytes} {published.digest.token}",
+    )
+
+    try:
+        locked = locked_wheels(
+            (root_path / "uv.lock").read_text(encoding="utf-8"),
+            [item.name for item in wheel_paths],
+        )
+        required = requirement_hashes(requirements_path.read_text(encoding="utf-8"))
+    except WheelhouseError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    staged_content = {record.relative_path: record for record in bundle.records if record.kind == "f"}
+    wheel_rows: list[dict[str, object]] = []
+    wheel_failures: list[str] = []
+    for wheel_path in wheel_paths:
+        entry = locked[wheel_path.name]
+        record = staged_content[f"wheels/{wheel_path.name}"]
+        canonical = canonical_package_name(entry.package)
+        stated = required.get(canonical)
+        # The hash is the authority; the size is compared only where uv.lock
+        # states one, so an entry without a size is not read as a size of zero.
+        matches_lock = record.content_sha256 == entry.sha256 and (
+            entry.size_bytes is None or record.size_bytes == entry.size_bytes
+        )
+        matches_requirements = stated is not None and stated[1] == entry.sha256
+        if not matches_lock:
+            wheel_failures.append(f"{wheel_path.name} does not match the bytes uv.lock locks")
+        if stated is None:
+            wheel_failures.append(f"{entry.package} is staged but {requirements_path.name} omits it")
+        elif not matches_requirements:
+            wheel_failures.append(f"{entry.package} carries a requirements hash uv.lock does not lock")
+        wheel_rows.append(
+            {
+                "package": entry.package,
+                "version": entry.version,
+                "filename": entry.filename,
+                "size_bytes": record.size_bytes,
+                "sha256": record.content_sha256,
+                "matches_uv_lock": matches_lock,
+                "matches_requirements_offline": matches_requirements,
+            }
+        )
+    for canonical in required.keys() - {canonical_package_name(item.package) for item in locked.values()}:
+        wheel_failures.append(f"{canonical} is required offline but no wheel is staged for it")
+    if wheel_failures:
+        for failure in wheel_failures:
+            heartbeat(command, "refused", failure)
+        raise typer.Exit(code=2)
+    heartbeat(command, "wheels", f"{len(wheel_rows)} verified against uv.lock and {requirements_path.name}")
+
+    remote_report: dict[str, object] | None = None
+    if remote is not None:
+        if not remote.is_dir():
+            heartbeat(command, "refused", f"no downloaded dataset at {remote}")
+            raise typer.Exit(code=2)
+        observed = tree_digest(remote, on_file=_periodic_progress(command, "published dataset"))
+        differences = compare_manifests(published, observed)
+        remote_report = {
+            "path": str(remote),
+            "tree": observed.digest.token,
+            "file_count": observed.file_count,
+            "total_bytes": observed.total_bytes,
+            "matches_published_payload": not differences,
+            "differences": [asdict(difference) for difference in differences],
+        }
+        if differences:
+            for difference in differences[:10]:
+                heartbeat(
+                    command,
+                    "refused",
+                    f"{difference.relative_path}: {difference.reason} "
+                    f"expected={difference.expected} observed={difference.observed}",
+                )
+            raise typer.Exit(code=2)
+        heartbeat(
+            command,
+            "published-dataset",
+            f"files={observed.file_count} bytes={observed.total_bytes} identical to the published payload",
+        )
+
+    report_path = out if out is not None else root_path / "artifacts/wheelhouse-identity.json"
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "wheelhouse": {
+            "path": str(house.relative_to(root_path)) if house.is_relative_to(root_path) else str(house)
+        },
+        "upload_bundle": {
+            "tree": bundle.digest.token,
+            "file_count": bundle.file_count,
+            "total_bytes": bundle.total_bytes,
+        },
+        "published_payload": {
+            "tree": published.digest.token,
+            "file_count": published.file_count,
+            "total_bytes": published.total_bytes,
+            "excludes": {
+                "relative_path": configuration[0].relative_path,
+                "size_bytes": configuration[0].size_bytes,
+                "sha256": configuration[0].content_sha256,
+                "why": "Kaggle reads it to create the dataset and does not store it as data",
+            },
+        },
+        "wheels": wheel_rows,
+        "published_dataset": remote_report,
+    }
+    atomic_write_text(report_path, json.dumps(payload, indent=2, sort_keys=True) + chr(10))
+    _write_manifest(
+        command,
+        {
+            "report": str(report_path),
+            "upload_bundle": bundle.digest.token,
+            "published_payload": published.digest.token,
+        },
+    )
+    heartbeat(command, "done", f"two identities recorded in {report_path.name}")
+    typer.echo(json.dumps(payload, sort_keys=True))
+
+
 @data_app.command("fingerprint")
 def data_fingerprint(
     root: Annotated[
