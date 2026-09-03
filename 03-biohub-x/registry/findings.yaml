@@ -692,3 +692,42 @@ findings:
         and the package pins commit b12261a0093f5dd37f18eef23c29143e60374593. It is
         a property of two movies and two epochs, not of the fold.
     superseded_by: null
+
+  - id: F-0025
+    claim: >-
+      A multi-scale Difference-of-Gaussians proposal source on the isotropic grid
+      dominates the classical local-maximum detector on the recall-versus-budget
+      frontier, on the F-0017 window. At a matched proposal budget the classical
+      detector at threshold 0.70 emits 75 proposals and reaches 0.3846 annotated
+      nodes within the official 7 micrometre radius, while DoG at response
+      quantile 0.997 emits 73 and reaches 0.6154. At matched reachability the
+      classical detector needs 310 proposals for 0.7692 while DoG needs 228 for
+      0.7308. DoG reaches 1.0000 at 483 proposals, which is 8.51 times the
+      window's estimated cell count and carries a node-count multiplier of 0.2488.
+    instrument: biohubx.proposals.dog, measured against biohubx.proposals.classical
+    evidence:
+      command: >-
+        load_window on 6bba_2540cd90 frames 0-12, z 0:32, y 128:256, x 128:256,
+        then detect_instances from each source over a response-quantile sweep
+      observed: >-
+        26 annotated nodes, window estimated cells 56.7; classical 75 / 0.3846 and
+        310 / 0.7692; DoG 20 / 0.1923, 44 / 0.4231, 58 / 0.5000, 73 / 0.6154,
+        104 / 0.6538, 228 / 0.7308, 483 / 1.0000
+      note: >-
+        integration_only, and three limits bind it. The measure is reachability,
+        meaning an annotated node has some proposal within 7 micrometres, which is
+        an upper bound on the official node recall that matches one to one; the
+        same classical detector at the same threshold reads 0.3846 here and 0.269
+        officially in F-0017, and that gap is the difference between the two
+        measures rather than a discrepancy. It is one window of one movie carrying
+        26 annotated nodes, on 6bba, which is the dense embryo; 44b6 is twelvefold
+        sparser and is not measured here. And no parameter was selected on a
+        training embryo, so this characterises a detector rather than reporting a
+        fold.
+    validity:
+      scope: proposal_sources_on_one_window
+      holds_while: >-
+        the E01 window in configs/phase3-cpu.yaml is unchanged and the official
+        voxel scale stays (1.625, 0.40625, 0.40625), from which the plane stride of
+        four is derived rather than assumed.
+    superseded_by: null

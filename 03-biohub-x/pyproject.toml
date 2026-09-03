@@ -117,3 +117,9 @@ exclude = ["src/biohubx/_vendor/", "artifacts/"]
 [[tool.mypy.overrides]]
 module = ["numcodecs.*"]
 ignore_missing_imports = true
+
+# scipy ships no stubs for ndimage. Declared here rather than silenced at the
+# import, so the set of untyped dependencies stays readable in one place.
+[[tool.mypy.overrides]]
+module = ["scipy.ndimage.*"]
+ignore_missing_imports = true

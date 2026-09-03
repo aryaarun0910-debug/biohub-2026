@@ -43,6 +43,9 @@ class ProposalSource(StrEnum):
     CLASSICAL_LOCAL_MAXIMUM = "classical_local_maximum"
     """Deterministic local-maximum detector with physical-radius suppression."""
 
+    DOG_MULTISCALE = "dog_multiscale"
+    """Multi-scale Difference-of-Gaussians blob detector on the isotropic grid."""
+
 
 class CandidateInstance(BaseModel):
     """One proposed cell, in both coordinate systems, with its provenance."""
