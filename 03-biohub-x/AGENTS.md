@@ -78,10 +78,21 @@ is a duplicate and must be removed in favour of the registry ID.
 
 ## 4. Experiments
 
-Every experiment declares, before it runs: ID; system or component; hypothesis;
+Biohub-X has two execution lanes.
+
+**Probe lane.** A local or CPU-only probe that cannot promote a component needs
+only a compact machine-readable declaration before it runs: ID; question;
+falsifier or stop condition; inputs; split; budget; and expected output. Probes
+may share one declaration and configuration across a batch of arms. They end as
+`integration_only`, `killed` or `invalid`; a useful signal graduates into a
+promotion experiment rather than being promoted from the probe.
+
+**Promotion lane.** An experiment that can support a finding or promote a
+component declares before it runs: ID; system or component; hypothesis;
 falsifier; inputs and their digests; data split; model configuration; budget;
 expected outputs; forbidden changes; promotion metric; runtime ceiling;
-provenance status.
+provenance status. Arms in one frozen experiment family share these fields
+instead of duplicating a registry entry per arm.
 
 Every completed experiment ends in exactly one status:
 
@@ -91,6 +102,13 @@ Every completed experiment ends in exactly one status:
 
 Promotion is decided by the official competition metric, reported per held-out
 domain and direction, never only pooled.
+
+Local CPU experiments on registered, cleared inputs are standing-authorized and
+do not stop for a per-run go-ahead. Private CPU-only Kaggle diagnostic or
+integration runs are also standing-authorized when they have passed the local
+package gate, use no internet, create no submission, introduce no unregistered
+input, and stay within their declared CPU budget. Every remote attempt is still
+recorded separately.
 
 ## 5. Data and splits
 
@@ -128,7 +146,9 @@ hash-bound source snapshot has a named consumer, and register claims as
 Arya Arun has additionally authorised acquiring public third-party dataset
 inputs, including published model weights such as the DeepCenter centre-prior
 pack, published architectures, and comparable public artifacts, without a
-per-item go-ahead.
+per-item go-ahead. Metadata, manifests and selective samples from public
+alternative datasets are included. A full multi-gigabyte dataset transfer still
+stops with its expected size and storage location before download.
 
 Acquisition is not standing. Section 6 applies in full before any such artifact
 enters the system: source, pinned release, code licence, weight licence,
@@ -140,23 +160,33 @@ produce a held-out finding or promote anything, which access does not change.
 
 This standing authorization does not cover private or access-controlled
 material, executing third-party code, publishing or changing anything
-externally, or an unexpectedly large or binary-heavy acquisition beyond what a
-published weight pack ordinarily is. If a pull contains one of those, stop
-before using it. Copying external code into `src/` still requires its licence,
-pinned identity, attribution and a named consumer under section 6.
+externally except for the private CPU-only Kaggle runs allowed by section 4, or
+an unexpectedly large acquisition beyond a published weight pack or selective
+dataset sample. If a pull contains one of those, stop before using it. Copying
+external code into `src/` still requires its licence, pinned identity,
+attribution and a named consumer under section 6.
 
 These require an explicit go-ahead. Prepare the artifacts, print the gate, and
 stop:
 
-- downloading model weights or large external datasets;
-- any GPU run;
-- any Kaggle kernel push;
+- downloading a full multi-gigabyte external dataset;
+- any GPU run not already inside an approved campaign envelope;
+- any Kaggle kernel push outside the CPU-only allowance in section 4 or an
+  approved GPU campaign envelope;
 - any competition submission;
 - any change to `.gitattributes`, the canonicalization version, or the
   quarantine list.
 
 Preflight on CPU with preregistered tiny inputs first, and report the exact
 inputs before requesting the run.
+
+A GPU go-ahead may authorize a bounded campaign rather than one immutable
+package digest: it names the objective, allowed inputs, hardware class, maximum
+pushes or runs, total compute budget, permitted arms and repair policy. Within
+that envelope, a package may be rebuilt and a failed integration attempt retried
+without another approval when the local gate passes and neither the scientific
+configuration nor the authorized inputs or budget change. Every package digest
+and attempt remains recorded. Anything outside the envelope stops and reports.
 
 ## 8. Branches
 

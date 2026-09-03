@@ -1148,3 +1148,51 @@ interface; it would not make any score built on it evidence.
 
 Large weights are never committed to Git, and raw captures stay outside it under
 [[D-0035]]. What enters the repository is the registry record, not the bytes.
+
+## D-0037 - Exploration runs as a factory; promotion remains a gate
+
+**Date:** 2026-09-03
+**Status:** accepted
+**Authorised by:** Arya Arun
+
+Per-source approval was only one serial bottleneck. Treating every cheap question
+as a promotion experiment imposed the same registry packet on a CPU probe and a
+held-out model comparison, while requiring a fresh authorization for every
+package digest turned packaging repairs into human scheduling work. Arya Arun
+authorises a research-and-test factory that continuously turns noisy public
+signals into cheap falsification, without lowering the standard for a finding.
+
+Biohub-X therefore has two execution lanes.
+
+**The probe lane is deliberately light.** A local or CPU-only probe that cannot
+promote anything declares only its ID, question, falsifier or stop condition,
+inputs, split, budget and expected output. Multiple arms may share one declaration
+and configuration. Local CPU probes on registered, cleared inputs need no
+per-run approval. Private CPU-only Kaggle diagnostic and integration pushes also
+have standing authorization when their local package gate passes, internet is
+disabled, no submission is created, every input is registered and the declared
+CPU budget is bounded. Every remote attempt remains a separate record. A probe
+ends `integration_only`, `killed` or `invalid`; a useful signal graduates into a
+promotion experiment rather than acquiring standing by enthusiasm.
+
+**The promotion lane keeps the full contract.** Anything that can enter
+`registry/findings.yaml` or promote a component declares the existing hypothesis,
+falsifier, typed input identities, clean split, frozen configuration, budget,
+outputs, forbidden changes, official promotion metric, ceiling and provenance.
+Results remain per held-out embryo and never pooled only. Shared fields belong to
+one experiment-family declaration instead of being copied into a row for every
+arm.
+
+**GPU approval is an envelope, not necessarily one digest.** A human go-ahead may
+name an objective, allowed inputs, hardware class, maximum pushes or runs, total
+compute budget, permitted arms and repair policy. Within that envelope, a
+package may be rebuilt and an integration failure retried without a new approval
+when the local gate passes and the scientific configuration, inputs and budget
+do not change. Every digest and attempt is still recorded. Work outside the
+envelope stops. A competition submission always retains its own explicit gate.
+
+This removes ceremony, not controls: the prior-campaign quarantine, provenance,
+unlabelled-region semantics, fold isolation, official metric, artifact identity
+and submission gate are unchanged. It also does not reward repository growth.
+Failed probes leave machine-readable reports and Git history, not dead modules,
+notebooks, Markdown packets or one bespoke test per idea.

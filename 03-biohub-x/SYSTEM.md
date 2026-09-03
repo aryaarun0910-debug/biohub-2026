@@ -549,9 +549,20 @@ hash-bound snapshot has a named consumer. Intake creates neither a new Markdown
 file nor a bespoke test per source; mechanisms are deduplicated into a compact
 hypothesis queue and earn code only through a preregistered experiment.
 
-This does not relax the prior-campaign quarantine or authorize weights,
-datasets, third-party code execution, GPU work, Kaggle pushes, submissions or
-other external writes.
+This does not relax the prior-campaign quarantine or turn acquisition into
+evidence. Public weights and selective alternative-data samples may be acquired
+under [[D-0036]] with full provenance; private material, third-party code
+execution, unbounded transfers and submissions remain outside the standing
+authorization.
+
+The research-and-test factory uses two lanes under [[D-0037]]. Compact probes
+run locally or CPU-only to eliminate weak ideas cheaply; they cannot promote a
+component. Promotion experiments retain the full preregistration, clean embryo
+folds, official metric and per-fold reporting. Shared experiment-family fields
+are declared once rather than copied per arm. Local CPU work and bounded private
+CPU Kaggle diagnostics are standing-authorized. GPU work uses an approved
+campaign envelope so implementation repairs and listed arms do not return for a
+new approval on every package digest; submissions remain individually gated.
 
 `research/shortlist.yaml` is empty at Phase 0 by construction: a primitive may
 enter it only when a live Biohub-X component consumes it.
