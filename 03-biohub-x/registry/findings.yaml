@@ -731,3 +731,42 @@ findings:
         voxel scale stays (1.625, 0.40625, 0.40625), from which the plane stride of
         four is derived rather than assumed.
     superseded_by: null
+
+  - id: F-0026
+    claim: >-
+      A multi-scale Difference-of-Gaussians proposal source reaches roughly twice
+      as many annotated cells as the classical local-maximum detector, on both
+      embryos, at every node budget swept. Over all 199 annotated training movies
+      at two annotated frames each, covering 394 annotated nodes on 44b6 and 1,762
+      on 6bba, reachability at the neutral budget of one times the estimated cell
+      count is 0.7614 against 0.3528 on 44b6 and 0.6288 against 0.3610 on 6bba.
+      Selecting the budget on one embryo and freezing it before measuring the
+      other, both folds improve: fold_44b6 selects ratio 2.0 and reads 0.7770
+      against 0.4523 on held-out 6bba, and fold_6bba selects ratio 2.0 and reads
+      0.7944 against 0.3629 on held-out 44b6. At the one point where the two
+      sources emit almost the same number of proposals, 6bba with classical at
+      31,045 and DoG at 31,482, DoG reaches 0.5539 against 0.4523.
+    instrument: biohubx evaluate proposals
+    evidence:
+      command: biohubx evaluate proposals
+      observed: artifacts/proposals.json, 199 movies, 0 skipped, 491.9 seconds
+      note: >-
+        integration_only, and three qualifications bind it. Reachability
+        upper-bounds the official one-to-one node recall and is not it. Both folds
+        selected the largest ratio in the sweep, which is a boundary selection: the
+        optimum may lie outside the swept range, so 2.0 is where the sweep stopped
+        rather than where the curve turned. And neither source fills its budget
+        above ratio 0.75, so the comparison at higher ratios is between two sources
+        at their natural operating points rather than at a genuinely matched count.
+        The single matched-count comparison that does exist, on 6bba, shows the
+        smaller margin of the two, +22 percent relative rather than +115 percent,
+        and it is the more conservative number to reason from.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, the official voxel scale stays
+        (1.625, 0.40625, 0.40625) from which the plane stride is derived, the
+        matching radius stays the official 7 micrometres, and the node budget
+        continues to come from each movie's own estimated_number_of_nodes. Two
+        annotated frames per movie were read, not whole movies.
+    superseded_by: null

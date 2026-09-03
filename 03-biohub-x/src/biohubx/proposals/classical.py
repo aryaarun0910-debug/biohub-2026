@@ -105,13 +105,33 @@ def suppressed_maxima(
     order = np.lexsort((above[:, 2], above[:, 1], above[:, 0], -values))
 
     spacing = np.array(spacing_um, dtype=np.float64)
-    accepted_physical: list[np.ndarray] = []
+    # Accepted points are bucketed on a grid whose cell is the suppression radius,
+    # so a candidate only has to be compared with the 27 buckets around it rather
+    # than with everything accepted so far. That is exact, not an approximation:
+    # any point within the radius necessarily lies in one of those buckets. The
+    # brute-force form was quadratic and became the binding cost once a permissive
+    # threshold on a full-extent frame offered ten thousand candidates.
+    buckets: dict[tuple[int, int, int], list[np.ndarray]] = {}
     accepted: list[tuple[tuple[float, float, float], float]] = []
+    neighbourhood = [(dz, dy, dx) for dz in (-1, 0, 1) for dy in (-1, 0, 1) for dx in (-1, 0, 1)]
     for index in order:
         voxel = above[index].astype(np.float64)
         physical = voxel * spacing
-        if any(float(np.linalg.norm(physical - taken)) < radius_um for taken in accepted_physical):
+        cell = (
+            int(np.floor(physical[0] / radius_um)),
+            int(np.floor(physical[1] / radius_um)),
+            int(np.floor(physical[2] / radius_um)),
+        )
+        crowded = False
+        for offset in neighbourhood:
+            near = buckets.get((cell[0] + offset[0], cell[1] + offset[1], cell[2] + offset[2]))
+            if not near:
+                continue
+            if float(np.min(np.linalg.norm(np.asarray(near) - physical, axis=1))) < radius_um:
+                crowded = True
+                break
+        if crowded:
             continue
-        accepted_physical.append(physical)
+        buckets.setdefault(cell, []).append(physical)
         accepted.append(((float(voxel[0]), float(voxel[1]), float(voxel[2])), float(values[index])))
     return accepted

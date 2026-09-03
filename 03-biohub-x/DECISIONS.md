@@ -1297,3 +1297,39 @@ A successful experiment only qualifies a component for integration; changing
 the canonical pipeline or merging it into `main` requires Arya Arun or a named
 delegated controller to approve promotion. The prior-campaign quarantine remains
 absolute.
+
+## D-0040 - An optimisation that changes an answer is not an optimisation
+
+**Date:** 2026-09-04
+**Status:** accepted
+
+Physical-radius suppression compared each candidate with every point accepted so
+far, in a Python loop. On the small windows it was written for that was fine. On a
+full-extent frame at a permissive threshold it is ten thousand candidates against
+a thousand accepted, and E04's first run did not finish.
+
+It is now bucketed: accepted points are indexed on a grid whose cell is the
+suppression radius, and a candidate is compared only with the twenty-seven cells
+around it. **This is exact rather than approximate**, because any point within the
+radius necessarily falls in one of those cells, and that is the only reason it is
+acceptable here.
+
+The reason it has to be exact is that four recorded findings rest on this
+detector's output. [[F-0006]] counts its instances on the synthetic fixture,
+[[F-0017]] its node recall and candidate reach on real bytes, [[F-0019]] its
+proposals after peak extraction, and [[F-0025]] its reachability against DoG. A
+suppression that returned a different set would silently invalidate all four while
+every test that only checks shapes kept passing.
+
+So the equivalence is asserted rather than argued. A test builds a random frame,
+runs the bucketed implementation, and independently reimplements the brute-force
+version inside the test rather than refactoring the original into it, then
+requires the two to return the same points in the same order. The end-to-end slice
+that F-0006 rests on runs unchanged alongside it.
+
+**The other half of the fix was not the algorithm.** E04's first attempt also
+passed the classical detector an absolute intensity threshold of 0.30, which on a
+normalised full-extent frame admits millions of candidates and means something
+different on every movie. Both sources are now cut at a quantile of their own
+response. The threshold stops being the thing that differs between them, which is
+what lets the node budget be the thing that is matched.

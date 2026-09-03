@@ -437,3 +437,99 @@ experiments:
     budget_consumed:
       pushes: 1 of 2 permitted
       gpu_minutes: about 1.7 of 80 permitted
+  - id: E04
+    component: proposal_detector
+    hypothesis: >-
+      A multi-scale Difference-of-Gaussians proposal source, with its budget and
+      scale bank selected on one embryo, reaches more annotated cells of the other
+      embryo than the classical local-maximum detector does at the same node
+      budget.
+    falsifier: >-
+      Killed if, at a matched node budget, DoG fails to improve reachability over
+      the classical baseline on either held-out embryo. One embryo improving and
+      the other not is a challenger, never a promotion. A pooled-only result is
+      not a result.
+    inputs:
+      - the 199 annotated competition.train .geff and .zarr artifacts
+      - configs/e04-dog-proposals.yaml
+    split:
+      scheme: leave_one_embryo_out
+      folds:
+        - id: fold_44b6
+          select_on: 44b6
+          evaluate_on: 6bba
+        - id: fold_6bba
+          select_on: 6bba
+          evaluate_on: 44b6
+      never_read: the public-test directory, for any purpose
+    model_config:
+      path: configs/e04-dog-proposals.yaml
+      section: E04
+      canonical_text: canonical_text_sha256:sha256/v1:e85a67c9406ef1dd2de5c1616a7486a857c18a9e23f0cfb908dde4f93d119f94
+    budget: CPU only, no GPU, no network, no download
+    expected_outputs:
+      - artifacts/proposals.json
+      - reachability per embryo, per source, per node budget, never pooled
+    forbidden_changes:
+      - the official 7 micrometre matching radius
+      - the node budget's origin, which is each movie's own estimated_number_of_nodes
+      - the fold definition
+    promotion_metric: >-
+      Reachability on the held-out embryo at a matched node budget. This cannot
+      promote a component on its own, because reachability is not the official
+      metric; it decides whether the proposal source is worth carrying into a
+      scored experiment.
+    mandatory_outputs:
+      - reachability per embryo
+      - the node budget each number was measured at
+      - each fold reported on its own
+    runtime_ceiling: 3600 seconds
+    provenance_status: external_cleared
+    measure_is_not_node_recall: >-
+      Reachability counts an annotated node as reached when some proposal lies
+      within the official radius in the same frame. It upper-bounds the official
+      one-to-one node recall and is not it: the same classical detector reads
+      0.3846 by this measure and 0.269 officially on the F-0017 window ([[F-0025]]).
+      It is used because an annotated endpoint with no nearby proposal cannot be
+      matched by any association method, so it is the ceiling every later stage
+      works under.
+    selection_leakage_argument: >-
+      The budget comes from each movie's own estimated_number_of_nodes, which is
+      official metadata present for every movie including unannotated ones, so
+      nothing about the held-out embryo's annotations enters the selection. The
+      budget ratio and scale bank are chosen on the training embryo and frozen
+      before the evaluation embryo is measured.
+    independence: >-
+      The mechanism is scale-space blob detection from primary literature and the
+      isotropic plane stride is derived from OFFICIAL_VOXEL_SCALE, which
+      biohubx.proposals.classical already documented. No constant is inherited
+      from any external analysis.
+    status: challenger
+    result: F-0026
+    status_reasoning: >-
+      Both folds improve independently, which the falsifier required and which
+      would normally justify promotion. It is a challenger rather than promoted
+      for the reason E04's own promotion_metric states: reachability is not the
+      official metric, and no component is promoted on a diagnostic. What this
+      earns the DoG source is a place in a scored experiment, not a place in the
+      pipeline. Promotion also requires Arya Arun's approval under [[D-0039]].
+    what_would_promote_it: >-
+      An end-to-end run on both embryo folds, scored through the pinned official
+      metric, where DoG proposals beat classical ones on the combined score rather
+      than on reachability. That run needs association to exist, since [[F-0026]]
+      raises the ceiling every later stage works under and does not itself close
+      any edge.
+    open_questions_this_raised:
+      - >-
+        Both folds selected the largest budget in the sweep. The curve is still
+        rising at 2.0 times the estimated cell count, so the useful range has not
+        been bracketed and the node-count cost of going further is unmeasured.
+      - >-
+        Neither source fills its budget above 0.75, so the matched-budget design
+        did not fully bind. A fair comparison needs each source truncated to the
+        other's actual count, which the aggregate as collected cannot reconstruct.
+      - >-
+        Reachability near 0.79 still leaves a fifth of annotated cells unproposed.
+        Whether the remainder is dim, non-Gaussian or simply outside the scale
+        bank decides whether a learned detector is complementary to DoG or
+        redundant with it, which is the union question in the queue.

@@ -69,3 +69,39 @@ def test_a_flat_volume_proposes_nothing_and_says_so() -> None:
     already refuse it."""
     with pytest.raises(ValueError, match="proposed nothing"):
         detect_instances(np.zeros((1, 8, 32, 32), dtype=np.float32), dataset=DATASET)
+
+
+def test_bucketed_suppression_agrees_exactly_with_brute_force() -> None:
+    """The bucket search must be an optimisation, not a different algorithm.
+
+    F-0006, F-0017, F-0019 and F-0025 all rest on this detector's output, so a
+    suppression that returns a different set would silently invalidate them. The
+    bucketing is exact because any point within the radius lies in one of the 27
+    surrounding cells; this asserts that rather than trusting the argument.
+    """
+    from biohubx.proposals.classical import suppressed_maxima
+
+    rng = np.random.default_rng(20260904)
+    frame = rng.random((12, 40, 40)).astype(np.float32)
+    spacing = (1.625, 1.625, 1.625)
+    radius = 4.0
+
+    fast = suppressed_maxima(frame, threshold=0.9, radius_um=radius, spacing_um=spacing)
+
+    # Brute force, written out here so the reference is independent of the code
+    # under test rather than a refactor of it.
+    above = np.argwhere(frame >= 0.9)
+    values = frame[above[:, 0], above[:, 1], above[:, 2]]
+    order = np.lexsort((above[:, 2], above[:, 1], above[:, 0], -values))
+    taken: list[np.ndarray] = []
+    slow: list[tuple[tuple[float, float, float], float]] = []
+    for index in order:
+        voxel = above[index].astype(np.float64)
+        physical = voxel * np.array(spacing)
+        if any(float(np.linalg.norm(physical - other)) < radius for other in taken):
+            continue
+        taken.append(physical)
+        slow.append(((float(voxel[0]), float(voxel[1]), float(voxel[2])), float(values[index])))
+
+    assert len(fast) == len(slow)
+    assert [point for point, _ in fast] == [point for point, _ in slow]

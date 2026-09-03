@@ -1598,6 +1598,238 @@ def evaluate_retention(
     typer.echo(json.dumps({"crossover": crossings}, sort_keys=True))
 
 
+@evaluate_app.command("proposals")
+def evaluate_proposals(
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    frames: Annotated[int, typer.Option("--frames", help="Annotated frames per movie.")] = 2,
+    ratios: Annotated[
+        str, typer.Option("--ratios", help="Comma-separated node budgets, as multiples of the estimate.")
+    ] = "0.5,0.75,1.0,1.5,2.0",
+    max_movies: Annotated[
+        int, typer.Option("--max-movies", help="Cap movies per embryo. 0 uses every annotated movie.")
+    ] = 0,
+    out: Annotated[
+        Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/proposals.json.")
+    ] = None,
+) -> None:
+    """Compare proposal sources at a matched node budget, per embryo.
+
+    The E04 probe. Every source is truncated to the same budget, taken from each
+    movie's own official estimated_number_of_nodes, so the comparison measures
+    detector quality rather than how much each source was allowed to emit.
+
+    Reads a bounded window of each annotated training movie and never the
+    public-test directory. Reports each embryo separately, because a pooled number
+    over two embryos differing twelvefold in annotation density would describe
+    neither.
+    """
+    command = "evaluate proposals"
+    import numpy as np
+
+    from biohubx.data.competition import (
+        CompetitionLayoutError,
+        WindowSelection,
+        competition_root,
+        load_ground_truth,
+        load_window,
+    )
+    from biohubx.evaluation.proposals import (
+        measure_reachability,
+        normalise_for_classical,
+        truncate_to_budget,
+    )
+    from biohubx.proposals import classical, dog
+
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    train_dir = data_root / "train"
+    movies = sorted(path.stem for path in train_dir.glob("*.geff"))
+    if not movies:
+        heartbeat(command, "refused", f"no annotated training datasets under {train_dir}")
+        raise typer.Exit(code=2)
+    budgets = tuple(float(item) for item in ratios.split(","))
+    if any(value <= 0 for value in budgets):
+        heartbeat(command, "refused", f"every budget ratio must be positive, got {budgets}")
+        raise typer.Exit(code=2)
+
+    by_embryo: dict[str, list[str]] = {}
+    for dataset_id in movies:
+        by_embryo.setdefault(dataset_id.split("_", 1)[0], []).append(dataset_id)
+    if max_movies:
+        by_embryo = {embryo: ids[:max_movies] for embryo, ids in by_embryo.items()}
+    heartbeat(
+        command,
+        "start",
+        " ".join(f"{embryo}={len(ids)}" for embryo, ids in sorted(by_embryo.items()))
+        + f" frames={frames} ratios={list(budgets)}",
+    )
+
+    started = time.monotonic()
+    # embryo -> source -> ratio -> [reached, annotated, proposals]
+    totals: dict[str, dict[str, dict[float, list[float]]]] = {}
+    skipped = 0
+    for embryo, dataset_ids in sorted(by_embryo.items()):
+        for index, dataset_id in enumerate(dataset_ids):
+            truth = load_ground_truth(data_root, dataset_id)
+            annotated_frames = sorted({node.frame for node in truth.lineage.nodes})
+            if not annotated_frames:
+                skipped += 1
+                continue
+            first = min(annotated_frames[0], max(0, truth.frames - frames))
+            depth, height, width = _open_volume(data_root / "train" / f"{dataset_id}.zarr").shape[1:]
+            try:
+                window = load_window(
+                    data_root,
+                    WindowSelection(dataset_id, first, frames, 0, depth, 0, height, 0, width),
+                    split="train",
+                )
+            except ValueError as exc:
+                heartbeat(command, "skip", f"{dataset_id}: {exc}")
+                skipped += 1
+                continue
+            if not window.annotated.nodes:
+                skipped += 1
+                continue
+
+            dataset = window.annotated.dataset
+            estimate = float(window.window_estimated_total_nodes)
+            # Detected once per source at a permissive setting, then truncated to
+            # each budget. Re-detecting per budget would multiply the cost and
+            # could not change which proposals rank highest.
+            # Both sources are cut at a quantile of their own response, not at an
+            # absolute number. An absolute intensity threshold admits millions of
+            # candidates on a full-extent frame and means something different on
+            # every movie; a quantile bounds the candidate pool symmetrically and
+            # leaves the budget, not the threshold, as the thing being matched.
+            normalised = normalise_for_classical(window.volume)
+            intensity_cut = float(np.clip(np.quantile(normalised, 0.997), 1e-6, 1.0 - 1e-6))
+            proposal_sets = {
+                "classical": classical.detect_instances(normalised, dataset=dataset, threshold=intensity_cut),
+                "dog": dog.detect_instances(window.volume, dataset=dataset, response_quantile=0.97),
+            }
+            for name, instances in proposal_sets.items():
+                for ratio in budgets:
+                    budget = max(1, round(ratio * estimate))
+                    reach = measure_reachability(
+                        truncate_to_budget(instances, budget),
+                        window.annotated,
+                        estimated_total_nodes=estimate,
+                    )
+                    bucket = (
+                        totals.setdefault(embryo, {})
+                        .setdefault(name, {})
+                        .setdefault(ratio, [0.0, 0.0, 0.0, 0.0])
+                    )
+                    bucket[0] += reach.reached
+                    bucket[1] += reach.annotated_nodes
+                    bucket[2] += reach.proposals
+                    bucket[3] += budget
+            if (index + 1) % 25 == 0:
+                heartbeat(command, "measured", f"{embryo} {index + 1}/{len(dataset_ids)}")
+        heartbeat(command, "embryo", f"{embryo} done")
+
+    rows: list[dict[str, object]] = []
+    for embryo, sources in sorted(totals.items()):
+        for name, per_ratio in sorted(sources.items()):
+            for ratio, (reached, annotated, proposals, allowed) in sorted(per_ratio.items()):
+                rows.append(
+                    {
+                        "embryo": embryo,
+                        "source": name,
+                        "budget_ratio": ratio,
+                        "reachability": round(reached / annotated, 6) if annotated else 0.0,
+                        "annotated_nodes": int(annotated),
+                        "reached": int(reached),
+                        "proposals": int(proposals),
+                        "budget_allowed": int(allowed),
+                        # When a source cannot fill its budget the comparison is
+                        # at its natural operating point, not at a matched one,
+                        # and saying so is the difference between a measurement
+                        # and a misreading.
+                        "budget_filled": bool(allowed) and proposals >= allowed * 0.99,
+                    }
+                )
+
+    # Selection happens on one embryo and is judged on the other, never both.
+    folds = []
+    embryos = sorted(totals)
+    for select_on in embryos:
+        evaluate_on = [other for other in embryos if other != select_on]
+        if len(evaluate_on) != 1:
+            continue
+        held_out = evaluate_on[0]
+        candidates = [row for row in rows if row["embryo"] == select_on and row["source"] == "dog"]
+        if not candidates:
+            continue
+        best = max(
+            candidates,
+            key=lambda row: (float(str(row["reachability"])), -float(str(row["budget_ratio"]))),
+        )
+        ratio = float(str(best["budget_ratio"]))
+        held = next(
+            row
+            for row in rows
+            if row["embryo"] == held_out and row["source"] == "dog" and row["budget_ratio"] == ratio
+        )
+        baseline = next(
+            row
+            for row in rows
+            if row["embryo"] == held_out and row["source"] == "classical" and row["budget_ratio"] == ratio
+        )
+        folds.append(
+            {
+                "fold_id": f"fold_{select_on}",
+                "selected_on": select_on,
+                "evaluated_on": held_out,
+                "selected_budget_ratio": ratio,
+                "selection_reachability": best["reachability"],
+                "held_out_dog_reachability": held["reachability"],
+                "held_out_classical_reachability": baseline["reachability"],
+                "improves_over_classical": float(str(held["reachability"]))
+                > float(str(baseline["reachability"])),
+            }
+        )
+        heartbeat(
+            command,
+            "fold",
+            f"select={select_on} ratio={ratio} -> held-out {held_out}: "
+            f"dog={float(str(held['reachability'])):.4f} "
+            f"classical={float(str(baseline['reachability'])):.4f}",
+        )
+
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "experiment": "E04",
+        "frames_per_movie": frames,
+        "budget_ratios": list(budgets),
+        "movies_skipped": skipped,
+        "measure": "reachability: an annotated node with some proposal within 7 um, per frame",
+        "rows": rows,
+        "folds": folds,
+        "both_folds_improve": bool(folds) and all(bool(fold["improves_over_classical"]) for fold in folds),
+        "runtime_seconds": round(time.monotonic() - started, 3),
+        "limits": (
+            "Reachability upper-bounds the official one-to-one node recall and is not it. Budgets "
+            "come from each movie's own estimated_number_of_nodes, which is official metadata, so "
+            "nothing about the held-out embryo enters the selection. A bounded window of each movie "
+            "is read, not the whole movie."
+        ),
+    }
+    report_path = out if out is not None else repository_root() / "artifacts/proposals.json"
+    atomic_write_text(report_path, json.dumps(payload, indent=2, sort_keys=True) + chr(10))
+    _write_manifest(command, {"report": str(report_path), "experiment": "E04"})
+    heartbeat(command, "done", f"both folds improve: {payload['both_folds_improve']}")
+    typer.echo(json.dumps({k: v for k, v in payload.items() if k != "rows"}, sort_keys=True))
+
+
 @evaluate_app.command("track-length")
 def evaluate_track_length(
     root: Annotated[
