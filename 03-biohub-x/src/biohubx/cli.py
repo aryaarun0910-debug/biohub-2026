@@ -2309,9 +2309,30 @@ def package_kaggle(
         "extracts_to": "/kaggle/working/biohubx-package",
         "imports_from_kaggle_input": False,
     }
+    # A smoke from an earlier build is not evidence about this one. The manifest
+    # records the commit it ran at, so a stale one is named as stale rather than
+    # presented beside a fresh package as though it belonged to it. This is the
+    # same refusal `evaluate slice` makes about a stored graph.
     smoke_manifest = gate_out / f"result-{spec.fold.fold_id}.json"
     if smoke_manifest.is_file():
-        payload["local_smoke"] = json.loads(smoke_manifest.read_text(encoding="utf-8"))
+        stored = json.loads(smoke_manifest.read_text(encoding="utf-8"))
+        stored_commit = str(stored.get("spec", {}).get("commit", ""))
+        if stored_commit == commit:
+            payload["local_smoke"] = stored
+        else:
+            payload["local_smoke"] = {
+                "state": "stale, not this build",
+                "ran_at_commit": stored_commit,
+                "this_package_pins": commit,
+                "note": "re-run with --smoke-local to exercise the entry point at this commit",
+            }
+            heartbeat(
+                command,
+                "local-smoke",
+                f"stale: the stored smoke ran at {stored_commit[:12]}, this package pins {commit[:12]}",
+            )
+    else:
+        payload["local_smoke"] = {"state": "not run; pass --smoke-local to exercise the entry point"}
 
     report = root_path / "artifacts/kaggle-package.json"
     atomic_write_text(report, json.dumps(payload, indent=2, sort_keys=True) + "\n")
