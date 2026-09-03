@@ -549,10 +549,19 @@ hash-bound snapshot has a named consumer. Intake creates neither a new Markdown
 file nor a bespoke test per source; mechanisms are deduplicated into a compact
 hypothesis queue and earn code only through a preregistered experiment.
 
+[[D-0039]] makes that intake autonomous and cross-domain. The controller may
+branch, follow citations, crawl bounded public unauthenticated sources, inspect
+notebook-linked resources and search by transferable primitive until marginal
+information gain falls relative to the shared resource budget. External values
+may seed provenance-labelled probe grids but cannot become production priors.
+Every acquired artifact is traceable through the research ledger, and duplicate
+suppression applies across agents and branches.
+
 This does not relax the prior-campaign quarantine or turn acquisition into
 evidence. Public weights and selective alternative-data samples may be acquired
-under [[D-0036]] with full provenance; private material, third-party code
-execution, unbounded transfers and submissions remain outside the standing
+under [[D-0036]] with full provenance. Third-party code may execute only inside
+the disposable sandbox specified by [[D-0039]]; private material, hard resource
+limits, unscoped external writes and submissions remain outside the standing
 authorization.
 
 The research-and-test factory uses two lanes under [[D-0037]]. Compact probes
@@ -563,6 +572,9 @@ are declared once rather than copied per arm. Local CPU work and bounded private
 CPU Kaggle diagnostics are standing-authorized. GPU work uses an approved
 campaign envelope so implementation repairs and listed arms do not return for a
 new approval on every package digest; submissions remain individually gated.
+Passing the scientific promotion gate qualifies a component, but integration
+into the canonical pipeline still requires Arya Arun or a named delegated
+controller to approve it.
 
 `research/shortlist.yaml` is empty at Phase 0 by construction: a primitive may
 enter it only when a live Biohub-X component consumes it.

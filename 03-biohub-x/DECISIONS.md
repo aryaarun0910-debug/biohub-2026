@@ -1238,3 +1238,62 @@ were set to `NvidiaTeslaT4` and the command line carried `--accelerator
 NvidiaTeslaT4`, and two cards still arrived. Whether an accelerator request can
 pin a count at all is unmeasured, and no further request will be described as
 pinning one until it is.
+
+## D-0039 - Research may roam and execute in isolation; integration and external writes remain gated
+
+**Date:** 2026-09-04
+**Status:** accepted
+**Authorised by:** Arya Arun
+
+[[D-0035]] broadened what Biohub-X could read and [[D-0037]] made cheap
+falsification a factory, but neither defined autonomous citation traversal,
+scraping, third-party execution, shared resource limits or durable raw-source
+provenance. Leaving those to interpretation made a broad authorization behave
+conservatively in one turn and expansively in another.
+
+Research autonomy is now explicit. A controller may decompose a question, spawn
+parallel branches, follow citations recursively, cross disciplinary boundaries,
+compare public implementations, abandon weak routes and repeat retrieval passes
+without an artificial search-depth or agent-hop limit. The stopping rule is
+marginal information gain relative to a shared request, transfer, time and disk
+budget, not a fixed paper count.
+
+Bounded scraping is authorized for genuinely public, unauthenticated resources
+reachable through ordinary HTTP. Authentication barriers, paywalls, CAPTCHAs,
+private APIs, credential reuse, IP rotation and anti-bot circumvention stay out
+of scope. Agents use conservative per-host concurrency, back off on 429 and 503,
+honour explicit rate limits and share counters so a hard limit cannot be evaded
+by splitting work. The three-tier resource envelope in `AGENTS.md` distinguishes
+autonomous work, continued work after a marginal-value check, and a hard stop.
+
+Public notebook-linked resources may be fetched automatically within that
+envelope. Research-cache acquisition is deliberately separated from system
+incorporation: acquiring bytes permits inspection, not use as evidence or a
+Biohub-X input. Each artifact receives a machine-readable ledger record and
+important claims trace to an exact location. Metadata survives payload eviction;
+raw captures remain outside Git unless a hash-bound snapshot has a named
+consumer. Parallel agents check the ledger and cache before downloading, so
+autonomy does not multiply large transfers.
+
+Third-party code may execute, including installation, tests, notebooks,
+inference and instrumentation, but only in a disposable sandbox with no secrets,
+no general host mount, no external writes, bounded processes and resources, and
+networking disabled or separately declared. The user's ordinary workstation
+shell is not such a sandbox. Trust escalates from static inspection to dependency
+inspection to isolated execution and then, only when separately controlled, to
+network access.
+
+External constants may freely seed provenance-labelled exploratory grids. They
+remain hypotheses until the target data, a clean validation experiment, physical
+reasoning or an official constraint independently supports them. This removes a
+discovery bottleneck without turning a neighboring paper's configuration into a
+biological fact.
+
+The autonomy ends at consequence boundaries. Private material, hard resource
+limits, unscoped GPU work, submissions and external writes still stop. Existing
+explicit standing grants, such as bounded private CPU-only Kaggle diagnostics,
+remain explicit grants rather than becoming an implied general write authority.
+A successful experiment only qualifies a component for integration; changing
+the canonical pipeline or merging it into `main` requires Arya Arun or a named
+delegated controller to approve promotion. The prior-campaign quarantine remains
+absolute.
