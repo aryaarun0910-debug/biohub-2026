@@ -981,3 +981,55 @@ at runtime or kept for provenance.
 is not a defence against the account holder. Anyone able to replace the dataset
 can still replace it. What they can no longer do is have the run proceed, which is
 the difference between a substitution that is caught and one that installs.
+
+## D-0033 - The identity locates the input as well as verifying it
+
+**Date:** 2026-09-03
+**Status:** accepted
+
+E03-WHEELHOUSE-PREFLIGHT-01 was authorised, pushed, and refused in 8.752 seconds
+because `/kaggle/input/biohubx-wheelhouse-zarr-cp312-linux` does not exist on the
+image. The dataset was attached: Kaggle's own recorded kernel metadata lists it
+and the dataset reports ready. The path was the guess that failed ([[R-0007]]).
+
+The evidence was already in hand and went unused. E03-SMOKE-02 established that
+competition data lives at `/kaggle/input/competitions/<slug>` on this image, so
+inputs are not mounted at `/kaggle/input/<slug>`. The competition path was checked
+against that measurement before the push and the wheelhouse path three lines above
+it was not, which is the same adjacent-check failure this repository keeps
+recording, committed by the agent that had just written up the previous instance.
+
+The response is not a better guess. **The package already carries the tree's
+identity for [[D-0032]], and an identity answers a stronger question than a path
+does: a name says where to look, a digest says when you have actually found it.**
+So the search enumerates what is mounted and selects the tree whose canonical
+digest equals the embedded one. Locating and verifying then rest on one fact
+rather than two, and the layout stops being something this repository has to know.
+
+Three properties keep it honest.
+
+**Shape is checked before anything is hashed, with an early abort.** A candidate
+larger than the tree being sought cannot be that tree, so the walk abandons it the
+moment the file count or byte total is exceeded. The competition mount is a corpus
+of hundreds of chunked volumes and must never be read to find a directory of four
+wheels. Measured on a simulated mount with a 480-file corpus-shaped decoy: three
+trees hashed, none of them the decoy, 0.369 seconds.
+
+**The enumeration is bounded and single-level, never a recursive glob**, four
+levels deep, which covers a plain mount, a mount under a kind, and a mount under a
+kind and an owner, with one spare. A test asserts no `rglob` and no `**` reaches
+the generated notebook.
+
+**A miss refuses with a listing of what is actually mounted.** The previous
+refusal named the path it wanted and not the paths it had, so its log could not
+distinguish a dataset that was never attached from one mounted elsewhere. That
+distinction is worth a run, and this is what stops it costing one.
+
+A directory containing only the wheelhouse has the wheelhouse's shape, is
+therefore hashed, and is rejected on identity. That is not waste; it is the reason
+the criterion is the digest and not the shape.
+
+**What this does not settle.** Where Kaggle actually mounts a private dataset on
+this image remains unmeasured, and this decision deliberately removes the need to
+know. If the next run resolves, the path it reports becomes a Biohub-X
+measurement rather than an assumption.

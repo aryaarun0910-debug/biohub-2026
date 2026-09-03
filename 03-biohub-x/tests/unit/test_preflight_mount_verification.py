@@ -209,3 +209,124 @@ def test_a_bare_hexadecimal_expectation_is_refused_because_it_states_no_kind() -
         build_preflight_notebook(
             SPEC, published_payload={"tree": "a" * 64, "records": [["f", "x", "1", "a"]]}
         )
+
+
+# --- locating the wheelhouse by its identity rather than by a guessed path ---
+
+
+def payload_for(root: Path) -> dict[str, Any]:
+    """The embedded expectation for a real tree, as the builder would compute it."""
+    manifest = tree_digest(root)
+    return {
+        "tree": manifest.digest.token,
+        "records": [
+            [
+                record.kind,
+                "-" if record.content_sha256 is None else record.content_sha256,
+                "-" if record.size_bytes is None else str(record.size_bytes),
+                record.relative_path,
+            ]
+            for record in manifest.records
+        ],
+    }
+
+
+def test_the_wheelhouse_is_found_wherever_it_is_mounted(tmp_path: Path) -> None:
+    """A path is a guess. The digest the package carries is not, so it locates too.
+
+    The same tree is planted at three different depths and found at each, without
+    the resolver being told any naming convention. R-0007 measured that the flat
+    path was wrong; this makes the layout stop mattering.
+    """
+    namespace = verifier()
+    for relative in ("flat", "kind/flat", "kind/owner/flat"):
+        mount = tmp_path / relative
+        mount.mkdir(parents=True)
+        build_tree(mount / "biohubx-wheelhouse")
+        expected = payload_for(mount / "biohubx-wheelhouse")
+
+        resolved, near_misses, hashed = namespace["biohubx_find_wheelhouse"](mount, expected)
+
+        # A directory holding only the wheelhouse has the wheelhouse's shape, so it
+        # is hashed and then rejected on identity. That is the point of matching on
+        # the digest rather than on the shape.
+        assert resolved == mount / "biohubx-wheelhouse", relative
+        assert resolved not in [Path(path) for path, _, _ in near_misses], relative
+        assert hashed >= 1, relative
+
+
+def test_an_absent_wheelhouse_refuses_with_a_listing_of_what_is_mounted(tmp_path: Path) -> None:
+    """The previous refusal named the path it wanted and not the paths it had."""
+    namespace = verifier()
+    (tmp_path / "competitions" / "some-competition").mkdir(parents=True)
+    (tmp_path / "competitions" / "some-competition" / "train").mkdir()
+    expected = payload_for(build_tree(tmp_path / "elsewhere" / "wheelhouse"))
+
+    resolved, _, _ = namespace["biohubx_find_wheelhouse"](tmp_path / "competitions", expected)
+    listing = namespace["biohubx_listing"](tmp_path / "competitions")
+
+    assert resolved is None
+    assert any("some-competition" in entry for entry in listing)
+
+
+def test_a_tree_of_the_wrong_size_is_never_hashed(tmp_path: Path) -> None:
+    """Shape first, so the corpus is never read to find a directory of four wheels.
+
+    The decoy holds far more files than the wheelhouse, which is the shape of the
+    competition mount. It must be skipped without a single byte being hashed.
+    """
+    namespace = verifier()
+    decoy = tmp_path / "big-corpus"
+    decoy.mkdir()
+    for index in range(60):
+        (decoy / f"chunk-{index}").write_bytes(b"x" * 64)
+    expected = payload_for(build_tree(tmp_path / "wheelhouse"))
+
+    resolved, near_misses, hashed = namespace["biohubx_find_wheelhouse"](tmp_path, expected)
+
+    assert resolved == tmp_path / "wheelhouse"
+    assert near_misses == []
+    assert hashed == 1
+
+
+def test_a_right_sized_wrong_tree_is_reported_as_a_near_miss_with_its_differences(
+    tmp_path: Path,
+) -> None:
+    """Same size, different bytes. The interesting failure, and the one shape misses.
+
+    Nothing here matches the authorised identity, so the search exhausts its
+    candidates and reports what it rejected, with the differing file named.
+    """
+    namespace = verifier()
+    expected = payload_for(build_tree(tmp_path / "authorised"))
+    impostor = build_tree(tmp_path / "only-impostor" / "impostor")
+    (impostor / "requirements-offline.txt").write_text("zarr==3.3.1\n", encoding="utf-8")
+
+    resolved, near_misses, hashed = namespace["biohubx_find_wheelhouse"](tmp_path / "only-impostor", expected)
+
+    assert resolved is None
+    assert hashed >= 1
+    assert str(impostor) in [path for path, _, _ in near_misses]
+    assert any(item.startswith("content requirements-offline.txt") for _, _, d in near_misses for item in d)
+
+
+def test_the_search_is_bounded_and_never_uses_a_recursive_glob() -> None:
+    """A ** under the competition mount would descend the whole corpus."""
+    source = source_of()
+
+    # Asserted against calls rather than prose: the walk's own docstring explains
+    # why rglob is refused, and a naive substring check would flag that comment.
+    assert ".rglob(" not in source
+    assert 'glob("**' not in source
+    assert "BIOHUBX_MAX_DEPTH = 4" in source
+
+
+def test_the_search_does_not_descend_past_the_depth_bound(tmp_path: Path) -> None:
+    namespace = verifier()
+    deep = tmp_path / "a" / "b" / "c" / "d" / "e"
+    deep.mkdir(parents=True)
+    expected = payload_for(build_tree(deep / "wheelhouse"))
+
+    resolved, _, _ = namespace["biohubx_find_wheelhouse"](tmp_path, expected)
+
+    assert resolved is None

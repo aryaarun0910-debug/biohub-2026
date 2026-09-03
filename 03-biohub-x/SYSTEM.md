@@ -368,6 +368,16 @@ test requires that copy to return exactly what `biohubx.hashing.tree_digest`
 returns for the same tree. `--expect-published` refuses to build unless the local
 wheelhouse publishes the identity an authorisation named.
 
+That same identity is how the input is found. The package does not assume a mount
+path, because assuming one cost an authorised run ([[R-0007]]): it enumerates what
+is mounted under `/kaggle/input`, bounded to four levels with single-level globs
+and never a recursive one, and selects the tree whose canonical digest equals the
+embedded identity ([[D-0033]]). Shape is compared first with an early abort, so a
+candidate larger than the tree being sought is abandoned rather than hashed and the
+competition corpus is never read to find a directory of four wheels. A miss refuses
+with a listing of what is actually mounted, because the run before it could not
+distinguish an unattached dataset from one mounted elsewhere.
+
 `package wheelhouse` records what a wheelhouse is, as the two different trees it
 actually is. Kaggle consumes `dataset-metadata.json` as configuration rather than
 storing it, so the upload bundle this machine sends and the published payload a

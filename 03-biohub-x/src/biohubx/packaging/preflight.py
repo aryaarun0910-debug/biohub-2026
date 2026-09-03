@@ -22,7 +22,12 @@ PREFLIGHT_ID = "E03-WHEELHOUSE-PREFLIGHT-01"
 PREFLIGHT_KERNEL = "aryaarun07/biohub-x-wheelhouse-preflight"
 PREFLIGHT_TITLE = "Biohub X wheelhouse preflight"
 WHEELHOUSE_SLUG = "aryaarun07/biohubx-wheelhouse-zarr-cp312-linux"
-WHEELHOUSE_MOUNT = "/kaggle/input/biohubx-wheelhouse-zarr-cp312-linux"
+INPUT_ROOT_DEFAULT = "/kaggle/input"
+"""Where the search starts. The wheelhouse is found inside it by identity.
+
+E03-WHEELHOUSE-PREFLIGHT-01 assumed /kaggle/input/<slug> and refused, having
+measured only that its guess was wrong (R-0007). A path is a guess; the tree
+digest the package already carries is not, so it locates as well as verifies."""
 PREFLIGHT_RUNTIME_CEILING_SECONDS = 600
 
 EXPECTED_PREFLIGHT_STAGES: tuple[str, ...] = (
@@ -121,6 +126,128 @@ def biohubx_compare(expected, observed):
                 "content " + relative + " expected=" + want[relative][1] + " observed=" + got[relative][1]
             )
     return differences
+
+
+BIOHUBX_MAX_DEPTH = 4
+
+
+def biohubx_candidate_roots(input_root, max_depth):
+    """Directories under the input root, shallowest first, bounded, one level at a time.
+
+    Never a recursive glob. The competition mount is a corpus of hundreds of
+    chunked volumes, and descending all of it to find a directory of four wheels
+    would cost more than the run it is part of. Four levels covers a plain mount,
+    a mount under a kind, and a mount under a kind and an owner, with one spare.
+    """
+    # The root counts as a candidate. Otherwise pointing the search straight at
+    # the wheelhouse would fail to find it, which is a surprising edge and costs
+    # nothing to remove: an oversized root is rejected by shape like any other.
+    roots = [input_root]
+    frontier = [input_root]
+    depth = 0
+    while frontier and depth < max_depth:
+        following = []
+        for parent in frontier:
+            try:
+                children = sorted(parent.iterdir(), key=lambda item: item.name)
+            except OSError:
+                continue
+            for child in children:
+                if child.is_symlink() or not child.is_dir():
+                    continue
+                roots.append(child)
+                following.append(child)
+        frontier = following
+        depth += 1
+    return roots
+
+
+def biohubx_shape(root, max_files, max_bytes):
+    """File count and total bytes, abandoned the moment either cap is passed.
+
+    The cap is what keeps the search cheap. A candidate already larger than the
+    tree being looked for cannot be that tree, so there is no reason to finish
+    counting it and every reason not to hash it.
+    """
+    files = 0
+    total = 0
+    pending = [root]
+    while pending:
+        directory = pending.pop()
+        try:
+            children = sorted(directory.iterdir(), key=lambda item: item.name)
+        except OSError:
+            return None
+        for child in children:
+            if child.is_symlink():
+                return None
+            if child.is_dir():
+                pending.append(child)
+            elif child.is_file():
+                files += 1
+                if files > max_files:
+                    return None
+                try:
+                    total += child.stat().st_size
+                except OSError:
+                    return None
+                if total > max_bytes:
+                    return None
+    return (files, total)
+
+
+def biohubx_find_wheelhouse(input_root, expected):
+    """Locate the authorised tree by its identity rather than by a guessed path.
+
+    A name says where to look. A digest says when you have actually found it,
+    which is the question that matters, and it is the same anchor the package
+    already carries, so locating and verifying rest on one fact instead of two.
+    Shape is checked first, so only a tree of exactly the right size is ever
+    hashed. A tree that is the right size and the wrong content is reported as a
+    near miss with its differences, because that is the interesting failure.
+    """
+    records = [tuple(item) for item in expected["records"]]
+    want_files = len([record for record in records if record[0] == "f"])
+    want_bytes = sum(int(record[2]) for record in records if record[0] == "f")
+    near_misses = []
+    hashed = 0
+    for candidate in biohubx_candidate_roots(input_root, BIOHUBX_MAX_DEPTH):
+        if biohubx_shape(candidate, want_files, want_bytes) != (want_files, want_bytes):
+            continue
+        hashed += 1
+        token, observed = biohubx_canonical_tree(candidate)
+        if token == expected["tree"]:
+            return candidate, near_misses, hashed
+        near_misses.append((str(candidate), token, biohubx_compare(records, observed)))
+    return None, near_misses, hashed
+
+
+def biohubx_listing(input_root, limit=60):
+    """What is actually mounted, so that a refusal diagnoses itself.
+
+    The previous refusal named the path it wanted and not the paths it had, which
+    left a missing dataset and a dataset mounted elsewhere indistinguishable.
+    """
+    entries = []
+    frontier = [input_root]
+    depth = 0
+    while frontier and depth < 3:
+        following = []
+        for parent in frontier:
+            try:
+                children = sorted(parent.iterdir(), key=lambda item: item.name)
+            except OSError:
+                continue
+            for child in children:
+                is_directory = child.is_dir()
+                entries.append(str(child) + ("/" if is_directory else ""))
+                if len(entries) >= limit:
+                    return entries
+                if is_directory and not child.is_symlink():
+                    following.append(child)
+        frontier = following
+        depth += 1
+    return entries
 '''
 
 
@@ -169,7 +296,7 @@ SPEC = json.loads(r"""__SPEC_JSON__""")
 # itself: a substituted dataset shipping its own matching requirements file would
 # satisfy --require-hashes exactly. The anchor has to arrive with the code.
 EXPECTED = json.loads(r"""__PUBLISHED_JSON__""")
-WHEELHOUSE = pathlib.Path(os.environ.get("BIOHUBX_WHEELHOUSE", "__WHEELHOUSE_ROOT__"))
+INPUT_ROOT = pathlib.Path(os.environ.get("BIOHUBX_INPUT_ROOT", "__INPUT_ROOT__"))
 COMPETITION = pathlib.Path(
     os.environ.get(
         "BIOHUB_DATA_ROOT", "/kaggle/input/competitions/biohub-cell-tracking-during-development"
@@ -193,14 +320,34 @@ def write_report():
     return manifest
 
 
-stage("wheelhouse", str(WHEELHOUSE))
-wheels = sorted(p.name for p in (WHEELHOUSE / "wheels").glob("*.whl")) if WHEELHOUSE.is_dir() else []
-report["wheelhouse"] = {"root": str(WHEELHOUSE), "present": WHEELHOUSE.is_dir(), "wheels": wheels}
-stage("wheelhouse", "wheels=" + str(len(wheels)))
-if not wheels:
-    report["fatal"] = "the wheelhouse is not mounted"
+stage("wheelhouse", "searching " + str(INPUT_ROOT) + " for the authorised tree")
+resolved, near_misses, hashed = biohubx_find_wheelhouse(INPUT_ROOT, EXPECTED)
+report["wheelhouse"] = {
+    "input_root": str(INPUT_ROOT),
+    "located_by": "the identity the package carries, not a guessed path",
+    "candidates_hashed": hashed,
+    "near_misses": [
+        {"path": path, "observed_tree": token, "differences": differences[:20]}
+        for path, token, differences in near_misses
+    ],
+    "resolved": None if resolved is None else str(resolved),
+}
+if resolved is None:
+    listing = biohubx_listing(INPUT_ROOT)
+    report["wheelhouse"]["mounted"] = listing
+    report["fatal"] = "the authorised wheelhouse is not mounted under " + str(INPUT_ROOT)
+    stage("wheelhouse", "NOT FOUND expected=" + EXPECTED["tree"])
+    for entry in listing[:40]:
+        stage("wheelhouse", "mounted " + entry)
+    for path, token, _ in near_misses:
+        stage("wheelhouse", "near miss " + path + " observed=" + token)
     write_report()
-    raise SystemExit("the wheelhouse is not mounted at " + str(WHEELHOUSE))
+    raise SystemExit("the authorised wheelhouse is not mounted under " + str(INPUT_ROOT))
+WHEELHOUSE = resolved
+wheels = sorted(p.name for p in (WHEELHOUSE / "wheels").glob("*.whl"))
+report["wheelhouse"]["root"] = str(WHEELHOUSE)
+report["wheelhouse"]["wheels"] = wheels
+stage("wheelhouse", "resolved " + str(WHEELHOUSE) + " wheels=" + str(len(wheels)))
 
 stage("verify", "recomputing the mounted tree under canonicalization v1")
 expected_records = [tuple(item) for item in EXPECTED["records"]]
@@ -321,7 +468,7 @@ def build_preflight_notebook(
     spec: AuditSpec,
     *,
     published_payload: dict[str, Any],
-    wheelhouse_root: str = WHEELHOUSE_MOUNT,
+    input_root: str = INPUT_ROOT_DEFAULT,
 ) -> dict[str, Any]:
     """One cell, no Biohub-X import, and the identity it will check travelling inside it.
 
@@ -347,7 +494,7 @@ def build_preflight_notebook(
             "__PUBLISHED_JSON__",
             json.dumps({"tree": token, "records": [list(record) for record in records]}, sort_keys=True),
         )
-        .replace("__WHEELHOUSE_ROOT__", wheelhouse_root)
+        .replace("__INPUT_ROOT__", input_root)
     )
     for forbidden in ("import biohubx", "from biohubx"):
         if forbidden in source:
