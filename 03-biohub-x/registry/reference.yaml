@@ -1164,10 +1164,12 @@ references:
       supplied_by: Arya Arun
       retrieved: false
       why_not: >-
-        The same message that named them authorised local preparation only, with
-        no additional download. Pulling a kernel is a download, so the three were
-        recorded and left alone pending a separate go-ahead. AGENTS.md section 7
-        puts downloads on the stop-and-report list.
+        The message that named them authorised local preparation only, so they
+        were not retrieved in that turn. D-0035 now gives standing authorization
+        for public research intake, including public Kaggle notebook source, but
+        this policy change itself performed no pull: Arya Arun stated that the
+        material has already been gathered and should not be independently
+        searched or scraped here.
     observed:
       notebooks:
         - ref: alioman/biohub-v19c-public0939-sis14-only

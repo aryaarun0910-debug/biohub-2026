@@ -540,5 +540,18 @@ Layers are never described as frames.
 `reference_only`. It is an input, not an instruction file, and it confers no
 standing on any primitive it lists.
 
+Public research intake is intentionally broad under [[D-0035]]. Public Kaggle
+notebook source and metadata, papers, repositories, technical reports, blogs and
+competition discussions may be pulled and read without a per-source approval.
+They enter through `registry/reference.yaml` as external assertions, not through
+`registry/findings.yaml` as results. Raw captures stay outside Git unless a
+hash-bound snapshot has a named consumer. Intake creates neither a new Markdown
+file nor a bespoke test per source; mechanisms are deduplicated into a compact
+hypothesis queue and earn code only through a preregistered experiment.
+
+This does not relax the prior-campaign quarantine or authorize weights,
+datasets, third-party code execution, GPU work, Kaggle pushes, submissions or
+other external writes.
+
 `research/shortlist.yaml` is empty at Phase 0 by construction: a primitive may
 enter it only when a live Biohub-X component consumes it.
