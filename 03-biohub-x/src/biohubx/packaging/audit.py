@@ -58,7 +58,7 @@ RUNTIME_CLOSURE: tuple[str, ...] = (
     "skimage",
     "tqdm",
     "typing_extensions",
-    "crc32c",
+    "google_crc32c",
     "packaging",
     "click",
     "annotated_types",

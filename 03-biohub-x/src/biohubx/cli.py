@@ -2428,6 +2428,177 @@ def prepush_closure() -> tuple[str, ...]:
     return RUNTIME_CLOSURE
 
 
+@package_app.command("preflight")
+def package_preflight(
+    out: Annotated[
+        Path | None,
+        typer.Option("--out", help="Where to stage it. Defaults to artifacts/kaggle-preflight."),
+    ] = None,
+    wheelhouse: Annotated[
+        Path | None,
+        typer.Option(
+            "--wheelhouse", help="Local wheelhouse to validate against. Defaults to artifacts/wheelhouse."
+        ),
+    ] = None,
+    allow_dirty: Annotated[
+        bool,
+        typer.Option("--allow-dirty", help="Build from an uncommitted tree. Records it and is unpushable."),
+    ] = False,
+) -> None:
+    """Stage the wheelhouse installation and readability preflight, and push nothing.
+
+    Two questions in order: does the wheelhouse install offline on the measured
+    image, and can the result decode a real competition chunk. A wheelhouse that
+    installs but cannot decode blosc has answered neither, which is why the
+    competition is attached for exactly one read.
+    """
+    command = "package preflight"
+    import shutil
+    import subprocess
+
+    from biohubx.packaging.audit import AuditSpec
+    from biohubx.packaging.kaggle import forbidden_content
+    from biohubx.packaging.preflight import (
+        PREFLIGHT_ID,
+        PREFLIGHT_KERNEL,
+        PREFLIGHT_RUNTIME_CEILING_SECONDS,
+        WHEELHOUSE_SLUG,
+        build_preflight_notebook,
+        preflight_kernel_metadata,
+    )
+
+    root_path = repository_root()
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root_path, capture_output=True, text=True, check=False
+    )
+    if revision.returncode != 0:
+        heartbeat(command, "refused", "cannot resolve the repository commit; a package must pin one")
+        raise typer.Exit(code=2)
+    commit = revision.stdout.strip()
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain"], cwd=root_path, capture_output=True, text=True, check=False
+    ).stdout.strip()
+    if dirty and not allow_dirty:
+        heartbeat(
+            command,
+            "refused",
+            "the working tree is dirty, so the commit this package would pin does not describe "
+            "the bytes it ships; commit first, or pass --allow-dirty for an unpushable build",
+        )
+        raise typer.Exit(code=2)
+
+    house = wheelhouse if wheelhouse is not None else root_path / "artifacts/wheelhouse"
+    wheels = sorted((house / "wheels").glob("*.whl")) if house.is_dir() else []
+    if not wheels:
+        heartbeat(command, "refused", f"no wheels under {house}; build the wheelhouse first")
+        raise typer.Exit(code=2)
+    sdists = [p.name for p in house.rglob("*") if p.suffix in {".gz", ".zip"} and p.is_file()]
+    if sdists:
+        heartbeat(command, "refused", f"the wheelhouse contains source distributions: {sdists[:3]}")
+        raise typer.Exit(code=2)
+
+    spec = AuditSpec(
+        audit_id=PREFLIGHT_ID,
+        commit=commit,
+        kernel=PREFLIGHT_KERNEL,
+        runtime_ceiling_seconds=PREFLIGHT_RUNTIME_CEILING_SECONDS,
+    )
+    heartbeat(command, "start", f"preflight={spec.audit_id} kernel={spec.kernel} wheels={len(wheels)}")
+
+    notebook = build_preflight_notebook(spec)
+    metadata = preflight_kernel_metadata()
+    if metadata["enable_gpu"] or metadata["enable_internet"]:
+        heartbeat(command, "refused", "the preflight must be CPU only with internet disabled")
+        raise typer.Exit(code=2)
+    if metadata["dataset_sources"] != [WHEELHOUSE_SLUG]:
+        heartbeat(command, "refused", "the preflight must attach the wheelhouse and nothing else")
+        raise typer.Exit(code=2)
+
+    staging = out if out is not None else root_path / "artifacts/kaggle-preflight"
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True)
+    atomic_write_text(staging / "run.ipynb", json.dumps(notebook, indent=1, sort_keys=True) + chr(10))
+    atomic_write_text(
+        staging / "kernel-metadata.json", json.dumps(metadata, indent=2, sort_keys=True) + chr(10)
+    )
+    atomic_write_text(
+        staging / "preflight-spec.json",
+        json.dumps({**spec.to_dict(), "preflight_id": spec.audit_id}, indent=2, sort_keys=True) + chr(10),
+    )
+
+    offenders = forbidden_content(staging)
+    if offenders:
+        heartbeat(command, "refused", f"the preflight would ship forbidden content: {offenders[:5]}")
+        raise typer.Exit(code=2)
+
+    # The notebook is validated and converted, but not executed: it installs
+    # packages and reads the corpus, neither of which belongs in a build step.
+    from biohubx.packaging import prepush
+    from biohubx.packaging.prepush import PrePushError
+
+    try:
+        prepush.check_required_metadata(notebook)
+        prepush.validate_notebook(notebook)
+        converted = prepush.convert_notebook(notebook)
+    except PrePushError as exc:
+        heartbeat(command, "refused", f"pre-push gate failed, nothing was sent: {exc}")
+        raise typer.Exit(code=2) from exc
+    heartbeat(command, "pre-push", f"nbformat ok, nbconvert produced {converted} bytes")
+
+    files = sorted(path for path in staging.rglob("*") if path.is_file())
+    total_bytes = sum(path.stat().st_size for path in files)
+    manifest_text = json.dumps(
+        {
+            "schema_version": 1,
+            "preflight": {**spec.to_dict(), "preflight_id": spec.audit_id},
+            "kernel_metadata": metadata,
+            "wheelhouse_validated": {
+                "path": str(house.relative_to(root_path)) if house.is_relative_to(root_path) else str(house),
+                "wheels": [path.name for path in wheels],
+                "source_distributions": [],
+            },
+            "files": {
+                path.relative_to(staging).as_posix(): digest_file(path, DigestKind.RAW_ARTIFACT).token
+                for path in files
+            },
+            "file_count": len(files),
+            "total_bytes": total_bytes,
+            "contains_competition_bytes": False,
+            "contains_external_weights": False,
+            "repository_clean_at_build": not dirty,
+            "pushable": not dirty,
+        },
+        indent=2,
+        sort_keys=True,
+    )
+    atomic_write_text(staging / "PREFLIGHT_MANIFEST.json", manifest_text + chr(10))
+    package_digest = digest_file(staging / "PREFLIGHT_MANIFEST.json", DigestKind.CANONICAL_TEXT)
+
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "preflight": {**spec.to_dict(), "preflight_id": spec.audit_id},
+        "package": {
+            "path": str(staging.relative_to(root_path)),
+            "manifest_digest": package_digest.token,
+            "file_count": len(files) + 1,
+            "total_bytes": total_bytes,
+            "push_command": f"kaggle kernels push -p {staging.relative_to(root_path)}",
+            "pushed": False,
+        },
+        "kernel_metadata": metadata,
+        "nbconvert_bytes": converted,
+    }
+    atomic_write_text(
+        root_path / "artifacts/kaggle-preflight.json", json.dumps(payload, indent=2, sort_keys=True) + chr(10)
+    )
+    _write_manifest(command, {"report": "artifacts/kaggle-preflight.json", "preflight": spec.audit_id})
+    heartbeat(command, "staged", f"files={len(files) + 1} digest={package_digest.token[:52]}")
+    heartbeat(command, "done", "NOT PUSHED and the dataset it needs does not exist yet")
+    typer.echo(json.dumps(payload, sort_keys=True))
+
+
 @data_app.command("fingerprint")
 def data_fingerprint(
     root: Annotated[
