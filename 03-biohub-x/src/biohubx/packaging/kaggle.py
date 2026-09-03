@@ -28,6 +28,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+# One resolver and one canonicalization, shared with the wheelhouse preflight.
+# A second copy would be a second thing to keep in agreement with the
+# authoritative walk, and the whole point of the carried verifier is that a test
+# holds it to that walk.
+from biohubx.packaging.preflight import INPUT_ROOT_DEFAULT, TREE_VERIFIER_SOURCE
+
 ARCHIVE_EPOCH = (1980, 1, 1, 0, 0, 0)
 """Fixed timestamp for every archive entry, so the payload digest is reproducible."""
 
@@ -96,6 +102,9 @@ class PackageSpec:
     expected_gpu_count: int
     expected_device_substring: str
     smoke: bool
+    smoke_id: str
+    wheelhouse_slug: str
+    wheelhouse_tree: str
     max_movies: int | None
     runtime_ceiling_seconds: int
 
@@ -112,6 +121,9 @@ class PackageSpec:
             "expected_gpu_count": self.expected_gpu_count,
             "expected_device_substring": self.expected_device_substring,
             "smoke": self.smoke,
+            "smoke_id": self.smoke_id,
+            "wheelhouse_slug": self.wheelhouse_slug,
+            "wheelhouse_tree": self.wheelhouse_tree,
             "max_movies": self.max_movies,
             "runtime_ceiling_seconds": self.runtime_ceiling_seconds,
         }
@@ -142,12 +154,18 @@ def kernel_id_for(owner: str, title: str) -> str:
 
 
 def kernel_metadata(spec: PackageSpec, *, slug: str, title: str) -> dict[str, Any]:
-    """The Kaggle kernel manifest, with internet off and no dataset sources.
+    """The Kaggle kernel manifest: internet off, one dataset source, no weights.
 
     ``enable_internet`` is false because a run that can reach the network can
-    also acquire a checkpoint nobody approved. ``dataset_sources`` is empty
-    because E03 uses no external weights at all, and an empty list is a claim a
-    reviewer can check at a glance.
+    also acquire a checkpoint nobody approved. ``dataset_sources`` holds exactly
+    the wheelhouse and nothing else: E03 uses no external weights, so a single
+    entry a reviewer can read at a glance is the claim, and the entry is named
+    rather than merely counted. ``model_sources`` stays empty for the same reason.
+
+    ``accelerator`` is the canonical ``NvidiaTeslaT4``. Attempt 2 requested
+    ``nvidiaTeslaT4`` and Kaggle allocated a P100 ([[D-0028]]). Whether the casing
+    was the cause is not established, so this is a correction and not a fix: the
+    guarantee comes from the runtime guard refusing a device that is not a T4.
     """
     owner, _, name = slug.rpartition("/")
     if not owner:
@@ -167,7 +185,7 @@ def kernel_metadata(spec: PackageSpec, *, slug: str, title: str) -> dict[str, An
         "enable_gpu": True,
         "enable_internet": False,
         "accelerator": spec.accelerator,
-        "dataset_sources": [],
+        "dataset_sources": [spec.wheelhouse_slug],
         "kernel_sources": [],
         "model_sources": [],
         "competition_sources": ["biohub-cell-tracking-during-development"],
@@ -184,6 +202,8 @@ def guard_report(
     opened_paths: list[str],
     gpu_count: int,
     device_name: str = "",
+    dataset_sources: list[str] | None = None,
+    wheelhouse_verified: bool = False,
 ) -> dict[str, Any]:
     """Run every guard and report each one, refusing on the first real failure.
 
@@ -244,11 +264,26 @@ def guard_report(
         )
     # Counting devices is not checking hardware. Attempt 2 was authorised for a
     # T4, Kaggle allocated a P100, device_count was 1, and the count guard passed
-    # while the run proceeded on hardware nobody approved.
-    if gpu_count and spec.expected_device_substring not in device_name:
+    # while the run proceeded on hardware nobody approved. The model check is
+    # therefore unconditional: an accelerator run that finds no accelerator, or
+    # finds the wrong one, refuses either way rather than only when one is
+    # present to disagree with.
+    if spec.expected_gpu_count and spec.expected_device_substring not in device_name:
         failures.append(
             f"approved hardware was {spec.expected_device_substring!r} and this machine reports "
             f"{device_name!r}; the accelerator request did not take effect"
+        )
+
+    # An external weight pack reaching this run is the thing dataset_sources
+    # could smuggle in, so the sources are checked by name and not by count.
+    sources = list(dataset_sources or [])
+    unexpected_sources = sorted(name for name in sources if name != spec.wheelhouse_slug)
+    if unexpected_sources:
+        failures.append(f"dataset sources other than the wheelhouse are attached: {unexpected_sources[:3]}")
+    if not wheelhouse_verified:
+        failures.append(
+            f"the wheelhouse was not verified against {spec.wheelhouse_tree} before it was used; "
+            "an unverified dependency source is one nobody approved"
         )
 
     return {
@@ -262,6 +297,12 @@ def guard_report(
         "quarantined_checkpoints_reachable": quarantined,
         "gpu_count": gpu_count,
         "expected_gpu_count": spec.expected_gpu_count,
+        "device_name": device_name,
+        "expected_device_substring": spec.expected_device_substring,
+        "dataset_sources": sources,
+        "wheelhouse_tree": spec.wheelhouse_tree,
+        "wheelhouse_verified": wheelhouse_verified,
+        "smoke_id": spec.smoke_id,
         "passed": not failures,
         "failures": failures,
     }
@@ -274,15 +315,17 @@ NOTEBOOK_CELL = """\
 # deterministic archive, is verified against a digest recorded at build time, and
 # is extracted into the writable runtime directory before anything imports it.
 #
-# Nothing is imported from /kaggle/input. No dataset or model source supplies
-# this package, so no such path is promised to exist, and an earlier run died
-# before executing a single line because it assumed one did.
+# The package itself is never imported from /kaggle/input. One thing does come
+# from there: the wheelhouse, because biohubx imports zarr and the image does not
+# carry it. That mount is located by the identity this notebook carries and
+# verified before pip is allowed to read a byte of it.
 import base64
 import hashlib
 import io
 import json
 import os
 import pathlib
+import subprocess
 import sys
 import zipfile
 
@@ -291,9 +334,16 @@ def stage(name, detail=""):
     print(("BIOHUBX_STAGE " + name + " " + str(detail)).rstrip(), flush=True)
 
 
+__TREE_VERIFIER__
+
 PAYLOAD_SHA256 = "__PAYLOAD_SHA256__"
 PAYLOAD_B64 = \"\"\"__PAYLOAD_B64__\"\"\"
 SPEC = json.loads(r\"\"\"__SPEC_JSON__\"\"\")
+# The wheelhouse identity, carried rather than read from the mount.
+# requirements-offline.txt cannot authenticate itself (D-0032), and the mount
+# path is found by digest rather than assumed (D-0033).
+WHEELHOUSE_EXPECTED = json.loads(r\"\"\"__WHEELHOUSE_JSON__\"\"\")
+INPUT_ROOT = pathlib.Path(os.environ.get("BIOHUBX_INPUT_ROOT", "__INPUT_ROOT__"))
 
 stage("bootstrap-verify", "expecting " + PAYLOAD_SHA256[:23])
 payload = base64.b64decode("".join(PAYLOAD_B64.split()))
@@ -315,6 +365,47 @@ with zipfile.ZipFile(io.BytesIO(payload)) as archive:
     archive.extractall(extracted)
 stage("bootstrap-extract", str(extracted) + " files=" + str(len(names)))
 
+stage("wheelhouse", "searching " + str(INPUT_ROOT) + " for the authorised tree")
+wheelhouse_root, wheelhouse_misses, wheelhouse_hashed = biohubx_find_wheelhouse(
+    INPUT_ROOT, WHEELHOUSE_EXPECTED
+)
+if wheelhouse_root is None:
+    stage("wheelhouse", "NOT FOUND expected=" + WHEELHOUSE_EXPECTED["tree"])
+    for entry in biohubx_listing(INPUT_ROOT)[:40]:
+        stage("wheelhouse", "mounted " + entry)
+    for path_seen, token_seen, _ in wheelhouse_misses:
+        stage("wheelhouse", "near miss " + path_seen + " observed=" + token_seen)
+    raise SystemExit("the authorised wheelhouse is not mounted under " + str(INPUT_ROOT))
+stage("wheelhouse", "resolved " + str(wheelhouse_root))
+
+stage("wheelhouse-verify", "recomputing the mounted tree under canonicalization v1")
+observed_tree, observed_records = biohubx_canonical_tree(wheelhouse_root)
+wheelhouse_differences = biohubx_compare(
+    [tuple(item) for item in WHEELHOUSE_EXPECTED["records"]], observed_records
+)
+stage("wheelhouse-verify", "expected=" + WHEELHOUSE_EXPECTED["tree"])
+stage("wheelhouse-verify", "observed=" + observed_tree)
+for difference in wheelhouse_differences[:20]:
+    stage("wheelhouse-verify", "difference " + difference)
+if observed_tree != WHEELHOUSE_EXPECTED["tree"] or wheelhouse_differences:
+    raise SystemExit("the mounted wheelhouse is not the authorised published payload")
+stage("wheelhouse-verify", "the mounted tree is the authorised published payload")
+
+stage("wheelhouse-install", "offline, no index, no deps, hashes required")
+install = subprocess.run(
+    [
+        sys.executable, "-m", "pip", "install",
+        "--no-index", "--no-deps", "--require-hashes",
+        "-r", str(wheelhouse_root / "requirements-offline.txt"),
+        "--find-links", str(wheelhouse_root / "wheels"),
+    ],
+    capture_output=True, text=True, check=False,
+)
+stage("wheelhouse-install", "returncode=" + str(install.returncode))
+if install.returncode != 0:
+    print(install.stderr[-2000:], flush=True)
+    raise SystemExit("the offline wheelhouse install failed")
+
 sys.path.insert(0, str(target / "src"))
 import biohubx
 
@@ -322,12 +413,12 @@ origin = pathlib.Path(biohubx.__file__).resolve()
 if not str(origin).startswith(str(extracted.resolve())):
     raise SystemExit("biohubx was imported from " + str(origin) + ", not the verified payload")
 stage("bootstrap-import", str(origin))
-stage("start", json.dumps(SPEC["fold"]))
+stage("start", SPEC["smoke_id"] + " " + json.dumps(SPEC["fold"]))
 stage("pinned", "commit=" + SPEC["commit"] + " config=" + SPEC["config_digest"])
 
 from biohubx.packaging.entry import run_fold
 
-run_fold(SPEC)
+run_fold(SPEC, wheelhouse_verified=True, wheelhouse_root=str(wheelhouse_root))
 """
 
 
@@ -336,7 +427,9 @@ def build_notebook(
     *,
     shipped: dict[str, Any] | None = None,
     payload: bytes | None = None,
+    wheelhouse_payload: dict[str, Any] | None = None,
     package_root: str = DEFAULT_PACKAGE_ROOT,
+    input_root: str = INPUT_ROOT_DEFAULT,
 ) -> dict[str, Any]:
     """A one-cell notebook carrying the package it needs and nothing else.
 
@@ -352,11 +445,26 @@ def build_notebook(
     if payload is None:
         raise PackagingError("a notebook without its package payload could not import anything")
     check_payload_contents(payload)
+    token = str((wheelhouse_payload or {}).get("tree", ""))
+    records = (wheelhouse_payload or {}).get("records") or []
+    if not token.startswith("tree_sha256:sha256/v1:"):
+        raise PackagingError(
+            f"the wheelhouse identity must be a canonical tree token, got {token!r}; without one "
+            "the run would install from whatever it happened to mount"
+        )
+    if not records:
+        raise PackagingError("the wheelhouse identity carries no records, so a mismatch could name no file")
     source = (
-        NOTEBOOK_CELL.replace("__PAYLOAD_SHA256__", hashlib.sha256(payload).hexdigest())
+        NOTEBOOK_CELL.replace("__TREE_VERIFIER__", TREE_VERIFIER_SOURCE)
+        .replace("__PAYLOAD_SHA256__", hashlib.sha256(payload).hexdigest())
         .replace("__PAYLOAD_B64__", encode_payload(payload))
         .replace("__PACKAGE_ROOT__", package_root)
         .replace("__SPEC_JSON__", json.dumps(shipped or spec.to_dict(), sort_keys=True))
+        .replace(
+            "__WHEELHOUSE_JSON__",
+            json.dumps({"tree": token, "records": [list(r) for r in records]}, sort_keys=True),
+        )
+        .replace("__INPUT_ROOT__", input_root)
     )
     if "/kaggle/input/biohubx-package" in source:
         raise PackagingError("the notebook still references the unmounted input path")

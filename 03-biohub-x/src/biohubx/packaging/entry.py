@@ -64,8 +64,19 @@ def _discover(data_root: Path) -> tuple[list[str], list[str]]:
     return datasets, reachable
 
 
-def run_fold(spec_dict: dict[str, Any], *, data_root: Path | None = None) -> dict[str, Any]:
-    """Guard, train, checkpoint, and write a result manifest. Refuses loudly."""
+def run_fold(
+    spec_dict: dict[str, Any],
+    *,
+    data_root: Path | None = None,
+    wheelhouse_verified: bool = False,
+    wheelhouse_root: str = "",
+) -> dict[str, Any]:
+    """Guard, train, checkpoint, and write a result manifest. Refuses loudly.
+
+    ``wheelhouse_verified`` is passed by the notebook that did the verifying. It
+    defaults to False so that a caller who did not verify cannot pass the guard by
+    saying nothing, which is how an absent check becomes a silent one.
+    """
     from biohubx.packaging.kaggle import FoldSpec, PackageSpec, guard_report
 
     started = time.perf_counter()
@@ -81,21 +92,41 @@ def run_fold(spec_dict: dict[str, Any], *, data_root: Path | None = None) -> dic
         accelerator=spec_dict["accelerator"],
         expected_gpu_count=spec_dict["expected_gpu_count"],
         smoke=spec_dict["smoke"],
-        expected_device_substring=spec_dict.get("expected_device_substring", "T4"),
+        smoke_id=spec_dict["smoke_id"],
+        wheelhouse_slug=spec_dict["wheelhouse_slug"],
+        wheelhouse_tree=spec_dict["wheelhouse_tree"],
+        expected_device_substring=spec_dict.get("expected_device_substring", "Tesla T4"),
         max_movies=spec_dict["max_movies"],
         runtime_ceiling_seconds=spec_dict["runtime_ceiling_seconds"],
     )
-    stage("environment", f"fold={fold.fold_id} smoke={spec.smoke}")
+    stage("environment", f"{spec.smoke_id} fold={fold.fold_id} smoke={spec.smoke}")
 
     import torch
 
     gpu_count = torch.cuda.device_count()
     device = "cuda" if gpu_count else "cpu"
     device_name = torch.cuda.get_device_name(0) if gpu_count else "cpu"
+    cuda_version = torch.version.cuda or "none"
+    # The build and the card are separate facts and both were unmeasured. The
+    # environment audit was CPU-only and measured torch 2.10.0+cpu; a GPU image
+    # carries a CUDA build nobody here has seen.
     stage(
         "environment",
-        f"torch={torch.__version__} gpus={gpu_count} device={device} name={device_name!r}",
+        f"torch={torch.__version__} cuda={cuda_version} gpus={gpu_count} "
+        f"device={device} name={device_name!r}",
     )
+    total_vram_bytes = 0
+    if gpu_count:
+        properties = torch.cuda.get_device_properties(0)
+        total_vram_bytes = int(properties.total_memory)
+        stage(
+            "environment",
+            f"vram_total_bytes={total_vram_bytes} "
+            f"vram_total_gib={total_vram_bytes / (1024**3):.2f} "
+            f"capability={properties.major}.{properties.minor}",
+        )
+    else:
+        stage("environment", "vram_total_bytes=0 no accelerator present")
 
     root = data_root or Path(
         os.environ.get(
@@ -168,6 +199,8 @@ def run_fold(spec_dict: dict[str, Any], *, data_root: Path | None = None) -> dic
         opened_paths=opened,
         gpu_count=gpu_count if not spec.smoke else spec.expected_gpu_count,
         device_name=device_name if gpu_count else spec.expected_device_substring,
+        dataset_sources=[spec.wheelhouse_slug],
+        wheelhouse_verified=wheelhouse_verified,
     )
     for line in report["failures"]:
         stage("guard-failed", line)
@@ -266,8 +299,20 @@ def run_fold(spec_dict: dict[str, Any], *, data_root: Path | None = None) -> dic
     from biohubx.hashing import DigestKind, digest_file
 
     checkpoint_digest = digest_file(checkpoint, DigestKind.RAW_ARTIFACT).token
+    # Peak rather than current: the number that decides whether a bigger window
+    # or batch fits is the high-water mark, and reading it after training is the
+    # only point at which it means anything.
+    peak_allocated = int(torch.cuda.max_memory_allocated()) if gpu_count else 0
+    peak_reserved = int(torch.cuda.max_memory_reserved()) if gpu_count else 0
+    stage(
+        "memory",
+        f"peak_allocated_bytes={peak_allocated} peak_reserved_bytes={peak_reserved} "
+        f"total_bytes={total_vram_bytes} "
+        f"headroom_bytes={max(0, total_vram_bytes - peak_reserved)}",
+    )
     manifest: dict[str, Any] = {
         "schema_version": 1,
+        "smoke_id": spec.smoke_id,
         "spec": spec.to_dict(),
         "guards": report,
         "training_movies": fold_datasets,
@@ -275,11 +320,26 @@ def run_fold(spec_dict: dict[str, Any], *, data_root: Path | None = None) -> dic
         "checkpoint": checkpoint.name,
         "checkpoint_digest": checkpoint_digest,
         "device": device,
+        "hardware": {
+            "torch": torch.__version__,
+            "cuda": cuda_version,
+            "device_name": device_name,
+            "gpu_count": gpu_count,
+            "total_vram_bytes": total_vram_bytes,
+            "peak_allocated_bytes": peak_allocated,
+            "peak_reserved_bytes": peak_reserved,
+        },
+        "wheelhouse": {
+            "slug": spec.wheelhouse_slug,
+            "tree": spec.wheelhouse_tree,
+            "verified_before_install": wheelhouse_verified,
+            "resolved_at": wheelhouse_root,
+        },
         "runtime_seconds": round(time.perf_counter() - started, 3),
     }
     manifest_path = out / f"result-{fold.fold_id}.json"
     partial = manifest_path.with_suffix(".json.partial")
     partial.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     partial.replace(manifest_path)
-    stage("done", f"{manifest_path.name} digest={checkpoint_digest[:46]}")
+    stage("done", f"{spec.smoke_id} {manifest_path.name} digest={checkpoint_digest[:46]}")
     return manifest

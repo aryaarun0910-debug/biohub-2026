@@ -244,9 +244,10 @@ Implemented:
 - `biohubx evaluate retention [--root PATH] [--retentions LIST] [--seed N]`
 - `biohubx evaluate mask-audit [--root PATH] [--max-frames N] [--compare-maxpool]`
 - `biohubx package audit [--out PATH] [--expect-kernel ID] [--allow-dirty]`
-- `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--allow-dirty]`
+- `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--smoke-id ID] [--wheelhouse PATH] [--expect-published DIGEST] [--expect-device NAME] [--allow-dirty]`
 - `biohubx package preflight [--out PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--allow-dirty]`
 - `biohubx package wheelhouse [--path PATH] [--remote PATH] [--out PATH]`
+- `biohubx package retrieve --kernel ID --only NAME... --out DIR [--allow-missing]`
 - `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--peak-quantile F] [--learning-rate F]`
 
 `infer synthetic` writes the emitted graph and a stage-by-stage report
@@ -347,6 +348,24 @@ training embryo, and its entry point re-verifies mounted identity, asserts fold
 membership, refuses public-test paths and quarantined checkpoints, checks the
 GPU count, heartbeats every stage and writes an atomic checkpoint with a typed
 digest. `--smoke-local` runs that exact entry point here on CPU first.
+
+Its package now also carries the wheelhouse, because `biohubx` imports zarr and
+the image does not have it ([[R-0006]]). The mount is located by the identity the
+package carries, verified before pip reads a byte of it, and installed offline,
+all before `import biohubx`, since installing after that import would install too
+late ([[D-0032]], [[D-0033]]). The accelerator is requested as the canonical
+`NvidiaTeslaT4`, and because a request is not an allocation, the run refuses
+unless the device it actually got reports a Tesla T4, including when it got no
+accelerator at all. Torch and CUDA versions, the device name, total VRAM and peak
+allocated and reserved memory are reported, so the T4-versus-P100 question and the
+memory headroom for a larger window stop being unmeasured.
+
+`package retrieve` fetches only the outputs an authorisation named. `kaggle
+kernels output` has no per-file mode, so this is containment rather than
+prevention: everything the platform sends lands in a temporary directory, only the
+named files are kept, the rest are deleted with it, and the report lists every
+file that arrived and what happened to it. It exists because retrieving a
+preflight also brought back an artifact nobody had asked for ([[R-0008]]).
 
 `package preflight` stages the wheelhouse installation and readability check, and
 sends nothing. It asks two questions in order: does the wheelhouse install offline

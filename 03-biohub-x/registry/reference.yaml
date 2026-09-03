@@ -879,6 +879,28 @@ references:
         run's own synthetic write. It was deleted rather than kept, because the
         authorisation permitted retrieving the log and the manifest and nothing
         else, and the manifest already records the round trip's outcome.
+      operational_deviation:
+        what: >-
+          The authorisation permitted retrieving the log and the manifest. Three
+          files arrived: those two and roundtrip.zarr/zarr.json, an artifact the
+          run itself wrote. The third was deleted immediately and never registered.
+        cause: >-
+          `kaggle kernels output` fetches a kernel's whole output directory and has
+          no per-file mode, so the retrieval could not be scoped at the point of
+          asking for it.
+        severity: >-
+          Low. The file was this run's own synthetic output, it contained no
+          competition bytes, it left the machine at no point, and its content is
+          already described by the manifest. What makes it worth recording is not
+          the file but the shape: a retrieval wider than its authorisation, which
+          on a different run could have pulled something that mattered.
+        remedy: >-
+          `biohubx package retrieve --kernel ID --only NAME --out DIR` keeps only
+          the named outputs, deletes the rest with the temporary directory it
+          fetched them into, and reports every file that arrived with what happened
+          to it. It is containment rather than prevention, because the platform
+          still sends everything, and the report says so rather than implying a
+          guarantee the CLI cannot make.
       self_identification: >-
         The manifest carries commit 5e5778133391c443470842c34d6c91ef916b4f8d,
         matching the staged package, so the measurement is bound to the artifact
@@ -986,6 +1008,187 @@ references:
       - Whether the image's polars 1.35.2 and scipy 1.16.3 behave like the pinned
         versions. A full fold needs the metric stack, which this wheelhouse does
         not carry.
+
+  - id: R-0009
+    status: reference_only
+    title: Three competition discussion threads, supplied by Arya, on the metric and on sparse-label overfitting
+    provenance:
+      supplied_by: Arya Arun
+      collected_by: not Biohub-X. These were handed over; nothing was scraped.
+      files:
+        - DiscussionThread1.txt
+        - DiscussionThread2.txt
+        - DiscussionThread3.txt
+        - two attached screenshots showing annotated nodes over a volume
+      note: >-
+        Public competitor discussion, not a prior campaign. It is reference_only
+        under [[D-0017]]: it may motivate an experiment and may never support a
+        claim, and no constant in it may be adopted as a prior. It is emphatically
+        NOT the AGENTS.md section 1 quarantine, which is absolute and applies to
+        the prior campaign alone. Keeping the two apart matters, because a
+        reference entry is citable as "someone asserts X" and a quarantined one is
+        not citable at all.
+
+    observed:
+      thread_1_node_count_adjustment:
+        who: a 12th-place competitor, with responses from 6th place and others
+        states: >-
+          The adjusted edge Jaccard has a floor at zero and no ceiling, so
+          predicting fewer nodes than estimated_number_of_nodes yields a
+          multiplier above one. Reports 0.98 edge Jaccard and a node ratio near
+          -0.29 giving 1.0102 on one training clip. A responder reports three
+          further synthetic observations: a signed node adjustment, different graph
+          normalisation between edge and division scoring, and a directory
+          evaluator that aggregates only datasets present in both prediction and
+          ground truth so an omitted dataset receives no explicit zero.
+        biohubx_position: >-
+          Independently measured here before this thread was supplied. [[F-0004]]
+          records the uncapped multiplier, [[F-0005]] the frame-skipping edge that
+          is dropped rather than charged, [[F-0015]] and [[F-0018]] the size of the
+          lever on the real corpus. Nothing here is new to Biohub-X and nothing
+          here needs to be believed. The convergence is worth noting only as
+          evidence that the reading is not eccentric.
+        unadopted: >-
+          The missing-dataset behaviour is NOT measured here and is not adopted.
+          Emitting fewer datasets to exploit it would be gaming a scorer silence,
+          which [[D-0010]] refuses on principle.
+
+      thread_2_proxy_versus_leaderboard:
+        who: a 51st-place competitor, answering a question about detectors above 0.94
+        states: >-
+          That the local proxy is scored against sparse ground truth while the
+          leaderboard is scored against dense labels, so the proxy barely
+          penalises over-detection and a proxy gain need not be a leaderboard
+          gain. A 172nd-place responder challenges this directly, saying they can
+          find no statement anywhere that the leaderboard uses dense labels.
+        biohubx_position: >-
+          UNRESOLVED AND CONTESTED IN THE THREAD ITSELF. Biohub-X has not measured
+          it and cannot, since the hidden set is not readable. It changes nothing
+          operationally: [[D-0020]] already disqualified the public leaderboard as
+          a target for an unrelated and independently established reason, so
+          Biohub-X targets a held-out split of the 199 annotated train movies
+          either way. Recorded because if the dense-label claim were true it would
+          make the node-count lever in [[F-0018]] behave differently on the hidden
+          set than on our folds, which is a real risk to name even while unproven.
+
+      thread_3_detector_overfitting:
+        who: a 75th-place competitor, with two responses from 172nd place
+        states: >-
+          Training a 3D UNet detector on fixed sparse-GT frames with a masked focal
+          loss, the real metric peaks around epoch 5 to 10 and then collapses by
+          more than half, adj_ej 0.40 to 0.07 by epoch 120, while the loss keeps
+          falling 0.25 to 0.003 and node recall stays flat near 0.98. Peaks per
+          frame climb from 1800 to over 2100 and the node-count term eventually
+          goes negative from over-detection. A responder attributes it to sparse
+          annotation: the unlabelled nodes "change from noisy targets to negative
+          targets after 10 epochs", and posts screenshots showing faint-intensity
+          annotated nodes.
+        why_this_one_matters_most: >-
+          It is the only one of the three describing a mechanism Biohub-X has
+          reasoned about but never observed, and it is a mechanism this repository
+          predicted from a different direction. [[D-0023]] and [[D-0024]] rejected
+          supervising unlabelled cells as background, and [[F-0021]] falsified
+          every intensity band across all 133,318 annotated nodes. This thread
+          reports what happens to someone who does supervise them as background:
+          the objective converges onto the training frames and the real score
+          collapses while the loss looks healthy. The screenshots showing faint
+          annotated nodes are the same population [[F-0021]] measured at percentile
+          0.063.
+        still_not_evidence: >-
+          A third party's uncontrolled observation with no ablation, no seed, no
+          fold definition and a different objective from the one Biohub-X uses. It
+          may motivate an experiment. It may not support a claim, and it does not
+          confirm [[D-0024]]; only a Biohub-X measurement can do that.
+
+    hypotheses_extracted:
+      - id: H-01
+        from: thread_3
+        statement: >-
+          Under a positive-unlabelled objective with no background class, the gap
+          between falling loss and falling official score that thread 3 describes
+          does not open, or opens far later, than under an objective that
+          supervises unlabelled voxels as background.
+        falsifier: >-
+          Killed if a Biohub-X nnPU detector shows the same signature, meaning
+          official score peaking early and then declining by more than half while
+          the training loss keeps falling, on either embryo fold.
+        cost: an epoch ladder on one fold; no new data, no new dependency
+        note: >-
+          This is the strongest item the three threads yield, because it is cheap,
+          it is falsifiable on our own folds, and its outcome changes what E03
+          reports either way.
+      - id: H-02
+        from: thread_3
+        statement: >-
+          Selecting a checkpoint on the official metric rather than on the training
+          loss changes which epoch is chosen, and the difference is large.
+        falsifier: >-
+          Killed if the metric-selected and loss-selected epochs coincide, or if
+          their held-out scores differ by less than the fold-to-fold spread.
+        note: >-
+          Already implied by Biohub-X's own promotion rule, which is the official
+          metric per fold. The thread supplies a reason to measure the size of the
+          difference rather than assume it is small.
+      - id: H-03
+        from: thread_3
+        statement: >-
+          Resampling which frames are trained on each epoch reduces the collapse
+          relative to a fixed frame subset.
+        falsifier: killed if resampling does not change the epoch at which the held-out score peaks
+        note: >-
+          Lowest priority of the three. It is a remedy for a failure Biohub-X has
+          not yet observed in its own objective, so it is queued behind H-01, which
+          establishes whether the failure exists here at all.
+
+    not_adopted:
+      - Any threshold, epoch count, peak count or learning rate stated in these threads.
+      - The claim that the leaderboard uses dense labels. Contested in the thread and unmeasured here.
+      - The missing-dataset aggregation behaviour, which is a scorer silence and is refused by [[D-0010]].
+      - The suggested ultrack-plus-post-processing route in thread 2. It is a
+        different system, it is advice rather than a measurement, and adopting a
+        pipeline on a forum suggestion is how a campaign acquires beliefs it
+        cannot falsify.
+
+    unresolved:
+      - Whether the hidden set is scored against dense labels. Contested by the
+        participants themselves and not checkable from outside.
+      - Whether the collapse in thread 3 is specific to that objective, which is
+        H-01 and is the reason H-01 exists.
+      - Whether the poster's node recall near 0.98 is measured the same way as
+        Biohub-X's, which is not stated and materially changes what the number means.
+
+  - id: R-0010
+    status: reference_only
+    title: Three public notebooks and their stated leaderboard scores, named but not retrieved
+    provenance:
+      supplied_by: Arya Arun
+      retrieved: false
+      why_not: >-
+        The same message that named them authorised local preparation only, with
+        no additional download. Pulling a kernel is a download, so the three were
+        recorded and left alone pending a separate go-ahead. AGENTS.md section 7
+        puts downloads on the stop-and-report list.
+    observed:
+      notebooks:
+        - ref: alioman/biohub-v19c-public0939-sis14-only
+          stated_public_score: 0.939
+        - ref: flexonafft/biohub-agreement-gated-dual-seed-fusion
+          stated_public_score: 0.935
+        - ref: alioman/biohub-v19d-dual-wide-div400
+          stated_public_score: 0.938
+      pull_commands_supplied: kaggle kernels pull <ref>
+    reading: >-
+      The scores are public-leaderboard numbers and are therefore observations,
+      never targets ([[D-0020]]). Two of the three names suggest dual-seed fusion
+      and division-count variation, which are mechanisms rather than constants, and
+      mechanisms are the part of a public notebook that can legitimately motivate
+      an experiment.
+    unresolved:
+      - Everything about their content. Nothing has been read.
+      - Whether their training splits include the four movies byte-identical to the
+        public test volumes, which is what made the reference's score uninformative
+        ([[R-0002]], [[F-0010]]). Until that is known for each, their scores say as
+        little as the reference's did.
 
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains

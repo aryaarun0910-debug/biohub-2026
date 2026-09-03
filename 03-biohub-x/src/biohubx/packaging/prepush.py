@@ -23,6 +23,9 @@ from typing import Any
 EXPECTED_STAGES = (
     "bootstrap-verify",
     "bootstrap-extract",
+    "wheelhouse",
+    "wheelhouse-verify",
+    "wheelhouse-install",
     "bootstrap-import",
     "start",
     "pinned",

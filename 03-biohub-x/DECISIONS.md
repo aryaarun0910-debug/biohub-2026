@@ -1033,3 +1033,41 @@ the criterion is the digest and not the shape.
 this image remains unmeasured, and this decision deliberately removes the need to
 know. If the next run resolves, the path it reports becomes a Biohub-X
 measurement rather than an assumption.
+
+## D-0034 - A requested accelerator is not an allocated one, and the run must know the difference
+
+**Date:** 2026-09-03
+**Status:** accepted
+
+E03-SMOKE-02 was authorised for one T4. `kernel-metadata.json` requested
+`nvidiaTeslaT4`, Kaggle allocated a P100, and the packaged guard checked
+`torch.cuda.device_count()`, which was 1, and passed ([[D-0028]]).
+
+Two changes, and only one of them is a fix.
+
+The accelerator id is now the canonical `NvidiaTeslaT4`. Whether the casing caused
+the fallback is **not established**, and this record does not claim it did. It is
+a correction to a field whose accepted spelling was guessed, made because a
+guessed spelling is worth removing whether or not it was the cause.
+
+**The guarantee is the runtime guard, not the request.** The run refuses unless
+the device it actually received reports a Tesla T4, and the check is now
+unconditional: an accelerator run that finds no accelerator refuses too. Guarding
+the model only when a device is present leaves the case where none is, which is
+the same shape as counting devices where the model mattered.
+
+The run also reports what it got rather than what it asked for: torch version,
+CUDA version, device name, total VRAM, and peak allocated and reserved memory
+after training. Two questions that have been open since the environment audit
+depend on this. The audit was CPU-only and measured `torch 2.10.0+cpu`, so the GPU
+image's CUDA build is unmeasured ([[R-0006]]), and the memory headroom that decides
+whether a larger window or batch fits has never been observed at all. Peak rather
+than current, because the high-water mark is the number that decides what fits.
+
+One consequence binds later work. The E03 package now attaches the wheelhouse as
+its single dataset source, so `dataset_sources` is no longer empty and can no
+longer be checked by counting. The guard names it: any source that is not the
+wheelhouse refuses, which is how an external weight pack would otherwise arrive in
+a run that is forbidden to use one. The wheelhouse is verified against its
+identity before pip runs, and a caller that does not verify cannot pass that guard
+by staying silent, because the parameter defaults to false.

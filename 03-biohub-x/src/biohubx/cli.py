@@ -1966,7 +1966,22 @@ def package_kaggle(
     expect_device: Annotated[
         str,
         typer.Option("--expect-device", help="Substring the allocated GPU name must contain."),
-    ] = "T4",
+    ] = "Tesla T4",
+    smoke_id: Annotated[
+        str,
+        typer.Option("--smoke-id", help="Attempt identity, carried in the package, log and manifest."),
+    ] = "E03-SMOKE-03",
+    wheelhouse: Annotated[
+        Path | None,
+        typer.Option("--wheelhouse", help="Local wheelhouse. Defaults to artifacts/wheelhouse."),
+    ] = None,
+    expect_published: Annotated[
+        str | None,
+        typer.Option(
+            "--expect-published",
+            help="Refuse unless the wheelhouse publishes this tree identity.",
+        ),
+    ] = None,
     expect_kernel: Annotated[
         str | None,
         typer.Option("--expect-kernel", help="Refuse unless the build would create exactly this kernel id."),
@@ -1982,7 +1997,9 @@ def package_kaggle(
     command = "package kaggle"
     import shutil
     import subprocess
+    import tempfile
 
+    from biohubx.hashing import tree_digest
     from biohubx.packaging import prepush
     from biohubx.packaging.kaggle import (
         FoldSpec,
@@ -1997,6 +2014,8 @@ def package_kaggle(
         kernel_id_for,
         kernel_metadata,
     )
+    from biohubx.packaging.preflight import WHEELHOUSE_SLUG
+    from biohubx.packaging.wheelhouse import published_relative_paths, stage_published_payload
 
     root_path = repository_root()
     config_path = root_path / "configs/e03-clean-folds.yaml"
@@ -2029,6 +2048,32 @@ def package_kaggle(
         )
         raise typer.Exit(code=2)
 
+    # E03 needs zarr, which the image does not carry, so the wheelhouse is an
+    # input to this package and its identity travels inside it (D-0032, D-0033).
+    house = wheelhouse if wheelhouse is not None else root_path / "artifacts/wheelhouse"
+    if not (house / "wheels").is_dir():
+        heartbeat(command, "refused", f"no wheelhouse under {house}; E03 cannot import zarr without it")
+        raise typer.Exit(code=2)
+    bundle = tree_digest(house, on_file=_periodic_progress(command, "upload bundle"))
+    with tempfile.TemporaryDirectory(prefix="biohubx-published-") as scratch:
+        payload_root = Path(scratch) / "payload"
+        payload_root.mkdir()
+        stage_published_payload(house, payload_root, published_relative_paths(bundle))
+        published = tree_digest(payload_root, on_file=_periodic_progress(command, "published payload"))
+    if expect_published is not None and expect_published != published.digest.token:
+        heartbeat(
+            command,
+            "refused",
+            f"the wheelhouse publishes {published.digest.token}, not the authorised {expect_published}",
+        )
+        raise typer.Exit(code=2)
+    heartbeat(
+        command,
+        "wheelhouse",
+        f"published payload {published.digest.token}"
+        + (" (pinned)" if expect_published is not None else " (NOT pinned to an authorisation)"),
+    )
+
     spec = PackageSpec(
         commit=commit,
         config_path="configs/e03-clean-folds.yaml",
@@ -2042,10 +2087,17 @@ def package_kaggle(
         epochs=epochs,
         batch_size=batch_size,
         learning_rate=learning_rate,
-        accelerator="nvidiaTeslaT4",
+        # Canonical casing. Attempt 2 requested nvidiaTeslaT4 and Kaggle
+        # allocated a P100 (D-0028). Whether the casing caused it is not
+        # established, so this is a correction, not a fix: the guarantee is the
+        # runtime guard refusing any device that is not a Tesla T4.
+        accelerator="NvidiaTeslaT4",
         expected_gpu_count=gpus,
         expected_device_substring=expect_device,
         smoke=True,
+        smoke_id=smoke_id,
+        wheelhouse_slug=WHEELHOUSE_SLUG,
+        wheelhouse_tree=published.digest.token,
         max_movies=max_movies or None,
         runtime_ceiling_seconds=runtime_ceiling,
     )
@@ -2122,7 +2174,23 @@ def package_kaggle(
         "payload",
         f"bytes={len(archive_bytes)} files={len(inventory)} digest={payload_token[:46]}",
     )
-    notebook = build_notebook(spec, shipped=shipped, payload=archive_bytes)
+    notebook = build_notebook(
+        spec,
+        shipped=shipped,
+        payload=archive_bytes,
+        wheelhouse_payload={
+            "tree": published.digest.token,
+            "records": [
+                [
+                    record.kind,
+                    "-" if record.content_sha256 is None else record.content_sha256,
+                    "-" if record.size_bytes is None else str(record.size_bytes),
+                    record.relative_path,
+                ]
+                for record in published.records
+            ],
+        },
+    )
     atomic_write_text(staging / "run.ipynb", json.dumps(notebook, indent=1, sort_keys=True) + chr(10))
     atomic_write_text(
         staging / "kernel-metadata.json",
@@ -2682,6 +2750,114 @@ def package_preflight(
     _write_manifest(command, {"report": "artifacts/kaggle-preflight.json", "preflight": spec.audit_id})
     heartbeat(command, "staged", f"files={len(files) + 1} digest={package_digest.token[:52]}")
     heartbeat(command, "done", "NOT PUSHED; the mounted tree is verified before pip runs")
+    typer.echo(json.dumps(payload, sort_keys=True))
+
+
+@package_app.command("retrieve")
+def package_retrieve(
+    kernel: Annotated[str, typer.Option("--kernel", help="Kernel id, owner/slug.")],
+    only: Annotated[
+        list[str],
+        typer.Option("--only", help="An output filename to keep. Repeatable. Nothing else is kept."),
+    ],
+    out: Annotated[Path, typer.Option("--out", help="Directory to place the kept files in.")],
+    allow_missing: Annotated[
+        bool,
+        typer.Option("--allow-missing", help="Do not refuse when a named file is absent."),
+    ] = False,
+) -> None:
+    """Retrieve only the named outputs of a kernel, and account for everything else.
+
+    An authorisation naming two artifacts should not be able to pull a third.
+    ``kaggle kernels output`` has no per-file mode: it fetches the whole output
+    directory. Retrieving E03-WHEELHOUSE-PREFLIGHT-01 attempt 2 therefore also
+    brought back the run's own roundtrip.zarr, which nobody had asked for and
+    which had to be deleted afterwards.
+
+    **This is containment, not prevention, and the difference is recorded rather
+    than glossed.** The platform still sends every output; what changes is that
+    they land in a temporary directory, only the named files are moved to ``out``,
+    the rest are deleted, and the report lists every file that arrived with what
+    happened to it. A reviewer can see what was discarded instead of taking it on
+    trust, which is the honest version of a guarantee this CLI cannot make.
+    """
+    command = "package retrieve"
+    import shutil
+    import subprocess
+    import tempfile
+
+    root_path = repository_root()
+    wanted = sorted(set(only))
+    if not wanted:
+        heartbeat(command, "refused", "no --only given; a retrieval that names nothing keeps nothing")
+        raise typer.Exit(code=2)
+    if any("/" in name or "\\" in name or name in {".", ".."} for name in wanted):
+        heartbeat(command, "refused", f"--only takes bare filenames, got {wanted}")
+        raise typer.Exit(code=2)
+
+    heartbeat(command, "start", f"kernel={kernel} keeping={wanted}")
+    with tempfile.TemporaryDirectory(prefix="biohubx-retrieve-") as scratch:
+        quarantine = Path(scratch)
+        completed = subprocess.run(
+            ["kaggle", "kernels", "output", kernel, "-p", str(quarantine)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if completed.returncode != 0:
+            heartbeat(
+                command, "refused", f"kaggle returned {completed.returncode}: {completed.stderr[-300:]}"
+            )
+            raise typer.Exit(code=2)
+
+        arrived = sorted(p for p in quarantine.rglob("*") if p.is_file())
+        kept: list[dict[str, object]] = []
+        discarded: list[str] = []
+        out.mkdir(parents=True, exist_ok=True)
+        for item in arrived:
+            relative = item.relative_to(quarantine).as_posix()
+            if item.name in wanted and item.parent == quarantine:
+                destination = out / item.name
+                shutil.copyfile(item, destination)
+                kept.append(
+                    {
+                        "name": item.name,
+                        "bytes": destination.stat().st_size,
+                        "digest": digest_file(destination, DigestKind.RAW_ARTIFACT).token,
+                    }
+                )
+            else:
+                discarded.append(relative)
+        missing = sorted(set(wanted) - {str(entry["name"]) for entry in kept})
+
+    for entry in kept:
+        heartbeat(command, "kept", f"{entry['name']} bytes={entry['bytes']} {entry['digest']}")
+    for name in discarded:
+        heartbeat(command, "discarded", name)
+    if missing and not allow_missing:
+        heartbeat(command, "refused", f"named outputs the kernel did not produce: {missing}")
+        raise typer.Exit(code=2)
+
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "kernel": kernel,
+        "requested": wanted,
+        "kept": kept,
+        "discarded": discarded,
+        "missing": missing,
+        "destination": str(out),
+        "containment_note": (
+            "The Kaggle CLI fetches a kernel's whole output directory; there is no per-file mode. "
+            "Everything arrived in a temporary directory, only the named files were copied out, and "
+            "the rest were deleted with the directory. Discarded names are listed above so the "
+            "difference between what was sent and what was kept is auditable."
+        ),
+    }
+    report_path = root_path / "artifacts/kaggle-retrieve.json"
+    atomic_write_text(report_path, json.dumps(payload, indent=2, sort_keys=True) + chr(10))
+    _write_manifest(command, {"report": str(report_path), "kernel": kernel, "kept": len(kept)})
+    heartbeat(command, "done", f"kept={len(kept)} discarded={len(discarded)} into {out}")
     typer.echo(json.dumps(payload, sort_keys=True))
 
 

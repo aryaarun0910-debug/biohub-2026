@@ -37,13 +37,21 @@ SPEC = PackageSpec(
     epochs=2,
     batch_size=2,
     learning_rate=1e-4,
-    accelerator="nvidiaTeslaT4",
+    accelerator="NvidiaTeslaT4",
     expected_gpu_count=1,
-    expected_device_substring="T4",
+    expected_device_substring="Tesla T4",
     smoke=True,
+    smoke_id="E03-SMOKE-03",
+    wheelhouse_slug="aryaarun07/biohubx-wheelhouse-zarr-cp312-linux",
+    wheelhouse_tree="tree_sha256:sha256/v1:" + "c" * 64,
     max_movies=2,
     runtime_ceiling_seconds=2400,
 )
+
+WHEELHOUSE = {
+    "tree": "tree_sha256:sha256/v1:" + "c" * 64,
+    "records": [["f", "d" * 64, "9", "requirements-offline.txt"]],
+}
 
 REGISTERED = {"44b6_a.zarr": "tree_sha256:sha256/v1:" + "b" * 64}
 
@@ -61,6 +69,8 @@ def report(**overrides: Any) -> dict[str, Any]:
         "opened_paths": ["/kaggle/input/competitions/x/train/44b6_a.zarr"],
         "gpu_count": 1,
         "device_name": "Tesla T4",
+        "dataset_sources": ["aryaarun07/biohubx-wheelhouse-zarr-cp312-linux"],
+        "wheelhouse_verified": True,
     }
     kwargs.update(overrides)
     return guard_report(SPEC, **kwargs)
@@ -142,15 +152,25 @@ def test_the_kernel_metadata_disables_internet_and_ships_no_datasets() -> None:
     )
     assert meta["enable_internet"] is False
     assert meta["enable_gpu"] is True
-    assert meta["accelerator"] == "nvidiaTeslaT4"
-    assert meta["dataset_sources"] == []
+    # Canonical casing. The lower-cased form was requested for attempt 2 and
+    # Kaggle allocated a P100 (D-0028).
+    assert meta["accelerator"] == "NvidiaTeslaT4"
+    # Exactly the wheelhouse and nothing else. E03 needs zarr, which the image
+    # lacks; it needs no external weights, and an extra source is how one would
+    # arrive.
+    assert meta["dataset_sources"] == ["aryaarun07/biohubx-wheelhouse-zarr-cp312-linux"]
     assert meta["model_sources"] == []
     assert meta["competition_sources"] == ["biohub-cell-tracking-during-development"]
 
 
 def test_the_notebook_embeds_the_spec_and_carries_no_model_logic() -> None:
     shipped = {**SPEC.to_dict(), "input_digests": REGISTERED}
-    notebook = build_notebook(SPEC, shipped=shipped, payload=deterministic_archive(repo_source()))
+    notebook = build_notebook(
+        SPEC,
+        shipped=shipped,
+        payload=deterministic_archive(repo_source()),
+        wheelhouse_payload=WHEELHOUSE,
+    )
     assert len(notebook["cells"]) == 1
     source = "".join(notebook["cells"][0]["source"])
     assert "run_fold" in source
@@ -199,6 +219,7 @@ def test_the_notebook_carries_the_fields_nbformat_validates_before_running() -> 
         SPEC,
         shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
         payload=deterministic_archive(repo_source()),
+        wheelhouse_payload=WHEELHOUSE,
     )
 
     kernelspec = notebook["metadata"]["kernelspec"]
@@ -271,6 +292,7 @@ def test_the_generated_notebook_validates_and_converts() -> None:
         SPEC,
         shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
         payload=deterministic_archive(repo_source()),
+        wheelhouse_payload=WHEELHOUSE,
     )
     prepush.check_required_metadata(notebook)
     prepush.validate_notebook(notebook)
@@ -331,6 +353,7 @@ def test_the_notebook_never_imports_from_the_unmounted_input_path() -> None:
         SPEC,
         shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
         payload=deterministic_archive(repo_source()),
+        wheelhouse_payload=WHEELHOUSE,
     )
     source = "".join(notebook["cells"][0]["source"])
     assert "/kaggle/input/biohubx-package" not in source
@@ -340,7 +363,7 @@ def test_the_notebook_never_imports_from_the_unmounted_input_path() -> None:
 
 def test_a_notebook_without_a_payload_is_refused() -> None:
     with pytest.raises(PackagingError, match="could not import anything"):
-        build_notebook(SPEC, shipped=SPEC.to_dict(), payload=None)
+        build_notebook(SPEC, shipped=SPEC.to_dict(), payload=None, wheelhouse_payload=WHEELHOUSE)
 
 
 def test_the_embedded_cell_is_valid_python() -> None:
@@ -350,6 +373,7 @@ def test_the_embedded_cell_is_valid_python() -> None:
         SPEC,
         shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
         payload=deterministic_archive(repo_source()),
+        wheelhouse_payload=WHEELHOUSE,
     )
     ast.parse("".join(notebook["cells"][0]["source"]))
 
@@ -378,3 +402,91 @@ def test_an_unapproved_gpu_model_is_refused() -> None:
     wrong = report(device_name="Tesla P100-PCIE-16GB")
     assert not wrong["passed"]
     assert any("did not take effect" in f for f in wrong["failures"])
+
+
+# --- E03-SMOKE-03: the hardware and the dependency source -------------------
+
+
+def test_an_accelerator_run_that_finds_no_accelerator_refuses() -> None:
+    """Attempt 2 passed a count check and ran on a P100. A missing card must refuse too.
+
+    Guarding the model only when a device is present leaves the case where none
+    is, which is the same adjacent-check shape: the check sits next to the thing
+    that matters instead of on it.
+    """
+    failures = report(gpu_count=0, device_name="cpu")["failures"]
+
+    assert any("Tesla T4" in line for line in failures)
+
+
+def test_a_p100_is_refused_by_name() -> None:
+    outcome = report(device_name="Tesla P100-PCIE-16GB")
+
+    assert not outcome["passed"]
+    assert any("P100" in line for line in outcome["failures"])
+    assert outcome["device_name"] == "Tesla P100-PCIE-16GB"
+
+
+def test_a_dataset_source_that_is_not_the_wheelhouse_is_refused_by_name() -> None:
+    """An external weight pack is what an extra source would smuggle in."""
+    outcome = report(
+        dataset_sources=[
+            "aryaarun07/biohubx-wheelhouse-zarr-cp312-linux",
+            "pilkwang/biohub-tracking-support-pack-50ep-v1",
+        ]
+    )
+
+    assert not outcome["passed"]
+    assert any("pilkwang" in line for line in outcome["failures"])
+
+
+def test_an_unverified_wheelhouse_refuses_even_when_everything_else_passes() -> None:
+    """Saying nothing must not pass. The default is False for exactly this case."""
+    outcome = report(wheelhouse_verified=False)
+
+    assert not outcome["passed"]
+    assert any("not verified" in line for line in outcome["failures"])
+
+
+def test_the_notebook_verifies_and_installs_the_wheelhouse_before_importing_biohubx() -> None:
+    """biohubx imports zarr, so installing after the import installs too late."""
+    source = "".join(
+        build_notebook(
+            SPEC,
+            shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
+            payload=deterministic_archive(repo_source()),
+            wheelhouse_payload=WHEELHOUSE,
+        )["cells"][0]["source"]
+    )
+
+    verified = source.index("biohubx_canonical_tree(wheelhouse_root)")
+    installed = source.index('"pip", "install"')
+    imported = source.index("import biohubx")
+    assert verified < installed < imported
+    assert str(WHEELHOUSE["tree"]) in source
+
+
+def test_a_package_cannot_be_built_without_the_wheelhouse_identity_it_will_check() -> None:
+    with pytest.raises(PackagingError, match="canonical tree token"):
+        build_notebook(
+            SPEC,
+            shipped=SPEC.to_dict(),
+            payload=deterministic_archive(repo_source()),
+            wheelhouse_payload={"tree": "", "records": [["f", "a", "1", "b"]]},
+        )
+
+
+def test_the_attempt_id_travels_in_the_package() -> None:
+    """E03-SMOKE-01 and -02 are separate immutable records; -03 must be nameable too."""
+    source = "".join(
+        build_notebook(
+            SPEC,
+            shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
+            payload=deterministic_archive(repo_source()),
+            wheelhouse_payload=WHEELHOUSE,
+        )["cells"][0]["source"]
+    )
+
+    assert "E03-SMOKE-03" in source
+    assert SPEC.to_dict()["smoke_id"] == "E03-SMOKE-03"
+    assert report()["smoke_id"] == "E03-SMOKE-03"
