@@ -185,6 +185,14 @@ def kernel_metadata(spec: PackageSpec, *, slug: str, title: str) -> dict[str, An
         "enable_gpu": True,
         "enable_internet": False,
         "accelerator": spec.accelerator,
+        # Both keys, deliberately. E03-SMOKE-02 requested a T4 through
+        # `accelerator` and Kaggle allocated a P100 (D-0028). Three public GPU
+        # notebooks that do get a T4 pin it through `machine_shape`, and Kaggle's
+        # own returned metadata for the Biohub-X preflight carried that key
+        # (R-0010). That is a mechanism worth copying and not evidence that it is
+        # the effective field, so both are set and neither is trusted: the
+        # guarantee stays the runtime guard refusing a device that is not a T4.
+        "machine_shape": spec.accelerator,
         "dataset_sources": [spec.wheelhouse_slug],
         "kernel_sources": [],
         "model_sources": [],

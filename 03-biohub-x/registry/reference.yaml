@@ -1260,6 +1260,21 @@ references:
           The strongest item this intake produced. It converts a policy three
           public notebooks share into a question our own oracle can already answer,
           and the answer does not depend on their contaminated scores.
+        status: >-
+          TESTED AND NOT KILLED. [[F-0023]] measured it on all 199 annotated
+          datasets: at the span of 6 those notebooks use, edge retention is 0.9963
+          on 44b6 and 0.9945 on 6bba, far above the 0.94 target. The falsifier
+          required more than 8 percent of correct edges to be destroyed and the
+          filter destroys under 0.6 percent.
+        what_survives_is_narrower_than_it_looks: >-
+          The same measurement shows the filter removes only 0.5 to 0.7 percent of
+          annotated nodes, because annotated tracks are long by construction and
+          ground truth contains almost no short-track structure to prune. So the
+          policy is established as harmless, not as effective. Whether it removes
+          enough spurious short tracks to reach the annotated node count is a
+          question about a detector's output, and no Biohub-X detector exists yet.
+          H-04 is therefore promoted from hypothesis to a candidate the first
+          trained fold must re-measure, not to a component.
       - id: H-05
         statement: >-
           Division acceptance by geometry alone, gated on parent-daughter distance,

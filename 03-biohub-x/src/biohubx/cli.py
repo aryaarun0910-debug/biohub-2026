@@ -1598,6 +1598,139 @@ def evaluate_retention(
     typer.echo(json.dumps({"crossover": crossings}, sort_keys=True))
 
 
+@evaluate_app.command("track-length")
+def evaluate_track_length(
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    minimums: Annotated[
+        str,
+        typer.Option("--minimums", help="Comma-separated minimum frame spans to sweep."),
+    ] = "2,3,4,5,6,8,10",
+    out: Annotated[
+        Path | None,
+        typer.Option("--out", help="Report path. Defaults to artifacts/track-length.json."),
+    ] = None,
+) -> None:
+    """What a minimum-track-length filter costs in correct edges, per embryo fold.
+
+    The H-04 probe. Three public notebooks prune short tracks and isolated nodes
+    ([[R-0010]]), and [[F-0018]] set the bar any real filter must clear: about 0.94
+    edge retention to buy the step to 0.950, and below 0.92 it stops paying at all.
+
+    Measured on the annotated graphs themselves, which is the cheapest possible
+    falsification. Against ground truth the filter meets a perfect graph, so what
+    it destroys here it destroys at best on a real one; a policy that already fails
+    the bar against perfect input cannot pass it against a detector's output.
+
+    Reads ground-truth graphs only. No volume is opened and the four duplicated
+    public-test fixtures are never read ([[D-0015]]).
+    """
+    command = "evaluate track-length"
+    from biohubx.data.competition import CompetitionLayoutError, competition_root, load_ground_truth
+    from biohubx.evaluation.track_length import filter_cost
+
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    train_dir = data_root / "train"
+    train = sorted(path.stem for path in train_dir.glob("*.geff"))
+    if not train:
+        heartbeat(command, "refused", f"no annotated training datasets under {train_dir}")
+        raise typer.Exit(code=2)
+    spans = tuple(int(item) for item in minimums.split(","))
+    heartbeat(command, "start", f"datasets={len(train)} minimums={list(spans)}")
+
+    started = time.monotonic()
+    corpus = []
+    for index, dataset_id in enumerate(train):
+        corpus.append(load_ground_truth(data_root, dataset_id))
+        if (index + 1) % 50 == 0:
+            heartbeat(command, "loaded", f"{index + 1}/{len(train)}")
+    heartbeat(command, "loaded", f"{len(corpus)} ground-truth graphs")
+
+    rows: list[dict[str, object]] = []
+    for keep_divisions in (True, False):
+        for minimum in spans:
+            per_embryo: dict[str, list[int]] = {}
+            for truth in corpus:
+                cost = filter_cost(truth.lineage, minimum_frames=minimum, keep_divisions=keep_divisions)
+                bucket = per_embryo.setdefault(truth.embryo, [0, 0, 0, 0])
+                bucket[0] += cost.edges_after
+                bucket[1] += cost.edges_before
+                bucket[2] += cost.nodes_after
+                bucket[3] += cost.nodes_before
+            for embryo, (edges_after, edges_before, nodes_after, nodes_before) in sorted(per_embryo.items()):
+                retention = 1.0 if edges_before == 0 else edges_after / edges_before
+                rows.append(
+                    {
+                        "embryo": embryo,
+                        "minimum_frames": minimum,
+                        "keep_divisions": keep_divisions,
+                        "edge_retention": round(retention, 6),
+                        "node_retention": round(1.0 if nodes_before == 0 else nodes_after / nodes_before, 6),
+                        "edges_kept": edges_after,
+                        "edges_total": edges_before,
+                        "nodes_kept": nodes_after,
+                        "nodes_total": nodes_before,
+                        # F-0018 put break-even at 0.92 and the 0.950 step at 0.94.
+                        "clears_break_even_0_92": retention >= 0.92,
+                        "clears_target_0_94": retention >= 0.94,
+                    }
+                )
+            heartbeat(
+                command,
+                "swept",
+                f"keep_divisions={keep_divisions} minimum={minimum} "
+                + " ".join(
+                    f"{row['embryo']}={row['edge_retention']:.4f}" for row in rows[-len(per_embryo) :]
+                ),
+            )
+
+    # The division exemption is the policy the public notebooks actually run, so
+    # the headline verdict is taken from that arm.
+    verdict: dict[int, bool] = {}
+    for minimum in spans:
+        arm = [row for row in rows if row["minimum_frames"] == minimum and row["keep_divisions"] is True]
+        verdict[minimum] = bool(arm) and all(bool(row["clears_target_0_94"]) for row in arm)
+    clearing = [minimum for minimum, passed in verdict.items() if passed]
+    largest_clearing = max(clearing) if clearing else None
+
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "hypothesis": "H-04",
+        "datasets": len(corpus),
+        "bar": {
+            "break_even_edge_retention": 0.92,
+            "target_edge_retention": 0.94,
+            "source": "F-0018, both embryo folds",
+        },
+        "rows": rows,
+        "largest_minimum_clearing_0_94_on_both_folds": largest_clearing,
+        "runtime_seconds": round(time.monotonic() - started, 3),
+        "limits": (
+            "Measured on ground-truth graphs, where every edge is correct by construction, so the "
+            "retention reported is what the filter costs against a perfect graph. A real detector's "
+            "output can only do worse. This says nothing about whether the filter reaches the "
+            "annotated node count, because ground truth is already at it."
+        ),
+    }
+    report_path = out if out is not None else repository_root() / "artifacts/track-length.json"
+    atomic_write_text(report_path, json.dumps(payload, indent=2, sort_keys=True) + chr(10))
+    _write_manifest(command, {"report": str(report_path), "datasets": len(corpus)})
+    heartbeat(
+        command,
+        "done",
+        f"largest minimum clearing 0.94 on both folds: {largest_clearing}",
+    )
+    typer.echo(json.dumps({k: v for k, v in payload.items() if k != "rows"}, sort_keys=True))
+
+
 @evaluate_app.command("mask-audit")
 def evaluate_mask_audit(
     root: Annotated[
@@ -2784,6 +2917,207 @@ def package_preflight(
     _write_manifest(command, {"report": "artifacts/kaggle-preflight.json", "preflight": spec.audit_id})
     heartbeat(command, "staged", f"files={len(files) + 1} digest={package_digest.token[:52]}")
     heartbeat(command, "done", "NOT PUSHED; the mounted tree is verified before pip runs")
+    typer.echo(json.dumps(payload, sort_keys=True))
+
+
+@package_app.command("transport")
+def package_transport(
+    package: Annotated[
+        Path | None,
+        typer.Option("--package", help="Staged package. Defaults to artifacts/kaggle-package."),
+    ] = None,
+    expect_kernel: Annotated[
+        str,
+        typer.Option("--expect-kernel", help="The kernel address the push must create."),
+    ] = "aryaarun07/biohub-x-e03-fold-44b6",
+    expect_digest: Annotated[
+        str | None,
+        typer.Option("--expect-digest", help="Refuse unless the staged manifest has this digest."),
+    ] = None,
+    push: Annotated[
+        bool,
+        typer.Option("--push", help="Actually send it. Refused without --campaign-envelope."),
+    ] = False,
+    campaign_envelope: Annotated[
+        str | None,
+        typer.Option("--campaign-envelope", help="The approval this push is drawn against."),
+    ] = None,
+) -> None:
+    """Validate a staged package for transport, and stop before sending it.
+
+    Everything here runs before any network call, because a package that is wrong
+    costs a GPU session to discover remotely and nothing to discover locally. The
+    checks are: the manifest digest re-derived from its bytes, every staged file
+    re-derived against the manifest's inventory, no file the builder did not
+    generate, no quarantined name or foreign path, no external checkpoint, exactly
+    the registered wheelhouse and the official competition as sources, and no
+    Docker image pin, because Biohub-X approves none and an unapproved one is an
+    unreviewed runtime.
+
+    Sending is a separate act and is refused unless ``--push`` is given together
+    with the campaign envelope it is drawn against. When it does send, it invokes
+    the CLI as a module, captures both streams, parses the kernel URL Kaggle
+    returns, and treats any divergence between that address and the expected one
+    as a failed attempt.
+
+    The credentials file belongs to the Kaggle CLI alone. Nothing here reads,
+    prints, copies or records it.
+    """
+    command = "package transport"
+    import re
+    import subprocess
+
+    from biohubx.packaging.kaggle import QUARANTINED_ARTIFACT_PREFIX
+    from biohubx.packaging.preflight import WHEELHOUSE_SLUG
+
+    root_path = repository_root()
+    staging = package if package is not None else root_path / "artifacts/kaggle-package"
+    manifest_path = staging / "PACKAGE_MANIFEST.json"
+    if not manifest_path.is_file():
+        heartbeat(command, "refused", f"no PACKAGE_MANIFEST.json under {staging}")
+        raise typer.Exit(code=2)
+
+    failures: list[str] = []
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    digest = digest_file(manifest_path, DigestKind.CANONICAL_TEXT).token
+    heartbeat(command, "digest", digest)
+    if expect_digest is not None and digest != expect_digest:
+        failures.append(f"staged manifest is {digest}, not the authorised {expect_digest}")
+
+    # Every staged file must be one the builder recorded, and vice versa. A file
+    # the manifest does not name is a file nobody reviewed.
+    recorded = dict(manifest.get("files", {}))
+    on_disk = {
+        path.relative_to(staging).as_posix(): path for path in sorted(staging.rglob("*")) if path.is_file()
+    }
+    unexpected = sorted(set(on_disk) - set(recorded) - {"PACKAGE_MANIFEST.json"})
+    absent = sorted(set(recorded) - set(on_disk))
+    if unexpected:
+        failures.append(f"files the builder did not generate: {unexpected[:5]}")
+    if absent:
+        failures.append(f"files the manifest names but the directory lacks: {absent[:5]}")
+    for name, token in sorted(recorded.items()):
+        if name in on_disk and digest_file(on_disk[name], DigestKind.RAW_ARTIFACT).token != token:
+            failures.append(f"{name} does not match the digest the manifest recorded")
+    heartbeat(command, "inventory", f"files={len(on_disk)} recorded={len(recorded)}")
+
+    # Names and paths that must never travel. The authoritative quarantine list is
+    # the constant in the isolation contract test, so it is read from there rather
+    # than copied here: two lists would drift, and the copy would be the one that
+    # silently stopped matching. src/ does not import tests/, so it is parsed.
+    import ast
+
+    isolation = root_path / "tests/contracts/test_repository_isolation.py"
+    quarantined_names: tuple[str, ...] = ()
+    for statement in ast.parse(isolation.read_text(encoding="utf-8")).body:
+        if isinstance(statement, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == "QUARANTINED_NAMES" for target in statement.targets
+        ):
+            quarantined_names = tuple(
+                element.value
+                for element in getattr(statement.value, "elts", [])
+                if isinstance(element, ast.Constant) and isinstance(element.value, str)
+            )
+    if not quarantined_names:
+        failures.append("could not read the authoritative quarantine list; refusing rather than guessing")
+
+    text_blob = "\n".join(
+        path.read_text(encoding="utf-8", errors="ignore")
+        for path in on_disk.values()
+        if path.suffix in {".json", ".ipynb", ".py", ".yaml", ".txt"}
+    )
+    for quarantined in quarantined_names:
+        if quarantined in text_blob:
+            failures.append(f"a quarantined name appears in the staged package: {quarantined}")
+    if QUARANTINED_ARTIFACT_PREFIX in text_blob:
+        failures.append("an external checkpoint source appears in the staged package")
+    if any(marker in text_blob for marker in ("edge_predictor_best.pth", "best.pt")):
+        failures.append("an external checkpoint filename appears in the staged package")
+
+    metadata = json.loads((staging / "kernel-metadata.json").read_text(encoding="utf-8"))
+    if metadata.get("dataset_sources") != [WHEELHOUSE_SLUG]:
+        failures.append(f"dataset sources are {metadata.get('dataset_sources')}, not the wheelhouse alone")
+    if metadata.get("competition_sources") != ["biohub-cell-tracking-during-development"]:
+        failures.append(f"competition sources are {metadata.get('competition_sources')}")
+    if metadata.get("model_sources") or metadata.get("kernel_sources"):
+        failures.append("model or kernel sources are attached and none is approved")
+    if metadata.get("enable_internet") is not False:
+        failures.append("internet is not disabled")
+    if "docker_image" in metadata:
+        failures.append("the package pins a Docker image and Biohub-X has approved none")
+    if metadata.get("id") != expect_kernel:
+        failures.append(f"kernel id is {metadata.get('id')!r}, not {expect_kernel!r}")
+    heartbeat(command, "metadata", f"id={metadata.get('id')} sources ok={not failures}")
+
+    for line in failures:
+        heartbeat(command, "refused", line)
+    if failures:
+        raise typer.Exit(code=2)
+    heartbeat(command, "validated", f"{len(on_disk)} files, every check passed")
+
+    pushed: dict[str, object] = {"attempted": False}
+    if push:
+        if not campaign_envelope:
+            heartbeat(
+                command,
+                "refused",
+                "--push needs --campaign-envelope naming the approval it is drawn against; "
+                "sending is a separate authorisation from building",
+            )
+            raise typer.Exit(code=2)
+        heartbeat(command, "push", f"envelope={campaign_envelope} kernel={expect_kernel}")
+        environment = dict(os.environ)
+        environment["PYTHONUTF8"] = "1"
+        environment["PYTHONIOENCODING"] = "utf-8"
+        completed = subprocess.run(
+            [sys.executable, "-m", "kaggle", "kernels", "push", "-p", str(staging)],
+            capture_output=True,
+            text=True,
+            env=environment,
+            check=False,
+        )
+        found = re.search(r"kaggle\.com/code/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)", completed.stdout or "")
+        observed = f"{found.group(1)}/{found.group(2)}" if found else ""
+        pushed = {
+            "attempted": True,
+            "envelope": campaign_envelope,
+            "returncode": completed.returncode,
+            "stdout_tail": (completed.stdout or "")[-1500:],
+            "stderr_tail": (completed.stderr or "")[-1500:],
+            "observed_kernel": observed,
+            "expected_kernel": expect_kernel,
+            "slug_matches": observed == expect_kernel,
+        }
+        if completed.returncode != 0 or observed != expect_kernel:
+            heartbeat(
+                command,
+                "refused",
+                f"push failed or diverged: returncode={completed.returncode} observed={observed!r}",
+            )
+            atomic_write_text(
+                root_path / "artifacts/kaggle-transport.json",
+                json.dumps({"schema_version": 1, "validated": True, "push": pushed}, indent=2, sort_keys=True)
+                + chr(10),
+            )
+            raise typer.Exit(code=2)
+        heartbeat(command, "push", f"created {observed}")
+
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "package": str(staging.relative_to(root_path)),
+        "manifest_digest": digest,
+        "file_count": len(on_disk),
+        "expected_kernel": expect_kernel,
+        "kernel_metadata": metadata,
+        "checks_passed": True,
+        "push": pushed,
+    }
+    atomic_write_text(
+        root_path / "artifacts/kaggle-transport.json", json.dumps(payload, indent=2, sort_keys=True) + chr(10)
+    )
+    _write_manifest(command, {"report": "artifacts/kaggle-transport.json", "digest": digest})
+    heartbeat(command, "done", "NOT PUSHED" if not push else "pushed once")
     typer.echo(json.dumps(payload, sort_keys=True))
 
 

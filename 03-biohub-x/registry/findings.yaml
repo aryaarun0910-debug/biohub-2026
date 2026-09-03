@@ -618,3 +618,42 @@ findings:
       scope: competition_corpus_and_supervision
       holds_while: the registered corpus is unchanged.
     superseded_by: null
+
+  - id: F-0023
+    claim: >-
+      A minimum-track-length filter with isolated-node pruning is nearly free in
+      correct edges and nearly inert in node count when applied to the annotated
+      graphs. Sweeping the minimum frame span over all 199 annotated training
+      datasets, with the division exemption the public notebooks carry, edge
+      retention at the span of 6 those notebooks use is 0.9963 on 44b6 and 0.9945
+      on 6bba, against the 0.94 target and 0.92 break-even F-0018 established.
+      Every span from 2 to 10 clears both bars on both folds; even a span of 10
+      retains 0.9875 and 0.9763. Node retention tracks it closely, 0.9945 and
+      0.9928 at span 6, so the filter removes between 0.5 and 0.7 percent of
+      annotated nodes. Dropping the division exemption changes retention by less
+      than 0.002 anywhere in the sweep.
+    instrument: biohubx evaluate track-length
+    evidence:
+      command: biohubx evaluate track-length --minimums 2,3,4,5,6,8,10
+      observed: artifacts/track-length.json, 199 datasets, 133,318 nodes, 30.5 seconds
+      note: >-
+        integration_only, and the second half of the claim is the load-bearing
+        half. Applied to ground truth the filter meets a perfect graph, so the
+        edge cost measured here is the best case and a real detector's output can
+        only do worse; that direction is what makes a cheap falsification
+        possible, since a policy failing the bar here could not pass it there.
+        What the measurement cannot establish is the other side of the trade.
+        Annotated tracks are long by construction, because an annotator followed a
+        cell across frames, so there is almost no short-track structure in ground
+        truth for the filter to remove. It is therefore harmless AND almost inert
+        here, and its value depends entirely on removing spurious short tracks
+        from a real detector's output, which does not yet exist. This establishes
+        the necessary condition and leaves the sufficient one open.
+    validity:
+      scope: competition_corpus_and_graph_policy
+      holds_while: >-
+        the registered corpus is unchanged and the filter is defined as removing
+        connected components whose frame span is below the threshold, keeping any
+        component containing a division. The four duplicated public-test fixtures
+        were not read.
+    superseded_by: null

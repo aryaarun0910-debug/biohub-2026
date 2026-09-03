@@ -155,6 +155,10 @@ def test_the_kernel_metadata_disables_internet_and_ships_no_datasets() -> None:
     # Canonical casing. The lower-cased form was requested for attempt 2 and
     # Kaggle allocated a P100 (D-0028).
     assert meta["accelerator"] == "NvidiaTeslaT4"
+    # Both keys. R-0010 observed that public T4 notebooks pin machine_shape and
+    # that Kaggle echoed that key for our own preflight; the accelerator key alone
+    # did not take effect for E03-SMOKE-02.
+    assert meta["machine_shape"] == "NvidiaTeslaT4"
     # Exactly the wheelhouse and nothing else. E03 needs zarr, which the image
     # lacks; it needs no external weights, and an extra source is how one would
     # arrive.
