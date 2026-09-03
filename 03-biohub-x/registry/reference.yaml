@@ -765,6 +765,79 @@ references:
       - Whether the image's polars 1.35.2 and scipy 1.16.3 behave identically to
         the versions this repository pins.
 
+  - id: R-0007
+    status: measured_environment
+    title: An attached Kaggle dataset is not mounted at /kaggle/input/<slug> on this image
+    source:
+      kind: biohubx_preflight_kernel
+      preflight_id: E03-WHEELHOUSE-PREFLIGHT-01
+      kernel: aryaarun07/biohub-x-wheelhouse-preflight
+      kernel_version: 1
+      pinned_commit: 27fdd3d6aa56c777e3af71068a729227a1834df8
+      package_digest: canonical_text_sha256:sha256/v1:9344153065a0674f63299978eb7cc930209372740e93909023428ffb7f3c824a
+      authorised_by: Arya Arun
+      scope: CPU only, internet disabled, wheelhouse and competition as the only sources, 600 second ceiling
+      elapsed_seconds_to_refusal: 8.752
+      note: >-
+        Measured by Biohub-X's own instrument on the target machine, so it is a
+        fact rather than a claim. It is not scientific evidence and may not
+        support a promotion: it says where a platform puts a directory, nothing
+        about cell tracking.
+
+    retrieved:
+      kernel_log: artifacts/wheelhouse-preflight/biohub-x-wheelhouse-preflight.log
+      kernel_log_digest: raw_artifact_sha256:sha256:82780554d12fc7af21f1bced24b000fb3e11a4b15e5e2ded5aec38f46bb88225
+      kernel_log_bytes: 4689
+      manifest: artifacts/wheelhouse-preflight/wheelhouse-preflight.json
+      manifest_digest: raw_artifact_sha256:sha256:00000712b99e6a093cac6260b8f5c60413e96a9ff3b52373db52deb6ae0edc1c
+      manifest_bytes: 302
+      self_identification: >-
+        The manifest carries preflight_id E03-WHEELHOUSE-PREFLIGHT-01 and commit
+        27fdd3d6aa56c777e3af71068a729227a1834df8, both matching the staged
+        package, so the measurement is bound to the artifact that produced it.
+
+    observed:
+      wheelhouse_expected_at: /kaggle/input/biohubx-wheelhouse-zarr-cp312-linux
+      wheelhouse_present: false
+      wheels_found: 0
+      dataset_attached_by_kaggle: >-
+        Yes. The kernel metadata Kaggle recorded for version 1 lists
+        dataset_sources ["aryaarun07/biohubx-wheelhouse-zarr-cp312-linux"], and
+        the dataset itself reports status ready. The attachment was accepted and
+        the directory still did not exist under the assumed name.
+      competition_path_by_contrast: >-
+        /kaggle/input/competitions/biohub-cell-tracking-during-development is a
+        real directory on this image, established by E03-SMOKE-02: that run
+        reached the import at entry.py line 106 of commit 6cb640e, which is
+        downstream of a _discover call that raises when train/*.geff is empty.
+        So competitions are mounted under a competitions/ prefix rather than at
+        /kaggle/input/<slug>, and the plain layout the wheelhouse assumed is not
+        what this image uses for either kind of input.
+      stages_seen: ["preflight-start", "wheelhouse"]
+      stages_not_reached: ["verify", "install", "import", "roundtrip", "competition-read"]
+
+    what_the_package_did_right: >-
+      It refused instead of proceeding, in 8.752 seconds, and wrote its manifest
+      atomically before exiting, so the refusal is readable rather than inferred
+      from an absent output. No pip ran, no import was attempted and no
+      competition byte was read. The guard behaved exactly as designed; what it
+      guarded against was not the thing that went wrong.
+
+    diagnostic_gap: >-
+      The refusal names the path it wanted and not the paths it had. Nothing in
+      the run lists /kaggle/input, so this log cannot distinguish a dataset that
+      was never attached from one mounted under another name, and that
+      distinction is what a second run would otherwise be spent on. The check was
+      adjacent to the thing that mattered again: it asked whether one guessed path
+      existed rather than what the mount actually contained.
+
+    unresolved:
+      - The actual mount path of an attached private dataset on this image.
+      - Whether the wheelhouse installs offline, which the run never reached.
+      - Whether the installed result decodes a real competition chunk, unchanged
+        from R-0006's open question.
+      - Whether blosc2 alone can decode a Blosc1 chunk, still open.
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per
@@ -1190,7 +1263,16 @@ approval_packet:
 
     preflight:
       preflight_id: E03-WHEELHOUSE-PREFLIGHT-01
-      state: REBUILT, NOT PUSHED, AWAITING AUTHORISATION
+      state: PUSHED ONCE AND REFUSED AT THE MOUNT GATE; see [[R-0007]]
+      outcome: >-
+        Authorised by Arya Arun and pushed once as kernel version 1. Every
+        authorised parameter was re-derived from the staged bytes before the push
+        and all matched. The run refused after 8.752 seconds because the
+        wheelhouse was not mounted at the path the package assumed, wrote its
+        manifest atomically, and reached neither verify, install, import,
+        roundtrip nor competition-read. No repair run was made, per the
+        authorisation. The wheelhouse identity check this package was rebuilt to
+        carry was never exercised on the target.
       package_digest: canonical_text_sha256:sha256/v1:9344153065a0674f63299978eb7cc930209372740e93909023428ffb7f3c824a
       supersedes_package: >-
         canonical_text_sha256:sha256/v1:6dcdf87f1c74a146fdf58404f6a2d7e168aff0ea80602aaae1aad1d2ba770ce5,
