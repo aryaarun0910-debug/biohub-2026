@@ -1263,7 +1263,12 @@ approval_packet:
 
     preflight:
       preflight_id: E03-WHEELHOUSE-PREFLIGHT-01
-      state: PUSHED ONCE AND REFUSED AT THE MOUNT GATE; see [[R-0007]]
+      state: REBUILT AFTER R-0007, NOT PUSHED, AWAITING AUTHORISATION
+      attempt: 2
+      prior_attempt: >-
+        Attempt 1 pushed package 9344153065 at commit 27fdd3d and refused at the
+        mount gate after 8.752 seconds. Its outcome is [[R-0007]] and is immutable;
+        this rebuild does not replace or inherit it.
       outcome: >-
         Authorised by Arya Arun and pushed once as kernel version 1. Every
         authorised parameter was re-derived from the staged bytes before the push
@@ -1273,15 +1278,47 @@ approval_packet:
         roundtrip nor competition-read. No repair run was made, per the
         authorisation. The wheelhouse identity check this package was rebuilt to
         carry was never exercised on the target.
-      package_digest: canonical_text_sha256:sha256/v1:9344153065a0674f63299978eb7cc930209372740e93909023428ffb7f3c824a
-      supersedes_package: >-
-        canonical_text_sha256:sha256/v1:6dcdf87f1c74a146fdf58404f6a2d7e168aff0ea80602aaae1aad1d2ba770ce5,
-        pinned at 8227221c20d4ad805c9b0195dd35052bdca841ac, which was never pushed.
-        It installed from whatever it mounted, and that is why it was replaced
-        rather than authorised.
+      package_digest: canonical_text_sha256:sha256/v1:ba93657b1781c083243d83d9c9f933b5bb6849ee3e952ec2fdf2c1ca607dee9b
+      supersedes_packages:
+        - >-
+          canonical_text_sha256:sha256/v1:6dcdf87f1c74a146fdf58404f6a2d7e168aff0ea80602aaae1aad1d2ba770ce5
+          at 8227221, never pushed. It installed from whatever it mounted.
+        - >-
+          canonical_text_sha256:sha256/v1:9344153065a0674f63299978eb7cc930209372740e93909023428ffb7f3c824a
+          at 27fdd3d, pushed once and refused at the mount gate ([[R-0007]]). It
+          verified the tree it mounted and assumed where that tree would be.
       file_count: 4
-      total_bytes: 15337
-      nbconvert_bytes: 327198
+      total_bytes: 22341
+      nbconvert_bytes: 347883
+
+      mount_resolution:
+        why: >-
+          Attempt 1 assumed /kaggle/input/<slug> and refused, having measured only
+          that its guess was wrong. The package already carries the tree's
+          identity, and an identity answers a stronger question than a path: a
+          name says where to look, a digest says when you have found it
+          ([[D-0033]]).
+        method: >-
+          Enumerate what is mounted under /kaggle/input and select the tree whose
+          canonical digest equals the embedded identity. Locating and verifying
+          then rest on one fact rather than two.
+        bounded: four levels, single-level globs, never a recursive glob
+        cost_control: >-
+          Shape is compared before anything is hashed and abandoned the moment the
+          file count or byte total is exceeded, so the competition corpus is never
+          read to find a directory of four wheels.
+        refusal: >-
+          A miss prints a listing of what is actually mounted, which is exactly
+          what attempt 1's refusal lacked.
+        exercised_locally: >-
+          Against a simulated mount holding a 480-file corpus-shaped decoy and the
+          real downloaded dataset nested three levels deep under a layout the
+          package was never told about: resolved correctly in 0.369 seconds,
+          hashed three trees, none of them the decoy.
+        still_unmeasured: >-
+          Where Kaggle actually mounts a private dataset on this image. The design
+          removes the need to know; if the next run resolves, the path it reports
+          becomes a Biohub-X measurement.
       repository_clean_at_build: true
 
       mount_verification:
@@ -1338,7 +1375,7 @@ approval_packet:
           It does not authenticate the dataset's origin and is not a defence
           against the account holder. Anyone able to replace the dataset can still
           replace it; what they can no longer do is have the run proceed.
-      pinned_commit: 27fdd3d6aa56c777e3af71068a729227a1834df8
+      pinned_commit: 5e5778133391c443470842c34d6c91ef916b4f8d
       kernel: aryaarun07/biohub-x-wheelhouse-preflight
       enable_gpu: false
       enable_internet: false
