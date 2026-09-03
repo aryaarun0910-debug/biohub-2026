@@ -930,3 +930,54 @@ payload and this package still has for its mount. Closing it means embedding the
 published tree digest and checking it before installing. That changes the package
 and needs its own authorisation, so it is recorded as an open gap rather than
 quietly accepted.
+
+## D-0032 - A packaged run verifies its inputs against an anchor it carried, not one it mounted
+
+**Date:** 2026-09-03
+**Status:** accepted
+
+The wheelhouse preflight installed from whatever it mounted. Its only integrity
+check was `pip --require-hashes` against `requirements-offline.txt`, and that file
+arrives inside the tree being checked. A substituted dataset shipping its own
+matching requirements file satisfies the hash check exactly, so the check bound
+nothing it had not also been handed.
+
+Verifying the published dataset remotely, as [[D-0031]] did, is not a substitute.
+It establishes what was published at one moment. It says nothing about the bytes a
+kernel reads at another, and the gap between those two moments is the whole
+window.
+
+So the identity travels with the code. The package embeds the published payload's
+tree token and the canonical records behind it, recomputes the mounted tree under
+canonicalization `v1` before pip is invoked, refuses on any extra, missing,
+renamed or modified file, and prints the expected and observed identities into the
+log so a mismatch is readable in the run rather than reconstructed from it. A
+rename appears as one missing path and one extra path, which is what a rename is.
+
+Three consequences bind later work.
+
+**The trust anchor may not come from the thing being trusted.** This is the rule
+[[D-0027]] earned for the notebook's own payload, now applied to its inputs
+instead of only to itself. A packaged run verifies what it mounts against
+something it brought.
+
+**Canonicalization `v1` now exists twice, and the copy is held to the original.**
+The preflight may not import Biohub-X, because it has to run on an image where
+Biohub-X cannot ([[D-0029]]), so the authoritative walk cannot travel as code. It
+travels as behaviour: a test executes the notebook's own verifier and requires it
+to return exactly what `biohubx.hashing.tree_digest` returns for the same tree,
+including the empty-directory record and the zero-byte-file size that are the two
+cases easiest to get subtly wrong. Without that test this would be a
+reimplementation that agrees with the original until the day it does not, which
+[[D-0008]] rejected for the metric and which is no safer for an identity.
+
+**The identity checked is the published payload, never the upload bundle.** Kaggle
+consumes `dataset-metadata.json`, so no kernel ever mounts the bundle, and
+embedding the bundle's identity would refuse every correct mount ([[D-0031]]).
+Both are recorded in the package manifest, each marked with whether it is verified
+at runtime or kept for provenance.
+
+**What this does not do.** It does not authenticate the dataset's origin, and it
+is not a defence against the account holder. Anyone able to replace the dataset
+can still replace it. What they can no longer do is have the run proceed, which is
+the difference between a substitution that is caught and one that installs.

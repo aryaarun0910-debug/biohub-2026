@@ -2440,6 +2440,13 @@ def package_preflight(
             "--wheelhouse", help="Local wheelhouse to validate against. Defaults to artifacts/wheelhouse."
         ),
     ] = None,
+    expect_published: Annotated[
+        str | None,
+        typer.Option(
+            "--expect-published",
+            help="Refuse unless the published payload has this tree identity. State the authorised one.",
+        ),
+    ] = None,
     allow_dirty: Annotated[
         bool,
         typer.Option("--allow-dirty", help="Build from an uncommitted tree. Records it and is unpushable."),
@@ -2451,11 +2458,20 @@ def package_preflight(
     image, and can the result decode a real competition chunk. A wheelhouse that
     installs but cannot decode blosc has answered neither, which is why the
     competition is attached for exactly one read.
+
+    Before either question, the package checks that the tree it mounted is the one
+    it was authorised against, using an identity and a walk it carries itself. The
+    mounted dataset supplies bytes and nothing else, because
+    ``requirements-offline.txt`` cannot authenticate itself: a substituted dataset
+    shipping its own matching requirements file satisfies ``--require-hashes``
+    exactly ([[D-0032]]).
     """
     command = "package preflight"
     import shutil
     import subprocess
+    import tempfile
 
+    from biohubx.hashing import tree_digest
     from biohubx.packaging.audit import AuditSpec
     from biohubx.packaging.kaggle import forbidden_content
     from biohubx.packaging.preflight import (
@@ -2466,6 +2482,7 @@ def package_preflight(
         build_preflight_notebook,
         preflight_kernel_metadata,
     )
+    from biohubx.packaging.wheelhouse import published_relative_paths, stage_published_payload
 
     root_path = repository_root()
     revision = subprocess.run(
@@ -2505,7 +2522,49 @@ def package_preflight(
     )
     heartbeat(command, "start", f"preflight={spec.audit_id} kernel={spec.kernel} wheels={len(wheels)}")
 
-    notebook = build_preflight_notebook(spec)
+    # The identity the package will carry is the published payload's, not the
+    # upload bundle's: the bundle includes dataset-metadata.json, which Kaggle
+    # consumes rather than stores, so a kernel never mounts it (D-0031).
+    bundle = tree_digest(house, on_file=_periodic_progress(command, "upload bundle"))
+    with tempfile.TemporaryDirectory(prefix="biohubx-published-") as scratch:
+        payload_root = Path(scratch) / "payload"
+        payload_root.mkdir()
+        stage_published_payload(house, payload_root, published_relative_paths(bundle))
+        published = tree_digest(payload_root, on_file=_periodic_progress(command, "published payload"))
+    if expect_published is not None and expect_published != published.digest.token:
+        heartbeat(
+            command,
+            "refused",
+            f"the wheelhouse publishes {published.digest.token}, not the authorised "
+            f"{expect_published}; the package would carry an identity nobody approved",
+        )
+        raise typer.Exit(code=2)
+    heartbeat(
+        command,
+        "identity",
+        f"published payload files={published.file_count} bytes={published.total_bytes} "
+        f"{published.digest.token}"
+        + (" (pinned)" if expect_published is not None else " (NOT pinned to an authorisation)"),
+    )
+
+    notebook = build_preflight_notebook(
+        spec,
+        published_payload={
+            "tree": published.digest.token,
+            # Serialised exactly as TreeRecord.line does, including the "-" for an
+            # absent field. `or "-"` would turn a zero-byte file into "-" and
+            # silently disagree with the authoritative listing.
+            "records": [
+                [
+                    record.kind,
+                    "-" if record.content_sha256 is None else record.content_sha256,
+                    "-" if record.size_bytes is None else str(record.size_bytes),
+                    record.relative_path,
+                ]
+                for record in published.records
+            ],
+        },
+    )
     metadata = preflight_kernel_metadata()
     if metadata["enable_gpu"] or metadata["enable_internet"]:
         heartbeat(command, "refused", "the preflight must be CPU only with internet disabled")
@@ -2558,6 +2617,28 @@ def package_preflight(
                 "wheels": [path.name for path in wheels],
                 "source_distributions": [],
             },
+            # Two identities, kept apart. The published payload is what the kernel
+            # mounts and what the notebook carries and checks. The upload bundle is
+            # what this machine sent; it is recorded for provenance and is not what
+            # anything verifies at runtime, because no kernel ever sees it (D-0031).
+            "wheelhouse_identity": {
+                "published_payload": {
+                    "tree": published.digest.token,
+                    "file_count": published.file_count,
+                    "total_bytes": published.total_bytes,
+                    "embedded_in_the_notebook": True,
+                    "verified_at_runtime_before_pip": True,
+                    "pinned_to_authorisation": expect_published is not None,
+                },
+                "upload_bundle": {
+                    "tree": bundle.digest.token,
+                    "file_count": bundle.file_count,
+                    "total_bytes": bundle.total_bytes,
+                    "embedded_in_the_notebook": False,
+                    "verified_at_runtime_before_pip": False,
+                    "why_not": "Kaggle consumes dataset-metadata.json, so no kernel mounts this tree",
+                },
+            },
             "files": {
                 path.relative_to(staging).as_posix(): digest_file(path, DigestKind.RAW_ARTIFACT).token
                 for path in files
@@ -2589,13 +2670,18 @@ def package_preflight(
         },
         "kernel_metadata": metadata,
         "nbconvert_bytes": converted,
+        "wheelhouse_identity": {
+            "published_payload": published.digest.token,
+            "published_payload_pinned_to_authorisation": expect_published is not None,
+            "upload_bundle": bundle.digest.token,
+        },
     }
     atomic_write_text(
         root_path / "artifacts/kaggle-preflight.json", json.dumps(payload, indent=2, sort_keys=True) + chr(10)
     )
     _write_manifest(command, {"report": "artifacts/kaggle-preflight.json", "preflight": spec.audit_id})
     heartbeat(command, "staged", f"files={len(files) + 1} digest={package_digest.token[:52]}")
-    heartbeat(command, "done", "NOT PUSHED and the dataset it needs does not exist yet")
+    heartbeat(command, "done", "NOT PUSHED; the mounted tree is verified before pip runs")
     typer.echo(json.dumps(payload, sort_keys=True))
 
 

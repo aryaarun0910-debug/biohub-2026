@@ -245,7 +245,7 @@ Implemented:
 - `biohubx evaluate mask-audit [--root PATH] [--max-frames N] [--compare-maxpool]`
 - `biohubx package audit [--out PATH] [--expect-kernel ID] [--allow-dirty]`
 - `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--allow-dirty]`
-- `biohubx package preflight [--out PATH] [--wheelhouse PATH] [--allow-dirty]`
+- `biohubx package preflight [--out PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--allow-dirty]`
 - `biohubx package wheelhouse [--path PATH] [--remote PATH] [--out PATH]`
 - `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--peak-quantile F] [--learning-rate F]`
 
@@ -354,6 +354,19 @@ on the measured image, and can the result decode a real competition chunk. It
 imports no part of Biohub-X, so it runs on an image where Biohub-X cannot, and its
 notebook is validated and converted at build time but never executed, because it
 installs packages and reads the corpus.
+
+Before either question it establishes that the tree it mounted is the tree it was
+authorised against. The published payload's identity and canonical records are
+embedded at build time, the mounted tree is recomputed under canonicalization `v1`
+before pip is invoked, and any extra, missing, renamed or modified file refuses
+with both identities printed into the log ([[D-0032]]). The anchor is carried
+rather than read from the mount, because `requirements-offline.txt` cannot
+authenticate itself: a substituted dataset shipping its own matching requirements
+file satisfies `--require-hashes` exactly. Since the package may not import
+Biohub-X, canonicalization `v1` exists a second time inside the notebook, and a
+test requires that copy to return exactly what `biohubx.hashing.tree_digest`
+returns for the same tree. `--expect-published` refuses to build unless the local
+wheelhouse publishes the identity an authorisation named.
 
 `package wheelhouse` records what a wheelhouse is, as the two different trees it
 actually is. Kaggle consumes `dataset-metadata.json` as configuration rather than
