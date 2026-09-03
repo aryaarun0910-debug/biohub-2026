@@ -431,7 +431,7 @@ experiments:
         was correct and the envelope named the model rather than a count, so the
         approved hardware was delivered. The packaged count guard did not notice,
         because smoke mode substituted the expected count for the observed one
-        before comparing them; recorded in [[R-0011]] and corrected in [[D-0037]].
+        before comparing them; recorded in [[R-0011]] and corrected in [[D-0038]].
         No effect on the run: the model trains on one device and peak memory fits
         one card with 11.9 GB to spare.
     budget_consumed:

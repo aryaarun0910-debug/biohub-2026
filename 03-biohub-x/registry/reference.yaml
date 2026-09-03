@@ -1361,7 +1361,7 @@ references:
         count whenever smoke mode was on, so it compared one to one and passed. The
         check was structurally incapable of failing in the only mode that used it,
         which is the same shape as [[D-0028]]'s device count standing in for device
-        model. Corrected in [[D-0037]]; the observed count now reaches the guard and
+        model. Corrected in [[D-0038]]; the observed count now reaches the guard and
         a local CPU exercise declares itself instead of being given the answer.
       material_effect: >-
         None on this run's science. The model is placed on one device and trained

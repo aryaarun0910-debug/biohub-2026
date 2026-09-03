@@ -1197,7 +1197,7 @@ and submission gate are unchanged. It also does not reward repository growth.
 Failed probes leave machine-readable reports and Git history, not dead modules,
 notebooks, Markdown packets or one bespoke test per idea.
 
-## D-0037 - A guard handed the expected value cannot check the observed one
+## D-0038 - A guard handed the expected value cannot check the observed one
 
 **Date:** 2026-09-03
 **Status:** accepted
