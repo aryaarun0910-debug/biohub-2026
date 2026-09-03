@@ -1110,3 +1110,41 @@ that actually runs.
 Nothing here relaxes the prior-campaign quarantine in `AGENTS.md` section 1.
 Arya also stated that the current notebook and discussion material has already
 been gathered, so this policy change performs no independent search or scrape.
+
+## D-0036 - Third-party dataset inputs may be acquired; their standing is unchanged
+
+**Date:** 2026-09-03
+**Status:** accepted
+**Authorised by:** Arya Arun
+
+[[D-0035]] opened public research intake but deliberately excluded weights and
+datasets. Arya Arun now extends the standing authorization to public third-party
+dataset inputs: published model weights such as the DeepCenter centre-prior pack,
+published architectures, and comparable public artifacts, without a per-item
+go-ahead.
+
+**Acquisition is not standing, and the distinction is the whole record.** Section
+6 applies unchanged before any such artifact enters the system: source, pinned
+release, code licence, weight licence, training-data provenance, competition
+eligibility, SHA-256 and exact role are recorded first, and a digest declared
+before the download is checked after it. "Publicly downloadable" is still not
+"cleared", and a weight licence is still not training-data provenance.
+
+Three consequences bind.
+
+An artifact whose training data is unknown or contaminated stays `blocked` in
+`registry/models.yaml` and may not produce a held-out finding, be evaluated
+against any split carved from the training data, or promote a component. That is
+[[D-0021]] and [[D-0022]], and access does not touch it. The two `pilkwang` packs
+Biohub-X already holds are exactly this case: one records training on all 199
+annotated movies, which include the four byte-identical to the public-test
+volumes ([[F-0010]], [[R-0002]]).
+
+Downloading a thing is not a reason to use it. [[R-0010]] records that all three
+public notebooks read this turn load those same quarantined packs, so their
+leaderboard scores are contaminated in the way [[D-0020]] already established for
+the reference. Acquiring DeepCenter would let Biohub-X study a centre-prior
+interface; it would not make any score built on it evidence.
+
+Large weights are never committed to Git, and raw captures stay outside it under
+[[D-0035]]. What enters the repository is the registry record, not the bytes.

@@ -125,12 +125,25 @@ does not need a separate go-ahead. Keep raw captures outside Git unless a
 hash-bound source snapshot has a named consumer, and register claims as
 `reference_only`.
 
-This standing authorization does not cover model weights, datasets, private or
-access-controlled material, executing third-party code, publishing or changing
-anything externally, or an unexpectedly large or binary-heavy acquisition. If
-a research pull contains one of those, stop before using it. Copying external
-code into `src/` still requires its licence, pinned identity, attribution and a
-named consumer under section 6.
+Arya Arun has additionally authorised acquiring public third-party dataset
+inputs, including published model weights such as the DeepCenter centre-prior
+pack, published architectures, and comparable public artifacts, without a
+per-item go-ahead.
+
+Acquisition is not standing. Section 6 applies in full before any such artifact
+enters the system: source, pinned release, code licence, weight licence,
+training-data provenance, competition eligibility, SHA-256 and exact role are
+recorded first, and a digest declared before the download is verified after it.
+Large weights are still never committed to Git. An artifact whose training data
+is unknown or contaminated stays `blocked` in `registry/models.yaml` and may not
+produce a held-out finding or promote anything, which access does not change.
+
+This standing authorization does not cover private or access-controlled
+material, executing third-party code, publishing or changing anything
+externally, or an unexpectedly large or binary-heavy acquisition beyond what a
+published weight pack ordinarily is. If a pull contains one of those, stop
+before using it. Copying external code into `src/` still requires its licence,
+pinned identity, attribution and a named consumer under section 6.
 
 These require an explicit go-ahead. Prepare the artifacts, print the gate, and
 stop:

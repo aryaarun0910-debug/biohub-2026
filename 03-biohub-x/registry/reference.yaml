@@ -1162,7 +1162,7 @@ references:
     title: Three public notebooks and their stated leaderboard scores, named but not retrieved
     provenance:
       supplied_by: Arya Arun
-      retrieved: false
+      retrieved: true, on 2026-09-03, source and metadata only
       why_not: >-
         The message that named them authorised local preparation only, so they
         were not retrieved in that turn. D-0035 now gives standing authorization
@@ -1181,16 +1181,111 @@ references:
       pull_commands_supplied: kaggle kernels pull <ref>
     reading: >-
       The scores are public-leaderboard numbers and are therefore observations,
-      never targets ([[D-0020]]). Two of the three names suggest dual-seed fusion
-      and division-count variation, which are mechanisms rather than constants, and
-      mechanisms are the part of a public notebook that can legitimately motivate
-      an experiment.
+      never targets ([[D-0020]]).
+
+    retrieved_2026-09-03:
+      how: kaggle kernels pull, source and metadata only, under [[D-0035]]
+      bytes: 636323 across six files; no weights, no binary artifact, no stop condition met
+      kept_outside_git: true
+
+    observed:
+      all_three_load_the_same_quarantined_weights:
+        dataset_sources_common_to_all_three:
+          - pilkwang/biohub-deepcenter-unet3d-center-prior-v1
+          - pilkwang/biohub-temporal-unet3d-seed314159-v1
+          - pilkwang/biohub-tracking-support-pack-50ep-v1
+        additional_in_the_fusion_notebook:
+          - xiaoleilian/biohub-unet3d-weights
+          - anhadmahajan06/images-for-competition-notebook
+        consequence: >-
+          This resolves the open question. Two of those three packs are the ones
+          [[R-0002]] showed were fitted or selected on movies byte-identical to the
+          public-test volumes, and [[models.yaml]] records both as blocked. All
+          three public scores, 0.939, 0.938 and 0.935, therefore rest on the same
+          contamination as the reference's 0.936 and mean what that meant: nothing
+          about generalisation. None of them is a baseline Biohub-X could honestly
+          aim to beat, and their ordering carries no information about method
+          quality.
+
+      the_two_alioman_variants_differ_by_two_constants:
+        v19c_reported_lb: 0.939
+        v19d_reported_lb: 0.938
+        differing_lines: 6, of which 4 are a label and a comment
+        substantive_difference:
+          BIOHUB_SAFE_DIV_MAX_UM: 7.0 in v19c, 9.0 in v19d
+          BIOHUB_SAFE_DIV_DIVERGE_UM: 2.25 in v19c, 4.0 in v19d
+        reading: >-
+          The two are one pipeline with a division-geometry sweep, not two methods,
+          and 0.001 of leaderboard separates them. v19d's own comment describes its
+          value as interpolating between the public stack and reported scores,
+          which is tuning against leaderboard feedback and disqualifies both
+          constants from being adopted as priors ([[D-0017]], [[D-0020]]).
+
+      accelerator_field:
+        all_three_set: 'machine_shape: NvidiaTeslaT4'
+        none_sets: an accelerator key
+        biohubx_currently_sets: 'accelerator: NvidiaTeslaT4'
+        why_it_matters: >-
+          E03-SMOKE-02 requested a T4 and Kaggle allocated a P100 ([[D-0028]]).
+          Three public GPU notebooks that pin a T4 all do it through machine_shape,
+          and Kaggle's own returned metadata for the Biohub-X preflight also
+          carried a machine_shape key. This is a mechanism, not a constant, so it
+          may motivate a change; it is not evidence that machine_shape is the
+          effective field, and the guarantee remains the runtime guard that refuses
+          a device which is not a Tesla T4 ([[D-0034]]).
+
+      shared_mechanisms:
+        - ILP-based global linking rather than a greedy decode
+        - a DeepCenter centre-prior model used as an add-only veto on gap closes and divisions
+        - minimum-track-length filtering with isolated-node pruning
+        - gap closing across one frame, with a distance cap and a cap on added links
+        - motion-based relinking with a velocity term
+        - division acceptance gated on parent-daughter distance, sister separation, symmetry and forward divergence
+        - agreement gating between two detector seeds, in the flexonafft notebook only
+
+    hypotheses_extracted:
+      - id: H-04
+        statement: >-
+          A minimum-track-length filter with isolated-node pruning is the
+          node-count lever [[F-0018]] measured, applied in practice. If so it must
+          retain at least 0.94 of correct edges at the annotated node count to pay,
+          on both embryo folds.
+        falsifier: >-
+          Killed if, on ground-truth graphs, removing tracks shorter than the
+          observed threshold destroys more than 8 percent of correct edges on
+          either fold, since [[F-0018]] puts break-even at 0.92 retention and the
+          target step at 0.94.
+        cost: reuses `evaluate retention`; ground-truth graphs only, no volume read
+        note: >-
+          The strongest item this intake produced. It converts a policy three
+          public notebooks share into a question our own oracle can already answer,
+          and the answer does not depend on their contaminated scores.
+      - id: H-05
+        statement: >-
+          Division acceptance by geometry alone, gated on parent-daughter distance,
+          sister separation and forward divergence, is worth more than a learned
+          division model on this corpus.
+        falsifier: >-
+          Killed if a geometric rule tuned on one embryo fails to beat chance on the
+          held-out embryo's annotated divisions.
+        note: >-
+          [[F-0014]] records 26 annotated divisions in the smaller fold, which is
+          too few to fit a learned triple scorer with confidence, so a geometric
+          prior was already the likely route. Three independent public pipelines
+          using one is consistent with that and does not establish it.
+
+    not_adopted:
+      - Every numeric threshold in all three notebooks. They were tuned against a
+        leaderboard Biohub-X does not use, on models trained on the public test set.
+      - The DeepCenter veto as a component. Its weights are quarantined, and
+        [[F-0016]] shows spurious divisions on unmatched nodes are nearly free, so
+        its contribution to a score is small and its provenance cost is not.
+      - Any claim that 0.939 is better than 0.935. The ordering is contaminated.
+
     unresolved:
-      - Everything about their content. Nothing has been read.
-      - Whether their training splits include the four movies byte-identical to the
-        public test volumes, which is what made the reference's score uninformative
-        ([[R-0002]], [[F-0010]]). Until that is known for each, their scores say as
-        little as the reference's did.
+      - Whether the ILP decode outperforms a greedy one on clean folds. Observed as
+        a mechanism, not measured here, and not yet a queued hypothesis.
+      - What agreement gating between two seeds buys, since Biohub-X has one detector.
 
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
