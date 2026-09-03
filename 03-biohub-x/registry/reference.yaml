@@ -838,6 +838,155 @@ references:
         from R-0006's open question.
       - Whether blosc2 alone can decode a Blosc1 chunk, still open.
 
+  - id: R-0008
+    status: measured_environment
+    title: The wheelhouse installs offline on the Kaggle image and the result decodes a real chunk
+    supersedes_nothing: >-
+      [[R-0007]] records attempt 1 and stands on its own. This is a second attempt
+      with its own package, commit and log; it does not replace or inherit that
+      record, and both are preserved separately.
+    source:
+      kind: biohubx_preflight_kernel
+      preflight_id_in_package: E03-WHEELHOUSE-PREFLIGHT-01
+      attempt: 2
+      attempt_naming_note: >-
+        Authorised as E03-WHEELHOUSE-PREFLIGHT-02. The package constant still reads
+        E03-WHEELHOUSE-PREFLIGHT-01, because changing it would have changed the
+        digest that was authorised and the authorisation said exactly as staged.
+        The two attempts are distinguished by the pinned commit each manifest
+        carries, not by that constant.
+      kernel: aryaarun07/biohub-x-wheelhouse-preflight
+      kernel_version: 2
+      pinned_commit: 5e5778133391c443470842c34d6c91ef916b4f8d
+      package_digest: canonical_text_sha256:sha256/v1:ba93657b1781c083243d83d9c9f933b5bb6849ee3e952ec2fdf2c1ca607dee9b
+      authorised_by: Arya Arun
+      scope: CPU only, internet disabled, wheelhouse and competition as the only sources, 600 second ceiling
+      elapsed_seconds: 6.907
+      note: >-
+        Measured by Biohub-X's own instrument on the target machine. It is a fact
+        about a runtime, not scientific evidence, and may not support a promotion
+        or appear in registry/findings.yaml.
+
+    retrieved:
+      kernel_log: artifacts/wheelhouse-preflight-02/biohub-x-wheelhouse-preflight.log
+      kernel_log_digest: raw_artifact_sha256:sha256:5ab394252fa42d76a4b5922a575c278ca78f0a004b39719cb27ac10639e6fbda
+      kernel_log_bytes: 5376
+      manifest: artifacts/wheelhouse-preflight-02/wheelhouse-preflight.json
+      manifest_digest: raw_artifact_sha256:sha256:1105b6933f019a512c164c9a8ccfa2e6238f2a6d9d8580983dfa83f75c345c36
+      manifest_bytes: 6903
+      only_these_two: >-
+        The Kaggle CLI also downloaded roundtrip.zarr/zarr.json, an artifact of the
+        run's own synthetic write. It was deleted rather than kept, because the
+        authorisation permitted retrieving the log and the manifest and nothing
+        else, and the manifest already records the round trip's outcome.
+      self_identification: >-
+        The manifest carries commit 5e5778133391c443470842c34d6c91ef916b4f8d,
+        matching the staged package, so the measurement is bound to the artifact
+        that produced it and is distinguishable from attempt 1.
+
+    mount_path_measured:
+      wheelhouse: /kaggle/input/datasets/aryaarun07/biohubx-wheelhouse-zarr-cp312-linux
+      competition: /kaggle/input/competitions/biohub-cell-tracking-during-development
+      reading: >-
+        This image nests inputs by kind, and a dataset additionally by owner. The
+        flat /kaggle/input/<slug> that attempt 1 assumed is used for neither kind.
+        The path was found rather than guessed: the package located the tree whose
+        canonical digest equalled the identity it carried ([[D-0033]]), so this is
+        a measurement rather than a second assumption that happened to work.
+      candidates_hashed: 3
+      near_misses_rejected_on_identity:
+        - /kaggle/input/datasets
+        - /kaggle/input/datasets/aryaarun07
+      near_miss_note: >-
+        Both are enclosing directories holding only the wheelhouse, so both share
+        its file count and byte total, were hashed, and were rejected because their
+        relative paths carry the extra prefix. Predicted and tested before the
+        push; it is why the criterion is the digest and not the shape.
+      search_seconds: 1.164
+
+    identity_verified_on_target:
+      expected_tree: tree_sha256:sha256/v1:4c7474376ba70a4772babee4c8fca8d13d829066686f8672cd1b9f23a10ee3ed
+      observed_tree: tree_sha256:sha256/v1:4c7474376ba70a4772babee4c8fca8d13d829066686f8672cd1b9f23a10ee3ed
+      file_count: 7
+      differences: none
+      ran_before_pip: true
+      note: >-
+        The bytes installed on Kaggle are the bytes verified here against uv.lock
+        and against the published dataset. The carried canonicalization v1 agreed
+        with the authoritative implementation on a real tree on a foreign machine,
+        which is the first time that copy has been exercised anywhere but the gate.
+
+    install:
+      returncode: 0
+      flags: --no-index --no-deps --require-hashes
+      installed:
+        zarr: 3.3.0
+        numcodecs: 0.15.1
+        donfig: 0.8.1.post1
+      already_satisfied:
+        google-crc32c: 1.8.0
+      already_satisfied_note: >-
+        Confirms the R-0006 correction. google-crc32c imports as google_crc32c and
+        was already on the image at exactly the locked version, so three wheels
+        were strictly required and the fourth shipped so the wheelhouse would not
+        depend on that staying true. It did not need installing and its presence
+        cost nothing.
+      seconds: 4.89
+
+    imports:
+      zarr:
+        importable: true
+        version: 3.3.0
+      numcodecs:
+        importable: true
+        version: 0.15.1
+      donfig:
+        importable: true
+        version: 0.8.1.post1
+      google_crc32c:
+        importable: true
+        version: unknown
+      version_reporting_gap: >-
+        google_crc32c exposes no __version__, so the probe reported unknown. pip
+        reported 1.8.0 for the same package in the same run, so the version is not
+        in doubt; what is recorded is that this probe cannot read it.
+
+    codec:
+      synthetic_roundtrip: >-
+        A zarr v3 array written with BloscCodec zstd, bitshuffle, typesize 2, read
+        back identical. That proves the codec path works, and alone would prove
+        only that zarr can read what zarr just wrote, which is why the competition
+        was attached.
+      real_competition_chunk:
+        dataset: 44b6_0113de3b.zarr
+        decoded: true
+        array_shape: [100, 64, 256, 256]
+        dtype: uint16
+        chunk_decoded_shape: [256, 256]
+        chunk_min: 12
+        chunk_max: 2397
+        volumes_visible: 199
+        note: >-
+          Exactly one stored chunk, as authorised: the array is chunked
+          (1, 64, 256, 256), so data[0, 0] lies inside a single chunk. Read from
+          train/, never from the test split.
+
+    what_this_closes: >-
+      R-0006 left open whether the image could read competition chunks. It can,
+      once numcodecs is installed, and the four-wheel wheelhouse is sufficient to
+      make it so. The dependency gap that killed E03-SMOKE-02 is therefore closed
+      by an artifact now exercised end to end on the machine it targets.
+
+    unresolved:
+      - Whether blosc2 alone can decode a Blosc1 chunk. Still unmeasured, and now
+        moot for the smoke path, since numcodecs is present and used.
+      - The GPU image's torch build, its memory headroom, and whether an
+        accelerator request is honoured. This run was CPU-only and measures none
+        of it.
+      - Whether the image's polars 1.35.2 and scipy 1.16.3 behave like the pinned
+        versions. A full fold needs the metric stack, which this wheelhouse does
+        not carry.
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per
@@ -1263,7 +1412,14 @@ approval_packet:
 
     preflight:
       preflight_id: E03-WHEELHOUSE-PREFLIGHT-01
-      state: REBUILT AFTER R-0007, NOT PUSHED, AWAITING AUTHORISATION
+      state: PERFORMED. Pushed once as kernel version 2 and completed; see [[R-0008]]
+      outcome: >-
+        Resolved the wheelhouse by its embedded identity at
+        /kaggle/input/datasets/aryaarun07/biohubx-wheelhouse-zarr-cp312-linux,
+        verified it before pip with zero differences, installed offline at
+        returncode 0, imported all four packages, round-tripped the competition's
+        own codec, and decoded one real chunk from train/44b6_0113de3b.zarr. 6.907
+        seconds against a 600 second ceiling.
       attempt: 2
       prior_attempt: >-
         Attempt 1 pushed package 9344153065 at commit 27fdd3d and refused at the
