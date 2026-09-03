@@ -1067,6 +1067,84 @@ approval_packet:
       - another training push
       - reading competition data
 
+  gate_6_wheelhouse:
+    state: awaiting_authorisation
+    scope_performed: >-
+      Four wheels downloaded from the URLs uv.lock records and verified against
+      the SHA-256 uv.lock records. Nothing else was downloaded, no dataset was
+      created or uploaded, and no kernel was pushed.
+
+    dataset:
+      slug: aryaarun07/biohubx-wheelhouse-zarr-cp312-linux
+      state: STAGED LOCALLY, NOT CREATED
+      tree_digest: tree_sha256:sha256/v1:32688f0520b25e314f677f46a8c843fe684890f951bffc643dbb2ea9180b6040
+      file_count: 8
+      total_bytes: 9304348
+      contents:
+        - wheels/zarr-3.3.0-py3-none-any.whl
+        - wheels/numcodecs-0.15.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+        - wheels/donfig-0.8.1.post1-py3-none-any.whl
+        - wheels/google_crc32c-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_5_x86_64.whl
+        - requirements-offline.txt
+        - WHEELHOUSE.json
+        - README.md
+        - dataset-metadata.json
+      licences:
+        zarr: MIT
+        numcodecs: MIT
+        donfig: MIT
+        google-crc32c: Apache-2.0
+      licence_evidence: >-
+        Read from each wheel rather than assumed. zarr, numcodecs and donfig
+        declare MIT in their METADATA and carry a licence file in dist-info.
+        google-crc32c declares no License field, so its licence was read from
+        the LICENSE file inside the wheel, which is the Apache License 2.0.
+      installation_command: >-
+        pip install --no-index --no-deps --require-hashes -r
+        /kaggle/input/biohubx-wheelhouse-zarr-cp312-linux/requirements-offline.txt
+        --find-links /kaggle/input/biohubx-wheelhouse-zarr-cp312-linux/wheels/
+      refusals: >-
+        --no-index forbids reaching an index, --no-deps forbids resolution, and
+        --require-hashes refuses any artifact whose hash is not in the
+        requirements file. No sdist is present, so none can be built, and the
+        builder refuses to stage a wheelhouse containing one.
+      deliberately_absent:
+        - polars, scipy and every other version the image already supplies
+        - tracksdata, geff, rustworkx, bidict, imagecodecs and the metric stack
+        - the reference's 322 MB bundle
+
+    preflight:
+      preflight_id: E03-WHEELHOUSE-PREFLIGHT-01
+      state: STAGED, NOT PUSHED
+      package_digest: canonical_text_sha256:sha256/v1:6dcdf87f1c74a146fdf58404f6a2d7e168aff0ea80602aaae1aad1d2ba770ce5
+      pinned_commit: 8227221c20d4ad805c9b0195dd35052bdca841ac
+      kernel: aryaarun07/biohub-x-wheelhouse-preflight
+      enable_gpu: false
+      enable_internet: false
+      dataset_sources: [aryaarun07/biohubx-wheelhouse-zarr-cp312-linux]
+      competition_sources: [biohub-cell-tracking-during-development]
+      runtime_ceiling_seconds: 600
+      what_it_asks: >-
+        Whether the wheelhouse installs offline on the measured image, and
+        whether the result decodes a real competition chunk. The competition is
+        attached for exactly one read, because a wheelhouse that installs but
+        cannot decode blosc has answered neither question.
+      not_executed_at_build: >-
+        The notebook is validated and converted locally but not run: it installs
+        packages and reads the corpus, and neither belongs in a build step.
+
+    correction_to_R-0006: >-
+      The audit reported crc32c missing. That was the wrong import name.
+      google-crc32c imports as google_crc32c and is present on the target at
+      exactly the locked 1.8.0, so only three of the four wheels are strictly
+      required. The fourth is shipped anyway so the wheelhouse does not depend on
+      that staying true, and the closure now probes the right name.
+
+    what_this_does_not_authorise:
+      - creating or uploading the Kaggle dataset
+      - pushing the preflight kernel
+      - E03-SMOKE-03, any GPU work, or a submission
+
   what_G-01_changed_about_the_plan:
     - >-
       Reproducing 0.936 is now a lower priority than it was. It anchors
