@@ -1190,39 +1190,73 @@ approval_packet:
 
     preflight:
       preflight_id: E03-WHEELHOUSE-PREFLIGHT-01
-      state: STAGED, NOT PUSHED, AWAITING RE-AUTHORISATION AGAINST THE PUBLISHED IDENTITY
-      package_digest: canonical_text_sha256:sha256/v1:6dcdf87f1c74a146fdf58404f6a2d7e168aff0ea80602aaae1aad1d2ba770ce5
-      package_unchanged_by_the_identity_work: >-
-        Not rebuilt. The manifest digest above was re-derived from the staged
-        bytes after the two identities were recorded and is unchanged, so the
-        package awaiting authorisation is the same package that was staged.
-      mounts:
-        expects: >-
-          The published payload,
-          tree_sha256:sha256/v1:4c7474376ba70a4772babee4c8fca8d13d829066686f8672cd1b9f23a10ee3ed.
-          It carries no upload-bundle expectation.
-        reads_from_the_mount:
-          - wheels/*.whl
-          - requirements-offline.txt
-        verified_how: >-
-          Checked mechanically against the staged notebook rather than by reading
-          it. The source contains no reference to dataset-metadata.json, no file
-          count, no byte total and no tree digest, so nothing in it can disagree
-          with a seven-file mount.
-        integrity_it_enforces: >-
-          pip --require-hashes against requirements-offline.txt, which refuses any
-          wheel whose hash that file does not list. That covers the four wheels,
-          9,297,804 of the 9,304,073 published bytes.
-        integrity_it_does_not_enforce: >-
-          The identity of the tree it mounts. README.md, WHEELHOUSE.json and
-          requirements-offline.txt itself are read unverified, and the hash check
-          is only as good as the requirements file that arrives with the wheels.
-          Closing this means embedding the published tree digest and checking it
-          before installing, which changes the package and needs its own
-          authorisation. Recorded as an open gap rather than quietly accepted,
-          because a check that is absent is the failure shape this gate exists to
-          stop repeating.
-      pinned_commit: 8227221c20d4ad805c9b0195dd35052bdca841ac
+      state: REBUILT, NOT PUSHED, AWAITING AUTHORISATION
+      package_digest: canonical_text_sha256:sha256/v1:9344153065a0674f63299978eb7cc930209372740e93909023428ffb7f3c824a
+      supersedes_package: >-
+        canonical_text_sha256:sha256/v1:6dcdf87f1c74a146fdf58404f6a2d7e168aff0ea80602aaae1aad1d2ba770ce5,
+        pinned at 8227221c20d4ad805c9b0195dd35052bdca841ac, which was never pushed.
+        It installed from whatever it mounted, and that is why it was replaced
+        rather than authorised.
+      file_count: 4
+      total_bytes: 15337
+      nbconvert_bytes: 327198
+      repository_clean_at_build: true
+
+      mount_verification:
+        why: >-
+          requirements-offline.txt cannot authenticate itself. A substituted
+          dataset shipping its own matching requirements file satisfies
+          pip --require-hashes exactly, so the hash check bound nothing it had not
+          also been handed. Verifying the published dataset remotely established
+          what was published at one moment and said nothing about the bytes a
+          kernel reads at another ([[D-0032]]).
+        anchor: carried by the package, never read from the mount
+        embedded_identity: tree_sha256:sha256/v1:4c7474376ba70a4772babee4c8fca8d13d829066686f8672cd1b9f23a10ee3ed
+        embedded_records: 7
+        pinned_to_authorisation: true
+        runs_before_pip: true
+        refuses_on: [extra, missing, renamed, modified]
+        rename_note: >-
+          A rename appears as one missing path and one extra path, which is what a
+          rename is.
+        logs: >-
+          Both identities are printed as BIOHUBX_STAGE verify lines, expected then
+          observed, followed by one line per difference, so a mismatch is readable
+          in the run rather than reconstructed from it.
+        second_implementation: >-
+          The package may not import Biohub-X, because it has to run on an image
+          where Biohub-X cannot ([[D-0029]]), so canonicalization v1 exists a
+          second time inside the notebook. A test executes the notebook's own
+          verifier and requires it to return exactly what
+          biohubx.hashing.tree_digest returns for the same tree, including the
+          empty-directory record and the zero-byte-file size. Without that test it
+          would be a reimplementation that agrees until it does not.
+        upload_bundle_not_checked: >-
+          tree_sha256:sha256/v1:32688f0520b25e314f677f46a8c843fe684890f951bffc643dbb2ea9180b6040
+          is recorded in the package manifest for provenance and is deliberately
+          not the identity checked. Kaggle consumes dataset-metadata.json, so no
+          kernel mounts that tree and embedding it would refuse every correct
+          mount ([[D-0031]]).
+        exercised_locally:
+          real_published_dataset: >-
+            The shipped notebook's own verifier, executed against the downloaded
+            published dataset, recomputed
+            tree_sha256:sha256/v1:4c7474376ba70a4772babee4c8fca8d13d829066686f8672cd1b9f23a10ee3ed
+            with zero differences.
+          same_size_substitution: >-
+            One byte of the zarr wheel flipped in place, leaving the file count,
+            every file size and the total bytes identical, was caught as a content
+            difference naming that wheel.
+          tampering: >-
+            A rewritten requirements file, an added file and a renamed file were
+            each named individually.
+          authorisation_pin: >-
+            Building against a wrong expected identity refuses and stages nothing.
+        what_it_does_not_do: >-
+          It does not authenticate the dataset's origin and is not a defence
+          against the account holder. Anyone able to replace the dataset can still
+          replace it; what they can no longer do is have the run proceed.
+      pinned_commit: 27fdd3d6aa56c777e3af71068a729227a1834df8
       kernel: aryaarun07/biohub-x-wheelhouse-preflight
       enable_gpu: false
       enable_internet: false
