@@ -1392,6 +1392,131 @@ references:
         versions. The metric stack was not installed, so this is still open and is
         what the next wheelhouse must answer.
 
+  - id: R-0012
+    status: measured_environment
+    title: The official-metric dependency closure, and a fold runtime forecast from measured throughput
+    source:
+      kind: biohubx_local_measurement
+      instruments: uv.lock resolution, a live import of the metric adapter, and F-0024's step timing
+      note: >-
+        Engineering facts about this repository's own dependency graph and about
+        how long a fold would take. Not scientific evidence and may not support a
+        promotion.
+
+    closure:
+      measured_how: >-
+        Two ways, because the declared tree and the imported set are different
+        questions. Walking uv.lock from biohubx's roots gives 64 distributions.
+        Importing biohubx.evaluation.official_metric and biohubx.data.competition
+        and reading sys.modules gives 51 distributions actually touched. The
+        overlap is large: the official metric really does pull most of tracksdata's
+        stack, including numba, llvmlite, pyarrow, scikit-image and the ilpy
+        solver wrapper.
+      distributions: 64
+      wheels_resolvable_for_cp312_manylinux_x86_64: 63
+      total_wheel_bytes: 325711643
+      total_wheel_mib: 310.6
+      largest:
+        llvmlite: 57.12 MiB
+        polars-runtime-32: 54.65 MiB
+        pyarrow: 47.78 MiB
+        scipy: 33.65 MiB
+        imagecodecs: 26.78 MiB
+        pyscipopt: 16.75 MiB
+        numpy: 15.95 MiB
+      comparison: >-
+        The smoke wheelhouse is four wheels and 8.9 MiB. The metric closure is
+        roughly thirty-five times larger and is comparable to the reference
+        notebook's 322 MB bundle, which [[D-0030]] noted Biohub-X had avoided. It
+        was avoided because the smoke path genuinely needed four wheels; scoring
+        through the official metric genuinely needs this. The difference is a
+        measurement either way, not a preference.
+      abi_note: >-
+        rustworkx, blosc2 and polars-runtime-32 ship abi3 wheels tagged cp310 or
+        cp311, which are compatible with cp312. A first pass rejected them by
+        matching the python tag literally and reported them as unresolvable; the
+        error was in the reader, not the lock. blosc2 4.12.0 requires
+        manylinux_2_27, satisfied by the target's glibc 2.35 ([[R-0006]]).
+
+    blocker_tracksdata_is_not_a_wheel:
+      version: 0.1.0rc9.dev4+g7bfeaf845
+      source: git, https://github.com/royerlab/tracksdata pinned at 7bfeaf845ceb951226f19b72fe5b80e01601018a
+      wheels_in_lock: 0
+      sdist_in_lock: false
+      consequence: >-
+        An ABI-locked wheelhouse assembled from uv.lock URLs cannot contain
+        tracksdata, because the lock records a git revision rather than an
+        artifact. It is the one distribution in the closure with no downloadable
+        wheel, and it is not optional: it is the official metric's graph
+        representation and distance matching, pinned in
+        registry/official_source.yaml as a runtime dependency.
+      options_not_yet_chosen:
+        - Build a wheel from the pinned commit and ship it with a Biohub-X digest.
+          Its identity would then be ours rather than a uv.lock hash, which is a
+          different provenance claim and needs its own record.
+        - Vendor it as source the way the metric itself is vendored, which keeps
+          one provenance model but enlarges what this repository carries.
+        - Establish whether the Kaggle image already provides it. [[R-0006]] probed
+          28 names and found tracksdata absent, so this is measured and the answer
+          is no.
+      recorded_rather_than_solved: >-
+        Choosing between these changes what Biohub-X ships and how its identity is
+        asserted, so it is a decision rather than an implementation detail.
+
+    fold_runtime_forecast:
+      anchored_on: >-
+        F-0024's steady-state step time on a real T4: epoch 2 ran two optimizer
+        steps in 1.25 seconds, so 0.625 seconds per step at a two-frame window of
+        524,288 grid voxels. Epoch 1 took 3.95 seconds and is excluded as warmup.
+      step_definition: one optimizer step per movie per epoch
+      fold_window: >-
+        entry.py uses 8 frames when not a smoke, so a fold step covers 2,097,152
+        grid voxels, four times the smoke's.
+      fixed_cost_per_run_seconds: about 100
+      fixed_cost_note: >-
+        Import, offline install, artifact verification and model construction. The
+        verification alone took 62.3 seconds to shape-check 142 registered 44b6
+        artifacts and re-digest 4 in full, and it does not scale with epochs. A
+        forecast that extrapolates the smoke's whole 84.7 seconds per movie
+        overstates a fold substantially, because most of that number is paid once.
+      projections_at_20_epochs:
+        fold_44b6_71_movies_1420_steps:
+          linear_in_voxels_2.50s_per_step: 0.99 hours
+          if_io_doubles_it_5.00s: 1.97 hours
+          if_io_quadruples_it_10.00s: 3.94 hours
+        fold_6bba_128_movies_2560_steps:
+          linear_in_voxels_2.50s_per_step: 1.78 hours
+          if_io_doubles_it_5.00s: 3.56 hours
+          if_io_quadruples_it_10.00s: 7.11 hours
+      the_assumption_that_needs_measuring: >-
+        That step time scales with window voxels. It is stated rather than
+        established. The smoke read two frames from a mounted zarr; a fold reads
+        eight, and whether the cost is dominated by compute or by chunk decode is
+        unmeasured. The bracket above spans a factor of four for exactly that
+        reason, and a single bounded timing probe at the real window size would
+        collapse it.
+      what_this_replaces: >-
+        The configured 21,600 second per-fold ceiling was a guess made before any
+        step had been timed. Even the pessimistic arm of this bracket fits inside
+        it, and the optimistic arm fits inside the 80 minute campaign budget for
+        one fold, so the ceiling is not the binding constraint; the step budget is.
+      gpu_count_caveat: >-
+        Every figure assumes one device, which is what the implementation uses.
+        Kaggle allocated two on E03-SMOKE-03 and the count is uncontrolled
+        ([[D-0038]]), so no budget may assume two.
+
+    unresolved:
+      - How many of the 51 imported distributions the Kaggle image already carries
+        at a usable version. [[R-0006]] probed 28 names on a CPU image and predates
+        this closure, so the wheelhouse cannot yet be trimmed to what is actually
+        absent. A single CPU diagnostic over all 64 names would size it honestly
+        and is cheap.
+      - Whether the image's polars 1.35.2 and scipy 1.16.3 produce identical
+        scorer output to the pinned 1.43.2 and 1.18.0. This is why the pinned
+        versions are shipped rather than accepted, and it is the check the metric
+        preflight has to make rather than assume.
+      - Step time at the real eight-frame window, which decides the fold budget.
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per
