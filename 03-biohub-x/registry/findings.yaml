@@ -657,3 +657,38 @@ findings:
         component containing a division. The four duplicated public-test fixtures
         were not read.
     superseded_by: null
+
+  - id: F-0024
+    claim: >-
+      The clean-fold nnPU training loop runs end to end on a real Kaggle T4 with
+      every guard intact. On fold_44b6 with two 44b6 movies, two epochs, seed 4460,
+      batch size 2 and learning rate 1e-4, the masked positive-unlabelled risk fell
+      from 0.61999181 to 0.60510752 across two epochs of two batches each, the
+      non-negative clamp fired in zero batches in both epochs, four annotated
+      positive voxels were supervised per epoch, the checkpoint wrote atomically
+      and reloaded with strict=True, and the run took 84.744 seconds against a
+      2,400 second ceiling. The 2,076,706-parameter detector reached a peak of
+      2,778,661,376 bytes allocated and 3,701,473,280 reserved against 15,636,037,632
+      total, leaving 11,934,564,352 bytes of headroom.
+    instrument: biohubx package kaggle, run as E03-SMOKE-03 on aryaarun07/biohub-x-e03-fold-44b6
+    evidence:
+      command: biohubx package transport --push --campaign-envelope GPU-CAMPAIGN-E03-01
+      observed: artifacts/e03-smoke-03/result-fold_44b6.json, 19 stages, 102.4 seconds wall
+      note: >-
+        integration_only, and the four positives per epoch are the reason. The
+        smoke trains on a two-frame window of two sparse 44b6 movies, so the whole
+        run supervises four annotated cells; it establishes that the loop is wired
+        correctly on the target hardware and nothing whatever about whether the
+        detector learns. Every falsifier the envelope named was checked and none
+        fired: risk decreased, no epoch had zero positives, the clamp never fired,
+        strict reload succeeded, the device was a Tesla T4, and no forbidden input
+        was observed. The checkpoint digest computed here equals the one the kernel
+        recorded, so the bytes retrieved are the bytes it wrote.
+    validity:
+      scope: training_loop_on_target_hardware
+      holds_while: >-
+        configs/e03-clean-folds.yaml keeps digest
+        canonical_text_sha256:sha256/v1:c31428ecad168ed5553965fad500ea75326491220c1b39abd5510b073ffc7117
+        and the package pins commit b12261a0093f5dd37f18eef23c29143e60374593. It is
+        a property of two movies and two epochs, not of the fold.
+    superseded_by: null

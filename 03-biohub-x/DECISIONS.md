@@ -1196,3 +1196,45 @@ unlabelled-region semantics, fold isolation, official metric, artifact identity
 and submission gate are unchanged. It also does not reward repository growth.
 Failed probes leave machine-readable reports and Git history, not dead modules,
 notebooks, Markdown packets or one bespoke test per idea.
+
+## D-0037 - A guard handed the expected value cannot check the observed one
+
+**Date:** 2026-09-03
+**Status:** accepted
+
+E03-SMOKE-03 was approved for one T4. Kaggle allocated two. The packaged guard
+compared the GPU count and passed, because the entry point handed it
+`spec.expected_gpu_count` in place of the observed count whenever smoke mode was
+on. It compared one to one. **The check was structurally incapable of failing in
+the only mode that ever used it**, and every smoke this project has run was in
+that mode.
+
+The substitution had a reason, which is why it survived review: the pre-push gate
+runs the same entry point on a machine with no accelerator, where an honest count
+of zero would refuse. Rather than tell the guard that this was a local exercise,
+the code told it the answer it wanted to hear.
+
+So the fix is not to delete the exemption but to make it declare itself. The
+observed count and the observed device name now always reach the guard. A local
+CPU exercise sets one environment variable that the pre-push gate owns, the guard
+skips the two hardware checks, and **it records in the report which checks it
+skipped**. A manifest from a local exercise can no longer be mistaken for one
+whose hardware was actually verified.
+
+This is the third instance of one shape. [[D-0028]] recorded a device count
+standing in for a device model. [[D-0033]] recorded a path assumed where an
+identity was available. Here an expected value stood in for an observed one. In
+all three the check sat next to the thing that mattered rather than on it, and in
+all three it passed.
+
+**What this does not excuse.** The device model guard worked: the run refused
+nothing because it genuinely got Tesla T4 hardware, and the envelope named a model
+rather than a count. The deviation cost nothing on this run, since the model
+trains on one device and peak memory fits one card with 11.9 GB spare. What was
+lost was the ability to notice, and noticing is the entire purpose of a guard.
+
+**Open, and named rather than guessed.** Both `accelerator` and `machine_shape`
+were set to `NvidiaTeslaT4` and the command line carried `--accelerator
+NvidiaTeslaT4`, and two cards still arrived. Whether an accelerator request can
+pin a count at all is unmeasured, and no further request will be described as
+pinning one until it is.

@@ -494,3 +494,35 @@ def test_the_attempt_id_travels_in_the_package() -> None:
     assert "E03-SMOKE-03" in source
     assert SPEC.to_dict()["smoke_id"] == "E03-SMOKE-03"
     assert report()["smoke_id"] == "E03-SMOKE-03"
+
+
+def test_the_gpu_count_guard_compares_the_observed_count_not_the_expected_one() -> None:
+    """E03-SMOKE-03 was approved for one T4 and Kaggle allocated two.
+
+    The guard passed, because smoke mode handed it `expected` in place of
+    `observed` before comparing them, so the check could not fail in the only mode
+    that used it. The observed count now reaches the guard.
+    """
+    outcome = report(gpu_count=2)
+
+    assert not outcome["passed"]
+    assert any("found 2" in line for line in outcome["failures"])
+    assert outcome["gpu_count"] == 2
+
+
+def test_a_local_exercise_skips_the_hardware_checks_and_records_that_it_did() -> None:
+    """Skipping is fine on a machine with no accelerator. Skipping silently is not:
+    a manifest from a local exercise must not look like one whose hardware was
+    actually checked."""
+    outcome = report(gpu_count=0, device_name="cpu", local_exercise=True)
+
+    assert outcome["passed"], outcome["failures"]
+    assert outcome["local_exercise"] is True
+    assert any("gpu_count" in line for line in outcome["checks_skipped"])
+
+
+def test_a_remote_run_cannot_acquire_the_local_exemption_by_default() -> None:
+    outcome = report(gpu_count=0, device_name="cpu")
+
+    assert not outcome["passed"]
+    assert outcome["checks_skipped"] == []

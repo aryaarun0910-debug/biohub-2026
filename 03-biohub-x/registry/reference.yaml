@@ -1302,6 +1302,96 @@ references:
         a mechanism, not measured here, and not yet a queued hypothesis.
       - What agreement gating between two seeds buys, since Biohub-X has one detector.
 
+  - id: R-0011
+    status: measured_environment
+    title: The Kaggle GPU runtime, and a mount path that moved between two kernels
+    source:
+      kind: biohubx_gpu_kernel
+      smoke_id: E03-SMOKE-03
+      kernel: aryaarun07/biohub-x-e03-fold-44b6
+      envelope: GPU-CAMPAIGN-E03-01
+      authorised_by: Arya Arun
+      pinned_commit: b12261a0093f5dd37f18eef23c29143e60374593
+      package_digest: canonical_text_sha256:sha256/v1:0a3edb3213749bbdf1c71c0d1522ace1130d9e3da73fbf4c2c4c3579ce4973f8
+      payload_digest: raw_artifact_sha256:sha256:361b4a7b0813c37b85ac8b289e24f9f33b779e82c565c17f1425cd50c90612bb
+      elapsed_seconds: 102.4
+      note: >-
+        Facts about a runtime, measured by this repository's instrument on the
+        machine in question. Not scientific evidence and may not support a
+        promotion.
+
+    retrieved:
+      kernel_log: artifacts/e03-smoke-03/biohub-x-e03-fold-44b6.log
+      kernel_log_digest: raw_artifact_sha256:sha256:605deb5a4b1f6d3012d06deb1d15d12eee564a08759311518b75aa0b836e562a
+      result_manifest: artifacts/e03-smoke-03/result-fold_44b6.json
+      result_manifest_digest: raw_artifact_sha256:sha256:01be7dd666c55e760cbcf4ddec39913f5237d682a72b1917285c7aceee1feae0
+      checkpoint: artifacts/e03-smoke-03/detector-fold_44b6.pt
+      checkpoint_digest: raw_artifact_sha256:sha256:f7fc77f6561d43d62bf46f65a9d7c7bc293b9cfa6a445628c945760a02913149
+      checkpoint_bytes: 8363443
+      round_trip: >-
+        The checkpoint digest computed here equals the one the kernel wrote into
+        its own manifest, so the bytes retrieved are the bytes it produced.
+      selective_retrieval: >-
+        Three files kept and 68 discarded by `package retrieve`, which is the
+        remedy for the wider-than-authorised retrieval recorded in [[R-0008]]
+        working as intended.
+
+    gpu_runtime:
+      torch: 2.10.0+cu128
+      cuda: '12.8'
+      device_name: Tesla T4
+      compute_capability: '7.5'
+      gpu_count: 2
+      total_vram_bytes: 15636037632
+      peak_allocated_bytes: 2778661376
+      peak_reserved_bytes: 3701473280
+      headroom_bytes: 11934564352
+      closes: >-
+        [[R-0006]] left the GPU image's torch build unmeasured, because the
+        environment audit was CPU-only and saw 2.10.0+cpu. It is 2.10.0+cu128 on
+        CUDA 12.8. Memory headroom had never been observed at all; at this window
+        the detector uses under a quarter of one card.
+
+    two_gpus_were_allocated_not_one:
+      requested: NvidiaTeslaT4, with expected_gpu_count 1 in the package
+      observed: 2
+      device_model_correct: true
+      why_the_guard_did_not_refuse: >-
+        The packaged guard was handed `expected_gpu_count` in place of the observed
+        count whenever smoke mode was on, so it compared one to one and passed. The
+        check was structurally incapable of failing in the only mode that used it,
+        which is the same shape as [[D-0028]]'s device count standing in for device
+        model. Corrected in [[D-0037]]; the observed count now reaches the guard and
+        a local CPU exercise declares itself instead of being given the answer.
+      material_effect: >-
+        None on this run's science. The model is placed on one device and trained
+        there, peak memory fits one card with room to spare, and the device model
+        was correct. What was lost was the ability to notice, not the run.
+
+    mount_path_moved_between_kernels:
+      preflight_kernel_resolved_at: /kaggle/input/datasets/aryaarun07/biohubx-wheelhouse-zarr-cp312-linux
+      training_kernel_resolved_at: /kaggle/input/biohubx-wheelhouse-zarr-cp312-linux
+      same_dataset: true
+      same_account: true
+      reading: >-
+        The same private dataset mounted at two different paths in two kernels days
+        apart. This is the decisive vindication of [[D-0033]]: any hardcoded path
+        would have been correct for one of these runs and wrong for the other, and
+        picking the one the earlier run measured would have failed this one. The
+        identity-based resolver found it both times, hashing three candidate trees
+        here and matching on the digest the package carried. A mount path is not a
+        fact to record and reuse; it is a thing to discover each time.
+      competition_root: /kaggle/input/competitions/biohub-cell-tracking-during-development
+      competition_root_stable_across_all_runs: true
+
+    unresolved:
+      - Whether an accelerator request can pin the GPU count as well as the model.
+        Both `accelerator` and `machine_shape` were set to NvidiaTeslaT4 and the
+        command line also carried --accelerator NvidiaTeslaT4; two cards arrived.
+      - Whether the image's polars 1.35.2 and scipy 1.16.3 behave like the pinned
+        versions. The metric stack was not installed, so this is still open and is
+        what the next wheelhouse must answer.
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per

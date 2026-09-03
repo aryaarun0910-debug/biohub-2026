@@ -212,6 +212,7 @@ def guard_report(
     device_name: str = "",
     dataset_sources: list[str] | None = None,
     wheelhouse_verified: bool = False,
+    local_exercise: bool = False,
 ) -> dict[str, Any]:
     """Run every guard and report each one, refusing on the first real failure.
 
@@ -219,6 +220,7 @@ def guard_report(
     it started. A guard that passes silently is a guard nobody can audit later.
     """
     failures: list[str] = []
+    skipped: list[str] = []
 
     # An identity check over an empty set verifies nothing and would pass
     # silently, which is worse than not having one.
@@ -265,7 +267,14 @@ def guard_report(
     if quarantined:
         failures.append(f"a quarantined checkpoint is reachable to this run: {quarantined[:3]}")
 
-    if gpu_count != spec.expected_gpu_count:
+    # A local CPU exercise has no accelerator to check, and it says so rather than
+    # being handed the expected value to compare against itself. E03-SMOKE-03 was
+    # approved for one T4, Kaggle allocated two, and this guard passed because
+    # smoke mode substituted `expected` for `observed` before comparing them: the
+    # check was structurally incapable of failing in the only mode that used it.
+    if local_exercise:
+        skipped.append("gpu_count and device model: no accelerator on a local CPU exercise")
+    elif gpu_count != spec.expected_gpu_count:
         failures.append(
             f"requested {spec.expected_gpu_count} GPU(s) and found {gpu_count}; "
             "the run would not cost what was approved"
@@ -276,7 +285,7 @@ def guard_report(
     # therefore unconditional: an accelerator run that finds no accelerator, or
     # finds the wrong one, refuses either way rather than only when one is
     # present to disagree with.
-    if spec.expected_gpu_count and spec.expected_device_substring not in device_name:
+    if not local_exercise and spec.expected_gpu_count and spec.expected_device_substring not in device_name:
         failures.append(
             f"approved hardware was {spec.expected_device_substring!r} and this machine reports "
             f"{device_name!r}; the accelerator request did not take effect"
@@ -311,6 +320,10 @@ def guard_report(
         "wheelhouse_tree": spec.wheelhouse_tree,
         "wheelhouse_verified": wheelhouse_verified,
         "smoke_id": spec.smoke_id,
+        # Recorded, so a manifest from a local exercise cannot be mistaken for one
+        # whose hardware was actually checked.
+        "checks_skipped": skipped,
+        "local_exercise": local_exercise,
         "passed": not failures,
         "failures": failures,
     }

@@ -99,7 +99,14 @@ def run_fold(
         max_movies=spec_dict["max_movies"],
         runtime_ceiling_seconds=spec_dict["runtime_ceiling_seconds"],
     )
-    stage("environment", f"{spec.smoke_id} fold={fold.fold_id} smoke={spec.smoke}")
+    # Set only by the pre-push gate, which runs this entry point on a machine with
+    # no accelerator. It is an environment fact about the exercise, never a
+    # property of the package, so a remote run cannot acquire it by accident.
+    local_exercise = os.environ.get("BIOHUBX_LOCAL_EXERCISE") == "1"
+    stage(
+        "environment",
+        f"{spec.smoke_id} fold={fold.fold_id} smoke={spec.smoke} local_exercise={local_exercise}",
+    )
 
     import torch
 
@@ -197,10 +204,11 @@ def run_fold(
         dataset_ids=fold_datasets,
         reachable_paths=reachable,
         opened_paths=opened,
-        gpu_count=gpu_count if not spec.smoke else spec.expected_gpu_count,
-        device_name=device_name if gpu_count else spec.expected_device_substring,
+        gpu_count=gpu_count,
+        device_name=device_name,
         dataset_sources=[spec.wheelhouse_slug],
         wheelhouse_verified=wheelhouse_verified,
+        local_exercise=local_exercise,
     )
     for line in report["failures"]:
         stage("guard-failed", line)

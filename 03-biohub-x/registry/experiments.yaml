@@ -365,3 +365,75 @@ experiments:
     blocks_further_attempts_until:
       - a dependency strategy is chosen for zarr and the rest of the stack
       - the GPU-model guard exists, so an unapproved accelerator refuses rather than proceeds
+  - id: E03-SMOKE-03
+    attempt: 3
+    component: proposal_detector
+    parent: E03
+    immutable: true
+    supersedes_nothing: >-
+      E03-SMOKE-01 and E03-SMOKE-02 stand on their own records. This attempt does
+      not replace, correct or inherit either.
+    hypothesis: >-
+      The packaged fold runs on a Kaggle T4 with every guard intact, so the full
+      folds can be requested on evidence rather than hope.
+    falsifier: >-
+      Any guard failing, or the risk not decreasing across the two epochs.
+    what_changed_since_attempt_2:
+      - the package carries the wheelhouse it needs, verified before pip and installed offline
+      - the mount is located by the identity the package carries rather than a guessed path
+      - accelerator and machine_shape both set to the canonical NvidiaTeslaT4
+      - the runtime guard requires an actual Tesla T4 rather than a device count
+      - the attempt id travels in the package, the log and the result manifest
+      - transport validates the staged inventory and verifies the returned slug
+    inputs:
+      - the Kaggle package at canonical_text_sha256:sha256/v1:0a3edb3213749bbdf1c71c0d1522ace1130d9e3da73fbf4c2c4c3579ce4973f8
+      - the embedded source payload at raw_artifact_sha256:sha256:361b4a7b0813c37b85ac8b289e24f9f33b779e82c565c17f1425cd50c90612bb
+      - the wheelhouse at tree_sha256:sha256/v1:4c7474376ba70a4772babee4c8fca8d13d829066686f8672cd1b9f23a10ee3ed
+    split:
+      scheme: leave_one_embryo_out
+      fold: fold_44b6, two movies from 44b6
+    model_config:
+      path: configs/e03-clean-folds.yaml
+      section: E03
+      canonical_text: canonical_text_sha256:sha256/v1:c31428ecad168ed5553965fad500ea75326491220c1b39abd5510b073ffc7117
+    budget: one Kaggle T4 under envelope GPU-CAMPAIGN-E03-01, 2400 second ceiling
+    expected_outputs:
+      - a result manifest carrying a typed checkpoint digest
+      - one checkpoint under 40 MB
+    forbidden_changes:
+      - any guard or falsifier in the package
+      - the recorded outcomes of E03-SMOKE-01 and E03-SMOKE-02
+    promotion_metric: none; this experiment cannot promote anything
+    runtime_ceiling: 2400 seconds
+    provenance_status: external_cleared
+    kernel: aryaarun07/biohub-x-e03-fold-44b6
+    kernel_version: 3
+    status: integration_only
+    result: F-0024
+    outcome: >-
+      Pushed once and completed in 102.4 seconds of wall clock, 84.744 of them
+      inside the packaged entry point. Nineteen stages appeared in order. The
+      wheelhouse resolved by identity, verified with zero differences, and
+      installed offline at returncode 0; the payload verified and imported from
+      the extracted tree; 142 registered artifacts were shape-checked and 4
+      re-digested in full; fold membership was asserted; the device reported Tesla
+      T4; both epochs ran, the risk fell and the clamp never fired; the checkpoint
+      wrote atomically and reloaded strict. Every falsifier the envelope named was
+      checked and none fired.
+    status_reasoning: >-
+      integration_only rather than promoted, because a smoke cannot promote and
+      because four supervised positives across the whole run is not evidence that
+      anything learns. What it establishes is that the clean nnPU training path
+      works on real Kaggle hardware, which is exactly what the envelope asked.
+    deviations_from_authorisation:
+      - >-
+        Kaggle allocated two T4s where the package expected one. The device model
+        was correct and the envelope named the model rather than a count, so the
+        approved hardware was delivered. The packaged count guard did not notice,
+        because smoke mode substituted the expected count for the observed one
+        before comparing them; recorded in [[R-0011]] and corrected in [[D-0037]].
+        No effect on the run: the model trains on one device and peak memory fits
+        one card with 11.9 GB to spare.
+    budget_consumed:
+      pushes: 1 of 2 permitted
+      gpu_minutes: about 1.7 of 80 permitted

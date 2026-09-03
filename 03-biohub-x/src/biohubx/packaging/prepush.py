@@ -272,6 +272,9 @@ def exercise_bootstrap(
             # than a simulated one. Only the pip call is skipped, and it says so.
             environment["BIOHUBX_INPUT_ROOT"] = str(wheelhouse_root)
             environment["BIOHUBX_SKIP_INSTALL"] = "1"
+            # This machine has no accelerator. The guard is told so, rather than
+            # being fed the expected count and asked to compare it with itself.
+            environment["BIOHUBX_LOCAL_EXERCISE"] = "1"
         if needs_data:
             environment["BIOHUB_DATA_ROOT"] = str(data_root)
         else:
