@@ -1076,7 +1076,31 @@ approval_packet:
 
     dataset:
       slug: aryaarun07/biohubx-wheelhouse-zarr-cp312-linux
-      state: STAGED LOCALLY, NOT CREATED
+      state: CREATED, PRIVATE, VERIFIED
+      created_utc: '2026-09-03T06:09:52Z'
+      remote_inventory:
+        files: 7
+        bytes: 9304073
+        every_file_byte_identical_to_staged: true
+        every_wheel_matches_uv_lock: true
+        nothing_present_that_was_not_staged: true
+      inventory_discrepancy: >-
+        The authorisation named 8 files and 9,304,348 bytes. The dataset holds 7
+        files and 9,304,073 bytes. The difference is exactly
+        dataset-metadata.json, 275 bytes, which Kaggle consumes as configuration
+        when creating a dataset and does not store as data. Every substantive
+        file is present and byte-identical, all four wheel digests still match
+        uv.lock, and nothing extra appeared. The preflight push was stopped
+        anyway, because the authorisation lists a differing inventory as a stop
+        condition and the difference is real even though its cause is benign.
+      upload_note: >-
+        Uploaded with --dir-mode zip because the CLI's default skips
+        subdirectories entirely, which would have dropped every wheel. Kaggle
+        extracted the archive and the wheels/ prefix survived.
+      first_attempt_failed: >-
+        A first create with a relative -p path failed inside the CLI on a
+        mixed-separator temp path and created nothing; the retry used an
+        absolute path. No partial dataset was left behind.
       tree_digest: tree_sha256:sha256/v1:32688f0520b25e314f677f46a8c843fe684890f951bffc643dbb2ea9180b6040
       file_count: 8
       total_bytes: 9304348
@@ -1115,7 +1139,7 @@ approval_packet:
 
     preflight:
       preflight_id: E03-WHEELHOUSE-PREFLIGHT-01
-      state: STAGED, NOT PUSHED
+      state: STAGED, NOT PUSHED, HELD ON THE INVENTORY DISCREPANCY
       package_digest: canonical_text_sha256:sha256/v1:6dcdf87f1c74a146fdf58404f6a2d7e168aff0ea80602aaae1aad1d2ba770ce5
       pinned_commit: 8227221c20d4ad805c9b0195dd35052bdca841ac
       kernel: aryaarun07/biohub-x-wheelhouse-preflight
