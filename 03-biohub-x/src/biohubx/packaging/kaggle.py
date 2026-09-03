@@ -391,20 +391,27 @@ if observed_tree != WHEELHOUSE_EXPECTED["tree"] or wheelhouse_differences:
     raise SystemExit("the mounted wheelhouse is not the authorised published payload")
 stage("wheelhouse-verify", "the mounted tree is the authorised published payload")
 
-stage("wheelhouse-install", "offline, no index, no deps, hashes required")
-install = subprocess.run(
-    [
-        sys.executable, "-m", "pip", "install",
-        "--no-index", "--no-deps", "--require-hashes",
-        "-r", str(wheelhouse_root / "requirements-offline.txt"),
-        "--find-links", str(wheelhouse_root / "wheels"),
-    ],
-    capture_output=True, text=True, check=False,
-)
-stage("wheelhouse-install", "returncode=" + str(install.returncode))
-if install.returncode != 0:
-    print(install.stderr[-2000:], flush=True)
-    raise SystemExit("the offline wheelhouse install failed")
+install_command = [
+    sys.executable, "-m", "pip", "install",
+    "--no-index", "--no-deps", "--require-hashes",
+    "-r", str(wheelhouse_root / "requirements-offline.txt"),
+    "--find-links", str(wheelhouse_root / "wheels"),
+]
+if os.environ.get("BIOHUBX_SKIP_INSTALL") == "1":
+    # The local pre-push gate sets this. Resolution and identity verification
+    # above run for real; only the install is skipped, because installing the
+    # locked wheels into the developer environment is a side effect the gate has
+    # no business causing, and because the install itself was already measured on
+    # the target image by the wheelhouse preflight (R-0008). Announced loudly so
+    # a skipped install can never read as a successful one.
+    stage("wheelhouse-install", "SKIPPED by BIOHUBX_SKIP_INSTALL; local gate only, NOT an install")
+else:
+    stage("wheelhouse-install", "offline, no index, no deps, hashes required")
+    install = subprocess.run(install_command, capture_output=True, text=True, check=False)
+    stage("wheelhouse-install", "returncode=" + str(install.returncode))
+    if install.returncode != 0:
+        print(install.stderr[-2000:], flush=True)
+        raise SystemExit("the offline wheelhouse install failed")
 
 sys.path.insert(0, str(target / "src"))
 import biohubx

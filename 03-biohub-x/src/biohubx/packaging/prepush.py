@@ -193,6 +193,7 @@ def run_all(
     interpreter: str,
     expected: tuple[str, ...] = EXPECTED_STAGES,
     needs_data: bool = True,
+    wheelhouse_root: Any = None,
 ) -> PrePushReport:
     """Every check, cheapest first. Raises on the first failure, before any network call."""
     check_required_metadata(notebook)
@@ -204,6 +205,7 @@ def run_all(
         interpreter=interpreter,
         expected=expected,
         needs_data=needs_data,
+        wheelhouse_root=wheelhouse_root,
     )
     return PrePushReport(
         nbformat_validated=True,
@@ -237,6 +239,7 @@ def exercise_bootstrap(
     interpreter: str,
     expected: tuple[str, ...] = EXPECTED_STAGES,
     needs_data: bool = True,
+    wheelhouse_root: Any = None,
 ) -> tuple[int, tuple[str, ...], tuple[str, ...]]:
     """Run the notebook's own code in a clean directory with no repository on the path.
 
@@ -263,6 +266,12 @@ def exercise_bootstrap(
         environment.pop("PYTHONPATH", None)
         environment["BIOHUBX_PACKAGE_ROOT"] = str(workdir / "package")
         environment["BIOHUBX_OUTPUT"] = str(workdir / "out")
+        if wheelhouse_root is not None:
+            # The published payload, staged as its own tree, so the notebook's
+            # resolver and its identity check run against a real mount rather
+            # than a simulated one. Only the pip call is skipped, and it says so.
+            environment["BIOHUBX_INPUT_ROOT"] = str(wheelhouse_root)
+            environment["BIOHUBX_SKIP_INSTALL"] = "1"
         if needs_data:
             environment["BIOHUB_DATA_ROOT"] = str(data_root)
         else:

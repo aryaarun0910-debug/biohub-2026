@@ -2277,7 +2277,20 @@ def package_kaggle(
     os.environ["BIOHUBX_OUTPUT"] = str(gate_out)
     heartbeat(command, "pre-push", "validating, converting and exercising before any network action")
     try:
-        gate = prepush.run_all(notebook, shipped, data_root=data_root, interpreter=sys.executable)
+        # The published payload staged as a real tree, so the notebook's own
+        # resolver and identity check run against a mount rather than a mock.
+        with tempfile.TemporaryDirectory(prefix="biohubx-gate-mount-") as mount:
+            gate_mount = Path(mount) / "input"
+            gate_payload = gate_mount / "biohubx-wheelhouse-zarr-cp312-linux"
+            gate_payload.mkdir(parents=True)
+            stage_published_payload(house, gate_payload, published_relative_paths(bundle))
+            gate = prepush.run_all(
+                notebook,
+                shipped,
+                data_root=data_root,
+                interpreter=sys.executable,
+                wheelhouse_root=gate_mount,
+            )
     except (PrePushError, EntryRefusal, PackagingError) as exc:
         heartbeat(command, "refused", f"pre-push gate failed, nothing was sent: {exc}")
         raise typer.Exit(code=2) from exc
