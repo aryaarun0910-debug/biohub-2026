@@ -2942,6 +2942,15 @@ def package_transport(
         str | None,
         typer.Option("--campaign-envelope", help="The approval this push is drawn against."),
     ] = None,
+    accelerator: Annotated[
+        str,
+        typer.Option("--accelerator", help="Accelerator requested on the command line as well."),
+    ] = "NvidiaTeslaT4",
+    timeout: Annotated[int, typer.Option("--timeout", help="Seconds Kaggle may run the kernel for.")] = 2400,
+    interpreter: Annotated[
+        str,
+        typer.Option("--interpreter", help="Launcher for the Kaggle CLI, invoked as a module."),
+    ] = "py -3.14",
 ) -> None:
     """Validate a staged package for transport, and stop before sending it.
 
@@ -3077,18 +3086,34 @@ def package_transport(
         environment = dict(os.environ)
         environment["PYTHONUTF8"] = "1"
         environment["PYTHONIOENCODING"] = "utf-8"
-        completed = subprocess.run(
-            [sys.executable, "-m", "kaggle", "kernels", "push", "-p", str(staging)],
-            capture_output=True,
-            text=True,
-            env=environment,
-            check=False,
-        )
+        # The CLI is invoked as a module through the launcher, not through the
+        # console script: kaggle is not importable in this project's virtualenv,
+        # and the .exe shim is not what the envelope authorises. The accelerator
+        # and ceiling are passed on the command line as well as carried in the
+        # metadata, so a request that one form drops is still made by the other.
+        argv = [
+            *interpreter.split(),
+            "-m",
+            "kaggle",
+            "kernels",
+            "push",
+            "-p",
+            str(staging),
+            "--accelerator",
+            accelerator,
+            "--timeout",
+            str(timeout),
+        ]
+        heartbeat(command, "push", " ".join(argv))
+        completed = subprocess.run(argv, capture_output=True, text=True, env=environment, check=False)
         found = re.search(r"kaggle\.com/code/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)", completed.stdout or "")
         observed = f"{found.group(1)}/{found.group(2)}" if found else ""
         pushed = {
             "attempted": True,
             "envelope": campaign_envelope,
+            "argv": argv,
+            "accelerator_requested": accelerator,
+            "timeout_seconds": timeout,
             "returncode": completed.returncode,
             "stdout_tail": (completed.stdout or "")[-1500:],
             "stderr_tail": (completed.stderr or "")[-1500:],
