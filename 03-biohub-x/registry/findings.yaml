@@ -1053,3 +1053,120 @@ findings:
         estimated_number_of_nodes, the response quantile is 0.95, suppression is
         4 micrometres, and two annotated frames per movie are read.
     superseded_by: null
+
+  - id: F-0033
+    claim: >-
+      Over the frozen strict-peak proposals of D-0041, a legal graph whose edges
+      are chosen with ground truth scores 0.9961 on 44b6 and 0.9227 on 6bba
+      through the pinned official scorer, on ten-frame windows of all 199
+      annotated training movies. The 44b6 ceiling clears 0.950 and the 6bba
+      ceiling does not, so under E06's preregistered rule association is not yet
+      the sole bottleneck and the bake-off does not start. On 44b6, 1,811 of
+      1,970 annotated nodes matched a proposal one-to-one within 7 micrometres
+      (0.9193), 1,544 of 1,750 annotated edges survived with both endpoints
+      matched (0.8823), both retained divisions were kept, and 219,020 proposals
+      stood against an estimated 280,156, a node ratio of -0.2182 that the
+      official adjustment rewards: raw edge Jaccard 0.8823, adjusted 0.8961,
+      division Jaccard 1.0. On 6bba, 9,208 of 10,157 nodes matched (0.9066),
+      7,852 of 8,949 edges survived (0.8774), 7 of 9 divisions were kept, and
+      275,566 proposals stood against an estimated 211,565, a node ratio of
+      +0.3025 that the adjustment charges: raw edge Jaccard 0.8781, adjusted
+      0.8449, division Jaccard 0.7778. One 6bba window with 9 annotated edges
+      retained no edge and could not be scored. The same detector configuration
+      therefore under-proposes the sparse embryo by a fifth and over-proposes
+      the dense one by a third; at a zero node ratio the 6bba ceiling would
+      read 0.9559 and the 44b6 ceiling 0.9823, so the 6bba shortfall is
+      proposal count before it is edge retention.
+    instrument: biohubx evaluate oracle-ceiling
+    evidence:
+      command: >-
+        biohubx evaluate oracle-ceiling --out artifacts/e06-oracle.json, with
+        the defaults that restate D-0041: --radii 2.0,3.0 --local-maxima
+        --response-quantile 0.95 --suppression-radius 4.0 --frames 10
+      observed: artifacts/e06-oracle.json
+      score_composition: >-
+        Per window, the pinned scorer computes edge Jaccard J and node ratio
+        r = (proposals - estimate) / estimate, then adjusted Jaccard
+        max(0, J * (1 - 0.1 * r)); per embryo it weights adjusted Jaccard by
+        each window's TP + FP + FN and adds 0.1 times the micro-averaged
+        division Jaccard. The constants are ADJUSTMENT_ALPHA and
+        SCORE_DIVISION_WEIGHT in the vendored official source.
+      note: >-
+        diagnostic_ceiling, never a method. Three readings. First, the decision
+        rule is met on its face: 6bba's ceiling is 0.027 short of 0.950 and no
+        association method can score above a graph whose edges were chosen with
+        the answer key. Second, the two embryos fail differently, and neither
+        failure is association. 44b6 loses to retention, since 12 percent of
+        annotated edges have an endpoint no proposal matched, and is then paid
+        back 0.014 by the node term for proposing fewer cells than estimated.
+        6bba retains almost the same fraction of edges but is charged 0.033 by
+        the node term for proposing a third more cells than estimated, and its
+        divisions cost a further 0.022. Third, a single response quantile of
+        0.95 cannot serve both embryos, because it lands a fifth under the
+        estimate on one and a third over it on the other; that is a proposal
+        count question, which E06's frozen block forbids answering inside E06,
+        so it goes to E05 as a new declaration rather than as a change here.
+        The ceiling was computed with every proposal kept as a node, which is
+        what the frozen configuration costs; a ceiling that also chose which
+        proposals to keep would be a different and more generous object.
+    validity:
+      scope: association_ceiling_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, the proposal block of D-0041 holds,
+        ten frames per movie are read from the first annotated frame, the
+        official 7 micrometre radius and voxel scale hold, and the pinned
+        scorer's constants are 0.1 and 0.1.
+    superseded_by: null
+
+  - id: F-0034
+    claim: >-
+      Taking strict peaks at each DoG scale on its own and unioning them before
+      one shared suppression pass (H-11c) recovers what the max-over-scales
+      response loses to fusion, and whether that helps depends entirely on the
+      bank. With the three-scale bank (2.0, 3.0, 4.5) the union saturates at
+      0.8376 reach on 44b6 with 37,596 proposals and 0.8842 on 6bba with 46,273,
+      above the fused three-scale peaks (0.7665 and 0.8314) and below the frozen
+      two-scale peaks (0.9239 and 0.8984), so the 4.5 micrometre scale costs
+      more than fusion does. With the frozen two-scale bank (2.0, 3.0), H-11d,
+      the union saturates at 0.9467 on 44b6 with 50,642 proposals and 0.9291 on
+      6bba with 60,587, above the frozen peaks by 0.023 and 0.031, and both
+      held-out directions improve: fold_44b6 reads 0.9064 on held-out 6bba at
+      twice the estimate against 0.8933, fold_6bba reads 0.9467 on held-out 44b6
+      at four times it against 0.9239. The gain is bought with proposals: the
+      union emits 16 percent more on 44b6 and 21 percent more on 6bba at
+      saturation, and at the neutral budget on the dense embryo it reads 0.7440
+      with 39,706 proposals against the frozen peaks' 0.7894 with 37,417, so
+      its extra candidates outrank true cells there. On 44b6 at the neutral
+      budget the two are level, 0.9188 against 0.9213.
+    instrument: biohubx evaluate proposals --per-scale-union
+    evidence:
+      command: >-
+        biohubx evaluate proposals --per-scale-union --radii 2.0,3.0,4.5 --ratios
+        0.5,1.0,2.0,4.0,8.0 (H-11c) and the same with --radii 2.0,3.0 (H-11d),
+        compared with artifacts/proposals-peaks-r23.json and
+        artifacts/proposals-peaks-r2345.json at each budget ratio
+      observed: artifacts/proposals-h11c-union-r2345.json, artifacts/proposals-h11d-union-r23.json
+      note: >-
+        integration_only; both are probes beside E06 and neither touches its
+        frozen block. Three readings. First, the fusion mechanism H-11c named is
+        real: at every budget the union beats the fused peaks of the same bank,
+        so a large scale's maximum does swallow neighbouring small-scale peaks.
+        Second, it is not the main loss with three scales, because dropping the
+        4.5 micrometre scale (F-0032) gains more than un-fusing it does. Third,
+        with two scales the union is a retention challenger that F-0033 says
+        cannot be taken blindly: 6bba already proposes a third more cells than
+        the official estimate and every ten percent of node ratio costs one
+        percent of edge Jaccard, so the union's extra fifth of proposals would
+        charge about 0.02 against the retention it adds, and on the sparse
+        embryo, which proposes a fifth fewer than estimated, the same extra
+        proposals are nearly free. That asymmetry is the proposal-count question
+        F-0033 hands to E05, and the union enters E05 as one candidate source
+        for a budgeted selection rather than as a replacement for D-0041.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, the official voxel scale and seven
+        micrometre radius hold, the node budget comes from each movie's own
+        estimated_number_of_nodes, the response quantile is 0.95, suppression is
+        4 micrometres, and two annotated frames per movie are read.
+    superseded_by: null

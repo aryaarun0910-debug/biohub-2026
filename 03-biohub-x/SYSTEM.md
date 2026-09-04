@@ -255,9 +255,10 @@ Implemented:
 - `biohubx package audit [--out PATH] [--expect-kernel ID] [--allow-dirty]`
 - `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--smoke-id ID] [--wheelhouse PATH] [--expect-published DIGEST] [--expect-device NAME] [--allow-dirty]`
 - `biohubx package preflight [--out PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--allow-dirty]`
-- `biohubx package wheelhouse [--path PATH] [--remote PATH] [--out PATH]`
+- `biohubx package wheelhouse [--path PATH] [--remote PATH] [--out PATH] [--built-wheel FILE=sha256:HEX...]`
+- `biohubx package metric-preflight [--wheelhouse PATH] [--out PATH] [--expect-published DIGEST] [--root PATH] [--dataset ID] [--frames N] [--allow-dirty]`
 - `biohubx package retrieve --kernel ID --only NAME... --out DIR [--allow-missing]`
-- `biohubx package transport [--package PATH] [--expect-kernel ID] [--expect-digest D] [--push --campaign-envelope ID] [--accelerator A] [--timeout S] [--interpreter CMD]`
+- `biohubx package transport [--package PATH] [--expect-kernel ID] [--expect-digest D] [--push --campaign-envelope ID] [--accelerator A] [--expect-dataset SLUG] [--timeout S] [--interpreter CMD]`
 - `biohubx research intake --url URL --kind KIND --campaign ID --branch NAME --note TEXT [--fetch] [--max-bytes N]`
 - `biohubx research evict --id RL-NNNN`
 - `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--peak-quantile F] [--learning-rate F]`
@@ -421,7 +422,24 @@ so an edited listing can describe a tree that could not exist. `--remote` compar
 a downloaded copy of the published dataset with the published payload by relative
 path, size and content digest, then by tree digest, and refuses on any difference.
 Content rather than inventory: a same-size substitution moves neither the file
-count nor the total bytes.
+count nor the total bytes. uv.lock is the hash authority for every wheel except
+one named with `--built-wheel FILE=sha256:HEX`: a wheel Biohub-X built from a git
+source the lock pins without an artifact ([[R-0014]]), whose digest the operator
+states from its registry entry and the report records as `biohubx_build`.
+
+`package metric-preflight` stages the kernel that proves the metric wheelhouse
+on the target before any fold is scored there: strict imports of the whole
+official-metric closure with the one deliberately absent name checked absent,
+the vendored official source hashed against `registry/official_source.yaml`,
+the scorer's fifteen characterisation fixtures, behavioural equivalence against
+this machine, and one tiny real-data window scored through the frozen proposals
+of [[D-0041]]. The baseline is computed here first and travels inside the spec,
+so the kernel compares rather than reports; the package travels inside the
+notebook as the training kernel's does, the wheelhouse is located and verified
+by identity before pip runs, and the run is CPU only with internet off and the
+metric wheelhouse as its only dataset. `package transport --expect-dataset`
+names that dataset, since the transport validator otherwise expects the zarr
+wheelhouse alone.
 
 `train preflight` proves the E03 loop runs before a GPU is asked for: forward,
 masked loss, backward, optimizer step, atomic checkpoint, strict reload,

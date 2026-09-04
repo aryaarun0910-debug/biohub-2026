@@ -650,6 +650,17 @@ experiments:
         proposals. Every proposal is a node whether or not it matched, so the
         node-count term is what the frozen detector actually costs.
       decision_rule: >-
-        Either embryy below 0.950: association is not yet the sole bottleneck,
+        Either embryo below 0.950: association is not yet the sole bottleneck,
         return to H-11c and E05. Both at or above 0.950 with headroom toward
         0.970: proceed to the bake-off.
+      outcome:
+        finding: F-0033
+        score_44b6: 0.9961
+        score_6bba: 0.9227
+        both_support_0_950: false
+        decision_applied: >-
+          6bba's ceiling is below 0.950. E06 halts before the bake-off, per the
+          rule above, and the campaign returns to proposal complementarity. The
+          frozen block is unchanged; the proposal-count question F-0033 raises
+          is declared in E05, not here.
+    status: halted_at_first_measurement

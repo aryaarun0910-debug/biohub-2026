@@ -1957,6 +1957,265 @@ references:
       - It is not in any wheelhouse yet; the closure audit decides what ships
         beside it.
 
+  - id: R-0015
+    status: measured_environment
+    title: The official-metric closure audited on the Kaggle CPU image, all 65 names, attempt 2 of E03-ENV-AUDIT
+    why: >-
+      [[R-0012]] priced the whole closure at 310.6 MiB on the assumption that
+      the image had none of it. The trimmed wheelhouse [[D-0032]] wants is what
+      the image lacks or Biohub-X pins, and that is a measurement, not an
+      assumption. Attempt 1 probed five names; this attempt probes every import
+      name uv.lock resolves for the closure plus torch and zstandard.
+
+    kernel:
+      slug: aryaarun07/biohub-x-environment-audit
+      version: 2
+      package_digest: canonical_text_sha256:sha256/v1:a35925ac59f96a14fee3c8277abf9714865511778baadc293c87c84103ac43d6
+      package_digest_note: artifacts/kaggle-audit.json, the transport validator record before the push; files=3 bytes=9592
+      commit: 734d8f5491a19c61face3d71d916d89387e1b3c2
+      accelerator: none
+      internet: off
+      sources: none
+      elapsed_seconds: 14.062
+      retrieved:
+        - name: biohub-x-environment-audit.log
+          bytes: 11984
+          digest: raw_artifact_sha256:sha256:e7f3be76c701db9e2e58c1a2d46ac9a3815675a8720978c3f937d2706c03d438
+        - name: environment-audit.json
+          bytes: 35329
+          digest: raw_artifact_sha256:sha256:6097a86ee627c4f6ad11861b29a7d3c08fc7dea754975c7062e182212fe6d371
+      retrieval: package retrieve, containment kept=2 discarded=0, into artifacts/env-audit-02
+
+    image:
+      python: 3.12.13 (GCC 11.4.0)
+      platform: Linux-6.12.90+-x86_64-with-glibc2.35
+      abi: cpython-312-x86_64-linux-gnu
+      torch: 2.10.0+cpu on this CPU kernel; the GPU image measured in R-0011 carries 2.10.0+cu128
+      installed_distributions: 874
+      codec_probe: blosc2 4.1.2 and zstandard 0.25.0 present; numcodecs and zarr absent, so the blosc fixture could not be decoded
+
+    closure:
+      probed: 65
+      absent: 11
+      absent_names: [bidict, donfig, geff, geff_spec, ilpy, imagecodecs, numcodecs, pyscipopt, rustworkx, tracksdata, zarr]
+      present_at_lock_version: 15
+      present_older_than_lock: 29
+      present_version_unreadable_from_module: 6
+      pinned_regardless_of_presence: [polars 1.35.2 -> 1.43.2, scipy 1.16.3 -> 1.18.0]
+      target_versions_of_note:
+        numpy: 2.0.2 against the lock's 2.5.2
+        numba: 0.60.0 against the lock's 0.67.0
+        llvmlite: 0.43.0 against the lock's 0.49.0
+        pyarrow: 24.0.0 against the lock's 25.0.1
+        pydantic: 2.12.3 against the lock's 2.13.5
+        scikit-image: 0.25.2 against the lock's 0.26.0
+        dask: 2026.3.0 against the lock's 2026.8.0
+        rich: 13.9.4 against the lock's 15.0.0
+        typing-extensions: 4.15.0 against the lock's 4.16.0
+      full_table: artifacts/env-audit-02/environment-audit.json, imports and installed_distributions
+
+    shipping_decision:
+      rule: ship what is absent, ship what is pinned regardless, ship nothing that is present unless a shipped wheel's own Requires-Dist rejects the image's version
+      wheels: 13, ten of the 11 absent, polars with its polars-runtime-32, scipy, at lock versions, plus the tracksdata build of R-0014
+      bytes: 123,089,478 as assembled, against the 310.6 MiB of R-0012 and the 150,870,528 the lock priced before imagecodecs was left out
+      resolution_check: >-
+        Every shipped wheel's Requires-Dist and Requires-Python were evaluated
+        against the image's 874 recorded distributions plus the wheelhouse,
+        with markers for linux, cpython 3.12.13, x86_64.
+      resolution_problems:
+        - imagecodecs 2026.8.16 requires numpy>=2.1; the image has numpy 2.0.2
+      resolution_note: >-
+        One conflict, and it is the lock's, not the image's. Shipping that
+        imagecodecs means replacing numpy beneath a numba 0.60.0 that accepts
+        nothing newer than 2.0, so llvmlite and numba would follow. tracksdata
+        declares imagecodecs and imports it in no module, checked with git grep
+        over the pinned tree. It is left out, the omission is written into the
+        wheelhouse manifest as a knowingly unmet declaration, and the metric
+        preflight checks that it is still absent. The wheelhouse itself is [[R-0016]].
+
+  - id: R-0016
+    status: assembled_locally
+    title: The metric wheelhouse, thirteen locked wheels for the official-metric closure on the Kaggle image
+    why: >-
+      [[R-0015]] measured what the image lacks. This is the answer, assembled
+      from uv.lock by hash and from the sandbox build of [[R-0014]], with two
+      identities recorded because the platform publishes one file fewer than
+      it is sent ([[D-0031]]). Nothing here is scientific evidence; it is what
+      the E06 metric preflight installs and checks.
+
+    dataset:
+      id: aryaarun07/biohubx-wheelhouse-metric-cp312-linux
+      private: true
+      staged_at: artifacts/wheelhouse-metric
+      published: not yet; the identities below are what a kernel must observe once it is
+
+    identities:
+      upload_bundle:
+        tree: tree_sha256:sha256/v1:c84025af8119075a0bbe46de6abdbd9239d8255fe63633e0754353dabcf2f64c
+        files: 17
+        bytes: 123174298
+      published_payload:
+        tree: tree_sha256:sha256/v1:cc8a180133fb8cdf0eaf10ca192bd9965b3b8bade1178746e4c364d790258f7d
+        files: 16
+        bytes: 123174020
+        excludes: dataset-metadata.json, which Kaggle consumes rather than stores
+      report: artifacts/wheelhouse-metric-identity.json
+      verified_by: package wheelhouse --built-wheel for tracksdata, uv.lock for the twelve others
+
+    assembly:
+      rule: >-
+        ship what the closure audit found absent, ship what is pinned regardless
+        (polars 1.43.2, scipy 1.18.0), ship nothing the image already has. Every
+        PyPI wheel from the URL uv.lock records, refused unless its SHA-256 equals
+        the lock's; tracksdata from the sandbox build, refused unless its SHA-256
+        equals R-0014's.
+      wheel_selection: cp312 or abi3 or pure, x86_64 manylinux at or below glibc 2.35, lowest glibc floor first
+      wheel_count: 13
+      total_bytes: 123089478
+      against: 310.6 MiB priced by R-0012 for the whole closure
+      resolution: >-
+        Every shipped wheel's Requires-Dist and Requires-Python evaluated against
+        the image's 874 recorded distributions plus this wheelhouse, markers for
+        linux, cpython 3.12.13, x86_64. Zero unmet requirements after the one
+        deliberate omission below.
+
+    deliberately_absent:
+      imagecodecs:
+        lock_version: 2026.8.16
+        declared_by: tracksdata, unversioned
+        imported_by_tracksdata_modules: 0, by git grep over the pinned tree; declared once, in pyproject.toml
+        why: >-
+          The lock's build requires numpy>=2.1; the image has numpy 2.0.2 under
+          numba 0.60.0, which accepts no newer numpy, so shipping it means
+          replacing numpy, numba and llvmlite beneath every other package on the
+          image. pip --no-deps binds no declaration, so the omission costs nothing
+          at install; the preflight's strict-import check expects imagecodecs
+          absent and would flag a wheelhouse that grew it.
+        knowingly_unmet_declaration: tracksdata==0.1.0rc9.dev4+g7bfeaf845 Requires-Dist imagecodecs
+
+    wheels:
+      - package: bidict
+        version: 0.24.1
+        filename: bidict-0.24.1-py3-none-any.whl
+        bytes: 36175
+        sha256: fd3eaa737917d8a14f4baa391670c433c4e3f6f5fd2cd99d4bf436437f432364
+        hash_authority: uv.lock
+        tags: py3-none-any
+        licence: MPL-2.0
+        consumer: absent on the target; tracksdata's node/edge id mapping
+      - package: donfig
+        version: 0.8.1.post1
+        filename: donfig-0.8.1.post1-py3-none-any.whl
+        bytes: 21592
+        sha256: 2a3175ce74a06109ff9307d90a230f81215cbac9a751f4d1c6194644b8204f9d
+        hash_authority: uv.lock
+        tags: py3-none-any
+        licence: MIT
+        consumer: absent on the target; zarr's configuration system
+      - package: geff
+        version: 1.3.1.1.3
+        filename: geff-1.3.1.1.3-py3-none-any.whl
+        bytes: 69012
+        sha256: d86d608f5a3eab5e7be3252d3a900f0d8ac0e2bf2a53e97ac546a91b675ff6b2
+        hash_authority: uv.lock
+        tags: py3-none-any
+        licence: MIT
+        consumer: absent on the target; the official metric reads and writes GEFF graphs
+      - package: geff-spec
+        version: 1.3.0
+        filename: geff_spec-1.3.0-py3-none-any.whl
+        bytes: 15602
+        sha256: cc629ced0bf9ff2bbe6c1b2184fe9d89f134776f1d5d9f1daa2b0096e92e6fbd
+        hash_authority: uv.lock
+        tags: py3-none-any
+        licence: MIT
+        consumer: absent on the target; geff's schema models
+      - package: ilpy
+        version: 0.6.0
+        filename: ilpy-0.6.0-py3-none-any.whl
+        bytes: 32126
+        sha256: 1c8e53144eafdaa1e59103543b9f05d38dfbf5819944f8b5766bd8a6f08fd6ab
+        hash_authority: uv.lock
+        tags: py3-none-any
+        licence: MIT
+        consumer: absent on the target; tracksdata's ILP solver binding
+      - package: numcodecs
+        version: 0.15.1
+        filename: numcodecs-0.15.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+        bytes: 8879163
+        sha256: c3a09e22140f2c691f7df26303ff8fa2dadcf26d7d0828398c0bc09b69e5efa3
+        hash_authority: uv.lock
+        tags: cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64
+        licence: MIT
+        consumer: absent on the target; zarr's codec pipeline for the blosc/zstd chunks
+      - package: polars
+        version: 1.43.2
+        filename: polars-1.43.2-py3-none-any.whl
+        bytes: 847150
+        sha256: 22aa0cb92a1ee2d60d6a15a638b2e8e0dd99aea21ac0cd8fb29da8e382e075a9
+        hash_authority: uv.lock
+        tags: py3-none-any
+        licence: Copyright (c) 2025 Ritchie Vink
+        consumer: present at 1.35.2, pinned to the lock's 1.43.2 by decision; tracksdata's tabular core
+      - package: polars-runtime-32
+        version: 1.43.2
+        filename: polars_runtime_32-1.43.2-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+        bytes: 57304599
+        sha256: 6d5a7ae004a2723ebf4427f6d6a639f30f86af4cf077075f6b35d04711154fc3
+        hash_authority: uv.lock
+        tags: cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64
+        licence: MIT
+        consumer: the compiled runtime polars 1.43.2 dispatches to; ships with polars
+      - package: pyscipopt
+        version: 6.2.1
+        filename: pyscipopt-6.2.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+        bytes: 17566755
+        sha256: faf86357d83772508c5b1925570ee7e08385fa1a736e0ee33bf0e5c421dd845f
+        hash_authority: uv.lock
+        tags: cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64
+        licence: MIT
+        consumer: absent on the target; ilpy's bundled SCIP backend
+      - package: rustworkx
+        version: 0.18.1
+        filename: rustworkx-0.18.1-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
+        bytes: 2366881
+        sha256: 1ebd2441a51c68a784df8c62dc2e6f1a9f58c0eb1c2e21fd59776e08f55c0c0b
+        hash_authority: uv.lock
+        tags: cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64
+        licence: Apache-2.0
+        consumer: absent on the target; tracksdata's in-memory graph backend
+      - package: scipy
+        version: 1.18.0
+        filename: scipy-1.18.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+        bytes: 35287115
+        sha256: 1f55797419e16e7f30cf88ffb3113ce0467f00cfe3f70d5c281730b21769bfc2
+        hash_authority: uv.lock
+        tags: cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64
+        licence: Copyright (c) 2001-2002 Enthought, Inc. 2003, SciPy Developers.
+        consumer: present at 1.16.3, pinned to the lock's 1.18.0 by decision; the official distance matching
+      - package: tracksdata
+        version: 0.1.0rc9.dev4+g7bfeaf845
+        filename: tracksdata-0.1.0rc9.dev4+g7bfeaf845-py3-none-any.whl
+        bytes: 299623
+        sha256: 3695611e747d059a0bc516e6965bc92db5ddb4ca52dee0ed49142e064fbc6757
+        hash_authority: R-0014 biohubx_built_wheel.raw_digest
+        tags: py3-none-any
+        licence: BSD-3-Clause
+        consumer: absent on the target; the official metric's graph representation and distance matching. Built by Biohub-X from the pinned commit (R-0014), not downloaded
+      - package: zarr
+        version: 3.3.0
+        filename: zarr-3.3.0-py3-none-any.whl
+        bytes: 363685
+        sha256: 323bf5366d4f909052ef6e2e03e7481a7434c3ee75d3a981eb3a71fc1ae22cef
+        hash_authority: uv.lock
+        tags: py3-none-any
+        licence: MIT
+        consumer: absent on the target; the competition volumes and GEFF stores are zarr
+
+    licences_note: >-
+      Each wheel carries its own licence file; WHEELHOUSE.json names them. scipy
+      and pyscipopt bundle further third-party notices inside their wheels.
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per

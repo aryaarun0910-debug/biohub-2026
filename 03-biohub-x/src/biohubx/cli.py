@@ -3474,6 +3474,13 @@ def package_transport(
         str,
         typer.Option("--accelerator", help="Accelerator requested on the command line as well."),
     ] = "NvidiaTeslaT4",
+    expect_dataset: Annotated[
+        str | None,
+        typer.Option(
+            "--expect-dataset",
+            help="The one dataset the kernel may attach. Defaults to the zarr wheelhouse.",
+        ),
+    ] = None,
     timeout: Annotated[int, typer.Option("--timeout", help="Seconds Kaggle may run the kernel for.")] = 2400,
     interpreter: Annotated[
         str,
@@ -3507,6 +3514,7 @@ def package_transport(
     from biohubx.packaging.kaggle import forbidden_content
     from biohubx.packaging.preflight import WHEELHOUSE_SLUG
 
+    expected_dataset = expect_dataset or WHEELHOUSE_SLUG
     root_path = repository_root()
     staging = package if package is not None else root_path / "artifacts/kaggle-package"
     manifest_path = staging / "PACKAGE_MANIFEST.json"
@@ -3576,14 +3584,17 @@ def package_transport(
         failures.append(f"the package stages forbidden content: {staged_offenders[:5]}")
 
     metadata = json.loads((staging / "kernel-metadata.json").read_text(encoding="utf-8"))
-    if metadata.get("dataset_sources") != [WHEELHOUSE_SLUG]:
-        failures.append(f"dataset sources are {metadata.get('dataset_sources')}, not the wheelhouse alone")
+    if metadata.get("dataset_sources") != [expected_dataset]:
+        failures.append(
+            f"dataset sources are {metadata.get('dataset_sources')}, "
+            f"not the expected {expected_dataset} alone"
+        )
     if metadata.get("competition_sources") != ["biohub-cell-tracking-during-development"]:
         failures.append(f"competition sources are {metadata.get('competition_sources')}")
     if metadata.get("model_sources") or metadata.get("kernel_sources"):
         failures.append("model or kernel sources are attached and none is approved")
     attached = list(metadata.get("dataset_sources", [])) + list(metadata.get("model_sources", []))
-    external_weights = sorted(name for name in attached if name != WHEELHOUSE_SLUG)
+    external_weights = sorted(name for name in attached if name != expected_dataset)
     if external_weights:
         failures.append(f"an unapproved external source is attached: {external_weights[:3]}")
     if metadata.get("enable_internet") is not False:
@@ -3679,6 +3690,360 @@ def package_transport(
     )
     _write_manifest(command, {"report": "artifacts/kaggle-transport.json", "digest": digest})
     heartbeat(command, "done", "NOT PUSHED" if not push else "pushed once")
+    typer.echo(json.dumps(payload, sort_keys=True))
+
+
+@package_app.command("metric-preflight")
+def package_metric_preflight(
+    wheelhouse: Annotated[
+        Path | None,
+        typer.Option("--wheelhouse", help="The metric wheelhouse. Defaults to artifacts/wheelhouse-metric."),
+    ] = None,
+    out: Annotated[
+        Path | None,
+        typer.Option("--out", help="Where to stage it. Defaults to artifacts/kaggle-metric-preflight."),
+    ] = None,
+    expect_published: Annotated[
+        str | None,
+        typer.Option(
+            "--expect-published", help="Refuse unless the published payload has this tree identity."
+        ),
+    ] = None,
+    root: Annotated[
+        Path | None,
+        typer.Option(
+            "--root",
+            help="Competition data root for the local baseline. BIOHUB_DATA_ROOT is the only fallback.",
+        ),
+    ] = None,
+    dataset: Annotated[
+        str | None,
+        typer.Option(
+            "--dataset",
+            help="Movie for the tiny real-data score. Defaults to the first annotated 44b6 movie.",
+        ),
+    ] = None,
+    frames: Annotated[int, typer.Option("--frames", help="Frames in the real-data window.")] = 2,
+    allow_dirty: Annotated[
+        bool,
+        typer.Option("--allow-dirty", help="Build from an uncommitted tree. Records it and is unpushable."),
+    ] = False,
+) -> None:
+    """Stage the metric preflight: five checks on the target, baseline computed here, nothing sent.
+
+    Strict imports of the whole closure, the vendored official source hashed
+    against the registry, the scorer's characterisation fixtures, behavioural
+    equivalence against this machine, and one tiny real-data score through the
+    frozen proposals of D-0041. The baseline the target must reproduce is computed
+    here first and travels inside the spec, so the kernel compares rather than
+    merely reports.
+    """
+    command = "package metric-preflight"
+    import shutil
+    import subprocess
+    import tempfile
+
+    import yaml
+
+    from biohubx.data.competition import CompetitionLayoutError, competition_root
+    from biohubx.hashing import tree_digest
+    from biohubx.packaging import prepush
+    from biohubx.packaging.audit import AuditSpec
+    from biohubx.packaging.kaggle import (
+        DEFAULT_PACKAGE_ROOT,
+        PackagingError,
+        archive_digest,
+        deterministic_archive,
+        forbidden_content,
+    )
+    from biohubx.packaging.metric_preflight import (
+        METRIC_PREFLIGHT_ID,
+        METRIC_PREFLIGHT_KERNEL,
+        METRIC_PREFLIGHT_RUNTIME_CEILING_SECONDS,
+        METRIC_WHEELHOUSE_SLUG,
+        build_metric_preflight_notebook,
+        metric_preflight_kernel_metadata,
+    )
+    from biohubx.packaging.metric_preflight_runtime import (
+        EXPECTED_ABSENT,
+        FROZEN_PROPOSALS,
+        OFFICIAL_SOURCE_FILES,
+        local_baseline,
+    )
+    from biohubx.packaging.prepush import PrePushError
+    from biohubx.packaging.wheelhouse import (
+        WheelhouseError,
+        published_relative_paths,
+        requirement_hashes,
+        stage_published_payload,
+    )
+
+    root_path = repository_root()
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root_path, capture_output=True, text=True, check=True
+    ).stdout.strip()
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain"], cwd=root_path, capture_output=True, text=True, check=True
+    ).stdout.strip()
+    if dirty and not allow_dirty:
+        heartbeat(
+            command,
+            "refused",
+            "the working tree is dirty, so the commit this package would pin does not describe "
+            "the bytes it ships; commit first, or pass --allow-dirty for an unpushable build",
+        )
+        raise typer.Exit(code=2)
+
+    house = wheelhouse if wheelhouse is not None else root_path / "artifacts/wheelhouse-metric"
+    wheels = sorted((house / "wheels").glob("*.whl")) if house.is_dir() else []
+    if not wheels:
+        heartbeat(command, "refused", f"no wheels under {house}; assemble the wheelhouse first")
+        raise typer.Exit(code=2)
+    sdists = [p.name for p in house.rglob("*") if p.suffix in {".gz", ".zip"} and p.is_file()]
+    if sdists:
+        heartbeat(command, "refused", f"the wheelhouse contains source distributions: {sdists[:3]}")
+        raise typer.Exit(code=2)
+    requirements_path = house / "requirements-offline.txt"
+    try:
+        required = requirement_hashes(requirements_path.read_text(encoding="utf-8"))
+    except (OSError, WheelhouseError) as exc:
+        heartbeat(command, "refused", f"cannot read what pip would enforce: {exc}")
+        raise typer.Exit(code=2) from exc
+    shipped_versions = {
+        name: {"version": version, "sha256": sha} for name, (version, sha) in sorted(required.items())
+    }
+
+    spec = AuditSpec(
+        audit_id=METRIC_PREFLIGHT_ID,
+        commit=commit,
+        kernel=METRIC_PREFLIGHT_KERNEL,
+        runtime_ceiling_seconds=METRIC_PREFLIGHT_RUNTIME_CEILING_SECONDS,
+    )
+    heartbeat(command, "start", f"preflight={spec.audit_id} kernel={spec.kernel} wheels={len(wheels)}")
+
+    bundle = tree_digest(house, on_file=_periodic_progress(command, "upload bundle"))
+    with tempfile.TemporaryDirectory(prefix="biohubx-published-") as scratch:
+        payload_root = Path(scratch) / "payload"
+        payload_root.mkdir()
+        stage_published_payload(house, payload_root, published_relative_paths(bundle))
+        published = tree_digest(payload_root, on_file=_periodic_progress(command, "published payload"))
+    if expect_published is not None and expect_published != published.digest.token:
+        heartbeat(
+            command,
+            "refused",
+            f"the wheelhouse publishes {published.digest.token}, not the authorised "
+            f"{expect_published}; the package would carry an identity nobody approved",
+        )
+        raise typer.Exit(code=2)
+    heartbeat(
+        command,
+        "identity",
+        f"published payload files={published.file_count} bytes={published.total_bytes} "
+        f"{published.digest.token}"
+        + (" (pinned)" if expect_published is not None else " (NOT pinned to an authorisation)"),
+    )
+
+    # The registry's digests for the vendored official source, keyed the way the
+    # runtime hashes them: relative to the biohubx package directory.
+    official = yaml.safe_load((root_path / "registry/official_source.yaml").read_text(encoding="utf-8"))
+    official_expected: dict[str, str] = {}
+    for item in official.get("sources", []) if isinstance(official, dict) else []:
+        vendored = str(item.get("vendored_path", ""))
+        relative = vendored.removeprefix("src/biohubx/")
+        if relative in OFFICIAL_SOURCE_FILES:
+            official_expected[relative] = str(item["digests"]["raw"]).removeprefix(
+                "raw_artifact_sha256:sha256:"
+            )
+    missing_digests = sorted(set(OFFICIAL_SOURCE_FILES) - set(official_expected))
+    if missing_digests:
+        heartbeat(command, "refused", f"registry/official_source.yaml pins no digest for {missing_digests}")
+        raise typer.Exit(code=2)
+
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    movie = dataset
+    if movie is None:
+        candidates = sorted(p.stem for p in (data_root / "train").glob("44b6*.geff"))
+        if not candidates:
+            heartbeat(command, "refused", "no annotated 44b6 movie under the data root to score")
+            raise typer.Exit(code=2)
+        movie = candidates[0]
+    heartbeat(command, "baseline", f"fixtures, official source, and {movie} x {frames} frames, locally")
+    try:
+        baseline = local_baseline(
+            data_root=data_root,
+            dataset_id=movie,
+            frames=frames,
+            package_dir=root_path / "src/biohubx",
+            official_expected=official_expected,
+            shipped_versions=shipped_versions,
+        )
+    except (ValueError, OSError, CompetitionLayoutError) as exc:
+        heartbeat(command, "refused", f"the local baseline could not be computed: {exc}")
+        raise typer.Exit(code=2) from exc
+    real = baseline["real_data"]
+    heartbeat(
+        command,
+        "baseline",
+        f"fixtures={baseline['fixtures_count']} digest={baseline['fixtures_digest'][:16]} "
+        f"real proposals={real['proposals']} matched={real['matched_nodes']}/{real['annotated_nodes']} "
+        f"score={real.get('score')}",
+    )
+
+    archive_bytes = deterministic_archive(root_path / "src/biohubx")
+    shipped = {
+        **spec.to_dict(),
+        "preflight_id": spec.audit_id,
+        "payload_digest": archive_digest(archive_bytes),
+        "package_root": DEFAULT_PACKAGE_ROOT,
+        "frozen_proposals": FROZEN_PROPOSALS,
+        "expected_absent": list(EXPECTED_ABSENT),
+        "wheelhouse_slug": METRIC_WHEELHOUSE_SLUG,
+        "baseline": baseline,
+    }
+    try:
+        notebook = build_metric_preflight_notebook(
+            shipped,
+            payload=archive_bytes,
+            wheelhouse_payload={
+                "tree": published.digest.token,
+                "records": [
+                    [
+                        record.kind,
+                        "-" if record.content_sha256 is None else record.content_sha256,
+                        "-" if record.size_bytes is None else str(record.size_bytes),
+                        record.relative_path,
+                    ]
+                    for record in published.records
+                ],
+            },
+        )
+        metadata = metric_preflight_kernel_metadata()
+    except PackagingError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    if metadata["enable_gpu"] or metadata["enable_internet"]:
+        heartbeat(command, "refused", "the metric preflight must be CPU only with internet disabled")
+        raise typer.Exit(code=2)
+    if metadata["dataset_sources"] != [METRIC_WHEELHOUSE_SLUG]:
+        heartbeat(
+            command, "refused", "the metric preflight must attach the metric wheelhouse and nothing else"
+        )
+        raise typer.Exit(code=2)
+
+    staging = out if out is not None else root_path / "artifacts/kaggle-metric-preflight"
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True)
+    atomic_write_text(staging / "run.ipynb", json.dumps(notebook, indent=1, sort_keys=True) + chr(10))
+    atomic_write_text(
+        staging / "kernel-metadata.json", json.dumps(metadata, indent=2, sort_keys=True) + chr(10)
+    )
+    atomic_write_text(
+        staging / "preflight-spec.json", json.dumps(shipped, indent=2, sort_keys=True) + chr(10)
+    )
+
+    offenders = forbidden_content(staging)
+    if offenders:
+        heartbeat(command, "refused", f"the preflight would ship forbidden content: {offenders[:5]}")
+        raise typer.Exit(code=2)
+    try:
+        prepush.check_required_metadata(notebook)
+        prepush.validate_notebook(notebook)
+        converted = prepush.convert_notebook(notebook)
+    except PrePushError as exc:
+        heartbeat(command, "refused", f"pre-push gate failed, nothing was sent: {exc}")
+        raise typer.Exit(code=2) from exc
+    heartbeat(command, "pre-push", f"nbformat ok, nbconvert produced {converted} bytes")
+
+    files = sorted(path for path in staging.rglob("*") if path.is_file())
+    total_bytes = sum(path.stat().st_size for path in files)
+    manifest_text = json.dumps(
+        {
+            "schema_version": 1,
+            "preflight": {**spec.to_dict(), "preflight_id": spec.audit_id},
+            "kernel_metadata": metadata,
+            "wheelhouse_validated": {
+                "path": str(house.relative_to(root_path)) if house.is_relative_to(root_path) else str(house),
+                "wheels": [path.name for path in wheels],
+                "source_distributions": [],
+            },
+            "wheelhouse_identity": {
+                "published_payload": {
+                    "tree": published.digest.token,
+                    "file_count": published.file_count,
+                    "total_bytes": published.total_bytes,
+                    "embedded_in_the_notebook": True,
+                    "verified_at_runtime_before_pip": True,
+                    "pinned_to_authorisation": expect_published is not None,
+                },
+                "upload_bundle": {
+                    "tree": bundle.digest.token,
+                    "file_count": bundle.file_count,
+                    "total_bytes": bundle.total_bytes,
+                    "embedded_in_the_notebook": False,
+                    "verified_at_runtime_before_pip": False,
+                    "why_not": "Kaggle consumes dataset-metadata.json, so no kernel mounts this tree",
+                },
+            },
+            "payload": {"digest": shipped["payload_digest"], "bytes": len(archive_bytes)},
+            "baseline": {
+                "fixtures_digest": baseline["fixtures_digest"],
+                "fixtures_count": baseline["fixtures_count"],
+                "real_data": real,
+                "official_source": official_expected,
+            },
+            "files": {
+                path.relative_to(staging).as_posix(): digest_file(path, DigestKind.RAW_ARTIFACT).token
+                for path in files
+            },
+            "file_count": len(files),
+            "total_bytes": total_bytes,
+            "contains_competition_bytes": False,
+            "contains_external_weights": False,
+            "repository_clean_at_build": not dirty,
+            "pushable": not dirty,
+        },
+        indent=2,
+        sort_keys=True,
+    )
+    atomic_write_text(staging / "PACKAGE_MANIFEST.json", manifest_text + chr(10))
+    package_digest = digest_file(staging / "PACKAGE_MANIFEST.json", DigestKind.CANONICAL_TEXT)
+
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "preflight": {**spec.to_dict(), "preflight_id": spec.audit_id},
+        "package": {
+            "path": str(staging.relative_to(root_path)),
+            "manifest_digest": package_digest.token,
+            "file_count": len(files) + 1,
+            "total_bytes": total_bytes,
+            "pushed": False,
+        },
+        "kernel_metadata": metadata,
+        "nbconvert_bytes": converted,
+        "wheelhouse_identity": {
+            "published_payload": published.digest.token,
+            "published_payload_pinned_to_authorisation": expect_published is not None,
+            "upload_bundle": bundle.digest.token,
+        },
+        "baseline": {
+            "fixtures_digest": baseline["fixtures_digest"],
+            "real_data": real,
+            "local_environment": baseline["local_environment"],
+        },
+    }
+    atomic_write_text(
+        root_path / "artifacts/kaggle-metric-preflight.json",
+        json.dumps(payload, indent=2, sort_keys=True) + chr(10),
+    )
+    _write_manifest(command, {"report": "artifacts/kaggle-metric-preflight.json", "preflight": spec.audit_id})
+    heartbeat(command, "staged", f"files={len(files) + 1} digest={package_digest.token[:52]}")
+    heartbeat(command, "done", "NOT PUSHED; the mounted tree is verified before pip runs")
     typer.echo(json.dumps(payload, sort_keys=True))
 
 
@@ -3807,6 +4172,16 @@ def package_wheelhouse(
         Path | None,
         typer.Option("--out", help="Report path. Defaults to artifacts/wheelhouse-identity.json."),
     ] = None,
+    built_wheel: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--built-wheel",
+            help=(
+                "FILENAME=sha256:HEX for a wheel Biohub-X built itself; the hash comes from its "
+                "registry entry, not from uv.lock. Repeatable."
+            ),
+        ),
+    ] = None,
 ) -> None:
     """Record what the wheelhouse is, as the two different trees it actually is.
 
@@ -3819,6 +4194,12 @@ def package_wheelhouse(
 
     With ``--remote``, a downloaded copy of the published dataset is compared with
     the published payload by name, size and content, and any difference refuses.
+
+    uv.lock is the authority for every wheel except one kind: a wheel Biohub-X
+    built from a git source the lock pins without an artifact (R-0014). Such a
+    wheel is accepted only when named with ``--built-wheel`` and the digest its
+    registry entry records, so the authority is stated by the operator and
+    recorded in the report as ``biohubx_build`` rather than inferred.
     """
     command = "package wheelhouse"
     import tempfile
@@ -3891,10 +4272,20 @@ def package_wheelhouse(
         f"files={published.file_count} bytes={published.total_bytes} {published.digest.token}",
     )
 
+    built: dict[str, str] = {}
+    for item in built_wheel or []:
+        filename, separator, stated_hash = item.partition("=")
+        if not separator or not stated_hash.startswith("sha256:") or len(stated_hash) != 71:
+            heartbeat(command, "refused", f"--built-wheel takes FILENAME=sha256:HEX, got {item!r}")
+            raise typer.Exit(code=2)
+        if filename not in {p.name for p in wheel_paths}:
+            heartbeat(command, "refused", f"--built-wheel names {filename}, which is not staged")
+            raise typer.Exit(code=2)
+        built[filename] = stated_hash.removeprefix("sha256:")
     try:
         locked = locked_wheels(
             (root_path / "uv.lock").read_text(encoding="utf-8"),
-            [item.name for item in wheel_paths],
+            [item.name for item in wheel_paths if item.name not in built],
         )
         required = requirement_hashes(requirements_path.read_text(encoding="utf-8"))
     except WheelhouseError as exc:
@@ -3905,8 +4296,43 @@ def package_wheelhouse(
     wheel_rows: list[dict[str, object]] = []
     wheel_failures: list[str] = []
     for wheel_path in wheel_paths:
-        entry = locked[wheel_path.name]
         record = staged_content[f"wheels/{wheel_path.name}"]
+        if wheel_path.name in built:
+            # A built wheel: the bytes on disk must be the registered build, and
+            # requirements-offline.txt must enforce that same hash, or pip would
+            # accept a wheel the registry never described.
+            stem_package, _, stem_version = (
+                wheel_path.name.split("-", 2)[0],
+                "",
+                wheel_path.name.split("-", 2)[1],
+            )
+            canonical = canonical_package_name(stem_package)
+            stated = required.get(canonical)
+            matches_build = record.content_sha256 == built[wheel_path.name]
+            matches_requirements = stated is not None and stated[1] == built[wheel_path.name]
+            if not matches_build:
+                wheel_failures.append(f"{wheel_path.name} does not match the registered build digest")
+            if stated is None:
+                wheel_failures.append(f"{canonical} is staged but {requirements_path.name} omits it")
+            elif not matches_requirements:
+                wheel_failures.append(
+                    f"{canonical} carries a requirements hash that is not the registered build"
+                )
+            wheel_rows.append(
+                {
+                    "package": canonical,
+                    "version": stem_version,
+                    "filename": wheel_path.name,
+                    "size_bytes": record.size_bytes,
+                    "sha256": record.content_sha256,
+                    "hash_authority": "biohubx_build",
+                    "matches_uv_lock": False,
+                    "matches_registered_build": matches_build,
+                    "matches_requirements_offline": matches_requirements,
+                }
+            )
+            continue
+        entry = locked[wheel_path.name]
         canonical = canonical_package_name(entry.package)
         stated = required.get(canonical)
         # The hash is the authority; the size is compared only where uv.lock
@@ -3928,11 +4354,15 @@ def package_wheelhouse(
                 "filename": entry.filename,
                 "size_bytes": record.size_bytes,
                 "sha256": record.content_sha256,
+                "hash_authority": "uv.lock",
                 "matches_uv_lock": matches_lock,
                 "matches_requirements_offline": matches_requirements,
             }
         )
-    for canonical in required.keys() - {canonical_package_name(item.package) for item in locked.values()}:
+    staged_packages = {canonical_package_name(item.package) for item in locked.values()} | {
+        canonical_package_name(name.split("-", 1)[0]) for name in built
+    }
+    for canonical in required.keys() - staged_packages:
         wheel_failures.append(f"{canonical} is required offline but no wheel is staged for it")
     if wheel_failures:
         for failure in wheel_failures:
