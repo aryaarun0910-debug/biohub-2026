@@ -1,0 +1,10 @@
+# biohub-research: the Python side of the profile. semantic-scholar-mcp pinned from
+# ledger RL-0032; mcp (its dependency) doubles as the client used to validate all
+# three servers of the profile over stdio. GitHub MCP is a Go binary and Playwright
+# MCP is npm; neither is here.
+semantic-scholar-mcp==0.4.0
+
+# semantic-scholar-mcp 0.4.0 imports mcp.server.fastmcp, removed in mcp 2.x; the
+# lock resolved mcp to 2.1.1 and the server could not start. Held to the 1.x line
+# the server was written against.
+mcp<2

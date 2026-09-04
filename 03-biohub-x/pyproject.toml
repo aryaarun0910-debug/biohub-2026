@@ -105,7 +105,9 @@ ignore = ["ANN401"]
 # and mypy does not see them at all. E402 because the validation script must set
 # the Qt platform and sys.path before napari is imported; ANN because the objects
 # they annotate would be FastMCP and napari types this environment cannot import.
-"tools/workstation/**" = ["E402", "ANN001", "ANN201"]
+# E501 too: manifests and session records carry long human-readable capability
+# and consumer strings that read worse split than long. The package keeps 110.
+"tools/workstation/**" = ["E402", "ANN001", "ANN201", "E501"]
 
 [tool.mypy]
 python_version = "3.12"

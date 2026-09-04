@@ -24,6 +24,7 @@ mounted read-only by the tools that open them.
 | Tool records (source, release, licence, digest, capabilities, consumer, status) | `tools/workstation/manifest.yaml` | yes |
 | MCP profiles (server definitions with path placeholders) | `tools/workstation/profiles/*.json` | yes |
 | The active profile | `.mcp.json` at the repo root, written by `tools/workstation/activate.py` | no, ignored |
+| Compute sandbox image | `biohubx-compute:<lock digest>` built from `tools/workstation/sandbox/Dockerfile` and the linux lock | Dockerfile yes, image no |
 | Source evidence for every pin | `registry/research-ledger.yaml`, campaign WS-01 | yes |
 | Material tool sessions | `artifacts/tool-sessions/<id>.json` | manifest only |
 
@@ -107,8 +108,13 @@ an existing CPU authorisation or GPU envelope. repl-mcp is not installed.
    viewer is not headless: a hidden napari canvas never renders, so the window
    is shown and the capture is guarded on the number of colours drawn.
 2. Research: GitHub MCP binary by digest, Playwright MCP under a local prefix,
-   Semantic Scholar MCP in its own environment.
-3. Compute: Jupyter MCP Server in its own environment, disposable kernel spec.
+   Semantic Scholar MCP in its own environment. Done; `artifacts/tool-sessions/WS-RESEARCH-01.json`:
+   19 GitHub tools with no mutating name, 24 Playwright tools, 33 Semantic Scholar
+   tools, all from pinned installs. The Semantic Scholar server needs mcp 1.x.
+3. Compute: jupyter-mcp-server on the host over stdio, Jupyter itself in the
+   Docker sandbox of `tools/workstation/sandbox/` (`launch_jupyter_mcp.py`).
+   Done; `WS-COMPUTE-01.json`: reads /data, a write into /data is refused,
+   outbound traffic is blocked, scratch is the one writable mount, biohubx imports.
 4. Crosscheck: recorded, not installed.
 
 ## What a material tool session preserves

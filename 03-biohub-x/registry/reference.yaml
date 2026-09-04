@@ -2405,6 +2405,138 @@ references:
         falsifier and is measured by a preregistered command before it can be a
         finding.
 
+  - id: R-0019
+    status: measured_environment
+    title: The biohub-research workstation profile, installed by digest and driven over stdio
+    why: >-
+      [[D-0043]]'s second profile. A claim that depends on an exact upstream
+      commit, issue, release, licence or dynamically rendered page needs a
+      read-only route to it; this records that the three servers start from
+      pinned installations and what each exposes.
+    installed:
+      github_mcp_server:
+        release: v1.12.0, commit 9205304fedf10540c33ae41fcf6352fa97dcc9be
+        zip_sha256_release_and_checksums: bc8782deda12dc1f36a182d0205bb4f11b05aee0eec7e2c8c109bb8f622fb4b4
+        binary_sha256: 75b7982916f802e25860e2a8988cecfb29d70e76a59d722e0ac0d306a4cbda30
+        binary_bytes: 26078720
+        launch: always stdio --read-only with toolsets repos,issues; the token comes from gh auth token at launch and is never written
+        ledger: RL-0031, RL-0038, RL-0042, RL-0043, RL-0046, RL-0047
+      playwright_mcp:
+        version: 0.0.80 with playwright-core 1.63.0-alpha-2026-08-31
+        package_lock_sha256: f6804807cb74155aa91e170ce051080a02bea4aa015470a57b0d2963ed9c4934
+        browsers: chromium r1243 153.0.8010.12; chromium-headless-shell r1243 153.0.8010.12, under a local PLAYWRIGHT_BROWSERS_PATH
+        ledger: RL-0030
+      semantic_scholar_mcp:
+        version: 0.4.0, community server, MIT
+        mcp_sdk: held to mcp 1.x; 0.4.0 imports mcp.server.fastmcp, which mcp 2 removed, and the first lock resolved 2.1.1 and would not start
+        ledger: RL-0032
+      python_environment: biohub-research/py, tools/workstation/requirements/biohub-research.lock.txt
+
+    validation:
+      session: artifacts/tool-sessions/WS-RESEARCH-01.json
+      github: 19 tools, server github-mcp-server 1.12.0, protocol 2025-11-25; mutating names exposed []
+      github_read_call: get_file_contents on github/github-mcp-server LICENSE, is_error False
+      playwright: 24 tools, Playwright 1.63.0-alpha-2026-08-31; navigated to about:blank headless
+      semantic_scholar: 33 tools listed, not queried; a query is an acquisition and goes through the ledger
+      overall_ok: True
+
+    not_evidence: >-
+      Nothing retrieved through these servers has standing until it is ledgered
+      with URL, time, digest and claim location and then measured by a
+      Biohub-X experiment.
+
+  - id: R-0020
+    status: measured_environment
+    title: The biohub-compute sandbox, a Jupyter server that can read the competition root and reach nothing else
+    why: >-
+      [[D-0043]]'s third profile. Multi-call exploration needs a kernel that
+      survives between calls; the authorisation requires no credentials, a
+      read-only competition root, one scratch output and no hosted service.
+      Those are properties a launcher can assert or a probe can measure; this
+      is the measurement.
+    design:
+      host_side: jupyter-mcp-server 2.1.4 in biohub-compute/py, stdio to Claude Code, HTTP to 127.0.0.1 only
+      image: biohubx-compute:15b696d6f181 from base python@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea, built by tools/workstation/sandbox/Dockerfile
+      lock: tools/workstation/requirements/biohub-compute-sandbox.lock.txt, sha256 15b696d6f181efec025c93acd2906ee550365de16b993abb36de29fe161a668a, compiled for linux/cp312 against the repository's uv.lock as constraints
+      network: docker internal network; the Jupyter container has no route out
+      ingress: one forwarder container publishing 127.0.0.1:18888 into the internal network
+      mounts: /data read-only competition root; /repo/src read-only repository source; /scratch the one read-write directory
+      root_filesystem: read-only, with tmpfs for the temporary directory and the sandbox user's home
+      user: 1000:1000, all capabilities dropped, no-new-privileges
+      limits: memory 8g, cpus 4, pids 512
+      secrets: one random token per launch, in process environments only
+      tracksdata: the Biohub-X build of R-0014, installed into the image with its hash
+
+    validation:
+      session: artifacts/tool-sessions/WS-COMPUTE-01.json
+      server: Jupyter MCP Server 2.1.4, 18 tools, executor execute_code
+      read_data_root: True
+      write_into_data_root_refused: True
+      outbound_network_blocked: True
+      scratch_writable: True
+      biohubx_imports_and_reads_a_movie: True
+      overall_ok: True
+      note: >-
+        Two defects found on the way and fixed before the record: the tmpfs home
+        was root-owned so Jupyter could not create its runtime directory, and a
+        proxy container leaked from that failed start kept the port, so the
+        next launch failed for an unrelated-looking reason. The launcher now
+        tears down on a failed start and surfaces docker's stderr.
+
+    not_evidence: >-
+      A notebook in this sandbox is an instrument. Any result must be rerun
+      through a preregistered biohubx command before it can enter findings.
+
+  - id: R-0021
+    status: measured_environment
+    title: The reference detector measured by biohubx model inspect on one registered window, CPU
+    why: >-
+      Stage 0 of the training funnel needs a baseline reading of the only
+      detector architecture the repository has, so the learned-proposal arms
+      are compared against numbers rather than impressions. Instrument
+      reading, integration_only; nothing here is a finding.
+    identity:
+      config: configs\e03-clean-folds.yaml, section E03, digest canonical_text_sha256:sha256/v1:c31428ecad168ed5553965fad500ea75326491220c1b39abd5510b073ffc7117
+      spec: {"downsample": [1, 4, 4], "pos_feat_dim": 32, "unet_layers": [32, 64, 128], "unet_out_channels": 32, "window_size": 2}
+      initialisation: deterministic random, seed 0
+      report: artifacts/model-inspect.json
+    input:
+      window: 44b6_ddf577ad frames 0..+4, crops z [0, 45] y [96, 352] x [96, 352]
+      grid: "[4, 45, 40, 40] at [1.625, 1.625, 1.625] micrometres, downsample [1, 4, 4]"
+      positives_on_grid: 13
+      class_prior: 5.2238e-03
+    measured:
+      parameters: 2076706 total, 2076706 trainable, 1290 buffers
+      by_module: {"detect_head": 33, "transformer": 580353, "unet": 1496320}
+      leaf_modules: 42
+      logits_shape: [1, 4, 1, 45, 40, 40]
+      spatial_factors: "[1.0, 1.0, 1.0], output spacing [1.625, 1.625, 1.625] micrometres, temporal factor 1.0"
+      receptive_field: extent [45, 40, 40] voxels, clipped by the input on every axis [True, True, True]; the true field exceeds a 45 x 40 x 40 grid
+      graph: torch.export, captured True, 260 nodes
+      activations: 186476800 elements, 745907200 bytes; largest unet.upsamples.1 at 18022400 elements
+      forward_seconds_median: 1.349
+      forward_backward_seconds_median: 6.312
+      optimizer_step_seconds_median: 0.0011
+      cpu_peak_rss_bytes: 1536040960
+      top_operators: [["aten::convolution_backward", 3522.21], ["aten::mkldnn_convolution", 1467.516], ["aten::upsample_trilinear3d", 366.995]]
+      output_logits: min -0.0179 max 0.1145; fraction of sigmoid above 0.5 0.9950 at random initialisation
+      gradient_norm_total: 1.3258e+00
+      zero_gradient_blocks: ['transformer']
+      frame_probes: [0.1191, 0.1191, 0.1182, 0.1202]
+      temporal: reversed order changes the output by 7.73e-07, freezing the neighbours by 0.0603
+      determinism: {"max_abs_difference_after_reload": 0.0, "output_identical_after_reload": true, "output_identical_between_runs": true, "strict_reload_ok": true}
+      extractor: 84 proposals at threshold quantile 0.999, node ratio -0.9442, match fraction 0.0, oracle None
+    readings: >-
+      Three things worth carrying into the family design. The transformer block
+      (580353 of 2076706 parameters) receives no gradient on the
+      detection path, so any arm that trains this architecture for proposals
+      carries it as dead weight. The output is invariant to frame order to
+      floating-point precision while depending on neighbouring frames, so the
+      temporal attention is symmetric in time: it cannot tell a cell arriving
+      from one leaving. And the empirical receptive field exceeds a
+      45 x 40 x 40 grid, so a crop that small trains every output voxel on
+      truncated context.
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per

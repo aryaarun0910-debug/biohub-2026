@@ -61,6 +61,15 @@ ABSOLUTE_PATH_ALLOWLIST = frozenset(
         # host. This entry narrows F-0001's claim by exactly that file, and the
         # detector still fires on any host path that ends up there.
         "src/biohubx/research/sandbox.py",
+        # The compute-profile launcher names the same kind of path: mounts and tmpfs
+        # inside the Jupyter container it starts, and probe snippets that run there.
+        # Nothing in it is a host location; the host paths it uses are derived from
+        # __file__ and the environment at run time. Same narrowing of F-0001.
+        "tools/workstation/launch_jupyter_mcp.py",
+        # The sandbox image and its forwarder name paths inside the container they
+        # define. Same reasoning, same narrowing.
+        "tools/workstation/sandbox/Dockerfile",
+        "tools/workstation/sandbox/proxy.py",
     }
 )
 

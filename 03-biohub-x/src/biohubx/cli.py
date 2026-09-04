@@ -28,7 +28,7 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, cast
 
 import typer
 import yaml
@@ -63,6 +63,9 @@ infer_app = typer.Typer(name="infer", help="Emit a lineage graph.", no_args_is_h
 train_app = typer.Typer(name="train", help="Train a Biohub-X model.", no_args_is_help=True)
 package_app = typer.Typer(name="package", help="Build a runnable package.", no_args_is_help=True)
 research_app = typer.Typer(name="research", help="Ledger public research intake.", no_args_is_help=True)
+model_app = typer.Typer(
+    name="model", help="Measure a model architecture before it is trained.", no_args_is_help=True
+)
 app.add_typer(artifacts_app)
 app.add_typer(official_app)
 app.add_typer(evaluate_app)
@@ -71,6 +74,7 @@ app.add_typer(infer_app)
 app.add_typer(train_app)
 app.add_typer(package_app)
 app.add_typer(research_app)
+app.add_typer(model_app)
 
 
 def repository_root() -> Path:
@@ -1859,6 +1863,170 @@ def evaluate_oracle_ceiling(
     _write_manifest(command, {"report": str(report_path), "experiment": "E06-ORACLE"})
     heartbeat(command, "done", f"both embryos support 0.950: {payload['both_support_0_950']}")
     typer.echo(json.dumps({k: v for k, v in payload.items() if k != "unscored_windows"}, sort_keys=True))
+
+
+@evaluate_app.command("miss-atlas")
+def evaluate_miss_atlas(
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    embryo: Annotated[str, typer.Option("--embryo", help="Embryo prefix whose misses are audited.")] = "6bba",
+    frames: Annotated[int, typer.Option("--frames", help="Frames per movie window, as E06-ORACLE.")] = 10,
+    radii: Annotated[str, typer.Option("--radii", help="DoG bank, um.")] = "2.0,3.0",
+    response_quantile: Annotated[float, typer.Option("--response-quantile")] = 0.95,
+    suppression_radius: Annotated[float, typer.Option("--suppression-radius")] = 4.0,
+    per_scale_union: Annotated[
+        bool,
+        typer.Option("--per-scale-union", help="The A2 source of F-0035: strict peaks per scale, unioned."),
+    ] = True,
+    local_maxima: Annotated[
+        bool, typer.Option("--local-maxima", help="Strict peaks on the fused response.")
+    ] = True,
+    max_movies: Annotated[
+        int, typer.Option("--max-movies", help="Cap movies. 0 uses every annotated movie.")
+    ] = 0,
+    out: Annotated[
+        Path | None,
+        typer.Option("--out", help="Report path. Defaults to artifacts/miss-atlas-<embryo>.json."),
+    ] = None,
+) -> None:
+    """Describe and classify every annotated cell the proposal source failed to reach.
+
+    Same windows as E06-ORACLE, so the misses are the ones F-0033 and F-0035
+    counted. For each: physical position, intensity percentile, per-scale DoG
+    response, distance and vector to the nearest proposal, boundary distance,
+    neighbour distances and density, whether the nearest proposal already
+    serves another cell, presence and matching in the neighbouring frames, and
+    whether a strict local maximum the quantile discarded lies within the
+    official radius. Then one ordered classification. The atlas motivates arms;
+    it is not a finding.
+    """
+    command = "evaluate miss-atlas"
+    from biohubx.data.competition import (
+        CompetitionLayoutError,
+        WindowSelection,
+        competition_root,
+        load_ground_truth,
+        load_window,
+    )
+    from biohubx.evaluation.miss_atlas import CLASSES, Thresholds, audit_window, representative, summarise
+    from biohubx.proposals import dog
+
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    movies = sorted(path.stem for path in (data_root / "train").glob(f"{embryo}*.geff"))
+    if not movies:
+        heartbeat(command, "refused", f"no annotated {embryo} movie under {data_root / 'train'}")
+        raise typer.Exit(code=2)
+    if max_movies:
+        movies = movies[:max_movies]
+    bank = tuple(float(item) for item in radii.split(","))
+    thresholds = Thresholds()
+    source = {
+        "source": "biohubx.proposals.dog",
+        "local_maxima_only": local_maxima,
+        "per_scale_union": per_scale_union,
+        "radii_um": list(bank),
+        "response_quantile": response_quantile,
+        "suppression_radius_um": suppression_radius,
+        "refine_centroids": False,
+        "truncation": "none",
+        "frames_per_movie": frames,
+    }
+    heartbeat(command, "start", f"{embryo}={len(movies)} source={json.dumps(source, sort_keys=True)}")
+
+    started = time.monotonic()
+    records = []
+    annotated_total = 0
+    per_movie: list[dict[str, object]] = []
+    for index, dataset_id in enumerate(movies):
+        truth = load_ground_truth(data_root, dataset_id)
+        annotated_frames = sorted({node.frame for node in truth.lineage.nodes})
+        if not annotated_frames:
+            continue
+        first = min(annotated_frames[0], max(0, truth.frames - frames))
+        depth, height, width = _open_volume(data_root / "train" / f"{dataset_id}.zarr").shape[1:]
+        try:
+            window = load_window(
+                data_root,
+                WindowSelection(dataset_id, first, frames, 0, depth, 0, height, 0, width),
+                split="train",
+            )
+        except ValueError as exc:
+            heartbeat(command, "skip", f"{dataset_id}: {exc}")
+            continue
+        if not window.annotated.nodes:
+            continue
+        instances = dog.detect_instances(
+            window.volume,
+            dataset=window.annotated.dataset,
+            radii_um=bank,
+            response_quantile=response_quantile,
+            suppression_radius_um=suppression_radius,
+            local_maxima_only=local_maxima,
+            per_scale_union=per_scale_union,
+        )
+        found = audit_window(
+            dataset_id=dataset_id,
+            embryo=embryo,
+            volume=window.volume,
+            annotated=window.annotated,
+            instances=instances,
+            first_frame=first,
+            radii_um=bank,
+            response_quantile=response_quantile,
+            thresholds=thresholds,
+        )
+        nodes_in_window = sum(1 for n in window.annotated.nodes if first <= n.frame < first + frames)
+        annotated_total += nodes_in_window
+        records.extend(found)
+        per_movie.append(
+            {
+                "dataset": dataset_id,
+                "first_frame": first,
+                "annotated_nodes": nodes_in_window,
+                "proposals": len(instances.instances),
+                "misses": len(found),
+                "classes": {
+                    c: sum(1 for r in found if r.primary_class == c)
+                    for c in CLASSES
+                    if any(r.primary_class == c for r in found)
+                },
+            }
+        )
+        if (index + 1) % 16 == 0:
+            heartbeat(command, "audited", f"{index + 1}/{len(movies)} misses={len(records)}")
+
+    summary = summarise(records, annotated_total)
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "role": "miss atlas; motivates arms, is not a finding until a preregistered probe reproduces it",
+        "embryo": embryo,
+        "source": source,
+        "thresholds": thresholds.to_dict(),
+        "class_order": list(CLASSES),
+        "summary": summary,
+        "per_movie": per_movie,
+        "representatives": representative(records),
+        "records": [r.to_dict() for r in records],
+        "runtime_seconds": round(time.monotonic() - started, 3),
+    }
+    report_path = out if out is not None else repository_root() / f"artifacts/miss-atlas-{embryo}.json"
+    atomic_write_text(report_path, json.dumps(payload, indent=2, sort_keys=True, default=str) + chr(10))
+    _write_manifest(command, {"report": str(report_path), "embryo": embryo})
+    heartbeat(command, "summary", json.dumps(summary["primary_class_counts"], sort_keys=True))
+    heartbeat(
+        command,
+        "done",
+        f"misses={summary['misses']} of {annotated_total} annotated ({summary['miss_fraction']}) "
+        f"report={report_path}",
+    )
+    typer.echo(json.dumps({"report": str(report_path), "summary": summary}, sort_keys=True))
 
 
 @evaluate_app.command("proposals")
@@ -4817,3 +4985,358 @@ def research_sandbox(
         heartbeat(name, "done", f"FAILED, record at {report_path}")
         raise typer.Exit(code=1)
     heartbeat(name, "done", f"record at {report_path}")
+
+
+@model_app.command("inspect")
+def model_inspect(
+    config: Annotated[
+        Path | None,
+        typer.Option(
+            "--config",
+            help="Experiment config carrying the model block. Defaults to configs/e03-clean-folds.yaml.",
+        ),
+    ] = None,
+    section: Annotated[str, typer.Option("--section", help="Config section holding `model`.")] = "E03",
+    checkpoint: Annotated[
+        Path | None, typer.Option("--checkpoint", help="Optional state_dict to load strictly and measure.")
+    ] = None,
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    dataset: Annotated[
+        str | None,
+        typer.Option(
+            "--dataset",
+            help="Registered movie for the representative input. Defaults to the first annotated 44b6 movie.",
+        ),
+    ] = None,
+    first_frame: Annotated[int, typer.Option("--first-frame")] = 0,
+    frames: Annotated[int, typer.Option("--frames", help="Frames in the representative window.")] = 4,
+    crop_z: Annotated[str, typer.Option("--crop-z", help="Half-open voxel range start:stop.")] = "0:32",
+    crop_y: Annotated[str, typer.Option("--crop-y", help="Half-open voxel range start:stop.")] = "128:256",
+    crop_x: Annotated[str, typer.Option("--crop-x", help="Half-open voxel range start:stop.")] = "128:256",
+    device: Annotated[str, typer.Option("--device", help="cpu or cuda.")] = "cpu",
+    precision: Annotated[str, typer.Option("--precision", help="fp32, bf16 or fp16 (autocast).")] = "fp32",
+    seed: Annotated[
+        int, typer.Option("--seed", help="Deterministic initialisation when no checkpoint is given.")
+    ] = 0,
+    pos_feat_dim: Annotated[
+        int, typer.Option("--pos-feat-dim", help="Reference spec field the config omits.")
+    ] = 32,
+    peak_quantile: Annotated[
+        float, typer.Option("--peak-quantile", help="Heatmap quantile used as the extractor threshold.")
+    ] = 0.999,
+    out: Annotated[
+        Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/model-inspect.json.")
+    ] = None,
+) -> None:
+    """Measure a detector: identity, coverage, census, shapes, spacing, receptive field, cost, behaviour.
+
+    Stage 0 of the training funnel. Every number here is an instrument reading
+    about an architecture on one registered input; none is a finding. With the
+    heatmap extractor attached, the output is also turned into proposals and the
+    oracle ceiling over them is scored through the pinned official path, which
+    is what tells a design whether it can even carry the metric.
+    """
+    command = "model inspect"
+    import time
+
+    import numpy as np
+    import torch
+
+    from biohubx.contracts.coordinates import OFFICIAL_VOXEL_SCALE
+    from biohubx.data.competition import (
+        CompetitionLayoutError,
+        WindowSelection,
+        competition_root,
+        load_window,
+    )
+    from biohubx.evaluation.official_metric import EstimatedTotalNodes, metric_row, summarise_fold
+    from biohubx.evaluation.oracle import oracle_graph
+    from biohubx.proposals.peaks import HeatmapProposalError, instances_from_heatmap
+    from biohubx.reference.architecture import ReferenceEdgeModel, ReferenceSpec
+    from biohubx.training import inspect as measure
+    from biohubx.training.targets import (
+        PriorError,
+        TargetConstructionError,
+        class_prior_from_estimate,
+        positive_mask,
+        positive_unlabelled_loss,
+    )
+
+    root_path = repository_root()
+    config_path = config if config is not None else root_path / "configs/e03-clean-folds.yaml"
+    try:
+        document = yaml.safe_load(config_path.read_text(encoding="utf-8"))[section]
+        model_block = document["model"]
+        downsample = tuple(int(d) for d in model_block["downsample"])
+        spec = ReferenceSpec(
+            unet_out_channels=int(model_block["unet_out_channels"]),
+            unet_layers=tuple(int(layer) for layer in model_block["unet_layers"]),
+            pos_feat_dim=pos_feat_dim,
+            window_size=int(model_block["window_size"]),
+            downsample=downsample,
+        )
+    except (OSError, KeyError, TypeError, ValueError) as exc:
+        heartbeat(command, "refused", f"cannot read a model block from {config_path} [{section}]: {exc}")
+        raise typer.Exit(code=2) from exc
+    config_digest = digest_file(config_path, DigestKind.CANONICAL_TEXT).token
+
+    try:
+        torch_device = torch.device(device)
+        dtype = measure.precision_dtype(precision)
+    except (RuntimeError, measure.InspectError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    if torch_device.type == "cuda" and not torch.cuda.is_available():
+        heartbeat(command, "refused", "cuda was requested and is not available")
+        raise typer.Exit(code=2)
+
+    def build() -> torch.nn.Module:
+        torch.manual_seed(seed)
+        return ReferenceEdgeModel(spec)
+
+    model = build().to(torch_device)
+    coverage: dict[str, Any] | None = None
+    checkpoint_digest: str | None = None
+    if checkpoint is not None:
+        state = torch.load(checkpoint, map_location="cpu", weights_only=True)
+        checkpoint_digest = digest_file(checkpoint, DigestKind.RAW_ARTIFACT).token
+        coverage = measure.state_dict_coverage(model, state)
+        heartbeat(
+            command,
+            "coverage",
+            f"strict_ok={coverage['strict_ok']} missing={len(coverage['missing_in_checkpoint'])} "
+            f"unexpected={len(coverage['unexpected_in_checkpoint'])}",
+        )
+        if not coverage["strict_ok"]:
+            heartbeat(
+                command,
+                "refused",
+                "the checkpoint does not cover the model strictly; nothing below would describe it",
+            )
+            raise typer.Exit(code=2)
+        model.load_state_dict(state, strict=True)
+
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    movie = dataset
+    if movie is None:
+        candidates = sorted(p.stem for p in (data_root / "train").glob("44b6*.geff"))
+        if not candidates:
+            heartbeat(command, "refused", "no annotated 44b6 movie under the data root")
+            raise typer.Exit(code=2)
+        movie = candidates[0]
+
+    def span(text: str, name: str) -> tuple[int, int]:
+        try:
+            start, stop = (int(part) for part in text.split(":"))
+        except ValueError as exc:
+            heartbeat(command, "refused", f"{name} must be start:stop, got {text!r}")
+            raise typer.Exit(code=2) from exc
+        return start, stop
+
+    z0, z1 = span(crop_z, "--crop-z")
+    y0, y1 = span(crop_y, "--crop-y")
+    x0, x1 = span(crop_x, "--crop-x")
+    selection = WindowSelection(movie, first_frame, frames, z0, z1, y0, y1, x0, x1)
+    try:
+        window = load_window(data_root, selection, split="train")
+    except (CompetitionLayoutError, ValueError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    dz, dy, dx = downsample
+    grid_np = np.ascontiguousarray(window.volume[:, ::dz, ::dy, ::dx]).astype(np.float32)
+    grid = torch.from_numpy(grid_np).unsqueeze(0).to(torch_device)
+    grid_spacing = (
+        OFFICIAL_VOXEL_SCALE.z_um * dz,
+        OFFICIAL_VOXEL_SCALE.y_um * dy,
+        OFFICIAL_VOXEL_SCALE.x_um * dx,
+    )
+    try:
+        positives, placed = positive_mask(tuple(grid_np.shape), window.annotated, downsample=downsample)
+        prior = class_prior_from_estimate(window.window_estimated_total_nodes, int(np.prod(grid_np.shape)))
+    except (TargetConstructionError, PriorError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    positives = positives.to(torch_device)
+    heartbeat(
+        command,
+        "start",
+        f"{movie} frames={frames} grid={tuple(grid_np.shape)} spacing_um={grid_spacing} "
+        f"positives={placed} prior={prior:.3e} device={torch_device} precision={precision}",
+    )
+
+    def forward(m: torch.nn.Module, x: torch.Tensor) -> torch.Tensor:
+        # The analyzer hands back a plain nn.Module; the detection path lives on the
+        # reference class, and the cast says so instead of letting __getattr__ guess.
+        detector = cast(ReferenceEdgeModel, m)
+        if dtype is torch.float32:
+            return detector.detect(x)[1]
+        with torch.autocast(device_type=torch_device.type, dtype=dtype):
+            return detector.detect(x)[1].float()
+
+    def loss_fn(logits: torch.Tensor) -> torch.Tensor:
+        return positive_unlabelled_loss(logits[0, :, 0], positives, prior=prior)[0]
+
+    started = time.monotonic()
+    report: dict[str, object] = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "consumer": "the learned-proposal experiment family; Stage 0 of the training funnel",
+        "identity": {
+            "config": str(config_path.relative_to(root_path))
+            if config_path.is_relative_to(root_path)
+            else str(config_path),
+            "section": section,
+            "config_digest": config_digest,
+            "spec": spec.to_dict(),
+            "checkpoint": None if checkpoint is None else str(checkpoint),
+            "checkpoint_digest": checkpoint_digest,
+            "initialisation": "checkpoint"
+            if checkpoint is not None
+            else f"deterministic random, seed {seed}",
+        },
+        "input": {
+            "window": window.to_dict(),
+            "axes": "(B, W, Z, Y, X); one intensity channel, added inside the model",
+            "grid_shape": list(grid_np.shape),
+            "dtype": str(grid.dtype).removeprefix("torch."),
+            "grid_spacing_um_zyx": list(grid_spacing),
+            "downsample_from_voxels": list(downsample),
+            "positives_on_grid": placed,
+            "class_prior": prior,
+        },
+        "execution": {"device": str(torch_device), "precision": precision, **measure.environment()},
+        "coverage": coverage,
+    }
+    census = measure.parameter_census(model)
+    report["census"] = census
+    heartbeat(
+        command, "census", f"parameters={census['total_parameters']:,} buffers={census['total_buffers']:,}"
+    )
+
+    trace = measure.shape_trace(model, forward, grid)
+    report["shape_trace"] = trace
+    model.eval()
+    with torch.no_grad():
+        logits = forward(model, grid)
+    spatial = measure.downsampling(tuple(grid.shape), tuple(logits.shape), grid_spacing)
+    temporal_factor = grid.shape[1] / logits.shape[1] if logits.shape[1] else float("inf")
+    report["downsampling"] = {
+        **spatial,
+        "temporal_factor": temporal_factor,
+        "logits_shape": list(logits.shape),
+    }
+    heartbeat(
+        command,
+        "shapes",
+        f"leaf_modules={len(trace)} logits={tuple(logits.shape)} spatial_factors={spatial['factors']} "
+        f"output_spacing_um={spatial['output_spacing_um']}",
+    )
+
+    try:
+        field = measure.empirical_receptive_field(model, forward, grid, spatial_axes=3)
+    except measure.InspectError as exc:
+        field = {"error": str(exc)}
+    report["receptive_field"] = field
+    heartbeat(command, "receptive-field", json.dumps(field.get("extent_voxels", field)))
+
+    graph = measure.capture_graph(model, forward, grid)
+    report["graph"] = graph
+    heartbeat(command, "graph", f"method={graph['method']} captured={graph['captured']}")
+    report["activations"] = measure.activation_census(model, forward, grid)
+    cost = measure.timings_and_memory(model, forward, loss_fn, grid, device=torch_device)
+    report["cost"] = cost
+    heartbeat(command, "cost", json.dumps(cost["timings"]))
+    report["profile"] = measure.profile_operators(model, forward, loss_fn, grid, device=torch_device)
+
+    model.eval()
+    with torch.no_grad():
+        logits = forward(model, grid)
+    report["output"] = measure.output_statistics(logits)
+    model.train()
+    model.zero_grad(set_to_none=True)
+    loss_fn(forward(model, grid)).backward()  # type: ignore[no-untyped-call]
+    gradients = measure.gradient_norm_by_block(model)
+    report["gradients"] = gradients
+    heartbeat(
+        command,
+        "gradients",
+        f"total={gradients['total']:.4e} zero_blocks={gradients['zero_gradient_blocks']}",
+    )
+    report["input_frame_probes"] = measure.input_channel_probes(model, forward, grid, channel_axis=1)
+    report["temporal"] = measure.temporal_perturbation(model, forward, grid, time_axis=1)
+    report["determinism"] = measure.strict_reload_determinism(build, model, forward, grid)
+    heartbeat(command, "determinism", json.dumps(report["determinism"]))
+
+    model.eval()
+    with torch.no_grad():
+        heatmap = torch.sigmoid(forward(model, grid))[0, :, 0].cpu().numpy()
+    threshold = float(np.quantile(heatmap, peak_quantile))
+    extractor: dict[str, object] = {"threshold": threshold, "threshold_quantile": peak_quantile}
+    try:
+        instances = instances_from_heatmap(
+            heatmap,
+            dataset=window.annotated.dataset,
+            downsample=downsample,
+            threshold=threshold,
+            scale=window.scale,
+        )
+        ceiling = oracle_graph(instances, window.annotated)
+        estimate = float(window.window_estimated_total_nodes)
+        extractor.update(
+            {
+                "proposals": ceiling.proposals,
+                "estimated_nodes": estimate,
+                "node_ratio": (ceiling.proposals - estimate) / estimate if estimate else None,
+                "annotated_nodes": ceiling.annotated_nodes,
+                "matched_nodes": ceiling.matched_nodes,
+                "match_fraction": ceiling.matched_nodes / ceiling.annotated_nodes
+                if ceiling.annotated_nodes
+                else None,
+                "retained_edges": ceiling.retained_edges,
+                "annotated_edges": ceiling.annotated_edges,
+            }
+        )
+        if ceiling.graph is not None:
+            row = metric_row(
+                ceiling.graph, window.annotated, estimated_total_nodes=EstimatedTotalNodes.declared(estimate)
+            )
+            extractor["oracle"] = summarise_fold([row]).to_dict()
+        else:
+            extractor["oracle"] = None
+    except (HeatmapProposalError, ValueError) as exc:
+        extractor["error"] = str(exc)
+    report["extractor"] = extractor
+    oracle_summary = extractor.get("oracle")
+    oracle_score = oracle_summary.get("score") if isinstance(oracle_summary, dict) else None
+    heartbeat(
+        command,
+        "extractor",
+        f"proposals={extractor.get('proposals')} match={extractor.get('match_fraction')} "
+        f"oracle={oracle_score}",
+    )
+
+    report["runtime_seconds"] = round(time.monotonic() - started, 3)
+    report_path = out if out is not None else root_path / "artifacts/model-inspect.json"
+    atomic_write_text(
+        report_path, json.dumps(measure.to_jsonable(report), indent=2, sort_keys=True) + chr(10)
+    )
+    _write_manifest(command, {"report": str(report_path), "config_digest": config_digest})
+    heartbeat(command, "done", f"report={report_path}")
+    typer.echo(
+        json.dumps(
+            {
+                "report": str(report_path),
+                "parameters": census["total_parameters"],
+                "oracle": oracle_summary,
+            },
+            sort_keys=True,
+        )
+    )

@@ -253,6 +253,7 @@ Implemented:
 - `biohubx evaluate track-length [--root PATH] [--minimums LIST] [--out PATH]`
 - `biohubx evaluate proposals [--root PATH] [--frames N] [--ratios LIST] [--max-movies N] [--radii LIST] [--local-maxima] [--per-scale-union] [--refine] [--suppression-radius UM] [--audit-misses] [--audit-ratio F] [--out PATH]`
 - `biohubx evaluate oracle-ceiling [--root PATH] [--frames N] [--radii LIST] [--local-maxima] [--response-quantile Q] [--suppression-radius UM] [--per-scale-union] [--budget-ratios LIST] [--max-movies N] [--out PATH]`
+- `biohubx model inspect [--config PATH] [--section S] [--checkpoint PATH] [--root PATH] [--dataset ID] [--first-frame N] [--frames N] [--crop-z A:B] [--crop-y A:B] [--crop-x A:B] [--device D] [--precision P] [--seed N] [--pos-feat-dim N] [--peak-quantile Q] [--out PATH]`
 - `biohubx package audit [--out PATH] [--expect-kernel ID] [--allow-dirty]`
 - `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--smoke-id ID] [--wheelhouse PATH] [--expect-published DIGEST] [--expect-device NAME] [--allow-dirty]`
 - `biohubx package preflight [--out PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--allow-dirty]`
@@ -441,6 +442,19 @@ by identity before pip runs, and the run is CPU only with internet off and the
 metric wheelhouse as its only dataset. `package transport --expect-dataset`
 names that dataset, since the transport validator otherwise expects the zarr
 wheelhouse alone.
+
+`model inspect` measures a detector architecture before anyone trains it, on one
+registered window: configuration and checkpoint digests, strict state-dict
+coverage, parameter and buffer census by module, every leaf module's shapes,
+spatial and temporal downsampling with the output spacing in micrometres, the
+empirical receptive field by gradient, a torch.export or FX capture or the named
+failure, activation volume, forward, backward and optimizer timings after warm-up,
+peak CPU and CUDA memory, the profiler's expensive operators, output calibration,
+gradient norm by block, inert-frame and temporal-perturbation probes, a strict
+reload comparison, and, with the heatmap extractor attached, proposal count, node
+ratio, match fraction and the oracle ceiling through the pinned scorer. It is Stage
+0 of the training funnel for the learned-proposal family and reports one JSON;
+none of its numbers is a finding.
 
 `train preflight` proves the E03 loop runs before a GPU is asked for: forward,
 masked loss, backward, optimizer step, atomic checkpoint, strict reload,

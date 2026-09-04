@@ -742,3 +742,120 @@ entries:
   payload_present: true
   status: reference_only
   claims: []
+- id: RL-0046
+  url: https://github.com/github/github-mcp-server/releases/download/v1.12.0/github-mcp-server_1.12.0_checksums.txt
+  kind: other
+  campaign: WS-01
+  branch: research
+  note: release checksums of github-mcp-server v1.12.0
+  recorded_utc: '2026-09-04T13:20:21+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T13:20:21+00:00'
+  http_status: 200
+  bytes: 824
+  raw_digest: raw_artifact_sha256:sha256:2ef040ceb06dba2c88f05c588c1ca51fc22a07dca75410f2d5e4f007f384155a
+  cache_path: research/cache/RL-0046/github-mcp-server_1.12.0_checksums.txt
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0047
+  url: https://github.com/github/github-mcp-server/releases/download/v1.12.0/github-mcp-server_Windows_x86_64.zip
+  kind: other
+  campaign: WS-01
+  branch: research
+  note: github-mcp-server v1.12.0 Windows x86_64 binary, verified against the release
+    digest before extraction
+  recorded_utc: '2026-09-04T13:20:22+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T13:20:22+00:00'
+  http_status: 200
+  bytes: 8466843
+  raw_digest: raw_artifact_sha256:sha256:bc8782deda12dc1f36a182d0205bb4f11b05aee0eec7e2c8c109bb8f622fb4b4
+  cache_path: research/cache/RL-0047/github-mcp-server_Windows_x86_64.zip
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0048
+  url: https://raw.githubusercontent.com/datalayer/jupyter-mcp-server/main/README.md
+  kind: repository
+  campaign: WS-01
+  branch: compute
+  note: 'how jupyter-mcp-server 2.x connects to a Jupyter server: URLs, tokens, required
+    server extensions, stdio flags'
+  recorded_utc: '2026-09-04T13:27:36+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T13:27:36+00:00'
+  http_status: 200
+  bytes: 22635
+  raw_digest: raw_artifact_sha256:sha256:81f00d5fb17c0c7182558fe16d92299a5352af9016a352dccb9f01be017c26ab
+  cache_path: research/cache/RL-0048/README.md
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0049
+  url: https://api.github.com/repos/royerlab/kaggle-cell-tracking-competition/contents?ref=075fc5f5a52d11077f9dc2b074644618f26939e2
+  kind: repository
+  campaign: SUB-01
+  branch: submission-format
+  note: file listing of the official competition repository at the pinned commit,
+    to locate the submission format specification
+  recorded_utc: '2026-09-04T13:59:34+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T13:59:34+00:00'
+  http_status: 200
+  bytes: 10075
+  raw_digest: raw_artifact_sha256:sha256:b9a89a3ad2ac7482af043a5e0f15c99c2d5d47953dc4807b3dcbcfac6b9a6cb2
+  cache_path: research/cache/RL-0049/contents_ref_075fc5f5a52d11077f9dc2b074644618f26939e2
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0050
+  url: https://raw.githubusercontent.com/royerlab/kaggle-cell-tracking-competition/075fc5f5a52d11077f9dc2b074644618f26939e2/README.md
+  kind: repository
+  campaign: SUB-01
+  branch: submission-format
+  note: 'the official README at the pinned commit: submission format, file naming,
+    and validation rules'
+  recorded_utc: '2026-09-04T13:59:36+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T13:59:36+00:00'
+  http_status: 200
+  bytes: 7254
+  raw_digest: raw_artifact_sha256:sha256:305222ff29b8b783c95ff2ceb2df3e801c52272633e798ef27af600fbe041812
+  cache_path: research/cache/RL-0050/README.md
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0051
+  url: https://raw.githubusercontent.com/royerlab/kaggle-cell-tracking-competition/075fc5f5a52d11077f9dc2b074644618f26939e2/scripts/geffs_to_csv.py
+  kind: repository
+  campaign: SUB-01
+  branch: submission-format
+  note: 'the official geffs-to-CSV writer: the exact submission CSV schema'
+  recorded_utc: '2026-09-04T13:59:55+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T13:59:55+00:00'
+  http_status: 200
+  bytes: 3131
+  raw_digest: raw_artifact_sha256:sha256:ecb8b121effb99f7889e6c9936f495fba6d98ea1bb541a2d1b1fb9f633bc9796
+  cache_path: research/cache/RL-0051/geffs_to_csv.py
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0052
+  url: https://raw.githubusercontent.com/royerlab/kaggle-cell-tracking-competition/075fc5f5a52d11077f9dc2b074644618f26939e2/scripts/csv_to_geffs.py
+  kind: repository
+  campaign: SUB-01
+  branch: submission-format
+  note: 'the official CSV-to-geffs reader: what a submission CSV must contain to be
+    reconstructed'
+  recorded_utc: '2026-09-04T13:59:57+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T13:59:57+00:00'
+  http_status: 200
+  bytes: 2887
+  raw_digest: raw_artifact_sha256:sha256:914d151495c2c0f6bcab1feeebc6d0452b0ec63175cbce3b8774d20f79fa6f9a
+  cache_path: research/cache/RL-0052/csv_to_geffs.py
+  payload_present: true
+  status: reference_only
+  claims: []

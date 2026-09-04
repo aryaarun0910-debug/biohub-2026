@@ -34,7 +34,15 @@ def tools_root(explicit: str | None) -> Path:
 
 def substitute(value, repo: Path, tools: Path):
     if isinstance(value, str):
-        return value.replace("${BIOHUBX_REPO}", repo.as_posix()).replace("${BIOHUBX_TOOLS}", tools.as_posix())
+        out = value.replace("${BIOHUBX_REPO}", repo.as_posix()).replace("${BIOHUBX_TOOLS}", tools.as_posix())
+        if "${BIOHUB_DATA_ROOT}" in out:
+            # The data root is never written into a tracked file; it is read from the
+            # same variable every biohubx command reads, at activation time.
+            data_root = os.environ.get("BIOHUB_DATA_ROOT")
+            if not data_root:
+                raise SystemExit("this profile needs BIOHUB_DATA_ROOT set in the environment at activation")
+            out = out.replace("${BIOHUB_DATA_ROOT}", Path(data_root).resolve().as_posix())
+        return out
     if isinstance(value, list):
         return [substitute(item, repo, tools) for item in value]
     if isinstance(value, dict):

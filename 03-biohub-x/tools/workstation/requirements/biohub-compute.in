@@ -1,0 +1,5 @@
+# biohub-compute, host side: the MCP server that Claude Code talks to over stdio.
+# It connects to a local Jupyter server that runs in a Docker sandbox with the
+# competition root mounted read-only and one scratch mount; that sandbox has its
+# own pinned image. Pin from ledger RL-0033.
+jupyter-mcp-server==2.1.4
