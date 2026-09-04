@@ -657,7 +657,6 @@ def run_rescore(
         # checkpoint, manifest and worker id. Nothing is shared but the read-only
         # inputs and the spec that was gated.
         import subprocess
-        import sys
 
         jobs: list[tuple[dict[str, Any], Path, subprocess.Popen[bytes]]] = []
         pending = list(enumerate(workers))
