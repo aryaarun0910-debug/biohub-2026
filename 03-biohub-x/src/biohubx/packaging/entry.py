@@ -126,6 +126,111 @@ def _discover(data_root: Path) -> tuple[list[str], list[str]]:
     return datasets, reachable
 
 
+INPUT_SEARCH_ROOT_ENV = "BIOHUBX_INPUT_ROOT"
+INPUT_SEARCH_ROOT_DEFAULT = "/kaggle/input"
+INPUT_SEARCH_DEPTH = 3
+
+
+def _input_listing(search_root: Path, limit: int = 60) -> list[str]:
+    """What is actually mounted, so that a refusal diagnoses itself.
+
+    E07-SMOKE-01 attempt 2 refused with the path it wanted and not the paths it
+    had, which leaves "the competition is not attached" and "the competition is
+    attached somewhere else" indistinguishable from the log ([[R-0026]]).
+    """
+    found: list[str] = []
+    frontier = [search_root]
+    depth = 0
+    while frontier and depth < INPUT_SEARCH_DEPTH and len(found) < limit:
+        following: list[Path] = []
+        for parent in frontier:
+            try:
+                children = sorted(parent.iterdir(), key=lambda item: item.name)
+            except OSError:
+                continue
+            for child in children:
+                found.append(str(child))
+                if child.is_dir():
+                    following.append(child)
+                if len(found) >= limit:
+                    return found
+        frontier = following
+        depth += 1
+    return found
+
+
+def _has_competition_layout(candidate: Path, expected_names: set[str]) -> bool:
+    """Whether this directory is the competition root, judged by what must be in it.
+
+    Named artifacts rather than a path, for the reason [[D-0033]] gives about the
+    wheelhouse: a path is a guess, and the identities the package already carries
+    are not. A hit here is only a candidate; the mounted trees are still verified
+    against their registered digests before anything trains.
+    """
+    train = candidate / "train"
+    if not train.is_dir():
+        return False
+    if not expected_names:
+        return any(train.glob("*.geff"))
+    return any((train / name).exists() for name in expected_names)
+
+
+def _resolve_data_root(explicit: Path | None, expected_names: set[str]) -> tuple[Path, str]:
+    """The competition root, found by the layout it must have rather than assumed.
+
+    Kaggle does not promise where it mounts a source. [[R-0011]] recorded the
+    wheelhouse mounting at two different paths in two kernels days apart, and the
+    competition root moved the same way between E03-SMOKE-03 and E07-SMOKE-01
+    ([[R-0026]]): the hardcoded default below was correct for one of those runs
+    and wrong for the other. It is kept as a first candidate and no longer as the
+    only one.
+    """
+    search_root = Path(os.environ.get(INPUT_SEARCH_ROOT_ENV, INPUT_SEARCH_ROOT_DEFAULT))
+    candidates: list[tuple[Path, str]] = []
+    if explicit is not None:
+        candidates.append((explicit, "explicit argument"))
+    configured = os.environ.get("BIOHUB_DATA_ROOT")
+    if configured:
+        candidates.append((Path(configured), "BIOHUB_DATA_ROOT"))
+    candidates.append(
+        (search_root / "competitions/biohub-cell-tracking-during-development", "the documented path")
+    )
+    candidates.append((search_root / "biohub-cell-tracking-during-development", "the slug directly"))
+
+    seen: set[str] = set()
+    for candidate, how in candidates:
+        if str(candidate) in seen:
+            continue
+        seen.add(str(candidate))
+        if _has_competition_layout(candidate, expected_names):
+            return candidate, how
+
+    # Nothing named worked, so search. Bounded in depth, and every hit is still
+    # subject to the digest verification that follows.
+    frontier = [search_root]
+    for _ in range(INPUT_SEARCH_DEPTH):
+        following: list[Path] = []
+        for parent in frontier:
+            try:
+                children = sorted(parent.iterdir(), key=lambda item: item.name)
+            except OSError:
+                continue
+            for child in children:
+                if not child.is_dir():
+                    continue
+                if str(child) not in seen and _has_competition_layout(child, expected_names):
+                    return child, f"found by layout under {search_root}"
+                following.append(child)
+        frontier = following
+
+    for line in _input_listing(search_root):
+        stage("inputs", f"mounted {line}")
+    raise EntryRefusal(
+        f"the competition training data is not mounted anywhere under {search_root}; "
+        f"looked for a directory whose train/ holds {sorted(expected_names)[:3]}"
+    )
+
+
 def run_fold(
     spec_dict: dict[str, Any],
     *,
@@ -188,13 +293,8 @@ def run_fold(
     device = hardware["training_device"]
     total_vram_bytes = hardware["total_vram_bytes"]
 
-    root = data_root or Path(
-        os.environ.get(
-            "BIOHUB_DATA_ROOT",
-            "/kaggle/input/competitions/biohub-cell-tracking-during-development",
-        )
-    )
-    stage("inputs", f"root={root}")
+    root, how = _resolve_data_root(data_root, set(spec_dict.get("input_digests", {})))
+    stage("inputs", f"root={root} resolved by {how}")
     datasets, reachable = _discover(root)
     if not datasets:
         raise EntryRefusal(f"no training datasets under {root}")
@@ -459,12 +559,8 @@ def run_rescore(
     device = hardware["training_device"]
     total_vram_bytes = hardware["total_vram_bytes"]
 
-    root = data_root or Path(
-        os.environ.get(
-            "BIOHUB_DATA_ROOT", "/kaggle/input/competitions/biohub-cell-tracking-during-development"
-        )
-    )
-    stage("inputs", f"root={root}")
+    root, how = _resolve_data_root(data_root, set(spec_dict.get("input_digests", {})))
+    stage("inputs", f"root={root} resolved by {how}")
     datasets, reachable = _discover(root)
     if not datasets:
         raise EntryRefusal(f"no training datasets under {root}")

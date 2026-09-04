@@ -2697,6 +2697,67 @@ references:
     limit_used: 1000000 decimal bytes, the smaller reading of an unpublished boundary
     measured_after_repair: see the package digests recorded for attempt 2
 
+  - id: R-0026
+    status: measured_environment
+    title: Two T4s again, the metric wheelhouse installs on the GPU image, and the competition mount is not where it was
+    why: >-
+      Attempt 2 of GPU-CAMPAIGN-E07-01 ran on Kaggle and refused at its own
+      guard. It measured three things the campaign needed and one defect, all
+      before a tensor was allocated.
+    campaign_envelope: GPU-CAMPAIGN-E07-01
+    attempt: 2 of a maximum 12
+    arm: A3
+    kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+    kernel_version: 1
+    package_digest: canonical_text_sha256:sha256/v1:e22f12ba76f00ad130578c3acfb4ed2e61007b6f695c3bff25b065195d77f676
+    commit: 0ff2de623eeafe02bbdc08b3e7fc44fa074dd93a
+    log: artifacts/e07-smoke-A3/biohub-x-e07-a3-fold-44b6.log
+    log_digest: raw_artifact_sha256:sha256:268f52d74ccbc2216c0565dadf1b6a7fcb31d0f440f8ea79778ef8d26a3f404b
+    outcome: ERROR at the input guard; no training, no checkpoint, no manifest
+    accelerator_wall_clock_seconds: 46
+    two_gpus_allocated_again:
+      requested: NvidiaTeslaT4, package accepting one or two visible devices
+      observed: 2
+      device_names: [Tesla T4, Tesla T4]
+      device_vram_bytes: [15636037632, 15636037632]
+      training_device: 'cuda:0'
+      reading: >-
+        The second independent observation of a two-card allocation against a
+        one-card request, after [[R-0011]]. Under the guard as it stood before
+        [[D-0044]] this run would have refused on the count alone. Arya Arun's
+        correction is therefore load-bearing and not precautionary: without it
+        the campaign could not have reached its own input guard. Both cards were
+        T4s, both were named and sized, and the idle one was recorded as idle.
+    metric_wheelhouse_on_the_gpu_image:
+      install_returncode: 0
+      seconds_to_install: 13.5
+      import_ok: true
+      closes: >-
+        The envelope's named first-use risk. The metric wheelhouse was proved on
+        the CPU image by [[R-0017]]; the GPU image differs in torch alone and it
+        installs and imports there too. The packaging retry reserved for this
+        risk was not needed for it.
+    the_competition_mount_was_not_where_it_was:
+      refusal: 'EntryRefusal: no training datasets under /kaggle/input/competitions/biohub-cell-tracking-during-development'
+      the_same_path_worked_for: E03-SMOKE-03, which read two movies from it
+      cause: >-
+        The entry point resolved the competition root from a hardcoded default
+        while resolving the wheelhouse by identity. That is the defect
+        [[D-0033]] named for the wheelhouse, still present on the other mount:
+        the path was correct for one kernel and wrong for another days later,
+        exactly as [[R-0011]] recorded for the wheelhouse.
+      diagnostic_gap: >-
+        The refusal named the path it wanted and not the paths it had, so the
+        log cannot distinguish a competition source that failed to attach from
+        one mounted elsewhere. Repaired with the resolution itself.
+      repair: >-
+        The root is now located by the registered artifact names the package
+        already carries: the documented path and the bare slug are tried first,
+        then a bounded search under the input root, and a refusal prints what is
+        actually mounted. Resolution is only a hint; the mounted trees are still
+        verified against their registered digests before anything trains.
+        Authorised as a mount-resolution repair under the envelope.
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per

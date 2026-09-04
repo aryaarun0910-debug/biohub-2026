@@ -330,3 +330,86 @@ def test_the_search_does_not_descend_past_the_depth_bound(tmp_path: Path) -> Non
     resolved, _, _ = namespace["biohubx_find_wheelhouse"](tmp_path, expected)
 
     assert resolved is None
+
+
+# --- E07-SMOKE-01 attempt 2: the competition root moved too -----------------
+
+
+def _competition_tree(root: Path, names: tuple[str, ...]) -> Path:
+    train = root / "train"
+    train.mkdir(parents=True)
+    for name in names:
+        (train / name).mkdir()
+    return root
+
+
+def test_the_competition_root_is_found_where_kaggle_actually_mounted_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """E03-SMOKE-03 read the documented path and E07-SMOKE-01 found nothing there.
+
+    A path is a guess. The registered artifact names are not, and they are what
+    the package already carries, so they locate the mount as well as describe it.
+    """
+    from biohubx.packaging import entry
+
+    mounted = _competition_tree(tmp_path / "kaggle/input/somewhere-else", ("44b6_a.geff",))
+    monkeypatch.setenv(entry.INPUT_SEARCH_ROOT_ENV, str(tmp_path / "kaggle/input"))
+    monkeypatch.delenv("BIOHUB_DATA_ROOT", raising=False)
+
+    root, how = entry._resolve_data_root(None, {"44b6_a.geff", "44b6_a.zarr"})
+
+    assert root == mounted
+    assert "layout" in how
+
+
+def test_the_documented_path_is_still_preferred_when_it_is_right(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The correction adds candidates; it does not move the run off a working mount."""
+    from biohubx.packaging import entry
+
+    documented = _competition_tree(
+        tmp_path / "kaggle/input/competitions/biohub-cell-tracking-during-development",
+        ("44b6_a.geff",),
+    )
+    _competition_tree(tmp_path / "kaggle/input/decoy", ("44b6_a.geff",))
+    monkeypatch.setenv(entry.INPUT_SEARCH_ROOT_ENV, str(tmp_path / "kaggle/input"))
+    monkeypatch.delenv("BIOHUB_DATA_ROOT", raising=False)
+
+    root, how = entry._resolve_data_root(None, {"44b6_a.geff"})
+
+    assert root == documented
+    assert how == "the documented path"
+
+
+def test_a_directory_without_the_registered_artifacts_is_not_the_competition_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Resolution is a hint and the digests remain the authority, but a hint that
+    matched any directory with a train/ would hand the verifier the wrong tree."""
+    from biohubx.packaging import entry
+
+    _competition_tree(tmp_path / "kaggle/input/some-other-dataset", ("unrelated.geff",))
+    monkeypatch.setenv(entry.INPUT_SEARCH_ROOT_ENV, str(tmp_path / "kaggle/input"))
+    monkeypatch.delenv("BIOHUB_DATA_ROOT", raising=False)
+
+    with pytest.raises(entry.EntryRefusal, match="not mounted anywhere under"):
+        entry._resolve_data_root(None, {"44b6_a.geff"})
+
+
+def test_the_refusal_lists_what_was_mounted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Attempt 2 named the path it wanted and not the paths it had, which is the
+    difference between a diagnosis and another attempt."""
+    from biohubx.packaging import entry
+
+    (tmp_path / "kaggle/input/wheelhouse-thing").mkdir(parents=True)
+    monkeypatch.setenv(entry.INPUT_SEARCH_ROOT_ENV, str(tmp_path / "kaggle/input"))
+    monkeypatch.delenv("BIOHUB_DATA_ROOT", raising=False)
+
+    with pytest.raises(entry.EntryRefusal):
+        entry._resolve_data_root(None, {"44b6_a.geff"})
+
+    assert "wheelhouse-thing" in capsys.readouterr().out
