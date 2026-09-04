@@ -905,3 +905,45 @@ findings:
         the conditions of F-0028 hold, with the DoG bank at radii (2.0, 3.0, 4.5)
         micrometres and ratio 1.6.
     superseded_by: null
+
+  - id: F-0030
+    claim: >-
+      Greedy physical-radius suppression does not return local maxima; it packs
+      the above-threshold region, and on this data most of what it returns are
+      shoulders of blobs. On frame 0 of 6bba_2540cd90 at the 0.95 response
+      quantile, 13,108 of 262,144 strided voxels cleared the threshold, the
+      suppression pass accepted 686 of them at a 4 micrometre radius, and only 46
+      of those 686 are strict 26-neighbourhood maxima of the response, against
+      37.8 estimated cells in the frame. Three different scale banks, (2.0, 3.0,
+      4.5), (2.0, 3.0) and (2.0, 2.5, 3.0), returned exactly 1,398 candidates on
+      the same two-frame window, because the count is set by how much of the
+      frame clears the quantile rather than by how many blobs there are.
+    instrument: biohubx.proposals.dog against scipy.ndimage.maximum_filter, one frame
+    evidence:
+      command: >-
+        detect_instances at response_quantile 0.95 on 6bba_2540cd90 frames 0-1,
+        compared voxel by voxel with a strict 3x3x3 maximum of the same response
+      observed: 686 accepted, 46 peaks, 6.7 percent; identical counts across three banks
+      note: >-
+        integration_only, and it is a finding about the instrument rather than
+        about cells. It reframes F-0025 to F-0029 without retracting any of them:
+        every number there is what the packed detector produced, and the packed
+        detector still beat the classical one at every budget. What changes is
+        the reading. The budget curve needing six to eight times the estimated
+        cell count to plateau (F-0027) is an artefact of counting shoulders, since
+        true peaks number about the estimate; and the near-miss residual whose
+        nearest proposal sits a nucleus-spacing away (F-0029) was measured
+        against a proposal set in which most entries were not peaks at all, so
+        which of those nearest proposals were neighbours' peaks and which were
+        shoulders is not known. The classical detector shares the same
+        suppression pass and therefore the same behaviour; its docstring's "one
+        instance per suppressed local maximum" is not strictly true, and F-0006
+        and F-0017 stand as measured. The corpus-level re-measurement with peaks
+        as candidates is F-0031.
+    validity:
+      scope: proposal_instrument
+      holds_while: >-
+        suppressed_maxima keeps its greedy definition. The local_maxima_only
+        path added in response leaves that function unchanged and filters before
+        it, so the older findings still reproduce.
+    superseded_by: null
