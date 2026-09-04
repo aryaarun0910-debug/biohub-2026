@@ -947,3 +947,47 @@ findings:
         path added in response leaves that function unchanged and filters before
         it, so the older findings still reproduce.
     superseded_by: null
+
+  - id: F-0031
+    claim: >-
+      Removing the 4.5 micrometre scale from the DoG bank raises reachability on
+      44b6 at every budget and at every matched proposal count, and on 6bba only
+      above twice the estimated cell count; adding a 2.5 micrometre scale changes
+      nothing. Over all 199 annotated movies under the packed suppression regime
+      of F-0027, the (2.0, 3.0) bank reaches 0.8782 against 0.8046 on 44b6 at the
+      neutral budget, 0.9543 against 0.8680 at twice it, and plateaus at 0.9695
+      against 0.8807; at the baseline's own proposal counts it reads 0.9371
+      against 0.8680 and 0.9570 against 0.8756. On 6bba it reads 0.5936 against
+      0.6385 at the neutral budget, 0.7980 against 0.8093 at twice it, and at the
+      baseline's count there 0.7796 against 0.8093, before overtaking at four
+      times, 0.9115 against 0.8865, and eight, 0.9427 against 0.9092. The
+      (2.0, 2.5, 3.0) bank matches (2.0, 3.0) to four decimals at every point.
+      Selecting on one embryo and measuring the other, fold_44b6 reads 0.9115
+      and fold_6bba reads 0.9695 with the two-scale bank, against 0.9001 and
+      0.8807 with three scales.
+    instrument: biohubx evaluate proposals --radii
+    evidence:
+      command: >-
+        biohubx evaluate proposals --ratios 1.0,2.0,4.0,8.0 --radii 2.0,3.0 and
+        --radii 2.0,2.5,3.0, compared with artifacts/proposals-e04b.json
+      observed: artifacts/proposals-h11b-r23.json, artifacts/proposals-h11b-r2253.json
+      note: >-
+        integration_only, and H-11b's falsifier is met on one fold and not the
+        other at low budgets. On 44b6 the large scale was costing reach at every
+        budget, which is the merging F-0029 predicted. On 6bba it was helping at
+        low budgets, which means on the denser embryo the 4.5 micrometre response
+        was ranking some annotated cells higher than the small scales do, and
+        losing it costs reach until the budget is large enough to admit them
+        anyway. So the bank is not one decision but a budget-dependent one, and
+        the honest status is challenger. Two further caveats. The 2.5 micrometre
+        scale being redundant to four decimals says the response maximum over
+        scales is already dominated by 2.0 or 3.0 wherever 2.5 would win, so
+        finer banks between them are not where the gain is. And this was measured
+        under the packed regime that F-0030 showed counts shoulders, so the
+        interaction between bank and true peaks is a separate measurement.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the conditions of F-0027 hold, with suppression in its packed form and
+        the response quantile at 0.95.
+    superseded_by: null

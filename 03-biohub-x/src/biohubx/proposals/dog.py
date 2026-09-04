@@ -216,7 +216,12 @@ def detect_instances(
             # non-positive maximum is a ripple in the background, not a cell.
             footprint = np.ones((3, 3, 3), dtype=bool)
             footprint[1, 1, 1] = False
-            neighbours = maximum_filter(response, footprint=footprint, mode="nearest")
+            # Padded with -inf, not by replication. Under "nearest" padding a
+            # voxel on a volume face is compared with a copy of itself, the strict
+            # inequality fails, and every peak on the first or last slice is lost;
+            # the first corpus probe found the missed cells clustered near the
+            # faces for exactly that reason.
+            neighbours = maximum_filter(response, footprint=footprint, mode="constant", cval=-np.inf)
             peaks = (response > neighbours) & (response > 0.0)
             scaled = np.where(peaks, scaled, 0.0)
         for raw_centre, peak in suppressed_maxima(

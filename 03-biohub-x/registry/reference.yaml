@@ -1802,6 +1802,14 @@ references:
           fold and falls on the other.
         source: F-0029, and the DoG scale-space argument that the outer sigma at 4.5 um is about 4.2 um
         cost: one evaluate proposals run per bank; no new model
+        status: >-
+          CHALLENGER. [[F-0031]]: removing the 4.5 micrometre scale raises reach
+          on 44b6 at every budget and matched count, and on 6bba only above twice
+          the estimate, with a loss at the neutral budget. The falsifier's
+          both-folds clause is met above ratio 4 and not below, so the bank is a
+          budget-dependent choice rather than a fix. The 2.5 micrometre scale is
+          redundant to four decimals. Measured under the packed regime; the bank's
+          interaction with true peaks (F-0030) is the next measurement.
       - id: H-10
         stream: division
         statement: >-

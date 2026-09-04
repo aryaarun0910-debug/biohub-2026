@@ -143,3 +143,14 @@ def test_local_maxima_only_yields_one_proposal_per_blob_where_packing_yields_sev
 
     assert len(packed.instances) > 1
     assert len(peaks.instances) == 1
+
+
+def test_a_peak_on_the_volume_face_is_still_a_peak() -> None:
+    """Replicated padding makes a face voxel tie with its own copy, so a strict
+    maximum on the first slice is silently dropped. A blob whose centre sits on
+    z=0 must still yield exactly one peak proposal."""
+    volume = volume_with_blob((0, 48, 48))
+    peaks = detect_instances(volume, dataset=DATASET, response_quantile=0.95, local_maxima_only=True)
+
+    assert len(peaks.instances) == 1
+    assert peaks.instances[0].voxel.z <= 1.0
