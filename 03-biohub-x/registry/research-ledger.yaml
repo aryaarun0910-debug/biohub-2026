@@ -318,3 +318,54 @@ entries:
   payload_present: true
   status: reference_only
   claims: []
+- id: RL-0020
+  url: https://arxiv.org/html/2403.15011
+  kind: paper
+  campaign: RX-01
+  branch: association
+  note: HTML full text of RL-0004, read for the mitosis-aware assignment formulation
+    and long-term conflict resolution
+  recorded_utc: '2026-09-04T00:30:40+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T00:30:40+00:00'
+  http_status: 200
+  bytes: 838534
+  raw_digest: raw_artifact_sha256:sha256:8b0de7520e9221a27dfcd594e79a859163c5f0e6efd8be5607dc993618f1faac
+  cache_path: research/cache/RL-0020/2403.15011
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0021
+  url: https://arxiv.org/html/2607.11754v1
+  kind: paper
+  campaign: RX-01
+  branch: association
+  note: HTML full text of RL-0007, read for edge-token features, edge-to-edge attention
+    and the 3D geometric prior
+  recorded_utc: '2026-09-04T00:30:43+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T00:30:43+00:00'
+  http_status: 200
+  bytes: 490509
+  raw_digest: raw_artifact_sha256:sha256:fc77a1bcdf13a8ac80d131d0df2e6a8be33c36c8c1fb68878f07756faf8b7682
+  cache_path: research/cache/RL-0021/2607.11754v1
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0022
+  url: https://arxiv.org/html/2501.03880v2
+  kind: paper
+  campaign: RX-01
+  branch: alternative_supervision
+  note: HTML full text of RL-0012, read for the unlabeled light-sheet data inventory
+    and licences
+  recorded_utc: '2026-09-04T00:30:45+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T00:30:45+00:00'
+  http_status: 200
+  bytes: 249584
+  raw_digest: raw_artifact_sha256:sha256:4fb1ae49238ccfc9c489540f0e561cd1016c24452de660be88d63b75504f400f
+  cache_path: research/cache/RL-0022/2501.03880v2
+  payload_present: true
+  status: reference_only
+  claims: []

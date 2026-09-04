@@ -1522,7 +1522,7 @@ references:
     title: RX-01 first pass, mechanisms only, each traced to the research ledger
     campaign: RX-01
     provenance:
-      ledger: registry/research-ledger.yaml, RL-0001 to RL-0019
+      ledger: registry/research-ledger.yaml, RL-0001 to RL-0022
       acquired_under: "[[D-0039]]"
       note: >-
         Every claim below names the ledger id it was read from, and the ledger
@@ -1608,19 +1608,62 @@ references:
           entropy of the per-target parent distribution is computable from any
           cost matrix Biohub-X already builds, with no new model.
         constants_not_adopted: K=10, gamma=0.1, dropout 0.5/0.25/0.125
-      mitosis_aware_mht_RL-0004:
-        mechanism: >-
-          Biological priors placed directly in assignment costs; motion
-          representations lifted to spatial densities via test-time augmentation;
-          a mitosis-aware assignment that resolves false divisions through
-          long-term conflicts.
-        read_depth: abstract only; the full text is not yet ledgered
-      higher_order_transformer_RL-0007:
-        mechanism: >-
-          Edge-centric attention in which candidate links attend to one another
-          under a 3D geometric prior, motivated by the observation that edges
-          sharing a node have near-random label agreement in pairwise models.
-        read_depth: abstract only
+      mitosis_aware_mht_RL-0004_RL-0020:
+        costs: >-
+          Association cost is a Gaussian match between a motion-predicted position
+          and a detection, each carrying its own covariance. Motion is regressed
+          from two frames, and its uncertainty is obtained by test-time
+          augmentation that shifts the previous frame by multiples of the mean
+          cell radius, forty transforms in all, then merging the per-pixel spread
+          into a per-cell Gaussian.
+        mitosis: >-
+          The assignment matrix is extended with a mirrored copy of each mother's
+          column so two daughters can be assigned to one mother. The cost of
+          dividing is the negative log of an Erlang cumulative distribution over
+          the cell's current age, so a cell that divided very recently is charged
+          for dividing again.
+        conflicts: >-
+          Multi-hypothesis tracking keeps the A_max best assignments per
+          hypothesis via Murty's algorithm, up to H_max hypotheses, and re-scores
+          them a posteriori so a false early mitosis is overturned when its
+          supposed daughter divides implausibly soon.
+        biohubx_relation: >-
+          Two ideas transfer without the framework. A track-age prior on division
+          needs only lineage bookkeeping Biohub-X already does, and [[F-0014]]
+          says the supervised division count is too small to learn such a prior,
+          which is an argument for a parametric one. And per-cell motion
+          uncertainty from augmentation is a cheap way to make the matcher's
+          distance cost heteroscedastic.
+        constants_not_adopted: A_max=7, H_max=150, forty augmentations, Erlang alpha=K beta=1/K
+      higher_order_transformer_RL-0007_RL-0021:
+        candidate_graph: >-
+          Edges between detections in different frames within a distance cutoff,
+          including gaps of more than one frame.
+        node_features: >-
+          Nineteen scalars per detection: time and 3D position, equivalent
+          diameter, four intensity statistics, the nine-entry inertia tensor, and
+          distance to the field-of-view border. No image encoder.
+        edge_attention: >-
+          Edge tokens are gathered from their two contextualised nodes and then
+          attend to other edges, with an attention bias proportional to the
+          minimum distance between the two edges as 3D line segments, learnable
+          per head and alternating in sign so some heads attract nearby edges
+          and others provide global context.
+        no_link_and_division: >-
+          The same parental softmax with a constant 1 in the denominator as
+          Trackastra; divisions weighted 3.5x in a focal loss; at most two children
+          enforced in a two-pass ILP that first links adjacent frames into
+          tracklets and then aggregates them and re-solves with longer gaps.
+        datasets: >-
+          Sixteen Cell Tracking Challenge sets. None is a 3D embryo nucleus set,
+          which bounds how far its reported numbers travel.
+        biohubx_relation: >-
+          Distance-to-border as an input feature and line-to-line edge geometry
+          are both computable from Biohub-X's existing contracts. The
+          observation that edges sharing a node have near-random label agreement
+          under pairwise scoring is a testable claim about our own candidate
+          graphs and belongs in E06.
+        constants_not_adopted: tau=300 px, focal gamma=3.5, w_n=-10, w_a=0.5, w_b=0.25, w_delta=0.25, lambda=0.5
       primal_dual_and_argus_RL-0006_RL-0008:
         note: >-
           Recorded as routes, not read in depth. The first is a solver for
@@ -1656,12 +1699,20 @@ references:
         note: LoG versus Hessian blob detection compared in one 3D pipeline; recorded as a route, not read in depth.
 
     stream_3_alternative_supervision:
-      selma3d_RL-0012:
-        note: >-
-          Public unlabeled 3D light-sheet volumes, including human brain nuclei,
-          intended for self-supervised pretraining. A candidate source for
-          representation pretraining that teaches nothing about which cells this
-          competition annotates.
+      selma3d_RL-0012_RL-0022:
+        inventory: >-
+          Thirty-five large light-sheet volumes: mouse vessels, mouse c-Fos cells,
+          mouse amyloid plaques, and four human-brain nucleus volumes at 0.54 x
+          0.54 x 5 micrometres. 315 annotated patches for validation. Winning
+          entries used BYOL on a 3D U-Net and DINO/iBOT on a 3D ViT.
+        licence: CC BY-NC-ND 4.0
+        provenance_blocker: >-
+          NonCommercial and NoDerivatives. A model whose weights were trained on
+          it is arguably a derivative, and a competition entry is arguably
+          commercial use. Under AGENTS.md section 6 this cannot be cleared by
+          reading a licence field; it stays out of any Biohub-X input until Arya
+          reviews the terms against the competition rules. Recorded so the
+          question is not rediscovered later.
       cellseg3d_RL-0013:
         mechanism: >-
           WNet3D: a dual U-Net trained without labels on a weighted sum of a soft
@@ -1716,9 +1767,27 @@ references:
         falsifier: killed if the proposal count at matched reachability does not fall on either fold
         source: RL-0010
 
+      - id: H-10
+        stream: division
+        statement: >-
+          A parametric track-age prior on division, charging a cell for dividing
+          again soon after it divided, removes more false divisions than it
+          suppresses true ones on both folds.
+        falsifier: killed if division TP falls faster than division FP on either held-out fold
+        source: RL-0020, and F-0014 for why a learned prior is not available
+        queued_after: E06, since it needs track ages from a working linker
+
+    stopping_note: >-
+      First-pass reading of the association stream has reached diminishing
+      returns: the last three full texts converged on the same parental-softmax
+      no-link mechanism, ILP decoding with degree constraints, and geometric
+      attention biases. Further association reads wait for E06 to show which
+      mechanism the folds actually reward.
+
     not_adopted:
       - Every constant listed under constants_not_adopted. They seed labelled probe grids only.
       - Any reported score. None was measured on this corpus or under this metric.
+      - SELMA3D as an input, pending a licence review against the competition rules.
 
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
