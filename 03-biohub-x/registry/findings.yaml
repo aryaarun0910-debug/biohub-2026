@@ -865,3 +865,43 @@ findings:
         the conditions of F-0027 hold: same corpus, radii, response quantile of
         0.95, official radius, and two annotated frames per movie.
     superseded_by: null
+
+  - id: F-0029
+    claim: >-
+      The near-miss residual is not sub-voxel error and not a z artefact. Among
+      the annotated cells DoG still misses at eight times the estimated cell
+      count whose nearest proposal lies within 14 micrometres, 41 on 44b6 and 125
+      on 6bba, the displacement from cell to nearest proposal is dominated by the
+      plane: median in-plane offset 7.46 and 7.85 micrometres against median
+      absolute z offset 3.25 and 4.88, with z the larger component for only 29
+      and 22 percent. The signed z offset has no consistent direction, mean +0.83
+      and -1.05 micrometres, so there is no systematic depth bias. The in-plane
+      offset's interquartile range, 5.8 to 8.9 on 44b6 and 6.4 to 9.8 on 6bba, is
+      the spacing between neighbouring nuclei on a grid whose plane step is 1.625
+      micrometres.
+    instrument: biohubx evaluate proposals --audit-misses, with the nearest-proposal displacement recorded
+    evidence:
+      command: biohubx evaluate proposals --ratios 8.0 --audit-misses --audit-ratio 8.0
+      observed: artifacts/proposals-residual-r8-displacement.json, 2,033 nodes audited, 613.5 seconds
+      note: >-
+        integration_only, and it settles H-11's first probe against refinement.
+        Sub-voxel centroid refinement can move a peak by at most a fraction of a
+        1.625 micrometre grid step per axis; the offsets here are four to six
+        steps. And a proposal that sits a nucleus-spacing away is not this cell's
+        peak displaced but a neighbour's peak, so moving it toward its own blob
+        centre cannot bring it to the missed cell. The mechanism this points at
+        is response merging: at the largest scale in the bank, 4.5 micrometres,
+        the outer Gaussian has a sigma of about 4.2 micrometres, wide enough to
+        fuse two nuclei eight micrometres apart into one response maximum, so
+        the dimmer of the pair produces no maximum of its own. That is the
+        merging-of-neighbours failure the C. elegans study named (R-0013,
+        RL-0009), and it is a property of the scale bank rather than of the
+        localisation. The suppression radius of 4 micrometres is not the cause:
+        it is smaller than the offsets observed, so it did not remove these
+        peaks; they were never formed.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the conditions of F-0028 hold, with the DoG bank at radii (2.0, 3.0, 4.5)
+        micrometres and ratio 1.6.
+    superseded_by: null

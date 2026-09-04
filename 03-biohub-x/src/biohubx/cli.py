@@ -1626,6 +1626,10 @@ def evaluate_proposals(
     suppression_radius: Annotated[
         float, typer.Option("--suppression-radius", help="Physical suppression radius in um.")
     ] = 4.0,
+    radii: Annotated[
+        str,
+        typer.Option("--radii", help="Comma-separated nucleus radii in um for the DoG bank (H-11b)."),
+    ] = "2.0,3.0,4.5",
     out: Annotated[
         Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/proposals.json.")
     ] = None,
@@ -1673,6 +1677,10 @@ def evaluate_proposals(
     budgets = tuple(float(item) for item in ratios.split(","))
     if any(value <= 0 for value in budgets):
         heartbeat(command, "refused", f"every budget ratio must be positive, got {budgets}")
+        raise typer.Exit(code=2)
+    bank = tuple(float(item) for item in radii.split(","))
+    if not bank or any(value <= 0 for value in bank):
+        heartbeat(command, "refused", f"the scale bank must be non-empty positive radii, got {bank}")
         raise typer.Exit(code=2)
 
     by_embryo: dict[str, list[str]] = {}
@@ -1734,6 +1742,7 @@ def evaluate_proposals(
                 "dog": dog.detect_instances(
                     window.volume,
                     dataset=dataset,
+                    radii_um=bank,
                     response_quantile=0.95,
                     suppression_radius_um=suppression_radius,
                     refine_centroids=refine,
@@ -1760,7 +1769,7 @@ def evaluate_proposals(
                         responses = {
                             local: dog.dog_response(
                                 dog.normalise_frame(window.volume[local][:, ::stride, ::stride]),
-                                radii_um=dog.DEFAULT_NUCLEUS_RADII_UM,
+                                radii_um=bank,
                                 voxel_um=1.625,
                             )
                             for local in range(window.volume.shape[0])
@@ -1860,6 +1869,7 @@ def evaluate_proposals(
         "budget_ratios": list(budgets),
         "dog_refine_centroids": refine,
         "dog_suppression_radius_um": suppression_radius,
+        "dog_radii_um": list(bank),
         "movies_skipped": skipped,
         "measure": "reachability: an annotated node with some proposal within 7 um, per frame",
         "rows": rows,

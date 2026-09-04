@@ -1780,6 +1780,28 @@ references:
           mostly along z where refinement cannot recover a strided grid.
         source: F-0028; the mechanism is standard blob-centroid refinement and needs no external source
         first_probe: re-audit with the displacement vector, to learn whether the miss is along z or in the plane
+        status: >-
+          REFINEMENT ARM KILLED BY ITS FIRST PROBE, before the expensive run.
+          [[F-0029]] measured the near-miss displacement at four to six grid
+          steps in the plane with no z bias, which refinement cannot close and
+          which identifies the nearest proposal as a neighbour's peak rather
+          than this cell's displaced one. The refinement instrument stays in the
+          repository behind a flag, because it is cheap and correct, but it is
+          not the fix for this residual.
+        reframed_as: H-11b
+      - id: H-11b
+        stream: proposals
+        statement: >-
+          The near-miss residual is response merging at the largest scale of
+          the bank. Removing the 4.5 micrometre scale, or taking maxima per scale
+          rather than of the max-over-scales response, separates neighbouring
+          nuclei and raises reachability at a fixed proposal count on both folds.
+        falsifier: >-
+          killed if reachability at a fixed proposal count does not rise on
+          either fold when the largest scale is removed, or if it rises on one
+          fold and falls on the other.
+        source: F-0029, and the DoG scale-space argument that the outer sigma at 4.5 um is about 4.2 um
+        cost: one evaluate proposals run per bank; no new model
       - id: H-10
         stream: division
         statement: >-
