@@ -131,3 +131,15 @@ def test_refinement_moves_a_peak_toward_a_blob_centred_between_grid_voxels() -> 
     # target is asserted; the direction is the claim.
     assert refined_dy < plain_dy
     assert refined_dx < plain_dx
+
+
+def test_local_maxima_only_yields_one_proposal_per_blob_where_packing_yields_several() -> None:
+    """A single wide blob. Greedy suppression packs its shoulders as separate
+    proposals once the threshold admits them; requiring a true local maximum
+    leaves exactly the peak."""
+    volume = volume_with_blob((12, 48, 48))
+    packed = detect_instances(volume, dataset=DATASET, response_quantile=0.95)
+    peaks = detect_instances(volume, dataset=DATASET, response_quantile=0.95, local_maxima_only=True)
+
+    assert len(packed.instances) > 1
+    assert len(peaks.instances) == 1

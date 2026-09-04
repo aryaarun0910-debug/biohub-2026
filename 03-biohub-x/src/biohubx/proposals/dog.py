@@ -35,7 +35,7 @@ Consumer: ``biohubx evaluate proposals``.
 from __future__ import annotations
 
 import numpy as np
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import gaussian_filter, maximum_filter
 
 from biohubx.contracts.coordinates import OFFICIAL_VOXEL_SCALE, VoxelCoordinateZYX, VoxelScaleZYX
 from biohubx.contracts.instances import CandidateInstance, InstanceSet, ProposalSource
@@ -167,6 +167,7 @@ def detect_instances(
     suppression_radius_um: float = DEFAULT_SUPPRESSION_RADIUS_UM,
     scale: VoxelScaleZYX = OFFICIAL_VOXEL_SCALE,
     refine_centroids: bool = False,
+    local_maxima_only: bool = False,
 ) -> InstanceSet:
     """Propose one instance per suppressed DoG maximum, frame by frame.
 
@@ -200,6 +201,16 @@ def detect_instances(
         floor = float(finite.min())
         scaled = np.clip((response - floor) / span, 0.0, 1.0)
         threshold = float(np.clip((cutoff - floor) / span, 1e-6, 1.0 - 1e-6))
+        if local_maxima_only:
+            # Greedy physical-radius suppression accepts any above-threshold voxel
+            # that is not within the radius of one already accepted. On a wide
+            # blob that admits its shoulders as separate proposals, and the count
+            # it returns is set by how much of the frame clears the quantile, not
+            # by how many blobs there are: three different scale banks returned
+            # the same 1,398 candidates on one frame. Requiring a voxel to be the
+            # maximum of its 26-neighbourhood first makes a candidate a peak.
+            peaks = response >= maximum_filter(response, size=3, mode="nearest")
+            scaled = np.where(peaks, scaled, 0.0)
         for raw_centre, peak in suppressed_maxima(
             scaled,
             threshold=threshold,

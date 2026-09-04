@@ -1630,6 +1630,10 @@ def evaluate_proposals(
         str,
         typer.Option("--radii", help="Comma-separated nucleus radii in um for the DoG bank (H-11b)."),
     ] = "2.0,3.0,4.5",
+    local_maxima: Annotated[
+        bool,
+        typer.Option("--local-maxima", help="Only true 3D local maxima of the response are candidates."),
+    ] = False,
     out: Annotated[
         Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/proposals.json.")
     ] = None,
@@ -1746,6 +1750,7 @@ def evaluate_proposals(
                     response_quantile=0.95,
                     suppression_radius_um=suppression_radius,
                     refine_centroids=refine,
+                    local_maxima_only=local_maxima,
                 ),
             }
             for name, instances in proposal_sets.items():
@@ -1870,6 +1875,7 @@ def evaluate_proposals(
         "dog_refine_centroids": refine,
         "dog_suppression_radius_um": suppression_radius,
         "dog_radii_um": list(bank),
+        "dog_local_maxima_only": local_maxima,
         "movies_skipped": skipped,
         "measure": "reachability: an annotated node with some proposal within 7 um, per frame",
         "rows": rows,
