@@ -243,11 +243,16 @@ Implemented:
 - `biohubx evaluate slice [--graph PATH]`
 - `biohubx evaluate retention [--root PATH] [--retentions LIST] [--seed N]`
 - `biohubx evaluate mask-audit [--root PATH] [--max-frames N] [--compare-maxpool]`
+- `biohubx evaluate track-length [--root PATH] [--minimums LIST] [--out PATH]`
+- `biohubx evaluate proposals [--root PATH] [--frames N] [--ratios LIST] [--max-movies N] [--audit-misses] [--audit-ratio F] [--out PATH]`
 - `biohubx package audit [--out PATH] [--expect-kernel ID] [--allow-dirty]`
 - `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--smoke-id ID] [--wheelhouse PATH] [--expect-published DIGEST] [--expect-device NAME] [--allow-dirty]`
 - `biohubx package preflight [--out PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--allow-dirty]`
 - `biohubx package wheelhouse [--path PATH] [--remote PATH] [--out PATH]`
 - `biohubx package retrieve --kernel ID --only NAME... --out DIR [--allow-missing]`
+- `biohubx package transport [--package PATH] [--expect-kernel ID] [--expect-digest D] [--push --campaign-envelope ID] [--accelerator A] [--timeout S] [--interpreter CMD]`
+- `biohubx research intake --url URL --kind KIND --campaign ID --branch NAME --note TEXT [--fetch] [--max-bytes N]`
+- `biohubx research evict --id RL-NNNN`
 - `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--peak-quantile F] [--learning-rate F]`
 
 `infer synthetic` writes the emitted graph and a stage-by-stage report
