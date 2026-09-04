@@ -37,7 +37,14 @@ def detect_instances(
     suppression_radius_um: float = DEFAULT_SUPPRESSION_RADIUS_UM,
     scale: VoxelScaleZYX = OFFICIAL_VOXEL_SCALE,
 ) -> InstanceSet:
-    """Propose one instance per suppressed local maximum, frame by frame.
+    """Propose one instance per accepted above-threshold voxel, frame by frame.
+
+    Not, strictly, one per local maximum. The suppression pass accepts the
+    brightest voxel in each physical neighbourhood and then any above-threshold
+    voxel outside the radius of an accepted one, so on a wide bright region it
+    admits that region's shoulders as separate proposals ([[F-0030]]). The
+    behaviour is kept as it is because F-0006 and F-0017 were measured against
+    it; the DoG source offers a strict-peak path behind a flag instead.
 
     Identities are assigned in a fixed order (frame, then descending intensity,
     then voxel position) so that two runs over the same volume produce byte-
