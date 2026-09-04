@@ -1784,7 +1784,8 @@ def evaluate_oracle_ceiling(
             "ceiling",
             f"{embryo}: score={fold.score:.4f} adj_edge={fold.adjusted_edge_jaccard:.4f} "
             f"raw_edge={fold.edge_jaccard:.4f} node_ratio={summaries[embryo]['node_ratio']} "
-            f"retention={summaries[embryo]['edge_retention']} unscored={summaries[embryo]['windows_unscored_no_retained_edge']}",
+            f"retention={summaries[embryo]['edge_retention']} "
+            f"unscored={summaries[embryo]['windows_unscored_no_retained_edge']}",
         )
 
     payload = {
