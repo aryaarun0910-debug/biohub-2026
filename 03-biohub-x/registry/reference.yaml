@@ -3608,6 +3608,368 @@ references:
           time: 0.0033
         scorer_null_threshold: 0.0567
       residual_passed: false
+  - id: R-0034
+    status: measured_environment
+    title: E08 Stage 2B, B3 fold_44b6, seeds 0 and 1, GPU-CAMPAIGN-E07E08-01
+    campaign_envelope: GPU-CAMPAIGN-E07E08-01
+    attempt: 3
+    kernel: aryaarun07/biohub-x-e08-b3-fold-44b6
+    kernel_status: KernelWorkerStatus.COMPLETE
+    log: artifacts/e08-stage2b-B3-fold_44b6/biohub-x-e08-b3-fold-44b6.log
+    log_digest: raw_artifact_sha256:sha256:8fda2a83d95bb9bb69878af2120a56bb0af4bbcec5b5ee2651f51be40f06cd7f
+    summary_manifest: artifacts/e08-stage2b-B3-fold_44b6/e07-fold_44b6-B3.json
+    summary_digest: raw_artifact_sha256:sha256:a45d02d16c8db3df865d02602df8f5debc0a36634861cbdafc9a8dc5967eced8
+    commit: 8d787ef2395169565c39ebf62ec434949d4473b2
+    hardware:
+      gpu_count: 2
+      device_names:
+      - Tesla T4
+      - Tesla T4
+      parallel_workers: true
+      torch: 2.10.0+cu128
+      cuda: '12.8'
+    elapsed_seconds: 1370.231
+    workers:
+    - worker_id: E08-SMOKE-2B-B3-fold_44b6-s0
+      seed: 0
+      device: cuda:0
+      manifest: e07-fold_44b6-B3-s0.json
+      manifest_digest: raw_artifact_sha256:sha256:81ed8528f3181e610f030e6a34f5f8979d2ae3d6bdf59ec15b62580ce83af437
+      checkpoint_digest: raw_artifact_sha256:sha256:d6e55c5b1d9714e684a72b79883bcff4570afdc3eca625d0d4b080fd488a5b1c
+      amp:
+        enabled: true
+        logit_tolerance: 0.05
+        loss_tolerance: 0.01
+        max_abs_logit_difference: 0.00011107325553894043
+        reason: verified
+        relative_loss_difference: 5.117431404243647e-06
+        requested: true
+      batch_used: 4096
+      batch_ladder:
+      - batch: 512
+        examples_per_second: 976.5
+        peak_allocated_bytes: 130624000
+        under_ceiling: true
+        out_of_memory: null
+      - batch: 1024
+        examples_per_second: 14211.5
+        peak_allocated_bytes: 248828416
+        under_ceiling: true
+        out_of_memory: null
+      - batch: 2048
+        examples_per_second: 9723.3
+        peak_allocated_bytes: 478004224
+        under_ceiling: true
+        out_of_memory: null
+      - batch: 4096
+        examples_per_second: 19701.5
+        peak_allocated_bytes: 938190848
+        under_ceiling: true
+        out_of_memory: null
+      sampling:
+        coefficients:
+          density: -2.3061
+          face_um: 0.1422
+          motion_um: -0.077
+          persist_next: 0.1957
+          persist_prev: 0.2271
+          t: 0.1632
+          x: 0.1439
+          y: 0.2487
+          z: 0.3164
+        effective_unlabelled_per_movie:
+        - 3179.8
+        - 3035.9
+        - 4302.4
+        - 3858.4
+        - 3502.0
+        - 2488.8
+        - 3317.5
+        - 3653.8
+        matched_on:
+        - z
+        - y
+        - x
+        - face_um
+        - t
+        - density
+        - persist_prev
+        - persist_next
+        - motion_um
+        weight_cap: 20.0
+      epochs:
+      - epoch: 0
+        batches: 34
+        positives: 236
+        loss_mean: 0.6045810965930715
+        loss_last: 1.4891934394836426
+        negative_risk_clamped_batches: 0
+        peak_allocated_bytes: 920475648
+      - epoch: 1
+        batches: 31
+        positives: 236
+        loss_mean: 0.485533302349429
+        loss_last: 0.55731201171875
+        negative_risk_clamped_batches: 3
+        peak_allocated_bytes: 921035776
+      loss_decreasing: true
+      positives_every_epoch: true
+      throughput:
+        batches: 65
+        clamp_frequency: 0.0462
+        clamped_batches: 3
+        compute_seconds: 8.315
+        data_wait_fraction: 0.1937
+        data_wait_seconds: 1.998
+        examples: 238867
+        examples_per_second: 28727.2
+        gpu_utilisation_median: 84.0
+        positives: 472
+        positives_per_batch: 7.262
+        skipped_no_positive: 17
+      peak_allocated_bytes: 921035776
+      peak_reserved_bytes: 1604321280
+      training_kept: 26942
+      reload_identical: true
+      held_out:
+        arm:
+          proposals: 8703
+          node_ratio: 0.0
+          node_match_fraction: 0.2296
+          edge_retention: 0.2278
+          score: 0.8307692307692308
+        A0:
+          proposals: 9686
+          node_ratio: 0.113
+          node_match_fraction: 0.9259
+          edge_retention: 0.903
+          score: 0.8290530614506255
+        pool:
+          proposals: 106772
+          node_ratio: 11.2687
+          node_match_fraction: 1.0
+          score: 0.2662066422448708
+      per_movie:
+      - A0: 1211
+        dataset: 6bba_05b6850b
+        estimate: 636.2
+        first_frame: 0
+        kept: 636
+        match_A0: 1.0
+        match_arm: 0.0
+        pool: 30870
+      - A0: 6172
+        dataset: 6bba_05db0fb1
+        estimate: 6980.0
+        first_frame: 0
+        kept: 6980
+        match_A0: 0.7333333333333333
+        match_arm: 0.8266666666666667
+        pool: 9030
+      - A0: 1243
+        dataset: 6bba_062c8d37
+        estimate: 603.0
+        first_frame: 0
+        kept: 603
+        match_A0: 1.0
+        match_arm: 0.0
+        pool: 32693
+      - A0: 1060
+        dataset: 6bba_07477033
+        estimate: 483.6
+        first_frame: 0
+        kept: 484
+        match_A0: 1.0
+        match_arm: 0.0
+        pool: 34179
+      ceiling_degraded: false
+      ceiling_at_or_above_A0: true
+      residual_propensity:
+        dog_control_auc: 0.9415
+        dog_gain: -0.011
+        passed: false
+        permutations: 30
+        rule: pass if scorer_gain <= max(null threshold, dog_gain)
+        scorer_control_auc: 0.8537
+        scorer_gain: 0.0754
+        scorer_group_gains:
+          appearance: 0.0816
+          density: 0.066
+          position: -0.0123
+          temporal: -0.0021
+          time: -0.0055
+        scorer_null_threshold: 0.0195
+      residual_passed: false
+    - worker_id: E08-SMOKE-2B-B3-fold_44b6-s1
+      seed: 1
+      device: cuda:1
+      manifest: e07-fold_44b6-B3-s1.json
+      manifest_digest: raw_artifact_sha256:sha256:66bb0c7d87dfb17eb1e2618535026cc952b21dab150d9e22a867162fa028cec7
+      checkpoint_digest: raw_artifact_sha256:sha256:b0b610b7e46ae94729a78e3dd3c524b557663ed1c5636886aea9bdb617599f16
+      amp:
+        enabled: true
+        logit_tolerance: 0.05
+        loss_tolerance: 0.01
+        max_abs_logit_difference: 7.43865966796875e-05
+        reason: verified
+        relative_loss_difference: 3.444936649337487e-07
+        requested: true
+      batch_used: 4096
+      batch_ladder:
+      - batch: 512
+        examples_per_second: 975.5
+        peak_allocated_bytes: 130624000
+        under_ceiling: true
+        out_of_memory: null
+      - batch: 1024
+        examples_per_second: 14352.0
+        peak_allocated_bytes: 248828416
+        under_ceiling: true
+        out_of_memory: null
+      - batch: 2048
+        examples_per_second: 9500.8
+        peak_allocated_bytes: 478004224
+        under_ceiling: true
+        out_of_memory: null
+      - batch: 4096
+        examples_per_second: 21463.3
+        peak_allocated_bytes: 938190848
+        under_ceiling: true
+        out_of_memory: null
+      sampling:
+        coefficients:
+          density: -2.3061
+          face_um: 0.1422
+          motion_um: -0.077
+          persist_next: 0.1957
+          persist_prev: 0.2271
+          t: 0.1632
+          x: 0.1439
+          y: 0.2487
+          z: 0.3164
+        effective_unlabelled_per_movie:
+        - 3179.8
+        - 3035.9
+        - 4302.4
+        - 3858.4
+        - 3502.0
+        - 2488.8
+        - 3317.5
+        - 3653.8
+        matched_on:
+        - z
+        - y
+        - x
+        - face_um
+        - t
+        - density
+        - persist_prev
+        - persist_next
+        - motion_um
+        weight_cap: 20.0
+      epochs:
+      - epoch: 0
+        batches: 33
+        positives: 236
+        loss_mean: 0.6238146451386538
+        loss_last: 0.7948676943778992
+        negative_risk_clamped_batches: 1
+        peak_allocated_bytes: 920475648
+      - epoch: 1
+        batches: 33
+        positives: 236
+        loss_mean: 0.5343768921765414
+        loss_last: 0.8358219861984253
+        negative_risk_clamped_batches: 0
+        peak_allocated_bytes: 921035776
+      loss_decreasing: true
+      positives_every_epoch: true
+      throughput:
+        batches: 66
+        clamp_frequency: 0.0152
+        clamped_batches: 1
+        compute_seconds: 8.437
+        data_wait_fraction: 0.2021
+        data_wait_seconds: 2.138
+        examples: 249948
+        examples_per_second: 29625.7
+        gpu_utilisation_median: 77.0
+        positives: 472
+        positives_per_batch: 7.152
+        skipped_no_positive: 16
+      peak_allocated_bytes: 921035776
+      peak_reserved_bytes: 1604321280
+      training_kept: 26942
+      reload_identical: true
+      held_out:
+        arm:
+          proposals: 8703
+          node_ratio: 0.0
+          node_match_fraction: 0.2333
+          edge_retention: 0.2278
+          score: 0.8307692307692308
+        A0:
+          proposals: 9686
+          node_ratio: 0.113
+          node_match_fraction: 0.9259
+          edge_retention: 0.903
+          score: 0.8290530614506255
+        pool:
+          proposals: 106772
+          node_ratio: 11.2687
+          node_match_fraction: 1.0
+          score: 0.2662066422448708
+      per_movie:
+      - A0: 1211
+        dataset: 6bba_05b6850b
+        estimate: 636.2
+        first_frame: 0
+        kept: 636
+        match_A0: 1.0
+        match_arm: 0.0
+        pool: 30870
+      - A0: 6172
+        dataset: 6bba_05db0fb1
+        estimate: 6980.0
+        first_frame: 0
+        kept: 6980
+        match_A0: 0.7333333333333333
+        match_arm: 0.84
+        pool: 9030
+      - A0: 1243
+        dataset: 6bba_062c8d37
+        estimate: 603.0
+        first_frame: 0
+        kept: 603
+        match_A0: 1.0
+        match_arm: 0.0
+        pool: 32693
+      - A0: 1060
+        dataset: 6bba_07477033
+        estimate: 483.6
+        first_frame: 0
+        kept: 484
+        match_A0: 1.0
+        match_arm: 0.0
+        pool: 34179
+      ceiling_degraded: false
+      ceiling_at_or_above_A0: true
+      residual_propensity:
+        dog_control_auc: 0.9415
+        dog_gain: -0.011
+        passed: false
+        permutations: 30
+        rule: pass if scorer_gain <= max(null threshold, dog_gain)
+        scorer_control_auc: 0.8286
+        scorer_gain: 0.0985
+        scorer_group_gains:
+          appearance: 0.1062
+          density: 0.0848
+          position: -0.0318
+          temporal: -0.0091
+          time: -0.0189
+        scorer_null_threshold: 0.0384
+      residual_passed: false
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per
