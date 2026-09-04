@@ -251,7 +251,8 @@ Implemented:
 - `biohubx evaluate retention [--root PATH] [--retentions LIST] [--seed N]`
 - `biohubx evaluate mask-audit [--root PATH] [--max-frames N] [--compare-maxpool]`
 - `biohubx evaluate track-length [--root PATH] [--minimums LIST] [--out PATH]`
-- `biohubx evaluate proposals [--root PATH] [--frames N] [--ratios LIST] [--max-movies N] [--audit-misses] [--audit-ratio F] [--out PATH]`
+- `biohubx evaluate proposals [--root PATH] [--frames N] [--ratios LIST] [--max-movies N] [--radii LIST] [--local-maxima] [--per-scale-union] [--refine] [--suppression-radius UM] [--audit-misses] [--audit-ratio F] [--out PATH]`
+- `biohubx evaluate oracle-ceiling [--root PATH] [--frames N] [--radii LIST] [--local-maxima] [--response-quantile Q] [--suppression-radius UM] [--per-scale-union] [--budget-ratios LIST] [--max-movies N] [--out PATH]`
 - `biohubx package audit [--out PATH] [--expect-kernel ID] [--allow-dirty]`
 - `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--smoke-id ID] [--wheelhouse PATH] [--expect-published DIGEST] [--expect-device NAME] [--allow-dirty]`
 - `biohubx package preflight [--out PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--allow-dirty]`

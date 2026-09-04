@@ -1614,6 +1614,20 @@ def evaluate_oracle_ceiling(
     max_movies: Annotated[
         int, typer.Option("--max-movies", help="Cap movies per embryo. 0 uses every annotated movie.")
     ] = 0,
+    per_scale_union: Annotated[
+        bool,
+        typer.Option("--per-scale-union", help="E05 source: strict peaks per scale, unioned (F-0034)."),
+    ] = False,
+    budget_ratios: Annotated[
+        str | None,
+        typer.Option(
+            "--budget-ratios",
+            help=(
+                "E05 selection: comma-separated multiples of the window estimate to keep, by "
+                "response rank. Every ratio is scored from one detection pass; omit for no truncation."
+            ),
+        ),
+    ] = None,
     out: Annotated[
         Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/e06-oracle.json.")
     ] = None,
@@ -1642,6 +1656,7 @@ def evaluate_oracle_ceiling(
     )
     from biohubx.evaluation.official_metric import EstimatedTotalNodes, metric_row, summarise_fold
     from biohubx.evaluation.oracle import oracle_graph
+    from biohubx.evaluation.proposals import truncate_to_budget
     from biohubx.proposals import dog
 
     try:
@@ -1649,6 +1664,18 @@ def evaluate_oracle_ceiling(
     except CompetitionLayoutError as exc:
         heartbeat(command, "refused", str(exc))
         raise typer.Exit(code=2) from exc
+    # Ratio keys are the strings the operator typed, so a report reads back the
+    # way it was asked for; "none" is the untruncated arm and is always scored.
+    ratios: list[tuple[str, float | None]] = [("none", None)]
+    if budget_ratios:
+        try:
+            ratios += [(item.strip(), float(item)) for item in budget_ratios.split(",") if item.strip()]
+        except ValueError as exc:
+            heartbeat(command, "refused", f"--budget-ratios must be numbers: {budget_ratios!r}")
+            raise typer.Exit(code=2) from exc
+        if any(value is not None and value <= 0 for _, value in ratios):
+            heartbeat(command, "refused", "a budget ratio must be positive")
+            raise typer.Exit(code=2)
 
     train_dir = data_root / "train"
     movies = sorted(path.stem for path in train_dir.glob("*.geff"))
@@ -1663,7 +1690,9 @@ def evaluate_oracle_ceiling(
         "response_quantile": response_quantile,
         "suppression_radius_um": suppression_radius,
         "refine_centroids": False,
-        "truncation": "none",
+        "per_scale_union": per_scale_union,
+        "truncation": "none" if budget_ratios is None else "by response rank to ratio x window estimate",
+        "budget_ratios": [key for key, _ in ratios],
         "frames_per_movie": frames,
     }
     by_embryo: dict[str, list[str]] = {}
@@ -1682,6 +1711,12 @@ def evaluate_oracle_ceiling(
     per_embryo_rows: dict[str, list[dict[str, Any]]] = {}
     accounting: dict[str, dict[str, float]] = {}
     unscored: dict[str, list[dict[str, object]]] = {}
+
+    def slot(ratio_key: str, embryo_id: str) -> str:
+        # The report keeps the E06-ORACLE shape when only the untruncated arm
+        # runs, so F-0033 and an E05 A0 read identically.
+        return embryo_id if len(ratios) == 1 else f"{embryo_id}@{ratio_key}"
+
     for embryo, dataset_ids in sorted(by_embryo.items()):
         for index, dataset_id in enumerate(dataset_ids):
             truth = load_ground_truth(data_root, dataset_id)
@@ -1701,53 +1736,63 @@ def evaluate_oracle_ceiling(
                 continue
             if not window.annotated.nodes:
                 continue
-            instances = dog.detect_instances(
+            detected = dog.detect_instances(
                 window.volume,
                 dataset=window.annotated.dataset,
                 radii_um=bank,
                 response_quantile=response_quantile,
                 suppression_radius_um=suppression_radius,
                 local_maxima_only=local_maxima,
+                per_scale_union=per_scale_union,
             )
-            ceiling = oracle_graph(instances, window.annotated)
-            bucket = accounting.setdefault(
-                embryo,
-                {
-                    "movies": 0,
-                    "proposals": 0,
-                    "estimated_nodes": 0.0,
-                    "annotated_nodes": 0,
-                    "matched_nodes": 0,
-                    "annotated_edges": 0,
-                    "retained_edges": 0,
-                    "retained_divisions": 0,
-                },
-            )
-            bucket["movies"] += 1
-            bucket["proposals"] += ceiling.proposals
-            bucket["estimated_nodes"] += float(window.window_estimated_total_nodes)
-            bucket["annotated_nodes"] += ceiling.annotated_nodes
-            bucket["matched_nodes"] += ceiling.matched_nodes
-            bucket["annotated_edges"] += ceiling.annotated_edges
-            bucket["retained_edges"] += ceiling.retained_edges
-            bucket["retained_divisions"] += ceiling.retained_divisions
-            if ceiling.graph is None:
-                unscored.setdefault(embryo, []).append(
-                    {
-                        "dataset": dataset_id,
-                        "annotated_edges": ceiling.annotated_edges,
-                        "matched_nodes": ceiling.matched_nodes,
-                    }
+            for ratio_key, ratio in ratios:
+                instances = (
+                    detected
+                    if ratio is None
+                    else truncate_to_budget(
+                        detected, round(ratio * float(window.window_estimated_total_nodes))
+                    )
                 )
-                continue
-            row = metric_row(
-                ceiling.graph,
-                window.annotated,
-                estimated_total_nodes=EstimatedTotalNodes.declared(
-                    float(window.window_estimated_total_nodes)
-                ),
-            )
-            per_embryo_rows.setdefault(embryo, []).append(row)
+                key = slot(ratio_key, embryo)
+                ceiling = oracle_graph(instances, window.annotated)
+                bucket = accounting.setdefault(
+                    key,
+                    {
+                        "movies": 0,
+                        "proposals": 0,
+                        "estimated_nodes": 0.0,
+                        "annotated_nodes": 0,
+                        "matched_nodes": 0,
+                        "annotated_edges": 0,
+                        "retained_edges": 0,
+                        "retained_divisions": 0,
+                    },
+                )
+                bucket["movies"] += 1
+                bucket["proposals"] += ceiling.proposals
+                bucket["estimated_nodes"] += float(window.window_estimated_total_nodes)
+                bucket["annotated_nodes"] += ceiling.annotated_nodes
+                bucket["matched_nodes"] += ceiling.matched_nodes
+                bucket["annotated_edges"] += ceiling.annotated_edges
+                bucket["retained_edges"] += ceiling.retained_edges
+                bucket["retained_divisions"] += ceiling.retained_divisions
+                if ceiling.graph is None:
+                    unscored.setdefault(key, []).append(
+                        {
+                            "dataset": dataset_id,
+                            "annotated_edges": ceiling.annotated_edges,
+                            "matched_nodes": ceiling.matched_nodes,
+                        }
+                    )
+                    continue
+                row = metric_row(
+                    ceiling.graph,
+                    window.annotated,
+                    estimated_total_nodes=EstimatedTotalNodes.declared(
+                        float(window.window_estimated_total_nodes)
+                    ),
+                )
+                per_embryo_rows.setdefault(key, []).append(row)
             if (index + 1) % 25 == 0:
                 heartbeat(command, "scored", f"{embryo} {index + 1}/{len(dataset_ids)}")
         heartbeat(command, "embryo", f"{embryo} done")
@@ -1796,7 +1841,11 @@ def evaluate_oracle_ceiling(
         "frozen_proposals": frozen,
         "per_embryo": summaries,
         "unscored_windows": unscored,
-        "both_support_0_950": bool(summaries) and all(bool(s["supports_0_950"]) for s in summaries.values()),
+        "both_support_0_950": bool(summaries)
+        and all(
+            bool(s["supports_0_950"]) for k, s in summaries.items() if "@" not in k or k.endswith("@none")
+        ),
+        "slots": "embryo, or embryo@ratio when --budget-ratios is given; @none is the untruncated arm",
         "runtime_seconds": round(time.monotonic() - started, 3),
         "limits": (
             "A ceiling, never a method: edges are chosen with ground truth. Scores are per window and "
@@ -3516,7 +3565,9 @@ def package_transport(
 
     expected_dataset = expect_dataset or WHEELHOUSE_SLUG
     root_path = repository_root()
-    staging = package if package is not None else root_path / "artifacts/kaggle-package"
+    # Resolved, because the report names the package relative to the repository
+    # and a relative --package would fail that at the very end, after validation.
+    staging = (package if package is not None else root_path / "artifacts/kaggle-package").resolve()
     manifest_path = staging / "PACKAGE_MANIFEST.json"
     if not manifest_path.is_file():
         heartbeat(command, "refused", f"no PACKAGE_MANIFEST.json under {staging}")
@@ -3630,19 +3681,24 @@ def package_transport(
         # and the .exe shim is not what the envelope authorises. The accelerator
         # and ceiling are passed on the command line as well as carried in the
         # metadata, so a request that one form drops is still made by the other.
-        argv = [
-            *interpreter.split(),
-            "-m",
-            "kaggle",
-            "kernels",
-            "push",
-            "-p",
-            str(staging),
-            "--accelerator",
-            accelerator,
-            "--timeout",
-            str(timeout),
-        ]
+        # A CPU package must not request an accelerator, and a GPU package must.
+        # The Kaggle API sets machine_shape from this flag when it is given, so
+        # for a CPU kernel the flag is omitted rather than sent as a name the
+        # platform might read as a request.
+        wants_gpu = bool(metadata.get("enable_gpu"))
+        accelerator_flag = None if accelerator.strip().lower() in {"", "none"} else accelerator
+        if wants_gpu and accelerator_flag is None:
+            heartbeat(command, "refused", "the package enables a GPU but no accelerator was requested")
+            raise typer.Exit(code=2)
+        if not wants_gpu and accelerator_flag is not None:
+            heartbeat(
+                command, "refused", f"the package is CPU only but --accelerator {accelerator} was requested"
+            )
+            raise typer.Exit(code=2)
+        argv = [*interpreter.split(), "-m", "kaggle", "kernels", "push", "-p", str(staging)]
+        if accelerator_flag is not None:
+            argv += ["--accelerator", accelerator_flag]
+        argv += ["--timeout", str(timeout)]
         heartbeat(command, "push", " ".join(argv))
         completed = subprocess.run(argv, capture_output=True, text=True, env=environment, check=False)
         found = re.search(r"kaggle\.com/code/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)", completed.stdout or "")
@@ -3651,7 +3707,7 @@ def package_transport(
             "attempted": True,
             "envelope": campaign_envelope,
             "argv": argv,
-            "accelerator_requested": accelerator,
+            "accelerator_requested": accelerator_flag or "none (CPU, metadata-driven)",
             "timeout_seconds": timeout,
             "returncode": completed.returncode,
             "stdout_tail": (completed.stdout or "")[-1500:],

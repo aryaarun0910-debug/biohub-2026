@@ -575,6 +575,101 @@ experiments:
           one nucleus spacing of a peak, and about a fifth of 6bba's at the
           neutral budget, a third of them dim. D-0041 fixes the configuration
           E05 inherits.
+  - id: E05
+    component: proposals
+    hypothesis: >-
+      The number of proposals kept, tied to each movie's official estimate, is
+      what separates the 6bba oracle ceiling from 0.950 (F-0033), and selecting
+      the frozen strict peaks or the per-scale union (F-0034) down to a budget
+      ratio chosen on the training embryo raises the oracle ceiling on both
+      held-out embryos over the untruncated D-0041 configuration.
+    falsifier: >-
+      No arm raises the held-out oracle score over A0 in both directions, at the
+      ratio selected on the training embryo. Then proposal count is not the
+      lever, the proposal stage needs a detector rather than a selector, and the
+      residual goes to a learned arm. One direction improving is a challenger; a
+      pooled number is not a result.
+    inputs:
+      - the 199 annotated competition.train .geff and .zarr artifacts
+      - configs/e05-proposal-selection.yaml
+    split:
+      scheme: leave_one_embryo_out
+      folds:
+        - id: fold_44b6
+          select_on: 44b6
+          evaluate_on: 6bba
+        - id: fold_6bba
+          select_on: 6bba
+          evaluate_on: 44b6
+      never_read: the public-test directory, for any purpose
+    model_config:
+      path: configs/e05-proposal-selection.yaml
+      section: E05
+      canonical_text: canonical_text_sha256:sha256/v1:0607cf5a958d7e028b78d06e8ed6d1e64782fef46c67b1e2006c6697e58493ff
+    instrument: >-
+      biohubx evaluate oracle-ceiling with --budget-ratios, and with
+      --per-scale-union for the union source; every ratio is scored from one
+      detection pass per window, so the arms share windows, proposals and
+      ground truth exactly.
+    candidate_sources:
+      peaks: the frozen configuration of D-0041, unchanged
+      union: H-11d, strict peaks per scale unioned before one shared suppression pass (F-0034)
+    selection:
+      rule: >-
+        rank proposals within each ten-frame window by DoG response and keep
+        the top round(k * window_estimate); ties break on instance identity
+      budget_ratios: [0.8, 1.0, 1.25, 1.5, 2.0]
+      constant_selected_on: the training embryo of each fold, by oracle score
+    arms:
+      - id: A0
+        source: peaks
+        truncation: none
+        role: baseline; must reproduce F-0033 to the digit
+      - id: A1
+        source: peaks
+        truncation: budget
+      - id: A2
+        source: union
+        truncation: none
+      - id: A3
+        source: union
+        truncation: budget
+    window:
+      frames_per_movie: 10
+      start: first annotated frame, clamped to fit
+      spatial_extent: full
+      identical_to: E06-ORACLE
+    budget: CPU only, no GPU, no network, no download
+    expected_outputs:
+      - artifacts/e05-peaks.json, arms A0 and A1 at every ratio, per embryo
+      - artifacts/e05-union.json, arms A2 and A3 at every ratio, per embryo
+    forbidden_changes:
+      - the pinned official scorer
+      - the two candidate sources' DoG parameters
+      - the window, once any arm has run
+      - the fold definition
+      - D-0041 and E06's frozen block; a promoted arm is a new declaration
+    promotion_metric: >-
+      oracle ceiling on the held-out embryo at the training-selected ratio,
+      both directions separately; promotion requires improvement over A0 on
+      both
+    mandatory_outputs:
+      - >-
+        per arm, per ratio, per embryo: proposals, node ratio, node match
+        fraction, edge retention, raw and adjusted edge Jaccard, division
+        Jaccard, combined score, unscored windows
+      - >-
+        per fold: the ratio selected on the training embryo and the held-out
+        score at that ratio beside A0's
+    exit_rule_toward_E06: >-
+      A promoted arm whose ceiling is at or above 0.950 on both embryos lets
+      E06 resume its bake-off on that arm's proposals under a new frozen
+      declaration. Otherwise the ceiling is still the proposal stage's and the
+      learned arm comes before any association work.
+    runtime_ceiling: 7200 seconds per source
+    provenance_status: diagnostic_ceiling
+    preregistered_at_commit: after b48c1ee, before any arm ran
+
   - id: E06
     component: association
     hypothesis: >-

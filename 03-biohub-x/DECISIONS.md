@@ -1375,3 +1375,54 @@ plateaus as peaks, the second lost every peak on a volume face to replicated
 padding, and each was caught by a synthetic blob before a corpus number was
 recorded. Three instrument defects in one afternoon, none of them in the science,
 all of them the kind that would have passed a shape check.
+
+## D-0042 - A wheelhouse ships what the target lacks, and a wheel outside the lock needs a named authority
+
+**Date:** 2026-09-04
+**Status:** accepted
+
+[[R-0012]] priced the official-metric closure at 310.6 MiB by assuming the Kaggle
+image had none of it. [[R-0015]] then imported all 65 names on the image and found
+eleven absent, fifteen at the locked version, twenty-nine older and six with no
+readable module version. The wheelhouse that followed, [[R-0016]], carries the
+eleven absent packages, polars and scipy pinned by Arya's instruction regardless
+of presence, and nothing else: 13 wheels, 123,174,020 published bytes.
+
+**Going forward, a wheelhouse is assembled from a measurement of the target, not
+from the lock's transitive closure.** What the image already has at an acceptable
+version stays on the image. The test of "acceptable" is each shipped wheel's own
+`Requires-Dist`, resolved against the image's recorded distributions plus the
+wheelhouse, before anything is uploaded.
+
+That resolution produced one conflict, and the way it was resolved is the second
+half of this decision. The lock's imagecodecs 2026.8.16 requires numpy 2.1 and the
+image runs numpy 2.0.2 under a numba 0.60.0 that accepts nothing newer, so
+shipping imagecodecs means replacing numpy, numba and llvmlite beneath every other
+package on the image. tracksdata declares imagecodecs in its metadata and imports
+it in no module, checked by `git grep` over the pinned tree. **A dependency that
+is declared, never imported, and would drag an interpreter-wide replacement with
+it is left out, the omission is written into the wheelhouse manifest as a
+knowingly unmet declaration, and the preflight checks that it is still absent.**
+`pip --no-deps` binds no declaration, so the install does not see the gap; the
+strict-import check ([[R-0017]]) is what would notice a wheelhouse that grew it.
+
+The third half is tracksdata itself. uv.lock pins it as a git source with no wheel
+and no hash, so `package wheelhouse` had no authority to verify the sandbox-built
+wheel of [[R-0014]] against and refused it. **A wheel the lock does not name is
+accepted only when the operator names it with `--built-wheel FILE=sha256:HEX`,
+the digest coming from its registry entry, and the identity report records the
+authority as `biohubx_build` rather than `uv.lock`.** The requirements file must
+carry that same hash, so pip enforces on the target exactly what the registry
+recorded here. An unnamed wheel is still refused with the same message as before.
+
+Two things this does not decide. It does not accept any other unlocked wheel:
+`--built-wheel` names one file and one digest, and a second one needs its own
+registry entry first. And it does not touch the zarr wheelhouse of [[R-0008]],
+which stays as it was and keeps serving the E03 kernels.
+
+What [[R-0017]] then measured is the reason the decision holds: the thirteen
+wheels install offline on the image, all 64 remaining closure names import,
+the vendored official source hashes byte for byte to the registry, the fifteen
+scorer fixtures produce the same digest as this machine, and a real two-frame
+window scores to the same 868 proposals and the same 1.0188663725416884. The
+scorer on the target is the scorer here.

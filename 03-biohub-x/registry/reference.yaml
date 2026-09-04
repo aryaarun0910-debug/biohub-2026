@@ -1827,6 +1827,13 @@ references:
           relative to the two-scale peaks detector.
         source: F-0032
         cost: one evaluate proposals run; a small change to how the response bank is reduced
+        result: >-
+          [[F-0034]]. With three scales the union beats the fused peaks and loses
+          to the two-scale peaks; the 4.5 micrometre scale is the cost, not the
+          fusion. Re-run on the two-scale bank as H-11d it is a retention
+          challenger, 0.9467 and 0.9291 saturated reach against 0.9239 and
+          0.8984 with both held-out directions improving, bought with a fifth
+          more proposals. Enters E05 as a candidate source; D-0041 unchanged.
       - id: H-10
         stream: division
         statement: >-
@@ -2047,7 +2054,9 @@ references:
       id: aryaarun07/biohubx-wheelhouse-metric-cp312-linux
       private: true
       staged_at: artifacts/wheelhouse-metric
-      published: not yet; the identities below are what a kernel must observe once it is
+      published: version 1, created from artifacts/wheelhouse-metric with --dir-mode zip
+      mounted_at: /kaggle/input/datasets/aryaarun07/biohubx-wheelhouse-metric-cp312-linux
+      identity_verified_on_target: E06-METRIC-PREFLIGHT-01, see R-0017
 
     identities:
       upload_bundle:
@@ -2215,6 +2224,113 @@ references:
     licences_note: >-
       Each wheel carries its own licence file; WHEELHOUSE.json names them. scipy
       and pyscipopt bundle further third-party notices inside their wheels.
+
+  - id: R-0017
+    status: measured_environment
+    title: The metric wheelhouse installs on the Kaggle CPU image and the scorer there is the scorer here, E06-METRIC-PREFLIGHT-01
+    why: >-
+      A fold scored on the target with a scorer that differed from the local one
+      by a version, a vendored byte or a floating-point convention would produce
+      numbers nobody could compare. This run installs [[R-0016]] on the image
+      [[R-0015]] measured and holds five checks to a baseline computed here.
+
+    kernel:
+      slug: aryaarun07/biohub-x-metric-preflight
+      version: 1
+      package_digest: canonical_text_sha256:sha256/v1:c2b48e6f15e0c3ebced4f4988a406f585af77875a091e15913554077d263b087
+      commit: b48c1eeb0e3aa7d0f2b936cdc55337cbd7336b19
+      accelerator: none, flag omitted, metadata-driven CPU
+      internet: off
+      sources: the metric wheelhouse dataset and the official competition
+      envelope: "E06-METRIC-PREFLIGHT-01: Arya's E06 instruction, CPU-preflight the finished metric wheelhouse, one push"
+      elapsed_seconds: 15.314
+      retrieved:
+        - name: biohub-x-metric-preflight.log
+          bytes: 5611
+          digest: raw_artifact_sha256:sha256:56bbcd6a883fde6b38c73b9f4c6ef0ebd88905c4cd4da300100e1fd9eb6d3272
+        - name: metric-preflight.json
+          bytes: 23389
+          digest: raw_artifact_sha256:sha256:683131fe7f5a27954e17c2f821a2e01f1dec7642f77850e7e894f1d1a12ec1b8
+      retrieval: package retrieve, containment kept=2 discarded=79, into artifacts/metric-preflight-01
+
+    mount:
+      resolved_at: /kaggle/input/datasets/aryaarun07/biohubx-wheelhouse-metric-cp312-linux
+      located_by: the published-payload identity carried in the notebook, not a path
+      verified_tree: tree_sha256:sha256/v1:cc8a180133fb8cdf0eaf10ca192bd9965b3b8bade1178746e4c364d790258f7d
+      install: pip --no-index --no-deps --require-hashes, returncode 0
+
+    target:
+      python: 3.12.13
+      platform: Linux-6.12.90+-x86_64-with-glibc2.35
+      versions_after_install:
+        geff: 1.3.1.1.3
+        numba: 0.60.0
+        numcodecs: 0.15.1
+        numpy: 2.0.2
+        polars: 1.43.2
+        pydantic: 2.12.3
+        rustworkx: 0.18.1
+        scipy: 1.18.0
+        tracksdata: 0.1.0rc9.dev4+g7bfeaf845
+        zarr: 3.3.0
+    local:
+      python: 3.12.12
+      platform: Windows-11-10.0.26200-SP0
+      versions:
+        geff: 1.3.1.1.3
+        numba: 0.67.0
+        numcodecs: 0.15.1
+        numpy: 2.5.2
+        polars: 1.43.2
+        pydantic: 2.13.5
+        rustworkx: 0.18.1
+        scipy: 1.18.0
+        tracksdata: 0.1.0rc9.dev4+g7bfeaf845
+        zarr: 3.3.0
+
+    checks:
+      strict_imports:
+        probed: 64
+        failures: 0
+        shipped_version_mismatches: 0
+        imagecodecs_absent_as_expected: True
+        ok: True
+      official_source_integrity:
+        files_checked: 3
+        all_match_registry: True
+        authoritative_module_inside_package: True
+        ok: True
+      scorer_fixtures:
+        count: 15
+        digest: 6a55195031ec55d76d838bbe53ccd2f2c064477fa5846733ae40141e0e030b18
+        matches_local: True
+      real_data_score:
+        dataset: 44b6_ddf577ad
+        first_frame: 0
+        frames: 2
+        proposals: 868 (local 868)
+        matched_nodes: 24 of 24
+        retained_edges: 12 of 12
+        estimated_nodes: 1069.84
+        score: 1.0188663725416884 (local 1.0188663725416884)
+        adjusted_edge_jaccard: 1.0188663725416884
+        edge_jaccard: 1.0
+        exact: True
+        within_tolerance: True
+      behavioural_equivalence:
+        fixtures_exact: True
+        ok: True
+        real_data_exact: True
+        real_data_within_tolerance: True
+        shipped_versions_equal: True
+    overall_ok: True
+    note: >-
+      integration_only. This says the metric closure installs and agrees on
+      the target; it says nothing about cell tracking and supports no
+      promotion. The real-data window is tiny by design, two frames of one
+      movie with 24 annotated nodes, enough to exercise reading, detection,
+      matching and the scorer end to end and to compare to the digit; the
+      corpus-scale agreement question is the fold's, not the preflight's.
 
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
