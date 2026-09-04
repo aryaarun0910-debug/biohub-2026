@@ -34,6 +34,13 @@ class NodeAudit:
     frame: int
     reached: bool
     nearest_proposal_um: float
+    # Signed displacement from the annotated cell to its nearest proposal, in
+    # micrometres, so a miss can be read as along z, where the grid is coarsest,
+    # or in the plane. Distance alone cannot tell those apart, and they call for
+    # different fixes.
+    nearest_dz_um: float
+    nearest_dy_um: float
+    nearest_dx_um: float
     intensity_percentile: float
     dog_response_percentile: float
     is_local_maximum_on_grid: bool
@@ -121,7 +128,17 @@ def audit_nodes(
         target = (physical.z_um, physical.y_um, physical.x_um)
 
         nearby = proposals.get(node.frame, [])
-        nearest = min((math.dist(target, candidate) for candidate in nearby), default=math.inf)
+        nearest = math.inf
+        offset = (0.0, 0.0, 0.0)
+        for candidate in nearby:
+            distance = math.dist(target, candidate)
+            if distance < nearest:
+                nearest = distance
+                offset = (
+                    candidate[0] - target[0],
+                    candidate[1] - target[1],
+                    candidate[2] - target[2],
+                )
 
         frame = volume[local]
         if local not in sorted_frames:
@@ -170,6 +187,9 @@ def audit_nodes(
                 frame=node.frame,
                 reached=nearest <= radius_um,
                 nearest_proposal_um=round(nearest, 3) if math.isfinite(nearest) else -1.0,
+                nearest_dz_um=round(offset[0], 3),
+                nearest_dy_um=round(offset[1], 3),
+                nearest_dx_um=round(offset[2], 3),
                 intensity_percentile=round(intensity_pct, 4),
                 dog_response_percentile=round(response_pct, 4) if math.isfinite(response_pct) else -1.0,
                 is_local_maximum_on_grid=is_max,

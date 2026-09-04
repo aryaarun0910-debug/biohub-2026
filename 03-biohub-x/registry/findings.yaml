@@ -823,3 +823,45 @@ findings:
         micrometres and a response quantile of 0.95. Two annotated frames per
         movie were read.
     superseded_by: null
+
+  - id: F-0028
+    claim: >-
+      The annotated cells DoG still misses at eight times the estimated cell
+      count are two different populations on the two embryos. On 44b6 the
+      residual is 44 of 365 nodes (12.1 percent) and is a localisation failure:
+      the missed cells have median intensity percentile 0.897 within their frame
+      with none below 0.50, median DoG response percentile 0.888, and a proposal
+      already lies within 10 micrometres of 73 percent of them and within 14 of
+      93 percent, at a median nearest distance of 9.08 micrometres, just outside
+      the official 7 micrometre radius. On 6bba the residual is 160 of 1,668
+      nodes (9.6 percent) and is half dimness: 60 percent sit below intensity
+      percentile 0.80 and 10 percent below 0.50, median DoG response percentile
+      0.877, with a proposal within 10 micrometres of 44 percent and within 14
+      of 78 percent. On neither embryo do annotated crowding within 10
+      micrometres (4.5 and 1.3 percent) or proximity to a volume face (16 percent
+      within 5 micrometres on both) distinguish the residual from reached cells.
+    instrument: biohubx evaluate proposals --audit-misses --audit-ratio 8.0
+    evidence:
+      command: biohubx evaluate proposals --ratios 8.0 --audit-misses --audit-ratio 8.0
+      observed: artifacts/proposals-residual-r8.json, 2,033 nodes audited, 450.9 seconds
+      note: >-
+        integration_only, and it answers the question F-0027 left open. The
+        residual is not one thing. On 44b6 a proposal exists near almost every
+        missed cell but lands 7 to 14 micrometres away, which points at peak
+        displacement or at two nearby cells collapsing to one suppressed peak
+        between them, and either is a property of the detector's localisation
+        rather than of its sensitivity. On 6bba roughly half the residual is
+        genuinely dim, with DoG response below the 0.95 quantile the candidate
+        pool was cut at, so those cells never entered the pool at any budget;
+        the other half is the same near-miss shape as 44b6. These are the two
+        failure modes the C. elegans nucleus study named for classical
+        detectors, dimness and merging of neighbours (R-0013, RL-0009), measured
+        here on our own corpus. The audit records nearest distance but not its
+        direction, so whether the displacement is along z, where the grid is
+        coarsest, or in the plane is not yet known.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the conditions of F-0027 hold: same corpus, radii, response quantile of
+        0.95, official radius, and two annotated frames per movie.
+    superseded_by: null

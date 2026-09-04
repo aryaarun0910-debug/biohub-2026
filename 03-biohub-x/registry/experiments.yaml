@@ -557,3 +557,12 @@ experiments:
           cells and is not yet characterised on its own.
         still_a_challenger: >-
           Nothing here is the official metric. The status of E04 does not change.
+        residual_characterised: >-
+          F-0028 splits the ratio-8 residual into a localisation regime on 44b6,
+          where a proposal already lies 7 to 14 micrometres from almost every
+          missed cell, and a half-dim regime on 6bba, where 60 percent of the
+          residual sits below intensity percentile 0.80 and never entered the
+          candidate pool. The cheap arm is therefore localisation (H-11) and a
+          second pass over lower-response peaks (H-08); the learned arm's real
+          target is the dim half of the 6bba residual, about five percent of that
+          embryo's annotated cells.

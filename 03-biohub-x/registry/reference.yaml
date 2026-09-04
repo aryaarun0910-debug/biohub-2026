@@ -1767,6 +1767,19 @@ references:
         falsifier: killed if the proposal count at matched reachability does not fall on either fold
         source: RL-0010
 
+      - id: H-11
+        stream: proposals
+        statement: >-
+          The near-miss residual, where a proposal lies 7 to 14 micrometres from
+          an annotated cell, is a localisation failure that sub-voxel centroid
+          refinement of each DoG peak, or a smaller suppression radius, converts
+          into hits without raising the proposal count.
+        falsifier: >-
+          killed if reachability at a fixed proposal count does not rise on
+          either fold after refinement, or if the displacement turns out to be
+          mostly along z where refinement cannot recover a strided grid.
+        source: F-0028; the mechanism is standard blob-centroid refinement and needs no external source
+        first_probe: re-audit with the displacement vector, to learn whether the miss is along z or in the plane
       - id: H-10
         stream: division
         statement: >-
