@@ -1,0 +1,56 @@
+# GPU-CAMPAIGN-E07E08-01. Authorised by Arya Arun on 2026-09-04 in their own words.
+# GPU-CAMPAIGN-E07-02 is complete and is not reopened by this file.
+
+GPU-CAMPAIGN-E07E08-01:
+  status: authorised
+  authorised_by: Arya Arun
+  authorised_on: '2026-09-04'
+  decision: >-
+    replicate A3, then test E08/B3 in one bounded campaign. The -0.250 ceiling
+    loss and +0.079 residual-propensity gain of R-0031 are too large to ignore;
+    one seed and 43 held-out cells are insufficient to condemn the objective.
+  waves:
+    R_a3_replication:
+      packages:
+        fold_44b6: {kernel: aryaarun07/biohub-x-e07-a3-fold-44b6, digest: canonical_text_sha256:sha256/v1:3e409fdc35c8d00a0988338ff4c5bcd6fa94afaca260e1123a652a6f05c51cb3, commit: c16096f}
+        fold_6bba: {kernel: aryaarun07/biohub-x-e07-a3-fold-6bba, digest: canonical_text_sha256:sha256/v1:509961b44ea493c02361a3ace20336915652726bb5cd10ed3c002c8c31a0e0e3, commit: c16096f}
+      seeds: [0, 1]
+      note: a repeated seed-0 result is a separate reproducibility measurement and never overwrites R-0031
+    B_e08_comparison:
+      packages: >-
+        B3 in both directions, rebuilt from a clean commit containing 2c182a4
+        and c16096f with no scientific change; the rebuilds and their digests
+        are authorised without another approval once they pass the complete
+        local gate and are recorded here before pushing. The earlier B3
+        packages (71cb1b9a..., 49b94c93...) predate the repairs and are not
+        pushed.
+      begins: after wave R is retrieved and validated; does not require A3 to fail again
+      justification: a direct controlled comparison against an already measured failure mechanism
+  limits:
+    kernels_planned: 4
+    attempts_maximum: 8 (one operational retry per kernel)
+    minutes_per_attempt_maximum: 60
+    accelerator_wall_clock_minutes_maximum: 240
+    accelerator: one or two visible Tesla T4s accepted; every visible device a T4
+    workers: one isolated worker per active GPU; separate caches, manifests, checkpoints
+    amp: must pass its numerical check; a worker reporting it disabled is a stop-and-report condition
+    batch: the measured throughput knee
+    memory_ceiling_gib_per_gpu: 13
+    internet: disabled
+    frozen: inputs, folds, movie selection, candidate pool, count ratio, seeds, objectives, evaluation criteria
+  repairs_permitted: packaging, dependency, child-process import, cache isolation, mount resolution, transport, hardware integration; scientific changes are a new arm
+  required_comparison_per_seed_and_direction:
+    - fixed-count held-out ceiling beside A0
+    - node-match fraction and edge retention
+    - raw DoG control AUC and trained-scorer AUC
+    - residual circumstance gain overall and by feature group
+    - loss trajectory, clamp frequency, positives per batch
+    - GPU utilisation, throughput, data wait, memory
+    - between-seed variance
+  survival_rule: >-
+    B3 survives only if it improves the fixed-count ceiling over A3 in both
+    directions and reduces residual circumstance dependence; one-direction
+    improvement is a challenger, not advancement; a pooled-only result is invalid
+  stop_after: wave B
+  excluded: A4 and B4, mini-folds, full folds, E06, public-test access, submission, internet, contaminated weights, canonical integration, promotion
+  attempts: {}
