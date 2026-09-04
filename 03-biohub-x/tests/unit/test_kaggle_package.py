@@ -663,9 +663,12 @@ def test_an_e08_package_routes_to_the_rescoring_loop_not_the_detector(
     from biohubx.packaging import entry
 
     seen: list[str] = []
-    monkeypatch.setattr(
-        entry, "run_rescore", lambda spec, **kw: seen.append(spec["experiment"]) or {"ok": True}
-    )
+
+    def fake(spec: dict[str, Any], **_: Any) -> dict[str, Any]:
+        seen.append(str(spec["experiment"]))
+        return {"ok": True}
+
+    monkeypatch.setattr(entry, "run_rescore", fake)
     for label in sorted(entry.RESCORE_EXPERIMENTS):
         entry.run_fold({"experiment": label})
     assert seen == ["E07", "E08"]
