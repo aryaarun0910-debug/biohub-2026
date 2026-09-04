@@ -2842,6 +2842,148 @@ references:
     log: artifacts/e07-stage2b-A3-fold_44b6/biohub-x-e07-a3-fold-44b6.log
     log_digest: raw_artifact_sha256:sha256:7f0c0928f965f459c72f372bb07cc09eec29ae5f3b2ac52fc78bb7355169b575
     outcome: no summary manifest retrieved; see the log
+  - id: R-0031
+    status: measured_environment
+    title: E07 Stage 2B wave 1, A3 fold_6bba, seeds 0 and 1, GPU-CAMPAIGN-E07-02
+    why: 'the representative smoke that replaces Stage 2: stratified movies, two seeds, the residual-propensity test
+      mandatory'
+    campaign_envelope: GPU-CAMPAIGN-E07-02
+    attempt: 4 of a maximum 4 in wave 1
+    kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
+    kernel_status: KernelWorkerStatus.ERROR
+    log: artifacts/e07-stage2b-A3-fold_6bba/biohub-x-e07-a3-fold-6bba.log
+    log_digest: raw_artifact_sha256:sha256:1bb5023561d582bc3491c50e2a1e007380d2998e146e9c66be363476c3a9b356
+    summary_manifest: null
+    summary_note: 'no summary manifest: the parent refused after a worker died; per-worker manifests recorded'
+    package_digest_pinned: canonical_text_sha256:sha256/v1:a4411b560d966a65cacd3ec25f2f85c441dc05ec058a3c8d0f7880e0538fc620
+    commit: 2c182a468c604f19cac24e2ca34645076aaf2eca
+    hardware:
+      gpu_count: 2
+      device_names:
+      - Tesla T4
+      - Tesla T4
+      parallel_workers: true
+      torch: 2.10.0+cu128
+      cuda: '12.8'
+    elapsed_seconds: 958.887
+    workers:
+    - worker_id: E07-SMOKE-2B-A3-fold_6bba-s0
+      seed: 0
+      device: cuda:0
+      manifest: e07-fold_6bba-A3-s0.json
+      manifest_digest: raw_artifact_sha256:sha256:794d01276309352e30bec3d9a9d85996ce6fd15c49203b6acc135d98cb8eb0d4
+      checkpoint_digest: raw_artifact_sha256:sha256:537a0a35a9fa744980dc38970be6d7a1dcd70e899608431f9aafc595a3315627
+      amp:
+        enabled: true
+        logit_tolerance: 0.05
+        loss_tolerance: 0.01
+        max_abs_logit_difference: 0.00025323033332824707
+        reason: verified
+        relative_loss_difference: 7.756579154678308e-06
+        requested: true
+      batch_used: 8192
+      batch_ladder_rungs:
+      - batch: 512
+        examples_per_second: 1164.2
+        peak_allocated_bytes: 130624000
+        under_ceiling: true
+        out_of_memory: null
+      - batch: 1024
+        examples_per_second: 14322.1
+        peak_allocated_bytes: 248828416
+        under_ceiling: true
+        out_of_memory: null
+      - batch: 2048
+        examples_per_second: 14052.5
+        peak_allocated_bytes: 478004224
+        under_ceiling: true
+        out_of_memory: null
+      - batch: 4096
+        examples_per_second: 23823.5
+        peak_allocated_bytes: 938190848
+        under_ceiling: true
+        out_of_memory: null
+      - batch: 8192
+        examples_per_second: 29466.0
+        peak_allocated_bytes: 1858564096
+        under_ceiling: true
+        out_of_memory: null
+      - batch: 16384
+        examples_per_second: 30087.3
+        peak_allocated_bytes: 3700359168
+        under_ceiling: true
+        out_of_memory: null
+      epochs:
+      - epoch: 0
+        batches: 28
+        positives: 675
+        loss_mean: 0.47510044848812477
+        loss_last: 0.35270246863365173
+        negative_risk_clamped_batches: 1
+        peak_allocated_bytes: 1822894080
+      - epoch: 1
+        batches: 28
+        positives: 675
+        loss_mean: 0.20992031813200032
+        loss_last: 1.306605577468872
+        negative_risk_clamped_batches: 4
+        peak_allocated_bytes: 1822894080
+      loss_decreasing: true
+      positives_every_epoch: true
+      throughput:
+        batches: 56
+        clamp_frequency: 0.0893
+        clamped_batches: 5
+        compute_seconds: 13.936
+        data_wait_fraction: 0.1701
+        data_wait_seconds: 2.855
+        examples: 410466
+        examples_per_second: 29453.8
+        gpu_utilisation_median: 86.0
+        positives: 1350
+        positives_per_batch: 24.107
+        skipped_no_positive: 0
+      peak_allocated_bytes: 1822894080
+      peak_reserved_bytes: 7891582976
+      training_kept: 11847
+      training_estimate: 11845.7
+      reload_identical: true
+      held_out:
+        arm:
+          proposals: 14614
+          node_ratio: -0.0
+          node_match_fraction: 0.5581
+          edge_retention: 0.4595
+          score: 0.6538487074887255
+        A0:
+          proposals: 12821
+          node_ratio: -0.1227
+          node_match_fraction: 0.9535
+          edge_retention: 0.9189
+          score: 0.9044552037654512
+        pool:
+          proposals: 62903
+          node_ratio: 3.3041
+          node_match_fraction: 1.0
+          score: 0.4788651607217481
+      ceiling_degraded: true
+      ceiling_at_or_above_A0: false
+      residual_propensity:
+        dog_control_auc: 0.9454
+        dog_gain: 0.0085
+        passed: false
+        permutations: 30
+        rule: pass if scorer_gain <= max(null threshold, dog_gain)
+        scorer_control_auc: 0.8798
+        scorer_gain: 0.0788
+        scorer_group_gains:
+          appearance: 0.0723
+          density: 0.0736
+          position: -0.0021
+          temporal: 0.0006
+          time: 0.0025
+        scorer_null_threshold: 0.0395
+      residual_passed: false
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per

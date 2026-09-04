@@ -910,6 +910,133 @@ experiments:
           kernel_status: KernelWorkerStatus.ERROR
           reference: R-0030
           outcome: no summary manifest retrieved
+        stage2b_fold_6bba_attempt4:
+          attempt: 4
+          kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
+          kernel_status: KernelWorkerStatus.ERROR
+          reference: R-0031
+          summary_note: 'no summary manifest: the parent refused after a worker died; per-worker manifests recorded'
+          workers:
+          - worker_id: E07-SMOKE-2B-A3-fold_6bba-s0
+            seed: 0
+            device: cuda:0
+            manifest: e07-fold_6bba-A3-s0.json
+            manifest_digest: raw_artifact_sha256:sha256:794d01276309352e30bec3d9a9d85996ce6fd15c49203b6acc135d98cb8eb0d4
+            checkpoint_digest: raw_artifact_sha256:sha256:537a0a35a9fa744980dc38970be6d7a1dcd70e899608431f9aafc595a3315627
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 0.00025323033332824707
+              reason: verified
+              relative_loss_difference: 7.756579154678308e-06
+              requested: true
+            batch_used: 8192
+            batch_ladder_rungs:
+            - batch: 512
+              examples_per_second: 1164.2
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 14322.1
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 14052.5
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 23823.5
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 8192
+              examples_per_second: 29466.0
+              peak_allocated_bytes: 1858564096
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 16384
+              examples_per_second: 30087.3
+              peak_allocated_bytes: 3700359168
+              under_ceiling: true
+              out_of_memory: null
+            epochs:
+            - epoch: 0
+              batches: 28
+              positives: 675
+              loss_mean: 0.47510044848812477
+              loss_last: 0.35270246863365173
+              negative_risk_clamped_batches: 1
+              peak_allocated_bytes: 1822894080
+            - epoch: 1
+              batches: 28
+              positives: 675
+              loss_mean: 0.20992031813200032
+              loss_last: 1.306605577468872
+              negative_risk_clamped_batches: 4
+              peak_allocated_bytes: 1822894080
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 56
+              clamp_frequency: 0.0893
+              clamped_batches: 5
+              compute_seconds: 13.936
+              data_wait_fraction: 0.1701
+              data_wait_seconds: 2.855
+              examples: 410466
+              examples_per_second: 29453.8
+              gpu_utilisation_median: 86.0
+              positives: 1350
+              positives_per_batch: 24.107
+              skipped_no_positive: 0
+            peak_allocated_bytes: 1822894080
+            peak_reserved_bytes: 7891582976
+            training_kept: 11847
+            training_estimate: 11845.7
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 14614
+                node_ratio: -0.0
+                node_match_fraction: 0.5581
+                edge_retention: 0.4595
+                score: 0.6538487074887255
+              A0:
+                proposals: 12821
+                node_ratio: -0.1227
+                node_match_fraction: 0.9535
+                edge_retention: 0.9189
+                score: 0.9044552037654512
+              pool:
+                proposals: 62903
+                node_ratio: 3.3041
+                node_match_fraction: 1.0
+                score: 0.4788651607217481
+            ceiling_degraded: true
+            ceiling_at_or_above_A0: false
+            residual_propensity:
+              dog_control_auc: 0.9454
+              dog_gain: 0.0085
+              passed: false
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.8798
+              scorer_gain: 0.0788
+              scorer_group_gains:
+                appearance: 0.0723
+                density: 0.0736
+                position: -0.0021
+                temporal: 0.0006
+                time: 0.0025
+              scorer_null_threshold: 0.0395
+            residual_passed: false
+          advancement_condition_met_per_seed:
+            '0': false
+          ceiling_degraded_any_seed: true
         stage2:
           campaign_envelope: GPU-CAMPAIGN-E07-01
           attempt: 3 of a maximum 12

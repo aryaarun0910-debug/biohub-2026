@@ -25,7 +25,8 @@ GPU-CAMPAIGN-E07-02:
     1: {package: A3-fold_44b6, digest: canonical_text_sha256:sha256/v1:64dbb55009bc1987aab68b5870e96268d4f86d90781b2450df3c11e6b0196d91, outcome: ERROR at worker start, workers could not import the package (R-0028)}
     2: {package: A3-fold_6bba, digest: canonical_text_sha256:sha256/v1:c94ce04a8bd6a595da8aa9eca4009fa47eed35d79ad70a0ef98012537ac29522, outcome: ERROR at worker start, same cause (R-0029)}
     3: {package: A3-fold_44b6, digest: canonical_text_sha256:sha256/v1:9f36660e073b37cbda49cda9a575a214437aedeec05341f366e822e549198e33, repair: worker PYTHONPATH (commit 2c182a4), outcome: ERROR while building inputs, the two workers raced on one shared cache file (R-0030)}
-    4: {package: A3-fold_6bba, digest: canonical_text_sha256:sha256/v1:31db0a43ab5f7df01ec8157e4cff8366360061469f85a3803c664fcaae5db7c4, repair: worker PYTHONPATH (commit 2c182a4), outcome: pending}
+    4: {package: A3-fold_6bba, digest: canonical_text_sha256:sha256/v1:31db0a43ab5f7df01ec8157e4cff8366360061469f85a3803c664fcaae5db7c4, repair: worker PYTHONPATH (commit 2c182a4), outcome: ERROR as a kernel, seed 1 lost to the same cache race while seed 0 completed on cuda:0 and wrote its own manifest (R-0031)}
+  wave1_status: exhausted, four of four attempts spent; one worker measurement obtained
   repairs_permitted_remaining: 0
   repaired_packages_staged_not_pushed:
     note: >-

@@ -233,14 +233,17 @@ def state_from_registries(root: Path) -> CampaignState:
                 fold = key.removeprefix("stage2b_").rsplit("_attempt", 1)[0]
                 if "advancement_condition_met_per_seed" in value:
                     per_fold[fold] = value
+            # Degradation is its own kill branch under D-0046 and needs no
+            # replication: one measured direction whose trained ceiling fell
+            # below A0 counts. The smoke as a whole still needs both directions.
+            for value in per_fold.values():
+                if value.get("ceiling_degraded_any_seed"):
+                    degraded = True
             if len(per_fold) >= 2:
                 smoke_passed = all(
                     all(bool(v) for v in value["advancement_condition_met_per_seed"].values())
                     for value in per_fold.values()
                 )
-                for value in per_fold.values():
-                    if value.get("ceiling_degraded_any_seed"):
-                        degraded = True
         else:
             smoke = block.get("stage2")
             if isinstance(smoke, dict) and "stage3_condition_met" in smoke:

@@ -187,3 +187,21 @@ def test_a_measured_stage2b_in_both_directions_decides_the_smoke(tmp_path: Path)
     a3 = next(a for a in state.arms if a.arm == "A3")
     assert a3.smoke_passed is False
     assert state.ceiling_degraded is True
+
+
+def test_one_measured_direction_that_degraded_is_enough_to_flag_degradation(tmp_path: Path) -> None:
+    """R-0031: seed 0 of the fold_6bba direction fell from A0's 0.904 to 0.654 while
+    the other seed died and the other direction never ran. Degradation is D-0046's
+    second kill branch and does not wait for replication; the smoke does."""
+    root = _registry(
+        tmp_path,
+        {
+            "stage2b_fold_6bba_attempt4": {
+                "advancement_condition_met_per_seed": {"0": False},
+                "ceiling_degraded_any_seed": True,
+            }
+        },
+    )
+    state = state_from_registries(root)
+    assert state.ceiling_degraded is True
+    assert next(a for a in state.arms if a.arm == "A3").smoke_passed is None
