@@ -1329,13 +1329,6 @@ experiments:
             '1': false
           ceiling_degraded_any_seed: true
           between_seed_ceiling_range: 0.0664
-        stage2b_gpu_campaign_e07e08_01_fold_6bba_attempt2:
-          campaign: GPU-CAMPAIGN-E07E08-01
-          attempt: 2
-          kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
-          kernel_status: KernelWorkerStatus.COMPLETE
-          reference: R-0033
-          outcome: no manifest retrieved
         stage2:
           campaign_envelope: GPU-CAMPAIGN-E07-01
           attempt: 3 of a maximum 12

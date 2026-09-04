@@ -3286,16 +3286,7 @@ references:
           time: -0.0051
         scorer_null_threshold: 0.015
       residual_passed: true
-  - id: R-0033
-    status: measured_environment
-    title: E07 Stage 2B, A3 fold_6bba, seeds 0 and 1, GPU-CAMPAIGN-E07E08-01
-    campaign_envelope: GPU-CAMPAIGN-E07E08-01
-    attempt: 2
-    kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
-    kernel_status: KernelWorkerStatus.COMPLETE
-    log: artifacts/e07e08-waveR-A3-fold_6bba/biohub-x-e07-a3-fold-6bba.log
-    log_digest: null
-    outcome: no manifest retrieved; see the log
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per
