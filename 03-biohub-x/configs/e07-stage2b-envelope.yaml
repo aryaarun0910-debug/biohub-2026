@@ -1,97 +1,286 @@
 # GPU-CAMPAIGN-E07-02, proposed. Not authorised until Arya Arun says so in their own words.
 #
-# The representative smoke that replaces E07 Stage 2. Stage 2 read the first two
-# 44b6 movies in name order, which are the second and fourth sparsest of 71, and
-# trained on 13 positives (R-0026). This one reads movies stratified across the
-# training embryo's annotation-count quartiles, both fold directions, and its
-# preflight refuses under a declared minimum before any GPU is allocated.
-#
-# Conditional on E07-PROPENSITY-01 (Arya Arun, 2026-09-04): it runs only if the
-# probe reports no propensity signal, or under a corrected objective if it does.
-# A3 first. A4 only if the probe does not specifically falsify temporal context.
+# Written from the four staged packages by the session's generator; every digest,
+# movie list and count below is read from the package that would be pushed.
 # Nothing here trains full folds, reads the public test split, or submits.
 
 GPU-CAMPAIGN-E07-02:
   status: proposed
   authorises: nothing yet
-  experiment: E07
-  stage: 2B, representative smoke, both directions
-  condition: >-
-    E07-PROPENSITY-01 recorded in registry/experiments.yaml with its outcome;
-    the controller's next_action does not read "stop and redesign"
-  arms:
-    A3: first
-    A4: only if the probe does not name the temporal group as predictive
+  requested_by: Arya Arun, 2026-09-04, after R-0027 and D-0046
+  objective: >-
+    Four comparable representative smokes, automatic killing, then compute on
+    the survivor. Wave 1 is E07 arm A3 at two independent seeds in both fold
+    directions. Wave 2, conditional, is E08 arm B3 at two seeds in both
+    directions. A4 and B4 are held.
+  commit: 159ca24eea87360b7ee92fc328772362331b7432
+  local_gate: ruff, ruff format, mypy strict, pytest, artifacts verify, and the pre-push exercise of every package on CPU
   accelerator: >-
     NvidiaTeslaT4 requested; the guard accepts one or two visible T4s, refuses
-    any other device, and trains on cuda:0 only (D-0044). Two visible cards may
-    run two isolated workers, one arm or one direction each, never one model
-    across both (D-0045).
+    any other device or count, and each worker trains on exactly one visible
+    device (D-0044 as amended by D-0046). Two visible cards run the two seeds
+    as two isolated processes, one per device, with separate optimizers,
+    checkpoints, manifests and worker ids; one visible card serialises them.
   image: the Kaggle GPU image measured in R-0026 (torch 2.10.0+cu128, CUDA 12.8)
   wheelhouse: aryaarun07/biohubx-wheelhouse-metric-cp312-linux, published payload tree_sha256:sha256/v1:cc8a180133fb8cdf0eaf10ca192bd9965b3b8bade1178746e4c364d790258f7d (R-0016, R-0017; installs on the GPU image per R-0026)
+  inputs: the registered competition training artifacts named in each package's input_digests, and the wheelhouse; nothing else
+  internet: disabled
+
+  compute_policy:
+    decision: D-0045 and D-0046
+    memory_ceiling_bytes_per_device: 13958643712
+    amp: requested; enabled per worker only after one fixed batch agrees with full precision (logit 5e-2 abs, loss 1e-2 rel), recorded either way
+    batch: ladder 512..16384 on the first training movie's patches, knee at 90 percent of best throughput below the ceiling, recorded with peak bytes and expected positives per batch
+    recorded_per_worker: examples per second, positives per batch, clamp frequency, data-wait fraction, median GPU utilisation, peak allocated and reserved bytes
+    checkpoints: atomic, per epoch, per worker
 
   selection:
-    rule: stratified across annotation-count quartiles of the training embryo, median bands first, deterministic (biohubx.training.rescore_loop.stratified_movies)
-    package: biohubx package rescore --select stratified --min-positives <declared below>
-    preflight: annotated cells in the windows the run will read, counted from the geffs before any push; the package refuses under the minimum
-    training_movies_per_direction: 8
-    evaluation_movies: 2, the first of the held-out embryo in name order, unchanged from Stage 2
+    training: stratified across annotation-count quartiles of the training embryo, median bands first, deterministic; shipped as a list
+    evaluation: the first four movies of the held-out embryo in name order, never chosen by their labels; refused only if their windows held no cell
     frames: 10
     epochs: 2
     count_ratio: 1.0
-    # Recomputed from the training embryo's own counts at package time; listed
-    # here so the authorisation names what will be read.
-    fold_44b6_training_movies:
-      - {id: 44b6_5f15d135, annotated_nodes: 278, annotated_in_window: 32}
-      - {id: 44b6_808952d6, annotated_nodes: 181, annotated_in_window: 10}
-      - {id: 44b6_7e557709, annotated_nodes: 570, annotated_in_window: 86}
-      - {id: 44b6_2f31fc2f, annotated_nodes: 89, annotated_in_window: 10}
-      - {id: 44b6_267148e4, annotated_nodes: 280, annotated_in_window: 22}
-      - {id: 44b6_cf8fed6b, annotated_nodes: 191, annotated_in_window: 12}
-      - {id: 44b6_8f5ab931, annotated_nodes: 616, annotated_in_window: 56}
-      - {id: 44b6_abf82518, annotated_nodes: 96, annotated_in_window: 10}
-    fold_44b6_annotated_in_window_total: 238
-    fold_6bba_training_movies:
-      - {id: 6bba_907271db, annotated_nodes: 945, annotated_in_window: 64}
-      - {id: 6bba_5b28472a, annotated_nodes: 737, annotated_in_window: 73}
-      - {id: 6bba_ebff6e76, annotated_nodes: 1318, annotated_in_window: 228}
-      - {id: 6bba_312f0dc3, annotated_nodes: 520, annotated_in_window: 57}
-      - {id: 6bba_20852818, annotated_nodes: 952, annotated_in_window: 105}
-      - {id: 6bba_c73a1d11, annotated_nodes: 737, annotated_in_window: 16}
-      - {id: 6bba_283bf9f1, annotated_nodes: 1342, annotated_in_window: 123}
-      - {id: 6bba_d5eae175, annotated_nodes: 528, annotated_in_window: 40}
-    fold_6bba_annotated_in_window_total: 706
-    min_positives_declared: 200
-    min_positives_note: >-
-      Below the sparser direction's own preflight (238) and an order of
-      magnitude above what Stage 2 trained on (13). A floor for the preflight
-      to refuse under, not a target.
+    min_positives_floor: 200 annotated cells across the training windows, checked before any push
 
-  pass_condition:
+  advancement_condition_per_direction:
     - a finite, decreasing epoch-mean loss
     - positives above zero in every epoch
-    - stable clamp behaviour: the non-negative clamp firing on fewer batches in the last epoch than in the first
-    - no guard failure
-    - peak allocation below the 13 GiB ceiling of D-0045
-    - held-out oracle ceiling at or above A0 on the same windows, reported per direction, never pooled
-  after_pass: mini-fold for the passing arm and direction under a further envelope; nothing here
-  kill: an arm failing the condition in a direction is held in that direction; failing both is killed
+    - no guard failure and peak allocation under the ceiling
+    - residual_propensity_test passed: the probe rerun with the trained scorer's logit as the control gains no more from circumstances than max(the permutation null, the DoG response's own gain)
+    - fixed-count held-out ceiling at or above A0 on the same windows, reported per seed and per direction, never pooled
+  after_wave_1: >-
+    only an arm improving the fixed-count ceiling in both directions at both
+    seeds reaches a mini-fold, under a further envelope; a direction that
+    degrades below A0 counts toward D-0046's kill; wave 2 runs only if the
+    controller's next_action after wave 1 does not read stop and redesign
+  kill: an arm failing the condition in a direction is held in that direction; failing both is killed; A4 and B4 stay held throughout
 
-  compute_policy: D-0045
-  measured_per_run: median GPU utilisation, data-wait fraction, examples per second, positives per batch, clamp frequency, peak allocated and reserved bytes
-  ceiling_minutes_per_run: 30
-  totals:
-    runs_maximum: 4 (A3 both directions; A4 both directions if permitted) plus one packaging, dependency, mount or transport repair retry per run
-    kernels_maximum: 8
-    gpu_minutes_ceiling: 120
+  packages:
+    A3-fold_44b6:
+      arm: A3
+      fold: fold_44b6
+      kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+      title: Biohub-X E07 A3 fold 44b6
+      smoke_id: E07-SMOKE-2B
+      commit: 159ca24eea87360b7ee92fc328772362331b7432
+      package_digest: canonical_text_sha256:sha256/v1:64dbb55009bc1987aab68b5870e96268d4f86d90781b2450df3c11e6b0196d91
+      kernel_source_bytes: 395387
+      pushable: true
+      workers:
+      - 0
+      - 1
+      train_movies:
+      - 44b6_5f15d135
+      - 44b6_808952d6
+      - 44b6_7e557709
+      - 44b6_2f31fc2f
+      - 44b6_267148e4
+      - 44b6_cf8fed6b
+      - 44b6_8f5ab931
+      - 44b6_abf82518
+      train_annotated_in_window: 238
+      evaluate_movies:
+      - 6bba_05b6850b
+      - 6bba_05db0fb1
+      - 6bba_062c8d37
+      - 6bba_07477033
+      evaluate_annotated_in_window: 270
+      runtime_ceiling_seconds: 3600
+      amp: true
+      batch_autotune: true
+      memory_ceiling_bytes: 13958643712
+      residual_test: true
+      sampling: uniform
+      input_artifacts: 24
+      path: artifacts/kaggle-stage2b-A3-fold_44b6
+    A3-fold_6bba:
+      arm: A3
+      fold: fold_6bba
+      kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
+      title: Biohub-X E07 A3 fold 6bba
+      smoke_id: E07-SMOKE-2B
+      commit: 159ca24eea87360b7ee92fc328772362331b7432
+      package_digest: canonical_text_sha256:sha256/v1:c94ce04a8bd6a595da8aa9eca4009fa47eed35d79ad70a0ef98012537ac29522
+      kernel_source_bytes: 395400
+      pushable: true
+      workers:
+      - 0
+      - 1
+      train_movies:
+      - 6bba_907271db
+      - 6bba_5b28472a
+      - 6bba_ebff6e76
+      - 6bba_312f0dc3
+      - 6bba_20852818
+      - 6bba_c73a1d11
+      - 6bba_283bf9f1
+      - 6bba_d5eae175
+      train_annotated_in_window: 706
+      evaluate_movies:
+      - 44b6_0113de3b
+      - 44b6_0b24845f
+      - 44b6_0c582fdc
+      - 44b6_0db75fae
+      evaluate_annotated_in_window: 43
+      runtime_ceiling_seconds: 3600
+      amp: true
+      batch_autotune: true
+      memory_ceiling_bytes: 13958643712
+      residual_test: true
+      sampling: uniform
+      input_artifacts: 24
+      path: artifacts/kaggle-stage2b-A3-fold_6bba
+    B3-fold_44b6:
+      arm: B3
+      fold: fold_44b6
+      kernel: aryaarun07/biohub-x-e08-b3-fold-44b6
+      title: Biohub-X E08 B3 fold 44b6
+      smoke_id: E08-SMOKE-2B
+      commit: 159ca24eea87360b7ee92fc328772362331b7432
+      package_digest: canonical_text_sha256:sha256/v1:71cb1b9a31df10798b3af750dd8298cecfb0df2fee7fb38487423999cd831d9c
+      kernel_source_bytes: 395398
+      pushable: true
+      workers:
+      - 0
+      - 1
+      train_movies:
+      - 44b6_5f15d135
+      - 44b6_808952d6
+      - 44b6_7e557709
+      - 44b6_2f31fc2f
+      - 44b6_267148e4
+      - 44b6_cf8fed6b
+      - 44b6_8f5ab931
+      - 44b6_abf82518
+      train_annotated_in_window: 238
+      evaluate_movies:
+      - 6bba_05b6850b
+      - 6bba_05db0fb1
+      - 6bba_062c8d37
+      - 6bba_07477033
+      evaluate_annotated_in_window: 270
+      runtime_ceiling_seconds: 3600
+      amp: true
+      batch_autotune: true
+      memory_ceiling_bytes: 13958643712
+      residual_test: true
+      sampling: propensity_matched
+      input_artifacts: 24
+      path: artifacts/kaggle-stage2b-B3-fold_44b6
+    B3-fold_6bba:
+      arm: B3
+      fold: fold_6bba
+      kernel: aryaarun07/biohub-x-e08-b3-fold-6bba
+      title: Biohub-X E08 B3 fold 6bba
+      smoke_id: E08-SMOKE-2B
+      commit: 159ca24eea87360b7ee92fc328772362331b7432
+      package_digest: canonical_text_sha256:sha256/v1:49b94c937bfe9545c85abe2a27e4a4b9b700149a8f3eeb22ac10877cde6bf8af
+      kernel_source_bytes: 395411
+      pushable: true
+      workers:
+      - 0
+      - 1
+      train_movies:
+      - 6bba_907271db
+      - 6bba_5b28472a
+      - 6bba_ebff6e76
+      - 6bba_312f0dc3
+      - 6bba_20852818
+      - 6bba_c73a1d11
+      - 6bba_283bf9f1
+      - 6bba_d5eae175
+      train_annotated_in_window: 706
+      evaluate_movies:
+      - 44b6_0113de3b
+      - 44b6_0b24845f
+      - 44b6_0c582fdc
+      - 44b6_0db75fae
+      evaluate_annotated_in_window: 43
+      runtime_ceiling_seconds: 3600
+      amp: true
+      batch_autotune: true
+      memory_ceiling_bytes: 13958643712
+      residual_test: true
+      sampling: propensity_matched
+      input_artifacts: 24
+      path: artifacts/kaggle-stage2b-B3-fold_6bba
+
+  cpu_preflight_of_the_two_objectives:
+    note: >-
+      the same two 44b6 windows at 4 frames, 2 epochs, 18 positives, 18 effective
+      steps; both scorers are untrained at this size and both residual tests
+      fail, which proves the mechanism runs and the test can fail, not anything
+      about either objective. Stage 2B is the first test with enough positives.
+    A3:
+      windows: 44b6_5f15d135 and 44b6_808952d6, 4 frames, 2 epochs, batch 512, CPU
+      positives: 18
+      steps: 18
+      skipped_no_positive: 34
+      held_out_score: 0.22226413776240875
+      A0_score: 0.90587865451116
+      held_out_match: 0.375
+      residual_passed: false
+      scorer_control_auc: 0.3587
+      scorer_gain: 0.5505
+      reload_identical: true
+      sampling: null
+    B3:
+      windows: 44b6_5f15d135 and 44b6_808952d6, 4 frames, 2 epochs, batch 512, CPU
+      positives: 18
+      steps: 18
+      skipped_no_positive: 34
+      held_out_score: null
+      A0_score: 0.90587865451116
+      held_out_match: 0.0
+      residual_passed: false
+      scorer_control_auc: 0.1137
+      scorer_gain: 0.7686
+      reload_identical: true
+      sampling:
+        coefficients:
+          density: -2.3937
+          face_um: -0.021
+          motion_um: -0.3529
+          persist_next: -0.3661
+          persist_prev: -0.1417
+          t: 0.2692
+          x: 0.3208
+          y: 1.0116
+          z: 0.5347
+        effective_unlabelled_per_movie:
+        - 743.6
+        - 735.8
+        matched_on:
+        - z
+        - y
+        - x
+        - face_um
+        - t
+        - density
+        - persist_prev
+        - persist_next
+        - motion_um
+        weight_cap: 20.0
+
+  budget:
+    kernels_planned: 4 (wave 1: two; wave 2: two, conditional)
+    kernels_maximum: 8 (one packaging, dependency, mount, transport or hardware-guard repair retry per planned kernel)
+    runtime_ceiling_seconds_per_kernel: 3600
+    expected_wall_clock_minutes_per_kernel: >-
+      about 25 with two cards: input building for twelve windows, two epochs,
+      the residual test at thirty permutations on eight movies, and four
+      held-out windows, the two workers in parallel; about 45 with one card
+      serialising the workers, which is why the ceiling is sixty
+    expected_wall_clock_minutes_total: about 100 for four kernels; the ceiling is 240
+    gpu_minutes_ceiling: 240
     stop_conditions:
-      - any guard failure that is not a packaging, dependency, mount or transport defect
-      - a run exceeding its declared runtime ceiling
-      - peak allocation above 13 GiB
-      - a preflight below the declared minimum, which stops before a push
+      - any guard failure that is not a packaging, dependency, mount, transport or hardware-guard defect
+      - a kernel exceeding its runtime ceiling
+      - peak allocation above the ceiling on any worker
+      - a preflight below the floor, which stops before a push
       - any read of the public-test directory
       - any attempt to push beyond the kernel maximum
 
-  retrieval: package retrieve, only the manifest and the log per kernel
-  registration: every attempt gets its own reference entry; results enter E07 stage_results as stage2b, per arm, per direction
-  forbidden: public-test data, submissions, external weights, full-fold training, any scientific configuration change beyond the selection rule this envelope declares
+  retrieval: package retrieve, only the summary manifest, the per-seed manifests and the log per kernel; checkpoints only for an arm that passes both directions
+  registration: every attempt gets its own reference entry; results enter E07 (A3) and E08 (B3) stage_results as stage2b, per seed, per direction
+  forbidden: public-test data, leaderboard tuning, submission, internet, contaminated weights, automatic promotion, full-fold training, and any scientific change, which is a new arm rather than a repair
