@@ -669,6 +669,24 @@ experiments:
     runtime_ceiling: 7200 seconds per source
     provenance_status: diagnostic_ceiling
     preregistered_at_commit: after b48c1ee, before any arm ran
+    outcome:
+      finding: F-0035
+      a0_reproduces_f0033: true
+      arms_killed: [A1, A3]
+      arm_promoted_as_proposal_source: A2
+      scores_held_out:
+        A0: {44b6: 0.9961, 6bba: 0.9227}
+        A2: {44b6: 1.0195, 6bba: 0.9283}
+      decision_applied: >-
+        Budgeted selection is killed on its falsifier: neither source improves
+        the held-out ceiling in both directions at the ratio chosen on the
+        training embryo. The per-scale union without truncation improves both
+        directions and needs no fitted constant, so it is the better proposal
+        source and becomes a new frozen declaration when one is written; it does
+        not edit D-0041 or E06's frozen block by itself. The exit rule toward
+        E06 is not met: A2's 6bba ceiling is 0.9283, below 0.950, so association
+        is still not the bottleneck and the learned proposal arm comes first.
+    status: complete
 
   - id: E06
     component: association

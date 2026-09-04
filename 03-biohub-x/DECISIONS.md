@@ -1426,3 +1426,66 @@ the vendored official source hashes byte for byte to the registry, the fifteen
 scorer fixtures produce the same digest as this machine, and a real two-frame
 window scores to the same 868 proposals and the same 1.0188663725416884. The
 scorer on the target is the scorer here.
+
+## D-0043 - Workstation tools live in a separate pinned environment, recorded before they are enabled
+
+**Date:** 2026-09-04
+**Status:** accepted
+**Authorised by:** Arya Arun
+
+Arya Arun authorised researching, pinning, installing, configuring and using
+public scientific tools for Biohub-X: a visual profile (napari, napari-mcp,
+napari-geff, motile-tracker, GEFF and tracksdata), a read-only research profile
+(GitHub MCP, Playwright, Semantic Scholar), a sandboxed compute profile (Jupyter
+MCP Server) and a cross-check profile (Fiji, traccuracy, BioIO, ngff-zarr,
+BioImage.IO) that stays disabled until a trigger occurs. The authorisation
+amends the third-party-execution rule narrowly and nothing else.
+
+**Going forward, workstation tools are not production dependencies.** They live
+in a `Biohub-X-tools/<profile>` directory beside the repository, whose
+location the launcher resolves from `BIOHUBX_TOOLS_ROOT` or that sibling
+default; one environment per profile, built from a hash lock committed under
+`tools/workstation/requirements/`. Nothing enters `pyproject.toml` or `uv.lock`
+because it is useful interactively. tracksdata inside the visual environment is
+the Biohub-X build of [[R-0014]], installed from the metric wheelhouse with
+hashes required, so the viewer reads graphs with the same library the scorer
+uses.
+
+**A tool is recorded before it is enabled.** `tools/workstation/manifest.yaml`
+carries, for each tool, the source repository, release or commit, licence, the
+digest of the installed artifact, its capabilities, its consumer and its status.
+Every pin traces to a research-ledger entry in campaign WS-01, which is how the
+napari pin became 0.7.1 rather than the current 0.9.0: motile-tracker 5.0.1
+requires napari below 0.8 (RL-0027), and a pin chosen from the release page
+alone would have installed a plugin that cannot load. "napari-track-edit" does
+not exist on PyPI; the 404 is in the ledger and the plugin Arya meant is
+motile-tracker.
+
+**One profile is active at a time, pinned, local, and stdio.** Profiles are JSON
+files with two path placeholders, so no tracked file carries an absolute path;
+`tools/workstation/activate.py` writes the ignored `.mcp.json` from one of them
+and refuses a profile whose commands are not installed. No `latest` command is
+configured as a durable installation. Competition data never leaves the
+machine: every server runs locally, data roots are opened read-only, and the
+six claude.ai connectors already present are unrelated and untouched.
+
+**napari-mcp's installer is removed and its code execution is off by default.**
+The server exposes `install_packages` and `execute_code` (RL-0039, RL-0044).
+The launcher drops `install_packages` unconditionally and `execute_code` unless
+`BIOHUBX_NAPARI_EXECUTE=1` is set for a session whose snippet, inputs and
+output path are declared in that session's record. napari's own plugin
+installer is not used.
+
+**A tool output is not a finding.** It may motivate a hypothesis; the hypothesis
+becomes a probe with a falsifier and is measured by a preregistered `biohubx`
+command before anything enters `registry/findings.yaml`. Material tool sessions
+keep objective and falsifier, tool version, inputs and digests, read and write
+scope, the calls that reproduce them, generated artifact and screenshot
+digests, and the uncertainty left open. No second experiment ledger (MLflow,
+Weights & Biases, DVC) is added; the registries remain canonical.
+
+What this does not touch: the prior-campaign quarantine, data licensing, the
+embryo splits, the vendored official scorer as promotion authority, falsifiers,
+provenance, finding status, promotion criteria and submission controls. The
+research sandbox of [[D-0039]] still governs research-acquired code; a pinned
+public tool in the workstation environment is the one thing carved out of it.

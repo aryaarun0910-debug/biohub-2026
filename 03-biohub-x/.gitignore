@@ -40,3 +40,6 @@ submission.csv
 # Research payloads acquired under D-0039. Metadata lives in
 # registry/research-ledger.yaml and is tracked; the bytes are not.
 research/cache/
+
+# the active workstation MCP profile, written by tools/workstation/activate.py
+.mcp.json

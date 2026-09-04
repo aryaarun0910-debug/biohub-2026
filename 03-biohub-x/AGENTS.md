@@ -140,6 +140,18 @@ separately declared research input. Unknown code progresses from static and
 dependency inspection to sandbox execution and only then to controlled network
 access. An ordinary shell on the user's workstation is not this sandbox.
 
+One narrow exception, under Arya Arun's authorisation of 2026-09-04 ([[D-0043]]):
+published scientific tools recorded in `tools/workstation/manifest.yaml`, pinned
+by release and artifact digest, with licence, capabilities and consumer stated
+before enabling, may be installed into the separate workstation environment and
+run on the workstation with data roots read-only and competition data never
+sent to a hosted service. They are instruments: their outputs may motivate a
+probe and never become a finding until a preregistered `biohubx` command
+measures it. Research-acquired code is not a tool in this sense and stays in
+the sandbox above. Nothing here touches the prior-campaign quarantine, data
+licensing, splits, the official scorer's authority, falsifiers, provenance,
+promotion or submission controls.
+
 ## 5. Data and splits
 
 Split by source embryo, movie or direction before augmentation. Augmented

@@ -1170,3 +1170,60 @@ findings:
         estimated_number_of_nodes, the response quantile is 0.95, suppression is
         4 micrometres, and two annotated frames per movie are read.
     superseded_by: null
+
+  - id: F-0035
+    claim: >-
+      Truncating proposals to a budget chosen on the training embryo does not
+      raise the oracle ceiling on the held-out embryo, and the per-scale union
+      without truncation does. Over ten-frame windows of all 199 annotated
+      movies, arm A0 (the frozen D-0041 peaks, untruncated) reproduces F-0033
+      exactly at 0.9961 on 44b6 and 0.9227 on 6bba, which is the check that the
+      instrument change did not move the baseline. Budgeted selection is killed
+      on its own falsifier: fold_44b6 selects k=1.5 on 44b6 (0.9962 against A0's
+      0.9961) and reads 0.9072 on held-out 6bba against A0's 0.9227, and the
+      union arm A3 selects the same ratio and reads 0.9116, also below A0.
+      Only the direction that selects on the dense embryo improves, and only
+      trivially: fold_6bba picks k=2.0 and reads 0.9961 on held-out 44b6, equal
+      to A0 to four decimals. Arm A2, the per-scale union with no truncation and
+      therefore no constant to select, improves both directions at once: 1.0195
+      on 44b6 against 0.9961 and 0.9283 on 6bba against 0.9227. It buys that
+      with proposals, 253,543 and 330,820 against 219,020 and 275,566, and pays
+      the node-ratio charge on the dense embryo, +0.5637 against +0.3025, while
+      raising its node match fraction from 0.9066 to 0.9300 and its edge
+      retention from 0.8774 to 0.9107. No arm reaches 0.950 on 6bba; the best
+      held-out reading on that embryo is A2's 0.9283.
+    instrument: biohubx evaluate oracle-ceiling --budget-ratios, with and without --per-scale-union
+    evidence:
+      command: >-
+        biohubx evaluate oracle-ceiling --budget-ratios 0.8,1.0,1.25,1.5,2.0
+        --out artifacts/e05-peaks.json, and the same with --per-scale-union
+        --out artifacts/e05-union.json; both at the E06-ORACLE window, ten frames
+        from the first annotated frame, every ratio scored from one detection
+        pass per window
+      observed: artifacts/e05-peaks.json, artifacts/e05-union.json
+      note: >-
+        diagnostic_ceiling. Four readings. First, the budget hypothesis fails in
+        the direction that matters: truncation helps the embryo it is fitted on
+        by a thousandth and costs the other one about 0.015, because the two
+        embryos want opposite corrections and one scalar cannot give them both.
+        Second, the union's gain is retention, not selection, which is why it
+        survives the held-out swap: it adds proposals the peak rule lost to
+        cross-scale fusion, and those proposals carry edges. Third, the node
+        term is doing more of the work than it looks: the official adjusted
+        Jaccard is J*(1 - 0.1*r), so a negative node ratio multiplies the score
+        above the raw Jaccard, and 44b6's window scores exceed 1.0 for that
+        reason. Window scores are therefore not comparable with whole-movie
+        scores and a window target of 0.950 is not the leaderboard's 0.950; what
+        is comparable here is one arm against another on the same windows.
+        Fourth, and the reason E05 does not end the proposal question: A2's 6bba
+        ceiling is 0.9283, so even a perfect linker over the best proposal set
+        measured so far cannot reach 0.950 on the dense embryo.
+    validity:
+      scope: association_ceiling_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, ten frames per movie are read from
+        the first annotated frame, the official 7 micrometre radius and voxel
+        scale hold, the response quantile is 0.95, suppression is 4 micrometres,
+        the bank is (2.0, 3.0), and the pinned scorer's constants are 0.1 and
+        0.1.
+    superseded_by: null

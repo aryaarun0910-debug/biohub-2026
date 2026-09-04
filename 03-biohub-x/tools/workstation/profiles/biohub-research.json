@@ -1,0 +1,25 @@
+{
+  "profile": "biohub-research",
+  "status": "planned",
+  "purpose": "read-only GitHub, Playwright browser evidence, Semantic Scholar citation expansion; every acquisition still enters the research ledger",
+  "mcpServers": {
+    "github": {
+      "type": "stdio",
+      "command": "${BIOHUBX_TOOLS}/biohub-research/Scripts/python.exe",
+      "args": ["${BIOHUBX_REPO}/tools/workstation/launch_github_mcp.py", "--read-only", "--toolsets", "repos,issues"],
+      "env": {}
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${BIOHUBX_TOOLS}/biohub-research/node_modules/@playwright/mcp/cli.js", "--browser", "chromium", "--isolated"],
+      "env": {"PLAYWRIGHT_BROWSERS_PATH": "${BIOHUBX_TOOLS}/biohub-research/browsers"}
+    },
+    "semantic-scholar": {
+      "type": "stdio",
+      "command": "${BIOHUBX_TOOLS}/biohub-research/Scripts/python.exe",
+      "args": ["-m", "semantic_scholar_mcp"],
+      "env": {}
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "profile": "biohub-crosscheck",
+  "status": "disabled",
+  "purpose": "independent implementations for cross-checks; each tool waits for its trigger. Fiji has no Java on this machine and is not installed.",
+  "mcpServers": {
+    "ngff-zarr": {
+      "type": "stdio",
+      "command": "${BIOHUBX_TOOLS}/biohub-crosscheck/Scripts/python.exe",
+      "args": ["-m", "ngff_zarr_mcp"],
+      "env": {}
+    }
+  }
+}

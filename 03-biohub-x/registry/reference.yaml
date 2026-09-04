@@ -2332,6 +2332,79 @@ references:
       matching and the scorer end to end and to compare to the digit; the
       corpus-scale agreement question is the fold's, not the preflight's.
 
+  - id: R-0018
+    status: measured_environment
+    title: The biohub-visual workstation profile, installed, pinned and validated on real data
+    why: >-
+      [[D-0043]] authorises pinned public tools in a separate environment and
+      requires each to be recorded before it is enabled. This is that record for
+      the first profile, the one that supports E05 and E06 error analysis.
+
+    environment:
+      root: >-
+        the biohub-visual directory under the workstation tools root, which is
+        BIOHUBX_TOOLS_ROOT or a Biohub-X-tools directory beside the repository.
+        No absolute path is recorded, because the isolation contract forbids one
+        and a checkout on another machine would inherit a directory that is not there.
+      python: 3.12.12
+      built_by: uv venv, then uv pip sync --require-hashes
+      lock: tools/workstation/requirements/biohub-visual.lock.txt
+      lock_lines: 3840
+      manifest: tools/workstation/manifest.yaml
+      in_production_dependencies: false
+
+    installed:
+      napari: 0.7.1 with PyQt6 6.11.0
+      napari-mcp: 0.1.0
+      napari-geff: 0.0.4
+      motile-tracker: 5.0.1
+      motile: 1.0.1
+      geff: 1.3.1.1.3
+      tracksdata: 0.1.0rc9.dev4+g7bfeaf845, the Biohub-X build of R-0014, installed from
+        artifacts/wheelhouse-metric with --require-hashes rather than from a git source
+      pin_reason: >-
+        napari is 0.7.1 rather than the current 0.9.0 because motile-tracker
+        5.0.1 requires napari below 0.8 (RL-0027). A pin taken from the release
+        page alone would have installed a plugin that cannot load.
+      not_installed:
+        napari-track-edit: no such distribution on PyPI; the 404 is RL-0027's neighbour in the ledger, and the track editor Arya named is motile-tracker
+
+    capability_restrictions:
+      launcher: tools/workstation/launch_napari_mcp.py
+      install_packages: removed unconditionally
+      execute_code: removed unless BIOHUBX_NAPARI_EXECUTE=1 for a declared session
+      proof: >-
+        launch_napari_mcp.py --list-tools prints removed and exposed names and
+        exits non-zero if a removed name is still exposed. Observed exposed set
+        with the gate closed: add_layer, apply_to_layers, close_viewer,
+        configure_viewer, get_layer, init_viewer, list_layers, read_output,
+        remove_layer, reorder_layer, save_layer_data, screenshot,
+        session_information, set_layer_properties. With BIOHUBX_NAPARI_EXECUTE=1
+        the set gains execute_code and still lacks install_packages.
+
+    validation:
+      session: artifacts/tool-sessions/WS-VISUAL-01.json
+      dataset: 44b6_ddf577ad, 2 frames from frame 0, full 45 x 411 x 425 window
+      loaded: the volume, 24 annotated nodes, and 868 frozen D-0041 proposals as three layers
+      scale: (1.0, 4.0, 1.0, 1.0) applied to (t, z, y, x); the proposal contract's physical field equals voxel times scale on the checked instance
+      rendered: an orthogonal view with 946 distinct colours and a 3D view with 7,328, different digests
+      data_root_unchanged: true
+      note: >-
+        A hidden viewer renders a blank canvas, so the first capture returned one
+        flat colour twice and two identical digests. The window is shown and the
+        colour count is now a guard rather than an assumption. The reading is
+        recorded because a screenshot that looks captured and is empty is exactly
+        the failure a visual profile would otherwise carry into an analysis.
+
+    not_yet_done:
+      - napari-geff's own npe2 reader has not been exercised on the competition
+        store; the graph in the validation was read with Biohub-X's reader. That
+        round trip is the next visual check.
+      - motile-tracker has been imported, not driven.
+      - Nothing here is evidence. A visual observation becomes a probe with a
+        falsifier and is measured by a preregistered command before it can be a
+        finding.
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per

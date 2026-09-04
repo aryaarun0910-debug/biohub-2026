@@ -100,6 +100,12 @@ ignore = ["ANN401"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["ANN201", "ANN001"]
+# Workstation instruments (D-0043). They run under a different interpreter in a
+# separate pinned environment, so their third-party imports do not resolve here
+# and mypy does not see them at all. E402 because the validation script must set
+# the Qt platform and sys.path before napari is imported; ANN because the objects
+# they annotate would be FastMCP and napari types this environment cannot import.
+"tools/workstation/**" = ["E402", "ANN001", "ANN201"]
 
 [tool.mypy]
 python_version = "3.12"

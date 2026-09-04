@@ -595,6 +595,18 @@ the disposable sandbox specified by [[D-0039]]; private material, hard resource
 limits, unscoped external writes and submissions remain outside the standing
 authorization.
 
+Workstation tools are the one carve-out, under [[D-0043]]. Published scientific
+tools (napari with napari-mcp, napari-geff and motile-tracker; read-only GitHub,
+Playwright and Semantic Scholar MCP servers; a local Jupyter MCP server;
+cross-check libraries) live in separate pinned environments beside the
+repository, are recorded in `tools/workstation/manifest.yaml` with source,
+release, licence, installed digest, capabilities and consumer before they are
+enabled, and are activated one profile at a time by
+`tools/workstation/activate.py`. They run locally over stdio with data roots
+read-only; competition data never reaches a hosted service. A tool output may
+motivate a probe and becomes a finding only through a preregistered `biohubx`
+command. The plan and triggers are in `tools/workstation/PLAN.md`.
+
 The research-and-test factory uses two lanes under [[D-0037]]. Compact probes
 run locally or CPU-only to eliminate weak ideas cheaply; they cannot promote a
 component. Promotion experiments retain the full preregistration, clean embryo

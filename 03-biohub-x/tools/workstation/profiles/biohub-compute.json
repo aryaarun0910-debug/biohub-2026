@@ -1,0 +1,13 @@
+{
+  "profile": "biohub-compute",
+  "status": "planned",
+  "purpose": "Jupyter MCP Server over a local disposable Jupyter: no secrets, competition inputs read-only, one scratch mount; notebooks are instruments, never evidence",
+  "mcpServers": {
+    "jupyter": {
+      "type": "stdio",
+      "command": "${BIOHUBX_TOOLS}/biohub-compute/Scripts/python.exe",
+      "args": ["-m", "jupyter_mcp_server", "--transport", "stdio"],
+      "env": {}
+    }
+  }
+}

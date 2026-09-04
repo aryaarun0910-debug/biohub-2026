@@ -1,0 +1,213 @@
+# Workstation tools, one record per tool, written before a tool is enabled (D-0043).
+# installed_digest is a canonicalization-v1 tree digest of the installed package
+# directory in the profile environment; planned and disabled tools carry none.
+schema_version: 1
+authorised_by: Arya Arun, 2026-09-04
+environments_root: BIOHUBX_TOOLS_ROOT, or a Biohub-X-tools directory beside the repository
+profiles:
+  biohub-visual: enabled
+  biohub-research: planned
+  biohub-compute: planned
+  biohub-crosscheck: disabled
+tools:
+  - id: napari
+    profile: biohub-visual
+    status: enabled
+    distribution: napari
+    version: 0.7.1
+    source: https://github.com/napari/napari
+    licence: BSD-3-Clause
+    ledger: RL-0024
+    lock: tools/workstation/requirements/biohub-visual.lock.txt
+    installed_digest: tree_sha256:sha256/v1:2c6ce044c7d3b834a87c0a27f6358d57351d4118dd17aee08294301e65d6ee02
+    installed_path: site-packages/napari
+    installed_files: 1287
+    installed_bytes: 12471397
+    capabilities: n-dimensional viewer: image, points, labels, shapes, tracks layers; orthogonal slices and 3D; screenshots
+    consumer: viewer for E05/E06 error analysis
+  - id: pyqt6
+    profile: biohub-visual
+    status: enabled
+    distribution: PyQt6
+    version: 6.11.0
+    source: https://www.riverbankcomputing.com/software/pyqt/
+    licence: GPL-3.0-only (workstation use, not distributed)
+    ledger: RL-0024 (napari pyqt6 extra)
+    lock: tools/workstation/requirements/biohub-visual.lock.txt
+    installed_digest: tree_sha256:sha256/v1:6c7518835c3c7ac25183bc6b2c70204adc23ecbba1c5a42cbe03ce0fde281f66
+    installed_path: site-packages/PyQt6
+    installed_files: 3536
+    installed_bytes: 217098213
+    capabilities: Qt6 bindings napari renders through
+    consumer: napari backend
+  - id: napari-mcp
+    profile: biohub-visual
+    status: enabled
+    distribution: napari-mcp
+    version: 0.1.0
+    source: https://github.com/royerlab/napari-mcp
+    licence: BSD-3-Clause
+    ledger: RL-0025, RL-0039, RL-0044, RL-0045
+    lock: tools/workstation/requirements/biohub-visual.lock.txt
+    installed_digest: tree_sha256:sha256/v1:0492e81f47674d9b728561a40fc9d36a7606903d5babc27135e0ba1d2d31d9b9
+    installed_path: site-packages/napari_mcp
+    installed_files: 34
+    installed_bytes: 329916
+    capabilities: MCP server over a live viewer: init/close viewer, add and configure layers, camera, screenshot, session info; install_packages removed, execute_code gated (launch_napari_mcp.py)
+    consumer: Claude Code visual sessions
+  - id: napari-geff
+    profile: biohub-visual
+    status: enabled
+    distribution: napari-geff
+    version: 0.0.4
+    source: https://github.com/live-image-tracking-tools/napari-geff
+    licence: BSD-3-Clause
+    ledger: RL-0026, RL-0040
+    lock: tools/workstation/requirements/biohub-visual.lock.txt
+    installed_digest: tree_sha256:sha256/v1:5c4b636588c5d2f3d6ac15397cd8b29c36b077a76e363b12899e895e0e58220c
+    installed_path: site-packages/napari_geff
+    installed_files: 16
+    installed_bytes: 58711
+    capabilities: reads a GEFF store into napari tracks/points layers and writes tracks back to GEFF
+    consumer: loading ground truth and predicted graphs as layers
+  - id: motile-tracker
+    profile: biohub-visual
+    status: enabled
+    distribution: motile-tracker
+    version: 5.0.1
+    source: https://github.com/funkelab/motile_tracker
+    licence: BSD-3-Clause
+    ledger: RL-0027, RL-0041
+    lock: tools/workstation/requirements/biohub-visual.lock.txt
+    installed_digest: tree_sha256:sha256/v1:20ccdfa4ecc23bd7e3d28a0600a7f729a63facfc212b5eabdeba5165f78407e4
+    installed_path: site-packages/motile_tracker
+    installed_files: 127
+    installed_bytes: 992210
+    capabilities: interactive track editing, lineage view, Motile ILP solving inside napari
+    consumer: inspecting and hand-editing links to form probes
+  - id: motile
+    profile: biohub-visual
+    status: enabled
+    distribution: motile
+    version: 1.0.1
+    source: https://github.com/funkelab/motile
+    licence: MIT
+    ledger: RL-0028
+    lock: tools/workstation/requirements/biohub-visual.lock.txt
+    installed_digest: tree_sha256:sha256/v1:48ed1233cc7534d6566e65289511e38cfc8517da07f67195cbaa32e602422447
+    installed_path: site-packages/motile
+    installed_files: 82
+    installed_bytes: 209372
+    capabilities: ILP tracking on candidate graphs via ilpy
+    consumer: motile-tracker's solver
+  - id: geff
+    profile: biohub-visual
+    status: enabled
+    distribution: geff
+    version: 1.3.1.1.3
+    source: https://github.com/live-image-tracking-tools/geff
+    licence: MIT
+    ledger: RL-0029
+    lock: tools/workstation/requirements/biohub-visual.lock.txt
+    installed_digest: tree_sha256:sha256/v1:6e20ecd864a9be507ac0028ce6b6301a8fdbfec3eda1f514f15bab8d9e59f459
+    installed_path: site-packages/geff
+    installed_files: 59
+    installed_bytes: 441614
+    capabilities: graph exchange file format reader and writer
+    consumer: same pin as the repository
+  - id: tracksdata
+    profile: biohub-visual
+    status: enabled
+    distribution: tracksdata
+    version: 0.1.0rc9.dev4+g7bfeaf845
+    source: https://github.com/royerlab/tracksdata
+    licence: BSD-3-Clause upstream; Biohub-X build (R-0014)
+    ledger: RL-0023, R-0014
+    lock: artifacts/wheelhouse-metric/requirements-offline.txt, tracksdata line, --require-hashes
+    installed_digest: tree_sha256:sha256/v1:710ec6ce18d3a1c8e4592fbc3b29c79892565f132187ae5d2e7d532cd64ac876
+    installed_path: site-packages/tracksdata
+    installed_files: 157
+    installed_bytes: 2092901
+    capabilities: graph representation used by the official scorer
+    consumer: reading graphs the way the scorer does; installed from artifacts/wheelhouse-metric with hashes
+  - id: github-mcp-server
+    profile: biohub-research
+    status: planned
+    source: https://github.com/github/github-mcp-server
+    pin: v1.12.0, Windows x86_64 zip sha256 bc8782deda12dc1f36a182d0205bb4f11b05aee0eec7e2c8c109bb8f622fb4b4
+    licence: MIT
+    ledger: RL-0031, RL-0038, RL-0042, RL-0043
+    capabilities: GitHub API over MCP; run with --read-only and --toolsets repos,issues; token injected at launch from gh auth token
+    consumer: exact upstream commits, issues, releases, licences, history
+  - id: playwright-mcp
+    profile: biohub-research
+    status: planned
+    source: https://github.com/microsoft/playwright-mcp
+    pin: @playwright/mcp 0.0.80 (npm)
+    licence: Apache-2.0
+    ledger: RL-0030
+    capabilities: browser automation over MCP: navigate, snapshot, screenshot, evaluate; isolated chromium
+    consumer: dynamically rendered pages and browser state as evidence
+  - id: semantic-scholar-mcp
+    profile: biohub-research
+    status: planned
+    source: https://github.com/hy20191108/semantic-scholar-mcp
+    pin: 0.4.0 (community server)
+    licence: MIT
+    ledger: RL-0032
+    capabilities: Semantic Scholar search, citations, references
+    consumer: citation expansion and convergence checks
+  - id: jupyter-mcp-server
+    profile: biohub-compute
+    status: planned
+    source: https://github.com/datalayer/jupyter-mcp-server
+    pin: 2.1.4
+    licence: BSD-3-Clause
+    ledger: RL-0033
+    capabilities: notebook and kernel control over MCP against a local Jupyter server
+    consumer: multi-call diagnostics and plots before a biohubx command exists
+  - id: traccuracy
+    profile: biohub-crosscheck
+    status: disabled
+    source: https://github.com/live-image-tracking-tools/traccuracy
+    pin: 0.4.3
+    licence: BSD-3-Clause
+    ledger: RL-0034
+    capabilities: CTC-style edge, division and track metrics with error localisation
+    consumer: diagnostics after an official-score run; never the promotion authority
+  - id: bioio
+    profile: biohub-crosscheck
+    status: disabled
+    source: https://github.com/bioio-devs/bioio
+    pin: 3.5.0
+    licence: BSD-3-Clause
+    ledger: RL-0035
+    capabilities: microscopy format reading with explicit TCZYX normalisation
+    consumer: an external dataset in a format the canonical reader does not support
+  - id: ngff-zarr-mcp
+    profile: biohub-crosscheck
+    status: disabled
+    source: https://github.com/thewtex/ngff-zarr
+    pin: 0.14.0 over ngff-zarr 0.45.0
+    licence: MIT
+    ledger: RL-0036, RL-0037
+    capabilities: OME-NGFF metadata inspection, conformance and conversion over MCP
+    consumer: genuine OME-NGFF questions; not a replacement for the competition reader
+  - id: fiji-mcp
+    profile: biohub-crosscheck
+    status: disabled
+    source: not selected
+    pin: none; no Java runtime on this machine
+    licence: 
+    ledger: 
+    capabilities: independent image-processing implementation
+    consumer: an image-processing conclusion needing an implementation independent of the Python stack
+  - id: bioimage-io
+    profile: biohub-crosscheck
+    status: disabled
+    source: https://bioimage.io
+    pin: search only, no client installed
+    licence: 
+    ledger: 
+    capabilities: public microscopy model zoo
+    consumer: reusable public models; source, licences, training data, preprocessing, axes, scale and eligibility recorded before any download
