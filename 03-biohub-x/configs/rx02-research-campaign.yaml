@@ -1,0 +1,83 @@
+# RX-02, the first campaign run through the controller/worker factory.
+#
+# Three jobs, three isolated workers, one controller. Each job is dispatched as
+# an immutable request and answered inside its own run directory; only
+# `biohubx research collect` writes the ledger, once, under a lock.
+#
+# None of these jobs reads competition data, trains anything, or can promote
+# anything. They are intake and mechanism extraction under AGENTS.md section 2:
+# they may motivate a falsifiable hypothesis and may not establish a finding.
+# Every result carries `reference_only` for that reason, and the taint is
+# monotonic, so nothing downstream can quietly drop it.
+#
+# Budgets are drawn against the shared session envelope in AGENTS.md section 7:
+# three concurrent branches at 2 GiB each against an 8 GiB session total.
+
+campaign: RX-02
+policy: D-0039
+opened: '2026-09-04'
+objective: >-
+  Three questions that can be answered without competition compute while E07
+  waits on a decision: what public solutions actually do, what the literature
+  says about ranking from positive-unlabelled data at a fixed count, and whether
+  any public microscopy corpus or pretrained representation could be used
+  without importing annotation propensity.
+
+jobs:
+  - job: notebook-mechanisms
+    question: >-
+      What mechanism do the highest-scoring public notebooks for this
+      competition actually use, read from their source rather than their
+      description: detector, association, decode, and where the score comes
+      from. The 0.941 notebook is the first target.
+    falsifier: >-
+      The job fails if no mechanism can be identified from source alone, or if
+      every high-scoring notebook turns out to exploit the public leaderboard
+      rather than to track cells, in which case the branch is killed and says so
+      rather than reporting an unusable mechanism.
+    inputs:
+      - public Kaggle notebook source and metadata, retrieved with kaggle kernels pull
+      - registry/reference.yaml, read only
+    split: not applicable; this job reads no competition data
+    seed: 0
+    budget: {requests: 500, bytes: 2147483648, minutes: 120}
+    taints: [reference_only]
+
+  - job: pu-ranking-primary
+    question: >-
+      What does primary research establish about ranking under
+      positive-unlabelled supervision with selection bias, calibration and
+      uncertainty, and about selecting a fixed number of candidates rather than
+      thresholding a score. E07's decode keeps a count tied to each movie's
+      official estimate, and that choice was made from one measurement.
+    falsifier: >-
+      The job fails if the literature offers no estimator, correction or
+      selection rule that could be stated as a falsifiable Biohub-X probe over
+      the existing candidate pool.
+    inputs:
+      - public papers, preprints and official project repositories
+      - registry/findings.yaml, read only
+    split: not applicable; this job reads no competition data
+    seed: 0
+    budget: {requests: 500, bytes: 2147483648, minutes: 120}
+    taints: [reference_only]
+
+  - job: alternative-microscopy
+    question: >-
+      Which public 3D microscopy corpora and pretrained representations exist
+      whose licence, provenance and training data are documented well enough to
+      be usable here, judged from metadata, licences and small samples only.
+    falsifier: >-
+      The job fails if no corpus clears AGENTS.md section 6 on licence and
+      training-data provenance, which is the outcome R-0013 already reached for
+      SELMA3D and would make the branch closed rather than open.
+    inputs:
+      - public dataset metadata, manifests, licences and small samples
+      - registry/models.yaml, read only
+    split: not applicable; this job reads no competition data
+    seed: 0
+    budget: {requests: 500, bytes: 2147483648, minutes: 120}
+    # Unknown training data is assumed until provenance is established, not
+    # after it fails to be. A pretrained representation whose corpus is unknown
+    # could contain this competition's images.
+    taints: [reference_only, unknown_training_data]
