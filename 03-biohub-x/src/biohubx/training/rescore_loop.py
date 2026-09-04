@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
@@ -233,6 +234,16 @@ def annotated_in_window(data_root: Path, dataset: str, frames: int) -> tuple[int
     return first, inside
 
 
+def staged_path(cached: Path) -> Path:
+    """A partial-file name carrying the writer's pid, so two writers never race on one name.
+
+    The rename onto the final name stays atomic; what changes is that a second
+    process staging the same key cannot remove the first's partial file out
+    from under it ([[R-0030]]).
+    """
+    return cached.with_name(f"{cached.name}.{os.getpid()}.partial")
+
+
 def cache_key(spec: LoopSpec, dataset: str, first_frame: int) -> str:
     payload = json.dumps(
         {
@@ -306,7 +317,7 @@ def build_inputs(
         patches = rescore.candidate_patches(window.volume, pool, arm=spec.arm, radii_um=spec.radii_um)
         if cached is not None:
             cached.parent.mkdir(parents=True, exist_ok=True)
-            staged = cached.with_suffix(".pt.partial")
+            staged = staged_path(cached)
             torch.save(patches, staged)
             staged.replace(cached)
     return MovieInputs(

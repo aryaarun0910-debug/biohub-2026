@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import subprocess
 import sys
 import zipfile
@@ -698,3 +699,14 @@ def test_a_worker_subprocess_finds_the_package_through_its_own_environment(tmp_p
     )
     assert child.returncode == 0, child.stderr
     assert Path(child.stdout.strip()).resolve().is_relative_to(src)
+
+
+def test_two_workers_share_nothing_writable(tmp_path: Path) -> None:
+    """R-0030: one cache directory for two workers raced on one partial name."""
+    from biohubx.packaging import entry
+    from biohubx.training.rescore_loop import staged_path
+
+    assert entry.worker_cache_dir(tmp_path, 0) != entry.worker_cache_dir(tmp_path, 1)
+    target = tmp_path / "abc.pt"
+    staged = staged_path(target)
+    assert staged != target and staged.name.endswith(".partial") and str(os.getpid()) in staged.name

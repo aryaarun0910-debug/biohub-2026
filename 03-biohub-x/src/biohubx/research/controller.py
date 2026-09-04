@@ -221,14 +221,32 @@ def state_from_registries(root: Path) -> CampaignState:
     arms = []
     for name in ("A3", "A4"):
         block = stage_results.get(name, {})
-        smoke = block.get("stage2b", block.get("stage2"))
         smoke_passed: bool | None = None
-        if isinstance(smoke, dict) and "stage3_condition_met" in smoke:
-            smoke_passed = bool(smoke["stage3_condition_met"])
-        # Degradation: a Stage 2B direction whose fixed-count held-out ceiling
-        # fell below A0 on the same windows, recorded by the run itself.
-        if isinstance(smoke, dict) and "ceiling_degraded" in smoke:
-            degraded = bool(degraded) or bool(smoke["ceiling_degraded"])
+        attempts = {k: v for k, v in block.items() if k.startswith("stage2b_") and isinstance(v, dict)}
+        if attempts:
+            # Stage 2B attempts, per direction; the latest measured one counts.
+            # An attempt that produced no measurement (an integration failure)
+            # leaves the direction unmeasured rather than failed: nothing was
+            # learned about the arm, only about the package.
+            per_fold: dict[str, dict[str, Any]] = {}
+            for key, value in attempts.items():
+                fold = key.removeprefix("stage2b_").rsplit("_attempt", 1)[0]
+                if "advancement_condition_met_per_seed" in value:
+                    per_fold[fold] = value
+            if len(per_fold) >= 2:
+                smoke_passed = all(
+                    all(bool(v) for v in value["advancement_condition_met_per_seed"].values())
+                    for value in per_fold.values()
+                )
+                for value in per_fold.values():
+                    if value.get("ceiling_degraded_any_seed"):
+                        degraded = True
+        else:
+            smoke = block.get("stage2")
+            if isinstance(smoke, dict) and "stage3_condition_met" in smoke:
+                smoke_passed = bool(smoke["stage3_condition_met"])
+            if isinstance(smoke, dict) and "ceiling_degraded" in smoke:
+                degraded = bool(degraded) or bool(smoke["ceiling_degraded"])
         folds = block.get("stage3")
         improved: int | None = None
         if isinstance(folds, dict) and "directions_improved" in folds:

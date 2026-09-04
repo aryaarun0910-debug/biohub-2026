@@ -904,6 +904,12 @@ experiments:
           kernel_status: ''
           reference: R-0029
           outcome: no summary manifest retrieved
+        stage2b_fold_44b6_attempt3:
+          attempt: 3
+          kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+          kernel_status: KernelWorkerStatus.ERROR
+          reference: R-0030
+          outcome: no summary manifest retrieved
         stage2:
           campaign_envelope: GPU-CAMPAIGN-E07-01
           attempt: 3 of a maximum 12

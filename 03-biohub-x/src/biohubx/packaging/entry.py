@@ -786,6 +786,17 @@ def worker_command(job_path: Path, device: str) -> tuple[list[str], dict[str, st
     return argv, env
 
 
+def worker_cache_dir(out: Path, seed: int) -> Path:
+    """Each worker's own cache. Two isolated workers must share nothing writable.
+
+    Wave-1 attempt 3 ([[R-0030]]): both workers built the same movie's inputs
+    under one cache directory, both wrote the same ``.partial`` name, one
+    renamed it and the other's rename found nothing. Isolation on the device
+    without isolation on disk is half an isolation.
+    """
+    return out / "cache" / f"s{seed}"
+
+
 def run_worker_file(path: str) -> None:
     """Subprocess entry: one worker, one device, from the job the parent wrote."""
     job = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -893,7 +904,7 @@ def run_worker(
         root,
         loop_spec,
         device=torch_device,
-        cache_dir=out / "cache",
+        cache_dir=worker_cache_dir(out, seed),
         checkpoint_path=checkpoint,
         log=log,
     )

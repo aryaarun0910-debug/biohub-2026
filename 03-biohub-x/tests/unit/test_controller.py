@@ -7,7 +7,16 @@ a test and the order of precedence is asserted rather than assumed.
 
 from __future__ import annotations
 
-from biohubx.research.controller import ArmState, CampaignState, next_action
+from pathlib import Path
+
+import yaml
+
+from biohubx.research.controller import (
+    ArmState,
+    CampaignState,
+    next_action,
+    state_from_registries,
+)
 
 
 def _state(**overrides: object) -> CampaignState:
@@ -132,3 +141,49 @@ def test_the_probe_outranks_every_other_rule() -> None:
         )
     )
     assert decision.rule.startswith("propensity falsified")
+
+
+def _registry(tmp_path: Path, a3: dict[str, object]) -> Path:
+    (tmp_path / "registry").mkdir()
+    body = {
+        "experiments": [
+            {"id": "E07", "baseline": {"ceilings": {"44b6": 1.0, "6bba": 0.9}}, "stage_results": {"A3": a3}}
+        ]
+    }
+    (tmp_path / "registry/experiments.yaml").write_text(yaml.safe_dump(body), encoding="utf-8")
+    return tmp_path
+
+
+def test_a_stage2b_attempt_without_a_measurement_leaves_the_smoke_unmeasured(tmp_path: Path) -> None:
+    """Wave-1 attempts 1 to 3 were integration failures. They say nothing about the
+    arm, so the controller must not read them as a failed smoke, and must not fall
+    back to the superseded Stage 2 reading either."""
+    root = _registry(
+        tmp_path,
+        {
+            "stage2": {"stage3_condition_met": False},
+            "stage2b_fold_44b6_attempt1": {"attempt": 1, "outcome": "no summary manifest retrieved"},
+        },
+    )
+    state = state_from_registries(root)
+    assert next(a for a in state.arms if a.arm == "A3").smoke_passed is None
+
+
+def test_a_measured_stage2b_in_both_directions_decides_the_smoke(tmp_path: Path) -> None:
+    root = _registry(
+        tmp_path,
+        {
+            "stage2b_fold_44b6_attempt3": {
+                "advancement_condition_met_per_seed": {"0": True, "1": True},
+                "ceiling_degraded_any_seed": False,
+            },
+            "stage2b_fold_6bba_attempt4": {
+                "advancement_condition_met_per_seed": {"0": True, "1": False},
+                "ceiling_degraded_any_seed": True,
+            },
+        },
+    )
+    state = state_from_registries(root)
+    a3 = next(a for a in state.arms if a.arm == "A3")
+    assert a3.smoke_passed is False
+    assert state.ceiling_degraded is True
