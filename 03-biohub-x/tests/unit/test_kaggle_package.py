@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import io
 import json
+import subprocess
+import sys
 import zipfile
 from pathlib import Path
 from typing import Any
@@ -672,3 +674,27 @@ def test_an_e08_package_routes_to_the_rescoring_loop_not_the_detector(
     for label in sorted(entry.RESCORE_EXPERIMENTS):
         entry.run_fold({"experiment": label})
     assert seen == ["E07", "E08"]
+
+
+def test_a_worker_subprocess_finds_the_package_through_its_own_environment(tmp_path: Path) -> None:
+    """Wave-1 attempts 1 and 2: every worker died on `No module named biohubx`, because
+    a child inherits no sys.path. The child here runs with -S, so site-packages is
+    hidden and the only way it can import the package is the PYTHONPATH the
+    command carries."""
+    from biohubx.packaging import entry
+
+    argv, env = entry.worker_command(tmp_path / "job.json", "cpu")
+    src = Path(entry.__file__).resolve().parents[2]
+
+    assert argv[0] == sys.executable and "run_worker_file" in argv[2]
+    assert env["PYTHONPATH"].split(";" if sys.platform == "win32" else ":")[0] == str(src)
+    assert env["BIOHUBX_WORKER_DEVICE"] == "cpu"
+    child = subprocess.run(
+        [sys.executable, "-S", "-c", "import biohubx.packaging.entry as e; print(e.__file__)"],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert child.returncode == 0, child.stderr
+    assert Path(child.stdout.strip()).resolve().is_relative_to(src)

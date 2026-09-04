@@ -2806,6 +2806,30 @@ references:
       sparse one is consistent with propensity that only becomes estimable
       when there are enough traced cells to estimate it from.
 
+  - id: R-0028
+    status: measured_environment
+    title: E07 Stage 2B wave 1, A3 fold_44b6, seeds 0 and 1, GPU-CAMPAIGN-E07-02
+    why: 'the representative smoke that replaces Stage 2: stratified movies, two seeds, the residual-propensity test
+      mandatory'
+    campaign_envelope: GPU-CAMPAIGN-E07-02
+    attempt: 1 of a maximum 4 in wave 1
+    kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+    kernel_status: ''
+    log: artifacts/e07-stage2b-A3-fold_44b6/biohub-x-e07-a3-fold-44b6.log
+    log_digest: raw_artifact_sha256:sha256:f7d0d679496d28b6791625d02712fc67a408b2885053de9dc49f57c010f7c6c6
+    outcome: no summary manifest retrieved; see the log
+  - id: R-0029
+    status: measured_environment
+    title: E07 Stage 2B wave 1, A3 fold_6bba, seeds 0 and 1, GPU-CAMPAIGN-E07-02
+    why: 'the representative smoke that replaces Stage 2: stratified movies, two seeds, the residual-propensity test
+      mandatory'
+    campaign_envelope: GPU-CAMPAIGN-E07-02
+    attempt: 2 of a maximum 4 in wave 1
+    kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
+    kernel_status: ''
+    log: artifacts/e07-stage2b-A3-fold_6bba/biohub-x-e07-a3-fold-6bba.log
+    log_digest: raw_artifact_sha256:sha256:6805573d851732ce40585c67cc390fda5a08986d5259c194361076ee7f2390fd
+    outcome: no summary manifest retrieved; see the log
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per

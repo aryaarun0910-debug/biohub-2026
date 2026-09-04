@@ -684,16 +684,8 @@ def run_rescore(
                 }
                 job_path = out / f"worker-{index}.json"
                 job_path.write_text(json.dumps(payload, default=str), encoding="utf-8")
-                process = subprocess.Popen(
-                    [
-                        sys.executable,
-                        "-c",
-                        "import sys; from biohubx.packaging.entry import run_worker_file; "
-                        "run_worker_file(sys.argv[1])",
-                        str(job_path),
-                    ],
-                    env={**os.environ, "BIOHUBX_WORKER_DEVICE": worker_device},
-                )
+                argv, env = worker_command(job_path, worker_device)
+                process = subprocess.Popen(argv, env=env)
                 jobs.append((worker, job_path, process))
                 stage(
                     "worker-start",
@@ -766,6 +758,33 @@ def run_rescore(
         "done", f"manifest={summary_path.name} workers={len(manifests)} elapsed={summary['elapsed_seconds']}s"
     )
     return summary
+
+
+def worker_command(job_path: Path, device: str) -> tuple[list[str], dict[str, str]]:
+    """The child's argv and environment.
+
+    A child process does not inherit ``sys.path``, and the payload is importable
+    only through the directory the notebook inserted there, so both workers of
+    wave-1 attempts 1 and 2 died on ``No module named biohubx`` before touching a
+    tensor ([[R-0028]], [[R-0029]]). The package's ``src`` directory travels in
+    ``PYTHONPATH`` explicitly; a test spawns a child that can find it no other way.
+    """
+    import sys
+
+    package_src = str(Path(__file__).resolve().parents[2])
+    inherited = os.environ.get("PYTHONPATH", "")
+    env = {
+        **os.environ,
+        "BIOHUBX_WORKER_DEVICE": device,
+        "PYTHONPATH": package_src + (os.pathsep + inherited if inherited else ""),
+    }
+    argv = [
+        sys.executable,
+        "-c",
+        "import sys; from biohubx.packaging.entry import run_worker_file; run_worker_file(sys.argv[1])",
+        str(job_path),
+    ]
+    return argv, env
 
 
 def run_worker_file(path: str) -> None:

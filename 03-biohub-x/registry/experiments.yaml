@@ -892,6 +892,18 @@ experiments:
           ceilings_on_the_window: {"A0": {"proposals": 1402, "match": 0.9714, "score": 0.9686}, "arm_kept": {"proposals": 1605, "match": 1.0, "score": 1.0}, "pool": {"proposals": 3097, "match": 1.0, "score": 0.907}}
           survives: True
           kill_reasons: []
+        stage2b_fold_44b6:
+          attempt: 1
+          kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+          kernel_status: ''
+          reference: R-0028
+          outcome: no summary manifest retrieved
+        stage2b_fold_6bba:
+          attempt: 2
+          kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
+          kernel_status: ''
+          reference: R-0029
+          outcome: no summary manifest retrieved
         stage2:
           campaign_envelope: GPU-CAMPAIGN-E07-01
           attempt: 3 of a maximum 12
