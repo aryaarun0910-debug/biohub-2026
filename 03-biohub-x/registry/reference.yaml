@@ -1795,6 +1795,50 @@ references:
 # AGENTS.md section 7.
 # ---------------------------------------------------------------------------
 
+research_campaigns:
+  - id: RX-01
+    status: active
+    authorised_by: Arya Arun
+    policy: "[[D-0039]]"
+    opened: 2026-09-04
+    objective: >-
+      Explain the roughly twenty percent of annotated cells DoG still misses
+      ([[F-0026]]) and identify the association architecture most likely to
+      convert DoG proposals into a 0.950 clean-fold score on both embryos.
+    streams:
+      - id: proposals
+        question: what the misses are, and whether another detector could complement DoG rather than re-find what it finds
+        first_pass: RL-0009, RL-0010, RL-0011, RL-0014, RL-0019
+      - id: association
+        question: which linking mechanism the clean folds reward once proposals are frozen
+        first_pass: RL-0001 to RL-0008, RL-0015 to RL-0018, RL-0020, RL-0021
+        state: first-pass diminishing returns reached; resumes after E06
+      - id: alternative_supervision
+        question: whether any public 3D nucleus data can pretrain a representation without teaching annotation propensity
+        first_pass: RL-0012, RL-0013, RL-0022
+        blocker: SELMA3D licence, see R-0013
+    budgets:
+      concurrent_branches: 3
+      bytes_per_branch: 2 GiB
+      bytes_total: 8 GiB
+      requests_total: 2000
+      clone_size_each: under 2 GiB
+      third_party_execution: 30 minutes, sandbox only, sandbox not yet built
+    consumed_so_far:
+      requests: 22
+      bytes: 7216247
+    stopping_rule: marginal information gain relative to the shared budget, per stream
+    outputs: >-
+      Mechanisms and falsifiable hypotheses in registry/reference.yaml (R-0013
+      onward), the hypothesis queue H-06 to H-10, and experiment declarations in
+      registry/experiments.yaml. No Markdown per source, no bespoke tests per
+      source, no constant adopted as a default.
+    experiment_sequence:
+      - E04b: extend the DoG budget curve, one-to-one node recall, miss audit
+      - E05: frozen DoG versus learned proposals versus their deduplicated union at identical budgets
+      - E06: association bake-off on frozen proposals
+      - E07: legal gap interpolation and division geometry, only after E06
+
 approval_packet:
   prepared_utc: '2026-09-02T00:00:00Z'
   prepared_against: R-0002

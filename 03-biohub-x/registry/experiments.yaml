@@ -533,3 +533,27 @@ experiments:
         Whether the remainder is dim, non-Gaussian or simply outside the scale
         bank decides whether a learned detector is complementary to DoG or
         redundant with it, which is the union question in the queue.
+    extensions:
+      - id: E04b
+        ran: 2026-09-04
+        change_from_E04: >-
+          Budget sweep extended to 0.5, 1, 2, 3, 4, 6 and 8 times the estimated
+          cell count; one-to-one node recall reported beside reachability; every
+          annotated node audited at the neutral budget. No change to the fold
+          definition, the radius, the budget's origin or the falsifier.
+        result: F-0027
+        outcome: >-
+          Both folds still improve, by wider margins. The curve plateaus at 0.88
+          on 44b6 by ratio 6 and is still rising at 0.91 on 6bba at ratio 8. The
+          neutral-budget misses are dimmer and lower-response than reached cells
+          and are mostly recoverable by budget; annotated crowding and boundary
+          distance do not distinguish them.
+        what_this_changes_for_E05: >-
+          The union question is sharpened. Most neutral-budget misses are cells
+          DoG ranks too low, not cells it cannot see, so the first arm to test is
+          a second pass over lower-response DoG peaks (H-08) before a learned
+          detector is asked to find anything; the learned arm's target is the
+          residual that remains at ratio 8, which is roughly a tenth of annotated
+          cells and is not yet characterised on its own.
+        still_a_challenger: >-
+          Nothing here is the official metric. The status of E04 does not change.

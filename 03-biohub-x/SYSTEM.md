@@ -4,7 +4,7 @@ Architecture, contracts, and the honest current state of Biohub-X.
 
 ## 1. Current state
 
-**Phase 2 complete. The system detects, associates and emits its own legal lineage graph, on a synthetic fixture only.**
+**Phase 3 integration gate passed. The clean nnPU training loop has run on a real Kaggle T4 (E03-SMOKE-03, [[F-0024]]); a physically-scaled DoG proposal source roughly doubles annotated-cell reachability over the classical detector on both embryo folds ([[F-0026]], [[F-0027]]) and is a challenger, not a promoted component. No fold has been trained and no official score exists on competition data beyond the E01 vertical slice ([[F-0017]]).**
 
 What exists:
 
@@ -22,6 +22,11 @@ What exists:
 | Synthetic fixture | `biohubx.data.synthetic` | deterministic movie with a known lineage |
 | Instance, representation, candidate, prediction contracts | `biohubx.contracts.*` | implemented, one mutation test per rule |
 | Classical detector | `biohubx.proposals.classical` | deterministic, physical-radius suppression |
+| DoG proposal source | `biohubx.proposals.dog` | multi-scale, isotropic grid derived from the official scale; challenger under E04 |
+| Proposal evaluation and miss audit | `biohubx.evaluation.proposals`, `biohubx.evaluation.residuals` | matched-budget reachability, one-to-one recall, per-node audit |
+| Track-length filter probe | `biohubx.evaluation.track_length` | H-04 measured on ground truth ([[F-0023]]) |
+| Kaggle packaging, transport, retrieval | `biohubx.packaging.*` | wheelhouse verified by carried identity, T4 guard, selective retrieval |
+| Research ledger | `biohubx.research.ledger` | one record per acquired public source, budget counted across branches |
 | Geometry representation | `biohubx.representation.geometry` | implemented, no defaulted channel |
 | Candidate graph and reach | `biohubx.tracking.candidate_graph` | implemented, reach measured not assumed |
 | Untrained matcher | `biohubx.tracking.matcher` | explicit no-parent option, hand-set constants |
@@ -33,12 +38,14 @@ division model, temporal context beyond one frame, alternative decoders, and
 deployment. Those modules are absent from `src/biohubx/`, not stubbed. A module
 is created when its first real consumer exists.
 
-No score has been measured on competition data. No model has been trained or
-downloaded. No GPU has been used. No Kaggle notebook exists. Every number this
-repository has produced comes from synthetic fixtures whose purpose is to
-characterise the scorer and to prove the software owns its graph. The matcher is
-an untrained rule with hand-set constants, so its score is a property of those
-constants and of a fixture far easier than real data.
+One official score exists on competition data, the E01 vertical slice at 0.082
+on a single window ([[F-0017]]), and it measured that detection rather than
+association was binding. One GPU run has happened: E03-SMOKE-03 trained two
+epochs on two movies on a real Tesla T4 with every guard intact ([[F-0024]]),
+which is an integration result and not a model. No fold has been trained, no
+learned proposal source exists, and the matcher is still an untrained rule with
+hand-set constants. Two reference checkpoints were downloaded and are quarantined
+as `blocked`; nothing trained here has touched them.
 
 ### 1.1 What Phase 1 established
 
@@ -529,7 +536,7 @@ until proposals exist that are worth keeping.
 | 0 | repository foundation, identity contract, registries, CLI heartbeat, contract tests | done |
 | 1 | official metric from its authoritative source, pinned revision, adapter, synthetic graphs with known scores, coordinate and lineage contracts | done |
 | 2 | end-to-end software vertical slice: fixture to candidate instances to representation to sparse T=2 graph to minimal matcher to legal final graph to official scorer | done |
-| 3 | real representation smoke, CPU preflight, one protected GPU smoke, stop and report before launch | CPU preflight done ([[F-0017]]); GPU smoke awaiting approval |
+| 3 | real representation smoke, CPU preflight, one protected GPU smoke, stop and report before launch | done: CPU preflight ([[F-0017]]), GPU smoke ([[F-0024]]); full folds await a runtime budget ([[R-0012]]) and the metric wheelhouse |
 | 4 | T=2 learning, depth ladder D = 4/6/8/10 as controlled arms, select one depth | not started |
 | 5 | System A against System B on identical frozen inputs, error complementarity | not started |
 | 6 | temporal context ladder, coordinated division learning, uncertainty routing once earned | not started |

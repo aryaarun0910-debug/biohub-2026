@@ -770,3 +770,56 @@ findings:
         continues to come from each movie's own estimated_number_of_nodes. Two
         annotated frames per movie were read, not whole movies.
     superseded_by: null
+
+  - id: F-0027
+    claim: >-
+      Extending the DoG budget sweep to eight times the estimated cell count, the
+      reachability curve plateaus on 44b6 and is still rising slowly on 6bba, and
+      one-to-one node recall tracks reachability to within 0.01 everywhere. Over
+      all 199 annotated training movies at two annotated frames each, DoG reaches
+      0.8046 at the neutral budget on 44b6 and 0.8807 from ratio 6 onward, where
+      it emits about 87,000 proposals against an allowance of 336,000 and cannot
+      fill the budget; on 6bba it reaches 0.6385 at the neutral budget, 0.9001 at
+      ratio 6 and 0.9092 at ratio 8. The classical detector saturates at 0.3629
+      and 0.4546 from ratio 2 onward on the same movies. Selecting the budget on
+      one embryo and measuring the other, fold_44b6 reads 0.9001 against 0.4546
+      and fold_6bba reads 0.8807 against 0.3629. Auditing the 2,033 annotated
+      nodes at the neutral budget, the 69 missed on 44b6 and 617 missed on 6bba
+      sit at median intensity percentile 0.919 and 0.955 within their frame
+      against 0.988 and 0.994 for reached nodes, at median DoG response
+      percentile 0.915 and 0.969 against 0.989 and 0.997, with no difference in
+      annotated crowding or boundary distance, and with a proposal already lying
+      within 14 micrometres of 87 percent of 44b6 misses and 50 percent of 6bba
+      misses.
+    instrument: biohubx evaluate proposals --audit-misses
+    evidence:
+      command: biohubx evaluate proposals --audit-misses --audit-ratio 1.0
+      observed: artifacts/proposals-e04b.json, 199 movies, 2,033 nodes audited, 654.6 seconds
+      note: >-
+        integration_only. Three things this settles and one it does not. The gap
+        between reachability and one-to-one recall, flagged as a caveat in F-0025
+        and F-0026, is measured at under 0.01 for DoG output, so the two can be
+        read together. The classical detector's ceiling is its own: it emits the
+        same 20,494 and 31,309 proposals at every ratio from 2 upward, so its
+        0.36 and 0.45 are what it has to offer, not a budget effect. And most of
+        the neutral-budget misses are ranking losses rather than absences: they
+        are dimmer than reached cells but still in the brightest tenth of their
+        frame, they carry lower but non-trivial DoG response, and raising the
+        budget recovers them, which is why the curve climbs to 0.88 and 0.91.
+        What it does not settle is the residual tenth that remains missed at
+        ratio 8, which is the population a complementary detector would have to
+        find; the audit was taken at the neutral budget and does not
+        characterise that residual separately. Two limits carry over from
+        F-0026: DoG cannot fill its budget above the neutral point because the
+        response quantile of 0.95 caps its candidate pool, so the high-ratio
+        arms compare sources at their natural operating points, and the 6bba
+        selection landed on the sweep's largest ratio again.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, the official voxel scale and the
+        seven micrometre radius hold, the node budget comes from each movie's own
+        estimated_number_of_nodes, and DoG runs with radii (2.0, 3.0, 4.5)
+        micrometres and a response quantile of 0.95. Two annotated frames per
+        movie were read.
+    superseded_by: null
