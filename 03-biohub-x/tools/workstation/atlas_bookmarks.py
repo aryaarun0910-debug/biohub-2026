@@ -31,7 +31,7 @@ _data_root = os.environ.get("BIOHUB_DATA_ROOT")
 if not _data_root:
     raise SystemExit("BIOHUB_DATA_ROOT is unset; give the competition data root the way biohubx does")
 DATA = Path(_data_root)
-ATLAS = Path(sys.argv[1]) if len(sys.argv) > 1 else REPO / "artifacts" / "miss-atlas-6bba.json"
+ATLAS = (Path(sys.argv[1]) if len(sys.argv) > 1 else REPO / "artifacts" / "miss-atlas-6bba.json").resolve()
 SESSION = sys.argv[2] if len(sys.argv) > 2 else "WS-VISUAL-02"
 OUT = REPO / "artifacts" / "tool-sessions" / SESSION
 PER_CLASS = int(os.environ.get("BIOHUBX_ATLAS_PER_CLASS", "2"))
@@ -177,8 +177,14 @@ for cls, examples in atlas["representatives"].items():
         ):
             if not 0 <= t_local < frames:
                 continue
+            # dims points are world coordinates: with scale (1, 4, 1, 1) the z plane index
+            # must be multiplied by the z spacing, or the capture shows plane z/4. The first
+            # run did exactly that; current_step is checked so it cannot happen silently.
             viewer.dims.set_point(0, t_local)
-            viewer.dims.set_point(1, vz)
+            viewer.dims.set_point(1, vz * scale[0])
+            landed = int(viewer.dims.current_step[1])
+            if landed != round(vz):
+                raise SystemExit(f"asked for plane {vz}, the viewer landed on {landed}")
             name = f"{cls}-{dataset_id}-f{frame}-n{example['node_id']}-{label}.png"
             digest, colours = capture(OUT / name)
             shots[label] = {

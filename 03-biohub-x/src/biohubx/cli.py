@@ -66,6 +66,9 @@ research_app = typer.Typer(name="research", help="Ledger public research intake.
 model_app = typer.Typer(
     name="model", help="Measure a model architecture before it is trained.", no_args_is_help=True
 )
+submission_app = typer.Typer(
+    name="submission", help="Write and validate the competition CSV; never submit.", no_args_is_help=True
+)
 app.add_typer(artifacts_app)
 app.add_typer(official_app)
 app.add_typer(evaluate_app)
@@ -75,6 +78,7 @@ app.add_typer(train_app)
 app.add_typer(package_app)
 app.add_typer(research_app)
 app.add_typer(model_app)
+app.add_typer(submission_app)
 
 
 def repository_root() -> Path:
@@ -2805,6 +2809,431 @@ def _open_volume(path: Path) -> Any:
     return group["0"]
 
 
+@train_app.command("probe")
+def train_probe(
+    arm: Annotated[str, typer.Option("--arm", help="E07 arm: A3 or A4.")],
+    config: Annotated[
+        Path | None,
+        typer.Option("--config", help="Family config. Defaults to configs/e07-candidate-rescoring.yaml."),
+    ] = None,
+    section: Annotated[str, typer.Option("--section")] = "E07",
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    dataset: Annotated[
+        str | None,
+        typer.Option("--dataset", help="Training-embryo movie. Defaults to the first annotated 44b6 movie."),
+    ] = None,
+    first_frame: Annotated[int, typer.Option("--first-frame")] = 0,
+    frames: Annotated[int, typer.Option("--frames", help="Frames in the probe window.")] = 3,
+    steps: Annotated[int, typer.Option("--steps", help="Optimizer steps after the first backward.")] = 3,
+    learning_rate: Annotated[float, typer.Option("--learning-rate")] = 1e-3,
+    seed: Annotated[int, typer.Option("--seed")] = 0,
+    device: Annotated[str, typer.Option("--device")] = "cpu",
+    batch: Annotated[int, typer.Option("--batch", help="Candidates per forward batch.")] = 512,
+    out: Annotated[
+        Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/e07-probe-<arm>.json.")
+    ] = None,
+) -> None:
+    """Stage 1: one deterministic training crop, forward, nnPU loss, backward, steps, strict reload.
+
+    Kills a design that produces no gradient, an unstable or non-finite loss,
+    an inert input channel, or an output that its own checkpoint does not
+    reproduce. Then decodes at the count-tied threshold and scores the kept
+    candidates through the oracle ceiling beside A0 on the same window, so the
+    arm's contribution is measured where it must appear. Training data only;
+    the held-out embryo is never read here.
+    """
+    command = "train probe"
+    import time
+
+    import numpy as np
+    import torch
+
+    from biohubx.contracts.instances import InstanceSet
+    from biohubx.data.competition import (
+        CompetitionLayoutError,
+        WindowSelection,
+        competition_root,
+        load_window,
+    )
+    from biohubx.evaluation.official_metric import EstimatedTotalNodes, metric_row, summarise_fold
+    from biohubx.evaluation.oracle import oracle_graph
+    from biohubx.proposals import dog, rescore
+    from biohubx.training import inspect as measure
+    from biohubx.training.targets import PriorError, TargetConstructionError, positive_unlabelled_loss
+
+    root_path = repository_root()
+    config_path = config if config is not None else root_path / "configs/e07-candidate-rescoring.yaml"
+    try:
+        family = yaml.safe_load(config_path.read_text(encoding="utf-8"))[section]
+        candidates_block = family["candidates"]
+        baseline_block = family["baseline"]["proposals"]
+        bank = tuple(float(r) for r in candidates_block["radii_um"])
+        suppression = float(candidates_block["suppression_radius_um"])
+        pool_quantile = float(candidates_block["response_quantile"])
+        baseline_quantile = float(baseline_block["response_quantile"])
+    except (OSError, KeyError, TypeError, ValueError) as exc:
+        heartbeat(command, "refused", f"cannot read the family from {config_path} [{section}]: {exc}")
+        raise typer.Exit(code=2) from exc
+    if arm not in rescore.ARMS:
+        heartbeat(command, "refused", f"unknown arm {arm!r}; the family declares {sorted(rescore.ARMS)}")
+        raise typer.Exit(code=2)
+    config_digest = digest_file(config_path, DigestKind.CANONICAL_TEXT).token
+    torch_device = torch.device(device)
+
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    movie = dataset
+    if movie is None:
+        found = sorted(p.stem for p in (data_root / "train").glob("44b6*.geff"))
+        if not found:
+            heartbeat(command, "refused", "no annotated 44b6 movie under the data root")
+            raise typer.Exit(code=2)
+        movie = found[0]
+    depth, height, width = _open_volume(data_root / "train" / f"{movie}.zarr").shape[1:]
+    try:
+        window = load_window(
+            data_root,
+            WindowSelection(movie, first_frame, frames, 0, depth, 0, height, 0, width),
+            split="train",
+        )
+    except (CompetitionLayoutError, ValueError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    started = time.monotonic()
+    estimate = float(window.window_estimated_total_nodes)
+    baseline = dog.detect_instances(
+        window.volume,
+        dataset=window.annotated.dataset,
+        radii_um=bank,
+        response_quantile=baseline_quantile,
+        suppression_radius_um=suppression,
+        local_maxima_only=True,
+        per_scale_union=True,
+    )
+    pool = rescore.extract_candidates(
+        window.volume,
+        dataset=window.annotated.dataset,
+        radii_um=bank,
+        suppression_radius_um=suppression,
+        response_quantile=pool_quantile,
+    )
+    labels = rescore.candidate_labels(pool, window.annotated).to(torch_device)
+    try:
+        prior = rescore.candidate_prior(estimate, len(pool.instances))
+    except rescore.RescoreError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    patches = rescore.candidate_patches(window.volume, pool, arm=arm, radii_um=bank).to(torch_device)
+    heartbeat(
+        command,
+        "start",
+        f"{arm} {movie} frames={frames} annotated={len(window.annotated.nodes)} "
+        f"baseline={len(baseline.instances)} pool={len(pool.instances)} positives={int(labels.sum())} "
+        f"prior={prior:.4f} patches={tuple(patches.shape)}",
+    )
+
+    def build() -> torch.nn.Module:
+        return rescore.build_scorer(arm, seed=seed)
+
+    model = build().to(torch_device)
+
+    def forward(m: torch.nn.Module, x: torch.Tensor) -> torch.Tensor:
+        pieces = [m(part) for part in rescore.batches(x, batch)]
+        return torch.cat(pieces) if pieces else torch.zeros(0, device=x.device)
+
+    def loss_of(logits: torch.Tensor) -> torch.Tensor:
+        return positive_unlabelled_loss(logits, labels, prior=prior)[0]
+
+    model.train()
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    trajectory: list[dict[str, float | bool]] = []
+    try:
+        logits = forward(model, patches)
+        loss, terms = positive_unlabelled_loss(logits, labels, prior=prior)
+    except (TargetConstructionError, PriorError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    loss_first = float(loss.item())
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()  # type: ignore[no-untyped-call]
+    gradients = measure.gradient_norm_by_block(model)
+    trajectory.append(
+        {"step": 0, "loss": loss_first, "negative_risk_clamped": bool(terms["negative_risk_clamped"])}
+    )
+    for step in range(1, steps + 1):
+        optimizer.step()
+        optimizer.zero_grad(set_to_none=True)
+        logits = forward(model, patches)
+        loss, terms = positive_unlabelled_loss(logits, labels, prior=prior)
+        loss.backward()  # type: ignore[no-untyped-call]
+        trajectory.append(
+            {
+                "step": step,
+                "loss": float(loss.item()),
+                "negative_risk_clamped": bool(terms["negative_risk_clamped"]),
+            }
+        )
+    optimizer.step()
+    finite = all(np.isfinite(t["loss"]) for t in trajectory)
+    heartbeat(
+        command,
+        "steps",
+        f"loss {loss_first:.6f} -> {trajectory[-1]['loss']:.6f} grad_norm={gradients['total']:.4e} "
+        f"zero_blocks={gradients['zero_gradient_blocks']}",
+    )
+
+    channel_probes = measure.input_channel_probes(model, forward, patches, channel_axis=1)
+    determinism = measure.strict_reload_determinism(build, model, forward, patches)
+    inert = [p["channel"] for p in channel_probes if p["inert"]]
+
+    model.eval()
+    with torch.no_grad():
+        final_logits = forward(model, patches)
+    threshold = rescore.threshold_for_count(final_logits, round(estimate))
+    kept = rescore.keep_by_threshold(pool, final_logits, threshold)
+
+    def ceiling_of(instances: InstanceSet) -> dict[str, object]:
+        graph = oracle_graph(instances, window.annotated)
+        row: dict[str, object] = {
+            "proposals": graph.proposals,
+            "node_ratio": (graph.proposals - estimate) / estimate if estimate else None,
+            "matched_nodes": graph.matched_nodes,
+            "annotated_nodes": graph.annotated_nodes,
+            "match_fraction": graph.matched_nodes / graph.annotated_nodes if graph.annotated_nodes else None,
+            "retained_edges": graph.retained_edges,
+            "annotated_edges": graph.annotated_edges,
+            "score": None,
+        }
+        if graph.graph is not None:
+            metric = metric_row(
+                graph.graph, window.annotated, estimated_total_nodes=EstimatedTotalNodes.declared(estimate)
+            )
+            row["score"] = summarise_fold([metric]).score
+        return row
+
+    ceilings = {"A0": ceiling_of(baseline), "pool": ceiling_of(pool), "arm_kept": ceiling_of(kept)}
+    kill_reasons = []
+    if gradients["total"] == 0.0:
+        kill_reasons.append("zero gradient")
+    if not finite:
+        kill_reasons.append("non-finite loss")
+    if inert:
+        kill_reasons.append(f"inert input channels {inert}")
+    if not determinism["output_identical_after_reload"]:
+        kill_reasons.append("strict reload does not reproduce the output")
+    report = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "stage": "1, gradient probe on one deterministic training crop",
+        "experiment": section,
+        "arm": rescore.describe(arm),
+        "config_digest": config_digest,
+        "window": window.to_dict(),
+        "seed": seed,
+        "device": str(torch_device),
+        "estimate": estimate,
+        "prior": prior,
+        "counts": {
+            "annotated": len(window.annotated.nodes),
+            "baseline_A0": len(baseline.instances),
+            "pool": len(pool.instances),
+            "positives": int(labels.sum()),
+            "kept_at_count_tied_threshold": len(kept.instances),
+        },
+        "threshold": threshold,
+        "census": measure.parameter_census(model),
+        "trajectory": trajectory,
+        "gradients": gradients,
+        "channel_probes": channel_probes,
+        "determinism": determinism,
+        "ceilings": ceilings,
+        "kill_reasons": kill_reasons,
+        "survives_stage_1": not kill_reasons,
+        "runtime_seconds": round(time.monotonic() - started, 3),
+        "limits": (
+            "A handful of steps from random initialisation on one window; the kept set and its ceiling say "
+            "whether the decode path works, not whether the arm can learn. Stage 3 answers that."
+        ),
+    }
+    report_path = out if out is not None else root_path / f"artifacts/e07-probe-{arm}.json"
+    atomic_write_text(
+        report_path, json.dumps(measure.to_jsonable(report), indent=2, sort_keys=True) + chr(10)
+    )
+    _write_manifest(command, {"report": str(report_path), "arm": arm, "config_digest": config_digest})
+    heartbeat(
+        command,
+        "ceilings",
+        json.dumps(
+            {
+                k: {"n": v["proposals"], "match": v["match_fraction"], "score": v["score"]}
+                for k, v in ceilings.items()
+            }
+        ),
+    )
+    heartbeat(command, "done", f"survives={not kill_reasons} kill={kill_reasons} report={report_path}")
+    typer.echo(
+        json.dumps(
+            {
+                "arm": arm,
+                "survives_stage_1": not kill_reasons,
+                "kill_reasons": kill_reasons,
+                "ceilings": ceilings,
+            },
+            sort_keys=True,
+        )
+    )
+
+
+@train_app.command("rescore")
+def train_rescore(
+    arm: Annotated[str, typer.Option("--arm", help="E07 arm: A3 or A4.")],
+    fold: Annotated[str, typer.Option("--fold", help="fold_44b6 or fold_6bba from the family config.")],
+    config: Annotated[
+        Path | None,
+        typer.Option("--config", help="Family config. Defaults to configs/e07-candidate-rescoring.yaml."),
+    ] = None,
+    section: Annotated[str, typer.Option("--section")] = "E07",
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    train_movies: Annotated[
+        int, typer.Option("--train-movies", help="First N movies of the training embryo. 0 = all.")
+    ] = 1,
+    evaluate_movies: Annotated[
+        int, typer.Option("--evaluate-movies", help="First M movies of the held-out embryo. 0 = all.")
+    ] = 1,
+    frames: Annotated[int, typer.Option("--frames", help="Frames per movie window.")] = 10,
+    epochs: Annotated[int, typer.Option("--epochs")] = 1,
+    batch: Annotated[int, typer.Option("--batch")] = 512,
+    learning_rate: Annotated[float, typer.Option("--learning-rate")] = 1e-3,
+    count_ratio: Annotated[
+        float,
+        typer.Option("--count-ratio", help="Kept candidates per movie = round(ratio x its own estimate)."),
+    ] = 1.0,
+    seed: Annotated[int, typer.Option("--seed")] = 0,
+    device: Annotated[str, typer.Option("--device")] = "cpu",
+    cache: Annotated[
+        Path | None, typer.Option("--cache", help="Patch cache directory. Defaults to artifacts/cache/e07.")
+    ] = None,
+    out: Annotated[
+        Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/e07-<fold>-<arm>.json.")
+    ] = None,
+) -> None:
+    """Train one E07 arm on the fold's training embryo and score its kept candidates on the other.
+
+    Stage 2 and 3 of the funnel run this same loop on Kaggle; on the workstation
+    it is the CPU smoke that proves the loop end to end on a movie or two. The
+    count-tied threshold is frozen on the training movies before the held-out
+    embryo is read, and the held-out ceiling is reported beside A0 and the pool
+    on the same windows. A diagnostic ceiling, never a promotable number.
+    """
+    command = "train rescore"
+    import torch
+
+    from biohubx.data.competition import CompetitionLayoutError, competition_root
+    from biohubx.proposals import rescore
+    from biohubx.training import inspect as measure
+    from biohubx.training.rescore_loop import LoopSpec, run_loop
+
+    root_path = repository_root()
+    config_path = config if config is not None else root_path / "configs/e07-candidate-rescoring.yaml"
+    try:
+        family = yaml.safe_load(config_path.read_text(encoding="utf-8"))[section]
+        candidates_block = family["candidates"]
+        baseline_block = family["baseline"]["proposals"]
+        folds = {f["id"]: f for f in family["folds"]}
+        chosen = folds[fold]
+        spec = LoopSpec(
+            arm=arm,
+            train_embryo=str(chosen["train_on"]),
+            evaluate_embryo=str(chosen["evaluate_on"]),
+            train_movies=train_movies,
+            evaluate_movies=evaluate_movies,
+            frames=frames,
+            epochs=epochs,
+            batch=batch,
+            learning_rate=learning_rate,
+            seed=seed,
+            radii_um=tuple(float(r) for r in candidates_block["radii_um"]),
+            suppression_radius_um=float(candidates_block["suppression_radius_um"]),
+            pool_quantile=float(candidates_block["response_quantile"]),
+            baseline_quantile=float(baseline_block["response_quantile"]),
+            config_digest=digest_file(config_path, DigestKind.CANONICAL_TEXT).token,
+            count_ratio=count_ratio,
+        )
+    except (OSError, KeyError, TypeError, ValueError) as exc:
+        heartbeat(command, "refused", f"cannot read fold {fold!r} of {section} from {config_path}: {exc}")
+        raise typer.Exit(code=2) from exc
+    if arm not in rescore.ARMS:
+        heartbeat(command, "refused", f"unknown arm {arm!r}; the family declares {sorted(rescore.ARMS)}")
+        raise typer.Exit(code=2)
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    torch_device = torch.device(device)
+    if torch_device.type == "cuda" and not torch.cuda.is_available():
+        heartbeat(command, "refused", "cuda was requested and is not available")
+        raise typer.Exit(code=2)
+    cache_dir = cache if cache is not None else root_path / "artifacts/cache/e07"
+    report_path = out if out is not None else root_path / f"artifacts/e07-{fold}-{arm}.json"
+    checkpoint_path = report_path.with_suffix(".pt")
+    heartbeat(command, "start", json.dumps(spec.to_dict(), sort_keys=True))
+
+    def log(stage: str, detail: str) -> None:
+        heartbeat(command, stage, detail)
+
+    result = run_loop(
+        data_root, spec, device=torch_device, cache_dir=cache_dir, checkpoint_path=checkpoint_path, log=log
+    )
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "diagnostic_ceiling",
+        "experiment": section,
+        "fold": fold,
+        "device": str(torch_device),
+        "execution": measure.environment(),
+        "checkpoint": str(checkpoint_path.relative_to(root_path))
+        if checkpoint_path.is_relative_to(root_path)
+        else str(checkpoint_path),
+        **result.to_dict(),
+        "limits": (
+            "Oracle ceilings over kept candidates on bounded windows of a fixed movie "
+            "subset; comparable with A0 "
+            "and the pool on the same windows and with nothing else. A promotable number needs Stage 4."
+        ),
+    }
+    atomic_write_text(
+        report_path, json.dumps(measure.to_jsonable(payload), indent=2, sort_keys=True) + chr(10)
+    )
+    _write_manifest(
+        command, {"report": str(report_path), "fold": fold, "arm": arm, "config_digest": spec.config_digest}
+    )
+    heartbeat(
+        command,
+        "done",
+        f"held-out {spec.evaluate_embryo}: arm={result.held_out.get('score')} "
+        f"A0={result.baseline_held_out.get('score')} "
+        f"pool={result.pool_held_out.get('score')} "
+        f"reload_identical={result.reload_identical} report={report_path}",
+    )
+    typer.echo(
+        json.dumps(
+            {"fold": fold, "arm": arm, "held_out": payload["held_out"], "threshold": result.threshold},
+            sort_keys=True,
+        )
+    )
+
+
 @package_app.command("kaggle")
 def package_kaggle(
     owner: Annotated[
@@ -3217,6 +3646,409 @@ def package_kaggle(
     _write_manifest(command, {"report": "artifacts/kaggle-package.json", "fold": spec.fold.fold_id})
     heartbeat(command, "done", f"NOT PUSHED. push with: {push_command}")
     typer.echo(json.dumps(payload, sort_keys=True))
+
+
+@package_app.command("rescore")
+def package_rescore(
+    owner: Annotated[
+        str,
+        typer.Option(
+            "--owner", help="Kaggle account slug owning the kernel, as it appears in the account URL."
+        ),
+    ],
+    arm: Annotated[str, typer.Option("--arm", help="E07 arm: A3 or A4.")],
+    fold: Annotated[
+        str, typer.Option("--fold", help="fold_44b6 or fold_6bba from the family config.")
+    ] = "fold_44b6",
+    smoke_id: Annotated[
+        str, typer.Option("--smoke-id", help="Attempt identity, carried in the package, log and manifest.")
+    ] = "E07-SMOKE-01",
+    train_movies: Annotated[
+        int, typer.Option("--train-movies", help="First N movies of the training embryo.")
+    ] = 2,
+    evaluate_movies: Annotated[
+        int, typer.Option("--evaluate-movies", help="First M movies of the held-out embryo.")
+    ] = 2,
+    frames: Annotated[int, typer.Option("--frames", help="Frames per movie window.")] = 10,
+    epochs: Annotated[int, typer.Option("--epochs")] = 2,
+    batch: Annotated[int, typer.Option("--batch")] = 512,
+    learning_rate: Annotated[float, typer.Option("--learning-rate")] = 1e-3,
+    count_ratio: Annotated[float, typer.Option("--count-ratio")] = 1.0,
+    seed: Annotated[int, typer.Option("--seed")] = 0,
+    gpus: Annotated[int, typer.Option("--gpus", help="GPUs the run expects and asserts.")] = 1,
+    expect_device: Annotated[
+        str, typer.Option("--expect-device", help="Substring the allocated GPU name must contain.")
+    ] = "Tesla T4",
+    runtime_ceiling: Annotated[
+        int, typer.Option("--runtime-ceiling", help="Seconds after which the run refuses to continue.")
+    ] = 1800,
+    config: Annotated[
+        Path | None,
+        typer.Option("--config", help="Family config. Defaults to configs/e07-candidate-rescoring.yaml."),
+    ] = None,
+    wheelhouse: Annotated[
+        Path | None,
+        typer.Option("--wheelhouse", help="The metric wheelhouse. Defaults to artifacts/wheelhouse-metric."),
+    ] = None,
+    expect_published: Annotated[
+        str | None,
+        typer.Option("--expect-published", help="Refuse unless the wheelhouse publishes this tree identity."),
+    ] = None,
+    root: Annotated[
+        Path | None, typer.Option("--root", help="Competition data root, for the pre-push gate.")
+    ] = None,
+    expect_kernel: Annotated[
+        str | None,
+        typer.Option("--expect-kernel", help="Refuse unless the build would create exactly this kernel id."),
+    ] = None,
+    out: Annotated[
+        Path | None, typer.Option("--out", help="Where to stage. Defaults to artifacts/kaggle-rescore.")
+    ] = None,
+    allow_dirty: Annotated[
+        bool, typer.Option("--allow-dirty", help="Build from an uncommitted tree; recorded and unpushable.")
+    ] = False,
+) -> None:
+    """Stage the E07 kernel: one arm, one fold, bounded movies and epochs, gated locally.
+
+    The same notebook shape as the E03 package: the source travels inside the
+    notebook, the wheelhouse is located and verified by identity before pip,
+    the entry point runs behind the GPU, input and wheelhouse guards. What runs
+    is `entry.run_rescore`: train the re-scorer on the fold's training movies,
+    freeze the decode, score the held-out movies through the oracle ceiling
+    beside A0. The pre-push gate exercises the notebook locally on one movie,
+    two frames and one epoch. Nothing here contacts Kaggle.
+    """
+    command = "package rescore"
+    import shutil
+    import subprocess
+    import tempfile
+
+    from biohubx.data.competition import CompetitionLayoutError, competition_root
+    from biohubx.hashing import tree_digest
+    from biohubx.packaging import prepush
+    from biohubx.packaging.entry import EntryRefusal
+    from biohubx.packaging.kaggle import (
+        FoldSpec,
+        PackageSpec,
+        PackagingError,
+        archive_digest,
+        archive_inventory,
+        build_notebook,
+        check_payload_contents,
+        deterministic_archive,
+        forbidden_content,
+        kernel_id_for,
+        kernel_metadata,
+    )
+    from biohubx.packaging.metric_preflight import METRIC_WHEELHOUSE_SLUG
+    from biohubx.packaging.prepush import PrePushError
+    from biohubx.packaging.wheelhouse import published_relative_paths, stage_published_payload
+    from biohubx.proposals import rescore
+
+    root_path = repository_root()
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root_path, capture_output=True, text=True, check=False
+    )
+    if revision.returncode != 0:
+        heartbeat(command, "refused", "cannot resolve the repository commit; a package must pin one")
+        raise typer.Exit(code=2)
+    commit = revision.stdout.strip()
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain"], cwd=root_path, capture_output=True, text=True, check=False
+    ).stdout.strip()
+    if dirty and not allow_dirty:
+        heartbeat(
+            command,
+            "refused",
+            "the working tree is dirty; commit first, or pass --allow-dirty for an unpushable build",
+        )
+        raise typer.Exit(code=2)
+
+    config_path = config if config is not None else root_path / "configs/e07-candidate-rescoring.yaml"
+    try:
+        family = yaml.safe_load(config_path.read_text(encoding="utf-8"))["E07"]
+        candidates_block = family["candidates"]
+        baseline_block = family["baseline"]["proposals"]
+        chosen = {f["id"]: f for f in family["folds"]}[fold]
+    except (OSError, KeyError, TypeError, ValueError) as exc:
+        heartbeat(command, "refused", f"cannot read fold {fold!r} from {config_path}: {exc}")
+        raise typer.Exit(code=2) from exc
+    if arm not in rescore.ARMS:
+        heartbeat(command, "refused", f"unknown arm {arm!r}; the family declares {sorted(rescore.ARMS)}")
+        raise typer.Exit(code=2)
+
+    house = wheelhouse if wheelhouse is not None else root_path / "artifacts/wheelhouse-metric"
+    if not (house / "wheels").is_dir():
+        heartbeat(command, "refused", f"no wheels under {house}; assemble the metric wheelhouse first")
+        raise typer.Exit(code=2)
+    bundle = tree_digest(house, on_file=_periodic_progress(command, "upload bundle"))
+    with tempfile.TemporaryDirectory(prefix="biohubx-published-") as scratch:
+        payload_root = Path(scratch) / "payload"
+        payload_root.mkdir()
+        stage_published_payload(house, payload_root, published_relative_paths(bundle))
+        published = tree_digest(payload_root, on_file=_periodic_progress(command, "published payload"))
+    if expect_published is not None and expect_published != published.digest.token:
+        heartbeat(
+            command,
+            "refused",
+            f"the wheelhouse publishes {published.digest.token}, not the authorised {expect_published}",
+        )
+        raise typer.Exit(code=2)
+    heartbeat(
+        command,
+        "wheelhouse",
+        f"published payload {published.digest.token}"
+        + (" (pinned)" if expect_published else " (NOT pinned to an authorisation)"),
+    )
+
+    spec = PackageSpec(
+        commit=commit,
+        config_path="configs/e07-candidate-rescoring.yaml",
+        config_digest=digest_file(config_path, DigestKind.CANONICAL_TEXT).token,
+        fold=FoldSpec(
+            fold_id=fold,
+            train_embryo=str(chosen["train_on"]),
+            evaluate_embryo=str(chosen["evaluate_on"]),
+            seed=seed,
+        ),
+        epochs=epochs,
+        batch_size=batch,
+        learning_rate=learning_rate,
+        accelerator="NvidiaTeslaT4",
+        expected_gpu_count=gpus,
+        expected_device_substring=expect_device,
+        smoke=True,
+        smoke_id=smoke_id,
+        wheelhouse_slug=METRIC_WHEELHOUSE_SLUG,
+        wheelhouse_tree=published.digest.token,
+        max_movies=train_movies or None,
+        runtime_ceiling_seconds=runtime_ceiling,
+    )
+    loop = {
+        "arm": arm,
+        "train_movies": train_movies,
+        "evaluate_movies": evaluate_movies,
+        "frames": frames,
+        "epochs": epochs,
+        "batch": batch,
+        "learning_rate": learning_rate,
+        "count_ratio": count_ratio,
+        "radii_um": [float(r) for r in candidates_block["radii_um"]],
+        "suppression_radius_um": float(candidates_block["suppression_radius_um"]),
+        "pool_quantile": float(candidates_block["response_quantile"]),
+        "baseline_quantile": float(baseline_block["response_quantile"]),
+    }
+    heartbeat(
+        command,
+        "start",
+        f"E07 {arm} {fold} commit={commit[:12]} dirty={bool(dirty)} loop={json.dumps(loop, sort_keys=True)}",
+    )
+
+    kernel_title = f"Biohub-X E07 {arm} {fold.replace('_', ' ')}"
+    try:
+        kernel_id = kernel_id_for(owner, kernel_title)
+    except PackagingError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    if expect_kernel and kernel_id != expect_kernel:
+        heartbeat(
+            command,
+            "refused",
+            f"the kernel this build would create is {kernel_id}, not the expected {expect_kernel}",
+        )
+        raise typer.Exit(code=2)
+    heartbeat(command, "kernel", f"id={kernel_id} title={kernel_title!r}")
+
+    staging = out if out is not None else root_path / "artifacts/kaggle-rescore"
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True)
+
+    # The registry's digests for exactly the movies this run opens: the first N of
+    # the training embryo and the first M of the held-out embryo, in sorted order.
+    registry = load_artifact_registry(root_path / ARTIFACT_REGISTRY_PATH)
+    input_digests: dict[str, str] = {}
+    input_shapes: dict[str, list[int]] = {}
+    for embryo, count in (
+        (spec.fold.train_embryo, train_movies),
+        (spec.fold.evaluate_embryo, evaluate_movies),
+    ):
+        prefix = f"competition.train.{embryo}_"
+        ids = sorted(
+            {
+                r.id.removeprefix("competition.train.").rsplit(".", 1)[0]
+                for r in registry.artifacts
+                if r.id.startswith(prefix)
+            }
+        )
+        wanted = set(ids[:count] if count else ids)
+        for record in registry.artifacts:
+            name = record.id.removeprefix("competition.train.")
+            if record.id.startswith(prefix) and name.rsplit(".", 1)[0] in wanted:
+                if "tree" in record.digests:
+                    input_digests[name] = record.digests["tree"]
+                if record.shape is not None:
+                    input_shapes[name] = [
+                        record.shape.file_count,
+                        record.shape.empty_directory_count,
+                        record.shape.total_bytes,
+                    ]
+    if not input_digests:
+        heartbeat(command, "refused", "no registered train artifacts for the movies this run would open")
+        raise typer.Exit(code=2)
+    shipped: dict[str, object] = dict(spec.to_dict())
+    shipped.update(
+        {"experiment": "E07", "loop": loop, "input_digests": input_digests, "input_shapes": input_shapes}
+    )
+    heartbeat(
+        command, "digests", f"shipped identities for {len(input_digests)} artifacts across both embryos"
+    )
+
+    try:
+        archive_bytes = deterministic_archive(root_path / "src/biohubx")
+        check_payload_contents(archive_bytes)
+    except PackagingError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    inventory = archive_inventory(archive_bytes)
+    payload_token = archive_digest(archive_bytes)
+    heartbeat(
+        command, "payload", f"bytes={len(archive_bytes)} files={len(inventory)} digest={payload_token[:46]}"
+    )
+    notebook = build_notebook(
+        spec,
+        shipped=shipped,
+        payload=archive_bytes,
+        wheelhouse_payload={
+            "tree": published.digest.token,
+            "records": [
+                [
+                    record.kind,
+                    "-" if record.content_sha256 is None else record.content_sha256,
+                    "-" if record.size_bytes is None else str(record.size_bytes),
+                    record.relative_path,
+                ]
+                for record in published.records
+            ],
+        },
+    )
+    atomic_write_text(staging / "run.ipynb", json.dumps(notebook, indent=1, sort_keys=True) + chr(10))
+    atomic_write_text(
+        staging / "kernel-metadata.json",
+        json.dumps(kernel_metadata(spec, slug=kernel_id, title=kernel_title), indent=2, sort_keys=True)
+        + chr(10),
+    )
+    atomic_write_text(staging / "spec.json", json.dumps(shipped, indent=2, sort_keys=True) + chr(10))
+    offenders = forbidden_content(staging)
+    if offenders:
+        heartbeat(command, "refused", f"the package would ship forbidden content: {offenders[:5]}")
+        raise typer.Exit(code=2)
+
+    files = sorted(path for path in staging.rglob("*") if path.is_file())
+    listing = {
+        path.relative_to(staging).as_posix(): digest_file(path, DigestKind.RAW_ARTIFACT).token
+        for path in files
+    }
+    total_bytes = sum(path.stat().st_size for path in files)
+    manifest_text = json.dumps(
+        {
+            "schema_version": 1,
+            "experiment": "E07",
+            "spec": spec.to_dict(),
+            "loop": loop,
+            "files": listing,
+            "file_count": len(files),
+            "total_bytes": total_bytes,
+            "contains_competition_bytes": False,
+            "contains_external_weights": False,
+            "repository_clean_at_build": not dirty,
+            "pushable": not dirty,
+        },
+        indent=2,
+        sort_keys=True,
+    )
+    atomic_write_text(staging / "PACKAGE_MANIFEST.json", manifest_text + chr(10))
+    package_digest = digest_file(staging / "PACKAGE_MANIFEST.json", DigestKind.CANONICAL_TEXT)
+    heartbeat(command, "staged", f"files={len(files)} bytes={total_bytes} digest={package_digest.token[:52]}")
+
+    payload: dict[str, object] = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "experiment": "E07",
+        "package": {
+            "path": str(staging.relative_to(root_path))
+            if staging.is_relative_to(root_path)
+            else str(staging),
+            "manifest_digest": package_digest.token,
+            "file_count": len(files),
+            "total_bytes": total_bytes,
+            "pushed": False,
+        },
+        "spec": spec.to_dict(),
+        "loop": loop,
+        "kernel": {"id": kernel_id, "title": kernel_title},
+    }
+
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    gate_out = staging.parent / "kaggle-rescore-gate"
+    gate_out.mkdir(parents=True, exist_ok=True)
+    os.environ["BIOHUBX_OUTPUT"] = str(gate_out)
+    heartbeat(
+        command, "pre-push", "validating, converting and exercising on one movie, two frames, one epoch"
+    )
+    try:
+        with tempfile.TemporaryDirectory(prefix="biohubx-gate-mount-") as mount:
+            gate_mount = Path(mount) / "input"
+            gate_payload = gate_mount / METRIC_WHEELHOUSE_SLUG.rsplit("/", 1)[-1]
+            gate_payload.mkdir(parents=True)
+            stage_published_payload(house, gate_payload, published_relative_paths(bundle))
+            gate = prepush.run_all(
+                notebook, shipped, data_root=data_root, interpreter=sys.executable, wheelhouse_root=gate_mount
+            )
+    except (PrePushError, EntryRefusal, PackagingError) as exc:
+        heartbeat(command, "refused", f"pre-push gate failed, nothing was sent: {exc}")
+        raise typer.Exit(code=2) from exc
+    heartbeat(
+        command,
+        "pre-push",
+        f"nbformat ok, nbconvert produced {gate.converted_bytes} bytes, "
+        f"{gate.stage_lines_seen} heartbeat lines across {len(gate.stage_names)} stages",
+    )
+    payload["pre_push_gate"] = gate.to_dict()
+    payload["bootstrap"] = {
+        "embedded_payload_digest": payload_token,
+        "embedded_payload_bytes": len(archive_bytes),
+        "embedded_file_count": len(inventory),
+        "extracts_to": "/kaggle/working/biohubx-package",
+        "imports_from_kaggle_input": False,
+    }
+    payload["wheelhouse_identity"] = {
+        "published_payload": published.digest.token,
+        "upload_bundle": bundle.digest.token,
+        "slug": METRIC_WHEELHOUSE_SLUG,
+    }
+    atomic_write_text(
+        root_path / "artifacts/kaggle-rescore.json", json.dumps(payload, indent=2, sort_keys=True) + chr(10)
+    )
+    _write_manifest(
+        command,
+        {"report": "artifacts/kaggle-rescore.json", "digest": package_digest.token, "arm": arm, "fold": fold},
+    )
+    heartbeat(command, "done", "NOT PUSHED; push goes through package transport under an envelope")
+    typer.echo(
+        json.dumps(
+            {
+                "package": payload["package"],
+                "kernel": payload["kernel"],
+                "gate_stages": gate.to_dict().get("stage_names"),
+            },
+            sort_keys=True,
+        )
+    )
 
 
 @package_app.command("audit")
@@ -4987,6 +5819,227 @@ def research_sandbox(
     heartbeat(name, "done", f"record at {report_path}")
 
 
+def _inspect_rescorer(
+    *,
+    command: str,
+    arm: str,
+    config_path: Path,
+    section: str,
+    root: Path | None,
+    dataset: str | None,
+    first_frame: int,
+    frames: int,
+    device: str,
+    precision: str,
+    seed: int,
+    out: Path | None,
+) -> None:
+    """The analyzer's measurements on a candidate re-scorer: patches in, one logit per candidate out."""
+    import time
+
+    import torch
+
+    from biohubx.data.competition import (
+        CompetitionLayoutError,
+        WindowSelection,
+        competition_root,
+        load_window,
+    )
+    from biohubx.evaluation.official_metric import EstimatedTotalNodes, metric_row, summarise_fold
+    from biohubx.evaluation.oracle import oracle_graph
+    from biohubx.proposals import rescore
+    from biohubx.training import inspect as measure
+    from biohubx.training.targets import positive_unlabelled_loss
+
+    root_path = repository_root()
+    try:
+        family = yaml.safe_load(config_path.read_text(encoding="utf-8"))[section]
+        candidates_block = family["candidates"]
+        bank = tuple(float(r) for r in candidates_block["radii_um"])
+        suppression = float(candidates_block["suppression_radius_um"])
+        pool_quantile = float(candidates_block["response_quantile"])
+    except (OSError, KeyError, TypeError, ValueError) as exc:
+        heartbeat(command, "refused", f"cannot read the family from {config_path} [{section}]: {exc}")
+        raise typer.Exit(code=2) from exc
+    if arm not in rescore.ARMS:
+        heartbeat(command, "refused", f"unknown arm {arm!r}; the family declares {sorted(rescore.ARMS)}")
+        raise typer.Exit(code=2)
+    config_digest = digest_file(config_path, DigestKind.CANONICAL_TEXT).token
+    torch_device = torch.device(device)
+    try:
+        dtype = measure.precision_dtype(precision)
+    except measure.InspectError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    movie = dataset
+    if movie is None:
+        found = sorted(p.stem for p in (data_root / "train").glob("44b6*.geff"))
+        if not found:
+            heartbeat(command, "refused", "no annotated 44b6 movie under the data root")
+            raise typer.Exit(code=2)
+        movie = found[0]
+    depth, height, width = _open_volume(data_root / "train" / f"{movie}.zarr").shape[1:]
+    try:
+        window = load_window(
+            data_root,
+            WindowSelection(movie, first_frame, frames, 0, depth, 0, height, 0, width),
+            split="train",
+        )
+    except (CompetitionLayoutError, ValueError) as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    started = time.monotonic()
+    estimate = float(window.window_estimated_total_nodes)
+    pool = rescore.extract_candidates(
+        window.volume,
+        dataset=window.annotated.dataset,
+        radii_um=bank,
+        suppression_radius_um=suppression,
+        response_quantile=pool_quantile,
+    )
+    labels = rescore.candidate_labels(pool, window.annotated).to(torch_device)
+    prior = rescore.candidate_prior(estimate, len(pool.instances))
+    patches = rescore.candidate_patches(window.volume, pool, arm=arm, radii_um=bank).to(torch_device)
+    heartbeat(
+        command,
+        "start",
+        f"{arm} {movie} frames={frames} pool={len(pool.instances)} positives={int(labels.sum())} "
+        f"patches={tuple(patches.shape)} device={torch_device} precision={precision}",
+    )
+
+    def build() -> torch.nn.Module:
+        return rescore.build_scorer(arm, seed=seed)
+
+    model = build().to(torch_device)
+
+    def forward(m: torch.nn.Module, x: torch.Tensor) -> torch.Tensor:
+        if dtype is torch.float32:
+            return torch.cat([m(part) for part in rescore.batches(x, 512)])
+        with torch.autocast(device_type=torch_device.type, dtype=dtype):
+            return torch.cat([m(part) for part in rescore.batches(x, 512)]).float()
+
+    def loss_fn(logits: torch.Tensor) -> torch.Tensor:
+        return positive_unlabelled_loss(logits, labels, prior=prior)[0]
+
+    one = patches[:1]
+    census = measure.parameter_census(model)
+    report: dict[str, object] = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "consumer": "E07, Stage 0 of the training funnel",
+        "identity": {
+            "config": str(config_path.relative_to(root_path))
+            if config_path.is_relative_to(root_path)
+            else str(config_path),
+            "section": section,
+            "config_digest": config_digest,
+            "arm": rescore.describe(arm),
+            "initialisation": f"deterministic random, seed {seed}",
+        },
+        "input": {
+            "window": window.to_dict(),
+            "axes": "(N candidates, C channels, 9, 9, 9) patches on the isotropic 1.625 um grid",
+            "patches_shape": list(patches.shape),
+            "dtype": str(patches.dtype).removeprefix("torch."),
+            "grid_spacing_um": [1.625, 1.625, 1.625],
+            "pool": len(pool.instances),
+            "positives": int(labels.sum()),
+            "class_prior": prior,
+        },
+        "execution": {"device": str(torch_device), "precision": precision, **measure.environment()},
+        "coverage": None,
+        "census": census,
+        "shape_trace": measure.shape_trace(model, lambda m, x: m(x), one),
+        "downsampling": {
+            "note": "not applicable: one scalar per candidate; the patch is the receptive field's upper bound"
+        },
+        "receptive_field": measure.empirical_receptive_field(model, lambda m, x: m(x), one, spatial_axes=3),
+        "graph": measure.capture_graph(model, lambda m, x: m(x), one),
+        "activations": measure.activation_census(model, lambda m, x: m(x), patches[:512]),
+    }
+    field = report["receptive_field"]
+    heartbeat(
+        command,
+        "census",
+        f"parameters={census['total_parameters']:,} "
+        f"receptive_field={field['extent_voxels'] if isinstance(field, dict) else field}",
+    )
+    cost = measure.timings_and_memory(model, forward, loss_fn, patches, device=torch_device)
+    report["cost"] = cost
+    heartbeat(command, "cost", json.dumps(cost["timings"]))
+    report["profile"] = measure.profile_operators(model, forward, loss_fn, patches, device=torch_device)
+    model.eval()
+    with torch.no_grad():
+        logits = forward(model, patches)
+    report["output"] = measure.output_statistics(logits)
+    model.train()
+    model.zero_grad(set_to_none=True)
+    loss_fn(forward(model, patches)).backward()  # type: ignore[no-untyped-call]
+    gradients = measure.gradient_norm_by_block(model)
+    report["gradients"] = gradients
+    probes = measure.input_channel_probes(model, forward, patches, channel_axis=1)
+    report["input_channel_probes"] = probes
+    report["temporal"] = {
+        "note": "no time axis on a patch; the temporal arm's frame channels are probed as channels above"
+    }
+    report["determinism"] = measure.strict_reload_determinism(build, model, forward, patches)
+    model.eval()
+    with torch.no_grad():
+        final = forward(model, patches)
+    threshold = rescore.threshold_for_count(final, round(estimate))
+    kept = rescore.keep_by_threshold(pool, final, threshold)
+    graph = oracle_graph(kept, window.annotated)
+    extractor: dict[str, object] = {
+        "rule": "count-tied threshold, round(window estimate) candidates kept",
+        "threshold": threshold,
+        "proposals": graph.proposals,
+        "estimated_nodes": estimate,
+        "node_ratio": (graph.proposals - estimate) / estimate if estimate else None,
+        "annotated_nodes": graph.annotated_nodes,
+        "matched_nodes": graph.matched_nodes,
+        "match_fraction": graph.matched_nodes / graph.annotated_nodes if graph.annotated_nodes else None,
+        "retained_edges": graph.retained_edges,
+        "annotated_edges": graph.annotated_edges,
+        "oracle": None,
+    }
+    if graph.graph is not None:
+        row = metric_row(
+            graph.graph, window.annotated, estimated_total_nodes=EstimatedTotalNodes.declared(estimate)
+        )
+        extractor["oracle"] = summarise_fold([row]).to_dict()
+    report["extractor"] = extractor
+    inert = [p["channel"] for p in probes if p["inert"]]
+    heartbeat(
+        command,
+        "gradients",
+        f"total={gradients['total']:.4e} zero_blocks={gradients['zero_gradient_blocks']} inert={inert}",
+    )
+    report["runtime_seconds"] = round(time.monotonic() - started, 3)
+    report_path = out if out is not None else root_path / f"artifacts/model-inspect-{arm}.json"
+    atomic_write_text(
+        report_path, json.dumps(measure.to_jsonable(report), indent=2, sort_keys=True) + chr(10)
+    )
+    _write_manifest(command, {"report": str(report_path), "config_digest": config_digest, "arm": arm})
+    heartbeat(command, "done", f"report={report_path}")
+    typer.echo(
+        json.dumps(
+            {
+                "report": str(report_path),
+                "arm": arm,
+                "parameters": census["total_parameters"],
+                "extractor": extractor,
+            },
+            sort_keys=True,
+        )
+    )
+
+
 @model_app.command("inspect")
 def model_inspect(
     config: Annotated[
@@ -5024,6 +6077,10 @@ def model_inspect(
     pos_feat_dim: Annotated[
         int, typer.Option("--pos-feat-dim", help="Reference spec field the config omits.")
     ] = 32,
+    arm: Annotated[
+        str | None,
+        typer.Option("--arm", help="An E07 re-scorer arm (A3, A4) instead of the reference detector."),
+    ] = None,
     peak_quantile: Annotated[
         float, typer.Option("--peak-quantile", help="Heatmap quantile used as the extractor threshold.")
     ] = 0.999,
@@ -5040,6 +6097,24 @@ def model_inspect(
     is what tells a design whether it can even carry the metric.
     """
     command = "model inspect"
+    if arm is not None:
+        _inspect_rescorer(
+            command=command,
+            arm=arm,
+            config_path=config
+            if config is not None
+            else repository_root() / "configs/e07-candidate-rescoring.yaml",
+            section=section if section != "E03" else "E07",
+            root=root,
+            dataset=dataset,
+            first_frame=first_frame,
+            frames=frames,
+            device=device,
+            precision=precision,
+            seed=seed,
+            out=out,
+        )
+        return
     import time
 
     import numpy as np
@@ -5340,3 +6415,160 @@ def model_inspect(
             sort_keys=True,
         )
     )
+
+
+@submission_app.command("validate")
+def submission_validate(
+    csv_path: Annotated[Path, typer.Option("--csv", help="A submission CSV to validate strictly.")],
+    expect_datasets: Annotated[
+        str | None,
+        typer.Option("--expect-datasets", help="Comma-separated dataset names that must all be present."),
+    ] = None,
+) -> None:
+    """Every reason the platform could refuse the file, found here first."""
+    command = "submission validate"
+    from biohubx.submission import validate_csv
+
+    expected = [item.strip() for item in expect_datasets.split(",")] if expect_datasets else None
+    report = validate_csv(csv_path, expected_datasets=expected)
+    for refusal in report.refusals[:20]:
+        heartbeat(command, "refused", refusal)
+    heartbeat(command, "done", f"rows={report.rows} datasets={len(report.datasets)} ok={report.ok}")
+    typer.echo(json.dumps(report.to_dict(), sort_keys=True))
+    if not report.ok:
+        raise typer.Exit(code=1)
+
+
+@submission_app.command("rehearse")
+def submission_rehearse(
+    out: Annotated[
+        Path | None,
+        typer.Option("--out", help="Staging directory. Defaults to artifacts/submission-rehearsal."),
+    ] = None,
+    datasets: Annotated[
+        int, typer.Option("--datasets", help="Synthetic datasets to emit, one seed each.")
+    ] = 3,
+    movies: Annotated[
+        int,
+        typer.Option(
+            "--movies", help="Assumed test movies for the size forecast; an assumption, stated as one."
+        ),
+    ] = 40,
+) -> None:
+    """The whole submission path on synthetic data: emit graphs, write, validate, round-trip, package.
+
+    Synthetic only, by design: the slice pipeline's deterministic fixture is
+    tracked and its graph written exactly as a real fold's would be. The package
+    it stages carries digests, row counts, the size forecast and the refusal
+    catalogue, and it cannot be pushed or submitted from here; a competition
+    submission is an act Arya Arun authorises individually.
+    """
+    command = "submission rehearse"
+    import shutil
+    import time
+
+    from biohubx.submission import COLUMNS, forecast, round_trip, validate_csv, write_csv
+    from biohubx.tracking.pipeline import SliceConfig, run_slice
+
+    started = time.monotonic()
+    staging = out if out is not None else repository_root() / "artifacts/submission-rehearsal"
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True)
+    graphs = {}
+    emitted: dict[str, dict[str, object]] = {}
+    for seed in range(1, datasets + 1):
+        result = run_slice(SliceConfig(seed=seed))
+        name = f"synthetic-slice-v1-s{seed}"
+        graphs[name] = result.emitted
+        emitted[name] = {
+            "seed": seed,
+            "nodes": len(result.emitted.nodes),
+            "edges": len(result.emitted.edges),
+            "divisions": result.decode_report.divisions,
+        }
+    heartbeat(command, "emitted", json.dumps({k: (v["nodes"], v["edges"]) for k, v in emitted.items()}))
+
+    csv_path = staging / "submission.csv"
+    written = write_csv(graphs, csv_path)
+    heartbeat(command, "written", f"rows={written.rows} bytes={written.bytes} digest={written.sha256[:16]}")
+    validation = validate_csv(csv_path, expected_datasets=sorted(graphs))
+    for refusal in validation.refusals[:10]:
+        heartbeat(command, "refused", refusal)
+    trip = round_trip(graphs, csv_path)
+    heartbeat(command, "round-trip", f"identical={trip['identical']} differences={trip['differences'][:3]}")
+
+    # E05 measured about 300 proposals per frame per movie at A2 over both embryos
+    # (253,543 over 710 frames on 44b6, 330,820 over 1,280 on 6bba); a 100-frame
+    # movie at that density is the assumption behind the forecast.
+    projection = forecast(written, nodes_per_movie=30000.0, edges_per_node=0.97, movies=movies)
+    catalogue = [
+        f"header not exactly {list(COLUMNS)}",
+        "a row without exactly ten fields",
+        "id not contiguous from 0",
+        "row_type other than node or edge",
+        "a node row with edge fields set, or a negative id, frame or coordinate",
+        "a node_id repeated within a dataset",
+        "an edge row with node fields set",
+        "an edge whose endpoint is not a node of the same dataset",
+        "an edge that does not span exactly one frame forward",
+        "a self loop",
+        "out-degree above 2 or in-degree above 1",
+        "a dataset expected and absent, or present and unexpected",
+        "an empty graph set, which is refused before any file exists",
+    ]
+    manifest = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "kind": "submission rehearsal on synthetic data; no competition bytes, no push, no submission",
+        "schema_source": (
+            "RL-0051 and RL-0052, the official geffs_to_csv.py and csv_to_geffs.py at "
+            "075fc5f5a52d11077f9dc2b074644618f26939e2"
+        ),
+        "columns": list(COLUMNS),
+        "emitted": emitted,
+        "written": written.to_dict(),
+        "validation": validation.to_dict(),
+        "round_trip": trip,
+        "forecast": projection,
+        "refusal_catalogue": catalogue,
+        "runtime_seconds": round(time.monotonic() - started, 3),
+        "pushed": False,
+        "submitted": False,
+        "submission_requires": "Arya Arun's explicit instruction; no command in this repository submits",
+    }
+    atomic_write_text(
+        staging / "REHEARSAL_MANIFEST.json", json.dumps(manifest, indent=2, sort_keys=True) + chr(10)
+    )
+    digest = digest_file(staging / "REHEARSAL_MANIFEST.json", DigestKind.CANONICAL_TEXT).token
+    report = {
+        "schema_version": 1,
+        "provenance_status": "integration_only",
+        "staging": str(staging.relative_to(repository_root()))
+        if staging.is_relative_to(repository_root())
+        else str(staging),
+        "manifest_digest": digest,
+        "csv_digest": f"raw_artifact_sha256:sha256:{written.sha256}",
+        "rows": written.rows,
+        "bytes": written.bytes,
+        "validation_ok": validation.ok,
+        "round_trip_identical": trip["identical"],
+        "forecast": projection,
+        "pushed": False,
+        "submitted": False,
+    }
+    atomic_write_text(
+        repository_root() / "artifacts/submission-rehearsal.json",
+        json.dumps(report, indent=2, sort_keys=True) + chr(10),
+    )
+    _write_manifest(command, {"report": "artifacts/submission-rehearsal.json", "digest": digest})
+    heartbeat(
+        command,
+        "done",
+        f"validated={validation.ok} round_trip={trip['identical']} "
+        f"forecast={projection['projected_megabytes']}MB "
+        f"for {movies} movies; NOT submitted",
+    )
+    typer.echo(json.dumps(report, sort_keys=True))
+    if not validation.ok or not trip["identical"]:
+        raise typer.Exit(code=1)

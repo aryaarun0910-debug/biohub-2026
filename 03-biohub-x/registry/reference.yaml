@@ -2537,6 +2537,125 @@ references:
       45 x 40 x 40 grid, so a crop that small trains every output voxel on
       truncated context.
 
+  - id: R-0022
+    status: measured_environment
+    title: The complete miss atlas of the A2 proposal source on 6bba, every unreached annotation classified
+    why: >-
+      F-0035 left the 6bba ceiling at 0.9283 with the best proposal source
+      measured. Before a learned architecture is chosen, every cell that source
+      fails to reach is described in features an arm can act on and classified
+      under one ordered rule, so arms are motivated or killed by counts rather
+      than by impression. The atlas motivates; it is not a finding until a
+      preregistered probe reproduces what it suggests.
+    instrument: biohubx evaluate miss-atlas, windows identical to E06-ORACLE and E05
+    source: {"frames_per_movie": 10, "local_maxima_only": true, "per_scale_union": true, "radii_um": [2.0, 3.0], "refine_centroids": false, "response_quantile": 0.95, "source": "biohubx.proposals.dog", "suppression_radius_um": 4.0, "truncation": "none"}
+    thresholds: {"boundary_um": 8.0, "dim_percentile": 0.8, "localization_um": 14.0, "low_response_um": 7.0, "merge_neighbour_um": 8.0}
+    class_order: ["boundary", "merged", "dim", "localization", "temporal_dropout", "low_response", "annotation_ambiguity", "unexplained"]
+    report: artifacts/miss-atlas-6bba.json
+    runtime_seconds: 287.579
+
+    counts:
+      annotated_nodes_in_windows: 9870
+      misses: 706
+      miss_fraction: 0.0715
+      primary_classes: {"annotation_ambiguity": 0, "boundary": 189, "dim": 331, "localization": 181, "low_response": 1, "merged": 2, "temporal_dropout": 1, "unexplained": 1}
+      flags: {"annotation_ambiguity": 0, "boundary": 189, "dim": 452, "localization": 555, "low_response": 587, "merged": 3, "temporal_dropout": 121}
+      with_a_strict_peak_within_7um: 665
+      of_which_the_quantile_discarded: 587
+      peak_within_7um_kept_yet_unmatched: 78
+      no_peak_within_7um: 41
+      a_proposal_within_14um: 562
+      median_intensity_percentile: 0.7386
+      median_nearest_proposal_um: 9.893
+      median_nearest_vector_um: '|dz| 4.88, in-plane 7.89'
+      most_common_flag_combinations: [[["dim", "localization", "low_response"], 192], [["localization", "low_response"], 105], [["dim", "low_response"], 88], [["boundary", "dim", "localization", "low_response"], 55], [["boundary", "dim", "low_response"], 45], [["localization"], 29]]
+    per_class_medians:
+      boundary: n=189, intensity_pct=0.755, nearest_um=10.124, boundary_um=3.656, response_pct=0.876
+      merged: n=2, intensity_pct=0.79, nearest_um=7.906, boundary_um=11.782, response_pct=0.686
+      dim: n=331, intensity_pct=0.647, nearest_um=10.733, boundary_um=17.875, response_pct=0.878
+      localization: n=181, intensity_pct=0.875, nearest_um=8.618, boundary_um=18.281, response_pct=0.911
+      temporal_dropout: n=1, intensity_pct=0.91, nearest_um=5.025, boundary_um=24.375, response_pct=0.843
+      low_response: n=1, intensity_pct=0.812, nearest_um=14.259, boundary_um=8.125, response_pct=0.54
+      unexplained: n=1, intensity_pct=0.85, nearest_um=6.918, boundary_um=20.719, response_pct=0.861
+    per_movie_extremes: >-
+      6bba_6feb10f0 79/189, 6bba_ebff6e76 67/228, 6bba_ab78413d 62/139, 6bba_b329af44 54/183, 6bba_32db13fc 51/227
+
+    reading: >-
+      Four things. First, the misses are almost never absences: 665 of
+      706 lie within 7 micrometres of a strict per-scale maximum, and 587
+      of those maxima were discarded by the frame-level response quantile,
+      not by suppression. The detector saw these cells and ranked them below
+      the 95th percentile of response. Second, merging is not the mechanism:
+      2 misses are merged under the rule and 3 carry the flag at all,
+      so a deblending or centre-offset head has almost nothing to recover on
+      this embryo. Third, only 41 misses have no peak within the radius; that
+      is the ceiling of a residual detector that finds cells the DoG cannot,
+      under half a percent of annotated cells. Fourth, dim and boundary
+      together carry most of the primary classes, and both are threshold
+      effects in disguise: the dim misses have peaks at the 88th response
+      percentile, the boundary misses at the 88th, and a fixed quantile cannot
+      keep them without admitting the spurious peaks E05 measured the cost of.
+      The lever is ranking. A learned scorer over the complete per-scale peak
+      set, with local image, per-scale response and temporal context, that
+      keeps true cells and drops the spurious third that inflates 6bba's node
+      ratio, is the family the atlas supports; the two deblending arms and the
+      residual detector are killed before implementation on these counts.
+
+  - id: R-0023
+    status: measured_environment
+    title: Napari bookmarks of the 6bba miss atlas, two representatives per class, with capture digests
+    why: >-
+      [[R-0022]] classified 706 misses by numbers. The visual procedure of
+      [[D-0043]] asks that representative examples of every class be looked at
+      in the frame they were missed in and the frames either side, with the
+      ground truth and the proposals in view, and that the captures carry
+      digests so the observation can be re-opened rather than remembered.
+    session: artifacts/tool-sessions/WS-VISUAL-02.json
+    atlas_digest: df1128c26f5fa9eed035b6b03fd871637d5e70170b730b2313022e8e45447e7a
+    bookmarks: 11
+    captures_per_bookmark: previous, missed and following frame at the cell's z plane, and one 3D view; every capture guarded on distinct colours drawn
+    layers: volume (gray, additive), ground truth (lime points), proposals (magenta points), the miss (red ring); scale (1, 4.0, 1.0, 1.0) um on (t, z, y, x)
+    classes_bookmarked: ['boundary', 'dim', 'localization', 'low_response', 'merged', 'temporal_dropout', 'unexplained']
+    what_was_seen: >-
+      The dim representatives are faint blobs under the ring with proposals
+      only on the bright nuclei around them; the boundary representatives sit
+      on the first z plane. Both are consistent with what their features say.
+      These are observations that motivated E07's ranking arms; they are not
+      findings.
+    defect_found_and_fixed: >-
+      The first capture addressed the z plane in voxel index while napari's
+      dims are world coordinates, so with the 4 micrometre z spacing every
+      capture except those at z=0 showed plane z/4. The script now converts and
+      asserts the plane it landed on; the recorded captures are from the
+      corrected run.
+
+  - id: R-0024
+    status: measured_environment
+    title: The submission path rehearsed on synthetic graphs, writer, validator, round trip and package, nothing sent
+    why: >-
+      The competition accepts one CSV. Learning its schema after a real fold
+      is the expensive order; this rehearsal reads the schema from the official
+      scripts at the pinned commit (RL-0051, RL-0052), writes it from Biohub-X's
+      own lineage graphs, validates it strictly, rebuilds the graphs from the
+      file and compares, and packages the result with digests and a forecast.
+    instrument: biohubx submission rehearse; biohubx submission validate for any CSV
+    report: artifacts/submission-rehearsal.json
+    staging: artifacts\submission-rehearsal
+    manifest_digest: canonical_text_sha256:sha256/v1:1b02d77c99aec6f14b2af9ff2a2c131fe9ec1853f33148e3ee91f5bed4256e6c
+    csv_digest: raw_artifact_sha256:sha256:e0141b3d3c00ac5fb128e97a6623a16641a2ec39a8178e1e59809118ef5fecbe
+    rows: 75
+    bytes: 3688
+    validated: True
+    round_trip_identical: True
+    forecast: {"assumed_edges_per_node": 0.97, "assumed_movies": 40, "assumed_nodes_per_movie": 30000.0, "measured_bytes_per_row": 49.173, "projected_bytes": 116245760, "projected_megabytes": 116.2, "projected_rows": 2364000}
+    refusal_conditions: header, field count, contiguous id, row type, node and edge field sentinels, unique node ids, dangling or self-loop or multi-frame edges, degree limits, dataset set, empty input
+    pushed: false
+    submitted: false
+    note: >-
+      Synthetic data only. No competition byte was read and no Kaggle call
+      exists in this path; a submission remains an act Arya Arun authorises
+      individually.
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per

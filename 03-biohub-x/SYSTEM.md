@@ -254,6 +254,13 @@ Implemented:
 - `biohubx evaluate proposals [--root PATH] [--frames N] [--ratios LIST] [--max-movies N] [--radii LIST] [--local-maxima] [--per-scale-union] [--refine] [--suppression-radius UM] [--audit-misses] [--audit-ratio F] [--out PATH]`
 - `biohubx evaluate oracle-ceiling [--root PATH] [--frames N] [--radii LIST] [--local-maxima] [--response-quantile Q] [--suppression-radius UM] [--per-scale-union] [--budget-ratios LIST] [--max-movies N] [--out PATH]`
 - `biohubx model inspect [--config PATH] [--section S] [--checkpoint PATH] [--root PATH] [--dataset ID] [--first-frame N] [--frames N] [--crop-z A:B] [--crop-y A:B] [--crop-x A:B] [--device D] [--precision P] [--seed N] [--pos-feat-dim N] [--peak-quantile Q] [--out PATH]`
+- `biohubx model inspect --arm A3|A4 [--config PATH] [--root PATH] [--dataset ID] [--first-frame N] [--frames N] [--device D] [--precision P] [--seed N] [--out PATH]`
+- `biohubx evaluate miss-atlas [--root PATH] [--embryo E] [--frames N] [--radii LIST] [--response-quantile Q] [--suppression-radius UM] [--per-scale-union] [--local-maxima] [--max-movies N] [--out PATH]`
+- `biohubx train probe --arm A3|A4 [--config PATH] [--root PATH] [--dataset ID] [--first-frame N] [--frames N] [--steps N] [--learning-rate LR] [--seed N] [--device D] [--batch N] [--out PATH]`
+- `biohubx train rescore --arm A3|A4 --fold F [--config PATH] [--root PATH] [--train-movies N] [--evaluate-movies M] [--frames N] [--epochs N] [--batch N] [--learning-rate LR] [--count-ratio R] [--seed N] [--device D] [--cache DIR] [--out PATH]`
+- `biohubx package rescore --owner SLUG --arm A3|A4 [--fold F] [--smoke-id ID] [--train-movies N] [--evaluate-movies M] [--frames N] [--epochs N] [--batch N] [--learning-rate LR] [--count-ratio R] [--seed N] [--gpus N] [--expect-device S] [--runtime-ceiling S] [--config PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--root PATH] [--expect-kernel ID] [--out PATH] [--allow-dirty]`
+- `biohubx submission rehearse [--out DIR] [--datasets N] [--movies N]`
+- `biohubx submission validate --csv PATH [--expect-datasets LIST]`
 - `biohubx package audit [--out PATH] [--expect-kernel ID] [--allow-dirty]`
 - `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--smoke-id ID] [--wheelhouse PATH] [--expect-published DIGEST] [--expect-device NAME] [--allow-dirty]`
 - `biohubx package preflight [--out PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--allow-dirty]`
@@ -455,6 +462,21 @@ reload comparison, and, with the heatmap extractor attached, proposal count, nod
 ratio, match fraction and the oracle ceiling through the pinned scorer. It is Stage
 0 of the training funnel for the learned-proposal family and reports one JSON;
 none of its numbers is a finding.
+
+`evaluate miss-atlas` describes every annotated cell a proposal source fails to
+reach on one embryo, in the E06-ORACLE windows, with the features that separate
+the ways a cell is missed and one ordered classification whose order and
+thresholds are tested; the atlas motivates arms and is not a finding. `train
+probe` is Stage 1 of the E07 funnel on one deterministic training window, and
+`train rescore` is the E07 loop itself: candidate pool, patches cached by typed
+digest, nnPU training with each movie's own prior, a per-movie decode tied to the
+movie's official estimate, and the held-out oracle ceiling beside A0 and the
+pool. `package rescore` stages that loop as a Kaggle kernel behind the same
+bootstrap, wheelhouse identity and guards as the E03 package, with the metric
+wheelhouse attached, and exercises it locally before anything is sent.
+`submission rehearse` runs the writer, validator, round trip and package on
+synthetic graphs; `submission validate` checks any CSV against the official
+schema; neither can submit.
 
 `train preflight` proves the E03 loop runs before a GPU is asked for: forward,
 masked loss, backward, optimizer step, atomic checkpoint, strict reload,

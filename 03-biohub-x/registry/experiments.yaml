@@ -777,3 +777,150 @@ experiments:
           frozen block is unchanged; the proposal-count question F-0033 raises
           is declared in E05, not here.
     status: halted_at_first_measurement
+  - id: E07
+    component: proposals
+    hypothesis: >-
+      Over the complete strict per-scale DoG peak set at response quantile 0.80,
+      which holds every annotated cell on the pilot, a small learned scorer over
+      a local patch of intensity and per-scale response, with or without the
+      neighbouring frames, ranks true cells above spurious peaks well enough
+      that keeping the count-tied top candidates raises the oracle ceiling on
+      both held-out embryos over the untruncated A2 union of F-0035, and lifts
+      6bba to at least 0.950.
+    falsifier: >-
+      An arm is killed if it fails strict loading or deterministic
+      reproduction, raises proposal count without raising the oracle ceiling,
+      improves only the embryo used for selection, exceeds its declared memory
+      or runtime ceiling, treats unlabelled voxels as negatives, or contributes
+      nothing once deduplicated with A0. The family is killed if neither
+      surviving arm beats A0 on both held-out directions in Stage 3; then the
+      ceiling is not a ranking problem either and the residual returns to the
+      atlas. One direction improving is a challenger; a pooled number is not a
+      result.
+    inputs:
+      - the 199 annotated competition.train .geff and .zarr artifacts
+      - configs/e07-candidate-rescoring.yaml
+      - artifacts/miss-atlas-6bba.json (R-0022) and the pool pilots, as motivation only
+    split:
+      scheme: leave_one_embryo_out
+      folds:
+        - id: fold_44b6
+          train_on: 44b6
+          evaluate_on: 6bba
+        - id: fold_6bba
+          train_on: 6bba
+          evaluate_on: 44b6
+      never_read: the public-test directory, for any purpose
+    model_config:
+      path: configs/e07-candidate-rescoring.yaml
+      section: E07
+      canonical_text: canonical_text_sha256:sha256/v1:a4411b560d966a65cacd3ec25f2f85c441dc05ec058a3c8d0f7880e0538fc620
+    baseline:
+      id: A0
+      source: the E05 arm A2 union, F-0035, unchanged
+      ceilings: {44b6: 1.0195, 6bba: 0.9283}
+    arms:
+      - id: A1
+        status: killed_before_implementation
+        reason: 41 of 706 atlas misses have no strict peak within 7 um
+      - id: A2
+        status: killed_before_implementation
+        reason: 2 of 706 atlas misses are merged
+      - id: A3
+        status: implemented
+        model: biohubx.proposals.rescore.PatchScorer with 3 channels
+      - id: A4
+        status: implemented
+        model: biohubx.proposals.rescore.PatchScorer with 5 channels, temporal context
+      - id: A5
+        status: killed_before_implementation
+        reason: as A2, merged is 2 of 706
+    candidate_pool:
+      rule: every strict per-scale maximum at or above response quantile 0.80, suppressed at 4.0 um
+      pilot: node match 1.000 on 44b6 and 0.999 on 6bba, 12 movies per embryo, 10-frame windows
+      quantile_selected: per embryo from its own rows; both give 0.80
+    supervision: non-negative positive-unlabelled; positives are one-to-one matches within 7 um; no negatives
+    decode: >-
+      per movie, the round(count_ratio x estimate) highest-scoring candidates, the
+      estimate being that movie's own official metadata; count_ratio 1.0 by
+      declaration, tunable only on the training embryo in Stage 3; the same
+      4.0 um suppression and deduplication as A0
+    amended_before_any_gpu_stage: >-
+      the decode was first written as a probability threshold frozen on the
+      training embryo; the CPU smoke of the loop showed that transfers a count
+      from a dense embryo to a sparse one (1,015 kept on a 6bba window whose
+      estimate was 191). Per-movie count tied to the official estimate replaces
+      it, with per-channel patch standardisation added after Stage 0 measured
+      the DoG channels barely moving the scorer. Both changes precede Stage 2.
+    funnel: stage0 model inspect, stage1 train probe, stage2 tiny GPU smoke, stage3 mini-fold both directions, stage4 full folds for survivors
+    budget: stages 0 and 1 CPU only; stages 2 to 4 under a bounded GPU campaign envelope presented separately
+    promotion_metric: >-
+      oracle ceiling on the held-out embryo at the training-frozen threshold,
+      both directions separately; promotion requires improvement over A0 on
+      both and at least 0.950 on 6bba; Stage 4 reports the official metric per
+      direction as well
+    forbidden_changes:
+      - the pinned official scorer
+      - the A0 baseline and its parameters
+      - the candidate pool rule, once any arm has trained
+      - the fold definition
+      - D-0041, E05 and E06's frozen blocks; a promoted arm is a new declaration
+    provenance_status: diagnostic_ceiling
+    preregistered_at_commit: after 00ce8c6, before any arm ran
+    stage_results:
+      A3:
+        stage0:
+          report: artifacts/model-inspect-A3.json
+          parameters: 42881
+          receptive_field_voxels: [9, 9, 9]
+          graph_capture: torch.export
+          activation_bytes_512_patches: 188352512
+          forward_seconds_median_cpu: 1.512 for 3097 patches
+          forward_backward_seconds_median_cpu: 6.418
+          cpu_peak_rss_bytes: 1502248960
+          channel_probes_relative_change: [0.1647, 0.0444, 0.1198]
+          inert_channels: []
+          determinism: {"max_abs_difference_after_reload": 0.0, "output_identical_after_reload": true, "output_identical_between_runs": true, "strict_reload_ok": true}
+        stage1:
+          report: artifacts/e07-probe-A3.json
+          window: 44b6_ddf577ad frames 0..+3
+          counts: {"annotated": 35, "baseline_A0": 1402, "kept_at_count_tied_threshold": 1605, "pool": 3097, "positives": 35}
+          prior: 0.5182
+          loss_trajectory: [0.680996, 0.626307, 0.555185, 0.465444, 0.363295, 0.250328]
+          gradient_norm_total: 4.1686e-01
+          zero_gradient_blocks: "[pool] (the pooling layer has no parameters)"
+          ceilings_on_the_window: {"A0": {"proposals": 1402, "match": 0.9714, "score": 0.9686}, "arm_kept": {"proposals": 1605, "match": 1.0, "score": 1.0}, "pool": {"proposals": 3097, "match": 1.0, "score": 0.907}}
+          survives: True
+          kill_reasons: []
+      A4:
+        stage0:
+          report: artifacts/model-inspect-A4.json
+          parameters: 43745
+          receptive_field_voxels: [9, 9, 9]
+          graph_capture: torch.export
+          activation_bytes_512_patches: 188352512
+          forward_seconds_median_cpu: 1.472 for 3097 patches
+          forward_backward_seconds_median_cpu: 6.274
+          cpu_peak_rss_bytes: 1520234496
+          channel_probes_relative_change: [0.0506, 0.0255, 0.0318, 0.0644, 0.0628]
+          inert_channels: []
+          determinism: {"max_abs_difference_after_reload": 0.0, "output_identical_after_reload": true, "output_identical_between_runs": true, "strict_reload_ok": true}
+        stage1:
+          report: artifacts/e07-probe-A4.json
+          window: 44b6_ddf577ad frames 0..+3
+          counts: {"annotated": 35, "baseline_A0": 1402, "kept_at_count_tied_threshold": 1605, "pool": 3097, "positives": 35}
+          prior: 0.5182
+          loss_trajectory: [0.694466, 0.668246, 0.630489, 0.569198, 0.478493, 0.357157]
+          gradient_norm_total: 2.4694e-01
+          zero_gradient_blocks: "[pool] (the pooling layer has no parameters)"
+          ceilings_on_the_window: {"A0": {"proposals": 1402, "match": 0.9714, "score": 0.9686}, "arm_kept": {"proposals": 1605, "match": 1.0, "score": 1.0}, "pool": {"proposals": 3097, "match": 1.0, "score": 0.907}}
+          survives: True
+          kill_reasons: []
+      reading: >-
+        Both arms clear Stage 0 and Stage 1. Neither number above is evidence
+        about learning: five optimizer steps on the same window that is then
+        decoded show that gradients flow, the loss moves, every channel is
+        live, the checkpoint reproduces, and the count-tied decode produces a
+        set the oracle path scores. A4's ceiling on its own training window
+        after five steps exceeds A0's; that is a training-set number and
+        belongs nowhere but here. Stage 2 and 3 need the GPU envelope.

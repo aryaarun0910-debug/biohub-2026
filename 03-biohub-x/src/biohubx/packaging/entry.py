@@ -77,6 +77,13 @@ def run_fold(
     defaults to False so that a caller who did not verify cannot pass the guard by
     saying nothing, which is how an absent check becomes a silent one.
     """
+    if spec_dict.get("experiment") == "E07":
+        return run_rescore(
+            spec_dict,
+            data_root=data_root,
+            wheelhouse_verified=wheelhouse_verified,
+            wheelhouse_root=wheelhouse_root,
+        )
     from biohubx.packaging.kaggle import FoldSpec, PackageSpec, guard_report
 
     started = time.perf_counter()
@@ -350,4 +357,230 @@ def run_fold(
     partial.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     partial.replace(manifest_path)
     stage("done", f"{spec.smoke_id} {manifest_path.name} digest={checkpoint_digest[:46]}")
+    return manifest
+
+
+def run_rescore(
+    spec_dict: dict[str, Any],
+    *,
+    data_root: Path | None = None,
+    wheelhouse_verified: bool = False,
+    wheelhouse_root: str = "",
+) -> dict[str, Any]:
+    """Guard, train the E07 re-scorer, freeze the decode, score the held-out embryo, write a manifest.
+
+    The same stage names as ``run_fold`` in the same order, because the pre-push
+    gate and the retrieval reader expect that sequence. Under the local
+    exercise the loop shrinks to one movie, two frames and one epoch; the
+    package itself is unchanged by that, and the stage line says so.
+    """
+    from biohubx.packaging.kaggle import FoldSpec, PackageSpec, guard_report
+    from biohubx.training.rescore_loop import LoopSpec, run_loop
+
+    started = time.perf_counter()
+    fold = FoldSpec(**spec_dict["fold"])
+    spec = PackageSpec(
+        commit=spec_dict["commit"],
+        config_path=spec_dict["config_path"],
+        config_digest=spec_dict["config_digest"],
+        fold=fold,
+        epochs=spec_dict["epochs"],
+        batch_size=spec_dict["batch_size"],
+        learning_rate=spec_dict["learning_rate"],
+        accelerator=spec_dict["accelerator"],
+        expected_gpu_count=spec_dict["expected_gpu_count"],
+        smoke=spec_dict["smoke"],
+        smoke_id=spec_dict["smoke_id"],
+        wheelhouse_slug=spec_dict["wheelhouse_slug"],
+        wheelhouse_tree=spec_dict["wheelhouse_tree"],
+        expected_device_substring=spec_dict.get("expected_device_substring", "Tesla T4"),
+        max_movies=spec_dict["max_movies"],
+        runtime_ceiling_seconds=spec_dict["runtime_ceiling_seconds"],
+    )
+    loop = dict(spec_dict["loop"])
+    local_exercise = os.environ.get("BIOHUBX_LOCAL_EXERCISE") == "1"
+    if local_exercise:
+        loop.update({"train_movies": 1, "evaluate_movies": 1, "frames": 2, "epochs": 1})
+    stage(
+        "environment",
+        f"{spec.smoke_id} E07 arm={loop['arm']} fold={fold.fold_id} smoke={spec.smoke} "
+        f"local_exercise={local_exercise}",
+    )
+
+    import torch
+
+    gpu_count = torch.cuda.device_count()
+    device = "cuda" if gpu_count else "cpu"
+    device_name = torch.cuda.get_device_name(0) if gpu_count else "cpu"
+    cuda_version = torch.version.cuda or "none"
+    stage(
+        "environment",
+        f"torch={torch.__version__} cuda={cuda_version} gpus={gpu_count} device={device} "
+        f"name={device_name!r}",
+    )
+    total_vram_bytes = 0
+    if gpu_count:
+        properties = torch.cuda.get_device_properties(0)
+        total_vram_bytes = int(properties.total_memory)
+        stage(
+            "environment",
+            f"vram_total_bytes={total_vram_bytes} capability={properties.major}.{properties.minor}",
+        )
+    else:
+        stage("environment", "vram_total_bytes=0 no accelerator present")
+
+    root = data_root or Path(
+        os.environ.get(
+            "BIOHUB_DATA_ROOT", "/kaggle/input/competitions/biohub-cell-tracking-during-development"
+        )
+    )
+    stage("inputs", f"root={root}")
+    datasets, reachable = _discover(root)
+    if not datasets:
+        raise EntryRefusal(f"no training datasets under {root}")
+    train_ids = [d for d in datasets if d.split("_", 1)[0] == fold.train_embryo][
+        : int(loop["train_movies"]) or None
+    ]
+    eval_ids = [d for d in datasets if d.split("_", 1)[0] == fold.evaluate_embryo][
+        : int(loop["evaluate_movies"]) or None
+    ]
+    opened_ids = train_ids + eval_ids
+    opened = [str(root / "train" / f"{d}{suffix}") for d in opened_ids for suffix in (".zarr", ".geff")]
+    stage(
+        "fold",
+        f"train_embryo={fold.train_embryo} movies={len(train_ids)} "
+        f"evaluate={fold.evaluate_embryo} movies={len(eval_ids)}",
+    )
+
+    registered: dict[str, str] = spec_dict.get("input_digests", {})
+    shapes: dict[str, list[int]] = spec_dict.get("input_shapes", {})
+    opened_names = {f"{d}{suffix}" for d in opened_ids for suffix in (".zarr", ".geff")}
+    mounted: dict[str, str] = {}
+    shape_failures: list[str] = []
+    for name in registered:
+        candidate = root / "train" / name
+        if not candidate.is_dir():
+            continue
+        expected = shapes.get(name)
+        if expected is not None:
+            observed = _tree_shape(candidate)
+            if list(observed) != list(expected):
+                shape_failures.append(f"{name}: shape {observed} != registered {expected}")
+                continue
+        mounted[name] = _tree_digest(candidate) if name in opened_names else registered[name]
+    for line in shape_failures:
+        stage("verify-failed", line)
+    if shape_failures:
+        raise EntryRefusal(f"mounted inputs do not match their registered shape: {shape_failures[:3]}")
+    stage("verify", f"registered={len(registered)} deep={len(opened_names & set(mounted))}")
+
+    report = guard_report(
+        spec,
+        mounted_digests=mounted,
+        registered_digests=registered,
+        # The guard's dataset_ids are the movies the run trains on. The held-out
+        # movies are opened for evaluation only and travel in opened_paths, where
+        # the public-test and registry checks still apply to them.
+        dataset_ids=train_ids,
+        reachable_paths=reachable,
+        opened_paths=opened,
+        gpu_count=gpu_count,
+        device_name=device_name,
+        dataset_sources=[spec.wheelhouse_slug],
+        wheelhouse_verified=wheelhouse_verified,
+        local_exercise=local_exercise,
+    )
+    for line in report["failures"]:
+        stage("guard-failed", line)
+    if not report["passed"]:
+        raise EntryRefusal(f"guards failed: {report['failures']}")
+    stage("guard", "passed")
+
+    loop_spec = LoopSpec(
+        arm=str(loop["arm"]),
+        train_embryo=fold.train_embryo,
+        evaluate_embryo=fold.evaluate_embryo,
+        train_movies=int(loop["train_movies"]),
+        evaluate_movies=int(loop["evaluate_movies"]),
+        frames=int(loop["frames"]),
+        epochs=int(loop["epochs"]),
+        batch=int(loop["batch"]),
+        learning_rate=float(loop["learning_rate"]),
+        seed=int(fold.seed),
+        radii_um=tuple(float(r) for r in loop["radii_um"]),
+        suppression_radius_um=float(loop["suppression_radius_um"]),
+        pool_quantile=float(loop["pool_quantile"]),
+        baseline_quantile=float(loop["baseline_quantile"]),
+        config_digest=spec.config_digest,
+        count_ratio=float(loop.get("count_ratio", 1.0)),
+    )
+    stage("model", f"arm={loop_spec.arm} seed={fold.seed} count_ratio={loop_spec.count_ratio}")
+    out = Path(os.environ.get("BIOHUBX_OUTPUT", "/kaggle/working"))
+    out.mkdir(parents=True, exist_ok=True)
+    checkpoint = out / f"rescorer-{loop_spec.arm}-{fold.fold_id}.pt"
+
+    def log(name: str, detail: str) -> None:
+        mapped = {
+            "epoch": "epoch-end",
+            "inputs": "inputs-built",
+            "decode": "decode",
+            "held-out": "held-out",
+            "cache": "cache",
+        }
+        if name == "epoch":
+            stage("epoch-start", detail[:40])
+        stage(mapped.get(name, name), detail)
+        if time.perf_counter() - started > spec.runtime_ceiling_seconds:
+            raise EntryRefusal(f"runtime ceiling {spec.runtime_ceiling_seconds}s exceeded")
+
+    result = run_loop(
+        root,
+        loop_spec,
+        device=torch.device(device),
+        cache_dir=out / "cache",
+        checkpoint_path=checkpoint,
+        log=log,
+    )
+    stage("checkpoint", f"{checkpoint.name} strict reload identical={result.reload_identical}")
+    if result.reload_identical is False:
+        raise EntryRefusal("the reloaded checkpoint did not reproduce its own output")
+    peak_allocated = int(torch.cuda.max_memory_allocated()) if gpu_count else 0
+    peak_reserved = int(torch.cuda.max_memory_reserved()) if gpu_count else 0
+    stage(
+        "memory",
+        f"peak_allocated_bytes={peak_allocated} peak_reserved_bytes={peak_reserved} "
+        f"total_bytes={total_vram_bytes}",
+    )
+
+    manifest: dict[str, Any] = {
+        "schema_version": 1,
+        "experiment": "E07",
+        "smoke_id": spec.smoke_id,
+        "spec": spec.to_dict(),
+        "loop": result.to_dict(),
+        "guards": report,
+        "local_exercise": local_exercise,
+        "device": device,
+        "hardware": {
+            "torch": torch.__version__,
+            "cuda": cuda_version,
+            "device_name": device_name,
+            "gpu_count": gpu_count,
+            "total_vram_bytes": total_vram_bytes,
+            "peak_allocated_bytes": peak_allocated,
+            "peak_reserved_bytes": peak_reserved,
+        },
+        "wheelhouse": {
+            "slug": spec.wheelhouse_slug,
+            "tree": spec.wheelhouse_tree,
+            "verified_before_install": wheelhouse_verified,
+            "resolved_at": wheelhouse_root,
+        },
+        "elapsed_seconds": round(time.perf_counter() - started, 3),
+    }
+    manifest_path = out / f"e07-{fold.fold_id}-{loop_spec.arm}.json"
+    staged = manifest_path.with_suffix(".json.partial")
+    staged.write_text(json.dumps(manifest, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+    staged.replace(manifest_path)
+    stage("done", f"manifest={manifest_path.name} elapsed={manifest['elapsed_seconds']}s")
     return manifest
