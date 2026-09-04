@@ -876,3 +876,109 @@ entries:
   payload_present: false
   status: reference_only
   claims: []
+- id: RL-0054
+  url: https://arxiv.org/abs/1703.00593
+  kind: paper
+  campaign: RX-02
+  branch: pu-ranking
+  note: 'nnPU: the non-negative risk estimator E07''s loss already uses. Establishes
+    that a flexible model drives the empirical negative risk below zero and overfits,
+    which is what the clamp prevents.'
+  recorded_utc: '2026-09-04T16:20:41+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T16:20:41+00:00'
+  http_status: 200
+  bytes: 42213
+  raw_digest: raw_artifact_sha256:sha256:39e4d6396c29d1d6be202a4af8a4359d07e1d305c2a4cfb4d3fb79e5a5c861e7
+  cache_path: research/cache/RL-0054/1703.00593
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0055
+  url: https://www.jmlr.org/papers/volume24/22-067/22-067.pdf
+  kind: paper
+  campaign: RX-02
+  branch: pu-ranking
+  note: Risk bounds for PU learning under selection bias. The label noise is instance-dependent
+    (SAR), not SCAR, which is the assumption nnPU's prior correction rests on.
+  recorded_utc: '2026-09-04T16:20:42+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T16:20:42+00:00'
+  http_status: 200
+  bytes: 360611
+  raw_digest: raw_artifact_sha256:sha256:012e4608c66a27efb52c10b3bb2c369e7b434668c7ee07e2eb747778618c540d
+  cache_path: research/cache/RL-0055/22-067.pdf
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0056
+  url: https://arxiv.org/abs/1809.03207
+  kind: paper
+  campaign: RX-02
+  branch: pu-ranking
+  note: 'Beyond SCAR: the Selected At Random assumption and propensity estimation
+    for PU learning.'
+  recorded_utc: '2026-09-04T16:20:43+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T16:20:43+00:00'
+  http_status: 200
+  bytes: 42272
+  raw_digest: raw_artifact_sha256:sha256:c7dfe646a06c3c9fcfc82a7632bc39d00185ec8092a760417e8d5dcf2a2744c5
+  cache_path: research/cache/RL-0056/1809.03207
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0057
+  url: https://celltrackingchallenge.net/3d-datasets/
+  kind: dataset_listing
+  campaign: RX-02
+  branch: alternative-supervision
+  note: 'Cell Tracking Challenge 3D+time datasets. Two light-sheet embryo nucleus
+    corpora: Fluo-N3DL-DRO (Drosophila, 5.8 GB train) and Fluo-N3DL-TRIF (Tribolium,
+    320 GB train). No licence stated on the page.'
+  recorded_utc: '2026-09-04T16:22:17+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T16:22:17+00:00'
+  http_status: 200
+  bytes: 81290
+  raw_digest: raw_artifact_sha256:sha256:9ad1a5b73a9b2cb983ae0ae86f4e30e39b27e0753ff38512efbbe7c7f8ebbf28
+  cache_path: research/cache/RL-0057/3d-datasets
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0058
+  url: https://selma3d2026.grand-challenge.org/
+  kind: dataset_listing
+  campaign: RX-02
+  branch: alternative-supervision
+  note: 'SELMA3D 2026: unannotated 3D light-sheet mouse and human data for pretraining
+    plus annotated crops for fine-tuning. R-0013 already recorded its licence as a
+    blocker.'
+  recorded_utc: '2026-09-04T16:22:19+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T16:22:19+00:00'
+  http_status: 200
+  bytes: 32691
+  raw_digest: raw_artifact_sha256:sha256:253ff5a310508b4166ec6d2a1f32f4007d349ccf633120becf8bff91c5a94a78
+  cache_path: research/cache/RL-0058/selma3d2026.grand-challenge.org
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0059
+  url: https://www.kaggle.com/code/analyticaobscura/biohub-lb-941
+  kind: notebook
+  campaign: RX-02
+  branch: notebook-mechanisms
+  note: Highest public leaderboard notebook found for this competition, 0.941. Dual-seed
+    TemporalUNet3D detector, transformer edge model, ILP, division post-processing
+    with DeepCenter veto. Runs entirely on the three pilkwang blocked weight datasets.
+  recorded_utc: '2026-09-04T16:22:50+00:00'
+  fetched: true
+  fetched_utc: null
+  http_status: null
+  bytes: 199391
+  raw_digest: raw_artifact_sha256:sha256:24253cae5a958b83d69e201719388031f5758080c5d01ca1a8e374f3a8225389
+  cache_path: artifacts/factory/RX-02/notebook-mechanisms-a01/pulled/biohub-lb-941.ipynb
+  payload_present: true
+  status: reference_only
+  claims: []
