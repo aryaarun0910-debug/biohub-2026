@@ -56,6 +56,11 @@ ABSOLUTE_PATH_ALLOWLIST = frozenset(
         # path, so the tests proving such a record is representable must contain
         # one. The registry field itself is exercised, not a real machine path.
         "tests/contracts/test_tiered_verification.py",
+        # The sandbox names paths inside the container it creates: /work, /tmp
+        # and /home/sandbox. Docker requires them absolute and they exist on no
+        # host. This entry narrows F-0001's claim by exactly that file, and the
+        # detector still fires on any host path that ends up there.
+        "src/biohubx/research/sandbox.py",
     }
 )
 

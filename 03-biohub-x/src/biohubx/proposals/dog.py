@@ -168,6 +168,7 @@ def detect_instances(
     scale: VoxelScaleZYX = OFFICIAL_VOXEL_SCALE,
     refine_centroids: bool = False,
     local_maxima_only: bool = False,
+    per_scale_union: bool = False,
 ) -> InstanceSet:
     """Propose one instance per suppressed DoG maximum, frame by frame.
 
@@ -188,7 +189,23 @@ def detect_instances(
 
     for frame_index in range(volume.shape[0]):
         plane = volume[frame_index][:, ::stride, ::stride]
-        response = dog_response(normalise_frame(plane), radii_um=radii_um, voxel_um=isotropic_um)
+        normalised = normalise_frame(plane)
+        response = dog_response(normalised, radii_um=radii_um, voxel_um=isotropic_um)
+        union_mask = None
+        if per_scale_union:
+            # H-11c. The max-over-scales response lets one scale's peak swallow
+            # another's: a large scale fuses two neighbours into one maximum and
+            # that maximum wins the pointwise max, so the small scale's two peaks
+            # never become candidates. Taking strict peaks at each scale on its
+            # own and unioning them keeps both, and the shared physical
+            # suppression pass afterwards is what removes the true duplicates.
+            union_mask = np.zeros(response.shape, dtype=bool)
+            footprint = np.ones((3, 3, 3), dtype=bool)
+            footprint[1, 1, 1] = False
+            for radius_um in radii_um:
+                single = dog_response(normalised, radii_um=(radius_um,), voxel_um=isotropic_um)
+                neighbours = maximum_filter(single, footprint=footprint, mode="constant", cval=-np.inf)
+                union_mask |= (single > neighbours) & (single > 0.0)
         finite = response[np.isfinite(response)]
         if finite.size == 0:
             continue
@@ -201,7 +218,9 @@ def detect_instances(
         floor = float(finite.min())
         scaled = np.clip((response - floor) / span, 0.0, 1.0)
         threshold = float(np.clip((cutoff - floor) / span, 1e-6, 1.0 - 1e-6))
-        if local_maxima_only:
+        if union_mask is not None:
+            scaled = np.where(union_mask, scaled, 0.0)
+        elif local_maxima_only:
             # Greedy physical-radius suppression accepts any above-threshold voxel
             # that is not within the radius of one already accepted. On a wide
             # blob that admits its shoulders as separate proposals, and the count

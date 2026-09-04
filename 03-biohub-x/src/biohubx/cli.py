@@ -1600,6 +1600,217 @@ def evaluate_retention(
     typer.echo(json.dumps({"crossover": crossings}, sort_keys=True))
 
 
+@evaluate_app.command("oracle-ceiling")
+def evaluate_oracle_ceiling(
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    frames: Annotated[int, typer.Option("--frames", help="Frames per movie window.")] = 10,
+    radii: Annotated[str, typer.Option("--radii", help="Frozen DoG bank, um.")] = "2.0,3.0",
+    local_maxima: Annotated[bool, typer.Option("--local-maxima", help="Frozen: strict peaks.")] = True,
+    response_quantile: Annotated[float, typer.Option("--response-quantile")] = 0.95,
+    suppression_radius: Annotated[float, typer.Option("--suppression-radius")] = 4.0,
+    max_movies: Annotated[
+        int, typer.Option("--max-movies", help="Cap movies per embryo. 0 uses every annotated movie.")
+    ] = 0,
+    out: Annotated[
+        Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/e06-oracle.json.")
+    ] = None,
+) -> None:
+    """Score the association ceiling over frozen proposals, per embryo, officially.
+
+    E06-ORACLE. Every emitted edge is a ground-truth edge whose endpoints both
+    matched a proposal one-to-one within the official radius; every proposal is a
+    node whether it matched or not. The result is what a perfect linker would
+    score on these proposals. It is a diagnostic ceiling and can never be
+    promoted, because it chooses edges with ground truth.
+
+    The frozen configuration is passed explicitly and recorded in the report;
+    the defaults here restate D-0041 and the E06 declaration, and a run that
+    changes them is a different measurement. Reads a bounded window of each
+    annotated training movie and never the public-test directory. Each embryo
+    is reported on its own.
+    """
+    command = "evaluate oracle-ceiling"
+    from biohubx.data.competition import (
+        CompetitionLayoutError,
+        WindowSelection,
+        competition_root,
+        load_ground_truth,
+        load_window,
+    )
+    from biohubx.evaluation.official_metric import EstimatedTotalNodes, metric_row, summarise_fold
+    from biohubx.evaluation.oracle import oracle_graph
+    from biohubx.proposals import dog
+
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    train_dir = data_root / "train"
+    movies = sorted(path.stem for path in train_dir.glob("*.geff"))
+    if not movies:
+        heartbeat(command, "refused", f"no annotated training datasets under {train_dir}")
+        raise typer.Exit(code=2)
+    bank = tuple(float(item) for item in radii.split(","))
+    frozen = {
+        "source": "biohubx.proposals.dog",
+        "local_maxima_only": local_maxima,
+        "radii_um": list(bank),
+        "response_quantile": response_quantile,
+        "suppression_radius_um": suppression_radius,
+        "refine_centroids": False,
+        "truncation": "none",
+        "frames_per_movie": frames,
+    }
+    by_embryo: dict[str, list[str]] = {}
+    for dataset_id in movies:
+        by_embryo.setdefault(dataset_id.split("_", 1)[0], []).append(dataset_id)
+    if max_movies:
+        by_embryo = {embryo: ids[:max_movies] for embryo, ids in by_embryo.items()}
+    heartbeat(
+        command,
+        "start",
+        " ".join(f"{embryo}={len(ids)}" for embryo, ids in sorted(by_embryo.items()))
+        + f" frozen={json.dumps(frozen, sort_keys=True)}",
+    )
+
+    started = time.monotonic()
+    per_embryo_rows: dict[str, list[dict[str, Any]]] = {}
+    accounting: dict[str, dict[str, float]] = {}
+    unscored: dict[str, list[dict[str, object]]] = {}
+    for embryo, dataset_ids in sorted(by_embryo.items()):
+        for index, dataset_id in enumerate(dataset_ids):
+            truth = load_ground_truth(data_root, dataset_id)
+            annotated_frames = sorted({node.frame for node in truth.lineage.nodes})
+            if not annotated_frames:
+                continue
+            first = min(annotated_frames[0], max(0, truth.frames - frames))
+            depth, height, width = _open_volume(data_root / "train" / f"{dataset_id}.zarr").shape[1:]
+            try:
+                window = load_window(
+                    data_root,
+                    WindowSelection(dataset_id, first, frames, 0, depth, 0, height, 0, width),
+                    split="train",
+                )
+            except ValueError as exc:
+                heartbeat(command, "skip", f"{dataset_id}: {exc}")
+                continue
+            if not window.annotated.nodes:
+                continue
+            instances = dog.detect_instances(
+                window.volume,
+                dataset=window.annotated.dataset,
+                radii_um=bank,
+                response_quantile=response_quantile,
+                suppression_radius_um=suppression_radius,
+                local_maxima_only=local_maxima,
+            )
+            ceiling = oracle_graph(instances, window.annotated)
+            bucket = accounting.setdefault(
+                embryo,
+                {
+                    "movies": 0,
+                    "proposals": 0,
+                    "estimated_nodes": 0.0,
+                    "annotated_nodes": 0,
+                    "matched_nodes": 0,
+                    "annotated_edges": 0,
+                    "retained_edges": 0,
+                    "retained_divisions": 0,
+                },
+            )
+            bucket["movies"] += 1
+            bucket["proposals"] += ceiling.proposals
+            bucket["estimated_nodes"] += float(window.window_estimated_total_nodes)
+            bucket["annotated_nodes"] += ceiling.annotated_nodes
+            bucket["matched_nodes"] += ceiling.matched_nodes
+            bucket["annotated_edges"] += ceiling.annotated_edges
+            bucket["retained_edges"] += ceiling.retained_edges
+            bucket["retained_divisions"] += ceiling.retained_divisions
+            if ceiling.graph is None:
+                unscored.setdefault(embryo, []).append(
+                    {
+                        "dataset": dataset_id,
+                        "annotated_edges": ceiling.annotated_edges,
+                        "matched_nodes": ceiling.matched_nodes,
+                    }
+                )
+                continue
+            row = metric_row(
+                ceiling.graph,
+                window.annotated,
+                estimated_total_nodes=EstimatedTotalNodes.declared(
+                    float(window.window_estimated_total_nodes)
+                ),
+            )
+            per_embryo_rows.setdefault(embryo, []).append(row)
+            if (index + 1) % 25 == 0:
+                heartbeat(command, "scored", f"{embryo} {index + 1}/{len(dataset_ids)}")
+        heartbeat(command, "embryo", f"{embryo} done")
+
+    summaries: dict[str, dict[str, object]] = {}
+    for embryo, rows in sorted(per_embryo_rows.items()):
+        fold = summarise_fold(rows)
+        acc = accounting[embryo]
+        summaries[embryo] = {
+            **fold.to_dict(),
+            "windows_scored": len(rows),
+            "windows_unscored_no_retained_edge": len(unscored.get(embryo, [])),
+            "annotated_edges_in_unscored_windows": sum(
+                int(str(u["annotated_edges"])) for u in unscored.get(embryo, [])
+            ),
+            "proposals": int(acc["proposals"]),
+            "estimated_nodes": round(acc["estimated_nodes"], 1),
+            "node_ratio": round((acc["proposals"] - acc["estimated_nodes"]) / acc["estimated_nodes"], 4),
+            "annotated_nodes": int(acc["annotated_nodes"]),
+            "matched_nodes": int(acc["matched_nodes"]),
+            "node_match_fraction": round(acc["matched_nodes"] / acc["annotated_nodes"], 4)
+            if acc["annotated_nodes"]
+            else 0.0,
+            "annotated_edges": int(acc["annotated_edges"]),
+            "retained_edges": int(acc["retained_edges"]),
+            "edge_retention": round(acc["retained_edges"] / acc["annotated_edges"], 4)
+            if acc["annotated_edges"]
+            else 0.0,
+            "retained_divisions": int(acc["retained_divisions"]),
+            "supports_0_950": bool(fold.score >= 0.950),
+        }
+        heartbeat(
+            command,
+            "ceiling",
+            f"{embryo}: score={fold.score:.4f} adj_edge={fold.adjusted_edge_jaccard:.4f} "
+            f"raw_edge={fold.edge_jaccard:.4f} node_ratio={summaries[embryo]['node_ratio']} "
+            f"retention={summaries[embryo]['edge_retention']} unscored={summaries[embryo]['windows_unscored_no_retained_edge']}",
+        )
+
+    payload = {
+        "schema_version": 1,
+        "provenance_status": "diagnostic_ceiling",
+        "experiment": "E06",
+        "measurement": "E06-ORACLE",
+        "frozen_proposals": frozen,
+        "per_embryo": summaries,
+        "unscored_windows": unscored,
+        "both_support_0_950": bool(summaries) and all(bool(s["supports_0_950"]) for s in summaries.values()),
+        "runtime_seconds": round(time.monotonic() - started, 3),
+        "limits": (
+            "A ceiling, never a method: edges are chosen with ground truth. Scores are per window and "
+            "aggregated the official way per embryo; they are not comparable with whole-movie scores. "
+            "A window with no retained edge cannot be scored by the pinned scorer (F-0009) and is counted "
+            "separately with its annotated edges, which a real linker would also have missed."
+        ),
+    }
+    report_path = out if out is not None else repository_root() / "artifacts/e06-oracle.json"
+    atomic_write_text(report_path, json.dumps(payload, indent=2, sort_keys=True) + chr(10))
+    _write_manifest(command, {"report": str(report_path), "experiment": "E06-ORACLE"})
+    heartbeat(command, "done", f"both embryos support 0.950: {payload['both_support_0_950']}")
+    typer.echo(json.dumps({k: v for k, v in payload.items() if k != "unscored_windows"}, sort_keys=True))
+
+
 @evaluate_app.command("proposals")
 def evaluate_proposals(
     root: Annotated[
@@ -1633,6 +1844,12 @@ def evaluate_proposals(
     local_maxima: Annotated[
         bool,
         typer.Option("--local-maxima", help="Only true 3D local maxima of the response are candidates."),
+    ] = False,
+    per_scale_union: Annotated[
+        bool,
+        typer.Option(
+            "--per-scale-union", help="H-11c: strict peaks at each scale, unioned, then suppressed."
+        ),
     ] = False,
     out: Annotated[
         Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/proposals.json.")
@@ -1751,6 +1968,7 @@ def evaluate_proposals(
                     suppression_radius_um=suppression_radius,
                     refine_centroids=refine,
                     local_maxima_only=local_maxima,
+                    per_scale_union=per_scale_union,
                 ),
             }
             for name, instances in proposal_sets.items():
@@ -1876,6 +2094,7 @@ def evaluate_proposals(
         "dog_suppression_radius_um": suppression_radius,
         "dog_radii_um": list(bank),
         "dog_local_maxima_only": local_maxima,
+        "dog_per_scale_union": per_scale_union,
         "movies_skipped": skipped,
         "measure": "reachability: an annotated node with some proposal within 7 um, per frame",
         "rows": rows,
@@ -4035,3 +4254,79 @@ def research_evict(
         raise typer.Exit(code=2) from exc
     heartbeat(command, "done", f"{entry.id} payload_present={entry.payload_present} digest kept")
     typer.echo(json.dumps(entry.to_dict(), sort_keys=True))
+
+
+@research_app.command("sandbox")
+def research_sandbox(
+    workdir: Annotated[Path, typer.Option("--workdir", help="The one host directory mounted at /work.")],
+    command: Annotated[list[str], typer.Option("--cmd", help="Command token. Repeat for each token.")],
+    image: Annotated[
+        str, typer.Option("--image", help="Base image, must be present with a repo digest.")
+    ] = "python:3.12-slim",
+    timeout: Annotated[int, typer.Option("--timeout", help="Wall-clock seconds.")] = 1800,
+    cpus: Annotated[str, typer.Option("--cpus")] = "2",
+    memory: Annotated[str, typer.Option("--memory")] = "4g",
+    allow_network: Annotated[
+        bool, typer.Option("--allow-network", help="Declare network. Off by default.")
+    ] = False,
+    env: Annotated[
+        list[str] | None, typer.Option("--env", help="KEY=VALUE passed into the container. Repeatable.")
+    ] = None,
+    report: Annotated[
+        Path | None,
+        typer.Option(
+            "--report", help="Where to write the run record. Defaults to artifacts/sandbox-run.json."
+        ),
+    ] = None,
+) -> None:
+    """Run one command on third-party code inside the disposable sandbox.
+
+    D-0039 permits third-party execution only with no secrets, no general host
+    mount, no external writes, bounded processes and resources, and networking
+    disabled unless separately declared. This command is that sandbox: a pinned
+    image by digest, --network none, a read-only root with tmpfs scratch, exactly
+    one bind mount, a non-root user, CPU, memory and PID limits, capabilities
+    dropped, and a timeout. The run record carries all of it.
+    """
+    name = "research sandbox"
+    from biohubx.research.sandbox import SandboxError, run_in_sandbox
+
+    environment: dict[str, str] = {}
+    for item in env or []:
+        key, sep, value = item.partition("=")
+        if not sep or not key:
+            heartbeat(name, "refused", f"--env takes KEY=VALUE, got {item!r}")
+            raise typer.Exit(code=2)
+        environment[key] = value
+    heartbeat(
+        name, "start", f"image={image} network={'declared' if allow_network else 'none'} workdir={workdir}"
+    )
+    try:
+        run = run_in_sandbox(
+            list(command),
+            workdir=workdir,
+            image=image,
+            cpus=cpus,
+            memory=memory,
+            timeout_seconds=timeout,
+            allow_network=allow_network,
+            env=environment,
+        )
+    except SandboxError as exc:
+        heartbeat(name, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    report_path = report if report is not None else repository_root() / "artifacts/sandbox-run.json"
+    atomic_write_text(report_path, json.dumps(run.to_dict(), indent=2, sort_keys=True) + chr(10))
+    heartbeat(name, "image", run.image_digest)
+    heartbeat(
+        name, "exit", f"returncode={run.returncode} timed_out={run.timed_out} elapsed={run.elapsed_seconds}s"
+    )
+    if run.stdout_tail.strip():
+        for line in run.stdout_tail.strip().splitlines()[-12:]:
+            heartbeat(name, "stdout", line[:160])
+    if run.returncode != 0:
+        for line in run.stderr_tail.strip().splitlines()[-12:]:
+            heartbeat(name, "stderr", line[:160])
+        heartbeat(name, "done", f"FAILED, record at {report_path}")
+        raise typer.Exit(code=1)
+    heartbeat(name, "done", f"record at {report_path}")

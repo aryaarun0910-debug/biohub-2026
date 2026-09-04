@@ -369,3 +369,21 @@ entries:
   payload_present: true
   status: reference_only
   claims: []
+- id: RL-0023
+  url: https://github.com/royerlab/tracksdata/commit/7bfeaf845ceb951226f19b72fe5b80e01601018a
+  kind: repository
+  campaign: RX-01
+  branch: association
+  note: tracksdata source at the officially pinned commit; cloned by git into research/cache/tracksdata-src
+    (124 files, tree cd3af1b0caea84319c7d2471f1e62a1b7d90fe82, BSD-3-Clause); wheel
+    to be built in the disposable sandbox
+  recorded_utc: '2026-09-04T08:04:54+00:00'
+  fetched: false
+  fetched_utc: null
+  http_status: null
+  bytes: null
+  raw_digest: null
+  cache_path: null
+  payload_present: false
+  status: reference_only
+  claims: []

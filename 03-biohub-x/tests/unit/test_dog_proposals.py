@@ -154,3 +154,20 @@ def test_a_peak_on_the_volume_face_is_still_a_peak() -> None:
 
     assert len(peaks.instances) == 1
     assert peaks.instances[0].voxel.z <= 1.0
+
+
+def test_per_scale_union_keeps_two_neighbours_a_large_scale_fuses() -> None:
+    """Two blobs 6 um apart in the plane. A 4.5 um scale fuses them into one
+    maximum that wins the pointwise max; strict peaks per scale keep both."""
+    volume = volume_with_blob((12, 48, 40))
+    volume = np.maximum(volume, volume_with_blob((12, 48, 55)))
+    bank = (2.0, 4.5)
+    fused = detect_instances(
+        volume, dataset=DATASET, radii_um=bank, response_quantile=0.95, local_maxima_only=True
+    )
+    union = detect_instances(
+        volume, dataset=DATASET, radii_um=bank, response_quantile=0.95, per_scale_union=True
+    )
+
+    assert len(union.instances) >= len(fused.instances)
+    assert len(union.instances) == 2

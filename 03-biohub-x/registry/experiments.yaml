@@ -575,3 +575,81 @@ experiments:
           one nucleus spacing of a peak, and about a fifth of 6bba's at the
           neutral budget, a third of them dim. D-0041 fixes the configuration
           E05 inherits.
+  - id: E06
+    component: association
+    hypothesis: >-
+      With proposals frozen at the strict-peak DoG configuration of D-0041, the
+      official combined score on each held-out embryo is limited by association,
+      and at least one association arm improves it over the nearest-parent
+      baseline on both embryo directions.
+    falsifier: >-
+      The oracle ceiling decides whether the hypothesis is even in play: if either
+      embryo's oracle score cannot support 0.950, association is not yet the sole
+      bottleneck and E06 halts in favour of proposal complementarity. In the
+      bake-off, an arm is killed if it fails to improve the official combined
+      score over the baseline on either held-out embryo; one direction improving
+      is a challenger; a pooled-only result is not a result.
+    inputs:
+      - the 199 annotated competition.train .geff and .zarr artifacts
+      - configs/e06-association.yaml
+    split:
+      scheme: leave_one_embryo_out
+      folds:
+        - id: fold_44b6
+          select_on: 44b6
+          evaluate_on: 6bba
+        - id: fold_6bba
+          select_on: 6bba
+          evaluate_on: 44b6
+      never_read: the public-test directory, for any purpose
+    model_config:
+      path: configs/e06-association.yaml
+      section: E06
+      canonical_text: canonical_text_sha256:sha256/v1:4560b2a4b4a7d49de154cc6edca2242d635517c38cf7e6548e7a53e23406bf6a
+    frozen_proposals:
+      source: biohubx.proposals.dog
+      local_maxima_only: true
+      radii_um: [2.0, 3.0]
+      response_quantile: 0.95
+      suppression_radius_um: 4.0
+      refine_centroids: false
+      truncation: none
+      frozen_by: D-0041
+      may_not_change: >-
+        Preregistered here. H-11c and every other proposal probe run beside E06
+        and cannot alter this block; a better proposal set is a new declaration.
+    window:
+      frames_per_movie: 10
+      start: first annotated frame, clamped to fit
+      spatial_extent: full
+    budget: CPU only, no GPU, no network, no download
+    expected_outputs:
+      - artifacts/e06-oracle.json, the ceiling per embryo
+      - one report per bake-off arm, per embryo direction, never pooled
+    forbidden_changes:
+      - the pinned official scorer
+      - the frozen proposal block above
+      - the window, once the oracle has run
+      - the fold definition
+    promotion_metric: >-
+      official combined score on the held-out embryo, both directions separately;
+      promotion requires improvement over A1 on both
+    mandatory_outputs:
+      - node ratio, raw and adjusted edge Jaccard, division counts, combined score, per embryo
+      - the oracle ceiling before any arm
+    runtime_ceiling: 7200 seconds per arm
+    provenance_status: external_cleared
+    first_measurement:
+      id: E06-ORACLE
+      role: diagnostic ceiling, never a promotable method
+      construction: >-
+        Proposal nodes are the frozen peaks. Ground-truth nodes are matched
+        one-to-one to proposals within the official 7 micrometre radius, per
+        frame, by minimum-cost assignment. The only edges emitted are ground-truth
+        edges whose two endpoints both matched, rewritten onto their matched
+        proposals. Every proposal is a node whether or not it matched, so the
+        node-count term is what the frozen detector actually costs.
+      decision_rule: >-
+        Either embryy below 0.950: association is not yet the sole bottleneck,
+        return to H-11c and E05. Both at or above 0.950 with headroom toward
+        0.970: proceed to the bake-off.
