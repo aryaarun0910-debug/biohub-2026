@@ -1517,6 +1517,209 @@ references:
         preflight has to make rather than assume.
       - Step time at the real eight-frame window, which decides the fold budget.
 
+  - id: R-0013
+    status: reference_only
+    title: RX-01 first pass, mechanisms only, each traced to the research ledger
+    campaign: RX-01
+    provenance:
+      ledger: registry/research-ledger.yaml, RL-0001 to RL-0019
+      acquired_under: "[[D-0039]]"
+      note: >-
+        Every claim below names the ledger id it was read from, and the ledger
+        record carries the URL, time, size and raw digest of what arrived.
+        Nothing here is evidence. A mechanism may seed a probe arm; a constant
+        appears only with its source and never as a default.
+
+    stream_2_association:
+      trackastra_RL-0001_RL-0016:
+        attends_over: >-
+          Detections in a sliding temporal window of s=6 frames, tokens built
+          from Fourier positional encodings of centre coordinates plus mean
+          intensity, area and inertia tensor, with rotary time embeddings.
+        edge_scoring: >-
+          Pairwise logits from an encoder-decoder cross-attention outer product,
+          normalised by a "parental softmax" over each detection's candidate
+          parents in the previous frame with a constant 1 in the denominator.
+          That constant is the no-parent option: a detection can decline every
+          parent, and the normalisation enforces at most one parent per vertex.
+        biohubx_relation: >-
+          This is the same shape as TargetPrediction's explicit no-parent row
+          ([[SYSTEM.md]] 4.4), arrived at independently. What differs is that
+          Trackastra learns the no-parent mass jointly with the parent scores,
+          where Biohub-X's is still a hand-set constant.
+        training: >-
+          Binary cross-entropy on the parental softmax plus lambda=0.01 times a
+          sigmoid BCE term; per-element weights 1+lambda_div with lambda_div=10 on
+          dividing cells and 1+lambda_cont with lambda_cont=1 on continuing ones;
+          links beyond delta_t=2 frames ignored.
+        decoding: >-
+          Three decoders from the same scores: greedy with threshold 0.5, a
+          two-stage linear assignment, or an ILP with degree constraints. The
+          paper reports all three, which is the bake-off E06 proposes.
+        constants_not_adopted: s=6, alpha=0.05, theta=0.5, d=256, L=6, lambda_div=10
+      ultrack_RL-0002_RL-0017:
+        hypotheses: >-
+          Hierarchical watershed on a contour map yields nested segment
+          candidates per frame, filtered by minimum and maximum size and contour
+          strength.
+        ilp: >-
+          Binary variables for segment selection, frame-to-frame assignment,
+          appearance, disappearance and division. Constraints: a selected segment
+          has exactly one incoming link or is an appearance; outgoing flow is one
+          continuation, or a division with at most two children, or a
+          disappearance; a division only from a selected segment; nested
+          candidates are mutually exclusive.
+        costs: >-
+          IoU between candidate segments in adjacent frames, raised to a power to
+          discourage over-segmentation, sparsified by a KD-tree query of the 2k
+          nearest neighbours then keeping the k with highest IoU. Appearance,
+          disappearance and division carry non-positive penalties.
+        biohubx_relation: >-
+          The constraint set is the LineageGraph legality contract expressed as
+          an ILP. The interesting part for E06 is the cost sparsification and the
+          global solve, not the segmentation front end, which Biohub-X does not
+          use.
+        scaling: windows of 50 frames with 5-frame overlap, solved in an interleaved two-pass scheme
+      bytetrack_RL-0003:
+        mechanism: >-
+          Associate high-confidence detections first, then run a second
+          association pass in which low-confidence detections may claim the
+          tracks left unmatched, rather than discarding them at a threshold.
+        biohubx_relation: >-
+          Directly relevant to the node-count trade in [[F-0018]]: a second pass
+          over low-response DoG peaks could recover annotated endpoints without
+          admitting every low peak as a node.
+      uncertainty_for_assignment_RL-0005_RL-0015_RL-0018:
+        per_link_probability: >-
+          A column softmax over negated costs gives each daughter a distribution
+          over candidate mothers plus a dummy no-match class.
+        bayesian_marginals: >-
+          Uniform prior over biologically feasible assignments, likelihood from
+          the cost, marginals approximated three ways: top-K assignment sampling
+          weighted by posterior, feature perturbation with K separate solves, or
+          feature perturbation with averaged costs and one solve.
+        abstention: >-
+          Drop links below a probability threshold, or flag high daughter-wise
+          entropy for review. Entropy is reported as less dependent on
+          temperature scaling.
+        calibration: expected calibration error, with post-hoc temperature scaling fit on one held-out sequence
+        biohubx_relation: >-
+          Gives E06's learned-abstention arm a concrete, cheap form: the
+          entropy of the per-target parent distribution is computable from any
+          cost matrix Biohub-X already builds, with no new model.
+        constants_not_adopted: K=10, gamma=0.1, dropout 0.5/0.25/0.125
+      mitosis_aware_mht_RL-0004:
+        mechanism: >-
+          Biological priors placed directly in assignment costs; motion
+          representations lifted to spatial densities via test-time augmentation;
+          a mitosis-aware assignment that resolves false divisions through
+          long-term conflicts.
+        read_depth: abstract only; the full text is not yet ledgered
+      higher_order_transformer_RL-0007:
+        mechanism: >-
+          Edge-centric attention in which candidate links attend to one another
+          under a 3D geometric prior, motivated by the observation that edges
+          sharing a node have near-random label agreement in pairwise models.
+        read_depth: abstract only
+      primal_dual_and_argus_RL-0006_RL-0008:
+        note: >-
+          Recorded as routes, not read in depth. The first is a solver for
+          large tracking-by-assignment problems; the second keeps optical flow
+          and linear assignment while replacing thresholding with learned
+          segmentation.
+
+    stream_1_proposals:
+      celegans_nuclei_RL-0009_RL-0014_RL-0019:
+        comparison: >-
+          Table 1 reports precision, recall and F1 of 0.81, 0.80, 0.80 for
+          IFT-watershed, 0.95, 0.90, 0.92 for LoG-GSF, and 0.95, 0.92, 0.93 for
+          a 3D U-Net. The learned detector's gain came from dim nuclei and from
+          separating adjacent nuclei that classical methods clumped.
+        biohubx_relation: >-
+          The two failure modes named there, dimness and merging under crowding,
+          are exactly the two features the E04b miss audit measures per node. If
+          the audit shows the same signature, a learned residual detector is
+          plausibly complementary to DoG; if the misses are instead outside the
+          scale bank, widening the bank is cheaper than a model.
+      hessian_constrained_blobs_RL-0010:
+        mechanism: >-
+          DoG-smooth, then mark voxels whose Hessian is negative definite as a
+          blob superset; gate that superset with a U-Net probability map to remove
+          noise-induced convexities, so no post-pruning is needed. Scale chosen by
+          the maximum of the scale-normalised DoG.
+        biohubx_relation: >-
+          A convexity test is a cheap second criterion Biohub-X's DoG does not yet
+          apply. It could reduce proposals at a fixed recall, which is the
+          node-count side of the trade.
+        constants_not_adopted: gamma=2, sigma 0.5 to 3 step 0.5
+      giani_RL-0011:
+        note: LoG versus Hessian blob detection compared in one 3D pipeline; recorded as a route, not read in depth.
+
+    stream_3_alternative_supervision:
+      selma3d_RL-0012:
+        note: >-
+          Public unlabeled 3D light-sheet volumes, including human brain nuclei,
+          intended for self-supervised pretraining. A candidate source for
+          representation pretraining that teaches nothing about which cells this
+          competition annotates.
+      cellseg3d_RL-0013:
+        mechanism: >-
+          WNet3D: a dual U-Net trained without labels on a weighted sum of a soft
+          normalised-cut clustering loss on the encoder logits and a
+          reconstruction loss on the decoder, then thresholded and split into
+          instances by Voronoi-Otsu. The authors state it has no notion of a cell
+          and cannot separate cells from artefacts on its own.
+        data: >-
+          mesoSPIM cleared mouse brain at 5.26 x 5.26 x 5 micrometre voxels, an
+          order of magnitude coarser than this competition's 0.40625 micrometre
+          plane. It releases 2,632 annotated nuclei across six volumes on Zenodo
+          under MIT.
+        biohubx_relation: >-
+          The released annotations are a candidate external set for a
+          with-and-without pretraining comparison, but the voxel scale gap is
+          large enough that transfer is a hypothesis in its own right, not a
+          given. Its reported F1 of 0.71 unfiltered against 0.83 for a supervised
+          transformer at 80 percent data is recorded and not adopted.
+        constants_not_adopted: intensity sigma 1, spatial sigma 4, radius 2 voxels, threshold 0.6
+
+    hypothesis_queue_additions:
+      - id: H-06
+        stream: association
+        statement: >-
+          A parental-softmax normalisation over candidate parents with an
+          explicit no-parent constant, learned jointly, beats the hand-set
+          no-parent constant in Biohub-X's untrained matcher on edge reach after
+          decoding, on both folds.
+        falsifier: killed if edge TP does not rise on either held-out fold at equal proposals
+        source: RL-0001, RL-0016
+      - id: H-07
+        stream: association
+        statement: >-
+          Daughter-wise entropy of the parent distribution identifies the links
+          most likely to be wrong, so abstaining on the highest-entropy fraction
+          raises edge precision more than it lowers recall.
+        falsifier: killed if edge Jaccard falls on either fold at every abstention fraction swept
+        source: RL-0005, RL-0018
+      - id: H-08
+        stream: proposals
+        statement: >-
+          A second association pass admitting low-response DoG peaks only where a
+          track has no successor recovers annotated endpoints without paying the
+          node-count cost of admitting all of them.
+        falsifier: killed if reachability does not rise at a fixed node budget on either fold
+        source: RL-0003, and F-0018 for the bar
+      - id: H-09
+        stream: proposals
+        statement: >-
+          Gating DoG peaks on a negative-definite Hessian reduces proposals at
+          fixed reachability.
+        falsifier: killed if the proposal count at matched reachability does not fall on either fold
+        source: RL-0010
+
+    not_adopted:
+      - Every constant listed under constants_not_adopted. They seed labelled probe grids only.
+      - Any reported score. None was measured on this corpus or under this metric.
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per

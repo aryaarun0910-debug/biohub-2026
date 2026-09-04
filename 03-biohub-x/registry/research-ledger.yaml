@@ -250,3 +250,71 @@ entries:
   payload_present: true
   status: reference_only
   claims: []
+- id: RL-0016
+  url: https://arxiv.org/html/2405.15700
+  kind: paper
+  campaign: RX-01
+  branch: association
+  note: HTML full text of RL-0001, read for the parental softmax, no-link constant,
+    loss weights and decoders
+  recorded_utc: '2026-09-04T00:28:08+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T00:28:08+00:00'
+  http_status: 200
+  bytes: 297072
+  raw_digest: raw_artifact_sha256:sha256:b242c16834e5547537154a46f1504febf2791f5fa31442b16940d5270f2df584
+  cache_path: research/cache/RL-0016/2405.15700
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0017
+  url: https://arxiv.org/html/2308.04526
+  kind: paper
+  campaign: RX-01
+  branch: association
+  note: HTML full text of RL-0002, read for the ILP variables, constraints and IoU
+    costs
+  recorded_utc: '2026-09-04T00:28:09+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T00:28:09+00:00'
+  http_status: 200
+  bytes: 225824
+  raw_digest: raw_artifact_sha256:sha256:e4503b1e2afa27413ae6857b4056b8a7e92b8d6439aada0bb3d01624f28602b7
+  cache_path: research/cache/RL-0017/2308.04526
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0018
+  url: https://arxiv.org/html/2503.09244
+  kind: paper
+  campaign: RX-01
+  branch: association
+  note: HTML full text of RL-0005, read for top-K assignment sampling, feature perturbation,
+    entropy and temperature scaling
+  recorded_utc: '2026-09-04T00:28:11+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T00:28:11+00:00'
+  http_status: 200
+  bytes: 531931
+  raw_digest: raw_artifact_sha256:sha256:756f9a6cad1d49f99d84c51238ac335e8d20993a966294536206bad459f73cde
+  cache_path: research/cache/RL-0018/2503.09244
+  payload_present: true
+  status: reference_only
+  claims: []
+- id: RL-0019
+  url: https://arxiv.org/html/2111.06425
+  kind: paper
+  campaign: RX-01
+  branch: proposals
+  note: HTML full text of RL-0009, read for Table 1 detector comparison and the dim-nucleus
+    failure mode
+  recorded_utc: '2026-09-04T00:28:12+00:00'
+  fetched: true
+  fetched_utc: '2026-09-04T00:28:12+00:00'
+  http_status: 200
+  bytes: 331704
+  raw_digest: raw_artifact_sha256:sha256:37506617b85cb2099d7362018b4b8b445875a0687ce1f74545214f51b021615c
+  cache_path: research/cache/RL-0019/2111.06425
+  payload_present: true
+  status: reference_only
+  claims: []
