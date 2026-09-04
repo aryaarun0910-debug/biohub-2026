@@ -892,6 +892,46 @@ experiments:
           ceilings_on_the_window: {"A0": {"proposals": 1402, "match": 0.9714, "score": 0.9686}, "arm_kept": {"proposals": 1605, "match": 1.0, "score": 1.0}, "pool": {"proposals": 3097, "match": 1.0, "score": 0.907}}
           survives: True
           kill_reasons: []
+        stage2:
+          campaign_envelope: GPU-CAMPAIGN-E07-01
+          attempt: 3 of a maximum 12
+          kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+          package_digest: canonical_text_sha256:sha256/v1:fcec3088ff64dd584d1ea38927817aadf7c401821fb6341e6404d1704a17538c
+          commit: 020c82c7689cf6774b221b5c5428529eb2f7f6a4
+          manifest: artifacts/e07-smoke-A3/e07-fold_44b6-A3.json
+          log_digest: raw_artifact_sha256:sha256:767d03e12932301d55cdcc8138c7554ac2168b1cee066e59a880285e091d5672
+          accelerator: two Tesla T4 observed, one requested; trained on cuda:0 only
+          gpu_count_observed: 2
+          device_names: ["Tesla T4", "Tesla T4"]
+          peak_allocated_bytes: 190747648
+          peak_reserved_bytes: 289406976
+          guards: all passed, no failures
+          elapsed_seconds: 78.265
+          train_datasets: ["44b6_0113de3b", "44b6_0b24845f"]
+          evaluate_datasets: ["6bba_05b6850b", "6bba_05db0fb1"]
+          pool_candidates: 32544
+          positives_in_the_training_window: 13
+          epochs: [{"batches": 10, "epoch": 0, "loss_last": 0.15445062518119812, "loss_mean": 0.5339606419205666, "negative_risk_clamped_batches": 2}, {"batches": 11, "epoch": 1, "loss_last": 1.4153579473495483, "loss_mean": 0.5457717203171342, "negative_risk_clamped_batches": 7}]
+          reload_identical: True
+          decode: count_ratio 1.0 keeps 9819 of 32544 training candidates
+          held_out_on_two_6bba_movies_ten_frames:
+            A0: {"edge_retention": 0.8083, "node_match_fraction": 0.854, "node_ratio": -0.0306, "proposals": 7383, "score": 0.771}
+            arm: {"edge_retention": 0.825, "node_match_fraction": 0.8467, "node_ratio": -0.0, "proposals": 7616, "score": 0.825}
+            pool: {"edge_retention": 1.0, "node_match_fraction": 1.0, "node_ratio": 4.2388, "proposals": 39900, "score": 0.5258}
+          stage3_condition_met: false
+          why: >-
+            The envelope conditions Stage 3 on a finite decreasing loss, positives
+            above zero in every epoch, no guard failure and peak memory below
+            12 GiB. Three hold. The loss does not decrease: the epoch mean rises
+            from 0.5340 to 0.5458 and the
+            non-negative clamp fires on 7 of
+            11 batches in epoch 1.
+          integration_evidence_only: >-
+            Every held-out number above is from two movies at ten frames trained
+            on 13 positives. It is not evidence about ranking and must not be
+            read as any. What it does establish is that the package trains,
+            decodes, scores the held-out embryo through the oracle path and
+            reloads its checkpoint identically on a real T4.
       A4:
         stage0:
           report: artifacts/model-inspect-A4.json
@@ -916,6 +956,46 @@ experiments:
           ceilings_on_the_window: {"A0": {"proposals": 1402, "match": 0.9714, "score": 0.9686}, "arm_kept": {"proposals": 1605, "match": 1.0, "score": 1.0}, "pool": {"proposals": 3097, "match": 1.0, "score": 0.907}}
           survives: True
           kill_reasons: []
+        stage2:
+          campaign_envelope: GPU-CAMPAIGN-E07-01
+          attempt: 4 of a maximum 12
+          kernel: aryaarun07/biohub-x-e07-a4-fold-44b6
+          package_digest: canonical_text_sha256:sha256/v1:9149c8388dd75352b24573e1d70118297c5f90fcbc65a1ec93df01f808cd592c
+          commit: 020c82c7689cf6774b221b5c5428529eb2f7f6a4
+          manifest: artifacts/e07-smoke-A4/e07-fold_44b6-A4.json
+          log_digest: raw_artifact_sha256:sha256:c3a46dffb64d0301fd4c2601a0277b67d0a84178db778fac7749162d265aaf61
+          accelerator: two Tesla T4 observed, one requested; trained on cuda:0 only
+          gpu_count_observed: 2
+          device_names: ["Tesla T4", "Tesla T4"]
+          peak_allocated_bytes: 354601984
+          peak_reserved_bytes: 660602880
+          guards: all passed, no failures
+          elapsed_seconds: 91.616
+          train_datasets: ["44b6_0113de3b", "44b6_0b24845f"]
+          evaluate_datasets: ["6bba_05b6850b", "6bba_05db0fb1"]
+          pool_candidates: 32544
+          positives_in_the_training_window: 13
+          epochs: [{"batches": 10, "epoch": 0, "loss_last": 0.19664157927036285, "loss_mean": 0.5335272386670112, "negative_risk_clamped_batches": 4}, {"batches": 11, "epoch": 1, "loss_last": 1.6110203266143799, "loss_mean": 0.5439706126503139, "negative_risk_clamped_batches": 7}]
+          reload_identical: True
+          decode: count_ratio 1.0 keeps 9819 of 32544 training candidates
+          held_out_on_two_6bba_movies_ten_frames:
+            A0: {"edge_retention": 0.8083, "node_match_fraction": 0.854, "node_ratio": -0.0306, "proposals": 7383, "score": 0.771}
+            arm: {"edge_retention": 0.3833, "node_match_fraction": 0.4161, "node_ratio": -0.0, "proposals": 7616, "score": 0.3833}
+            pool: {"edge_retention": 1.0, "node_match_fraction": 1.0, "node_ratio": 4.2388, "proposals": 39900, "score": 0.5258}
+          stage3_condition_met: false
+          why: >-
+            The envelope conditions Stage 3 on a finite decreasing loss, positives
+            above zero in every epoch, no guard failure and peak memory below
+            12 GiB. Three hold. The loss does not decrease: the epoch mean rises
+            from 0.5335 to 0.5440 and the
+            non-negative clamp fires on 7 of
+            11 batches in epoch 1.
+          integration_evidence_only: >-
+            Every held-out number above is from two movies at ten frames trained
+            on 13 positives. It is not evidence about ranking and must not be
+            read as any. What it does establish is that the package trains,
+            decodes, scores the held-out embryo through the oracle path and
+            reloads its checkpoint identically on a real T4.
       reading: >-
         Both arms clear Stage 0 and Stage 1. Neither number above is evidence
         about learning: five optimizer steps on the same window that is then
@@ -924,3 +1004,23 @@ experiments:
         set the oracle path scores. A4's ceiling on its own training window
         after five steps exceeds A0's; that is a training-set number and
         belongs nowhere but here. Stage 2 and 3 need the GPU envelope.
+      stage2_reading: >-
+        Stage 2 succeeded as integration and is uninformative as science, and
+        the reason is measurable rather than arguable. Both arms ran on a real
+        T4, passed every guard, trained, decoded, scored the held-out embryo and
+        reloaded identically, at 0.19 and 0.35 GiB peak against a 12 GiB
+        ceiling. Neither arm's loss decreased across its two epochs, so neither
+        meets the envelope's Stage 3 condition.
+        The cause is the training window, not the arms. The smoke takes the
+        first two movies of the training embryo in name order, and those are
+        44b6_0113de3b and 44b6_0b24845f, which hold 52 and 51 annotated nodes
+        and rank 4th and 2nd sparsest of the 71 movies in 44b6. Ten frames of
+        each yielded 13 positives against 32,544 candidates. [[F-0013]] already
+        recorded that 44b6 is annotated at 0.77 percent against 6bba's 9.71 and
+        warned that the folds are different annotation regimes; Stage 2 is the
+        first place that finding has cost a run. The first eight movies in name
+        order, which is what the declared Stage 3 would take, hold 1,495
+        annotated nodes between them against a 44b6 median of 214 per movie.
+        Changing which movies the fold reads is a change to the split and is
+        outside the repair scope the envelope allows, so nothing here was
+        adjusted. Stage 3 stops pending Arya Arun's decision.

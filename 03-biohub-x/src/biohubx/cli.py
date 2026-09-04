@@ -5881,6 +5881,136 @@ def research_sandbox(
     heartbeat(name, "done", f"record at {report_path}")
 
 
+@research_app.command("dispatch")
+def research_dispatch(
+    campaign: Annotated[str, typer.Option("--campaign", help="Campaign id, e.g. RX-02.")],
+    plan: Annotated[
+        Path, typer.Option("--plan", help="Campaign plan declaring each job, its falsifier and its budget.")
+    ],
+    job: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--job", help="Dispatch only these jobs. Repeatable. Defaults to every job in the plan."
+        ),
+    ] = None,
+) -> None:
+    """Freeze one immutable request per job, for exactly one worker each.
+
+    The controller's half of the boundary. Every request pins the commit, the
+    dependency lock, the image, the inputs, the split, the seed, the budget and
+    the falsifier, and is written once into its own run directory. A retry takes
+    a new run id, so no attempt is ever overwritten by a later one. Nothing here
+    fetches anything or writes a registry.
+    """
+    command = "research dispatch"
+    from biohubx.research.factory import FactoryError, dispatch, frozen_context
+
+    root_path = repository_root()
+    try:
+        plan_body = yaml.safe_load(plan.read_text(encoding="utf-8"))
+        declared = list(plan_body["jobs"])
+    except (OSError, KeyError, TypeError, ValueError) as exc:
+        heartbeat(command, "refused", f"cannot read jobs from {plan}: {exc}")
+        raise typer.Exit(code=2) from exc
+    wanted = set(job or [])
+    jobs = [item for item in declared if not wanted or str(item.get("job")) in wanted]
+    missing = sorted(wanted - {str(item.get("job")) for item in declared})
+    if missing:
+        heartbeat(command, "refused", f"{plan} declares no job named {missing}")
+        raise typer.Exit(code=2)
+    if not jobs:
+        heartbeat(command, "refused", f"{plan} declares no jobs")
+        raise typer.Exit(code=2)
+
+    try:
+        context = frozen_context(root_path)
+        outcome = dispatch(root_path, campaign=campaign, jobs=jobs, context=context)
+    except FactoryError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    heartbeat(command, "frozen", f"commit={context['commit'][:12]} image={context['image']}")
+    for item in outcome["dispatched"]:
+        heartbeat(command, "dispatched", f"{item['run_id']} request={item['request_digest'][:46]}")
+    heartbeat(command, "done", f"{len(outcome['dispatched'])} job(s); NOTHING FETCHED, NO REGISTRY WRITTEN")
+    typer.echo(json.dumps(outcome, sort_keys=True))
+
+
+@research_app.command("worker")
+def research_worker(
+    request: Annotated[Path, typer.Option("--request", help="The dispatched request.json this run answers.")],
+    result: Annotated[
+        Path, typer.Option("--result", help="Draft result JSON: status, conclusion, claims, taints, budget.")
+    ],
+) -> None:
+    """Validate one worker's draft against its own request and write it once.
+
+    The worker's half of the boundary, and the only writer of a run's result. It
+    refuses a request that changed after dispatch, a status a worker may not
+    reach, a taint set smaller than the one it inherited, a budget overrun, a
+    claim with no source, and any second result for a run that already has one.
+    It touches no registry and no Git: acquisitions are recorded in the run
+    directory and merged later by `research collect`.
+    """
+    command = "research worker"
+    from biohubx.research.factory import FactoryError, record_result
+
+    root_path = repository_root()
+    try:
+        draft = json.loads(result.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        heartbeat(command, "refused", f"cannot read the draft result at {result}: {exc}")
+        raise typer.Exit(code=2) from exc
+    try:
+        recorded = record_result(root_path, request_path=request, draft=draft)
+    except FactoryError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    heartbeat(command, "status", f"{recorded['run_id']} {recorded['status']} taints={recorded['taints']}")
+    heartbeat(command, "done", f"result={recorded['result_digest'][:46]}")
+    typer.echo(json.dumps(recorded, sort_keys=True))
+
+
+@research_app.command("collect")
+def research_collect(
+    campaign: Annotated[
+        str, typer.Option("--campaign", help="Campaign id whose runs to verify and collect.")
+    ],
+) -> None:
+    """Verify every run, merge what the workers acquired, and compare what they concluded.
+
+    The only place a canonical registry is written, and the only place the
+    ledger's sequential ids are allocated, under a lock. Conflicting results are
+    kept apart: two attempts that disagree produce a comparison naming both,
+    never an average and never a rewrite. The dossier is regenerated here as a
+    view over the collection, so it cannot drift from the records it summarises.
+    """
+    command = "research collect"
+    from biohubx.research.factory import COLLECTION_FILE, DOSSIER_FILE, FACTORY_ROOT, FactoryError, collect
+
+    root_path = repository_root()
+    try:
+        collection = collect(root_path, campaign=campaign)
+    except FactoryError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    for run in collection["runs"]:
+        heartbeat(command, "run", f"{run['run_id']} {run['status']} result={run['result_digest'][:46]}")
+    if collection["pending"]:
+        heartbeat(command, "pending", f"no result yet: {collection['pending']}")
+    for comparison in collection["comparisons"]:
+        if not comparison["agree"]:
+            heartbeat(command, "conflict", f"{comparison['job']}: {comparison['resolution']}")
+    heartbeat(command, "ledger", f"added={collection['ledger']['added']}")
+    heartbeat(command, "taints", str(collection["campaign_taints"]))
+    heartbeat(
+        command,
+        "done",
+        f"{(FACTORY_ROOT / campaign / COLLECTION_FILE).as_posix()} and "
+        f"{(FACTORY_ROOT / campaign / DOSSIER_FILE).as_posix()}",
+    )
+    typer.echo(json.dumps(collection, sort_keys=True))
+
+
 def _inspect_rescorer(
     *,
     command: str,

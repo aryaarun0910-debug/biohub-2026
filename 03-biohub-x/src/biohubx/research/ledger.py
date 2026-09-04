@@ -21,9 +21,13 @@ tracked file.
 
 from __future__ import annotations
 
+import os
 import re
+import time
 import urllib.error
 import urllib.request
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -33,6 +37,12 @@ import yaml
 
 from biohubx.artifacts import atomic_write_text
 from biohubx.hashing import DigestKind, digest_file
+
+LEDGER_LOCK_PATH = Path("registry/.research-ledger.lock")
+"""The one lock every canonical research-ledger write takes."""
+
+LEDGER_LOCK_TIMEOUT_SECONDS = 120.0
+"""Long enough to outlast an intake's bounded fetch, short enough to fail loudly."""
 
 LEDGER_PATH = Path("registry/research-ledger.yaml")
 CACHE_ROOT = Path("research/cache")
@@ -45,6 +55,45 @@ USER_AGENT = "Biohub-X research intake (public sources only; contact via reposit
 
 class LedgerError(ValueError):
     """The intake cannot proceed as asked, and says why."""
+
+
+@contextmanager
+def ledger_lock(root: Path, *, timeout: float = LEDGER_LOCK_TIMEOUT_SECONDS) -> Iterator[Path]:
+    """Exclusive-create a lock file, or refuse.
+
+    ``O_CREAT | O_EXCL`` is atomic on every filesystem this repository runs on,
+    including Windows, which is why it is used rather than a library. The holder
+    writes its pid and the time it acquired, so a stale lock is diagnosable
+    instead of anonymous. Nothing here breaks a lock automatically: a lock that
+    outlives its holder is a fact worth seeing.
+    """
+    path = root / LEDGER_LOCK_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+    deadline = time.monotonic() + timeout
+    handle: int | None = None
+    while True:
+        try:
+            handle = os.open(str(path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            break
+        except FileExistsError:
+            if time.monotonic() >= deadline:
+                held = path.read_text(encoding="utf-8").strip() if path.exists() else "unknown holder"
+                raise LedgerError(
+                    f"the research ledger lock at {LEDGER_LOCK_PATH} was held for more than "
+                    f"{timeout:.0f}s by {held}; no write was attempted"
+                ) from None
+            time.sleep(0.05)
+    try:
+        os.write(
+            handle, f"pid={os.getpid()} acquired={datetime.now(UTC).isoformat(timespec='seconds')}\n".encode()
+        )
+        os.close(handle)
+        handle = None
+        yield path
+    finally:
+        if handle is not None:
+            os.close(handle)
+        path.unlink(missing_ok=True)
 
 
 @dataclass(frozen=True, slots=True)
@@ -164,6 +213,34 @@ def intake(
     if not _is_public_http(url):
         raise LedgerError(f"only public http(s) sources are recorded, got {url!r}")
 
+    # The whole read, modify, write is inside the lock, fetch included. The
+    # sequential id allocation below is exactly the operation that is correct for
+    # one writer and lossy for two, and holding the lock across a bounded fetch
+    # costs a queued caller seconds while dropping it would cost a record.
+    with ledger_lock(root):
+        return _intake_locked(
+            root,
+            url=url,
+            kind=kind,
+            campaign=campaign,
+            branch=branch,
+            note=note,
+            do_fetch=do_fetch,
+            max_bytes=max_bytes,
+        )
+
+
+def _intake_locked(
+    root: Path,
+    *,
+    url: str,
+    kind: str,
+    campaign: str,
+    branch: str,
+    note: str,
+    do_fetch: bool,
+    max_bytes: int,
+) -> tuple[LedgerEntry, bool]:
     entries = load_ledger(root)
     existing = find_by_url(entries, url)
     if existing is not None:
@@ -222,6 +299,11 @@ def intake(
 
 def evict(root: Path, entry_id: str) -> LedgerEntry:
     """Delete a cached payload and keep everything else about it."""
+    with ledger_lock(root):
+        return _evict_locked(root, entry_id)
+
+
+def _evict_locked(root: Path, entry_id: str) -> LedgerEntry:
     entries = load_ledger(root)
     for index, entry in enumerate(entries):
         if entry.id != entry_id:
