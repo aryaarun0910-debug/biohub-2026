@@ -1,0 +1,97 @@
+# GPU-CAMPAIGN-E07-02, proposed. Not authorised until Arya Arun says so in their own words.
+#
+# The representative smoke that replaces E07 Stage 2. Stage 2 read the first two
+# 44b6 movies in name order, which are the second and fourth sparsest of 71, and
+# trained on 13 positives (R-0026). This one reads movies stratified across the
+# training embryo's annotation-count quartiles, both fold directions, and its
+# preflight refuses under a declared minimum before any GPU is allocated.
+#
+# Conditional on E07-PROPENSITY-01 (Arya Arun, 2026-09-04): it runs only if the
+# probe reports no propensity signal, or under a corrected objective if it does.
+# A3 first. A4 only if the probe does not specifically falsify temporal context.
+# Nothing here trains full folds, reads the public test split, or submits.
+
+GPU-CAMPAIGN-E07-02:
+  status: proposed
+  authorises: nothing yet
+  experiment: E07
+  stage: 2B, representative smoke, both directions
+  condition: >-
+    E07-PROPENSITY-01 recorded in registry/experiments.yaml with its outcome;
+    the controller's next_action does not read "stop and redesign"
+  arms:
+    A3: first
+    A4: only if the probe does not name the temporal group as predictive
+  accelerator: >-
+    NvidiaTeslaT4 requested; the guard accepts one or two visible T4s, refuses
+    any other device, and trains on cuda:0 only (D-0044). Two visible cards may
+    run two isolated workers, one arm or one direction each, never one model
+    across both (D-0045).
+  image: the Kaggle GPU image measured in R-0026 (torch 2.10.0+cu128, CUDA 12.8)
+  wheelhouse: aryaarun07/biohubx-wheelhouse-metric-cp312-linux, published payload tree_sha256:sha256/v1:cc8a180133fb8cdf0eaf10ca192bd9965b3b8bade1178746e4c364d790258f7d (R-0016, R-0017; installs on the GPU image per R-0026)
+
+  selection:
+    rule: stratified across annotation-count quartiles of the training embryo, median bands first, deterministic (biohubx.training.rescore_loop.stratified_movies)
+    package: biohubx package rescore --select stratified --min-positives <declared below>
+    preflight: annotated cells in the windows the run will read, counted from the geffs before any push; the package refuses under the minimum
+    training_movies_per_direction: 8
+    evaluation_movies: 2, the first of the held-out embryo in name order, unchanged from Stage 2
+    frames: 10
+    epochs: 2
+    count_ratio: 1.0
+    # Recomputed from the training embryo's own counts at package time; listed
+    # here so the authorisation names what will be read.
+    fold_44b6_training_movies:
+      - {id: 44b6_5f15d135, annotated_nodes: 278, annotated_in_window: 32}
+      - {id: 44b6_808952d6, annotated_nodes: 181, annotated_in_window: 10}
+      - {id: 44b6_7e557709, annotated_nodes: 570, annotated_in_window: 86}
+      - {id: 44b6_2f31fc2f, annotated_nodes: 89, annotated_in_window: 10}
+      - {id: 44b6_267148e4, annotated_nodes: 280, annotated_in_window: 22}
+      - {id: 44b6_cf8fed6b, annotated_nodes: 191, annotated_in_window: 12}
+      - {id: 44b6_8f5ab931, annotated_nodes: 616, annotated_in_window: 56}
+      - {id: 44b6_abf82518, annotated_nodes: 96, annotated_in_window: 10}
+    fold_44b6_annotated_in_window_total: 238
+    fold_6bba_training_movies:
+      - {id: 6bba_907271db, annotated_nodes: 945, annotated_in_window: 64}
+      - {id: 6bba_5b28472a, annotated_nodes: 737, annotated_in_window: 73}
+      - {id: 6bba_ebff6e76, annotated_nodes: 1318, annotated_in_window: 228}
+      - {id: 6bba_312f0dc3, annotated_nodes: 520, annotated_in_window: 57}
+      - {id: 6bba_20852818, annotated_nodes: 952, annotated_in_window: 105}
+      - {id: 6bba_c73a1d11, annotated_nodes: 737, annotated_in_window: 16}
+      - {id: 6bba_283bf9f1, annotated_nodes: 1342, annotated_in_window: 123}
+      - {id: 6bba_d5eae175, annotated_nodes: 528, annotated_in_window: 40}
+    fold_6bba_annotated_in_window_total: 706
+    min_positives_declared: 200
+    min_positives_note: >-
+      Below the sparser direction's own preflight (238) and an order of
+      magnitude above what Stage 2 trained on (13). A floor for the preflight
+      to refuse under, not a target.
+
+  pass_condition:
+    - a finite, decreasing epoch-mean loss
+    - positives above zero in every epoch
+    - stable clamp behaviour: the non-negative clamp firing on fewer batches in the last epoch than in the first
+    - no guard failure
+    - peak allocation below the 13 GiB ceiling of D-0045
+    - held-out oracle ceiling at or above A0 on the same windows, reported per direction, never pooled
+  after_pass: mini-fold for the passing arm and direction under a further envelope; nothing here
+  kill: an arm failing the condition in a direction is held in that direction; failing both is killed
+
+  compute_policy: D-0045
+  measured_per_run: median GPU utilisation, data-wait fraction, examples per second, positives per batch, clamp frequency, peak allocated and reserved bytes
+  ceiling_minutes_per_run: 30
+  totals:
+    runs_maximum: 4 (A3 both directions; A4 both directions if permitted) plus one packaging, dependency, mount or transport repair retry per run
+    kernels_maximum: 8
+    gpu_minutes_ceiling: 120
+    stop_conditions:
+      - any guard failure that is not a packaging, dependency, mount or transport defect
+      - a run exceeding its declared runtime ceiling
+      - peak allocation above 13 GiB
+      - a preflight below the declared minimum, which stops before a push
+      - any read of the public-test directory
+      - any attempt to push beyond the kernel maximum
+
+  retrieval: package retrieve, only the manifest and the log per kernel
+  registration: every attempt gets its own reference entry; results enter E07 stage_results as stage2b, per arm, per direction
+  forbidden: public-test data, submissions, external weights, full-fold training, any scientific configuration change beyond the selection rule this envelope declares

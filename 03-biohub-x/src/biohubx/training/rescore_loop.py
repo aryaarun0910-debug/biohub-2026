@@ -58,10 +58,19 @@ class LoopSpec:
     baseline_quantile: float
     config_digest: str
     count_ratio: float = 1.0
+    train_datasets: tuple[str, ...] = ()
+    """Explicit training movies, chosen at package time and shipped; empty means the first N in name order.
+
+    Name order drew the sparsest tail of 44b6 for Stage 2 ([[R-0026]]). A
+    selection made locally from the training embryo's own annotation counts
+    travels with the package as a list, so the run reads what was chosen and
+    the choice can be recomputed from the counts recorded beside it.
+    """
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "arm": self.arm,
+            "train_datasets": list(self.train_datasets),
             "train_embryo": self.train_embryo,
             "evaluate_embryo": self.evaluate_embryo,
             "train_movies": self.train_movies,
@@ -103,6 +112,88 @@ def movies_of(data_root: Path, embryo: str, count: int) -> list[str]:
     """The first ``count`` annotated movies of an embryo in sorted order: a fixed subset, never a choice."""
     ids = sorted(path.stem for path in (data_root / "train").glob(f"{embryo}*.geff"))
     return ids[:count] if count else ids
+
+
+def annotated_node_counts(data_root: Path, embryo: str) -> dict[str, int]:
+    """Annotated nodes per movie of one embryo, read from each geff's metadata and nodes."""
+    counts: dict[str, int] = {}
+    for dataset in movies_of(data_root, embryo, 0):
+        counts[dataset] = len(load_ground_truth(data_root, dataset).lineage.nodes)
+    return counts
+
+
+STRATA = 4
+"""Annotation-count quartiles. Four, so a selection of eight reads two per band."""
+
+STRATUM_ORDER = (2, 1, 3, 0)
+"""Which bands receive picks first when the count does not divide by four.
+
+Median-first, then outward: the second and third quartiles before the densest
+and the sparsest. E07 Stage 2 read the two sparsest-but-one movies of 44b6 by
+taking the first two in name order and trained on 13 positives ([[R-0026]]);
+Arya Arun's instruction of 2026-09-04 replaces name order with stratification
+that neither repeats that nor selects only the densest.
+"""
+
+
+def stratified_movies(counts: dict[str, int], count: int) -> list[str]:
+    """``count`` movies across annotation-count quartiles; deterministic; training-embryo labels only.
+
+    Movies are ranked by annotated node count with the id as the tie-break, cut
+    into four contiguous rank bands, and picks are taken band by band in
+    ``STRATUM_ORDER``, each band yielding its median-rank movie first and then
+    alternating outward. The same counts always give the same list, and nothing
+    about the held-out embryo enters. The counts are what the selection used
+    and travel with it, so a reader can recompute the choice.
+    """
+    if count <= 0:
+        return []
+    ranked = sorted(counts, key=lambda dataset: (counts[dataset], dataset))
+    if count >= len(ranked):
+        return ranked
+    bands: list[list[str]] = [[] for _ in range(STRATA)]
+    for index, dataset in enumerate(ranked):
+        bands[min(STRATA - 1, index * STRATA // len(ranked))].append(dataset)
+
+    def median_outward(band: list[str]) -> list[str]:
+        order: list[str] = []
+        middle = len(band) // 2
+        for step in range(len(band)):
+            offset = (step + 1) // 2 * (1 if step % 2 else -1)
+            position = middle + offset
+            if 0 <= position < len(band) and band[position] not in order:
+                order.append(band[position])
+        for dataset in band:
+            if dataset not in order:
+                order.append(dataset)
+        return order
+
+    queues = [median_outward(band) for band in bands]
+    chosen: list[str] = []
+    while len(chosen) < count:
+        progressed = False
+        for stratum in STRATUM_ORDER:
+            if queues[stratum]:
+                chosen.append(queues[stratum].pop(0))
+                progressed = True
+                if len(chosen) == count:
+                    break
+        if not progressed:
+            break
+    return chosen
+
+
+def annotated_in_window(data_root: Path, dataset: str, frames: int) -> tuple[int, int]:
+    """First frame the loop would read and the annotated nodes inside that window.
+
+    The same window rule ``build_inputs`` applies, so what the preflight counts is
+    what the run will see. Cheap: the geff only, no volume and no detector.
+    """
+    truth = load_ground_truth(data_root, dataset)
+    annotated_frames = sorted({node.frame for node in truth.lineage.nodes})
+    first = min(annotated_frames[0], max(0, truth.frames - frames)) if annotated_frames else 0
+    inside = sum(1 for node in truth.lineage.nodes if first <= node.frame < first + frames)
+    return first, inside
 
 
 def cache_key(spec: LoopSpec, dataset: str, first_frame: int) -> str:
@@ -282,7 +373,10 @@ def run_loop(
     started = time.monotonic()
     torch.manual_seed(spec.seed)
     generator = torch.Generator().manual_seed(spec.seed)
-    train_ids = movies_of(data_root, spec.train_embryo, spec.train_movies)
+    train_ids = list(spec.train_datasets) or movies_of(data_root, spec.train_embryo, spec.train_movies)
+    foreign = [d for d in train_ids if d.split("_", 1)[0] != spec.train_embryo]
+    if foreign:
+        raise ValueError(f"shipped training movies are not all from {spec.train_embryo}: {foreign}")
     eval_ids = movies_of(data_root, spec.evaluate_embryo, spec.evaluate_movies)
     result = LoopResult(spec=spec, train_datasets=train_ids, evaluate_datasets=eval_ids)
 

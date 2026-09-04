@@ -1024,3 +1024,29 @@ experiments:
         Changing which movies the fold reads is a change to the split and is
         outside the repair scope the envelope allows, so nothing here was
         adjusted. Stage 3 stops pending Arya Arun's decision.
+    decision_2026_09_04: >-
+      Arya Arun: hold the declared Stage 3; run the CPU propensity probe
+      E07-PROPENSITY-01 first and apply its result mechanically; replace
+      name-order movie selection with deterministic stratification across
+      annotation-count quartiles of the training embryo only, with a preflight
+      that reports positives before any GPU is allocated; then a representative
+      Stage 2B in both directions, A3 first, A4 only if temporal context is not
+      specifically falsified. Full-fold compute only for survivors. No further
+      GPU is drawn against the declared Stage 3.
+    probes:
+      - id: E07-PROPENSITY-01
+        lane: probe
+        declaration: configs/e07-propensity-probe.yaml
+        instrument: biohubx evaluate propensity
+        question: >-
+          within the training embryo, is annotated-versus-unlabelled status
+          predictable from brightness, position, time, persistence, local
+          density and motion after controlling for DoG response, movie held
+          out, against a within-movie permutation control
+        falsifier: >-
+          no signal if the held-out AUC gain from every non-response feature
+          does not exceed the declared quantile of the same gain when those
+          features are row-shuffled within each movie with the response and
+          labels intact; a signal otherwise; either answer is used
+        status: declared
+        outcome: pending

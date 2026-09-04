@@ -564,9 +564,20 @@ def run_rescore(
     datasets, reachable = _discover(root)
     if not datasets:
         raise EntryRefusal(f"no training datasets under {root}")
-    train_ids = [d for d in datasets if d.split("_", 1)[0] == fold.train_embryo][
-        : int(loop["train_movies"]) or None
-    ]
+    shipped_train = [str(d) for d in loop.get("train_datasets", [])]
+    if shipped_train:
+        # Chosen at package time from the training embryo's own annotation
+        # counts and carried as a list; the run reads what was chosen. A shipped
+        # movie that is not mounted is a refusal, not a silent fallback to name
+        # order, because then the run would not be the one that was gated.
+        absent = sorted(set(shipped_train) - set(datasets))
+        if absent:
+            raise EntryRefusal(f"shipped training movies are not mounted: {absent[:5]}")
+        train_ids = shipped_train[:1] if local_exercise else shipped_train
+    else:
+        train_ids = [d for d in datasets if d.split("_", 1)[0] == fold.train_embryo][
+            : int(loop["train_movies"]) or None
+        ]
     eval_ids = [d for d in datasets if d.split("_", 1)[0] == fold.evaluate_embryo][
         : int(loop["evaluate_movies"]) or None
     ]
@@ -641,6 +652,7 @@ def run_rescore(
         baseline_quantile=float(loop["baseline_quantile"]),
         config_digest=spec.config_digest,
         count_ratio=float(loop.get("count_ratio", 1.0)),
+        train_datasets=tuple(train_ids),
     )
     stage("model", f"arm={loop_spec.arm} seed={fold.seed} count_ratio={loop_spec.count_ratio}")
     out = Path(os.environ.get("BIOHUBX_OUTPUT", "/kaggle/working"))

@@ -1,0 +1,69 @@
+# E07-PROPENSITY-01: is "annotated" predictable from anything but the DoG response?
+#
+# Probe lane (AGENTS.md section 4). Local, CPU-only, registered training inputs,
+# cannot promote anything. It exists because E07's loss assumes labelled
+# positives are a uniform random sample of all positives (RL-0054) and the
+# corpus is not that (F-0013, R-0026): 44b6 movies carry single traced lineages.
+# If the annotators' choice is predictable from a candidate's circumstances, a
+# scorer can learn that choice instead of cellness, and no held-out ceiling on
+# the other embryo would say why it transferred badly.
+#
+# Decided by Arya Arun on 2026-09-04: hold the declared Stage 3, run this
+# first, and apply its result mechanically before any further GPU is spent.
+
+E07-PROPENSITY-01:
+  lane: probe
+  instrument: biohubx evaluate propensity
+  question: >-
+    Within the training embryo, is a candidate's annotated-versus-unlabelled
+    status predictable from brightness, position, time, persistence, local
+    density and motion after controlling for DoG response, evaluated with the
+    movie held out and judged against a within-movie permutation of those
+    features, the response and the labels left intact?
+  falsifier: >-
+    The probe reports no propensity signal if the held-out AUC gain from adding
+    every non-response feature to the response-only model does not exceed the
+    declared quantile of the same gain when those features are row-shuffled
+    within each movie with the response and labels intact. It reports a signal
+    otherwise. Either answer is used; the probe cannot fail to
+    decide unless a window carries no positive, which it refuses rather than
+    imputes.
+  inputs:
+    candidates: the E07 pool rule from configs/e07-candidate-rescoring.yaml, unchanged
+    positives: one-to-one matches within 7 um, as E07 defines them
+    movies: stratified across annotation-count quartiles of the training embryo, median bands first, deterministic
+    read: full-extent windows of the training embryo only; never the other embryo of the fold
+  split:
+    embryos: [44b6, 6bba]
+    each_as_its_own_training_embryo: true
+    held_out: leave one movie out, grouped; standardisation from the training movies alone
+    never_read: the public-test directory, and the fold's evaluation embryo
+  parameters:
+    movies_per_embryo: 8
+    frames_per_window: 10
+    density_radius_um: 10.0
+    persistence_radius_um: 5.0
+    motion_cap_um: 15.0
+    l2: 0.01
+    permutations: 30
+    seed: 0
+    null_quantile: 0.95
+    constants_note: >-
+      The radii are neighbourhood definitions, not learned; 10 um is about two
+      nuclear diameters at this scale and 5 um is inside the 7 um match radius,
+      so persistence means the same thing the matcher means. The L2 weight is a
+      conditioning choice for a model with under a dozen features. None of these
+      is tuned and none is read from the held-out embryo.
+  budget:
+    compute: CPU, local, under one hour per embryo
+    reads: sixteen ten-frame full-extent windows
+  expected_output:
+    report: artifacts/e07-propensity.json
+    per_embryo: held-out AUC for the response alone, for the response plus each feature group, for all features, for temporal alone and non-temporal alone; the gains; the permutation null per tested gain; the decision
+    decision_rules:
+      signal_absent: continue to representative E07 training
+      signal_present: stop current nnPU training; design a bias-robust objective
+      temporal_predictive: hold A4; its neighbouring frames can learn tracing propensity
+      only_non_temporal_predictive: retain A3 as the safer baseline while the objective is corrected
+  forbidden: reading the other embryo, tuning any constant on the result, calling any number here a finding
+  provenance_status: diagnostic

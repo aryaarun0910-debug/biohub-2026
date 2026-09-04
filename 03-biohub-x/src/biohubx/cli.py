@@ -2829,6 +2829,183 @@ def _open_volume(path: Path) -> Any:
     return group["0"]
 
 
+@evaluate_app.command("propensity")
+def evaluate_propensity(
+    embryo: Annotated[
+        list[str] | None,
+        typer.Option("--embryo", help="Training embryo to probe. Repeatable. Defaults to the declaration's."),
+    ] = None,
+    config: Annotated[
+        Path | None,
+        typer.Option("--config", help="Probe declaration. Defaults to configs/e07-propensity-probe.yaml."),
+    ] = None,
+    family: Annotated[
+        Path | None,
+        typer.Option("--family", help="E07 family config for the pool rule. Defaults to the frozen one."),
+    ] = None,
+    root: Annotated[
+        Path | None,
+        typer.Option("--root", help="Competition data root. BIOHUB_DATA_ROOT is the only fallback."),
+    ] = None,
+    movies: Annotated[
+        int | None, typer.Option("--movies", help="Override movies per embryo; recorded as a deviation.")
+    ] = None,
+    permutations: Annotated[
+        int | None, typer.Option("--permutations", help="Override the permutation count; recorded.")
+    ] = None,
+    out: Annotated[
+        Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/e07-propensity.json.")
+    ] = None,
+) -> None:
+    """Whether "annotated" is predictable from a candidate's circumstances, per training embryo.
+
+    E07-PROPENSITY-01. The pool rule is the frozen E07 one, the movies are
+    stratified across annotation-count quartiles of the training embryo, and
+    each embryo is probed as its own training embryo with the other never read.
+    The result is a decision the controller applies mechanically; it is not a
+    finding and it cannot promote anything.
+    """
+    command = "evaluate propensity"
+    import time
+
+    import numpy as np
+
+    from biohubx.data.competition import (
+        CompetitionLayoutError,
+        WindowSelection,
+        competition_root,
+        load_window,
+    )
+    from biohubx.evaluation import propensity
+    from biohubx.proposals import rescore
+    from biohubx.training.rescore_loop import annotated_in_window, annotated_node_counts, stratified_movies
+
+    root_path = repository_root()
+    config_path = config if config is not None else root_path / "configs/e07-propensity-probe.yaml"
+    family_path = family if family is not None else root_path / "configs/e07-candidate-rescoring.yaml"
+    try:
+        declaration = yaml.safe_load(config_path.read_text(encoding="utf-8"))["E07-PROPENSITY-01"]
+        parameters_block = declaration["parameters"]
+        declared_embryos = [str(e) for e in declaration["split"]["embryos"]]
+        candidates_block = yaml.safe_load(family_path.read_text(encoding="utf-8"))["E07"]["candidates"]
+        bank = tuple(float(r) for r in candidates_block["radii_um"])
+        suppression = float(candidates_block["suppression_radius_um"])
+        pool_quantile = float(candidates_block["response_quantile"])
+    except (OSError, KeyError, TypeError, ValueError) as exc:
+        heartbeat(command, "refused", f"cannot read the declaration or the family: {exc}")
+        raise typer.Exit(code=2) from exc
+    declared_movies = int(parameters_block["movies_per_embryo"])
+    declared_permutations = int(parameters_block["permutations"])
+    frames = int(parameters_block["frames_per_window"])
+    parameters = propensity.ProbeParameters(
+        density_radius_um=float(parameters_block["density_radius_um"]),
+        persistence_radius_um=float(parameters_block["persistence_radius_um"]),
+        motion_cap_um=float(parameters_block["motion_cap_um"]),
+        l2=float(parameters_block["l2"]),
+        permutations=permutations if permutations is not None else declared_permutations,
+        seed=int(parameters_block["seed"]),
+        null_quantile=float(parameters_block["null_quantile"]),
+    )
+    movies_per_embryo = movies if movies is not None else declared_movies
+    matches_declaration = (
+        movies_per_embryo == declared_movies and parameters.permutations == declared_permutations
+    )
+    try:
+        data_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+
+    started = time.monotonic()
+    embryos = embryo or declared_embryos
+    per_embryo: dict[str, Any] = {}
+    for name in embryos:
+        counts = annotated_node_counts(data_root, name)
+        chosen = stratified_movies(counts, movies_per_embryo)
+        heartbeat(
+            command,
+            "select",
+            f"{name} movies={len(counts)} chosen={len(chosen)} annotated={[counts[d] for d in chosen]}",
+        )
+        tables = []
+        for dataset in chosen:
+            first, inside = annotated_in_window(data_root, dataset, frames)
+            depth, height, width = _open_volume(data_root / "train" / f"{dataset}.zarr").shape[1:]
+            window = load_window(
+                data_root,
+                WindowSelection(dataset, first, frames, 0, depth, 0, height, 0, width),
+                split="train",
+            )
+            pool = rescore.extract_candidates(
+                window.volume,
+                dataset=window.annotated.dataset,
+                radii_um=bank,
+                suppression_radius_um=suppression,
+                response_quantile=pool_quantile,
+            )
+            labels = rescore.candidate_labels(pool, window.annotated).numpy()
+            table = propensity.candidate_table(
+                dataset=dataset,
+                volume=window.volume,
+                first_frame=first,
+                pool=pool,
+                labels=labels,
+                estimate=float(window.window_estimated_total_nodes),
+                annotated_nodes=len(window.annotated.nodes),
+                parameters=parameters,
+            )
+            tables.append(table)
+            heartbeat(
+                command,
+                "window",
+                f"{dataset} first={first} annotated_in_window={inside} pool={len(pool.instances)} "
+                f"positives={table.positives}",
+            )
+        try:
+            result = propensity.probe(tables, parameters)
+        except propensity.PropensityError as exc:
+            heartbeat(command, "refused", f"{name}: {exc}")
+            raise typer.Exit(code=2) from exc
+        result["selection"] = {
+            "rule": "stratified across annotation-count quartiles, median bands first",
+            "annotated_node_counts": {d: counts[d] for d in chosen},
+        }
+        per_embryo[name] = result
+        deltas = result["delta_auc"]
+        heartbeat(
+            command,
+            "result",
+            f"{name} control={result['control_auc']['pooled']:.4f} "
+            f"delta_all={deltas['all']:+.4f} null95={result['null']['all']['threshold']:+.4f} "
+            f"delta_temporal={deltas['temporal']:+.4f} delta_non_temporal={deltas['non_temporal']:+.4f}",
+        )
+        heartbeat(
+            command,
+            "decision",
+            f"{name} {result['decision']['verdict']}: {result['decision']['next_action']}",
+        )
+
+    payload: dict[str, Any] = {
+        "schema_version": 1,
+        "probe": "E07-PROPENSITY-01",
+        "declaration": str(config_path.relative_to(root_path)).replace(chr(92), "/"),
+        "declaration_digest": digest_file(config_path, DigestKind.CANONICAL_TEXT).token,
+        "family_digest": digest_file(family_path, DigestKind.CANONICAL_TEXT).token,
+        "matches_declaration": matches_declaration,
+        "frames_per_window": frames,
+        "movies_per_embryo": movies_per_embryo,
+        "per_embryo": per_embryo,
+        "provenance_status": "diagnostic",
+        "runtime_seconds": round(time.monotonic() - started, 3),
+        "numpy": np.__version__,
+    }
+    report = out if out is not None else root_path / "artifacts/e07-propensity.json"
+    atomic_write_text(report, json.dumps(payload, indent=2, sort_keys=True, default=str) + chr(10))
+    _write_manifest(command, {"report": str(report), "embryos": list(embryos)})
+    heartbeat(command, "done", f"{report} matches_declaration={matches_declaration}")
+    typer.echo(json.dumps({name: per_embryo[name]["decision"] for name in per_embryo}, sort_keys=True))
+
+
 @train_app.command("probe")
 def train_probe(
     arm: Annotated[str, typer.Option("--arm", help="E07 arm: A3 or A4.")],
@@ -3746,6 +3923,22 @@ def package_rescore(
     allow_dirty: Annotated[
         bool, typer.Option("--allow-dirty", help="Build from an uncommitted tree; recorded and unpushable.")
     ] = False,
+    select: Annotated[
+        str,
+        typer.Option(
+            "--select",
+            help="Training movies: name-order (first N) or stratified (annotation-count quartiles of the "
+            "training embryo, median bands first, deterministic).",
+        ),
+    ] = "name-order",
+    min_positives: Annotated[
+        int,
+        typer.Option(
+            "--min-positives",
+            help="Refuse unless the training windows hold at least this many annotated cells. A preflight, "
+            "before any GPU is allocated.",
+        ),
+    ] = 0,
 ) -> None:
     """Stage the E07 kernel: one arm, one fold, bounded movies and epochs, gated locally.
 
@@ -3882,6 +4075,63 @@ def package_rescore(
         "pool_quantile": float(candidates_block["response_quantile"]),
         "baseline_quantile": float(baseline_block["response_quantile"]),
     }
+    # Which training movies, chosen here from the training embryo's own annotation
+    # counts and shipped as a list. Name order drew the two sparsest-but-one movies
+    # of 44b6 for Stage 2 and trained on 13 positives (R-0026); the preflight below
+    # counts the annotated cells in the windows the run will read before any GPU
+    # is allocated, and refuses under the declared minimum.
+    from biohubx.training.rescore_loop import (
+        annotated_in_window,
+        annotated_node_counts,
+        movies_of,
+        stratified_movies,
+    )
+
+    if select not in {"name-order", "stratified"}:
+        heartbeat(command, "refused", f"--select must be name-order or stratified, got {select!r}")
+        raise typer.Exit(code=2)
+    try:
+        selection_root = competition_root(root)
+    except CompetitionLayoutError as exc:
+        heartbeat(command, "refused", f"the selection preflight needs the data root: {exc}")
+        raise typer.Exit(code=2) from exc
+    counts = annotated_node_counts(selection_root, spec.fold.train_embryo)
+    if select == "stratified":
+        train_ids = stratified_movies(counts, train_movies)
+    else:
+        train_ids = movies_of(selection_root, spec.fold.train_embryo, train_movies)
+    preflight: dict[str, dict[str, int]] = {}
+    for dataset in train_ids:
+        first, inside = annotated_in_window(selection_root, dataset, frames)
+        preflight[dataset] = {
+            "first_frame": first,
+            "annotated_in_window": inside,
+            "annotated_nodes": counts[dataset],
+        }
+    annotated_total = sum(item["annotated_in_window"] for item in preflight.values())
+    heartbeat(
+        command,
+        "preflight",
+        f"select={select} train={train_ids} "
+        f"annotated_in_window={[preflight[d]['annotated_in_window'] for d in train_ids]} "
+        f"total={annotated_total} min={min_positives}",
+    )
+    if annotated_total < min_positives:
+        heartbeat(
+            command,
+            "refused",
+            f"the training windows hold {annotated_total} annotated cells and the declared minimum is "
+            f"{min_positives}; a run with too little supervision is refused here, not discovered on a GPU",
+        )
+        raise typer.Exit(code=2)
+    loop["train_datasets"] = train_ids
+    loop["selection"] = {
+        "rule": select,
+        "annotated_node_counts": {d: counts[d] for d in train_ids},
+        "preflight": preflight,
+        "annotated_in_window_total": annotated_total,
+        "min_positives": min_positives,
+    }
     heartbeat(
         command,
         "start",
@@ -3908,8 +4158,8 @@ def package_rescore(
         shutil.rmtree(staging)
     staging.mkdir(parents=True)
 
-    # The registry's digests for exactly the movies this run opens: the first N of
-    # the training embryo and the first M of the held-out embryo, in sorted order.
+    # The registry's digests for exactly the movies this run opens: the chosen
+    # training movies and the first M of the held-out embryo in sorted order.
     registry = load_artifact_registry(root_path / ARTIFACT_REGISTRY_PATH)
     input_digests: dict[str, str] = {}
     input_shapes: dict[str, list[int]] = {}
@@ -3925,7 +4175,11 @@ def package_rescore(
                 if r.id.startswith(prefix)
             }
         )
-        wanted = set(ids[:count] if count else ids)
+        wanted = set(train_ids) if embryo == spec.fold.train_embryo else set(ids[:count] if count else ids)
+        unregistered = sorted(wanted - set(ids))
+        if unregistered:
+            heartbeat(command, "refused", f"chosen movies are not registered artifacts: {unregistered[:5]}")
+            raise typer.Exit(code=2)
         for record in registry.artifacts:
             name = record.id.removeprefix("competition.train.")
             if record.id.startswith(prefix) and name.rsplit(".", 1)[0] in wanted:
@@ -6002,6 +6256,10 @@ def research_collect(
             heartbeat(command, "conflict", f"{comparison['job']}: {comparison['resolution']}")
     heartbeat(command, "ledger", f"added={collection['ledger']['added']}")
     heartbeat(command, "taints", str(collection["campaign_taints"]))
+    decision = collection["next_action"]
+    heartbeat(command, "next-action", f"{decision['next_action']} [{decision['rule']}]")
+    for blocked in decision["blocked"]:
+        heartbeat(command, "blocked", blocked)
     heartbeat(
         command,
         "done",

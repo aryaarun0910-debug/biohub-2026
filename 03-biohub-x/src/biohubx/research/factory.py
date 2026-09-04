@@ -60,6 +60,7 @@ from typing import Any
 
 from biohubx.artifacts import atomic_write_text
 from biohubx.hashing import DigestKind, digest_file
+from biohubx.research.controller import next_action, state_from_registries
 from biohubx.research.ledger import ledger_lock
 
 FACTORY_ROOT = Path("artifacts/factory")
@@ -450,6 +451,7 @@ def collect(root: Path, *, campaign: str) -> dict[str, Any]:
         )
 
     merged = _merge_ledger_additions(root, additions)
+    campaign_state = state_from_registries(root)
 
     by_job: dict[str, list[dict[str, Any]]] = {}
     for run in runs:
@@ -488,6 +490,10 @@ def collect(root: Path, *, campaign: str) -> dict[str, Any]:
         # Monotonic across the campaign: once any run carries a taint, the
         # campaign carries it, whatever a later run forgets to mention.
         "campaign_taints": sorted({taint for run in runs for taint in run["taints"]}),
+        # The controller's decision, from the registries and the probe report
+        # alone. Workers propose; this is what spends GPU or unlocks a stage.
+        "controller_state": campaign_state.to_dict(),
+        "next_action": next_action(campaign_state).to_dict(),
         "standing": (
             "no run in this campaign carries standing; a worker reports "
             f"{list(WORKER_STATUSES)} and promotion is decided in the registries"
@@ -541,5 +547,6 @@ def dossier(collection: dict[str, Any]) -> dict[str, Any]:
         "campaign_taints": collection["campaign_taints"],
         "standing": collection["standing"],
         "pending": collection["pending"],
+        "next_action": collection.get("next_action"),
         "jobs": jobs,
     }

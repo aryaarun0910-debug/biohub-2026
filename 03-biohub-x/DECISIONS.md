@@ -1533,3 +1533,45 @@ This is a repair to how a run is executed and recorded. It changes no split, no
 model, no feature, no candidate pool, no decode, no loss, no hyperparameter, no
 epoch count and no promotion criterion, and every package rebuilt under it
 passes the local gate and receives a new recorded digest.
+
+## D-0045 - A GPU budget is a ceiling on memory and a target on throughput, and two cards are two workers
+
+**Date:** 2026-09-04
+**Status:** accepted
+**Authorised by:** Arya Arun
+
+E07 Stage 2 ran a 43k-parameter scorer at 0.19 and 0.35 GiB peak on a 15 GiB
+card ([[R-0026]]). The instinct that follows is to fill the card. That instinct
+is refused here: inflating a batch until memory is full reduces the number of
+useful optimizer steps a session can take without improving what any of them
+learns, and with the supervision this corpus offers ([[F-0013]]) the binding
+constraint is positives per step, not bytes per step.
+
+**Going forward, 13 GiB peak allocation per active T4 is a hard safety ceiling
+and not an occupancy target.** The operational target is examples per second
+and positives per step. A batch-size ladder is run on representative
+training-only inputs and the knee below 13 GiB is chosen; mixed precision is
+enabled only after a numerical verification records that it reproduces the
+full-precision result to a stated tolerance. Every GPU manifest records median
+GPU utilisation, the data-wait fraction, examples per second, positives per
+batch and the non-negative clamp frequency, because those are the numbers that
+say whether a session was spent well.
+
+**Two visible T4s are two isolated workers, never one model.** If Kaggle exposes
+two cards, they run one arm or one fold each, each pinned to its own device
+with its own optimizer and its own manifest; there is no DataParallel, no
+process group and no shared state between them. If one compatible card appears,
+the workers serialise. This is the same boundary the research factory draws
+between workers and the controller, on hardware: isolation is what makes two
+results comparable.
+
+**Checkpoints are written atomically at useful intervals.** Kaggle documents a
+twelve-hour execution ceiling for a notebook; a full-fold package may use about
+eleven and must keep shutdown and artifact-writing headroom, and a session that
+dies at hour ten must not lose hour nine.
+
+What this does not decide: nothing scientific. Batch size, precision and worker
+placement change how fast a declared configuration is measured, and the
+verification that they change nothing else is part of enabling them. The
+north star is useful throughput after the objective has survived its probe,
+not occupancy before anyone knows what the model is learning.

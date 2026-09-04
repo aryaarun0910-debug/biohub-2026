@@ -258,7 +258,7 @@ Implemented:
 - `biohubx evaluate miss-atlas [--root PATH] [--embryo E] [--frames N] [--radii LIST] [--response-quantile Q] [--suppression-radius UM] [--per-scale-union] [--local-maxima] [--max-movies N] [--out PATH]`
 - `biohubx train probe --arm A3|A4 [--config PATH] [--root PATH] [--dataset ID] [--first-frame N] [--frames N] [--steps N] [--learning-rate LR] [--seed N] [--device D] [--batch N] [--out PATH]`
 - `biohubx train rescore --arm A3|A4 --fold F [--config PATH] [--root PATH] [--train-movies N] [--evaluate-movies M] [--frames N] [--epochs N] [--batch N] [--learning-rate LR] [--count-ratio R] [--seed N] [--device D] [--cache DIR] [--out PATH]`
-- `biohubx package rescore --owner SLUG --arm A3|A4 [--fold F] [--smoke-id ID] [--train-movies N] [--evaluate-movies M] [--frames N] [--epochs N] [--batch N] [--learning-rate LR] [--count-ratio R] [--seed N] [--allow-gpu-counts LIST] [--expect-device S] [--runtime-ceiling S] [--config PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--root PATH] [--expect-kernel ID] [--out PATH] [--allow-dirty]`
+- `biohubx package rescore --owner SLUG --arm A3|A4 [--fold F] [--smoke-id ID] [--train-movies N] [--evaluate-movies M] [--frames N] [--epochs N] [--batch N] [--learning-rate LR] [--count-ratio R] [--seed N] [--allow-gpu-counts LIST] [--expect-device S] [--runtime-ceiling S] [--config PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--root PATH] [--expect-kernel ID] [--out PATH] [--allow-dirty] [--select name-order|stratified] [--min-positives N]`
 - `biohubx submission rehearse [--out DIR] [--datasets N] [--movies N]`
 - `biohubx submission validate --csv PATH [--expect-datasets LIST]`
 - `biohubx package audit [--out PATH] [--expect-kernel ID] [--allow-dirty]`
@@ -269,6 +269,10 @@ Implemented:
 - `biohubx package retrieve --kernel ID --only NAME... --out DIR [--allow-missing]`
 - `biohubx package transport [--package PATH] [--expect-kernel ID] [--expect-digest D] [--push --campaign-envelope ID] [--accelerator A] [--expect-dataset SLUG] [--timeout S] [--interpreter CMD]`
 - `biohubx research intake --url URL --kind KIND --campaign ID --branch NAME --note TEXT [--fetch] [--max-bytes N]`
+- `biohubx research dispatch --campaign ID --plan PATH [--job NAME]...`
+- `biohubx research worker --request PATH --result PATH`
+- `biohubx research collect --campaign ID`
+- `biohubx evaluate propensity [--embryo E]... [--config PATH] [--family PATH] [--root PATH] [--movies N] [--permutations N] [--out PATH]`
 - `biohubx research evict --id RL-NNNN`
 - `biohubx train preflight [--dataset ID] [--root PATH] [--seed N] [--peak-quantile F] [--learning-rate F]`
 
