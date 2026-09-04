@@ -200,7 +200,12 @@ def state_from_registries(root: Path) -> CampaignState:
         yaml.safe_load(registry.read_text(encoding="utf-8")) or {} if registry.is_file() else {}
     )
     e07: dict[str, Any] = next((e for e in experiments.get("experiments", []) if e.get("id") == "E07"), {})
+    e08: dict[str, Any] = next((e for e in experiments.get("experiments", []) if e.get("id") == "E08"), {})
     stage_results = dict(e07.get("stage_results", {}))
+    # E08's arms are read from its own entry; the rule table treats every arm alike.
+    stage_results.update(
+        {k: v for k, v in dict(e08.get("stage_results", {})).items() if k not in stage_results}
+    )
 
     propensity: str | None = None
     temporal: bool | None = None
@@ -219,7 +224,7 @@ def state_from_registries(root: Path) -> CampaignState:
             )
 
     arms = []
-    for name in ("A3", "A4"):
+    for name in ("A3", "A4", *sorted(k for k in stage_results if k.startswith("B"))):
         block = stage_results.get(name, {})
         smoke_passed: bool | None = None
         attempts = {k: v for k, v in block.items() if k.startswith("stage2b_") and isinstance(v, dict)}

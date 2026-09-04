@@ -205,3 +205,32 @@ def test_one_measured_direction_that_degraded_is_enough_to_flag_degradation(tmp_
     state = state_from_registries(root)
     assert state.ceiling_degraded is True
     assert next(a for a in state.arms if a.arm == "A3").smoke_passed is None
+
+
+def test_e08_arms_are_read_from_their_own_entry(tmp_path: Path) -> None:
+    (tmp_path / "registry").mkdir()
+    body = {
+        "experiments": [
+            {"id": "E07", "baseline": {"ceilings": {"44b6": 1.0, "6bba": 0.9}}, "stage_results": {"A3": {}}},
+            {
+                "id": "E08",
+                "stage_results": {
+                    "B3": {
+                        "stage2b_c_fold_44b6_attempt3": {
+                            "advancement_condition_met_per_seed": {"0": True, "1": True},
+                            "ceiling_degraded_any_seed": False,
+                        },
+                        "stage2b_c_fold_6bba_attempt4": {
+                            "advancement_condition_met_per_seed": {"0": True, "1": True},
+                            "ceiling_degraded_any_seed": False,
+                        },
+                    }
+                },
+            },
+        ]
+    }
+    (tmp_path / "registry/experiments.yaml").write_text(yaml.safe_dump(body), encoding="utf-8")
+    state = state_from_registries(tmp_path)
+    b3 = next(a for a in state.arms if a.arm == "B3")
+    assert b3.smoke_passed is True
+    assert {a.arm for a in state.arms} == {"A3", "A4", "B3"}
