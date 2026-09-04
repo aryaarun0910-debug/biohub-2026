@@ -258,11 +258,11 @@ Implemented:
 - `biohubx evaluate miss-atlas [--root PATH] [--embryo E] [--frames N] [--radii LIST] [--response-quantile Q] [--suppression-radius UM] [--per-scale-union] [--local-maxima] [--max-movies N] [--out PATH]`
 - `biohubx train probe --arm A3|A4 [--config PATH] [--root PATH] [--dataset ID] [--first-frame N] [--frames N] [--steps N] [--learning-rate LR] [--seed N] [--device D] [--batch N] [--out PATH]`
 - `biohubx train rescore --arm A3|A4 --fold F [--config PATH] [--root PATH] [--train-movies N] [--evaluate-movies M] [--frames N] [--epochs N] [--batch N] [--learning-rate LR] [--count-ratio R] [--seed N] [--device D] [--cache DIR] [--out PATH]`
-- `biohubx package rescore --owner SLUG --arm A3|A4 [--fold F] [--smoke-id ID] [--train-movies N] [--evaluate-movies M] [--frames N] [--epochs N] [--batch N] [--learning-rate LR] [--count-ratio R] [--seed N] [--gpus N] [--expect-device S] [--runtime-ceiling S] [--config PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--root PATH] [--expect-kernel ID] [--out PATH] [--allow-dirty]`
+- `biohubx package rescore --owner SLUG --arm A3|A4 [--fold F] [--smoke-id ID] [--train-movies N] [--evaluate-movies M] [--frames N] [--epochs N] [--batch N] [--learning-rate LR] [--count-ratio R] [--seed N] [--allow-gpu-counts LIST] [--expect-device S] [--runtime-ceiling S] [--config PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--root PATH] [--expect-kernel ID] [--out PATH] [--allow-dirty]`
 - `biohubx submission rehearse [--out DIR] [--datasets N] [--movies N]`
 - `biohubx submission validate --csv PATH [--expect-datasets LIST]`
 - `biohubx package audit [--out PATH] [--expect-kernel ID] [--allow-dirty]`
-- `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--gpus N] [--runtime-ceiling S] [--smoke-id ID] [--wheelhouse PATH] [--expect-published DIGEST] [--expect-device NAME] [--allow-dirty]`
+- `biohubx package kaggle --owner SLUG [--expect-kernel ID] [--fold ID] [--out PATH] [--epochs N] [--max-movies N] [--allow-gpu-counts LIST] [--runtime-ceiling S] [--smoke-id ID] [--wheelhouse PATH] [--expect-published DIGEST] [--expect-device NAME] [--allow-dirty]`
 - `biohubx package preflight [--out PATH] [--wheelhouse PATH] [--expect-published DIGEST] [--allow-dirty]`
 - `biohubx package wheelhouse [--path PATH] [--remote PATH] [--out PATH] [--built-wheel FILE=sha256:HEX...]`
 - `biohubx package metric-preflight [--wheelhouse PATH] [--out PATH] [--expect-published DIGEST] [--root PATH] [--dataset ID] [--frames N] [--allow-dirty]`
@@ -377,10 +377,15 @@ package carries, verified before pip reads a byte of it, and installed offline,
 all before `import biohubx`, since installing after that import would install too
 late ([[D-0032]], [[D-0033]]). The accelerator is requested as the canonical
 `NvidiaTeslaT4`, and because a request is not an allocation, the run refuses
-unless the device it actually got reports a Tesla T4, including when it got no
-accelerator at all. Torch and CUDA versions, the device name, total VRAM and peak
-allocated and reserved memory are reported, so the T4-versus-P100 question and the
-memory headroom for a larger window stop being unmeasured.
+unless every device it actually got reports a Tesla T4, including when it got no
+accelerator at all. How many it got is a separate question from what they are:
+Kaggle allocated two cards against a request for one ([[R-0011]]), so the package
+carries the visible-GPU counts it accepts and refuses any other, while training
+stays pinned to `cuda:0` whatever it is handed ([[D-0044]]). Torch and CUDA
+versions, every visible device's name and VRAM, the device training selected, and
+peak allocated and reserved memory are reported, so the T4-versus-P100 question,
+the allocation size and the memory headroom for a larger window stop being
+unmeasured.
 
 `package retrieve` fetches only the outputs an authorisation named. `kaggle
 kernels output` has no per-file mode, so this is containment rather than

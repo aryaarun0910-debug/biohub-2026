@@ -38,7 +38,7 @@ SPEC = PackageSpec(
     batch_size=2,
     learning_rate=1e-4,
     accelerator="NvidiaTeslaT4",
-    expected_gpu_count=1,
+    allowed_gpu_counts=(1, 2),
     expected_device_substring="Tesla T4",
     smoke=True,
     smoke_id="E03-SMOKE-03",
@@ -68,7 +68,9 @@ def report(**overrides: Any) -> dict[str, Any]:
         "reachable_paths": ["/kaggle/input/competitions/x/train", "/kaggle/input/competitions/x/test"],
         "opened_paths": ["/kaggle/input/competitions/x/train/44b6_a.zarr"],
         "gpu_count": 1,
-        "device_name": "Tesla T4",
+        "device_names": ["Tesla T4"],
+        "device_vram_bytes": [15636037632],
+        "training_device": "cuda:0",
         "dataset_sources": ["aryaarun07/biohubx-wheelhouse-zarr-cp312-linux"],
         "wheelhouse_verified": True,
     }
@@ -136,8 +138,8 @@ def test_a_reachable_quarantined_checkpoint_is_refused() -> None:
     assert any("quarantined checkpoint" in f for f in result["failures"])
 
 
-def test_the_wrong_number_of_gpus_is_refused() -> None:
-    result = report(gpu_count=2)
+def test_a_gpu_count_outside_the_permitted_set_is_refused() -> None:
+    result = report(gpu_count=3, device_names=["Tesla T4"] * 3, device_vram_bytes=[1] * 3)
     assert not result["passed"]
     assert any("would not cost what was approved" in f for f in result["failures"])
 
@@ -401,9 +403,9 @@ def test_an_unapproved_gpu_model_is_refused() -> None:
     1, and the count guard passed while the run proceeded on hardware nobody
     approved.
     """
-    assert report(device_name="Tesla T4")["passed"]
+    assert report(device_names=["Tesla T4"])["passed"]
 
-    wrong = report(device_name="Tesla P100-PCIE-16GB")
+    wrong = report(device_names=["Tesla P100-PCIE-16GB"])
     assert not wrong["passed"]
     assert any("did not take effect" in f for f in wrong["failures"])
 
@@ -418,17 +420,17 @@ def test_an_accelerator_run_that_finds_no_accelerator_refuses() -> None:
     is, which is the same adjacent-check shape: the check sits next to the thing
     that matters instead of on it.
     """
-    failures = report(gpu_count=0, device_name="cpu")["failures"]
+    failures = report(gpu_count=0, device_names=[], device_vram_bytes=[], training_device="cpu")["failures"]
 
     assert any("Tesla T4" in line for line in failures)
 
 
 def test_a_p100_is_refused_by_name() -> None:
-    outcome = report(device_name="Tesla P100-PCIE-16GB")
+    outcome = report(device_names=["Tesla P100-PCIE-16GB"])
 
     assert not outcome["passed"]
     assert any("P100" in line for line in outcome["failures"])
-    assert outcome["device_name"] == "Tesla P100-PCIE-16GB"
+    assert outcome["device_names"] == ["Tesla P100-PCIE-16GB"]
 
 
 def test_a_dataset_source_that_is_not_the_wheelhouse_is_refused_by_name() -> None:
@@ -501,20 +503,81 @@ def test_the_gpu_count_guard_compares_the_observed_count_not_the_expected_one() 
 
     The guard passed, because smoke mode handed it `expected` in place of
     `observed` before comparing them, so the check could not fail in the only mode
-    that used it. The observed count now reaches the guard.
+    that used it. The observed count now reaches the guard, and the tolerance
+    Arya Arun authorised on 2026-09-04 is a declared set rather than a widened
+    comparison: a count outside the set still refuses and still names what it saw.
     """
-    outcome = report(gpu_count=2)
+    outcome = report(gpu_count=4, device_names=["Tesla T4"] * 4, device_vram_bytes=[1] * 4)
 
     assert not outcome["passed"]
-    assert any("found 2" in line for line in outcome["failures"])
+    assert any("reports 4" in line for line in outcome["failures"])
+    assert outcome["gpu_count"] == 4
+    assert outcome["allowed_gpu_counts"] == [1, 2]
+
+
+def test_two_visible_t4s_are_accepted_and_recorded() -> None:
+    """[[R-0011]]: Kaggle allocated two cards against a request for one.
+
+    With the count guard corrected by [[D-0038]] that allocation would now refuse
+    and cost an attempt, so the envelope permits one or two. What must not
+    happen is the second card being used, so the guard records the whole
+    allocation and the pinned device beside it.
+    """
+    outcome = report(
+        gpu_count=2,
+        device_names=["Tesla T4", "Tesla T4"],
+        device_vram_bytes=[15636037632, 15636037632],
+    )
+
+    assert outcome["passed"], outcome["failures"]
     assert outcome["gpu_count"] == 2
+    assert outcome["device_names"] == ["Tesla T4", "Tesla T4"]
+    assert outcome["device_vram_bytes"] == [15636037632, 15636037632]
+    assert outcome["training_device"] == "cuda:0"
+
+
+def test_a_second_visible_device_that_is_not_a_t4_refuses() -> None:
+    """R-0011 recorded the model of device 0 alone, so a mixed allocation was
+    invisible. Every visible card is now checked by name."""
+    outcome = report(
+        gpu_count=2,
+        device_names=["Tesla T4", "Tesla P100-PCIE-16GB"],
+        device_vram_bytes=[15636037632, 17071734784],
+    )
+
+    assert not outcome["passed"]
+    assert any("cuda:1" in line and "P100" in line for line in outcome["failures"])
+
+
+def test_training_on_any_device_but_cuda_zero_refuses() -> None:
+    """Accepting two cards is not using two, and the guard is where that is said."""
+    outcome = report(
+        gpu_count=2,
+        device_names=["Tesla T4", "Tesla T4"],
+        device_vram_bytes=[15636037632, 15636037632],
+        training_device="cuda:1",
+    )
+
+    assert not outcome["passed"]
+    assert any("pinned to 'cuda:0'" in line for line in outcome["failures"])
+
+
+def test_a_vram_reading_per_visible_device_is_required() -> None:
+    """Recording less hardware than was checked would leave the manifest unable
+    to say what the run actually ran on."""
+    outcome = report(gpu_count=2, device_names=["Tesla T4", "Tesla T4"], device_vram_bytes=[15636037632])
+
+    assert not outcome["passed"]
+    assert any("VRAM reading" in line for line in outcome["failures"])
 
 
 def test_a_local_exercise_skips_the_hardware_checks_and_records_that_it_did() -> None:
     """Skipping is fine on a machine with no accelerator. Skipping silently is not:
     a manifest from a local exercise must not look like one whose hardware was
     actually checked."""
-    outcome = report(gpu_count=0, device_name="cpu", local_exercise=True)
+    outcome = report(
+        gpu_count=0, device_names=[], device_vram_bytes=[], training_device="cpu", local_exercise=True
+    )
 
     assert outcome["passed"], outcome["failures"]
     assert outcome["local_exercise"] is True
@@ -522,7 +585,7 @@ def test_a_local_exercise_skips_the_hardware_checks_and_records_that_it_did() ->
 
 
 def test_a_remote_run_cannot_acquire_the_local_exemption_by_default() -> None:
-    outcome = report(gpu_count=0, device_name="cpu")
+    outcome = report(gpu_count=0, device_names=[], device_vram_bytes=[], training_device="cpu")
 
     assert not outcome["passed"]
     assert outcome["checks_skipped"] == []

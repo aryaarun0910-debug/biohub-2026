@@ -755,6 +755,26 @@ def _periodic_progress(command: str, label: str) -> Callable[[int, int], None]:
     return progress
 
 
+def _permitted_gpu_counts(raw: str) -> tuple[int, ...]:
+    """Parse ``--allow-gpu-counts`` into the set the packaged guard will enforce.
+
+    A malformed value must not silently widen the guard, so an unparseable
+    entry, a negative count or an empty list raises rather than defaulting.
+    Zero is refused too: an accelerator package that would accept no accelerator
+    is the check standing next to the thing it is supposed to be sitting on.
+    """
+    try:
+        counts = tuple(sorted({int(part) for part in raw.split(",") if part.strip()}))
+    except ValueError as exc:
+        raise ValueError(f"--allow-gpu-counts must be comma-separated integers, got {raw!r}") from exc
+    if not counts or any(count < 1 for count in counts):
+        raise ValueError(
+            f"--allow-gpu-counts must name at least one positive count, got {raw!r}; "
+            "a GPU package that accepts zero GPUs checks nothing"
+        )
+    return counts
+
+
 SLICE_GRAPH_PATH = Path("artifacts/slice-graph.json")
 
 
@@ -3256,7 +3276,14 @@ def package_kaggle(
     max_movies: Annotated[
         int, typer.Option("--max-movies", help="Cap training movies. 0 uses the whole training embryo.")
     ] = 2,
-    gpus: Annotated[int, typer.Option("--gpus", help="GPUs the run expects and asserts.")] = 1,
+    allow_gpu_counts: Annotated[
+        str,
+        typer.Option(
+            "--allow-gpu-counts",
+            help="Comma-separated visible-GPU counts the run accepts. Training pins to cuda:0 "
+            "whatever it is handed.",
+        ),
+    ] = "1,2",
     runtime_ceiling: Annotated[
         int, typer.Option("--runtime-ceiling", help="Seconds after which the run refuses to continue.")
     ] = 2400,
@@ -3302,6 +3329,11 @@ def package_kaggle(
     a heartbeat at every stage. Building is local and pushes nothing.
     """
     command = "package kaggle"
+    try:
+        permitted_counts = _permitted_gpu_counts(allow_gpu_counts)
+    except ValueError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
     import shutil
     import subprocess
     import tempfile
@@ -3399,7 +3431,7 @@ def package_kaggle(
         # established, so this is a correction, not a fix: the guarantee is the
         # runtime guard refusing any device that is not a Tesla T4.
         accelerator="NvidiaTeslaT4",
-        expected_gpu_count=gpus,
+        allowed_gpu_counts=permitted_counts,
         expected_device_substring=expect_device,
         smoke=True,
         smoke_id=smoke_id,
@@ -3675,7 +3707,14 @@ def package_rescore(
     learning_rate: Annotated[float, typer.Option("--learning-rate")] = 1e-3,
     count_ratio: Annotated[float, typer.Option("--count-ratio")] = 1.0,
     seed: Annotated[int, typer.Option("--seed")] = 0,
-    gpus: Annotated[int, typer.Option("--gpus", help="GPUs the run expects and asserts.")] = 1,
+    allow_gpu_counts: Annotated[
+        str,
+        typer.Option(
+            "--allow-gpu-counts",
+            help="Comma-separated visible-GPU counts the run accepts. Training pins to cuda:0 "
+            "whatever it is handed.",
+        ),
+    ] = "1,2",
     expect_device: Annotated[
         str, typer.Option("--expect-device", help="Substring the allocated GPU name must contain.")
     ] = "Tesla T4",
@@ -3719,6 +3758,11 @@ def package_rescore(
     two frames and one epoch. Nothing here contacts Kaggle.
     """
     command = "package rescore"
+    try:
+        permitted_counts = _permitted_gpu_counts(allow_gpu_counts)
+    except ValueError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
     import shutil
     import subprocess
     import tempfile
@@ -3815,7 +3859,7 @@ def package_rescore(
         batch_size=batch,
         learning_rate=learning_rate,
         accelerator="NvidiaTeslaT4",
-        expected_gpu_count=gpus,
+        allowed_gpu_counts=permitted_counts,
         expected_device_substring=expect_device,
         smoke=True,
         smoke_id=smoke_id,

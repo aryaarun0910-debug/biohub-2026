@@ -32,6 +32,68 @@ class EntryRefusal(RuntimeError):
     """A guard failed. The run stops before it costs anything."""
 
 
+def _observe_accelerator() -> dict[str, Any]:
+    """Every visible device, then the one device training will be pinned to.
+
+    Observation comes first and selection second, deliberately. Restricting
+    visibility up front (``CUDA_VISIBLE_DEVICES``) would make a two-card
+    allocation look like a one-card allocation and destroy the very fact the
+    guard was corrected to check. So the run counts what it was given, names and
+    sizes each card, and only then pins itself to ``cuda:0``.
+
+    Consumers: ``run_fold`` and ``run_rescore``, which pass this to the guard and
+    copy it into their manifests.
+    """
+    import torch
+
+    from biohubx.packaging.kaggle import TRAINING_DEVICE
+
+    count = torch.cuda.device_count()
+    names = [torch.cuda.get_device_name(index) for index in range(count)]
+    vram = [int(torch.cuda.get_device_properties(index).total_memory) for index in range(count)]
+    if count:
+        # Explicit, so the default device is the pinned one for any tensor
+        # created without a device argument as well as for the ones that name it.
+        torch.cuda.set_device(0)
+    device = TRAINING_DEVICE if count else "cpu"
+    return {
+        "torch": torch.__version__,
+        "cuda": torch.version.cuda or "none",
+        "gpu_count": count,
+        "device_names": names,
+        "device_vram_bytes": vram,
+        "training_device": device,
+        # The training card's size, which is what every headroom figure is
+        # against. A second card's VRAM is recorded above and used by nothing.
+        "total_vram_bytes": vram[0] if vram else 0,
+        "capability": (
+            f"{torch.cuda.get_device_properties(0).major}.{torch.cuda.get_device_properties(0).minor}"
+            if count
+            else "none"
+        ),
+    }
+
+
+def _stage_accelerator(hardware: dict[str, Any]) -> None:
+    """Print what was observed, one line per card, before anything is trained."""
+    stage(
+        "environment",
+        f"torch={hardware['torch']} cuda={hardware['cuda']} gpus={hardware['gpu_count']} "
+        f"training_device={hardware['training_device']}",
+    )
+    for index, (name, size) in enumerate(
+        zip(hardware["device_names"], hardware["device_vram_bytes"], strict=True)
+    ):
+        stage(
+            "environment",
+            f"visible cuda:{index} name={name!r} vram_total_bytes={size} "
+            f"vram_total_gib={size / (1024**3):.2f}"
+            + (" <- training" if index == 0 else " <- observed, idle"),
+        )
+    if not hardware["gpu_count"]:
+        stage("environment", "vram_total_bytes=0 no accelerator present")
+
+
 def _tree_digest(path: Path) -> str:
     """The registry's tree identity for a mounted dataset directory. Reads every byte."""
     from biohubx.hashing import tree_digest
@@ -97,7 +159,7 @@ def run_fold(
         batch_size=spec_dict["batch_size"],
         learning_rate=spec_dict["learning_rate"],
         accelerator=spec_dict["accelerator"],
-        expected_gpu_count=spec_dict["expected_gpu_count"],
+        allowed_gpu_counts=tuple(int(n) for n in spec_dict["allowed_gpu_counts"]),
         smoke=spec_dict["smoke"],
         smoke_id=spec_dict["smoke_id"],
         wheelhouse_slug=spec_dict["wheelhouse_slug"],
@@ -117,30 +179,14 @@ def run_fold(
 
     import torch
 
-    gpu_count = torch.cuda.device_count()
-    device = "cuda" if gpu_count else "cpu"
-    device_name = torch.cuda.get_device_name(0) if gpu_count else "cpu"
-    cuda_version = torch.version.cuda or "none"
     # The build and the card are separate facts and both were unmeasured. The
     # environment audit was CPU-only and measured torch 2.10.0+cpu; a GPU image
     # carries a CUDA build nobody here has seen.
-    stage(
-        "environment",
-        f"torch={torch.__version__} cuda={cuda_version} gpus={gpu_count} "
-        f"device={device} name={device_name!r}",
-    )
-    total_vram_bytes = 0
-    if gpu_count:
-        properties = torch.cuda.get_device_properties(0)
-        total_vram_bytes = int(properties.total_memory)
-        stage(
-            "environment",
-            f"vram_total_bytes={total_vram_bytes} "
-            f"vram_total_gib={total_vram_bytes / (1024**3):.2f} "
-            f"capability={properties.major}.{properties.minor}",
-        )
-    else:
-        stage("environment", "vram_total_bytes=0 no accelerator present")
+    hardware = _observe_accelerator()
+    _stage_accelerator(hardware)
+    gpu_count = hardware["gpu_count"]
+    device = hardware["training_device"]
+    total_vram_bytes = hardware["total_vram_bytes"]
 
     root = data_root or Path(
         os.environ.get(
@@ -212,7 +258,9 @@ def run_fold(
         reachable_paths=reachable,
         opened_paths=opened,
         gpu_count=gpu_count,
-        device_name=device_name,
+        device_names=hardware["device_names"],
+        device_vram_bytes=hardware["device_vram_bytes"],
+        training_device=device,
         dataset_sources=[spec.wheelhouse_slug],
         wheelhouse_verified=wheelhouse_verified,
         local_exercise=local_exercise,
@@ -336,11 +384,7 @@ def run_fold(
         "checkpoint_digest": checkpoint_digest,
         "device": device,
         "hardware": {
-            "torch": torch.__version__,
-            "cuda": cuda_version,
-            "device_name": device_name,
-            "gpu_count": gpu_count,
-            "total_vram_bytes": total_vram_bytes,
+            **hardware,
             "peak_allocated_bytes": peak_allocated,
             "peak_reserved_bytes": peak_reserved,
         },
@@ -388,7 +432,7 @@ def run_rescore(
         batch_size=spec_dict["batch_size"],
         learning_rate=spec_dict["learning_rate"],
         accelerator=spec_dict["accelerator"],
-        expected_gpu_count=spec_dict["expected_gpu_count"],
+        allowed_gpu_counts=tuple(int(n) for n in spec_dict["allowed_gpu_counts"]),
         smoke=spec_dict["smoke"],
         smoke_id=spec_dict["smoke_id"],
         wheelhouse_slug=spec_dict["wheelhouse_slug"],
@@ -409,25 +453,11 @@ def run_rescore(
 
     import torch
 
-    gpu_count = torch.cuda.device_count()
-    device = "cuda" if gpu_count else "cpu"
-    device_name = torch.cuda.get_device_name(0) if gpu_count else "cpu"
-    cuda_version = torch.version.cuda or "none"
-    stage(
-        "environment",
-        f"torch={torch.__version__} cuda={cuda_version} gpus={gpu_count} device={device} "
-        f"name={device_name!r}",
-    )
-    total_vram_bytes = 0
-    if gpu_count:
-        properties = torch.cuda.get_device_properties(0)
-        total_vram_bytes = int(properties.total_memory)
-        stage(
-            "environment",
-            f"vram_total_bytes={total_vram_bytes} capability={properties.major}.{properties.minor}",
-        )
-    else:
-        stage("environment", "vram_total_bytes=0 no accelerator present")
+    hardware = _observe_accelerator()
+    _stage_accelerator(hardware)
+    gpu_count = hardware["gpu_count"]
+    device = hardware["training_device"]
+    total_vram_bytes = hardware["total_vram_bytes"]
 
     root = data_root or Path(
         os.environ.get(
@@ -485,7 +515,9 @@ def run_rescore(
         reachable_paths=reachable,
         opened_paths=opened,
         gpu_count=gpu_count,
-        device_name=device_name,
+        device_names=hardware["device_names"],
+        device_vram_bytes=hardware["device_vram_bytes"],
+        training_device=device,
         dataset_sources=[spec.wheelhouse_slug],
         wheelhouse_verified=wheelhouse_verified,
         local_exercise=local_exercise,
@@ -562,11 +594,7 @@ def run_rescore(
         "local_exercise": local_exercise,
         "device": device,
         "hardware": {
-            "torch": torch.__version__,
-            "cuda": cuda_version,
-            "device_name": device_name,
-            "gpu_count": gpu_count,
-            "total_vram_bytes": total_vram_bytes,
+            **hardware,
             "peak_allocated_bytes": peak_allocated,
             "peak_reserved_bytes": peak_reserved,
         },

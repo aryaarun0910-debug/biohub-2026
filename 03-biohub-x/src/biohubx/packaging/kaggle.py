@@ -65,6 +65,18 @@ QUARANTINED_ARTIFACT_PREFIX = "reference.pilkwang"
 """Artifact ids the training run may never load."""
 
 
+TRAINING_DEVICE = "cuda:0"
+"""The one device an accelerator run is allowed to train on.
+
+Kaggle decides how many cards it exposes; this repository decides how many it
+uses. [[R-0011]] observed two allocated against a request for one. Accepting
+that allocation is an operational fact and must not become a scientific one, so
+the device is named here rather than inferred from ``device_count``: a second
+visible card is observed, checked and left idle. There is no DataParallel, no
+process group and no implicit device selection anywhere in the package.
+"""
+
+
 class PackagingError(ValueError):
     """The package cannot be built or does not satisfy its own guards."""
 
@@ -99,7 +111,7 @@ class PackageSpec:
     batch_size: int
     learning_rate: float
     accelerator: str
-    expected_gpu_count: int
+    allowed_gpu_counts: tuple[int, ...]
     expected_device_substring: str
     smoke: bool
     smoke_id: str
@@ -118,8 +130,9 @@ class PackageSpec:
             "batch_size": self.batch_size,
             "learning_rate": self.learning_rate,
             "accelerator": self.accelerator,
-            "expected_gpu_count": self.expected_gpu_count,
+            "allowed_gpu_counts": list(self.allowed_gpu_counts),
             "expected_device_substring": self.expected_device_substring,
+            "training_device": TRAINING_DEVICE,
             "smoke": self.smoke,
             "smoke_id": self.smoke_id,
             "wheelhouse_slug": self.wheelhouse_slug,
@@ -209,7 +222,9 @@ def guard_report(
     reachable_paths: list[str],
     opened_paths: list[str],
     gpu_count: int,
-    device_name: str = "",
+    device_names: list[str] | None = None,
+    device_vram_bytes: list[int] | None = None,
+    training_device: str = "cpu",
     dataset_sources: list[str] | None = None,
     wheelhouse_verified: bool = False,
     local_exercise: bool = False,
@@ -221,6 +236,8 @@ def guard_report(
     """
     failures: list[str] = []
     skipped: list[str] = []
+    names = list(device_names or [])
+    vram = list(device_vram_bytes or [])
 
     # An identity check over an empty set verifies nothing and would pass
     # silently, which is worse than not having one.
@@ -273,23 +290,60 @@ def guard_report(
     # smoke mode substituted `expected` for `observed` before comparing them: the
     # check was structurally incapable of failing in the only mode that used it.
     if local_exercise:
-        skipped.append("gpu_count and device model: no accelerator on a local CPU exercise")
-    elif gpu_count != spec.expected_gpu_count:
-        failures.append(
-            f"requested {spec.expected_gpu_count} GPU(s) and found {gpu_count}; "
-            "the run would not cost what was approved"
+        skipped.append(
+            "gpu_count, device models, VRAM and the training device: no accelerator on a local CPU exercise"
         )
-    # Counting devices is not checking hardware. Attempt 2 was authorised for a
-    # T4, Kaggle allocated a P100, device_count was 1, and the count guard passed
-    # while the run proceeded on hardware nobody approved. The model check is
-    # therefore unconditional: an accelerator run that finds no accelerator, or
-    # finds the wrong one, refuses either way rather than only when one is
-    # present to disagree with.
-    if not local_exercise and spec.expected_gpu_count and spec.expected_device_substring not in device_name:
-        failures.append(
-            f"approved hardware was {spec.expected_device_substring!r} and this machine reports "
-            f"{device_name!r}; the accelerator request did not take effect"
-        )
+    else:
+        # How many cards Kaggle exposes is not something the request controls.
+        # [[R-0011]] measured two allocated against a request for one, and
+        # [[D-0038]] then made the observed count reach the guard, which is what
+        # would now refuse that same allocation. Arya Arun's correction of
+        # 2026-09-04 accepts one or two and keeps everything else: the count is
+        # a member of a declared set rather than a single number, so an
+        # allocation of four still refuses and the number seen is still
+        # recorded. This is an operational tolerance, never a licence to use
+        # the second card.
+        if gpu_count not in spec.allowed_gpu_counts:
+            failures.append(
+                f"the envelope permits {list(spec.allowed_gpu_counts)} visible GPU(s) and this machine "
+                f"reports {gpu_count}; the run would not cost what was approved"
+            )
+        # Counting devices is not checking hardware. Attempt 2 was authorised for
+        # a T4, Kaggle allocated a P100, device_count was 1, and the count guard
+        # passed while the run proceeded on hardware nobody approved. Every
+        # visible device is checked and not only the one training will use:
+        # R-0011 recorded the model of device 0 alone, so a mixed allocation was
+        # a thing this repository had no way to notice.
+        wrong_model = [
+            f"cuda:{index}={name!r}"
+            for index, name in enumerate(names)
+            if spec.expected_device_substring not in name
+        ]
+        if wrong_model:
+            failures.append(
+                f"approved hardware was {spec.expected_device_substring!r} and these visible devices "
+                f"are not it: {wrong_model[:4]}; the accelerator request did not take effect"
+            )
+        # An accelerator run that finds no accelerator refuses for the same
+        # reason: the check sits on the hardware rather than next to it.
+        if not names:
+            failures.append(
+                f"approved hardware was {spec.expected_device_substring!r} and this machine reports no "
+                "accelerator at all; the accelerator request did not take effect"
+            )
+        # Accepting two cards is not using two. Training is pinned to one device
+        # and the guard says which, so a package that quietly spread itself over
+        # the allocation could not report that it had.
+        elif training_device != TRAINING_DEVICE:
+            failures.append(
+                f"training must be pinned to {TRAINING_DEVICE!r} and this run selected "
+                f"{training_device!r}; a second visible card is observed and never trained on"
+            )
+        if len(vram) != len(names):
+            failures.append(
+                f"{len(names)} visible device(s) and {len(vram)} VRAM reading(s); "
+                "the hardware the run recorded is not the hardware it checked"
+            )
 
     # An external weight pack reaching this run is the thing dataset_sources
     # could smuggle in, so the sources are checked by name and not by count.
@@ -313,8 +367,11 @@ def guard_report(
         "paths_the_run_opens": len(opened_paths),
         "quarantined_checkpoints_reachable": quarantined,
         "gpu_count": gpu_count,
-        "expected_gpu_count": spec.expected_gpu_count,
-        "device_name": device_name,
+        "allowed_gpu_counts": list(spec.allowed_gpu_counts),
+        "device_names": names,
+        "device_vram_bytes": vram,
+        "training_device": training_device,
+        "expected_training_device": TRAINING_DEVICE,
         "expected_device_substring": spec.expected_device_substring,
         "dataset_sources": sources,
         "wheelhouse_tree": spec.wheelhouse_tree,

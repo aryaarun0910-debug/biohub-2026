@@ -1489,3 +1489,47 @@ embryo splits, the vendored official scorer as promotion authority, falsifiers,
 provenance, finding status, promotion criteria and submission controls. The
 research sandbox of [[D-0039]] still governs research-acquired code; a pinned
 public tool in the workstation environment is the one thing carved out of it.
+
+## D-0044 - The GPU guard tolerates the allocation it is given and pins the device it uses
+
+**Date:** 2026-09-04
+**Status:** accepted
+**Authorised by:** Arya Arun
+
+Two facts about Kaggle were already recorded and had never been reconciled.
+[[D-0028]]: a request for a T4 is not an allocation of a T4, so the run refuses
+unless the device it got is one. [[R-0011]]: a request for one device is not an
+allocation of one device, and Kaggle handed E03-SMOKE-03 two cards. [[D-0038]]
+then corrected the count check so the observed count reaches the guard, which is
+right and which also means the guard as written would refuse that same
+allocation and spend an attempt discovering that Kaggle had been generous.
+
+**Going forward, an accelerator package carries the visible-GPU counts it
+accepts rather than the one it expects.** Under Arya Arun's authorisation of
+2026-09-04 the set is one or two. A count outside the set still refuses, so this
+is a declared tolerance and not a widened comparison: four cards fail, and the
+number seen is recorded either way.
+
+**Accepting two cards is not using two.** Training is pinned to `cuda:0`, the
+guard refuses any other selection, and there is no `DataParallel`, no process
+group and no implicit device selection anywhere in the package. The tolerance is
+operational: how many devices the platform exposes may vary, and how many this
+repository trains on may not, because a number that changes between runs cannot
+sit under a comparison between arms.
+
+**Every visible device is checked, not the first one.** R-0011 recorded the
+model of device 0 alone, so a mixed allocation — a T4 and something else — was a
+thing this repository had no instrument to notice. The name check now runs over
+the whole allocation, and the manifest records the observed count, each device's
+name, each device's VRAM and the device training selected, so what the run ran
+on is readable after the fact rather than inferred from a request.
+
+Observation precedes selection, deliberately. Restricting visibility with
+`CUDA_VISIBLE_DEVICES` before counting would make a two-card allocation look
+like a one-card allocation and destroy the fact the guard exists to check. The
+run counts what it was given, then pins itself.
+
+This is a repair to how a run is executed and recorded. It changes no split, no
+model, no feature, no candidate pool, no decode, no loss, no hyperparameter, no
+epoch count and no promotion criterion, and every package rebuilt under it
+passes the local gate and receives a new recorded digest.
