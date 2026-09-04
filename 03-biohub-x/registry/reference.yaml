@@ -2758,6 +2758,53 @@ references:
         verified against their registered digests before anything trains.
         Authorised as a mount-resolution repair under the envelope.
 
+  - id: R-0027
+    status: measured_diagnostic
+    title: E07-PROPENSITY-01 measured on both training embryos, movie held out, against a feature-permutation null
+    why: >-
+      Arya Arun held the declared Stage 3 until this answered whether a
+      candidate's annotated status is predictable from its circumstances beyond
+      the DoG response. The answer decides whether E07's objective survives.
+    probe: E07-PROPENSITY-01
+    declaration: configs/e07-propensity-probe.yaml
+    declaration_digest: canonical_text_sha256:sha256/v1:33d31aba06e12d8cba582180f2f4f0de377dab7789c4a95491807cd44ceaf701
+    report: artifacts/e07-propensity.json
+    report_digest: canonical_text_sha256:sha256/v1:c604d4c89285294a85d902f268f836307cc10c592ba71b780cd9eee506f948b9
+    movies_per_embryo: 8
+    frames_per_window: 10
+    permutations: 30
+    runtime_seconds: 775.532
+    per_embryo:
+      44b6: {control_auc: 0.9415, delta_all: -0.011, null_threshold_all: -0.0024, signal_all: false, delta_temporal: -0.0005, signal_temporal: false, delta_non_temporal: -0.0106, signal_non_temporal: false, positives: 236, candidates: 149185, verdict: propensity_signal_absent}
+      6bba: {control_auc: 0.9454, delta_all: 0.0085, null_threshold_all: -0.0006, signal_all: true, delta_temporal: 0.0017, signal_temporal: true, delta_non_temporal: 0.0086, signal_non_temporal: true, positives: 675, candidates: 205233, verdict: propensity_signal_present}
+    reading: >-
+      The two embryos answer differently, and the difference is the finding.
+      On 44b6, adding every circumstance feature to the response-only model
+      lowers held-out AUC by 0.0110, further than any of the 30 shuffled
+      feature sets lowered it (null threshold -0.0024, all 30 at or above the
+      observed): the circumstances relate to "annotated" within a movie in a
+      way that does not carry to the next movie, which is anti-signal under
+      movie-held-out evaluation, not propensity. On 6bba the same features
+      raise held-out AUC by 0.0085 and no shuffle reaches it (0 of 30, null
+      threshold -0.0006); appearance contributes 0.0069, density 0.0055,
+      position 0.0039, temporal 0.0017, time 0.0001. The declared falsifier
+      is the permutation test alone, so 6bba reports a signal and 44b6 does
+      not, and the controller applied the stop-and-redesign rule because one
+      embryo did. The magnitude is small against a control AUC of 0.9454 and
+      it is present in the dense annotation regime only, which F-0013 already
+      told us is a different regime from 44b6's. Two further facts for the
+      dossier: the response alone separates annotated from unlabelled
+      candidates very unevenly by movie (per-movie control AUC 0.624 to 0.992
+      on 6bba, 0.719 to 0.997 on 44b6), and the eight stratified windows held
+      236 and 675 positives against Stage 2's 13.
+    what_it_does_not_say: >-
+      Nothing about a trained scorer. The probe measures whether the labels
+      carry a circumstance signal a scorer could learn; whether A3 or A4
+      learned it is a separate measurement on their outputs. And nothing about
+      which embryo is "right": a signal in the dense regime and none in the
+      sparse one is consistent with propensity that only becomes estimable
+      when there are enough traced cells to estimate it from.
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per

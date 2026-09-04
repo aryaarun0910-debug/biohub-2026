@@ -1048,5 +1048,86 @@ experiments:
           does not exceed the declared quantile of the same gain when those
           features are row-shuffled within each movie with the response and
           labels intact; a signal otherwise; either answer is used
-        status: declared
-        outcome: pending
+        status: measured
+        reference: R-0027
+        decision_applied: >-
+          the controller (biohubx research collect, rule table of 2026-09-04)
+          reads 'propensity falsified objective -> stop and redesign' because
+          6bba reports a signal; A4 is held because the temporal group cleared
+          its null on 6bba; A3 is eligible only under a corrected objective;
+          Stage 2B under the current objective, E06 resumption and submission
+          stay blocked. The declared Stage 3 is not run.
+        outcome:
+          report: "artifacts/e07-propensity.json"
+          report_digest: "canonical_text_sha256:sha256/v1:c604d4c89285294a85d902f268f836307cc10c592ba71b780cd9eee506f948b9"
+          declaration_digest: "canonical_text_sha256:sha256/v1:33d31aba06e12d8cba582180f2f4f0de377dab7789c4a95491807cd44ceaf701"
+          runtime_seconds: 775.532
+          per_embryo:
+            44b6:
+              movies:
+                - "44b6_5f15d135"
+                - "44b6_808952d6"
+                - "44b6_7e557709"
+                - "44b6_2f31fc2f"
+                - "44b6_267148e4"
+                - "44b6_cf8fed6b"
+                - "44b6_8f5ab931"
+                - "44b6_abf82518"
+              candidates: 149185
+              positives: 236
+              control_auc: 0.9415
+              auc_all: 0.9305
+              delta_all: -0.011
+              delta_temporal: -0.0005
+              delta_non_temporal: -0.0106
+              null_threshold_all: -0.0024
+              null_threshold_temporal: 0.0003
+              null_threshold_non_temporal: -0.0024
+              null_permutations: 30
+              signal_all: false
+              signal_temporal: false
+              signal_non_temporal: false
+              group_gain:
+                appearance: -0.0021
+                density: -0.001
+                position: -0.0058
+                temporal: -0.0005
+                time: -0.0002
+              verdict: "propensity_signal_absent"
+              next_action: "continue to representative E07 training"
+              A3: "eligible"
+              A4: "eligible"
+            6bba:
+              movies:
+                - "6bba_907271db"
+                - "6bba_5b28472a"
+                - "6bba_ebff6e76"
+                - "6bba_312f0dc3"
+                - "6bba_20852818"
+                - "6bba_c73a1d11"
+                - "6bba_283bf9f1"
+                - "6bba_d5eae175"
+              candidates: 205233
+              positives: 675
+              control_auc: 0.9454
+              auc_all: 0.954
+              delta_all: 0.0085
+              delta_temporal: 0.0017
+              delta_non_temporal: 0.0086
+              null_threshold_all: -0.0006
+              null_threshold_temporal: 0.001
+              null_threshold_non_temporal: -0.0006
+              null_permutations: 30
+              signal_all: true
+              signal_temporal: true
+              signal_non_temporal: true
+              group_gain:
+                appearance: 0.0069
+                density: 0.0055
+                position: 0.0039
+                temporal: 0.0017
+                time: 0.0001
+              verdict: "propensity_signal_present"
+              next_action: "stop current nnPU training; design a bias-robust objective"
+              A3: "retain as baseline while the objective is corrected"
+              A4: "hold; neighbouring frames can learn tracing propensity"
