@@ -1620,6 +1620,12 @@ def evaluate_proposals(
     audit_ratio: Annotated[
         float, typer.Option("--audit-ratio", help="Budget ratio at which misses are audited.")
     ] = 1.0,
+    refine: Annotated[
+        bool, typer.Option("--refine", help="Sub-voxel centroid refinement of DoG peaks (H-11).")
+    ] = False,
+    suppression_radius: Annotated[
+        float, typer.Option("--suppression-radius", help="Physical suppression radius in um.")
+    ] = 4.0,
     out: Annotated[
         Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/proposals.json.")
     ] = None,
@@ -1725,7 +1731,13 @@ def evaluate_proposals(
             # be filled where the detector has that many peaks to offer.
             proposal_sets = {
                 "classical": classical.detect_instances(normalised, dataset=dataset, threshold=intensity_cut),
-                "dog": dog.detect_instances(window.volume, dataset=dataset, response_quantile=0.95),
+                "dog": dog.detect_instances(
+                    window.volume,
+                    dataset=dataset,
+                    response_quantile=0.95,
+                    suppression_radius_um=suppression_radius,
+                    refine_centroids=refine,
+                ),
             }
             for name, instances in proposal_sets.items():
                 for ratio in budgets:
@@ -1846,6 +1858,8 @@ def evaluate_proposals(
         "experiment": "E04",
         "frames_per_movie": frames,
         "budget_ratios": list(budgets),
+        "dog_refine_centroids": refine,
+        "dog_suppression_radius_um": suppression_radius,
         "movies_skipped": skipped,
         "measure": "reachability: an annotated node with some proposal within 7 um, per frame",
         "rows": rows,

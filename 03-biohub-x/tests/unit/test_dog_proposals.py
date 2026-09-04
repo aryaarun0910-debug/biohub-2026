@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 
 from biohubx.contracts.coordinates import OFFICIAL_VOXEL_SCALE, VoxelScaleZYX
-from biohubx.contracts.instances import ProposalSource
+from biohubx.contracts.instances import InstanceSet, ProposalSource
 from biohubx.contracts.lineage import DatasetIdentity
 from biohubx.proposals.dog import detect_instances, dog_response, isotropic_plane_stride
 
@@ -105,3 +105,29 @@ def test_bucketed_suppression_agrees_exactly_with_brute_force() -> None:
 
     assert len(fast) == len(slow)
     assert [point for point, _ in fast] == [point for point, _ in slow]
+
+
+def test_refinement_moves_a_peak_toward_a_blob_centred_between_grid_voxels() -> None:
+    """A blob centred at a half-voxel offset in the plane lands on a grid voxel
+    without refinement and closer to its true centre with it. If refinement made
+    it worse the H-11 probe would be measuring the wrong thing."""
+    from biohubx.proposals.dog import detect_instances as detect
+
+    # Centre at y = 50, x = 62: on the stride-4 grid that is 12.5 and 15.5, so
+    # exactly between voxels in both plane axes.
+    volume = volume_with_blob((12, 50, 62))
+    plain = detect(volume, dataset=DATASET, response_quantile=0.999)
+    refined = detect(volume, dataset=DATASET, response_quantile=0.999, refine_centroids=True)
+
+    def nearest(instances: InstanceSet) -> tuple[float, float]:
+        best = min(instances.instances, key=lambda i: abs(i.voxel.y - 50) + abs(i.voxel.x - 62))
+        return abs(best.voxel.y - 50), abs(best.voxel.x - 62)
+
+    plain_dy, plain_dx = nearest(plain)
+    refined_dy, refined_dx = nearest(refined)
+    # Refinement must move toward the true centre on each plane axis, not merely
+    # reduce a sum that one axis could dominate. A one-voxel cube on a stride-4
+    # grid is deliberately conservative, so the gain is bounded and no absolute
+    # target is asserted; the direction is the claim.
+    assert refined_dy < plain_dy
+    assert refined_dx < plain_dx

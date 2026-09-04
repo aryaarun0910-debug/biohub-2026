@@ -129,6 +129,35 @@ def dog_response(
     return best
 
 
+def refine_centroid(
+    response: np.ndarray, centre: tuple[float, float, float], radius: int = 1
+) -> tuple[float, float, float]:
+    """Response-weighted centroid in a small cube around a peak, on the isotropic grid.
+
+    A DoG maximum sits on a grid voxel; the cell it marks does not. On the strided
+    plane one voxel is 1.625 micrometres in every direction, so a peak can be off
+    by most of a micrometre in each axis before any other error is counted, and
+    [[F-0028]] measured a residual whose nearest proposal lies just outside the
+    matching radius. Weighting the neighbourhood by response moves the centre
+    toward the mass of the blob. Negative responses are clipped to zero so a
+    neighbouring trough cannot pull the centroid away from the blob.
+    """
+    z, y, x = (round(value) for value in centre)
+    z0, z1 = max(0, z - radius), min(response.shape[0], z + radius + 1)
+    y0, y1 = max(0, y - radius), min(response.shape[1], y + radius + 1)
+    x0, x1 = max(0, x - radius), min(response.shape[2], x + radius + 1)
+    block = np.clip(response[z0:z1, y0:y1, x0:x1], 0.0, None).astype(np.float64)
+    total = float(block.sum())
+    if total <= 0.0:
+        return centre
+    zz, yy, xx = np.mgrid[z0:z1, y0:y1, x0:x1]
+    return (
+        float((block * zz).sum() / total),
+        float((block * yy).sum() / total),
+        float((block * xx).sum() / total),
+    )
+
+
 def detect_instances(
     volume: np.ndarray,
     *,
@@ -137,6 +166,7 @@ def detect_instances(
     response_quantile: float = DEFAULT_RESPONSE_QUANTILE,
     suppression_radius_um: float = DEFAULT_SUPPRESSION_RADIUS_UM,
     scale: VoxelScaleZYX = OFFICIAL_VOXEL_SCALE,
+    refine_centroids: bool = False,
 ) -> InstanceSet:
     """Propose one instance per suppressed DoG maximum, frame by frame.
 
@@ -170,7 +200,7 @@ def detect_instances(
         floor = float(finite.min())
         scaled = np.clip((response - floor) / span, 0.0, 1.0)
         threshold = float(np.clip((cutoff - floor) / span, 1e-6, 1.0 - 1e-6))
-        for centre, peak in suppressed_maxima(
+        for raw_centre, peak in suppressed_maxima(
             scaled,
             threshold=threshold,
             radius_um=suppression_radius_um,
@@ -180,6 +210,7 @@ def detect_instances(
             # is handed.
             spacing_um=(isotropic_um, isotropic_um, isotropic_um),
         ):
+            centre = refine_centroid(response, raw_centre) if refine_centroids else raw_centre
             instances.append(
                 CandidateInstance.from_voxel(
                     dataset=dataset,
