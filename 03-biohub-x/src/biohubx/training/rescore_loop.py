@@ -25,12 +25,15 @@ from typing import Any
 
 import numpy as np
 import torch
+from torch.amp.grad_scaler import GradScaler
 
 from biohubx.contracts.instances import InstanceSet
 from biohubx.data.competition import WindowSelection, load_ground_truth, load_window
+from biohubx.evaluation import propensity
 from biohubx.evaluation.official_metric import EstimatedTotalNodes, metric_row, summarise_fold
 from biohubx.evaluation.oracle import oracle_graph
 from biohubx.proposals import dog, rescore
+from biohubx.training import runtime
 from biohubx.training.targets import positive_unlabelled_loss
 
 Log = Callable[[str, str], None]
@@ -66,11 +69,28 @@ class LoopSpec:
     travels with the package as a list, so the run reads what was chosen and
     the choice can be recomputed from the counts recorded beside it.
     """
+    amp: bool = False
+    batch_autotune: bool = False
+    memory_ceiling_bytes: int = runtime.MEMORY_CEILING_BYTES
+    sampling: str = "uniform"
+    """``uniform`` (E07) or ``propensity_matched`` (E08): how a batch's unlabelled side is drawn."""
+    residual_test: bool = False
+    """Rerun E07-PROPENSITY-01 with the trained scorer's logit as control; mandatory for advancement."""
+    worker_id: str = ""
+    propensity_parameters: dict[str, float] | None = None
+    """The probe's declared constants, shipped with the package, for the sampler and the residual test."""
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "arm": self.arm,
             "train_datasets": list(self.train_datasets),
+            "amp": self.amp,
+            "batch_autotune": self.batch_autotune,
+            "memory_ceiling_bytes": self.memory_ceiling_bytes,
+            "sampling": self.sampling,
+            "residual_test": self.residual_test,
+            "worker_id": self.worker_id,
+            "propensity_parameters": self.propensity_parameters,
             "train_embryo": self.train_embryo,
             "evaluate_embryo": self.evaluate_embryo,
             "train_movies": self.train_movies,
@@ -106,6 +126,23 @@ class MovieInputs:
     baseline: InstanceSet
     annotated: Any
     cache_key: str
+    circumstances: Any = None
+    """Per-candidate circumstance features (propensity.FEATURE_NAMES order) when the spec needs them."""
+
+
+def _probe_parameters(spec: LoopSpec) -> propensity.ProbeParameters:
+    if spec.propensity_parameters is None:
+        raise ValueError("the spec carries no propensity parameters; the sampler and residual test need them")
+    q = spec.propensity_parameters
+    return propensity.ProbeParameters(
+        density_radius_um=float(q["density_radius_um"]),
+        persistence_radius_um=float(q["persistence_radius_um"]),
+        motion_cap_um=float(q["motion_cap_um"]),
+        l2=float(q["l2"]),
+        permutations=int(q["permutations"]),
+        seed=spec.seed,
+        null_quantile=float(q["null_quantile"]),
+    )
 
 
 def movies_of(data_root: Path, embryo: str, count: int) -> list[str]:
@@ -247,6 +284,18 @@ def build_inputs(
         response_quantile=spec.pool_quantile,
     )
     labels = rescore.candidate_labels(pool, window.annotated)
+    circumstances = None
+    if spec.sampling == "propensity_matched" or spec.residual_test:
+        circumstances = propensity.candidate_table(
+            dataset=dataset,
+            volume=window.volume,
+            first_frame=first,
+            pool=pool,
+            labels=labels.numpy(),
+            estimate=float(window.window_estimated_total_nodes),
+            annotated_nodes=len(window.annotated.nodes),
+            parameters=_probe_parameters(spec),
+        ).features
     if cached is not None and cached.is_file():
         patches = torch.load(cached, map_location="cpu", weights_only=True)
         if tuple(patches.shape[:1]) != (len(pool.instances),):
@@ -274,6 +323,7 @@ def build_inputs(
         baseline=baseline,
         annotated=window.annotated,
         cache_key=key,
+        circumstances=circumstances,
     )
 
 
@@ -336,6 +386,14 @@ class LoopResult:
     checkpoint_digest: str | None = None
     reload_identical: bool | None = None
     runtime_seconds: float = 0.0
+    amp: dict[str, Any] | None = None
+    batch_ladder: dict[str, Any] | None = None
+    batch_used: int = 0
+    sampling: dict[str, Any] | None = None
+    memory_ceiling: dict[str, Any] | None = None
+    throughput: dict[str, Any] | None = None
+    residual_propensity: dict[str, Any] | None = None
+    ceiling_degraded: bool | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -351,6 +409,14 @@ class LoopResult:
             "checkpoint_digest": self.checkpoint_digest,
             "reload_identical": self.reload_identical,
             "runtime_seconds": self.runtime_seconds,
+            "amp": self.amp,
+            "batch_ladder": self.batch_ladder,
+            "batch_used": self.batch_used,
+            "sampling": self.sampling,
+            "memory_ceiling": self.memory_ceiling,
+            "throughput": self.throughput,
+            "residual_propensity": self.residual_propensity,
+            "ceiling_degraded": self.ceiling_degraded,
         }
 
 
@@ -359,6 +425,67 @@ def _forward(model: torch.nn.Module, patches: torch.Tensor, batch: int, device: 
     for part in rescore.batches(patches, batch):
         pieces.append(model(part.to(device)))
     return torch.cat(pieces) if pieces else torch.zeros(0, device=device)
+
+
+def residual_propensity_test(
+    train_inputs: Sequence[MovieInputs], train_logits: torch.Tensor, spec: LoopSpec
+) -> dict[str, Any]:
+    """E07-PROPENSITY-01 rerun with the trained scorer's logit as the control.
+
+    Passes when the circumstance features add no more to the scorer's own
+    held-out ranking than they add to the DoG response's, or no more than the
+    permutation null, whichever is larger. A scorer that carried the input's
+    weak propensity forward unchanged passes; one that learned to amplify it
+    fails. Needs at least two training movies, and says so rather than
+    imputing when it has one.
+    """
+    if any(m.circumstances is None for m in train_inputs):
+        raise ValueError("the residual-propensity test needs circumstance features on every training movie")
+    if len(train_inputs) < 2:
+        return {"skipped": "needs at least two training movies", "passed": None}
+    parameters = _probe_parameters(spec)
+    column = propensity.FEATURE_NAMES.index("dog")
+    logits = train_logits.detach().float().cpu().numpy()
+    offset = 0
+    scorer_tables: list[propensity.CandidateTable] = []
+    dog_tables: list[propensity.CandidateTable] = []
+    for movie in train_inputs:
+        n = movie.pool_size
+        features = np.asarray(movie.circumstances, dtype=np.float64).copy()
+        with_scorer = features.copy()
+        with_scorer[:, column] = logits[offset : offset + n]
+        offset += n
+        for table, rows in ((scorer_tables, with_scorer), (dog_tables, features)):
+            table.append(
+                propensity.CandidateTable(
+                    dataset=movie.dataset,
+                    first_frame=movie.first_frame,
+                    frames=spec.frames,
+                    features=rows,
+                    labels=movie.labels.numpy(),
+                    estimate=movie.estimate,
+                    annotated_nodes=movie.annotated_nodes,
+                )
+            )
+    scorer = propensity.probe(scorer_tables, parameters)
+    baseline = propensity.probe(dog_tables, parameters)
+    scorer_gain = float(scorer["delta_auc"]["all"])
+    dog_gain = float(baseline["delta_auc"]["all"])
+    threshold = float(scorer["null"]["all"]["threshold"])
+    control = float(scorer["control_auc"]["pooled"])
+    return {
+        "passed": scorer_gain <= max(threshold, dog_gain),
+        "scorer_control_auc": round(control, 4),
+        "scorer_gain": round(scorer_gain, 4),
+        "scorer_null_threshold": round(threshold, 4),
+        "scorer_group_gains": {
+            g: round(float(v["pooled"]) - control, 4) for g, v in scorer["group_auc"].items()
+        },
+        "dog_control_auc": round(float(baseline["control_auc"]["pooled"]), 4),
+        "dog_gain": round(dog_gain, 4),
+        "permutations": parameters.permutations,
+        "rule": "pass if scorer_gain <= max(null threshold, dog_gain)",
+    }
 
 
 def run_loop(
@@ -392,35 +519,127 @@ def run_loop(
 
     model = rescore.build_scorer(spec.arm, seed=spec.seed).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=spec.learning_rate)
+    result.memory_ceiling = runtime.memory_ceiling(device, spec.memory_ceiling_bytes)
+    total_pool = sum(m.pool_size for m in train_inputs)
+    total_positives = sum(m.positives for m in train_inputs)
+    positive_rate = total_positives / total_pool if total_pool else 0.0
+    first_movie = train_inputs[0]
+    first_prior = rescore.candidate_prior(first_movie.estimate, first_movie.pool_size)
+    probe_rows = min(first_movie.pool_size, 2048)
+
+    # Mixed precision only after one fixed batch agrees with full precision (D-0045).
+    amp_enabled = False
+    if spec.amp:
+        result.amp = runtime.verify_amp(
+            model,
+            first_movie.patches[:probe_rows],
+            first_movie.labels[:probe_rows],
+            prior=first_prior,
+            device=device,
+            loss_fn=positive_unlabelled_loss,
+        )
+        amp_enabled = bool(result.amp["enabled"])
+        log("amp", json.dumps(result.amp))
+
+    # The batch is a measured knee below the ceiling, not a guess and not the ceiling.
+    batch = spec.batch
+    if spec.batch_autotune:
+        result.batch_ladder = runtime.autotune_batch(
+            model,
+            first_movie.patches,
+            first_movie.labels,
+            prior=first_prior,
+            device=device,
+            loss_fn=positive_unlabelled_loss,
+            amp=amp_enabled,
+            ceiling_bytes=spec.memory_ceiling_bytes,
+            positive_rate=positive_rate,
+        )
+        batch = int(result.batch_ladder["chosen"])
+        log("batch", json.dumps({"chosen": batch, "rungs": result.batch_ladder["rungs"]}))
+    result.batch_used = batch
+
+    # E08: the unlabelled risk importance-weighted onto the positives' circumstances.
+    weights: list[torch.Tensor] | None = None
+    if spec.sampling == "propensity_matched":
+        if any(m.circumstances is None for m in train_inputs):
+            raise ValueError(
+                "propensity-matched sampling needs circumstance features on every training movie"
+            )
+        per_movie_weights, result.sampling = runtime.matched_sampling_weights(
+            [m.circumstances for m in train_inputs], [m.labels.numpy() for m in train_inputs]
+        )
+        weights = [torch.from_numpy(w) for w in per_movie_weights]
+        log("sampling", json.dumps(result.sampling))
+    elif spec.sampling != "uniform":
+        raise ValueError(f"unknown sampling {spec.sampling!r}")
+
+    scaler = GradScaler("cuda", enabled=amp_enabled and device.type == "cuda")
+    meter = runtime.ThroughputMeter()
     for epoch in range(spec.epochs):
         model.train()
         losses: list[float] = []
         clamped = 0
         batches_run = 0
+        epoch_positives = 0
         order = torch.randperm(len(train_inputs), generator=generator).tolist()
         for index in order:
             movie = train_inputs[index]
             prior = rescore.candidate_prior(movie.estimate, movie.pool_size)
+            # Batch composition is the same for every arm. E08 differs only in
+            # the loss, where the unlabelled risk is importance-weighted onto the
+            # positives' circumstance distribution; ordering the permutation by
+            # weight instead would reweight nothing over an epoch and would
+            # cluster the positives against their least similar unlabelled
+            # rows, which the residual-propensity test caught on the first run.
             permutation = torch.randperm(movie.pool_size, generator=generator)
-            for start in range(0, movie.pool_size, spec.batch):
-                chosen = permutation[start : start + spec.batch]
+            for start in range(0, movie.pool_size, batch):
+                waited = time.perf_counter()
+                chosen = permutation[start : start + batch]
                 labels = movie.labels[chosen].to(device)
                 if int(labels.sum()) == 0 or int((~labels).sum()) == 0:
+                    meter.skipped_no_positive += 1
                     continue
-                logits = model(movie.patches[chosen].to(device))
-                loss, terms = positive_unlabelled_loss(logits, labels, prior=prior)
+                x = movie.patches[chosen].to(device, non_blocking=True)
+                if device.type == "cuda":
+                    torch.cuda.synchronize(device)
+                compute_started = time.perf_counter()
+                meter.wait_seconds += compute_started - waited
+                batch_weights = weights[index][chosen].to(device) if weights is not None else None
+                with runtime.autocast_context(device, amp_enabled):
+                    logits = model(x)
+                    loss, terms = positive_unlabelled_loss(
+                        logits.float(), labels, prior=prior, unlabelled_weights=batch_weights
+                    )
                 optimizer.zero_grad(set_to_none=True)
-                loss.backward()  # type: ignore[no-untyped-call]
-                optimizer.step()
+                scaler.scale(loss).backward()  # type: ignore[no-untyped-call]
+                scaler.step(optimizer)
+                scaler.update()
+                if device.type == "cuda":
+                    torch.cuda.synchronize(device)
+                meter.compute_seconds += time.perf_counter() - compute_started
+                positives_here = int(labels.sum())
+                meter.examples += int(labels.numel())
+                meter.positives += positives_here
+                meter.batches += 1
+                fired = int(bool(terms["negative_risk_clamped"]))
+                meter.clamped += fired
+                clamped += fired
                 losses.append(float(loss.item()))
-                clamped += int(bool(terms["negative_risk_clamped"]))
                 batches_run += 1
+                epoch_positives += positives_here
+                if meter.batches % 20 == 0:
+                    meter.sample_utilisation(device)
+        runtime.check_ceiling(device, spec.memory_ceiling_bytes, f"epoch {epoch}")
         record = {
             "epoch": epoch,
             "batches": batches_run,
+            "batch": batch,
+            "positives": epoch_positives,
             "loss_mean": float(np.mean(losses)) if losses else None,
             "loss_last": losses[-1] if losses else None,
             "negative_risk_clamped_batches": clamped,
+            "peak_allocated_bytes": runtime.peak_allocated(device),
         }
         result.epochs.append(record)
         log("epoch", json.dumps(record))
@@ -429,6 +648,8 @@ def run_loop(
             staged = checkpoint_path.with_suffix(".pt.partial")
             torch.save(model.state_dict(), staged)
             staged.replace(checkpoint_path)
+    result.throughput = meter.to_dict()
+    log("throughput", json.dumps(result.throughput))
 
     model.eval()
     with torch.no_grad():
@@ -491,6 +712,16 @@ def run_loop(
     result.held_out = aggregate(arm_rows)
     result.baseline_held_out = aggregate(a0_rows)
     result.pool_held_out = aggregate(pool_rows)
+    arm_score = result.held_out.get("score")
+    a0_score = result.baseline_held_out.get("score")
+    if arm_score is not None and a0_score is not None:
+        # The second way the objective is killed: the trained scorer's fixed-count
+        # held-out ceiling fell below A0 on the same windows.
+        result.ceiling_degraded = bool(float(arm_score) < float(a0_score))
+
+    if spec.residual_test:
+        result.residual_propensity = residual_propensity_test(train_inputs, train_logits, spec)
+        log("residual-propensity", json.dumps(result.residual_propensity))
     result.runtime_seconds = round(time.monotonic() - started, 3)
     log(
         "held-out",

@@ -56,7 +56,30 @@ ARMS: dict[str, dict[str, Any]] = {
         "channels": 5,
         "description": "A3 plus the previous and following frames' intensity at the same location",
     },
+    # E08: the same scorers under propensity-matched sampling of the unlabelled
+    # side (biohubx.training.runtime.matched_sampling_weights). The arm decides
+    # the channels here and the sampling in the loop spec; keeping both under
+    # one id means a manifest cannot claim B3 while training uniformly.
+    "B3": {
+        "temporal": False,
+        "channels": 3,
+        "sampling": "propensity_matched",
+        "description": "A3 channels; unlabelled batch side matched to the positives' circumstances",
+    },
+    "B4": {
+        "temporal": True,
+        "channels": 5,
+        "sampling": "propensity_matched",
+        "description": "A4 channels under the same matched sampling; held until B3 passes the residual test",
+    },
 }
+
+
+def sampling_for(arm: str) -> str:
+    """The sampling an arm declares; uniform unless it says otherwise."""
+    if arm not in ARMS:
+        raise RescoreError(f"unknown arm {arm!r}")
+    return str(ARMS[arm].get("sampling", "uniform"))
 
 
 class RescoreError(ValueError):

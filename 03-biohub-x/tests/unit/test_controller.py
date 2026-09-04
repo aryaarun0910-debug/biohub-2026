@@ -13,6 +13,8 @@ from biohubx.research.controller import ArmState, CampaignState, next_action
 def _state(**overrides: object) -> CampaignState:
     base: dict[str, object] = {
         "propensity": "absent",
+        "propensity_replicates": False,
+        "ceiling_degraded": False,
         "propensity_temporal": False,
         "arms": (
             ArmState("A3", smoke_passed=None, folds_improved=None),
@@ -26,12 +28,26 @@ def _state(**overrides: object) -> CampaignState:
     return CampaignState(**base)  # type: ignore[arg-type]
 
 
-def test_a_present_propensity_signal_stops_everything_and_redesigns() -> None:
+def test_a_signal_on_one_embryo_is_weak_evidence_and_does_not_stop_the_campaign() -> None:
+    """Arya Arun's amendment: present on one embryo is embryo-specific, not a kill."""
     decision = next_action(_state(propensity="present", propensity_temporal=True))
-    assert decision.rule.startswith("propensity falsified")
+    assert not decision.rule.startswith("propensity falsified")
+    assert decision.arms["A4"].startswith("hold")
+    assert decision.arms["A3"] == "run the representative smoke"
+    assert "Stage 2B under the current objective" not in " ".join(decision.blocked)
+
+
+def test_a_signal_replicated_across_both_embryos_stops_and_redesigns() -> None:
+    decision = next_action(_state(propensity="present", propensity_replicates=True, propensity_temporal=True))
+    assert decision.rule.startswith("propensity falsified objective (replicated")
     assert decision.arms["A4"].startswith("hold; neighbouring")
     assert "Stage 2B under the current objective" in " ".join(decision.blocked)
     assert decision.unlocked == ()
+
+
+def test_a_degraded_trained_ceiling_stops_and_redesigns() -> None:
+    decision = next_action(_state(propensity="present", ceiling_degraded=True))
+    assert decision.rule.startswith("propensity falsified objective (trained ceiling degraded")
 
 
 def test_nothing_is_decided_before_the_probe_has_run() -> None:
@@ -110,6 +126,7 @@ def test_the_probe_outranks_every_other_rule() -> None:
     decision = next_action(
         _state(
             propensity="present",
+            propensity_replicates=True,
             arms=(ArmState("A3", smoke_passed=True, folds_improved=2),),
             official_metric_passes=True,
         )

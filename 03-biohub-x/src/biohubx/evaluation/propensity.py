@@ -429,33 +429,30 @@ def probe(tables: Sequence[CandidateTable], parameters: ProbeParameters) -> dict
 
 
 def decide(*, signal: bool, temporal: bool, non_temporal: bool) -> dict[str, Any]:
-    """Arya Arun's rules of 2026-09-04, applied without discretion.
+    """One embryo's reading, which by itself never kills the objective.
 
-    Strong propensity signal: stop the current nnPU training and design a
-    bias-robust objective. Weak or absent: continue to representative E07
-    training. Temporal features predictive: hold A4, whose neighbouring frames
-    can learn tracing propensity. Only non-temporal features predictive: retain
-    A3 as the safer baseline while the objective is corrected.
+    Arya Arun's amended rule of 2026-09-04: a statistically present circumstance
+    signal is weak, embryo-specific evidence unless it replicates across both
+    embryos or demonstrably degrades a trained scorer's fixed-count held-out
+    ceiling. Replication and degradation are judged by the controller over both
+    embryos' readings and the Stage 2B results; this function only says what
+    this embryo saw and which arm could see it.
     """
     if not signal:
         return {
             "verdict": "propensity_signal_absent",
-            "next_action": "continue to representative E07 training",
+            "next_action": "no signal on this embryo; continue",
             "A3": "eligible",
-            "A4": "eligible",
-        }
-    if temporal:
-        return {
-            "verdict": "propensity_signal_present",
-            "next_action": "stop current nnPU training; design a bias-robust objective",
-            "A3": "retain as baseline while the objective is corrected"
-            if non_temporal
-            else "eligible under a corrected objective",
-            "A4": "hold; neighbouring frames can learn tracing propensity",
+            "A4": "eligible on this embryo's evidence",
         }
     return {
         "verdict": "propensity_signal_present",
-        "next_action": "stop current nnPU training; design a bias-robust objective",
-        "A3": "retain as the safer baseline while the objective is corrected",
-        "A4": "not specifically falsified by temporal context; eligible only under a corrected objective",
+        "next_action": (
+            "weak, embryo-specific evidence on its own; the objective is killed only if this "
+            "replicates on the other embryo or the trained scorer's fixed-count held-out ceiling degrades"
+        ),
+        "A3": "eligible; the residual-propensity test on its trained scorer is mandatory",
+        "A4": "hold; neighbouring frames can learn tracing propensity"
+        if temporal
+        else "hold pending the residual-propensity test on A3",
     }

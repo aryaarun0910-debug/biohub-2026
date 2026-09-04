@@ -25,13 +25,26 @@ E08:
   mechanism:
     objective: non-negative positive-unlabelled risk, as E07, with the same per-movie class prior
     change: >-
-      within each training movie, unlabelled candidates enter a batch with
-      probability proportional to the propensity score of E07-PROPENSITY-01's
-      circumstance model fit on that fold's training movies, so the unlabelled
-      batch distribution over circumstances matches the positives' and the
+      within each training movie, each unlabelled candidate's risk term is
+      weighted by the propensity odds of E07-PROPENSITY-01's circumstance model
+      fit on that fold's training movies, so the unlabelled distribution the
+      risk is taken over has the positives' circumstances and those
       circumstances carry no separating signal inside the loss
     matched_on: [position, face_um, time, density, persist_prev, persist_next, motion_um]
     not_matched_on: [dog, intensity]
+    how: >-
+      the unlabelled risk inside the non-negative PU loss is importance-weighted
+      by the fitted odds of being a positive given the circumstances, normalised
+      per movie; batch composition is identical to E07's. The first
+      implementation ordered batches by weight instead, reweighted nothing over
+      an epoch, and inverted the scorer; the residual-propensity test caught it
+      on the first CPU run (D-0046).
+    weight_cap: 20.0
+    weight_cap_note: >-
+      odds are clipped to [1/20, 20] before normalisation; with eighteen
+      positives the unclipped odds span orders of magnitude and a handful of
+      rows would carry the whole unlabelled risk. The effective unlabelled
+      sample after clipping is recorded per movie.
     why_not_intensity: >-
       matching on intensity would blind the scorer to brightness, which is a
       cellness cue the atlas (R-0022) says the misses lack. Whether the 0.0069

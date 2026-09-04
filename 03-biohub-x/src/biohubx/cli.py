@@ -3317,6 +3317,13 @@ def train_rescore(
     ] = 1.0,
     seed: Annotated[int, typer.Option("--seed")] = 0,
     device: Annotated[str, typer.Option("--device")] = "cpu",
+    residual_test: Annotated[
+        bool,
+        typer.Option("--residual-test", help="Rerun the propensity probe on the trained scorer's logits."),
+    ] = False,
+    select: Annotated[
+        str, typer.Option("--select", help="Training movies: name-order or stratified.")
+    ] = "name-order",
     cache: Annotated[
         Path | None, typer.Option("--cache", help="Patch cache directory. Defaults to artifacts/cache/e07.")
     ] = None,
@@ -3348,6 +3355,34 @@ def train_rescore(
         baseline_block = family["baseline"]["proposals"]
         folds = {f["id"]: f for f in family["folds"]}
         chosen = folds[fold]
+        from biohubx.training.rescore_loop import annotated_node_counts, movies_of, stratified_movies
+
+        if select not in {"name-order", "stratified"}:
+            heartbeat(command, "refused", f"--select must be name-order or stratified, got {select!r}")
+            raise typer.Exit(code=2)
+        selection_root = competition_root(root)
+        if select == "stratified":
+            train_ids = stratified_movies(
+                annotated_node_counts(selection_root, str(chosen["train_on"])), train_movies
+            )
+        else:
+            train_ids = movies_of(selection_root, str(chosen["train_on"]), train_movies)
+        probe_path = root_path / "configs/e07-propensity-probe.yaml"
+        probe_block = yaml.safe_load(probe_path.read_text(encoding="utf-8"))["E07-PROPENSITY-01"][
+            "parameters"
+        ]
+        probe_parameters = {
+            k: probe_block[k]
+            for k in (
+                "density_radius_um",
+                "persistence_radius_um",
+                "motion_cap_um",
+                "l2",
+                "permutations",
+                "null_quantile",
+            )
+        }
+        heartbeat(command, "select", f"{select} train={train_ids} sampling={rescore.sampling_for(arm)}")
         spec = LoopSpec(
             arm=arm,
             train_embryo=str(chosen["train_on"]),
@@ -3365,8 +3400,12 @@ def train_rescore(
             baseline_quantile=float(baseline_block["response_quantile"]),
             config_digest=digest_file(config_path, DigestKind.CANONICAL_TEXT).token,
             count_ratio=count_ratio,
+            train_datasets=tuple(train_ids),
+            sampling=rescore.sampling_for(arm),
+            residual_test=residual_test,
+            propensity_parameters=probe_parameters,
         )
-    except (OSError, KeyError, TypeError, ValueError) as exc:
+    except (OSError, KeyError, TypeError, ValueError, CompetitionLayoutError) as exc:
         heartbeat(command, "refused", f"cannot read fold {fold!r} of {section} from {config_path}: {exc}")
         raise typer.Exit(code=2) from exc
     if arm not in rescore.ARMS:
@@ -3939,6 +3978,29 @@ def package_rescore(
             "before any GPU is allocated.",
         ),
     ] = 0,
+    seeds: Annotated[
+        str, typer.Option("--seeds", help="Comma-separated seeds, one isolated worker each (D-0045).")
+    ] = "",
+    amp: Annotated[bool, typer.Option("--amp", help="Mixed precision, verified in-run before use.")] = False,
+    batch_autotune: Annotated[
+        bool,
+        typer.Option(
+            "--batch-autotune", help="Batch-size ladder on training patches; knee under the ceiling."
+        ),
+    ] = False,
+    memory_ceiling_gib: Annotated[
+        float, typer.Option("--memory-ceiling-gib", help="Hard peak-allocation ceiling per device.")
+    ] = 13.0,
+    residual_test: Annotated[
+        bool,
+        typer.Option("--residual-test", help="Rerun the propensity probe on the trained scorer's logits."),
+    ] = False,
+    probe_config: Annotated[
+        Path | None,
+        typer.Option(
+            "--probe-config", help="Probe declaration whose constants the sampler and residual test use."
+        ),
+    ] = None,
 ) -> None:
     """Stage the E07 kernel: one arm, one fold, bounded movies and epochs, gated locally.
 
@@ -4124,6 +4186,51 @@ def package_rescore(
             f"{min_positives}; a run with too little supervision is refused here, not discovered on a GPU",
         )
         raise typer.Exit(code=2)
+    worker_seeds = [int(s) for s in seeds.split(",") if s.strip()] or [seed]
+    if len(set(worker_seeds)) != len(worker_seeds):
+        heartbeat(command, "refused", f"seeds must be distinct, got {worker_seeds}")
+        raise typer.Exit(code=2)
+    probe_path = probe_config if probe_config is not None else root_path / "configs/e07-propensity-probe.yaml"
+    probe_parameters = yaml.safe_load(probe_path.read_text(encoding="utf-8"))["E07-PROPENSITY-01"][
+        "parameters"
+    ]
+    loop["workers"] = [{"seed": s} for s in worker_seeds]
+    loop["amp"] = amp
+    loop["batch_autotune"] = batch_autotune
+    loop["memory_ceiling_bytes"] = int(memory_ceiling_gib * 1024**3)
+    loop["residual_test"] = residual_test
+    loop["sampling"] = rescore.sampling_for(arm)
+    loop["propensity"] = {
+        k: probe_parameters[k]
+        for k in (
+            "density_radius_um",
+            "persistence_radius_um",
+            "motion_cap_um",
+            "l2",
+            "permutations",
+            "null_quantile",
+        )
+    }
+    loop["propensity_declaration_digest"] = digest_file(probe_path, DigestKind.CANONICAL_TEXT).token
+    # The held-out movies are the first M in name order, never chosen by their
+    # labels. Their windows are counted so a run cannot be sent to score a window
+    # with nothing in it, which is the one case that refuses.
+    eval_ids = movies_of(selection_root, spec.fold.evaluate_embryo, evaluate_movies)
+    eval_preflight = {}
+    for dataset in eval_ids:
+        first, inside = annotated_in_window(selection_root, dataset, frames)
+        eval_preflight[dataset] = {"first_frame": first, "annotated_in_window": inside}
+    eval_total = sum(item["annotated_in_window"] for item in eval_preflight.values())
+    heartbeat(
+        command,
+        "preflight",
+        f"evaluate={eval_ids} "
+        f"annotated_in_window={[eval_preflight[d]['annotated_in_window'] for d in eval_ids]} "
+        f"total={eval_total}",
+    )
+    if eval_total == 0:
+        heartbeat(command, "refused", "the held-out windows hold no annotated cell; nothing could be scored")
+        raise typer.Exit(code=2)
     loop["train_datasets"] = train_ids
     loop["selection"] = {
         "rule": select,
@@ -4131,6 +4238,11 @@ def package_rescore(
         "preflight": preflight,
         "annotated_in_window_total": annotated_total,
         "min_positives": min_positives,
+        "evaluation": {
+            "rule": "first M of the held-out embryo in name order",
+            "preflight": eval_preflight,
+            "annotated_in_window_total": eval_total,
+        },
     }
     heartbeat(
         command,
@@ -4138,7 +4250,8 @@ def package_rescore(
         f"E07 {arm} {fold} commit={commit[:12]} dirty={bool(dirty)} loop={json.dumps(loop, sort_keys=True)}",
     )
 
-    kernel_title = f"Biohub-X E07 {arm} {fold.replace('_', ' ')}"
+    experiment_label = "E08" if arm.startswith("B") else "E07"
+    kernel_title = f"Biohub-X {experiment_label} {arm} {fold.replace('_', ' ')}"
     try:
         kernel_id = kernel_id_for(owner, kernel_title)
     except PackagingError as exc:
@@ -4196,7 +4309,12 @@ def package_rescore(
         raise typer.Exit(code=2)
     shipped: dict[str, object] = dict(spec.to_dict())
     shipped.update(
-        {"experiment": "E07", "loop": loop, "input_digests": input_digests, "input_shapes": input_shapes}
+        {
+            "experiment": experiment_label,
+            "loop": loop,
+            "input_digests": input_digests,
+            "input_shapes": input_shapes,
+        }
     )
     heartbeat(
         command, "digests", f"shipped identities for {len(input_digests)} artifacts across both embryos"
@@ -4251,7 +4369,7 @@ def package_rescore(
     manifest_text = json.dumps(
         {
             "schema_version": 1,
-            "experiment": "E07",
+            "experiment": experiment_label,
             "spec": spec.to_dict(),
             "loop": loop,
             "files": listing,
@@ -4272,7 +4390,7 @@ def package_rescore(
     payload: dict[str, object] = {
         "schema_version": 1,
         "provenance_status": "integration_only",
-        "experiment": "E07",
+        "experiment": experiment_label,
         "package": {
             "path": str(staging.relative_to(root_path))
             if staging.is_relative_to(root_path)

@@ -519,7 +519,6 @@ def run_rescore(
     package itself is unchanged by that, and the stage line says so.
     """
     from biohubx.packaging.kaggle import FoldSpec, PackageSpec, guard_report
-    from biohubx.training.rescore_loop import LoopSpec, run_loop
 
     started = time.perf_counter()
     fold = FoldSpec(**spec_dict["fold"])
@@ -551,13 +550,10 @@ def run_rescore(
         f"local_exercise={local_exercise}",
     )
 
-    import torch
-
     hardware = _observe_accelerator()
     _stage_accelerator(hardware)
     gpu_count = hardware["gpu_count"]
     device = hardware["training_device"]
-    total_vram_bytes = hardware["total_vram_bytes"]
 
     root, how = _resolve_data_root(data_root, set(spec_dict.get("input_digests", {})))
     stage("inputs", f"root={root} resolved by {how}")
@@ -635,8 +631,190 @@ def run_rescore(
         raise EntryRefusal(f"guards failed: {report['failures']}")
     stage("guard", "passed")
 
+    out = Path(os.environ.get("BIOHUBX_OUTPUT", "/kaggle/working"))
+    out.mkdir(parents=True, exist_ok=True)
+    workers = [dict(w) for w in loop.get("workers", [])] or [{"seed": int(fold.seed)}]
+    if local_exercise:
+        workers = workers[:1]
+    parallel = gpu_count >= 2 and len(workers) >= 2 and not local_exercise
+    stage(
+        "workers",
+        f"count={len(workers)} seeds={[w.get('seed') for w in workers]} "
+        f"devices_visible={gpu_count} mode={'one worker per device' if parallel else 'serial on ' + device}",
+    )
+
+    if parallel:
+        # One isolated process per visible device (D-0045): its own device, optimizer,
+        # checkpoint, manifest and worker id. Nothing is shared but the read-only
+        # inputs and the spec that was gated.
+        import subprocess
+        import sys
+
+        jobs: list[tuple[dict[str, Any], Path, subprocess.Popen[bytes]]] = []
+        pending = list(enumerate(workers))
+        manifests: list[dict[str, Any]] = []
+        while pending:
+            wave, pending = pending[:gpu_count], pending[gpu_count:]
+            jobs = []
+            for slot, (index, worker) in enumerate(wave):
+                worker_device = f"cuda:{slot}"
+                payload = {
+                    "spec": spec_dict,
+                    "loop": loop,
+                    "worker": worker,
+                    "worker_index": index,
+                    "device": worker_device,
+                    "hardware": hardware,
+                    "guards": report,
+                    "root": str(root),
+                    "out": str(out),
+                    "train_ids": train_ids,
+                    "wheelhouse_verified": wheelhouse_verified,
+                    "wheelhouse_root": wheelhouse_root,
+                    "started": started,
+                }
+                job_path = out / f"worker-{index}.json"
+                job_path.write_text(json.dumps(payload, default=str), encoding="utf-8")
+                process = subprocess.Popen(
+                    [
+                        sys.executable,
+                        "-c",
+                        "import sys; from biohubx.packaging.entry import run_worker_file; "
+                        "run_worker_file(sys.argv[1])",
+                        str(job_path),
+                    ],
+                    env={**os.environ, "BIOHUBX_WORKER_DEVICE": worker_device},
+                )
+                jobs.append((worker, job_path, process))
+                stage(
+                    "worker-start",
+                    f"index={index} seed={worker.get('seed')} device={worker_device} pid={process.pid}",
+                )
+            for worker, job_path, process in jobs:
+                code = process.wait()
+                result_path = job_path.with_suffix(".result.json")
+                if code != 0 or not result_path.is_file():
+                    raise EntryRefusal(f"worker seed={worker.get('seed')} exited {code} without a manifest")
+                manifests.append(json.loads(result_path.read_text(encoding="utf-8")))
+                stage("worker-done", f"seed={worker.get('seed')} manifest={manifests[-1]['manifest_name']}")
+    else:
+        manifests = []
+        for index, worker in enumerate(workers):
+            manifests.append(
+                run_worker(
+                    spec_dict,
+                    loop,
+                    worker,
+                    index,
+                    device,
+                    root=root,
+                    out=out,
+                    train_ids=train_ids,
+                    hardware=hardware,
+                    guards=report,
+                    wheelhouse_verified=wheelhouse_verified,
+                    wheelhouse_root=wheelhouse_root,
+                    started=started,
+                    local_exercise=local_exercise,
+                )
+            )
+
+    summary: dict[str, Any] = {
+        "schema_version": 2,
+        "experiment": spec_dict.get("experiment", "E07"),
+        "smoke_id": spec.smoke_id,
+        "arm": str(loop["arm"]),
+        "fold": fold.fold_id,
+        "spec": spec.to_dict(),
+        "guards": report,
+        "hardware": hardware,
+        "local_exercise": local_exercise,
+        "parallel_workers": parallel,
+        "workers": [
+            {
+                "worker_id": m["worker_id"],
+                "seed": m["seed"],
+                "device": m["device"],
+                "manifest": m["manifest_name"],
+                "manifest_digest": m["manifest_digest"],
+                "checkpoint_digest": m["loop"].get("checkpoint_digest"),
+                "held_out_score": (m["loop"].get("held_out") or {}).get("arm", {}).get("score"),
+                "A0_score": (m["loop"].get("held_out") or {}).get("A0", {}).get("score"),
+                "ceiling_degraded": m["loop"].get("ceiling_degraded"),
+                "residual_propensity_passed": (m["loop"].get("residual_propensity") or {}).get("passed"),
+                "peak_allocated_bytes": m["hardware"].get("peak_allocated_bytes"),
+                "throughput": m["loop"].get("throughput"),
+            }
+            for m in manifests
+        ],
+        "elapsed_seconds": round(time.perf_counter() - started, 3),
+    }
+    summary_path = out / f"e07-{fold.fold_id}-{loop['arm']}.json"
+    staged = summary_path.with_suffix(".json.partial")
+    staged.write_text(json.dumps(summary, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+    staged.replace(summary_path)
+    stage(
+        "done", f"manifest={summary_path.name} workers={len(manifests)} elapsed={summary['elapsed_seconds']}s"
+    )
+    return summary
+
+
+def run_worker_file(path: str) -> None:
+    """Subprocess entry: one worker, one device, from the job the parent wrote."""
+    job = json.loads(Path(path).read_text(encoding="utf-8"))
+    device = str(job["device"])
+    import torch
+
+    torch.cuda.set_device(int(device.split(":")[1]))
+    manifest = run_worker(
+        job["spec"],
+        job["loop"],
+        job["worker"],
+        int(job["worker_index"]),
+        device,
+        root=Path(job["root"]),
+        out=Path(job["out"]),
+        train_ids=list(job["train_ids"]),
+        hardware=dict(job["hardware"]),
+        guards=dict(job["guards"]),
+        wheelhouse_verified=bool(job["wheelhouse_verified"]),
+        wheelhouse_root=str(job["wheelhouse_root"]),
+        started=float(job["started"]),
+        local_exercise=False,
+    )
+    Path(path).with_suffix(".result.json").write_text(json.dumps(manifest, default=str), encoding="utf-8")
+
+
+def run_worker(
+    spec_dict: dict[str, Any],
+    loop: dict[str, Any],
+    worker: dict[str, Any],
+    index: int,
+    device: str,
+    *,
+    root: Path,
+    out: Path,
+    train_ids: list[str],
+    hardware: dict[str, Any],
+    guards: dict[str, Any],
+    wheelhouse_verified: bool,
+    wheelhouse_root: str,
+    started: float,
+    local_exercise: bool,
+) -> dict[str, Any]:
+    """Train one seed on one device and write its own manifest. Shares nothing with another worker."""
+    import torch
+
+    from biohubx.packaging.kaggle import FoldSpec
+    from biohubx.proposals import rescore
+    from biohubx.training.rescore_loop import LoopSpec, run_loop
+
+    fold = FoldSpec(**spec_dict["fold"])
+    seed = int(worker.get("seed", fold.seed))
+    arm = str(loop["arm"])
+    worker_id = f"{spec_dict['smoke_id']}-{arm}-{fold.fold_id}-s{seed}"
     loop_spec = LoopSpec(
-        arm=str(loop["arm"]),
+        arm=arm,
         train_embryo=fold.train_embryo,
         evaluate_embryo=fold.evaluate_embryo,
         train_movies=int(loop["train_movies"]),
@@ -645,19 +823,29 @@ def run_rescore(
         epochs=int(loop["epochs"]),
         batch=int(loop["batch"]),
         learning_rate=float(loop["learning_rate"]),
-        seed=int(fold.seed),
+        seed=seed,
         radii_um=tuple(float(r) for r in loop["radii_um"]),
         suppression_radius_um=float(loop["suppression_radius_um"]),
         pool_quantile=float(loop["pool_quantile"]),
         baseline_quantile=float(loop["baseline_quantile"]),
-        config_digest=spec.config_digest,
+        config_digest=str(spec_dict["config_digest"]),
         count_ratio=float(loop.get("count_ratio", 1.0)),
         train_datasets=tuple(train_ids),
+        amp=bool(loop.get("amp", False)) and not local_exercise,
+        batch_autotune=bool(loop.get("batch_autotune", False)) and not local_exercise,
+        memory_ceiling_bytes=int(loop.get("memory_ceiling_bytes", 13 * 1024**3)),
+        sampling=rescore.sampling_for(arm),
+        residual_test=bool(loop.get("residual_test", False)),
+        worker_id=worker_id,
+        propensity_parameters=loop.get("propensity"),
     )
-    stage("model", f"arm={loop_spec.arm} seed={fold.seed} count_ratio={loop_spec.count_ratio}")
-    out = Path(os.environ.get("BIOHUBX_OUTPUT", "/kaggle/working"))
-    out.mkdir(parents=True, exist_ok=True)
-    checkpoint = out / f"rescorer-{loop_spec.arm}-{fold.fold_id}.pt"
+    stage(
+        "model",
+        f"worker={worker_id} device={device} count_ratio={loop_spec.count_ratio} "
+        f"sampling={loop_spec.sampling}",
+    )
+    checkpoint = out / f"rescorer-{arm}-{fold.fold_id}-s{seed}.pt"
+    ceiling_seconds = int(spec_dict["runtime_ceiling_seconds"])
 
     def log(name: str, detail: str) -> None:
         mapped = {
@@ -668,55 +856,62 @@ def run_rescore(
             "cache": "cache",
         }
         if name == "epoch":
-            stage("epoch-start", detail[:40])
-        stage(mapped.get(name, name), detail)
-        if time.perf_counter() - started > spec.runtime_ceiling_seconds:
-            raise EntryRefusal(f"runtime ceiling {spec.runtime_ceiling_seconds}s exceeded")
+            stage("epoch-start", f"{worker_id} " + detail[:40])
+        stage(mapped.get(name, name), f"{worker_id} {detail}")
+        if time.perf_counter() - started > ceiling_seconds:
+            raise EntryRefusal(f"runtime ceiling {ceiling_seconds}s exceeded")
 
+    torch_device = torch.device(device)
     result = run_loop(
         root,
         loop_spec,
-        device=torch.device(device),
+        device=torch_device,
         cache_dir=out / "cache",
         checkpoint_path=checkpoint,
         log=log,
     )
-    stage("checkpoint", f"{checkpoint.name} strict reload identical={result.reload_identical}")
+    stage("checkpoint", f"{worker_id} {checkpoint.name} strict reload identical={result.reload_identical}")
     if result.reload_identical is False:
         raise EntryRefusal("the reloaded checkpoint did not reproduce its own output")
-    peak_allocated = int(torch.cuda.max_memory_allocated()) if gpu_count else 0
-    peak_reserved = int(torch.cuda.max_memory_reserved()) if gpu_count else 0
-    stage(
-        "memory",
-        f"peak_allocated_bytes={peak_allocated} peak_reserved_bytes={peak_reserved} "
-        f"total_bytes={total_vram_bytes}",
-    )
+    peak_allocated = int(torch.cuda.max_memory_allocated(torch_device)) if torch_device.type == "cuda" else 0
+    peak_reserved = int(torch.cuda.max_memory_reserved(torch_device)) if torch_device.type == "cuda" else 0
+    stage("memory", f"{worker_id} peak_allocated_bytes={peak_allocated} peak_reserved_bytes={peak_reserved}")
 
+    manifest_name = f"e07-{fold.fold_id}-{arm}-s{seed}.json"
     manifest: dict[str, Any] = {
-        "schema_version": 1,
-        "experiment": "E07",
-        "smoke_id": spec.smoke_id,
-        "spec": spec.to_dict(),
-        "loop": result.to_dict(),
-        "guards": report,
-        "local_exercise": local_exercise,
+        "schema_version": 2,
+        "experiment": spec_dict.get("experiment", "E07"),
+        "smoke_id": spec_dict["smoke_id"],
+        "worker_id": worker_id,
+        "seed": seed,
         "device": device,
+        "spec": {k: v for k, v in spec_dict.items() if k not in {"input_digests", "input_shapes"}},
+        "loop": result.to_dict(),
+        "guards": guards,
+        "local_exercise": local_exercise,
         "hardware": {
             **hardware,
             "peak_allocated_bytes": peak_allocated,
             "peak_reserved_bytes": peak_reserved,
         },
         "wheelhouse": {
-            "slug": spec.wheelhouse_slug,
-            "tree": spec.wheelhouse_tree,
+            "slug": spec_dict["wheelhouse_slug"],
+            "tree": spec_dict["wheelhouse_tree"],
             "verified_before_install": wheelhouse_verified,
             "resolved_at": wheelhouse_root,
         },
         "elapsed_seconds": round(time.perf_counter() - started, 3),
     }
-    manifest_path = out / f"e07-{fold.fold_id}-{loop_spec.arm}.json"
+    manifest_path = out / manifest_name
     staged = manifest_path.with_suffix(".json.partial")
-    staged.write_text(json.dumps(manifest, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+    text = json.dumps(manifest, indent=2, sort_keys=True, default=str) + "\n"
+    staged.write_text(text, encoding="utf-8")
     staged.replace(manifest_path)
-    stage("done", f"manifest={manifest_path.name} elapsed={manifest['elapsed_seconds']}s")
+    import hashlib
+
+    manifest["manifest_name"] = manifest_name
+    manifest["manifest_digest"] = (
+        "raw_artifact_sha256:sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
+    )
+    stage("worker-manifest", f"{worker_id} {manifest_name} digest={manifest['manifest_digest'][:46]}")
     return manifest

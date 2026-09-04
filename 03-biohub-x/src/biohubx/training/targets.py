@@ -177,12 +177,20 @@ def positive_unlabelled_loss(
     positive: torch.Tensor,
     *,
     prior: float,
+    unlabelled_weights: torch.Tensor | None = None,
 ) -> tuple[torch.Tensor, dict[str, float]]:
     """Non-negative positive-unlabelled risk. No voxel is ever called background.
 
     Returns the loss and its three risk terms. The clamp firing is the signal
     that the model has started to memorise the positives, and it belongs in a
     log rather than being discovered afterwards.
+
+    ``unlabelled_weights``, when given, importance-weights the unlabelled risk:
+    each unlabelled row's term is scaled by its weight and the sum is
+    normalised by the weights' sum, so the unlabelled distribution the risk is
+    taken over is the reweighted one. E08 uses it to match the unlabelled
+    side's circumstances to the positives' ([[D-0046]]); E07 passes nothing
+    and the risk is the plain mean. Batch composition is identical either way.
     """
     if logits.shape != positive.shape:
         raise TargetConstructionError(
@@ -201,7 +209,18 @@ def positive_unlabelled_loss(
     softplus = torch.nn.functional.softplus
     risk_positive = softplus(-logits[mask]).mean()
     risk_positive_as_negative = softplus(logits[mask]).mean()
-    risk_unlabelled_as_negative = softplus(logits[unlabelled]).mean()
+    if unlabelled_weights is None:
+        risk_unlabelled_as_negative = softplus(logits[unlabelled]).mean()
+    else:
+        if unlabelled_weights.shape != positive.shape:
+            raise TargetConstructionError(
+                f"unlabelled weights {tuple(unlabelled_weights.shape)} and rows "
+                f"{tuple(positive.shape)} differ"
+            )
+        weights = unlabelled_weights[unlabelled].to(logits.dtype)
+        if float(weights.sum()) <= 0.0:
+            raise TargetConstructionError("unlabelled weights sum to nothing; the risk would be undefined")
+        risk_unlabelled_as_negative = (weights * softplus(logits[unlabelled])).sum() / weights.sum()
 
     negative_risk = risk_unlabelled_as_negative - prior * risk_positive_as_negative
     loss = prior * risk_positive + torch.clamp(negative_risk, min=0.0)

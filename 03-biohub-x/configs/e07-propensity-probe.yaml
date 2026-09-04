@@ -62,8 +62,15 @@ E07-PROPENSITY-01:
     per_embryo: held-out AUC for the response alone, for the response plus each feature group, for all features, for temporal alone and non-temporal alone; the gains; the permutation null per tested gain; the decision
     decision_rules:
       signal_absent: continue to representative E07 training
-      signal_present: stop current nnPU training; design a bias-robust objective
+      signal_present_on_one_embryo: weak, embryo-specific evidence; continue, with the residual-propensity test on the trained scorer mandatory for advancement
+      signal_replicates_on_both_embryos: stop current nnPU training; design a bias-robust objective
+      trained_ceiling_degrades: stop current nnPU training; design a bias-robust objective
       temporal_predictive: hold A4; its neighbouring frames can learn tracing propensity
-      only_non_temporal_predictive: retain A3 as the safer baseline while the objective is corrected
+    amended: >-
+      2026-09-04 by Arya Arun, after R-0027. The first version stopped the
+      objective on a present signal from either embryo; a 0.0085 AUC gain on
+      one embryo is weak, embryo-specific evidence, and the kill now needs
+      replication across both embryos or a demonstrable degradation of the
+      trained scorer's fixed-count held-out ceiling.
   forbidden: reading the other embryo, tuning any constant on the result, calling any number here a finding
   provenance_status: diagnostic

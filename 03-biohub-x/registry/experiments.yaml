@@ -1051,12 +1051,15 @@ experiments:
         status: measured
         reference: R-0027
         decision_applied: >-
-          the controller (biohubx research collect, rule table of 2026-09-04)
-          reads 'propensity falsified objective -> stop and redesign' because
-          6bba reports a signal; A4 is held because the temporal group cleared
-          its null on 6bba; A3 is eligible only under a corrected objective;
-          Stage 2B under the current objective, E06 resumption and submission
-          stay blocked. The declared Stage 3 is not run.
+          first reading, rule table as first written: stop and redesign because
+          6bba reported a signal. Amended the same day by Arya Arun: the 6bba
+          signal is weak, embryo-specific evidence, absent on 44b6, and does
+          not kill the objective; a kill needs replication across both embryos
+          or a demonstrable degradation of the trained scorer's fixed-count
+          held-out ceiling. A3 continues to a representative Stage 2B with the
+          residual-propensity test mandatory for advancement; A4 is held; the
+          declared Stage 3 is not run; E06 resumption and submission stay
+          blocked below the ceiling target.
         outcome:
           report: "artifacts/e07-propensity.json"
           report_digest: "canonical_text_sha256:sha256/v1:c604d4c89285294a85d902f268f836307cc10c592ba71b780cd9eee506f948b9"

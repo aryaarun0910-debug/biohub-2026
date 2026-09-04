@@ -1575,3 +1575,56 @@ placement change how fast a declared configuration is measured, and the
 verification that they change nothing else is part of enabling them. The
 north star is useful throughput after the objective has survived its probe,
 not occupancy before anyone knows what the model is learning.
+
+## D-0046 - A circumstance signal kills an objective only when it replicates or degrades a trained ceiling, and a session is spent by measured throughput
+
+**Date:** 2026-09-04
+**Status:** accepted
+**Authorised by:** Arya Arun
+
+[[R-0027]] measured E07-PROPENSITY-01: on 6bba, circumstance features add 0.0085
+held-out AUC to the DoG response in predicting "annotated" and no within-movie
+shuffle reaches it; on 44b6 they subtract 0.0110. The rule as first declared
+stopped the objective on a present signal from either embryo, and the controller
+did exactly that. Arya Arun amended the rule the same day.
+
+**Going forward, a statistically present circumstance signal is weak,
+embryo-specific evidence on its own.** It kills an objective only when it
+replicates across both embryos, or when a trained scorer's fixed-count held-out
+ceiling demonstrably degrades below A0. The residual-propensity test, the
+probe's own procedure rerun with the trained scorer's logit as the control, is
+mandatory for any arm to advance from a representative smoke: a scorer whose
+ranking gains more from circumstances than the response it was given did, and
+more than the permutation null, has learned the annotators and not the cells.
+
+**E08 is the objective that removes what the test measures, and its first
+implementation was wrong in a way the test caught.** Ordering a permutation by
+propensity weight reweights nothing over a full epoch and clustered the
+positives against their least similar unlabelled rows; the scorer inverted
+(held-out AUC 0.07) and the residual test failed on the first CPU run. The
+objective is now an importance-weighted unlabelled risk inside the loss, batch
+composition identical to E07's, matched on position, face distance, time,
+density, persistence and motion and never on intensity or the response, which
+are cellness cues as much as circumstances.
+
+**A GPU session is spent by measured throughput under a hard ceiling.** Mixed
+precision is enabled only after one fixed batch agrees with full precision to a
+declared tolerance, in the run that uses it. The batch size is the throughput
+knee of a ladder climbed on the first training movie's own patches, below a 13
+GiB peak-allocation ceiling that the allocator enforces. Every worker manifest
+records examples per second, positives per batch, clamp frequency, data-wait
+fraction, median GPU utilisation and peak bytes. Two visible T4s are two
+isolated workers, one seed each, each on its own device with its own optimizer,
+checkpoint, manifest and worker id; one visible card serialises them. The
+guard of [[D-0044]] now accepts any one visible device per worker and still
+refuses a device outside the allocation or a name that is not one device.
+
+**Which movies a run reads is stratified, and the held-out windows are counted
+before a push.** Training movies come from annotation-count quartiles of the
+training embryo, median bands first; held-out movies stay the first M in name
+order, never chosen by their labels, and the package refuses only when their
+windows hold no annotated cell at all.
+
+What this does not decide: whether E08 works. Its CPU preflight proves the
+mechanism runs and that the test can fail; its standing waits on the same
+representative smoke and the same held-out ceilings as E07's arms.

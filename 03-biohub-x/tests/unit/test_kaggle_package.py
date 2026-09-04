@@ -553,17 +553,21 @@ def test_a_second_visible_device_that_is_not_a_t4_refuses() -> None:
     assert any("cuda:1" in line and "P100" in line for line in outcome["failures"])
 
 
-def test_training_on_any_device_but_cuda_zero_refuses() -> None:
-    """Accepting two cards is not using two, and the guard is where that is said."""
-    outcome = report(
-        gpu_count=2,
-        device_names=["Tesla T4", "Tesla T4"],
-        device_vram_bytes=[15636037632, 15636037632],
-        training_device="cuda:1",
-    )
+def test_a_second_worker_may_train_on_the_second_visible_card_and_nowhere_else() -> None:
+    """D-0045: two cards are two isolated workers. cuda:1 is a worker's device when two
+    are visible; cuda:2 is nobody's, and a name that is not one device refuses."""
+    two = dict(gpu_count=2, device_names=["Tesla T4", "Tesla T4"], device_vram_bytes=[15636037632] * 2)
 
-    assert not outcome["passed"]
-    assert any("pinned to 'cuda:0'" in line for line in outcome["failures"])
+    assert report(**two, training_device="cuda:1")["passed"]
+    outside = report(**two, training_device="cuda:2")
+    assert not outside["passed"]
+    assert any("pinned to one visible device" in line for line in outside["failures"])
+    spread = report(**two, training_device="cuda")
+    assert not spread["passed"]
+    one = report(
+        gpu_count=1, device_names=["Tesla T4"], device_vram_bytes=[15636037632], training_device="cuda:1"
+    )
+    assert not one["passed"]
 
 
 def test_a_vram_reading_per_visible_device_is_required() -> None:

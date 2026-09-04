@@ -2760,6 +2760,7 @@ references:
 
   - id: R-0027
     status: measured_diagnostic
+    evidence_class: weak, embryo-specific; present on 6bba only, absent on 44b6; not a kill under the amended rule
     title: E07-PROPENSITY-01 measured on both training embryos, movie held out, against a feature-permutation null
     why: >-
       Arya Arun held the declared Stage 3 until this answered whether a

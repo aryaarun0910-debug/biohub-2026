@@ -3,6 +3,8 @@
 Arya Arun's rule table of 2026-09-04, applied without discretion:
 
     propensity falsified objective -> stop and redesign
+      (only when the signal replicates across both embryos, or a trained
+       scorer's fixed-count held-out ceiling demonstrably degrades)
     smoke failed                   -> kill or hold the arm
     one fold improved              -> challenger only
     both folds improved            -> qualify the full-fold stage
@@ -43,7 +45,13 @@ class ArmState:
 @dataclass(frozen=True)
 class CampaignState:
     propensity: str | None
-    """``present``, ``absent`` or None when the probe has not run."""
+    """``present``, ``absent`` or None before the probe runs; present means on at least one embryo."""
+
+    propensity_replicates: bool | None
+    """True when the signal is present on both embryos; the first way the objective is killed."""
+
+    ceiling_degraded: bool | None
+    """True when a trained scorer's fixed-count held-out ceiling fell below A0 in a direction."""
 
     propensity_temporal: bool | None
     arms: tuple[ArmState, ...]
@@ -86,7 +94,14 @@ def next_action(state: CampaignState) -> Decision:
     if not ceiling_met:
         blocked.extend(["association (E06 resume)", "submission"])
 
-    if state.propensity == "present":
+    # Arya Arun's amendment of 2026-09-04: a statistically present signal is
+    # weak, embryo-specific evidence on its own. It kills the objective only when
+    # it replicates across both embryos or a trained scorer's fixed-count
+    # held-out ceiling demonstrably degrades.
+    kills = state.propensity == "present" and (
+        bool(state.propensity_replicates) or bool(state.ceiling_degraded)
+    )
+    if kills:
         held: dict[str, str] = {}
         for arm in state.arms:
             if arm.arm == "A4" and state.propensity_temporal:
@@ -95,7 +110,11 @@ def next_action(state: CampaignState) -> Decision:
                 held[arm.arm] = "hold under the current objective; eligible only under a corrected one"
         return Decision(
             next_action="stop the current nnPU training and design a bias-robust objective",
-            rule="propensity falsified objective -> stop and redesign",
+            rule=(
+                "propensity falsified objective (replicated across embryos) -> stop and redesign"
+                if state.propensity_replicates
+                else "propensity falsified objective (trained ceiling degraded) -> stop and redesign"
+            ),
             arms=held,
             blocked=(*blocked, "representative Stage 2B under the current objective"),
             unlocked=(),
@@ -112,7 +131,11 @@ def next_action(state: CampaignState) -> Decision:
 
     arms: dict[str, str] = {}
     unlocked: list[str] = []
+    weak = state.propensity == "present"
     for arm in state.arms:
+        if arm.arm == "A4" and weak and arm.smoke_passed is None:
+            arms[arm.arm] = "hold; weak propensity evidence names the temporal group"
+            continue
         if arm.smoke_passed is False:
             arms[arm.arm] = "kill or hold: the smoke failed"
         elif arm.smoke_passed is None:
@@ -181,14 +204,16 @@ def state_from_registries(root: Path) -> CampaignState:
 
     propensity: str | None = None
     temporal: bool | None = None
+    replicates: bool | None = None
+    degraded: bool | None = None
     report = root / "artifacts/e07-propensity.json"
     if report.is_file():
         body = json.loads(report.read_text(encoding="utf-8"))
         verdicts = {name: block["decision"]["verdict"] for name, block in body.get("per_embryo", {}).items()}
         if verdicts:
-            propensity = (
-                "present" if any(v == "propensity_signal_present" for v in verdicts.values()) else "absent"
-            )
+            present = [v == "propensity_signal_present" for v in verdicts.values()]
+            propensity = "present" if any(present) else "absent"
+            replicates = len(present) >= 2 and all(present)
             temporal = any(
                 bool(block["null"]["temporal"]["signal"]) for block in body.get("per_embryo", {}).values()
             )
@@ -200,6 +225,10 @@ def state_from_registries(root: Path) -> CampaignState:
         smoke_passed: bool | None = None
         if isinstance(smoke, dict) and "stage3_condition_met" in smoke:
             smoke_passed = bool(smoke["stage3_condition_met"])
+        # Degradation: a Stage 2B direction whose fixed-count held-out ceiling
+        # fell below A0 on the same windows, recorded by the run itself.
+        if isinstance(smoke, dict) and "ceiling_degraded" in smoke:
+            degraded = bool(degraded) or bool(smoke["ceiling_degraded"])
         folds = block.get("stage3")
         improved: int | None = None
         if isinstance(folds, dict) and "directions_improved" in folds:
@@ -213,6 +242,8 @@ def state_from_registries(root: Path) -> CampaignState:
     official = e07.get("official_metric_passes")
     return CampaignState(
         propensity=propensity,
+        propensity_replicates=replicates,
+        ceiling_degraded=degraded,
         propensity_temporal=temporal,
         arms=tuple(arms),
         proposal_ceiling_44b6=float(ceiling_44b6) if ceiling_44b6 is not None else None,

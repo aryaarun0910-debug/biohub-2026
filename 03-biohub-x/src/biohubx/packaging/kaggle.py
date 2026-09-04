@@ -66,15 +66,20 @@ QUARANTINED_ARTIFACT_PREFIX = "reference.pilkwang"
 
 
 TRAINING_DEVICE = "cuda:0"
-"""The one device an accelerator run is allowed to train on.
+"""The device the first worker trains on, and the only one when a run has one worker.
 
-Kaggle decides how many cards it exposes; this repository decides how many it
-uses. [[R-0011]] observed two allocated against a request for one. Accepting
-that allocation is an operational fact and must not become a scientific one, so
-the device is named here rather than inferred from ``device_count``: a second
-visible card is observed, checked and left idle. There is no DataParallel, no
-process group and no implicit device selection anywhere in the package.
+Kaggle decides how many cards it exposes; this repository decides how they are
+used. [[R-0011]] and [[R-0026]] observed two allocated against a request for
+one. Under [[D-0045]] two visible cards are two isolated workers, one arm or
+seed each, each pinned to its own ``cuda:<k>`` with its own optimizer,
+checkpoint and manifest. There is no DataParallel, no process group and no
+model that spans devices; a worker's device is named in its manifest and the
+guard refuses a device outside the visible allocation.
 """
+
+
+def worker_device(index: int) -> str:
+    return f"cuda:{index}"
 
 
 class PackagingError(ValueError):
@@ -331,13 +336,14 @@ def guard_report(
                 f"approved hardware was {spec.expected_device_substring!r} and this machine reports no "
                 "accelerator at all; the accelerator request did not take effect"
             )
-        # Accepting two cards is not using two. Training is pinned to one device
-        # and the guard says which, so a package that quietly spread itself over
-        # the allocation could not report that it had.
-        elif training_device != TRAINING_DEVICE:
+        # A worker trains on exactly one visible device and names it. A device
+        # outside the allocation, or a name that is not one device, refuses, so a
+        # package that quietly spread itself over the allocation could not report
+        # that it had.
+        elif training_device not in {worker_device(i) for i in range(gpu_count)}:
             failures.append(
-                f"training must be pinned to {TRAINING_DEVICE!r} and this run selected "
-                f"{training_device!r}; a second visible card is observed and never trained on"
+                f"training must be pinned to one visible device (cuda:0..cuda:{gpu_count - 1}) and this "
+                f"run selected {training_device!r}"
             )
         if len(vram) != len(names):
             failures.append(

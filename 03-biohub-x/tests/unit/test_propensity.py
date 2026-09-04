@@ -118,7 +118,7 @@ def test_a_planted_propensity_is_seen_and_the_temporal_group_is_named() -> None:
     assert report["null"]["all"]["signal"] is True
     assert report["null"]["temporal"]["signal"] is True
     assert report["delta_auc"]["all"] > report["null"]["all"]["threshold"]
-    assert report["decision"]["A4"].startswith("hold")
+    assert report["decision"]["A4"].startswith("hold; neighbouring")
 
 
 def test_the_probe_refuses_windows_with_no_positive_anywhere() -> None:
@@ -129,19 +129,19 @@ def test_the_probe_refuses_windows_with_no_positive_anywhere() -> None:
         probe(tables, PARAMETERS)
 
 
-def test_the_decision_table_is_the_one_arya_wrote() -> None:
+def test_one_embryo_never_kills_the_objective_on_its_own() -> None:
     absent = decide(signal=False, temporal=False, non_temporal=False)
     assert absent["verdict"] == "propensity_signal_absent"
     assert "continue" in absent["next_action"]
 
     temporal = decide(signal=True, temporal=True, non_temporal=True)
     assert temporal["verdict"] == "propensity_signal_present"
-    assert temporal["A4"].startswith("hold")
-    assert "stop" in temporal["next_action"]
+    assert temporal["A4"].startswith("hold; neighbouring")
+    assert "weak, embryo-specific" in temporal["next_action"]
+    assert "residual-propensity test" in temporal["A3"]
 
     spatial_only = decide(signal=True, temporal=False, non_temporal=True)
-    assert spatial_only["A3"].startswith("retain")
-    assert "not specifically falsified" in spatial_only["A4"]
+    assert spatial_only["A4"].startswith("hold pending")
 
 
 def test_column_selection_keeps_the_control_first_and_never_duplicates() -> None:
