@@ -1,12 +1,26 @@
-# GPU-CAMPAIGN-E07-02, proposed. Not authorised until Arya Arun says so in their own words.
+# GPU-CAMPAIGN-E07-02. Wave 1 authorised by Arya Arun on 2026-09-04 in their own words; wave 2 remains proposed.
 #
 # Written from the four staged packages by the session's generator; every digest,
 # movie list and count below is read from the package that would be pushed.
 # Nothing here trains full folds, reads the public test split, or submits.
 
 GPU-CAMPAIGN-E07-02:
-  status: proposed
-  authorises: nothing yet
+  status: authorised, wave 1 only
+  authorised_by: Arya Arun
+  authorised_on: '2026-09-04'
+  authorises: >-
+    wave 1 only: the two A3 packages named by digest below, seeds 0 and 1 in
+    both directions, two isolated workers on two Tesla T4s serialised if one
+    compatible device is available, sixty minutes per kernel, at most four
+    wave-1 attempts (one push and one repair retry per package), AMP
+    validation, batch-throughput autotuning, the enforced 13 GiB ceiling, the
+    mandatory residual-propensity evaluation and every declared output, and
+    the sparse 43-cell held-out direction with its uncertainty retained.
+    Repairs may touch packaging, dependency, mount, transport or hardware
+    integration only. Not covered: wave 2 and E08, mini-folds, full folds,
+    public-test access, internet, contaminated weights, submission, promotion.
+    Stop and report after wave 1.
+  wave1_attempts_maximum: 4
   requested_by: Arya Arun, 2026-09-04, after R-0027 and D-0046
   objective: >-
     Four comparable representative smokes, automatic killing, then compute on
