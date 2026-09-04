@@ -653,3 +653,19 @@ def test_the_real_package_fits_under_the_kaggle_source_limit() -> None:
     )
 
     assert kernel_source_bytes(notebook) < KERNEL_SOURCE_LIMIT_BYTES
+
+
+def test_an_e08_package_routes_to_the_rescoring_loop_not_the_detector(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The E03 detector announces the same milestones, so a wrong route passes the
+    stage check and costs a session. The route is a named set and this holds it."""
+    from biohubx.packaging import entry
+
+    seen: list[str] = []
+    monkeypatch.setattr(
+        entry, "run_rescore", lambda spec, **kw: seen.append(spec["experiment"]) or {"ok": True}
+    )
+    for label in sorted(entry.RESCORE_EXPERIMENTS):
+        entry.run_fold({"experiment": label})
+    assert seen == ["E07", "E08"]

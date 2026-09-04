@@ -22,6 +22,15 @@ from typing import Any
 
 STAGE = "BIOHUBX_STAGE"
 
+RESCORE_EXPERIMENTS = frozenset({"E07", "E08"})
+"""Families the candidate re-scoring loop serves. Anything else is the E03 detector path.
+
+A B3 package labelled E08 once fell through to the detector: the gate's
+stage subsequence still passed, because the detector announces the same
+milestones, and the only tell was a two-hundred-second local exercise. The
+routing is a named set now, and a test holds it.
+"""
+
 
 def stage(name: str, detail: str = "") -> None:
     """One heartbeat line. Printed unbuffered so a stall is visible immediately."""
@@ -244,7 +253,7 @@ def run_fold(
     defaults to False so that a caller who did not verify cannot pass the guard by
     saying nothing, which is how an absent check becomes a silent one.
     """
-    if spec_dict.get("experiment") == "E07":
+    if spec_dict.get("experiment") in RESCORE_EXPERIMENTS:
         return run_rescore(
             spec_dict,
             data_root=data_root,
