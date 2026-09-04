@@ -6,13 +6,16 @@ that was approved.
 
 from __future__ import annotations
 
+import io
 import json
+import zipfile
 from pathlib import Path
 from typing import Any
 
 import pytest
 
 from biohubx.packaging.kaggle import (
+    KERNEL_SOURCE_LIMIT_BYTES,
     FoldSpec,
     PackageSpec,
     PackagingError,
@@ -25,6 +28,7 @@ from biohubx.packaging.kaggle import (
     guard_report,
     kernel_id_for,
     kernel_metadata,
+    kernel_source_bytes,
     slug_of,
 )
 
@@ -589,3 +593,59 @@ def test_a_remote_run_cannot_acquire_the_local_exemption_by_default() -> None:
 
     assert not outcome["passed"]
     assert outcome["checks_skipped"] == []
+
+
+# --- E07-SMOKE-01 attempt 1: Kaggle's one-megabyte kernel source limit -------
+
+
+def test_the_source_archive_is_actually_compressed() -> None:
+    """`writestr` honours the ZipInfo over the archive, so the ZIP_DEFLATED the
+    builder asked for was silently ignored and the source shipped stored.
+
+    Nobody noticed until Kaggle refused the E07 package for exceeding its source
+    limit ([[R-0025]]). The assertion is on the effect, not the argument.
+    """
+    payload = deterministic_archive(repo_source())
+
+    with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+        entries = archive.infolist()
+    assert entries
+    assert all(entry.compress_type == zipfile.ZIP_DEFLATED for entry in entries)
+    stored = sum(entry.file_size for entry in entries)
+    assert len(payload) < stored / 2, (
+        f"{stored} bytes of source became a {len(payload)} byte archive; it is not being compressed"
+    )
+
+
+def test_the_archive_is_still_byte_identical_between_builds() -> None:
+    """Compression may not cost reproducibility: the runtime verifies the payload
+    against a digest recorded at build time."""
+    assert deterministic_archive(repo_source()) == deterministic_archive(repo_source())
+
+
+def test_the_measured_source_is_what_kaggle_receives_not_the_file() -> None:
+    """The Kaggle CLI strips code-cell outputs and joins each source list before
+    sending, so the file on disk overstates what the limit applies to."""
+    notebook = build_notebook(
+        SPEC,
+        shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
+        payload=deterministic_archive(repo_source()),
+        wheelhouse_payload=WHEELHOUSE,
+    )
+    notebook["cells"][0]["outputs"] = [{"output_type": "stream", "text": "x" * 50_000}]
+
+    measured = kernel_source_bytes(notebook)
+
+    assert measured < len(json.dumps(notebook).encode("utf-8"))
+
+
+def test_the_real_package_fits_under_the_kaggle_source_limit() -> None:
+    """The regression that cost attempt 1 of GPU-CAMPAIGN-E07-01."""
+    notebook = build_notebook(
+        SPEC,
+        shipped={**SPEC.to_dict(), "input_digests": REGISTERED},
+        payload=deterministic_archive(repo_source()),
+        wheelhouse_payload=WHEELHOUSE,
+    )
+
+    assert kernel_source_bytes(notebook) < KERNEL_SOURCE_LIMIT_BYTES

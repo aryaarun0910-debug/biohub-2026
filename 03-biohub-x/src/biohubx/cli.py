@@ -4604,7 +4604,11 @@ def package_transport(
     import re
     import subprocess
 
-    from biohubx.packaging.kaggle import forbidden_content
+    from biohubx.packaging.kaggle import (
+        KERNEL_SOURCE_LIMIT_BYTES,
+        forbidden_content,
+        kernel_source_bytes,
+    )
     from biohubx.packaging.preflight import WHEELHOUSE_SLUG
 
     expected_dataset = expect_dataset or WHEELHOUSE_SLUG
@@ -4677,6 +4681,18 @@ def package_transport(
     staged_offenders = forbidden_content(staging)
     if staged_offenders:
         failures.append(f"the package stages forbidden content: {staged_offenders[:5]}")
+
+    # Kaggle refuses a kernel whose source exceeds its limit, and it refuses at
+    # the API rather than at run time, so the cost of discovering it remotely is
+    # a spent attempt and no run at all (R-0025). The size is measured as Kaggle
+    # will receive it and refused here, where it costs nothing.
+    source_bytes = kernel_source_bytes(json.loads((staging / "run.ipynb").read_text(encoding="utf-8")))
+    heartbeat(command, "source", f"bytes={source_bytes} limit={KERNEL_SOURCE_LIMIT_BYTES}")
+    if source_bytes >= KERNEL_SOURCE_LIMIT_BYTES:
+        failures.append(
+            f"the kernel source is {source_bytes} bytes and Kaggle accepts under "
+            f"{KERNEL_SOURCE_LIMIT_BYTES}; the push would be refused before the kernel ran"
+        )
 
     metadata = json.loads((staging / "kernel-metadata.json").read_text(encoding="utf-8"))
     if metadata.get("dataset_sources") != [expected_dataset]:
@@ -4780,6 +4796,8 @@ def package_transport(
         "package": str(staging.relative_to(root_path)),
         "manifest_digest": digest,
         "file_count": len(on_disk),
+        "kernel_source_bytes": source_bytes,
+        "kernel_source_limit_bytes": KERNEL_SOURCE_LIMIT_BYTES,
         "expected_kernel": expect_kernel,
         "kernel_metadata": metadata,
         "checks_passed": True,

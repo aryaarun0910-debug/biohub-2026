@@ -604,6 +604,13 @@ def deterministic_archive(root: Path) -> bytes:
     Entries are sorted, timestamps fixed and permissions normalised, because a
     payload whose digest moves between builds cannot be verified at runtime
     against a digest recorded at build time.
+
+    The compression is stated on every entry rather than on the archive. A
+    ``ZipInfo`` built by hand carries ``ZIP_STORED`` and ``writestr`` honours the
+    entry over the archive's setting, so the ``ZIP_DEFLATED`` asked for below was
+    silently ignored and 799,570 bytes of source shipped uncompressed. Kaggle
+    caps a kernel's source at one megabyte and refused the E07 package for it
+    ([[R-0025]]). Compression was always the intent; only now is it the effect.
     """
     files = sorted(
         (path for path in root.rglob("*") if path.is_file() and path.suffix in ARCHIVE_SUFFIXES),
@@ -620,8 +627,37 @@ def deterministic_archive(root: Path) -> bytes:
             info = zipfile.ZipInfo(filename=name, date_time=ARCHIVE_EPOCH)
             info.external_attr = 0o644 << 16
             info.create_system = 0
-            archive.writestr(info, path.read_bytes())
+            archive.writestr(info, path.read_bytes(), compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
     return buffer.getvalue()
+
+
+KERNEL_SOURCE_LIMIT_BYTES = 1_000_000
+"""What Kaggle accepts as a kernel's source, measured rather than assumed.
+
+``SaveKernel`` answers 400 with "The kernel source must be less than 1 megabytes
+in size." ([[R-0025]]). The exact boundary is not published, so the limit here is
+the decimal megabyte, which is the smaller of the two readings and therefore the
+safe one. A package that would be refused for size is refused locally instead,
+where it costs nothing.
+"""
+
+
+def kernel_source_bytes(notebook: dict[str, Any]) -> int:
+    """The size of the source Kaggle will actually receive, not of the file.
+
+    The Kaggle CLI does not send ``run.ipynb`` verbatim: it strips code-cell
+    outputs and joins each cell's ``source`` list into one string before
+    serialising, which is smaller than the file on disk. Measuring the file
+    would refuse packages Kaggle would have accepted, so the transformation is
+    reproduced here and the result measured.
+    """
+    body = json.loads(json.dumps(notebook))
+    for cell in body.get("cells", []):
+        if cell.get("cell_type") == "code" and "outputs" in cell:
+            cell["outputs"] = []
+        if isinstance(cell.get("source"), list):
+            cell["source"] = "".join(cell["source"])
+    return len(json.dumps(body).encode("utf-8"))
 
 
 def archive_inventory(payload: bytes) -> list[str]:

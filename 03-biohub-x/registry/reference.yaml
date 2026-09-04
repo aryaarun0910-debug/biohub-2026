@@ -2656,6 +2656,47 @@ references:
       exists in this path; a submission remains an act Arya Arun authorises
       individually.
 
+  - id: R-0025
+    status: measured_environment
+    title: Kaggle refuses a kernel source of one megabyte or more, and the E07 payload was never being compressed
+    why: >-
+      Attempt 1 of GPU-CAMPAIGN-E07-01 was refused by the platform before any
+      kernel existed. The refusal is an environment fact worth recording once,
+      and the cause was a packaging defect this repository could have caught
+      locally.
+    campaign_envelope: GPU-CAMPAIGN-E07-01
+    attempt: 1 of a maximum 12
+    arm: A3
+    kernel_requested: aryaarun07/biohub-x-e07-a3-fold-44b6
+    package_digest_refused: canonical_text_sha256:sha256/v1:76bb0b2708946b28f7be9d792696e67b0519760b76c8eb98b33db9daebafb70f
+    api: 'https://api.kaggle.com/v1/kernels.KernelsApiService/SaveKernel'
+    kaggle_cli: 2.2.2
+    status_code: 400
+    server_message: 'The kernel source must be less than 1 megabytes in size.'
+    request_body_bytes: 1124980
+    notebook_bytes_on_disk: 1188472
+    outcome: >-
+      No kernel was created, no kernel version exists, no accelerator was
+      allocated and no GPU minute was spent. The attempt is recorded because
+      the envelope counts attempts, not successes.
+    cause: >-
+      zipfile.ZipFile(compression=ZIP_DEFLATED) does not reach an entry written
+      from a hand-built ZipInfo; writestr honours the entry, whose default is
+      ZIP_STORED. Every Biohub-X package since the first has shipped its source
+      uncompressed: 799,570 bytes of Python in an 807,296 byte archive, with
+      compress_size equal to file_size on all 62 entries.
+    why_it_had_not_bitten: >-
+      The E03 package notebook was 760,073 bytes and the metric preflight
+      933,337, both under the limit. E07 ships the same tree plus the rescoring
+      loop and crossed it.
+    repair: >-
+      The compression is now stated per entry and asserted by a test on the
+      effect rather than the argument, and package transport measures the source
+      as Kaggle receives it, refusing locally at 1,000,000 bytes. Authorised as
+      a packaging repair under the envelope; nothing scientific changed.
+    limit_used: 1000000 decimal bytes, the smaller reading of an unpublished boundary
+    measured_after_repair: see the package digests recorded for attempt 2
+
 # ---------------------------------------------------------------------------
 # Approval gate, revised after G-01. The metadata gate is spent; what remains
 # is weights and GPU. Both still require an explicit human go-ahead per
