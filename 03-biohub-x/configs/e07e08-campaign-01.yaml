@@ -56,4 +56,5 @@ GPU-CAMPAIGN-E07E08-01:
     improvement is a challenger, not advancement; a pooled-only result is invalid
   stop_after: wave B
   excluded: A4 and B4, mini-folds, full folds, E06, public-test access, submission, internet, contaminated weights, canonical integration, promotion
-  attempts: {}
+  attempts:
+    1: {wave: R, package: A3 fold_44b6, digest: canonical_text_sha256:sha256/v1:3e409fdc35c8d00a0988338ff4c5bcd6fa94afaca260e1123a652a6f05c51cb3, outcome: COMPLETE, both seeds measured, reference: R-0032}
