@@ -11,6 +11,7 @@ profiles:
   biohub-research: enabled
   biohub-compute: enabled
   biohub-crosscheck: disabled
+  biohub-colab-explore: disabled
 tools:
   - id: napari
     profile: biohub-visual
@@ -25,7 +26,7 @@ tools:
     installed_path: site-packages/napari
     installed_files: 1287
     installed_bytes: 12471397
-    capabilities: n-dimensional viewer: image, points, labels, shapes, tracks layers; orthogonal slices and 3D; screenshots
+    capabilities: "n-dimensional viewer: image, points, labels, shapes, tracks layers; orthogonal slices and 3D; screenshots"
     consumer: viewer for E05/E06 error analysis
   - id: pyqt6
     profile: biohub-visual
@@ -55,7 +56,7 @@ tools:
     installed_path: site-packages/napari_mcp
     installed_files: 34
     installed_bytes: 329916
-    capabilities: MCP server over a live viewer: init/close viewer, add and configure layers, camera, screenshot, session info; install_packages removed, execute_code gated (launch_napari_mcp.py)
+    capabilities: "MCP server over a live viewer: init/close viewer, add and configure layers, camera, screenshot, session info; install_packages removed, execute_code gated (launch_napari_mcp.py)"
     consumer: Claude Code visual sessions
   - id: napari-geff
     profile: biohub-visual
@@ -150,7 +151,7 @@ tools:
     profile: biohub-research
     status: enabled
     source: https://github.com/microsoft/playwright-mcp
-    pin: '@playwright/mcp 0.0.80 (npm), --save-exact under the biohub-research prefix'
+    pin: "'@playwright/mcp 0.0.80 (npm), --save-exact under the biohub-research prefix'"
     licence: Apache-2.0
     ledger: RL-0030
     version: 0.0.80
@@ -237,8 +238,8 @@ tools:
     status: disabled
     source: not selected
     pin: none; no Java runtime on this machine
-    licence: 
-    ledger: 
+    licence: ""
+    ledger: ""
     capabilities: independent image-processing implementation
     consumer: an image-processing conclusion needing an implementation independent of the Python stack
   - id: bioimage-io
@@ -246,7 +247,36 @@ tools:
     status: disabled
     source: https://bioimage.io
     pin: search only, no client installed
-    licence: 
-    ledger: 
+    licence: ""
+    ledger: ""
     capabilities: public microscopy model zoo
     consumer: reusable public models; source, licences, training data, preprocessing, axes, scale and eligibility recorded before any download
+  - id: colab-mcp
+    profile: biohub-colab-explore
+    status: disabled
+    source: https://github.com/googlecolab/colab-mcp
+    pin: v1.0.2 at commit b85ab6ec5206e06fdd289ff4ff3f9c4ee767b422
+    licence: Apache-2.0
+    ledger: RL-0053
+    capabilities: >-
+      drives a Google Colab session from a local stdio MCP server: dispatch
+      cells to a hosted runtime, execute remotely, read results back. The
+      runtime is networked and hosted, which is the whole capability and the
+      whole risk.
+    consumer: >-
+      nothing yet. Enabling it would permit synthetic experiments, public
+      alternative datasets whose licences allow hosted processing, architecture
+      profiling, pretraining and representation probes, and CPU or GPU
+      environment audits, and nothing else.
+    not_installed: true
+    forbidden: >-
+      competition data in Drive or in consumer Colab; E07 or any scored fold;
+      any result promoted from a hosted runtime. Every result it could produce
+      carries the networked_runtime taint.
+    why_not_e07: >-
+      consumer Colab runtimes are ephemeral and its hardware is not guaranteed
+      by Google's own FAQ, while Kaggle already has the verified
+      competition-data mount, the published metric wheelhouse and a measured
+      retrieval path. Hosted competition training, if it is ever needed, is
+      Colab Enterprise with controlled networking and a separate
+      data-processing review.

@@ -246,6 +246,22 @@ DISABLED = [
 ]
 
 
+def scalar(value: str) -> str:
+    """A YAML scalar that survives being read back.
+
+    The manifest was assembled as text and its free-text fields were emitted
+    bare, so every capability line carrying a colon and a space made the file
+    unparseable. It is the record D-0043 requires to be consulted before a tool
+    is enabled, and nothing could read it. Quoting is applied where YAML needs
+    it rather than everywhere, so the file stays readable by a person too.
+    """
+    if value != value.strip() or not value:
+        return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+    if ": " in value or value.endswith(":") or value[0] in "[]{}&*!|>%@`\"'#":
+        return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+    return value
+
+
 def record(tool_id: str, profile: str, status: str, fields: list[str]) -> list[str]:
     return [f"  - id: {tool_id}", f"    profile: {profile}", f"    status: {status}", *fields]
 
@@ -289,7 +305,7 @@ def main() -> None:
         )
         if visual_ok:
             fields += python_tool(VISUAL_PY, dist, package_dir)
-        fields += [f"    capabilities: {caps}", f"    consumer: {consumer}"]
+        fields += [f"    capabilities: {scalar(caps)}", f"    consumer: {scalar(consumer)}"]
         lines += record(tool_id, "biohub-visual", "enabled" if visual_ok else "planned", fields)
 
     fields = [
@@ -308,7 +324,7 @@ def main() -> None:
     fields += [
         "    launch: tools/workstation/launch_github_mcp.py, always stdio --read-only, toolsets repos,issues; "
         "token from gh auth token at launch, never on disk",
-        "    capabilities: GitHub API over MCP, read-only; repositories, file contents, commits, releases, issues",
+        f"    capabilities: {scalar('GitHub API over MCP, read-only; repositories, file contents, commits, releases, issues')}",
         "    consumer: exact upstream commits, issues, releases, licences and history behind a claim",
     ]
     lines += record(
@@ -344,7 +360,7 @@ def main() -> None:
             f"    browsers: {chromium}, under biohub-research/browsers (PLAYWRIGHT_BROWSERS_PATH)",
         ]
     fields += [
-        "    capabilities: browser automation over MCP; navigate, snapshot, screenshot, click, evaluate; isolated profile",
+        f"    capabilities: {scalar('browser automation over MCP; navigate, snapshot, screenshot, click, evaluate; isolated profile')}",
         "    consumer: dynamically rendered pages and browser state as evidence; CLI for bounded bulk collection",
     ]
     lines += record(
@@ -361,7 +377,7 @@ def main() -> None:
         ]
         if research_ok:
             fields += python_tool(RESEARCH_PY, dist, package_dir)
-        fields += [f"    capabilities: {caps}", f"    consumer: {consumer}"]
+        fields += [f"    capabilities: {scalar(caps)}", f"    consumer: {scalar(consumer)}"]
         lines += record(tool_id, "biohub-research", "enabled" if research_ok else "planned", fields)
 
     for tool_id, dist, package_dir, source, licence, ledger, caps, consumer in COMPUTE_PY_TOOLS:
@@ -374,7 +390,7 @@ def main() -> None:
         ]
         if compute_ok:
             fields += python_tool(COMPUTE_PY, dist, package_dir)
-        fields += [f"    capabilities: {caps}", f"    consumer: {consumer}"]
+        fields += [f"    capabilities: {scalar(caps)}", f"    consumer: {scalar(consumer)}"]
         lines += record(tool_id, "biohub-compute", "enabled" if compute_ok else "planned", fields)
 
     for tool_id, profile, source, pin, licence, ledger, caps, consumer in DISABLED:
@@ -387,8 +403,8 @@ def main() -> None:
                 f"    pin: {pin}",
                 f"    licence: {licence}",
                 f"    ledger: {ledger}",
-                f"    capabilities: {caps}",
-                f"    consumer: {consumer}",
+                f"    capabilities: {scalar(caps)}",
+                f"    consumer: {scalar(consumer)}",
             ],
         )
 

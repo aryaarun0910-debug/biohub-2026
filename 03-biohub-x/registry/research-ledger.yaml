@@ -859,3 +859,20 @@ entries:
   payload_present: true
   status: reference_only
   claims: []
+- id: RL-0053
+  url: https://github.com/googlecolab/colab-mcp
+  kind: repository
+  campaign: RX-02
+  branch: tooling
+  note: Google's official Colab MCP server. Pinned at v1.0.2, commit b85ab6ec5206e06fdd289ff4ff3f9c4ee767b422,
+    Apache-2.0. Basis of the disabled biohub-colab-explore profile; not installed.
+  recorded_utc: '2026-09-04T16:18:33+00:00'
+  fetched: false
+  fetched_utc: null
+  http_status: null
+  bytes: null
+  raw_digest: null
+  cache_path: null
+  payload_present: false
+  status: reference_only
+  claims: []

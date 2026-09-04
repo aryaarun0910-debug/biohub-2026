@@ -1,6 +1,6 @@
 {
   "profile": "biohub-compute",
-  "status": "planned",
+  "status": "enabled",
   "purpose": "jupyter-mcp-server over a Jupyter server that runs in the Docker sandbox of tools/workstation/sandbox: internal network with no route out, root read-only, competition root read-only at /data, repository src read-only, one scratch mount, non-root, capabilities dropped",
   "mcpServers": {
     "jupyter": {

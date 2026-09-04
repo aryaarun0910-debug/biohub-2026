@@ -1,6 +1,6 @@
 {
   "profile": "biohub-research",
-  "status": "planned",
+  "status": "enabled",
   "purpose": "read-only GitHub, Playwright browser evidence, Semantic Scholar citation expansion; every acquisition still enters the research ledger",
   "mcpServers": {
     "github": {
