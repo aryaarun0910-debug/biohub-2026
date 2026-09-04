@@ -991,3 +991,65 @@ findings:
         the conditions of F-0027 hold, with suppression in its packed form and
         the response quantile at 0.95.
     superseded_by: null
+
+  - id: F-0032
+    claim: >-
+      Requiring a DoG candidate to be a strict 26-neighbourhood maximum, with the
+      two-scale bank (2.0, 3.0) micrometres, reaches 0.9239 of annotated cells on
+      44b6 and 0.8984 on 6bba while emitting at or below the estimated cell
+      count, and does so with a third to a half of the proposals the packed
+      detector needed to reach less. Over all 199 annotated training movies at two
+      annotated frames each, the peaks detector saturates at 43,825 proposals on
+      44b6 against a neutral budget of 56,032, and at 50,159 on 6bba against
+      42,309; at the neutral budget it reads 0.9213 with 42,478 proposals on 44b6
+      and 0.7894 with 37,417 on 6bba, and at twice it 0.9239 and 0.8933. The
+      packed detector with the three-scale bank, interpolated to the peaks
+      detector's own proposal counts, reads 0.7159 on 44b6 and 0.6803 on 6bba.
+      Under the peaks rule the large scale hurts on both embryos above the
+      neutral budget: three scales saturate at 0.7665 and 0.8314 with 26,847 and
+      32,544 proposals, because neighbouring nuclei merge into one maximum at 4.5
+      micrometres; at the neutral budget on 6bba alone the three-scale bank still
+      edges the two-scale one, 0.8048 against 0.7894. Selecting the budget on one
+      embryo and measuring the other with the two-scale peaks detector, fold_44b6
+      reads 0.8933 on held-out 6bba at twice the estimate and fold_6bba reads
+      0.9239 on held-out 44b6 at four times it, against classical 0.4523 and
+      0.3629. The remaining misses at the neutral budget are 31 of 365 on 44b6,
+      every one within 14 micrometres of a proposal and 84 percent within 10, and
+      368 of 1,668 on 6bba, of which 30 percent sit below intensity percentile
+      0.80 and 64 percent lie within 14 micrometres of a proposal.
+    instrument: biohubx evaluate proposals --local-maxima --radii 2.0,3.0
+    evidence:
+      command: >-
+        biohubx evaluate proposals --local-maxima --radii 2.0,3.0 --ratios
+        0.5,1.0,2.0,4.0,8.0 --audit-misses --audit-ratio 1.0, and the same with
+        the default three-scale bank, compared with artifacts/proposals-e04b.json
+        and artifacts/proposals-h11b-r23.json
+      observed: artifacts/proposals-peaks-r23.json, artifacts/proposals-peaks-r2345.json
+      note: >-
+        integration_only, and the first proposal result that lands inside the
+        regime F-0018 asked for: annotated cells reached at a node count near the
+        official estimate, where the node-count multiplier is close to one rather
+        than paid for with shoulders. Three readings. First, the peaks detector
+        saturates because there are only so many maxima, so its curve is flat
+        above twice the estimate and its proposal count is a property of the
+        image rather than of a budget; that is the behaviour a detector should
+        have and the packed one did not. Second, the bank question resolves
+        differently under peaks than under packing: with shoulders removed the
+        large scale mostly merges neighbours, so two scales win on both embryos
+        wherever the budget is at least twice the estimate, and the one place
+        three scales still win is the neutral budget on the dense embryo, by
+        0.015. Third, the residual on 44b6 is now almost entirely near misses
+        within one nucleus spacing, which is merging at the 3 micrometre scale
+        or an annotated cell sitting between two peaks; on 6bba it is a third dim
+        and the rest near misses. A first peaks probe put missed cells near the
+        volume faces; that was replicated padding defeating a strict inequality
+        on the boundary slices, fixed before these numbers were taken, and its
+        report is kept under a name that says so.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, the official voxel scale and seven
+        micrometre radius hold, the node budget comes from each movie's own
+        estimated_number_of_nodes, the response quantile is 0.95, suppression is
+        4 micrometres, and two annotated frames per movie are read.
+    superseded_by: null

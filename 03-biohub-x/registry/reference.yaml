@@ -1810,6 +1810,23 @@ references:
           budget-dependent choice rather than a fix. The 2.5 micrometre scale is
           redundant to four decimals. Measured under the packed regime; the bank's
           interaction with true peaks (F-0030) is the next measurement.
+        under_peaks: >-
+          [[F-0032]]: with a strict-maximum rule the two-scale bank wins on both
+          embryos wherever the budget is at least twice the estimate, and the
+          three-scale bank keeps a 0.015 lead only at the neutral budget on 6bba.
+          Carried forward as the operating configuration under [[D-0041]].
+      - id: H-11c
+        stream: proposals
+        statement: >-
+          A per-scale peak union, taking strict maxima at each scale separately
+          and deduplicating by physical suppression, recovers the neutral-budget
+          6bba cells the 4.5 micrometre scale ranks well without re-merging the
+          44b6 neighbours it fuses.
+        falsifier: >-
+          killed if reachability at a fixed proposal count falls on either fold
+          relative to the two-scale peaks detector.
+        source: F-0032
+        cost: one evaluate proposals run; a small change to how the response bank is reduced
       - id: H-10
         stream: division
         statement: >-

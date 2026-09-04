@@ -566,3 +566,12 @@ experiments:
           second pass over lower-response peaks (H-08); the learned arm's real
           target is the dim half of the 6bba residual, about five percent of that
           embryo's annotated cells.
+        superseded_reading: >-
+          F-0030 then showed the detector behind all of the above was counting
+          blob shoulders as proposals. F-0032 re-measured with strict peaks and
+          two scales: 0.92 and 0.90 reach at a proposal count near the official
+          estimate, which is the regime F-0018 asked for. The residual to hand a
+          learned detector is now 31 of 365 annotated cells on 44b6, all within
+          one nucleus spacing of a peak, and about a fifth of 6bba's at the
+          neutral budget, a third of them dim. D-0041 fixes the configuration
+          E05 inherits.

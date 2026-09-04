@@ -1333,3 +1333,45 @@ normalised full-extent frame admits millions of candidates and means something
 different on every movie. Both sources are now cut at a quantile of their own
 response. The threshold stops being the thing that differs between them, which is
 what lets the node budget be the thing that is matched.
+
+
+## D-0041 - The DoG operating configuration is strict peaks on two scales, stated explicitly
+
+**Date:** 2026-09-04
+**Status:** accepted
+
+[[F-0030]] measured that greedy physical-radius suppression packs the
+above-threshold region rather than returning maxima, and [[F-0032]] measured what
+changes when a candidate has to be a strict 26-neighbourhood maximum: reach near
+0.92 and 0.90 on the two embryos at a proposal count at or below the official cell
+estimate, against 0.72 and 0.68 for the packed detector at the same counts, and
+with the two-scale bank (2.0, 3.0) micrometres beating three scales on both
+embryos wherever the budget is at least twice the estimate.
+
+**Going forward, the DoG configuration carried into scored experiments is
+`local_maxima_only=True` with radii (2.0, 3.0).** It is stated as an explicit
+argument on every experiment declaration and every command, not baked into a
+default.
+
+The defaults do not change, and that is deliberate. `detect_instances` keeps
+packed suppression and the three-scale bank as its defaults, and `evaluate
+proposals` keeps them as its option defaults, because [[F-0025]], [[F-0026]],
+[[F-0027]], [[F-0028]], [[F-0029]] and [[F-0031]] record commands that relied on
+those defaults, and a finding whose command no longer reproduces is a finding
+that has quietly been rewritten. The cost is that a caller who omits the flags
+gets the old detector. That is accepted, because the registry says which
+configuration each number came from and the alternative silently changes what
+six recorded numbers mean.
+
+Two things this does not decide. It does not promote DoG: reachability is not the
+official metric and no scored fold exists. And it does not settle the bank at the
+neutral budget on the dense embryo, where three scales still lead by 0.015;
+whether a per-scale peak union recovers that without re-merging neighbours is
+H-11c and is cheap to measure.
+
+The chain that led here is worth naming once. A proposal count identical across
+three different scale banks was the tell ([[F-0030]]); the first fix admitted
+plateaus as peaks, the second lost every peak on a volume face to replicated
+padding, and each was caught by a synthetic blob before a corpus number was
+recorded. Three instrument defects in one afternoon, none of them in the science,
+all of them the kind that would have passed a shape check.
