@@ -1033,6 +1033,56 @@ experiments:
       Stage 2B in both directions, A3 first, A4 only if temporal context is not
       specifically falsified. Full-fold compute only for survivors. No further
       GPU is drawn against the declared Stage 3.
+    stage2b_declared:
+      envelope: configs/e07-stage2b-envelope.yaml (GPU-CAMPAIGN-E07-02, proposed)
+      arm: A3
+      seeds:
+      - 0
+      - 1
+      directions:
+        fold_44b6:
+          kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+          package_digest: canonical_text_sha256:sha256/v1:64dbb55009bc1987aab68b5870e96268d4f86d90781b2450df3c11e6b0196d91
+          commit: 159ca24eea87360b7ee92fc328772362331b7432
+          train_movies:
+          - 44b6_5f15d135
+          - 44b6_808952d6
+          - 44b6_7e557709
+          - 44b6_2f31fc2f
+          - 44b6_267148e4
+          - 44b6_cf8fed6b
+          - 44b6_8f5ab931
+          - 44b6_abf82518
+          train_annotated_in_window: 238
+          evaluate_movies:
+          - 6bba_05b6850b
+          - 6bba_05db0fb1
+          - 6bba_062c8d37
+          - 6bba_07477033
+          evaluate_annotated_in_window: 270
+        fold_6bba:
+          kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
+          package_digest: canonical_text_sha256:sha256/v1:c94ce04a8bd6a595da8aa9eca4009fa47eed35d79ad70a0ef98012537ac29522
+          commit: 159ca24eea87360b7ee92fc328772362331b7432
+          train_movies:
+          - 6bba_907271db
+          - 6bba_5b28472a
+          - 6bba_ebff6e76
+          - 6bba_312f0dc3
+          - 6bba_20852818
+          - 6bba_c73a1d11
+          - 6bba_283bf9f1
+          - 6bba_d5eae175
+          train_annotated_in_window: 706
+          evaluate_movies:
+          - 44b6_0113de3b
+          - 44b6_0b24845f
+          - 44b6_0c582fdc
+          - 44b6_0db75fae
+          evaluate_annotated_in_window: 43
+      advancement: loss decreasing, positives every epoch, no guard failure, residual-propensity test passed,
+        held-out ceiling at or above A0; per seed, per direction
+      status: staged and gated, not pushed; awaiting Arya Arun's authorisation
     probes:
       - id: E07-PROPENSITY-01
         lane: probe
@@ -1134,3 +1184,94 @@ experiments:
               next_action: "stop current nnPU training; design a bias-robust objective"
               A3: "retain as baseline while the objective is corrected"
               A4: "hold; neighbouring frames can learn tracing propensity"
+  - id: E08
+    component: proposals
+    status: declared; runs under GPU-CAMPAIGN-E07-02 wave 2 only if authorised and only if wave 1 does not
+      stop the objective
+    declaration: configs/e08-propensity-matched-rescoring.yaml
+    declaration_digest: canonical_text_sha256:sha256/v1:c00b14ce63a29e55dfd4d795aeb66497920387878e6afbbbc53bff3c984b1757
+    parent: E07; pool, patches, scorer, decode and folds unchanged
+    hypothesis: an importance-weighted unlabelled risk matched on circumstances (never intensity or response)
+      learns cellness rather than annotation propensity and transfers across the two annotation regimes
+      better than E07's objective
+    falsifier: killed if the residual-propensity test on its trained scorer fails, or if it does not beat
+      A0's fixed-count ceiling on both held-out directions; one direction is a challenger; promotion additionally
+      needs 6bba at or above 0.950
+    arms:
+      B3: A3 channels, matched objective
+      B4: held until B3 passes the residual test
+    objective_correction: the first implementation ordered batches by weight, reweighted nothing over an
+      epoch and inverted the scorer; the residual test caught it on the first CPU run (D-0046). Now an importance-weighted
+      risk inside the loss, odds capped at 20, batch composition identical to E07
+    cpu_preflight:
+      A3:
+        windows: 44b6_5f15d135 and 44b6_808952d6, 4 frames, 2 epochs, batch 512, CPU
+        positives: 18
+        steps: 18
+        skipped_no_positive: 34
+        held_out_score: 0.22226413776240875
+        A0_score: 0.90587865451116
+        held_out_match: 0.375
+        residual_passed: false
+        scorer_control_auc: 0.3587
+        scorer_gain: 0.5505
+        reload_identical: true
+        sampling: null
+      B3:
+        windows: 44b6_5f15d135 and 44b6_808952d6, 4 frames, 2 epochs, batch 512, CPU
+        positives: 18
+        steps: 18
+        skipped_no_positive: 34
+        held_out_score: null
+        A0_score: 0.90587865451116
+        held_out_match: 0.0
+        residual_passed: false
+        scorer_control_auc: 0.1137
+        scorer_gain: 0.7686
+        reload_identical: true
+        sampling:
+          coefficients:
+            density: -2.3937
+            face_um: -0.021
+            motion_um: -0.3529
+            persist_next: -0.3661
+            persist_prev: -0.1417
+            t: 0.2692
+            x: 0.3208
+            y: 1.0116
+            z: 0.5347
+          effective_unlabelled_per_movie:
+          - 743.6
+          - 735.8
+          matched_on:
+          - z
+          - y
+          - x
+          - face_um
+          - t
+          - density
+          - persist_prev
+          - persist_next
+          - motion_um
+          weight_cap: 20.0
+    stage2b_declared:
+      fold_44b6:
+        kernel: aryaarun07/biohub-x-e08-b3-fold-44b6
+        package_digest: canonical_text_sha256:sha256/v1:71cb1b9a31df10798b3af750dd8298cecfb0df2fee7fb38487423999cd831d9c
+        commit: 159ca24eea87360b7ee92fc328772362331b7432
+        seeds:
+        - 0
+        - 1
+      fold_6bba:
+        kernel: aryaarun07/biohub-x-e08-b3-fold-6bba
+        package_digest: canonical_text_sha256:sha256/v1:49b94c937bfe9545c85abe2a27e4a4b9b700149a8f3eeb22ac10877cde6bf8af
+        commit: 159ca24eea87360b7ee92fc328772362331b7432
+        seeds:
+        - 0
+        - 1
+    forbidden_changes:
+    - the pool rule, patch, scorer and decode of E07
+    - the fold definition
+    - any constant chosen against the held-out embryo
+    - editing E07, E06, E05 or D-0041
+    provenance_status: diagnostic_ceiling

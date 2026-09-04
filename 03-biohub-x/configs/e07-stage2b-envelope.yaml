@@ -46,7 +46,7 @@ GPU-CAMPAIGN-E07-02:
     - a finite, decreasing epoch-mean loss
     - positives above zero in every epoch
     - no guard failure and peak allocation under the ceiling
-    - residual_propensity_test passed: the probe rerun with the trained scorer's logit as the control gains no more from circumstances than max(the permutation null, the DoG response's own gain)
+    - "residual-propensity test passed: the probe rerun with the trained scorer's logit as the control gains no more from circumstances than max(the permutation null, the DoG response's own gain)"
     - fixed-count held-out ceiling at or above A0 on the same windows, reported per seed and per direction, never pooled
   after_wave_1: >-
     only an arm improving the fixed-count ceiling in both directions at both
@@ -263,7 +263,7 @@ GPU-CAMPAIGN-E07-02:
         weight_cap: 20.0
 
   budget:
-    kernels_planned: 4 (wave 1: two; wave 2: two, conditional)
+    kernels_planned: "4 (wave 1: two; wave 2: two, conditional)"
     kernels_maximum: 8 (one packaging, dependency, mount, transport or hardware-guard repair retry per planned kernel)
     runtime_ceiling_seconds_per_kernel: 3600
     expected_wall_clock_minutes_per_kernel: >-
