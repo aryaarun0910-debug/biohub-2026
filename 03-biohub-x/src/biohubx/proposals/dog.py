@@ -209,7 +209,15 @@ def detect_instances(
             # by how many blobs there are: three different scale banks returned
             # the same 1,398 candidates on one frame. Requiring a voxel to be the
             # maximum of its 26-neighbourhood first makes a candidate a peak.
-            peaks = response >= maximum_filter(response, size=3, mode="nearest")
+            # Strictly greater than every one of the 26 neighbours, with the
+            # centre excluded from the footprint. A plateau ties with itself under
+            # a plain maximum filter, so a flat background would pass as a field
+            # of peaks; and a DoG peak that marks a blob is positive, so a
+            # non-positive maximum is a ripple in the background, not a cell.
+            footprint = np.ones((3, 3, 3), dtype=bool)
+            footprint[1, 1, 1] = False
+            neighbours = maximum_filter(response, footprint=footprint, mode="nearest")
+            peaks = (response > neighbours) & (response > 0.0)
             scaled = np.where(peaks, scaled, 0.0)
         for raw_centre, peak in suppressed_maxima(
             scaled,
