@@ -121,5 +121,5 @@ ignore_missing_imports = true
 # scipy ships no stubs for ndimage. Declared here rather than silenced at the
 # import, so the set of untyped dependencies stays readable in one place.
 [[tool.mypy.overrides]]
-module = ["scipy.ndimage.*"]
+module = ["scipy.ndimage.*", "scipy.optimize.*"]
 ignore_missing_imports = true

@@ -36,3 +36,7 @@ artifacts/manifests/*
 
 # Competition output
 submission.csv
+
+# Research payloads acquired under D-0039. Metadata lives in
+# registry/research-ledger.yaml and is tracked; the bytes are not.
+research/cache/

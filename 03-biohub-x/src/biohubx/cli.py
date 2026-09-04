@@ -62,6 +62,7 @@ data_app = typer.Typer(name="data", help="Read-only dataset validation.", no_arg
 infer_app = typer.Typer(name="infer", help="Emit a lineage graph.", no_args_is_help=True)
 train_app = typer.Typer(name="train", help="Train a Biohub-X model.", no_args_is_help=True)
 package_app = typer.Typer(name="package", help="Build a runnable package.", no_args_is_help=True)
+research_app = typer.Typer(name="research", help="Ledger public research intake.", no_args_is_help=True)
 app.add_typer(artifacts_app)
 app.add_typer(official_app)
 app.add_typer(evaluate_app)
@@ -69,6 +70,7 @@ app.add_typer(data_app)
 app.add_typer(infer_app)
 app.add_typer(train_app)
 app.add_typer(package_app)
+app.add_typer(research_app)
 
 
 def repository_root() -> Path:
@@ -1607,10 +1609,17 @@ def evaluate_proposals(
     frames: Annotated[int, typer.Option("--frames", help="Annotated frames per movie.")] = 2,
     ratios: Annotated[
         str, typer.Option("--ratios", help="Comma-separated node budgets, as multiples of the estimate.")
-    ] = "0.5,0.75,1.0,1.5,2.0",
+    ] = "0.5,1.0,2.0,3.0,4.0,6.0,8.0",
     max_movies: Annotated[
         int, typer.Option("--max-movies", help="Cap movies per embryo. 0 uses every annotated movie.")
     ] = 0,
+    audit_misses: Annotated[
+        bool,
+        typer.Option("--audit-misses", help="Describe every annotated node DoG reached or missed."),
+    ] = False,
+    audit_ratio: Annotated[
+        float, typer.Option("--audit-ratio", help="Budget ratio at which misses are audited.")
+    ] = 1.0,
     out: Annotated[
         Path | None, typer.Option("--out", help="Report path. Defaults to artifacts/proposals.json.")
     ] = None,
@@ -1641,6 +1650,7 @@ def evaluate_proposals(
         normalise_for_classical,
         truncate_to_budget,
     )
+    from biohubx.evaluation.residuals import NodeAudit, audit_nodes, one_to_one_recall, summarise
     from biohubx.proposals import classical, dog
 
     try:
@@ -1672,8 +1682,9 @@ def evaluate_proposals(
     )
 
     started = time.monotonic()
-    # embryo -> source -> ratio -> [reached, annotated, proposals]
+    # embryo -> source -> ratio -> [reached, annotated, proposals, budget, matched]
     totals: dict[str, dict[str, dict[float, list[float]]]] = {}
+    audits: list[dict[str, object]] = []
     skipped = 0
     for embryo, dataset_ids in sorted(by_embryo.items()):
         for index, dataset_id in enumerate(dataset_ids):
@@ -1710,27 +1721,51 @@ def evaluate_proposals(
             # leaves the budget, not the threshold, as the thing being matched.
             normalised = normalise_for_classical(window.volume)
             intensity_cut = float(np.clip(np.quantile(normalised, 0.997), 1e-6, 1.0 - 1e-6))
+            # A permissive quantile, so the largest budget in the sweep can still
+            # be filled where the detector has that many peaks to offer.
             proposal_sets = {
                 "classical": classical.detect_instances(normalised, dataset=dataset, threshold=intensity_cut),
-                "dog": dog.detect_instances(window.volume, dataset=dataset, response_quantile=0.97),
+                "dog": dog.detect_instances(window.volume, dataset=dataset, response_quantile=0.95),
             }
             for name, instances in proposal_sets.items():
                 for ratio in budgets:
                     budget = max(1, round(ratio * estimate))
-                    reach = measure_reachability(
-                        truncate_to_budget(instances, budget),
-                        window.annotated,
-                        estimated_total_nodes=estimate,
-                    )
+                    kept = truncate_to_budget(instances, budget)
+                    reach = measure_reachability(kept, window.annotated, estimated_total_nodes=estimate)
+                    matched, _ = one_to_one_recall(kept, window.annotated)
                     bucket = (
                         totals.setdefault(embryo, {})
                         .setdefault(name, {})
-                        .setdefault(ratio, [0.0, 0.0, 0.0, 0.0])
+                        .setdefault(ratio, [0.0, 0.0, 0.0, 0.0, 0.0])
                     )
                     bucket[0] += reach.reached
                     bucket[1] += reach.annotated_nodes
                     bucket[2] += reach.proposals
                     bucket[3] += budget
+                    bucket[4] += matched
+                    if audit_misses and name == "dog" and ratio == audit_ratio:
+                        stride = dog.isotropic_plane_stride()
+                        responses = {
+                            local: dog.dog_response(
+                                dog.normalise_frame(window.volume[local][:, ::stride, ::stride]),
+                                radii_um=dog.DEFAULT_NUCLEUS_RADII_UM,
+                                voxel_um=1.625,
+                            )
+                            for local in range(window.volume.shape[0])
+                        }
+                        audits.extend(
+                            audit.to_dict()
+                            for audit in audit_nodes(
+                                dataset_id=dataset_id,
+                                embryo=embryo,
+                                volume=window.volume,
+                                instances=kept,
+                                annotated=window.annotated,
+                                response_per_frame=responses,
+                                plane_stride=stride,
+                                first_frame=first,
+                            )
+                        )
             if (index + 1) % 25 == 0:
                 heartbeat(command, "measured", f"{embryo} {index + 1}/{len(dataset_ids)}")
         heartbeat(command, "embryo", f"{embryo} done")
@@ -1738,13 +1773,14 @@ def evaluate_proposals(
     rows: list[dict[str, object]] = []
     for embryo, sources in sorted(totals.items()):
         for name, per_ratio in sorted(sources.items()):
-            for ratio, (reached, annotated, proposals, allowed) in sorted(per_ratio.items()):
+            for ratio, (reached, annotated, proposals, allowed, matched_total) in sorted(per_ratio.items()):
                 rows.append(
                     {
                         "embryo": embryo,
                         "source": name,
                         "budget_ratio": ratio,
                         "reachability": round(reached / annotated, 6) if annotated else 0.0,
+                        "one_to_one_node_recall": round(matched_total / annotated, 6) if annotated else 0.0,
                         "annotated_nodes": int(annotated),
                         "reached": int(reached),
                         "proposals": int(proposals),
@@ -1814,6 +1850,16 @@ def evaluate_proposals(
         "measure": "reachability: an annotated node with some proposal within 7 um, per frame",
         "rows": rows,
         "folds": folds,
+        "miss_audit": (
+            {
+                "budget_ratio": audit_ratio,
+                "nodes_audited": len(audits),
+                "summary": summarise([NodeAudit(**item) for item in audits]),  # type: ignore[arg-type]
+                "nodes": audits,
+            }
+            if audit_misses
+            else None
+        ),
         "both_folds_improve": bool(folds) and all(bool(fold["improves_over_classical"]) for fold in folds),
         "runtime_seconds": round(time.monotonic() - started, 3),
         "limits": (
@@ -3883,3 +3929,79 @@ def data_fingerprint(
 
 if __name__ == "__main__":
     app()
+
+
+@research_app.command("intake")
+def research_intake(
+    url: Annotated[str, typer.Option("--url", help="Public http(s) source.")],
+    kind: Annotated[
+        str,
+        typer.Option(
+            "--kind", help="paper | repository | notebook | discussion | page | dataset_listing | other"
+        ),
+    ],
+    campaign: Annotated[str, typer.Option("--campaign", help="Research campaign id, e.g. RX-01.")],
+    branch: Annotated[str, typer.Option("--branch", help="Stream within the campaign.")],
+    note: Annotated[str, typer.Option("--note", help="Why this source is being read.")],
+    fetch: Annotated[bool, typer.Option("--fetch", help="Download the bytes into research/cache.")] = False,
+    max_bytes: Annotated[
+        int, typer.Option("--max-bytes", help="Per-item cap. Raise deliberately for a large acquisition.")
+    ] = 256 * 1024 * 1024,
+) -> None:
+    """Record a public research source, and optionally fetch it, under D-0039.
+
+    Every acquired artifact gets a ledger record with its source, time, size and
+    raw digest, so a claim in registry/reference.yaml can point at an exact place a
+    reader can re-fetch. A URL already in the ledger is returned rather than
+    fetched again. The request and byte budgets are counted over the whole
+    ledger, not the session, so splitting work across branches cannot evade them.
+
+    Payloads live under research/cache, which Git ignores; only the
+    repository-relative path is recorded. Acquiring bytes permits inspection, not
+    use as evidence: nothing here can become a finding.
+    """
+    command = "research intake"
+    from biohubx.research.ledger import LedgerError, budget_used, intake, load_ledger
+
+    root_path = repository_root()
+    heartbeat(command, "start", f"{kind} {campaign}/{branch} fetch={fetch}")
+    try:
+        entry, created = intake(
+            root_path,
+            url=url,
+            kind=kind,
+            campaign=campaign,
+            branch=branch,
+            note=note,
+            do_fetch=fetch,
+            max_bytes=max_bytes,
+        )
+    except LedgerError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    requests_used, bytes_used = budget_used(load_ledger(root_path))
+    heartbeat(
+        command,
+        "recorded" if created else "already-known",
+        f"{entry.id} bytes={entry.bytes} digest={(entry.raw_digest or 'none')[:44]}",
+    )
+    heartbeat(command, "budget", f"requests={requests_used}/2000 bytes={bytes_used}")
+    heartbeat(command, "done", entry.id)
+    typer.echo(json.dumps(entry.to_dict(), sort_keys=True))
+
+
+@research_app.command("evict")
+def research_evict(
+    entry_id: Annotated[str, typer.Option("--id", help="Ledger id whose payload to delete.")],
+) -> None:
+    """Delete a cached payload and keep its record, digest and source intact."""
+    command = "research evict"
+    from biohubx.research.ledger import LedgerError, evict
+
+    try:
+        entry = evict(repository_root(), entry_id)
+    except LedgerError as exc:
+        heartbeat(command, "refused", str(exc))
+        raise typer.Exit(code=2) from exc
+    heartbeat(command, "done", f"{entry.id} payload_present={entry.payload_present} digest kept")
+    typer.echo(json.dumps(entry.to_dict(), sort_keys=True))
