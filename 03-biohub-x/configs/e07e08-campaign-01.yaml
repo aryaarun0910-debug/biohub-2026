@@ -25,6 +25,9 @@ GPU-CAMPAIGN-E07E08-01:
         packages (71cb1b9a..., 49b94c93...) predate the repairs and are not
         pushed.
       begins: after wave R is retrieved and validated; does not require A3 to fail again
+      rebuilt_packages:
+        fold_44b6: {kernel: aryaarun07/biohub-x-e08-b3-fold-44b6, digest: canonical_text_sha256:sha256/v1:37c909c2ea2a7a0d242e952fb5e317bc9a491bb4f81fe122ab3150f721a4da23, commit: 8d787ef23951, sampling: propensity_matched, gate: passed, pushed: false}
+        fold_6bba: {kernel: aryaarun07/biohub-x-e08-b3-fold-6bba, digest: canonical_text_sha256:sha256/v1:410b327dc1696015af81e56ee4d849b8c5a6413a0f2cd5f75cfc00a308c97b74, commit: 8d787ef23951, sampling: propensity_matched, gate: passed, pushed: false}
       justification: a direct controlled comparison against an already measured failure mechanism
   limits:
     kernels_planned: 4
