@@ -1936,8 +1936,7 @@ experiments:
               A4: "hold; neighbouring frames can learn tracing propensity"
   - id: E08
     component: proposals
-    status: declared; runs under GPU-CAMPAIGN-E07-02 wave 2 only if authorised and only if wave 1 does not stop the
-      objective
+    status: 'stage2b measured under GPU-CAMPAIGN-E07E08-01: killed; nothing advances without a further authorisation'
     declaration: configs/e08-propensity-matched-rescoring.yaml
     declaration_digest: canonical_text_sha256:sha256/v1:c00b14ce63a29e55dfd4d795aeb66497920387878e6afbbbc53bff3c984b1757
     parent: E07; pool, patches, scorer, decode and folds unchanged
@@ -2751,3 +2750,59 @@ experiments:
             '1': false
           ceiling_degraded_any_seed: true
           between_seed_ceiling_range: 0.0
+    stage2b_outcome:
+      campaign: GPU-CAMPAIGN-E07E08-01
+      comparison: artifacts/e07e08-stage2b-comparison.json
+      comparison_digest: canonical_text_sha256:sha256/v1:ca763c49040eeadee32a37651937f3e73319f286c5fe2ae5418e5b324c1fd77d
+      between_seed:
+        A3/fold_44b6:
+          all_windows_scored: true
+          ceiling_mean: 0.7727
+          ceiling_range: 0.0664
+          node_match_mean: 0.7926
+          residual_gain_mean: 0.0105
+          residual_gain_range: 0.0081
+          seeds: 2
+        A3/fold_6bba:
+          all_windows_scored: false
+          ceiling_mean: 0.6538
+          ceiling_range: 0.0
+          node_match_mean: 0.5349
+          residual_gain_mean: 0.0851
+          residual_gain_range: 0.0125
+          seeds: 2
+        B3/fold_44b6:
+          all_windows_scored: false
+          ceiling_mean: 0.8308
+          ceiling_range: 0.0
+          node_match_mean: 0.2314
+          residual_gain_mean: 0.0869
+          residual_gain_range: 0.0231
+          seeds: 2
+        B3/fold_6bba:
+          all_windows_scored: false
+          ceiling_mean: 0.8889
+          ceiling_range: 0.0
+          node_match_mean: 0.2442
+          residual_gain_mean: 0.204
+          residual_gain_range: 0.024
+          seeds: 2
+      survival_rule: improves the fixed-count ceiling over A3 in both directions and reduces residual circumstance
+        dependence; one direction is a challenger; pooled is invalid
+      survival:
+        ceiling_better_than_A3_per_direction:
+          fold_44b6: null
+          fold_6bba: null
+        ceilings_comparable_per_direction:
+          fold_44b6: false
+          fold_6bba: false
+        node_match_better_than_A3_per_direction:
+          fold_44b6: false
+          fold_6bba: false
+        note: per-direction means over seeds; a pooled-only result is invalid and none is computed
+        residual_dependence_reduced_per_direction:
+          fold_44b6: false
+          fold_6bba: false
+        verdict: 'killed: no comparable direction improved or residual dependence not reduced; ceilings not comparable
+          in fold_44b6, fold_6bba (unscored windows), node match reported instead'
+      status_after_wave_B: killed

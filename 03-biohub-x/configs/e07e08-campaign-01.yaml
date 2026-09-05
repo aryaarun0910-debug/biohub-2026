@@ -68,3 +68,12 @@ GPU-CAMPAIGN-E07E08-01:
     a shell sequencing error let the commit and the pushes proceed anyway.
     Recorded as a process deviation; the kernels were complete and the pushes
     are within the authorised attempt count.
+  outcome:
+    comparison: artifacts/e07e08-stage2b-comparison.json
+    comparison_digest: canonical_text_sha256:sha256/v1:ca763c49040eeadee32a37651937f3e73319f286c5fe2ae5418e5b324c1fd77d
+    A3_ceiling_mean_per_direction: {fold_44b6: 0.7727, fold_6bba: 0.6538}
+    B3_ceiling_mean_per_direction: {fold_44b6: 0.8308, fold_6bba: 0.8889}
+    A3_residual_gain_mean_per_direction: {fold_44b6: 0.0105, fold_6bba: 0.0851}
+    B3_residual_gain_mean_per_direction: {fold_44b6: 0.0869, fold_6bba: 0.204}
+    B3_verdict: "killed: no comparable direction improved or residual dependence not reduced; ceilings not comparable in fold_44b6, fold_6bba (unscored windows), node match reported instead"
+    stopped_after: wave B, as authorised
