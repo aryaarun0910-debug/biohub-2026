@@ -60,7 +60,7 @@ GPU-CAMPAIGN-E07E08-01:
     1: {wave: R, package: A3 fold_44b6, digest: canonical_text_sha256:sha256/v1:3e409fdc35c8d00a0988338ff4c5bcd6fa94afaca260e1123a652a6f05c51cb3, outcome: COMPLETE, both seeds measured, reference: R-0032}
     2: {wave: R, package: A3 fold_6bba, digest: canonical_text_sha256:sha256/v1:509961b44ea493c02361a3ace20336915652726bb5cd10ed3c002c8c31a0e0e3, outcome: COMPLETE, both seeds measured, reference: R-0033}
     3: {wave: B, package: B3 fold_44b6, digest: canonical_text_sha256:sha256/v1:37c909c2ea2a7a0d242e952fb5e317bc9a491bb4f81fe122ab3150f721a4da23, outcome: COMPLETE, both seeds measured, reference: R-0034}
-    4: {wave: B, package: B3 fold_6bba, digest: canonical_text_sha256:sha256/v1:410b327dc1696015af81e56ee4d849b8c5a6413a0f2cd5f75cfc00a308c97b74, outcome: pending}
+    4: {wave: B, package: B3 fold_6bba, digest: canonical_text_sha256:sha256/v1:410b327dc1696015af81e56ee4d849b8c5a6413a0f2cd5f75cfc00a308c97b74, outcome: COMPLETE, both seeds measured, reference: R-0035}
   wave_R: >-
     both kernels COMPLETE; fold_44b6 fully retrieved (R-0032). Wave B was pushed
     when fold_6bba's summary manifest had been retrieved but its per-seed

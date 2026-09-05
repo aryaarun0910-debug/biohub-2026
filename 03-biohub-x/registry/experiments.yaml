@@ -2379,3 +2379,375 @@ experiments:
             '1': false
           ceiling_degraded_any_seed: false
           between_seed_ceiling_range: 0.0
+        stage2b_gpu_campaign_e07e08_01_fold_6bba_attempt4:
+          campaign: GPU-CAMPAIGN-E07E08-01
+          attempt: 4
+          kernel: aryaarun07/biohub-x-e08-b3-fold-6bba
+          kernel_status: KernelWorkerStatus.COMPLETE
+          reference: R-0035
+          workers:
+          - worker_id: E08-SMOKE-2B-B3-fold_6bba-s0
+            seed: 0
+            device: cuda:0
+            manifest: e07-fold_6bba-B3-s0.json
+            manifest_digest: raw_artifact_sha256:sha256:e0747836241462b14357510d6ee2c078cbfeab3bfdab148ea7689bcffa86fa95
+            checkpoint_digest: raw_artifact_sha256:sha256:f9b61b96d3ebf8eaaeadc6edafc3f30af093c9dd67893a01c42f73eee73359fc
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 0.00025323033332824707
+              reason: verified
+              relative_loss_difference: 7.756579154678308e-06
+              requested: true
+            batch_used: 8192
+            batch_ladder:
+            - batch: 512
+              examples_per_second: 1047.0
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 13804.6
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 12526.7
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 21692.3
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 8192
+              examples_per_second: 30446.0
+              peak_allocated_bytes: 1858564096
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 16384
+              examples_per_second: 30735.3
+              peak_allocated_bytes: 3700359168
+              under_ceiling: true
+              out_of_memory: null
+            sampling:
+              coefficients:
+                density: -2.2517
+                face_um: 0.4689
+                motion_um: -0.1983
+                persist_next: -0.0258
+                persist_prev: 0.1259
+                t: 0.3362
+                x: 0.2394
+                y: -0.1247
+                z: 0.1505
+              effective_unlabelled_per_movie:
+              - 2314.9
+              - 2214.2
+              - 5279.7
+              - 2217.4
+              - 2662.2
+              - 3710.1
+              - 4054.9
+              - 1744.1
+              matched_on:
+              - z
+              - y
+              - x
+              - face_um
+              - t
+              - density
+              - persist_prev
+              - persist_next
+              - motion_um
+              weight_cap: 20.0
+            epochs:
+            - epoch: 0
+              batches: 28
+              positives: 675
+              loss_mean: 0.3936216581080641
+              loss_last: 0.39755016565322876
+              negative_risk_clamped_batches: 0
+              peak_allocated_bytes: 1822959616
+            - epoch: 1
+              batches: 28
+              positives: 675
+              loss_mean: 0.250803413401757
+              loss_last: 1.1735023260116577
+              negative_risk_clamped_batches: 0
+              peak_allocated_bytes: 1822959616
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 56
+              clamp_frequency: 0.0
+              clamped_batches: 0
+              compute_seconds: 13.756
+              data_wait_fraction: 0.2166
+              data_wait_seconds: 3.804
+              examples: 410466
+              examples_per_second: 29838.9
+              gpu_utilisation_median: 60.5
+              positives: 1350
+              positives_per_batch: 24.107
+              skipped_no_positive: 0
+            peak_allocated_bytes: 1822959616
+            peak_reserved_bytes: 7891582976
+            training_kept: 11847
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 14614
+                node_ratio: -0.0
+                node_match_fraction: 0.2791
+                edge_retention: 0.2162
+                score: 0.8888943097694432
+              A0:
+                proposals: 12821
+                node_ratio: -0.1227
+                node_match_fraction: 0.9535
+                edge_retention: 0.9189
+                score: 0.9044552037654512
+              pool:
+                proposals: 62903
+                node_ratio: 3.3041
+                node_match_fraction: 1.0
+                score: 0.4788651607217481
+            per_movie:
+            - A0: 2167
+              dataset: 44b6_0113de3b
+              estimate: 3388.815789473684
+              first_frame: 0
+              kept: 3389
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 24619
+            - A0: 4460
+              dataset: 44b6_0b24845f
+              estimate: 6430.392156862745
+              first_frame: 11
+              kept: 6430
+              match_A0: 1.0
+              match_arm: 0.9
+              pool: 7925
+            - A0: 3560
+              dataset: 44b6_0c582fdc
+              estimate: 3072.3076923076924
+              first_frame: 20
+              kept: 3072
+              match_A0: 1.0
+              match_arm: 0.1
+              pool: 5871
+            - A0: 2634
+              dataset: 44b6_0db75fae
+              estimate: 1723.0337078651685
+              first_frame: 0
+              kept: 1723
+              match_A0: 0.9
+              match_arm: 0.1
+              pool: 24488
+            ceiling_degraded: true
+            ceiling_at_or_above_A0: false
+            residual_propensity:
+              dog_control_auc: 0.9454
+              dog_gain: 0.0085
+              passed: false
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.7635
+              scorer_gain: 0.192
+              scorer_group_gains:
+                appearance: 0.1818
+                density: 0.1776
+                position: -0.015
+                temporal: 0.0036
+                time: 0.0065
+              scorer_null_threshold: 0.0385
+            residual_passed: false
+          - worker_id: E08-SMOKE-2B-B3-fold_6bba-s1
+            seed: 1
+            device: cuda:1
+            manifest: e07-fold_6bba-B3-s1.json
+            manifest_digest: raw_artifact_sha256:sha256:d67835722574293f4638389d654668b0864d13398bf6815b861d79463dbc6ba5
+            checkpoint_digest: raw_artifact_sha256:sha256:89047b5ef6c8d7b8c3faad72122cc91fb2e9062c1a27466a8201f91ef4004459
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 0.00010383874177932739
+              reason: verified
+              relative_loss_difference: 1.575972665445334e-05
+              requested: true
+            batch_used: 8192
+            batch_ladder:
+            - batch: 512
+              examples_per_second: 1046.9
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 13815.4
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 11477.7
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 19311.4
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 8192
+              examples_per_second: 30730.1
+              peak_allocated_bytes: 1858564096
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 16384
+              examples_per_second: 31037.8
+              peak_allocated_bytes: 3700359168
+              under_ceiling: true
+              out_of_memory: null
+            sampling:
+              coefficients:
+                density: -2.2517
+                face_um: 0.4689
+                motion_um: -0.1983
+                persist_next: -0.0258
+                persist_prev: 0.1259
+                t: 0.3362
+                x: 0.2394
+                y: -0.1247
+                z: 0.1505
+              effective_unlabelled_per_movie:
+              - 2314.9
+              - 2214.2
+              - 5279.7
+              - 2217.4
+              - 2662.2
+              - 3710.1
+              - 4054.9
+              - 1744.1
+              matched_on:
+              - z
+              - y
+              - x
+              - face_um
+              - t
+              - density
+              - persist_prev
+              - persist_next
+              - motion_um
+              weight_cap: 20.0
+            epochs:
+            - epoch: 0
+              batches: 28
+              positives: 675
+              loss_mean: 0.349989336516176
+              loss_last: 0.14617697894573212
+              negative_risk_clamped_batches: 0
+              peak_allocated_bytes: 1822959616
+            - epoch: 1
+              batches: 28
+              positives: 675
+              loss_mean: 0.2715677778635706
+              loss_last: 0.2513180673122406
+              negative_risk_clamped_batches: 0
+              peak_allocated_bytes: 1822959616
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 56
+              clamp_frequency: 0.0
+              clamped_batches: 0
+              compute_seconds: 13.42
+              data_wait_fraction: 0.2185
+              data_wait_seconds: 3.753
+              examples: 410466
+              examples_per_second: 30586.4
+              gpu_utilisation_median: 69.5
+              positives: 1350
+              positives_per_batch: 24.107
+              skipped_no_positive: 0
+            peak_allocated_bytes: 1822959616
+            peak_reserved_bytes: 7891582976
+            training_kept: 11847
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 14614
+                node_ratio: -0.0
+                node_match_fraction: 0.2093
+                edge_retention: 0.2162
+                score: 0.8888943097694432
+              A0:
+                proposals: 12821
+                node_ratio: -0.1227
+                node_match_fraction: 0.9535
+                edge_retention: 0.9189
+                score: 0.9044552037654512
+              pool:
+                proposals: 62903
+                node_ratio: 3.3041
+                node_match_fraction: 1.0
+                score: 0.4788651607217481
+            per_movie:
+            - A0: 2167
+              dataset: 44b6_0113de3b
+              estimate: 3388.815789473684
+              first_frame: 0
+              kept: 3389
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 24619
+            - A0: 4460
+              dataset: 44b6_0b24845f
+              estimate: 6430.392156862745
+              first_frame: 11
+              kept: 6430
+              match_A0: 1.0
+              match_arm: 0.9
+              pool: 7925
+            - A0: 3560
+              dataset: 44b6_0c582fdc
+              estimate: 3072.3076923076924
+              first_frame: 20
+              kept: 3072
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 5871
+            - A0: 2634
+              dataset: 44b6_0db75fae
+              estimate: 1723.0337078651685
+              first_frame: 0
+              kept: 1723
+              match_A0: 0.9
+              match_arm: 0.0
+              pool: 24488
+            ceiling_degraded: true
+            ceiling_at_or_above_A0: false
+            residual_propensity:
+              dog_control_auc: 0.9454
+              dog_gain: 0.0085
+              passed: false
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.7402
+              scorer_gain: 0.216
+              scorer_group_gains:
+                appearance: 0.2049
+                density: 0.2029
+                position: -0.019
+                temporal: 0.0049
+                time: 0.008
+              scorer_null_threshold: 0.0422
+            residual_passed: false
+          advancement_condition_met_per_seed:
+            '0': false
+            '1': false
+          ceiling_degraded_any_seed: true
+          between_seed_ceiling_range: 0.0
