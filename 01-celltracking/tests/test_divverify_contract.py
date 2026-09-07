@@ -225,3 +225,203 @@ def test_adapter_refuses_a_node_that_is_not_a_fork():
     ad.children_of = {1: [10]}
     with pytest.raises(RuntimeError, match="not a fork"):
         ad.weakest_child(1)
+
+
+# ==================================================================================================
+# PKT-0035 - the route-neutral feature space, the association-mistake class, and the operating
+# points. Software contracts only: these assert that the guards fire and that the arithmetic is the
+# one the docstrings claim. Nothing here decides whether the verifier works.
+# ==================================================================================================
+def test_route_neutral_excludes_every_route_reading_column():
+    """FACT-0385's trap was out_degree and competing_parents reading the CONSTRUCTION ROUTE. The
+    fix is mechanical removal, so the removal has to actually hold."""
+    assert set(dv.ROUTE_READING) <= set(dv.FEATURES)
+    assert not (set(dv.ROUTE_NEUTRAL) & set(dv.ROUTE_READING))
+    assert set(dv.ROUTE_NEUTRAL) < set(dv.FEATURES)
+    for f in ("out_degree", "competing_parents"):
+        assert f not in dv.ROUTE_NEUTRAL
+
+
+def test_feature_list_is_v1_then_v2_and_carries_no_identifier():
+    assert dv.FEATURES == dv.FEATURES_V1 + dv.FEATURES_V2
+    assert len(set(dv.FEATURES)) == len(dv.FEATURES), "a feature is listed twice"
+    assert not (set(dv.FEATURES) & set(dv.IDENTIFIER_COLUMNS))
+
+
+def test_external_shared_space_is_pinned_to_v1():
+    """The v2 features have no counterpart in the external event table, so a mixed fit can only
+    ever happen in the v1 space. Pinning it stops a future v2 feature silently entering."""
+    assert set(dv.EXTERNAL_SHARED) < set(dv.FEATURES_V1)
+
+
+def test_mislinked_by_frame_groups_by_the_target_frame():
+    ctx = _toy_context()
+    # (1 -> 10) and (2 -> 12) both land at t=1; (10 -> 20) lands at t=2
+    mis = dv.mislinked_by_frame(ctx, {(1, 10), (2, 12), (10, 20)})
+    assert sorted(mis[1]) == [10, 12]
+    assert mis[2] == [20]
+    assert dv.mislinked_by_frame(ctx, set()) == {}
+
+
+def test_assoc_mistake_builds_a_fork_from_a_charged_mislink():
+    """The class is seeded from the association layer's own charged errors, so the mother and the
+    charged target must both survive into the triple."""
+    ctx = _toy_context()
+    rows = dv.assoc_mistake_rows(ctx, {(2, 12)}, "44b6_toy", 0, "44b6",
+                                 lambda m, n: False, np.random.default_rng(0), per_crop=3)
+    assert rows, "the association-mistake constructor produced nothing - a silent no-op"
+    for r in rows:
+        assert r["neg_kind"] == "cf_assoc_mistake"
+        assert r["label"] == 0
+        assert r["mother"] == 2
+        assert 12 in (r["d1"], r["d2"]), "the charged target did not survive into the triple"
+        assert r["derived_from"] == "charged_fp_edge:2:12"
+
+
+def test_assoc_mistake_skips_a_mother_that_is_already_an_emitted_fork():
+    """Node 1 has two children in the toy graph, so its triples ARE the natural FP population and
+    building them here would count the same rows twice."""
+    ctx = _toy_context()
+    assert dv.assoc_mistake_rows(ctx, {(1, 10)}, "44b6_toy", 0, "44b6",
+                                 lambda m, n: False, np.random.default_rng(0)) == []
+
+
+def test_assoc_mistake_refuses_a_link_that_is_not_one_frame_apart():
+    """A fork spans exactly one frame gap. A charged edge that does not is not a fork shape."""
+    ctx = _toy_context()
+    assert dv.assoc_mistake_rows(ctx, {(2, 20)}, "44b6_toy", 0, "44b6",
+                                 lambda m, n: False, np.random.default_rng(0)) == []
+
+
+def test_assoc_mistake_refuses_a_triple_that_is_really_a_division():
+    """A constructed negative that is secretly a true division would teach the exact opposite of
+    what the class is for, so the guard must refuse it rather than mislabel it."""
+    ctx = _toy_context()
+    rng = np.random.default_rng(0)
+    rows = dv.assoc_mistake_rows(ctx, {(2, 12)}, "44b6_toy", 0, "44b6",
+                                 lambda m, n: True, rng)
+    assert rows == []
+
+
+def test_assoc_mistake_fabricates_nothing_without_a_charged_edge():
+    ctx = _toy_context()
+    assert dv.assoc_mistake_rows(ctx, set(), "44b6_toy", 0, "44b6", lambda m, n: False,
+                                 np.random.default_rng(0)) == []
+
+
+def test_assoc_mistake_respects_the_per_crop_cap():
+    ctx = _toy_context()
+    rows = dv.assoc_mistake_rows(ctx, {(2, 12), (3, 13)}, "44b6_toy", 0, "44b6",
+                                 lambda m, n: False, np.random.default_rng(0), per_crop=1)
+    assert len(rows) == 1
+
+
+def test_assoc_mistake_rows_carry_the_fold_of_the_crop_they_came_from():
+    ctx = _toy_context()
+    rows = dv.assoc_mistake_rows(ctx, {(2, 12)}, "44b6_toy", 0, "44b6", lambda m, n: False,
+                                 np.random.default_rng(0))
+    table = pl.DataFrame(rows).select(["fold", "embryo", "crop", "label"])
+    with pytest.raises(RuntimeError, match="LEAK"):
+        dv.assert_no_leak(table, 0)
+
+
+# ------------------------------------------------------------------ the verifier's arithmetic
+def _vrows(**cols):
+    n = len(next(iter(cols.values())))
+    base = {"crop": [f"c{i}" for i in range(n)], "mother": list(range(n)),
+            "d1": list(range(n)), "d2": list(range(100, 100 + n)), "fold": [0] * n,
+            "embryo": ["44b6"] * n, "source": ["pipeline_fork"] * n, "neg_kind": [""] * n}
+    base.update(cols)
+    return pl.DataFrame(base)
+
+
+def test_verifier_feature_sets_are_subsets_of_the_closed_list():
+    import divverify_verifier as vv
+
+    for name, cols in vv.FEATURE_SETS.items():
+        assert set(cols) <= set(dv.FEATURES), f"{name} names a feature that does not exist"
+        assert not (set(cols) & set(dv.IDENTIFIER_COLUMNS)), f"{name} carries an identifier"
+    assert set(vv.FEATURE_SETS["route_neutral"]) == set(dv.ROUTE_NEUTRAL)
+
+
+def test_verifier_populations_select_exactly_the_declared_classes():
+    import divverify_verifier as vv
+
+    t = _vrows(
+        official_label=["tp_fork", "fp_fork", "gt_positive", "ignored", "constructed_negative",
+                        "constructed_negative"],
+        label=[1, 0, 1, 0, 0, 0],
+    ).with_columns(
+        pl.Series("source", ["pipeline_fork"] * 4 + ["counterfactual"] * 2),
+        pl.Series("neg_kind", ["", "natural_fp", "", "ignored_fork", "cf_wrong_parent",
+                               "cf_assoc_mistake"]),
+    )
+    assert sorted(vv.population_rows(t, "emitted_charged")["official_label"].to_list()) == \
+        ["fp_fork", "tp_fork"]
+    assert sorted(vv.population_rows(t, "genuine_tuples")["official_label"].to_list()) == \
+        ["fp_fork", "gt_positive", "tp_fork"]
+    assert vv.population_rows(t, "genuine_plus_cf").height == 5
+    kinds = set(vv.population_rows(t, "genuine_plus_assoc")["neg_kind"].to_list())
+    assert "cf_assoc_mistake" in kinds and "cf_wrong_parent" not in kinds
+    # the ignored forks never enter any training population
+    for pop in vv.POPULATIONS:
+        assert "ignored" not in vv.population_rows(t, pop)["official_label"].to_list()
+
+
+def test_verifier_deployment_population_is_the_charged_forks_only():
+    import divverify_verifier as vv
+
+    t = _vrows(official_label=["tp_fork", "fp_fork", "ignored", "gt_positive"],
+               label=[1, 0, 0, 1]).with_columns(
+        pl.Series("source", ["pipeline_fork"] * 3 + ["gt_tuple"]))
+    assert sorted(vv.deployment_rows(t, 0)["official_label"].to_list()) == ["fp_fork", "tp_fork"]
+    # ... while the DEPLOYABLE rule sees every emitted fork, ignored ones included (FACT-0383)
+    assert vv.all_emitted_forks(t, 0).height == 3
+
+
+def test_verifier_operating_point_reports_a_lost_true_fork_as_a_failure():
+    """PRESERVATION IS THE PRIMARY CONSTRAINT. An operating point that costs a true fork is a
+    failure of that operating point and must not be netted off against the FPs it cut."""
+    import divverify_verifier as vv
+
+    y = np.array([1, 0, 0, 0])
+    p = np.array([0.10, 0.01, 0.02, 0.90])
+    ok = vv.operating_point(y, p, 0.05)
+    assert ok["true_forks_lost"] == 0 and ok["false_forks_cut"] == 2
+    assert ok["preserves_every_true_fork"] and ok["verdict"] == "OK"
+    bad = vv.operating_point(y, p, 0.5)
+    assert bad["true_forks_lost"] == 1
+    assert not bad["preserves_every_true_fork"]
+    assert "FAILS the primary constraint" in bad["verdict"]
+
+
+def test_verifier_transferred_threshold_comes_from_the_training_positives_only():
+    import divverify_verifier as vv
+
+    y = np.array([1, 1, 0, 0])
+    oof = np.array([0.4, 0.7, 0.9, 0.1])
+    assert vv.threshold_from_training(y, oof) == pytest.approx(0.4)
+    assert vv.threshold_from_training(np.array([0, 0]), np.array([0.5, 0.5])) == 0.0
+
+
+def test_verifier_oracle_cut_counts_false_forks_before_the_first_true_one():
+    import divverify_verifier as vv
+
+    y = np.array([0, 0, 1, 0, 1])
+    s = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
+    r = vv.oracle_cut(y, s)
+    assert r["fp_rejected_before_losing_any_tp"] == 2
+    assert r["fp_rejected_before_losing_a_second_tp"] == 3
+    assert r["is_an_oracle"] is True
+    # a fold where every false fork sorts below every true one is the perfect case
+    perfect = vv.oracle_cut(np.array([0, 0, 1]), np.array([0.1, 0.2, 0.9]))
+    assert perfect["fp_rejected_before_losing_any_tp"] == 2
+
+
+def test_adapter_paired_bootstrap_refuses_unpaired_arms():
+    import divverify_adapter as da
+
+    with pytest.raises(RuntimeError, match="paired bootstrap"):
+        da._paired_bootstrap([{"score": 1.0}], [], lambda rs: {"score": 0.0})
+    with pytest.raises(RuntimeError, match="paired bootstrap"):
+        da._paired_bootstrap([], [], lambda rs: {"score": 0.0})

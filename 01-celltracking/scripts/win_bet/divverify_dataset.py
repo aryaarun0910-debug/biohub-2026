@@ -97,7 +97,7 @@ FOLD_EMBRYO = {0: "44b6", 1: "6bba"}
 # The closed feature list. Ported from scripts/win_bet/phaseb_h1g_features.py lines 128-152,
 # minus the four census-only columns that need the E0c proposer (flow_midpoint_residual, rank,
 # resid_*/best_alt_gap, steal_required). NO IDENTIFIER APPEARS HERE - that is guard (2).
-FEATURES = [
+FEATURES_V1 = [
     "parent_midpoint_um",   # |midpoint(d1,d2) - mother|   strongest external feature (FACT-0296)
     "pd1_um", "pd2_um",     # mother->daughter distances, min/max ordered so d1/d2 order is inert
     "pd_ratio",             # arm symmetry
@@ -116,6 +116,84 @@ FEATURES = [
     "out_degree",           # fork out-degree in the prediction (0 for a constructed triple)
 ]
 
+# ------------------------------------------------------------------ PKT-0035 extension (v2)
+# Six families the packet names, every one still a pure function of ONE crop's own node cloud and
+# edge set, and every one symmetric in daughter order (tests/test_divverify_contract.py asserts
+# that over the WHOLE of FEATURES, so a new asymmetric feature fails the suite).
+#
+# ASSOCIATION MARGINS are a DISTANCE-BASED PROXY and are labelled as one. The champion export
+# carries no edge probability, so a margin cannot be read off the model. FACT-0271 measured that a
+# pure-distance LAP reproduces the deployed linker to within 0.001, which is what makes a
+# flow-corrected distance margin a faithful stand-in for the association margin rather than an
+# unrelated quantity. It is still a proxy, and it is never described as the model's own margin.
+#
+# LOCALISATION CONFIDENCE (FACT-0380) is likewise a PROXY. The residual against the annotation is
+# ground truth and does not exist at inference; crowding (nearest-neighbour spacing) and flow
+# residual are the GT-free quantities that predict it.
+FEATURES_V2 = [
+    # daughter association margins - how contested each daughter's parent choice is
+    "assoc_margin_min", "assoc_margin_max",      # 2nd-best minus mother, flow-corrected um
+    "parent_rank_min", "parent_rank_max",        # mother's rank among candidate parents
+    "mother_fwd_claims",                         # nodes at t+1 whose best parent is the mother
+    # forward / backward agreement
+    "fb_ratio_min", "fb_ratio_max",              # 1.0 iff the daughter IS the mother's forward pick
+    # sister geometry, made scale-free (the FACT-0385 per-feature scale gap acts on lengths)
+    "sister_over_nn", "mid_over_nn", "pd1_over_nn", "pd2_over_nn",
+    "sister_over_flow", "sister_perp_frac",
+    # trajectory divergence - do the two branches separate like daughters, or shadow each other
+    "traj_div_2", "traj_div_3", "traj_len_min", "traj_len_max", "traj_min_sep_ratio",
+    # localisation confidence proxies (FACT-0380)
+    "nn_um_mother", "nn_um_dmin", "nn_um_dmax", "nn_ratio_mother",
+    "flow_resid_min", "flow_resid_max",
+    # temporal context
+    "t_frac", "growth_ratio", "forks_at_t_excl", "frames_remaining",
+]
+
+FEATURES = FEATURES_V1 + FEATURES_V2
+
+# ROUTE-READING FEATURES - the fix for the trap PKT-0032 DIAGNOSED but did not disarm.
+# FACT-0385: pooling GT-derived tuples with emitted forks inflated the unseen-fold AUC to 0.8006
+# against a deployment view of 0.5254, because out_degree and competing_parents read the
+# CONSTRUCTION ROUTE rather than the physics - an emitted fork has out_degree>=2 and
+# competing_parents==0 BY CONSTRUCTION, a GT-derived triple usually does not. Those features are
+# not wrong, they are unusable in any fit whose positives and negatives arrive by different routes.
+# Removing them is a MECHANISM, not an assertion, and `route_audit` tests it by trying to predict
+# the route from the surviving features.
+ROUTE_READING = (
+    "out_degree",          # >=2 for an emitted fork, whatever m happens to have otherwise
+    "competing_parents",   # 0 for an emitted fork by definition
+    "dt_d1", "dt_d2",      # 1/1 for an emitted fork AND for a GT tuple - carries nothing, and is
+                           # constant in the external corpus too
+    "forks_at_t_excl",     # excludes m, but an emitted fork's frame still differs systematically
+)
+ROUTE_NEUTRAL = [f for f in FEATURES if f not in ROUTE_READING]
+
+# ROUTE_READING_STRICT - what the PKT-0035 route audit actually found, and the MECHANISM behind it.
+# Removing out_degree and competing_parents was not enough. With the label held fixed, an emitted
+# true fork is still separated from a GT-derived tuple at AUC 0.98 by `traj_div_2`, and a natural
+# false fork from a constructed negative at AUC 0.98 by `assoc_margin_min`. Neither is computed
+# FROM the mother-daughter edges, so neither was caught by the first pass - but both are proxies
+# for the LINKER'S DECISION:
+#   * the association-margin family asks "is this mother the daughter's best available parent";
+#     the pipeline linked the triple precisely when the answer was yes, so the margin's SIGN is
+#     very nearly the route;
+#   * the trajectory family follows each daughter's onward chain, and a daughter the pipeline
+#     never attached to this mother more often has no usable chain, so the -1 sentinel pattern
+#     carries the route;
+#   * persistence and the daughters' own flow residual carry the same sentinel structure.
+# THE CONSEQUENCE IS STRUCTURAL, NOT COSMETIC. The GT-derived positives are exactly the divisions
+# the pipeline did NOT link, so any feature measuring how well the association layer supports a
+# triple must separate them from the emitted true forks. The enlarged positive class and the
+# association-margin / trajectory features are therefore MUTUALLY EXCLUSIVE, and this list is what
+# survives if the enlarged class is chosen.
+ROUTE_READING_STRICT = ROUTE_READING + (
+    "assoc_margin_min", "assoc_margin_max", "parent_rank_min", "parent_rank_max",
+    "mother_fwd_claims", "fb_ratio_min", "fb_ratio_max",
+    "traj_div_2", "traj_div_3", "traj_len_min", "traj_len_max", "traj_min_sep_ratio",
+    "persist_d1", "persist_d2", "n_persist", "flow_resid_min", "flow_resid_max",
+)
+ROUTE_NEUTRAL_STRICT = [f for f in FEATURES if f not in ROUTE_READING_STRICT]
+
 IDENTIFIER_COLUMNS = ("fold", "embryo", "crop", "mother", "d1", "d2", "t",
                       "label", "neg_kind", "source", "official_label", "derived_from")
 
@@ -123,8 +201,18 @@ IDENTIFIER_COLUMNS = ("fold", "embryo", "crop", "mother", "d1", "d2", "t",
 # constants in the external table by construction (every external triple is a proposed t->t+1
 # fork), so keeping them would hand any model a perfect in-domain/external discriminator - a
 # DOMAIN artifact that reads as signal. They are dropped from any mixed fit.
-EXTERNAL_SHARED = [f for f in FEATURES if f not in ("dt_d1", "dt_d2", "out_degree")]
+# PINNED TO V1: the v2 features have no counterpart in the external event table, so the external
+# corpus can only ever be mixed in the v1 space. That is itself a finding about the plank and not
+# a reason to weaken the check - FACT-0385 already made Zebrahub inadmissible for this lever.
+EXTERNAL_SHARED = [f for f in FEATURES_V1 if f not in ("dt_d1", "dt_d2", "out_degree")]
 EXTERNAL_GLOB = "_evidence/agent_runs/agent4/external_events/*.parquet"
+# THE EXTERNAL PLANK IS SHUT (PKT-0035, 2026-08-30). FACT-0385 measured Zebrahub anti-aligned with
+# this surface - pooled AUC 0.179, an in-domain fit collapsing 0.80 -> 0.21 when its rows were
+# mixed in - and LEVER-0040 forbids their use until that is solved and the solution demonstrated.
+# PKT-0032's crossfit map still declared `train_external: true`, written before its own probe
+# measured the anti-alignment. One constant now decides it, and every consumer reads it, so a
+# stale declaration cannot quietly re-admit the rows.
+EXTERNAL_ADMISSIBLE = False
 # Length-scaled features: the ones FACT-0296's ~1.6x per-embryo scale difference acts on.
 LENGTH_FEATURES = ("parent_midpoint_um", "pd1_um", "pd2_um", "sister_um", "mother_speed_um",
                    "vel_consistency", "bdist_um")
@@ -175,6 +263,31 @@ class CropContext:
             self.fmed[a] = np.median(self.darr[a], axis=0)
             self.ktree[a] = cKDTree(pos_um[src_by_t[a]]) if len(src_by_t[a]) >= 4 else None
 
+        # ---------------- PKT-0035: crowding, frame occupancy and the parent-cost cache.
+        # All per-CROP, all inference-available. Per-crop normalisation is explicitly allowed by
+        # the leakage contract (the crop is present at inference); per-FOLD is not, and none is
+        # taken here.
+        self.tmax = int(t.max()) if len(t) else 0
+        self.n_at = {a: len(ii) for a, ii in self.by_t.items()}
+        self.forks_at: dict[int, int] = defaultdict(int)
+        for a_id, kids in self.children_of.items():
+            ia = self.idx.get(int(a_id))
+            if ia is not None and len(kids) >= 2:
+                self.forks_at[int(t[ia])] += 1
+        self.nn_um = np.full(len(node_ids), -1.0)
+        self.nn_med: dict[int, float] = {}
+        for a, ii in self.by_t.items():
+            if len(ii) < 2:
+                for i in ii:
+                    self.nn_um[i] = -1.0
+                self.nn_med[a] = -1.0
+                continue
+            dd, _jj = self.trees[a].query(pos_um[ii], k=2)
+            self.nn_um[np.asarray(ii)] = dd[:, 1]
+            self.nn_med[a] = float(np.median(dd[:, 1]))
+        self._pcost: dict[int, dict[int, float]] = {}
+        self._best_parent: dict[int, int | None] = {}
+
     def flow_at(self, i: int, a: int) -> np.ndarray:
         kt = self.ktree.get(a)
         if kt is not None:
@@ -189,6 +302,98 @@ class CropContext:
             cur = self.parent_of[cur]
             n += 1
         return n
+
+    # ------------------------------------------------------- PKT-0035 association machinery
+    def parent_costs(self, di: int, k: int = 8) -> dict[int, float]:
+        """Flow-corrected cost of every plausible parent of node index ``di``, keyed by index.
+
+        cost(n) = | pos[d] - (pos[n] + flow_at(n)) |. This is a DISTANCE PROXY for the association
+        cost, not the model's own score - the export carries no probability. FACT-0271 measured
+        that a pure-distance LAP reproduces the deployed linker to within 0.001, which is the
+        licence for the proxy. Cached per node, so the whole crop costs O(N) queries.
+        """
+        got = self._pcost.get(di)
+        if got is not None:
+            return got
+        a = int(self.t[di]) - 1
+        tree = self.trees.get(a)
+        out: dict[int, float] = {}
+        if tree is not None:
+            ii = self.by_t[a]
+            kk = min(k, len(ii))
+            _dd, jj = tree.query(self.pos[di], k=kk)
+            for j in np.atleast_1d(jj):
+                c = int(ii[int(j)])
+                out[c] = float(np.linalg.norm(self.pos[di] - (self.pos[c] + self.flow_at(c, a))))
+        self._pcost[di] = out
+        return out
+
+    def best_parent(self, di: int) -> int | None:
+        got = self._best_parent.get(di, 0)
+        if got != 0:
+            return got
+        costs = self.parent_costs(di)
+        best = min(costs, key=lambda c: (costs[c], c)) if costs else None
+        self._best_parent[di] = best
+        return best
+
+    def margin_and_rank(self, di: int, mi: int) -> tuple[float, int]:
+        """(2nd-best cost minus the mother's cost, the mother's rank) for daughter index ``di``.
+
+        The mother is inserted if the k-nearest scan missed it, so a distant mother is ranked
+        honestly rather than silently dropped.
+        """
+        costs = dict(self.parent_costs(di))
+        a = int(self.t[di]) - 1
+        if mi not in costs:
+            costs[mi] = float(np.linalg.norm(self.pos[di] - (self.pos[mi] + self.flow_at(mi, a))))
+        cm = costs[mi]
+        others = [v for c, v in costs.items() if c != mi]
+        margin = (min(others) - cm) if others else 0.0
+        rank = sum(1 for v in others if v < cm)
+        return float(margin), int(rank)
+
+    def forward_pick(self, mi: int, k: int = 8) -> tuple[int | None, float]:
+        """The mother's own forward choice at t+1: (node index, its flow-corrected cost)."""
+        a = int(self.t[mi])
+        tree = self.trees.get(a + 1)
+        if tree is None:
+            return None, -1.0
+        ii = self.by_t[a + 1]
+        kk = min(k, len(ii))
+        proj = self.pos[mi] + self.flow_at(mi, a)
+        dd, jj = tree.query(proj, k=kk)
+        dd, jj = np.atleast_1d(dd), np.atleast_1d(jj)
+        b = int(np.argmin(dd))
+        return int(ii[int(jj[b])]), float(dd[b])
+
+    def fwd_claims(self, mi: int, k: int = 12) -> int:
+        """How many nodes at t+1 name this mother as their BEST parent. A real divider is claimed
+        by two; a node that has become a magnet for a crowded neighbourhood is claimed by more."""
+        a = int(self.t[mi])
+        tree = self.trees.get(a + 1)
+        if tree is None:
+            return 0
+        ii = self.by_t[a + 1]
+        kk = min(k, len(ii))
+        proj = self.pos[mi] + self.flow_at(mi, a)
+        _dd, jj = tree.query(proj, k=kk)
+        return int(sum(1 for j in np.atleast_1d(jj) if self.best_parent(int(ii[int(j)])) == mi))
+
+    def chain(self, node: int, steps: int) -> list[int]:
+        """The single-child forward chain from a node, stopping at a fork, a death or ``steps``.
+
+        Route-neutral with respect to the triple being scored: it follows the DAUGHTER's own
+        onward links, which exist whether or not the mother was linked to her.
+        """
+        out, cur = [], int(node)
+        for _ in range(steps):
+            kids = sorted(self.children_of.get(cur, ()))
+            if len(kids) != 1:
+                break
+            cur = int(kids[0])
+            out.append(cur)
+        return out
 
     def neighbours_at(self, frame: int, centre: np.ndarray, k: int) -> list[int]:
         """The k nearest node ids at ``frame`` to ``centre`` (um). Used to CONSTRUCT negatives."""
@@ -230,6 +435,50 @@ def triple_features(ctx: CropContext, m: int, d1: int, d2: int) -> dict | None:
     mv = pm - ctx.pos[ctx.idx[par]] if par is not None and par in ctx.idx else np.zeros(3)
     u1, u2 = _unit(p1 - pm), _unit(p2 - pm)
     tree_t, tree_t1 = ctx.trees.get(a), ctx.trees.get(a + 1)
+
+    # ---------------------------------------------------------------- PKT-0035 v2 features
+    # Everything below is symmetric in (d1, d2) - the pair is reduced by min/max or by a
+    # quantity of the pair itself. tests/test_divverify_contract.py asserts that over all of
+    # FEATURES, so an asymmetric addition fails the suite rather than leaking daughter order.
+    mg1, rk1 = ctx.margin_and_rank(i1, im)
+    mg2, rk2 = ctx.margin_and_rank(i2, im)
+    fwd_i, fwd_c = ctx.forward_pick(im)
+    def _fb(ii_: int) -> float:
+        if fwd_i is None or fwd_c < 0:
+            return -1.0
+        this = float(np.linalg.norm(ctx.pos[ii_] - (pm + fl)))
+        return float(fwd_c / (this + EPS))
+    fb1, fb2 = _fb(i1), _fb(i2)
+
+    nn_t = ctx.nn_med.get(a, -1.0)
+    nn_t1 = ctx.nn_med.get(a + 1, -1.0)
+    sc_t = nn_t if nn_t and nn_t > 0 else float("nan")
+    sc_t1 = nn_t1 if nn_t1 and nn_t1 > 0 else float("nan")
+    flmag = float(np.linalg.norm(fl))
+    sis_vec = p2 - p1
+    perp = sis_vec - np.dot(sis_vec, _unit(fl)) * _unit(fl) if flmag > EPS else sis_vec
+
+    ch1, ch2 = ctx.chain(d1, 8), ctx.chain(d2, 8)
+    def _sep(k: int) -> float:
+        if len(ch1) < k or len(ch2) < k:
+            return -1.0
+        q1, q2 = ctx.idx.get(ch1[k - 1]), ctx.idx.get(ch2[k - 1])
+        if q1 is None or q2 is None:
+            return -1.0
+        return float(np.linalg.norm(ctx.pos[q2] - ctx.pos[q1]) / (sis + EPS))
+    seps = [_sep(k) for k in range(1, min(len(ch1), len(ch2)) + 1)]
+    seps = [v for v in seps if v >= 0.0]
+
+    def _flow_resid(dd: int) -> float:
+        idd = ctx.idx.get(dd)
+        kids = sorted(ctx.children_of.get(dd, ()))
+        if idd is None or len(kids) != 1 or kids[0] not in ctx.idx:
+            return -1.0
+        ad = int(ctx.t[idd])
+        step = ctx.pos[ctx.idx[kids[0]]] - ctx.pos[idd]
+        return float(np.linalg.norm(step - ctx.flow_at(idd, ad)))
+    fr1, fr2 = _flow_resid(d1), _flow_resid(d2)
+
     return {
         "mother": int(m), "d1": int(d1), "d2": int(d2), "t": a,
         "parent_midpoint_um": float(np.linalg.norm(mid - pm)),
@@ -252,6 +501,35 @@ def triple_features(ctx: CropContext, m: int, d1: int, d2: int) -> dict | None:
         "dt_d1": int(ctx.t[i1]) - a,
         "dt_d2": int(ctx.t[i2]) - a,
         "out_degree": len(ctx.children_of.get(m, ())),
+        # --- v2: daughter association margins (distance proxy, FACT-0271)
+        "assoc_margin_min": min(mg1, mg2), "assoc_margin_max": max(mg1, mg2),
+        "parent_rank_min": min(rk1, rk2), "parent_rank_max": max(rk1, rk2),
+        "mother_fwd_claims": ctx.fwd_claims(im),
+        # --- v2: forward / backward agreement
+        "fb_ratio_min": min(fb1, fb2), "fb_ratio_max": max(fb1, fb2),
+        # --- v2: sister geometry, scale-free against the crop's own cell spacing
+        "sister_over_nn": float(sis / sc_t1) if sc_t1 == sc_t1 else -1.0,
+        "mid_over_nn": float(np.linalg.norm(mid - pm) / sc_t) if sc_t == sc_t else -1.0,
+        "pd1_over_nn": float(min(pd1, pd2) / sc_t1) if sc_t1 == sc_t1 else -1.0,
+        "pd2_over_nn": float(max(pd1, pd2) / sc_t1) if sc_t1 == sc_t1 else -1.0,
+        "sister_over_flow": float(sis / (flmag + EPS)),
+        "sister_perp_frac": float(np.linalg.norm(perp) / (sis + EPS)),
+        # --- v2: trajectory divergence
+        "traj_div_2": _sep(2), "traj_div_3": _sep(3),
+        "traj_len_min": min(len(ch1), len(ch2)), "traj_len_max": max(len(ch1), len(ch2)),
+        "traj_min_sep_ratio": float(min(seps)) if seps else -1.0,
+        # --- v2: localisation-confidence proxies (FACT-0380)
+        "nn_um_mother": float(ctx.nn_um[im]),
+        "nn_um_dmin": float(min(ctx.nn_um[i1], ctx.nn_um[i2])),
+        "nn_um_dmax": float(max(ctx.nn_um[i1], ctx.nn_um[i2])),
+        "nn_ratio_mother": float(ctx.nn_um[im] / sc_t) if sc_t == sc_t else -1.0,
+        "flow_resid_min": min(fr1, fr2), "flow_resid_max": max(fr1, fr2),
+        # --- v2: temporal context
+        "t_frac": float(a / max(1, ctx.tmax)),
+        "growth_ratio": float(ctx.n_at.get(a + 1, 0) / max(1, ctx.n_at.get(a, 1))),
+        "forks_at_t_excl": int(ctx.forks_at.get(a, 0)
+                               - (1 if len(ctx.children_of.get(m, ())) >= 2 else 0)),
+        "frames_remaining": int(ctx.tmax - a),
     }
 
 
@@ -386,9 +664,38 @@ def census_crop(name: str, sub: pl.DataFrame, gt_geff: Path, fold: int, ea, dm, 
                     **feats,
                 })
 
+    # --- PKT-0035: the association-error surface, in SUBMISSION ids -------------------------
+    # s2gt is the scorer's own one-to-one matching, re-keyed; gt_parent comes from the GT edge
+    # table, not from a second traversal, so "the linker got this edge wrong" is the GT's verdict.
+    s2gt = {s(p): int(gv) for p, gv in st["pred_to_gt"].items()
+            if gv is not None and int(gv) != -1}
+    gte = gt.edge_attrs(attr_keys=[K.EDGE_SOURCE, K.EDGE_TARGET]).to_pandas()
+    gt_parent = {int(t_): int(s_) for s_, t_ in zip(gte[K.EDGE_SOURCE], gte[K.EDGE_TARGET])}
+    from tracking_cellmot import metrics as metrics_mod
+    fp_edges = charged_fp_edges(g, gt, i2s, metrics_mod)
+    if len(fp_edges) != er.edge_fp:
+        raise RuntimeError(
+            f"{name}: charged FP edge set has {len(fp_edges)} members but the official scorer "
+            f"reports edge_fp={er.edge_fp} - the association surface does not reconcile"
+        )
+    mis_by_t = mislinked_by_frame(ctx, fp_edges)
+    # The strictly-provable subclass, measured rather than assumed: both endpoints matched and
+    # the GT names a different parent. Reported so the difference between the two definitions is
+    # visible in the census instead of buried in a docstring.
+    strict = sum(1 for a_, b_ in fp_edges
+                 if a_ in s2gt and b_ in s2gt and gt_parent.get(s2gt[b_]) != s2gt[a_])
+
+    def is_true_pair(mm: int, nn: int) -> bool:
+        gm, gn = s2gt.get(int(mm)), s2gt.get(int(nn))
+        return gm is not None and gn is not None and gt_parent.get(gn) == gm
+
     return {
         "crop": name, "ctx": ctx, "forks": fork_rows, "gt_tuples": pos_rows,
-        "gtdiv": gtdiv_rows,
+        "gtdiv": gtdiv_rows, "mis_by_t": mis_by_t, "fp_edges": fp_edges,
+        "is_true_pair": is_true_pair,
+        "n_mislinked": int(sum(len(v) for v in mis_by_t.values())),
+        "n_mislinked_strict": int(strict),
+        "n_matched_pred": len(s2gt),
         "counts": {"division_tp": tp, "division_fp": fp, "division_fn": fn,
                    "gt_divisions": len(st["scores"]), "pred_forks": len(all_forks),
                    "forks_ignored": sum(1 for r in fork_rows if r["official_label"] == "ignored")},
@@ -458,6 +765,108 @@ def counterfactual_rows(ctx: CropContext, seed_rows: list[dict], crop: str, fold
     return out
 
 
+# ------------------------------------------------------------ PKT-0035 - the fifth negative class
+def charged_fp_edges(g, gt, i2s, metrics_mod) -> set[tuple[int, int]]:
+    """The edges the OFFICIAL metric charges as false positives, in SUBMISSION ids.
+
+    Read from the scorer's own ``_evaluate_matched_graph`` - the function whose
+    ``pred_valid - MATCHED_EDGE_MASK`` difference IS ``EvaluationResult.edge_fp`` - rather than
+    from a second matcher. Same discipline as ``_pred_division_fork_sets`` and ``_match_full``
+    above: the metric's verdict, not our reconstruction of it.
+
+    SAY WHAT THIS MEANS, because the obvious reading is wrong. ``pred_valid`` is true when EITHER
+    endpoint is a matched annotated cell, so a charged FP edge is usually a link from an annotated
+    cell to an UNANNOTATED detection (FACT-0335: 99% of fold-0 FP edges have that shape), not two
+    annotated cells wired to each other. The unannotated endpoint may well be a real cell. So
+    "mistake" here means EXACTLY "a link the metric charges as false" - which is the operative
+    notion for a verifier whose whole purpose is to move that metric - and it is NOT a claim that
+    the biology was misread. The strictly-provable class (both endpoints matched, GT names another
+    parent) was measured first and is nearly empty on this substrate, which is itself why this
+    definition is the one that can be populated at all.
+    """
+    ea = metrics_mod._evaluate_matched_graph(g, gt)
+    import tracksdata as td
+    K = td.DEFAULT_ATTR_KEYS
+    fp = ea.filter(pl.col("pred_valid") & ~pl.col(K.MATCHED_EDGE_MASK))
+    return {(int(i2s[int(s_)]), int(i2s[int(t_)]))
+            for s_, t_ in zip(fp[K.EDGE_SOURCE].to_list(), fp[K.EDGE_TARGET].to_list())}
+
+
+def mislinked_by_frame(ctx: CropContext, fp_edges: set[tuple[int, int]]) -> dict[int, list[int]]:
+    """Targets of charged FP edges, grouped by their own frame.
+
+    "High-confidence" means the pipeline committed to the edge - it survived the ILP, the motion
+    relink and every filter and is in the final graph - and the official metric charges it.
+
+    This is the class that connects LEVER-0040 to the association lane, and the connection is a
+    mechanism rather than an analogy: FACT-0371 measured that perfecting only the EDGES takes
+    fold-0 division false positives from 67 to zero. If false forks are association errors wearing
+    a fork's shape, then a sister drawn from the association layer's own charged mistakes is the
+    negative a verifier must reject, and it is the one the natural FP fork population under-supplies.
+    """
+    out: dict[int, list[int]] = defaultdict(list)
+    for _a, b in fp_edges:
+        ib = ctx.idx.get(int(b))
+        if ib is not None:
+            out[int(ctx.t[ib])].append(int(b))
+    return out
+
+
+def assoc_mistake_rows(ctx: CropContext, fp_edges: set[tuple[int, int]], crop: str, fold: int,
+                       embryo: str, is_true_pair, rng: np.random.Generator,
+                       per_crop: int = 3) -> list[dict]:
+    """``cf_assoc_mistake``: THE FORK A CHARGED MISLINK WOULD MAKE IF IT ACQUIRED A SISTER.
+
+    Seeded from the association layer's own charged errors, not from the division seeds. The first
+    version of this constructor drew a substitute sister from the mislinked nodes at a division's
+    own frame and produced FOUR rows on fold 0 - the charged mislinks and the annotated divisions
+    barely co-occur in space and time. That is a finding, and it is recorded rather than tuned
+    away; but four rows is not a class, so the construction was moved to where the population is.
+
+    For each charged FP edge ``a -> b`` one frame apart, the triple is ``(a, b, n)`` with ``n`` the
+    nearest other node at b's frame. Mothers that are ALREADY emitted forks are skipped, because
+    those triples are the natural FP population and would be counted twice.
+
+    WHY THIS CLASS EXISTS. FACT-0371 measured that perfecting only the EDGES takes fold-0 division
+    false positives from 67 to zero. If false forks are association errors wearing a fork's shape,
+    a verifier has to reject the shape a charged mislink makes - and the natural FP fork population
+    is only 67 examples of it. ``is_true_pair`` refuses any triple that is secretly a real GT
+    division, so a "negative" cannot be a mislabelled positive.
+    """
+    out: list[dict] = []
+    cands: list[tuple] = []
+    for a, b in sorted(fp_edges):
+        ia, ib = ctx.idx.get(int(a)), ctx.idx.get(int(b))
+        if ia is None or ib is None:
+            continue
+        if int(ctx.t[ib]) != int(ctx.t[ia]) + 1:
+            continue                                   # not a one-frame link; not a fork shape
+        if len(ctx.children_of.get(int(a), ())) >= 2:
+            continue                                   # already a natural fork row
+        near = [q for q in ctx.neighbours_at(int(ctx.t[ib]), ctx.pos[ib], 4)
+                if q not in (int(a), int(b))]
+        if not near:
+            continue
+        n = int(near[0])
+        if is_true_pair(int(a), int(b)) and is_true_pair(int(a), n):
+            continue                                   # a real division - refuse, do not mislabel
+        f = triple_features(ctx, int(a), int(b), n)
+        if f is not None:
+            cands.append((int(a), int(b), n, f))
+    if len(cands) > per_crop:
+        pick = sorted(rng.choice(len(cands), size=per_crop, replace=False).tolist())
+        cands = [cands[i] for i in pick]
+    for a, b, n, f in cands:
+        out.append({
+            "fold": fold, "embryo": embryo, "crop": crop, "source": "counterfactual",
+            "official_label": "constructed_negative", "label": 0, "metric_visible": False,
+            "fp_evaluable": False, "fp_cross_component": False, "fp_malformed": False,
+            "neg_kind": "cf_assoc_mistake", "derived_from": f"charged_fp_edge:{a}:{b}",
+            "n_children": len(ctx.children_of.get(a, ())), **f,
+        })
+    return out
+
+
 # ============================================================ stage 2 - the leakage contract
 def crossfit_map() -> dict:
     """The cross-fitting map, written down BEFORE any row is used to fit anything."""
@@ -472,8 +881,24 @@ def crossfit_map() -> dict:
             "counterfactual built from a fold-0 crop is a fold-0 row."
         ),
         "assignments": {
-            "judge_fold_0": {"train_folds": [1], "train_external": True, "forbidden_rows": "fold == 0"},
-            "judge_fold_1": {"train_folds": [0], "train_external": True, "forbidden_rows": "fold == 1"},
+            "judge_fold_0": {"train_folds": [1], "train_external": EXTERNAL_ADMISSIBLE,
+                             "forbidden_rows": "fold == 0"},
+            "judge_fold_1": {"train_folds": [0], "train_external": EXTERNAL_ADMISSIBLE,
+                             "forbidden_rows": "fold == 1"},
+        },
+        "external_admissibility": {
+            "admissible": EXTERNAL_ADMISSIBLE,
+            "changed_by": "PKT-0035, 2026-08-30",
+            "was": ("PKT-0032 wrote this map with train_external: true, BEFORE its own viability "
+                    "probe measured the anti-alignment. FACT-0385 then recorded pooled AUC 0.179 "
+                    "and an in-domain fit collapsing 0.80 -> 0.21 when Zebrahub rows were mixed "
+                    "in, and LEVER-0040 forbade their use until that is solved. The map had not "
+                    "been updated to match, so a later reader would have found a declaration that "
+                    "contradicts the lever. It is corrected here rather than left as a footnote."),
+            "reopen_when": ("the per-feature scale gap is solved AND the solution is demonstrated "
+                            "on this surface - not asserted. Until then EXTERNAL_ADMISSIBLE is "
+                            "False and every consumer must pass an explicit override to use the "
+                            "rows at all."),
         },
         "external": {
             "corpus": "Zebrahub (FACT-0296)",
@@ -544,6 +969,12 @@ def cmd_census(args) -> int:
     out.mkdir(parents=True, exist_ok=True)
     df = read_submission(ea.open_csv(Path(args.csv)))
     names = sorted(df["dataset"].unique().to_list())
+    if args.only:
+        want = [c.strip() for c in args.only.split(",") if c.strip()]
+        missing = [c for c in want if c not in names]
+        if missing:
+            raise RuntimeError(f"--only names crops not in this export: {missing}")
+        names = want
     if args.stride:
         names = names[::args.stride]
     if args.max_crops:
@@ -572,12 +1003,34 @@ def cmd_census(args) -> int:
         seeds = [x for x in r["forks"] if x["official_label"] == "tp_fork"] + r["gt_tuples"]
         cfs += counterfactual_rows(r["ctx"], seeds, name, args.fold, name.split("_")[0], rng,
                                    per_seed=args.per_seed)
+        cfs += assoc_mistake_rows(r["ctx"], r["fp_edges"], name, args.fold, name.split("_")[0],
+                                  r["is_true_pair"], rng, per_crop=args.assoc_per_crop)
+        totals["mislinked_nodes"] += r["n_mislinked"]
+        totals["mislinked_strict"] += r["n_mislinked_strict"]
+        totals["matched_pred_nodes"] += r["n_matched_pred"]
+        totals["seeds"] += len(seeds)
         for k, v in r["counts"].items():
             totals[k] += v
         print(f"  [{i}/{len(names)}] {name} gtdiv={r['counts']['gt_divisions']} "
               f"tp/fp/fn={r['counts']['division_tp']}/{r['counts']['division_fp']}/"
               f"{r['counts']['division_fn']} forks={r['counts']['pred_forks']} "
               f"cf={len(cfs)} ({time.time() - t0:.0f}s)", flush=True)
+
+    # FAIL CLOSED. The fifth negative class is the one new construction in this packet; if it
+    # produced nothing the run must SAY so rather than quietly shipping a four-class dataset that
+    # looks exactly like PKT-0032's.
+    n_assoc = sum(1 for r in cfs if r["neg_kind"] == "cf_assoc_mistake")
+    if n_assoc == 0 and totals["seeds"] > 0:
+        raise RuntimeError(
+            f"fold {args.fold}: cf_assoc_mistake produced ZERO rows over {len(names)} crops from "
+            f"{int(totals['seeds'])} seeds, with {int(totals['mislinked_nodes'])} charged FP edges "
+            f"available. The pool filter is wrong - a silent no-op here would ship a dataset "
+            f"identical to PKT-0032's while claiming a new negative class"
+        )
+    if totals["seeds"] == 0:
+        print("DIVVERIFY_NO_SEEDS: this crop selection contains no annotated division at all, so "
+              "no counterfactual of any kind can be built from it. Not an error on a truncated "
+              "smoke run; on a COMPLETE fold it would be one.", flush=True)
 
     table = pl.DataFrame(rows + cfs)
     table.write_parquet(out / f"rows_f{args.fold}.parquet")
@@ -592,6 +1045,20 @@ def cmd_census(args) -> int:
                             ("gt_divisions", "division_tp", "division_fp", "division_fn")},
         "pred_forks_total": int(totals["pred_forks"]),
         "pred_forks_ignored_by_metric": int(totals["forks_ignored"]),
+        "association_surface": {
+            "matched_pred_nodes": int(totals["matched_pred_nodes"]),
+            "charged_fp_edges": int(totals["mislinked_nodes"]),
+            "charged_fp_edges_both_endpoints_matched": int(totals["mislinked_strict"]),
+            "note": ("charged_fp_edges is the metric's OWN edge-FP tally, reconciled per crop "
+                     "against evaluate().edge_fp. The strict subclass - both endpoints matched "
+                     "and the GT naming another parent - is reported beside it because "
+                     "FACT-0335 says the charged population is dominated by links from an "
+                     "annotated cell to an UNANNOTATED detection, and the two are not the same "
+                     "claim"),
+        },
+        "feature_space": {"v1": len(FEATURES_V1), "v2_added": len(FEATURES_V2),
+                          "total": len(FEATURES), "route_neutral": len(ROUTE_NEUTRAL),
+                          "route_reading_excluded": list(ROUTE_READING)},
         "rows": {
             "pipeline_fork_tp": int(sum(1 for r in rows if r["official_label"] == "tp_fork")),
             "pipeline_fork_fp": int(sum(1 for r in rows if r["official_label"] == "fp_fork")),
@@ -828,9 +1295,20 @@ def cmd_viability(args) -> int:
             c: round(_auc(yc, fc[c].to_numpy().astype(float)), 4) for c in FEATURES
         }
 
-    # external rows, if built
+    # external rows, if built AND admissible. The gate is a constant, not a comment: with
+    # EXTERNAL_ADMISSIBLE False the rows are not loaded at all unless the caller passes
+    # --allow-external, and the report says so either way.
     ext_path = out / "rows_external.parquet"
-    ext = pl.read_parquet(ext_path) if ext_path.exists() else None
+    allow_ext = bool(getattr(args, "allow_external", False)) or EXTERNAL_ADMISSIBLE
+    report["external_gate"] = {
+        "EXTERNAL_ADMISSIBLE": EXTERNAL_ADMISSIBLE,
+        "override_passed": bool(getattr(args, "allow_external", False)),
+        "external_rows_used": bool(allow_ext and ext_path.exists()),
+        "why": ("FACT-0385: pooled AUC 0.179 and an in-domain fit collapsing 0.80 -> 0.21 when "
+                "Zebrahub rows are mixed in. LEVER-0040 forbids their use until the alignment is "
+                "solved AND the solution demonstrated"),
+    }
+    ext = pl.read_parquet(ext_path) if (allow_ext and ext_path.exists()) else None
     if ext is not None:
         report["external"] = {
             "rows": int(ext.height), "positives": int(ext["label"].sum()),
@@ -948,7 +1426,11 @@ def main() -> int:
     c.add_argument("--out-dir", required=True)
     c.add_argument("--max-crops", type=int)
     c.add_argument("--stride", type=int)
+    c.add_argument("--only", help="comma-separated crop names; for smoke runs only")
     c.add_argument("--per-seed", type=int, default=2)
+    c.add_argument("--assoc-per-crop", type=int, default=3,
+                   help=("cap on cf_assoc_mistake rows per crop, so the class stays comparable in "
+                         "size to the other constructions instead of swamping them"))
     c.set_defaults(func=cmd_census)
 
     x = sub.add_parser("crossfit")
@@ -961,6 +1443,11 @@ def main() -> int:
 
     v = sub.add_parser("viability")
     v.add_argument("--out-dir", required=True)
+    v.add_argument("--allow-external", action="store_true",
+                   help=("override EXTERNAL_ADMISSIBLE and mix the Zebrahub rows in. LEVER-0040 "
+                         "forbids this until the FACT-0385 anti-alignment is solved AND the "
+                         "solution demonstrated; the flag exists so that using them is a "
+                         "deliberate, recorded act rather than a default"))
     v.set_defaults(func=cmd_viability)
 
     args = ap.parse_args()

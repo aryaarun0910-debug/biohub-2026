@@ -110,7 +110,15 @@
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config op_bright --per-embryo 10 --workers 7)",
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config v3 --per-embryo 10 --workers 7)",
       "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config v3_smooth --per-embryo 10 --workers 7)",
-      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config op_bright_smooth --per-embryo 10 --workers 7)"
+      "Bash(PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config op_bright_smooth --per-embryo 10 --workers 7)",
+      "Bash(nohup .venv/Scripts/python.exe scripts/run_phase1_ablation.py --config op_bright_smooth --all --workers 7)",
+      "Bash(echo \"launched PID $!\")",
+      "Bash(.venv/Scripts/python.exe -c \"import biotrack; print\\('biotrack OK'\\)\")",
+      "Bash(.venv/Scripts/python.exe -c \"import yaml; print\\('PyYAML OK', yaml.__version__\\)\")",
+      "Bash(.venv/Scripts/python.exe -c \"import jsonschema; print\\('jsonschema OK', jsonschema.__version__\\)\")",
+      "Bash(.venv/Scripts/python.exe scripts/claims_table.py --check)",
+      "Read(//c/temp/focus3d/**)",
+      "Bash(curl -sS --max-time 60 \"https://raw.githubusercontent.com/yu-lab-vt/FOCUS-3D/main/README.md\" -o gh_README.md -w \"[HTTP %{http_code}] %{size_download}B\\\\n\")"
     ]
   }
 }

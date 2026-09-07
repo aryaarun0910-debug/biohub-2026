@@ -70,6 +70,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 SCALE = (1.625, 0.40625, 0.40625)
 MAX_DISTANCE = 7.0
+SEED_BOOTSTRAP = 20260829
 
 # The deployed fold-0 division counts this adapter must reproduce. Recorded in FACT-0375's scope
 # block (control arm) and independently in FACT-0371's f0.deployed block. Stated here as a TEST
@@ -328,9 +329,181 @@ def cmd_prove(args) -> int:
     return 0
 
 
+# ============================================================ PKT-0035 - scoring a real decision
+def _paired_bootstrap(a: list[dict], b: list[dict], summarise, key: str = "score",
+                      draws: int = 2000, seed: int = SEED_BOOTSTRAP) -> dict:
+    """Paired over CROPS, which is the unit of independence here. Same convention as
+    scripts/win_bet/p28_full_chain_panel.py, so the interval means the same thing it does there."""
+    rng = np.random.default_rng(seed)
+    n = len(a)
+    if n != len(b) or n == 0:
+        raise RuntimeError("paired bootstrap needs the same non-empty crop list on both arms")
+    deltas = np.empty(draws)
+    for i in range(draws):
+        idx = rng.integers(0, n, n)
+        deltas[i] = (summarise([b[j] for j in idx])[key]
+                     - summarise([a[j] for j in idx])[key])
+    lo, hi = np.percentile(deltas, [2.5, 97.5])
+    return {"mean": float(deltas.mean()), "ci95": [float(lo), float(hi)], "draws": draws,
+            "seed": seed, "excludes_zero": bool(lo > 0 or hi < 0)}
+
+
+def cmd_apply(args) -> int:
+    """Score REAL verifier decisions through the official metric, alongside control and ceiling.
+
+    Four rungs in ONE pass over the crops, so the ceiling that credentials the machinery and the
+    decision being judged are measured by the same code on the same run:
+
+      control            no rejections. Must reproduce the deployed counts - the same rung-1 check
+                         `prove` makes, repeated here so this run is self-credentialed rather than
+                         inheriting a proof from another one.
+      oracle_all_fp      reject every fork the scorer calls false. Reproduces FACT-0384's ceiling.
+      <arm>              each arm in the rejection table, applied as written.
+
+    EVERY RUNG REPORTS RAW EDGE COUNTS. Removing a fork removes an edge; a division gain bought
+    with a raw edge loss is a trade and is reported as one (PKT-0035 falsifier (d)).
+    """
+    ea = _ea_atlas()
+    from biotrack.metric import estimated_nodes, load_graph
+    from biotrack.submission import read_submission
+    from tracking_cellmot import division_metrics as dm
+    from tracking_cellmot.metrics import evaluate, node_recall, per_sample_metrics, summarise
+    mods = (load_graph, evaluate, estimated_nodes, node_recall, per_sample_metrics)
+
+    out = Path(args.out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    rej = pl.read_parquet(args.rejections).filter(pl.col("fold") == args.fold)
+    if not rej.height:
+        raise RuntimeError(f"{args.rejections} carries no rows for fold {args.fold} - a silent "
+                           f"no-op would report the control as though it were a result")
+    all_arms = sorted(set(rej["arm"].to_list()))
+    arms = sorted(set(rej.filter(pl.col("reject"))["arm"].to_list()))
+    inert_arms = [a for a in all_arms if a not in arms]
+    if not arms:
+        # A LEGITIMATE OUTCOME, NOT AN ERROR. "The only operating point that preserves every
+        # training true fork rejects nothing" is a result, and the control-plus-ceiling rungs still
+        # have to run so the machinery is credentialed on this run rather than on another one.
+        print(f"DIVVERIFY_APPLY_NO_REJECTIONS fold={args.fold}: every arm in the rejection table "
+              f"rejects nothing. Control and the oracle ceiling are still measured; no arm rung "
+              f"is produced because each would be identical to the control.", flush=True)
+    by_arm_crop: dict[tuple[str, str], set[int]] = defaultdict(set)
+    for a_, c_, m_, r_ in zip(rej["arm"].to_list(), rej["crop"].to_list(),
+                              rej["mother"].to_list(), rej["reject"].to_list()):
+        if r_:
+            by_arm_crop[(str(a_), str(c_))].add(int(m_))
+
+    df = read_submission(ea.open_csv(Path(args.csv)))
+    names = sorted(df["dataset"].unique().to_list())
+    if args.max_crops:
+        names = names[: args.max_crops]
+
+    rungs = ["control", "oracle_all_fp"] + arms
+    rows: dict[str, list[dict]] = {r: [] for r in rungs}
+    n_rejected: dict[str, int] = defaultdict(int)
+    n_inert: dict[str, int] = defaultdict(int)
+    n_cost_tp: dict[str, int] = defaultdict(int)
+    n_cut_fp: dict[str, int] = defaultdict(int)
+    t0 = time.time()
+    for i, name in enumerate(names, 1):
+        gt_geff = Path(args.gt_dir) / f"{name}.geff"
+        if not gt_geff.exists():
+            raise RuntimeError(f"{name}: no GT at {gt_geff}")
+        ad = DivisionMetricAdapter(name, df.filter(pl.col("dataset") == name), gt_geff, ea, dm, mods)
+        for rung in rungs:
+            if rung == "control":
+                sel: set[int] = set()
+            elif rung == "oracle_all_fp":
+                sel = set(ad.fp_forks)
+            else:
+                sel = by_arm_crop.get((rung, name), set())
+                unknown = sel - ad.all_forks
+                if unknown:
+                    raise RuntimeError(f"{name}/{rung}: {len(unknown)} rejected nodes are not "
+                                       f"forks in this export, e.g. {sorted(unknown)[:3]}")
+            rows[rung].append(ad.exact_counts(sel))
+            if sel:
+                pc = ad.predict_counts(sel)
+                n_rejected[rung] += len(sel)
+                n_inert[rung] += pc["rejections_the_metric_ignores"]
+                n_cost_tp[rung] += pc["rejections_that_cost_a_true_positive"]
+                n_cut_fp[rung] += pc["rejections_that_cut_a_charged_fp"]
+        print(f"  [{i}/{len(names)}] {name} ({time.time() - t0:.0f}s)", flush=True)
+
+    def _tot(rs: list[dict]) -> dict:
+        s = dict(summarise(rs))
+        for k in ("edge_tp", "edge_fp", "edge_fn"):
+            s[k] = int(sum(r[k] for r in rs))
+        return s
+
+    control = _tot(rows["control"])
+    measured = {k: int(control[k]) for k in ("division_tp", "division_fp", "division_fn")}
+    control_ok = (args.fold != 0) or (measured == DEPLOYED_F0_DIVISION)
+
+    report = {
+        "schema_version": 1, "heartbeat": "DIVVERIFY_ADAPTER_APPLY_COMPLETE",
+        "fold": args.fold, "csv": str(args.csv), "n_crops": len(names),
+        "rejections": str(args.rejections),
+        "arms_in_the_table": all_arms,
+        "arms_that_reject_nothing": inert_arms,
+        "control_reproduces_the_deployed_counts": {
+            "expected_from_registry": DEPLOYED_F0_DIVISION if args.fold == 0 else None,
+            "measured": measured, "exact_match": bool(control_ok),
+            "note": ("self-credentialing: this run's own control must reproduce the deployed "
+                     "fold-0 division counts before any rung of it is read"),
+        },
+        "rungs": {},
+    }
+    for rung in rungs:
+        tot = _tot(rows[rung])
+        d = {k: float(tot[k]) - float(control[k]) for k in
+             ("score", "division_jaccard", "edge_jaccard", "adj_edge_jaccard")}
+        d_int = {k: int(tot[k]) - int(control[k]) for k in
+                 ("division_tp", "division_fp", "division_fn", "edge_tp", "edge_fp", "edge_fn")}
+        report["rungs"][rung] = {
+            "is_an_oracle": rung in ("oracle_all_fp",) or rung.endswith("_ORACLE"),
+            "forks_rejected": int(n_rejected[rung]),
+            "rejections_the_metric_ignores": int(n_inert[rung]),
+            "rejections_that_cut_a_charged_fp": int(n_cut_fp[rung]),
+            "rejections_that_cost_a_true_positive": int(n_cost_tp[rung]),
+            "preserves_every_true_fork": bool(n_cost_tp[rung] == 0),
+            "absolute": {k: (float(tot[k]) if k in ("score", "division_jaccard", "edge_jaccard",
+                                                    "adj_edge_jaccard") else int(tot[k]))
+                         for k in ("score", "division_jaccard", "edge_jaccard", "adj_edge_jaccard",
+                                   "division_tp", "division_fp", "division_fn",
+                                   "edge_tp", "edge_fp", "edge_fn")},
+            "delta_vs_control": {**{k: round(v, 7) for k, v in d.items()}, **d_int},
+            "raw_edge_verdict": (
+                "raw edge Jaccard RISES - not a division-for-edges trade" if d["edge_jaccard"] > 0
+                else "raw edge Jaccard FALLS - any division gain here is a TRADE, not a gain"
+                if d["edge_jaccard"] < 0 else "raw edge Jaccard unchanged"),
+        }
+        if rung != "control" and n_rejected[rung]:
+            report["rungs"][rung]["paired_bootstrap_score_delta"] = _paired_bootstrap(
+                rows["control"], rows[rung], summarise)
+        pl.DataFrame(rows[rung]).write_parquet(
+            out / f"apply_f{args.fold}_{rung.replace('|', '_')}.parquet")
+
+    (out / f"adapter_apply_f{args.fold}.json").write_text(
+        json.dumps(report, indent=2, default=float), encoding="utf-8")
+    print(json.dumps(report, indent=2, default=float))
+    if not control_ok:
+        print("\nAPPLY NOT TRUSTED: the control did not reproduce the deployed fold-0 division "
+              "counts, so no rung of this run may be read.", flush=True)
+        return 2
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
+    a = sub.add_parser("apply")
+    a.add_argument("--csv", required=True)
+    a.add_argument("--fold", type=int, required=True, choices=(0, 1))
+    a.add_argument("--rejections", required=True)
+    a.add_argument("--gt-dir", default=str(ROOT / "data" / "train"))
+    a.add_argument("--out-dir", required=True)
+    a.add_argument("--max-crops", type=int)
+    a.set_defaults(func=cmd_apply)
     p = sub.add_parser("prove")
     p.add_argument("--csv", required=True)
     p.add_argument("--fold", type=int, required=True, choices=(0, 1))
