@@ -4,6 +4,8 @@ into biohub_base.db so the new sprint starts from measured knowledge, not prose.
 import os, re, sqlite3, datetime, sys, hashlib
 import yaml
 
+from pathlib import Path
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB   = os.path.join(ROOT, "db", "biohub_base.db")
 MONO = os.path.join(ROOT, "repos", "Biohub-CellTracking-2026")
@@ -20,7 +22,7 @@ def cx_():
 
 def src_for(cx, path, note):
     rel = os.path.relpath(path, ROOT)
-    digest = hashlib.sha256(open(path, "rb").read()).hexdigest()
+    digest = hashlib.sha256(Path(path).read_bytes()).hexdigest()
     cx.execute("INSERT OR IGNORE INTO source(url,sha256,method,fetched_at,note)"
                " VALUES(?,?,?,?,?)", (rel, digest, "git", NOW, note))
     return cx.execute("SELECT id FROM source WHERE sha256=?", (digest,)).fetchone()[0]
@@ -29,7 +31,7 @@ def load_facts(cx):
     p = os.path.join(MONO, "research/00-system/registry/facts.yaml")
     if not os.path.exists(p): print("  facts.yaml missing"); return 0
     sid = src_for(cx, p, "monolith facts registry")
-    doc = yaml.safe_load(open(p))
+    doc = yaml.safe_load(Path(p).read_text())
     n = 0
     identifiers = {}
     links = {}
@@ -82,7 +84,7 @@ def save_experiment(cx, name, approach, outcome, notes, ref):
 def load_levers(cx):
     p = os.path.join(MONO, "research/00-system/registry/levers.yaml")
     if not os.path.exists(p): print("  levers.yaml missing"); return 0
-    doc = yaml.safe_load(open(p))
+    doc = yaml.safe_load(Path(p).read_text())
     n = 0
     for l in (doc.get("levers") or []):
         lid = l.get("id");  name = l.get("name") or l.get("statement") or ""
@@ -103,7 +105,7 @@ def load_failed(cx):
     p = os.path.join(MONO, "research/06-knowledge-system/failed-experiments.md")
     if not os.path.exists(p): return 0
     n = 0
-    for line in open(p):
+    for line in Path(p).read_text().splitlines():
         m = re.match(r"\|\s*([^|]+?)\s*\|\s*\*{0,2}([^|]+?)\*{0,2}\s*\|\s*([^|]*?)\s*\|\s*([^|]+?)\s*\|", line)
         if not m or m.group(1).strip() in ("lever","---"): continue
         lever, result, basis, why = (g.strip() for g in m.groups())
@@ -118,7 +120,7 @@ def load_failed(cx):
 def load_submissions(cx):
     p = os.path.join(MONO, "research/07-outputs/submissions.md")
     if not os.path.exists(p): return 0
-    txt = open(p).read()
+    txt = Path(p).read_text()
     subs = set(re.findall(r"kaggle submission (\d{6,})", txt)) | set(re.findall(r"submission[_ ]?id[:=]\s*(\d{6,})", txt, re.I))
     scores = re.findall(r"(0\.9\d{2,4})", txt)
     sid = src_for(cx, p, "monolith submission ledger")

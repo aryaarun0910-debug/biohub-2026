@@ -7,6 +7,8 @@ judgement is auditable and nobody re-reads 35 findings to rediscover which 13 we
 """
 import os, sqlite3, datetime, yaml, textwrap, hashlib
 
+from pathlib import Path
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB   = os.path.join(ROOT, "db", "biohub_base.db")
 SRC  = os.path.join(ROOT, "repos", "Biohub-X", "registry", "findings.yaml")
@@ -54,12 +56,12 @@ JUDGED = {
 def main():
     cx = sqlite3.connect(DB)
     cx.execute("PRAGMA foreign_keys=ON")
-    digest = hashlib.sha256(open(SRC, 'rb').read()).hexdigest()
+    digest = hashlib.sha256(Path(SRC).read_bytes()).hexdigest()
     cx.execute("INSERT OR IGNORE INTO source(url,sha256,method,fetched_at,note)"
                " VALUES('repos/Biohub-X/registry/findings.yaml',?,'git',?,?)",
                (digest, NOW, "Biohub-X findings registry, curated"))
     sid, observed = cx.execute("SELECT id,fetched_at FROM source WHERE sha256=?", (digest,)).fetchone()
-    doc = yaml.safe_load(open(SRC))
+    doc = yaml.safe_load(Path(SRC).read_text())
     kept = skipped = 0
     for f in doc["findings"]:
         fid = f["id"]

@@ -75,7 +75,7 @@ def main():
     # ---- competition metadata ----
     p = os.path.join(EV, "comp.json")
     sid = src(cx, p, RPC + "competitions.CompetitionService/GetCompetition")
-    c = json.load(open(p))
+    c = json.loads(Path(p).read_text())
     keep = ["deadline","teamMergerExplicitDeadline","prohibitNewEntrantsExplicitDeadline",
             "maxDailySubmissions","numScoredSubmissions","maxTeamSize","leaderboardPercentage",
             "onlyAllowKernelSubmissions","usesSynchronousReruns","maxGpuRuntimeMinutes",
@@ -93,13 +93,13 @@ def main():
         name = os.path.basename(md)[:-3]
         s2 = src(cx, md, "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development",
                  note=f"page:{name}")
-        body = open(md).read()
+        body = Path(md).read_text()
         fact(cx,"page",name,f"{len(body)} chars @ {os.path.relpath(md, ROOT)}","claim","high",s2, quote=body[:400])
 
     # ---- leaderboard snapshot ----
     p = os.path.join(EV,"lb.json")
     sid = src(cx,p, RPC+"competitions.LeaderboardService/GetLeaderboard")
-    lb = json.load(open(p)); teams = {t["teamId"]: t for t in lb.get("teams",[])}
+    lb = json.loads(Path(p).read_text()); teams = {t["teamId"]: t for t in lb.get("teams",[])}
     n=0
     for i, r in enumerate(lb.get("publicLeaderboard",[]), start=1):
         t = teams.get(r.get("teamId"), {})
@@ -121,7 +121,7 @@ def main():
     tot=0
     for f in sorted(glob.glob(os.path.join(EV,"topics_p*.json"))):
         s2 = src(cx,f, RPC+"discussions.DiscussionsService/GetTopicListByForumId")
-        for t in json.load(open(f)).get("topics",[]):
+        for t in json.loads(Path(f).read_text()).get("topics",[]):
             rel,take = CRITICAL.get(t["id"], (None,None))
             cx.execute("INSERT INTO forum_topic"
                        "(id,title,votes,comments,is_host,url,harvested_at,relevance,takeaway)"
@@ -141,7 +141,7 @@ def main():
     # ---- public kernels ----
     for f in sorted(glob.glob(os.path.join(EV,"kernels_p*.json"))):
         s2 = src(cx,f, RPC+"kernels.KernelsService/ListKernels")
-        for k in json.load(open(f)).get("kernels",[]):
+        for k in json.loads(Path(f).read_text()).get("kernels",[]):
             score = float(k["bestPublicScore"]) if k.get("bestPublicScore") else None
             rt = int(k["lastRunExecutionTimeSeconds"]) if k.get("lastRunExecutionTimeSeconds") else None
             cx.execute("INSERT INTO public_kernel"

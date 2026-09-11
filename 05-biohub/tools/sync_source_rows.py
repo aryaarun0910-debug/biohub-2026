@@ -5,6 +5,7 @@ Restore into an empty database; reimporting the identical snapshot is a no-op.
 Never merge by integer IDs into a different database or overwrite unexported work.
 """
 import argparse
+from contextlib import closing
 import json
 import os
 from pathlib import Path
@@ -56,7 +57,7 @@ def read_snapshot(path):
 
 
 def export(db=DB, out=OUT):
-    with connect(db, readonly=True) as cx:
+    with closing(connect(db, readonly=True)) as cx:
         cx.execute('BEGIN')
         records = list(rows(cx))
         if cx.execute('PRAGMA foreign_key_check').fetchall():
@@ -81,11 +82,12 @@ def export(db=DB, out=OUT):
 def load(db=DB, out=OUT):
     records = read_snapshot(out)
     # Validate the entire payload in isolation before touching the destination.
-    with sqlite3.connect(':memory:') as staged:
+    with closing(sqlite3.connect(':memory:')) as staged:
         staged.row_factory = sqlite3.Row
         staged.executescript((ROOT / 'db/schema.sql').read_text())
         staged.execute('PRAGMA foreign_keys=ON')
         with staged:
+            staged.execute("BEGIN")
             staged.execute('PRAGMA defer_foreign_keys=ON')
             for record in records:
                 table = record['tbl']
@@ -99,7 +101,7 @@ def load(db=DB, out=OUT):
             raise ValueError('Snapshot is not in canonical order')
         db = Path(db)
         db.parent.mkdir(parents=True, exist_ok=True)
-        with sqlite3.connect(db) as cx:
+        with closing(sqlite3.connect(db)) as cx, cx:
             cx.row_factory = sqlite3.Row
             cx.executescript((ROOT / 'db/schema.sql').read_text())
             cx.execute('PRAGMA foreign_keys=ON')
@@ -126,7 +128,7 @@ def load(db=DB, out=OUT):
 
 def check(db=DB, out=OUT):
     saved = read_snapshot(out)
-    with connect(db, readonly=True) as cx:
+    with closing(connect(db, readonly=True)) as cx:
         cx.execute('BEGIN')
         live = list(rows(cx))
         if cx.execute('PRAGMA foreign_key_check').fetchall():
