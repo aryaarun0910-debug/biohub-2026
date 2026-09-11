@@ -8,3 +8,4 @@ db/*.db
 db/*.db-wal
 db/*.db-shm
 __pycache__/
+# TestBench scratchpad lives at ~/Work/TestBench/BiohubTestBench (separate, disposable)
