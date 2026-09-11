@@ -1,0 +1,136 @@
+id,authorName,postDate,votes,content
+3522957,,2026-09-10 03:33:29.587000,1,"<p>I had assumed a division shows up as an unusually long parent to daughter step, so a distance gate could isolate one. Measured on the labels, that is wrong. Everything below comes from the training label files only, no model and no predictions, so anyone holding the labels can reproduce it. 73 files I could read locally, 36 divisions, 25,661 continuation edges. An edge is a continuation when its source has one child, and a division edge when its source has two.</p>
+<p>Caveat added after hengck23's comment below: these labels cover segments, not whole lineages. Of 572 labelled tracks, 351 begin after frame 0 and 391 end before the last frame, median length 35 frames, while all 25,733 labelled edges span exactly one timepoint. So the 36 divisions are a labelled subset, not an unbiased sample of every division in the movies. If annotators favoured the clear cases, the short parent to daughter displacement below is partly selection. Read every number here as a one frame displacement between labelled centroids on that subset.</p>
+<p>Step length in micrometres:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>n</th>
+<th>median</th>
+<th>IQR</th>
+<th>p90</th>
+<th>p99</th>
+<th>max</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>continuation</td>
+<td>25,661</td>
+<td>1.724</td>
+<td>0.908 to 2.188</td>
+<td>3.350</td>
+<td>6.906</td>
+<td>18.692</td>
+</tr>
+<tr>
+<td>division step</td>
+<td>72</td>
+<td>4.569</td>
+<td>3.300 to 6.214</td>
+<td>7.081</td>
+<td>10.619</td>
+<td>12.336</td>
+</tr>
+<tr>
+<td>sister separation</td>
+<td>36</td>
+<td>8.849</td>
+<td>7.196 to 10.235</td>
+<td>11.866</td>
+<td>13.896</td>
+<td>14.653</td>
+</tr>
+</tbody>
+</table>
+<p>A division step is about 2.7x the median continuation, but that is not the comparison that matters. How many continuations sit in the same band:</p>
+<table>
+<thead>
+<tr>
+<th>step above</th>
+<th>continuations</th>
+<th>division steps</th>
+<th>ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5 um</td>
+<td>722</td>
+<td>30</td>
+<td>24:1</td>
+</tr>
+<tr>
+<td>7 um</td>
+<td>241</td>
+<td>8</td>
+<td>30:1</td>
+</tr>
+<tr>
+<td>9 um</td>
+<td>82</td>
+<td>3</td>
+<td>27:1</td>
+</tr>
+<tr>
+<td>10 um</td>
+<td>38</td>
+<td>1</td>
+<td>38:1</td>
+</tr>
+</tbody>
+</table>
+<p>The division IQR sits entirely inside the ordinary continuation range, whose p99 is 6.91. A gate wide enough to admit the median division admits hundreds of continuations for every division it catches. The failure is a base rate, not an overlap you can tune away.</p>
+<p>One trap worth flagging. I first measured these steps between my own predicted nodes instead of labelled ones. On seven divisions the longest parent to daughter step per event reads median 6.36 um and max 7.37 um on the labels, but median 8.47 um and max 13.65 um between the predicted nodes matched to them. That gap is detector localisation. A predicted node may sit up to 7 um from the label it matches, and two such errors compound across one edge. Tune a division gate on predicted positions and you calibrate it for your detector error, not for cell motion. An earlier post of mine compared about 3 um against 8.47, two numbers measured differently from each other, so that ratio was meaningless.</p>
+<p>Sister separation is the one quantity that does look different, median 8.85 um against 1.72 um. But it is a property of a candidate pair rather than of an edge, so you can only use it after proposing the pair, and proposing pairs is the expensive step.</p>
+<p>So, for anyone scoring divisions above zero: what does the decision key on? Appearance change in the parent, a learned edge score rather than geometry, symmetry of the two candidate steps, something spanning more than two frames? Not asking for configurations, only which family of signal carried the information, and whether you validated it on more than a handful of events. I have 36 divisions, so I distrust anything I tune on that.</p>"
+3523039,,2026-09-10 12:13:35.820000,0,"<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fd5b1f91d89d66e534da6f4c0edd0aa08%2FSelection_4904.png?generation=1789042287653411&amp;alt=media"" alt=""""></p>
+<p>typo: bright thin lines at time t are new cell divisions that happen before t (maybe a few frames before). It is very good clue to detect division</p>
+<p>i think many cell divisions are not annotated in the Kaggle data. It is not so difficult to identify them (and i think when you find one, you are likely to find many others. it is rare only one cell splits).</p>
+<p>Here i show an example I found in the external data used in the ultrack paper </p>"
+3523041,,2026-09-10 12:26:17.993000,0,"<p>you may want to verify this. i am busy with ultrack segmentation so i will do that much later</p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Feb06414e4cf6305f1462131097bf94db%2FSelection_4906.png?generation=1789043157023478&amp;alt=media"" alt=""""></p>"
+3523059,,2026-09-10 13:49:04.660000,0,"<p>I checked what I could tonight on the labelled events. Numbers are small, so read them as a first look.</p>
+<p>Synchrony, labels only: 25 films have labelled divisions, 8 have two or more. Within one film the labelled division times spread by a median of 32 frames (8 to 38) out of 100. So the labelled divisions do not cluster. That says nothing about the unlabelled ones, which is your actual claim, and I cannot test that without a detector for them.</p>
+<p>Appearance: 5 films with both images and labels, giving 8 parents at the split frame, 16 daughters at t+1, 16 at t+2, 15 at t+3, against 299 ordinary labelled nodes from the same films. Patch of about 5 by 3.7 by 3.7 um around each centroid. Peak intensity separates them at AUC 0.73 for the parent at t, then 0.68, 0.70, 0.70 for t+1 to t+3. Local contrast 0.55, 0.65, 0.69, 0.64. An intensity weighted elongation measure does not separate at all: 0.34, 0.48, 0.58, 0.56, which is chance. So brighter I can confirm on these events, thin I could not, at least not with covariance anisotropy at 1.625 um z spacing. Your figure puts the thinnest and brightest moment at anaphase, which would be before the labelled split frame. My parent at t is the closest sample I have and it is the roundest of the lot, so I may be looking one or two frames too late.</p>
+<p>One question so I can set a search window: in this data, how many frames after the split does the thin bright phase stay visible, and does it already show at the parent frame or only after?</p>"
+3523096,,2026-09-10 15:25:28.813000,0,"<p>the best way is to use napari viewer. eg the end of kaggle parent node is zxy. then you make a crop around it for t=t-10 to t+10 and use your napari viewer to show that small part roi. you can easily confirm the distinctive appearance for divided cell detection. </p>
+<p>it is not difficult to use focus3d framework to hand-label these because it supports human-in-the-loop annotation (basically click a point like SAM). then you can train a division detector</p>"
+3522987,,2026-09-10 07:31:22.093000,0,"<p>note that the annotation is sparse. it is possible that the ""long parent"" is annotated short. </p>
+<p>btw, you want to check if the division characteristics (separation distance, appearance) is the same for:</p>
+<p><a href=""https://github.com/royerlab/ultrack_supplementary/tree/main/configuration"" target=""_blank"">https://github.com/royerlab/ultrack_supplementary/tree/main/configuration</a><br>
+<a href=""https://public.czbiohub.org/royerlab/zebrahub/imaging/single-objective/"" target=""_blank"">https://public.czbiohub.org/royerlab/zebrahub/imaging/single-objective/</a>  </p>
+<p>note thate voxel/um of the data set. one is the same as kaggle (1.625,0.4025,0.4025), but most are different.</p>"
+3522995,,2026-09-10 08:28:20.723000,0,"<p>You are right about the annotation, and it changes how my numbers should be read.</p>
+<p>Two checks. First, whether labelled edges ever skip frames: across 73 label files, 25,661 continuation edges and 72 division edges, every one spans exactly one timepoint. So each number I posted is a one frame displacement between labelled centroids. Not biological motion exactly, since the label coordinates carry their own localisation error, but not a multi frame jump either. Second, track coverage: 572 labelled tracks, 351 begin after frame 0 and 391 end before the last frame, median length 35 frames. Some of those are cells entering or leaving the field of view, so I cannot call it truncation outright, but it is consistent with labelling by segment rather than by whole lineage. The safe reading is that my 36 divisions are a labelled subset, not an unbiased sample of every division in the movies. If the easy ones were the ones that got labelled, the median parent to daughter displacement of 4.57 um is partly selection. I will add that caveat to the post.</p>
+<p>On the Ultrack configs, that was worth the hour. Both zebrafish configs in the supplementary repo use max_distance 10.0 and max_neighbors 5, and the event penalties are small and balanced: large_zebrafish has appear 0.002, disappear 0.001, division 0.001; sparse_zebrafish has all three at 0.1. The public lineage I forked runs division at 1.2 and disappearance at 1.5 with appearance at 0. I had already worked out on my own solver's objective that a fork can never be optimal at those values, and the reference config is consistent with that, though the link scores are on a different scale so it is corroboration rather than proof.</p>
+<p>On units: as far as I can tell the linking step inherits the scale recorded by the segmentation step, so max_distance is in micrometres only if the image reader supplied physical units. I could not confirm which case their run was.</p>
+<p>On the voxel sizes, all six single objective files I could read (ZSNS001 to 005 and the tail crop) report 1.24 by 0.439 by 0.439 um, none 1.625 by 0.40625. So I did not find the acquisition that matches Kaggle. If you know which one it is I would like to look at it.</p>"
+3523010,,2026-09-10 09:43:27.307000,0,"<p>read the ultrack paper. repeat Figure.6 experiment is the key.
+<a href=""https://public.czbiohub.org/royerlab/ultrack/"" target=""_blank"">https://public.czbiohub.org/royerlab/ultrack/</a></p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb148d243cf892da9bdee93d894cfe14f%2FSelection_4888.png?generation=1789033318421343&amp;alt=media"" alt=""""></p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb581a89fc67b5f6bc012af05071f290a%2FSelection_4881.png?generation=1789033350621459&amp;alt=media"" alt=""""></p>
+<p><a href=""https://github.com/royerlab/ultrack_supplementary/tree/main/configuration/sparse_zebrafish"" target=""_blank"">https://github.com/royerlab/ultrack_supplementary/tree/main/configuration/sparse_zebrafish</a>
+(dense green channel)</p>"
+3523013,,2026-09-10 09:52:16.767000,0,"<pre><code>url = ""https://public.czbiohub.org/royerlab/ultrack/zebrafish_embryo.ome.zarr/""
+if 1:
+    g = zarr.open(fsspec.get_mapper(url), mode=""r"")
+    print(type(g))
+    print(g.attrs.asdict())
+
+    paths = [d[""path""] for d in g.attrs[""multiscales""][0][""datasets""]]
+    for path in paths:
+        arr = g[path]
+        print(
+            f""level={path}"",
+            f""shape={arr.shape}"",
+            f""chunks={arr.chunks}"",
+            f""dtype={arr.dtype}"",
+        )
+
+
+#print out
+ [{'coordinateTransformations': [{'scale': [1.0, 1.0, 1.625, 0.40625, 0.40625], 'type': 'scale'}], 'path': '0'},
+level=0 shape=(522, 1, 505, 2217, 2170) chunks=(1, 1, 128, 2217, 2170) dtype=uint16
+</code></pre>"

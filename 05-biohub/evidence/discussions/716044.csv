@@ -1,0 +1,5 @@
+id,authorName,postDate,votes,content
+3484064,,2026-06-30 00:29:04.647000,-6,<p>I have finished the first version of my project and successfully generated the output in the required CSV format. How should I submit it?</p>
+3484079,,2026-06-30 01:26:46.267000,0,"<p>Hi <a href=""https://www.kaggle.com/abdowael1"" target=""_blank"">@abdowael1</a> -- in addition to what <a href=""https://www.kaggle.com/inversion"" target=""_blank"">@inversion</a> said below, check out this documentation page that could be helpful: <a href=""https://www.kaggle.com/docs/competitions#making-a-prediction-submission"" target=""_blank"">https://www.kaggle.com/docs/competitions#making-a-prediction-submission</a></p>
+<p>Good Luck!</p>"
+3484078,,2026-06-30 01:25:32.200000,0,"<p>See the ""Code Requirements"" section on the Overview tab of the competition.</p>"

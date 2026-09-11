@@ -1,0 +1,32 @@
+id,authorName,postDate,votes,content
+3499801,,2026-07-18 00:20:53.127000,36,"<p>Hello all, </p>
+<p>A few of you might be aware that an exploit of our metrics was found, specifically in the division Jaccard score. 
+We have made a patch and will re-score all submissions as soon as possible (likely Monday). Submissions that did not actively exploit this will not have their scores affected. </p>
+<p>In the meanwhile the patch is already public on <a href=""https://github.com/royerlab/kaggle-cell-tracking-competition"" target=""_blank"">https://github.com/royerlab/kaggle-cell-tracking-competition</a> so you can score your submissions locally. </p>
+<p>Apologies for the mistake and thank you for your understanding. </p>"
+3500919,,2026-07-20 21:27:36.867000,9,<p>when will you re-score all our submissions ?</p>
+3501121,,2026-07-21 12:42:53.233000,1,"<p>I was wondering the same thing <a href=""https://www.kaggle.com/thibautgoldsborough"" target=""_blank"">@thibautgoldsborough</a>, any updates?</p>"
+3501385,,2026-07-21 22:43:16.923000,3,"<p><a href=""https://www.kaggle.com/sweetyheehee"" target=""_blank"">@sweetyheehee</a> <a href=""https://www.kaggle.com/khalid000000"" target=""_blank"">@khalid000000</a> <a href=""https://www.kaggle.com/thedyingkai"" target=""_blank"">@thedyingkai</a> and others, the re-scoring is running, and it should be updated tomorrow if everything works out.</p>"
+3501459,,2026-07-22 03:03:43.173000,0,"<p>nice, thanks for the update</p>"
+3501506,,2026-07-22 06:34:14.217000,0,"<p>Thank you for the update, we are awaiting the results.</p>"
+3501109,,2026-07-21 11:57:35.713000,3,<p>I hope you can rerun it as soon as possible so I can evaluate the current strategy quickly as well.</p>
+3500762,,2026-07-20 13:26:27.690000,1,"<p>Thank you for sharing the github repo! It's a great resource for validating the predictions locally before submitting them.</p>
+<p>I've taken the liberty of copying it into a public Kaggle dataset, so it can be attached to a notebook and used to debug: <a href=""https://www.kaggle.com/datasets/dalloliogm/biohub-official-scorer-patched/data"" target=""_blank"">https://www.kaggle.com/datasets/dalloliogm/biohub-official-scorer-patched/data</a></p>"
+3502398,,2026-07-24 07:37:33.870000,0,"<p>Thank you for the Division Metric exploit and patch. <a href=""https://www.kaggle.com/thibautgoldsborough"" target=""_blank"">@thibautgoldsborough</a> </p>"
+3501698,,2026-07-22 16:03:06.593000,0,"<p>Is it just me, or are the submissions taking so much longer to evaluate, now? I submitted this morning and it is still running after 11 hours. It uses to take about 5 hours to complete.</p>"
+3501630,,2026-07-22 12:32:35.473000,0,"<p>Thanks for update, we are waiting for this results.</p>"
+3501441,,2026-07-22 01:12:59.720000,0,<p>Thanks for the update and for sharing the local patch so quickly! Really appreciate the team's dedication to maintaining a level playing field for all participants.</p>
+3501163,,2026-07-21 14:03:50.573000,0,<p>when rescore?</p>
+3499867,,2026-07-18 05:58:30.563000,0,"<p>As it is gonna fix, then it would be now safe to tell what's actually found? I am not aware yet.</p>"
+3500056,,2026-07-18 12:26:15.307000,2,"<p>(My current third place exploits the metric hack as I tested it last night.)</p>
+<p><strong>What the division-metric exploit was</strong></p>
+<p>The competition score is <code>adjusted_edge_jaccard + 0.1 × division_jaccard</code>. The exploit targeted the second term — the division Jaccard — which carries up to 0.1 of the total.</p>
+<p>The division score works by pulling out ""division"" events (a parent node with two children) from your predicted lineage graph and matching them against the ground-truth divisions. In the pre-patch version, that matching relied on <strong>weakly-connected-component</strong> structure and did not strictly require each matched division to be a genuine parent→two-daughter fork sitting near a real GT division.</p>
+<p>The exploit added a small amount of synthetic graph structure <strong>far outside the image volume</strong>:</p>
+<ul>
+<li>a single ""hub"" node placed at coordinates far outside the data (e.g. −10000, −10000, −10000), with edges to the root of every (or the largest <em>N</em>) track components — this merges the whole prediction into one big weakly-connected component;</li>
+<li>a handful of synthetic ""fork"" chains (a divider node with two children) at those same far-away coordinates;</li>
+<li>and dropping the real forks from the tracks.</li>
+</ul>
+<p>Under the old matching this pushed the division Jaccard from ~0 to ~1.0, adding close to the full +0.1 to the score — even though none of the added nodes or edges correspond to a real cell or a real division. It's a pure scoring artifact; it does nothing for actual tracking quality.</p>
+<p><strong>The patch</strong> (now public in the repo) requires divisions to be genuine <strong>strongly-connected</strong> parent→two-daughter structures matched within the 7 µm distance radius. The far-away synthetic forks now register as false positives instead of true positives, which removes the benefit and is why exploiting submissions will drop on re-score.</p>"

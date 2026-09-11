@@ -1,0 +1,4 @@
+id,authorName,postDate,votes,content
+3502297,,2026-07-24 00:35:47.033000,1,"<p>Hello. I would love to participate in the competition, and have worked in cell tracking previously… but have never used Python and have no interest in doing so. Wouldn't it be more realistic to just provide us with the raw images/videos (TIFF files for example) rather than some pre-processed Zarr files… it looks to me like they're pre-processed segmentations… that may already have errors? If you want us to have a ""real-world"" application, then providing the raw data seems more realistic. Even if it's hundreds of GB…</p>"
+3502329,,2026-07-24 03:53:01.393000,0,"<p>Hi <a href=""https://www.kaggle.com/waynebhayes"" target=""_blank"">@waynebhayes</a></p>
+<p>zarr is just a standard, there are several implementations in multiple programming languages, <a href=""https://zarr.dev/implementations/"" target=""_blank"">https://zarr.dev/implementations/</a></p>"

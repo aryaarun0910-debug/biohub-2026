@@ -1,0 +1,48 @@
+id,authorName,postDate,votes,content
+3496301,,2026-07-13 15:44:50.310000,0,"<p>Several threads mention submissions timing out during scoring. I've hit it three times and have some data that might narrow down the cause, plus a question for the hosts.</p>
+<p>Setup: classical pipeline (Otsu/watershed detection → nearest-neighbour linking → graph repair). Predictions on the 4 test videos, node counts roughly matching estimated_number_of_nodes (over_ratio ~0.85–0.95, i.e. slightly under-predicting, not spamming detections).
+What scores and what doesn't:</p>
+<table>
+<thead>
+<tr>
+<th>pipeline</th>
+<th>nodes</th>
+<th>edges</th>
+<th>edges/node</th>
+<th>scoring</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>raw detect + NN link</td>
+<td>~62k</td>
+<td>fragmented</td>
+<td>—</td>
+<td>4–5 hrs</td>
+</tr>
+<tr>
+<td>+ gap-close + short-track</td>
+<td>61,942</td>
+<td>58,786</td>
+<td>0.95</td>
+<td>timed out</td>
+</tr>
+<tr>
+<td>+ relink + gap-close + filter</td>
+<td>61,670</td>
+<td>58,460</td>
+<td>0.95</td>
+<td>timed out</td>
+</tr>
+</tbody>
+</table>
+<p>The node counts are essentially identical across all three. The thing that changes is edge structure: the raw linker leaves a fragmented graph (many short, broken tracks), while the repair stages knit those fragments into long continuous tracks.</p>
+<p>Hypothesis: scoring cost is driven by connected-component structure, not node count. A graph of N nodes in many short components appears to be much cheaper to score than the same N nodes in few long components — presumably the division/lineage analysis traverses components.</p>
+<p>Things I ruled out:</p>
+<p>Malformed graph — all edges span exactly 1 frame, max out-degree = 1, zero orphan edges, zero self-loops, zero duplicate edges, node IDs per-dataset starting at 1 (matching sample_submission.csv).
+Over-detection — over_ratio &lt; 1.0 on every video.</p>
+<p>Node count as the driver — raising the detection threshold to cut nodes 17% costs ~0.18 edge Jaccard (there are no junk detections to remove; the node count reflects real cell density). Not a viable lever.</p>
+<p>Happy to share more numbers if useful. If anyone else has a submission that scores with gap-closing/track-linking on the dense video, I'd love to know your node/edge counts for comparison.</p>"
+3502053,,2026-07-23 11:50:31.030000,0,"<p>this is not caused by scoring; local scoring on all train data runs just over 1 minute. All the other time goes into constructing your prediction. Time how long your code takes over test set of 4 videos, scale it up to approximate full test set - that is how long your submission will run.</p>"
+3498096,,2026-07-15 04:15:33.537000,0,"<p>Are you considering the time complexities of the function you are using?
+For 60K nodes, using function having time complexity O(N^3) will also cause the time out.</p>"

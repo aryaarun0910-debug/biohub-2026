@@ -1,0 +1,122 @@
+id,authorName,postDate,votes,content
+3505056,,2026-07-29 11:35:42.627000,2,"<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F31093689%2F0aac464b3c81659722fb825221b2c7e2%2Fbiohub_cover.jpg?generation=1785325597251551&amp;alt=media"" alt=""""></p>
+<h1>3D Spatiotemporal Cell Lineage Graph Tracking Engine for Developmental Microscopy</h1>
+<p><strong>Track</strong>: Main Track<br>
+<strong>Dataset</strong>: CZ Biohub Developmental Microscopy (<code>.zarr</code> &amp; <code>.geff</code> Data Stores)  </p>
+<hr>
+<h2>1. Executive Summary &amp; Problem Formulation</h2>
+<p>Understanding embryonic development requires tracking thousands of individual cell nuclei across 3D space and time ($x, y, z, t$). </p>
+<p>We present a <strong>Spatiotemporal Cell Lineage Tracking Engine</strong> that extracts 3D cell centroids and lineage connectivity graphs from Graph Exchange File Format (<code>.geff</code>) data stores. Our framework measures cell migration velocities, identifies cell division events, and evaluates tracking continuity across developmental time series.</p>
+<hr>
+<h2>2. GEFF Graph Extraction &amp; Kinematic Metrics</h2>
+<h3>2.1 3D Cell Centroid Extraction</h3>
+<p>Cell positions are extracted from Zarr node property groups:
+$$\mathbf{p}_i(t) = \left( x_i(t), y_i(t), z_i(t) \right) \in \mathbb{R}^3, \quad t \in [0, T]$$</p>
+<p>Our spatial analysis on sample volumes (<code>6bba_2540cd90</code>) extracted <strong>529 cell centroids</strong> spanning $X \in [3, 253]$ μm, $Y \in [2, 248]$ μm, and $Z \in [6, 43]$ μm across 100 time frames ($t = 0 \dots 99$).</p>
+<h3>2.2 Cell Migration Velocity Distribution</h3>
+<p>Frame-to-frame cell displacement vector $\Delta \mathbf{p}<em>i(t)$ is calculated as:
+$$v_i(t) = \sqrt{(x_t - x</em>{t-1})^2 + (y_t - y_{t-1})^2 + (z_t - z_{t-1})^2}$$</p>
+<ul>
+<li><strong>Average Cell Velocity</strong>: $2.20\text{ μm/step}$</li>
+<li><strong>Maximum Cell Displacement Speed</strong>: $5.74\text{ μm/step}$</li>
+</ul>
+<hr>
+<h2>3. Multi-Dataset Empirical Benchmark Matrix</h2>
+<p>We benchmarked our pipeline across 10 representative developmental microscopy volumes:</p>
+<table>
+<thead>
+<tr>
+<th>Dataset ID</th>
+<th>Total Cell Centroids</th>
+<th>Lineage Tracking Edges</th>
+<th>Tracking Density Ratio</th>
+<th>Runtime (s)</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>6bba_2540cd90</code></td>
+<td>529</td>
+<td>523</td>
+<td>0.989</td>
+<td>0.0323s</td>
+<td><strong>SUCCESS</strong></td>
+</tr>
+<tr>
+<td><code>44b6_0b24845f</code></td>
+<td>51</td>
+<td>49</td>
+<td>0.961</td>
+<td>0.0530s</td>
+<td><strong>SUCCESS</strong></td>
+</tr>
+<tr>
+<td><code>44b6_996155de</code></td>
+<td>380</td>
+<td>377</td>
+<td><strong>0.992</strong></td>
+<td>0.0653s</td>
+<td><strong>SUCCESS</strong></td>
+</tr>
+<tr>
+<td><code>44b6_0c582fdc</code></td>
+<td>71</td>
+<td>70</td>
+<td>0.986</td>
+<td>0.0549s</td>
+<td><strong>SUCCESS</strong></td>
+</tr>
+<tr>
+<td><code>44b6_8f9ecab4</code></td>
+<td>374</td>
+<td>370</td>
+<td>0.989</td>
+<td>0.0632s</td>
+<td><strong>SUCCESS</strong></td>
+</tr>
+<tr>
+<td><code>6bba_d2b9fc0c</code></td>
+<td><strong>944</strong></td>
+<td><strong>921</strong></td>
+<td>0.976</td>
+<td>0.0637s</td>
+<td><strong>SUCCESS</strong></td>
+</tr>
+<tr>
+<td><code>44b6_18ced818</code></td>
+<td>100</td>
+<td>99</td>
+<td>0.990</td>
+<td>0.0584s</td>
+<td><strong>SUCCESS</strong></td>
+</tr>
+<tr>
+<td><code>44b6_33b596bf</code></td>
+<td>50</td>
+<td>49</td>
+<td>0.980</td>
+<td>0.0555s</td>
+<td><strong>SUCCESS</strong></td>
+</tr>
+<tr>
+<td><code>6bba_7b5d3b2c</code></td>
+<td>565</td>
+<td>555</td>
+<td>0.982</td>
+<td>0.0680s</td>
+<td><strong>SUCCESS</strong></td>
+</tr>
+<tr>
+<td><code>6bba_0e7c0d07</code></td>
+<td>209</td>
+<td>198</td>
+<td>0.947</td>
+<td>0.0636s</td>
+<td><strong>SUCCESS</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>4. Conclusion &amp; Output Verification</h2>
+<p>Our engine outputs both <code>submission.parquet</code> and <code>submission.csv</code> in <code>/kaggle/working/</code>, providing an automated, scalable pipeline for 4D developmental biology cell tracking.</p>"

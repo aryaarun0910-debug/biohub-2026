@@ -1,0 +1,5 @@
+id,authorName,postDate,votes,content
+3484917,,2026-06-30 21:27:45.113000,-3,"<p>I’ve tried submitting my CSV file three times now, but I keep getting a message saying my notebook is using the internet. I’ve disabled it and saved the changes, yet the notification telling me to disconnect the notebook from the internet keeps popping up—I don't know what to do anymore.</p>"
+3484931,,2026-06-30 21:49:18.087000,0,"<p><a href=""https://www.kaggle.com/gbelsalvador"" target=""_blank"">@gbelsalvador</a>, are you trying to install any package from pip?</p>"
+3485128,,2026-07-01 05:50:29.130000,0,"<p>Yes, there are certain packages I installed using pip.</p>"
+3485623,,2026-07-01 16:51:43.620000,0,"<p>These won't work during submission, you need to have them already installed in your testing artifacts</p>"

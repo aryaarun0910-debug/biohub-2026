@@ -1,0 +1,8 @@
+id,authorName,postDate,votes,content
+3517118,,2026-08-26 08:00:08.593000,1,"<p>For me division_jaccard never rises above 0.0004, at any weight tested. Even at 0.5, where the ILP does find 1 real division (div_tp=1), it does so alongside 3260 false ones. div_j = tp/(tp+fp+fn) ≈ 1/3260 - swamped to near-zero by the FP volume.</p>
+<p>This means weight-tuning cannot produce a real division_jaccard contribution. It can only choose between ""suppress everything, div_j=0"" (weight 1.0) or ""let a few real ones through, buried under thousands of fake ones, div_j still ≈0"" (weight 0.5–0.65). Neither path gets me a meaningful positive division score.</p>
+<p>I highely need help with thisl</p>"
+3517187,,2026-08-26 11:55:37.080000,0,"<p>Hi Jawad, sorry for this question , which is not related to your post: I saw your score; does this mean you got this score with division jaccard being 0? Currently I am in 0.85 and wondering how to proceed next. Is it mainly about training or inference tuning; i trained 50 epochs.</p>"
+3517206,,2026-08-26 12:56:28.023000,-1,"<p>Dont consider my current score for this post. What im doing is basically having 2 approaches. </p>
+<p>1) Going with public model and tuning it around to grab a pinch of score somehow.
+2) Training from scratch myself. I started doing so 2 days ago. As public one hits a final checkpoint. No further work induces it. So this post is about the scratch model im working on.</p>"

@@ -1,0 +1,10 @@
+id,authorName,postDate,votes,content
+3511361,,2026-08-11 00:18:51.970000,19,"<p>Hi <a href=""https://www.kaggle.com/thibautgoldsborough"" target=""_blank"">@thibautgoldsborough</a> ,</p>
+<p>Could you please clarify whether the publicly available Zebrahub imaging and tracking data can be used as external training data for this competition?</p>
+<p>Zebrahub imaging data:
+<a href=""https://zebrahub.sf.czbiohub.org/imaging"" target=""_blank"">https://zebrahub.sf.czbiohub.org/imaging</a></p>
+<p>Specifically, I'd like to confirm whether both the imaging data and the tracking annotations (*_tracks.csv) are allowed.</p>
+<p>Thanks!</p>"
+3512606,,2026-08-13 21:58:20.713000,5,<p>Hi! Yes you are free to use the data and all resources in Zebrahub for this competition! There is no overlap with the test set. </p>
+3512686,,2026-08-14 05:42:51.883000,-1,"<p>ZebraHub data allowed as external training data? <a href=""https://www.kaggle.com/marumarukun"" target=""_blank"">@marumarukun</a> </p>"
+3512267,,2026-08-13 02:12:42.163000,0,<p>Following this thread. Clarification on external Zebrahub datasets (*_tracks.csv) would be very helpful!</p>

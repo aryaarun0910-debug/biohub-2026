@@ -1,0 +1,35 @@
+id,authorName,postDate,votes,content
+3522229,,2026-09-08 13:31:27.037000,10,"<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb9aa6b1321cfd69983aab968deba4789%2FSelection_4826.png?generation=1788875194680167&amp;alt=media"" alt=""""></p>
+<p>e.g. at epoch 8:
+refine_prob &gt;= 0.0888, remove 13.13% peak detection and has kaggle recall of 99.45%. Error distance from kaggle annotation in 64x64x64 canonical voxel is refined from 1.1766 to 0.969</p>"
+3522587,,2026-09-09 08:49:45.653000,2,"<p>Improved cell detection is not used in inference but to create better dense training samples. Here you can see that better localisation clearly improves edge recall significantly.</p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F17e8b575e301310ace4f3ff8614a2bba%2FSelection_4851.png?generation=1788943783835062&amp;alt=media"" alt=""""></p>
+<p>note: ultrack has few node detector. But I haven't checked if they align with the Kaggle annotated point yet.
+<a href=""https://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-daxi.pt"" target=""_blank"">https://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-daxi.pt</a><br>
+ <a href=""https://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-simview.pt"" target=""_blank"">https://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-simview.pt</a>  </p>"
+3522636,,2026-09-09 12:27:44.490000,0,"<p>i use ChatGPT to make a trajectory of nodes (using slice as appearance ), with evaluation results like hit,fp,miss. It turns  out that quite a number of FPs are actually very close to the truth node.</p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F35f7a6efb326453d9dd8c14b6985cfb9%2FSelection_4859.png?generation=1788956851020692&amp;alt=media"" alt=""""></p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fd20d3f9daebdc021de9fb96a707b30ad%2FSelection_4860.png?generation=1788956862377427&amp;alt=media"" alt=""""></p>"
+3522645,,2026-09-09 12:35:18.217000,1,"<p>It actually means that during linking, my zxy must change, the node must shift to better position. So actually you cannot detect and fixed a location.  </p>
+<p>Or i need to guess the location model in kaggle annotation </p>"
+3522401,,2026-09-08 19:35:47.550000,0,<p>Idk y but  it feels overfitting</p>
+3522369,,2026-09-08 18:26:15.160000,0,"<p>update
+<img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F73c31f1a9f19a6fd92fc4b44fb6011f5%2FSelection_4838.png?generation=1788891973475998&amp;alt=media"" alt=""""></p>
+<p>how i know augmentation data is more difficult? I report metrics for different data groups. ChatGPT is incredible for debugging algorithms; just ask him how. This is how a beginner can become an expert in machine learning.</p>"
+3522275,,2026-09-08 14:54:38.210000,0,"<p>how to analyze your edge transformer</p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F86fdf404585661419220b50525609e15%2FSelection_4832.png?generation=1788879742049134&amp;alt=media"" alt=""""></p>
+<p>Obviously, the strategy is:
+1) increase correct edge probability so that you can threshold to reduce fp<br>
+2) fill the gap either by learning a net or heuristics ( 1-frame gap correction seems achievable)  </p>
+<p>how to increase edge probability:</p>
+<ul>
+<li>""appearance feature smiliarity"" : maybe better localisation? resolution? larger region/scale. need to visualise the error case, but i can imagine difficult cases are: cell density is too high and everyone is similarly packed, or the cell is too faint and disappears in the next frame, or the movement (and neighbours) is too large and looks different  </li>
+</ul>
+<p>TRICKS!!!</p>
+<ul>
+<li>refine only candidates at 99% cutoff to avoid complex appearance features for edge probability
+so i need to push edge recall from 0.966 to 0.990 for 99% cutoff. Then a refine module to better choose/rank from these candidates with more complex computation, or attention from multiple frames etc.</li>
+</ul>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F3140beb4e7364cae6f958da162fbb0e0%2FSelection_4837.png?generation=1788881686957802&amp;alt=media"" alt=""""></p>
+<p>locate the ceilings </p>"
+3522599,,2026-09-09 10:08:27.853000,0,"<p>Thank you for the magic <a href=""https://www.kaggle.com/hengck23"" target=""_blank"">@hengck23</a> </p>"

@@ -1,0 +1,22 @@
+id,authorName,postDate,votes,content
+3515166,,2026-08-21 00:33:12.047000,-1,<p>After 30 days suspension. I finally back</p>
+3494317,,2026-07-09 16:55:59.110000,47,"<p>repo: <a href=""https://github.com/tom99763/celltrack-studio"" target=""_blank"">https://github.com/tom99763/celltrack-studio</a> </p>
+<ul>
+<li>support uploading script to test your own post-processing</li>
+<li>know your score on this video</li>
+<li>check your matching between frame t to frame t+1</li>
+<li>observe your predicted trajectories and errors in 3d view </li>
+</ul>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4310004%2Fcbfe42f675f3d938ab23b511046f224a%2Fnapari.png?generation=1783616306670559&amp;alt=media"" alt=""""></p>"
+3494479,,2026-07-10 04:23:54.487000,2,"<p>there is a napari chatgpt plugin
+<a href=""https://github.com/royerlab/napari-chatgpt"" target=""_blank"">https://github.com/royerlab/napari-chatgpt</a></p>
+<p>seems that this competition is a good testbed for biomedical image agent
+<img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb7dbb6b7dd0f585e8117890ea79fafe9%2FSelection_4357.png?generation=1783657431797421&amp;alt=media"" alt=""""></p>"
+3496419,,2026-07-13 20:18:07.787000,2,"<p>This interactive tool might also be useful, <a href=""https://github.com/funkelab/motile_tracker"" target=""_blank"">https://github.com/funkelab/motile_tracker</a></p>"
+3496538,,2026-07-14 05:26:45.417000,0,"<p><a href=""https://www.kaggle.com/jookuma"" target=""_blank"">@jookuma</a>  Tree representation is better for this challenge. Really thanks for sharing this I'll update my design </p>"
+3494326,,2026-07-09 17:36:33.977000,0,<p>This is a really impressive and useful contribution! A custom napari visualizer for inspecting cell tracking results in 3D space and time is extremely valuable for debugging and improving models.</p>
+3495154,,2026-07-11 14:43:46.227000,-2,"<p>This is the kind of tool sharing that moves a competition forward. Most public notebooks are just clones.</p>
+<p>3D trajectory and frame to frame matching is the debugging step people skip, then wonder why their tracking model scores fine but looks wrong visually. Metrics on cell tracking can look okay while the actual trajectories are jumping between cells.</p>
+<p>Does it handle two cells crossing paths where the model swaps their IDs? That failure is invisible in aggregate scores and obvious the second you watch the video.</p>"
+3516520,,2026-08-24 15:51:58.507000,0,<p>Thank you this was super helpful. </p>
+3494434,,2026-07-10 00:08:26.873000,0,"<p>Thanks, It was so useful :D</p>"

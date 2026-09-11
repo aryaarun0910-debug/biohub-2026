@@ -1,0 +1,5 @@
+id,authorName,postDate,votes,content
+3513003,,2026-08-14 23:50:52.463000,-2,"<p>I submitted my notebook with my successfully ran version and the submission.cvs , and my last version took just 2.8 hours to complete. But I noticed that after I submitted my latest work to the competition it is runing from 11hours. Please let me know what or why is this thing happening.</p>"
+3514794,,2026-08-20 06:00:07.540000,0,"<p>I have the similar problem, but my version took like 20 minutes and after submitting it is still running for 11 hours.</p>"
+3513088,,2026-08-15 07:28:34.047000,0,"<p>I can’t say for sure because I’m not familiar with the code, but perhaps you made significant changes to the processing compared to the previous version. Notebooks can sometimes hit the timeout limit, but I think this is still within the normal range.</p>"
+3513004,,2026-08-14 23:51:28.627000,0,<p>Help Me please 🥺</p>

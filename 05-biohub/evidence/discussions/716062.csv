@@ -1,0 +1,91 @@
+id,authorName,postDate,votes,content
+3484088,,2026-06-30 02:16:18.647000,77,"<h1>Welcome to the Biohub - Cell Tracking During Development Challenge</h1>
+<p>Hello everyone,</p>
+<p>We, at Biohub, are excited to present this challenge to you! </p>
+<p>Advances in machine learning and computer vision have transformed many areas of science, from image analysis to biological discovery. These methods are now being applied to increasingly complex microscopy data, where even expert researchers face major challenges in managing the scale, noise, and biological complexity of the data.</p>
+<p>Tracking cells across time in 3D microscopy is a fundamental problem in biological research. Scientists use time-lapse 3D imaging to study how cells grow, move, interact, divide, and form complex biological structures. However, analyzing these datasets remains a major bottleneck. In many studies, researchers still spend countless hours manually detecting and linking cells across frames, especially when datasets contain thousands of visually similar cells that move, deform, and divide over time.</p>
+<p>Automated cell-tracking tools already exist, but they often struggle in real-world conditions. Dense cell populations, imaging noise, irregular cell shapes, cell divisions, and complex 3D structures can lead to tracking errors and incorrect lineage reconstruction. These errors limit scientists' ability to scale their analyses and compare results across datasets and experiments.</p>
+<p>Based on real microscopy datasets from developing Zebrafish embryos, we are launching this challenge to provide a shared benchmark for robust 3D+time cell tracking. Your goal is to develop algorithms that can detect cells, associate them across time, identify division events, and reconstruct accurate cell lineages. We hope this challenge will inspire new methods that are reliable, generalizable, and useful for real biological research.</p>
+<p>We have prepared the following resource to help you get started:</p>
+<p>1 - Python library for working with 3D+time datasets, including training a small baseline, running inference, visualizing ground-truth and model predictions, understanding and computing the metrics is available here:  <a href=""https://github.com/royerlab/kaggle-cell-tracking-competition"" target=""_blank"">https://github.com/royerlab/kaggle-cell-tracking-competition</a></p>
+<h2>Data</h2>
+<p>By node and edge count, this dataset is the largest cell tracking dataset published to date. The provided ground truth annotations are sparse. You have to develop methods that can leverage sparsely annotated datasets. While inference will require the tracking of all cells present in the videos, your submissions will be evaluated on a random sparse subset of these cells. </p>
+<h2>Open Problem and Research Ideas</h2>
+<h3>1 - Data perspective</h3>
+<p>We strongly encourage you to visit the Cell Tracking Challenge (<a href=""https://celltrackingchallenge.net/)"" target=""_blank"">https://celltrackingchallenge.net/)</a>, which is highly regarded in the field for hosting a number of 2D+time and 3D+time datasets as well as benchmarking state-of-the-art methods for cell tracking. </p>
+<h3>2 - Useful packages:</h3>
+<p>geff (<a href=""https://github.com/live-image-tracking-tools/geff"" target=""_blank"">https://github.com/live-image-tracking-tools/geff</a>)<br>
+zarr (<a href=""https://zarr.readthedocs.io/en/stable/"" target=""_blank"">https://zarr.readthedocs.io/en/stable/</a>)<br>
+tracksdata (<a href=""https://github.com/royerlab/tracksdata"" target=""_blank"">https://github.com/royerlab/tracksdata</a>)<br>
+cupy (<a href=""https://docs.cupy.dev/en/stable/index.html"" target=""_blank"">https://docs.cupy.dev/en/stable/index.html</a>)<br>
+cucim (<a href=""https://github.com/rapidsai/cucim"" target=""_blank"">https://github.com/rapidsai/cucim</a>)<br>
+napari (native usage only) (<a href=""https://napari.org/"" target=""_blank"">https://napari.org/</a>)<br>
+ndv (<a href=""https://github.com/pyapp-kit/ndv"" target=""_blank"">https://github.com/pyapp-kit/ndv</a>)<br>
+motile (<a href=""https://github.com/funkelab/motile"" target=""_blank"">https://github.com/funkelab/motile</a>)  </p>
+<h3>3 - Some competitive tracking methods</h3>
+<p>ultrack (<a href=""https://github.com/royerlab/ultrack"" target=""_blank"">https://github.com/royerlab/ultrack</a>)<br>
+trackastra (<a href=""https://github.com/weigertlab/trackastra"" target=""_blank"">https://github.com/weigertlab/trackastra</a>)<br>
+byotrack (<a href=""https://github.com/raphaelreme/byotrack"" target=""_blank"">https://github.com/raphaelreme/byotrack</a>)<br>
+laptrack (<a href=""https://github.com/yfukai/laptrack"" target=""_blank"">https://github.com/yfukai/laptrack</a>)<br>
+cellect (<a href=""https://github.com/zzz333za/CELLECT"" target=""_blank"">https://github.com/zzz333za/CELLECT</a>)<br>
+ascent (<a href=""https://github.com/lu-lab/ascent"" target=""_blank"">https://github.com/lu-lab/ascent</a>)<br>
+OrganoidTracker (<a href=""https://github.com/jvzonlab/OrganoidTracker"" target=""_blank"">https://github.com/jvzonlab/OrganoidTracker</a>)  </p>
+<p>Last but not least, we really hope you enjoy the competition. We cannot wait to see your solutions. We strongly encourage you to open-source your code and solutions so that the entire community can benefit from your work.</p>
+<p>On behalf of all the organizers,</p>"
+3485628,,2026-07-01 16:53:13.377000,8,"<p>There are two other related works that might be useful</p>
+<p><a href=""https://openaccess.thecvf.com/content_CVPR_2020/papers/Hayashida_MPM_Joint_Representation_of_Motion_and_Position_Map_for_Cell_CVPR_2020_paper.pdf"" target=""_blank"">https://openaccess.thecvf.com/content_CVPR_2020/papers/Hayashida_MPM_Joint_Representation_of_Motion_and_Position_Map_for_Cell_CVPR_2020_paper.pdf</a></p>
+<p><a href=""https://www.nature.com/articles/s41587-022-01427-7.pdf"" target=""_blank"">https://www.nature.com/articles/s41587-022-01427-7.pdf</a></p>"
+3487249,,2026-07-03 15:05:59.287000,4,"<p>would you please provide a script to evaluate predictions? Something that takes ""submission.csv"", reads  ""train/xxx.geff"" data, and outputs final competition score? This is a required resource for a competition, and it is not easy to create it from documentation alone. </p>
+<p>Thanks.</p>"
+3494865,,2026-07-10 20:55:43.780000,3,"<p>Hey! The repo (<a href=""https://github.com/royerlab/kaggle-cell-tracking-competition"" target=""_blank"">https://github.com/royerlab/kaggle-cell-tracking-competition</a>) we shared does implement the official metric (from a folder with .geff predictions and a folder with .geff ground truth). You're right that there was no official code for converting a .csv file to a list of .geff files, so I wrote a simple script and I recently added it to the repo, I hope that helps you running the official metric. </p>"
+3493936,,2026-07-08 19:12:09.417000,1,"<p>Hi <a href=""https://www.kaggle.com/thibautgoldsborough"" target=""_blank"">@thibautgoldsborough</a> ,</p>
+<p>Thanks for putting this challenge together, really interesting problem and dataset.</p>
+<p>Wanted to flag something I found while setting up local cross-validation: all 4 official test clips appear to have byte-identical copies in the train split, including full ground truth annotations.</p>
+<p>Verified by comparing actual pixel data (not just filenames) at t=0, t=50, and t=99 for each clip:</p>
+<table>
+<thead>
+<tr>
+<th>Test clip id</th>
+<th>Train copy</th>
+<th>Pixel-identical</th>
+<th>Train <code>.geff</code> present</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>44b6_0113de3b</code></td>
+<td><code>train/44b6_0113de3b.zarr</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>44b6_0b24845f</code></td>
+<td><code>train/44b6_0b24845f.zarr</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>6bba_05b6850b</code></td>
+<td><code>train/6bba_05b6850b.zarr</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>6bba_05db0fb1</code></td>
+<td><code>train/6bba_05db0fb1.zarr</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>Reproduction: read <code>train/{clip_id}.zarr/0/c/{t}/0/0/0</code> and <code>test/{clip_id}.zarr/0/c/{t}/0/0/0</code> from the competition zip for the same clip id and timepoint, decompress with blosc2, and compare arrays: they match exactly frame for frame.</p>
+<p>If this is intentional (e.g. these clips are meant to double as both a train example and a test target), no action needed, just wanted to confirm. But if not, it means the ground truth for the hidden test set is currently downloadable by anyone through the train split, which could affect leaderboard integrity. Happy to share the verification script if it's useful for checking on your end.</p>
+<p>Thanks again for the great competition.</p>"
+3494866,,2026-07-10 20:59:33.480000,1,"<p>Hi, thank you for expressing your concern. 
+Indeed these are dummy placeholder files to help you ensure that your submission notebook actually produces a .csv file without erroring out. The actual leaderboard score is obtained from a much bigger test set, that is deliberately kept private, and I assure you there is no overlap between that hidden test set and the train set that is publicly available. 
+I hope that answers your question. </p>"
+3507714,,2026-08-02 13:27:44.360000,0,"<p>Hi <a href=""https://www.kaggle.com/thibautgoldsborough"" target=""_blank"">@thibautgoldsborough</a> ,</p>
+<p>I am trying to use baseline model/approach provided by you to get started in the competition.</p>
+<p>Without modifications training per epoch takes more than 3 hours, batch size is 8; with 16 I get OOM error.</p>
+<p>If I introduce mixed value precision, then training time reduced to about 2 hours, batch=16 works as well.</p>
+<p>I was wondering: am I doing something wrong and one can significantly improve training time on kaggle notebook? Or one should come up with other solution, like faster GPU.</p>"

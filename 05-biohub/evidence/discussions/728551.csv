@@ -1,0 +1,12 @@
+id,authorName,postDate,votes,content
+3502194,,2026-07-23 18:08:45.090000,7,"<p>Trying to reconcile something after the division-metric patch — would love the community's (and host's) read.</p>
+<p>Across the public approaches I can score with the patched metric, two things look consistent:</p>
+<ul>
+<li><strong>adjusted_edge_jaccard</strong> plateaus around ~0.90–0.91 — the field is on the same split_0 stack, and the post-proc knobs (disappearance cost, D4/9-way TTA, gap-closing) seem to top out there.</li>
+<li><strong>division_jaccard ≈ 0</strong> for essentially everyone under the patch.</li>
+</ul>
+<p>Yet the post-patch top is <strong>0.914–0.929</strong>, so the separation comes from somewhere. For those above ~0.914 — not asking for methods — is your gain on the <strong>edge term</strong> (a genuinely better/retrained model pushing adj_edge past ~0.91), or on <strong>divisions</strong> (getting div_jaccard up to ~0.15–0.2 that the patch accepts)? Just which term, if you're willing to say.</p>
+<p><strong>A finding to give back:</strong> I tried the host's HOCT (general_v0) as a division-aware tracker by feeding my own point detections in as synthetic 3D balls (to get around it needing instance masks). On my train movies it under-performed a tuned ILP on the edge term (it over-links), produced spurious forks rather than recovering real divisions, and ran ~45 min/movie on the open-source solver — so it's not submission-viable as-is with this input. Almost certainly the uniform-ball masks being OOD for a model trained on real morphology, not a knock on HOCT itself. Sharing in case it saves someone the same detour; happy to detail the setup. Or if someone has tried this and worked out that would be helpful too.</p>
+<p>My hunch is that a cleaner edge model would let the ILP form divisions natively (divisions riding on long-range link recall) — i.e. the two terms aren't independent. Curious whether that matches what the frontier teams see.</p>"
+3504813,,2026-07-28 19:01:40.093000,0,<p>I don't know how I did in edge division but I think its something like 0.2</p>
+3504951,,2026-07-29 03:23:53.583000,0,<p>0.2 on divisions?</p>

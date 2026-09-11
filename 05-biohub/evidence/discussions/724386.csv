@@ -1,0 +1,7 @@
+id,authorName,postDate,votes,content
+3496285,,2026-07-13 14:49:36.097000,3,"<p><a href=""https://www.kaggle.com/jamesweatherhead"" target=""_blank"">@jamesweatherhead</a>, all the data in this competition followed the same protocol (e.g., instrument, developmental stage, etc), each embryo being acquired in a separate imaging session</p>"
+3494899,,2026-07-11 00:19:02.570000,4,"<p>Two questions about the two training embryos (44b6 and 6bba):</p>
+<ol>
+<li>Are they at the same developmental stage?</li>
+<li>Were they acquired with the same imaging protocol, or in separate imaging sessions?</li>
+</ol>"

@@ -1,0 +1,10 @@
+id,authorName,postDate,votes,content
+3516861,,2026-08-25 14:20:22.700000,4,"<p>hey im kinda stuck and wanna know if ppl have a different design to me especially in a few areas.</p>
+<p>my linker is basically 1:1 right now. hungarian assignment frame to frame. then i add divisions in a totally separate step after on top of the result. so the division decision never actually sees the model. its js a hand written rule with distance and image checks.</p>
+<p>my divJ is around 0.12 which is way below what some ppl report. edge side is ok. its the divisions.</p>
+<p>the thing i measured that surprised me. the ones im missing arent random at all. theyre almost all in crowded frames. like 3x the node count of the ones i get right and closer neighbours. and when i checked why each one failed basically none of them fail for js one reason. they fail 2 or 3 checks at once. so loosening any single threshold recovers nothing. it js adds false ones.</p>
+<p>so the areas where i wanna know if ur design is different.</p>
+<p>where the division decision lives. do u let a cell have 2 children inside the assignment itself w some learned prob. or do u bolt it on after like me. if its inside was it worth the rewrite.</p>
+<p>dense regions. is there a design that actually handles crowded frames. or does everyone js lose those and accept it.</p>
+<p>high divJ. for ppl getting way more than me is it a better model on the same structure. or is the structure itself different.</p>
+<p>not asking for anyones solution. js wanna know if im stuck on a design everyone else already moved past. thanks</p>"

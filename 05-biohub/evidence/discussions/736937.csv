@@ -1,0 +1,6 @@
+id,authorName,postDate,votes,content
+3518316,,2026-08-30 12:06:39.967000,1,"<p>The rebase lining should occur in all competitions to keep the community progressing optimally. Kaggle should make it easy for everyone to progress the field of study together without these barriers and challenges, it’s a win win for all and easy solutions</p>"
+3515901,,2026-08-22 14:50:45.067000,5,"<p>The metric bug was fixed and the leaderboard was recalculated, but some public notebooks still display their old, inflated scores from the pre-fix metric.</p>
+<p>Since “Highest Score” is the natural way to find strong baselines, these notebooks are still appearing above solutions that actually perform better under the corrected metric.</p>
+<p>Could we consider updating or flagging those old notebook scores? Otherwise, we are essentially keeping a few ghosts at the top of the leaderboard. 👻
+<a href=""https://www.kaggle.com/thibautgoldsborough"" target=""_blank"">@thibautgoldsborough</a> <a href=""https://www.kaggle.com/macruzbar"" target=""_blank"">@macruzbar</a> </p>"

@@ -1,0 +1,11 @@
+id,authorName,postDate,votes,content
+3516209,,2026-08-23 14:42:16.033000,20,"<p>Hi! Here is what I found out that may help you as well:</p>
+<p>Break your missed edges into two categories: missing endpoint nodes and incorrect associations. In my case, many ""linking"" issues actually originated earlier during node selection, so improving the edge model won't necessarily help.</p>
+<p>Always validate complete movies using the official scorer and movie-level OOF splits. Edge-level random CV can be highly misleading. Once you identify which category dominates, focus exclusively on that bottleneck.</p>
+<p>Good luck and have fun!</p>"
+3516150,,2026-08-23 09:12:21.220000,11,"<p>Hey guys, I kind of need some help. I was unable to improve my algorithm beyond 0.928, which I got nearly 3 weeks ago. [I was submitting public notebook's edge algorithm + my division algorithm]</p>
+<p>I really can't think of any ways to approach edge jaccard and the public notebooks have very low CV so I'm afraid to use them in actual submission. My own edge algorithms are really bad and has ~0.895 on actual lb and 0.919 CV. Can someone with high edge jaccard tell me how you are approaching this on a high level? [Or even how much you get on edge]? Thank you</p>"
+3518337,,2026-08-30 13:48:02.517000,0,"<p>hi can you please share how you are training. i have note been able to train a single model yet, really confused right now. I am trying using only the TemporalUnet3D model but the loss for detections keep bouncing around</p>"
+3517545,,2026-08-27 12:34:34.317000,0,<p>how did you get the breakthrough now?</p>
+3516297,,2026-08-23 21:15:22.420000,0,<p>Try blending </p>
+3516267,,2026-08-23 18:04:21.480000,0,<p>i am at the same spectrum but on the other end i have 0 on divisions</p>

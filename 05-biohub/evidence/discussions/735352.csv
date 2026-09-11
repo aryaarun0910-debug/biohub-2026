@@ -1,0 +1,19 @@
+id,authorName,postDate,votes,content
+3513101,,2026-08-15 08:25:14.080000,9,"<p>Hey guys! I noticed the top of the leaderboard often has difference less than 0.001 points. In areas like division jaccard where theres only a few samples, it's really easy to overfit. I think this might cause a huge shakeup as even parameter tuning could cause 0.001 changes.</p>
+<p>Do you guys have any ideas on this?</p>"
+3513174,,2026-08-15 13:23:10.347000,7,"<p>I can see why it may appear that way. I can't speak as to what others in the top 10 are doing, but we are not focused on 0.0001 or Division J; we are working on a universal plugin that the bio cell team can plug into their current pipeline with minimal changes. We have tested our plugin with every available unique public notebook and model, with gains ranging from 0.030, 0.040, to 0.050 instantly just attaching our plugin. We've seen gains from a single public model reach a score of 0.940 untuned. We are not focused on the 0.0001 or tuning to the hidden.</p>"
+3513176,,2026-08-15 14:04:18.200000,0,<p>thanks for the info! I feel like the public notebooks are really overtuned to the lb so i'm afraid to use them</p>
+3513238,,2026-08-15 18:12:20.333000,0,"<p>Hi <a href=""https://www.kaggle.com/tweakai"" target=""_blank"">@tweakai</a>, by plugin do you mean something that optimizes/refines the tracking graph, or do you mean you take the public notebook detections and apply your own tracking method on top?</p>
+<p>Got curious about it, but no worries if you can’t share more</p>"
+3513384,,2026-08-16 09:56:04.003000,0,<p>yeah i believe it is very interesting to know if the calibration was for keeping the track or reassigning</p>
+3514408,,2026-08-19 08:44:19.630000,0,<p>that is an impressive approach/tool. Thank you for the information.</p>
+3513149,,2026-08-15 11:43:45.287000,4,"<p>I guess what we can do is:</p>
+<ul>
+<li>Build a reliable CV, and trust it.</li>
+<li>Use external datasets or synthetic data to make our model more robust on division cells prediction.</li>
+</ul>"
+3513868,,2026-08-17 20:06:00.097000,-1,<p>did you train your very own model uptil now or used the publicly available one and did u take the public notebook detections and apply your own tracking method on top</p>
+3513158,,2026-08-15 12:49:38.453000,1,"<p>yea ig so too , because training past ep 400 has diminishing returns , so maybe yea we wait fro the private shake </p>"
+3513867,,2026-08-17 20:04:44.877000,0,"<p>you dont mind me asking you, did you train your very own model from scratch or rather you fine tuned public model?</p>"
+3513915,,2026-08-18 00:00:15.817000,1,<p>I trained mine from scratch since my division score is quite good [0.3] and edge is really bad [its ~0.01 points below public notebooks] so I'm trying to improve that.</p>
+3514774,,2026-08-20 04:44:28.813000,1,<p>Trained from scratch. And training here isn't very expensive. Its affordable.</p>

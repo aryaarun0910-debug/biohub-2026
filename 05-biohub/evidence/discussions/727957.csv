@@ -1,0 +1,9 @@
+id,authorName,postDate,votes,content
+3501148,,2026-07-21 13:35:12.123000,13,"<p>Has anyone heard an updated estimate for when the re-scoring will happen?</p>
+<p>The original note about the division metric patch mentioned it would likely be Monday (yesterday), and I wasn't sure whether that's still the plan or has shifted.</p>
+<p>Asking mainly for planning reasons, with the leaderboard still showing pre-patch scores, it's hard to tell where a submission actually stands, which makes it tricky to judge which directions are worth pursuing.</p>
+<p>Thanks to the organisers for publishing the patch on GitHub, by the way, being able to score locally against the corrected metric has been genuinely helpful in the meantime.</p>
+<p>Anyone know more?</p>"
+3501386,,2026-07-21 22:44:18.303000,6,"<p><a href=""https://www.kaggle.com/tahaalshatiri"" target=""_blank"">@tahaalshatiri</a> <a href=""https://www.kaggle.com/simonrba"" target=""_blank"">@simonrba</a>, the re-scoring is running, and it should be done tomorrow if everything works out </p>"
+3501493,,2026-07-22 05:29:35.447000,1,"<p>Thank you for the re-scoring timeline update <a href=""https://www.kaggle.com/simonrba"" target=""_blank"">@simonrba</a> </p>"
+3501261,,2026-07-21 17:48:28.203000,-3,"<p>I've just joined and been waiting for 3 days for the rescore, as it's hard to do expirements with a misleading leaderboard and public notebooks</p>"

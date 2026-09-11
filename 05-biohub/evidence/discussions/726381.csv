@@ -1,0 +1,22 @@
+id,authorName,postDate,votes,content
+3498193,,2026-07-15 08:22:12.443000,5,"<h2>Potential Ground Truth Annotation Gaps in Boundary Cells</h2>
+<p>Hi everyone,</p>
+<p>While analyzing the training data, I came across what appears to be inconsistent GT annotations for cells that travel along the <strong>image boundary (y=0 edge)</strong>.</p>
+<h3>What I Found</h3>
+<p>In sample <code>44b6_12dfb391</code>, there is a cell tracked as <strong>two separate GT lineages</strong>:</p>
+<ul>
+<li>Track A: <code>t=21</code> to <code>t=24</code> (4 nodes), ending at <code>x=139, y=0, z=80</code></li>
+<li>Track B: <code>t=29</code> to <code>t=37</code> (9 nodes), starting at <code>x=143, y=0, z=80</code></li>
+</ul>
+<p>The spatial distance between the end of Track A and the start of Track B is only <strong>4.0 µm</strong>, with identical <code>y=0</code> and <code>z=80</code> coordinates. The 4-frame gap (<code>t=25</code> to <code>t=28</code>) appears to be due to the cell <strong>partially leaving the field of view</strong> at the y=0 boundary.</p>
+<p>When I visualized the raw image at <code>t=25–28</code>, the cell is still <strong>partially visible at the edge</strong> — my model correctly tracked it continuously (<code>t=19</code> to <code>t=33</code>), but is penalized because the GT treats it as two separate tracks.</p>
+<h3>Why This Matters</h3>
+<p>The competition metric computes <strong>Edge Jaccard</strong> based on GT edges. If a cell is annotated as two tracks due to a boundary visibility gap, any model that correctly tracks it continuously will incur <strong>false positive edges</strong> for the gap frames and <strong>false negative edges</strong> for the missing GT connections — even though the biological interpretation is correct.</p>
+<h3>Questions for Organizers</h3>
+<ol>
+<li>Is this a known annotation artifact for boundary-traveling cells?</li>
+<li>Are there other samples with similar gaps?</li>
+<li>Could the metric be adjusted to account for short re-entry events near image boundaries?</li>
+</ol>
+<p>Happy to share the specific node IDs and visualization code if helpful.</p>
+<p>Thanks!</p>"

@@ -1,0 +1,4 @@
+id,authorName,postDate,votes,content
+3518336,,2026-08-30 13:43:26.897000,0,"<p>I seriously need a notebook which actually trains the model instead of loading it up. I have not been able to train a single deep learning model in this competition yet, the loss keeps bouncing around, i am confused regarding what kind of loss function to use.</p>
+<p>my current architecture uses only the temporal unet 3d without the SimpleNodeTransformer, but i need help training! </p>
+<p>please if anyone can help me share a solution!</p>"

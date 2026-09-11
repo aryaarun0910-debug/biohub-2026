@@ -1,0 +1,86 @@
+id,authorName,postDate,votes,content
+3494667,,2026-07-10 12:47:17.917000,42,"<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F421105476d0308ddaf76f6be42659a9e%2FSelection_4367.png?generation=1783687617945117&amp;alt=media"" alt=""""></p>
+<p>At first, i thought not all ground truths are correct. Then, on inspection, i find the following are quite common
+1) some frames are frozen. i.e subraction of vol at t and t+1 gives exactly zero
+2) there are suddent jumps in time (global movement of whole volume)  </p>
+<p>i.e. the time step are not constant, maybe due to limitations of acquisition equipment</p>"
+3494946,,2026-07-11 05:05:58.217000,1,"<p>this too falls under sparse annotations i think</p>
+<blockquote>
+  <p>Annotations are sparse — not every cell in every frame is labeled.</p>
+</blockquote>
+<p>and we can't reconstruct the entire embryo either</p>"
+3494947,,2026-07-11 05:15:06.200000,2,<p>Each volume is a crop. Maybe can reconstruct like jigsaw puzzle </p>
+3494977,,2026-07-11 07:27:12.527000,2,"<p>if the spatial crops are independently sampled time windows, we can only approximate the full embryo (stitching all samples together) reconstruction (not the lineage reconstruction, as that's the competition, only the FOVs matter)</p>
+<p>What we have</p>
+<p>Every training video provides:</p>
+<ul>
+<li>An embryo prefix: 44b6 or 6bba</li>
+<li>Exactly 100 frames</li>
+<li>Volume shape 64 × 256 × 256</li>
+<li>Frame spacing of 1 second</li>
+<li>Voxel scale (1.625, 0.40625, 0.40625) µm</li>
+<li>Raw fluorescence appearance</li>
+<li>Sparse within-video tracks</li>
+<li>An estimated total number of cell nodes</li>
+</ul>
+<p>What is missing</p>
+<p>The metadata does not provide:</p>
+<ul>
+<li>Absolute acquisition time or developmental stage</li>
+<li>Clip start time within the original recording</li>
+<li>Global spatial/crop origin</li>
+<li>Orientation or registration transform</li>
+<li>Persistent cell IDs between clips</li>
+<li>Whether two clips overlap or are consecutive</li>
+<li>Any guarantee that all clips tile one continuous acquisition</li>
+<li>Dense lineages or anatomical landmarks</li>
+</ul>
+<p>edit: FOVs is the competition format - lack of computation for full embryo is the likely reason for it. but since i think each cell depends on every other cells in the embryo is the idea behind reconstructing the full embryo for a full picture view of everything.</p>
+<p>although, there are many ways to stitch it together - but it will only be an approximation since we lack the full data needed.</p>"
+3494986,,2026-07-11 08:03:34.213000,1,"<p>It's somewhat similar to the temporal/sequencing issue in CMI3. Of course, this heuristic strategy can also compensate for the missing frames.</p>"
+3495053,,2026-07-11 10:48:14.990000,5,"<p>okay, digging deeper, it is a systematic fault surely</p>
+<p>Scanning every consecutive frame pair in all 199 training videos by comparing their stored compressed chunks byte-for-byte.</p>
+<pre><code>   Group                  Videos    Videos affected    Duplicate pairs    Pair rate
+  ━━━━━━━━━━━━━━━━━━━━━    ━━━━━━━━    ━━━━━━━━━━━━━━━━━  ━━━━━━━━━━━━━━━━━   ━━━━━━━━━━━
+   44b6                       71                  0                  0           0%
+  ─────────────────────    ────────    ─────────────────   ─────────────────   ───────────
+   6bba                      128                114                947        7.47%
+  ─────────────────────    ────────    ─────────────────   ─────────────────   ───────────
+   Entire training set       199                114                947        4.81%
+</code></pre>
+<ul>
+<li>57.3% of all training videos contain at least one frozen transition.</li>
+<li>89.1% of 6bba videos are affected.</li>
+<li>Approximately one in every 13 adjacent pairs in 6bba is frozen.</li>
+<li>No exact duplicates occur in 44b6.</li>
+</ul>
+<p>Evidence that this is systematic</p>
+<p>Several different 6bba samples have exactly the same freeze schedule. For example:</p>
+<p>6bba_05b6850b
+  6bba_07477033
+  6bba_5b28472a</p>
+<p>all freeze after the same frame indices:</p>
+<p>4, 12, 27, 42, 52, 57, 59, 62, 66, 76</p>
+<p>Likewise, these three share another identical schedule:</p>
+<p>6bba_1f58c2f6
+  6bba_20852818
+  6bba_80d12824</p>"
+3495059,,2026-07-11 11:02:00.433000,1,<p>You analyzed it very thoroughly. I only started suspecting something during cross-validation—their adj_edge_jaccard values are around 0.5 and 0.7.</p>
+3495060,,2026-07-11 11:04:20.747000,1,"<p>This is a huge problem if test data is not the same as we learned and memorised the freezing unintentionally. It also means rule-based heuristics need to be changed to avoid overfitting etc.</p>
+<p>“all freeze after the same frame indices:” this means they are cropped from the same master big volume… which i will be interested ""to jigsaw it"" back</p>
+<hr>
+<p>do we need to probe the hidden test frame for frozen frame?</p>"
+3495115,,2026-07-11 13:31:34.027000,1,<p>a simple conditional tracking would work too</p>
+3495185,,2026-07-11 15:55:51.073000,1,"<p>Videos sharing the schedule    Frames duplicated after index…
+6bba_05b6850b · 07477033 · 5b28472a    4, 12, 27, 42, 52, 57, 59, 62, 66, 76
+6bba_1f58c2f6 · 20852818 · 80d12824    1, 14, 19, 43, 44, 45, 49, 57, 61, 66, 73</p>
+<p>See html</p>"
+3502950,,2026-07-25 06:30:11.603000,1,"<p>conditional copy wouldn't work because the GT differs as well </p>
+<p>details here: <a href=""https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/729082"" target=""_blank"">https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/729082</a></p>"
+3510365,,2026-08-08 09:50:56.223000,1,"<p>and what about the embryos types,  In training data there are two distinct types of Embryo, what if there is 3rd or fourth type, how well do I interpolate within embryos I've already seen,"" not ""how well do I generalize to an embryo I haven't.</p>"
+3494983,,2026-07-11 07:50:56.430000,2,"<p>I personally believe this is a fault in the imaging system causing repeated frames or dropped frames. Zebrafish embryo development is a continuous dynamic process. From the cleavage stage to the gastrulation stage, cells are constantly undergoing division, migration, and tissue deformation. Even in slower developmental phases, there are still sub-pixel-level cell displacements and fluctuations in signal intensity/grayscale. It is impossible for the entire 3D volume to show completely zero change, let alone produce perfectly repeated frames where subtraction yields exactly 0.</p>"
+3499734,,2026-07-17 20:01:23.637000,0,<p>submission stuck gang report in</p>
+3499282,,2026-07-16 21:36:23.747000,0,<p>can coorberate this</p>
+3494847,,2026-07-10 19:57:17.873000,0,"<p>I wonder if this could come from a sudden movement of the entire setup?</p>
+<p>Also, technically we should just let it be if the Ground Truth says so but a preprocessing of the signal/ground truth would be a nice addition.</p>"
+3494709,,2026-07-10 14:11:17,0,<p>Some cells are natural long jumpers</p>

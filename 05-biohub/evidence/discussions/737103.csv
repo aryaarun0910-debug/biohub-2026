@@ -1,0 +1,11 @@
+id,authorName,postDate,votes,content
+3516155,,2026-08-23 09:59:31.383000,10,"<p>If I hand label data and train on it, is this an external data source? Would I need to open-source this before the competition ends?</p>
+<p>I am not sure what the general rules interpretation is here, and there is a massive risk training on data from my interpretation,  but I want to know before I try.</p>"
+3516494,,2026-08-24 14:25:12.757000,-5,<p>no thats not allowed clearly mentioned in rules.</p>
+3516574,,2026-08-24 17:56:29.667000,1,"<p>Can you post where you found this? I only see mention specifically prohibiting hand-labeling the competition's validation and test records (section 3.4), not unrelated external data. So I'd still love to see a host answer as that's different than OPs question. </p>"
+3516671,,2026-08-24 23:15:49.393000,0,<p>Please point me to where this is stated clearly. I missed it.</p>
+3516762,,2026-08-25 07:17:41.127000,3,"<p>Hand labeling data has usually been allowed in previous competition.
+What you cannot do is label the test data but we don't have access to it.
+I can't 100% confirm it's allowed for this competition but unless the hosts state otherwise I think you can go ahead.</p>"
+3519940,,2026-09-02 14:44:16.143000,0,"<p>Hosts, can you please answer this?</p>"
+3516481,,2026-08-24 13:49:44.010000,0,

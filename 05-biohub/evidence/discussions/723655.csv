@@ -1,0 +1,149 @@
+id,authorName,postDate,votes,content
+3493388,,2026-07-07 17:37:36.697000,25,"<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fc2e84c73dc0f3992d61c0c742e0c2975%2FSelection_4328.png?generation=1783445842204878&amp;alt=media"" alt=""""></p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F2273352e7963197f144ce11501586ae2%2FSelection_4329.png?generation=1783445854887011&amp;alt=media"" alt=""""></p>
+<p>""Temporal Affinity Fields for 3D Cell Lineage Reconstruction""  </p>
+<ul>
+<li>predicting a local vector field that tells the graph optimizer how cells should connect   </li>
+</ul>
+<p>Hint: create flow GT for supervision using optical flow and sparse annotation tracks   </p>"
+3498881,,2026-07-16 04:42:56.547000,1,"<p>i find a metric hack:<br>
+you make a graph. if your just repeat your tracks (giving new id) your edge_jaccard is not affected. this is the cause the kaggle metric don't penalize fragmentation, duplication. hence you can create multiple almost smiliar tracks to improve TP. But there is the node num correction (aka adj_edge_jaccard) But you can over come this by duplicating/perturbing at the correct length and correct location.</p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F0c8f49fc633511f2736c46579fa5b7f3%2FSelection_4383.png?generation=1784177205409163&amp;alt=media"" alt=""""></p>"
+3499146,,2026-07-16 17:04:28.493000,1,"<p>Hi, perfectly duplicated edges are filtered out before scoring the edge Jaccard, this might be why you are not seeing a change in the Jaccard score, each ground truth edge can only used for a single TP. If you duplicate the edges but modify the nodes very slightly, then you should see a drop in Jaccard. This should not allow you to hack (i.e. increase) your score.  Please contact us if you can actually game the metric. </p>"
+3499495,,2026-07-17 13:11:05.160000,1,"<p>How to hack metric:</p>
+<ol>
+<li><p>Real matching nodes only need to be in the same weakly connected component​</p></li>
+<li><p>Forks only need to exist anywhere within that component​</p></li>
+<li><p>Unmatched false forks are generally not counted as FP</p></li>
+<li><p>I'm now trying the next… not sure it works:</p></li>
+</ol>
+<ul>
+<li>4.1.  </li>
+<li>4.2. Shifted track targeting 7µm node matching</li>
+</ul>"
+3499497,,2026-07-17 13:25:14.247000,1,"<p>I fully understand the original intention behind designing this metric. When I performed local validation, I found that achieving very high accuracy (e.g., 0.999) is quite easy, but balancing recall and other metrics is relatively difficult, because excluding negative samples is a very challenging task. I believe that refining the metrics is also an indispensable step in advancing this research, as your current work is already pushing the limits.</p>"
+3499781,,2026-07-17 22:33:20.300000,1,<p>Indeed the division metric can be gamed. We're working on a patch and will update the scoring asap. I will make a separate post explaining this. </p>
+3499815,,2026-07-18 01:17:36.170000,1,<p>I think the node correction can both increase and decrease original edge jacard score?</p>
+3493617,,2026-07-08 06:01:56.357000,3,"<p>I just start to develop flow approach then seeing your post. Welcome back <a href=""https://www.kaggle.com/hengck23"" target=""_blank"">@hengck23</a> </p>"
+3493914,,2026-07-08 18:05:02.130000,2,"<p>i have been playing with it. i think the winning formula is to generate dense tracks for training (1) and(2) below<br>
+1) 3d point is easy to generate (e.g. opensource cellpose, etc)<br>
+2) short track (2 frame or 3 frame) is easy to generate. it can be the utlrack, or rule base heuristics or open source tracker.  </p>
+<p>if 1 and 2  can get good results, then ILP or min-cost graph-cut network will generate the long tracks required for submission.</p>
+<p>currently the rule-based graph correcting post processor in public notebook should be used for generating new links in (2) for training. Imagine if i use 5 open source tracker, and using consistency, i can have more short tracks (currently we have less than 1% link labelled and the rest are unlabelled)</p>
+<p>(2) only need locations. there are opensource zebrafish data with long (real and synthetic) dense tracks (lineage) without microscopy images that can be used too.</p>
+<p><a href=""https://chatgpt.com/c/6a4e91cd-8d90-83ec-bf7a-825b27a9e284"" target=""_blank"">https://chatgpt.com/c/6a4e91cd-8d90-83ec-bf7a-825b27a9e284</a></p>"
+3494324,,2026-07-09 17:32:44.350000,2,"<p>i change strategy a bit:
+1) use opensource to make tracks, measure local LB score
+2) ensemble opensource and own/ai heuristics,  measure local LB score
+3) when i have good LB score, these become dense pesudo labels.</p>
+<p>opensouce trackers are very good for short tracking. 
+tricks:</p>
+<ul>
+<li>cellpose etc to provide dense 3d tzyx</li>
+<li>use only  tzyx for opensouce tracking. some opensouce like ultrack needs segmentation labels as input, i synthetically rendered 3d ball as input</li>
+</ul>"
+3499372,,2026-07-17 04:35:11.853000,2,"<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F20e5cb2adbba2365f79bbb79b5b5024e%2FSelection_4384.png?generation=1784262681228749&amp;alt=media"" alt=""""></p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F1ed4a3ecc2a5dedc98fcdc44ba8ef0bd%2FSelection_4385.png?generation=1784263063174669&amp;alt=media"" alt=""""></p>
+<p>center fig: red is t=0, green is t=1   </p>
+<p>Visualisation results from host repo baseline code (temporal unet + link transformer). i show max prob link.  </p>
+<ul>
+<li>long links are almost wrong (easy to filter such results)</li>
+</ul>
+<p>looking at the results, link are short. maybe a conv  3d CNN (T as channel) unet to detection motion object is good? i.e. rather than detect zxy center, we segment ""center of motion = line connecting zyx0 and zyx1.""</p>"
+3494690,,2026-07-10 13:29:32.203000,1,"<p>Something struck  my mind. Since it is video and tracking, unsupervised pretraining should help. Hence we no need dense track or point</p>
+<p>Tracking needs dense, spatially precise features. The newer V-JEPA 2.1 specifically targets dense, spatially structured and temporally consistent features ….  </p>
+<p>V-JEPA 2.1 behaves like unsupervised optical flow in feature space,</p>"
+3494468,,2026-07-10 03:07:03.517000,1,"<p>3d cuda optical flow: <a href=""https://github.com/yongxb/OpticalFlow3d"" target=""_blank"">https://github.com/yongxb/OpticalFlow3d</a><br>
+3d optical flow kalman filter tracker : <a href=""https://byotrack.readthedocs.io/en/latest/"" target=""_blank"">https://byotrack.readthedocs.io/en/latest/</a>  </p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Ff09cbac39ef7361221ceef47e9382955%2FSelection_4356.png?generation=1783652776657450&amp;alt=media"" alt=""""></p>
+<p>hint: use synthetic image or synthetic motion is eaiser to debug your code</p>"
+3494428,,2026-07-09 23:39:28.950000,1,"<p>Open-source optical flow tracker + Kalman filter. 
+The visualisation is messy. anyone has a better suggestion?</p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F96f536ce5845530631cda7458673780e%2FSelection_4347.png?generation=1783640249216751&amp;alt=media"" alt=""""></p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fd9a4b36a962237c4eb72da62851d472f%2FSelection_4348.png?generation=1783640266346613&amp;alt=media"" alt=""""></p>"
+3494458,,2026-07-10 02:30:20.060000,1,"<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fbac01c8b8fc39e9f60fddbe7aacec3d3%2FSelection_4351.png?generation=1783650518238328&amp;alt=media"" alt=""""></p>
+<p>results of ultrack and byotrack. They tend to disagree when there is ""large predicted movement"". this is because the optimization cost forces it to ""always"" link to something</p>
+<p>""link cost &lt; termination cost + new-track cost""</p>"
+3494632,,2026-07-10 11:07:44.763000,1,"<p>in theory, linking can be done by CNN.</p>
+<p>i illusrate with a 1d example:  the axes are x and time t</p>
+<pre><code>input (rendered detected cell point), treat as image:
+
+.......x..........x....... 
+..................x....... 
+.......x..........x....... 
+.......x..........x....... 
+.......x................. 
+.......x................. 
+.......x................. 
+.......x...x............. 
+.......x...x............. 
+
+
+ouput after unet
+
+
+.......S..........S....... 
+........I.........I....... 
+........I........I....... 
+........I..........E....... 
+........I................. 
+........I................. 
+........I................. 
+........I...S............. 
+.......E..E............. 
+</code></pre>"
+3494640,,2026-07-10 11:24:05.523000,1,"<p>That's good reformulation. Consider do
+X, t
+Y, t
+Z, t
+Three heads</p>
+<p>Seems SDF would work?</p>"
+3494762,,2026-07-10 16:44:46.160000,1,"<p>Once you get detection point, you can plot everything once in zxy and color code using t. Hence it become 3d conv ( instead of 4d conv)you can think of recolor the points from t to linkage colors ( s,l,d,e ). Temporal unet —&gt; ordinary unet ( like detecting blood vessel)</p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F7ef2a07a8d2b8265e2ea95cf85512075%2FSelection_4368.png?generation=1783702607348734&amp;alt=media"" alt=""""></p>
+<p>if you use feature from temporal unet e.g. 32, then you create 1+32 channel (one is for time, and you copy 32 values from temporal to ordinary unet) in the tracking ordinary unet</p>"
+3493433,,2026-07-07 19:39:53.660000,1,"<p>feasibility study:</p>
+<pre><code>all_df = []
+for f in glob_file[::2]:
+    print(f)
+
+    nodes_df, edges_df = read_geff(f) 
+    print(nodes_df.head())
+    print(edges_df.head())
+
+    link_df = compute_link_displacement_stats(
+        nodes_df,
+        edges_df,
+        scale=(1, 4, 4),
+    )
+    all_df.append(link_df)
+
+
+link_df= pd.concat(all_df).reset_index(drop=True)
+print(link_df.shape)
+print(link_df[[""dz_sub"",""dy_sub"",""dx_sub""]].describe())
+print(np.percentile(np.abs(link_df[""dz_sub""]), [50,90,95,99]))
+print(np.percentile(np.abs(link_df[""dy_sub""]), [50,90,95,99]))
+print(np.percentile(np.abs(link_df[""dx_sub""]), [50,90,95,99]))
+
+
+
+(63751, 10)
+             dz_sub        dy_sub        dx_sub
+count  63751.000000  63751.000000  63751.000000
+mean      -0.318066     -0.011200     -0.234604
+std        1.149520      0.878445      0.989713
+min      -37.000000    -13.000000     -9.750000  ###???
+25%       -1.000000     -0.500000     -0.750000
+50%        0.000000      0.000000      0.000000
+75%        0.000000      0.500000      0.250000
+max       35.000000     12.500000      5.750000 ###???
+[1. 2. 2. 4.]
+[0.5  1.25 1.75 3.  ]
+[0.5  1.5  2.   3.75]
+</code></pre>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F30872efbdb6d455fabf83b8dcbe210ea%2FSelection_4333.png?generation=1783453191851967&amp;alt=media"" alt=""""></p>"
+3494792,,2026-07-10 17:35:26.270000,2,"<p>solving the sparse annotation for cell center detection.<br>
+1) observation : DoG peak detection somehow work. i.e., microscopy cell are blobs.<br>
+2) instead of classification binary problem, we reformulate it as learnable peak detection. at each pixel location after unet logit head, loss = softmax of pixel over his neighbour.  those pixel without annotation are not computed in loss at all     </p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F7a94ffe3bbada2de65d720c1fead0bd7%2FSelection_4369.png?generation=1783705181623495&amp;alt=media"" alt=""""></p>
+<p>hint: ask chatgpt make a margin loss version: peak is at least T greater than neighbour </p>"

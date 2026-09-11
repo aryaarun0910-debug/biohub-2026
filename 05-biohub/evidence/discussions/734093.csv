@@ -1,0 +1,38 @@
+id,authorName,postDate,votes,content
+3510907,,2026-08-09 20:23:41.313000,2,"<p>I’m sharing a public technical case study developed in connection with the Biohub Cell Tracking During Development competition:</p>
+<p><a href=""https://github.com/luisrosa/from-detection-to-identity"" target=""_blank""></a></p>
+<p>The repository is available publicly to all competition participants.</p>
+<p>The project documents how I decomposed the cell-lineage inference problem into distinct questions about evidence, identity, persistence, representation, validation, and global compatibility, and how those questions affected engineering decisions and experiments.</p>
+<p>The public artifact includes:</p>
+<ul>
+<li>the problem formulation and question-to-decision ledger;</li>
+<li>aggregate training and held-out validation records;</li>
+<li>reproducible checkpoint-selection and continuation-promotion analysis;</li>
+<li>a comparison against a zero-motion physical baseline;</li>
+<li>aggregate uncertainty/calibration analysis;</li>
+<li>synthetic demonstrations of unknown-versus-negative supervision;</li>
+<li>public-safe analysis notebooks, utilities, tests, figures, and provenance checks;</li>
+<li>explicit limitations and rejected experiments.</li>
+</ul>
+<p>For example, on 7,368 unique held-out ordinary-persistence edges, the selected motion field achieved approximately 0.570 µm error per coordinate versus 1.035 µm for a zero-motion baseline, a 44.9% reduction. The repository also documents why a later continuation state was rejected despite improving some point metrics: held-out motion likelihood deteriorated enough to worsen the declared validation objective.</p>
+<p>The repository is intentionally <strong>not</strong> the complete competition implementation.</p>
+<p>It does <strong>not</strong> contain Competition Data, competition images or annotations, model weights, checkpoints, the production architecture, training or inference source code, operating thresholds, proposal-reconciliation logic, relation-scoring implementation, global graph-selection implementation, or the submission-generation pipeline.</p>
+<p>The public repository reproduces analyses from committed aggregate records; it does not reconstruct those records from the private training system or Competition Data.</p>
+<p>Public software and notebooks in the repository are released under the MIT License. The repository’s disclosure and licensing files describe the boundary between public and private material in detail.</p>
+<p>To reproduce the public artifact:</p>
+<pre><code>git clone https://github.com/luisrosa/from-detection-to-identity.git
+cd from-detection-to-identity
+
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
+make reproduce
+</code></pre>
+<p>Expected terminal conclusions include:</p>
+<pre><code>PUBLIC RELEASE VALIDATION PASSED
+CLEAN COPY REPRODUCTION PASSED
+</code></pre>
+<p>This post is the competition-specific public sharing notice for the repository so that the same released materials are available to all participants.</p>"
+3511327,,2026-08-10 21:45:02.063000,0,"<p>Really interesting approach. The 3D tracking problem is unique because cells can move in z as well as x,y. The zarr format for the microscopy data is efficient for chunked loading. For the submission, the key is getting the node/edge structure right — each dataset has its own graph of cell positions over time.</p>"

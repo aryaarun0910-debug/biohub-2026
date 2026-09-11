@@ -1,0 +1,21 @@
+id,authorName,postDate,votes,content
+3520615,,2026-09-03 18:36:29.897000,3,"<p>Can we expect a huge shakeup? if so, what are your thoughts/opinions.</p>"
+3520875,,2026-09-04 10:33:46.103000,2,"<p>I have an edge weight model which gives boost around 0.02-0.04 on each of 5 folds, with similar scores hold up when trained on one embryo and tested on another.</p>
+<p>It gives approx +0.000 on LB though.</p>"
+3520694,,2026-09-04 00:02:43.187000,1,<p>I have like 0.96 CV and 0.93 LB for some reason</p>
+3520713,,2026-09-04 00:56:03.757000,7,"<p>it is not useful to state/anayse "" 0.96 CV ""
+you should break it down:</p>
+<pre><code>edge_jaccard = ???
+adjusted_edge_jaccard = ???
+
+node recall = ...
+estimated no of nodes = ...
+division = ...
+
+breaks in tracks ....
+link to wrong trajectory ....
+</code></pre>
+<p>if you do this you will know if there is overfitting etc</p>"
+3521195,,2026-09-05 05:38:43.977000,0,<p>How did you evaluate your CV? Wouldn't evaluating CV using the data we trained with be prone to overfitting?</p>
+3521471,,2026-09-06 03:12:03.350000,0,"<p>Somehow, I observed a CV‑LB shift in my exps; nearly all my local CV scores are more pessimistic than the public LB by about ~0.013‑0.02 (・∀・*). (Edge Jaccard only; haven’t specifically developed division J yet.)</p>"
+3521470,,2026-09-06 03:09:50.730000,0,

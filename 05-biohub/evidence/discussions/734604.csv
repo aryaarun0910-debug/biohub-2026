@@ -1,0 +1,28 @@
+id,authorName,postDate,votes,content
+3513403,,2026-08-16 11:20:35.360000,4,"<p>I'd recommend retraining the model instead of just using the public ckpt.
+unet+transformer is a strong approach, but there are still things you can improve, like preprocessing, model architecture
+the current ckpt has kind of hit a wall, it's hard to get more gain from post-processing alone.</p>"
+3513406,,2026-08-16 11:25:44.900000,0,<p>I’m currently running into a roadblock with the public approach and haven't been able to make meaningful progress on it yet. I would really appreciate some guidance on the best direction to take here.</p>
+3514405,,2026-08-19 08:36:15.220000,1,"<p>the common approach for this task is basically two parts: modeling and track optimization, aka post-processing.
+for modeling, use gpt or something to rebuild the training pipeline from the public notebook. just treat it like a normal CV task , here are a lot of similar competitions , so you can check those.
+as for track optimization, maybe some algorithm or correction model. i'm not working on that part. so I don’t know much about it yet.</p>"
+3511826,,2026-08-12 05:17:31.760000,5,"<p>I would first decompose the score before switching models.</p>
+<p>The metric:</p>
+<p><strong>Adjusted edge Jaccard + 0.1 × division Jaccard</strong></p>
+<p>An edge is correct only if both cells are detected and then linked correctly. A useful approximation is:</p>
+<p><strong>Edge recall ≈ node recall² × conditional linking accuracy</strong></p>
+<p>This means detector misses are especially expensive. Divisions are even more demanding because the parent and both daughters must be detected before a linker or division ranker can recover the event.</p>
+<p>I would measure four things separately:</p>
+<ol>
+<li><strong>Detection:</strong> node recall within the 7 µm matching radius and predicted-node count versus the provided estimated count.</li>
+<li><strong>Linking:</strong> linking accuracy only where both GT endpoints were successfully detected.</li>
+<li><strong>Detection ceiling:</strong> the best possible edge score using your current detections with an oracle or GT-aware linker diagnostic.</li>
+<li><strong>Divisions:</strong> parent/daughter detection availability, candidate recall@K, ranking quality, and final division TP/FP/FN.</li>
+</ol>
+<p>Then keep the detector fixed while comparing linkers, and keep the linker fixed while comparing detectors. Otherwise, post-processing can appear to improve locally by changing the candidate set and graph simultaneously.</p>
+<p>From my experiments, Pilkwang's UNet/node-transformer is still a very strong backbone. </p>
+<p>If conditional linking is already high, I would focus on detector calibration/precision and division ranking before spending much more time on a new linker.</p>"
+3512044,,2026-08-12 14:54:00.887000,0,"<p>the detector is finding the real cells, but it is also producing an enormous junk candidate pool. The linker then has to choose among those candidates which ends up with wrong linking </p>"
+3511821,,2026-08-12 05:01:34.623000,4,"<p>I have tried pilkwang model family (3d Unet) so far, without further fine tuning but it seem to be stuck at a certain score.
+I have tried a lot of post processing techniques, it does push score locally but LD score drops.
+im not sure if its a Detector problem if yes what models should i use before jumping into training/fine-tuning.</p>"

@@ -1,0 +1,16 @@
+id,authorName,postDate,votes,content
+3519921,,2026-09-02 14:03:48.860000,3,"<p>Hi all, and thanks to the organizers for putting this competition together. The data has been a pleasure to work with.</p>
+<p>I've been reading the released scoring code fairly closely and wanted to flag something in case it's unintended. In tracking_cellmot/metrics.py, the adjusted edge Jaccard is computed as:</p>
+<pre><code>adj_edge_jaccard = max(0.0, edge_jaccard * (1 - 0.1 * total_node_ratio))
+</code></pre>
+<p>where <code>total_node_ratio = (N_pred - N_est) / N_est</code>.</p>
+<p>The <code>max(0.0, ...)</code> puts a floor on it, but there's no corresponding ceiling. So when a submission predicts fewer nodes than estimated_number_of_nodes, the ratio goes negative and the multiplier ends up greater than 1.</p>
+<p>On one of the training clips (44b6_0b24845f) I get an edge Jaccard of 0.98 and a node ratio of about -0.29, which comes out as an adjusted value of 1.0102, a Jaccard above 1. The inline comment in the source describes the coefficient as a penalty, which is what made me think the symmetric bonus on the other side might not be what was intended.</p>
+<p>I genuinely don't know whether this matters in practice, and I haven't been able to determine whether the scoring server behaves the same way as the released reference implementation. The difference between the two possibilities is smaller than the leaderboard's displayed precision, so I couldn't tell from the outside.</p>
+<p>Entirely possible I'm misreading the intent here, in which case please ignore me. But it seemed better to ask than to sit on it. Happy to share the exact clip and numbers if that's useful.</p>
+<p>Thanks again.</p>"
+3519929,,2026-09-02 14:14:33.800000,2,"<p>yes. N_pred is a metric hack. From competition point of view: ""it is better to detect just enough annotated nodes (up to N_est or less)"" rather than all nodes"". This change the way on how you treated unlablled data, apart from sparse labelled.</p>
+<p>Obviously, the sparse annotation are not random tracks. they are difficult tracks (or tracks that are annotated by open source ultrack and hand corrected by host). you should expand sparse annotation to dense N_est annotation that is closest to sparse annotation. then train your model to detect N_est targets or less.</p>
+<hr>
+<p>but of course, you can focus on division track and pay less attention on N_est. that is another separate strategy</p>"
+3519949,,2026-09-02 14:56:29.057000,1,
