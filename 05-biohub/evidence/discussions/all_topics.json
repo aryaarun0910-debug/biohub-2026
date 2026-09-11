@@ -4057,195 +4057,463 @@
  },
  "737659": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 737659,
+    "title": "Scoring after notebook ran",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/737659",
+    "postDate": "2026-08-26T16:27:51.320257Z",
+    "authorName": "Alex Amirkhanyan",
+    "authorUrl": "https://www.kaggle.com/aleksamirkhanyan",
+    "votes": -1,
+    "commentCount": 5,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>The scoring has been active for nearly 6 hours, is it normal?</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3519055,
+     "authorName": "X.X",
+     "postDate": "2026-09-01T02:18:54.327Z",
+     "content": "<p>Yes. It could be longer</p>"
+    },
+    {
+     "id": 3517312,
+     "authorName": "nusrati",
+     "postDate": "2026-08-26T18:27:33.700Z",
+     "content": "<p>yes, it can exceed to 7 hrs as well </p>",
+     "replies": [
+      {
+       "id": 3517316,
+       "authorName": "Alex Amirkhanyan",
+       "postDate": "2026-08-26T18:35:02.980Z",
+       "content": "<p>oh understood thank you, already at 7th hour\ud83d\ude02\ud83e\udee1</p>",
+       "replies": [
+        {
+         "id": 3517325,
+         "authorName": "Sireesh Limbu",
+         "postDate": "2026-08-26T20:14:41.993Z",
+         "content": "<p>Mine takes between 8-9hrs</p>"
+        },
+        {
+         "id": 3517340,
+         "authorName": "Alex Amirkhanyan",
+         "postDate": "2026-08-26T22:07:29.190Z",
+         "content": "<p>Mine is on 11th hour\ud83d\ude2d</p>"
+        }
+       ]
+      }
+     ]
+    }
+   ]
   }
  },
  "726526": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 726526,
+    "title": "Submission Stuck",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/726526",
+    "postDate": "2026-07-15T16:47:18.295306400Z",
+    "authorName": "Samson Enoch",
+    "authorUrl": "https://www.kaggle.com/samsonenoch",
+    "votes": -2,
+    "commentCount": 4,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>is it just me or the submission evaluation is going on for a long time, mine personally has been scoring for the past 5 hour ! ANY CLUE ON WHATS HAPPENING ????</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3498917,
+     "authorName": "FasterYouChase FasterIRun",
+     "postDate": "2026-07-16T07:04:59.320Z",
+     "content": "<p>Because this is a standard Kaggle code competition with a 12-hour rerun limit, the visible verification dataset is intentionally kept minimal to allow rapid notebook saving and verification in 15\u201330 minutes. However, according to the official Kaggle Dataset Overview, the hidden test set swapped in during final evaluation is not a fraction of the training data. It is roughly <strong>the exact same size as the ~88 GB training dataset.</strong> Since the training set covers 199 total Zarr image volumes, our submission pipelines must be optimized to process roughly 200 hidden test volumes within the strict 12-hour notebook execution window.</p>",
+     "votes": 2
+    },
+    {
+     "id": 3499038,
+     "authorName": "OzanM.",
+     "postDate": "2026-07-16T12:16:31.433Z",
+     "content": "<p>I'm curious about the secret of anyone whose submission time is shorter.\nMine sometimes takes 7 hours, sometimes 5 and a half hours.</p>"
+    },
+    {
+     "id": 3498931,
+     "postDate": "2026-07-16T07:28:04.277Z",
+     "votes": -1
+    },
+    {
+     "id": 3498855,
+     "postDate": "2026-07-16T03:11:14.070Z",
+     "votes": -1
+    }
+   ]
   }
  },
  "726955": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 726955,
+    "title": "Zarr import",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/726955",
+    "postDate": "2026-07-17T09:26:37.518385Z",
+    "authorName": "kai",
+    "authorUrl": "https://www.kaggle.com/irving1101",
+    "votes": -2,
+    "commentCount": 2,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>How can I import Barr if it requires off-line submission?</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3500046,
+     "authorName": "Antonoof",
+     "postDate": "2026-07-18T11:33:31.083Z",
+     "content": "<h1>First install dependences</h1>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F17954496%2F217ec3c8f4de6cf1a688fa2f2278ff11%2Ff1.png?generation=1784374380922525&amp;alt=media\" alt=\"f1\"></p>\n<h1>Next save</h1>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F17954496%2F7402c5023e9faf489b99801be191f558%2Ff2.png?generation=1784374404526108&amp;alt=media\" alt=\"f2\"></p>\n<p><a href=\"https://www.kaggle.com/code/antonoof/import-kaggle?scriptVersionId=336231500\" target=\"_blank\">https://www.kaggle.com/code/antonoof/import-kaggle?scriptVersionId=336231500</a></p>",
+     "votes": 1
+    },
+    {
+     "id": 3499868,
+     "authorName": "FasterYouChase FasterIRun",
+     "postDate": "2026-07-18T06:02:12.043Z",
+     "content": "<p>But uploading a dataset containing the .whl files required for its install, run them, install Zarr and then import.</p>",
+     "votes": 1
+    }
+   ]
   }
  },
  "735307": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 735307,
+    "title": "What is happening after submitting the notebook for the first time?",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/735307",
+    "postDate": "2026-08-14T23:50:52.463209200Z",
+    "authorName": "Developer kgf",
+    "authorUrl": "https://www.kaggle.com/developerkgf",
+    "votes": -2,
+    "commentCount": 3,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>I submitted my notebook with my successfully ran version and the submission.cvs , and my last version took just 2.8 hours to complete. But I noticed that after I submitted my latest work to the competition it is runing from 11hours. Please let me know what or why is this thing happening.</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3514794,
+     "authorName": "NurpeyisRiskeldi",
+     "postDate": "2026-08-20T06:00:07.540Z",
+     "content": "<p>I have the similar problem, but my version took like 20 minutes and after submitting it is still running for 11 hours.</p>"
+    },
+    {
+     "id": 3513088,
+     "authorName": "yoikoarmor",
+     "postDate": "2026-08-15T07:28:34.047Z",
+     "content": "<p>I can\u2019t say for sure because I\u2019m not familiar with the code, but perhaps you made significant changes to the processing compared to the previous version. Notebooks can sometimes hit the timeout limit, but I think this is still within the normal range.</p>"
+    },
+    {
+     "id": 3513004,
+     "authorName": "Developer kgf",
+     "postDate": "2026-08-14T23:51:28.627Z",
+     "content": "<p>Help Me please \ud83e\udd7a</p>"
+    }
+   ]
   }
  },
  "735531": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 735531,
+    "title": "so to get a score above the public baseline is training?",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/735531",
+    "postDate": "2026-08-16T15:43:39.090172800Z",
+    "authorName": "Bharath Varma",
+    "authorUrl": "https://www.kaggle.com/bharath111l",
+    "votes": -2,
+    "commentCount": 6,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>im stuck tbh and all my post proc efforts gone to waste , i need a direction , is it training or is it something else ??</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3513865,
+     "authorName": "Mohit",
+     "postDate": "2026-08-17T20:01:55.457Z",
+     "content": "<p>Damn even i wanna know</p>"
+    },
+    {
+     "id": 3513864,
+     "authorName": "nusrati",
+     "postDate": "2026-08-17T20:00:15.697Z",
+     "content": "<p>Bruh how did you pass .925\nIm stuck with public data starting @ .907 with tuned upto .916 but cant make it cross nor touch .92\nTried multiple algos but score remains the same. \nNot in the position to train my own model from scratch.</p>",
+     "replies": [
+      {
+       "id": 3513866,
+       "authorName": "nusrati",
+       "postDate": "2026-08-17T20:03:21.593Z",
+       "content": "<p>lmao I went from 58th to 187th in no time.\nam busy rn will look into this stuff from tmr.</p>"
+      }
+     ]
+    },
+    {
+     "id": 3513510,
+     "authorName": "Arul Prasad S P",
+     "postDate": "2026-08-16T19:19:17.880Z",
+     "content": "<p>Check out this discussion \ud83d\ude4c</p>\n<p><a href=\"https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/735352\" target=\"_blank\">https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/735352</a></p>"
+    },
+    {
+     "id": 3513484,
+     "authorName": "Moawiz",
+     "postDate": "2026-08-16T17:02:07.693Z",
+     "content": "<p>i can relate to this broski, better if get direction from GMs </p>"
+    },
+    {
+     "id": 3513479,
+     "postDate": "2026-08-16T16:30:29.607Z"
+    }
+   ]
   }
  },
  "740337": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 740337,
+    "title": "Not able to submit my notebook and scoring is failing ",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/740337",
+    "postDate": "2026-09-09T04:29:13.592304700Z",
+    "authorName": "Mahesh Kolekar",
+    "authorUrl": "https://www.kaggle.com/maheshkolekar9",
+    "votes": -2,
+    "commentCount": 1,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>Not able to submit my notebook and scoring is failing </p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3522538,
+     "authorName": "Mahesh Kolekar",
+     "postDate": "2026-09-09T04:31:36.357Z",
+     "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F30516716%2Fa760dd3ec7c846be0d6796d677c7d9d1%2FBiohub.jpg?generation=1788928289549190&amp;alt=media\" alt=\"\"></p>"
+    }
+   ]
   }
  },
  "716704": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 716704,
+    "title": "failed submission",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/716704",
+    "postDate": "2026-06-30T21:27:45.111872400Z",
+    "authorName": "Gb El Salvador",
+    "authorUrl": "https://www.kaggle.com/gbelsalvador",
+    "votes": -3,
+    "commentCount": 3,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>I\u2019ve tried submitting my CSV file three times now, but I keep getting a message saying my notebook is using the internet. I\u2019ve disabled it and saved the changes, yet the notification telling me to disconnect the notebook from the internet keeps popping up\u2014I don't know what to do anymore.</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3484931,
+     "authorName": "Jord\u00e3o Bragantini",
+     "postDate": "2026-06-30T21:49:18.087Z",
+     "content": "<p><a href=\"https://www.kaggle.com/gbelsalvador\" target=\"_blank\">@gbelsalvador</a>, are you trying to install any package from pip?</p>",
+     "replies": [
+      {
+       "id": 3485128,
+       "authorName": "Gb El Salvador",
+       "postDate": "2026-07-01T05:50:29.130Z",
+       "content": "<p>Yes, there are certain packages I installed using pip.</p>",
+       "replies": [
+        {
+         "id": 3485623,
+         "authorName": "Jord\u00e3o Bragantini",
+         "postDate": "2026-07-01T16:51:43.620Z",
+         "content": "<p>These won't work during submission, you need to have them already installed in your testing artifacts</p>"
+        }
+       ]
+      }
+     ]
+    }
+   ]
   }
  },
  "725015": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 725015,
+    "title": "What if anyone will get 0.999 on lb, then competition will got cancled? I am curious, does any previous competition get 0.99 percentile on LB?",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/725015",
+    "postDate": "2026-07-14T02:02:06.767259300Z",
+    "authorName": "Rocker Ritesh",
+    "authorUrl": "https://www.kaggle.com/rockerritesh",
+    "votes": -4,
+    "commentCount": 4,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>According to pattern and days passed, there is high chance of getting 0.99 on LB by end of this month.</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3496495,
+     "authorName": "Thibgolds",
+     "postDate": "2026-07-14T02:11:53.310Z",
+     "content": "<p>Hi, the best submission score is actually 1.1, not 1, so it is possible for the scores to go over 1. In fact it is theoretically possible to obtain a score slightly above 1.1 (due to our adjusted jaccard metric) but we don't expect to happen. \nOur metrics are detailed here <a href=\"https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md\" target=\"_blank\">https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md</a></p>",
+     "votes": 5,
+     "replies": [
+      {
+       "id": 3496507,
+       "authorName": "Rocker Ritesh",
+       "postDate": "2026-07-14T02:45:43.220Z",
+       "content": "<p>Ah, that makes sense \u2014 thanks for the quick clarification! I'll keep that in mind.</p>"
+      }
+     ]
+    },
+    {
+     "id": 3496615,
+     "authorName": "thedyingkai",
+     "postDate": "2026-07-14T10:36:04.807Z",
+     "content": "<p>Can this score really reach 0.999? That sounds insane.</p>",
+     "replies": [
+      {
+       "id": 3498346,
+       "authorName": "hengck23",
+       "postDate": "2026-07-15T11:56:50.220Z",
+       "content": "<p>lb more than 1.0 is possible. (hint: get your num of nodes correct using texture regression like human head counting, i.e. concept of density)</p>"
+      }
+     ]
+    }
+   ]
   }
  },
  "716415": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 716415,
+    "title": "Scoring issue",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/716415",
+    "postDate": "2026-06-30T14:52:26.158593500Z",
+    "authorName": "Sri Sai Hemanth Bollepalli",
+    "authorUrl": "https://www.kaggle.com/sshemanth07",
+    "votes": -5,
+    "commentCount": 1,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>I noticed my submission has been scoring for several hours. May i know whats the issue? anyone experiencing like me.</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3485642,
+     "authorName": "Rahul Parmeshwar",
+     "postDate": "2026-07-01T17:09:52.353Z",
+     "content": "<p>Same issue here. </p>"
+    }
+   ]
   }
  },
  "716044": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 716044,
+    "title": "how to sumbit ?",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/716044",
+    "postDate": "2026-06-30T00:29:04.647467500Z",
+    "authorName": "ordinary",
+    "authorUrl": "https://www.kaggle.com/abdowael1",
+    "votes": -6,
+    "commentCount": 2,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>I have finished the first version of my project and successfully generated the output in the required CSV format. How should I submit it?</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3484079,
+     "authorName": "Mar\u00eda Cruz",
+     "postDate": "2026-06-30T01:26:46.267Z",
+     "content": "<p>Hi <a href=\"https://www.kaggle.com/abdowael1\" target=\"_blank\">@abdowael1</a> -- in addition to what <a href=\"https://www.kaggle.com/inversion\" target=\"_blank\">@inversion</a> said below, check out this documentation page that could be helpful: <a href=\"https://www.kaggle.com/docs/competitions#making-a-prediction-submission\" target=\"_blank\">https://www.kaggle.com/docs/competitions#making-a-prediction-submission</a></p>\n<p>Good Luck!</p>"
+    },
+    {
+     "id": 3484078,
+     "authorName": "inversion",
+     "postDate": "2026-06-30T01:25:32.200Z",
+     "content": "<p>See the \"Code Requirements\" section on the Overview tab of the competition.</p>"
+    }
+   ]
   }
  },
  "716421": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 716421,
+    "title": "Submission issue",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/716421",
+    "postDate": "2026-06-30T15:06:02.225823700Z",
+    "authorName": "Sri Sai Hemanth Bollepalli",
+    "authorUrl": "https://www.kaggle.com/sshemanth07",
+    "votes": -7,
+    "commentCount": 2,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F27082480%2F27ef658b0b031d85b80cd3dfb72039a4%2FScreenshot%202026-07-01%20010533.png?generation=1782831943944582&amp;alt=media\" alt=\"\"> Please solve ,my issue</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3484663,
+     "authorName": "Thibgolds",
+     "postDate": "2026-06-30T16:45:29.833Z",
+     "content": "<p>Hi, if this is the UNet baseline, this is expected, inference is very slow, and needs to be improved!</p>"
+    },
+    {
+     "id": 3484641,
+     "authorName": "Kaushik Ramayya Chikkala",
+     "postDate": "2026-06-30T16:23:25.187Z",
+     "content": "<p>same for me, after a few hours it submitted</p>"
+    }
+   ]
   }
  },
  "740285": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 740285,
+    "title": "Essa competi\u00e7\u00e3o ta sendo meu parque de divers\u00e3o.",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/740285",
+    "postDate": "2026-09-08T22:26:22.872142700Z",
+    "authorName": "JosephErikRibeiro",
+    "authorUrl": "https://www.kaggle.com/josepherikribeiro",
+    "votes": -7,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>Aprezendo Ezo \u2026 em breve Airis \u2026 e ja ta tudo a caminho.\npreciso de parceiros \u2026 nao pra competi\u00e7\u00e3o isso agora \u00e9 hobby\u2026. \nPra mudar o planeta, fazer acontecer \u2026. </p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F21808370%2F70b3eeaf0572ee36e78a0bf2a1018276%2Fnewplot.png?generation=1788906150935157&amp;alt=media\" alt=\"\">  <img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F21808370%2Fe10e0be2a0aca80d60518c830d33660f%2Fdefencerag.png?generation=1788906299278456&amp;alt=media\" alt=\"\"></p>"
    }
   },
-  "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
-  }
+  "comments": {}
  },
  "723921": {
   "topic": {
@@ -4338,34 +4606,45 @@
  },
  "715981": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 715981,
+    "title": "train_df = pd.read_csv(f\"{DATA_PATH}/train.csv\") test_df = pd.read_csv(f\"{DATA_PATH}/test.csv\") sample_sub = pd.read_csv(f\"{DATA_PATH}/sample_submission.csv\")",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/715981",
+    "postDate": "2026-06-29T20:24:51.310139300Z",
+    "authorName": "Sohil Arman",
+    "authorUrl": "https://www.kaggle.com/sohilarman",
+    "votes": -20,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>print(train_df.head())\nprint(train_df.info())\nprint(train_df.describe())</p>"
    }
   },
-  "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
-  }
+  "comments": {}
  },
  "724502": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 724502,
+    "title": "Clarification on Using a Self-Trained Model in Notebook Submission",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/724502",
+    "postDate": "2026-07-11T14:24:42.701801400Z",
+    "authorName": "Giridharan R",
+    "authorUrl": "https://www.kaggle.com/girigd26",
+    "commentCount": 1,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>I would like to clarify the notebook submission requirements.</p>\n<p>I trained a model entirely by myself using only the official BioHub Cell Tracking During Development competition training data. I would like to use this trained model for inference in my submission notebook instead of retraining it every time.</p>\n<p>Is it permitted to:</p>\n<p>Upload the trained model as a private Kaggle Dataset (or other supported notebook input), and\nLoad that model in the submission notebook for inference?</p>\n<p>The model was trained exclusively on the competition's official training data, and no external data or pretrained weights were used.</p>\n<p>Would this be considered a valid notebook submission under the competition rules?</p>\n<p>Thank you!</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3496287,
+     "authorName": "Jord\u00e3o Bragantini",
+     "postDate": "2026-07-13T14:54:03.473Z",
+     "content": "<p>That's permitted, but you should be able to reproduce it in case you win, see <a href=\"https://www.kaggle.com/WinningModelDocumentationGuidelines\" target=\"_blank\">https://www.kaggle.com/WinningModelDocumentationGuidelines</a></p>"
+    }
+   ]
   }
  },
  "724917": {
@@ -4402,51 +4681,79 @@
  },
  "730054": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 730054,
+    "title": "How to Save n Run All with AI tools",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/730054",
+    "postDate": "2026-07-27T20:03:37.728494800Z",
+    "authorName": "Adarsh",
+    "authorUrl": "https://www.kaggle.com/madarshbb",
+    "commentCount": 2,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>Does anyone know how to do this? When asking claude code, it relies on manually going on kaggle. What's the best way to do this?</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3504510,
+     "authorName": "KevinYongxin",
+     "postDate": "2026-07-28T08:40:25.233Z",
+     "content": "<p>Create token and use kaggle-cli provided by official.</p>",
+     "votes": 2
+    },
+    {
+     "id": 3504503,
+     "authorName": "mikelou1",
+     "postDate": "2026-07-28T08:30:22.900Z",
+     "content": "<p>kaggle cli</p>",
+     "votes": 2
+    }
+   ]
   }
  },
  "730149": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 730149,
+    "title": "Submission Time",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/730149",
+    "postDate": "2026-07-28T08:52:53.464316300Z",
+    "authorName": "Sanath S Srivatsa",
+    "authorUrl": "https://www.kaggle.com/sanathssrivatsa",
+    "commentCount": 1,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>I was able to complete a notebook execution for the <strong>4 test data</strong>.</p>\n<p>Notebook successful completed its end to end execution against test data in <strong>637s</strong> using <strong>GPU T4 x2</strong>.</p>\n<p>*<em>But the actual submission(i.e scoring) took 7hrs</em>.*</p>\n<p>Is this expected..?</p>"
    }
   },
   "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
+   "comments": [
+    {
+     "id": 3505044,
+     "authorName": "mikelou1",
+     "postDate": "2026-07-29T10:38:36.387Z",
+     "content": "<p>yes. there is ~200 videos for actual submission, so around 7 hours is accurate.</p>"
+    }
+   ]
   }
  },
  "738210": {
   "topic": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
+   "topic": {
+    "id": 738210,
+    "title": "Cannot find any good notebook which shows the training method",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/738210",
+    "postDate": "2026-08-30T13:43:26.896920300Z",
+    "authorName": "Abhirup Choudhury",
+    "authorUrl": "https://www.kaggle.com/abhirupchoudhury073",
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>I seriously need a notebook which actually trains the model instead of loading it up. I have not been able to train a single deep learning model in this competition yet, the loss keeps bouncing around, i am confused regarding what kind of loss function to use.</p>\n<p>my current architecture uses only the temporal unet 3d without the SimpleNodeTransformer, but i need help training! </p>\n<p>please if anyone can help me share a solution!</p>"
    }
   },
-  "comments": {
-   "error": {
-    "code": 429,
-    "message": "Too many requests",
-    "status": "RESOURCE_EXHAUSTED"
-   }
-  }
+  "comments": {}
  },
  "739221": {
   "topic": {

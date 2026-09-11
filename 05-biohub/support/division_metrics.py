@@ -1,5 +1,4 @@
 import warnings
-from collections import deque
 from typing import NamedTuple
 
 import polars as pl
@@ -12,6 +11,28 @@ class DivisionCounts(NamedTuple):
     tp: int
     fn: int
     fp: int
+
+
+class DivisionScores(NamedTuple):
+    """Result of :func:`score_divisions`.
+
+    Attributes
+    ----------
+    scores : dict[int, int]
+        Mapping from GT dividing-node ID to 1 (recovered) or 0 (not).
+    tp_forks : set[int]
+        Predicted dividing nodes paired to GT divisions.
+    fp_forks : set[int]
+        Predicted dividing nodes that were considered for a GT division
+        but did not become a true positive, including local-topology
+        rejects, bipartite leftovers, evaluable spurious forks, malformed
+        local branches, and forks whose branch evidence spans distinct GT
+        components.
+    """
+
+    scores: dict[int, int]
+    tp_forks: set[int]
+    fp_forks: set[int]
 
 
 def _reset_matching_attrs(graph: td.graph.BaseGraph) -> None:
@@ -97,6 +118,7 @@ def match_divisions(
         *pred_graph* for that division.
     """
     from tracksdata.metrics import DistanceMatching
+
     matching = DistanceMatching(max_distance=max_distance, scale=scale)
 
     gt_divisions = extract_divisions(gt_graph)
@@ -112,6 +134,7 @@ def match_divisions(
             _reset_matching_attrs(pred_copy)
             with warnings.catch_warnings():
                 from scipy.sparse import SparseEfficiencyWarning
+
                 warnings.filterwarnings("ignore", category=SparseEfficiencyWarning)
                 pred_copy.match(gt_div, matching=matching)
             matched[div_node] = pred_copy
@@ -129,6 +152,7 @@ def _match_full(
 ) -> td.graph.BaseGraph:
     """Match the full pred graph against the full GT graph, return the matched copy."""
     from tracksdata.metrics import DistanceMatching
+
     matching = DistanceMatching(max_distance=max_distance, scale=scale)
 
     pred_copy = pred_graph.copy()
@@ -141,6 +165,7 @@ def _match_full(
     try:
         with warnings.catch_warnings():
             from scipy.sparse import SparseEfficiencyWarning
+
             warnings.filterwarnings("ignore", category=SparseEfficiencyWarning)
             pred_copy.match(gt_graph, matching=matching)
     finally:
@@ -150,12 +175,11 @@ def _match_full(
 
 
 def _matched_node_attrs(graph: td.graph.BaseGraph) -> pl.DataFrame:
-    """Return node attrs (node_id, matched_node_id, t) for matched pred nodes."""
+    """Return pred/GT node-ID pairs for matched prediction nodes."""
     node_attrs = graph.node_attrs(
         attr_keys=[
             td.DEFAULT_ATTR_KEYS.NODE_ID,
             td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID,
-            "t",
         ],
     )
     return node_attrs.filter(
@@ -164,97 +188,87 @@ def _matched_node_attrs(graph: td.graph.BaseGraph) -> pl.DataFrame:
     )
 
 
-def _has_stage_coverage(
+def _matched_division_nodes(
     matched_attrs: pl.DataFrame,
     gt_div: td.graph.BaseGraph,
     divider_id: int,
-) -> bool:
-    """Check that matches cover both stages of a GT division.
+) -> tuple[set[int], list[set[int]]] | None:
+    """Group matched pred nodes by their role in a GT division window.
 
-    The GT division subgraph has a *one-node stage* (timepoints with a
-    single GT node — parent and divider, pre-split) and two or more
-    *daughter lineages* (each child of *divider_id* plus its descendants
-    within the subgraph). A valid match requires:
-
-    * ≥1 matched prediction node whose timepoint falls in the one-node
-      stage, AND
-    * matched prediction nodes whose matched GT nodes cover ≥2 distinct
-      daughter lineages. Lineage hits may occur at different timepoints;
-      a single daughter matched only at t=divider+2 still counts.
-
-    When the subgraph contains a secondary divider (e.g. successive
-    divisions), *divider_id* disambiguates which split we're scoring.
+    The parent side contains the GT divider (the parent cell) and its
+    immediate predecessor (the grandparent). Each daughter side contains
+    one GT child and its immediate successors (the grandchildren).
     """
     if matched_attrs.is_empty():
-        return False
+        return None
 
-    gt_time_counts = (
-        gt_div.node_attrs(attr_keys=["t"])
-        .group_by("t")
-        .agg(pl.len().alias("n"))
+    node_to_gt = dict(
+        zip(
+            matched_attrs[td.DEFAULT_ATTR_KEYS.NODE_ID].to_list(),
+            matched_attrs[td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID].to_list(),
+            strict=True,
+        )
     )
-    one_node_times = set(gt_time_counts.filter(pl.col("n") == 1)["t"].to_list())
-    if not one_node_times:
-        return False
+    gt_children = gt_div.successors(divider_id)
+    if len(gt_children) < 2:
+        return None
 
-    children = gt_div.successors(divider_id)
-    if len(children) < 2:
-        return False
-
-    def _descendants(seed: int) -> set[int]:
-        out: set[int] = {seed}
-        stack = [seed]
-        while stack:
-            for nxt in gt_div.successors(stack.pop()):
-                if nxt not in out:
-                    out.add(nxt)
-                    stack.append(nxt)
-        return out
-
-    lineages = [_descendants(c) for c in children]
-
-    matched_time_counts = matched_attrs.group_by("t").agg(pl.len().alias("n"))
-    has_one = matched_time_counts.filter(pl.col("t").is_in(one_node_times)).height > 0
-    if not has_one:
-        return False
-
-    matched_gt_ids = set(matched_attrs[td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID].to_list())
-    lineages_covered = sum(1 for lin in lineages if lin & matched_gt_ids)
-    return lineages_covered >= 2
+    gt_parent_ids = {divider_id, *gt_div.predecessors(divider_id)}
+    parent_ids = {pred_id for pred_id, gt_id in node_to_gt.items() if gt_id in gt_parent_ids}
+    daughter_ids = [
+        {pred_id for pred_id, gt_id in node_to_gt.items() if gt_id in {child, *gt_div.successors(child)}}
+        for child in gt_children
+    ]
+    if not parent_ids or sum(bool(ids) for ids in daughter_ids) < 2:
+        return None
+    return parent_ids, daughter_ids
 
 
-def _weakly_connected_components(
-    graph: td.graph.BaseGraph,
-    node_ids: list[int],
-) -> list[tuple[set[int], set[int]]]:
-    """Partition *node_ids* into weakly-connected components of *graph*.
+def _is_strongly_connected_division(
+    pred_graph: td.graph.BaseGraph,
+    pred_div: int,
+    parent_ids: set[int],
+    daughter_ids: list[set[int]],
+) -> bool:
+    """Check a predicted division's local directed topology.
 
-    Returns one ``(matched_subset, visited)`` pair per component:
-    *matched_subset* is the component restricted to *node_ids*; *visited*
-    is every graph node reachable from the component (including unmatched
-    intermediaries). The visited set lets callers locate structural
-    features -- in particular pred dividing nodes -- that may sit on
-    unmatched nodes between matched ones.
+    The prediction window mirrors :func:`extract_divisions`: an immediate
+    predecessor (grandparent), *pred_div* (parent), its children, and their
+    children (grandchildren). The parent match must be the fork itself or
+    its immediate predecessor. Matches from at least two GT daughter
+    lineages must occur in two distinct predicted child lineages.
+
+    Parameters
+    ----------
+    pred_graph : td.graph.BaseGraph
+        The predicted tracking graph.
+    pred_div : int
+        Candidate predicted dividing node (the parent/fork).
+    parent_ids : set[int]
+        Prediction node IDs matched to the GT parent side (grandparent or
+        dividing parent).
+    daughter_ids : list[set[int]]
+        Prediction node IDs matched to each GT daughter lineage (child or
+        grandchild), grouped by lineage.
+
+    Returns
+    -------
+    bool
+        Whether the local prediction topology connects the parent side to
+        at least two distinct daughter lineages through *pred_div*.
     """
-    remaining = set(node_ids)
-    components: list[tuple[set[int], set[int]]] = []
-    while remaining:
-        seed = next(iter(remaining))
-        visited: set[int] = {seed}
-        queue: deque[int] = deque([seed])
-        component: set[int] = {seed}
-        while queue:
-            current = queue.popleft()
-            neighbors = graph.successors(current) + graph.predecessors(current)
-            for neighbor in neighbors:
-                if neighbor not in visited:
-                    visited.add(neighbor)
-                    queue.append(neighbor)
-                    if neighbor in remaining:
-                        component.add(neighbor)
-        components.append((component, visited))
-        remaining -= component
-    return components
+    pred_parent_ids = {pred_div, *pred_graph.predecessors(pred_div)}
+    if pred_parent_ids.isdisjoint(parent_ids):
+        return False
+
+    pred_lineages = [{child, *pred_graph.successors(child)} for child in pred_graph.successors(pred_div)]
+    lineage_edges = {
+        gt_lineage: {
+            pred_lineage for pred_lineage, pred_ids in enumerate(pred_lineages) if not matched_ids.isdisjoint(pred_ids)
+        }
+        for gt_lineage, matched_ids in enumerate(daughter_ids)
+    }
+    return len(_bipartite_max_matching(list(lineage_edges), lineage_edges)) >= 2
 
 
 def _bipartite_max_matching(
@@ -291,26 +305,24 @@ def score_divisions(
     gt_graph: td.graph.BaseGraph,
     scale: tuple[float, ...] | None = None,
     max_distance: float = 7.0,
-) -> dict[int, int]:
+) -> DivisionScores:
     """Score each GT division: 1 if the prediction recovers it, 0 otherwise.
 
-    For each GT division, the predicted graph is matched against the
-    division subgraph and checked for a spanning component satisfying:
+    For each GT division, the predicted graph is matched against its
+    parent/divider/children/grandchildren window. Candidate pred forks are
+    restricted to the matched parent-side nodes and their immediate
+    successors. A candidate is valid only when its local topology contains
+    a matched parent and matches from two GT daughter lineages on distinct
+    predicted child branches. A fork is rejected when two direct-child
+    branches have nearest matched evidence in distinct reliable GT components.
+    An unmatched child may use unambiguous grandchild evidence as a fallback;
+    matched children take precedence over downstream matches.
 
-    1. At least one matched prediction node in the GT's one-node stage
-       (pre-division timepoints).
-    2. At least two matched prediction nodes at the same timepoint in the
-       GT's two-node stage (post-division timepoints).
-    3. All matched prediction nodes in a single weakly-connected
-       component of the prediction graph.
-
-    Each such spanning component is associated with the *pred dividing
-    nodes* (out-degree ≥ 2) it contains. A maximum-cardinality bipartite
-    matching is then computed so each pred dividing node serves at most
-    one GT division, and each GT division is paired with at most one
-    pred dividing node. A GT division scores 1 only if it is paired in
-    that matching -- this prevents a single pred fork from being
-    credited to multiple GT divisions.
+    A maximum-cardinality bipartite matching is then computed so each pred
+    fork serves at most one GT division, and each GT division is paired
+    with at most one pred fork. A GT division scores 1 only if paired;
+    rejected candidates and valid candidates left unpaired are returned as
+    false-positive forks.
 
     Parameters
     ----------
@@ -325,32 +337,159 @@ def score_divisions(
 
     Returns
     -------
-    dict[int, int]
-        Mapping from GT dividing-node ID to 1 (paired) or 0 (not).
+    DivisionScores
+        The per-division scores and the predicted forks classified as true
+        positives or false positives. False-positive forks include local
+        topology rejects, cross-GT-component branches, locally merged branches,
+        evaluable spurious forks, and valid candidates left unmatched by the
+        bipartite pairing.
     """
     matched = match_divisions(
-        pred_graph, gt_graph, scale, max_distance,
+        pred_graph,
+        gt_graph,
+        scale,
+        max_distance,
     )
     gt_divisions = extract_divisions(gt_graph)
-    pred_div_nodes = set(pred_graph.dividing_nodes())
+    pred_div_nodes = {
+        node_id for node_id in pred_graph.node_ids()
+        if pred_graph.out_degree(node_id) >= 2
+    }
+    evaluable_forks, cross_component_forks, malformed_forks = (
+        _pred_division_fork_sets(pred_graph, gt_graph, scale, max_distance)
+    )
+    invalid_forks = cross_component_forks | malformed_forks
 
     candidates: dict[int, set[int]] = {}
+    considered: set[int] = set()
     for div_node, matched_pred in matched.items():
-        matched_attrs = _matched_node_attrs(matched_pred)
-        node_ids = matched_attrs[td.DEFAULT_ATTR_KEYS.NODE_ID].to_list()
-        components = _weakly_connected_components(matched_pred, node_ids)
-        gt_div = gt_divisions[div_node]
-        div_candidates: set[int] = set()
-        for matched_subset, visited in components:
-            comp_attrs = matched_attrs.filter(
-                pl.col(td.DEFAULT_ATTR_KEYS.NODE_ID).is_in(list(matched_subset))
-            )
-            if _has_stage_coverage(comp_attrs, gt_div, div_node):
-                div_candidates |= visited & pred_div_nodes
-        candidates[div_node] = div_candidates
+        matched_nodes = _matched_division_nodes(_matched_node_attrs(matched_pred), gt_divisions[div_node], div_node)
+        if matched_nodes is None:
+            candidates[div_node] = set()
+            continue
+
+        parent_ids, daughter_ids = matched_nodes
+        local_nodes = parent_ids | {
+            successor for parent_id in parent_ids for successor in matched_pred.successors(parent_id)
+        }
+        local_forks = local_nodes & pred_div_nodes
+        considered |= local_forks
+        candidates[div_node] = {
+            pred_div
+            for pred_div in local_forks - invalid_forks
+            if _is_strongly_connected_division(matched_pred, pred_div, parent_ids, daughter_ids)
+        }
 
     pairing = _bipartite_max_matching(list(candidates), candidates)
-    return {div: int(div in pairing) for div in candidates}
+    scores = {div: int(div in pairing) for div in candidates}
+    tp_forks = set(pairing.values())
+    # Use a set union so forks supported by multiple FP rules are counted once.
+    # Invalid forks were excluded from the pairing above and therefore cannot
+    # also be true positives.
+    fp_forks = (considered | evaluable_forks | invalid_forks) - tp_forks
+    return DivisionScores(scores=scores, tp_forks=tp_forks, fp_forks=fp_forks)
+
+
+def _gt_weak_component_ids(graph: td.graph.BaseGraph) -> dict[int, int]:
+    """Map each GT node to its weakly connected component ID."""
+    component_ids: dict[int, int] = {}
+    for seed in graph.node_ids():
+        if seed in component_ids:
+            continue
+        component_ids[seed] = seed
+        stack = [seed]
+        while stack:
+            current = stack.pop()
+            for neighbor in graph.successors(current) + graph.predecessors(current):
+                if neighbor not in component_ids:
+                    component_ids[neighbor] = seed
+                    stack.append(neighbor)
+    return component_ids
+
+
+def _branch_component_evidence(
+    graph: td.graph.BaseGraph,
+    pred_div: int,
+    child: int,
+    pred_to_gt: dict[int, int],
+    gt_component: dict[int, int],
+) -> tuple[int | None, bool]:
+    """Return one GT component for a predicted child branch.
+
+    Direct-child evidence takes precedence over grandchildren so downstream
+    errors do not invalidate a correctly matched division. Grandchildren are
+    fallback evidence only when the child is unmatched. The boolean marks a
+    locally merged branch that cannot be assigned uniquely to this fork.
+    """
+    if set(graph.predecessors(child)) != {pred_div}:
+        return None, True
+    if child in pred_to_gt:
+        return gt_component[pred_to_gt[child]], False
+
+    grandchildren = graph.successors(child)
+    if any(set(graph.predecessors(node)) != {child} for node in grandchildren):
+        return None, True
+
+    components = {
+        gt_component[pred_to_gt[node]]
+        for node in grandchildren
+        if node in pred_to_gt
+    }
+    if len(components) == 1:
+        return next(iter(components)), False
+    return None, False
+
+
+def _pred_division_fork_sets(
+    pred_graph: td.graph.BaseGraph,
+    gt_graph: td.graph.BaseGraph,
+    scale: tuple[float, ...] | None,
+    max_distance: float,
+) -> tuple[set[int], set[int], set[int]]:
+    """Return evaluable, cross-component, and malformed predicted forks.
+
+    Cross-component evidence must come from distinct direct-child branches.
+    A matched child identifies its branch; otherwise an unambiguous matched
+    grandchild may identify it. Merged local branches are malformed.
+    """
+    matched_pred = _match_full(pred_graph, gt_graph, scale, max_distance)
+    matched_attrs = _matched_node_attrs(matched_pred)
+    pred_to_gt = dict(
+        zip(
+            matched_attrs[td.DEFAULT_ATTR_KEYS.NODE_ID].to_list(),
+            matched_attrs[td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID].to_list(),
+            strict=True,
+        )
+    )
+
+    pred_forks = {
+        node_id for node_id in matched_pred.node_ids()
+        if matched_pred.out_degree(node_id) >= 2
+    }
+    evaluable_forks = {
+        pred_id for pred_id in pred_forks
+        if pred_id in pred_to_gt and gt_graph.out_degree(pred_to_gt[pred_id]) >= 1
+    }
+
+    gt_component = _gt_weak_component_ids(gt_graph)
+    cross_component_forks: set[int] = set()
+    malformed_forks: set[int] = set()
+    for pred_id in pred_forks:
+        branch_evidence: list[int] = []
+        for child in matched_pred.successors(pred_id):
+            component, malformed = _branch_component_evidence(
+                matched_pred, pred_id, child, pred_to_gt, gt_component
+            )
+            if malformed:
+                malformed_forks.add(pred_id)
+                break
+            if component is not None:
+                branch_evidence.append(component)
+        else:
+            if len(set(branch_evidence)) >= 2:
+                cross_component_forks.add(pred_id)
+
+    return evaluable_forks, cross_component_forks, malformed_forks
 
 
 def count_matched_pred_divisions(
@@ -385,28 +524,10 @@ def count_matched_pred_divisions(
     int
         Number of matched predicted division nodes.
     """
-    matched_pred = _match_full(
-        pred_graph, gt_graph, scale, max_distance,
+    evaluable_forks, _, _ = _pred_division_fork_sets(
+        pred_graph, gt_graph, scale, max_distance
     )
-
-    node_attrs = matched_pred.node_attrs(
-        attr_keys=[td.DEFAULT_ATTR_KEYS.NODE_ID, td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID],
-    )
-    matched_nodes = node_attrs.filter(
-        pl.col(td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID).is_not_null()
-        & (pl.col(td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID) != -1)
-    )
-
-    count = 0
-    for row in matched_nodes.iter_rows(named=True):
-        pred_node = row[td.DEFAULT_ATTR_KEYS.NODE_ID]
-        gt_node = row[td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID]
-        if (
-            matched_pred.out_degree(pred_node) >= 2
-            and gt_graph.out_degree(gt_node) >= 1
-        ):
-            count += 1
-    return count
+    return len(evaluable_forks)
 
 
 def evaluate_divisions(
@@ -420,7 +541,11 @@ def evaluate_divisions(
     - **TP**: GT divisions correctly recovered in the prediction
       (matched nodes connected and forking).
     - **FN**: GT divisions not recovered.
-    - **FP**: Predicted divisions whose matched GT node is not dividing.
+    - **FP**: Spurious predicted divisions, including forks matched to an
+      annotated GT node, local-topology rejects, bipartite leftovers, and
+      forks whose distinct child branches have nearest matched evidence in
+      distinct GT components, and forks with locally merged branches. Fork IDs
+      are unioned, so a fork supported by multiple rules counts once.
 
     Parameters
     ----------
@@ -438,13 +563,12 @@ def evaluate_divisions(
     DivisionCounts
         Named tuple with ``tp``, ``fn``, and ``fp`` fields.
     """
-    scores = score_divisions(
-        pred_graph, gt_graph, scale, max_distance,
+    result = score_divisions(
+        pred_graph,
+        gt_graph,
+        scale,
+        max_distance,
     )
-    tp = sum(scores.values())
-    fn = len(scores) - tp
-    matched_pred_divs = count_matched_pred_divisions(
-        pred_graph, gt_graph, scale, max_distance,
-    )
-    fp = max(0, matched_pred_divs - tp)
-    return DivisionCounts(tp=tp, fn=fn, fp=fp)
+    tp = sum(result.scores.values())
+    fn = len(result.scores) - tp
+    return DivisionCounts(tp=tp, fn=fn, fp=len(result.fp_forks))

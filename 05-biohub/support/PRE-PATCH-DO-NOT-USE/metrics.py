@@ -64,93 +64,7 @@ def _evaluate_matched_graph(
         subset=[td.DEFAULT_ATTR_KEYS.EDGE_SOURCE, td.DEFAULT_ATTR_KEYS.EDGE_TARGET],
         keep="first",
     )
-    node_attrs = graph.node_attrs(
-        attr_keys=[td.DEFAULT_ATTR_KEYS.NODE_ID, td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID, td.DEFAULT_ATTR_KEYS.T]
-    )
-
-    # Drop edges that do not connect consecutive frames, i.e. keep only edges where
-    # t_target == t_source + 1. This removes backward-in-time edges (t_target <= t_source)
-    # and any edge spanning more than a single time step (t_target - t_source > 1).
-    node_times = node_attrs.select(td.DEFAULT_ATTR_KEYS.NODE_ID, td.DEFAULT_ATTR_KEYS.T)
-    edge_attrs = edge_attrs.join(
-        node_times.rename({td.DEFAULT_ATTR_KEYS.T: "_source_t"}),
-        left_on=td.DEFAULT_ATTR_KEYS.EDGE_SOURCE,
-        right_on=td.DEFAULT_ATTR_KEYS.NODE_ID,
-        how="left",
-    ).join(
-        node_times.rename({td.DEFAULT_ATTR_KEYS.T: "_target_t"}),
-        left_on=td.DEFAULT_ATTR_KEYS.EDGE_TARGET,
-        right_on=td.DEFAULT_ATTR_KEYS.NODE_ID,
-        how="left",
-    ).filter(
-        pl.col("_target_t") - pl.col("_source_t") == 1
-    ).drop("_source_t", "_target_t")
-
-    # Collapse merges: when several predicted nodes match the same ground-truth
-    # node, multiple predicted edges can map onto the same ground-truth edge
-    # (identical matched source/target pair). tracksdata marks all of them as
-    # matched, inflating the intersection. Keep only the edge with the lowest
-    # EDGE_ID per matched GT edge and discard the rest with a warning.
-    matched_ids = node_attrs.select(
-        td.DEFAULT_ATTR_KEYS.NODE_ID, td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID
-    )
-    edge_attrs = edge_attrs.join(
-        matched_ids.rename({td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID: "_matched_source"}),
-        left_on=td.DEFAULT_ATTR_KEYS.EDGE_SOURCE,
-        right_on=td.DEFAULT_ATTR_KEYS.NODE_ID,
-        how="left",
-    ).join(
-        matched_ids.rename({td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID: "_matched_target"}),
-        left_on=td.DEFAULT_ATTR_KEYS.EDGE_TARGET,
-        right_on=td.DEFAULT_ATTR_KEYS.NODE_ID,
-        how="left",
-    )
-    # Only edges whose endpoints both match a GT node can collapse onto a GT edge.
-    both_matched = (
-        pl.col("_matched_source").is_not_null()
-        & pl.col("_matched_target").is_not_null()
-        & (pl.col("_matched_source") != -1)
-        & (pl.col("_matched_target") != -1)
-    )
-    edge_attrs = edge_attrs.with_columns(
-        (
-            both_matched
-            & (
-                pl.col(td.DEFAULT_ATTR_KEYS.EDGE_ID)
-                != pl.col(td.DEFAULT_ATTR_KEYS.EDGE_ID)
-                .min()
-                .over("_matched_source", "_matched_target")
-            )
-        ).alias("_is_merge_dup")
-    )
-    n_merge_dropped = int(edge_attrs["_is_merge_dup"].sum())
-    if n_merge_dropped > 0:
-        warnings.warn(
-            f"Dropped {n_merge_dropped} merged edge(s) mapping onto the same "
-            "ground-truth edge; kept the lowest edge id per merge.",
-            stacklevel=2,
-        )
-    edge_attrs = edge_attrs.filter(~pl.col("_is_merge_dup")).drop(
-        "_matched_source", "_matched_target", "_is_merge_dup"
-    )
-
-    # Cap out-degree: a dividing cell has at most two children, so a predicted node
-    # with more than two outgoing edges is biologically invalid. Keep the two edges
-    # with the lowest EDGE_ID per source and drop the rest with a warning.
-    edge_attrs = edge_attrs.with_columns(
-        pl.col(td.DEFAULT_ATTR_KEYS.EDGE_ID)
-        .rank("ordinal")
-        .over(td.DEFAULT_ATTR_KEYS.EDGE_SOURCE)
-        .alias("_out_rank")
-    )
-    n_outdeg_dropped = int((edge_attrs["_out_rank"] > 2).sum())
-    if n_outdeg_dropped > 0:
-        warnings.warn(
-            f"Dropped {n_outdeg_dropped} outgoing edge(s) from nodes with more than "
-            "two children; kept the two lowest edge ids per source.",
-            stacklevel=2,
-        )
-    edge_attrs = edge_attrs.filter(pl.col("_out_rank") <= 2).drop("_out_rank")
+    node_attrs = graph.node_attrs(attr_keys=[td.DEFAULT_ATTR_KEYS.NODE_ID, td.DEFAULT_ATTR_KEYS.MATCHED_NODE_ID])
 
     # I'm assuming valid ground-truth edges are always 100% correct if they have an edge.
     # Therefore, we don't have cases where the cell divided, but not in the ground truth.
@@ -280,7 +194,7 @@ def evaluate(
     centroid-distance node matching.
 
     Computes edge TP/FP/FN, division TP/FP/FN (via
-    :func:`tracking_cellmot.division_metrics.evaluate_divisions`), and the
+    :func:`biohub_tracking.division_metrics.evaluate_divisions`), and the
     total number of predicted nodes (irrespective of matching).
 
     Parameters
