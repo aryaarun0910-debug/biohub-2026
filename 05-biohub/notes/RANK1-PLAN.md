@@ -79,6 +79,53 @@ Do not re-pay for these — all measured, all in the base:
   negative — the likely cause of that instability.
 - **The division upweight hook is dead code**: `weight = torch.ones_like(loss); weight[div_rows] = 1.0`.
 
+## The detector: dual-head, dense-supervised, with a refinement head
+
+Added 2026-09-11 from the Obsidian vault. This is the single largest architectural change
+against everything else on the board, and no public pipeline does any of it.
+
+**Supervise detection densely, refinement sparsely.** The sparse annotation is the root of the
+field's training instability — a BCE detection loss on single hard voxels teaches every
+*unannotated real cell* to be a hard negative, which is why three separate people report loss
+blowing up after ~10 epochs. The fix is not a better loss on sparse labels; it is to stop using
+sparse labels for detection at all:
+
+    node_logit  = node_head(x)      # supervised DENSE  — FOCUS-3D pseudo-centres
+    refinement  = refine_head(x)    # supervised SPARSE — Kaggle, CONDITIONAL on detected peaks
+    refine_coord = coord + dzyx ;   refine_logit = logit + dlogit
+
+Sparse labels are fine for refinement, because refinement is only ever evaluated *at peaks that
+already exist*. Measured by its author: **centroid error 1.18 → 0.90–0.97 voxels, an 18–24%
+reduction, with 70–75% of points improved, 10–14% of peaks pruned, and Kaggle recall held at
+99.5%.** Training runs 200 epochs without overfitting, against the ~10 that sparse-label
+training survives.
+
+Why this matters more than it looks: **centroid error has a cliff at σ≈2 µm** — 2.5 µm costs
+16% of the edge Jaccard, 3 µm costs 41% — and separately, **a single duplicate detection 0.4 µm
+away halves it**. A 20% error reduction plus a 10–14% peak prune lands squarely on the two most
+expensive failure modes in the metric, and `refine_logit` gives the prune a learned ranker
+rather than a threshold.
+
+**Corollary that breaks our stage contract.** *"During linking, my zxy must change… you cannot
+detect and fix a location."* Detection and localisation are not separable: many false positives
+sit very close to a true node and are recoverable by moving them. So `detect → link` must not
+freeze node positions — the graph carries mutable coordinates, and the linker may refine them.
+
+**Do not augment.** Removing augmentation improved peak pruning (8% → 10–14%) *and* error
+reduction (18% → 22–24%) while holding recall, and halved epoch time from 6.7 to 3.5 minutes.
+Diagnosed as "too difficult or outside the real validation distribution".
+
+**Train the linker on predicted points, not GT points.** Feed it `t0 = volume + predicted dense
+points` and `t1 = augmented volume + predicted dense points`, copying edge links across by
+linear assignment. This removes the train/inference mismatch we found — training currently picks
+peaks at a raw logit of 0.3 (p≈0.574) while inference uses sigmoid > 0.99, so the linker has
+never seen the candidate set it is scored on.
+
+### Gate
+
+Centroid error on held-out annotated nodes must fall ≥15% against the un-refined detector, with
+Kaggle recall ≥99.0%. Below that, keep the plain detector and spend the time on the linker.
+
 ## Edge term: cheap wins first
 
 - **NMS quality outranks everything.** A single duplicate detection 0.4 µm away **halves** the
@@ -92,7 +139,10 @@ Do not re-pay for these — all measured, all in the base:
   set it is scored on. Training also matches at 5.0 µm against the metric's 7 µm.
 - **Gap recovery means a NODE, not an edge.** All 7,998 GT edges span exactly one frame, so a
   t→t+2 edge can never match — the scorer drops it. Recover the intermediate node, emit two
-  1-frame edges.
+  1-frame edges. Gaps are bounded: ~20 one-frame, ~3 two-frame, ~2 longer per sample.
+- **+0.024 of edge recall is in RANKING, not detection.** Accumulating candidates to a 0.99
+  cutoff reaches 0.966 edge recall; greedy top-1 gets 0.942. The right edges are already in the
+  candidate set. A re-ranking module beats a better detector here.
 
 ## The traps that end runs
 
@@ -133,7 +183,13 @@ submittable.**
 **16–18 Sep.** Reach the honest plateau. It is one codebase with `BIOHUB_*` env vars: 0.912→0.940
 is a single edit, 0.940→0.947 is three flags. Weights are public. Gate: edge ≥0.92 held out.
 
-**19–24 Sep.** Divisions — fork *proposal capacity*, not filtering. Trackastra paired with the
+**16–18 Sep (revised).** Dual-head detector first — it feeds everything downstream, and EXP-5
+showed the linker fix is cheap once detection is good.
+
+**19–24 Sep.** Divisions — fork *acceptance*, not proposal. EXP-5 settled that permitting forks
+recovers 142/151 divisions for an edge cost of 0.0002; the binding constraint is precision, 230
+FP against 142 TP. Apply the EXP-1 discriminators: cos(angle) median −0.746, and sisters
+diverging 10.57 → 13.66 µm by t+2. Trackastra paired with the
 support-pack detector; ILP fork pricing at or below continuation; stop the Hungarian relink
 destroying forks. Gate: **divJ > 0.30 held out by the 24th.** Note 22 Sep is the entry and
 team-merge deadline.
