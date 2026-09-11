@@ -12,6 +12,18 @@ from scratch.
     python3 tools/ask.py facts prior-campaign
     python3 tools/ask.py todo       # open decisions
 
+## Knowledge lives here too
+
+Split out of the Claude memory store on 2026-09-11 so competition knowledge does not auto-load
+into unrelated sessions, and does not become permanent noise after the deadline.
+
+- `knowledge/` — provenance-tracked notes. Start at `knowledge/hub-biohub.md`.
+- `db/` — the measurements. Notes cite the base; they never restate a number from it.
+
+Machine-level facts that outlive this project (what the Mac/Kaggle/Colab can run, the torch-2.14
+conv3d finding) stay in the portable store at `~/.claude/projects/<slug>/memory/`. Links that
+cross that boundary appear as explicit paths like `claude-memory/macbook-m5-pro-ml.md`.
+
 ## Layout
 
 | Path | What |
@@ -21,6 +33,7 @@ from scratch.
 | `tools/ingest_repos.py` | Clones the 3 private repos, loads commits/files → DB. Re-run after each session. |
 | `tools/ingest_registries.py` | Prior campaigns' `facts.yaml` / `levers.yaml` / ledgers → DB. |
 | `tools/ask.py` | Read-only views. |
+| `tools/sync_source_rows.py` | Export/restore the rows no ingester can rebuild. **Run `export` after any session that adds facts, decisions or experiments.** |
 | `evidence/raw/` + `evidence/index.jsonl` | Frozen Kaggle responses, sha256-indexed. Nothing here is a guess. |
 | `reference/royerlab-baseline/` | The organizers' own baseline + the **authoritative metric source**. |
 | `repos/` | Working clones of the three private repos. |
@@ -56,3 +69,9 @@ Carried from the prior campaigns, because they are why their numbers can be beli
     python3 tools/ingest_repos.py        # after every work session
     python3 tools/ingest_kaggle.py       # after re-harvesting Kaggle (LB moves daily)
     python3 tools/ingest_registries.py   # if the registries change
+    python3 tools/sync_source_rows.py export   # ALWAYS, after adding rows by hand
+
+`db/*.db` stays gitignored - it is a 1.8 MB binary that churns and will not merge. But 63 rows
+(12 decisions, 51 analysis facts) exist nowhere else, so they are mirrored to the tracked
+`db/source_rows.jsonl`. `sync_source_rows.py check` fails if that export has drifted; `import`
+restores them after a rebuild. Round-tripped on 2026-09-11: 63 out, 63 back.
