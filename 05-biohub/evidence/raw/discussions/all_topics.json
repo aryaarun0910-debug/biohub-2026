@@ -1,0 +1,2822 @@
+{
+ "716062": {
+  "topic": {
+   "topic": {
+    "id": 716062,
+    "title": "Welcome to the Biohub - Cell Tracking During Development Challenge",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/716062",
+    "postDate": "2026-06-30T02:16:18.647926700Z",
+    "authorName": "Thibgolds",
+    "authorUrl": "https://www.kaggle.com/thibautgoldsborough",
+    "votes": 77,
+    "commentCount": 6,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<h1>Welcome to the Biohub - Cell Tracking During Development Challenge</h1>\n<p>Hello everyone,</p>\n<p>We, at Biohub, are excited to present this challenge to you! </p>\n<p>Advances in machine learning and computer vision have transformed many areas of science, from image analysis to biological discovery. These methods are now being applied to increasingly complex microscopy data, where even expert researchers face major challenges in managing the scale, noise, and biological complexity of the data.</p>\n<p>Tracking cells across time in 3D microscopy is a fundamental problem in biological research. Scientists use time-lapse 3D imaging to study how cells grow, move, interact, divide, and form complex biological structures. However, analyzing these datasets remains a major bottleneck. In many studies, researchers still spend countless hours manually detecting and linking cells across frames, especially when datasets contain thousands of visually similar cells that move, deform, and divide over time.</p>\n<p>Automated cell-tracking tools already exist, but they often struggle in real-world conditions. Dense cell populations, imaging noise, irregular cell shapes, cell divisions, and complex 3D structures can lead to tracking errors and incorrect lineage reconstruction. These errors limit scientists' ability to scale their analyses and compare results across datasets and experiments.</p>\n<p>Based on real microscopy datasets from developing Zebrafish embryos, we are launching this challenge to provide a shared benchmark for robust 3D+time cell tracking. Your goal is to develop algorithms that can detect cells, associate them across time, identify division events, and reconstruct accurate cell lineages. We hope this challenge will inspire new methods that are reliable, generalizable, and useful for real biological research.</p>\n<p>We have prepared the following resource to help you get started:</p>\n<p>1 - Python library for working with 3D+time datasets, including training a small baseline, running inference, visualizing ground-truth and model predictions, understanding and computing the metrics is available here:  <a href=\"https://github.com/royerlab/kaggle-cell-tracking-competition\" target=\"_blank\">https://github.com/royerlab/kaggle-cell-tracking-competition</a></p>\n<h2>Data</h2>\n<p>By node and edge count, this dataset is the largest cell tracking dataset published to date. The provided ground truth annotations are sparse. You have to develop methods that can leverage sparsely annotated datasets. While inference will require the tracking of all cells present in the videos, your submissions will be evaluated on a random sparse subset of these cells. </p>\n<h2>Open Problem and Research Ideas</h2>\n<h3>1 - Data perspective</h3>\n<p>We strongly encourage you to visit the Cell Tracking Challenge (<a href=\"https://celltrackingchallenge.net/)\" target=\"_blank\">https://celltrackingchallenge.net/)</a>, which is highly regarded in the field for hosting a number of 2D+time and 3D+time datasets as well as benchmarking state-of-the-art methods for cell tracking. </p>\n<h3>2 - Useful packages:</h3>\n<p>geff (<a href=\"https://github.com/live-image-tracking-tools/geff\" target=\"_blank\">https://github.com/live-image-tracking-tools/geff</a>)<br>\nzarr (<a href=\"https://zarr.readthedocs.io/en/stable/\" target=\"_blank\">https://zarr.readthedocs.io/en/stable/</a>)<br>\ntracksdata (<a href=\"https://github.com/royerlab/tracksdata\" target=\"_blank\">https://github.com/royerlab/tracksdata</a>)<br>\ncupy (<a href=\"https://docs.cupy.dev/en/stable/index.html\" target=\"_blank\">https://docs.cupy.dev/en/stable/index.html</a>)<br>\ncucim (<a href=\"https://github.com/rapidsai/cucim\" target=\"_blank\">https://github.com/rapidsai/cucim</a>)<br>\nnapari (native usage only) (<a href=\"https://napari.org/\" target=\"_blank\">https://napari.org/</a>)<br>\nndv (<a href=\"https://github.com/pyapp-kit/ndv\" target=\"_blank\">https://github.com/pyapp-kit/ndv</a>)<br>\nmotile (<a href=\"https://github.com/funkelab/motile\" target=\"_blank\">https://github.com/funkelab/motile</a>)  </p>\n<h3>3 - Some competitive tracking methods</h3>\n<p>ultrack (<a href=\"https://github.com/royerlab/ultrack\" target=\"_blank\">https://github.com/royerlab/ultrack</a>)<br>\ntrackastra (<a href=\"https://github.com/weigertlab/trackastra\" target=\"_blank\">https://github.com/weigertlab/trackastra</a>)<br>\nbyotrack (<a href=\"https://github.com/raphaelreme/byotrack\" target=\"_blank\">https://github.com/raphaelreme/byotrack</a>)<br>\nlaptrack (<a href=\"https://github.com/yfukai/laptrack\" target=\"_blank\">https://github.com/yfukai/laptrack</a>)<br>\ncellect (<a href=\"https://github.com/zzz333za/CELLECT\" target=\"_blank\">https://github.com/zzz333za/CELLECT</a>)<br>\nascent (<a href=\"https://github.com/lu-lab/ascent\" target=\"_blank\">https://github.com/lu-lab/ascent</a>)<br>\nOrganoidTracker (<a href=\"https://github.com/jvzonlab/OrganoidTracker\" target=\"_blank\">https://github.com/jvzonlab/OrganoidTracker</a>)  </p>\n<p>Last but not least, we really hope you enjoy the competition. We cannot wait to see your solutions. We strongly encourage you to open-source your code and solutions so that the entire community can benefit from your work.</p>\n<p>On behalf of all the organizers,</p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3485628,
+     "authorName": "Jord\u00e3o Bragantini",
+     "postDate": "2026-07-01T16:53:13.377Z",
+     "content": "<p>There are two other related works that might be useful</p>\n<p><a href=\"https://openaccess.thecvf.com/content_CVPR_2020/papers/Hayashida_MPM_Joint_Representation_of_Motion_and_Position_Map_for_Cell_CVPR_2020_paper.pdf\" target=\"_blank\">https://openaccess.thecvf.com/content_CVPR_2020/papers/Hayashida_MPM_Joint_Representation_of_Motion_and_Position_Map_for_Cell_CVPR_2020_paper.pdf</a></p>\n<p><a href=\"https://www.nature.com/articles/s41587-022-01427-7.pdf\" target=\"_blank\">https://www.nature.com/articles/s41587-022-01427-7.pdf</a></p>",
+     "votes": 8
+    },
+    {
+     "id": 3487249,
+     "authorName": "Youri Matiounine",
+     "postDate": "2026-07-03T15:05:59.287Z",
+     "content": "<p>would you please provide a script to evaluate predictions? Something that takes \"submission.csv\", reads  \"train/xxx.geff\" data, and outputs final competition score? This is a required resource for a competition, and it is not easy to create it from documentation alone. </p>\n<p>Thanks.</p>",
+     "votes": 4,
+     "replies": [
+      {
+       "id": 3494865,
+       "authorName": "Thibgolds",
+       "postDate": "2026-07-10T20:55:43.780Z",
+       "content": "<p>Hey! The repo (<a href=\"https://github.com/royerlab/kaggle-cell-tracking-competition\" target=\"_blank\">https://github.com/royerlab/kaggle-cell-tracking-competition</a>) we shared does implement the official metric (from a folder with .geff predictions and a folder with .geff ground truth). You're right that there was no official code for converting a .csv file to a list of .geff files, so I wrote a simple script and I recently added it to the repo, I hope that helps you running the official metric. </p>",
+       "votes": 3
+      }
+     ]
+    },
+    {
+     "id": 3493936,
+     "authorName": "LeeWhieldon",
+     "postDate": "2026-07-08T19:12:09.417Z",
+     "content": "<p>Hi <a href=\"https://www.kaggle.com/thibautgoldsborough\" target=\"_blank\">@thibautgoldsborough</a> ,</p>\n<p>Thanks for putting this challenge together, really interesting problem and dataset.</p>\n<p>Wanted to flag something I found while setting up local cross-validation: all 4 official test clips appear to have byte-identical copies in the train split, including full ground truth annotations.</p>\n<p>Verified by comparing actual pixel data (not just filenames) at t=0, t=50, and t=99 for each clip:</p>\n<table>\n<thead>\n<tr>\n<th>Test clip id</th>\n<th>Train copy</th>\n<th>Pixel-identical</th>\n<th>Train <code>.geff</code> present</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><code>44b6_0113de3b</code></td>\n<td><code>train/44b6_0113de3b.zarr</code></td>\n<td>Yes</td>\n<td>Yes</td>\n</tr>\n<tr>\n<td><code>44b6_0b24845f</code></td>\n<td><code>train/44b6_0b24845f.zarr</code></td>\n<td>Yes</td>\n<td>Yes</td>\n</tr>\n<tr>\n<td><code>6bba_05b6850b</code></td>\n<td><code>train/6bba_05b6850b.zarr</code></td>\n<td>Yes</td>\n<td>Yes</td>\n</tr>\n<tr>\n<td><code>6bba_05db0fb1</code></td>\n<td><code>train/6bba_05db0fb1.zarr</code></td>\n<td>Yes</td>\n<td>Yes</td>\n</tr>\n</tbody>\n</table>\n<p>Reproduction: read <code>train/{clip_id}.zarr/0/c/{t}/0/0/0</code> and <code>test/{clip_id}.zarr/0/c/{t}/0/0/0</code> from the competition zip for the same clip id and timepoint, decompress with blosc2, and compare arrays: they match exactly frame for frame.</p>\n<p>If this is intentional (e.g. these clips are meant to double as both a train example and a test target), no action needed, just wanted to confirm. But if not, it means the ground truth for the hidden test set is currently downloadable by anyone through the train split, which could affect leaderboard integrity. Happy to share the verification script if it's useful for checking on your end.</p>\n<p>Thanks again for the great competition.</p>",
+     "votes": 1,
+     "replies": [
+      {
+       "id": 3494866,
+       "authorName": "Thibgolds",
+       "postDate": "2026-07-10T20:59:33.480Z",
+       "content": "<p>Hi, thank you for expressing your concern. \nIndeed these are dummy placeholder files to help you ensure that your submission notebook actually produces a .csv file without erroring out. The actual leaderboard score is obtained from a much bigger test set, that is deliberately kept private, and I assure you there is no overlap between that hidden test set and the train set that is publicly available. \nI hope that answers your question. </p>",
+       "votes": 1
+      }
+     ]
+    },
+    {
+     "id": 3507714,
+     "authorName": "Davit Khantadze",
+     "postDate": "2026-08-02T13:27:44.360Z",
+     "content": "<p>Hi <a href=\"https://www.kaggle.com/thibautgoldsborough\" target=\"_blank\">@thibautgoldsborough</a> ,</p>\n<p>I am trying to use baseline model/approach provided by you to get started in the competition.</p>\n<p>Without modifications training per epoch takes more than 3 hours, batch size is 8; with 16 I get OOM error.</p>\n<p>If I introduce mixed value precision, then training time reduced to about 2 hours, batch=16 works as well.</p>\n<p>I was wondering: am I doing something wrong and one can significantly improve training time on kaggle notebook? Or one should come up with other solution, like faster GPU.</p>"
+    }
+   ]
+  }
+ },
+ "732103": {
+  "topic": {
+   "topic": {
+    "id": 732103,
+    "title": "[Free Dataset] 18.5 GB of fully-labelled synthetic 3D microscopy \u2014 165k labelled divisions",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/732103",
+    "postDate": "2026-08-01T21:12:10.502460400Z",
+    "authorName": "Jos\u00e9 Freitas",
+    "authorUrl": "https://www.kaggle.com/josefreitasalvesneto",
+    "votes": 58,
+    "commentCount": 15,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>I got tired of trying to train a division model on ~304 events, so I built a synthetic dataset and I'm releasing it free (CC0).</p>\n<p><strong>The problem, concretely.</strong> The training ground truth is sparse \u2014 roughly 2.8% of nuclei are annotated, and across all 199 videos there are about 304 division events. Divisions carry 10% of the metric (<code>score = adjusted_edge_jaccard + 0.1 * division_jaccard</code>), and most public solutions I've seen simply leave that term at zero. That is understandable: you cannot fit a division model to a few hundred scattered examples.</p>\n<p><strong>What I generated.</strong> 18.5 GB where every nucleus is labelled:</p>\n<ul>\n<li><strong>1,539 static volumes</strong> at native 256\u00d7256 resolution, centroids with sub-voxel precision</li>\n<li><strong>2,174 time sequences</strong> with the complete lineage graph \u2014 nodes, edges, and mitosis events</li>\n<li><strong>165,267 labelled divisions</strong> across 4,056,226 nodes</li>\n</ul>\n<p>That is roughly 540\u00d7 more mitosis supervision than the competition ground truth provides.</p>\n<p><strong>It is a physical model, not a GAN.</strong> Dark medium, physically-sized ellipsoidal nuclei with a super-gaussian profile (the real radial profile is a flat top, not a gaussian \u2014 I measured it), light emission that scatters and accumulates where cells are dense, anisotropic PSF, then Poisson + read noise. Three details I'd flag as the ones that actually matter:</p>\n<ol>\n<li><strong>The pooling matches the evaluator exactly.</strong> The official pipeline downsamples XY by 4 with a <em>stride</em> (<code>vol[:, ::4, ::4]</code>), not a block mean. A block mean averages noise away and would hand you data that is cleaner than what your detector really sees. I generate at native resolution and apply the identical stride.</li>\n<li><strong>Detectability is calibrated, not assumed.</strong> A classical DoG detector recovers ~0.89 of the synthetic nuclei in a moderately dense field, ~0.76 when crowded; on the real annotated nuclei it recovers 0.91\u20130.94. So if anything the synthetic volumes are slightly <em>harder</em>, not easier. The notebook measures this live at three densities so you can judge the gap yourself.</li>\n<li><strong>Tissue geometry is fitted from the real detections</strong> \u2014 the embryo surface, its curvature, its thickness \u2014 and then resampled. The geometry is learned from real data; the coordinates are generated. No real positions are copied.</li>\n</ol>\n<p>Motion is calibrated on the real lineage edges: 1.86 \u00b5m/frame median step, +0.30 lag-1 directional persistence, 7.24 \u00b5m sister separation.</p>\n<p><strong>Explorer notebook (runs end to end, all figures computed live):</strong>\n<a href=\"https://www.kaggle.com/code/josefreitasalvesneto/synthetic-3d-microscopy-data-for-cell-tracking\" target=\"_blank\">https://www.kaggle.com/code/josefreitasalvesneto/synthetic-3d-microscopy-data-for-cell-tracking</a></p>\n<p><strong>Dataset + full generator source (open, nothing hidden):</strong>\n<a href=\"https://www.kaggle.com/code/josefreitasalvesneto/biohub-synthetic-dataset\" target=\"_blank\">https://www.kaggle.com/code/josefreitasalvesneto/biohub-synthetic-dataset</a></p>\n<p><strong>Two things I want to be upfront about</strong>, because I'd want to know them before spending 18 GB of quota:</p>\n<ul>\n<li>The division rate is <strong>deliberately inflated</strong> (4.07% of nodes vs ~0.26% in reality). A model starved of examples never learns mitosis. Re-weight your loss by the real rate if you need calibrated priors.</li>\n<li>Distribution match is partial. Nucleus texture and contrast are the weakest axes. The value here is the <strong>labels</strong> \u2014 density, lineage and mitosis \u2014 much more than photorealism.</li>\n</ul>\n<p>Happy to answer anything about the generator. If you try it and it breaks, or it helps, I'd genuinely like to hear which \u2014 both make the next version better.</p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3521851,
+     "authorName": "hengck23",
+     "postDate": "2026-09-07T10:56:47.250Z",
+     "content": "<p>zebra fish cell development trajectory data<br>\n<a href=\"https://ssbd.riken.jp/database/project/5-Keller-FishEmbryo\" target=\"_blank\">https://ssbd.riken.jp/database/project/5-Keller-FishEmbryo</a> </p>",
+     "votes": 1
+    },
+    {
+     "id": 3521291,
+     "authorName": "hengck23",
+     "postDate": "2026-09-05T12:48:14.990Z",
+     "content": "<p>synthetic data from biohub<br>\n<a href=\"https://virtual-embryo-zoo.sf.czbiohub.org/\" target=\"_blank\">https://virtual-embryo-zoo.sf.czbiohub.org/</a>\n<img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F744fe1d219782a2f1503130d654c3bd3%2FSelection_4780.png?generation=1788612493147291&amp;alt=media\" alt=\"\"></p>",
+     "votes": 1
+    },
+    {
+     "id": 3521235,
+     "authorName": "hengck23",
+     "postDate": "2026-09-05T09:00:18.660Z",
+     "content": "<p>if i got time, i want to do this:<br>\n1) it is difficult to track over 100 frames, but it is easy to track over eg 5 to 10 frames.<br>\n2) it is also easy to manually inspect and correct (1) above too.<br>\n3) so we can easily use video diffusion, gan, flow etc to make synthetic data for 10 frames (at 64x64x64),   conditioned on tracks and the first frame  </p>\n<hr>\n<p>After sucess of dense cell training and dense pair (link) training, i now proceed to do 5-frame training:  </p>\n<ul>\n<li>augmentation (elastic transform over 5 frames)  </li>\n<li>dense pesudo label Kaggle tracks using opensource ultrack, ITEC, HOCT \u2026.</li>\n<li>make a new intertace for manual inspection and correct for short tracklet  </li>\n</ul>",
+     "votes": 2
+    },
+    {
+     "id": 3521140,
+     "authorName": "hengck23",
+     "postDate": "2026-09-04T23:42:33.660Z",
+     "content": "<p>There is another similar solution. Convert real microscopy image to simplified eg ellipsoid image using unet that output ellipsoid ( just like bonding box in instance object detection). Then you create sythetic unet output to feed into link transformer.</p>\n<p>The problem is then shift to instance detection. Need to find lots of real microscopy image with cell division.</p>\n<p>\u2014-</p>\n<p>I haven\u2019t moved to cell division yet. But my current strategy is to have good cell detection and tracking. Then infer division from long track ( stage 3 ). I assume death/birth can only happen at image boundary,  so maybe we can detect splits from long tracks, ie i treat division as tracklet association problem, tracklet as node association </p>",
+     "votes": 1
+    },
+    {
+     "id": 3521070,
+     "authorName": "Jos\u00e9 Luiz Luna-Xavier",
+     "postDate": "2026-09-04T18:56:39.873Z",
+     "content": "<p>Hi Jos\u00e9 (Jos\u00e9 Freitas Alves Neto),</p>\n<p>I wanted to flag three specific things in your generator that I think deserve more attention than a quick \"thanks, nice dataset\" \u2014 because they show real domain awareness rather than just synthetic-data box-checking.</p>\n<ol>\n<li><p>Matching the stride, not a block mean. Noticing that the official pipeline downsamples XY with vol[:, ::4, ::4] (a stride) rather than a block-average, and reproducing that exactly, is a subtle but important call. A block mean averages noise away and would silently hand a detector cleaner statistics than it will ever see at inference \u2014 a train/eval mismatch that's easy to miss and hard to debug after the fact, since it doesn't show up as an obvious bug, just as a quiet leaderboard gap. Catching this before training anything is genuinely sharp.</p></li>\n<li><p>Self-critical detectability calibration. Reporting that your DoG baseline recovers less on the synthetic volumes than on the real annotated nuclei (0.89/0.76 vs 0.91\u20130.94) is the opposite of what most synthetic datasets do. It's tempting to tune synthetic data until it \"looks easy\" and quietly inflates confidence. Publishing numbers that go the other way is a good-faith signal that's rare to see, and it makes the dataset much more trustworthy to build on.</p></li>\n<li><p>Sister-separation calibrated from real lineage edges. The 7.24 \u00b5m figure, tied back to actual BioHub lineage data rather than an assumed value, is directly useful \u2014 it's one of the few external anchors we have for reasoning about candidate-graph radius choices around division events specifically, as opposed to continuation motion in general.</p></li>\n</ol>\n<p>Taken together, these aren't cosmetic details \u2014 they're the kind of choices that decide whether a synthetic dataset actually transfers or just looks good in isolation. Really solid work, and thank you for documenting the caveats as openly as the strengths (the inflated division rate, the texture/contrast gap) \u2014 that honesty is what makes it usable rather than just impressive.</p>\n<p>One thing I'd love your take on, if you have a moment: could you clarify exactly what a single \"division\" is counted as in the 165,267 figure \u2014 a mitotic parent/fork, a daughter node, or a parent\u2192daughter edge? We're (my team) trying to align units before doing any prior-reweighting on our end, and getting that straight from you directly would save some guesswork.</p>\n<p>Thanks again for releasing this \u2014 genuinely useful contribution to the competition. Excellente Contribui\u00e7\u00e3o, forte abra\u00e7o, Jos\u00e9 Luiz.</p>",
+     "replies": [
+      {
+       "id": 3521156,
+       "authorName": "Jos\u00e9 Freitas",
+       "postDate": "2026-09-05T01:57:43.933Z",
+       "content": "<p>Hi Jos\u00e9 Luiz,</p>\n<p>Thanks for reading it that closely \u2014 and for asking about units rather than assuming them. Happy to pin it down precisely, because it's the kind of thing that's easy to get wrong by exactly one factor of two.</p>\n<p>A \"division\" in the 165,267 figure is a mitotic parent \u2014 one fork event. Not a daughter, and not a parent\u2192daughter edge.</p>\n<p>Concretely, in the generator: when a track divides, I record the parent's node id (its node at frame t-1), and I record it once per daughter \u2014 then store sorted(set(\u2026)). The set() is doing real work there: it collapses those two entries back down to a single event. So the divisions array in each seq_XXXX.npz holds node indices of mitotic parents, which matches how it's documented in the explorer \u2014 \"a node with two outgoing edges is a division.\"</p>\n<p>Since every division in the generator produces exactly two daughters, the conversions are exact. 165,267 mitotic parents (fork events) is the published figure. That corresponds to 330,534 daughter nodes, and 330,534 parent\u2192daughter division edges, out of 4,056,226 total nodes. So if you're working in edge units or daughter units, double it; if you're working in event units, take it as published.</p>\n<p>And for the reweighting specifically: the 4.07% figure is in that same unit \u2014 mitotic parents divided by all nodes, i.e. 165,267 / 4,056,226. So it's directly comparable to the ~0.26% real rate I quoted; both are \"fraction of nodes that are a dividing parent.\" No conversion needed on your side, as long as you count the real rate the same way. That's a ratio of roughly 15.7x, if you're scaling a positive-class weight.</p>\n<p>One gotcha I should have put in the post, since you're about to parse these files: both daughters inherit the parent's track_id. So nodes[:, 4] is a lineage/clone id, not a unique track \u2014 after a division, two distinct tracks share it. The unambiguous lineage lives in edges (and a node with two outgoing edges is exactly a mitosis). If you build your candidate graph off track_id expecting uniqueness, it will look like cells teleport.</p>\n<p>While I'm at it, one honest caveat on the detectability numbers you mentioned: the 0.91\u20130.94 real reference comes from the sparse annotations (~2.8% of nuclei), and annotators tend to label unambiguous cells \u2014 so that reference is probably optimistic, and I haven't measured how real recall varies with density. The notebook says this too, but it's worth repeating, since it means the synthetic-vs-real gap may be a little smaller than the raw numbers suggest.</p>\n<p>If you do the prior-reweighting and it moves anything for you, I'd genuinely like to hear it \u2014 that's the feedback that improves the next version.</p>\n<p>Forte abra\u00e7o,\nJos\u00e9 </p>",
+       "votes": 1
+      }
+     ]
+    },
+    {
+     "id": 3510364,
+     "authorName": "Ace",
+     "postDate": "2026-08-08T09:47:15.693Z",
+     "content": "<p>This is a great effort, thanks for releasing it. One thing I haven't seen raised yet: our real training set turns out to come from only 2 actual embryos, and they differ a lot  annotation sparsity of roughly 1% vs 9%, and division counts of 26 vs 125 across their samples. Given that real embryo-to-embryo heterogeneity, I'm curious whether the synthetic generation process models that kind of variation (density, noise, crowding) across its volumes, or whether it's drawn from one more canonical/idealized regime.</p>",
+     "votes": 2,
+     "replies": [
+      {
+       "id": 3510754,
+       "authorName": "Jos\u00e9 Freitas",
+       "postDate": "2026-08-09T14:02:08.883Z",
+       "content": "<p>Hello, I'm happy to help! I understand your doubt, the divisions were generated inspired by real movement, we might not have total accuracy, but we can use my data to pretrain a model and then fine-tune it with the real data, that helps it converge faster!</p>",
+       "votes": 1
+      }
+     ]
+    },
+    {
+     "id": 3509286,
+     "authorName": "Juan Neira",
+     "postDate": "2026-08-06T06:30:17.397Z",
+     "content": "<p>First and foremost, thank you for your effort Jose and for sharing.</p>\n<p>I just started in this competition, so I'm not sure if I will use your data yet, but If I do, I will let you know.</p>",
+     "votes": 2,
+     "replies": [
+      {
+       "id": 3509458,
+       "authorName": "Jos\u00e9 Freitas",
+       "postDate": "2026-08-06T12:03:18.437Z",
+       "content": "<p>Thank you very much! I'm happy to help! If you have any questions, I'm available!</p>",
+       "votes": 1
+      }
+     ]
+    },
+    {
+     "id": 3522908,
+     "authorName": "L\u00ea Quang C\u1ea3nh",
+     "postDate": "2026-09-10T00:13:40.043Z",
+     "content": "<p>I took the upper bound suggestion and measured it on the detections instead of by eye, since the ground truth lets you ask the same question without human labelling. Seven labelled divisions across the four films I have volumes for.</p>\n<p>For each one: is the parent detected, are both daughters detected, all within the metric's own 7 um matching radius.</p>\n<pre><code>parent and both daughters detected       7/7   (100%)\nboth parent-&gt;daughter edges in my graph  0/7\nexactly one edge present                 7/7\npredicted parent out-degree              1, every single time\n</code></pre>\n<p>So detection is not the ceiling at all. My detector finds all three nodes for every division, the linker attaches one daughter every time, and never the second. Upper bound given my detections is 100% and I am scoring 0%.</p>\n<p>Your point 4 is exactly what the geometry says:</p>\n<pre><code>longest parent to daughter step   median 8.47 um   range 5.69 to 13.65\nsister separation at prediction   median 10.22 um  range 7.87 to 13.12\n</code></pre>\n<p>A labelled continuation step here is around 3 um. So a division step is two to four times a normal step and the daughters land 8 to 13 um apart. The cell does not slowly split, it appears as two things already far apart, which is what you described.</p>\n<p>Which turns into a reachability curve, and this is the part I did not expect:</p>\n<pre><code>both steps inside a  7.0 um gate    2/7   (29%)\nboth steps inside a  9.9 um gate    5/7   (71%)\nboth steps inside a 12.0 um gate    6/7   (86%)\nboth steps inside a 15.0 um gate    7/7  (100%)\n</code></pre>\n<p>That reframes the capacity patch I mentioned earlier. Allowing out-degree 2 was necessary and not sufficient, because a gate tuned for continuations rejects the second arc before capacity ever gets consulted. What the numbers say is that the second arc needs a different gate from the first: tight for a continuation, roughly double for a candidate daughter.</p>\n<p>Caveat, n = 7, which is tiny. But it is 7/7 unanimous on both binary facts and the geometry holds across all four films.</p>\n<p>On Ultrack, this is also why I now think their formulation wins here rather than a post-hoc fix. If division and non-division hypotheses compete inside one optimisation, the wide gate only gets used where the alternative explanation is worse, so you do not pay for it everywhere. Doing it afterwards, the way my pipeline does, the gate is global and every widening buys false positives across the whole graph. That matches your A,B,C easy and E,F,G both-low-probability picture: the ambiguity is real and the right place to resolve it is inside the objective, not with a threshold.</p>\n<p>I am going to try the asymmetric gate next since it is cheap, and report whether it moves anything. If you want the measurement script I can post it.</p>"
+    },
+    {
+     "id": 3522706,
+     "authorName": "L\u00ea Quang C\u1ea3nh",
+     "postDate": "2026-09-09T16:13:32.543Z",
+     "content": "<p><a href=\"/hengck23\" target=\"_blank\">@hengck23</a> I tested your tracklet-association framing for divisions and it came back negative, which seems worth reporting since you said you had not moved to division yet.</p>\n<p>Your assumption that birth and death only happen at the image boundary is the right filter to start from. Applied to my pipeline's output on four labelled films:</p>\n<pre><code>forks in graph                          105\ntrack starts at t=0                   1,056\ntrack starts at t&gt;0                   3,542\n  near the volume border              2,253\n  interior orphans (your pool)        1,289\n    prev-frame neighbour has 1 child    762\n    no node within 12 um                486\nmedian orphan -&gt; nearest prev node  8.5-10 um\n</code></pre>\n<p>Those four films hold 3 labelled divisions; the whole train set holds 151 across 87 of the 199 label files. So the pool is roughly 400x larger than the events it is meant to contain. A median jump of 8.5-10 um against a ~3 um labelled frame-to-frame step says most of them are continuations the linker refused because the detector put the endpoints ~4 um off, not daughters it missed.</p>\n<p>The part that worries me for your stage 3: those broken continuations sit at the same separation a real sister pair does. Jose calibrated sister separation at 7.24 um from the real lineage edges; my orphan median is 8.5-10 um. A distance gate cannot separate the two populations. Whatever decides daughter-vs-broken-track has to use something else - appearance, the parent's own motion history, or simply a better-localised detector so the continuations stop breaking in the first place.</p>\n<p>Two other things from the same measurement, in case they save you time:</p>\n<ul>\n<li>In the public 0.938 pipeline family the motion-relink stage rebuilds the edge list from a one-to-one Hungarian assignment before safe-div runs, so every fork the ILP produced is destroyed there. If you inherit that post-processing, any division work upstream of it is invisible.</li>\n<li>Fine-tuning the public detector on a 7-film sparse split made it worse, not better: node recall and N_pred/N_est fell on every film and adj_J dropped 0.0161, while a dense-label branch collapsed to zero nodes on one film. Whatever makes fine-tuning work here, it is not more epochs on the sparse annotations.</li>\n</ul>\n<p>Caveat on my numbers: I first described those four films as the test set. Theo Viel corrected me - the test folder ships dummies copied from train, and the real hidden set is bigger. So the counts above come from four train films the released weights were trained on. The ratio between pool size and event count is the part I would still trust.</p>\n<p>Your 5-frame training is what I am most curious about: does a window-5 link transformer recover the gap-2 continuations that the heuristic currently patches by hand? That is exactly the population generating this orphan pool.</p>",
+     "replies": [
+      {
+       "id": 3522789,
+       "authorName": "hengck23",
+       "postDate": "2026-09-09T19:08:51.583Z",
+       "content": "<p>i haven't looked into division in detail yet. I suggest you visually inspect the appearance changes of the cell as time increases. e.g. given a series of crop images from a trajectory of points: CROP = [crop1, crop2, crop3, crop3 \u2026..]:</p>\n<ul>\n<li>1. it is easy for a human to check if all crops are from the same cell (i.e. no FP) if there is no division. That is why you have 0.8 or 0.9 Jaccard </li>\n<li>2. it is not easy to tell if there is any missing crop in between if i  don't tell you the timestamp</li>\n<li>3. For division, I can sometimes see 2 \"different series being concatenated together\". In fact, it may be difficult for humans to tell if it is FP or division?</li>\n<li>4. the frame rate seems to be too large for us to observe the slow splitting of a cell. It is like the cell \"suddenly becomes two (and far apart)\"</li>\n</ul>\n<p>i can only be very sure it is a division when the neighbour track is very obvious, so that since the parent cell cannot disappear, it must be split. This means that IPL can only make a correct division only if the neighbour tracks has very high confidence?</p>\n<p>The above simulates what happens when you present a feature vector at zyx to the model after dfferent t.  </p>\n<p>My first instinct is to find the upper bound of achievable division Jaccard. I would use the human correct rate as a proxy or oracle. From my observations, just by appearance above alone, i don't get good results.  I need to think of something else.</p>\n<p>upper bound means \"if your model cannot do better, other kaggler also cannot do better\" (so their improvement may be somewhere else)</p>\n<hr>\n<p>i suggest you study Ultack paper. it uses oversegmentation to detect division. i.e. it competes against non-division and division hypothesis. Ultrack does simultaneous detection and tracking (not detection first, then link). I think the paper also gives upper bound for the division case using the paper's data.</p>",
+       "replies": [
+        {
+         "id": 3522811,
+         "authorName": "hengck23",
+         "postDate": "2026-09-09T19:35:01.667Z",
+         "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Facea4450a5d3fcbb773c1d9287de7731%2FSelection_4864.png?generation=1788982357856715&amp;alt=media\" alt=\"\"></p>\n<p>this is from the ultrack paper and it is also what i observed from kaggle data.</p>\n<p>easy to link A,B,C.<br>\ndifficult to link A,B,D.<br>\ndifficult to link EG or EF (both has low probability)</p>",
+         "votes": 1
+        },
+        {
+         "id": 3522813,
+         "authorName": "hengck23",
+         "postDate": "2026-09-09T19:37:33.740Z",
+         "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9b473eb830530ce73f50f5a82032a456%2FSelection_4865.png?generation=1788982651212641&amp;alt=media\" alt=\"\"></p>"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "716952": {
+  "topic": {
+   "topic": {
+    "id": 716952,
+    "title": "Rule-based is surprisingly strong? (currently 7th/344teams / gold zone, no learning)",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/716952",
+    "postDate": "2026-07-01T08:50:08.239056100Z",
+    "authorName": "ISAKA Tsuyoshi",
+    "authorUrl": "https://www.kaggle.com/isakatsuyoshi",
+    "votes": 48,
+    "commentCount": 7,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>I ran a few experiments locally, submitted several, and tracked CV vs LB. Bottom line: <strong>without any modeling (learning), a pure rule-based pipeline reached the gold zone (7th/344teams, LB 0.826 at time of writing)</strong>. Sharing a short table and the notebook.</p>\n<p><a href=\"https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline\" target=\"_blank\">https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline</a></p>\n<p><strong>Validation strategy (short)</strong></p>\n<ul>\n<li>The metric is essentially <strong>edge Jaccard</strong> (7 \u00b5m point matching \u2192 edge agreement). A naive baseline showed <strong>CV \u2248 LB</strong>, so I fixed that as the target.</li>\n<li>Train has <strong>only 2 embryos</strong> (<code>44b6</code>/<code>6bba</code>); learned models are hard to validate for generalization, so I went <strong>rule-based</strong> first (DoG-blob detection + Hungarian linking).</li>\n<li><strong>Submit only on a new CV best</strong>, adding a (CV, LB) point to a scatter each time to monitor the proxy.</li>\n</ul>\n<p><strong>Results (all rule-based, no learning)</strong></p>\n<table>\n<thead>\n<tr>\n<th>#</th>\n<th>Method</th>\n<th>CV(edge)</th>\n<th>LB(public)</th>\n<th>Notebook</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td>DoG-blob detection + Hungarian linking</td>\n<td>0.682</td>\n<td>0.663</td>\n<td><a href=\"https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline?scriptVersionId=331719029\" target=\"_blank\">v1</a></td>\n</tr>\n<tr>\n<td>2</td>\n<td>Tuned DoG scales + 8 \u00b5m linking</td>\n<td>0.791</td>\n<td>0.786</td>\n<td><a href=\"https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline?scriptVersionId=331729770\" target=\"_blank\">v2</a></td>\n</tr>\n<tr>\n<td>3</td>\n<td>+ gap closing</td>\n<td>0.807</td>\n<td>0.784</td>\n<td><a href=\"https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline?scriptVersionId=331733252\" target=\"_blank\">v3</a></td>\n</tr>\n<tr>\n<td>4</td>\n<td>+ division edges</td>\n<td>0.810</td>\n<td>0.778</td>\n<td><a href=\"https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline?scriptVersionId=331746701\" target=\"_blank\">v4</a></td>\n</tr>\n<tr>\n<td>5</td>\n<td><strong>multi-scale DoG</strong></td>\n<td>0.824</td>\n<td><strong>0.826</strong></td>\n<td><a href=\"https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline?scriptVersionId=331751321\" target=\"_blank\">v5</a></td>\n</tr>\n</tbody>\n</table>\n<p><strong>Detection was the biggest lever.</strong> Just taking DoG at multiple scales and using the scale-space max jumped <strong>LB from 0.786 \u2192 0.826 (+0.040)</strong>. In contrast, <strong>division edges hurt</strong> (0.784 \u2192 0.778) and gap closing was roughly neutral.</p>\n<p><strong>CV-LB plot</strong> (attached): detection improvements track <strong>CV \u2248 LB (~1:1)</strong>. Graph-level add-ons (like divisions) can raise CV yet lower LB \u2014 <strong>redrawing the scatter each submission is how you catch that</strong>.</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F5927283%2F34dc10e74c0ce84bb947c72ba8cbb719%2Fcv_lb_correlation.png?generation=1782895694211724&amp;alt=media\" alt=\"\"></p>\n<p><strong>Takeaway</strong>: with careful validation, a <strong>rule-based</strong> pipeline can reach the gold zone here \u2014 no deep model required. I also tried a learned 3D U-Net, but with only 2 embryos it didn't generalize, so I set it aside. Notebook is public \u2014 feedback welcome!</p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3485267,
+     "authorName": "Timmy Juicehouse",
+     "postDate": "2026-07-01T09:10:37.060Z",
+     "content": "<p>Thanks for your feedback!</p>\n<p>It looks like the correlation between CV and LB isn't actually very good. The 3D-UNet method is very time-consuming to train, while my own heuristic strategy is quite fast. I'm waiting for biohub's confirmation before considering my next submission plan.</p>",
+     "votes": 3
+    },
+    {
+     "id": 3485411,
+     "authorName": "Adarsh",
+     "postDate": "2026-07-01T12:29:36.690Z",
+     "content": "<p>Its too early but yeah, rule-based DoG is surprisingly good compared to DL approaches right now.</p>",
+     "votes": 4,
+     "replies": [
+      {
+       "id": 3485594,
+       "authorName": "Tom",
+       "postDate": "2026-07-01T16:18:30.327Z",
+       "content": "<p>I think a lot of stuffs can play around with those rules. Might need to reformulate the problem statement. I believe a certain learning signal can make deep learning model powerful. </p>",
+       "votes": 3
+      }
+     ]
+    },
+    {
+     "id": 3487075,
+     "authorName": "Timmy Juicehouse",
+     "postDate": "2026-07-03T10:53:01.280Z",
+     "content": "<p><strong>Let me add to my results:</strong></p>\n<table>\n<thead>\n<tr>\n<th><strong>baseline</strong></th>\n<th>CV(all train dataset using official metric)</th>\n<th>lb</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>my heuristic 1 (~2-hour inferece)</td>\n<td>0.7448</td>\n<td>0.834</td>\n</tr>\n<tr>\n<td>my heuristic 2(~3-hour inferece)</td>\n<td>0.8213</td>\n<td>0.846</td>\n</tr>\n</tbody>\n</table>",
+     "votes": 2
+    },
+    {
+     "id": 3485302,
+     "authorName": "Tom",
+     "postDate": "2026-07-01T09:44:45.717Z",
+     "content": "<p>Hi, may I know your division jacard CV?</p>",
+     "votes": 2,
+     "replies": [
+      {
+       "id": 3485317,
+       "authorName": "ISAKA Tsuyoshi",
+       "postDate": "2026-07-01T09:57:32.680Z",
+       "content": "<p>Thanks! My division Jaccard CV is basically 0, because my best submissions don't predict divisions at all.</p>",
+       "votes": 2
+      }
+     ]
+    },
+    {
+     "id": 3486700,
+     "authorName": "BeanTard",
+     "postDate": "2026-07-02T20:43:37.407Z",
+     "content": "<p>doesnt seem to be very calibrated, but structural priors are usually very good, the idea is to have these structural priors in the model and have the model learn off of them and get more. </p>"
+    }
+   ]
+  }
+ },
+ "717109": {
+  "topic": {
+   "topic": {
+    "id": 717109,
+    "title": "Resource sharing for cell tracking challenge",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/717109",
+    "postDate": "2026-07-01T14:00:25.871499400Z",
+    "authorName": "Tom",
+    "authorUrl": "https://www.kaggle.com/tom99763",
+    "votes": 48,
+    "commentCount": 4,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>in the attachments. </p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3521835,
+     "authorName": "Rishabh Roy",
+     "postDate": "2026-09-07T09:24:47.893Z",
+     "content": "<p>Are you using cell segmentation based tracking ?</p>",
+     "votes": 1
+    },
+    {
+     "id": 3487641,
+     "authorName": "Tom",
+     "postDate": "2026-07-04T05:45:46.917Z",
+     "content": "<p>Finally division got learning signal!</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4310004%2F8f869234903a7d25d2b54ecad8a04d66%2F123.png?generation=1783143916774683&amp;alt=media\" alt=\"\"></p>",
+     "votes": 3,
+     "replies": [
+      {
+       "id": 3520467,
+       "authorName": "Rishabh Roy",
+       "postDate": "2026-09-03T13:03:24.960Z",
+       "content": "<blockquote>\n  <p>Finally division got learning signal!</p>\n  <p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4310004%2F8f869234903a7d25d2b54ecad8a04d66%2F123.png?generation=1783143916774683&amp;alt=media\" alt=\"\"></p>\n</blockquote>\n<p>thats awesome how did you improve on the divisions </p>"
+      }
+     ]
+    },
+    {
+     "id": 3493457,
+     "authorName": "NevilleAndrade",
+     "postDate": "2026-07-07T20:46:03.703Z",
+     "content": "<p>Could you share the notebook for the dataset_eda_and_results html?</p>"
+    }
+   ]
+  }
+ },
+ "724130": {
+  "topic": {
+   "topic": {
+    "id": 724130,
+    "title": "Share a custom napari visualizer",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/724130",
+    "postDate": "2026-07-09T16:55:59.111354100Z",
+    "authorName": "Tom",
+    "authorUrl": "https://www.kaggle.com/tom99763",
+    "votes": 47,
+    "commentCount": 8,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>repo: <a href=\"https://github.com/tom99763/celltrack-studio\" target=\"_blank\">https://github.com/tom99763/celltrack-studio</a> </p>\n<ul>\n<li>support uploading script to test your own post-processing</li>\n<li>know your score on this video</li>\n<li>check your matching between frame t to frame t+1</li>\n<li>observe your predicted trajectories and errors in 3d view </li>\n</ul>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4310004%2Fcbfe42f675f3d938ab23b511046f224a%2Fnapari.png?generation=1783616306670559&amp;alt=media\" alt=\"\"></p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3515166,
+     "authorName": "Tom",
+     "postDate": "2026-08-21T00:33:12.047Z",
+     "content": "<p>After 30 days suspension. I finally back</p>",
+     "votes": -1
+    },
+    {
+     "id": 3494479,
+     "authorName": "hengck23",
+     "postDate": "2026-07-10T04:23:54.487Z",
+     "content": "<p>there is a napari chatgpt plugin\n<a href=\"https://github.com/royerlab/napari-chatgpt\" target=\"_blank\">https://github.com/royerlab/napari-chatgpt</a></p>\n<p>seems that this competition is a good testbed for biomedical image agent\n<img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb7dbb6b7dd0f585e8117890ea79fafe9%2FSelection_4357.png?generation=1783657431797421&amp;alt=media\" alt=\"\"></p>",
+     "votes": 2,
+     "replies": [
+      {
+       "id": 3496419,
+       "authorName": "Jord\u00e3o Bragantini",
+       "postDate": "2026-07-13T20:18:07.787Z",
+       "content": "<p>This interactive tool might also be useful, <a href=\"https://github.com/funkelab/motile_tracker\" target=\"_blank\">https://github.com/funkelab/motile_tracker</a></p>",
+       "votes": 2,
+       "replies": [
+        {
+         "id": 3496538,
+         "authorName": "Tom",
+         "postDate": "2026-07-14T05:26:45.417Z",
+         "content": "<p><a href=\"https://www.kaggle.com/jookuma\" target=\"_blank\">@jookuma</a>  Tree representation is better for this challenge. Really thanks for sharing this I'll update my design </p>"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 3494326,
+     "authorName": "Md Feroz Ahmed",
+     "postDate": "2026-07-09T17:36:33.977Z",
+     "content": "<p>This is a really impressive and useful contribution! A custom napari visualizer for inspecting cell tracking results in 3D space and time is extremely valuable for debugging and improving models.</p>"
+    },
+    {
+     "id": 3495154,
+     "authorName": "Mr. Ahtasham Ul haq",
+     "postDate": "2026-07-11T14:43:46.227Z",
+     "content": "<p>This is the kind of tool sharing that moves a competition forward. Most public notebooks are just clones.</p>\n<p>3D trajectory and frame to frame matching is the debugging step people skip, then wonder why their tracking model scores fine but looks wrong visually. Metrics on cell tracking can look okay while the actual trajectories are jumping between cells.</p>\n<p>Does it handle two cells crossing paths where the model swaps their IDs? That failure is invisible in aggregate scores and obvious the second you watch the video.</p>",
+     "votes": -2
+    },
+    {
+     "id": 3516520,
+     "authorName": "Joseph Adamski",
+     "postDate": "2026-08-24T15:51:58.507Z",
+     "content": "<p>Thank you this was super helpful. </p>"
+    },
+    {
+     "id": 3494434,
+     "authorName": "xaxipiruli",
+     "postDate": "2026-07-10T00:08:26.873Z",
+     "content": "<p>Thanks, It was so useful :D</p>"
+    }
+   ]
+  }
+ },
+ "724283": {
+  "topic": {
+   "topic": {
+    "id": 724283,
+    "title": "beware of jumps in ground truth track",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/724283",
+    "postDate": "2026-07-10T12:47:17.916832900Z",
+    "authorName": "hengck23",
+    "authorUrl": "https://www.kaggle.com/hengck23",
+    "votes": 42,
+    "commentCount": 16,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F421105476d0308ddaf76f6be42659a9e%2FSelection_4367.png?generation=1783687617945117&amp;alt=media\" alt=\"\"></p>\n<p>At first, i thought not all ground truths are correct. Then, on inspection, i find the following are quite common\n1) some frames are frozen. i.e subraction of vol at t and t+1 gives exactly zero\n2) there are suddent jumps in time (global movement of whole volume)  </p>\n<p>i.e. the time step are not constant, maybe due to limitations of acquisition equipment</p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3494946,
+     "authorName": "g john rao",
+     "postDate": "2026-07-11T05:05:58.217Z",
+     "content": "<p>this too falls under sparse annotations i think</p>\n<blockquote>\n  <p>Annotations are sparse \u2014 not every cell in every frame is labeled.</p>\n</blockquote>\n<p>and we can't reconstruct the entire embryo either</p>",
+     "votes": 1,
+     "replies": [
+      {
+       "id": 3494947,
+       "authorName": "hengck23",
+       "postDate": "2026-07-11T05:15:06.200Z",
+       "content": "<p>Each volume is a crop. Maybe can reconstruct like jigsaw puzzle </p>",
+       "votes": 2,
+       "replies": [
+        {
+         "id": 3494977,
+         "authorName": "g john rao",
+         "postDate": "2026-07-11T07:27:12.527Z",
+         "content": "<p>if the spatial crops are independently sampled time windows, we can only approximate the full embryo (stitching all samples together) reconstruction (not the lineage reconstruction, as that's the competition, only the FOVs matter)</p>\n<p>What we have</p>\n<p>Every training video provides:</p>\n<ul>\n<li>An embryo prefix: 44b6 or 6bba</li>\n<li>Exactly 100 frames</li>\n<li>Volume shape 64 \u00d7 256 \u00d7 256</li>\n<li>Frame spacing of 1 second</li>\n<li>Voxel scale (1.625, 0.40625, 0.40625) \u00b5m</li>\n<li>Raw fluorescence appearance</li>\n<li>Sparse within-video tracks</li>\n<li>An estimated total number of cell nodes</li>\n</ul>\n<p>What is missing</p>\n<p>The metadata does not provide:</p>\n<ul>\n<li>Absolute acquisition time or developmental stage</li>\n<li>Clip start time within the original recording</li>\n<li>Global spatial/crop origin</li>\n<li>Orientation or registration transform</li>\n<li>Persistent cell IDs between clips</li>\n<li>Whether two clips overlap or are consecutive</li>\n<li>Any guarantee that all clips tile one continuous acquisition</li>\n<li>Dense lineages or anatomical landmarks</li>\n</ul>\n<p>edit: FOVs is the competition format - lack of computation for full embryo is the likely reason for it. but since i think each cell depends on every other cells in the embryo is the idea behind reconstructing the full embryo for a full picture view of everything.</p>\n<p>although, there are many ways to stitch it together - but it will only be an approximation since we lack the full data needed.</p>",
+         "votes": 2
+        },
+        {
+         "id": 3494986,
+         "authorName": "Timmy Juicehouse",
+         "postDate": "2026-07-11T08:03:34.213Z",
+         "content": "<p>It's somewhat similar to the temporal/sequencing issue in CMI3. Of course, this heuristic strategy can also compensate for the missing frames.</p>",
+         "votes": 1
+        },
+        {
+         "id": 3495053,
+         "authorName": "g john rao",
+         "postDate": "2026-07-11T10:48:14.990Z",
+         "content": "<p>okay, digging deeper, it is a systematic fault surely</p>\n<p>Scanning every consecutive frame pair in all 199 training videos by comparing their stored compressed chunks byte-for-byte.</p>\n<pre><code>   Group                  Videos    Videos affected    Duplicate pairs    Pair rate\n  \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501    \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501    \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501  \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n   44b6                       71                  0                  0           0%\n  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500    \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500    \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   6bba                      128                114                947        7.47%\n  \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500    \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500    \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n   Entire training set       199                114                947        4.81%\n</code></pre>\n<ul>\n<li>57.3% of all training videos contain at least one frozen transition.</li>\n<li>89.1% of 6bba videos are affected.</li>\n<li>Approximately one in every 13 adjacent pairs in 6bba is frozen.</li>\n<li>No exact duplicates occur in 44b6.</li>\n</ul>\n<p>Evidence that this is systematic</p>\n<p>Several different 6bba samples have exactly the same freeze schedule. For example:</p>\n<p>6bba_05b6850b\n  6bba_07477033\n  6bba_5b28472a</p>\n<p>all freeze after the same frame indices:</p>\n<p>4, 12, 27, 42, 52, 57, 59, 62, 66, 76</p>\n<p>Likewise, these three share another identical schedule:</p>\n<p>6bba_1f58c2f6\n  6bba_20852818\n  6bba_80d12824</p>",
+         "votes": 5
+        },
+        {
+         "id": 3495059,
+         "authorName": "Timmy Juicehouse",
+         "postDate": "2026-07-11T11:02:00.433Z",
+         "content": "<p>You analyzed it very thoroughly. I only started suspecting something during cross-validation\u2014their adj_edge_jaccard values are around 0.5 and 0.7.</p>",
+         "votes": 1
+        },
+        {
+         "id": 3495060,
+         "authorName": "hengck23",
+         "postDate": "2026-07-11T11:04:20.747Z",
+         "content": "<p>This is a huge problem if test data is not the same as we learned and memorised the freezing unintentionally. It also means rule-based heuristics need to be changed to avoid overfitting etc.</p>\n<p>\u201call freeze after the same frame indices:\u201d this means they are cropped from the same master big volume\u2026 which i will be interested \"to jigsaw it\" back</p>\n<hr>\n<p>do we need to probe the hidden test frame for frozen frame?</p>",
+         "votes": 1
+        },
+        {
+         "id": 3495115,
+         "authorName": "g john rao",
+         "postDate": "2026-07-11T13:31:34.027Z",
+         "content": "<p>a simple conditional tracking would work too</p>",
+         "votes": 1
+        },
+        {
+         "id": 3495185,
+         "authorName": "Tom",
+         "postDate": "2026-07-11T15:55:51.073Z",
+         "content": "<p>Videos sharing the schedule    Frames duplicated after index\u2026\n6bba_05b6850b \u00b7 07477033 \u00b7 5b28472a    4, 12, 27, 42, 52, 57, 59, 62, 66, 76\n6bba_1f58c2f6 \u00b7 20852818 \u00b7 80d12824    1, 14, 19, 43, 44, 45, 49, 57, 61, 66, 73</p>\n<p>See html</p>",
+         "votes": 1
+        },
+        {
+         "id": 3502950,
+         "authorName": "g john rao",
+         "postDate": "2026-07-25T06:30:11.603Z",
+         "content": "<p>conditional copy wouldn't work because the GT differs as well </p>\n<p>details here: <a href=\"https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/729082\" target=\"_blank\">https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/729082</a></p>",
+         "votes": 1
+        },
+        {
+         "id": 3510365,
+         "authorName": "Ace",
+         "postDate": "2026-08-08T09:50:56.223Z",
+         "content": "<p>and what about the embryos types,  In training data there are two distinct types of Embryo, what if there is 3rd or fourth type, how well do I interpolate within embryos I've already seen,\" not \"how well do I generalize to an embryo I haven't.</p>",
+         "votes": 1
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 3494983,
+     "authorName": "Timmy Juicehouse",
+     "postDate": "2026-07-11T07:50:56.430Z",
+     "content": "<p>I personally believe this is a fault in the imaging system causing repeated frames or dropped frames. Zebrafish embryo development is a continuous dynamic process. From the cleavage stage to the gastrulation stage, cells are constantly undergoing division, migration, and tissue deformation. Even in slower developmental phases, there are still sub-pixel-level cell displacements and fluctuations in signal intensity/grayscale. It is impossible for the entire 3D volume to show completely zero change, let alone produce perfectly repeated frames where subtraction yields exactly 0.</p>",
+     "votes": 2
+    },
+    {
+     "id": 3499734,
+     "authorName": "victor",
+     "postDate": "2026-07-17T20:01:23.637Z",
+     "content": "<p>submission stuck gang report in</p>"
+    },
+    {
+     "id": 3499282,
+     "authorName": "emtcole",
+     "postDate": "2026-07-16T21:36:23.747Z",
+     "content": "<p>can coorberate this</p>"
+    },
+    {
+     "id": 3494847,
+     "authorName": "Angantyr",
+     "postDate": "2026-07-10T19:57:17.873Z",
+     "content": "<p>I wonder if this could come from a sudden movement of the entire setup?</p>\n<p>Also, technically we should just let it be if the Ground Truth says so but a preprocessing of the signal/ground truth would be a nice addition.</p>"
+    },
+    {
+     "id": 3494709,
+     "authorName": "Tom",
+     "postDate": "2026-07-10T14:11:17Z",
+     "content": "<p>Some cells are natural long jumpers</p>"
+    }
+   ]
+  }
+ },
+ "727154": {
+  "topic": {
+   "topic": {
+    "id": 727154,
+    "title": "Division Metric exploit and patch. ",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/727154",
+    "postDate": "2026-07-18T00:20:53.126631100Z",
+    "authorName": "Thibgolds",
+    "authorUrl": "https://www.kaggle.com/thibautgoldsborough",
+    "votes": 36,
+    "commentCount": 14,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>Hello all, </p>\n<p>A few of you might be aware that an exploit of our metrics was found, specifically in the division Jaccard score. \nWe have made a patch and will re-score all submissions as soon as possible (likely Monday). Submissions that did not actively exploit this will not have their scores affected. </p>\n<p>In the meanwhile the patch is already public on <a href=\"https://github.com/royerlab/kaggle-cell-tracking-competition\" target=\"_blank\">https://github.com/royerlab/kaggle-cell-tracking-competition</a> so you can score your submissions locally. </p>\n<p>Apologies for the mistake and thank you for your understanding. </p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3500919,
+     "authorName": "Khalid",
+     "postDate": "2026-07-20T21:27:36.867Z",
+     "content": "<p>when will you re-score all our submissions ?</p>",
+     "votes": 9,
+     "replies": [
+      {
+       "id": 3501121,
+       "authorName": "Thiago Munhoz da N\u00f3brega",
+       "postDate": "2026-07-21T12:42:53.233Z",
+       "content": "<p>I was wondering the same thing <a href=\"https://www.kaggle.com/thibautgoldsborough\" target=\"_blank\">@thibautgoldsborough</a>, any updates?</p>",
+       "votes": 1
+      }
+     ]
+    },
+    {
+     "id": 3501385,
+     "authorName": "Jord\u00e3o Bragantini",
+     "postDate": "2026-07-21T22:43:16.923Z",
+     "content": "<p><a href=\"https://www.kaggle.com/sweetyheehee\" target=\"_blank\">@sweetyheehee</a> <a href=\"https://www.kaggle.com/khalid000000\" target=\"_blank\">@khalid000000</a> <a href=\"https://www.kaggle.com/thedyingkai\" target=\"_blank\">@thedyingkai</a> and others, the re-scoring is running, and it should be updated tomorrow if everything works out.</p>",
+     "votes": 3,
+     "replies": [
+      {
+       "id": 3501459,
+       "authorName": "Thiago Munhoz da N\u00f3brega",
+       "postDate": "2026-07-22T03:03:43.173Z",
+       "content": "<p>nice, thanks for the update</p>"
+      },
+      {
+       "id": 3501506,
+       "authorName": "OzanM.",
+       "postDate": "2026-07-22T06:34:14.217Z",
+       "content": "<p>Thank you for the update, we are awaiting the results.</p>"
+      }
+     ]
+    },
+    {
+     "id": 3501109,
+     "authorName": "Timmy Juicehouse",
+     "postDate": "2026-07-21T11:57:35.713Z",
+     "content": "<p>I hope you can rerun it as soon as possible so I can evaluate the current strategy quickly as well.</p>",
+     "votes": 3
+    },
+    {
+     "id": 3500762,
+     "authorName": "Giovanni Marco Dall'Olio",
+     "postDate": "2026-07-20T13:26:27.690Z",
+     "content": "<p>Thank you for sharing the github repo! It's a great resource for validating the predictions locally before submitting them.</p>\n<p>I've taken the liberty of copying it into a public Kaggle dataset, so it can be attached to a notebook and used to debug: <a href=\"https://www.kaggle.com/datasets/dalloliogm/biohub-official-scorer-patched/data\" target=\"_blank\">https://www.kaggle.com/datasets/dalloliogm/biohub-official-scorer-patched/data</a></p>",
+     "votes": 1
+    },
+    {
+     "id": 3502398,
+     "authorName": "Navneet",
+     "postDate": "2026-07-24T07:37:33.870Z",
+     "content": "<p>Thank you for the Division Metric exploit and patch. <a href=\"https://www.kaggle.com/thibautgoldsborough\" target=\"_blank\">@thibautgoldsborough</a> </p>"
+    },
+    {
+     "id": 3501698,
+     "authorName": "Giovanni Marco Dall'Olio",
+     "postDate": "2026-07-22T16:03:06.593Z",
+     "content": "<p>Is it just me, or are the submissions taking so much longer to evaluate, now? I submitted this morning and it is still running after 11 hours. It uses to take about 5 hours to complete.</p>"
+    },
+    {
+     "id": 3501630,
+     "authorName": "OfficialBiohubs",
+     "postDate": "2026-07-22T12:32:35.473Z",
+     "content": "<p>Thanks for update, we are waiting for this results.</p>"
+    },
+    {
+     "id": 3501441,
+     "authorName": "Maria Aqdas",
+     "postDate": "2026-07-22T01:12:59.720Z",
+     "content": "<p>Thanks for the update and for sharing the local patch so quickly! Really appreciate the team's dedication to maintaining a level playing field for all participants.</p>"
+    },
+    {
+     "id": 3501163,
+     "authorName": "thedyingkai",
+     "postDate": "2026-07-21T14:03:50.573Z",
+     "content": "<p>when rescore?</p>"
+    },
+    {
+     "id": 3499867,
+     "authorName": "FasterYouChase FasterIRun",
+     "postDate": "2026-07-18T05:58:30.563Z",
+     "content": "<p>As it is gonna fix, then it would be now safe to tell what's actually found? I am not aware yet.</p>",
+     "replies": [
+      {
+       "id": 3500056,
+       "authorName": "codebeforework",
+       "postDate": "2026-07-18T12:26:15.307Z",
+       "content": "<p>(My current third place exploits the metric hack as I tested it last night.)</p>\n<p><strong>What the division-metric exploit was</strong></p>\n<p>The competition score is <code>adjusted_edge_jaccard + 0.1 \u00d7 division_jaccard</code>. The exploit targeted the second term \u2014 the division Jaccard \u2014 which carries up to 0.1 of the total.</p>\n<p>The division score works by pulling out \"division\" events (a parent node with two children) from your predicted lineage graph and matching them against the ground-truth divisions. In the pre-patch version, that matching relied on <strong>weakly-connected-component</strong> structure and did not strictly require each matched division to be a genuine parent\u2192two-daughter fork sitting near a real GT division.</p>\n<p>The exploit added a small amount of synthetic graph structure <strong>far outside the image volume</strong>:</p>\n<ul>\n<li>a single \"hub\" node placed at coordinates far outside the data (e.g. \u221210000, \u221210000, \u221210000), with edges to the root of every (or the largest <em>N</em>) track components \u2014 this merges the whole prediction into one big weakly-connected component;</li>\n<li>a handful of synthetic \"fork\" chains (a divider node with two children) at those same far-away coordinates;</li>\n<li>and dropping the real forks from the tracks.</li>\n</ul>\n<p>Under the old matching this pushed the division Jaccard from ~0 to ~1.0, adding close to the full +0.1 to the score \u2014 even though none of the added nodes or edges correspond to a real cell or a real division. It's a pure scoring artifact; it does nothing for actual tracking quality.</p>\n<p><strong>The patch</strong> (now public in the repo) requires divisions to be genuine <strong>strongly-connected</strong> parent\u2192two-daughter structures matched within the 7 \u00b5m distance radius. The far-away synthetic forks now register as false positives instead of true positives, which removes the benefit and is why exploiting submissions will drop on re-score.</p>",
+       "votes": 2
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "738217": {
+  "topic": {
+   "topic": {
+    "id": 738217,
+    "title": "focus3d : one of the best 3d cell segmentation",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/738217",
+    "postDate": "2026-08-30T15:24:33.907558500Z",
+    "authorName": "hengck23",
+    "authorUrl": "https://www.kaggle.com/hengck23",
+    "votes": 32,
+    "commentCount": 38,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>Here are the results i tried on one of the kaggle train dataset</p>\n<p><a href=\"https://huggingface.co/spaces/Qinghua-thu/FOCUS-3D\" target=\"_blank\">https://huggingface.co/spaces/Qinghua-thu/FOCUS-3D</a></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Ff26b419d2743cbd3570314408b10e3f8%2FSelection_4730.png?generation=1788103458247804&amp;alt=media\" alt=\"\"></p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3522918,
+     "authorName": "hengck23",
+     "postDate": "2026-09-10T00:40:24.790Z",
+     "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F53f2b08efba45290cfcb9e985cc2114f%2FSelection_4877.png?generation=1789000712859568&amp;alt=media\" alt=\"\"></p>\n<p>It seems that i cannot get Ultrack oversegment to work.   </p>\n<p>When the cell is isolated and no oversegment is required, Ultrack centroid is close to Kaggle ground truth</p>",
+     "votes": 1,
+     "replies": [
+      {
+       "id": 3522929,
+       "authorName": "Satwik",
+       "postDate": "2026-09-10T01:36:07.310Z",
+       "content": "<p>Ultrack segmentation proved ineffective for me as well compared to just using our own detector. What Ultrack did seem to do well for me was generating dense tracks, using ultrack-td contours from FOCUS3D segmentations. I have not been able to acheive any meaningful result yet from any of these so far however.</p>",
+       "votes": 1
+      }
+     ]
+    },
+    {
+     "id": 3521737,
+     "authorName": "hengck23",
+     "postDate": "2026-09-07T03:00:29.040Z",
+     "content": "<p>another idea\n<img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F17a1759af0e5e5ef2acfad20a57f84c7%2FSelection_4813.png?generation=1788750027595991&amp;alt=media\" alt=\"\"></p>",
+     "votes": 1
+    },
+    {
+     "id": 3521535,
+     "authorName": "hengck23",
+     "postDate": "2026-09-06T08:51:47.800Z",
+     "content": "<p>updated results</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9e8d5f4c47591d7e21251755f284fcb8%2FSelection_4806.png?generation=1788684703562892&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F54fceef06b3911402346a7f5ebd371f6%2FSelection_4805.png?generation=1788684641113578&amp;alt=media\" alt=\"\"></p>",
+     "votes": 3,
+     "replies": [
+      {
+       "id": 3521539,
+       "authorName": "hengck23",
+       "postDate": "2026-09-06T09:18:04.263Z",
+       "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F65e9183d4ded303e8bd71201170f37ad%2FSelection_4809.png?generation=1788686281728622&amp;alt=media\" alt=\"\"></p>\n<p>still feel that it is not good enough (does not help if gap is more than one missing frame) \u2026 need to dream about it</p>",
+       "votes": 2
+      },
+      {
+       "id": 3521562,
+       "authorName": "hengck23",
+       "postDate": "2026-09-06T10:48:52.160Z",
+       "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F1fc32a4c8e74689f84192fd6b1dd5e9d%2FSelection_4810.png?generation=1788691729613470&amp;alt=media\" alt=\"\"></p>"
+      }
+     ]
+    },
+    {
+     "id": 3521418,
+     "authorName": "hengck23",
+     "postDate": "2026-09-05T19:41:24.460Z",
+     "content": "<p>The trick to transforming Focus3D annotation to Kaggle-like annotation<br>\n1) Just pretrain with Focus3D annotation<br>\n2) find matches (hit) of Focus3D and Kaggle zyx to compute diff dzyx<br>\n3) have two heads: one to predict Focus3D zyx, another head dzyx, then Kagge zyx = Focus3D +dzyx  </p>\n<p>hint: might as well let diff head predict values in um (instead of quantized 64x64x64 coord) </p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fe52d3a2127e86cfcfcf93c3c78f9cf1d%2FSelection_4791.png?generation=1788637476144738&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F69f74bce646bd3f4c2ff78d45bb4e4e4%2FSelection_4792.png?generation=1788637813426997&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F7c169ccb2d1d5567e7fc500bdf120d1c%2FSelection_4793.png?generation=1788637823261833&amp;alt=media\" alt=\"\"></p>\n<p>-- </p>\n<p>This is a classical trick for OOD adaptation with few data. We have a prior model, then we shift to a new domain using A*ptior + B</p>\n<p>keywords: domain calibration, domain adaptation </p>",
+     "votes": 2,
+     "replies": [
+      {
+       "id": 3521430,
+       "authorName": "Rishabh Roy",
+       "postDate": "2026-09-05T21:54:49.850Z",
+       "content": "<p>why not use ultratrack directly ?</p>",
+       "votes": 1,
+       "replies": [
+        {
+         "id": 3522473,
+         "authorName": "hengck23",
+         "postDate": "2026-09-09T00:01:24.747Z",
+         "content": "<p>thanks. i did not know utlrack segmentation until i find this.\n<a href=\"https://github.com/royerlab/ultrack-td/blob/main/examples/zebrahub.py\" target=\"_blank\">https://github.com/royerlab/ultrack-td/blob/main/examples/zebrahub.py</a></p>"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 3521158,
+     "authorName": "hengck23",
+     "postDate": "2026-09-05T02:07:51.003Z",
+     "content": "<p>i basically solved the cell detection problem. During development, chatgpt offers some interesting solutions: 2d to 3d:<br>\npaper:  </p>\n<ol>\n<li><p>u-Segment3D \u2014 \u201cUniversal consensus 3D segmentation of cells from 2D segmented stacks\u201d.<br>\n<a href=\"https://github.com/DanuserLab/u-Segment3D\" target=\"_blank\">https://github.com/DanuserLab/u-Segment3D</a><br>\n<a href=\"https://www.biorxiv.org/content/10.1101/2024.05.03.592249v3\" target=\"_blank\">https://www.biorxiv.org/content/10.1101/2024.05.03.592249v3</a>  </p></li>\n<li><p>Seg2Link: an efficient and versatile solution for semi-automatic cell segmentation in 3D image stacks\n<a href=\"https://github.com/WenChentao/Seg2Link\" target=\"_blank\">https://github.com/WenChentao/Seg2Link</a></p></li>\n</ol>"
+    },
+    {
+     "id": 3520950,
+     "authorName": "hengck23",
+     "postDate": "2026-09-04T13:26:45.227Z",
+     "content": "<p>experiment on training a unet3d with dense cell centroids from focus3d + kaggle annotation:<br>\n<a href=\"https://www.kaggle.com/code/hengck23/cell-point-detector\" target=\"_blank\">https://www.kaggle.com/code/hengck23/cell-point-detector</a><br>\n(6 sec per volume on one T4 gpu) </p>\n<p>here is recall rate on kaggle node annotations:<br>\ninput 64x64x64 (one volume)</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Facdf250b20a9f3efcc3328dbdcbe14e4%2FSelection_4771.png?generation=1788528152996386&amp;alt=media\" alt=\"\"></p>\n<p>plan:</p>\n<ul>\n<li>(1) train on external data (there are many opensource 3d zebrafish embryo cells, especially those from biohub) </li>\n<li>(2) i haven't apply tricks like augmentation, SWA weight averaging, etc \u2026</li>\n<li>(3) another ranker head to push probability upwards so that i can have less predicted nodes</li>\n<li>(4) maybe a head to predict node density so that i can predict kaggle estimate node count (metric hack)  </li>\n</ul>\n<p>(3),(4) may not be necessary, because tracking can recover missing cells (or adaptively adjust prob threshold)</p>\n<hr>\n<p>i divide the problems into steps:\n1) train a good cell detector first<br>\n2) then get cell detector feature (+ modify vector) to make link transformer<br>\n3) if you analyse post-processing, you will find that they use heuristics to join cells if the broken gap interval is   small. This means that if we train link transformer with window &gt;2 (eg like 5) results is better. i.e. learn the \"joining\" instead of heuristics. but the risk is that data lis limited and maybe heuristics is better?  </p>",
+     "votes": 1,
+     "replies": [
+      {
+       "id": 3520955,
+       "authorName": "hengck23",
+       "postDate": "2026-09-04T13:39:53.937Z",
+       "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F2d7f3d5429dda866877f5b1331afb2c6%2FSelection_4773.png?generation=1788529191797128&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F834de770caf26c33624489fbcef64537%2FSelection_4774.png?generation=1788529381336076&amp;alt=media\" alt=\"\"></p>",
+       "replies": [
+        {
+         "id": 3521023,
+         "authorName": "Rishabh Roy",
+         "postDate": "2026-09-04T16:15:45.133Z",
+         "content": "<p>This is awesome . Thanks for sharing your findings . Would love to implement this . Will try if this fits under kaggle 12 hour window run </p>"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 3518742,
+     "authorName": "hengck23",
+     "postDate": "2026-08-31T15:45:28.467Z",
+     "content": "<p>elastic augmentation<br>\nso actually you have dense data for training  </p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F936529f234ae0f09dcafc7f0960ecc77%2FPeek%202026-08-31%2023-44.gif?generation=1788191083712245&amp;alt=media\" alt=\"\"></p>",
+     "votes": 3
+    },
+    {
+     "id": 3519195,
+     "authorName": "hengck23",
+     "postDate": "2026-09-01T09:19:47.130Z",
+     "content": "<p>An idea that is too much for the competition but could be feasible in long term cell tracking research. I have been looking at video generation deep net. You can have a depth map as prompt then generate anime or life movie.</p>\n<p>So it is easy to create 3d virtual cell in blender and add motion. Then you can style it to create fluorescent microscopy volume.    </p>\n<p>In fact with infinite data you can simply convert 4d to 4d end to end. From volume back to bender model.</p>",
+     "votes": 1,
+     "replies": [
+      {
+       "id": 3519199,
+       "authorName": "nusrati",
+       "postDate": "2026-09-01T09:42:06.583Z",
+       "content": "<p>yup super idea, but for an undergrad, thats not manageable in our routine. But I surely would like to contribute to it if someones upto it.</p>"
+      }
+     ]
+    },
+    {
+     "id": 3518534,
+     "authorName": "hengck23",
+     "postDate": "2026-08-31T07:41:29.500Z",
+     "content": "<p><a href=\"https://www.biorxiv.org/content/10.1101/2025.07.23.666425v1\" target=\"_blank\">https://www.biorxiv.org/content/10.1101/2025.07.23.666425v1</a><br>\nASCENT: Annotation-free Self-supervised Contrastive Embeddings for 3D Neuron Tracking in Fluorescence Microscopy  </p>\n<p>another shortcut is :<br>\nFOCUS3d --&gt; label --&gt;augmentation (e.g. affine, elastic deform) to create window of T=2 pairs.<br>\nthen you can train link transformer etc..</p>",
+     "votes": 1,
+     "replies": [
+      {
+       "id": 3518571,
+       "authorName": "Tom",
+       "postDate": "2026-08-31T09:44:45.063Z",
+       "content": "<p><a href=\"https://www.kaggle.com/hengck23\" target=\"_blank\">@hengck23</a>  It looks like there are even more great ideas to me now</p>",
+       "replies": [
+        {
+         "id": 3518591,
+         "authorName": "hengck23",
+         "postDate": "2026-08-31T10:34:59.190Z",
+         "content": "<p>you can just randomly make some grid points that are non-background, then \"track/link them\" in next \"augmented frame\" as pretraining or aux loss</p>"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 3518488,
+     "authorName": "hengck23",
+     "postDate": "2026-08-31T04:04:38.893Z",
+     "content": "<p>FOCUS-3D (instance segmentation) --&gt; HOCT (tracking)<br>\n<a href=\"https://github.com/royerlab/hoct/tree/main\" target=\"_blank\">https://github.com/royerlab/hoct/tree/main</a><br>\n<a href=\"https://arxiv.org/abs/2607.11754\" target=\"_blank\">https://arxiv.org/abs/2607.11754</a><br>\nHigher-Order Cell Tracking Transformer  </p>\n<hr>\n<p>THICK BLUE: kaggle annotation<br>\nOTHER THIN: nearest track from HOCT  </p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F335a3eeb48ab9d2b799e6bf2c0ed973a%2FSelection_4733.png?generation=1788148939168370&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F6ae538c0de22bd26ba2f5bc2c8a2f1d7%2FSelection_4734.png?generation=1788148953830155&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F07a0f1d2c25bad1d915b127224cf6e71%2FSelection_4735.png?generation=1788148976594585&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F13a5e112eb312200b3bc018e42c7e078%2FSelection_4736.png?generation=1788149017218352&amp;alt=media\" alt=\"\"></p>",
+     "votes": 1
+    },
+    {
+     "id": 3518454,
+     "authorName": "hengck23",
+     "postDate": "2026-08-31T00:34:08.573Z",
+     "content": "<p>Once you have dense segmentation label, you can use many opensource tracker like hoct, itec, trackastra to make dense tracks for better training.</p>\n<p>Then you can do longer range tracking over window of 5 or 8 (instead of 2)</p>",
+     "votes": 1,
+     "replies": [
+      {
+       "id": 3518559,
+       "authorName": "Rishabh Roy",
+       "postDate": "2026-08-31T09:05:24.563Z",
+       "content": "<p>Are you able to use this segmentation in your code ? <a href=\"https://www.kaggle.com/hengck23\" target=\"_blank\">@hengck23</a> </p>",
+       "replies": [
+        {
+         "id": 3518577,
+         "authorName": "hengck23",
+         "postDate": "2026-08-31T09:50:37.440Z",
+         "content": "<p>You can download hf spaces gradio code and modify from there. It is self contained </p>"
+        },
+        {
+         "id": 3518592,
+         "authorName": "Rishabh Roy",
+         "postDate": "2026-08-31T10:37:22.100Z",
+         "content": "<p>would love to see this work </p>"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 3523020,
+     "authorName": "hengck23",
+     "postDate": "2026-09-10T10:43:51.150Z",
+     "content": "<p>let's try again. see if repo is detailed enough to repeat segmentation results\u2026</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fbd63a659a989989be36b9560f933eebf%2FSelection_4894.png?generation=1789036983651376&amp;alt=media\" alt=\"\"></p>"
+    },
+    {
+     "id": 3522961,
+     "authorName": "hengck23",
+     "postDate": "2026-09-10T04:34:37.563Z",
+     "content": "<p>need to set uncertainty weights</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F480ff2dcc663fba1d8ee7404f528f983%2FSelection_4880.png?generation=1789014846921779&amp;alt=media\" alt=\"\"></p>"
+    },
+    {
+     "id": 3522955,
+     "authorName": "hengck23",
+     "postDate": "2026-09-10T03:20:56.770Z",
+     "content": "<p>My friend said my approach was wrong. There are ambiguities and there is inly partial labels. Instead of learning perfect predictors, the focus should generate hypothesis and test.eg different way to link up assume with and without division and score hypothesis </p>"
+    },
+    {
+     "id": 3522824,
+     "authorName": "hengck23",
+     "postDate": "2026-09-09T20:08:13.220Z",
+     "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F785aea4f57ece422f1e995ca430d6e4d%2FSelection_4870.png?generation=1788984621673535&amp;alt=media\" alt=\"\"></p>"
+    },
+    {
+     "id": 3521575,
+     "authorName": "hengck23",
+     "postDate": "2026-09-06T11:46:51.953Z",
+     "content": "<p>Another trick, but maybe will overfit if you don't have sufficient data. Kaggle annotations may not be best for tracking. Let gt be the Kaggle annotation; you can refine ground truth to gt+dzxy so that it is still within the 7um error limit but drastically improves link probability. Also coord could be subpixel and use F.graid sample to sample feature.</p>"
+    },
+    {
+     "id": 3521474,
+     "authorName": "hengck23",
+     "postDate": "2026-09-06T03:42:42.483Z",
+     "content": "<p>training usually dense FOCUS3d annotation + frame/augmented frame actually works.<br>\nwith dense node and edge (pairing) annotation, i can train up to 200 epochs without overfitting.</p>\n<p>I design my own transformer following the SuperGlue framework for keypoint matching: alternating self-frame attention and cross-frame attention.</p>\n<p>validation: unseen sample_id + kaggle annotation:</p>\n<pre><code>6bba_337b1b3a\ndivision excluded in this test\n\n{'num_gt_nodes': 1272, 'num_matched_nodes': 1272, 'node_recall': 1.0, \n'num_gt_edges': 1209, 'num_edges_both_nodes_matched': 1209, 'num_correct_edges': 1166, \n'edge_recall_end_to_end': 0.9644334160463193, \n'edge_recall_given_nodes': 0.9644334160463193, \n'mean_edge_rank': 0.060891938250428816, # e.g. top1, top2 ... \n'mean_edge_prob': 0.9515399047913187}\n</code></pre>\n<p>I have chatgpt to do all the coding, while i check. i think this can be automatic once i get new external data. </p>\n<p>more visualisation and code coming up. !!!!\n<img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb8ffc8ecd5ee733ab8d0144baaca33d0%2FSelection_4796.png?generation=1788669728505646&amp;alt=media\" alt=\"\"></p>",
+     "replies": [
+      {
+       "id": 3521478,
+       "authorName": "hengck23",
+       "postDate": "2026-09-06T03:59:31.693Z",
+       "content": "<p>The implication is that you do not need kaggle annotation to train. So you can do online training on hidden data in theory</p>",
+       "votes": 1
+      }
+     ]
+    },
+    {
+     "id": 3520752,
+     "authorName": "YanngYT",
+     "postDate": "2026-09-04T04:39:39.543Z",
+     "content": "<p>I tried to use focus-3d to segment cells, but it timed out when submitting. Are you doing dense segmentation first when tracking? Or is it just using focus-3d to generate a dense annotation set for training tracking?</p>",
+     "replies": [
+      {
+       "id": 3520759,
+       "authorName": "hengck23",
+       "postDate": "2026-09-04T04:58:02.320Z",
+       "content": "<p>First verify the recall error of focus3d on kaggle nodes after trying several parameters search. If you are satisfied, train link/track transformer on focus3d zyx(eg centroid of instance label)</p>\n<p>Finally train a point predictor using simple unet to distill focus3d results.</p>\n<p>Getting the point is usually not the issue.  But we want to minimise no of predicted nodes with near 100% recall rate</p>"
+      }
+     ]
+    },
+    {
+     "id": 3519829,
+     "authorName": "Qiwei",
+     "postDate": "2026-09-02T09:56:12.787Z",
+     "content": "<p>This is a draft version, where FOCUS\u20113D is only used as a detector directly\uff1a\n<a href=\"https://www.kaggle.com/code/qiweiyin/focus3d-nuclei-physical-pp-submit?scriptVersionId=346624807\" target=\"_blank\">https://www.kaggle.com/code/qiweiyin/focus3d-nuclei-physical-pp-submit?scriptVersionId=346624807</a></p>",
+     "replies": [
+      {
+       "id": 3519902,
+       "authorName": "hengck23",
+       "postDate": "2026-09-02T12:49:19.523Z",
+       "content": "<p>You should use focus3d, then measure</p>\n<ol>\n<li>Hitrate of sparse annotation ( also distance error)</li>\n<li>Compare num of detected nodes with estimated number of nodes</li>\n</ol>\n<pre><code>    geff_meta = GeffMetadata.read(\n        zarr_file.replace(\".zarr\", \".geff\")\n    )\n\n    est_num_nodes = float(\n        geff_meta.extra[\"estimated_number_of_nodes\"]\n    )\n</code></pre>\n<p>\u2014-</p>\n<p>Also you should evaluate link transformer or other link model given gt location + other location and compared detected location + other location.</p>",
+       "votes": 1,
+       "replies": [
+        {
+         "id": 3519903,
+         "authorName": "hengck23",
+         "postDate": "2026-09-02T12:51:42.613Z",
+         "content": "<p>Further, i think gt annotation must have used some open source cell instance detector. I suspect it it cellpose3d or stardist3d with manual collection.</p>",
+         "votes": 1
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 3520479,
+     "postDate": "2026-09-03T13:38:57.213Z"
+    },
+    {
+     "id": 3518582,
+     "postDate": "2026-08-31T10:05:52.303Z",
+     "votes": 1
+    }
+   ]
+  }
+ },
+ "722668": {
+  "topic": {
+   "topic": {
+    "id": 722668,
+    "title": "good visualisation of the task",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/722668",
+    "postDate": "2026-07-06T22:04:40.576799500Z",
+    "authorName": "hengck23",
+    "authorUrl": "https://www.kaggle.com/hengck23",
+    "votes": 30,
+    "commentCount": 1,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>Here is a movie on what we are doing<br>\n<a href=\"https://virtual-embryo-zoo.sf.czbiohub.org/dataset/danior\" target=\"_blank\">https://virtual-embryo-zoo.sf.czbiohub.org/dataset/danior</a><br>\n<a href=\"https://zebrahub.sf.czbiohub.org/software\" target=\"_blank\">https://zebrahub.sf.czbiohub.org/software</a>  </p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fd133594cbe9f1df1ee78d5d655360da4%2FSelection_4315.png?generation=1783375458284825&amp;alt=media\" alt=\"\"></p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3493404,
+     "authorName": "Rahul Parmeshwar",
+     "postDate": "2026-07-07T18:18:29.627Z",
+     "content": "<p>Pretty fascinating!</p>"
+    }
+   ]
+  }
+ },
+ "714101": {
+  "topic": {
+   "topic": {
+    "id": 714101,
+    "title": "How to get started + Competition's Official Discord",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/714101",
+    "postDate": "2026-06-25T16:44:43.592999100Z",
+    "authorName": "Mar\u00eda Cruz",
+    "authorUrl": "https://www.kaggle.com/macruzbar",
+    "votes": 27,
+    "commentCount": 8,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<h3>Information for newbies</h3>\n<p><strong>New to machine learning and data science?</strong> No question is too basic or too simple. Feel free to start your own thread, or use this thread as a place to post any first-timer clarifying questions for the Kaggle community to help you with!</p>\n<p><strong>New to Kaggle?</strong> Take a look at a few videos to learn a bit more about <a href=\"https://www.youtube.com/watch?v=aIus8si_Et0\" target=\"_blank\">site etiquette</a>, <a href=\"https://www.youtube.com/watch?v=sEJHyuWKd-s\" target=\"_blank\">Kaggle lingo</a>, and <a href=\"https://www.youtube.com/watch?&amp;v=GJBOMWpLpTQ\" target=\"_blank\">how to enter a competition using Kaggle Notebooks</a>. Publish and share your <a href=\"https://www.kaggle.com/docs/models#publishing-a-model\" target=\"_blank\">models on Kaggle Models</a>!</p>\n<p><strong>Looking for a team?</strong> Express your interest in joining a team through our <a href=\"https://www.kaggle.com/discussions/product-feedback/341195\" target=\"_blank\">Team Up</a> feature.</p>\n<p><strong>Remember</strong>: Kaggle is for everyone. Whether you're teaming up or sharing tips in the competition forum, we expect everyone to follow our Kaggle community guidelines.</p>\n<h3>Competition's Official Discord</h3>\n<p>In addition to this competition forum, you can continue the discussion in our official Kaggle Discord Server here:</p>\n<h1><a href=\"http://discord.gg/kaggle\" target=\"_blank\">discord.gg/kaggle</a></h1>\n<p>The Discord is a great place to ask getting started questions, chat about the nuances of this competition, and connect with potential team mates. Learn more about Discord at our <a href=\"https://www.kaggle.com/discussions/general/429933\" target=\"_blank\">announcement here</a>. Here are a few things to keep in mind though:</p>\n<p><strong>1. Discord Competition Channels are 'Public' - Don't Share Private Information</strong></p>\n<p>Discord channels for specific competitions are considered 'public' spaces where you are allowed to talk about competition details. Please remember that private sharing of competition code or data outside of your team is, as always, not permitted. Code sharing must always be done publicly through the Kaggle forums/notebooks.</p>\n<p><strong>2. Discord Competition Channels are Not Monitored by Staff - Keep Important Information on the Kaggle Forums</strong></p>\n<p>Kaggle Staff and Hosts running competitions will not monitor Discord or be available to answer questions in Discord. This is intended to be a more casual space to discuss competitions and help each other. Please keep important questions, insights, writeups, and other valuable conversation on the Kaggle forums. </p>\n<p>Happy modeling! </p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3499546,
+     "authorName": "Cho Royou",
+     "postDate": "2026-07-17T15:45:54.417Z",
+     "content": "<p>Hi organizers,</p>\n<p>This public notebook appears to exploit a weakness in how the official scoring script parses submitted submission.csv files, rather than reflecting genuine cell tracking accuracy:</p>\n<p><a href=\"https://www.kaggle.com/code/outwrest/metric-hack-minimal-baseline-tta-2gpu\" target=\"_blank\">https://www.kaggle.com/code/outwrest/metric-hack-minimal-baseline-tta-2gpu</a></p>\n<p>The detection/tracking pipeline itself (TemporalUNet3D + node transformer + ILP solver, TTA, multi-GPU inference) is a legitimate baseline. The problem is a post-processing cell (augment_dataset) that runs after predictions are generated and modifies only the final submitted CSV \u2014 it does not affect the notebook's own local metric check, which is a strong signal it's specifically targeting the official scorer rather than improving predictions.</p>\n<p>For each sample, it:</p>\n<p>Splits the predicted lineage forest into connected components, sorts by size, and keeps up to MAX_COMPONENTS = 1400 of the largest trees.</p>\n<p>Adds one synthetic \"hub\" node at sentinel coordinates (t=-1000, z=y=x=-10000 \u2014 clearly outside any real acquisition volume/time range) connected to the roots of those trees.</p>\n<p>Appends a chain of 5 synthetic cell-division events (divider \u2192 child, continuation), also at sentinel coordinates (t\u2248-999\u2026, z=y=x=-10000/-10001).</p>\n<p>None of this corresponds to real detections \u2014 the coordinates are deliberately outside any physically valid range, so it can't be genuine matched signal under normal ground-truth matching. It looks designed to exploit something in how the scorer counts connected components / division events / normalizes its Jaccard-style metric.</p>\n<p>This is a public, forkable notebook, so it may already be in use by other teams \u2014 I'd flag this as urgent. I forked/submitted a copy of it myself (submission ID 54786048, 2026-07-17) before fully realizing what the post-processing step did, and would like that submission disregarded/excluded from scoring.</p>\n<p>Happy to provide more details if useful.</p>",
+     "votes": 7,
+     "replies": [
+      {
+       "id": 3499556,
+       "authorName": "Jord\u00e3o Bragantini",
+       "postDate": "2026-07-17T16:01:45.470Z",
+       "content": "<p>Hi <a href=\"https://www.kaggle.com/ngyzly\" target=\"_blank\">@ngyzly</a>, thanks for bringing this to our attention. We are taking a look at it</p>",
+       "votes": 3,
+       "replies": [
+        {
+         "id": 3499634,
+         "authorName": "outwrest",
+         "postDate": "2026-07-17T17:56:41.693Z",
+         "content": "<p>Hi <a href=\"https://www.kaggle.com/jookuma\" target=\"_blank\">@jookuma</a>, can you help patch this metric hack on the division_jaccard? Under the current four certeria (<a href=\"https://github.com/royerlab/kaggle-cell-tracking-competition/blob/7396b7e98e61844e799152ddda7e5493084cc8f3/metrics.md?plain=1#L62-L76)\" target=\"_blank\">https://github.com/royerlab/kaggle-cell-tracking-competition/blob/7396b7e98e61844e799152ddda7e5493084cc8f3/metrics.md?plain=1#L62-L76)</a>, a division can count as a TP by connecting the predicted tracks to a fake fork outside the image, without acutally predicting the real division's location or time.</p>\n<p>I found this trick and I am sure others did that were high on the scoreboard. The notebook shared is mine and I made it public so it can be verified &amp; patched.</p>",
+         "votes": 4
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 3487011,
+     "authorName": "Evdilos_Ikaria",
+     "postDate": "2026-07-03T09:26:08.437Z",
+     "content": "<p>Is there any available code for the applied combined tracking metric?\n Thanks </p>",
+     "votes": 3,
+     "replies": [
+      {
+       "id": 3500202,
+       "authorName": "Tom\u00e1s Travis",
+       "postDate": "2026-07-18T20:38:00.347Z",
+       "content": "<p>Yes! It\u2019s available in the <a href=\"https://github.com/royerlab/kaggle-cell-tracking-competition\" target=\"_blank\">official GitHub repository</a>. The metric itself is in <a href=\"https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/src/tracking_cellmot/metrics.py\" target=\"_blank\">metrics.py</a>, and the <a href=\"https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/README.md\" target=\"_blank\">README</a> shows how to run <a href=\"https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/scripts/evaluate.py\" target=\"_blank\">scripts/evaluate.py</a> locally against the training GEFF files. <a href=\"https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md\" target=\"_blank\">metrics.md</a> also explains each part of the combined score.</p>",
+       "votes": 1
+      }
+     ]
+    },
+    {
+     "id": 3515635,
+     "authorName": "axorina",
+     "postDate": "2026-08-22T07:38:14.340Z",
+     "content": "<p>hi everyone im a 12th grader  and im looking for a beginner friendly team for biohub cell track if annyone is interested let me know! </p>"
+    },
+    {
+     "id": 3506616,
+     "authorName": "Asogwa Samson",
+     "postDate": "2026-07-31T16:53:46.037Z",
+     "content": "<p>Pardon me,\nHow long will it take for ones file to be processed?</p>"
+    },
+    {
+     "id": 3518615,
+     "postDate": "2026-08-31T11:28:33.580Z"
+    }
+   ]
+  }
+ },
+ "723655": {
+  "topic": {
+   "topic": {
+    "id": 723655,
+    "title": "simple idea:\"Your Affinity Field Tells Your Fate\"",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/723655",
+    "postDate": "2026-07-07T17:37:36.697254400Z",
+    "authorName": "hengck23",
+    "authorUrl": "https://www.kaggle.com/hengck23",
+    "votes": 25,
+    "commentCount": 19,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fc2e84c73dc0f3992d61c0c742e0c2975%2FSelection_4328.png?generation=1783445842204878&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F2273352e7963197f144ce11501586ae2%2FSelection_4329.png?generation=1783445854887011&amp;alt=media\" alt=\"\"></p>\n<p>\"Temporal Affinity Fields for 3D Cell Lineage Reconstruction\"  </p>\n<ul>\n<li>predicting a local vector field that tells the graph optimizer how cells should connect   </li>\n</ul>\n<p>Hint: create flow GT for supervision using optical flow and sparse annotation tracks   </p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3498881,
+     "authorName": "hengck23",
+     "postDate": "2026-07-16T04:42:56.547Z",
+     "content": "<p>i find a metric hack:<br>\nyou make a graph. if your just repeat your tracks (giving new id) your edge_jaccard is not affected. this is the cause the kaggle metric don't penalize fragmentation, duplication. hence you can create multiple almost smiliar tracks to improve TP. But there is the node num correction (aka adj_edge_jaccard) But you can over come this by duplicating/perturbing at the correct length and correct location.</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F0c8f49fc633511f2736c46579fa5b7f3%2FSelection_4383.png?generation=1784177205409163&amp;alt=media\" alt=\"\"></p>",
+     "votes": 1,
+     "replies": [
+      {
+       "id": 3499146,
+       "authorName": "Thibgolds",
+       "postDate": "2026-07-16T17:04:28.493Z",
+       "content": "<p>Hi, perfectly duplicated edges are filtered out before scoring the edge Jaccard, this might be why you are not seeing a change in the Jaccard score, each ground truth edge can only used for a single TP. If you duplicate the edges but modify the nodes very slightly, then you should see a drop in Jaccard. This should not allow you to hack (i.e. increase) your score.  Please contact us if you can actually game the metric. </p>",
+       "votes": 1,
+       "replies": [
+        {
+         "id": 3499495,
+         "authorName": "Timmy Juicehouse",
+         "postDate": "2026-07-17T13:11:05.160Z",
+         "content": "<p>How to hack metric:</p>\n<ol>\n<li><p>Real matching nodes only need to be in the same weakly connected component\u200b</p></li>\n<li><p>Forks only need to exist anywhere within that component\u200b</p></li>\n<li><p>Unmatched false forks are generally not counted as FP</p></li>\n<li><p>I'm now trying the next\u2026 not sure it works:</p></li>\n</ol>\n<ul>\n<li>4.1.  </li>\n<li>4.2. Shifted track targeting 7\u00b5m node matching</li>\n</ul>",
+         "votes": 1
+        },
+        {
+         "id": 3499497,
+         "authorName": "Timmy Juicehouse",
+         "postDate": "2026-07-17T13:25:14.247Z",
+         "content": "<p>I fully understand the original intention behind designing this metric. When I performed local validation, I found that achieving very high accuracy (e.g., 0.999) is quite easy, but balancing recall and other metrics is relatively difficult, because excluding negative samples is a very challenging task. I believe that refining the metrics is also an indispensable step in advancing this research, as your current work is already pushing the limits.</p>",
+         "votes": 1
+        },
+        {
+         "id": 3499781,
+         "authorName": "Thibgolds",
+         "postDate": "2026-07-17T22:33:20.300Z",
+         "content": "<p>Indeed the division metric can be gamed. We're working on a patch and will update the scoring asap. I will make a separate post explaining this. </p>",
+         "votes": 1
+        }
+       ]
+      },
+      {
+       "id": 3499815,
+       "authorName": "hengck23",
+       "postDate": "2026-07-18T01:17:36.170Z",
+       "content": "<p>I think the node correction can both increase and decrease original edge jacard score?</p>",
+       "votes": 1
+      }
+     ]
+    },
+    {
+     "id": 3493617,
+     "authorName": "Tom",
+     "postDate": "2026-07-08T06:01:56.357Z",
+     "content": "<p>I just start to develop flow approach then seeing your post. Welcome back <a href=\"https://www.kaggle.com/hengck23\" target=\"_blank\">@hengck23</a> </p>",
+     "votes": 3,
+     "replies": [
+      {
+       "id": 3493914,
+       "authorName": "hengck23",
+       "postDate": "2026-07-08T18:05:02.130Z",
+       "content": "<p>i have been playing with it. i think the winning formula is to generate dense tracks for training (1) and(2) below<br>\n1) 3d point is easy to generate (e.g. opensource cellpose, etc)<br>\n2) short track (2 frame or 3 frame) is easy to generate. it can be the utlrack, or rule base heuristics or open source tracker.  </p>\n<p>if 1 and 2  can get good results, then ILP or min-cost graph-cut network will generate the long tracks required for submission.</p>\n<p>currently the rule-based graph correcting post processor in public notebook should be used for generating new links in (2) for training. Imagine if i use 5 open source tracker, and using consistency, i can have more short tracks (currently we have less than 1% link labelled and the rest are unlabelled)</p>\n<p>(2) only need locations. there are opensource zebrafish data with long (real and synthetic) dense tracks (lineage) without microscopy images that can be used too.</p>\n<p><a href=\"https://chatgpt.com/c/6a4e91cd-8d90-83ec-bf7a-825b27a9e284\" target=\"_blank\">https://chatgpt.com/c/6a4e91cd-8d90-83ec-bf7a-825b27a9e284</a></p>",
+       "votes": 2,
+       "replies": [
+        {
+         "id": 3494324,
+         "authorName": "hengck23",
+         "postDate": "2026-07-09T17:32:44.350Z",
+         "content": "<p>i change strategy a bit:\n1) use opensource to make tracks, measure local LB score\n2) ensemble opensource and own/ai heuristics,  measure local LB score\n3) when i have good LB score, these become dense pesudo labels.</p>\n<p>opensouce trackers are very good for short tracking. \ntricks:</p>\n<ul>\n<li>cellpose etc to provide dense 3d tzyx</li>\n<li>use only  tzyx for opensouce tracking. some opensouce like ultrack needs segmentation labels as input, i synthetically rendered 3d ball as input</li>\n</ul>",
+         "votes": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 3499372,
+     "authorName": "hengck23",
+     "postDate": "2026-07-17T04:35:11.853Z",
+     "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F20e5cb2adbba2365f79bbb79b5b5024e%2FSelection_4384.png?generation=1784262681228749&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F1ed4a3ecc2a5dedc98fcdc44ba8ef0bd%2FSelection_4385.png?generation=1784263063174669&amp;alt=media\" alt=\"\"></p>\n<p>center fig: red is t=0, green is t=1   </p>\n<p>Visualisation results from host repo baseline code (temporal unet + link transformer). i show max prob link.  </p>\n<ul>\n<li>long links are almost wrong (easy to filter such results)</li>\n</ul>\n<p>looking at the results, link are short. maybe a conv  3d CNN (T as channel) unet to detection motion object is good? i.e. rather than detect zxy center, we segment \"center of motion = line connecting zyx0 and zyx1.\"</p>",
+     "votes": 2
+    },
+    {
+     "id": 3494690,
+     "authorName": "hengck23",
+     "postDate": "2026-07-10T13:29:32.203Z",
+     "content": "<p>Something struck  my mind. Since it is video and tracking, unsupervised pretraining should help. Hence we no need dense track or point</p>\n<p>Tracking needs dense, spatially precise features. The newer V-JEPA 2.1 specifically targets dense, spatially structured and temporally consistent features \u2026.  </p>\n<p>V-JEPA 2.1 behaves like unsupervised optical flow in feature space,</p>",
+     "votes": 1
+    },
+    {
+     "id": 3494468,
+     "authorName": "hengck23",
+     "postDate": "2026-07-10T03:07:03.517Z",
+     "content": "<p>3d cuda optical flow: <a href=\"https://github.com/yongxb/OpticalFlow3d\" target=\"_blank\">https://github.com/yongxb/OpticalFlow3d</a><br>\n3d optical flow kalman filter tracker : <a href=\"https://byotrack.readthedocs.io/en/latest/\" target=\"_blank\">https://byotrack.readthedocs.io/en/latest/</a>  </p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Ff09cbac39ef7361221ceef47e9382955%2FSelection_4356.png?generation=1783652776657450&amp;alt=media\" alt=\"\"></p>\n<p>hint: use synthetic image or synthetic motion is eaiser to debug your code</p>",
+     "votes": 1
+    },
+    {
+     "id": 3494428,
+     "authorName": "hengck23",
+     "postDate": "2026-07-09T23:39:28.950Z",
+     "content": "<p>Open-source optical flow tracker + Kalman filter. \nThe visualisation is messy. anyone has a better suggestion?</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F96f536ce5845530631cda7458673780e%2FSelection_4347.png?generation=1783640249216751&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fd9a4b36a962237c4eb72da62851d472f%2FSelection_4348.png?generation=1783640266346613&amp;alt=media\" alt=\"\"></p>",
+     "votes": 1,
+     "replies": [
+      {
+       "id": 3494458,
+       "authorName": "hengck23",
+       "postDate": "2026-07-10T02:30:20.060Z",
+       "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fbac01c8b8fc39e9f60fddbe7aacec3d3%2FSelection_4351.png?generation=1783650518238328&amp;alt=media\" alt=\"\"></p>\n<p>results of ultrack and byotrack. They tend to disagree when there is \"large predicted movement\". this is because the optimization cost forces it to \"always\" link to something</p>\n<p>\"link cost &lt; termination cost + new-track cost\"</p>",
+       "votes": 1,
+       "replies": [
+        {
+         "id": 3494632,
+         "authorName": "hengck23",
+         "postDate": "2026-07-10T11:07:44.763Z",
+         "content": "<p>in theory, linking can be done by CNN.</p>\n<p>i illusrate with a 1d example:  the axes are x and time t</p>\n<pre><code>input (rendered detected cell point), treat as image:\n\n.......x..........x....... \n..................x....... \n.......x..........x....... \n.......x..........x....... \n.......x................. \n.......x................. \n.......x................. \n.......x...x............. \n.......x...x............. \n\n\nouput after unet\n\n\n.......S..........S....... \n........I.........I....... \n........I........I....... \n........I..........E....... \n........I................. \n........I................. \n........I................. \n........I...S............. \n.......E..E............. \n</code></pre>",
+         "votes": 1
+        },
+        {
+         "id": 3494640,
+         "authorName": "Tom",
+         "postDate": "2026-07-10T11:24:05.523Z",
+         "content": "<p>That's good reformulation. Consider do\nX, t\nY, t\nZ, t\nThree heads</p>\n<p>Seems SDF would work?</p>",
+         "votes": 1
+        },
+        {
+         "id": 3494762,
+         "authorName": "hengck23",
+         "postDate": "2026-07-10T16:44:46.160Z",
+         "content": "<p>Once you get detection point, you can plot everything once in zxy and color code using t. Hence it become 3d conv ( instead of 4d conv)you can think of recolor the points from t to linkage colors ( s,l,d,e ). Temporal unet \u2014&gt; ordinary unet ( like detecting blood vessel)</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F7ef2a07a8d2b8265e2ea95cf85512075%2FSelection_4368.png?generation=1783702607348734&amp;alt=media\" alt=\"\"></p>\n<p>if you use feature from temporal unet e.g. 32, then you create 1+32 channel (one is for time, and you copy 32 values from temporal to ordinary unet) in the tracking ordinary unet</p>",
+         "votes": 1
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 3493433,
+     "authorName": "hengck23",
+     "postDate": "2026-07-07T19:39:53.660Z",
+     "content": "<p>feasibility study:</p>\n<pre><code>all_df = []\nfor f in glob_file[::2]:\n    print(f)\n\n    nodes_df, edges_df = read_geff(f) \n    print(nodes_df.head())\n    print(edges_df.head())\n\n    link_df = compute_link_displacement_stats(\n        nodes_df,\n        edges_df,\n        scale=(1, 4, 4),\n    )\n    all_df.append(link_df)\n\n\nlink_df= pd.concat(all_df).reset_index(drop=True)\nprint(link_df.shape)\nprint(link_df[[\"dz_sub\",\"dy_sub\",\"dx_sub\"]].describe())\nprint(np.percentile(np.abs(link_df[\"dz_sub\"]), [50,90,95,99]))\nprint(np.percentile(np.abs(link_df[\"dy_sub\"]), [50,90,95,99]))\nprint(np.percentile(np.abs(link_df[\"dx_sub\"]), [50,90,95,99]))\n\n\n\n(63751, 10)\n             dz_sub        dy_sub        dx_sub\ncount  63751.000000  63751.000000  63751.000000\nmean      -0.318066     -0.011200     -0.234604\nstd        1.149520      0.878445      0.989713\nmin      -37.000000    -13.000000     -9.750000  ###???\n25%       -1.000000     -0.500000     -0.750000\n50%        0.000000      0.000000      0.000000\n75%        0.000000      0.500000      0.250000\nmax       35.000000     12.500000      5.750000 ###???\n[1. 2. 2. 4.]\n[0.5  1.25 1.75 3.  ]\n[0.5  1.5  2.   3.75]\n</code></pre>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F30872efbdb6d455fabf83b8dcbe210ea%2FSelection_4333.png?generation=1783453191851967&amp;alt=media\" alt=\"\"></p>",
+     "votes": 1
+    },
+    {
+     "id": 3494792,
+     "authorName": "hengck23",
+     "postDate": "2026-07-10T17:35:26.270Z",
+     "content": "<p>solving the sparse annotation for cell center detection.<br>\n1) observation : DoG peak detection somehow work. i.e., microscopy cell are blobs.<br>\n2) instead of classification binary problem, we reformulate it as learnable peak detection. at each pixel location after unet logit head, loss = softmax of pixel over his neighbour.  those pixel without annotation are not computed in loss at all     </p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F7a94ffe3bbada2de65d720c1fead0bd7%2FSelection_4369.png?generation=1783705181623495&amp;alt=media\" alt=\"\"></p>\n<p>hint: ask chatgpt make a margin loss version: peak is at least T greater than neighbour </p>",
+     "votes": 2
+    }
+   ]
+  }
+ },
+ "728324": {
+  "topic": {
+   "topic": {
+    "id": 728324,
+    "title": "COMPLETED: Rescore Underway",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/728324",
+    "postDate": "2026-07-22T21:49:20.465081900Z",
+    "authorName": "inversion",
+    "authorUrl": "https://www.kaggle.com/inversion",
+    "votes": 20,
+    "commentCount": 4,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>The metric has been patched to address an exploit. All submissions are currently being rescored. It will take some time to complete, during which time, some scores might disappear from the leaderboard. It is expected that most submissions with have at least a minor drop in score.</p>\n<p>This post will be updated when the rescore is complete.</p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3501876,
+     "authorName": "inversion",
+     "postDate": "2026-07-23T01:16:56.140Z",
+     "content": "<p>The rescore is complete. Thanks for everyone's patience!</p>",
+     "votes": 10,
+     "replies": [
+      {
+       "id": 3501963,
+       "authorName": "KevinYongxin",
+       "postDate": "2026-07-23T07:17:54.587Z",
+       "content": "<p>I run the notebook successful but submit all notebook with error, is it caused by new submission rules?</p>"
+      }
+     ]
+    },
+    {
+     "id": 3501860,
+     "authorName": "Yusuke Togashi",
+     "postDate": "2026-07-23T00:12:15.830Z",
+     "content": "<p>Yes, it does appear that the Hacking score has decreased. Thank you for looking into this.</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F25515343%2Fbba2d25991f9dbe643383f851c76a6f9%2F2026-07-22_22h24_15.png?generation=1784765409829476&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F25515343%2F072d7fb14582463dccb4d660bd1b8456%2F2026-07-23_09h09_22.png?generation=1784765431009865&amp;alt=media\" alt=\"\"></p>",
+     "votes": 4
+    },
+    {
+     "id": 3501916,
+     "authorName": "Zejun_",
+     "postDate": "2026-07-23T03:46:29.983Z",
+     "content": "<p>Yes and can we fix score on public notebook also\uff1fIt might make some new participants confused.</p>",
+     "votes": 2
+    }
+   ]
+  }
+ },
+ "734330": {
+  "topic": {
+   "topic": {
+    "id": 734330,
+    "title": "Is public Zebrahub data allowed as external training data?",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/734330",
+    "postDate": "2026-08-11T00:18:51.970829200Z",
+    "authorName": "marumarukun",
+    "authorUrl": "https://www.kaggle.com/marumarukun",
+    "votes": 19,
+    "commentCount": 3,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>Hi <a href=\"https://www.kaggle.com/thibautgoldsborough\" target=\"_blank\">@thibautgoldsborough</a> ,</p>\n<p>Could you please clarify whether the publicly available Zebrahub imaging and tracking data can be used as external training data for this competition?</p>\n<p>Zebrahub imaging data:\n<a href=\"https://zebrahub.sf.czbiohub.org/imaging\" target=\"_blank\">https://zebrahub.sf.czbiohub.org/imaging</a></p>\n<p>Specifically, I'd like to confirm whether both the imaging data and the tracking annotations (*_tracks.csv) are allowed.</p>\n<p>Thanks!</p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3512606,
+     "authorName": "Thibgolds",
+     "postDate": "2026-08-13T21:58:20.713Z",
+     "content": "<p>Hi! Yes you are free to use the data and all resources in Zebrahub for this competition! There is no overlap with the test set. </p>",
+     "votes": 5
+    },
+    {
+     "id": 3512686,
+     "authorName": "Navneet",
+     "postDate": "2026-08-14T05:42:51.883Z",
+     "content": "<p>ZebraHub data allowed as external training data? <a href=\"https://www.kaggle.com/marumarukun\" target=\"_blank\">@marumarukun</a> </p>",
+     "votes": -1
+    },
+    {
+     "id": 3512267,
+     "authorName": "Maria Aqdas",
+     "postDate": "2026-08-13T02:12:42.163Z",
+     "content": "<p>Following this thread. Clarification on external Zebrahub datasets (*_tracks.csv) would be very helpful!</p>"
+    }
+   ]
+  }
+ },
+ "729053": {
+  "topic": {
+   "topic": {
+    "id": 729053,
+    "title": "not all sparse GT edge are correct",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/729053",
+    "postDate": "2026-07-25T04:01:20.815014700Z",
+    "authorName": "hengck23",
+    "authorUrl": "https://www.kaggle.com/hengck23",
+    "votes": 15,
+    "commentCount": 1,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>Not all edge annotations are correct. But the error rate is very low. Here is an error detected by checking neighbouring cell motion</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F5cc8a0f35bc698acbb4d30de10f0977f%2FSelection_4399.png?generation=1784952074278647&amp;alt=media\" alt=\"\"></p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3504071,
+     "authorName": "Bharat",
+     "postDate": "2026-07-27T07:24:05.757Z",
+     "content": "<p>I think the cell for track_id 73 is very dim and can't be located in 3d. With 2d slices from frame 15 to 16 the tracking is clear, but 16 to 17 have many changes in cell positions \n<a href=\"https://www.kaggle.com/code/bharat0/check-sample-6bba-1d0d8384?scriptVersionId=338241708\" target=\"_blank\">https://www.kaggle.com/code/bharat0/check-sample-6bba-1d0d8384?scriptVersionId=338241708</a></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F2411334%2F69f2427d5b18da710848da7d5b40f13c%2FScreenshot%20from%202026-07-27%2012-51-53.png?generation=1785137016207578&amp;alt=media\" alt=\"Frame 15-16\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F2411334%2Ff4bc5d01e077d9ac9f561c8aa8237dc7%2FScreenshot%20from%202026-07-27%2012-52-02.png?generation=1785137035868401&amp;alt=media\" alt=\"Frame 16 - 17\"></p>"
+    }
+   ]
+  }
+ },
+ "716793": {
+  "topic": {
+   "topic": {
+    "id": 716793,
+    "title": "Only 2 groups of embryo_id\uff1f",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/716793",
+    "postDate": "2026-07-01T03:15:26.558908700Z",
+    "authorName": "Timmy Juicehouse",
+    "authorUrl": "https://www.kaggle.com/sweetyheehee",
+    "votes": 14,
+    "commentCount": 6,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p><a href=\"https://www.kaggle.com/thibautgoldsborough\" target=\"_blank\">@thibautgoldsborough</a></p>\n<p>Hi, biohub team. During my EDA, I found only two groups of embryo_ids. I would like to ask about the situation with the embryo_ids in the test set. If there are multiple groups of embryo_ids in the test set, how should the training results be evaluated and how did you consider the design of the training set?</p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3485884,
+     "authorName": "Thibgolds",
+     "postDate": "2026-07-01T22:17:13.263Z",
+     "content": "<p>Hi, indeed there are two unique embryo_ids in the training set. You can assume the test sit is roughly similar in size, with no overlap in embryo_ids between train and test sets. </p>",
+     "votes": 4,
+     "replies": [
+      {
+       "id": 3485936,
+       "authorName": "Timmy Juicehouse",
+       "postDate": "2026-07-02T00:19:38.363Z",
+       "content": "<p>So my understanding is that the test set consists of another two groups of embryos of the same number, right?</p>",
+       "votes": 1
+      },
+      {
+       "id": 3485971,
+       "authorName": "Tom",
+       "postDate": "2026-07-02T02:34:45.883Z",
+       "content": "<p>Hi <a href=\"https://www.kaggle.com/thibautgoldsborough\" target=\"_blank\">@thibautgoldsborough</a>, the test set also consists of two groups of embryos? and the distribution is similar to train set: 71:128?</p>",
+       "votes": 1,
+       "replies": [
+        {
+         "id": 3486896,
+         "authorName": "Timmy Juicehouse",
+         "postDate": "2026-07-03T06:19:28.050Z",
+         "content": "<p>I probed the test set and found that its size is significantly smaller than the training set. Of course, it's also possible that the embryonic cell development nodes in the test set are simpler. Assuming the development process is the same, the size is roughly only 2/3 or even less.</p>"
+        },
+        {
+         "id": 3486932,
+         "authorName": "Sangram Patil",
+         "postDate": "2026-07-03T07:20:22.253Z",
+         "content": "<p>This leaderboard is calculated with approximately 29% of the test data. The final results will be based on the other 71%, so the final standings may be different.</p>\n<p><code>You can assume the test sit is roughly similar in size</code></p>\n<p>199 * 29% = 57.71 = 58 ids PBLB with 1 unique embryo_ids</p>\n<p>199 * 71% = 141 ids PVLB with (1 in PuB &amp; 1 Unq = 2 unique embryo_ids)</p>\n<p>is my assumption!!</p>",
+         "votes": 1
+        },
+        {
+         "id": 3487942,
+         "authorName": "Timmy Juicehouse",
+         "postDate": "2026-07-04T11:58:10.993Z",
+         "content": "<p>thanks, Sangram. I did think about this possibility, but from my deep learning CV experiments, the public leaderboard scores don't correlate well with local CV. Plus, if the public LB is based on one group of embryos and the private LB uses a completely different group (or even more), it's difficult for me to judge the training/test set split design.\"</p>",
+         "votes": 1
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "727957": {
+  "topic": {
+   "topic": {
+    "id": 727957,
+    "title": "Any update on the re-scoring timeline?",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/727957",
+    "postDate": "2026-07-21T13:35:12.124644500Z",
+    "authorName": "Simon R\u00fcba",
+    "authorUrl": "https://www.kaggle.com/simonrba",
+    "votes": 13,
+    "commentCount": 3,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>Has anyone heard an updated estimate for when the re-scoring will happen?</p>\n<p>The original note about the division metric patch mentioned it would likely be Monday (yesterday), and I wasn't sure whether that's still the plan or has shifted.</p>\n<p>Asking mainly for planning reasons, with the leaderboard still showing pre-patch scores, it's hard to tell where a submission actually stands, which makes it tricky to judge which directions are worth pursuing.</p>\n<p>Thanks to the organisers for publishing the patch on GitHub, by the way, being able to score locally against the corrected metric has been genuinely helpful in the meantime.</p>\n<p>Anyone know more?</p>"
+   }
+  },
+  "comments": {
+   "comments": [
+    {
+     "id": 3501386,
+     "authorName": "Jord\u00e3o Bragantini",
+     "postDate": "2026-07-21T22:44:18.303Z",
+     "content": "<p><a href=\"https://www.kaggle.com/tahaalshatiri\" target=\"_blank\">@tahaalshatiri</a> <a href=\"https://www.kaggle.com/simonrba\" target=\"_blank\">@simonrba</a>, the re-scoring is running, and it should be done tomorrow if everything works out </p>",
+     "votes": 6
+    },
+    {
+     "id": 3501493,
+     "authorName": "Navneet",
+     "postDate": "2026-07-22T05:29:35.447Z",
+     "content": "<p>Thank you for the re-scoring timeline update <a href=\"https://www.kaggle.com/simonrba\" target=\"_blank\">@simonrba</a> </p>",
+     "votes": 1
+    },
+    {
+     "id": 3501261,
+     "authorName": "Taha_Alshatiri",
+     "postDate": "2026-07-21T17:48:28.203Z",
+     "content": "<p>I've just joined and been waiting for 3 days for the rescore, as it's hard to do expirements with a misleading leaderboard and public notebooks</p>",
+     "votes": -3
+    }
+   ]
+  }
+ },
+ "729057": {
+  "topic": {
+   "topic": {
+    "id": 729057,
+    "title": "Cell Tracking Challenge dataset",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/729057",
+    "postDate": "2026-07-25T04:11:18.683172600Z",
+    "authorName": "Mikhail Kotyushev",
+    "authorUrl": "https://www.kaggle.com/mkotyushev",
+    "votes": 13,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>There are open <a href=\"https://celltrackingchallenge.net/datasets/\" target=\"_blank\">Cell Tracking Challenge datasets</a> that could prove to be useful (haven't done extensive experiments with them yet). </p>\n<p>As per the data usage term \"3) Any public non-CTC-related, scientific use of our datasets requires explicit permission from the challenge organizers.\" on the site, I e-mailed the challenge organizers and they permitted the usage of the datasets, given the proper citation is included in the solution description.</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F2190976%2F18abf1648e5615527a8b5dd74c637638%2FScreenshot%202026-07-25%20090743.png?generation=1784952607487208&amp;alt=media\" alt=\"\"></p>\n<p>So I share the link here with the community</p>"
+   }
+  },
+  "comments": {}
+ },
+ "726521": {
+  "topic": {
+   "topic": {
+    "id": 726521,
+    "title": "Higher-order cell tracking",
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/726521",
+    "postDate": "2026-07-15T16:24:16.968400700Z",
+    "authorName": "Jord\u00e3o Bragantini",
+    "authorUrl": "https://www.kaggle.com/jookuma",
+    "votes": 12,
+    "commentCount": 1,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "forumId": 10656304,
+    "content": "<p>This additional work might be helpful, <a href=\"https://arxiv.org/pdf/2607.11754\" target=\"_blank\">https://arxiv.org/pdf/2607.11754</a>\nFull disclaimer, I'm one of the authors</p>\n<p>We haven't tried on the competition dataset yet.\nThe inference code and pre-trained model are available at <a href=\"https://github.com/royerlab/hoct\" target=\"_blank\">https://github.com/royerlab/hoct</a>\nThe training code isn't available yet because it's under peer review.\nThe tracking results depend on the quality of the segmentation mask.</p>\n<p>I suggest comparing CPU vs GPU inference, depending on the number of cells, the first might be faster.</p>"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "729082": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "737101": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "737103": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "740145": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "718110": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "735352": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "730924": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "739731": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "728300": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "728551": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "732474": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "726924": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "730160": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "738833": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "726381": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "727051": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "736937": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "738276": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "739278": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "739516": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "739915": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "724386": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "734604": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "737438": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "737543": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "737896": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "738773": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "717228": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "724582": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "727493": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "728613": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "729420": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "729930": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "733877": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "734192": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "739018": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "739352": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "739686": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "727462": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "730486": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "732674": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "733389": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "734093": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "739570": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "739685": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "723694": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "723696": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "728620": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "729878": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "732345": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "733973": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "734015": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "734053": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "737577": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "738778": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "738970": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "739220": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "740573": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "717817": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "724323": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "724914": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "727881": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "734237": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "737659": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "726526": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "726955": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "735307": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "735531": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "740337": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "716704": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "725015": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "716415": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "716044": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "716421": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "740285": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "723921": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "715981": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "724502": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "724917": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "730054": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "730149": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "738210": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "739221": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ },
+ "740103": {
+  "topic": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  },
+  "comments": {
+   "error": {
+    "code": 429,
+    "message": "Too many requests",
+    "status": "RESOURCE_EXHAUSTED"
+   }
+  }
+ }
+}

@@ -1,0 +1,132 @@
+{
+  "artifact_name": "biohub-tracking-support-pack-400ep-snapshot-v1",
+  "compatibility": {
+    "coordinate_order": [
+      "z",
+      "y",
+      "x"
+    ],
+    "coordinate_unit": "original_voxel",
+    "gate_diagnostics": {
+      "files": [
+        "weights/full_frame_center/gate_summary.json",
+        "weights/full_frame_center/gate_threshold_metrics.csv",
+        "weights/full_frame_center/gate_frame_metrics.csv",
+        "weights/full_frame_center/gate_peak_samples.csv"
+      ],
+      "purpose": "threshold calibration for full_frame_center node rescue",
+      "warning": "Sparse-label precision/recall are calibration features, not complete-cell metrics."
+    },
+    "models": {
+      "full_frame_center": {
+        "outputs": [
+          "center heatmap on XY-pooled volume",
+          "peak coordinates mapped back to original z/y/x voxel coordinates",
+          "peak score usable as a conservative node-rescue gate"
+        ],
+        "recommended_use": "Use only as a high-confidence rescue prior near graph gaps, short components, or unmatched motion endpoints. Avoid adding all peaks directly to the node set.",
+        "role": "auxiliary_center_prior"
+      },
+      "unet_transformer": {
+        "outputs": [
+          "node detections in original z/y/x voxel coordinates",
+          "learned edge probabilities between adjacent frames",
+          "ILP candidate graph before notebook-level graph repair"
+        ],
+        "role": "primary_graph_generator"
+      }
+    },
+    "schema_version": 1,
+    "voxel_scale_um": {
+      "x": 0.40625,
+      "y": 0.40625,
+      "z": 1.625
+    }
+  },
+  "contents": {
+    "full_frame_center_included": false,
+    "repo": {
+      "bytes": 148660,
+      "files": 13
+    },
+    "source_scripts": {
+      "build_biohub_support_pack.py": {
+        "bytes": 16869,
+        "path": "source_scripts/build_biohub_support_pack.py",
+        "sha256": "01a895ece59fd842bd80e936104d6a22be3c498cd87c7b8bf280a1f8367e1556"
+      },
+      "package_and_upload_support_pack_version.sh": {
+        "bytes": 5072,
+        "path": "source_scripts/package_and_upload_support_pack_version.sh",
+        "sha256": "3d51bbef78075247757dc39df641bfd34223d24b09eb04656709975599994941"
+      },
+      "run_full_frame_center_training.sh": {
+        "bytes": 9458,
+        "path": "source_scripts/run_full_frame_center_training.sh",
+        "sha256": "fefe6822cef273a60f12078efa8d59f3cde2b630cf5524faec5f38ce46173670"
+      },
+      "train_full_frame_center_detector.py": {
+        "bytes": 43133,
+        "path": "source_scripts/train_full_frame_center_detector.py",
+        "sha256": "96f39e25901fc3f728d08d945efa62c5eac28d4ef771d71889053b65396cde5e"
+      }
+    },
+    "weights": {
+      "bytes": 33432975,
+      "files": 3
+    },
+    "wheels_included": true
+  },
+  "generated_at_utc": "2026-07-08T22:41:42.637485+00:00",
+  "model": {
+    "config": {
+      "downsample": [
+        1,
+        4,
+        4
+      ],
+      "pool_kernel_um": 5.0,
+      "unet_layers": [
+        32,
+        64,
+        128
+      ],
+      "unet_out_channels": 32,
+      "window_size": 2
+    },
+    "method": "unet_transformer",
+    "weight_bytes": 8363159,
+    "weight_path": "weights/unet_transformer/split_0/edge_predictor_best.pth",
+    "weight_sha256": "12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771"
+  },
+  "models": {
+    "unet_transformer": {
+      "config": {
+        "downsample": [
+          1,
+          4,
+          4
+        ],
+        "pool_kernel_um": 5.0,
+        "unet_layers": [
+          32,
+          64,
+          128
+        ],
+        "unet_out_channels": 32,
+        "window_size": 2
+      },
+      "method": "unet_transformer",
+      "weight_bytes": 8363159,
+      "weight_path": "weights/unet_transformer/split_0/edge_predictor_best.pth",
+      "weight_sha256": "12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771"
+    }
+  },
+  "notes": [
+    "This support artifact includes offline dependency wheels for code-submission reruns.",
+    "Use kaggle_dependency_install_command.txt in Kaggle dependency input before inference, or attach offline wheels.",
+    "Do not quote zarr>=3.0.10,<4 in Kaggle dependency input; helper parsers may treat quotes as literal text.",
+    "The model architecture is reconstructed from repo/ plus config.json."
+  ],
+  "source": "public learned baseline artifact, repackaged locally"
+}

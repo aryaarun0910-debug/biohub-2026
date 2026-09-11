@@ -8,3 +8,14 @@ __pycache__/
 # TestBench scratchpad lives at ~/Work/TestBench/BiohubTestBench (separate, disposable)
 db/.receipts/
 .agents/
+
+# Codex's support pack: 308M wheels + 32M weights are BUILD ARTIFACTS, regenerable from
+# evidence/datasets/support-pack/source_scripts/ and destined for a Kaggle Dataset, not git.
+# The manifest, README, requirements and build scripts ARE tracked - they are the recipe.
+evidence/datasets/support-pack/wheels/
+evidence/datasets/support-pack/weights/
+# Pulled public notebooks: large, re-pullable with `kaggle kernels pull`, and not ours to vendor.
+nb/
+evidence/kernels/
+# Ground truth downloaded by tools/fetch_geff.py
+data/
