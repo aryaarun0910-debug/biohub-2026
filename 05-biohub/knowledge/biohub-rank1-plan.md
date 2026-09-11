@@ -23,18 +23,10 @@ provenance:
   verified_at: 2026-09-11
 ---
 
-Arya's stated aim is **rank 1**. The plan is a versioned file, not a memory note, because it
-changes daily and is edited alongside the code it governs:
+The active plan is [notes/RANK1-PLAN.md](../notes/RANK1-PLAN.md). Its review and evidence
+pointers are in [notes/APPROACH-REVIEW.md](../notes/APPROACH-REVIEW.md).
 
-    ~/Work/biohub/notes/RANK1-PLAN.md      (git-tracked)
-
-It supersedes the day-by-day shape in `repos/Biohub-Sprint-2026/05-SPRINT-PLAN.md`, which was
-written against a different machine-arrival date. The rest of that handoff pack still stands and
-should be read first — `01-START-HERE.md` through `05`.
-
-It carries the runway, the strategic decision not to ship a metric exploit and why, the primary
-honest lever, the per-day gates with their falsifiers, and a hardware section covering what
-actually maximises the Mac.
-
-Numbers in it are snapshots. The live ones are in the base — see [[biohub-dev-base]] and
-[[hub-biohub]]. Competition constraints: [[biohub-competition-2026]].
+Start with a reproducible baseline and honest component scores. Division gate widening is
+a hypothesis, not an established route to rank 1. Consult the corrected prior-campaign
+records before making an edge-parity argument. Measurements live in the base; see
+[[biohub-dev-base]] and [[hub-biohub]].

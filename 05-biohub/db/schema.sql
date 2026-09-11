@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS fact (
   review_after TEXT,
   status      TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','superseded','retracted')),
   superseded_by INTEGER REFERENCES fact(id),
+  validity    TEXT NOT NULL DEFAULT 'UNKNOWN' CHECK(validity IN ('VALID','SUSPECT','INVALID','UNKNOWN')),
+  validity_reason TEXT,
   UNIQUE(topic,key,observed_at)
 );
 

@@ -5,7 +5,7 @@ Each finding was read and judged. KEEP carries a reason the claim still matters 
 2026-09-29 sprint; SKIP carries the reason it does not. The skips are recorded too, so the
 judgement is auditable and nobody re-reads 35 findings to rediscover which 13 were noise.
 """
-import os, sqlite3, datetime, yaml, textwrap
+import os, sqlite3, datetime, yaml, textwrap, hashlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB   = os.path.join(ROOT, "db", "biohub_base.db")
@@ -53,10 +53,12 @@ JUDGED = {
 
 def main():
     cx = sqlite3.connect(DB)
+    cx.execute("PRAGMA foreign_keys=ON")
+    digest = hashlib.sha256(open(SRC, 'rb').read()).hexdigest()
     cx.execute("INSERT OR IGNORE INTO source(url,sha256,method,fetched_at,note)"
-               " VALUES('repos/Biohub-X/registry/findings.yaml','git:bx-findings','git',?,?)",
-               (NOW, "Biohub-X findings registry, curated"))
-    sid = cx.execute("SELECT id FROM source WHERE sha256='git:bx-findings'").fetchone()[0]
+               " VALUES('repos/Biohub-X/registry/findings.yaml',?,'git',?,?)",
+               (digest, NOW, "Biohub-X findings registry, curated"))
+    sid, observed = cx.execute("SELECT id,fetched_at FROM source WHERE sha256=?", (digest,)).fetchone()
     doc = yaml.safe_load(open(SRC))
     kept = skipped = 0
     for f in doc["findings"]:
@@ -66,17 +68,21 @@ def main():
         ev = f.get("evidence") or {}
         quote = " ".join(str(ev.get("observed") or ev.get("command") or "")[:400].split())
         if keep:
-            cx.execute("INSERT OR REPLACE INTO fact"
+            cx.execute("INSERT INTO fact"
                        "(topic,key,value,claim_type,confidence,source_id,quote,observed_at,status)"
-                       " VALUES(?,?,?,'observation','high',?,?,?,'active')",
+                       " VALUES(?,?,?,'observation','high',?,?,?,'active')"
+                       " ON CONFLICT(topic,key,observed_at) DO UPDATE SET value=excluded.value,"
+                       " source_id=excluded.source_id,quote=excluded.quote",
                        (topic, f"{fid}: {why}", claim, sid,
-                        f"instrument: {f.get('instrument','')} | {quote}", NOW))
+                        f["claim"], observed[:10]))
             kept += 1
         else:
-            cx.execute("INSERT OR REPLACE INTO fact"
+            cx.execute("INSERT INTO fact"
                        "(topic,key,value,claim_type,confidence,source_id,quote,observed_at,status)"
-                       " VALUES('bx-skipped',?,?,'decision','high',?,?,?,'retracted')",
-                       (f"{fid}: NOT INGESTED", why, sid, claim[:300], NOW))
+                       " VALUES('bx-skipped',?,?,'decision','high',?,?,?,'retracted')"
+                       " ON CONFLICT(topic,key,observed_at) DO UPDATE SET value=excluded.value,"
+                       " source_id=excluded.source_id,quote=excluded.quote",
+                       (f"{fid}: NOT INGESTED", why, sid, f["claim"], observed[:10]))
             skipped += 1
     cx.commit()
     print(f"  findings judged: {kept} kept, {skipped} skipped as fat")

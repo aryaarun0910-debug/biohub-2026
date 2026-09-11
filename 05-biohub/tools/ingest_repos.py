@@ -7,7 +7,7 @@ Then:                     python3 tools/ingest_repos.py
 
 Idempotent: re-run after every work session to keep the development base current.
 """
-import json, os, re, sqlite3, subprocess, sys, datetime, hashlib
+import json, os, re, sqlite3, subprocess, sys, datetime, hashlib, shutil
 
 ROOT   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB     = os.path.join(ROOT, "db", "biohub_base.db")
@@ -31,14 +31,15 @@ def sh(args, cwd=None, check=True):
 
 def have_auth():
     if os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN"): return True
+    if not shutil.which("gh"): return False
     r = subprocess.run(["gh","auth","status"], capture_output=True, text=True)
     return r.returncode == 0
 
 def clone_or_pull(name):
     dest = os.path.join(CHECKOUTS, name)
     if os.path.isdir(os.path.join(dest, ".git")):
-        sh(["git","fetch","--all","--quiet"], cwd=dest, check=False)
-        sh(["git","pull","--quiet","--ff-only"], cwd=dest, check=False)
+        sh(["git","fetch","--all","--quiet"], cwd=dest)
+        sh(["git","pull","--quiet","--ff-only"], cwd=dest)
     else:
         os.makedirs(CHECKOUTS, exist_ok=True)
         url = f"https://github.com/{OWNER}/{name}.git"
@@ -83,7 +84,7 @@ def ingest(cx, name, path):
 
     # commits (with churn)
     log = sh(["git","log","--no-merges","--date=iso-strict",
-              "--pretty=format:%H%x1f%ad%x1f%an%x1f%s%x1e","--shortstat"], cwd=path)
+              "--pretty=format:%x1e%H%x1f%ad%x1f%an%x1f%s","--shortstat"], cwd=path)
     nc = 0
     for chunk in log.split("\x1e"):
         if not chunk.strip(): continue
@@ -131,17 +132,23 @@ def main():
               "  Then: python3 tools/ingest_repos.py", file=sys.stderr)
         return 2
     cx = sqlite3.connect(DB)
+    failed = False
     for name in REPOS:
         try:
+            cx.execute("SAVEPOINT ingest_repo")
             ingest(cx, name, clone_or_pull(name))
+            cx.execute("RELEASE ingest_repo")
         except Exception as e:
+            cx.execute("ROLLBACK TO ingest_repo")
+            cx.execute("RELEASE ingest_repo")
+            failed = True
             print(f"  {name}: FAILED - {e}", file=sys.stderr)
             cx.execute("UPDATE repo SET status='error', last_ingest=? WHERE name=?", (NOW, name))
     cx.commit()
     print(f"\ncommits={cx.execute('SELECT COUNT(*) FROM repo_commit').fetchone()[0]}"
           f"  files={cx.execute('SELECT COUNT(*) FROM repo_file').fetchone()[0]}"
           f"  reusable={cx.execute('SELECT COUNT(*) FROM repo_file WHERE reusable=1').fetchone()[0]}")
-    cx.close(); return 0
+    cx.close(); return 1 if failed else 0
 
 if __name__ == "__main__":
     sys.exit(main())

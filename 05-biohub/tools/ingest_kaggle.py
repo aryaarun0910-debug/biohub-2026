@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Populate biohub_base.db from frozen Kaggle evidence. Idempotent: re-run any time."""
 import json, sqlite3, hashlib, glob, os, re, datetime, sys
+from pathlib import Path
+from evidence import verify
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB   = os.path.join(ROOT, "db", "biohub_base.db")
@@ -14,18 +16,26 @@ def sha(p):
         for b in iter(lambda: f.read(1 << 20), b""): h.update(b)
     return h.hexdigest()
 
+MANIFEST = {}
+
+def observed(path):
+    return MANIFEST[Path(path).resolve()]["fetched_at"]
+
 def src(cx, path, url, method="rpc", note=None):
     """Register a frozen artifact, return its source id."""
     s = sha(path)
     cx.execute("INSERT OR IGNORE INTO source(url,sha256,method,http_status,fetched_at,note)"
-               " VALUES(?,?,?,?,?,?)", (url, s, method, 200, NOW, note))
+               " VALUES(?,?,?,?,?,?)", (url, s, method, 200, observed(path), note))
     return cx.execute("SELECT id FROM source WHERE sha256=?", (s,)).fetchone()[0]
 
 def fact(cx, topic, key, value, ctype, conf, sid, quote=None, review=None):
-    cx.execute("INSERT OR REPLACE INTO fact"
+    cx.execute("INSERT INTO fact"
                "(topic,key,value,claim_type,confidence,source_id,quote,observed_at,review_after,status)"
-               " VALUES(?,?,?,?,?,?,?,?,?, 'active')",
-               (topic, key, str(value), ctype, conf, sid, quote, NOW[:10], review))
+               " VALUES(?,?,?,?,?,?,?,?,?, 'active')"
+               " ON CONFLICT(topic,key,observed_at) DO UPDATE SET value=excluded.value,"
+               " claim_type=excluded.claim_type,confidence=excluded.confidence,"
+               " source_id=excluded.source_id,quote=excluded.quote,review_after=excluded.review_after",
+               (topic, key, str(value), ctype, conf, sid, quote, cx.execute("SELECT fetched_at FROM source WHERE id=?", (sid,)).fetchone()[0][:10], review))
 
 def classify_kernel(title, score, runtime_s):
     t = title.lower()
@@ -58,6 +68,8 @@ CRITICAL = {
 }
 
 def main():
+    global MANIFEST
+    MANIFEST = verify(Path(ROOT) / "evidence")
     cx = sqlite3.connect(DB); cx.execute("PRAGMA foreign_keys=ON")
 
     # ---- competition metadata ----
@@ -73,7 +85,8 @@ def main():
         if k in c:
             fact(cx,"competition",k,c[k],"claim","high",sid,
                  quote=f'"{k}":{json.dumps(c[k])}', review="2026-09-29")
-    fact(cx,"competition","reward",json.dumps(c.get("reward")),"claim","high",sid)
+    fact(cx,"competition","reward",json.dumps(c.get("reward")),"claim","high",sid,
+         quote='"reward":' + json.dumps(c.get("reward")))
 
     # ---- pages (rules/description/evaluation/data/timeline/prizes/code-reqs) ----
     for md in sorted(glob.glob(os.path.join(EV,"pages","*.md"))):
@@ -81,7 +94,7 @@ def main():
         s2 = src(cx, md, "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development",
                  note=f"page:{name}")
         body = open(md).read()
-        fact(cx,"page",name,f"{len(body)} chars @ {md}","claim","high",s2, quote=body[:400])
+        fact(cx,"page",name,f"{len(body)} chars @ {os.path.relpath(md, ROOT)}","claim","high",s2, quote=body[:400])
 
     # ---- leaderboard snapshot ----
     p = os.path.join(EV,"lb.json")
@@ -91,10 +104,13 @@ def main():
     for i, r in enumerate(lb.get("publicLeaderboard",[]), start=1):
         t = teams.get(r.get("teamId"), {})
         tl = (t.get("teamUpInfo") or {}).get("teamLeader") or {}
-        cx.execute("INSERT OR REPLACE INTO lb_snapshot"
+        cx.execute("INSERT INTO lb_snapshot"
                    "(taken_at,rank,team_id,team_name,score,n_subs,n_members,leader_tier,last_sub)"
-                   " VALUES(?,?,?,?,?,?,?,?,?)",
-                   (NOW[:10], r.get("rank", i), r.get("teamId"), t.get("teamName"),
+                   " VALUES(?,?,?,?,?,?,?,?,?)"
+                   " ON CONFLICT(taken_at,rank) DO UPDATE SET team_id=excluded.team_id,team_name=excluded.team_name,"
+                   " score=excluded.score,n_subs=excluded.n_subs,n_members=excluded.n_members,"
+                   " leader_tier=excluded.leader_tier,last_sub=excluded.last_sub",
+                   (observed(p), r.get("rank", i), r.get("teamId"), t.get("teamName"),
                     float(r["displayScore"]) if r.get("displayScore") else None,
                     t.get("submissionCount"), len(t.get("teamMembers") or [])+1,
                     tl.get("tier"), (t.get("lastSubmissionDate") or "")[:10]))
@@ -107,13 +123,18 @@ def main():
         s2 = src(cx,f, RPC+"discussions.DiscussionsService/GetTopicListByForumId")
         for t in json.load(open(f)).get("topics",[]):
             rel,take = CRITICAL.get(t["id"], (None,None))
-            cx.execute("INSERT OR REPLACE INTO forum_topic"
+            cx.execute("INSERT INTO forum_topic"
                        "(id,title,votes,comments,is_host,url,harvested_at,relevance,takeaway)"
-                       " VALUES(?,?,?,?,?,?,?,?,?)",
+                       " VALUES(?,?,?,?,?,?,?,?,?)"
+                       " ON CONFLICT(id) DO UPDATE SET title=excluded.title,votes=excluded.votes,"
+                       " comments=excluded.comments,is_host=excluded.is_host,url=excluded.url,"
+                       " harvested_at=excluded.harvested_at,"
+                       " relevance=COALESCE(forum_topic.relevance,excluded.relevance),"
+                       " takeaway=COALESCE(forum_topic.takeaway,excluded.takeaway)",
                        (t["id"], t.get("title"), t.get("votes"), t.get("commentCount"),
                         1 if t.get("authorType")=="HOST" else 0,
                         "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/%d"%t["id"],
-                        NOW[:10], rel, take))
+                        observed(f), rel, take))
             tot+=1
     print(f"  forum topics: {cx.execute('SELECT COUNT(*) FROM forum_topic').fetchone()[0]} unique (from {tot} rows)")
 
@@ -123,12 +144,16 @@ def main():
         for k in json.load(open(f)).get("kernels",[]):
             score = float(k["bestPublicScore"]) if k.get("bestPublicScore") else None
             rt = int(k["lastRunExecutionTimeSeconds"]) if k.get("lastRunExecutionTimeSeconds") else None
-            cx.execute("INSERT OR REPLACE INTO public_kernel"
+            cx.execute("INSERT INTO public_kernel"
                        "(id,title,author,votes,best_score,runtime_s,url,harvested_at,family)"
-                       " VALUES(?,?,?,?,?,?,?,?,?)",
+                       " VALUES(?,?,?,?,?,?,?,?,?)"
+                       " ON CONFLICT(id) DO UPDATE SET title=excluded.title,author=excluded.author,"
+                       " votes=excluded.votes,best_score=excluded.best_score,runtime_s=excluded.runtime_s,"
+                       " url=excluded.url,harvested_at=excluded.harvested_at,"
+                       " family=COALESCE(public_kernel.family,excluded.family)",
                        (k["id"], k.get("title"), (k.get("author") or {}).get("userName"),
                         k.get("totalVotes"), score, rt,
-                        "https://www.kaggle.com"+(k.get("scriptUrl") or ""), NOW[:10],
+                        "https://www.kaggle.com"+(k.get("scriptUrl") or ""), observed(f),
                         classify_kernel(k.get("title",""), score, rt)))
     print(f"  public kernels: {cx.execute('SELECT COUNT(*) FROM public_kernel').fetchone()[0]}")
 

@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Quick views over the development base.  Usage: python3 tools/ask.py <view> [arg]"""
 import sqlite3, sys, os, textwrap
+from pathlib import Path
 DB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "db", "biohub_base.db")
-cx = sqlite3.connect(DB); cx.row_factory = sqlite3.Row
+if not Path(DB).is_file():
+    sys.exit("Knowledge DB missing. Run python3 tools/sync_source_rows.py import, then python3 tools/ingest_kaggle.py")
+cx = sqlite3.connect(Path(DB).as_uri() + "?mode=ro", uri=True); cx.row_factory = sqlite3.Row
 def q(sql, *a): return cx.execute(sql, a).fetchall()
 def table(rows, cols=None):
     if not rows: print("  (none)"); return
@@ -18,7 +21,7 @@ def view(fn): V[fn.__name__] = fn; return fn
 @view
 def status(_=None):
     "One-screen situation report."
-    f = dict((r["key"], r["value"]) for r in q("SELECT key,value FROM fact WHERE topic='competition'"))
+    f = dict((r["key"], r["value"]) for r in q("SELECT key,value FROM fact WHERE topic='competition' AND status='active' AND validity NOT IN ('INVALID','SUSPECT') ORDER BY observed_at,id"))
     import datetime
     dl = f.get("deadline","")[:10]
     left = (datetime.date.fromisoformat(dl) - datetime.date.today()).days if dl else "?"
@@ -27,9 +30,10 @@ def status(_=None):
           f"  subs/day={f.get('maxDailySubmissions')}  final_subs={f.get('numScoredSubmissions')}"
           f"  public_LB={f.get('leaderboardPercentage')}%")
     print(f"  teams={f.get('totalTeams')}  prizes={f.get('numPrizes')}  score_decimals={f.get('scoreTruncationNumDecimals')}\n")
-    print("  Leaderboard shape:")
+    latest = q("SELECT MAX(taken_at) AS at FROM lb_snapshot")[0]['at']
+    print(f"  Leaderboard snapshot: {latest or 'not loaded'} (frozen evidence, not a live lookup)")
     for k in (1,3,7,10,25,50,100,250,500,1000):
-        r = q("SELECT score FROM lb_snapshot WHERE rank=? ORDER BY taken_at DESC LIMIT 1", k)
+        r = q("SELECT score FROM lb_snapshot WHERE rank=? AND taken_at=(SELECT MAX(taken_at) FROM lb_snapshot) LIMIT 1", k)
         if r: print(f"    rank {k:>5}: {r[0]['score']}")
     print("\n  Repos:"); table(q("SELECT name,status,last_ingest FROM repo"))
 
@@ -68,11 +72,28 @@ def kernels(arg=None):
 
 @view
 def facts(arg=None):
-    "Recorded facts (arg: topic)."
-    sql="SELECT topic,key,value,claim_type,confidence FROM fact WHERE status='active'"
+    "Active records with provenance (arg: topic); UNKNOWN validity is not verified."
+    sql="SELECT topic,key,value,claim_type,confidence,validity,observed_at,review_after,source_id,quote FROM fact WHERE status='active' AND validity NOT IN ('INVALID','SUSPECT')"
     a=[]
     if arg: sql+=" AND topic=?"; a=[arg]
     table(q(sql+" ORDER BY topic,key", *a))
+
+@view
+def audit(_=None):
+    "Records needing provenance or validity review; history remains in SQLite."
+    table(q("""SELECT id,topic,key,status,validity,validity_reason,source_id,
+                      CASE WHEN quote IS NULL OR trim(quote)='' THEN 'missing' ELSE 'present' END AS quote,
+                      review_after
+               FROM fact WHERE source_id IS NULL OR quote IS NULL OR trim(quote)=''
+                 OR validity IN ('SUSPECT','INVALID')
+                 OR (status='active' AND review_after < date('now')) ORDER BY topic,key"""))
+
+@view
+def counts(_=None):
+    "Current table counts, instead of stale counts in prose."
+    for name in ('source','fact','experiment','decision','artifact','repo','repo_commit','repo_file',
+                 'lb_snapshot','forum_topic','public_kernel'):
+        print(f"  {name:<16} {q(f'SELECT COUNT(*) n FROM {name}')[0]['n']}")
 
 @view
 def expts(_=None):

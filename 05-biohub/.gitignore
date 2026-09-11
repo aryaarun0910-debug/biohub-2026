@@ -1,9 +1,6 @@
 # working clones of the three private repos - cloned by tools/ingest_repos.py
 repos/
-# The DB is a 1.8 MB binary: it churns and will not merge, so it stays untracked.
-# It rebuilds from evidence/ + repos/ via the ingesters - EXCEPT the 63 rows that exist
-# nowhere else, which are mirrored to the TRACKED db/source_rows.jsonl.
-# See tools/sync_source_rows.py; run `export` after adding rows by hand.
+# The local SQLite file rebuilds from the tracked v2 knowledge snapshot.
 db/*.db
 db/*.db-wal
 db/*.db-shm

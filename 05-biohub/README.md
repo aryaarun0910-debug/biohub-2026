@@ -1,77 +1,74 @@
-# Biohub Cell Tracking 2026 — Development Base
+# Biohub cell tracking development base
 
-One queryable place holding everything the three campaigns learned plus live
-competition intel, so the sprint on the MacBook starts from a base instead of
-from scratch.
+This repository preserves campaign evidence, experiment records and archived findings for
+Biohub cell tracking. It includes the organizers' reference code; a current campaign
+training/inference package is the next milestone, not an already verified deliverable.
 
-    python3 tools/ask.py status     # situation report: deadline, LB shape, repo state
-    python3 tools/ask.py gap        # what separates the 0.947 plateau from the podium
-    python3 tools/ask.py topics     # triaged discussion threads + our takeaways
-    python3 tools/ask.py kernels    # public notebooks ranked by score, with family labels
-    python3 tools/ask.py expts      # every lever already tried, and what killed it
-    python3 tools/ask.py facts prior-campaign
-    python3 tools/ask.py todo       # open decisions
+Read [the approach review](notes/APPROACH-REVIEW.md) for the critique and reasoning behind
+the fixes, and [the campaign plan](notes/RANK1-PLAN.md) for the next validation gates.
 
-## Knowledge lives here too
+## Start from a clean checkout
 
-Split out of the Claude memory store on 2026-09-11 so competition knowledge does not auto-load
-into unrelated sessions, and does not become permanent noise after the deadline.
+Python 3.11 or 3.12 is sufficient for the knowledge tools; they use the standard library.
+No Kaggle credentials, private archive clones, or GPU are needed for this bootstrap:
 
-- `knowledge/` — provenance-tracked notes. Start at `knowledge/hub-biohub.md`.
-- `db/` — the measurements. Notes cite the base; they never restate a number from it.
+```bash
+python3 tools/sync_source_rows.py import
+python3 tools/ingest_kaggle.py
+python3 tools/sync_source_rows.py export
+python3 tools/sync_source_rows.py check
+python3 tools/ask.py status
+python3 -m unittest discover -s tests -v
+```
 
-Machine-level facts that outlive this project (what the Mac/Kaggle/Colab can run, the torch-2.14
-conv3d finding) stay in the portable store at `~/.claude/projects/<slug>/memory/`. Links that
-cross that boundary appear as explicit paths like `claude-memory/macbook-m5-pro-ml.md`.
+Import restores the tracked knowledge core with its original identities and relationships.
+It is safe to repeat on identical knowledge; it refuses to overwrite differing knowledge.
+To inspect a separate restore, pass `--db /path/to/new.db` to the sync command. Ingestion
+refreshes competition indexes from digest-verified frozen evidence, using acquisition dates.
+It does **not** fetch today's leaderboard. Export records any deliberate refresh changes.
+
+Optional archive registry ingesters require PyYAML (`python3 -m pip install -r requirements-knowledge.txt`).
+The reference model has separate dependencies in `reference/royerlab-baseline/pyproject.toml`;
+its moving `tracksdata` dependency must be pinned before campaign evaluation.
+
+## Query and maintain
+
+```bash
+python3 tools/ask.py counts
+python3 tools/ask.py facts division
+python3 tools/ask.py facts prior-campaign
+python3 tools/ask.py audit
+python3 tools/ask.py expts
+python3 tools/ask.py todo
+```
+
+Facts show confidence, validity, source, quote and review dates. UNKNOWN validity is not
+verification. `audit` exposes missing provenance, expired reviews and suspect/invalid records.
+Historical rows remain queryable in SQLite even when excluded from active views.
+
+Before a session: pull, then run snapshot `check`. After editing knowledge: `export`, tests,
+`check`, commit and push. Never run simultaneous SQLite writers. Read
+[the database contract](db/DATABASE.md) before changing rows.
 
 ## Layout
 
-| Path | What |
+| Path | Purpose |
 |---|---|
-| `db/biohub_base.db` | SQLite. The whole base. Schema in `db/schema.sql`. |
-| `tools/ingest_kaggle.py` | Competition intel from frozen evidence → DB. Idempotent. |
-| `tools/ingest_repos.py` | Clones the 3 private repos, loads commits/files → DB. Re-run after each session. |
-| `tools/ingest_registries.py` | Prior campaigns' `facts.yaml` / `levers.yaml` / ledgers → DB. |
-| `tools/ask.py` | Read-only views. |
-| `tools/sync_source_rows.py` | Export/restore the rows no ingester can rebuild. **Run `export` after any session that adds facts, decisions or experiments.** |
-| `evidence/raw/` + `evidence/index.jsonl` | Frozen Kaggle responses, sha256-indexed. Nothing here is a guess. |
-| `reference/royerlab-baseline/` | The organizers' own baseline + the **authoritative metric source**. |
-| `repos/` | Working clones of the three private repos. |
+| `db/source_rows.jsonl` | Lossless, tracked knowledge snapshot; `db/*.db` is a local working copy |
+| `db/schema.sql` | Schema, including independent fact validity |
+| `tools/` | Knowledge queries, snapshot, ingestion and standalone-script smoke checks |
+| `evidence/` | Frozen Kaggle responses and acquisition-time digest index |
+| `knowledge/` | Navigation and conclusions; use DB keys for measurements |
+| `notes/` | Reviewed approach and experiment plan |
+| `reference/royerlab-baseline/` | Vendored upstream reference, not modified by the review |
+| `repos/` | Ignored private campaign clones, optional for bootstrap |
+| `tests/` | Offline regression tests for the knowledge tools |
 
-## What is in the DB
+`tools/ingest_repos.py` refreshes optional archive clones with GitHub authentication.
+`tools/ingest_registries.py` imports their registries; `tools/ingest_bx_findings.py` applies
+curated findings. Export afterward. Keep archives pinned for reproducible experiment use.
 
-| Table | Rows | Holds |
-|---|---|---|
-| `fact` | 317 | Competition facts + all 270 prior-campaign registry facts, with provenance, confidence and superseded/invalid status preserved |
-| `experiment` | 57 | 46 levers, 5 closed dead-ends with measured deltas, 6 submissions |
-| `lb_snapshot` | 3375 | Full public leaderboard, dated — re-run the ingester to track movement |
-| `forum_topic` | 102 | Every discussion thread, 16 triaged with takeaways |
-| `public_kernel` | 200 | Public notebooks with score, runtime and a `family` label |
-| `artifact` | 243 | The Biohub-X archive branch: 20 checkpoints, 5 submission CSVs, 218 measurement reports |
-| `repo` / `repo_commit` / `repo_file` | 3 / 672 / 1940 | The three repos' history; `reusable=1` flags files worth porting |
-| `decision` | 5 | Open strategic calls, with rationale |
-
-## Rules this base enforces
-
-Carried from the prior campaigns, because they are why their numbers can be believed:
-
-1. **A measured value lives in the registry once.** Prose cites it; prose never restates it.
-   The monolith measured the cost of breaking this: a superseded score appeared 244 times
-   across 36 files while the live one appeared 31 times across 7.
-2. **Declare the experiment and its falsifier before running it.**
-3. **Bind every artifact by content digest and verify before loading.**
-4. **Provenance and validity are separate axes.** A number can be correctly computed from an
-   invalid run — that is exactly how the `EXP-0019` leave-one-embryo-out leak propagated to
-   seven downstream facts before it was caught.
-
-## Refresh
-
-    python3 tools/ingest_repos.py        # after every work session
-    python3 tools/ingest_kaggle.py       # after re-harvesting Kaggle (LB moves daily)
-    python3 tools/ingest_registries.py   # if the registries change
-    python3 tools/sync_source_rows.py export   # ALWAYS, after adding rows by hand
-
-`db/*.db` stays gitignored - it is a 1.8 MB binary that churns and will not merge. But 63 rows
-(12 decisions, 51 analysis facts) exist nowhere else, so they are mirrored to the tracked
-`db/source_rows.jsonl`. `sync_source_rows.py check` fails if that export has drifted; `import`
-restores them after a rebuild. Round-tripped on 2026-09-11: 63 out, 63 back.
+`tools/colab_guard.sh` is for standalone scripts with an explicit smoke-check contract
+(documented in `tools/preflight.py`). Receipts cover the script bytes, not imports, datasets
+or checkpoints. A successful CLI exit does not prove remote numerical parity or teardown;
+inspect the remote report and session state before relying on it.

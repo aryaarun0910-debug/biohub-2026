@@ -1,89 +1,60 @@
-# The Biohub knowledge base — how it stores things, and why
+# Knowledge storage contract
 
-One file: `db/biohub_base.db`, SQLite. ~1.8 MB, 376 active facts.
+SQLite is the local query/edit store. `source_rows.jsonl` is its versioned knowledge core.
+Table counts are available through `python3 tools/ask.py counts`; do not copy them into prose.
 
-## Why SQLite and not a graph DB, a server, or more markdown
+## Persistence
 
-The store answers questions like *"what has already been measured about divisions?"* and
-*"which levers are closed and by how much?"*. Those are **filter-and-rank** questions over a few
-thousand rows, which is exactly SQL's shape and exactly what a document store is bad at.
+The v2 snapshot includes every column of `source`, `repo`, `fact`, `experiment`, `artifact`
+`decision`, `lb_snapshot`, `forum_topic` and `public_kernel`, including primary keys, foreign keys, dates and supersession links. These
+records include manual interpretation and corrections even when an original ingest exists.
+A topic-name or source-ref heuristic cannot reliably decide whether they are disposable.
 
-It is not Memgraph or any graph database. The graph-ish part — notes linking to notes — lives in
-markdown under `knowledge/`, where `[[wikilinks]]` are edges. That split is deliberate:
+`repo_commit` and `repo_file` are disposable indexes that require the optional private
+clones to rebuild. Competition snapshots and annotations are preserved because historical
+responses and manual triage may not be recoverable from the latest raw evidence. Store
+checkpoints and competition data separately by content digest.
 
-| | Lives in | Because |
-|---|---|---|
-| Measurements, scores, counts | SQLite | They are queried, ranked, filtered, and compared |
-| Conclusions, decisions, orientation | Markdown | They are read by humans and by recall, and they link |
+```bash
+python3 tools/sync_source_rows.py export
+python3 tools/sync_source_rows.py check
+python3 tools/sync_source_rows.py import --db /path/to/new.db
+```
 
-A server was rejected because the data is 1.8 MB and single-writer. A graph DB was rejected
-because nothing here traverses more than one hop.
+Export is deterministic and atomically replaces the tracked file. Restore validates the full
+snapshot in isolation, then writes one transaction with foreign keys enforced. Repeating an
+identical restore is a no-op. Restoring over differing knowledge is refused: save/export that
+work and restore to another path. Integer IDs from independently edited databases must never
+be silently merged. New checkouts import **before** running ingesters.
 
-## The core technique: provenance and validity are separate axes
+The legacy snapshot lost fields and relationships. The v2 snapshot was exported from the
+surviving complete database, not reconstructed from the lossy file. A pre-change backup was
+kept outside the repository during the migration. Do not downgrade the export format.
 
-This is the part worth copying. It came from the monolith, which paid for it.
+## Evidence and validity
 
-**Provenance** grades how strongly a number was *derived*:
-`VERIFIED` → `MEASURED` → `EXTERNAL` → `UNVERIFIED`.
+Every new fact needs `source_id` and a verbatim supporting `quote`. `source` records the
+artifact location, acquisition time, method and content digest when available. Legacy
+`git:...` labels are identifiers, not verified content hashes. Legacy missing provenance
+remains visible in `ask.py audit`; do not invent a source to clear that report.
 
-**Validity** asks whether the run it came from was a *legitimate measurement of what it claims*:
-`VALID` / `SUSPECT` / `INVALID`.
+- `claim_type` describes observation, claim, inference, decision or profile.
+- `confidence` describes strength of support.
+- `validity` separately records VALID, SUSPECT, INVALID or UNKNOWN, with `validity_reason`.
+- `status` records active, superseded or retracted. Keep history and set `superseded_by`
+  to the replacement when a contradiction is resolved.
 
-They are orthogonal, and conflating them is how false facts survive. The monolith's `EXP-0019`
-scored the 6bba embryo using weights trained on 6bba — a leave-one-embryo-out leak. Those facts
-were `MEASURED` and *deserved* that grade: they were correctly computed. They were also
-worthless, because the run was invalid. Seven downstream facts and eight work packets inherited
-the leak before anyone noticed.
+UNKNOWN is the default for legacy facts; a high-confidence observation is not automatically
+valid. Registry ingestion preserves explicit validity and supersession relationships.
+Active query views exclude suspect/invalid facts and show provenance and review dates.
 
-In this schema that becomes `claim_type` + `confidence` + `status`, and every row carries a
-`source_id` and a verbatim `quote`. A fact with no retrievable source is not a fact.
+Declare an experiment's hypothesis, parameter candidates, data/checkpoint/code/scorer hashes,
+training/evaluation membership, budget and falsifier in its config/notes **before** running.
+Record invalid runs as invalid evidence, never as model wins or scientific dead ends.
 
-## The four row classes
+## Refresh
 
-Every row is one of these, and knowing which is what makes the rebuild rules obvious:
-
-1. **Derived-from-Kaggle** — `lb_snapshot`, `forum_topic`, `public_kernel`, plus `fact` rows on
-   topics `competition` and `page`. Rebuilt by `tools/harvest_kaggle.sh`. Disposable.
-2. **Derived-from-repos** — `repo`, `repo_commit`, `repo_file`, and `fact` rows on
-   `prior-campaign`. Rebuilt by `ingest_repos.py` / `ingest_registries.py`. Disposable.
-3. **Curated** — the judged ingests (`ingest_bx_findings.py`). Reproducible *only because the
-   judgement is committed as code*: the keep/skip decision for all 35 Biohub-X findings lives in
-   a dict in that file, with a reason per line, including the rejects.
-4. **Source** — `decision` rows and our own analysis facts. **No ingester regenerates these.**
-   Mirrored to the tracked `db/source_rows.jsonl` by `tools/sync_source_rows.py`.
-
-That last split is why `db/*.db` can be gitignored safely: the binary churns and will not merge,
-but nothing irreplaceable rides on it.
-
-## Tables
-
-| Table | Holds |
-|---|---|
-| `source` | Every artifact a claim rests on: url, sha256, method, fetched_at |
-| `fact` | topic, key, value, claim_type, confidence, source_id, **quote**, status, superseded_by |
-| `experiment` | Levers and runs: hypothesis, config, cv/lb scores, outcome (`win`/`neutral`/`dead-end`) |
-| `decision` | Strategic calls with rationale and open/decided status |
-| `lb_snapshot` | The full public leaderboard, dated — re-harvest to track movement |
-| `forum_topic` | All 102 threads, with our triage and takeaway |
-| `public_kernel` | 240 notebooks with score, runtime, and a `family` label |
-| `artifact` | 243 archived items incl. 20 checkpoints, addressed by git blob sha |
-| `repo` / `repo_commit` / `repo_file` | Repo history; `reusable=1` flags files worth porting |
-
-## The rules it enforces
-
-1. **A measured value lives here once.** Prose cites it; prose never restates it. The monolith
-   measured the cost of breaking this: a superseded score appeared 244 times across 36 files
-   while the live one appeared 31 times across 7.
-2. **Every fact carries a source and a verbatim quote.** No quote, no fact.
-3. **Never delete a contradicted fact** — set `status='superseded'` and point `superseded_by` at
-   the replacement.
-4. **Skips are recorded too.** When 10 of 35 findings were judged not worth ingesting, the
-   reasons went in as `status='retracted'` rows, so nobody re-reads them to rediscover that.
-
-## Using it
-
-    python3 tools/ask.py status | gap | topics | kernels | expts | facts <topic> | todo
-    sqlite3 db/biohub_base.db
-
-    python3 tools/sync_source_rows.py export   # after adding rows by hand
-    python3 tools/sync_source_rows.py check    # fails if the export drifted
+Kaggle ingestion verifies every indexed artifact before writing and uses its original
+acquisition timestamp. Replaying evidence does not make it fresh. Registry ingesters update
+existing identities instead of deleting facts/experiments referenced elsewhere. Export all
+knowledge changes after refresh. Keep one writer and run the offline tests before pushing.
