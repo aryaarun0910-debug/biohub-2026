@@ -91,8 +91,9 @@ class Config:
     # EXP-1: parent<=12 / sister<=18 admits 150 of 151 GT divisions (99.3%)
     fork_parent_um:  float = _env("fork_parent_um", 12.0)
     fork_sister_um:  float = _env("fork_sister_um", 18.0)
-    # EXP-1 discriminators for fork ACCEPTANCE (EXP-5: precision is the binding constraint)
-    fork_cos_max:    float = _env("fork_cos_max", -0.30)
-    fork_divergence_min_um: float = _env("fork_divergence_min_um", 1.0)
+    # Fork ACCEPTANCE discriminators. EXP-7 swept these leave-one-embryo-out: RECALL binds,
+    # not precision, so both were loosened from the EXP-1 angle/divergence distributions.
+    fork_cos_max:    float = _env("fork_cos_max", 1.0)          # EXP-7 LOEO: angle gate is monotone loss -> off
+    fork_divergence_min_um: float = _env("fork_divergence_min_um", 0.0)  # EXP-7 LOEO: sisters must merely not re-converge
     gap_max_frames:  int   = _env("gap_max_frames", 2, int)
     min_track_len:   int   = _env("min_track_len", 6, int)
