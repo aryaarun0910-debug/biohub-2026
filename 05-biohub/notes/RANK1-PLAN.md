@@ -151,7 +151,11 @@ Kaggle recall ≥99.0%. Below that, keep the plain detector and spend the time o
    error. A worked case scored exactly 0.0 against ~0.57 locally after striding frames to fit the
    time budget. **The pressure that causes this arrives in the final week**: the rerun takes 5–12 h
    against a hard 12 h ceiling and the visible clips run ~50× faster, telling you nothing.
-   **Gate every submission on a `nonconsecutive_edges` check computed from `submission.csv`.**
+   **Gate is built and verified: `python3 tools/validate_submission.py submission.csv`.**
+   Stdlib-only, so it runs inside the internet-disabled notebook that writes the file. FATAL on
+   non-consecutive edges, edgeless graphs, dangling endpoints, negative timepoints and
+   out-of-volume coordinates; WARN on out-degree >2 and merges. Run it in the last cell, before
+   the file is written, every single time.
 2. **Never select on `data/test`** — four volumes, byte-identical to train, replaced at rerun.
 3. **The Kaggle Evaluation page is stale.** It still describes the pre-patch rule. Design to
    `metrics.md` and the vendored source.
