@@ -139,3 +139,119 @@ unsubmitted.
   offline against +0.003 on the LB, and `icom` at +0.002 offline against −0.014 actual.
 - One registry is the only home for numbers: `db/biohub_base.db`. Prose cites, never restates.
 - Declare the falsifier before the run.
+
+---
+
+# The machine — what actually maximises it
+
+Researched 2026-09-11 against primary sources. Full claims with URLs and verbatim quotes are
+in the database (`python3 tools/ask.py facts hardware`), including ~17 explicitly unverified
+inferences kept labelled as such.
+
+## The finding that changes day 1
+
+`F.conv3d` on Apple Silicon ran at **~7% of conv2d throughput** up to PyTorch 2.12. **2.14.0,
+released 2026-09-02 — nine days ago — moved it to hand-written Metal kernels and it now reaches
+97% of matmul peak.** That is 3.63 → 59.13 TFLOP/s, about **16x**, on the operator that
+dominates 3D U-Net training.
+
+Two conditions attach, and both are easy to miss:
+
+- **`bias=True` on every `nn.Conv3d`.** A bias-free conv3d fell to the slow SIMD path; the
+  no-bias fix (#192229) also landed in 2.14 but the measured gap was 10x.
+- **macOS 26+.** The fast path needs Metal Performance Primitives. Do not upgrade to macOS 27
+  mid-competition.
+
+`04-ARCHITECTURE.md` tells you to test Conv3d / MaxPool3d / ConvTranspose3d on day 1. That test
+is still right, but its premise — "historically the weakest part of PyTorch's Metal backend" —
+expired nine days ago. **The gate now is the torch version, not the backend.** And the failure
+mode is slowness, not an error, so a wrong pin costs 16x silently.
+
+## The architecture change this forces
+
+**`ConvTranspose3d` is still unusable on MPS.** It rejects fp16/bf16 outright, which also
+crashes `torch.amp.autocast` for any model containing it, and the fix PR is still open. This is
+exactly why nnU-Net does not run on Apple Silicon.
+
+**Build the U-Net decoder from `Upsample` + `Conv3d`.** It costs nothing in model quality and
+removes the only hard blocker. Decide this before writing the detector, not after.
+
+## The uncomfortable part
+
+The Mac is **not** faster than the machine you submit from. Estimated ~33–35 TFLOPS dense FP16
+(low confidence) against a single T4's 65. **Kaggle's T4 x2 is roughly 4x this machine for raw
+training throughput**, and its bandwidth (300 GB/s) is at parity with the M5 Pro's 307 GB/s.
+
+So "abuse its computational strength" is the wrong frame. What the Mac actually buys:
+
+- **48 GB of unified memory**, no host/device copies, no gradient checkpointing where a 16 GB
+  T4 needs it. nnU-Net's presets stop at a 40 GB "XL" tier; this machine can plan past it.
+- **No queue and no 12-hour wall.** Kaggle gives you two concurrent sessions and five
+  submissions a day. The Mac gives unlimited ablations.
+
+Use it for data preparation, the classical baseline, ablations, evaluation and packaging — and
+run the long training jobs on Kaggle's T4 x2 in parallel. That is two machines working at once,
+which is the real throughput win.
+
+One caveat that cuts the other way: **plan the patch size for the T4, not the Mac.** A
+configuration tuned to 48 GB will not run at inference on a 16 GB GPU — nnU-Net warns about
+exactly this.
+
+## Train on Mac → infer on Kaggle: the handoff
+
+1. `sd = {k: v.detach().to("cpu", torch.float32).contiguous() for k, v in model.state_dict().items()}`
+   The `.cpu()` is load-bearing: `state_dict()` does **not** strip the device, MPS tensors carry
+   an `"mps"` location tag, and deserialising calls `obj.mps()`, which cannot succeed on Kaggle.
+   The `.float()` avoids T4/P100 having no bf16 tensor-core path.
+2. Save as **safetensors** — no pickle, no device tag, no torch-version gate.
+3. Ship a **frozen parity fixture** with the weights: fixed-seed input plus the fp32 CPU
+   reference output.
+4. In the notebook, assert with `torch.testing.assert_close(..., check_device=False,
+   check_stride=True)` and set **`torch.backends.cudnn.allow_tf32 = False`**. That flag defaults
+   to **True**, so Conv3d silently runs at 10 mantissa bits on an L4 (cc 8.9) but full fp32 on a
+   T4 (7.5) — same notebook, different numerics depending on what you're assigned.
+   `set_float32_matmul_precision` does **not** control convolutions; it is not the lever.
+5. Order matters: `load_state_dict` **first**, then `.to(memory_format=torch.channels_last_3d)`.
+
+Version skew runs the breaking direction: the Mac gets 2.14, Kaggle's live image is the 2.10
+line, and 2.11 is already merged to their `main`. Pin with `docker_image_pinning_type:
+"original"` so the image cannot move under you mid-competition.
+
+## Kaggle operational traps worth more than any tuning
+
+- **Attach every data source before Save Version.** The save run cannot attach new sources or
+  different versions, and this is a leading cause of rerun failure.
+- Kaggle's **Dependency Manager** now does offline pip installs for internet-disabled
+  competitions — the manual wheels-in-a-dataset trick is superseded.
+- **P100 was dropped from Kaggle's GPU CI on 2026-09-05; T4 x2 is the sole test bed**, which
+  matches the handoff's T4 x2 / cc 7.5.
+- Ship weights as a Kaggle **Model**, not a Dataset — Models version, Datasets don't — and read
+  them via `kagglehub`, not hardcoded `/kaggle/input` paths.
+
+## Setup, in order of payoff
+
+1. `torch >= 2.14.0`, then run the conv3d benchmark from pytorch#192213 as an acceptance test.
+2. `bias=True` on every Conv3d.
+3. Decoder = `Upsample` + `Conv3d`.
+4. Stay on macOS 26.x.
+5. CPU fp32 safetensors + parity fixture + `allow_tf32 = False`.
+6. Measure `torch.mps.recommended_max_memory()` — do not assume 36 GB. Cap with
+   `set_per_process_memory_fraction`; the allocator's default high watermark is 1.7, which will
+   happily swap the machine.
+7. DataLoader: `pin_memory=False` (meaningless on unified memory), `persistent_workers=True`,
+   `multiprocessing_context="forkserver"`, and benchmark `num_workers=0` honestly — macOS
+   defaults to `spawn`, so workers cost seconds each.
+8. Zarr v3 with sharding on the internal SSD, outside iCloud, excluded from Spotlight. Avoid
+   HDF5 — its process-wide lock and fork hazard are exactly wrong here.
+9. A/B `torch.compile` before trusting it. Compiled *training* on MPS was up to 4.35x **slower**
+   than eager until August 2026; if it regresses try `TORCHINDUCTOR_LAYOUT_OPTIMIZATION=0`.
+10. Turn `PYTORCH_ENABLE_MPS_FALLBACK` **off** during parity testing so divergences throw
+    instead of hiding.
+
+**Skip:** MLX (its one real advantage was conv3d, and 2.14 erased it — and it costs you MONAI,
+TorchIO and every forkable notebook); High Power Mode (~0.4% on GPU work — it only raises the
+CPU ceiling and the fans to 7500 rpm); the Neural Engine (cannot train); a bigger charger (input
+is hard-capped at ~97 W); clamshell operation (heat exits through the keyboard deck — lid open).
+
+**No float64 on MPS at all** — a hard error, not a downcast. Voxel spacings and affines are
+commonly float64; cast them at the boundary.
