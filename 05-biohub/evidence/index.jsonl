@@ -1,23 +1,23 @@
-{"file":"raw/comp.json","sha256":"895b66b7bd2357ebc98a8b75d1d2a8d446d1d412b56fc96978cde42cc4ef7e66","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/kernels_p1.json","sha256":"ec5c5ae6ee04055e9fe0510c81f94db59c69236036db219faac66c8e3f54e0df","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/kernels_p2.json","sha256":"0da5cb64c3e070575c3f0985f10cbd48663277bd2ef9e6e17d683bab83bb843a","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/kernels_p3.json","sha256":"e4126e9c8eb26e709686c94d01d42a4fbc45d7948de8aeef52b3c1f01eb4a9ef","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/kernels_p4.json","sha256":"4dbb93e72529c8c5fd38990f138a9b2963eeebb614a323f3232e19aaa3eca677","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/kernels_p5.json","sha256":"42acbc06d48e8f51066c57a5b70af7a512fe9ad1e4fbc1014c093db678e7824a","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/kernels_p6.json","sha256":"a17718bab2716fd047b04e624201987a94e6a6da53a399b0ba3a427f9ee88f03","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/lb.json","sha256":"84ed2e6494370fcbdbe83056ab478c21901bbdc4e3e2638219e4ce8d7490c8f2","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/pages.json","sha256":"b9282f3a94d07f6e0c4296f1a2b075aaa15ad39709c2b8b95ffccac16e9a68b7","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/topics_p1.json","sha256":"5e5963a1b7d7c1126d7766395f44619484e93fd46e2850c98fcc9bd19e233224","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/topics_p2.json","sha256":"5e515677db61dece87d389b74b1d54ce54299f466bab13426716f46b54914ef5","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/topics_p3.json","sha256":"5cb61c5829933c9756011c89386e0649ea959d444d29ef529c65cd321d075d8d","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/topics_p4.json","sha256":"a7fdfffa573594eb9db5b9bec513da4fa7e94f77d0e9175a454a2a736bc04454","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/topics_p5.json","sha256":"47d3a275f063f19a95ca2950367a459bfaf373ec067354f360c8387bc342b5d6","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/topics_p6.json","sha256":"11cd26923bf0ce2146321cbdd44e936ab5d3d93021ffdbaeff38ef47dc882da5","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/pages/1_rules.md","sha256":"14a61abea978cda14209163cd047ac8167b3d8f5dc3d450d2e21412f026686bb","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/pages/2_Description.md","sha256":"c90ef0ff30c0f7fb17b28aa36124b0eca30fce126a4231a865406e77c4491d77","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/pages/3_Evaluation.md","sha256":"4de063dfff996fd734e3d2ae371aefefc1eaea4504baded5a2a073e1742f8027","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/pages/4_Timeline.md","sha256":"9909260dd296aa4859a5be084d20266b110cd262e2f487e77b8785c685b114dd","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/pages/5_data-description.md","sha256":"b57de043f06ff05500be69d4c10c293567b55878a947b6c2ca3d568b260534ba","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/pages/6_Prizes.md","sha256":"d5045fed19eacac1b712f8d5018383b13be4243bbef2803a345da197fc82f0b7","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/pages/7_Code_Requirements.md","sha256":"556ed778342f2f9ad5265d9e21aeb6e607281a836cab196412b0dc23a4682191","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
-{"file":"raw/pages/8_abstract.md","sha256":"db0a9965731e673f096734b32f396b64f1168e4efe3a7ea7694291c5033e7da3","method":"rpc","fetched_at":"2026-09-11T12:57:51Z"}
+{"file": "raw/comp.json", "sha256": "a74eeb318ec957f9ec9dffb38701d25e5c5848cf16280d48f2639a2f4f0614b2", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/kernels_p1.json", "sha256": "b426431defec4e39e3f1368acbf8a144f27e1e1f08dc7404b4cde7425870d486", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/kernels_p2.json", "sha256": "29cf8f3c8d88630935020d7dd559ad0088ba0d66d173278cd40d0936dbb0f3c4", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/kernels_p3.json", "sha256": "041606691a6415e499bf959b56a0648e18bf1e9702d9801cc86195d0a42372d2", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/kernels_p4.json", "sha256": "1511ce61dd283e123a94ae9ba1827e3fd7e2836ae4b2ddae9ecedb467655c0fb", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/kernels_p5.json", "sha256": "aadd776c381558e35c91eb53b60351a2726a59056b5cb1ed7cb2d318ec8dcc35", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/kernels_p6.json", "sha256": "78000f610542559f570f81ba0c50427a42c165cb94bb5a5aa6178d95aa7bb66f", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/lb.json", "sha256": "fa9c55170b76aa283b5e86953d432e4184ce106b561f64fe0adfda46d787ec82", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/pages/1_rules.md", "sha256": "14a61abea978cda14209163cd047ac8167b3d8f5dc3d450d2e21412f026686bb", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/pages/2_Description.md", "sha256": "c90ef0ff30c0f7fb17b28aa36124b0eca30fce126a4231a865406e77c4491d77", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/pages/3_Evaluation.md", "sha256": "4de063dfff996fd734e3d2ae371aefefc1eaea4504baded5a2a073e1742f8027", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/pages/4_Timeline.md", "sha256": "9909260dd296aa4859a5be084d20266b110cd262e2f487e77b8785c685b114dd", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/pages/5_data-description.md", "sha256": "b57de043f06ff05500be69d4c10c293567b55878a947b6c2ca3d568b260534ba", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/pages/6_Prizes.md", "sha256": "d5045fed19eacac1b712f8d5018383b13be4243bbef2803a345da197fc82f0b7", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/pages/7_Code_Requirements.md", "sha256": "556ed778342f2f9ad5265d9e21aeb6e607281a836cab196412b0dc23a4682191", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/pages/8_abstract.md", "sha256": "db0a9965731e673f096734b32f396b64f1168e4efe3a7ea7694291c5033e7da3", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/pages.json", "sha256": "b9282f3a94d07f6e0c4296f1a2b075aaa15ad39709c2b8b95ffccac16e9a68b7", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/topics_p1.json", "sha256": "ad4886febeed1a1f9f98c5d28340907c2bdaec82a4f824702f4465ab6a855578", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/topics_p2.json", "sha256": "88e0a1805e6abd40e05c295f75e3ad823d800e92ae21fcbd97bb8f5b763f2d58", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/topics_p3.json", "sha256": "5cb61c5829933c9756011c89386e0649ea959d444d29ef529c65cd321d075d8d", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/topics_p4.json", "sha256": "a7fdfffa573594eb9db5b9bec513da4fa7e94f77d0e9175a454a2a736bc04454", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/topics_p5.json", "sha256": "47d3a275f063f19a95ca2950367a459bfaf373ec067354f360c8387bc342b5d6", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
+{"file": "raw/topics_p6.json", "sha256": "11cd26923bf0ce2146321cbdd44e936ab5d3d93021ffdbaeff38ef47dc882da5", "method": "rpc", "fetched_at": "2026-09-11T17:41:00Z"}
