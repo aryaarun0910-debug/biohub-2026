@@ -45,24 +45,32 @@ def divJ(subset, cfg):
 
 A=[p for p in files if p.stem.startswith("44b6")]
 B=[p for p in files if p.stem.startswith("6bba")]
-GRID=[(c,d) for c in (1.0,0.0,-0.30) for d in (-99.0,0.0,1.0,2.0)]
-res={}
-print(f"  {'cos<=':>6} {'div>=':>6} | {'44b6 divJ':>10} {'tp/fp/fn':>12} | {'6bba divJ':>10} {'tp/fp/fn':>12}")
-for c,d in GRID:
-    cfg=Config(fork_cos_max=c, fork_divergence_min_um=d)
-    ja,ta,fa,na = divJ(A,cfg); jb,tb,fb,nb = divJ(B,cfg)
-    res[(c,d)]=(ja,jb)
-    print(f"  {c:>6.2f} {d:>6.1f} | {ja:>10.4f} {f'{ta}/{fa}/{na}':>12} | {jb:>10.4f} {f'{tb}/{fb}/{nb}':>12}")
+
+# which two Config fields to sweep, and over what: `exp7 <fieldA>=v,v,v <fieldB>=v,v,v`
+AXES = [a.split("=", 1) for a in (sys.argv[1:] or
+        ["fork_cos_max=1.0,0.0,-0.30", "fork_divergence_min_um=-99.0,0.0,1.0,2.0"])]
+(KA, VA), (KB, VB) = [(k, [float(x) for x in v.split(",")]) for k, v in AXES]
+DEFAULT = (getattr(Config(), KA), getattr(Config(), KB))
+
+res = {}
+print(f"  {KA:>22} {KB:>22} | {'44b6 divJ':>10} {'tp/fp/fn':>12} | {'6bba divJ':>10} {'tp/fp/fn':>12}")
+for a in VA:
+    for b in VB:
+        cfg = Config(**{KA: a, KB: b})
+        ja, ta, fa, na = divJ(A, cfg); jb, tb, fb, nb = divJ(B, cfg)
+        res[(a, b)] = (ja, jb)
+        print(f"  {a:>22.2f} {b:>22.2f} | {ja:>10.4f} {f'{ta}/{fa}/{na}':>12} | "
+              f"{jb:>10.4f} {f'{tb}/{fb}/{nb}':>12}", flush=True)
 
 print("\n=== LEAVE-ONE-EMBRYO-OUT: pick on one, report on the other ===")
-best_on_A=max(res, key=lambda k: res[k][0]); best_on_B=max(res, key=lambda k: res[k][1])
-print(f"  picked on 44b6 -> cos<={best_on_A[0]} div>={best_on_A[1]}   HELD-OUT 6bba divJ {res[best_on_A][1]:.4f}")
-print(f"  picked on 6bba -> cos<={best_on_B[0]} div>={best_on_B[1]}   HELD-OUT 44b6 divJ {res[best_on_B][0]:.4f}")
-print(f"  MIN of the two directions: {min(res[best_on_A][1], res[best_on_B][0]):.4f}")
-cur=res[(-0.30,1.0)]
-print(f"\n  current default (cos<=-0.30, div>=1.0): 44b6 {cur[0]:.4f}  6bba {cur[1]:.4f}  min {min(cur):.4f}")
-gates=res[(1.0,-99.0)]
-print(f"  gates only (no discriminators):          44b6 {gates[0]:.4f}  6bba {gates[1]:.4f}  min {min(gates):.4f}")
-best_min=max(res, key=lambda k: min(res[k]))
-print(f"  best by MIN across embryos: cos<={best_min[0]} div>={best_min[1]} -> "
-      f"44b6 {res[best_min][0]:.4f}  6bba {res[best_min][1]:.4f}  min {min(res[best_min]):.4f}")
+bA = max(res, key=lambda k: res[k][0]); bB = max(res, key=lambda k: res[k][1])
+print(f"  picked on 44b6 -> {KA}={bA[0]} {KB}={bA[1]}   HELD-OUT 6bba divJ {res[bA][1]:.4f}")
+print(f"  picked on 6bba -> {KA}={bB[0]} {KB}={bB[1]}   HELD-OUT 44b6 divJ {res[bB][0]:.4f}")
+print(f"  MIN of the two directions: {min(res[bA][1], res[bB][0]):.4f}")
+if DEFAULT in res:
+    d = res[DEFAULT]
+    print(f"\n  current default ({KA}={DEFAULT[0]}, {KB}={DEFAULT[1]}): "
+          f"44b6 {d[0]:.4f}  6bba {d[1]:.4f}  min {min(d):.4f}")
+bm = max(res, key=lambda k: min(res[k]))
+print(f"  best by MIN across embryos: {KA}={bm[0]} {KB}={bm[1]} -> "
+      f"44b6 {res[bm][0]:.4f}  6bba {res[bm][1]:.4f}  min {min(res[bm]):.4f}")
