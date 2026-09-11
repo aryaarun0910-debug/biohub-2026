@@ -62,6 +62,20 @@ Treat **28 September** as the deadline. Assume one day is lost to something.
 
 ### Before the Mac arrives (11-13 Sep, on the HP laptop)
 
+**Revised after the Colab account came to light: these are not filler days.** Colab and Kaggle
+are both reachable from a browser, so the critical path — *be submittable* — can start now. The
+Mac adds a zero-cost iteration box on the 14th; it is not the starting gun. Waiting for it costs
+3 of 18 days.
+
+0. **Verify the Colab burn rates on your own billing page.** My figures are from a secondary
+   source and Google changes them. Everything downstream assumes ~65-85 h of A100; confirm it
+   before planning around that number.
+0b. **Open one Colab session and record what it gives you** — `torch.__version__`, the GPU you
+   are assigned, and whether an A100 is actually available on your tier. Kill the session the
+   moment you have the answer; idle A100 time bills at ~15 units/hour.
+0c. **Kaggle API token** (`kaggle.json`) so the download and any notebook push can be scripted
+   rather than clicked.
+
 These need no GPU and remove a whole day from the critical path.
 
 1. **Kaggle identity verification.** `requiresIdentityVerification: true` — it gates
