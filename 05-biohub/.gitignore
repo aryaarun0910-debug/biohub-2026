@@ -1,0 +1,7 @@
+# working clones of the three private repos - cloned by tools/ingest_repos.py
+repos/
+# the DB is rebuildable from evidence/ + repos/ via the ingesters
+db/*.db
+db/*.db-wal
+db/*.db-shm
+__pycache__/

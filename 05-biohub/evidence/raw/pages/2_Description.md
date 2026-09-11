@@ -1,0 +1,5 @@
+Tracking cells across time in 3D microscopy is a fundamental challenge in biological research. Scientists rely on time-lapse 3D imaging to study how cells grow, interact, and evolve, but analyzing this data remains a massive bottleneck. Currently, researchers spend countless hours manually tracking cells—especially in complex datasets where thousands of visually similar cells move, deform, and divide.
+
+While automated tools exist, they often fail under real-world conditions. High cell density, imaging noise, and irregular cell shapes cause critical errors in lineage reconstruction, limiting the scalability of these studies.
+
+This competition provides a shared benchmark to solve this problem. Your task is to detect cells, associate them across frames, and identify division events to reconstruct accurate cell lineages. By developing robust, generalizable algorithms for 3D+time cell tracking, you will help eliminate manual effort, improve scientific reproducibility, and accelerate new discoveries in developmental biology, immunology, and disease research.
