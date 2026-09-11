@@ -255,3 +255,104 @@ is hard-capped at ~97 W); clamshell operation (heat exits through the keyboard d
 
 **No float64 on MPS at all** — a hard error, not a downcast. Voxel spacings and affines are
 commonly float64; cast them at the boundary.
+
+---
+
+# Compute: three machines, one framework
+
+Revised 2026-09-11 after the Colab budget came to light.
+
+## One framework. PyTorch. Not MLX.
+
+The instinct — "use the 20-core GPU properly" — is right. The conclusion doesn't follow, because
+**PyTorch already reaches the M5's Neural Accelerators.** Apple says so directly: *"Open source
+tools like MLX, llama.cpp, and PyTorch already leverage neural accelerators under the hood."*
+There is no Metal performance sitting behind an MLX-shaped door.
+
+Against adopting it, specifically:
+
+- **MLX cannot produce a submission.** Kernels-only, and Kaggle has no Metal. MLX could only ever
+  be a local trainer whose weights you convert afterwards — a conversion step plus a numerical
+  agreement check, bought for nothing.
+- **Its one real advantage evaporated nine days ago.** MLX's conv3d edge existed because
+  PyTorch's was broken. torch 2.14 took conv3d to 97% of matmul peak.
+- **It is not reliably faster.** An open MLX issue has it **10–20% slower** than PyTorch on M5
+  bf16 GEMM, flagged as hurting training.
+- **There is no official MLX→PyTorch exporter.** Every conversion tool runs the other way.
+- **You lose the ecosystem** — MONAI, TorchIO, nnU-Net, timm 3D encoders, and every forkable
+  public notebook. In an 18-day runway that is the whole argument by itself.
+
+So: **PyTorch, device chosen at runtime, in exactly one function.** `mps` at home, `cuda` on
+Colab and Kaggle, `cpu` for tests. This is what `04-ARCHITECTURE.md` already decided, and 2.14
+made it more right, not less.
+
+## Where GPUs actually accelerate this problem
+
+Be precise about it, because the answer is "one stage out of five":
+
+| Stage | Character | GPU helps? |
+|---|---|---|
+| Data loading, Zarr decompression, patch extraction | I/O + CPU | No — 18 cores matter |
+| **Detector (3D U-Net) training** | **conv3d-bound** | **Yes. This is the only real GPU job** |
+| Detector inference | GPU, but capped at Kaggle's 12 h | Yes, constrained |
+| Linking / association | bipartite matching, ILP — combinatorial | Barely. CPU-bound |
+| Division detection | rare-event modelling | Data-starved, not compute-starved |
+| Metric evaluation | graph ops | No — but you run it constantly |
+
+**Compute is not the binding constraint. 18 days and the division term are.** A100 hours cannot
+fix a model that scores 0.000 on divisions. Budget compute to the detector; spend thinking on
+divisions.
+
+## The three machines
+
+**Colab A100 — the training machine.** ~1000 units at ~12–15/hr is **roughly 65–85 hours** of
+A100: ~312 TFLOPS bf16, 40 GB, 1555 GB/s. That is about **10x the Mac's FLOPS and 5x its
+bandwidth**. Every long detector run belongs here.
+
+Two disciplines, non-negotiable:
+- **An idle session burns the budget.** 15 units/hour means one A100 left running overnight
+  costs ~120 units — 12% of everything you have. Terminate sessions explicitly, every time.
+- **Colab disconnects.** Checkpoint to Drive every N steps or you will pay twice for the same
+  epoch.
+
+**Kaggle T4 x2 — free parallel compute, and the only submission-truthful numerics.** Two
+concurrent 12-hour sessions that cost no credits. Use it for runs that must match what the
+submission will do, and to keep training moving while Colab credits are conserved.
+
+**Mac M5 Pro — the zero-marginal-cost machine, and the one that makes Colab cheap.** It is the
+*slowest* of the three for training. Its value is that nothing it does costs money or queues:
+data preparation, the classical DoG baseline, metric development, small ablations, evaluation,
+visual QA, packaging, and building the submission notebook.
+
+Its highest-leverage job: **preprocess the ~98 GB into a compact, training-ready patch store on
+the Mac, and upload only that.** Raw data into Colab means either a long download each session
+or a Drive quota fight, and A100 minutes spent on I/O are A100 minutes burned at 15 units an
+hour. Cheap local preprocessing converts directly into more effective A100 time.
+
+## The rules question, resolved
+
+The prior campaign left Colab "unresolved" and its manifest forbade processing competition data
+in consumer Colab. **That was self-imposed policy, not a rules requirement.** The dataset is
+licensed **CC0: Public Domain**, and §47 is the permissive variant: *"You may access and use the
+Competition Data for any purpose, whether commercial or non-commercial."* §51 restricts giving
+the data to **people** who have not accepted the rules — it says nothing about which of your own
+machines you compute on.
+
+Keep the notebook and Drive folder private and Colab is fine. Recorded as a decision so it is
+not re-litigated.
+
+## On "build from scratch"
+
+Right instinct, with one correction: **rebuild is not retype.** In 18 days, re-deriving the
+contracts, the metric adapter, the submission writer and the digest system would consume the
+runway and reproduce work that is already correct and tested.
+
+Port, from Biohub-X: the contracts, the fail-closed metric adapter, the submission writer and
+validator, the digest system, the classical DoG detector, the Kaggle packaging path.
+
+Leave behind: the bounded streaming cache, the window census and the resume machinery — all of
+it existed because 16 GB could not hold a training window. Also every Windows accommodation, and
+the blind-isolation contract.
+
+What genuinely *is* new: the model (`Upsample`+`Conv3d` decoder, no `ConvTranspose3d`), the
+division head, and a three-device compute layer instead of a one-machine one.
