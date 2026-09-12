@@ -121,6 +121,6 @@ class Config:
     # trained -- under a real detector this verdict is expected to flip.
     # EXP-15: learned fork acceptance. >=0 uses fork_model.json; <0 falls back to the
     # hand-tuned divergence threshold above.
-    fork_accept_p:   float = _env("fork_accept_p", 0.40)   # EXP-15: LOEO-validated operating point
+    fork_accept_p:   float = _env("fork_accept_p", 0.30)   # EXP-16: mean of the two LOEO folds (0.25, 0.35)
     gap_max_frames:  int   = _env("gap_max_frames", 0, int)
     min_track_len:   int   = _env("min_track_len", 1, int)
