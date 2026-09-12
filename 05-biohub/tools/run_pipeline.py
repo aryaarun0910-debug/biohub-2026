@@ -11,6 +11,7 @@ import numpy as np, polars as pl, tracksdata as td
 sys.path.insert(0,"src"); sys.path.insert(0,"reference/royerlab-baseline/src"); sys.path.insert(0,"reference/royerlab-baseline")
 from geff import GeffMetadata
 from tracking_cellmot.metrics import evaluate, per_sample_metrics, summarise, node_recall
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from biohub.contracts import Graph, Config, StageDelta, SCALE
 from biohub.detect import detect_oracle
 from biohub.refine import refine
@@ -19,15 +20,9 @@ from biohub.resolve import resolve
 from biohub.repair import repair
 from biohub.submit import write
 
+from _eval_common import load_gt as load, to_td, score_one
+
 GT=Path("data/train_geff"); cfg=Config()
-def load(p):
-    g=td.graph.IndexedRXGraph.from_geff(p); return g[0] if isinstance(g,tuple) else g
-def to_td(g):
-    G=td.graph.InMemoryGraph()
-    for k in ("z","y","x"): G.add_node_attr_key(k,pl.Float64,-999999.0)
-    ids=G.bulk_add_nodes([{"t":int(t),"z":float(z),"y":float(y),"x":float(x)} for t,(z,y,x) in zip(g.t,g.zyx)])
-    if len(g.edges): G.bulk_add_edges([{"source_id":ids[a],"target_id":ids[b]} for a,b in g.edges])
-    return G
 
 files=sorted(GT.glob("*.geff"))
 STAGES=("refine","score_edges","resolve","repair")
@@ -45,9 +40,7 @@ for i,p in enumerate(files,1):
             setattr(T,f,getattr(T,f)+getattr(d,f))
         prev=cur
     graphs.append(prev)
-    pred=to_td(prev); gt=load(p); er=evaluate(pred,gt,scale=tuple(SCALE),max_distance=7.0)
-    v=(GeffMetadata.read(p).extra or {}).get("estimated_number_of_nodes")
-    r=per_sample_metrics(er,float(v) if v else float("nan"),node_recall(pred,gt))
+    r=score_one(prev, load(p), path=p)
     rows.append(r); per_emb[p.stem[:4]].append(r)
     if i%50==0: print(f"    {i}/{len(files)}  {time.time()-t0:.0f}s", flush=True)
 

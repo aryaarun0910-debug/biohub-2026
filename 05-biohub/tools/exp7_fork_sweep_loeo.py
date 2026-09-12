@@ -19,55 +19,43 @@ import numpy as np, polars as pl, tracksdata as td
 sys.path.insert(0, "src")
 sys.path.insert(0, "reference/royerlab-baseline/src")
 sys.path.insert(0, "reference/royerlab-baseline")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from geff import GeffMetadata
-from tracking_cellmot.metrics import evaluate, per_sample_metrics, summarise, node_recall
-from biohub.contracts import Graph, Config, SCALE
+from tracking_cellmot.metrics import summarise
+from biohub.contracts import Config
+from biohub.detect import detect_oracle
 from biohub.edges import score_edges
 from biohub.refine import refine
 from biohub.resolve import resolve
 from biohub.repair import repair
+from _eval_common import load_gt as _load, score_one
 
 GT = Path("data/train_geff")
-
-
-def _load(p):
-    g = td.graph.IndexedRXGraph.from_geff(p)
-    return g[0] if isinstance(g, tuple) else g
-
-
-def to_td(g):
-    G = td.graph.InMemoryGraph()
-    for k in ("z", "y", "x"):
-        G.add_node_attr_key(k, pl.Float64, -999999.0)
-    ids = G.bulk_add_nodes([{"t": int(t), "z": float(z), "y": float(y), "x": float(x)}
-                            for t, (z, y, x) in zip(g.t, g.zyx)])
-    if len(g.edges):
-        G.bulk_add_edges([{"source_id": ids[a], "target_id": ids[b]} for a, b in g.edges])
-    return G
 
 
 files = sorted(GT.glob("*.geff"))
 CACHE = {}
 for p in files:
-    n = _load(p).node_attrs()
+    gt = _load(p)                                    # read ONCE, keep as ground truth
+    n = gt.node_attrs()
     CACHE[p] = (np.array([r["t"] for r in n.iter_rows(named=True)]),
                 np.array([[r["z"], r["y"], r["x"]] for r in n.iter_rows(named=True)], float),
-                _load(p),
+                gt,
                 (GeffMetadata.read(p).extra or {}).get("estimated_number_of_nodes"))
 
 
 def run(subset, cfg) -> dict:
-    """Full stage chain per dataset, scored exactly as tools/run_pipeline.py scores it."""
+    """Full stage chain per dataset, scored through the SAME code path as run_pipeline.py."""
     rows = []
     for p in subset:
         t, zyx, gt, est = CACHE[p]
-        g = Graph(t=t, zyx=zyx, dataset=p.stem)
+        # Graph coordinates are mutable by contract, and the cache is shared across every grid
+        # point -- hand each run its own copy or the first in-place refine silently poisons the
+        # rest of the sweep with drifted coordinates and no error.
+        g = detect_oracle(t.copy(), zyx.copy(), p.stem)
         for stage in (refine, score_edges, resolve, repair):
             g = stage(g, cfg)
-        pred = to_td(g)
-        er = evaluate(pred, gt, scale=tuple(SCALE), max_distance=7.0)
-        rows.append(per_sample_metrics(er, float(est) if est else float("nan"),
-                                       node_recall(pred, gt)))
+        rows.append(score_one(g, gt, est=est))
     return summarise(rows)
 
 
@@ -77,6 +65,11 @@ B = [p for p in files if p.stem.startswith("6bba")]
 AXES = [a.split("=", 1) for a in (sys.argv[1:] or
         ["fork_cos_max=1.0,0.0", "fork_divergence_min_um=-99.0,0.0"])]
 (KA, VA), (KB, VB) = [(k, [float(x) for x in v.split(",")]) for k, v in AXES]
+if KA == KB:            # Config(**{K: a, K: b}) collapses to one key and prints a lie
+    raise SystemExit(f"both axes name the same field '{KA}' -- the grid would be 1-D")
+for K in (KA, KB):
+    if not hasattr(Config(), K):
+        raise SystemExit(f"'{K}' is not a Config field")
 DEFAULT = (getattr(Config(), KA), getattr(Config(), KB))
 
 res, det = {}, {}
@@ -102,7 +95,9 @@ if DEFAULT in res:
           f"44b6 {d[0]:.4f}  6bba {d[1]:.4f}  min {min(d):.4f}")
 bm = max(res, key=lambda k: min(res[k]))
 sa, sb = det[bm]
-print(f"  best by MIN across embryos: {KA}={bm[0]} {KB}={bm[1]} -> "
+print(f"  best by MIN across embryos [SELECTED ON BOTH EMBRYOS -- an upper bound, not a")
+print(f"  held-out estimate; the honest LOEO number is the MIN line above]:")
+print(f"    {KA}={bm[0]} {KB}={bm[1]} -> "
       f"44b6 {res[bm][0]:.4f}  6bba {res[bm][1]:.4f}  min {min(res[bm]):.4f}")
 print(f"     44b6 adj_edge {sa['adj_edge_jaccard']:.4f} edgeJ {sa['edge_jaccard']:.4f} divJ "
       f"{sa['division_jaccard']:.4f} tp/fp/fn {sa['division_tp']}/{sa['division_fp']}/{sa['division_fn']}")
