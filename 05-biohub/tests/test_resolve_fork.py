@@ -18,16 +18,19 @@ def _fork(sep_t2_um):
 
 
 class ForkDivergence(unittest.TestCase):
+    """These pin fork_accept_p=-1.0 on purpose: EXP-15's learned model now supersedes the
+    divergence threshold by default, and this class tests the FALLBACK rule itself."""
+
     def test_diverging_sisters_keep_the_fork(self):
-        g = resolve(_fork(14.0), Config(fork_divergence_min_um=0.0))
+        g = resolve(_fork(14.0), Config(fork_divergence_min_um=0.0, fork_accept_p=-1.0))
         self.assertEqual(g.forks(), 1, "sisters separating 10->14um must stay a division")
 
     def test_converging_sisters_lose_the_fork(self):
-        g = resolve(_fork(6.0), Config(fork_divergence_min_um=0.0))
+        g = resolve(_fork(6.0), Config(fork_divergence_min_um=0.0, fork_accept_p=-1.0))
         self.assertEqual(g.forks(), 0, "sisters closing 10->6um are not a division")
 
     def test_gate_disabled_keeps_both(self):
-        g = resolve(_fork(6.0), Config(fork_divergence_min_um=-99.0))
+        g = resolve(_fork(6.0), Config(fork_divergence_min_um=-99.0, fork_accept_p=-1.0))
         self.assertEqual(g.forks(), 1, "at -99 the gate must be inert")
 
 
@@ -49,3 +52,27 @@ class OutDegreeCap(unittest.TestCase):
         out = resolve(g, Config())
         deg = np.bincount(out.edges[:, 0], minlength=5) if len(out.edges) else np.zeros(5)
         self.assertLessEqual(int(deg.max()), 2, f"out-degree {deg.max()} exceeds 2: {out.edges}")
+
+
+class LearnedAcceptance(unittest.TestCase):
+    """EXP-15 replaced the hand-tuned divergence rule with a 7-feature logistic model. The
+    features must be computed IDENTICALLY at training and inference or the shipped coefficients
+    mean nothing, so training imports the same fork_features() the pipeline calls."""
+
+    def test_features_are_finite_and_ordered(self):
+        from biohub.resolve import fork_features
+        P = np.array([[0., 0., 0.], [0., -5., 0.], [0., 5., 0.], [0., -7., 0.], [0., 7., 0.]])
+        f = fork_features(P, 0, 1, 2, {1: 3, 2: 4})
+        self.assertEqual(len(f), 7)
+        self.assertTrue(all(np.isfinite(f)), f)
+        self.assertAlmostEqual(f[0], -1.0, places=6)          # perfectly opposed
+        self.assertAlmostEqual(f[1], 10.0, places=6)          # sisters 10um apart
+        self.assertGreater(f[5], 0.0)                          # and separating
+
+    def test_model_scores_a_real_division_above_a_degenerate_one(self):
+        from biohub.resolve import fork_probability
+        P = np.array([[0., 0., 0.], [0., -5., 0.], [0., 5., 0.], [0., -7., 0.], [0., 7., 0.]])
+        good = fork_probability(P, 0, 1, 2, {1: 3, 2: 4})
+        Q = np.array([[0., 0., 0.], [0., 9., 0.], [0., 10., 0.], [0., 9., 0.], [0., 10., 0.]])
+        bad = fork_probability(Q, 0, 1, 2, {1: 3, 2: 4})       # same side, no divergence
+        self.assertGreater(good, bad, f"opposed+diverging {good:.3f} !> same-side {bad:.3f}")

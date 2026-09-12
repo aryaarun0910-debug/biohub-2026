@@ -12,7 +12,7 @@ sys.path.insert(0,"src"); sys.path.insert(0,"reference/royerlab-baseline/src"); 
 from geff import GeffMetadata
 from tracking_cellmot.metrics import evaluate, per_sample_metrics, summarise, node_recall
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from biohub.contracts import Graph, Config, StageDelta, SCALE
+from biohub.contracts import check_env, Graph, Config, StageDelta, SCALE
 from biohub.detect import detect_oracle
 from biohub.refine import refine
 from biohub.edges import score_edges
@@ -22,6 +22,7 @@ from biohub.submit import write
 
 from _eval_common import load_gt as load, to_td, score_one
 
+check_env()
 GT=Path("data/train_geff"); cfg=Config()
 
 files=sorted(GT.glob("*.geff"))

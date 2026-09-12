@@ -74,9 +74,28 @@ class StageDelta:
                 f"moved {mv}  edges {self.edges_added:+7}/{-self.edges_removed:<7} "
                 f"forks {self.forks_created:+5}/{-self.forks_destroyed:<5} {self.wall_s:6.1f}s")
 
+_ENV_SEEN: set[str] = set()
+
+
 def _env(name, default, cast=float):
+    _ENV_SEEN.add(f"BIOHUB_{name.upper()}")
     v = os.environ.get(f"BIOHUB_{name.upper()}")
     return cast(v) if v is not None else default
+
+
+def check_env() -> None:
+    """Fail loudly on a BIOHUB_* variable that matches no field.
+
+    _env upper-cases the name, so `BIOHUB_fork_accept_p=0.4` sets nothing and says nothing --
+    a whole threshold sweep once returned four identical rows because of it. A config override
+    that is silently ignored is worse than one that crashes.
+    """
+    unknown = sorted(k for k in os.environ
+                     if k.startswith("BIOHUB_") and k not in _ENV_SEEN)
+    if unknown:
+        raise SystemExit(
+            "unrecognised BIOHUB_* override(s): " + ", ".join(unknown) +
+            "\n  (names are UPPER_CASE; known: " + ", ".join(sorted(_ENV_SEEN)) + ")")
 
 @dataclass(frozen=True)
 class Config:
@@ -99,5 +118,8 @@ class Config:
     # because close_gaps only has detector misses to repair and there are none, and prune_short
     # only has spurious tracks to remove and there are none. MUST BE RE-SWEPT once detect is
     # trained -- under a real detector this verdict is expected to flip.
+    # EXP-15: learned fork acceptance. >=0 uses fork_model.json; <0 falls back to the
+    # hand-tuned divergence threshold above.
+    fork_accept_p:   float = _env("fork_accept_p", 0.40)   # EXP-15: LOEO-validated operating point
     gap_max_frames:  int   = _env("gap_max_frames", 0, int)
     min_track_len:   int   = _env("min_track_len", 1, int)

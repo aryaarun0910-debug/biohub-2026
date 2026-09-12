@@ -31,6 +31,9 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from .contracts import Graph, Config
 from .trace import Trace
+import json, pathlib
+
+_MODEL = None
 
 BIG = 1e6
 
@@ -61,6 +64,41 @@ def _accept_fork(P, parent, first, second, cfg, tr=None) -> bool:
         tr.add("fork_gates_passed", parent=int(parent), first=int(first), second=int(second),
                cos=cos, sister=sis, arc=float(max(na, nb)))
     return True
+
+
+def fork_features(P, parent, first, second, succ):
+    """The 7 numbers the acceptance model sees. Shared by training and inference so they cannot
+    drift apart -- a feature computed two ways is a bug waiting for a deadline."""
+    va, vb = P[first] - P[parent], P[second] - P[parent]
+    na, nb = np.linalg.norm(va), np.linalg.norm(vb)
+    if na < 1e-9 or nb < 1e-9:
+        return None
+    cos = float(va @ vb / (na * nb))
+    sis = float(np.linalg.norm(P[first] - P[second]))
+    g1, g2 = succ.get(first), succ.get(second)
+    div = (float(np.linalg.norm(P[g1] - P[g2]) - sis)
+           if g1 is not None and g2 is not None else 0.0)
+    return [cos, sis, float(max(na, nb)), float(min(na, nb)),
+            float(abs(na - nb)), div, float(na + nb)]
+
+
+def _model():
+    global _MODEL
+    if _MODEL is None:
+        f = pathlib.Path(__file__).with_name("fork_model.json")
+        _MODEL = json.loads(f.read_text()) if f.exists() else {}
+    return _MODEL
+
+
+def fork_probability(P, parent, first, second, succ) -> float:
+    """P(this fork is a real division). Falls back to 1.0 if no model is shipped."""
+    m = _model()
+    f = fork_features(P, parent, first, second, succ)
+    if not m or f is None:
+        return 1.0
+    z = np.array(f, float)
+    z = (z - np.array(m["mu"])) / np.array(m["sd"])
+    return float(1.0 / (1.0 + np.exp(-(z @ np.array(m["coef"]) + m["intercept"]))))
 
 
 def _diverges(P, first, second, succ, cfg) -> bool:
@@ -121,7 +159,17 @@ def resolve(g: Graph, cfg: Config, allow_fork: bool = True, trace: Trace | None 
             succ.setdefault(s, d)
         drop = set()
         for p, a, b in forks:
-            if _diverges(P, a, b, succ, cfg):
+            # The learned acceptance model supersedes the hand-tuned divergence rule when it is
+            # enabled (EXP-15); fork_accept_p < 0 falls back to the threshold.
+            if cfg.fork_accept_p >= 0.0:
+                pr = fork_probability(P, p, a, b, succ)
+                ok = pr >= cfg.fork_accept_p
+                if trace is not None:
+                    trace.add("fork_model", parent=int(p), first=int(a), second=int(b), p=pr,
+                              accepted=bool(ok))
+            else:
+                ok = _diverges(P, a, b, succ, cfg)
+            if ok:
                 if trace is not None:
                     trace.add("fork_accept", parent=int(p), first=int(a), second=int(b))
             else:
