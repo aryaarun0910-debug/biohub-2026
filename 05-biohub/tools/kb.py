@@ -74,6 +74,10 @@ def record(topic, key, value, quote, source, claim="observation", conf="high",
 
 
 def supersede(old_key, by_key, why):
+    """A fact cannot supersede itself. That happened once, from a stray command, and it silently
+    deactivated a true fact while leaving a self-referential dangling pointer."""
+    if old_key == by_key:
+        raise SystemExit("refusing to supersede a fact by itself")
     db = conn(); c = db.cursor()
     row = c.execute("select id from fact where key=? and status='active'", (by_key,)).fetchone()
     if not row: raise SystemExit(f"no active fact with key '{by_key}' to supersede by")
