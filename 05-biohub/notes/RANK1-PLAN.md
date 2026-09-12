@@ -79,6 +79,58 @@ Do not re-pay for these — all measured, all in the base:
   negative — the likely cause of that instability.
 - **The division upweight hook is dead code**: `weight = torch.ones_like(loss); weight[div_rows] = 1.0`.
 
+## The linking stack is settled (EXP-7 → EXP-10, 11–12 Sep)
+
+Every threshold downstream of detection has now been swept **leave-one-embryo-out** against the
+**full competition score** over all 199 datasets. 6bba carries 125 of the 151 divisions and the
+test set is embryo-disjoint, so a pooled sweep only ever fits 6bba; the protocol is fit on one
+embryo, report on the other, both directions, take the minimum.
+
+| | before | after | Δ |
+|---|---|---|---|
+| score | 1.0920 | **1.1412** | +0.0492 |
+| edge Jaccard | 0.9645 | **0.9955** | |
+| division Jaccard | 0.3908 | **0.5431** | |
+| division tp/fp/fn | 68/23/83 | **126/81/25** | |
+| 44b6 / 6bba gap | 0.064 | **0.031** | narrowed |
+
+**`motion_gate_um` 10 → 14 is the single biggest lever found** (+0.0396). It confirmed and then
+fixed the recall diagnosis: 6bba's division FN fell 69 → 21, because those divisions were never
+*proposed* as candidates. The candidate surface is one-dimensional in the effective radius
+R = `motion_gate_um`·√(1−`edge_prob_min`), peaking at R ≈ 10.0 µm — tune R, never the two axes
+separately.
+
+**The fork discriminators are dead weight.** `fork_cos_max` is monotone loss on *both* embryos at
+every tightening step, so it is off (1.0). Only divergence persistence earns its place, at the
+loosest non-trivial setting: sisters must merely not *re-converge*. Re-tested after the candidate
+set widened and the verdict held — low precision is not an argument for tightening, because
+divJ = TP/(TP+FP+FN) penalises a lost true division exactly as hard as a false one.
+
+**Three bugs, all found by sweeping rather than reading:**
+
+1. The divergence check had **never once executed** — it indexed a frame-`t` parent map with a
+   frame-`t+1` daughter node. Invisible except as identical results across every parameter value,
+   including the disabled sentinel. Now a post-pass, since the t+1→t+2 assignment does not exist
+   while frame `t` is being resolved.
+2. `resolve` could give one parent **three or more children**. The official scorer silently
+   *discards* the surplus rather than erroring, so this was corruption, not a crash. Out-degree is
+   now capped at 2; zero scorer warnings across all 199.
+3. The sweep harness itself optimised divJ alone — which would have reported edge-term losses as
+   wins the moment it was pointed upstream of `resolve`. The objective is now the full score and
+   all four stages run. Parity with `run_pipeline.py` verified to 4 dp before it was trusted.
+
+### What this number is not
+
+**1.1412 assumes oracle detection.** `detect` and `refine` are still stubs. It is the ceiling of
+the linking stack given perfect inputs, not a submittable score, and not comparable to the 0.970
+at rank 1. The whole remaining gap is detection.
+
+One consequence is live and **must not be forgotten**: `repair` is disabled (`gap_max_frames=0`,
+`min_track_len=1`) because under an oracle there are no detector misses to bridge and no spurious
+tracks to prune. **Both premises reverse under a real detector.** The value carries an inline
+warning in `contracts.py` and the decision is recorded **open**, not settled — re-sweep it the day
+`detect` trains.
+
 ## The detector: dual-head, dense-supervised, with a refinement head
 
 Added 2026-09-11 from the Obsidian vault. This is the single largest architectural change
@@ -170,14 +222,12 @@ Kaggle recall ≥99.0%. Below that, keep the plain detector and spend the time o
 
 ## Runway: 12–29 September
 
-Today is the 11th. The Mac lands on the 14th. **You do not need it to start** — Colab, Kaggle and
-this laptop are all available now, and the highest-value work is CPU-only.
+Today is the 12th. The Mac lands on the 14th. The CPU-only work is **done** — see "The linking
+stack is settled" above. Everything that remains needs the machine.
 
-**Now → 13 Sep.** Kaggle identity verification (it gates prizes and has a queue you don't
-control). Finish the `.geff` download — it is 2.4 MB of ground truth against 98 GB of images, and
-every division experiment below runs on it alone. Decompose our own `p15` ablation locally: it
-scored 0.906 fork-free against P9's 0.925, implying divJ ≈0.19, but removing forks also removes
-edge TPs, so split the terms with `evaluate_datasets()` before trusting it.
+**Now → 13 Sep.** Kaggle identity verification is the only outstanding item, and it is the one
+with a queue you do not control: it gates prizes. The `.geff` corpus is complete (4,179 files,
+199/199 datasets) and every sweep above ran on it.
 
 **14–15 Sep.** Machine up. Pin **torch ≥ 2.14.0** — conv3d on MPS was fixed there and is ~16×
 faster with `bias=True`; build decoders from `Upsample`+`Conv3d`, never `ConvTranspose3d`. Port
@@ -190,13 +240,12 @@ is a single edit, 0.940→0.947 is three flags. Weights are public. Gate: edge �
 **16–18 Sep (revised).** Dual-head detector first — it feeds everything downstream, and EXP-5
 showed the linker fix is cheap once detection is good.
 
-**19–24 Sep.** Divisions — fork *acceptance*, not proposal. EXP-5 settled that permitting forks
-recovers 142/151 divisions for an edge cost of 0.0002; the binding constraint is precision, 230
-FP against 142 TP. Apply the EXP-1 discriminators: cos(angle) median −0.746, and sisters
-diverging 10.57 → 13.66 µm by t+2. Trackastra paired with the
-support-pack detector; ILP fork pricing at or below continuation; stop the Hungarian relink
-destroying forks. Gate: **divJ > 0.30 held out by the 24th.** Note 22 Sep is the entry and
-team-merge deadline.
+**19–24 Sep.** Divisions are **already past the gate offline** — divJ 0.5431 against a target of
+0.30 — so this window is now about holding that under *real* detections rather than an oracle.
+Re-sweep `repair` (the open decision) and re-check `motion_gate_um` the moment `detect` produces
+noisy centroids, since both were tuned against perfect inputs. Do not re-sweep the fork
+discriminators: EXP-9 already retested them against a wider candidate set and the verdict held.
+Note 22 Sep is the entry and team-merge deadline.
 
 **25–27 Sep.** Whichever term the numbers say is weaker. One change at a time.
 
