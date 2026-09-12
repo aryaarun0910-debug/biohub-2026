@@ -15,12 +15,24 @@ schema that will be got wrong.
     kb.py check                   # provenance audit: every fact must have a source and a quote
 """
 from __future__ import annotations
-import argparse, sqlite3, subprocess, sys, textwrap
+import argparse, re, sqlite3, subprocess, sys, textwrap
 from pathlib import Path
 
 DB = Path(__file__).resolve().parent.parent / "db" / "biohub_base.db"
-CLAIM = ("observation", "inference", "kaggle", "external")
-CONF = ("high", "medium", "low")
+def _allowed(col: str) -> tuple:
+    """Read the CHECK constraint out of the schema instead of remembering it.
+
+    The first version of this file hardcoded the claim_type values from memory and got them
+    wrong -- 'external' and 'kaggle' are not in the constraint -- which is precisely the failure
+    kb.py exists to prevent. A vocabulary the code guesses is a vocabulary it will guess wrong.
+    """
+    sql = sqlite3.connect(DB).execute(
+        "select sql from sqlite_master where type='table' and name='fact'").fetchone()[0]
+    m = re.search(rf"{col}\s+[A-Za-z]*\s*(?:NOT NULL\s*)?CHECK\s*\(\s*{col}\s+IN\s*\(([^)]*)\)",
+                  sql, re.I)
+    if not m:
+        m = re.search(rf"CHECK\s*\(\s*{col}\s+IN\s*\(([^)]*)\)", sql, re.I)
+    return tuple(v.strip().strip("'\"") for v in m.group(1).split(",")) if m else ()
 
 
 def conn():
@@ -38,8 +50,11 @@ def _git_sha() -> str:
 def record(topic, key, value, quote, source, claim="observation", conf="high",
            observed="", note="") -> int:
     """Insert one fact with its provenance. Raises BEFORE writing if anything is missing."""
-    if claim not in CLAIM: raise SystemExit(f"claim_type must be one of {CLAIM}")
-    if conf not in CONF:   raise SystemExit(f"confidence must be one of {CONF}")
+    claims, confs = _allowed("claim_type"), _allowed("confidence")
+    if claims and claim not in claims:
+        raise SystemExit(f"claim_type must be one of {claims}")
+    if confs and conf not in confs:
+        raise SystemExit(f"confidence must be one of {confs}")
     if not quote.strip():  raise SystemExit("a fact needs a verbatim quote -- that is the rule")
     if not source.strip(): raise SystemExit("a fact needs a retrievable source")
     observed = observed or __import__("datetime").date.today().isoformat()

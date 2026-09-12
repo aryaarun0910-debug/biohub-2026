@@ -90,8 +90,9 @@ def check_env() -> None:
     a whole threshold sweep once returned four identical rows because of it. A config override
     that is silently ignored is worse than one that crashes.
     """
+    allowed = _ENV_SEEN | {"BIOHUB_FORK_MODEL"}      # a path, not a Config field
     unknown = sorted(k for k in os.environ
-                     if k.startswith("BIOHUB_") and k not in _ENV_SEEN)
+                     if k.startswith("BIOHUB_") and k not in allowed)
     if unknown:
         raise SystemExit(
             "unrecognised BIOHUB_* override(s): " + ", ".join(unknown) +

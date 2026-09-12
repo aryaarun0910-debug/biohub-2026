@@ -83,11 +83,23 @@ def fork_features(P, parent, first, second, succ):
 
 
 def _model():
+    """The shipped model, unless BIOHUB_FORK_MODEL points elsewhere.
+
+    A leave-one-embryo-out fold MUST swap this: the shipped coefficients were fitted on both
+    embryos, so scoring a held-out embryo with them leaks. The override exists for that.
+    """
     global _MODEL
     if _MODEL is None:
-        f = pathlib.Path(__file__).with_name("fork_model.json")
+        import os
+        f = pathlib.Path(os.environ.get("BIOHUB_FORK_MODEL", "")) if os.environ.get("BIOHUB_FORK_MODEL") \
+            else pathlib.Path(__file__).with_name("fork_model.json")
         _MODEL = json.loads(f.read_text()) if f.exists() else {}
     return _MODEL
+
+
+def reset_model_cache():
+    global _MODEL
+    _MODEL = None
 
 
 def fork_probability(P, parent, first, second, succ) -> float:

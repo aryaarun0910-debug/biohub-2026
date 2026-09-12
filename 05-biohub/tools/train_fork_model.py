@@ -19,12 +19,19 @@ from biohub.refine import refine
 from biohub.resolve import resolve, fork_features
 from biohub.repair import repair
 
+import argparse
+_ap = argparse.ArgumentParser()
+_ap.add_argument("--embryo", default="", help="train on THIS embryo only (LOEO fold)")
+_ap.add_argument("--out", default="src/biohub/fork_model.json")
+_A = _ap.parse_args()
+
 GT = Path("data/train_geff")
-OUT = Path("src/biohub/fork_model.json")
+OUT = Path(_A.out)
 
 X, y, emb = [], [], []
 cfg = Config(fork_accept_p=-1.0)          # -1 disables the model so we can harvest ALL candidates
 for p in sorted(GT.glob("*.geff")):
+    if _A.embryo and not p.stem.startswith(_A.embryo): continue
     g = td.graph.IndexedRXGraph.from_geff(p); g = g[0] if isinstance(g, tuple) else g
     n = g.node_attrs(); e = g.edge_attrs()
     idx = {r["node_id"]: i for i, r in enumerate(n.iter_rows(named=True))}
