@@ -225,9 +225,13 @@ Kaggle recall ≥99.0%. Below that, keep the plain detector and spend the time o
 Today is the 12th. The Mac lands on the 14th. The CPU-only work is **done** — see "The linking
 stack is settled" above. Everything that remains needs the machine.
 
-**Now → 13 Sep.** Kaggle identity verification is the only outstanding item, and it is the one
-with a queue you do not control: it gates prizes. The `.geff` corpus is complete (4,179 files,
-199/199 datasets) and every sweep above ran on it.
+**Now → 13 Sep.** Nothing is outstanding. The account is already phone-verified, entered and
+submitting — 26 completed submissions, best public 0.932, `userRank` 1045, `submissionsDisabled`
+false. An earlier draft of this plan listed "Kaggle identity verification" as a blocking task;
+that was an unsourced claim and it was wrong. The only identity paperwork that exists is the
+*winner's* prize-acceptance documents (eligibility certifications, W-9/W-8BEN) under Rule 3.1,
+which are requested **after** a win and cannot be filed in advance. The `.geff` corpus is complete
+(4,179 files, 199/199 datasets) and every sweep above ran on it.
 
 **14–15 Sep.** Machine up. Pin **torch ≥ 2.14.0** — conv3d on MPS was fixed there and is ~16×
 faster with `bias=True`; build decoders from `Upsample`+`Conv3d`, never `ConvTranspose3d`. Port
