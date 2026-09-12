@@ -1,0 +1,58 @@
+[
+  {
+    "key": "review_pacmap_target_and_decoder",
+    "url": "https://github.com/DeVosLab/PAC-MAP",
+    "quote": "Each Gaussian kernel’s amplitude and standard deviation is equal to the proximity to the nearest neighbor",
+    "value": "PAC-MAP's target amplitude encodes nearest-neighbour distance, not inverse distance; width uses an estimated nuclear radius. Author code points2prob.py queries k=2 neighbours in physical coordinates and passes dist[:,1] as target values. It also uses a proximity-aware decoder. A target-only change with the current fixed-threshold decoder is not a faithful PAC-MAP implementation. Weak-label pretraining plus manual fine-tuning does not establish support for arbitrary missing Kaggle annotations: missing neighbours inflate target distances. Test on dense pseudo-centres with a defined uncertainty mask and matched decoder. The authors now cite the 2025 Computers in Biology and Medicine publication, DOI 10.1016/j.compbiomed.2024.109561.",
+    "claim_type": "inference"
+  },
+  {
+    "key": "review_zebrahub_label_provenance",
+    "url": "https://zebrahub.sf.czbiohub.org/imaging",
+    "quote": "Ultrack, the cell tracking tool used.",
+    "value": "The dataset provider identifies Ultrack as the tool producing the released tracking data. Treat these lineages as algorithm-generated reference labels unless curation is separately documented. Agreement is not proof of biological truth or evidence of beating Ultrack. Use spatial crops with intact trajectories, native physical scales and matched time intervals; measure nearest-neighbour spacing and motion, not just cells/frame. Whole-embryo cell count cannot establish local crop density. The local host-response archive allows Zebrahub and states no test overlap, but this does not establish label correctness or exclude overlap with training material.",
+    "claim_type": "inference"
+  },
+  {
+    "key": "review_ultrack_joint_hypotheses",
+    "url": "https://github.com/royerlab/ultrack",
+    "quote": "By evaluating multiple candidate segmentations and employing temporal consistency",
+    "value": "Ultrack jointly considers segmentation hypotheses and temporal consistency. This supports testing whether irreversible detection and Hungarian decisions cause errors; it does not require replacing the entire pipeline immediately. A baseline comparison must use identical detections and evaluation regions, and cannot score Ultrack against its own generated labels as an independent accuracy test. The Nature paper landing page/PDF could not be retrieved in this review; implementation claims were checked against the authors' repository and the linked ECCV algorithm paper.",
+    "claim_type": "inference"
+  },
+  {
+    "key": "review_linajea_sparse_supervision",
+    "url": "https://www.janelia.org/sites/default/files/Malin-Mayor%202022.pdf",
+    "quote": "We only train on the mean squared error loss within the training mask.",
+    "value": "Malin-Mayor et al., Automated reconstruction of whole-embryo cell lineages by learning from sparse annotations (DOI 10.1038/s41587-022-01427-7), explicitly train cell-centre predictions on local masks around sparse annotations. Their backward movement vectors let both daughters point to one parent. This is a more direct sparse-supervision precedent than PAC-MAP. It disproves the categorical claim that sparse annotations cannot supervise detection, but does not demonstrate Biohub gains. Compare a masked Gaussian baseline before adding dense pseudo-label dependence or a second refinement head. Background predictions remain unconstrained and require filtering; mask radius must avoid neighbouring nuclei. The paper also uses augmentation, so a universal ban on augmentation is not supported.",
+    "claim_type": "inference"
+  },
+  {
+    "key": "review_trackastra_3d_checkpoint",
+    "url": "https://raw.githubusercontent.com/weigertlab/trackastra/refs/heads/main/trackastra/model/pretrained.json",
+    "quote": "\"dimensionality\": [2, 3]",
+    "value": "The authors' checkpoint registry lists ctc as supporting 2D and 3D; the usual general_2d example is not the appropriate 3D checkpoint. Trackastra links segmented objects, so centroid-only integration needs an explicit feature/mask adapter and validation. Candidate for a paired linker baseline after that adapter exists. Freeze the checkpoint, code and training-data ancestry before use; Cell Tracking Challenge success does not imply a Biohub score.",
+    "claim_type": "inference"
+  },
+  {
+    "key": "review_colab_budget_is_estimate",
+    "url": "https://research.google.com/colaboratory/faq.html",
+    "quote": "Paid users whose compute unit balance is exhausted will revert to the free-of-charge tier policies",
+    "value": "Colab hardware availability and runtime limits are dynamic. The proposed units-to-A100-hours conversion is a planning estimate, not a guaranteed allocation. Record the actual offered GPU, memory, unit burn rate, checkpoint resume behavior and measured step time before a budgeted run. There is no technical reason to wait for a Mac to perform CPU validation or prepare CUDA training, but peak throughput specifications do not establish this workload's platform ranking.",
+    "claim_type": "inference"
+  },
+  {
+    "key": "review_a100_peak_not_throughput",
+    "url": "https://www.nvidia.com/en-us/data-center/a100/",
+    "quote": "312 TFLOPS",
+    "value": "NVIDIA specifies A100 dense BF16 Tensor Core peak at 312 TFLOPS. This is a peak hardware figure, not measured 3D-convolution training throughput. Two T4s do not automatically combine memory or accelerate a single-process pipeline. Benchmark actual batch/precision/model shape and I/O before forecasting training or the Kaggle rerun.",
+    "claim_type": "inference"
+  },
+  {
+    "key": "review_current_submission_requirements",
+    "url": "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/overview",
+    "quote": "Internet access disabled",
+    "value": "The current competition overview requires notebook submissions, a file named submission.csv, disabled internet, and a maximum 12-hour CPU or GPU run. Public external data is allowed. Package weights, code and offline dependencies together and validate complete dataset coverage. A local graph roundtrip does not establish Kaggle acceptance, hidden-data runtime or GPU parity.",
+    "claim_type": "claim"
+  }
+]

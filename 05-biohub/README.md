@@ -4,6 +4,9 @@ This repository preserves campaign evidence, experiment records and archived fin
 Biohub cell tracking. It includes the organizers' reference code; a current campaign
 training/inference package is the next milestone, not an already verified deliverable.
 
+Read [the full September 12 review](notes/FULL-REVIEW-2026-09-12.md) for current correctness
+findings, research, and the hold-compute decision.
+
 Read [the approach review](notes/APPROACH-REVIEW.md) for the critique and reasoning behind
 the fixes, and [the campaign plan](notes/RANK1-PLAN.md) for the next validation gates.
 
