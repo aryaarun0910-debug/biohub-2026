@@ -24,7 +24,9 @@ percentile of the volume, and 99.1-99.2% of voxels are dimmer than the DIMMEST a
 The threshold is per-dataset: the two embryos differ ~2x in absolute intensity.
 
 Output is one .npz per dataset under data/cache/, written atomically so an interrupted run
-resumes instead of corrupting.
+resumes instead of corrupting. It stores TARGETS ONLY -- heat, mask and the threshold used.
+The volume stays in its zarr: re-storing it drove the cache toward ~104GB for nothing, when
+zarr already streams at 211 MB/s (EXP-12), and all of this has to be copied to the Mac.
 """
 from __future__ import annotations
 import sys, os, argparse, time
@@ -115,15 +117,14 @@ def main():
             ix = ix[np.all((ix >= 0) & (ix < np.array(gshape)), 1)]
             if len(ix): peaks.append(vs[ix[:, 0], ix[:, 1], ix[:, 2]])
         neg_thr = float(np.percentile(np.concatenate(peaks), NEG_PCT)) if peaks else np.inf
-        vols, heats, masks, ts = [], [], [], []
+        heats, masks, ts = [], [], []
         for fi in range(T):
-            raw = np.asarray(arr[fi], np.uint16)
-            vs = downsample(raw.astype(np.float32))
+            vs = downsample(np.asarray(arr[fi], np.float32))
             h, m = render(zyx_um[t == fi], gshape, vs, neg_thr)
-            vols.append(raw); heats.append(h); masks.append(m); ts.append(fi)
+            heats.append(h); masks.append(m); ts.append(fi)
         tmp = op.with_suffix(".tmp.npz")
-        np.savez_compressed(tmp, vol=np.stack(vols), heat=np.stack(heats),
-                            mask=np.stack(masks), t=np.array(ts),
+        np.savez_compressed(tmp, heat=np.stack(heats).astype(np.float16),
+                            mask=np.stack(masks), t=np.array(ts), zarr=str(zp),
                             sigma_um=SIGMA_UM, neg_pct=NEG_PCT, neg_thr=neg_thr,
                             stem=np.array(STEM))
         os.replace(tmp, op); done += 1
@@ -133,7 +134,7 @@ def main():
     if done:
         d = np.load(sorted(OUT.glob('*.npz'))[0])
         pos = (d['heat'] > 0.01).mean(); m = d['mask'].mean()
-        print(f"  sample: vol {d['vol'].shape} {d['vol'].dtype} | heat {d['heat'].shape}")
+        print(f"  sample: heat {d['heat'].shape} {d['heat'].dtype} (volume stays in the zarr)")
         print(f"    positive {pos:.4%} | loss taken on {m:.2%} | UNKNOWN (excluded) {1-m:.2%}")
 
 
