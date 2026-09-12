@@ -30,25 +30,36 @@ from __future__ import annotations
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from .contracts import Graph, Config
+from .trace import Trace
 
 BIG = 1e6
 
-def _accept_fork(P, parent, first, second, cfg) -> bool:
+def _accept_fork(P, parent, first, second, cfg, tr=None) -> bool:
     """Discriminators from EXP-1, measured over all 151 ground-truth divisions.
 
     cos(angle) between the two parent->daughter arcs: median -0.746, IQR -0.914..-0.486.
     Sisters keep diverging: 10.570um at birth -> 13.656um by t+2. False forks do neither.
     """
+    def no(reason, **kw):
+        if tr is not None:
+            tr.add("fork_reject", parent=int(parent), first=int(first), second=int(second),
+                   reason=reason, **kw)
+        return False
     a, b = P[first] - P[parent], P[second] - P[parent]
     na, nb = np.linalg.norm(a), np.linalg.norm(b)
     if na < 1e-9 or nb < 1e-9:
-        return False
-    if float(np.dot(a, b) / (na * nb)) > cfg.fork_cos_max:      # not opposed enough
-        return False
-    if np.linalg.norm(P[first] - P[second]) > cfg.fork_sister_um:
-        return False
+        return no("degenerate")
+    cos = float(np.dot(a, b) / (na * nb))
+    if cos > cfg.fork_cos_max:                                  # not opposed enough
+        return no("cos", value=cos)
+    sis = float(np.linalg.norm(P[first] - P[second]))
+    if sis > cfg.fork_sister_um:
+        return no("sister", value=sis)
     if max(na, nb) > cfg.fork_parent_um:
-        return False
+        return no("parent", value=float(max(na, nb)))
+    if tr is not None:
+        tr.add("fork_gates_passed", parent=int(parent), first=int(first), second=int(second),
+               cos=cos, sister=sis, arc=float(max(na, nb)))
     return True
 
 
@@ -61,7 +72,7 @@ def _diverges(P, first, second, succ, cfg) -> bool:
     sis = np.linalg.norm(P[first] - P[second])
     return np.linalg.norm(P[g1] - P[g2]) >= sis + cfg.fork_divergence_min_um
 
-def resolve(g: Graph, cfg: Config, allow_fork: bool = True) -> Graph:
+def resolve(g: Graph, cfg: Config, allow_fork: bool = True, trace: Trace | None = None) -> Graph:
     if not len(g.edges):
         return g
     P = g.um()
@@ -97,7 +108,7 @@ def resolve(g: Graph, cfg: Config, allow_fork: bool = True) -> Graph:
             for (s, dd), p in pairs.items():
                 if dd != d or s not in first or s in forked or p <= best_p:
                     continue
-                if _accept_fork(P, s, first[s], d, cfg):
+                if _accept_fork(P, s, first[s], d, cfg, trace):
                     best, best_p = s, p
             if best is not None:
                 chosen.append((best, d)); taken.add(d); forked.add(best)
@@ -108,7 +119,16 @@ def resolve(g: Graph, cfg: Config, allow_fork: bool = True) -> Graph:
         succ: dict[int, int] = {}
         for s, d in chosen:
             succ.setdefault(s, d)
-        drop = {(p, b) for p, a, b in forks if not _diverges(P, a, b, succ, cfg)}
+        drop = set()
+        for p, a, b in forks:
+            if _diverges(P, a, b, succ, cfg):
+                if trace is not None:
+                    trace.add("fork_accept", parent=int(p), first=int(a), second=int(b))
+            else:
+                drop.add((p, b))
+                if trace is not None:
+                    trace.add("fork_reject", parent=int(p), first=int(a), second=int(b),
+                              reason="diverge")
         if drop:
             chosen = [e for e in chosen if e not in drop]
 
