@@ -95,5 +95,9 @@ class Config:
     # not precision, so both were loosened from the EXP-1 angle/divergence distributions.
     fork_cos_max:    float = _env("fork_cos_max", 1.0)          # EXP-7 LOEO: angle gate is monotone loss -> off
     fork_divergence_min_um: float = _env("fork_divergence_min_um", 0.0)  # EXP-7 LOEO: sisters must merely not re-converge
-    gap_max_frames:  int   = _env("gap_max_frames", 2, int)
-    min_track_len:   int   = _env("min_track_len", 6, int)
+    # EXP-10: both repair ops are net-harmful UNDER ORACLE DETECTION (+0.0042 to disable),
+    # because close_gaps only has detector misses to repair and there are none, and prune_short
+    # only has spurious tracks to remove and there are none. MUST BE RE-SWEPT once detect is
+    # trained -- under a real detector this verdict is expected to flip.
+    gap_max_frames:  int   = _env("gap_max_frames", 0, int)
+    min_track_len:   int   = _env("min_track_len", 1, int)
