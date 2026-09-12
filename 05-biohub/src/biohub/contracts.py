@@ -87,7 +87,7 @@ class Config:
     refine_enabled:  bool  = bool(_env("refine_enabled", 1, int))
     refine_prune_quantile: float = _env("refine_prune_quantile", 0.12)  # author pruned 10-14% of peaks
     edge_prob_min:   float = _env("edge_prob_min", 0.48)
-    motion_gate_um:  float = _env("motion_gate_um", 10.0)
+    motion_gate_um:  float = _env("motion_gate_um", 14.0)   # EXP-8 LOEO: 10 -> 14 is +0.045 score, fn 69 -> 21
     # EXP-1: parent<=12 / sister<=18 admits 150 of 151 GT divisions (99.3%)
     fork_parent_um:  float = _env("fork_parent_um", 12.0)
     fork_sister_um:  float = _env("fork_sister_um", 18.0)

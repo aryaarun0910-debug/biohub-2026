@@ -89,17 +89,18 @@ def resolve(g: Graph, cfg: Config, allow_fork: bool = True) -> Graph:
         if not allow_fork:
             continue
         # second pass: an unclaimed target may become a parent's SECOND child
+        forked: set[int] = set()        # a cell divides ONCE: out-degree is capped at 2
         for d in dsts:
             if d in taken:
                 continue
             best, best_p = None, 0.0
             for (s, dd), p in pairs.items():
-                if dd != d or s not in first or p <= best_p:
+                if dd != d or s not in first or s in forked or p <= best_p:
                     continue
                 if _accept_fork(P, s, first[s], d, cfg):
                     best, best_p = s, p
             if best is not None:
-                chosen.append((best, d)); taken.add(d)
+                chosen.append((best, d)); taken.add(d); forked.add(best)
                 forks.append((best, first[best], d))
 
     # divergence persistence, now that every frame's successors are known
