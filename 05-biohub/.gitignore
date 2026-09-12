@@ -20,3 +20,4 @@ evidence/kernels/
 # Ground truth downloaded by tools/fetch_geff.py
 data/
 evidence/vault/
+data/images/
