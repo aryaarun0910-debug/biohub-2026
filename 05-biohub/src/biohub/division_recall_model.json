@@ -1,0 +1,14 @@
+{
+  "features": [
+    "parent_dist",
+    "sister_dist",
+    "child_dist",
+    "cos",
+    "diverge",
+    "arc_max",
+    "arc_min",
+    "arc_asym",
+    "arc_sum"
+  ],
+  "note": "see EXP-24 log"
+}
