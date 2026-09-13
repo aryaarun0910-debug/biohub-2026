@@ -36,12 +36,17 @@ GT = Path("data/train_geff")
 
 
 def wide_cfg() -> D.DivCfg:
-    """Gates opened so real divisions survive to be labelled. EXP-21 prices each closed gate:
-    symmetry 37.7%, divergence 48.3%, parent arc 19.9%, sister 12.6% of real divisions lost."""
-    return D.DivCfg(max_um=20.0, sister_max_um=30.0, existing_child_max_um=20.0,
-                    symmetry_tau=0.0,          # 0 disables the symmetry test
-                    diverge_um=-99.0, require_divergence=False,
-                    require_mutual_nn=False,
+    """The region their gates REJECT, plus the region they accept -- but no wider.
+
+    Fully open (mutual-NN off, arc 20/30) gives 30,288 candidates per dataset against ~1.7 real
+    divisions: a 1:17,816 imbalance that asks a model to rank 2 true divisions into the top few
+    of 30,000. Keeping mutual-NN and modest distance bounds while dropping the two gates EXP-21
+    priced most expensively (symmetry 37.7%, divergence 48.3%) gives ~2,485 per dataset at 1:2155
+    -- still hard, but a population a classifier can actually separate.
+    """
+    return D.DivCfg(max_um=12.0, sister_max_um=20.0, existing_child_max_um=12.0,
+                    symmetry_tau=0.0, diverge_um=-99.0, require_divergence=False,
+                    require_mutual_nn=True,
                     frame_frac_cap=1.0, global_frac_cap=1.0)
 
 
@@ -133,8 +138,32 @@ if __name__ == "__main__":
     print(f"  harvesting from {gd} with WIDE gates...", flush=True)
     X, y, emb, ds = harvest(gd, wide_cfg())
     print(f"  candidates {len(y)}  positive {int(np.sum(y))}")
+    import json as _json
+    X_, y_, emb_ = np.asarray(X, float), np.asarray(y, int), np.asarray(emb)
     for mdl in ("logistic", "grad-boost"):
-        r = loeo(X, y, emb, mdl)
-        if r:
-            print(f"  {mdl:<11} " + "  ".join(f"{k} AUC {v['auc']:.3f} (n={v['n']})"
-                                              for k, v in r.items()))
+        r = loeo(X_, y_, emb_, mdl)
+        if not r:
+            continue
+        print(f"\n  === {mdl} ===")
+        for held, v in r.items():
+            print(f"    held-out {held}: AUC {v['auc']:.3f}  n={v['n']:,}  positives {v['pos']}")
+        # the metric's question: at what score threshold does PRECISION clear 24%,
+        # and how many real divisions does that recover?
+        for held in sorted(set(emb_)):
+            tr, te = emb_ != held, emb_ == held
+            if te.sum() < 5 or len(set(y_[tr])) < 2 or len(set(y_[te])) < 2:
+                continue
+            mu, sd = X_[tr].mean(0), X_[tr].std(0) + 1e-9
+            m = (LogisticRegression(max_iter=3000, class_weight="balanced") if mdl == "logistic"
+                 else GradientBoostingClassifier(n_estimators=60, max_depth=2, random_state=0))
+            m.fit((X_[tr] - mu) / sd, y_[tr])
+            s_te = m.predict_proba((X_[te] - mu) / sd)[:, 1]
+            order = np.argsort(-s_te); yy = y_[te][order]
+            print(f"    held-out {held}: precision at top-K (break-even is 24%)")
+            for K in (10, 25, 50, 100, 200, 500):
+                if K > len(yy):
+                    break
+                prec = yy[:K].mean()
+                flag = "  <-- PAYS" if prec > 0.24 else ""
+                print(f"       top-{K:<4} precision {prec:>6.1%}  true divisions {int(yy[:K].sum()):>3}{flag}")
+    _json.dump({"features": FEATS, "note": "see EXP-24 log"}, open(a.out, "w"), indent=2)
