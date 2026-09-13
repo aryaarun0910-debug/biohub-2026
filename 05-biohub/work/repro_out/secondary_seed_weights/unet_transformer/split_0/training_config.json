@@ -1,0 +1,39 @@
+{
+  "method": "unet_transformer_alltrain_seed314159_v1",
+  "fold": 0,
+  "splits_file": "dataset_splits_alltrain.json",
+  "splits_file_sha256": "d1d52843503f014400c22541d27db992ef94c42dfd71b91beb6e09f660acc179",
+  "split_manifest": "split_manifest.json",
+  "train_datasets": 199,
+  "validation_datasets": 40,
+  "base_seed": 314159,
+  "effective_seed": 314159,
+  "deterministic": false,
+  "epochs_target": 500,
+  "learning_rate": 0.0001,
+  "batch_size": 8,
+  "num_workers": 4,
+  "unet_out_channels": 32,
+  "unet_layers": [
+    32,
+    64,
+    128
+  ],
+  "downsample": [
+    1,
+    4,
+    4
+  ],
+  "window_size": 2,
+  "pool_kernel_um": 5.0,
+  "det_loss_weight": 1.0,
+  "det_neg_weight": 0.01,
+  "max_iters": null,
+  "eval_max_batches": 200,
+  "snapshot_interval": 100,
+  "snapshot_root": "/workspace/26_Biohub/weights/snapshots",
+  "augmentations": [
+    "brightness_augment",
+    "flip_augment"
+  ]
+}
