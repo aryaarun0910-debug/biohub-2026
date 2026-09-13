@@ -58,6 +58,89 @@ def parent_only(f: dict) -> float:
     return -f["parent_dist"]
 
 
+def _propose(nodes_by_id, edges, cfg: DivCfg):
+    """Shared gate logic. Returns [(features, source_id, candidate_id, frame), ...]."""
+    out_by_source, incoming = {}, set()
+    for e in edges:
+        out_by_source.setdefault(int(e["source_id"]), []).append(e)
+        incoming.add(int(e["target_id"]))
+    ids_by_t = {}
+    for nid, n in nodes_by_id.items():
+        ids_by_t.setdefault(int(n["t"]), []).append(nid)
+    existing = {(int(e["source_id"]), int(e["target_id"])) for e in edges}
+
+    props = []
+    for t in sorted(ids_by_t):
+        kids_frame = ids_by_t.get(t + 1, [])
+        if not kids_frame:
+            continue
+        srcs = [i for i in ids_by_t[t] if len(out_by_source.get(i, [])) == 1]
+        cands = [i for i in kids_frame if i not in incoming]
+        if not srcs or not cands:
+            continue
+        tree = cKDTree(np.stack([_pos(nodes_by_id[c]) for c in cands])) if cfg.require_mutual_nn else None
+        for sid in srcs:
+            src = nodes_by_id[sid]
+            ce = out_by_source[sid][0]
+            cid = int(ce["target_id"]); child = nodes_by_id.get(cid)
+            if child is None or int(child["t"]) != t + 1:
+                continue
+            child_dist = _dist(src, child)
+            if child_dist > cfg.existing_child_max_um:
+                continue
+            mutual = cands[int(tree.query(_pos(child))[1])] if tree is not None else None
+            for qid in cands:
+                if (sid, qid) in existing:
+                    continue
+                q = nodes_by_id[qid]
+                parent_dist = _dist(src, q)
+                if parent_dist > cfg.max_um:
+                    continue
+                sister_dist = _dist(child, q)
+                if sister_dist > cfg.sister_max_um:
+                    continue
+                if cfg.require_mutual_nn and qid != mutual:
+                    continue
+                diverge = 0.0
+                if cfg.require_divergence or True:
+                    cs, qs = out_by_source.get(cid, []), out_by_source.get(qid, [])
+                    if len(cs) == 1 and len(qs) == 1:
+                        cg = nodes_by_id.get(int(cs[0]["target_id"]))
+                        qg = nodes_by_id.get(int(qs[0]["target_id"]))
+                        if (cg is not None and qg is not None
+                                and int(cg["t"]) == t + 2 and int(qg["t"]) == t + 2):
+                            diverge = _dist(cg, qg) - sister_dist
+                        elif cfg.require_divergence:
+                            continue
+                    elif cfg.require_divergence:
+                        continue
+                    if cfg.require_divergence and diverge < cfg.diverge_um:
+                        continue
+                if cfg.symmetry_tau > 0.0:
+                    den = max((child_dist + parent_dist) / 2.0, 1e-6)
+                    if abs(child_dist - parent_dist) / den > cfg.symmetry_tau:
+                        continue
+                va, vb = _pos(child) - _pos(src), _pos(q) - _pos(src)
+                na, nb = np.linalg.norm(va), np.linalg.norm(vb)
+                cos = float(va @ vb / (na * nb)) if na > 1e-9 and nb > 1e-9 else 0.0
+                props.append((dict(parent_dist=parent_dist, sister_dist=sister_dist,
+                                   child_dist=child_dist, cos=cos, diverge=diverge,
+                                   arc_max=max(na, nb), arc_min=min(na, nb),
+                                   arc_asym=abs(na - nb), arc_sum=na + nb),
+                              sid, qid, t))
+    return props
+
+
+def collect_proposals(nodes_by_id, edges, cfg: DivCfg):
+    """Every (source, candidate) fork the gates admit, with its features. No ranking, no cap.
+
+    Split out of add_safe_divisions so the trainer can harvest LABELLED candidates under widened
+    gates using exactly the code path that runs in production -- a feature computed two ways is a
+    bug waiting for a deadline.
+    """
+    return _propose(nodes_by_id, edges, cfg)
+
+
 def add_safe_divisions(nodes_by_id, edges, cfg: DivCfg, rank=theirs):
     """Faithful reimplementation of add_safe_divisions_postlink with a pluggable ranker."""
     out_by_source, incoming = {}, set()
