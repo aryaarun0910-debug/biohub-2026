@@ -31,7 +31,7 @@ FEATS = ["dist", "rival_dist", "rival_margin", "n_rivals", "src_outdeg",
          "tgt_indeg_free", "disp_ratio", "src_speed"]
 X, y, EMB = [], [], []
 
-for p in sorted(GRAPHS.rglob("*.geff"))[:80]:
+for p in sorted(GRAPHS.rglob("*.geff")):          # ALL 199, not a slice
     gp = GT / f"{p.stem}.geff"
     if not gp.exists():
         continue
