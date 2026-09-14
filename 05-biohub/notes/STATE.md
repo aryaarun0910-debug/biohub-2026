@@ -402,3 +402,59 @@ This is the root cause underneath the structural law. It explains, with one mech
 The 97.6% of edges the linker gets right are the ones sampled below the aliasing limit. The
 1.5% it misses are the tail where displacement reaches inter-cell spacing. That tail is not a
 modelling failure. It is a property of the acquisition.
+
+## The weighting discovery, and the first real gain (2026-09-14)
+
+### 6bba is 95.4% of the score
+
+`tools/testproxy.py` scores a prediction on THE ACTUAL FOUR TEST MOVIES using the released
+annotations. Their 0.947 pipeline, per stem:
+
+    stem               N_pred  n_total    mult   edgeJ     adj   weight  share
+    44b6_0113de3b      25,822   25,755  0.9997  1.0000  0.9997       50   2.3%
+    44b6_0b24845f      22,491   32,795  1.0314  0.9600  0.9902       50   2.3%
+    6bba_05b6850b       6,305    6,362  1.0009  0.9697  0.9705      857  38.6%
+    6bba_05db0fb1      70,687   69,800  0.9987  0.8688  0.8677     1265  56.9%
+
+adj is weight-averaged by each sample's ANNOTATED edge count (metrics.summarise), so **6bba
+carries 95.4% of the score and 44b6 carries 4.6%**. Every leave-one-embryo-out MINIMUM this
+campaign reported was dominated by an embryo worth one twentieth of the result. EXP-39 gained
++0.0177 on 6bba and +0.0025 on 44b6, and was reported as +0.0025.
+
+`6bba_05db0fb1` alone is 56.9% of the score and holds nearly all the loss (edgeJ 0.8688 against
+1.0000 / 0.9600 / 0.9697). On it, 27 of 84 missing edges are lost to detection -- 2.3% of its GT
+edges, double the validator rate.
+
+### EXP-47 -- OUTPUT_MIN_TRACK_LEN, judged on the right substrate
+
+    config              adj      SCORE    delta   per-stem adj
+    theirs (6, none)  0.91281  0.91281  +0.00000  0.961 1.000 0.975 0.866
+    minlen 8          0.91790  0.91790  +0.00510  0.962 1.010 0.979 0.871
+    minlen 9          0.92061  0.92061  +0.00780  0.963 1.013 0.984 0.872
+    minlen 10         0.92228  0.92228  +0.00947  0.963 1.017 0.986 0.874
+    minlen 11         0.90875  0.90875  -0.00406  0.964 1.020 0.987 0.849   <- cliff
+    minlen10+emax11   0.92269  0.92269  +0.00988
+
+EXP-34 read this null on 199 train graphs. Wrong substrate twice: a different pipeline, and
+even embryo weighting.
+
+### Why it is robust: the gain is ENTIRELY multiplier
+
+    stem             minlen   N_pred    mult   edgeJ     adj
+    6bba_05db0fb1         6   68,441  1.0019  0.8639  0.8656
+    6bba_05db0fb1        10   62,931  1.0098  0.8653  0.8738
+    6bba_05b6850b         6    6,044  1.0050  0.9697  0.9745
+    6bba_05b6850b        10    5,447  1.0144  0.9719  0.9859
+
+**Edge Jaccard never falls; it rises slightly on both heavy stems.** The multiplier depends only
+on N_pred and n_total, both known exactly with no annotation dependence, so this transfers to the
+hidden annotations essentially unchanged. Short components are tracking fragments: pruning them
+drops ~8% of nodes and costs no annotated edges. This is the provably-spurious pool EXP-39
+sought, reached by another route.
+
+**Submitted minlen 9 (+0.0078), not the peak at 10**, because the cliff at 11 is one step away
+and the hidden annotations are a different sample of the same movies.
+
+Caveat: their filter has OUTPUT_KEEP_DIV and SHORT_TRACK_RESCUE_MIN_LEN, so the kernel prunes
+more gently than the plain component-size model used offline. Direction should hold; magnitude
+may differ.
