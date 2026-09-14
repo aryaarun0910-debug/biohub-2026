@@ -393,7 +393,19 @@ SPACING per frame. That is the aliasing limit. At that ratio the nearest cell at
 expected to be the same cell, and the correspondence is not recoverable from geometry because
 the information is not present in the geometry.
 
-This is the root cause underneath the structural law. It explains, with one mechanism:
+**CORRECTED 2026-09-14 (later).** The paragraph below overstated this. These statistics are
+conditioned on the HARD RESIDUAL SET -- cases where the true successor is not the nearest cell --
+not on all edges. Displacement comparable to spacing demonstrates ambiguity for PROXIMITY-BASED
+matching; it is not a Nyquist limit on cell identity, and longer temporal context, appearance or
+global constraints may retain information proximity does not. Nor does it show the ~0.96 leaders
+are exploiting the scorer: that claim needs a score decomposition or an ablation, not a
+displacement-to-spacing ratio. Acquisition timing is also unresolved -- the competition zarr
+metadata says 1 second (a placeholder), while the published Ultrack whole-embryo protocol used
+90 s and DaXi ~60 s. At 90 s, 6.89 um implies 4.59 um/min against published lateral-mesoderm
+averages of 2.2-2.8 um/min, so these are roughly 2x typical speed, consistent with being the
+hard tail rather than the norm.
+
+With that scope, it is still a good explanation of:
   - why appearance fails (EXP-32) -- the cells genuinely look alike
   - why flow fails (EXP-42, 44) -- motion is incoherent and too small
   - why the linker's residual errors are irreducible (EXP-43)
@@ -514,3 +526,44 @@ of their ppsweep is inert where it counts.
 
 **ppgrid independently gives +0.0031** by a different mechanism than minlen9's multiplier gain.
 The two have never been combined -- that is the obvious next run.
+
+## EXP-49 -- does the Ultrack annotation protocol reopen the N_pred pool? Weakly, and not enough
+
+The published Ultrack ground-truth protocol (Nature Methods 2025) introduces sparse RANDOM red
+nuclear labelling by early microinjection, the marker propagates to daughters, and annotators
+select "long, green-overlapping, high-quality lineages" -- 152 tracklets spanning 85-521 frames.
+Competition provenance for 44b6 / 6bba is UNCONFIRMED, so this measured the claim rather than
+assuming it.
+
+Two things follow from the protocol even if it holds. Membership depends partly on a SEPARATE
+FLUORESCENCE CHANNEL not present in the supplied images, so it is not a deterministic selector we
+could compute -- which is consistent with EXP-36's failure. And the selection is on lineage
+LENGTH, which is measurable.
+
+On the four real test movies, predicted-component length of matched vs unmatched nodes:
+
+    ALL   matched 2,172 (median component 74 nodes)   unmatched 120,622 (median 43)
+
+     minlen  matched KEPT  unmatched KEPT  nodes pruned
+          9        99.6%           96.0%          3.9%
+         14        97.4%           89.4%         10.5%
+         20        93.6%           81.2%         18.6%
+         50        73.7%           42.5%         57.0%
+
+Annotated cells do sit in longer components, but by a factor of **1.7**, not the order of
+magnitude "85-521 frame lineages" implies. FRAGMENTATION destroys the signal: a real 300-frame
+lineage arrives as several ~70-node pieces, so predicted length is a weak proxy for annotated
+lineage length.
+
+Applying the break-even condition  eps/J < delta/(m+delta)  at m = 1.0138:
+
+    step        extra pruning   delta/(m+delta)   matched lost   eps/J ~ 2f   verdict
+    minlen 9        3.9%            0.38%            0.4%          ~0.8%      marginal
+    minlen 14      10.5%            0.64%            2.2%          ~4.4%      negative
+    minlen 20      18.6%            1.42%            6.4%         ~12.8%      clearly negative
+
+**Prediction recorded before the kernel landed: biohub-ml14 will score worse than minlen9.**
+
+Aggressive pruning is not available. minlen 9-10 is at or near the optimum, and the 0.0862
+multiplier headroom is not independently attainable -- the 1.1 ceiling sits at zero predicted
+nodes, which cannot preserve edge recall.

@@ -1,0 +1,22 @@
+  submission: work/repro_out/submission.csv
+
+  stem              matched  med len    p10  unmatched  med len    p90
+  44b6_0113de3b          49       27     27     25,588       48     91
+  44b6_0b24845f          51       72     34     20,670       20     46
+  6bba_05b6850b         856       90     46      5,296       52     91
+  6bba_05db0fb1       1,216       70     25     69,068       50     96
+
+  ALL   matched 2,172 (median component 74 nodes)   unmatched 120,622 (median 43)
+
+   minlen  matched KEPT  unmatched KEPT  nodes pruned
+        9        99.6%           96.0%          3.9%
+       14        97.4%           89.4%         10.5%
+       20        93.6%           81.2%         18.6%
+       30        89.2%           66.6%         33.0%
+       50        73.7%           42.5%         57.0%
+       80        41.2%           16.7%         82.9%
+      120         0.4%            1.2%         98.8%
+      200         0.0%            0.0%        100.0%
+
+  'matched KEPT' must stay at ~100% or edge Jaccard collapses; 'nodes pruned' is
+  what buys multiplier. The gap between the two columns is the whole opportunity.
