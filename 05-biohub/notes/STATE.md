@@ -481,3 +481,36 @@ precisely because it is unbounded.
 `size` and `span` orderings give identical output, which is legitimate rather than a bug: a track
 is a chain, so a 10-node component spans 10 frames. (An earlier version of this script grouped by
 rank VALUE instead of by component and was discarded.)
+
+## Instrument calibration -- and a correction (2026-09-14)
+
+`tools/score_submission_local.py` scores a real submission.csv on the four test movies against
+the released annotations. Run over every variant we hold:
+
+    variant      local      their_proxy
+    repro       0.89319      0.94904
+    ns          0.89319      0.94904   <- both LB 0.947, EXACT null
+    tight45     0.89319      0.94726   <- byte-identical test submission
+    tight50     0.89319      0.94648   <- byte-identical test submission
+    outgrid     0.89319      0.94904   <- byte-identical test submission
+    ppgrid      0.89629      0.94904   +0.0031
+    minlen9     0.89638      0.94900   +0.0032
+    vr          0.89051      0.92803   both negative
+    vs          0.89237      0.94621   both negative
+
+**The one hard test passes.** repro and noSister have identical leaderboard scores (0.947 both),
+and the local proxy scores them identically to five decimals. The noSister change produced no
+difference on the test set whatsoever.
+
+**CORRECTION.** An earlier note here said their in-kernel proxy reads minlen9 at -0.0021 and so
+conflicted with our +0.0032. That used 0.9511 as the baseline; repro's actual base_proxy is
+0.94904, against which minlen9's 0.94900 is -0.00004. **The two instruments do not conflict.**
+Theirs is insensitive where ours resolves, which is expected: 8 TRAIN stems with EVEN embryo
+weighting against four TEST movies weighted 95.4% 6bba.
+
+**tight45, tight50 and outgrid produce byte-identical test submissions.** Those knobs change
+nothing on the test data even though their proxy reads differences on train stems. A large part
+of their ppsweep is inert where it counts.
+
+**ppgrid independently gives +0.0031** by a different mechanism than minlen9's multiplier gain.
+The two have never been combined -- that is the obvious next run.
