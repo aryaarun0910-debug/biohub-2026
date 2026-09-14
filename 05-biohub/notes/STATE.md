@@ -718,3 +718,47 @@ they test whether `tools/score_submission_local.py` SIZES a gain correctly or on
 error; none opened a new pool. The gains came from two places neither of which was an experiment
 in the usual sense -- discovering the test set is four movies we hold annotations for, and
 discovering the score weights 6bba at 95.4%.
+
+## EXP-50 -- divisions were closed on the WRONG mechanism (2026-09-14)
+
+EXP-38b concluded divisions were closed: eight gate relaxations, divTP never moved, only false
+positives added. That conclusion was right about the observation and wrong about the cause.
+
+In `add_safe_divisions`:
+
+    cands = [i for i in kids_frame if i not in incoming and i not in used_t]
+
+**Only daughters with NO INCOMING EDGE are ever proposed.** A daughter already linked to some
+other parent is excluded before any gate is evaluated, so no relaxation of max_um, symmetry_tau
+or diverge_um could possibly reach it. The eight relaxations were testing a door already bricked
+up.
+
+Measured on their validator output (12 divisions) and on all 199 train graphs (151 divisions):
+
+    their validator, 12 divisions        199 train graphs, 151 divisions
+      PRESENT        0   0.0%              PRESENT       60  39.7%
+      FREE           0   0.0%              FREE           9   6.0%
+      CONTENDED     11  91.7%              CONTENDED     79  52.3%
+      NO_DAUGHTER    1   8.3%              NO_DAUGHTER    3   2.0%
+
+    of the 91 missed divisions on train:
+      reachable by the gates (FREE)        9.9%
+      STRUCTURALLY EXCLUDED (CONTENDED)   86.8%
+      undetectable (NO_DAUGHTER)           3.3%
+
+**The division route is open.** It needs a different mechanism from anything tried: allow
+contended daughters as candidates and decide whether to STEAL them from their current parent.
+
+The economics of a steal are unusually good. If the truth is P->Q and the prediction has X->Q,
+then X->Q is already a false positive when Q matched a GT node. Replacing it wins three ways at
+once -- edge TP+1, FP-1, FN-1 -- and adds a division on top. Recovering even half the contended
+pool would take div_tp from 3 to ~7 of 12 on the validator, divJ 0.23 -> ~0.6, worth about
++0.0038 on the score before the edge gains.
+
+The deciding signal is the open question. Geometry is the cheap first test. The public notebook
+"A dividing nucleus gets smaller, not dimmer" (zhincez) supplies an independent one worth trying:
+nucleus VOLUME drops ~0.27 around a division while PEAK brightness holds, and the drop begins
+1-2 frames BEFORE the split, so it is predictive rather than descriptive. Their key methodological
+point is that mean intensity in a fixed-radius ball is an ARTEFACT -- a fixed probe around a
+smaller object contains more background, so the mean falls with nothing dimming. Measure peak and
+half-max volume in the same box instead.
