@@ -5,7 +5,7 @@ set -u
 sig() {
   kaggle competitions submissions -c biohub-cell-tracking-during-development 2>/dev/null \
     | grep -oE "SubmissionStatus\.[A-Z]+ +[0-9.]*" | head -3 | tr -d ' \n'
-  for k in biohub-ppgrid-ml12 biohub-ppgrid-ml7 biohub-final-ml9; do
+  for k in biohub-final-ml7 biohub-final-ml9; do
     kaggle kernels status "aryaarun07/$k" 2>/dev/null | grep -oE "KernelWorkerStatus\.[A-Z]+" | tr -d '\n'
   done
 }
