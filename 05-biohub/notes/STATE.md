@@ -1107,3 +1107,30 @@ Stopping the old watcher, I ran `pkill -f "push_when_free.sh biohub-final-ml9"` 
 shell (exit 144) -- the THIRD time this campaign, and it is already recorded as a known trap with
 the fix (`ps -eo pid,args | grep "[p]attern"` then kill the explicit PID). Having a trap written
 down is not the same as not walking into it.
+
+## The sweep-free mechanism is validated (biohub-final-ml9 run)
+
+    ppsweep_selected.json   selected "base", overrides {}, held_out_stems []  -> sweep did not run
+    ppsweep_results.csv     ABSENT                                            -> no candidates scored
+    kernel log              279KB   (vs 919KB for the swept ppgrid-ml9 run)
+    node counts             25,325 / 18,353 / 5,875 / 68,577
+    ppgrid-ml9 node counts  25,325 / 18,353 / 5,875 / 68,577   IDENTICAL
+
+Baking `MOTION_RELINK_TIGHT_UM=5.5`, `MOTION_RELINK_VELOCITY_WEIGHT=0.25` and
+`OUTPUT_MIN_TRACK_LEN=9` into the environment with `BIOHUB_VALIDATOR_ENABLE=0` reproduces the
+SWEPT run's output exactly while skipping the entire ~139-minute validator + sweep block.
+
+Three things confirmed at once:
+
+1. `VALIDATOR_ENABLE=0` gates the block cleanly; `ppsweep_selected.json` is still written but as
+   an empty record.
+2. **Env overrides finally take effect.** Every earlier attempt failed because the sweep applied
+   its own winner OVER the environment; with `selected_config` empty they apply.
+3. **The re-selection confound is eliminated.** A swept submission runs its sweep against the
+   HIDDEN test landscape, so the config applied there need not be the one analysed on the commit
+   run -- one of the three candidate explanations for #29 scoring 0.946. A baked kernel cannot
+   drift: what is chosen locally is what runs.
+
+This is the architecture for every remaining submission. `biohub-final-ml9` itself stays
+unsubmitted (minlen 9 is below minlen 6 on the transfer metric); `biohub-final-ml7` carries the
+transfer-best configuration and is running.
