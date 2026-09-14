@@ -567,3 +567,30 @@ Applying the break-even condition  eps/J < delta/(m+delta)  at m = 1.0138:
 Aggressive pruning is not available. minlen 9-10 is at or near the optimum, and the 0.0862
 multiplier headroom is not independently attainable -- the 1.1 ceiling sits at zero predicted
 nodes, which cannot preserve edge recall.
+
+## ml9-norescue -- a null, and a wrong attribution corrected (2026-09-14)
+
+    variant        local test score
+    repro           0.89319
+    minlen9         0.89638
+    ml9-norescue    0.89639   <- exact null vs minlen9
+
+Disabling ADAPTIVE_SHORT_TRACK_RESCUE changed essentially nothing: N_pred on the heavy stem is
+68,565 either way, and only 44b6_0b24845f moved at all (18,328 -> 18,209).
+
+**Correction.** I attributed minlen9's gain being a third of my offline model to the short-track
+rescue pulling components back. That was wrong. The rescue has
+BIOHUB_SHORT_TRACK_RESCUE_TRIGGER_REMOVED_FRAC = 0.10 and only fires when more than 10% of nodes
+are removed; minlen 9 removes about 4%, so it never triggered and turning it off was a no-op.
+
+The real cap was already in EXP-49's table: at minlen 9 only **4.0% of nodes** sit in components
+shorter than 9. Their pipeline already filters at minlen 6 and gap-closes fragments, so the final
+graph has few short components left to remove. My offline model ran on PRE-FILTER geffs that
+still contained them -- the same substrate error as EXP-34 and EXP-38, in a new place.
+
+So OUTPUT_MIN_TRACK_LEN is near its ceiling at about +0.003, not because pruning stops paying but
+because there is little left to prune. Nothing to submit from this run.
+
+OUTPUT_KEEP_DIVISION_COMPONENTS=0 would prune division-bearing short components, but the local
+proxy reads divJ 0.0000 (the released annotations on these four movies carry almost no
+divisions), so we would be flying blind on a term worth 0.1 * divJ. Not worth it.
