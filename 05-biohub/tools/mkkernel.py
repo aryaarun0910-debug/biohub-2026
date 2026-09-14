@@ -6,13 +6,22 @@ assignment AND the matching entry in _EXPECTED_NUMERIC, which exists specificall
 configuration drift. machine_shape must be NvidiaTeslaT4 -- a P100 (sm_60) cannot run the pinned
 torch at all, and acceleratorType is accepted and silently ignored.
 
-    python tools/mkkernel.py <slug> KEY=VALUE [KEY=VALUE ...]
+    python tools/mkkernel.py <slug> KEY=VALUE [KEY=VALUE ...] [--base kernels/X/v.ipynb]
+
+--base defaults to the reproduced 0.947. Use v-ppgrid as the base when the change must sit on
+top of an EXTENDED PP_CANDIDATES table: their in-kernel sweep applies its own winner OVER the
+environment, so a swept parameter cannot be set from outside -- it has to be in the table.
 """
 import json, re, sys
 from pathlib import Path
 
-slug, kv = sys.argv[1], [a.split("=", 1) for a in sys.argv[2:]]
-nb = json.load(open("kernels/repro-947/repro-947.ipynb"))
+args = sys.argv[1:]
+base = "kernels/repro-947/repro-947.ipynb"
+if "--base" in args:
+    i = args.index("--base"); base = args[i + 1]; del args[i:i + 2]
+slug, kv = args[0], [a.split("=", 1) for a in args[1:]]
+nb = json.load(open(base))
+print(f"  base: {base}")
 anchor = 'os.environ["BIOHUB_DET_THRESHOLD"] = "0.965"'
 patched = 0
 for c in nb["cells"]:
