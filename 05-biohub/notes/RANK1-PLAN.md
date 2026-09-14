@@ -1,72 +1,63 @@
-# Current campaign plan — fork the 0.947, beat it on divisions
+# Campaign plan — post-processing on a reproduced 0.947
 
-Supersedes the validation-gate plan (kept as
-[RANK1-PLAN.validation-gate-2026-09-12.md](RANK1-PLAN.validation-gate-2026-09-12.md)), whose
-correctness findings stand but whose *sequencing* is overtaken: it assumed we would build a
-detector. We do not need to.
+Supersedes [RANK1-PLAN.superseded-2026-09-14.md](RANK1-PLAN.superseded-2026-09-14.md), whose
+plan was "beat it on divisions". Divisions are now closed by measurement (EXP-38b: divTP never
+moved across eight gate relaxations). The full evidence trail is in
+[STATE.md](STATE.md) — read that first; this file is only the forward plan.
 
-## What changed
+## Position
 
-**The floor is the public 0.947, and it is free.** Every clean 0.947-family kernel attaches the
-same three **CC0** datasets — a trained DeepCenter UNet3D, a trained temporal UNet3D, and the
-tracking support pack. `detect` being a stub never required training anything.
+| | |
+|---|---|
+| Public LB | **0.947**, reproduced exactly (#27) |
+| Best measured variant | ppgrid + OUTPUT_MIN_TRACK_LEN=9, **+0.0082** on the four real test movies |
+| Deadline | 2026-09-29 23:59 UTC; entry/merge cutoff 2026-09-22 |
 
-**Reproduced and submitted.** `aryaarun07/biohub-repro-947` is byte-identical and T4-pinned;
-submission 27 is pending. Two traps are now settled and both matter for the *final* submission,
-which cannot be retried:
+## What is closed, and why
 
-- Pushing with `enableGpu` alone lets Kaggle hand you a **P100 (sm_60)**, which the pinned
-  PyTorch cannot execute at all. `machineShape="NvidiaTeslaT4"` is the field that binds;
-  `acceleratorType` is accepted and silently ignored.
-- A kernels-only entry must be submitted **explicitly, by kernel reference, via the CLI**. The
-  REST endpoint is the file path and rejects it.
+All four scoring terms were attacked and three are shut by base-rate arithmetic:
 
-**Their pipeline runs locally against our ground truth**, scoring edgeJ **0.9261** against their
-published 0.926, at `node_recall 1.0000`. Detection is not their bottleneck, which is consistent
-with FOCUS-3D and the SSL routes having failed to beat 0.947 in public hands.
+- **divisions** — EXP-38b, no gate relaxation adds a single true division
+- **edge numerator** — EXP-40/41, only 5.5% of missing edges have both endpoints free
+- **edge rewiring** — EXP-43, the linker beats nearest-neighbour 53:7 on disagreements
+- **N_pred by node selection** — EXP-36, annotation is not predictable (AUC 0.641/0.557)
+- **detection** — EXP-37, node recall 0.9979; and better detection *lowers* the multiplier
 
-## Where it is beatable
+The residual has one shape every time: ~1-2% base rate against a 24-48% precision bar.
 
-The three 0.947-family kernels differ in **4 of 54** settings; fifty are consensus, so the
-threshold surface is mined out. (Our own `fork_sister_um=18` was already tried at real density
-and lost: 0.946 against 0.947 at 14.0.)
+## What is open
 
-Nobody varies the **division gates**. EXP-21 prices them against ground truth:
+**The multiplier, via component pruning.** It is the only lever whose gain is
+annotation-independent: it depends solely on N_pred and n_total, both known exactly for all four
+test movies. Currently 1.0138 of a possible 1.1000, though the ceiling is not attainable (it sits
+at zero predicted nodes).
 
-| gate | rejects (Kaggle GT, n=151) | (Zebrahub, n=761,849) |
-|---|---|---|
-| `SISTER_SYMMETRY_TAU` 0.6 | **37.7%** | 54.9% |
-| `DIVERGE_UM` 2.25 | **48.3%** | 85.6% |
-| `MAX_UM` 9.0 | 19.9% | 14.6% |
-| `SISTER_MAX_UM` 14.0 | 12.6% | 2.2% |
-| **all combined** | **74.8%** | 87.0% |
+**The sweep's selection objective.** This is the live idea. Their in-kernel sweep picks a config
+by weight-averaging over 8 held-out TRAIN stems, which mix to 44b6 25.9% / 6bba 74.1%. The real
+test set weights **44b6 4.6% / 6bba 95.4%**. Every public fork has therefore been selecting the
+config that wins on an embryo mix the test set does not contain. `kernels/biohub-rw-ml9` scales
+44b6 weights by 0.1379 so the proxy's mix matches the test's.
 
-They discard three quarters of real divisions **before ranking**. At perfect precision those
-gates cap divJ at 0.252 — almost exactly the 0.231 they publish. That is the strongest evidence
-we have that their division term is **recall-limited, not selection-limited**, and it corrects
-our own earlier reading.
+This is also the principled version of an accident: ppgrid+minlen9 gained +0.0082, more than the
++0.0063 its parts predict, because pruning perturbed the landscape enough that the sweep
+*stumbled* onto a better config. Reweighting looks for those deliberately.
 
-## The play, in order
+## Method rules earned the hard way
 
-1. **Loosen** `SAFE_DIV_DIVERGE_UM` and `SAFE_DIV_SISTER_SYMMETRY_TAU`. Both env-settable, both
-   untouched by the entire family. Dropping divergence admits 48.7% instead of 25.2%: divJ 0.355
-   at p=0.8, worth **+0.012** of score.
-2. **Rank** the enlarged pool. Their selector is one line — `parent_dist + 0.15*sister_dist` —
-   which measures *worse* than `parent_dist` alone (AUC 0.776 vs 0.806), because sister distance
-   ranks at 0.551. Our learned ranker beats it by **+0.079 AUC held out** on 6bba.
-3. **Let the cap enforce precision.** `GLOBAL_FRAC_CAP` 0.00375 sits just under the true
-   biological rate of 0.00391 measured on Zebrahub, so it binds once recall is restored.
+1. **Score variants with `tools/score_submission_local.py`** on a REAL kernel submission, against
+   the four test movies. Their in-kernel proxy is mis-weighted; our cached train graphs are a
+   different pipeline; pre-filter geffs are a different stage. Substrate errors cost three
+   experiments in one day.
+2. **Validate an instrument against a known answer before trusting it.** `tools/fastpp.py` looked
+   like a 6x speedup and under-read the one case we could check by 3x.
+3. **Check the break-even** `eps/J < delta/(m+delta)` before spending a run on pruning.
+4. **The multiplier is exactly computable offline** — `tools/multiplier.py`. Never infer it from
+   leaderboard deltas.
+5. **A kernel run is not a submission**, and `machine_shape="NvidiaTeslaT4"` is what binds.
 
-A ranker is worth most when there is a surplus of candidates to order — which their gates
-currently prevent from existing. The steps compose; do them in that order.
+## Next
 
-## Discipline
-
-- **Measure offline, not per submission.** `tools/div_sweep.py` reimplements their selector with
-  the ranker pluggable; `kernels/gen-train-graphs` produces linked graphs for all 199 train
-  datasets on a T4 so variants cost seconds instead of a 2-hour run each.
-- **Leave-one-embryo-out, both directions, report the minimum.** Train and test are
-  embryo-disjoint by the host's own statement.
-- **Scoring takes up to 8 hours.** Never serialise experiments behind it; never block on polling.
-- Oracle-detection results are conditional diagnostics at 6.7 cells/frame against a real 237.
-  They are not a submittable ceiling.
+- Read #29 / #30 / #31 when they score; they test whether the local proxy SIZES gains or only
+  detects nulls.
+- Run `biohub-rw-ml9` (built, waiting on a slot).
+- If reweighting works, sweep a wider PP_CANDIDATES table under the corrected objective.
