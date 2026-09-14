@@ -458,3 +458,26 @@ and the hidden annotations are a different sample of the same movies.
 Caveat: their filter has OUTPUT_KEEP_DIV and SHORT_TRACK_RESCUE_MIN_LEN, so the kernel prunes
 more gently than the plain component-size model used offline. Direction should hold; magnitude
 may differ.
+
+## EXP-48 -- per-dataset ratio targeting is WORSE than a global minlen
+
+The multiplier is applied per dataset and n_total is known for all four test movies, so targeting
+a node ratio per dataset looked strictly better than one global OUTPUT_MIN_TRACK_LEN. It is not.
+
+    order    target      adj    SCORE    delta
+    none          -  0.91307  0.91307 +0.00000
+    size      +0.00  0.91236  0.91236 -0.00071
+    size      -0.05  0.91416  0.91416 +0.00109
+    size      -0.10  0.91497  0.91497 +0.00190   <- best, vs minlen 9 at +0.00780
+    size      -0.15  0.90998  0.90998 -0.00309
+    size      -0.20  0.89104  0.89104 -0.02203
+
+Peak +0.0019 against the global minlen's +0.0078. The reason is worth keeping: a ratio target
+STOPS pruning once a dataset reaches it, but edge Jaccard stays flat far below n_total, so
+pruning keeps paying. 44b6_0b24845f already sits at ratio -0.368, so a -0.10 target prunes it not
+at all, while minlen 10 takes it to 13,479 nodes and multiplier 1.0589. The global threshold wins
+precisely because it is unbounded.
+
+`size` and `span` orderings give identical output, which is legitimate rather than a bug: a track
+is a chain, so a 10-node component spans 10 frames. (An earlier version of this script grouped by
+rank VALUE instead of by component and was discarded.)
