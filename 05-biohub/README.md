@@ -1,14 +1,30 @@
-# Biohub cell tracking development base
+# Biohub cell tracking
 
-This repository preserves campaign evidence, experiment records and archived findings for
-Biohub cell tracking. It includes the organizers' reference code; a current campaign
-training/inference package is the next milestone, not an already verified deliverable.
+Campaign evidence, experiment records and tooling for the Kaggle competition
+*Biohub — Cell Tracking During Development* (closes 2026-09-29).
 
-Read [the full September 12 review](notes/FULL-REVIEW-2026-09-12.md) for current correctness
-findings, research, and the hold-compute decision.
+**Start at [notes/STATE.md](notes/STATE.md)** — the single honest account of where things are:
+the metric and its exchange rates, which scoring terms are closed and by which experiment, and
+the corrections made along the way. [notes/RANK1-PLAN.md](notes/RANK1-PLAN.md) is the forward
+plan only.
 
-Read [the approach review](notes/APPROACH-REVIEW.md) for the critique and reasoning behind
-the fixes, and [the campaign plan](notes/RANK1-PLAN.md) for the next validation gates.
+Current position: the public **0.947** reproduced exactly, with a measured **+0.0082** variant
+(extended post-process grid plus `OUTPUT_MIN_TRACK_LEN=9`) submitted and awaiting scoring.
+
+## What the tooling does
+
+| tool | purpose |
+|---|---|
+| `tools/score_submission_local.py` | score a real submission.csv on the FOUR actual test movies against released annotations — the only trustworthy offline instrument |
+| `tools/multiplier.py` | compute the metric's node-count multiplier exactly, offline, with no leaderboard feedback |
+| `tools/mkkernel.py` | build a kernel variant with env overrides that survive the notebook's drift guard |
+| `tools/kb.py` | the only interface to the knowledge base; `check` audits provenance |
+| `tools/testproxy.py` | score prediction geffs (raw stage) on the four test movies |
+| `tools/fastpp.py` | **shelved** — local post-processing loop; under-read a known delta by 3x |
+
+The test set is four movies and `estimated_number_of_nodes` ships for all four, so the
+multiplier term is exactly computable without submitting. The score weight-averages by annotated
+edge count, which makes it **95.4% 6bba / 4.6% 44b6** — not an even embryo split.
 
 ## Start from a clean checkout
 
