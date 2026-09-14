@@ -965,3 +965,34 @@ and still pending; if they error or truncate, this is why.
 
 **Action: trim the candidate table before any further submission, and prefer baking a chosen
 config into the environment over sweeping for it at submission time.**
+
+## Kernel architecture rule: never sweep at submission time
+
+The sweep runs on 8 held-out TRAIN stems, so its cost is FIXED (~139 min: 16 validator + 7 base
++ 410s per candidate) regardless of hidden-test size. Prediction is what scales. On a 199-film
+hidden set at 2.29 min/film that is 455 min, leaving only ~85 min of headroom under a 9h limit.
+
+    kernel                      cands  sweep+pre  predict  TOTAL  verdict
+    #27 repro / #28 noSister       7       71m      455m    8.8h  SURVIVED (calibrates the model)
+    #30 minlen9                    7       71m      455m    8.8h  should survive
+    #29 ppgrid / #31 ppgrid+ml9   17      139m      455m    9.9h  AT RISK
+    rw-ml9 / r3-ml9 (queued)      17      139m      455m    9.9h  would fail
+
+**#31 is our best measured variant and the one most likely to be killed.**
+
+### The rule
+
+- **Research kernels may keep a large candidate table.** They run as COMMITS, which see only the
+  four example films (~9 min of prediction), so 17 candidates costs ~2.5h total -- fine. Read
+  `ppsweep_results.csv` from the commit output.
+- **Submission kernels set `BIOHUB_VALIDATOR_ENABLE=0` and bake the chosen config into the
+  environment.** That gates the whole 139-min block (`if VALIDATOR_ENABLE and val_stems ...`), and
+  with `selected_config` empty the environment values finally apply -- the sweep applying its
+  winner OVER the environment is what blocked env overrides in every earlier attempt.
+
+`kernels/biohub-final-ml9` is the first of these: VALIDATOR_ENABLE=0 with tight55 + vel025 +
+OUTPUT_MIN_TRACK_LEN=9 baked in, i.e. the #31 configuration without the sweep. Projected 7.6h
+against the 9h limit.
+
+Credit: the fixed-vs-scaling split came from discussion 741242, which measured the same ~75 min
+on a dual-seed + HOCT variant.
