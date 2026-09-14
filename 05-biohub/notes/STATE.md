@@ -909,3 +909,59 @@ parts are noisy, even though the whole is solid.
 
 **Rule going forward: no variant is submitted on a point estimate.** Run `tools/proxy_ci.py`
 first; require the 95% lower bound to clear 0.001.
+
+## MAJOR CORRECTION: the four films are EXAMPLES, not the scored test set (2026-09-14)
+
+Discussion 741242 (2026-09-14, "Saving ~75 min in the dual-seed + HOCT veto pipeline") states
+plainly:
+
+> "...it matters more on the hidden test set than on **the 4 public example videos**"
+> "The **hidden test set is about the size of the training set**, so the veto can realistically
+> hit the deadline."
+
+**This reverses the verification recorded earlier today.** I checked that the four test films were
+full-size rather than truncated and concluded they were the scored set. Full-size EXAMPLES are
+still examples. At submission time Kaggle mounts the real hidden test; the submission.csv we
+download comes from the COMMIT run, which only ever sees the four. The host's "no overlap in
+embryo_ids between train and test" -- which I recorded as contradicted by the data -- is almost
+certainly correct, and the hidden set is a third embryo.
+
+Runtime confirms it independently. Our own repro: 4,886s total, of which prediction on the four
+films is 9.15 min. The remaining ~75 min is validator + base scoring + sweep, matching the
+poster's table exactly. At ~2.3 min/film, 199 hidden films would need ~7.6 h of prediction alone.
+
+### What this invalidates
+
+- **`tools/score_submission_local.py` scores example films, not the scored set.** Every delta
+  measured with it today -- minlen9 +0.0034, ppgrid +0.0025, ppgrid+minlen9 +0.0081 -- describes
+  four films that are not scored.
+- **The 95.4% / 4.6% embryo weighting is from those four films.** The hidden set's composition is
+  unknown, and if it is a third embryo the weighting does not carry over at all.
+- **The leave-one-embryo-out MINIMUM discipline, which I abandoned on the strength of that
+  weighting, was the right rule** -- it is exactly the transfer-to-an-unseen-embryo question.
+- `tools/proxy_ci.py` intervals are conditional on the same four films, so they measure sampling
+  noise within the examples, not transfer.
+
+### What survives
+
+- The metric arithmetic, break-even conditions and `tools/multiplier.py` are unaffected.
+- Every base-rate closure (divisions, edges, rewiring, N_pred classification, detection) was
+  measured on TRAIN films with ground truth, not on the examples, so those stand.
+- minlen9's gain is multiplier-driven and depends on N_pred/n_total, a per-film property that
+  plausibly generalises -- but "plausibly" is now the honest word, not "arithmetically".
+
+### OPERATIONAL RISK: kernel runtime on the hidden set
+
+    scenario                      candidates   predict   pre-write   total
+    public examples                     7          9m        71m      1.3h
+    public examples                    17          9m       139m      2.5h
+    hidden ~= train size                7        455m        71m      8.8h
+    hidden ~= train size               17        455m       139m      9.9h   OVER THE 9h LIMIT
+
+Their sweep costs ~410s per candidate. **Our ppgrid and round-3 kernels carry 17 candidates where
+theirs carries 7**, adding ~68 min. On a hidden set the size of train that is the difference
+between finishing at 8.8h and exceeding the limit. Submissions #29 and #31 are both ppgrid-based
+and still pending; if they error or truncate, this is why.
+
+**Action: trim the candidate table before any further submission, and prefer baking a chosen
+config into the environment over sweeping for it at submission time.**
