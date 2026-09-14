@@ -844,3 +844,43 @@ resolution, not the "+0.0128" the note quoted, which assumed fixing ALL 2,887 at
 So: real signal, rejected for the wrong reason, worth ~+0.001 rather than ~+0.013. Worth a
 submission only if cheaper levers run out, and it would need re-measuring on the real artifact
 first since it was computed on train_graphs.
+
+## Verification: is the visible test set the scored test set? (2026-09-14)
+
+Prompted by the public EDA notebook (zhincez/label-eda), which states the hidden test films come
+from an embryo appearing nowhere in training. That would invalidate everything measured today,
+since our four test films carry the train embryo prefixes.
+
+The host said on record (competition discussion, frozen in evidence/):
+
+> "Hi, indeed there are two unique embryo_ids in the training set. You can assume the test sit is
+> roughly similar in size, with no overlap in embryo_ids between train and test sets."
+
+**That statement does not match the shipped data.** Checks run:
+
+- `sample_submission.csv` requires exactly four datasets: 44b6_0113de3b, 44b6_0b24845f,
+  6bba_05b6850b, 6bba_05db0fb1 -- both train embryo prefixes.
+- All four exist in `data/images/train/` AND `data/images/test/` AND `data/train_geff/`.
+- The test copies are FULL SIZE, not truncated placeholders: 436M and 516M, matching their
+  train/ counterparts byte-for-byte in size. So they are not a sample that gets swapped at
+  scoring time, which was the main risk.
+
+What reconciles it: the released annotations on the four scored films are unusually sparse.
+Expected at typical embryo density against released counts:
+
+    44b6_0113de3b   0.8% x 25,755 =   206      released    52
+    44b6_0b24845f   0.8% x 32,795 =   262      released    51
+    6bba_05b6850b   9.7% x  6,362 =   617      released   861
+    6bba_05db0fb1   9.7% x 69,800 = 6,771      released 1,229
+
+Roughly 18-25% of expected. The organisers withheld most annotations on the scored films, which
+is exactly why our local proxy reads 0.893 against a leaderboard 0.947.
+
+**The embryo weighting is robust to this.** At typical density the mix is 44b6 6.0% / 6bba 94.0%,
+against 4.6% / 95.4% measured from released counts. Same conclusion either way, so today's
+decisions stand.
+
+Unresolved: the host's "no overlap in embryo_ids" is contradicted by the shipped data and by
+sample_submission. Treat it as inaccurate rather than as evidence of a hidden swap -- but if a
+private rerun ever produces scores wildly out of line with public, this is the first thing to
+re-examine.
