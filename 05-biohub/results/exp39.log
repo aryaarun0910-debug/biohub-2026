@@ -1,0 +1,39 @@
+  50 datasets   node ratio -0.454 .. +1.192   median +0.109   OVER-PREDICTING 39/50
+
+  config                    edgeJ    divJ      adj    SCORE    delta
+  ------------------------------------------------------------------
+  no trim                  0.8933  0.0223   0.8829   0.8852  +0.0000
+[2;36m[09/14/26 10:26:12][0m[2;36m [0m[33mWARNING [0m No matching edges found.        ]8;id=10163379;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py\[2m_base_graph.py[0m]8;;\[2m:[0m]8;id=10163380;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py#1455\[2m1455[0m]8;;\
+  ratio>0.00 -> 0.00       0.8950  0.0218   0.8969   0.8991  +0.0140
+[2;36m[09/14/26 10:27:17][0m[2;36m [0m[33mWARNING [0m No matching edges found.        ]8;id=10163385;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py\[2m_base_graph.py[0m]8;;\[2m:[0m]8;id=10163386;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py#1455\[2m1455[0m]8;;\
+  ratio>0.05 -> 0.00       0.8949  0.0218   0.8968   0.8990  +0.0138
+[2;36m[09/14/26 10:28:04][0m[2;36m [0m[33mWARNING [0m No matching edges found.        ]8;id=10163391;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py\[2m_base_graph.py[0m]8;;\[2m:[0m]8;id=10163392;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py#1455\[2m1455[0m]8;;\
+  ratio>0.10 -> 0.00       0.8937  0.0218   0.8943   0.8965  +0.0113
+[2;36m[09/14/26 10:28:50][0m[2;36m [0m[33mWARNING [0m No matching edges found.        ]8;id=10163397;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py\[2m_base_graph.py[0m]8;;\[2m:[0m]8;id=10163398;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py#1455\[2m1455[0m]8;;\
+  ratio>0.00 -> -0.05      0.8919  0.0220   0.8975   0.8998  +0.0146
+[2;36m[09/14/26 10:30:04][0m[2;36m [0m[33mWARNING [0m No matching edges found.        ]8;id=10163403;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py\[2m_base_graph.py[0m]8;;\[2m:[0m]8;id=10163404;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py#1455\[2m1455[0m]8;;\
+  ratio>0.00 -> -0.10      0.8850  0.0228   0.8944   0.8966  +0.0115
+[2;36m[09/14/26 10:31:55][0m[2;36m [0m[33mWARNING [0m No matching edges found.        ]8;id=10163409;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py\[2m_base_graph.py[0m]8;;\[2m:[0m]8;id=10163410;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py#1455\[2m1455[0m]8;;\
+  ratio>-0.10 -> -0.15     0.8769  0.0234   0.8907   0.8930  +0.0078
+[2;36m[09/14/26 10:32:36][0m[2;36m [0m[33mWARNING [0m No matching edges found.        ]8;id=10163415;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py\[2m_base_graph.py[0m]8;;\[2m:[0m]8;id=10163416;file:///home/aryaarun/.local/share/score-venv/lib/python3.13/site-packages/tracksdata/graph/_base_graph.py#1455\[2m1455[0m]8;;\
+  ALL -> -0.20             0.8577  0.0242   0.8754   0.8778  -0.0074
+
+  === leave-one-embryo-out ===
+    held out 44b6:
+      no trim                edgeJ  0.8633  adj  0.8653  score  0.8669  +0.0000
+      ratio>0.00 -> 0.00     edgeJ  0.8602  adj  0.8678  score  0.8693  +0.0025
+      ratio>0.05 -> 0.00     edgeJ  0.8604  adj  0.8678  score  0.8694  +0.0025
+      ratio>0.10 -> 0.00     edgeJ  0.8604  adj  0.8676  score  0.8691  +0.0023
+      ratio>0.00 -> -0.05    edgeJ  0.8575  adj  0.8667  score  0.8682  +0.0014
+      ratio>0.00 -> -0.10    edgeJ  0.8550  adj  0.8658  score  0.8673  +0.0005
+      ratio>-0.10 -> -0.15   edgeJ  0.8431  adj  0.8583  score  0.8599  -0.0070
+      ALL -> -0.20           edgeJ  0.8307  adj  0.8494  score  0.8511  -0.0158
+    held out 6bba:
+      no trim                edgeJ  0.9029  adj  0.8886  score  0.8912  +0.0000
+      ratio>0.00 -> 0.00     edgeJ  0.9062  adj  0.9064  score  0.9089  +0.0177
+      ratio>0.05 -> 0.00     edgeJ  0.9062  adj  0.9062  score  0.9087  +0.0175
+      ratio>0.10 -> 0.00     edgeJ  0.9046  adj  0.9030  score  0.9055  +0.0143
+      ratio>0.00 -> -0.05    edgeJ  0.9030  adj  0.9076  score  0.9101  +0.0189
+      ratio>0.00 -> -0.10    edgeJ  0.8948  adj  0.9036  score  0.9063  +0.0151
+      ratio>-0.10 -> -0.15   edgeJ  0.8879  adj  0.9012  score  0.9039  +0.0127
+      ALL -> -0.20           edgeJ  0.8665  adj  0.8838  score  0.8866  -0.0045
