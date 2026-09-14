@@ -996,3 +996,45 @@ against the 9h limit.
 
 Credit: the fixed-vs-scaling split came from discussion 741242, which measured the same ~75 min
 on a dual-seed + HOCT variant.
+
+## Foundation restored: LOEO selection on train films (2026-09-14)
+
+With the four films now known to be EXAMPLES and the hidden test a third embryo, the question a
+config must answer is **transfer to an embryo never seen**. `tools/loeo_select.py` answers it from
+data we already hold: `validator_results.csv` is PER-STEM, so any run can be re-scored separately
+on its 44b6 and 6bba stems and ranked by the MINIMUM.
+
+On the ppgrid run (no minlen):
+
+    config                               pooled     44b6     6bba    MIN d   pooled d
+    combo(tight55+vel025+tight50relax9) 0.95242  0.95946  0.94530  +0.00242  +0.00338
+    tight50relax9                       0.94970  0.94921  0.94566  -0.00412  +0.00066
+
+On the ppgrid+minlen9 run:
+
+    combo(tight55+vel025)               0.95261  0.96125  0.94492  +0.00294  +0.00360
+
+**Both rules agree on the winner in both runs**, which is the best evidence available that the
+config transfers rather than fitting one embryo. And the rule bites where it matters:
+`tight50relax9` is positive pooled (+0.00066) but **-0.00412 on the minimum** -- it fits 6bba and
+hurts 44b6. A pooled proxy would have kept it.
+
+`kernels/biohub-final-ml9` bakes `combo(tight55+vel025)` + minlen9, which is exactly the
+min-embryo winner on the landscape it will run in. Min-embryo delta improves from +0.00242 to
++0.00294 once minlen9 is applied, so the pruning helps transfer too.
+
+### The honest expected gain
+
+    +0.0082   on the four EXAMPLE films        -- wrong substrate, do not quote
+    +0.0029   min-embryo on held-out train      -- the transfer-valid estimate
+
+**Our honest expectation for the hidden set is about +0.003, not +0.008.** The larger figure was
+measured on films that are not scored.
+
+### The corrected selection rule
+
+1. Rank configs by the MINIMUM across embryos, never by a pooled or reweighted proxy.
+2. The 6bba reweighting (`BIOHUB_PPSWEEP_44B6_WEIGHT`) was derived from the example films and is
+   now WRONG for the hidden set -- `rw-ml9` should not be submitted as built.
+3. Research kernels sweep on commits; submission kernels bake the min-embryo winner with
+   `BIOHUB_VALIDATOR_ENABLE=0`.
