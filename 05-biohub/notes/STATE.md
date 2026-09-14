@@ -805,3 +805,42 @@ than EXP-38b's gate sweeps provided.
 other closure survived re-examination. The single recurring cause is SUBSTRATE: measuring on the
 wrong artifact (a different pipeline, a pre-filter stage, or an even embryo weighting). That is
 now a standing warning at the top of this file and in RANK1-PLAN.
+
+## Substrate audit part 2 -- EXP-31 revisited under the correct weighting
+
+Systematic check of which experiments used which artifact:
+
+    EXP-23..EXP-39   train_graphs   (WRONG pipeline -- over-predicts, ~187 native forks/dataset)
+    EXP-40..EXP-45   validator      (their pipeline, 8 train stems)
+    EXP-46..EXP-48   test geffs     (RAW stage, not the submission)
+    EXP-49           submission     (correct artifact)
+
+Fifteen experiments ran on train_graphs, the substrate that produced the one confirmed false
+negative (EXP-34). EXP-31 is the one whose conclusion turned on a weighting rule we have since
+shown to be wrong.
+
+EXP-31 found the SWAP pool is structurally different from everything else: 2,887 GT edges have
+their target assigned to a different parent, out of ~124k predicted edges -- a **2.3% base rate**,
+15x richer than any other pool, needing only 8.1x lift rather than 150-320x. It was rejected
+because "the min-across-embryos margin is nil: -0.0003 at 49%".
+
+Re-run, per embryo:
+
+                              top50   top200  top1000    (break-even 48.1%)
+    logistic   held-out 44b6    44%     48%*     49%*
+    logistic   held-out 6bba    46%     53%*     52%*
+    grad-boost held-out 44b6    62%*    60%*     50%*
+    grad-boost held-out 6bba    28%     48%      54%*
+
+The MINIMUM is 49% (44b6). Weighted at the real 95.4% 6bba it is **52-53%**, clearing break-even
+by 4-5 points. **The rejection was an artefact of the min-across-embryos rule**, which optimises
+for the embryo worth 4.6% of the score.
+
+But the value is small, and the original note oversold it. A correct swap fix moves the Jaccard
+numerator +1 and the denominator -1; a wrong one does the reverse. At 52% precision on the top
+1,000 of 2,887 that is +40 net edges across 199 graphs, about **+0.0011** -- at leaderboard
+resolution, not the "+0.0128" the note quoted, which assumed fixing ALL 2,887 at 65%.
+
+So: real signal, rejected for the wrong reason, worth ~+0.001 rather than ~+0.013. Worth a
+submission only if cheaper levers run out, and it would need re-measuring on the real artifact
+first since it was computed on train_graphs.
