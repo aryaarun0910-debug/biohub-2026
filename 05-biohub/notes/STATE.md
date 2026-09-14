@@ -232,3 +232,56 @@ Real scorer, 40 embryo-balanced datasets:
 **divTP never moves.** Every gate relaxation adds false divisions and not one
 true one, and our own linker's native forking already runs at 2.2% division
 precision -- below the 12.4% break-even, not above it. Divisions are closed.
+
+## EXP-39 and what the test set actually is (2026-09-14)
+
+**The test set is four datasets.** 44b6_0113de3b, 44b6_0b24845f, 6bba_05b6850b,
+6bba_05db0fb1 -- and `estimated_number_of_nodes` ships for every one of them in
+the organisers' released GEFF metadata: 25,755 / 32,795 / 6,362 / 69,800. The
+images are shared with train; the leaderboard annotations are held-out cells in
+the same movies (our local GT for those four stems holds only 52 / 51 / 861 /
+1,229 annotated nodes).
+
+This makes the multiplier term **exactly computable offline**. It is applied per
+dataset, adj is weight-averaged by each sample's annotated-edge count
+(metrics.summarise), and node rows per dataset are countable in any
+submission.csv. `tools/multiplier.py` does it. The multiplier stops being a
+quantity we infer from leaderboard deltas.
+
+Their 0.947 pipeline on the real test set:
+
+    44b6_0113de3b  N_pred 25,637  n_total 25,755  ratio -0.005  mult 1.0005
+    44b6_0b24845f  N_pred 20,721  n_total 32,795  ratio -0.368  mult 1.0368
+    6bba_05b6850b  N_pred  6,152  n_total  6,362  ratio -0.033  mult 1.0033
+    6bba_05db0fb1  N_pred 70,284  n_total 69,800  ratio +0.007  mult 0.9993
+    unweighted mean 1.0100 of a possible 1.1000
+
+### The experiment
+
+Where N_pred EXCEEDS n_total the excess cannot be real-but-unannotated cells --
+there are not that many cells to be unannotated. That excess is *provably*
+spurious, which is exactly the property EXP-36 searched for and could not find.
+So trim only datasets above a ratio threshold, only down to a target ratio,
+smallest connected components first.
+
+On 50 train datasets (median ratio +0.109, 39 of 50 over-predicting):
+
+    config                    edgeJ    divJ      adj    SCORE    delta
+    no trim                  0.8933  0.0223   0.8829   0.8852  +0.0000
+    ratio>0.00 -> 0.00       0.8950  0.0218   0.8969   0.8991  +0.0140
+    ratio>0.00 -> -0.05      0.8919  0.0220   0.8975   0.8998  +0.0146
+    ALL -> -0.20             0.8577  0.0242   0.8754   0.8778  -0.0074
+
+    LOEO: 44b6 +0.0025   6bba +0.0177   -> minimum +0.0025
+
+Edge Jaccard *improves* on 6bba under the trim (0.9029 -> 0.9062). Over-detection
+is causally upstream of fragmentation, which is our largest edge failure mode.
+
+**It does not transfer.** Only one test dataset over-predicts, by 0.7%, worth
++0.0007 -- under the leaderboard's 0.001 resolution. Null for submission.
+
+The general lesson, which has now cost three experiments: our cached train
+graphs are NOT the 0.947 pipeline's output. They over-predict (median +0.109)
+and carry ~187 native linker forks per dataset where their pipeline carries
+almost none. Anything measured on train_graphs must be re-checked against their
+actual output before it is believed to be a submittable gain.
