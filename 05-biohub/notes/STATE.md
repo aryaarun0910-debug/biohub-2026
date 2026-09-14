@@ -1075,3 +1075,35 @@ Three readings, and we cannot yet distinguish them:
   set is smaller than 199 films, the limit is above 9h, or 2.29 min/film is too high. The
   never-sweep-at-submission rule still stands on the re-selection confound above, but not on
   imminent-timeout grounds.
+
+## The minlen curve by TRANSFER (min-embryo), and it reverses the example-film result
+
+ppgrid-ml7 and ppgrid-ml12 completed, giving four points. Absolute min-embryo scores -- the worse
+of the two embryos, which is the transfer-to-an-unseen-embryo estimate:
+
+    minlen   base MIN    selected MIN   selected config
+       6     0.94288      0.94530       combo(tight55+vel025+tight50relax9)
+       7     0.94250      0.94579       combo(tight55+vel025+tight50relax9)   <- BEST
+       9     0.94198      0.94492       combo(tight55+vel025)
+      12     0.94150      0.94444       combo(vel025+tight55)
+
+Two reversals of what the example films said:
+
+1. **Pruning monotonically HURTS the worse embryo.** Base MIN falls 0.94288 -> 0.94150 from
+   minlen 6 to 12. On the example films pruning looked like a clean multiplier win.
+2. **minlen 9 scores BELOW minlen 6** (0.94492 vs 0.94530). `biohub-final-ml9` bakes minlen 9 and
+   is therefore a mild negative on the transfer metric. It has been retired unsubmitted.
+
+**The PP combo is the real lever (+0.0024); minlen contributes at most +0.0005 and turns negative
+past 7.** This also predicts #30 (minlen9 alone) will not beat 0.947.
+
+`kernels/biohub-final-ml7` replaces it: VALIDATOR_ENABLE=0 with minlen 7 + tight55 + vel025 +
+relaxed9 -- the transfer-best configuration, sweep-free so no re-selection confound. Push watcher
+armed.
+
+### Process note
+
+Stopping the old watcher, I ran `pkill -f "push_when_free.sh biohub-final-ml9"` and killed my own
+shell (exit 144) -- the THIRD time this campaign, and it is already recorded as a known trap with
+the fix (`ps -eo pid,args | grep "[p]attern"` then kill the explicit PID). Having a trap written
+down is not the same as not walking into it.
