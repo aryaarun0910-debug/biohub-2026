@@ -133,3 +133,35 @@ route is finished and the only remaining path is retraining the detector.
 - **`machineShape="NvidiaTeslaT4"`** selects the GPU. `acceleratorType` is
   accepted and silently ignored, and a P100 (sm_60) is fatal -- the pinned torch
   needs sm_70+.
+
+## EXP-36 result -- the N_pred lever is closed (2026-09-14)
+
+827,797 nodes, 30 embryo-balanced datasets, 14 features, LOEO GradientBoosting,
+target = "did a human annotator label this cell".
+
+    AUC 0.641 (held out 44b6) / 0.557 (held out 6bba)
+    best single feature: comp_len, AUC 0.726  <- this is EXP-34's track length, already null
+
+Removal precision does beat chance, but chance is the wrong bar. Removing
+fraction f of nodes gains multiplier 0.0962*f and costs edge Jaccard about
+2*f*(1-p)/m, so net-positive requires
+
+    (1 - p) < 0.0479 * m
+
+| embryo | matched m | error needed | error achieved | short by |
+|---|---|---|---|---|
+| 44b6 | 0.55% | 0.026% | 0.258% | 9.8x |
+| 6bba | 4.21% | 0.202% | 3.633% | 18x |
+
+At 25% removal on 6bba the rule discards 2,815 of 13,050 matched nodes -- 21.6%
+of the entire matched set -- to buy a 2.4% multiplier gain. Net about -0.15.
+
+Why it fails, stated causally: annotators chose **lineages to follow**. That is
+a decision made once at the root of a track and then propagated down it. It is
+not a property visible at an individual node, so no per-node feature set can
+recover it.
+
+**All four levers are now closed.** Post-processing on DeepCenter's output is
+finished. The only remaining path to a score above ~0.950 is changing the
+detector: partial-label / positive-unlabelled finetuning of the 3D U-Net on the
+2.8% annotated cells, where "unlabelled" must not be treated as negative.
