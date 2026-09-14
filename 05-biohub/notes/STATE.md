@@ -1134,3 +1134,35 @@ Three things confirmed at once:
 This is the architecture for every remaining submission. `biohub-final-ml9` itself stays
 unsubmitted (minlen 9 is below minlen 6 on the transfer metric); `biohub-final-ml7` carries the
 transfer-best configuration and is running.
+
+## #30 = 0.947, exactly baseline. Both levers now measured on the hidden set.
+
+    #27 repro         0.947
+    #28 noSister      0.947   null (byte-identical submission)
+    #29 ppgrid        0.946   -0.001
+    #30 minlen9       0.947   null
+    #31 ppgrid+ml9    pending
+
+**The prediction recorded before #30 landed was correct**: minlen 9 would not beat 0.947, because
+the transfer metric put it below minlen 6 (0.94492 vs 0.94530 min-embryo).
+
+### Proxy calibration, now with two points
+
+    lever        example-film proxy   transfer (min-embryo)   ACTUAL LB
+    ppgrid            +0.0025               +0.0024            -0.001
+    minlen9           +0.0034               slightly negative   0.000
+
+The example-film proxy over-read both by ~0.003. The transfer metric over-read ppgrid by the same
+amount but got minlen9's DIRECTION right. So min-embryo on held-out train stems is the better
+instrument -- it is not accurate, but it is not sign-blind either.
+
+### What this means
+
+Two independent post-processing levers measured on the scored set: one flat, one a tick down.
+Neither survives the embryo transfer. The combination (#31) is the last test; if it lands at or
+below 0.947, post-processing on this pipeline is exhausted and the honest conclusion is that
+0.947 is what it gives.
+
+That would not be a failure of the search -- divisions, edges, rewiring, N_pred classification and
+detection were each closed with measured base rates on train films with ground truth. It would
+mean the remaining gap to the leaders is not reachable by post-processing at all.
