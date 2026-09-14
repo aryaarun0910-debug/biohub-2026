@@ -1,0 +1,20 @@
+{
+  "id": "aryaarun07/biohub-ppgrid-ml7",
+  "title": "biohub-ppgrid-ml7",
+  "code_file": "v.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "kernel_sources": [],
+  "dataset_sources": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ]
+}

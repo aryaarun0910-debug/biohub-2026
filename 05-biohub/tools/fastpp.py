@@ -26,7 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 NB = ROOT / "kernels/repro-947/repro-947.ipynb"
-RUNDIR = ROOT / "work/fastpp2"
+RUNDIR = ROOT / "work/fastpp2"  # default; --rundir overrides
 STEMS = ["44b6_0113de3b", "44b6_0b24845f", "6bba_05b6850b", "6bba_05db0fb1"]
 
 ap = argparse.ArgumentParser()
@@ -34,7 +34,12 @@ ap.add_argument("--set", action="append", default=[], metavar="KEY=VAL")
 ap.add_argument("--out", default=None)
 ap.add_argument("--check", action="store_true")
 ap.add_argument("--base", default=str(NB))
+ap.add_argument("--rundir", default=None, help="separate dir so concurrent runs do not clobber")
+ap.add_argument("--threads", type=int, default=0, help="bind torch threads; required for concurrency")
 a = ap.parse_args()
+
+if a.rundir:
+    RUNDIR = ROOT / a.rundir
 
 for kv in a.set:
     k, v = kv.split("=", 1)
@@ -55,6 +60,18 @@ if _man.exists():
     os.environ.setdefault("BIOHUB_DEEPCENTER_MANIFEST", str(_man))
 os.environ["CUDA_VISIBLE_DEVICES"] = ""          # force CPU; the veto net is small
 
+# Torch ignores OMP_NUM_THREADS here: two concurrent screens each took 262% CPU and drove load
+# to 17 on 8 cores, making both SLOWER than one alone. Bind threads in-process instead.
+if a.threads:
+    for _v in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
+        os.environ[_v] = str(a.threads)
+    try:
+        import torch as _t
+        _t.set_num_threads(a.threads); _t.set_num_interop_threads(1)
+        print(f"  torch threads bound to {a.threads}")
+    except Exception as _e:
+        print(f"  could not bind torch threads: {_e}")
+
 cells = [("".join(c.get("source", "")) if isinstance(c.get("source"), list)
           else (c.get("source") or "")) for c in json.load(open(a.base))["cells"]]
 
@@ -63,6 +80,14 @@ cells = [("".join(c.get("source", "")) if isinstance(c.get("source"), list)
 # neutralised HERE ONLY, for the local harness. Fidelity is then judged by --check comparing the
 # produced submission.csv byte-for-byte against the one the real kernel wrote -- which is the
 # only claim that matters.
+# The notebook's own drift guard (_EXPECTED_NUMERIC) raises if an env var differs from the
+# value it was authored with, so every --set key must be updated there too -- exactly what
+# tools/mkkernel.py does when building a kernel variant.
+for _k, _v in (kv.split("=", 1) for kv in a.set):
+    _env = f"BIOHUB_{_k}"
+    for _i in range(len(cells)):
+        cells[_i] = re.sub(rf'"{_env}":\s*[0-9.]+,', f'"{_env}": {float(_v)},', cells[_i])
+
 cells[3] = cells[3].replace(
     "if _support_actual_sha256 != _support_expected_sha256:",
     "if False:  # fastpp: local harness, see --check for the real fidelity test")

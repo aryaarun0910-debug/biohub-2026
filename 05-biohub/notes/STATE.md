@@ -660,3 +660,31 @@ Submitted as #31. Two submissions remaining today.
 Note the multiplier is 1.0138, identical to minlen9 alone, so this gain is NOT multiplier -- it
 is edge Jaccard, from the relink configuration. That makes it annotation-dependent and therefore
 less certain to transfer than minlen9's was. The leaderboard decides.
+
+### fastpp VALIDATION FAILED -- deltas do not transfer (2026-09-14)
+
+                fastpp local     real kernel
+    base          0.89365          0.89319
+    minlen9       0.89466          0.89638
+    delta        +0.00101         +0.00319     <- 3x under-read
+
+Per-stem on 6bba_05db0fb1 (56.9% of the score):
+
+    kernel  base 0.8455 -> minlen9 0.8417   edgeJ loss 0.0038
+    fastpp  base 0.8463 -> minlen9 0.8386   edgeJ loss 0.0077
+
+Node pruning is comparable (kernel -1,719, fastpp -1,770), so the divergence is in WHICH
+components get pruned: the small CPU-vs-GPU differences in DeepCenter gating change which nodes
+exist, and minlen then removes different components. The +0.00046 absolute bias was never the
+issue -- the error COMPOUNDS through the pruning stage.
+
+**fastpp is NOT fit for screening at the 0.002-0.003 scale.** A 3x error on effect size would
+have ranked minlen9 as marginal when it is the best measured lever we have. It is shelved for
+config screening. The GPU kernel remains the only trustworthy arbiter, and
+tools/score_submission_local.py on a REAL kernel submission remains the right instrument.
+
+Process note: this tool was described as capable three times in one session -- byte-fidelity,
+then parallelism, then delta accuracy -- and measurement walked back each claim. The tool cost
+roughly two hours and returned a negative result. The discipline that caught it (validate the
+instrument against a case whose answer is already known) is the only reason it did not
+contaminate a submission decision.
