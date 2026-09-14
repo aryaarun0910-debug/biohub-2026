@@ -165,3 +165,70 @@ recover it.
 finished. The only remaining path to a score above ~0.950 is changing the
 detector: partial-label / positive-unlabelled finetuning of the 3D U-Net on the
 2.8% annotated cells, where "unlabelled" must not be treated as negative.
+
+## EXP-37 -- the detector is NOT the bottleneck (2026-09-14)
+
+Measured before spending GPU hours on a detector retrain, because the retrain is
+only worth doing if detection is what binds. It is not.
+
+    GT nodes 15,934   detected 15,901   NODE RECALL  0.9979
+    GT edges 15,369   reachable 15,316  EDGE CEILING 0.9966
+    structurally unrecoverable edges: 0.34%
+    44b6 node recall 0.9986 / edge ceiling 0.9971
+    6bba node recall 0.9978 / edge ceiling 0.9964
+
+The edge ceiling is the maximum edge recall ANY linker can reach on this
+detector's output -- an edge missing an endpoint cannot be produced. At 0.9966
+against a measured edgeJ of 0.9116, detection accounts for 0.34 points of an
+8.5-point gap. **This retracts the pivot recommended earlier the same day.**
+
+There is a second and sharper reason not to retrain. n_total in the metric is
+`estimated_number_of_nodes` -- the estimated count of ALL real cells, not the
+annotated ones. A better detector finds more real-but-unannotated cells, which
+raises N_pred and *lowers* the multiplier. **The metric actively penalises
+better detection.** That is the most likely reason the public leaderboard piles
+up between 0.940 and 0.948 regardless of model.
+
+## The measured decomposition of 0.947
+
+From work/repro_out/validator_results.csv (their pipeline, our GT):
+
+| component | value | max |
+|---|---|---|
+| edge_jaccard | 0.9116 | 1.0 |
+| multiplier | ~1.005 | 1.1 |
+| adj_edge_jaccard | 0.9114 | — |
+| div_jaccard | 0.2308 micro (0.3125 per-sample mean) | 1.0 |
+
+Edge failures split as: edges_fragmented 17.1/dataset (linking) against
+edges_lost_to_detection 9.9/dataset (detection), with wrong_association_edges
+exactly 0. Fragmentation is the single largest identified failure mode.
+
+## EXP-38 / 38b -- division relaxation, and a claim I had to retract
+
+I read a division precision of 72.7% off their validator and argued we were
+running 6x more conservatively than break-even (12.4% at that operating point,
+since Jaccard moves +0.609 per true division and -0.086 per false one).
+
+**That rate is 3 true divisions against 1 false one.** Their whole validator is
+8 stems carrying 12 GT divisions. A sample of four carries no information, and
+the claim is withdrawn. This is the same resolution problem already recorded for
+the paired bootstrap, where even 151 divisions resolve only +/-0.0068.
+
+EXP-38's own hand-rolled division metric also failed validation (divJ 0.0172 vs
+0.3125), so it was discarded and EXP-38b calls the competition's `evaluate()`
+and `per_sample_metrics()` directly. The cause of that mismatch turned out to be
+the substrate, not the metric: work/train_graphs carry ~187 native linker forks
+per dataset, where their pipeline's output carries almost none.
+
+Real scorer, 40 embryo-balanced datasets:
+
+    config                    divTP  divFP  divFN    divJ    edgeJ    SCORE    delta
+    baseline (as-is)             11    481     15  0.0217   0.8899   0.8722  +0.0000
+    theirs (9,14,.6,2.25)        11    502     15  0.0208   0.8889   0.8710  -0.0012
+    max_um 13                    11    502     15  0.0208   0.8889   0.8710  -0.0012
+    tau .25                      11    485     15  0.0215   0.8896   0.8718  -0.0004
+
+**divTP never moves.** Every gate relaxation adds false divisions and not one
+true one, and our own linker's native forking already runs at 2.2% division
+precision -- below the 12.4% break-even, not above it. Divisions are closed.
