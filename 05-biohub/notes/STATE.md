@@ -762,3 +762,46 @@ nucleus VOLUME drops ~0.27 around a division while PEAK brightness holds, and th
 point is that mean intensity in a fixed-radius ball is an ARTEFACT -- a fixed probe around a
 smaller object contains more background, so the mean falls with nothing dimming. Measure peak and
 half-max volume in the same box instead.
+
+## EXP-51 -- contended steals are NOT decidable on geometry; divisions close properly
+
+EXP-50 showed 86.8% of missed divisions are excluded from the candidate set because the daughter
+already has a parent. This tests whether the steal can be decided geometrically.
+
+    HEAD-TO-HEAD on true contended divisions
+      true parent closer than the incumbent: 0/20 = 0.0%
+
+    ALL steal candidates: 7,918,981   true 17   BASE RATE 0.0002%
+      rule                            fires   true  precision
+      d_PQ < d_XQ                    42,377      0     0.00%
+      sym < 0.6                     384,186      4     0.00%
+      sym < 0.3                     117,502      2     0.00%
+      cos < 0.0                   3,192,314     13     0.00%
+      diverge > 0                 2,919,617     13     0.00%
+      ALL FOUR                        6,017      0     0.00%
+
+**The true parent is never closer than the incumbent -- 0 of 20.** That is exactly why the linker
+chose the incumbent. And a 0.0002% base rate against a 12-24% break-even needs ~60,000x lift, the
+most extreme instance of the structural law measured in this campaign.
+
+The "ALL FOUR" row is decisive: tightening to 6,017 candidates catches ZERO of the 17 true
+divisions. Contended divisions do not look like divisions geometrically. The volume signal from
+the public notebook would have to supply all 60,000x by itself, from an effect size of 0.27 with
+overlapping distributions. It cannot.
+
+**Divisions are closed** -- now on the correct mechanism and with a far better-supported number
+than EXP-38b's gate sweeps provided.
+
+## Audit: which closures were wrong?
+
+| originally | actually | cause |
+|---|---|---|
+| EXP-34: OUTPUT_MIN_TRACK_LEN null on 199 train graphs | **+0.0032**, our best single lever | wrong substrate |
+| EXP-38b: divisions closed by gate relaxation | conclusion right, **mechanism wrong** | gates were never the constraint |
+| tools/fastpp.py: working screening instrument | under-reads deltas 3x | not validated before use |
+| EXP-50: the division route is open | closed by EXP-51 within the hour | base rate 0.0002% |
+
+**One genuine false negative recovered** -- min_track_len, which produced today's gains. Every
+other closure survived re-examination. The single recurring cause is SUBSTRATE: measuring on the
+wrong artifact (a different pipeline, a pre-filter stage, or an even embryo weighting). That is
+now a standing warning at the top of this file and in RANK1-PLAN.
