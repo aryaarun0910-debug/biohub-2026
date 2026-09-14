@@ -884,3 +884,28 @@ Unresolved: the host's "no overlap in embryo_ids" is contradicted by the shipped
 sample_submission. Treat it as inaccurate rather than as evidence of a hidden swap -- but if a
 private rerun ever produces scores wildly out of line with public, this is the first thing to
 re-examine.
+
+## Error bars on the local proxy -- most of today's deltas are NOT significant
+
+Every decision today rested on differences from `tools/score_submission_local.py` with no error
+bar. The proxy sees only the released annotations on the four scored films -- about **2,127 GT
+edges** -- so the sample is small. `tools/proxy_ci.py` does a PAIRED bootstrap over GT edges
+(paired because the two submissions share most of their edges, so an unpaired interval would be
+dominated by variance that cancels).
+
+    variant             delta     95% CI                P(delta<=0)
+    ppgrid + minlen9   +0.0081   [+0.0026, +0.0135]       0.001     SOLID
+    det94 + minlen9    +0.0036   [-0.0011, +0.0083]       0.066     marginal
+    minlen9            +0.0034   [-0.0006, +0.0073]       0.056     marginal
+    ppgrid alone       +0.0025   [-0.0022, +0.0080]       0.147     NOT significant
+
+**Neither individual lever is distinguishable from zero at 95%.** Only the combination clears,
+and it clears decisively (lower bound +0.0026, still 2.6x the leaderboard's resolution).
+
+This is a correction to how today's results were presented and acted on. minlen9's +0.0032 and
+ppgrid's +0.0031 were reported as established gains and submitted as #30 and #29; on 2,127 edges
+they are inside the noise. The super-additivity story is therefore weaker than stated too -- the
+parts are noisy, even though the whole is solid.
+
+**Rule going forward: no variant is submitted on a point estimate.** Run `tools/proxy_ci.py`
+first; require the 95% lower bound to clear 0.001.
