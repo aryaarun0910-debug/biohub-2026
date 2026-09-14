@@ -594,3 +594,43 @@ because there is little left to prune. Nothing to submit from this run.
 OUTPUT_KEEP_DIVISION_COMPONENTS=0 would prune division-bearing short components, but the local
 proxy reads divJ 0.0000 (the released annotations on these four movies carry almost no
 divisions), so we would be flying blind on a term worth 0.1 * divJ. Not worth it.
+
+## tools/fastpp.py -- a local post-processing loop (2026-09-14)
+
+Iteration was bottlenecked at ~3 hours per variant because every knob we tune sits AFTER the
+U-Net but the only way to run it was a full Kaggle kernel. run_stats.csv shows the split:
+
+    44b6_0113de3b   raw_nodes 25,822  ->  nodes 25,637
+
+The cached .geff files are the RAW linker output. Everything between them and submission.csv --
+gap closing, motion relink, gap2 recovery, safe divisions, DeepCenter gating, short-track
+filtering, linefit smoothing -- is CPU Python in notebook cell 5. Cell 4 is the only GPU stage
+and is skippable when raw predictions exist.
+
+fastpp.py execs cells 0-3 and 5 locally. Six blockers had to clear: missing pandas / IPython /
+deprecated wheels; BIOHUB_MODEL_ARTIFACTS; two repo integrity checksums; the DeepCenter and
+secondary-seed checkpoints (both need env vars RE-ASSERTED after each cell, since the notebook
+assigns os.environ itself); and the subtle one -- the support pack ships its OWN repo/predictions
+holding unrelated sample stems, which shadowed ours so write_test_submission globbed the wrong
+graphs. Cell 3 re-materialises the repo, so the symlink must be restored AFTER it runs.
+
+Also: our local "50ep" support pack is actually the 400ep snapshot (Kaggle re-versioned the
+dataset). Per-file checksums showed ONLY scripts/evaluate.py differs; every
+src/biohub_tracking/*.py matched exactly.
+
+### Fidelity: NOT byte-exact, bias +0.00046
+
+                      local    kernel   diff
+    44b6_0113de3b    25,622    25,637    -15
+    44b6_0b24845f    20,709    20,721    -12
+    6bba_05b6850b     6,152     6,152      0
+    6bba_05db0fb1    70,262    70,284    -22
+    score           0.89365   0.89319   +0.00046
+
+22 nodes in 70,000 (0.03%), one dataset exact -- consistent with CPU-vs-GPU float differences
+moving a few DeepCenter gate candidates across a threshold.
+
+**Usage rule.** This is a SCREENING instrument, not a substitute for a kernel run. The bias is
+below the leaderboard's 0.001 resolution and 7x smaller than the effects we chase, so it can rank
+configs and reject bad ones; any winner is still confirmed with a real kernel run before being
+submitted. Runtime ~34 min per config on CPU, dominated by DeepCenter heatmaps.
