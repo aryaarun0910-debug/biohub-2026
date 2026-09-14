@@ -688,3 +688,33 @@ then parallelism, then delta accuracy -- and measurement walked back each claim.
 roughly two hours and returned a negative result. The discipline that caught it (validate the
 instrument against a case whose answer is already known) is the only reason it did not
 contaminate a submission decision.
+
+## Live state at end of 2026-09-14
+
+**Submissions**
+
+    #31  ppgrid + minlen9      PENDING   local +0.0082  (best measured)
+    #30  minlen9               PENDING   local +0.0032
+    #29  ppgrid combo          PENDING   local +0.0031
+    #28  noSister              0.947     (null, byte-identical test submission to #27)
+    #27  repro of the 0.947    0.947     (exact reproduction)
+
+Two submissions remain for the day, deliberately held. #29/#30/#31 are a natural experiment:
+they test whether `tools/score_submission_local.py` SIZES a gain correctly or only detects nulls
+(it has passed the null test exactly). Spending the last two before that answer would be guessing.
+
+**Kernels**
+
+    biohub-ppgrid-ml12   RUNNING   joint minlen optimum above 9
+    biohub-ppgrid-ml7    RUNNING   joint minlen optimum below 9
+    biohub-rw-ml9        BUILT     embryo-reweighted sweep objective, waiting on a slot
+
+**Shelved**
+
+    tools/fastpp.py      3x delta under-read; GPU kernels remain the only arbiter
+    biohub-det88         det94 evidence argued against lowering the detection threshold
+
+**Experiments today:** EXP-36 through EXP-49. Every one closed a route or corrected a method
+error; none opened a new pool. The gains came from two places neither of which was an experiment
+in the usual sense -- discovering the test set is four movies we hold annotations for, and
+discovering the score weights 6bba at 95.4%.
