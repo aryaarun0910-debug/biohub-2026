@@ -1,0 +1,32 @@
+  44b6_12dfb391: 45,351 nodes  42,871 edges  judgeable GT pairs 761
+  44b6_267148e4: 22,829 nodes  21,427 edges  judgeable GT pairs 267
+  44b6_2a2eff9f: 40,928 nodes  38,160 edges  judgeable GT pairs 209
+  44b6_341df25f: 8,523 nodes  8,189 edges  judgeable GT pairs 208
+  6bba_062c8d37: 5,997 nodes  5,696 edges  judgeable GT pairs 897
+  6bba_07e24132: 29,751 nodes  27,970 edges  judgeable GT pairs 312
+  6bba_085bf656: 8,417 nodes  8,086 edges  judgeable GT pairs 1163
+  6bba_09961292: 29,955 nodes  28,658 edges  judgeable GT pairs 1853
+
+  === PRECISION on judgeable sinks (break-even 48.1%) ===
+  config                        proposed  judgeable  correct  PRECISION
+  r4 wt0 mutual                      500          9        8     88.9%
+  r4 wt0 hung                        500          9        8     88.9%
+  r4 wt0.5 mutual                    381          5        4     80.0%
+  r4 wt0.5 hung                      381          5        4     80.0%
+  r6 wt0 mutual                      745         12       10     83.3%
+  r6 wt0 hung                        747         12       10     83.3%
+  r6 wt0.5 mutual                    695         11        9     81.8%
+  r6 wt0.5 hung                      700         11        9     81.8%
+  r9 wt0 mutual                    1,068         15       11     73.3%
+  r9 wt0 hung                      1,086         15       11     73.3%
+  r9 wt0.5 mutual                  1,054         15       11     73.3%
+  r9 wt0.5 hung                    1,081         15       11     73.3%
+  r12 wt0 mutual                   1,526         17       11     64.7%
+  r12 wt0 hung                     1,584         17       11     64.7%
+  r12 wt0.5 mutual                 1,520         16       11     68.8%
+  r12 wt0.5 hung                   1,589         17       10     58.8%
+Traceback (most recent call last):
+  File [35m"/home/aryaarun/Work/biohub/tools/exp40_flow_stitch.py"[0m, line [35m163[0m, in [35m<module>[0m
+    print(f"\n  best judgeable precision: {[31mbest[0m[1;31m[0][0m:.1%} at r={best[1]:g} wt={best[2]:g} "
+                                           [31m~~~~[0m[1;31m^^^[0m
+[1;35mTypeError[0m: [35m'NoneType' object is not subscriptable[0m

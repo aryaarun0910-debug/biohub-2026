@@ -1,0 +1,11 @@
+
+  judgeable single-successor nodes: 5,635
+
+  linker AGREES with nearest-neighbour : 5,575   correct 5,499  wrong 76
+  linker DIFFERS from nearest-neighbour: 60
+      linker right, nearest wrong :    53
+      nearest right, linker wrong :     7   <- the rewire pool
+      both wrong                  :     0
+
+  snapping ALL disagreements to nearest: +7 TP / -53 TP  = net -46 edges
+  head-to-head precision of 'nearest': 11.7%   (break-even 48.1%)

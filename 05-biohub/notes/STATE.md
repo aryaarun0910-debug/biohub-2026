@@ -285,3 +285,68 @@ graphs are NOT the 0.947 pipeline's output. They over-predict (median +0.109)
 and carry ~187 native linker forks per dataset where their pipeline carries
 almost none. Anything measured on train_graphs must be re-checked against their
 actual output before it is believed to be a submittable gain.
+
+## EXP-40 to 43 -- the fragmentation route, closed (2026-09-14)
+
+Run against their validator output graphs (predictions/.../unet_transformer_val/split_0), NOT
+work/train_graphs, after the substrate lesson cost three experiments earlier the same day.
+
+### EXP-40 -- flow-compensated stitching works, and reaches almost nothing
+
+Build a motion field from the accepted edges (v = x_j - x_i, interpolated by Gaussian-weighted
+kNN), predict each orphan sink's successor at x_i + v(x_i), require mutual best, solve Hungarian.
+
+    r4  mutual   500 proposed    9 judgeable   8 correct   88.9%
+    r6  mutual   745 proposed   12 judgeable  10 correct   83.3%
+    r9  mutual 1,068 proposed   15 judgeable  11 correct   73.3%
+    r12 mutual 1,526 proposed   17 judgeable  11 correct   64.7%
+
+Precision is far above the 48.1% break-even. Reach is the problem: worth about +0.0013.
+
+### EXP-41 -- why. Only 5.5% of the pool is free-endpoint
+
+    GT edges 5,751   present 5,552   MISSING 199
+      FREE          11     5.5%   <- all EXP-40 can reach
+      I_BUSY        36    18.1%
+      J_BUSY        41    20.6%
+      BOTH_BUSY     47    23.6%
+      NO_NODE       64    32.2%
+
+**"wrong_association_edges = 0" is an artefact of sparse annotation.** Their diagnostic counts a
+wrong link only when BOTH endpoints are annotated. In 62.3% of missing edges an endpoint is
+already linked to something else -- a wrong association whose wrong partner is an unannotated
+cell, so the diagnostic reads zero. Any plan resting on "the existing links are perfectly
+trustworthy, never touch them" is resting on a measurement artefact.
+
+### EXP-42 -- the true successor is reachable, and flow does not help
+
+    rank of TRUE successor      raw dist   flow-comp
+      top-1                        37.0%       37.0%
+      top-2                        80.0%       80.7%
+      top-3                        92.6%       91.9%
+    flow beats raw on 11, loses on 12, ties 112
+
+All 135 judgeable cases have the true successor within 15 um. So this is a two-way
+discrimination, not a search. And **flow compensation is a null** -- the embryo's coherent
+motion is small relative to cell spacing and never reorders candidates.
+
+### EXP-43 -- the linker already wins the reranking comparison
+
+    judgeable single-successor nodes: 5,635
+    linker AGREES with nearest : 5,575   correct 5,499  wrong 76
+    linker DIFFERS from nearest:    60
+        linker right, nearest wrong :  53
+        nearest right, linker wrong :   7
+        both wrong                  :   0
+    head-to-head precision of 'nearest': 11.7%  (break-even 48.1%)
+
+The linker beats nearest-neighbour 53 to 7. Snapping all disagreements to nearest loses 46
+edges. Every proposed rerank -- LAP stitching, Kalman gating, mutual NN, a learned rejoin
+classifier, Trackastra, HOCT -- reranks candidates by geometry, and the global linker already
+beats that decisively because it has strictly more information.
+
+**The residual: 76 of 83 errors are cases where linker and nearest AGREED and both were wrong.**
+The true successor simply is not the nearest cell. Identifying those 76 among 5,575 agreements
+is a 1.4% base rate against a 48.1% bar -- a 34x lift. The structural law, third instance.
+
+Fragmentation is closed. It was the last route flagged as open.
