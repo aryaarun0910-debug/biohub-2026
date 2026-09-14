@@ -634,3 +634,29 @@ moving a few DeepCenter gate candidates across a threshold.
 below the leaderboard's 0.001 resolution and 7x smaller than the effects we chase, so it can rank
 configs and reject bad ones; any winner is still confirmed with a real kernel run before being
 submitted. Runtime ~34 min per config on CPU, dominated by DeepCenter heatmaps.
+
+## ppgrid + minlen9: super-additive, +0.0082 (2026-09-14)
+
+                        local test score   delta
+    repro (baseline)         0.89319      +0.0000
+    minlen9                  0.89638      +0.0032
+    ppgrid alone             0.89629      +0.0031
+    ppgrid + minlen9         0.90143      +0.0082   <- vs +0.0063 from summing
+
+    stem               N_pred    mult   edgeJ     adj
+    44b6_0113de3b      25,325  1.0017  0.8679  0.8694
+    44b6_0b24845f      18,353  1.0440  0.9800  1.0232   (edgeJ was 0.9412 at baseline)
+    6bba_05b6850b       5,875  1.0077  0.9685  0.9759
+    6bba_05db0fb1      68,577  1.0018  0.8472  0.8487
+
+Every stem improved. The mechanism for the super-additivity is visible in the sweep's own choice:
+it re-selected **combo(tight55+vel025)** rather than the combo(tight55+vel025+tight50relax9) it
+picked without minlen9. Pruning short components changes the landscape the in-kernel sweep
+optimises over, so the two levers are not independent -- the pruning lets a different relink
+configuration win.
+
+Submitted as #31. Two submissions remaining today.
+
+Note the multiplier is 1.0138, identical to minlen9 alone, so this gain is NOT multiplier -- it
+is edge Jaccard, from the relink configuration. That makes it annotation-dependent and therefore
+less certain to transfer than minlen9's was. The leaderboard decides.
