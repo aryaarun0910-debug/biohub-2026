@@ -1,0 +1,14 @@
+
+  hard-set cases: 138
+
+  quantity                                     median      p90
+  ------------------------------------------------------------
+  |mu|  local displacement field (um)            1.40     6.17
+  gap   d(true) - d(nearest)  (um)               3.26     7.49
+  d(i, true successor)        (um)               6.89     9.65
+  d(i, nearest impostor)      (um)               3.63     6.70
+  nearest-neighbour spacing at t+1 (um)          6.70     8.90
+  coherence |mu| / spread                        0.77     2.93
+
+  |mu| exceeds the gap it must overturn in 43.5% of hard cases
+  local motion is coherent (|mu| > spread) in 40.6% of hard cases

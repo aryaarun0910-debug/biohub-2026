@@ -1,0 +1,15 @@
+
+  HARD set (true successor exists but is NOT the nearest cell): 138 cases
+
+  signal          prefers TRUE      n   verdict
+  --------------------------------------------------------
+  euclid                 0.0%    138   control (0% by construction)
+  flow_knn              39.9%    138   noise
+  flow_affine           38.4%    138   noise
+  accel                 15.4%    130   noise
+  neigh_topo            39.1%    138   noise
+  back_cycle            39.9%    138   noise
+
+  break-even for acting on a signal is 48.1% edge precision, but these are
+  PAIRWISE preferences on the hard set, not precision -- a signal must first
+  beat 50% here before any threshold rule can be worth building.

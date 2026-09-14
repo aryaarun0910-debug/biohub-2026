@@ -350,3 +350,55 @@ The true successor simply is not the nearest cell. Identifying those 76 among 5,
 is a 1.4% base rate against a 48.1% bar -- a 34x lift. The structural law, third instance.
 
 Fragmentation is closed. It was the last route flagged as open.
+
+## EXP-44 / 45 -- why the last route is closed: the data is at the aliasing limit
+
+EXP-43 localised every remaining edge error to one shape: the true successor exists, another
+cell is closer, the tracker takes the closer one. EXP-44 tests, pairwise on that HARD set only,
+which geometric signal prefers the true successor over the near impostor.
+
+    signal          prefers TRUE    n
+    euclid                  0.0%  138   control, 0% by construction
+    flow_knn               39.9%  138
+    flow_affine            38.4%  138
+    accel                  15.4%  130
+    neigh_topo             39.1%  138
+    back_cycle             39.9%  138
+
+**Every signal is below 50%** -- they all side with the impostor, clustered near 39%. That
+uniformity is the tell: each feature is dominated by the same term, distance.
+
+EXP-45 measures why, and the answer is structural rather than a matter of feature design:
+
+    |mu|  local displacement field        1.40 um   (p90 6.17)
+    gap   d(true) - d(nearest)            3.26 um   (p90 7.49)
+    d(i, true successor)                  6.89 um
+    d(i, nearest impostor)                3.63 um
+    nearest-neighbour spacing at t+1      6.70 um
+    coherence |mu| / spread               0.77
+
+    |mu| exceeds the gap it must overturn in 43.5% of cases
+    local motion is coherent (|mu| > spread) in 40.6% of cases
+
+Two independent reasons the premise fails. The correction available (1.40 um of flow) is
+**smaller than the ordering error it must overturn** (3.26 um gap), so no flow-based feature of
+any sophistication -- affine, deformation field, transformer -- can reorder these candidates.
+And coherence is 0.77: the spread of neighbour displacements EXCEEDS the collective component,
+so the tissue is not moving collectively at this frame interval. "Neighbours predict each other"
+is the assumption these methods need, and the data does not satisfy it.
+
+The decisive number is the last pair. On the hard set the true successor sits **6.89 um** away
+while nearest-neighbour spacing is **6.70 um**: the cell moves roughly ONE FULL INTER-CELL
+SPACING per frame. That is the aliasing limit. At that ratio the nearest cell at t+1 is not
+expected to be the same cell, and the correspondence is not recoverable from geometry because
+the information is not present in the geometry.
+
+This is the root cause underneath the structural law. It explains, with one mechanism:
+  - why appearance fails (EXP-32) -- the cells genuinely look alike
+  - why flow fails (EXP-42, 44) -- motion is incoherent and too small
+  - why the linker's residual errors are irreducible (EXP-43)
+  - why the public leaderboard saturates at 0.940-0.948 regardless of model
+
+The 97.6% of edges the linker gets right are the ones sampled below the aliasing limit. The
+1.5% it misses are the tail where displacement reaches inter-cell spacing. That tail is not a
+modelling failure. It is a property of the acquisition.
