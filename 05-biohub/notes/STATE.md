@@ -1038,3 +1038,40 @@ measured on films that are not scored.
    now WRONG for the hidden set -- `rw-ml9` should not be submitted as built.
 3. Research kernels sweep on commits; submission kernels bake the min-embryo winner with
    `BIOHUB_VALIDATOR_ENABLE=0`.
+
+## CALIBRATION: #29 scored 0.946 -- BOTH proxies were wrong in sign (2026-09-14)
+
+    submission                       predicted            actual LB
+    #27 repro                        (reproduction)         0.947
+    #28 noSister                     null                   0.947   correct
+    #29 ppgrid alone                 +0.0025 example-film   0.946   WRONG SIGN
+                                     +0.0024 LOEO min-embryo
+    #30 minlen9                      pending
+    #31 ppgrid + minlen9             pending
+
+The example-film proxy failing was expected once the four films were shown to be examples. **The
+LOEO min-embryo proxy failing is new and worse** -- that was the substrate we fell back to, and
+it predicted +0.0024 for a config that lost a tick.
+
+Three readings, and we cannot yet distinguish them:
+
+1. **The train films do not predict the hidden embryo.** LOEO across the two train embryos may
+   simply not generalise to a third, which is the whole difficulty the host built into the split.
+2. **0.001 is one leaderboard tick.** 0.946 vs 0.947 could be rounding around a near-zero true
+   effect; the proxies said +0.002, so they would still be over-reading, but not catastrophically.
+3. **The sweep re-selects at submission time.** #29 ran its sweep against the HIDDEN test
+   landscape, so the config it applied may differ from the one our commit-run analysis saw. This
+   is a live confound in every swept submission and is a further argument for baking configs in.
+
+### What this changes
+
+- **No config change should be submitted on proxy evidence alone.** We have one directional
+  calibration point and it is negative.
+- `kernels/biohub-final-ml9` bakes the same family (tight55+vel025) that just lost a tick. It is
+  built and the push watcher is armed, but it should NOT be submitted until #30 and #31 report --
+  #30 (minlen9 alone) is the clean test of the multiplier lever, which is the only one with an
+  annotation-independent argument behind it.
+- The runtime model was PESSIMISTIC: #29 carried 17 candidates and completed. Either the hidden
+  set is smaller than 199 films, the limit is above 9h, or 2.29 min/film is too high. The
+  never-sweep-at-submission rule still stands on the re-selection confound above, but not on
+  imminent-timeout grounds.
