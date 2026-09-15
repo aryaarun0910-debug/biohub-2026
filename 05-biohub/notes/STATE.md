@@ -1166,3 +1166,45 @@ below 0.947, post-processing on this pipeline is exhausted and the honest conclu
 That would not be a failure of the search -- divisions, edges, rewiring, N_pred classification and
 detection were each closed with measured base rates on train films with ground truth. It would
 mean the remaining gap to the leaders is not reachable by post-processing at all.
+
+## bigval: the 8-stem validator was over-reading 3x. Post-processing is exhausted.
+
+32 stems (16 per embryo) against the previous 8, with the table cut to the configs that matter:
+
+    config      pooled     44b6     6bba     MIN d
+    combo_tv   0.91594  0.94570  0.90492   +0.00090   <- best by MIN
+    tight55    0.91545  0.94551  0.90434   +0.00033
+    combo_tvr  0.91574  0.94670  0.90433   +0.00031
+    base       0.91474  0.94362  0.90401   +0.00000
+    vel025     0.91522  0.94360  0.90466   -0.00001
+
+**Same winner, one third of the gain.** `combo(tight55+vel025)` still ranks first by both pooled
+and min-embryo, but its min-embryo delta falls from **+0.0029 on 8 stems to +0.00090 on 32**.
+The 8-stem estimate was inflated by small-sample noise, by almost exactly the margin that made
+our predictions wrong.
+
+**+0.0009 is below the leaderboard's 0.001 resolution.** The best post-processing configuration
+available is, on the best measurement we can make, unobservable on the board.
+
+This retro-explains both scored submissions exactly:
+
+    lever      8-stem said   32-stem says   ACTUAL LB
+    ppgrid       +0.0024        ~+0.001       -0.001
+    minlen9      +0.0034         ~0.000        0.000
+
+The true effects were about +0.001 and 0, and tick-level noise supplied the rest.
+
+### Conclusion
+
+**Post-processing on this pipeline is exhausted.** Every scoring term was attacked and closed with
+a measured base rate on train films with ground truth -- divisions at 0.0002%, edges, rewiring,
+N_pred classification, detection -- and the one term that remained open, the post-process
+configuration, is worth less than one leaderboard tick.
+
+`biohub-final-ml7` will NOT be submitted. Spending a submission on a +0.0009 expected gain is
+spending it on noise. Our position is the reproduced 0.947.
+
+The remaining gap to the leaders is not reachable from post-processing. If it is reachable at all
+it is upstream -- in detection or linking -- and EXP-37 showed better detection LOWERS the
+multiplier, so it would have to be better LINKING at equal node count, which EXP-43 showed the
+global linker already wins against every geometric reranking we could construct.
