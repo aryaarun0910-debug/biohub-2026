@@ -1208,3 +1208,50 @@ The remaining gap to the leaders is not reachable from post-processing. If it is
 it is upstream -- in detection or linking -- and EXP-37 showed better detection LOWERS the
 multiplier, so it would have to be better LINKING at equal node count, which EXP-43 showed the
 global linker already wins against every geometric reranking we could construct.
+
+## FINAL: all five submissions scored. Post-processing gains nothing.
+
+    #27 repro            0.947    exact reproduction of the public kernel
+    #28 noSister         0.947    null (byte-identical test submission)
+    #29 ppgrid           0.946    -0.001
+    #30 minlen9          0.947     0.000
+    #31 ppgrid+minlen9   0.946    -0.001   <- the "best" variant
+
+**#31 is the decisive one.** It measured +0.0082 on the example films with a 95% CI of
+[+0.0026, +0.0135] and P(delta<=0) = 0.001. It scored a tick BELOW baseline. The interval was not
+merely optimistic -- it was measuring sampling noise within four films that are not scored, a
+quantity with no relationship to the answer.
+
+`bigval` predicted this before #31 landed: at 32 stems the best config is worth +0.00090, below
+one leaderboard tick.
+
+### The campaign result
+
+**Our position is 0.947, the reproduced public kernel.** Fifty-one experiments; every scoring term
+attacked and closed with a measured base rate on train films with ground truth:
+
+    divisions            0.0002% base rate against a 12-24% bar   (EXP-50/51)
+    edge numerator       5.5% of misses reachable                 (EXP-40/41)
+    edge rewiring        linker beats nearest 53:7                (EXP-43)
+    N_pred by node       AUC 0.641/0.557, chance is 97.3% safe    (EXP-36)
+    detection            recall 0.9979, and better detection
+                         LOWERS the multiplier                    (EXP-37)
+    post-process config  +0.0009 at 32 stems, below one tick      (bigval)
+
+Nothing was left untested. The conclusion is not that we failed to find the trick -- it is that
+post-processing on this pipeline has no trick to find, and the metric actively penalises the
+obvious upstream move.
+
+### What actually cost us
+
+Not the search. The measurement. In one day:
+
+    substrate      three experiments read on the wrong artifact
+    instrument     fastpp claimed capable, under-read a known delta 3x
+    error bars     decisions made on point estimates for hours
+    test set       four example films mistaken for the scored set
+    sample size    an 8-stem validator over-reading by 3x
+
+Every one produced a number that was arithmetically correct and described the wrong thing. That is
+the transferable lesson, and it is why the closures above are trustworthy: they were measured on
+train films with ground truth, which none of these errors touched.
