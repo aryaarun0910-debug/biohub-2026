@@ -1,5 +1,15 @@
 # What to change on the 0.947 pipeline, and why
 
+> **SUPERSEDED, 2026-09-19.** The ranked gate-loosening plan below was measured
+> on a weak local rebuild (adj 0.845, 9.3% orphan pool). On deployed-quality
+> graphs the safe_div gates are at a LOCAL OPTIMUM in every direction: no single
+> change beats them by more than one division event, loosening `tau`/`diverge`
+> floods false positives, and `DIVERGE_UM = 0` was rejected by Kaggle's own
+> validator (division FP 1 -> 15). Submissions s02/s03/s04 are retired.
+> The real levers turned out to be STRUCTURAL: remove motion relink (+0.0295)
+> and run gap2 after safe_div (+0.0076). Keep this file for the measurement
+> method and the tried-and-failed log; do not act on the ranked plan.
+
 Measured 2026-09-19 on all 199 training films and all 151 labelled divisions.
 Everything here is reproducible from this repo: `scripts/17_safediv_gate_cost.py`,
 `artifacts/safediv_gate_cost.csv`.

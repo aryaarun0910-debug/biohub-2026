@@ -216,6 +216,70 @@ nodes_per_frame_max            +0.008     -0.119       +0.039   [-0.120, +0.288]
     44b6_341df25f    stat   0.338   d_adj  +0.00000
 
 ============================================================================================================
+THE MECHANISM AT EDGE LEVEL -- pooled over all 8 films, so n is thousands, not 8
+For every GT edge the ILP already got right, does relink break it?  Bucketed by
+the true displacement of that edge, i.e. by how the 6 um tight gate sees it.
+  true displacement (um)        n  broken  break rate
+  [0, 2)                     2946       0        0.0%
+  [2, 4)                     2251       4        0.2%
+  [4, 6)                      203       5        2.5%
+  [6, 8)                      113      21       18.6%
+  [8, 10)                      22      14       63.6%
+  [10, 99)                      5       5      100.0%
+
+  below the 6 um tight gate: 9/5400 broken = 0.17%
+  above the 6 um tight gate: 40/140 broken = 28.6%   (171x)
+
+  Same split, per film -- the law is not one film's quirk:
+  stem               n<6um  brk<6    rate     n>=6um  brk>=6    rate       d_adj
+  44b6_267148e4        237      1    0.4%         18       9   50.0%    +0.08472
+  6bba_09961292       1760      6    0.3%         33      21   63.6%    +0.02894
+  6bba_07e24132        295      0    0.0%          8       4   50.0%    +0.02337
+  6bba_062c8d37        844      1    0.1%         52       6   11.5%    +0.01324
+  44b6_2a2eff9f        197      1    0.5%          0       0    0.0%    +0.01193
+  44b6_341df25f        206      0    0.0%          1       0    0.0%    +0.00000
+  6bba_085bf656       1135      0    0.0%         27       0    0.0%    +0.00000
+  44b6_12dfb391        726      0    0.0%          1       0    0.0%    -0.00982
+
+  A per-film predictor follows from the law WITHOUT fitting anything:
+  expected broken edges ~ (share of GT edges over 6 um) x (break rate above the gate).
+  stem              GT>6um share  predicted brk  actual brk     d_adj
+  44b6_267148e4             7.1%            5.1          10  +0.08472
+  6bba_09961292             1.8%            9.4          27  +0.02894
+  6bba_07e24132             2.6%            2.3           4  +0.02337
+  6bba_062c8d37             5.8%           14.9           7  +0.01324
+  44b6_2a2eff9f             0.0%            0.0           1  +0.01193
+  44b6_341df25f             0.5%            0.3           0  +0.00000
+  6bba_085bf656             2.3%            7.7           0  +0.00000
+  44b6_12dfb391             0.1%            0.3           0  -0.00982
+  pearson r (GT>6um share vs d_adj) = +0.744   -- but this needs GT, so it is a diagnosis, not a deployable rule.
+
+  TWO-FACTOR CONFIRMATION.  Exceeding the gate is necessary but not sufficient:
+  the wrong target also has to be close enough to be attractive.  Break rate ABOVE
+  the gate, ordered by how tightly packed the film's detections are:
+  stem              nn_med (um)   n>=6um  broken  break rate
+  6bba_09961292            7.62       33      21       63.6%
+  44b6_267148e4            8.29       18       9       50.0%
+  6bba_07e24132            8.29        8       4       50.0%
+  6bba_085bf656           11.38       27       0        0.0%
+  6bba_062c8d37           13.10       52       6       11.5%
+  Tighter packing -> higher break rate.  6bba_085bf656 has 27 GT edges beyond the
+  gate and loses NONE, because at 11.4 um spacing no wrong target is nearer.
+
+============================================================================================================
+WHAT WOULD A PER-FILM 'SKIP RELINK' RULE BUY?
+  relink everywhere (deployed)      adj 0.91654   (0 film(s) skipped)
+  skip relink on FOCUS only         adj 0.92122   (1 film(s) skipped)
+  skip when ambiguity_p90 > 0.50    adj 0.92122   (1 film(s) skipped)
+  skip when ambiguity_p90 > 0.40    adj 0.93335   (4 film(s) skipped)
+  oracle: skip whenever it helps    adj 0.93494   (5 film(s) skipped)
+  never relink (raw ILP)            adj 0.93358   (8 film(s) skipped)
+  The whole aggregate prize for perfectly adaptive skipping is ~0.017 adj, and
+  ~0.004 of that is the one film.  Turning the stage off entirely captures all of it
+  on this val set, which is the simpler action and needs no per-film statistic.
+
+
+============================================================================================================
 RECONCILIATION with the per-film 'proxy' deltas in the brief
   Raw ILP has zero forks, so per-film proxy == per-film adj unless safe_div runs.
   Re-running both graphs through the deployed safe_div reproduces the brief's numbers:

@@ -86,6 +86,7 @@ def one_film(film: str) -> dict:
                 "est_nodes": float(gt["estimated_number_of_nodes"])}
     p2g: dict[int, int] = {}
     g2p: dict[int, int] = {}
+    g2p5: dict[int, int] = {}
     if npz.exists():
         d = np.load(npz)
         det_t = d["det_t"].astype(np.int64)
@@ -131,6 +132,51 @@ def one_film(film: str) -> dict:
                     p2g[int(pi[j])] = int(gi[i])
         film_row["gt_node_recall"] = len(g2p) / n if n else np.nan
 
+        # --- what a LARGER kernel would keep, computed exactly from the cache ---
+        # peaks(k=5) is a strict subset of peaks(k=3): a 5x5x5 maximum is also a
+        # 3x3x3 one.  Approximate it by greedy Chebyshev-2 thinning of the cached
+        # k=3 peaks.  det_p is float16 and 77% saturated at 1.0, so ties are broken
+        # arbitrarily -- that moves WHICH peak survives by <= 3.25 um, far inside
+        # the 7 um match radius, so node recall is unaffected by the tie-break.
+        keep_k5 = np.ones(len(det_t), bool)
+        vox = d["det_zyx"].astype(np.int32)
+        for t in np.unique(det_t):
+            sel = np.where(det_t == t)[0]
+            if len(sel) < 2:
+                continue
+            tree = cKDTree(vox[sel])
+            pairs = tree.query_pairs(2.0, p=np.inf, output_type="ndarray")
+            if not len(pairs):
+                continue
+            order = np.argsort(-det_p[sel], kind="stable")
+            rank = np.empty(len(sel), np.int64)
+            rank[order] = np.arange(len(sel))
+            alive = np.ones(len(sel), bool)
+            nbr: dict[int, list[int]] = {}
+            for u, v in pairs:
+                nbr.setdefault(int(u), []).append(int(v))
+                nbr.setdefault(int(v), []).append(int(u))
+            for i in order:
+                if not alive[i]:
+                    continue
+                for j in nbr.get(int(i), ()):
+                    if alive[j] and rank[j] > rank[i]:
+                        alive[j] = False
+            keep_k5[sel] = alive
+        film_row["n_det_k5_approx"] = int(keep_k5.sum())
+        kt, kum = det_t[keep_k5], det_um[keep_k5]
+        for t in np.unique(gt_t):
+            gi = np.where(gt_t == t)[0]
+            pi = np.where(kt == t)[0]
+            if not len(gi) or not len(pi):
+                continue
+            dm = np.linalg.norm(gt_grid[gi][:, None] * GRID_UM - kum[pi][None], axis=-1)
+            r, c = linear_sum_assignment(dm)
+            for i, j in zip(r, c):
+                if dm[i, j] <= MATCH_RADIUS_UM:
+                    g2p5[int(gi[i])] = int(pi[j])
+        film_row["gt_node_recall_k5"] = len(g2p5) / n if n else np.nan
+
     # ---- divisions ----
     rows = []
     for par, ch in children.items():
@@ -169,6 +215,7 @@ def one_film(film: str) -> dict:
             r["a_matched"] = int(pa is not None)
             r["b_matched"] = int(pb is not None)
             r["both_matched"] = int(pa is not None and pb is not None)
+            r["both_matched_k5"] = int(a in g2p5 and b in g2p5)
             for who, gidx, mine, other in (("a", a, pa, pb), ("b", b, pb, pa)):
                 selt = np.where(det_t == gt_t[gidx])[0]
                 if len(selt):
@@ -191,10 +238,16 @@ def one_film(film: str) -> dict:
 # --------------------------------------------------------------------------
 
 def kernel_sweep(films: list[str], kernels=(1, 3, 5, 7), device="mps") -> list[dict]:
+    """Exact peak count per kernel, plus exact GT node recall for kernels 3 and 5.
+
+    This is the only part that needs the GPU; everything else runs off the cache.
+    """
     import torch
+    from scipy.optimize import linear_sum_assignment
     from biohub import model as M
 
     m, _cfg = M.load("primary", device)
+    recall_for = tuple(k for k in kernels if k in (3, 5, 7))
     out = []
     for film in films:
         zp = io.dataset_root() / "train" / f"{film}.zarr"
@@ -202,28 +255,42 @@ def kernel_sweep(films: list[str], kernels=(1, 3, 5, 7), device="mps") -> list[d
         q = io.quantiles(zp)
         q_low, q_high = float(q["0.001"]), float(q["0.999"])
         T = io.image_meta(zp)["shape"][0]
-        est = float(io.read_geff(gp)["estimated_number_of_nodes"])
+        gt = io.read_geff(gp)
+        est = float(gt["estimated_number_of_nodes"])
+        gt_grid_um = np.stack([gt["z"], gt["y"] / 4.0, gt["x"] / 4.0], 1) * GRID_UM
+        gt_t = gt["t"].astype(np.int64)
         counts = {k: 0 for k in kernels}
+        matched = {k: 0 for k in recall_for}
         supra = 0
         for ws in range(0, T - M.WINDOW + 1):
             ts = list(range(ws, ws + M.WINDOW))
             imgs = torch.stack([M.normalise(io.read_frame(zp, t), q_low, q_high) for t in ts])
             with torch.no_grad():
                 _unet, det = m.encode(imgs.unsqueeze(0).to(device))
-            for i, _t in enumerate(ts):
+            for i, t in enumerate(ts):
                 if ws > 0 and i == 0:
                     continue
                 lg = det[i][0]
                 supra += int((torch.sigmoid(lg) > M.DET_THRESHOLD).sum())
+                gi = np.where(gt_t == t)[0]
                 for k in kernels:
-                    counts[k] += len(M.peaks(lg, kernel=(k, k, k)))
+                    pk = M.peaks(lg, kernel=(k, k, k))
+                    counts[k] += len(pk)
+                    if k in recall_for and len(gi) and len(pk):
+                        pu = pk.cpu().numpy().astype(np.float64) * GRID_UM
+                        dm = np.linalg.norm(gt_grid_um[gi][:, None] - pu[None], axis=-1)
+                        r, c = linear_sum_assignment(dm)
+                        matched[k] += int((dm[r, c] <= MATCH_RADIUS_UM).sum())
         row = {"film": film, "embryo": film.split("_")[0], "est_nodes": est,
-               "suprathreshold_voxels": supra}
+               "n_gt": len(gt["ids"]), "suprathreshold_voxels": supra}
         for k in kernels:
             row[f"n_k{k}"] = counts[k]
             row[f"ratio_k{k}"] = counts[k] / est
+        for k in recall_for:
+            row[f"recall_k{k}"] = matched[k] / max(len(gt["ids"]), 1)
         out.append(row)
         print(f"  {film}  " + "  ".join(f"k{k}={counts[k]}" for k in kernels)
+              + "  " + "  ".join(f"rec{k}={row[f'recall_k{k}']:.4f}" for k in recall_for)
               + f"  est={est:.0f}", flush=True)
     return out
 
@@ -349,6 +416,20 @@ def main() -> None:
             if lost.sum() else np.nan,
             "lost_with_sep_below_floor": int((lost & (sep < floor)).sum()),
         }
+        if "both_matched_k5" in div_rows[0]:
+            bm5 = np.array([d["both_matched_k5"] for d in div_rows])
+            summary["detection_stage"]["both_daughters_detected_k5_approx"] = int(bm5.sum())
+            nd3 = sum(r["n_det"] for r in film_rows if "n_det" in r)
+            nd5 = sum(r["n_det_k5_approx"] for r in film_rows if "n_det_k5_approx" in r)
+            rec5 = [r["gt_node_recall_k5"] for r in film_rows if "gt_node_recall_k5" in r]
+            rec3 = [r["gt_node_recall"] for r in film_rows if "gt_node_recall" in r]
+            summary["k5_approx_all_films"] = {
+                "n_det_k3": int(nd3), "n_det_k5": int(nd5), "kept_fraction": nd5 / nd3,
+                "gt_node_recall_k3": float(np.mean(rec3)),
+                "gt_node_recall_k5": float(np.mean(rec5)),
+                "divisions_both_daughters_k3": int(bm.sum()),
+                "divisions_both_daughters_k5": int(bm5.sum()),
+            }
 
     # ---- cost side: detection crowding across all 199 films ----
     have = [r for r in film_rows if "n_det" in r]
@@ -390,6 +471,10 @@ def main() -> None:
             ke = sum(r["est_nodes"] for r in krows)
             ks[f"k{k}"] = {"kernel": k, "min_sep_um": min_separation_um(k),
                            "n_peaks": int(tot), "ratio_to_est": tot / ke}
+            if f"recall_k{k}" in krows[0]:
+                w = [r["n_gt"] for r in krows]
+                ks[f"k{k}"]["gt_node_recall"] = float(
+                    np.average([r[f"recall_k{k}"] for r in krows], weights=w))
         ks["vs_current"] = {f"k{k}": ks[f"k{k}"]["n_peaks"] / ks["k3"]["n_peaks"]
                             for k in (1, 3, 5, 7)}
         summary["kernel_sweep"] = ks
@@ -410,16 +495,28 @@ def main() -> None:
         "current_node_penalty_score": 0.1 * (crowd["det_over_est"] - 1.0) * J_EDGE,
     }
     if krows:
+        # divisions currently scored TP by the deployed pipeline (artifacts/
+        # division_sweep.csv): only this fraction of structurally-resolvable
+        # divisions is actually converted, so a structural gain/loss must be
+        # discounted by it to be an honest score estimate.
+        recovered_now = 26
+        rate = recovered_now / D
+        trade["divisions_scored_tp_today"] = recovered_now
+        trade["conversion_rate"] = rate
         for k in (1, 5, 7):
             dn = ks[f"k{k}"]["ratio_to_est"] - ks["k3"]["ratio_to_est"]
-            need = (k + 1) // 2
-            gained = int((cheb >= (3 + 1) // 2).sum()) - int((cheb >= need).sum())
+            # resolvable_new - resolvable_now  (negative = a larger kernel forbids more)
+            dd = int((cheb >= (k + 1) // 2).sum()) - int((cheb >= 2).sum())
+            node_gain = -0.1 * dn * J_EDGE
             trade[f"k3_to_k{k}"] = {
                 "node_ratio_delta": dn,
-                "node_penalty_score_delta": -0.1 * dn * J_EDGE,
-                "divisions_delta": gained,
-                "division_score_delta": gained * 0.1 / D,
-                "net_score_delta": gained * 0.1 / D - 0.1 * dn * J_EDGE,
+                "node_penalty_score_delta": node_gain,
+                "divisions_structurally_delta": dd,
+                "division_score_delta_structural": dd * 0.1 / D,
+                "division_score_delta_discounted": dd * rate * 0.1 / D,
+                "net_score_delta_discounted": dd * rate * 0.1 / D + node_gain,
+                "caveat": "node_penalty term models the multiplier only; it ignores "
+                          "edge-Jaccard loss from discarding true detections",
             }
     summary["trade"] = trade
 

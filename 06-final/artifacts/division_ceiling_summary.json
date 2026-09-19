@@ -97,13 +97,70 @@
       "frac_max_axis_below_2vox": 0.0
     }
   },
+  "kernel_floor_vs_divisions": {
+    "k1": {
+      "min_sep_um": 1.625,
+      "divisions_unresolvable": 0,
+      "fraction": 0.0,
+      "by_embryo": {
+        "44b6": 0,
+        "6bba": 0
+      }
+    },
+    "k3": {
+      "min_sep_um": 3.25,
+      "divisions_unresolvable": 1,
+      "fraction": 0.006622516556291391,
+      "by_embryo": {
+        "44b6": 1,
+        "6bba": 0
+      }
+    },
+    "k5": {
+      "min_sep_um": 4.875,
+      "divisions_unresolvable": 8,
+      "fraction": 0.052980132450331126,
+      "by_embryo": {
+        "44b6": 3,
+        "6bba": 5
+      }
+    },
+    "k7": {
+      "min_sep_um": 6.5,
+      "divisions_unresolvable": 32,
+      "fraction": 0.2119205298013245,
+      "by_embryo": {
+        "44b6": 9,
+        "6bba": 23
+      }
+    },
+    "k9": {
+      "min_sep_um": 8.125,
+      "divisions_unresolvable": 59,
+      "fraction": 0.39072847682119205,
+      "by_embryo": {
+        "44b6": 15,
+        "6bba": 44
+      }
+    }
+  },
   "detection_stage": {
     "both_daughters_detected": 145,
     "one_or_both_lost": 6,
     "lost_and_nearest_det_is_sisters": 5,
     "sister_sep_when_both_detected_median": 10.878097619184157,
     "sister_sep_when_lost_median": 5.748114321103886,
-    "lost_with_sep_below_floor": 0
+    "lost_with_sep_below_floor": 0,
+    "both_daughters_detected_k5_approx": 142
+  },
+  "k5_approx_all_films": {
+    "n_det_k3": 5429739,
+    "n_det_k5": 5227966,
+    "kept_fraction": 0.9628392819618034,
+    "gt_node_recall_k3": 0.9965601906321919,
+    "gt_node_recall_k5": 0.9951775348024833,
+    "divisions_both_daughters_k3": 145,
+    "divisions_both_daughters_k5": 142
   },
   "detection_crowding": {
     "n_det_total": 5429739,
@@ -111,26 +168,27 @@
     "det_over_est": 1.1491226566453274,
     "det_nn_min_over_corpus": 1.625,
     "det_nn_median_of_film_medians": 8.75089281159357,
-    "pairs_closer_than_3.25um": 24148,
-    "pairs_closer_than_3.25um_per_1000_det": 4.447359256126307,
-    "frac_det_with_neighbour_lt_3.25": 1.841709150292491e-06,
-    "pairs_closer_than_4.0um": 143800,
-    "pairs_closer_than_4.0um_per_1000_det": 26.48377758120602,
-    "frac_det_with_neighbour_lt_4.0": 0.051304860141527985,
-    "pairs_closer_than_5.0um": 223920,
-    "pairs_closer_than_5.0um_per_1000_det": 41.23955129334946,
-    "frac_det_with_neighbour_lt_5.0": 0.07837835299265766,
-    "pairs_closer_than_6.0um": 500422,
-    "pairs_closer_than_6.0um_per_1000_det": 92.16317764076689,
-    "frac_det_with_neighbour_lt_6.0": 0.16503592529954017,
-    "pairs_closer_than_7.0um": 1121736,
-    "pairs_closer_than_7.0um_per_1000_det": 206.59114554124977,
-    "frac_det_with_neighbour_lt_7.0": 0.32628934834620965,
-    "pairs_closer_than_8.0um": 1905275,
-    "pairs_closer_than_8.0um_per_1000_det": 350.8962401323526,
-    "frac_det_with_neighbour_lt_8.0": 0.4788675846113414
+    "pairs_le_3.25um": 24148,
+    "pairs_le_3.25um_per_1000_det": 4.447359256126307,
+    "frac_det_with_neighbour_strictly_lt_3.25": 1.841709150292491e-06,
+    "pairs_le_4.0um": 143800,
+    "pairs_le_4.0um_per_1000_det": 26.48377758120602,
+    "frac_det_with_neighbour_strictly_lt_4.0": 0.051304860141527985,
+    "pairs_le_5.0um": 223920,
+    "pairs_le_5.0um_per_1000_det": 41.23955129334946,
+    "frac_det_with_neighbour_strictly_lt_5.0": 0.07837835299265766,
+    "pairs_le_6.0um": 500422,
+    "pairs_le_6.0um_per_1000_det": 92.16317764076689,
+    "frac_det_with_neighbour_strictly_lt_6.0": 0.16503592529954017,
+    "pairs_le_7.0um": 1121736,
+    "pairs_le_7.0um_per_1000_det": 206.59114554124977,
+    "frac_det_with_neighbour_strictly_lt_7.0": 0.32628934834620965,
+    "pairs_le_8.0um": 1905275,
+    "pairs_le_8.0um_per_1000_det": 350.8962401323526,
+    "frac_det_with_neighbour_strictly_lt_8.0": 0.4788675846113414
   },
   "kernel_sweep": {
+    "n_films": 24,
     "k1": {
       "kernel": 1,
       "min_sep_um": 1.625,
@@ -141,25 +199,66 @@
       "kernel": 3,
       "min_sep_um": 3.25,
       "n_peaks": 761246,
-      "ratio_to_est": 1.1446051786796336
+      "ratio_to_est": 1.1446051786796336,
+      "gt_node_recall": 0.9968652037617555
     },
     "k5": {
       "kernel": 5,
       "min_sep_um": 4.875,
       "n_peaks": 680908,
-      "ratio_to_est": 1.0238094164099278
+      "ratio_to_est": 1.0238094164099278,
+      "gt_node_recall": 0.9902133190610903
     },
     "k7": {
       "kernel": 7,
       "min_sep_um": 6.5,
       "n_peaks": 529366,
-      "ratio_to_est": 0.7959517225928582
+      "ratio_to_est": 0.7959517225928582,
+      "gt_node_recall": 0.9454086703876443
     },
     "vs_current": {
       "k1": 19.968644827033575,
       "k3": 1.0,
       "k5": 0.8944651269103548,
       "k7": 0.6953941301497808
+    }
+  },
+  "trade": {
+    "D_labelled_divisions": 151,
+    "score_per_division": 0.0006622516556291391,
+    "J_edge_assumed": 0.83,
+    "score_per_1pct_extra_nodes": 0.00083,
+    "divisions_equivalent_of_1pct_nodes": 1.2533,
+    "current_node_overprediction": 0.14912265664532742,
+    "current_node_penalty_score": 0.012377180501562175,
+    "divisions_scored_tp_today": 26,
+    "conversion_rate": 0.17218543046357615,
+    "k3_to_k1": {
+      "node_ratio_delta": 21.711609101557272,
+      "node_penalty_score_delta": -1.8020635554292534,
+      "divisions_structurally_delta": 1,
+      "division_score_delta_structural": 0.0006622516556291391,
+      "division_score_delta_discounted": 0.0001140300863997193,
+      "net_score_delta_discounted": -1.8019495253428537,
+      "caveat": "node_penalty term models the multiplier only; it ignores edge-Jaccard loss from discarding true detections"
+    },
+    "k3_to_k5": {
+      "node_ratio_delta": -0.12079576226970579,
+      "node_penalty_score_delta": 0.01002604826838558,
+      "divisions_structurally_delta": -7,
+      "division_score_delta_structural": -0.004635761589403974,
+      "division_score_delta_discounted": -0.0007982106047980352,
+      "net_score_delta_discounted": 0.009227837663587545,
+      "caveat": "node_penalty term models the multiplier only; it ignores edge-Jaccard loss from discarding true detections"
+    },
+    "k3_to_k7": {
+      "node_ratio_delta": -0.34865345608677545,
+      "node_penalty_score_delta": 0.02893823685520236,
+      "divisions_structurally_delta": -31,
+      "division_score_delta_structural": -0.020529801324503313,
+      "division_score_delta_discounted": -0.0035349326783912986,
+      "net_score_delta_discounted": 0.02540330417681106,
+      "caveat": "node_penalty term models the multiplier only; it ignores edge-Jaccard loss from discarding true detections"
     }
   }
 }

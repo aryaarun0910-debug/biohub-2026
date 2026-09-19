@@ -799,6 +799,45 @@ def main():
       f"{float(np.corrcoef(sh, np.array([s['d_adj'] for s in stats]))[0,1]):+.3f}"
       f"   -- but this needs GT, so it is a diagnosis, not a deployable rule.")
     p("")
+    p("  TWO-FACTOR CONFIRMATION.  Exceeding the gate is necessary but not sufficient:")
+    p("  the wrong target also has to be close enough to be attractive.  Break rate ABOVE")
+    p("  the gate, ordered by how tightly packed the film's detections are:")
+    p(f"  {'stem':<16}{'nn_med (um)':>13}{'n>=6um':>9}{'broken':>8}{'break rate':>12}")
+    rows2 = []
+    for s in stats:
+        kf = [f for f in keep if f["stem"] == s["stem"]]
+        hi_ = [f for f in kf if f["true_dist_um"] >= 6]
+        if len(hi_) < 5:
+            continue
+        nhi = sum(1 for f in hi_ if not f["rel_ok"])
+        rows2.append((s["nn_med"], s["stem"], len(hi_), nhi, nhi / len(hi_)))
+    for nnm, st_, n_, b_, r_ in sorted(rows2):
+        p(f"  {st_:<16}{nnm:>13.2f}{n_:>9}{b_:>8}{r_*100:>11.1f}%")
+    p("  Tighter packing -> higher break rate.  6bba_085bf656 has 27 GT edges beyond the")
+    p("  gate and loses NONE, because at 11.4 um spacing no wrong target is nearer.")
+    p("")
+
+    # ------------------------------ what an adaptive skip would actually buy
+    p("=" * 108)
+    p("WHAT WOULD A PER-FILM 'SKIP RELINK' RULE BUY?")
+    w = np.array([r["weight"] for r in rows_rel], float)
+    for lbl, sel in [("relink everywhere (deployed)", lambda i: False),
+                     ("skip relink on FOCUS only", lambda i: i == focus_i),
+                     ("skip when ambiguity_p90 > 0.50",
+                      lambda i: stats[i]["ambiguity_p90"] > 0.50),
+                     ("skip when ambiguity_p90 > 0.40",
+                      lambda i: stats[i]["ambiguity_p90"] > 0.40),
+                     ("oracle: skip whenever it helps",
+                      lambda i: stats[i]["d_adj"] > 0),
+                     ("never relink (raw ILP)", lambda i: True)]:
+        rows = [rows_raw[i] if sel(i) else rows_rel[i] for i in range(len(stats))]
+        a = M2.aggregate(rows)
+        n_skipped = sum(1 for i in range(len(stats)) if sel(i))
+        p(f"  {lbl:<34}adj {a['adj']:.5f}   ({n_skipped} film(s) skipped)")
+    p("  The whole aggregate prize for perfectly adaptive skipping is ~0.017 adj, and")
+    p("  ~0.004 of that is the one film.  Turning the stage off entirely captures all of it")
+    p("  on this val set, which is the simpler action and needs no per-film statistic.")
+    p("")
 
     # ------------------------------------------------ reconciliation
     p("")
