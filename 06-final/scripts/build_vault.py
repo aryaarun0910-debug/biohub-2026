@@ -53,6 +53,7 @@ Everything known about this competition, as a graph. Start at a hub below.
 ## The decision layer — read before proposing any change
 - [[Both-Sets Rule]] — what must be true before something ships
 - [[Evidence Tiers]] — what each film set can and cannot support
+- [[Harness Prediction Confirmed]] — the harness predicted [[s08]] before the run, to the mechanism
 
 ## Read this before trusting any local number
 [[Scored Films Measurement]] — the 4 films the board scores can be measured
@@ -631,6 +632,10 @@ Gain is on the **division axis** — see [[Axis Priors]].
 ⚠ **But it is worth +0.00000 on the films that are actually scored.** Their
 division ledger is 0/6/3, so `divJ = 0` in every arm and there is no division to
 recover. See [[Scored Films Measurement]]. Harmless, but not a gain.
+
+**Kernel result, 2026-09-19:** in-kernel validator **0.9795** against [[s05]]'s
+0.9715 — **+0.00803**, against a harness prediction of +0.00748 recorded before
+the run. See [[Harness Prediction Confirmed]].
 
 Proven by [[Script 96 Reorder Variant]], measured by [[Script 98 Reorder On Norelink]].
 """)

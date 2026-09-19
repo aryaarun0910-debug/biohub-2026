@@ -26,6 +26,7 @@ Everything known about this competition, as a graph. Start at a hub below.
 ## The decision layer — read before proposing any change
 - [[Both-Sets Rule]] — what must be true before something ships
 - [[Evidence Tiers]] — what each film set can and cannot support
+- [[Harness Prediction Confirmed]] — the harness predicted [[s08]] before the run, to the mechanism
 
 ## Read this before trusting any local number
 [[Scored Films Measurement]] — the 4 films the board scores can be measured
