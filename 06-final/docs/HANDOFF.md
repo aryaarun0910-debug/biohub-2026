@@ -55,7 +55,36 @@ is in `data/.../train/`. `scripts/102_on_real_scored_films.py` and
 | s09 over s08 | +0.00487 | **−0.00086** — SIGN FLIP |
 | s09 over base | +0.03030 | +0.02621 — worse than s05 alone |
 
-**s05 alone is the best configuration on the films that count.** It is positive
+**UPDATE — s10 supersedes this.** Re-pricing every knob on the SCORED films
+(`scripts/106_reprice_on_scored.py`, 35 configs in 19 s on 16 cores) found what
+the validator-film sweeps could not: **`OUTPUT_LINEFIT_WEIGHT` 0.8 → 0.6 is
++0.00471 on the scored films with `ratio` EXACTLY unchanged** — a pure edge-J
+gain, no node-count component. `scripts/107_linefit_both_sets.py` then applied
+the rule s09 violated — ship a weight only if it is positive on BOTH sets:
+
+| w | scored | validator | |
+|---|---|---|---|
+| 0.2 | −0.00172 | +0.00440 | validator only |
+| 0.3 | **−0.00086** | +0.00487 | validator only — **this was s09** |
+| 0.4 | +0.00298 | +0.00372 | both |
+| 0.5 | +0.00298 | +0.00291 | both |
+| **0.6** | **+0.00471** | **+0.00338** | **both — best worst case** |
+| 0.7 | +0.00384 | −0.00131 | scored only |
+| 0.8 | 0 | 0 | deployed |
+
+**s10 = s05 + `LINEFIT_WEIGHT 0.6`**, pushed 2026-09-19 ~13:52 UTC.
+
+Also learned on the scored films: **safe_div earns its keep on EDGES even though
+it earns zero division credit there.** Turning it off takes the ledger 0/6/3 →
+0/0/3 (all six false positives gone) and still costs **−0.00179**. Do not remove it.
+
+**Next candidate, untested on this base:** `OUTPUT_MIN_TRACK_LEN` 6 → 9 is
+**+0.00772** on the scored films and, unlike on the validator films, **J RISES**
+(+0.00293) rather than falling. About half the gain is still multiplier
+(ratio −0.056), and the board already scored 6→9 at 0.947 — but that was on the
+relink-ON base. Worth one probe once a slot frees.
+
+**s05 alone was the best configuration on the films that count.** It is positive
 on all four individually, including the heaviest (`6bba_05db0fb1` +0.03885).
 **Do not select s09.**
 
