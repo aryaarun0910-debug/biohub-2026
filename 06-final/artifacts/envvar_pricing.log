@@ -1,0 +1,4 @@
+8 films, 191751 pred nodes, 5751 GT edges, 8 ... loaded in 0.2s
+selftest OK: gap_close2 == 91.gap_close, safe_div2 == 24.safe_div
+269 configurations x 8 films = 2152 film-runs
+  200/2152 film-runs  91s
