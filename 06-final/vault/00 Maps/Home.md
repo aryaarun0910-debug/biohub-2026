@@ -23,6 +23,10 @@ Everything known about this competition, as a graph. Start at a hub below.
 2. [[Ordering Bug Class]] — the recurring defect is *sequence*, not parameters.
 3. [[Node Count Exploit]] — the metric pays for deleting nodes, without bound.
 
+## The decision layer — read before proposing any change
+- [[Both-Sets Rule]] — what must be true before something ships
+- [[Evidence Tiers]] — what each film set can and cannot support
+
 ## Read this before trusting any local number
 [[Scored Films Measurement]] — the 4 films the board scores can be measured
 locally, and they disagree with the 8 validator films. [[Manifest Contamination]]
@@ -30,5 +34,7 @@ is the debate that prompted it.
 
 ## State as of 2026-09-19
 - Board: **0.947**, stuck on the [[0.947 Plateau]] with 652 other teams.
-- In flight: [[s08]] (division axis) and [[s09]] (edge axis).
+- In flight: [[s08]] (neutral where scored) and [[s10]] (first change to pass the [[Both-Sets Rule]]).
+- Queued: [[s11]], a data-generation run to quadruple the evidence base.
+- Best known on the films that count: [[s05]], backed by [[Relink Across 199]] (176/199).
 - [[Parametric Search Closed]] — every post-processing knob re-priced, nothing left.

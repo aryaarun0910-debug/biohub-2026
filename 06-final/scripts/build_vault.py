@@ -50,6 +50,10 @@ Everything known about this competition, as a graph. Start at a hub below.
 2. [[Ordering Bug Class]] — the recurring defect is *sequence*, not parameters.
 3. [[Node Count Exploit]] — the metric pays for deleting nodes, without bound.
 
+## The decision layer — read before proposing any change
+- [[Both-Sets Rule]] — what must be true before something ships
+- [[Evidence Tiers]] — what each film set can and cannot support
+
 ## Read this before trusting any local number
 [[Scored Films Measurement]] — the 4 films the board scores can be measured
 locally, and they disagree with the 8 validator films. [[Manifest Contamination]]
@@ -57,7 +61,9 @@ is the debate that prompted it.
 
 ## State as of 2026-09-19
 - Board: **0.947**, stuck on the [[0.947 Plateau]] with 652 other teams.
-- In flight: [[s08]] (division axis) and [[s09]] (edge axis).
+- In flight: [[s08]] (neutral where scored) and [[s10]] (first change to pass the [[Both-Sets Rule]]).
+- Queued: [[s11]], a data-generation run to quadruple the evidence base.
+- Best known on the films that count: [[s05]], backed by [[Relink Across 199]] (176/199).
 - [[Parametric Search Closed]] — every post-processing knob re-priced, nothing left.
 """)
 
@@ -629,7 +635,12 @@ recover. See [[Scored Films Measurement]]. Harmless, but not a gain.
 Proven by [[Script 96 Reorder Variant]], measured by [[Script 98 Reorder On Norelink]].
 """)
 
-note("s09", ["submission", "inflight"], """
+note("s09", ["submission", "failed"], """
+# s09 — CANCELLED
+
+> **Cancelled 2026-09-19 mid-run, and superseded by [[s10]].** Kept because the
+> mistake is the most instructive one in the project: it shipped on one film set.
+
 # s09 — `OUTPUT_LINEFIT_WEIGHT` 0.8 → 0.3, on [[s08]]
 
 **Pushed 2026-09-19 ~13:10 UTC**, `biohub-s09-linefit03-on-s08`. Local **+0.00487**.
@@ -733,26 +744,37 @@ noticed — on the [[s09]] chain all three positive rows were exploits:
 """)
 
 note("Parametric Search Closed", ["finding", "key"], """
-# The Parametric Search Is Closed
+# The Parametric Search — Closed On One Set, Reopened On Another
 
-Every post-processing knob has been **re-priced on the current ([[s09]]) chain**,
-not inherited from an older topology, per the [[Transfer Lesson]].
+⚠ **This note previously said "nothing survives, do not re-tune". That was
+wrong, and the reason is instructive.**
 
-- [[Script 100 Reprice On s09]] — 21 settings across [[Gap Closing]],
-  [[Gap2 Recovery]], [[Prune Isolated]], [[Short Track Filter]].
-- [[Script 101 Safediv Gates]] — all seven [[Safe Division]] gates.
+The sweeps that produced it — [[Script 100 Reprice On s09]] (21 settings) and
+[[Script 101 Safediv Gates]] (7 gates) — both ran on the **VALIDATOR** films. See
+[[Evidence Tiers]]. Re-running the same 35 configs on the **SCORED** films
+(`scripts/106_reprice_on_scored.py`, 19 s on 16 cores) found a candidate the
+validator films structurally could not see: `OUTPUT_LINEFIT_WEIGHT` 0.6,
+**+0.00471 with `ratio` exactly unchanged**. That became [[s10]].
 
-**Nothing survives.** The only positive rows anywhere are the
-[[Node Count Exploit]], flagged automatically. Everything else is exactly
-0.00000 or negative.
+**What is actually closed:**
+- Every knob, on the **validator** films — nothing survives there.
+- Every knob, on the **scored** films — except linefit, now shipped as [[s10]].
+- `OUTPUT_MIN_TRACK_LEN`, killed by the [[Both-Sets Rule]] — see [[MIN_TRACK_LEN Is Dead]].
 
-Two durable facts fell out:
-- A **third** confirmation of the [[Transfer Lesson]] (`GAP_CLOSE_UM` 5→8).
+**What this episode teaches**, beyond the knobs: a negative result inherits the
+scope of the set it was measured on. "Nothing left to tune" meant "nothing left
+to tune *on the 8 validator films*", and the wider claim was never licensed.
+
+Two durable facts still stand:
+- A **third** confirmation of the [[Transfer Lesson]] (`GAP_CLOSE_UM` 5→8:
+  +0.00089 raw, −0.00015 on the s09 chain).
 - [[Inert Variables]] re-confirmed after three topology changes.
+- **[[Safe Division]] earns its keep on EDGES** even with zero division credit on
+  the scored films: switching it off takes the ledger 0/6/3 → 0/0/3 and still
+  costs **−0.00179**.
 
-**Consequence: do not re-tune.** The remaining defects are structural, and the
-weights are frozen. What is left is [[Upstream Knobs]] — untestable locally — and
-waiting on [[s08]] / [[s09]].
+What remains is [[Upstream Knobs]], untestable locally, and better measurement —
+see [[s11]].
 """)
 
 note("Gap2 In The Wrong Position", ["finding"], """
@@ -1782,6 +1804,279 @@ independently shows flipping sign.
 Fixed by [[Scored Films Measurement]], which removes the need to argue about it.
 """)
 
+note("Evidence Tiers", ["rule", "key"], """
+# Evidence Tiers — what each film set can and cannot support
+
+Every number in this vault was measured somewhere. **Where** decides what it can
+carry. Quote the tier whenever you quote a delta.
+
+| tier | films | GT edges | GT divisions | graphs | what it supports |
+|---|---|---|---|---|---|
+| **SCORED** | 4 | ~2,273 | **3** | deployed ILP | the only set that *is* the target. Small and noisy, but final. |
+| **VALIDATOR** | 8 | ~5,700 | 12 | deployed ILP | mechanism and divisions. **Does not predict the board** — see [[Scored Films Measurement]]. |
+| **REBUILD-199** | 199 | large | 151 | *weaker rebuild* (greedy, not ILP) | **direction and consistency only.** Absolute values do not carry. Must be calibrated on the 4 scored films first. |
+| **KERNEL VALIDATOR** | 8 | — | 12 | deployed, in-kernel | the instrument that rejected [[s01]]. Same 8 films as VALIDATOR. |
+
+**The three failure modes this table exists to prevent:**
+1. Quoting a VALIDATOR delta as if it were a board prediction — that is [[s09]].
+2. Quoting a REBUILD-199 absolute — it has none; only its *direction* is meaningful.
+3. Reporting a division difference finer than [[One Division Event Floor]], which
+   is **0.00714** at a 14-division ledger and **0.0111** on the scored films.
+
+The 199-film tier is only admissible because it is **calibrated**: it reproduced
+the deployed direction on 4/4 for relink ([[Relink Across 199]]) and 3/4 for
+linefit. An uncalibrated rebuild claim is not evidence.
+
+Related: [[Both-Sets Rule]], [[Transfer Lesson]]
+""")
+
+note("Both-Sets Rule", ["rule", "key"], """
+# The Both-Sets Rule
+
+> **A change ships only if it is positive on BOTH the scored films and the
+> validator films — and does not gain by dropping `J` on either.**
+
+Written after [[s09]], which shipped on the validator films alone (+0.00487) and
+is **−0.00086** where it counts.
+
+**It has already earned its keep twice:**
+
+- **[[s10]] passes.** Linefit weight on the s05 chain: 0.2 and 0.3 are
+  validator-only, 0.7 is scored-only, **0.4/0.5/0.6 are positive on both**, and
+  0.6 maximises the worst case. A third tier later agreed — see
+  [[Relink Across 199]] and the 0.4–0.6 plateau.
+- **`OUTPUT_MIN_TRACK_LEN` fails.** See [[MIN_TRACK_LEN Is Dead]]. It gains proxy
+  on both sets at L=7..10 but `J` **falls on the validator set every time**. The
+  two sets disagree about the *mechanism*, which the rule catches and a proxy
+  comparison would not.
+
+**The second clause matters as much as the first.** Proxy can rise on both sets
+while the gain is the [[Node Count Exploit]] on one of them. Require `J` up, or
+`ratio` unchanged, not just proxy up.
+
+Related: [[Evidence Tiers]], [[Operating Rules]]
+""")
+
+note("MIN_TRACK_LEN Is Dead", ["failed"], """
+# `OUTPUT_MIN_TRACK_LEN` Is Dead
+
+The scored-film re-price flagged 6→9 as the next probe: **+0.00772 with J
+RISING** (+0.00293), which is *not* the [[Node Count Exploit]] signature and is
+why it looked real.
+
+Put through the [[Both-Sets Rule]] before spending a GPU slot
+(`scripts/108_shorttrack_both_sets.py`), it fails at **every** setting:
+
+| L | scored dJ | validator dJ | dratio |
+|---|---|---|---|
+| 7 | +0.00000 | −0.00019 | −0.020 |
+| 8 | −0.00217 | −0.00076 | −0.041 |
+| 9 | **+0.00293** | **−0.00243** | −0.056 |
+| 10 | **+0.00293** | **−0.00379** | −0.071 |
+
+Proxy rises on both sets at L=7..10, but `J` falls on the validator set every
+time and the gain tracks `ratio` dropping 2–7%. The two sets disagree about the
+**mechanism**, not the size — the exploit wearing a disguise on one film set.
+
+Consistent with [[Failed Short Track Exploit]]: monotone to L=40. **No slot spent.**
+""")
+
+note("Relink Across 199", ["finding", "key"], """
+# Relink Removal, Across All 199 Films
+
+The largest-sample result in the project, and the strongest support for [[s05]].
+
+`artifacts/graphs/*.npz` stores **both arms** of exactly the s05 contrast:
+`raw_edges` (greedy, forks allowed → relink OFF) and `linked_edges` (1:1
+Hungarian tight-then-relaxed → relink ON).
+
+**Calibrated first**, per [[Evidence Tiers]] — the 4 scored films are in this set
+and their deployed answer is known from [[Scored Films Measurement]]. The rebuild
+agrees in direction on **4/4**: +0.09382, +0.03218, +0.01333, +0.05210.
+
+Only then the other 195:
+
+- removing relink **helps 176/199 films (88.4%)**
+- mean **+0.03858**, median +0.02456, p05 −0.00653, p95 +0.12539
+- `44b6`: 52/71 (73.2%) · **`6bba`: 124/128 (96.9%)**
+- weighted aggregate over 199 films: **+0.03764**
+
+**6bba is where removal is near-universal**, and 6bba dominates the scored weight.
+
+`scripts/105_relink_across_199.py`, 199 films × 2 arms in **1.5 s** on 16 workers.
+
+⚠ One bug worth remembering: `gt_edges` in the npz stores **node IDs**, not
+indices. Passing them straight to `score_film` gives `J = 0.00000` on every film,
+**silently** — the first run said "relink helps 0/199" and that was the loader.
+""")
+
+note("s10", ["submission", "inflight"], """
+# s10 — `OUTPUT_LINEFIT_WEIGHT` 0.8 → 0.6, on [[s05]]
+
+Pushed 2026-09-19 ~13:52 UTC, `biohub-s10-linefit06-on-s05`. **The first change
+selected under the [[Both-Sets Rule]].**
+
+| set | delta |
+|---|---|
+| SCORED (4) | **+0.00471** |
+| VALIDATOR (8) | **+0.00338** |
+| REBUILD-199 | +0.00136 (optimum 0.5 at +0.00148) |
+
+Three tiers, three different optima — 0.6, 0.4, 0.5 — but **one shared plateau at
+0.4–0.6**, and all three put [[s09]]'s 0.3 outside it.
+
+**Pure edge axis.** `ratio` is identical across all ten weights on both sets,
+asserted in the script rather than assumed, so there is no node-count component.
+Division ledger unchanged.
+
+⚠ **The gain is concentrated AND two-sided.** Across the 199-film tier at w=0.6
+vs deployed 0.8: **119/199 films change, of which 73 improve and 46 GET WORSE**;
+80 are untouched because linefit only acts where chains are long enough to fit.
+The median delta is exactly 0.00000 at every weight. So s10 is net positive but
+carries real downside spread — do not read the mean as a per-film expectation,
+and do not describe it as "73 films move".
+
+Supersedes [[s09]] as the linefit decision.
+""")
+
+note("s11", ["submission", "infra"], """
+# s11 — a data-generation run, not a scoring change
+
+**The problem it solves:** every Kaggle run regenerates the same **12**
+deployed-quality graphs (8 [[Validator Films]] + 4 [[Test Films]]). Twelve films
+is what killed [[s06]] and [[s09]].
+
+`BIOHUB_VALIDATOR_N_PER_TYPE` controls films per embryo type and the kernel emits
+a `.geff` for every one. s11 raises it **4 → 16 = 32 validator films**.
+
+Cost, from [[s05]]'s own `validator_prediction_state.json` (~115 s/film):
+
+| films | projected run |
+|---|---|
+| 8 (current) | 1.0 h |
+| **32 (s11)** | **3.4 h** |
+| 40 | 4.2 h |
+
+**Harvest its graphs; do not submit it.** It quadruples the deployed-quality
+evidence base permanently.
+
+⚠ **Known limitation, stated up front:** `val_stems` takes `ranked[:N]` per type,
+so films 5–16 are *lower ranked* than the current 8 — sparser labels, fewer
+divisions. It buys many more **edges** and only some more **divisions**. That is
+the right trade: the scored films hold 3 divisions total and `divJ` is 0 in every
+arm there.
+
+Related: [[Evidence Tiers]], [[Kaggle Mechanics]]
+""")
+
+# ───────────────────────── FACT VERIFICATION ─────────────────────────
+# The atlas drifted once already: "Parametric Search Closed" said "nothing
+# survives, do not re-tune" after s10 had already been found. A knowledge base
+# that lies is worse than none, so every load-bearing number is RECOMPUTED from
+# its source artifact at build time and the build FAILS if the note disagrees.
+#
+# Each check is (label, note, recompute) where recompute returns a string that
+# must appear verbatim in that note.
+
+def _csv(path):
+    import csv as _c
+    with open(ROOT / path) as fh:
+        return list(_c.DictReader(fh))
+
+
+def _relink_helps():
+    rows = _csv("artifacts/relink_across_199.csv")
+    n = sum(1 for r in rows if float(r["delta_off_minus_on"]) > 0)
+    return f"{n}/{len(rows)}"
+
+
+def _linefit_movers():
+    rows = _csv("artifacts/linefit_across_199.csv")
+    n = sum(1 for r in rows if float(r["w0.6"]) != float(r["w0.8"]))
+    return f"{n}/{len(rows)}"
+
+
+def _scored_delta(change):
+    """The SCORED column is the SECOND signed number on the row."""
+    import re as _re
+    txt = (ROOT / "artifacts/relink_on_scored.log").read_text()
+    for line in txt.splitlines():
+        if line.strip().startswith(change):
+            nums = _re.findall(r"[+-]\d+\.\d+", line)
+            if len(nums) < 2:
+                raise AssertionError(f"{change!r}: expected 2 numbers, got {nums}")
+            return nums[1]
+    raise AssertionError(f"{change!r} not found in relink_on_scored.log")
+
+
+def _reprice(label):
+    for r in _csv("artifacts/reprice_on_scored.csv"):
+        if r["label"] == label:
+            return f"{float(r['dproxy']):+.5f}"
+    raise AssertionError(f"{label!r} not in reprice_on_scored.csv")
+
+
+def _manifest_train(path, key):
+    import json as _j
+    return str(len(_j.loads((ROOT / path).read_text())[key]))
+
+
+def _scored_divisions():
+    """Total GT divisions across the 4 scored films -- the atlas claims 3."""
+    want = ["44b6_0113de3b", "44b6_0b24845f", "6bba_05b6850b", "6bba_05db0fb1"]
+    d = {r["film"]: int(r["divisions"]) for r in _csv("artifacts/films.csv")}
+    return f"{sum(d[f] for f in want)} divisions total"
+
+
+CHECKS = [
+    ("relink helps N/199", "Relink Across 199", _relink_helps),
+    ("linefit movers", "s10", _linefit_movers),
+    ("s05 on scored films", "Scored Films Measurement", lambda: _scored_delta("s05 over BASE")),
+    ("s09 on scored films", "Scored Films Measurement", lambda: _scored_delta("s09 over s08")),
+    ("s10 linefit on scored", "s10", lambda: _reprice("lf_w=0.6")),
+    ("safe_div off on scored", "Parametric Search Closed", lambda: _reprice("STAGE OFF: safe_div")),
+    ("secondary manifest train",  "Manifest Contamination",
+     lambda: _manifest_train("weights/biohub-temporal-unet3d-seed314159-v1/weights/"
+                             "unet_transformer/split_0/split_manifest.json", "train")),
+    ("deepcenter train", "Manifest Contamination",
+     lambda: _manifest_train("weights/biohub-deepcenter-unet3d-center-prior-v1/"
+                             "weights/full_frame_center/split_manifest.json", "train")),
+    ("deepcenter val", "Manifest Contamination",
+     lambda: _manifest_train("weights/biohub-deepcenter-unet3d-center-prior-v1/"
+                             "weights/full_frame_center/split_manifest.json", "val")),
+    ("scored film divisions", "s11", _scored_divisions),
+]
+
+
+def verify():
+    bad, skipped = [], []
+    for label, target, fn in CHECKS:
+        if target not in N:
+            bad.append(f"{label}: note {target!r} does not exist")
+            continue
+        try:
+            want = fn()
+        except FileNotFoundError as e:
+            skipped.append(f"{label}: source artifact missing ({e.filename})")
+            continue
+        except Exception as e:
+            bad.append(f"{label}: recompute failed -- {e}")
+            continue
+        body = (N[target][1].replace("\u2212", "-").replace("\u2013", "-")
+                .replace("\u2014", "-"))
+        if want not in body:
+            bad.append(f"{label}: artifact says {want!r}, note {target!r} does not contain it")
+    for m in skipped:
+        print(f"  SKIP  {m}")
+    if bad:
+        print("FACT CHECK FAILED -- the atlas disagrees with its own artifacts:")
+        for m in bad:
+            print(f"  {m}")
+        sys.exit(1)
+    print(f"fact check: {len(CHECKS) - len(skipped)}/{len(CHECKS)} load-bearing "
+          f"numbers recomputed from artifacts and matched")
+
+
 # ─────────────────────────────── WRITE ───────────────────────────────
 FOLDER = {
     "moc": "00 Maps", "concept": "01 Concepts", "stage": "02 Pipeline",
@@ -1796,6 +2091,8 @@ def folder_for(tags):
         if t in FOLDER:
             return FOLDER[t]
     return "99 Misc"
+
+verify()
 
 names = set(N)
 dangling, written = {}, 0

@@ -88,9 +88,10 @@ scored → 0.6, validator → 0.4, 199-film → 0.5. All three put **0.4–0.6 i
 good region and 0.3 outside it**. s10's 0.6 is within 0.00012 of the 199-film
 optimum. The pick is sound.
 
-⚠ The gain is **concentrated, not broad**: only 73/199 films move at all and the
-median delta is exactly 0.00000 at every weight. linefit only acts where chains
-are long enough to fit. Do not read the mean as a per-film expectation.
+⚠ The gain is **concentrated AND two-sided**: at w=0.6 vs 0.8 across the 199-film
+tier, **119/199 films change — 73 improve, 46 GET WORSE** — and 80 are untouched
+because linefit only acts where chains are long enough to fit. Median delta is
+exactly 0.00000 at every weight. s10 is net positive with real downside spread.
 
 Also learned on the scored films: **safe_div earns its keep on EDGES even though
 it earns zero division credit there.** Turning it off takes the ledger 0/6/3 →
