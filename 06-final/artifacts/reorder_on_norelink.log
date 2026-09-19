@@ -1,0 +1,83 @@
+Does the gap2/safe_div reorder survive in the FULL s05 chain (relink OFF)?
+
+scripts/91_other_stages.py measured the reorder on `raw + gap2 + safe_div`
+alone:
+
+    + gap2 total=10.2 step=4.4  (BEFORE safe_div)   proxy 0.961627  -0.008016
+    + safe_div then gap2        (AFTER)             proxy 0.970849  +0.001206
+
+a +0.00922 swing. But that is a THREE-STAGE topology. s05 deploys the whole
+chain, and docs/HANDOFF.md section 6 is the record of what happens when a delta
+measured in one topology is assumed to hold in another: linefit w=0.4 was
++0.0024 on raw graphs and -0.00135 on the relinked pipeline, because the stages
+either side of it changed what it was fitting along.
+
+So measure the reorder where it would actually ship: every deployed stage on,
+at deployed parameters, motion relink off (that is what s05 is), and gap2 moved
+from before safe_div to after it. Nothing else differs between the two arms.
+
+    A (s05 as submitted)  gap_close -> gap2 -> safe_div -> prune -> short -> linefit
+    B (s07 on top of s05) gap_close -> safe_div -> gap2 -> prune -> short -> linefit
+
+Deployed parameters, read out of cell 2 of the 0.947 notebook:
+    GAP_CLOSE_UM 5.0, GAP_CLOSE_REUSE_UM 3.2, GAP2_MAX_TOTAL_UM 10.2,
+    GAP2_MAX_STEP_UM 4.4, GAP2_REQUIRE_CONTEXT 1, OUTPUT_MIN_TRACK_LEN 6,
+    OUTPUT_KEEP_DIVISION_COMPONENTS 1, OUTPUT_LINEFIT_WEIGHT 0.8, WINDOW 2,
+    OUTPUT_PRUNE_ISOLATED 1.
+
+Known gaps between this chain and the kernel's: single-parent repair and the
+adaptive short-track rescue are not ported, and the DeepCenter gap/safe-div
+vetoes are not applied. Those are held IDENTICAL across the two arms, so they
+cannot manufacture the difference -- but they do mean the absolute proxy here
+is not the kernel's proxy. Only the A-vs-B delta is being claimed.
+======================================================================================================================
+configuration                               proxy    dprox        J       dJ    mult    dmult n/n_est    divJ TP/FP/FN  notes
+A  s05 chain, gap2 BEFORE safe_div        0.96682           0.93483          1.00361           0.8977  0.2857    4/2/8  gap2_nodes=724 gap2_pairs=362 gap_pairs=1222 gap_synth=1222 lf_moved=187312 st_comps=1414 st_removed=6344
+B  s05 chain, gap2 AFTER safe_div         0.97431 +0.00748  0.93516 +0.00034 1.00361 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+C  s05 chain, gap2 OFF entirely           0.97297 +0.00615  0.93333 -0.00149 1.00415 +0.00055  0.8913  0.3571    5/2/7  gap_pairs=1222 gap_synth=1222 lf_moved=185979 st_comps=1550 st_removed=6950  <<FALSE GAIN: all multiplier
+
+reorder delta B - A : +0.00748 proxy   (dJ +0.00034, dmult +0.00000)
+divisions           : A 4/2/8  ->  B 5/2/7   divJ 0.2857 -> 0.3571
+one division event  : 0.00714 of proxy at this denominator (14 divisions)
+three-stage topology predicted +0.00922; full chain gives +0.00748 (-19%), sign HELD
+
+READ: the delta is one recovered division (TP 4 -> 5, FN 8 -> 7) plus +0.00034 of edge J.
+      That is exactly one event -- real and discrete, but AT the measurement floor, not above it.
+      The gain is on the DIVISION axis, where the offline-vs-board ledger is 3 for 3,
+      not the edge axis, where it is 0 for 3.
+
+--- per-film (the 8 validator films) ---
+film                       A proxy   B proxy     delta       A J       B J        dJ  n/n_est
+44b6_12dfb391              0.93502   0.93628  +0.00126   0.91315   0.91439  +0.00124   0.7606
+44b6_267148e4              0.85748   0.85746  -0.00002   0.87119   0.87119  +0.00000   1.1576
+44b6_2a2eff9f              0.87872   0.87874  +0.00001   0.85345   0.85345  +0.00000   0.7037
+44b6_341df25f              0.97333   0.97806  +0.00472   0.98565   0.99043  +0.00478   1.1249
+6bba_062c8d37              0.98709   0.98712  +0.00003   0.98450   0.98450  +0.00000   0.9733
+6bba_07e24132              0.82159   0.82159  +0.00000   0.85083   0.85083  +0.00000   1.3436
+6bba_085bf656              0.99539   0.99539  +0.00000   0.99316   0.99316  +0.00000   0.9775
+6bba_09961292              0.91998   0.91998  +0.00000   0.91535   0.91535  +0.00000   0.9494
+films where the reorder helped: 4/8
+
+--- which film supplies the division? ---
+film                      A tp/fp/fn  B tp/fp/fn
+44b6_12dfb391                  0/0/1       0/0/1
+44b6_267148e4                  1/0/0       1/0/0
+44b6_2a2eff9f                  1/2/0       1/2/0
+44b6_341df25f                  0/0/1       1/0/0   <-- DIVISION RECOVERED
+6bba_062c8d37                  1/0/0       1/0/0
+6bba_07e24132                  0/0/2       0/0/2
+6bba_085bf656                  0/0/1       0/0/1
+6bba_09961292                  1/0/3       1/0/3
+
+--- sign stability under the stages either side of the move ---
+perturbation                             A proxy   B proxy       B-A         divJ A->B
+deployed                                 0.96682   0.97431  +0.00748  0.2857 -> 0.3571
+linefit w=0.4 (the s06 setting)          0.97054   0.97803  +0.00749  0.2857 -> 0.3571
+linefit w=0.0 (smoothing off)            0.96636   0.97384  +0.00748  0.2857 -> 0.3571
+linefit window=3                         0.96714   0.97462  +0.00748  0.2857 -> 0.3571
+gap_close 8.0um                          0.96667   0.97416  +0.00749  0.2857 -> 0.3571
+gap_close 3.0um                          0.96596   0.97344  +0.00748  0.2857 -> 0.3571
+short_track L=9 (the board 0.947)        0.96804   0.97552  +0.00749  0.2857 -> 0.3571
+short_track keep_forks=0                 0.96682   0.97431  +0.00748  0.2857 -> 0.3571
+gap2 total=14 step=6                     0.96669   0.97419  +0.00750  0.2857 -> 0.3571
+reorder positive in 9/9 perturbations

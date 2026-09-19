@@ -24,8 +24,12 @@ train films:
 **Not submitted:** s01 (validator rejected it), s02/s03/s04 (retired),
 s06 (ran, measured **negative**, see §5).
 
-**Built but never pushed:** `submissions/s07_reorder/` — gap2 moved after
-safe_div. **Do not push it as built.** See §6.
+**Built but never pushed:** `submissions/s08_reorder_on_s05/` — gap2 moved after
+safe_div, **on top of s05**. Measured **+0.00748** on the full s05 chain locally,
+positive in 9/9 perturbations. Ready to push, but see the falsifier in §6.
+
+**Superseded, do not push:** `submissions/s07_reorder/` — the same reorder on the
+unmodified base with relink **ON**. Wrong base; s08 replaces it. See §6.
 
 ---
 
@@ -157,17 +161,66 @@ safe_div applied to the **unmodified base with relink ON**, and by the same
 argument it will probably not transfer — gap2 competes with safe_div for orphan
 nodes, and relink is what manufactures the orphan pool.
 
-**Next action: rebuild s07 on top of s05** (no relink **plus** the gap2 reorder),
-so it is one change relative to the configuration that actually scored well, and
-is tested in the topology it was measured in. The reorder itself is already
-AST-proven — see `scripts/96_reorder_variant.py`, which verifies it is a strict
-permutation of statements (558 top-level statements, exactly 1 differs; within
-`filter_output_graph`, `sorted(old) == sorted(new)`) and confirms safe_div adds
-**edges only, never nodes**, so synthetic node ids do not drift.
+**DONE — s08 is that rebuild.** `python scripts/96_reorder_variant.py s08`
+builds it; `submissions/s08_reorder_on_s05/`. The builder proves seven things,
+including two that are new: (f) the s05 env line adds **exactly one** top-level
+statement and leaves `filter_output_graph` a pure permutation of the base, and
+(g) the built notebook differs from the **shipped s05 notebook** by exactly the
+two moved statements — so "one change relative to s05" is demonstrated, not
+asserted. `python scripts/96_reorder_variant.py s07` still builds the old, wrong
+variant if it is ever needed for comparison.
 
-After that, re-test **linefit on top of no-relink** — it was positive there
+**And this time the transfer was checked before building**, which is the whole
+point of the lesson above. `scripts/98_reorder_on_norelink.py` runs the **full**
+s05 chain at deployed parameters on the 8 validator films, gap2 on either side
+of safe_div, nothing else differing:
+
+| configuration | proxy | J | mult | divJ | TP/FP/FN |
+|---|---|---|---|---|---|
+| A  gap2 BEFORE safe_div (= s05) | 0.96682 | 0.93483 | 1.00361 | 0.2857 | 4/2/8 |
+| **B  gap2 AFTER safe_div (= s08)** | **0.97431** | 0.93516 | 1.00361 | **0.3571** | **5/2/7** |
+| C  gap2 OFF entirely | 0.97297 | 0.93333 | 1.00415 | 0.3571 | 5/2/7 |
+
+**B − A = +0.00748.** The three-stage topology predicted +0.00922; the full chain
+gave 19% less but the **sign held** — unlike s06's linefit, which flipped.
+
+Three things to keep straight about that number:
+
+- **It is exactly one division**, not a broad gain. divJ 0.2857 → 0.3571 is one
+  event at a denominator of 14, worth 0.00714; the remaining +0.00034 is edge J.
+  All of it comes from **one film**, `44b6_341df25f` (0/0/1 → 1/0/0). Five of the
+  eight films move by exactly 0.00000. Do not read +0.00748 as resolution it does
+  not have — §7's floor rule applies, and note the floor here is **0.00714**, not
+  the 0.0083 quoted for a 12-division denominator.
+- **But it is invariant.** Positive in **9/9** perturbations of the stages either
+  side — linefit w ∈ {0, 0.4, 0.8}, window 2/3, gap_close 3/5/8 µm, short-track
+  L=6/L=9, keep_forks on/off, gap2 10.2/4.4 and 14/6 — and the spread across all
+  nine is **+0.00748 to +0.00750**. That is the mechanistic signature: the reorder
+  is a discrete contest over one orphan node, not a continuous geometric fit, so
+  the surrounding stages cannot move it. This is precisely why it behaves unlike
+  linefit.
+- **Row C is the surprise.** gap2 in its *deployed* position is **worse than
+  turning gap2 off** (+0.00615 for C over A). Row C trips the harness's
+  `<<FALSE GAIN: all multiplier` flag, but that is a **false alarm** — the flag
+  only inspects edge J and cannot see divJ, and C's gain over A is the same
+  division B recovers, not node deletion. gap2 only earns its place once it
+  runs after safe_div, where it beats C by +0.00133 with a real edge-J gain
+  (+0.00149) and no multiplier trick. If s08 is ever rejected, `GAP2_RECOVERY=0`
+  is the cheaper fallback and recovers most of the same ground.
+
+**The gain is on the DIVISION axis** — it *is* a division — where §7's
+offline-vs-board ledger is **3 for 3**, not the edge axis where it is 0 for 3.
+That is a better prior than s05 had.
+
+**FALSIFIER, and why s08 has not been pushed:** s08's base is s05, and **s05 has
+no board score yet** (submitted 12:25 UTC 2026-09-19, still `PENDING`; a commit
+run is ~1.75 h). If s05 does not beat 0.947, s08 is void with it — its entire
+premise is that no-relink is the right base. Do not push s08 until s05 scores.
+
+**After that, re-test linefit on top of no-relink** — it was positive there
 (+0.0024 to +0.0044 on raw graphs) and only failed because it was tested on the
-wrong base.
+wrong base. Note `scripts/98` already has the scaffolding: it runs the full s05
+chain with `LF_W`/`LF_WIN` as parameters.
 
 ---
 

@@ -33,9 +33,28 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "public notebooks/biohub-0-947-lb-runnable-with-public-datasets.ipynb"
-OUT_DIR = ROOT / "submissions/s07_reorder"
-SLUG = "biohub-s07-reorder"
-TITLE = "Biohub S07 gap2 after safe-division"
+S05 = ROOT / "submissions/s05_no_relink/biohub-s05-no-relink.ipynb"
+
+# Two build targets. s07 puts the reorder on the unmodified base (relink ON);
+# docs/HANDOFF.md section 6 says do not push that one -- gap2 competes with
+# safe_div for orphan nodes and relink is what manufactures the orphan pool, so
+# a delta measured with relink off need not survive with it on. s08 puts the
+# same reorder on top of s05 (relink OFF), which is the topology the +0.00922
+# three-stage delta and the +0.00748 full-chain delta were both measured in
+# (scripts/91_other_stages.py, scripts/98_reorder_on_norelink.py).
+TARGETS = {
+    "s07": dict(out="submissions/s07_reorder", slug="biohub-s07-reorder",
+                title="Biohub S07 gap2 after safe-division", env=False),
+    "s08": dict(out="submissions/s08_reorder_on_s05",
+                slug="biohub-s08-reorder-on-s05",
+                title="Biohub S08 no relink + gap2 after safe-division",
+                env=True),
+}
+
+# The s05 change, inserted at exactly the position s05 uses so that s08 differs
+# from the shipped s05 notebook by the reorder and nothing else.
+ENV_ANCHOR = "os.environ['BIOHUB_OUTPUT_GAP2_RECOVERY'] = '1'"
+ENV_LINE = "os.environ['BIOHUB_OUTPUT_MOTION_RELINK'] = '0'\n"
 
 FUNC = "filter_output_graph"
 CODE_CELL = 2
@@ -99,7 +118,11 @@ def show_sequence(body, title):
                 print(f"      [{k:2d}] {short}")
 
 
-def main():
+def main(target="s08"):
+    spec = TARGETS[target]
+    out_dir, slug, title = ROOT / spec["out"], spec["slug"], spec["title"]
+    print(f"building {target}: {spec['title']}\n"
+          f"  reorder on {'the s05 no-relink base' if spec['env'] else 'the unmodified base'}\n")
     nb = json.loads(BASE.read_text())
     before_lines = [l for c in nb["cells"] for l in c.get("source", [])]
     cell = nb["cells"][CODE_CELL]
@@ -213,24 +236,75 @@ def main():
     print("    (the moved statements are two calls/prints inside a function; the "
           "guard runs at import time on os.environ only)")
 
+    # --------------------------------------- (f) the s05 change, if building s08
+    if spec["env"]:
+        print("\n--- (f) adding the s05 change on top of the reorder ---------------")
+        k = only(new_list, ENV_ANCHOR, "gap2-recovery env line")
+        final_list = new_list[:k + 1] + [ENV_LINE] + new_list[k + 1:]
+        if len(final_list) != len(new_list) + 1:
+            die("env insertion changed more than one line")
+        if sorted(final_list) != sorted(new_list + [ENV_LINE]):
+            die("env insertion perturbed an existing line")
+        cell["source"] = final_list
+        final_src = "".join(final_list)
+        compile(final_src, "<cell2>", "exec")
+
+        # exactly one added top-level statement, and it is that os.environ set
+        f_top = [ast.dump(n) for n in ast.parse(final_src).body]
+        if len(f_top) != len(new_top) + 1:
+            die(f"top-level statement count moved by {len(f_top) - len(new_top)}, expected +1")
+        added = [i for i in range(len(f_top)) if f_top[i] not in new_top]
+        node = ast.parse(final_src).body[added[0]] if len(added) == 1 else None
+        if node is None or ast.unparse(node) != ENV_LINE.strip():
+            die(f"the added statement is not the expected env set: {added}")
+        print(f"    inserted after line {k + 1} ({ENV_ANCHOR})")
+        print(f"    one added top-level statement at index {added[0]}: "
+              f"{ast.unparse(node)}")
+        if sorted(func_body(final_src)) != sorted(old_body):
+            die("filter_output_graph changed when the env line went in")
+        print(f"    {FUNC} still a pure permutation of the base: PASS")
+        new_list = final_list
+
     # ------------------------------------------------------------- write out
     for c in nb["cells"]:
         if c.get("cell_type") == "code":
             c["outputs"] = []
             c["execution_count"] = None
     after_lines = [l for c in nb["cells"] for l in c.get("source", [])]
-    if len(after_lines) != len(before_lines):
-        die("whole-notebook line count changed")
+    grew = 1 if spec["env"] else 0
+    if len(after_lines) != len(before_lines) + grew:
+        die(f"whole-notebook line count moved by "
+            f"{len(after_lines) - len(before_lines)}, expected +{grew}")
     whole = [l for l in difflib.unified_diff(before_lines, after_lines,
                                              lineterm="", n=0)
              if l.startswith(("+", "-")) and not l.startswith(("+++", "---"))]
-    if len(whole) != 4:
-        die(f"whole-notebook diff shows {len(whole)} lines, expected 4")
+    if len(whole) != 4 + grew:
+        die(f"whole-notebook diff shows {len(whole)} lines, expected {4 + grew}")
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUT_DIR / f"{SLUG}.ipynb").write_text(json.dumps(nb))
-    (OUT_DIR / "kernel-metadata.json").write_text(json.dumps({
-        "id": f"aryaarun07/{SLUG}", "title": TITLE, "code_file": f"{SLUG}.ipynb",
+    # ------- (g) one change relative to s05, demonstrated not asserted -------
+    if spec["env"]:
+        print("\n--- (g) diff against the SHIPPED s05 notebook ---------------------")
+        if not S05.exists():
+            die(f"{S05} not found; cannot prove one-change-vs-s05")
+        s05_lines = [l for c in json.loads(S05.read_text())["cells"]
+                     for l in c.get("source", [])]
+        vs05 = [l for l in difflib.unified_diff(s05_lines, after_lines,
+                                                lineterm="", n=0)
+                if l.startswith(("+", "-")) and not l.startswith(("+++", "---"))]
+        for l in vs05:
+            print("   ", l.rstrip()[:160])
+        if len(vs05) != 4:
+            die(f"s08 differs from s05 by {len(vs05)} lines, expected 4 "
+                "(the two moved statements)")
+        if sorted(s05_lines) != sorted(after_lines):
+            die("s08 is not a pure reorder of s05")
+        print("    s08 == s05 with two statements moved, nothing else: PASS")
+        print("    => ONE change relative to the configuration that was submitted")
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / f"{slug}.ipynb").write_text(json.dumps(nb))
+    (out_dir / "kernel-metadata.json").write_text(json.dumps({
+        "id": f"aryaarun07/{slug}", "title": title, "code_file": f"{slug}.ipynb",
         "language": "python", "kernel_type": "notebook", "is_private": "true",
         "enable_gpu": "true", "enable_tpu": "false", "enable_internet": "false",
         "machine_shape": "NvidiaTeslaT4",
@@ -239,9 +313,9 @@ def main():
                             "pilkwang/biohub-deepcenter-unet3d-center-prior-v1"],
         "competition_sources": ["biohub-cell-tracking-during-development"],
         "kernel_sources": [], "model_sources": []}, indent=2))
-    print(f"\nwrote {OUT_DIR}/{SLUG}.ipynb  "
-          f"({len(after_lines)} source lines, {len(whole) // 2} moved)")
-    print(f"wrote {OUT_DIR}/kernel-metadata.json")
+    print(f"\nwrote {out_dir}/{slug}.ipynb  "
+          f"({len(after_lines)} source lines)")
+    print(f"wrote {out_dir}/kernel-metadata.json")
 
     simulate(old_src)
 
@@ -377,4 +451,4 @@ def simulate(src):
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1] if len(sys.argv) > 1 else "s08")
