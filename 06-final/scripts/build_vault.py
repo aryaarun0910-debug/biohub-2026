@@ -53,6 +53,9 @@ Everything known about this competition, as a graph. Start at a hub below.
 ## What we are waiting for
 - [[Board Predictions]] — pre-registered bands and what each outcome would mean
 
+## Capability
+- [[Local Pipeline On The Mac]] — the deployed pipeline runs locally, bit-identical, 2.5× faster than Kaggle
+
 ## Where the remaining headroom is
 - [[The 32-Film Verdict]] — everything holds, but 8 films inflate small effects 2–5×
 - [[Error Budget]] — 80% of the error is the linker; the detector ceiling is +0.0126
@@ -1868,6 +1871,54 @@ independently shows flipping sign.
 Fixed by [[Scored Films Measurement]], which removes the need to argue about it.
 """)
 
+note("Local Pipeline On The Mac", ["infra", "key"], """
+# The Deployed Pipeline Runs On The Mac — Bit-Identical
+
+**The single biggest capability change in the project.** Kaggle is no longer
+needed to measure anything.
+
+The kernel ships its own source tree, and it was sitting in
+`artifacts/s05_output/tracking_repo/` the whole time: the temporal UNet3D, the
+node transformer, and `predict_unet_transformer.py`.
+
+**Everything installs on macOS arm64.** `tracksdata` and `ilpy` ship as
+*pure-Python* wheels in the weights datasets; the only native dependency is
+`pyscipopt` (the SCIP ILP solver), and PyPI has **6.2.1** for arm64 — the exact
+version the kernel uses.
+
+**Two patches, both trivial:**
+1. `device = cuda if available else cpu` → add an `mps` branch. The original
+   falls silently to CPU on a Mac.
+2. Two hardcoded `Path('/kaggle/working')` → `$BIOHUB_WORKING_DIR`.
+
+Only **16** `BIOHUB_*` vars are read by the pipeline (the other 49 the notebook
+sets are post-processing, which the [[Local Harness]] already replicates).
+
+## The verification that matters
+
+Run on `44b6_341df25f`, against the graph the Kaggle T4 produced:
+
+| | nodes | edges | max coord diff | edge sets |
+|---|---|---|---|---|
+| LOCAL (MPS) | 8523 | 8189 | **0** | **identical** |
+| KERNEL (T4) | 8523 | 8189 | | |
+
+Identical `J`, identical tp/fp/fn. **Not a rebuild — the same graphs.**
+
+## What it changes
+
+- **96 s/film on the M5 Pro against the T4's ~236 s — 2.5× faster than Kaggle.**
+- All 199 films in ~5.3 h single-process, less when sharded (`--slice N::M`).
+- No 9 h kernel limit, no 2-session cap, no submission cost.
+- [[Evidence Tiers]]' REBUILD-199 row — greedy, weaker, direction-only — is
+  **obsolete**. It becomes a *deployed-quality* 199-film tier.
+- Both Kaggle slots are freed for what they are actually for: scoring.
+
+`scripts/local_predict_199.sh`
+
+Related: [[s11]], [[The 32-Film Verdict]]
+""")
+
 note("The 32-Film Verdict", ["finding", "key"], """
 # The 32-Film Verdict — everything holds, but 8 films inflate small effects
 
@@ -2050,7 +2101,7 @@ carry. Quote the tier whenever you quote a delta.
 |---|---|---|---|---|---|
 | **SCORED** | 4 | ~2,273 | **3** | deployed ILP | the only set that *is* the target. Small and noisy, but final. |
 | **VALIDATOR** | 8 | ~5,700 | 12 | deployed ILP | mechanism and divisions. **Does not predict the board** — see [[Scored Films Measurement]]. |
-| **REBUILD-199** | 199 | large | 151 | *weaker rebuild* (greedy, not ILP) | **direction and consistency only.** Absolute values do not carry. Must be calibrated on the 4 scored films first. |
+| **DEPLOYED-199** | 199 | ~120k | 151 | **deployed ILP, generated locally** | full weight — see [[Local Pipeline On The Mac]], verified bit-identical to the kernel. Supersedes the old greedy rebuild tier. |
 | **KERNEL VALIDATOR** | 8 | — | 12 | deployed, in-kernel | the instrument that rejected [[s01]]. Same 8 films as VALIDATOR. |
 
 **The three failure modes this table exists to prevent:**

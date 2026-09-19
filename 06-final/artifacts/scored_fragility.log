@@ -1,0 +1,56 @@
+Do the OTHER post-processing stages help on the RAW ILP graph (no relink)?
+
+Motion relink is off (that was worth +0.0295 proxy on its own). The question
+left over is whether the rest of the deployed chain -- gap closing, gap2
+recovery, prune-isolated, short-track filtering, linefit smoothing -- are
+carrying their weight once the ILP's own global assignment is kept.
+
+Every stage is measured ONE AT A TIME against the raw + safe_div anchor.
+Each stage sits at its DEPLOYED position in the chain:
+
+    gap_close -> gap2 -> safe_div -> prune_isolated -> short_track -> linefit
+
+so "gap close" means gap-close-then-safe_div, because gap closing eats the
+orphan pool that safe_div draws its daughters from. Anything after safe_div is
+a pure post-hoc edit of the same divided graph.
+
+Stage implementations are ported from the 0.947 notebook (cell 2:
+close_single_frame_gaps, recover_strict_gap2, filter_short_track_components,
+linefit_smooth_output_graph, the OUTPUT_PRUNE_ISOLATED block) onto
+ORIGINAL-VOXEL coordinates with the anisotropic SCALE. src/biohub/postprocess.py
+has lookalikes but they use an isotropic GRID_UM = 1.625, which is 4x wrong in
+y and x on these graphs -- do not use them here.
+
+Node counts: the metric multiplies edge Jaccard by 1 - 0.1*(n_pred - n_est)/n_est.
+Deleting nodes RAISES that multiplier, so every row prints n_pred/n_est and
+J separately. A row where mult moves and J does not is a bookkeeping gain,
+not a tracking gain.
+======================================================================================
+
+########## SCORED (4 films): 4 films, 2127 GT edges ##########
+--- s05 vs BASE ---
+  GT edges gained 29, lost 17, NET +12  out of 2127 (0.564% of the set)
+  paired bootstrap over GT edges, 4000 draws: net +12 95% CI [-1, +25]
+  => CI spans zero -- direction NOT resolved by this sample
+--- s08 vs s05 ---
+  GT edges gained 0, lost 0, NET +0  out of 2127 (0.000% of the set)
+  paired bootstrap over GT edges, 4000 draws: net +0 95% CI [+0, +0]
+  => CI spans zero -- direction NOT resolved by this sample
+--- s10 vs s05 ---
+  GT edges gained 9, lost 5, NET +4  out of 2127 (0.188% of the set)
+  paired bootstrap over GT edges, 4000 draws: net +4 95% CI [-3, +11]
+  => CI spans zero -- direction NOT resolved by this sample
+
+########## VALIDATOR-32: 32 films, 19332 GT edges ##########
+--- s05 vs BASE ---
+  GT edges gained 278, lost 179, NET +99  out of 19332 (0.512% of the set)
+  paired bootstrap over GT edges, 4000 draws: net +99 95% CI [+57, +142]
+  => CI EXCLUDES ZERO -- direction resolved
+--- s08 vs s05 ---
+  GT edges gained 3, lost 4, NET -1  out of 19332 (0.005% of the set)
+  paired bootstrap over GT edges, 4000 draws: net -1 95% CI [-6, +4]
+  => CI spans zero -- direction NOT resolved by this sample
+--- s10 vs s05 ---
+  GT edges gained 47, lost 35, NET +12  out of 19332 (0.062% of the set)
+  paired bootstrap over GT edges, 4000 draws: net +12 95% CI [-6, +30]
+  => CI spans zero -- direction NOT resolved by this sample

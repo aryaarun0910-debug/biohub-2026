@@ -13,7 +13,7 @@ carry. Quote the tier whenever you quote a delta.
 |---|---|---|---|---|---|
 | **SCORED** | 4 | ~2,273 | **3** | deployed ILP | the only set that *is* the target. Small and noisy, but final. |
 | **VALIDATOR** | 8 | ~5,700 | 12 | deployed ILP | mechanism and divisions. **Does not predict the board** — see [[Scored Films Measurement]]. |
-| **REBUILD-199** | 199 | large | 151 | *weaker rebuild* (greedy, not ILP) | **direction and consistency only.** Absolute values do not carry. Must be calibrated on the 4 scored films first. |
+| **DEPLOYED-199** | 199 | ~120k | 151 | **deployed ILP, generated locally** | full weight — see [[Local Pipeline On The Mac]], verified bit-identical to the kernel. Supersedes the old greedy rebuild tier. |
 | **KERNEL VALIDATOR** | 8 | — | 12 | deployed, in-kernel | the instrument that rejected [[s01]]. Same 8 films as VALIDATOR. |
 
 **The three failure modes this table exists to prevent:**

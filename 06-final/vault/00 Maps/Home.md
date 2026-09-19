@@ -26,6 +26,9 @@ Everything known about this competition, as a graph. Start at a hub below.
 ## What we are waiting for
 - [[Board Predictions]] — pre-registered bands and what each outcome would mean
 
+## Capability
+- [[Local Pipeline On The Mac]] — the deployed pipeline runs locally, bit-identical, 2.5× faster than Kaggle
+
 ## Where the remaining headroom is
 - [[The 32-Film Verdict]] — everything holds, but 8 films inflate small effects 2–5×
 - [[Error Budget]] — 80% of the error is the linker; the detector ceiling is +0.0126
