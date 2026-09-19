@@ -30,6 +30,9 @@ Everything known about this competition, as a graph. Start at a hub below.
 - [[Local Pipeline On The Mac]] — the deployed pipeline runs locally, bit-identical, 2.5× faster than Kaggle
 - [[Training Recipe Research]] — the public model's own config, and the discussion finding that justifies the held-out detector
 
+## The plan
+- [[The Division Lever]] — the only arithmetic that reaches 0.975
+
 ## Where the remaining headroom is
 - [[The 32-Film Verdict]] — everything holds, but 8 films inflate small effects 2–5×
 - [[Error Budget]] — 80% of the error is the linker; the detector ceiling is +0.0126
