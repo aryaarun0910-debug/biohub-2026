@@ -78,11 +78,15 @@ Also learned on the scored films: **safe_div earns its keep on EDGES even though
 it earns zero division credit there.** Turning it off takes the ledger 0/6/3 →
 0/0/3 (all six false positives gone) and still costs **−0.00179**. Do not remove it.
 
-**Next candidate, untested on this base:** `OUTPUT_MIN_TRACK_LEN` 6 → 9 is
-**+0.00772** on the scored films and, unlike on the validator films, **J RISES**
-(+0.00293) rather than falling. About half the gain is still multiplier
-(ratio −0.056), and the board already scored 6→9 at 0.947 — but that was on the
-relink-ON base. Worth one probe once a slot frees.
+**`OUTPUT_MIN_TRACK_LEN` was the next candidate, and it is DEAD.**
+`scripts/108_shorttrack_both_sets.py` puts it through the both-sets rule at
+L = 4,6,7,8,9,10,12. It fails at **every** setting: proxy rises on both sets at
+L=7..10, but **J falls on the validator set every time**, and the gain tracks
+`ratio` dropping 2–7%. L=9 is +0.00772 scored / +0.00121 validator with J
++0.00293 / **−0.00243** — the two sets disagree about the *mechanism*, not just
+the size. That is the node-count exploit wearing a disguise on one film set.
+Consistent with §5: this stage's multiplier gain is monotone to L=40. **Do not
+spend a slot on it.**
 
 **s05 alone was the best configuration on the films that count.** It is positive
 on all four individually, including the heaviest (`6bba_05db0fb1` +0.03885).
