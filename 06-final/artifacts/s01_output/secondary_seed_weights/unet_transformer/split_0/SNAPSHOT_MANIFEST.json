@@ -1,0 +1,40 @@
+{
+  "base_seed": 314159,
+  "best_epoch": 381,
+  "best_score": 0.9779747766406395,
+  "captured_at_utc": "2026-07-20T07:26:13Z",
+  "effective_seed": 314159,
+  "epoch": 400,
+  "files": {
+    "checkpoint_last.pth": {
+      "bytes": 25070547,
+      "sha256": "ee6c123717c9f99945888b502c6301c5d769bf9647bcb0b96f0016037df42d8c"
+    },
+    "config.json": {
+      "bytes": 165,
+      "sha256": "e9b4e396c58081bca08adf8275bd0bd1c2d3fd6eb091a1912a5116cb6de7b50a"
+    },
+    "edge_predictor_best.pth": {
+      "bytes": 8363159,
+      "sha256": "9bac2fa0dadc4a6fc1899e0caf187f4b553e0a7cd90ba1261a68b35ffe9e305f"
+    },
+    "history.csv": {
+      "bytes": 89559,
+      "sha256": "dfc4fd06d0c32b31bb1a35944fda1457c7585134e2596583e611c41880960ba2"
+    },
+    "split_manifest.json": {
+      "bytes": 5359,
+      "sha256": "cbe8ace34ffc157172280538441454b60250f0188faa063d1a9eadfb1ac55c0b"
+    },
+    "training_config.json": {
+      "bytes": 899,
+      "sha256": "4f29349439e133ad41846dec14b30f5cdbe2b7bb20908c5d0d3d205b5d71a87b"
+    }
+  },
+  "fold": 0,
+  "method": "unet_transformer_alltrain_seed314159_v1",
+  "model_family": "TemporalUNet3D + node transformer",
+  "schema_version": 1,
+  "source_live_directory": "/workspace/26_Biohub/weights/unet_transformer_alltrain_seed314159_v1/split_0",
+  "split": 0
+}

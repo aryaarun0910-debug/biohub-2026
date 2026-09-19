@@ -1,0 +1,43 @@
+30 films
+[1/30] 44b6_d5e7d891  eta 29min
+[2/30] 44b6_c50204e0  eta 27min
+[3/30] 44b6_e28840c6  eta 26min
+[4/30] 44b6_a21120c2  eta 24min
+[5/30] 44b6_d2f34f90  eta 23min
+[6/30] 44b6_12dfb391  eta 22min
+[7/30] 44b6_7a302da0  eta 22min
+[8/30] 44b6_eb2880fc  eta 21min
+[9/30] 44b6_587a1e22  eta 20min
+[10/30] 44b6_996155de  eta 19min
+[11/30] 44b6_267148e4  eta 18min
+[12/30] 44b6_5f15d135  eta 17min
+[13/30] 44b6_9be80b04  eta 16min
+[14/30] 44b6_341df25f  eta 15min
+[15/30] 44b6_2a2eff9f  eta 14min
+[16/30] 6bba_48816121  eta 13min
+[17/30] 6bba_09961292  eta 12min
+[18/30] 6bba_cdcfe533  eta 11min
+[19/30] 6bba_debd7bfa  eta 10min
+[20/30] 6bba_df673a83  eta 9min
+[21/30] 6bba_afb141ff  eta 8min
+[22/30] 6bba_bb9f20c3  eta 7min
+[23/30] 6bba_57b7cc1e  eta 7min
+[24/30] 6bba_786893ac  eta 6min
+[25/30] 6bba_05db0fb1  eta 5min
+[26/30] 6bba_5c039895  eta 4min
+[27/30] 6bba_12665c0e  eta 3min
+[28/30] 6bba_7f87b3d8  eta 2min
+[29/30] 6bba_20852818  eta 1min
+[30/30] 6bba_4ffd3da3  eta 0min
+
+regime        beta    score     adjJ        J  vs beta=1
+single         1.0   0.8115   0.8115   0.8174    +0.0000
+single         4.0   0.8177   0.8177   0.8238    +0.0062
+single        16.0   0.8227   0.8227   0.8288    +0.0112
+tta_dual       1.0   0.8451   0.8451   0.8448    +0.0000
+tta_dual       4.0   0.8491   0.8491   0.8489    +0.0040
+tta_dual      16.0   0.8527   0.8527   0.8525    +0.0076
+
+beta gain on single-view probabilities : +0.0112
+beta gain on TTA+dual probabilities    : +0.0076
+-> SURVIVES
