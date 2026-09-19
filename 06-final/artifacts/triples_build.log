@@ -1,0 +1,26 @@
+Score CANDIDATE TRIPLES (parent, daughter_a, daughter_b), not patches.
+
+scripts/121 asked "does this nucleus divide?" from a patch and got AUC 0.65 on
+synthetic AND 0.66 on real -- the same, so transfer was never the issue. The
+reason is now measured (scripts/122 probe): inside a 16^3 window at t+1 a
+dividing parent has on average 1.82 nuclei and a non-dividing one has 1.38. A
++0.44 difference. The patch does not contain a decidable answer, so no capacity
+fixes it.
+
+Given the CANDIDATE PAIR the ambiguity disappears: the question stops being "are
+there two nuclei nearby" and becomes "is THIS pair a mother-daughter split".
+That is also exactly what safe_div needs -- it proposes triples and then applies
+hand-tuned geometric gates that section 4 showed sit at a local optimum and
+section 5's sweep could not improve in any direction.
+
+Two arms, because the comparison is the point:
+  GEOM        the same information the gates already use. If a learned model on
+              geometry alone beats the gates, the gates were simply the wrong
+              functional form (axis-aligned thresholds on a joint distribution).
+  GEOM+IMAGE  adds appearance, which the gates structurally cannot see. The
+              difference between the two arms IS the value of the image.
+====================================================================================
+building candidate triples from 300 sequences (radius 14.0um, the safe_div sister gate) ...
+  130,391 triples, 11,598 true divisions (8.9%)
+  geometry (130391, 7), image (130391, 3, 10, 10, 10)
+  cached -> artifacts/div_triples.npz

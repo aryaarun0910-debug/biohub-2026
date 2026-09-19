@@ -24,7 +24,8 @@ Everything known about this competition, as a graph. Start at a hub below.
 3. [[Node Count Exploit]] — the metric pays for deleting nodes, without bound.
 
 ## What we are waiting for
-- [[Board Predictions]] — pre-registered bands and what each outcome would mean
+- [[The Board Verdict]] — all three scored; the instrument test PASSED, the both-sets rule FAILED
+- [[Board Predictions]] — the pre-registered bands these were judged against
 
 ## Capability
 - [[Local Pipeline On The Mac]] — the deployed pipeline runs locally, bit-identical, 2.5× faster than Kaggle

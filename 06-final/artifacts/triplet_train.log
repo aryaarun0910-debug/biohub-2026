@@ -1,0 +1,23 @@
+Three arms on the same candidate triples: deployed GATES vs learned GEOM vs GEOM+IMAGE.
+
+The gates are the incumbent. safe_div accepts a triple when
+    max(d_parent_daughter) <= SAFE_DIV_MAX_UM (9.0)
+    d_sister              <= SAFE_DIV_SISTER_MAX_UM (14.0)
+    |dpa-dpb|/mean        <= SAFE_DIV_SISTER_SYMMETRY_TAU (0.6)
+and section 5's sweep could not improve any of those three in any direction.
+
+So the question is not "can a model do this" but "can a model beat THOSE RULES
+on the same inputs". Two ways it might:
+  GEOM        same information, better functional form -- the gates are
+              axis-aligned thresholds on what is really a joint distribution.
+  GEOM+IMAGE  information the gates structurally cannot see.
+The gap between the learned arms is the measured value of the image.
+====================================================================================
+train 104,313 | val 26,078 | 8.9% positive
+
+ARM                            AUC     TP     FP     FN  precision   recall
+0 deployed GATES (rule)     0.7126    369   1790   2048      0.171    0.153
+1 learned GEOM              0.9233   1383    776   1034      0.641    0.572
+2 learned GEOM+IMAGE        0.9231   1376    783   1041      0.637    0.569
+
+value of the image = -0.0002 AUC over geometry alone

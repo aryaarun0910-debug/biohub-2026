@@ -1,0 +1,31 @@
+A division classifier trained on SYNTHETIC data, evaluated on REAL divisions.
+
+WHY THIS AND NOT ANYTHING ELSE (docs/HANDOFF.md, The Division Lever):
+the gap to first place is a division problem. proxy = adj_edge + 0.1*divJ, we sit
+at divJ 0.2308, and 0.0769 of the metric is simply unclaimed. Reaching 0.975 by
+edges needs +0.026 against an oracle ceiling of +0.049 for eliminating EVERY edge
+error. Reaching it by divisions needs divJ 0.23 -> 0.49.
+
+WHY IT FAILED BEFORE: our classifier hit AUC 0.456 -- chance -- fit to ~304 real
+division events on frozen features. A data problem, not a method problem. The CC0
+synthetic set has ~160,000 time-resolved divisions, ~526x more.
+
+WHY THE PATCHES TRANSFER: synthetic volumes are (64,64,64) uint16 at 1.625um
+ISOTROPIC; real frames pooled the way the evaluator pools them (vol[:, ::4, ::4])
+are also (64,64,64) uint16 at 1.625um isotropic. Same grid, same dtype, no
+rescaling. The generator was built to match.
+
+THE TEST, and it is deliberately a kill-test: does a model that has never seen a
+single real label beat AUC 0.70 on the real GT divisions? Our frozen-feature
+attempt managed 0.456. This evaluation is also the cleanest measurement in the
+project -- no training labels are involved on the real side at all, so there is
+no contamination argument to have.
+========================================================================================
+
+building synthetic patches from 600 sequences ...
+  184,412 patches, 46,103 positive (25.0%), shape (2, 16, 16, 16)  [6s]
+  cached -> artifacts/div_synth_patches.npz
+
+building REAL evaluation patches ...
+  real eval set: 87 films with divisions, 151 positives, 453 negatives
+  cached -> artifacts/div_real_patches.npz  [2s]
