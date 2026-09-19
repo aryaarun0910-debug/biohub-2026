@@ -33,6 +33,7 @@ Everything known about this competition, as a graph. Start at a hub below.
 
 ## The plan
 - [[The Division Lever]] — the only arithmetic that reaches 0.975
+- [[Learned Division Ranker]] — the gates are the wrong functional form; +0.19 AUC on real, CI excludes zero
 
 ## Where the remaining headroom is
 - [[The 32-Film Verdict]] — everything holds, but 8 films inflate small effects 2–5×
