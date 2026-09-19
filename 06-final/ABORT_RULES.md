@@ -183,3 +183,44 @@ board shows only the sum, and two people on 0.948 can need opposite work.
   G7 (finals) — because 2026-09-29 is not negotiable and lateness is the
   failure mode this file exists to prevent. Both are "no later than": moving
   faster pulls them earlier, never later.
+
+- **2026-09-19, amendment 2. G3 PASSED — thesis holds, divisions stay primary.**
+  Measured on all 199 films, frozen LOEO folds, metric verified against ground
+  truth identity (J=1.0000, divisions exactly 2/0/0).
+
+  | | ceiling | deployed now | headroom |
+  |---|---|---|---|
+  | adj edge Jaccard | 0.9651 (perfect association, current detections) | ~0.926 | +0.039 |
+  | division term | 0.9536 x 0.1 = 0.0954 | ~0.19-0.23 -> 0.021 | **+0.074** |
+
+  Divisions are ~1.9x association. Association only wins if current adj_J is
+  below 0.852; the deployed pipeline is well above that. Free number that
+  decided it: **99.63% of GT nodes matched, 99.34% of GT edges have BOTH
+  endpoints matched.** Detection is not the bottleneck -- O3 buys only +0.0108
+  over O2. Caveat kept on the record: the 0.9536 ceiling assumes you know which
+  forks to create; realistic attainment (divJ 0.20 -> 0.45 = +0.025 against
+  association 0.926 -> 0.945 = +0.019) narrows the lead considerably.
+
+- **2026-09-19, amendment 3. Node-count finding: measured, banked, NOT chased.**
+  O4 says neutralising the node-count term is worth +0.0232, and isolated-node
+  pruning captures only +0.004 of it, so ~+0.024 is genuinely unclaimed. This
+  is NOT prohibition #1 (which bans farming a multiplier above 1 by deleting
+  true tracks); moving a ratio toward 1.0 without crossing it is precision.
+
+  It is not being built, for a measured reason. `estimated_number_of_nodes`
+  lives in the .geff and test films ship .zarr only, so capturing it needs a
+  predicted n_est -- and that predictor transfers 1-for-2 across embryos:
+  44b6 -> 6bba gives R2 +0.937, 6bba -> 44b6 gives **R2 +0.494 with a median
+  17% UNDERestimate and a p10 of 0.43**. Under-predicting n_est sets the
+  threshold too high and lands below true n_est: the exact configuration with a
+  published -0.004 board result. Two cross-embryo points, extrapolated to an
+  unseen third, with an asymmetric tail into the forbidden region.
+
+  Also on the record: the gap to 1st does not require this lever.
+  adj_J 0.950 + 0.1 x divJ 0.23 = 0.973, exactly the leader's score.
+
+  **Approved instead:** a global detection threshold raise 0.965 -> 0.99.
+  No new component, no n_est prediction, +0.006 of ceiling, and NEITHER embryo
+  crosses parity (44b6 -> 1.009, 6bba -> 1.263). One submission to measure.
+  If the predictor is ever built, its target is ratio **1.15, not 1.0**, so a
+  17% bias still leaves it above parity.

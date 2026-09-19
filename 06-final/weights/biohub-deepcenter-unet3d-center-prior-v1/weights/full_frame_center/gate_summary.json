@@ -1,0 +1,145 @@
+{
+  "evaluated_frames": 240,
+  "match_radius_um": 7.0,
+  "max_frames": 240,
+  "notes": [
+    "Sparse-label precision/recall are calibration features, not complete-cell metrics.",
+    "Use high precision thresholds as conservative node-rescue gates."
+  ],
+  "peak_min_distance": 1,
+  "peak_sample_limit": 50000,
+  "threshold_metrics": [
+    {
+      "f1_sparse": 0.09221844864771066,
+      "frames": 240,
+      "gt_per_frame": 8.6125,
+      "n_gt_sparse": 2067,
+      "n_matched": 1860,
+      "n_pred": 38272,
+      "precision_sparse": 0.0485994983277592,
+      "pred_per_frame": 159.46666666666667,
+      "recall_sparse": 0.8998548621190131,
+      "threshold": 0.1
+    },
+    {
+      "f1_sparse": 0.09983351674708654,
+      "frames": 240,
+      "gt_per_frame": 8.6125,
+      "n_gt_sparse": 2067,
+      "n_matched": 1769,
+      "n_pred": 33372,
+      "precision_sparse": 0.05300851012825123,
+      "pred_per_frame": 139.05,
+      "recall_sparse": 0.8558297048863086,
+      "threshold": 0.15
+    },
+    {
+      "f1_sparse": 0.10941616523011871,
+      "frames": 240,
+      "gt_per_frame": 8.6125,
+      "n_gt_sparse": 2067,
+      "n_matched": 1682,
+      "n_pred": 28678,
+      "precision_sparse": 0.05865123090871051,
+      "pred_per_frame": 119.49166666666666,
+      "recall_sparse": 0.8137397194000967,
+      "threshold": 0.2
+    },
+    {
+      "f1_sparse": 0.11971183323114654,
+      "frames": 240,
+      "gt_per_frame": 8.6125,
+      "n_gt_sparse": 2067,
+      "n_matched": 1562,
+      "n_pred": 24029,
+      "precision_sparse": 0.06500478588372384,
+      "pred_per_frame": 100.12083333333334,
+      "recall_sparse": 0.7556845670053217,
+      "threshold": 0.25
+    },
+    {
+      "f1_sparse": 0.13288277568892484,
+      "frames": 240,
+      "gt_per_frame": 8.6125,
+      "n_gt_sparse": 2067,
+      "n_matched": 1396,
+      "n_pred": 18944,
+      "precision_sparse": 0.07369087837837837,
+      "pred_per_frame": 78.93333333333334,
+      "recall_sparse": 0.6753749395258829,
+      "threshold": 0.3
+    },
+    {
+      "f1_sparse": 0.14482142857142855,
+      "frames": 240,
+      "gt_per_frame": 8.6125,
+      "n_gt_sparse": 2067,
+      "n_matched": 811,
+      "n_pred": 9133,
+      "precision_sparse": 0.08879886127230921,
+      "pred_per_frame": 38.05416666666667,
+      "recall_sparse": 0.3923560716013546,
+      "threshold": 0.4
+    },
+    {
+      "f1_sparse": 0.06639247943595769,
+      "frames": 240,
+      "gt_per_frame": 8.6125,
+      "n_gt_sparse": 2067,
+      "n_matched": 113,
+      "n_pred": 1337,
+      "precision_sparse": 0.08451757666417352,
+      "pred_per_frame": 5.570833333333334,
+      "recall_sparse": 0.05466860183841316,
+      "threshold": 0.5
+    },
+    {
+      "f1_sparse": 0.0009633911368015414,
+      "frames": 240,
+      "gt_per_frame": 8.6125,
+      "n_gt_sparse": 2067,
+      "n_matched": 1,
+      "n_pred": 9,
+      "precision_sparse": 0.1111111111111111,
+      "pred_per_frame": 0.0375,
+      "recall_sparse": 0.0004837929366231253,
+      "threshold": 0.6
+    },
+    {
+      "f1_sparse": NaN,
+      "frames": 240,
+      "gt_per_frame": 8.6125,
+      "n_gt_sparse": 2067,
+      "n_matched": 0,
+      "n_pred": 1,
+      "precision_sparse": 0.0,
+      "pred_per_frame": 0.004166666666666667,
+      "recall_sparse": 0.0,
+      "threshold": 0.7
+    },
+    {
+      "f1_sparse": NaN,
+      "frames": 240,
+      "gt_per_frame": 8.6125,
+      "n_gt_sparse": 2067,
+      "n_matched": 0,
+      "n_pred": 0,
+      "precision_sparse": NaN,
+      "pred_per_frame": 0.0,
+      "recall_sparse": 0.0,
+      "threshold": 0.8
+    }
+  ],
+  "thresholds": [
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8
+  ]
+}
