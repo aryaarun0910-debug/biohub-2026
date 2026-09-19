@@ -40,6 +40,26 @@ unmodified base with relink **ON**. Wrong base; s08 replaces it. See §6.
 
 ---
 
+## 1a. THE 32-FILM VERDICT (s11 landed)
+
+All three board submissions survive a 4× larger validator tier, but the small
+effects were inflated:
+
+| change | 8 films | **32 films** | |
+|---|---|---|---|
+| s05 over base | +0.01794 | **+0.01945** | holds, grew |
+| s08 over s05 | +0.00748 | **+0.00152** | holds, shrank **4.9×** |
+| s10 over s05 | +0.00338 | **+0.00146** | holds, shrank **2.3×** |
+
+**8 films inflate SMALL effects by 2–5×; the large one was understated.**
+
+**The sharper finding:** at 32 films the validator tier cannot distinguish
+linefit 0.3 from 0.6 at all (spread 0.00004) — it would have passed s09. Only the
+4 scored films separate them (spread 0.00557). **More validator films does not
+substitute for measuring where you are scored.**
+
+---
+
 ## 1b. READ FIRST — measure on the films that are actually scored
 
 The submission covers **4 films**, and we can score them locally: their ILP

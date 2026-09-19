@@ -27,6 +27,7 @@ Everything known about this competition, as a graph. Start at a hub below.
 - [[Board Predictions]] — pre-registered bands and what each outcome would mean
 
 ## Where the remaining headroom is
+- [[The 32-Film Verdict]] — everything holds, but 8 films inflate small effects 2–5×
 - [[Error Budget]] — 80% of the error is the linker; the detector ceiling is +0.0126
 - [[Edge Pruning Is Dead]] — the largest class is real but not reachable by thresholding
 

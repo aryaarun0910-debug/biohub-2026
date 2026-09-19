@@ -1,0 +1,64 @@
+Do the OTHER post-processing stages help on the RAW ILP graph (no relink)?
+
+Motion relink is off (that was worth +0.0295 proxy on its own). The question
+left over is whether the rest of the deployed chain -- gap closing, gap2
+recovery, prune-isolated, short-track filtering, linefit smoothing -- are
+carrying their weight once the ILP's own global assignment is kept.
+
+Every stage is measured ONE AT A TIME against the raw + safe_div anchor.
+Each stage sits at its DEPLOYED position in the chain:
+
+    gap_close -> gap2 -> safe_div -> prune_isolated -> short_track -> linefit
+
+so "gap close" means gap-close-then-safe_div, because gap closing eats the
+orphan pool that safe_div draws its daughters from. Anything after safe_div is
+a pure post-hoc edit of the same divided graph.
+
+Stage implementations are ported from the 0.947 notebook (cell 2:
+close_single_frame_gaps, recover_strict_gap2, filter_short_track_components,
+linefit_smooth_output_graph, the OUTPUT_PRUNE_ISOLATED block) onto
+ORIGINAL-VOXEL coordinates with the anisotropic SCALE. src/biohub/postprocess.py
+has lookalikes but they use an isotropic GRID_UM = 1.625, which is 4x wrong in
+y and x on these graphs -- do not use them here.
+
+Node counts: the metric multiplies edge Jaccard by 1 - 0.1*(n_pred - n_est)/n_est.
+Deleting nodes RAISES that multiplier, so every row prints n_pred/n_est and
+J separately. A row where mult moves and J does not is a bookkeeping gain,
+not a tracking gain.
+========================================================================================================
+
+### 32 films  (n=32)
+arm                                        proxy   vs BASE         J    divJ   TP/FP/FN
+BASE relink ON,  gap2 before, lf0.8      0.91871             0.89733  0.1781   13/27/33
+s05  relink OFF, gap2 before, lf0.8      0.93816  +0.01945   0.91386  0.2027   15/28/31
+s08  relink OFF, gap2 AFTER,  lf0.8      0.93967  +0.02096   0.91372  0.2192   16/27/30
+s10  relink OFF, gap2 before, lf0.6      0.93962  +0.02091   0.91532  0.2027   15/28/31
+
+### the original 8  (n=8)
+arm                                        proxy   vs BASE         J    divJ   TP/FP/FN
+BASE relink ON,  gap2 before, lf0.8      0.94888             0.92246  0.2308      3/1/9
+s05  relink OFF, gap2 before, lf0.8      0.96682  +0.01794   0.93483  0.2857      4/2/8
+s08  relink OFF, gap2 AFTER,  lf0.8      0.97431  +0.02543   0.93516  0.3571      5/2/7
+s10  relink OFF, gap2 before, lf0.6      0.97020  +0.02132   0.93822  0.2857      4/2/8
+
+========================================================================================================
+DOES THE 8-FILM CONCLUSION SURVIVE AT 32 FILMS?
+change                 on 8 films   on 32 films  verdict
+s05 over BASE            +0.01794      +0.01945  HOLDS
+s08 over s05             +0.00748      +0.00152  HOLDS
+s10 over s05             +0.00338      +0.00146  HOLDS
+
+--- linefit weight, on the s05 chain, 8 vs 32 films ---
+    w    8-film d   32-film d   note
+  0.0    -0.00047    -0.00345
+  0.2    +0.00440    +0.00007
+  0.3    +0.00487    +0.00142  <- s09 shipped this
+  0.4    +0.00372    +0.00152
+  0.5    +0.00291    +0.00176
+  0.6    +0.00338    +0.00146  <- s10 ships this
+  0.7    -0.00131    -0.00019
+  0.8    +0.00000    +0.00000
+  0.9    -0.00048    -0.00114
+  1.0    -0.00354    -0.00388
+
+32-film optimum: w=0.5 (+0.00176); s10 ships 0.6 (+0.00146)
