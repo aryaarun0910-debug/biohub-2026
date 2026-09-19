@@ -45,9 +45,15 @@ S05 = ROOT / "submissions/s05_no_relink/biohub-s05-no-relink.ipynb"
 TARGETS = {
     "s07": dict(out="submissions/s07_reorder", slug="biohub-s07-reorder",
                 title="Biohub S07 gap2 after safe-division", env=False),
+    # NOTE: Kaggle derives the live kernel slug by slugifying the TITLE, not the
+    # `id` in kernel-metadata.json. s05 shipped as id=biohub-s05-no-relink but
+    # went live at biohub-s05-no-motion-relink (= slugify("Biohub S05 no motion
+    # relink")); s06's log is biohub-s06-linefit-weight-0-4.log from "Biohub S06
+    # linefit weight 0.4". So keep title and slug in sync or the push lands
+    # somewhere you did not predict and `kernels status` 404s.
     "s08": dict(out="submissions/s08_reorder_on_s05",
                 slug="biohub-s08-reorder-on-s05",
-                title="Biohub S08 no relink + gap2 after safe-division",
+                title="Biohub S08 reorder on s05",
                 env=True),
 }
 

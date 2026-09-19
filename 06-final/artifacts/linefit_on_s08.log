@@ -1,0 +1,71 @@
+Re-test linefit smoothing on the s08 chain (relink OFF, gap2 AFTER safe_div).
+
+docs/HANDOFF.md section 6: linefit w=0.4 measured +0.0024 on raw ILP graphs and
+-0.00135 on the RELINKED pipeline (s06), because linefit fits along unique
+predecessor/successor chains and relink changes that topology. The follow-on it
+names is to re-test it on the no-relink base, where it was positive.
+
+s08 is now the right base: relink off AND gap2 after safe_div. This sweeps
+(weight, window) over the FULL s08 chain at deployed parameters, on the same 8
+validator films.
+
+Deployed is w=0.8, window=2. The notebook never sets BIOHUB_OUTPUT_LINEFIT_WEIGHT
+at all -- 0.8 is the os.environ.get default -- so a variant ADDS a line, exactly
+as s06 did.
+============================================================================================================
+configuration                               proxy    dprox        J       dJ    mult    dmult n/n_est    divJ TP/FP/FN  notes
+s08 DEPLOYED linefit w=0.8 win=2          0.97431           0.93516          1.00361           0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+
+  linefit w=0 win=2                       0.97384 -0.00047  0.93470 -0.00046 1.00366 +0.00005  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 st_comps=1412 st_removed=6334
+  linefit w=0.2 win=2                     0.97871 +0.00440  0.93956 +0.00439 1.00365 +0.00004  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.3 win=2                     0.97918 +0.00487  0.94003 +0.00487 1.00368 +0.00007  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.4 win=2                     0.97803 +0.00372  0.93890 +0.00374 1.00370 +0.00009  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.5 win=2                     0.97722 +0.00291  0.93809 +0.00293 1.00370 +0.00009  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.6 win=2                     0.97768 +0.00338  0.93856 +0.00339 1.00369 +0.00008  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.8 win=2                     0.97431 +0.00000  0.93516 +0.00000 1.00361 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=1 win=2                       0.97076 -0.00354  0.93162 -0.00354 1.00359 -0.00002  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+
+  linefit w=0 win=3                       0.97384 -0.00047  0.93470 -0.00046 1.00366 +0.00005  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 st_comps=1412 st_removed=6334
+  linefit w=0.2 win=3                     0.97709 +0.00278  0.93793 +0.00277 1.00365 +0.00004  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.3 win=3                     0.97935 +0.00505  0.94021 +0.00505 1.00367 +0.00006  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.4 win=3                     0.98001 +0.00570  0.94086 +0.00570 1.00367 +0.00006  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.5 win=3                     0.98001 +0.00570  0.94085 +0.00569 1.00366 +0.00005  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.6 win=3                     0.97692 +0.00261  0.93777 +0.00261 1.00365 +0.00004  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.8 win=3                     0.97462 +0.00032  0.93550 +0.00034 1.00365 +0.00004  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=1 win=3                       0.96610 -0.00821  0.92697 -0.00820 1.00356 -0.00005  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+
+  linefit w=0 win=4                       0.97384 -0.00047  0.93470 -0.00046 1.00366 +0.00005  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 st_comps=1412 st_removed=6334
+  linefit w=0.2 win=4                     0.97709 +0.00278  0.93793 +0.00277 1.00365 +0.00004  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.3 win=4                     0.97872 +0.00441  0.93957 +0.00440 1.00366 +0.00005  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.4 win=4                     0.98051 +0.00620  0.94134 +0.00617 1.00365 +0.00004  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.5 win=4                     0.97596 +0.00166  0.93679 +0.00163 1.00362 +0.00001  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.6 win=4                     0.97708 +0.00278  0.93794 +0.00278 1.00366 +0.00005  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=0.8 win=4                     0.97190 -0.00241  0.93277 -0.00239 1.00364 +0.00004  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  linefit w=1 win=4                       0.96449 -0.00981  0.92536 -0.00981 1.00357 -0.00004  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+
+node-count ratio identical across all 24 cells: PASS  (n_pred/n_est = 0.8977)
+aggregate mult drifts at most 8.85e-05 -- re-weighting by weight=tp+fp+fn, not node deletion
+division ledger across all cells: {(5, 2, 7)} (unchanged -- linefit is a pure edge-axis lever here)
+
+argmax: w=0.4 win=4  proxy 0.98051 (+0.00620 vs deployed)
+cells within the 0.002 wobble of the top (7):
+    w=0.4 win=4  0.98051
+    w=0.4 win=3  0.98001
+    w=0.5 win=3  0.98001
+    w=0.3 win=3  0.97935
+    w=0.3 win=2  0.97918
+    w=0.3 win=4  0.97872
+    w=0.2 win=2  0.97871
+    -> weight plateau [0.2, 0.3, 0.4, 0.5], window plateau [2, 3, 4]
+
+--- per-film: deployed w=0.8/win=2  vs  w=0.4/win=4 ---
+film                         dep J     new J        dJ
+44b6_12dfb391              0.91439   0.90864  -0.00575
+44b6_267148e4              0.87119   0.89965  +0.02847
+44b6_2a2eff9f              0.85345   0.85345  +0.00000
+44b6_341df25f              0.99043   0.99043  +0.00000
+6bba_062c8d37              0.98450   0.99556  +0.01106
+6bba_07e24132              0.85083   0.84488  -0.00595
+6bba_085bf656              0.99316   0.99316  +0.00000
+6bba_09961292              0.91535   0.92798  +0.01263
+films improved: 3/8

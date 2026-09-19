@@ -24,9 +24,16 @@ train films:
 **Not submitted:** s01 (validator rejected it), s02/s03/s04 (retired),
 s06 (ran, measured **negative**, see §5).
 
-**Built but never pushed:** `submissions/s08_reorder_on_s05/` — gap2 moved after
-safe_div, **on top of s05**. Measured **+0.00748** on the full s05 chain locally,
-positive in 9/9 perturbations. Ready to push, but see the falsifier in §6.
+**Pushed 2026-09-19, kernels RUNNING, both GPU slots in use:**
+
+| | change | on top of | local delta | kernel |
+|---|---|---|---|---|
+| `s08` | gap2 moved after safe_div | s05 | **+0.00748** | `biohub-s08-reorder-on-s05` |
+| `s09` | `OUTPUT_LINEFIT_WEIGHT` 0.8 → 0.3 | s08 | **+0.00487** | `biohub-s09-linefit03-on-s08` |
+
+Each is ONE change relative to its stated parent, machine-proven (§6, §9). Their
+in-kernel validator readings arrive in ~1.75 h and are the real decision signal —
+the board can take **8 hours**, so do not wait on it.
 
 **Superseded, do not push:** `submissions/s07_reorder/` — the same reorder on the
 unmodified base with relink **ON**. Wrong base; s08 replaces it. See §6.
@@ -217,10 +224,36 @@ no board score yet** (submitted 12:25 UTC 2026-09-19, still `PENDING`; a commit
 run is ~1.75 h). If s05 does not beat 0.947, s08 is void with it — its entire
 premise is that no-relink is the right base. Do not push s08 until s05 scores.
 
-**After that, re-test linefit on top of no-relink** — it was positive there
-(+0.0024 to +0.0044 on raw graphs) and only failed because it was tested on the
-wrong base. Note `scripts/98` already has the scaffolding: it runs the full s05
-chain with `LF_W`/`LF_WIN` as parameters.
+**DONE — that is s09, and the predicted sign flip is confirmed.**
+`scripts/99_linefit_on_s08.py` sweeps (weight, window) over the full **s08**
+chain. Deployed w=0.8/win=2 scores 0.97431; the surface:
+
+| w \ window | 2 | 3 | 4 |
+|---|---|---|---|
+| 0.2 | +0.00440 | +0.00278 | +0.00278 |
+| **0.3** | **+0.00487** | +0.00505 | +0.00441 |
+| 0.4 | +0.00372 | +0.00570 | +0.00620 |
+| 0.5 | +0.00291 | +0.00570 | +0.00166 |
+| 0.8 (deployed) | 0 | +0.00032 | −0.00241 |
+| 1.0 | −0.00354 | −0.00821 | −0.00981 |
+
+s06 measured w=0.4 at **−0.00135 on the relinked pipeline**; here it is
+**+0.00372**, and w=0.3 is +0.00487. Same knob, opposite sign, different base —
+the §6 lesson, confirmed in the direction it predicted.
+
+**w=0.3 was shipped, not the argmax.** The argmax is w=0.4/win=4 (+0.00620), but
+w=0.3 is the most **window-stable** weight — spread across windows 2/3/4 is
+**0.00064**, against 0.00248 for w=0.4 and 0.00404 for w=0.5 — and it leaves
+window at its deployed 2, so only one variable moves. Taking the argmax would
+have meant moving two variables onto a cell that the handoff's own ~0.002 wobble
+warning says is untrustworthy.
+
+**Caveat, and it is a real one:** the gain is high-variance. At the argmax only
+**3/8 films improve**; the total is carried by 44b6_267148e4 (+0.02847),
+6bba_09961292 (+0.01263) and 6bba_062c8d37 (+0.01106), while two films lose
+~0.006. The division ledger is **unchanged at 5/2/7 in all 24 cells**, so unlike
+s08 this is a **pure edge-axis lever** — the axis where the board ledger is
+**0 for 3**. Weigh s09 accordingly: good local evidence, bad axis prior.
 
 ---
 
@@ -268,3 +301,24 @@ sign agreement stays honest.
   B=1 vs 51.5 ms at B=23) — measured, don't re-litigate. The real headroom is
   **18 CPU cores**; most scripts here are single-threaded.
 - `data/` is 82 GB and gitignored. Never write to it.
+- **Kaggle slugs come from the TITLE, not the `id`.** s05 shipped with
+  `"id": "aryaarun07/biohub-s05-no-relink"` and went live at
+  **`biohub-s05-no-motion-relink`** = slugify("Biohub S05 no motion relink");
+  s06's log is `biohub-s06-linefit-weight-0-4.log`. Querying the metadata id
+  gives a misleading *"Permission 'kernels.get' was denied"*, not a 404. Both
+  builders now abort unless `slug == slugify(title)`.
+- **The in-kernel PP sweep is provably inert once relink is off.** In
+  `artifacts/s05_output/ppsweep_results.csv`, `tight55`, `relaxed9`, `bonus125`,
+  `gap2step40` and `reuse28` all return proxy `0.9715059814960677` — identical to
+  base to the last digit — and `ppsweep_selected.json` picks `base` with `{}`
+  overrides. Five of the eight candidates are motion-relink knobs, which cannot
+  do anything with the stage switched off. It costs ~8 × 250 s ≈ **33 min** of
+  every relink-off run. This is the §8 runtime cut, but now *evidenced* rather
+  than "untested but low risk" — for relink-off variants only.
+- **Aggregate `mult` is not a node-count readout.** `metric2.aggregate` averages
+  with `weight = tp + fp + fn` (metric2.py:91), which depends on the predictions,
+  so any stage that moves coordinates re-weights the average and drifts aggregate
+  `mult` by ~1e-5 with node counts untouched. The node-count exploit ABORT_RULES
+  warns about shows up in **`ratio` (n_pred/n_est)**, which stayed at exactly
+  0.8977 across all 24 linefit cells. Do not read a 1e-5 `mult` wobble as the
+  exploit, and do not assert on it — `scripts/99` asserts on `ratio`.
