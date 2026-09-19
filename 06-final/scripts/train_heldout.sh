@@ -22,5 +22,5 @@ EXTRA=""
 /private/tmp/claude-501/-Users-aryaarun-Developer-biohub26/f87a5df4-927a-4e79-9911-13f800866a92/scratchpad/pipeenv/bin/python $REPO/scripts/train_unet_transformer.py \
   --data-dir "/Users/aryaarun/Developer/biohub26/data/biohub-cell-tracking-during-development/train" \
   --splits splits_heldout.json --split 0 \
-  --epochs $EPOCHS --single-gpu --num-workers 4 \
+  --epochs $EPOCHS --single-gpu --num-workers ${NW:-4} --batch-size ${BS:-8} --lr ${LR:-1e-4} --window-size 2 --pool-kernel-um 5.0 \
   --method heldout40 $EXTRA
