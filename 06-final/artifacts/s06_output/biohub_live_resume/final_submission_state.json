@@ -1,0 +1,111 @@
+{
+  "base_postprocess_signature": "40267284b74ef4255c04cad5df1c7045603bf3ac16f3a13670d5dc32528879f5",
+  "preview_records": [
+    {
+      "dataset": "44b6_0113de3b",
+      "id": 0,
+      "node_id": 0,
+      "row_type": "node",
+      "source_id": -1,
+      "t": 0,
+      "target_id": -1,
+      "x": 52,
+      "y": 9,
+      "z": 0
+    },
+    {
+      "dataset": "44b6_0113de3b",
+      "id": 1,
+      "node_id": 1,
+      "row_type": "node",
+      "source_id": -1,
+      "t": 0,
+      "target_id": -1,
+      "x": 72,
+      "y": 8,
+      "z": 0
+    },
+    {
+      "dataset": "44b6_0113de3b",
+      "id": 2,
+      "node_id": 2,
+      "row_type": "node",
+      "source_id": -1,
+      "t": 0,
+      "target_id": -1,
+      "x": 76,
+      "y": 108,
+      "z": 0
+    },
+    {
+      "dataset": "44b6_0113de3b",
+      "id": 3,
+      "node_id": 3,
+      "row_type": "node",
+      "source_id": -1,
+      "t": 0,
+      "target_id": -1,
+      "x": 64,
+      "y": 212,
+      "z": 0
+    },
+    {
+      "dataset": "44b6_0113de3b",
+      "id": 4,
+      "node_id": 4,
+      "row_type": "node",
+      "source_id": -1,
+      "t": 0,
+      "target_id": -1,
+      "x": 68,
+      "y": 244,
+      "z": 0
+    },
+    {
+      "dataset": "44b6_0113de3b",
+      "id": 5,
+      "node_id": 5,
+      "row_type": "node",
+      "source_id": -1,
+      "t": 0,
+      "target_id": -1,
+      "x": 64,
+      "y": 24,
+      "z": 1
+    },
+    {
+      "dataset": "44b6_0113de3b",
+      "id": 6,
+      "node_id": 6,
+      "row_type": "node",
+      "source_id": -1,
+      "t": 0,
+      "target_id": -1,
+      "x": 84,
+      "y": 52,
+      "z": 1
+    },
+    {
+      "dataset": "44b6_0113de3b",
+      "id": 7,
+      "node_id": 7,
+      "row_type": "node",
+      "source_id": -1,
+      "t": 0,
+      "target_id": -1,
+      "x": 60,
+      "y": 65,
+      "z": 1
+    }
+  ],
+  "resume_schema": "biohub_0947_live_resume_v1",
+  "rows": 241356,
+  "selected_config": {
+    "MOTION_RELINK_TIGHT_UM": 5.5
+  },
+  "selected_label": "tight55",
+  "sha256": "e6f04ef6cf24e8bdb2e13aa26853f16394293a9a9203ab506e6bc4c1dc745f46",
+  "signature": "02ab5e23cde47ea0c88c0a8827566e8758b585c5a02c3e6a25acb294c65ac128",
+  "status": "complete",
+  "test_prediction_signature": "0cfd5faf31cdc58a7e69641935ad32cababe5a373f88ec22a51eb7274a3be19e"
+}

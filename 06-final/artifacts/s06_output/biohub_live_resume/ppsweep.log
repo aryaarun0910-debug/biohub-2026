@@ -1,0 +1,344 @@
+[44b6_12dfb391] after edge-filter+motion-relink: 45351 nodes, 43045 edges
+[44b6_12dfb391] after gap-closing (single-frame + gap2): 46001 nodes, 44273 edges
+[44b6_12dfb391] after safe-division repair: 46001 nodes, 44297 edges (geometric_candidates = 151, deepcenter_rejected = 127, post_veto_candidates = 24, added = 24, cap_skipped = 0, mutual_nn_rejected = 60, divergence_rejected = 1568)
+[44b6_12dfb391] after division-geometry-filter+prune-isolated: 45999 nodes, 44297 edges
+[44b6_12dfb391] after short-track filtering: 44939 nodes, 43476 edges (components_removed = 239)
+[44b6_12dfb391] FINAL: 44939 nodes, 43476 edges
+[44b6_267148e4] after edge-filter+motion-relink: 22829 nodes, 21448 edges
+[44b6_267148e4] after gap-closing (single-frame + gap2): 23061 nodes, 21865 edges
+[44b6_267148e4] after safe-division repair: 23061 nodes, 21892 edges (geometric_candidates = 209, deepcenter_rejected = 174, post_veto_candidates = 35, added = 27, cap_skipped = 0, mutual_nn_rejected = 138, divergence_rejected = 1064)
+[44b6_267148e4] after division-geometry-filter+prune-isolated: 23001 nodes, 21892 edges
+[44b6_267148e4] after short-track filtering: 22232 nodes, 21308 edges (components_removed = 185)
+[44b6_267148e4] FINAL: 22232 nodes, 21308 edges
+[44b6_2a2eff9f] after edge-filter+motion-relink: 40928 nodes, 38433 edges
+[44b6_2a2eff9f] after gap-closing (single-frame + gap2): 41445 nodes, 39392 edges
+[44b6_2a2eff9f] after safe-division repair: 41445 nodes, 39433 edges (geometric_candidates = 294, deepcenter_rejected = 253, post_veto_candidates = 41, added = 41, cap_skipped = 0, mutual_nn_rejected = 75, divergence_rejected = 1669)
+[44b6_2a2eff9f] after division-geometry-filter+prune-isolated: 41441 nodes, 39433 edges
+[44b6_2a2eff9f] after short-track filtering: 40119 nodes, 38409 edges (components_removed = 298)
+[44b6_2a2eff9f] FINAL: 40119 nodes, 38409 edges
+[44b6_341df25f] after edge-filter+motion-relink: 8523 nodes, 8210 edges
+[44b6_341df25f] after gap-closing (single-frame + gap2): 8568 nodes, 8288 edges
+[44b6_341df25f] after safe-division repair: 8568 nodes, 8299 edges (geometric_candidates = 36, deepcenter_rejected = 23, post_veto_candidates = 13, added = 11, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 141)
+[44b6_341df25f] after division-geometry-filter+prune-isolated: 8568 nodes, 8299 edges
+[44b6_341df25f] after short-track filtering: 8409 nodes, 8175 edges (components_removed = 35)
+[44b6_341df25f] FINAL: 8409 nodes, 8175 edges
+[6bba_062c8d37] after edge-filter+motion-relink: 5997 nodes, 5645 edges
+[6bba_062c8d37] after gap-closing (single-frame + gap2): 6048 nodes, 5740 edges
+[6bba_062c8d37] after safe-division repair: 6048 nodes, 5744 edges (geometric_candidates = 15, deepcenter_rejected = 11, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 66)
+[6bba_062c8d37] after division-geometry-filter+prune-isolated: 6022 nodes, 5744 edges
+[6bba_062c8d37] after short-track filtering: 5853 nodes, 5620 edges (components_removed = 45)
+[6bba_062c8d37] FINAL: 5853 nodes, 5620 edges
+[6bba_07e24132] after edge-filter+motion-relink: 29751 nodes, 28214 edges
+[6bba_07e24132] after gap-closing (single-frame + gap2): 30087 nodes, 28828 edges
+[6bba_07e24132] after safe-division repair: 30087 nodes, 28834 edges (geometric_candidates = 118, deepcenter_rejected = 111, post_veto_candidates = 7, added = 6, cap_skipped = 0, mutual_nn_rejected = 69, divergence_rejected = 1006)
+[6bba_07e24132] after division-geometry-filter+prune-isolated: 30080 nodes, 28834 edges
+[6bba_07e24132] after short-track filtering: 29181 nodes, 28143 edges (components_removed = 208)
+[6bba_07e24132] FINAL: 29181 nodes, 28143 edges
+[6bba_085bf656] after edge-filter+motion-relink: 8417 nodes, 8092 edges
+[6bba_085bf656] after gap-closing (single-frame + gap2): 8438 nodes, 8131 edges
+[6bba_085bf656] after safe-division repair: 8438 nodes, 8135 edges (geometric_candidates = 21, deepcenter_rejected = 17, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 4, divergence_rejected = 102)
+[6bba_085bf656] after division-geometry-filter+prune-isolated: 8435 nodes, 8135 edges
+[6bba_085bf656] after short-track filtering: 8300 nodes, 8030 edges (components_removed = 30)
+[6bba_085bf656] FINAL: 8300 nodes, 8030 edges
+[6bba_09961292] after edge-filter+motion-relink: 29955 nodes, 28814 edges
+[6bba_09961292] after gap-closing (single-frame + gap2): 30165 nodes, 29195 edges
+[6bba_09961292] after safe-division repair: 30165 nodes, 29221 edges (geometric_candidates = 98, deepcenter_rejected = 67, post_veto_candidates = 31, added = 26, cap_skipped = 0, mutual_nn_rejected = 76, divergence_rejected = 1004)
+[6bba_09961292] after division-geometry-filter+prune-isolated: 30159 nodes, 29221 edges
+[6bba_09961292] after short-track filtering: 29747 nodes, 28907 edges (components_removed = 98)
+[6bba_09961292] FINAL: 29747 nodes, 28907 edges
+VALIDATOR candidate: gap45 proxy = 0.947747 adjusted edge = 0.92467
+[44b6_12dfb391] after edge-filter+motion-relink: 45351 nodes, 43042 edges
+[44b6_12dfb391] after gap-closing (single-frame + gap2): 46007 nodes, 44283 edges
+[44b6_12dfb391] after safe-division repair: 46007 nodes, 44307 edges (geometric_candidates = 150, deepcenter_rejected = 126, post_veto_candidates = 24, added = 24, cap_skipped = 0, mutual_nn_rejected = 59, divergence_rejected = 1566)
+[44b6_12dfb391] after division-geometry-filter+prune-isolated: 46005 nodes, 44307 edges
+[44b6_12dfb391] after short-track filtering: 44959 nodes, 43497 edges (components_removed = 236)
+[44b6_12dfb391] FINAL: 44959 nodes, 43497 edges
+[44b6_267148e4] after edge-filter+motion-relink: 22829 nodes, 21464 edges
+[44b6_267148e4] after gap-closing (single-frame + gap2): 23063 nodes, 21888 edges
+[44b6_267148e4] after safe-division repair: 23063 nodes, 21917 edges (geometric_candidates = 210, deepcenter_rejected = 174, post_veto_candidates = 36, added = 29, cap_skipped = 0, mutual_nn_rejected = 117, divergence_rejected = 1048)
+[44b6_267148e4] after division-geometry-filter+prune-isolated: 23009 nodes, 21917 edges
+[44b6_267148e4] after short-track filtering: 22277 nodes, 21364 edges (components_removed = 179)
+[44b6_267148e4] FINAL: 22277 nodes, 21364 edges
+[44b6_2a2eff9f] after edge-filter+motion-relink: 40928 nodes, 38430 edges
+[44b6_2a2eff9f] after gap-closing (single-frame + gap2): 41457 nodes, 39413 edges
+[44b6_2a2eff9f] after safe-division repair: 41457 nodes, 39453 edges (geometric_candidates = 293, deepcenter_rejected = 252, post_veto_candidates = 41, added = 40, cap_skipped = 0, mutual_nn_rejected = 74, divergence_rejected = 1659)
+[44b6_2a2eff9f] after division-geometry-filter+prune-isolated: 41453 nodes, 39453 edges
+[44b6_2a2eff9f] after short-track filtering: 40126 nodes, 38425 edges (components_removed = 299)
+[44b6_2a2eff9f] FINAL: 40126 nodes, 38425 edges
+[44b6_341df25f] after edge-filter+motion-relink: 8523 nodes, 8210 edges
+[44b6_341df25f] after gap-closing (single-frame + gap2): 8569 nodes, 8290 edges
+[44b6_341df25f] after safe-division repair: 8569 nodes, 8301 edges (geometric_candidates = 36, deepcenter_rejected = 23, post_veto_candidates = 13, added = 11, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 140)
+[44b6_341df25f] after division-geometry-filter+prune-isolated: 8569 nodes, 8301 edges
+[44b6_341df25f] after short-track filtering: 8413 nodes, 8179 edges (components_removed = 34)
+[44b6_341df25f] FINAL: 8413 nodes, 8179 edges
+[6bba_062c8d37] after edge-filter+motion-relink: 5997 nodes, 5648 edges
+[6bba_062c8d37] after gap-closing (single-frame + gap2): 6048 nodes, 5743 edges
+[6bba_062c8d37] after safe-division repair: 6048 nodes, 5747 edges (geometric_candidates = 15, deepcenter_rejected = 11, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 63)
+[6bba_062c8d37] after division-geometry-filter+prune-isolated: 6022 nodes, 5747 edges
+[6bba_062c8d37] after short-track filtering: 5853 nodes, 5623 edges (components_removed = 45)
+[6bba_062c8d37] FINAL: 5853 nodes, 5623 edges
+[6bba_07e24132] after edge-filter+motion-relink: 29751 nodes, 28212 edges
+[6bba_07e24132] after gap-closing (single-frame + gap2): 30088 nodes, 28828 edges
+[6bba_07e24132] after safe-division repair: 30088 nodes, 28834 edges (geometric_candidates = 117, deepcenter_rejected = 111, post_veto_candidates = 6, added = 6, cap_skipped = 0, mutual_nn_rejected = 68, divergence_rejected = 1011)
+[6bba_07e24132] after division-geometry-filter+prune-isolated: 30079 nodes, 28834 edges
+[6bba_07e24132] after short-track filtering: 29179 nodes, 28142 edges (components_removed = 208)
+[6bba_07e24132] FINAL: 29179 nodes, 28142 edges
+[6bba_085bf656] after edge-filter+motion-relink: 8417 nodes, 8092 edges
+[6bba_085bf656] after gap-closing (single-frame + gap2): 8438 nodes, 8131 edges
+[6bba_085bf656] after safe-division repair: 8438 nodes, 8135 edges (geometric_candidates = 21, deepcenter_rejected = 17, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 4, divergence_rejected = 102)
+[6bba_085bf656] after division-geometry-filter+prune-isolated: 8435 nodes, 8135 edges
+[6bba_085bf656] after short-track filtering: 8300 nodes, 8030 edges (components_removed = 30)
+[6bba_085bf656] FINAL: 8300 nodes, 8030 edges
+[6bba_09961292] after edge-filter+motion-relink: 29955 nodes, 28827 edges
+[6bba_09961292] after gap-closing (single-frame + gap2): 30167 nodes, 29212 edges
+[6bba_09961292] after safe-division repair: 30167 nodes, 29237 edges (geometric_candidates = 92, deepcenter_rejected = 66, post_veto_candidates = 26, added = 25, cap_skipped = 0, mutual_nn_rejected = 66, divergence_rejected = 972)
+[6bba_09961292] after division-geometry-filter+prune-isolated: 30163 nodes, 29237 edges
+[6bba_09961292] after short-track filtering: 29742 nodes, 28916 edges (components_removed = 100)
+[6bba_09961292] FINAL: 29742 nodes, 28916 edges
+VALIDATOR candidate: tight55 proxy = 0.95025 adjusted edge = 0.927173
+[44b6_12dfb391] after edge-filter+motion-relink: 45351 nodes, 43007 edges
+[44b6_12dfb391] after gap-closing (single-frame + gap2): 46032 nodes, 44295 edges
+[44b6_12dfb391] after safe-division repair: 46032 nodes, 44319 edges (geometric_candidates = 150, deepcenter_rejected = 126, post_veto_candidates = 24, added = 24, cap_skipped = 0, mutual_nn_rejected = 58, divergence_rejected = 1560)
+[44b6_12dfb391] after division-geometry-filter+prune-isolated: 46030 nodes, 44319 edges
+[44b6_12dfb391] after short-track filtering: 44951 nodes, 43484 edges (components_removed = 244)
+[44b6_12dfb391] FINAL: 44951 nodes, 43484 edges
+[44b6_267148e4] after edge-filter+motion-relink: 22829 nodes, 21382 edges
+[44b6_267148e4] after gap-closing (single-frame + gap2): 23093 nodes, 21863 edges
+[44b6_267148e4] after safe-division repair: 23093 nodes, 21888 edges (geometric_candidates = 209, deepcenter_rejected = 175, post_veto_candidates = 34, added = 25, cap_skipped = 0, mutual_nn_rejected = 146, divergence_rejected = 1093)
+[44b6_267148e4] after division-geometry-filter+prune-isolated: 23028 nodes, 21888 edges
+[44b6_267148e4] after short-track filtering: 22254 nodes, 21304 edges (components_removed = 190)
+[44b6_267148e4] FINAL: 22254 nodes, 21304 edges
+[44b6_2a2eff9f] after edge-filter+motion-relink: 40928 nodes, 38395 edges
+[44b6_2a2eff9f] after gap-closing (single-frame + gap2): 41470 nodes, 39404 edges
+[44b6_2a2eff9f] after safe-division repair: 41470 nodes, 39444 edges (geometric_candidates = 292, deepcenter_rejected = 252, post_veto_candidates = 40, added = 40, cap_skipped = 0, mutual_nn_rejected = 72, divergence_rejected = 1689)
+[44b6_2a2eff9f] after division-geometry-filter+prune-isolated: 41465 nodes, 39444 edges
+[44b6_2a2eff9f] after short-track filtering: 40114 nodes, 38398 edges (components_removed = 305)
+[44b6_2a2eff9f] FINAL: 40114 nodes, 38398 edges
+[44b6_341df25f] after edge-filter+motion-relink: 8523 nodes, 8208 edges
+[44b6_341df25f] after gap-closing (single-frame + gap2): 8571 nodes, 8291 edges
+[44b6_341df25f] after safe-division repair: 8571 nodes, 8302 edges (geometric_candidates = 37, deepcenter_rejected = 24, post_veto_candidates = 13, added = 11, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 140)
+[44b6_341df25f] after division-geometry-filter+prune-isolated: 8571 nodes, 8302 edges
+[44b6_341df25f] after short-track filtering: 8411 nodes, 8177 edges (components_removed = 35)
+[44b6_341df25f] FINAL: 8411 nodes, 8177 edges
+[6bba_062c8d37] after edge-filter+motion-relink: 5997 nodes, 5618 edges
+[6bba_062c8d37] after gap-closing (single-frame + gap2): 6054 nodes, 5723 edges
+[6bba_062c8d37] after safe-division repair: 6054 nodes, 5726 edges (geometric_candidates = 14, deepcenter_rejected = 11, post_veto_candidates = 3, added = 3, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 67)
+[6bba_062c8d37] after division-geometry-filter+prune-isolated: 6029 nodes, 5726 edges
+[6bba_062c8d37] after short-track filtering: 5829 nodes, 5581 edges (components_removed = 55)
+[6bba_062c8d37] FINAL: 5829 nodes, 5581 edges
+[6bba_07e24132] after edge-filter+motion-relink: 29751 nodes, 28153 edges
+[6bba_07e24132] after gap-closing (single-frame + gap2): 30103 nodes, 28799 edges
+[6bba_07e24132] after safe-division repair: 30103 nodes, 28809 edges (geometric_candidates = 126, deepcenter_rejected = 112, post_veto_candidates = 14, added = 10, cap_skipped = 0, mutual_nn_rejected = 82, divergence_rejected = 1018)
+[6bba_07e24132] after division-geometry-filter+prune-isolated: 30091 nodes, 28809 edges
+[6bba_07e24132] after short-track filtering: 29193 nodes, 28120 edges (components_removed = 209)
+[6bba_07e24132] FINAL: 29193 nodes, 28120 edges
+[6bba_085bf656] after edge-filter+motion-relink: 8417 nodes, 8085 edges
+[6bba_085bf656] after gap-closing (single-frame + gap2): 8442 nodes, 8130 edges
+[6bba_085bf656] after safe-division repair: 8442 nodes, 8133 edges (geometric_candidates = 20, deepcenter_rejected = 17, post_veto_candidates = 3, added = 3, cap_skipped = 0, mutual_nn_rejected = 4, divergence_rejected = 102)
+[6bba_085bf656] after division-geometry-filter+prune-isolated: 8438 nodes, 8133 edges
+[6bba_085bf656] after short-track filtering: 8290 nodes, 8020 edges (components_removed = 35)
+[6bba_085bf656] FINAL: 8290 nodes, 8020 edges
+[6bba_09961292] after edge-filter+motion-relink: 29955 nodes, 28780 edges
+[6bba_09961292] after gap-closing (single-frame + gap2): 30186 nodes, 29202 edges
+[6bba_09961292] after safe-division repair: 30186 nodes, 29228 edges (geometric_candidates = 101, deepcenter_rejected = 68, post_veto_candidates = 33, added = 26, cap_skipped = 0, mutual_nn_rejected = 80, divergence_rejected = 1017)
+[6bba_09961292] after division-geometry-filter+prune-isolated: 30178 nodes, 29228 edges
+[6bba_09961292] after short-track filtering: 29754 nodes, 28904 edges (components_removed = 100)
+[6bba_09961292] FINAL: 29754 nodes, 28904 edges
+VALIDATOR candidate: relaxed9 proxy = 0.946895 adjusted edge = 0.925467
+[44b6_12dfb391] after edge-filter+motion-relink: 45351 nodes, 43045 edges
+[44b6_12dfb391] after gap-closing (single-frame + gap2): 46006 nodes, 44284 edges
+[44b6_12dfb391] after safe-division repair: 46006 nodes, 44308 edges (geometric_candidates = 150, deepcenter_rejected = 126, post_veto_candidates = 24, added = 24, cap_skipped = 0, mutual_nn_rejected = 58, divergence_rejected = 1557)
+[44b6_12dfb391] after division-geometry-filter+prune-isolated: 46004 nodes, 44308 edges
+[44b6_12dfb391] after short-track filtering: 44948 nodes, 43490 edges (components_removed = 238)
+[44b6_12dfb391] FINAL: 44948 nodes, 43490 edges
+[44b6_267148e4] after edge-filter+motion-relink: 22829 nodes, 21452 edges
+[44b6_267148e4] after gap-closing (single-frame + gap2): 23071 nodes, 21889 edges
+[44b6_267148e4] after safe-division repair: 23071 nodes, 21914 edges (geometric_candidates = 205, deepcenter_rejected = 172, post_veto_candidates = 33, added = 25, cap_skipped = 0, mutual_nn_rejected = 132, divergence_rejected = 1053)
+[44b6_267148e4] after division-geometry-filter+prune-isolated: 23011 nodes, 21914 edges
+[44b6_267148e4] after short-track filtering: 22238 nodes, 21327 edges (components_removed = 186)
+[44b6_267148e4] FINAL: 22238 nodes, 21327 edges
+[44b6_2a2eff9f] after edge-filter+motion-relink: 40928 nodes, 38433 edges
+[44b6_2a2eff9f] after gap-closing (single-frame + gap2): 41459 nodes, 39419 edges
+[44b6_2a2eff9f] after safe-division repair: 41459 nodes, 39459 edges (geometric_candidates = 290, deepcenter_rejected = 250, post_veto_candidates = 40, added = 40, cap_skipped = 0, mutual_nn_rejected = 74, divergence_rejected = 1651)
+[44b6_2a2eff9f] after division-geometry-filter+prune-isolated: 41455 nodes, 39459 edges
+[44b6_2a2eff9f] after short-track filtering: 40149 nodes, 38447 edges (components_removed = 294)
+[44b6_2a2eff9f] FINAL: 40149 nodes, 38447 edges
+[44b6_341df25f] after edge-filter+motion-relink: 8523 nodes, 8210 edges
+[44b6_341df25f] after gap-closing (single-frame + gap2): 8569 nodes, 8290 edges
+[44b6_341df25f] after safe-division repair: 8569 nodes, 8301 edges (geometric_candidates = 36, deepcenter_rejected = 23, post_veto_candidates = 13, added = 11, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 140)
+[44b6_341df25f] after division-geometry-filter+prune-isolated: 8569 nodes, 8301 edges
+[44b6_341df25f] after short-track filtering: 8413 nodes, 8179 edges (components_removed = 34)
+[44b6_341df25f] FINAL: 8413 nodes, 8179 edges
+[6bba_062c8d37] after edge-filter+motion-relink: 5997 nodes, 5645 edges
+[6bba_062c8d37] after gap-closing (single-frame + gap2): 6048 nodes, 5740 edges
+[6bba_062c8d37] after safe-division repair: 6048 nodes, 5744 edges (geometric_candidates = 15, deepcenter_rejected = 11, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 66)
+[6bba_062c8d37] after division-geometry-filter+prune-isolated: 6022 nodes, 5744 edges
+[6bba_062c8d37] after short-track filtering: 5853 nodes, 5620 edges (components_removed = 45)
+[6bba_062c8d37] FINAL: 5853 nodes, 5620 edges
+[6bba_07e24132] after edge-filter+motion-relink: 29751 nodes, 28214 edges
+[6bba_07e24132] after gap-closing (single-frame + gap2): 30086 nodes, 28826 edges
+[6bba_07e24132] after safe-division repair: 30086 nodes, 28833 edges (geometric_candidates = 119, deepcenter_rejected = 111, post_veto_candidates = 8, added = 7, cap_skipped = 0, mutual_nn_rejected = 73, divergence_rejected = 1005)
+[6bba_07e24132] after division-geometry-filter+prune-isolated: 30080 nodes, 28833 edges
+[6bba_07e24132] after short-track filtering: 29191 nodes, 28150 edges (components_removed = 206)
+[6bba_07e24132] FINAL: 29191 nodes, 28150 edges
+[6bba_085bf656] after edge-filter+motion-relink: 8417 nodes, 8092 edges
+[6bba_085bf656] after gap-closing (single-frame + gap2): 8438 nodes, 8131 edges
+[6bba_085bf656] after safe-division repair: 8438 nodes, 8135 edges (geometric_candidates = 21, deepcenter_rejected = 17, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 4, divergence_rejected = 102)
+[6bba_085bf656] after division-geometry-filter+prune-isolated: 8435 nodes, 8135 edges
+[6bba_085bf656] after short-track filtering: 8300 nodes, 8030 edges (components_removed = 30)
+[6bba_085bf656] FINAL: 8300 nodes, 8030 edges
+[6bba_09961292] after edge-filter+motion-relink: 29955 nodes, 28814 edges
+[6bba_09961292] after gap-closing (single-frame + gap2): 30171 nodes, 29207 edges
+[6bba_09961292] after safe-division repair: 30171 nodes, 29231 edges (geometric_candidates = 97, deepcenter_rejected = 68, post_veto_candidates = 29, added = 24, cap_skipped = 0, mutual_nn_rejected = 72, divergence_rejected = 989)
+[6bba_09961292] after division-geometry-filter+prune-isolated: 30165 nodes, 29231 edges
+[6bba_09961292] after short-track filtering: 29745 nodes, 28911 edges (components_removed = 100)
+[6bba_09961292] FINAL: 29745 nodes, 28911 edges
+VALIDATOR candidate: bonus125 proxy = 0.94774 adjusted edge = 0.924663
+[44b6_12dfb391] after edge-filter+motion-relink: 45351 nodes, 43045 edges
+[44b6_12dfb391] after gap-closing (single-frame + gap2): 46006 nodes, 44284 edges
+[44b6_12dfb391] after safe-division repair: 46006 nodes, 44308 edges (geometric_candidates = 150, deepcenter_rejected = 126, post_veto_candidates = 24, added = 24, cap_skipped = 0, mutual_nn_rejected = 59, divergence_rejected = 1557)
+[44b6_12dfb391] after division-geometry-filter+prune-isolated: 46004 nodes, 44308 edges
+[44b6_12dfb391] after short-track filtering: 44953 nodes, 43494 edges (components_removed = 237)
+[44b6_12dfb391] FINAL: 44953 nodes, 43494 edges
+[44b6_267148e4] after edge-filter+motion-relink: 22829 nodes, 21448 edges
+[44b6_267148e4] after gap-closing (single-frame + gap2): 23070 nodes, 21883 edges
+[44b6_267148e4] after safe-division repair: 23070 nodes, 21909 edges (geometric_candidates = 207, deepcenter_rejected = 173, post_veto_candidates = 34, added = 26, cap_skipped = 0, mutual_nn_rejected = 133, divergence_rejected = 1057)
+[44b6_267148e4] after division-geometry-filter+prune-isolated: 23010 nodes, 21909 edges
+[44b6_267148e4] after short-track filtering: 22251 nodes, 21333 edges (components_removed = 183)
+[44b6_267148e4] FINAL: 22251 nodes, 21333 edges
+[44b6_2a2eff9f] after edge-filter+motion-relink: 40928 nodes, 38433 edges
+[44b6_2a2eff9f] after gap-closing (single-frame + gap2): 41455 nodes, 39412 edges
+[44b6_2a2eff9f] after safe-division repair: 41455 nodes, 39452 edges (geometric_candidates = 291, deepcenter_rejected = 251, post_veto_candidates = 40, added = 40, cap_skipped = 0, mutual_nn_rejected = 74, divergence_rejected = 1655)
+[44b6_2a2eff9f] after division-geometry-filter+prune-isolated: 41451 nodes, 39452 edges
+[44b6_2a2eff9f] after short-track filtering: 40137 nodes, 38434 edges (components_removed = 296)
+[44b6_2a2eff9f] FINAL: 40137 nodes, 38434 edges
+[44b6_341df25f] after edge-filter+motion-relink: 8523 nodes, 8210 edges
+[44b6_341df25f] after gap-closing (single-frame + gap2): 8569 nodes, 8290 edges
+[44b6_341df25f] after safe-division repair: 8569 nodes, 8301 edges (geometric_candidates = 36, deepcenter_rejected = 23, post_veto_candidates = 13, added = 11, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 140)
+[44b6_341df25f] after division-geometry-filter+prune-isolated: 8569 nodes, 8301 edges
+[44b6_341df25f] after short-track filtering: 8413 nodes, 8179 edges (components_removed = 34)
+[44b6_341df25f] FINAL: 8413 nodes, 8179 edges
+[6bba_062c8d37] after edge-filter+motion-relink: 5997 nodes, 5645 edges
+[6bba_062c8d37] after gap-closing (single-frame + gap2): 6048 nodes, 5740 edges
+[6bba_062c8d37] after safe-division repair: 6048 nodes, 5744 edges (geometric_candidates = 15, deepcenter_rejected = 11, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 66)
+[6bba_062c8d37] after division-geometry-filter+prune-isolated: 6022 nodes, 5744 edges
+[6bba_062c8d37] after short-track filtering: 5853 nodes, 5620 edges (components_removed = 45)
+[6bba_062c8d37] FINAL: 5853 nodes, 5620 edges
+[6bba_07e24132] after edge-filter+motion-relink: 29751 nodes, 28214 edges
+[6bba_07e24132] after gap-closing (single-frame + gap2): 30087 nodes, 28828 edges
+[6bba_07e24132] after safe-division repair: 30087 nodes, 28834 edges (geometric_candidates = 118, deepcenter_rejected = 111, post_veto_candidates = 7, added = 6, cap_skipped = 0, mutual_nn_rejected = 69, divergence_rejected = 1006)
+[6bba_07e24132] after division-geometry-filter+prune-isolated: 30080 nodes, 28834 edges
+[6bba_07e24132] after short-track filtering: 29181 nodes, 28143 edges (components_removed = 208)
+[6bba_07e24132] FINAL: 29181 nodes, 28143 edges
+[6bba_085bf656] after edge-filter+motion-relink: 8417 nodes, 8092 edges
+[6bba_085bf656] after gap-closing (single-frame + gap2): 8438 nodes, 8131 edges
+[6bba_085bf656] after safe-division repair: 8438 nodes, 8135 edges (geometric_candidates = 21, deepcenter_rejected = 17, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 4, divergence_rejected = 102)
+[6bba_085bf656] after division-geometry-filter+prune-isolated: 8435 nodes, 8135 edges
+[6bba_085bf656] after short-track filtering: 8300 nodes, 8030 edges (components_removed = 30)
+[6bba_085bf656] FINAL: 8300 nodes, 8030 edges
+[6bba_09961292] after edge-filter+motion-relink: 29955 nodes, 28814 edges
+[6bba_09961292] after gap-closing (single-frame + gap2): 30171 nodes, 29207 edges
+[6bba_09961292] after safe-division repair: 30171 nodes, 29231 edges (geometric_candidates = 97, deepcenter_rejected = 68, post_veto_candidates = 29, added = 24, cap_skipped = 0, mutual_nn_rejected = 73, divergence_rejected = 989)
+[6bba_09961292] after division-geometry-filter+prune-isolated: 30165 nodes, 29231 edges
+[6bba_09961292] after short-track filtering: 29753 nodes, 28917 edges (components_removed = 98)
+[6bba_09961292] FINAL: 29753 nodes, 28917 edges
+VALIDATOR candidate: gap2step40 proxy = 0.947731 adjusted edge = 0.924655
+[44b6_12dfb391] after edge-filter+motion-relink: 45351 nodes, 43045 edges
+[44b6_12dfb391] after gap-closing (single-frame + gap2): 46006 nodes, 44284 edges
+[44b6_12dfb391] after safe-division repair: 46006 nodes, 44308 edges (geometric_candidates = 150, deepcenter_rejected = 126, post_veto_candidates = 24, added = 24, cap_skipped = 0, mutual_nn_rejected = 59, divergence_rejected = 1557)
+[44b6_12dfb391] after division-geometry-filter+prune-isolated: 46004 nodes, 44308 edges
+[44b6_12dfb391] after short-track filtering: 44953 nodes, 43494 edges (components_removed = 237)
+[44b6_12dfb391] FINAL: 44953 nodes, 43494 edges
+[44b6_267148e4] after edge-filter+motion-relink: 22829 nodes, 21448 edges
+[44b6_267148e4] after gap-closing (single-frame + gap2): 23070 nodes, 21883 edges
+[44b6_267148e4] after safe-division repair: 23070 nodes, 21909 edges (geometric_candidates = 207, deepcenter_rejected = 173, post_veto_candidates = 34, added = 26, cap_skipped = 0, mutual_nn_rejected = 133, divergence_rejected = 1057)
+[44b6_267148e4] after division-geometry-filter+prune-isolated: 23010 nodes, 21909 edges
+[44b6_267148e4] after short-track filtering: 22251 nodes, 21333 edges (components_removed = 183)
+[44b6_267148e4] FINAL: 22251 nodes, 21333 edges
+[44b6_2a2eff9f] after edge-filter+motion-relink: 40928 nodes, 38433 edges
+[44b6_2a2eff9f] after gap-closing (single-frame + gap2): 41455 nodes, 39412 edges
+[44b6_2a2eff9f] after safe-division repair: 41455 nodes, 39452 edges (geometric_candidates = 291, deepcenter_rejected = 251, post_veto_candidates = 40, added = 40, cap_skipped = 0, mutual_nn_rejected = 74, divergence_rejected = 1655)
+[44b6_2a2eff9f] after division-geometry-filter+prune-isolated: 41451 nodes, 39452 edges
+[44b6_2a2eff9f] after short-track filtering: 40137 nodes, 38434 edges (components_removed = 296)
+[44b6_2a2eff9f] FINAL: 40137 nodes, 38434 edges
+[44b6_341df25f] after edge-filter+motion-relink: 8523 nodes, 8210 edges
+[44b6_341df25f] after gap-closing (single-frame + gap2): 8569 nodes, 8290 edges
+[44b6_341df25f] after safe-division repair: 8569 nodes, 8301 edges (geometric_candidates = 36, deepcenter_rejected = 23, post_veto_candidates = 13, added = 11, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 140)
+[44b6_341df25f] after division-geometry-filter+prune-isolated: 8569 nodes, 8301 edges
+[44b6_341df25f] after short-track filtering: 8413 nodes, 8179 edges (components_removed = 34)
+[44b6_341df25f] FINAL: 8413 nodes, 8179 edges
+[6bba_062c8d37] after edge-filter+motion-relink: 5997 nodes, 5645 edges
+[6bba_062c8d37] after gap-closing (single-frame + gap2): 6048 nodes, 5740 edges
+[6bba_062c8d37] after safe-division repair: 6048 nodes, 5744 edges (geometric_candidates = 15, deepcenter_rejected = 11, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 66)
+[6bba_062c8d37] after division-geometry-filter+prune-isolated: 6022 nodes, 5744 edges
+[6bba_062c8d37] after short-track filtering: 5853 nodes, 5620 edges (components_removed = 45)
+[6bba_062c8d37] FINAL: 5853 nodes, 5620 edges
+[6bba_07e24132] after edge-filter+motion-relink: 29751 nodes, 28214 edges
+[6bba_07e24132] after gap-closing (single-frame + gap2): 30087 nodes, 28828 edges
+[6bba_07e24132] after safe-division repair: 30087 nodes, 28834 edges (geometric_candidates = 118, deepcenter_rejected = 111, post_veto_candidates = 7, added = 6, cap_skipped = 0, mutual_nn_rejected = 69, divergence_rejected = 1006)
+[6bba_07e24132] after division-geometry-filter+prune-isolated: 30080 nodes, 28834 edges
+[6bba_07e24132] after short-track filtering: 29181 nodes, 28143 edges (components_removed = 208)
+[6bba_07e24132] FINAL: 29181 nodes, 28143 edges
+[6bba_085bf656] after edge-filter+motion-relink: 8417 nodes, 8092 edges
+[6bba_085bf656] after gap-closing (single-frame + gap2): 8438 nodes, 8131 edges
+[6bba_085bf656] after safe-division repair: 8438 nodes, 8135 edges (geometric_candidates = 21, deepcenter_rejected = 17, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 4, divergence_rejected = 102)
+[6bba_085bf656] after division-geometry-filter+prune-isolated: 8435 nodes, 8135 edges
+[6bba_085bf656] after short-track filtering: 8300 nodes, 8030 edges (components_removed = 30)
+[6bba_085bf656] FINAL: 8300 nodes, 8030 edges
+[6bba_09961292] after edge-filter+motion-relink: 29955 nodes, 28814 edges
+[6bba_09961292] after gap-closing (single-frame + gap2): 30171 nodes, 29207 edges
+[6bba_09961292] after safe-division repair: 30171 nodes, 29231 edges (geometric_candidates = 97, deepcenter_rejected = 68, post_veto_candidates = 29, added = 24, cap_skipped = 0, mutual_nn_rejected = 73, divergence_rejected = 989)
+[6bba_09961292] after division-geometry-filter+prune-isolated: 30165 nodes, 29231 edges
+[6bba_09961292] after short-track filtering: 29753 nodes, 28917 edges (components_removed = 98)
+[6bba_09961292] FINAL: 29753 nodes, 28917 edges
+VALIDATOR candidate: reuse28 proxy = 0.947731 adjusted edge = 0.924655
+[44b6_12dfb391] after edge-filter+motion-relink: 45351 nodes, 43045 edges
+[44b6_12dfb391] after gap-closing (single-frame + gap2): 45994 nodes, 44259 edges
+[44b6_12dfb391] after safe-division repair: 45994 nodes, 44284 edges (geometric_candidates = 151, deepcenter_rejected = 126, post_veto_candidates = 25, added = 25, cap_skipped = 0, mutual_nn_rejected = 60, divergence_rejected = 1571)
+[44b6_12dfb391] after division-geometry-filter+prune-isolated: 45992 nodes, 44284 edges
+[44b6_12dfb391] after short-track filtering: 44923 nodes, 43456 edges (components_removed = 241)
+[44b6_12dfb391] FINAL: 44923 nodes, 43456 edges
+[44b6_267148e4] after edge-filter+motion-relink: 22829 nodes, 21448 edges
+[44b6_267148e4] after gap-closing (single-frame + gap2): 23063 nodes, 21869 edges
+[44b6_267148e4] after safe-division repair: 23063 nodes, 21896 edges (geometric_candidates = 209, deepcenter_rejected = 174, post_veto_candidates = 35, added = 27, cap_skipped = 0, mutual_nn_rejected = 133, divergence_rejected = 1066)
+[44b6_267148e4] after division-geometry-filter+prune-isolated: 23002 nodes, 21896 edges
+[44b6_267148e4] after short-track filtering: 22235 nodes, 21314 edges (components_removed = 185)
+[44b6_267148e4] FINAL: 22235 nodes, 21314 edges
+[44b6_2a2eff9f] after edge-filter+motion-relink: 40928 nodes, 38433 edges
+[44b6_2a2eff9f] after gap-closing (single-frame + gap2): 41440 nodes, 39382 edges
+[44b6_2a2eff9f] after safe-division repair: 41440 nodes, 39423 edges (geometric_candidates = 295, deepcenter_rejected = 254, post_veto_candidates = 41, added = 41, cap_skipped = 0, mutual_nn_rejected = 75, divergence_rejected = 1675)
+[44b6_2a2eff9f] after division-geometry-filter+prune-isolated: 41436 nodes, 39423 edges
+[44b6_2a2eff9f] after short-track filtering: 40104 nodes, 38391 edges (components_removed = 300)
+[44b6_2a2eff9f] FINAL: 40104 nodes, 38391 edges
+[44b6_341df25f] after edge-filter+motion-relink: 8523 nodes, 8210 edges
+[44b6_341df25f] after gap-closing (single-frame + gap2): 8569 nodes, 8290 edges
+[44b6_341df25f] after safe-division repair: 8569 nodes, 8301 edges (geometric_candidates = 36, deepcenter_rejected = 23, post_veto_candidates = 13, added = 11, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 140)
+[44b6_341df25f] after division-geometry-filter+prune-isolated: 8569 nodes, 8301 edges
+[44b6_341df25f] after short-track filtering: 8413 nodes, 8179 edges (components_removed = 34)
+[44b6_341df25f] FINAL: 8413 nodes, 8179 edges
+[6bba_062c8d37] after edge-filter+motion-relink: 5997 nodes, 5645 edges
+[6bba_062c8d37] after gap-closing (single-frame + gap2): 6048 nodes, 5740 edges
+[6bba_062c8d37] after safe-division repair: 6048 nodes, 5744 edges (geometric_candidates = 15, deepcenter_rejected = 11, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 3, divergence_rejected = 66)
+[6bba_062c8d37] after division-geometry-filter+prune-isolated: 6022 nodes, 5744 edges
+[6bba_062c8d37] after short-track filtering: 5853 nodes, 5620 edges (components_removed = 45)
+[6bba_062c8d37] FINAL: 5853 nodes, 5620 edges
+[6bba_07e24132] after edge-filter+motion-relink: 29751 nodes, 28214 edges
+[6bba_07e24132] after gap-closing (single-frame + gap2): 30085 nodes, 28824 edges
+[6bba_07e24132] after safe-division repair: 30085 nodes, 28831 edges (geometric_candidates = 119, deepcenter_rejected = 111, post_veto_candidates = 8, added = 7, cap_skipped = 0, mutual_nn_rejected = 69, divergence_rejected = 1007)
+[6bba_07e24132] after division-geometry-filter+prune-isolated: 30078 nodes, 28831 edges
+[6bba_07e24132] after short-track filtering: 29179 nodes, 28140 edges (components_removed = 208)
+[6bba_07e24132] FINAL: 29179 nodes, 28140 edges
+[6bba_085bf656] after edge-filter+motion-relink: 8417 nodes, 8092 edges
+[6bba_085bf656] after gap-closing (single-frame + gap2): 8438 nodes, 8131 edges
+[6bba_085bf656] after safe-division repair: 8438 nodes, 8135 edges (geometric_candidates = 21, deepcenter_rejected = 17, post_veto_candidates = 4, added = 4, cap_skipped = 0, mutual_nn_rejected = 4, divergence_rejected = 102)
+[6bba_085bf656] after division-geometry-filter+prune-isolated: 8435 nodes, 8135 edges
+[6bba_085bf656] after short-track filtering: 8300 nodes, 8030 edges (components_removed = 30)
+[6bba_085bf656] FINAL: 8300 nodes, 8030 edges
+[6bba_09961292] after edge-filter+motion-relink: 29955 nodes, 28814 edges
+[6bba_09961292] after gap-closing (single-frame + gap2): 30167 nodes, 29199 edges
+[6bba_09961292] after safe-division repair: 30167 nodes, 29223 edges (geometric_candidates = 97, deepcenter_rejected = 68, post_veto_candidates = 29, added = 24, cap_skipped = 0, mutual_nn_rejected = 73, divergence_rejected = 999)
+[6bba_09961292] after division-geometry-filter+prune-isolated: 30161 nodes, 29223 edges
+[6bba_09961292] after short-track filtering: 29747 nodes, 28908 edges (components_removed = 99)
+[6bba_09961292] FINAL: 29747 nodes, 28908 edges
+VALIDATOR candidate: dcgap035 proxy = 0.947749 adjusted edge = 0.924672
+VALIDATOR selected config: tight55 {'MOTION_RELINK_TIGHT_UM': 5.5}
