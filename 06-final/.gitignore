@@ -18,3 +18,6 @@ artifacts/predictions/
 
 # tracked deliberately: artifacts/*.csv, artifacts/*.json, artifacts/ledger/runs.db
 # the ledger is the single most valuable artifact in this repo.
+
+# symlink to the session scratchpad holding the live training log
+artifacts/training_live
