@@ -1,0 +1,7 @@
+baseline  score 0.8448  adjJ 0.8448  divJ 0.0000
+
+ordering     contest     score        d   d_adjJ    divJ  TP   FP   FN    add    44b6    6bba
+prune-first  False      0.8499  +0.0051  -0.0003  0.0540  15  127  136   6063  0.8540  0.8493  FAIL
+prune-first  True       0.8499  +0.0051  -0.0003  0.0540  15  127  136   6065  0.8540  0.8493  FAIL
+FORK-FIRST   False      0.8497  +0.0049  -0.0003  0.0517  14  120  137   5941  0.8523  0.8495  FAIL
+FORK-FIRST   True       0.8487  +0.0040  -0.0003  0.0428  14  176  137   7930  0.8526  0.8483  FAIL
