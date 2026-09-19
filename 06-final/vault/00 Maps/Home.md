@@ -23,6 +23,9 @@ Everything known about this competition, as a graph. Start at a hub below.
 2. [[Ordering Bug Class]] — the recurring defect is *sequence*, not parameters.
 3. [[Node Count Exploit]] — the metric pays for deleting nodes, without bound.
 
+## What we are waiting for
+- [[Board Predictions]] — pre-registered bands and what each outcome would mean
+
 ## Where the remaining headroom is
 - [[Error Budget]] — 80% of the error is the linker; the detector ceiling is +0.0126
 
