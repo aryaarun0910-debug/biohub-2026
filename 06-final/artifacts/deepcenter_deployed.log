@@ -1,0 +1,120 @@
+=== DeepCenter checkpoint ===
+  path            /Users/aryaarun/Developer/biohub26/weights/biohub-deepcenter-unet3d-center-prior-v1/weights/full_frame_center/best.pt
+  state_dict      50 tensors, 3,151,369 params, strict load OK (0 missing / 0 unexpected)
+  base_channels   24   pool_factor 4
+  normalisation   clip((v-P50.0)/(P99.5-P50.0), -0.5, 6.0)
+  epoch           2  (best val loss 0.045003) -- checkpoint_last.pt (epoch 500) deliberately NOT used
+  DC train split  71 films, embryos ['44b6']
+  DC val split    128 films, embryos ['6bba']
+  device          mps
+
+=== 8 deployed-quality prediction graphs ===
+  [1/8] 44b6_12dfb391  nodes  45351  edges  42871  forks  44  true  0  credited 0  charged_fp 0  frames  39  (3s)
+  [2/8] 44b6_267148e4  nodes  22829  edges  21427  forks  69  true  1  credited 1  charged_fp 0  frames  50  (6s)
+  [3/8] 44b6_2a2eff9f  nodes  40928  edges  38160  forks  87  true  0  credited 1  charged_fp 2  frames  56  (11s)
+  [4/8] 44b6_341df25f  nodes   8523  edges   8189  forks  12  true  1  credited 1  charged_fp 0  frames  12  (11s)
+  [5/8] 6bba_062c8d37  nodes   5997  edges   5696  forks   9  true  1  credited 1  charged_fp 0  frames   9  (12s)
+  [6/8] 6bba_07e24132  nodes  29751  edges  27970  forks  27  true  0  credited 0  charged_fp 0  frames  22  (13s)
+  [7/8] 6bba_085bf656  nodes   8417  edges   8086  forks   6  true  0  credited 0  charged_fp 0  frames   6  (14s)
+  [8/8] 6bba_09961292  nodes  29955  edges  28658  forks  33  true  1  credited 1  charged_fp 0  frames  26  (16s)
+
+wrote artifacts/deepcenter_deployed_proposals.csv  (287 proposals)
+
+=== GEOMETRY POSITIVE CONTROL (a wrong index gives plausible garbage) ===
+  GT nodes (z, y//4, x//4)  n=   94  median 0.3718
+  random voxels             n=   94  median 0.0033
+  GT nodes, y/x SWAPPED     n=   94  median 0.0097
+  AUC  GT vs random  = 0.8907   (swapped index: 0.5140)
+  -> correct index separates real cells from noise; the swap does not.
+
+=== KEY TABLE: DeepCenter veto on raw ILP + safe_div, 8 deployed graphs ===
+(12 ground-truth divisions in total; 1 division ~ 0.0083 of proxy)
+         variant  forks  TP  FP  FN    divJ      adj     proxy   d_proxy
+------------------------------------------------------------------------
+    raw ILP only      0   0   0  12  0.0000  0.93358   0.93358  -0.03607
+ veto OFF (0.00)    287   5   2   7  0.3571  0.93393   0.96964  +0.00000
+    veto >= 0.05    272   5   2   7  0.3571  0.93393   0.96964  +0.00000
+    veto >= 0.10    251   5   2   7  0.3571  0.93393   0.96964  +0.00000
+    veto >= 0.15    215   5   1   7  0.3846  0.93409   0.97255  +0.00290
+    veto >= 0.20    184   5   1   7  0.3846  0.93409   0.97255  +0.00290
+    veto >= 0.25    141   4   0   8  0.3333  0.93424   0.96758  -0.00207
+    veto >= 0.30    105   3   0   9  0.2500  0.93408   0.95908  -0.01057
+    veto >= 0.40     35   2   0  10  0.1667  0.93391   0.95058  -0.01907
+    veto >= 0.50      4   2   0  10  0.1667  0.93391   0.95058  -0.01907
+wrote artifacts/deepcenter_deployed_thresholds.csv
+
+  best threshold      veto >= 0.15  proxy 0.97255
+  deployed thr 0.20   proxy 0.97255  (delta vs best +0.00000 = +0.00 divisions)
+
+=== CEILING: an oracle veto that keeps only the metric-credited forks ===
+  oracle (5 forks kept)  TP 5 FP 1 FN 7  divJ 0.3846  adj 0.93409  proxy 0.97255  (+0.00290 vs no veto)
+  DeepCenter at its best threshold reaches 0.97255 = 100% of that ceiling.
+
+=== CONTROL: same veto driven by raw normalised intensity instead ===
+  img thr  forks  TP  FP  FN    divJ     proxy
+     0.00    287   5   2   7  0.3571   0.96964
+     0.40    273   5   2   7  0.3571   0.96964
+     0.60    241   5   2   7  0.3571   0.96964
+     0.70    218   5   1   7  0.3846   0.97255
+     0.80    186   5   1   7  0.3846   0.97255
+     0.90    136   3   0   9  0.2500   0.95908
+     1.10     64   3   0   9  0.2500   0.95908
+     1.30     22   2   0  10  0.1667   0.95058
+
+=== SAFE WINDOW (why 0.15 and 0.20 tie) ===
+  highest-scoring removable FP fork : 0.1086
+  lowest-scoring credited TP fork   : 0.2117
+  any threshold in (0.1086, 0.2117] gives the identical, best result.
+  deployed 0.20 sits 0.0117 below the first TP it would destroy and 0.0914 above the FP it must clear.
+
+=== JACKKNIFE at thr 0.20: drop one film, re-measure the veto's value ===
+   film held out   d_proxy(0.20 vs off)   TP/FP/FN off    -> 0.20
+   44b6_12dfb391               +0.00339          5/2/6      5/1/6
+   44b6_267148e4               +0.00273          4/2/7      4/1/7
+   44b6_2a2eff9f               +0.00000          4/0/7      4/0/7
+   44b6_341df25f               +0.00273          4/2/7      4/1/7
+   6bba_062c8d37               +0.00275          4/2/7      4/1/7
+   6bba_07e24132               +0.00396          5/2/5      5/1/5
+   6bba_085bf656               +0.00340          5/2/6      5/1/6
+   6bba_09961292               +0.00468          4/2/4      4/1/4
+
+--- proposal label census (GT is sparse: most parents match no GT node) ---
+label
+parent_unmatched              280
+TRUE                            4
+parent_matched_not_divider      3
+
+  metric-visible forks (parent matched a GT node): 7 / 287
+  forks the metric CREDITS as a division TP        : 5
+  forks the metric CHARGES as a division FP        : 2
+
+  scores of the forks that actually matter:
+    44b6_267148e4 t=  4 Q=   734  score 0.2818  img 0.8201  CREDITED TP      [TRUE]
+    44b6_2a2eff9f t= 14 Q=  7002  score 0.2117  img 0.8288  CREDITED TP      [parent_matched_not_divider]
+    44b6_2a2eff9f t= 61 Q= 25492  score 0.1086  img 0.6610  CHARGED FP       [parent_matched_not_divider]
+    44b6_341df25f t=  5 Q=   514  score 0.5247  img 1.2258  CREDITED TP      [TRUE]
+    6bba_062c8d37 t= 90 Q=  5468  score 0.5881  img 2.2513  CREDITED TP      [TRUE]
+    6bba_09961292 t= 45 Q= 13993  score 0.3655  img 1.3476  CREDITED TP      [TRUE]
+
+=== AUC: DeepCenter score, TRUE vs FALSE proposal, on THIS pool ===
+               ALL  label=true      n= 287 pos= 4  DeepCenter AUC 0.8569   brightness control 0.8030
+               ALL  label=credited  n= 287 pos= 5  DeepCenter AUC 0.7645   brightness control 0.7270
+   44b6 (DC train)  label=true      n= 212 pos= 2  DeepCenter AUC 0.8286   brightness control 0.6214
+   44b6 (DC train)  label=credited  n= 212 pos= 3  DeepCenter AUC 0.6970   brightness control 0.5455
+     6bba (DC val)  label=true      n=  75 pos= 2  DeepCenter AUC 0.8425   brightness control 0.9658
+     6bba (DC val)  label=credited  n=  75 pos= 2  DeepCenter AUC 0.8425   brightness control 0.9658
+
+  Mann-Whitney TRUE > FALSE: U=970  p=0.005  (n_true=4, n_false=283)
+
+  weak-graph reference (script 90): pool 2334, true 13, AUC 0.836 (held-out embryo 0.880), brightness control 0.615
+
+=== score distributions, median [Q1-Q3] ===
+            fold              class      n   median       Q1       Q3
+             ALL      TRUE division      4   0.4451   0.3446   0.5405
+             ALL    FALSE candidate    283   0.2475   0.1473   0.3320
+ 44b6 (DC train)      TRUE division      2   0.4032   0.3425   0.4639
+ 44b6 (DC train)    FALSE candidate    210   0.2403   0.1327   0.3116
+   6bba (DC val)      TRUE division      2   0.4768   0.4212   0.5324
+   6bba (DC val)    FALSE candidate     73   0.3021   0.1828   0.4022
+
+total wall 22s
