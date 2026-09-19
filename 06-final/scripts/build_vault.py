@@ -957,6 +957,13 @@ Two invariants confirmed across all 24 cells:
 Aggregate `mult` drifts up to 8.85e-05, which is *not* a node-count change — see
 [[Aggregate Mult Re-weighting]].
 
+**Superseded as a shipping decision by [[Scored Films Measurement]]:** w=0.3 is
+−0.00086 where it counts. Three film sets agree the plateau is **0.4–0.6** —
+scored peaks at 0.6, validator at 0.4, the 199-film rebuild at 0.5 — and all
+three put 0.3 outside it. s10 ships **0.6**.
+
+⚠ The gain is concentrated: only 73/199 films move at all, median delta 0.00000.
+
 Related: [[s09]], [[Linefit Smoothing]], [[Transfer Lesson]]
 """)
 

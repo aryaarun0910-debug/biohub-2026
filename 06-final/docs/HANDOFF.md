@@ -74,6 +74,24 @@ the rule s09 violated — ship a weight only if it is positive on BOTH sets:
 
 **s10 = s05 + `LINEFIT_WEIGHT 0.6`**, pushed 2026-09-19 ~13:52 UTC.
 
+**Confirmed by a THIRD film set.** `scripts/109_linefit_across_199.py` sweeps the
+weight over all 199 rebuild films (calibrated first: the rebuild puts 0.6 above
+0.3 on 3/4 scored films, the fourth being a 53-GT-edge tie at 0.00000, so
+uninformative rather than contradictory). Weighted aggregate vs deployed 0.8:
+
+| w | 0.3 | 0.4 | 0.5 | 0.6 | 0.7 | 0.9 |
+|---|---|---|---|---|---|---|
+| 199-film | −0.00013 | +0.00109 | **+0.00148** | +0.00136 | +0.00069 | −0.00201 |
+
+Three independent sets, three different optima, **one shared plateau**:
+scored → 0.6, validator → 0.4, 199-film → 0.5. All three put **0.4–0.6 in the
+good region and 0.3 outside it**. s10's 0.6 is within 0.00012 of the 199-film
+optimum. The pick is sound.
+
+⚠ The gain is **concentrated, not broad**: only 73/199 films move at all and the
+median delta is exactly 0.00000 at every weight. linefit only acts where chains
+are long enough to fit. Do not read the mean as a per-film expectation.
+
 Also learned on the scored films: **safe_div earns its keep on EDGES even though
 it earns zero division credit there.** Turning it off takes the ledger 0/6/3 →
 0/0/3 (all six false positives gone) and still costs **−0.00179**. Do not remove it.
