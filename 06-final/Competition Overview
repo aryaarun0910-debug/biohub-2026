@@ -1,0 +1,465 @@
+# Biohub — Cell Tracking During Development
+
+## Overview
+
+Your goal is to develop algorithms to **detect, track, and link cells across time in 3D microscopy data**, including accurate identification of **cell divisions** and **lineage reconstruction**.
+
+You will work with real microscopy datasets to build robust methods capable of handling:
+
+- Dense cell populations
+- Imaging noise
+- Complex biological structures
+- Cell motion and deformation
+- Cell division events
+
+Your work will help eliminate a major manual bottleneck in biological research and enable scientists to quantify the building blocks of life.
+
+---
+
+## Competition Description
+
+Tracking cells across time in **3D microscopy** is a fundamental challenge in biological research.
+
+Scientists rely on **time-lapse 3D imaging** to study how cells:
+
+- Grow
+- Interact
+- Move
+- Divide
+- Develop over time
+
+However, analyzing these datasets remains a major bottleneck.
+
+Researchers currently spend countless hours manually tracking cells, particularly in complex datasets where thousands of visually similar cells move, deform, and divide.
+
+While automated tracking tools already exist, they often fail under real-world conditions.
+
+Important challenges include:
+
+- High cell density
+- Imaging noise
+- Irregular cell shapes
+- Similar appearance between neighboring cells
+- Cell movement
+- Cell deformation
+- Cell mitosis
+
+These failures can produce critical errors in **lineage reconstruction**, limiting the scalability of biological studies.
+
+This competition provides a shared benchmark for addressing these problems.
+
+The task consists of three major components:
+
+1. **Detect cells** in each 3D timepoint.
+2. **Associate cells across frames**.
+3. **Identify division events** to reconstruct accurate cell lineages.
+
+Developing robust and generalizable methods for **3D+time cell tracking** can:
+
+- Reduce manual annotation effort.
+- Improve scientific reproducibility.
+- Enable analysis of much larger microscopy datasets.
+- Accelerate discoveries in:
+  - Developmental biology
+  - Immunology
+  - Disease research
+
+---
+
+# Evaluation
+
+Submissions are evaluated using a **combined tracking metric** measuring two major components:
+
+1. **Edge accuracy** — how accurately cells are linked across time.
+2. **Division detection** — how accurately mitosis events are identified.
+
+The final score combines:
+
+- **Adjusted Edge Jaccard**
+- **Division Jaccard**
+
+> Due to the design of the metric, it is possible for competition scores to exceed `1.0`.
+
+---
+
+## Edge Jaccard
+
+Predicted nodes are first matched to ground-truth nodes independently for each timepoint.
+
+Matching is performed using **optimal bipartite assignment** based on physical centroid distance.
+
+### Matching Threshold
+
+The maximum permitted distance between a predicted and ground-truth centroid is:
+
+```text
+7.0 µm
+```
+
+The physical voxel scale is:
+
+| Axis | Scale |
+|---|---:|
+| Z | 1.625 µm/voxel |
+| Y | 0.40625 µm/voxel |
+| X | 0.40625 µm/voxel |
+
+The scaled physical distance between two voxel coordinates can therefore be considered using:
+
+```text
+dz = Δz × 1.625
+dy = Δy × 0.40625
+dx = Δx × 0.40625
+```
+
+with matching restricted to distances of at most:
+
+```text
+7.0 µm
+```
+
+---
+
+### Edge True Positive
+
+A predicted edge is considered a **true positive** when:
+
+1. Its source node matches a ground-truth node.
+2. Its target node matches a ground-truth node.
+3. Those two ground-truth nodes are connected by a ground-truth edge.
+
+The standard edge Jaccard is:
+
+```text
+Edge Jaccard = TP / (TP + FP + FN)
+```
+
+where:
+
+- `TP` = true-positive edges
+- `FP` = false-positive edges
+- `FN` = false-negative edges
+
+The resulting score is then adjusted using a penalty related to **over-predicting the total number of nodes**.
+
+This produces the:
+
+```text
+Adjusted Edge Jaccard
+```
+
+---
+
+## Division Jaccard
+
+A cell division is represented as a node with:
+
+```text
+2 or more outgoing edges
+```
+
+For each ground-truth division, the predicted tracking graph is checked for a connected component that:
+
+1. Covers the **pre-split stage**.
+2. Connects to both **daughter lineages**.
+
+Division events are then classified into:
+
+- Division true positives (`TP`)
+- Division false positives (`FP`)
+- Division false negatives (`FN`)
+
+The Division Jaccard is calculated using:
+
+```text
+Division Jaccard = TP / (TP + FP + FN)
+```
+
+Division Jaccards are **micro-averaged across all samples**.
+
+---
+
+## Dataset-Level Aggregation
+
+### Edge Score
+
+Per-sample adjusted Edge Jaccards are weighted according to:
+
+```text
+TP + FP + FN
+```
+
+before being combined across samples.
+
+### Division Score
+
+Division statistics are aggregated across all samples and evaluated using a **micro-averaged Jaccard**.
+
+---
+
+## Sparse Ground Truth
+
+Cells are **sparsely labeled** in the ground truth.
+
+This means that:
+
+> An unlabeled cell is not necessarily a negative example.
+
+The evaluation metric explicitly accounts for this sparse-label setting.
+
+Additional metric details are available in the official metric documentation:
+
+[Competition Metric Documentation](https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md)
+
+---
+
+# Submission File
+
+The submission must be a CSV file containing two different row types:
+
+1. **Node rows** — predicted cell detections.
+2. **Edge rows** — links between predicted cells.
+
+Rows are grouped by dataset.
+
+The required columns are:
+
+```text
+id,dataset,row_type,node_id,t,z,y,x,source_id,target_id
+```
+
+Example:
+
+```csv
+id,dataset,row_type,node_id,t,z,y,x,source_id,target_id
+0,44b6,node,1,0,32,128,128,-1,-1
+1,44b6,node,2,1,33,130,125,-1,-1
+2,6bba,edge,-1,-1,-1,-1,-1,1,2
+```
+
+---
+
+## Node Rows
+
+For cell detections:
+
+```text
+row_type = node
+```
+
+The following fields must be populated:
+
+- `node_id`
+- `t`
+- `z`
+- `y`
+- `x`
+
+Coordinates are integer centroid coordinates expressed in **voxels**.
+
+For node rows:
+
+```text
+source_id = -1
+target_id = -1
+```
+
+Example:
+
+```csv
+0,44b6,node,1,0,32,128,128,-1,-1
+```
+
+---
+
+## Edge Rows
+
+For temporal links between cells:
+
+```text
+row_type = edge
+```
+
+The following fields must be populated:
+
+- `source_id`
+- `target_id`
+
+These values must reference existing `node_id` values.
+
+For edge rows, set the node-specific fields to:
+
+```text
+node_id = -1
+t       = -1
+z       = -1
+y       = -1
+x       = -1
+```
+
+Example:
+
+```csv
+2,6bba,edge,-1,-1,-1,-1,-1,1,2
+```
+
+---
+
+## Submission Column Definitions
+
+| Column | Description |
+|---|---|
+| `id` | Required throwaway index containing consecutive integers |
+| `dataset` | Dataset/sample identifier |
+| `row_type` | Either `node` or `edge` |
+| `node_id` | Unique cell detection ID |
+| `t` | Timepoint |
+| `z` | Z centroid coordinate in voxels |
+| `y` | Y centroid coordinate in voxels |
+| `x` | X centroid coordinate in voxels |
+| `source_id` | Source node of an edge |
+| `target_id` | Target node of an edge |
+
+The `dataset` value must exactly match the corresponding folder name in the test set, excluding the `.zarr` extension.
+
+For example:
+
+```text
+44b6.zarr
+```
+
+becomes:
+
+```text
+44b6
+```
+
+Every dataset present in the test set **must appear in the submission**.
+
+---
+
+# Timeline
+
+| Event | Date |
+|---|---|
+| Competition Start | June 29, 2026 |
+| Entry Deadline | September 22, 2026 |
+| Team Merger Deadline | September 22, 2026 |
+| Final Submission Deadline | September 29, 2026 |
+
+All deadlines occur at:
+
+```text
+11:59 PM UTC
+```
+
+on the corresponding day unless otherwise specified.
+
+Participants must accept the competition rules before the **Entry Deadline** in order to compete.
+
+The organizers reserve the right to modify the competition timeline if necessary.
+
+---
+
+# Prizes
+
+| Placement | Prize |
+|---|---:|
+| 1st Place | $18,000 |
+| 2nd Place | $12,000 |
+| 3rd Place | $8,000 |
+| 4th Place | $6,000 |
+| 5th Place | $6,000 |
+| 6th Place | $5,000 |
+| 7th Place | $5,000 |
+
+Total prize pool:
+
+```text
+$60,000
+```
+
+This leaderboard is calculated with approximately 29% of the test data. The final results will be based on the other 71%, so the final standings may be different.
+
+---
+
+# Code Requirements
+
+Submissions must be generated through **Kaggle Notebooks**.
+
+For the **Submit** button to become active after committing a notebook, the following conditions must be satisfied:
+
+- CPU notebook runtime must be **≤ 12 hours**.
+- GPU notebook runtime must be **≤ 12 hours**.
+- Internet access must be **disabled**.
+- Freely and publicly available external data is allowed.
+- Pre-trained models are allowed.
+- The generated submission file must be named:
+
+```text
+submission.csv
+```
+
+External resources therefore need to be available to the notebook without requiring internet access during the competition rerun.
+
+For more information:
+
+- [Kaggle Code Competition FAQ](https://www.kaggle.com/docs/competitions#notebooks-only-FAQ)
+- [Kaggle Code Competition Debugging Guide](https://www.kaggle.com/code-competition-debugging)
+
+---
+
+# Task Summary
+
+The complete competition pipeline can be summarized as:
+
+```text
+3D+Time Microscopy
+        │
+        ▼
+┌─────────────────────┐
+│   Cell Detection    │
+│   (t, z, y, x)      │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Temporal Association│
+│   Cell t → Cell t+1 │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Division Detection  │
+│ Parent → Daughters  │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Tracking / Lineage  │
+│       Graph         │
+└──────────┬──────────┘
+           │
+           ▼
+     submission.csv
+```
+
+The resulting graph contains:
+
+```text
+Nodes = Cell detections
+Edges = Temporal relationships
+Branches = Cell divisions / lineage events
+```
+
+---
+
+# Citation
+
+Goldsborough, T., Bragantini, J., Zhao, X., Leary, G., Huijben, T., da Silva Theodoro, I., Harrington, K., Chiu, C.-L., Reade, W., Cruz, M., & Royer, L. A. (2026).
+
+**Biohub — Cell Tracking During Development.**
+
+Kaggle.
+
+https://www.kaggle.com/competitions/biohub-cell-tracking-during-development

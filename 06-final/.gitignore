@@ -1,0 +1,20 @@
+# 82 GB of competition data — never
+Data/
+
+# environments
+.venv/
+__pycache__/
+*.pyc
+
+# large derived caches (feature volumes, mined patch crops, predicted graphs)
+artifacts/cache/
+artifacts/patches/
+artifacts/predictions/
+*.zarr/
+*.geff/
+
+# macOS
+.DS_Store
+
+# tracked deliberately: artifacts/*.csv, artifacts/*.json, artifacts/ledger/runs.db
+# the ledger is the single most valuable artifact in this repo.

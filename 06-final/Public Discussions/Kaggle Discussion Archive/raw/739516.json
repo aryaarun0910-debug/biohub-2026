@@ -1,0 +1,112 @@
+{
+  "forumTopic": {
+    "authorId": 15306749,
+    "authorThumbnailName": "15306749-kg.png?t=2025-12-27-02-08-57",
+    "authorUserDisplayName": "hikaggler",
+    "authorUserName": "hikarukai",
+    "comments": [
+      {
+        "id": 3521952,
+        "postDate": "2026-09-07T17:35:28.277Z",
+        "rawMarkdown": "Hi @hk4165692682,                                                                                                                                                                                                   Nice trick isolating the division term via a paired run — and the 0.948-with-two-completely-different-profiles example is a good illustration of a real problem: the combined score isn't identifiable from a single number.\n\nOne thing worth flagging on the estimate itself, though: the subtraction only gives you the true division_jaccard if edge_jaccard stayed exactly constant between the \"normal\" and \"divisions off\" runs. But parent→daughter edges are part of the edge count too — if turning off division creation means your linker only keeps one of the two daughter links instead of two, the dropped daughter becomes an edge false negative, not just a division miss. That would pull edge_jaccard down as well, so your 0.022 delta would be splitting between two effects, not attributable to division_jaccard alone. Depending on how your ablation is wired, 0.22 could be an upper or lower bound rather than the actual value — hard to say without knowing the exact mechanism.\n\nIf it helps: the official repo (royerlab/kaggle-cell-tracking-competition) ships evaluate_datasets(), which returns edge_jaccard and division_jaccard as two separate fields, computed locally against the train .geff ground truth. That gets you the exact split without spending a submission or needing to assume anything stays constant — probably worth switching to that instead of the paired-LB-diff method going forward.\n\nAs for your actual question — I don't have a submitted division_jaccard yet (still in the candidate-graph/EDA stage on my end), so I can't give you a real number. What I can share: on the training set, a simple nearest-parent candidate graph (R≈9.9µm, K≤10) only reaches ~88% coverage on the 151 GT division forks, versus ~99.7% on plain continuation edges — so there's a real, measurable gap concentrated on divisions before any classifier even gets involved. That's a ceiling on division_jaccard, not the metric itself, but it suggests the rare-event nature of divisions (a few hundred events among hundreds of thousands of annotated nodes) is probably the dominant bottleneck for most people's division score, more than model architecture per se.",
+        "content": "<p>Hi <a href=\"https://www.kaggle.com/hk4165692682\" target=\"_blank\">@hk4165692682</a>,                                                                                                                                                                                                   Nice trick isolating the division term via a paired run — and the 0.948-with-two-completely-different-profiles example is a good illustration of a real problem: the combined score isn't identifiable from a single number.</p>\n<p>One thing worth flagging on the estimate itself, though: the subtraction only gives you the true division_jaccard if edge_jaccard stayed exactly constant between the \"normal\" and \"divisions off\" runs. But parent→daughter edges are part of the edge count too — if turning off division creation means your linker only keeps one of the two daughter links instead of two, the dropped daughter becomes an edge false negative, not just a division miss. That would pull edge_jaccard down as well, so your 0.022 delta would be splitting between two effects, not attributable to division_jaccard alone. Depending on how your ablation is wired, 0.22 could be an upper or lower bound rather than the actual value — hard to say without knowing the exact mechanism.</p>\n<p>If it helps: the official repo (royerlab/kaggle-cell-tracking-competition) ships evaluate_datasets(), which returns edge_jaccard and division_jaccard as two separate fields, computed locally against the train .geff ground truth. That gets you the exact split without spending a submission or needing to assume anything stays constant — probably worth switching to that instead of the paired-LB-diff method going forward.</p>\n<p>As for your actual question — I don't have a submitted division_jaccard yet (still in the candidate-graph/EDA stage on my end), so I can't give you a real number. What I can share: on the training set, a simple nearest-parent candidate graph (R≈9.9µm, K≤10) only reaches ~88% coverage on the 151 GT division forks, versus ~99.7% on plain continuation edges — so there's a real, measurable gap concentrated on divisions before any classifier even gets involved. That's a ceiling on division_jaccard, not the metric itself, but it suggests the rare-event nature of divisions (a few hundred events among hundreds of thousands of annotated nodes) is probably the dominant bottleneck for most people's division score, more than model architecture per se.</p>",
+        "parent": {},
+        "author": {
+          "displayName": "José Luiz Luna-Xavier",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/default-thumb.png",
+          "url": "/josluizlunaxavier",
+          "tier": "CONTRIBUTOR",
+          "id": 20884731,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": -3,
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 2890,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "reactions": [
+          {
+            "emoji": "LOVE",
+            "featuredUserNames": [
+              "hikarukai"
+            ],
+            "userCount": 1
+          }
+        ],
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "José Luiz Luna-Xavier",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/default-thumb.png",
+            "url": "/josluizlunaxavier",
+            "userName": "josluizlunaxavier",
+            "tier": "CONTRIBUTOR",
+            "id": 20884731,
+            "profileUrl": "/josluizlunaxavier",
+            "performanceTier": "CONTRIBUTOR",
+            "userId": 20884731,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      }
+    ],
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3520922,
+      "postDate": "2026-09-04T12:23:52.430Z",
+      "rawMarkdown": "The score is adj_edge_jaccard + 0.1 × division_jaccard, but I had no idea what my division part was, so I spent one submission to find out.\n\nI submitted the same pipeline with the division-creating step turned off — two division-related settings\nchanged, everything else identical.\n\n - normal: LB 0.929\n - divisions off: LB 0.907\n - difference 0.022 = 0.1 × division_jaccard\n - so my division_jaccard ≈ 0.22\n\nWhat surprised me is that two people on the same 0.948 can be in completely different situations:\n\n - if your division_jaccard is 0.30, you only need adj_edge_jaccard 0.918\n - if it is 0.15, you need adj_edge_jaccard 0.933\nThose two people should be working on opposite things, and the leaderboard shows them the same number.\n\nMy question: for anyone at 0.945 or above — roughly what is your division_jaccard?\nA rough number is fine, and \"I ignore divisions\" is just as useful an answer.",
+      "content": "<p>The score is adj_edge_jaccard + 0.1 × division_jaccard, but I had no idea what my division part was, so I spent one submission to find out.</p>\n<p>I submitted the same pipeline with the division-creating step turned off — two division-related settings\nchanged, everything else identical.</p>\n<ul>\n<li>normal: LB 0.929</li>\n<li>divisions off: LB 0.907</li>\n<li>difference 0.022 = 0.1 × division_jaccard</li>\n<li>so my division_jaccard ≈ 0.22</li>\n</ul>\n<p>What surprised me is that two people on the same 0.948 can be in completely different situations:</p>\n<ul>\n<li>if your division_jaccard is 0.30, you only need adj_edge_jaccard 0.918</li>\n<li>if it is 0.15, you need adj_edge_jaccard 0.933\nThose two people should be working on opposite things, and the leaderboard shows them the same number.</li>\n</ul>\n<p>My question: for anyone at 0.945 or above — roughly what is your division_jaccard?\nA rough number is fine, and \"I ignore divisions\" is just as useful an answer.</p>",
+      "parent": {},
+      "author": {
+        "displayName": "hikaggler",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15306749-kg.png?t=2025-12-27-02-08-57",
+        "url": "/hikarukai",
+        "tier": "EXPERT",
+        "id": 15306749,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 5,
+        "canUpvote": true,
+        "totalUpvotes": 5
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 204,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "teamUpInfo": {
+        "teamLeader": {
+          "displayName": "hikaggler",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15306749-kg.png?t=2025-12-27-02-08-57",
+          "url": "/hikarukai",
+          "userName": "hikarukai",
+          "tier": "EXPERT",
+          "id": 15306749,
+          "profileUrl": "/hikarukai",
+          "performanceTier": "EXPERT",
+          "userId": 15306749,
+          "progressionOptOut": false
+        },
+        "intro": ""
+      }
+    },
+    "firstMessageId": 3520922,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 739516,
+    "name": "I measured my own division_jaccard (0.22). What's yours?",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-09-04T12:23:52.430593200Z",
+    "totalVotes": 5,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/739516",
+    "totalMessages": 1,
+    "authorPerformanceTier": "EXPERT",
+    "authorProgressionOptOut": false
+  }
+}

@@ -1,0 +1,318 @@
+{
+  "forumTopic": {
+    "authorId": 4310004,
+    "authorThumbnailName": "4310004-kg.png?t=2025-12-30-09-11-55",
+    "authorUserDisplayName": "Tom",
+    "authorUserName": "tom99763",
+    "comments": [
+      {
+        "id": 3521835,
+        "postDate": "2026-09-07T09:24:47.893Z",
+        "rawMarkdown": "Are you using cell segmentation based tracking ?",
+        "content": "<p>Are you using cell segmentation based tracking ?</p>",
+        "parent": {},
+        "author": {
+          "displayName": "Rishabh Roy",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/217906-kg.jpg",
+          "url": "/rishabhr0y",
+          "tier": "EXPERT",
+          "id": 217906,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 1,
+          "canUpvote": true,
+          "totalUpvotes": 1
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 656,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "enabled": true,
+          "teamLeader": {
+            "displayName": "Rishabh Roy",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/217906-kg.jpg",
+            "url": "/rishabhr0y",
+            "userName": "rishabhr0y",
+            "tier": "EXPERT",
+            "id": 217906,
+            "profileUrl": "/rishabhr0y",
+            "performanceTier": "EXPERT",
+            "userId": 217906,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3487641,
+        "postDate": "2026-07-04T05:45:46.917Z",
+        "rawMarkdown": "Finally division got learning signal!\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4310004%2F8f869234903a7d25d2b54ecad8a04d66%2F123.png?generation=1783143916774683&alt=media)",
+        "content": "<p>Finally division got learning signal!</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4310004%2F8f869234903a7d25d2b54ecad8a04d66%2F123.png?generation=1783143916774683&amp;alt=media\" alt=\"\"></p>",
+        "replies": [
+          {
+            "id": 3520467,
+            "postDate": "2026-09-03T13:03:24.960Z",
+            "rawMarkdown": "> Finally division got learning signal!\n> \n> ![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4310004%2F8f869234903a7d25d2b54ecad8a04d66%2F123.png?generation=1783143916774683&alt=media)\n\nthats awesome how did you improve on the divisions ",
+            "content": "<blockquote>\n  <p>Finally division got learning signal!</p>\n  <p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4310004%2F8f869234903a7d25d2b54ecad8a04d66%2F123.png?generation=1783143916774683&amp;alt=media\" alt=\"\"></p>\n</blockquote>\n<p>thats awesome how did you improve on the divisions </p>",
+            "parent": {},
+            "author": {
+              "displayName": "Rishabh Roy",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/217906-kg.jpg",
+              "url": "/rishabhr0y",
+              "tier": "EXPERT",
+              "id": 217906,
+              "progressionOptOut": false
+            },
+            "authorType": "COMMENT",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 656,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "enabled": true,
+              "teamLeader": {
+                "displayName": "Rishabh Roy",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/217906-kg.jpg",
+                "url": "/rishabhr0y",
+                "userName": "rishabhr0y",
+                "tier": "EXPERT",
+                "id": 217906,
+                "profileUrl": "/rishabhr0y",
+                "performanceTier": "EXPERT",
+                "userId": 217906,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "Tom",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/4310004-kg.png?t=2025-12-30-09-11-55",
+          "url": "/tom99763",
+          "tier": "MASTER",
+          "id": 4310004,
+          "progressionOptOut": false
+        },
+        "authorType": "TOPIC",
+        "votes": {
+          "totalVotes": 3,
+          "canUpvote": true,
+          "totalUpvotes": 3
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 14,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "reactions": [
+          {
+            "emoji": "YAY",
+            "featuredUserNames": [
+              "rishabhr0y",
+              "coderrkj",
+              "beckpro",
+              "yunusgmsoy",
+              "caramelite"
+            ],
+            "userCount": 5
+          }
+        ],
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "Tom",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/4310004-kg.png?t=2025-12-30-09-11-55",
+            "url": "/tom99763",
+            "userName": "tom99763",
+            "tier": "MASTER",
+            "id": 4310004,
+            "profileUrl": "/tom99763",
+            "performanceTier": "MASTER",
+            "userId": 4310004,
+            "progressionOptOut": false
+          },
+          "intro": "pursue champion position. welcome to reach out if you have interesting idea."
+        }
+      },
+      {
+        "id": 3493457,
+        "postDate": "2026-07-07T20:46:03.703Z",
+        "rawMarkdown": "Could you share the notebook for the dataset_eda_and_results html?",
+        "content": "<p>Could you share the notebook for the dataset_eda_and_results html?</p>",
+        "parent": {},
+        "author": {
+          "displayName": "NevilleAndrade",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/346284-gp.jpg",
+          "url": "/dradebyte",
+          "tier": "CONTRIBUTOR",
+          "id": 346284,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 3537,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "NevilleAndrade",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/346284-gp.jpg",
+            "url": "/dradebyte",
+            "userName": "dradebyte",
+            "tier": "CONTRIBUTOR",
+            "id": 346284,
+            "profileUrl": "/dradebyte",
+            "performanceTier": "CONTRIBUTOR",
+            "userId": 346284,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      }
+    ],
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3485475,
+      "postDate": "2026-07-01T14:00:25.870Z",
+      "rawMarkdown": "in the attachments. ",
+      "content": "<p>in the attachments. </p>",
+      "attachments": [
+        {
+          "fileType": ".html",
+          "id": 46060,
+          "name": "dataset_eda_and_results_en.html",
+          "totalBytes": 33713,
+          "url": "https://storage.googleapis.com/kaggle-forum-message-attachments/3485475/46060/dataset_eda_and_results_en.html"
+        },
+        {
+          "fileType": ".html",
+          "id": 46061,
+          "name": "host_method_explained_en.html",
+          "totalBytes": 53168,
+          "url": "https://storage.googleapis.com/kaggle-forum-message-attachments/3485475/46061/host_method_explained_en.html"
+        },
+        {
+          "fileType": ".html",
+          "id": 46062,
+          "name": "metric_explained.html",
+          "totalBytes": 1172762,
+          "url": "https://storage.googleapis.com/kaggle-forum-message-attachments/3485475/46062/metric_explained.html"
+        },
+        {
+          "fileType": ".html",
+          "id": 46070,
+          "name": "pred_fp_fn.html",
+          "totalBytes": 834162,
+          "url": "https://storage.googleapis.com/kaggle-forum-message-attachments/3485475/46070/pred_fp_fn.html"
+        },
+        {
+          "fileType": ".html",
+          "id": 46072,
+          "name": "dog_eda.html",
+          "totalBytes": 607596,
+          "url": "https://storage.googleapis.com/kaggle-forum-message-attachments/3485475/46072/dog_eda.html"
+        }
+      ],
+      "parent": {},
+      "author": {
+        "displayName": "Tom",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/4310004-kg.png?t=2025-12-30-09-11-55",
+        "url": "/tom99763",
+        "tier": "MASTER",
+        "id": 4310004,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 49,
+        "canUpvote": true,
+        "totalUpvotes": 49
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 14,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "reactions": [
+        {
+          "emoji": "THANK_YOU",
+          "featuredUserNames": [
+            "dradebyte",
+            "xaxipirulazo",
+            "coderrkj",
+            "playwithme",
+            "saqibm128",
+            "davitkhantadze",
+            "beckpro",
+            "hashimrazi",
+            "tergelmunkhbat",
+            "jonathanweiss00",
+            "yunusgmsoy",
+            "zinutag",
+            "trizyx",
+            "arulprasadsp",
+            "vova2006",
+            "jamesweatherhead",
+            "caramelite",
+            "jordanjin",
+            "marcuseno",
+            "alfonso1799"
+          ],
+          "userCount": 20
+        },
+        {
+          "emoji": "LOVE",
+          "featuredUserNames": [
+            "jazivxt",
+            "yunusgmsoy",
+            "russcore"
+          ],
+          "userCount": 3
+        },
+        {
+          "emoji": "KAGGLE",
+          "featuredUserNames": [
+            "shikhageekachad"
+          ],
+          "userCount": 1
+        }
+      ],
+      "teamUpInfo": {
+        "teamLeader": {
+          "displayName": "Tom",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/4310004-kg.png?t=2025-12-30-09-11-55",
+          "url": "/tom99763",
+          "userName": "tom99763",
+          "tier": "MASTER",
+          "id": 4310004,
+          "profileUrl": "/tom99763",
+          "performanceTier": "MASTER",
+          "userId": 4310004,
+          "progressionOptOut": false
+        },
+        "intro": "pursue champion position. welcome to reach out if you have interesting idea."
+      }
+    },
+    "firstMessageId": 3485475,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 717109,
+    "name": "Resource sharing for cell tracking challenge",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-07-01T14:00:25.871499400Z",
+    "totalVotes": 49,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/717109",
+    "totalMessages": 4,
+    "authorPerformanceTier": "MASTER",
+    "authorProgressionOptOut": false
+  }
+}

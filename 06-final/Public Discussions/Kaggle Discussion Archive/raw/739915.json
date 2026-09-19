@@ -1,0 +1,71 @@
+{
+  "forumTopic": {
+    "authorId": 10909732,
+    "authorThumbnailName": "10909732-kg.png?t=2026-08-21-18-49-20",
+    "authorUserDisplayName": "Mark",
+    "authorUserName": "markdjadchenko",
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3521779,
+      "postDate": "2026-09-07T06:47:17.103Z",
+      "rawMarkdown": "Why train Unet for more than 100 epochs? Doesn't that lead to overfitting? ",
+      "content": "<p>Why train Unet for more than 100 epochs? Doesn't that lead to overfitting? </p>",
+      "parent": {},
+      "author": {
+        "displayName": "Mark",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/10909732-kg.png?t=2026-08-21-18-49-20",
+        "url": "/markdjadchenko",
+        "tier": "MASTER",
+        "id": 10909732,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 7,
+        "canUpvote": true,
+        "totalUpvotes": 8
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 18,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "reactions": [
+        {
+          "emoji": "KAGGLE",
+          "featuredUserNames": [
+            "octaviograu"
+          ],
+          "userCount": 1
+        }
+      ],
+      "teamUpInfo": {
+        "enabled": true,
+        "teamLeader": {
+          "displayName": "TWEAK",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28207655-kg.png?t=2026-08-05-03-21-49",
+          "url": "/tweakai",
+          "userName": "tweakai",
+          "tier": "EXPERT",
+          "id": 28207655,
+          "profileUrl": "/tweakai",
+          "performanceTier": "EXPERT",
+          "userId": 28207655,
+          "progressionOptOut": false
+        },
+        "intro": ""
+      }
+    },
+    "firstMessageId": 3521779,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 739915,
+    "name": "Why train Unet for more than 100 epochs? Doesn't that lead to overfitting? ",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-09-07T06:47:17.104766300Z",
+    "totalVotes": 7,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/739915",
+    "authorPerformanceTier": "MASTER",
+    "authorProgressionOptOut": false
+  }
+}

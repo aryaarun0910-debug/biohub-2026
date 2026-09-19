@@ -1,0 +1,61 @@
+{
+  "forumTopic": {
+    "authorId": 36060323,
+    "authorThumbnailName": "36060323-kg.jpg?t=2026-09-18-09-27-58",
+    "authorUserDisplayName": "Hammad Farooq",
+    "authorUserName": "malikhammadfarooq",
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3524154,
+      "postDate": "2026-09-14T04:24:30.653Z",
+      "rawMarkdown": "Hi everyone,\n\nI've been working with the public **dual-seed UNet-transformer + DeepCenter + HOCT veto** pipeline (credit to the original authors and dataset owners, links below). While reading through a full run's logs I found a simple runtime saving that doesn't change the submission, and I think it matters more on the hidden test set than on the 4 public example videos.\n\n## What I noticed\n\nThe notebook spends a lot of time before it writes the final submission:\n\n| Stage | Time (2× T4) |\n|---|---|\n| Validator prediction on 8 held-out train videos | ~16 min |\n| Scoring the base post-process config | ~7 min |\n| Sweep of 7 post-process candidates | ~51 min |\n| **Total before the final write** | **~75 min** |\n\nThe sweep only uses **train** videos, which are the same on every rerun. So it picks the same winner every time. In my runs that was:\n\n```text\nSELECTED: tight55  overrides={'MOTION_RELINK_TIGHT_UM': 5.5}\n  base     proxy=0.9490 adj=0.9260 divJ=0.2308\n  selected proxy=0.9511 adj=0.9280 divJ=0.2308\n```\n\n## The change\n\n1. Set the selected value directly in the config cell:\n\n```python\nos.environ[\"BIOHUB_MOTION_RELINK_TIGHT_UM\"] = \"5.5\"\n```\n\n2. Remove the validator prediction, the base scoring and the sweep cells.\n3. Remove the first `write_test_submission(\"base\")` call. That file gets overwritten later anyway. Write `submission.csv` **once**, with the HOCT veto armed.\n\nDetection, linking, ILP, post-processing and HOCT mode stay exactly the same.\n\n## Why it matters for the private LB\n\nThe HOCT veto has a wall-clock budget (`BIOHUB_HOCT_DEADLINE_H = 10`) and skips any video it predicts won't finish in time. On the public example set HOCT took ~18 min total, and the largest video (~70k nodes) alone took ~12 min. The hidden test set is about the size of the training set, so the veto can realistically hit the deadline. If it does, the remaining videos are written **without** the veto.\n\nFreeing ~75 min gives HOCT that much more room, so fewer hidden-test videos should be skipped.\n\n## Caveats\n\n- Please diff `submission.csv` before and after on your own run. Small GPU nondeterminism can change a few rows.\n- The local proxy uses only 8 videos, so treat small proxy differences with caution.\n\n## Open questions\n\n- Has anyone measured HOCT **mode 1 vs mode 2** on a held-out split? The notebook's validator never scores the veto itself.\n- Division Jaccard on the local validator is low (3 TP / 1 FP / 9 FN). Has anyone found post-processing that improves divisions without hurting edge Jaccard?\n\n## Credits / attached datasets\n\n- https://www.kaggle.com/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1\n- https://www.kaggle.com/datasets/pilkwang/biohub-temporal-unet3d-seed314159-v1\n- https://www.kaggle.com/datasets/pilkwang/biohub-deepcenter-unet3d-center-prior-v1\n- https://www.kaggle.com/datasets/sjlee101/biohub-hoct-020-wheels\n- https://www.kaggle.com/datasets/musculer/biohub-hoct-general-v0-official\n- Harmonic association fusion rule: public notebook by yusuketogashi (as credited in the original code)\n\nFeedback welcome, and thanks to everyone who shared their work publicly.",
+      "content": "<p>Hi everyone,</p>\n<p>I've been working with the public <strong>dual-seed UNet-transformer + DeepCenter + HOCT veto</strong> pipeline (credit to the original authors and dataset owners, links below). While reading through a full run's logs I found a simple runtime saving that doesn't change the submission, and I think it matters more on the hidden test set than on the 4 public example videos.</p>\n<h2>What I noticed</h2>\n<p>The notebook spends a lot of time before it writes the final submission:</p>\n<table>\n<thead>\n<tr>\n<th>Stage</th>\n<th>Time (2× T4)</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Validator prediction on 8 held-out train videos</td>\n<td>~16 min</td>\n</tr>\n<tr>\n<td>Scoring the base post-process config</td>\n<td>~7 min</td>\n</tr>\n<tr>\n<td>Sweep of 7 post-process candidates</td>\n<td>~51 min</td>\n</tr>\n<tr>\n<td><strong>Total before the final write</strong></td>\n<td><strong>~75 min</strong></td>\n</tr>\n</tbody>\n</table>\n<p>The sweep only uses <strong>train</strong> videos, which are the same on every rerun. So it picks the same winner every time. In my runs that was:</p>\n<pre><code>SELECTED: tight55  overrides={'MOTION_RELINK_TIGHT_UM': 5.5}\n  base     proxy=0.9490 adj=0.9260 divJ=0.2308\n  selected proxy=0.9511 adj=0.9280 divJ=0.2308\n</code></pre>\n<h2>The change</h2>\n<ol>\n<li>Set the selected value directly in the config cell:</li>\n</ol>\n<pre><code>os.environ[\"BIOHUB_MOTION_RELINK_TIGHT_UM\"] = \"5.5\"\n</code></pre>\n<ol>\n<li>Remove the validator prediction, the base scoring and the sweep cells.</li>\n<li>Remove the first <code>write_test_submission(\"base\")</code> call. That file gets overwritten later anyway. Write <code>submission.csv</code> <strong>once</strong>, with the HOCT veto armed.</li>\n</ol>\n<p>Detection, linking, ILP, post-processing and HOCT mode stay exactly the same.</p>\n<h2>Why it matters for the private LB</h2>\n<p>The HOCT veto has a wall-clock budget (<code>BIOHUB_HOCT_DEADLINE_H = 10</code>) and skips any video it predicts won't finish in time. On the public example set HOCT took ~18 min total, and the largest video (~70k nodes) alone took ~12 min. The hidden test set is about the size of the training set, so the veto can realistically hit the deadline. If it does, the remaining videos are written <strong>without</strong> the veto.</p>\n<p>Freeing ~75 min gives HOCT that much more room, so fewer hidden-test videos should be skipped.</p>\n<h2>Caveats</h2>\n<ul>\n<li>Please diff <code>submission.csv</code> before and after on your own run. Small GPU nondeterminism can change a few rows.</li>\n<li>The local proxy uses only 8 videos, so treat small proxy differences with caution.</li>\n</ul>\n<h2>Open questions</h2>\n<ul>\n<li>Has anyone measured HOCT <strong>mode 1 vs mode 2</strong> on a held-out split? The notebook's validator never scores the veto itself.</li>\n<li>Division Jaccard on the local validator is low (3 TP / 1 FP / 9 FN). Has anyone found post-processing that improves divisions without hurting edge Jaccard?</li>\n</ul>\n<h2>Credits / attached datasets</h2>\n<ul>\n<li><a href=\"https://www.kaggle.com/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1\" target=\"_blank\">https://www.kaggle.com/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1</a></li>\n<li><a href=\"https://www.kaggle.com/datasets/pilkwang/biohub-temporal-unet3d-seed314159-v1\" target=\"_blank\">https://www.kaggle.com/datasets/pilkwang/biohub-temporal-unet3d-seed314159-v1</a></li>\n<li><a href=\"https://www.kaggle.com/datasets/pilkwang/biohub-deepcenter-unet3d-center-prior-v1\" target=\"_blank\">https://www.kaggle.com/datasets/pilkwang/biohub-deepcenter-unet3d-center-prior-v1</a></li>\n<li><a href=\"https://www.kaggle.com/datasets/sjlee101/biohub-hoct-020-wheels\" target=\"_blank\">https://www.kaggle.com/datasets/sjlee101/biohub-hoct-020-wheels</a></li>\n<li><a href=\"https://www.kaggle.com/datasets/musculer/biohub-hoct-general-v0-official\" target=\"_blank\">https://www.kaggle.com/datasets/musculer/biohub-hoct-general-v0-official</a></li>\n<li>Harmonic association fusion rule: public notebook by yusuketogashi (as credited in the original code)</li>\n</ul>\n<p>Feedback welcome, and thanks to everyone who shared their work publicly.</p>",
+      "parent": {},
+      "author": {
+        "displayName": "Hammad Farooq",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/36060323-kg.jpg?t=2026-09-18-09-27-58",
+        "url": "/malikhammadfarooq",
+        "tier": "CONTRIBUTOR",
+        "id": 36060323,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 1,
+        "canUpvote": true,
+        "totalUpvotes": 2
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 302,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "teamUpInfo": {
+        "teamLeader": {
+          "displayName": "URAD",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/36348566-kg.jpg?t=2026-08-28-00-07-12",
+          "url": "/uradkr",
+          "userName": "uradkr",
+          "tier": "CONTRIBUTOR",
+          "id": 36348566,
+          "profileUrl": "/uradkr",
+          "performanceTier": "CONTRIBUTOR",
+          "userId": 36348566,
+          "progressionOptOut": false
+        },
+        "intro": ""
+      }
+    },
+    "firstMessageId": 3524154,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 741242,
+    "name": "Saving ~75 min in the dual-seed + HOCT veto pipeline (same output, less HOCT deadline risk)",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-09-14T04:24:30.653434800Z",
+    "totalVotes": 1,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/741242",
+    "authorPerformanceTier": "CONTRIBUTOR",
+    "authorProgressionOptOut": false
+  }
+}

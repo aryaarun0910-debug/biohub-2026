@@ -1,0 +1,352 @@
+{
+  "forumTopic": {
+    "authorId": 15306749,
+    "authorThumbnailName": "15306749-kg.png?t=2025-12-27-02-08-57",
+    "authorUserDisplayName": "hikaggler",
+    "authorUserName": "hikarukai",
+    "comments": [
+      {
+        "id": 3525577,
+        "postDate": "2026-09-18T08:18:39.780Z",
+        "rawMarkdown": "Thanks for starting this thread — this is close to the problem I’m seeing. My best public score is 0.947 on the published U-Net + transformer/graph stack. I tested controlled temporal-context changes to detector logits and association variants. The effects are inconsistent across the two image-source groups: a change can suppress false detections in one group while reducing valid peaks or associations in the other, so I have not found a defensible local gain to promote.\n\nFor people who broke past this plateau, which diagnostic was most predictive of LB movement: node-count/calibration error, missed detections, edge assignment, or division handling? Did you need a different detector/pretraining regime, or could a carefully gated change to the published stack do it? I’m especially interested in validation designs that correlate with the LB without tuning repeatedly on the same embryos. High-level guidance is enough.",
+        "content": "<p>Thanks for starting this thread — this is close to the problem I’m seeing. My best public score is 0.947 on the published U-Net + transformer/graph stack. I tested controlled temporal-context changes to detector logits and association variants. The effects are inconsistent across the two image-source groups: a change can suppress false detections in one group while reducing valid peaks or associations in the other, so I have not found a defensible local gain to promote.</p>\n<p>For people who broke past this plateau, which diagnostic was most predictive of LB movement: node-count/calibration error, missed detections, edge assignment, or division handling? Did you need a different detector/pretraining regime, or could a carefully gated change to the published stack do it? I’m especially interested in validation designs that correlate with the LB without tuning repeatedly on the same embryos. High-level guidance is enough.</p>",
+        "replies": [
+          {
+            "id": 3525605,
+            "postDate": "2026-09-18T11:03:17.987Z",
+            "rawMarkdown": "\n@MOHAMMADJAFAR ZAMANI — at a high level: of the four you list, node-count calibration predicted my LB movement far better than missed detections did. I can change recall by a point and the LB does not react, while the N_pred ratio term shows up every time. What you describe — a change that removes false detections in one group and valid peaks in the other — is what I see as well, so I keep a hold-out stratified across both lineages, fix it once and never retune on it, and compare runs with a paired standard error rather than a difference of means. The part I would stress most: post-processing settings chosen locally do carry over to the LB, but the local ranking of two trained models does not, so I stopped choosing weights that way. On your other question, the pretraining regime was the only change on my side that clearly moved anything; carefully gated changes on top of the published stack gained me almost nothing.",
+            "content": "<p><a href=\"/MOHAMMADJAFAR\" target=\"_blank\">@MOHAMMADJAFAR</a> ZAMANI — at a high level: of the four you list, node-count calibration predicted my LB movement far better than missed detections did. I can change recall by a point and the LB does not react, while the N_pred ratio term shows up every time. What you describe — a change that removes false detections in one group and valid peaks in the other — is what I see as well, so I keep a hold-out stratified across both lineages, fix it once and never retune on it, and compare runs with a paired standard error rather than a difference of means. The part I would stress most: post-processing settings chosen locally do carry over to the LB, but the local ranking of two trained models does not, so I stopped choosing weights that way. On your other question, the pretraining regime was the only change on my side that clearly moved anything; carefully gated changes on top of the published stack gained me almost nothing.</p>",
+            "parent": {},
+            "author": {
+              "displayName": "hikaggler",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15306749-kg.png?t=2025-12-27-02-08-57",
+              "url": "/hikarukai",
+              "tier": "EXPERT",
+              "id": 15306749,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 201,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "hikaggler",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15306749-kg.png?t=2025-12-27-02-08-57",
+                "url": "/hikarukai",
+                "userName": "hikarukai",
+                "tier": "EXPERT",
+                "id": 15306749,
+                "profileUrl": "/hikarukai",
+                "performanceTier": "EXPERT",
+                "userId": 15306749,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "MOHAMMADJAFAR ZAMANI",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28053944-kg.png?t=2026-02-22-01-43-57",
+          "url": "/mohammadjafarzamani",
+          "tier": "CONTRIBUTOR",
+          "id": 28053944,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 222,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "reactions": [
+          {
+            "emoji": "THANK_YOU",
+            "featuredUserNames": [
+              "hikarukai"
+            ],
+            "userCount": 1
+          }
+        ],
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "MOHAMMADJAFAR ZAMANI",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28053944-kg.png?t=2026-02-22-01-43-57",
+            "url": "/mohammadjafarzamani",
+            "userName": "mohammadjafarzamani",
+            "tier": "CONTRIBUTOR",
+            "id": 28053944,
+            "profileUrl": "/mohammadjafarzamani",
+            "performanceTier": "CONTRIBUTOR",
+            "userId": 28053944,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3525406,
+        "postDate": "2026-09-17T17:48:19.580Z",
+        "rawMarkdown": "Could you tell us more about \"Pretraining on the public synthetic dataset (+0.012–0.018 over from-scratch). This was the only big lever I found\"? What is your model/models base score before you add in your division and division head? Are you using anything from the public notebooks that would cause your model/models to converge on 0.947?",
+        "content": "<p>Could you tell us more about \"Pretraining on the public synthetic dataset (+0.012–0.018 over from-scratch). This was the only big lever I found\"? What is your model/models base score before you add in your division and division head? Are you using anything from the public notebooks that would cause your model/models to converge on 0.947?</p>",
+        "replies": [
+          {
+            "id": 3525570,
+            "postDate": "2026-09-18T07:21:37.373Z",
+            "rawMarkdown": "Fair question, so let me be explicit: the 0.947 next to my name is a public notebook score, not mine. My own pipeline, run end to end by me, is at 0.939. It's built on the host's published baseline — the temporal 3D U-Net detector, the transformer edge scorer and the ILP from the official repo — not on the public notebook chain. That's also why the \"model changes don't move the LB\" observation in my post is about the 0.939, not the 0.947.\n\n　Base scores: a single detector with my own linker and post-processing, no fusion and no division head, is around 0.92. Probability-level fusion of three detectors gets most of the way to 0.939, and the pair-softmax division head adds at most ~0.002 on top — locally it lifts division_jaccard from 0.07 to 0.19 on a 124-video OOF, which barely shows up on the LB. For scale, an ablation with division creation switched off cost me 0.022, so my division_jaccard is roughly 0.22.\n　\n　On the synthetic pretraining: pretrain detector and linker on the public CC0 synthetic set for 80 epochs, then fine-tune on the 175 real videos for 60 epochs with the same recipe I use from scratch. On a 24-video hold-out that's 0.9146 → 0.9269. Three caveats: it pushes the node count up, so part of the gain is paid back through the N_pred term; it buys nothing on divisions (the generator doesn't model mitosis over time); and more synthetic data isn't obviously better — transfer to real data peaks very early and then decays.\n\n　And a question back, if you don't mind: did you get to 0.957 on top of the host's baseline pipeline, or is it a different pipeline altogether? I'm not asking for the recipe — just whether the remaining 0.018 is reachable from the published U-Net + transformer + ILP at all, or whether people up there have replaced it. That alone decides how I spend the last eleven days.",
+            "content": "<p>Fair question, so let me be explicit: the 0.947 next to my name is a public notebook score, not mine. My own pipeline, run end to end by me, is at 0.939. It's built on the host's published baseline — the temporal 3D U-Net detector, the transformer edge scorer and the ILP from the official repo — not on the public notebook chain. That's also why the \"model changes don't move the LB\" observation in my post is about the 0.939, not the 0.947.</p>\n<p>　Base scores: a single detector with my own linker and post-processing, no fusion and no division head, is around 0.92. Probability-level fusion of three detectors gets most of the way to 0.939, and the pair-softmax division head adds at most ~0.002 on top — locally it lifts division_jaccard from 0.07 to 0.19 on a 124-video OOF, which barely shows up on the LB. For scale, an ablation with division creation switched off cost me 0.022, so my division_jaccard is roughly 0.22.\n　\n　On the synthetic pretraining: pretrain detector and linker on the public CC0 synthetic set for 80 epochs, then fine-tune on the 175 real videos for 60 epochs with the same recipe I use from scratch. On a 24-video hold-out that's 0.9146 → 0.9269. Three caveats: it pushes the node count up, so part of the gain is paid back through the N_pred term; it buys nothing on divisions (the generator doesn't model mitosis over time); and more synthetic data isn't obviously better — transfer to real data peaks very early and then decays.</p>\n<p>　And a question back, if you don't mind: did you get to 0.957 on top of the host's baseline pipeline, or is it a different pipeline altogether? I'm not asking for the recipe — just whether the remaining 0.018 is reachable from the published U-Net + transformer + ILP at all, or whether people up there have replaced it. That alone decides how I spend the last eleven days.</p>",
+            "replies": [
+              {
+                "id": 3525596,
+                "postDate": "2026-09-18T10:13:21.050Z",
+                "rawMarkdown": "Could you please clarify what public synthetic data did you use?\n\n>whether the remaining 0.018 is reachable from the published U-Net\n\nIt's reachable to some extent but pretty risky.\n",
+                "content": "<p>Could you please clarify what public synthetic data did you use?</p>\n<blockquote>\n  <p>whether the remaining 0.018 is reachable from the published U-Net</p>\n</blockquote>\n<p>It's reachable to some extent but pretty risky.</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "Ogurtsov",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/682731-kg.jpg?t=2024-04-01-08-44-00",
+                  "url": "/ogurtsov",
+                  "tier": "MASTER",
+                  "id": 682731,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 15,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "enabled": true,
+                  "teamLeader": {
+                    "displayName": "Ogurtsov",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/682731-kg.jpg?t=2024-04-01-08-44-00",
+                    "url": "/ogurtsov",
+                    "userName": "ogurtsov",
+                    "tier": "MASTER",
+                    "id": 682731,
+                    "profileUrl": "/ogurtsov",
+                    "performanceTier": "MASTER",
+                    "userId": 682731,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3525606,
+                "postDate": "2026-09-18T11:03:22.247Z",
+                "rawMarkdown": "@Ogurtsov — it's the CC0 synthetic set that José Freitas shared in this competition's discussion (the output of his biohub-synthetic-dataset notebook). It contains 1,539 static volumes and 2,174 time sequences. I used only the sequences, since I pretrain the detector and the linker together and the static volumes have no time axis — and in fact only 497 of those 2,174, for 80 epochs, before fine-tuning on the 175 real videos. Yesterday I repeated the pretraining with all 2,174 at the same number of gradient steps, and it came out slightly worse on my hold-out (adj −0.005). So what helps is having some of that data, not having more of it.\n\nAbout \"risky\" — do you mean risky for the private LB, or risky to train, as in unstable and sensitive to which checkpoint you keep?\n",
+                "content": "<p><a href=\"/Ogurtsov\" target=\"_blank\">@Ogurtsov</a> — it's the CC0 synthetic set that José Freitas shared in this competition's discussion (the output of his biohub-synthetic-dataset notebook). It contains 1,539 static volumes and 2,174 time sequences. I used only the sequences, since I pretrain the detector and the linker together and the static volumes have no time axis — and in fact only 497 of those 2,174, for 80 epochs, before fine-tuning on the 175 real videos. Yesterday I repeated the pretraining with all 2,174 at the same number of gradient steps, and it came out slightly worse on my hold-out (adj −0.005). So what helps is having some of that data, not having more of it.</p>\n<p>About \"risky\" — do you mean risky for the private LB, or risky to train, as in unstable and sensitive to which checkpoint you keep?</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "hikaggler",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15306749-kg.png?t=2025-12-27-02-08-57",
+                  "url": "/hikarukai",
+                  "tier": "EXPERT",
+                  "id": 15306749,
+                  "progressionOptOut": false
+                },
+                "authorType": "TOPIC",
+                "votes": {
+                  "totalVotes": 1,
+                  "canUpvote": true,
+                  "totalUpvotes": 1
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 201,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "hikaggler",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15306749-kg.png?t=2025-12-27-02-08-57",
+                    "url": "/hikarukai",
+                    "userName": "hikarukai",
+                    "tier": "EXPERT",
+                    "id": 15306749,
+                    "profileUrl": "/hikarukai",
+                    "performanceTier": "EXPERT",
+                    "userId": 15306749,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3525615,
+                "postDate": "2026-09-18T11:48:48.723Z",
+                "rawMarkdown": "Thanks! My primary concern is private LB. ",
+                "content": "<p>Thanks! My primary concern is private LB. </p>",
+                "parent": {},
+                "author": {
+                  "displayName": "Ogurtsov",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/682731-kg.jpg?t=2024-04-01-08-44-00",
+                  "url": "/ogurtsov",
+                  "tier": "MASTER",
+                  "id": 682731,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 15,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "enabled": true,
+                  "teamLeader": {
+                    "displayName": "Ogurtsov",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/682731-kg.jpg?t=2024-04-01-08-44-00",
+                    "url": "/ogurtsov",
+                    "userName": "ogurtsov",
+                    "tier": "MASTER",
+                    "id": 682731,
+                    "profileUrl": "/ogurtsov",
+                    "performanceTier": "MASTER",
+                    "userId": 682731,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              }
+            ],
+            "parent": {},
+            "author": {
+              "displayName": "hikaggler",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15306749-kg.png?t=2025-12-27-02-08-57",
+              "url": "/hikarukai",
+              "tier": "EXPERT",
+              "id": 15306749,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "totalVotes": 1,
+              "canUpvote": true,
+              "totalUpvotes": 1
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 201,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "hikaggler",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15306749-kg.png?t=2025-12-27-02-08-57",
+                "url": "/hikarukai",
+                "userName": "hikarukai",
+                "tier": "EXPERT",
+                "id": 15306749,
+                "profileUrl": "/hikarukai",
+                "performanceTier": "EXPERT",
+                "userId": 15306749,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "TWEAK",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28207655-kg.png?t=2026-08-05-03-21-49",
+          "url": "/tweakai",
+          "tier": "EXPERT",
+          "id": 28207655,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 18,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "enabled": true,
+          "teamLeader": {
+            "displayName": "TWEAK",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28207655-kg.png?t=2026-08-05-03-21-49",
+            "url": "/tweakai",
+            "userName": "tweakai",
+            "tier": "EXPERT",
+            "id": 28207655,
+            "profileUrl": "/tweakai",
+            "performanceTier": "EXPERT",
+            "userId": 28207655,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      }
+    ],
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3525208,
+      "postDate": "2026-09-17T06:31:17.693Z",
+      "rawMarkdown": "Hi all. Over the last three weeks I've been trying to get above the ~0.947 public-notebook plateau by changing the detector and linker, measuring each change one variable at a time on a 24-video hold-out stratified across both embryo lineages. What surprised me is that almost nothing on the model side moves the score. I'd like to hear from people who saw the same thing, or who found something that did work.\n\nWhat did NOT move (hold-out adj_edge_jaccard, paired SE ≈ 0.006):\n- Deeper / wider U-Net (width 32 → 48, 4.0M params): no gain. Deeper nets inflate the node count and lose on the N_pred term\n- Longer training (60 → 131 epochs): edge Jaccard goes up, the node-count term eats it\n- Strong augmentation, Gaussian heatmap loss, local-softmax peak loss: neutral or negative\n- Wider temporal window (2 → 9 frames): recovers ~0.1% of GT nodes\n- A trained division head (pair softmax over candidate daughters): local division Jaccard 0.07 → 0.19, but ±0.001 on the LB\n- Post-processing knobs (gap closing, short-track removal, thresholds): saturated, same as the public sweeps\n\nWhat DID move:\n- Pretraining on the public synthetic dataset (+0.012–0.018 over from-scratch). This was the only big lever I found\n- Two-model fusion, but only when conditional: use the second model only on columns where the primary is uncertain. Plain averaging does nothing\n\nQuestions:\n1. Where do you think the 0.947 → 0.955+ gap actually lives: detector, linker, or graph construction?\n2. How well does your local CV track the LB? In the 0.93–0.95 band mine has r ≈ −0.2, so I can't rank weight-level changes locally at all\n3. If a model change (not post-processing) moved your LB, I'd be grateful to hear even just what kind of change it was\n\nHappy to share more numbers on any of the above if useful.",
+      "content": "<p>Hi all. Over the last three weeks I've been trying to get above the ~0.947 public-notebook plateau by changing the detector and linker, measuring each change one variable at a time on a 24-video hold-out stratified across both embryo lineages. What surprised me is that almost nothing on the model side moves the score. I'd like to hear from people who saw the same thing, or who found something that did work.</p>\n<p>What did NOT move (hold-out adj_edge_jaccard, paired SE ≈ 0.006):</p>\n<ul>\n<li>Deeper / wider U-Net (width 32 → 48, 4.0M params): no gain. Deeper nets inflate the node count and lose on the N_pred term</li>\n<li>Longer training (60 → 131 epochs): edge Jaccard goes up, the node-count term eats it</li>\n<li>Strong augmentation, Gaussian heatmap loss, local-softmax peak loss: neutral or negative</li>\n<li>Wider temporal window (2 → 9 frames): recovers ~0.1% of GT nodes</li>\n<li>A trained division head (pair softmax over candidate daughters): local division Jaccard 0.07 → 0.19, but ±0.001 on the LB</li>\n<li>Post-processing knobs (gap closing, short-track removal, thresholds): saturated, same as the public sweeps</li>\n</ul>\n<p>What DID move:</p>\n<ul>\n<li>Pretraining on the public synthetic dataset (+0.012–0.018 over from-scratch). This was the only big lever I found</li>\n<li>Two-model fusion, but only when conditional: use the second model only on columns where the primary is uncertain. Plain averaging does nothing</li>\n</ul>\n<p>Questions:</p>\n<ol>\n<li>Where do you think the 0.947 → 0.955+ gap actually lives: detector, linker, or graph construction?</li>\n<li>How well does your local CV track the LB? In the 0.93–0.95 band mine has r ≈ −0.2, so I can't rank weight-level changes locally at all</li>\n<li>If a model change (not post-processing) moved your LB, I'd be grateful to hear even just what kind of change it was</li>\n</ol>\n<p>Happy to share more numbers on any of the above if useful.</p>",
+      "parent": {},
+      "author": {
+        "displayName": "hikaggler",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15306749-kg.png?t=2025-12-27-02-08-57",
+        "url": "/hikarukai",
+        "tier": "EXPERT",
+        "id": 15306749,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 5,
+        "canUpvote": true,
+        "totalUpvotes": 5
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 201,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "teamUpInfo": {
+        "teamLeader": {
+          "displayName": "hikaggler",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15306749-kg.png?t=2025-12-27-02-08-57",
+          "url": "/hikarukai",
+          "userName": "hikarukai",
+          "tier": "EXPERT",
+          "id": 15306749,
+          "profileUrl": "/hikarukai",
+          "performanceTier": "EXPERT",
+          "userId": 15306749,
+          "progressionOptOut": false
+        },
+        "intro": ""
+      }
+    },
+    "firstMessageId": 3525208,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 741749,
+    "name": "Model changes don't move the LB above the public plateau — what actually did for you?",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-09-17T06:31:17.691927Z",
+    "totalVotes": 5,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/741749",
+    "totalMessages": 7,
+    "authorPerformanceTier": "EXPERT",
+    "authorProgressionOptOut": false
+  }
+}

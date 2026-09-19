@@ -1,0 +1,376 @@
+{
+  "forumTopic": {
+    "authorId": 35644958,
+    "authorThumbnailName": "35644958-kg.PNG?t=2026-09-08-08-23-08",
+    "authorUserDisplayName": "Lê Quang Cảnh",
+    "authorUserName": "zhincez",
+    "comments": [
+      {
+        "id": 3523039,
+        "postDate": "2026-09-10T12:13:35.820Z",
+        "rawMarkdown": "![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fd5b1f91d89d66e534da6f4c0edd0aa08%2FSelection_4904.png?generation=1789042287653411&alt=media)\n\ntypo: bright thin lines at time t are new cell divisions that happen before t (maybe a few frames before). It is very good clue to detect division\n\ni think many cell divisions are not annotated in the Kaggle data. It is not so difficult to identify them (and i think when you find one, you are likely to find many others. it is rare only one cell splits).\n\nHere i show an example I found in the external data used in the ultrack paper ",
+        "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fd5b1f91d89d66e534da6f4c0edd0aa08%2FSelection_4904.png?generation=1789042287653411&amp;alt=media\" alt=\"\"></p>\n<p>typo: bright thin lines at time t are new cell divisions that happen before t (maybe a few frames before). It is very good clue to detect division</p>\n<p>i think many cell divisions are not annotated in the Kaggle data. It is not so difficult to identify them (and i think when you find one, you are likely to find many others. it is rare only one cell splits).</p>\n<p>Here i show an example I found in the external data used in the ultrack paper </p>",
+        "replies": [
+          {
+            "id": 3523041,
+            "postDate": "2026-09-10T12:26:17.993Z",
+            "rawMarkdown": "you may want to verify this. i am busy with ultrack segmentation so i will do that much later\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Feb06414e4cf6305f1462131097bf94db%2FSelection_4906.png?generation=1789043157023478&alt=media)",
+            "content": "<p>you may want to verify this. i am busy with ultrack segmentation so i will do that much later</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Feb06414e4cf6305f1462131097bf94db%2FSelection_4906.png?generation=1789043157023478&amp;alt=media\" alt=\"\"></p>",
+            "replies": [
+              {
+                "id": 3523059,
+                "postDate": "2026-09-10T13:49:04.660Z",
+                "rawMarkdown": "I checked what I could tonight on the labelled events. Numbers are small, so read them as a first look.\n\nSynchrony, labels only: 25 films have labelled divisions, 8 have two or more. Within one film the labelled division times spread by a median of 32 frames (8 to 38) out of 100. So the labelled divisions do not cluster. That says nothing about the unlabelled ones, which is your actual claim, and I cannot test that without a detector for them.\n\nAppearance: 5 films with both images and labels, giving 8 parents at the split frame, 16 daughters at t+1, 16 at t+2, 15 at t+3, against 299 ordinary labelled nodes from the same films. Patch of about 5 by 3.7 by 3.7 um around each centroid. Peak intensity separates them at AUC 0.73 for the parent at t, then 0.68, 0.70, 0.70 for t+1 to t+3. Local contrast 0.55, 0.65, 0.69, 0.64. An intensity weighted elongation measure does not separate at all: 0.34, 0.48, 0.58, 0.56, which is chance. So brighter I can confirm on these events, thin I could not, at least not with covariance anisotropy at 1.625 um z spacing. Your figure puts the thinnest and brightest moment at anaphase, which would be before the labelled split frame. My parent at t is the closest sample I have and it is the roundest of the lot, so I may be looking one or two frames too late.\n\nOne question so I can set a search window: in this data, how many frames after the split does the thin bright phase stay visible, and does it already show at the parent frame or only after?",
+                "content": "<p>I checked what I could tonight on the labelled events. Numbers are small, so read them as a first look.</p>\n<p>Synchrony, labels only: 25 films have labelled divisions, 8 have two or more. Within one film the labelled division times spread by a median of 32 frames (8 to 38) out of 100. So the labelled divisions do not cluster. That says nothing about the unlabelled ones, which is your actual claim, and I cannot test that without a detector for them.</p>\n<p>Appearance: 5 films with both images and labels, giving 8 parents at the split frame, 16 daughters at t+1, 16 at t+2, 15 at t+3, against 299 ordinary labelled nodes from the same films. Patch of about 5 by 3.7 by 3.7 um around each centroid. Peak intensity separates them at AUC 0.73 for the parent at t, then 0.68, 0.70, 0.70 for t+1 to t+3. Local contrast 0.55, 0.65, 0.69, 0.64. An intensity weighted elongation measure does not separate at all: 0.34, 0.48, 0.58, 0.56, which is chance. So brighter I can confirm on these events, thin I could not, at least not with covariance anisotropy at 1.625 um z spacing. Your figure puts the thinnest and brightest moment at anaphase, which would be before the labelled split frame. My parent at t is the closest sample I have and it is the roundest of the lot, so I may be looking one or two frames too late.</p>\n<p>One question so I can set a search window: in this data, how many frames after the split does the thin bright phase stay visible, and does it already show at the parent frame or only after?</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "Lê Quang Cảnh",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/35644958-kg.PNG?t=2026-09-08-08-23-08",
+                  "url": "/zhincez",
+                  "tier": "CONTRIBUTOR",
+                  "id": 35644958,
+                  "progressionOptOut": false
+                },
+                "authorType": "TOPIC",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 45,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "Lê Quang Cảnh",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/35644958-kg.PNG?t=2026-09-08-08-23-08",
+                    "url": "/zhincez",
+                    "userName": "zhincez",
+                    "tier": "CONTRIBUTOR",
+                    "id": 35644958,
+                    "profileUrl": "/zhincez",
+                    "performanceTier": "CONTRIBUTOR",
+                    "userId": 35644958,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3523096,
+                "postDate": "2026-09-10T15:25:28.813Z",
+                "rawMarkdown": "the best way is to use napari viewer. eg the end of kaggle parent node is zxy. then you make a crop around it for t=t-10 to t+10 and use your napari viewer to show that small part roi. you can easily confirm the distinctive appearance for divided cell detection. \n\nit is not difficult to use focus3d framework to hand-label these because it supports human-in-the-loop annotation (basically click a point like SAM). then you can train a division detector",
+                "content": "<p>the best way is to use napari viewer. eg the end of kaggle parent node is zxy. then you make a crop around it for t=t-10 to t+10 and use your napari viewer to show that small part roi. you can easily confirm the distinctive appearance for divided cell detection. </p>\n<p>it is not difficult to use focus3d framework to hand-label these because it supports human-in-the-loop annotation (basically click a point like SAM). then you can train a division detector</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "hengck23",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                  "url": "/hengck23",
+                  "tier": "GRANDMASTER",
+                  "id": 113660,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 868,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "hengck23",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                    "url": "/hengck23",
+                    "userName": "hengck23",
+                    "tier": "GRANDMASTER",
+                    "id": 113660,
+                    "profileUrl": "/hengck23",
+                    "performanceTier": "GRANDMASTER",
+                    "userId": 113660,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              }
+            ],
+            "parent": {},
+            "author": {
+              "displayName": "hengck23",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+              "url": "/hengck23",
+              "tier": "GRANDMASTER",
+              "id": 113660,
+              "progressionOptOut": false
+            },
+            "authorType": "COMMENT",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 868,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "hengck23",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                "url": "/hengck23",
+                "userName": "hengck23",
+                "tier": "GRANDMASTER",
+                "id": 113660,
+                "profileUrl": "/hengck23",
+                "performanceTier": "GRANDMASTER",
+                "userId": 113660,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 868,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3522987,
+        "postDate": "2026-09-10T07:31:22.093Z",
+        "rawMarkdown": "note that the annotation is sparse. it is possible that the \"long parent\" is annotated short. \n\nbtw, you want to check if the division characteristics (separation distance, appearance) is the same for:\n\nhttps://github.com/royerlab/ultrack_supplementary/tree/main/configuration  \nhttps://public.czbiohub.org/royerlab/zebrahub/imaging/single-objective/  \n\nnote thate voxel/um of the data set. one is the same as kaggle (1.625,0.4025,0.4025), but most are different.",
+        "content": "<p>note that the annotation is sparse. it is possible that the \"long parent\" is annotated short. </p>\n<p>btw, you want to check if the division characteristics (separation distance, appearance) is the same for:</p>\n<p><a href=\"https://github.com/royerlab/ultrack_supplementary/tree/main/configuration\" target=\"_blank\">https://github.com/royerlab/ultrack_supplementary/tree/main/configuration</a><br>\n<a href=\"https://public.czbiohub.org/royerlab/zebrahub/imaging/single-objective/\" target=\"_blank\">https://public.czbiohub.org/royerlab/zebrahub/imaging/single-objective/</a>  </p>\n<p>note thate voxel/um of the data set. one is the same as kaggle (1.625,0.4025,0.4025), but most are different.</p>",
+        "replies": [
+          {
+            "id": 3522995,
+            "postDate": "2026-09-10T08:28:20.723Z",
+            "rawMarkdown": "You are right about the annotation, and it changes how my numbers should be read.\n\nTwo checks. First, whether labelled edges ever skip frames: across 73 label files, 25,661 continuation edges and 72 division edges, every one spans exactly one timepoint. So each number I posted is a one frame displacement between labelled centroids. Not biological motion exactly, since the label coordinates carry their own localisation error, but not a multi frame jump either. Second, track coverage: 572 labelled tracks, 351 begin after frame 0 and 391 end before the last frame, median length 35 frames. Some of those are cells entering or leaving the field of view, so I cannot call it truncation outright, but it is consistent with labelling by segment rather than by whole lineage. The safe reading is that my 36 divisions are a labelled subset, not an unbiased sample of every division in the movies. If the easy ones were the ones that got labelled, the median parent to daughter displacement of 4.57 um is partly selection. I will add that caveat to the post.\n\nOn the Ultrack configs, that was worth the hour. Both zebrafish configs in the supplementary repo use max_distance 10.0 and max_neighbors 5, and the event penalties are small and balanced: large_zebrafish has appear 0.002, disappear 0.001, division 0.001; sparse_zebrafish has all three at 0.1. The public lineage I forked runs division at 1.2 and disappearance at 1.5 with appearance at 0. I had already worked out on my own solver's objective that a fork can never be optimal at those values, and the reference config is consistent with that, though the link scores are on a different scale so it is corroboration rather than proof.\n\nOn units: as far as I can tell the linking step inherits the scale recorded by the segmentation step, so max_distance is in micrometres only if the image reader supplied physical units. I could not confirm which case their run was.\n\nOn the voxel sizes, all six single objective files I could read (ZSNS001 to 005 and the tail crop) report 1.24 by 0.439 by 0.439 um, none 1.625 by 0.40625. So I did not find the acquisition that matches Kaggle. If you know which one it is I would like to look at it.",
+            "content": "<p>You are right about the annotation, and it changes how my numbers should be read.</p>\n<p>Two checks. First, whether labelled edges ever skip frames: across 73 label files, 25,661 continuation edges and 72 division edges, every one spans exactly one timepoint. So each number I posted is a one frame displacement between labelled centroids. Not biological motion exactly, since the label coordinates carry their own localisation error, but not a multi frame jump either. Second, track coverage: 572 labelled tracks, 351 begin after frame 0 and 391 end before the last frame, median length 35 frames. Some of those are cells entering or leaving the field of view, so I cannot call it truncation outright, but it is consistent with labelling by segment rather than by whole lineage. The safe reading is that my 36 divisions are a labelled subset, not an unbiased sample of every division in the movies. If the easy ones were the ones that got labelled, the median parent to daughter displacement of 4.57 um is partly selection. I will add that caveat to the post.</p>\n<p>On the Ultrack configs, that was worth the hour. Both zebrafish configs in the supplementary repo use max_distance 10.0 and max_neighbors 5, and the event penalties are small and balanced: large_zebrafish has appear 0.002, disappear 0.001, division 0.001; sparse_zebrafish has all three at 0.1. The public lineage I forked runs division at 1.2 and disappearance at 1.5 with appearance at 0. I had already worked out on my own solver's objective that a fork can never be optimal at those values, and the reference config is consistent with that, though the link scores are on a different scale so it is corroboration rather than proof.</p>\n<p>On units: as far as I can tell the linking step inherits the scale recorded by the segmentation step, so max_distance is in micrometres only if the image reader supplied physical units. I could not confirm which case their run was.</p>\n<p>On the voxel sizes, all six single objective files I could read (ZSNS001 to 005 and the tail crop) report 1.24 by 0.439 by 0.439 um, none 1.625 by 0.40625. So I did not find the acquisition that matches Kaggle. If you know which one it is I would like to look at it.</p>",
+            "replies": [
+              {
+                "id": 3523010,
+                "postDate": "2026-09-10T09:43:27.307Z",
+                "rawMarkdown": "read the ultrack paper. repeat Figure.6 experiment is the key.\nhttps://public.czbiohub.org/royerlab/ultrack/\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb148d243cf892da9bdee93d894cfe14f%2FSelection_4888.png?generation=1789033318421343&alt=media)\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb581a89fc67b5f6bc012af05071f290a%2FSelection_4881.png?generation=1789033350621459&alt=media)\n\nhttps://github.com/royerlab/ultrack_supplementary/tree/main/configuration/sparse_zebrafish\n(dense green channel)",
+                "content": "<p>read the ultrack paper. repeat Figure.6 experiment is the key.\n<a href=\"https://public.czbiohub.org/royerlab/ultrack/\" target=\"_blank\">https://public.czbiohub.org/royerlab/ultrack/</a></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb148d243cf892da9bdee93d894cfe14f%2FSelection_4888.png?generation=1789033318421343&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb581a89fc67b5f6bc012af05071f290a%2FSelection_4881.png?generation=1789033350621459&amp;alt=media\" alt=\"\"></p>\n<p><a href=\"https://github.com/royerlab/ultrack_supplementary/tree/main/configuration/sparse_zebrafish\" target=\"_blank\">https://github.com/royerlab/ultrack_supplementary/tree/main/configuration/sparse_zebrafish</a>\n(dense green channel)</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "hengck23",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                  "url": "/hengck23",
+                  "tier": "GRANDMASTER",
+                  "id": 113660,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 868,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "hengck23",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                    "url": "/hengck23",
+                    "userName": "hengck23",
+                    "tier": "GRANDMASTER",
+                    "id": 113660,
+                    "profileUrl": "/hengck23",
+                    "performanceTier": "GRANDMASTER",
+                    "userId": 113660,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3523013,
+                "postDate": "2026-09-10T09:52:16.767Z",
+                "rawMarkdown": "```\nurl = \"https://public.czbiohub.org/royerlab/ultrack/zebrafish_embryo.ome.zarr/\"\nif 1:\n    g = zarr.open(fsspec.get_mapper(url), mode=\"r\")\n    print(type(g))\n    print(g.attrs.asdict())\n\n    paths = [d[\"path\"] for d in g.attrs[\"multiscales\"][0][\"datasets\"]]\n    for path in paths:\n        arr = g[path]\n        print(\n            f\"level={path}\",\n            f\"shape={arr.shape}\",\n            f\"chunks={arr.chunks}\",\n            f\"dtype={arr.dtype}\",\n        )\n\n\n#print out\n [{'coordinateTransformations': [{'scale': [1.0, 1.0, 1.625, 0.40625, 0.40625], 'type': 'scale'}], 'path': '0'},\nlevel=0 shape=(522, 1, 505, 2217, 2170) chunks=(1, 1, 128, 2217, 2170) dtype=uint16\n\n\n```",
+                "content": "<pre><code>url = \"https://public.czbiohub.org/royerlab/ultrack/zebrafish_embryo.ome.zarr/\"\nif 1:\n    g = zarr.open(fsspec.get_mapper(url), mode=\"r\")\n    print(type(g))\n    print(g.attrs.asdict())\n\n    paths = [d[\"path\"] for d in g.attrs[\"multiscales\"][0][\"datasets\"]]\n    for path in paths:\n        arr = g[path]\n        print(\n            f\"level={path}\",\n            f\"shape={arr.shape}\",\n            f\"chunks={arr.chunks}\",\n            f\"dtype={arr.dtype}\",\n        )\n\n\n#print out\n [{'coordinateTransformations': [{'scale': [1.0, 1.0, 1.625, 0.40625, 0.40625], 'type': 'scale'}], 'path': '0'},\nlevel=0 shape=(522, 1, 505, 2217, 2170) chunks=(1, 1, 128, 2217, 2170) dtype=uint16\n</code></pre>",
+                "parent": {},
+                "author": {
+                  "displayName": "hengck23",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                  "url": "/hengck23",
+                  "tier": "GRANDMASTER",
+                  "id": 113660,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 868,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "hengck23",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                    "url": "/hengck23",
+                    "userName": "hengck23",
+                    "tier": "GRANDMASTER",
+                    "id": 113660,
+                    "profileUrl": "/hengck23",
+                    "performanceTier": "GRANDMASTER",
+                    "userId": 113660,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              }
+            ],
+            "parent": {},
+            "author": {
+              "displayName": "Lê Quang Cảnh",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/35644958-kg.PNG?t=2026-09-08-08-23-08",
+              "url": "/zhincez",
+              "tier": "CONTRIBUTOR",
+              "id": 35644958,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 45,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "Lê Quang Cảnh",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/35644958-kg.PNG?t=2026-09-08-08-23-08",
+                "url": "/zhincez",
+                "userName": "zhincez",
+                "tier": "CONTRIBUTOR",
+                "id": 35644958,
+                "profileUrl": "/zhincez",
+                "performanceTier": "CONTRIBUTOR",
+                "userId": 35644958,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 868,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      }
+    ],
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3522957,
+      "postDate": "2026-09-10T03:33:29.587Z",
+      "rawMarkdown": "I had assumed a division shows up as an unusually long parent to daughter step, so a distance gate could isolate one. Measured on the labels, that is wrong. Everything below comes from the training label files only, no model and no predictions, so anyone holding the labels can reproduce it. 73 files I could read locally, 36 divisions, 25,661 continuation edges. An edge is a continuation when its source has one child, and a division edge when its source has two.\n\nCaveat added after hengck23's comment below: these labels cover segments, not whole lineages. Of 572 labelled tracks, 351 begin after frame 0 and 391 end before the last frame, median length 35 frames, while all 25,733 labelled edges span exactly one timepoint. So the 36 divisions are a labelled subset, not an unbiased sample of every division in the movies. If annotators favoured the clear cases, the short parent to daughter displacement below is partly selection. Read every number here as a one frame displacement between labelled centroids on that subset.\n\nStep length in micrometres:\n\n| | n | median | IQR | p90 | p99 | max |\n| --- | --- | --- | --- | --- | --- | --- |\n| continuation | 25,661 | 1.724 | 0.908 to 2.188 | 3.350 | 6.906 | 18.692 |\n| division step | 72 | 4.569 | 3.300 to 6.214 | 7.081 | 10.619 | 12.336 |\n| sister separation | 36 | 8.849 | 7.196 to 10.235 | 11.866 | 13.896 | 14.653 |\n\nA division step is about 2.7x the median continuation, but that is not the comparison that matters. How many continuations sit in the same band:\n\n| step above | continuations | division steps | ratio |\n| --- | --- | --- | --- |\n| 5 um | 722 | 30 | 24:1 |\n| 7 um | 241 | 8 | 30:1 |\n| 9 um | 82 | 3 | 27:1 |\n| 10 um | 38 | 1 | 38:1 |\n\nThe division IQR sits entirely inside the ordinary continuation range, whose p99 is 6.91. A gate wide enough to admit the median division admits hundreds of continuations for every division it catches. The failure is a base rate, not an overlap you can tune away.\n\nOne trap worth flagging. I first measured these steps between my own predicted nodes instead of labelled ones. On seven divisions the longest parent to daughter step per event reads median 6.36 um and max 7.37 um on the labels, but median 8.47 um and max 13.65 um between the predicted nodes matched to them. That gap is detector localisation. A predicted node may sit up to 7 um from the label it matches, and two such errors compound across one edge. Tune a division gate on predicted positions and you calibrate it for your detector error, not for cell motion. An earlier post of mine compared about 3 um against 8.47, two numbers measured differently from each other, so that ratio was meaningless.\n\nSister separation is the one quantity that does look different, median 8.85 um against 1.72 um. But it is a property of a candidate pair rather than of an edge, so you can only use it after proposing the pair, and proposing pairs is the expensive step.\n\nSo, for anyone scoring divisions above zero: what does the decision key on? Appearance change in the parent, a learned edge score rather than geometry, symmetry of the two candidate steps, something spanning more than two frames? Not asking for configurations, only which family of signal carried the information, and whether you validated it on more than a handful of events. I have 36 divisions, so I distrust anything I tune on that.",
+      "content": "<p>I had assumed a division shows up as an unusually long parent to daughter step, so a distance gate could isolate one. Measured on the labels, that is wrong. Everything below comes from the training label files only, no model and no predictions, so anyone holding the labels can reproduce it. 73 files I could read locally, 36 divisions, 25,661 continuation edges. An edge is a continuation when its source has one child, and a division edge when its source has two.</p>\n<p>Caveat added after hengck23's comment below: these labels cover segments, not whole lineages. Of 572 labelled tracks, 351 begin after frame 0 and 391 end before the last frame, median length 35 frames, while all 25,733 labelled edges span exactly one timepoint. So the 36 divisions are a labelled subset, not an unbiased sample of every division in the movies. If annotators favoured the clear cases, the short parent to daughter displacement below is partly selection. Read every number here as a one frame displacement between labelled centroids on that subset.</p>\n<p>Step length in micrometres:</p>\n<table>\n<thead>\n<tr>\n<th></th>\n<th>n</th>\n<th>median</th>\n<th>IQR</th>\n<th>p90</th>\n<th>p99</th>\n<th>max</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>continuation</td>\n<td>25,661</td>\n<td>1.724</td>\n<td>0.908 to 2.188</td>\n<td>3.350</td>\n<td>6.906</td>\n<td>18.692</td>\n</tr>\n<tr>\n<td>division step</td>\n<td>72</td>\n<td>4.569</td>\n<td>3.300 to 6.214</td>\n<td>7.081</td>\n<td>10.619</td>\n<td>12.336</td>\n</tr>\n<tr>\n<td>sister separation</td>\n<td>36</td>\n<td>8.849</td>\n<td>7.196 to 10.235</td>\n<td>11.866</td>\n<td>13.896</td>\n<td>14.653</td>\n</tr>\n</tbody>\n</table>\n<p>A division step is about 2.7x the median continuation, but that is not the comparison that matters. How many continuations sit in the same band:</p>\n<table>\n<thead>\n<tr>\n<th>step above</th>\n<th>continuations</th>\n<th>division steps</th>\n<th>ratio</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>5 um</td>\n<td>722</td>\n<td>30</td>\n<td>24:1</td>\n</tr>\n<tr>\n<td>7 um</td>\n<td>241</td>\n<td>8</td>\n<td>30:1</td>\n</tr>\n<tr>\n<td>9 um</td>\n<td>82</td>\n<td>3</td>\n<td>27:1</td>\n</tr>\n<tr>\n<td>10 um</td>\n<td>38</td>\n<td>1</td>\n<td>38:1</td>\n</tr>\n</tbody>\n</table>\n<p>The division IQR sits entirely inside the ordinary continuation range, whose p99 is 6.91. A gate wide enough to admit the median division admits hundreds of continuations for every division it catches. The failure is a base rate, not an overlap you can tune away.</p>\n<p>One trap worth flagging. I first measured these steps between my own predicted nodes instead of labelled ones. On seven divisions the longest parent to daughter step per event reads median 6.36 um and max 7.37 um on the labels, but median 8.47 um and max 13.65 um between the predicted nodes matched to them. That gap is detector localisation. A predicted node may sit up to 7 um from the label it matches, and two such errors compound across one edge. Tune a division gate on predicted positions and you calibrate it for your detector error, not for cell motion. An earlier post of mine compared about 3 um against 8.47, two numbers measured differently from each other, so that ratio was meaningless.</p>\n<p>Sister separation is the one quantity that does look different, median 8.85 um against 1.72 um. But it is a property of a candidate pair rather than of an edge, so you can only use it after proposing the pair, and proposing pairs is the expensive step.</p>\n<p>So, for anyone scoring divisions above zero: what does the decision key on? Appearance change in the parent, a learned edge score rather than geometry, symmetry of the two candidate steps, something spanning more than two frames? Not asking for configurations, only which family of signal carried the information, and whether you validated it on more than a handful of events. I have 36 divisions, so I distrust anything I tune on that.</p>",
+      "parent": {},
+      "author": {
+        "displayName": "Lê Quang Cảnh",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/35644958-kg.PNG?t=2026-09-08-08-23-08",
+        "url": "/zhincez",
+        "tier": "CONTRIBUTOR",
+        "id": 35644958,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 1,
+        "canUpvote": true,
+        "totalUpvotes": 1
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 45,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "teamUpInfo": {
+        "teamLeader": {
+          "displayName": "Lê Quang Cảnh",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/35644958-kg.PNG?t=2026-09-08-08-23-08",
+          "url": "/zhincez",
+          "userName": "zhincez",
+          "tier": "CONTRIBUTOR",
+          "id": 35644958,
+          "profileUrl": "/zhincez",
+          "performanceTier": "CONTRIBUTOR",
+          "userId": 35644958,
+          "progressionOptOut": false
+        },
+        "intro": ""
+      }
+    },
+    "firstMessageId": 3522957,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 740573,
+    "name": "Division steps are not long steps: base rates from the training labels",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-09-10T03:33:29.586903900Z",
+    "totalVotes": 1,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/740573",
+    "totalMessages": 8,
+    "authorPerformanceTier": "CONTRIBUTOR",
+    "authorProgressionOptOut": false
+  }
+}

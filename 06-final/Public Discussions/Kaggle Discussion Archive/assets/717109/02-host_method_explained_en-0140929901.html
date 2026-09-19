@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Host Baseline Method Explained — TemporalUNet3D + SimpleNodeTransformer</title>
+<style>
+  :root {
+    --bg: #0f1117; --panel: #171a23; --panel2: #1e2230; --line: #2a2f42;
+    --text: #e6e8ef; --muted: #9aa3b8; --accent: #5eb3ff; --accent2: #ff9d5e;
+    --accent3: #7ee08c; --accent4: #d68cff; --warn: #ff6e6e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text); margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.7;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 24px 100px; }
+  h1 { font-size: 28px; margin-bottom: 4px; }
+  h1 .sub { display:block; font-size: 15px; color: var(--muted); font-weight: 400; margin-top: 6px; }
+  h2 {
+    font-size: 20px; margin-top: 56px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--line); color: var(--accent);
+  }
+  h2 .num { color: var(--muted); font-weight: 400; margin-right: 8px; }
+  h3 { font-size: 16px; color: var(--accent2); margin-top: 28px; }
+  p { color: #cdd2e0; }
+  code, .mono { font-family: "SF Mono", Consolas, monospace; font-size: 0.92em; }
+  code { background: #232838; padding: 2px 6px; border-radius: 4px; color: var(--accent3); }
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 20px 22px; margin: 18px 0;
+  }
+  .panel.figure { text-align: center; padding: 22px 10px 14px; }
+  .figure-caption { font-size: 13.5px; color: var(--muted); margin-top: 10px; padding: 0 16px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+  th { background: var(--panel2); color: var(--accent); }
+  td.mono { color: var(--accent3); }
+  .tag {
+    display: inline-block; font-size: 12px; padding: 2px 9px; border-radius: 20px;
+    background: #232838; color: var(--accent); margin-right: 6px; border: 1px solid var(--line);
+  }
+  .tag.warn { color: var(--warn); }
+  .callout {
+    border-left: 3px solid var(--accent); background: #14202e; padding: 12px 16px;
+    border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 14.5px;
+  }
+  .callout.why { border-left-color: var(--accent2); background: #241c14; }
+  .toc { columns: 2; column-gap: 30px; }
+  .toc a { color: var(--accent); text-decoration: none; display: block; padding: 3px 0; font-size: 14px;}
+  .toc a:hover { text-decoration: underline; }
+  svg text { fill: var(--text); font-family: inherit; }
+  .lbl { fill: var(--muted); font-size: 12px; }
+  .lbl.accent { fill: var(--accent); font-weight: 600; }
+  footer { margin-top: 70px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Host Baseline Method Explained
+<span class="sub">TemporalUNet3D + SimpleNodeTransformer — how 3D+time cell tracking works</span>
+</h1>
+
+<p>
+This document breaks down the Kaggle host's <code>tracking_cellmot</code> baseline (the
+<span class="tag">unet_transformer</span> method) end to end — from the 3D+time microscopy
+volumes, through detection and linking, to the final track graph, <b>covering both inference
+(Part I) and training (Part II)</b>. The focus throughout is on
+<b>how the "time" dimension actually gets into the model and gets fused via attention</b>,
+and how the model learns all of this from sparse annotations.
+(This repo is a fork of this architecture — our A/B experiments share the same backbone and
+differ only in training data / loss / resolution.)
+</p>
+
+<div class="panel">
+<div class="toc">
+<a href="#data">1. Input data shape</a>
+<a href="#pipeline">2. End-to-end pipeline overview</a>
+<a href="#window">3. Temporal sliding window</a>
+<a href="#unet">4. TemporalUNet3D detection backbone</a>
+<a href="#tattn">5. Per-voxel temporal attention (the core trick)</a>
+<a href="#detect">6. From heatmap to cell coordinates (NMS)</a>
+<a href="#posenc">7. Positional encoding</a>
+<a href="#transformer">8. SimpleNodeTransformer linking</a>
+<a href="#ilp">9. Global ILP track solving</a>
+<a href="#summary">10. The whole pipeline in one figure (inference)</a>
+<a href="#tdata">T1. How training data is fed to the model</a>
+<a href="#tgt">T2. Sparse annotations → supervision targets</a>
+<a href="#tdet">T3. Detection loss (two variants)</a>
+<a href="#tedge">T4. Linking loss (sparsely-masked BCE)</a>
+<a href="#tflow">T5. The full training forward pass in one figure</a>
+<a href="#tstop">T6. Checkpointing and early stopping</a>
+</div>
+</div>
+
+<h2 id="data"><span class="num">1</span>Input data shape</h2>
+<p>Each video is a 4D array <code>(T, Z, Y, X)</code>:</p>
+<table>
+<tr><th>Axis</th><th>Meaning</th><th>Typical size</th></tr>
+<tr><td>T</td><td>Time frames (time-lapse)</td><td class="mono">~100 frames</td></tr>
+<tr><td>Z</td><td>Depth slices</td><td class="mono">64</td></tr>
+<tr><td>Y, X</td><td>In-plane resolution</td><td class="mono">256 × 256</td></tr>
+</table>
+<p>
+Voxels are <b>anisotropic</b>: the Z spacing is ≈ 1.625 µm, roughly 4× coarser than the
+Y/X spacing of ≈ 0.406 µm. This anisotropy affects the model design throughout the pipeline
+(e.g. the NMS suppression radius is specified in physical µm and then converted into a
+different integer voxel kernel size per axis).
+</p>
+
+<h2 id="pipeline"><span class="num">2</span>End-to-end pipeline overview</h2>
+<div class="panel figure">
+<svg viewBox="0 0 920 190" width="100%" style="max-width:900px">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5eb3ff"/>
+    </marker>
+  </defs>
+  <!-- stage boxes -->
+  <g font-size="13">
+    <rect x="10" y="60" width="140" height="70" rx="8" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="80" y="88" text-anchor="middle" class="lbl accent">3D+T volume</text>
+    <text x="80" y="106" text-anchor="middle" class="lbl">(T,Z,Y,X)</text>
+
+    <rect x="190" y="60" width="150" height="70" rx="8" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="265" y="82" text-anchor="middle" class="lbl accent">TemporalUNet3D</text>
+    <text x="265" y="100" text-anchor="middle" class="lbl">temporal-attention U-Net</text>
+    <text x="265" y="116" text-anchor="middle" class="lbl">→ detection heatmap</text>
+
+    <rect x="380" y="60" width="140" height="70" rx="8" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="450" y="82" text-anchor="middle" class="lbl accent">NMS peak extraction</text>
+    <text x="450" y="100" text-anchor="middle" class="lbl">heatmap → coords</text>
+    <text x="450" y="116" text-anchor="middle" class="lbl">(t,z,y,x) list</text>
+
+    <rect x="560" y="60" width="160" height="70" rx="8" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="640" y="82" text-anchor="middle" class="lbl accent">SimpleNode</text>
+    <text x="640" y="98" text-anchor="middle" class="lbl accent">Transformer</text>
+    <text x="640" y="116" text-anchor="middle" class="lbl">cross-frame cross-attention</text>
+
+    <rect x="760" y="60" width="150" height="70" rx="8" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="835" y="82" text-anchor="middle" class="lbl accent">Global ILP</text>
+    <text x="835" y="100" text-anchor="middle" class="lbl">flow-consistent</text>
+    <text x="835" y="116" text-anchor="middle" class="lbl">track graph</text>
+
+    <line x1="150" y1="95" x2="188" y2="95" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="340" y1="95" x2="378" y2="95" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="520" y1="95" x2="558" y2="95" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="720" y1="95" x2="758" y2="95" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+  </g>
+  <text x="10" y="20" class="lbl">Detection (which cells exist in each frame, and where)</text>
+  <text x="560" y="20" class="lbl">Linking (which cell → which cell in the next frame; divisions included)</text>
+  <line x1="10" y1="28" x2="530" y2="28" stroke="#2a2f42"/>
+  <line x1="560" y1="28" x2="910" y2="28" stroke="#2a2f42"/>
+</svg>
+<div class="figure-caption">
+Two independent neural networks working in sequence: the <b>detection network</b> turns the
+image into "which cells exist in this frame", the <b>linking network</b> connects the cell
+sets of two adjacent frames into tracks, and finally <b>ILP</b> picks a single, globally
+consistent, flow-conserving subset out of all candidate links.
+</div>
+</div>
+
+<h2 id="window"><span class="num">3</span>Temporal sliding window — how the time axis is "chewed" through</h2>
+<p>
+The model does not ingest the whole ~100-frame video at once. Instead it uses a
+<b>sliding window of width W=2 frames</b>, sliding forward with stride = W−1 = 1, so that
+every adjacent pair <code>(t, t+1)</code> is covered exactly once:
+</p>
+<div class="panel figure">
+<svg viewBox="0 0 860 130" width="100%" style="max-width:820px">
+  <g font-size="13">
+    <!-- frame timeline -->
+    <text x="10" y="16" class="lbl">Video time axis T</text>
+    <g>
+      <rect x="10"  y="26" width="60" height="30" rx="4" fill="#232838" stroke="#2a2f42"/>
+      <rect x="76"  y="26" width="60" height="30" rx="4" fill="#232838" stroke="#2a2f42"/>
+      <rect x="142" y="26" width="60" height="30" rx="4" fill="#232838" stroke="#2a2f42"/>
+      <rect x="208" y="26" width="60" height="30" rx="4" fill="#232838" stroke="#2a2f42"/>
+      <rect x="274" y="26" width="60" height="30" rx="4" fill="#232838" stroke="#2a2f42"/>
+      <rect x="340" y="26" width="60" height="30" rx="4" fill="#232838" stroke="#2a2f42"/>
+      <text x="40"  y="46" text-anchor="middle" class="lbl">t0</text>
+      <text x="106" y="46" text-anchor="middle" class="lbl">t1</text>
+      <text x="172" y="46" text-anchor="middle" class="lbl">t2</text>
+      <text x="238" y="46" text-anchor="middle" class="lbl">t3</text>
+      <text x="304" y="46" text-anchor="middle" class="lbl">t4</text>
+      <text x="370" y="46" text-anchor="middle" class="lbl">t5 ...</text>
+    </g>
+    <!-- windows -->
+    <rect x="8"   y="66" width="130" height="22" rx="4" fill="none" stroke="#5eb3ff" stroke-width="2"/>
+    <text x="73"  y="81" text-anchor="middle" class="lbl accent">window 1 (t0,t1)</text>
+    <rect x="74"  y="94" width="130" height="22" rx="4" fill="none" stroke="#ff9d5e" stroke-width="2"/>
+    <text x="139" y="109" text-anchor="middle" class="lbl" style="fill:#ff9d5e">window 2 (t1,t2)</text>
+  </g>
+</svg>
+<div class="figure-caption">
+Every window goes through the same U-Net; the model sees "this frame" and "the next frame"
+as two 3D volumes, and inside the network <b>per-voxel temporal self-attention</b> lets the
+two frames see each other (see section 5) — this is how the model learns "where this signal
+should appear in the next frame", rather than matching things up afterwards with heuristics.
+</div>
+</div>
+<div class="callout why">
+<b>Why W=2 and not longer?</b>
+Per-voxel temporal attention scales quadratically with W (every voxel attends to the other T
+time steps at the same position), and in this microscopy data cell motion mostly happens
+between adjacent frames; W=2 covers the minimum time span needed for "detect + link" while
+keeping memory/compute affordable.
+</div>
+
+<h2 id="unet"><span class="num">4</span>TemporalUNet3D detection backbone</h2>
+<p>
+Input is a pair of frames <code>(B, T=2, C=1, Z, Y, X)</code>; output is a feature map of the
+same shape <code>(B, T=2, C_feat, Z, Y, X)</code>. The architecture is a standard 3D U-Net
+(encoder downsamples stage by stage, decoder symmetrically upsamples with skip connections),
+but <b>a "temporal attention" block is inserted after every encoder stage</b>:
+</p>
+<div class="panel figure">
+<svg viewBox="0 0 900 300" width="100%" style="max-width:880px">
+  <g font-size="12.5">
+    <!-- encoder -->
+    <text x="20" y="20" class="lbl accent">Encoder (downsampling)</text>
+    <rect x="10"  y="30" width="90" height="46" rx="6" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="55" y="49" text-anchor="middle" class="lbl">Conv Block</text>
+    <text x="55" y="65" text-anchor="middle" class="lbl">stage 0 (full res)</text>
+    <rect x="10"  y="86" width="90" height="30" rx="6" fill="#14202e" stroke="#5eb3ff" stroke-dasharray="3 2"/>
+    <text x="55" y="105" text-anchor="middle" class="lbl accent">Identity (skipped)</text>
+
+    <rect x="10"  y="130" width="90" height="46" rx="6" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="55" y="149" text-anchor="middle" class="lbl">Conv Block</text>
+    <text x="55" y="165" text-anchor="middle" class="lbl">stage 1</text>
+    <rect x="10"  y="186" width="90" height="30" rx="6" fill="#241c14" stroke="#ff9d5e"/>
+    <text x="55" y="205" text-anchor="middle" class="lbl" style="fill:#ff9d5e">temporal attention</text>
+
+    <rect x="10"  y="230" width="90" height="46" rx="6" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="55" y="249" text-anchor="middle" class="lbl">Conv Block</text>
+    <text x="55" y="265" text-anchor="middle" class="lbl">stage 2 (deepest)</text>
+    <rect x="10"  y="284" width="90" height="0" rx="6"/>
+
+    <!-- arrows down encoder -->
+    <line x1="55" y1="76" x2="55" y2="86" stroke="#5eb3ff" stroke-width="2"/>
+    <line x1="55" y1="116" x2="55" y2="130" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="55" y1="176" x2="55" y2="186" stroke="#5eb3ff" stroke-width="2"/>
+    <line x1="55" y1="216" x2="55" y2="230" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="115" y="123" class="lbl">MaxPool ↓2</text>
+    <text x="115" y="223" class="lbl">MaxPool ↓2</text>
+
+    <!-- skip connections -->
+    <path d="M100,53 C 500,53 500,150 620,150" fill="none" stroke="#7ee08c" stroke-width="1.6" stroke-dasharray="4 3"/>
+    <path d="M100,153 C 450,153 450,220 620,220" fill="none" stroke="#7ee08c" stroke-width="1.6" stroke-dasharray="4 3"/>
+    <text x="330" y="45" class="lbl" style="fill:#7ee08c">skip connection</text>
+
+    <!-- bottleneck -> decoder -->
+    <path d="M100,253 C 400,253 400,253 620,253" fill="none" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- decoder -->
+    <text x="640" y="20" class="lbl accent">Decoder (upsampling)</text>
+    <rect x="620" y="230" width="110" height="46" rx="6" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="675" y="249" text-anchor="middle" class="lbl">Upsample</text>
+    <text x="675" y="265" text-anchor="middle" class="lbl">+ concat skip</text>
+
+    <rect x="620" y="160" width="110" height="46" rx="6" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="675" y="179" text-anchor="middle" class="lbl">Upsample</text>
+    <text x="675" y="195" text-anchor="middle" class="lbl">+ concat skip</text>
+
+    <rect x="620" y="90" width="110" height="46" rx="6" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="675" y="109" text-anchor="middle" class="lbl">1×1×1 Conv</text>
+    <text x="675" y="125" text-anchor="middle" class="lbl">→ detection head</text>
+
+    <line x1="675" y1="230" x2="675" y2="206" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="675" y1="160" x2="675" y2="136" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <rect x="760" y="90" width="120" height="46" rx="6" fill="#241c14" stroke="#ff9d5e"/>
+    <text x="820" y="109" text-anchor="middle" class="lbl" style="fill:#ff9d5e">detection heatmap</text>
+    <text x="820" y="125" text-anchor="middle" class="lbl">(one logit per voxel)</text>
+    <line x1="730" y1="113" x2="758" y2="113" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+  </g>
+</svg>
+<div class="figure-caption">
+Every encoder stage: conv block → temporal attention (stage 0 skips it, replaced by Identity,
+since full-resolution attention is too expensive). The decoder symmetrically upsamples and
+concatenates the matching encoder-stage features via skip connections. A final 1×1×1
+convolution collapses the features into a single-channel detection logit (one "is this a
+cell centre" score per voxel).
+</div>
+</div>
+
+<h2 id="tattn"><span class="num">5</span>Per-voxel temporal attention — the real "temporal fusion" mechanism</h2>
+<p>
+This is the <b>core</b> of how the whole architecture handles the time dimension. The input is
+<code>(B, T, C, Z, Y, X)</code>; the trick is to flatten "spatial position" into the batch
+dimension, so that <b>every voxel independently runs self-attention over its own time series
+(length T)</b>:
+</p>
+<div class="panel figure">
+<svg viewBox="0 0 900 260" width="100%" style="max-width:880px">
+  <g font-size="12.5">
+    <!-- 3D volume icon at t0 and t1 -->
+    <g transform="translate(20,30)">
+      <text x="0" y="-8" class="lbl accent">3D feature volume at t0</text>
+      <rect x="0" y="0" width="90" height="70" rx="4" fill="#1e2230" stroke="#2a2f42"/>
+      <circle cx="35" cy="35" r="5" fill="#5eb3ff"/>
+      <text x="50" y="39" class="lbl">voxel v</text>
+    </g>
+    <g transform="translate(20,140)">
+      <text x="0" y="-8" class="lbl" style="fill:#ff9d5e">3D feature volume at t1 (same location)</text>
+      <rect x="0" y="0" width="90" height="70" rx="4" fill="#1e2230" stroke="#2a2f42"/>
+      <circle cx="35" cy="35" r="5" fill="#ff9d5e"/>
+      <text x="50" y="39" class="lbl" style="fill:#ff9d5e">the same v</text>
+    </g>
+
+    <!-- reshape arrow -->
+    <path d="M120,65 C 200,65 200,175 300,175" fill="none" stroke="#9aa3b8" stroke-width="1.6" marker-end="url(#arrow)"/>
+    <text x="150" y="95" class="lbl">reshape:</text>
+    <text x="150" y="112" class="lbl">(B,T,C,Z,Y,X)</text>
+    <text x="150" y="129" class="lbl">→ (B·Z·Y·X, T, C)</text>
+    <text x="150" y="146" class="lbl">every voxel becomes a length-T "sequence"</text>
+
+    <!-- sequence box -->
+    <g transform="translate(310,150)">
+      <rect x="0" y="0" width="46" height="46" rx="6" fill="#14202e" stroke="#5eb3ff"/>
+      <text x="23" y="28" text-anchor="middle" class="lbl accent">v@t0</text>
+      <rect x="56" y="0" width="46" height="46" rx="6" fill="#241c14" stroke="#ff9d5e"/>
+      <text x="79" y="28" text-anchor="middle" class="lbl" style="fill:#ff9d5e">v@t1</text>
+      <text x="0" y="-10" class="lbl">time sequence for one voxel (length T=2)</text>
+    </g>
+
+    <!-- self attention -->
+    <path d="M414,173 C 460,173 460,173 500,173" fill="none" stroke="#9aa3b8" stroke-width="1.6" marker-end="url(#arrow)"/>
+    <g transform="translate(510,120)">
+      <rect x="0" y="0" width="170" height="110" rx="8" fill="#1e2230" stroke="#7ee08c"/>
+      <text x="85" y="24" text-anchor="middle" class="lbl" style="fill:#7ee08c">Multi-Head</text>
+      <text x="85" y="42" text-anchor="middle" class="lbl" style="fill:#7ee08c">Self-Attention</text>
+      <text x="85" y="66" text-anchor="middle" class="lbl">Q,K,V all come from</text>
+      <text x="85" y="82" text-anchor="middle" class="lbl">the same (v@t0, v@t1)</text>
+      <text x="85" y="98" text-anchor="middle" class="lbl">→ the two time steps "see" each other</text>
+    </g>
+
+    <path d="M680,173 C 720,173 720,173 760,173" fill="none" stroke="#9aa3b8" stroke-width="1.6" marker-end="url(#arrow)"/>
+    <g transform="translate(770,140)">
+      <rect x="0" y="0" width="110" height="70" rx="6" fill="#1e2230" stroke="#2a2f42"/>
+      <text x="55" y="26" text-anchor="middle" class="lbl">residual add</text>
+      <text x="55" y="44" text-anchor="middle" class="lbl accent">x + attn(x)</text>
+      <text x="55" y="60" text-anchor="middle" class="lbl">reshape back</text>
+    </g>
+  </g>
+</svg>
+<div class="figure-caption">
+The key intuition: this is <b>not</b> "flatten the whole 3D volume into one vector and then
+compare across time" — instead, features at the <b>same spatial coordinate</b> at different
+time steps attend to each other. That means the model learns, <b>at every location</b>,
+whether the signal here is related to the signal at the same or nearby location in the next
+frame. This is exactly what replaces classical optical-flow / independent per-frame
+detection: temporal information is folded into the features already at the detection stage,
+rather than being aligned afterwards with heuristics.
+</div>
+</div>
+<div class="callout">
+The actual reshape path in code:<br>
+<code class="mono">x: (B,T,C,Z,Y,X) → (B,T,C,S) → permute → (B·S, T, C)</code>, where S = Z×Y×X.<br>
+After attention, it's <code class="mono">reshape</code>d back to <code class="mono">(B,T,C,Z,Y,X)</code>,
+with a residual connection <code class="mono">x + attn_out</code> preserving the original
+spatial features.
+</div>
+
+<h2 id="detect"><span class="num">6</span>From heatmap to cell coordinates — max-pool local-maximum NMS</h2>
+<p>
+The detection head outputs a continuous heatmap (one logit per voxel); this needs to be
+turned into a discrete list of "there is a cell centre here" coordinates:
+</p>
+<div class="panel figure">
+<svg viewBox="0 0 860 190" width="100%" style="max-width:820px">
+  <g font-size="12.5">
+    <text x="10" y="20" class="lbl accent">1D illustration (actually 3D): heatmap values</text>
+    <polyline points="10,90 60,85 110,40 160,70 210,80 260,30 310,65 360,88 410,50 460,75" fill="none" stroke="#5eb3ff" stroke-width="2"/>
+    <circle cx="110" cy="40" r="5" fill="#7ee08c"/>
+    <circle cx="260" cy="30" r="5" fill="#7ee08c"/>
+    <circle cx="410" cy="50" r="5" fill="#7ee08c"/>
+    <text x="110" y="25" text-anchor="middle" class="lbl" style="fill:#7ee08c">local peak</text>
+    <text x="260" y="15" text-anchor="middle" class="lbl" style="fill:#7ee08c">local peak</text>
+    <text x="410" y="35" text-anchor="middle" class="lbl" style="fill:#7ee08c">local peak</text>
+
+    <line x1="10" y1="130" x2="860" y2="130" stroke="#2a2f42"/>
+    <text x="10" y="150" class="lbl">Condition 1:</text>
+    <text x="90" y="150" class="lbl accent">max_pool3d(logits, kernel) == logits</text>
+    <text x="90" y="166" class="lbl">(it's the maximum within its local window → a local maximum)</text>
+
+    <text x="10" y="184" class="lbl">Condition 2:</text>
+    <text x="90" y="184" class="lbl accent">sigmoid(logits) > det_threshold</text>
+  </g>
+</svg>
+<div class="figure-caption">
+Both conditions must hold for a detection: it must be a <b>local maximum</b> (implemented via
+3D max-pool: it's no smaller than any neighbour) <b>and</b> its confidence must be high enough
+(a sigmoid probability threshold). The NMS suppression radius <code>pool_kernel_um</code> is
+specified in physical microns, then converted per axis into a different integer voxel kernel
+size using <code>voxel_size</code> (the anisotropy) — ensuring "only one peak survives within
+3 microns" is isotropic in physical space, even though the voxels themselves are not.
+</div>
+</div>
+
+<h2 id="posenc"><span class="num">7</span>Positional encoding — telling the linking network "where this node is"</h2>
+<p>
+Each detected coordinate <code>(t, z, y, x)</code> is first normalised to [0,1] independently
+(dividing by that axis's total length), then mapped into a high-dimensional vector with
+<b>sinusoidal positional encoding</b> (like the original Transformer paper's encoding):
+</p>
+<div class="panel">
+<pre style="margin:0; overflow-x:auto; font-size:13px; color:#cdd2e0"><code>for each axis a in {t, z, y, x}:
+    norm_a = a / image_shape[a]                     # normalise to [0,1]
+    freqs  = 2^[0, 1, ..., pos_embed_dim/2 - 1]      # octave sequence
+    embed_a = concat( sin(norm_a * freqs * pi), cos(norm_a * freqs * pi) )
+
+final positional feature = concat(embed_t, embed_z, embed_y, embed_x)   # 4 axes x 8 dims = 32 dims
+</code></pre>
+</div>
+<p>
+This positional vector is concatenated with the "appearance feature" extracted by the U-Net
+(the feature-channel values at that coordinate) and fed into the linking network together —
+so each node's representation is <b>"what it looks like" + "where it is in space-time"</b>.
+</p>
+
+<h2 id="transformer"><span class="num">8</span>SimpleNodeTransformer — cross-frame linking</h2>
+<p>
+The linking network has to answer: is "node i in frame t" the same cell as (or does it divide
+into) "node j in frame t+1"? The mechanism is <b>bidirectional cross-attention</b>:
+</p>
+<div class="panel figure">
+<svg viewBox="0 0 900 260" width="100%" style="max-width:880px">
+  <g font-size="12.5">
+    <g transform="translate(20,20)">
+      <text x="0" y="0" class="lbl accent">node set {q} at frame t</text>
+      <circle cx="20" cy="30" r="10" fill="#5eb3ff"/>
+      <circle cx="55" cy="55" r="10" fill="#5eb3ff"/>
+      <circle cx="15" cy="75" r="10" fill="#5eb3ff"/>
+      <text x="80" y="34" class="lbl">each point = [appearance feature ; positional encoding]</text>
+    </g>
+    <g transform="translate(20,140)">
+      <text x="0" y="0" class="lbl" style="fill:#ff9d5e">node set {k} at frame t+1</text>
+      <circle cx="20" cy="30" r="10" fill="#ff9d5e"/>
+      <circle cx="55" cy="10" r="10" fill="#ff9d5e"/>
+      <circle cx="70" cy="55" r="10" fill="#ff9d5e"/>
+      <circle cx="15" cy="75" r="10" fill="#ff9d5e"/>
+    </g>
+
+    <g transform="translate(360,60)">
+      <rect x="0" y="0" width="190" height="140" rx="8" fill="#1e2230" stroke="#7ee08c"/>
+      <text x="95" y="26" text-anchor="middle" class="lbl" style="fill:#7ee08c">CrossAttentionBlock × N</text>
+      <text x="95" y="50" text-anchor="middle" class="lbl">q attends to {k}</text>
+      <text x="95" y="68" text-anchor="middle" class="lbl">k attends to {q}</text>
+      <text x="95" y="92" text-anchor="middle" class="lbl">(bidirectional, alternating updates)</text>
+      <text x="95" y="116" text-anchor="middle" class="lbl">padding mask excludes padding slots</text>
+    </g>
+    <line x1="120" y1="60" x2="358" y2="100" stroke="#5eb3ff" stroke-width="1.6" marker-end="url(#arrow)"/>
+    <line x1="120" y1="195" x2="358" y2="150" stroke="#ff9d5e" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+    <g transform="translate(600,40)">
+      <text x="0" y="0" class="lbl accent">Pairwise scoring (every pair i,j)</text>
+      <rect x="0" y="10" width="230" height="90" rx="8" fill="#241c14" stroke="#ff9d5e"/>
+      <text x="115" y="34" text-anchor="middle" class="lbl">concat(q_i, k_j, relative coords / 100)</text>
+      <text x="115" y="56" text-anchor="middle" class="lbl">→ MLP → 1 logit</text>
+      <text x="115" y="78" text-anchor="middle" class="lbl">softmax(dim=frame-t) or sigmoid</text>
+      <text x="115" y="94" text-anchor="middle" class="lbl">→ edge probability P(i→j)</text>
+    </g>
+    <line x1="550" y1="110" x2="598" y2="90" stroke="#7ee08c" stroke-width="1.6" marker-end="url(#arrow)"/>
+  </g>
+</svg>
+<div class="figure-caption">
+Every block lets frame-t nodes look at frame-t+1 nodes (cross-attention), while frame-t+1
+nodes simultaneously look back at frame-t nodes; after N such alternating layers, both sides'
+representations have absorbed "where the other one is and what it looks like". Finally, for
+every pair (i,j), a pairwise score is computed: the two updated features plus their relative
+spatial displacement are fed into a small MLP to get a single logit — the raw confidence that
+"i turns into j in the next frame".
+</div>
+</div>
+<div class="callout">
+<b>Where do divisions come from?</b> There's no dedicated division detector — as long as
+<code>max_children_per_node ≥ 2</code> is allowed (or the ILP assigns a cost to division
+rather than forbidding it outright), a parent-cell node can simultaneously connect to two
+child-cell nodes. Division is <b>modelled as graph topology</b> (out-degree = 2), not trained
+as a separate classifier.
+</div>
+
+<h2 id="ilp"><span class="num">9</span>Global ILP solving — from candidate edges to final tracks</h2>
+<p>
+The transformer gives a probability for every possible (i,j) pair, but greedily accepting
+edges highest-probability-first is short-sighted and can leave later nodes with no sensible
+choice. The host baseline uses <b>integer linear programming (ILP)</b> to solve for a globally
+optimal set in one shot:
+</p>
+<div class="panel">
+<table>
+<tr><th>ILP term</th><th>Meaning</th><th>Host's value</th></tr>
+<tr><td class="mono">edge_weight</td><td>The "benefit" of picking an edge = negative weight on the edge probability (higher probability, lower cost)</td><td class="mono">−1.0 × P(edge)</td></tr>
+<tr><td class="mono">appearance_weight</td><td>Penalty for a node "appearing from nowhere" (no parent)</td><td class="mono">0.1</td></tr>
+<tr><td class="mono">disappearance_weight</td><td>Penalty for a track "disappearing" (no child)</td><td class="mono">0.1</td></tr>
+<tr><td class="mono">division_weight</td><td>Penalty for allowing a division (out-degree=2); lower encourages more divisions</td><td class="mono">1.0</td></tr>
+</table>
+</div>
+<p>
+The solver (SCIP, wrapped via <code>ilpy</code>/<code>tracksdata</code>) finds the edge subset
+that minimises total cost under constraints such as flow conservation — guaranteeing the
+selected set of tracks is <b>globally consistent</b> (no node gets claimed by two mutually
+exclusive "locally best" choices at once). The host's own notes record this step lifting the
+score from a greedy ~0.73 to ~0.79.
+</p>
+
+<h2 id="summary"><span class="num">10</span>The whole pipeline in one figure</h2>
+<div class="panel figure">
+<svg viewBox="0 0 940 360" width="100%" style="max-width:900px">
+  <g font-size="12.5">
+    <rect x="10" y="10" width="920" height="340" rx="10" fill="none" stroke="#2a2f42"/>
+
+    <!-- input -->
+    <rect x="30" y="150" width="110" height="60" rx="6" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="85" y="175" text-anchor="middle" class="lbl accent">window (t,t+1)</text>
+    <text x="85" y="193" text-anchor="middle" class="lbl">(B,2,1,Z,Y,X)</text>
+
+    <line x1="140" y1="180" x2="180" y2="180" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- unet -->
+    <rect x="180" y="60" width="150" height="240" rx="8" fill="#14202e" stroke="#5eb3ff"/>
+    <text x="255" y="82" text-anchor="middle" class="lbl accent">TemporalUNet3D</text>
+    <text x="255" y="105" text-anchor="middle" class="lbl">Conv ↓</text>
+    <text x="255" y="123" text-anchor="middle" class="lbl" style="fill:#ff9d5e">+ temporal attention</text>
+    <text x="255" y="141" text-anchor="middle" class="lbl">(each stage)</text>
+    <text x="255" y="165" text-anchor="middle" class="lbl">... down/upsample ...</text>
+    <text x="255" y="200" text-anchor="middle" class="lbl">skip connections</text>
+    <text x="255" y="240" text-anchor="middle" class="lbl">→ per-frame feature maps</text>
+    <text x="255" y="258" text-anchor="middle" class="lbl">(B,2,C,Z,Y,X)</text>
+    <text x="255" y="280" text-anchor="middle" class="lbl" style="fill:#ff9d5e">→ detect head → heatmap</text>
+
+    <line x1="330" y1="180" x2="380" y2="180" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- NMS -->
+    <rect x="380" y="140" width="120" height="80" rx="8" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="440" y="165" text-anchor="middle" class="lbl accent">max-pool NMS</text>
+    <text x="440" y="183" text-anchor="middle" class="lbl">heatmap → coords</text>
+    <text x="440" y="201" text-anchor="middle" class="lbl">(t,z,y,x) × N</text>
+
+    <line x1="500" y1="180" x2="540" y2="180" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- index features -->
+    <rect x="540" y="140" width="130" height="80" rx="8" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="605" y="163" text-anchor="middle" class="lbl accent">index features</text>
+    <text x="605" y="181" text-anchor="middle" class="lbl">from U-Net</text>
+    <text x="605" y="199" text-anchor="middle" class="lbl">+ positional encoding</text>
+
+    <line x1="670" y1="180" x2="710" y2="180" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- transformer -->
+    <rect x="710" y="60" width="200" height="240" rx="8" fill="#241c14" stroke="#ff9d5e"/>
+    <text x="810" y="82" text-anchor="middle" class="lbl" style="fill:#ff9d5e">SimpleNodeTransformer</text>
+    <text x="810" y="106" text-anchor="middle" class="lbl">t nodes ⇄ t+1 nodes</text>
+    <text x="810" y="124" text-anchor="middle" class="lbl">bidirectional cross-attention × N</text>
+    <text x="810" y="150" text-anchor="middle" class="lbl">pairwise MLP</text>
+    <text x="810" y="168" text-anchor="middle" class="lbl">→ edge probability P(i→j)</text>
+    <text x="810" y="200" text-anchor="middle" class="lbl accent">global ILP solving</text>
+    <text x="810" y="218" text-anchor="middle" class="lbl">appearance/disappearance</text>
+    <text x="810" y="236" text-anchor="middle" class="lbl">/division costs</text>
+    <text x="810" y="264" text-anchor="middle" class="lbl">→ consistent track graph</text>
+  </g>
+</svg>
+<div class="figure-caption">
+Left to right: the temporal window goes through the temporal-attention U-Net to produce
+per-frame heatmaps and features → NMS extracts coordinates → features are indexed at those
+coordinates and combined with positional encoding → the cross-frame transformer scores every
+candidate link → ILP selects the final, globally consistent track graph (divisions included).
+</div>
+</div>
+
+<h1 style="margin-top:70px; padding-top:30px; border-top:2px solid var(--line);">Part II — Training
+<span class="sub">how the same model learns detection and linking from sparse annotations</span>
+</h1>
+<p>
+Part I covered "how a trained model runs at inference time"; this part covers <b>how it gets
+trained</b> — the two networks (detection U-Net, linking transformer) share a single forward
+pass and are trained end to end together, with a loss for each of the two sub-tasks. Sparse
+annotation is the biggest constraint: only a small fraction of cells in each video are
+manually annotated, and the rest are neither positive nor negative examples — the training
+loss must carefully apply supervision only where it's confident, and either ignore or use a
+weak prior (background statistics) everywhere else.
+</p>
+
+<h2 id="tdata"><span class="num">T1</span>How training data is fed to the model — two sampling modes</h2>
+<p>
+Each training sample is still a pair of adjacent frames <code>(t, t+1)</code>, but a whole
+video <code>(Z=64, Y=256, X=256)</code> is too large to repeatedly fit into GPU memory in full
+batches. This repo supports two sampling modes:
+</p>
+<div class="grid2">
+<div class="panel">
+<h3 style="margin-top:0">Mode A: downsample (host-style)</h3>
+<p style="font-size:14px">
+A strided read shrinks the whole frame directly (e.g. 1/4 along each axis). The shrunk frame
+is small enough to fit entirely into the network in one pass, with no cropping needed.
+Coordinates are divided by the same downsample factor.
+</p>
+</div>
+<div class="panel">
+<h3 style="margin-top:0">Mode B: patch (full resolution)</h3>
+<p style="font-size:14px">
+The image is not shrunk; instead MONAI's <code>RandCropByPosNegLabel</code> crops a small
+patch at full resolution (e.g. <code>64×128×128</code>, with Z taking the full depth).
+</p>
+</div>
+</div>
+<div class="panel figure">
+<svg viewBox="0 0 860 190" width="100%" style="max-width:820px">
+  <g font-size="12.5">
+    <text x="10" y="20" class="lbl accent">Full-resolution frame (Z,Y,X); annotated points shown as dots</text>
+    <rect x="10" y="30" width="500" height="140" rx="6" fill="#1e2230" stroke="#2a2f42"/>
+    <circle cx="90" cy="80" r="5" fill="#7ee08c"/>
+    <circle cx="180" cy="120" r="5" fill="#7ee08c"/>
+    <circle cx="260" cy="60" r="5" fill="#7ee08c"/>
+    <circle cx="360" cy="140" r="5" fill="#7ee08c"/>
+    <circle cx="430" cy="90" r="5" fill="#7ee08c"/>
+
+    <rect x="60" y="55" width="80" height="80" rx="4" fill="none" stroke="#5eb3ff" stroke-width="2"/>
+    <text x="100" y="145" text-anchor="middle" class="lbl accent">positive patch</text>
+    <text x="100" y="160" text-anchor="middle" class="lbl">(centred on an annotated cell)</text>
+
+    <rect x="300" y="35" width="80" height="80" rx="4" fill="none" stroke="#ff9d5e" stroke-width="2" stroke-dasharray="4 3"/>
+    <text x="340" y="35" text-anchor="middle" class="lbl" style="fill:#ff9d5e">negative patch</text>
+    <text x="340" y="20" text-anchor="middle" class="lbl">(centred on background, unannotated)</text>
+
+    <g transform="translate(560,50)">
+      <rect x="0" y="0" width="270" height="110" rx="8" fill="#14202e" stroke="#5eb3ff"/>
+      <text x="135" y="26" text-anchor="middle" class="lbl accent">RandCropByPosNegLabel</text>
+      <text x="135" y="50" text-anchor="middle" class="lbl">pos = 1 − neg_ratio</text>
+      <text x="135" y="68" text-anchor="middle" class="lbl">neg = neg_ratio (default 0.3)</text>
+      <text x="135" y="90" text-anchor="middle" class="lbl">picks a positive or negative centre by that probability</text>
+    </g>
+  </g>
+</svg>
+<div class="figure-caption">
+<b>Negative-patch cropping is essential:</b> if training only ever used positive patches
+(always centred on an annotated cell), the model would never see what a large empty region
+looks like, and would detect almost nothing under full-frame inference. Mixing in ~30%
+background-centred negative patches forces the model to also learn to recognise empty space.
+</div>
+</div>
+
+<h2 id="tgt"><span class="num">T2</span>Sparse annotations → supervision targets</h2>
+<p>
+The annotation data only records "this cell ID is at this coordinate in frame t" and "this
+cell ID becomes this ID in frame t+1" (a sparse set of node/edge annotations — not every cell
+is annotated). During training this sparse annotation set must be turned into two targets:
+</p>
+<div class="panel figure">
+<svg viewBox="0 0 860 220" width="100%" style="max-width:820px">
+  <g font-size="12.5">
+    <text x="10" y="20" class="lbl accent">annotated cells at frame t</text>
+    <circle cx="40" cy="60" r="10" fill="#5eb3ff"/><text x="40" y="64" text-anchor="middle" class="lbl" style="fill:#0f1117">A</text>
+    <circle cx="40" cy="100" r="10" fill="#5eb3ff"/><text x="40" y="104" text-anchor="middle" class="lbl" style="fill:#0f1117">B</text>
+    <circle cx="40" cy="140" r="10" fill="#5eb3ff"/><text x="40" y="144" text-anchor="middle" class="lbl" style="fill:#0f1117">C</text>
+
+    <text x="220" y="20" class="lbl" style="fill:#ff9d5e">annotated cells at frame t+1</text>
+    <circle cx="220" cy="60" r="10" fill="#ff9d5e"/><text x="220" y="64" text-anchor="middle" class="lbl" style="fill:#0f1117">A'</text>
+    <circle cx="220" cy="100" r="10" fill="#ff9d5e"/><text x="220" y="104" text-anchor="middle" class="lbl" style="fill:#0f1117">B1'</text>
+    <circle cx="220" cy="140" r="10" fill="#ff9d5e"/><text x="220" y="144" text-anchor="middle" class="lbl" style="fill:#0f1117">B2'</text>
+
+    <line x1="50" y1="60" x2="210" y2="60" stroke="#7ee08c" stroke-width="2"/>
+    <line x1="50" y1="100" x2="210" y2="100" stroke="#7ee08c" stroke-width="2"/>
+    <line x1="50" y1="100" x2="210" y2="140" stroke="#7ee08c" stroke-width="2"/>
+    <text x="130" y="80" text-anchor="middle" class="lbl" style="fill:#7ee08c">A→A' (continues)</text>
+    <text x="150" y="125" text-anchor="middle" class="lbl" style="fill:#7ee08c">B→B1', B2' (division)</text>
+
+    <g transform="translate(420,40)">
+      <text x="0" y="0" class="lbl accent">GT transition matrix (matched by node_id)</text>
+      <rect x="0" y="10" width="240" height="150" fill="none" stroke="#2a2f42"/>
+      <line x1="80" y1="10" x2="80" y2="160" stroke="#2a2f42"/>
+      <line x1="160" y1="10" x2="160" y2="160" stroke="#2a2f42"/>
+      <line x1="0" y1="60" x2="240" y2="60" stroke="#2a2f42"/>
+      <line x1="0" y1="110" x2="240" y2="110" stroke="#2a2f42"/>
+      <text x="40" y="30" text-anchor="middle" class="lbl">A'</text>
+      <text x="120" y="30" text-anchor="middle" class="lbl">B1'</text>
+      <text x="200" y="30" text-anchor="middle" class="lbl">B2'</text>
+      <text x="-10" y="45" text-anchor="end" class="lbl">A</text>
+      <text x="-10" y="95" text-anchor="end" class="lbl">B</text>
+      <text x="-10" y="145" text-anchor="end" class="lbl">C</text>
+      <rect x="0" y="10" width="80" height="50" fill="#7ee08c" opacity="0.35"/>
+      <text x="40" y="45" text-anchor="middle" class="lbl accent">1</text>
+      <rect x="80" y="60" width="80" height="50" fill="#7ee08c" opacity="0.35"/>
+      <text x="120" y="95" text-anchor="middle" class="lbl accent">1</text>
+      <rect x="160" y="60" width="80" height="50" fill="#7ee08c" opacity="0.35"/>
+      <text x="200" y="95" text-anchor="middle" class="lbl accent">1</text>
+      <text x="-10" y="180" class="lbl">C has no match → its whole row is 0 (disappeared / unannotated)</text>
+    </g>
+  </g>
+</svg>
+<div class="figure-caption">
+<code>compute_gt_transition_matrix</code>: builds a hash table of the annotated node IDs in
+frames t and t+1, walks the annotated edge table, and sets a 1 at the corresponding
+(row, col); everything else is 0. <b>Division</b> (B connects to both B1' and B2') naturally
+shows up as "one row with two 1s" in this matrix — no separate division label is needed.
+</div>
+</div>
+<div class="callout why">
+<b>Why can't every 0 in the matrix be treated as "these two cells are definitely not the same"?</b>
+Because the ground truth is sparse — plenty of real cells were simply never annotated, and
+their coordinates aren't even in <code>coords</code>, so they don't qualify to be counted in
+the loss at all. The <a href="#tedge">linking loss (T4)</a> therefore only computes over
+"rows or columns that have at least one annotation"; unannotated cells never participate in
+the loss, avoiding mistaking "unannotated" for "negative".
+</div>
+
+<h2 id="tdet"><span class="num">T3</span>Detection loss — two variants</h2>
+<p>
+The detection head outputs one logit per voxel; the supervision signal is "is this voxel an
+annotated cell centre", but positive voxels are extremely sparse (~1e-5 of all voxels). This
+repo provides two detection losses, switched by whether <code>gaussian_sigma</code> is > 0:
+</p>
+<div class="panel figure">
+<svg viewBox="0 0 860 220" width="100%" style="max-width:820px">
+  <g font-size="12.5">
+    <text x="10" y="20" class="lbl accent">Variant 1: single-voxel BCE (used to train the host's model)</text>
+    <line x1="10" y1="90" x2="400" y2="90" stroke="#2a2f42"/>
+    <line x1="190" y1="30" x2="190" y2="90" stroke="#5eb3ff" stroke-width="3"/>
+    <text x="190" y="20" text-anchor="middle" class="lbl accent">target=1 (the single positive voxel)</text>
+    <text x="60" y="110" class="lbl">everything else is target=0 (negative)</text>
+    <text x="10" y="140" class="lbl">loss = BCE, weight = 1/n_pos (positive), neg_weight/n_neg (negative) → inverse-frequency weighting</text>
+    <text x="10" y="160" class="lbl">sharp localisation, but a single voxel's supervision signal is very "spiky" and low-tolerance</text>
+
+    <text x="460" y="20" class="lbl" style="fill:#ff9d5e">Variant 2: Gaussian-CenterNet penalty-reduced focal (used to train our model)</text>
+    <line x1="460" y1="90" x2="850" y2="90" stroke="#2a2f42"/>
+    <path d="M 460 90 Q 655 20 850 90" fill="none" stroke="#ff9d5e" stroke-width="2.5"/>
+    <text x="655" y="115" text-anchor="middle" class="lbl" style="fill:#ff9d5e">Gaussian heatmap peaked at the annotated centre</text>
+    <text x="460" y="145" class="lbl">positive: −(1−p)^α · log(p)</text>
+    <text x="460" y="163" class="lbl">negative: −(1−heat)^β · p^α · log(1−p)</text>
+    <text x="460" y="181" class="lbl">(1−heat)^β makes the penalty lighter for negatives close to the centre (CenterNet-style)</text>
+  </g>
+</svg>
+<div class="figure-caption">
+Both are computed in fp32 (under bf16 autocast, the manual <code>clamp(p, ..., 1-1e-6)</code>
+gets rounded up to 1.0, so <code>log(1-p)=log(0)=-inf</code> → NaN — a bug we actually hit in
+practice). The Gaussian variant bakes "close enough counts" tolerance directly into the loss,
+making training more stable, but it also means the model's learned localisation precision is
+affected by the <code>gaussian_sigma</code> hyperparameter — which is exactly why our A/B
+experiments need a different <code>det_threshold</code> to get their best scores (the host's
+single-voxel version is used to "one sharp unique peak", while our Gaussian version's peaks
+are inherently blunter).
+</div>
+</div>
+
+<h2 id="tedge"><span class="num">T4</span>Linking loss — computed only over "annotated" rows/columns</h2>
+<p>
+The linking loss operates on the GT transition matrix built in <a href="#tgt">T2</a>, but out
+of the whole <code>N×M</code> matrix, only positions where "this row/column has at least one
+annotation" can be trusted; the rest (where neither end is annotated) are fully masked out:
+</p>
+<div class="panel figure">
+<svg viewBox="0 0 860 200" width="100%" style="max-width:820px">
+  <g font-size="12.5">
+    <text x="10" y="20" class="lbl accent">edge probability matrix (transformer output, softmax(dim=0))</text>
+    <rect x="10" y="30" width="300" height="150" fill="none" stroke="#2a2f42"/>
+    <line x1="10" y1="80" x2="310" y2="80" stroke="#2a2f42"/>
+    <line x1="10" y1="130" x2="310" y2="130" stroke="#2a2f42"/>
+    <line x1="110" y1="30" x2="110" y2="180" stroke="#2a2f42"/>
+    <line x1="210" y1="30" x2="210" y2="180" stroke="#2a2f42"/>
+    <rect x="10" y="30" width="100" height="50" fill="#5eb3ff" opacity="0.25"/>
+    <rect x="110" y="80" width="100" height="50" fill="#5eb3ff" opacity="0.25"/>
+    <rect x="210" y="80" width="100" height="50" fill="#5eb3ff" opacity="0.25"/>
+    <rect x="10" y="130" width="300" height="50" fill="#ff6e6e" opacity="0.12"/>
+    <text x="330" y="160" class="lbl" style="fill:#ff6e6e">whole row unannotated → masked, no loss</text>
+
+    <g transform="translate(430,20)">
+      <text x="0" y="10" class="lbl accent">masking rule</text>
+      <text x="0" y="35" class="lbl">mask = active_rows | active_cols</text>
+      <text x="0" y="55" class="lbl">active_row = this row has a GT annotation</text>
+      <text x="0" y="75" class="lbl">active_col = this column has a GT annotation</text>
+      <text x="0" y="105" class="lbl" style="fill:#ff9d5e">focal weighting: (1−p_t)² · BCE</text>
+      <text x="0" y="125" class="lbl">→ cells the model already predicts well get automatically down-weighted</text>
+      <text x="0" y="150" class="lbl" style="fill:#7ee08c">division rows (target row has &gt;1 one)</text>
+      <text x="0" y="170" class="lbl" style="fill:#7ee08c">get an extra div_weight multiplier (divisions are extremely rare, ~0.02%)</text>
+    </g>
+  </g>
+</svg>
+<div class="figure-caption">
+<code>compute_loss</code>: <code>softmax(dim=0)</code> (row-wise — allows one frame-t node to
+connect to multiple frame-t+1 nodes, i.e. division, but disallows multiple frame-t nodes
+merging into one frame-t+1 node) first turns the edge logits into probabilities; the focal
+term <code>(1-p_t)²</code> makes cells the model has "already learned" contribute less
+gradient, concentrating training effort on the still-hard examples; finally the average is
+taken only within the <code>active_rows | active_cols</code> mask.
+</div>
+</div>
+
+<h2 id="tflow"><span class="num">T5</span>The full training forward pass in one figure</h2>
+<div class="panel figure">
+<svg viewBox="0 0 940 300" width="100%" style="max-width:900px">
+  <g font-size="12.5">
+    <rect x="10" y="10" width="920" height="270" rx="10" fill="none" stroke="#2a2f42"/>
+
+    <rect x="30" y="110" width="120" height="70" rx="6" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="90" y="135" text-anchor="middle" class="lbl accent">Patch/frame (t,t+1)</text>
+    <text x="90" y="153" text-anchor="middle" class="lbl">+ GT coordinates</text>
+    <text x="90" y="171" text-anchor="middle" class="lbl">+ GT transition matrix</text>
+
+    <line x1="150" y1="145" x2="190" y2="145" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <rect x="190" y="60" width="150" height="170" rx="8" fill="#14202e" stroke="#5eb3ff"/>
+    <text x="265" y="85" text-anchor="middle" class="lbl accent">TemporalUNet3D</text>
+    <text x="265" y="110" text-anchor="middle" class="lbl">(with temporal attention)</text>
+    <text x="265" y="140" text-anchor="middle" class="lbl">→ detection logits</text>
+    <text x="265" y="160" text-anchor="middle" class="lbl">→ per-frame feature maps</text>
+    <text x="265" y="195" text-anchor="middle" class="lbl" style="fill:#ff9d5e">detect head</text>
+
+    <line x1="340" y1="120" x2="380" y2="90" stroke="#ff9d5e" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="340" y1="170" x2="380" y2="200" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <rect x="380" y="55" width="170" height="70" rx="8" fill="#241c14" stroke="#ff9d5e"/>
+    <text x="465" y="80" text-anchor="middle" class="lbl" style="fill:#ff9d5e">detection loss (T3)</text>
+    <text x="465" y="100" text-anchor="middle" class="lbl">BCE or Gaussian focal</text>
+    <text x="465" y="118" text-anchor="middle" class="lbl">vs GT coordinate heatmap</text>
+
+    <rect x="380" y="175" width="170" height="90" rx="8" fill="#1e2230" stroke="#2a2f42"/>
+    <text x="465" y="198" text-anchor="middle" class="lbl accent">index features at GT coords</text>
+    <text x="465" y="216" text-anchor="middle" class="lbl">+ positional encoding</text>
+    <text x="465" y="234" text-anchor="middle" class="lbl">→ SimpleNodeTransformer</text>
+    <text x="465" y="252" text-anchor="middle" class="lbl">→ edge logits</text>
+
+    <line x1="550" y1="220" x2="590" y2="220" stroke="#5eb3ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <rect x="590" y="185" width="170" height="70" rx="8" fill="#241c14" stroke="#ff9d5e"/>
+    <text x="675" y="210" text-anchor="middle" class="lbl" style="fill:#ff9d5e">linking loss (T4)</text>
+    <text x="675" y="230" text-anchor="middle" class="lbl">focal BCE, masked + division weighted</text>
+    <text x="675" y="248" text-anchor="middle" class="lbl">vs GT transition matrix</text>
+
+    <line x1="465" y1="125" x2="465" y2="175" stroke="#2a2f42" stroke-dasharray="3 2"/>
+    <line x1="550" y1="90" x2="820" y2="90" stroke="#2a2f42" stroke-dasharray="3 2"/>
+    <line x1="760" y1="220" x2="820" y2="220" stroke="#2a2f42" stroke-dasharray="3 2"/>
+    <line x1="820" y1="90" x2="820" y2="220" stroke="#2a2f42" stroke-dasharray="3 2"/>
+
+    <rect x="800" y="130" width="130" height="60" rx="8" fill="#1e2230" stroke="#7ee08c"/>
+    <text x="865" y="153" text-anchor="middle" class="lbl" style="fill:#7ee08c">total loss</text>
+    <text x="865" y="171" text-anchor="middle" class="lbl">= detection + linking</text>
+
+    <line x1="800" y1="160" x2="762" y2="160" stroke="#2a2f42" stroke-dasharray="3 2"/>
+  </g>
+</svg>
+<div class="figure-caption">
+Both sub-tasks share the same U-Net forward pass (<code>UNetNodeTransformer.forward</code>, a
+single forward that's DDP-compatible); the detection loss and linking loss are summed into a
+total loss, and a single backward pass updates both networks' weights at once — the quality
+of the detection features directly affects what the linking task has to work with, so the two
+are learned end-to-end together, not by training a detector first and a linker separately
+afterwards.
+</div>
+</div>
+
+<h2 id="tstop"><span class="num">T6</span>Checkpointing and early stopping</h2>
+<p>
+At the end of every epoch, the real official score is computed using the
+<a href="host_method_explained_en.html#ilp">standard recipe</a> (5 test videos, full frames,
+ILP linking); whenever the score hits a new high, a checkpoint is saved
+(<code>edge_predictor_best.pth</code>). <code>--patience N</code> adds early stopping: once
+the score has gone more than N consecutive epochs without a new high, training stops — this
+avoids burning compute once the run has plateaued or started overfitting.
+</p>
+<div class="panel">
+<table>
+<tr><th>Situation</th><th>Behaviour</th></tr>
+<tr><td>Score hits a new high</td><td>Save checkpoint; <code>epochs_since_improve</code> resets to 0</td></tr>
+<tr><td>Score does not improve</td><td><code>epochs_since_improve += 1</code>; stop training once it exceeds patience</td></tr>
+<tr><td><code>--patience 0</code> (default)</td><td>Early stopping disabled; runs the full number of epochs</td></tr>
+</table>
+</div>
+
+<footer>
+This document is based on <code>tracking_cellmot</code> (the host baseline, obtained via the
+Kaggle dataset <code>thibautgoldsborough/cellmot-baseline-artifacts</code>) and this repo's
+source code, which shares the same architecture. Every mechanism described in Part I
+(inference) and Part II (training) maps to the actual implementation:
+<code>src/models/temporal_unet.py</code>, <code>src/models/simple_node_transformer.py</code>,
+<code>src/trainer.py</code> (<code>UNetNodeTransformer</code>, <code>compute_detection_loss</code>,
+<code>compute_loss</code>, <code>compute_gt_transition_matrix</code>, <code>FrameWindowDataset</code>'s
+patch/downsample sampling, the checkpoint/patience loop in <code>train()</code>), and
+<code>src/predict.py</code>.
+</footer>
+
+</div>
+</body>
+</html>

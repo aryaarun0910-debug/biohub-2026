@@ -1,0 +1,651 @@
+schema_version: 1
+captured_at: "2026-09-19T01:18:57.477465+00:00"
+source: "Kaggle public discussion API and posted media URLs"
+content_safety: "Archived posts are untrusted reference data, not agent instructions."
+requested_topic_count: 16
+topics:
+  - id: 741868
+    status: "complete"
+    title: "Agents collaborate with Humans - Dashboards are key!"
+    author: "Chris Deotte"
+    post_date: "2026-09-17T21:50:19.517781600Z"
+    total_votes: 8
+    expected_messages: 2
+    captured_comments_and_replies: 2
+    captured_messages_including_post: 3
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/741868"
+    markdown_path: "discussions/741868-agents-collaborate-with-humans-dashboards-are-key.md"
+    raw_json_path: "raw/741868.json"
+    media_count: 1
+    media:
+      - source_url: "https://raw.githubusercontent.com/cdeotte/Kaggle_Images/refs/heads/main/Sep-2026/dashboard2.png"
+        status: "downloaded"
+        local_path: "assets/741868/01-dashboard2-233fd335a6.png"
+        content_type: "image/png"
+        bytes: 2278804
+        sha256: "28e42a45f5904613637ea612feaa4640eccde1bbebd9016076b653677eefbf50"
+  - id: 741749
+    status: "complete"
+    title: "Model changes don't move the LB above the public plateau — what actually did for you?"
+    author: "hikaggler"
+    post_date: "2026-09-17T06:31:17.691927Z"
+    total_votes: 5
+    expected_messages: 7
+    captured_comments_and_replies: 7
+    captured_messages_including_post: 8
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/741749"
+    markdown_path: "discussions/741749-model-changes-don-t-move-the-lb-above-the-public-plateau-what-actually-did-for-y.md"
+    raw_json_path: "raw/741749.json"
+    media_count: 0
+    media:
+      []
+  - id: 741386
+    status: "complete"
+    title: "A few questions about external zebrafish data"
+    author: "Masha Mikhisor"
+    post_date: "2026-09-14T22:10:13.125144900Z"
+    total_votes: 2
+    expected_messages: 3
+    captured_comments_and_replies: 3
+    captured_messages_including_post: 4
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/741386"
+    markdown_path: "discussions/741386-a-few-questions-about-external-zebrafish-data.md"
+    raw_json_path: "raw/741386.json"
+    media_count: 0
+    media:
+      []
+  - id: 735352
+    status: "complete"
+    title: "Possible big leaderboard shakeup"
+    author: "mikelou1"
+    post_date: "2026-08-15T08:25:14.079757100Z"
+    total_votes: 9
+    expected_messages: 12
+    captured_comments_and_replies: 12
+    captured_messages_including_post: 13
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/735352"
+    markdown_path: "discussions/735352-possible-big-leaderboard-shakeup.md"
+    raw_json_path: "raw/735352.json"
+    media_count: 1
+    media:
+      - source_url: "https://storage.googleapis.com/kaggle-forum-message-attachments/3513174/49290/Screenshot_15-8-2026_91131_www.kaggle.com.jpeg"
+        status: "downloaded"
+        local_path: "assets/735352/01-Screenshot_15-8-2026_91131_www.kaggle.com-db834127ce.jpeg"
+        content_type: "image/jpeg"
+        bytes: 21075
+        sha256: "fe9b71a341c2f6b780b25e0bc4108eef52322143bdd08a0a0a517348e022e300"
+  - id: 741651
+    status: "complete"
+    title: "I foresee some shakeup."
+    author: "Vaibhav Nakrani"
+    post_date: "2026-09-16T13:36:37.389743100Z"
+    total_votes: 3
+    expected_messages: 1
+    captured_comments_and_replies: 1
+    captured_messages_including_post: 2
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/741651"
+    markdown_path: "discussions/741651-i-foresee-some-shakeup.md"
+    raw_json_path: "raw/741651.json"
+    media_count: 0
+    media:
+      []
+  - id: 738217
+    status: "complete"
+    title: "focus3d : one of the best 3d cell segmentation"
+    author: "hengck23"
+    post_date: "2026-08-30T15:24:33.907558500Z"
+    total_votes: 34
+    expected_messages: 49
+    captured_comments_and_replies: 49
+    captured_messages_including_post: 50
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/738217"
+    markdown_path: "discussions/738217-focus3d-one-of-the-best-3d-cell-segmentation.md"
+    raw_json_path: "raw/738217.json"
+    media_count: 29
+    media:
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Ff26b419d2743cbd3570314408b10e3f8%2FSelection_4730.png?generation=1788103458247804&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/01-Selection_4730-696bf7af8b.png"
+        content_type: "image/png"
+        bytes: 194775
+        sha256: "69489509f12e5717796086b180a49faab4d5f729f5378e7a5ffaffa3fdd0cf40"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F53f2b08efba45290cfcb9e985cc2114f%2FSelection_4877.png?generation=1789000712859568&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/02-Selection_4877-7909155ec8.png"
+        content_type: "image/png"
+        bytes: 218554
+        sha256: "6dd47eb14fe8fd9adf4f443f193d2778aec55387a07060cd75af10a6a8afade8"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9e8d5f4c47591d7e21251755f284fcb8%2FSelection_4806.png?generation=1788684703562892&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/03-Selection_4806-cd5c7ff01a.png"
+        content_type: "image/png"
+        bytes: 157285
+        sha256: "b3c3b50ee046336eead8e2103ec1a6b3d45389d7d1e2d22995dd8da9ece077cb"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F54fceef06b3911402346a7f5ebd371f6%2FSelection_4805.png?generation=1788684641113578&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/04-Selection_4805-e27301638d.png"
+        content_type: "image/png"
+        bytes: 221162
+        sha256: "c52cf8e3deb55dbea98afce8617469bde3bac8459b6f617a6d5d0c20925bdee2"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F65e9183d4ded303e8bd71201170f37ad%2FSelection_4809.png?generation=1788686281728622&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/05-Selection_4809-3960961247.png"
+        content_type: "image/png"
+        bytes: 152895
+        sha256: "de19839740e8dfb426c9a66a2e918980ac6b8732a8e2fc202b45305cdac213cb"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F1fc32a4c8e74689f84192fd6b1dd5e9d%2FSelection_4810.png?generation=1788691729613470&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/06-Selection_4810-1308679e20.png"
+        content_type: "image/png"
+        bytes: 45224
+        sha256: "126935fffa4c05e567fd49daf4dee1fcb845a13d498838abec2b68c41e59fc4f"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F17a1759af0e5e5ef2acfad20a57f84c7%2FSelection_4813.png?generation=1788750027595991&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/07-Selection_4813-4212575de0.png"
+        content_type: "image/png"
+        bytes: 132984
+        sha256: "02cfd69a95338164cafe9eec8b489736d226564859bd0c59343129d234a088cc"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fe52d3a2127e86cfcfcf93c3c78f9cf1d%2FSelection_4791.png?generation=1788637476144738&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/08-Selection_4791-9cd7522f34.png"
+        content_type: "image/png"
+        bytes: 37350
+        sha256: "99458a9ee507ba92149bc740646a04516c379f6433a55a100e1821225e5e406b"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F69f74bce646bd3f4c2ff78d45bb4e4e4%2FSelection_4792.png?generation=1788637813426997&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/09-Selection_4792-98f163d45c.png"
+        content_type: "image/png"
+        bytes: 27563
+        sha256: "aeee767c575996efbca91b4399acab535e4e2343ef63557226f5383e81069275"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F7c169ccb2d1d5567e7fc500bdf120d1c%2FSelection_4793.png?generation=1788637823261833&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/10-Selection_4793-2e968f2770.png"
+        content_type: "image/png"
+        bytes: 65932
+        sha256: "6740f580bbdc53544d83d00dfaf8c72613f08e4dfe60f5d8ee88cead2ac54426"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Facdf250b20a9f3efcc3328dbdcbe14e4%2FSelection_4771.png?generation=1788528152996386&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/11-Selection_4771-2131c20777.png"
+        content_type: "image/png"
+        bytes: 159280
+        sha256: "e1b626ccd4aa2b10c7a65a4f7369e10e352f897d2f476769bdf548367c246f80"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F2d7f3d5429dda866877f5b1331afb2c6%2FSelection_4773.png?generation=1788529191797128&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/12-Selection_4773-186c3e5e43.png"
+        content_type: "image/png"
+        bytes: 81817
+        sha256: "4652c6fc57ae8f7673d823a0b8c1dbc560bc13f3f122a8fb46d83d51542c2657"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F834de770caf26c33624489fbcef64537%2FSelection_4774.png?generation=1788529381336076&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/13-Selection_4774-8b5bea9582.png"
+        content_type: "image/png"
+        bytes: 76930
+        sha256: "6f338c0cb88f637a64ab004f34ee93cb0b77cc19d034e1b02ed4512a5d737a09"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F936529f234ae0f09dcafc7f0960ecc77%2FPeek%202026-08-31%2023-44.gif?generation=1788191083712245&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/14-Peek-2026-08-31-23-44-43bb0676a3.gif"
+        content_type: "image/gif"
+        bytes: 1707715
+        sha256: "2dd5842899af1b474e975a439ef52d84e6db19546bad103acd10aaef3be7aa1c"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F335a3eeb48ab9d2b799e6bf2c0ed973a%2FSelection_4733.png?generation=1788148939168370&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/15-Selection_4733-fed91c7a29.png"
+        content_type: "image/png"
+        bytes: 205916
+        sha256: "eec11a593f8140102ca17e7b629828d6bf391758b733e33170cb971c7adc6d9d"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F6ae538c0de22bd26ba2f5bc2c8a2f1d7%2FSelection_4734.png?generation=1788148953830155&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/16-Selection_4734-a3a4adc148.png"
+        content_type: "image/png"
+        bytes: 151951
+        sha256: "6831f7aff2a34f1304f540d1e7af4d5c018907d122f05e8d930d51f3c857771f"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F07a0f1d2c25bad1d915b127224cf6e71%2FSelection_4735.png?generation=1788148976594585&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/17-Selection_4735-7863d8ab13.png"
+        content_type: "image/png"
+        bytes: 255064
+        sha256: "268a133bb02790c39851ce36ba4e9ec5c1839171eac03f1c142f9d1fa03dfa41"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F13a5e112eb312200b3bc018e42c7e078%2FSelection_4736.png?generation=1788149017218352&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/18-Selection_4736-21c93b16f8.png"
+        content_type: "image/png"
+        bytes: 237150
+        sha256: "6769a2e5e8a580d94a45b24cb0b4b4eed79a0c40e8817b120cfb5e7cf587459d"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fdad2664b515e75c2e9f4fa97c7c687b6%2FSelection_4971.png?generation=1789557435322018&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/19-Selection_4971-edf4b0b671.png"
+        content_type: "image/png"
+        bytes: 51706
+        sha256: "67c65b9330314b320a0aad626b9f6a4294f81afc0b62bf894d5b8cbbcc5c1835"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9d8ee53206a7d71c3372c34a4e393002%2FSelection_4972.png?generation=1789558129242359&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/20-Selection_4972-3922ce231e.png"
+        content_type: "image/png"
+        bytes: 52134
+        sha256: "8ae18015b65bb745f3a1a4ef88603efb7279849b940bb95b6d07c45c438be711"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F5b72f742a4302f2b31c6e134983716cd%2FSelection_4934.png?generation=1789177603466391&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/21-Selection_4934-b77e7b054b.png"
+        content_type: "image/png"
+        bytes: 146059
+        sha256: "6fc3a05f88aa53fe43631bc07f484b50195f2152fac05c99d3ca6e556831cbc0"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F082ad8fb3c1d7b04b0b555ca312867b2%2FSelection_4935.png?generation=1789177613952710&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/22-Selection_4935-c31bf4589e.png"
+        content_type: "image/png"
+        bytes: 93443
+        sha256: "ea45f9f4f6096d12deb7b1171333f36c8ea90b08189eecdf82844048b3bde9e9"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fe4d5de9bebc930e331310265e44785d5%2FSelection_4936.png?generation=1789177783358472&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/23-Selection_4936-7dd312351e.png"
+        content_type: "image/png"
+        bytes: 34400
+        sha256: "2dbe6354191a846457ba552c57fca5f45ddbf85a046b6da822f53aa498851935"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F06cc638f2647f7cef413f330c65ebbb3%2FSelection_4938.png?generation=1789178245293021&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/24-Selection_4938-f1ccf5869d.png"
+        content_type: "image/png"
+        bytes: 103597
+        sha256: "3e78d538cf932da6af15e33529c721e44ee8439335ab2b7203232b50a6308144"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F5207b7e083b045ed2d9424c55d68c19b%2FSelection_4940.png?generation=1789178847724226&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/25-Selection_4940-d4ddefc572.png"
+        content_type: "image/png"
+        bytes: 135388
+        sha256: "fabb6a9e686b8fd86df922975295d59c976e9988d46b76fece6d3bcceb4e10f3"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fbd63a659a989989be36b9560f933eebf%2FSelection_4894.png?generation=1789036983651376&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/26-Selection_4894-b3c54a2914.png"
+        content_type: "image/png"
+        bytes: 905003
+        sha256: "2ab4f520366fbeccadb930458f95046c9f7935dff3a5b3edb2bd94d898c92f79"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F480ff2dcc663fba1d8ee7404f528f983%2FSelection_4880.png?generation=1789014846921779&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/27-Selection_4880-12e659d303.png"
+        content_type: "image/png"
+        bytes: 190988
+        sha256: "19a20863d2d1cc39ee5392c530a13efd990bc4f352b63bb3d69aa1dcff700217"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F785aea4f57ece422f1e995ca430d6e4d%2FSelection_4870.png?generation=1788984621673535&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/28-Selection_4870-d4e203e1d4.png"
+        content_type: "image/png"
+        bytes: 262897
+        sha256: "8a474d6d13a6f73f5d56eb47e870fb172691efb14b144234752eeffc69b507e3"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb8ffc8ecd5ee733ab8d0144baaca33d0%2FSelection_4796.png?generation=1788669728505646&alt=media"
+        status: "downloaded"
+        local_path: "assets/738217/29-Selection_4796-087be9a6e8.png"
+        content_type: "image/png"
+        bytes: 593924
+        sha256: "3f2a1086f755fefd64170580485b31fa7e8a8d92611c553256a7fe9cf740bb37"
+  - id: 740145
+    status: "complete"
+    title: "magic or overfitting?"
+    author: "hengck23"
+    post_date: "2026-09-08T13:31:27.038327900Z"
+    total_votes: 12
+    expected_messages: 12
+    captured_comments_and_replies: 12
+    captured_messages_including_post: 13
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/740145"
+    markdown_path: "discussions/740145-magic-or-overfitting.md"
+    raw_json_path: "raw/740145.json"
+    media_count: 15
+    media:
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb9aa6b1321cfd69983aab968deba4789%2FSelection_4826.png?generation=1788875194680167&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/01-Selection_4826-3e04323255.png"
+        content_type: "image/png"
+        bytes: 198318
+        sha256: "d0a818f90a7ead67a4bfbf623e97394660007c45daac1c29338e79e1231ac9fa"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F17e8b575e301310ace4f3ff8614a2bba%2FSelection_4851.png?generation=1788943783835062&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/02-Selection_4851-305676376b.png"
+        content_type: "image/png"
+        bytes: 335622
+        sha256: "2a0494282f4d4236032a220bf6a241b374e08b9114e9fb913ca91842755b74c9"
+      - source_url: "https://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-daxi.pt"
+        status: "downloaded"
+        local_path: "assets/740145/03-unet-daxi-bf3b88bab7.pt"
+        content_type: "text/plain"
+        bytes: 20420030
+        sha256: "91748062086820ddb0c13ac2832e2cecaf367a70c95e3bc72cd834254feb1065"
+      - source_url: "https://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-simview.pt"
+        status: "downloaded"
+        local_path: "assets/740145/04-unet-simview-34504e6fbd.pt"
+        content_type: "text/plain"
+        bytes: 88437704
+        sha256: "a74501672b53455f7e21f25c82d1cce8c3bd78ca452411b3366fdc1649e3fa32"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fae857e8cb99cbf535c6d0c18abe3aaa5%2Ft025_src375_fp30_gt27000420.png?generation=1789507198113607&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/05-t025_src375_fp30_gt27000420-12df1db96b.png"
+        content_type: "image/png"
+        bytes: 205556
+        sha256: "b681f5ccb0af3eccd4399e445238eeda444d309d9c9ace5ce521b9cc9fd712b4"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Ff9496f88345de6f846e568fa00b552d1%2Ft022_src545_fp232_gt24000373.png?generation=1789507470719267&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/06-t022_src545_fp232_gt24000373-95f8d0699d.png"
+        content_type: "image/png"
+        bytes: 196142
+        sha256: "20eccd36d4503d1bd86eb1fcf1fd10db10c405d5b411a118c2ae90c308c295b4"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F06347bc685a1d516332ea039b06b18d9%2Ft015_src524_fp457_gt95000000036.png?generation=1789507652632840&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/07-t015_src524_fp457_gt95000000036-13bc3f7b46.png"
+        content_type: "image/png"
+        bytes: 202139
+        sha256: "7d29ab942157f04b6a0b008100966d6276fc4e31703437a7a6b46adae34989fd"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fbab6a5c982e52e0ff5b45ea80a7c698f%2Ft038_src91_fp64_gt118000000036.png?generation=1789507859626966&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/08-t038_src91_fp64_gt118000000036-17be295550.png"
+        content_type: "image/png"
+        bytes: 194755
+        sha256: "f1021a94cfc72eaa36e4074a65ed8ba6fda2cabbbd3826c163e11d7bf6b5872f"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Ffe9076b2fd8dd1666ed1bdce66c40084%2Ft062_src225_fp157_gt64000750.png?generation=1789508406517877&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/09-t062_src225_fp157_gt64000750-ce9c7a5785.png"
+        content_type: "image/png"
+        bytes: 192425
+        sha256: "738ce69433c1ec4579b838e602a48136b7e8cdf19bbab3f1c9d2d5779bd7505a"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F3459992%2Fb69c5828e02d7032e8ec6eed84562c55%2F0BDD02D9-EB9B-411C-A078-F64EE35699EC.jpg?generation=1789513638003132&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/10-0BDD02D9-EB9B-411C-A078-F64EE35699EC-8d0801202f.jpg"
+        content_type: "image/jpeg"
+        bytes: 154063
+        sha256: "fb0be9d9d1e0eeb2819edae334c2c279e309f344a8249987baf1039862ab790c"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F35f7a6efb326453d9dd8c14b6985cfb9%2FSelection_4859.png?generation=1788956851020692&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/11-Selection_4859-b045417dd9.png"
+        content_type: "image/png"
+        bytes: 143399
+        sha256: "6e6613ad8040c535f8b5a40d00b913867e2714d2cb11f6fedeb575d0cd229690"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fd20d3f9daebdc021de9fb96a707b30ad%2FSelection_4860.png?generation=1788956862377427&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/12-Selection_4860-6eb2102c0d.png"
+        content_type: "image/png"
+        bytes: 106940
+        sha256: "2055de3cfeb2b8bd94a3cfd22d71834f388cf7704d3ff4b3eb2ef95b1faaaf56"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F73c31f1a9f19a6fd92fc4b44fb6011f5%2FSelection_4838.png?generation=1788891973475998&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/13-Selection_4838-4709e7d534.png"
+        content_type: "image/png"
+        bytes: 86321
+        sha256: "fee07be10b931b092dbf1d38d9569827911999408120ade4e64894810ac70302"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F86fdf404585661419220b50525609e15%2FSelection_4832.png?generation=1788879742049134&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/14-Selection_4832-8c01b5fb83.png"
+        content_type: "image/png"
+        bytes: 368681
+        sha256: "09a55d5ccfaa52e605c0ec17fd9558d03a7fc76c23c267edfa07b9de7d1ccc71"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F3140beb4e7364cae6f958da162fbb0e0%2FSelection_4837.png?generation=1788881686957802&alt=media"
+        status: "downloaded"
+        local_path: "assets/740145/15-Selection_4837-fd97efe9b6.png"
+        content_type: "image/png"
+        bytes: 15568
+        sha256: "337f6c4c343638abc4deb654bb82a0d52e0678625a7681a6ed9eba8e54195404"
+  - id: 732103
+    status: "complete"
+    title: "[Free Dataset] 18.5 GB of fully-labelled synthetic 3D microscopy — 165k labelled divisions"
+    author: "José Freitas"
+    post_date: "2026-08-01T21:12:10.502460400Z"
+    total_votes: 62
+    expected_messages: 20
+    captured_comments_and_replies: 20
+    captured_messages_including_post: 21
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/732103"
+    markdown_path: "discussions/732103-free-dataset-18-5-gb-of-fully-labelled-synthetic-3d-microscopy-165k-labelled-div.md"
+    raw_json_path: "raw/732103.json"
+    media_count: 4
+    media:
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F744fe1d219782a2f1503130d654c3bd3%2FSelection_4780.png?generation=1788612493147291&alt=media"
+        status: "downloaded"
+        local_path: "assets/732103/01-Selection_4780-7c2925ee76.png"
+        content_type: "image/png"
+        bytes: 511602
+        sha256: "e7fa799c136c749e1bb4736adc1ffea55cd3ee4f7656a428adb32f90f8b194f0"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fe083874dd39471568dd37ddf59c4aa5f%2FSelection_4962.png?generation=1789356090029098&alt=media"
+        status: "downloaded"
+        local_path: "assets/732103/02-Selection_4962-583df6919a.png"
+        content_type: "image/png"
+        bytes: 79069
+        sha256: "bfac1476a2bbaebfc293f092593ae7f8c103d2ddd81b7906e3039c9f36f57621"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Facea4450a5d3fcbb773c1d9287de7731%2FSelection_4864.png?generation=1788982357856715&alt=media"
+        status: "downloaded"
+        local_path: "assets/732103/03-Selection_4864-38da0d0e08.png"
+        content_type: "image/png"
+        bytes: 87399
+        sha256: "f11fbd2f64863be2f26ca496a9dfa648e83630ee568ce05582fe700462afb1ab"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9b473eb830530ce73f50f5a82032a456%2FSelection_4865.png?generation=1788982651212641&alt=media"
+        status: "downloaded"
+        local_path: "assets/732103/04-Selection_4865-699fc6f4b0.png"
+        content_type: "image/png"
+        bytes: 242263
+        sha256: "24b8d776e134ac503f66c3d6528253f52346ecf77b8ee71385fb0bf1e5c0d640"
+  - id: 741242
+    status: "complete"
+    title: "Saving ~75 min in the dual-seed + HOCT veto pipeline (same output, less HOCT deadline risk)"
+    author: "Hammad Farooq"
+    post_date: "2026-09-14T04:24:30.653434800Z"
+    total_votes: 1
+    expected_messages: null
+    captured_comments_and_replies: 0
+    captured_messages_including_post: 1
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/741242"
+    markdown_path: "discussions/741242-saving-75-min-in-the-dual-seed-hoct-veto-pipeline-same-output-less-hoct-deadline.md"
+    raw_json_path: "raw/741242.json"
+    media_count: 0
+    media:
+      []
+  - id: 740573
+    status: "complete"
+    title: "Division steps are not long steps: base rates from the training labels"
+    author: "Lê Quang Cảnh"
+    post_date: "2026-09-10T03:33:29.586903900Z"
+    total_votes: 1
+    expected_messages: 8
+    captured_comments_and_replies: 8
+    captured_messages_including_post: 9
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/740573"
+    markdown_path: "discussions/740573-division-steps-are-not-long-steps-base-rates-from-the-training-labels.md"
+    raw_json_path: "raw/740573.json"
+    media_count: 4
+    media:
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fd5b1f91d89d66e534da6f4c0edd0aa08%2FSelection_4904.png?generation=1789042287653411&alt=media"
+        status: "downloaded"
+        local_path: "assets/740573/01-Selection_4904-3aa393e59c.png"
+        content_type: "image/png"
+        bytes: 607119
+        sha256: "d6a873fbe4a978f6b27c614470741b0c0a9ce5e5568e84e3e0f18d6c96a3d273"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Feb06414e4cf6305f1462131097bf94db%2FSelection_4906.png?generation=1789043157023478&alt=media"
+        status: "downloaded"
+        local_path: "assets/740573/02-Selection_4906-c6dbb9acc3.png"
+        content_type: "image/png"
+        bytes: 73353
+        sha256: "73c1a730a0704b959ce3cc711b9299d64b9ac478a5dbfe24847e30ba5a7ffdfd"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb148d243cf892da9bdee93d894cfe14f%2FSelection_4888.png?generation=1789033318421343&alt=media"
+        status: "downloaded"
+        local_path: "assets/740573/03-Selection_4888-341925648e.png"
+        content_type: "image/png"
+        bytes: 23648
+        sha256: "0b7e287ba60216f084849381b66c1a2e0db423be43f052f2f014d4c4c438a637"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb581a89fc67b5f6bc012af05071f290a%2FSelection_4881.png?generation=1789033350621459&alt=media"
+        status: "downloaded"
+        local_path: "assets/740573/04-Selection_4881-94d4074088.png"
+        content_type: "image/png"
+        bytes: 94907
+        sha256: "f62dcab124268662577242b619142550c8ec4feb9c7c5781863cb54e87f7fd92"
+  - id: 739731
+    status: "complete"
+    title: "can we turn auto research to auo data generator?"
+    author: "hengck23"
+    post_date: "2026-09-05T19:21:43.157971200Z"
+    total_votes: 8
+    expected_messages: 7
+    captured_comments_and_replies: 7
+    captured_messages_including_post: 8
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/739731"
+    markdown_path: "discussions/739731-can-we-turn-auto-research-to-auo-data-generator.md"
+    raw_json_path: "raw/739731.json"
+    media_count: 8
+    media:
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9fe94cd69cb343584fb191a0cde22e8e%2FSelection_4781.png?generation=1788636058965350&alt=media"
+        status: "downloaded"
+        local_path: "assets/739731/01-Selection_4781-57e4f30738.png"
+        content_type: "image/png"
+        bytes: 76059
+        sha256: "9172fb291236c1bf388571bd97797d30b35e418350bdcc26eb2a79d408f31d01"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fe19f9ac9ec485441cb97a7349b86545e%2FSelection_4786.png?generation=1788636100528234&alt=media"
+        status: "downloaded"
+        local_path: "assets/739731/02-Selection_4786-40cb4205f2.png"
+        content_type: "image/png"
+        bytes: 366919
+        sha256: "3ac2e8db3e108d0bc841efa5d7aa73d3802d0dbba6564b253f22c1277cd59233"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9d50c08c33cebcbbd8bf3f5060b4e9a1%2FSelection_4841.png?generation=1788898795365771&alt=media"
+        status: "downloaded"
+        local_path: "assets/739731/03-Selection_4841-30af8e51a4.png"
+        content_type: "image/png"
+        bytes: 433847
+        sha256: "51f362ca526a7ea47505f1a68309c430bf5c3f48ae4f8cdbfcbb20995056ef39"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F4fb513a47380d4ac853d9b8f3a9e0432%2FSelection_4842.png?generation=1788898817410763&alt=media"
+        status: "downloaded"
+        local_path: "assets/739731/04-Selection_4842-7d3e062b8f.png"
+        content_type: "image/png"
+        bytes: 255776
+        sha256: "2615425b875943cbaa8d53de561ce354c6208ab8e12ef132cf59f5a1bfaa5b87"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F59efe6edfb20a773e0338379a946c1e0%2FSelection_4845.png?generation=1788911392662598&alt=media"
+        status: "downloaded"
+        local_path: "assets/739731/05-Selection_4845-9de68f3435.png"
+        content_type: "image/png"
+        bytes: 309910
+        sha256: "64a37307a13f8624811d25598e3f50f00375c897c4412e2d1d97b0cc72548362"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F2221915%2F508c44ad1c064184a3a589b7de41f5dd%2Fsynthetic_z_stack_optimized.gif?generation=1788641223173538&alt=media"
+        status: "downloaded"
+        local_path: "assets/739731/06-synthetic_z_stack_optimized-9c04d384d1.gif"
+        content_type: "image/gif"
+        bytes: 4506097
+        sha256: "c394d395f45b4ab808b228eeeeba5a03cff52a9fe74b9fa9111110546f75613f"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fda81e458e6ac40760f6bd444de79eb82%2FSelection_4788.png?generation=1788636533698104&alt=media"
+        status: "downloaded"
+        local_path: "assets/739731/07-Selection_4788-e47ba75635.png"
+        content_type: "image/png"
+        bytes: 241590
+        sha256: "e75b9116211945042b244425a6b47fd4cf1cbdf3218da12a48a6194747cc0c9b"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F4ca457bf73e3526165ae8d2e1a59bbd6%2FSelection_4789.png?generation=1788636465458910&alt=media"
+        status: "downloaded"
+        local_path: "assets/739731/08-Selection_4789-2cfc08b6c5.png"
+        content_type: "image/png"
+        bytes: 225736
+        sha256: "2cfc4062d3ac4cb378579cfbdcdfa572341fc3855c80a44bd6e8f04c50dfee3d"
+  - id: 739685
+    status: "complete"
+    title: "Problems with edje connection"
+    author: "Mark"
+    post_date: "2026-09-05T13:05:03.739057700Z"
+    total_votes: 3
+    expected_messages: 7
+    captured_comments_and_replies: 7
+    captured_messages_including_post: 8
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/739685"
+    markdown_path: "discussions/739685-problems-with-edje-connection.md"
+    raw_json_path: "raw/739685.json"
+    media_count: 0
+    media:
+      []
+  - id: 739516
+    status: "complete"
+    title: "I measured my own division_jaccard (0.22). What's yours?"
+    author: "hikaggler"
+    post_date: "2026-09-04T12:23:52.430593200Z"
+    total_votes: 5
+    expected_messages: 1
+    captured_comments_and_replies: 1
+    captured_messages_including_post: 2
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/739516"
+    markdown_path: "discussions/739516-i-measured-my-own-division-jaccard-0-22-what-s-yours.md"
+    raw_json_path: "raw/739516.json"
+    media_count: 0
+    media:
+      []
+  - id: 717109
+    status: "complete"
+    title: "Resource sharing for cell tracking challenge"
+    author: "Tom"
+    post_date: "2026-07-01T14:00:25.871499400Z"
+    total_votes: 49
+    expected_messages: 4
+    captured_comments_and_replies: 4
+    captured_messages_including_post: 5
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/717109"
+    markdown_path: "discussions/717109-resource-sharing-for-cell-tracking-challenge.md"
+    raw_json_path: "raw/717109.json"
+    media_count: 6
+    media:
+      - source_url: "https://storage.googleapis.com/kaggle-forum-message-attachments/3485475/46060/dataset_eda_and_results_en.html"
+        status: "downloaded"
+        local_path: "assets/717109/01-dataset_eda_and_results_en-a7ec67d242.html"
+        content_type: "text/html"
+        bytes: 33713
+        sha256: "83f5cff732d1a835a9ebc1458998bbc7eab200f3c2ae55b5f4acb98fd4acc2b3"
+      - source_url: "https://storage.googleapis.com/kaggle-forum-message-attachments/3485475/46061/host_method_explained_en.html"
+        status: "downloaded"
+        local_path: "assets/717109/02-host_method_explained_en-0140929901.html"
+        content_type: "text/html"
+        bytes: 53168
+        sha256: "7640ff530c77c317f5bd96d684ef197cd18055fbc1880a1d1780e56753a895d9"
+      - source_url: "https://storage.googleapis.com/kaggle-forum-message-attachments/3485475/46062/metric_explained.html"
+        status: "downloaded"
+        local_path: "assets/717109/03-metric_explained-bed4885ccb.html"
+        content_type: "text/html"
+        bytes: 1172762
+        sha256: "bd9db3d01a4b5b04765bdf735cc06c656af832921c12ab3878b227fab7aaf651"
+      - source_url: "https://storage.googleapis.com/kaggle-forum-message-attachments/3485475/46070/pred_fp_fn.html"
+        status: "downloaded"
+        local_path: "assets/717109/04-pred_fp_fn-9f4707bc24.html"
+        content_type: "text/html"
+        bytes: 834162
+        sha256: "ff7709b6079b1cb851903852f817470742f2ba012518b9cca65d230f48f57219"
+      - source_url: "https://storage.googleapis.com/kaggle-forum-message-attachments/3485475/46072/dog_eda.html"
+        status: "downloaded"
+        local_path: "assets/717109/05-dog_eda-b5af0d11d9.html"
+        content_type: "text/html"
+        bytes: 607596
+        sha256: "5636b9229f46c89c89258c4409c14280e02670b84e5ce4d82bbbaca792c14c45"
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4310004%2F8f869234903a7d25d2b54ecad8a04d66%2F123.png?generation=1783143916774683&alt=media"
+        status: "downloaded"
+        local_path: "assets/717109/06-123-de06d95979.png"
+        content_type: "image/png"
+        bytes: 20202
+        sha256: "f3bdf88b3aa1162c2074246f6d6fd24b16ad56cef6795a7fd5d7f8b9b49da19a"
+  - id: 739915
+    status: "complete"
+    title: "Why train Unet for more than 100 epochs? Doesn't that lead to overfitting? "
+    author: "Mark"
+    post_date: "2026-09-07T06:47:17.104766300Z"
+    total_votes: 7
+    expected_messages: null
+    captured_comments_and_replies: 0
+    captured_messages_including_post: 1
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/739915"
+    markdown_path: "discussions/739915-why-train-unet-for-more-than-100-epochs-doesn-t-that-lead-to-overfitting.md"
+    raw_json_path: "raw/739915.json"
+    media_count: 0
+    media:
+      []
+  - id: 739686
+    status: "complete"
+    title: "Metric problem"
+    author: "Antonoof"
+    post_date: "2026-09-05T13:05:50.482469100Z"
+    total_votes: 3
+    expected_messages: 4
+    captured_comments_and_replies: 4
+    captured_messages_including_post: 5
+    source_url: "https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/739686"
+    markdown_path: "discussions/739686-metric-problem.md"
+    raw_json_path: "raw/739686.json"
+    media_count: 1
+    media:
+      - source_url: "https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F17954496%2Fe8b608858dd4a42fa7df29d929e6fe60%2Fcells.png?generation=1788613072033596&alt=media"
+        status: "downloaded"
+        local_path: "assets/739686/01-cells-05184e1a1d.png"
+        content_type: "image/png"
+        bytes: 1131135
+        sha256: "a6f1afd8be2dc3f6535b31eecfc367c563f8d15eb73977ebce113ceb6eb4eeaa"

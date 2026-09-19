@@ -1,0 +1,538 @@
+{
+  "forumTopic": {
+    "authorId": 32181963,
+    "authorThumbnailName": "default-thumb.png",
+    "authorUserDisplayName": "mikelou1",
+    "authorUserName": "mikelou1",
+    "comments": [
+      {
+        "id": 3525358,
+        "postDate": "2026-09-17T15:49:49.820Z",
+        "rawMarkdown": "I looked up how much boards like this one moved once the private part was scored: every medal-awarding microscopy or histopathology image competition since 2019 with 500 or more teams, a public/private split and two final picks, thirteen boards on cells, tissue and cryo-ET. Eleven were code competitions, Recursion 2019 and HPA 2019 took file submissions, and none is a tracking task. For each: how many of the public top 10 stayed in the top 10, how much of the public medal zone (every rank down to the last bronze, 100 to 216 teams on these boards) still held a medal, and how many teams took no medal while one of their own submissions would have earned one, counted in hindsight, one team at a time with everyone else left where they finished.\n\n| board | top 10 kept | medal zone kept | no medal, one in own submissions |\n|---|---|---|---|\n| Recursion 2019 | 9 | 97% | 0.1% |\n| CZII cryo-ET 2025 | 9 | 96% | 0.2% |\n| Sartorius 2021 | 7 | 95% | 0.2% |\n| HuBMAP organ 2022 | 7 | 94% | 0.3% |\n| HPA 2019 | 6 | 87% | 0.7% |\n| HPA single cell 2021 | 7 | 67% | 0.4% |\n| UBC-OCEAN 2024 | 5 | 63% | 2.9% |\n| BYU motors 2025 | 6 | 60% | 5.5% |\n| HuBMAP kidney 2021 | 0 | 50% | 5.4% |\n| PANDA 2020 | 3 | 46% | 5.6% |\n| HuBMAP vasculature 2023 | 3 | 44% | 18% |\n| SenNet vessels 2024 | 4 | 36% | 9.3% |\n| Mayo Clinic STRIP AI 2022 | 0 | 9% | 6.1% |\n\nOn the eight boards that kept 60% or more of the zone, at least 5 of the public top 10 stayed; on the five that kept half or less, the top ten fell to 0, 3, 3, 4 and 0. On four of those five, 5 to 18% of all teams went home without a medal they had already scored in a submission that did not count, against 0.1 to 5.5% on the other eight, 6 of them under 1%; the plain best-public pick would have caught 21 of those 413 teams. Mayo is the fifth: its bronze line fell inside 68 teams tied on a constant prediction, and 42 of its 99 medals went to that tie, so its row is as much a tie artefact as a reshuffle. The public share does not sort the table: SenNet showed 67% of the test and collapsed, CZII showed 26% and held; this competition shows 29%.\n\nNothing on the public board says which end of that table this competition lands on. One number that bears on that risk is @ramarlina's ±0.14 movie-to-movie spread on a leave-one-embryo-out hold-out in [the CV thread](https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/730160), where the public board runs about 10% above that hold-out.\n\nNumbers from my [dataset of public and private scores for past competitions](https://www.kaggle.com/datasets/georgymamarin/kaggle-submission-histories).",
+        "content": "<p>I looked up how much boards like this one moved once the private part was scored: every medal-awarding microscopy or histopathology image competition since 2019 with 500 or more teams, a public/private split and two final picks, thirteen boards on cells, tissue and cryo-ET. Eleven were code competitions, Recursion 2019 and HPA 2019 took file submissions, and none is a tracking task. For each: how many of the public top 10 stayed in the top 10, how much of the public medal zone (every rank down to the last bronze, 100 to 216 teams on these boards) still held a medal, and how many teams took no medal while one of their own submissions would have earned one, counted in hindsight, one team at a time with everyone else left where they finished.</p>\n<table>\n<thead>\n<tr>\n<th>board</th>\n<th>top 10 kept</th>\n<th>medal zone kept</th>\n<th>no medal, one in own submissions</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Recursion 2019</td>\n<td>9</td>\n<td>97%</td>\n<td>0.1%</td>\n</tr>\n<tr>\n<td>CZII cryo-ET 2025</td>\n<td>9</td>\n<td>96%</td>\n<td>0.2%</td>\n</tr>\n<tr>\n<td>Sartorius 2021</td>\n<td>7</td>\n<td>95%</td>\n<td>0.2%</td>\n</tr>\n<tr>\n<td>HuBMAP organ 2022</td>\n<td>7</td>\n<td>94%</td>\n<td>0.3%</td>\n</tr>\n<tr>\n<td>HPA 2019</td>\n<td>6</td>\n<td>87%</td>\n<td>0.7%</td>\n</tr>\n<tr>\n<td>HPA single cell 2021</td>\n<td>7</td>\n<td>67%</td>\n<td>0.4%</td>\n</tr>\n<tr>\n<td>UBC-OCEAN 2024</td>\n<td>5</td>\n<td>63%</td>\n<td>2.9%</td>\n</tr>\n<tr>\n<td>BYU motors 2025</td>\n<td>6</td>\n<td>60%</td>\n<td>5.5%</td>\n</tr>\n<tr>\n<td>HuBMAP kidney 2021</td>\n<td>0</td>\n<td>50%</td>\n<td>5.4%</td>\n</tr>\n<tr>\n<td>PANDA 2020</td>\n<td>3</td>\n<td>46%</td>\n<td>5.6%</td>\n</tr>\n<tr>\n<td>HuBMAP vasculature 2023</td>\n<td>3</td>\n<td>44%</td>\n<td>18%</td>\n</tr>\n<tr>\n<td>SenNet vessels 2024</td>\n<td>4</td>\n<td>36%</td>\n<td>9.3%</td>\n</tr>\n<tr>\n<td>Mayo Clinic STRIP AI 2022</td>\n<td>0</td>\n<td>9%</td>\n<td>6.1%</td>\n</tr>\n</tbody>\n</table>\n<p>On the eight boards that kept 60% or more of the zone, at least 5 of the public top 10 stayed; on the five that kept half or less, the top ten fell to 0, 3, 3, 4 and 0. On four of those five, 5 to 18% of all teams went home without a medal they had already scored in a submission that did not count, against 0.1 to 5.5% on the other eight, 6 of them under 1%; the plain best-public pick would have caught 21 of those 413 teams. Mayo is the fifth: its bronze line fell inside 68 teams tied on a constant prediction, and 42 of its 99 medals went to that tie, so its row is as much a tie artefact as a reshuffle. The public share does not sort the table: SenNet showed 67% of the test and collapsed, CZII showed 26% and held; this competition shows 29%.</p>\n<p>Nothing on the public board says which end of that table this competition lands on. One number that bears on that risk is <a href=\"/ramarlina\" target=\"_blank\">@ramarlina</a>'s ±0.14 movie-to-movie spread on a leave-one-embryo-out hold-out in <a href=\"https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/730160\" target=\"_blank\">the CV thread</a>, where the public board runs about 10% above that hold-out.</p>\n<p>Numbers from my <a href=\"https://www.kaggle.com/datasets/georgymamarin/kaggle-submission-histories\" target=\"_blank\">dataset of public and private scores for past competitions</a>.</p>",
+        "parent": {},
+        "author": {
+          "displayName": "Georgy Mamarin",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/9407128-kg.jpg?t=2026-04-01-15-02-02",
+          "url": "/georgymamarin",
+          "tier": "MASTER",
+          "id": 9407128,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 1,
+          "canUpvote": true,
+          "totalUpvotes": 1
+        },
+        "kernelVersion": 0,
+        "feedbackTrackingData": {},
+        "isThankYou": false
+      },
+      {
+        "id": 3513174,
+        "postDate": "2026-08-15T13:23:10.347Z",
+        "rawMarkdown": "I can see why it may appear that way. I can't speak as to what others in the top 10 are doing, but we are not focused on 0.0001 or Division J; we are working on a universal plugin that the bio cell team can plug into their current pipeline with minimal changes. We have tested our plugin with every available unique public notebook and model, with gains ranging from 0.030, 0.040, to 0.050 instantly just attaching our plugin. We've seen gains from a single public model reach a score of 0.940 untuned. We are not focused on the 0.0001 or tuning to the hidden.",
+        "content": "<p>I can see why it may appear that way. I can't speak as to what others in the top 10 are doing, but we are not focused on 0.0001 or Division J; we are working on a universal plugin that the bio cell team can plug into their current pipeline with minimal changes. We have tested our plugin with every available unique public notebook and model, with gains ranging from 0.030, 0.040, to 0.050 instantly just attaching our plugin. We've seen gains from a single public model reach a score of 0.940 untuned. We are not focused on the 0.0001 or tuning to the hidden.</p>",
+        "replies": [
+          {
+            "id": 3513176,
+            "postDate": "2026-08-15T14:04:18.200Z",
+            "rawMarkdown": "thanks for the info! I feel like the public notebooks are really overtuned to the lb so i'm afraid to use them",
+            "content": "<p>thanks for the info! I feel like the public notebooks are really overtuned to the lb so i'm afraid to use them</p>",
+            "parent": {},
+            "author": {
+              "displayName": "mikelou1",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/default-thumb.png",
+              "url": "/mikelou1",
+              "tier": "EXPERT",
+              "id": 32181963,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 77,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "enabled": true,
+              "teamLeader": {
+                "displayName": "mikelou1",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/default-thumb.png",
+                "url": "/mikelou1",
+                "userName": "mikelou1",
+                "tier": "EXPERT",
+                "id": 32181963,
+                "profileUrl": "/mikelou1",
+                "performanceTier": "EXPERT",
+                "userId": 32181963,
+                "progressionOptOut": false
+              },
+              "intro": "Looking for teams with very strong edge jaccard that is private-safe. I have a very strong division model and we can do a ensemble."
+            }
+          },
+          {
+            "id": 3513238,
+            "postDate": "2026-08-15T18:12:20.333Z",
+            "rawMarkdown": "Hi @tweakai, by plugin do you mean something that optimizes/refines the tracking graph, or do you mean you take the public notebook detections and apply your own tracking method on top?\n\nGot curious about it, but no worries if you can’t share more\n",
+            "content": "<p>Hi <a href=\"https://www.kaggle.com/tweakai\" target=\"_blank\">@tweakai</a>, by plugin do you mean something that optimizes/refines the tracking graph, or do you mean you take the public notebook detections and apply your own tracking method on top?</p>\n<p>Got curious about it, but no worries if you can’t share more</p>",
+            "replies": [
+              {
+                "id": 3513384,
+                "postDate": "2026-08-16T09:56:04.003Z",
+                "rawMarkdown": "yeah i believe it is very interesting to know if the calibration was for keeping the track or reassigning",
+                "content": "<p>yeah i believe it is very interesting to know if the calibration was for keeping the track or reassigning</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "Moawiz",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/20852044-kg.jpeg?t=2026-08-02-09-10-32",
+                  "url": "/moawiz",
+                  "tier": "CONTRIBUTOR",
+                  "id": 20852044,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 1681,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "Moawiz",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/20852044-kg.jpeg?t=2026-08-02-09-10-32",
+                    "url": "/moawiz",
+                    "userName": "moawiz",
+                    "tier": "CONTRIBUTOR",
+                    "id": 20852044,
+                    "profileUrl": "/moawiz",
+                    "performanceTier": "CONTRIBUTOR",
+                    "userId": 20852044,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              }
+            ],
+            "parent": {},
+            "author": {
+              "displayName": "Sergio Alvarez",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/2221915-kg.jpg?t=2024-09-24-13-40-46",
+              "url": "/sersasj",
+              "tier": "MASTER",
+              "id": 2221915,
+              "progressionOptOut": false
+            },
+            "authorType": "COMMENT",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 2,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "Sergio Alvarez",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/2221915-kg.jpg?t=2024-09-24-13-40-46",
+                "url": "/sersasj",
+                "userName": "sersasj",
+                "tier": "MASTER",
+                "id": 2221915,
+                "profileUrl": "/sersasj",
+                "performanceTier": "MASTER",
+                "userId": 2221915,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          },
+          {
+            "id": 3514408,
+            "postDate": "2026-08-19T08:44:19.630Z",
+            "rawMarkdown": "that is an impressive approach/tool. Thank you for the information.",
+            "content": "<p>that is an impressive approach/tool. Thank you for the information.</p>",
+            "parent": {},
+            "author": {
+              "displayName": "OpPrime",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/31234056-kg.jpg?t=2026-03-22-23-34-57",
+              "url": "/farshidamira",
+              "tier": "CONTRIBUTOR",
+              "id": 31234056,
+              "progressionOptOut": false
+            },
+            "authorType": "COMMENT",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 295,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "OpPrime",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/31234056-kg.jpg?t=2026-03-22-23-34-57",
+                "url": "/farshidamira",
+                "userName": "farshidamira",
+                "tier": "CONTRIBUTOR",
+                "id": 31234056,
+                "profileUrl": "/farshidamira",
+                "performanceTier": "CONTRIBUTOR",
+                "userId": 31234056,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "attachments": [
+          {
+            "fileType": ".jpeg",
+            "id": 49290,
+            "name": "Screenshot_15-8-2026_91131_www.kaggle.com.jpeg",
+            "totalBytes": 21075,
+            "url": "https://storage.googleapis.com/kaggle-forum-message-attachments/3513174/49290/Screenshot_15-8-2026_91131_www.kaggle.com.jpeg"
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "TWEAK",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28207655-kg.png?t=2026-08-05-03-21-49",
+          "url": "/tweakai",
+          "tier": "EXPERT",
+          "id": 28207655,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 7,
+          "canUpvote": true,
+          "totalUpvotes": 7
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 18,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "enabled": true,
+          "teamLeader": {
+            "displayName": "TWEAK",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28207655-kg.png?t=2026-08-05-03-21-49",
+            "url": "/tweakai",
+            "userName": "tweakai",
+            "tier": "EXPERT",
+            "id": 28207655,
+            "profileUrl": "/tweakai",
+            "performanceTier": "EXPERT",
+            "userId": 28207655,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3513149,
+        "postDate": "2026-08-15T11:43:45.287Z",
+        "rawMarkdown": "I guess what we can do is:\n- Build a reliable CV, and trust it.\n- Use external datasets or synthetic data to make our model more robust on division cells prediction.",
+        "content": "<p>I guess what we can do is:</p>\n<ul>\n<li>Build a reliable CV, and trust it.</li>\n<li>Use external datasets or synthetic data to make our model more robust on division cells prediction.</li>\n</ul>",
+        "replies": [
+          {
+            "id": 3513868,
+            "postDate": "2026-08-17T20:06:00.097Z",
+            "rawMarkdown": "did you train your very own model uptil now or used the publicly available one and did u take the public notebook detections and apply your own tracking method on top",
+            "content": "<p>did you train your very own model uptil now or used the publicly available one and did u take the public notebook detections and apply your own tracking method on top</p>",
+            "parent": {},
+            "author": {
+              "displayName": "nusrati",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/23336356-kg.jpeg?t=2026-09-01-09-43-05",
+              "url": "/nusrati",
+              "tier": "CONTRIBUTOR",
+              "id": 23336356,
+              "progressionOptOut": false
+            },
+            "authorType": "COMMENT",
+            "votes": {
+              "totalVotes": -1,
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 626,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "nusrati",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/23336356-kg.jpeg?t=2026-09-01-09-43-05",
+                "url": "/nusrati",
+                "userName": "nusrati",
+                "tier": "CONTRIBUTOR",
+                "id": 23336356,
+                "profileUrl": "/nusrati",
+                "performanceTier": "CONTRIBUTOR",
+                "userId": 23336356,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "Tang",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/2312281-kg.png?t=2026-01-05-02-44-35",
+          "url": "/hirotetsu",
+          "tier": "MASTER",
+          "id": 2312281,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 4,
+          "canUpvote": true,
+          "totalUpvotes": 4
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 5,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "Tang",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/2312281-kg.png?t=2026-01-05-02-44-35",
+            "url": "/hirotetsu",
+            "userName": "hirotetsu",
+            "tier": "MASTER",
+            "id": 2312281,
+            "profileUrl": "/hirotetsu",
+            "performanceTier": "MASTER",
+            "userId": 2312281,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3513158,
+        "postDate": "2026-08-15T12:49:38.453Z",
+        "rawMarkdown": "yea ig so too , because training past ep 400 has diminishing returns , so maybe yea we wait fro the private shake ",
+        "content": "<p>yea ig so too , because training past ep 400 has diminishing returns , so maybe yea we wait fro the private shake </p>",
+        "parent": {},
+        "author": {
+          "displayName": "Bharath Varma",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/30683105-kg.jpeg?t=2026-04-16-05-40-04",
+          "url": "/bharath111l",
+          "tier": "CONTRIBUTOR",
+          "id": 30683105,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 1,
+          "canUpvote": true,
+          "totalUpvotes": 1
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 675,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "Bharath Varma",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/30683105-kg.jpeg?t=2026-04-16-05-40-04",
+            "url": "/bharath111l",
+            "userName": "bharath111l",
+            "tier": "CONTRIBUTOR",
+            "id": 30683105,
+            "profileUrl": "/bharath111l",
+            "performanceTier": "CONTRIBUTOR",
+            "userId": 30683105,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3513867,
+        "postDate": "2026-08-17T20:04:44.877Z",
+        "rawMarkdown": "you dont mind me asking you, did you train your very own model from scratch or rather you fine tuned public model?",
+        "content": "<p>you dont mind me asking you, did you train your very own model from scratch or rather you fine tuned public model?</p>",
+        "replies": [
+          {
+            "id": 3513915,
+            "postDate": "2026-08-18T00:00:15.817Z",
+            "rawMarkdown": "I trained mine from scratch since my division score is quite good [0.3] and edge is really bad [its ~0.01 points below public notebooks] so I'm trying to improve that.",
+            "content": "<p>I trained mine from scratch since my division score is quite good [0.3] and edge is really bad [its ~0.01 points below public notebooks] so I'm trying to improve that.</p>",
+            "parent": {},
+            "author": {
+              "displayName": "mikelou1",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/default-thumb.png",
+              "url": "/mikelou1",
+              "tier": "EXPERT",
+              "id": 32181963,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "totalVotes": 1,
+              "canUpvote": true,
+              "totalUpvotes": 1
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 77,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "enabled": true,
+              "teamLeader": {
+                "displayName": "mikelou1",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/default-thumb.png",
+                "url": "/mikelou1",
+                "userName": "mikelou1",
+                "tier": "EXPERT",
+                "id": 32181963,
+                "profileUrl": "/mikelou1",
+                "performanceTier": "EXPERT",
+                "userId": 32181963,
+                "progressionOptOut": false
+              },
+              "intro": "Looking for teams with very strong edge jaccard that is private-safe. I have a very strong division model and we can do a ensemble."
+            }
+          },
+          {
+            "id": 3514774,
+            "postDate": "2026-08-20T04:44:28.813Z",
+            "rawMarkdown": "Trained from scratch. And training here isn't very expensive. Its affordable.",
+            "content": "<p>Trained from scratch. And training here isn't very expensive. Its affordable.</p>",
+            "parent": {},
+            "author": {
+              "displayName": "Komil Parmar",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/11351811-kg.jpg?t=2025-07-02-06-16-19",
+              "url": "/komilparmar",
+              "tier": "EXPERT",
+              "id": 11351811,
+              "progressionOptOut": false
+            },
+            "authorType": "COMMENT",
+            "votes": {
+              "totalVotes": 1,
+              "canUpvote": true,
+              "totalUpvotes": 1
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 348,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "Komil Parmar",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/11351811-kg.jpg?t=2025-07-02-06-16-19",
+                "url": "/komilparmar",
+                "userName": "komilparmar",
+                "tier": "EXPERT",
+                "id": 11351811,
+                "profileUrl": "/komilparmar",
+                "performanceTier": "EXPERT",
+                "userId": 11351811,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "nusrati",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/23336356-kg.jpeg?t=2026-09-01-09-43-05",
+          "url": "/nusrati",
+          "tier": "CONTRIBUTOR",
+          "id": 23336356,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 626,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "nusrati",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/23336356-kg.jpeg?t=2026-09-01-09-43-05",
+            "url": "/nusrati",
+            "userName": "nusrati",
+            "tier": "CONTRIBUTOR",
+            "id": 23336356,
+            "profileUrl": "/nusrati",
+            "performanceTier": "CONTRIBUTOR",
+            "userId": 23336356,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      }
+    ],
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3513101,
+      "postDate": "2026-08-15T08:25:14.080Z",
+      "rawMarkdown": "Hey guys! I noticed the top of the leaderboard often has difference less than 0.001 points. In areas like division jaccard where theres only a few samples, it's really easy to overfit. I think this might cause a huge shakeup as even parameter tuning could cause 0.001 changes.\n\nDo you guys have any ideas on this?",
+      "content": "<p>Hey guys! I noticed the top of the leaderboard often has difference less than 0.001 points. In areas like division jaccard where theres only a few samples, it's really easy to overfit. I think this might cause a huge shakeup as even parameter tuning could cause 0.001 changes.</p>\n<p>Do you guys have any ideas on this?</p>",
+      "parent": {},
+      "author": {
+        "displayName": "mikelou1",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/default-thumb.png",
+        "url": "/mikelou1",
+        "tier": "EXPERT",
+        "id": 32181963,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 9,
+        "canUpvote": true,
+        "totalUpvotes": 9
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 77,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "teamUpInfo": {
+        "enabled": true,
+        "teamLeader": {
+          "displayName": "mikelou1",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/default-thumb.png",
+          "url": "/mikelou1",
+          "userName": "mikelou1",
+          "tier": "EXPERT",
+          "id": 32181963,
+          "profileUrl": "/mikelou1",
+          "performanceTier": "EXPERT",
+          "userId": 32181963,
+          "progressionOptOut": false
+        },
+        "intro": "Looking for teams with very strong edge jaccard that is private-safe. I have a very strong division model and we can do a ensemble."
+      }
+    },
+    "firstMessageId": 3513101,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 735352,
+    "name": "Possible big leaderboard shakeup",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-08-15T08:25:14.079757100Z",
+    "totalVotes": 9,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/735352",
+    "totalMessages": 12,
+    "authorPerformanceTier": "EXPERT",
+    "authorProgressionOptOut": false
+  }
+}
