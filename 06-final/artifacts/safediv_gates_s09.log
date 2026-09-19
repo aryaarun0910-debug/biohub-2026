@@ -1,0 +1,92 @@
+Re-price the safe_div GATES on the s09 chain. Division axis.
+
+scripts/100 re-priced gap_close / gap2 / prune / short_track on this chain and
+found nothing. It did not touch the safe_div gates, and those are the axis that
+matters: the offline-vs-board ledger in section 7 is 3 for 3 on divisions and
+0 for 3 on edges.
+
+Re-pricing them is not redundant with section 4's "gates are at a local
+optimum", because safe_div's INPUT has changed. Deployed it saw
+raw + relink + gap_close + gap2; on the s09 chain it sees raw + gap_close. The
+orphan pool it draws daughters from is a different set, and the orphan pool is
+the whole mechanism.
+
+Section 5: an autopsy of all 12 divisions found EXACTLY ONE blocked by a gate,
+and it misses by 0.35 um. So the steps here are deliberately fine near the
+deployed values -- a coarse sweep would step straight over it. Deployed gates:
+
+    parent_max 9.0   sister_max 14.0   child_max 10.0
+    tau 0.6          diverge 2.25      frame_cap 0.0076   glob_cap 0.00375
+======================================================================================================================
+configuration                               proxy    dprox        J       dJ    mult    dmult n/n_est    divJ TP/FP/FN  notes
+s09 BASE (deployed gates)                 0.97918           0.94003          1.00368           0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=273 st_comps=1412 st_removed=6334
+
+--- parent_max (deployed 9.0) ---
+  parent_max=9.25                         0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=274 st_comps=1412 st_removed=6334
+  parent_max=9.5                          0.97917 -0.00001  0.94003 +0.00000 1.00367 -0.00001  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187315 sd_added=277 st_comps=1411 st_removed=6329
+  parent_max=10.0                         0.97917 -0.00001  0.94003 +0.00000 1.00367 -0.00001  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187315 sd_added=279 st_comps=1411 st_removed=6329
+  parent_max=11.0                         0.97917 -0.00001  0.94003 +0.00000 1.00366 -0.00001  0.8978  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187316 sd_added=284 st_comps=1410 st_removed=6324
+  parent_max=12.0                         0.97917 -0.00001  0.94003 +0.00000 1.00366 -0.00001  0.8978  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187316 sd_added=284 st_comps=1410 st_removed=6324
+  parent_max=8.5                          0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=716 gap2_pairs=358 gap_pairs=1222 gap_synth=1222 lf_moved=187312 sd_added=264 st_comps=1413 st_removed=6338
+--- sister_max (deployed 14.0) ---
+  sister_max=14.5                         0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=273 st_comps=1412 st_removed=6334
+  sister_max=15.0                         0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=273 st_comps=1412 st_removed=6334
+  sister_max=16.0                         0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=273 st_comps=1412 st_removed=6334
+  sister_max=13.0                         0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=270 st_comps=1412 st_removed=6334
+--- child_max (deployed 10.0) ---
+  child_max=10.5                          0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=273 st_comps=1412 st_removed=6334
+  child_max=11.0                          0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=273 st_comps=1412 st_removed=6334
+  child_max=12.0                          0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=273 st_comps=1412 st_removed=6334
+  child_max=9.0                           0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=272 st_comps=1412 st_removed=6334
+--- tau (deployed 0.6) ---
+  tau=0.65                                0.97918 -0.00000  0.94003 +0.00000 1.00368 -0.00000  0.8978  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187323 sd_added=285 st_comps=1409 st_removed=6320
+  tau=0.7                                 0.97918 -0.00000  0.94003 +0.00000 1.00368 -0.00000  0.8978  0.3571    5/2/7  gap2_nodes=712 gap2_pairs=356 gap_pairs=1222 gap_synth=1222 lf_moved=187327 sd_added=307 st_comps=1407 st_removed=6311
+  tau=0.8                                 0.96455 -0.01462  0.93970 -0.00034 1.00367 -0.00001  0.8980  0.2143    3/2/9  gap2_nodes=706 gap2_pairs=353 gap_pairs=1222 gap_synth=1222 lf_moved=187360 sd_added=376 st_comps=1398 st_removed=6271
+  tau=1.0                                 0.96027 -0.01891  0.93922 -0.00081 1.00365 -0.00003  0.8982  0.1765    3/5/9  gap2_nodes=700 gap2_pairs=350 gap_pairs=1222 gap_synth=1222 lf_moved=187389 sd_added=451 st_comps=1387 st_removed=6223
+  tau=0.5                                 0.97187 -0.00731  0.93986 -0.00017 1.00368 +0.00000  0.8976  0.2857    4/2/8  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187291 sd_added=225 st_comps=1418 st_removed=6362
+--- diverge (deployed 2.25) ---
+  diverge=2.0                             0.97917 -0.00001  0.94003 +0.00000 1.00367 -0.00001  0.8979  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187336 sd_added=324 st_comps=1405 st_removed=6302
+  diverge=1.75                            0.97891 -0.00027  0.94021 +0.00018 1.00366 -0.00002  0.8980  0.3529    6/5/6  gap2_nodes=708 gap2_pairs=354 gap_pairs=1222 gap_synth=1222 lf_moved=187354 sd_added=364 st_comps=1399 st_removed=6274
+  diverge=1.5                             0.97331 -0.00587  0.93991 -0.00013 1.00366 -0.00002  0.8980  0.3000    6/8/6  gap2_nodes=708 gap2_pairs=354 gap_pairs=1222 gap_synth=1222 lf_moved=187362 sd_added=400 st_comps=1397 st_removed=6265
+  diverge=2.5                             0.97919 +0.00001  0.94003 +0.00000 1.00369 +0.00001  0.8975  0.3571    5/2/7  gap2_nodes=716 gap2_pairs=358 gap_pairs=1222 gap_synth=1222 lf_moved=187272 sd_added=235 st_comps=1421 st_removed=6376  <<FALSE GAIN: all multiplier
+  diverge=3.0                             0.97188 -0.00730  0.93986 -0.00017 1.00369 +0.00002  0.8973  0.2857    4/2/8  gap2_nodes=718 gap2_pairs=359 gap_pairs=1222 gap_synth=1222 lf_moved=187242 sd_added=188 st_comps=1431 st_removed=6419
+--- frame_cap (deployed 0.0076) ---
+  frame_cap=0.01                          0.97918 -0.00000  0.94003 +0.00000 1.00368 -0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187313 sd_added=285 st_comps=1411 st_removed=6330
+  frame_cap=0.015                         0.97918 -0.00000  0.94003 +0.00000 1.00367 -0.00000  0.8978  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187324 sd_added=296 st_comps=1409 st_removed=6320
+--- glob_cap (deployed 0.00375) ---
+  glob_cap=0.005                          0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=273 st_comps=1412 st_removed=6334
+  glob_cap=0.0075                         0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 sd_added=273 st_comps=1412 st_removed=6334
+
+======================================================================================================================
+SCREEN: a gate change only counts if divJ RISES. Section 4: loosening
+tau/diverge raises TP while divJ FALLS, because FP rises faster.
+gate                      dproxy    ddivJ   TP/FP/FN   dratio  verdict
+(deployed)              +0.00000  +0.0000      5/2/7 +0.00000  base
+parent_max=9.25         +0.00000  +0.0000      5/2/7 +0.00000  no division change
+parent_max=9.5          -0.00001  +0.0000      5/2/7 +0.00002  no division change
+parent_max=10.0         -0.00001  +0.0000      5/2/7 +0.00002  no division change
+parent_max=11.0         -0.00001  +0.0000      5/2/7 +0.00005  no division change
+parent_max=12.0         -0.00001  +0.0000      5/2/7 +0.00005  no division change
+parent_max=8.5          +0.00000  +0.0000      5/2/7 -0.00001  no division change
+sister_max=14.5         +0.00000  +0.0000      5/2/7 +0.00000  no division change
+sister_max=15.0         +0.00000  +0.0000      5/2/7 +0.00000  no division change
+sister_max=16.0         +0.00000  +0.0000      5/2/7 +0.00000  no division change
+sister_max=13.0         +0.00000  +0.0000      5/2/7 +0.00000  no division change
+child_max=10.5          +0.00000  +0.0000      5/2/7 +0.00000  no division change
+child_max=11.0          +0.00000  +0.0000      5/2/7 +0.00000  no division change
+child_max=12.0          +0.00000  +0.0000      5/2/7 +0.00000  no division change
+child_max=9.0           +0.00000  +0.0000      5/2/7 +0.00000  no division change
+tau=0.65                -0.00000  +0.0000      5/2/7 +0.00007  no division change
+tau=0.7                 -0.00000  +0.0000      5/2/7 +0.00010  no division change
+diverge=2.0             -0.00001  +0.0000      5/2/7 +0.00015  no division change
+diverge=2.5             +0.00001  +0.0000      5/2/7 -0.00019  no division change
+frame_cap=0.01          -0.00000  +0.0000      5/2/7 +0.00002  no division change
+frame_cap=0.015         -0.00000  +0.0000      5/2/7 +0.00007  no division change
+glob_cap=0.005          +0.00000  +0.0000      5/2/7 +0.00000  no division change
+glob_cap=0.0075         +0.00000  +0.0000      5/2/7 +0.00000  no division change
+diverge=1.75            -0.00027  -0.0042      6/5/6 +0.00026  TP up but divJ flat/down -- FP flood, the section 4 trap
+diverge=1.5             -0.00587  -0.0571      6/8/6 +0.00030  TP up but divJ flat/down -- FP flood, the section 4 trap
+tau=0.5                 -0.00731  -0.0714      4/2/8 -0.00013  divJ down
+diverge=3.0             -0.00730  -0.0714      4/2/8 -0.00039  divJ down
+tau=0.8                 -0.01462  -0.1429      3/2/9 +0.00026  divJ down
+tau=1.0                 -0.01891  -0.1807      3/5/9 +0.00046  divJ down

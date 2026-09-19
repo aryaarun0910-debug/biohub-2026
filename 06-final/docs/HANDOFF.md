@@ -95,6 +95,15 @@ rebuild), `artifacts/films.csv`, `artifacts/loeo_split.json` (frozen).
 
 ## 4. What is established
 
+**The parametric search is CLOSED.** Every post-processing knob has now been
+re-priced on the current (s09) chain, not inherited from an older topology:
+`scripts/100_repice_on_s09.py` covers gap_close / gap2 / prune / short_track (21
+settings) and `scripts/101_safediv_gates_on_s09.py` covers the seven safe_div
+gates. **Nothing survives.** The only positive rows anywhere are the node-count
+exploit, and both scripts flag it automatically rather than leaving it to be
+noticed. Do not re-tune; the remaining defects are structural, and with the
+weights frozen that means s08/s09 are the plays.
+
 **Motion relink is the one large lever.** Removing it is worth **+0.0224** on
 Kaggle's validator (+0.0295 predicted locally). It is *systematic*: pooling
 5,540 correctly-linked GT edges, the break rate jumps **171×** with a clean knee
@@ -149,6 +158,7 @@ off.)
 | DeepCenter as a division veto | Real ranker (AUC 0.836–0.857) but **at its oracle ceiling**, worth +0.0029, and a plain **brightness threshold matches it**. Gain is one fork in one film. |
 | Division detection ceiling (pool kernel merging sisters) | **Refuted.** `pool_kernel_um` quantises — 3.0/4.0/5.0 give the identical (3,3,3) kernel, true floor 3.25 µm Chebyshev. Only 1/151 divisions below it; **zero** actually lost. The instance that motivated it was a *linker* failure with all three nodes detected. |
 | Short-track filter L≥6 | **Metric exploit.** J falls, multiplier rises, and the multiplier gain is **monotone to L=40**. A real stage would peak. |
+| Re-pricing the safe_div GATES on the s09 chain | **Exhausted.** No gate in any direction gains a division; ledger holds 5/2/7. `parent_max` 9→12 catches nothing, so §5's 0.35 µm gate-blocked division is no longer reachable — the s08 reorder appears to have taken it. `tau` loses a division in BOTH directions (0.5→4 TP, 0.8→3 TP). `diverge` 1.75/1.5 gains a TP but FP goes 2→5/2→8 and divJ falls — §4's trap, reproduced. `scripts/101_safediv_gates_on_s09.py`. |
 | Re-pricing all 21 remaining PP settings on the s09 chain | **Exhausted.** Every positive row is the node-count exploit (`st_len=8` +0.00103, `st_len=9` +0.00041, `gc_um=4.0` +0.00012 — all with J **down** and `ratio` down); everything else is 0 or negative. `scripts/100_repice_on_s09.py`. |
 | `GAP_CLOSE_UM 5 → 8` on the s09 chain | **+0.00089 on raw graphs, −0.00015 here.** Third instance of the §6 non-transfer, after relink (s05) and linefit (s06). |
 | `OUTPUT_LINEFIT_WEIGHT 0.8 → 0.4` (s06) | **−0.00135.** Measured +0.0024 on *raw* graphs; sign flipped on the *relinked* pipeline. See §6. |
