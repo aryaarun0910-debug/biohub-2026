@@ -1,0 +1,29 @@
+---
+tags:
+  - moc
+---
+
+# Biohub Cell Tracking — Vault
+
+Everything known about this competition, as a graph. Start at a hub below.
+
+## Hubs
+- [[Competition]] — the task, the deadline, the money
+- [[Tracking Pipeline]] — what actually runs
+- [[The Metric]] — how score is computed, and how it can be gamed
+- [[Submission Ledger]] — every submission and what it scored
+- [[Local Harness]] — the thing that makes experiments cost seconds
+- [[Operating Rules]] — the discipline that keeps results honest
+- [[Scripts]] — every script and what it proves
+- [[Failed Attempts]] — twelve dead ends, with the reason each died
+- [[Kaggle Mechanics]] — the constraints that shape a day's work
+
+## The three ideas that matter most
+1. [[Transfer Lesson]] — a price measured on one topology does not hold on another. Three confirmed instances.
+2. [[Ordering Bug Class]] — the recurring defect is *sequence*, not parameters.
+3. [[Node Count Exploit]] — the metric pays for deleting nodes, without bound.
+
+## State as of 2026-09-19
+- Board: **0.947**, stuck on the [[0.947 Plateau]] with 652 other teams.
+- In flight: [[s08]] (division axis) and [[s09]] (edge axis).
+- [[Parametric Search Closed]] — every post-processing knob re-priced, nothing left.
