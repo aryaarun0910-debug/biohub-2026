@@ -21,6 +21,10 @@ Applied to what is in flight:
 - [[s09]]'s gain leaves the division ledger untouched at 5/2/7 in all 24 cells →
   **pure edge axis**, bad prior, despite better local evidence.
 - [[s05]] is an edge-axis change with much better evidence than the three that
-  failed — but the base rate is real.
+  failed — and [[Scored Films Measurement]] now puts it at **+0.02707 on the
+  scored films**, larger than on the validator and positive on all four.
+
+**Update:** the axis prior may partly *be* a composition effect. Division gains
+are measured where there are 12 divisions and scored where there are 3.
 
 Related: [[Operating Rules]], [[Proxy Score]]

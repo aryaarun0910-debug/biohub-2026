@@ -1,0 +1,49 @@
+Score s05 / s08 / s09 on the FOUR FILMS THE LEADERBOARD ACTUALLY SCORES.
+
+A discussion post argues the public stack's detectors were trained on all 199
+train videos, so any local hold-out is in-sample and local measurements cannot
+be trusted. The manifest claim is TRUE and verified:
+
+    weights/biohub-temporal-unet3d-seed314159-v1/.../split_manifest.json
+        method = unet_transformer_alltrain_seed314159_v1
+        train  = all 199 videos;  test = 40, a strict SUBSET of train
+
+But the same manifest also contains the four films the submission is scored on,
+so the leaderboard films are in-sample too. In-sample-ness is therefore SYMMETRIC
+and cannot by itself explain a local-vs-LB sign flip. What actually differs
+between our 8 validator films and the 4 scored films is composition:
+
+    validator  8 films, 4x 44b6 + 4x 6bba, 12 GT divisions, weighted ~evenly
+    scored     4 films, 2x 44b6 + 2x 6bba, THREE GT divisions (all in
+               6bba_05db0fb1), dominated by one 70k-node film
+
+So rather than argue, score the real films. We hold their ILP graphs:
+    artifacts/s05_output/tracking_repo/predictions/unknown/unet_transformer/split_0/
+verified byte-identical to the relink-ON run's graphs, i.e. pure ILP output,
+independent of post-processing config. Ground truth is in data/.../train/.
+========================================================================================================
+
+### SCORED (the 4 leaderboard films)
+arm                                  proxy    dproxy         J    divJ  TP/FP/FN   ratio
+s05  gap2 before, linefit 0.8      0.91768             0.91490  0.0000     0/6/3  0.8982
+s08  gap2 AFTER,  linefit 0.8      0.91768  +0.00000   0.91490  0.0000     0/6/3  0.8981
+s09  gap2 AFTER,  linefit 0.3      0.91682  -0.00086   0.91404  0.0000     0/6/3  0.8981
+
+### VALIDATOR (the 8 train hold-outs)
+arm                                  proxy    dproxy         J    divJ  TP/FP/FN   ratio
+s05  gap2 before, linefit 0.8      0.96682             0.93483  0.2857     4/2/8  0.8977
+s08  gap2 AFTER,  linefit 0.8      0.97431  +0.00748   0.93516  0.3571     5/2/7  0.8977
+s09  gap2 AFTER,  linefit 0.3      0.97918  +0.01236   0.94003  0.3571     5/2/7  0.8977
+
+========================================================================================================
+DOES THE LOCAL RESULT SURVIVE ON THE FILMS THAT ARE ACTUALLY SCORED?
+change                               validator  SCORED films  verdict
+s08 over s05                          +0.00748      +0.00000  HOLDS
+s09 over s08                          +0.00487      -0.00086  *** SIGN FLIP -- local gain does NOT survive ***
+
+--- per-film on the SCORED films (s09 vs s05) ---
+film                divs  s05 proxy  s09 proxy     delta   weight
+44b6_0113de3b          0    0.96051    0.96051  +0.00000       50
+44b6_0b24845f          0    0.97925    0.97926  +0.00001       52
+6bba_05b6850b          0    0.96689    0.97375  +0.00686      861
+6bba_05db0fb1          3    0.87974    0.87389  -0.00585     1258

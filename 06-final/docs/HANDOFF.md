@@ -40,6 +40,42 @@ unmodified base with relink **ON**. Wrong base; s08 replaces it. See §6.
 
 ---
 
+## 1b. READ FIRST — measure on the films that are actually scored
+
+The submission covers **4 films**, and we can score them locally: their ILP
+graphs are in `artifacts/s05_output/.../unet_transformer/split_0/` (verified
+byte-identical to the relink-ON run, so pure ILP output) and their ground truth
+is in `data/.../train/`. `scripts/102_on_real_scored_films.py` and
+`scripts/103_relink_on_scored_films.py`.
+
+| change | validator (8 films) | **SCORED (4 films)** |
+|---|---|---|
+| **s05** over base | +0.01794 | **+0.02707** — holds, and larger |
+| s08 over s05 | +0.00748 | **+0.00000** — validator-only |
+| s09 over s08 | +0.00487 | **−0.00086** — SIGN FLIP |
+| s09 over base | +0.03030 | +0.02621 — worse than s05 alone |
+
+**s05 alone is the best configuration on the films that count.** It is positive
+on all four individually, including the heaviest (`6bba_05db0fb1` +0.03885).
+**Do not select s09.**
+
+Why they diverge is *composition*, not contamination: the scored films hold
+**3** ground-truth divisions against the validator's **12**, with a ledger of
+0/6/3 so `divJ = 0` in every arm — s08 has no division to recover — and the
+score is dominated by one 70k-node film.
+
+Caveat: the scored films carry only ~2,273 GT edges and sparse labels
+(0.16%–13.5%), so this is noisier than the validator set. It is still the target.
+
+Prompted by a discussion post claiming the public weights are all-train.
+**Verified true** (`method: unet_transformer_alltrain_seed314159_v1`, train=199,
+test⊂train) — but the 4 scored films are in that same 199, so in-sample-ness is
+symmetric and cannot explain a sign flip on its own. Separately: the DeepCenter
+split is **embryo-level** — train = all 71 `44b6`, val = all 128 `6bba`, so it
+has never seen a 6bba frame.
+
+---
+
 ## 2. The thing being worked on
 
 Nothing here trains a model. The deployed pipeline is a **public Kaggle

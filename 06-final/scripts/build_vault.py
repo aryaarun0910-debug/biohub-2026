@@ -50,6 +50,11 @@ Everything known about this competition, as a graph. Start at a hub below.
 2. [[Ordering Bug Class]] — the recurring defect is *sequence*, not parameters.
 3. [[Node Count Exploit]] — the metric pays for deleting nodes, without bound.
 
+## Read this before trusting any local number
+[[Scored Films Measurement]] — the 4 films the board scores can be measured
+locally, and they disagree with the 8 validator films. [[Manifest Contamination]]
+is the debate that prompted it.
+
 ## State as of 2026-09-19
 - Board: **0.947**, stuck on the [[0.947 Plateau]] with 652 other teams.
 - In flight: [[s08]] (division axis) and [[s09]] (edge axis).
@@ -617,6 +622,10 @@ Three things to keep straight:
 
 Gain is on the **division axis** — see [[Axis Priors]].
 
+⚠ **But it is worth +0.00000 on the films that are actually scored.** Their
+division ledger is 0/6/3, so `divJ = 0` in every arm and there is no division to
+recover. See [[Scored Films Measurement]]. Harmless, but not a gain.
+
 Proven by [[Script 96 Reorder Variant]], measured by [[Script 98 Reorder On Norelink]].
 """)
 
@@ -639,8 +648,13 @@ only 3/8 films improve at the argmax, two lose ~0.006, and the division ledger i
 **unchanged at 5/2/7 in all 24 cells**. A pure edge-axis lever, where
 [[Axis Priors]] is 0-for-3. Good local evidence, bad prior.
 
-s09 contains [[s05]] + [[s08]] + itself, so it is the **current best-known
-configuration**: local proxy 0.97918 against s05's 0.96682.
+⚠ **On the films that are actually scored, s09 is −0.00086 — a sign flip.** It
+helps one film and hurts the heavier one. See [[Scored Films Measurement]].
+**Do not select s09.** [[s05]] alone is better where it counts.
+
+This is exactly the failure the [[Manifest Contamination]] post predicted for
+coordinate-localisation changes, and it converges with the two warnings already
+on record: edge axis, and 3/8 films.
 
 Built by [[make_env_variant]].
 """)
@@ -1432,7 +1446,11 @@ Applied to what is in flight:
 - [[s09]]'s gain leaves the division ledger untouched at 5/2/7 in all 24 cells →
   **pure edge axis**, bad prior, despite better local evidence.
 - [[s05]] is an edge-axis change with much better evidence than the three that
-  failed — but the base rate is real.
+  failed — and [[Scored Films Measurement]] now puts it at **+0.02707 on the
+  scored films**, larger than on the validator and positive on all four.
+
+**Update:** the axis prior may partly *be* a composition effect. Division gains
+are measured where there are 12 divisions and scored where there are 3.
 
 Related: [[Operating Rules]], [[Proxy Score]]
 """)
@@ -1671,6 +1689,90 @@ division signal.
 
 The base notebook is a fork of Reyhan Ksatria's 0.947 notebook with three input
 paths changed and nothing else. See [[0.947 Plateau]].
+""")
+
+note("Scored Films Measurement", ["finding", "key"], """
+# Measuring On The Films That Are Actually Scored
+
+**The most important measurement in the project**, and it should have come first.
+
+The submission covers exactly **4 films**. We hold their ILP graphs
+(`artifacts/s05_output/.../unet_transformer/split_0/`, verified byte-identical
+to the relink-ON run, so pure ILP output) and their ground truth is in
+`data/.../train/`. So the actual scored films can be scored locally.
+
+| change | validator (8 films) | **SCORED (4 films)** | verdict |
+|---|---|---|---|
+| [[s05]] over base | +0.01794 | **+0.02707** | holds, and is *larger* |
+| [[s08]] over s05 | +0.00748 | **+0.00000** | neutral — validator-only |
+| [[s09]] over s08 | +0.00487 | **−0.00086** | **sign flip** |
+| s09 over base | +0.03030 | +0.02621 | worse than s05 alone |
+
+**[[s05]] is the best configuration on the films that count.** It gains on all
+four individually, including the heaviest:
+
+| film | GT divisions | base | s05 | delta | GT edges |
+|---|---|---|---|---|---|
+| 44b6_0113de3b | 0 | 0.86847 | 0.96051 | **+0.09204** | 53 |
+| 44b6_0b24845f | 0 | 0.97812 | 0.97925 | +0.00113 | 52 |
+| 6bba_05b6850b | 0 | 0.96172 | 0.96689 | +0.00517 | 864 |
+| 6bba_05db0fb1 | 3 | 0.84089 | 0.87974 | **+0.03885** | 1304 |
+
+**Why [[s08]] evaporates:** the scored films have a division ledger of **0/6/3**,
+so `divJ = 0` in every arm. s08's whole gain was one *division*
+([[Division Recovery in 44b6_341df25f]]) and there is no division to recover here.
+
+**Why [[s09]] flips:** it helps `6bba_05b6850b` (+0.00686, weight 861) and hurts
+`6bba_05db0fb1` (−0.00585, weight 1258). The heavier film loses.
+
+⚠ **Caveat:** labels on the scored films are sparse (0.16%–13.5%), only ~2,273 GT
+edges and 3 divisions total. Noisier than the validator set — but it is the
+actual target, and the s05 signal is broad and large.
+
+Scripts: `102_on_real_scored_films.py`, `103_relink_on_scored_films.py`.
+
+Related: [[Manifest Contamination]], [[Validator Films]], [[Test Films]]
+""")
+
+note("Manifest Contamination", ["finding", "gotcha", "key"], """
+# The All-Train Manifest Claim
+
+A discussion post argued the public stack's detectors saw all 199 train videos,
+so any local hold-out is in-sample and local measurement cannot be trusted.
+
+**Verified true**, from the manifests in `weights/`:
+
+```
+unet_transformer/split_0/split_manifest.json
+  method: unet_transformer_alltrain_seed314159_v1
+  train:  199        test: 40 -- a strict SUBSET of train (40/40 overlap)
+```
+
+All 8 [[Validator Films]] are in that 199.
+
+**But the inference does not follow.** All **4** [[Test Films]] — the films the
+submission is actually scored on — are in the *same* 199 train list. In-sample-ness
+is **symmetric**, so it cannot by itself explain a local-vs-board sign flip.
+
+What differs is **composition**:
+| | validator | scored |
+|---|---|---|
+| films | 8 | 4 |
+| GT divisions | **12** | **3** |
+| weighting | roughly even | dominated by one 70k-node film |
+
+**A sharper fact nobody mentioned:** the [[DeepCenter]] split is not a hold-out at
+all — it is **entirely embryo-level**. Train = all 71 `44b6` films, val = all 128
+`6bba` films. DeepCenter has never seen a single 6bba frame, and 6bba carries 125
+of 151 divisions and most of the scored weight.
+
+**Their counter-example was right about the mechanism, though.** A sub-voxel peak
+refinement gained locally and lost on the board — a coordinate-localisation
+change, the same family as [[s09]], which [[Scored Films Measurement]]
+independently shows flipping sign.
+
+**Verdict:** the fact is real, the causal story is wrong, the warning lands.
+Fixed by [[Scored Films Measurement]], which removes the need to argue about it.
 """)
 
 # ─────────────────────────────── WRITE ───────────────────────────────
