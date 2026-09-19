@@ -1,0 +1,44 @@
+Do the OTHER post-processing stages help on the RAW ILP graph (no relink)?
+
+Motion relink is off (that was worth +0.0295 proxy on its own). The question
+left over is whether the rest of the deployed chain -- gap closing, gap2
+recovery, prune-isolated, short-track filtering, linefit smoothing -- are
+carrying their weight once the ILP's own global assignment is kept.
+
+Every stage is measured ONE AT A TIME against the raw + safe_div anchor.
+Each stage sits at its DEPLOYED position in the chain:
+
+    gap_close -> gap2 -> safe_div -> prune_isolated -> short_track -> linefit
+
+so "gap close" means gap-close-then-safe_div, because gap closing eats the
+orphan pool that safe_div draws its daughters from. Anything after safe_div is
+a pure post-hoc edit of the same divided graph.
+
+Stage implementations are ported from the 0.947 notebook (cell 2:
+close_single_frame_gaps, recover_strict_gap2, filter_short_track_components,
+linefit_smooth_output_graph, the OUTPUT_PRUNE_ISOLATED block) onto
+ORIGINAL-VOXEL coordinates with the anisotropic SCALE. src/biohub/postprocess.py
+has lookalikes but they use an isotropic GRID_UM = 1.625, which is 4x wrong in
+y and x on these graphs -- do not use them here.
+
+Node counts: the metric multiplies edge Jaccard by 1 - 0.1*(n_pred - n_est)/n_est.
+Deleting nodes RAISES that multiplier, so every row prints n_pred/n_est and
+J separately. A row where mult moves and J does not is a bookkeeping gain,
+not a tracking gain.
+================================================================================================
+
+### SCORED (4 films)
+safe_div variant                       proxy    dproxy    divJ   TP/FP/FN
+GATES (deployed)                     0.89061            0.0000      0/6/3
+RANKER thr=+2.0                      0.89096  +0.00035  0.0000      0/1/3
+RANKER thr=+1.0                      0.88975  -0.00086  0.0000      0/6/3
+RANKER thr=+0.0                      0.89890  +0.00830  0.0833      1/9/2
+RANKER thr=-1.0                      0.89813  +0.00752  0.0714     1/11/2
+
+### VALIDATOR (8)
+safe_div variant                       proxy    dproxy    divJ   TP/FP/FN
+GATES (deployed)                     0.94888            0.2308      3/1/9
+RANKER thr=+2.0                      0.92535  -0.02353  0.0000     0/0/12
+RANKER thr=+1.0                      0.92505  -0.02383  0.0000     0/4/12
+RANKER thr=+0.0                      0.93989  -0.00898  0.1500      3/8/9
+RANKER thr=-1.0                      0.92991  -0.01896  0.0645    2/19/10

@@ -1,42 +1,86 @@
 # Handoff — Biohub Cell Tracking
 
-Written 2026-09-19. Competition closes **2026-09-29 23:59 UTC**.
+Rewritten 2026-09-19 (end of day 2). Competition closes **2026-09-29 23:59 UTC**
+— **10 days, ~50 submissions left**. Standing **0.947**, unchanged.
 
 ---
 
-## 1. Where things stand
+## 0. READ THIS FIRST — what today actually established
 
-**Board:** `aryaarun07`, standing score **0.947**, rank ~423 of 3,697. There are
-**653 teams tied at exactly 0.947** (ranks 186–838) — that tie is the public
-notebook plateau. The leader is **0.973**; 7th place (last prize) is **0.964**.
-So the gap to money is **+0.017** and to 1st is **+0.026**.
+**Three submissions scored, all below baseline. We lost nothing; the 0.947
+standing is intact.**
 
-**Submitted and awaiting a board score:** `s05` — one added line,
-`BIOHUB_OUTPUT_MOTION_RELINK = 0`. Kaggle's own in-kernel validator, 8 held-out
-train films:
+| submission | board | pre-registered | |
+|---|---|---|---|
+| s05 remove relink | 0.945 | 0.960–0.970 | failed |
+| s08 + gap2 reorder | 0.946 | = s05 ±0.001 | **correct** |
+| s10 + linefit 0.6 | 0.944 | s05 +0.002…0.005 | failed |
 
-| | proxy | adj_edge | divJ | div TP/FP/FN |
-|---|---|---|---|---|
-| unmodified 0.947 | 0.9491 | 0.9260 | 0.2308 | 3/1/9 |
-| s01 `DIVERGE_UM=0` | 0.9369 | 0.9258 | 0.1111 | 3/15/9 |
-| **s05 no relink** | **0.9715** | **0.9407** | **0.3077** | **4/1/8** |
+**The root cause of the failures** (§ vault: *Why Every Offline Tier Was Wrong*):
+every local number was scored against `train/` annotations, which are the
+detector's **own training targets**, covering **1.63%** of nodes. The test
+annotations are private. We were measuring fit-to-training-labels.
 
-**Not submitted:** s01 (validator rejected it), s02/s03/s04 (retired),
-s06 (ran, measured **negative**, see §5).
+**The one instrument that works:** the 4 scored films. s08 was submitted
+*predicted to be worth nothing* to test it — the scored films said +0.00000, the
+validator films said +0.00803, the board gave +0.001.
 
-**Pushed 2026-09-19, kernels RUNNING, both GPU slots in use:**
+**The decision rule, earned by s10:** a positive point estimate is not enough.
+**Require the bootstrap CI to exclude zero.** s10 shipped on +4 edges with
+CI [−3,+12] and lost.
 
-| | change | on top of | local delta | kernel |
-|---|---|---|---|---|
-| `s08` | gap2 moved after safe_div | s05 | **+0.00748** | `biohub-s08-reorder-on-s05` |
-| `s09` | `OUTPUT_LINEFIT_WEIGHT` 0.8 → 0.3 | s08 | **+0.00487** | `biohub-s09-linefit03-on-s08` |
+**Axis prior, now 0-for-4:** every edge-axis change this project ever shipped has
+lost. Division-axis is 4-for-4.
 
-Each is ONE change relative to its stated parent, machine-proven (§6, §9). Their
-in-kernel validator readings arrive in ~1.75 h and are the real decision signal —
-the board can take **8 hours**, so do not wait on it.
+---
 
-**Superseded, do not push:** `submissions/s07_reorder/` — the same reorder on the
-unmodified base with relink **ON**. Wrong base; s08 replaces it. See §6.
+## 0b. CLOSED — do not reopen
+
+- **Post-processing parameters**, on both tiers (`scripts/100,101,106,108`).
+- **The no-relink lane** — board-refuted. s05/s08/s10 are dead; the incumbent is
+  the **unmodified 0.947 notebook, relink ON**.
+- **Edge pruning** — real discriminator (AUC 0.79) beaten by a 29:1 base rate.
+- **Patch-based division classification** — ill-posed: a dividing parent has 1.82
+  nuclei in its window against 1.38 for a non-dividing one.
+- **Ranker replacing safe_div's gates** — wins on AUC (+0.19 on real GT triples,
+  CI excluding zero) and **loses in the pipeline**: validator FP 1→8, divJ
+  0.2308→0.1500. `divJ` punishes a false positive as hard as a miss, so AUC is
+  the wrong currency; the gates' conservatism is load-bearing.
+
+---
+
+## 0c. THE REMAINING PATH — synthetic pretraining, untried
+
+**This is the only lever anyone has publicly reported working, and we skipped it
+deliberately for a reason that no longer applies.**
+
+Discussion `741749`: *"Pretraining on the public synthetic dataset
+(+0.012–0.018 over from-scratch). This was the only big lever I found."*
+Their recipe: pretrain detector+linker on the CC0 synthetic set for 80 epochs,
+then fine-tune on the real videos for 60 — a 24-video hold-out went
+**0.9146 → 0.9269**.
+
+We skipped it because it would make our detector's error profile differ from the
+public stack, which mattered when we were building an *instrument*. **That plan
+is dead, so the objection is gone.**
+
+Everything needed is already here:
+- `artifacts/synthetic/` — 2,174 sequences, 6.5 GB, ~160k divisions (statics deleted)
+- `scripts/train_heldout.sh`, `scripts/local_predict_199.sh` — the pipeline runs
+  on this Mac, verified **bit-identical** to Kaggle, 96 s/film vs the T4's 236 s
+- `weights/.../training_config.json` — the public model's own recipe
+  (batch 8, lr 1e-4, 500 epochs, brightness+flip, seed 314159)
+- measured throughput: **5.19 s/iter at batch 8** (batch 32 is 4× worse)
+
+**Honest expectation: ~+0.012 lands near 0.959.** Prize-adjacent, not first place.
+hikaggler's caveats: it pushes node count up (paid back through the N_pred term),
+buys nothing on divisions, and transfer **peaks early** — 497 sequences beat all
+2,174.
+
+**Also untried:** the upstream knobs (`DET_THRESHOLD`, both ILP weights,
+`BIDIRECTIONAL_EDGE_WEIGHT`, `SECONDARY_EDGE_FEATURE_TTA_WEIGHT`).
+`scripts/make_env_variant.py` handles their drift guard. Node-count calibration
+is worth ~+0.012 and the discussions say it predicted board movement best.
 
 ---
 
