@@ -1204,7 +1204,25 @@ The first closed prediction loop: harness number recorded in the [[Ledger]]
 | edge term | **+0.00035** | **+0.00034** |
 | proxy delta | **+0.00803** | **+0.00748** |
 
-Absolute in-kernel validator proxy: [[s05]] **0.9715**, [[s08]] **0.9795**.
+Absolute in-kernel validator proxy: [[s05]] **0.9715**, [[s08]] **0.9795**,
+[[s10]] **0.9736**.
+
+**A second loop closed, with a different answer.** [[s10]] was predicted at
++0.00338 and measured **+0.00207** — sign right, magnitude over-predicted by 39%.
+The mechanism was still confirmed exactly: divJ unchanged at 4/1/8 (pure edge
+axis, as predicted), `edges_fragmented` 111 → 108 and `edges_recovered`
+5565 → 5568, so the gain is precisely **3 recovered fragmented edges**, and
+`edges_lost_to_detection` held at 75 as a coordinate-only stage requires.
+
+**Why s08 was near-exact and s10 was not:** s08's mechanism is **discrete** — one
+orphan, one division — and a missing stage cannot blur it. s10's is
+**continuous**: [[Linefit Smoothing]] fits along chains, and the harness omits
+[[Single Parent Repair]], the short-track rescue and the [[DeepCenter]] vetoes,
+all of which change those chains. The [[Transfer Lesson]] operating one level up,
+between harness and kernel.
+
+**Rule of thumb earned here:** trust harness magnitudes for discrete mechanisms,
+trust only their sign for continuous ones.
 
 **Mechanism confirmed exactly:** one division recovered, which is what
 [[Division Recovery in 44b6_341df25f]] predicted.
