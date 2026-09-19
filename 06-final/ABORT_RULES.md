@@ -224,3 +224,37 @@ board shows only the sum, and two people on 0.948 can need opposite work.
   crosses parity (44b6 -> 1.009, 6bba -> 1.263). One submission to measure.
   If the predictor is ever built, its target is ratio **1.15, not 1.0**, so a
   17% bias still leaves it above parity.
+
+- **2026-09-19, amendment 4. G3b FIRED — learned division classifier dropped.**
+  L2 logistic probe on frozen UNet features, division parents vs controls
+  matched within the same film and frame, leave-one-embryo-out:
+
+  | features | AUC | 95% CI |
+  |---|---|---|
+  | raw peak intensity | 0.630 | 0.572-0.687 |
+  | frozen features at t-2 | 0.484 | 0.437-0.538 |
+  | frozen features at t-1 | 0.510 | 0.464-0.559 |
+  | **frozen features at t+0 (labelled split)** | **0.456** | 0.419-0.506 |
+  | frozen features at t+1 | 0.663 | 0.611-0.717 |
+  | all offsets + intensity + density | 0.581 | 0.535-0.629 |
+
+  Nothing clears the 0.70 floor; at the split frame the encoder is at CHANCE.
+  Per the G3b gate, a learned division classifier is no longer the main bet.
+  The anaphase hypothesis is also NOT supported: t-1 and t-2 are both chance.
+  That question is now tested rather than believed.
+
+  Scope of the experiment, stated but NOT used to overturn the trigger: it
+  tests single-voxel LINEAR decodability, not the image at patch scale; the
+  matching was imperfect (intensity alone still reads 0.630); and the 44b6 fold
+  carries only 11 positives, so only 6bba (123) has weight.
+
+  **The only real signal is at t+1 (0.663) -- AFTER the split, when two
+  daughters exist. That is CONSEQUENCE, not cause.**
+
+  **Replacement mechanism (approved):** promote the consequence criterion from
+  labeller to DECISION RULE. Geometry already reaches divJ 0.19-0.23 in the
+  deployed pipeline; the probe says appearance will not beat it. Divisions are
+  scored by trajectory consequence -- both daughters persist, separation grows
+  monotonically, symmetry about the parent -- inside the baseline-immutable
+  second pass. This is legal at inference: tracking is offline over the whole
+  movie, so the predicted graph's future is observable without labels.

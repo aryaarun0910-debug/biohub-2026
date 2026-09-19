@@ -113,6 +113,6 @@ for n, film in enumerate(targets):
           f"eta {el/(n+1)*(len(targets)-n-1)/60:.0f}min", flush=True)
 
 df = pd.DataFrame(rows)
-df.to_parquet("artifacts/probe_dataset.parquet")
+df.to_csv("artifacts/probe_dataset.csv.gz", index=False)
 print(f"\nwrote {len(df)} rows | positives {int(df.label.sum())} | films {df.film.nunique()}")
 print(df.groupby('embryo').label.agg(['size','sum']).to_string())
