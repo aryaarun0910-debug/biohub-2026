@@ -28,6 +28,7 @@ Everything known about this competition, as a graph. Start at a hub below.
 
 ## Where the remaining headroom is
 - [[Error Budget]] — 80% of the error is the linker; the detector ceiling is +0.0126
+- [[Edge Pruning Is Dead]] — the largest class is real but not reachable by thresholding
 
 ## The decision layer — read before proposing any change
 - [[Both-Sets Rule]] — what must be true before something ships
