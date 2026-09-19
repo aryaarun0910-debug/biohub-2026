@@ -560,7 +560,10 @@ for lw, lwin, g2 in ((0.4, 3, True), (0.3, 3, True), (0.4, 3, False),
 print()
 
 # ---- per-film consistency of the winner -------------------------------
-print("--- per-film: is the winner's gain broad or one film? ---")
+# BEST() defaults to window=3, not the sweep-max window=4: the (w, window)
+# surface wobbles by ~0.002 between neighbouring settings on 8 films, so the
+# top cell of the sweep is not a trustworthy pick.
+print("--- per-film: is the winner's gain broad or one film? (w=0.4, window=3) ---")
 print(f"{'film':<24}{'anchor J':>10}{'best J':>10}{'dJ':>10}"
       f"{'anchor adj':>12}{'best adj':>10}{'dadj':>10}{'n/n_est':>9}")
 nwin = 0
@@ -575,6 +578,45 @@ for stem, (P, GT) in DATA.items():
           f"{ra['adj']:>12.5f}{rb['adj']:>10.5f}{rb['adj']-ra['adj']:>+10.5f}"
           f"{rb['n_pred']/rb['n_est']:>9.4f}")
 print(f"films where edge J improved: {nwin}/8")
+print()
+
+# ---- edge confusion in absolute counts --------------------------------
+print("--- absolute edge confusion (the eval set is only ~5.7k GT edges) ---")
+print(f"{'film':<24}{'GTnode':>8}{'GTedge':>8}{'anchor tp/fp/fn':>20}{'best tp/fp/fn':>20}")
+A = [0, 0, 0]; B = [0, 0, 0]; gn = ge = 0
+for stem, (P, GT) in DATA.items():
+    e, _ = safe_div(P)
+    ra = M2.score(P["t"], P["zyx"], e, GT["t"], GT["zyx"], GT["edges"], GT["n_est"])
+    Gb, _ = BEST(G_of(P), P, stem)
+    rb = M2.score(Gb["t"], Gb["zyx"], Gb["edges"], GT["t"], GT["zyx"], GT["edges"], GT["n_est"])
+    sa = "%d/%d/%d" % (ra["etp"], ra["efp"], ra["efn"])
+    sb = "%d/%d/%d" % (rb["etp"], rb["efp"], rb["efn"])
+    print(f"{stem:<24}{len(GT['t']):>8}{len(GT['edges']):>8}{sa:>20}{sb:>20}")
+    for i, k in enumerate(("etp", "efp", "efn")):
+        A[i] += ra[k]; B[i] += rb[k]
+    gn += len(GT["t"]); ge += len(GT["edges"])
+print(f"{'TOTAL':<24}{gn:>8}{ge:>8}{'%d/%d/%d' % tuple(A):>20}{'%d/%d/%d' % tuple(B):>20}")
+print(f"net edge change (tp, fp, fn): {[B[i] - A[i] for i in range(3)]}")
+print()
+
+# ---- is the linefit gain real localization, or Hungarian jitter? -------
+print("--- linefit localization check: distance from matched pred node to its GT partner ---")
+print(f"{'config':<26}{'matched':>9}{'mean um':>9}{'median um':>11}")
+for w, win in ((0.0, 2), (0.2, 2), (0.3, 2), (0.4, 2), (0.4, 3),
+               (0.4, 4), (0.6, 2), (0.8, 2), (1.0, 2)):
+    tot, acc_mean, acc_med = 0, 0.0, 0.0
+    for stem, (P, GT) in DATA.items():
+        e, _ = safe_div(P)
+        G = dict(t=P["t"], zyx=P["zyx"], edges=e)
+        if w > 0:
+            G, _ = linefit(G, w=w, window=win)
+        p2g, _ = M2.match(G["t"], G["zyx"], GT["t"], GT["zyx"])
+        if not p2g:
+            continue
+        pu, gu = G["zyx"] * SCALE, GT["zyx"] * SCALE
+        d = np.array([np.linalg.norm(pu[p] - gu[g]) for p, g in p2g.items()])
+        tot += len(d); acc_mean += d.sum(); acc_med += np.median(d) * len(d)
+    print(f"{f'linefit w={w:g} window={win}':<26}{tot:>9}{acc_mean/tot:>9.3f}{acc_med/tot:>11.3f}")
 print()
 
 import csv

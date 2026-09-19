@@ -13,6 +13,11 @@ from __future__ import annotations
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
+# WARNING: isotropic, for the DOWNSAMPLED (1,4,4) 64^3 grid only.
+# The kernel's prediction .geff files use ORIGINAL voxels, where the scale is
+# (1.625, 0.40625, 0.40625) -- using this constant there is 4x wrong in y and x
+# and fails silently. For those graphs use metric2.SCALE and the stage ports in
+# scripts/91_other_stages.py instead.
 GRID_UM = 1.625
 
 
