@@ -39,6 +39,10 @@ Everything known about this competition, as a graph. Start at a hub below.
 - [[Evidence Tiers]] — what each film set can and cannot support
 - [[Harness Prediction Confirmed]] — the harness predicted [[s08]] before the run, to the mechanism
 
+## READ THIS FIRST
+- [[Why Every Offline Tier Was Wrong]] — we were scoring on the model's own
+  training labels, a 1.63% sample. s05 predicted +0.022, scored **0.945**.
+
 ## Read this before trusting any local number
 [[Scored Films Measurement]] — the 4 films the board scores can be measured
 locally, and they disagree with the 8 validator films. [[Manifest Contamination]]
