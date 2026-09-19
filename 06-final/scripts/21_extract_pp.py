@@ -12,7 +12,7 @@ behind.
 import ast, json
 from pathlib import Path
 
-nb = json.loads(Path("Public Notebooks/biohub-0-947-lb-runnable-with-public-datasets.ipynb").read_text())
+nb = json.loads(Path("public notebooks/biohub-0-947-lb-runnable-with-public-datasets.ipynb").read_text())
 src = "".join(nb["cells"][2]["source"])
 tree = ast.parse(src)
 

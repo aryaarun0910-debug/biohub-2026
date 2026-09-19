@@ -495,11 +495,12 @@ for w in (0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8):
         G, _ = SD(G, P)
         return linefit(G, w=w)
     show(run(_lf, f"  + linefit w={w:g} window=2", ALL), base)
-for win in (1, 3):
-    def _lfw(G, P, s, win=win):
-        G, _ = SD(G, P)
-        return linefit(G, w=0.4, window=win)
-    show(run(_lfw, f"  + linefit w=0.4 window={win}", ALL), base)
+for win in (1, 3, 4, 5):
+    for w in (0.3, 0.4):
+        def _lfw(G, P, s, win=win, w=w):
+            G, _ = SD(G, P)
+            return linefit(G, w=w, window=win)
+        show(run(_lfw, f"  + linefit w={w:g} window={win}", ALL), base)
 print("  (linefit BEFORE safe_div -- smoother positions feed the division gates)")
 for w in (0.3, 0.4):
     def _lfb(G, P, s, w=w):
@@ -540,6 +541,40 @@ def _c4(G, P, s):
     G, st3 = linefit(G, w=0.4)
     return G, {**st, **st2, **st3}
 show(run(_c4, "  gap_close8+safe_div+short8+linefit0.4", ALL), base)
+
+
+def BEST(G, P, s, lw=0.4, lwin=3, use_gap2=True):
+    G, st = gap_close(G, max_um=8.0, allow_synth=True)
+    G, _ = SD(G, P)
+    if use_gap2:
+        G, st2 = gap2(G)
+        st.update(st2)
+    G, st3 = linefit(G, w=lw, window=lwin)
+    return G, {**st, **st3}
+
+
+for lw, lwin, g2 in ((0.4, 3, True), (0.3, 3, True), (0.4, 3, False),
+                     (0.4, 4, True), (0.3, 4, True)):
+    show(run(lambda G, P, s, a=lw, b=lwin, c=g2: BEST(G, P, s, a, b, c),
+             f"  BEST gc8+sd+{'gap2+' if g2 else ''}lf{lw:g}/w{lwin}", ALL), base)
+print()
+
+# ---- per-film consistency of the winner -------------------------------
+print("--- per-film: is the winner's gain broad or one film? ---")
+print(f"{'film':<24}{'anchor J':>10}{'best J':>10}{'dJ':>10}"
+      f"{'anchor adj':>12}{'best adj':>10}{'dadj':>10}{'n/n_est':>9}")
+nwin = 0
+for stem, (P, GT) in DATA.items():
+    Ga = dict(G_of(P))
+    Ga["edges"] = safe_div(dict(P, edges=Ga["edges"]))[0]
+    ra = M2.score(Ga["t"], Ga["zyx"], Ga["edges"], GT["t"], GT["zyx"], GT["edges"], GT["n_est"])
+    Gb, _ = BEST(G_of(P), P, stem)
+    rb = M2.score(Gb["t"], Gb["zyx"], Gb["edges"], GT["t"], GT["zyx"], GT["edges"], GT["n_est"])
+    nwin += rb["J_edge"] > ra["J_edge"]
+    print(f"{stem:<24}{ra['J_edge']:>10.5f}{rb['J_edge']:>10.5f}{rb['J_edge']-ra['J_edge']:>+10.5f}"
+          f"{ra['adj']:>12.5f}{rb['adj']:>10.5f}{rb['adj']-ra['adj']:>+10.5f}"
+          f"{rb['n_pred']/rb['n_est']:>9.4f}")
+print(f"films where edge J improved: {nwin}/8")
 print()
 
 import csv

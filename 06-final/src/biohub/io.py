@@ -146,7 +146,7 @@ def to_um(zyx: np.ndarray) -> np.ndarray:
 
 @lru_cache(maxsize=1)
 def dataset_root() -> Path:
-    return Path(__file__).resolve().parents[2] / "Data" / "biohub-cell-tracking-during-development"
+    return Path(__file__).resolve().parents[2] / "data" / "biohub-cell-tracking-during-development"
 
 
 def films(split: str = "train") -> list[str]:

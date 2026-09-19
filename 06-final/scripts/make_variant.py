@@ -8,7 +8,7 @@ edit or the notebook aborts at cell 3.
 import json, sys, difflib
 from pathlib import Path
 
-BASE = Path("Public Notebooks/biohub-0-947-lb-runnable-with-public-datasets.ipynb")
+BASE = Path("public notebooks/biohub-0-947-lb-runnable-with-public-datasets.ipynb")
 GUARDED = {"BIOHUB_DET_THRESHOLD", "BIOHUB_ILP_APPEARANCE_WEIGHT",
            "BIOHUB_ILP_DISAPPEARANCE_WEIGHT", "BIOHUB_GAP_CLOSE_UM",
            "BIOHUB_OUTPUT_MIN_TRACK_LEN", "BIOHUB_SAFE_DIV_MAX_UM",

@@ -27,7 +27,7 @@ for attempt in range(60):
         "    def __fspath__(self): return '_dummy'\n"
         "    def __eq__(self, o): return False\n"
         "    def __hash__(self): return 0\n"
-        "COMP_DIR = Path('Data/biohub-cell-tracking-during-development')\n"
+        "COMP_DIR = Path('data/biohub-cell-tracking-during-development')\n"
         "TEST_DIR = COMP_DIR / 'test'\n"
         "TRAIN_DIR = COMP_DIR / 'train'\n"
         "WORKING_DIR = Path('artifacts/pp_work')\n"
