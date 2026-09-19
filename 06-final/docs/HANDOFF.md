@@ -149,6 +149,8 @@ off.)
 | DeepCenter as a division veto | Real ranker (AUC 0.836–0.857) but **at its oracle ceiling**, worth +0.0029, and a plain **brightness threshold matches it**. Gain is one fork in one film. |
 | Division detection ceiling (pool kernel merging sisters) | **Refuted.** `pool_kernel_um` quantises — 3.0/4.0/5.0 give the identical (3,3,3) kernel, true floor 3.25 µm Chebyshev. Only 1/151 divisions below it; **zero** actually lost. The instance that motivated it was a *linker* failure with all three nodes detected. |
 | Short-track filter L≥6 | **Metric exploit.** J falls, multiplier rises, and the multiplier gain is **monotone to L=40**. A real stage would peak. |
+| Re-pricing all 21 remaining PP settings on the s09 chain | **Exhausted.** Every positive row is the node-count exploit (`st_len=8` +0.00103, `st_len=9` +0.00041, `gc_um=4.0` +0.00012 — all with J **down** and `ratio` down); everything else is 0 or negative. `scripts/100_repice_on_s09.py`. |
+| `GAP_CLOSE_UM 5 → 8` on the s09 chain | **+0.00089 on raw graphs, −0.00015 here.** Third instance of the §6 non-transfer, after relink (s05) and linefit (s06). |
 | `OUTPUT_LINEFIT_WEIGHT 0.8 → 0.4` (s06) | **−0.00135.** Measured +0.0024 on *raw* graphs; sign flipped on the *relinked* pipeline. See §6. |
 | Node-count / `n_est` predictor | Transfers 1-for-2 across embryos (R² 0.937 vs **0.494**, median **17% underestimate** — the dangerous direction). |
 | Synthetic division data (someone else's result) | AP 0.98 on held-out synthetic, board **0.910 → 0.906**. |
