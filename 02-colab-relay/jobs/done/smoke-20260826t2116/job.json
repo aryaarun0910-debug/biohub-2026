@@ -1,0 +1,26 @@
+{
+  "competition": "",
+  "created_at": "2026-08-26T21:16:00Z",
+  "datasets": [],
+  "drive_outputs": [
+    "**/*"
+  ],
+  "env": {},
+  "id": "smoke-20260826t2116",
+  "kaggle_dataset_slug": "",
+  "kind": "smoke",
+  "max_hours": 0.1,
+  "note": "plumbing smoke: nvidia-smi, torch matmul, metrics.json round-trip",
+  "notebook": "",
+  "notebook_sha256": "",
+  "priority": 0,
+  "publish_kaggle": false,
+  "relay_outputs": [
+    "submission.csv",
+    "*.json",
+    "*.csv",
+    "*.log"
+  ],
+  "spec": "",
+  "version": 1
+}

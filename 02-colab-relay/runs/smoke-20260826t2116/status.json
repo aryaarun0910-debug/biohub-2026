@@ -1,0 +1,15 @@
+{
+  "drive_dir": "/content/drive/MyDrive/biohub/runs/smoke-20260826t2116",
+  "elapsed_s": 8.189463376998901,
+  "finished": "2026-08-26T21:43:03Z",
+  "gpu": "NVIDIA L4",
+  "kaggle_dataset": "",
+  "kind": "smoke",
+  "reason": "",
+  "relay_outputs": [
+    "metrics.json"
+  ],
+  "started": "2026-08-26T21:42:55Z",
+  "state": "done",
+  "units": 0.011374254690276251
+}

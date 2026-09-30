@@ -1,0 +1,13 @@
+{
+  "drive_dir": "/content/drive/MyDrive/biohub/runs/p21-parity-f0-a5",
+  "elapsed_s": 150.96539092063904,
+  "finished": "2026-08-26T22:55:34Z",
+  "gpu": "NVIDIA L4",
+  "kaggle_dataset": "aryaarunkaggle/colab-p21-parity-f0",
+  "kind": "notebook",
+  "reason": "papermill exit 1",
+  "relay_outputs": [],
+  "started": "2026-08-26T22:53:00Z",
+  "state": "failed",
+  "units": 0.2096741540564431
+}

@@ -1,0 +1,200 @@
+Input Notebook:  /content/relay/jobs/running/p21_colab_parity_f0-20260826t2204/notebook.ipynb
+Output Notebook: /kaggle/working/executed.ipynb
+Working directory: /kaggle/working
+Executing notebook with kernel: python3
+Executing Cell 1---------------------------------------
+<IPython.core.display.Image object>
+Ending Cell 1------------------------------------------
+Executing Cell 2---------------------------------------
+<IPython.core.display.Image object>
+Ending Cell 2------------------------------------------
+Executing Cell 3---------------------------------------
+BIOHUB_PRESET: dual_seed_near_balanced_center_confirmed_synthetic_gap
+BIOHUB_SCORE_AXIS: near-balanced shared detections with marginal synthetic-gap confirmation
+
+Ending Cell 3------------------------------------------
+Executing Cell 4---------------------------------------
+Biohub learned UNet + node-transformer + ILP submission
+COMP_DIR: /content/kaggle/input/competitions/biohub-cell-tracking-during-development exists: True
+TEST_DIR: /content/kaggle/input/competitions/biohub-cell-tracking-during-development/test exists: True
+{
+  "adaptive_short_track_rescue": false,
+  "allow_artifact_fallback": false,
+  "allow_pip_install": false,
+  "deepcenter_checkpoint_default": "/content/kaggle/input/biohub-deepcenter-unet3d-center-prior-v1/weights/full_frame_center/checkpoint_last.pt",
+  "deepcenter_expected_epoch": 500,
+  "deepcenter_gap_add_gate": true,
+  "deepcenter_gap_confirm_min_span_um": 8.5,
+  "deepcenter_gap_threshold": 0.25,
+  "deepcenter_safe_div_add_gate": false,
+  "deepcenter_safe_div_threshold": 0.12,
+  "det_threshold": 0.96875,
+  "div_drop_to_single_if_bad": true,
+  "div_parent_max_um": 10.5,
+  "div_sister_max_um": 8.0,
+  "experiment_tag": "selected_101_dual_seed_near_balanced_center_confirmed_synthetic_gap",
+  "gap2_frame_frac_cap": 0.006,
+  "gap2_max_links_abs": 180,
+  "gap2_max_links_frac": 0.0045,
+  "gap2_max_step_um": 4.4,
+  "gap2_max_total_um": 10.2,
+  "gap2_require_context": true,
+  "gap_close_effective_max_gap": 1,
+  "gap_close_max_added_abs": 2000,
+  "gap_close_max_added_frac": 0.05,
+  "gap_close_max_gap": 2,
+  "gap_close_reuse_existing": true,
+  "gap_close_reuse_um": 3.2,
+  "gap_close_um": 5.8,
+  "gap_density_adaptive": true,
+  "gap_density_gain": 0.04,
+  "gap_density_max_step_delta_um": 0.125,
+  "gap_density_neighbors": 3,
+  "gap_density_reference_um": 6.5,
+  "gap_refine_max_shift_um": 3.2,
+  "gap_refine_synthetic": true,
+  "gap_refine_win_yx": 3,
+  "gap_refine_win_z": 1,
+  "ilp_appearance_weight": 0.0,
+  "ilp_disappearance_weight": 1.5,
+  "ilp_division_weight": 1.0,
+  "ilp_edge_weight": -1.0,
+  "method": "unet_transformer",
+  "motion_relink_learned_bonus": 1.0,
+  "motion_relink_max_frame_nodes": 2600,
+  "motion_relink_relaxed_um": 10.0,
+  "motion_relink_tight_um": 6.0,
+  "motion_relink_velocity_weight": 0.5,
+  "output_division_geometry_filter": false,
+  "output_edge_max_um": 14.0,
+  "output_enforce_next_frame": true,
+  "output_filter_short_tracks": true,
+  "output_gap2_recovery": false,
+  "output_gap_close": true,
+  "output_keep_division_components": true,
+  "output_linefit_smooth": true,
+  "output_linefit_weight": 0.8,
+  "output_linefit_window": 2,
+  "output_min_track_len": 6,
+  "output_motion_relink": true,
+  "output_prune_isolated": true,
+  "output_safe_divisions": true,
+  "output_single_child_repair": false,
+  "output_single_parent_repair": true,
+  "primary_artifact_manifest": "/content/kaggle/input/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1/ARTIFACT_MANIFEST.json",
+  "safe_div_existing_child_max_um": 10.0,
+  "safe_div_frame_frac_cap": 0.0076,
+  "safe_div_global_frac_cap": 0.00375,
+  "safe_div_max_um": 8.0,
+  "safe_div_sister_max_um": 11.0,
+  "short_track_rescue_max_mean_edge_dist_um": 3.25,
+  "short_track_rescue_max_nodes_abs": 180,
+  "short_track_rescue_max_nodes_frac": 0.018,
+  "short_track_rescue_min_len": 4,
+  "short_track_rescue_min_mean_edge_prob": 0.82,
+  "short_track_rescue_trigger_removed_frac": 0.1,
+  "slice": "",
+  "target_artifact_slug": "biohub-tracking-support-pack-50ep-v1",
+  "unet_batch_size": 4,
+  "use_deepcenter_add_only_gate": true,
+  "use_ilp": true,
+  "weights": "weights/unet_transformer/split_0/edge_predictor_best.pth"
+}
+
+Ending Cell 4------------------------------------------
+Executing Cell 5---------------------------------------
+ARTIFACTS: /content/kaggle/input/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1
+Has offline wheels: True
+Artifact name: biohub-tracking-support-pack-400ep-snapshot-v1
+Weight sha256: 12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771
+Weight path: weights/unet_transformer/split_0/edge_predictor_best.pth
+
+Installing missing packages from offline package dirs: ['polars']
+Dependency resolver is disabled with --no-deps to avoid replacing Kaggle numpy/scipy in a live kernel.
+Offline package dirs: ['/content/kaggle/input/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1/wheels', '/content/kaggle/input/biohub-temporal-unet3d-seed314159-v1/wheels', '/content/kaggle/input/biohub-tracking-support-pack-50ep-v1/wheels']
+
+Offline dependency install succeeded.
+Installing missing packages from offline package dirs: ['tracksdata', 'zarr', 'pyscipopt', 'geff', 'geff_spec', 'ilpy', 'imagecodecs', 'rustworkx', 'numcodecs', 'donfig', 'bidict', 'deprecated']
+Dependency resolver is disabled with --no-deps to avoid replacing Kaggle numpy/scipy in a live kernel.
+Offline package dirs: ['/content/kaggle/input/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1/wheels', '/content/kaggle/input/biohub-temporal-unet3d-seed314159-v1/wheels', '/content/kaggle/input/biohub-tracking-support-pack-50ep-v1/wheels']
+
+Offline dependency install failed. Last pip output:
+Looking in links: /content/kaggle/input/datasets/pilkwang/biohub-tracking-support-pack-50ep-v1/wheels, /content/kaggle/input/biohub-temporal-unet3d-seed314159-v1/wheels, /content/kaggle/input/biohub-tracking-support-pack-50ep-v1/wheels
+Processing /content/kaggle/input/biohub-temporal-unet3d-seed314159-v1/wheels/tracksdata-0.1.0rc6.dev3+g980c2d30a-py3-none-any.whl
+Processing /content/kaggle/input/biohub-temporal-unet3d-seed314159-v1/wheels/bidict-0.23.1-py3-none-any.whl
+
+ERROR: Could not find a version that satisfies the requirement psygnal>=0.14 (from versions: none)
+ERROR: No matching distribution found for psygnal>=0.14
+
+
+Ending Cell 5------------------------------------------
+Traceback (most recent call last):
+  File "/usr/local/bin/papermill", line 8, in <module>
+    sys.exit(papermill())
+             ~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/click/core.py", line 1569, in __call__
+    return self.main(*args, **kwargs)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/click/core.py", line 1490, in main
+    rv = self.invoke(ctx)
+  File "/usr/local/lib/python3.13/dist-packages/click/core.py", line 1353, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/click/core.py", line 907, in invoke
+    return callback(*args, **kwargs)
+  File "/usr/local/lib/python3.13/dist-packages/click/decorators.py", line 34, in new_func
+    return f(get_current_context(), *args, **kwargs)
+  File "/usr/local/lib/python3.13/dist-packages/papermill/cli.py", line 235, in papermill
+    execute_notebook(
+    ~~~~~~~~~~~~~~~~^
+        input_path=input_path,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<15 lines>...
+        execution_timeout=execution_timeout,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/papermill/execute.py", line 131, in execute_notebook
+    raise_for_execution_errors(nb, output_path)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/papermill/execute.py", line 251, in raise_for_execution_errors
+    raise error
+papermill.exceptions.PapermillExecutionError: 
+---------------------------------------------------------------------------
+Exception encountered at "In [5]":
+---------------------------------------------------------------------------
+ImportError                               Traceback (most recent call last)
+/tmp/ipykernel_26410/3256488147.py in <cell line: 0>()
+    439         )
+    440 
+--> 441 ensure_dependencies(ARTIFACTS)
+    442 materialize_inference_repo(ARTIFACTS)
+    443 
+
+/tmp/ipykernel_26410/3256488147.py in ensure_dependencies(artifacts)
+    340         missing = [pkg for pkg, module in REQUIRED_MODULES.items() if module_missing(module)]
+    341         if missing:
+--> 342             install_missing_dependencies(missing, artifacts)
+    343             continue
+    344 
+
+/tmp/ipykernel_26410/3256488147.py in install_missing_dependencies(missing, artifacts)
+    323 
+    324     command = "pip install tracksdata zarr>=3.0.10,<4 pyscipopt geff geff-spec ilpy polars blosc2 dask imagecodecs pyarrow rustworkx sqlalchemy donfig numcodecs"
+--> 325     raise ImportError(
+    326         "Missing required packages or dependency wheels: " + ", ".join(missing) + "\n"
+    327         "Attach the support dataset with offline wheels. If supplying Kaggle dependency input instead, use:\n"
+
+ImportError: Missing required packages or dependency wheels: tracksdata, zarr, pyscipopt, geff, geff_spec, ilpy, imagecodecs, rustworkx, numcodecs, donfig, bidict, deprecated
+Attach the support dataset with offline wheels. If supplying Kaggle dependency input instead, use:
+pip install tracksdata zarr>=3.0.10,<4 pyscipopt geff geff-spec ilpy polars blosc2 dask imagecodecs pyarrow rustworkx sqlalchemy donfig numcodecs
+Do not quote zarr>=3.0.10,<4 in Kaggle dependency input.
+
+---------------------------------------------------------------------------
+NOTE: If your import is failing due to a missing package, you can
+manually install dependencies using either !pip or !apt.
+
+To view examples of installing some common dependencies, click the
+"Open Examples" button below.
+---------------------------------------------------------------------------
+

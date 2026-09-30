@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/tmp/ipykernel_7751/1559978028.py", line 55, in run_job
+    ensure_inputs(job)
+    ~~~~~~~~~~~~~^^^^^
+  File "/tmp/ipykernel_7751/1559978028.py", line 16, in ensure_inputs
+    target.symlink_to(src, target_is_directory=True)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/pathlib/_local.py", line 789, in symlink_to
+    os.symlink(target, self, target_is_directory)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 30] Read-only file system: '/root/.cache/kagglehub/datasets/pilkwang/biohub-deepcenter-unet3d-center-prior-v1/versions/5' -> '/kaggle/input/biohub-deepcenter-unet3d-center-prior-v1'

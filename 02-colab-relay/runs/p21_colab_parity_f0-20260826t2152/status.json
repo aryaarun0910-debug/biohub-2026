@@ -1,0 +1,13 @@
+{
+  "drive_dir": "/content/drive/MyDrive/biohub/runs/p21_colab_parity_f0-20260826t2152",
+  "elapsed_s": 2.718498945236206,
+  "finished": "2026-08-26T21:52:43Z",
+  "gpu": "NVIDIA L4",
+  "kaggle_dataset": "FAILED: ",
+  "kind": "notebook",
+  "reason": "OSError: [Errno 30] Read-only file system: '/kaggle/input/datasets'",
+  "relay_outputs": [],
+  "started": "2026-08-26T21:52:39Z",
+  "state": "failed",
+  "units": 0.0037756929794947307
+}

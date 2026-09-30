@@ -1,0 +1,13 @@
+{
+  "drive_dir": "/content/drive/MyDrive/biohub/runs/p21_colab_parity_f0-20260826t2154",
+  "elapsed_s": 20.80314350128174,
+  "finished": "2026-08-26T21:57:57Z",
+  "gpu": "NVIDIA L4",
+  "kaggle_dataset": "FAILED: ",
+  "kind": "notebook",
+  "reason": "KaggleApiHTTPError: 401 Client Error.\n\nYou don't have permission to access resource at URL: https://kaggle.com/competitions/biohub-cell-tracking-during-development\nPlease make sure you are authenticated and have accepted the competition rules which can be found at this location: https://kaggle.com/competitions/biohub-cell-tracking-during-development/rules",
+  "relay_outputs": [],
+  "started": "2026-08-26T21:57:35Z",
+  "state": "failed",
+  "units": 0.028893254862891304
+}
