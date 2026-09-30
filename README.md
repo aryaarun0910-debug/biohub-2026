@@ -2,7 +2,9 @@
 
 Everything from my entry to the Kaggle competition *Biohub — Cell Tracking During
 Development* (closed 2026-09-29): tracking cells through 3D+t light-sheet movies of
-developing embryos. Best public leaderboard score: **0.947**.
+developing embryos. Final private leaderboard: **rank 1488 of 4017**, best private
+score 0.914 (best public 0.947). Full results and all 34 submissions are in
+[results/](results/RESULTS.md).
 
 The work ran as several campaigns, each in its own repository. They are merged here
 with full commit history, one folder per repository, in chronological order.
