@@ -1,0 +1,58 @@
+40 films: 44b6=20, 6bba=20
+[  1/40] 44b6_d5e7d891  70s/film  eta 46min
+[  2/40] 44b6_c50204e0  83s/film  eta 52min
+[  3/40] 44b6_e28840c6  79s/film  eta 49min
+[  4/40] 44b6_a21120c2  78s/film  eta 47min
+[  5/40] 44b6_d2f34f90  80s/film  eta 46min
+[  6/40] 44b6_12dfb391  78s/film  eta 44min
+[  7/40] 44b6_7a302da0  77s/film  eta 42min
+[  8/40] 44b6_eb2880fc  75s/film  eta 40min
+[  9/40] 44b6_587a1e22  73s/film  eta 38min
+[ 10/40] 44b6_996155de  72s/film  eta 36min
+[ 11/40] 44b6_267148e4  71s/film  eta 34min
+[ 12/40] 44b6_5f15d135  70s/film  eta 33min
+[ 13/40] 44b6_9be80b04  70s/film  eta 31min
+[ 14/40] 44b6_341df25f  69s/film  eta 30min
+[ 15/40] 44b6_2a2eff9f  69s/film  eta 29min
+[ 16/40] 44b6_aaf8b0ea  68s/film  eta 27min
+[ 17/40] 44b6_c8e2a523  68s/film  eta 26min
+[ 18/40] 44b6_74d0c52e  67s/film  eta 25min
+[ 19/40] 44b6_deabac95  67s/film  eta 23min
+[ 20/40] 44b6_706092f0  66s/film  eta 22min
+[ 21/40] 6bba_48816121  66s/film  eta 21min
+[ 22/40] 6bba_09961292  66s/film  eta 20min
+[ 23/40] 6bba_cdcfe533  66s/film  eta 19min
+[ 24/40] 6bba_debd7bfa  65s/film  eta 17min
+[ 25/40] 6bba_df673a83  65s/film  eta 16min
+[ 26/40] 6bba_afb141ff  67s/film  eta 16min
+[ 27/40] 6bba_bb9f20c3  67s/film  eta 15min
+[ 28/40] 6bba_57b7cc1e  69s/film  eta 14min
+[ 29/40] 6bba_786893ac  70s/film  eta 13min
+[ 30/40] 6bba_05db0fb1  70s/film  eta 12min
+[ 31/40] 6bba_5c039895  70s/film  eta 10min
+[ 32/40] 6bba_12665c0e  69s/film  eta 9min
+[ 33/40] 6bba_7f87b3d8  69s/film  eta 8min
+[ 34/40] 6bba_20852818  69s/film  eta 7min
+[ 35/40] 6bba_4ffd3da3  68s/film  eta 6min
+[ 36/40] 6bba_969618f6  68s/film  eta 5min
+[ 37/40] 6bba_9a41d029  68s/film  eta 3min
+[ 38/40] 6bba_337b1b3a  68s/film  eta 2min
+[ 39/40] 6bba_ef7b4f7e  67s/film  eta 1min
+[ 40/40] 6bba_7d3058ae  67s/film  eta 0min
+
+==============================================================================
+variant           score      vs A     adjJ        J    mult    divJ
+A_base           0.8302   +0.0000   0.8302   0.8359  0.9919  0.0000
+B_tta            0.8520   +0.0217   0.8520   0.8520  0.9991  0.0000
+C_dual           0.8617   +0.0314   0.8617   0.8611  1.0000  0.0000
+D_bidir          0.8619   +0.0317   0.8619   0.8613  1.0000  0.0000
+E_consensus      0.8620   +0.0317   0.8620   0.8614  1.0000  0.0000
+
+per fold:
+fold          44b6   6bba    ALL
+variant                         
+A_base      0.8545 0.8234 0.8302
+B_tta       0.8637 0.8486 0.8520
+C_dual      0.8662 0.8604 0.8617
+D_bidir     0.8669 0.8605 0.8619
+E_consensus 0.8669 0.8605 0.8620

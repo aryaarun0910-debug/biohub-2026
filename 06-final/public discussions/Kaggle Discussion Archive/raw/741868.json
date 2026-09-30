@@ -1,0 +1,144 @@
+{
+  "forumTopic": {
+    "authorId": 1723677,
+    "authorThumbnailName": "1723677-kg.jpg",
+    "authorUserDisplayName": "Chris Deotte",
+    "authorUserName": "cdeotte",
+    "comments": [
+      {
+        "id": 3525558,
+        "postDate": "2026-09-18T06:31:37.763Z",
+        "rawMarkdown": "definitely. the other day i was thinking a similar viz tool for models as well. so we ask these models to try some custom model families right, it would be great to see a forward pass visually -- how the features move through and then we humans can add to it.",
+        "content": "<p>definitely. the other day i was thinking a similar viz tool for models as well. so we ask these models to try some custom model families right, it would be great to see a forward pass visually -- how the features move through and then we humans can add to it.</p>",
+        "replies": [
+          {
+            "id": 3525621,
+            "postDate": "2026-09-18T12:14:44.647Z",
+            "rawMarkdown": "Absolutely. We could click a button and pop out a page showing visually the architecture and preprocess of each experiment pipeline",
+            "content": "<p>Absolutely. We could click a button and pop out a page showing visually the architecture and preprocess of each experiment pipeline</p>",
+            "parent": {},
+            "author": {
+              "displayName": "Chris Deotte",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/1723677-kg.jpg",
+              "url": "/cdeotte",
+              "tier": "GRANDMASTER",
+              "id": 1723677,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 2553,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "Chris Deotte",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/1723677-kg.jpg",
+                "url": "/cdeotte",
+                "userName": "cdeotte",
+                "tier": "GRANDMASTER",
+                "id": 1723677,
+                "profileUrl": "/cdeotte",
+                "performanceTier": "GRANDMASTER",
+                "userId": 1723677,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "Vaibhav Nakrani",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/14581223-kg.jpg",
+          "url": "/vaibhavnakrani",
+          "tier": "CONTRIBUTOR",
+          "id": 14581223,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 1,
+          "canUpvote": true,
+          "totalUpvotes": 1
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 231,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "Vaibhav Nakrani",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/14581223-kg.jpg",
+            "url": "/vaibhavnakrani",
+            "userName": "vaibhavnakrani",
+            "tier": "CONTRIBUTOR",
+            "id": 14581223,
+            "profileUrl": "/vaibhavnakrani",
+            "performanceTier": "CONTRIBUTOR",
+            "userId": 14581223,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      }
+    ],
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3525497,
+      "postDate": "2026-09-17T21:50:19.517Z",
+      "rawMarkdown": "We are entering a new era of humans collaborating with LLM agents. I think one of the most valuable techniques will be asking LLM agents to make dashboards to show humans visually what they are doing. Then we humans can review the visualizations and make suggestions to the LLM agents:\n\nBelow is a 3D movie visualization from a dashboard my LLM agent made for me to review its model's predictions. The 3D uses quaternions and allows me to rotate, zoom, and pan to see its predictions.\n\n![](https://raw.githubusercontent.com/cdeotte/Kaggle_Images/refs/heads/main/Sep-2026/dashboard2.png)",
+      "content": "<p>We are entering a new era of humans collaborating with LLM agents. I think one of the most valuable techniques will be asking LLM agents to make dashboards to show humans visually what they are doing. Then we humans can review the visualizations and make suggestions to the LLM agents:</p>\n<p>Below is a 3D movie visualization from a dashboard my LLM agent made for me to review its model's predictions. The 3D uses quaternions and allows me to rotate, zoom, and pan to see its predictions.</p>\n<p><img src=\"https://raw.githubusercontent.com/cdeotte/Kaggle_Images/refs/heads/main/Sep-2026/dashboard2.png\" alt=\"\"></p>",
+      "parent": {},
+      "author": {
+        "displayName": "Chris Deotte",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/1723677-kg.jpg",
+        "url": "/cdeotte",
+        "tier": "GRANDMASTER",
+        "id": 1723677,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 8,
+        "canUpvote": true,
+        "totalUpvotes": 8
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 2553,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "teamUpInfo": {
+        "teamLeader": {
+          "displayName": "Chris Deotte",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/1723677-kg.jpg",
+          "url": "/cdeotte",
+          "userName": "cdeotte",
+          "tier": "GRANDMASTER",
+          "id": 1723677,
+          "profileUrl": "/cdeotte",
+          "performanceTier": "GRANDMASTER",
+          "userId": 1723677,
+          "progressionOptOut": false
+        },
+        "intro": ""
+      }
+    },
+    "firstMessageId": 3525497,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 741868,
+    "name": "Agents collaborate with Humans - Dashboards are key!",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-09-17T21:50:19.517781600Z",
+    "totalVotes": 8,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/741868",
+    "totalMessages": 2,
+    "authorPerformanceTier": "GRANDMASTER",
+    "authorProgressionOptOut": false
+  }
+}

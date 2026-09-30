@@ -1,0 +1,298 @@
+============================================================================================================
+AGGREGATE (weighted, 8 films)
+  raw ILP       adj 0.93358  J 0.93188  proxy 0.93358
+  motion relink adj 0.91654  J 0.91480  proxy 0.91654
+
+============================================================================================================
+PER-FILM SCORES
+stem                 w   rawadj   reladj     dadj  rawTP  relTP  rawFP  relFP    ilpE    relE  drop%
+44b6_267148e4      294  0.85058  0.76585 +0.08472    255    246     17     38  21,427  21,448    5.1
+6bba_09961292     1954  0.92103  0.89210 +0.02894   1793   1774     83    125  28,658  28,814    1.5
+6bba_07e24132      364  0.80039  0.77702 +0.02337    303    299     19     25  27,970  28,214    1.3
+6bba_062c8d37      899  0.99721  0.98396 +0.01324    896    890      1      7   5,696   5,645    3.1
+44b6_2a2eff9f      231  0.87617  0.86424 +0.01193    197    196     21     23  38,160  38,433    0.4
+44b6_341df25f      210  0.97131  0.97131 +0.00000    207    207      1      1   8,189   8,210    0.3
+6bba_085bf656     1171  0.99285  0.99285 +0.00000   1162   1162      3      3   8,086   8,092    0.2
+44b6_12dfb391      822  0.90451  0.91433 -0.00982    727    734     49     48  42,871  43,045    0.1
+
+============================================================================================================
+DENSITY  (deployed pipeline skips relink when any frame has > 2600 nodes)
+stem             frames   n_pred  n/frame  max/frm  nn_p10  nn_med  nn_p90  n/n_est
+44b6_267148e4       100   22,829      228      286    6.08    8.29   10.41     1.19
+6bba_09961292       100   29,955      300      348    5.86    7.62    9.75     0.96
+6bba_07e24132       100   29,751      298      365    6.08    8.29   11.60     1.38
+6bba_062c8d37       100    5,997       60       71    9.48   13.10   18.81     0.99
+44b6_2a2eff9f       100   40,928      409      498    6.08    8.29   10.78     0.73
+44b6_341df25f       100    8,523       85      102    6.70    9.61   13.50     1.15
+6bba_085bf656       100    8,417       84      126    8.29   11.38   15.42     0.99
+44b6_12dfb391       100   45,351      454      527    5.86    8.12   10.53     0.77
+
+============================================================================================================
+MOTION  (ILP edge length, um; relink gates at 6 then 10)
+stem               d_p10   d_med   d_p90   d_p99   >6um%  >10um%   AMBIG  ambig90
+44b6_267148e4       1.62    2.81    5.39    8.90    8.46    0.29   0.340    0.650
+6bba_09961292       0.00    1.62    3.25    6.70    2.03    0.02   0.213    0.426
+6bba_07e24132       0.00    1.62    3.25    6.89    2.31    0.11   0.196    0.392
+6bba_062c8d37       0.00    2.30    5.39   12.16    7.97    1.95   0.175    0.411
+44b6_2a2eff9f       0.00    2.30    3.63    5.39    0.62    0.02   0.277    0.439
+44b6_341df25f       0.00    1.62    3.25    5.39    0.68    0.06   0.169    0.338
+6bba_085bf656       1.62    2.30    4.29    6.08    1.66    0.11   0.202    0.377
+44b6_12dfb391       0.00    1.62    2.81    4.88    0.50    0.02   0.200    0.346
+   AMBIG = median ILP edge length / median within-frame nearest-neighbour spacing.
+
+============================================================================================================
+PROBABILITY FIELD  (edge_prob exists ONLY on ILP edges; every other pair scores 0.0,
+                    so -beta*prob is a flat incumbency discount, not a likelihood)
+stem               p_mean    p_med    p_std    p_p10  ilp_fill  rel_fill
+44b6_267148e4      0.8443   0.8796   0.1196   0.6576    0.9597    0.9606
+6bba_09961292      0.8607   0.8941   0.1077   0.6995    0.9762    0.9815
+6bba_07e24132      0.8199   0.8478   0.1193   0.6381    0.9590    0.9674
+6bba_062c8d37      0.9021   0.9469   0.1090   0.7410    0.9742    0.9655
+44b6_2a2eff9f      0.8489   0.8765   0.1082   0.6903    0.9511    0.9579
+44b6_341df25f      0.8941   0.9359   0.1097   0.7273    0.9804    0.9829
+6bba_085bf656      0.9027   0.9413   0.1012   0.7586    0.9813    0.9820
+44b6_12dfb391      0.9044   0.9350   0.0923   0.7795    0.9637    0.9677
+   *_fill = edges / sum_t min(n_t, n_t+1): how much of the 1:1 capacity each graph uses.
+
+============================================================================================================
+EDGE-SET DIFF (relink vs ILP)
+stem                 kept  dropped    added  ilpLmed  relLmed  dropLmed  addLmed
+44b6_267148e4      20,329    1,098    1,119     2.81     2.81      7.18     5.14
+6bba_09961292      28,232      426      582     1.62     1.62      6.70     5.14
+6bba_07e24132      27,620      350      594     1.62     1.62      6.70     4.88
+6bba_062c8d37       5,520      176      125     2.30     2.30     10.53     5.86
+44b6_2a2eff9f      38,022      138      411     2.30     2.30      3.98     5.14
+44b6_341df25f       8,166       23       44     1.62     1.62      6.70     3.44
+6bba_085bf656       8,067       19       25     2.30     2.30      8.90     3.98
+44b6_12dfb391      42,807       64      238     1.62     1.62      4.29     5.86
+
+============================================================================================================
+FORENSICS ON 44b6_267148e4: fate of every GT edge whose endpoints both matched
+  matched GT edges           268
+  both graphs correct        245
+  ILP correct, relink WRONG  10   <-- the damage
+  relink correct, ILP wrong  1
+  both wrong                 12
+
+  broken edges: the true link vs what relink chose instead
+    true link length          med   8.29 um   (all matched GT edges: med 2.81)
+    relink's chosen link      med   4.56 um  (n with a chosen target = 10/10)
+    chosen target is          90% NEARER the source than the truth
+    dist(chosen, truth)       med  10.65 um
+    crowding at true target   med   8.29 um   (all matched GT: med 8.12)
+    true link exceeded 6um gate in 9/10 cases, 10um gate in 0/10
+    source left unlinked entirely: 0
+    frames touched: 8 distinct (of 100); busiest: t=10:2, t=48:2, t=13:1, t=30:1, t=44:1, t=45:1, t=46:1, t=52:1
+    GT edges available in those frames: t=10:2, t=48:3, t=13:2, t=30:3, t=44:2, t=45:2, t=46:1, t=52:2
+
+============================================================================================================
+WHICH PASS COMMITS THE WRONG LINK ON 44b6_267148e4?
+  wrong links committed in the TIGHT (6 um) pass   7/10
+  wrong links committed in the RELAXED (10 um) pass 3/10
+  source left unlinked                              0/10
+
+  Cost of the CORRECT target vs the one relink took (both in um of cost units).
+  'margin' is how much extra bonus beta would have to supply to flip it back;
+  the incumbency bonus available is at most beta*edge_prob ~ 0.9.
+      t  pass  raw_true  raw_chosen  cost_true  cost_chosen   margin  gated?  stolen?         cause
+     10     0      9.61        2.30       7.96         4.34     3.63     YES      YES          GATE
+     10     0      8.29        3.98       6.81         5.21     1.60     YES      YES          GATE
+     13     1      9.33        7.27       9.16         6.71     2.45      no      YES        STOLEN
+     30     0      8.29        5.86       9.13         7.83     1.30     YES      YES          GATE
+     44     0      8.29        5.14       5.55         7.75    -2.20     YES      YES          GATE
+     45     0      8.29        2.30       6.85         3.16     3.69     YES       no          GATE
+     46     1      6.70        6.08       6.26         8.67    -2.41      no      YES        STOLEN
+     48     0      7.96        3.98       7.33         5.94     1.39     YES      YES          GATE
+     48     0      8.44        3.98       8.32         4.18     4.14     YES      YES          GATE
+     52     1      4.88        9.19       3.76        11.63    -7.87      no      YES        STOLEN
+
+  cause breakdown: {'GATE': 7, 'STOLEN': 3}
+  GATE   = tight pass committed a wrong link while the correct target sat beyond
+           6 um and was therefore not even a candidate; the source is then in
+           used_i and the 10 um relaxed pass can never revisit it.
+  STOLEN = the correct target was cheaper for this source, but the 1:1 constraint
+           had already handed that target to a competing source.
+  median |margin| 2.43 um; 10/10 exceed the ~0.9 um that the
+  learned-probability bonus can supply, so the bonus cannot rescue them.
+
+============================================================================================================
+HOW MUCH INCUMBENCY BONUS WOULD IT TAKE TO UNDO THE DAMAGE?
+    beta   FOCUS adj    TP    FP   (raw ILP = 0.85058, TP 255, FP 17)
+     0.0     0.76585   246    38
+     1.0     0.76585   246    38
+     2.0     0.76829   246    37
+     5.0     0.77636   247    35
+    10.0     0.77636   247    35
+    50.0     0.77636   247    35
+  Even an overwhelming bonus cannot recover the raw ILP score: the 1:1
+  constraint and the distance gates remove options the bonus cannot buy back.
+
+============================================================================================================
+CAUSAL ABLATION: which ingredient of the stage does the damage?
+variant                       FOCUS adj  FOCUS TP  FOCUS FP   |  all-8 adj   all-8 J
+deployed (6 then 10)            0.76585       246        38   |    0.91654   0.91480
+no tight pass (10 only)         0.67474       236        66   |    0.81725   0.81590
+no tight pass (6 only)          0.75460       237        31   |    0.90461   0.90282
+tight=relaxed=8                 0.76274       245        38   |    0.91100   0.90929
+no incumbency bonus beta=0      0.76585       246        38   |    0.91386   0.91212
+bonus x5 (beta=5)               0.77636       247        35   |    0.91888   0.91714
+no velocity anchor vel=0        0.76343       246        39   |    0.91639   0.91465
+wide gates (10 then 16)         0.67474       236        66   |    0.81706   0.81570
+(no relink at all: raw ILP)     0.85058       255        17   |    0.93358   0.93188
+
+============================================================================================================
+GT MOTION vs PREDICTED MOTION, and what relink does to divisions
+stem              gtDmed  gtDp90  gtDmax  gt>6um%  predDmed  ilpForks  relForks  rawDivJ  relDivJ
+44b6_267148e4       2.33    5.59    9.27     8.66      2.81         0         0    0.000    0.000
+6bba_09961292       1.22    2.87    8.38     1.98      1.62         0         0    0.000    0.000
+6bba_07e24132       1.68    3.49   10.03     2.32      1.62         0         0    0.000    0.000
+6bba_062c8d37       1.82    4.49    9.83     4.90      2.30         0         0    0.000    0.000
+44b6_2a2eff9f       1.86    3.31    8.38     0.95      2.30         0         0    0.000    0.000
+44b6_341df25f       1.68    2.63    7.14     0.96      1.62         0         0    0.000    0.000
+6bba_085bf656       2.33    4.02    9.07     1.46      2.30         0         0    0.000    0.000
+44b6_12dfb391       1.28    2.07    5.87     0.00      1.62         0         0    0.000    0.000
+   NOTE: ilpForks is 0 on every film -- the raw ILP graphs contain no out-degree-2
+   node at all, and rawDivJ is 0 everywhere.  So relink's 1:1 constraint destroys
+   nothing here: the division term is not part of this collapse.  The whole delta
+   is edge Jaccard.  (Divisions only appear later, when safe_div runs.)
+
+============================================================================================================
+WHERE THE EXTRA FALSE POSITIVES COME FROM
+stem               ilpFP   relFP   newFP  replacing  onUnlinked  FPfixed
+44b6_267148e4         17      38      22         16           6        1
+6bba_09961292         83     125      45         34          11        3
+6bba_07e24132         19      25       6          4           2        0
+6bba_062c8d37          1       7       6          6           0        0
+44b6_2a2eff9f         21      23       2          2           0        0
+44b6_341df25f          1       1       0          0           0        0
+6bba_085bf656          3       3       0          0           0        0
+44b6_12dfb391         49      48       1          0           1        2
+   'replacing'  = relink overwrote an ILP link on that source with a wrong one.
+   'onUnlinked' = ILP deliberately left the source unlinked; 1:1 Hungarian linked it anyway.
+
+============================================================================================================
+CAN ANY FILM-LEVEL STATISTIC PREDICT THE RELINK DELTA?  (n = 8)
+statistic                   pearson r   spearman  r w/o FOCUS   leave-one-out pearson range
+ambiguity_p90                  +0.958     +0.810       +0.750   [+0.750, +0.974]
+frac_ilp_dropped               +0.882     +0.905       +0.560   [+0.560, +0.981]
+ambiguity                      +0.789     +0.500       +0.193   [+0.193, +0.902]
+prob_std                       +0.734     +0.595       +0.738   [+0.707, +0.813]
+frac_disp_gt_tight             +0.705     +0.833       +0.314   [+0.314, +0.954]
+prob_mean                      -0.608     -0.738       -0.732   [-0.745, -0.535]
+disp_med                       +0.596     +0.571       -0.086   [-0.086, +0.702]
+disp_p90                       +0.569     +0.548       +0.096   [+0.096, +0.768]
+prob_med                       -0.547     -0.429       -0.673   [-0.673, -0.489]
+ratio_n                        +0.443     +0.381       +0.378   [+0.319, +0.546]
+disp_p99                       +0.426     +0.762       +0.357   [+0.330, +0.956]
+rel_fill                       -0.390     -0.452       -0.066   [-0.516, -0.066]
+ilp_fill                       -0.338     -0.310       -0.154   [-0.506, -0.154]
+nn_med                         -0.286     -0.238       -0.208   [-0.435, -0.200]
+nn_p10                         -0.250     -0.095       -0.128   [-0.411, -0.128]
+frac_disp_gt_relaxed           +0.033     +0.476       +0.118   [-0.046, +0.834]
+n_pred                         -0.011     -0.119       +0.038   [-0.135, +0.283]
+nodes_per_frame_mean           -0.011     -0.119       +0.038   [-0.135, +0.283]
+nodes_per_frame_max            +0.008     -0.119       +0.039   [-0.120, +0.288]
+   'r w/o FOCUS' drops 44b6_267148e4 and refits on the remaining 7 films.
+
+  leave-one-out range is the decisive column: a statistic whose correlation
+  survives dropping any single film is worth something; one that does not is
+  describing 44b6_267148e4 and nothing else.
+
+  PERMUTATION NULL (19 candidate statistics, 20,000 shuffles of the 8 deltas):
+    best |r| observed                 0.958
+    best |r| under the null, median   0.660   90th pct 0.894   99th pct 0.946
+    P(best-of-19 null |r| >= observed) = 0.0052
+    With 8 points and a screen this wide, |r| ~ 0.85 happens by chance often;
+    read the p-value, not the raw r.
+
+  RANKING CHECK on 'ambiguity_p90' (films sorted by the statistic, descending):
+    44b6_267148e4    stat   0.650   d_adj  +0.08472
+    44b6_2a2eff9f    stat   0.439   d_adj  +0.01193
+    6bba_09961292    stat   0.426   d_adj  +0.02894
+    6bba_062c8d37    stat   0.411   d_adj  +0.01324
+    6bba_07e24132    stat   0.392   d_adj  +0.02337
+    6bba_085bf656    stat   0.377   d_adj  +0.00000
+    44b6_12dfb391    stat   0.346   d_adj  -0.00982
+    44b6_341df25f    stat   0.338   d_adj  +0.00000
+
+============================================================================================================
+THE MECHANISM AT EDGE LEVEL -- pooled over all 8 films, so n is thousands, not 8
+For every GT edge the ILP already got right, does relink break it?  Bucketed by
+the true displacement of that edge, i.e. by how the 6 um tight gate sees it.
+  true displacement (um)        n  broken  break rate
+  [0, 2)                     2946       0        0.0%
+  [2, 4)                     2251       4        0.2%
+  [4, 6)                      203       5        2.5%
+  [6, 8)                      113      21       18.6%
+  [8, 10)                      22      14       63.6%
+  [10, 99)                      5       5      100.0%
+
+  below the 6 um tight gate: 9/5400 broken = 0.17%
+  above the 6 um tight gate: 40/140 broken = 28.6%   (171x)
+
+  Same split, per film -- the law is not one film's quirk:
+  stem               n<6um  brk<6    rate     n>=6um  brk>=6    rate       d_adj
+  44b6_267148e4        237      1    0.4%         18       9   50.0%    +0.08472
+  6bba_09961292       1760      6    0.3%         33      21   63.6%    +0.02894
+  6bba_07e24132        295      0    0.0%          8       4   50.0%    +0.02337
+  6bba_062c8d37        844      1    0.1%         52       6   11.5%    +0.01324
+  44b6_2a2eff9f        197      1    0.5%          0       0    0.0%    +0.01193
+  44b6_341df25f        206      0    0.0%          1       0    0.0%    +0.00000
+  6bba_085bf656       1135      0    0.0%         27       0    0.0%    +0.00000
+  44b6_12dfb391        726      0    0.0%          1       0    0.0%    -0.00982
+
+  A per-film predictor follows from the law WITHOUT fitting anything:
+  expected broken edges ~ (share of GT edges over 6 um) x (break rate above the gate).
+  stem              GT>6um share  predicted brk  actual brk     d_adj
+  44b6_267148e4             7.1%            5.1          10  +0.08472
+  6bba_09961292             1.8%            9.4          27  +0.02894
+  6bba_07e24132             2.6%            2.3           4  +0.02337
+  6bba_062c8d37             5.8%           14.9           7  +0.01324
+  44b6_2a2eff9f             0.0%            0.0           1  +0.01193
+  44b6_341df25f             0.5%            0.3           0  +0.00000
+  6bba_085bf656             2.3%            7.7           0  +0.00000
+  44b6_12dfb391             0.1%            0.3           0  -0.00982
+  pearson r (GT>6um share vs d_adj) = +0.744   -- but this needs GT, so it is a diagnosis, not a deployable rule.
+
+  TWO-FACTOR CONFIRMATION.  Exceeding the gate is necessary but not sufficient:
+  the wrong target also has to be close enough to be attractive.  Break rate ABOVE
+  the gate, ordered by how tightly packed the film's detections are:
+  stem              nn_med (um)   n>=6um  broken  break rate
+  6bba_09961292            7.62       33      21       63.6%
+  44b6_267148e4            8.29       18       9       50.0%
+  6bba_07e24132            8.29        8       4       50.0%
+  6bba_085bf656           11.38       27       0        0.0%
+  6bba_062c8d37           13.10       52       6       11.5%
+  Tighter packing -> higher break rate.  6bba_085bf656 has 27 GT edges beyond the
+  gate and loses NONE, because at 11.4 um spacing no wrong target is nearer.
+
+============================================================================================================
+WHAT WOULD A PER-FILM 'SKIP RELINK' RULE BUY?
+  relink everywhere (deployed)      adj 0.91654   (0 film(s) skipped)
+  skip relink on FOCUS only         adj 0.92122   (1 film(s) skipped)
+  skip when ambiguity_p90 > 0.50    adj 0.92122   (1 film(s) skipped)
+  skip when ambiguity_p90 > 0.40    adj 0.93335   (4 film(s) skipped)
+  oracle: skip whenever it helps    adj 0.93494   (5 film(s) skipped)
+  never relink (raw ILP)            adj 0.93358   (8 film(s) skipped)
+  The whole aggregate prize for perfectly adaptive skipping is ~0.017 adj, and
+  ~0.004 of that is the one film.  Turning the stage off entirely captures all of it
+  on this val set, which is the simpler action and needs no per-film statistic.
+
+
+============================================================================================================
+RECONCILIATION with the per-film 'proxy' deltas in the brief
+  Raw ILP has zero forks, so per-film proxy == per-film adj unless safe_div runs.
+  Re-running both graphs through the deployed safe_div reproduces the brief's numbers:
+  stem              proxy(raw+sd)  proxy(rel+sd)     delta  |  adj-only delta
+  44b6_267148e4           0.95391        0.76585   +0.1881  |        +0.08472
+  6bba_09961292           0.94655        0.89210   +0.0544  |        +0.02894
+  6bba_07e24132           0.80039        0.77702   +0.0234  |        +0.02337
+  6bba_062c8d37           1.09832        1.08507   +0.0133  |        +0.01324
+  44b6_2a2eff9f           0.90199        0.91865   -0.0167  |        +0.01193
+  44b6_341df25f           1.07600        1.07600   +0.0000  |        +0.00000
+  6bba_085bf656           0.99285        0.99285   +0.0000  |        +0.00000
+  44b6_12dfb391           0.90451        0.91433   -0.0098  |        -0.00982
+  The extra swing beyond the edge-Jaccard delta is safe_div: on 44b6_267148e4 the
+  raw graph lets safe_div recover the film's one division and the relinked graph
+  does not, which adds ~0.10 of per-film proxy on top of the 0.085 edge-Jaccard loss.
+

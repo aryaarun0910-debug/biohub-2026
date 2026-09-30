@@ -1,0 +1,1 @@
+pip install tracksdata zarr>=3.0.10,<4 pyscipopt geff ilpy polars blosc2 dask imagecodecs pyarrow rustworkx sqlalchemy

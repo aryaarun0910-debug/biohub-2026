@@ -1,0 +1,174 @@
+{
+  "forumTopic": {
+    "authorId": 1693758,
+    "authorThumbnailName": "1693758-gp.jpg",
+    "authorUserDisplayName": "Masha Mikhisor",
+    "authorUserName": "mikhisor",
+    "comments": [
+      {
+        "id": 3524603,
+        "postDate": "2026-09-15T12:02:31.787Z",
+        "rawMarkdown": "About question 1, they are not the same embryos used in training, but they are very similar and the spacing is the same. You can download it to check it out. If you want to use it, you just have to extract chunks from it because it's not the same 64×256×256 size as in the competition. Also, it wouldn’t make sense for it to be in the test set. It's standard in Kaggle competitions that the hidden test set is never shared anywhere, it's a new set images that the hosts have never shared, but prepared using the same methodology as the training data.\n\nAs far as I know the hosts never shared how tracks were made in discussions, I think it's based on their methods (ultrack?/hoct?) + manual review",
+        "content": "<p>About question 1, they are not the same embryos used in training, but they are very similar and the spacing is the same. You can download it to check it out. If you want to use it, you just have to extract chunks from it because it's not the same 64×256×256 size as in the competition. Also, it wouldn’t make sense for it to be in the test set. It's standard in Kaggle competitions that the hidden test set is never shared anywhere, it's a new set images that the hosts have never shared, but prepared using the same methodology as the training data.</p>\n<p>As far as I know the hosts never shared how tracks were made in discussions, I think it's based on their methods (ultrack?/hoct?) + manual review</p>",
+        "parent": {},
+        "author": {
+          "displayName": "Sergio Alvarez",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/2221915-kg.jpg?t=2024-09-24-13-40-46",
+          "url": "/sersasj",
+          "tier": "MASTER",
+          "id": 2221915,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 1,
+          "canUpvote": true,
+          "totalUpvotes": 1
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 2,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "reactions": [
+          {
+            "emoji": "LOVE",
+            "featuredUserNames": [
+              "mikhisor"
+            ],
+            "userCount": 1
+          }
+        ],
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "Sergio Alvarez",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/2221915-kg.jpg?t=2024-09-24-13-40-46",
+            "url": "/sersasj",
+            "userName": "sersasj",
+            "tier": "MASTER",
+            "id": 2221915,
+            "profileUrl": "/sersasj",
+            "performanceTier": "MASTER",
+            "userId": 2221915,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3525439,
+        "postDate": "2026-09-17T18:40:37.507Z",
+        "rawMarkdown": "Could the organizers clarify whether the public Janelia/linajea zebrafish recording **160328** is independent of every competition training and hidden-test embryo and is permitted for external validation?\n\nFor the Zebrahub/Ultrack data discussed above, which released recordings have independently reviewed sparse lineage annotations? A link binding each reviewed annotation export to its exact image recording/version, voxel spacing, frame interval and annotation coverage would help us evaluate trackers correctly.\n\nDataset reference: https://janelia.figshare.com/articles/dataset/Zebrafish_data_for_whole-embryo_lineage_reconstruction_with_linajea/24968724",
+        "content": "<p>Could the organizers clarify whether the public Janelia/linajea zebrafish recording <strong>160328</strong> is independent of every competition training and hidden-test embryo and is permitted for external validation?</p>\n<p>For the Zebrahub/Ultrack data discussed above, which released recordings have independently reviewed sparse lineage annotations? A link binding each reviewed annotation export to its exact image recording/version, voxel spacing, frame interval and annotation coverage would help us evaluate trackers correctly.</p>\n<p>Dataset reference: <a href=\"https://janelia.figshare.com/articles/dataset/Zebrafish_data_for_whole-embryo_lineage_reconstruction_with_linajea/24968724\" target=\"_blank\">https://janelia.figshare.com/articles/dataset/Zebrafish_data_for_whole-embryo_lineage_reconstruction_with_linajea/24968724</a></p>",
+        "parent": {},
+        "author": {
+          "displayName": "MOHAMMADJAFAR ZAMANI",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28053944-kg.png?t=2026-02-22-01-43-57",
+          "url": "/mohammadjafarzamani",
+          "tier": "CONTRIBUTOR",
+          "id": 28053944,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 223,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "MOHAMMADJAFAR ZAMANI",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28053944-kg.png?t=2026-02-22-01-43-57",
+            "url": "/mohammadjafarzamani",
+            "userName": "mohammadjafarzamani",
+            "tier": "CONTRIBUTOR",
+            "id": 28053944,
+            "profileUrl": "/mohammadjafarzamani",
+            "performanceTier": "CONTRIBUTOR",
+            "userId": 28053944,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3524632,
+        "postDate": "2026-09-15T13:36:06.680Z",
+        "rawMarkdown": "Thank you for the external zebrafish data @mikhisor ",
+        "content": "<p>Thank you for the external zebrafish data <a href=\"/mikhisor\" target=\"_blank\">@mikhisor</a> </p>",
+        "parent": {},
+        "author": {
+          "displayName": "Navneet",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15692441-kg.jpg?t=2025-05-18-07-58-06",
+          "url": "/navneetbende",
+          "tier": "CONTRIBUTOR",
+          "id": 15692441,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "feedbackTrackingData": {},
+        "isThankYou": false
+      }
+    ],
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3524433,
+      "postDate": "2026-09-14T22:10:13.127Z",
+      "rawMarkdown": "Hi, thanks for confirming that Zebrahub data is OK to use. I'm looking for other embryos to check my tracker on and have a few questions:\n\n1. Is the [public Ultrack embryo](https://public.czbiohub.org/royerlab/ultrack/zebrafish_embryo.ome.zarr/.zattrs) (2024_03_22_dorado/stabilized.zarr) one of the competition train or test embryos? If it's separate, can I use it for validation, including manually checking tracks?\n\n2. Can I download the curated tracks and reviewed DaXi lineages from Figs. 4–5 of the [Ultrack paper](https://www.nature.com/articles/s41592-025-02778-0)? Are they in [tracks_benchmark](https://public.czbiohub.org/royerlab/zebrahub/imaging/single-objective/tracks_benchmark/), and which images do they match? If they aren't public yet, could they be shared with everyone?\n\n3. What's the time between competition frames? How were the annotations made, and how is estimated_number_of_nodes estimated?\n\nThanks!",
+      "content": "<p>Hi, thanks for confirming that Zebrahub data is OK to use. I'm looking for other embryos to check my tracker on and have a few questions:</p>\n<ol>\n<li><p>Is the <a href=\"https://public.czbiohub.org/royerlab/ultrack/zebrafish_embryo.ome.zarr/.zattrs\" target=\"_blank\">public Ultrack embryo</a> (2024_03_22_dorado/stabilized.zarr) one of the competition train or test embryos? If it's separate, can I use it for validation, including manually checking tracks?</p></li>\n<li><p>Can I download the curated tracks and reviewed DaXi lineages from Figs. 4–5 of the <a href=\"https://www.nature.com/articles/s41592-025-02778-0\" target=\"_blank\">Ultrack paper</a>? Are they in <a href=\"https://public.czbiohub.org/royerlab/zebrahub/imaging/single-objective/tracks_benchmark/\" target=\"_blank\">tracks_benchmark</a>, and which images do they match? If they aren't public yet, could they be shared with everyone?</p></li>\n<li><p>What's the time between competition frames? How were the annotations made, and how is estimated_number_of_nodes estimated?</p></li>\n</ol>\n<p>Thanks!</p>",
+      "parent": {},
+      "author": {
+        "displayName": "Masha Mikhisor",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/1693758-gp.jpg",
+        "url": "/mikhisor",
+        "tier": "CONTRIBUTOR",
+        "id": 1693758,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 2,
+        "canUpvote": true,
+        "totalUpvotes": 2
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 15,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "teamUpInfo": {
+        "enabled": true,
+        "teamLeader": {
+          "displayName": "Ogurtsov",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/682731-kg.jpg?t=2024-04-01-08-44-00",
+          "url": "/ogurtsov",
+          "userName": "ogurtsov",
+          "tier": "MASTER",
+          "id": 682731,
+          "profileUrl": "/ogurtsov",
+          "performanceTier": "MASTER",
+          "userId": 682731,
+          "progressionOptOut": false
+        },
+        "intro": ""
+      }
+    },
+    "firstMessageId": 3524433,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 741386,
+    "name": "A few questions about external zebrafish data",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-09-14T22:10:13.125144900Z",
+    "totalVotes": 2,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/741386",
+    "totalMessages": 3,
+    "authorPerformanceTier": "CONTRIBUTOR",
+    "authorProgressionOptOut": false
+  }
+}

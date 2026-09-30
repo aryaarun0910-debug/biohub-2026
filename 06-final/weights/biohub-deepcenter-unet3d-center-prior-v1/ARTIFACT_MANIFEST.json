@@ -1,0 +1,206 @@
+{
+  "artifact_name": "biohub-full-frame-center-pack-deepcenter-unet3d-ep0500-v1",
+  "artifact_type": "biohub_full_frame_center_detector",
+  "contents": {
+    "bytes": 79504075,
+    "files": 14,
+    "source_scripts": {
+      "build_full_frame_center_pack.py": {
+        "bytes": 13367,
+        "path": "source_scripts/build_full_frame_center_pack.py",
+        "sha256": "bb5dcb238bb1bf56f130d0ad028329a210b714a62bf2e433cf4a64412c361be0"
+      },
+      "package_and_upload_full_frame_center_pack.sh": {
+        "bytes": 4586,
+        "path": "source_scripts/package_and_upload_full_frame_center_pack.sh",
+        "sha256": "bcab0b41370673214760a86db2057599f4155a5762343a04587dddbcebbf68b5"
+      },
+      "run_full_frame_center_training.sh": {
+        "bytes": 9456,
+        "path": "source_scripts/run_full_frame_center_training.sh",
+        "sha256": "262c6a833794e6223c95c9ea2ec29efe734d2bc63a23eb3e9ab9c2df73702d71"
+      },
+      "train_full_frame_center_detector.py": {
+        "bytes": 43133,
+        "path": "source_scripts/train_full_frame_center_detector.py",
+        "sha256": "96f39e25901fc3f728d08d945efa62c5eac28d4ef771d71889053b65396cde5e"
+      }
+    }
+  },
+  "coordinate_contract": {
+    "coordinate_order": [
+      "z",
+      "y",
+      "x"
+    ],
+    "coordinate_unit": "original_voxel",
+    "pool_factor": 4,
+    "pooled_peak_to_original_voxel": {
+      "x_orig": "x * pool_factor + (pool_factor - 1) / 2",
+      "y_orig": "y * pool_factor + (pool_factor - 1) / 2",
+      "z_orig": "z"
+    },
+    "voxel_scale_um": {
+      "x": 0.40625,
+      "y": 0.40625,
+      "z": 1.625
+    }
+  },
+  "dataset_id": "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+  "gate_and_blend_contract": {
+    "avoid": "adding all peaks directly to the node set without context gates",
+    "candidate_features": [
+      "full_frame_score",
+      "nearest_existing_node_um",
+      "frame_candidate_rank",
+      "local_intensity_refined_centroid",
+      "component_length",
+      "gap_length",
+      "motion_residual_um",
+      "linefit_residual_um"
+    ],
+    "diagnostic_files": {
+      "SNAPSHOT_MANIFEST.json": {
+        "bytes": 1920,
+        "path": "weights/full_frame_center/SNAPSHOT_MANIFEST.json",
+        "sha256": "e7d791b1500610602f33a1e0576f04804a734762df306ff008226b9f2c608d6e"
+      },
+      "gate_frame_metrics.csv": {
+        "bytes": 216769,
+        "path": "weights/full_frame_center/gate_frame_metrics.csv",
+        "sha256": "5bc49b72f9a0ed793c0aba24a5c5d71c677a2e3a565151ec5756751c6f7f5734"
+      },
+      "gate_peak_samples.csv": {
+        "bytes": 3362105,
+        "path": "weights/full_frame_center/gate_peak_samples.csv",
+        "sha256": "c3e3a837267976b5002a83815223f7b05a3da66346a7d554b955415a0eb87780"
+      },
+      "gate_summary.json": {
+        "bytes": 3662,
+        "path": "weights/full_frame_center/gate_summary.json",
+        "sha256": "0062df0daed741157b816d64d10aee8cd0d02a12408effc8a8950a26ebb3b7d7"
+      },
+      "gate_threshold_metrics.csv": {
+        "bytes": 1063,
+        "path": "weights/full_frame_center/gate_threshold_metrics.csv",
+        "sha256": "357e4a364e5fa21f0381f6e779ed5478e3e43133bb6a665712b3a8dd8263d08c"
+      },
+      "history.csv": {
+        "bytes": 43208,
+        "path": "weights/full_frame_center/history.csv",
+        "sha256": "59f6ef2a342ccfc6464990606557ba9e71baeced3e447d21f8cc3f5a7656f4ce"
+      },
+      "split_manifest.json": {
+        "bytes": 8447,
+        "path": "weights/full_frame_center/split_manifest.json",
+        "sha256": "c1cc5b597fa9bc647390920affdd5bc4cb27ee1ea84e1cedb59d108a68c2a845"
+      }
+    },
+    "recommended_use": "high-confidence node rescue near graph gaps, short components, or unmatched motion endpoints",
+    "threshold_suggestions_from_sparse_labels": {
+      "max_sparse_f1": {
+        "f1_sparse": 0.14482142857142855,
+        "precision_sparse": 0.08879886127230921,
+        "pred_per_frame": 38.05416666666667,
+        "recall_sparse": 0.3923560716013546,
+        "threshold": 0.4
+      }
+    },
+    "warning": "Sparse-label precision/recall are calibration features, not complete-cell leaderboard estimates."
+  },
+  "generated_at_utc": "2026-07-07T11:53:47.387698+00:00",
+  "model": {
+    "architecture": "DeepCenterUNet3D",
+    "best_checkpoint": {
+      "bytes": 37876911,
+      "path": "weights/full_frame_center/best.pt",
+      "sha256": "8040999a92f6b7bbd98fa8cf458141e045c0f9ad7c936bdb3b18e1f7edafe2a0"
+    },
+    "best_checkpoint_summary": {
+      "best_score": -0.04500306242456039,
+      "epoch": 2,
+      "history_best": {
+        "epoch": 2.0,
+        "minutes": 1.797789708773295,
+        "score": -0.04500306242456039,
+        "train_loss": 0.012330461980414216,
+        "val_loss": 0.04500306242456039
+      },
+      "history_last": {
+        "epoch": 2.0,
+        "minutes": 1.797789708773295,
+        "score": -0.04500306242456039,
+        "train_loss": 0.012330461980414216,
+        "val_loss": 0.04500306242456039
+      },
+      "history_len": 2
+    },
+    "config": {
+      "base_channels": 24,
+      "batch_size": 8,
+      "bg_quantile": 0.4,
+      "brightness_jitter": 0.0,
+      "epochs": 1000,
+      "frames_per_movie": 0,
+      "gauss_sigma": 1.0,
+      "grad_clip_norm": null,
+      "learning_rate": 0.001,
+      "movie_limit": null,
+      "norm_clip_hi": 6.0,
+      "norm_clip_lo": -0.5,
+      "norm_hi_pct": 99.5,
+      "norm_lo_pct": 50.0,
+      "num_workers": 4,
+      "pool_factor": 4,
+      "pos_thresh": 0.05,
+      "random_flip": true,
+      "seed": 2026,
+      "val_fraction": 0.1,
+      "w_bg": 1.0,
+      "w_ignore": 0.05,
+      "w_pos": 12.0,
+      "weight_decay": 0.0
+    },
+    "last_checkpoint": {
+      "bytes": 37918921,
+      "path": "weights/full_frame_center/checkpoint_last.pt",
+      "sha256": "8164d1ffa07f87e0506027a0392edeab7939a32bd5e3f756377c0d72885cf127"
+    },
+    "last_checkpoint_summary": {
+      "best_score": -0.04500306242456039,
+      "epoch": 500,
+      "history_best": {
+        "epoch": 2.0,
+        "minutes": 1.797789708773295,
+        "score": -0.04500306242456039,
+        "train_loss": 0.012330461980414216,
+        "val_loss": 0.04500306242456039
+      },
+      "history_last": {
+        "epoch": 500.0,
+        "minutes": 1.6046498457590739,
+        "score": -0.31674331178267795,
+        "train_loss": 0.0077227268030820835,
+        "val_loss": 0.31674331178267795
+      },
+      "history_len": 500
+    },
+    "method": "full_frame_center",
+    "role": "auxiliary_center_prior"
+  },
+  "schema_version": 1,
+  "training_contract": {
+    "ignored_or_low_weight_region": "bright unlabeled voxels receive small weight to reduce sparse-label false negatives",
+    "loss": "positive-unlabeled weighted BCE on center heatmap logits",
+    "negative_labels": "dark background sampled by image quantile",
+    "normalization": {
+      "clip_hi": 6.0,
+      "clip_lo": -0.5,
+      "hi_pct": 99.5,
+      "lo_pct": 50.0,
+      "type": "per-frame percentile normalization"
+    },
+    "positive_labels": "sparse GEFF node centroids rendered as Gaussian blobs",
+    "target": "sparse center heatmap"
+  }
+}

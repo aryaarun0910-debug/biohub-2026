@@ -1,0 +1,77 @@
+{
+  "best_score_so_far": -0.04500306242456039,
+  "config": {
+    "base_channels": 24,
+    "batch_size": 8,
+    "bg_quantile": 0.4,
+    "brightness_jitter": 0.0,
+    "epochs": 1000,
+    "frames_per_movie": 0,
+    "gauss_sigma": 1.0,
+    "grad_clip_norm": null,
+    "learning_rate": 0.001,
+    "movie_limit": null,
+    "norm_clip_hi": 6.0,
+    "norm_clip_lo": -0.5,
+    "norm_hi_pct": 99.5,
+    "norm_lo_pct": 50.0,
+    "num_workers": 4,
+    "pool_factor": 4,
+    "pos_thresh": 0.05,
+    "random_flip": true,
+    "seed": 2026,
+    "val_fraction": 0.1,
+    "w_bg": 1.0,
+    "w_ignore": 0.05,
+    "w_pos": 12.0,
+    "weight_decay": 0.0
+  },
+  "files": {
+    "best.pt": {
+      "bytes": 37876911,
+      "path": "best.pt"
+    },
+    "checkpoint_last.pt": {
+      "bytes": 37918921,
+      "path": "checkpoint_last.pt"
+    },
+    "config.json": {
+      "bytes": 527,
+      "path": "config.json"
+    },
+    "gate_frame_metrics.csv": {
+      "bytes": 216769,
+      "path": "gate_frame_metrics.csv"
+    },
+    "gate_peak_samples.csv": {
+      "bytes": 3362105,
+      "path": "gate_peak_samples.csv"
+    },
+    "gate_summary.json": {
+      "bytes": 3662,
+      "path": "gate_summary.json"
+    },
+    "gate_threshold_metrics.csv": {
+      "bytes": 1063,
+      "path": "gate_threshold_metrics.csv"
+    },
+    "history.csv": {
+      "bytes": 43208,
+      "path": "history.csv"
+    },
+    "split_manifest.json": {
+      "bytes": 8447,
+      "path": "split_manifest.json"
+    }
+  },
+  "gate_eval_frames": 240,
+  "gate_summary_written": true,
+  "notes": [
+    "best.pt is the best validation-loss checkpoint observed up to this snapshot epoch.",
+    "checkpoint_last.pt is the exact training state at this snapshot epoch.",
+    "Gate diagnostics are computed from best.pt on the fixed validation split."
+  ],
+  "snapshot_epoch": 500,
+  "snapshot_prefix": "ep",
+  "source_output_dir": "/workspace/26_Biohub/weights/full_frame_center_v1"
+}

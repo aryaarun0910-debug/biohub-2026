@@ -1,0 +1,34 @@
+Where is the remaining error, and what is each fix WORTH at its ceiling?
+
+The question this answers: is a better DETECTOR (an SSL pretrain, a new model,
+anything upstream of linking) worth building in the time left?
+
+Source is the kernel's own validator output for s05 -- not our ports --
+artifacts/s05_output/validator_results.csv (per-film edge_tp/fp/fn) and
+ppsweep_results.csv, which classifies every missed GT edge into:
+
+    edges_lost_to_detection   the node was never detected      -> DETECTOR
+    edges_fragmented          nodes detected, link not made    -> LINKER
+    wrong_association_edges   linked to the wrong node         -> LINKER
+
+plus false-positive edges, which are links asserted between two correctly
+matched nodes that do not exist in the ground truth -> LINKER.
+========================================================================================
+s05, 8 validator films, kernel's own numbers
+  edge TP 5565   FP 184   FN 186
+  FN breakdown: detection 75, fragmented 111, wrong-assoc 1  (sum 187, reported FN 186)
+  NOTE: breakdown sums to 187, FN is 186; the classifier and the metric disagree by 1. Ceilings below use the BREAKDOWN, so treat them as +/-1 edges.
+  micro edge Jaccard = 5565/(5565+184+186) = 0.93766
+
+oracle fix (that class -> 0)        edges     new J   ceiling  owner
+perfect DETECTION                      75   0.95029  +0.01264  DETECTOR  <- what SSL would target
+zero FRAGMENTATION                    111   0.95636  +0.01870  LINKER
+zero WRONG-ASSOCIATION                  1   0.93783  +0.00017  LINKER
+zero FALSE-POSITIVE edges             184   0.96766  +0.03000  LINKER
+
+  DETECTOR ceiling (all of it) : +0.01264
+  LINKER  ceiling (all of it)  : +0.04887   = 3.9x the detector
+  errors owned by the linker   : 296/371 (80%)
+
+  for scale: gap from the 0.947 board to 7th place (0.964) is +0.017,
+             and these are ORACLE ceilings -- a real fix captures a fraction.

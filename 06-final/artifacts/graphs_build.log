@@ -1,0 +1,200 @@
+[  1/199] 44b6_0113de3b  nodes= 27172  raw= 25805  linked= 25747  4.0s/film  eta 13min
+[  2/199] 44b6_0b24845f  nodes= 44136  raw= 33563  linked= 36435  3.8s/film  eta 12min
+[  3/199] 44b6_0c582fdc  nodes= 32998  raw= 29750  linked= 30042  3.3s/film  eta 11min
+[  4/199] 44b6_0db75fae  nodes= 20401  raw= 18160  linked= 18532  2.9s/film  eta 10min
+[  5/199] 44b6_12dfb391  nodes= 58822  raw= 54831  linked= 54920  3.2s/film  eta 10min
+[  6/199] 44b6_144b256d  nodes= 47093  raw= 38852  linked= 40812  3.1s/film  eta 10min
+[  7/199] 44b6_1574802b  nodes= 22936  raw= 20795  linked= 21098  2.9s/film  eta 9min
+[  8/199] 44b6_18ced818  nodes= 95688  raw= 82855  linked= 86663  3.6s/film  eta 12min
+[  9/199] 44b6_1d530831  nodes= 45711  raw= 40725  linked= 41260  3.5s/film  eta 11min
+[ 10/199] 44b6_24264f12  nodes= 30410  raw= 28098  linked= 28082  3.4s/film  eta 11min
+[ 11/199] 44b6_267148e4  nodes= 27313  raw= 23378  linked= 24288  3.3s/film  eta 10min
+[ 12/199] 44b6_2a2eff9f  nodes= 52813  raw= 45835  linked= 47218  3.3s/film  eta 10min
+[ 13/199] 44b6_2f31fc2f  nodes= 30300  raw= 23909  linked= 25808  3.2s/film  eta 10min
+[ 14/199] 44b6_33b596bf  nodes= 27828  raw= 25432  linked= 25606  3.1s/film  eta 10min
+[ 15/199] 44b6_341df25f  nodes= 10820  raw=  9155  linked=  9657  3.0s/film  eta 9min
+[ 16/199] 44b6_3a861e03  nodes= 42493  raw= 40163  linked= 40044  3.0s/film  eta 9min
+[ 17/199] 44b6_3bb3690f  nodes= 21801  raw= 18802  linked= 19164  2.9s/film  eta 9min
+[ 18/199] 44b6_40c45f5a  nodes= 41748  raw= 36157  linked= 37680  2.9s/film  eta 9min
+[ 19/199] 44b6_415c0a3a  nodes= 49566  raw= 43926  linked= 44766  2.9s/film  eta 9min
+[ 20/199] 44b6_53f95252  nodes= 42874  raw= 37491  linked= 38943  2.9s/film  eta 9min
+[ 21/199] 44b6_551a5dba  nodes= 49646  raw= 42368  linked= 44067  2.9s/film  eta 9min
+[ 22/199] 44b6_5740d24b  nodes= 18770  raw= 15509  linked= 16138  2.9s/film  eta 9min
+[ 23/199] 44b6_587a1e22  nodes= 20824  raw= 19197  linked= 19322  2.8s/film  eta 8min
+[ 24/199] 44b6_5f15d135  nodes= 34428  raw= 28933  linked= 29714  2.8s/film  eta 8min
+[ 25/199] 44b6_668e0cc7  nodes= 40184  raw= 37426  linked= 37670  2.8s/film  eta 8min
+[ 26/199] 44b6_66f9292d  nodes= 36993  raw= 29587  linked= 31872  2.8s/film  eta 8min
+[ 27/199] 44b6_706092f0  nodes= 45874  raw= 39015  linked= 39898  2.8s/film  eta 8min
+[ 28/199] 44b6_71a4179f  nodes= 47515  raw= 40822  linked= 41823  2.8s/film  eta 8min
+[ 29/199] 44b6_74d0c52e  nodes= 13175  raw= 11152  linked= 11245  2.8s/film  eta 8min
+[ 30/199] 44b6_7a302da0  nodes= 68677  raw= 59876  linked= 61479  2.9s/film  eta 8min
+[ 31/199] 44b6_7e557709  nodes= 54241  raw= 51649  linked= 51563  2.9s/film  eta 8min
+[ 32/199] 44b6_808952d6  nodes= 19951  raw= 17718  linked= 17935  2.9s/film  eta 8min
+[ 33/199] 44b6_81c256f0  nodes= 13714  raw= 12195  linked= 12438  2.9s/film  eta 8min
+[ 34/199] 44b6_87bba6c4  nodes= 37756  raw= 31945  linked= 33396  2.9s/film  eta 8min
+[ 35/199] 44b6_8cc6506c  nodes= 25961  raw= 21833  linked= 22601  2.8s/film  eta 8min
+[ 36/199] 44b6_8f5ab931  nodes= 34455  raw= 30819  linked= 31246  2.8s/film  eta 8min
+[ 37/199] 44b6_8f9ecab4  nodes= 55271  raw= 48369  linked= 49041  2.9s/film  eta 8min
+[ 38/199] 44b6_90724892  nodes= 28410  raw= 25989  linked= 26178  2.8s/film  eta 8min
+[ 39/199] 44b6_949adeb1  nodes= 48683  raw= 42761  linked= 43670  2.9s/film  eta 8min
+[ 40/199] 44b6_95029e92  nodes=  6232  raw=  5191  linked=  5435  2.8s/film  eta 8min
+[ 41/199] 44b6_97725144  nodes= 46282  raw= 40583  linked= 41864  2.8s/film  eta 7min
+[ 42/199] 44b6_996155de  nodes= 12238  raw= 10764  linked= 10897  2.8s/film  eta 7min
+[ 43/199] 44b6_9be80b04  nodes= 40114  raw= 34108  linked= 35139  2.8s/film  eta 7min
+[ 44/199] 44b6_9bfa6a0a  nodes= 53902  raw= 48042  linked= 48812  2.8s/film  eta 7min
+[ 45/199] 44b6_a21120c2  nodes= 24499  raw= 22774  linked= 22750  2.8s/film  eta 7min
+[ 46/199] 44b6_a2bb48bb  nodes= 74806  raw= 59852  linked= 65322  2.9s/film  eta 7min
+[ 47/199] 44b6_aaf8b0ea  nodes= 22163  raw= 19200  linked= 19402  2.9s/film  eta 7min
+[ 48/199] 44b6_abf82518  nodes= 33345  raw= 30352  linked= 30735  2.9s/film  eta 7min
+[ 49/199] 44b6_b2c44266  nodes= 54599  raw= 48397  linked= 49203  2.9s/film  eta 7min
+[ 50/199] 44b6_c15fded2  nodes= 22735  raw= 21063  linked= 21040  2.9s/film  eta 7min
+[ 51/199] 44b6_c50204e0  nodes= 57636  raw= 47380  linked= 50389  2.9s/film  eta 7min
+[ 52/199] 44b6_c771cb04  nodes= 48671  raw= 41084  linked= 42402  2.9s/film  eta 7min
+[ 53/199] 44b6_c8e2a523  nodes= 32541  raw= 31078  linked= 30921  2.9s/film  eta 7min
+[ 54/199] 44b6_c96cfa10  nodes= 49060  raw= 44484  linked= 45000  2.9s/film  eta 7min
+[ 55/199] 44b6_cf2536e8  nodes= 39053  raw= 33118  linked= 33774  2.9s/film  eta 7min
+[ 56/199] 44b6_cf8fed6b  nodes= 48385  raw= 44140  linked= 45284  3.0s/film  eta 7min
+[ 57/199] 44b6_d29c9ab2  nodes= 39205  raw= 37643  linked= 37459  3.0s/film  eta 7min
+[ 58/199] 44b6_d2f34f90  nodes= 22746  raw= 19060  linked= 19568  2.9s/film  eta 7min
+[ 59/199] 44b6_d5e7d891  nodes= 56721  raw= 49207  linked= 51279  3.0s/film  eta 7min
+[ 60/199] 44b6_d754aa59  nodes=  7711  raw=  6031  linked=  6386  3.0s/film  eta 7min
+[ 61/199] 44b6_d78e09d9  nodes= 26450  raw= 24056  linked= 24169  3.0s/film  eta 7min
+[ 62/199] 44b6_db3c847b  nodes= 19898  raw= 17276  linked= 17803  3.0s/film  eta 7min
+[ 63/199] 44b6_ddf577ad  nodes= 52759  raw= 47580  linked= 48468  3.0s/film  eta 7min
+[ 64/199] 44b6_deabac95  nodes= 18294  raw= 16531  linked= 16663  3.0s/film  eta 7min
+[ 65/199] 44b6_e28840c6  nodes= 41050  raw= 35437  linked= 35811  3.0s/film  eta 7min
+[ 66/199] 44b6_e29f0176  nodes= 16541  raw= 14227  linked= 14803  3.0s/film  eta 7min
+[ 67/199] 44b6_e31261b4  nodes= 78820  raw= 70852  linked= 72733  3.0s/film  eta 7min
+[ 68/199] 44b6_e35b117d  nodes= 35285  raw= 28289  linked= 29847  3.0s/film  eta 7min
+[ 69/199] 44b6_e57ff5c6  nodes= 26054  raw= 21001  linked= 22143  3.0s/film  eta 7min
+[ 70/199] 44b6_eb2880fc  nodes= 46168  raw= 41015  linked= 42156  3.0s/film  eta 7min
+[ 71/199] 44b6_f28707c6  nodes= 25186  raw= 22819  linked= 23007  3.0s/film  eta 6min
+[ 72/199] 6bba_05b6850b  nodes=  8840  raw=  6730  linked=  7637  3.0s/film  eta 6min
+[ 73/199] 6bba_05db0fb1  nodes= 79305  raw= 72584  linked= 74366  3.1s/film  eta 6min
+[ 74/199] 6bba_062c8d37  nodes=  7967  raw=  6380  linked=  6812  3.1s/film  eta 6min
+[ 75/199] 6bba_07477033  nodes=  6557  raw=  5152  linked=  5745  3.0s/film  eta 6min
+[ 76/199] 6bba_07e24132  nodes= 39973  raw= 33149  linked= 35149  3.0s/film  eta 6min
+[ 77/199] 6bba_085bf656  nodes= 10346  raw=  8713  linked=  9249  3.0s/film  eta 6min
+[ 78/199] 6bba_09961292  nodes= 33009  raw= 30011  linked= 30716  3.0s/film  eta 6min
+[ 79/199] 6bba_0c7fa718  nodes= 16078  raw= 13325  linked= 14044  3.0s/film  eta 6min
+[ 80/199] 6bba_0e7c0d07  nodes= 28175  raw= 23512  linked= 25208  3.0s/film  eta 6min
+[ 81/199] 6bba_12665c0e  nodes= 10007  raw=  8605  linked=  8813  3.0s/film  eta 6min
+[ 82/199] 6bba_13f19531  nodes=  7735  raw=  6137  linked=  6610  3.0s/film  eta 6min
+[ 83/199] 6bba_15403b9a  nodes=  7761  raw=  6675  linked=  6851  3.0s/film  eta 6min
+[ 84/199] 6bba_1d0d8384  nodes= 24095  raw= 19574  linked= 21226  2.9s/film  eta 6min
+[ 85/199] 6bba_1ebfb80d  nodes= 15550  raw= 12740  linked= 13618  2.9s/film  eta 6min
+[ 86/199] 6bba_1f58c2f6  nodes= 40712  raw= 33247  linked= 36604  2.9s/film  eta 6min
+[ 87/199] 6bba_207c6aaf  nodes= 28596  raw= 20763  linked= 24337  2.9s/film  eta 5min
+[ 88/199] 6bba_20852818  nodes= 13134  raw= 10659  linked= 11602  2.9s/film  eta 5min
+[ 89/199] 6bba_2312ac41  nodes= 15263  raw= 13215  linked= 13647  2.9s/film  eta 5min
+[ 90/199] 6bba_23af9eeb  nodes=  6537  raw=  5033  linked=  5543  2.9s/film  eta 5min
+[ 91/199] 6bba_2540cd90  nodes=  3859  raw=  3617  linked=  3613  2.9s/film  eta 5min
+[ 92/199] 6bba_2646afc7  nodes=  7029  raw=  5894  linked=  6236  2.9s/film  eta 5min
+[ 93/199] 6bba_268e1230  nodes=  7806  raw=  5628  linked=  6385  2.9s/film  eta 5min
+[ 94/199] 6bba_2819ca14  nodes=  6543  raw=  5453  linked=  5633  2.8s/film  eta 5min
+[ 95/199] 6bba_283bf9f1  nodes= 24917  raw= 22030  linked= 22415  2.8s/film  eta 5min
+[ 96/199] 6bba_312f0dc3  nodes= 11706  raw=  9896  linked= 10299  2.8s/film  eta 5min
+[ 97/199] 6bba_32db13fc  nodes= 56968  raw= 46969  linked= 51419  2.8s/film  eta 5min
+[ 98/199] 6bba_337b1b3a  nodes= 31549  raw= 29178  linked= 29517  2.8s/film  eta 5min
+[ 99/199] 6bba_372c8cb8  nodes=  8681  raw=  7396  linked=  7701  2.8s/film  eta 5min
+[100/199] 6bba_3a1849c2  nodes= 10161  raw=  7403  linked=  8775  2.8s/film  eta 5min
+[101/199] 6bba_3abfe10a  nodes= 71637  raw= 61159  linked= 64746  2.8s/film  eta 5min
+[102/199] 6bba_3c5691b6  nodes=  9497  raw=  7238  linked=  8173  2.8s/film  eta 5min
+[103/199] 6bba_3db54e20  nodes= 29284  raw= 24416  linked= 26245  2.8s/film  eta 5min
+[104/199] 6bba_3fda6b25  nodes= 15972  raw= 10332  linked= 13325  2.8s/film  eta 4min
+[105/199] 6bba_43fea39d  nodes=  8234  raw=  6103  linked=  7038  2.8s/film  eta 4min
+[106/199] 6bba_474be664  nodes= 38042  raw= 31590  linked= 33669  2.8s/film  eta 4min
+[107/199] 6bba_48816121  nodes= 28758  raw= 26071  linked= 26148  2.8s/film  eta 4min
+[108/199] 6bba_4aa14c89  nodes= 10760  raw=  8331  linked=  9246  2.8s/film  eta 4min
+[109/199] 6bba_4f99ce20  nodes=  6969  raw=  5742  linked=  5896  2.8s/film  eta 4min
+[110/199] 6bba_4ffd3da3  nodes= 25819  raw= 22184  linked= 22719  2.8s/film  eta 4min
+[111/199] 6bba_55b7eebe  nodes=  5935  raw=  5201  linked=  5375  2.8s/film  eta 4min
+[112/199] 6bba_55c70843  nodes= 53148  raw= 44970  linked= 47927  2.8s/film  eta 4min
+[113/199] 6bba_57b7cc1e  nodes=110559  raw= 86873  linked= 98249  2.9s/film  eta 4min
+[114/199] 6bba_5a4d9360  nodes=  6752  raw=  5818  linked=  5875  2.9s/film  eta 4min
+[115/199] 6bba_5b28472a  nodes=  8669  raw=  6815  linked=  7526  2.8s/film  eta 4min
+[116/199] 6bba_5c039895  nodes= 10127  raw=  8376  linked=  8952  2.8s/film  eta 4min
+[117/199] 6bba_5c824876  nodes= 30223  raw= 26242  linked= 27306  2.8s/film  eta 4min
+[118/199] 6bba_5dfe9ad1  nodes= 35295  raw= 31405  linked= 32221  2.8s/film  eta 4min
+[119/199] 6bba_5f89039d  nodes=  5208  raw=  4733  linked=  4801  2.8s/film  eta 4min
+[120/199] 6bba_61dd1e0d  nodes= 13371  raw= 10998  linked= 11931  2.8s/film  eta 4min
+[121/199] 6bba_61ecbe65  nodes=  7662  raw=  6123  linked=  6449  2.8s/film  eta 4min
+[122/199] 6bba_6321a359  nodes=  7691  raw=  5333  linked=  6387  2.8s/film  eta 4min
+[123/199] 6bba_6479435d  nodes= 37106  raw= 28019  linked= 32833  2.8s/film  eta 4min
+[124/199] 6bba_67ebd073  nodes= 23099  raw= 16179  linked= 20117  2.8s/film  eta 3min
+[125/199] 6bba_6ca87370  nodes=  8466  raw=  7060  linked=  7419  2.8s/film  eta 3min
+[126/199] 6bba_6db0e9b4  nodes= 33476  raw= 28620  linked= 30299  2.8s/film  eta 3min
+[127/199] 6bba_6feb10f0  nodes= 20969  raw= 14069  linked= 17468  2.7s/film  eta 3min
+[128/199] 6bba_6feeb0b1  nodes=  9643  raw=  7547  linked=  8401  2.7s/film  eta 3min
+[129/199] 6bba_705ec2c9  nodes= 10708  raw=  7656  linked=  8953  2.7s/film  eta 3min
+[130/199] 6bba_718b21f9  nodes=  4914  raw=  4533  linked=  4569  2.7s/film  eta 3min
+[131/199] 6bba_74686d6a  nodes= 35609  raw= 30340  linked= 31844  2.7s/film  eta 3min
+[132/199] 6bba_767a1e17  nodes= 63920  raw= 52930  linked= 56945  2.7s/film  eta 3min
+[133/199] 6bba_76db78c1  nodes=  5695  raw=  4973  linked=  5187  2.7s/film  eta 3min
+[134/199] 6bba_784a78c9  nodes= 14810  raw= 13207  linked= 13605  2.7s/film  eta 3min
+[135/199] 6bba_786893ac  nodes= 90715  raw= 74513  linked= 81532  2.8s/film  eta 3min
+[136/199] 6bba_789f8168  nodes= 13109  raw= 11374  linked= 11550  2.7s/film  eta 3min
+[137/199] 6bba_78a7bd97  nodes= 53072  raw= 44824  linked= 47728  2.8s/film  eta 3min
+[138/199] 6bba_7af54fde  nodes= 14331  raw= 11206  linked= 12531  2.7s/film  eta 3min
+[139/199] 6bba_7b5d3b2c  nodes=  6725  raw=  5875  linked=  6071  2.7s/film  eta 3min
+[140/199] 6bba_7d3058ae  nodes=  9814  raw=  8000  linked=  8717  2.7s/film  eta 3min
+[141/199] 6bba_7f87b3d8  nodes= 12781  raw= 10022  linked= 10829  2.7s/film  eta 3min
+[142/199] 6bba_80d12824  nodes= 11242  raw=  9104  linked=  9797  2.7s/film  eta 3min
+[143/199] 6bba_825bd1c6  nodes=  9311  raw=  7612  linked=  8219  2.7s/film  eta 3min
+[144/199] 6bba_87289e13  nodes= 16357  raw= 14417  linked= 14820  2.7s/film  eta 2min
+[145/199] 6bba_8b7818bf  nodes=  7371  raw=  6124  linked=  6548  2.7s/film  eta 2min
+[146/199] 6bba_907271db  nodes=  8551  raw=  7179  linked=  7528  2.7s/film  eta 2min
+[147/199] 6bba_91951b3a  nodes= 13652  raw= 12020  linked= 12245  2.7s/film  eta 2min
+[148/199] 6bba_96833384  nodes=  6720  raw=  5326  linked=  5711  2.6s/film  eta 2min
+[149/199] 6bba_969618f6  nodes= 20193  raw= 17009  linked= 17678  2.6s/film  eta 2min
+[150/199] 6bba_971fa5e0  nodes=  6239  raw=  5314  linked=  5497  2.6s/film  eta 2min
+[151/199] 6bba_9a41d029  nodes= 21711  raw= 19232  linked= 19920  2.6s/film  eta 2min
+[152/199] 6bba_9e23430b  nodes= 11088  raw=  8595  linked=  9645  2.6s/film  eta 2min
+[153/199] 6bba_a5e926bb  nodes=  9855  raw=  8294  linked=  8554  2.6s/film  eta 2min
+[154/199] 6bba_a90a0b9c  nodes= 47476  raw= 40024  linked= 42841  2.6s/film  eta 2min
+[155/199] 6bba_ab78413d  nodes= 23151  raw= 16679  linked= 19772  2.6s/film  eta 2min
+[156/199] 6bba_acd782a8  nodes= 22665  raw= 19996  linked= 20713  2.6s/film  eta 2min
+[157/199] 6bba_ae82a791  nodes=  8230  raw=  7284  linked=  7485  2.6s/film  eta 2min
+[158/199] 6bba_aeee7805  nodes=  7192  raw=  5868  linked=  6229  2.6s/film  eta 2min
+[159/199] 6bba_af149c94  nodes=  9778  raw=  8257  linked=  8690  2.6s/film  eta 2min
+[160/199] 6bba_afb141ff  nodes=  7993  raw=  5890  linked=  6922  2.6s/film  eta 2min
+[161/199] 6bba_b1ae37b9  nodes= 28152  raw= 24606  linked= 25808  2.6s/film  eta 2min
+[162/199] 6bba_b204cac7  nodes=  7409  raw=  5922  linked=  6423  2.5s/film  eta 2min
+[163/199] 6bba_b329af44  nodes= 79237  raw= 70246  linked= 73497  2.6s/film  eta 2min
+[164/199] 6bba_b693381b  nodes=  7923  raw=  6615  linked=  6827  2.6s/film  eta 1min
+[165/199] 6bba_bb9f20c3  nodes= 27042  raw= 23885  linked= 24524  2.6s/film  eta 1min
+[166/199] 6bba_bbb708ca  nodes=  9874  raw=  7452  linked=  8398  2.6s/film  eta 1min
+[167/199] 6bba_c27cba08  nodes=  8220  raw=  6700  linked=  7278  2.5s/film  eta 1min
+[168/199] 6bba_c328f2fd  nodes= 35353  raw= 31487  linked= 32638  2.6s/film  eta 1min
+[169/199] 6bba_c73a1d11  nodes= 37750  raw= 28272  linked= 32461  2.6s/film  eta 1min
+[170/199] 6bba_cdcfe533  nodes= 30963  raw= 28188  linked= 28670  2.6s/film  eta 1min
+[171/199] 6bba_cf35214c  nodes= 39505  raw= 36275  linked= 36838  2.6s/film  eta 1min
+[172/199] 6bba_cff5865f  nodes= 51199  raw= 47400  linked= 48171  2.6s/film  eta 1min
+[173/199] 6bba_d0fc38b5  nodes=  8093  raw=  6397  linked=  7044  2.6s/film  eta 1min
+[174/199] 6bba_d1acb6ff  nodes= 21697  raw= 17792  linked= 18773  2.6s/film  eta 1min
+[175/199] 6bba_d2b9fc0c  nodes= 20408  raw= 18546  linked= 19024  2.6s/film  eta 1min
+[176/199] 6bba_d3da753b  nodes= 17365  raw= 15845  linked= 16065  2.6s/film  eta 1min
+[177/199] 6bba_d5eae175  nodes=  4699  raw=  4363  linked=  4364  2.5s/film  eta 1min
+[178/199] 6bba_d6ecebbb  nodes=  8735  raw=  7015  linked=  7706  2.5s/film  eta 1min
+[179/199] 6bba_d82a4fc6  nodes= 35924  raw= 31323  linked= 32457  2.5s/film  eta 1min
+[180/199] 6bba_debd7bfa  nodes= 14220  raw= 12215  linked= 12568  2.5s/film  eta 1min
+[181/199] 6bba_df673a83  nodes= 24785  raw= 22773  linked= 22631  2.5s/film  eta 1min
+[182/199] 6bba_e16ffc58  nodes=  7465  raw=  6387  linked=  6601  2.5s/film  eta 1min
+[183/199] 6bba_e5e44988  nodes=  7163  raw=  5940  linked=  6088  2.5s/film  eta 1min
+[184/199] 6bba_ebdf3b34  nodes= 66451  raw= 59551  linked= 61644  2.5s/film  eta 1min
+[185/199] 6bba_ebff6e76  nodes= 74148  raw= 58836  linked= 65977  2.6s/film  eta 1min
+[186/199] 6bba_ed9377fd  nodes=  5627  raw=  4835  linked=  5060  2.6s/film  eta 1min
+[187/199] 6bba_edf14583  nodes= 63709  raw= 56251  linked= 58070  2.6s/film  eta 1min
+[188/199] 6bba_eebc57a5  nodes= 14465  raw= 10689  linked= 12211  2.6s/film  eta 0min
+[189/199] 6bba_ef7b4f7e  nodes=  7902  raw=  6377  linked=  6853  2.6s/film  eta 0min
+[190/199] 6bba_f17befbc  nodes= 32293  raw= 26830  linked= 28660  2.6s/film  eta 0min
+[191/199] 6bba_f1fde7e0  nodes= 11799  raw=  8994  linked=  9942  2.6s/film  eta 0min
+[192/199] 6bba_f20478e9  nodes=  6747  raw=  5520  linked=  5685  2.6s/film  eta 0min
+[193/199] 6bba_f4ae811c  nodes= 11684  raw=  9871  linked= 10262  2.5s/film  eta 0min
+[194/199] 6bba_f8ffd5e7  nodes= 38336  raw= 32522  linked= 34606  2.6s/film  eta 0min
+[195/199] 6bba_fbc898dc  nodes=  6511  raw=  5553  linked=  5850  2.5s/film  eta 0min
+[196/199] 6bba_fc516dc6  nodes=  9081  raw=  7533  linked=  7875  2.5s/film  eta 0min
+[197/199] 6bba_fc5f39dc  nodes= 21740  raw= 18871  linked= 19474  2.5s/film  eta 0min
+[198/199] 6bba_fc83837d  nodes= 20687  raw= 15172  linked= 17762  2.5s/film  eta 0min
+[199/199] 6bba_fe670320  nodes= 12570  raw= 10433  linked= 11114  2.5s/film  eta 0min
+DONE 8.4 min

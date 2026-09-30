@@ -1,0 +1,895 @@
+{
+  "forumTopic": {
+    "authorId": 15974520,
+    "authorThumbnailName": "15974520-kg.png?t=2026-08-01-22-26-32",
+    "authorUserDisplayName": "José Freitas",
+    "authorUserName": "josefreitasalvesneto",
+    "comments": [
+      {
+        "id": 3521851,
+        "postDate": "2026-09-07T10:56:47.250Z",
+        "rawMarkdown": "zebra fish cell development trajectory data  \nhttps://ssbd.riken.jp/database/project/5-Keller-FishEmbryo \n\n",
+        "content": "<p>zebra fish cell development trajectory data<br>\n<a href=\"https://ssbd.riken.jp/database/project/5-Keller-FishEmbryo\" target=\"_blank\">https://ssbd.riken.jp/database/project/5-Keller-FishEmbryo</a> </p>",
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 1,
+          "canUpvote": true,
+          "totalUpvotes": 1
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 876,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3521291,
+        "postDate": "2026-09-05T12:48:14.990Z",
+        "rawMarkdown": "synthetic data from biohub  \nhttps://virtual-embryo-zoo.sf.czbiohub.org/\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F744fe1d219782a2f1503130d654c3bd3%2FSelection_4780.png?generation=1788612493147291&alt=media)\n",
+        "content": "<p>synthetic data from biohub<br>\n<a href=\"https://virtual-embryo-zoo.sf.czbiohub.org/\" target=\"_blank\">https://virtual-embryo-zoo.sf.czbiohub.org/</a>\n<img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F744fe1d219782a2f1503130d654c3bd3%2FSelection_4780.png?generation=1788612493147291&amp;alt=media\" alt=\"\"></p>",
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 1,
+          "canUpvote": true,
+          "totalUpvotes": 1
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 876,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3521140,
+        "postDate": "2026-09-04T23:42:33.660Z",
+        "rawMarkdown": "There is another similar solution. Convert real microscopy image to simplified eg ellipsoid image using unet that output ellipsoid ( just like bonding box in instance object detection). Then you create sythetic unet output to feed into link transformer.\n\nThe problem is then shift to instance detection. Need to find lots of real microscopy image with cell division.\n\n—-\n\nI haven’t moved to cell division yet. But my current strategy is to have good cell detection and tracking. Then infer division from long track ( stage 3 ). I assume death/birth can only happen at image boundary,  so maybe we can detect splits from long tracks, ie i treat division as tracklet association problem, tracklet as node association ",
+        "content": "<p>There is another similar solution. Convert real microscopy image to simplified eg ellipsoid image using unet that output ellipsoid ( just like bonding box in instance object detection). Then you create sythetic unet output to feed into link transformer.</p>\n<p>The problem is then shift to instance detection. Need to find lots of real microscopy image with cell division.</p>\n<p>—-</p>\n<p>I haven’t moved to cell division yet. But my current strategy is to have good cell detection and tracking. Then infer division from long track ( stage 3 ). I assume death/birth can only happen at image boundary,  so maybe we can detect splits from long tracks, ie i treat division as tracklet association problem, tracklet as node association </p>",
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 1,
+          "canUpvote": true,
+          "totalUpvotes": 1
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 876,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3521235,
+        "postDate": "2026-09-05T09:00:18.660Z",
+        "rawMarkdown": "if i got time, i want to do this:  \n1) it is difficult to track over 100 frames, but it is easy to track over eg 5 to 10 frames.  \n2) it is also easy to manually inspect and correct (1) above too.  \n3) so we can easily use video diffusion, gan, flow etc to make synthetic data for 10 frames (at 64x64x64),   conditioned on tracks and the first frame  \n\n---\n\nAfter sucess of dense cell training and dense pair (link) training, i now proceed to do 5-frame training:  \n- augmentation (elastic transform over 5 frames)  \n- dense pesudo label Kaggle tracks using opensource ultrack, ITEC, HOCT ....\n- make a new intertace for manual inspection and correct for short tracklet  ",
+        "content": "<p>if i got time, i want to do this:<br>\n1) it is difficult to track over 100 frames, but it is easy to track over eg 5 to 10 frames.<br>\n2) it is also easy to manually inspect and correct (1) above too.<br>\n3) so we can easily use video diffusion, gan, flow etc to make synthetic data for 10 frames (at 64x64x64),   conditioned on tracks and the first frame  </p>\n<hr>\n<p>After sucess of dense cell training and dense pair (link) training, i now proceed to do 5-frame training:  </p>\n<ul>\n<li>augmentation (elastic transform over 5 frames)  </li>\n<li>dense pesudo label Kaggle tracks using opensource ultrack, ITEC, HOCT ….</li>\n<li>make a new intertace for manual inspection and correct for short tracklet  </li>\n</ul>",
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 2,
+          "canUpvote": true,
+          "totalUpvotes": 2
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 876,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3521070,
+        "postDate": "2026-09-04T18:56:39.873Z",
+        "rawMarkdown": "Hi José (José Freitas Alves Neto),\n\nI wanted to flag three specific things in your generator that I think deserve more attention than a quick \"thanks, nice dataset\" — because they show real domain awareness rather than just synthetic-data box-checking.\n\n1. Matching the stride, not a block mean. Noticing that the official pipeline downsamples XY with vol[:, ::4, ::4] (a stride) rather than a block-average, and reproducing that exactly, is a subtle but important call. A block mean averages noise away and would silently hand a detector cleaner statistics than it will ever see at inference — a train/eval mismatch that's easy to miss and hard to debug after the fact, since it doesn't show up as an obvious bug, just as a quiet leaderboard gap. Catching this before training anything is genuinely sharp.\n\n2. Self-critical detectability calibration. Reporting that your DoG baseline recovers less on the synthetic volumes than on the real annotated nuclei (0.89/0.76 vs 0.91–0.94) is the opposite of what most synthetic datasets do. It's tempting to tune synthetic data until it \"looks easy\" and quietly inflates confidence. Publishing numbers that go the other way is a good-faith signal that's rare to see, and it makes the dataset much more trustworthy to build on.\n\n3. Sister-separation calibrated from real lineage edges. The 7.24 µm figure, tied back to actual BioHub lineage data rather than an assumed value, is directly useful — it's one of the few external anchors we have for reasoning about candidate-graph radius choices around division events specifically, as opposed to continuation motion in general.\n\nTaken together, these aren't cosmetic details — they're the kind of choices that decide whether a synthetic dataset actually transfers or just looks good in isolation. Really solid work, and thank you for documenting the caveats as openly as the strengths (the inflated division rate, the texture/contrast gap) — that honesty is what makes it usable rather than just impressive.\n\nOne thing I'd love your take on, if you have a moment: could you clarify exactly what a single \"division\" is counted as in the 165,267 figure — a mitotic parent/fork, a daughter node, or a parent→daughter edge? We're (my team) trying to align units before doing any prior-reweighting on our end, and getting that straight from you directly would save some guesswork.\n\nThanks again for releasing this — genuinely useful contribution to the competition. Excellente Contribuição, forte abraço, José Luiz.",
+        "content": "<p>Hi José (José Freitas Alves Neto),</p>\n<p>I wanted to flag three specific things in your generator that I think deserve more attention than a quick \"thanks, nice dataset\" — because they show real domain awareness rather than just synthetic-data box-checking.</p>\n<ol>\n<li><p>Matching the stride, not a block mean. Noticing that the official pipeline downsamples XY with vol[:, ::4, ::4] (a stride) rather than a block-average, and reproducing that exactly, is a subtle but important call. A block mean averages noise away and would silently hand a detector cleaner statistics than it will ever see at inference — a train/eval mismatch that's easy to miss and hard to debug after the fact, since it doesn't show up as an obvious bug, just as a quiet leaderboard gap. Catching this before training anything is genuinely sharp.</p></li>\n<li><p>Self-critical detectability calibration. Reporting that your DoG baseline recovers less on the synthetic volumes than on the real annotated nuclei (0.89/0.76 vs 0.91–0.94) is the opposite of what most synthetic datasets do. It's tempting to tune synthetic data until it \"looks easy\" and quietly inflates confidence. Publishing numbers that go the other way is a good-faith signal that's rare to see, and it makes the dataset much more trustworthy to build on.</p></li>\n<li><p>Sister-separation calibrated from real lineage edges. The 7.24 µm figure, tied back to actual BioHub lineage data rather than an assumed value, is directly useful — it's one of the few external anchors we have for reasoning about candidate-graph radius choices around division events specifically, as opposed to continuation motion in general.</p></li>\n</ol>\n<p>Taken together, these aren't cosmetic details — they're the kind of choices that decide whether a synthetic dataset actually transfers or just looks good in isolation. Really solid work, and thank you for documenting the caveats as openly as the strengths (the inflated division rate, the texture/contrast gap) — that honesty is what makes it usable rather than just impressive.</p>\n<p>One thing I'd love your take on, if you have a moment: could you clarify exactly what a single \"division\" is counted as in the 165,267 figure — a mitotic parent/fork, a daughter node, or a parent→daughter edge? We're (my team) trying to align units before doing any prior-reweighting on our end, and getting that straight from you directly would save some guesswork.</p>\n<p>Thanks again for releasing this — genuinely useful contribution to the competition. Excellente Contribuição, forte abraço, José Luiz.</p>",
+        "replies": [
+          {
+            "id": 3521156,
+            "postDate": "2026-09-05T01:57:43.933Z",
+            "rawMarkdown": "Hi José Luiz,\n\nThanks for reading it that closely — and for asking about units rather than assuming them. Happy to pin it down precisely, because it's the kind of thing that's easy to get wrong by exactly one factor of two.\n\nA \"division\" in the 165,267 figure is a mitotic parent — one fork event. Not a daughter, and not a parent→daughter edge.\n\nConcretely, in the generator: when a track divides, I record the parent's node id (its node at frame t-1), and I record it once per daughter — then store sorted(set(...)). The set() is doing real work there: it collapses those two entries back down to a single event. So the divisions array in each seq_XXXX.npz holds node indices of mitotic parents, which matches how it's documented in the explorer — \"a node with two outgoing edges is a division.\"\n\nSince every division in the generator produces exactly two daughters, the conversions are exact. 165,267 mitotic parents (fork events) is the published figure. That corresponds to 330,534 daughter nodes, and 330,534 parent→daughter division edges, out of 4,056,226 total nodes. So if you're working in edge units or daughter units, double it; if you're working in event units, take it as published.\n\nAnd for the reweighting specifically: the 4.07% figure is in that same unit — mitotic parents divided by all nodes, i.e. 165,267 / 4,056,226. So it's directly comparable to the ~0.26% real rate I quoted; both are \"fraction of nodes that are a dividing parent.\" No conversion needed on your side, as long as you count the real rate the same way. That's a ratio of roughly 15.7x, if you're scaling a positive-class weight.\n\nOne gotcha I should have put in the post, since you're about to parse these files: both daughters inherit the parent's track_id. So nodes[:, 4] is a lineage/clone id, not a unique track — after a division, two distinct tracks share it. The unambiguous lineage lives in edges (and a node with two outgoing edges is exactly a mitosis). If you build your candidate graph off track_id expecting uniqueness, it will look like cells teleport.\n\nWhile I'm at it, one honest caveat on the detectability numbers you mentioned: the 0.91–0.94 real reference comes from the sparse annotations (~2.8% of nuclei), and annotators tend to label unambiguous cells — so that reference is probably optimistic, and I haven't measured how real recall varies with density. The notebook says this too, but it's worth repeating, since it means the synthetic-vs-real gap may be a little smaller than the raw numbers suggest.\n\nIf you do the prior-reweighting and it moves anything for you, I'd genuinely like to hear it — that's the feedback that improves the next version.\n\nForte abraço,\nJosé ",
+            "content": "<p>Hi José Luiz,</p>\n<p>Thanks for reading it that closely — and for asking about units rather than assuming them. Happy to pin it down precisely, because it's the kind of thing that's easy to get wrong by exactly one factor of two.</p>\n<p>A \"division\" in the 165,267 figure is a mitotic parent — one fork event. Not a daughter, and not a parent→daughter edge.</p>\n<p>Concretely, in the generator: when a track divides, I record the parent's node id (its node at frame t-1), and I record it once per daughter — then store sorted(set(…)). The set() is doing real work there: it collapses those two entries back down to a single event. So the divisions array in each seq_XXXX.npz holds node indices of mitotic parents, which matches how it's documented in the explorer — \"a node with two outgoing edges is a division.\"</p>\n<p>Since every division in the generator produces exactly two daughters, the conversions are exact. 165,267 mitotic parents (fork events) is the published figure. That corresponds to 330,534 daughter nodes, and 330,534 parent→daughter division edges, out of 4,056,226 total nodes. So if you're working in edge units or daughter units, double it; if you're working in event units, take it as published.</p>\n<p>And for the reweighting specifically: the 4.07% figure is in that same unit — mitotic parents divided by all nodes, i.e. 165,267 / 4,056,226. So it's directly comparable to the ~0.26% real rate I quoted; both are \"fraction of nodes that are a dividing parent.\" No conversion needed on your side, as long as you count the real rate the same way. That's a ratio of roughly 15.7x, if you're scaling a positive-class weight.</p>\n<p>One gotcha I should have put in the post, since you're about to parse these files: both daughters inherit the parent's track_id. So nodes[:, 4] is a lineage/clone id, not a unique track — after a division, two distinct tracks share it. The unambiguous lineage lives in edges (and a node with two outgoing edges is exactly a mitosis). If you build your candidate graph off track_id expecting uniqueness, it will look like cells teleport.</p>\n<p>While I'm at it, one honest caveat on the detectability numbers you mentioned: the 0.91–0.94 real reference comes from the sparse annotations (~2.8% of nuclei), and annotators tend to label unambiguous cells — so that reference is probably optimistic, and I haven't measured how real recall varies with density. The notebook says this too, but it's worth repeating, since it means the synthetic-vs-real gap may be a little smaller than the raw numbers suggest.</p>\n<p>If you do the prior-reweighting and it moves anything for you, I'd genuinely like to hear it — that's the feedback that improves the next version.</p>\n<p>Forte abraço,\nJosé </p>",
+            "parent": {},
+            "author": {
+              "displayName": "José Freitas",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15974520-kg.png?t=2026-08-01-22-26-32",
+              "url": "/josefreitasalvesneto",
+              "tier": "EXPERT",
+              "id": 15974520,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "totalVotes": 1,
+              "canUpvote": true,
+              "totalUpvotes": 1
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 864,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "José Freitas",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15974520-kg.png?t=2026-08-01-22-26-32",
+                "url": "/josefreitasalvesneto",
+                "userName": "josefreitasalvesneto",
+                "tier": "EXPERT",
+                "id": 15974520,
+                "profileUrl": "/josefreitasalvesneto",
+                "performanceTier": "EXPERT",
+                "userId": 15974520,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "José Luiz Luna-Xavier",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/default-thumb.png",
+          "url": "/josluizlunaxavier",
+          "tier": "CONTRIBUTOR",
+          "id": 20884731,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true,
+          "totalUpvotes": 1
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 2895,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "José Luiz Luna-Xavier",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/default-thumb.png",
+            "url": "/josluizlunaxavier",
+            "userName": "josluizlunaxavier",
+            "tier": "CONTRIBUTOR",
+            "id": 20884731,
+            "profileUrl": "/josluizlunaxavier",
+            "performanceTier": "CONTRIBUTOR",
+            "userId": 20884731,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3510364,
+        "postDate": "2026-08-08T09:47:15.693Z",
+        "rawMarkdown": "This is a great effort, thanks for releasing it. One thing I haven't seen raised yet: our real training set turns out to come from only 2 actual embryos, and they differ a lot  annotation sparsity of roughly 1% vs 9%, and division counts of 26 vs 125 across their samples. Given that real embryo-to-embryo heterogeneity, I'm curious whether the synthetic generation process models that kind of variation (density, noise, crowding) across its volumes, or whether it's drawn from one more canonical/idealized regime.",
+        "content": "<p>This is a great effort, thanks for releasing it. One thing I haven't seen raised yet: our real training set turns out to come from only 2 actual embryos, and they differ a lot  annotation sparsity of roughly 1% vs 9%, and division counts of 26 vs 125 across their samples. Given that real embryo-to-embryo heterogeneity, I'm curious whether the synthetic generation process models that kind of variation (density, noise, crowding) across its volumes, or whether it's drawn from one more canonical/idealized regime.</p>",
+        "replies": [
+          {
+            "id": 3510754,
+            "postDate": "2026-08-09T14:02:08.883Z",
+            "rawMarkdown": "Hello, I'm happy to help! I understand your doubt, the divisions were generated inspired by real movement, we might not have total accuracy, but we can use my data to pretrain a model and then fine-tune it with the real data, that helps it converge faster!",
+            "content": "<p>Hello, I'm happy to help! I understand your doubt, the divisions were generated inspired by real movement, we might not have total accuracy, but we can use my data to pretrain a model and then fine-tune it with the real data, that helps it converge faster!</p>",
+            "parent": {},
+            "author": {
+              "displayName": "José Freitas",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15974520-kg.png?t=2026-08-01-22-26-32",
+              "url": "/josefreitasalvesneto",
+              "tier": "EXPERT",
+              "id": 15974520,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "totalVotes": 1,
+              "canUpvote": true,
+              "totalUpvotes": 1
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 864,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "José Freitas",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15974520-kg.png?t=2026-08-01-22-26-32",
+                "url": "/josefreitasalvesneto",
+                "userName": "josefreitasalvesneto",
+                "tier": "EXPERT",
+                "id": 15974520,
+                "profileUrl": "/josefreitasalvesneto",
+                "performanceTier": "EXPERT",
+                "userId": 15974520,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "Ace",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/22169099-kg.png?t=2026-01-27-00-40-56",
+          "url": "/shikhageekachad",
+          "tier": "EXPERT",
+          "id": 22169099,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 2,
+          "canUpvote": true,
+          "totalUpvotes": 2
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 612,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "Ace",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/22169099-kg.png?t=2026-01-27-00-40-56",
+            "url": "/shikhageekachad",
+            "userName": "shikhageekachad",
+            "tier": "EXPERT",
+            "id": 22169099,
+            "profileUrl": "/shikhageekachad",
+            "performanceTier": "EXPERT",
+            "userId": 22169099,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3509286,
+        "postDate": "2026-08-06T06:30:17.397Z",
+        "rawMarkdown": "First and foremost, thank you for your effort Jose and for sharing.\n\nI just started in this competition, so I'm not sure if I will use your data yet, but If I do, I will let you know.",
+        "content": "<p>First and foremost, thank you for your effort Jose and for sharing.</p>\n<p>I just started in this competition, so I'm not sure if I will use your data yet, but If I do, I will let you know.</p>",
+        "replies": [
+          {
+            "id": 3509458,
+            "postDate": "2026-08-06T12:03:18.437Z",
+            "rawMarkdown": "Thank you very much! I'm happy to help! If you have any questions, I'm available!",
+            "content": "<p>Thank you very much! I'm happy to help! If you have any questions, I'm available!</p>",
+            "replies": [
+              {
+                "id": 3524124,
+                "postDate": "2026-09-14T01:14:31.897Z",
+                "rawMarkdown": "Hi José,  \n\nThanks again for sharing the synthetic dataset. I tried integrating it into my current pipeline, mainly as a source of additional supervision for division detection. \n\nI trained a lightweight division classifier using the synthetic lineage geometry, with sequence-level validation and several types of hard negatives. The classifier performed very well on held-out synthetic sequences, with an average precision of about 0.98.  However, when I integrated the synthetic-trained division gate into my current tracking pipeline, my public leaderboard score dropped from 0.910 to 0.906.\n\nMy impression is that the main issue may be a domain shift between the synthetic and real division geometry, or possibly a calibration problem in how I am using the classifier at inference time, rather than an issue with the dataset itself.\n\nIf you have any recommendations on how you think the synthetic data is best used in this competition, I would really appreciate your advice. For example, do you think it is better suited for pre-training followed by fine-tuning on the real data, for learning motion/lineage features, or for another type of augmentation or calibration strategy?  \n\nThanks again for making the dataset available and for any suggestions you may have.",
+                "content": "<p>Hi José,  </p>\n<p>Thanks again for sharing the synthetic dataset. I tried integrating it into my current pipeline, mainly as a source of additional supervision for division detection. </p>\n<p>I trained a lightweight division classifier using the synthetic lineage geometry, with sequence-level validation and several types of hard negatives. The classifier performed very well on held-out synthetic sequences, with an average precision of about 0.98.  However, when I integrated the synthetic-trained division gate into my current tracking pipeline, my public leaderboard score dropped from 0.910 to 0.906.</p>\n<p>My impression is that the main issue may be a domain shift between the synthetic and real division geometry, or possibly a calibration problem in how I am using the classifier at inference time, rather than an issue with the dataset itself.</p>\n<p>If you have any recommendations on how you think the synthetic data is best used in this competition, I would really appreciate your advice. For example, do you think it is better suited for pre-training followed by fine-tuning on the real data, for learning motion/lineage features, or for another type of augmentation or calibration strategy?  </p>\n<p>Thanks again for making the dataset available and for any suggestions you may have.</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "Juan Neira",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/14770099-kg.jpg?t=2025-12-17-06-36-27",
+                  "url": "/juancneira",
+                  "tier": "CONTRIBUTOR",
+                  "id": 14770099,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 1867,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "Juan Neira",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/14770099-kg.jpg?t=2025-12-17-06-36-27",
+                    "url": "/juancneira",
+                    "userName": "juancneira",
+                    "tier": "CONTRIBUTOR",
+                    "id": 14770099,
+                    "profileUrl": "/juancneira",
+                    "performanceTier": "CONTRIBUTOR",
+                    "userId": 14770099,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3524143,
+                "postDate": "2026-09-14T03:18:40.143Z",
+                "rawMarkdown": "you need to check your local validation metric what is getting worse, e.g.\n- more nodes are predicted (T_pred gets larger)\n- less nodes are matched, ist is due to lower probability or longer error distance\n- smaller raw edge jaccard, is it more miss (longer gap) or more FP\n- smaller raw dvision jaccard,\n\nhttps://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md\n\nwithout breaking down the root cost, it is hard to decide what to do next.\ne.g, if node error distance and probability get worst, relabel synthetic data centroid with a model closer to kaggle annotation. Or discard prediction of node with synthetic data, use it only for eadge linkage instead, etc ",
+                "content": "<p>you need to check your local validation metric what is getting worse, e.g.</p>\n<ul>\n<li>more nodes are predicted (T_pred gets larger)</li>\n<li>less nodes are matched, ist is due to lower probability or longer error distance</li>\n<li>smaller raw edge jaccard, is it more miss (longer gap) or more FP</li>\n<li>smaller raw dvision jaccard,</li>\n</ul>\n<p><a href=\"https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md\" target=\"_blank\">https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md</a></p>\n<p>without breaking down the root cost, it is hard to decide what to do next.\ne.g, if node error distance and probability get worst, relabel synthetic data centroid with a model closer to kaggle annotation. Or discard prediction of node with synthetic data, use it only for eadge linkage instead, etc </p>",
+                "parent": {},
+                "author": {
+                  "displayName": "hengck23",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                  "url": "/hengck23",
+                  "tier": "GRANDMASTER",
+                  "id": 113660,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 876,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "isCollapsed": true,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "hengck23",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                    "url": "/hengck23",
+                    "userName": "hengck23",
+                    "tier": "GRANDMASTER",
+                    "id": 113660,
+                    "profileUrl": "/hengck23",
+                    "performanceTier": "GRANDMASTER",
+                    "userId": 113660,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3524144,
+                "postDate": "2026-09-14T03:21:47.507Z",
+                "rawMarkdown": "![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fe083874dd39471568dd37ddf59c4aa5f%2FSelection_4962.png?generation=1789356090029098&alt=media)\n\nhe explains better",
+                "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fe083874dd39471568dd37ddf59c4aa5f%2FSelection_4962.png?generation=1789356090029098&amp;alt=media\" alt=\"\"></p>\n<p>he explains better</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "hengck23",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                  "url": "/hengck23",
+                  "tier": "GRANDMASTER",
+                  "id": 113660,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 876,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "isCollapsed": true,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "hengck23",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                    "url": "/hengck23",
+                    "userName": "hengck23",
+                    "tier": "GRANDMASTER",
+                    "id": 113660,
+                    "profileUrl": "/hengck23",
+                    "performanceTier": "GRANDMASTER",
+                    "userId": 113660,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3524149,
+                "postDate": "2026-09-14T03:42:15.187Z",
+                "rawMarkdown": "Dear hengck23\n\nThank you for your reply.\n\nI will check the information you shared and comment about my outcome later.",
+                "content": "<p>Dear hengck23</p>\n<p>Thank you for your reply.</p>\n<p>I will check the information you shared and comment about my outcome later.</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "Juan Neira",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/14770099-kg.jpg?t=2025-12-17-06-36-27",
+                  "url": "/juancneira",
+                  "tier": "CONTRIBUTOR",
+                  "id": 14770099,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 1867,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "isCollapsed": true,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "Juan Neira",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/14770099-kg.jpg?t=2025-12-17-06-36-27",
+                    "url": "/juancneira",
+                    "userName": "juancneira",
+                    "tier": "CONTRIBUTOR",
+                    "id": 14770099,
+                    "profileUrl": "/juancneira",
+                    "performanceTier": "CONTRIBUTOR",
+                    "userId": 14770099,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3524797,
+                "postDate": "2026-09-15T21:33:48.683Z",
+                "rawMarkdown": "@juancneira \n\nexample of domain shift\nhttps://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/740145#3524794",
+                "content": "<p><a href=\"/juancneira\" target=\"_blank\">@juancneira</a> </p>\n<p>example of domain shift\n<a href=\"https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/740145#3524794\" target=\"_blank\">https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/740145#3524794</a></p>",
+                "parent": {},
+                "author": {
+                  "displayName": "hengck23",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                  "url": "/hengck23",
+                  "tier": "GRANDMASTER",
+                  "id": 113660,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 876,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "isCollapsed": true,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "hengck23",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                    "url": "/hengck23",
+                    "userName": "hengck23",
+                    "tier": "GRANDMASTER",
+                    "id": 113660,
+                    "profileUrl": "/hengck23",
+                    "performanceTier": "GRANDMASTER",
+                    "userId": 113660,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              }
+            ],
+            "parent": {},
+            "author": {
+              "displayName": "José Freitas",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15974520-kg.png?t=2026-08-01-22-26-32",
+              "url": "/josefreitasalvesneto",
+              "tier": "EXPERT",
+              "id": 15974520,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "totalVotes": 1,
+              "canUpvote": true,
+              "totalUpvotes": 1
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 864,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "José Freitas",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15974520-kg.png?t=2026-08-01-22-26-32",
+                "url": "/josefreitasalvesneto",
+                "userName": "josefreitasalvesneto",
+                "tier": "EXPERT",
+                "id": 15974520,
+                "profileUrl": "/josefreitasalvesneto",
+                "performanceTier": "EXPERT",
+                "userId": 15974520,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "Juan Neira",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/14770099-kg.jpg?t=2025-12-17-06-36-27",
+          "url": "/juancneira",
+          "tier": "CONTRIBUTOR",
+          "id": 14770099,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 2,
+          "canUpvote": true,
+          "totalUpvotes": 2
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 1867,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "Juan Neira",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/14770099-kg.jpg?t=2025-12-17-06-36-27",
+            "url": "/juancneira",
+            "userName": "juancneira",
+            "tier": "CONTRIBUTOR",
+            "id": 14770099,
+            "profileUrl": "/juancneira",
+            "performanceTier": "CONTRIBUTOR",
+            "userId": 14770099,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3522908,
+        "postDate": "2026-09-10T00:13:40.043Z",
+        "rawMarkdown": "I took the upper bound suggestion and measured it on the detections instead of by eye, since the ground truth lets you ask the same question without human labelling. Seven labelled divisions across the four films I have volumes for.\n\nFor each one: is the parent detected, are both daughters detected, all within the metric's own 7 um matching radius.\n\n```\nparent and both daughters detected       7/7   (100%)\nboth parent->daughter edges in my graph  0/7\nexactly one edge present                 7/7\npredicted parent out-degree              1, every single time\n```\n\nSo detection is not the ceiling at all. My detector finds all three nodes for every division, the linker attaches one daughter every time, and never the second. Upper bound given my detections is 100% and I am scoring 0%.\n\nYour point 4 is exactly what the geometry says:\n\n```\nlongest parent to daughter step   median 8.47 um   range 5.69 to 13.65\nsister separation at prediction   median 10.22 um  range 7.87 to 13.12\n```\n\nA labelled continuation step here is around 3 um. So a division step is two to four times a normal step and the daughters land 8 to 13 um apart. The cell does not slowly split, it appears as two things already far apart, which is what you described.\n\nWhich turns into a reachability curve, and this is the part I did not expect:\n\n```\nboth steps inside a  7.0 um gate    2/7   (29%)\nboth steps inside a  9.9 um gate    5/7   (71%)\nboth steps inside a 12.0 um gate    6/7   (86%)\nboth steps inside a 15.0 um gate    7/7  (100%)\n```\n\nThat reframes the capacity patch I mentioned earlier. Allowing out-degree 2 was necessary and not sufficient, because a gate tuned for continuations rejects the second arc before capacity ever gets consulted. What the numbers say is that the second arc needs a different gate from the first: tight for a continuation, roughly double for a candidate daughter.\n\nCaveat, n = 7, which is tiny. But it is 7/7 unanimous on both binary facts and the geometry holds across all four films.\n\nOn Ultrack, this is also why I now think their formulation wins here rather than a post-hoc fix. If division and non-division hypotheses compete inside one optimisation, the wide gate only gets used where the alternative explanation is worse, so you do not pay for it everywhere. Doing it afterwards, the way my pipeline does, the gate is global and every widening buys false positives across the whole graph. That matches your A,B,C easy and E,F,G both-low-probability picture: the ambiguity is real and the right place to resolve it is inside the objective, not with a threshold.\n\nI am going to try the asymmetric gate next since it is cheap, and report whether it moves anything. If you want the measurement script I can post it.",
+        "content": "<p>I took the upper bound suggestion and measured it on the detections instead of by eye, since the ground truth lets you ask the same question without human labelling. Seven labelled divisions across the four films I have volumes for.</p>\n<p>For each one: is the parent detected, are both daughters detected, all within the metric's own 7 um matching radius.</p>\n<pre><code>parent and both daughters detected       7/7   (100%)\nboth parent-&gt;daughter edges in my graph  0/7\nexactly one edge present                 7/7\npredicted parent out-degree              1, every single time\n</code></pre>\n<p>So detection is not the ceiling at all. My detector finds all three nodes for every division, the linker attaches one daughter every time, and never the second. Upper bound given my detections is 100% and I am scoring 0%.</p>\n<p>Your point 4 is exactly what the geometry says:</p>\n<pre><code>longest parent to daughter step   median 8.47 um   range 5.69 to 13.65\nsister separation at prediction   median 10.22 um  range 7.87 to 13.12\n</code></pre>\n<p>A labelled continuation step here is around 3 um. So a division step is two to four times a normal step and the daughters land 8 to 13 um apart. The cell does not slowly split, it appears as two things already far apart, which is what you described.</p>\n<p>Which turns into a reachability curve, and this is the part I did not expect:</p>\n<pre><code>both steps inside a  7.0 um gate    2/7   (29%)\nboth steps inside a  9.9 um gate    5/7   (71%)\nboth steps inside a 12.0 um gate    6/7   (86%)\nboth steps inside a 15.0 um gate    7/7  (100%)\n</code></pre>\n<p>That reframes the capacity patch I mentioned earlier. Allowing out-degree 2 was necessary and not sufficient, because a gate tuned for continuations rejects the second arc before capacity ever gets consulted. What the numbers say is that the second arc needs a different gate from the first: tight for a continuation, roughly double for a candidate daughter.</p>\n<p>Caveat, n = 7, which is tiny. But it is 7/7 unanimous on both binary facts and the geometry holds across all four films.</p>\n<p>On Ultrack, this is also why I now think their formulation wins here rather than a post-hoc fix. If division and non-division hypotheses compete inside one optimisation, the wide gate only gets used where the alternative explanation is worse, so you do not pay for it everywhere. Doing it afterwards, the way my pipeline does, the gate is global and every widening buys false positives across the whole graph. That matches your A,B,C easy and E,F,G both-low-probability picture: the ambiguity is real and the right place to resolve it is inside the objective, not with a threshold.</p>\n<p>I am going to try the asymmetric gate next since it is cheap, and report whether it moves anything. If you want the measurement script I can post it.</p>",
+        "parent": {},
+        "author": {
+          "displayName": "Lê Quang Cảnh",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/35644958-kg.PNG?t=2026-09-08-08-23-08",
+          "url": "/zhincez",
+          "tier": "CONTRIBUTOR",
+          "id": 35644958,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 45,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "Lê Quang Cảnh",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/35644958-kg.PNG?t=2026-09-08-08-23-08",
+            "url": "/zhincez",
+            "userName": "zhincez",
+            "tier": "CONTRIBUTOR",
+            "id": 35644958,
+            "profileUrl": "/zhincez",
+            "performanceTier": "CONTRIBUTOR",
+            "userId": 35644958,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3522706,
+        "postDate": "2026-09-09T16:13:32.543Z",
+        "rawMarkdown": "@hengck23 I tested your tracklet-association framing for divisions and it came back negative, which seems worth reporting since you said you had not moved to division yet.\n\nYour assumption that birth and death only happen at the image boundary is the right filter to start from. Applied to my pipeline's output on four labelled films:\n\n```\nforks in graph                          105\ntrack starts at t=0                   1,056\ntrack starts at t>0                   3,542\n  near the volume border              2,253\n  interior orphans (your pool)        1,289\n    prev-frame neighbour has 1 child    762\n    no node within 12 um                486\nmedian orphan -> nearest prev node  8.5-10 um\n```\n\nThose four films hold 3 labelled divisions; the whole train set holds 151 across 87 of the 199 label files. So the pool is roughly 400x larger than the events it is meant to contain. A median jump of 8.5-10 um against a ~3 um labelled frame-to-frame step says most of them are continuations the linker refused because the detector put the endpoints ~4 um off, not daughters it missed.\n\nThe part that worries me for your stage 3: those broken continuations sit at the same separation a real sister pair does. Jose calibrated sister separation at 7.24 um from the real lineage edges; my orphan median is 8.5-10 um. A distance gate cannot separate the two populations. Whatever decides daughter-vs-broken-track has to use something else - appearance, the parent's own motion history, or simply a better-localised detector so the continuations stop breaking in the first place.\n\nTwo other things from the same measurement, in case they save you time:\n\n- In the public 0.938 pipeline family the motion-relink stage rebuilds the edge list from a one-to-one Hungarian assignment before safe-div runs, so every fork the ILP produced is destroyed there. If you inherit that post-processing, any division work upstream of it is invisible.\n- Fine-tuning the public detector on a 7-film sparse split made it worse, not better: node recall and N_pred/N_est fell on every film and adj_J dropped 0.0161, while a dense-label branch collapsed to zero nodes on one film. Whatever makes fine-tuning work here, it is not more epochs on the sparse annotations.\n\nCaveat on my numbers: I first described those four films as the test set. Theo Viel corrected me - the test folder ships dummies copied from train, and the real hidden set is bigger. So the counts above come from four train films the released weights were trained on. The ratio between pool size and event count is the part I would still trust.\n\nYour 5-frame training is what I am most curious about: does a window-5 link transformer recover the gap-2 continuations that the heuristic currently patches by hand? That is exactly the population generating this orphan pool.",
+        "content": "<p><a href=\"/hengck23\" target=\"_blank\">@hengck23</a> I tested your tracklet-association framing for divisions and it came back negative, which seems worth reporting since you said you had not moved to division yet.</p>\n<p>Your assumption that birth and death only happen at the image boundary is the right filter to start from. Applied to my pipeline's output on four labelled films:</p>\n<pre><code>forks in graph                          105\ntrack starts at t=0                   1,056\ntrack starts at t&gt;0                   3,542\n  near the volume border              2,253\n  interior orphans (your pool)        1,289\n    prev-frame neighbour has 1 child    762\n    no node within 12 um                486\nmedian orphan -&gt; nearest prev node  8.5-10 um\n</code></pre>\n<p>Those four films hold 3 labelled divisions; the whole train set holds 151 across 87 of the 199 label files. So the pool is roughly 400x larger than the events it is meant to contain. A median jump of 8.5-10 um against a ~3 um labelled frame-to-frame step says most of them are continuations the linker refused because the detector put the endpoints ~4 um off, not daughters it missed.</p>\n<p>The part that worries me for your stage 3: those broken continuations sit at the same separation a real sister pair does. Jose calibrated sister separation at 7.24 um from the real lineage edges; my orphan median is 8.5-10 um. A distance gate cannot separate the two populations. Whatever decides daughter-vs-broken-track has to use something else - appearance, the parent's own motion history, or simply a better-localised detector so the continuations stop breaking in the first place.</p>\n<p>Two other things from the same measurement, in case they save you time:</p>\n<ul>\n<li>In the public 0.938 pipeline family the motion-relink stage rebuilds the edge list from a one-to-one Hungarian assignment before safe-div runs, so every fork the ILP produced is destroyed there. If you inherit that post-processing, any division work upstream of it is invisible.</li>\n<li>Fine-tuning the public detector on a 7-film sparse split made it worse, not better: node recall and N_pred/N_est fell on every film and adj_J dropped 0.0161, while a dense-label branch collapsed to zero nodes on one film. Whatever makes fine-tuning work here, it is not more epochs on the sparse annotations.</li>\n</ul>\n<p>Caveat on my numbers: I first described those four films as the test set. Theo Viel corrected me - the test folder ships dummies copied from train, and the real hidden set is bigger. So the counts above come from four train films the released weights were trained on. The ratio between pool size and event count is the part I would still trust.</p>\n<p>Your 5-frame training is what I am most curious about: does a window-5 link transformer recover the gap-2 continuations that the heuristic currently patches by hand? That is exactly the population generating this orphan pool.</p>",
+        "replies": [
+          {
+            "id": 3522789,
+            "postDate": "2026-09-09T19:08:51.583Z",
+            "rawMarkdown": "i haven't looked into division in detail yet. I suggest you visually inspect the appearance changes of the cell as time increases. e.g. given a series of crop images from a trajectory of points: CROP = [crop1, crop2, crop3, crop3 .....]:\n\n- 1. it is easy for a human to check if all crops are from the same cell (i.e. no FP) if there is no division. That is why you have 0.8 or 0.9 Jaccard \n- 2. it is not easy to tell if there is any missing crop in between if i  don't tell you the timestamp\n- 3. For division, I can sometimes see 2 \"different series being concatenated together\". In fact, it may be difficult for humans to tell if it is FP or division?\n- 4. the frame rate seems to be too large for us to observe the slow splitting of a cell. It is like the cell \"suddenly becomes two (and far apart)\"\n\ni can only be very sure it is a division when the neighbour track is very obvious, so that since the parent cell cannot disappear, it must be split. This means that IPL can only make a correct division only if the neighbour tracks has very high confidence?\n\n\nThe above simulates what happens when you present a feature vector at zyx to the model after dfferent t.  \n\nMy first instinct is to find the upper bound of achievable division Jaccard. I would use the human correct rate as a proxy or oracle. From my observations, just by appearance above alone, i don't get good results.  I need to think of something else.\n\n\nupper bound means \"if your model cannot do better, other kaggler also cannot do better\" (so their improvement may be somewhere else)\n\n---\n\ni suggest you study Ultack paper. it uses oversegmentation to detect division. i.e. it competes against non-division and division hypothesis. Ultrack does simultaneous detection and tracking (not detection first, then link). I think the paper also gives upper bound for the division case using the paper's data.\n",
+            "content": "<p>i haven't looked into division in detail yet. I suggest you visually inspect the appearance changes of the cell as time increases. e.g. given a series of crop images from a trajectory of points: CROP = [crop1, crop2, crop3, crop3 …..]:</p>\n<ul>\n<li>1. it is easy for a human to check if all crops are from the same cell (i.e. no FP) if there is no division. That is why you have 0.8 or 0.9 Jaccard </li>\n<li>2. it is not easy to tell if there is any missing crop in between if i  don't tell you the timestamp</li>\n<li>3. For division, I can sometimes see 2 \"different series being concatenated together\". In fact, it may be difficult for humans to tell if it is FP or division?</li>\n<li>4. the frame rate seems to be too large for us to observe the slow splitting of a cell. It is like the cell \"suddenly becomes two (and far apart)\"</li>\n</ul>\n<p>i can only be very sure it is a division when the neighbour track is very obvious, so that since the parent cell cannot disappear, it must be split. This means that IPL can only make a correct division only if the neighbour tracks has very high confidence?</p>\n<p>The above simulates what happens when you present a feature vector at zyx to the model after dfferent t.  </p>\n<p>My first instinct is to find the upper bound of achievable division Jaccard. I would use the human correct rate as a proxy or oracle. From my observations, just by appearance above alone, i don't get good results.  I need to think of something else.</p>\n<p>upper bound means \"if your model cannot do better, other kaggler also cannot do better\" (so their improvement may be somewhere else)</p>\n<hr>\n<p>i suggest you study Ultack paper. it uses oversegmentation to detect division. i.e. it competes against non-division and division hypothesis. Ultrack does simultaneous detection and tracking (not detection first, then link). I think the paper also gives upper bound for the division case using the paper's data.</p>",
+            "replies": [
+              {
+                "id": 3522811,
+                "postDate": "2026-09-09T19:35:01.667Z",
+                "rawMarkdown": "![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Facea4450a5d3fcbb773c1d9287de7731%2FSelection_4864.png?generation=1788982357856715&alt=media)\n\nthis is from the ultrack paper and it is also what i observed from kaggle data.\n\neasy to link A,B,C.  \ndifficult to link A,B,D.  \ndifficult to link EG or EF (both has low probability)\n",
+                "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Facea4450a5d3fcbb773c1d9287de7731%2FSelection_4864.png?generation=1788982357856715&amp;alt=media\" alt=\"\"></p>\n<p>this is from the ultrack paper and it is also what i observed from kaggle data.</p>\n<p>easy to link A,B,C.<br>\ndifficult to link A,B,D.<br>\ndifficult to link EG or EF (both has low probability)</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "hengck23",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                  "url": "/hengck23",
+                  "tier": "GRANDMASTER",
+                  "id": 113660,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "totalVotes": 1,
+                  "canUpvote": true,
+                  "totalUpvotes": 1
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 876,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "hengck23",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                    "url": "/hengck23",
+                    "userName": "hengck23",
+                    "tier": "GRANDMASTER",
+                    "id": 113660,
+                    "profileUrl": "/hengck23",
+                    "performanceTier": "GRANDMASTER",
+                    "userId": 113660,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3522813,
+                "postDate": "2026-09-09T19:37:33.740Z",
+                "rawMarkdown": "![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9b473eb830530ce73f50f5a82032a456%2FSelection_4865.png?generation=1788982651212641&alt=media)",
+                "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9b473eb830530ce73f50f5a82032a456%2FSelection_4865.png?generation=1788982651212641&amp;alt=media\" alt=\"\"></p>",
+                "parent": {},
+                "author": {
+                  "displayName": "hengck23",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                  "url": "/hengck23",
+                  "tier": "GRANDMASTER",
+                  "id": 113660,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 876,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "hengck23",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                    "url": "/hengck23",
+                    "userName": "hengck23",
+                    "tier": "GRANDMASTER",
+                    "id": 113660,
+                    "profileUrl": "/hengck23",
+                    "performanceTier": "GRANDMASTER",
+                    "userId": 113660,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              }
+            ],
+            "parent": {},
+            "author": {
+              "displayName": "hengck23",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+              "url": "/hengck23",
+              "tier": "GRANDMASTER",
+              "id": 113660,
+              "progressionOptOut": false
+            },
+            "authorType": "COMMENT",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 876,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "hengck23",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                "url": "/hengck23",
+                "userName": "hengck23",
+                "tier": "GRANDMASTER",
+                "id": 113660,
+                "profileUrl": "/hengck23",
+                "performanceTier": "GRANDMASTER",
+                "userId": 113660,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "Lê Quang Cảnh",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/35644958-kg.PNG?t=2026-09-08-08-23-08",
+          "url": "/zhincez",
+          "tier": "CONTRIBUTOR",
+          "id": 35644958,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 45,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "Lê Quang Cảnh",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/35644958-kg.PNG?t=2026-09-08-08-23-08",
+            "url": "/zhincez",
+            "userName": "zhincez",
+            "tier": "CONTRIBUTOR",
+            "id": 35644958,
+            "profileUrl": "/zhincez",
+            "performanceTier": "CONTRIBUTOR",
+            "userId": 35644958,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      }
+    ],
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3507381,
+      "postDate": "2026-08-01T21:12:10.503Z",
+      "rawMarkdown": "I got tired of trying to train a division model on ~304 events, so I built a synthetic dataset and I'm releasing it free (CC0).\n\n**The problem, concretely.** The training ground truth is sparse — roughly 2.8% of nuclei are annotated, and across all 199 videos there are about 304 division events. Divisions carry 10% of the metric (`score = adjusted_edge_jaccard + 0.1 * division_jaccard`), and most public solutions I've seen simply leave that term at zero. That is understandable: you cannot fit a division model to a few hundred scattered examples.\n\n**What I generated.** 18.5 GB where every nucleus is labelled:\n\n- **1,539 static volumes** at native 256×256 resolution, centroids with sub-voxel precision\n- **2,174 time sequences** with the complete lineage graph — nodes, edges, and mitosis events\n- **165,267 labelled divisions** across 4,056,226 nodes\n\nThat is roughly 540× more mitosis supervision than the competition ground truth provides.\n\n**It is a physical model, not a GAN.** Dark medium, physically-sized ellipsoidal nuclei with a super-gaussian profile (the real radial profile is a flat top, not a gaussian — I measured it), light emission that scatters and accumulates where cells are dense, anisotropic PSF, then Poisson + read noise. Three details I'd flag as the ones that actually matter:\n\n1. **The pooling matches the evaluator exactly.** The official pipeline downsamples XY by 4 with a *stride* (`vol[:, ::4, ::4]`), not a block mean. A block mean averages noise away and would hand you data that is cleaner than what your detector really sees. I generate at native resolution and apply the identical stride.\n2. **Detectability is calibrated, not assumed.** A classical DoG detector recovers ~0.89 of the synthetic nuclei in a moderately dense field, ~0.76 when crowded; on the real annotated nuclei it recovers 0.91–0.94. So if anything the synthetic volumes are slightly *harder*, not easier. The notebook measures this live at three densities so you can judge the gap yourself.\n3. **Tissue geometry is fitted from the real detections** — the embryo surface, its curvature, its thickness — and then resampled. The geometry is learned from real data; the coordinates are generated. No real positions are copied.\n\nMotion is calibrated on the real lineage edges: 1.86 µm/frame median step, +0.30 lag-1 directional persistence, 7.24 µm sister separation.\n\n**Explorer notebook (runs end to end, all figures computed live):**\nhttps://www.kaggle.com/code/josefreitasalvesneto/synthetic-3d-microscopy-data-for-cell-tracking\n\n**Dataset + full generator source (open, nothing hidden):**\nhttps://www.kaggle.com/code/josefreitasalvesneto/biohub-synthetic-dataset\n\n**Two things I want to be upfront about**, because I'd want to know them before spending 18 GB of quota:\n\n- The division rate is **deliberately inflated** (4.07% of nodes vs ~0.26% in reality). A model starved of examples never learns mitosis. Re-weight your loss by the real rate if you need calibrated priors.\n- Distribution match is partial. Nucleus texture and contrast are the weakest axes. The value here is the **labels** — density, lineage and mitosis — much more than photorealism.\n\nHappy to answer anything about the generator. If you try it and it breaks, or it helps, I'd genuinely like to hear which — both make the next version better.",
+      "content": "<p>I got tired of trying to train a division model on ~304 events, so I built a synthetic dataset and I'm releasing it free (CC0).</p>\n<p><strong>The problem, concretely.</strong> The training ground truth is sparse — roughly 2.8% of nuclei are annotated, and across all 199 videos there are about 304 division events. Divisions carry 10% of the metric (<code>score = adjusted_edge_jaccard + 0.1 * division_jaccard</code>), and most public solutions I've seen simply leave that term at zero. That is understandable: you cannot fit a division model to a few hundred scattered examples.</p>\n<p><strong>What I generated.</strong> 18.5 GB where every nucleus is labelled:</p>\n<ul>\n<li><strong>1,539 static volumes</strong> at native 256×256 resolution, centroids with sub-voxel precision</li>\n<li><strong>2,174 time sequences</strong> with the complete lineage graph — nodes, edges, and mitosis events</li>\n<li><strong>165,267 labelled divisions</strong> across 4,056,226 nodes</li>\n</ul>\n<p>That is roughly 540× more mitosis supervision than the competition ground truth provides.</p>\n<p><strong>It is a physical model, not a GAN.</strong> Dark medium, physically-sized ellipsoidal nuclei with a super-gaussian profile (the real radial profile is a flat top, not a gaussian — I measured it), light emission that scatters and accumulates where cells are dense, anisotropic PSF, then Poisson + read noise. Three details I'd flag as the ones that actually matter:</p>\n<ol>\n<li><strong>The pooling matches the evaluator exactly.</strong> The official pipeline downsamples XY by 4 with a <em>stride</em> (<code>vol[:, ::4, ::4]</code>), not a block mean. A block mean averages noise away and would hand you data that is cleaner than what your detector really sees. I generate at native resolution and apply the identical stride.</li>\n<li><strong>Detectability is calibrated, not assumed.</strong> A classical DoG detector recovers ~0.89 of the synthetic nuclei in a moderately dense field, ~0.76 when crowded; on the real annotated nuclei it recovers 0.91–0.94. So if anything the synthetic volumes are slightly <em>harder</em>, not easier. The notebook measures this live at three densities so you can judge the gap yourself.</li>\n<li><strong>Tissue geometry is fitted from the real detections</strong> — the embryo surface, its curvature, its thickness — and then resampled. The geometry is learned from real data; the coordinates are generated. No real positions are copied.</li>\n</ol>\n<p>Motion is calibrated on the real lineage edges: 1.86 µm/frame median step, +0.30 lag-1 directional persistence, 7.24 µm sister separation.</p>\n<p><strong>Explorer notebook (runs end to end, all figures computed live):</strong>\n<a href=\"https://www.kaggle.com/code/josefreitasalvesneto/synthetic-3d-microscopy-data-for-cell-tracking\" target=\"_blank\">https://www.kaggle.com/code/josefreitasalvesneto/synthetic-3d-microscopy-data-for-cell-tracking</a></p>\n<p><strong>Dataset + full generator source (open, nothing hidden):</strong>\n<a href=\"https://www.kaggle.com/code/josefreitasalvesneto/biohub-synthetic-dataset\" target=\"_blank\">https://www.kaggle.com/code/josefreitasalvesneto/biohub-synthetic-dataset</a></p>\n<p><strong>Two things I want to be upfront about</strong>, because I'd want to know them before spending 18 GB of quota:</p>\n<ul>\n<li>The division rate is <strong>deliberately inflated</strong> (4.07% of nodes vs ~0.26% in reality). A model starved of examples never learns mitosis. Re-weight your loss by the real rate if you need calibrated priors.</li>\n<li>Distribution match is partial. Nucleus texture and contrast are the weakest axes. The value here is the <strong>labels</strong> — density, lineage and mitosis — much more than photorealism.</li>\n</ul>\n<p>Happy to answer anything about the generator. If you try it and it breaks, or it helps, I'd genuinely like to hear which — both make the next version better.</p>",
+      "parent": {},
+      "author": {
+        "displayName": "José Freitas",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15974520-kg.png?t=2026-08-01-22-26-32",
+        "url": "/josefreitasalvesneto",
+        "tier": "EXPERT",
+        "id": 15974520,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 62,
+        "canUpvote": true,
+        "totalUpvotes": 62
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 864,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "reactions": [
+        {
+          "emoji": "YAY",
+          "featuredUserNames": [
+            "godhand",
+            "playwithme",
+            "tanetisanjay",
+            "juancneira",
+            "josefreitasalvesneto",
+            "josluizlunaxavier",
+            "marcuseno"
+          ],
+          "userCount": 7
+        },
+        {
+          "emoji": "THANK_YOU",
+          "featuredUserNames": [
+            "juancneira",
+            "josefreitasalvesneto",
+            "josluizlunaxavier",
+            "upmanyuawasthi",
+            "soukeaizenz"
+          ],
+          "userCount": 5
+        },
+        {
+          "emoji": "LOVE",
+          "featuredUserNames": [
+            "josefreitasalvesneto",
+            "josluizlunaxavier"
+          ],
+          "userCount": 2
+        }
+      ],
+      "teamUpInfo": {
+        "teamLeader": {
+          "displayName": "José Freitas",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15974520-kg.png?t=2026-08-01-22-26-32",
+          "url": "/josefreitasalvesneto",
+          "userName": "josefreitasalvesneto",
+          "tier": "EXPERT",
+          "id": 15974520,
+          "profileUrl": "/josefreitasalvesneto",
+          "performanceTier": "EXPERT",
+          "userId": 15974520,
+          "progressionOptOut": false
+        },
+        "intro": ""
+      }
+    },
+    "firstMessageId": 3507381,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 732103,
+    "name": "[Free Dataset] 18.5 GB of fully-labelled synthetic 3D microscopy — 165k labelled divisions",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-08-01T21:12:10.502460400Z",
+    "totalVotes": 62,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/732103",
+    "totalMessages": 20,
+    "authorPerformanceTier": "EXPERT",
+    "authorProgressionOptOut": false
+  }
+}

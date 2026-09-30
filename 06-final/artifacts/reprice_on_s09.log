@@ -1,0 +1,86 @@
+Re-price the remaining post-processing knobs on the CURRENT best chain (s09).
+
+Everything in section 4 of docs/HANDOFF.md was priced on either the RAW ILP
+graph or the RELINKED deployed one. The chain has moved twice since: relink off
+(s05), gap2 after safe_div (s08), linefit 0.8 -> 0.3 (s09). Section 6 is the
+record of what happens when a price measured on one topology is assumed to hold
+on another -- so re-price rather than inherit.
+
+Chain under test (s09):
+    gap_close -> safe_div -> gap2 -> prune_isolated -> short_track -> linefit(0.3, 2)
+
+One knob moves per row, everything else at its s09 value.
+======================================================================================================================
+configuration                               proxy    dprox        J       dJ    mult    dmult n/n_est    divJ TP/FP/FN  notes
+s09 BASE                                  0.97918           0.94003          1.00368           0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+one division event at this ledger = 0.00714 proxy
+
+--- gap_close um ---
+  gc_um=3.0                               0.97831 -0.00086  0.93885 -0.00118 1.00404 +0.00037  0.8928  0.3571    5/2/7  gap2_nodes=728 gap2_pairs=364 gap_pairs=821 gap_synth=821 lf_moved=186279 st_comps=1555 st_removed=6972
+  gc_um=4.0                               0.97930 +0.00012  0.94003 +0.00000 1.00381 +0.00013  0.8963  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1108 gap_synth=1108 lf_moved=187015 st_comps=1451 st_removed=6512  <<FALSE GAIN: all multiplier
+  gc_um=6.0                               0.97892 -0.00025  0.93988 -0.00016 1.00357 -0.00010  0.8990  0.3571    5/2/7  gap2_nodes=706 gap2_pairs=353 gap_pairs=1332 gap_synth=1332 lf_moved=187570 st_comps=1377 st_removed=6177
+  gc_um=8.0                               0.97902 -0.00015  0.94021 +0.00018 1.00333 -0.00035  0.9015  0.3571    5/2/7  gap2_nodes=686 gap2_pairs=343 gap_pairs=1575 gap_synth=1575 lf_moved=188103 st_comps=1308 st_removed=5868
+  gc_um=10.0                              0.97856 -0.00062  0.93992 -0.00012 1.00312 -0.00055  0.9043  0.3571    5/2/7  gap2_nodes=664 gap2_pairs=332 gap_pairs=1839 gap_synth=1839 lf_moved=188680 st_comps=1235 st_removed=5532
+  gc_um=12.0                              0.97824 -0.00093  0.93977 -0.00027 1.00295 -0.00073  0.9078  0.3571    5/2/7  gap2_nodes=616 gap2_pairs=308 gap_pairs=2172 gap_synth=2172 lf_moved=189422 st_comps=1133 st_removed=5077
+
+--- gap_close synth off ---
+  gc_synth=False                          0.97818 -0.00100  0.93818 -0.00186 1.00468 +0.00100  0.8828  0.3571    5/2/7  gap2_nodes=750 gap2_pairs=375 lf_moved=184179 st_comps=1844 st_removed=8266
+
+--- gap_close reuse um ---
+  gc_reuse=2.8                            0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  gc_reuse=4.0                            0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+
+--- gap2 total um ---
+  g2_total=8.0                            0.97874 -0.00044  0.93953 -0.00051 1.00374 +0.00007  0.8969  0.3571    5/2/7  gap2_nodes=622 gap2_pairs=311 gap_pairs=1222 gap_synth=1222 lf_moved=187145 st_comps=1428 st_removed=6407
+  g2_total=12.0                           0.97911 -0.00007  0.94003 +0.00000 1.00360 -0.00007  0.8985  0.3571    5/2/7  gap2_nodes=790 gap2_pairs=395 gap_pairs=1222 gap_synth=1222 lf_moved=187469 st_comps=1393 st_removed=6251
+  g2_total=14.0                           0.97908 -0.00010  0.94003 +0.00000 1.00357 -0.00011  0.8987  0.3571    5/2/7  gap2_nodes=820 gap2_pairs=410 gap_pairs=1222 gap_synth=1222 lf_moved=187518 st_comps=1389 st_removed=6232
+
+--- gap2 step um ---
+  g2_step=4.0                             0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  g2_step=5.0                             0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  g2_step=6.0                             0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+
+--- gap2 context gate off ---
+  g2_ctx=False                            0.97914 -0.00004  0.94003 +0.00000 1.00364 -0.00004  0.8979  0.3571    5/2/7  gap2_nodes=738 gap2_pairs=369 gap_pairs=1222 gap_synth=1222 lf_moved=187351 st_comps=1409 st_removed=6317
+
+--- gap2 caps ---
+  g2_frac=0.009                           0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+  g2_abs=360                              0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+
+--- prune isolated off ---
+  prune=False                             0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+
+--- short_track L ---
+  st_len=4                                0.97541 -0.00376  0.93862 -0.00142 1.00112 -0.00255  0.9281  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=193644
+  st_len=8                                0.98021 +0.00103  0.93846 -0.00157 1.00648 +0.00281  0.8655  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=180595 st_comps=2448 st_removed=13049  <<FALSE GAIN: all multiplier
+  st_len=9                                0.97959 +0.00041  0.93679 -0.00324 1.00765 +0.00397  0.8517  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=177715 st_comps=2808 st_removed=15929  <<FALSE GAIN: all multiplier
+
+--- short_track keep_forks off ---
+  st_forks=False                          0.97918 +0.00000  0.94003 +0.00000 1.00368 +0.00000  0.8977  0.3571    5/2/7  gap2_nodes=714 gap2_pairs=357 gap_pairs=1222 gap_synth=1222 lf_moved=187310 st_comps=1412 st_removed=6334
+
+======================================================================================================================
+SCREEN: proxy gain, is it real, and does it clear one division event?
+knob                            dproxy        dJ    dratio  verdict
+st_len=8                      +0.00103  -0.00157  -0.03218  NODE-COUNT EXPLOIT -- proxy up, J flat, ratio moved
+st_len=9                      +0.00041  -0.00324  -0.04598  NODE-COUNT EXPLOIT -- proxy up, J flat, ratio moved
+gc_um=4.0                     +0.00012  +0.00000  -0.00140  NODE-COUNT EXPLOIT -- proxy up, J flat, ratio moved
+gc_reuse=2.8                  +0.00000  +0.00000  +0.00000  no gain
+gc_reuse=4.0                  +0.00000  +0.00000  +0.00000  no gain
+g2_step=4.0                   +0.00000  +0.00000  +0.00000  no gain
+g2_step=5.0                   +0.00000  +0.00000  +0.00000  no gain
+g2_step=6.0                   +0.00000  +0.00000  +0.00000  no gain
+g2_frac=0.009                 +0.00000  +0.00000  +0.00000  no gain
+g2_abs=360                    +0.00000  +0.00000  +0.00000  no gain
+prune=False                   +0.00000  +0.00000  +0.00000  no gain
+st_forks=False                +0.00000  +0.00000  +0.00000  no gain
+g2_ctx=False                  -0.00004  +0.00000  +0.00020  no gain
+g2_total=12.0                 -0.00007  +0.00000  +0.00076  no gain
+g2_total=14.0                 -0.00010  +0.00000  +0.00100  no gain
+gc_um=8.0                     -0.00015  +0.00018  +0.00379  no gain
+gc_um=6.0                     -0.00025  -0.00016  +0.00124  no gain
+g2_total=8.0                  -0.00044  -0.00051  -0.00079  no gain
+gc_um=10.0                    -0.00062  -0.00012  +0.00656  no gain
+gc_um=3.0                     -0.00086  -0.00118  -0.00491  no gain
+gc_um=12.0                    -0.00093  -0.00027  +0.01011  no gain
+gc_synth=False                -0.00100  -0.00186  -0.01494  no gain
+st_len=4                      -0.00376  -0.00142  +0.03035  no gain

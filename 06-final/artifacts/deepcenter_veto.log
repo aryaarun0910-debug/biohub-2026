@@ -1,0 +1,185 @@
+=== DeepCenter checkpoint ===
+  path            /Users/aryaarun/Developer/biohub26/weights/biohub-deepcenter-unet3d-center-prior-v1/weights/full_frame_center/best.pt
+  state_dict      50 tensors, 3,151,369 params, strict load OK (0 missing / 0 unexpected)
+  base_channels   24   pool_factor 4
+  normalisation   clip((v-P50.0)/(P99.5-P50.0), -0.5, 6.0)
+  epoch           2  (best val loss 0.045003, history in best.pt = 2 epochs)
+  train split     71 films, embryos ['44b6']
+  val split       128 films, embryos ['6bba']
+  device          mps
+
+=== subset: 40 films ===
+        films  divisions
+embryo                  
+44b6       20         25
+6bba       20         63
+
+  [ 1/40] 44b6_a21120c2 44b6  nodes  22821  proposals   64  true  1  frames  48  gtdiv 2  (2s)
+  [ 2/40] 44b6_c50204e0 44b6  nodes  47949  proposals  148  true  2  frames  73  gtdiv 2  (5s)
+  [ 3/40] 44b6_d2f34f90 44b6  nodes  18236  proposals   38  true  0  frames  35  gtdiv 2  (7s)
+  [ 4/40] 44b6_d5e7d891 44b6  nodes  50434  proposals  153  true  0  frames  76  gtdiv 2  (12s)
+  [ 5/40] 44b6_e28840c6 44b6  nodes  33900  proposals    5  true  0  frames   5  gtdiv 2  (12s)
+  [ 6/40] 44b6_12dfb391 44b6  nodes  54928  proposals   52  true  0  frames  39  gtdiv 1  (15s)
+  [ 7/40] 44b6_267148e4 44b6  nodes  23662  proposals   79  true  0  frames  57  gtdiv 1  (18s)
+  [ 8/40] 44b6_2a2eff9f 44b6  nodes  45992  proposals   87  true  0  frames  58  gtdiv 1  (22s)
+  [ 9/40] 44b6_341df25f 44b6  nodes   9332  proposals    9  true  0  frames   9  gtdiv 1  (22s)
+  [10/40] 44b6_587a1e22 44b6  nodes  19348  proposals   47  true  0  frames  37  gtdiv 1  (25s)
+  [11/40] 44b6_5f15d135 44b6  nodes  27998  proposals   74  true  0  frames  52  gtdiv 1  (28s)
+  [12/40] 44b6_706092f0 44b6  nodes  37677  proposals   18  true  0  frames  13  gtdiv 1  (29s)
+  [13/40] 44b6_74d0c52e 44b6  nodes  10395  proposals   18  true  0  frames  18  gtdiv 1  (30s)
+  [14/40] 44b6_7a302da0 44b6  nodes  59955  proposals  105  true  0  frames  65  gtdiv 1  (34s)
+  [15/40] 44b6_996155de 44b6  nodes  10554  proposals   17  true  0  frames  17  gtdiv 1  (35s)
+  [16/40] 44b6_9be80b04 44b6  nodes  33596  proposals   59  true  1  frames  44  gtdiv 1  (37s)
+  [17/40] 44b6_aaf8b0ea 44b6  nodes  18632  proposals   15  true  0  frames  15  gtdiv 1  (38s)
+  [18/40] 44b6_c8e2a523 44b6  nodes  31197  proposals   46  true  0  frames  37  gtdiv 1  (41s)
+  [19/40] 44b6_d754aa59 44b6  nodes   5949  proposals    8  true  0  frames   8  gtdiv 1  (41s)
+  [20/40] 44b6_deabac95 44b6  nodes  16566  proposals   32  true  0  frames  28  gtdiv 1  (43s)
+  [21/40] 6bba_48816121 6bba  nodes  26036  proposals   50  true  1  frames  45  gtdiv 5  (45s)
+  [22/40] 6bba_09961292 6bba  nodes  30733  proposals   32  true  1  frames  26  gtdiv 4  (47s)
+  [23/40] 6bba_afb141ff 6bba  nodes   6585  proposals   12  true  0  frames  12  gtdiv 4  (48s)
+  [24/40] 6bba_cdcfe533 6bba  nodes  28773  proposals   88  true  2  frames  59  gtdiv 4  (51s)
+  [25/40] 6bba_debd7bfa 6bba  nodes  12470  proposals   36  true  1  frames  31  gtdiv 4  (53s)
+  [26/40] 6bba_df673a83 6bba  nodes  22492  proposals   25  true  1  frames  22  gtdiv 4  (54s)
+  [27/40] 6bba_05db0fb1 6bba  nodes  75005  proposals  127  true  0  frames  60  gtdiv 3  (58s)
+  [28/40] 6bba_12665c0e 6bba  nodes   8658  proposals   16  true  0  frames  16  gtdiv 3  (59s)
+  [29/40] 6bba_20852818 6bba  nodes  11169  proposals   16  true  0  frames  12  gtdiv 3  (60s)
+  [30/40] 6bba_4ffd3da3 6bba  nodes  22185  proposals   73  true  0  frames  55  gtdiv 3  (63s)
+  [31/40] 6bba_57b7cc1e 6bba  nodes  96240  proposals  338  true  0  frames  73  gtdiv 3  (68s)
+  [32/40] 6bba_5c039895 6bba  nodes   8605  proposals   14  true  1  frames  14  gtdiv 3  (69s)
+  [33/40] 6bba_786893ac 6bba  nodes  80129  proposals  202  true  0  frames  68  gtdiv 3  (73s)
+  [34/40] 6bba_7f87b3d8 6bba  nodes  10278  proposals   36  true  0  frames  34  gtdiv 3  (75s)
+  [35/40] 6bba_969618f6 6bba  nodes  17044  proposals   37  true  0  frames  37  gtdiv 3  (77s)
+  [36/40] 6bba_bb9f20c3 6bba  nodes  23847  proposals   22  true  0  frames  19  gtdiv 3  (78s)
+  [37/40] 6bba_07e24132 6bba  nodes  33521  proposals   33  true  0  frames  23  gtdiv 2  (79s)
+  [38/40] 6bba_2312ac41 6bba  nodes  13241  proposals   15  true  1  frames  14  gtdiv 2  (80s)
+  [39/40] 6bba_337b1b3a 6bba  nodes  29933  proposals   83  true  1  frames  50  gtdiv 2  (82s)
+  [40/40] 6bba_3c5691b6 6bba  nodes   7533  proposals    5  true  0  frames   5  gtdiv 2  (82s)
+
+wrote artifacts/deepcenter_veto_proposals.csv  (2334 proposals)
+
+=== KEY TABLE: DeepCenter score as a veto on division proposals ===
+(pool = 2334 proposals over 40 films; 13 are TRUE divisions; 88 labelled divisions in subset)
+   thr  survive  true  precision  rec_pool  rec_GT  prec_44b6  prec_6bba
+------------------------------------------------------------------------
+  0.00     2334    13     0.0056     1.000   0.148     0.0037     0.0071
+  0.05     2075    13     0.0063     1.000   0.148     0.0039     0.0085
+  0.10     1784    13     0.0073     1.000   0.148     0.0044     0.0102
+  0.15     1496    13     0.0087     1.000   0.148     0.0052     0.0123
+  0.20     1203    13     0.0108     1.000   0.148     0.0065     0.0153
+  0.25      871    13     0.0149     1.000   0.148     0.0089     0.0214
+  0.30      548     9     0.0164     0.692   0.102     0.0035     0.0307
+  0.40      190     4     0.0211     0.308   0.045     0.0108     0.0309
+  0.50       18     0     0.0000     0.000   0.000     0.0000     0.0000
+  0.70        0     0        nan     0.000   0.000        nan        nan
+wrote artifacts/deepcenter_veto_thresholds.csv
+
+--- proposal label census (GT is SPARSE: most parents match nothing) ---
+label
+parent_unmatched                    2261
+parent_matched_not_divider            59
+TRUE                                  13
+parent_is_divider_wrong_daughter       1
+
+=== SECONDARY TABLE: proposals whose parent P matched a GT node (n=73, the metric-visible pool) ===
+   thr  survive  true  precision
+  0.00       73    13     0.1781
+  0.05       68    13     0.1912
+  0.10       67    13     0.1940
+  0.15       61    13     0.2131
+  0.20       57    13     0.2281
+  0.25       51    13     0.2549
+  0.30       38     9     0.2368
+  0.40       12     4     0.3333
+  0.50        1     0     0.0000
+  0.70        0     0        nan
+
+=== AUC: DeepCenter score, TRUE vs FALSE division proposal ===
+    ALL  score      AUC 0.8356   (n=2334, true=13)
+    ALL  score_iso  AUC 0.8526   (n=2334, true=13)
+    ALL  score_pt   AUC 0.8441   (n=2334, true=13)
+   44b6  score      AUC 0.7276   (n=1074, true=4)
+   44b6  score_iso  AUC 0.7479   (n=1074, true=4)
+   44b6  score_pt   AUC 0.7255   (n=1074, true=4)
+   6bba  score      AUC 0.8799   (n=1260, true=9)
+   6bba  score_iso  AUC 0.8971   (n=1260, true=9)
+   6bba  score_pt   AUC 0.9035   (n=1260, true=9)
+
+=== score distributions (documented window), median [Q1-Q3] ===
+  fold                      class       n   median       Q1       Q3
+   ALL              TRUE division      13   0.3463   0.2986   0.4051
+   ALL            FALSE candidate    2321   0.2041   0.1061   0.2923
+   ALL           parent_unmatched    2261   0.2024   0.1045   0.2902
+   ALL parent_matched_not_divider      59   0.2992   0.1864   0.3528
+   ALL parent_is_divider_wrong_daughter       1   0.2838   0.2838   0.2838
+  44b6              TRUE division       4   0.2855   0.2671   0.3315
+  44b6            FALSE candidate    1070   0.2242   0.1352   0.3061
+  44b6           parent_unmatched    1057   0.2226   0.1345   0.3055
+  44b6 parent_matched_not_divider      13   0.2963   0.2724   0.3327
+  44b6 parent_is_divider_wrong_daughter       0      nan      nan      nan
+  6bba              TRUE division       9   0.3535   0.3455   0.4051
+  6bba            FALSE candidate    1251   0.1839   0.0822   0.2795
+  6bba           parent_unmatched    1204   0.1814   0.0814   0.2765
+  6bba parent_matched_not_divider      46   0.3009   0.1853   0.3571
+  6bba parent_is_divider_wrong_daughter       1   0.2838   0.2838   0.2838
+
+=== mechanism check: DeepCenter on GT-matched vs other detections ===
+(all pruned detections living in the scored frames; GT labels are sparse,
+ so 'other' is a mixture of unlabelled-real and false detections)
+  fold     n_det  n_gt_matched      AUC   med(GT)  med(other)
+   ALL    544347         10247   0.6393    0.2926      0.2213
+  44b6    264976          2727   0.6301    0.2888      0.2371
+  6bba    279371          7520   0.6558    0.2944      0.2019
+
+=== candidate daughters Q vs GT-matched detections (same frames) ===
+    ALL  candidate Q  n=  2334 median 0.2049 [0.1065-0.2936]   GT-matched n=10247 median 0.2926 [0.1982-0.3789]
+   44b6  candidate Q  n=  1074 median 0.2247 [0.1366-0.3061]   GT-matched n= 2727 median 0.2888 [0.2167-0.3587]
+   6bba  candidate Q  n=  1260 median 0.1855 [0.0824-0.2838]   GT-matched n= 7520 median 0.2944 [0.1883-0.3871]
+
+=== CONTROL: raw normalised intensity at Q, same window ===
+  fold  DeepCenter AUC  intensity AUC
+   ALL          0.8356         0.6147
+  44b6          0.7276         0.5180
+  6bba          0.8799         0.6608
+  detection-level (GT-matched vs other):  DeepCenter 0.6393   intensity 0.5902
+
+  matched-retention comparison (keep the same COUNT by each score):
+   keep   DC true  int true
+    871        13         8
+    548         9         6
+    190         4         0
+
+  Mann-Whitney (TRUE > FALSE, ALL): U=25212  p=1.47e-05
+  thr 0.25: retains 871/2334 = 0.373 of the pool, keeps 13/13 true; P(all true survive | score irrelevant) = 2.72e-06
+  thr 0.30: retains 548/2334 = 0.235 of the pool, keeps 9/13 true; P(all true survive | score irrelevant) = nan
+
+=== METRIC EFFECT on the same 40 films (prune6 + fork, veto applied) ===
+       variant    score   d_score     adjJ    divJ   TP   FP   FN  forks
+------------------------------------------------------------------------
+       no fork   0.8252   +0.0000   0.8252  0.0000    0    0   88      0
+fork (no veto)   0.8380   +0.0127   0.8250  0.1293   19   59   69   2334
+    veto>=0.00   0.8380   +0.0127   0.8250  0.1293   19   59   69   2334
+    veto>=0.05   0.8384   +0.0132   0.8251  0.1329   19   55   69   2075
+    veto>=0.10   0.8385   +0.0133   0.8251  0.1338   19   54   69   1784
+    veto>=0.15   0.8393   +0.0140   0.8253  0.1397   19   48   69   1496
+    veto>=0.20   0.8397   +0.0144   0.8253  0.1439   19   44   69   1203
+    veto>=0.25   0.8396   +0.0144   0.8253  0.1429   18   38   70    871
+    veto>=0.30   0.8347   +0.0095   0.8253  0.0940   11   29   77    548
+    veto>=0.40   0.8295   +0.0043   0.8254  0.0417    4    8   84    190
+    veto>=0.50   0.8252   -0.0000   0.8252  0.0000    0    1   88     18
+    veto>=0.70   0.8252   +0.0000   0.8252  0.0000    0    0   88      0
+wrote artifacts/deepcenter_veto_metric.csv
+
+--- metric effect per embryo (44b6 = DeepCenter TRAIN, 6bba = held out) ---
+       variant 44b6:   score   divJ   TP/FP/FN  6bba:   score   divJ   TP/FP/FN
+          fork   44b6:  0.8657 0.1579   6/ 13/ 19  6bba:  0.8298 0.1193  13/ 46/ 50
+    veto>=0.15   44b6:  0.8664 0.1622   6/ 12/ 19  6bba:  0.8312 0.1313  13/ 36/ 50
+    veto>=0.20   44b6:  0.8667 0.1667   6/ 11/ 19  6bba:  0.8317 0.1354  13/ 33/ 50
+    veto>=0.25   44b6:  0.8672 0.1714   6/ 10/ 19  6bba:  0.8314 0.1319  12/ 28/ 51
+
+=== per-film summary ===
+        films  proposals  true  gt_div  gt_div_matched  frames
+embryo                                                        
+44b6       20       1074     4      25              25     734
+6bba       20       1260     9      63              62     675
+
+total wall 102s

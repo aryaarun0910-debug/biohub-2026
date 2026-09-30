@@ -1,0 +1,341 @@
+{
+  "forumTopic": {
+    "authorId": 113660,
+    "authorThumbnailName": "113660-fb.jpg",
+    "authorUserDisplayName": "hengck23",
+    "authorUserName": "hengck23",
+    "comments": [
+      {
+        "id": 3522384,
+        "postDate": "2026-09-08T18:58:40.797Z",
+        "rawMarkdown": "external data  \nhttps://zebrahub.sf.czbiohub.org/imaging  \nhttps://public.czbiohub.org/royerlab/zebrahub/imaging/single-objective/  \nhttps://public.czbiohub.org/royerlab/zoo/\nhttps://public.czbiohub.org/royerlab/ultrack/\n\nit is dense track! i think it is by ultrack\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9d50c08c33cebcbbd8bf3f5060b4e9a1%2FSelection_4841.png?generation=1788898795365771&alt=media)\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F4fb513a47380d4ac853d9b8f3a9e0432%2FSelection_4842.png?generation=1788898817410763&alt=media)\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F59efe6edfb20a773e0338379a946c1e0%2FSelection_4845.png?generation=1788911392662598&alt=media)\n\nwe do have \"unlimited external data\"",
+        "content": "<p>external data<br>\n<a href=\"https://zebrahub.sf.czbiohub.org/imaging\" target=\"_blank\">https://zebrahub.sf.czbiohub.org/imaging</a><br>\n<a href=\"https://public.czbiohub.org/royerlab/zebrahub/imaging/single-objective/\" target=\"_blank\">https://public.czbiohub.org/royerlab/zebrahub/imaging/single-objective/</a><br>\n<a href=\"https://public.czbiohub.org/royerlab/zoo/\" target=\"_blank\">https://public.czbiohub.org/royerlab/zoo/</a>\n<a href=\"https://public.czbiohub.org/royerlab/ultrack/\" target=\"_blank\">https://public.czbiohub.org/royerlab/ultrack/</a></p>\n<p>it is dense track! i think it is by ultrack</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9d50c08c33cebcbbd8bf3f5060b4e9a1%2FSelection_4841.png?generation=1788898795365771&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F4fb513a47380d4ac853d9b8f3a9e0432%2FSelection_4842.png?generation=1788898817410763&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F59efe6edfb20a773e0338379a946c1e0%2FSelection_4845.png?generation=1788911392662598&amp;alt=media\" alt=\"\"></p>\n<p>we do have \"unlimited external data\"</p>",
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "TOPIC",
+        "votes": {
+          "totalVotes": 1,
+          "canUpvote": true,
+          "totalUpvotes": 1
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 854,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3521427,
+        "postDate": "2026-09-05T20:48:27.127Z",
+        "rawMarkdown": "I've tried the synthetic volume idea for ~2 weeks with no clear improvement in my scores, so I dropped it. Still, it would be cool to see this strategy work here, as it helped improve a little in the CZII competition. (Polnet was used there: https://github.com/anmartinezs/polnet)\n\nI suggest to send DaXi microscope paper as reference (https://www.nature.com/articles/s41592-022-01417-2)\n\nHere is one example of synthetic volume I tried to use:\n\n ![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F2221915%2F508c44ad1c064184a3a589b7de41f5dd%2Fsynthetic_z_stack_optimized.gif?generation=1788641223173538&alt=media)",
+        "content": "<p>I've tried the synthetic volume idea for ~2 weeks with no clear improvement in my scores, so I dropped it. Still, it would be cool to see this strategy work here, as it helped improve a little in the CZII competition. (Polnet was used there: <a href=\"https://github.com/anmartinezs/polnet\" target=\"_blank\">https://github.com/anmartinezs/polnet</a>)</p>\n<p>I suggest to send DaXi microscope paper as reference (<a href=\"https://www.nature.com/articles/s41592-022-01417-2\" target=\"_blank\">https://www.nature.com/articles/s41592-022-01417-2</a>)</p>\n<p>Here is one example of synthetic volume I tried to use:</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F2221915%2F508c44ad1c064184a3a589b7de41f5dd%2Fsynthetic_z_stack_optimized.gif?generation=1788641223173538&amp;alt=media\" alt=\"\"></p>",
+        "replies": [
+          {
+            "id": 3521446,
+            "postDate": "2026-09-05T23:02:44.757Z",
+            "rawMarkdown": "Your synthetic data quality is good! I will check the DaXi paper. Thanks!",
+            "content": "<p>Your synthetic data quality is good! I will check the DaXi paper. Thanks!</p>",
+            "parent": {},
+            "author": {
+              "displayName": "hengck23",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+              "url": "/hengck23",
+              "tier": "GRANDMASTER",
+              "id": 113660,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 854,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "hengck23",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                "url": "/hengck23",
+                "userName": "hengck23",
+                "tier": "GRANDMASTER",
+                "id": 113660,
+                "profileUrl": "/hengck23",
+                "performanceTier": "GRANDMASTER",
+                "userId": 113660,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          },
+          {
+            "id": 3521482,
+            "postDate": "2026-09-06T04:12:28.723Z",
+            "rawMarkdown": "I have some bold idea. At inference you run your model. You have rough estimate of motion. Then you can do augmentation of hiddent test data with appropriate motion and perform online test finetuning or adaptation at selected frames etc",
+            "content": "<p>I have some bold idea. At inference you run your model. You have rough estimate of motion. Then you can do augmentation of hiddent test data with appropriate motion and perform online test finetuning or adaptation at selected frames etc</p>",
+            "parent": {},
+            "author": {
+              "displayName": "hengck23",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+              "url": "/hengck23",
+              "tier": "GRANDMASTER",
+              "id": 113660,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 854,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "hengck23",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                "url": "/hengck23",
+                "userName": "hengck23",
+                "tier": "GRANDMASTER",
+                "id": 113660,
+                "profileUrl": "/hengck23",
+                "performanceTier": "GRANDMASTER",
+                "userId": 113660,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "Sergio Alvarez",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/2221915-kg.jpg?t=2024-09-24-13-40-46",
+          "url": "/sersasj",
+          "tier": "MASTER",
+          "id": 2221915,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "totalVotes": 5,
+          "canUpvote": true,
+          "totalUpvotes": 6
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 2,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "Sergio Alvarez",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/2221915-kg.jpg?t=2024-09-24-13-40-46",
+            "url": "/sersasj",
+            "userName": "sersasj",
+            "tier": "MASTER",
+            "id": 2221915,
+            "profileUrl": "/sersasj",
+            "performanceTier": "MASTER",
+            "userId": 2221915,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3521416,
+        "postDate": "2026-09-05T19:29:22.643Z",
+        "rawMarkdown": "close to my idea  \nhttps://arxiv.org/pdf/2107.10180  \n3D fluorescence microscopy data synthesis for segmentation and benchmarking  \nhttps://www.biorxiv.org/content/10.1101/2022.06.10.495713v1  \nNISNet3D: Three-Dimensional Nuclear Synthesis and Instance Segmentation for Fluorescence Microscopy Images  \n\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fda81e458e6ac40760f6bd444de79eb82%2FSelection_4788.png?generation=1788636533698104&alt=media)",
+        "content": "<p>close to my idea<br>\n<a href=\"https://arxiv.org/pdf/2107.10180\" target=\"_blank\">https://arxiv.org/pdf/2107.10180</a><br>\n3D fluorescence microscopy data synthesis for segmentation and benchmarking<br>\n<a href=\"https://www.biorxiv.org/content/10.1101/2022.06.10.495713v1\" target=\"_blank\">https://www.biorxiv.org/content/10.1101/2022.06.10.495713v1</a><br>\nNISNet3D: Three-Dimensional Nuclear Synthesis and Instance Segmentation for Fluorescence Microscopy Images  </p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fda81e458e6ac40760f6bd444de79eb82%2FSelection_4788.png?generation=1788636533698104&amp;alt=media\" alt=\"\"></p>",
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "TOPIC",
+        "votes": {
+          "totalVotes": -2,
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 854,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3521415,
+        "postDate": "2026-09-05T19:27:55.870Z",
+        "rawMarkdown": "differentiable render\nhttps://github.com/VirtualEmbryo/deltaMic?utm_source=chatgpt.com\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F4ca457bf73e3526165ae8d2e1a59bbd6%2FSelection_4789.png?generation=1788636465458910&alt=media)",
+        "content": "<p>differentiable render\n<a href=\"https://github.com/VirtualEmbryo/deltaMic?utm_source=chatgpt.com\" target=\"_blank\">https://github.com/VirtualEmbryo/deltaMic?utm_source=chatgpt.com</a></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F4ca457bf73e3526165ae8d2e1a59bbd6%2FSelection_4789.png?generation=1788636465458910&amp;alt=media\" alt=\"\"></p>",
+        "replies": [
+          {
+            "id": 3521533,
+            "postDate": "2026-09-06T08:44:54.313Z",
+            "rawMarkdown": "https://arxiv.org/abs/2002.10749\n",
+            "content": "<p><a href=\"https://arxiv.org/abs/2002.10749\" target=\"_blank\">https://arxiv.org/abs/2002.10749</a></p>",
+            "parent": {},
+            "author": {
+              "displayName": "Rishabh Roy",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/217906-kg.jpg",
+              "url": "/rishabhr0y",
+              "tier": "EXPERT",
+              "id": 217906,
+              "progressionOptOut": false
+            },
+            "authorType": "COMMENT",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 643,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "enabled": true,
+              "teamLeader": {
+                "displayName": "Rishabh Roy",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/217906-kg.jpg",
+                "url": "/rishabhr0y",
+                "userName": "rishabhr0y",
+                "tier": "EXPERT",
+                "id": 217906,
+                "profileUrl": "/rishabhr0y",
+                "performanceTier": "EXPERT",
+                "userId": 217906,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "TOPIC",
+        "votes": {
+          "totalVotes": -1,
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 854,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      }
+    ],
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3521411,
+      "postDate": "2026-09-05T19:21:43.157Z",
+      "rawMarkdown": "i have a feeling that it can be done. Ask Codex to generate psf, then style it for fluorescence microscopy. We have a discriminator as a judge. it fits the loop generator --> test --> iterate.\n\nthis is just psf generator\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9fe94cd69cb343584fb191a0cde22e8e%2FSelection_4781.png?generation=1788636058965350&alt=media)\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fe19f9ac9ec485441cb97a7349b86545e%2FSelection_4786.png?generation=1788636100528234&alt=media)",
+      "content": "<p>i have a feeling that it can be done. Ask Codex to generate psf, then style it for fluorescence microscopy. We have a discriminator as a judge. it fits the loop generator --&gt; test --&gt; iterate.</p>\n<p>this is just psf generator</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F9fe94cd69cb343584fb191a0cde22e8e%2FSelection_4781.png?generation=1788636058965350&amp;alt=media\" alt=\"\">\n<img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fe19f9ac9ec485441cb97a7349b86545e%2FSelection_4786.png?generation=1788636100528234&amp;alt=media\" alt=\"\"></p>",
+      "parent": {},
+      "author": {
+        "displayName": "hengck23",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+        "url": "/hengck23",
+        "tier": "GRANDMASTER",
+        "id": 113660,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 8,
+        "canUpvote": true,
+        "totalUpvotes": 8
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 854,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "teamUpInfo": {
+        "teamLeader": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "userName": "hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "profileUrl": "/hengck23",
+          "performanceTier": "GRANDMASTER",
+          "userId": 113660,
+          "progressionOptOut": false
+        },
+        "intro": ""
+      }
+    },
+    "firstMessageId": 3521411,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 739731,
+    "name": "can we turn auto research to auo data generator?",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-09-05T19:21:43.157971200Z",
+    "totalVotes": 8,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/739731",
+    "totalMessages": 7,
+    "authorPerformanceTier": "GRANDMASTER",
+    "authorProgressionOptOut": false
+  }
+}

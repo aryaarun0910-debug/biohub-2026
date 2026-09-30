@@ -1,0 +1,68 @@
+Do the OTHER post-processing stages help on the RAW ILP graph (no relink)?
+
+Motion relink is off (that was worth +0.0295 proxy on its own). The question
+left over is whether the rest of the deployed chain -- gap closing, gap2
+recovery, prune-isolated, short-track filtering, linefit smoothing -- are
+carrying their weight once the ILP's own global assignment is kept.
+
+Every stage is measured ONE AT A TIME against the raw + safe_div anchor.
+Each stage sits at its DEPLOYED position in the chain:
+
+    gap_close -> gap2 -> safe_div -> prune_isolated -> short_track -> linefit
+
+so "gap close" means gap-close-then-safe_div, because gap closing eats the
+orphan pool that safe_div draws its daughters from. Anything after safe_div is
+a pure post-hoc edit of the same divided graph.
+
+Stage implementations are ported from the 0.947 notebook (cell 2:
+close_single_frame_gaps, recover_strict_gap2, filter_short_track_components,
+linefit_smooth_output_graph, the OUTPUT_PRUNE_ISOLATED block) onto
+ORIGINAL-VOXEL coordinates with the anisotropic SCALE. src/biohub/postprocess.py
+has lookalikes but they use an isotropic GRID_UM = 1.625, which is 4x wrong in
+y and x on these graphs -- do not use them here.
+
+Node counts: the metric multiplies edge Jaccard by 1 - 0.1*(n_pred - n_est)/n_est.
+Deleting nodes RAISES that multiplier, so every row prints n_pred/n_est and
+J separately. A row where mult moves and J does not is a bookkeeping gain,
+not a tracking gain.
+================================================================================================
+--- DIAGNOSTIC: does edge probability separate TP from FP? ---
+set        film                  nTP   nFP   TP med   FP med     AUC
+scored     44b6_0113de3b          50     0   0.9887      nan     nan
+scored     44b6_0b24845f          48     1   0.9144   0.6925   0.875
+scored     6bba_05b6850b         831    12   0.9457   0.6700   0.865
+scored     6bba_05db0fb1        1099    82   0.9202   0.8235   0.737
+scored     POOLED               2028    95   0.9320   0.8118   0.780
+validator  44b6_12dfb391         727    49   0.9025   0.8452   0.631
+validator  44b6_267148e4         255    17   0.8665   0.7237   0.763
+validator  44b6_2a2eff9f         197    21   0.9012   0.8275   0.737
+validator  44b6_341df25f         207     1   0.9817   0.7056   0.971
+validator  6bba_062c8d37         896     1   0.9719   0.7084   0.981
+validator  6bba_07e24132         303    19   0.9198   0.8626   0.568
+validator  6bba_085bf656        1162     3   0.9691   0.5553   0.893
+validator  6bba_09961292        1793    83   0.9064   0.8207   0.763
+validator  POOLED               5540   194   0.9362   0.8276   0.788
+
+pooled AUC -- validator 0.788, scored 0.780
+=> REAL SEPARATION. A threshold should remove FP faster than TP.
+
+--- WHY: the base rate, on the validator films ---
+    5540 TP against 194 FP -- 29:1
+   thr   TP cut  FP cut  TP per FP  net J units  (need > 0)
+  0.55       60      16        3.8         -104
+  0.65      191      36        5.3         -346
+  0.75      440      67        6.6         -813
+  0.83      870      99        8.8        -1641
+  0.90     1840     147       12.5        -3533
+    even at the FP median (0.83) the cut is dominated by TP loss.
+
+--- SWEEP: prune edges below threshold, both tiers, both-sets rule ---
+   thr |  scored dprox        dJ   dratio |   val dprox        dJ   dratio   verdict
+  0.50 |      -0.00513  -0.00575 -0.00677 |    -0.00409  -0.00270 -0.00552   fails the both-sets rule
+  0.55 |      -0.01472  -0.01708 -0.02944 |    -0.01521  -0.01340 -0.02089   fails the both-sets rule
+  0.60 |      -0.01707  -0.02064 -0.04962 |    -0.01795  -0.02204 -0.03878   fails the both-sets rule
+  0.65 |      -0.01594  -0.02110 -0.07236 |    -0.03880  -0.03465 -0.05745   fails the both-sets rule
+  0.70 |      -0.03220  -0.03877 -0.09649 |    -0.05123  -0.04273 -0.07755   fails the both-sets rule
+  0.75 |      -0.03798  -0.04608 -0.11917 |    -0.07042  -0.06353 -0.09970   fails the both-sets rule
+  0.80 |      -0.05940  -0.06908 -0.14142 |    -0.08948  -0.08265 -0.12360   fails the both-sets rule
+  0.85 |      -0.09030  -0.10244 -0.17754 |    -0.11560  -0.10790 -0.14590   fails the both-sets rule

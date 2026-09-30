@@ -1,0 +1,876 @@
+Launching 2 independent video shards on CUDA devices ['0', '1']
+GPU shard 0: CUDA_VISIBLE_DEVICES = 0 | /usr/bin/python3 scripts/predict_unet_transformer.py --data-dir /kaggle/input/competitions/biohub-cell-tracking-during-development/test --splits kaggle_test_splits_50ep.json --split 0 --weights weights/unet_transformer/split_0/edge_predictor_best.pth --unet-batch-size 4 --det-threshold 0.965 --ilp-edge-weight -1.0 --ilp-appearance-weight 0.0 --ilp-disappearance-weight 2.0 --ilp-division-weight 1.2 --use-ilp --method unet_transformer_gpu0 --slice 0::2
+GPU shard 1: CUDA_VISIBLE_DEVICES = 1 | /usr/bin/python3 scripts/predict_unet_transformer.py --data-dir /kaggle/input/competitions/biohub-cell-tracking-during-development/test --splits kaggle_test_splits_50ep.json --split 0 --weights weights/unet_transformer/split_0/edge_predictor_best.pth --unet-batch-size 4 --det-threshold 0.965 --ilp-edge-weight -1.0 --ilp-appearance-weight 0.0 --ilp-disappearance-weight 2.0 --ilp-division-weight 1.2 --use-ilp --method unet_transformer_gpu1 --slice 1::2
+/usr/local/lib/python3.12/dist-packages/dask/array/image.py:7: FutureWarning: `find_available_plugins` is deprecated since version 0.25 and will be removed in version 0.27. The plugin infrastructure of `skimage.io` is deprecated. Instead, use `imageio` or other I/O packages directly.
+  from skimage.io import imread as sk_imread
+/usr/lib/python3.12/importlib/__init__.py:90: FutureWarning: `reset_plugins` is deprecated since version 0.25 and will be removed in version 0.27. The plugin infrastructure of `skimage.io` is deprecated. Instead, use `imageio` or other I/O packages directly.
+  return _bootstrap._gcd_import(name[level:], package, level)
+/usr/local/lib/python3.12/dist-packages/dask/array/image.py:7: FutureWarning: `find_available_plugins` is deprecated since version 0.25 and will be removed in version 0.27. The plugin infrastructure of `skimage.io` is deprecated. Instead, use `imageio` or other I/O packages directly.
+  from skimage.io import imread as sk_imread
+/usr/lib/python3.12/importlib/__init__.py:90: FutureWarning: `reset_plugins` is deprecated since version 0.25 and will be removed in version 0.27. The plugin infrastructure of `skimage.io` is deprecated. Instead, use `imageio` or other I/O packages directly.
+  return _bootstrap._gcd_import(name[level:], package, level)
+Secondary model: /kaggle/working/secondary_seed_weights/unet_transformer/split_0/edge_predictor_best.pth | edge weight = 0.150 | detection weight = 0.800 | link mode = low_margin_consensus | temperature = 1.000 | low-margin max = 0.350 | edge threshold = 0.480
+Fold 0: 2 datasets | weights=weights/unet_transformer/split_0/edge_predictor_best.pth | device=cuda | window_size=2 | pool_kernel_um=3.0
+Secondary model: /kaggle/working/secondary_seed_weights/unet_transformer/split_0/edge_predictor_best.pth | edge weight = 0.150 | detection weight = 0.800 | link mode = low_margin_consensus | temperature = 1.000 | low-margin max = 0.350 | edge threshold = 0.480
+Fold 0: 2 datasets | weights=weights/unet_transformer/split_0/edge_predictor_best.pth | device=cuda | window_size=2 | pool_kernel_um=3.0
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.323238
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.360585
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.28166
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.230737
+BIOHUB_RETENTION_GUARD {"blended_candidates": 387, "dataset": "44b6_0b24845f", "frame": 0, "minimum_retention": 0.9, "primary_candidates": 465, "retention": 0.832258064516129, "use_primary": true}
+BIOHUB_RETENTION_GUARD {"blended_candidates": 391, "dataset": "44b6_0b24845f", "frame": 1, "minimum_retention": 0.9, "primary_candidates": 444, "retention": 0.8806306306306306, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.328294
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.361891
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23209
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.288809
+BIOHUB_RETENTION_GUARD {"blended_candidates": 333, "dataset": "44b6_0b24845f", "frame": 2, "minimum_retention": 0.9, "primary_candidates": 390, "retention": 0.8538461538461538, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.326314
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.354206
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232786
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.287127
+BIOHUB_RETENTION_GUARD {"blended_candidates": 362, "dataset": "44b6_0b24845f", "frame": 3, "minimum_retention": 0.9, "primary_candidates": 421, "retention": 0.8598574821852731, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.32686
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.358867
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232764
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.283303
+BIOHUB_RETENTION_GUARD {"blended_candidates": 341, "dataset": "44b6_0b24845f", "frame": 4, "minimum_retention": 0.9, "primary_candidates": 404, "retention": 0.844059405940594, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.327781
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.362463
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.236445
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.289665
+BIOHUB_RETENTION_GUARD {"blended_candidates": 326, "dataset": "44b6_0b24845f", "frame": 5, "minimum_retention": 0.9, "primary_candidates": 383, "retention": 0.8511749347258486, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.332086
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.363112
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.236059
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.296162
+BIOHUB_RETENTION_GUARD {"blended_candidates": 333, "dataset": "44b6_0b24845f", "frame": 6, "minimum_retention": 0.9, "primary_candidates": 403, "retention": 0.826302729528536, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.337311
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.363947
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.242392
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.297976
+BIOHUB_RETENTION_GUARD {"blended_candidates": 309, "dataset": "44b6_0b24845f", "frame": 7, "minimum_retention": 0.9, "primary_candidates": 390, "retention": 0.7923076923076923, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.336476
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.368841
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.241164
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.292587
+BIOHUB_RETENTION_GUARD {"blended_candidates": 378, "dataset": "44b6_0b24845f", "frame": 8, "minimum_retention": 0.9, "primary_candidates": 443, "retention": 0.8532731376975169, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.33307
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.372442
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.240446
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.291168
+BIOHUB_RETENTION_GUARD {"blended_candidates": 362, "dataset": "44b6_0b24845f", "frame": 9, "minimum_retention": 0.9, "primary_candidates": 429, "retention": 0.8438228438228438, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.333216
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36599
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.24216
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.301242
+BIOHUB_RETENTION_GUARD {"blended_candidates": 331, "dataset": "44b6_0b24845f", "frame": 10, "minimum_retention": 0.9, "primary_candidates": 419, "retention": 0.7899761336515513, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.341654
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.358411
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.243727
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.289865
+BIOHUB_RETENTION_GUARD {"blended_candidates": 376, "dataset": "44b6_0b24845f", "frame": 11, "minimum_retention": 0.9, "primary_candidates": 441, "retention": 0.8526077097505669, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.334228
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.361758
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.241899
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.298743
+BIOHUB_RETENTION_GUARD {"blended_candidates": 304, "dataset": "44b6_0b24845f", "frame": 12, "minimum_retention": 0.9, "primary_candidates": 361, "retention": 0.8421052631578947, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.335161
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.237416
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.368237
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.295579
+BIOHUB_RETENTION_GUARD {"blended_candidates": 314, "dataset": "44b6_0b24845f", "frame": 13, "minimum_retention": 0.9, "primary_candidates": 382, "retention": 0.8219895287958116, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.330752
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238386
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.366311
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.29037
+BIOHUB_RETENTION_GUARD {"blended_candidates": 330, "dataset": "44b6_0b24845f", "frame": 14, "minimum_retention": 0.9, "primary_candidates": 378, "retention": 0.873015873015873, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.32964
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238478
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.362666
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.32447
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.286822
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.234529
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.368515
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.325522
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.282972
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238533
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.37163
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.319866
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.284899
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.239819
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.367306
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.323582
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.276632
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.242037
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.356982
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.326415
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.278285
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.241724
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.354988
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.32326
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.280197
+BIOHUB_RETENTION_GUARD {"blended_candidates": 285, "dataset": "44b6_0b24845f", "frame": 20, "minimum_retention": 0.9, "primary_candidates": 317, "retention": 0.8990536277602523, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.234753
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.355885
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.324888
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.281334
+BIOHUB_RETENTION_GUARD {"blended_candidates": 265, "dataset": "44b6_0b24845f", "frame": 21, "minimum_retention": 0.9, "primary_candidates": 325, "retention": 0.8153846153846154, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238746
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.357492
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.325752
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.280031
+BIOHUB_RETENTION_GUARD {"blended_candidates": 286, "dataset": "44b6_0b24845f", "frame": 22, "minimum_retention": 0.9, "primary_candidates": 326, "retention": 0.8773006134969326, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238954
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.361386
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.330364
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.277655
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.235145
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.361052
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.329773
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.282322
+BIOHUB_RETENTION_GUARD {"blended_candidates": 261, "dataset": "44b6_0b24845f", "frame": 24, "minimum_retention": 0.9, "primary_candidates": 306, "retention": 0.8529411764705882, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.236219
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36198
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.325156
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.280181
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.234985
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.365963
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.328005
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.284381
+BIOHUB_RETENTION_GUARD {"blended_candidates": 273, "dataset": "44b6_0b24845f", "frame": 26, "minimum_retention": 0.9, "primary_candidates": 309, "retention": 0.883495145631068, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.230623
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.369614
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.332057
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.289602
+BIOHUB_RETENTION_GUARD {"blended_candidates": 258, "dataset": "44b6_0b24845f", "frame": 27, "minimum_retention": 0.9, "primary_candidates": 302, "retention": 0.8543046357615894, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.233514
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.365619
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.327244
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.291319
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.236419
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.366332
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.331491
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.283865
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.240106
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.364134
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.332767
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.282155
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.251196
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.359711
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.333532
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.283753
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.251416
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.362505
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.339086
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.282429
+BIOHUB_RETENTION_GUARD {"blended_candidates": 249, "dataset": "44b6_0b24845f", "frame": 32, "minimum_retention": 0.9, "primary_candidates": 293, "retention": 0.8498293515358362, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.251129
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.364903
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.336421
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.280468
+BIOHUB_RETENTION_GUARD {"blended_candidates": 234, "dataset": "44b6_0b24845f", "frame": 33, "minimum_retention": 0.9, "primary_candidates": 276, "retention": 0.8478260869565217, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.248917
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.364198
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.329875
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.273313
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.248317
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.362852
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.328572
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.27435
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.247468
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.373852
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.326071
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.28122
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.246968
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.368966
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.328178
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.277064
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.250361
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.366559
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.331242
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.274933
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.24375
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.370597
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.332742
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.278308
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.239566
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.372674
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.325998
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.285352
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.242074
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.367938
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.326187
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.280788
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.24388
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.364834
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.329641
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.282166
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.242396
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36801
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.331184
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.283823
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.24245
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.367877
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.330506
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.281373
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.246663
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.368248
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.326851
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.281151
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.248161
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.366473
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.32759
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.288338
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.244572
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.369227
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.323605
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.292434
+BIOHUB_RETENTION_GUARD {"blended_candidates": 264, "dataset": "44b6_0b24845f", "frame": 47, "minimum_retention": 0.9, "primary_candidates": 307, "retention": 0.8599348534201955, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.244253
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.376915
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.332571
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.288129
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.251298
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.373149
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.328319
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.299885
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.241945
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.373289
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.327289
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.305548
+BIOHUB_RETENTION_GUARD {"blended_candidates": 253, "dataset": "44b6_0b24845f", "frame": 50, "minimum_retention": 0.9, "primary_candidates": 285, "retention": 0.887719298245614, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.241039
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.372374
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.337614
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.296505
+BIOHUB_RETENTION_GUARD {"blended_candidates": 321, "dataset": "44b6_0b24845f", "frame": 51, "minimum_retention": 0.9, "primary_candidates": 361, "retention": 0.889196675900277, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.250851
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36791
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.338693
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.295986
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.253217
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.370709
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.338257
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.30285
+BIOHUB_RETENTION_GUARD {"blended_candidates": 305, "dataset": "44b6_0b24845f", "frame": 53, "minimum_retention": 0.9, "primary_candidates": 342, "retention": 0.8918128654970761, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.261342
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.369503
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.33887
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.30254
+BIOHUB_RETENTION_GUARD {"blended_candidates": 321, "dataset": "44b6_0b24845f", "frame": 54, "minimum_retention": 0.9, "primary_candidates": 362, "retention": 0.8867403314917127, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.263655
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.3697
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.339106
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.304896
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.264049
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.37301
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.341611
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.308335
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.262185
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.367347
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.346143
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.3079
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.257653
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36398
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.340083
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.304751
+BIOHUB_RETENTION_GUARD {"blended_candidates": 263, "dataset": "44b6_0b24845f", "frame": 58, "minimum_retention": 0.9, "primary_candidates": 312, "retention": 0.842948717948718, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.252778
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.366206
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.339203
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.300835
+BIOHUB_RETENTION_GUARD {"blended_candidates": 303, "dataset": "44b6_0b24845f", "frame": 59, "minimum_retention": 0.9, "primary_candidates": 346, "retention": 0.8757225433526011, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.255196
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36887
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.336994
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.300158
+BIOHUB_RETENTION_GUARD {"blended_candidates": 335, "dataset": "44b6_0b24845f", "frame": 60, "minimum_retention": 0.9, "primary_candidates": 393, "retention": 0.8524173027989822, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.255652
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.365386
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.342499
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.300168
+BIOHUB_RETENTION_GUARD {"blended_candidates": 275, "dataset": "44b6_0b24845f", "frame": 61, "minimum_retention": 0.9, "primary_candidates": 333, "retention": 0.8258258258258259, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.256616
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.366621
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.346059
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.300845
+BIOHUB_RETENTION_GUARD {"blended_candidates": 298, "dataset": "44b6_0b24845f", "frame": 62, "minimum_retention": 0.9, "primary_candidates": 345, "retention": 0.863768115942029, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.257121
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.373908
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.346159
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.303221
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.257896
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.368494
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.345426
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.299317
+BIOHUB_RETENTION_GUARD {"blended_candidates": 295, "dataset": "44b6_0b24845f", "frame": 64, "minimum_retention": 0.9, "primary_candidates": 344, "retention": 0.8575581395348837, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.259858
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.370026
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.344989
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.299955
+BIOHUB_RETENTION_GUARD {"blended_candidates": 335, "dataset": "44b6_0b24845f", "frame": 65, "minimum_retention": 0.9, "primary_candidates": 378, "retention": 0.8862433862433863, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.25507
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.369253
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.343404
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.296912
+BIOHUB_RETENTION_GUARD {"blended_candidates": 324, "dataset": "44b6_0b24845f", "frame": 66, "minimum_retention": 0.9, "primary_candidates": 375, "retention": 0.864, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.262098
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.365768
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.341221
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.291366
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.262847
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.365075
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.343003
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.293296
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.261047
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.366016
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.343125
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.301719
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.257455
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.365231
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.337095
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.301488
+BIOHUB_RETENTION_GUARD {"blended_candidates": 260, "dataset": "44b6_0b24845f", "frame": 70, "minimum_retention": 0.9, "primary_candidates": 305, "retention": 0.8524590163934426, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.254838
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36009
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.337123
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.299423
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.260524
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.360462
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.338112
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.301712
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.262847
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.359757
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.338704
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.305584
+BIOHUB_RETENTION_GUARD {"blended_candidates": 197, "dataset": "44b6_0b24845f", "frame": 73, "minimum_retention": 0.9, "primary_candidates": 262, "retention": 0.7519083969465649, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.260131
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.368022
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.340176
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.304789
+BIOHUB_RETENTION_GUARD {"blended_candidates": 224, "dataset": "44b6_0b24845f", "frame": 74, "minimum_retention": 0.9, "primary_candidates": 291, "retention": 0.7697594501718213, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.256523
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.358754
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.346094
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.299735
+BIOHUB_RETENTION_GUARD {"blended_candidates": 325, "dataset": "44b6_0b24845f", "frame": 75, "minimum_retention": 0.9, "primary_candidates": 374, "retention": 0.8689839572192514, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.265074
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.358919
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.295727
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.348292
+BIOHUB_RETENTION_GUARD {"blended_candidates": 321, "dataset": "44b6_0b24845f", "frame": 76, "minimum_retention": 0.9, "primary_candidates": 379, "retention": 0.8469656992084432, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.26712
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.361097
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.301815
+BIOHUB_RETENTION_GUARD {"blended_candidates": 243, "dataset": "44b6_0b24845f", "frame": 77, "minimum_retention": 0.9, "primary_candidates": 331, "retention": 0.7341389728096677, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.344312
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.263739
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36529
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.305391
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.341477
+BIOHUB_RETENTION_GUARD {"blended_candidates": 284, "dataset": "44b6_0b24845f", "frame": 78, "minimum_retention": 0.9, "primary_candidates": 392, "retention": 0.7244897959183674, "use_primary": true}
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.262727
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.365892
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.302826
+BIOHUB_RETENTION_GUARD {"blended_candidates": 298, "dataset": "44b6_0b24845f", "frame": 79, "minimum_retention": 0.9, "primary_candidates": 424, "retention": 0.7028301886792453, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.34091
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.256411
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.365633
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.303473
+BIOHUB_RETENTION_GUARD {"blended_candidates": 291, "dataset": "44b6_0b24845f", "frame": 80, "minimum_retention": 0.9, "primary_candidates": 388, "retention": 0.75, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.337156
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.260031
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.369442
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.308215
+BIOHUB_RETENTION_GUARD {"blended_candidates": 294, "dataset": "44b6_0b24845f", "frame": 81, "minimum_retention": 0.9, "primary_candidates": 382, "retention": 0.7696335078534031, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.339841
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.262153
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.373979
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.312577
+BIOHUB_RETENTION_GUARD {"blended_candidates": 277, "dataset": "44b6_0b24845f", "frame": 82, "minimum_retention": 0.9, "primary_candidates": 385, "retention": 0.7194805194805195, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.34054
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.258925
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.365009
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.311063
+BIOHUB_RETENTION_GUARD {"blended_candidates": 268, "dataset": "44b6_0b24845f", "frame": 83, "minimum_retention": 0.9, "primary_candidates": 379, "retention": 0.7071240105540897, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.345761
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.260799
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36654
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.311139
+BIOHUB_RETENTION_GUARD {"blended_candidates": 287, "dataset": "44b6_0b24845f", "frame": 84, "minimum_retention": 0.9, "primary_candidates": 361, "retention": 0.7950138504155124, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.34535
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.261693
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.364996
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.312248
+BIOHUB_RETENTION_GUARD {"blended_candidates": 198, "dataset": "44b6_0b24845f", "frame": 85, "minimum_retention": 0.9, "primary_candidates": 294, "retention": 0.673469387755102, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.345018
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.264586
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.364819
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.317294
+BIOHUB_RETENTION_GUARD {"blended_candidates": 169, "dataset": "44b6_0b24845f", "frame": 86, "minimum_retention": 0.9, "primary_candidates": 282, "retention": 0.599290780141844, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.339492
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.262994
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.360555
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.318325
+BIOHUB_RETENTION_GUARD {"blended_candidates": 232, "dataset": "44b6_0b24845f", "frame": 87, "minimum_retention": 0.9, "primary_candidates": 323, "retention": 0.718266253869969, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.333718
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.257147
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.367991
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.319785
+BIOHUB_RETENTION_GUARD {"blended_candidates": 287, "dataset": "44b6_0b24845f", "frame": 88, "minimum_retention": 0.9, "primary_candidates": 363, "retention": 0.790633608815427, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.334199
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.259374
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.374613
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.325312
+BIOHUB_RETENTION_GUARD {"blended_candidates": 219, "dataset": "44b6_0b24845f", "frame": 89, "minimum_retention": 0.9, "primary_candidates": 322, "retention": 0.6801242236024845, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.338008
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.257413
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.362102
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.321967
+BIOHUB_RETENTION_GUARD {"blended_candidates": 175, "dataset": "44b6_0b24845f", "frame": 90, "minimum_retention": 0.9, "primary_candidates": 269, "retention": 0.6505576208178439, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.338144
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.257555
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.362535
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.320952
+BIOHUB_RETENTION_GUARD {"blended_candidates": 136, "dataset": "44b6_0b24845f", "frame": 91, "minimum_retention": 0.9, "primary_candidates": 237, "retention": 0.5738396624472574, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.336404
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36442
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.253368
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.322162
+BIOHUB_RETENTION_GUARD {"blended_candidates": 151, "dataset": "44b6_0b24845f", "frame": 92, "minimum_retention": 0.9, "primary_candidates": 286, "retention": 0.527972027972028, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.336923
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.357811
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.253968
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.314236
+BIOHUB_RETENTION_GUARD {"blended_candidates": 133, "dataset": "44b6_0b24845f", "frame": 93, "minimum_retention": 0.9, "primary_candidates": 253, "retention": 0.525691699604743, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.340204
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.25869
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.3551
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.314665
+BIOHUB_RETENTION_GUARD {"blended_candidates": 168, "dataset": "44b6_0b24845f", "frame": 94, "minimum_retention": 0.9, "primary_candidates": 290, "retention": 0.5793103448275863, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.343273
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.362482
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.249107
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.321701
+BIOHUB_RETENTION_GUARD {"blended_candidates": 140, "dataset": "44b6_0b24845f", "frame": 95, "minimum_retention": 0.9, "primary_candidates": 309, "retention": 0.45307443365695793, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.340039
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.358614
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.250998
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.325788
+BIOHUB_RETENTION_GUARD {"blended_candidates": 124, "dataset": "44b6_0b24845f", "frame": 96, "minimum_retention": 0.9, "primary_candidates": 273, "retention": 0.4542124542124542, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.338922
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.354717
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.249091
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.328691
+BIOHUB_RETENTION_GUARD {"blended_candidates": 181, "dataset": "44b6_0b24845f", "frame": 97, "minimum_retention": 0.9, "primary_candidates": 328, "retention": 0.551829268292683, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.342488
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.362901
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.25058
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.327921
+BIOHUB_RETENTION_GUARD {"blended_candidates": 153, "dataset": "44b6_0b24845f", "frame": 98, "minimum_retention": 0.9, "primary_candidates": 295, "retention": 0.5186440677966102, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.341683
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.362405
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.25428
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.328126
+BIOHUB_RETENTION_GUARD {"blended_candidates": 111, "dataset": "44b6_0b24845f", "frame": 99, "minimum_retention": 0.9, "primary_candidates": 224, "retention": 0.4955357142857143, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.336457
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229228
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.33652
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.231364
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.334504
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.353265
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.231505
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229197
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.356556
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.331503
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.228531
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.233103
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.359353
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.334571
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232233
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.230713
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.361838
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.333844
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.231136
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.228063
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.349332
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.237962
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.333957
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36765
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23148
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23324
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.333005
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.37095
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.226861
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.233703
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.335609
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.362298
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.226753
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23047
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.338411
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.357762
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229067
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.222866
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.360193
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.33357
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.223297
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.224805
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.35856
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.328392
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.226482
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.22475
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.365065
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.329088
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229453
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.223629
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.353373
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.331454
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.233899
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.221381
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.366767
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.228562
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.332081
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.360859
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.220825
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229373
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.331331
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.358711
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.220942
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.228983
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.331316
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.357908
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.220064
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.22723
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.331281
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36076
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.219385
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.227184
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.363026
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.332495
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.228674
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.221891
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36528
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.326164
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.22969
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.22287
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.365255
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.3318
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.227887
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.226905
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.364292
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.332454
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229597
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.227329
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.369457
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229355
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.329795
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.366989
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.227094
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.228164
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.330008
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.364738
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.228038
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.230204
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.327924
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.368159
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.226869
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229792
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.370711
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.324294
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.231598
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.219975
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.360618
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.329966
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.237748
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.22725
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.372812
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.322964
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229174
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.225732
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.374406
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.329623
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23239
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229625
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.3777
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.233543
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.33189
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229021
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.376339
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.230711
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.328077
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.369146
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229917
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.230076
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.330658
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.367025
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232737
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.330195
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.371094
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.227525
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.231427
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.332086
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.375255
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.228923
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229981
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.373994
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.334902
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229437
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.234703
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.366011
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.331026
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229485
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.228868
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.364698
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.33352
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.234306
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229406
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.366732
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.235733
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.333668
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.228734
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.370041
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.231775
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.326117
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.367914
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.227258
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.227854
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.327201
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.352519
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232919
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232249
+BIOHUB_RETENTION_GUARD {"blended_candidates": 66, "dataset": "6bba_05b6850b", "frame": 43, "minimum_retention": 0.9, "primary_candidates": 74, "retention": 0.8918918918918919, "use_primary": true}
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.330095
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.36891
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.237762
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.226463
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.372785
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.333419
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232529
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238631
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.372432
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.338616
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.234792
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.236776
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.371331
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.335349
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.233309
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.233805
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.369641
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.337635
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.231091
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.2393
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.371647
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.336677
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.231415
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.241418
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.368025
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232042
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.334169
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.362922
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.240548
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232766
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.334586
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.352705
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.239217
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.235979
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.333591
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.336896
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238117
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.241376
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.333424
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.34476
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.241111
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.233304
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.329672
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.351291
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.233408
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.237349
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.350787
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.330847
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.237192
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.236893
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.352459
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.332545
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23579
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.244446
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.343926
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.333406
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.245733
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.249633
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.361961
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.33416
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.237609
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.246702
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.359198
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.335015
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.24975
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.239557
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.364122
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.342511
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23735
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238104
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.357428
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.239857
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.342159
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.343652
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.239919
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.246472
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.340811
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.355033
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238456
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23837
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.349582
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.351347
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.237938
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23794
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.350508
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.353252
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.242027
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.237401
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.347721
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.33905
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.244117
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.245673
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.354422
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.347752
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.235875
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.243325
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.359708
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.347648
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.241531
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.244042
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.359515
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.350568
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238654
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.24973
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.356987
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.339277
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.235897
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.239339
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.358806
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.341866
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232787
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.244666
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.360605
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.235419
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.344401
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.244039
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.35888
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232021
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.341738
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.364525
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.245322
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.235438
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.339738
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.367055
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.2464
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238512
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.336334
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.351417
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.244837
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.246384
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.336552
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.363487
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.249715
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.234938
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.336751
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.361591
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.246366
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.237752
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.35878
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.342229
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23573
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.250553
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.361252
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.34433
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.235636
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.253052
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.357825
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.338919
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.23299
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.249056
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.356818
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.334467
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232458
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.249429
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.358323
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.334048
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232166
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.246018
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.352135
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.334845
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232609
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.244333
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.351911
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.334767
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232939
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.248241
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.356519
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.231872
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.330452
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.353385
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.239474
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232685
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.33197
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.351229
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.247447
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.233018
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.33369
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.350705
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.242876
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.234885
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.335249
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.353278
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.249719
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.232744
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.33665
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.358064
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.250474
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.229484
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.338336
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.35946
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.243806
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.231302
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.357537
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.337788
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.233885
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.245508
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.357561
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.325091
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.235923
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.241957
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.356691
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.32712
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.236514
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.252361
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.360713
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.323213
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.236886
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.245152
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.361191
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.321976
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.236659
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.249767
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.363957
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.323768
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.238038
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.251085
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.324838
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.239244
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.323094
+Saved 2 predictions to /kaggle/working/tracking_repo/predictions/unknown/unet_transformer_gpu0/split_0
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.247015
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.322603
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.251849
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.325152
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.251093
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.328347
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.244661
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.328262
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.243635
+EDGE_TTA_ACTIVE views = 8 mean_abs_feat_delta = 0.327618
+SECONDARY_EDGE_TTA_ACTIVE views = 8 weight = 0.75 mean_abs_feat_delta = 0.248058
+Saved 2 predictions to /kaggle/working/tracking_repo/predictions/unknown/unet_transformer_gpu1/split_0
+Merged 4 prediction graphs into /kaggle/working/tracking_repo/predictions/unknown/unet_transformer/split_0
+Prediction completed in 9.15 minutes

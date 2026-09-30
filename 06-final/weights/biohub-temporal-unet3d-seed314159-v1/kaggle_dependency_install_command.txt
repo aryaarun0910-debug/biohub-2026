@@ -1,0 +1,1 @@
+pip install tracksdata zarr pyscipopt geff geff-spec ilpy polars polars-runtime-32 blosc2 dask imagecodecs pyarrow rustworkx sqlalchemy donfig google-crc32c numcodecs

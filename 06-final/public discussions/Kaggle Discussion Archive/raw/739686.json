@@ -1,0 +1,233 @@
+{
+  "forumTopic": {
+    "authorId": 17954496,
+    "authorThumbnailName": "17954496-kg.jpg?t=2025-01-08-20-35-47",
+    "authorUserDisplayName": "Antonoof",
+    "authorUserName": "antonoof",
+    "comments": [
+      {
+        "id": 3521392,
+        "postDate": "2026-09-05T17:48:40.707Z",
+        "rawMarkdown": "Hey @antonoof, you’re sure that your submission removed the edges? Every node/edges removal I've done reflected public lb/cv score. \nAbout the unbounded score, the hosts are aware. They've commented in other posts ready, its the expected behavior ",
+        "content": "<p>Hey <a href=\"https://www.kaggle.com/antonoof\" target=\"_blank\">@antonoof</a>, you’re sure that your submission removed the edges? Every node/edges removal I've done reflected public lb/cv score. \nAbout the unbounded score, the hosts are aware. They've commented in other posts ready, its the expected behavior </p>",
+        "replies": [
+          {
+            "id": 3521402,
+            "postDate": "2026-09-05T18:48:28.507Z",
+            "rawMarkdown": "I deleted the ones that metric ignores by its own definition. And there is an experiment that shows this without a single controversial point: remove only edges, do not touch nodes — then the node counter and multiplier do not change at all, and any shift would be purely edge-based.",
+            "content": "<p>I deleted the ones that metric ignores by its own definition. And there is an experiment that shows this without a single controversial point: remove only edges, do not touch nodes — then the node counter and multiplier do not change at all, and any shift would be purely edge-based.</p>",
+            "replies": [
+              {
+                "id": 3521611,
+                "postDate": "2026-09-06T14:11:59.200Z",
+                "rawMarkdown": "Did you delete non-ground-truth nodes/edges from predictions? It's easy to implement for training data, but how should it work on LB? Removing of random half of nodes/edges will reduce score a lot.\n",
+                "content": "<p>Did you delete non-ground-truth nodes/edges from predictions? It's easy to implement for training data, but how should it work on LB? Removing of random half of nodes/edges will reduce score a lot.</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "Ogurtsov",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/682731-kg.jpg?t=2024-04-01-08-44-00",
+                  "url": "/ogurtsov",
+                  "tier": "MASTER",
+                  "id": 682731,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 15,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "enabled": true,
+                  "teamLeader": {
+                    "displayName": "Ogurtsov",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/682731-kg.jpg?t=2024-04-01-08-44-00",
+                    "url": "/ogurtsov",
+                    "userName": "ogurtsov",
+                    "tier": "MASTER",
+                    "id": 682731,
+                    "profileUrl": "/ogurtsov",
+                    "performanceTier": "MASTER",
+                    "userId": 682731,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3521619,
+                "postDate": "2026-09-06T14:40:34.393Z",
+                "rawMarkdown": "maybe I was mistaken. I tried deleting edges, deleted them more than 1/2, the metric did not change, deleted 2/3, the metric did not change. Okay, I think it's just me, I'll share the results after the competition.",
+                "content": "<p>maybe I was mistaken. I tried deleting edges, deleted them more than 1/2, the metric did not change, deleted 2/3, the metric did not change. Okay, I think it's just me, I'll share the results after the competition.</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "Antonoof",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/17954496-kg.jpg?t=2025-01-08-20-35-47",
+                  "url": "/antonoof",
+                  "tier": "GRANDMASTER",
+                  "id": 17954496,
+                  "progressionOptOut": false
+                },
+                "authorType": "TOPIC",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 18,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "enabled": true,
+                  "teamLeader": {
+                    "displayName": "TWEAK",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28207655-kg.png?t=2026-08-05-03-21-49",
+                    "url": "/tweakai",
+                    "userName": "tweakai",
+                    "tier": "EXPERT",
+                    "id": 28207655,
+                    "profileUrl": "/tweakai",
+                    "performanceTier": "EXPERT",
+                    "userId": 28207655,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              }
+            ],
+            "parent": {},
+            "author": {
+              "displayName": "Antonoof",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/17954496-kg.jpg?t=2025-01-08-20-35-47",
+              "url": "/antonoof",
+              "tier": "GRANDMASTER",
+              "id": 17954496,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 18,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "enabled": true,
+              "teamLeader": {
+                "displayName": "TWEAK",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28207655-kg.png?t=2026-08-05-03-21-49",
+                "url": "/tweakai",
+                "userName": "tweakai",
+                "tier": "EXPERT",
+                "id": 28207655,
+                "profileUrl": "/tweakai",
+                "performanceTier": "EXPERT",
+                "userId": 28207655,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "Sergio Alvarez",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/2221915-kg.jpg?t=2024-09-24-13-40-46",
+          "url": "/sersasj",
+          "tier": "MASTER",
+          "id": 2221915,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 2,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "Sergio Alvarez",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/2221915-kg.jpg?t=2024-09-24-13-40-46",
+            "url": "/sersasj",
+            "userName": "sersasj",
+            "tier": "MASTER",
+            "id": 2221915,
+            "profileUrl": "/sersasj",
+            "performanceTier": "MASTER",
+            "userId": 2221915,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      }
+    ],
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3521300,
+      "postDate": "2026-09-05T13:05:50.483Z",
+      "rawMarkdown": "Two submissions, identical pipeline, identical hyper-parameters, differing only\nin a post-processing step that deletes predicted tracks:\n\n![image](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F17954496%2Fe8b608858dd4a42fa7df29d929e6fe60%2Fcells.png?generation=1788613072033596&alt=media)\n\n```\n              nodes      edges     public LB\n  full      121,782    117,187         0.954\n  reduced    67,292     65,651         0.954\n```\n\nThe second deletes 44.7% of the predicted nodes and 44.0% of the edges. The\npublic score does not move to three decimals. Two observations follow, and I\nthink the second matters more.\n\n1) metrics.md and the scoring server appear to disagree.\n\n  \"To penalise false-positive node predictions, the edge Jaccard is scaled by\n   a penalty on the total number of predicted nodes\"\n```\n  adjusted_jaccard = max(0, jaccard * (1 - a * (T_pred - T_true) / T_true))\n```\n\nBut as written the factor is two-sided. It is floored at zero and unbounded\nabove, so a submission with T_pred < T_true is multiplied *up*. In the reduced\nsubmission above every video sits near (T_pred - T_true)/T_true = -0.5, i.e. a\nfactor of 1.05, and the weighted factor goes from 1.0009 to 1.0500.\n\nHas anyone encountered this problem? We have achieved (in our opinion) good results over the past week, but we have not seen any changes in the PB metric, although the improvements seem better from our side.",
+      "content": "<p>Two submissions, identical pipeline, identical hyper-parameters, differing only\nin a post-processing step that deletes predicted tracks:</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F17954496%2Fe8b608858dd4a42fa7df29d929e6fe60%2Fcells.png?generation=1788613072033596&amp;alt=media\" alt=\"image\"></p>\n<pre><code>              nodes      edges     public LB\n  full      121,782    117,187         0.954\n  reduced    67,292     65,651         0.954\n</code></pre>\n<p>The second deletes 44.7% of the predicted nodes and 44.0% of the edges. The\npublic score does not move to three decimals. Two observations follow, and I\nthink the second matters more.</p>\n<p>1) metrics.md and the scoring server appear to disagree.</p>\n<p>\"To penalise false-positive node predictions, the edge Jaccard is scaled by\n   a penalty on the total number of predicted nodes\"</p>\n<pre><code>  adjusted_jaccard = max(0, jaccard * (1 - a * (T_pred - T_true) / T_true))\n</code></pre>\n<p>But as written the factor is two-sided. It is floored at zero and unbounded\nabove, so a submission with T_pred &lt; T_true is multiplied <em>up</em>. In the reduced\nsubmission above every video sits near (T_pred - T_true)/T_true = -0.5, i.e. a\nfactor of 1.05, and the weighted factor goes from 1.0009 to 1.0500.</p>\n<p>Has anyone encountered this problem? We have achieved (in our opinion) good results over the past week, but we have not seen any changes in the PB metric, although the improvements seem better from our side.</p>",
+      "parent": {},
+      "author": {
+        "displayName": "Antonoof",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/17954496-kg.jpg?t=2025-01-08-20-35-47",
+        "url": "/antonoof",
+        "tier": "GRANDMASTER",
+        "id": 17954496,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 3,
+        "canUpvote": true,
+        "totalUpvotes": 7
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 18,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "reactions": [
+        {
+          "emoji": "KAGGLE",
+          "featuredUserNames": [
+            "yunusgmsoy"
+          ],
+          "userCount": 1
+        }
+      ],
+      "teamUpInfo": {
+        "enabled": true,
+        "teamLeader": {
+          "displayName": "TWEAK",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/28207655-kg.png?t=2026-08-05-03-21-49",
+          "url": "/tweakai",
+          "userName": "tweakai",
+          "tier": "EXPERT",
+          "id": 28207655,
+          "profileUrl": "/tweakai",
+          "performanceTier": "EXPERT",
+          "userId": 28207655,
+          "progressionOptOut": false
+        },
+        "intro": ""
+      }
+    },
+    "firstMessageId": 3521300,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 739686,
+    "name": "Metric problem",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-09-05T13:05:50.482469100Z",
+    "totalVotes": 3,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/739686",
+    "totalMessages": 4,
+    "authorPerformanceTier": "GRANDMASTER",
+    "authorProgressionOptOut": false
+  }
+}

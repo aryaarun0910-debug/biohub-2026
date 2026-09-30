@@ -1,0 +1,28 @@
+Found 4 prediction graphs
+[44b6_0113de3b] after edge-filter+motion-relink: 25822 nodes, 24951 edges
+[44b6_0113de3b] after gap-closing (single-frame + gap2): 25882 nodes, 25063 edges
+[44b6_0113de3b] after safe-division repair: 25882 nodes, 25118 edges (geometric_candidates = 172, deepcenter_rejected = 108, post_veto_candidates = 64, added = 55, cap_skipped = 0, mutual_nn_rejected = 60, divergence_rejected = 535)
+[44b6_0113de3b] after division-geometry-filter+prune-isolated: 25877 nodes, 25118 edges
+[44b6_0113de3b] after short-track filtering: 25637 nodes, 24933 edges (components_removed = 55)
+[44b6_0113de3b] FINAL: 25637 nodes, 24933 edges
+[44b6_0b24845f] after edge-filter+motion-relink: 22491 nodes, 20375 edges
+[44b6_0b24845f] after gap-closing (single-frame + gap2): 22873 nodes, 21067 edges
+[44b6_0b24845f] after safe-division repair: 22873 nodes, 21092 edges (geometric_candidates = 232, deepcenter_rejected = 200, post_veto_candidates = 32, added = 25, cap_skipped = 0, mutual_nn_rejected = 56, divergence_rejected = 913)
+[44b6_0b24845f] after division-geometry-filter+prune-isolated: 22858 nodes, 21092 edges
+[44b6_0b24845f] after short-track filtering: 20729 nodes, 19449 edges (components_removed = 486)
+[44b6_0b24845f] FINAL: 20729 nodes, 19449 edges
+[6bba_05b6850b] after edge-filter+motion-relink: 6305 nodes, 6032 edges
+[6bba_05b6850b] after gap-closing (single-frame + gap2): 6336 nodes, 6088 edges
+[6bba_05b6850b] after safe-division repair: 6336 nodes, 6098 edges (geometric_candidates = 22, deepcenter_rejected = 12, post_veto_candidates = 10, added = 10, cap_skipped = 0, mutual_nn_rejected = 5, divergence_rejected = 82)
+[6bba_05b6850b] after division-geometry-filter+prune-isolated: 6335 nodes, 6098 edges
+[6bba_05b6850b] after short-track filtering: 6152 nodes, 5958 edges (components_removed = 43)
+[6bba_05b6850b] FINAL: 6152 nodes, 5958 edges
+[6bba_05db0fb1] after edge-filter+motion-relink: 70687 nodes, 67990 edges
+[6bba_05db0fb1] after gap-closing (single-frame + gap2): 71114 nodes, 68785 edges
+[6bba_05db0fb1] after safe-division repair: 71114 nodes, 68819 edges (geometric_candidates = 304, deepcenter_rejected = 261, post_veto_candidates = 43, added = 34, cap_skipped = 0, mutual_nn_rejected = 256, divergence_rejected = 2642)
+[6bba_05db0fb1] after division-geometry-filter+prune-isolated: 71087 nodes, 68819 edges
+[6bba_05db0fb1] after short-track filtering: 70290 nodes, 68208 edges (components_removed = 186)
+[6bba_05db0fb1] FINAL: 70290 nodes, 68208 edges
+Wrote /kaggle/working/submission.csv with 241,356 rows
+Node rows: 122,808 | edge rows: 118,548
+Wrote /kaggle/working/run_stats.csv

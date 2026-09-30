@@ -1,0 +1,508 @@
+{
+  "forumTopic": {
+    "authorId": 113660,
+    "authorThumbnailName": "113660-fb.jpg",
+    "authorUserDisplayName": "hengck23",
+    "authorUserName": "hengck23",
+    "comments": [
+      {
+        "id": 3522587,
+        "postDate": "2026-09-09T08:49:45.653Z",
+        "rawMarkdown": "Improved cell detection is not used in inference but to create better dense training samples. Here you can see that better localisation clearly improves edge recall significantly.\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F17e8b575e301310ace4f3ff8614a2bba%2FSelection_4851.png?generation=1788943783835062&alt=media)\n\n\n\nnote: ultrack has few node detector. But I haven't checked if they align with the Kaggle annotated point yet.\nhttps://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-daxi.pt    \n https://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-simview.pt  ",
+        "content": "<p>Improved cell detection is not used in inference but to create better dense training samples. Here you can see that better localisation clearly improves edge recall significantly.</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F17e8b575e301310ace4f3ff8614a2bba%2FSelection_4851.png?generation=1788943783835062&amp;alt=media\" alt=\"\"></p>\n<p>note: ultrack has few node detector. But I haven't checked if they align with the Kaggle annotated point yet.\n<a href=\"https://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-daxi.pt\" target=\"_blank\">https://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-daxi.pt</a><br>\n <a href=\"https://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-simview.pt\" target=\"_blank\">https://public.czbiohub.org/royerlab/ultrack/unet_weights/unet-simview.pt</a>  </p>",
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "TOPIC",
+        "votes": {
+          "totalVotes": 2,
+          "canUpvote": true,
+          "totalUpvotes": 2
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 863,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3524676,
+        "postDate": "2026-09-15T15:28:38Z",
+        "rawMarkdown": "end2end cell linking code:  \nhttps://www.kaggle.com/code/hengck23/end2end-cell-linker-raw-edge-ja-0-9-no-ilp   \n\nit shows the limit of using link probability only (no ILP, no gap filling). It has raw edge Jaccard of about 0.90. Trained without kaggle annotation. Use 20% of the data at t=0,5,10. ... Use dense3d label + augmentation to simulate cell movement.  \n\nTricks of getting good results is to analyse reason of FP (and MISS). e.g. multiple nodes matched to GT node and kaggle metric only consider first 2. your edge may be linking to other matching node (not the first 2) ",
+        "content": "<p>end2end cell linking code:<br>\n<a href=\"https://www.kaggle.com/code/hengck23/end2end-cell-linker-raw-edge-ja-0-9-no-ilp\" target=\"_blank\">https://www.kaggle.com/code/hengck23/end2end-cell-linker-raw-edge-ja-0-9-no-ilp</a>   </p>\n<p>it shows the limit of using link probability only (no ILP, no gap filling). It has raw edge Jaccard of about 0.90. Trained without kaggle annotation. Use 20% of the data at t=0,5,10. … Use dense3d label + augmentation to simulate cell movement.  </p>\n<p>Tricks of getting good results is to analyse reason of FP (and MISS). e.g. multiple nodes matched to GT node and kaggle metric only consider first 2. your edge may be linking to other matching node (not the first 2) </p>",
+        "replies": [
+          {
+            "id": 3524793,
+            "postDate": "2026-09-15T21:21:05.163Z",
+            "rawMarkdown": "![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fae857e8cb99cbf535c6d0c18abe3aaa5%2Ft025_src375_fp30_gt27000420.png?generation=1789507198113607&alt=media)\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Ff9496f88345de6f846e568fa00b552d1%2Ft022_src545_fp232_gt24000373.png?generation=1789507470719267&alt=media)\n\nbeing trained from synthetic augmentation, the linker is very precise. below slow an fp edge in validation\n",
+            "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fae857e8cb99cbf535c6d0c18abe3aaa5%2Ft025_src375_fp30_gt27000420.png?generation=1789507198113607&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Ff9496f88345de6f846e568fa00b552d1%2Ft022_src545_fp232_gt24000373.png?generation=1789507470719267&amp;alt=media\" alt=\"\"></p>\n<p>being trained from synthetic augmentation, the linker is very precise. below slow an fp edge in validation</p>",
+            "replies": [
+              {
+                "id": 3524794,
+                "postDate": "2026-09-15T21:27:34.920Z",
+                "rawMarkdown": "![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F06347bc685a1d516332ea039b06b18d9%2Ft015_src524_fp457_gt95000000036.png?generation=1789507652632840&alt=media)\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fbab6a5c982e52e0ff5b45ea80a7c698f%2Ft038_src91_fp64_gt118000000036.png?generation=1789507859626966&alt=media)\n\nhere you can see effects of domain shift. kaggle annotation is based on Ultrack segmentation i think it sometimes annotates \"cell corners\". my annotation is based on focus3d, will is cell center.",
+                "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F06347bc685a1d516332ea039b06b18d9%2Ft015_src524_fp457_gt95000000036.png?generation=1789507652632840&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fbab6a5c982e52e0ff5b45ea80a7c698f%2Ft038_src91_fp64_gt118000000036.png?generation=1789507859626966&amp;alt=media\" alt=\"\"></p>\n<p>here you can see effects of domain shift. kaggle annotation is based on Ultrack segmentation i think it sometimes annotates \"cell corners\". my annotation is based on focus3d, will is cell center.</p>",
+                "parent": {},
+                "author": {
+                  "displayName": "hengck23",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                  "url": "/hengck23",
+                  "tier": "GRANDMASTER",
+                  "id": 113660,
+                  "progressionOptOut": false
+                },
+                "authorType": "TOPIC",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 863,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "hengck23",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                    "url": "/hengck23",
+                    "userName": "hengck23",
+                    "tier": "GRANDMASTER",
+                    "id": 113660,
+                    "profileUrl": "/hengck23",
+                    "performanceTier": "GRANDMASTER",
+                    "userId": 113660,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3524799,
+                "postDate": "2026-09-15T21:40:08.357Z",
+                "rawMarkdown": "i think i can catch some kaggle annotation error?\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Ffe9076b2fd8dd1666ed1bdce66c40084%2Ft062_src225_fp157_gt64000750.png?generation=1789508406517877&alt=media)",
+                "content": "<p>i think i can catch some kaggle annotation error?\n<img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Ffe9076b2fd8dd1666ed1bdce66c40084%2Ft062_src225_fp157_gt64000750.png?generation=1789508406517877&amp;alt=media\" alt=\"\"></p>",
+                "parent": {},
+                "author": {
+                  "displayName": "hengck23",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                  "url": "/hengck23",
+                  "tier": "GRANDMASTER",
+                  "id": 113660,
+                  "progressionOptOut": false
+                },
+                "authorType": "TOPIC",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 863,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "hengck23",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                    "url": "/hengck23",
+                    "userName": "hengck23",
+                    "tier": "GRANDMASTER",
+                    "id": 113660,
+                    "profileUrl": "/hengck23",
+                    "performanceTier": "GRANDMASTER",
+                    "userId": 113660,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              },
+              {
+                "id": 3524840,
+                "postDate": "2026-09-15T23:07:23.423Z",
+                "rawMarkdown": "there are definitely errors in kaggle annotations. here is a check I was doing of missed cells for my model, and the red + is GT label. ![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F3459992%2Fb69c5828e02d7032e8ec6eed84562c55%2F0BDD02D9-EB9B-411C-A078-F64EE35699EC.jpg?generation=1789513638003132&alt=media)",
+                "content": "<p>there are definitely errors in kaggle annotations. here is a check I was doing of missed cells for my model, and the red + is GT label. <img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F3459992%2Fb69c5828e02d7032e8ec6eed84562c55%2F0BDD02D9-EB9B-411C-A078-F64EE35699EC.jpg?generation=1789513638003132&amp;alt=media\" alt=\"\"></p>",
+                "parent": {},
+                "author": {
+                  "displayName": "Satwik",
+                  "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/3459992-kg.jpg?t=2025-11-13-11-42-38",
+                  "url": "/p4rallax",
+                  "tier": "MASTER",
+                  "id": 3459992,
+                  "progressionOptOut": false
+                },
+                "authorType": "COMMENT",
+                "votes": {
+                  "canUpvote": true
+                },
+                "kernelVersion": 0,
+                "competitionRanking": 623,
+                "feedbackTrackingData": {},
+                "isThankYou": false,
+                "teamUpInfo": {
+                  "teamLeader": {
+                    "displayName": "Satwik",
+                    "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/3459992-kg.jpg?t=2025-11-13-11-42-38",
+                    "url": "/p4rallax",
+                    "userName": "p4rallax",
+                    "tier": "MASTER",
+                    "id": 3459992,
+                    "profileUrl": "/p4rallax",
+                    "performanceTier": "MASTER",
+                    "userId": 3459992,
+                    "progressionOptOut": false
+                  },
+                  "intro": ""
+                }
+              }
+            ],
+            "parent": {},
+            "author": {
+              "displayName": "hengck23",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+              "url": "/hengck23",
+              "tier": "GRANDMASTER",
+              "id": 113660,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "canUpvote": true
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 863,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "hengck23",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                "url": "/hengck23",
+                "userName": "hengck23",
+                "tier": "GRANDMASTER",
+                "id": 113660,
+                "profileUrl": "/hengck23",
+                "performanceTier": "GRANDMASTER",
+                "userId": 113660,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "TOPIC",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 863,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3522636,
+        "postDate": "2026-09-09T12:27:44.490Z",
+        "rawMarkdown": "i use ChatGPT to make a trajectory of nodes (using slice as appearance ), with evaluation results like hit,fp,miss. It turns  out that quite a number of FPs are actually very close to the truth node.\n\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F35f7a6efb326453d9dd8c14b6985cfb9%2FSelection_4859.png?generation=1788956851020692&alt=media)\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fd20d3f9daebdc021de9fb96a707b30ad%2FSelection_4860.png?generation=1788956862377427&alt=media)",
+        "content": "<p>i use ChatGPT to make a trajectory of nodes (using slice as appearance ), with evaluation results like hit,fp,miss. It turns  out that quite a number of FPs are actually very close to the truth node.</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F35f7a6efb326453d9dd8c14b6985cfb9%2FSelection_4859.png?generation=1788956851020692&amp;alt=media\" alt=\"\"></p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fd20d3f9daebdc021de9fb96a707b30ad%2FSelection_4860.png?generation=1788956862377427&amp;alt=media\" alt=\"\"></p>",
+        "replies": [
+          {
+            "id": 3522645,
+            "postDate": "2026-09-09T12:35:18.217Z",
+            "rawMarkdown": "It actually means that during linking, my zxy must change, the node must shift to better position. So actually you cannot detect and fixed a location.  \n\n\nOr i need to guess the location model in kaggle annotation ",
+            "content": "<p>It actually means that during linking, my zxy must change, the node must shift to better position. So actually you cannot detect and fixed a location.  </p>\n<p>Or i need to guess the location model in kaggle annotation </p>",
+            "parent": {},
+            "author": {
+              "displayName": "hengck23",
+              "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+              "url": "/hengck23",
+              "tier": "GRANDMASTER",
+              "id": 113660,
+              "progressionOptOut": false
+            },
+            "authorType": "TOPIC",
+            "votes": {
+              "totalVotes": 1,
+              "canUpvote": true,
+              "totalUpvotes": 1
+            },
+            "kernelVersion": 0,
+            "competitionRanking": 863,
+            "feedbackTrackingData": {},
+            "isThankYou": false,
+            "teamUpInfo": {
+              "teamLeader": {
+                "displayName": "hengck23",
+                "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+                "url": "/hengck23",
+                "userName": "hengck23",
+                "tier": "GRANDMASTER",
+                "id": 113660,
+                "profileUrl": "/hengck23",
+                "performanceTier": "GRANDMASTER",
+                "userId": 113660,
+                "progressionOptOut": false
+              },
+              "intro": ""
+            }
+          }
+        ],
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "TOPIC",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 863,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3522401,
+        "postDate": "2026-09-08T19:35:47.550Z",
+        "rawMarkdown": "Idk y but  it feels overfitting",
+        "content": "<p>Idk y but  it feels overfitting</p>",
+        "parent": {},
+        "author": {
+          "displayName": "Mohit",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/27988504-kg.jpg?t=2026-04-05-10-48-36",
+          "url": "/mohit78241",
+          "tier": "EXPERT",
+          "id": 27988504,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "feedbackTrackingData": {},
+        "isThankYou": false
+      },
+      {
+        "id": 3522369,
+        "postDate": "2026-09-08T18:26:15.160Z",
+        "rawMarkdown": "update\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F73c31f1a9f19a6fd92fc4b44fb6011f5%2FSelection_4838.png?generation=1788891973475998&alt=media)\n\nhow i know augmentation data is more difficult? I report metrics for different data groups. ChatGPT is incredible for debugging algorithms; just ask him how. This is how a beginner can become an expert in machine learning.",
+        "content": "<p>update\n<img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F73c31f1a9f19a6fd92fc4b44fb6011f5%2FSelection_4838.png?generation=1788891973475998&amp;alt=media\" alt=\"\"></p>\n<p>how i know augmentation data is more difficult? I report metrics for different data groups. ChatGPT is incredible for debugging algorithms; just ask him how. This is how a beginner can become an expert in machine learning.</p>",
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "TOPIC",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 863,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3522275,
+        "postDate": "2026-09-08T14:54:38.210Z",
+        "rawMarkdown": "how to analyze your edge transformer\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F86fdf404585661419220b50525609e15%2FSelection_4832.png?generation=1788879742049134&alt=media)\n\nObviously, the strategy is:\n1) increase correct edge probability so that you can threshold to reduce fp  \n2) fill the gap either by learning a net or heuristics ( 1-frame gap correction seems achievable)  \n\nhow to increase edge probability:\n- \"appearance feature smiliarity\" : maybe better localisation? resolution? larger region/scale. need to visualise the error case, but i can imagine difficult cases are: cell density is too high and everyone is similarly packed, or the cell is too faint and disappears in the next frame, or the movement (and neighbours) is too large and looks different  \n\nTRICKS!!!\n- refine only candidates at 99% cutoff to avoid complex appearance features for edge probability\nso i need to push edge recall from 0.966 to 0.990 for 99% cutoff. Then a refine module to better choose/rank from these candidates with more complex computation, or attention from multiple frames etc.\n\n![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F3140beb4e7364cae6f958da162fbb0e0%2FSelection_4837.png?generation=1788881686957802&alt=media)\n\nlocate the ceilings ",
+        "content": "<p>how to analyze your edge transformer</p>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F86fdf404585661419220b50525609e15%2FSelection_4832.png?generation=1788879742049134&amp;alt=media\" alt=\"\"></p>\n<p>Obviously, the strategy is:\n1) increase correct edge probability so that you can threshold to reduce fp<br>\n2) fill the gap either by learning a net or heuristics ( 1-frame gap correction seems achievable)  </p>\n<p>how to increase edge probability:</p>\n<ul>\n<li>\"appearance feature smiliarity\" : maybe better localisation? resolution? larger region/scale. need to visualise the error case, but i can imagine difficult cases are: cell density is too high and everyone is similarly packed, or the cell is too faint and disappears in the next frame, or the movement (and neighbours) is too large and looks different  </li>\n</ul>\n<p>TRICKS!!!</p>\n<ul>\n<li>refine only candidates at 99% cutoff to avoid complex appearance features for edge probability\nso i need to push edge recall from 0.966 to 0.990 for 99% cutoff. Then a refine module to better choose/rank from these candidates with more complex computation, or attention from multiple frames etc.</li>\n</ul>\n<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2F3140beb4e7364cae6f958da162fbb0e0%2FSelection_4837.png?generation=1788881686957802&amp;alt=media\" alt=\"\"></p>\n<p>locate the ceilings </p>",
+        "parent": {},
+        "author": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "progressionOptOut": false
+        },
+        "authorType": "TOPIC",
+        "votes": {
+          "canUpvote": true
+        },
+        "kernelVersion": 0,
+        "competitionRanking": 863,
+        "feedbackTrackingData": {},
+        "isThankYou": false,
+        "reactions": [
+          {
+            "emoji": "THANK_YOU",
+            "featuredUserNames": [
+              "afterrain42"
+            ],
+            "userCount": 1
+          }
+        ],
+        "teamUpInfo": {
+          "teamLeader": {
+            "displayName": "hengck23",
+            "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+            "url": "/hengck23",
+            "userName": "hengck23",
+            "tier": "GRANDMASTER",
+            "id": 113660,
+            "profileUrl": "/hengck23",
+            "performanceTier": "GRANDMASTER",
+            "userId": 113660,
+            "progressionOptOut": false
+          },
+          "intro": ""
+        }
+      },
+      {
+        "id": 3522599,
+        "postDate": "2026-09-09T10:08:27.853Z",
+        "rawMarkdown": "Thank you for the magic @hengck23 ",
+        "content": "<p>Thank you for the magic <a href=\"https://www.kaggle.com/hengck23\" target=\"_blank\">@hengck23</a> </p>",
+        "parent": {},
+        "author": {
+          "displayName": "Navneet",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/15692441-kg.jpg?t=2025-05-18-07-58-06",
+          "url": "/navneetbende",
+          "tier": "CONTRIBUTOR",
+          "id": 15692441,
+          "progressionOptOut": false
+        },
+        "authorType": "COMMENT",
+        "votes": {
+          "canUpvote": true,
+          "totalUpvotes": 1
+        },
+        "kernelVersion": 0,
+        "feedbackTrackingData": {},
+        "isThankYou": true
+      }
+    ],
+    "commentSort": "COMMENT_LIST_SORT_BY_HOT",
+    "firstMessage": {
+      "id": 3522229,
+      "postDate": "2026-09-08T13:31:27.037Z",
+      "rawMarkdown": "![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb9aa6b1321cfd69983aab968deba4789%2FSelection_4826.png?generation=1788875194680167&alt=media)\n\ne.g. at epoch 8:\nrefine\\_prob >= 0.0888, remove 13.13% peak detection and has kaggle recall of 99.45%. Error distance from kaggle annotation in 64x64x64 canonical voxel is refined from 1.1766 to 0.969",
+      "content": "<p><img src=\"https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F113660%2Fb9aa6b1321cfd69983aab968deba4789%2FSelection_4826.png?generation=1788875194680167&amp;alt=media\" alt=\"\"></p>\n<p>e.g. at epoch 8:\nrefine_prob &gt;= 0.0888, remove 13.13% peak detection and has kaggle recall of 99.45%. Error distance from kaggle annotation in 64x64x64 canonical voxel is refined from 1.1766 to 0.969</p>",
+      "parent": {},
+      "author": {
+        "displayName": "hengck23",
+        "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+        "url": "/hengck23",
+        "tier": "GRANDMASTER",
+        "id": 113660,
+        "progressionOptOut": false
+      },
+      "authorType": "TOPIC",
+      "votes": {
+        "totalVotes": 12,
+        "canUpvote": true,
+        "totalUpvotes": 12
+      },
+      "kernelVersion": 0,
+      "competitionRanking": 863,
+      "feedbackTrackingData": {},
+      "isThankYou": false,
+      "teamUpInfo": {
+        "teamLeader": {
+          "displayName": "hengck23",
+          "thumbnailUrl": "https://storage.googleapis.com/kaggle-avatars/thumbnails/113660-fb.jpg",
+          "url": "/hengck23",
+          "userName": "hengck23",
+          "tier": "GRANDMASTER",
+          "id": 113660,
+          "profileUrl": "/hengck23",
+          "performanceTier": "GRANDMASTER",
+          "userId": 113660,
+          "progressionOptOut": false
+        },
+        "intro": ""
+      }
+    },
+    "firstMessageId": 3522229,
+    "forumId": 10656304,
+    "forumName": "Biohub - Cell Tracking During Development",
+    "id": 740145,
+    "name": "magic or overfitting?",
+    "parentName": "biohub-cell-tracking-during-development",
+    "parentUrl": "/competitions/biohub-cell-tracking-during-development",
+    "postDate": "2026-09-08T13:31:27.038327900Z",
+    "totalVotes": 12,
+    "url": "/competitions/biohub-cell-tracking-during-development/discussion/740145",
+    "totalMessages": 12,
+    "authorPerformanceTier": "GRANDMASTER",
+    "authorProgressionOptOut": false
+  }
+}

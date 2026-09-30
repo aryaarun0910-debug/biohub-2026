@@ -1,0 +1,30 @@
+
+--- CALIBRATION: the 4 SCORED films, deployed-graph truth known ---
+    deployed (scripts/106-107): w=0.6 -> +0.00471,  w=0.3 -> -0.00086
+film                  w=0.3 d    w=0.6 d   reproduces ordering?
+44b6_0113de3b        +0.00000   +0.00000   NO
+44b6_0b24845f        -0.03339   +0.00000   yes
+6bba_05b6850b        -0.00625   -0.00212   yes
+6bba_05db0fb1        +0.00088   +0.00641   yes
+    rebuild puts 0.6 above 0.3 on 3/4 scored films
+
+--- ALL 199 FILMS: delta vs deployed w=0.8 ---
+    w       mean     median   films>0   weighted agg
+  0.0   -0.00256   -0.00119    59/199       -0.00369
+  0.2   +0.00032   +0.00000    66/199       -0.00107
+  0.3   +0.00131   +0.00000    69/199       -0.00013
+  0.4   +0.00244   +0.00000    75/199       +0.00109
+  0.5   +0.00244   +0.00000    74/199       +0.00148
+  0.6   +0.00252   +0.00000    73/199       +0.00136
+  0.7   +0.00108   +0.00000    50/199       +0.00069
+  0.8   +0.00000   +0.00000     0/199       +0.00000
+  0.9   -0.00228   +0.00000    23/199       -0.00201
+  1.0   -0.00523   +0.00000    31/199       -0.00451
+
+199-film optimum: w=0.5  (+0.00148 weighted)
+s10 ships w=0.6.  s09 shipped w=0.3.
+wrote /Users/aryaarun/Developer/biohub26/artifacts/linefit_across_199.csv
+.venv/bin/python scripts/109_linefit_across_199.py 2>&1  2316.93s user 4.42s system 1483% cpu 2:36.46 total
+tail -26  0.00s user 0.00s system 0% cpu 2:36.46 total
+
+[exited with code 0]

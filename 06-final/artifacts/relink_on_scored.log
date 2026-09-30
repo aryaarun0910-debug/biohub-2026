@@ -1,0 +1,43 @@
+Does removing motion relink (s05, +0.0224 on the validator) survive on the
+FOUR FILMS THE LEADERBOARD ACTUALLY SCORES?
+
+scripts/102 showed s08 is +0.00000 and s09 is -0.00086 on the scored films,
+against +0.00748 and +0.00487 on the validator films. Both of those sit on the
+no-relink base, so neither tested the decision that base rests on.
+
+s05 is already SUBMITTED. This is the measurement that should have preceded it.
+
+Same substrate as 102: ILP graphs from
+artifacts/s05_output/.../unet_transformer/split_0, verified byte-identical to
+the relink-ON run, i.e. pure ILP output. Ground truth from data/.../train/.
+motion_relink() is the deployed-stage reproduction from scripts/25_relink_control.py.
+====================================================================================================
+
+### SCORED (the 4 leaderboard films)
+arm                                          proxy   vs BASE         J    divJ  TP/FP/FN
+BASE  relink ON,  gap2 before, lf 0.8      0.89061             0.88869  0.0000     0/6/3
+s05   relink OFF, gap2 before, lf 0.8      0.91768  +0.02707   0.91490  0.0000     0/6/3
+s08   relink OFF, gap2 AFTER,  lf 0.8      0.91768  +0.02707   0.91490  0.0000     0/6/3
+s09   relink OFF, gap2 AFTER,  lf 0.3      0.91682  +0.02621   0.91404  0.0000     0/6/3
+
+### VALIDATOR (the 8 train hold-outs)
+arm                                          proxy   vs BASE         J    divJ  TP/FP/FN
+BASE  relink ON,  gap2 before, lf 0.8      0.94888             0.92246  0.2308     3/1/9
+s05   relink OFF, gap2 before, lf 0.8      0.96682  +0.01794   0.93483  0.2857     4/2/8
+s08   relink OFF, gap2 AFTER,  lf 0.8      0.97431  +0.02543   0.93516  0.3571     5/2/7
+s09   relink OFF, gap2 AFTER,  lf 0.3      0.97918  +0.03030   0.94003  0.3571     5/2/7
+
+====================================================================================================
+EVERY CHANGE, MEASURED WHERE IT IS SCORED
+change                   validator      SCORED  verdict
+s05 over BASE             +0.01794    +0.02707  holds on both
+s08 over s05              +0.00748    +0.00000  NEUTRAL where it is scored (all of it was validator-only)
+s09 over s08              +0.00487    -0.00086  *** SIGN FLIP ***
+s09 over BASE             +0.03030    +0.02621  holds on both
+
+--- per-film, BASE vs s05, on the SCORED films ---
+film                divs      BASE       s05     delta  GT edges
+44b6_0113de3b          0   0.86847   0.96051  +0.09204        53
+44b6_0b24845f          0   0.97812   0.97925  +0.00113        52
+6bba_05b6850b          0   0.96172   0.96689  +0.00517       864
+6bba_05db0fb1          3   0.84089   0.87974  +0.03885      1304

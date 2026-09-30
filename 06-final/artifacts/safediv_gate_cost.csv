@@ -1,0 +1,152 @@
+film,fold,blocked_by,reachable,d_pc,d_pq,d_cq,g_existing,g_parent,g_sister,g_symmetry,g_mutual_nn,g_diverge
+44b6_12dfb391,44b6,daughter held by another parent,,,,,,,,,,
+44b6_267148e4,44b6,daughter held by another parent,,,,,,,,,,
+44b6_2a2eff9f,44b6,daughter held by another parent,,,,,,,,,,
+44b6_341df25f,44b6,,True,6.700046641628698,6.080193253507654,12.481861840286488,True,True,True,True,True,False
+44b6_587a1e22,44b6,daughter held by another parent,,,,,,,,,,
+44b6_5f15d135,44b6,daughter held by another parent,,,,,,,,,,
+44b6_706092f0,44b6,detection,,,,,,,,,,
+44b6_74d0c52e,44b6,daughter held by another parent,,,,,,,,,,
+44b6_7a302da0,44b6,,True,3.25,6.080193253507654,8.900491559458949,True,True,True,False,True,False
+44b6_996155de,44b6,,True,4.875,4.596194077712559,9.334914300624297,True,True,True,True,True,False
+44b6_9be80b04,44b6,,True,3.9804208320226646,4.596194077712559,8.285906709588275,True,True,True,True,True,True
+44b6_a21120c2,44b6,,True,3.9804208320226646,4.596194077712559,8.285906709588275,True,True,True,True,True,True
+44b6_a21120c2,44b6,daughter held by another parent,,,,,,,,,,
+44b6_aaf8b0ea,44b6,daughter held by another parent,,,,,,,,,,
+44b6_c50204e0,44b6,linker child is neither daughter,,,,,,,,,,
+44b6_c50204e0,44b6,,True,3.25,4.596194077712559,7.267220926874317,True,True,True,True,True,True
+44b6_c8e2a523,44b6,daughter held by another parent,,,,,,,,,,
+44b6_d2f34f90,44b6,,True,2.2980970388562794,6.894291116568838,8.285906709588275,True,True,True,False,True,False
+44b6_d2f34f90,44b6,,True,2.2980970388562794,7.44668550430324,8.125,True,True,True,False,True,False
+44b6_d5e7d891,44b6,daughter held by another parent,,,,,,,,,,
+44b6_d5e7d891,44b6,,True,3.9804208320226646,4.875,8.443747686898277,True,True,True,True,True,False
+44b6_d754aa59,44b6,daughter held by another parent,,,,,,,,,,
+44b6_deabac95,44b6,daughter held by another parent,,,,,,,,,,
+44b6_e28840c6,44b6,daughter held by another parent,,,,,,,,,,
+44b6_e28840c6,44b6,daughter held by another parent,,,,,,,,,,
+44b6_eb2880fc,44b6,daughter held by another parent,,,,,,,,,,
+6bba_05db0fb1,6bba,linker child is neither daughter,,,,,,,,,,
+6bba_05db0fb1,6bba,parent out-degree != 1,,,,,,,,,,
+6bba_05db0fb1,6bba,daughter held by another parent,,,,,,,,,,
+6bba_062c8d37,6bba,daughter held by another parent,,,,,,,,,,
+6bba_07e24132,6bba,daughter held by another parent,,,,,,,,,,
+6bba_07e24132,6bba,daughter held by another parent,,,,,,,,,,
+6bba_085bf656,6bba,detection,,,,,,,,,,
+6bba_09961292,6bba,daughter held by another parent,,,,,,,,,,
+6bba_09961292,6bba,,True,3.6336104634371584,4.596194077712559,4.875,True,True,True,True,True,True
+6bba_09961292,6bba,daughter held by another parent,,,,,,,,,,
+6bba_09961292,6bba,,True,3.6336104634371584,3.9804208320226646,6.700046641628698,True,True,True,True,True,False
+6bba_0e7c0d07,6bba,,True,3.9804208320226646,11.375,11.830178570080843,True,False,True,False,True,False
+6bba_12665c0e,6bba,daughter held by another parent,,,,,,,,,,
+6bba_12665c0e,6bba,,True,3.6336104634371584,10.900831390311474,14.16642156650719,True,False,False,False,True,False
+6bba_12665c0e,6bba,daughter held by another parent,,,,,,,,,,
+6bba_1d0d8384,6bba,daughter held by another parent,,,,,,,,,,
+6bba_207c6aaf,6bba,daughter held by another parent,,,,,,,,,,
+6bba_20852818,6bba,daughter held by another parent,,,,,,,,,,
+6bba_20852818,6bba,daughter held by another parent,,,,,,,,,,
+6bba_20852818,6bba,daughter held by another parent,,,,,,,,,,
+6bba_2312ac41,6bba,daughter held by another parent,,,,,,,,,,
+6bba_2312ac41,6bba,,True,3.9804208320226646,5.3895152843275245,8.75089281159357,True,True,True,True,True,True
+6bba_268e1230,6bba,,True,2.2980970388562794,10.405076885828379,11.830178570080843,True,False,True,False,True,False
+6bba_2819ca14,6bba,daughter held by another parent,,,,,,,,,,
+6bba_32db13fc,6bba,detection,,,,,,,,,,
+6bba_337b1b3a,6bba,,True,3.6336104634371584,8.443747686898277,11.490485194281398,True,True,True,False,True,True
+6bba_337b1b3a,6bba,,True,5.3895152843275245,5.138701197773616,10.405076885828379,True,True,True,True,True,True
+6bba_3abfe10a,6bba,daughter held by another parent,,,,,,,,,,
+6bba_3c5691b6,6bba,daughter held by another parent,,,,,,,,,,
+6bba_3c5691b6,6bba,daughter held by another parent,,,,,,,,,,
+6bba_3db54e20,6bba,linker child is neither daughter,,,,,,,,,,
+6bba_3fda6b25,6bba,,True,2.8145825622994254,7.960841664045329,10.65583760199075,True,True,True,False,True,True
+6bba_474be664,6bba,,True,6.894291116568838,7.267220926874317,13.978778558944269,True,True,True,True,False,False
+6bba_48816121,6bba,daughter held by another parent,,,,,,,,,,
+6bba_48816121,6bba,,True,4.596194077712559,7.44668550430324,11.830178570080843,True,True,True,True,True,True
+6bba_48816121,6bba,daughter held by another parent,,,,,,,,,,
+6bba_48816121,6bba,daughter held by another parent,,,,,,,,,,
+6bba_48816121,6bba,detection,,,,,,,,,,
+6bba_4f99ce20,6bba,,True,2.2980970388562794,6.894291116568838,6.080193253507654,True,True,True,False,True,False
+6bba_4f99ce20,6bba,daughter held by another parent,,,,,,,,,,
+6bba_4ffd3da3,6bba,linker child is neither daughter,,,,,,,,,,
+6bba_4ffd3da3,6bba,daughter held by another parent,,,,,,,,,,
+6bba_4ffd3da3,6bba,,True,3.6336104634371584,17.04314378276496,16.331047884321446,True,False,False,False,False,False
+6bba_55b7eebe,6bba,,True,5.859020822628983,8.285906709588275,13.498263777241872,True,True,True,True,True,False
+6bba_57b7cc1e,6bba,daughter held by another parent,,,,,,,,,,
+6bba_57b7cc1e,6bba,daughter held by another parent,,,,,,,,,,
+6bba_57b7cc1e,6bba,daughter held by another parent,,,,,,,,,,
+6bba_5c039895,6bba,,True,5.859020822628983,6.080193253507654,11.830178570080843,True,True,True,True,False,False
+6bba_5c039895,6bba,,True,5.138701197773616,7.44668550430324,11.604821196382131,True,True,True,True,True,True
+6bba_5c039895,6bba,,True,4.875,5.3895152843275245,9.475296829123613,True,True,True,True,True,True
+6bba_5c824876,6bba,,True,5.859020822628983,5.138701197773616,10.405076885828379,True,True,True,True,True,True
+6bba_61ecbe65,6bba,,True,3.6336104634371584,5.629165124598851,3.6336104634371584,True,True,True,True,True,False
+6bba_6321a359,6bba,daughter held by another parent,,,,,,,,,,
+6bba_67ebd073,6bba,daughter held by another parent,,,,,,,,,,
+6bba_6ca87370,6bba,,True,2.2980970388562794,6.700046641628698,8.125,True,True,True,False,True,False
+6bba_705ec2c9,6bba,daughter held by another parent,,,,,,,,,,
+6bba_74686d6a,6bba,daughter held by another parent,,,,,,,,,,
+6bba_74686d6a,6bba,daughter held by another parent,,,,,,,,,,
+6bba_784a78c9,6bba,,True,3.6336104634371584,7.621925609713073,10.65583760199075,True,True,True,False,True,True
+6bba_786893ac,6bba,daughter held by another parent,,,,,,,,,,
+6bba_786893ac,6bba,,True,2.2980970388562794,8.75089281159357,9.884489111734608,True,True,True,False,True,False
+6bba_786893ac,6bba,,True,2.8145825622994254,7.083210783253595,7.267220926874317,True,True,True,False,True,True
+6bba_78a7bd97,6bba,daughter held by another parent,,,,,,,,,,
+6bba_78a7bd97,6bba,detection,,,,,,,,,,
+6bba_7af54fde,6bba,daughter held by another parent,,,,,,,,,,
+6bba_7af54fde,6bba,daughter held by another parent,,,,,,,,,,
+6bba_7d3058ae,6bba,daughter held by another parent,,,,,,,,,,
+6bba_7d3058ae,6bba,,True,5.859020822628983,8.75089281159357,13.595725431178728,True,True,True,True,True,False
+6bba_7f87b3d8,6bba,,True,2.2980970388562794,8.285906709588275,10.017172754824587,True,True,True,False,True,True
+6bba_7f87b3d8,6bba,daughter held by another parent,,,,,,,,,,
+6bba_7f87b3d8,6bba,detection,,,,,,,,,,
+6bba_80d12824,6bba,daughter held by another parent,,,,,,,,,,
+6bba_87289e13,6bba,parent out-degree != 1,,,,,,,,,,
+6bba_8b7818bf,6bba,daughter held by another parent,,,,,,,,,,
+6bba_8b7818bf,6bba,daughter held by another parent,,,,,,,,,,
+6bba_907271db,6bba,,True,6.700046641628698,9.475296829123613,13.498263777241872,True,False,True,True,True,False
+6bba_969618f6,6bba,parent out-degree != 1,,,,,,,,,,
+6bba_969618f6,6bba,daughter held by another parent,,,,,,,,,,
+6bba_969618f6,6bba,,True,2.2980970388562794,6.894291116568838,7.267220926874317,True,True,True,False,False,True
+6bba_9a41d029,6bba,,True,3.6336104634371584,7.083210783253595,8.900491559458949,True,True,True,False,False,True
+6bba_9a41d029,6bba,linker child is neither daughter,,,,,,,,,,
+6bba_9e23430b,6bba,,True,4.596194077712559,4.875,8.75089281159357,True,True,True,True,True,False
+6bba_ab78413d,6bba,daughter held by another parent,,,,,,,,,,
+6bba_ab78413d,6bba,daughter held by another parent,,,,,,,,,,
+6bba_aeee7805,6bba,,True,1.625,4.596194077712559,4.875,True,True,True,False,True,True
+6bba_afb141ff,6bba,,True,5.138701197773616,8.285906709588275,12.160386507015309,True,True,True,True,True,False
+6bba_afb141ff,6bba,,True,1.625,6.700046641628698,6.894291116568838,True,True,True,False,False,False
+6bba_afb141ff,6bba,daughter held by another parent,,,,,,,,,,
+6bba_afb141ff,6bba,,True,2.2980970388562794,10.531203634912773,12.795262795269194,True,False,True,False,False,False
+6bba_b204cac7,6bba,daughter held by another parent,,,,,,,,,,
+6bba_b204cac7,6bba,,True,4.875,10.017172754824587,13.101168840985142,True,False,True,False,True,False
+6bba_b329af44,6bba,daughter held by another parent,,,,,,,,,,
+6bba_bb9f20c3,6bba,,True,4.596194077712559,8.900491559458949,11.941262496067994,True,True,True,False,False,False
+6bba_bb9f20c3,6bba,,True,2.2980970388562794,5.3895152843275245,6.700046641628698,True,True,True,False,True,True
+6bba_bb9f20c3,6bba,daughter held by another parent,,,,,,,,,,
+6bba_c328f2fd,6bba,linker child is neither daughter,,,,,,,,,,
+6bba_c328f2fd,6bba,linker child is neither daughter,,,,,,,,,,
+6bba_cdcfe533,6bba,,True,4.875,9.75,9.334914300624297,True,False,True,False,True,True
+6bba_cdcfe533,6bba,,True,2.8145825622994254,8.125,8.900491559458949,True,True,True,False,True,True
+6bba_cdcfe533,6bba,,True,3.9804208320226646,6.080193253507654,6.080193253507654,True,True,True,True,True,True
+6bba_cdcfe533,6bba,,True,4.596194077712559,3.9804208320226646,8.285906709588275,True,True,True,True,True,True
+6bba_d1acb6ff,6bba,,True,2.2980970388562794,1.625,3.6336104634371584,True,True,True,True,True,False
+6bba_d2b9fc0c,6bba,daughter held by another parent,,,,,,,,,,
+6bba_d2b9fc0c,6bba,daughter held by another parent,,,,,,,,,,
+6bba_d3da753b,6bba,daughter held by another parent,,,,,,,,,,
+6bba_debd7bfa,6bba,,True,1.625,7.083210783253595,8.285906709588275,True,True,True,False,True,True
+6bba_debd7bfa,6bba,,True,5.859020822628983,6.080193253507654,9.884489111734608,True,True,True,True,True,True
+6bba_debd7bfa,6bba,,True,2.8145825622994254,14.259317129512198,13.978778558944269,True,False,True,False,False,True
+6bba_debd7bfa,6bba,,True,6.700046641628698,6.700046641628698,8.285906709588275,True,True,True,True,True,True
+6bba_df673a83,6bba,,True,1.625,3.6336104634371584,4.596194077712559,True,True,True,False,True,True
+6bba_df673a83,6bba,,True,4.875,6.700046641628698,8.285906709588275,True,True,True,True,True,True
+6bba_df673a83,6bba,daughter held by another parent,,,,,,,,,,
+6bba_df673a83,6bba,detection,,,,,,,,,,
+6bba_e16ffc58,6bba,linker child is neither daughter,,,,,,,,,,
+6bba_ebdf3b34,6bba,linker child is neither daughter,,,,,,,,,,
+6bba_ebdf3b34,6bba,,True,2.8145825622994254,6.080193253507654,8.75089281159357,True,True,True,False,True,False
+6bba_ef7b4f7e,6bba,daughter held by another parent,,,,,,,,,,
+6bba_ef7b4f7e,6bba,,True,6.080193253507654,7.44668550430324,13.301198254292732,True,True,True,True,True,False
+6bba_f20478e9,6bba,,True,4.596194077712559,3.25,7.267220926874317,True,True,True,True,True,False
+6bba_f8ffd5e7,6bba,,True,5.3895152843275245,7.44668550430324,11.490485194281398,True,True,True,True,True,False
+6bba_f8ffd5e7,6bba,daughter held by another parent,,,,,,,,,,
+6bba_fc5f39dc,6bba,daughter held by another parent,,,,,,,,,,
+6bba_fc5f39dc,6bba,daughter held by another parent,,,,,,,,,,
+6bba_fe670320,6bba,linker child is neither daughter,,,,,,,,,,
+6bba_fe670320,6bba,,True,6.700046641628698,6.894291116568838,12.481861840286488,True,True,True,True,True,False

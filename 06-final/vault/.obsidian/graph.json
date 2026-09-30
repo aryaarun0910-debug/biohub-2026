@@ -1,0 +1,33 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": true,
+  "showAttachments": false,
+  "hideUnresolved": true,
+  "showOrphans": true,
+  "collapse-color-groups": false,
+  "colorGroups": [
+    { "query": "tag:#key",        "color": { "a": 1, "rgb": 16007990 } },
+    { "query": "tag:#submission", "color": { "a": 1, "rgb": 2201331  } },
+    { "query": "tag:#stage",      "color": { "a": 1, "rgb": 1483257  } },
+    { "query": "tag:#finding",    "color": { "a": 1, "rgb": 3562649  } },
+    { "query": "tag:#failed",     "color": { "a": 1, "rgb": 9127187  } },
+    { "query": "tag:#gotcha",     "color": { "a": 1, "rgb": 15695665 } },
+    { "query": "tag:#infra",      "color": { "a": 1, "rgb": 7627107  } },
+    { "query": "tag:#concept",    "color": { "a": 1, "rgb": 10233776 } },
+    { "query": "tag:#rule",       "color": { "a": 1, "rgb": 6710886  } },
+    { "query": "tag:#moc",        "color": { "a": 1, "rgb": 16750592 } }
+  ],
+  "collapse-display": false,
+  "showArrow": true,
+  "textFadeMultiplier": -0.3,
+  "nodeSizeMultiplier": 1.4,
+  "lineSizeMultiplier": 1.1,
+  "collapse-forces": false,
+  "centerStrength": 0.42,
+  "repelStrength": 11,
+  "linkStrength": 0.6,
+  "linkDistance": 210,
+  "scale": 0.55,
+  "close": false
+}
