@@ -1,0 +1,99 @@
+# E06: association on frozen proposals, leave-one-embryo-out.
+#
+# A separate file from every earlier config on purpose: their digests are
+# recorded against the experiments that ran them.
+
+schema_version: 1
+
+E06:
+  name: association bake-off on frozen DoG peaks
+  component: association
+
+  frozen_proposals:
+    source: biohubx.proposals.dog
+    local_maxima_only: true
+    radii_um: [2.0, 3.0]
+    response_quantile: 0.95
+    suppression_radius_um: 4.0
+    refine_centroids: false
+    truncation: none
+    why_no_truncation: >-
+      F-0032 measured that the strict-peak detector saturates at or below the
+      estimated cell count on both embryos, so the natural peak set is already
+      inside the node-count regime F-0018 asked for and a budget would only
+      remove peaks. The node ratio is reported, never assumed.
+    frozen_by: "[[D-0041]]"
+    may_not_change_after_preregistration: >-
+      H-11c or any other proposal probe runs beside E06 and cannot alter this
+      block. A better proposal set enters a new declaration, not this one.
+
+  window:
+    frames_per_movie: 10
+    start: the first annotated frame of the movie, clamped so the window fits
+    spatial_extent: full
+    why_a_window: >-
+      DoG over every frame of every movie costs about fifty times the two-frame
+      probes, and the association question does not need whole movies to be
+      answered per embryo. Ground truth is restricted to the same window by the
+      reader, so scores are per window and are not comparable with whole-movie
+      scores; they are comparable across arms and across embryos, which is what
+      E06 compares.
+
+  folds:
+    - id: fold_44b6
+      select_on: 44b6
+      evaluate_on: 6bba
+    - id: fold_6bba
+      select_on: 6bba
+      evaluate_on: 44b6
+    never_read: the public-test directory, for any purpose
+
+  first_measurement:
+    id: E06-ORACLE
+    what: >-
+      A legal graph over the frozen proposals in which the only edges are the
+      ground-truth edges whose two endpoints each match one-to-one to a proposal
+      within the official radius, scored through the pinned official metric per
+      window and aggregated per embryo.
+    role: diagnostic ceiling, never a promotable method
+    decision_rule: >-
+      If either embryo's oracle score cannot support 0.950, association is not
+      yet the sole bottleneck and the campaign returns to proposal
+      complementarity (H-11c, E05). If both clear 0.950 with headroom toward
+      0.970, the bake-off proceeds on identical proposal nodes and candidate
+      edges.
+
+  bake_off_arms:
+    - id: A1
+      name: nearest-parent baseline with explicit no-parent
+      note: the existing untrained matcher, constants unchanged
+    - id: A2
+      name: linear assignment
+    - id: A3
+      name: parental-softmax scoring with a no-link constant
+      source: H-06
+    - id: A4
+      name: entropy-based abstention
+      source: H-07
+    - id: A5
+      name: globally constrained ILP decoding
+    identical_inputs: >-
+      Every arm consumes the same frozen proposal nodes and the same candidate
+      edge set, so a difference between arms is a difference in association and
+      nothing else.
+
+  selection:
+    constants: selected on the training embryo only, frozen before the other is measured
+    promotion_metric: official combined score on the held-out embryo, both directions, never pooled
+
+  falsifier:
+    oracle: >-
+      The oracle has no falsifier of its own; it is a ceiling. Its decision rule
+      above is binding.
+    bake_off: >-
+      An arm is killed if it fails to improve the official combined score over
+      A1 on either held-out embryo. Promotion requires improvement on both
+      directions. One direction improving is a challenger.
+
+  runtime_ceiling_seconds: 7200
+  budget: CPU only, no GPU, no network, no download

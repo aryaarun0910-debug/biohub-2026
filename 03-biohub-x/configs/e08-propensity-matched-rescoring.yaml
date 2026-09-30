@@ -1,0 +1,98 @@
+# E08, proposed. A declaration draft for the bias-robust objective the controller
+# asked for after E07-PROPENSITY-01 (R-0027). It runs nothing and promotes
+# nothing until Arya Arun accepts it in their own words; E07's frozen blocks are
+# untouched and the E07 arms stay held.
+#
+# What the probe measured, and what it could not. On 6bba, circumstance features
+# add 0.0085 held-out AUC to the DoG response in predicting "annotated", and no
+# within-movie shuffle reaches that; on 44b6 they subtract 0.0110. Appearance
+# (0.0069) and density (0.0055) carry most of the 6bba gain. The probe cannot
+# tell "annotators trace bright, crowded cells" from "bright, crowded candidates
+# are cells": intensity is a circumstance and a cellness cue at once. Only a
+# held-out ceiling on the other embryo can separate those, so that is the
+# arbiter here, as in E07.
+
+E08:
+  status: proposed
+  component: proposals
+  parent: E07, whose pool, patches, scorer, decode and folds are reused unchanged
+  hypothesis: >-
+    A candidate re-scorer trained with its unlabelled side drawn to match the
+    positives' circumstance distribution learns cellness rather than annotation
+    propensity, and therefore transfers across the annotation regimes of the two
+    embryos better than the E07 objective: it raises the oracle ceiling over A0
+    on both held-out directions and lifts 6bba to at least 0.950.
+  mechanism:
+    objective: non-negative positive-unlabelled risk, as E07, with the same per-movie class prior
+    change: >-
+      within each training movie, each unlabelled candidate's risk term is
+      weighted by the propensity odds of E07-PROPENSITY-01's circumstance model
+      fit on that fold's training movies, so the unlabelled distribution the
+      risk is taken over has the positives' circumstances and those
+      circumstances carry no separating signal inside the loss
+    matched_on: [position, face_um, time, density, persist_prev, persist_next, motion_um]
+    not_matched_on: [dog, intensity]
+    how: >-
+      the unlabelled risk inside the non-negative PU loss is importance-weighted
+      by the fitted odds of being a positive given the circumstances, normalised
+      per movie; batch composition is identical to E07's. The first
+      implementation ordered batches by weight instead, reweighted nothing over
+      an epoch, and inverted the scorer; the residual-propensity test caught it
+      on the first CPU run (D-0046).
+    weight_cap: 20.0
+    weight_cap_note: >-
+      odds are clipped to [1/20, 20] before normalisation; with eighteen
+      positives the unclipped odds span orders of magnitude and a handful of
+      rows would carry the whole unlabelled risk. The effective unlabelled
+      sample after clipping is recorded per movie.
+    why_not_intensity: >-
+      matching on intensity would blind the scorer to brightness, which is a
+      cellness cue the atlas (R-0022) says the misses lack. Whether the 0.0069
+      appearance gain on 6bba is propensity or cellness is exactly what the
+      held-out ceiling decides, and it is not decided here by construction.
+  arms:
+    - id: B3
+      channels: as E07 A3, intensity and the per-scale responses of the candidate's frame
+    - id: B4
+      channels: as E07 A4, with the neighbouring frames' intensity
+      condition: >-
+        held until B3 has shown the residual-propensity test below passing;
+        R-0027 named the temporal group on 6bba and A4 is the arm that can see it
+  falsifier:
+    residual_propensity: >-
+      after training, E07-PROPENSITY-01's procedure is rerun on the training
+      embryo with the scorer's logit in place of the DoG response as the
+      control. If the circumstance features still raise the scorer's held-out
+      AUC beyond the permutation null on the embryo where the probe found the
+      signal, the objective did not remove what it was built to remove and the
+      arm is killed.
+    ceiling: >-
+      the arm is killed if it fails to beat A0's oracle ceiling on both held-out
+      directions; one direction is a challenger; a pooled number is not a
+      result. Promotion additionally needs 6bba at or above 0.950.
+    inherited: every E07 kill rule, unchanged
+  inputs:
+    - the registered competition training artifacts, as E07
+    - configs/e07-candidate-rescoring.yaml for the pool, patch and decode rules, by digest
+    - artifacts/e07-propensity.json, R-0027, for the circumstance model's feature set only; its weights are refit per fold on training movies
+  split:
+    folds: as E07, fold_44b6 and fold_6bba, both directions reported separately
+    movies: stratified across annotation-count quartiles of the training embryo, as GPU-CAMPAIGN-E07-02 declares
+    never_read: the public-test directory; the held-out embryo before the threshold is frozen
+  funnel:
+    stage0: model inspect on B3 and B4; the scorer is E07's, so this is a reuse check
+    stage1: train probe on one stratified 44b6 window with matched sampling; loss moves, gradients flow, clamp behaviour recorded
+    stage1b: the residual-propensity test on the stage-1 checkpoint, CPU, both embryos; a design that fails it here does not reach a GPU
+    stage2: representative smoke, both directions, under an envelope of its own
+    stage3: mini-fold both directions; stage4 full folds for survivors
+  budget: stages 0 to 1b CPU only; nothing beyond without a GPU envelope authorised separately
+  forbidden_changes:
+    - the pool rule, patch, scorer architecture and count-tied decode of E07
+    - the fold definition
+    - any constant chosen against the held-out embryo
+    - editing E07, E06, E05 or D-0041
+  provenance_status: diagnostic_ceiling
+  open_questions_for_review:
+    - whether a 0.0085 AUC gain on one embryo is the signal this redesign was written for, or whether the E07-PROPENSITY-01 declaration should carry an effect-size floor and E07 continue to Stage 2B instead
+    - whether matching on density removes a cellness cue as intensity would; the atlas records crowding among the miss classes
+    - whether the circumstance model should be fit with the movie held out inside the training embryo, as the probe does, or on all training movies

@@ -1,0 +1,1229 @@
+# Findings registry: one measured claim per entry.
+#
+# Required per finding:
+#   id            stable identifier
+#   claim         a single measured statement
+#   instrument    the code that measured it
+#   evidence      how to reproduce, and what was observed
+#   validity      scope, and the conditions under which the claim holds
+#   superseded_by finding id that replaces this one, or null
+#
+# A number that is not here is not a result. Numbers are never restated in
+# prose; prose references the finding id.
+
+schema_version: 1
+
+findings:
+  - id: F-0001
+    claim: >-
+      Biohub-X is a standalone Git repository with no ancestor repository; no
+      tracked file names a quarantined prior-campaign repository; no tracked
+      file carries an absolute filesystem path outside the allow-listed
+      provenance records; and no import-path entry resolves outside the
+      repository, its virtual environment and the standard library.
+    instrument: tests/contracts/test_repository_isolation.py
+    evidence:
+      command: uv run pytest tests/contracts/test_repository_isolation.py
+      observed: 14 passed
+      note: >-
+        The content scans read the Git index, so they pass vacuously on an empty
+        index; the instrument asserts the index is non-empty, and both the
+        absolute-path detector and the quarantine scan carry negative controls
+        that plant the exact shape of a leak and require it to be flagged.
+    validity:
+      scope: repository_integrity
+      holds_while: >-
+        the instrument runs in CI on a full clone and the two allow-lists are
+        not extended. Extending either allow-list narrows this claim.
+    superseded_by: null
+
+  - id: F-0002
+    claim: >-
+      The two content identities separate platform drift from content change: a
+      CRLF rewrite of a configuration file breaks its raw identity and leaves
+      its canonical identity intact, while a single-character content edit
+      breaks both.
+    instrument: tests/mutation/test_line_ending_drift.py
+    evidence:
+      command: uv run pytest tests/mutation/test_line_ending_drift.py
+      observed: 5 passed
+    validity:
+      scope: content_identity
+      holds_while: >-
+        CANONICALIZATION_VERSION is v1. Bumping it invalidates every recorded
+        canonical digest and supersedes this finding.
+    superseded_by: null
+
+  - id: F-0003
+    claim: >-
+      Under the pinned official scorer, a predicted node that matches no
+      ground-truth node adds no edge false positive. Adding one isolated,
+      unmatched node to a perfect two-node prediction left edge TP, FP, FN at
+      1, 0, 0 and the raw edge Jaccard at 1.0. An edge between two mutually
+      unmatched predicted nodes is likewise uncharged. The exemption ends at
+      the annotated cells: an edge whose source matches a ground-truth node
+      that has a ground-truth successor, but which points elsewhere, was
+      charged as one false positive.
+    instrument: tests/contracts/test_official_scorer_behaviour.py
+    evidence:
+      command: uv run pytest tests/contracts/test_official_scorer_behaviour.py
+      observed: 11 passed
+      note: >-
+        This is edge accounting only. The same unmatched node still enters the
+        node-count adjustment: holding the estimated total at 2, it raised
+        num_pred_nodes from 2 to 3, total_node_ratio from 0.0 to 0.5, and
+        lowered the adjusted edge Jaccard from 1.0 to 0.95 while the raw
+        Jaccard did not move. Free of edge penalty is not free of consequence.
+    validity:
+      scope: official_metric_behaviour
+      holds_while: >-
+        registry/official_source.yaml pins commit
+        075fc5f5a52d11077f9dc2b074644618f26939e2 and its digests verify. Moving
+        the pin supersedes this finding until the instrument is re-run.
+    superseded_by: null
+
+  - id: F-0004
+    claim: >-
+      The official node-count adjustment multiplies the edge Jaccard by
+      1 - 0.1 * (N_pred - N_total) / N_total and is clamped only at zero, so the
+      multiplier exceeds one whenever fewer nodes are predicted than the
+      estimated total. With 2 predicted nodes, a declared estimated total of 20
+      and a raw edge Jaccard of 1.0, total_node_ratio was -0.9 and the adjusted
+      edge Jaccard was 1.09.
+    instrument: tests/contracts/test_official_scorer_behaviour.py
+    evidence:
+      command: uv run pytest tests/contracts/test_official_scorer_behaviour.py
+      observed: 11 passed
+      note: >-
+        Demonstrating an adjusted Jaccard above one requires an estimated total
+        larger than the annotated ground-truth count. On a complete synthetic
+        ground truth the two coincide, total_node_ratio is 0.0 and the adjusted
+        Jaccard equals the raw one, which is why the estimate is a required,
+        provenance-tagged argument rather than a default. Whether the real
+        datasets are sparse enough for this to be exploitable is not measured
+        here and needs competition data.
+    validity:
+      scope: official_metric_behaviour
+      holds_while: >-
+        the official source pin holds and ADJUSTMENT_ALPHA remains 0.1 in the
+        vendored implementation.
+    superseded_by: null
+
+  - id: F-0005
+    claim: >-
+      The two boundaries around a multi-frame edge behave differently and were
+      measured separately. The Biohub-X lineage contract refuses an edge that
+      does not advance exactly one frame at construction, so such an edge cannot
+      reach evaluation. The pinned official scorer, called directly on a graph
+      built beneath that contract, drops a frame-skipping edge instead of
+      charging it: a prediction whose only edge ran from frame 0 to frame 2
+      produced edge TP 0, FP 0 and FN 2 against a ground truth of two
+      consecutive edges.
+    instrument: tests/contracts/test_official_scorer_behaviour.py
+    evidence:
+      command: uv run pytest tests/contracts/test_official_scorer_behaviour.py
+      observed: 11 passed
+      note: >-
+        The official behaviour is silence rather than penalty, which is the
+        reason the contract refuses rather than relies on it: an illegal edge
+        would neither be rewarded nor charged, while the annotated edge it
+        failed to reproduce still counts against the system. Backward and
+        same-frame edges are refused by the same contract rule.
+    validity:
+      scope: official_metric_behaviour_and_lineage_contract
+      holds_while: >-
+        the official source pin holds and LineageGraph keeps its one-frame edge
+        rule.
+    superseded_by: null
+
+  - id: F-0006
+    claim: >-
+      A complete detect-to-score chain can be run on a deterministic synthetic
+      fixture with no competition data, no GPU and no external artifact, and the
+      graph it emits is legal by construction. On the default fixture the chain
+      detects 14 instances, offers 37 candidate edges at a 12 micrometre radius,
+      reaches every true edge, decodes 11 edges including the one division, and
+      scores 1.1 under the official metric.
+    instrument: tests/end_to_end/test_vertical_slice.py
+    evidence:
+      command: uv run pytest tests/end_to_end
+      observed: 19 passed
+      note: >-
+        The matcher is an untrained deterministic rule with hand-set constants.
+        The score is a property of the fixture and those constants, not evidence
+        about the competition, and the fixture is far easier than real data.
+        What the number demonstrates is causal ownership: every stage is reached
+        only through the one in front of it and every intermediate is a
+        validated contract.
+    validity:
+      scope: software_vertical_slice
+      holds_while: >-
+        the synthetic fixture, the classical detector and the untrained matcher
+        are unchanged. Any of them changing supersedes the specific counts.
+    superseded_by: null
+
+  - id: F-0007
+    claim: >-
+      Candidate reach is a real ceiling on the edge Jaccard and its two failure
+      modes are separately attributable. Narrowing the candidate radius to 1
+      micrometre, below the fixture's one-to-two micrometre true displacements,
+      dropped reach to 0.182 with 9 true edges unreachable outside the radius and
+      0 unreachable for a missing endpoint, and the edge Jaccard equalled the
+      reach at 0.182. Raising the detection threshold to 0.99 instead dropped
+      reach to 0.273 with 8 true edges unreachable for a missing endpoint and 0
+      outside the radius.
+    instrument: tests/end_to_end/test_vertical_slice.py
+    evidence:
+      command: uv run pytest tests/end_to_end
+      observed: 19 passed
+      note: >-
+        The two knobs produce the same symptom, a low score, through different
+        stages. Reporting them apart is what stops the next experiment being
+        aimed at the wrong component.
+    validity:
+      scope: software_vertical_slice
+      holds_while: the synthetic fixture and the classical detector are unchanged.
+    superseded_by: null
+
+  - id: F-0008
+    claim: >-
+      The node-count lever measured on hand-built graphs in F-0003 and F-0004
+      reproduces through a whole running pipeline. Between fixture noise 0.06 and
+      0.15 the detector went from 15 to 189 instances while the raw edge Jaccard
+      stayed at 0.9091 and edge false positives stayed at 0; the node-count ratio
+      rose from +0.071 to +12.500 and the adjusted edge Jaccard fell from 0.9026
+      to 0.0000.
+    instrument: tests/end_to_end/test_vertical_slice.py
+    evidence:
+      command: uv run pytest tests/end_to_end
+      observed: 19 passed
+      note: >-
+        The spurious detections match no annotated node, so they cost nothing in
+        edge terms and everything through the adjustment. This makes the lever a
+        property of a system rather than of an equation, and is the direct
+        justification for the deferral recorded in D-0011.
+    validity:
+      scope: software_vertical_slice_and_official_metric_behaviour
+      holds_while: >-
+        the official source pin holds and the fixture and detector are unchanged.
+    superseded_by: null
+
+  - id: F-0009
+    claim: >-
+      A prediction that abstains on every target emits a graph with nodes and no
+      edges, and the pinned official scorer cannot score it: `evaluate` returns
+      early for an edgeless graph without applying its matching, so the
+      `node_recall` helper it documents as requiring a matched graph raises a
+      KeyError from inside tracksdata rather than returning a number. Biohub-X
+      refuses such a prediction with a named error instead.
+    instrument: tests/end_to_end/test_vertical_slice.py
+    evidence:
+      command: uv run pytest tests/end_to_end
+      observed: 19 passed
+      note: >-
+        Found by driving the matcher's abstention weight to an extreme while
+        testing that no feature channel is inert. A system that abstains
+        everywhere is a real possible output, so the failure is reported as a
+        refusal that says why, not as a score of zero and not as a dependency's
+        key error.
+    validity:
+      scope: official_metric_behaviour
+      holds_while: >-
+        registry/official_source.yaml pins commit
+        075fc5f5a52d11077f9dc2b074644618f26939e2 and tracksdata stays at the
+        pinned commit.
+    superseded_by: null
+
+  - id: F-0010
+    claim: >-
+      The local test split is not a held-out evaluation set. It contains four
+      volumes and no ground truth at all, and every one of the four is
+      byte-identical to a train volume carrying the same dataset id, confirmed
+      by matching tree digests over 456,757,564 to 547,662,847 bytes each. It is
+      a format example for the submission pipeline; the genuinely held-out data
+      is the hidden set swapped in at rerun.
+    instrument: tests/contracts/test_competition_corpus.py
+    evidence:
+      command: uv run pytest tests/contracts/test_competition_corpus.py
+      observed: 6 passed
+      note: >-
+        Any score computed against the local test split is a score on training
+        data. All held-out evaluation must therefore be carved out of the 199
+        annotated train datasets. The duplication is recorded structure, not
+        permission to score train labels against the test directory.
+    validity:
+      scope: competition_corpus
+      holds_while: >-
+        registry/artifacts.yaml records the corpus onboarded on 2026-09-02. A
+        genuine held-out test set arriving supersedes this finding, and the
+        instrument fails loudly if it does.
+    superseded_by: null
+
+  - id: F-0011
+    claim: >-
+      The supervised corpus spans two embryos, not 199 independent subjects.
+      Dataset ids are {embryo}_{field_of_view}, and the 199 annotated train
+      datasets divide into embryo 6bba with 128 fields of view and embryo 44b6
+      with 71.
+    instrument: tests/contracts/test_competition_corpus.py
+    evidence:
+      command: uv run pytest tests/contracts/test_competition_corpus.py
+      observed: 6 passed
+      note: >-
+        Leave-one-embryo-out yields exactly two folds, each training on a single
+        embryo. Any claim that a result holds across embryos rests on n=2, and
+        199 is a count of fields of view rather than of independent subjects.
+        Fields of view from one embryo are not independent of each other, so a
+        random split over the 199 would leak.
+    validity:
+      scope: competition_corpus
+      holds_while: the registered corpus is unchanged.
+    superseded_by: null
+
+  - id: F-0012
+    claim: >-
+      Annotation is sparse by orders of magnitude. Across the 199 annotated
+      train datasets the ground truth totals 2,353,863 bytes against
+      87,607,537,865 bytes of volume, which is 0.0027 percent. Per dataset the
+      median ground truth is 11,713 bytes against a median volume of
+      411,186,738 bytes.
+    instrument: tests/contracts/test_competition_corpus.py
+    evidence:
+      command: uv run pytest tests/contracts/test_competition_corpus.py
+      observed: 6 passed
+      note: >-
+        Byte ratios are a proxy for annotation density, not a measurement of it,
+        because the two formats differ in what they store. The order of
+        magnitude is what matters here: no component may be written assuming
+        most cells carry a label. Converting this into a node count needs the
+        estimated_number_of_nodes metadata and is not established yet.
+    validity:
+      scope: competition_corpus
+      holds_while: the registered corpus is unchanged.
+    superseded_by: F-0013
+
+  - id: F-0013
+    claim: >-
+      Annotation density varies by two orders of magnitude across the corpus and
+      differs systematically between the two embryos. Across 199 annotated
+      datasets there are 133,318 annotated nodes and 128,883 annotated edges
+      against a summed estimated_number_of_nodes of 4,725,117, so 2.821 percent
+      overall. Per dataset the annotated fraction ranges from 0.13 to 20.21
+      percent with a median of 3.56. Embryo 44b6 has a median density of 0.77
+      percent across 71 movies; embryo 6bba has 9.71 percent across 128.
+    instrument: artifacts/corpus-annotation-survey.json
+    evidence:
+      command: >-
+        read every train .geff, count nodes and edges, and read
+        estimated_number_of_nodes from the geff metadata extra
+      observed: 199 datasets surveyed, all carrying an estimate
+      note: >-
+        The two leave-one-embryo-out folds are therefore not merely different
+        embryos, they are different annotation regimes differing about
+        twelvefold in density. A result that holds on one says little about the
+        other, and reporting the folds pooled would hide that.
+    validity:
+      scope: competition_corpus
+      holds_while: the registered corpus is unchanged.
+    superseded_by: null
+
+  - id: F-0014
+    claim: >-
+      Division supervision is extremely scarce. The corpus contains 151
+      annotated divisions in total, and 112 of the 199 datasets contain none at
+      all. The median dataset has zero and the maximum has five. Embryo 44b6
+      holds 26 divisions and embryo 6bba holds 125, so a leave-one-embryo-out
+      fold trains a division model on either 26 or 125 examples.
+    instrument: artifacts/corpus-annotation-survey.json
+    evidence:
+      command: count nodes with out-degree of two or more in every train .geff
+      observed: 151 divisions across 199 datasets
+      note: >-
+        This bounds the joint division scorer proposed as experiment E04 far
+        more tightly than the 0.1 metric weight suggests. Twenty-six positive
+        examples in the smaller fold is not enough to fit a learned triple
+        scorer with any confidence, so synthetic fork pretraining or a
+        geometric prior is likely necessary rather than optional.
+    validity:
+      scope: competition_corpus
+      holds_while: the registered corpus is unchanged.
+    superseded_by: null
+
+  - id: F-0015
+    claim: >-
+      The official node-count adjustment offers roughly a ten percent uplift on
+      the raw edge Jaccard to a system that predicts the annotated node count
+      rather than the true cell count. Using each dataset's own
+      estimated_number_of_nodes, the multiplier 1 - 0.1 * (N_pred - N_total) /
+      N_total has a median of 1.0000 when predicting the estimated total and
+      1.0964 when predicting the annotated count, ranging 1.0798 to 1.0999. It
+      is 1.0992 for embryo 44b6 and 1.0903 for embryo 6bba.
+    instrument: artifacts/corpus-annotation-survey.json
+    evidence:
+      command: >-
+        evaluate the pinned metric's adjustment formula against each dataset's
+        recorded estimated_number_of_nodes under four node-count policies
+      observed: 199 datasets, medians 1.0000 / 1.0929 / 1.0964 / 1.0982
+      note: >-
+        This quantifies the lever established abstractly in F-0004 against the
+        real corpus. It is a ceiling, not a strategy: the uplift is only
+        realised if the nodes predicted are the annotated ones, since an edge
+        scores nothing unless both endpoints match ground truth within 7
+        micrometres. The multiplier is nearly flat between predicting half the
+        annotated count and twice it, so precision in node count matters far
+        less than which nodes are chosen.
+    validity:
+      scope: official_metric_behaviour_and_competition_corpus
+      holds_while: >-
+        the official source pin holds, ADJUSTMENT_ALPHA remains 0.1, and the
+        registered corpus is unchanged.
+    superseded_by: null
+
+  - id: F-0016
+    claim: >-
+      The official division counter shares the unmatched-prediction exemption
+      that F-0003 measured for edges. A predicted fork built entirely from
+      unmatched nodes is not charged: added to a perfect single-division
+      prediction it left division TP, FP, FN at 1, 0, 0 and the division
+      Jaccard at 1.0, while raising num_pred_nodes from 3 to 6 and lowering the
+      adjusted edge Jaccard from 1.0 to 0.9. The exemption ends at the annotated
+      cells: against a ground truth holding no divisions, a fork whose own node
+      matched an annotated cell with a successor was charged as one division
+      false positive, taking the division Jaccard from undefined to 0.0, and was
+      charged again as one edge false positive.
+    instrument: tests/contracts/test_official_scorer_behaviour.py
+    evidence:
+      command: uv run pytest tests/contracts/test_official_scorer_behaviour.py
+      observed: 13 passed
+      note: >-
+        A predicted fork enters the false-positive set only through
+        `considered`, `evaluable_forks` or `invalid_forks`. A fork on an
+        unmatched node is local to no ground-truth division window, is excluded
+        from `evaluable_forks` because that set requires the fork node to carry
+        a match, and supplies no cross-component branch evidence. Spurious
+        division repair on unannotated cells is therefore nearly free, and the
+        cost of an aggressive division policy is paid in the node count rather
+        than in the division term.
+    validity:
+      scope: official_metric_behaviour
+      holds_while: >-
+        registry/official_source.yaml pins commit
+        075fc5f5a52d11077f9dc2b074644618f26939e2 and its digests verify. Moving
+        the pin supersedes this finding until the instrument is re-run.
+    superseded_by: null
+
+  - id: F-0017
+    claim: >-
+      The Phase-2 chain runs end to end on real competition bytes and scores
+      0.082121 through the pinned official scorer, and detection rather than
+      association is what limits it. On a 12-frame, 32x128x128 window of
+      6bba_2540cd90 holding 26 annotated nodes and 22 annotated edges, the
+      classical local-maximum detector proposed 65 instances at node recall
+      0.269. Candidate reach was 0.182: of 18 unreachable annotated edges, all
+      18 were unreachable because an endpoint was never detected and 0 because
+      the 12 micrometre candidate radius was too small. Edge TP, FP, FN were
+      2, 2, 20 for a raw edge Jaccard of 0.083333; 65 predicted nodes against a
+      declared window estimate of 56.745 gave a node ratio of +0.145 and an
+      adjusted edge Jaccard of 0.082121. The window holds no annotated
+      divisions, and all 4 predicted divisions were uncharged.
+    instrument: biohubx infer real
+    evidence:
+      command: >-
+        biohubx infer real --dataset 6bba_2540cd90 --first-frame 0 --frames 12
+        --crop-z 0:32 --crop-y 128:256 --crop-x 128:256 --detection-threshold 0.70
+      observed: artifacts/real-preflight.json, 0.39 seconds of chain runtime
+      note: >-
+        integration_only. This measures that the chain runs on real data and
+        where its first bottleneck is, not that the approach works. The split
+        of unreachable edges is the load-bearing part: association had nothing
+        to fix, because the endpoints it needed did not exist. The window's
+        node-count estimate is prorated from the movie's official estimate by
+        frame and voxel fraction, which assumes uniform cell density, so it is
+        DECLARED rather than official metadata and the adjusted figure is not
+        comparable with a whole-movie one.
+    validity:
+      scope: vertical_slice_on_real_data
+      holds_while: >-
+        the window in configs/phase3-cpu.yaml section E01 is unchanged, the
+        official source pin holds, and the classical detector is unchanged.
+    superseded_by: null
+  - id: F-0018
+    claim: >-
+      Emitting the annotated node count instead of the estimated cell count is
+      worth about nine percent of the adjusted edge Jaccard, and it stops paying
+      once a filter destroys more than about eight percent of the correct edges
+      to get there. Across all 199 annotated training datasets, a dense
+      prediction padded to each dataset's own estimated_number_of_nodes scored an
+      adjusted edge Jaccard of exactly 1.0000 on both embryo folds, because its
+      node ratio is zero by construction. The same edges emitted at the annotated
+      node count scored 1.0986 on 44b6 and 1.0905 on 6bba. Sweeping the fraction
+      of correct edges the filtered policy retains, both folds break even at 0.92
+      and both fall behind the dense baseline at 0.90, by 0.0114 on 44b6 and
+      0.0184 on 6bba. Reaching 0.014 above the dense baseline, which is the step
+      from a 0.936 system to 0.950 with the division term held fixed, requires a
+      retention of 0.94 on both folds: 0.0327 on 44b6 and 0.0251 on 6bba.
+    instrument: biohubx evaluate retention
+    evidence:
+      command: >-
+        biohubx evaluate retention --seed 0
+        --retentions 1.0,0.98,0.96,0.94,0.92,0.90,0.88,0.85
+      observed: artifacts/retention-oracle.json, 199 datasets, 1180 seconds
+      note: >-
+        An oracle upper bound, not a strategy. Every retained edge is correct by
+        construction, so a real filter at the same node count scores no higher
+        than this and almost certainly lower. The command re-measured F-0003 and
+        F-0016 on real data before relying on them: padding 44b6_0113de3b from 52
+        nodes to its estimated 25,755 left every edge and division count
+        identical and moved the adjusted edge Jaccard from 1.0998 to 1.0000.
+        The crossover is independent of association quality while no false
+        positive is charged, since both policies scale linearly in the fraction
+        of correct edges, and that independence ends as soon as a system emits
+        wrong edges on annotated cells, which F-0003 shows are charged.
+    validity:
+      scope: official_metric_behaviour_and_competition_corpus
+      holds_while: >-
+        the official source pin holds, ADJUSTMENT_ALPHA remains 0.1, and the
+        registered corpus is unchanged. The four duplicated public-test fixtures
+        were not read.
+    superseded_by: null
+  - id: F-0019
+    claim: >-
+      A three-valued detection target with an intensity-quantile ignore band
+      keeps every annotated cell supervised while refusing to call unannotated
+      cells background, and the whole E03 training loop runs on CPU. On the E01
+      window at the ninetieth percentile the target was 26 positive, 353,632
+      negative and 39,558 ignored voxels, 10.06 percent ignored, at an intensity
+      threshold of 0.0976, with 0 annotated nodes unplaceable and all 26 inside
+      the ignore band. From deterministic random initialisation one Adam step at
+      1e-4 moved the masked loss from 1.110484 to 0.859316 at a gradient norm of
+      14.08. The checkpoint wrote atomically, reloaded with strict=True and
+      reproduced its output bit-identically. Peak extraction and suppression
+      yielded 133 proposals, which decoded to a legal graph of 133 nodes and 114
+      edges at candidate reach 0.227 and node recall 0.269, scoring 0.099879
+      through the pinned official metric. The run took 24.8 seconds and 1.52 GB
+      peak resident.
+    instrument: biohubx train preflight, tests/unit/test_training_targets.py
+    evidence:
+      command: biohubx train preflight --seed 0
+      observed: artifacts/train-preflight.json, 11 passed
+      note: >-
+        integration_only. One tiny window, one optimizer step, no fold and no
+        promotion; the score is what an untrained detector produces and means
+        nothing beyond the loop being wired correctly. Two things are worth
+        keeping. The ignore band containing all 26 annotated cells is the
+        evidence for D-0023, since a band that hid unannotated cells without
+        containing annotated ones would be guesswork. And peak extraction had to
+        threshold by quantile: one step from noise leaves the detector
+        uncalibrated, its maximum probability reached only 0.4929, so no
+        absolute threshold would have fired. E03 uses an absolute threshold once
+        a trained detector's scale means something.
+    validity:
+      scope: training_boundaries_on_real_data
+      holds_while: >-
+        the E01 window in configs/phase3-cpu.yaml is unchanged and the official
+        source pin holds. Its loop-integrity half still stands; its band half
+        does not.
+    superseded_by: F-0020
+  - id: F-0020
+    claim: >-
+      No intensity band can call any voxel background without contradicting
+      annotated cells, and the failure is not a grid artefact. Measuring the
+      intensity percentile of 5,291 annotated nodes across all 199 training
+      movies, the dimmest annotated cell sits at percentile 0.5263 on 44b6 and
+      0.0917 on 6bba. The q90 band this repository had adopted would call 179 of
+      856 44b6 nodes (20.9 percent) and 671 of 4,435 6bba nodes (15.1 percent)
+      background. Selecting per fold from the training embryo alone, 44b6 admits
+      only q50, which withholds half the volume from supervision and still
+      misclassifies 46 of 4,435 held-out 6bba nodes (1.04 percent); 6bba admits
+      no band at all, since even q50 contradicts 46 of its own. Replacing the
+      reference's striding with max-pooling over the same 4x4 block makes it
+      slightly worse, not better: the dimmest node moves to 0.4961 on 44b6 and
+      0.0894 on 6bba, and q90 coverage falls from 0.791 to 0.758 and from 0.849
+      to 0.840. Annotated cells are also rarely local intensity maxima on this
+      grid: 14.8 percent on 44b6 and 5.8 percent on 6bba.
+    instrument: biohubx evaluate mask-audit
+    evidence:
+      command: biohubx evaluate mask-audit --max-frames 4
+      observed: artifacts/mask-audit.json, 199 datasets, 5,291 nodes, 124 seconds
+      note: >-
+        Percentile rank within a frame is invariant to any monotonic intensity
+        normalisation, so none of these numbers move if the scaling changes;
+        what a normalisation moves is the absolute value a band maps to, never
+        which nodes fall inside it. Band selection used only each fold's
+        training embryo, and the evaluation embryo was measured afterwards as a
+        false-negative proxy that could not influence the choice. This finding
+        supersedes the single-window result in F-0019 that appeared to bless
+        q90: one window of one bright movie is not the corpus.
+    validity:
+      scope: competition_corpus_and_supervision
+      holds_while: >-
+        the registered corpus is unchanged and the model grid stays (1, 4, 4).
+        A finer grid would need re-measuring, and might change the answer.
+    superseded_by: F-0021
+  - id: F-0021
+    claim: >-
+      Audited over every annotated node in the corpus rather than a sample, no
+      intensity band survives on either fold, the class prior is valid at every
+      scale, and no annotated cell is lost to the model grid. All 133,318
+      annotated nodes across 18,933 annotated frames were measured, with zero
+      excluded by sampling and zero falling outside the strided grid, so
+      coverage is exact. The dimmest annotated cell sits at percentile 0.2987 on
+      44b6 and 0.0628 on 6bba, so band selection returns nothing for BOTH folds,
+      not only 6bba: the q50 band that appeared to survive on 44b6 under
+      four-frame sampling does not survive the full population. The q90 band
+      would call 4,877 of 20,197 44b6 nodes (24.1 percent) and 16,336 of 113,121
+      6bba nodes (14.4 percent) background. Grid collisions are zero, so the
+      count of positive voxels equals the annotated node count exactly. The class
+      prior spans 1.443e-4 to 3.000e-3 per grid voxel with a median of 6.832e-4,
+      every dataset inside the open unit interval. Annotated cells are local
+      intensity maxima for 12.0 percent of 44b6 and 6.1 percent of 6bba.
+    instrument: biohubx evaluate mask-audit
+    evidence:
+      command: biohubx evaluate mask-audit --max-frames 0 --no-compare-maxpool
+      observed: artifacts/mask-audit.json, 199 datasets, 133,318 nodes, 1699 seconds
+      note: >-
+        This supersedes F-0020, whose 5,291 nodes came from sampling four frames
+        per dataset. The sampling excluded 128,027 nodes and nothing else; no
+        node was ever dropped for falling outside the grid. The correction
+        matters in one direction: the full population is harsher, and it removes
+        the last band that appeared usable.
+    validity:
+      scope: competition_corpus_and_supervision
+      holds_while: >-
+        the registered corpus is unchanged and the model grid stays (1, 4, 4).
+    superseded_by: null
+
+  - id: F-0022
+    claim: >-
+      The SCAR assumption that nnPU relies on is not supported by this corpus.
+      Across the 199 training datasets, annotation density correlates with the
+      median intensity percentile of the annotated cells at Pearson r = +0.354.
+      Labelling is therefore not independent of the feature the detector reads,
+      and the direction is that densely annotated movies carry brighter
+      annotations, not dimmer ones.
+    instrument: biohubx evaluate mask-audit
+    evidence:
+      command: biohubx evaluate mask-audit --max-frames 0 --no-compare-maxpool
+      observed: artifacts/mask-audit.json, selection_bias_probe, 199 datasets
+      note: >-
+        The probe cannot separate density from embryo. 6bba is both the denser
+        embryo and the one with brighter annotations at the median, 0.9883
+        against 0.9651, so the correlation may be an embryo effect rather than a
+        density effect. What it cannot be read as is evidence FOR SCAR. A
+        near-zero correlation would have been consistent with SCAR without
+        proving it; +0.354 is not even that. nnPU's unbiasedness result assumes
+        SCAR, so E03 may not claim an unbiased estimator, and the direction of
+        the residual bias is unmeasured.
+    validity:
+      scope: competition_corpus_and_supervision
+      holds_while: the registered corpus is unchanged.
+    superseded_by: null
+
+  - id: F-0023
+    claim: >-
+      A minimum-track-length filter with isolated-node pruning is nearly free in
+      correct edges and nearly inert in node count when applied to the annotated
+      graphs. Sweeping the minimum frame span over all 199 annotated training
+      datasets, with the division exemption the public notebooks carry, edge
+      retention at the span of 6 those notebooks use is 0.9963 on 44b6 and 0.9945
+      on 6bba, against the 0.94 target and 0.92 break-even F-0018 established.
+      Every span from 2 to 10 clears both bars on both folds; even a span of 10
+      retains 0.9875 and 0.9763. Node retention tracks it closely, 0.9945 and
+      0.9928 at span 6, so the filter removes between 0.5 and 0.7 percent of
+      annotated nodes. Dropping the division exemption changes retention by less
+      than 0.002 anywhere in the sweep.
+    instrument: biohubx evaluate track-length
+    evidence:
+      command: biohubx evaluate track-length --minimums 2,3,4,5,6,8,10
+      observed: artifacts/track-length.json, 199 datasets, 133,318 nodes, 30.5 seconds
+      note: >-
+        integration_only, and the second half of the claim is the load-bearing
+        half. Applied to ground truth the filter meets a perfect graph, so the
+        edge cost measured here is the best case and a real detector's output can
+        only do worse; that direction is what makes a cheap falsification
+        possible, since a policy failing the bar here could not pass it there.
+        What the measurement cannot establish is the other side of the trade.
+        Annotated tracks are long by construction, because an annotator followed a
+        cell across frames, so there is almost no short-track structure in ground
+        truth for the filter to remove. It is therefore harmless AND almost inert
+        here, and its value depends entirely on removing spurious short tracks
+        from a real detector's output, which does not yet exist. This establishes
+        the necessary condition and leaves the sufficient one open.
+    validity:
+      scope: competition_corpus_and_graph_policy
+      holds_while: >-
+        the registered corpus is unchanged and the filter is defined as removing
+        connected components whose frame span is below the threshold, keeping any
+        component containing a division. The four duplicated public-test fixtures
+        were not read.
+    superseded_by: null
+
+  - id: F-0024
+    claim: >-
+      The clean-fold nnPU training loop runs end to end on a real Kaggle T4 with
+      every guard intact. On fold_44b6 with two 44b6 movies, two epochs, seed 4460,
+      batch size 2 and learning rate 1e-4, the masked positive-unlabelled risk fell
+      from 0.61999181 to 0.60510752 across two epochs of two batches each, the
+      non-negative clamp fired in zero batches in both epochs, four annotated
+      positive voxels were supervised per epoch, the checkpoint wrote atomically
+      and reloaded with strict=True, and the run took 84.744 seconds against a
+      2,400 second ceiling. The 2,076,706-parameter detector reached a peak of
+      2,778,661,376 bytes allocated and 3,701,473,280 reserved against 15,636,037,632
+      total, leaving 11,934,564,352 bytes of headroom.
+    instrument: biohubx package kaggle, run as E03-SMOKE-03 on aryaarun07/biohub-x-e03-fold-44b6
+    evidence:
+      command: biohubx package transport --push --campaign-envelope GPU-CAMPAIGN-E03-01
+      observed: artifacts/e03-smoke-03/result-fold_44b6.json, 19 stages, 102.4 seconds wall
+      note: >-
+        integration_only, and the four positives per epoch are the reason. The
+        smoke trains on a two-frame window of two sparse 44b6 movies, so the whole
+        run supervises four annotated cells; it establishes that the loop is wired
+        correctly on the target hardware and nothing whatever about whether the
+        detector learns. Every falsifier the envelope named was checked and none
+        fired: risk decreased, no epoch had zero positives, the clamp never fired,
+        strict reload succeeded, the device was a Tesla T4, and no forbidden input
+        was observed. The checkpoint digest computed here equals the one the kernel
+        recorded, so the bytes retrieved are the bytes it wrote.
+    validity:
+      scope: training_loop_on_target_hardware
+      holds_while: >-
+        configs/e03-clean-folds.yaml keeps digest
+        canonical_text_sha256:sha256/v1:c31428ecad168ed5553965fad500ea75326491220c1b39abd5510b073ffc7117
+        and the package pins commit b12261a0093f5dd37f18eef23c29143e60374593. It is
+        a property of two movies and two epochs, not of the fold.
+    superseded_by: null
+
+  - id: F-0025
+    claim: >-
+      A multi-scale Difference-of-Gaussians proposal source on the isotropic grid
+      dominates the classical local-maximum detector on the recall-versus-budget
+      frontier, on the F-0017 window. At a matched proposal budget the classical
+      detector at threshold 0.70 emits 75 proposals and reaches 0.3846 annotated
+      nodes within the official 7 micrometre radius, while DoG at response
+      quantile 0.997 emits 73 and reaches 0.6154. At matched reachability the
+      classical detector needs 310 proposals for 0.7692 while DoG needs 228 for
+      0.7308. DoG reaches 1.0000 at 483 proposals, which is 8.51 times the
+      window's estimated cell count and carries a node-count multiplier of 0.2488.
+    instrument: biohubx.proposals.dog, measured against biohubx.proposals.classical
+    evidence:
+      command: >-
+        load_window on 6bba_2540cd90 frames 0-12, z 0:32, y 128:256, x 128:256,
+        then detect_instances from each source over a response-quantile sweep
+      observed: >-
+        26 annotated nodes, window estimated cells 56.7; classical 75 / 0.3846 and
+        310 / 0.7692; DoG 20 / 0.1923, 44 / 0.4231, 58 / 0.5000, 73 / 0.6154,
+        104 / 0.6538, 228 / 0.7308, 483 / 1.0000
+      note: >-
+        integration_only, and three limits bind it. The measure is reachability,
+        meaning an annotated node has some proposal within 7 micrometres, which is
+        an upper bound on the official node recall that matches one to one; the
+        same classical detector at the same threshold reads 0.3846 here and 0.269
+        officially in F-0017, and that gap is the difference between the two
+        measures rather than a discrepancy. It is one window of one movie carrying
+        26 annotated nodes, on 6bba, which is the dense embryo; 44b6 is twelvefold
+        sparser and is not measured here. And no parameter was selected on a
+        training embryo, so this characterises a detector rather than reporting a
+        fold.
+    validity:
+      scope: proposal_sources_on_one_window
+      holds_while: >-
+        the E01 window in configs/phase3-cpu.yaml is unchanged and the official
+        voxel scale stays (1.625, 0.40625, 0.40625), from which the plane stride of
+        four is derived rather than assumed.
+    superseded_by: null
+
+  - id: F-0026
+    claim: >-
+      A multi-scale Difference-of-Gaussians proposal source reaches roughly twice
+      as many annotated cells as the classical local-maximum detector, on both
+      embryos, at every node budget swept. Over all 199 annotated training movies
+      at two annotated frames each, covering 394 annotated nodes on 44b6 and 1,762
+      on 6bba, reachability at the neutral budget of one times the estimated cell
+      count is 0.7614 against 0.3528 on 44b6 and 0.6288 against 0.3610 on 6bba.
+      Selecting the budget on one embryo and freezing it before measuring the
+      other, both folds improve: fold_44b6 selects ratio 2.0 and reads 0.7770
+      against 0.4523 on held-out 6bba, and fold_6bba selects ratio 2.0 and reads
+      0.7944 against 0.3629 on held-out 44b6. At the one point where the two
+      sources emit almost the same number of proposals, 6bba with classical at
+      31,045 and DoG at 31,482, DoG reaches 0.5539 against 0.4523.
+    instrument: biohubx evaluate proposals
+    evidence:
+      command: biohubx evaluate proposals
+      observed: artifacts/proposals.json, 199 movies, 0 skipped, 491.9 seconds
+      note: >-
+        integration_only, and three qualifications bind it. Reachability
+        upper-bounds the official one-to-one node recall and is not it. Both folds
+        selected the largest ratio in the sweep, which is a boundary selection: the
+        optimum may lie outside the swept range, so 2.0 is where the sweep stopped
+        rather than where the curve turned. And neither source fills its budget
+        above ratio 0.75, so the comparison at higher ratios is between two sources
+        at their natural operating points rather than at a genuinely matched count.
+        The single matched-count comparison that does exist, on 6bba, shows the
+        smaller margin of the two, +22 percent relative rather than +115 percent,
+        and it is the more conservative number to reason from.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, the official voxel scale stays
+        (1.625, 0.40625, 0.40625) from which the plane stride is derived, the
+        matching radius stays the official 7 micrometres, and the node budget
+        continues to come from each movie's own estimated_number_of_nodes. Two
+        annotated frames per movie were read, not whole movies.
+    superseded_by: null
+
+  - id: F-0027
+    claim: >-
+      Extending the DoG budget sweep to eight times the estimated cell count, the
+      reachability curve plateaus on 44b6 and is still rising slowly on 6bba, and
+      one-to-one node recall tracks reachability to within 0.01 everywhere. Over
+      all 199 annotated training movies at two annotated frames each, DoG reaches
+      0.8046 at the neutral budget on 44b6 and 0.8807 from ratio 6 onward, where
+      it emits about 87,000 proposals against an allowance of 336,000 and cannot
+      fill the budget; on 6bba it reaches 0.6385 at the neutral budget, 0.9001 at
+      ratio 6 and 0.9092 at ratio 8. The classical detector saturates at 0.3629
+      and 0.4546 from ratio 2 onward on the same movies. Selecting the budget on
+      one embryo and measuring the other, fold_44b6 reads 0.9001 against 0.4546
+      and fold_6bba reads 0.8807 against 0.3629. Auditing the 2,033 annotated
+      nodes at the neutral budget, the 69 missed on 44b6 and 617 missed on 6bba
+      sit at median intensity percentile 0.919 and 0.955 within their frame
+      against 0.988 and 0.994 for reached nodes, at median DoG response
+      percentile 0.915 and 0.969 against 0.989 and 0.997, with no difference in
+      annotated crowding or boundary distance, and with a proposal already lying
+      within 14 micrometres of 87 percent of 44b6 misses and 50 percent of 6bba
+      misses.
+    instrument: biohubx evaluate proposals --audit-misses
+    evidence:
+      command: biohubx evaluate proposals --audit-misses --audit-ratio 1.0
+      observed: artifacts/proposals-e04b.json, 199 movies, 2,033 nodes audited, 654.6 seconds
+      note: >-
+        integration_only. Three things this settles and one it does not. The gap
+        between reachability and one-to-one recall, flagged as a caveat in F-0025
+        and F-0026, is measured at under 0.01 for DoG output, so the two can be
+        read together. The classical detector's ceiling is its own: it emits the
+        same 20,494 and 31,309 proposals at every ratio from 2 upward, so its
+        0.36 and 0.45 are what it has to offer, not a budget effect. And most of
+        the neutral-budget misses are ranking losses rather than absences: they
+        are dimmer than reached cells but still in the brightest tenth of their
+        frame, they carry lower but non-trivial DoG response, and raising the
+        budget recovers them, which is why the curve climbs to 0.88 and 0.91.
+        What it does not settle is the residual tenth that remains missed at
+        ratio 8, which is the population a complementary detector would have to
+        find; the audit was taken at the neutral budget and does not
+        characterise that residual separately. Two limits carry over from
+        F-0026: DoG cannot fill its budget above the neutral point because the
+        response quantile of 0.95 caps its candidate pool, so the high-ratio
+        arms compare sources at their natural operating points, and the 6bba
+        selection landed on the sweep's largest ratio again.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, the official voxel scale and the
+        seven micrometre radius hold, the node budget comes from each movie's own
+        estimated_number_of_nodes, and DoG runs with radii (2.0, 3.0, 4.5)
+        micrometres and a response quantile of 0.95. Two annotated frames per
+        movie were read.
+    superseded_by: null
+
+  - id: F-0028
+    claim: >-
+      The annotated cells DoG still misses at eight times the estimated cell
+      count are two different populations on the two embryos. On 44b6 the
+      residual is 44 of 365 nodes (12.1 percent) and is a localisation failure:
+      the missed cells have median intensity percentile 0.897 within their frame
+      with none below 0.50, median DoG response percentile 0.888, and a proposal
+      already lies within 10 micrometres of 73 percent of them and within 14 of
+      93 percent, at a median nearest distance of 9.08 micrometres, just outside
+      the official 7 micrometre radius. On 6bba the residual is 160 of 1,668
+      nodes (9.6 percent) and is half dimness: 60 percent sit below intensity
+      percentile 0.80 and 10 percent below 0.50, median DoG response percentile
+      0.877, with a proposal within 10 micrometres of 44 percent and within 14
+      of 78 percent. On neither embryo do annotated crowding within 10
+      micrometres (4.5 and 1.3 percent) or proximity to a volume face (16 percent
+      within 5 micrometres on both) distinguish the residual from reached cells.
+    instrument: biohubx evaluate proposals --audit-misses --audit-ratio 8.0
+    evidence:
+      command: biohubx evaluate proposals --ratios 8.0 --audit-misses --audit-ratio 8.0
+      observed: artifacts/proposals-residual-r8.json, 2,033 nodes audited, 450.9 seconds
+      note: >-
+        integration_only, and it answers the question F-0027 left open. The
+        residual is not one thing. On 44b6 a proposal exists near almost every
+        missed cell but lands 7 to 14 micrometres away, which points at peak
+        displacement or at two nearby cells collapsing to one suppressed peak
+        between them, and either is a property of the detector's localisation
+        rather than of its sensitivity. On 6bba roughly half the residual is
+        genuinely dim, with DoG response below the 0.95 quantile the candidate
+        pool was cut at, so those cells never entered the pool at any budget;
+        the other half is the same near-miss shape as 44b6. These are the two
+        failure modes the C. elegans nucleus study named for classical
+        detectors, dimness and merging of neighbours (R-0013, RL-0009), measured
+        here on our own corpus. The audit records nearest distance but not its
+        direction, so whether the displacement is along z, where the grid is
+        coarsest, or in the plane is not yet known.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the conditions of F-0027 hold: same corpus, radii, response quantile of
+        0.95, official radius, and two annotated frames per movie.
+    superseded_by: null
+
+  - id: F-0029
+    claim: >-
+      The near-miss residual is not sub-voxel error and not a z artefact. Among
+      the annotated cells DoG still misses at eight times the estimated cell
+      count whose nearest proposal lies within 14 micrometres, 41 on 44b6 and 125
+      on 6bba, the displacement from cell to nearest proposal is dominated by the
+      plane: median in-plane offset 7.46 and 7.85 micrometres against median
+      absolute z offset 3.25 and 4.88, with z the larger component for only 29
+      and 22 percent. The signed z offset has no consistent direction, mean +0.83
+      and -1.05 micrometres, so there is no systematic depth bias. The in-plane
+      offset's interquartile range, 5.8 to 8.9 on 44b6 and 6.4 to 9.8 on 6bba, is
+      the spacing between neighbouring nuclei on a grid whose plane step is 1.625
+      micrometres.
+    instrument: biohubx evaluate proposals --audit-misses, with the nearest-proposal displacement recorded
+    evidence:
+      command: biohubx evaluate proposals --ratios 8.0 --audit-misses --audit-ratio 8.0
+      observed: artifacts/proposals-residual-r8-displacement.json, 2,033 nodes audited, 613.5 seconds
+      note: >-
+        integration_only, and it settles H-11's first probe against refinement.
+        Sub-voxel centroid refinement can move a peak by at most a fraction of a
+        1.625 micrometre grid step per axis; the offsets here are four to six
+        steps. And a proposal that sits a nucleus-spacing away is not this cell's
+        peak displaced but a neighbour's peak, so moving it toward its own blob
+        centre cannot bring it to the missed cell. The mechanism this points at
+        is response merging: at the largest scale in the bank, 4.5 micrometres,
+        the outer Gaussian has a sigma of about 4.2 micrometres, wide enough to
+        fuse two nuclei eight micrometres apart into one response maximum, so
+        the dimmer of the pair produces no maximum of its own. That is the
+        merging-of-neighbours failure the C. elegans study named (R-0013,
+        RL-0009), and it is a property of the scale bank rather than of the
+        localisation. The suppression radius of 4 micrometres is not the cause:
+        it is smaller than the offsets observed, so it did not remove these
+        peaks; they were never formed.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the conditions of F-0028 hold, with the DoG bank at radii (2.0, 3.0, 4.5)
+        micrometres and ratio 1.6.
+    superseded_by: null
+
+  - id: F-0030
+    claim: >-
+      Greedy physical-radius suppression does not return local maxima; it packs
+      the above-threshold region, and on this data most of what it returns are
+      shoulders of blobs. On frame 0 of 6bba_2540cd90 at the 0.95 response
+      quantile, 13,108 of 262,144 strided voxels cleared the threshold, the
+      suppression pass accepted 686 of them at a 4 micrometre radius, and only 46
+      of those 686 are strict 26-neighbourhood maxima of the response, against
+      37.8 estimated cells in the frame. Three different scale banks, (2.0, 3.0,
+      4.5), (2.0, 3.0) and (2.0, 2.5, 3.0), returned exactly 1,398 candidates on
+      the same two-frame window, because the count is set by how much of the
+      frame clears the quantile rather than by how many blobs there are.
+    instrument: biohubx.proposals.dog against scipy.ndimage.maximum_filter, one frame
+    evidence:
+      command: >-
+        detect_instances at response_quantile 0.95 on 6bba_2540cd90 frames 0-1,
+        compared voxel by voxel with a strict 3x3x3 maximum of the same response
+      observed: 686 accepted, 46 peaks, 6.7 percent; identical counts across three banks
+      note: >-
+        integration_only, and it is a finding about the instrument rather than
+        about cells. It reframes F-0025 to F-0029 without retracting any of them:
+        every number there is what the packed detector produced, and the packed
+        detector still beat the classical one at every budget. What changes is
+        the reading. The budget curve needing six to eight times the estimated
+        cell count to plateau (F-0027) is an artefact of counting shoulders, since
+        true peaks number about the estimate; and the near-miss residual whose
+        nearest proposal sits a nucleus-spacing away (F-0029) was measured
+        against a proposal set in which most entries were not peaks at all, so
+        which of those nearest proposals were neighbours' peaks and which were
+        shoulders is not known. The classical detector shares the same
+        suppression pass and therefore the same behaviour; its docstring's "one
+        instance per suppressed local maximum" is not strictly true, and F-0006
+        and F-0017 stand as measured. The corpus-level re-measurement with peaks
+        as candidates is F-0031.
+    validity:
+      scope: proposal_instrument
+      holds_while: >-
+        suppressed_maxima keeps its greedy definition. The local_maxima_only
+        path added in response leaves that function unchanged and filters before
+        it, so the older findings still reproduce.
+    superseded_by: null
+
+  - id: F-0031
+    claim: >-
+      Removing the 4.5 micrometre scale from the DoG bank raises reachability on
+      44b6 at every budget and at every matched proposal count, and on 6bba only
+      above twice the estimated cell count; adding a 2.5 micrometre scale changes
+      nothing. Over all 199 annotated movies under the packed suppression regime
+      of F-0027, the (2.0, 3.0) bank reaches 0.8782 against 0.8046 on 44b6 at the
+      neutral budget, 0.9543 against 0.8680 at twice it, and plateaus at 0.9695
+      against 0.8807; at the baseline's own proposal counts it reads 0.9371
+      against 0.8680 and 0.9570 against 0.8756. On 6bba it reads 0.5936 against
+      0.6385 at the neutral budget, 0.7980 against 0.8093 at twice it, and at the
+      baseline's count there 0.7796 against 0.8093, before overtaking at four
+      times, 0.9115 against 0.8865, and eight, 0.9427 against 0.9092. The
+      (2.0, 2.5, 3.0) bank matches (2.0, 3.0) to four decimals at every point.
+      Selecting on one embryo and measuring the other, fold_44b6 reads 0.9115
+      and fold_6bba reads 0.9695 with the two-scale bank, against 0.9001 and
+      0.8807 with three scales.
+    instrument: biohubx evaluate proposals --radii
+    evidence:
+      command: >-
+        biohubx evaluate proposals --ratios 1.0,2.0,4.0,8.0 --radii 2.0,3.0 and
+        --radii 2.0,2.5,3.0, compared with artifacts/proposals-e04b.json
+      observed: artifacts/proposals-h11b-r23.json, artifacts/proposals-h11b-r2253.json
+      note: >-
+        integration_only, and H-11b's falsifier is met on one fold and not the
+        other at low budgets. On 44b6 the large scale was costing reach at every
+        budget, which is the merging F-0029 predicted. On 6bba it was helping at
+        low budgets, which means on the denser embryo the 4.5 micrometre response
+        was ranking some annotated cells higher than the small scales do, and
+        losing it costs reach until the budget is large enough to admit them
+        anyway. So the bank is not one decision but a budget-dependent one, and
+        the honest status is challenger. Two further caveats. The 2.5 micrometre
+        scale being redundant to four decimals says the response maximum over
+        scales is already dominated by 2.0 or 3.0 wherever 2.5 would win, so
+        finer banks between them are not where the gain is. And this was measured
+        under the packed regime that F-0030 showed counts shoulders, so the
+        interaction between bank and true peaks is a separate measurement.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the conditions of F-0027 hold, with suppression in its packed form and
+        the response quantile at 0.95.
+    superseded_by: null
+
+  - id: F-0032
+    claim: >-
+      Requiring a DoG candidate to be a strict 26-neighbourhood maximum, with the
+      two-scale bank (2.0, 3.0) micrometres, reaches 0.9239 of annotated cells on
+      44b6 and 0.8984 on 6bba while emitting at or below the estimated cell
+      count, and does so with a third to a half of the proposals the packed
+      detector needed to reach less. Over all 199 annotated training movies at two
+      annotated frames each, the peaks detector saturates at 43,825 proposals on
+      44b6 against a neutral budget of 56,032, and at 50,159 on 6bba against
+      42,309; at the neutral budget it reads 0.9213 with 42,478 proposals on 44b6
+      and 0.7894 with 37,417 on 6bba, and at twice it 0.9239 and 0.8933. The
+      packed detector with the three-scale bank, interpolated to the peaks
+      detector's own proposal counts, reads 0.7159 on 44b6 and 0.6803 on 6bba.
+      Under the peaks rule the large scale hurts on both embryos above the
+      neutral budget: three scales saturate at 0.7665 and 0.8314 with 26,847 and
+      32,544 proposals, because neighbouring nuclei merge into one maximum at 4.5
+      micrometres; at the neutral budget on 6bba alone the three-scale bank still
+      edges the two-scale one, 0.8048 against 0.7894. Selecting the budget on one
+      embryo and measuring the other with the two-scale peaks detector, fold_44b6
+      reads 0.8933 on held-out 6bba at twice the estimate and fold_6bba reads
+      0.9239 on held-out 44b6 at four times it, against classical 0.4523 and
+      0.3629. The remaining misses at the neutral budget are 31 of 365 on 44b6,
+      every one within 14 micrometres of a proposal and 84 percent within 10, and
+      368 of 1,668 on 6bba, of which 30 percent sit below intensity percentile
+      0.80 and 64 percent lie within 14 micrometres of a proposal.
+    instrument: biohubx evaluate proposals --local-maxima --radii 2.0,3.0
+    evidence:
+      command: >-
+        biohubx evaluate proposals --local-maxima --radii 2.0,3.0 --ratios
+        0.5,1.0,2.0,4.0,8.0 --audit-misses --audit-ratio 1.0, and the same with
+        the default three-scale bank, compared with artifacts/proposals-e04b.json
+        and artifacts/proposals-h11b-r23.json
+      observed: artifacts/proposals-peaks-r23.json, artifacts/proposals-peaks-r2345.json
+      note: >-
+        integration_only, and the first proposal result that lands inside the
+        regime F-0018 asked for: annotated cells reached at a node count near the
+        official estimate, where the node-count multiplier is close to one rather
+        than paid for with shoulders. Three readings. First, the peaks detector
+        saturates because there are only so many maxima, so its curve is flat
+        above twice the estimate and its proposal count is a property of the
+        image rather than of a budget; that is the behaviour a detector should
+        have and the packed one did not. Second, the bank question resolves
+        differently under peaks than under packing: with shoulders removed the
+        large scale mostly merges neighbours, so two scales win on both embryos
+        wherever the budget is at least twice the estimate, and the one place
+        three scales still win is the neutral budget on the dense embryo, by
+        0.015. Third, the residual on 44b6 is now almost entirely near misses
+        within one nucleus spacing, which is merging at the 3 micrometre scale
+        or an annotated cell sitting between two peaks; on 6bba it is a third dim
+        and the rest near misses. A first peaks probe put missed cells near the
+        volume faces; that was replicated padding defeating a strict inequality
+        on the boundary slices, fixed before these numbers were taken, and its
+        report is kept under a name that says so.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, the official voxel scale and seven
+        micrometre radius hold, the node budget comes from each movie's own
+        estimated_number_of_nodes, the response quantile is 0.95, suppression is
+        4 micrometres, and two annotated frames per movie are read.
+    superseded_by: null
+
+  - id: F-0033
+    claim: >-
+      Over the frozen strict-peak proposals of D-0041, a legal graph whose edges
+      are chosen with ground truth scores 0.9961 on 44b6 and 0.9227 on 6bba
+      through the pinned official scorer, on ten-frame windows of all 199
+      annotated training movies. The 44b6 ceiling clears 0.950 and the 6bba
+      ceiling does not, so under E06's preregistered rule association is not yet
+      the sole bottleneck and the bake-off does not start. On 44b6, 1,811 of
+      1,970 annotated nodes matched a proposal one-to-one within 7 micrometres
+      (0.9193), 1,544 of 1,750 annotated edges survived with both endpoints
+      matched (0.8823), both retained divisions were kept, and 219,020 proposals
+      stood against an estimated 280,156, a node ratio of -0.2182 that the
+      official adjustment rewards: raw edge Jaccard 0.8823, adjusted 0.8961,
+      division Jaccard 1.0. On 6bba, 9,208 of 10,157 nodes matched (0.9066),
+      7,852 of 8,949 edges survived (0.8774), 7 of 9 divisions were kept, and
+      275,566 proposals stood against an estimated 211,565, a node ratio of
+      +0.3025 that the adjustment charges: raw edge Jaccard 0.8781, adjusted
+      0.8449, division Jaccard 0.7778. One 6bba window with 9 annotated edges
+      retained no edge and could not be scored. The same detector configuration
+      therefore under-proposes the sparse embryo by a fifth and over-proposes
+      the dense one by a third; at a zero node ratio the 6bba ceiling would
+      read 0.9559 and the 44b6 ceiling 0.9823, so the 6bba shortfall is
+      proposal count before it is edge retention.
+    instrument: biohubx evaluate oracle-ceiling
+    evidence:
+      command: >-
+        biohubx evaluate oracle-ceiling --out artifacts/e06-oracle.json, with
+        the defaults that restate D-0041: --radii 2.0,3.0 --local-maxima
+        --response-quantile 0.95 --suppression-radius 4.0 --frames 10
+      observed: artifacts/e06-oracle.json
+      score_composition: >-
+        Per window, the pinned scorer computes edge Jaccard J and node ratio
+        r = (proposals - estimate) / estimate, then adjusted Jaccard
+        max(0, J * (1 - 0.1 * r)); per embryo it weights adjusted Jaccard by
+        each window's TP + FP + FN and adds 0.1 times the micro-averaged
+        division Jaccard. The constants are ADJUSTMENT_ALPHA and
+        SCORE_DIVISION_WEIGHT in the vendored official source.
+      note: >-
+        diagnostic_ceiling, never a method. Three readings. First, the decision
+        rule is met on its face: 6bba's ceiling is 0.027 short of 0.950 and no
+        association method can score above a graph whose edges were chosen with
+        the answer key. Second, the two embryos fail differently, and neither
+        failure is association. 44b6 loses to retention, since 12 percent of
+        annotated edges have an endpoint no proposal matched, and is then paid
+        back 0.014 by the node term for proposing fewer cells than estimated.
+        6bba retains almost the same fraction of edges but is charged 0.033 by
+        the node term for proposing a third more cells than estimated, and its
+        divisions cost a further 0.022. Third, a single response quantile of
+        0.95 cannot serve both embryos, because it lands a fifth under the
+        estimate on one and a third over it on the other; that is a proposal
+        count question, which E06's frozen block forbids answering inside E06,
+        so it goes to E05 as a new declaration rather than as a change here.
+        The ceiling was computed with every proposal kept as a node, which is
+        what the frozen configuration costs; a ceiling that also chose which
+        proposals to keep would be a different and more generous object.
+    validity:
+      scope: association_ceiling_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, the proposal block of D-0041 holds,
+        ten frames per movie are read from the first annotated frame, the
+        official 7 micrometre radius and voxel scale hold, and the pinned
+        scorer's constants are 0.1 and 0.1.
+    superseded_by: null
+
+  - id: F-0034
+    claim: >-
+      Taking strict peaks at each DoG scale on its own and unioning them before
+      one shared suppression pass (H-11c) recovers what the max-over-scales
+      response loses to fusion, and whether that helps depends entirely on the
+      bank. With the three-scale bank (2.0, 3.0, 4.5) the union saturates at
+      0.8376 reach on 44b6 with 37,596 proposals and 0.8842 on 6bba with 46,273,
+      above the fused three-scale peaks (0.7665 and 0.8314) and below the frozen
+      two-scale peaks (0.9239 and 0.8984), so the 4.5 micrometre scale costs
+      more than fusion does. With the frozen two-scale bank (2.0, 3.0), H-11d,
+      the union saturates at 0.9467 on 44b6 with 50,642 proposals and 0.9291 on
+      6bba with 60,587, above the frozen peaks by 0.023 and 0.031, and both
+      held-out directions improve: fold_44b6 reads 0.9064 on held-out 6bba at
+      twice the estimate against 0.8933, fold_6bba reads 0.9467 on held-out 44b6
+      at four times it against 0.9239. The gain is bought with proposals: the
+      union emits 16 percent more on 44b6 and 21 percent more on 6bba at
+      saturation, and at the neutral budget on the dense embryo it reads 0.7440
+      with 39,706 proposals against the frozen peaks' 0.7894 with 37,417, so
+      its extra candidates outrank true cells there. On 44b6 at the neutral
+      budget the two are level, 0.9188 against 0.9213.
+    instrument: biohubx evaluate proposals --per-scale-union
+    evidence:
+      command: >-
+        biohubx evaluate proposals --per-scale-union --radii 2.0,3.0,4.5 --ratios
+        0.5,1.0,2.0,4.0,8.0 (H-11c) and the same with --radii 2.0,3.0 (H-11d),
+        compared with artifacts/proposals-peaks-r23.json and
+        artifacts/proposals-peaks-r2345.json at each budget ratio
+      observed: artifacts/proposals-h11c-union-r2345.json, artifacts/proposals-h11d-union-r23.json
+      note: >-
+        integration_only; both are probes beside E06 and neither touches its
+        frozen block. Three readings. First, the fusion mechanism H-11c named is
+        real: at every budget the union beats the fused peaks of the same bank,
+        so a large scale's maximum does swallow neighbouring small-scale peaks.
+        Second, it is not the main loss with three scales, because dropping the
+        4.5 micrometre scale (F-0032) gains more than un-fusing it does. Third,
+        with two scales the union is a retention challenger that F-0033 says
+        cannot be taken blindly: 6bba already proposes a third more cells than
+        the official estimate and every ten percent of node ratio costs one
+        percent of edge Jaccard, so the union's extra fifth of proposals would
+        charge about 0.02 against the retention it adds, and on the sparse
+        embryo, which proposes a fifth fewer than estimated, the same extra
+        proposals are nearly free. That asymmetry is the proposal-count question
+        F-0033 hands to E05, and the union enters E05 as one candidate source
+        for a budgeted selection rather than as a replacement for D-0041.
+    validity:
+      scope: proposal_sources_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, the official voxel scale and seven
+        micrometre radius hold, the node budget comes from each movie's own
+        estimated_number_of_nodes, the response quantile is 0.95, suppression is
+        4 micrometres, and two annotated frames per movie are read.
+    superseded_by: null
+
+  - id: F-0035
+    claim: >-
+      Truncating proposals to a budget chosen on the training embryo does not
+      raise the oracle ceiling on the held-out embryo, and the per-scale union
+      without truncation does. Over ten-frame windows of all 199 annotated
+      movies, arm A0 (the frozen D-0041 peaks, untruncated) reproduces F-0033
+      exactly at 0.9961 on 44b6 and 0.9227 on 6bba, which is the check that the
+      instrument change did not move the baseline. Budgeted selection is killed
+      on its own falsifier: fold_44b6 selects k=1.5 on 44b6 (0.9962 against A0's
+      0.9961) and reads 0.9072 on held-out 6bba against A0's 0.9227, and the
+      union arm A3 selects the same ratio and reads 0.9116, also below A0.
+      Only the direction that selects on the dense embryo improves, and only
+      trivially: fold_6bba picks k=2.0 and reads 0.9961 on held-out 44b6, equal
+      to A0 to four decimals. Arm A2, the per-scale union with no truncation and
+      therefore no constant to select, improves both directions at once: 1.0195
+      on 44b6 against 0.9961 and 0.9283 on 6bba against 0.9227. It buys that
+      with proposals, 253,543 and 330,820 against 219,020 and 275,566, and pays
+      the node-ratio charge on the dense embryo, +0.5637 against +0.3025, while
+      raising its node match fraction from 0.9066 to 0.9300 and its edge
+      retention from 0.8774 to 0.9107. No arm reaches 0.950 on 6bba; the best
+      held-out reading on that embryo is A2's 0.9283.
+    instrument: biohubx evaluate oracle-ceiling --budget-ratios, with and without --per-scale-union
+    evidence:
+      command: >-
+        biohubx evaluate oracle-ceiling --budget-ratios 0.8,1.0,1.25,1.5,2.0
+        --out artifacts/e05-peaks.json, and the same with --per-scale-union
+        --out artifacts/e05-union.json; both at the E06-ORACLE window, ten frames
+        from the first annotated frame, every ratio scored from one detection
+        pass per window
+      observed: artifacts/e05-peaks.json, artifacts/e05-union.json
+      note: >-
+        diagnostic_ceiling. Four readings. First, the budget hypothesis fails in
+        the direction that matters: truncation helps the embryo it is fitted on
+        by a thousandth and costs the other one about 0.015, because the two
+        embryos want opposite corrections and one scalar cannot give them both.
+        Second, the union's gain is retention, not selection, which is why it
+        survives the held-out swap: it adds proposals the peak rule lost to
+        cross-scale fusion, and those proposals carry edges. Third, the node
+        term is doing more of the work than it looks: the official adjusted
+        Jaccard is J*(1 - 0.1*r), so a negative node ratio multiplies the score
+        above the raw Jaccard, and 44b6's window scores exceed 1.0 for that
+        reason. Window scores are therefore not comparable with whole-movie
+        scores and a window target of 0.950 is not the leaderboard's 0.950; what
+        is comparable here is one arm against another on the same windows.
+        Fourth, and the reason E05 does not end the proposal question: A2's 6bba
+        ceiling is 0.9283, so even a perfect linker over the best proposal set
+        measured so far cannot reach 0.950 on the dense embryo.
+    validity:
+      scope: association_ceiling_on_the_competition_corpus
+      holds_while: >-
+        the registered corpus is unchanged, ten frames per movie are read from
+        the first annotated frame, the official 7 micrometre radius and voxel
+        scale hold, the response quantile is 0.95, suppression is 4 micrometres,
+        the bank is (2.0, 3.0), and the pinned scorer's constants are 0.1 and
+        0.1.
+    superseded_by: null

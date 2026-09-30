@@ -1,0 +1,92 @@
+# GPU-CAMPAIGN-E07-01, authorised by Arya Arun on 2026-09-04 in their own words.
+#
+# The authorisation carried one operational correction, made before the first
+# push and recorded in [[D-0044]]: the hardware guard accepts either one or two
+# visible Tesla T4 GPUs, every visible accelerator must be a Tesla T4, and
+# training stays pinned to exactly one device. Nothing scientific changed with
+# it; the arms, split, pool, decode, budget and promotion criteria below are the
+# preregistered ones.
+#
+# Covers Stage 2 (tiny GPU smoke) for both surviving arms and, conditionally,
+# Stage 3 (mini-fold, both directions) for arms whose smoke shows loss movement,
+# live nnPU terms and a memory reading; one retry per stage for packaging,
+# dependency, mount or transport defects only. Nothing here trains full folds,
+# reads the public test split, or submits.
+
+GPU-CAMPAIGN-E07-01:
+  status: authorised
+  authorised_by: Arya Arun
+  authorised_on: '2026-09-04'
+  authorises: >-
+    Stage 2 smoke for arms A3 and A4, and Stage 3 mini-folds in both embryo
+    directions only where the Stage 2 criteria below pass; nothing else
+  experiment: E07
+  arms: [A3, A4]
+  accelerator: >-
+    NvidiaTeslaT4 requested; the runtime guard accepts one or two visible
+    devices and refuses any other count, refuses unless every visible device
+    reports a Tesla T4, and refuses unless training is pinned to cuda:0
+  hardware_guard_correction:
+    authorised_by: Arya Arun
+    authorised_on: '2026-09-04'
+    kind: operational repair, not a scientific change
+    reason: >-
+      Kaggle has previously exposed two cards despite a single-device request
+      ([[R-0011]]); with the count check corrected by [[D-0038]] that same
+      allocation would now refuse and cost an attempt
+    accepts_visible_counts: [1, 2]
+    every_visible_device_must_be: Tesla T4
+    training_pinned_to: cuda:0, no DDP, no implicit multi-GPU
+    records: observed count, every device name, every device VRAM, selected training device
+    decision: D-0044
+  repair_policy: >-
+    a repair may change packaging, dependency installation, mount resolution,
+    transport or hardware-guard implementation only; it may not change the
+    split, model, features, candidate pool, decoding, loss, hyperparameters,
+    epochs or promotion criteria, and every rebuilt package passes the local
+    gate and receives a new recorded digest
+  forbidden: >-
+    public-test data, submissions, external weights, full-fold Stage 4 training,
+    scientific configuration changes, and internet in the kernel
+  image: the Kaggle GPU image measured in R-0011 (torch 2.10.0+cu128, CUDA 12.8)
+  wheelhouse: aryaarun07/biohubx-wheelhouse-metric-cp312-linux, published payload tree_sha256:sha256/v1:cc8a180133fb8cdf0eaf10ca192bd9965b3b8bade1178746e4c364d790258f7d (R-0016, R-0017)
+  first_use_of_the_metric_wheelhouse_on_the_gpu_image: >-
+    yes; the CPU image proved every wheel installs and imports (R-0017), the
+    GPU image differs in torch only; a packaging retry is reserved for exactly
+    that risk
+
+  stage2_smoke:
+    per_arm: one kernel, two training movies, two evaluation movies, ten-frame windows, two epochs
+    package: biohubx package rescore --arm <A3|A4> --fold fold_44b6 --train-movies 2 --evaluate-movies 2 --frames 10 --epochs 2
+    what_it_proves: loss moves, positives present, nnPU terms live, peak memory and throughput measured, the held-out decode runs; integration evidence only
+    ceiling_minutes_per_arm: 20
+    pushes: one per arm, plus one packaging retry per arm
+
+  stage3_mini_fold:
+    condition: the arm's Stage 2 manifest shows a finite decreasing loss, positives above zero in every epoch, no guard failure, and peak memory below 12 GiB
+    per_arm_per_direction: eight training movies of the training embryo, eight evaluation movies of the other, ten-frame windows, five epochs, count_ratio 1.0
+    directions: fold_44b6 and fold_6bba, both, reported separately
+    mandatory_outputs: proposal count, node ratio, node match fraction, edge retention, oracle score per direction, beside A0 and the pool on the same windows
+    ceiling_minutes_per_arm_per_direction: 30
+    pushes: one per arm per direction, plus one conditional retry per arm for packaging, dependency, mount or transport defects only
+
+  totals:
+    gpu_minutes_ceiling: 240
+    kernels_maximum: 12
+    stop_conditions:
+      - any guard failure that is not a packaging, dependency, mount or transport defect
+      - a run exceeding its declared runtime ceiling
+      - peak memory above 12 GiB in the smoke
+      - any read of the public-test directory
+      - any attempt to push beyond the kernel maximum
+
+  local_evidence_behind_the_sizing:
+    stage0: A3 42,881 parameters, A4 43,745; 9^3 patches; torch.export captures both; CPU forward 1.46 s and 1.87 s per 3,097 patches, forward+backward 6.1 s and 7.3 s
+    stage1: both arms survive; A3 loss 0.681 -> 0.250 over five steps with standardised patches, gradients flow, no inert channel, strict reload identical
+    pool: at quantile 0.80 the pilot pool is 1,433 candidates per frame on 44b6 and 2,560 on 6bba; two movies at ten frames is roughly 40,000 candidates, eight movies roughly 160,000
+    cpu_smoke_of_the_loop: >-
+      one training movie, one held-out movie, three frames, one epoch: held-out ceiling 0.9166 against A0 0.9046 at node ratio +0.0007; a three-frame number, not evidence
+
+  retrieval: package retrieve, only the manifest and the log per kernel; checkpoints retrieved only for a surviving Stage 3 arm
+  registration: every attempt gets its own reference entry; Stage 3 numbers enter the E07 experiment entry as stage_results, per direction, never pooled
+  after_stage3: full folds (Stage 4) need a separate envelope and are not covered here

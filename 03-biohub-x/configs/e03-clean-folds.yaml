@@ -1,0 +1,113 @@
+# E03: two clean leave-one-embryo-out detectors.
+#
+# A separate file from configs/phase3-cpu.yaml on purpose. That file's canonical
+# digest is recorded against E01 and E02 as an assertion about what ran; editing
+# it to hold E03 would break both.
+
+schema_version: 1
+
+E03:
+  name: clean-fold proposal detector
+  component: proposal_detector
+
+  folds:
+    - id: fold_44b6
+      train_embryo: 44b6
+      train_movies: 71
+      evaluate_embryo: 6bba
+      evaluate_movies: 128
+      seed: 4460
+    - id: fold_6bba
+      train_embryo: 6bba
+      train_movies: 128
+      evaluate_embryo: 44b6
+      evaluate_movies: 71
+      seed: 6660
+
+  never_read:
+    - the public-test directory, for any purpose
+
+  initialisation:
+    scheme: deterministic random
+    forbidden:
+      - initialising from either quarantined checkpoint
+      - distillation or pseudo-labels from either quarantined checkpoint
+      - copying any threshold the reference tuned against the public leaderboard
+      - selecting a checkpoint against anything the reference produced
+
+  objective:
+    kind: non_negative_positive_unlabelled
+    positive: annotated node voxels on the strided grid
+    unlabelled: every other voxel
+    background: none; no voxel is supervised as background
+    class_prior: >-
+      Each dataset's own estimated_number_of_nodes divided by its grid voxels.
+      Official metadata, not a tuned constant, and fixed before the fold starts.
+    rationale: >-
+      E03-MASK-AUDIT measured every candidate band at every annotated node in
+      the corpus and none survives: 6bba admits no band at all and the tightest
+      one 44b6 admits withholds half the volume and still misfires on the
+      held-out embryo (F-0020, D-0024). Max-pooling instead of striding does not
+      rescue it. Widening the band would be fitting the rule to the complaint.
+    stated_uncertainty: >-
+      How many dim unannotated cells exist is unknown. Annotated ones reach
+      percentile 0.09, and the prior counts every cell the dataset estimates, so
+      if that estimate is itself biased against dim cells the prior is too low
+      and the detector will under-predict. This is E03's open risk, carried
+      deliberately and reported with its results, not a solved problem.
+
+  model:
+    architecture: vendored CC0 TemporalUNet3D plus detect_head
+    unet_out_channels: 32
+    unet_layers: [32, 64, 128]
+    downsample: [1, 4, 4]
+    window_size: 2
+    note: >-
+      Architecture reused, weights not. The CC0 code carries no training.
+
+  optimisation:
+    optimizer: adam
+    learning_rate: 1.0e-4
+    batch_size: 2
+    epochs: 20
+    loss: non-negative positive-unlabelled risk; see the objective block above
+
+  heartbeat:
+    required: true
+    stages:
+      - environment and GPU shape confirmed
+      - input digests verified
+      - fold membership asserted, with the evaluation embryo named
+      - per epoch: loss, both risk terms, whether the clamp fired, positives seen
+      - checkpoint written and reloaded strict
+      - evaluation started, per-fold metrics emitted
+    rationale: >-
+      A GPU run that fails silently costs the whole budget. Every stage prints
+      before it starts and after it ends, so a stall is visible in the log
+      rather than inferred from a missing result.
+
+  proposal_extraction:
+    peak_threshold: absolute, calibrated on the training fold only
+    suppression_radius_um: 4.0
+    note: >-
+      The preflight thresholded by quantile because an untrained detector has no
+      calibrated scale (F-0019). E03 does not; calibrating on the evaluation
+      fold would be leakage.
+
+  mandatory_outputs:
+    - node_recall
+    - candidate_reach
+    - official combined score
+    - every one of them per fold, never pooled
+
+  falsifier:
+    kill_if: node recall or candidate reach fails to improve over F-0017 on either fold
+    promote_only_if: both folds improve independently
+    challenger_if: one fold improves and the other does not
+    invalid_if: only a pooled number is produced
+
+  not_a_training_target: >-
+    The 94 percent retention crossover in F-0018 is a later filter's target. It
+    is not a label, not a loss term, and E03 does not optimise it.
+
+  runtime_ceiling_seconds: 21600

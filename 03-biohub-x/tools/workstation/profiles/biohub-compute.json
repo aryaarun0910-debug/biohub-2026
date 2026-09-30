@@ -1,0 +1,20 @@
+{
+  "profile": "biohub-compute",
+  "status": "enabled",
+  "purpose": "jupyter-mcp-server over a Jupyter server that runs in the Docker sandbox of tools/workstation/sandbox: internal network with no route out, root read-only, competition root read-only at /data, repository src read-only, one scratch mount, non-root, capabilities dropped",
+  "mcpServers": {
+    "jupyter": {
+      "type": "stdio",
+      "command": "${BIOHUBX_TOOLS}/biohub-compute/py/Scripts/python.exe",
+      "args": [
+        "${BIOHUBX_REPO}/tools/workstation/launch_jupyter_mcp.py",
+        "--port",
+        "18888"
+      ],
+      "env": {
+        "BIOHUB_DATA_ROOT": "${BIOHUB_DATA_ROOT}",
+        "BIOHUBX_TOOLS_ROOT": "${BIOHUBX_TOOLS}"
+      }
+    }
+  }
+}

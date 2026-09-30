@@ -1,0 +1,44 @@
+{
+  "profile": "biohub-research",
+  "status": "enabled",
+  "purpose": "read-only GitHub, Playwright browser evidence, Semantic Scholar citation expansion; every acquisition still enters the research ledger",
+  "mcpServers": {
+    "github": {
+      "type": "stdio",
+      "command": "${BIOHUBX_TOOLS}/biohub-research/py/Scripts/python.exe",
+      "args": [
+        "${BIOHUBX_REPO}/tools/workstation/launch_github_mcp.py",
+        "--read-only",
+        "--toolsets",
+        "repos,issues"
+      ],
+      "env": {}
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${BIOHUBX_TOOLS}/biohub-research/node_modules/@playwright/mcp/cli.js",
+        "--browser",
+        "chromium",
+        "--isolated"
+      ],
+      "env": {
+        "PLAYWRIGHT_BROWSERS_PATH": "${BIOHUBX_TOOLS}/biohub-research/browsers"
+      }
+    },
+    "semantic-scholar": {
+      "type": "stdio",
+      "command": "${BIOHUBX_TOOLS}/biohub-research/py/Scripts/python.exe",
+      "args": [
+        "-m",
+        "semantic_scholar_mcp"
+      ],
+      "env": {
+        "MCP_MODE": "true"
+      },
+      "note": "MCP_MODE=true keeps the server's logging off stdout; no API key is configured, the public rate limit applies"
+    }
+  },
+  "layout": "biohub-research/py is the Python environment; biohub-research/github-mcp-server holds the Go binary; biohub-research/node_modules and browsers hold Playwright"
+}

@@ -1,0 +1,111 @@
+# E05: proposal complementarity as budgeted selection. Preregistered before any arm runs.
+#
+# F-0033 says the frozen detector of D-0041 proposes a fifth fewer cells than the
+# official estimate on 44b6 and a third more on 6bba, and that the 6bba ceiling
+# would clear 0.950 at a zero node ratio. F-0034 says the per-scale union reaches
+# more cells than the frozen peaks at the cost of a fifth more proposals. Both
+# point at the same lever: how many proposals to keep, tied to each movie's own
+# estimate. E05 measures that lever with the same oracle instrument as E06-ORACLE,
+# on identical windows, so every number here is comparable with F-0033.
+#
+# Nothing in this file changes D-0041 or E06. A promoted arm becomes a new frozen
+# proposal declaration by a new decision.
+
+E05:
+  component: proposals
+  instrument: biohubx evaluate oracle-ceiling
+  measure: >-
+    official combined score of the oracle legal graph over the proposals of each
+    arm, per held-out embryo, ten-frame windows from the first annotated frame,
+    aggregated the official way per embryo. A diagnostic ceiling, never a method.
+
+  window:
+    frames_per_movie: 10
+    start: first annotated frame, clamped to fit
+    spatial_extent: full
+    identical_to: E06-ORACLE, so A0 reproduces F-0033 exactly
+
+  candidate_sources:
+    peaks:
+      source: biohubx.proposals.dog
+      local_maxima_only: true
+      per_scale_union: false
+      radii_um: [2.0, 3.0]
+      response_quantile: 0.95
+      suppression_radius_um: 4.0
+      refine_centroids: false
+      note: the frozen configuration of D-0041, unchanged
+    union:
+      source: biohubx.proposals.dog
+      local_maxima_only: true
+      per_scale_union: true
+      flag_note: >-
+        the union path takes strict peaks at each scale itself and ignores the
+        max-over-scales peak rule; the instrument records both flags as passed
+      radii_um: [2.0, 3.0]
+      response_quantile: 0.95
+      suppression_radius_um: 4.0
+      refine_centroids: false
+      note: H-11d (F-0034), strict peaks per scale, unioned, one shared suppression pass
+
+  selection:
+    rule: >-
+      Rank proposals within each ten-frame window by DoG response, keep the
+      top round(k * window_estimate), where window_estimate is the movie's
+      official estimated_number_of_nodes scaled to the window, as the reader
+      already reports it. No other signal enters the selection; ties break on
+      instance identity so two runs keep the same set.
+    budget_ratios: [0.8, 1.0, 1.25, 1.5, 2.0]
+    constant_selected_on: the training embryo of each fold, by oracle score
+    never_selected_on: the held-out embryo
+
+  arms:
+    - id: A0
+      source: peaks
+      truncation: none
+      role: baseline; must reproduce F-0033 to the digit
+    - id: A1
+      source: peaks
+      truncation: budget
+    - id: A2
+      source: union
+      truncation: none
+    - id: A3
+      source: union
+      truncation: budget
+
+  folds:
+    - id: fold_44b6
+      select_on: 44b6
+      evaluate_on: 6bba
+    - id: fold_6bba
+      select_on: 6bba
+      evaluate_on: 44b6
+
+  falsifiers:
+    killed: >-
+      No arm raises the oracle score on both held-out embryos over A0. Then the
+      number of proposals is not the lever, the proposal stage needs a detector
+      rather than a selector, and E05 hands the residual to a learned arm.
+    challenger: an arm improves one direction and not the other
+    not_a_result: any number pooled across embryos
+    promotion: >-
+      an arm whose selected budget ratio, chosen on the training embryo, raises
+      the held-out oracle score over A0 in both directions. Promotion writes a
+      new frozen proposal declaration for E06; it edits nothing in D-0041.
+
+  exit_rule_toward_E06: >-
+    If the promoted arm's oracle ceiling is at or above 0.950 on both embryos,
+    E06 resumes at its bake-off on that arm's proposals under a new declaration.
+    If not, the ceiling is still the proposal stage's, and the learned arm comes
+    before any association work.
+
+  mandatory_outputs:
+    - per arm, per budget ratio, per embryo: proposals, node ratio, node match
+      fraction, edge retention, raw and adjusted edge Jaccard, division Jaccard,
+      combined score, unscored windows
+    - per fold: the ratio selected on the training embryo and the held-out score
+      at that ratio, beside A0's held-out score
+
+  budget: CPU only, no GPU, no network, no download
+  runtime_ceiling_seconds: 7200

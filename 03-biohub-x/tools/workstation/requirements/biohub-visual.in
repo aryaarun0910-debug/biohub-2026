@@ -1,0 +1,10 @@
+# biohub-visual: pins from ledger RL-0024..RL-0029 (WS-01). napari 0.7.1 because
+# motile-tracker 5.0.1 requires napari<0.8; PyQt6 is napari's own default Qt.
+# tracksdata is NOT here: it is installed from artifacts/wheelhouse-metric with
+# --require-hashes, the Biohub-X build of R-0014.
+napari[pyqt6]==0.7.1
+napari-mcp==0.1.0
+napari-geff==0.0.4
+motile-tracker==5.0.1
+motile==1.0.1
+geff==1.3.1.1.3

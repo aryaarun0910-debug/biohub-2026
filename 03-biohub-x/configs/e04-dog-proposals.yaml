@@ -1,0 +1,86 @@
+# E04: does a physically-scaled blob detector propose the annotated cells?
+#
+# A separate file from the E03 config, because that file's digest is recorded
+# against E03 and E03-SMOKE-01..03 as an assertion about what ran.
+
+schema_version: 1
+
+E04:
+  name: DoG proposal source, leave-one-embryo-out
+  component: proposal_detector
+
+  question: >-
+    F-0017 found the binding constraint: every annotated edge the chain could not
+    reach was unreachable because an endpoint was never proposed. F-0025 showed a
+    multi-scale Difference-of-Gaussians source beating the classical detector on
+    one window of one movie. This asks whether that holds across a whole embryo,
+    and whether a choice made on one embryo survives on the other.
+
+  folds:
+    - id: fold_44b6
+      select_on: 44b6
+      evaluate_on: 6bba
+    - id: fold_6bba
+      select_on: 6bba
+      evaluate_on: 44b6
+
+  budget_policy:
+    kind: node_budget_from_official_metadata
+    rule: >-
+      Each movie is allowed round(target_ratio * estimated_number_of_nodes) for
+      the window, and the highest-responding suppressed maxima up to that count
+      are kept. The budget therefore comes from official metadata alone and never
+      from annotations, so nothing about the held-out embryo leaks into it.
+    why: >-
+      A fixed response quantile is not a fixed budget. Estimated cell counts span
+      two orders of magnitude across this corpus, so one quantile yields a node
+      ratio near 1 on a dense movie and near 10 on a sparse one, and any
+      comparison built on it would confound detector quality with budget.
+    target_ratios: [0.5, 0.75, 1.0, 1.5, 2.0]
+    note: >-
+      F-0015 puts the node-count multiplier at 1.0 when predictions equal the
+      estimate, so ratio 1.0 is the neutral point rather than a tuned choice.
+
+  measure:
+    primary: >-
+      Reachability: the fraction of annotated nodes with some proposal within the
+      official 7 micrometre matching radius, in physical coordinates.
+    why_not_official_node_recall: >-
+      Reachability upper-bounds the official one-to-one node recall and is the
+      quantity F-0017 identified as binding, since an annotated endpoint with no
+      nearby proposal cannot be matched by any association method. Both are
+      reported where the official adapter can be run; only reachability is
+      compared across sources here, and it is never described as node recall.
+
+  sources_compared:
+    - classical local-maximum, the F-0017 baseline
+    - multi-scale DoG on the isotropic grid
+
+  detector:
+    radii_um: [2.0, 3.0, 4.5]
+    dog_ratio: 1.6
+    normalisation: per-frame percentiles (1.0, 99.9)
+    suppression_radius_um: 4.0
+    plane_stride: derived from the official voxel scale, not stated
+    note: >-
+      The scale bank is a hypothesis about nucleus size and is selected on the
+      training embryo like any other parameter. No constant here is inherited from
+      any external source.
+
+  selection:
+    on: the training embryo only
+    rule: the target ratio and scale bank maximising reachability on the training embryo
+    frozen_before: the evaluation embryo is measured
+
+  falsifier:
+    kill_if: >-
+      At a matched node budget, DoG fails to improve reachability over the
+      classical baseline on either held-out embryo.
+    challenger_if: one held-out embryo improves and the other does not
+    invalid_if: only a pooled number is produced
+
+  never_read:
+    - the public-test directory, for any purpose
+
+  runtime_ceiling_seconds: 3600
+  budget: CPU only, no GPU, no network, no download

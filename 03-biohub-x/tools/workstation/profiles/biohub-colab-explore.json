@@ -1,0 +1,26 @@
+{
+  "profile": "biohub-colab-explore",
+  "status": "disabled",
+  "purpose": "hosted exploration only: synthetic experiments, licence-cleared public alternative datasets, architecture profiling, pretraining and representation probes, and CPU/GPU environment audits. Not installed and not enabled; this file records what it would be if Arya Arun enables it.",
+  "competition_data": "never. The corpus is not placed in Drive or in consumer Colab, and no competition byte leaves this machine through this profile.",
+  "why_e07_stays_on_kaggle": "consumer Colab runtimes are ephemeral and its hardware is not guaranteed, per Google's own FAQ. Kaggle already has the verified competition-data mount, the published metric wheelhouse and a measured retrieval path.",
+  "escalation": "if Google-hosted competition training ever becomes necessary, the route is Colab Enterprise with controlled networking and a separate data-processing review, not this profile.",
+  "mcpServers": {
+    "colab": {
+      "type": "stdio",
+      "command": "${BIOHUBX_TOOLS}/biohub-colab-explore/py/Scripts/python.exe",
+      "args": [
+        "-m",
+        "colab_mcp"
+      ],
+      "env": {},
+      "pin": {
+        "source": "https://github.com/googlecolab/colab-mcp",
+        "release": "v1.0.2",
+        "commit": "b85ab6ec5206e06fdd289ff4ff3f9c4ee767b422",
+        "licence": "Apache-2.0"
+      },
+      "note": "The server runs locally and drives a Colab session in the browser, so enabling it gives an agent a networked remote runtime. That is why this profile is disabled by default and why every result it could produce carries the networked_runtime taint."
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "profile": "biohub-visual",
+  "status": "enabled",
+  "purpose": "napari over a live viewer for E05/E06 error analysis; data roots read-only; no dynamic package installation",
+  "mcpServers": {
+    "napari": {
+      "type": "stdio",
+      "command": "${BIOHUBX_TOOLS}/biohub-visual/Scripts/python.exe",
+      "args": ["${BIOHUBX_REPO}/tools/workstation/launch_napari_mcp.py"],
+      "env": {"BIOHUBX_NAPARI_EXECUTE": "0"}
+    }
+  }
+}

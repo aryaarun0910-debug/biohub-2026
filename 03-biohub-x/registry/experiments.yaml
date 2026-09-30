@@ -1,0 +1,2808 @@
+# Experiment registry: one entry per experiment, declared BEFORE it runs.
+#
+# Required at declaration time:
+#   id                 stable identifier
+#   component          system or component under test (see SYSTEM.md)
+#   hypothesis         what is claimed
+#   falsifier          the observation that would kill it
+#   inputs             artifact ids from registry/artifacts.yaml
+#   split              data split scheme and fold
+#   model_config       config path plus its canonical_text digest
+#   budget             compute the experiment is allowed
+#   expected_outputs   artifact ids it will produce
+#   forbidden_changes  what must not move while it runs
+#   promotion_metric   the official metric field that decides it
+#   runtime_ceiling    wall clock it may not exceed
+#   provenance_status  from registry/artifacts.yaml
+#
+# An experiment is pre-registered only once its inputs, its configuration file
+# and that file's canonical_text digest all exist. Declaring one earlier would
+# record intentions rather than a runnable experiment, and the declaration is
+# only binding if it names the exact thing that will run.
+#
+# Required at completion, exactly one:
+#   status: promoted | challenger | killed | invalid | integration_only
+#
+# There is no `pending`. A declared but unfinished experiment carries no status
+# key at all: a status is a result, and a placeholder result is indistinguishable
+# from a real one at a glance. "implemented" and "interesting" are not statuses
+# either. Scores are referenced by finding id from registry/findings.yaml, never
+# restated here or in prose.
+
+schema_version: 1
+
+experiments:
+  - id: E01
+    component: vertical_slice
+    hypothesis: >-
+      The Phase-2 chain runs end to end on real competition bytes and produces a
+      score through the pinned official scorer, without the synthetic fixture.
+    falsifier: >-
+      Any stage refuses real data, or the run produces a number the official
+      adapter will not accept. A poor score does not falsify this; an
+      unreachable score does.
+    inputs:
+      - competition.train.6bba_2540cd90.zarr
+      - competition.train.6bba_2540cd90.geff
+    split:
+      scheme: single_window
+      note: >-
+        One window of one training movie. Not a fold and not an evaluation set.
+        Nothing here may be compared with a fold result.
+    model_config:
+      path: configs/phase3-cpu.yaml
+      section: E01
+      canonical_text: canonical_text_sha256:sha256/v1:adbafd25957c7873211061fee7f80940ce5507bdf3b236855921e651c7e5be9e
+    budget: CPU only, no GPU, no network, no download
+    expected_outputs:
+      - artifacts/real-preflight.json
+      - artifacts/real-preflight-graph.json
+    forbidden_changes:
+      - the window, once a score exists
+      - the pinned official source
+    promotion_metric: none
+    runtime_ceiling: 600 seconds
+    provenance_status: external_cleared
+    status: integration_only
+    result: F-0017
+  - id: E02
+    component: graph_policy
+    hypothesis: >-
+      Emitting roughly the annotated node count rather than roughly every cell
+      raises the official adjusted edge Jaccard, and the gain survives the
+      correct edges a real filter would destroy reaching that node count.
+    falsifier: >-
+      Killed if the filtered policy fails to match the dense baseline on either
+      embryo fold at a retention a real filter could plausibly achieve.
+    inputs:
+      - the 199 annotated competition.train .geff artifacts
+    split:
+      scheme: leave_one_embryo_out
+      folds: [44b6, 6bba]
+      excluded: the four duplicated public-test fixtures, per D-0015
+    model_config:
+      path: configs/phase3-cpu.yaml
+      section: E02
+      canonical_text: canonical_text_sha256:sha256/v1:adbafd25957c7873211061fee7f80940ce5507bdf3b236855921e651c7e5be9e
+    budget: CPU only, no GPU, no network, no download
+    expected_outputs:
+      - artifacts/retention-oracle.json
+    forbidden_changes:
+      - the pinned official scorer and its aggregation
+      - each dataset's own estimated_number_of_nodes as the denominator
+    promotion_metric: adjusted_edge_jaccard per embryo fold, never pooled
+    runtime_ceiling: 3600 seconds
+    provenance_status: external_cleared
+    declaration_note: >-
+      Declared late. The configuration file was written while the sweep was
+      already running, from the invocation that was passed. The run is
+      deterministic in its recorded seed and retention list, so the declaration
+      names exactly what executed, but the ordering AGENTS.md section 4 requires
+      was not followed and is recorded rather than concealed.
+    status: challenger
+    result: F-0018
+    status_reasoning: >-
+      The direction wins on both embryo folds, which the promotion rule would
+      normally reward. It is recorded as challenger and not promoted because the
+      experiment measured the metric's own trade curve using ground truth, not a
+      filter. There is no implementation to promote, and main holds promoted
+      implementations rather than promoted intentions. It becomes promotable when
+      a real filter is shown to retain at least 0.94 of its correct edges at the
+      annotated node count on both folds.
+  - id: E03
+    component: proposal_detector
+    hypothesis: >-
+      A detector trained on one embryo, with unlabelled cells ignored rather
+      than supervised as background, proposes the annotated cells of the other
+      embryo well enough to raise node recall and candidate reach above the
+      classical detector measured in F-0017.
+    falsifier: >-
+      Killed if node recall or candidate reach fails to improve over F-0017 on
+      either fold. Not promoted unless BOTH folds improve independently; a gain
+      on one fold and a loss on the other is a challenger, never a promotion. A
+      pooled-only result is not a result at all.
+    inputs:
+      - the 199 annotated competition.train .geff and .zarr artifacts
+      - configs/e03-clean-folds.yaml
+    split:
+      scheme: leave_one_embryo_out
+      folds:
+        - id: fold_44b6
+          train: 44b6, 71 movies
+          evaluate: 6bba, 128 movies
+        - id: fold_6bba
+          train: 6bba, 128 movies
+          evaluate: 44b6, 71 movies
+      never_read: >-
+        The public-test directory. Not once, for any purpose. Every artifact
+        E03 touches is a registered train artifact (D-0015).
+    initialisation:
+      scheme: deterministic random, seeded per fold
+      forbidden: >-
+        Neither quarantined checkpoint may initialise, supervise, select or tune
+        a clean-fold model. No distillation, no warm start, no threshold copied
+        from the reference's tuning, no model selection against anything the
+        reference produced (D-0021, D-0022).
+      architecture_note: >-
+        The vendored CC0 architecture is reused with fresh random weights. The
+        code is CC0 and carries no training; reusing a published architecture is
+        not reusing a published model.
+    model_config:
+      path: configs/e03-clean-folds.yaml
+      section: E03
+      canonical_text: canonical_text_sha256:sha256/v1:c31428ecad168ed5553965fad500ea75326491220c1b39abd5510b073ffc7117
+      note: >-
+        A separate file from configs/phase3-cpu.yaml, because that file's digest
+        is recorded against E01 and E02 as an assertion about what ran and
+        editing it would break both.
+    budget: Kaggle T4, gated. Nothing runs until the smoke in the packet passes.
+    expected_outputs:
+      - one checkpoint per fold
+      - node recall, candidate reach and the official metric, per fold, separately
+    forbidden_changes:
+      - the pinned official scorer
+      - the ignore quantile, once a fold has started
+      - the fold definition
+    promotion_metric: >-
+      node_recall and candidate reach as the falsifier; the official combined
+      score, per held-out embryo, as the promotion criterion. Never pooled.
+    mandatory_outputs:
+      - node recall
+      - candidate reach
+      - official combined score
+      - each fold reported on its own
+    runtime_ceiling: 6 hours per fold
+    provenance_status: external_cleared
+    not_a_training_target: >-
+      The 94 percent retention crossover in F-0018 is a property of the metric
+      that a later filter must clear. It is not a label, not a loss term and not
+      something E03 optimises. Confusing the two would train a detector to
+      predict its own evaluation.
+    objective: >-
+      Non-negative positive-unlabelled. No voxel is supervised as background,
+      because F-0020 falsified every candidate band on this corpus and D-0024
+      removed the negative class rather than widening it.
+    stated_uncertainty: >-
+      The number of dim unannotated cells is unknown. Annotated cells reach
+      intensity percentile 0.063, and the class prior counts every cell the
+      dataset estimates, so a prior biased against dim cells makes the detector
+      under-predict. E03 reports this with its results and does not claim to
+      have resolved it.
+    assumptions:
+      - id: SCAR
+        statement: >-
+          nnPU is unbiased only if labelled positives are Selected Completely At
+          Random from all positives.
+        status: MEASURED AND NOT SUPPORTED. F-0022 finds annotation density
+          correlates with annotated-cell brightness at r = +0.354 across the 199
+          datasets, so labelling is not independent of the feature the detector
+          reads.
+        consequence: >-
+          E03 may not describe its estimator as unbiased (D-0025). The residual
+          bias is unmeasured in direction and magnitude and is reported with the
+          results.
+        falsifier: >-
+          The assumption is already violated. It is recorded so that a result
+          depending on it cannot be read as if it were not. Independently, if a
+          fold's detector recovers annotated cells markedly better than
+          unannotated ones at matched intensity, that is the bias showing up in
+          the outputs and the fold is reported as compromised rather than
+          promoted.
+      - id: PRIOR_VALIDITY
+        statement: The class prior is a probability at every scale the pipeline uses.
+        status: MEASURED AND HOLDS. F-0021 records 1.443e-4 to 3.000e-3 per grid
+          voxel across 199 datasets, all inside the open unit interval, with zero
+          grid collisions so positive voxels equal annotated nodes exactly.
+        falsifier: any dataset whose prior leaves the open unit interval at any scale.
+  - id: E03-SMOKE-01
+    attempt: 1
+    superseded_identity: >-
+      Recorded as E03-SMOKE before a retry existed. Renamed once, to give the
+      retry a distinct identity that cannot overwrite this outcome. The remote
+      run, its status and its log digest are unchanged and must stay so.
+    immutable: true
+    component: proposal_detector
+    parent: E03
+    hypothesis: >-
+      The packaged fold runs on a Kaggle T4 with every guard intact, so the full
+      folds can be requested on evidence rather than hope.
+    falsifier: >-
+      Any guard failing, or the risk not decreasing across the two epochs.
+    inputs:
+      - the Kaggle package at canonical_text_sha256:sha256/v1:928065d6f7f5b71b72b4e291152a814fcd89353f174dc77799271a325ef04c73
+    split:
+      scheme: leave_one_embryo_out
+      fold: fold_44b6, two movies from 44b6
+    model_config:
+      path: configs/e03-clean-folds.yaml
+      section: E03
+    budget: one Kaggle T4, 2400 second ceiling
+    expected_outputs:
+      - artifacts/e03-smoke/result-fold_44b6.json
+      - one checkpoint under 40 MB
+    forbidden_changes:
+      - any guard or falsifier in the package
+    promotion_metric: none; this experiment cannot promote anything
+    runtime_ceiling: 2400 seconds
+    provenance_status: external_cleared
+    status: invalid
+    result: none produced
+    outcome: >-
+      The kernel errored before executing any packaged code. nbformat validation
+      rejected the generated notebook for a missing kernelspec display_name and
+      missing cell ids, so conversion failed at import time. The log contains
+      zero BIOHUBX_STAGE lines: no guard ran, no falsifier fired, no epoch
+      started, and no checkpoint or result manifest exists to retrieve.
+    status_reasoning: >-
+      invalid rather than killed. Nothing about the hypothesis was tested. A run
+      whose code never executed measures neither success nor failure of what it
+      was meant to measure, and recording it as killed would misrepresent a
+      packaging defect as a scientific result.
+    retrieved:
+      kernel_log: artifacts/e03-smoke/kernel.log
+      kernel_log_digest: raw_artifact_sha256:sha256:cec04e32b04cf2d0db31d0162d7b246b86fd8dc4fad2335a7c342be791a18ecb
+      result_manifest: not produced
+      checkpoint: not produced
+    deviations_from_authorisation:
+      - >-
+        The kernel was created at aryaarun07/biohub-x-e03-fold-44b6, not the
+        authorised aryaarunkaggle/biohubx-e03-fold-44b6. Two causes, both in the
+        package. The owner in the metadata came from the username field of the
+        local credentials file, which is not the account's URL slug, and Kaggle
+        used the authenticated account instead. And the title slugified to
+        biohub-x-e03-fold-44b6, which Kaggle preferred over the requested id,
+        with a warning. The package content pushed was byte-for-byte the
+        authorised package; only its address differed.
+    repairs_made:
+      note: >-
+        No repair run and no second push. The defects are fixed in the builder so
+        a future authorised attempt cannot repeat them, and both are bound by
+        tests: the notebook now carries a kernelspec display_name and cell ids,
+        and kernel_metadata refuses a title that does not slugify to its own id
+        or an id without an owner.
+  - id: E03-SMOKE-02
+    attempt: 2
+    component: proposal_detector
+    parent: E03
+    supersedes_nothing: >-
+      E03-SMOKE-01 stands on its own record. This attempt does not replace it,
+      correct it, or inherit its identity; a failed attempt that can be
+      overwritten by a later one is not a record.
+    hypothesis: >-
+      The packaged fold runs on a Kaggle T4 with every guard intact, so the full
+      folds can be requested on evidence rather than hope.
+    falsifier: >-
+      Any guard failing, or the risk not decreasing across the two epochs.
+    what_changed_since_attempt_1:
+      - the notebook carries kernelspec display_name and cell ids, so nbformat validates it
+      - the notebook carries its own source and imports from /kaggle/working, not /kaggle/input
+      - a mandatory pre-push gate validates, converts, and runs the bootstrap isolated from this repository
+      - the kernel id is derived from its own title, and --expect-kernel pins the address
+      - the builder refuses a dirty tree, so the pinned commit describes the shipped bytes
+    inputs:
+      - the Kaggle package at canonical_text_sha256:sha256/v1:265c10fc60b34c0342b9c1225bfebdb0930dc8c8a20b3c2c23b291767fdd793c
+      - the embedded source payload at raw_artifact_sha256:sha256:c24db880462b202943669e459e0f2d1fb322e5e7223e7165a64b3a8d01b8acf9
+    split:
+      scheme: leave_one_embryo_out
+      fold: fold_44b6, two movies from 44b6
+    model_config:
+      path: configs/e03-clean-folds.yaml
+      section: E03
+    budget: one Kaggle T4, 2400 second ceiling
+    expected_outputs:
+      - a result manifest carrying a typed checkpoint digest
+      - one checkpoint under 40 MB
+    forbidden_changes:
+      - any guard or falsifier in the package
+      - the recorded outcome of E03-SMOKE-01
+    promotion_metric: none; this experiment cannot promote anything
+    runtime_ceiling: 2400 seconds
+    provenance_status: external_cleared
+    kernel: aryaarun07/biohub-x-e03-fold-44b6
+    kernel_note: >-
+      The same kernel slug as attempt 1, because Kaggle addresses a kernel by
+      slug and pushing creates a new version rather than a new kernel. Attempt
+      identity lives in this registry, not in the remote name, which is why the
+      two must not share a record id.
+    status: invalid
+    immutable: true
+    outcome: >-
+      Pushed once as kernel version 2 and ran. The bootstrap worked exactly as
+      designed: the embedded payload verified against its recorded digest, 44
+      files extracted to /kaggle/working/biohubx-package, and biohubx imported
+      from that verified tree. Nine of the fifteen stages appeared, through
+      bootstrap-verify, bootstrap-extract, bootstrap-import, start, pinned,
+      environment and inputs. It then died on `import zarr`.
+      ModuleNotFoundError. The Kaggle image does not carry zarr and the kernel
+      runs with internet disabled, so nothing could install it. No epoch ran, no
+      risk was computed, no checkpoint or result manifest exists.
+    status_reasoning: >-
+      invalid rather than killed, for the same reason as attempt 1: the
+      hypothesis was never tested. What differs is where it stopped. Attempt 1
+      died before executing a line; attempt 2 executed, verified its own payload
+      and reached the data reader. The packaging problem is solved and an
+      environment problem is now visible underneath it.
+    retrieved:
+      kernel_log: artifacts/e03-smoke-02/kernel.log
+      kernel_log_digest: raw_artifact_sha256:sha256:056b2c28279adf10d67e64d7a299e9ca0f159e27a7ac8d5c16e5bdb801ce1ab1
+      result_manifest: not produced
+      checkpoint: not produced
+      extracted_payload_digest_returned_by_the_kernel: raw_artifact_sha256:sha256:c24db880462b202943669e459e0f2d1fb322e5e7223e7165a64b3a8d01b8acf9
+      round_trip: >-
+        The kernel returned the tree it had extracted, and re-archiving it here
+        reproduces the embedded digest exactly. The bootstrap is verified end to
+        end by evidence from the remote machine, not by local simulation.
+    deviations_from_authorisation:
+      - >-
+        The authorisation named one Kaggle T4. Kaggle allocated a P100, shown in
+        the kernel UI as "Version #2 with GPU P100". kernel-metadata.json
+        requested accelerator nvidiaTeslaT4 and that did not take effect. The
+        packaged guard checks torch.cuda.device_count(), which was 1 and passed,
+        and never checked the device model, so the run proceeded on hardware
+        nobody approved. The guard gap is mine; the allocation is Kaggle's.
+        Nothing about the failure depends on which GPU it was, since the run died
+        before any tensor work, but the scope was still exceeded.
+    blocks_further_attempts_until:
+      - a dependency strategy is chosen for zarr and the rest of the stack
+      - the GPU-model guard exists, so an unapproved accelerator refuses rather than proceeds
+  - id: E03-SMOKE-03
+    attempt: 3
+    component: proposal_detector
+    parent: E03
+    immutable: true
+    supersedes_nothing: >-
+      E03-SMOKE-01 and E03-SMOKE-02 stand on their own records. This attempt does
+      not replace, correct or inherit either.
+    hypothesis: >-
+      The packaged fold runs on a Kaggle T4 with every guard intact, so the full
+      folds can be requested on evidence rather than hope.
+    falsifier: >-
+      Any guard failing, or the risk not decreasing across the two epochs.
+    what_changed_since_attempt_2:
+      - the package carries the wheelhouse it needs, verified before pip and installed offline
+      - the mount is located by the identity the package carries rather than a guessed path
+      - accelerator and machine_shape both set to the canonical NvidiaTeslaT4
+      - the runtime guard requires an actual Tesla T4 rather than a device count
+      - the attempt id travels in the package, the log and the result manifest
+      - transport validates the staged inventory and verifies the returned slug
+    inputs:
+      - the Kaggle package at canonical_text_sha256:sha256/v1:0a3edb3213749bbdf1c71c0d1522ace1130d9e3da73fbf4c2c4c3579ce4973f8
+      - the embedded source payload at raw_artifact_sha256:sha256:361b4a7b0813c37b85ac8b289e24f9f33b779e82c565c17f1425cd50c90612bb
+      - the wheelhouse at tree_sha256:sha256/v1:4c7474376ba70a4772babee4c8fca8d13d829066686f8672cd1b9f23a10ee3ed
+    split:
+      scheme: leave_one_embryo_out
+      fold: fold_44b6, two movies from 44b6
+    model_config:
+      path: configs/e03-clean-folds.yaml
+      section: E03
+      canonical_text: canonical_text_sha256:sha256/v1:c31428ecad168ed5553965fad500ea75326491220c1b39abd5510b073ffc7117
+    budget: one Kaggle T4 under envelope GPU-CAMPAIGN-E03-01, 2400 second ceiling
+    expected_outputs:
+      - a result manifest carrying a typed checkpoint digest
+      - one checkpoint under 40 MB
+    forbidden_changes:
+      - any guard or falsifier in the package
+      - the recorded outcomes of E03-SMOKE-01 and E03-SMOKE-02
+    promotion_metric: none; this experiment cannot promote anything
+    runtime_ceiling: 2400 seconds
+    provenance_status: external_cleared
+    kernel: aryaarun07/biohub-x-e03-fold-44b6
+    kernel_version: 3
+    status: integration_only
+    result: F-0024
+    outcome: >-
+      Pushed once and completed in 102.4 seconds of wall clock, 84.744 of them
+      inside the packaged entry point. Nineteen stages appeared in order. The
+      wheelhouse resolved by identity, verified with zero differences, and
+      installed offline at returncode 0; the payload verified and imported from
+      the extracted tree; 142 registered artifacts were shape-checked and 4
+      re-digested in full; fold membership was asserted; the device reported Tesla
+      T4; both epochs ran, the risk fell and the clamp never fired; the checkpoint
+      wrote atomically and reloaded strict. Every falsifier the envelope named was
+      checked and none fired.
+    status_reasoning: >-
+      integration_only rather than promoted, because a smoke cannot promote and
+      because four supervised positives across the whole run is not evidence that
+      anything learns. What it establishes is that the clean nnPU training path
+      works on real Kaggle hardware, which is exactly what the envelope asked.
+    deviations_from_authorisation:
+      - >-
+        Kaggle allocated two T4s where the package expected one. The device model
+        was correct and the envelope named the model rather than a count, so the
+        approved hardware was delivered. The packaged count guard did not notice,
+        because smoke mode substituted the expected count for the observed one
+        before comparing them; recorded in [[R-0011]] and corrected in [[D-0038]].
+        No effect on the run: the model trains on one device and peak memory fits
+        one card with 11.9 GB to spare.
+    budget_consumed:
+      pushes: 1 of 2 permitted
+      gpu_minutes: about 1.7 of 80 permitted
+  - id: E04
+    component: proposal_detector
+    hypothesis: >-
+      A multi-scale Difference-of-Gaussians proposal source, with its budget and
+      scale bank selected on one embryo, reaches more annotated cells of the other
+      embryo than the classical local-maximum detector does at the same node
+      budget.
+    falsifier: >-
+      Killed if, at a matched node budget, DoG fails to improve reachability over
+      the classical baseline on either held-out embryo. One embryo improving and
+      the other not is a challenger, never a promotion. A pooled-only result is
+      not a result.
+    inputs:
+      - the 199 annotated competition.train .geff and .zarr artifacts
+      - configs/e04-dog-proposals.yaml
+    split:
+      scheme: leave_one_embryo_out
+      folds:
+        - id: fold_44b6
+          select_on: 44b6
+          evaluate_on: 6bba
+        - id: fold_6bba
+          select_on: 6bba
+          evaluate_on: 44b6
+      never_read: the public-test directory, for any purpose
+    model_config:
+      path: configs/e04-dog-proposals.yaml
+      section: E04
+      canonical_text: canonical_text_sha256:sha256/v1:e85a67c9406ef1dd2de5c1616a7486a857c18a9e23f0cfb908dde4f93d119f94
+    budget: CPU only, no GPU, no network, no download
+    expected_outputs:
+      - artifacts/proposals.json
+      - reachability per embryo, per source, per node budget, never pooled
+    forbidden_changes:
+      - the official 7 micrometre matching radius
+      - the node budget's origin, which is each movie's own estimated_number_of_nodes
+      - the fold definition
+    promotion_metric: >-
+      Reachability on the held-out embryo at a matched node budget. This cannot
+      promote a component on its own, because reachability is not the official
+      metric; it decides whether the proposal source is worth carrying into a
+      scored experiment.
+    mandatory_outputs:
+      - reachability per embryo
+      - the node budget each number was measured at
+      - each fold reported on its own
+    runtime_ceiling: 3600 seconds
+    provenance_status: external_cleared
+    measure_is_not_node_recall: >-
+      Reachability counts an annotated node as reached when some proposal lies
+      within the official radius in the same frame. It upper-bounds the official
+      one-to-one node recall and is not it: the same classical detector reads
+      0.3846 by this measure and 0.269 officially on the F-0017 window ([[F-0025]]).
+      It is used because an annotated endpoint with no nearby proposal cannot be
+      matched by any association method, so it is the ceiling every later stage
+      works under.
+    selection_leakage_argument: >-
+      The budget comes from each movie's own estimated_number_of_nodes, which is
+      official metadata present for every movie including unannotated ones, so
+      nothing about the held-out embryo's annotations enters the selection. The
+      budget ratio and scale bank are chosen on the training embryo and frozen
+      before the evaluation embryo is measured.
+    independence: >-
+      The mechanism is scale-space blob detection from primary literature and the
+      isotropic plane stride is derived from OFFICIAL_VOXEL_SCALE, which
+      biohubx.proposals.classical already documented. No constant is inherited
+      from any external analysis.
+    status: challenger
+    result: F-0026
+    status_reasoning: >-
+      Both folds improve independently, which the falsifier required and which
+      would normally justify promotion. It is a challenger rather than promoted
+      for the reason E04's own promotion_metric states: reachability is not the
+      official metric, and no component is promoted on a diagnostic. What this
+      earns the DoG source is a place in a scored experiment, not a place in the
+      pipeline. Promotion also requires Arya Arun's approval under [[D-0039]].
+    what_would_promote_it: >-
+      An end-to-end run on both embryo folds, scored through the pinned official
+      metric, where DoG proposals beat classical ones on the combined score rather
+      than on reachability. That run needs association to exist, since [[F-0026]]
+      raises the ceiling every later stage works under and does not itself close
+      any edge.
+    open_questions_this_raised:
+      - >-
+        Both folds selected the largest budget in the sweep. The curve is still
+        rising at 2.0 times the estimated cell count, so the useful range has not
+        been bracketed and the node-count cost of going further is unmeasured.
+      - >-
+        Neither source fills its budget above 0.75, so the matched-budget design
+        did not fully bind. A fair comparison needs each source truncated to the
+        other's actual count, which the aggregate as collected cannot reconstruct.
+      - >-
+        Reachability near 0.79 still leaves a fifth of annotated cells unproposed.
+        Whether the remainder is dim, non-Gaussian or simply outside the scale
+        bank decides whether a learned detector is complementary to DoG or
+        redundant with it, which is the union question in the queue.
+    extensions:
+      - id: E04b
+        ran: 2026-09-04
+        change_from_E04: >-
+          Budget sweep extended to 0.5, 1, 2, 3, 4, 6 and 8 times the estimated
+          cell count; one-to-one node recall reported beside reachability; every
+          annotated node audited at the neutral budget. No change to the fold
+          definition, the radius, the budget's origin or the falsifier.
+        result: F-0027
+        outcome: >-
+          Both folds still improve, by wider margins. The curve plateaus at 0.88
+          on 44b6 by ratio 6 and is still rising at 0.91 on 6bba at ratio 8. The
+          neutral-budget misses are dimmer and lower-response than reached cells
+          and are mostly recoverable by budget; annotated crowding and boundary
+          distance do not distinguish them.
+        what_this_changes_for_E05: >-
+          The union question is sharpened. Most neutral-budget misses are cells
+          DoG ranks too low, not cells it cannot see, so the first arm to test is
+          a second pass over lower-response DoG peaks (H-08) before a learned
+          detector is asked to find anything; the learned arm's target is the
+          residual that remains at ratio 8, which is roughly a tenth of annotated
+          cells and is not yet characterised on its own.
+        still_a_challenger: >-
+          Nothing here is the official metric. The status of E04 does not change.
+        residual_characterised: >-
+          F-0028 splits the ratio-8 residual into a localisation regime on 44b6,
+          where a proposal already lies 7 to 14 micrometres from almost every
+          missed cell, and a half-dim regime on 6bba, where 60 percent of the
+          residual sits below intensity percentile 0.80 and never entered the
+          candidate pool. The cheap arm is therefore localisation (H-11) and a
+          second pass over lower-response peaks (H-08); the learned arm's real
+          target is the dim half of the 6bba residual, about five percent of that
+          embryo's annotated cells.
+        superseded_reading: >-
+          F-0030 then showed the detector behind all of the above was counting
+          blob shoulders as proposals. F-0032 re-measured with strict peaks and
+          two scales: 0.92 and 0.90 reach at a proposal count near the official
+          estimate, which is the regime F-0018 asked for. The residual to hand a
+          learned detector is now 31 of 365 annotated cells on 44b6, all within
+          one nucleus spacing of a peak, and about a fifth of 6bba's at the
+          neutral budget, a third of them dim. D-0041 fixes the configuration
+          E05 inherits.
+  - id: E05
+    component: proposals
+    hypothesis: >-
+      The number of proposals kept, tied to each movie's official estimate, is
+      what separates the 6bba oracle ceiling from 0.950 (F-0033), and selecting
+      the frozen strict peaks or the per-scale union (F-0034) down to a budget
+      ratio chosen on the training embryo raises the oracle ceiling on both
+      held-out embryos over the untruncated D-0041 configuration.
+    falsifier: >-
+      No arm raises the held-out oracle score over A0 in both directions, at the
+      ratio selected on the training embryo. Then proposal count is not the
+      lever, the proposal stage needs a detector rather than a selector, and the
+      residual goes to a learned arm. One direction improving is a challenger; a
+      pooled number is not a result.
+    inputs:
+      - the 199 annotated competition.train .geff and .zarr artifacts
+      - configs/e05-proposal-selection.yaml
+    split:
+      scheme: leave_one_embryo_out
+      folds:
+        - id: fold_44b6
+          select_on: 44b6
+          evaluate_on: 6bba
+        - id: fold_6bba
+          select_on: 6bba
+          evaluate_on: 44b6
+      never_read: the public-test directory, for any purpose
+    model_config:
+      path: configs/e05-proposal-selection.yaml
+      section: E05
+      canonical_text: canonical_text_sha256:sha256/v1:0607cf5a958d7e028b78d06e8ed6d1e64782fef46c67b1e2006c6697e58493ff
+    instrument: >-
+      biohubx evaluate oracle-ceiling with --budget-ratios, and with
+      --per-scale-union for the union source; every ratio is scored from one
+      detection pass per window, so the arms share windows, proposals and
+      ground truth exactly.
+    candidate_sources:
+      peaks: the frozen configuration of D-0041, unchanged
+      union: H-11d, strict peaks per scale unioned before one shared suppression pass (F-0034)
+    selection:
+      rule: >-
+        rank proposals within each ten-frame window by DoG response and keep
+        the top round(k * window_estimate); ties break on instance identity
+      budget_ratios: [0.8, 1.0, 1.25, 1.5, 2.0]
+      constant_selected_on: the training embryo of each fold, by oracle score
+    arms:
+      - id: A0
+        source: peaks
+        truncation: none
+        role: baseline; must reproduce F-0033 to the digit
+      - id: A1
+        source: peaks
+        truncation: budget
+      - id: A2
+        source: union
+        truncation: none
+      - id: A3
+        source: union
+        truncation: budget
+    window:
+      frames_per_movie: 10
+      start: first annotated frame, clamped to fit
+      spatial_extent: full
+      identical_to: E06-ORACLE
+    budget: CPU only, no GPU, no network, no download
+    expected_outputs:
+      - artifacts/e05-peaks.json, arms A0 and A1 at every ratio, per embryo
+      - artifacts/e05-union.json, arms A2 and A3 at every ratio, per embryo
+    forbidden_changes:
+      - the pinned official scorer
+      - the two candidate sources' DoG parameters
+      - the window, once any arm has run
+      - the fold definition
+      - D-0041 and E06's frozen block; a promoted arm is a new declaration
+    promotion_metric: >-
+      oracle ceiling on the held-out embryo at the training-selected ratio,
+      both directions separately; promotion requires improvement over A0 on
+      both
+    mandatory_outputs:
+      - >-
+        per arm, per ratio, per embryo: proposals, node ratio, node match
+        fraction, edge retention, raw and adjusted edge Jaccard, division
+        Jaccard, combined score, unscored windows
+      - >-
+        per fold: the ratio selected on the training embryo and the held-out
+        score at that ratio beside A0's
+    exit_rule_toward_E06: >-
+      A promoted arm whose ceiling is at or above 0.950 on both embryos lets
+      E06 resume its bake-off on that arm's proposals under a new frozen
+      declaration. Otherwise the ceiling is still the proposal stage's and the
+      learned arm comes before any association work.
+    runtime_ceiling: 7200 seconds per source
+    provenance_status: diagnostic_ceiling
+    preregistered_at_commit: after b48c1ee, before any arm ran
+    outcome:
+      finding: F-0035
+      a0_reproduces_f0033: true
+      arms_killed: [A1, A3]
+      arm_promoted_as_proposal_source: A2
+      scores_held_out:
+        A0: {44b6: 0.9961, 6bba: 0.9227}
+        A2: {44b6: 1.0195, 6bba: 0.9283}
+      decision_applied: >-
+        Budgeted selection is killed on its falsifier: neither source improves
+        the held-out ceiling in both directions at the ratio chosen on the
+        training embryo. The per-scale union without truncation improves both
+        directions and needs no fitted constant, so it is the better proposal
+        source and becomes a new frozen declaration when one is written; it does
+        not edit D-0041 or E06's frozen block by itself. The exit rule toward
+        E06 is not met: A2's 6bba ceiling is 0.9283, below 0.950, so association
+        is still not the bottleneck and the learned proposal arm comes first.
+    status: complete
+
+  - id: E06
+    component: association
+    hypothesis: >-
+      With proposals frozen at the strict-peak DoG configuration of D-0041, the
+      official combined score on each held-out embryo is limited by association,
+      and at least one association arm improves it over the nearest-parent
+      baseline on both embryo directions.
+    falsifier: >-
+      The oracle ceiling decides whether the hypothesis is even in play: if either
+      embryo's oracle score cannot support 0.950, association is not yet the sole
+      bottleneck and E06 halts in favour of proposal complementarity. In the
+      bake-off, an arm is killed if it fails to improve the official combined
+      score over the baseline on either held-out embryo; one direction improving
+      is a challenger; a pooled-only result is not a result.
+    inputs:
+      - the 199 annotated competition.train .geff and .zarr artifacts
+      - configs/e06-association.yaml
+    split:
+      scheme: leave_one_embryo_out
+      folds:
+        - id: fold_44b6
+          select_on: 44b6
+          evaluate_on: 6bba
+        - id: fold_6bba
+          select_on: 6bba
+          evaluate_on: 44b6
+      never_read: the public-test directory, for any purpose
+    model_config:
+      path: configs/e06-association.yaml
+      section: E06
+      canonical_text: canonical_text_sha256:sha256/v1:4560b2a4b4a7d49de154cc6edca2242d635517c38cf7e6548e7a53e23406bf6a
+    frozen_proposals:
+      source: biohubx.proposals.dog
+      local_maxima_only: true
+      radii_um: [2.0, 3.0]
+      response_quantile: 0.95
+      suppression_radius_um: 4.0
+      refine_centroids: false
+      truncation: none
+      frozen_by: D-0041
+      may_not_change: >-
+        Preregistered here. H-11c and every other proposal probe run beside E06
+        and cannot alter this block; a better proposal set is a new declaration.
+    window:
+      frames_per_movie: 10
+      start: first annotated frame, clamped to fit
+      spatial_extent: full
+    budget: CPU only, no GPU, no network, no download
+    expected_outputs:
+      - artifacts/e06-oracle.json, the ceiling per embryo
+      - one report per bake-off arm, per embryo direction, never pooled
+    forbidden_changes:
+      - the pinned official scorer
+      - the frozen proposal block above
+      - the window, once the oracle has run
+      - the fold definition
+    promotion_metric: >-
+      official combined score on the held-out embryo, both directions separately;
+      promotion requires improvement over A1 on both
+    mandatory_outputs:
+      - node ratio, raw and adjusted edge Jaccard, division counts, combined score, per embryo
+      - the oracle ceiling before any arm
+    runtime_ceiling: 7200 seconds per arm
+    provenance_status: external_cleared
+    first_measurement:
+      id: E06-ORACLE
+      role: diagnostic ceiling, never a promotable method
+      construction: >-
+        Proposal nodes are the frozen peaks. Ground-truth nodes are matched
+        one-to-one to proposals within the official 7 micrometre radius, per
+        frame, by minimum-cost assignment. The only edges emitted are ground-truth
+        edges whose two endpoints both matched, rewritten onto their matched
+        proposals. Every proposal is a node whether or not it matched, so the
+        node-count term is what the frozen detector actually costs.
+      decision_rule: >-
+        Either embryo below 0.950: association is not yet the sole bottleneck,
+        return to H-11c and E05. Both at or above 0.950 with headroom toward
+        0.970: proceed to the bake-off.
+      outcome:
+        finding: F-0033
+        score_44b6: 0.9961
+        score_6bba: 0.9227
+        both_support_0_950: false
+        decision_applied: >-
+          6bba's ceiling is below 0.950. E06 halts before the bake-off, per the
+          rule above, and the campaign returns to proposal complementarity. The
+          frozen block is unchanged; the proposal-count question F-0033 raises
+          is declared in E05, not here.
+    status: halted_at_first_measurement
+  - id: E07
+    component: proposals
+    hypothesis: >-
+      Over the complete strict per-scale DoG peak set at response quantile 0.80,
+      which holds every annotated cell on the pilot, a small learned scorer over
+      a local patch of intensity and per-scale response, with or without the
+      neighbouring frames, ranks true cells above spurious peaks well enough
+      that keeping the count-tied top candidates raises the oracle ceiling on
+      both held-out embryos over the untruncated A2 union of F-0035, and lifts
+      6bba to at least 0.950.
+    falsifier: >-
+      An arm is killed if it fails strict loading or deterministic
+      reproduction, raises proposal count without raising the oracle ceiling,
+      improves only the embryo used for selection, exceeds its declared memory
+      or runtime ceiling, treats unlabelled voxels as negatives, or contributes
+      nothing once deduplicated with A0. The family is killed if neither
+      surviving arm beats A0 on both held-out directions in Stage 3; then the
+      ceiling is not a ranking problem either and the residual returns to the
+      atlas. One direction improving is a challenger; a pooled number is not a
+      result.
+    inputs:
+      - the 199 annotated competition.train .geff and .zarr artifacts
+      - configs/e07-candidate-rescoring.yaml
+      - artifacts/miss-atlas-6bba.json (R-0022) and the pool pilots, as motivation only
+    split:
+      scheme: leave_one_embryo_out
+      folds:
+        - id: fold_44b6
+          train_on: 44b6
+          evaluate_on: 6bba
+        - id: fold_6bba
+          train_on: 6bba
+          evaluate_on: 44b6
+      never_read: the public-test directory, for any purpose
+    model_config:
+      path: configs/e07-candidate-rescoring.yaml
+      section: E07
+      canonical_text: canonical_text_sha256:sha256/v1:a4411b560d966a65cacd3ec25f2f85c441dc05ec058a3c8d0f7880e0538fc620
+    baseline:
+      id: A0
+      source: the E05 arm A2 union, F-0035, unchanged
+      ceilings: {44b6: 1.0195, 6bba: 0.9283}
+    arms:
+      - id: A1
+        status: killed_before_implementation
+        reason: 41 of 706 atlas misses have no strict peak within 7 um
+      - id: A2
+        status: killed_before_implementation
+        reason: 2 of 706 atlas misses are merged
+      - id: A3
+        status: implemented
+        model: biohubx.proposals.rescore.PatchScorer with 3 channels
+      - id: A4
+        status: implemented
+        model: biohubx.proposals.rescore.PatchScorer with 5 channels, temporal context
+      - id: A5
+        status: killed_before_implementation
+        reason: as A2, merged is 2 of 706
+    candidate_pool:
+      rule: every strict per-scale maximum at or above response quantile 0.80, suppressed at 4.0 um
+      pilot: node match 1.000 on 44b6 and 0.999 on 6bba, 12 movies per embryo, 10-frame windows
+      quantile_selected: per embryo from its own rows; both give 0.80
+    supervision: non-negative positive-unlabelled; positives are one-to-one matches within 7 um; no negatives
+    decode: >-
+      per movie, the round(count_ratio x estimate) highest-scoring candidates, the
+      estimate being that movie's own official metadata; count_ratio 1.0 by
+      declaration, tunable only on the training embryo in Stage 3; the same
+      4.0 um suppression and deduplication as A0
+    amended_before_any_gpu_stage: >-
+      the decode was first written as a probability threshold frozen on the
+      training embryo; the CPU smoke of the loop showed that transfers a count
+      from a dense embryo to a sparse one (1,015 kept on a 6bba window whose
+      estimate was 191). Per-movie count tied to the official estimate replaces
+      it, with per-channel patch standardisation added after Stage 0 measured
+      the DoG channels barely moving the scorer. Both changes precede Stage 2.
+    funnel: stage0 model inspect, stage1 train probe, stage2 tiny GPU smoke, stage3 mini-fold both directions, stage4 full folds for survivors
+    budget: stages 0 and 1 CPU only; stages 2 to 4 under a bounded GPU campaign envelope presented separately
+    promotion_metric: >-
+      oracle ceiling on the held-out embryo at the training-frozen threshold,
+      both directions separately; promotion requires improvement over A0 on
+      both and at least 0.950 on 6bba; Stage 4 reports the official metric per
+      direction as well
+    forbidden_changes:
+      - the pinned official scorer
+      - the A0 baseline and its parameters
+      - the candidate pool rule, once any arm has trained
+      - the fold definition
+      - D-0041, E05 and E06's frozen blocks; a promoted arm is a new declaration
+    provenance_status: diagnostic_ceiling
+    preregistered_at_commit: after 00ce8c6, before any arm ran
+    stage_results:
+      A3:
+        stage0:
+          report: artifacts/model-inspect-A3.json
+          parameters: 42881
+          receptive_field_voxels: [9, 9, 9]
+          graph_capture: torch.export
+          activation_bytes_512_patches: 188352512
+          forward_seconds_median_cpu: 1.512 for 3097 patches
+          forward_backward_seconds_median_cpu: 6.418
+          cpu_peak_rss_bytes: 1502248960
+          channel_probes_relative_change: [0.1647, 0.0444, 0.1198]
+          inert_channels: []
+          determinism: {"max_abs_difference_after_reload": 0.0, "output_identical_after_reload": true, "output_identical_between_runs": true, "strict_reload_ok": true}
+        stage1:
+          report: artifacts/e07-probe-A3.json
+          window: 44b6_ddf577ad frames 0..+3
+          counts: {"annotated": 35, "baseline_A0": 1402, "kept_at_count_tied_threshold": 1605, "pool": 3097, "positives": 35}
+          prior: 0.5182
+          loss_trajectory: [0.680996, 0.626307, 0.555185, 0.465444, 0.363295, 0.250328]
+          gradient_norm_total: 4.1686e-01
+          zero_gradient_blocks: "[pool] (the pooling layer has no parameters)"
+          ceilings_on_the_window: {"A0": {"proposals": 1402, "match": 0.9714, "score": 0.9686}, "arm_kept": {"proposals": 1605, "match": 1.0, "score": 1.0}, "pool": {"proposals": 3097, "match": 1.0, "score": 0.907}}
+          survives: True
+          kill_reasons: []
+        stage2b_fold_44b6_attempt1:
+          attempt: 1
+          kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+          kernel_status: ''
+          reference: R-0028
+          outcome: no summary manifest retrieved
+        stage2b_fold_6bba_attempt2:
+          attempt: 2
+          kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
+          kernel_status: ''
+          reference: R-0029
+          outcome: no summary manifest retrieved
+        stage2b_fold_44b6_attempt3:
+          attempt: 3
+          kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+          kernel_status: KernelWorkerStatus.ERROR
+          reference: R-0030
+          outcome: no summary manifest retrieved
+        stage2b_fold_6bba_attempt4:
+          attempt: 4
+          kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
+          kernel_status: KernelWorkerStatus.ERROR
+          reference: R-0031
+          summary_note: 'no summary manifest: the parent refused after a worker died; per-worker manifests recorded'
+          workers:
+          - worker_id: E07-SMOKE-2B-A3-fold_6bba-s0
+            seed: 0
+            device: cuda:0
+            manifest: e07-fold_6bba-A3-s0.json
+            manifest_digest: raw_artifact_sha256:sha256:794d01276309352e30bec3d9a9d85996ce6fd15c49203b6acc135d98cb8eb0d4
+            checkpoint_digest: raw_artifact_sha256:sha256:537a0a35a9fa744980dc38970be6d7a1dcd70e899608431f9aafc595a3315627
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 0.00025323033332824707
+              reason: verified
+              relative_loss_difference: 7.756579154678308e-06
+              requested: true
+            batch_used: 8192
+            batch_ladder_rungs:
+            - batch: 512
+              examples_per_second: 1164.2
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 14322.1
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 14052.5
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 23823.5
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 8192
+              examples_per_second: 29466.0
+              peak_allocated_bytes: 1858564096
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 16384
+              examples_per_second: 30087.3
+              peak_allocated_bytes: 3700359168
+              under_ceiling: true
+              out_of_memory: null
+            epochs:
+            - epoch: 0
+              batches: 28
+              positives: 675
+              loss_mean: 0.47510044848812477
+              loss_last: 0.35270246863365173
+              negative_risk_clamped_batches: 1
+              peak_allocated_bytes: 1822894080
+            - epoch: 1
+              batches: 28
+              positives: 675
+              loss_mean: 0.20992031813200032
+              loss_last: 1.306605577468872
+              negative_risk_clamped_batches: 4
+              peak_allocated_bytes: 1822894080
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 56
+              clamp_frequency: 0.0893
+              clamped_batches: 5
+              compute_seconds: 13.936
+              data_wait_fraction: 0.1701
+              data_wait_seconds: 2.855
+              examples: 410466
+              examples_per_second: 29453.8
+              gpu_utilisation_median: 86.0
+              positives: 1350
+              positives_per_batch: 24.107
+              skipped_no_positive: 0
+            peak_allocated_bytes: 1822894080
+            peak_reserved_bytes: 7891582976
+            training_kept: 11847
+            training_estimate: 11845.7
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 14614
+                node_ratio: -0.0
+                node_match_fraction: 0.5581
+                edge_retention: 0.4595
+                score: 0.6538487074887255
+              A0:
+                proposals: 12821
+                node_ratio: -0.1227
+                node_match_fraction: 0.9535
+                edge_retention: 0.9189
+                score: 0.9044552037654512
+              pool:
+                proposals: 62903
+                node_ratio: 3.3041
+                node_match_fraction: 1.0
+                score: 0.4788651607217481
+            ceiling_degraded: true
+            ceiling_at_or_above_A0: false
+            residual_propensity:
+              dog_control_auc: 0.9454
+              dog_gain: 0.0085
+              passed: false
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.8798
+              scorer_gain: 0.0788
+              scorer_group_gains:
+                appearance: 0.0723
+                density: 0.0736
+                position: -0.0021
+                temporal: 0.0006
+                time: 0.0025
+              scorer_null_threshold: 0.0395
+            residual_passed: false
+          advancement_condition_met_per_seed:
+            '0': false
+          ceiling_degraded_any_seed: true
+        stage2b_gpu_campaign_e07e08_01_fold_44b6_attempt1:
+          campaign: GPU-CAMPAIGN-E07E08-01
+          attempt: 1
+          kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+          kernel_status: KernelWorkerStatus.COMPLETE
+          reference: R-0032
+          workers:
+          - worker_id: E07-SMOKE-2B-A3-fold_44b6-s0
+            seed: 0
+            device: cuda:0
+            manifest: e07-fold_44b6-A3-s0.json
+            manifest_digest: raw_artifact_sha256:sha256:3d1d5d25979e628620979633456eaef822c3ad4374ee02716792ad2aadc16da5
+            checkpoint_digest: raw_artifact_sha256:sha256:2ea0cdb3779a545a5d8e4f6426bd2acde934a558e36f2f70bb2ad6146b54a504
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 0.00011107325553894043
+              reason: verified
+              relative_loss_difference: 5.117431404243647e-06
+              requested: true
+            batch_used: 4096
+            batch_ladder:
+            - batch: 512
+              examples_per_second: 1217.2
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 14326.3
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 13191.2
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 20769.4
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            sampling: null
+            epochs:
+            - epoch: 0
+              batches: 34
+              positives: 236
+              loss_mean: 0.3110231872400681
+              loss_last: 0.18032433092594147
+              negative_risk_clamped_batches: 18
+              peak_allocated_bytes: 920442880
+            - epoch: 1
+              batches: 31
+              positives: 236
+              loss_mean: 0.23108057897684578
+              loss_last: 0.4463405907154083
+              negative_risk_clamped_batches: 16
+              peak_allocated_bytes: 921003008
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 65
+              clamp_frequency: 0.5231
+              clamped_batches: 34
+              compute_seconds: 7.978
+              data_wait_fraction: 0.1976
+              data_wait_seconds: 1.965
+              examples: 238867
+              examples_per_second: 29939.3
+              gpu_utilisation_median: 80.0
+              positives: 472
+              positives_per_batch: 7.262
+              skipped_no_positive: 17
+            peak_allocated_bytes: 921003008
+            peak_reserved_bytes: 1604321280
+            training_kept: 26942
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 8703
+                node_ratio: 0.0
+                node_match_fraction: 0.763
+                edge_retention: 0.7468
+                score: 0.739494673560465
+              A0:
+                proposals: 9686
+                node_ratio: 0.113
+                node_match_fraction: 0.9259
+                edge_retention: 0.903
+                score: 0.8290530614506255
+              pool:
+                proposals: 106772
+                node_ratio: 11.2687
+                node_match_fraction: 1.0
+                score: 0.2662066422448708
+            per_movie:
+            - A0: 1211
+              dataset: 6bba_05b6850b
+              estimate: 636.2
+              first_frame: 0
+              kept: 636
+              match_A0: 1.0
+              match_arm: 0.9516129032258065
+              pool: 30870
+            - A0: 6172
+              dataset: 6bba_05db0fb1
+              estimate: 6980.0
+              first_frame: 0
+              kept: 6980
+              match_A0: 0.7333333333333333
+              match_arm: 0.8
+              pool: 9030
+            - A0: 1243
+              dataset: 6bba_062c8d37
+              estimate: 603.0
+              first_frame: 0
+              kept: 603
+              match_A0: 1.0
+              match_arm: 0.7375
+              pool: 32693
+            - A0: 1060
+              dataset: 6bba_07477033
+              estimate: 483.6
+              first_frame: 0
+              kept: 484
+              match_A0: 1.0
+              match_arm: 0.5283018867924528
+              pool: 34179
+            ceiling_degraded: true
+            ceiling_at_or_above_A0: false
+            residual_propensity:
+              dog_control_auc: 0.9415
+              dog_gain: -0.011
+              passed: true
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.9154
+              scorer_gain: 0.0064
+              scorer_group_gains:
+                appearance: 0.0173
+                density: -0.0012
+                position: -0.1008
+                temporal: 0.0004
+                time: -0.0046
+              scorer_null_threshold: 0.0083
+            residual_passed: true
+          - worker_id: E07-SMOKE-2B-A3-fold_44b6-s1
+            seed: 1
+            device: cuda:1
+            manifest: e07-fold_44b6-A3-s1.json
+            manifest_digest: raw_artifact_sha256:sha256:abba3a8a571560dc07b7e5bb7ca0f6093b7ba777086e6b3f11bd821fa18f89c2
+            checkpoint_digest: raw_artifact_sha256:sha256:8b5e88667e0039968b24ea6bd001a11c7afd11c375f8dc58e8368a839e703768
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 7.43865966796875e-05
+              reason: verified
+              relative_loss_difference: 3.444936649337487e-07
+              requested: true
+            batch_used: 4096
+            batch_ladder:
+            - batch: 512
+              examples_per_second: 1217.2
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 14321.2
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 14199.3
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 24733.0
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            sampling: null
+            epochs:
+            - epoch: 0
+              batches: 33
+              positives: 236
+              loss_mean: 0.597325099224804
+              loss_last: 1.1527060270309448
+              negative_risk_clamped_batches: 6
+              peak_allocated_bytes: 920442880
+            - epoch: 1
+              batches: 33
+              positives: 236
+              loss_mean: 0.23861980317034603
+              loss_last: 0.22648772597312927
+              negative_risk_clamped_batches: 16
+              peak_allocated_bytes: 921003008
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 66
+              clamp_frequency: 0.3333
+              clamped_batches: 22
+              compute_seconds: 8.541
+              data_wait_fraction: 0.1986
+              data_wait_seconds: 2.116
+              examples: 249948
+              examples_per_second: 29263.7
+              gpu_utilisation_median: 79.0
+              positives: 472
+              positives_per_batch: 7.152
+              skipped_no_positive: 16
+            peak_allocated_bytes: 921003008
+            peak_reserved_bytes: 1604321280
+            training_kept: 26942
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 8703
+                node_ratio: 0.0
+                node_match_fraction: 0.8222
+                edge_retention: 0.8059
+                score: 0.8059078374232062
+              A0:
+                proposals: 9686
+                node_ratio: 0.113
+                node_match_fraction: 0.9259
+                edge_retention: 0.903
+                score: 0.8290530614506255
+              pool:
+                proposals: 106772
+                node_ratio: 11.2687
+                node_match_fraction: 1.0
+                score: 0.2662066422448708
+            per_movie:
+            - A0: 1211
+              dataset: 6bba_05b6850b
+              estimate: 636.2
+              first_frame: 0
+              kept: 636
+              match_A0: 1.0
+              match_arm: 1.0
+              pool: 30870
+            - A0: 6172
+              dataset: 6bba_05db0fb1
+              estimate: 6980.0
+              first_frame: 0
+              kept: 6980
+              match_A0: 0.7333333333333333
+              match_arm: 0.8266666666666667
+              pool: 9030
+            - A0: 1243
+              dataset: 6bba_062c8d37
+              estimate: 603.0
+              first_frame: 0
+              kept: 603
+              match_A0: 1.0
+              match_arm: 0.9125
+              pool: 32693
+            - A0: 1060
+              dataset: 6bba_07477033
+              estimate: 483.6
+              first_frame: 0
+              kept: 484
+              match_A0: 1.0
+              match_arm: 0.4716981132075472
+              pool: 34179
+            ceiling_degraded: true
+            ceiling_at_or_above_A0: false
+            residual_propensity:
+              dog_control_auc: 0.9415
+              dog_gain: -0.011
+              passed: true
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.9076
+              scorer_gain: 0.0145
+              scorer_group_gains:
+                appearance: 0.0252
+                density: 0.0101
+                position: -0.0832
+                temporal: 0.0004
+                time: -0.0051
+              scorer_null_threshold: 0.015
+            residual_passed: true
+          advancement_condition_met_per_seed:
+            '0': false
+            '1': false
+          ceiling_degraded_any_seed: true
+          between_seed_ceiling_range: 0.0664
+        stage2b_gpu_campaign_e07e08_01_fold_6bba_attempt2:
+          campaign: GPU-CAMPAIGN-E07E08-01
+          attempt: 2
+          kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
+          kernel_status: KernelWorkerStatus.COMPLETE
+          reference: R-0033
+          summary_note: 'no summary manifest: the parent refused after a worker died; per-worker manifests recorded'
+          workers:
+          - worker_id: E07-SMOKE-2B-A3-fold_6bba-s0
+            seed: 0
+            device: cuda:0
+            manifest: e07-fold_6bba-A3-s0.json
+            manifest_digest: raw_artifact_sha256:sha256:96243678ee86658c5fed034be811dead408c2ffff55f23ebfe44210706f00cea
+            checkpoint_digest: raw_artifact_sha256:sha256:537a0a35a9fa744980dc38970be6d7a1dcd70e899608431f9aafc595a3315627
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 0.00025323033332824707
+              reason: verified
+              relative_loss_difference: 7.756579154678308e-06
+              requested: true
+            batch_used: 8192
+            batch_ladder:
+            - batch: 512
+              examples_per_second: 780.0
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 13739.0
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 10357.2
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 20180.7
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 8192
+              examples_per_second: 28374.9
+              peak_allocated_bytes: 1858564096
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 16384
+              examples_per_second: 29998.9
+              peak_allocated_bytes: 3700359168
+              under_ceiling: true
+              out_of_memory: null
+            sampling: null
+            epochs:
+            - epoch: 0
+              batches: 28
+              positives: 675
+              loss_mean: 0.47510044848812477
+              loss_last: 0.35270246863365173
+              negative_risk_clamped_batches: 1
+              peak_allocated_bytes: 1822894080
+            - epoch: 1
+              batches: 28
+              positives: 675
+              loss_mean: 0.20992031813200032
+              loss_last: 1.306605577468872
+              negative_risk_clamped_batches: 4
+              peak_allocated_bytes: 1822894080
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 56
+              clamp_frequency: 0.0893
+              clamped_batches: 5
+              compute_seconds: 13.91
+              data_wait_fraction: 0.2048
+              data_wait_seconds: 3.583
+              examples: 410466
+              examples_per_second: 29508.1
+              gpu_utilisation_median: 72.5
+              positives: 1350
+              positives_per_batch: 24.107
+              skipped_no_positive: 0
+            peak_allocated_bytes: 1822894080
+            peak_reserved_bytes: 7891582976
+            training_kept: 11847
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 14614
+                node_ratio: -0.0
+                node_match_fraction: 0.5581
+                edge_retention: 0.4595
+                score: 0.6538487074887255
+              A0:
+                proposals: 12821
+                node_ratio: -0.1227
+                node_match_fraction: 0.9535
+                edge_retention: 0.9189
+                score: 0.9044552037654512
+              pool:
+                proposals: 62903
+                node_ratio: 3.3041
+                node_match_fraction: 1.0
+                score: 0.4788651607217481
+            per_movie:
+            - A0: 2167
+              dataset: 44b6_0113de3b
+              estimate: 3388.815789473684
+              first_frame: 0
+              kept: 3389
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 24619
+            - A0: 4460
+              dataset: 44b6_0b24845f
+              estimate: 6430.392156862745
+              first_frame: 11
+              kept: 6430
+              match_A0: 1.0
+              match_arm: 0.9
+              pool: 7925
+            - A0: 3560
+              dataset: 44b6_0c582fdc
+              estimate: 3072.3076923076924
+              first_frame: 20
+              kept: 3072
+              match_A0: 1.0
+              match_arm: 0.1
+              pool: 5871
+            - A0: 2634
+              dataset: 44b6_0db75fae
+              estimate: 1723.0337078651685
+              first_frame: 0
+              kept: 1723
+              match_A0: 0.9
+              match_arm: 0.7
+              pool: 24488
+            ceiling_degraded: true
+            ceiling_at_or_above_A0: false
+            residual_propensity:
+              dog_control_auc: 0.9454
+              dog_gain: 0.0085
+              passed: false
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.8798
+              scorer_gain: 0.0788
+              scorer_group_gains:
+                appearance: 0.0723
+                density: 0.0736
+                position: -0.0021
+                temporal: 0.0006
+                time: 0.0025
+              scorer_null_threshold: 0.0395
+            residual_passed: false
+          - worker_id: E07-SMOKE-2B-A3-fold_6bba-s1
+            seed: 1
+            device: cuda:1
+            manifest: e07-fold_6bba-A3-s1.json
+            manifest_digest: raw_artifact_sha256:sha256:ca009823a5dcb29430b96c81efd38f0aafa6c083032300de0fb386fc6e2e0355
+            checkpoint_digest: raw_artifact_sha256:sha256:1fd7459817803c08196f5a3ce5082a4505bc3f4f5a3078da81b93ccf584fe142
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 0.00010383874177932739
+              reason: verified
+              relative_loss_difference: 1.575972665445334e-05
+              requested: true
+            batch_used: 8192
+            batch_ladder:
+            - batch: 512
+              examples_per_second: 776.6
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 13689.1
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 10827.6
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 21493.9
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 8192
+              examples_per_second: 29532.0
+              peak_allocated_bytes: 1858564096
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 16384
+              examples_per_second: 30191.4
+              peak_allocated_bytes: 3700359168
+              under_ceiling: true
+              out_of_memory: null
+            sampling: null
+            epochs:
+            - epoch: 0
+              batches: 28
+              positives: 675
+              loss_mean: 0.3488153775355646
+              loss_last: 0.05403485894203186
+              negative_risk_clamped_batches: 0
+              peak_allocated_bytes: 1822894080
+            - epoch: 1
+              batches: 28
+              positives: 675
+              loss_mean: 0.27788021250258665
+              loss_last: 0.046980515122413635
+              negative_risk_clamped_batches: 13
+              peak_allocated_bytes: 1822894080
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 56
+              clamp_frequency: 0.2321
+              clamped_batches: 13
+              compute_seconds: 13.72
+              data_wait_fraction: 0.2059
+              data_wait_seconds: 3.558
+              examples: 410466
+              examples_per_second: 29917.1
+              gpu_utilisation_median: 79.0
+              positives: 1350
+              positives_per_batch: 24.107
+              skipped_no_positive: 0
+            peak_allocated_bytes: 1822894080
+            peak_reserved_bytes: 7891582976
+            training_kept: 11847
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 14614
+                node_ratio: -0.0
+                node_match_fraction: 0.5116
+                edge_retention: 0.4595
+                score: 0.6538487074887255
+              A0:
+                proposals: 12821
+                node_ratio: -0.1227
+                node_match_fraction: 0.9535
+                edge_retention: 0.9189
+                score: 0.9044552037654512
+              pool:
+                proposals: 62903
+                node_ratio: 3.3041
+                node_match_fraction: 1.0
+                score: 0.4788651607217481
+            per_movie:
+            - A0: 2167
+              dataset: 44b6_0113de3b
+              estimate: 3388.815789473684
+              first_frame: 0
+              kept: 3389
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 24619
+            - A0: 4460
+              dataset: 44b6_0b24845f
+              estimate: 6430.392156862745
+              first_frame: 11
+              kept: 6430
+              match_A0: 1.0
+              match_arm: 0.9
+              pool: 7925
+            - A0: 3560
+              dataset: 44b6_0c582fdc
+              estimate: 3072.3076923076924
+              first_frame: 20
+              kept: 3072
+              match_A0: 1.0
+              match_arm: 0.1
+              pool: 5871
+            - A0: 2634
+              dataset: 44b6_0db75fae
+              estimate: 1723.0337078651685
+              first_frame: 0
+              kept: 1723
+              match_A0: 0.9
+              match_arm: 0.6
+              pool: 24488
+            ceiling_degraded: true
+            ceiling_at_or_above_A0: false
+            residual_propensity:
+              dog_control_auc: 0.9454
+              dog_gain: 0.0085
+              passed: false
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.8669
+              scorer_gain: 0.0913
+              scorer_group_gains:
+                appearance: 0.0868
+                density: 0.083
+                position: -0.007
+                temporal: 0.0008
+                time: 0.0033
+              scorer_null_threshold: 0.0567
+            residual_passed: false
+          advancement_condition_met_per_seed:
+            '0': false
+            '1': false
+          ceiling_degraded_any_seed: true
+          between_seed_ceiling_range: 0.0
+        stage2:
+          campaign_envelope: GPU-CAMPAIGN-E07-01
+          attempt: 3 of a maximum 12
+          kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+          package_digest: canonical_text_sha256:sha256/v1:fcec3088ff64dd584d1ea38927817aadf7c401821fb6341e6404d1704a17538c
+          commit: 020c82c7689cf6774b221b5c5428529eb2f7f6a4
+          manifest: artifacts/e07-smoke-A3/e07-fold_44b6-A3.json
+          log_digest: raw_artifact_sha256:sha256:767d03e12932301d55cdcc8138c7554ac2168b1cee066e59a880285e091d5672
+          accelerator: two Tesla T4 observed, one requested; trained on cuda:0 only
+          gpu_count_observed: 2
+          device_names: ["Tesla T4", "Tesla T4"]
+          peak_allocated_bytes: 190747648
+          peak_reserved_bytes: 289406976
+          guards: all passed, no failures
+          elapsed_seconds: 78.265
+          train_datasets: ["44b6_0113de3b", "44b6_0b24845f"]
+          evaluate_datasets: ["6bba_05b6850b", "6bba_05db0fb1"]
+          pool_candidates: 32544
+          positives_in_the_training_window: 13
+          epochs: [{"batches": 10, "epoch": 0, "loss_last": 0.15445062518119812, "loss_mean": 0.5339606419205666, "negative_risk_clamped_batches": 2}, {"batches": 11, "epoch": 1, "loss_last": 1.4153579473495483, "loss_mean": 0.5457717203171342, "negative_risk_clamped_batches": 7}]
+          reload_identical: True
+          decode: count_ratio 1.0 keeps 9819 of 32544 training candidates
+          held_out_on_two_6bba_movies_ten_frames:
+            A0: {"edge_retention": 0.8083, "node_match_fraction": 0.854, "node_ratio": -0.0306, "proposals": 7383, "score": 0.771}
+            arm: {"edge_retention": 0.825, "node_match_fraction": 0.8467, "node_ratio": -0.0, "proposals": 7616, "score": 0.825}
+            pool: {"edge_retention": 1.0, "node_match_fraction": 1.0, "node_ratio": 4.2388, "proposals": 39900, "score": 0.5258}
+          stage3_condition_met: false
+          why: >-
+            The envelope conditions Stage 3 on a finite decreasing loss, positives
+            above zero in every epoch, no guard failure and peak memory below
+            12 GiB. Three hold. The loss does not decrease: the epoch mean rises
+            from 0.5340 to 0.5458 and the
+            non-negative clamp fires on 7 of
+            11 batches in epoch 1.
+          integration_evidence_only: >-
+            Every held-out number above is from two movies at ten frames trained
+            on 13 positives. It is not evidence about ranking and must not be
+            read as any. What it does establish is that the package trains,
+            decodes, scores the held-out embryo through the oracle path and
+            reloads its checkpoint identically on a real T4.
+      A4:
+        stage0:
+          report: artifacts/model-inspect-A4.json
+          parameters: 43745
+          receptive_field_voxels: [9, 9, 9]
+          graph_capture: torch.export
+          activation_bytes_512_patches: 188352512
+          forward_seconds_median_cpu: 1.472 for 3097 patches
+          forward_backward_seconds_median_cpu: 6.274
+          cpu_peak_rss_bytes: 1520234496
+          channel_probes_relative_change: [0.0506, 0.0255, 0.0318, 0.0644, 0.0628]
+          inert_channels: []
+          determinism: {"max_abs_difference_after_reload": 0.0, "output_identical_after_reload": true, "output_identical_between_runs": true, "strict_reload_ok": true}
+        stage1:
+          report: artifacts/e07-probe-A4.json
+          window: 44b6_ddf577ad frames 0..+3
+          counts: {"annotated": 35, "baseline_A0": 1402, "kept_at_count_tied_threshold": 1605, "pool": 3097, "positives": 35}
+          prior: 0.5182
+          loss_trajectory: [0.694466, 0.668246, 0.630489, 0.569198, 0.478493, 0.357157]
+          gradient_norm_total: 2.4694e-01
+          zero_gradient_blocks: "[pool] (the pooling layer has no parameters)"
+          ceilings_on_the_window: {"A0": {"proposals": 1402, "match": 0.9714, "score": 0.9686}, "arm_kept": {"proposals": 1605, "match": 1.0, "score": 1.0}, "pool": {"proposals": 3097, "match": 1.0, "score": 0.907}}
+          survives: True
+          kill_reasons: []
+        stage2:
+          campaign_envelope: GPU-CAMPAIGN-E07-01
+          attempt: 4 of a maximum 12
+          kernel: aryaarun07/biohub-x-e07-a4-fold-44b6
+          package_digest: canonical_text_sha256:sha256/v1:9149c8388dd75352b24573e1d70118297c5f90fcbc65a1ec93df01f808cd592c
+          commit: 020c82c7689cf6774b221b5c5428529eb2f7f6a4
+          manifest: artifacts/e07-smoke-A4/e07-fold_44b6-A4.json
+          log_digest: raw_artifact_sha256:sha256:c3a46dffb64d0301fd4c2601a0277b67d0a84178db778fac7749162d265aaf61
+          accelerator: two Tesla T4 observed, one requested; trained on cuda:0 only
+          gpu_count_observed: 2
+          device_names: ["Tesla T4", "Tesla T4"]
+          peak_allocated_bytes: 354601984
+          peak_reserved_bytes: 660602880
+          guards: all passed, no failures
+          elapsed_seconds: 91.616
+          train_datasets: ["44b6_0113de3b", "44b6_0b24845f"]
+          evaluate_datasets: ["6bba_05b6850b", "6bba_05db0fb1"]
+          pool_candidates: 32544
+          positives_in_the_training_window: 13
+          epochs: [{"batches": 10, "epoch": 0, "loss_last": 0.19664157927036285, "loss_mean": 0.5335272386670112, "negative_risk_clamped_batches": 4}, {"batches": 11, "epoch": 1, "loss_last": 1.6110203266143799, "loss_mean": 0.5439706126503139, "negative_risk_clamped_batches": 7}]
+          reload_identical: True
+          decode: count_ratio 1.0 keeps 9819 of 32544 training candidates
+          held_out_on_two_6bba_movies_ten_frames:
+            A0: {"edge_retention": 0.8083, "node_match_fraction": 0.854, "node_ratio": -0.0306, "proposals": 7383, "score": 0.771}
+            arm: {"edge_retention": 0.3833, "node_match_fraction": 0.4161, "node_ratio": -0.0, "proposals": 7616, "score": 0.3833}
+            pool: {"edge_retention": 1.0, "node_match_fraction": 1.0, "node_ratio": 4.2388, "proposals": 39900, "score": 0.5258}
+          stage3_condition_met: false
+          why: >-
+            The envelope conditions Stage 3 on a finite decreasing loss, positives
+            above zero in every epoch, no guard failure and peak memory below
+            12 GiB. Three hold. The loss does not decrease: the epoch mean rises
+            from 0.5335 to 0.5440 and the
+            non-negative clamp fires on 7 of
+            11 batches in epoch 1.
+          integration_evidence_only: >-
+            Every held-out number above is from two movies at ten frames trained
+            on 13 positives. It is not evidence about ranking and must not be
+            read as any. What it does establish is that the package trains,
+            decodes, scores the held-out embryo through the oracle path and
+            reloads its checkpoint identically on a real T4.
+      reading: >-
+        Both arms clear Stage 0 and Stage 1. Neither number above is evidence
+        about learning: five optimizer steps on the same window that is then
+        decoded show that gradients flow, the loss moves, every channel is
+        live, the checkpoint reproduces, and the count-tied decode produces a
+        set the oracle path scores. A4's ceiling on its own training window
+        after five steps exceeds A0's; that is a training-set number and
+        belongs nowhere but here. Stage 2 and 3 need the GPU envelope.
+      stage2_reading: >-
+        Stage 2 succeeded as integration and is uninformative as science, and
+        the reason is measurable rather than arguable. Both arms ran on a real
+        T4, passed every guard, trained, decoded, scored the held-out embryo and
+        reloaded identically, at 0.19 and 0.35 GiB peak against a 12 GiB
+        ceiling. Neither arm's loss decreased across its two epochs, so neither
+        meets the envelope's Stage 3 condition.
+        The cause is the training window, not the arms. The smoke takes the
+        first two movies of the training embryo in name order, and those are
+        44b6_0113de3b and 44b6_0b24845f, which hold 52 and 51 annotated nodes
+        and rank 4th and 2nd sparsest of the 71 movies in 44b6. Ten frames of
+        each yielded 13 positives against 32,544 candidates. [[F-0013]] already
+        recorded that 44b6 is annotated at 0.77 percent against 6bba's 9.71 and
+        warned that the folds are different annotation regimes; Stage 2 is the
+        first place that finding has cost a run. The first eight movies in name
+        order, which is what the declared Stage 3 would take, hold 1,495
+        annotated nodes between them against a 44b6 median of 214 per movie.
+        Changing which movies the fold reads is a change to the split and is
+        outside the repair scope the envelope allows, so nothing here was
+        adjusted. Stage 3 stops pending Arya Arun's decision.
+    decision_2026_09_04: >-
+      Arya Arun: hold the declared Stage 3; run the CPU propensity probe
+      E07-PROPENSITY-01 first and apply its result mechanically; replace
+      name-order movie selection with deterministic stratification across
+      annotation-count quartiles of the training embryo only, with a preflight
+      that reports positives before any GPU is allocated; then a representative
+      Stage 2B in both directions, A3 first, A4 only if temporal context is not
+      specifically falsified. Full-fold compute only for survivors. No further
+      GPU is drawn against the declared Stage 3.
+    stage2b_declared:
+      envelope: configs/e07-stage2b-envelope.yaml (GPU-CAMPAIGN-E07-02, proposed)
+      arm: A3
+      seeds:
+      - 0
+      - 1
+      directions:
+        fold_44b6:
+          kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+          package_digest: canonical_text_sha256:sha256/v1:64dbb55009bc1987aab68b5870e96268d4f86d90781b2450df3c11e6b0196d91
+          commit: 159ca24eea87360b7ee92fc328772362331b7432
+          train_movies:
+          - 44b6_5f15d135
+          - 44b6_808952d6
+          - 44b6_7e557709
+          - 44b6_2f31fc2f
+          - 44b6_267148e4
+          - 44b6_cf8fed6b
+          - 44b6_8f5ab931
+          - 44b6_abf82518
+          train_annotated_in_window: 238
+          evaluate_movies:
+          - 6bba_05b6850b
+          - 6bba_05db0fb1
+          - 6bba_062c8d37
+          - 6bba_07477033
+          evaluate_annotated_in_window: 270
+        fold_6bba:
+          kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
+          package_digest: canonical_text_sha256:sha256/v1:c94ce04a8bd6a595da8aa9eca4009fa47eed35d79ad70a0ef98012537ac29522
+          commit: 159ca24eea87360b7ee92fc328772362331b7432
+          train_movies:
+          - 6bba_907271db
+          - 6bba_5b28472a
+          - 6bba_ebff6e76
+          - 6bba_312f0dc3
+          - 6bba_20852818
+          - 6bba_c73a1d11
+          - 6bba_283bf9f1
+          - 6bba_d5eae175
+          train_annotated_in_window: 706
+          evaluate_movies:
+          - 44b6_0113de3b
+          - 44b6_0b24845f
+          - 44b6_0c582fdc
+          - 44b6_0db75fae
+          evaluate_annotated_in_window: 43
+      advancement: loss decreasing, positives every epoch, no guard failure, residual-propensity test passed,
+        held-out ceiling at or above A0; per seed, per direction
+      status: staged and gated, not pushed; awaiting Arya Arun's authorisation
+    probes:
+      - id: E07-PROPENSITY-01
+        lane: probe
+        declaration: configs/e07-propensity-probe.yaml
+        instrument: biohubx evaluate propensity
+        question: >-
+          within the training embryo, is annotated-versus-unlabelled status
+          predictable from brightness, position, time, persistence, local
+          density and motion after controlling for DoG response, movie held
+          out, against a within-movie permutation control
+        falsifier: >-
+          no signal if the held-out AUC gain from every non-response feature
+          does not exceed the declared quantile of the same gain when those
+          features are row-shuffled within each movie with the response and
+          labels intact; a signal otherwise; either answer is used
+        status: measured
+        reference: R-0027
+        decision_applied: >-
+          first reading, rule table as first written: stop and redesign because
+          6bba reported a signal. Amended the same day by Arya Arun: the 6bba
+          signal is weak, embryo-specific evidence, absent on 44b6, and does
+          not kill the objective; a kill needs replication across both embryos
+          or a demonstrable degradation of the trained scorer's fixed-count
+          held-out ceiling. A3 continues to a representative Stage 2B with the
+          residual-propensity test mandatory for advancement; A4 is held; the
+          declared Stage 3 is not run; E06 resumption and submission stay
+          blocked below the ceiling target.
+        outcome:
+          report: "artifacts/e07-propensity.json"
+          report_digest: "canonical_text_sha256:sha256/v1:c604d4c89285294a85d902f268f836307cc10c592ba71b780cd9eee506f948b9"
+          declaration_digest: "canonical_text_sha256:sha256/v1:33d31aba06e12d8cba582180f2f4f0de377dab7789c4a95491807cd44ceaf701"
+          runtime_seconds: 775.532
+          per_embryo:
+            44b6:
+              movies:
+                - "44b6_5f15d135"
+                - "44b6_808952d6"
+                - "44b6_7e557709"
+                - "44b6_2f31fc2f"
+                - "44b6_267148e4"
+                - "44b6_cf8fed6b"
+                - "44b6_8f5ab931"
+                - "44b6_abf82518"
+              candidates: 149185
+              positives: 236
+              control_auc: 0.9415
+              auc_all: 0.9305
+              delta_all: -0.011
+              delta_temporal: -0.0005
+              delta_non_temporal: -0.0106
+              null_threshold_all: -0.0024
+              null_threshold_temporal: 0.0003
+              null_threshold_non_temporal: -0.0024
+              null_permutations: 30
+              signal_all: false
+              signal_temporal: false
+              signal_non_temporal: false
+              group_gain:
+                appearance: -0.0021
+                density: -0.001
+                position: -0.0058
+                temporal: -0.0005
+                time: -0.0002
+              verdict: "propensity_signal_absent"
+              next_action: "continue to representative E07 training"
+              A3: "eligible"
+              A4: "eligible"
+            6bba:
+              movies:
+                - "6bba_907271db"
+                - "6bba_5b28472a"
+                - "6bba_ebff6e76"
+                - "6bba_312f0dc3"
+                - "6bba_20852818"
+                - "6bba_c73a1d11"
+                - "6bba_283bf9f1"
+                - "6bba_d5eae175"
+              candidates: 205233
+              positives: 675
+              control_auc: 0.9454
+              auc_all: 0.954
+              delta_all: 0.0085
+              delta_temporal: 0.0017
+              delta_non_temporal: 0.0086
+              null_threshold_all: -0.0006
+              null_threshold_temporal: 0.001
+              null_threshold_non_temporal: -0.0006
+              null_permutations: 30
+              signal_all: true
+              signal_temporal: true
+              signal_non_temporal: true
+              group_gain:
+                appearance: 0.0069
+                density: 0.0055
+                position: 0.0039
+                temporal: 0.0017
+                time: 0.0001
+              verdict: "propensity_signal_present"
+              next_action: "stop current nnPU training; design a bias-robust objective"
+              A3: "retain as baseline while the objective is corrected"
+              A4: "hold; neighbouring frames can learn tracing propensity"
+  - id: E08
+    component: proposals
+    status: 'stage2b measured under GPU-CAMPAIGN-E07E08-01: killed; nothing advances without a further authorisation'
+    declaration: configs/e08-propensity-matched-rescoring.yaml
+    declaration_digest: canonical_text_sha256:sha256/v1:c00b14ce63a29e55dfd4d795aeb66497920387878e6afbbbc53bff3c984b1757
+    parent: E07; pool, patches, scorer, decode and folds unchanged
+    hypothesis: an importance-weighted unlabelled risk matched on circumstances (never intensity or response) learns
+      cellness rather than annotation propensity and transfers across the two annotation regimes better than E07's
+      objective
+    falsifier: killed if the residual-propensity test on its trained scorer fails, or if it does not beat A0's fixed-count
+      ceiling on both held-out directions; one direction is a challenger; promotion additionally needs 6bba at or
+      above 0.950
+    arms:
+      B3: A3 channels, matched objective
+      B4: held until B3 passes the residual test
+    objective_correction: the first implementation ordered batches by weight, reweighted nothing over an epoch and
+      inverted the scorer; the residual test caught it on the first CPU run (D-0046). Now an importance-weighted risk
+      inside the loss, odds capped at 20, batch composition identical to E07
+    cpu_preflight:
+      A3:
+        windows: 44b6_5f15d135 and 44b6_808952d6, 4 frames, 2 epochs, batch 512, CPU
+        positives: 18
+        steps: 18
+        skipped_no_positive: 34
+        held_out_score: 0.22226413776240875
+        A0_score: 0.90587865451116
+        held_out_match: 0.375
+        residual_passed: false
+        scorer_control_auc: 0.3587
+        scorer_gain: 0.5505
+        reload_identical: true
+        sampling: null
+      B3:
+        windows: 44b6_5f15d135 and 44b6_808952d6, 4 frames, 2 epochs, batch 512, CPU
+        positives: 18
+        steps: 18
+        skipped_no_positive: 34
+        held_out_score: null
+        A0_score: 0.90587865451116
+        held_out_match: 0.0
+        residual_passed: false
+        scorer_control_auc: 0.1137
+        scorer_gain: 0.7686
+        reload_identical: true
+        sampling:
+          coefficients:
+            density: -2.3937
+            face_um: -0.021
+            motion_um: -0.3529
+            persist_next: -0.3661
+            persist_prev: -0.1417
+            t: 0.2692
+            x: 0.3208
+            y: 1.0116
+            z: 0.5347
+          effective_unlabelled_per_movie:
+          - 743.6
+          - 735.8
+          matched_on:
+          - z
+          - y
+          - x
+          - face_um
+          - t
+          - density
+          - persist_prev
+          - persist_next
+          - motion_um
+          weight_cap: 20.0
+    stage2b_declared:
+      fold_44b6:
+        kernel: aryaarun07/biohub-x-e08-b3-fold-44b6
+        package_digest: canonical_text_sha256:sha256/v1:71cb1b9a31df10798b3af750dd8298cecfb0df2fee7fb38487423999cd831d9c
+        commit: 159ca24eea87360b7ee92fc328772362331b7432
+        seeds:
+        - 0
+        - 1
+      fold_6bba:
+        kernel: aryaarun07/biohub-x-e08-b3-fold-6bba
+        package_digest: canonical_text_sha256:sha256/v1:49b94c937bfe9545c85abe2a27e4a4b9b700149a8f3eeb22ac10877cde6bf8af
+        commit: 159ca24eea87360b7ee92fc328772362331b7432
+        seeds:
+        - 0
+        - 1
+    forbidden_changes:
+    - the pool rule, patch, scorer and decode of E07
+    - the fold definition
+    - any constant chosen against the held-out embryo
+    - editing E07, E06, E05 or D-0041
+    provenance_status: diagnostic_ceiling
+    stage_results:
+      B3:
+        stage2b_gpu_campaign_e07e08_01_fold_44b6_attempt3:
+          campaign: GPU-CAMPAIGN-E07E08-01
+          attempt: 3
+          kernel: aryaarun07/biohub-x-e08-b3-fold-44b6
+          kernel_status: KernelWorkerStatus.COMPLETE
+          reference: R-0034
+          workers:
+          - worker_id: E08-SMOKE-2B-B3-fold_44b6-s0
+            seed: 0
+            device: cuda:0
+            manifest: e07-fold_44b6-B3-s0.json
+            manifest_digest: raw_artifact_sha256:sha256:81ed8528f3181e610f030e6a34f5f8979d2ae3d6bdf59ec15b62580ce83af437
+            checkpoint_digest: raw_artifact_sha256:sha256:d6e55c5b1d9714e684a72b79883bcff4570afdc3eca625d0d4b080fd488a5b1c
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 0.00011107325553894043
+              reason: verified
+              relative_loss_difference: 5.117431404243647e-06
+              requested: true
+            batch_used: 4096
+            batch_ladder:
+            - batch: 512
+              examples_per_second: 976.5
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 14211.5
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 9723.3
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 19701.5
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            sampling:
+              coefficients:
+                density: -2.3061
+                face_um: 0.1422
+                motion_um: -0.077
+                persist_next: 0.1957
+                persist_prev: 0.2271
+                t: 0.1632
+                x: 0.1439
+                y: 0.2487
+                z: 0.3164
+              effective_unlabelled_per_movie:
+              - 3179.8
+              - 3035.9
+              - 4302.4
+              - 3858.4
+              - 3502.0
+              - 2488.8
+              - 3317.5
+              - 3653.8
+              matched_on:
+              - z
+              - y
+              - x
+              - face_um
+              - t
+              - density
+              - persist_prev
+              - persist_next
+              - motion_um
+              weight_cap: 20.0
+            epochs:
+            - epoch: 0
+              batches: 34
+              positives: 236
+              loss_mean: 0.6045810965930715
+              loss_last: 1.4891934394836426
+              negative_risk_clamped_batches: 0
+              peak_allocated_bytes: 920475648
+            - epoch: 1
+              batches: 31
+              positives: 236
+              loss_mean: 0.485533302349429
+              loss_last: 0.55731201171875
+              negative_risk_clamped_batches: 3
+              peak_allocated_bytes: 921035776
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 65
+              clamp_frequency: 0.0462
+              clamped_batches: 3
+              compute_seconds: 8.315
+              data_wait_fraction: 0.1937
+              data_wait_seconds: 1.998
+              examples: 238867
+              examples_per_second: 28727.2
+              gpu_utilisation_median: 84.0
+              positives: 472
+              positives_per_batch: 7.262
+              skipped_no_positive: 17
+            peak_allocated_bytes: 921035776
+            peak_reserved_bytes: 1604321280
+            training_kept: 26942
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 8703
+                node_ratio: 0.0
+                node_match_fraction: 0.2296
+                edge_retention: 0.2278
+                score: 0.8307692307692308
+              A0:
+                proposals: 9686
+                node_ratio: 0.113
+                node_match_fraction: 0.9259
+                edge_retention: 0.903
+                score: 0.8290530614506255
+              pool:
+                proposals: 106772
+                node_ratio: 11.2687
+                node_match_fraction: 1.0
+                score: 0.2662066422448708
+            per_movie:
+            - A0: 1211
+              dataset: 6bba_05b6850b
+              estimate: 636.2
+              first_frame: 0
+              kept: 636
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 30870
+            - A0: 6172
+              dataset: 6bba_05db0fb1
+              estimate: 6980.0
+              first_frame: 0
+              kept: 6980
+              match_A0: 0.7333333333333333
+              match_arm: 0.8266666666666667
+              pool: 9030
+            - A0: 1243
+              dataset: 6bba_062c8d37
+              estimate: 603.0
+              first_frame: 0
+              kept: 603
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 32693
+            - A0: 1060
+              dataset: 6bba_07477033
+              estimate: 483.6
+              first_frame: 0
+              kept: 484
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 34179
+            ceiling_degraded: false
+            ceiling_at_or_above_A0: true
+            residual_propensity:
+              dog_control_auc: 0.9415
+              dog_gain: -0.011
+              passed: false
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.8537
+              scorer_gain: 0.0754
+              scorer_group_gains:
+                appearance: 0.0816
+                density: 0.066
+                position: -0.0123
+                temporal: -0.0021
+                time: -0.0055
+              scorer_null_threshold: 0.0195
+            residual_passed: false
+          - worker_id: E08-SMOKE-2B-B3-fold_44b6-s1
+            seed: 1
+            device: cuda:1
+            manifest: e07-fold_44b6-B3-s1.json
+            manifest_digest: raw_artifact_sha256:sha256:66bb0c7d87dfb17eb1e2618535026cc952b21dab150d9e22a867162fa028cec7
+            checkpoint_digest: raw_artifact_sha256:sha256:b0b610b7e46ae94729a78e3dd3c524b557663ed1c5636886aea9bdb617599f16
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 7.43865966796875e-05
+              reason: verified
+              relative_loss_difference: 3.444936649337487e-07
+              requested: true
+            batch_used: 4096
+            batch_ladder:
+            - batch: 512
+              examples_per_second: 975.5
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 14352.0
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 9500.8
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 21463.3
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            sampling:
+              coefficients:
+                density: -2.3061
+                face_um: 0.1422
+                motion_um: -0.077
+                persist_next: 0.1957
+                persist_prev: 0.2271
+                t: 0.1632
+                x: 0.1439
+                y: 0.2487
+                z: 0.3164
+              effective_unlabelled_per_movie:
+              - 3179.8
+              - 3035.9
+              - 4302.4
+              - 3858.4
+              - 3502.0
+              - 2488.8
+              - 3317.5
+              - 3653.8
+              matched_on:
+              - z
+              - y
+              - x
+              - face_um
+              - t
+              - density
+              - persist_prev
+              - persist_next
+              - motion_um
+              weight_cap: 20.0
+            epochs:
+            - epoch: 0
+              batches: 33
+              positives: 236
+              loss_mean: 0.6238146451386538
+              loss_last: 0.7948676943778992
+              negative_risk_clamped_batches: 1
+              peak_allocated_bytes: 920475648
+            - epoch: 1
+              batches: 33
+              positives: 236
+              loss_mean: 0.5343768921765414
+              loss_last: 0.8358219861984253
+              negative_risk_clamped_batches: 0
+              peak_allocated_bytes: 921035776
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 66
+              clamp_frequency: 0.0152
+              clamped_batches: 1
+              compute_seconds: 8.437
+              data_wait_fraction: 0.2021
+              data_wait_seconds: 2.138
+              examples: 249948
+              examples_per_second: 29625.7
+              gpu_utilisation_median: 77.0
+              positives: 472
+              positives_per_batch: 7.152
+              skipped_no_positive: 16
+            peak_allocated_bytes: 921035776
+            peak_reserved_bytes: 1604321280
+            training_kept: 26942
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 8703
+                node_ratio: 0.0
+                node_match_fraction: 0.2333
+                edge_retention: 0.2278
+                score: 0.8307692307692308
+              A0:
+                proposals: 9686
+                node_ratio: 0.113
+                node_match_fraction: 0.9259
+                edge_retention: 0.903
+                score: 0.8290530614506255
+              pool:
+                proposals: 106772
+                node_ratio: 11.2687
+                node_match_fraction: 1.0
+                score: 0.2662066422448708
+            per_movie:
+            - A0: 1211
+              dataset: 6bba_05b6850b
+              estimate: 636.2
+              first_frame: 0
+              kept: 636
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 30870
+            - A0: 6172
+              dataset: 6bba_05db0fb1
+              estimate: 6980.0
+              first_frame: 0
+              kept: 6980
+              match_A0: 0.7333333333333333
+              match_arm: 0.84
+              pool: 9030
+            - A0: 1243
+              dataset: 6bba_062c8d37
+              estimate: 603.0
+              first_frame: 0
+              kept: 603
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 32693
+            - A0: 1060
+              dataset: 6bba_07477033
+              estimate: 483.6
+              first_frame: 0
+              kept: 484
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 34179
+            ceiling_degraded: false
+            ceiling_at_or_above_A0: true
+            residual_propensity:
+              dog_control_auc: 0.9415
+              dog_gain: -0.011
+              passed: false
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.8286
+              scorer_gain: 0.0985
+              scorer_group_gains:
+                appearance: 0.1062
+                density: 0.0848
+                position: -0.0318
+                temporal: -0.0091
+                time: -0.0189
+              scorer_null_threshold: 0.0384
+            residual_passed: false
+          advancement_condition_met_per_seed:
+            '0': false
+            '1': false
+          ceiling_degraded_any_seed: false
+          between_seed_ceiling_range: 0.0
+        stage2b_gpu_campaign_e07e08_01_fold_6bba_attempt4:
+          campaign: GPU-CAMPAIGN-E07E08-01
+          attempt: 4
+          kernel: aryaarun07/biohub-x-e08-b3-fold-6bba
+          kernel_status: KernelWorkerStatus.COMPLETE
+          reference: R-0035
+          workers:
+          - worker_id: E08-SMOKE-2B-B3-fold_6bba-s0
+            seed: 0
+            device: cuda:0
+            manifest: e07-fold_6bba-B3-s0.json
+            manifest_digest: raw_artifact_sha256:sha256:e0747836241462b14357510d6ee2c078cbfeab3bfdab148ea7689bcffa86fa95
+            checkpoint_digest: raw_artifact_sha256:sha256:f9b61b96d3ebf8eaaeadc6edafc3f30af093c9dd67893a01c42f73eee73359fc
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 0.00025323033332824707
+              reason: verified
+              relative_loss_difference: 7.756579154678308e-06
+              requested: true
+            batch_used: 8192
+            batch_ladder:
+            - batch: 512
+              examples_per_second: 1047.0
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 13804.6
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 12526.7
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 21692.3
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 8192
+              examples_per_second: 30446.0
+              peak_allocated_bytes: 1858564096
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 16384
+              examples_per_second: 30735.3
+              peak_allocated_bytes: 3700359168
+              under_ceiling: true
+              out_of_memory: null
+            sampling:
+              coefficients:
+                density: -2.2517
+                face_um: 0.4689
+                motion_um: -0.1983
+                persist_next: -0.0258
+                persist_prev: 0.1259
+                t: 0.3362
+                x: 0.2394
+                y: -0.1247
+                z: 0.1505
+              effective_unlabelled_per_movie:
+              - 2314.9
+              - 2214.2
+              - 5279.7
+              - 2217.4
+              - 2662.2
+              - 3710.1
+              - 4054.9
+              - 1744.1
+              matched_on:
+              - z
+              - y
+              - x
+              - face_um
+              - t
+              - density
+              - persist_prev
+              - persist_next
+              - motion_um
+              weight_cap: 20.0
+            epochs:
+            - epoch: 0
+              batches: 28
+              positives: 675
+              loss_mean: 0.3936216581080641
+              loss_last: 0.39755016565322876
+              negative_risk_clamped_batches: 0
+              peak_allocated_bytes: 1822959616
+            - epoch: 1
+              batches: 28
+              positives: 675
+              loss_mean: 0.250803413401757
+              loss_last: 1.1735023260116577
+              negative_risk_clamped_batches: 0
+              peak_allocated_bytes: 1822959616
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 56
+              clamp_frequency: 0.0
+              clamped_batches: 0
+              compute_seconds: 13.756
+              data_wait_fraction: 0.2166
+              data_wait_seconds: 3.804
+              examples: 410466
+              examples_per_second: 29838.9
+              gpu_utilisation_median: 60.5
+              positives: 1350
+              positives_per_batch: 24.107
+              skipped_no_positive: 0
+            peak_allocated_bytes: 1822959616
+            peak_reserved_bytes: 7891582976
+            training_kept: 11847
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 14614
+                node_ratio: -0.0
+                node_match_fraction: 0.2791
+                edge_retention: 0.2162
+                score: 0.8888943097694432
+              A0:
+                proposals: 12821
+                node_ratio: -0.1227
+                node_match_fraction: 0.9535
+                edge_retention: 0.9189
+                score: 0.9044552037654512
+              pool:
+                proposals: 62903
+                node_ratio: 3.3041
+                node_match_fraction: 1.0
+                score: 0.4788651607217481
+            per_movie:
+            - A0: 2167
+              dataset: 44b6_0113de3b
+              estimate: 3388.815789473684
+              first_frame: 0
+              kept: 3389
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 24619
+            - A0: 4460
+              dataset: 44b6_0b24845f
+              estimate: 6430.392156862745
+              first_frame: 11
+              kept: 6430
+              match_A0: 1.0
+              match_arm: 0.9
+              pool: 7925
+            - A0: 3560
+              dataset: 44b6_0c582fdc
+              estimate: 3072.3076923076924
+              first_frame: 20
+              kept: 3072
+              match_A0: 1.0
+              match_arm: 0.1
+              pool: 5871
+            - A0: 2634
+              dataset: 44b6_0db75fae
+              estimate: 1723.0337078651685
+              first_frame: 0
+              kept: 1723
+              match_A0: 0.9
+              match_arm: 0.1
+              pool: 24488
+            ceiling_degraded: true
+            ceiling_at_or_above_A0: false
+            residual_propensity:
+              dog_control_auc: 0.9454
+              dog_gain: 0.0085
+              passed: false
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.7635
+              scorer_gain: 0.192
+              scorer_group_gains:
+                appearance: 0.1818
+                density: 0.1776
+                position: -0.015
+                temporal: 0.0036
+                time: 0.0065
+              scorer_null_threshold: 0.0385
+            residual_passed: false
+          - worker_id: E08-SMOKE-2B-B3-fold_6bba-s1
+            seed: 1
+            device: cuda:1
+            manifest: e07-fold_6bba-B3-s1.json
+            manifest_digest: raw_artifact_sha256:sha256:d67835722574293f4638389d654668b0864d13398bf6815b861d79463dbc6ba5
+            checkpoint_digest: raw_artifact_sha256:sha256:89047b5ef6c8d7b8c3faad72122cc91fb2e9062c1a27466a8201f91ef4004459
+            amp:
+              enabled: true
+              logit_tolerance: 0.05
+              loss_tolerance: 0.01
+              max_abs_logit_difference: 0.00010383874177932739
+              reason: verified
+              relative_loss_difference: 1.575972665445334e-05
+              requested: true
+            batch_used: 8192
+            batch_ladder:
+            - batch: 512
+              examples_per_second: 1046.9
+              peak_allocated_bytes: 130624000
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 1024
+              examples_per_second: 13815.4
+              peak_allocated_bytes: 248828416
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 2048
+              examples_per_second: 11477.7
+              peak_allocated_bytes: 478004224
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 4096
+              examples_per_second: 19311.4
+              peak_allocated_bytes: 938190848
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 8192
+              examples_per_second: 30730.1
+              peak_allocated_bytes: 1858564096
+              under_ceiling: true
+              out_of_memory: null
+            - batch: 16384
+              examples_per_second: 31037.8
+              peak_allocated_bytes: 3700359168
+              under_ceiling: true
+              out_of_memory: null
+            sampling:
+              coefficients:
+                density: -2.2517
+                face_um: 0.4689
+                motion_um: -0.1983
+                persist_next: -0.0258
+                persist_prev: 0.1259
+                t: 0.3362
+                x: 0.2394
+                y: -0.1247
+                z: 0.1505
+              effective_unlabelled_per_movie:
+              - 2314.9
+              - 2214.2
+              - 5279.7
+              - 2217.4
+              - 2662.2
+              - 3710.1
+              - 4054.9
+              - 1744.1
+              matched_on:
+              - z
+              - y
+              - x
+              - face_um
+              - t
+              - density
+              - persist_prev
+              - persist_next
+              - motion_um
+              weight_cap: 20.0
+            epochs:
+            - epoch: 0
+              batches: 28
+              positives: 675
+              loss_mean: 0.349989336516176
+              loss_last: 0.14617697894573212
+              negative_risk_clamped_batches: 0
+              peak_allocated_bytes: 1822959616
+            - epoch: 1
+              batches: 28
+              positives: 675
+              loss_mean: 0.2715677778635706
+              loss_last: 0.2513180673122406
+              negative_risk_clamped_batches: 0
+              peak_allocated_bytes: 1822959616
+            loss_decreasing: true
+            positives_every_epoch: true
+            throughput:
+              batches: 56
+              clamp_frequency: 0.0
+              clamped_batches: 0
+              compute_seconds: 13.42
+              data_wait_fraction: 0.2185
+              data_wait_seconds: 3.753
+              examples: 410466
+              examples_per_second: 30586.4
+              gpu_utilisation_median: 69.5
+              positives: 1350
+              positives_per_batch: 24.107
+              skipped_no_positive: 0
+            peak_allocated_bytes: 1822959616
+            peak_reserved_bytes: 7891582976
+            training_kept: 11847
+            reload_identical: true
+            held_out:
+              arm:
+                proposals: 14614
+                node_ratio: -0.0
+                node_match_fraction: 0.2093
+                edge_retention: 0.2162
+                score: 0.8888943097694432
+              A0:
+                proposals: 12821
+                node_ratio: -0.1227
+                node_match_fraction: 0.9535
+                edge_retention: 0.9189
+                score: 0.9044552037654512
+              pool:
+                proposals: 62903
+                node_ratio: 3.3041
+                node_match_fraction: 1.0
+                score: 0.4788651607217481
+            per_movie:
+            - A0: 2167
+              dataset: 44b6_0113de3b
+              estimate: 3388.815789473684
+              first_frame: 0
+              kept: 3389
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 24619
+            - A0: 4460
+              dataset: 44b6_0b24845f
+              estimate: 6430.392156862745
+              first_frame: 11
+              kept: 6430
+              match_A0: 1.0
+              match_arm: 0.9
+              pool: 7925
+            - A0: 3560
+              dataset: 44b6_0c582fdc
+              estimate: 3072.3076923076924
+              first_frame: 20
+              kept: 3072
+              match_A0: 1.0
+              match_arm: 0.0
+              pool: 5871
+            - A0: 2634
+              dataset: 44b6_0db75fae
+              estimate: 1723.0337078651685
+              first_frame: 0
+              kept: 1723
+              match_A0: 0.9
+              match_arm: 0.0
+              pool: 24488
+            ceiling_degraded: true
+            ceiling_at_or_above_A0: false
+            residual_propensity:
+              dog_control_auc: 0.9454
+              dog_gain: 0.0085
+              passed: false
+              permutations: 30
+              rule: pass if scorer_gain <= max(null threshold, dog_gain)
+              scorer_control_auc: 0.7402
+              scorer_gain: 0.216
+              scorer_group_gains:
+                appearance: 0.2049
+                density: 0.2029
+                position: -0.019
+                temporal: 0.0049
+                time: 0.008
+              scorer_null_threshold: 0.0422
+            residual_passed: false
+          advancement_condition_met_per_seed:
+            '0': false
+            '1': false
+          ceiling_degraded_any_seed: true
+          between_seed_ceiling_range: 0.0
+    stage2b_outcome:
+      campaign: GPU-CAMPAIGN-E07E08-01
+      comparison: artifacts/e07e08-stage2b-comparison.json
+      comparison_digest: canonical_text_sha256:sha256/v1:ca763c49040eeadee32a37651937f3e73319f286c5fe2ae5418e5b324c1fd77d
+      between_seed:
+        A3/fold_44b6:
+          all_windows_scored: true
+          ceiling_mean: 0.7727
+          ceiling_range: 0.0664
+          node_match_mean: 0.7926
+          residual_gain_mean: 0.0105
+          residual_gain_range: 0.0081
+          seeds: 2
+        A3/fold_6bba:
+          all_windows_scored: false
+          ceiling_mean: 0.6538
+          ceiling_range: 0.0
+          node_match_mean: 0.5349
+          residual_gain_mean: 0.0851
+          residual_gain_range: 0.0125
+          seeds: 2
+        B3/fold_44b6:
+          all_windows_scored: false
+          ceiling_mean: 0.8308
+          ceiling_range: 0.0
+          node_match_mean: 0.2314
+          residual_gain_mean: 0.0869
+          residual_gain_range: 0.0231
+          seeds: 2
+        B3/fold_6bba:
+          all_windows_scored: false
+          ceiling_mean: 0.8889
+          ceiling_range: 0.0
+          node_match_mean: 0.2442
+          residual_gain_mean: 0.204
+          residual_gain_range: 0.024
+          seeds: 2
+      survival_rule: improves the fixed-count ceiling over A3 in both directions and reduces residual circumstance
+        dependence; one direction is a challenger; pooled is invalid
+      survival:
+        ceiling_better_than_A3_per_direction:
+          fold_44b6: null
+          fold_6bba: null
+        ceilings_comparable_per_direction:
+          fold_44b6: false
+          fold_6bba: false
+        node_match_better_than_A3_per_direction:
+          fold_44b6: false
+          fold_6bba: false
+        note: per-direction means over seeds; a pooled-only result is invalid and none is computed
+        residual_dependence_reduced_per_direction:
+          fold_44b6: false
+          fold_6bba: false
+        verdict: 'killed: no comparable direction improved or residual dependence not reduced; ceilings not comparable
+          in fold_44b6, fold_6bba (unscored windows), node match reported instead'
+      status_after_wave_B: killed

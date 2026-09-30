@@ -1,0 +1,315 @@
+# GPU-CAMPAIGN-E07-02. Wave 1 authorised by Arya Arun on 2026-09-04 in their own words; wave 2 remains proposed.
+#
+# Written from the four staged packages by the session's generator; every digest,
+# movie list and count below is read from the package that would be pushed.
+# Nothing here trains full folds, reads the public test split, or submits.
+
+GPU-CAMPAIGN-E07-02:
+  status: authorised, wave 1 only
+  authorised_by: Arya Arun
+  authorised_on: '2026-09-04'
+  authorises: >-
+    wave 1 only: the two A3 packages named by digest below, seeds 0 and 1 in
+    both directions, two isolated workers on two Tesla T4s serialised if one
+    compatible device is available, sixty minutes per kernel, at most four
+    wave-1 attempts (one push and one repair retry per package), AMP
+    validation, batch-throughput autotuning, the enforced 13 GiB ceiling, the
+    mandatory residual-propensity evaluation and every declared output, and
+    the sparse 43-cell held-out direction with its uncertainty retained.
+    Repairs may touch packaging, dependency, mount, transport or hardware
+    integration only. Not covered: wave 2 and E08, mini-folds, full folds,
+    public-test access, internet, contaminated weights, submission, promotion.
+    Stop and report after wave 1.
+  wave1_attempts_maximum: 4
+  wave1_attempts:
+    1: {package: A3-fold_44b6, digest: canonical_text_sha256:sha256/v1:64dbb55009bc1987aab68b5870e96268d4f86d90781b2450df3c11e6b0196d91, outcome: ERROR at worker start, workers could not import the package (R-0028)}
+    2: {package: A3-fold_6bba, digest: canonical_text_sha256:sha256/v1:c94ce04a8bd6a595da8aa9eca4009fa47eed35d79ad70a0ef98012537ac29522, outcome: ERROR at worker start, same cause (R-0029)}
+    3: {package: A3-fold_44b6, digest: canonical_text_sha256:sha256/v1:9f36660e073b37cbda49cda9a575a214437aedeec05341f366e822e549198e33, repair: worker PYTHONPATH (commit 2c182a4), outcome: ERROR while building inputs, the two workers raced on one shared cache file (R-0030)}
+    4: {package: A3-fold_6bba, digest: canonical_text_sha256:sha256/v1:31db0a43ab5f7df01ec8157e4cff8366360061469f85a3803c664fcaae5db7c4, repair: worker PYTHONPATH (commit 2c182a4), outcome: ERROR as a kernel, seed 1 lost to the same cache race while seed 0 completed on cuda:0 and wrote its own manifest (R-0031)}
+  wave1_status: exhausted, four of four attempts spent; one worker measurement obtained
+  repairs_permitted_remaining: 0
+  repaired_packages_staged_not_pushed:
+    note: >-
+      rebuilt at commit c16096f after R-0030 (per-worker cache, pid-stamped
+      partial names), gated locally and validated for transport; pushing them
+      would be a fifth and sixth wave-1 attempt, which this authorisation does
+      not cover
+    A3-fold_44b6: canonical_text_sha256:sha256/v1:3e409fdc35c8d00a0988338ff4c5bcd6fa94afaca260e1123a652a6f05c51cb3
+    A3-fold_6bba: canonical_text_sha256:sha256/v1:509961b44ea493c02361a3ace20336915652726bb5cd10ed3c002c8c31a0e0e3
+  requested_by: Arya Arun, 2026-09-04, after R-0027 and D-0046
+  objective: >-
+    Four comparable representative smokes, automatic killing, then compute on
+    the survivor. Wave 1 is E07 arm A3 at two independent seeds in both fold
+    directions. Wave 2, conditional, is E08 arm B3 at two seeds in both
+    directions. A4 and B4 are held.
+  commit: 159ca24eea87360b7ee92fc328772362331b7432
+  local_gate: ruff, ruff format, mypy strict, pytest, artifacts verify, and the pre-push exercise of every package on CPU
+  accelerator: >-
+    NvidiaTeslaT4 requested; the guard accepts one or two visible T4s, refuses
+    any other device or count, and each worker trains on exactly one visible
+    device (D-0044 as amended by D-0046). Two visible cards run the two seeds
+    as two isolated processes, one per device, with separate optimizers,
+    checkpoints, manifests and worker ids; one visible card serialises them.
+  image: the Kaggle GPU image measured in R-0026 (torch 2.10.0+cu128, CUDA 12.8)
+  wheelhouse: aryaarun07/biohubx-wheelhouse-metric-cp312-linux, published payload tree_sha256:sha256/v1:cc8a180133fb8cdf0eaf10ca192bd9965b3b8bade1178746e4c364d790258f7d (R-0016, R-0017; installs on the GPU image per R-0026)
+  inputs: the registered competition training artifacts named in each package's input_digests, and the wheelhouse; nothing else
+  internet: disabled
+
+  compute_policy:
+    decision: D-0045 and D-0046
+    memory_ceiling_bytes_per_device: 13958643712
+    amp: requested; enabled per worker only after one fixed batch agrees with full precision (logit 5e-2 abs, loss 1e-2 rel), recorded either way
+    batch: ladder 512..16384 on the first training movie's patches, knee at 90 percent of best throughput below the ceiling, recorded with peak bytes and expected positives per batch
+    recorded_per_worker: examples per second, positives per batch, clamp frequency, data-wait fraction, median GPU utilisation, peak allocated and reserved bytes
+    checkpoints: atomic, per epoch, per worker
+
+  selection:
+    training: stratified across annotation-count quartiles of the training embryo, median bands first, deterministic; shipped as a list
+    evaluation: the first four movies of the held-out embryo in name order, never chosen by their labels; refused only if their windows held no cell
+    frames: 10
+    epochs: 2
+    count_ratio: 1.0
+    min_positives_floor: 200 annotated cells across the training windows, checked before any push
+
+  advancement_condition_per_direction:
+    - a finite, decreasing epoch-mean loss
+    - positives above zero in every epoch
+    - no guard failure and peak allocation under the ceiling
+    - "residual-propensity test passed: the probe rerun with the trained scorer's logit as the control gains no more from circumstances than max(the permutation null, the DoG response's own gain)"
+    - fixed-count held-out ceiling at or above A0 on the same windows, reported per seed and per direction, never pooled
+  after_wave_1: >-
+    only an arm improving the fixed-count ceiling in both directions at both
+    seeds reaches a mini-fold, under a further envelope; a direction that
+    degrades below A0 counts toward D-0046's kill; wave 2 runs only if the
+    controller's next_action after wave 1 does not read stop and redesign
+  kill: an arm failing the condition in a direction is held in that direction; failing both is killed; A4 and B4 stay held throughout
+
+  packages:
+    A3-fold_44b6:
+      arm: A3
+      fold: fold_44b6
+      kernel: aryaarun07/biohub-x-e07-a3-fold-44b6
+      title: Biohub-X E07 A3 fold 44b6
+      smoke_id: E07-SMOKE-2B
+      commit: 159ca24eea87360b7ee92fc328772362331b7432
+      package_digest: canonical_text_sha256:sha256/v1:64dbb55009bc1987aab68b5870e96268d4f86d90781b2450df3c11e6b0196d91
+      kernel_source_bytes: 395387
+      pushable: true
+      workers:
+      - 0
+      - 1
+      train_movies:
+      - 44b6_5f15d135
+      - 44b6_808952d6
+      - 44b6_7e557709
+      - 44b6_2f31fc2f
+      - 44b6_267148e4
+      - 44b6_cf8fed6b
+      - 44b6_8f5ab931
+      - 44b6_abf82518
+      train_annotated_in_window: 238
+      evaluate_movies:
+      - 6bba_05b6850b
+      - 6bba_05db0fb1
+      - 6bba_062c8d37
+      - 6bba_07477033
+      evaluate_annotated_in_window: 270
+      runtime_ceiling_seconds: 3600
+      amp: true
+      batch_autotune: true
+      memory_ceiling_bytes: 13958643712
+      residual_test: true
+      sampling: uniform
+      input_artifacts: 24
+      path: artifacts/kaggle-stage2b-A3-fold_44b6
+    A3-fold_6bba:
+      arm: A3
+      fold: fold_6bba
+      kernel: aryaarun07/biohub-x-e07-a3-fold-6bba
+      title: Biohub-X E07 A3 fold 6bba
+      smoke_id: E07-SMOKE-2B
+      commit: 159ca24eea87360b7ee92fc328772362331b7432
+      package_digest: canonical_text_sha256:sha256/v1:c94ce04a8bd6a595da8aa9eca4009fa47eed35d79ad70a0ef98012537ac29522
+      kernel_source_bytes: 395400
+      pushable: true
+      workers:
+      - 0
+      - 1
+      train_movies:
+      - 6bba_907271db
+      - 6bba_5b28472a
+      - 6bba_ebff6e76
+      - 6bba_312f0dc3
+      - 6bba_20852818
+      - 6bba_c73a1d11
+      - 6bba_283bf9f1
+      - 6bba_d5eae175
+      train_annotated_in_window: 706
+      evaluate_movies:
+      - 44b6_0113de3b
+      - 44b6_0b24845f
+      - 44b6_0c582fdc
+      - 44b6_0db75fae
+      evaluate_annotated_in_window: 43
+      runtime_ceiling_seconds: 3600
+      amp: true
+      batch_autotune: true
+      memory_ceiling_bytes: 13958643712
+      residual_test: true
+      sampling: uniform
+      input_artifacts: 24
+      path: artifacts/kaggle-stage2b-A3-fold_6bba
+    B3-fold_44b6:
+      arm: B3
+      fold: fold_44b6
+      kernel: aryaarun07/biohub-x-e08-b3-fold-44b6
+      title: Biohub-X E08 B3 fold 44b6
+      smoke_id: E08-SMOKE-2B
+      commit: 159ca24eea87360b7ee92fc328772362331b7432
+      package_digest: canonical_text_sha256:sha256/v1:71cb1b9a31df10798b3af750dd8298cecfb0df2fee7fb38487423999cd831d9c
+      kernel_source_bytes: 395398
+      pushable: true
+      workers:
+      - 0
+      - 1
+      train_movies:
+      - 44b6_5f15d135
+      - 44b6_808952d6
+      - 44b6_7e557709
+      - 44b6_2f31fc2f
+      - 44b6_267148e4
+      - 44b6_cf8fed6b
+      - 44b6_8f5ab931
+      - 44b6_abf82518
+      train_annotated_in_window: 238
+      evaluate_movies:
+      - 6bba_05b6850b
+      - 6bba_05db0fb1
+      - 6bba_062c8d37
+      - 6bba_07477033
+      evaluate_annotated_in_window: 270
+      runtime_ceiling_seconds: 3600
+      amp: true
+      batch_autotune: true
+      memory_ceiling_bytes: 13958643712
+      residual_test: true
+      sampling: propensity_matched
+      input_artifacts: 24
+      path: artifacts/kaggle-stage2b-B3-fold_44b6
+    B3-fold_6bba:
+      arm: B3
+      fold: fold_6bba
+      kernel: aryaarun07/biohub-x-e08-b3-fold-6bba
+      title: Biohub-X E08 B3 fold 6bba
+      smoke_id: E08-SMOKE-2B
+      commit: 159ca24eea87360b7ee92fc328772362331b7432
+      package_digest: canonical_text_sha256:sha256/v1:49b94c937bfe9545c85abe2a27e4a4b9b700149a8f3eeb22ac10877cde6bf8af
+      kernel_source_bytes: 395411
+      pushable: true
+      workers:
+      - 0
+      - 1
+      train_movies:
+      - 6bba_907271db
+      - 6bba_5b28472a
+      - 6bba_ebff6e76
+      - 6bba_312f0dc3
+      - 6bba_20852818
+      - 6bba_c73a1d11
+      - 6bba_283bf9f1
+      - 6bba_d5eae175
+      train_annotated_in_window: 706
+      evaluate_movies:
+      - 44b6_0113de3b
+      - 44b6_0b24845f
+      - 44b6_0c582fdc
+      - 44b6_0db75fae
+      evaluate_annotated_in_window: 43
+      runtime_ceiling_seconds: 3600
+      amp: true
+      batch_autotune: true
+      memory_ceiling_bytes: 13958643712
+      residual_test: true
+      sampling: propensity_matched
+      input_artifacts: 24
+      path: artifacts/kaggle-stage2b-B3-fold_6bba
+
+  cpu_preflight_of_the_two_objectives:
+    note: >-
+      the same two 44b6 windows at 4 frames, 2 epochs, 18 positives, 18 effective
+      steps; both scorers are untrained at this size and both residual tests
+      fail, which proves the mechanism runs and the test can fail, not anything
+      about either objective. Stage 2B is the first test with enough positives.
+    A3:
+      windows: 44b6_5f15d135 and 44b6_808952d6, 4 frames, 2 epochs, batch 512, CPU
+      positives: 18
+      steps: 18
+      skipped_no_positive: 34
+      held_out_score: 0.22226413776240875
+      A0_score: 0.90587865451116
+      held_out_match: 0.375
+      residual_passed: false
+      scorer_control_auc: 0.3587
+      scorer_gain: 0.5505
+      reload_identical: true
+      sampling: null
+    B3:
+      windows: 44b6_5f15d135 and 44b6_808952d6, 4 frames, 2 epochs, batch 512, CPU
+      positives: 18
+      steps: 18
+      skipped_no_positive: 34
+      held_out_score: null
+      A0_score: 0.90587865451116
+      held_out_match: 0.0
+      residual_passed: false
+      scorer_control_auc: 0.1137
+      scorer_gain: 0.7686
+      reload_identical: true
+      sampling:
+        coefficients:
+          density: -2.3937
+          face_um: -0.021
+          motion_um: -0.3529
+          persist_next: -0.3661
+          persist_prev: -0.1417
+          t: 0.2692
+          x: 0.3208
+          y: 1.0116
+          z: 0.5347
+        effective_unlabelled_per_movie:
+        - 743.6
+        - 735.8
+        matched_on:
+        - z
+        - y
+        - x
+        - face_um
+        - t
+        - density
+        - persist_prev
+        - persist_next
+        - motion_um
+        weight_cap: 20.0
+
+  budget:
+    kernels_planned: "4 (wave 1: two; wave 2: two, conditional)"
+    kernels_maximum: 8 (one packaging, dependency, mount, transport or hardware-guard repair retry per planned kernel)
+    runtime_ceiling_seconds_per_kernel: 3600
+    expected_wall_clock_minutes_per_kernel: >-
+      about 25 with two cards: input building for twelve windows, two epochs,
+      the residual test at thirty permutations on eight movies, and four
+      held-out windows, the two workers in parallel; about 45 with one card
+      serialising the workers, which is why the ceiling is sixty
+    expected_wall_clock_minutes_total: about 100 for four kernels; the ceiling is 240
+    gpu_minutes_ceiling: 240
+    stop_conditions:
+      - any guard failure that is not a packaging, dependency, mount, transport or hardware-guard defect
+      - a kernel exceeding its runtime ceiling
+      - peak allocation above the ceiling on any worker
+      - a preflight below the floor, which stops before a push
+      - any read of the public-test directory
+      - any attempt to push beyond the kernel maximum
+
+  retrieval: package retrieve, only the summary manifest, the per-seed manifests and the log per kernel; checkpoints only for an arm that passes both directions
+  registration: every attempt gets its own reference entry; results enter E07 (A3) and E08 (B3) stage_results as stage2b, per seed, per direction
+  forbidden: public-test data, leaderboard tuning, submission, internet, contaminated weights, automatic promotion, full-fold training, and any scientific change, which is a new arm rather than a repair

@@ -1,0 +1,37 @@
+# The Jupyter sandbox image (tools/workstation/sandbox/Dockerfile), linux/cp312.
+# Compiled against the repository's uv.lock export as constraints so every
+# shared package is the version the scorer runs. tracksdata is not here: the
+# image installs the Biohub-X build (R-0014) from a copied wheel with its hash.
+# The Jupyter side of jupyter-mcp-server 2.x (RL-0048): a server with the
+# collaboration extension and a kernel.
+jupyter-server
+jupyter-collaboration
+ipykernel
+# analysis libraries a notebook reaches for
+matplotlib
+pandas
+# biohubx runtime dependencies (pyproject [project].dependencies) minus tracksdata
+numpy
+pydantic
+polars==1.43.2
+pyyaml
+scipy==1.18.0
+typer
+zarr
+# tracksdata's runtime requirements, so the copied wheel imports
+bidict
+blosc2
+dask
+geff
+ilpy
+imagecodecs
+numba
+numcodecs
+psygnal
+pyarrow
+rich
+rustworkx
+scikit-image
+sqlalchemy
+tqdm
+typing-extensions

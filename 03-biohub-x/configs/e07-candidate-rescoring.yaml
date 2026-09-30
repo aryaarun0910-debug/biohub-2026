@@ -1,0 +1,137 @@
+# E07: proposal complementarity by candidate re-scoring, A2 of E05 frozen as the baseline.
+#
+# What the 6bba miss atlas (R-0022) found and what the pool pilot measured decide
+# this family. 706 of 9,870 annotated cells were unreached by the A2 source;
+# 587 of them lie within 7 um of a strict per-scale DoG maximum the frame-level
+# response quantile discarded, 41 have no peak within the radius at all, and 2
+# are merged. Lowering the quantile to 0.80 keeps every annotated cell in the
+# candidate pool (node match 1.000 on 44b6 and 0.999 on 6bba, edge retention
+# 1.000 and 0.998, twelve-movie pilot) at 3.4 and 14.7 times the estimated count.
+# The ceiling is therefore set by ranking, not detection: which candidates to
+# keep, with the count tied to each movie's own estimate.
+#
+# Nothing here edits D-0041, E05 or E06. A promoted arm becomes a new frozen
+# proposal declaration by a new decision.
+
+E07:
+  component: proposals
+  instrument: >-
+    biohubx model inspect --arm (Stage 0), biohubx train probe --arm (Stage 1),
+    then the GPU stages under their own envelope; every stage scores kept
+    candidates through biohubx evaluate oracle-ceiling on identical windows.
+
+  baseline:
+    id: A0
+    role: the untruncated per-scale DoG union promoted by F-0035 (E05 arm A2), unchanged
+    proposals:
+      source: biohubx.proposals.dog
+      local_maxima_only: true
+      per_scale_union: true
+      radii_um: [2.0, 3.0]
+      response_quantile: 0.95
+      suppression_radius_um: 4.0
+      refine_centroids: false
+      truncation: none
+    ceilings: {44b6: 1.0195, 6bba: 0.9283}
+
+  target:
+    primary: raise the 6bba oracle ceiling to at least 0.950 without lowering 44b6 below A0
+    north_star: 0.970 on both
+
+  evidence:
+    miss_atlas: artifacts/miss-atlas-6bba.json, R-0022
+    atlas_primary_classes_6bba: {boundary: 189, dim: 331, localization: 181, merged: 2, temporal_dropout: 1, low_response: 1, unexplained: 1, annotation_ambiguity: 0}
+    atlas_flags_6bba: {low_response: 587, localization: 555, dim: 452, boundary: 189, temporal_dropout: 121, merged: 3}
+    atlas_no_peak_within_7um: 41
+    pool_pilot: artifacts/e07-pool-q0.80.json and artifacts/e07-pool-q0.50.json, 12 movies per embryo, 10-frame windows
+    pool_pilot_q0.80: {44b6: {proposals: 172018, estimate: 50831, node_ratio: 2.384, match: 1.000, retention: 1.000}, 6bba: {proposals: 307185, estimate: 20884, node_ratio: 13.709, match: 0.999, retention: 0.998}}
+    pool_pilot_q0.50: {44b6: {match: 1.000}, 6bba: {match: 0.999}, note: no cell gained below 0.80, only candidates}
+
+  candidates:
+    source: biohubx.proposals.rescore.extract_candidates
+    rule: every strict per-scale DoG maximum at or above the pool quantile, deduplicated by the shared physical suppression
+    radii_um: [2.0, 3.0]
+    response_quantile: 0.80
+    suppression_radius_um: 4.0
+    patch: 9^3 isotropic grid voxels at 1.625 um, zero-padded at the volume faces
+    preprocessing: per-channel standardisation over the window's own pool; the DoG responses are two orders of magnitude smaller than normalised intensity and Stage 0 measured the scorer barely moving with them at initialisation
+    quantile_note: >-
+      chosen per embryo from that embryo's own pilot rows; both embryos give
+      0.80, the highest quantile at which match is at least 0.999, so no
+      held-out number selected a constant the other fold uses.
+
+  supervision:
+    kind: non_negative_positive_unlabelled
+    positive: a candidate that is the one-to-one match of an annotated cell within 7 um
+    unlabelled: every other candidate
+    negative: none; no candidate is ever called background
+    class_prior: the movie's own estimated_number_of_nodes for the window, divided by the pool size
+
+  decode:
+    rule: per movie, keep the round(count_ratio x estimate) highest-scoring candidates, where estimate is that movie's own official estimated_number_of_nodes for the window; count_ratio is 1.0 by declaration and may be tuned only on the training embryo in Stage 3
+    never: a threshold, count or ratio chosen against the held-out embryo's ground truth; the estimate is metadata the node-ratio term itself uses, not ground truth
+    amended: before any GPU stage, from a probability threshold frozen on the training embryo, which the CPU smoke showed transfers a count from a dense embryo to a sparse one (1,015 kept against an estimate of 191)
+    final_step: the same 4.0 um physical suppression as A0, then one-to-one deduplication; scored at the natural count
+
+  arms:
+    - id: A1
+      name: learned residual detector
+      status: killed_before_implementation
+      reason: 41 of 706 misses have no strict peak within 7 um (R-0022); a detector that finds cells the DoG cannot has a ceiling of 0.4 percent of annotated cells, below the 2.2 percentage points the target needs
+    - id: A2
+      name: full-resolution centre-and-offset deblending head
+      status: killed_before_implementation
+      reason: 2 of 706 misses are merged and 3 carry the flag; there is nothing to deblend
+    - id: A3
+      name: patch re-scorer, intensity and per-scale DoG channels
+      status: implemented
+      model: biohubx.proposals.rescore.PatchScorer, 3 input channels, 9^3 patch at 1.625 um
+      mechanism: one small 3D convolutional scorer per candidate; keeps by count-tied threshold
+      atlas_motivation: 587 discarded-peak misses, 452 dim, 189 boundary, all threshold effects a ranker can undo
+    - id: A4
+      name: patch re-scorer with temporal context
+      status: implemented
+      model: biohubx.proposals.rescore.PatchScorer, 5 input channels, A3 plus previous and following frame intensity
+      mechanism: as A3, with motion and persistence visible to the scorer
+      atlas_motivation: 121 misses matched in both neighbouring frames; a cell that persists is a cell
+    - id: A5
+      name: curvature/Hessian-triggered deblending
+      status: killed_before_implementation
+      reason: as A2, merged is 2 of 706
+
+  funnel:
+    stage0: model inspect --arm on A3 and A4; kill impossible or duplicative designs on measurement
+    stage1: train probe --arm on one deterministic 44b6 window; kill zero-gradient, non-finite, inert-channel or non-reproducing designs
+    stage2: tiny GPU smoke, two movies, two epochs; loss movement, positives, nnPU terms, memory, throughput; integration evidence only
+    stage3: mini-fold, a fixed small movie subset of the training embryo, a fixed evaluation subset of the other, both directions, bounded epochs; proposal recall, count ratio and oracle score mandatory
+    stage4: full folds only for arms that improve A0 in both mini-fold directions; official metric per direction; no pooled-only result
+
+  kill_rules:
+    - fails strict loading or deterministic reproduction
+    - raises proposal count without raising the oracle ceiling
+    - improves only the embryo used for selection
+    - exceeds the declared memory or runtime ceiling
+    - treats unlabelled voxels as negatives
+    - its contribution disappears when deduplicated with A0
+
+  folds:
+    - id: fold_44b6
+      train_on: 44b6
+      evaluate_on: 6bba
+    - id: fold_6bba
+      train_on: 6bba
+      evaluate_on: 44b6
+  never_read: the public-test directory, for any purpose
+
+  promotion: >-
+    an arm that beats A0's oracle ceiling on both held-out directions and lifts
+    the 6bba ceiling to at least 0.950; preference to the arm with more headroom
+    toward 0.970. Promotion writes a new frozen proposal declaration; it edits
+    nothing in D-0041 or E06.
+
+  search_control: >-
+    manual mechanism arms first. Once one shows signal in Stage 3, an ephemeral
+    pinned Optuna study may search training-fold parameters only, with early
+    pruning; its database is not a registry, the frozen selected configuration
+    and trial evidence are exported into the experiment report, and the held-out
+    embryo is evaluated once.
