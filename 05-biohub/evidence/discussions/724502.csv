@@ -1,0 +1,10 @@
+id,authorName,postDate,votes,content
+3496287,,2026-07-13 14:54:03.473000,0,"<p>That's permitted, but you should be able to reproduce it in case you win, see <a href=""https://www.kaggle.com/WinningModelDocumentationGuidelines"" target=""_blank"">https://www.kaggle.com/WinningModelDocumentationGuidelines</a></p>"
+3495138,,2026-07-11 14:24:42.703000,0,"<p>I would like to clarify the notebook submission requirements.</p>
+<p>I trained a model entirely by myself using only the official BioHub Cell Tracking During Development competition training data. I would like to use this trained model for inference in my submission notebook instead of retraining it every time.</p>
+<p>Is it permitted to:</p>
+<p>Upload the trained model as a private Kaggle Dataset (or other supported notebook input), and
+Load that model in the submission notebook for inference?</p>
+<p>The model was trained exclusively on the competition's official training data, and no external data or pretrained weights were used.</p>
+<p>Would this be considered a valid notebook submission under the competition rules?</p>
+<p>Thank you!</p>"

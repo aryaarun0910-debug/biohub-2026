@@ -1,0 +1,24 @@
+id,authorName,postDate,votes,content
+3509628,,2026-08-06 18:29:06.877000,2,"<p>Hi!</p>
+<p>I'm new to this. I am trying to overlay <code>.geff</code> ground-truth nodes on the <code>.zarr</code> microscopy volumes.</p>
+<p>Example training sample:</p>
+<ul>
+<li>Volume shape: <code>(T,Z,Y,X) = (100,64,256,256)</code></li>
+<li>Node: <code>node_id: 1000004</code> @  <code>t=0, x=21, y=28, z=15</code></li>
+</ul>
+<p>Plotting this coordinate on the corresponding z-slices (<code>z=12–18</code>) places the <strong>marker in a dark background area</strong> near the image corner, not on a visible fluorescent cell.</p>
+<p>I tested <code>(x,y)</code>, <code>(y,x)</code>, and flipped variants, but no transformation consistently aligns the annotations.</p>
+<p>Can anyone confirm whether GEFF <code>nodes/props/{t,z,y,x}</code> coordinates map directly to the Zarr <code>(t,z,y,x)</code> voxel coordinates, or is an additional axis/origin transformation required?
+Thanks!</p>"
+3509828,,2026-08-07 06:10:14.667000,0,"<p>Hi! The GEFF coordinates map directly to the corresponding Zarr array as:</p>
+<pre><code>image = zarr.open_group(zarr_path, mode=""r"")[""0""]
+voxel = image[t, z, y, x]
+</code></pre>
+<p>There is no additional axis swap, flip, or origin transformation. The metadata uses <code>(T, Z, Y, X)</code>, and the GEFF properties correspond directly to <code>t</code>, <code>z</code>, <code>y</code>, and <code>x</code>.</p>
+<p>For an XY overlay:</p>
+<pre><code>plt.imshow(image[t, z])
+plt.scatter(x, y, c=""red"")
+</code></pre>
+<p>The voxel scaling is (Z, Y, X) = (1.625, 0.40625, 0.40625) µm/voxel, but that scaling should only be applied when calculating physical positions or distances not when indexing the array.</p>
+<p>If the marker appears in a dark corner, I would first check that the <code>.geff` `and` `.zarr</code> files have exactly the same sample name, <code>t</code> is read from <code>nodes/props/t/values</code> rather than inferred from <code>node_id</code>, the image is opened from Zarr dataset <code>""0""</code>, you are plotting <code>(x, y)</code>, not `(y, x), physical scaling has not been applied before array indexing.</p>
+<p>It can also help to inspect a small 3D crop around (z, y, x) using percentile based contrast, since the annotated centroid may not be the brightest individual voxel. We verified the direct mapping in the XY, XZ, and YZ views and found that the annotations aligned with the visible fluorescent structures.</p>"

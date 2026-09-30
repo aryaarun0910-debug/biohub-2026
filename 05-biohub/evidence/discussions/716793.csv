@@ -1,0 +1,13 @@
+id,authorName,postDate,votes,content
+3485043,,2026-07-01 03:15:26.560000,14,"<p><a href=""https://www.kaggle.com/thibautgoldsborough"" target=""_blank"">@thibautgoldsborough</a></p>
+<p>Hi, biohub team. During my EDA, I found only two groups of embryo_ids. I would like to ask about the situation with the embryo_ids in the test set. If there are multiple groups of embryo_ids in the test set, how should the training results be evaluated and how did you consider the design of the training set?</p>"
+3485884,,2026-07-01 22:17:13.263000,4,"<p>Hi, indeed there are two unique embryo_ids in the training set. You can assume the test sit is roughly similar in size, with no overlap in embryo_ids between train and test sets. </p>"
+3485936,,2026-07-02 00:19:38.363000,1,"<p>So my understanding is that the test set consists of another two groups of embryos of the same number, right?</p>"
+3485971,,2026-07-02 02:34:45.883000,1,"<p>Hi <a href=""https://www.kaggle.com/thibautgoldsborough"" target=""_blank"">@thibautgoldsborough</a>, the test set also consists of two groups of embryos? and the distribution is similar to train set: 71:128?</p>"
+3486896,,2026-07-03 06:19:28.050000,0,"<p>I probed the test set and found that its size is significantly smaller than the training set. Of course, it's also possible that the embryonic cell development nodes in the test set are simpler. Assuming the development process is the same, the size is roughly only 2/3 or even less.</p>"
+3486932,,2026-07-03 07:20:22.253000,1,"<p>This leaderboard is calculated with approximately 29% of the test data. The final results will be based on the other 71%, so the final standings may be different.</p>
+<p><code>You can assume the test sit is roughly similar in size</code></p>
+<p>199 * 29% = 57.71 = 58 ids PBLB with 1 unique embryo_ids</p>
+<p>199 * 71% = 141 ids PVLB with (1 in PuB &amp; 1 Unq = 2 unique embryo_ids)</p>
+<p>is my assumption!!</p>"
+3487942,,2026-07-04 11:58:10.993000,1,"<p>thanks, Sangram. I did think about this possibility, but from my deep learning CV experiments, the public leaderboard scores don't correlate well with local CV. Plus, if the public LB is based on one group of embryos and the private LB uses a completely different group (or even more), it's difficult for me to judge the training/test set split design.""</p>"

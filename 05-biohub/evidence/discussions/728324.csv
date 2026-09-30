@@ -1,0 +1,9 @@
+id,authorName,postDate,votes,content
+3501818,,2026-07-22 21:49:20.467000,20,"<p>The metric has been patched to address an exploit. All submissions are currently being rescored. It will take some time to complete, during which time, some scores might disappear from the leaderboard. It is expected that most submissions with have at least a minor drop in score.</p>
+<p>This post will be updated when the rescore is complete.</p>"
+3501876,,2026-07-23 01:16:56.140000,10,<p>The rescore is complete. Thanks for everyone's patience!</p>
+3501963,,2026-07-23 07:17:54.587000,0,"<p>I run the notebook successful but submit all notebook with error, is it caused by new submission rules?</p>"
+3501860,,2026-07-23 00:12:15.830000,4,"<p>Yes, it does appear that the Hacking score has decreased. Thank you for looking into this.</p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F25515343%2Fbba2d25991f9dbe643383f851c76a6f9%2F2026-07-22_22h24_15.png?generation=1784765409829476&amp;alt=media"" alt=""""></p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F25515343%2F072d7fb14582463dccb4d660bd1b8456%2F2026-07-23_09h09_22.png?generation=1784765431009865&amp;alt=media"" alt=""""></p>"
+3501916,,2026-07-23 03:46:29.983000,2,<p>Yes and can we fix score on public notebook also？It might make some new participants confused.</p>

@@ -1,0 +1,28 @@
+id,authorName,postDate,votes,content
+3505690,,2026-07-30 14:12:07.410000,8,"<p>I am using the public TemporalUNet3D pipeline with a clean graph backend and no metric exploits.
+My controlled experiments:</p>
+<ul>
+<li>Clean single-seed pipeline: 0.908</li>
+<li>Detection/ILP parameter probes around the best configuration: all 0.908</li>
+<li>Two independent seeds, 50/50 detection-logit blend: 0.910</li>
+<li>Edge Top-K / feature-TTA branch: 0.885–0.886</li>
+</ul>
+<p>The two-seed blend reduced emitted nodes by about 1.7% and improved the score, suggesting that model diversity mainly improved detection precision. However, this appears close to the public two-seed notebook score of 0.911.</p>
+<p>For participants who moved beyond this plateau, which direction was most useful in general?</p>
+<ol>
+<li>More diverse detector architectures or training objectives  </li>
+<li>Better temporal/context features for association  </li>
+<li>Division-specific modeling  </li>
+<li>A local validation or proxy metric that correlates with the leaderboard  </li>
+<li>Confidence-adaptive ensembling rather than fixed logit averaging</li>
+</ol>
+<p>I am not asking for private solution details—general guidance about which class of errors to diagnose next would be greatly appreciated.</p>"
+3505981,,2026-07-30 18:23:20.893000,2,"<p>It's a competition. Every team is competing against the others, so I don't think anyone will share their strongest ideas in detail.</p>
+<p>Still, one small hint from my experiments: after the two-seed detection blend plateaued, the more useful gains seemed to come from association consistency rather than additional detection tuning. In particular, it may be worth examining ambiguous parent links from more than one temporal or model view instead of applying a fixed global logit average everywhere.</p>
+<p>I would separately diagnose detection, ordinary association, track fragmentation, and division errors. The next improvement may depend less on adding another seed and more on identifying where the current models disagree—and only using the extra view in those uncertain cases.</p>"
+3505982,,2026-07-30 18:27:59.223000,3,"<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F27966974%2Fbaf53a894e86ee46b7007e1f8b4e157d%2FScreenshot%202026-07-31%20001607.png?generation=1785435886054048&amp;alt=media"" alt=""""></p>
+<p>I also share with you a screenshot of my submissions. Happy Learning!</p>"
+3506140,,2026-07-31 01:40:50.357000,0,"<p>Thank you for the helpful advice! I really appreciate you taking the time to share your experience. 
+Your suggestions about association consistency and focusing on uncertain cases give me a clear direction for my next experiments. 
+Good luck with the competition, and I hope we both do well!</p>"
+3505918,,2026-07-30 17:25:31.637000,0,"<p>this is exactly where I am, thank you for posting the question, hope someone will reply.</p>"

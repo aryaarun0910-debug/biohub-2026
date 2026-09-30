@@ -1,0 +1,19 @@
+id,authorName,postDate,votes,content
+3520466,,2026-09-03 13:03:05.090000,3,"<p>the more you hands on the more you understand and only then its high chance you hit .9</p>
+<p>there are many models on hugging face + already shared here publicly too. The one approach you mentioned is what evey LLM suggests upon given prompt.</p>
+<p>understand problem first 
+gothrough public notebooks second
+broaden your exposure third
+apply test, apply test, apply test, finally</p>"
+3520854,,2026-09-04 10:08:29.180000,1,"<p>if we are talking about a general solution for cell tracking (not restricted to the kaggle competition), to improve tracking, just increase the frame rate of the captured volume. Then you just need to have a good detector and nearest neighbour + linear assignment would have solved 95% of the problem. </p>"
+3521082,,2026-09-04 19:52:17.620000,0,"<p>This would work assuming most cells have similar velocity, unless I'm missing something.</p>"
+3521134,,2026-09-04 23:34:02.753000,1,"<p>Imagine if you can improve the camera and capture image at say 100 fps instead of 10 fps. Then the cell move very little between each frame and in-fact they may just overlap a lot. So you can track them by nearest cell association. The trick is to capture faster than the cell moves or changes(division). This is hardware solution, which of course may be just a fancy solution ( eg due to limitation or cost. High speed camera are incredibly expensive)</p>"
+3520375,,2026-09-03 08:36:32,1,"<p>Try to take advantage of this competition to learn new things (detection, tracking, post processing, 3D viz, etc) and have fun most importantly. Don't chase public score for now as suggested <a href=""https://www.kaggle.com/rustambazarbayev"" target=""_blank"">@rustambazarbayev</a>. Good luck and enjoy!</p>"
+3520383,,2026-09-03 09:07:31.017000,1,<p>Yeah i get that but i am genuinely lost. All the notebooks publicly shared are just inference notebooks at this point. I want to look into the training methods too</p>
+3520398,,2026-09-03 10:00:51.667000,0,<p>Try model separate into several parts like object detection linkage…etc</p>
+3520403,,2026-09-03 10:06:45.710000,1,"<p>if you have access to an LLM, ask it to explain one training notebook. From there, keep digging until you understand what the notebook does. Then, ask the LLM again for ways to improve. Keep iterating, explore the data, and be creative.</p>"
+3520366,,2026-09-03 08:14:07.053000,0,<p>Don't chase public score</p>
+3520354,,2026-09-03 07:55:55.087000,0,"<p>Is everyone using the 3DTemporalUnet + CrossAttention with SImpleNodeTransformer? what is the training method and lose used here? same as the internal repo?</p>
+<p>I am stuck on fixing paramters in the post processing part, in ilp and NMS</p>"
+3521119,,2026-09-04 22:51:57.370000,0,
+3521386,,2026-09-05 17:16:43.437000,0,"<p>thank you, this really puts things into perspective</p>"

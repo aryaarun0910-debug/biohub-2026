@@ -1,0 +1,10 @@
+
+  GT nodes 15,934   detected 15,901   NODE RECALL 0.9979
+  GT edges 15,369   reachable 15,316   EDGE CEILING 0.9966
+  structurally unrecoverable edges: 0.34%
+
+    44b6: node recall 0.9986   edge ceiling 0.9971   (15 datasets, 2,786 edges)
+    6bba: node recall 0.9978   edge ceiling 0.9964   (15 datasets, 12,583 edges)
+
+  reading: edge ceiling is the MAX edge Jaccard recall any linker can reach
+  on this detector's output. Compare to our measured edgeJ to split the gap.

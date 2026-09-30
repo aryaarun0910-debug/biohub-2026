@@ -1,0 +1,16 @@
+id,authorName,postDate,votes,content
+3500287,,2026-07-19 01:03:56.667000,2,"<p>Hi everyone,</p>
+<p>I am excited to join my first active Kaggle competition, <strong>Biohub - Cell Tracking During Development</strong>! As someone new to bioinformatics and life sciences, I wanted to document my initial setup process to help others starting out.</p>
+<p>I have written a step-by-step guide covering the entire workflow from setting up the Kaggle Notebook to making the first submission. </p>
+<h3>What's covered in the guide:</h3>
+<ol>
+<li>Agreeing to competition rules and setting up API tokens.</li>
+<li>Creating and preparing a Kaggle Notebook.</li>
+<li><strong>Troubleshooting <code>zarr</code> offline installation issues</strong> (since internet access must be turned off during submission evaluation).</li>
+<li>Running the template notebook, saving versions, and successfully submitting to the leaderboard.</li>
+</ol>
+<p>If you are just getting started or facing import errors while setting up your environment, feel free to check out the post:
+👉 <strong><a href=""https://dev.to/kito2718/bct1-kaggle-environment-setup-and-first-submission-4016"" target=""_blank"">BCT1: Kaggle Environment Setup and First Submission</a></strong></p>
+<p><em>(For Japanese readers, I also published the original Japanese version on Zenn here: <a href=""https://zenn.dev/rg687076/articles/zenn_20260714_0630_bct_environment_submission"" target=""_blank"">18-①Kaggle実践3 Biohub細胞トラッキング：環境構築から初回提出までの手順</a>)</em></p>
+<p>I hope this helps anyone who is starting out with this competition! I would love to hear your feedback or any tips.</p>
+<p>Good luck to everyone!</p>"

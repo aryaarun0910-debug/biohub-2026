@@ -1,0 +1,6 @@
+id,authorName,postDate,votes,content
+3494758,,2026-07-10 16:38:22.707000,-1,"<p>Hi everyone. I'm a beginner in this competition documenting my parameter experiments on the JIRKA baseline. So far:
+● Default settings: 0.728
+● USE_COUNT_CALIBRATION = True: 0.728 (no change)
+● DETECT_DIV = True: 0.695 (worse, division detection hurts without tuning)</p>
+<p>Currently testing BUDGET_SAFETY adjustments. Happy to share results. I would love to hear what parameter ranges others have found useful.</p>"

@@ -1,0 +1,9 @@
+id,authorName,postDate,votes,content
+3511192,,2026-08-10 16:35:37.427000,-1,"<p>My submission is running for over an hour now while my notebook ran with in 10 mins, this is my first ever submission and im not sure how long should it take.
+There is no error uptill now, also i was using T4 so it isnt a gpu/cpu acceleration factor</p>"
+3511461,,2026-08-11 08:32:00.433000,0,<p>9-12 hours for me depending on the model</p>
+3511314,,2026-08-10 21:41:11.257000,0,"<p>From my experience, the submission evaluation depends on the number of test datasets and the complexity of the tracking pipeline. The sample submission has a fairly small number of entries, so scoring should be relatively quick (minutes, not hours). If your submission is still pending after 30 minutes, check if the format matches the sample_submission.csv exactly.</p>"
+3511382,,2026-08-11 03:00:08.127000,0,"<p>the Submission succeeded without any error got my first LD score at 0.892, i believe it was queued which took a long time to get executed </p>"
+3511193,,2026-08-10 16:37:26.253000,0,<p>it takes ~50x longer than running notebook i think</p>
+3511202,,2026-08-10 16:49:50.647000,0,"<p>That's new, probably the hidden dataset is way bigger than i expected </p>"
+3514887,,2026-08-20 10:52:54.350000,1,"<p>From the Overview: ""The size of the hidden test set is approximately the same size as the training dataset.""</p>"

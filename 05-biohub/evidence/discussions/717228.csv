@@ -1,0 +1,11 @@
+id,authorName,postDate,votes,content
+3485667,,2026-07-01 17:37:42.173000,4,"<p>Hi <a href=""https://www.kaggle.com/rahulparmeshwar"" target=""_blank"">@rahulparmeshwar</a>. Here's the snippet from the overview page:</p>
+<blockquote>
+  <p>When a notebook is submitted for rerun, a new hidden test set is swapped in. The size of the hidden test set is approximately the same size as the training dataset.</p>
+</blockquote>
+<p>The training set has 199 image volumes (T=100, Z=64, Y=256, X=256), so the hidden test set will be roughly that same size. I haven't submitted, but ~200 second per volume should fit in 12h</p>"
+3485916,,2026-07-01 23:17:47.330000,0,<p>Understood! Thanks Sergio!</p>
+3485640,,2026-07-01 17:09:11.807000,3,"<p>Hi, my last two submissions failed because scoring timed out, the submissions.csv was produced but after that the scoring element of kaggle timed out after 12 hours. Anyone else experienced this?</p>"
+3487760,,2026-07-04 08:24:37.790000,0,"<p>facing this issue, were you able to find a solution</p>"
+3487867,,2026-07-04 10:38:54.043000,1,"<p>Yeah, but it wasn’t on my end, it just takes 5 hours for me to run the full validation on scoring, so you’ll just have to wait because there’s 199 validation images</p>"
+3487967,,2026-07-04 12:36:33.480000,0,<p>Thanks. Mine is just timing out error after 14hours.</p>

@@ -1,0 +1,10 @@
+id,authorName,postDate,votes,content
+3518456,,2026-08-31 00:39:19.730000,1,<p>It can be false positive or results of interpolation. Eg annotation label frame t=1 and t=3 and interpolate for t=2</p>
+3517729,,2026-08-28 01:13:05.783000,4,"<p>Hello,
+I was looking though my false negatives and realised that some of the nodes cannot be seen properly and i was wondering whether thsoe where annotation artifacts or cells can actually be this dim.
+I am looking at the track for node <code>53000565</code>. This node is specifically at slice 31 of frame 52 of the video <code>6bba_3a1849c2</code> and is supposed to be at the red dot in the following picture:</p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4090870%2Ffa1d164dfc3ad63e2260eb90d996b038%2FScreenshot%20from%202026-08-28%2003-06-45.png?generation=1787879525897274&amp;alt=media"" alt=""""></p>
+<p>Its whole track looks like this. Can this be an artifact, or can cells actually look like this?</p>
+<p>Regards</p>"
+3517749,,2026-08-28 04:05:31.593000,0,"<p>Thank you for sharing your false negatives. <a href=""https://www.kaggle.com/cjpal18"" target=""_blank"">@cjpal18</a> </p>"
+3517747,,2026-08-28 03:55:59.157000,0,

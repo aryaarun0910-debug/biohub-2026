@@ -1,0 +1,13 @@
+
+  judgeable missing edges with the true successor inside 15 um: 135
+  out of radius entirely: 0
+
+  rank of the TRUE successor          raw dist   flow-comp
+    within top-1                             37.0%       37.0%
+    within top-2                             80.0%       80.7%
+    within top-3                             92.6%       91.9%
+    within top-5                             98.5%       99.3%
+    within top-10                           100.0%      100.0%
+    median rank                               2           2
+
+  flow beats raw on 11 cases, loses on 12, ties 112

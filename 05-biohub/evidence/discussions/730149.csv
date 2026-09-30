@@ -1,0 +1,6 @@
+id,authorName,postDate,votes,content
+3504517,,2026-07-28 08:52:53.463000,0,"<p>I was able to complete a notebook execution for the <strong>4 test data</strong>.</p>
+<p>Notebook successful completed its end to end execution against test data in <strong>637s</strong> using <strong>GPU T4 x2</strong>.</p>
+<p>*<em>But the actual submission(i.e scoring) took 7hrs</em>.*</p>
+<p>Is this expected..?</p>"
+3505044,,2026-07-29 10:38:36.387000,0,"<p>yes. there is ~200 videos for actual submission, so around 7 hours is accurate.</p>"

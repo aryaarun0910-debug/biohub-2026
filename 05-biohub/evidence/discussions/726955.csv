@@ -1,0 +1,8 @@
+id,authorName,postDate,votes,content
+3500046,,2026-07-18 11:33:31.083000,1,"<h1>First install dependences</h1>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F17954496%2F217ec3c8f4de6cf1a688fa2f2278ff11%2Ff1.png?generation=1784374380922525&amp;alt=media"" alt=""f1""></p>
+<h1>Next save</h1>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F17954496%2F7402c5023e9faf489b99801be191f558%2Ff2.png?generation=1784374404526108&amp;alt=media"" alt=""f2""></p>
+<p><a href=""https://www.kaggle.com/code/antonoof/import-kaggle?scriptVersionId=336231500"" target=""_blank"">https://www.kaggle.com/code/antonoof/import-kaggle?scriptVersionId=336231500</a></p>"
+3499868,,2026-07-18 06:02:12.043000,1,"<p>But uploading a dataset containing the .whl files required for its install, run them, install Zarr and then import.</p>"
+3499434,,2026-07-17 09:26:37.520000,-2,<p>How can I import Barr if it requires off-line submission?</p>

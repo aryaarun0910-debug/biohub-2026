@@ -1,0 +1,4 @@
+id,authorName,postDate,votes,content
+3484584,,2026-06-30 15:06:02.227000,-7,"<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F27082480%2F27ef658b0b031d85b80cd3dfb72039a4%2FScreenshot%202026-07-01%20010533.png?generation=1782831943944582&amp;alt=media"" alt=""""> Please solve ,my issue</p>"
+3484663,,2026-06-30 16:45:29.833000,0,"<p>Hi, if this is the UNet baseline, this is expected, inference is very slow, and needs to be improved!</p>"
+3484641,,2026-06-30 16:23:25.187000,0,"<p>same for me, after a few hours it submitted</p>"

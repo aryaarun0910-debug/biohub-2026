@@ -1,0 +1,32 @@
+  40 datasets cached
+
+  config                    divTP  divFP  divFN    divJ    edgeJ      adj    SCORE    delta
+  -----------------------------------------------------------------------------------------
+  baseline (as-is)             11    481     15  0.0217   0.8899   0.8700   0.8722  +0.0000
+  theirs (9,14,.6,2.25)        11    502     15  0.0208   0.8889   0.8689   0.8710  -0.0012
+  max_um 13                    11    502     15  0.0208   0.8889   0.8689   0.8710  -0.0012
+  tau .25                      11    485     15  0.0215   0.8896   0.8697   0.8718  -0.0004
+  no divergence                11    556     15  0.0189   0.8883   0.8680   0.8699  -0.0023
+  no mutual_nn                 11    504     15  0.0208   0.8887   0.8688   0.8709  -0.0012
+  caps x4                      11    506     15  0.0207   0.8888   0.8688   0.8709  -0.0013
+  RELAX ALL                    12    587     14  0.0196   0.8862   0.8662   0.8682  -0.0040
+
+  === leave-one-embryo-out ===
+    held out 44b6:
+      baseline (as-is)         divJ  0.0124  edgeJ  0.8560  score  0.8676  +0.0000
+      theirs (9,14,.6,2.25)    divJ  0.0119  edgeJ  0.8541  score  0.8661  -0.0015
+      max_um 13                divJ  0.0119  edgeJ  0.8541  score  0.8661  -0.0015
+      tau .25                  divJ  0.0122  edgeJ  0.8553  score  0.8670  -0.0006
+      no divergence            divJ  0.0107  edgeJ  0.8538  score  0.8649  -0.0027
+      no mutual_nn             divJ  0.0119  edgeJ  0.8541  score  0.8661  -0.0015
+      caps x4                  divJ  0.0118  edgeJ  0.8540  score  0.8660  -0.0016
+      RELAX ALL                divJ  0.0153  edgeJ  0.8524  score  0.8643  -0.0033
+    held out 6bba:
+      baseline (as-is)         divJ  0.0260  edgeJ  0.9000  score  0.8763  +0.0000
+      theirs (9,14,.6,2.25)    divJ  0.0250  edgeJ  0.8993  score  0.8754  -0.0009
+      max_um 13                divJ  0.0250  edgeJ  0.8993  score  0.8754  -0.0009
+      tau .25                  divJ  0.0259  edgeJ  0.8998  score  0.8761  -0.0001
+      no divergence            divJ  0.0228  edgeJ  0.8986  score  0.8745  -0.0017
+      no mutual_nn             divJ  0.0249  edgeJ  0.8991  score  0.8753  -0.0010
+      caps x4                  divJ  0.0248  edgeJ  0.8992  score  0.8753  -0.0010
+      RELAX ALL                divJ  0.0216  edgeJ  0.8963  score  0.8719  -0.0043

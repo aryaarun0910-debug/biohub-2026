@@ -1,0 +1,13 @@
+  work/bigval_out/validator_results.csv
+
+  config                               pooled     44b6     6bba    MIN d  pooled d
+  ----------------------------------------------------------------------------------
+  combo_tv                            0.91594  0.94570  0.90492 +0.00090  +0.00120  <-- best by MIN
+  tight55                             0.91545  0.94551  0.90434 +0.00033  +0.00072
+  combo(combo_tv+combo_tvr+tight55)   0.91574  0.94670  0.90433 +0.00031  +0.00101
+  combo_tvr                           0.91574  0.94670  0.90433 +0.00031  +0.00101
+  base                                0.91474  0.94362  0.90401 +0.00000  +0.00000
+  vel025                              0.91522  0.94360  0.90466 -0.00001  +0.00048
+
+  best by POOLED proxy : combo_tv   (min delta +0.00090)
+  best by MIN-EMBRYO   : combo_tv   (pooled delta +0.00120)

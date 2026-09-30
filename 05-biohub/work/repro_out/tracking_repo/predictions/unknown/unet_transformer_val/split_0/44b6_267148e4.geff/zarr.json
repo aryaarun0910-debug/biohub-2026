@@ -1,0 +1,128 @@
+{
+  "attributes": {
+    "geff": {
+      "geff_version": "1.1",
+      "directed": true,
+      "axes": [
+        {
+          "name": "t",
+          "type": "time",
+          "unit": null,
+          "min": 0.0,
+          "max": 99.0,
+          "scale": null,
+          "scaled_unit": null,
+          "offset": null
+        },
+        {
+          "name": "z",
+          "type": "space",
+          "unit": null,
+          "min": 0.0,
+          "max": 63.0,
+          "scale": null,
+          "scaled_unit": null,
+          "offset": null
+        },
+        {
+          "name": "y",
+          "type": "space",
+          "unit": null,
+          "min": 8.0,
+          "max": 252.0,
+          "scale": null,
+          "scaled_unit": null,
+          "offset": null
+        },
+        {
+          "name": "x",
+          "type": "space",
+          "unit": null,
+          "min": 0.0,
+          "max": 252.0,
+          "scale": null,
+          "scaled_unit": null,
+          "offset": null
+        }
+      ],
+      "node_props_metadata": {
+        "t": {
+          "identifier": "t",
+          "dtype": "int32",
+          "varlength": false,
+          "unit": null,
+          "name": null,
+          "description": null
+        },
+        "z": {
+          "identifier": "z",
+          "dtype": "float64",
+          "varlength": false,
+          "unit": null,
+          "name": null,
+          "description": null
+        },
+        "y": {
+          "identifier": "y",
+          "dtype": "float64",
+          "varlength": false,
+          "unit": null,
+          "name": null,
+          "description": null
+        },
+        "x": {
+          "identifier": "x",
+          "dtype": "float64",
+          "varlength": false,
+          "unit": null,
+          "name": null,
+          "description": null
+        },
+        "solution": {
+          "identifier": "solution",
+          "dtype": "bool",
+          "varlength": false,
+          "unit": null,
+          "name": null,
+          "description": null
+        }
+      },
+      "edge_props_metadata": {
+        "edge_prob": {
+          "identifier": "edge_prob",
+          "dtype": "float64",
+          "varlength": false,
+          "unit": null,
+          "name": null,
+          "description": null
+        },
+        "edge_dist": {
+          "identifier": "edge_dist",
+          "dtype": "float64",
+          "varlength": false,
+          "unit": null,
+          "name": null,
+          "description": null
+        },
+        "solution": {
+          "identifier": "solution",
+          "dtype": "bool",
+          "varlength": false,
+          "unit": null,
+          "name": null,
+          "description": null
+        }
+      },
+      "sphere": null,
+      "ellipsoid": null,
+      "track_node_props": null,
+      "related_objects": null,
+      "display_hints": null,
+      "extra": {
+        "tracksdata": {}
+      }
+    }
+  },
+  "zarr_format": 3,
+  "node_type": "group"
+}

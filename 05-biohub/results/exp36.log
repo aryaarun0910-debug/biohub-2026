@@ -1,0 +1,29 @@
+
+  nodes 827,797   ANNOTATED (matched) 15,890   base rate 1.920%
+  chance precision on 'unmatched' = 98.080%  <-- the bar to beat
+
+  per-feature AUC for 'this node IS annotated':
+    t         0.515
+    z         0.503
+    y         0.517
+    x         0.511
+    rho2      0.500
+    rho5      0.513
+    rho10     0.630
+    nn1       0.641
+    nn3       0.663
+    indeg     0.557
+    outdeg    0.565
+    comp_len  0.726
+    step_in   0.505
+    step_out  0.508
+
+  === leave-one-embryo-out: precision on REMOVAL (predicting unmatched) ===
+    held-out 44b6: AUC 0.641  chance 99.45%
+       remove 10% (51,782): 99.838% truly unannotated   BEATS CHANCE
+       remove 25% (129,456): 99.742% truly unannotated   BEATS CHANCE
+       remove 50% (258,913): 99.671% truly unannotated   BEATS CHANCE
+    held-out 6bba: AUC 0.557  chance 95.79%
+       remove 10% (30,997): 96.490% truly unannotated   BEATS CHANCE
+       remove 25% (77,492): 96.367% truly unannotated   BEATS CHANCE
+       remove 50% (154,985): 96.416% truly unannotated   BEATS CHANCE

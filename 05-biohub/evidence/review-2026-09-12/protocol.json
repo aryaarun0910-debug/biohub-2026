@@ -1,0 +1,11 @@
+{
+  "purpose": "CPU-only review diagnostics, not a model experiment or promotion",
+  "code_commit": "46713c5bae637400a8a5f7afd16848ff131a927b",
+  "hypothesis": "Existing passing tests do not establish detector-to-CSV readiness; targeted boundary probes expose gaps.",
+  "parameters": "Current Config; handcrafted tiny graphs and heatmaps; no tuning",
+  "data": "Synthetic fixtures only; metadata census of local training GEFFs; no data/test",
+  "budget": "10 CPU minutes; zero remote sessions and zero training",
+  "falsifier": "All readiness probes pass their stated expected behavior",
+  "artifacts": ["review_checks.py", "checks.json", "tests.log", "environment.json"],
+  "promotion": "None; diagnostics must not be represented as held-out model performance"
+}

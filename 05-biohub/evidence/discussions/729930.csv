@@ -1,0 +1,8 @@
+id,authorName,postDate,votes,content
+3504109,,2026-07-27 09:29:37.743000,3,"<p>Hello,so I am new to handling image dataset .my question is how do you guys train model on such large datasets multiple times as it takes a lot time just for 50 epoch.is there any trick or something people use that i should know.</p>"
+3507709,,2026-08-02 12:47:25.233000,0,"<p>could you share training time per epoch? For me, after introducing some tricks, it takes 2 hours currently.</p>"
+3504505,,2026-07-28 08:31:28.733000,0,<p>There isn't really a trick to make training quicker. I suppose you could train it in FP16/BF16 but that reduces quality. I just train it on my gpus and it takes ~4 hours for 50 epochs.</p>
+3507711,,2026-08-02 13:07:46.997000,0,"<p>wanted to check: you train baseline model 50 epochs in 4 hours? For me, after introducing mixed precision, 1 epoch takes around 2 hours. Not sure that the difference can be explained by GPU alone.</p>"
+3507716,,2026-08-02 13:38:16.137000,0,<p>What GPU do you train it on?</p>
+3507720,,2026-08-02 13:51:24.410000,0,"<p>T4, from kaggle. Does this tell you something? </p>"
+3508063,,2026-08-03 16:09:45.540000,0,<p>Yeah that explains it. T4 has very bad fp32 [its basically 25x slower]. Try fp16 or something</p>

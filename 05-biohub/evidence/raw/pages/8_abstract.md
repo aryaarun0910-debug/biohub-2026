@@ -1,0 +1,3 @@
+Your goal is to develop algorithms to detect, track and link cells across time in 3D microscopy data, including accurate identification of cell divisions and lineage reconstruction. You will work with real microscopy datasets to build robust methods that can handle dense cell populations, noise and complex biological structures.
+
+Your work will eliminate a massive manual bottleneck in biological research and help scientists quantify the building blocks of life.

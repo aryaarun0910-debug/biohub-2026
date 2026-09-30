@@ -1,0 +1,10 @@
+id,authorName,postDate,votes,content
+3498498,,2026-07-15 16:24:16.970000,12,"<p>This additional work might be helpful, <a href=""https://arxiv.org/pdf/2607.11754"" target=""_blank"">https://arxiv.org/pdf/2607.11754</a>
+Full disclaimer, I'm one of the authors</p>
+<p>We haven't tried on the competition dataset yet.
+The inference code and pre-trained model are available at <a href=""https://github.com/royerlab/hoct"" target=""_blank"">https://github.com/royerlab/hoct</a>
+The training code isn't available yet because it's under peer review.
+The tracking results depend on the quality of the segmentation mask.</p>
+<p>I suggest comparing CPU vs GPU inference, depending on the number of cells, the first might be faster.</p>"
+3498817,,2026-07-16 01:05:05.560000,-1,"<p>thankyou my good sir. how has the competition been for you and what is the insights you hope to get from the results?
+i do lots of random research on stuff for ai so if you ever want collaboration or notes hit me up. Im not the smartest guy but i try hard lol my github is issdandavis and i use my custom ai systems the SCBE frameworks and its extensions to work on things and it has done well on so far.</p>"

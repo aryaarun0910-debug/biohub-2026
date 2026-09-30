@@ -1,0 +1,36 @@
+id,authorName,postDate,votes,content
+3499546,,2026-07-17 15:45:54.417000,7,"<p>Hi organizers,</p>
+<p>This public notebook appears to exploit a weakness in how the official scoring script parses submitted submission.csv files, rather than reflecting genuine cell tracking accuracy:</p>
+<p><a href=""https://www.kaggle.com/code/outwrest/metric-hack-minimal-baseline-tta-2gpu"" target=""_blank"">https://www.kaggle.com/code/outwrest/metric-hack-minimal-baseline-tta-2gpu</a></p>
+<p>The detection/tracking pipeline itself (TemporalUNet3D + node transformer + ILP solver, TTA, multi-GPU inference) is a legitimate baseline. The problem is a post-processing cell (augment_dataset) that runs after predictions are generated and modifies only the final submitted CSV — it does not affect the notebook's own local metric check, which is a strong signal it's specifically targeting the official scorer rather than improving predictions.</p>
+<p>For each sample, it:</p>
+<p>Splits the predicted lineage forest into connected components, sorts by size, and keeps up to MAX_COMPONENTS = 1400 of the largest trees.</p>
+<p>Adds one synthetic ""hub"" node at sentinel coordinates (t=-1000, z=y=x=-10000 — clearly outside any real acquisition volume/time range) connected to the roots of those trees.</p>
+<p>Appends a chain of 5 synthetic cell-division events (divider → child, continuation), also at sentinel coordinates (t≈-999…, z=y=x=-10000/-10001).</p>
+<p>None of this corresponds to real detections — the coordinates are deliberately outside any physically valid range, so it can't be genuine matched signal under normal ground-truth matching. It looks designed to exploit something in how the scorer counts connected components / division events / normalizes its Jaccard-style metric.</p>
+<p>This is a public, forkable notebook, so it may already be in use by other teams — I'd flag this as urgent. I forked/submitted a copy of it myself (submission ID 54786048, 2026-07-17) before fully realizing what the post-processing step did, and would like that submission disregarded/excluded from scoring.</p>
+<p>Happy to provide more details if useful.</p>"
+3499556,,2026-07-17 16:01:45.470000,3,"<p>Hi <a href=""https://www.kaggle.com/ngyzly"" target=""_blank"">@ngyzly</a>, thanks for bringing this to our attention. We are taking a look at it</p>"
+3499634,,2026-07-17 17:56:41.693000,4,"<p>Hi <a href=""https://www.kaggle.com/jookuma"" target=""_blank"">@jookuma</a>, can you help patch this metric hack on the division_jaccard? Under the current four certeria (<a href=""https://github.com/royerlab/kaggle-cell-tracking-competition/blob/7396b7e98e61844e799152ddda7e5493084cc8f3/metrics.md?plain=1#L62-L76)"" target=""_blank"">https://github.com/royerlab/kaggle-cell-tracking-competition/blob/7396b7e98e61844e799152ddda7e5493084cc8f3/metrics.md?plain=1#L62-L76)</a>, a division can count as a TP by connecting the predicted tracks to a fake fork outside the image, without acutally predicting the real division's location or time.</p>
+<p>I found this trick and I am sure others did that were high on the scoreboard. The notebook shared is mine and I made it public so it can be verified &amp; patched.</p>"
+3481139,,2026-06-25 16:44:43.593000,27,"<h3>Information for newbies</h3>
+<p><strong>New to machine learning and data science?</strong> No question is too basic or too simple. Feel free to start your own thread, or use this thread as a place to post any first-timer clarifying questions for the Kaggle community to help you with!</p>
+<p><strong>New to Kaggle?</strong> Take a look at a few videos to learn a bit more about <a href=""https://www.youtube.com/watch?v=aIus8si_Et0"" target=""_blank"">site etiquette</a>, <a href=""https://www.youtube.com/watch?v=sEJHyuWKd-s"" target=""_blank"">Kaggle lingo</a>, and <a href=""https://www.youtube.com/watch?&amp;v=GJBOMWpLpTQ"" target=""_blank"">how to enter a competition using Kaggle Notebooks</a>. Publish and share your <a href=""https://www.kaggle.com/docs/models#publishing-a-model"" target=""_blank"">models on Kaggle Models</a>!</p>
+<p><strong>Looking for a team?</strong> Express your interest in joining a team through our <a href=""https://www.kaggle.com/discussions/product-feedback/341195"" target=""_blank"">Team Up</a> feature.</p>
+<p><strong>Remember</strong>: Kaggle is for everyone. Whether you're teaming up or sharing tips in the competition forum, we expect everyone to follow our Kaggle community guidelines.</p>
+<h3>Competition's Official Discord</h3>
+<p>In addition to this competition forum, you can continue the discussion in our official Kaggle Discord Server here:</p>
+<h1><a href=""http://discord.gg/kaggle"" target=""_blank"">discord.gg/kaggle</a></h1>
+<p>The Discord is a great place to ask getting started questions, chat about the nuances of this competition, and connect with potential team mates. Learn more about Discord at our <a href=""https://www.kaggle.com/discussions/general/429933"" target=""_blank"">announcement here</a>. Here are a few things to keep in mind though:</p>
+<p><strong>1. Discord Competition Channels are 'Public' - Don't Share Private Information</strong></p>
+<p>Discord channels for specific competitions are considered 'public' spaces where you are allowed to talk about competition details. Please remember that private sharing of competition code or data outside of your team is, as always, not permitted. Code sharing must always be done publicly through the Kaggle forums/notebooks.</p>
+<p><strong>2. Discord Competition Channels are Not Monitored by Staff - Keep Important Information on the Kaggle Forums</strong></p>
+<p>Kaggle Staff and Hosts running competitions will not monitor Discord or be available to answer questions in Discord. This is intended to be a more casual space to discuss competitions and help each other. Please keep important questions, insights, writeups, and other valuable conversation on the Kaggle forums. </p>
+<p>Happy modeling! </p>"
+3487011,,2026-07-03 09:26:08.437000,3,"<p>Is there any available code for the applied combined tracking metric?
+ Thanks </p>"
+3500202,,2026-07-18 20:38:00.347000,1,"<p>Yes! It’s available in the <a href=""https://github.com/royerlab/kaggle-cell-tracking-competition"" target=""_blank"">official GitHub repository</a>. The metric itself is in <a href=""https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/src/tracking_cellmot/metrics.py"" target=""_blank"">metrics.py</a>, and the <a href=""https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/README.md"" target=""_blank"">README</a> shows how to run <a href=""https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/scripts/evaluate.py"" target=""_blank"">scripts/evaluate.py</a> locally against the training GEFF files. <a href=""https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md"" target=""_blank"">metrics.md</a> also explains each part of the combined score.</p>"
+3515635,,2026-08-22 07:38:14.340000,0,<p>hi everyone im a 12th grader  and im looking for a beginner friendly team for biohub cell track if annyone is interested let me know! </p>
+3506616,,2026-07-31 16:53:46.037000,0,"<p>Pardon me,
+How long will it take for ones file to be processed?</p>"
+3518615,,2026-08-31 11:28:33.580000,0,

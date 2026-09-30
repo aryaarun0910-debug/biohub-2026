@@ -1,0 +1,91 @@
+id,authorName,postDate,votes,content
+3485252,,2026-07-01 08:50:08.240000,48,"<p>I ran a few experiments locally, submitted several, and tracked CV vs LB. Bottom line: <strong>without any modeling (learning), a pure rule-based pipeline reached the gold zone (7th/344teams, LB 0.826 at time of writing)</strong>. Sharing a short table and the notebook.</p>
+<p><a href=""https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline"" target=""_blank"">https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline</a></p>
+<p><strong>Validation strategy (short)</strong></p>
+<ul>
+<li>The metric is essentially <strong>edge Jaccard</strong> (7 µm point matching → edge agreement). A naive baseline showed <strong>CV ≈ LB</strong>, so I fixed that as the target.</li>
+<li>Train has <strong>only 2 embryos</strong> (<code>44b6</code>/<code>6bba</code>); learned models are hard to validate for generalization, so I went <strong>rule-based</strong> first (DoG-blob detection + Hungarian linking).</li>
+<li><strong>Submit only on a new CV best</strong>, adding a (CV, LB) point to a scatter each time to monitor the proxy.</li>
+</ul>
+<p><strong>Results (all rule-based, no learning)</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Method</th>
+<th>CV(edge)</th>
+<th>LB(public)</th>
+<th>Notebook</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>DoG-blob detection + Hungarian linking</td>
+<td>0.682</td>
+<td>0.663</td>
+<td><a href=""https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline?scriptVersionId=331719029"" target=""_blank"">v1</a></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Tuned DoG scales + 8 µm linking</td>
+<td>0.791</td>
+<td>0.786</td>
+<td><a href=""https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline?scriptVersionId=331729770"" target=""_blank"">v2</a></td>
+</tr>
+<tr>
+<td>3</td>
+<td>+ gap closing</td>
+<td>0.807</td>
+<td>0.784</td>
+<td><a href=""https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline?scriptVersionId=331733252"" target=""_blank"">v3</a></td>
+</tr>
+<tr>
+<td>4</td>
+<td>+ division edges</td>
+<td>0.810</td>
+<td>0.778</td>
+<td><a href=""https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline?scriptVersionId=331746701"" target=""_blank"">v4</a></td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>multi-scale DoG</strong></td>
+<td>0.824</td>
+<td><strong>0.826</strong></td>
+<td><a href=""https://www.kaggle.com/code/isakatsuyoshi/biohub-rule-based-baseline?scriptVersionId=331751321"" target=""_blank"">v5</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Detection was the biggest lever.</strong> Just taking DoG at multiple scales and using the scale-space max jumped <strong>LB from 0.786 → 0.826 (+0.040)</strong>. In contrast, <strong>division edges hurt</strong> (0.784 → 0.778) and gap closing was roughly neutral.</p>
+<p><strong>CV-LB plot</strong> (attached): detection improvements track <strong>CV ≈ LB (~1:1)</strong>. Graph-level add-ons (like divisions) can raise CV yet lower LB — <strong>redrawing the scatter each submission is how you catch that</strong>.</p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F5927283%2F34dc10e74c0ce84bb947c72ba8cbb719%2Fcv_lb_correlation.png?generation=1782895694211724&amp;alt=media"" alt=""""></p>
+<p><strong>Takeaway</strong>: with careful validation, a <strong>rule-based</strong> pipeline can reach the gold zone here — no deep model required. I also tried a learned 3D U-Net, but with only 2 embryos it didn't generalize, so I set it aside. Notebook is public — feedback welcome!</p>"
+3485267,,2026-07-01 09:10:37.060000,3,"<p>Thanks for your feedback!</p>
+<p>It looks like the correlation between CV and LB isn't actually very good. The 3D-UNet method is very time-consuming to train, while my own heuristic strategy is quite fast. I'm waiting for biohub's confirmation before considering my next submission plan.</p>"
+3485411,,2026-07-01 12:29:36.690000,4,"<p>Its too early but yeah, rule-based DoG is surprisingly good compared to DL approaches right now.</p>"
+3485594,,2026-07-01 16:18:30.327000,3,<p>I think a lot of stuffs can play around with those rules. Might need to reformulate the problem statement. I believe a certain learning signal can make deep learning model powerful. </p>
+3487075,,2026-07-03 10:53:01.280000,2,"<p><strong>Let me add to my results:</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>baseline</strong></th>
+<th>CV(all train dataset using official metric)</th>
+<th>lb</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>my heuristic 1 (~2-hour inferece)</td>
+<td>0.7448</td>
+<td>0.834</td>
+</tr>
+<tr>
+<td>my heuristic 2(~3-hour inferece)</td>
+<td>0.8213</td>
+<td>0.846</td>
+</tr>
+</tbody>
+</table>"
+3485302,,2026-07-01 09:44:45.717000,2,"<p>Hi, may I know your division jacard CV?</p>"
+3485317,,2026-07-01 09:57:32.680000,2,"<p>Thanks! My division Jaccard CV is basically 0, because my best submissions don't predict divisions at all.</p>"
+3486700,,2026-07-02 20:43:37.407000,0,"<p>doesnt seem to be very calibrated, but structural priors are usually very good, the idea is to have these structural priors in the model and have the model learn off of them and get more. </p>"

@@ -1,0 +1,51 @@
+test_complete_harvest_publishes_verified_batch (test_knowledge.BootstrapTests.test_complete_harvest_publishes_verified_batch) ... ok
+test_evidence_tampering_fails_before_ingest (test_knowledge.BootstrapTests.test_evidence_tampering_fails_before_ingest) ... ok
+test_failed_harvest_preserves_frozen_evidence (test_knowledge.BootstrapTests.test_failed_harvest_preserves_frozen_evidence) ... ok
+test_manual_competition_annotations_survive_refresh (test_knowledge.BootstrapTests.test_manual_competition_annotations_survive_refresh) ... ok
+test_tracked_snapshot_bootstraps_and_replays_without_drift (test_knowledge.BootstrapTests.test_tracked_snapshot_bootstraps_and_replays_without_drift) ... ok
+test_exit_zero_without_cpu_report_does_not_pass (test_knowledge.PreflightTests.test_exit_zero_without_cpu_report_does_not_pass) ... ok
+test_validity_supersession_and_artifact_links_survive_reingest (test_knowledge.RegistryTests.test_validity_supersession_and_artifact_links_survive_reingest) ... ok
+test_commit_statistics_belong_to_correct_commit (test_knowledge.RepositoryTests.test_commit_statistics_belong_to_correct_commit) ... ok
+test_failed_fetch_is_not_silently_accepted (test_knowledge.RepositoryTests.test_failed_fetch_is_not_silently_accepted) ... ok
+test_invalid_foreign_key_never_creates_destination (test_knowledge.SnapshotTests.test_invalid_foreign_key_never_creates_destination) ... ok
+test_lossless_repeat_restore_and_atomic_export (test_knowledge.SnapshotTests.test_lossless_repeat_restore_and_atomic_export) ... ok
+test_missing_db_is_not_created_by_read (test_knowledge.SnapshotTests.test_missing_db_is_not_created_by_read) ... ok
+test_refuses_drift_without_overwriting_work (test_knowledge.SnapshotTests.test_refuses_drift_without_overwriting_work) ... ok
+test_rejects_legacy_and_unknown_tables (test_knowledge.SnapshotTests.test_rejects_legacy_and_unknown_tables) ... ok
+test_converging_sisters_lose_the_fork (test_resolve_fork.ForkDivergence.test_converging_sisters_lose_the_fork) ... ok
+test_diverging_sisters_keep_the_fork (test_resolve_fork.ForkDivergence.test_diverging_sisters_keep_the_fork) ... ok
+test_gate_disabled_keeps_both (test_resolve_fork.ForkDivergence.test_gate_disabled_keeps_both) ... ok
+test_features_are_finite_and_ordered (test_resolve_fork.LearnedAcceptance.test_features_are_finite_and_ordered) ... ok
+test_model_scores_a_real_division_above_a_degenerate_one (test_resolve_fork.LearnedAcceptance.test_model_scores_a_real_division_above_a_degenerate_one) ... ok
+test_parent_never_gets_a_third_child (test_resolve_fork.OutDegreeCap.test_parent_never_gets_a_third_child) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 6.232s
+
+OK
+Restored 12189 knowledge rows into /tmp/tmpk1g5gc_6/db/biohub_base.db
+Restored 12189 knowledge rows into /tmp/tmpmbgd70kx/base.db
+  leaderboard rows: 3428
+  forum topics: 102 unique (from 102 rows)
+  public kernels: 247
+  sources: 127 | facts: 1199
+Restored 12189 knowledge rows into /tmp/tmp9oxb07yr/base.db
+Up to date (12189 knowledge rows)
+  leaderboard rows: 3428
+  forum topics: 102 unique (from 102 rows)
+  public kernels: 247
+  sources: 127 | facts: 1199
+  leaderboard rows: 3428
+  forum topics: 102 unique (from 102 rows)
+  public kernels: 247
+  sources: 127 | facts: 1199
+Up to date (12189 knowledge rows)
+PASS: script reports successful CPU smoke check
+  facts.yaml      -> 2 facts
+  facts.yaml      -> 2 facts
+  fixture                    branch=main         commits=2     files=0
+Restored 8 knowledge rows into /tmp/tmptxgx8pe8/restored.db
+Already restored; no changes
+Up to date (8 knowledge rows)
+Exported 8 knowledge rows to /tmp/tmptxgx8pe8/snapshot.jsonl
+STALE: run python3 tools/sync_source_rows.py export

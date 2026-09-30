@@ -1,0 +1,15 @@
+id,authorName,postDate,votes,content
+3486814,,2026-07-03 03:41:10.120000,14,"<p>Some tips:</p>
+<ul>
+<li>plan idea by yourself, even better if you implement it by yourself and let it optimize your code :)</li>
+<li>ask it to make <a href=""https://www.kaggle.com/code/tom99763/tracksdata-tutorial-evaluation-mock-tests"" target=""_blank"">tutorial notebook</a> (Iike this one I made) for this challenge and upload to kaggle. then spending serveral days manually go through every step and data flow to understand data. </li>
+<li>keep generating <a href=""https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/717109"" target=""_blank"">html report </a>and explaination to check how well it understand the challenge, that's also a good tool for showing your teammate your results</li>
+<li>repositery organization</li>
+<li>do not copy public notebook and ask it to gain lb</li>
+</ul>"
+3486804,,2026-07-03 02:57:01.237000,9,"<p>Are people finding more success in asking the AI (Codex, Claude Code, etc…) new ideas or just using it to implement ideas which the user finds on their own?</p>
+<p>For me, its almost always the latter because the ideas that AI comes up with are quite bad. They love reverting back to parameter sweeping in the baseline code and calling it an experiment and quite difficult to extract original ideas from them.</p>
+<p>How were other people's experience with them?</p>"
+3494895,,2026-07-10 23:58:05.337000,0,"<p>I use LLMs to teach myself as much as possible on the details of the data and task. I like to use Claude Code with tools like Paperclip CLI  to learn as much as I can from literature in all fields of study; as biological solutions can often be found from experimental physics, mathematics, etc. </p>
+<p>Paperclip CLI tool from James Zou (Stanford): <a href=""https://paperclip.gxl.ai/"" target=""_blank"">https://paperclip.gxl.ai/</a></p>"
+3493765,,2026-07-08 13:00:47.170000,0,"<p>In reality, I view AI tools merely as convenient instruments for bringing ideas to life. It’s still too early to expect AI—which is built on statistics—to autonomously generate ideas. Let's at least wait until an AI can go to jail for a calculation error before we talk about that. lol</p>"

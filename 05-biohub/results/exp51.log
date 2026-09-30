@@ -1,0 +1,18 @@
+
+  === 1. HEAD-TO-HEAD on true contended divisions ===
+  true parent closer than the incumbent: 0/20 = 0.0%
+
+  === 2. ALL steal candidates: 7,918,981   true 17   BASE RATE 0.000% ===
+  break-even division precision is ~12-24%
+
+  rule                                 fires   true  PRECISION
+  ------------------------------------------------------------
+  all candidates (base rate)        7,918,981     17     0.00%
+  d_PQ < d_XQ                         42,377      0     0.00%
+  sym < 0.6                          384,186      4     0.00%
+  sym < 0.3                          117,502      2     0.00%
+  cos < 0.0                         3,192,314     13     0.00%
+  diverge > 0                       2,919,617     13     0.00%
+  d_PQ<d_XQ & sym<0.6                 32,215      0     0.00%
+  d_PQ<d_XQ & sym<0.3 & cos<0         14,626      0     0.00%
+  ALL FOUR                             6,017      0     0.00%

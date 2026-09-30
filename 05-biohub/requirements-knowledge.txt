@@ -1,0 +1,2 @@
+# Optional: only needed to ingest the private archives' YAML registries.
+PyYAML==6.0.2

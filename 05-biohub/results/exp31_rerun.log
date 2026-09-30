@@ -1,0 +1,28 @@
+
+  contested predicted edges: 63,636
+  of which WRONG:            3,794
+  BASE RATE (wrong):         5.96%   <-- free-pair region was 0.152%
+
+  per-feature AUC for 'this assignment is wrong':
+    dist           0.643
+    rival_dist     0.551
+    rival_margin   0.647
+    n_rivals       0.558
+    src_outdeg     0.750
+    tgt_indeg_free 0.500
+    disp_ratio     0.649
+    src_speed      0.643
+
+  edge break-even precision 48.1%  ->  lift required 8.1x
+  ranking by rival_margin alone (rival closer than the assigned parent):
+    top-100   precision   7.0%  wrong found     7
+    top-500   precision  11.6%  wrong found    58
+    top-2000  precision  10.7%  wrong found   213
+    top-5000  precision  11.5%  wrong found   576
+
+  === trained discriminator, leave-one-embryo-out ===
+    logistic    held-out 44b6: AUC 0.805  base 5.74%  top50 44%  top200 48%*  top1000 49%*  
+    logistic    held-out 6bba: AUC 0.807  base 6.04%  top50 46%  top200 53%*  top1000 52%*  
+    grad-boost  held-out 44b6: AUC 0.812  base 5.74%  top50 62%*  top200 60%*  top1000 50%*  
+    grad-boost  held-out 6bba: AUC 0.792  base 6.04%  top50 28%  top200 48%  top1000 54%*  
+    (* clears the 48.1% edge break-even)

@@ -1,0 +1,7 @@
+id,authorName,postDate,votes,content
+3495364,,2026-07-12 06:04:10.640000,3,"<p>Is the data raw intensity values at each z layer, or has there been some normalization or sharpening operation performed intentionally or unintentionally by the recording device?</p>"
+3496288,,2026-07-13 14:57:44.790000,2,"<p>The microscope acquired multiple views of each volume, which were then fused.
+There may be small intensity deviations between views, so they were linearly scaled to match a reference view.
+In case you're interested, the microscope is custom-built and based on this design, <a href=""https://www.janelia.org/sites/default/files/Library/Tomer%202012_0.pdf"" target=""_blank"">https://www.janelia.org/sites/default/files/Library/Tomer%202012_0.pdf</a></p>"
+3496308,,2026-07-13 16:04:17.657000,0,"<p>This was a cool rabbit hole to go down into. Thanks! There are some intensity patterns I have noted along slices of individual data, so was wondering how the exact process might work.</p>"
+3496316,,2026-07-13 16:21:15.300000,0,"<p>If you find the time, could you please share a rough diagram of the mechanical setup of optics? This would help remove some setup dependant noise and data quality degradation.</p>"

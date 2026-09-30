@@ -1,0 +1,10 @@
+  repro        local 0.89319   their_proxy 0.94904
+  ns           local 0.89319   their_proxy 0.94904
+  vr           local 0.89051   their_proxy 0.92803
+  vs           local 0.89237   their_proxy 0.94621
+  tight45      local 0.89319   their_proxy 0.94726
+  tight50      local 0.89319   their_proxy 0.94648
+  ppgrid       local 0.89629   their_proxy 0.94904
+  outgrid      local 0.89319   their_proxy 0.94904
+  minlen9      local 0.89638   their_proxy 0.94900
+  det94ml9     local 0.89630   their_proxy 0.94377

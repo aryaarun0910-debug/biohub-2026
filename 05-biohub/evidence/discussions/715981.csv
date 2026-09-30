@@ -1,0 +1,4 @@
+id,authorName,postDate,votes,content
+3483980,,2026-06-29 20:24:51.310000,-20,"<p>print(train_df.head())
+print(train_df.info())
+print(train_df.describe())</p>"

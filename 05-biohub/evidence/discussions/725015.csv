@@ -1,0 +1,7 @@
+id,authorName,postDate,votes,content
+3496495,,2026-07-14 02:11:53.310000,5,"<p>Hi, the best submission score is actually 1.1, not 1, so it is possible for the scores to go over 1. In fact it is theoretically possible to obtain a score slightly above 1.1 (due to our adjusted jaccard metric) but we don't expect to happen. 
+Our metrics are detailed here <a href=""https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md"" target=""_blank"">https://github.com/royerlab/kaggle-cell-tracking-competition/blob/main/metrics.md</a></p>"
+3496507,,2026-07-14 02:45:43.220000,0,"<p>Ah, that makes sense — thanks for the quick clarification! I'll keep that in mind.</p>"
+3496488,,2026-07-14 02:02:06.767000,-4,"<p>According to pattern and days passed, there is high chance of getting 0.99 on LB by end of this month.</p>"
+3496615,,2026-07-14 10:36:04.807000,0,<p>Can this score really reach 0.999? That sounds insane.</p>
+3498346,,2026-07-15 11:56:50.220000,0,"<p>lb more than 1.0 is possible. (hint: get your num of nodes correct using texture regression like human head counting, i.e. concept of density)</p>"

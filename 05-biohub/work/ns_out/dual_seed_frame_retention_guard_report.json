@@ -1,0 +1,108 @@
+{
+  "configuration": {
+    "bidirectional_primary_weight": 0.3,
+    "deepcenter_gap_confirm_min_span_um": 8.5,
+    "deepcenter_gap_threshold": 0.25,
+    "detector_threshold": 0.96875,
+    "edge_candidate_threshold": 0.48,
+    "fallback_scope": "individual_frame",
+    "gap_close_um": 5.8,
+    "ilp_appearance_weight": 0.0,
+    "ilp_disappearance_weight": 1.5,
+    "minimum_candidate_retention": 0.9,
+    "secondary_detection_weight": 0.475,
+    "secondary_edge_weight": 0.15,
+    "secondary_link_mode": "low_margin_consensus",
+    "secondary_low_margin_max": 0.35
+  },
+  "diagnostics": {
+    "by_movie": {
+      "44b6_0113de3b": {
+        "fallback_frames": 0,
+        "frames": 100,
+        "median_retention": 1.0118578927634045,
+        "minimum_retention": 0.9926739926739927
+      },
+      "44b6_0b24845f": {
+        "fallback_frames": 64,
+        "frames": 100,
+        "median_retention": 0.8618514846811123,
+        "minimum_retention": 0.45307443365695793
+      },
+      "6bba_05b6850b": {
+        "fallback_frames": 1,
+        "frames": 100,
+        "median_retention": 1.0137012012012012,
+        "minimum_retention": 0.8918918918918919
+      },
+      "6bba_05db0fb1": {
+        "fallback_frames": 0,
+        "frames": 100,
+        "median_retention": 1.0110725229826354,
+        "minimum_retention": 0.9715142428785607
+      }
+    },
+    "fallback_frames": 65,
+    "rows": 400
+  },
+  "experiment": "harmonic_bidirectional_association_v1",
+  "hardware": {
+    "visible_gpu_count": 2
+  },
+  "leaderboard_feedback_used_for_configuration": true,
+  "method_attribution": "fixed-90 dual-seed baseline with harmonic mutual-support association fusion (rule from public CC0 notebook yusuketogashi/no-hack-biohub-cell-another-approch-3rd v18)",
+  "metric_hack_used": false,
+  "organizer_labels_used_for_configuration": false,
+  "parent_experiment": "paired_bidirectional_primary_weight020_vs_forward_v1",
+  "public_output_used": false,
+  "quality_promotion": {
+    "execute_push_submit": "FORBIDDEN_UNTIL_REQUIRED_CONDITION",
+    "required_condition": "promote=true",
+    "required_receipt": "bidirectional_blend_union13_receipt.json",
+    "status": "candidate_unverified",
+    "validated_receipt_sha256": null
+  },
+  "source_kernel": "raykkretzschmar/biohub-bidirectional-primary-union13-diagnostic-v1",
+  "source_notebook_sha256": "3e65ca691941949196bf417030ea84fccafe16baaec174b2a63540451bb937e8",
+  "status": "clean_graph_audit_pass_candidate_unverified_quality",
+  "submission": {
+    "datasets": [
+      "44b6_0113de3b",
+      "44b6_0b24845f",
+      "6bba_05b6850b",
+      "6bba_05db0fb1"
+    ],
+    "rows": 241196,
+    "sha256": "52678245b37890f7d4da706a33076aac354b0b2b5b41cfc4a4329987f06a6797"
+  },
+  "topology": {
+    "44b6_0113de3b": {
+      "division_parents": 46,
+      "edges": 24903,
+      "max_indegree": 1,
+      "max_outdegree": 2,
+      "nodes": 25626
+    },
+    "44b6_0b24845f": {
+      "division_parents": 15,
+      "edges": 19424,
+      "max_indegree": 1,
+      "max_outdegree": 2,
+      "nodes": 20709
+    },
+    "6bba_05b6850b": {
+      "division_parents": 9,
+      "edges": 5956,
+      "max_indegree": 1,
+      "max_outdegree": 2,
+      "nodes": 6152
+    },
+    "6bba_05db0fb1": {
+      "division_parents": 28,
+      "edges": 68164,
+      "max_indegree": 1,
+      "max_outdegree": 2,
+      "nodes": 70262
+    }
+  }
+}

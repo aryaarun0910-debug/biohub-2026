@@ -1,0 +1,5 @@
+id,authorName,postDate,votes,content
+3493456,,2026-07-07 20:39:50.977000,1,"<p>In the submission file there is a field called node_id. Could you please explain what this id represents? </p>
+<p><img src=""https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F346284%2F237b5f8b8f5b9804a28814f748245d26%2FNode_id_question.png?generation=1783456560596473&amp;alt=media"" alt=""""></p>"
+3494032,,2026-07-09 02:05:25.447000,0,"<p>the actual cell identifier is coordinates/time and not node_ids, node_ids are arbitrary numbers assigned for cell detections, and it is to link the rows as edges</p>"
+3495454,,2026-07-12 10:32:20.620000,0,<p>Understood about the cell identifier being coordinate and time. When you say arbitraty node_id I suppose I can give that particular cell a unique identifier of say 500 instead of 1 and the next cell identifier say 501 correct?</p>

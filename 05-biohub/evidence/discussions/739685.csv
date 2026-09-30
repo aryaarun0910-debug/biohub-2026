@@ -1,0 +1,17 @@
+id,authorName,postDate,votes,content
+3521828,,2026-09-07 09:08:18.460000,-1,<p>i believe that for me since i am using a point based detector it losing out on lot of features . If i would have used a cell segment based approach it would have al lot of features that we could ave used and identify the tracked cell </p>
+3521299,,2026-09-05 13:05:03.740000,2,"<p>Any implementation of a ""smarter"" motion linker—anything beyond a basic algorithm—results in an increase of exactly 0.001.</p>
+<p>The CV may vary by about 0.01–0.03, but the model's performance simply neither worsens nor improves on the LB, which seems strange. </p>
+<p>Has anyone encountered this?</p>"
+3522082,,2026-09-08 04:03:10.897000,0,"<p>I’m seeing pretty much the same behavior.</p>
+<p>My motion linker changes give around +0.012 on 5-fold CV on average, with no fold getting worse, but the LB gain is exactly +0.001. I also compared the public 0.946 LB notebook with my older private 0.942 LB notebook under the same 5-fold CV setup, and surprisingly the public one was about 0.015 worse locally. Given that some people have already pointed out possible test-set overfitting in public notebooks, I’m starting to suspect there may also be a fairly large distribution shift between train, public test, and hidden test…?</p>
+<p><a href=""https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/739278"" target=""_blank"">https://www.kaggle.com/competitions/biohub-cell-tracking-during-development/discussion/739278</a></p>"
+3522206,,2026-09-08 12:03:12.330000,1,"<p>ask chatgpt ""distribution shift between train, public test, and hidden test…"" on how to probe or verify.
+You definitely can do some online testing/training and send the results back by ""smart encoding your submission""</p>
+<p>also download more external data or augmentation etc to test locally.
+when you evaluate your model on local dataset, don't just look at the numbers. visualise the results and more importantly, explain why (especially statistically). is the error common or will be common? </p>"
+3522210,,2026-09-08 12:08:33.423000,0,"<p>I'm working on finding the cause you mentioned, which was also a problem I encountered when I hit a bottleneck with my ROGII. Thanks a lot🥲</p>"
+3522221,,2026-09-08 12:50:02.010000,1,"<p>Root cause not necessarily means why it happens. It can also means will it reliably happen. Eg you can make some smart error correction to repair local track. But will this error actually happens in hidden test ( not why it happens).</p>
+<p>As a concept example, you find your gain in local lb is due to repair of gap = 5 missing frames. Then you find that of all broken tracks, 80% is gap1, 18% is gap2 … less than one percent is gap5</p>"
+3522271,,2026-09-08 14:49:59.107000,0,<p>Truly brilliant probe design! Thank you for guiding a Kaggle newcomer like me.</p>
+3521324,,2026-09-05 14:55:36.760000,0,<p>on the same boat </p>

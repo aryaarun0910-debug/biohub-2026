@@ -1,0 +1,83 @@
+{
+  "checks": [
+    {
+      "name": "flat_heatmap_has_no_unique_peaks",
+      "expected": 0,
+      "actual": 27,
+      "passed": false
+    },
+    {
+      "name": "stem_grid_peaks_8um_apart_survive_5um_nms",
+      "expected": 2,
+      "actual": 1,
+      "passed": false
+    },
+    {
+      "name": "writer_rejects_nan",
+      "expected": true,
+      "actual": false,
+      "passed": false
+    },
+    {
+      "name": "validator_rejects_header_only",
+      "expected": 1,
+      "actual": 0,
+      "passed": false
+    },
+    {
+      "name": "writer_rejects_negative_endpoint",
+      "expected": true,
+      "actual": false,
+      "passed": false
+    },
+    {
+      "name": "graph_csv_reload_official_scorer_roundtrip",
+      "expected": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "actual": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "passed": true
+    },
+    {
+      "name": "fork_can_compete_with_two_continuations",
+      "expected": 1,
+      "actual": 0,
+      "passed": false
+    },
+    {
+      "name": "inflation_preserves_one_extra_track_node_per_frame",
+      "expected": true,
+      "actual": false,
+      "passed": false
+    }
+  ],
+  "metadata": {
+    "first_60_embryos": {
+      "44b6": 60
+    },
+    "annotated": {
+      "44b6": 20197,
+      "6bba": 113121
+    },
+    "estimated": {
+      "44b6": 2618970,
+      "6bba": 2106147
+    },
+    "multiplier_at_estimated_density": 1.0,
+    "multiplier_at_annotated_density_pooled_illustration": 1.097178524891553
+  },
+  "hashes": {
+    "/home/aryaarun/Work/biohub/evidence/review-2026-09-12/review_checks.py": "2701106200d86617e11014e5363b6f90e1b5c7c127fafc195460221334c02643",
+    "src/biohub/fork_model.json": "a057853073ea689f8231a6e1b4a4ad8256275313490d7f8543c4441d579029a8",
+    "reference/royerlab-baseline/src/tracking_cellmot/metrics.py": "cfdd596e3f8909cca14db0682889738b19ff75c3808b3773175aba9367ca7444",
+    "reference/royerlab-baseline/src/tracking_cellmot/division_metrics.py": "0635c38621a38f1eb4b55a302b4a817a88e9094930dfc2dab16faeeee60f4dc9"
+  }
+}

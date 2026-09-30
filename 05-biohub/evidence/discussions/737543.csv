@@ -1,0 +1,38 @@
+id,authorName,postDate,votes,content
+3517363,,2026-08-27 00:36:00.903000,3,"<p>improvements com from all of them.
+it's hard to say which one matter most, but i think there's a ""correct"" order to work on them:
+detection -&gt; linking -&gt; division.
+detection should come first, once detection is solid, it's easier to improve others.</p>"
+3517780,,2026-08-28 06:38:46.290000,2,"<p>thanks for replying</p>
+<p>sry i didnt put this in the main post my detection recall is already 0.9945 so i dont think theres much left there for me</p>
+<p>my real problem is divisions my divJ is 0.1176 and my adjJ is 0.9212 so basically all my score is edges</p>
+<p>did fixing detection actually move ur divisions or did u need something else for that</p>"
+3517789,,2026-08-28 06:59:04,0,"<p>I think some division-specific handling is needed for divisions beyond just improving detection recall. Recall still matters, especially at shorter distances, but a high overall detection recall by itself doesn't seem to translate directly into a good divJ.</p>
+<p>In my validation, divisions seemed much more sensitive to spatial accuracy, roughly within 3 um, even though the competition metric uses 7 um. For reference, in LB, I got about 0.28 divJ with an adjJ around 0.89…</p>"
+3517802,,2026-08-28 07:34:38.537000,-1,"<p>tysm this helps so much</p>
+<p>i went and checked mine and my division nodes really do localize worse than everything else 39 percent of them are outside 3um even tho all of them pass the 7um metric</p>
+<p>gonna give it a try</p>"
+3517832,,2026-08-28 10:28:48.563000,0,"<p>also is that handling a model thing or something after the graph</p>
+<p>no worries if u dont wanna say. this already helped a lot</p>"
+3518088,,2026-08-29 11:18:26.907000,0,"<p>glad to help.
+in my case, most of the gains come from model improvements.</p>"
+3518541,,2026-08-31 08:05:40.273000,0,"<blockquote>
+  <p>improvements com from all of them.
+  it's hard to say which one matter most, but i think there's a ""correct"" order to work on them:
+  detection -&gt; linking -&gt; division.
+  detection should come first, once detection is solid, it's easier to improve others.</p>
+</blockquote>
+<p><a href=""https://www.kaggle.com/hirotetsu"" target=""_blank"">@hirotetsu</a> Can you help how you improved the detection beyond the normal unet 3d detector . any suggestion would be great . </p>"
+3517057,,2026-08-26 03:10:45.083000,4,"<p>im at 0.933 and pretty stuck. top of the board is 0.962 so thats a big gap and i genuinely dont know what its made of.</p>
+<p>heres what i can see. the public notebooks are all basically the same stack. learned unet then node transformer then ILP. i checked the configs on a few of the higher ones and theyre nearly identical to mine knob for knob. so the public field and me are all the same lineage sitting between 0.92 and 0.933.</p>
+<p>but the top 10 is 0.945 plus. thats way outside that cluster so it feels structural not js better tuning.</p>
+<p>what i actually wanna know is which LAYER ur gains came from. not the solution js the layer.</p>
+<p>detection. did u retrain the detector or swap it for smth else entirely.</p>
+<p>linking. is ur linker still 1:1 hungarian or did u replace it.</p>
+<p>divisions. inside the assignment or bolted on after.</p>
+<p>post processing. how much of ur score is stuff that happens after the graph exists.</p>
+<p>or none of those and its js a lot more training on the base model.</p>
+<p>for context im not fishing for a config. ive tuned every knob i have and every division route i tried came back closed. so im trying to work out if im stuck on the wrong layer entirely rather than missing a setting.</p>
+<p>even js which one mattered most for u would help. thanks</p>"
+3517441,,2026-08-27 07:10:52.763000,0,"<p>Could it be because the training data isn't good enough? The training data is too sparsely labeled, and I feel like that makes it very difficult to train a detection model.</p>"
+3517777,,2026-08-28 06:35:48.187000,0,

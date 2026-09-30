@@ -1,0 +1,59 @@
+id,authorName,postDate,votes,content
+3494214,,2026-07-09 12:40:38.307000,1,<p>Those are just a placeholder</p>
+3494231,,2026-07-09 13:14:39.053000,0,<p>Placeholder for what? Can you please clarify?</p>
+3494854,,2026-07-10 20:17:58.243000,0,"<p>Its a placeholder to see if your notebook actually produces a csv file, it's just to help participants debug and has nothing to do with the actual scoring or leaderboard. Once you submit the notebook for evaluation, a different test set is used (that you don't have access to).</p>"
+3495493,,2026-07-12 12:02:37.673000,0,<p>But I think it could impact the public leaderboard. Could you clarify how it won’t cause a potential gaming of the commit/public leaderboard? </p>
+3495610,,2026-07-12 15:07:04.890000,0,"<p>Those four events won't be used to calculate your leaderboard score. They are only there to test if your solution works mechanically. </p>
+<p>Once you do an actual submission, they will be replaced with the actual test dataset. 
+So think of them as placeholders. </p>
+<p>Kaggle has two ways of running your notebooks: Normal mode, and submission mode (there is even a environmental variable you can check to see what mode you are in). </p>
+<p>Once you run in submission mode, the true test set it used. That's why internet access is disabled for submission mode: so you can't exfiltrate the real data. </p>"
+3494127,,2026-07-09 08:06:44.387000,2,"<p>The real test set is not visible. The four you see are actually dummies, used to help you debug whether the submission can be generated and pass the test by producing submission.csv.</p>"
+3494221,,2026-07-09 12:53:23.820000,0,"<p>Hi <a href=""https://www.kaggle.com/sweetyheehee"" target=""_blank"">@sweetyheehee</a>, thanks for flagging this &amp; really useful if true.</p>
+<p>I independently found something that's consistent with what you're describing: the 4 visible test clips (44b6_0113de3b, 44b6_0b24845f, 6bba_05b6850b, 6bba_05db0fb1) are byte-identical to train clips of the same id, including full ground truth annotations (see original message). If the real hidden test set gets substituted at grading time, that would explain it tidily: the visible ones are just there so we can validate our submission pipeline runs and produces a well-formed submission.csv, not for actual scoring. Is that safe to say?</p>
+<p>Also, do you know if this testing assumption has been confirmed by the host anywhere, or is it something you inferred from behavior (e.g. discrepancies between public LB scores and what a notebook produces locally)? Would be great to get it nailed down explicitly since it changes how everyone should be interpreting local validation against the visible test folder.</p>"
+3494227,,2026-07-09 12:58:42.817000,0,"<p>All Kaggle competitions work like this, so don't overthink it.</p>"
+3494230,,2026-07-09 13:08:26.987000,0,"<p>I've participated in other Kaggle competitions where train &amp; test datasets are mutually exclusive, hence why I am bubbling up my questions. It is typically recommended to perform testing against a dataset that's not part of the training set (as you know, could cause contamination of the model). </p>
+<p>That said, I'll follow your advice and submit rather than attempting to perform heavy CV testing on my end. </p>
+<p>Thanks!</p>"
+3493934,,2026-07-08 19:09:04.760000,-8,"<p>While building a local cross-validation setup, I found that all 4 official test clips presented in the dataset for the competition have byte-identical copies in the <code>train</code> split, complete with full ground truth annotations (<code>.geff</code>).</p>
+<p>Verified directly against the competition zip (pixel comparison at t=0, t=50, t=99 for each clip, not just filename matching):</p>
+<table>
+<thead>
+<tr>
+<th>Test clip id</th>
+<th>Train copy</th>
+<th>Pixel-identical</th>
+<th>Train <code>.geff</code> present</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>44b6_0113de3b</code></td>
+<td><code>train/44b6_0113de3b.zarr</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>44b6_0b24845f</code></td>
+<td><code>train/44b6_0b24845f.zarr</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>6bba_05b6850b</code></td>
+<td><code>train/6bba_05b6850b.zarr</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>6bba_05db0fb1</code></td>
+<td><code>train/6bba_05db0fb1.zarr</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>Reproduction: read <code>train/{clip_id}.zarr/0/c/{t}/0/0/0</code> and <code>test/{clip_id}.zarr/0/c/{t}/0/0/0</code> from the competition zip for the same clip id and timepoint, decompress with blosc2, and compare arrays: they match exactly.</p>
+<p>This means the ground truth for the hidden test set is currently downloadable by anyone via the train split. Flagging this before it's discovered and used to game the leaderboard. Happy to provide the verification script if useful.</p>"
+3493969,,2026-07-08 20:52:32.737000,0,

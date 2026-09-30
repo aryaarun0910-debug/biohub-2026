@@ -1,0 +1,17 @@
+id,authorName,postDate,votes,content
+3521052,,2026-09-04 17:45:43.777000,2,"<p>Hey everyone! As we get closer to the end of the competition, I’ve been doing a deep dive into the architecture of the public 0.940+ notebooks. I wanted to share some observations and spark a discussion about the current meta and where we are heading.</p>
+<ol>
+<li>The Public Baseline ""Trap"" (Are we all overfitting?) If you look closely at the top-scoring public scripts, they are heavily reliant on the biohub-tracking-support-pack datasets. Rather than running lightweight inference natively, these notebooks often shell out to a zipped GitHub repo to run heavy ILP solvers, or they just run post-processing on pre-computed .geff tracks. Because a massive portion of the leaderboard is essentially post-processing the exact same set of baseline detections, doesn't this guarantee a massive Private LB shake-up?</li>
+</ol>
+<p>Question 1: Are you guys actually training your own 3D UNets from scratch for your final submissions, or is the current meta purely focused on ensembling and pruning these public ILP graphs?</p>
+<ol>
+<li>Fast-Motion Occlusions vs. Static ILP I noticed that the public ILP gap-closers (which heavily rely on static XYZ distance or bidirectional harmonic distance) tend to drop tracks when cells move rapidly and occlude each other. To combat this, I’ve been experimenting with Velocity-Projected Gap Closing. Instead of measuring the distance from where a cell disappeared, I calculate its EMA (Exponential Moving Average) velocity and project its position forward by velocity * gap_frames. Connecting the projected position to the target target drastically improves recovery on fast-moving occlusions.</li>
+</ol>
+<p>Question 2: How is everyone else handling these fast-motion occlusions? Are you incorporating explicit motion prediction into your cost matrices, or are you relying entirely on the ILP solver's spatial tolerance?</p>
+<ol>
+<li>The DeepCenter Veto The DeepCenter veto logic in the public scripts is a brilliant heuristic for rejecting spurious wide divisions. However, by aggressively pruning these graphs, it feels like we might be discarding genuine biological outliers that will be present in the Private test set.</li>
+</ol>
+<p>Question 3: Has anyone found a sweet spot for tuning the DeepCenter gap threshold, or found a better architectural way to validate tricky divisions without just blindly pruning them?</p>
+<p>Would love to hear your thoughts. Good luck to everyone in the final stretch!</p>"
+3521192,,2026-09-05 05:23:27.347000,1,"<p>A lot of us, myself included are for sure overfitting the LB. Trust you local CV, good principles still apply.</p>"
+3521217,,2026-09-05 08:08:30.167000,0,"<p>The 50ep heuristics are great for a quick public score, but sticking to solid local CV principles is definitely the only way to survive the remaining 79% of the private data. Good luck in the final stretch!</p>"

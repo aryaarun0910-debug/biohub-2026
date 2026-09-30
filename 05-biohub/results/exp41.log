@@ -1,0 +1,19 @@
+  44b6_12dfb391: GT edges   773  present   727  missing   46  (FREE 5, I_BUSY 8, J_BUSY 8, BOTH 14, NO_NODE 11)
+  44b6_267148e4: GT edges   277  present   255  missing   22  (FREE 0, I_BUSY 6, J_BUSY 6, BOTH 1, NO_NODE 9)
+  44b6_2a2eff9f: GT edges   210  present   197  missing   13  (FREE 0, I_BUSY 3, J_BUSY 1, BOTH 9, NO_NODE 0)
+  44b6_341df25f: GT edges   209  present   207  missing    2  (FREE 0, I_BUSY 1, J_BUSY 1, BOTH 0, NO_NODE 0)
+  6bba_062c8d37: GT edges   898  present   896  missing    2  (FREE 0, I_BUSY 1, J_BUSY 1, BOTH 0, NO_NODE 0)
+  6bba_07e24132: GT edges   345  present   312  missing   33  (FREE 0, I_BUSY 2, J_BUSY 2, BOTH 3, NO_NODE 26)
+  6bba_085bf656: GT edges  1168  present  1163  missing    5  (FREE 0, I_BUSY 0, J_BUSY 1, BOTH 0, NO_NODE 4)
+  6bba_09961292: GT edges  1871  present  1795  missing   76  (FREE 6, I_BUSY 15, J_BUSY 21, BOTH 20, NO_NODE 14)
+
+  GT edges 5,751   present 5,552   MISSING 199
+
+    FREE          11     5.5% of missing
+    I_BUSY        36    18.1% of missing
+    J_BUSY        41    20.6% of missing
+    BOTH_BUSY     47    23.6% of missing
+    NO_NODE       64    32.2% of missing
+
+  addressable by free-endpoint stitching (EXP-40): 5.5%
+  requires rewiring an existing edge:              62.3%
