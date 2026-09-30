@@ -1,0 +1,74 @@
+{
+  "name": "h1r_edge_s5_smoke",
+  "slug": "biohub-h1r-edge-s5-smoke",
+  "title": "Biohub H1R Edge S5 Smoke",
+  "code_file": "biohub-h1r-edge-s5-smoke.ipynb",
+  "out_dir": "notebooks/kaggle_h1r_edge_s5_smoke",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "kkunizaw/biohub-zh001r",
+    "aryaarun07/biohub-zh001r-identity"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": false,
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "purpose": "Two-step S5 plumbing smoke. Verifies separate Zh001r image/node and identity mounts, strict public initialization, one train/eval path, frozen detector bytes, and artifact export before any full edge run. No submission. 2026-08-27: the h1r_rope4d module cell is spliced in (inert under H1R_EDGE_POS_ENCODING=sinusoidal, bit-identical model) so this control and the rope4d arm run identical code and differ only in the env knob.",
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "H1R_KERNEL": "1",
+        "H1R_EDGE_EPOCHS": "1",
+        "H1R_EDGE_BS": "1",
+        "H1R_EDGE_LR": "1e-4",
+        "H1R_EDGE_MAX_STEPS": "2",
+        "H1R_EDGE_NODE_CAP": "256",
+        "H1R_EDGE_VAL_MOD": "6",
+        "H1R_EDGE_AMP": "1",
+        "H1R_EDGE_RESUME": "0",
+        "H1R_EDGE_SEED": "0",
+        "H1R_APPEARANCE_DIM": "64",
+        "H1R_TRIPLET_WEIGHT": "0.05",
+        "H1R_EDGE_POS_ENCODING": "sinusoidal"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "Fail fast instead of silently running volumetric inference on CPU",
+      "code_file": "scripts/kaggle_edits/h1r_edge_data.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "SUBMISSION_COLUMNS =",
+      "code_file": "scripts/kaggle_edits/h1r_edge_train.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "Runnable S5 Zh001r association/appearance trainer",
+      "anchor": "from h1r_edge_data import Zh001rEdgeData, build_transition_target, discover_edge_assets",
+      "code_file": "scripts/kaggle_edits/h1r_rope4d.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "Independent audit for the frozen frame-retention probe",
+      "code_file": "scripts/kaggle_edits/h1r_edge_kernel_run.py",
+      "expect": 1
+    }
+  ],
+  "artifact_role": "diagnostic",
+  "diagnostic_reason": "Two-step plumbing smoke: proves the GPU autocast path, both Zh001r mounts, the frozen-detector drift assertion and a zero-epoch link_top1/candidate_recall baseline. Its edge_predictor_best.pth is NOT for deployment."
+}

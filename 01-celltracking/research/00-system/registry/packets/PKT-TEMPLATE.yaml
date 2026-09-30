@@ -1,0 +1,55 @@
+# WORK PACKET TEMPLATE - copy to PKT-####.yaml and fill in before doing any work.
+#
+# A packet is a DOSSIER, not a to-do item. Everything below is declared BEFORE the work
+# starts, so the outcome cannot be rationalised afterwards.
+#
+# Claiming: set `lever` and `lock: claimed`, put your agent name in `owner`, then run
+#   .\.venv\Scripts\python.exe scripts\core\validate_registry.py
+# It FAILS if another packet already holds that lever (check R6). That is the
+# anti-duplication guard - run it before you start, not after.
+
+id: PKT-0000
+title: <one line, what this packet does>
+lever: LEVER-0000          # must exist in levers.yaml and should be `open`
+owner: null                # agent name; null while `lock: open`
+lock: open                 # open | claimed | running | done
+opened: '2026-01-01'
+
+claim: >-
+  What would be true if this succeeds. One sentence, falsifiable.
+
+falsifier: >-
+  THE RESULT THAT KILLS IT. Write this first. If you cannot state what would refute the
+  claim, the packet is not ready to run.
+
+prediction: >-
+  Optional but strongly encouraged for anything that consumes a submission slot. State the
+  central band BEFORE the score. Promote the stated low band to the central estimate - the
+  naive modal estimate has run optimistic here.
+
+inputs:
+  facts: []                # FACT-#### this depends on. If any is UNVERIFIED, say how you
+                           # handle that - do not build a conclusion on it silently.
+  artifacts: []            # paths, e.g. _evidence/p4_detpeak_smoke_f0/
+  code: []                 # instruments this uses
+
+method: >-
+  How it will be done. Smoke -> pilot -> full. A passing smoke is not scientific evidence.
+
+budget:
+  gpu_sessions: 0          # max 2 concurrent batch sessions exist (FACT-0061)
+  submissions: 0           # ~5/day, shared across all packets
+  wall_clock: <estimate>
+
+forbidden: []              # what this packet must NOT touch, e.g.
+                           # - .claude/settings.json
+                           # - the deployed spec
+
+outputs:
+  evidence: <path under _evidence/ or /temp>
+  facts_added: []          # FACT-#### this will create, with provenance
+  record: >-
+    One compact row appended to research/06-knowledge-system/experimental-records.md
+
+result: null               # filled in on completion: what actually happened, including
+                           # whether the falsifier fired

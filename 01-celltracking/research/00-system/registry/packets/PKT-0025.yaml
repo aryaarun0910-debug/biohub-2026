@@ -1,0 +1,114 @@
+id: PKT-0025
+title: "LEVER-0035: retention - exact CPU ILP replay, a lost-cell atlas, then one-factor solver sweeps"
+lever: LEVER-0035
+owner: primary
+lock: done
+opened: '2026-08-28'
+
+claim: >-
+  The nodes the P28 pipeline discards after detection are recoverable by relaxing the deployed ILP
+  appearance/disappearance asymmetry and the short-track filter, and recovering them raises the pooled objective
+  on BOTH folds of the P28 substrate - clearing +0.003 with a fold-0 gain, not a fold-1-only gain.
+
+falsifier: >-
+  Any of: (a) the CPU ILP replayer does not reproduce its source artifact's recorded post-ILP graph EXACTLY
+  (node and edge parity) - in which case no sweep from it is trustworthy and the packet stops before it starts;
+  (b) the lost-cell atlas shows the discarded cells have NO viable candidate edge, i.e. the solver is reacting
+  correctly to weak association rather than causing the loss - which redirects the effort to association and
+  kills the solver-weight lane; (c) a one-factor solver relaxation does not beat the deployed weights on the
+  pooled objective on BOTH folds with a fold-0 crop-bootstrap CI excluding zero; (d) the gain is an artifact of
+  the node-count adjustment, checked by reporting raw edge Jaccard SEPARATELY from the count term; (e) it does
+  not reach +0.003 on fold 0.
+
+prediction: >-
+  Stated before any sweep. The atlas is expected to split the lost cells, not to fall cleanly one way: a
+  majority with weak or absent edge support (solver reacting correctly, FACT-0335's association bottleneck) and
+  a minority with viable edges lost to the appearance/disappearance asymmetry or the min-track-len cut. If that
+  split holds, the recoverable share is the minority and the honest expectation on fold 0 is SMALL - promote the
+  low band: below +0.003, i.e. the falsifier fires on fold 0 even where fold 1 looks large. Fold 1's 0.0442
+  retention loss (FACT-0355) is NOT the forecast; it is association-degraded (FACT-0261) and fold 0 is the gate.
+
+inputs:
+  facts: [FACT-0353, FACT-0355, FACT-0356, FACT-0345, FACT-0335, FACT-0349, FACT-0350, FACT-0261, FACT-0352]
+  artifacts:
+    - C:/temp/node_budget/p29_f{0,1}/            # DetPeak sidecars, detection-identical to P28 (FACT-0352)
+    - C:/temp/p28_f{0,1}/                        # the 0.928-base champion controls + run_stats (FACT-0345)
+    - C:/temp/preilp_f1_v2/preilp_split1.parquet # OLD substrate - PLUMBING PARITY ONLY, never a result
+    - data/train/*.geff                          # GT nodes/edges and estimated_number_of_nodes
+  code:
+    - vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py  # :554-564 build_graph -> ILPSolver -> save
+    - scripts/win_bet/ea_atlas.py                                      # scorer-exact round-trip
+    - scripts/win_bet/audit_detpeak_full_export.py                     # stage attribution
+
+method: >-
+  STEP 0 (PLUMBING GATE, host-directed): build a CPU ILP replayer and prove it reproduces the OLD pre-ILP
+  artifact's own recorded post-ILP graph with EXACT node and edge parity. The old artifact is used strictly as
+  plumbing - FACT-0350 forbids inheriting its deltas and no scientific claim may cite it. If parity fails, stop:
+  every downstream sweep would be measuring the replayer, not the solver.
+  STEP 1 (LOST-CELL ATLAS): from the P29 sidecars and the P28 champion graph, classify every annotated cell the
+  detector found and the pipeline lost, by detector confidence, candidate-edge support (does a viable edge to a
+  neighbouring frame exist AT ALL), component length, distance to the temporal boundary, division proximity, and
+  localisation residual. This decides falsifier (b) BEFORE any sweep: it separates "the solver threw away
+  recoverable cells" from "the solver correctly declined cells association could not link".
+  STEP 2 (ONE-FACTOR SWEEP): vary appearance, disappearance, division and edge weights ONE AT A TIME on the
+  replayer, then test interaction with BIOHUB_OUTPUT_MIN_TRACK_LEN. Report raw edge Jaccard SEPARATELY from the
+  count-adjusted score, per fold, with paired crop bootstrap.
+  STEP 3: only a both-fold win with a clean FOLD-0 CI excluding zero and >= +0.003 on fold 0 licenses a P28
+  re-export, and only then one P24-based submission with a pre-registered band.
+  A P28 pre-ILP export is a GPU action and is NOT taken in this packet without explicit host authorisation.
+
+budget:
+  gpu_sessions: 0   # CPU forensics only; a P28 pre-ILP export is a separate, host-authorised action
+  submissions: 0    # no submission is licensed by this packet
+  wall_clock: 2-4 days
+
+forbidden:
+  - citing any number derived from the OLD pre-ILP artifact as evidence (FACT-0350) - plumbing parity only
+  - fitting solver weights on fold 1 and promoting on fold 1 (FACT-0261 - fold 0 is the gate)
+  - reporting a count-adjusted gain without the raw edge Jaccard beside it
+  - launching a GPU export or a submission without explicit host authorisation (rule 8)
+  - float-coordinate export (FACT-0344)
+  - .claude/settings.json
+
+outputs:
+  evidence: _evidence/retention/ and C:/temp/retention/
+  facts_added: [FACT-0357, FACT-0358, FACT-0359, FACT-0360, FACT-0361, FACT-0362, FACT-0363, FACT-0364, FACT-0365, FACT-0366]
+  record: >-
+    One section per step in research/06-knowledge-system/experimental-records.md
+
+closed: '2026-08-28'
+
+result: >-
+  CLOSED. LEVER-0035 is KILLED and one successor direction survives as LEVER-0036. Zero GPU, zero submissions.
+
+  STEP 0 (plumbing gate) - PASSED ON NODES, AND FOUND THAT THE EDGE HALF WAS UNSATISFIABLE. The CPU replayer
+  uses the same tracksdata ILPSolver as the deployed predictor and reproduces raw_nodes EXACTLY on all 128
+  fold-1 crops against three independently recorded runs. Edge parity cannot be exact: three identical local
+  solves of one crop returned 5,035/5,036/5,035 edges while holding nodes at 5,385 every time - the ILP has
+  multiple optima (FACT-0363). Falsifier (a) as written demanded exact node AND edge parity; that specification
+  assumed a determinism the solver does not have, and the finding is recorded rather than waved through. The
+  old pre-ILP artifact was additionally shown substrate-equivalent to P28 at the pre-ILP stage (FACT-0358), and
+  was still used only as replay input, never as a source of an inherited delta.
+
+  STEP 1 (lost-cell atlas) - FALSIFIER (b) LARGELY FIRES. Of the 5,440 annotated cells fold 1 detects and then
+  loses, 18.1% had no candidate edge at all and 39.9% only a sub-0.8 candidate, and the solver's drop rate falls
+  monotonically with candidate quality - 51.1% at no candidate against 1.90% above 0.99 (FACT-0357). The solver
+  is mostly reacting correctly to weak association, which is FACT-0335's bottleneck one stage later. Detector
+  confidence does not discriminate lost from kept, independently confirming this is not a detection problem.
+
+  STEP 2 (one-factor sweeps) - DIRECTION INVERTED. Relaxing the disappearance weight loses monotonically; the
+  optimum is at 3.0, TIGHTER than the deployed 1.5, worth +0.0085 adjusted and +0.0078 raw Jaccard with both
+  CIs excluding zero, and it keeps 12.5% FEWER nodes at unchanged recall (FACT-0365). The short-track filter is
+  already at its optimum (FACT-0366). The 5.0 arm posted an adjusted gain with no raw gain and was flagged by
+  the instrument as a count-adjustment artifact - the separate reporting the packet required did its job.
+
+  STEP 3 - NOT REACHED, AND CORRECTLY SO. The champion replaces the ILP's entire edge list with motion relink on
+  all 128 crops (FACT-0364), so the sweep's edge-Jaccard gain has no established transfer path. Only the
+  node-set change survives to the deployed chain. No submission was made and no GPU was spent.
+
+  BONUS, from the architecture half: HOCT's base edge predictor is architecturally identical to ours
+  (FACT-0361), so LEVER-0034's association half is a head swap rather than a port; and its fork head trained on
+  327,265 pairs with 110 positives and reported zero division recall, which says the division lane is
+  data-limited rather than architecture-limited (FACT-0362). Division failure on our own substrate is
+  topology-dominant (FACT-0359) and localisation-sensitive in the direction Lime reported, though not
+  established at n=93 (FACT-0360).

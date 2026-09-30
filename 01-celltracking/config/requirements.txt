@@ -1,0 +1,24 @@
+# Portable install for a fresh clone / CI (Python 3.11-3.13; 3.14 unsupported by tracksdata).
+#   uv venv .venv --python 3.12
+#   uv pip install --python .venv torch --index-url https://download.pytorch.org/whl/cpu
+#   uv pip install --python .venv -r requirements.txt
+# Exact machine snapshot: requirements.lock.txt.
+torch
+# Pin the post-2026-07-17 evaluator patch.  Moving main would silently change
+# canonical OOF scores and invalidate experiment comparisons.
+tracking-cellmot @ git+https://github.com/royerlab/kaggle-cell-tracking-competition@075fc5f5a52d11077f9dc2b074644618f26939e2
+geff
+polars
+scipy
+scikit-image
+numpy
+pandas
+zarr
+dask[array]
+kaggle
+matplotlib
+pillow
+pytest
+# research-machine integrity validator (scripts/validate_research_tree.py + its test)
+pyyaml
+jsonschema

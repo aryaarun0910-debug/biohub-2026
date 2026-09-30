@@ -1,0 +1,18 @@
+{
+  "name": "p32_public931_exact",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p32_public931_exact.json",
+  "base_notebook": "notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb",
+  "base_sha256": "b998e582e41d5ea8986572370c71ced39cba3233a02e536a9f4a9fee3f9bf307",
+  "built_notebook": "notebooks\\kaggle_p32_public931_exact\\biohub-p32-public931-exact.ipynb",
+  "built_sha256": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c",
+  "config_hash": "824281b48a37",
+  "n_cells": 10,
+  "edits": [],
+  "declared_slug": "biohub-p32-public931-exact",
+  "title": "Biohub P32 Public931 Exact",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p32-public931-exact"
+}

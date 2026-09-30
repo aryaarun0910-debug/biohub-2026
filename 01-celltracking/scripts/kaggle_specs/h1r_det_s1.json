@@ -1,0 +1,78 @@
+{
+  "name": "h1r_det_s1",
+  "slug": "biohub-h1r-detector-s1",
+  "title": "Biohub H1R Detector S1",
+  "code_file": "biohub-h1r-det-s1.ipynb",
+  "out_dir": "notebooks/kaggle_h1r_det_s1",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "kkunizaw/biohub-zh001r"
+  ],
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": false,
+  "artifact_role": "training",
+  "produces_artifacts": ["edge_predictor_best.pth", "training_audit.json", "summary.json"],
+  "deploy_consumers": [
+    {
+      "artifact": "edge_predictor_best.pth",
+      "spec": "scripts/kaggle_specs/deploy_h1r_det_s1.json"
+    }
+  ],
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "purpose": "S1 detector-head fine-tune from the public 50-epoch model. The shared UNet trunk and BatchNorm buffers are frozen to preserve association features; promotion uses eight-view deployed TTA at the fixed 0.96875 operating point. Optimizer-step telemetry and early stopping fail closed. No submission.",
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "H1R_KERNEL": "1",
+        "H1R_EPOCHS": "20",
+        "H1R_BS": "16",
+        "H1R_LR": "1e-4",
+        "H1R_NEG_WEIGHT": "0.1",
+        "H1R_MAX_STEPS": "0",
+        "H1R_VAL_MOD": "6",
+        "H1R_AMP": "1",
+        "H1R_BENCH_STEPS": "50",
+        "H1R_MIN_AMP_SPEEDUP": "1.3",
+        "H1R_EVAL_TTA": "1",
+        "H1R_SELECT_THRESHOLD": "deployed",
+        "H1R_TRUNK_CONTRACT": "freeze",
+        "H1R_REQUIRE_OPT_STEPS": "1",
+        "H1R_PATIENCE": "3",
+        "H1R_MIN_DELTA": "1e-4",
+        "H1R_EVAL_PROBS": "0.50,0.75,0.90,0.95,0.96875,0.98,0.99",
+        "H1R_ROT90": "1",
+        "H1R_RESUME": "0",
+        "H1R_WORKERS": "3",
+        "H1R_SEED": "0"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "Fail fast instead of silently running volumetric inference on CPU",
+      "code_file": "scripts/kaggle_edits/h1r_trainer_patch.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "SUBMISSION_COLUMNS =",
+      "code_file": "scripts/kaggle_edits/h1r_det_train.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "Independent audit for the frozen frame-retention probe",
+      "code_file": "scripts/kaggle_edits/h1r_det_kernel_run.py",
+      "expect": 1
+    }
+  ]
+}

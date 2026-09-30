@@ -1,0 +1,79 @@
+{
+  "name": "assoc_tournament_context_f0_stabledet",
+  "fold": 0,
+  "no_claim": true,
+  "note": "PREPARED, NOT LAUNCHED - PKT-0038 arm 3. FACT-0392: HOCT's own head cannot rerank our candidate list - its 15 um uncapped geometric ball discriminates among competitors our pipeline never offers, and its abstain mass makes absolute levels incomparable. This arm is therefore a head trained on OUR contract over the licensed cache's frozen-trunk node features, not a port. BLOCKED ON: a Gate-1 (EXP-0041) receipt whose band-B checked count is > 0 - FACT-0382 puts every contested error below the deployed 0.5 floor, so a band-A-only receipt validates exactly the band this task does not use and the harness refuses it; a fetched per-crop feature cache carrying the CACHE_KEYS contract, written inside the predictor's own process by source rewriting and SERIALISED TO DISK then reloaded (FACT-0387 conditions i-iii); a licence written by `assoc_train_harness.py gate`, which pins the cache bytes by sha256 and is re-verified at training time; PKT-0037 foundation certification and a PKT-0036 Gate-1 receipt before any GPU session; a per-cache manifest that BINDS trunk, fold, embryo, normalisation, node ordering, candidate parameters and commit, verified by scripts/win_bet/audit_feature_cache.py `audit` - PKT-0038 forbids training on a cache whose manifest does not bind these; a DUAL-TRUNK PAIR for the fold, passing audit_feature_cache.audit_dual_trunk: same node set, same fold, same crops, DIFFERENT checkpoints, DIFFERENT roles and DIFFERENT feature digests. FACT-0392's third risk is that trunk identity is a --weights argument recorded nowhere in the artifact, so without the pair a null result cannot be told apart from a wrong feature contract and the whole run is uninterpretable",
+  "table": "C:\\temp\\assoc\\f0.parquet",
+  "trunk": {
+    "role": "stabledet",
+    "fold_legitimate": false,
+    "manifest": "C:/temp/assoc_tournament/cache_f0_stabledet/cache_manifest.json",
+    "audit": "scripts/win_bet/audit_feature_cache.py audit --cache-dir C:/temp/assoc_tournament/cache_f0_stabledet --expect-fold 0 --expect-role stabledet",
+    "dual_trunk_pair": [
+      "official",
+      "stabledet"
+    ],
+    "dual_trunk_audit": "audit_feature_cache.audit_dual_trunk(C:/temp/assoc_tournament/cache_f0_official, C:/temp/assoc_tournament/cache_f0_stabledet)",
+    "why": "FACT-0392 third risk - trunk identity is a --weights argument recorded nowhere in the artifact, so a null measured on a single unaudited trunk cannot be told apart from a wrong feature contract."
+  },
+  "cache": {
+    "dir": "C:/temp/assoc_tournament/cache_f0_stabledet",
+    "receipt": "C:/temp/assoc_tournament/gate1_receipt_f0_stabledet.json",
+    "licence": "C:/temp/assoc_tournament/licence_f0_stabledet.json",
+    "preilp": "C:/temp/p30_f0/preilp_split0.parquet",
+    "ecb_dir": "C:/temp/p30_f0/ecb",
+    "reproducer": "receipt",
+    "crops": null
+  },
+  "cv": {
+    "kind": "GroupKFold",
+    "n_splits": 5
+  },
+  "preserve_single_candidate": true,
+  "allow_degenerate": false,
+  "models": [
+    {
+      "class": "contextual",
+      "contract": {
+        "name": "frozen_trunk_node_features",
+        "dim": "from_cache",
+        "pair_builder": "concat_diff",
+        "extra_features": [
+          "prob",
+          "dist_um"
+        ],
+        "has_null_head": false
+      },
+      "abstain": {
+        "kind": "none"
+      },
+      "population": "alldec",
+      "tag": "A3.context.hoct_style.stabledet"
+    },
+    {
+      "class": "contextual",
+      "contract": {
+        "name": "frozen_trunk_node_features",
+        "dim": "from_cache",
+        "pair_builder": "concat_diff",
+        "extra_features": [
+          "prob",
+          "dist_um"
+        ],
+        "has_null_head": false
+      },
+      "population": "alldec",
+      "tag": "A3.context.hoct_style.stabledet.abstain",
+      "abstain": {
+        "kind": "train_quantile",
+        "q": 0.05
+      }
+    }
+  ],
+  "out_dir": "C:/temp/assoc_tournament/context_f0_stabledet",
+  "binding_restriction": {
+    "fact": "FACT-0451",
+    "offline_scoreable": true,
+    "why": "Declared true: no artifact restricted by FACT-0451 reaches this spec. The claim is CHECKED at load, not trusted - spec_restriction.enforce_spec re-derives it from the sha256 of every checkpoint this spec names, and a restricted hash overrides a true declaration however the file is named (rule 3). Omission would be a refusal (rule 2)."
+  }
+}

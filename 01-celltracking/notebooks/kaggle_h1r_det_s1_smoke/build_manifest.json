@@ -1,0 +1,50 @@
+{
+  "name": "h1r_det_s1_smoke",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\h1r_det_s1_smoke.json",
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "built_notebook": "notebooks\\kaggle_h1r_det_s1_smoke\\biohub-h1r-det-s1-smoke.ipynb",
+  "built_sha256": "d67c3cd9d431c4881e39cfccb71975d959460585ae58f4fc7d4658517439eb85",
+  "config_hash": "1424474df29c",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "a786197087c9874385364938e1e6f2477c00dc1fbf206f9d54bf77df5d2e0948"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "81223e08c1b26f4490b78f62f280185f0df288c12fffe2855dc7cf57e8d98cb9"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "db56c4054d8e926ca54ed7cf0cc858be93020c3c80d741494282f8a4da62d2d1"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "9861166bc8b759dd699a55cd763115e617809ec91f4faefe6c3d3cbe6feb3edc"
+    }
+  ],
+  "declared_slug": "biohub-h1r-detector-s1-smoke",
+  "title": "Biohub H1R Detector S1 Smoke",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": [
+      "DG-004-any-threshold-checkpoint-selection",
+      "DG-005-unreachable-resume",
+      "DG-007-produced-artifact-has-no-deployer"
+    ]
+  }
+}

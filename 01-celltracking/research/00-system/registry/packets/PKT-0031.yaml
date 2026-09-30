@@ -1,0 +1,128 @@
+id: PKT-0031
+title: "AGENT A - learnability baselines for parent discrimination on the frozen surface"
+lever: LEVER-0039
+owner: agent-a-association
+lock: done
+opened: '2026-08-29'
+
+claim: >-
+  A linear model and a tree/listwise ranker, trained on the nine representation-free features already
+  available in scripts/win_bet/assoc_parent_dataset.py and evaluated held-out by crop, beat the deployed
+  argmax on CONTESTED fold-0 targets without losing the single-candidate population - establishing whether
+  the EXISTING representation already separates true parents.
+
+falsifier: >-
+  Inherited verbatim from LEVER-0039, and none of it may be relaxed after seeing a result:
+  (a) held-out contested top-1 does not beat the deployed 0.8338 (FACT-0381);
+  (b) it beats it while losing single-candidate targets, so overall top-1 does not rise;
+  (c) top-1 rises without net parent-choice CONVERSION, the FACT-0376 quantity;
+  (d) the apparent gain is a count-adjustment artifact (FACT-0375);
+  (e) it does not cross-fit between folds.
+  A CLEAN (a) FAILURE IS A RESULT, NOT A DEAD END. If simple models cannot beat the deployed probability on
+  its own surface, the existing representation is not the limit and richer node context is justified - which
+  is precisely the question PKT-0029's HOCT lane needs answered. Report it as such, do not go hunting for a
+  feature that rescues it.
+
+prediction: >-
+  Stated before training. The deployed probability is itself a learned edge model's output, so a model given
+  that probability plus rank, margin and geometry is being asked to beat a strong feature using mostly
+  side-information. I expect a SMALL gain at best on contested top-1 - on the order of one to three points,
+  and quite possibly none - with the tree model ahead of the linear one. The likelier informative outcome is
+  that geometry adds little once probability and margin are in, which would be evidence that the
+  representation, not the head, is the constraint.
+
+inputs:
+  facts: [FACT-0381, FACT-0376, FACT-0369, FACT-0370, FACT-0375, FACT-0371]
+  artifacts:
+    - C:/temp/assoc/f0.parquet          # 19,444 decidable fold-0 targets, 4,157 contested
+    - C:/temp/assoc/f0.json
+    - C:/temp/p30_f0/preilp_split0.parquet
+    - C:/temp/p30_f0/ecb/               # the richer fold-0 candidate surface
+  code:
+    - scripts/win_bet/assoc_parent_dataset.py    # the FROZEN surface and label contract
+    - scripts/win_bet/assoc_report.py            # the ONLY summary a model may be promoted on
+    - scripts/win_bet/p28_full_chain_replay.py
+    - scripts/win_bet/p28_full_chain_panel.py
+
+method: >-
+  CPU only. Train on the frozen surface, never rebuild it. Splits are GROUPED BY CROP - a random row split
+  leaks, because candidates for one target share a target and targets in one crop share a movie, and
+  neighbouring frames of one embryo are not independent samples. Report through assoc_report.py and nothing
+  else. Stages: (1) reproduce the deployed baseline on the surface as a self-check - if the harness does not
+  reproduce FACT-0381's 0.8338 exactly, stop and say so; (2) fit the linear model and the tree ranker with
+  grouped cross-validation, reporting contested top-1, single-candidate retention, margin and calibration;
+  (3) report parent CONVERSIONS - gained, lost, net and churn - never a net figure alone; (4) only a model
+  that clears the two-sided bar goes to a full-chain replay, and it is the primary agent, not this packet,
+  that runs it.
+
+budget:
+  gpu_sessions: 0   # both concurrent slots are held by P33 and P34; this packet is CPU-bound by design
+  submissions: 0
+  wall_clock: 1-2 days
+
+forbidden:
+  - claiming LEVER-0034, LEVER-0037 or LEVER-0040, or investigating them - other packets hold them
+  - modifying the frozen surface, the label contract, or the ambiguity rules in assoc_parent_dataset.py
+  - reporting any summary not produced by assoc_report.py
+  - any fold-1 ranker accuracy claim before PKT-0030 lands - fold 1 is degenerate for ranking today
+    (FACT-0381) and top-1 there is 1.0 for every model
+  - training on fold-0 rows and evaluating on fold-0 rows without a crop-grouped split
+  - launching a GPU job, pushing a kernel, or making a submission
+  - editing .claude/settings.json, .gitignore, or any registry file other than by reporting back
+
+outputs:
+  evidence: C:/temp/assoc_baselines/ and _evidence/assoc/baselines/
+  facts_added: []   # facts are written by the primary agent from this packet's evidence
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: >-
+  DONE 2026-08-29. FALSIFIER (a) FIRES, cleanly and informatively. Recorded as FACT-0386; LEVER-0039 is
+  killed on it with an explicit scope precision, and the surviving hypothesis - richer node context - was
+  handed to LEVER-0034 as an inherited deployment gate rather than left to die with the lever.
+
+  THE RESULT. Twenty-two preregistered crop-grouped arms, all reported, out-of-fold only. The LINEAR model
+  never beats the deployed 0.8338 at any feature set. The best TREE arm reaches 0.8367 - net +12 of the 691
+  available targets, churn 40, McNemar p = 0.081, crop-paired interval [-0.00051, +0.00644] including zero.
+  NO ARM OF THE 22 IS FAVOURABLE, which is the standard assoc_report.verdict already applies to every model
+  in this cycle.
+
+  THE PART THAT MAKES IT INTERPRETABLE, and it was not asked for. The packet measured its own NOISE FLOOR: a
+  tree given ONLY the deployed probability - which cannot in principle beat an argmax over that same scalar -
+  still posts +0.0014 and net +6, because the learner bins each feature into at most 255 quantile bins and 41
+  contested targets have candidates colliding in a bin. So the best arm's +12 is roughly twice a pure
+  discretisation artifact. The harness carries its own control confirming this: a LINEAR model on the
+  probability alone returns exactly the deployed number with churn 0, which is what a monotone transform of
+  one feature must do to an argmax. Without that floor the +0.0029 would have looked like a small real gain.
+
+  STAGE 0 PASSED EXACTLY - the surface reproduced FACT-0381 to the digit, both before and after the tie-break
+  correction landed mid-run. The packet killed its own in-flight run and re-ran the entire grid against the
+  corrected surface; the two runs agree on all 22 arms with zero disagreements.
+
+  STAGE 3, THE QUESTION THAT DECIDES THE NEXT LANE. Geometry is the only thing that adds anything, and what
+  it adds is 10 targets, non-linearly - added to the linear model it makes it worse. Rank, margin and
+  candidate count SUBTRACT 7, which is what they should do: within a target they are deterministic functions
+  of the probability and carry nothing the argmax lacked. Geometry alone is catastrophic (-0.0310). So the
+  existing representation is a weak complement to the deployed probability and never a substitute.
+
+  THREE HONEST NEGATIVES THE PACKET VOLUNTEERED, each of which would have been easy to bank as a win.
+  (1) Single-candidate retention is 1.0000 everywhere, but that is ARITHMETIC, not skill - the frozen
+  evaluate() argmaxes without abstention, so side (b) of the two-sided bar cannot fire on a non-abstaining
+  model and is UNTESTED rather than passed. (2) The tree calibrates better (Brier 0.0444 against 0.0460) but
+  a monotone recalibration cannot move a within-target argmax, so calibration is descriptive only.
+  (3) The +0.0029 is not a score gain and was not extrapolated to the chain; conversions are reported with
+  stage: pre_ILP_candidate_ranking.
+
+  FALSIFIERS: (a) FIRES. (b) UNTESTABLE against a non-abstaining model. (c) and (d) NOT REACHED - no
+  full-chain replay was run, correctly, since nothing cleared the bar to justify one. (e) UNTESTABLE today
+  because fold 1 is single-parent by construction; leave-one-crop-out is reported as the strictest available
+  grouped proxy and agrees with the 5-fold result.
+
+  ENVIRONMENT CHANGE TO BE AWARE OF: scikit-learn was installed into .venv via `uv pip install` (it was
+  absent and the venv has no pip). The resolution was additive - joblib, narwhals, scikit-learn - with
+  numpy, scipy and polars unchanged, and the full suite passes at 1179 tests afterwards.
+
+  A NOTE ON THE PACKET'S OWN CONDUCT, worth recording because it is the behaviour the partition was designed
+  to produce: it declined to stage anything, on the correct reasoning that three agents shared one worktree
+  and staged files would be swept into another packet's commit.
+

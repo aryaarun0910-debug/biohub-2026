@@ -1,0 +1,104 @@
+{
+  "name": "p27_champion_icom",
+  "slug": "biohub-p27-champion-icom",
+  "title": "Biohub P27 Champion ICOM",
+  "code_file": "biohub-p27-champion-icom.ipynb",
+  "out_dir": "notebooks/kaggle_p27_champion_icom",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "purpose": "FORWARD STACK on the new champion (FACT-0341, P24=0.928): the DeepCenter best.pt (epoch 2) + safe-division veto ON bundle that won +0.003, PLUS the LEVER-0022 intensity-centroid float re-localisation of every exported node (icom_refine, float writer; offline full-fold +0.0013/+0.0024 on the champion controls, FACT-0330; float format now code-legal, FACT-0336). Everything else exactly the P9 coupled-division champion. This tests whether icom stacks on the 0.928 base rather than the superseded P9 base (p23 was built on P9, which is now working backwards). Pre-registered band 0.927-0.931, central 0.929 (P24 + icom's ~0.001-0.003 offline x the 0.6-0.7 calibration); falsifier <= 0.928 (no gain over the champion P24). Not launched or submitted by this spec.",
+  "provenance": {
+    "base": "deployed P3 harmonic built notebook, sha256 70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8, public LB 0.915",
+    "public_sources": [
+      {
+        "kernel": "kunaldesale2408/biohub-cell-tracking",
+        "kernel_id": 130667075,
+        "leaderboard_score_observed_2026_08_24": 0.926,
+        "notebook_sha256": "1f1cbdb26779cc3a14cc2fa4e3649e78897d57ec0a69cd8cf77a0c185fda4a3a"
+      },
+      {
+        "kernel": "rockerritesh/0-926-biohub-divsub",
+        "kernel_id": 131694028,
+        "leaderboard_score_observed_2026_08_24": 0.926,
+        "notebook_sha256": "a0c44e988ca4eadfddb6022f933c128042eaf51b9f74c12e5aa4e6c62f0c18cf"
+      }
+    ],
+    "public_function_sha256": "b0d50a39e07624bc5a29207215fb4ec11908b49a8b60662e3527a513b1b35a5d",
+    "public_function_identity": "The complete 150-line add_safe_divisions_postlink function is byte-identical in both downloaded public notebooks. Full code differs only by blank-line whitespace at four positions.",
+    "routes_on": "graph topology and physical node coordinates only; no dataset, crop, acquisition, hidden label, or image-content routing",
+    "interaction_warning": "The three radii and C1/C2/C3 filters are one coupled treatment. Do not ablate or submit C3 alone; local GT shows that would discard about half of true divisions. The P3 harmonic association surface can change which nodes are orphans, so the public +0.013 is evidence for the mechanism family, not a guaranteed additive delta on P3.",
+    "derived_from": "scripts/kaggle_specs/p23_icom155.json (icom float on P9) + the P24 DeepCenter env bundle (best.pt epoch 2 + safe-div veto ON, the +0.003 winner FACT-0341)",
+    "stacks": [
+      "LEVER-0024 (DeepCenter bundle, closed positive, FACT-0341)",
+      "LEVER-0022 (icom, FACT-0330)"
+    ]
+  },
+  "float_coordinates": true,
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_SAFE_DIV_MAX_UM": "8.0",
+        "BIOHUB_SAFE_DIV_SISTER_MAX_UM": "11.0",
+        "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM": "10.0",
+        "BIOHUB_SAFE_DIV_DIVERGE_UM": "2.25",
+        "BIOHUB_DEEPCENTER_CHECKPOINT": "/kaggle/input/biohub-deepcenter-unet3d-center-prior-v1/weights/full_frame_center/best.pt",
+        "BIOHUB_DEEPCENTER_EXPECTED_EPOCH": "2",
+        "BIOHUB_DEEPCENTER_SAFE_DIV_VETO": "1"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "def filter_short_track_components(",
+      "anchor": "def filter_short_track_components(",
+      "code_file": "scripts/kaggle_edits/coupled_division_transplant.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "def linefit_smooth_output_graph(",
+      "code_file": "scripts/kaggle_edits/icom_refine.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_after",
+      "anchor": "    nodes_by_id = linefit_smooth_output_graph(nodes_by_id, edges, stats)",
+      "code": "    nodes_by_id = icom_refine_output_graph(nodes_by_id, dataset, stats)\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "old": "\"z\": max(0, int(round(float(node[\"z\"])))),",
+      "new": "\"z\": max(0.0, round(float(node[\"z\"]), 3)),",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "old": "\"y\": max(0, int(round(float(node[\"y\"])))),",
+      "new": "\"y\": max(0.0, round(float(node[\"y\"]), 3)),",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "old": "\"x\": max(0, int(round(float(node[\"x\"])))),",
+      "new": "\"x\": max(0.0, round(float(node[\"x\"]), 3)),",
+      "expect": 1
+    }
+  ]
+}

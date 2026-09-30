@@ -1,0 +1,74 @@
+id: PKT-0022
+title: "LEVER-0026: GT-free safe duplicate-endpoint pruning on both champion folds, then one P9 submission"
+lever: LEVER-0026
+owner: codex-lead
+lock: claimed
+opened: '2026-08-27'
+
+claim: >-
+  A pure post-emission rule can identify the safe subset of locally duplicated, poorly connected
+  predicted nodes and remove their incident false-positive edges without deleting scored true-positive
+  edges, producing a positive official-score delta on both embryo directions and transferring to P9.
+
+falsifier: >-
+  Offline scorer round-trip delta below +0.003 on either champion fold, adj_edge below -0.0005 on
+  either fold, or any scored-TP edge deletion kills stage 1. Stage 2 is killed if its single P9
+  leaderboard submission does not beat FACT-0001. The adversarial review must be resolved before
+  submission; an unresolved GT leak, crop-specific route, or metric-only artifact blocks deployment.
+
+prediction: >-
+  Pre-submission band will be written only after the frozen rule passes both folds and its safe subset
+  size is measured. The low band will be promoted to central. No score will be read before that record.
+
+inputs:
+  facts: [FACT-0001, FACT-0260, FACT-0321, FACT-0322, FACT-0335, FACT-0338]
+  artifacts:
+    - C:/temp/p20_relink_sweep_f0/sweep_pen_off.csv.gz
+    - C:/temp/p19_relink_sweep_f1/sweep_pen_off.csv.gz
+    - C:/temp/p20_relink_sweep_f0/atlas/
+    - C:/temp/p19_relink_sweep_f1/atlas/
+    - C:/Users/aryaa/AppData/Local/Temp/claude/c--Users-aryaa-Documents-Biohub-CellTracking-2026/c1bc12ef-ad9b-4253-8215-eaeb30ffebc8/scratchpad/audit/
+  code:
+    - scripts/win_bet/div_reach_steal.py
+    - scripts/win_bet/ea_atlas.py
+    - scripts/kaggle_edits/coupled_division_transplant.py
+
+method: >-
+  Build a committed GT-free candidate/prune instrument under scripts/win_bet. Candidate generation may
+  use only emitted coordinates and graph topology. Freeze a conservative rule on one fold, replay it in
+  the opposite direction, then score both full folds through score_crop and the official GEFF round-trip.
+  Record all removed nodes/edges, TP-edge deletions, crop deltas and bootstrap CIs. An independent
+  adversarial agent reviews leakage, matching artifacts, node-budget gaming and process-boundary deployment.
+  Only a rule clearing every gate is transplanted into a one-factor P9 spec and submitted once.
+
+budget:
+  gpu_sessions: 1
+  submissions: 1
+  wall_clock: 1 day
+
+forbidden:
+  - ground-truth fields or atlas matches in deployed candidate selection
+  - tuning and reporting on the same fold without the reverse direction
+  - detector or association-weight changes
+  - reading the four visible test movies
+  - .claude/settings.json
+
+outputs:
+  evidence: C:/temp/fp_endpoint_dedup/ and _evidence/fp_endpoint_dedup/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md with both-fold gate and,
+    if licensed, the pre-registered submission band and leaderboard result.
+
+result: >-
+  STAGE 1 NOT PASSED as of 2026-08-27 (cycle close, control handed back from codex-lead). The committed GT-free
+  duplicate-endpoint rule (scripts/win_bet/fp_endpoint_dedup.py) is a near-null that STILL violates the hard gate:
+  on a 5-crop fold-0 pilot the radius-5um safe_v1 rule removed 374 endpoints but deleted 4 SCORED TP edges and
+  scored -0.0022; the tighter radius-3um safe_v2 on a 4-crop fold-1 pilot removed 7, deleted 1 scored TP edge, and
+  moved +0.00001. So the +0.065/+0.096 GT-guided ceiling (FACT-0338) does NOT convert to a GT-free gain with a
+  conservative connectivity+distance rule - the spurious endpoints are not separable from true one-edge endpoints
+  by local geometry alone, consistent with the ~35% metric-gaming caveat. NOT deployed, NO submission taken. The
+  lever stays OPEN: the next attempt needs a rule that reaches ZERO scored-TP deletions AND a positive delta on
+  BOTH full folds (pilots are not evidence), or a learned spurious-node classifier. Evidence: C:/temp/fp_endpoint_dedup/
+  (safe_v1.json, safe_v2.json, per-tag summary_*.json, candidate ledgers, an adversary replay). Instrument +
+  tests/test_fp_endpoint_dedup.py are green and committed.

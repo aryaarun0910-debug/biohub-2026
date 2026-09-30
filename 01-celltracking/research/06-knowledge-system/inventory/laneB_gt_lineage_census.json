@@ -1,0 +1,17 @@
+{
+  "n_crops": 199,
+  "gt_nodes": 133318,
+  "gt_edges": 128883,
+  "divisions": 151,
+  "divisions_44b6": 26,
+  "divisions_6bba": 125,
+  "mothers_with_observed_birth": 0,
+  "observed_interdivision_intervals": 0,
+  "mother_age_left_censored_median": 15,
+  "tracklet_len_median": 20,
+  "tracklet_len_mean": 28.143972978678487,
+  "verdict": {
+    "hazard_over_age": "NOT MEASURABLE (0/151 births observed)",
+    "gt_fitted_refractory_window": "NOT MEASURABLE (0 intervals observed)"
+  }
+}

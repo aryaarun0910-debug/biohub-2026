@@ -1,0 +1,945 @@
+# EXPERIMENTS REGISTRY - binds every identifier for one experiment in ONE place.
+#
+# WHY THIS EXISTS
+# An experiment currently has up to six different names: the spec file stem, the spec
+# `name`, the Kaggle slug, the notebook out_dir, the submission ref, and whatever prose
+# called it in the ledger. Nothing tied them together, so answering "what did p15 score?"
+# meant guessing a slug. On 2026-08-25 that cost a wrong-slug API call, and separately a
+# spec copied without changing `out_dir` silently overwrote a sibling kernel's metadata.
+#
+# THE RULE
+# One EXP-#### per experiment. Every other identifier hangs off it. Prose cites the EXP id.
+#
+# status:
+#   built     notebook built locally, never pushed
+#   running   pushed, kernel executing
+#   complete  kernel finished, output fetched
+#   scored    submission has a leaderboard score
+#   pending   submitted, awaiting score
+#   void      ran but produced nothing usable - the run is evidence of a DEFECT, not a result
+#   cancelled stopped before it finished; whatever it emitted is partial
+#   deployed  the current live submission
+#
+# TWO LINK DIRECTIONS, AND THEY ARE NOT THE SAME. `experiments[].facts` is a loose "facts
+# involved in this run" list and includes the facts that MOTIVATED it - EXP-0019 cites
+# FACT-0111, which closed LEVER-0003 on unrelated evidence and is untouched by the leak. The
+# RETRACTION edge runs the other way: `facts[].experiment` names the run a fact's numbers came
+# from. validate_registry R8 walks ONLY that direction, so setting a status to `void` or
+# `cancelled` forces every fact DERIVED from it to declare a validity, and never retracts the
+# run's own inputs. If you void an experiment, check that its derived facts carry the link.
+
+schema_version: 1
+updated: '2026-08-25'
+
+experiments:
+
+  - id: EXP-0003
+    title: P3 harmonic re-baseline
+    spec: scripts/kaggle_specs/p3_harmonic.json
+    kernel: aryaarun07/biohub-p3-harmonic
+    submission: 55274582
+    lb: 0.915
+    status: scored
+    date: '2026-08-05'
+    note: Long-standing baseline; superseded as the deployment by EXP-0009.
+
+  - id: EXP-0006
+    title: Instrument control - det_threshold 0.96875 -> 0.999
+    spec: scripts/kaggle_specs/p6_control_degraded.json
+    kernel: aryaarun07/biohub-p6-control-degraded
+    submission: 55667537
+    lb: 0.883
+    status: scored
+    date: '2026-08-21'
+    note: >-
+      Deliberate degradation to prove the LB responds at all after three submissions
+      returned identical 0.915. Removed 28% of nodes; scored -0.032. This is the ONLY prior
+      control in the detection-surface class, and it moved in the SUBTRACTIVE direction.
+
+  - id: EXP-0008
+    title: Loose-propose / strict-filter divisions
+    spec: scripts/kaggle_specs/p8_loosefilter.json
+    kernel: aryaarun07/biohub-p8-loosefilter
+    submission: 55698581
+    lb: 0.912
+    status: scored
+    date: '2026-08-22'
+    confounded: true
+    note: >-
+      Scored -0.003 against P3. Carries a THIRD, unrecorded confound: the spec sets
+      BIOHUB_DEEPCENTER_SAFE_DIV_VETO=1 while pinning no DEEPCENTER_SAFE_DIV_THRESHOLD, so
+      the silent 0.12 default applied. Treat the delta as uninterpretable.
+
+  - id: EXP-0009
+    title: P9 coupled division transplant
+    spec: scripts/kaggle_specs/p9_coupled_division.json
+    kernel: aryaarun07/biohub-p9-coupled-division
+    submission: 55753516
+    lb: 0.925
+    status: deployed
+    date: '2026-08-24'
+    facts: [FACT-0001]
+    note: >-
+      +0.010 over 0.915, the largest gain of the campaign and the first division-class
+      change to score positive. Prediction band (central 0.919-0.925) HIT.
+
+  - id: EXP-0015
+    title: Fork-free diagnostic probe
+    spec: scripts/kaggle_specs/p15_forkfree_probe.json
+    kernel: aryaarun07/biohub-p15-forkfree-probe
+    submission: 55768476
+    lb: 0.906
+    status: scored
+    date: '2026-08-25'
+    note: >-
+      OUTPUT_SAFE_DIVISIONS=0 on P9. summarise() drops the division term when a submission
+      has no forks, so the score IS our pure adj_edge and divJ follows by subtraction.
+      CAVEAT - it also lost 578 edges / 230 nodes beyond its 406 divisions because the
+      short-track filter reacts, so the subtraction is approximate and biased to read divJ
+      high. SCORED 0.906 - BELOW both pre-registered bands. The naive subtraction gives divJ
+      0.19, contradicting the direct 1/125 measurement (FACT-0080) by 24x; the ~984 lost
+      true-positive edges explain the drop on their own. See FACT-0100 / FACT-0101.
+
+  - id: EXP-0016
+    title: Detection threshold 0.96875 -> 0.90
+    spec: scripts/kaggle_specs/p16_det090.json
+    kernel: aryaarun07/biohub-p16-det090
+    submission: 55768483
+    lb: 0.922
+    status: scored
+    date: '2026-08-25'
+    note: Read as a PAIR with EXP-0017 for slope, not as a point.
+
+  - id: EXP-0017
+    title: Detection threshold 0.96875 -> 0.94
+    spec: scripts/kaggle_specs/p17_det094.json
+    kernel: aryaarun07/biohub-p17-det094
+    submission: 55769398
+    lb: 0.924
+    status: scored
+    date: '2026-08-25'
+
+  - id: EXP-0004
+    title: DetPeak superset export, fold 0 - version 1
+    spec: scripts/kaggle_specs/p4_detsweep_export_f0.json
+    kernel: aryaarun07/biohub-p4-detpeak-superset-export-loeo-f0
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: void
+    date: '2026-08-25'
+    facts: [FACT-0060]
+    evidence: _evidence/p4_detpeak_f0/
+    note: >-
+      Ran 9,439 s and returned an EMPTY detpeaks/ directory across all 71 crops. Sink and
+      flush were installed on the parent process's builtins while prediction runs in a
+      subprocess; both call sites were None-guarded so the failure was silent in BOTH
+      branches. VOID, not a result. Its LOEO export is still valid.
+
+  - id: EXP-0004S
+    title: DetPeak smoke, 2 crops - verifies the repaired subprocess-local hooks
+    spec: scripts/kaggle_specs/p4_detpeak_smoke_f0.json
+    kernel: aryaarun07/biohub-p4-detpeak-smoke-f0
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-25'
+    evidence: _evidence/p4_detpeak_smoke_f0/
+    note: >-
+      PASSED. Emitted 2 npz (77,031 peaks). Confirms the repair and confirms nested output
+      fetch. Per-crop threshold spread is large - 44b6_0113de3b gains 4% of nodes going
+      0.96875 -> 0.5 while 44b6_0b24845f gains 49%.
+
+  - id: EXP-0004A
+    title: DetPeak superset export, fold 0 - repaired
+    spec: scripts/kaggle_specs/p4_detsweep_export_f0.json
+    kernel: aryaarun07/biohub-p4-detpeak-superset-export-loeo-f0
+    kernel_version: 2
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-25'
+
+  - id: EXP-0004B
+    title: DetPeak superset export, fold 1 - repaired
+    spec: scripts/kaggle_specs/p4_detsweep_export_f1.json
+    kernel: aryaarun07/biohub-p4-detpeak-superset-export-loeo-f1
+    kernel_version: 2
+    submission: null
+    lb: null
+    status: cancelled
+    date: '2026-08-25'
+    note: >-
+      CANCELLED mid-run by the host to save GPU, on a deliberate call. Its original purpose -
+      selecting a detection threshold - was closed the same day by FACT-0111: the fold-0 curve
+      showed recall saturated (+0.0010 down to 0.5, -0.043 up to 0.999) and PREDICTED both
+      scored arms. Fold 1 would most likely have re-closed a closed lever.
+      .
+      WHAT WE GAVE UP, stated so nobody assumes it is available: this was the only source of
+      fold-1 PEAK-STAGE node recall, which would size LEVER-0011. Fold 0 loses ~1 point
+      between peak 0.9955 and scored 0.9861; the record puts fold-1 scored recall at 0.8691,
+      implying a much larger downstream loss on the fold carrying essentially all the
+      headroom (FACT-0031). That number remains UNMEASURED and the fold-1 half of FACT-0112
+      is still quoted from the record, not re-derived. Re-running costs one GPU session and
+      nothing is blocked on it.
+      .
+      The 6bba fold carries essentially all the headroom (FACT-0031).
+
+  - id: EXP-0018
+    title: P18 relink division - a priced second row per source in the motion relink
+    spec: scripts/kaggle_specs/p18_relink_division.json
+    kernel: aryaarun07/biohub-p18-relink-division
+    submission: null
+    lb: null
+    status: built
+    date: '2026-08-25'
+    facts: [FACT-0090, FACT-0093]
+    note: >-
+      BUILT AND VERIFIED, NOT LAUNCHED (rule 8; both GPU slots also busy with EXP-0004A/B).
+      Single-variable arm off the champion EXP-0009. Duplicates each source row in the
+      relink cost matrix and prices the copy, so linear_sum_assignment SELECTS which sources
+      earn a second child jointly over motion + raw distance + learned probability - the
+      joint-scorer structure the multi-cause evidence (FACT-0084) calls for, rather than a
+      fifth AND-gate. Targets the 14 fork-collapsed divisions (FACT-0090).
+      .
+      38 contract tests pass: the disabled default (-1) reproduces the champion EXACTLY on
+      random matrices, in-degree <= 1 and out-degree <= 2 always hold, the penalty is
+      monotone in second children (so it is a real selector), and the gap-close bijection at
+      cell 6:697 is left untouched.
+      .
+      CAVEAT: the penalty 2.0 is an UNMEASURED GUESS. Cost units are roughly um
+      (motion + 0.05*raw - 0.75*prob), so 2.0 demands a clearly better second child, but
+      nothing has measured it. Today's lesson says buy the CURVE not the point - the relink
+      is post-processing and cheap relative to inference, so one kernel could emit the whole
+      penalty sweep as several LOEO exports and be scored offline for zero submission slots.
+      That is the better design and it is NOT yet built.
+
+  - id: EXP-0019
+    title: P19 relink division penalty SWEEP - the whole curve from one GPU session
+    spec: scripts/kaggle_specs/p19_relink_sweep_f1.json
+    kernel: aryaarun07/biohub-p19-relink-division-sweep-loeo-f1
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: void
+    date: '2026-08-25'
+    facts: [FACT-0090, FACT-0093, FACT-0102, FACT-0111]
+    note: >-
+      BUILT AND VERIFIED, NOT LAUNCHED (rule 8). Supersedes the single-value EXP-0018 as the
+      thing to run. Emits one LOEO fold-1 export per penalty in {-1, 0, 1, 2, 4, 8}, each
+      scoreable offline against data/train with scripts/core/score_oof.py - ZERO submission
+      slots.
+      .
+      WHY A SWEEP: two slots were spent on two points of the DETECTION curve (EXP-0016/0017)
+      which one offline CPU pass then reproduced entirely (FACT-0111). The relink penalty has
+      the same shape - one scalar, unknown optimum - so a per-value submission would repeat
+      that mistake. Cheap because the geffs are cached: only filter_output_graph is re-run
+      per penalty, not the UNet, edge model or ILP.
+      .
+      ON THE CHAMPION SUBSTRATE. Built from notebooks/kaggle_p3_harmonic (the deployed base)
+      plus the P9 coupled-division transplant, NOT the older p0b base the existing LOEO chain
+      uses. So it measures what we actually deploy. Discovered while building this: our LOEO
+      diagnostics have been running on a DIFFERENT substrate from the deployment.
+      .
+      ORDERING IS LOAD-BEARING: the sweep must run BEFORE the LOEO cleanup, which deletes
+      every /kaggle/working entry not in _LOEO_KEEP - and the geffs live under
+      /kaggle/working/tracking_repo. A sweep ordered after it would find nothing and waste
+      the session silently. Verified at build (offset 3,532 vs 12,300) and guarded by a test.
+      .
+      IN-RUN CONTROL: penalty -1 is the disabled sentinel and must reproduce the champion
+      exactly. If its node/edge counts do not match the primary LOEO export, the sweep is
+      invalid and must not be interpreted.
+      .
+      43 contract tests pass across EXP-0018/0019.
+      .
+      VOID 2026-08-26 - TRAIN/TEST LEAK (FACT-0160). It evaluated fold 1 (6bba) with the pack's
+      split_0 weights, TRAINED ON 6bba, because the spec set no BIOHUB_LOEO_WEIGHTS_GLOB. All
+      nine other fold-1 LOEO specs do. Every absolute number below is inflated; the paired
+      penalty COMPARISON may survive but its magnitudes do not. The spec is now repaired and
+      tests/test_loeo_weights_hygiene.py makes the omission a build failure.
+      .
+      ORIGINAL RESULT, RETAINED FOR PROVENANCE: RAN CLEAN, CONTROL PASSED, MECHANISM KILLED. Penalty -1 reproduced
+      the champion EXACTLY (2,156,725 nodes / 2,077,140 edges / 6,314 forks), so the sweep is
+      valid. Every other penalty scored WORSE: -0.0040 (p=0) to -0.0023 (p=2), with divJ
+      falling 0.0743 -> 0.061-0.067 and div_tp dropping 26 -> 21. See FACT-0131, LEVER-0012.
+      Evidence: _evidence/p19_relink_sweep_f1/. Cost: one GPU session, ZERO submission slots,
+      six points instead of one - the sweep design paid for itself.
+
+  - id: EXP-0021
+    title: P19 v2 - HONEST relink penalty sweep, fold 1, OOF split_1 weights
+    spec: scripts/kaggle_specs/p19_relink_sweep_f1.json
+    kernel: aryaarun07/biohub-p19-relink-division-sweep-loeo-f1
+    kernel_version: 2
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-26'
+    facts: [FACT-0221, FACT-0160, FACT-0325, FACT-0326]
+    note: >-
+      Replaces the VOID leaky EXP-0019. Spec repaired with BIOHUB_LOEO_WEIGHTS_GLOB pointing at
+      edge_predictor_best_split_1.pth plus the oof-weights dataset; tests/test_loeo_weights_hygiene.py
+      now makes the omission a build failure.
+      PRE-REGISTERED FALSIFIER (FACT-0221): score should RISE monotonically with penalty until
+      accepted-fork precision reaches about 3.4%. If it does not rise, LEVER-0012 dies properly
+      on honest evidence.
+      Its penalty -1 control is also an honest fold-1 export of the CHAMPION config, which is
+      the substrate LEVER-0019 needs for its fold-1 rescore.
+
+  - id: EXP-0022
+    title: P20 - relink penalty sweep, fold 0, clean by construction
+    spec: scripts/kaggle_specs/p20_relink_sweep_f0.json
+    kernel: aryaarun07/biohub-p20-relink-sweep-loeo-f0
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: complete
+    facts: [FACT-0321, FACT-0322, FACT-0323]
+    date: '2026-08-26'
+    note: >-
+      Fold 0 holds out 44b6, which the pack split_0 weights never saw, so it is LOEO-clean with
+      no override - and the hygiene test asserts a fold-0 spec must NOT load split_1.
+      Gives the contract-required SECOND EMBRYO DIRECTION for the sweep, and a second
+      offline-versus-LB calibration point on the champion config.
+
+  - id: EXP-0023
+    title: P22 - secondary detection weight 0.60, one-factor A/B on the P9 champion
+    spec: scripts/kaggle_specs/p22_sdw060.json
+    kernel: aryaarun07/biohub-p22-sdw060
+    kernel_version: 1
+    submission: 55806155
+    lb: 0.925
+    status: scored
+    date: '2026-08-27'
+    facts: [FACT-0001, FACT-0331]
+    note: >-
+      The single knob separating evgendvorkin/biohub-0-927-lb (self-declared 0.923) from arnav170/biohub-sdw60
+      (0.927) on a code-identical lineage (teardown at C:/temp/intel/arnav170_sdw60/REPORT.md). Everything else
+      exactly P9. PRE-REGISTERED band 0.924-0.929, central 0.927; falsifier <= 0.925 (no gain over the champion).
+      Host authorised push AND submission on completion (2026-08-27).
+
+  - id: EXP-0024
+    title: H1R S5 edge-training SMOKE - two optimizer steps on Zh001r + identity sidecar
+    spec: scripts/kaggle_specs/h1r_edge_s5_smoke.json
+    kernel: aryaarun07/biohub-h1r-edge-s5-smoke
+    kernel_version: 2
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-27'
+    facts: [FACT-0296, FACT-0328, FACT-0329]
+    note: >-
+      First GPU execution of the S5 edge half of H1 (dossier C:/temp/intel/H1_DOSSIER.md). Diagnostic, no
+      submission. Proves: both Zh001r mounts resolve; two finite fp16-autocast optimizer steps with the explicit
+      fp32 BCE (the autocast-banned op was removed this session); detection_drift.max_abs <= 1e-4 (trunk frozen);
+      a zero-epoch link_top1 / candidate_recall baseline on the held-out crops. A pass licenses h1r_edge_s5.json;
+      a fail kills the S5 packaging before any Colab unit is spent on it.
+      .
+      VERSION 1 (2026-08-27 00:2x UTC) ERRORED at the drift assertion: detection logits moved by 3.065e+01
+      after two steps with every trunk parameter at requires_grad=False - the vendored UNet's BatchNorm3d
+      running statistics updated under model.train() (FACT-0328). Fixed by an EdgeTrainingModel.train()
+      override that keeps the frozen trunk in eval mode (tests/test_h1r_edge_train.py). VERSION 2 pushed.
+
+  - id: EXP-0025
+    title: P24 - DeepCenter best.pt + safe-division veto ON, env-only A/B on the P9 champion (LEVER-0024)
+    spec: scripts/kaggle_specs/p24_deepcenter_best_veto.json
+    kernel: aryaarun07/biohub-p24-deepcenter-best-veto
+    kernel_version: 1
+    submission: 55820202
+    lb: 0.928
+    status: scored
+    date: '2026-08-27'
+    facts: [FACT-0311, FACT-0312, FACT-0331, FACT-0341]
+    note: >-
+      Built and verified locally 2026-08-27 (cell-2 env diff only: best.pt path, expected epoch 2,
+      BIOHUB_DEEPCENTER_SAFE_DIV_VETO=1; defect gate PASS). PRE-REGISTERED band 0.921-0.929, central 0.925;
+      falsifier <= 0.925. Packet PKT-0020. PUSHED v1 2026-08-27 14:53 local (host GPU + submission authorisation given the same day, rule 8 satisfied); the queue runner submits on audit PASS. Attribution
+      follow-up if it moves: P10 (best.pt alone, EXP-less, built 2026-08-24).
+
+  - id: EXP-0026
+    title: P25 - recipe parity, fold-0 LOEO of the champion configuration with OUR July split_0 instead of the pack's
+    spec: scripts/kaggle_specs/p25_recipe_parity_loeo_f0.json
+    kernel: aryaarun07/biohub-p25-recipe-parity-loeo-f0
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-27'
+    facts: [FACT-0321, FACT-0322, FACT-0263, FACT-0339]
+    note: >-
+      The cheapest decisive test of the retrain question (LEVER-0023): our 30-epoch x 800-iter, batch-1, lr 1e-4
+      split_0 (train 6bba, hold out 44b6; kernel aryaarun07/biohub-train-oof, last epoch = proxy-best, sha d3e89eb3...)
+      against the pack's split_0 (sha 12f6881e...) on identical pipeline and crops, paired vs the EXP-0022 control.
+      PRE-REGISTERED reading: within the fold-0 paired MDE (FACT-0263) = the recipe reproduces the public quality and
+      continued training is credible; more than 0.01 below = the recipe/compute is the bottleneck. No submission.
+      SCORED 2026-08-27 (FACT-0339): our split_0 -0.162 below the pack's on fold 0 - the recipe fails parity, retrain re-scoped. Built + verified 2026-08-27; PUSHED v1 2026-08-27 14:53 local by scripts/core/kaggle_queue.py after the host's GPU/submission authorisation (rule 8 satisfied).
+
+  - id: EXP-0027
+    title: P23 - intensity-centroid float re-localisation, one-factor deployment on P9
+    spec: scripts/kaggle_specs/p23_icom155.json
+    kernel: aryaarun07/biohub-p23-icom155
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-27'
+    facts: [FACT-0001, FACT-0324, FACT-0330, FACT-0336]
+    note: >-
+      Kernel completed while the queue runner was absent. PRE-REGISTERED public-LB band 0.925-0.929,
+      central 0.925 (low band promoted), falsifier <= FACT-0001; recorded in PKT-0018 before resume,
+      audit, submission, or score. Host authorised the inherited queue to submit p23 on audit PASS.
+
+  - id: EXP-0028
+    title: H1R S5 RoPE-4D two-step plumbing smoke
+    spec: scripts/kaggle_specs/h1r_edge_s5_rope4d_smoke.json
+    kernel: aryaarun07/biohub-h1r-edge-s5-rope4d-smoke
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-27'
+    facts: [FACT-0340, FACT-0329, FACT-0335]
+    note: >-
+      Gate 1 of LEVER-0027 / PKT-0023. Built and verified locally with the focused RoPE suite passing;
+      pushed under the host's GPU authorisation while the sinusoidal S5 control occupies the other
+      Kaggle slot. Diagnostic only; a passing smoke is not evidence that RoPE improves link selection.
+
+  - id: EXP-0029
+    title: P27 - DeepCenter best.pt + veto bundle (the 0.928 winner) PLUS icom float, stacked on the P9 champion
+    spec: scripts/kaggle_specs/p27_champion_icom.json
+    kernel: aryaarun07/biohub-p27-champion-icom
+    kernel_version: 1
+    submission: 55827508
+    lb: 0.914
+    status: scored
+    date: '2026-08-27'
+    facts: [FACT-0341, FACT-0330, FACT-0336]
+    note: >-
+      The forward stack: P24's winning DeepCenter bundle (best.pt epoch 2 + safe-div veto ON, +0.003 = FACT-0341)
+      PLUS LEVER-0022 icom float re-localisation (offline full-fold +0.0013/+0.0024, FACT-0330). Built on the P9
+      champion, NOT the superseded base (p23/EXP-0027 tested icom on P9 and is now working backwards). PRE-REGISTERED
+      band 0.927-0.931, central 0.929; falsifier <= 0.928 (no gain over the champion P24). Pushed v1 2026-08-27 under
+      host GPU+submission authorisation; SUBMITTED 2026-08-27 (2 subs left); our integer-audit false-positived on the icom floats (FACT-0343), coords verified sound and floats scorer-legal (FACT-0336). SCORED 0.914 (FACT-0344): -0.014 REVERSAL, falsifier fired; float export is LB-unsafe. Champion stays P24=0.928.
+
+  - id: EXP-0030
+    title: P28 champion control f0 - P24-lineage (0.928) LOEO control, fold 0 (best.pt + veto ON, champion arm)
+    spec: scripts/kaggle_specs/p28_champion_control_f0.json
+    kernel: aryaarun07/biohub-p28-champion-control-f0
+    kernel_version: 2
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-27'
+    facts: [FACT-0341, FACT-0310, FACT-0345]
+    note: >-
+      Downstream fix #1: re-establish the offline screening substrate on the 0.928 base. New `champion` LOEO arm keeps
+      the DeepCenter best.pt + safe-div veto bundle ON. CAVEAT (FACT-0310): DeepCenter has no fold variant and is
+      IN-SAMPLE on fold 0 (44b6), so this fold-0 control's ABSOLUTE score is contaminated - use for PAIRED lever deltas
+      only, not the calibration anchor. Pushed 2026-08-27; no submission.
+
+  - id: EXP-0031
+    title: P28 champion control f1 - P24-lineage (0.928) LOEO control, fold 1 (best.pt + veto ON, split_1 weights)
+    spec: scripts/kaggle_specs/p28_champion_control_f1.json
+    kernel: aryaarun07/biohub-p28-champion-control-f1
+    kernel_version: 2
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-27'
+    facts: [FACT-0341, FACT-0310, FACT-0345]
+    note: >-
+      The CLEANER P24-lineage control: fold 1 (6bba held out), OOF split_1 edge weights (leak guard intact), DeepCenter
+      best.pt validated on 6bba (checkpoint selection only, not trained) so near-out-of-sample. This is the fold to
+      trust for the 0.928-base offline calibration and DeepCenter-adjacent lever screening. Pushed 2026-08-27; no submission.
+
+  - id: EXP-0032
+    title: P29 P28 DetPeak exporter two-crop process-boundary smoke, fold 0
+    spec: scripts/kaggle_specs/p29_p28_detpeak_smoke_f0.json
+    kernel: aryaarun07/biohub-p29-p28-detpeak-smoke-f0
+    kernel_version: 3
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-28'
+    facts: [FACT-0346, FACT-0351]
+    note: >-
+      PKT-0024 prerequisite smoke. Must retain the P28 champion output and emit exactly two non-empty
+      per-crop sidecars from the prediction subprocess, each carrying the actual detector threshold and
+      a reconstructable pipeline peak-count heartbeat. Plumbing only; never scientific evidence or a submission.
+      VERSION 1 preserved graph parity and emitted both sidecars, but the inherited predictor invoked each
+      crop twice and the exporter silently overwrote the first file. Although the logs showed identical counts,
+      byte identity was not proved. VERSION 2 showed the same repeated console lines without a duplicate-collision
+      heartbeat. Source audit established disjoint GPU slices and that Kaggle duplicated captured subprocess output,
+      not writes. VERSION 3 retains fail-closed atomic publication and passes the actual parity/reconstruction gate
+      (FACT-0351); the full fold exporters are licensed.
+
+  - id: EXP-0033
+    title: P29 P28 DetPeak full exporter, fold 0
+    spec: scripts/kaggle_specs/p29_p28_detpeak_export_f0.json
+    kernel: aryaarun07/biohub-p29-p28-detpeak-export-f0
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-28'
+    facts: [FACT-0345, FACT-0346, FACT-0352, FACT-0353, FACT-0354, FACT-0355]
+    note: >-
+      Passive candidate-score diagnostic on the P28 fold-0 champion substrate. Launch only after EXP-0032
+      passes. No threshold or graph change, no submission. Fold 0 is paired-delta use only because of FACT-0310.
+      FETCHED and AUDITED 2026-08-28: detection bit-identical to the P28 control on all 71 crops and the whole
+      champion graph reproduces exactly (FACT-0352). The replay it bought did NOT support the lever it was built
+      for - the detector is already at budget and the deficit is the ILP's (FACT-0353, FACT-0354, FACT-0355).
+
+  - id: EXP-0034
+    title: P29 P28 DetPeak full exporter, clean fold 1 with split_1 weights
+    spec: scripts/kaggle_specs/p29_p28_detpeak_export_f1.json
+    kernel: aryaarun07/biohub-p29-p28-detpeak-export-f1
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: complete
+    date: '2026-08-28'
+    facts: [FACT-0345, FACT-0346, FACT-0160, FACT-0352, FACT-0353, FACT-0354, FACT-0355]
+    note: >-
+      Passive candidate-score diagnostic on the clean P28 fold-1 champion substrate. The verified P28
+      base retains BIOHUB_LOEO_WEIGHTS_GLOB=split_1. Launch only after EXP-0032 passes; no submission.
+      FETCHED and AUDITED 2026-08-28: detection bit-identical on all 128 crops; 127 of 128 crops reproduce the
+      champion graph exactly and the single divergence is confined to stages after detection (FACT-0352).
+
+  - id: EXP-0035
+    title: P30 fold-0 acquisition - passive pre-ILP substrate (LEVER-0036) plus richer candidate surface (LEVER-0037)
+    spec: scripts/kaggle_specs/p30_acquisition_f0.json
+    kernel: aryaarun07/biohub-p30-acquisition-f0
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-29'
+    facts: [FACT-0345, FACT-0369, FACT-0370, FACT-0367, FACT-0261]
+    note: >-
+      PKT-0027. ONE passive run on the P28 fold-0 champion control base that acquires BOTH missing substrates:
+      the pre-ILP candidate graph the LEVER-0036 promotion gate needs on the honest fold, and per-crop sidecars
+      of the richer candidate surface (floor 0.02, at most 8 parents per target) that LEVER-0037 needs. The
+      edge-candidate treatment variables are deliberately UNSET, so the consumed candidate list, the emitted
+      graph and every downstream stage stay bit-identical to EXP-0030 - the acquisition must not change what it
+      observes, and bundling both levers' graph changes into one GPU treatment would confound them. The two
+      levers are replayed independently on CPU afterwards. Verified before push: both patches compose and
+      compile on the vendored predictor, the treatment variables are absent from the built notebook, and the
+      P28 control configuration is preserved. No submission.
+
+  - id: EXP-0036
+    title: P31 public-0.931 configuration replica, LOEO fold 0
+    spec: scripts/kaggle_specs/p31_public931_replica_f0.json
+    kernel: aryaarun07/biohub-p31-public931-replica-f0
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-29'
+    facts: [FACT-0377, FACT-0345, FACT-0368, FACT-0376, FACT-0261]
+    note: >-
+      FACT-0377: the public kernel reported at 0.931 is our own code lineage and differs from the P24/P28
+      champion by ENVIRONMENT ONLY. This replays that exact configuration as a LOEO control on fold 0 -
+      the honest promotion fold - so it can be compared against the P28 champion baseline (FACT-0345) on our own substrate before
+      any submission is contemplated. The two substantive additions are association-DISCRIMINATION mechanisms
+      the champion leaves off - a secondary model blended by low_margin_consensus, consulted only where the
+      primary is uncertain AND both agree on the top parent, and bidirectional harmonic-probability fusion -
+      which is exactly the lane FACT-0368 sizes at 87% of the fold-0 gap and FACT-0376 identifies as
+      discrimination-bound rather than availability-bound. Also carries a tighter ILP (disappearance 2.0,
+      division 1.2), det threshold 0.965, gap-2 recovery and adaptive short-track rescue on, and the pack's
+      epoch-500 DeepCenter with the safe-division veto OFF. Diagnostic only; no submission.
+
+  - id: EXP-0037
+    title: P31 public-0.931 configuration replica, LOEO fold 1
+    spec: scripts/kaggle_specs/p31_public931_replica_f1.json
+    kernel: aryaarun07/biohub-p31-public931-replica-f1
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-29'
+    facts: [FACT-0377, FACT-0345, FACT-0368, FACT-0376, FACT-0261]
+    note: >-
+      FACT-0377: the public kernel reported at 0.931 is our own code lineage and differs from the P24/P28
+      champion by ENVIRONMENT ONLY. This replays that exact configuration as a LOEO control on fold 1 -
+      the association-degraded diagnostic fold - so it can be compared against the P28 champion baseline (FACT-0345) on our own substrate before
+      any submission is contemplated. The two substantive additions are association-DISCRIMINATION mechanisms
+      the champion leaves off - a secondary model blended by low_margin_consensus, consulted only where the
+      primary is uncertain AND both agree on the top parent, and bidirectional harmonic-probability fusion -
+      which is exactly the lane FACT-0368 sizes at 87% of the fold-0 gap and FACT-0376 identifies as
+      discrimination-bound rather than availability-bound. Also carries a tighter ILP (disappearance 2.0,
+      division 1.2), det threshold 0.965, gap-2 recovery and adaptive short-track rescue on, and the pack's
+      epoch-500 DeepCenter with the safe-division veto OFF. Diagnostic only; no submission.
+
+  - id: EXP-0038
+    title: P32 exact public-0.931 configuration, verbatim, one preregistered submission
+    spec: scripts/kaggle_specs/p32_public931_exact.json
+    kernel: aryaarun07/biohub-p32-public931-exact
+    kernel_version: 1
+    submission: 55871868
+    lb: 0.931
+    status: scored
+    date: '2026-08-29'
+    facts: [FACT-0377, FACT-0378, FACT-0341]
+    note: >-
+      PKT-0028, the BRIDGE experiment - calibration, not the campaign's centre. The public notebook is run
+      BYTE-IDENTICAL, with attribution to its author, because the one genuine association-side difference from
+      our champion is the bidirectional fusion rule (harmonic-probability at 0.15 against our plain linear
+      blend at 0.20) and no notebook in our tree implements it; reconstructing it would re-derive the mechanism
+      under test. This configuration CANNOT be judged offline - its secondary is trained on all 199 movies,
+      legitimate against a hidden test set but un-measurable by any LOEO control we can build (FACT-0378) - so
+      one submission is the only instrument and exactly one is authorised. Preregistered band 0.925-0.932,
+      central 0.929, falsifier at or below the 0.928 champion. Attribution is to the whole bundle only; every
+      knob is confounded, and a positive result relocates the baseline without advancing the association
+      capability FACT-0368 says is needed. No follow-up knob sweeps or stacking on this lineage.
+
+
+  - id: EXP-0039
+    title: P34 passive fold-1 candidate acquisition on the P28 fold-1 champion control
+    spec: scripts/kaggle_specs/p34_acquisition_f1.json
+    kernel: aryaarun07/biohub-p34-acquisition-f1
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: running
+    date: '2026-08-29'
+    facts: [FACT-0381, FACT-0369, FACT-0370, FACT-0373]
+    note: >-
+      PKT-0030. The fold-1 mirror of P30, and the ONLY thing that makes a cross-fitted parent ranker
+      measurable: FACT-0381 showed fold 1's candidate surface is single-parent by construction, so top-1
+      there is 1.0 for any model and a metric that cannot fail is not evidence. Built as a PURE SUPERSET of
+      the P28 fold-1 control - verified before push, zero deleted lines in every cell - so graph parity holds
+      by construction and is then confirmed empirically by audit A. Split-1 weights are re-declared
+      explicitly rather than inherited silently and the built notebook contains zero split_0 references; both
+      TREATMENT variables are unset and absent. The pre-ILP export ships in the same run because audit D
+      (node-id stability) can only be self-consistent if both artifacts come from one run - joining new
+      sidecars to the 2026-08-19 preilp_f1_v2 parquet would assume the stability D exists to prove. No
+      submission.
+
+  - id: EXP-0040
+    title: P33 association feature-parity smoke, PKT-0029 Gate 1
+    spec: scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json
+    kernel: aryaarun07/biohub-p33-assoc-feature-parity-smoke
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: failed
+    date: '2026-08-29'
+    facts: [FACT-0387]
+    superseded_by: EXP-0043
+    superseded_reason: >-
+      P33's INDEPENDENT-WORKER design is retired 2026-08-30, not merely this attempt 1. Six distinct
+      defects across three attempts all share one cause - the worker REIMPLEMENTED the deployed
+      computation instead of reusing it - and the sixth (FACT-0402) shows the frame-keyed cache was
+      scientifically undefined, so a fourth run would have FAILED on the instrument rather than the
+      cache. P36 replaces it with a passive tap inside the deployed predict_video. THE FAILURE
+      EVIDENCE BELOW IS RETAINED DELIBERATELY: it is the record of what two GPU sessions bought.
+    note: >-
+      FAILED at a process boundary, not on parity - see FACT-0387. The patch imported
+      predict_unet_transformer into the NOTEBOOK process, where it does not exist: the deployed predictor is
+      launched as a subprocess with the repo directory as cwd, and every patch in this tree that works reaches
+      it by rewriting that file's source text. Zero crops compared, all_passed false. The fail-closed
+      heartbeat is what makes this cheap: it refused to report a pass, so the two full feature-cache sessions
+      it would have licensed were not spent. The gate is NOT to be re-pushed with a sys.path fix - the
+      PKT-0033 audit established independently that it exercises no serialised cache and never compares the
+      sub-0.5 band where FACT-0382 puts all 691 contested errors, so it needs redesign, not repair. One GPU
+      session spent, no submission, deployed output unchanged.
+
+  - id: EXP-0041
+    title: P33 v2 association feature-parity smoke, PKT-0029 Gate 1 attempt 2
+    spec: scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json
+    kernel: aryaarun07/biohub-p33-assoc-feature-parity-smoke
+    kernel_version: 2
+    submission: null
+    lb: null
+    status: failed
+    date: '2026-08-29'
+    facts: [FACT-0387, FACT-0382, FACT-0369, FACT-0373]
+    superseded_by: EXP-0043
+    superseded_reason: >-
+      P33's INDEPENDENT-WORKER design is retired 2026-08-30, not merely this attempt 2. Six distinct
+      defects across three attempts all share one cause - the worker REIMPLEMENTED the deployed
+      computation instead of reusing it - and the sixth (FACT-0402) shows the frame-keyed cache was
+      scientifically undefined, so a fourth run would have FAILED on the instrument rather than the
+      cache. P36 replaces it with a passive tap inside the deployed predict_video. THE FAILURE
+      EVIDENCE BELOW IS RETAINED DELIBERATELY: it is the record of what two GPU sessions bought.
+    note: >-
+      The redesigned gate, pushed UNCHANGED from the committed build at 7c15b23 - a rebuild before pushing was
+      byte-identical to the commit, so what runs is what was tested. It is now the SINGLE LICENSING
+      EXPERIMENT for LEVER-0034 (host, 2026-08-29): if it passes, the two fold feature caches launch with no
+      additional model changes; if it fails, nothing downstream is licensed. Concurrent with P34 (EXP-0039),
+      which is within the FACT-0061 cap of two. No submission.
+      HOST PASS CRITERIA, PREREGISTERED BEFORE THE RESULT - all six bind, and where the kernel does not
+      enforce one the audit does:
+      (1) both crop heartbeats appear - ENFORCED AT AUDIT, not in-kernel. The report's all_passed requires a
+          non-empty crop list with every entry passing, but does not assert the count is 2, so a run that
+          silently processed one crop would still report all_passed true. The kernel was pushed unchanged as
+          directed, so this one criterion is checked when the result is read, and a crop count other than 2
+          is a FAIL regardless of what all_passed says.
+      (2) the fresh reader uses only persisted cache artifacts - enforced by construction: the verify phase is
+          a separate process and cannot see the writer's memory.
+      (3) node ordering and identities reconstruct exactly - enforced transitively and stated as such. The
+          per-frame node-count assertion is direct; ordering and identity are proven by band A matching
+          exactly, since a reordering would change which positional index each recorded edge names.
+      (4) deployed candidates match exactly - band A: zero missing, zero extra, max probability delta <= 1e-4.
+      (5) the richer probability band matches within the frozen tolerance - band B against the ECB sidecars
+          down to 0.02, every recorded sub-threshold pair reproduced, max delta <= 1e-4. Extras beyond the
+          sidecar's top-k cap are expected and are not failures.
+      (6) missing or empty cache output fails closed - the verify phase raises FileNotFoundError on a missing
+          cache file and requires a non-zero band-B comparison count; both are covered by tests that run the
+          worker as real subprocesses.
+      KNOWN LIMIT OF A PASS, recorded so the licence it grants is not over-read: the gate compares
+      post-softmax probabilities over the SOURCE axis, so a cache error shifting every source in a frame
+      equally is mathematically invisible to it. Non-uniform errors - a single node, an index remap, a dtype
+      change, a stale frame - all show up.
+
+  - id: EXP-0042
+    title: P35 DeepCenter/veto exchange on the released 0.931 base, one capped exploitation
+    spec: scripts/kaggle_specs/p35_dcveto_on_931.json
+    kernel: aryaarun07/biohub-p35-dcveto-on-931
+    kernel_version: 1
+    submission: 55888865
+    lb: 0.932
+    status: scored
+    date: '2026-08-30'
+    facts: [FACT-0393, FACT-0341, FACT-0345, FACT-0377, FACT-0378]
+    note: >-
+      PKT-0039 / LEVER-0042, Slot A, the ONLY inherited-component exploitation experiment and capped at one
+      submission whatever it scores. Launched under the four host conditions, each satisfied and evidenced
+      rather than asserted.
+      (1) THE EXACT COMMITTED ARTIFACT went through the class-aware preflight - the working tree was clean
+      for both the spec and the notebook at launch.
+      (2) AN ACTUAL ACCEPT RECEIPT, not an expectation: verdict PASS with failed=[], signature verified,
+      artifact class `submission` decided from spec.expects_submission. Its notebook_sha256
+      c2ecc3988880d485... matches the live built notebook EXACTLY, so the receipt binds the artifact that was
+      pushed rather than one like it. Five checks SKIP as out-of-class (PF03/05/06/07/10 are gate-smoke
+      checks); under the corrected profile gating a skip is recorded and excluded from the verdict, never
+      counted as a pass, and a class that should carry a check but has no profile fails closed.
+      (3) THE CONTRACT IS BOUND. Band 0.927-0.935 and falsifier "at or below 0.931" appear in the packet AND
+      verbatim in the submission description, so Kaggle timestamps the preregistration ahead of the score
+      (FACT-0396). The prereg file was hashed at 09:19:17Z with "no treatment built yet" recorded beside it,
+      an hour before the build. The treatment is ONE cell of ten, +293 characters, three os.environ lines and
+      ZERO deletions - exactly the vars of P24's single env edit.
+      (4) NO VETO OUTSTANDING. PKT-0036's recorded position was that the artifact is clean and it found
+      nothing to veto; its only blocker was the shared preflight returning FAIL, which was Gate-1 checks
+      applied to a submission notebook and is resolved by the class gating.
+      WHAT THE PREFLIGHT LICENSES AND WHAT IT DOES NOT. It licenses that the artifact is well formed and that
+      the single declared component takes effect on the deployed code path under both mount conventions. It
+      licenses NOTHING about the score: this configuration cannot be validated offline at all because its
+      secondary saw all 199 movies (FACT-0378), so the band is a prior and not a measurement. The notebook's
+      PROXY_SCORE over the four visible movies is not a selection signal.
+      THE MECHANISM UNDER TEST, read from the base's own scoring log: the released 0.931 configuration
+      resolves its DeepCenter file to best.pt, REJECTS it on an epoch-500 assertion against the checkpoint's
+      actual epoch 2, falls back to a collapsed checkpoint_last.pt whose recorded best_score is -0.045, and
+      runs with the safe-division veto off - so deepcenter_rejected=0 on all eight movies across 664
+      geometric candidates. The base holds the good checkpoint in hand and declines it. This experiment
+      removes exactly that and nothing else.
+
+  - id: EXP-0043
+    title: P36 passive feature-tap parity smoke, Gate 1 attempt 4 - the redesign
+    spec: scripts/kaggle_specs/p36_assoc_feature_tap_smoke.json
+    kernel: aryaarun07/biohub-p36-assoc-feature-tap-smoke
+    kernel_version: 1
+    submission: null
+    lb: null
+    status: invalid
+    date: '2026-08-30'
+    facts: [FACT-0403, FACT-0402, FACT-0400]
+    note: >-
+      The replacement for P33, which is superseded (EXP-0040, EXP-0041). Launched only after the class-aware
+      CPU preflight returned PASS with failed=[] and skipped=[] on the exact committed artifact, its receipt
+      signature verified and its notebook_sha256 matching the live file - the launch gate the host set.
+      NOT A FAILED CACHE - AN INVALID PARITY VERDICT. Recorded as the host directed: passivity PROVEN,
+      pair/role schema PROVEN, structural integrity PROVEN, and the parity verdict INVALID because the
+      reference quantity was downstream of secondary fusion. It is also the first Gate-1 run that produced
+      evidence. Three previous attempts compared
+      ZERO pairs; this compared 4,199 band-A and 9,907 band-B pairs across both expected crops, on real
+      32-dimensional features at the deployed downsample, with passivity proved statically and re-proved
+      in-kernel. Positional features round-trip at exactly 0.0 and integrity failures are zero, so the cache
+      structure, node ordering and role keying are sound and defect 6 does not recur.
+      The failure is a COMPARISON-TARGET defect, not a cache defect: the deployed probability is computed
+      after a secondary-model logit blend at weight 0.15, while the replay re-runs the primary head alone
+      (FACT-0403). Per the standing instruction, the failing artifacts were persisted and the mismatch
+      reproduced offline; nothing was patched and nothing relaunched.
+      The session also satisfies the standing GPU rule on its own terms: it produced a reusable artifact, the
+      1.6 MB archived pair-and-role cache, which is the first cache of the correct schema this campaign has.
+
+  - id: EXP-0044
+    title: P37 contract-2 passive feature-tap smoke - the first cache a training run could consume
+    spec: scripts/kaggle_specs/p37_assoc_feature_tap_c2_smoke.json
+    kernel: null
+    kernel_version: null
+    submission: null
+    lb: null
+    status: prepared
+    date: '2026-08-30'
+    facts: [FACT-0416, FACT-0417, FACT-0418]
+    note: >-
+      A NEW EXPERIMENT, NOT P36 RE-VERSIONED. FACT-0410 and FACT-0411 required this: the archived P36 cache
+      is contract 1, keeps its full evidentiary value and loses its training licence, and no legacy
+      read-only mode is admitted because contract 1 never held the pre-fusion surface. New spec, new out_dir,
+      new slug, new kernel id.
+      SCOPE IS DELIBERATELY NARROW. FACT-0407 already proved the P36 cache faithful to about 1e-6 on CPU
+      against real pack weights, so this smoke's remaining job is only the CPU/GPU float boundary on real
+      weights plus the contract-2 surfaces P36 never recorded - the pre-blend primary and post-blend deployed
+      columns as separate quantities, which is the distinction that invalidated P36's verdict.
+      NOT LAUNCHED AT THIS ENTRY. Built notebook sha256
+      48d68bfbde052ecbb852ae583563a62852f9255b5924ff4c128003b1680f3c1f, 11 cells, two expected crops
+      44b6_0113de3b and 44b6_0b24845f, single trunk on the support pack's split_0 primary
+      (sha256 12f6881ee3620a83) by design - it claims no dual-trunk pair. The class-aware CPU preflight
+      returns FAIL on PF01 alone, 9 of 10 applicable checks passing with NOTHING skipped, because the
+      injected patch scripts/kaggle_edits/assoc_tap_gate.py is uncommitted and the built notebook therefore
+      embeds code that exists at no commit. That is the whole blocker and it is cleared by a commit and a
+      plain rebuild, which reproduces the same notebook sha256 - verified twice, since the built notebook is
+      a pure function of the base notebook, the spec and the patch bytes.
+      THE COMMIT SET IS LARGER THAN THE FILE THE AUDIT NAMED, and this is the reason the entry records it:
+      assoc_tap_gate.py is GENERATED from scripts/win_bet/assoc_tap_replay.py by sync_tap_worker.py, which
+      embeds the worker's text in the patch's _AFTG_WORKER literal, and a drift-lock test fails the moment
+      the two disagree. Committing the named file alone would have left HEAD green on the preflight and RED
+      on the suite.
+      Preflight receipt _evidence/foundations/preflight_receipt_p37.json, signature verified, recording ten
+      input sha256s including the deployed 1047-line predictor 25b3ebfd8849 and never the vendored tree
+      (FACT-0408).
+
+  # ---------------------------------------------------------------------------------------------
+  # RETRO-BINDING OF SIX LEGACY SUBMISSIONS (2026-08-31). FACT-0444 measured the gap: Kaggle held 18
+  # scored submissions and experiments.yaml bound 12. These six are the remainder. They predate the
+  # release-receipt harness, so NO RECEIPT EXISTS FOR ANY OF THEM and none is fabricated. Four of the
+  # six artifacts were RECOVERED and hash-verified on disk by finishing a search rather than assuming
+  # they were gone - the AGENTS.md "check whether it is already on disk" class, which has now cost this
+  # project three false absences. Two remain unrecovered and say so.
+  # ---------------------------------------------------------------------------------------------
+
+  - id: EXP-0045
+    title: "P0A clean 0.913 reproduction (legacy, retro-bound)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55136759'
+    lb: 0.913
+    status: scored
+    date: '2026-07-31'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. Artifact RECOVERED and hash-verified: C:/temp/lbcal/p0a/submission.csv,
+      sha256 prefix 8c1605b5944d25e4, matching the sha256 the submission description itself declared.
+      Receipt ABSENT - this predates the release-receipt harness and none is fabricated. Description:
+      "P0A clean 0.913 reproduction; out sha256 8c1605b5944d25e4; structural audit PASS 10/10". The SCORE
+      is from Kaggle's own submissions endpoint and is authoritative; the artifact binding is verified by
+      digest; the spec and kernel that produced it are not recorded and are not reconstructed here.
+
+  - id: EXP-0046
+    title: "P0B clean base + source-locked reverse-time w=0.20 (legacy, retro-bound)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55136908'
+    lb: 0.914
+    status: scored
+    date: '2026-07-31'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. Artifact RECOVERED and hash-verified: sha256 prefix 4c285cae0c220a11, present
+      at TWO paths with identical bytes - C:/temp/lbcal/p0b/submission.csv and
+      C:/temp/lbcal/armb_base/submission.csv. Receipt ABSENT, none fabricated. Description: "P0B clean 0.913
+      base + source-locked reverse-time w=0.20; out sha256 4c285cae0c220a11; audit PASS; delta vs P0A: nodes
+      +64 edges +103 div -9, 749 parent reassignments". The two-path identity is recorded because a future
+      reader finding the same digest under a different experiment name should not conclude they are
+      different artifacts.
+
+  - id: EXP-0047
+    title: "P0-CR: v122 base + source-locked reverse-time + line-fit volume guard (legacy, retro-bound)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55147215'
+    lb: 0.906
+    status: scored
+    date: '2026-07-31'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. Artifact RECOVERED and hash-verified: C:/temp/lbcal/p0cr/submission.csv,
+      sha256 prefix 435bf5d19d85563c. Receipt ABSENT, none fabricated. Description: "P0-CR: v122 base +
+      source-locked reverse-time w=0.20 + line-fit volume guard; out sha256 435bf5d19d85563c; structural
+      audit PASS 10/10 (A1-A10, outside=0); causal question: is reverse-time's effect base-dependent
+      (clean-913 base gave +0.001, divisions -9; v122 base moves divisions +10)". This is the lowest-scoring
+      of the six at 0.906 and its own description frames it as a causal probe rather than a candidate.
+
+  - id: EXP-0048
+    title: "Arm B solo: flow-compensated motion-relink gate (legacy, retro-bound)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55181562'
+    lb: 0.914
+    status: scored
+    date: '2026-08-02'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. Artifact RECOVERED and hash-verified: C:/temp/lbcal/armb_solo/submission.csv,
+      sha256 prefix 83498f9e27d44532. Receipt ABSENT, none fabricated. Description: "Arm B solo: P0-B plus
+      flow-compensated motion-relink gate; corrected safe-division outdegree invariant; baseline byte
+      parity; audit PASS 10/10; sha256 83498f9e27d44532".
+
+  - id: EXP-0049
+    title: "P3 + arm-B motion-gate (legacy, retro-bound, ARTIFACT NOT RECOVERED)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55585140'
+    lb: 0.915
+    status: scored
+    date: '2026-08-17'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. ARTIFACT UNKNOWN and RECEIPT ABSENT - neither is fabricated. Its description
+      declares no sha256, so there is nothing to search for by digest and the finished search over
+      C:/temp and notebooks/ found no candidate that could be bound with confidence. Description in full:
+      "P3 + arm-B motion-gate (LOEO +0.0144/+0.0090, paired deployment substrate)". WHAT IS AUTHORITATIVE
+      HERE IS THE SCORE AND THE DATE, read from Kaggle's own submissions endpoint. Everything about which
+      bytes produced it is UNVERIFIED, and this entry exists so that absence is recorded rather than
+      leaving the submission unbound and invisible.
+
+  - id: EXP-0050
+    title: "P3 + ILP division economics, division_weight 0.55 (legacy, retro-bound, ARTIFACT NOT RECOVERED)"
+    spec: null
+    kernel: null
+    kernel_version: null
+    submission: '55616685'
+    lb: 0.915
+    status: scored
+    date: '2026-08-19'
+    facts: []
+    note: >-
+      RETRO-BOUND 2026-08-31. ARTIFACT UNKNOWN and RECEIPT ABSENT - neither is fabricated. Its description
+      declares no sha256. Description in full: "P3 + ILP division economics: division_weight 0.55 +
+      safe-div patch OFF + L3 restore (703 ILP divisions re-admitted, 0 from patch); pre-ILP audit measured
+      29/125 GT divisions offered to the solver at median edge_prob 0.9188; audit PASS 10/10". The score
+      and date are authoritative from Kaggle; the producing bytes are UNVERIFIED.
+
+  - id: EXP-0051
+    title: "P38 relink bonus b2: the first submission under the Q2 leaderboard-calibration policy"
+    spec: scripts/kaggle_specs/p38_relink_bonus_b2.json
+    kernel: aryaarun07/biohub-p38-relink-bonus-b2
+    kernel_version: 1
+    submission: '55915569'
+    lb: 0.932
+    status: scored
+    date: '2026-08-31'
+    facts: [FACT-0446]
+    note: >-
+      SCORE PENDING and the reading is SEALED IN ADVANCE by PKT-0045, committed at 77e41ca BEFORE the
+      artifact existed: at or below 0.930 kills the tested GLOBAL b2 amplification ON THE HIDDEN SUBSTRATE
+      and is NOT a claim that the hidden set resembles fold 1; at or above 0.935 is positive transfer FOR
+      THIS SETTING and is NOT confirmation of the consumption thesis, which is Gate B's unresolved question;
+      0.931 to 0.934 is UNINFORMATIVE, declared in advance, and licenses nothing.
+      TREATMENT: exactly one environment value on the P35 champion, BIOHUB_MOTION_RELINK_LEARNED_BONUS
+      1.0 -> 2.0. The other fifteen changed lines are PASSIVE instrumentation - atomic submission write plus
+      a completion heartbeat - required by gpu_protection_contract submission_run_v1 after the auditor's
+      VETO 6, and they alter no graph, score, threshold, candidate or post-processing behaviour.
+      ARTIFACT PROVABLY COMPLETE RATHER THAN ASSUMED: the in-kernel heartbeat reported rows 237,716,
+      bytes 12,373,010 and sha256 786ccf1b, and the fetched file's size and digest match it exactly.
+      Treatment verified LIVE in the immutable log at motion_relink_learned_bonus 2.0. Structural audit
+      PASS 10 of 10; receipt 0d56e564; protection contract SIGNED with failed empty.
+      LOOK ONE OF TWO on this lever family. An identical artifact hash is never resubmitted - Kaggle scoring
+      is deterministic, so that would spend a look and measure nothing. The plateau interior at bonus 4 and 8
+      is INELIGIBLE without new safety evidence, because fold-1 division TP declines there.

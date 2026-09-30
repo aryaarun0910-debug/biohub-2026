@@ -1,0 +1,44 @@
+{
+  "name": "p35_dcveto_on_931",
+  "slug": "biohub-p35-dcveto-on-931",
+  "title": "Biohub P35 DCVeto On 931",
+  "code_file": "biohub-p35-dcveto-on-931.ipynb",
+  "out_dir": "notebooks/kaggle_p35_dcveto_on_931",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb",
+  "base_sha256": "856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c",
+  "purpose": "PKT-0039 / LEVER-0042, THE ONLY exploitation experiment on the public lineage and capped at one submission. ONE controlled treatment on the released 0.931 base (FACT-0393): exchange ONLY the collapsed DeepCenter/veto configuration for the P24 best-checkpoint plus safe-division-veto bundle - the single knob in the public lineage measured POSITIVELY AND INDEPENDENTLY on our own substrate (FACT-0341), whose leaderboard contribution our offline instrument under-reads three to four times (FACT-0345). Every other difference in the public bundle is confounded (FACT-0377) and PKT-0028 rule (1) forbids crediting any of them, so nothing else is touched: no threshold change, no candidate widening, no rescue change, no stacking. Preregistered band and falsifier are in PKT-0039 and are repeated verbatim in the submission description so Kaggle timestamps them earlier than the score (FACT-0396). THIS CANNOT BE VALIDATED OFFLINE AT ALL - the base secondary saw all 199 movies (FACT-0378) - so the band is a prior, not a measurement, and no offline check licenses any part of it.",
+  "provenance": {
+    "base": "The released champion P32, notebook sha256 856451d88cf2e99415eef42bd90a22d0d95935b09e59be6d0df12a8e9db3668c, which produced submission 55871868 at 0.931 (FACT-0393) and passes the release receipt 26 of 26 (FACT-0396).",
+    "base_trap_E1_handled": "FACT-0396 exception E1: the P32 spec sets base_notebook == built_notebook, so its build consumed its own base and base_sha256 b998e582 exists nowhere in the worktree or in git history; kaggle_factory build on THAT spec now aborts. This spec does NOT reuse it. It names the surviving BUILT P32 notebook as its base and writes its own output to a DIFFERENT out_dir, so base != built and the base is a file that exists, is committed at 4cce909 and is clean in git.",
+    "component_exchanged": "Exactly the three environment variables that constitute the DeepCenter checkpoint / safe-division-veto pair, and they are exactly the three variables of the P24 spec's single env edit (scripts/kaggle_specs/p24_deepcenter_best_veto.json edits[0].vars).",
+    "why_these_three_and_no_others": "Direct comparison of the two env blocks shows the DeepCenter axis differs between P32 and P24 in these three variables ONLY. BIOHUB_USE_DEEPCENTER_VETO, BIOHUB_REQUIRE_DEEPCENTER_VETO, BIOHUB_DEEPCENTER_GAP_VETO, BIOHUB_DEEPCENTER_GAP_THRESHOLD and BIOHUB_DEEPCENTER_GAP_CONFIRM_MIN_SPAN_UM are already identical in both, and BIOHUB_DEEPCENTER_SAFE_DIV_THRESHOLD is unset in both so both take the same default. The safe-division RADII are a SEPARATE confounded difference in FACT-0377 and are deliberately left at the base values.",
+    "what_the_base_actually_runs": "Read from the fetched kernel log of the scoring run (C:/temp/exploit931/p32log/kernel.log): the integrity block resolves the DeepCenter file to best.pt and rewrites BIOHUB_DEEPCENTER_CHECKPOINT to it (line 128), the loader then SKIPS best.pt because epoch 2 does not match the base's expected epoch 500 (lines 300-301), and loads checkpoint_last.pt, the COLLAPSED epoch-500 prior, instead (lines 302-304). The pipeline manifest confirms safe-div veto False (line 537), and every movie reports deepcenter_rejected=0 at the safe-division repair stage. The released 0.931 base therefore pays to load a DeepCenter detector that rejects nothing on the division path.",
+    "mount_root": "BIOHUB_DEEPCENTER_CHECKPOINT is set to the /kaggle/input/datasets/<owner>/<slug>/ root, which BOTH fetched logs prove is the real mount: P32 log lines 300-303 and P24 log lines 295-298. The literal string in the P24 spec used the /kaggle/input/<slug>/ root, which did not exist at run time - the P24 loader never even printed a Trying line for it. Using the live root is a MOUNT-ROOT ADAPTATION OF THE IDENTICAL FILE (same sha256 8040999a...), not a second component change, and it is observationally equivalent on this base because the base's own integrity block rewrites the variable to the same resolved file either way. It is preferred so the loader's first candidate is correct without relying on a silent fallback.",
+    "author_credit": "The base configuration and its harmonic-probability fusion are the work of Kaggle user stephennedumpally, published publicly and run here unmodified apart from the single declared component exchange; no authorship is claimed.",
+    "not_launched": "Rule 8 - this spec neither launches nor submits. The primary agent decides the push after the CPU preflight; PKT-0036 releases the submission."
+  },
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_DEEPCENTER_CHECKPOINT": "/kaggle/input/datasets/pilkwang/biohub-deepcenter-unet3d-center-prior-v1/weights/full_frame_center/best.pt",
+        "BIOHUB_DEEPCENTER_EXPECTED_EPOCH": "2",
+        "BIOHUB_DEEPCENTER_SAFE_DIV_VETO": "1"
+      },
+      "expect": 1
+    }
+  ]
+}

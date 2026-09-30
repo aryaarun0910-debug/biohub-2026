@@ -1,0 +1,2033 @@
+# LEVERS REGISTRY - every hypothesis that could move the score, with its status.
+#
+# WHY THIS EXISTS
+# The most expensive recurring mistake in this project has been reopening a lever that was
+# already answered. The second most expensive has been CLOSING one by association - the
+# Trackastra pruning lane was filed as "a detour" on evidence about HOCT, a different model,
+# and stayed closed for weeks on evidence that was never about it.
+#
+# So a lever may only be closed by evidence ABOUT ITSELF, and `closed_by` must name the
+# FACT ids that did it. `scripts/core/validate_registry.py` enforces that a closed lever
+# names its evidence, and that its evidence is not UNVERIFIED.
+#
+# status:
+#   open      live hypothesis, may be claimed by a packet
+#   running   a packet is executing against it
+#   killed    tested and refuted BY EVIDENCE ABOUT ITSELF
+#   closed    ruled out for a stated structural reason (cost, contamination, infeasibility)
+#   parked    plausible but deliberately deferred; `reopen_when` states the trigger
+
+schema_version: 2          # 2 adds retracted_closure / reclose_pending
+updated: '2026-08-27'
+
+levers:
+
+# ---------------------------------------------------------------------------------------------
+# STANDING SUBMISSION POLICY - SEAM-CALIBRATION EXCEPTION (host, 2026-08-29)
+#
+# WHY IT EXISTS. Our offline instruments have repeatedly failed to predict leaderboard DIRECTION
+# and MAGNITUDE for this pipeline: DeepCenter read +0.0009 offline against +0.003 on the LB
+# (FACT-0345, a 3-4x under-read) and icom read +0.002 offline and scored -0.014 (FACT-0344). More
+# offline rigor cannot fix a seam; only a submission measures it. For a genuinely NEW model class
+# the risk is that a fortnight of both-fold work is spent before learning whether the offline proxy
+# tracks the LB for that kind of change at all.
+#
+# THE EXCEPTION. A genuinely new LEARNED ASSOCIATION MODEL may receive ONE calibration submission
+# after passing the honest FOLD-0 full-chain gate, BEFORE fold 1 is complete. Every condition binds:
+#   - it is a new learned SCORER, not another threshold, candidate rule or post-processing change;
+#   - RAW association improves through the complete chain, not merely the adjusted score;
+#   - opportunity CONVERTS into net true edges (the FACT-0376 quantity);
+#   - node recall stays acceptable AND division TP does not decline (FACT-0371 caution);
+#   - the artifact is audited, submitted STANDALONE, and preregistered with a band;
+#   - ONE slot, no stacking and no rapid follow-up;
+#   - FOLD 1 IS STILL REQUIRED before the model becomes established campaign evidence.
+#
+# THIS IS SEAM CALIBRATION, NOT PROMOTION. It does not weaken any gate for ordinary levers, and it
+# is not available to node-count manipulation, candidate widening, threshold nudges or
+# public-bundle micro-ablation - those remain excluded from submissions entirely.
+# ---------------------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------------------
+# STANDING GPU RULE (host, 2026-08-30) - EVERY SESSION MUST PRODUCE AN ASSET
+#
+# WHY IT EXISTS. Two consecutive GPU sessions were spent on Gate 1 and it never compared a single
+# crop. Attempt 1 died on a process boundary (FACT-0387); attempt 2 died on a dataset mount root
+# (FACT-0397) that this repository had already hit, diagnosed and written up on 2026-08-01 in a
+# file the failing notebook LOADS. Neither was a scientific result. Both were environment
+# discovery paid for at GPU rates.
+#
+# THE RULE. Every GPU session must produce ONE of:
+#   - a reusable feature dataset;
+#   - a trained model checkpoint;
+#   - a full-fold scientific result;
+#   - a leaderboard artifact.
+# GPU is NEVER used to discover mounts, imports, filenames, subprocess boundaries or empty inputs.
+# Those are CPU preflight questions and they are answered on CPU, against the exact built notebook,
+# the exact datasets and the real subprocess boundary, before a kernel is pushed.
+#
+# ONE ENVIRONMENT FAILURE AFTER THE PREFLIGHT EXISTS STOPS THE MECHANISM until it is reproduced
+# locally. There is no fourth speculative kernel.
+#
+# DAILY ATTRITION CONTRACT. Every 24-hour cycle ends with at least one of: an audited leaderboard
+# score; a reusable full-fold feature cache; a trained model checkpoint; a complete full-chain
+# model comparison; or a model family killed on committed evidence. A cycle that ends with only a
+# new harness, packet or audit rule is INCOMPLETE - unless that harness demonstrably prevented an
+# already-scheduled GPU launch, which is the one case where infrastructure counts as output.
+# ---------------------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------------------
+# THE WINNING FUNCTION AND THE REVISED PROMOTION GATE (host, 2026-08-30)
+#
+# THE FUNCTION. Offer the correct parent  x  discriminate it correctly  x  ensure the final relink
+# CONSUMES that score. We have separately failed each partial version - LEVER-0037 offered without
+# discriminating and was killed; LEVER-0039 discriminated without offering and was killed; LEVER-0041
+# discriminated on a widened surface and its output is discarded 85% of the time on fold 0
+# (FACT-0428). It is the COUPLED system that is the route past the public frontier, and it must be
+# tested coupled.
+#
+# WHY THE OLD FOLD-0 RANKING GATE IS RETIRED. Every prior gate required a favourable fold-0 paired
+# interval on contested parent ranking. FACT-0420 MEASURED that fold 0 cannot supply one: an apparent
+# +0.024 leaves exactly 0.000 out of fold, the refit moves 81 of 4,157 targets and all 81 sit in the
+# lowest margin quartile, at roughly ten contested errors per crop. Keeping that gate would prohibit
+# EVERY parent scorer regardless of merit - it demands a resolution the substrate does not have. This
+# is not a relaxation; it is the removal of an impossible condition and its replacement by five that
+# are each answerable.
+#
+# THE REPLACEMENT GATE. All five bind.
+#   RANKING     probability-free CONTEXTUAL scoring transfers positively in BOTH embryo directions.
+#               FACT-0421 currently supplies that premise and it must be re-established, not assumed,
+#               for any new scorer.
+#   CONSUMPTION the FROZEN scorer and bonus improve COMPLETE-CHAIN raw association on BOTH folds.
+#   STATISTICAL fold 1 shows a favourable crop-paired interval; fold 0 must be NON-INFERIOR with a
+#               POSITIVE POINT ESTIMATE. Do not demand an interval the surface cannot resolve.
+#   SAFETY      neither node recall nor division TP declines on either fold (FACT-0371).
+#   METRIC      an ADJUSTED improvement with flat or negative RAW association is REJECTED. This is the
+#               shape that killed LEVER-0036 (FACT-0375) and, mirrored, LEVER-0037 (FACT-0376).
+#   COMPARISON  widened surface + scorer + FINAL CONSUMER, against the DEPLOYED control - never against
+#               a widened-only control (FACT-0382).
+#
+# RECORDED BEFORE GATE B RUNS, as the host required, so it cannot be tuned to a result.
+# ---------------------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------------------
+# THE WINNING FUNCTION, SHARPENED (host, 2026-08-31) - after the reversed ladder and the reach oracle
+#
+#   RICH OBJECT REPRESENTATION -> DISCRIMINATIVE CANDIDATE SCORING WITH ABSTENTION -> A CONSUMER THAT
+#   PRESERVES THE GAIN
+#
+# WHY IT IS STATED AS A PRODUCT. Improving ANY ONE factor while freezing the other two has now produced
+# a zero or a bound five times, measured rather than argued:
+#   LEVER-0037  offered without discriminating        -> killed
+#   LEVER-0039  discriminated without offering        -> killed (FACT-0386)
+#   LEVER-0045  temporal proposal, frozen scorer      -> killed at 0.84x/1.13x the bar (FACT-0442)
+#   reversed ladder: nodes at a frozen consumer       -> EXACTLY ZERO edges moved (FACT-0447)
+#   pre-ILP ranking at a frozen consumer              -> only 15%/30% survives (FACT-0428)
+#   Gate A: consumer moved, score frozen              -> paid on ONE fold only (FACT-0437)
+# That is SIX instances and they cover all three factors from both sides: LEVER-0037/0045 and the
+# reversed ladder move the OFFER with the scorer frozen; LEVER-0039 and FACT-0428 move the SCORER with
+# the offer and consumer frozen; Gate A moves the CONSUMER with the score frozen. Every one returned a
+# zero, a bound, or a single-fold result. The factors are not additive and not separately testable.
+# Co-design, or expect a zero.
+#
+# WHERE THE FACTORS STAND. P38 (Kaggle 55915569) tests the THIRD factor on the leaderboard now.
+# FOCUS-3D -> HOCT targets the FIRST TWO together and is the most coherent currently identified
+# co-designed route - but NOT the only one. Still open: other mask generators feeding official HOCT;
+# a POINT-NATIVE HOCT trained from a contract we own; synthetic-correspondence T=2 pretraining
+# followed by cross-fitted association training; and a detector and consumer integrated TOGETHER.
+#
+# THREE SCOPE LIMITS THAT MUST TRAVEL WITH THE KILLS, so the board is not over-closed:
+#   FACT-0448's sixteen caps CORRECTING WRONG LINKS BETWEEN TWO ANNOTATED CELLS. It does not cap a
+#     scorer that ABSTAINS on unmatched-node edges, REMOVES bad edges, or RECOVERS missing true ones.
+#   FACT-0449 makes BROAD node deletion expensive. SELECTIVE deletion stays admissible and must pay
+#     through the COMPLETE objective.
+#   FACT-0447 holds TOPOLOGY FIXED by design. It cannot bound a detector producing new features,
+#     masks, candidates and associations JOINTLY. What is dead is the NODE-ONLY thesis.
+#
+# COMPUTE POLICY THAT FOLLOWS.
+#   Node-only detector GPU spend: HELD PERMANENTLY.
+#   Unprotected FOCUS/HOCT GPU execution: HELD until its adapter passes.
+#   CPU preparation and Gate B: NOT held for P38 - P38 decides whether the EXISTING consumer
+#     amplification transfers, not whether mask-aware association is valuable.
+#   GPU goes to the FIRST mask/HOCT smoke whose contract proves SCALE, FEATURE COVERAGE, OUTPUT
+#     INTERPRETATION, PROVENANCE and INDEPENDENT AUDITABILITY - all five, or it does not launch.
+# ---------------------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------------------
+# GPU PROTECTION CONTRACT (host, 2026-08-30) - FOUR SIGNED SECTIONS BEFORE EVERY LAUNCH
+#
+# This sits UNDER the standing GPU rule, not beside it: that rule says every session must produce an
+# asset, this one says what must be signed before a session may start. Four sections, each signed,
+# each failing CLOSED.
+#
+#   CODE      clean scoped tree; explicit staged paths; reproducible notebook SHA; unique slug and
+#             out_dir; deployed support-pack SHA pinned. A built notebook embedding uncommitted code
+#             is refused - and note the trap that produced this clause: the injected patch may be
+#             GENERATED, so committing the file the check names can still leave HEAD failing its own
+#             drift lock.
+#   DATA      a FOLD-LEGITIMATE trunk - explicitly NOT the invalid pairing FACT-0418 exposed, where
+#             every declared dual_trunk_pair had no legitimate arm on either fold and the audit
+#             constant would have refused the honest pair - plus contamination status and checkpoint
+#             hashes.
+#   PROCESS   exact environment propagation INTO the predictor subprocess; a positive heartbeat whose
+#             ABSENCE is the alarm; a crop-count assertion, because the kernel's own all_passed cannot
+#             see a crop that never ran; a timing probe with early abort that banks its own result.
+#   ARTIFACT  atomic output; capacity guard against the RE-DERIVED storage figure (FACT-0416, after a
+#             12.3x-low estimate); independent post-run reconstruction; and expected outputs
+#             RE-DERIVED FROM THE BUILT NOTEBOOK rather than trusted from the receipt - FACT-0417
+#             records the receipt's own expected-outputs field hardcoded to the wrong worker, which
+#             would have failed a correct run and passed a run that recorded nothing.
+#
+# NO GPU IS SPENT until the free coupled CPU experiment (LEVER-0044 Gate B) shows the learned signal
+# can reach the final graph at all.
+# ---------------------------------------------------------------------------------------------
+
+  - id: LEVER-0001
+    claim: >-
+      Smoothing node positions along a tracklet before the linker recovers association
+      accuracy, because ~37% of localisation error is independent per frame
+    status: killed
+    falsifier: >-
+      The nearest-parent statistic must move UP off the run's own deployed baseline.
+    closed_by: [FACT-0050, FACT-0051]
+    closed_date: '2026-08-25'
+    outcome: >-
+      Six of six measurements moved it DOWN, across two substrates and both estimators.
+      Mean -5.64 pp, linefit -1.41 pp on the pre-ILP frame. The kill is robust to the
+      disputed FACT-0043 anchor because it depends only on the SIGN of the change against
+      each run's own baseline. Mechanism - smoothing follows PREDICTED tracks, and predicted
+      tracks are the broken thing, so denoising along a wrong link propagates its error.
+      Consequence: do NOT move linefit_smooth_output_graph earlier (FACT-0052).
+
+  - id: LEVER-0002
+    claim: >-
+      A division STAGE 2 - keep the bijection, add divisions via a learned selector on
+      appearance change and longer-track cues - unlocks the structurally unreachable divJ
+    status: closed
+    falsifier: >-
+      Must beat the P9 division mechanism end-to-end on a scored submission.
+    # 2026-08-26 validity backfill: FACT-0130 and FACT-0131 are INVALID (EXP-0019 leak,
+    # FACT-0160). Replaced by their honest successors - FACT-0161 for the fold-1 numbers,
+    # FACT-0180 for the mechanism the lever is now aimed at.
+    supporting: [FACT-0034, FACT-0083, FACT-0084, FACT-0161, FACT-0180]
+    note: >-
+      SHARPENED 2026-08-25 by direct measurement. We recover 1 of 125 GT divisions on f1
+      (FACT-0080) while EMITTING 6,303 (FACT-0082) - a selection failure, not a threshold
+      failure, which is why blanket out-degree<=2 scored -0.0081. Independently corroborated
+      by a 48th-place competitor who measures that missed divisions fail 2-3 checks at once,
+      so no single threshold recovers anything (FACT-0084).
+      .
+      THE DESIGN CONSEQUENCE: our P9 mechanism is an AND-chain of independent gates (radii
+      8/11/10 AND mid-track parent AND mutual-nearest-orphan AND t+2 divergence). A
+      conjunction of gates cannot be tuned into a joint scorer - the correct structure is ONE
+      model that sees all cues together and emits a probability, then a top-k selection
+      against a budget.
+      .
+      AND THE CHEAPER MOVE FIRST: the pre-ILP graph already contains 24 of the 125
+      (FACT-0083); the ILP and relink destroy 23 of them. Recovering what we already have
+      precedes training anything. Note this also BOUNDS a selector over the current candidate
+      set at ~19% division recall.
+      .
+      hengck23 (discussion/726924) names the stage-2 architecture; a CC0 corpus of 165,267
+      labelled divisions exists for pretraining only (division rate inflated 4.07% vs 0.26%).
+      .
+      RE-AIMED AND DEMOTED 2026-08-26 on honest weights. THE MECHANISM IS NOW KNOWN
+      (FACT-0180): our fork generator's MAXIMUM sibling separation, 8.97 um, sits BELOW the
+      25th percentile of real divisions, 9.19 um. It is not imprecise, it is pointed at a
+      disjoint region. No selector over the current candidate set can help, because real
+      divisions are not IN it.
+      .
+      THE PROBLEM CLASS IS ALSO WRONG (FACT-0182): daughter antipodality separates at AUC
+      0.785, but that is a PAIRWISE interaction between the two daughter edges and the cost is
+      a SUM over edges. b-matching, min-cost flow and degree-constrained subgraph are all still
+      linear per-edge and are predicted to fail identically. The correct class scores
+      (mother, daughter-pair) TRIPLES.
+      .
+      AND THE PRIZE IS SMALL (FACT-0183): perfect forks are worth +0.035 against +0.326 for
+      perfect edges. 47% of divisions are lost to DETECTION before linking. The fold cannot
+      even validate a selector - 43 positives against 1.84M candidates (FACT-0185).
+      Demoted to 5. Do not build a selector before the edge/detector lane is exhausted.
+      .
+      CLOSED PROPERLY 2026-08-26 by the ceiling-raise seat. Three measurements, each sufficient:
+      (1) the BINDING gate is SAFE_DIV_MAX_UM = 4.66, not the sister gate (FACT-0290), and
+      raising sister to 22 um alone admits ZERO true divisions on both folds;
+      (2) raising the gates WITHOUT replacing the ranking admits zero true candidates inside the
+      cap (FACT-0291), which retro-explains EXP-0008 with no appeal to its confounds;
+      (3) a cross-embryo-validated triple scorer over the raised pool scores BELOW doing nothing
+      in BOTH directions (FACT-0293).
+      And the fold cannot validate a selector anyway - 51/19 positives, FP price differing 4.6x
+      between embryos, against a measured 10.5x cross-embryo precision swing on Zebrahub at 60x
+      the sample size (FACT-0294).
+      .
+      ALSO: the external-data plank named a CC0 corpus that DOES NOT EXIST on disk and was already
+      rejected at Gate B on measured grounds. The real substrate is Zebrahub, with a 1.48M-row
+      triple-feature table ALREADY BUILT (FACT-0296).
+      .
+      TWO UNEXPLOITED FINDINGS SURVIVE for whoever reopens this: the scorer accepts predecessor
+      and granddaughter evidence, so METRIC-LEGAL reach is 80/125 and 23/26 versus a naive 68/21;
+      and the daughter steal is FREE - it breaks a scored TP in ZERO of 48 cases, and allowing it
+      would raise reach 24->51 (f1) and 6->19 (f0) (FACT-0295). Neither rescues the lane alone.
+    closed_by: [FACT-0290, FACT-0291, FACT-0293, FACT-0294]
+    closed_date: '2026-08-26'
+    priority: 8
+
+  - id: LEVER-0003
+    claim: >-
+      The deployed detection threshold 0.96875 is too high; lowering it raises edge recall
+      by more than the under-production bonus it erodes
+    status: killed
+    falsifier: >-
+      EXP-0016 / EXP-0017 read as a PAIR must show a monotone or interior-optimum gain.
+    closed_by: [FACT-0102, FACT-0111]
+    closed_date: '2026-08-25'
+    outcome: >-
+      FULLY CLOSED - both directions, by LB arms AND by the offline curve. The curve bought
+      from the repaired p4 export shows detection recall is SATURATED: dropping 0.96875 to
+      0.5 buys +0.0010 recall for 23.7% more nodes, raising to 0.999 costs -0.043
+      (FACT-0111). That PREDICTS the measured arms exactly. The inherited threshold is
+      effectively optimal; there is no headroom either way. The real detection lever moved
+      DOWNSTREAM (FACT-0112, now LEVER-0011).
+      .
+      Originally: REFUTED IN THE DIRECTION TESTED. Both arms scored inside their pre-registered bands and
+      both moved DOWN: 0.90 -> 0.922, 0.94 -> 0.924 against the deployed 0.96875 -> 0.925.
+      Four independent lines of evidence supported lowering the threshold and all were wrong
+      about the sign. With the p6 control (0.999 -> 0.883) the four points bracket an interior
+      optimum at or slightly ABOVE 0.96875. LOWERING is closed; the remaining live question is
+      whether a SLIGHTLY HIGHER threshold pays, which the detpeak curve answers offline for
+      zero slots since T=0.5 makes every higher threshold a subset.
+    experiments: [EXP-0016, EXP-0017, EXP-0004A, EXP-0004B]
+    note: >-
+      The p4 detpeak export buys the whole [0.5,1.0] curve offline for zero submission
+      slots, which subsumes the pointwise arms. Smoke (EXP-0004S) shows the per-crop spread
+      is large - 4% vs 49% extra nodes on two crops of the same fold - so a single global
+      threshold is probably the wrong instrument.
+    priority: 9
+
+  - id: LEVER-0004
+    claim: Trackastra used as a PRUNER of candidate edges
+    status: killed
+    falsifier: Must beat the cached-graph baseline when scored.
+    closed_by: [FACT-0070, FACT-0071]
+    closed_date: '2026-08-25'
+    outcome: >-
+      Scored from cached graphs f0 -0.187, f1 -0.084. Its 14.7/55.2/39.2% rejection rates
+      cannot clear the measured 58.88% break-even deletion precision. Closed on evidence
+      about ITSELF, replacing an earlier closure-by-association with HOCT.
+
+  - id: LEVER-0005
+    claim: >-
+      Trackastra OWNING re-association with its background class live, replacing the
+      geometric LAP rather than filtering its output
+    status: open
+    priority: 1
+    reopened_date: '2026-09-01'
+    reopened_by: PKT-0050
+    new_mechanism: >-
+      Consume the reusable FOCUS mask/center/embedding export as a COMPLETE graph owner with
+      Trackastra's background class live. This is not the killed pruning mechanism: no incumbent
+      graph, geometric LAP, motion relink or downstream re-parenter is retained.
+    falsifier: >-
+      Kill the graph-owning route if it cannot satisfy biohubx_io_v1 on one preregistered real crop
+      from each fold, or if its complete-fold emitted graph fails to improve raw association on fold
+      0 with division TP preserved and fold 1 non-catastrophic. An adjusted-only gain, a result that
+      depends on pruning an incumbent graph, or failure to establish a valid T=2 owner by the packet
+      checkpoint also kills the tested mechanism.
+    reopen_when: >-
+      A cheaper lever is exhausted, or the p15 reading shows the deficit is edges not
+      divisions.
+    note: >-
+      A DIFFERENT mechanism from LEVER-0004 and explicitly NOT closed by it. The prior on it
+      should drop given the pruning result, but the two are not the same experiment and the
+      distinction must not be collapsed. Reopened only for PKT-0050's complete graph-owner arm over
+      the same reusable export as PKT-0049; no GPU or submission is licensed by reopening it.
+
+  - id: LEVER-0006
+    claim: The remaining gap is divisions rather than edges
+    status: running
+    falsifier: >-
+      EXP-0015 returns our pure adj_edge. ~0.923-0.924 means the edge term is already at
+      top-3 level and the whole deficit is divisions; ~0.915-0.920 means the gap is edges.
+    experiments: [EXP-0015]
+    supporting: [FACT-0100, FACT-0101, FACT-0080]
+    note: >-
+      PARTIALLY ANSWERED, NOT PINNED. The probe scored 0.906, BELOW both pre-registered bands.
+      The naive subtraction gives divJ 0.19, contradicting the direct 1/125 measurement
+      (FACT-0080) by 24x - the probe destroyed ~984 true-positive edges it was not meant to
+      touch, which alone explains the drop. Preferred reading: adj_edge ~0.924 with divJ ~0.01,
+      i.e. our EDGE term is near top-3 level and the deficit IS divisions. That is inferred,
+      not measured. A clean read needs a fork-free probe that does not trip the short-track
+      filter. Either way the direction of travel is divisions, which LEVER-0002 owns.
+    priority: 1
+
+  - id: LEVER-0007
+    claim: ILP_APPEARANCE_WEIGHT is mistuned
+    status: closed
+    closed_date: '2026-08-23'
+    outcome: 0.0 is the tuned public consensus; the code default 0.1 was the anomaly. No headroom.
+
+  - id: LEVER-0008
+    claim: HOCT replaces the ILP profitably
+    status: closed
+    closed_date: '2026-08-23'
+    outcome: Measured under-performing a tuned ILP at ~45 min/movie. Cost-infeasible.
+
+  - id: LEVER-0009
+    claim: Abstention / edge deletion improves precision enough to pay for lost recall
+    status: closed
+    closed_date: '2026-08-25'
+    outcome: >-
+      Break-even deletion precision is 58.88%; our best measured is 58.3%. Nothing has ever
+      cleared it. Generalises LEVER-0004.
+
+  - id: LEVER-0010
+    claim: >-
+      The defect ledger can be made to gate real specs by widening spec_name_globs
+    status: killed
+    closed_by: [FACT-0063]
+    closed_date: '2026-08-25'
+    outcome: >-
+      The proposed fix does not exist - kaggle_factory.py:295 ALREADY defaults to ["*"].
+      Widening the 8 rules would fail nearly every deploy spec. The real gap is that no rule
+      has ever been written for the deploy substrate, which is a coverage problem needing
+      new rules, not a globbing problem.
+
+  - id: LEVER-0011
+    claim: >-
+      Node recall is lost DOWNSTREAM of detection - in filtering and post-processing, not at
+      the threshold - and recovering it is worth more than any threshold change
+    status: open
+    falsifier: >-
+      If the peak-stage and scored-frame node recall agree on fold 1, there is nothing
+      downstream to recover and this closes.
+    supporting: [FACT-0110, FACT-0112, FACT-0083]
+    note: >-
+      Fold 0 loses ~1 point of recall between peak detection (0.9955) and the scored graph
+      (0.9861). The prior record puts scored fold-1 node recall at 0.8691, implying a far
+      larger downstream loss on the fold that carries essentially all the headroom
+      (FACT-0031). This is the same shape as the division finding - the pipeline discards
+      what it already has (FACT-0083) - and matches Soheil Ayati's public remark that "many
+      linking issues actually originated earlier during node selection".
+      .
+      PROMOTED TO PRIORITY 1 on 2026-08-26. The honest numbers put essentially all headroom
+      here: perfect edges are worth +0.326 against +0.035 for perfect forks (FACT-0183), and
+      47% of divisions are lost to DETECTION before any linking question arises. Changing ONLY
+      the edge weights moved fold-1 node recall by 12.7 points (0.8547 leaky-vs-honest delta),
+      so scored node recall is largely DOWNSTREAM of edge quality - a far larger effect than
+      the 1 point this lever was opened on.
+      .
+      The terms are coupled in one direction only: fix edges -> node recall rises ->
+      reachability rises -> the division ceiling rises with it. This is also what FACT-0030..0033
+      said before I wrongly flagged them suspect.
+      .
+      REFRAMED 2026-08-26 (FACT-0231). Translated into SCORE units the LINKING oracle beats the
+      NODE oracle on BOTH folds - f0 +0.1791 vs [0.0153,0.0460], f1 +0.2100 vs [0.1003,0.1655] -
+      even at the top of the node band. The fold-1 "nodes dominate" reading was a UNIT ERROR:
+      the recorded +0.136 was an edge-RECALL delta, not a score delta. So this lever stays
+      priority 1 but its target is EDGE ASSOCIATION, not node recall per se. Node recall is
+      largely downstream of edge quality anyway - changing only the edge weights moved fold-1
+      node recall 12.7 points.
+    priority: 1
+
+  - id: LEVER-0012
+    claim: >-
+      Relaxing the relink bijection with a priced second row per source recovers the
+      fork-collapsed divisions
+    # 2026-08-26 validity backfill. The status said `killed` while `reopened: true` and the
+    # status_note said the opposite - a contradiction the gate could not see, because nothing
+    # graded the evidence. R9 now refuses a closure that rests on an INVALID fact, so the
+    # closure is RETRACTED rather than annotated: status follows EXP-0021, which is running.
+    status: killed
+    closed_by: [FACT-0323, FACT-0325]
+    closed_date: '2026-08-27'
+    falsifier: >-
+      Any penalty must beat the disabled control on the offline LOEO score.
+    retracted_closure:
+      facts: [FACT-0131]
+      date: '2026-08-26'
+      reason: >-
+        FACT-0131 is INVALID - all six p19 sweep arms ran on the EXP-0019 leak (FACT-0160,
+        FACT-0221). Kept here as provenance: this lever WAS closed, and by what.
+    reclosed: >-
+      2026-08-27 on HONEST fold-0 evidence (FACT-0323, EXP-0022, clean split_0 weights): every penalty is
+      below the control (-0.0087 at best, -0.0140 at worst), division TP never moves, and the score only
+      recovers as the penalty grows - the reopening prediction (FACT-0221) failed on the deciding statistic.
+      Fold 1 (EXP-0021) is recorded when it lands as the second embryo direction; it cannot un-kill this.
+    status_note: >-
+      REOPENED 2026-08-26 (FACT-0221). This closure rests ENTIRELY on the leaked substrate -
+      all six p19 sweep arms used split_0 weights against held-out 6bba. The sweep concluded
+      penalties never help, which is TRUE where precision already exceeds break-even; the leak
+      arranged exactly that (10.4% vs 9.0%). On both honest folds the premise INVERTS - we
+      over-accept by 3.1x (f0) and 16.7x (f1).
+      New mechanism and stated falsifier both exist, satisfying the mission rule for reopening:
+      re-run the pen_* sweep on _evidence/exports/loeo_f1_strict/. PREDICTION - score rises
+      monotonically with penalty until accepted-fork precision reaches ~3.4%. If it does not
+      rise, the closure stands on honest evidence and the lever dies properly.
+    reopened: true
+    outcome: >-
+      HARMFUL AT EVERY PENALTY: -0.0040 (p=0) to -0.0023 (p=2) against a control that
+      reproduced the champion exactly. divJ FALLS at every setting (0.0743 -> 0.061-0.067)
+      and div_tp drops 26 -> 21, so it DESTROYS correct divisions rather than finding them.
+      .
+      MECHANISM: linear_sum_assignment returns at most min(2*n_src, n_tgt) pairs, so
+      duplicating source rows cannot CREATE edges, only reallocate them - a source winning
+      two targets orphans another, which OUTPUT_PRUNE_ISOLATED then deletes. At penalty 0
+      that cost 3,412 nodes and 6,105 edges to buy 95 forks.
+      .
+      ROOT CAUSE, and this is the transferable part: the relink cost is
+      motion + 0.05*raw - 0.75*prob, a GEOMETRIC prior containing no division-specific
+      signal. Structural permission to fork is NECESSARY BUT NOT SUFFICIENT; the information
+      simply is not in the cost function. Cost: one GPU session, ZERO submission slots.
+    note: >-
+      This does NOT close LEVER-0002. That lever proposes a LEARNED selector on appearance
+      change and longer-track cues - a different mechanism, and precisely the signal shown
+      here to be missing. Closing it by association would repeat the Trackastra/HOCT error.
+
+  - id: LEVER-0013
+    claim: >-
+      Our offline LOEO diagnostics have been measuring a DIFFERENT substrate from the
+      deployment, which may explain past offline-versus-leaderboard disagreements
+    status: closed
+    closed_by: [FACT-0232]
+    falsifier: >-
+      If a champion-substrate LOEO export and a p0b-substrate one agree within noise on the
+      same fold, the substrate difference is immaterial and this closes.
+    note: >-
+      Found while building EXP-0019. The champion builds from notebooks/kaggle_p3_harmonic;
+      the pre-existing LOEO chain builds from notebooks/kaggle_p0b_clean913_revtime, an older
+      base carrying 20 forward-porting edits - two of which already patch the relink region.
+      PREMISE REVERSED 2026-08-26 (FACT-0160). EXP-0019 was not a cleaner measurement - it was
+      a LEAKY one, scoring the 6bba embryo with pack split_0 weights trained on 6bba. The
+      p0b-substrate atlas is LOEO-CLEAN. A substrate difference may still exist, but it is
+      confounded with the leak and cannot be estimated from EXP-0019.
+      .
+      CLOSED 2026-08-26 (FACT-0232). The atlas is verified LOEO-CLEAN (built from subvoxel_f0 +
+      subvoxel_f1; subvoxel_f1 uses OOF split_1). A different clean fold-0 substrate scores
+      0.9037 against the atlas 0.9033 with the lever ranking intact and magnitudes stable. The
+      "substrate mismatch" was really the LEAK. On clean substrates the ranking is robust.
+    status_note: closed by FACT-0232
+    priority: 9
+
+  - id: LEVER-0014
+    claim: >-
+      REMOVING false divisions is worth as much as finding true ones, because
+      divJ = TP/(125+FP) and our FP (225) exceeds all real divisions (125)
+    status: killed
+    falsifier: >-
+      If no feature separates our 26 TP from our 225 FP better than chance, a filter cannot
+      be built and this closes.
+    # 2026-08-26 validity backfill: FACT-0130 is INVALID (EXP-0019 leak, FACT-0160).
+    # Its honest successor FACT-0161 is what actually supports this lever now, and it is
+    # already the evidence that killed the reframe.
+    supporting: [FACT-0161]
+    note: >-
+      THE REFRAME. TP+FN is FIXED at 125, so FP alone dilutes the denominator. Deleting every
+      FP with ZERO new discovery gives 26/125 = 0.208, i.e. +0.0134 of score by subtraction.
+      We have spent the cycle trying to FIND divisions while precision sits at 10%. A filter
+      is a ranking problem over 350 existing candidates, not a discovery problem.
+      .
+      Includes the model-misspecification conjecture: if true sibling separation is unimodal
+      with an interior mode (~10.6 um - OUR OWN measurement, see FACT-0174, NOT public) while our cost is MONOTONE in
+      distance, then any monotone ranker preferentially selects the CLOSEST pairs - which are
+      the false ones. Prediction: FP separation < TP separation. THAT SUB-CONJECTURE IS
+      UNAFFECTED by the leak - the GT separation distribution is ground truth.
+      .
+      DEPRIORITISED 2026-08-26 (FACT-0160): the headline arithmetic came from the LEAKY
+      TP=26/FP=225 split. On honest weights (TP 1-3, FP ~500) deleting every FP is worth about
+      +0.0019, not +0.0134 - below any promotion bar. The lever is not dead, but it is no longer
+      priority 1 and must be re-costed on honest counts before any effort is committed.
+      .
+      KILLED 2026-08-26 (FACT-0171). Re-costed: the veto ceiling is +0.00064 (f1) and +0.00611
+      (f0) for deleting EVERY false division perfectly at zero collateral. Break-even is 616
+      false removed per true one lost on fold 1. The ceiling scales with TP, and honest TP is
+      1 and 2 - my "removal is worth as much as discovery" reframe was a pure leak artifact.
+      The NUMERATOR is broken; you cannot subtract your way to a score. Perfect SELECTION is
+      worth +0.053 (f1) / +0.083 (f0) at current reach - discovery is the lane.
+    closed_by: [FACT-0171, FACT-0161]
+    closed_date: '2026-08-26'
+    priority: 9
+
+  - id: LEVER-0015
+    claim: >-
+      Cell-count conservation gives a per-frame division BUDGET that no local geometric gate
+      can express
+    status: killed
+    falsifier: >-
+      If GT cell count does not track division count (cells leave the volume, filtering
+      removes them), the conservation assumption fails and this closes.
+    closed_by: [FACT-0153, FACT-0151]
+    closed_date: '2026-08-26'
+    outcome: >-
+      REFUTED - the falsifier fired verbatim. Cell count does not track divisions: AUC 0.5592
+      for GT divisions and 0.4674 (BELOW chance) for separating our TP from FP forks. 48.8%
+      of GT divisions occur where the count change is <= 0. Fork count carries 2.0% of the
+      variance in count change. 57.6% of GT track ends sit within 5 um of the crop boundary
+      (27.0% base rate), so the sub-volume population is not closed and conservation holds
+      only in aggregate - per-interval error is 37.8x the division signal.
+      .
+      EVERY budget variant loses even under an ORACLE within-interval ranking: best case
+      -0.00105, realistic -0.0017. The algebra explains it (FACT-0152): proportional pruning
+      is strictly harmful, and a global budget prunes mostly INVISIBLE forks (96% are unscored,
+      FACT-0151) while paying for the scarce TPs it hits. Independently corroborated by the
+      p19 sweep, where every suppression setting scored worse.
+
+  - id: LEVER-0016
+    claim: >-
+      Forward/reverse assignment DISAGREEMENT is a division signal obtainable with no new
+      model and no new features
+    status: killed
+    falsifier: >-
+      If GT division parents are not enriched among forward/reverse disagreements versus base
+      rate, there is no signal and this closes.
+    closed_by: [FACT-0201, FACT-0200]
+    closed_date: '2026-08-26'
+    outcome: >-
+      ENRICHMENT IS 0.00x IN BOTH FOLDS - 0 of 106 GT division parents among 1,639 disagreement
+      nodes on fold 1, 0 of 26 among 1,468 on fold 0. Killed at the MECHANISM, not merely
+      empirically: linear_sum_assignment is invariant under transposing the cost matrix, and a
+      bijection's constraint set is time-symmetric, so forward and reverse are the SAME problem
+      and abandon the same link. A control zeroing the velocity term drops disagreement to 1
+      node in 530,792, proving 100% of it comes from the asymmetric extrapolation term and none
+      from the bijection. It is a velocity-consistency signal.
+      .
+      CAUTIONARY: on the LEAKED export this looked real at 60x enrichment, p=3.1e-08
+      (FACT-0202). A leak manufactures significant structure in derived analyses, not just
+      inflated headlines.
+    note: >-
+      A division forward in time is a MERGE backward. Both directions use a bijection, so both
+      must abandon something at a real division - but they fail DIFFERENTLY. This extracts
+      division information from structure we already compute, which matters because the relink
+      cost provably contains none (LEVER-0012).
+    priority: 3
+
+  - id: LEVER-0017
+    claim: >-
+      Ensembling used as a division VETO raises divJ without finding anything new
+    status: closed
+    falsifier: >-
+      If independent linkers agree on our false divisions as often as on our true ones,
+      agreement carries no signal and this closes.
+    closed_by: [FACT-0176, FACT-0171]
+    closed_date: '2026-08-26'
+    outcome: >-
+      CLOSED as low-ceiling AND untestable. Agreement AUC 0.543 within the sweep and 0.482
+      (BELOW chance) across genuinely different pipelines; only 1.6-2.2% of forks are confirmed
+      by any other pipeline while nodes replicate at 79-82%, so forks are ~40x less
+      reproducible than nodes. Independently, the veto ceiling is +0.0006/+0.0061 (FACT-0171),
+      so even a perfect signal could not pay. And on honest weights the test is UNPOWERED by
+      construction - TP is 1 (f1) and 2 (f0); no agreement statistic is estimable from n=1.
+      Recorded as untestable rather than as a clean null.
+    note: >-
+      Detection ensembling is a known trap - unioning detections without a merge pass costs
+      ~9% for nothing (Duvanov, EXTERNAL). But a veto only ever REMOVES, and removal is
+      exactly what divJ = TP/(125+FP) rewards.
+    priority: 3
+
+  - id: LEVER-0018
+    claim: >-
+      The node-ratio multiplier is uncapped above 1, so node COUNT is a direct lever
+      independent of node quality
+    status: killed
+    falsifier: >-
+      If the multiplier is in fact capped at 1 in the official scorer, there is no bonus to
+      exploit and this closes.
+    closed_by: [FACT-0173]
+    closed_date: '2026-08-26'
+    outcome: >-
+      PREMISE FALSE. Pooled total_node_ratio is +0.0240 - we OVER-produce. FACT-0021's -0.0937
+      had no instrument and is wrong by ~37x in the wrong DIRECTION. There is no
+      under-production bonus to exploit; each 1% of node inflation costs 0.00090 and needs 54
+      new true edges to break even.
+    supporting: [FACT-0102, FACT-0111]
+    note: >-
+      adj_edge = edge_jaccard * (1 - 0.1 * total_node_ratio), clamped below at 0 and
+      reportedly UNCAPPED above 1. We under-produce (ratio -0.0937, UNVERIFIED) and reportedly
+      collect a bonus. This would explain why LOWERING the detection threshold scored worse
+      despite recall being saturated - the lever would be node COUNT, not node QUALITY, and we
+      have never optimised it directly.
+    priority: 2
+
+  - id: LEVER-0019
+    claim: >-
+      A sibling-separation FLOOR removes most false divisions while keeping the true ones,
+      because real divisions have an interior-mode separation and our gates are hard ceilings
+    status: open
+    falsifier: >-
+      If the measured fold-0 gain does not reproduce on a clean fold-1 rescore, or if it fails
+      on the leaderboard, this closes.
+    supporting: [FACT-0240, FACT-0241, FACT-0242]
+    note: >-
+      MEASURED, NOT PROJECTED: dxy >= 4.5 um scores +0.0062 end-to-end on the LOEO-clean fold 0
+      (0.9037 -> 0.9099), keeping all 3 TP while removing 95 of 103 FP, at a -0.0003 edge cost.
+      Transfers cross-fold: threshold fit on 44b6 applied to 6bba takes FP 491 -> 5 with TP 1 -> 1.
+      Single feature, AUC 0.994 pooled, no model, no GPU.
+      .
+      NEXT STEPS, in order: (1) rescore the clean fold-1 export with the same rule - it was killed
+      mid-run at session close; (2) report both embryo directions before promoting; (3) only then
+      consider a submission. Note this is a REMOVAL rule and FACT-0212 says removal also drops the
+      precision bar for any future proposer 5x, so it composes with the division lane rather than
+      competing with it.
+      .
+      VALIDATED AND DEFLATED 2026-08-26 (FACT-0300). Fold-1 measured end-to-end at +0.0003 - it
+      holds its single TP while removing 456 of 491 scored FPs. But FACT-0240s fold-0 substrate
+      was a DIFFERENT NOTEBOOK VINTAGE; vintage-matched fold 0 gives +0.0036, and the POOLED
+      objective the contract requires is +0.00085 at T=4.5, at most +0.00111 at 5.0. The headline
+      +0.0062 was a ~5-7x overstatement. Still positive on BOTH embryo directions and free at
+      inference, so it stays open - but it must never again be quoted as +0.0062.
+      .
+      DEPLOY AT 4.5, NOT THE POOLED OPTIMUM 5.0: fold 0s lowest TP fork sits at dxy 5.45, so 4.5
+      leaves 0.95 um of margin against 0.45 um, and the extra +0.0003 does not pay for it.
+      .
+      TWO RISKS PRICED (FACT-0301, FACT-0303): the margin is the same size as an unmeasured
+      coordinate distortion of up to 0.74 um between the smoothed exports it was fitted on and
+      the pre-smoothing coordinates it would run against; and it must be a POST-EMISSION removal,
+      because a proposal-time reject frees the cap slot and creates new forks at higher dxy. The
+      safe_division tag decides which edge is dropped, and the SIGN of the fold-1 result depends
+      on that choice.
+      .
+      ANTI-COMPOSES WITH THE CEILING RAISE (FACT-0292) - dxy AUC falls 0.994 to ~0.51 once
+      long-separation candidates are admitted. It works BECAUSE the gates are tight.
+    priority: 3
+
+  - id: LEVER-0020
+    claim: >-
+      A defensible offline-to-leaderboard mapping exists, or can be shown not to exist with
+      the data we hold
+    status: running
+    falsifier: >-
+      If no pooling of the two folds reconciles with the LB, offline cannot predict deployed
+      performance and every offline-vs-competitor comparison must carry that caveat.
+    supporting: [FACT-0184]
+    note: >-
+      0 of 7 LB-scored experiments has an offline score. Fold 0 reads 0.900 and fold 1 reads
+      0.703 against an LB of 0.925. This gap produced the retracted FACT-0141 and I then
+      repeated the same incommensurable comparison in my own correction of it. EXP-0021 and
+      EXP-0022 are running and their penalty -1 control arms are the champion config on both
+      folds, which is the first half of a real calibration.
+    priority: 2
+
+  - id: LEVER-0021
+    claim: >-
+      Refining endpoint localisation - replacing integer node coordinates with sub-voxel
+      centres - fixes the geometry the linker is failing on, and is worth 2-6x the best
+      measured division gain
+    status: killed
+    closed_by: [FACT-0314, FACT-0316, FACT-0317]
+    closed_date: '2026-08-26'
+    outcome: >-
+      KILLED on both embryo directions under BOTH pre-registered mechanisms, CPU-only, zero slots
+      (PKT-0017). (1) Sub-voxel refinement around the detection: primary arm -1.3% median residual
+      on the honest fold against a -10% bar; passes only on fold 0, where DeepCenter is in-sample
+      (FACT-0310), and even there the score is flat because the MEAN does not move (FACT-0314).
+      (2) Peak-snap: mean residual +6.4% / +14.2%, scorer round-trip -0.0146 / -0.0114 (FACT-0316).
+      MECHANISM: the deployed centre prior does not localise - its peaks sit a median 2.6 um from the
+      annotated centre and its centroid recovers only ~20% of an imposed offset (FACT-0317). The
+      deployed checkpoint is worse still: collapsed, ~0 on unseen embryos (FACT-0311).
+      .
+      WHAT SURVIVES: FACT-0270 (mislinks are geometrically wrong endpoints) is untouched - it is
+      evidence about the linker's inputs, not about DeepCenter. FACT-0272's dose-response is REFUTED
+      as a median-based model: a -9% / -14% median bought +0.0025 / +0.0002. Reopening needs a
+      DIFFERENT localiser (not DeepCenter) and a falsifier written on the MEAN residual and the >3 um
+      tail, then a scorer round-trip.
+    falsifier: >-
+      TWO STAGES, pre-registered. (a) If the refinement does not reduce the median matched-node
+      residual by at least 10%, kill it BEFORE re-scoring. (b) If the residual drops ~25% but
+      the score does not rise by at least +0.010 on BOTH folds, the dose-response model is wrong
+      and the lever dies.
+    supporting: [FACT-0270, FACT-0272, FACT-0273, FACT-0274]
+    note: >-
+      THE MECHANISM IS MEASURED (FACT-0270): mislinked cells barely moved - GT displacement 2.33
+      / 2.44 um - yet our two detections sit 7.68 / 7.93 um apart. Endpoint residual is
+      3.35 / 3.68 um on mislinks against 1.68 / 2.30 um on true positives. The linker picks the
+      geometrically better answer and is wrong because the coordinates are.
+      .
+      THE OPPORTUNITY IS UNEXPLOITED (FACT-0273): every predicted coordinate in both honest
+      exports is 100% INTEGER - including the export labelled subvoxel - so sub-voxel
+      localisation has never reached a submission. And DEEPCENTER, a trained UNet3D centre-prior
+      heatmap, is ALREADY in the deployed pipeline but used only as a boolean VETO for synthetic
+      gap points. It never moves a primary detection.
+      .
+      CHEAPEST EXPERIMENT: run deepcenter_heatmap_for_frame over the existing strict export,
+      replace each integer (z,y,x) with the local sub-voxel argmax or centre-of-mass, and
+      re-score both folds with scripts/core/score_loeo_submission.py. NO retraining, NO Kaggle,
+      CPU-hours only.
+      .
+      CAVEAT ON THE ESTIMATE: the dose-response is SIMULATED on frozen node-to-GT matches, not a
+      scorer round-trip, because refined coordinates would change the matching itself. That is
+      exactly what stage (b) of the falsifier tests. Voxel quantisation is only ~0.50 um RMS of
+      the residual, so most of the error is genuine centroid error of uncharacterised origin.
+    priority: 1
+
+  - id: LEVER-0022
+    claim: >-
+      Re-localising every exported node to the intensity-weighted centroid of the RAW frame (the
+      0.927 public lineage's refine_centroids: z+-1, y/x+-3 voxel window, 20th-percentile baseline)
+      reduces the mean endpoint residual and the >3 um tail on the honest fold, and that lifts the
+      scorer-exact fold score on both embryo directions
+    status: killed
+    reopen_when: >-
+      SATISFIED 2026-08-27: the host authorised the queued p23 submission and the organizer's converter
+      casts coordinates to Float64 (FACT-0336). Deploy spec p23_icom155.json is complete.
+    outcome: >-
+      Full scale, both folds (FACT-0330): +0.0013 / +0.0024 for icom_155 - positive in both directions, below the
+      pre-registered +0.005 bar the pilots (FACT-0324) had suggested. Rounded export is <= 0; float export required.
+    falsifier: >-
+      Same two stages as LEVER-0021 but on the statistics FACT-0314 showed the score follows:
+      (a) on fold-1 frozen matches the primary arm must cut the MEAN residual by >= 10% AND the
+      fraction of matched nodes beyond 3 um by >= 20%; miss either and the lever dies.
+      (b) the scorer round-trip must be >= +0.005 on fold 1 and >= 0 on fold 0 at pilot scale,
+      then >= +0.005 on BOTH folds at full scale. A fold-0-only pass does not count.
+    supporting: [FACT-0270, FACT-0314, FACT-0317]
+    closed_by: [FACT-0344]
+    note: >-
+      NEW MECHANISM relative to the killed LEVER-0021: no learned prior at all - the raw image's
+      intensity centroid, which cannot have the flat-blob pathology FACT-0317 measured in DeepCenter.
+      It is IN the 0.927 public notebook (arnav170/biohub-sdw60 cell13:71-134, called before
+      filter_output_graph), so it is field-validated as harmless at worst; its isolated value is
+      unmeasured because the public lineage bundled it with the division port. Instrument:
+      scripts/win_bet/dc_subvoxel_refine.py icentroid + eval, scripts/win_bet/ea_atlas.py; substrate:
+      the clean champion exports of EXP-0021/0022 (FACT-0322). Note the window geometry caps the
+      possible shift at ~2 um, so it can only fix sub-2-um errors - the z axis (RMS 1.6-2.4 um,
+      FACT-0313) is the one it can reach least.
+    priority: 2
+
+  - id: LEVER-0023
+    claim: >-
+      A detector retrained with the FULL trunk on competition GT plus external division supervision
+      (Jose Freitas synthetic divisions, Zebrahub zh001r identity edges) and movie-level validation
+      raises node selection on the under-detected embryo class and lifts the fold-0 paired delta by
+      >= +0.005 - the only lane sized for the +0.03 gap to the top-3 threshold
+    status: open
+    falsifier: >-
+      Gate 1 (plumbing): EXP-0024's S5 smoke must pass (two finite fp16 steps, detection_drift <= 1e-4,
+      a zero-epoch baseline) or the packaging is dead. Gate 2 (learning): the first full training run
+      must beat its own zero-epoch baseline on held-out link_top1 / detection F1 at the deployed
+      threshold; no improvement = the data or objective is wrong, stop. Gate 3 (transfer): a fold-0
+      LOEO export with the new weights must show a paired delta >= +0.005 (FACT-0321 instrument, crop
+      bootstrap CI excluding 0) or the weights are not deployed. Gate 4: one submission; band stated
+      before the score. Any gate failing closes the lever on evidence about itself.
+    supporting: [FACT-0296, FACT-0321, FACT-0183, FACT-0339]
+    note: >-
+      Re-scoped from the S1/S5 spec after the 2026-08-27 dossier (C:/temp/intel/H1_DOSSIER.md) and
+      external research (C:/temp/intel/EXTERNAL_RESEARCH.md): S1 as packaged trains a 33-parameter
+      head; every published from-scratch retrain lands at or below the public stack; the teams above
+      0.95 pair retraining with node-budget-driven detection, synthetic division pretraining and new
+      detector architectures. Host confidence stated 2026-08-27: P(>= +0.005 LB) ~ 0.20 for H1 as
+      packaged; the re-scope exists to raise that, not to assume it. Compute: Colab (FACT-0318) under
+      a host-recorded budget; ~100-150 units per training lane on A100. Launch only after EXP-0024
+      passes and the Colab parity pilot (p21) reproduces Kaggle.
+    priority: 1
+
+  - id: LEVER-0024
+    claim: >-
+      The residual of the public 0.927 lineage's edge over P9 is its DeepCenter bundle - the epoch-2
+      best.pt checkpoint (whose heatmap is non-zero on unseen embryos) together with the safe-division
+      veto switched ON - and deploying that bundle env-only on P9 lifts the public LB
+    status: closed
+    falsifier: >-
+      One submission of scripts/kaggle_specs/p24_deepcenter_best_veto.json (EXP-0025), pre-registered
+      band 0.921-0.929 with the LOW band promoted to central (0.925). Killed if the LB is <= 0.925
+      (FACT-0001, no gain). No offline instrument is honest for this lever: DeepCenter is in-sample on
+      fold 0 (FACT-0310) and the strict LOEO arm disables it, so the submission IS the cheapest valid test.
+      If it scores >= 0.927, P10 (best.pt alone, built, never submitted) attributes the gain between
+      the two coupled knobs before anything is called a mechanism.
+    supporting: [FACT-0311, FACT-0312, FACT-0331]
+    closed_by: [FACT-0341]
+    note: >-
+      Opened 2026-08-27 after EXP-0023 killed the detection-blend explanation (FACT-0331): the 0.923 ->
+      0.927 chain (C:/temp/intel/arnav170_sdw60/REPORT.md) is code-identical to P9 except for sdw
+      (dead), lambda 0.30 (arnav's 0.40 probe flat), refine_all_centroids (<= 0 as deployed, FACT-0324),
+      and this bundle. EXP-0008 turned the veto on with the COLLAPSED checkpoint (FACT-0311), which
+      rejects every checked point (FACT-0312) - so the bundle has never been measured with a live prior
+      on our lineage. Coupled by design: the gap veto also changes from 0% to ~18% accepted (FACT-0312).
+      Sign unknown; this is a one-submission question, not a mechanism claim.
+    priority: 4
+
+  - id: LEVER-0025
+    claim: >-
+      The scorer's ACTUAL division acceptance (fork at the node matched to the GT divider OR its
+      predecessor; daughter evidence from the GT child OR a grandchild) plus a TARGETED steal of the
+      second daughter from a provably-wrong parent converts metric-legal-but-unscored GT divisions into
+      true positives at near-zero edge cost, lifting the division term on BOTH embryo directions
+    status: parked
+    reopen_when: >-
+      a LEARNED triple scorer (LEVER-0002 class) reaches >= 15% precision on the steal candidates cross-fold,
+      or the orphan sub-lane is combined with another positive to clear +0.003 on a fold; the census and
+      oracle (FACT-0333/0334) stand and do not need re-deriving.
+    outcome: >-
+      Stage C FAILED the bar (FACT-0337): the GT-free steal scores -0.0141/-0.0076 (precision ~0), the
+      orphan sub-lane is +0.0013 (f1) / -0.0003 (f0), below +0.003. The +0.0192/+0.0133 oracle was GT
+      selection, not per-candidate signal. Parked, not killed.
+    falsifier: >-
+      Three stages, each on the clean champion controls (FACT-0322) with the scorer round-trip, both folds
+      reported. Stage A (census, committed instrument scripts/win_bet/div_reach_steal.py): must reproduce
+      FACT-0295's reach and steal counts within +-2, else the premise is wrong and the lever closes.
+      Stage B (GT-guided ORACLE round-trip - the ceiling): killed if the oracle is < +0.003 score on fold 1
+      or < 0 on fold 0; that would mean even perfect targeting cannot pay through the scorer. Stage C
+      (a GT-FREE rule replayed offline on the exports): killed if < +0.003 on fold 1 or < 0 on fold 0
+      paired, or if it costs > 0.0005 adj_edge on either fold - the steal must not break scored edges at
+      scale, which is exactly how the blind priced-second-row died (LEVER-0012).
+    supporting: [FACT-0295, FACT-0290, FACT-0325, FACT-0323, FACT-0333, FACT-0334]
+    note: >-
+      Opened 2026-08-27; the highest-EV UNMEASURED item on the board since FACT-0295 (2026-08-26). NEW
+      MECHANISM relative to the killed division levers: LEVER-0012 reallocated blindly through the
+      assignment; the gate-widening and dxy lanes changed WHICH candidates the proposer sees. This changes
+      neither - it changes what counts as a proposable fork (t-1 / t+2 evidence the proposer never uses)
+      and removes ONE edge that cannot be a GT edge (the second daughter's only GT parent is the mother).
+      Priced from the control counts (FACT-0325 f1 division 15/351/110; FACT-0323 f0 5/69/21): every
+      converted division is +1 TP / -1 FN on the division term with SCORE_DIVISION_WEIGHT applied, so the
+      oracle band is roughly +0.003..+0.008 (f1) and +0.003..+0.010 (f0) if the FACT-0295 counts convert;
+      a GT-free rule is expected to keep 30-60% of that. Also composes with LEVER-0019 (removal) rather
+      than competing. Not a detector change; CPU only; zero submissions until stage C passes.
+    priority: 2
+
+  - id: LEVER-0026
+    claim: >-
+      Removing spurious FP-edge endpoints - unmatched predicted nodes that are the downstream endpoint of a
+      charged false-positive edge - lifts the dominant adj_edge term, and the GT-FREE-identifiable subset (a
+      predicted node that duplicates a better-connected neighbour within ~5-7 um) recovers a usable fraction of
+      the +0.065 (f0) / +0.096 (f1) GT-guided ceiling on BOTH embryo directions
+    status: open
+    falsifier: >-
+      Stage 1 (offline, both folds, committed instrument): a GT-free dedup/prune rule scored through the official
+      round-trip on the champion controls must be >= +0.003 on BOTH folds with adj_edge NOT worse than -0.0005;
+      below that offline it does not proceed. Stage 2 (the decisive one, because this lever cuts at the offline/LB
+      seam): ONE submission of the rule on P9 with a band stated first - the offline gain is UNTRUSTWORTHY here
+      because deleting edges to real-but-unannotated cells games the train-GT sparsity, so the LB is the only
+      honest judge; killed if the LB does not move up. The rule must be a pure post-emission node/edge prune, no
+      detector change, and must never delete a node that carries a scored TP edge.
+    supporting: [FACT-0338, FACT-0335, FACT-0260]
+    note: >-
+      Opened 2026-08-27 from the FP-endpoint anatomy. NEW MECHANISM relative to the refuted dedup lane (the
+      2026-08-26 "duplicate-stealing REFUTED, we UNDER-predict nodes" finding was about ~8.4 um mislink competitors
+      on fold 1; this is a DIFFERENT population - the unmatched endpoints of charged FP edges, 815/1377 of which on
+      fold 0 sit within 7 um of an already-detected annotated cell, i.e. genuine local over-detection). The ceiling
+      is a ceiling and PARTLY metric-gaming: ~35-40% of U have no annotation within 7 um and may be real cells.
+      The lever's whole point is the offline/LB seam - the offline apparatus reads ~0.6-0.7x the LB on real gains
+      (FACT-0321/0326) but could read the WRONG SIGN here, so stage 2 is a deliberate submission, not a formality.
+      Instrument to build: a committed GT-free prune in scripts/win_bet/ (dedup by predicted-graph connectivity
+      + distance) with the same round-trip as div_steal_rule.py. Highest unmeasured ceiling on the board.
+    priority: 1
+
+  - id: LEVER-0027
+    claim: >-
+      Applying parameter-free 4-D rotary position encoding to the S5 association transformer's
+      attention queries and keys improves held-out adjacent-frame link selection over the otherwise
+      identical sinusoidal S5 arm, and the learned edge checkpoint transfers to a positive fold-0
+      paired score delta without changing detector outputs.
+    status: open
+    falsifier: >-
+      Gate 1: the two-step Kaggle smoke must export a finite checkpoint/config, preserve zero detector
+      drift, and emit the training/config heartbeats H1R_POS_ENCODING and H1R_EDGE_RESULT. Gate 2: at equal training steps, held-out link_top1 must
+      exceed the sinusoidal S5 arm (`FACT-0329` supplies only the plumbing baseline; the full equal-step
+      sinusoidal result must be fetched before comparison). Gate 3: the fold-0 LOEO scorer round-trip
+      must show paired delta >= +0.005 with a crop-bootstrap CI excluding zero against the champion
+      control (`FACT-0321` instrument), with H1R_ROPE4D_INFERENCE_PATCH and H1R_ROPE4D_INFERENCE present
+      in the LOEO logs. Any failed gate closes this RoPE mechanism; candidate recall
+      alone cannot rescue a link_top1 failure.
+    supporting: [FACT-0182, FACT-0321, FACT-0329, FACT-0335, FACT-0339]
+    note: >-
+      Opened 2026-08-27 as a separate mechanism from LEVER-0023. It changes association geometry,
+      not the detector recipe refuted by FACT-0339. The implementation is already built in
+      scripts/kaggle_edits/h1r_rope4d.py plus its inference subprocess patch and three Kaggle specs.
+      The rotary factor is relative, but the complete model is NOT translation-equivariant because
+      the public checkpoint's absolute sinusoidal inputs are intentionally retained.
+      Only if all three gates pass may the wavelength bands be swept or the rotation be extended to
+      the daughter-pair head (FACT-0182).
+    priority: 1
+
+  - id: LEVER-0028
+    claim: >-
+      Node-budget-driven detection per volume - setting the detection threshold / node count per crop toward
+      that crop's estimated_number_of_nodes instead of a single global 0.96875 - recovers the systematically
+      under-detected embryo class (44b6 median 0.888 of estimate vs 6bba 0.988) and lifts the score more than any
+      global threshold, because the rank-1 competitor locates the loss in node selection
+    status: killed
+    closed_by: [FACT-0353, FACT-0354, FACT-0102]
+    falsifier: >-
+      A per-volume budget rule replayed offline on both champion controls (adjusting which detections survive per
+      crop toward estimated_number_of_nodes) must beat the global-threshold sweep (FACT-0102) on the pooled objective
+      with a crop-bootstrap CI excluding 0, and then move the LB on one submission. Killed if per-crop budgeting is
+      within noise of the global optimum, or if recovering nodes costs more edge FP than it gains.
+    supporting: [FACT-0102, FACT-0335, FACT-0261]
+    note: >-
+      The frontier's #1 mechanism and one we have barely touched: dariushafshar's node-budget harness measures a
+      0.972-median node ratio with a 44b6 vs 6bba split of 0.888 vs 0.988; Soheil (rank 1) says the loss originates
+      in node selection. Our fold-0 shows association-dominated misses (FACT-0335) ONLY because fold-0 node recall is
+      already 0.99 - on harder/hidden volumes detection is the bottleneck. Instrument: re-threshold per crop from the
+      geff estimate; measure on P24-lineage controls once re-exported. Cheap to prototype offline; a detector change
+      is the deeper version. Priority-1 parallel to LEVER-0026.
+
+      KILLED 2026-08-28 at the PREMISE, on the P28 substrate the packet demanded (PKT-0024). The cited 0.888
+      under-count is real but it is NOT a detection deficit: measured crop by crop, the detector already emits at
+      or above estimated_number_of_nodes on BOTH folds and the ILP solver then discards 15-20% of those peaks -
+      0.888 reproduces exactly at the POST-ILP stage, which the detection threshold cannot reach (FACT-0353).
+      Consistent with that, the entire available threshold band (0.96875 down to the export floor 0.5) recovers
+      20 annotated cells on fold 0 for 552,832 extra peaks (FACT-0354), while FACT-0102 already measured the same
+      direction losing monotonically across four LEADERBOARD submissions.
+
+      HONEST SCOPE OF THE KILL. The falsifier as written asked for a frozen budget function scored offline against
+      the best global threshold. That was NOT run, and cannot be: FACT-0353 shows the admitted peaks must pass
+      edge prediction and the ILP before they become nodes, neither of which replays on CPU from a sidecar. The
+      premise is refuted instead, which is cheaper and decisive for THIS mechanism. Reopening requires a new
+      mechanism at the detector, not a re-run of this one. The theme survives at the stage where the deficit is
+      actually created - see LEVER-0035.
+
+      WHAT THIS KILL DOES NOT COVER (host, 2026-08-28). The exact per-crop budget POLICY was never scored - no
+      frozen function was fit and no scorer round-trip was run. What is dead is the stated MECHANISM: rescuing a
+      systematically under-detected embryo class by lowering the per-crop detection threshold, because no such
+      under-detection exists at the detector. Candidate PRUNING in the other direction (raising thresholds,
+      confidence-conditioned candidate selection, or any rule that changes WHICH peaks enter the solver rather
+      than how many) is untouched by this evidence and would need its own lever and its own falsifier. Do not
+      cite this kill against those.
+    priority: 1
+
+  - id: LEVER-0035
+    claim: >-
+      The node budget is lost in RETENTION, not detection: relaxing the deployed ILP appearance/disappearance
+      asymmetry and the short-track filter recovers annotated cells the detector already found - 0.0442 of node
+      recall on the clean fold - and lifts the pooled objective on both folds of the P28 substrate
+    status: killed
+    closed_by: [FACT-0357, FACT-0364, FACT-0365, FACT-0366]
+    falsifier: >-
+      A retention change (ILP weights and/or the short-track filter) replayed on a P28 pre-ILP export must beat
+      the deployed champion on the pooled objective on BOTH folds with a clean fold-1 crop-bootstrap CI excluding
+      zero and >= +0.003, reporting adj WITH and WITHOUT the count adjustment so a node-count gain cannot mask an
+      edge-term loss, and then move the LB on one submission stacked on P24. Killed if recovering these cells does
+      not raise the score - i.e. if they are exactly the cells the solver could not place in a consistent track.
+    supporting: [FACT-0353, FACT-0355, FACT-0356, FACT-0357, FACT-0363, FACT-0191, FACT-0192, FACT-0345, FACT-0335]
+    note: >-
+      Successor to LEVER-0028, at the stage where the deficit is actually created. Measured on P28: the ILP drops
+      354,243 peaks on fold 0 and 502,767 on fold 1 (FACT-0353), and the pipeline as a whole nets away 133 / 5,000
+      annotated cells the detector had already found, one-directionally - 126 of 128 fold-1 crops lose and none
+      gains (FACT-0355). The deployed weights are the suspect mechanism: BIOHUB_ILP_APPEARANCE_WEIGHT=0.0 with
+      BIOHUB_ILP_DISAPPEARANCE_WEIGHT=1.5 against vendor defaults 0.1/0.1, so an isolated detection must pay to
+      disappear and is dropped unless an edge carries it; BIOHUB_OUTPUT_MIN_TRACK_LEN=6 then removes short
+      components. The node ledger closes EXACTLY on both folds and sizes the two knobs (FACT-0356): the ILP is
+      79-83% of all node removal and the short-track filter 17-21%, so sweep the solver weights FIRST and treat
+      BIOHUB_OUTPUT_MIN_TRACK_LEN as secondary.
+      This is CHEAP to instrument the way DetPeak was: a passive pre-ILP export (nodes + candidate
+      edges with probabilities, before solver.solve) makes the whole weight sweep a CPU replay, one GPU run per
+      fold, no submission. A pre-ILP export already exists for an older substrate
+      (C:/temp/preilp_f1_v2/preilp_split1.parquet) but FACT-0350 forbids inheriting it - it must be re-taken on P28.
+      THE OBVIOUS TRAP, stated first: these may be precisely the junk detections the solver is right to reject, and
+      recovering them would raise node recall while costing the edge term. FACT-0349 adds that aggregate recall
+      cannot certify a parent-plus-two-daughter topology. The count-adjustment split in the falsifier exists to
+      catch both.
+
+      TWO MEASURED HEADWINDS, added 2026-08-28 after the forensics. (1) THE METRIC PAYS US TO UNDER-PRODUCE.
+      The multiplier is 1 - 0.1 * total_node_ratio with no upper cap (FACT-0191), and on the clean folds the
+      pipeline's node deficit is currently collecting a real bonus (FACT-0192). Recovering nodes SPENDS that
+      bonus, so this lever must win on RAW edge Jaccard by more than the bonus it gives back - which is exactly
+      why raw and adjusted are reported separately, and it is also an independent explanation of FACT-0102's
+      leaderboard loss when the detection threshold was lowered. (2) THE RECOVERABLE POPULATION IS SMALL AND
+      MOSTLY NOT THE SOLVER'S FAULT (FACT-0357): 58% of fold-1 losses had no candidate edge or one below 0.8,
+      the drop rate falls monotonically with candidate quality, and on fold 0 - the promotion gate - every lost
+      cell together is 0.88% of node recall. Expect the falsifier to fire on fold 0; run it to find out where the
+      solver IS wrong (the strong-candidate and one-sided-candidate populations), not because a win is likely.
+
+      KILLED 2026-08-28 by PKT-0025, on three independent grounds, none of which is "it did not help enough".
+      (1) THE PREMISE IS MOSTLY WRONG: 58% of the fold-1 losses had no candidate edge or one below 0.8 and the
+      drop rate falls monotonically with candidate quality, so the solver is largely reacting correctly to weak
+      association (FACT-0357). (2) THE DIRECTION IS INVERTED: relaxing the disappearance weight loses
+      monotonically; the optimum is at 3.0, TIGHTER than deployed, keeping 12.5% fewer nodes at unchanged
+      recall (FACT-0365). The short-track filter is already optimal at 6 (FACT-0366). (3) THE CHANNEL IS
+      OVERWRITTEN: the champion replaces the ILP's entire edge list with motion relink on all 128 crops
+      (FACT-0364), so the edge-Jaccard gain that the sweep found has no established path to the deployed score.
+      The surviving direction is a different claim with a different mechanism and is LEVER-0036.
+    priority: 1
+
+  - id: LEVER-0036
+    claim: >-
+      The deployed pipeline is under-tuned in the direction the metric actually pays: raising the ILP
+      disappearance weight to about 3.0 yields a SMALLER, more selective node set at unchanged node recall, and
+      that node set - the only part of the solver's output the champion keeps - raises the score through the
+      FULL post-processing chain on both folds
+    status: killed
+    closed_by: [FACT-0375]
+    falsifier: >-
+      The tightened node set must be scored through the COMPLETE champion chain (motion relink, gap closure,
+      DeepCenter vetoes, safe division, short-track filter, line fit), not the ILP stage alone, and must beat
+      the deployed weight on the pooled objective on BOTH folds with a clean FOLD-0 crop-bootstrap CI excluding
+      zero and >= +0.003 on fold 0, reporting raw edge Jaccard beside the adjusted score. Killed if the gain
+      exists only before the relink (FACT-0364), or if it is a count-adjustment artifact, or if fold 0 does not
+      move.
+    supporting: [FACT-0372, FACT-0367, FACT-0365, FACT-0364, FACT-0368, FACT-0191, FACT-0192, FACT-0102, FACT-0354]
+    note: >-
+      This is the one direction PKT-0025 found that survives its own forensics, and it is the OPPOSITE of the
+      node-budget theme that produced LEVER-0028 and LEVER-0035. Three independent measurements now agree that
+      this pipeline should predict FEWER nodes, not more: adding nodes by lowering the detection threshold lost
+      on the leaderboard (FACT-0102), the detector is already at or above the node estimate (FACT-0354), and the
+      solver optimum sits at 12.5% fewer nodes than deployed with recall unchanged (FACT-0365). FACT-0191/0192
+      give the reason - the metric multiplier is 1 - 0.1 * total_node_ratio with no upper cap, so
+      under-production is paid.
+      WHAT MAKES THIS HARD, AND WHY IT IS NOT JUST A RERUN: the sweep's gain was in the ILP's EDGE structure,
+      which motion relink discards (FACT-0364). Only the node-set change reaches the champion. So the test is
+      not another ILP sweep - it needs the post-relink chain replayed on CPU (the notebook's
+      filter_output_graph, which needs the DeepCenter bundle and image frames for gap refinement) or one
+      host-authorised GPU run per fold. Fold 0 has no pre-ILP export at all and fold 0 is the promotion gate
+      (FACT-0261), so a fold-0 export is required either way before promotion.
+      COMPLETE FOLD-1 RESULT, 2026-08-29 (FACT-0372) - THE EXPECTATION IS NOW SMALL, AND THE PANEL BELOW IS
+      SUPERSEDED IN MAGNITUDE. All 128 crops through the full chain give +0.0058 with a bootstrap interval
+      INCLUDING zero, against the 20-crop panel's +0.0195 with an interval excluding it. Three things the panel
+      hid, each visible only because the terms are reported separately: RAW edge Jaccard moves only +0.0013, so
+      78% of the adjusted gain is the node-count adjustment (FACT-0191/0192); node recall FALLS 0.8636 to
+      0.8359; and division true positives DROP 14 to 12, the divJ gain being a false-positive reduction rather
+      than better recovery. FACT-0372 is the load-bearing reason for pessimism, precisely because it SEPARATES
+      the count adjustment from genuine tracking quality. FACT-0368's 5.9% is a weaker and narrower bound and
+      must not be over-read: its shares are computed on RAW edge Jaccard, so it caps what better node SELECTION
+      can contribute to the raw association gap and says nothing about gains manufactured by the metric's
+      count multiplier, which moves on an entirely different channel and leaves raw Jaccard untouched. The
+      lever stays open only because fold 0 is the gate and is unmeasured, but it should now be EXPECTED TO FAIL
+      its +0.003 fold-0 bar, and it must never be promoted on an adjusted gain whose raw counterpart is near
+      zero.
+
+      KILLED 2026-08-29 ON ITS OWN FOLD-0 GATE (FACT-0375). All 71 fold-0 crops through the complete chain:
+      score +0.00288 against a +0.003 bar, a bootstrap interval of [-0.0018, +0.0077] that includes zero, and
+      RAW edge Jaccard NEGATIVE at -0.00084 while the adjusted figure is +0.00264. The falsifier named this
+      exactly - "killed if it is a count-adjustment artifact" - and it is one: the whole apparent gain is the
+      under-production bonus of a smaller node set. Node recall falls 0.9868 to 0.9782, the edge trade is
+      slightly adverse (132 true lost against 129 false removed), and division true positives do not move.
+      Closed on evidence about itself, not by inheritance from FACT-0372, which only predicted it.
+
+      CPU FEASIBILITY RESOLVED 2026-08-29 (FACT-0367): exact control replays prove the complete P28 chain is
+      replayable from local assets, and a fixed fold-1 panel stays positive through the official scorer. This
+      removes the full-chain tooling blocker but does not waive the both-fold gate; the panel is heterogeneous
+      and the honest fold-0 pre-ILP artifact is still absent.
+    priority: 1
+
+  - id: LEVER-0037
+    claim: >-
+      The deployed candidate-edge rule - softmax over sources with a 0.5 threshold - offers AT MOST ONE parent
+      per target and no candidate at all for 14.3% of nodes (FACT-0369), so it discards 15.6% of GT edges before
+      any scorer or solver sees them (FACT-0370). Re-exporting candidates with a lower edge threshold, or top-k
+      parents per target, puts those pairs on the table and raises the pooled objective through the full chain
+      on both folds
+    status: open
+    falsifier: >-
+      A candidate re-export that offers more parents per target must (a) actually raise candidate reachability
+      on the honest fold, and (b) beat the deployed configuration through the COMPLETE champion chain - motion
+      relink, gap closure, DeepCenter, safe division, short-track, line fit - on both folds, with a clean fold-0
+      crop-bootstrap CI excluding zero and >= +0.003 on fold 0, reporting raw edge Jaccard beside the adjusted
+      score. Killed if the extra candidates are absorbed by the relink with no score change, if precision losses
+      cancel the recall gain, or if the count adjustment (FACT-0191) is doing the work.
+    status: killed
+    closed_by: [FACT-0376]
+    supporting: [FACT-0376, FACT-0374, FACT-0368, FACT-0369, FACT-0370, FACT-0361, FACT-0364, FACT-0357]
+    note: >-
+      This is the lever the ceiling decomposition points at most directly. FACT-0368 measured association at 87%
+      of the fold-0 gap; FACT-0370 splits that into about five sixths winnable by a better SCORER on existing
+      candidates and one sixth that no scorer can reach because the pair is never proposed. This lever is the
+      second half, and FACT-0369 is why it is a real structural limit rather than a tuning detail: a softmax
+      over the source axis with a 0.5 threshold can admit at most one parent per target by arithmetic, so the
+      edge model is deployed as a hard argmax with abstention rather than as a ranker.
+      RELATION TO THE NODE-BUDGET FAMILY: this is an EDGE budget, not a node budget, and the two have opposite
+      signs. LEVER-0028 and LEVER-0035 died because the metric pays for predicting FEWER nodes (FACT-0191/0192);
+      nothing in that evidence bears on offering MORE candidate edges, whose cost is precision at the linking
+      stage rather than node count. Do not cite the node-budget kills against this.
+      COST AND SEQUENCING: this requires a candidate re-export, which is a GPU action, so it cannot be settled
+      on CPU. `cfg.threshold` is already env-reachable as BIOHUB_DUAL_SEED_EDGE_THRESHOLD but only on the
+      secondary-model code path, so a small patch is needed to make it apply unconditionally. Pair it with the
+      honest fold-0 pre-ILP export that LEVER-0036 already needs, so one GPU session serves both.
+
+      KILLED AS A WIDENING LEVER 2026-08-29 (FACT-0376), and it is the most informative negative of the cycle.
+      On the complete fold 0 at its own best setting - floor 0.1, rank 2, chosen from that fold's reach surface
+      and therefore biased IN THE LEVER'S FAVOUR - widening raised GT-edge reach by 924 pairs at 1.45x the
+      candidates, and the chain converted 28 of them into net true edges (3.0%) while adding 113 false
+      positives, about four wrong edges per right one. The score FELL 0.0091 with an interval excluding zero,
+      raw edge Jaccard fell, and division true positives dropped 5 to 4.
+      WHAT THIS SETTLES: FACT-0368 measured association at 87% of the fold-0 gap but could not say whether that
+      gap is bounded by WHICH PAIRS ARE OFFERED or WHICH PAIR IS CHOSEN. It is the latter. Candidate generation
+      is NOT the binding constraint on the honest fold and further widening is contraindicated. The lane is the
+      SCORER's discrimination - which is precisely LEVER-0034's HOCT head, a differently-trained edge head on
+      an architecturally identical trunk (FACT-0361).
+      The node-retention mechanism is real and separable: extra candidates DO retain nodes (+0.0032 recall),
+      but that spends the under-production bonus, which is why the adjusted loss exceeds the raw loss - the
+      exact mirror of LEVER-0036.
+    priority: 1
+
+  - id: LEVER-0038
+    claim: >-
+      The public configuration reported at 0.931 (FACT-0377) transfers to our deployment and scores above the
+      P24 champion, relocating the campaign's baseline
+    # The claim was CONFIRMED, not refuted - but `confirmed` is not in this file's status
+    # vocabulary (open|running|killed|closed|parked), and inventing a sixth value to record a win
+    # would break the one thing the vocabulary is for. `closed` is correct on its own terms: the
+    # lane is shut for a stated structural reason - the host authorises no further work on this
+    # lineage - and `outcome_2026_08_30` records that the claim held.
+    status: closed
+    closed_by: [FACT-0393]
+    closed_date: '2026-08-30'
+    outcome_2026_08_30: >-
+      CONFIRMED at 0.931 - the top of the preregistered 0.925-0.932 band, with the falsifier at or below
+      0.928 not firing. The lineage transfers and the baseline relocates by +0.003, leaving 0.019 to 0.950.
+      The lever's own note bounded this in advance and that bound is now load-bearing rather than decorative:
+      it calibrates transfer and does NOT advance the association capability the route to 0.950 requires.
+      No follow-up knob sweeps, no stacking, no incremental squeezing of this lineage - and note the harder
+      constraint the win does not remove, that this configuration cannot be validated offline at all because
+      its secondary saw all 199 movies (FACT-0378). It is a leaderboard baseline, not an offline control.
+    falsifier: >-
+      The one preregistered submission scores at or below the 0.928 champion. Because the notebook is run
+      byte-identical, a miss is a fact about the configuration or the leaderboard, not about our transcription,
+      and the correct response is to stop treating that lineage as our baseline - NOT to sweep its knobs.
+    supporting: [FACT-0377, FACT-0378, FACT-0341]
+    note: >-
+      A BRIDGE lever, deliberately bounded. It calibrates transfer and relocates the starting point; it does
+      not advance the association capability the ceiling analysis says the route to 0.950 requires
+      (FACT-0368). Host direction 2026-08-29: no follow-up knob sweeps, no stacking, no incremental squeezing
+      of this lineage whatever the result. It also cannot be judged offline - its secondary is trained on all
+      199 movies (FACT-0378) - which is why a submission is the instrument.
+    priority: 3
+
+  - id: LEVER-0029
+    claim: >-
+      Self-supervised / representation pretraining on the UNLABELLED volumes (masked-autoencoding or contrastive on
+      the full light-sheet stacks) before the sparse-label finetune fixes the FACT-0339 recipe failure at its root -
+      a better nucleus representation - and reaches split_0 parity then beats it, unlike the from-scratch 30-epoch head
+    status: open
+    falsifier: >-
+      An SSL-pretrained-then-finetuned detector must first reach split_0 parity offline (within FACT-0263 MDE of the
+      pack on fold 0 - the bar FACT-0339 failed by 0.162), then beat it with a fold-0 paired delta CI excluding 0.
+      Killed if SSL pretraining does not close the parity gap, i.e. representation is not the bottleneck.
+    supporting: [FACT-0339, FACT-0296, FACT-0335]
+    note: >-
+      FACT-0339 showed our 30-epoch from-scratch head lands -0.162 below the pack - the recipe is broken. The public
+      pack is a ~400-epoch snapshot. Rather than brute-force more epochs, the research bet is that SSL pretraining on
+      the abundant UNLABELLED volume (the GT is sparse - only tracked cells) learns a better nucleus representation
+      cheaply, then a short sparse finetune reaches parity. Precedents: Attrackt unsupervised pretraining, Noisy-Student,
+      DINOCell/LSM 3D foundation features. This is the representation-learning lane and the root fix for the retrain
+      recipe. Heavy compute (Colab A100); GATED on Colab parity (FACT-0327) and a working finetune recipe.
+    priority: 2
+
+  - id: LEVER-0030
+    claim: >-
+      A model-agnostic ENSEMBLE of the available public weight sets plus test-time augmentation (multi-seed detection
+      blend + JS-TTA, stacked on the P24 champion) adds score without any retraining, as the top public teams report
+    status: open
+    falsifier: >-
+      An offline ensemble/TTA replay on both champion controls must beat the single-weight champion on the pooled
+      objective with a CI excluding 0, then move the LB on one submission stacked on P24. Killed if the blend is within
+      noise of the best single weight set or if TTA's cost is not repaid.
+    supporting: [FACT-0341, FACT-0331]
+    note: >-
+      TWEAK (0.953) claims a model-agnostic post-processing plugin worth +0.03-0.05 on unchanged weights, unreproduced;
+      Yusuke uses JS-TTA (15%); the shared lineage blends two seeds. We deploy a single blend and 8-view TTA already,
+      but have never ENSEMBLED distinct public weight sets (pilkwang dual-seed, leevvin movie-heldout, our OOF splits)
+      or tuned TTA on the P24 base. Cheap, stackable on the champion, and the closest thing to the claimed frontier
+      plugin. Priority-2 parallel; measure on P24-lineage controls.
+    priority: 2
+
+  - id: LEVER-0031
+    claim: >-
+      A different detector ARCHITECTURE - StarDist3D, a wide ResUNet3D, HOCT hard-negative, or a 3D nuclei foundation
+      model - trained/finetuned for this data beats the pack's UNet3D on node selection and is the only lane sized for
+      the full +0.027 gap to top-3, which the teams above 0.94 all take
+    status: parked
+    reopen_when: >-
+      never as this umbrella - it is DECOMPOSED into LEVER-0032 (StarDist3D), LEVER-0033 (wide-ResUNet3D) and
+      LEVER-0034 (StableDet/HOCT). Claim a specific architecture lever with its own parity gate, not this one.
+    falsifier: >-
+      Any candidate architecture must reach split_0 detection parity offline, then beat it on a fold-0 paired delta with
+      a CI excluding 0, then move the LB. Killed per-architecture on the parity gate; the lane closes only if NO
+      available 3D nuclei architecture transfers to zebrafish light-sheet within the compute budget.
+    supporting: [FACT-0335, FACT-0339, FACT-0332]
+    note: >-
+      The frontier evidence (EXTERNAL_RESEARCH.md): teams >0.94 pair retraining with new detector architectures -
+      matiasantezana's StarDist3D / wide-ResUNet3D champion weights, rudispresence's HOCT hard-negative + query-lineage
+      transformers, xiaoleilian's from-scratch UNet (0.918). Candidates with public code/weights and a licence check:
+      StarDist3D, HOCT (MIT), nnU-Net, and the 3D nuclei foundation models (LSM, DINOCell, micro-sam). The deepest,
+      highest-ceiling and highest-cost research lane; GATED on Colab parity and a licence/prize-rules check
+      (Zebrahub-derived weights are CC BY-NC). This is the lane that most likely reaches 0.955+.
+    priority: 3
+
+  - id: LEVER-0032
+    claim: >-
+      A StarDist3D detector (star-convex nucleus polyhedra) - warm-started from the public 3D weights where a licence
+      permits, finetuned to this light-sheet data - beats the Pilkwang UNet3D on node selection and reaches a fold-0
+      paired delta >= +0.005 on the P28 champion substrate
+    status: open
+    falsifier: >-
+      Per-architecture parity gate: the detector must first reach split_0 detection parity offline (within FACT-0263
+      MDE on fold 0), then beat it with a fold-1 paired delta CI excluding zero on the P28 substrate (FACT-0345), then
+      one submission. Killed on the parity gate if StarDist3D does not transfer to zebrafish light-sheet nuclei.
+    supporting: [FACT-0335, FACT-0339, FACT-0345]
+    note: >-
+      Split from the LEVER-0031 umbrella (2026-08-28). StarDist3D has public code (BSD-3) but no official 3D zebrafish
+      light-sheet weights (EXTERNAL_RESEARCH.md); start from any available 3D star-convex weights, else train. GATED on
+      Colab parity (FACT-0327) and a working finetune recipe (FACT-0339). Integrate the public weights BEFORE training.
+    priority: 3
+
+  - id: LEVER-0033
+    claim: >-
+      A wide-ResUNet3D detector (the matiasantezana champion-weights family) integrated as the node source beats the
+      Pilkwang UNet3D and reaches a fold-0 paired delta >= +0.005 on the P28 substrate
+    status: open
+    falsifier: >-
+      Same per-architecture parity gate as LEVER-0032: split_0 parity offline, then a clean fold-1 paired CI excluding
+      zero on P28, then one submission. Killed if the wide-ResUNet3D weights do not transfer or beat the pack detector.
+    supporting: [FACT-0335, FACT-0345]
+    note: >-
+      Split from LEVER-0031 (2026-08-28). matiasantezana/biohub-champion-weights publishes exp017_wide_unet3d /
+      exp019_wide_resunet3d (undocumented, 2026-08-26); a licence/prize-rules check is required. Cheapest of the three
+      to TRY because the weights are public - INTEGRATE first, train only if integration alone underperforms.
+    priority: 3
+
+  - id: LEVER-0034
+    claim: >-
+      A StableDet + HOCT hard-negative detector / query-lineage association stack (the rudispresence checkpoints)
+      integrated for detection and/or association beats the Pilkwang family and reaches a fold-0 paired delta >= +0.005
+    status: open
+    falsifier: >-
+      Per-architecture parity gate: split_0 detection parity (or, for the association half, a link-metric parity on a
+      HARDER movie-held-out split - not the saturated Zebrahub proxy, FACT-0342), then a clean fold-1 paired CI
+      excluding zero on P28, then one submission. Killed if HOCT/StableDet does not transfer to this data.
+    supporting: [FACT-0335, FACT-0342, FACT-0345]
+    note: >-
+      Split from LEVER-0031 (2026-08-28). HOCT is MIT-licensed with public checkpoints and 19 hand-crafted features,
+      1st on Fluo-N3DH-CE but with no zebrafish mention; rudispresence/biohub-stabledet-hoct-hard-negative-checkpoints
+      is CC-BY. Licence/prize check required. This is also the strongest ASSOCIATION candidate (query-lineage
+      transformers) - the harder-association-gate the route-to-0.950 asks for. Integrate public weights before training.
+      INHERITED DEPLOYMENT GATE, added 2026-08-29 when LEVER-0039 was killed (FACT-0386) and its falsifier (f)
+      was handed here rather than lost with it. FACT-0386's positive content is that on the parent-choice task
+      the HEAD is not the constraint and the REPRESENTATION is - which is this lever's association half, and
+      the reason it now carries the question. The gate: any ranker from this lane that beats the deployed
+      argmax must be compared as (WIDENED candidate surface + the new ranker) against the DEPLOYED control,
+      never against a widened control. FACT-0382 is why - all 691 fold-0 contested errors have their true
+      parent BELOW the deployed threshold, so the errors are only visible on a surface the pipeline does not
+      currently consume, and consuming it costs FACT-0376's -0.00906 under the unchanged scorer. That cost is
+      not an inherited debt, since FACT-0376's own scope precision exempts a candidate rule paired with a
+      better scorer; the gate is that the comparison must be RUN and reported through
+      scripts/win_bet/assoc_report.py.
+      PRIORITY RAISED 2026-08-29 (host). FACT-0386 killed representation-free reranking on this surface -
+      linear and tree models over nine features could not beat the deployed argmax, and the apparent gain was
+      mostly quantile binning - which is direct evidence that the HEAD is not the constraint and CONTEXTUAL
+      REPRESENTATIONS are the lane. This lever now carries the association question alone. Its licensing
+      chain is explicit and serial: EXP-0041 (Gate 1 parity) must pass before the two fold feature caches
+      launch, and the caches then launch WITH NO ADDITIONAL MODEL CHANGES, so a later result is attributable
+      to the head rather than to a bundled edit.
+      ---
+      2026-08-29 (PKT-0029 STEP 1). THE FEATURE CONTRACT IS NO LONGER INFERRED, IT IS READ. The premise that
+      the publisher shipped weights and a config but NO model code is FALSE: their own LICENSES.md names the
+      dataset rudispresence/biohub-stabledet-hoct-code, which exists and ships
+      repo_overlay/methods/stabledet_hoct_fork/hoct_edge_transformer.py under the MIT licence. Their class
+      StableDetHOCTFork(feature_dim=32) strict-loads BOTH published checkpoints at 447,376 parameters, so the
+      published source is the producing source, and our reimplementation now reproduces its edge and quiet
+      logits BIT-EXACTLY on both folds. Two consequences bind this lever from here.
+      (1) THE INTEGRATION BLOCKER RECORDED IN THIS NOTE IS FULLY DEAD, AND NOT FOR THE RECORDED REASON.
+      FACT-0379 correctly concluded that HOCT's node contract matches ours but reasoned that their
+      pool_kernel_um was dropped by the same load_model quirk as ours. It is not - their cache script
+      re-injects it explicitly. It is inert because the model-card configuration supplies node COORDINATES
+      from a node graph, which overrides peak extraction entirely, and peak extraction is the only consumer
+      of pool_kernel_um and det_threshold. The conclusion survives on stronger evidence than the one recorded.
+      (2) A NEW AND LARGER UPSTREAM MISMATCH REPLACES IT, and it is about the CANDIDATE SURFACE, not the
+      detector. HOCT's candidate rule is a purely geometric 15 um ball over every source, uncapped and
+      unfiltered; ours admits at most ONE parent per target by arithmetic (FACT-0369) and the widened P30
+      surface at most four. The head was trained to discriminate among competitors our pipeline never offers,
+      so it cannot be run as a reranker of OUR candidate list - it must be given its own 15 um graph rebuilt
+      from node coordinates. That rebuild is CPU-cheap and is implemented; what remains GPU-bound is only the
+      32-channel node features. A THIRD RISK IS NEWLY IDENTIFIED AND UNRESOLVED: which trunk produced those
+      features is a CLI argument, absent from the checkpoint, and feeding official-trunk features to a head
+      trained on StableDet-trunk features would look exactly like a wrong contract. Both trunks must be
+      cached and compared in the SAME session. Licence question in this note is ANSWERED: code MIT, weights
+      CC BY 4.0 with a required attribution string.
+    priority: 3
+
+  - id: LEVER-0039
+    claim: >-
+      A learned TARGET-WISE parent ranker over the frozen candidate surface chooses better parents than the
+      deployed argmax, converting contested wrong-parent choices into net true edges through the complete
+      unchanged chain
+    status: killed
+    closed_by: [FACT-0386, FACT-0382]
+    closed_date: '2026-08-29'
+    falsifier: >-
+      Any of, in the order they bite. (a) On held-out contested fold-0 targets the ranker does not beat the
+      deployed 0.8338 (FACT-0381). (b) It beats it but LOSES part of the 78.6% single-candidate population,
+      so overall top-1 does not rise - the two-sided bar, because a model free to abstain can trade the easy
+      targets for the hard ones and post a better contested figure while associating worse overall. (c) Top-1
+      rises but does not CONVERT: net true edges through the complete chain do not increase, which is exactly
+      the FACT-0376 failure one stage earlier. (d) The gain is a count-adjustment artifact - adjusted edge
+      Jaccard up with the raw channel flat or negative (FACT-0375). (e) It does not cross-fit: a ranker
+      trained on one fold does not transfer to the other on its contested population.
+      (f) ADDED 2026-08-29 ON FACT-0382, AND IT IS THE HARDEST OF THE SIX. The contested population exists
+      only on the WIDENED acquisition surface: at the deployed floor of 0.5 fold 0 has ZERO contested targets
+      and all 691 contested errors have their true parent below that threshold. So no gain here is realisable
+      unless the pipeline CONSUMES the widened surface, and the honest full-chain comparison is therefore
+      (widened surface + learned ranker) against the DEPLOYED control - never against the widened control,
+      which would flatter the ranker with a baseline nobody deploys. Killed if it cannot win that comparison.
+      Note what this does NOT say: FACT-0376's -0.00906 is the cost of widening under the deployed ARGMAX,
+      and FACT-0376's own scope precision states that a candidate rule paired with a better scorer is
+      untouched by that evidence. The bar is that this comparison must be RUN, not that the loss is inherited.
+      Any of these kills the SIMPLE-FEATURE version of this lever; (a) failing specifically is informative
+      rather than merely negative, because it says the existing representation is not the limit and richer
+      node context is justified - a question about the REPRESENTATION, which (f) does not touch.
+    supporting: [FACT-0381, FACT-0382, FACT-0376, FACT-0369, FACT-0370, FACT-0368]
+    note: >-
+      The direct successor to LEVER-0037's kill. FACT-0376 established that availability is not the binding
+      constraint - offering the true parent raised reach by 924 edges and the pipeline took 28 while taking
+      113 wrong ones - so the lane is the SCORER's discrimination. FACT-0381 then sized that lane honestly and
+      it is SMALL and HARD: 691 wrong parent choices on 4,157 contested fold-0 targets, NOT the 87% of the gap
+      FACT-0368 measured for perfect association over all edges. Those are different quantities and conflating
+      them would overstate a ranker's reach substantially. The lane is still worth working because the
+      contested errors are concentrated where divisions also fail, and FACT-0371 showed perfect edges drive
+      division false positives to ZERO - the coupling, not the edge count alone, is what makes this the
+      shortest credible route. Cross-fitting REQUIRES the fold-1 candidate export (PKT-0030): fold 1's
+      surface is single-parent by construction, so top-1 there is 1.0 for any model and a metric that cannot
+      fail is not evidence - and FACT-0382 sharpens that, because fold 0 is equally degenerate at the
+      deployed floor and differs only in HAVING the widened acquisition. P34 gives fold 1 the same widened
+      surface; it does not reveal a natural richness fold 1 was hiding.
+      OUTCOME 2026-08-29 (PKT-0031), AND READ THE SCOPE PRECISION BELOW BEFORE CITING THIS KILL ANYWHERE.
+      Falsifier (a) FIRED on evidence about this lever itself. Twenty-two preregistered crop-grouped arms:
+      the linear model never beats the deployed 0.8338 at any feature set, the best tree reaches 0.8367 with
+      a paired interval including zero, and NO arm of the 22 is favourable. The harness measured its own
+      noise floor rather than assuming one - a tree given only the deployed probability, which cannot beat an
+      argmax over that same scalar, still posts +0.0014 and net +6 from quantile binning - so the best arm's
+      +12 is about twice a pure-binning artifact (FACT-0386).
+      SCOPE PRECISION, written at the moment of the kill because LEVER-0037's had to be added afterwards.
+      What is killed is the SIMPLE-FEATURE FORM: linear and tree models over the nine representation-free
+      features, on the frozen fold-0 surface. This is NOT a finding that no learned ranker can beat the
+      deployed argmax, and it must never be cited as one. Falsifiers (c), (d) and (f) were never reached -
+      nothing was replayed through the chain - and (b) is UNTESTABLE against a non-abstaining model because
+      the frozen evaluate() argmaxes without abstention.
+      WHERE THE SURVIVING HYPOTHESIS LIVES, and why that is not a closure-by-association. This lever is
+      closed by its own evidence; the pointer that follows is about where the REMAINING question is worked,
+      not the basis of the kill. FACT-0386's positive content is that the HEAD is not the constraint and the
+      REPRESENTATION is, which is precisely LEVER-0034's association half. Keeping this lever open alongside
+      it would put two packets on one lane, which the R6 lock exists to prevent.
+      FALSIFIER (f) IS NOT DISCHARGED AND IS HANDED FORWARD. Any ranker that eventually beats the deployed
+      argmax still has to be compared as (widened surface + ranker) against the DEPLOYED control, because
+      FACT-0382 showed all 691 contested errors sit below the deployed threshold. That condition now binds
+      LEVER-0034 at deployment and is recorded in its entry. Every report goes through scripts/win_bet/assoc_report.py; no other summary counts.
+    priority: 1
+
+  - id: LEVER-0040
+    claim: >-
+      A learned DIVISION VERIFIER that rejects false forks - trained cross-fitted so it never sees the fold it
+      judges - cuts fold-0 division false positives substantially without losing division true positives,
+      and is worth about three times the localisation prize
+    status: open
+    falsifier: >-
+      Any of. (a) The verifier cannot cut false positives without losing true positives roughly one for one -
+      at 5 TP against 67 FP (FACT-0375) there is very little TP to spend, so a precision-recall trade that
+      costs even two TP wipes out the gain. (b) Trained cross-fitted it does not transfer: performance on the
+      fold it never saw collapses to chance, which would mean it learned fold-specific appearance rather than
+      what a false fork looks like. (c) The division-Jaccard gain does not survive the complete chain, where
+      safe-division post-processing and motion relink both rewrite forks after the solver. (d) The gain is
+      real but the combined-score effect is inside noise on a paired interval. Note (a) and (c) are the ones
+      expected to bite.
+    supporting: [FACT-0375, FACT-0380, FACT-0371, FACT-0362, FACT-0359, FACT-0383, FACT-0384, FACT-0385]
+    outcome_2026_08_29: >-
+      FIRST ATTEMPT MEASURED (PKT-0032). The falsifier above is left EXACTLY as written, because rewriting one
+      after seeing a result is how a lever survives evidence it should not. What it says, read literally:
+      (a) DID NOT FIRE, it was REFUTED - a cross-fitted model cut 14 of 67 fold-0 false positives at ZERO
+      true-positive cost, so false positives are not one-for-one with true ones (FACT-0385).
+      (b) FIRED ON FOLD 1 ONLY - 5 of 349, below the random expectation of 23.3 - while fold 0 was above
+      chance. That is an INVERSION between embryos, not a transfer collapse, and pooling would have hidden it.
+      (c) and (d) were not reached, because the achievable effect is about +0.001 against a measured ceiling
+      of +0.01416 (FACT-0384) and nothing that small survives the full chain as a distinguishable result.
+      WHAT ACTUALLY BINDS is a quantity the falsifier did not anticipate: the usable positive class is 19
+      EMITTED TRUE FORKS across both folds, not the 151 annotated divisions, because the metric charges only
+      72 of fold 0's 5,656 emitted forks (FACT-0383). PKT-0032's falsifier (a) fires on that.
+      THE LEVER STAYS OPEN ON A NARROWED CLAIM, and the prize is BIGGER than it was opened for: +0.01416, and
+      the oracle's edits RAISE raw edge Jaccard rather than trading it away, so this is not a division-versus-
+      edges compromise. The next attempt is a different experiment, and its falsifier is stated here BEFORE it
+      runs.
+    successor_falsifier: >-
+      For the next attempt only, and written before it starts. The successor must (1) train on the CHARGED
+      fork population rather than pooling GT-derived tuples - the one change already measured to help,
+      deployment AUC 0.5254 to 0.6299 (FACT-0385); (2) increase the emitted-true-fork count beyond 19, since
+      that and not the head is what binds; and (3) be judged on BOTH folds separately with the inversion as an
+      explicit gate. It is killed if, with a larger positive population, fold 1 still rejects false positives
+      at or below chance - that would mean the signal is embryo-specific rather than a property of false forks,
+      and no amount of data fixes it. It is ALSO killed if the achievable effect stays under +0.003 through the
+      complete chain, which is the bar LEVER-0036 failed on and there is no reason to hold this lever to less.
+      Zebrahub is NOT an admissible source of the extra positives until its anti-alignment is solved: pooled
+      AUC 0.179, per-feature median ratios 0.345 to 3.719, and our divisions localised at 3.60 um against
+      their 1.24 (FACT-0385). Pooling those rows collapsed an in-domain fit from 0.80 to 0.21.
+      RESOURCE POLICY (host, 2026-08-29). This lever stays SCIENTIFICALLY OPEN and is explicitly NOT killed -
+      its ceiling is real at +0.01416 (FACT-0384) and its mechanism was refuted in the lever's favour. But it
+      MUST NOT CONSUME THE PRIMARY GPU LANE until its positive and calibration population improves beyond the
+      19 emitted true forks that bind it today. Work on it is CPU-side dataset and population work; the GPU
+      lane belongs to LEVER-0034 while that lane is live. This is a sequencing decision about scarce compute,
+      not a judgement about the lever's merit, and it weakens none of its gates.
+    note: >-
+      Sized from our own arithmetic, not from ambition: fold 0 emits 67 division FPs against 26 annotated
+      divisions, so cutting FPs to about 20 takes divJ from 0.0538 to about 0.109 - roughly +0.006 of score,
+      about three times the +0.002 localisation prize (FACT-0380 note 2). VERIFIER BEFORE GENERATOR is
+      deliberate: the FP population is 13x the TP population, so rejection has far more mass to work on than
+      recall does, and FACT-0362 already showed the division lane is DATA-limited rather than
+      architecture-limited - HOCT's fork head trained on 110 positives and reported zero recall, so a new
+      generator head is not the missing piece. THE LEAKAGE RULE IS PART OF THE LEVER, not a caveat on it:
+      fold-0 false forks cannot train a model judged on fold 0. Positives come from fold 1 and external
+      division tuples (FACT-0296), negatives from fold-1 false forks, and the fold-0 judgement is made by a
+      model that never saw fold 0. Counterfactual negatives are required - wrong parent with plausible
+      daughters, correct parent with a wrong sister, temporally incoherent forks - because a verifier trained
+      only on naturally-occurring negatives learns the generator's habits rather than the physics.
+      Localisation (FACT-0380) is explicitly NOT this lever and stays secondary; if it is used at all it is as
+      a conditional layer where this verifier flags division-sensitive uncertainty, never a global coordinate
+      rewrite.
+    priority: 1
+
+  - id: LEVER-0041
+    claim: >-
+      A parent scorer trained on CACHED CONTEXTUAL node features with EXPLICIT ABSTENTION, fitted group-wise
+      over targets rather than over individual edges, beats the deployed argmax through the complete
+      unchanged chain - where the representation-free rerankers of LEVER-0039 could not
+    status: open
+    falsifier: >-
+      Written before any training. (a) On held-out contested targets the scorer does not beat the deployed
+      0.8338 with a favourable paired interval - the bar LEVER-0039 failed, and it is not relaxed here.
+      (b) It beats contested top-1 while REGRESSING single-candidate targets, which abstention makes possible
+      for the first time: LEVER-0039 could not lose them because a non-abstaining argmax cannot, so this
+      side of the two-sided bar becomes live and every single-candidate regression must be reported
+      individually rather than netted away. (c) It improves parent choice but does not convert into net true
+      edges through the COMPLETE chain - the genuine FACT-0376 quantity, not the pre-ILP proxy. (d) The gain
+      is a count-adjustment artifact (FACT-0375). (e) It does not transfer between folds on their contested
+      populations. (f) The FACT-0382 condition inherited from LEVER-0039: the full-chain comparison is
+      (widened surface + scorer) against the DEPLOYED control, never against a widened control.
+      TERMINAL AND EXPLICIT - if a contextual head with abstention also fails (a), then the association lane
+      is not head-limited at all on this node surface, and the remaining explanations are the node surface
+      itself or the metric's structure. That is a finding, not a failure to report.
+    supporting: [FACT-0386, FACT-0382, FACT-0376, FACT-0368, FACT-0369, FACT-0371]
+    note: >-
+      OPENED 2026-08-29 AS THE SUCCESSOR TO THE KILLED LEVER-0039, and the two differ by mechanism rather
+      than by ambition, which is what the reopening rule requires. LEVER-0039 tested REPRESENTATION-FREE
+      rerankers without abstention over nine features and died on FACT-0386; this lever tests CONTEXTUAL
+      features from the frozen-trunk cache WITH abstention, fitted group-wise over targets. FACT-0386's
+      positive content is precisely the warrant: the head was not the constraint, so the representation is
+      where the next attempt must differ.
+      BOUNDARY WITH LEVER-0034, STATED SO TWO PACKETS NEVER WORK ONE LANE. LEVER-0034 owns PUBLISHED-WEIGHT
+      REUSE and the contract-identification experiment - can the shipped HOCT tensors be made to mean
+      something on our trunk. LEVER-0041 owns THE HARNESS AND TRAINING FROM A KNOWN CONTRACT - once a
+      contract is ours by construction, can a head trained on it win. They meet at exactly one handover:
+      LEVER-0034's `not_identifiable` terminal outcome hands the architecture to this lever as a
+      train-from-known-contract lane. Until that handover or a successful identification, neither packet
+      touches the other's records.
+      GATED ON THE CACHE. No training claim may be made from a cache that has not passed Gate 1 (EXP-0041);
+      a head trained on an unlicensed cache measures the cache, which is the whole reason the gate exists.
+    priority: 1
+
+  - id: LEVER-0042
+    claim: >-
+      Replacing ONLY the collapsed DeepCenter/veto configuration in the public 0.931 base with the P24
+      best-checkpoint plus safe-division-veto bundle - the one inherited component independently measured
+      positive on our own lineage - scores above 0.931
+    # CLOSED, not killed: the claim held. `closed` is the vocabulary's term for a lane shut on a stated
+    # structural reason, and the reason is the lever's own cap - one submission, ends either way.
+    status: closed
+    closed_by: [FACT-0412]
+    closed_date: '2026-08-30'
+    outcome_2026_08_30: >-
+      SCORED 0.932. The falsifier - at or below 0.931 - did NOT fire, so the claim is confirmed, and it is
+      confirmed by the smallest distinguishable margin. Reason (h) of the preregistration, written before the
+      run, says public-LB variance alone is of the order of the effect under test; one +0.001 submission
+      cannot separate the component from noise. What IS solid is the mechanism: the log shows best.pt loaded
+      at epoch 2 rather than skipped, the veto on, and deepcenter_rejected non-zero on seven of eight movies
+      where the base recorded zero everywhere.
+      THE LANE ENDS AS WRITTEN. No second exploitation experiment, no follow-up tuning, no stacking - and a
+      marginal pass is precisely when that rule matters, because +0.001 invites sweeping the neighbours.
+    falsifier: >-
+      The single preregistered submission scores at or below 0.931. Because exactly one component is
+      exchanged and the rest of the public configuration is untouched, a miss is a fact about that component
+      ON THIS BASE and not an invitation to sweep its neighbours. THE LANE ENDS EITHER WAY - win or lose,
+      there is no second exploitation experiment and no follow-up tuning of the public lineage.
+    supporting: [FACT-0393, FACT-0341, FACT-0345, FACT-0377]
+    note: >-
+      OPENED 2026-08-30 as the ONLY inherited-component exploitation experiment, deliberately capped at one
+      submission. Its purpose is to establish an intermediate baseline quickly, NOT to pursue 0.950 - that is
+      LEVER-0041's job, and this lane must not consume effort from it.
+      WHY THIS COMPONENT AND NO OTHER. The DeepCenter best.pt + safe-division-veto bundle is the single knob
+      in the public lineage that we have measured POSITIVELY AND INDEPENDENTLY on our own substrate:
+      FACT-0341 records it as the P24 A/B that took us to 0.928, and FACT-0345 records the offline
+      instrument UNDER-reading its leaderboard contribution by three to four times. Every other difference
+      in the public bundle is confounded (FACT-0377) and PKT-0028's rule (1) forbids crediting any of them.
+      WHAT THIS IS NOT. It is not a knob sweep, not candidate widening, not a threshold change, not a rescue
+      change and not stacking. Those remain excluded from submissions entirely. The exchange is one component
+      for one component on an otherwise byte-identical base.
+      A CAUTION THAT APPLIES EVEN IF IT WINS. The 0.931 configuration cannot be validated offline at all -
+      its secondary saw all 199 movies (FACT-0378) - so this experiment's offline preflight can check that
+      the artifact is well-formed and CANNOT predict its score. The band is a prior, not a measurement.
+    priority: 2
+
+  - id: LEVER-0043
+    claim: >-
+      A FOREIGN INSTANCE-QUERY REPRESENTATION, frozen and used as a THIRD TRUNK, carries nucleus shape and
+      morphology information that our point-centric trunk lacks, and adding it to the association scorer
+      improves contested-parent ranking ON THE HONEST FOLD - and/or its instance centroids improve
+      division-sensitive localisation without damaging node recall. The candidate is FOCUS-3D, a query-based
+      3D instance segmenter (MAE3D / ViT-Adapter backbone, 3D deformable pixel decoder, Mask2Former-style
+      decoder, hundreds of object queries per patch) with a nuclei-specific checkpoint
+    status: parked
+    parked_date: '2026-08-30'
+    reopen_when: >-
+      HOST DECISION 2026-08-30. FOCUS-3D is a strong research candidate and it is NOT pivotal today. Its
+      admissibility, contamination and packaging risks are largely cleared (FACT-0423, FACT-0424, FACT-0425),
+      but the campaign's BINDING failure is downstream CONSUMPTION (FACT-0426 through FACT-0429), and a third
+      representation cannot fix a stage that discards the score it is given. Parking is a sequencing decision
+      about scarce attention and compute; it weakens none of this lever's gates and kills nothing.
+      REOPEN ON ANY ONE OF THREE TRIGGERS:
+        (1) LEVER-0044 Gate B WORKS but the existing representation lacks enough discrimination to convert it;
+        (2) probability-free contextual transfer (FACT-0421) COLLAPSES after full-chain integration, so the
+            representation rather than the consumption point becomes binding again;
+        (3) an architecturally independent MORPHOLOGY representation is needed for genuine diversity - which
+            FACT-0415 already establishes alternate seeds cannot supply.
+      UNTIL THEN: no checkpoint download, no GPU, no Kaggle dataset staging. The host authorisation recorded
+      in host_authorisation_2026_08_30 REMAINS VALID and does not need re-granting when a trigger fires.
+    falsifier: >-
+      Written before any download, any packaging and any GPU. Any of these kills or closes the lever, and
+      which one fires decides whether it dies as a KILL (evidence about itself) or a CLOSE (a structural
+      reason).
+      (a) LICENCE / PRIZE RULES - the gated checkpoint's access conditions make it inadmissible under the
+          competition's external-data and pretrained-weights rules. CLOSES the lever; it is not evidence
+          about the science. This is checked FIRST, before compute is spent, because it can end the lane on
+          its own.
+      (b) TRAINING-DATA CONTAMINATION - if its published training inventory overlaps the competition movies
+          or their sources, then embeddings derived from it may be legitimate to USE while being
+          un-validatable OFFLINE, exactly the FACT-0378 trap. Fires as a scope restriction rather than a
+          kill, and if it fires the lever may only ever be judged by submission, which changes its cost
+          entirely and must be stated before anyone builds on it.
+      (c) IT WILL NOT RUN OFFLINE inside a packageable Kaggle environment within the session budget -
+          Detectron2 and the 3D deformable-attention components are the named risks. CLOSES on cost.
+      (d) ITS INSTANCES WILL NOT JOIN TO OUR NODE SURFACE. If matched-node recall against the official
+          predicted nodes is too low to attach an embedding to most nodes, no representation claim is
+          reachable at all and the lever dies on its own evidence.
+      (e) THE ASSOCIATION BAR, NOT RELAXED - the frozen embeddings do not beat the deployed contested top-1
+          with a favourable crop-paired interval on the HONEST fold. This is the bar LEVER-0039 failed
+          (FACT-0386) and LEVER-0041 has not yet cleared (FACT-0414).
+      (f) THE DIAGNOSTIC FALSIFIER, AND IT IS THE ONE THIS LEVER EXISTS FOR - the FOCUS embeddings improve
+          the DISCOVERY fold and fail to transfer to the honest fold, reproducing the FACT-0414 pattern on a
+          representation architecturally unrelated to ours. That REFUTES "our trunk causes the inversion"
+          and is a genuine finding, not a failure to report: it would relocate the cause to the fold
+          substrate, the label contract or the metric's structure, and it would do so more cheaply than any
+          further head work.
+      (g) THE LOCALISATION HALF - the centroids do not improve the FACT-0380 division-sensitive localisation
+          quantity, or improve it while damaging node recall.
+    supporting: [FACT-0354, FACT-0368, FACT-0386, FACT-0380, FACT-0413, FACT-0414, FACT-0415, FACT-0378]
+    note: >-
+      OPENED 2026-08-30 (host). WHAT THIS LEVER IS NOT, STATED FIRST BECAUSE IT IS THE OBVIOUS
+      MISREADING: it is NOT a detector replacement and it does NOT touch the node surface. FACT-0354 shows
+      the detection-threshold curve has almost no recall headroom on fold 0, and FACT-0368 puts the large
+      majority of the fold-0 gap in ASSOCIATION, so replacing the node surface would buy little while
+      creating merge / split / count risk against a metric that taxes over-prediction. If FOCUS-3D is ever
+      proposed as the NODE SOURCE that is a different lever in the LEVER-0031 decomposition, and it must
+      carry that family's split_0 detection-parity gate. Nothing here licenses smuggling a node-surface
+      replacement in under a representation claim.
+      THREE REGISTRY BOUNDARIES, SO TWO PACKETS NEVER WORK ONE LANE.
+      (1) vs LEVER-0034, which owns PUBLISHED-WEIGHT REUSE for association. That lever's asset is the
+          StableDet/HOCT stack - a tracking-specific head trained on its own candidate surface, which is
+          why its blocker is a candidate-rule mismatch. FOCUS-3D ships no association head at all; it is a
+          segmentation backbone, so the mechanism, the asset and the failure modes are different.
+      (2) vs LEVER-0041, which owns TRAINING A HEAD FROM A CONTRACT WE OWN and is held by PKT-0038. This
+          lever owns whether a FOREIGN frozen representation adds information ours lacks. They meet at
+          exactly one handover: if the embeddings clear (a)-(d), LEVER-0041's harness consumes them as an
+          ADDITIONAL trunk. This lever never trains the deployed scorer itself.
+      (3) vs LEVER-0029, which owns pretraining OUR OWN representation on the unlabelled volumes. Reusing a
+          foreign one is a different cost and a different kind of evidence.
+      WHY IT IS WORTH OPENING NOW RATHER THAN LATER, and it is not novelty. FACT-0386 killed
+      representation-free ranking and its positive content was that the REPRESENTATION is the constraint.
+      FACT-0413 then found a contextual gain on the discovery fold that FACT-0414 could not transfer, by
+      either of two readings the experiment cannot separate. A representation architecturally unrelated to
+      ours is the cheapest available probe of whether that inversion is a property of OUR TRUNK or of the
+      folds themselves - see falsifier (f). FACT-0415 adds the second motive: alternate seeds are not
+      diversity, so the consensus lane needs a genuinely different association VIEW, and an instance-query
+      representation is one.
+      THE EVIDENCE STATUS OF EVERY CLAIM ABOUT IT IS `EXTERNAL` UNTIL WE MEASURE IT. The project is
+      pre-alpha, has no published paper and no reproducible benchmark table, and its own documentation says
+      publication details are forthcoming. AGENTS.md is explicit that EXTERNAL means a third party asserted
+      it and we have NOT checked it. Its architecture, its licence terms, its parameter count, its
+      preprocessing and its training inventory are all to be read off the artifact, never off the model
+      card.
+      GATED, IN THIS ORDER, AND THE ORDER IS THE POINT: licence and prize-rules check, then contamination
+      check, then offline packaging, then ONE two-crop passive GPU diagnostic that must itself produce a
+      reusable asset under the standing GPU rule, then CPU-side association testing on BOTH folds. No
+      full-fold run, no detector replacement, no threshold sweep and no submission at any stage of this
+      lever without a new preregistration.
+    priority: 2
+    host_authorisation_2026_08_30: >-
+      THE HOST GRANTED AUTHORITY TO USE FOCUS-3D on 2026-08-30: "I give the go for FOCUS-3D - we have
+      authority to use." THE FALSIFIER ABOVE IS NOT REWRITTEN - it is left exactly as first written, because
+      rewriting a falsifier after the fact is how a lever survives evidence it should not. What changed is
+      not the test but which axis of (a) is still live, and the split is recorded here rather than edited
+      into the text.
+      (a) IS RELEASED ON THE AUTHORITY AXIS. The question "may we use this asset" is answered by the host and
+      is not reopened. Acquisition, offline experimentation and every step of the method are unblocked.
+      (a) IS RETAINED ON THE COMPETITION-RULES AXIS, DEMOTED FROM A GATE TO A SUBMISSION PRECONDITION. Host
+      authority settles our right to use the asset; it cannot change what the competition's external-data and
+      pretrained-weights rules say, and those govern whether a SUBMISSION built on this asset is valid rather
+      than whether the science may proceed. The finding is still recorded, it no longer blocks any offline
+      work, and it attaches to the submission decision if this lever ever reaches one.
+      (b) IS ENTIRELY UNAFFECTED AND REMAINS THE SHARPEST RISK. Authority to USE is not the same as offline
+      evaluation being INTERPRETABLE. If the training inventory overlaps the competition movies or their
+      sources, FACT-0378's situation applies exactly - legitimate weights whose offline measurement no LOEO
+      control we can build is able to validate. That restriction is recorded before any number is produced.
+      (c) THROUGH (g) ARE UNAFFECTED. They are about the artifact and the science, and no authorisation
+      touches them.
+
+  - id: LEVER-0044
+    claim: >-
+      THE CONSUMPTION POINT, NOT THE SCORER, IS WHAT BINDS. A learned association score consumed at the FINAL
+      parent-selecting operation - motion_relink_edges - rather than only at pre-ILP candidate ranking
+      converts ranking skill into emitted edges, where a pre-ILP-only change is discarded 85% of the time on
+      fold 0 and 70% on fold 1
+    status: open
+    falsifier: >-
+      AMENDED BY THE HOST ON 2026-08-30 BEFORE ANY DATA WAS TAKEN - see falsifier_original_2026_08_30 below,
+      which is preserved verbatim, and falsifier_amendment_reason for why. TWO CPU GATES, and only the second
+      can kill this lever.
+      GATE A - CONSUMPTION CALIBRATION. Sweep MOTION_RELINK_LEARNED_BONUS over the preregistered coarse grid
+      [0, 0.5, 1, 2, 4, 8] with the DEPLOYED edge_prob unchanged, all crops of BOTH folds, through the
+      complete chain and the official scorer. A LOSS HERE KILLS ONLY "AMPLIFY THE DEPLOYED SCORE". It does
+      NOT kill this lever, and reading it as if it did would be a logical error - see the amendment reason.
+      GATE B - THE DECISIVE MECHANISM TEST, and the only one that can kill LEVER-0044. Place the existing
+      PROBABILITY-FREE CONTEXTUAL score (FACT-0421) into the edge_prob slot, combine it with the WIDENED
+      candidate surface, and consume it inside motion_relink_edges at the winning or preregistered bonus. If
+      that COMPLETE COUPLED INTERVENTION cannot improve RAW association through the full chain, the
+      final-edge scorer mechanism is dead and no feature cache may be built.
+      SUPPORTING CONDITIONS, applying to both gates. (b) Fewer than 1% of assignments change across the whole
+      sweep - the knob is inert rather than harmful. (c) Raw edge Jaccard flat through the COMPLETE chain
+      under the official scorer. (d) Net true edges at or below zero - the genuine FACT-0376 quantity, never
+      the pre-ILP proxy. (e) Node recall or division true positives decline on either fold (FACT-0371).
+      (f) An adjusted improvement with flat or negative RAW association is REJECTED, not reported as a win.
+      (g) RESTORED 2026-08-30 - see falsifier_restoration below. The fold-0 arm reproduces FACT-0414's exact
+          zero AT THE FULL-CHAIN STAGE. That is a distinct outcome from (c): it would mean the fold-0
+          substrate cannot resolve THIS intervention either, in which case the honest gate has to move rather
+          than the model, and it must be reported explicitly rather than folded into a null.
+      PROTOCOL BINDING BOTH GATES. The deployed bonus value must reproduce the control EXACTLY before any
+      treatment is read - a control that does not reproduce is a hard refusal. The CROP-PAIRED INTERVAL
+      requirement is retained and is not optional: assoc_report's verdict() enforces it at :304-305 whatever
+      the prose says, and under the revised promotion gate fold 1 must show a favourable crop-paired interval
+      while fold 0 must be non-inferior with a positive point estimate. CONTROL PROVENANCE MUST BE ASSERTED,
+      not supplied: build_report validates `control` in no way and it arrives as an arbitrary spec-supplied
+      path (assoc_train_harness.py:1628), so a report whose only defect is a widened control returns
+      promotable true with no blockers - exercised, not inferred. COVERAGE MUST BE REPORTED: learned_edge_probs
+      defaults an uncovered pair to 0.0, the WORST score rather than a neutral one (notebook :1652), so
+      partial coverage over a widened surface penalises every uncovered candidate and an arm can fail on
+      coverage while the mechanism is sound. Report raw AND adjusted edge
+      Jaccard separately, edge TP/FP/FN, node recall, division TP/FP/FN, assignment churn, the
+      count-adjustment contribution, and results BY FOLD and pooled. Select the SMALLEST value on a winning
+      PLATEAU, never the numerically best isolated point - an isolated optimum on a coarse grid is a
+      selection artifact.
+    launch_decision_tree_2026_08_30: >-
+      HOST DECISION, RECORDED BEFORE EITHER GATE REPORTS so the mapping from outcome to action cannot be
+      chosen after seeing a number. PHASE 2 IS TECHNICALLY CLEARED AND SCIENTIFICALLY ON HOLD: the contract-2
+      smoke passes its preflight and signs all four protection-contract sections, and it still does not
+      launch until a VALID Gate B exists.
+      (1) GATE B INVALID - repair and rerun. NO scientific verdict may be written, in either direction. A run
+          started under the pre-fix code is QUARANTINED, its output uninterpreted, and pre-fix and post-fix
+          crops are NEVER mixed in one panel.
+      (2) GATE B LOSES RAW ASSOCIATION - close the tested coupled mechanism. NO contract-2 GPU session.
+      (3) GATE B WINS ONLY THROUGH THE ADJUSTMENT - kill it as an artifact. This is the shape that killed
+          LEVER-0036 (FACT-0375) and, mirrored, LEVER-0037 (FACT-0376), and it is not readmitted here.
+      (4) GATE B WINS RAW ASSOCIATION, PRESERVES NODES AND DIVISIONS, AND TRANSFERS - launch the contract-2
+          smoke.
+      (5) SMOKE PASSES - acquire the legitimate caches and train the stronger scorer AT THE NOW-PROVEN
+          CONSUMPTION POINT. Fold-1's legitimate trunk first, fold 0 acquired while training runs.
+      (6) SUBMIT ONLY THE STRONGEST FULL-CHAIN CANDIDATE - never the bonus-only knob, unless its measured
+          gain is independently large enough to matter against the deficit recorded in FACT-0412.
+      NEITHER GATE MAY BE READ FROM THE ADJUSTED SCORE ALONE, and Gate A's negative kills only the
+      amplification of the deployed score.
+      THE PHASE-3 BLOCKER IS SEPARATE AND BINDS INDEPENDENTLY: until one fold-aware provenance policy is
+      consumed by BOTH guards (PKT-0043), the protection contract licenses only the SINGLE-TRUNK smoke and
+      NOT a dual-trunk acquisition (FACT-0418, FACT-0431).
+    falsifier_original_2026_08_30: >-
+      PRESERVED VERBATIM. The text this lever opened with, before the host's amendment and before any data:
+      "(a) THE FREE TEST. Sweeping MOTION_RELINK_LEARNED_BONUS alone on the existing replay over COMPLETE
+      fold 0, with the deployed edge_prob unchanged, produces no bonus that beats the deployed control with a
+      crop-paired interval excluding zero on the favourable side. If that is the outcome the lever dies for
+      ZERO GPU, because widening the band the learned channel acts in is a strictly easier intervention than
+      replacing what fills it. (b) Fewer than 1% of assignments change across the whole sweep. (c) Raw edge
+      Jaccard is flat through the COMPLETE chain on fold 0 under the official scorer. (d) Net true edges
+      through the complete chain are at or below zero. (e) Node recall or division true positives decline on
+      either fold. (f) The fold-0 arm reproduces FACT-0414's exact zero at the FULL-CHAIN stage."
+    falsifier_restoration_2026_08_30: >-
+      TWO CONDITIONS WERE DROPPED BY THE AMENDMENT WITHOUT BEING MENTIONED, AND THE AUDITOR CAUGHT IT. They
+      are restored above, still before any data was taken.
+      (1) The original clause (f) - the fold-0 arm reproducing FACT-0414's exact zero at the FULL-CHAIN stage
+      - disappeared when the letter (f) was reused for the adjusted-versus-raw condition. It is NOT subsumed
+      by the Gate A narrowing, because it binds precisely the stage Gate B tests, and it is now (g).
+      (2) The crop-paired interval requirement vanished from the prose while assoc_report's verdict() went on
+      enforcing it, so the text and the instrument disagreed.
+      NET EFFECT: the lever is HARDER than either the original or the first amendment, and every change to
+      this falsifier - the host's and this one - has moved in that direction. The record is kept in three
+      pieces on purpose: falsifier (live), falsifier_original_2026_08_30 (verbatim), and the two reason
+      fields, so any reader can reconstruct what changed and when without trusting a summary.
+      Two additional protocol conditions were added at the same time, from auditor vetoes V4 and V5, and both
+      are about making a NULL interpretable rather than about the bar: control provenance must be asserted,
+      and score coverage must be reported.
+    falsifier_amendment_reason: >-
+      THE ORIGINAL (a) CONTAINED A LOGICAL FLAW AND THE HOST CAUGHT IT BEFORE IT COST ANYTHING. It proposed
+      to kill the entire final-edge thesis on a sweep of the DEPLOYED probability - but FACT-0421 measured
+      that the deployed probability is precisely the NON-TRANSFERRING feature, the one component whose
+      deletion makes the scorer transfer in both directions. Amplifying a poor score at the correct stage can
+      still lose, while a better score at that same stage might win. So a negative Gate A is evidence about
+      the deployed probability, not about the consumption point, and the original falsifier would have
+      retired a live mechanism on evidence that cannot address it - the exact "closed by association" error
+      AGENTS.md section 2 names as this project's second most expensive mistake.
+      THE AMENDMENT IS RECORDED BEFORE ANY DATA WAS TAKEN, which is what makes it legitimate rather than
+      rationalisation. It does not relax the lever's bar: it NARROWS what Gate A is permitted to conclude and
+      ADDS Gate B, a strictly harder coupled test, as the only thing that can kill the lever. The original
+      text is preserved above so the change is auditable rather than silent.
+    supporting: [FACT-0426, FACT-0427, FACT-0428, FACT-0429, FACT-0422, FACT-0420, FACT-0364, FACT-0376]
+    note: >-
+      OPENED 2026-08-30. THIS IS NOT A RESTATEMENT OF LEVER-0041 AND THE BOUNDARY IS MECHANICAL. LEVER-0041
+      asks whether a better SCORER can be built and consumed at pre-ILP candidate ranking; it stays OPEN and
+      is NOT closed by this lever, because FACT-0419 retired the selection-artifact reading and FACT-0420
+      classified the fold-0 null as a power collapse rather than a representation failure. This lever asks a
+      different question with a different intervention: whether the score is CONSUMED where it can act.
+      WHY IT IS OPENED NOW, ON EVIDENCE ABOUT ITSELF. FACT-0426 establishes that exactly one deployed
+      operation can change an already-assigned parent, and every later edge-mutating stage is add-only or
+      node-removing. FACT-0427 reads the deployed cost expression: the learned channel enters as a bonus
+      capped at 1.0 subtracted from a cost in MICROMETRES, and pairs the ILP dropped score exactly zero.
+      FACT-0429 measures the consequence - the band where the bonus can act reaches only 5.1% of alternatives
+      on fold 0 - and FACT-0428 measures the cost of that: a pre-ILP-only change survives 15.4% of the time on
+      fold 0. Combined with FACT-0422's ceiling of 240 wrong-parent GT edges on fold 0, the realisable prize
+      for a pre-ILP-only scorer is of order a few dozen edges, which is not a lane worth a GPU cache on its
+      own.
+      THE SEQUENCING CONSEQUENCE IS THE POINT OF THE LEVER. Falsifier (a) is a CPU sweep on an existing
+      replay that reads the constant from its own environment, so it costs no GPU session and it can kill or
+      validate the whole final-edge thesis before the ~7 GiB dual-trunk caches of FACT-0416 are built. Under
+      the standing GPU rule this is the correct order: the cheapest thing that can end the lane runs first.
+      TWO CAUTIONS CARRIED IN AT BIRTH. The bonus is GLOBAL, so raising it trades geometric coherence
+      everywhere for learned influence everywhere - the FACT-0376 shape, where a change that helps the
+      targeted population is charged against the rest, and it must therefore be scored through the complete
+      chain and the official scorer and never on the relink's own objective. And learned_prob at notebook
+      lines 1833-1842 SILENTLY SIGMOIDS out-of-range scores, so any future scorer writing into that slot must
+      assert its range rather than trust it - a silent no-op is worse than a crash.
+      DIVISIONS GET NOTHING FROM THIS LEVER. add_safe_divisions_postlink is add-only and its candidate set
+      excludes incoming edges, so no division claim may be read from any result here (FACT-0371).
+    priority: 1
+
+  - id: LEVER-0045
+    claim: >-
+      A TRACKLET-CONDITIONED CANDIDATE GENERATOR trained with high-confidence PSEUDO-LINEAGES increases
+      category-3 reach - the true edges never offered to any scorer - and a MULTI-FRAME edge scorer converts
+      that reach into complete-chain RAW association without node or division loss.
+    status: killed
+    closed_by: [FACT-0442, FACT-0441, FACT-0443]
+    closed_date: '2026-08-31'
+    outcome_2026_08_31: >-
+      FALSIFIER 0 FIRED ON ITS OWN EVIDENCE AND THE ROUTE CLOSED BEFORE ANY GPU WAS SPENT - which is exactly
+      what the falsifier was written to do. All SIX cells kill: the oracle contribution is 0.84x the
+      remaining deficit on fold 0 and 1.13x on fold 1 against a preregistered threshold of 2x, and the best
+      cell reaches 57% of it. The honest promotion fold does not clear even the bare-pass line that was
+      itself preregistered as a kill (FACT-0442).
+      THE KILL IS STRONGER THAN A NULL BECAUSE IT IS AN ORACLE. The figures assume PERFECT selection over
+      every newly reached edge - no scorer, no errors, no cost - so no better model can rescue the route.
+      Applying FACT-0428's measured survival leaves +0.0023 and +0.0061.
+      AN INDEPENDENT SECOND REASON, WHICH WOULD HAVE BOUND EVEN IF THE HEADROOM HAD CLEARED: fold-1 division
+      Jaccard FALLS at every context under perfect selection (FACT-0443), because re-parenting a target
+      strips a child edge from its previous source. FACT-0371's safety condition fails at the oracle, and the
+      loss is a property of the edit rather than of the chooser.
+      IT WAS NOT LEVER-0037 IN DISGUISE, AND THAT WAS CHECKED RATHER THAN ASSERTED. The frozen rule never
+      reads edge_prob, reaches short misses a wider radius cannot (FACT-0370), and does so at a SMALLER
+      candidate multiplier than the 1.45x FACT-0376 charged. A genuinely different mechanism, tested on its
+      own terms, that still does not pay.
+      THE LARGEST RESULT IS NOT THE VERDICT. The packet sent to exploit the never-offered mass MEASURED THAT
+      THE MASS IS TWO THIRDS SMALLER THAN THE REGISTRY BELIEVED (FACT-0441): motion_relink_edges assigns over
+      all node pairs in a 6.0 um gate, so 713 of 1,110 fold-0 and 9,522 of 14,007 fold-1 never-offered edges
+      are ALREADY EMITTED. Category 3 partitions the candidate surface, not the output. That correction
+      outlives this lever and re-prices every candidate-side argument in the campaign.
+    what_this_does_not_kill: >-
+      SCOPED DELIBERATELY, because closing by association is this project's second most expensive recorded
+      mistake and a coupled lever is the easiest place to do it.
+      (1) It says NOTHING about LEVER-0044's consumption question, which is measured separately and remains
+          open on Gate B.
+      (2) It does NOT kill MANUFACTURED SUPERVISION as such. What was tested is a temporal PROPOSAL rule
+          against the never-offered mass; no pseudo-label was ever generated, so falsifiers (1) and (2) never
+          ran. Manufactured supervision aimed at a DIFFERENT target - notably the division data limit
+          FACT-0362 records, where the binding constraint is positives and not proposals - is untested here
+          and would need its own lever and its own falsifier.
+      (3) It does not condemn multi-frame context in a SCORER. What failed is multi-frame context as a
+          CANDIDATE GENERATOR; a scorer consuming temporal context over the existing surface is a different
+          claim.
+      A USEFUL NEGATIVE WORTH CARRYING FORWARD: the rule's rank-1 nominee is the target's DEPLOYED candidate
+      parent in 289 of 640 fold-0 and 3,091 of 6,995 fold-1 cases, so temporal extrapolation on this data
+      mostly re-proposes what the softmax already chose. That is a fact about the data, not about the lever.
+    mechanism: >-
+      temporal tracklet proposal + manufactured labels + learned discrimination + final consumption. All four,
+      coupled. This is the only version of the lane with the mass to matter.
+    falsifier: >-
+      WRITTEN BEFORE ANY WORK. FALSIFIER 0 IS A CPU ORACLE AND IT RUNS FIRST, BESIDE LEVER-0044's GATE B.
+      THE VACUOUS VERSION IS EXPLICITLY FORBIDDEN. Do NOT measure whether a true edge "exists inside an
+      eight-frame window" - both endpoints already exist in ADJACENT frames, so that measurement is nearly
+      vacuous and would pass regardless of merit.
+      THE PROPOSAL RULE IS FROZEN BEFORE GT IS CONSULTED, and it is GT-FREE by construction:
+        - context lengths 2, 5 and 8 frames;
+        - tracklets built from DEPLOYED predicted edges only;
+        - tracklet motion EXTRAPOLATED to the target frame;
+        - previous-frame parents nominated by PHYSICAL DISTANCE to the extrapolated position;
+        - a FIXED candidate cap and physical gate, identical across both embryos;
+        - ADJACENT-FRAME candidates only. Longer gaps supply CONTEXT, never illegal scored edges.
+      THEN, ON LEDGER CATEGORY 3 ONLY, report: newly reachable GT edges; true-parent RANK; candidate
+      MULTIPLIER per target; coverage by crop AND embryo; the ORACLE official-score delta if those newly
+      reachable edges were selected perfectly; and OVERLAP with the endpoint-removal (category 2) and
+      downstream-overwrite (category 5) populations.
+      KILL THRESHOLD, PREREGISTERED WITH A SAFETY MARGIN RATHER THAN AN EXACT FIT: the oracle score
+      contribution must exceed TWICE the remaining gap to 0.950 recorded in FACT-0412. A bare pass at one
+      times the deficit is a KILL, not a marginal pass. The margin is not arbitrary - this campaign has
+      measured its oracle-to-real conversion and it is poor: FACT-0384 priced a PERFECT false-fork verifier at
+      +0.01416 while the achievable effect came in near +0.001, roughly a fourteen-fold haircut. A route that
+      only just clears the deficit under a perfect-selection oracle will not clear it in deployment.
+      SUBSEQUENT FALSIFIERS, in order of when they can fire.
+      (1) PSEUDO-LABEL FIDELITY. Consensus pseudo-edge precision, measured on our ANNOTATED movies by EDGE
+          IDENTITY through the OFFICIAL matcher - never by nearest-track distance - is too low to train on.
+      (2) ASSOCIATION-RECIPE PARITY ON REAL LABELS fails before any pseudo-label is introduced. If we cannot
+          reproduce the deployed association head's quality on real supervision, a pseudo-label result is
+          uninterpretable. FACT-0339 is the precedent and it is why this gate exists.
+      (3) The multi-frame scorer does not convert the reach into COMPLETE-CHAIN raw association, both folds,
+          official scorer.
+      (4) NODE RECALL or DIVISION TP declines on either fold (FACT-0371).
+      (5) The gain is a count-adjustment artifact, or adjusted improves while RAW is flat or negative.
+      (6) The comparison is not (new candidate surface + scorer + final consumer) against the DEPLOYED
+          control (FACT-0382).
+    supporting: [FACT-0422, FACT-0370, FACT-0369, FACT-0362, FACT-0412, FACT-0426, FACT-0427, FACT-0428,
+                 FACT-0430, FACT-0368, FACT-0339]
+    boundary_with_other_levers: >-
+      STATED FIRST BECAUSE THREE COLLISIONS ARE PLAUSIBLE AND ALL THREE ARE REAL LEVERS.
+      (1) vs LEVER-0044. That lever asks whether our DEPLOYED FINAL CONSUMER uses learned evidence
+      effectively. This lever asks whether multi-frame context and manufactured supervision can NOMINATE the
+      large population of true edges currently never offered. Different question, different intervention,
+      different failure mode. They meet at the consumption point and the branch logic below states exactly how.
+      (2) vs the KILLED LEVER-0037, and this is the one that must not be fudged. LEVER-0037 died widening the
+      candidate rule - threshold and radius - on a TWO-FRAME surface under the UNCHANGED scorer, at a measured
+      cost. This lever changes the PROPOSAL MECHANISM, not its width: tracklet motion extrapolated over a
+      temporal context, which is a different object. FACT-0370 is the independent reason the distinction is
+      real rather than semantic - the never-offered misses are SHORT, median 2.26 um, so a wider radius is
+      demonstrably not the fix and only a temporal mechanism can reach them. This is a new mechanism with a
+      stated falsification test, which is what AGENTS.md requires; it is NOT a reopening of LEVER-0037.
+      (3) vs LEVER-0043 (FOCUS-3D, parked) and LEVER-0029 (SSL pretraining, open). FOCUS-3D was parked as a
+      REPRESENTATION trunk; it re-enters here only if dense segmentation QUALITY becomes the bottleneck in
+      manufacturing labels, at which point it is a DATA-PRODUCTION component and not a detector replacement.
+      ASCENT is a representation/pretraining reference belonging to LEVER-0029's lane: its released models
+      target C. elegans NEURON tracking with embedding similarity plus Hungarian matching, which is a
+      DOMAIN-TRANSFER hypothesis and not a ready solution here.
+    label_manufacture_policy: >-
+      BEGINS ONLY IF THE ORACLE PASSES, and it needs no GPU to begin.
+      (1) Pseudo-tracks from AT LEAST TWO INDEPENDENT trackers.
+      (2) Only CONSENSUS edges are accepted as positives.
+      (3) Disagreements are UNCERTAIN, never automatic negatives - a disagreement is missing information, and
+          treating it as a negative teaches the model the trackers' shared blind spots.
+      (4) Synthetic two-frame pairs by affine and elastic deformation, CALIBRATED against registry facts on
+          displacement, density, localisation residual and division frequency. An uncalibrated deformation
+          generates a distribution the deployed data does not contain.
+      (5) EXACT lineage identities preserved through every deformation.
+      (6) SPLIT BY SOURCE MOVIE BEFORE GENERATION, so transformed siblings cannot cross folds. Doing this
+          after generation is the leak.
+      (7) Pseudo-label precision measured on our ANNOTATED movies by EDGE IDENTITY through the OFFICIAL
+          matcher - never nearest-track distance, which measures spatial proximity and not association
+          correctness.
+    training_policy: >-
+      THE DETECTOR IS NOT RETRAINED. Association-only, detector frozen.
+      Prove ASSOCIATION-RECIPE PARITY ON REAL LABELS first; introduce pseudo-labels only after. Use
+      edge/tracklet representations at the context length the CPU oracle selects. Produce CALIBRATED
+      ADJACENT-EDGE probabilities. Consume them at the final selector LEVER-0044 establishes. Score COMPLETE
+      MOVIES through the official scorer.
+      HOCT architecture and code may be used where useful - it is MIT and its design is the relevant
+      reference, combining edge-centric attention with a multi-frame parental softmax and a tracklet-level
+      ILP rather than merely enlarging a two-frame transformer, and it reports rapid adaptation from limited
+      corrections, which is direct support for manufactured supervision. BUT VALIDATION MUST NOT REST ON
+      ORGANIZER CHECKPOINTS WITHOUT A TRAINING MANIFEST: HOCT is the organizer lab's model, so the FACT-0378
+      hidden-overlap ambiguity applies to any claim validated on its weights. Training our own head from an
+      explicit contract avoids that entirely, and that is the reason to do it.
+    branch_logic_on_lever_0044: >-
+      FIVE BRANCHES, FIXED BEFORE EITHER RESULT EXISTS.
+      - GATE B PASSES: use its PROVEN final consumer for the pseudo-trained temporal scorer.
+      - GATE B FAILS because the deployed consumer cannot convert good evidence: THIS LEVER STAYS ALIVE but
+        must bring its OWN final selector, and HOCT's multi-frame parental-softmax / tracklet-ILP design is
+        the relevant successor.
+      - ORACLE REACH FAILS: CLOSE this route BEFORE any GPU.
+      - ORACLE REACH PASSES BUT PSEUDO-LABEL FIDELITY FAILS: keep the TEMPORAL CANDIDATE GENERATOR and abandon
+        MANUFACTURED SUPERVISION. Those are separable and must not die together.
+      - BOTH PASS: this becomes the PRIMARY HIGH-CEILING LANE, ahead of contract-2 image-feature caching.
+    note: >-
+      OPENED 2026-08-31 (host). WHY NOW AND WHY THIS SHAPE. Our own ledger measured the parent-rescoring prize
+      at 240 fold-0 GT edges against 1,110 fold-0 and 14,007 fold-1 true edges NEVER OFFERED to any scorer
+      (FACT-0422), and FACT-0369 shows the deployed rule admits at most one parent per target by arithmetic,
+      so no rescoring can reach them. FACT-0362 independently established that the division lane is DATA
+      limited rather than architecture limited. This lever attacks both of those and nothing else does.
+      A COMPETITOR ARRIVED AT THE SAME DIAGNOSIS INDEPENDENTLY, which is corroboration rather than evidence -
+      the public demonstration shows NEAREST-TRACK DISTANCE, which measures spatial proximity and not the
+      edge-level quantity the metric charges, and no score accompanies it. Treated accordingly: the direction
+      is corroborated, the magnitude is not.
+      THIS IS THE 0.970-SCALE PROGRAM. Attack the never-offered mass, manufacture the supervision needed to
+      learn it, and ensure the learned evidence controls the final graph.
+    priority: 1
+
+  - id: LEVER-0046
+    claim: >-
+      A STANDALONE GRAPH-OWNING TRACKER - one system that produces the instance representation, the
+      candidate parents WITH an explicit no-parent class, the continuation / division / neither
+      decision AND the FINAL EMITTED LINEAGE GRAPH - improves complete-chain RAW association on both
+      folds, where every move that improved ONE of those factors against a frozen consumer has
+      returned a zero or a bound.
+    status: open
+    opened: '2026-08-31'
+    falsifier: >-
+      PREREGISTERED BEFORE ANY MODEL EXISTS, five clauses, and (a) is deliberately the cheapest.
+      (a) INTEGRATION. If a Biohub-X artifact cannot satisfy the frozen `biohubx_io_v1` contract on
+      ONE preregistered crop from EACH fold - coordinate round-trip against FACT-0040, no constant
+      head, exactly one explicit no-parent row per target, complete candidate coverage with no fill,
+      and a graph passing the lineage invariants whose declared consumer chain contains no incumbent
+      relink - then at the seven-day checkpoint this route reports STILL INTEGRATING, which the host
+      has defined as FAILURE. A contract pass is INTEGRATION evidence and is explicitly NOT
+      scientific promotion.
+      (b) CONSUMPTION AND STATISTICS. With the complete chain owned end to end, on ALL 71 fold-0 and
+      ALL 128 fold-1 crops through the OFFICIAL patched scorer: fold 1 must show a favourable
+      crop-paired interval on RAW edge Jaccard and fold 0 must be NON-INFERIOR with a POSITIVE POINT
+      ESTIMATE. Failing that kills the graph-owning thesis AS BUILT, and the kill is strong precisely
+      because this system removes the one excuse the previous six failures could offer - a consumer
+      that discards the score (FACT-0428).
+      (c) SAFETY. Node recall or division true positives declining on either fold (FACT-0371).
+      (d) METRIC SHAPE. An ADJUSTED improvement with flat or negative RAW association is REJECTED,
+      not reported as a win. That shape killed LEVER-0036 (FACT-0375) and, mirrored, LEVER-0037
+      (FACT-0376).
+      (e) SCOPE LIMIT THAT MUST TRAVEL WITH THE KILL. A kill under (b) kills THE SYSTEM AS BUILT. It
+      does not separately kill mask-derived representation, learned abstention, or graph ownership,
+      and the closing packet MUST name which factor failed - mask quality, training parity, graph
+      consumption, or transfer - or the closure is inadmissible. Closing this by association is the
+      error AGENTS.md section 2 records costing weeks on the Trackastra lane.
+    supporting: [FACT-0428, FACT-0447, FACT-0442, FACT-0437, FACT-0448, FACT-0449, FACT-0422,
+                 FACT-0412, FACT-0446, FACT-0423, FACT-0424, FACT-0425, FACT-0457, FACT-0459,
+                 FACT-0040, FACT-0380]
+    note: >-
+      OPENED 2026-08-31 (host) AS A RADICAL PIVOT. THE INHERITED NOTEBOOK IS FROZEN AS THE CONTROL.
+      .
+      WHY THIS IS NOT A REOPENED LEVER. Six single-factor moves returned a zero or a bound and they
+      cover all three factors from both sides: LEVER-0037 and LEVER-0045 (FACT-0442) moved the OFFER
+      with the scorer frozen; LEVER-0039 (FACT-0386) and FACT-0428 moved the SCORER with the offer
+      and consumer frozen; Gate A (FACT-0437) moved the CONSUMER with the score frozen; and the
+      reversed ladder (FACT-0447) moved the NODES with the consumer frozen, moving EXACTLY ZERO
+      edges. Every one of those held at least one factor of the product fixed. This lever is the
+      first that holds NONE of them fixed, so it is a new mechanism rather than a retry, and the
+      three standing scope limits explicitly leave it open: FACT-0448 caps only wrong links between
+      two ANNOTATED cells; FACT-0449 makes BROAD node deletion expensive and leaves SELECTIVE
+      deletion admissible; FACT-0447 holds TOPOLOGY FIXED BY DESIGN and cannot bound a detector
+      producing new features, masks, candidates and associations JOINTLY - what is dead is the
+      NODE-ONLY thesis.
+      .
+      THE FOURTH ARROW IS THE POINT AND IT IS THE ONE PREVIOUS ATTEMPTS DID NOT CROSS. FACT-0428
+      measured that a change made only at pre-ILP ranking is overwritten on most forced changes,
+      while the unperturbed pre-ILP parent IS the emitted parent almost always - the pipeline AGREES
+      WITH its ranking and does not FOLLOW it, because the relink re-derives the same answer from
+      geometry and overrules the score exactly where the score disagrees. A scorer's gains live in
+      the disagreements. So a better scorer fed to that consumer is not a partially-realised win, it
+      is a structurally suppressed one, and the only way to test the scorer is to give it the graph.
+      .
+      THE CONTRACT IS FROZEN FIRST, ON PURPOSE. `scripts/win_bet/biohubx/contract.py`
+      (`biohubx_io_v1`) and `tests/test_biohubx_contract.py` were written and committed BEFORE any
+      model, so no result can be obtained and then have the interface adjusted to fit it. Every
+      clause is tied to a measured silent failure rather than to taste - the coordinate round-trip to
+      FACT-0040, the non-constant head checks to FACT-0457 and FACT-0459, the coverage refusal to
+      FACT-0432, the integer export to FACT-0344, and the forbidden consumer list to FACT-0428.
+      .
+      WHAT IS KEPT AND WHAT IS REPLACED. KEEP: the champion (FACT-0412) as the control; official
+      scoring; graph and integer-export audits; release receipts; registry and experiment discipline.
+      REPLACE: detector representation, candidate semantics, association objective, division
+      handling, and the final graph consumer.
+      .
+      THE HONEST FRAME, RECORDED SO A LATER READER IS NOT MISLED BY THE AMBITION. Nothing on the
+      board has measured full-chain headroom of at least +0.02 that survives its own gates, and this
+      lever does not have one either. What it has is the only proposed system that attacks EVERY
+      factor the campaign has independently found to be binding. FOCUS-3D into official HOCT depends
+      too heavily on an unvalidated external checkpoint, and the HOCT half of it is blocked
+      independently by FACT-0456 (no admissible unit convention for our 4:1:1 geometry) and
+      FACT-0451 (submission-only judgement).
+    priority: 1

@@ -1,0 +1,31 @@
+{
+  "name": "p32_public931_exact",
+  "slug": "biohub-p32-public931-exact",
+  "title": "Biohub P32 Public931 Exact",
+  "code_file": "biohub-p32-public931-exact.ipynb",
+  "out_dir": "notebooks/kaggle_p32_public931_exact",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb",
+  "base_sha256": "b998e582e41d5ea8986572370c71ced39cba3233a02e536a9f4a9fee3f9bf307",
+  "purpose": "THE controlled experiment for the 2026-08-29 pivot: run the public configuration reported at 0.931 EXACTLY, unmodified, as one preregistered submission. It is run verbatim rather than reconstructed because the one genuine association-side difference from our champion is the bidirectional FUSION RULE - harmonic-probability at 0.15 against our plain linear blend at 0.20 - and no notebook in our tree implements harmonic_probability, so any reconstruction would be a re-derivation of the thing under test. FACT-0377 as corrected: the secondary low_margin_consensus is NOT a difference - the deployed P24 champion already runs it with identical parameters; the LOEO controls only appear to lack it because the harness cuts contaminated auxiliaries (FACT-0378). The remaining differences are solver (ILP disappearance 2.0, division 1.2), detector threshold 0.965, gap-2 recovery and adaptive short-track rescue on, safe-division radii, and the epoch-500 DeepCenter with its safe-division veto off. This CANNOT be judged offline: the secondary is trained on all 199 movies, legitimate against a hidden test set but un-measurable by any LOEO control we can build (FACT-0378). Submission is therefore the only instrument, which is why exactly one is preregistered. A positive result establishes that the lineage transfers to our deployment and gives a stronger baseline; it attributes nothing to any individual knob, all of which remain confounded.",
+  "provenance": {
+    "source_kernel": "stephennedumpally/pls-upvote-share-higher-scoring-ideas",
+    "source_kernel_id_no": 131761963,
+    "author_credit": "Configuration and harmonic-probability fusion implementation are the work of Kaggle user stephennedumpally, published publicly. Run here unmodified as a controlled replication; no authorship is claimed.",
+    "reported_score": "0.931 public LB, per host report - not independently reproduced by us",
+    "modifications": "none - the notebook is run byte-identical to the pulled public version",
+    "why_verbatim": "Reconstructing harmonic-probability fusion would re-derive the exact mechanism under test and risk a subtly different implementation being credited or blamed."
+  },
+  "edits": []
+}

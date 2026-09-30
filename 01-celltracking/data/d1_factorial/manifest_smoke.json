@@ -1,0 +1,451 @@
+{
+  "budget": {
+    "by_cell": {
+      "split_0__44b6": {
+        "bytes": 2656100,
+        "crop_inferences": 1,
+        "mib": 2.53,
+        "n_kernels": 1,
+        "predict_hours": 0.0539,
+        "sec_per_crop_planning": 193.9,
+        "session_fraction_per_kernel": 0.0338,
+        "wall_hours_incl_fixed": 0.3039,
+        "wall_hours_production_bracket": 0.2851,
+        "wall_hours_smoke_marginal_bracket": 0.2743
+      },
+      "split_0__6bba": {
+        "bytes": 6408325,
+        "crop_inferences": 2,
+        "mib": 6.11,
+        "n_kernels": 1,
+        "predict_hours": 0.1077,
+        "sec_per_crop_planning": 193.9,
+        "session_fraction_per_kernel": 0.0397,
+        "wall_hours_incl_fixed": 0.3577,
+        "wall_hours_production_bracket": 0.3203,
+        "wall_hours_smoke_marginal_bracket": 0.2986
+      },
+      "split_1__44b6": {
+        "bytes": 2656100,
+        "crop_inferences": 1,
+        "mib": 2.53,
+        "n_kernels": 1,
+        "predict_hours": 0.0539,
+        "sec_per_crop_planning": 193.9,
+        "session_fraction_per_kernel": 0.0338,
+        "wall_hours_incl_fixed": 0.3039,
+        "wall_hours_production_bracket": 0.2851,
+        "wall_hours_smoke_marginal_bracket": 0.2743
+      },
+      "split_1__6bba": {
+        "bytes": 6408325,
+        "crop_inferences": 2,
+        "mib": 6.11,
+        "n_kernels": 1,
+        "predict_hours": 0.1077,
+        "sec_per_crop_planning": 193.9,
+        "session_fraction_per_kernel": 0.0397,
+        "wall_hours_incl_fixed": 0.3577,
+        "wall_hours_production_bracket": 0.3203,
+        "wall_hours_smoke_marginal_bracket": 0.2986
+      }
+    },
+    "by_stage": {
+      "1": {
+        "bytes": 2656100,
+        "crop_inferences": 1,
+        "mib": 2.53,
+        "n_kernels": 1,
+        "predict_hours": 0.0539,
+        "sec_per_crop_planning": 193.9,
+        "wall_hours_incl_fixed": 0.3039,
+        "wall_hours_production_bracket": 0.2851,
+        "wall_hours_smoke_marginal_bracket": 0.2743
+      },
+      "2": {
+        "bytes": 6408325,
+        "crop_inferences": 2,
+        "mib": 6.11,
+        "n_kernels": 1,
+        "predict_hours": 0.1077,
+        "sec_per_crop_planning": 193.9,
+        "wall_hours_incl_fixed": 0.3577,
+        "wall_hours_production_bracket": 0.3203,
+        "wall_hours_smoke_marginal_bracket": 0.2986
+      },
+      "3": {
+        "bytes": 6408325,
+        "crop_inferences": 2,
+        "mib": 6.11,
+        "n_kernels": 1,
+        "predict_hours": 0.1077,
+        "sec_per_crop_planning": 193.9,
+        "wall_hours_incl_fixed": 0.3577,
+        "wall_hours_production_bracket": 0.3203,
+        "wall_hours_smoke_marginal_bracket": 0.2986
+      },
+      "4": {
+        "bytes": 2656100,
+        "crop_inferences": 1,
+        "mib": 2.53,
+        "n_kernels": 1,
+        "predict_hours": 0.0539,
+        "sec_per_crop_planning": 193.9,
+        "wall_hours_incl_fixed": 0.3039,
+        "wall_hours_production_bracket": 0.2851,
+        "wall_hours_smoke_marginal_bracket": 0.2743
+      }
+    },
+    "max_shard_seconds": 29160.0,
+    "session_seconds": 32400.0,
+    "session_usable_fraction": 0.9,
+    "total": {
+      "bytes": 18128850,
+      "crop_inferences": 6,
+      "mib": 17.29,
+      "n_kernels": 4,
+      "predict_hours": 0.3232,
+      "sec_per_crop_planning": 193.9,
+      "wall_hours_incl_fixed": 1.3232,
+      "wall_hours_production_bracket": 1.2108,
+      "wall_hours_smoke_marginal_bracket": 1.1458
+    }
+  },
+  "cells": {
+    "split_0__44b6": {
+      "checkpoint_heldout_family": "44b6",
+      "checkpoint_sha256": "d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f",
+      "checkpoint_trained_on_family": "6bba",
+      "checkpoint_weights_file": "edge_predictor_best_split_0.pth",
+      "encoder_saw_this_family_in_training": false,
+      "family": "44b6",
+      "fit_and_select_here": false,
+      "fold": 0,
+      "open_once_after_freeze": true,
+      "role": "target"
+    },
+    "split_0__6bba": {
+      "checkpoint_heldout_family": "44b6",
+      "checkpoint_sha256": "d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f",
+      "checkpoint_trained_on_family": "6bba",
+      "checkpoint_weights_file": "edge_predictor_best_split_0.pth",
+      "encoder_saw_this_family_in_training": true,
+      "family": "6bba",
+      "fit_and_select_here": true,
+      "fold": 0,
+      "open_once_after_freeze": false,
+      "role": "source"
+    },
+    "split_1__44b6": {
+      "checkpoint_heldout_family": "6bba",
+      "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+      "checkpoint_trained_on_family": "44b6",
+      "checkpoint_weights_file": "edge_predictor_best_split_1.pth",
+      "encoder_saw_this_family_in_training": true,
+      "family": "44b6",
+      "fit_and_select_here": true,
+      "fold": 1,
+      "open_once_after_freeze": false,
+      "role": "source"
+    },
+    "split_1__6bba": {
+      "checkpoint_heldout_family": "6bba",
+      "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+      "checkpoint_trained_on_family": "44b6",
+      "checkpoint_weights_file": "edge_predictor_best_split_1.pth",
+      "encoder_saw_this_family_in_training": false,
+      "family": "6bba",
+      "fit_and_select_here": false,
+      "fold": 1,
+      "open_once_after_freeze": true,
+      "role": "target"
+    }
+  },
+  "census": {
+    "n_crops_total": 199,
+    "roster_sha256": "3f96d322822bc0043d1ca6fbba958f1707f43397f104c36ceb08fe374d8e1772"
+  },
+  "crops": [
+    "44b6_0113de3b",
+    "6bba_57b7cc1e",
+    "6bba_6feb10f0"
+  ],
+  "design": {
+    "fit_rule": "fit and select ONLY on the source family within the same checkpoint basis",
+    "freeze_rule": "freeze the head, then open the target family exactly once",
+    "name": "2x2 checkpoint x family factorial",
+    "rationale": "The v5 export confounds family with checkpoint; the two 32-D bases are independent (rel-L2 1.41542 vs sqrt(2)=1.41421), so a head fitted in one basis cannot be applied in the other.  Here the SAME checkpoint encodes both source and target family, so transfer is measured inside one basis.",
+    "stage_order": [
+      {
+        "fold": 1,
+        "role": "source",
+        "stage": 1
+      },
+      {
+        "fold": 1,
+        "role": "target",
+        "stage": 2
+      },
+      {
+        "fold": 0,
+        "role": "source",
+        "stage": 3
+      },
+      {
+        "fold": 0,
+        "role": "target",
+        "stage": 4
+      }
+    ],
+    "stage_rule": "split 1 stages first at full scale (held-out 6bba ~ 85% of the objective)"
+  },
+  "feasibility": {
+    "every_shard_fits_one_session": true,
+    "fits_allocated_full_export_budget": true,
+    "fits_total_remaining_budget": true,
+    "kernels_cannot_be_merged_because": "the LOEO retarget binds one fold at module level and rebinds TEST_DIR globally, so a single kernel cannot serve both checkpoints",
+    "min_kernel_runs": 4,
+    "required_t4_hours": 1.323,
+    "roadmap_allocated_t4_hours_for_full_export": 7.0,
+    "roadmap_total_remaining_t4_hours": 11.5,
+    "verdict": "FITS the allocated full-export budget",
+    "what_has_to_give": {
+      "principle": "TARGET cells are the measurement and stay at full scale; SOURCE cells only have to supply fitting rows for a 33-parameter pointwise head in a 32-D basis, so they can be cut to the stratified subsample",
+      "reduced_plan_crop_inferences": 6,
+      "reduced_plan_mib": 17.29,
+      "reduced_plan_saving_t4_hours": 0.0,
+      "reduced_plan_t4_hours": 1.323,
+      "split_1_only_covers": "the primary experiment: held-out 6bba, ~85% of the pooled objective",
+      "split_1_only_first_window_t4_hours": 0.662
+    }
+  },
+  "gt_nodes_total": 3079,
+  "kind": "d1_factorial_manifest",
+  "n_crops": 3,
+  "n_rows": 6,
+  "rows": [
+    {
+      "cell": "split_0__44b6",
+      "checkpoint_sha256": "d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f",
+      "crop_id": "44b6_0113de3b",
+      "est_bytes": 2656100,
+      "family": "44b6",
+      "fold": 0,
+      "gt_nodes": 52,
+      "miss_nodes": 0,
+      "role": "target",
+      "row_id": "split_0::44b6_0113de3b"
+    },
+    {
+      "cell": "split_0__6bba",
+      "checkpoint_sha256": "d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f",
+      "crop_id": "6bba_57b7cc1e",
+      "est_bytes": 3258725,
+      "family": "6bba",
+      "fold": 0,
+      "gt_nodes": 1659,
+      "miss_nodes": 143,
+      "role": "source",
+      "row_id": "split_0::6bba_57b7cc1e"
+    },
+    {
+      "cell": "split_0__6bba",
+      "checkpoint_sha256": "d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f",
+      "crop_id": "6bba_6feb10f0",
+      "est_bytes": 3149600,
+      "family": "6bba",
+      "fold": 0,
+      "gt_nodes": 1368,
+      "miss_nodes": 1233,
+      "role": "source",
+      "row_id": "split_0::6bba_6feb10f0"
+    },
+    {
+      "cell": "split_1__44b6",
+      "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+      "crop_id": "44b6_0113de3b",
+      "est_bytes": 2656100,
+      "family": "44b6",
+      "fold": 1,
+      "gt_nodes": 52,
+      "miss_nodes": 0,
+      "role": "source",
+      "row_id": "split_1::44b6_0113de3b"
+    },
+    {
+      "cell": "split_1__6bba",
+      "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+      "crop_id": "6bba_57b7cc1e",
+      "est_bytes": 3258725,
+      "family": "6bba",
+      "fold": 1,
+      "gt_nodes": 1659,
+      "miss_nodes": 143,
+      "role": "target",
+      "row_id": "split_1::6bba_57b7cc1e"
+    },
+    {
+      "cell": "split_1__6bba",
+      "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+      "crop_id": "6bba_6feb10f0",
+      "est_bytes": 3149600,
+      "family": "6bba",
+      "fold": 1,
+      "gt_nodes": 1368,
+      "miss_nodes": 1233,
+      "role": "target",
+      "row_id": "split_1::6bba_6feb10f0"
+    }
+  ],
+  "schema_version": 1,
+  "shards": [
+    {
+      "cell": "split_1__44b6",
+      "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+      "config_glob": "/kaggle/input/*/config_split_1.json",
+      "env": {
+        "BIOHUB_D1_CKPT_SHA": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+        "BIOHUB_D1_EXPECTED_CROPS": "1",
+        "BIOHUB_D1_FOLD": "1",
+        "BIOHUB_D1_N_SUBTHR": "32",
+        "BIOHUB_D1_N_UNIFORM": "64",
+        "BIOHUB_LOEO_ARM": "strict",
+        "BIOHUB_LOEO_CONFIG_GLOB": "/kaggle/input/*/config_split_1.json",
+        "BIOHUB_LOEO_FOLD": "1",
+        "BIOHUB_LOEO_LIMIT": "0",
+        "BIOHUB_LOEO_STEMS": "[\"44b6_0113de3b\"]",
+        "BIOHUB_LOEO_WEIGHTS_GLOB": "/kaggle/input/*/edge_predictor_best_split_1.pth"
+      },
+      "est_bytes": 2656100,
+      "est_predict_hours": 0.0539,
+      "est_wall_hours": 0.3039,
+      "expected_crops": 1,
+      "family": "44b6",
+      "fold": 1,
+      "gt_nodes_total": 52,
+      "kernel_edit_change_required": false,
+      "role": "source",
+      "shard_id": "smoke__s1__split_1__44b6__source__0",
+      "stage": 1,
+      "stems": [
+        "44b6_0113de3b"
+      ],
+      "stems_are_in_checkpoint_training_set": true,
+      "weights_glob": "/kaggle/input/*/edge_predictor_best_split_1.pth"
+    },
+    {
+      "cell": "split_1__6bba",
+      "checkpoint_sha256": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+      "config_glob": "/kaggle/input/*/config_split_1.json",
+      "env": {
+        "BIOHUB_D1_CKPT_SHA": "2e4ebf616b3d4fb53881eadf42c7972e04978c28f74f229c5cb30bee835063de",
+        "BIOHUB_D1_EXPECTED_CROPS": "2",
+        "BIOHUB_D1_FOLD": "1",
+        "BIOHUB_D1_N_SUBTHR": "32",
+        "BIOHUB_D1_N_UNIFORM": "64",
+        "BIOHUB_LOEO_ARM": "strict",
+        "BIOHUB_LOEO_CONFIG_GLOB": "/kaggle/input/*/config_split_1.json",
+        "BIOHUB_LOEO_FOLD": "1",
+        "BIOHUB_LOEO_LIMIT": "0",
+        "BIOHUB_LOEO_STEMS": "[\"6bba_57b7cc1e\", \"6bba_6feb10f0\"]",
+        "BIOHUB_LOEO_WEIGHTS_GLOB": "/kaggle/input/*/edge_predictor_best_split_1.pth"
+      },
+      "est_bytes": 6408325,
+      "est_predict_hours": 0.1077,
+      "est_wall_hours": 0.3577,
+      "expected_crops": 2,
+      "family": "6bba",
+      "fold": 1,
+      "gt_nodes_total": 3027,
+      "kernel_edit_change_required": false,
+      "role": "target",
+      "shard_id": "smoke__s2__split_1__6bba__target__0",
+      "stage": 2,
+      "stems": [
+        "6bba_57b7cc1e",
+        "6bba_6feb10f0"
+      ],
+      "stems_are_in_checkpoint_training_set": false,
+      "weights_glob": "/kaggle/input/*/edge_predictor_best_split_1.pth"
+    },
+    {
+      "cell": "split_0__6bba",
+      "checkpoint_sha256": "d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f",
+      "config_glob": "/kaggle/input/*/config_split_0.json",
+      "env": {
+        "BIOHUB_D1_CKPT_SHA": "d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f",
+        "BIOHUB_D1_EXPECTED_CROPS": "2",
+        "BIOHUB_D1_FOLD": "0",
+        "BIOHUB_D1_N_SUBTHR": "32",
+        "BIOHUB_D1_N_UNIFORM": "64",
+        "BIOHUB_LOEO_ARM": "strict",
+        "BIOHUB_LOEO_CONFIG_GLOB": "/kaggle/input/*/config_split_0.json",
+        "BIOHUB_LOEO_FOLD": "0",
+        "BIOHUB_LOEO_LIMIT": "0",
+        "BIOHUB_LOEO_STEMS": "[\"6bba_57b7cc1e\", \"6bba_6feb10f0\"]",
+        "BIOHUB_LOEO_WEIGHTS_GLOB": "/kaggle/input/*/edge_predictor_best_split_0.pth"
+      },
+      "est_bytes": 6408325,
+      "est_predict_hours": 0.1077,
+      "est_wall_hours": 0.3577,
+      "expected_crops": 2,
+      "family": "6bba",
+      "fold": 0,
+      "gt_nodes_total": 3027,
+      "kernel_edit_change_required": false,
+      "role": "source",
+      "shard_id": "smoke__s3__split_0__6bba__source__0",
+      "stage": 3,
+      "stems": [
+        "6bba_57b7cc1e",
+        "6bba_6feb10f0"
+      ],
+      "stems_are_in_checkpoint_training_set": true,
+      "weights_glob": "/kaggle/input/*/edge_predictor_best_split_0.pth"
+    },
+    {
+      "cell": "split_0__44b6",
+      "checkpoint_sha256": "d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f",
+      "config_glob": "/kaggle/input/*/config_split_0.json",
+      "env": {
+        "BIOHUB_D1_CKPT_SHA": "d3e89eb361eeadef06d18159d834594776174a9f8cabd81f65271abbb42a492f",
+        "BIOHUB_D1_EXPECTED_CROPS": "1",
+        "BIOHUB_D1_FOLD": "0",
+        "BIOHUB_D1_N_SUBTHR": "32",
+        "BIOHUB_D1_N_UNIFORM": "64",
+        "BIOHUB_LOEO_ARM": "strict",
+        "BIOHUB_LOEO_CONFIG_GLOB": "/kaggle/input/*/config_split_0.json",
+        "BIOHUB_LOEO_FOLD": "0",
+        "BIOHUB_LOEO_LIMIT": "0",
+        "BIOHUB_LOEO_STEMS": "[\"44b6_0113de3b\"]",
+        "BIOHUB_LOEO_WEIGHTS_GLOB": "/kaggle/input/*/edge_predictor_best_split_0.pth"
+      },
+      "est_bytes": 2656100,
+      "est_predict_hours": 0.0539,
+      "est_wall_hours": 0.3039,
+      "expected_crops": 1,
+      "family": "44b6",
+      "fold": 0,
+      "gt_nodes_total": 52,
+      "kernel_edit_change_required": false,
+      "role": "target",
+      "shard_id": "smoke__s4__split_0__44b6__target__0",
+      "stage": 4,
+      "stems": [
+        "44b6_0113de3b"
+      ],
+      "stems_are_in_checkpoint_training_set": false,
+      "weights_glob": "/kaggle/input/*/edge_predictor_best_split_0.pth"
+    }
+  ],
+  "storage_model": {
+    "assumes": {
+      "N_SUBTHR": 32,
+      "N_UNIFORM": 64,
+      "T": 100
+    },
+    "bytes_per_crop": "2_636_600 + 375 * gt_nodes",
+    "derivation": "feat_gt and feat_max are float32 (n_rows, 32) npy with n_rows = gt_nodes + T*(N_UNIFORM+N_SUBTHR) = gt_nodes + 9600; the rows.parquet residual fits 179_000 + 119*gt_nodes.  Reproduces all three measured v5 smoke crops to within 0.25%."
+  },
+  "tier": "smoke"
+}

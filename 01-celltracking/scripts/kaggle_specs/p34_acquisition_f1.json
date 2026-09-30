@@ -1,0 +1,67 @@
+{
+  "name": "p34_acquisition_f1",
+  "slug": "biohub-p34-acquisition-f1",
+  "title": "Biohub P34 Acquisition F1",
+  "code_file": "biohub-p34-acquisition-f1.ipynb",
+  "out_dir": "notebooks/kaggle_p34_acquisition_f1",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork",
+    "aryaarun07/biohub-oof-weights"
+  ],
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": false,
+  "artifact_role": "diagnostic",
+  "diagnostic_reason": "PKT-0030 acquisition. The fold-1 mirror of the P30 fold-0 export: pre-ILP candidate graph plus richer candidate-probability sidecars on top of the P28 fold-1 champion control. No treatment variable is set, the consumed graph is unchanged, and no submission is produced.",
+  "base_notebook": "notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb",
+  "base_sha256": "f7ab7e083c352c6cfe8cc953396ae2531a1fc42d473ad5a285a9848dcb125da6",
+  "purpose": "REMOVES THE CROSS-FITTING BLOCKER NAMED BY FACT-0381. A parent ranker cannot be cross-fitted today because fold 1 has no richer candidate export: FACT-0369's deployed rule softmaxes over the SOURCE axis and thresholds at 0.5, so at most one parent per target survives, and a top-1 accuracy measured on that surface is 1.0 by arithmetic for ANY model. A metric that cannot fail is not evidence, so this run manufactures the fold-1 surface on which a held-out ranker claim can actually be made. It is the exact fold-1 mirror of the P30 fold-0 acquisition (FACT-0373 audits A-D all passed there), on the P28 fold-1 champion control base with split-1 weights. TREATMENT IS DISABLED: BIOHUB_EDGE_CANDIDATE_THRESHOLD and BIOHUB_EDGE_CANDIDATE_TOPK are deliberately UNSET, so the consumed candidate list, the emitted graph and every downstream stage stay bit-identical to the P28 fold-1 control (EXP-0031) - the acquisition must not change the thing it observes. WHY THE PRE-ILP EXPORT IS INCLUDED ALONGSIDE THE SIDECARS even though only the richer candidates are wanted: the sidecar records idx_src/idx_tgt as positional indices into coords_so_far, while the graph addresses nodes through the ids bulk_add_nodes returns. Audit check D proves those coincide, and it can only be run self-consistently if BOTH artifacts come from the SAME run. Joining new sidecars to the 2026-08-19 preilp_f1_v2 parquet from a different run would ASSUME the very node-id stability the audit exists to prove. Cross-run stability against that older parquet is then measured as a separate, additional check rather than assumed. No submission.",
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_LOEO_WEIGHTS_GLOB": "/kaggle/input/*/edge_predictor_best_split_1.pth",
+        "BIOHUB_LOEO_CONFIG_GLOB": "/kaggle/input/*/config_split_1.json",
+        "BIOHUB_EDGE_CANDIDATE_EXPORT_THRESHOLD": "0.02",
+        "BIOHUB_EDGE_CANDIDATE_EXPORT_TOPK": "8",
+        "BIOHUB_EDGE_CANDIDATE_EXPORT_DIR": "/kaggle/working/ecb"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "available_gpu_count = _torch.cuda.device_count()",
+      "cell_match": "available_gpu_count = _torch.cuda.device_count()",
+      "code_file": "scripts/kaggle_edits/pre_ilp_export.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "available_gpu_count = _torch.cuda.device_count()",
+      "cell_match": "available_gpu_count = _torch.cuda.device_count()",
+      "code_file": "scripts/kaggle_edits/edge_candidate_budget.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_after",
+      "anchor": "print(f\"Found {len(geffs)} prediction graphs\")",
+      "cell_match": "print(f\"Found {len(geffs)} prediction graphs\")",
+      "code_file": "scripts/kaggle_edits/pre_ilp_rollup.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_after",
+      "anchor": "_LOEO_KEEP |= set(globals().get(\"_SWEEP_KEEP\", []))",
+      "cell_match": "_LOEO_KEEP = {",
+      "code": "\n_LOEO_KEEP |= {\"ecb\", f\"preilp_split{LOEO_FOLD}.parquet\"}\n",
+      "expect": 1
+    }
+  ]
+}

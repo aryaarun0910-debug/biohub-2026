@@ -1,0 +1,48 @@
+id: PKT-0001
+title: Buy the whole [0.5,1.0] detection-threshold curve offline from the peak superset
+lever: LEVER-0003
+owner: primary
+lock: done
+opened: '2026-08-25'
+
+claim: >-
+  The deployed detection threshold 0.96875 is not the optimum, and the entire curve can be
+  read offline from one exported peak superset for zero submission slots.
+
+falsifier: >-
+  If the replayed curve is flat or monotone-improving toward 0.96875 across BOTH folds,
+  the threshold is already right and LEVER-0003 closes.
+
+inputs:
+  facts: [FACT-0020, FACT-0021, FACT-0062]
+  artifacts:
+    - _evidence/p4_detpeak_smoke_f0/    # EXP-0004S, passed
+  code:
+    - scripts/kaggle_edits/detpeak_export.py
+    - scripts/win_bet/detpeak_curve.py  # NOTE: has never had input until now
+
+method: >-
+  Smoke (EXP-0004S) passed on 2 crops. Full exports EXP-0004A (f0, 71 crops) and EXP-0004B
+  (f1, 128 crops) are running. Replay the curve on CPU against real GT, reporting f0 and f1
+  SEPARATELY - the lever ranking flips by fold (FACT-0030..0033).
+
+budget:
+  gpu_sessions: 2
+  submissions: 0
+  wall_clock: ~2.6 h per fold
+
+forbidden:
+  - .claude/settings.json
+  - changing BIOHUB_DET_THRESHOLD in the deployed spec before the curve is read
+
+outputs:
+  evidence: _evidence/p4_detpeak_f0/, _evidence/p4_detpeak_f1/
+  facts_added: []
+  record: one row in experimental-records.md
+
+result: >-
+  RECONCILED 2026-09-01 (Phase 1.5 packet-lock audit). NO RESULT WAS EVER PRODUCED BY THIS PACKET. Its lever was killed the SAME DAY the packet opened, by evidence this packet did not generate (FACT-0102, FACT-0111), and nothing was written here afterwards. Recorded honestly as a packet that was overtaken rather than completed - the lever's kill stands on its own evidence and is not affected either way.
+  .
+  LOCK RELEASED. It was `running` while LEVER-0003 had already been closed by FACT-0102, FACT-0111 on 2026-08-25, so the
+  anti-duplication lock was reserving a lever that was no longer available to claim - the opposite
+  of the failure AGENTS.md section 2 built it for. The lever is NOT reopened to preserve the lock.

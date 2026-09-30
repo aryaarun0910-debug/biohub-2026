@@ -1,0 +1,90 @@
+{
+  "name": "assoc_harness_f1",
+  "fold": 1,
+  "no_claim": true,
+  "note": "REPOINTED 2026-08-30 (PKT-0038). THIS SPEC PREVIOUSLY NAMED C:/temp/assoc/f1.parquet, WHICH IS THE DEPLOYED SURFACE AND CANNOT FALSIFY A RANKER: 2,162,040 rows, at most one candidate per target by arithmetic (FACT-0369), contested share 0.0000, probability minimum exactly 0.5 (FACT-0381, FACT-0382). Anyone running it would have measured a metric that cannot fail. It now names the WIDENED P34 fold-1 surface that FACT-0388 rests on, held in the acquisition's own directory C:/temp/p34_f1/ - never in C:/temp/audit_receipts/, which is PKT-0036 audit scratch and may be cleaned at any time. `allow_degenerate` stays false: the harness exercises that refusal rather than trusting the flag. `no_claim` stays true - the contextual arms in this spec are still refused until Gate 1 (EXP-0041) licenses a cache (FACT-0387); the CPU tournament that does run on this surface is scripts/win_bet/assoc_tournament.py. SCHEMA V2 (FACT-0402): the cache is keyed by (pair, role), never by frame, and `cache.manifest` is MANDATORY - it binds the producing TRUNK by sha256, because trunk identity is a --weights argument recorded nowhere in the checkpoint and official_f0 and stabledet_f0 share a byte size with different sha256 (FACT-0392). Build it with `audit_feature_cache.py bind`.",
+  "table": "C:/temp/p34_f1/assoc_targets_split1.parquet",
+  "cache": {
+    "dir": "C:/temp/assoc_tournament/cache_f1",
+    "receipt": "C:/temp/assoc_tournament/gate1_receipt_f1.json",
+    "licence": "C:/temp/assoc_tournament/licence_f1.json",
+    "manifest": "C:/temp/assoc_tournament/cache_f1/cache_manifest.json",
+    "trunk": "C:/temp/hoct/trunks/official_f1.pth",
+    "trunk_role": "official",
+    "fold": "1",
+    "preilp": "C:/temp/p34_f1/preilp_split1.parquet",
+    "ecb_dir": "C:/temp/p34_f1/ecb",
+    "reproducer": "receipt",
+    "crops": null
+  },
+  "cv": {
+    "kind": "GroupKFold",
+    "n_splits": 5
+  },
+  "preserve_single_candidate": true,
+  "allow_degenerate": false,
+  "models": [
+    {
+      "tag": "alldec.all_nine.linear",
+      "class": "linear",
+      "features": [
+        "prob",
+        "rank",
+        "margin_to_best",
+        "n_candidates",
+        "dist_um",
+        "dz_um",
+        "dy_um",
+        "dx_um",
+        "src_out_degree"
+      ],
+      "abstain": {
+        "kind": "none"
+      },
+      "population": "alldec"
+    },
+    {
+      "tag": "alldec.all_nine.tree",
+      "class": "tree",
+      "features": [
+        "prob",
+        "rank",
+        "margin_to_best",
+        "n_candidates",
+        "dist_um",
+        "dz_um",
+        "dy_um",
+        "dx_um",
+        "src_out_degree"
+      ],
+      "abstain": {
+        "kind": "none"
+      },
+      "population": "alldec"
+    },
+    {
+      "tag": "alldec.context.linear",
+      "class": "contextual",
+      "contract": {
+        "name": "frozen_trunk_node_features",
+        "dim": "from_cache",
+        "pair_builder": "concat_diff",
+        "extra_features": [
+          "prob",
+          "dist_um"
+        ],
+        "has_null_head": false
+      },
+      "abstain": {
+        "kind": "none"
+      },
+      "population": "alldec"
+    }
+  ],
+  "out_dir": "C:/temp/assoc_harness/f1",
+  "binding_restriction": {
+    "fact": "FACT-0451",
+    "offline_scoreable": true,
+    "why": "Declared true: no artifact restricted by FACT-0451 reaches this spec. The claim is CHECKED at load, not trusted - spec_restriction.enforce_spec re-derives it from the sha256 of every checkpoint this spec names, and a restricted hash overrides a true declaration however the file is named (rule 3). Omission would be a refusal (rule 2)."
+  }
+}

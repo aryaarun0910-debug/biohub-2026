@@ -1,0 +1,93 @@
+id: PKT-0028
+title: "One preregistered submission of the exact public-0.931 configuration, as the transfer control"
+lever: LEVER-0038
+owner: primary
+lock: done
+opened: '2026-08-29'
+
+claim: >-
+  The public configuration reported at 0.931, run byte-identical on our account, scores above our deployed
+  champion (FACT-0341) and therefore establishes that the lineage transfers to our deployment - giving a
+  stronger baseline from which the association work proceeds.
+
+falsifier: >-
+  The submission scores at or below the champion. That would mean the reported 0.931 does not reproduce on our
+  account, and the correct response is to STOP treating the public configuration as a baseline rather than to
+  hunt for which knob was mis-copied - the notebook is run unmodified, so a miss is a fact about the
+  configuration or the leaderboard, not about our transcription.
+
+prediction: >-
+  Stated before the run, low band promoted per the packet convention. Central estimate 0.929, band 0.925-0.932.
+  Reasoning: the reported 0.931 is a public-LB number on a lineage we share, and our champion is 0.928 on the
+  same board, so the differences are real but small; public-LB variance and the possibility that the report is
+  a best-of-several observation both argue against expecting the full +0.003. A score at or below 0.928 fires
+  the falsifier.
+
+inputs:
+  facts: [FACT-0377, FACT-0378, FACT-0341, FACT-0368, FACT-0376, FACT-0371]
+  artifacts:
+    - notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb   # verbatim public source
+    - C:/temp/intel/sn931/                                                    # pull and dissection
+  code:
+    - scripts/kaggle_specs/p32_public931_exact.json
+
+method: >-
+  Run the pulled public notebook UNMODIFIED. It is not reconstructed because the single genuine
+  association-side difference from our champion is the bidirectional fusion rule - harmonic-probability at
+  0.15 against our plain linear blend at 0.20 - and no notebook in our tree implements harmonic_probability,
+  so a reconstruction would re-derive the mechanism under test. Offline validation is IMPOSSIBLE for this
+  configuration: its secondary is trained on all 199 movies, legitimate against a hidden test set but
+  un-measurable by any LOEO control we can build (FACT-0378). One submission is therefore the only available
+  instrument, and exactly one is spent.
+
+budget:
+  gpu_sessions: 1
+  submissions: 1   # exactly one, preregistered above; no second attempt on this configuration
+  wall_clock: 1 day
+
+forbidden:
+  - modifying the public notebook in any way before this submission - it is the control
+  - STACKING anything of ours onto this configuration before its own score is known
+  - attributing any observed gain to an individual knob; every difference is confounded
+  - treating a positive result as validating the secondary consensus specifically, which our champion
+    already deploys identically (FACT-0377 as corrected)
+  - a second submission of this configuration to chase variance
+  - >-
+    POLLING THE SUBMISSION. Reaffirmed by the host on 2026-08-29 - this packet stays untouched and unpolled
+    while it scores. Scoring takes hours, polling changes nothing, and a partial reading invites the band to
+    be re-interpreted before the result exists, which is exactly what preregistering it was for.
+  - any Colab action
+  - .claude/settings.json
+
+outputs:
+  evidence: C:/temp/p32/ and _evidence/p32/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+interpretation_rules_preregistered: >-
+  Written before the run.
+  (1) ATTRIBUTION IS TO THE WHOLE BUNDLE ONLY. Bidirectional fusion rule and weight, ILP disappearance and
+  division weights, detector threshold, gap-2 recovery, adaptive short-track rescue, safe-division radii, and
+  the DeepCenter checkpoint/veto pair are all confounded. No knob may be credited.
+  (2) A POSITIVE RESULT IS A BASELINE, NOT A SOLUTION. It relocates the starting point; it does not advance
+  the association capability the ceiling analysis says is needed (FACT-0368).
+  (3) DIVISION IS REPORTED SEPARATELY at every subsequent gate, and a gain here is never read as division
+  recovery (FACT-0371 host caution).
+  (4) IF IT LOSES, the public lineage is not our baseline and the campaign continues from P24 unchanged. That
+  is an informative outcome and costs one slot.
+
+result: >-
+  DONE 2026-08-30. THE CLAIM HELD AND THE FALSIFIER DID NOT FIRE. Submission 55871868 scored 0.931 - the
+  TOP of the preregistered 0.925-0.932 band, against a falsifier set at or below 0.928 (FACT-0393). The
+  public lineage reproduces on our account and the campaign baseline relocates from 0.928 to 0.931,
+  leaving 0.019 to 0.950. Exactly one submission was spent, as budgeted.
+  ALL FOUR INTERPRETATION RULES STAND, and the win is precisely when they matter most. (1) Attribution is
+  to the whole bundle only; no knob is credited and no follow-up sweep is authorised. (2) It relocates the
+  starting point and advances no capability - FACT-0368 puts 87% of the fold-0 gap in association and
+  nothing here touched association. (3) Division is not credited. (4) This configuration remains
+  UN-VALIDATABLE OFFLINE because its secondary saw all 199 movies (FACT-0378), so it is a leaderboard
+  baseline and must never be used as an offline control; offline work continues against the P28 LOEO
+  controls.
+  CHAMPION TRANSITION IS NOT AUTOMATIC and is deliberately left to PKT-0036: the deployed champion of
+  record stays P24 until a release receipt binds notebook, weights, manifest, graph and score together.

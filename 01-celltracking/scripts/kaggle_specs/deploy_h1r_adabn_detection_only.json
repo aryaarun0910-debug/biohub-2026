@@ -1,0 +1,58 @@
+{
+  "name": "deploy_h1r_adabn_detection_only",
+  "slug": "biohub-h1r-adabn-detection-only",
+  "title": "Biohub H1R AdaBN Detection Only",
+  "code_file": "biohub-h1r-adabn-detection-only.ipynb",
+  "out_dir": "notebooks/kaggle_deploy_h1r_adabn_detection_only",
+  "artifact_role": "deployment",
+  "consumes_artifacts": [
+    {
+      "producer_spec": "scripts/kaggle_specs/h1r_det_s1_adabn_control.json",
+      "artifact": "edge_predictor_best.pth",
+      "mode": "detection_only_bn_buffers",
+      "sha256": "1371c35a63a55366e6daba77f025b7c39b57a7ba7a63d516cd70b2c3d5e358de"
+    }
+  ],
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "kernel_sources": [
+    "aryaarun07/biohub-h1r-detector-s1-adabn-control"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "purpose": "Isolated deployment candidate: use the completed LR=0 AdaBN control only for detector logits. The exact original P3 checkpoint and identity-view unet_out remain the sole association representation; all primary/secondary edge weights, harmonic fusion, ILP, and post-processing remain unchanged. Runtime aborts unless source hashes match and all 30 checkpoint differences are U-Net BatchNorm running buffers.",
+  "provenance": {
+    "producer_kernel": "aryaarun07/biohub-h1r-detector-s1-adabn-control",
+    "producer_last_run_utc": "2026-08-24T19:05:20.613Z",
+    "producer_built_notebook_sha256": "25c983118dcf725d7585847072ea321616a3b0b3b5f6da5f38e01d86be56d2b2",
+    "primary_checkpoint_sha256": "12f6881ee3620a831697ca098ff8f48e687a24225f4e048b538deec3562fe771",
+    "calibrated_checkpoint_sha256": "1371c35a63a55366e6daba77f025b7c39b57a7ba7a63d516cd70b2c3d5e358de",
+    "producer_config_sha256": "fdeff5809574543376eeee4fe83d9c344f45680535b505c9d712ecd77b966a57",
+    "producer_summary_sha256": "eb965ba98e403f50f4b6f74dee38ab624f9e34ef365ebb2163e972e0e6300421",
+    "producer_training_audit_sha256": "a67bfab726835a509ac25647560945889160623efcd3f133e276416db67cc0f8",
+    "consumer_patch_sha256": "c3e2580bf02f475120d474a440828c0f46e0e4d3d4ffc25b41e111e693b0c65d",
+    "expected_built_notebook_sha256": "d49a10ea86959cda96c0129ecee6661600291d850aef3f1d4fd9f0015f2b8dce",
+    "measured_tensor_delta": "30/136 changed: exactly 10 U-Net BatchNorm modules x running_mean/running_var/num_batches_tracked; 106/136 identical including detect_head and transformer"
+  },
+  "edits": [
+    {
+      "kind": "insert_before",
+      "cell_match": "start_time = time.time()",
+      "anchor": "start_time = time.time()",
+      "code_file": "scripts/kaggle_edits/h1r_adabn_detection_only.py",
+      "expect": 1
+    }
+  ]
+}

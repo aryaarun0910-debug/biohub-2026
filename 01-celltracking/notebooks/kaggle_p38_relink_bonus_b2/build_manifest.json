@@ -1,0 +1,40 @@
+{
+  "name": "p38_relink_bonus_b2",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p38_relink_bonus_b2.json",
+  "base_notebook": "notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb",
+  "base_sha256": "c2ecc3988880d485594af6ce5605254880bd8c6ff27adf80215701b8c92a0257",
+  "built_notebook": "notebooks\\kaggle_p38_relink_bonus_b2\\biohub-p38-relink-bonus-b2.ipynb",
+  "built_sha256": "dad9cdf00372dd08b5da8a61ebe39b955cb594d69eb9f9c4329d322b3f112347",
+  "config_hash": "c15635e0d054",
+  "n_cells": 10,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        0
+      ],
+      "payload_sha256": "b30e468012f36a8c7339360e3be7874c4d84a982a82b0b13b4aca960a7211fdc"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "7dcc8c7f1ba45e1b53ce92ac6f7123f32ce4b39730c25a8ce6c1e38c5821c448"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "0b22a79c4add17546e9d22f155aba779d4273abd36f2ba393a4ad9f5d05efdb6"
+    }
+  ],
+  "declared_slug": "biohub-p38-relink-bonus-b2",
+  "title": "Biohub P38 Relink Bonus B2",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p38-relink-bonus-b2"
+}

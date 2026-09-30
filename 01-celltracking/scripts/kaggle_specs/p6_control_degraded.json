@@ -1,0 +1,110 @@
+{
+  "name": "p6_control_degraded",
+  "slug": "biohub-p6-control-degraded",
+  "title": "Biohub P6 CONTROL degraded",
+  "code_file": "biohub-p6-control-degraded.ipynb",
+  "out_dir": "notebooks/kaggle_p6_control_degraded",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "purpose": "INSTRUMENT CONTROL, not a lever. THREE materially different graphs (P3 307 divisions; P3+armB 328 divisions and ~6% edge churn; P3+divfix 703 divisions) all scored EXACTLY 0.915. Rounding cannot explain it: the predicted divfix gain was +0.0227, ~45x the 0.0005 rounding threshold. This ships a DELIBERATELY DEGRADED config -- detection threshold 0.96875 -> 0.999, which must sharply cut detections and therefore node recall and edge TP. It MUST move the score a lot. If it also returns 0.915, the fault is in the MEASUREMENT CHAIN and every LB-based conclusion of 2026-08-18 needs revisiting (arm-B kill, division kill). Cheaper than any lever and gates all of them.",
+  "provenance": {
+    "base": "P0-B, public 0.914, artifact sha256 4c285cae0c220a11b8ffdeeea1e02de86b5c1e7795daeb2bb27c073e1ab4ecec",
+    "mechanism_source": "harmonic fusion rule transcribed from public CC0 notebook yusuketogashi/no-hack-biohub-cell-another-approch-3rd v18 'Biohub 145 | Bidirectional Harmonic Probability', via raykkretzschmar/biohub-harmonic-bidirectional-association-v1 (kernel id_no 129697527). Licence CC0. Credit for the rule: Yusuke Togashi.",
+    "routes_on": "nothing -- no acquisition state, no family, no crop identity, no GT, no image",
+    "interaction_warning": "arm B's relink cost consumes `prob`, which this edit rewrites. The two MUST be measured together and never assumed additive. This arm is harmonic ALONE."
+  },
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_DET_THRESHOLD": "0.999"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "_bi_new = ",
+      "old": "_bi_new = '            edge_logits_pair = model.predict_edges(\\n                unet_feat_src, unet_feat_tgt,\\n                p_coords_src * ds_arr_t, p_coords_tgt * ds_arr_t,\\n                p_pos_src, p_pos_tgt,\\n                p_mask_src, p_mask_tgt,\\n            )  # (1, n_src, n_tgt)\\n\\n            _bidirectional_weight = float(\\n                os.environ.get(\"BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT\", \"0\")\\n            )\\n            if _bidirectional_weight > 0.0:\\n                reverse_logits_native = model.predict_edges(\\n                    unet_feat_tgt, unet_feat_src,\\n                    p_coords_tgt * ds_arr_t, p_coords_src * ds_arr_t,\\n                    p_pos_tgt, p_pos_src,\\n                    p_mask_tgt, p_mask_src,\\n                )  # (1, n_tgt, n_src)\\n                reverse_logits_pair = reverse_logits_native.transpose(1, 2)\\n\\n                forward_center = edge_logits_pair.mean(dim=1, keepdim=True)\\n                forward_scale = edge_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_center = reverse_logits_pair.mean(dim=1, keepdim=True)\\n                reverse_scale = reverse_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_scale_ratio = (forward_scale / reverse_scale).clamp(0.5, 2.0)\\n                reverse_scale_ratio = reverse_scale_ratio.to(reverse_logits_pair.dtype)\\n                reverse_aligned = (\\n                    (reverse_logits_pair - reverse_center) * reverse_scale_ratio\\n                    + forward_center\\n                )\\n                edge_logits_pair = (\\n                    (1.0 - _bidirectional_weight) * edge_logits_pair\\n                    + _bidirectional_weight * reverse_aligned\\n                )\\n                del reverse_logits_native, reverse_logits_pair, reverse_aligned\\n\\n            if secondary_model is not None:\\n'",
+      "new": "_bi_new = '            edge_logits_pair = model.predict_edges(\\n                unet_feat_src, unet_feat_tgt,\\n                p_coords_src * ds_arr_t, p_coords_tgt * ds_arr_t,\\n                p_pos_src, p_pos_tgt,\\n                p_mask_src, p_mask_tgt,\\n            )  # (1, n_src, n_tgt)\\n\\n            _bidirectional_weight = float(\\n                os.environ.get(\"BIOHUB_BIDIRECTIONAL_EDGE_WEIGHT\", \"0\")\\n            )\\n            if _bidirectional_weight > 0.0:\\n                reverse_logits_native = model.predict_edges(\\n                    unet_feat_tgt, unet_feat_src,\\n                    p_coords_tgt * ds_arr_t, p_coords_src * ds_arr_t,\\n                    p_pos_tgt, p_pos_src,\\n                    p_mask_tgt, p_mask_src,\\n                )  # (1, n_tgt, n_src)\\n                reverse_logits_pair = reverse_logits_native.transpose(1, 2)\\n\\n                forward_center = edge_logits_pair.mean(dim=1, keepdim=True)\\n                forward_scale = edge_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_center = reverse_logits_pair.mean(dim=1, keepdim=True)\\n                reverse_scale = reverse_logits_pair.float().std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                reverse_scale_ratio = (forward_scale / reverse_scale).clamp(0.5, 2.0)\\n                reverse_scale_ratio = reverse_scale_ratio.to(reverse_logits_pair.dtype)\\n                reverse_aligned = (\\n                    (reverse_logits_pair - reverse_center) * reverse_scale_ratio\\n                    + forward_center\\n                )\\n                # Biohub 145: require mutual forward/reverse support in probability space.\\n                # The harmonic mean penalizes a candidate when either temporal direction\\n                # assigns it very low probability, while calibration preserves the forward\\n                # logit scale used by the unchanged downstream candidate threshold and ILP.\\n                forward_prob = torch.softmax(edge_logits_pair.float(), dim=1).clamp_min(1e-8)\\n                reverse_prob = torch.softmax(reverse_aligned.float(), dim=1).clamp_min(1e-8)\\n                harmonic_prob = 1.0 / (\\n                    (1.0 - _bidirectional_weight) / forward_prob\\n                    + _bidirectional_weight / reverse_prob\\n                )\\n                harmonic_prob = harmonic_prob / harmonic_prob.sum(\\n                    dim=1, keepdim=True\\n                ).clamp_min(1e-8)\\n                harmonic_logits = torch.log(harmonic_prob.clamp_min(1e-8))\\n                harmonic_center = harmonic_logits.mean(dim=1, keepdim=True)\\n                harmonic_scale = harmonic_logits.std(\\n                    dim=1, keepdim=True, unbiased=False\\n                ).clamp_min(1e-4)\\n                harmonic_scale_ratio = (forward_scale / harmonic_scale).clamp(0.5, 2.0)\\n                edge_logits_pair = (\\n                    (harmonic_logits - harmonic_center) * harmonic_scale_ratio\\n                    + forward_center\\n                ).to(reverse_aligned.dtype)\\n                del (\\n                    reverse_logits_native,\\n                    reverse_logits_pair,\\n                    reverse_aligned,\\n                    forward_prob,\\n                    reverse_prob,\\n                    harmonic_prob,\\n                    harmonic_logits,\\n                )\\n            if secondary_model is not None:\\n'",
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "anchor": "def filter_output_graph(",
+      "cell_match": "def filter_output_graph(",
+      "code_file": "scripts/kaggle_edits/degree_invariants.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "        \"safe_division_skipped_cap\": 0,\n",
+      "new": "        \"safe_division_skipped_cap\": 0,\n        \"safe_division_skipped_outdegree\": 0,\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "    used_targets: set[int] = set()\n",
+      "new": "    used_targets: set[int] = set()\n    out_degree_now: dict[int, int] = {\n        _src: len(_lst) for _src, _lst in out_by_source.items()\n    }\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "            if candidate_id in used_targets or candidate_id in incoming:\n                continue\n",
+      "new": "            if candidate_id in used_targets or candidate_id in incoming:\n                continue\n            if out_degree_now.get(source_id, 0) >= 2:\n                stats[\"safe_division_skipped_outdegree\"] += 1\n                continue\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def add_safe_divisions_postlink(",
+      "old": "            used_targets.add(candidate_id)\n            added_this_frame += 1\n",
+      "new": "            used_targets.add(candidate_id)\n            out_degree_now[source_id] = out_degree_now.get(source_id, 0) + 1\n            added_this_frame += 1\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def close_single_frame_gaps(",
+      "old": "                    candidates = [nid for nid in isolated_by_t.get(mid_t, []) if nid not in used_isolated]\n",
+      "new": "                    candidates = [nid for nid in isolated_by_t.get(mid_t, [])\n                                  if nid not in used_isolated and nid not in incoming]\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def close_single_frame_gaps(",
+      "old": "                if source_id in outgoing or target_id in used_starts:\n                    continue\n",
+      "new": "                if source_id in outgoing or target_id in used_starts or target_id in incoming:\n                    continue\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "    repair_frame_cache: dict[int, np.ndarray] = {}\n",
+      "new": "    assert_degree_invariants(edges, \"motion relink + parent/child repair\")\n\n    repair_frame_cache: dict[int, np.ndarray] = {}\n",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def filter_output_graph(",
+      "old": "    nodes_by_id = linefit_smooth_output_graph(nodes_by_id, edges, stats)\n\n    return nodes_by_id, edges, stats",
+      "new": "    nodes_by_id = linefit_smooth_output_graph(nodes_by_id, edges, stats)\n\n    assert_degree_invariants(edges, \"export\")\n    return nodes_by_id, edges, stats",
+      "expect": 1
+    }
+  ]
+}

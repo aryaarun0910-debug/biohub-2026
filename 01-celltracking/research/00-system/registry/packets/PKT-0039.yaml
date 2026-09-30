@@ -1,0 +1,185 @@
+id: PKT-0039
+title: "AGENT 2 - one capped exploitation of the 0.931 base: the P24 DeepCenter/veto bundle, and then the lane ends"
+lever: LEVER-0042
+owner: agent-2-exploitation
+lock: done
+opened: '2026-08-30'
+
+claim: >-
+  Exchanging ONLY the collapsed DeepCenter/veto configuration in the public 0.931 base for the P24
+  best-checkpoint plus safe-division-veto bundle scores above 0.931, establishing an intermediate baseline
+  without touching the association capability the 0.950 route depends on.
+
+falsifier: >-
+  The one preregistered submission scores at or below 0.931. Because exactly one component is exchanged on
+  an otherwise byte-identical base, a miss is a fact about that component ON THIS BASE - not an invitation to
+  sweep its neighbours. THE LANE ENDS EITHER WAY. There is no second exploitation experiment, no follow-up
+  tuning, and no stacking, whatever the score.
+
+prediction: >-
+  PREREGISTERED 2026-08-30 BEFORE THE TREATMENT WAS BUILT, and written verbatim into
+  submission_description below so Kaggle timestamps it earlier than the score (FACT-0396).
+  NAIVE MODAL ESTIMATE, REJECTED: base + the full FACT-0341 delta = 0.934. It is rejected because
+  the modal estimate has run optimistic on this campaign and because the component is not additive
+  by construction - see the reasoning below.
+  PREREGISTERED CENTRAL: 0.931 - the LOW band promoted to the central per packet convention. The
+  modal outcome I actually expect is NO CHANGE, which means my own central estimate SITS ON the
+  falsifier. That is deliberate and is stated now so it cannot be reinterpreted later: this lane is
+  a cheap capped test of a component we like, not a result we expect.
+  PREREGISTERED BAND: 0.927 to 0.935.
+  FALSIFIER (unchanged, fixed by the lever): a score AT OR BELOW 0.931.
+  REASONING, both directions.
+  FOR a gain: (a) FACT-0341 measured this exact three-variable exchange on our own substrate,
+  moving the P9 lineage by its recorded delta, and FACT-0345 records our offline instrument
+  under-reading its leaderboard contribution three to four times, so a small offline signal is not
+  evidence of a small leaderboard one. (b) The exchange is not a threshold nudge: on the released
+  base the DeepCenter detector is LOADED BUT INERT on the division path - the fetched kernel log of
+  the scoring run shows deepcenter_rejected=0 on every movie because the safe-division veto is off,
+  and the gap veto runs on the collapsed epoch-500 prior that FACT-0312 measured at zero acceptance.
+  The base pays for a detector that decides nothing. (c) The base safe-division radii sit close to
+  the radii the P24 A/B was measured at, so the candidate population the veto filters is not alien.
+  (d) The base own validator reports a very low division jaccard, so there is real division headroom.
+  AGAINST a gain: (e) the two mechanisms act on stages the public bundle has already changed -
+  gap-2 recovery and adaptive short-track rescue are both ON here and were both OFF in P24, so
+  making the gap veto live ADDS repairs on top of an already more permissive regime, where extra
+  adds are likelier to be spurious. (f) The safe-division veto is a PRUNER: it can only subtract
+  from the division edges the base already adds, and FACT-0345 records it lowering node recall
+  slightly, so its sign on this base is genuinely uncertain. (g) The base is already above the P9
+  substrate the delta was measured on, and nothing guarantees the same headroom survives.
+  (h) Public-LB variance alone is of the order of the effect under test.
+  NOT A MEASUREMENT: this configuration cannot be validated offline at all (FACT-0378, FACT-0393
+  rule 4). The band is a PRIOR. No offline check performed for this packet licenses any part of it.
+
+submission_description: >-
+  PREREGISTERED before build (PKT-0039 / LEVER-0042). Treatment = the released public-0.931 base
+  with exactly one component exchanged: DeepCenter checkpoint best.pt epoch 2 plus safe-division
+  veto ON (the P24 bundle, FACT-0341). Nothing else touched - no threshold, candidate, rescue or
+  stacking change. CENTRAL 0.931 (low band promoted; naive modal 0.934 rejected as optimistic).
+  BAND 0.927-0.935. FALSIFIER: score at or below 0.931. One submission only; this lane ends either
+  way, win or lose, with no follow-up tuning of the public lineage.
+
+inputs:
+  facts: [FACT-0393, FACT-0341, FACT-0345, FACT-0377, FACT-0378, FACT-0396]
+  artifacts:
+    - notebooks/kaggle_p32_public931_exact/       # the 0.931 base, released champion
+    - C:/temp/queue/p24_deepcenter_best_veto/     # the P24 artifact, receipt-passing
+  code:
+    - scripts/kaggle_specs/p32_public931_exact.json
+    - scripts/core/kaggle_factory.py
+    - scripts/win_bet/audit_release_receipt.py
+
+method: >-
+  ONE controlled treatment, in this order and no other. (1) Preregister the band and falsifier HERE and in
+  the submission description. (2) Build the treatment on the P32 base with exactly one component exchanged -
+  the DeepCenter checkpoint and safe-division-veto pair - and nothing else touched. (3) CPU PREFLIGHT, which
+  is now mandatory before any GPU push (standing rule, head of levers.yaml): the exact built notebook, the
+  exact datasets, the real subprocess boundary. (4) ONE GPU build. (5) Audit through
+  scripts/win_bet/audit_release_receipt.py, which must bind notebook, weights, manifest, graph and score.
+  (6) Submit STANDALONE, never stacked. Then stop.
+  NOTE THE BUILD TRAP THIS BASE CARRIES, recorded as exception E1 of FACT-0396: the P32 spec sets
+  base_notebook == built_notebook, so a rebuild consumed its own base and kaggle_factory build on that spec
+  now ABORTS. The treatment spec must name a base that still exists, or restore one, before anything is
+  built. Do not work around this by pointing the spec at its own output.
+
+budget:
+  gpu_sessions: 1   # Slot A
+  submissions: 1    # exactly one, and PKT-0036 releases it
+  wall_clock: 1 day
+
+forbidden:
+  - any second submission on this lane, whatever the first one scores
+  - threshold changes, candidate widening, rescue changes, or stacking of any kind
+  - crediting any individual knob of the public bundle - PKT-0028 rule (1) still binds (FACT-0377)
+  - pushing to GPU before the CPU preflight passes on the exact built notebook (standing rule)
+  - claiming LEVER-0041 or LEVER-0034, or editing PKT-0036, PKT-0037 or PKT-0040
+  - treating an offline check as a score prediction - this base cannot be validated offline at all (FACT-0378)
+  - .claude/settings.json or .gitignore
+  - staging or committing to git - the primary agent commits explicit paths per packet
+
+outputs:
+  evidence: C:/temp/exploit931/ and _evidence/exploit931/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+progress: >-
+  2026-08-30, STOPPED AT THE REPORT LINE AS INSTRUCTED - PREPARED AND PREFLIGHTED, NOT PUSHED.
+  (1) PREREGISTERED FIRST. The band, the falsifier and the submission description above were written
+  and hashed BEFORE the treatment was built; the stamp is _evidence/exploit931/prereg_before_build.sha256.
+  (2) BUILT. scripts/kaggle_specs/p35_dcveto_on_931.json ->
+  notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb, built sha256 c2ecc398, from base
+  notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb sha256 856451d8 - the artifact the
+  P32 release receipt binds to the scoring submission. base != built, so the FACT-0396 exception E1 trap
+  that aborts a rebuild of the P32 spec is not re-armed. kaggle_factory verify: 10 cells in, 10 out, ONE
+  cell changed, +293 characters, three appended os.environ lines and nothing else.
+  (3) THE EXCHANGE IS THE P24 EDIT. The three variables are exactly the vars of the single env edit in
+  scripts/kaggle_specs/p24_deepcenter_best_veto.json. Every other DeepCenter variable was ALREADY identical
+  between the two configurations, so three is the whole component, not a selection from it. Only the
+  checkpoint path's mount-root prefix differs; the FILE is the same, sha256 8040999a.
+  (4) CPU PREFLIGHT PASSES 10 OF 10, and its own planted-defect self-test passes 8 of 8 -
+  scripts/win_bet/preflight_p35_dcveto.py, report _evidence/exploit931/preflight_p35.json. Agent 1's
+  central resolver scripts/win_bet/kaggle_mounts.py existed by build time and IS used; this packet did not
+  write a second ladder.
+  (5) WHAT THE PREFLIGHT ESTABLISHED THAT WAS NOT KNOWN. Read from the fetched kernel logs of both scoring
+  runs, now at _evidence/exploit931/p32_kernel.log and p24_kernel.log: the released 0.931 base LOADS A
+  DEEPCENTER MODEL THAT DECIDES NOTHING ON THE DIVISION PATH - deepcenter_rejected=0 on all eight movies
+  across 664 geometric candidates, because its safe-division veto is off - and its gap veto runs on the
+  collapsed epoch-500 prior. Its integrity block resolves the file to best.pt and rewrites the checkpoint
+  variable to it, and the loader then SKIPS best.pt because epoch 2 does not match the base's declared
+  expected epoch 500, falling back to checkpoint_last.pt. So the base already carries the good checkpoint
+  in hand and declines it on an epoch assertion. The treatment removes exactly that.
+  (6) MOUNT ROOT. Both logs prove the real mount is /kaggle/input/datasets/<owner>/<slug>/ and that the
+  /kaggle/input/<slug>/ form the P24 spec hardcoded did not exist at run time. The preflight executes the
+  built notebook's OWN candidate ladder against a simulated mount holding the REAL dataset bytes, first
+  requires it to reproduce BOTH scored runs, and only then reports the treatment - which resolves to
+  best.pt epoch 2 under BOTH mount conventions.
+  (7) WHAT IT DOES NOT LICENSE. Nothing about the score. This configuration cannot be validated offline at
+  all (FACT-0378, FACT-0393 rule 4). The band above is a prior. The notebook prints a PROXY_SCORE over the
+  four VISIBLE movies; it is not a selection signal and must not be used as one.
+  NEXT STEP IS NOT MINE: the primary agent decides the single GPU push, and PKT-0036 releases the one
+  submission. No second submission on this lane whatever it scores.
+
+central_preflight_adjudication: >-
+  BOTH PREFLIGHTS WERE RUN AND BOTH ARE REPORTED. Agent 1's central scripts/win_bet/gpu_preflight.py
+  landed while this treatment was being built, so it was run as well:
+  `gpu_preflight.py run --spec scripts/kaggle_specs/p35_dcveto_on_931.json`, receipt at
+  _evidence/exploit931/central_preflight_receipt.json. ITS VERDICT IS FAIL, 3 of 10, and the failures are
+  adjudicated here rather than waved away. It is written for the Gate-1 / association-feature kernels, and
+  four of the seven failures ask this submission notebook for things that exist only in those:
+  PF03 wants an expected CROP COUNT and crop names, PF07 wants an _AFP_WORKER literal, PF08 wants
+  assoc_feature_parity.json in the export keep-set, PF10 wants the ASSOC_FEATURE_PARITY_COMPLETE heartbeat.
+  None applies to a full inference-and-submission notebook. Of the remaining three:
+  PF01 is a GOVERNANCE condition and it is REAL - it fails only because the spec and the built notebook are
+  UNCOMMITTED, which this packet is forbidden to change. Everything PF01 actually compares agrees: notebook
+  sha equals manifest built sha, metadata slug equals spec slug, dataset list, competition source, GPU and
+  T4 machine shape all match. THE PRIMARY MUST COMMIT scripts/kaggle_specs/p35_dcveto_on_931.json AND
+  notebooks/kaggle_p35_dcveto_on_931/ BEFORE THE PUSH, and PF01 then flips.
+  PF02 is TRUE AND UNFIXABLE HERE: the public base carries five of its own resolvers and does not use the
+  central ladder. Injecting the central ladder would be a SECOND component change and would destroy this
+  experiment's only claim. It is a property of the inherited base, recorded, not repaired.
+  PF09 is a FALSE NEGATIVE on this spec shape and should be reported to its author: it labels the declared
+  checkpoint deepcenter_hardcodes_flat_mount=true when the declared value is the DATASETS root, and it
+  builds its simulated tree with a doubled datasets/pilkwang/ prefix. Its own substantive result is
+  positive - the file resolves under BOTH conventions - which is also what the dedicated preflight found by
+  executing the notebook's own ladder.
+  RESIDUAL RISK CARRIED KNOWINGLY: the base's _dc_checkpoint_candidates contains an unbounded `**` glob
+  under /kaggle/input, which PF02 did not assess because the function's name does not match its resolver
+  pattern. It is pre-existing public-base code and it completed in BOTH scored runs, so it is a cost, not a
+  blocker - and removing it would be a second change.
+
+result: >-
+  DONE 2026-08-30, SCORED 0.932, LANE ENDED. The falsifier - at or below 0.931 - did NOT fire, so the claim
+  is confirmed, by the smallest margin the leaderboard can display (FACT-0412). Reason (h) of this packet's
+  own preregistration, written before the run, states that public-LB variance alone is of the order of the
+  effect under test; +0.001 from one submission cannot separate the component from noise, which is why the
+  fact is recorded SUSPECT on attribution while the score itself is not in doubt.
+  THE MECHANISM IS SOLID EVEN WHERE THE MAGNITUDE IS NOT. The run's log shows best.pt loaded at epoch 2
+  rather than skipped on the base's epoch-500 assertion, the safe-division veto ON, and deepcenter_rejected
+  non-zero on seven of eight movies where the base recorded zero on all eight. The detector decides now; it
+  decided nothing before.
+  EXACTLY ONE SUBMISSION SPENT, as budgeted, and the lane ends here: no second exploitation experiment, no
+  follow-up tuning, no stacking, whatever the score. A marginal pass is precisely the case that rule exists
+  for - +0.001 invites sweeping the neighbours, which PKT-0028 rule (1) independently forbids.
+  WHAT IT SETTLES STRATEGICALLY: inherited knobs cannot reach 0.940. Baseline 0.932 leaves 0.008, and the
+  only other identified candidate is FACT-0404's public 0.933 at about +0.002 on a base that lacks the
+  component now in our champion. Even fully additive that is 0.934.

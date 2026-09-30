@@ -1,0 +1,89 @@
+{
+  "name": "p36_assoc_feature_tap_smoke",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p36_assoc_feature_tap_smoke.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p36_assoc_feature_tap_smoke\\biohub-p36-assoc-feature-tap-smoke.ipynb",
+  "built_sha256": "ca5524b80d8cd40877635e92c4fb887736398d7a9384cc7ae02fd86002d27f28",
+  "config_hash": "6923ba836ba2",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "edf9aeb5c4d69e2fce454c03437811950050d21e3768cd5939ebf5598b44e436"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "8d15030bec2f040f2bd186e7a3ebed167b0f17414de3aeef15f9994fb3710461"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "7956542e7190dbb71f06fef09d7e77f0785fcd2d46f3646c56fea5d162bb23a0"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "8be0433869eafd6adafa9c406db8e1848ca138020bb15d35aeecc7a39ebaf52c"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "32582192ed21aa95de8f1e718d0e31f8e6f85568f6d0579a0a13180ece9c3f09"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "724ae07f9bed8b105d1a825d028d4d4e22926248e144431cab2851c8e63eeb86"
+    },
+    {
+      "kind": "insert_after",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "bb300382c6ca844ff624ab2310b4ce26987022994bae1807bf2754933dc51343"
+    },
+    {
+      "kind": "insert_after",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "66b57ef3da64c443fb65d2cccd807794ad82ab7f0b3785aa469b0f3baf9380bb"
+    }
+  ],
+  "declared_slug": "biohub-p36-assoc-feature-tap-smoke",
+  "title": "Biohub P36 Assoc Feature Tap Smoke",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p36-assoc-feature-tap-smoke"
+}

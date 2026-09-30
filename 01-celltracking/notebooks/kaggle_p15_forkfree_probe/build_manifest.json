@@ -1,0 +1,33 @@
+{
+  "name": "p15_forkfree_probe",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p15_forkfree_probe.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p15_forkfree_probe\\biohub-p15-forkfree-probe.ipynb",
+  "built_sha256": "c41465a2d3ed0956aa722758a5f1e1ab0db701eb6864abb1e38fd5c50cd15c15",
+  "config_hash": "067fa84e68e9",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "8eb07ffce4b77ecd24adcbc260429af5f433b344264c5caef597c5e12cb57b2c"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    }
+  ],
+  "declared_slug": "biohub-p15-forkfree-probe",
+  "title": "Biohub P15 ForkFree Probe",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p15-forkfree-probe"
+}

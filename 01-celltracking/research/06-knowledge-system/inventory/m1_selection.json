@@ -1,0 +1,49 @@
+{
+  "rule": "max aggregate patched composite, edge-volume weighted; exact ties -> earlier epoch; regime slices diagnostic only",
+  "manifest_sha256": "ea5fe9b2eb9bd0fee8df513512c93b38ec9268a8da1c6fece57f2dbd5f0324f0",
+  "det_threshold": 0.99,
+  "downstream": "E0c greedy + faithful E0c wrapper, no ILP",
+  "val_crops": [
+    "44b6_12dfb391",
+    "44b6_267148e4",
+    "44b6_3a861e03",
+    "44b6_668e0cc7",
+    "44b6_8f5ab931",
+    "44b6_d29c9ab2",
+    "44b6_d2f34f90",
+    "44b6_d5e7d891",
+    "44b6_d78e09d9",
+    "44b6_ddf577ad",
+    "44b6_e31261b4",
+    "44b6_eb2880fc"
+  ],
+  "per_epoch": {
+    "10": {
+      "composite": 0.7963073723834547,
+      "adj_edge_jaccard": 0.7963073723834547,
+      "edge_jaccard": 0.7905264449625721
+    },
+    "15": {
+      "composite": 0.7954893556803733,
+      "adj_edge_jaccard": 0.7954893556803733,
+      "edge_jaccard": 0.7901415324548561
+    },
+    "20": {
+      "composite": 0.6820311923853695,
+      "adj_edge_jaccard": 0.6820311923853695,
+      "edge_jaccard": 0.6624727800629083
+    },
+    "25": {
+      "composite": 0.7501197309409581,
+      "adj_edge_jaccard": 0.7501197309409581,
+      "edge_jaccard": 0.7363481228668942
+    },
+    "30": {
+      "composite": 0.6974614401744734,
+      "adj_edge_jaccard": 0.6974614401744734,
+      "edge_jaccard": 0.681338891613536
+    }
+  },
+  "selected_epoch": 10,
+  "selected_composite": 0.7963073723834547
+}

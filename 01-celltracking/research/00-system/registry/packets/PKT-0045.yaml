@@ -1,0 +1,122 @@
+id: PKT-0045
+title: "LB calibration look one of two: the Gate A relink bonus at b2, one environment value on the champion"
+lever: null              # the lever stays with PKT-0042; see why_no_lever
+owner: agent-0-coordinator
+lock: claimed
+opened: '2026-08-31'
+
+why_no_lever: >-
+  LEVER-0044 is held by PKT-0042, which is still running Gate B, and R6 forbids a second holder. This packet
+  claims no lever: it executes ONE leaderboard calibration submission on PKT-0042's completed Gate A finding
+  under the Q2 submission policy, and the scientific claim about the consumption point remains PKT-0042's.
+  The pattern follows PKT-0036, which holds the seam-calibration slot without holding a hypothesis.
+
+policy_basis: >-
+  The submission policy adopted 2026-08-31 after the macro review. Offline retains veto over validity,
+  provenance, leakage, integer export, graph invariants, catastrophic node/edge loss and division-TP
+  regression, and retains its diagnostic and prioritisation role - but it LOSES veto over MAGNITUDE, because
+  FACT-0344 records an arm reading +0.002 offline and scoring -0.014, and FACT-0345 records a three-to-four
+  fold under-read in the other direction. The leaderboard is the instrument for external direction and
+  magnitude. Eligibility is one clean fold with positive full-chain evidence, the other flat but not
+  materially unsafe. Belief promotion still requires both folds or independent corroboration; THIS
+  SUBMISSION DOES NOT PROMOTE ANYTHING TO ESTABLISHED CAPABILITY.
+
+claim: >-
+  The fold-0 combined-score gain measured under the deployed relink at bonus 2.0 transfers to the hidden
+  test substrate.
+
+falsifier: >-
+  PREREGISTERED BEFORE THE BUILD, three-way on purpose because FACT-0412 records public-LB variance as being
+  of the order of the effect under test, and forcing a binary is how PKT-0039's +0.001 pass ended up weak.
+  AT OR BELOW 0.930 - kills the tested GLOBAL b2 AMPLIFICATION ON THE HIDDEN SUBSTRATE. It does NOT establish
+  that the hidden set behaves like fold 1, and it must not be reported that way; it is a fact about this
+  setting on that substrate.
+  AT OR ABOVE 0.935 - strong leaderboard evidence of POSITIVE TRANSFER FOR THIS SETTING. It is NOT general
+  confirmation of the consumption thesis, which is Gate B's question and is unresolved.
+  0.931 TO 0.934 INCLUSIVE - UNINFORMATIVE, DECLARED IN ADVANCE. Licenses no follow-up and closes nothing.
+  Naming this band before the score exists is what stops it being rationalised into a win afterwards.
+
+prediction: >-
+  Central 0.932, the low estimate promoted per packet convention because the naive modal estimate has run
+  optimistic on this campaign. Band 0.928 to 0.938. THE BAND IS A PRIOR AND NOT A MEASUREMENT.
+
+family_cap: >-
+  THIS IS LOOK ONE OF AT MOST TWO on this lever family, under the Q2 two-look rule that exists to stop the
+  public board becoming a 145-step optimiser.
+  A HIGH RESULT LICENSES EXACTLY ONE FURTHER LOOK - EITHER an independent kernel rerun producing a
+  SEPARATELY AUDITED artifact, OR one different safe setting. NEVER BOTH.
+  AN IDENTICAL ARTIFACT HASH IS NEVER RESUBMITTED: Kaggle scoring is deterministic for the same file, so a
+  resubmission of identical bytes measures nothing and spends a look. Replication counts only if an
+  independent kernel run produces a separately audited artifact.
+  THE PLATEAU INTERIOR IS INELIGIBLE. Bonus 4 and 8 score higher on fold 0 but decline fold-1 division TP,
+  tripping the FACT-0371 safety condition. They do not become eligible on a good result here; they would
+  need NEW SAFETY EVIDENCE.
+
+measured_basis:
+  source: _evidence/assoc/finaledge/panel_gateA.json, arm gateA_b2
+  scorer: official patched scorer, complete deployed chain, both folds separately
+  fold_0:
+    combined_score: {control: 0.9120513223407455, candidate: 0.9147102679068939, delta: 0.0026589455661484296}
+    crop_paired_ci95: [0.0007869571604456505, 0.005171115259055886]
+    excludes_zero: true
+    favourable: true
+    raw_edge_jaccard_delta: 0.002946323252609351
+    adjusted_delta: 0.0029780945023186733
+    count_channel: -6.7463591366667686e-06
+    count_adjustment_artifact: false
+    edge_tp_delta: 31
+    edge_fp_delta: -35
+    edge_fn_delta: -31
+    node_recall_delta: 0.000936145378749309
+    division_tp: {control: 5, candidate: 5, delta: 0}
+    division_fp_delta: 6
+    division_jaccard_delta: -0.0031914893617021253
+  fold_1:
+    combined_score: {control: 0.712186, candidate: 0.712028, delta: -0.0001583}
+    crop_paired_ci95: [-0.000872, 0.000512]
+    excludes_zero: false
+    raw_edge_jaccard_delta: -0.0001464
+    count_adjustment_artifact: false
+    edge_tp_delta: -6
+    edge_fp_delta: 17
+    node_recall_delta: 0.0001527
+    division_tp: {control: 14, candidate: 14, delta: 0}
+    division_jaccard_delta: -6.14e-05
+  the_disclosure_that_must_stay_prominent: >-
+    b2 IMPROVES ORDINARY ASSOCIATION WHILE INCREASING FALSE FORKS. Fold-0 division Jaccard falls 0.0031915 on
+    six extra division false positives. That BOUNDS THE MECHANISM CLAIM and must be carried with every
+    citation of this arm. It does not block eligibility, because the combined objective already charges the
+    division term and the net is positive AFTER paying it, and because the stated safety condition is on
+    division TP, which is flat on both folds.
+
+eligibility_check:
+  division_tp_regression: none - flat on both folds
+  clean_fold_with_positive_full_chain_evidence: fold 0, favourable interval excluding zero
+  other_fold_flat_not_materially_unsafe: fold 1, interval spans zero, node recall slightly positive
+  count_adjustment_artifact: false on both folds
+  verdict: PASSES Q2 eligibility
+
+budget:
+  gpu_sessions: 1   # the kernel run that produces the artifact; a leaderboard artifact under the standing GPU rule
+  submissions: 1
+  wall_clock: same day
+
+forbidden:
+  - changing anything other than the single environment assignment
+  - resubmitting an identical artifact hash
+  - treating a 0.931-0.934 outcome as a win or as a kill
+  - sweeping the plateau interior on a good result
+  - reading this as promotion to established capability - that needs both folds or independent corroboration
+  - claiming any lever, or editing PKT-0042, PKT-0043 or PKT-0044
+  - .claude/settings.json or .gitignore
+
+outputs:
+  evidence: notebooks/kaggle_p38_relink_bonus_b2/_out/ and _evidence/audit/receipts/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+submission_description_recorded_before_submit: >-
+  PREREGISTERED before the artifact existed (PKT-0045, committed 77e41ca). LB CALIBRATION look 1 of 2 on PKT-0042 Gate A. Treatment = P35 champion (0.932, sub 55888865) with EXACTLY ONE env value changed: BIOHUB_MOTION_RELINK_LEARNED_BONUS 1.0->2.0. The other 15 changed lines are PASSIVE instrumentation (atomic submission write + completion heartbeat) required by the GPU protection contract; no graph, score, threshold, candidate or post-processing logic altered. b2 chosen BY RULE: smallest value on the winning plateau, and the ONLY grid value leaving division TP flat on BOTH folds. OFFLINE, not a prediction: fold0 combined score +0.0026589 ci95[+0.00079,+0.00517] excluding zero; fold1 -0.0001583, interval spans zero; fold0 division Jaccard -0.0032 on +6 division FPs - DISCLOSED, the mechanism increases false forks. CENTRAL 0.932. BAND 0.928-0.938. FALSIFIER: at or below 0.930 kills the tested global b2 amplification on the hidden substrate (NOT a claim the hidden set behaves like fold 1). At or above 0.935 = positive transfer FOR THIS SETTING (not confirmation of the consumption thesis). 0.931-0.934 = UNINFORMATIVE, declared in advance, licenses nothing and closes nothing. Look 1 of 2; identical hashes never resubmitted; plateau interior b4/b8 ineligible on fold-1 division safety.
+
+result: null

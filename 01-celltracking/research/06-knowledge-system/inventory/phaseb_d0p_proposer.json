@@ -1,0 +1,105 @@
+{
+  "surfaces": {
+    "native": {
+      "parent_um": null,
+      "sister_um": null
+    },
+    "geometric_core": {
+      "parent_um": 10.5,
+      "sister_um": 8.5
+    },
+    "outer_diag": {
+      "parent_um": 15.0,
+      "sister_um": 15.0
+    },
+    "division_flow_pair": {
+      "parent_um": 15.0,
+      "sister_um": 8.5,
+      "midpoint_um": 6.0,
+      "flow": "knn",
+      "knn_k": 16,
+      "knn_min": 4
+    },
+    "division_flow_pair_framemedian": {
+      "parent_um": 15.0,
+      "sister_um": 8.5,
+      "midpoint_um": 6.0,
+      "flow": "frame_median",
+      "knn_k": 0,
+      "knn_min": 0
+    },
+    "division_flow_pair_wide": {
+      "parent_um": 15.0,
+      "sister_um": 15.0,
+      "midpoint_um": 6.0,
+      "flow": "knn",
+      "knn_k": 16,
+      "knn_min": 4
+    }
+  },
+  "e0c_anchor": {
+    "0": 0.7595,
+    "1": 0.649
+  },
+  "rows": [
+    {
+      "surface": "division_flow_pair_wide",
+      "surface_hash": "34f91ada4626",
+      "fold": 0,
+      "family": "44b6",
+      "composite": 0.8299273292024169,
+      "delta_vs_e0c": 0.0704273292024169,
+      "division_jaccard": 0.6923076923076923,
+      "division_tp": 18,
+      "division_fp": 0,
+      "division_fn": 8,
+      "node_recall": 0.9481579805030419,
+      "n_gt_div": 26,
+      "reachable": 20,
+      "covered_reachable": 18,
+      "cand_total": 14365276,
+      "cand_steals": 14022639,
+      "cat_unlabeled": 14273716,
+      "cat_reliable_negative": 90715,
+      "cat_annotated_end": 713,
+      "mothers_with_cands": 2704662,
+      "flow_knn": 2821391,
+      "runtime_s": 6955.825535774231,
+      "cat_true_divider": 132,
+      "pm_median": 4.0,
+      "pm_p90": 8.0,
+      "pm_p99": 13.0,
+      "pm_max": 43
+    },
+    {
+      "surface": "division_flow_pair_wide",
+      "surface_hash": "34f91ada4626",
+      "fold": 1,
+      "family": "6bba",
+      "composite": 0.7102924497797816,
+      "delta_vs_e0c": 0.061292449779781544,
+      "division_jaccard": 0.624,
+      "division_tp": 78,
+      "division_fp": 0,
+      "division_fn": 47,
+      "node_recall": 0.873079269165798,
+      "n_gt_div": 125,
+      "reachable": 93,
+      "covered_reachable": 78,
+      "cand_total": 10154368,
+      "cand_steals": 9889209,
+      "cat_unlabeled": 9900842,
+      "cat_reliable_negative": 246045,
+      "cat_annotated_end": 7088,
+      "mothers_with_cands": 2000945,
+      "flow_knn": 2157052,
+      "runtime_s": 4386.930800676346,
+      "cat_true_divider": 393,
+      "flow_frame_median": 14,
+      "pm_median": 2.0,
+      "pm_p90": 5.0,
+      "pm_p99": 9.0,
+      "pm_max": 54
+    }
+  ]
+}

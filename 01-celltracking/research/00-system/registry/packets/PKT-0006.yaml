@@ -1,0 +1,50 @@
+id: PKT-0006
+title: Cell-count conservation as a per-frame division budget
+lever: LEVER-0015
+owner: rnd-agent
+lock: done
+opened: '2026-08-26'
+
+claim: >-
+  Observed frame-to-frame count change bounds the number of genuine divisions and can veto the excess.
+
+falsifier: >-
+  If GT count does not track GT divisions, conservation fails and LEVER-0015 closes.
+
+inputs:
+  facts: [FACT-0160, FACT-0161]   # FACT-0130/0140/0141 RETRACTED - leak-contaminated
+  artifacts:
+    - _evidence/exports/loeo_f1_strict/  # OOF split_1 weights - HONEST fold 1, use this
+    - C:/temp/error_atlas/               # LOEO-CLEAN (p0b substrate, older but honest)
+    - _evidence/p19_relink_sweep_f1/     # LEAK-CONTAMINATED (FACT-0160) - do NOT treat as truth
+  code: [scripts/core/score_loeo_submission.py]
+
+method: >-
+  Dispatched to a background R&D agent. Mandatory calibration: reproduce the GT inter-frame
+  displacement median of 1.82 um before trusting any distance. Agents do not write to the
+  registry; the lead integrates their findings.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: analysis only
+
+forbidden:
+  - modifying research/00-system/registry/
+  - launching any Kaggle kernel or submission
+  - re-proposing a lever already killed without a NEW mechanism and a stated falsifier
+
+outputs:
+  evidence: agent report, integrated by the lead
+  facts_added: []
+  record: one row in experimental-records.md once integrated
+
+result: >-
+  REFUTED 2026-08-26, falsifier fired verbatim. Cell count does not track divisions
+  (AUC 0.5592; 0.4674 - below chance - for TP vs FP). Every budget variant loses even under
+  an oracle ranking: best -0.00105. LEVER-0015 killed; FACT-0150..0153 recorded.
+  .
+  TWO CORRECTIONS TO THE LEAD'S FRAMING, both accepted: (1) GT annotates only 5.4% of cells,
+  so the real over-emission is 2.65x per cell-per-frame, not the ~50x implied by comparing
+  6,314 forks against a 125-division SAMPLE; (2) 96% of our forks are invisible to the metric
+  - only 251 of 6,314 are scored. Calibration passed at 1.8168 um.

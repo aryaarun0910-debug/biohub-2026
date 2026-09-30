@@ -1,0 +1,70 @@
+id: PKT-0020
+title: "LEVER-0024: DeepCenter best.pt + safe-division veto ON, env-only on the P9 champion (p24) - built, pre-registered, awaiting host go"
+lever: LEVER-0024
+owner: primary
+lock: done
+opened: '2026-08-27'
+
+claim: >-
+  The public 0.927 lineage's remaining edge over P9 is its DeepCenter bundle (best.pt epoch 2 + safe-div
+  veto ON); deploying it env-only on P9 scores above the champion on the public LB.
+
+falsifier: >-
+  LB <= 0.925 (FACT-0001) on submission of p24 kills the lever. Band pre-registered here, before any
+  score: 0.921-0.929, central 0.925 (the low band promoted to central, per the template rule). A score
+  >= 0.927 does NOT by itself name a mechanism: P10 (best.pt alone) is the attribution follow-up.
+
+prediction: >-
+  Central 0.925 (no effect), band 0.921-0.929. The prior is symmetric: with best.pt the gap veto
+  admits ~18% of checked synthetic gap points instead of 0% (FACT-0312) - unknown sign on the edge
+  term - and the safe-div veto at threshold 0.12 prunes second-daughter candidates whose heatmap
+  max is low, which trims FP forks (divJ up) and some TP forks (divJ down). EXP-0008's -0.003 with
+  the collapsed checkpoint is the only prior point and is confounded.
+
+inputs:
+  facts: [FACT-0001, FACT-0310, FACT-0311, FACT-0312, FACT-0331]
+  artifacts:
+    - notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb   # base, sha 6b93ef47...
+    - notebooks/kaggle_p24_deepcenter_best_veto/                               # built 2026-08-27, verified
+    - C:/temp/intel/arnav170_sdw60/REPORT.md                                   # the lineage teardown (outside git)
+  code:
+    - scripts/kaggle_specs/p24_deepcenter_best_veto.json
+    - tests/test_p24_deepcenter_best_veto.py
+    - scripts/kaggle_specs/p10_deepcenter_best.json   # the one-factor attribution arm, built earlier
+
+method: >-
+  kaggle_factory build -> verify (done locally, 2026-08-27; cell-2 env diff only). On the host's go:
+  push -> status -> fetch -> audit (PASS 10/10 required) -> submitcmd. One slot, one submission. Read
+  the score, record FACT + EXP outcome, then decide P10 attribution only if the band's top is hit.
+
+budget:
+  gpu_sessions: 1
+  submissions: 1
+  wall_clock: ~2.5 h kernel + scoring
+
+forbidden:
+  - pushing or submitting without the host's explicit go (rule 8)
+  - any edit beyond the three env overrides
+  - reading the four visible test movies for any selection
+  - .claude/settings.json
+
+outputs:
+  evidence: notebooks/kaggle_p24_deepcenter_best_veto/_out/ and C:/temp/p24_deepcenter_best_veto/
+  facts_added: []          # one FACT on scoring: the LB value and the band verdict
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md under 2026-08-27 (day)
+
+result: >-
+  WON 2026-08-27 (FACT-0341): P24 scored 0.928 on the public LB (submission 55820202) - +0.003 over the champion
+  and ABOVE the pre-registered central 0.925; the falsifier (<= 0.925) did not fire. LEVER-0024 CLOSED positive:
+  the 0.927 lineage's edge is the DeepCenter best.pt + safe-div veto bundle (confirms FACT-0331). P24 is the new
+  best config and should be SELECTED as a final leaderboard submission. Pure post-processing - no retrain, no new
+  weights - and it matches mikelou1's from-scratch 0.928. Next submissions should build on the P24 base, not P9.
+
+reconciliation:
+  date: '2026-09-01'
+  audit: Phase 1.5 packet-lock reconciliation
+  verdict: COMPLETE
+  why: >-
+    the packet's own result is recorded above - it WON and closed its lever positively on FACT-0341. The work is finished and the lock is released. Its lever LEVER-0024 is closed on FACT-0341. No scientific claim is added, removed or
+    reinterpreted here - only the lock state is corrected.

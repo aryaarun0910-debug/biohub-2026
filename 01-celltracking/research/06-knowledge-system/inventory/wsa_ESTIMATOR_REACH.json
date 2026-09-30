@@ -1,0 +1,63 @@
+{
+ "basis_tag": "GT-oracle labels on the frozen node set; distances in um",
+ "n_gt_true_pairs_on_union_surface": 113875,
+ "reach_all": {
+  "raw_um": {
+   "le6": 0.8968518111964874,
+   "le10": 0.9939407244785949
+  },
+  "resid_um": {
+   "le6": 0.9246103183315039,
+   "le10": 0.9967508232711306
+  },
+  "resid_L_um": {
+   "le6": 0.9198155872667398,
+   "le10": 0.9950472008781559
+  }
+ },
+ "reach_post_frozen": {
+  "raw_um": {
+   "le6": 0.7280170879316483,
+   "le10": 0.9716981132075472
+  },
+  "resid_um": {
+   "le6": 0.83250266998932,
+   "le10": 0.9814880740477038
+  },
+  "resid_L_um": {
+   "le6": 0.735315058739765,
+   "le10": 0.9469562121751512
+  }
+ },
+ "reach_core": {
+  "raw_um": {
+   "le6": 0.47530864197530864,
+   "le10": 0.9185185185185185
+  },
+  "resid_um": {
+   "le6": 0.6407407407407407,
+   "le10": 0.9617283950617284
+  },
+  "resid_core_um": {
+   "le6": 0.3728395061728395,
+   "le10": 0.5691358024691358
+  }
+ },
+ "quantity": "CANDIDATE-SURFACE REACH of the GATE QUANTITY. Not a score. A rise here is NOT success.",
+ "gt_true_pairs_by_state": {
+  "ordinary_motion": 99795,
+  "exact_duplicate": 7369,
+  "post_frozen_gap": 5618,
+  "intensity_discontinuity": 402,
+  "near_duplicate": 283,
+  "global_translation": 259,
+  "deformation": 149,
+  "bilateral_core_total": 810
+ },
+ "findings": {
+  "F1_unscaled_flow_is_the_right_gate_quantity": "reach<=6um rises 0.8969 -> 0.9246 corpus-wide and 0.4753 -> 0.6407 on the bilateral core. The plain kNN16 residual beats raw distance in EVERY state.",
+  "F2_the_(L+1)_scaling_is_FALSIFIED_as_a_gate_quantity": "on post_frozen_gap, reach<=6um is raw 0.7280, unscaled residual 0.8325, (L+1)-scaled 0.7353; at 10um the scaled quantity is WORSE than raw (0.9470 vs 0.9717). Mechanism: the flow is rebuilt from the RAW geff edges of that same frame pair, which already span the enlarged interval, so the (L+1) multiplier double-counts the dilation. Lane 2 measured the opposite direction (0.8776 -> 0.9005) using a flow derived from the POST-WRAPPER E0c graph, whose continuations across a frozen interval have already been suppressed - that estimator under-reads the displacement and therefore benefits from scaling. Only the raw-edge flow is available at the point the gate runs, so the scaled variant must not be deployed.",
+  "F3_phase_correlation_as_a_VECTOR_is_catastrophic": "on the bilateral core, reach<=10um collapses from raw 0.9185 to 0.5691 when the gate is centred on flow + phase-correlation shift; reach<=6um falls 0.4753 -> 0.3728. This independently reconfirms Lane 2 own verdict (valid FLAG, useless VECTOR; 19.2um residual against zero-motion 8.83um) and falsifies surface (iv) as specified.",
+  "F4_where_the_mass_is": "the largest per-pair gain is on the bilateral core (+16.5 pp at 6um) but that state holds only 810 of 113,875 GT-true pairs (0.71%). ordinary_motion holds 99,795 (87.6%) and also improves (median raw 2.298 -> resid 1.817). The deployable value measured here is a GATE-QUANTITY FIX, not an acquisition-state policy: state routing confines the same fix to a few percent of the mass."
+ }
+}

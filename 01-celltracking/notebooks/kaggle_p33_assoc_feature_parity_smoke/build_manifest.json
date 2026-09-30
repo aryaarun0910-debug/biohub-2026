@@ -1,0 +1,81 @@
+{
+  "name": "p33_assoc_feature_parity_smoke",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p33_assoc_feature_parity_smoke.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p33_assoc_feature_parity_smoke\\biohub-p33-assoc-feature-parity-smoke.ipynb",
+  "built_sha256": "654e32fb60b9bb2d322e231a01d9362349e5409330d45c4d6ebe5a1069795416",
+  "config_hash": "88f6d6a6db4c",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "df3807fba112556ec93f797d153131fe1ba42f0918d0792d28472ab5a55559af"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "8d15030bec2f040f2bd186e7a3ebed167b0f17414de3aeef15f9994fb3710461"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "7956542e7190dbb71f06fef09d7e77f0785fcd2d46f3646c56fea5d162bb23a0"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "8be0433869eafd6adafa9c406db8e1848ca138020bb15d35aeecc7a39ebaf52c"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "32582192ed21aa95de8f1e718d0e31f8e6f85568f6d0579a0a13180ece9c3f09"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "6f86aabea664c20b10e9d72a921fd7b2c6fb29e90de3e2c7877fc8b869afcbcb"
+    },
+    {
+      "kind": "insert_after",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "3ac46fb10bf24efc0366e8b9262c5998e8d36d6ef157d800f1afd2072d0ff61f"
+    }
+  ],
+  "declared_slug": "biohub-p33-assoc-feature-parity-smoke",
+  "title": "Biohub P33 Assoc Feature Parity Smoke",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}

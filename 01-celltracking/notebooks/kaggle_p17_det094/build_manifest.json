@@ -1,0 +1,33 @@
+{
+  "name": "p17_det094",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p17_det094.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p17_det094\\biohub-p17-det094.ipynb",
+  "built_sha256": "7c8c72dbe153cd8cee193af356a2022c03fef4ffdae518e7bd9ce44678c706c6",
+  "config_hash": "f89d8c2f30db",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "f9f8b58a6f9efc38b4ba7caca105393cc10fce4a5cc7679211bc473abb146dc9"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    }
+  ],
+  "declared_slug": "biohub-p17-det094",
+  "title": "Biohub P17 DET094",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p17-det094"
+}

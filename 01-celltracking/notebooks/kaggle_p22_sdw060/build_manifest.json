@@ -1,0 +1,40 @@
+{
+  "name": "p22_sdw060",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p22_sdw060.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p22_sdw060\\biohub-p22-sdw060.ipynb",
+  "built_sha256": "b78a4659d4f554a246e55ad25062617724a5fb8a9fa34453bbafa39e65884496",
+  "config_hash": "f772f83f204b",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "dad55a793f3067ef0ae01e3ec970c311ca637fd9a226aff13bef36378f45af3f"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    },
+    {
+      "kind": "env",
+      "cells": [
+        4
+      ],
+      "payload_sha256": "68dcf76cbdf3f14d537bd780cd99a3a79e80afd2ac02018b48949141c6f5a0e3"
+    }
+  ],
+  "declared_slug": "biohub-p22-sdw060",
+  "title": "Biohub P22 SDW060",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p22-sdw060"
+}

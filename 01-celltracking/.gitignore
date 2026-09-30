@@ -1,0 +1,38 @@
+# full 87GB dataset - never committed (reproducible via kaggle download)
+data/
+# local venv
+.venv/
+.venv-trackastra/
+# vendored organizer repo - reproducible via git clone (see pyproject.toml)
+vendor/
+# pretrained weights - reproducible from public URLs (see research/04-data/data-acquisition.md)
+weights/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+kt_out/
+artifacts/
+scratch_live_lb/
+scratch_public_kernels/
+scratch_lb/
+scratch_nb/
+notebooks/**/_out/
+/biohub-cell-tracking-during-development.zip
+# consolidated raw research store (was the _RESEARCH sibling) - durable-raw evidence tier
+_evidence/
+# research DB and backups live physically in-repo but stay untracked (binary)
+research/**/*.sqlite
+research/**/*.sqlite.bak*
+# transient logs and the one large zero-shot csv kept as evidence, not tracked
+research/**/*.log
+research/06-knowledge-system/inventory/spotiflow_zeroshot.csv
+# RAG artifacts (embeddings, vector stores, indexes) live under .claude/rag/ - gitignored
+# (large/binary); the RAG POLICY is tracked in research/04-data/databases.md
+.claude/rag/
+notebooks/kaggle_p3_armb_loeo_f0_smoke/
+notebooks/kaggle_p3_base_loeo_f0/
+notebooks/kaggle_p3_base_loeo_f1/
+notebooks/kaggle_p3_subvoxel_loeo_f0/
+notebooks/kaggle_p3_subvoxel_loeo_f1/
+notebooks/kaggle_p3_subvoxel_loeo_f0_smoke/

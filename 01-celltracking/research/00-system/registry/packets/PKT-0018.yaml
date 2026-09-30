@@ -1,0 +1,70 @@
+id: PKT-0018
+title: "LEVER-0022: intensity-centroid re-localisation (the 0.927 lineage's refine_centroids) on the clean champion exports"
+lever: LEVER-0022
+owner: primary
+lock: done
+opened: '2026-08-27'
+
+claim: >-
+  Intensity-centroid re-localisation of every exported node cuts the mean residual and the >3 um tail
+  on the honest fold and lifts the scorer-exact score on both folds.
+
+falsifier: >-
+  (a) fold-1 frozen matches: mean residual -10% AND >3 um fraction -20% for the primary arm icom_133,
+  else dead. (b) scorer round-trip >= +0.005 on fold 1 and >= 0 on fold 0 at pilot scale (stride
+  subsets), then >= +0.005 on BOTH folds at full scale. Both embryo directions always reported.
+
+prediction: >-
+  Mean residual -8% on fold 1 (band -3%..-15%; z is barely reachable by a z+-1 window), >3 um tail
+  -10% (band -3%..-20%). Score: +0.001..+0.004 on fold 1 at full scale; fold 0 within +-0.002. The
+  lower halves of the bands are the more likely outcome - this is a sub-2-um corrector.
+  DEPLOYMENT ADDENDUM, recorded before the leaderboard score: p23 public-LB band 0.925-0.929,
+  central 0.925 (low band promoted); falsifier <= FACT-0001.
+
+inputs:
+  facts: [FACT-0270, FACT-0313, FACT-0314, FACT-0317, FACT-0322]
+  artifacts:
+    - C:/temp/p20_relink_sweep_f0/sweep_pen_off.csv.gz    # clean fold-0 champion export (EXP-0022 control)
+    - C:/temp/p19_relink_sweep_f1/sweep_pen_off.csv.gz    # clean fold-1 champion export (EXP-0021 control)
+    - C:/temp/p20_relink_sweep_f0/atlas/, C:/temp/p19_relink_sweep_f1/atlas/   # scorer-exact matches
+    - data/train/*.zarr
+  code: [scripts/win_bet/dc_subvoxel_refine.py (icentroid, eval), scripts/win_bet/ea_atlas.py]
+
+method: >-
+  Arms pre-registered: icom_133 (PRIMARY, their exact settings), icom_122, icom_155 (window
+  sensitivity), icom_133_s5 (cap sensitivity - non-binding by geometry, kept as a control).
+  Pilot on stride subsets of both folds -> frozen-match eval (calibration gate: unrefined
+  coordinates must reproduce the atlas residual) -> ea_atlas round-trip -> full folds if (a) and
+  the pilot (b) pass. CPU only.
+
+budget:
+  gpu_sessions: 0
+  submissions: 1
+  wall_clock: ~1-2 CPU-hours
+
+forbidden:
+  - any submission other than the one-factor p23_icom155 deployment authorised by the host
+  - fitting per-fold offsets and reporting them as the lever
+  - the deployed spec
+
+outputs:
+  evidence: C:/temp/icom/ and _evidence/icom/summary.json
+  facts_added: [FACT-0324]
+  record: one section in research/06-knowledge-system/experimental-records.md
+
+result: >-
+  Pilots (FACT-0324): icom_155 +0.0065 / +0.0057, icom_133 +0.0040 / +0.0038 with float coordinates; the rounded
+  variants are <= 0 on fold 1. Full folds (FACT-0330): icom_155 +0.0013 / +0.0024, icom_133 +0.0013 / +0.0021,
+  icom_255 +0.0005 / +0.0034 - both folds positive, promotion bar (+0.005 both) NOT met. Stage-(a) proxies were
+  retired mid-packet (recorded in FACT-0324 before full scale). Lever PARKED with deploy spec p23_icom155.json
+  built; prediction record: the pilot band (+0.001..+0.004 f1 full) was HIT (+0.0024); the promotion bar was mis-set
+  by the pilots' optimism. DEPLOYMENT PENDING: the inherited queue's p23 kernel completed before the runner died.
+  Host authorisation and the public-LB band above license fetch -> audit -> one submission on resume.
+
+reconciliation:
+  date: '2026-09-01'
+  audit: Phase 1.5 packet-lock reconciliation
+  verdict: COMPLETE
+  why: >-
+    the packet's own result is recorded above and its lever was subsequently KILLED by FACT-0344 (the float-icom leaderboard reversal). The work is finished and the lock is released. Its lever LEVER-0022 is closed on FACT-0344. No scientific claim is added, removed or
+    reinterpreted here - only the lock state is corrected.

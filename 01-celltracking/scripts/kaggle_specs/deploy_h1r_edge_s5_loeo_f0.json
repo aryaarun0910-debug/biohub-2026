@@ -1,0 +1,85 @@
+{
+  "name": "deploy_h1r_edge_s5_loeo_f0",
+  "slug": "biohub-deploy-h1r-edge-s5-loeo-f0",
+  "title": "Biohub Deploy H1R Edge S5 LOEO F0",
+  "code_file": "biohub-deploy-h1r-edge-s5-loeo-f0.ipynb",
+  "out_dir": "notebooks/kaggle_deploy_h1r_edge_s5_loeo_f0",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "kernel_sources": [
+    "aryaarun07/biohub-h1r-edge-s5"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": false,
+  "artifact_role": "deployment",
+  "consumes_artifacts": [
+    {
+      "producer_spec": "scripts/kaggle_specs/h1r_edge_s5.json",
+      "artifact": "edge_predictor_best.pth"
+    }
+  ],
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "purpose": "LEVER-0023 gate 3 instrument (PKT-0019): the champion configuration (P9 coupled division on the P3 harmonic base) retargeted at LOEO fold 0 (44b6 held out), with the PRIMARY edge weights overridden by the S5-trained checkpoint mounted from the producer kernel aryaarun07/biohub-h1r-edge-s5 (unique basename edge_predictor_best_h1r_s5.pth). Its export is scored against the EXP-0022 control (C:/temp/p20_relink_sweep_f0/sweep_pen_off.csv.gz) with the FACT-0321 paired instrument; the falsifier is a paired delta < +0.005 or a crop-bootstrap CI that covers 0. Clean by construction only because the S5 run initialises from OUR split_0 (6bba-trained) and trains on Zebrahub - 44b6 is never seen. No submission.",
+  "provenance": {
+    "base": "deployed P3 harmonic built notebook, sha256 70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8, public LB 0.915",
+    "control": "scripts/kaggle_specs/p20_relink_sweep_f0.json penalty -1 arm = the deployed champion (FACT-0322)",
+    "weights": "producer kernel output edge_predictor_best_h1r_s5.pth + config_h1r_s5.json (h1r_edge_kernel_run.py)",
+    "routes_on": "graph topology and physical node coordinates only; no dataset, crop, acquisition, hidden label, or image-content routing"
+  },
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_SAFE_DIV_MAX_UM": "8.0",
+        "BIOHUB_SAFE_DIV_SISTER_MAX_UM": "11.0",
+        "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM": "10.0",
+        "BIOHUB_SAFE_DIV_DIVERGE_UM": "2.25",
+        "BIOHUB_LOEO_FOLD": "0",
+        "BIOHUB_LOEO_ARM": "strict",
+        "BIOHUB_LOEO_LIMIT": "0",
+        "BIOHUB_LOEO_STEMS": "[\"44b6_0113de3b\", \"44b6_0b24845f\", \"44b6_0c582fdc\", \"44b6_0db75fae\", \"44b6_12dfb391\", \"44b6_144b256d\", \"44b6_1574802b\", \"44b6_18ced818\", \"44b6_1d530831\", \"44b6_24264f12\", \"44b6_267148e4\", \"44b6_2a2eff9f\", \"44b6_2f31fc2f\", \"44b6_33b596bf\", \"44b6_341df25f\", \"44b6_3a861e03\", \"44b6_3bb3690f\", \"44b6_40c45f5a\", \"44b6_415c0a3a\", \"44b6_53f95252\", \"44b6_551a5dba\", \"44b6_5740d24b\", \"44b6_587a1e22\", \"44b6_5f15d135\", \"44b6_668e0cc7\", \"44b6_66f9292d\", \"44b6_706092f0\", \"44b6_71a4179f\", \"44b6_74d0c52e\", \"44b6_7a302da0\", \"44b6_7e557709\", \"44b6_808952d6\", \"44b6_81c256f0\", \"44b6_87bba6c4\", \"44b6_8cc6506c\", \"44b6_8f5ab931\", \"44b6_8f9ecab4\", \"44b6_90724892\", \"44b6_949adeb1\", \"44b6_95029e92\", \"44b6_97725144\", \"44b6_996155de\", \"44b6_9be80b04\", \"44b6_9bfa6a0a\", \"44b6_a21120c2\", \"44b6_a2bb48bb\", \"44b6_aaf8b0ea\", \"44b6_abf82518\", \"44b6_b2c44266\", \"44b6_c15fded2\", \"44b6_c50204e0\", \"44b6_c771cb04\", \"44b6_c8e2a523\", \"44b6_c96cfa10\", \"44b6_cf2536e8\", \"44b6_cf8fed6b\", \"44b6_d29c9ab2\", \"44b6_d2f34f90\", \"44b6_d5e7d891\", \"44b6_d754aa59\", \"44b6_d78e09d9\", \"44b6_db3c847b\", \"44b6_ddf577ad\", \"44b6_deabac95\", \"44b6_e28840c6\", \"44b6_e29f0176\", \"44b6_e31261b4\", \"44b6_e35b117d\", \"44b6_e57ff5c6\", \"44b6_eb2880fc\", \"44b6_f28707c6\"]",
+        "BIOHUB_LOEO_WEIGHTS_GLOB": "/kaggle/input/*/edge_predictor_best_h1r_s5.pth",
+        "BIOHUB_LOEO_CONFIG_GLOB": "/kaggle/input/*/config_h1r_s5.json"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "def filter_short_track_components(",
+      "anchor": "def filter_short_track_components(",
+      "code_file": "scripts/kaggle_edits/coupled_division_transplant.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "def list_test_stems() -> list[str]:",
+      "anchor": "def list_test_stems() -> list[str]:",
+      "code_file": "scripts/kaggle_edits/loeo_retarget.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "old": "test_stems = list_test_stems()",
+      "new": "test_stems = list(LOEO_STEMS)  # LOEO retarget",
+      "expect": 1
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "_guard_submission = Path(",
+      "code_file": "scripts/kaggle_edits/loeo_export.py",
+      "expect": 1
+    }
+  ]
+}

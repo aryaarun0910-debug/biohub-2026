@@ -1,0 +1,562 @@
+{
+  "workstream": "B - suppress-all through the COMPLETE wrapper on the P0-strict LOEO OOF substrate",
+  "date": "2026-08-01",
+  "verdict": "PROMOTE under the workstream rule (pooled positive, bootstrap LCB > 0); NOT bilaterally positive - see min_fold_inversion",
+  "basis_tag": "exact-pooled-OOF (199 crops, exact patched scorer, complete wrapper node filter re-run)",
+  "arms_delivered": [
+    "base",
+    "suppress-all"
+  ],
+  "arm3_acquisition_policy": {
+    "delivered": false,
+    "reason": "Workstream A has not landed a relinked prediction surface. Its artifacts are an offline candidate ENUMERATION plus a GPU_CACHE_MANIFEST ('NO score here'); it still needs one GPU inference pass. It is also enumerated on the E0c/oof_clean node population (5,383,277 nodes), not P0-strict, so composition would need a fresh P0-strict enumeration even after A lands."
+  },
+  "prerequisite_fold1_cache": {
+    "source_csv": "RESEARCH/exports/loeo_f1_strict/loeo_split1_strict.csv.gz",
+    "csv_sha256": "a7b9a0d7db542e64345783eda61cb6230f6c0cf649eee8ef980994011e35bb88",
+    "schema_verified_how": "the builder was first run on the FOLD-0 CSV and its output asserted frame-equal (columns, dtypes, row order, values) to the shipped artifacts/kaggle/p0strict_f0_cache/graphs/0 - 71/71 crops, 0 mismatches. Schema tested, not assumed.",
+    "surface": "artifacts/kaggle/p0strict_cache/graphs/{0,1}",
+    "fold0": {
+      "n": 71,
+      "manifest_sha256": "1d37d8ad2b292f28574ec49d6643ef6aa7772c6a65038333453d79d0e7442991",
+      "provenance": "byte copy of the shipped fold-0 cache"
+    },
+    "fold1": {
+      "n": 128,
+      "manifest_sha256": "e16b772dd2f90f4ed0778c4872640b345a3e0ca401ce12cf83c7bca842ce2531",
+      "nodes": 1851947,
+      "edges": 1770146
+    }
+  },
+  "parity": {
+    "per_crop_counter_mismatches": 0,
+    "n_crops": 199,
+    "anchors_reproduced": {
+      "44b6": {
+        "n": 71,
+        "edge_jaccard": 0.8822448402601074,
+        "division_jaccard": 0.015873015873015872,
+        "division_tp": 2,
+        "division_fp": 100,
+        "division_fn": 24,
+        "node_recall": 0.9845728349343518,
+        "adj_edge_jaccard": 0.8985894447220537,
+        "n_adj": 71,
+        "score": 0.9001767463093553
+      },
+      "6bba": {
+        "n": 128,
+        "edge_jaccard": 0.6952654769952517,
+        "division_jaccard": 0.0016233766233766235,
+        "division_tp": 1,
+        "division_fp": 491,
+        "division_fn": 124,
+        "node_recall": 0.8547376902476025,
+        "adj_edge_jaccard": 0.7024751985220626,
+        "n_adj": 128,
+        "score": 0.7026375361844003
+      }
+    },
+    "refilter_identity_all_crops": true,
+    "pooled_state_vs_summarise": {
+      "supp": {
+        "score": 0.7334786060584936,
+        "edge": 0.7334786060584936,
+        "divJ": 0.0,
+        "vs_summarise": 0.0
+      },
+      "base": {
+        "score": 0.7317816475149699,
+        "edge": 0.7313773348465062,
+        "divJ": 0.004043126684636119,
+        "vs_summarise": 0.0
+      }
+    },
+    "independent_cross_check": "fold-0 supp arm reproduces reports/inventory/laneB_h0d_p0strict_f0.json supp_refilt digit-for-digit (score 0.899558, adjJ 0.899558, rawJ 0.883081, div 0/0/26, del_nodes 3767 = 210 isolated + 3557 short-track) under a DIFFERENT edge insertion order -> trap 18 has no bite on this operation"
+  },
+  "result": {
+    "pooled": {
+      "n_crops": 199,
+      "base": {
+        "score": 0.7317816475149699,
+        "edge": 0.7313773348465062,
+        "divJ": 0.004043126684636119,
+        "DTP": 3,
+        "DFP": 591,
+        "DFN": 148,
+        "NUM": 105319.06759523174,
+        "DEN": 144001
+      },
+      "supp": {
+        "score": 0.7334786060584936,
+        "edge": 0.7334786060584936,
+        "divJ": 0.0,
+        "DTP": 0,
+        "DFP": 0,
+        "DFN": 151,
+        "NUM": 105181.56558739404,
+        "DEN": 143401
+      },
+      "delta_composite": 0.0016969585435236967,
+      "delta_edge_term": 0.0021012712119873322,
+      "delta_division_term": -0.0004043126684636119,
+      "share_edge": 1.2382572455919219,
+      "share_division": -0.238257245591908,
+      "ledger": {
+        "edge_tp": {
+          "base": 104087,
+          "supp": 103925,
+          "delta": -162
+        },
+        "edge_fp": {
+          "base": 15118,
+          "supp": 14518,
+          "delta": -600
+        },
+        "edge_fn": {
+          "base": 24796,
+          "supp": 24958,
+          "delta": 162
+        },
+        "division_tp": {
+          "base": 3,
+          "supp": 0,
+          "delta": -3
+        },
+        "division_fp": {
+          "base": 591,
+          "supp": 0,
+          "delta": -591
+        },
+        "division_fn": {
+          "base": 148,
+          "supp": 151,
+          "delta": 3
+        },
+        "n_pred": {
+          "base": 3752580,
+          "supp": 3743347,
+          "delta": -9233
+        },
+        "n_est": 4725117.0,
+        "q_net_deleted": 0.2125984251968504,
+        "deleted_counted_edges": 762
+      },
+      "node_ratio_base": -0.20582283994237602,
+      "retain_floor_q_star": 0.4187197991790319,
+      "delete_is_correct_by_rule": true,
+      "adjJ_decomposition": {
+        "mult_w": 1.0124330758369808,
+        "d_mult_w": 0.000271039036437613,
+        "rawJ_w": 0.7247710251988891,
+        "d_rawJ_w": 0.0019496559028425364,
+        "term_rawJ": 0.0019647042725776226,
+        "term_mult": 0.00018951141214769378,
+        "term_cross": 6.446169048156378e-07
+      },
+      "summarise": {
+        "base": {
+          "n": 199,
+          "edge_jaccard": 0.7228213692960466,
+          "division_jaccard": 0.004043126684636119,
+          "division_tp": 3,
+          "division_fp": 591,
+          "division_fn": 148,
+          "node_recall": 0.901060782070513,
+          "adj_edge_jaccard": 0.7313773348465062,
+          "n_adj": 199,
+          "score": 0.7317816475149699
+        },
+        "supp": {
+          "n": 199,
+          "edge_jaccard": 0.7247160061645316,
+          "division_jaccard": 0.0,
+          "division_tp": 0,
+          "division_fp": 0,
+          "division_fn": 151,
+          "node_recall": 0.9005742596937638,
+          "adj_edge_jaccard": 0.7334786060584936,
+          "n_adj": 199,
+          "score": 0.7334786060584936
+        }
+      }
+    },
+    "44b6": {
+      "n_crops": 71,
+      "base": {
+        "score": 0.9001767463093553,
+        "edge": 0.8985894447220537,
+        "divJ": 0.015873015873015872,
+        "DTP": 2,
+        "DFP": 100,
+        "DFN": 24,
+        "NUM": 19069.865195891423,
+        "DEN": 21222
+      },
+      "supp": {
+        "score": 0.8995580226530959,
+        "edge": 0.8995580226530959,
+        "divJ": 0.0,
+        "DTP": 0,
+        "DFP": 0,
+        "DFN": 26,
+        "NUM": 19034.64775933951,
+        "DEN": 21160
+      },
+      "delta_composite": -0.0006187236562593679,
+      "delta_edge_term": 0.0009685779310422138,
+      "delta_division_term": -0.0015873015873015873,
+      "share_edge": -1.5654451244000724,
+      "share_division": 2.5654451244000813,
+      "ledger": {
+        "edge_tp": {
+          "base": 18723,
+          "supp": 18686,
+          "delta": -37
+        },
+        "edge_fp": {
+          "base": 1396,
+          "supp": 1334,
+          "delta": -62
+        },
+        "edge_fn": {
+          "base": 1103,
+          "supp": 1140,
+          "delta": 37
+        },
+        "division_tp": {
+          "base": 2,
+          "supp": 0,
+          "delta": -2
+        },
+        "division_fp": {
+          "base": 100,
+          "supp": 0,
+          "delta": -100
+        },
+        "division_fn": {
+          "base": 24,
+          "supp": 26,
+          "delta": 2
+        },
+        "n_pred": {
+          "base": 1900633,
+          "supp": 1896866,
+          "delta": -3767
+        },
+        "n_est": 2618970.0,
+        "q_net_deleted": 0.37373737373737376,
+        "deleted_counted_edges": 99
+      },
+      "node_ratio_base": -0.27428225600140516,
+      "retain_floor_q_star": 0.46692424371187063,
+      "delete_is_correct_by_rule": true,
+      "adjJ_decomposition": {
+        "mult_w": 1.0186690135843688,
+        "d_mult_w": 0.00014959683640141617,
+        "rawJ_w": 0.8831036502278325,
+        "d_rawJ_w": 0.0008588099677251325,
+        "term_rawJ": 0.000869701442708128,
+        "term_mult": 0.00013122422656323976,
+        "term_cross": 4.2705366477231057e-08
+      },
+      "summarise": {
+        "base": {
+          "n": 71,
+          "edge_jaccard": 0.8822448402601074,
+          "division_jaccard": 0.015873015873015872,
+          "division_tp": 2,
+          "division_fp": 100,
+          "division_fn": 24,
+          "node_recall": 0.9845728349343518,
+          "adj_edge_jaccard": 0.8985894447220537,
+          "n_adj": 71,
+          "score": 0.9001767463093553
+        },
+        "supp": {
+          "n": 71,
+          "edge_jaccard": 0.8830812854442344,
+          "division_jaccard": 0.0,
+          "division_tp": 0,
+          "division_fp": 0,
+          "division_fn": 26,
+          "node_recall": 0.9844301846117071,
+          "adj_edge_jaccard": 0.8995580226530959,
+          "n_adj": 71,
+          "score": 0.8995580226530959
+        }
+      }
+    },
+    "6bba": {
+      "n_crops": 128,
+      "base": {
+        "score": 0.7026375361844003,
+        "edge": 0.7024751985220626,
+        "divJ": 0.0016233766233766235,
+        "DTP": 1,
+        "DFP": 491,
+        "DFN": 124,
+        "NUM": 86249.20239934033,
+        "DEN": 122779
+      },
+      "supp": {
+        "score": 0.7047301464161332,
+        "edge": 0.7047301464161332,
+        "divJ": 0.0,
+        "DTP": 0,
+        "DFP": 0,
+        "DFN": 125,
+        "NUM": 86146.91782805453,
+        "DEN": 122241
+      },
+      "delta_composite": 0.0020926102317329054,
+      "delta_edge_term": 0.002254947894070547,
+      "delta_division_term": -0.00016233766233766236,
+      "share_edge": 1.0775766360480845,
+      "share_division": -0.07757663604809453,
+      "ledger": {
+        "edge_tp": {
+          "base": 85364,
+          "supp": 85239,
+          "delta": -125
+        },
+        "edge_fp": {
+          "base": 13722,
+          "supp": 13184,
+          "delta": -538
+        },
+        "edge_fn": {
+          "base": 23693,
+          "supp": 23818,
+          "delta": 125
+        },
+        "division_tp": {
+          "base": 1,
+          "supp": 0,
+          "delta": -1
+        },
+        "division_fp": {
+          "base": 491,
+          "supp": 0,
+          "delta": -491
+        },
+        "division_fn": {
+          "base": 124,
+          "supp": 125,
+          "delta": 1
+        },
+        "n_pred": {
+          "base": 1851947,
+          "supp": 1846481,
+          "delta": -5466
+        },
+        "n_est": 2106147.0,
+        "q_net_deleted": 0.1885369532428356,
+        "deleted_counted_edges": 663
+      },
+      "node_ratio_base": -0.12069432950311636,
+      "retain_floor_q_star": 0.41207926230971603,
+      "delete_is_correct_by_rule": true,
+      "adjJ_decomposition": {
+        "mult_w": 1.0113552117814415,
+        "d_mult_w": 0.00029202997437625207,
+        "rawJ_w": 0.6974036825070262,
+        "d_rawJ_w": 0.0021382055117745323,
+        "term_rawJ": 0.0021539723889125863,
+        "term_mult": 0.00019958618594837047,
+        "term_cross": 7.486555976427309e-07
+      },
+      "summarise": {
+        "base": {
+          "n": 128,
+          "edge_jaccard": 0.6952654769952517,
+          "division_jaccard": 0.0016233766233766235,
+          "division_tp": 1,
+          "division_fp": 491,
+          "division_fn": 124,
+          "node_recall": 0.8547376902476025,
+          "adj_edge_jaccard": 0.7024751985220626,
+          "n_adj": 128,
+          "score": 0.7026375361844003
+        },
+        "supp": {
+          "n": 128,
+          "edge_jaccard": 0.6973028689228655,
+          "division_jaccard": 0.0,
+          "division_tp": 0,
+          "division_fp": 0,
+          "division_fn": 125,
+          "node_recall": 0.8540604263408422,
+          "adj_edge_jaccard": 0.7047301464161332,
+          "n_adj": 128,
+          "score": 0.7047301464161332
+        }
+      }
+    }
+  },
+  "bootstrap": {
+    "iid": {
+      "supp": {
+        "mean": 0.0016705955921102493,
+        "ci95": [
+          0.000715882091632622,
+          0.002545419632932812
+        ],
+        "ci90": [
+          0.0009081623711485298,
+          0.002409873843903642
+        ],
+        "p_gt_0": 0.9995,
+        "p_gt_0015": 0.658
+      }
+    },
+    "stratified": {
+      "supp": {
+        "mean": 0.0016855900419187368,
+        "ci95": [
+          0.0007713988989614867,
+          0.0025918728072750084
+        ],
+        "ci90": [
+          0.000933401778970433,
+          0.0024345731468790707
+        ],
+        "p_gt_0": 1.0,
+        "p_gt_0015": 0.6575
+      }
+    },
+    "family_44b6": {
+      "supp": {
+        "mean": -0.0006661588115131719,
+        "ci95": [
+          -0.0038188500911176316,
+          0.0016810986440368562
+        ],
+        "p_gt_0": 0.3385
+      }
+    },
+    "family_6bba": {
+      "supp": {
+        "mean": 0.0020852197106722534,
+        "ci95": [
+          0.0011196892168538752,
+          0.002967445739119981
+        ],
+        "p_gt_0": 1.0
+      }
+    }
+  },
+  "structure": {
+    "n_nodes": 3752580,
+    "n_edges": 3598004,
+    "forks": 10726,
+    "suppressed_edges": 10728,
+    "comps_pre": 154576,
+    "exempt_comps_pre": 0,
+    "exempt_nodes_pre": 0,
+    "exempt_comps_lost": 0,
+    "exempt_lost_nodes": 0,
+    "del_nodes": 9233,
+    "del_nodes_from_fork_components": 9233,
+    "pruned_isolated_supp": 585,
+    "shorttrack_nodes_supp": 8648,
+    "shorttrack_comps_supp": 2248,
+    "del_edges": 17128,
+    "refilter_identity_all": true,
+    "reach_base": 88,
+    "reach_supp": 88,
+    "gt_div": 151
+  },
+  "census": {
+    "pooled": {
+      "n_nodes": 3752580,
+      "n_edges_raw": 3598004,
+      "n_edges_dedup": 3598004,
+      "dup_edges": 0,
+      "forks": 10726,
+      "outdeg_ge3": 2,
+      "suppressible_edges": 10728,
+      "exempt_comps": 0,
+      "exempt_nodes": 0,
+      "n_comps": 154576,
+      "isolated_at_load": 0,
+      "shorttrack_removed_at_load": 0
+    },
+    "by_family": {
+      "44b6": {
+        "n_nodes": 1900633,
+        "n_edges_raw": 1827858,
+        "n_edges_dedup": 1827858,
+        "dup_edges": 0,
+        "forks": 5300,
+        "outdeg_ge3": 2,
+        "suppressible_edges": 5302,
+        "exempt_comps": 0,
+        "exempt_nodes": 0,
+        "n_comps": 72775,
+        "isolated_at_load": 0,
+        "shorttrack_removed_at_load": 0,
+        "n_crops": 71
+      },
+      "6bba": {
+        "n_nodes": 1851947,
+        "n_edges_raw": 1770146,
+        "n_edges_dedup": 1770146,
+        "dup_edges": 0,
+        "forks": 5426,
+        "outdeg_ge3": 0,
+        "suppressible_edges": 5426,
+        "exempt_comps": 0,
+        "exempt_nodes": 0,
+        "n_comps": 81801,
+        "isolated_at_load": 0,
+        "shorttrack_removed_at_load": 0,
+        "n_crops": 128
+      }
+    },
+    "fixed_point_all": true
+  },
+  "min_fold_inversion": {
+    "44b6_delta": -0.0006187236562593679,
+    "6bba_delta": 0.0020926102317329054,
+    "mechanism": "suppress-all is division-FREE only where divJ is already 0. On E0c 44b6 divisions were TP0/FP93/FN26 (divJ=0) so suppression cost nothing there. On P0-strict 44b6 divisions are TP2/FP100/FN24 (divJ=0.015873): suppression destroys 2 real division TPs, costing -0.0015873 against an edge gain of only +0.0009686. The 44b6 edge side IMPROVES; only the family-restricted divJ denominator (126) makes 2 TPs expensive. In the POOLED objective the same 3 TPs sit over a denominator of 742 and the entire division cost is -0.00040431.",
+    "e0c_comparison": {
+      "pooled": 0.002706,
+      "44b6": 0.001532,
+      "6bba": 0.002872,
+      "note": "E0c bilateral; P0-strict is not"
+    }
+  },
+  "p0b_diagnostic": {
+    "basis_tag": "placeholder-proxy (4 visible movies, in-sample) - CHECK, NOT A GATE",
+    "artifact_sha256": "4c285cae0c220a11b8ffdeeea1e02de86b5c1e7795daeb2bb27c073e1ab4ecec",
+    "base": 0.889224766308105,
+    "supp": 0.8899725059825626,
+    "delta": 0.0007477396744576259,
+    "totals": {
+      "n_nodes": 120861,
+      "n_edges": 116604,
+      "forks": 305,
+      "suppressed_edges": 305,
+      "exempt_comps_pre": 0,
+      "exempt_nodes_pre": 0,
+      "del_nodes": 189,
+      "del_edges": 445,
+      "pruned_isolated": 3,
+      "shorttrack_nodes": 186,
+      "shorttrack_comps": 46
+    },
+    "base_reproduces": "0.889224766308105 = the score recorded in reports/inventory/p1_node_budget_p0b_substrate.json for the same artifact",
+    "division_side": "TP0/FP8/FN3 -> TP0/FP0/FN3; divJ is 0 before AND after, so on P0-B the operation cannot lose division credit at all"
+  },
+  "premise_correction": {
+    "claim_in_brief": "E0c has 20,353 forks, P0-B has 8, so the magnitude cannot port",
+    "measured": "the '8' is P0-B's metric division FP count (TP0/FP8/FN3), NOT its graph fork count. P0-B's four visible movies carry 305 graph forks over 120,861 nodes = 2.52e-3 per node. P0-strict carries 10,726 forks over 3,752,580 nodes = 2.86e-3 per node; E0c 20,353 over 5,118,041 = 3.98e-3. On the SAME four crops P0-strict has 307 forks vs P0-B's 305. The substrates are comparable in fork density; the two orders of magnitude were a units error."
+  },
+  "runtimes_s": {
+    "cache_verify_and_build": 12,
+    "structural_census_3workers": 97.23706126213074,
+    "replay_199_crops_3workers": 373.864107131958,
+    "p0b_probe": 13.919713020324707
+  }
+}

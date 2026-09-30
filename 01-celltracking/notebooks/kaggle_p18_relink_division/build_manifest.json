@@ -1,0 +1,46 @@
+{
+  "name": "p18_relink_division",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p18_relink_division.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p18_relink_division\\biohub-p18-relink-division.ipynb",
+  "built_sha256": "f010d8c570f8cf27d7395edde5292374a1894c861f9010e588ea2d21cf5d675c",
+  "config_hash": "94ce1ab04555",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "9ec1b4b512ed7742629a75ad73ea91d9faf30b5fda98748bde59c86222748c0b"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        3
+      ],
+      "payload_sha256": "80e98992a3904d3672a1aa469d95368fc81147d056482da3aea1218b7672040d"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "91cd4f6164bd2f86c8cc4dc9af1017b4b5474f457c57367ca27a1784f53e3eae"
+    }
+  ],
+  "declared_slug": "biohub-p18-relink-division",
+  "title": "Biohub P18 Relink Division",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}

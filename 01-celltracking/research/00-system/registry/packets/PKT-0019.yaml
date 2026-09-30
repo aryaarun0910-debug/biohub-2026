@@ -1,0 +1,74 @@
+id: PKT-0019
+title: "LEVER-0023: H1' full-trunk detector retrain - gated plan, no compute until EXP-0024 and the Colab parity pilot pass"
+lever: LEVER-0023
+owner: primary
+lock: claimed
+opened: '2026-08-27'
+
+claim: >-
+  A full-trunk detector retrain with external division supervision and movie-level validation raises
+  node selection on the under-detected embryo class and yields a fold-0 paired delta >= +0.005.
+
+falsifier: >-
+  The four gates in LEVER-0023: plumbing (EXP-0024), learning (beats its own zero-epoch baseline),
+  transfer (fold-0 paired delta >= +0.005 with a CI excluding 0), leaderboard (one submission with a
+  pre-stated band). Any gate failing closes the lever.
+
+prediction: >-
+  Host-stated prior P(>= +0.005 LB) ~ 0.20 for H1 as packaged; this packet's job is to make each gate
+  cheap enough that a NO costs under 30 units and a YES is earned stepwise.
+
+inputs:
+  facts: [FACT-0296, FACT-0318, FACT-0321, FACT-0322, FACT-0183, FACT-0261]
+  artifacts:
+    - "C:/temp/intel/H1_DOSSIER.md"                       # what is measured, what is not (2026-08-27)
+    - "C:/temp/intel/EXTERNAL_RESEARCH.md"                # forum, top teams, models, literature (2026-08-27)
+    - "data/external/zebrahub/zh001r_identity.npz"        # 1.26M association edges
+    - "kaggle dataset josefreitasalvesneto/biohub-synthetic-dataset (165k divisions, CC0)"
+    - "kaggle dataset daifanhao/biohub-synthetic-detector-pretrain-public-v1"
+    - "kaggle dataset kkunizaw/biohub-zmnscrops"
+  code:
+    - "scripts/kaggle_specs/h1r_edge_s5_smoke.json"
+    - "scripts/kaggle_specs/h1r_edge_s5.json"
+    - "scripts/kaggle_specs/h1r_det_s1.json"
+    - "scripts/kaggle_edits/h1r_edge_train.py, h1r_edge_data.py, h1r_edge_kernel_run.py"
+    - "scripts/core/colab_cli.py"
+
+method: >-
+  Stage 0 (now, Kaggle): EXP-0024 smoke. Stage 1 (Kaggle or Colab L4, ~3 GPU-h): h1r_edge_s5.json
+  full run; compare link_top1 / candidate_recall to the zero-epoch row. Stage 2 (Colab A100, host
+  budget): detector with the trunk UNFROZEN, initialised from the pack, trained on competition GT +
+  synthetic divisions, validated movie-level with the official scorer; threshold re-swept at export.
+  Stage 3: fold-0 LOEO export with the new weights -> FACT-0321 instrument. Stage 4: one submission.
+  Each stage writes its numbers to the registry before the next is authorised.
+
+budget:
+  gpu_sessions: 1 Kaggle slot for stage 0-1; Colab units per host statement for stage 2 (~100-150 on A100)
+  submissions: 1 (stage 4)
+  wall_clock: 1-3 weeks; deadline 2026-09-29
+
+forbidden:
+  - launching stage 2 before EXP-0024 passes and p21 parity is confirmed
+  - training on any 6bba/44b6 crop that is held out by the fold used for validation
+  - reading the four visible test movies for any selection
+
+outputs:
+  evidence: _evidence/h1p/ and C:/temp/h1p/
+  facts_added: []
+  record: one section per stage in research/06-knowledge-system/experimental-records.md
+
+result: >-
+  GATE 1 PASSED 2026-08-27 (FACT-0329): EXP-0024 v2 ran two fp16 steps on T4x2 with detection_drift 0.0 after
+  v1 caught BatchNorm drift in the "frozen" trunk (FACT-0328). STAGE-1 PREREQUISITES BUILT 2026-08-27 (day):
+  (a) scripts/kaggle_edits/h1r_edge_kernel_run.py now takes H1R_EDGE_INIT_WEIGHTS_GLOB + H1R_EDGE_INIT_CONFIG_GLOB
+  (fail-closed, exactly one hit each, sha256 printed as H1R_INIT_WEIGHTS) and h1r_edge_s5.json initialises from
+  OUR out-of-fold split_0 (aryaarun07/biohub-oof-weights, 6bba-trained, 44b6 never seen; bare 136-tensor
+  state_dict verified loadable under the trainer's contract) with H1R_EDGE_RESUME=0 for the first run (DG-005);
+  (b) the S5 -> LOEO consumer scripts/kaggle_specs/deploy_h1r_edge_s5_loeo_f0.json exists (champion configuration
+  retargeted at fold 0, primary weights overridden by the producer kernel's uniquely-named
+  edge_predictor_best_h1r_s5.pth), so DG-007 admits the full spec (artifact_role training; the appearance projector
+  declared an undeployed by-product with a reason) and gate 3 has its instrument; both specs build through the
+  defect gate (2026-08-27). Tests: tests/test_h1r_edge_s5_oof_init.py. Still required before stage 1 launches: the
+  host's slot/budget statement (rule 8). Nothing launched beyond the smoke. The host's 2026-08-27 question - is a
+  retrain the game-changing play - is answered in the handoff banner: the cheapest decisive test is RECIPE PARITY
+  (our July split_0 vs the pack's split_0 on the same fold-0 pipeline), spec p25_recipe_parity_loeo_f0.json.

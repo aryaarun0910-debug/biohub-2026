@@ -1,0 +1,19 @@
+[project]
+name = "biotrack"
+version = "0.1.0"
+description = "Biohub Cell Tracking During Development (Kaggle 2026) - detection, linking, lineage."
+requires-python = ">=3.11,<3.14"   # tracksdata/host stack; 3.14 unsupported
+readme = "research/README.md"      # repo front door + machine map (root has no loose docs)
+
+# Environment is a uv venv at ./.venv (Python 3.12). Reproduce with:
+#   uv venv .venv --python 3.12
+#   uv pip install --python .venv torch --index-url https://download.pytorch.org/whl/cpu
+#   uv pip install --python .venv -e vendor/kaggle-cell-tracking geff polars \
+#       kaggle "dask[array]" pandas scikit-image pytest
+# Exact pins captured in config/requirements.lock.txt (uv pip freeze).
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}

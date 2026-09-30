@@ -1,0 +1,40 @@
+{
+  "name": "p29_p28_detpeak_export_f0",
+  "slug": "biohub-p29-p28-detpeak-export-f0",
+  "title": "Biohub P29 P28 DetPeak Export F0",
+  "code_file": "biohub-p29-p28-detpeak-export-f0.ipynb",
+  "out_dir": "notebooks/kaggle_p29_p28_detpeak_export_f0",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": ["biohub-cell-tracking-during-development"],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": false,
+  "artifact_role": "diagnostic",
+  "diagnostic_reason": "Passive detection-local-max/logit sidecars required by PKT-0024; no deployment artifact and no submission.",
+  "base_notebook": "notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb",
+  "base_sha256": "6d54240b85eb563faa6015761cb348fb2ad4df801218077fbf7c6480c8194f8a",
+  "purpose": "P28 champion fold-0 control plus a passive, subprocess-safe local-maximum/logit export. The returned detector nodes, association graph, champion post-processing, and integer LOEO output remain unchanged. The manifest and per-crop files are retained as positive heartbeats. PKT-0024 prerequisite only; no submission.",
+  "edits": [
+    {
+      "kind": "insert_before",
+      "anchor": "available_gpu_count = _torch.cuda.device_count()",
+      "cell_match": "available_gpu_count = _torch.cuda.device_count()",
+      "code_file": "scripts/kaggle_edits/detpeak_export.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_after",
+      "anchor": "_LOEO_KEEP |= set(globals().get(\"_SWEEP_KEEP\", []))",
+      "cell_match": "_LOEO_KEEP = {",
+      "code": "\n_LOEO_KEEP |= {\"detpeaks\", \"detpeak_manifest.json\"}\n",
+      "expect": 1
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+ "arm": "E - complete observable acquisition-state policy, AS SPECIFIED ((L+1)-scaled flow on post_frozen_gap; flow + phase-correlation shift on the bilateral core; raw elsewhere)",
+ "corpus": "199/199 crops, exact patched scorer, complete wrapper (trap 14 respected)",
+ "baseline_parity": "199/199 per-crop against artifacts/kaggle/coupled_cache/scores/A__*.json; pooled/44b6/6bba reproduce the CANONICAL anchors with gap EXACTLY 0.0",
+ "bound_1_LOWER_DIAGNOSTIC_new_pairs_probability_zero": {
+  "pooled": -0.0023157497192427545,
+  "44b6": -0.0005541152778232306,
+  "6bba": -0.002619682719871008,
+  "bootstrap_pooled": {
+   "mean": -0.002325899983055557,
+   "lo95": -0.004125557365567273,
+   "hi95": -0.0005124517777977014,
+   "p_gt_0": 0.0055,
+   "p_gt_0.002": 0.0,
+   "n_boot": 2000
+  },
+  "label": "NOT DEPLOYABLE - explicit lower diagnostic"
+ },
+ "bound_2_UPPER_DIAGNOSTIC_GT_oracle_probability_on_newly_admitted_pairs": {
+  "pooled": -0.002293140981375008,
+  "44b6": -0.0005541152778232306,
+  "6bba": -0.0025936489745250757,
+  "bootstrap_pooled": {
+   "mean": -0.002302807683350938,
+   "lo95": -0.004114613665852304,
+   "hi95": -0.0004884883875766717,
+   "p_gt_0": 0.006,
+   "p_gt_0.002": 0.0,
+   "n_boot": 2000
+  },
+  "label": "NOT DEPLOYABLE - explicit upper diagnostic, GT-oracle"
+ },
+ "bracket_width_pooled": 2.260873786774642e-05,
+ "VERDICT": "FALSIFIED. The UPPER bound is -0.0022931 pooled against a +0.002 promotion gate. The two bounds differ by 2.26e-05, so the entire value of the GPU probability supply on this gate is at most 2.26e-05 pooled - three orders of magnitude below the gate. The loss is in the CANDIDATE SURFACE, not the probability: arm E removes 574 GT-true pairs from the surface and adds 152 (net -422), and a pair that is not on the surface cannot be selected at any probability.",
+ "mechanism": "both compensation vectors the specification mandates are worse than the plain kNN16 flow. (L+1) scaling: post_frozen reach<=6um 0.8325 unscaled -> 0.7353 scaled, and at 10um it falls BELOW raw. Phase-correlation shift: bilateral-core reach<=10um collapses 0.9185 -> 0.5691. See ESTIMATOR_REACH.json.",
+ "what_is_NOT_falsified": "the underlying gate-quantity fix. The plain kNN16 residual improves reach in every state (corpus <=6um 0.8969 -> 0.9246) and arm B is the only arm with positive net candidate recall (+320). Arms B and E2 (same routing as E but with the unscaled flow) are running.",
+ "reporting_basis": "exact-pooled-OOF"
+}

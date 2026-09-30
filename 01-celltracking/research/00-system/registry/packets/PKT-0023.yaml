@@ -1,0 +1,66 @@
+id: PKT-0023
+title: "LEVER-0027: RoPE-4D association smoke, equal-step link gate, and fold-0 transfer"
+lever: LEVER-0027
+owner: codex-lead
+lock: claimed
+opened: '2026-08-27'
+
+claim: >-
+  An added relative 4-D rotary attention factor improves held-out link_top1 over sinusoidal encoding at equal steps and
+  transfers through the inference subprocess to a positive fold-0 official-score delta.
+
+falsifier: >-
+  The three gates in LEVER-0027. In particular, a passing smoke is only plumbing, link_top1 must beat
+  the equal-step sinusoidal arm, and transfer must reach +0.005 paired with a crop-bootstrap CI excluding
+  zero. The smoke requires its training/config heartbeats; the two inference-patch heartbeats are required
+  only from the Gate-3 LOEO consumer. Failure at any gate ends the lane without a wavelength sweep or
+  daughter-head extension.
+
+prediction: >-
+  Sign uncertain. The mechanism is licensed by association-dominated misses (FACT-0335), but recipe
+  transfer is fragile (FACT-0339); expect a small link_top1 change and treat the fold-0 scorer as decisive.
+
+inputs:
+  facts: [FACT-0182, FACT-0321, FACT-0322, FACT-0329, FACT-0335, FACT-0339]
+  artifacts:
+    - aryaarun07/biohub-oof-weights
+    - aryaarun07/biohub-zh001r-identity
+  code:
+    - scripts/kaggle_edits/h1r_rope4d.py
+    - scripts/kaggle_edits/h1r_rope4d_inference_patch.py
+    - scripts/kaggle_specs/h1r_edge_s5_rope4d_smoke.json
+    - scripts/kaggle_specs/h1r_edge_s5_rope4d.json
+    - scripts/kaggle_specs/deploy_h1r_edge_s5_rope4d_loeo_f0.json
+    - tests/test_h1r_rope4d.py
+
+method: >-
+  Build/verify and run the two-step smoke first. Fetch and compare the full sinusoidal and RoPE S5
+  metrics at identical steps. If RoPE wins link_top1, run its fold-0 LOEO consumer, verify the inference
+  heartbeats, and score against the champion control using the FACT-0321 paired instrument. Do not use
+  Colab until the parity pilot is established; Kaggle is the default execution substrate here.
+
+budget:
+  gpu_sessions: 2
+  submissions: 0
+  wall_clock: 1 day
+
+forbidden:
+  - detector retraining or any claim about detector parity
+  - fold-1 LOEO weight routing that does not set BIOHUB_LOEO_WEIGHTS_GLOB to split_1 (FACT-0160)
+  - wavelength tuning before the fixed-band arm clears transfer
+  - reading the four visible test movies
+  - .claude/settings.json
+
+outputs:
+  evidence: C:/temp/h1r_rope4d/ and _evidence/h1r_rope4d/
+  facts_added: []
+  record: >-
+    One compact row per gate in research/06-knowledge-system/experimental-records.md.
+
+result: >-
+  GATE 1 IN FLIGHT at cycle close (2026-08-27): EXP-0028 (h1r-edge-s5-rope4d-smoke) was RUNNING on Kaggle when the
+  local queue runner was stopped for clean-out; the sinusoidal S5 control (h1r_edge_s5, EXP for LEVER-0027 gate 2)
+  was also running. Both will finish on Kaggle unattended and must be FETCHED next cycle (kaggle_factory fetch), then
+  the equal-step link_top1 compared. The RoPE code, three specs, and tests/test_h1r_rope4d.py are green and committed;
+  the sinusoidal control is bit-identical (tested). No fold-0 transfer run was launched. Weight transfer expectations
+  are low given FACT-0339 (recipe parity fails), but this arm changes only the encoding, not the detector.

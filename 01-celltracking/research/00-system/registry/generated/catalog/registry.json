@@ -1,0 +1,6117 @@
+{
+ "registry": {
+  "experiments": {
+   "EXP-0003": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0003",
+    "kernel": "aryaarun07/biohub-p3-harmonic",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p3_harmonic.json",
+    "status": "scored",
+    "submission": 55274582
+   },
+   "EXP-0004": {
+    "facts": [
+     "FACT-0060"
+    ],
+    "has_score": false,
+    "id": "EXP-0004",
+    "kernel": "aryaarun07/biohub-p4-detpeak-superset-export-loeo-f0",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p4_detsweep_export_f0.json",
+    "status": "void",
+    "submission": null
+   },
+   "EXP-0004A": {
+    "facts": [],
+    "has_score": false,
+    "id": "EXP-0004A",
+    "kernel": "aryaarun07/biohub-p4-detpeak-superset-export-loeo-f0",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p4_detsweep_export_f0.json",
+    "status": "running",
+    "submission": null
+   },
+   "EXP-0004B": {
+    "facts": [],
+    "has_score": false,
+    "id": "EXP-0004B",
+    "kernel": "aryaarun07/biohub-p4-detpeak-superset-export-loeo-f1",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p4_detsweep_export_f1.json",
+    "status": "cancelled",
+    "submission": null
+   },
+   "EXP-0004S": {
+    "facts": [],
+    "has_score": false,
+    "id": "EXP-0004S",
+    "kernel": "aryaarun07/biohub-p4-detpeak-smoke-f0",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p4_detpeak_smoke_f0.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0006": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0006",
+    "kernel": "aryaarun07/biohub-p6-control-degraded",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p6_control_degraded.json",
+    "status": "scored",
+    "submission": 55667537
+   },
+   "EXP-0008": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0008",
+    "kernel": "aryaarun07/biohub-p8-loosefilter",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p8_loosefilter.json",
+    "status": "scored",
+    "submission": 55698581
+   },
+   "EXP-0009": {
+    "facts": [
+     "FACT-0001"
+    ],
+    "has_score": true,
+    "id": "EXP-0009",
+    "kernel": "aryaarun07/biohub-p9-coupled-division",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p9_coupled_division.json",
+    "status": "deployed",
+    "submission": 55753516
+   },
+   "EXP-0015": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0015",
+    "kernel": "aryaarun07/biohub-p15-forkfree-probe",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p15_forkfree_probe.json",
+    "status": "scored",
+    "submission": 55768476
+   },
+   "EXP-0016": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0016",
+    "kernel": "aryaarun07/biohub-p16-det090",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p16_det090.json",
+    "status": "scored",
+    "submission": 55768483
+   },
+   "EXP-0017": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0017",
+    "kernel": "aryaarun07/biohub-p17-det094",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p17_det094.json",
+    "status": "scored",
+    "submission": 55769398
+   },
+   "EXP-0018": {
+    "facts": [
+     "FACT-0090",
+     "FACT-0093"
+    ],
+    "has_score": false,
+    "id": "EXP-0018",
+    "kernel": "aryaarun07/biohub-p18-relink-division",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p18_relink_division.json",
+    "status": "built",
+    "submission": null
+   },
+   "EXP-0019": {
+    "facts": [
+     "FACT-0090",
+     "FACT-0093",
+     "FACT-0102",
+     "FACT-0111"
+    ],
+    "has_score": false,
+    "id": "EXP-0019",
+    "kernel": "aryaarun07/biohub-p19-relink-division-sweep-loeo-f1",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p19_relink_sweep_f1.json",
+    "status": "void",
+    "submission": null
+   },
+   "EXP-0021": {
+    "facts": [
+     "FACT-0221",
+     "FACT-0160",
+     "FACT-0325",
+     "FACT-0326"
+    ],
+    "has_score": false,
+    "id": "EXP-0021",
+    "kernel": "aryaarun07/biohub-p19-relink-division-sweep-loeo-f1",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p19_relink_sweep_f1.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0022": {
+    "facts": [
+     "FACT-0321",
+     "FACT-0322",
+     "FACT-0323"
+    ],
+    "has_score": false,
+    "id": "EXP-0022",
+    "kernel": "aryaarun07/biohub-p20-relink-sweep-loeo-f0",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p20_relink_sweep_f0.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0023": {
+    "facts": [
+     "FACT-0001",
+     "FACT-0331"
+    ],
+    "has_score": true,
+    "id": "EXP-0023",
+    "kernel": "aryaarun07/biohub-p22-sdw060",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p22_sdw060.json",
+    "status": "scored",
+    "submission": 55806155
+   },
+   "EXP-0024": {
+    "facts": [
+     "FACT-0296",
+     "FACT-0328",
+     "FACT-0329"
+    ],
+    "has_score": false,
+    "id": "EXP-0024",
+    "kernel": "aryaarun07/biohub-h1r-edge-s5-smoke",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/h1r_edge_s5_smoke.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0025": {
+    "facts": [
+     "FACT-0311",
+     "FACT-0312",
+     "FACT-0331",
+     "FACT-0341"
+    ],
+    "has_score": true,
+    "id": "EXP-0025",
+    "kernel": "aryaarun07/biohub-p24-deepcenter-best-veto",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p24_deepcenter_best_veto.json",
+    "status": "scored",
+    "submission": 55820202
+   },
+   "EXP-0026": {
+    "facts": [
+     "FACT-0321",
+     "FACT-0322",
+     "FACT-0263",
+     "FACT-0339"
+    ],
+    "has_score": false,
+    "id": "EXP-0026",
+    "kernel": "aryaarun07/biohub-p25-recipe-parity-loeo-f0",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p25_recipe_parity_loeo_f0.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0027": {
+    "facts": [
+     "FACT-0001",
+     "FACT-0324",
+     "FACT-0330",
+     "FACT-0336"
+    ],
+    "has_score": false,
+    "id": "EXP-0027",
+    "kernel": "aryaarun07/biohub-p23-icom155",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p23_icom155.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0028": {
+    "facts": [
+     "FACT-0340",
+     "FACT-0329",
+     "FACT-0335"
+    ],
+    "has_score": false,
+    "id": "EXP-0028",
+    "kernel": "aryaarun07/biohub-h1r-edge-s5-rope4d-smoke",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/h1r_edge_s5_rope4d_smoke.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0029": {
+    "facts": [
+     "FACT-0341",
+     "FACT-0330",
+     "FACT-0336"
+    ],
+    "has_score": true,
+    "id": "EXP-0029",
+    "kernel": "aryaarun07/biohub-p27-champion-icom",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p27_champion_icom.json",
+    "status": "scored",
+    "submission": 55827508
+   },
+   "EXP-0030": {
+    "facts": [
+     "FACT-0341",
+     "FACT-0310",
+     "FACT-0345"
+    ],
+    "has_score": false,
+    "id": "EXP-0030",
+    "kernel": "aryaarun07/biohub-p28-champion-control-f0",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p28_champion_control_f0.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0031": {
+    "facts": [
+     "FACT-0341",
+     "FACT-0310",
+     "FACT-0345"
+    ],
+    "has_score": false,
+    "id": "EXP-0031",
+    "kernel": "aryaarun07/biohub-p28-champion-control-f1",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p28_champion_control_f1.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0032": {
+    "facts": [
+     "FACT-0346",
+     "FACT-0351"
+    ],
+    "has_score": false,
+    "id": "EXP-0032",
+    "kernel": "aryaarun07/biohub-p29-p28-detpeak-smoke-f0",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p29_p28_detpeak_smoke_f0.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0033": {
+    "facts": [
+     "FACT-0345",
+     "FACT-0346",
+     "FACT-0352",
+     "FACT-0353",
+     "FACT-0354",
+     "FACT-0355"
+    ],
+    "has_score": false,
+    "id": "EXP-0033",
+    "kernel": "aryaarun07/biohub-p29-p28-detpeak-export-f0",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p29_p28_detpeak_export_f0.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0034": {
+    "facts": [
+     "FACT-0345",
+     "FACT-0346",
+     "FACT-0160",
+     "FACT-0352",
+     "FACT-0353",
+     "FACT-0354",
+     "FACT-0355"
+    ],
+    "has_score": false,
+    "id": "EXP-0034",
+    "kernel": "aryaarun07/biohub-p29-p28-detpeak-export-f1",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p29_p28_detpeak_export_f1.json",
+    "status": "complete",
+    "submission": null
+   },
+   "EXP-0035": {
+    "facts": [
+     "FACT-0345",
+     "FACT-0369",
+     "FACT-0370",
+     "FACT-0367",
+     "FACT-0261"
+    ],
+    "has_score": false,
+    "id": "EXP-0035",
+    "kernel": "aryaarun07/biohub-p30-acquisition-f0",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p30_acquisition_f0.json",
+    "status": "running",
+    "submission": null
+   },
+   "EXP-0036": {
+    "facts": [
+     "FACT-0377",
+     "FACT-0345",
+     "FACT-0368",
+     "FACT-0376",
+     "FACT-0261"
+    ],
+    "has_score": false,
+    "id": "EXP-0036",
+    "kernel": "aryaarun07/biohub-p31-public931-replica-f0",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p31_public931_replica_f0.json",
+    "status": "running",
+    "submission": null
+   },
+   "EXP-0037": {
+    "facts": [
+     "FACT-0377",
+     "FACT-0345",
+     "FACT-0368",
+     "FACT-0376",
+     "FACT-0261"
+    ],
+    "has_score": false,
+    "id": "EXP-0037",
+    "kernel": "aryaarun07/biohub-p31-public931-replica-f1",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p31_public931_replica_f1.json",
+    "status": "running",
+    "submission": null
+   },
+   "EXP-0038": {
+    "facts": [
+     "FACT-0377",
+     "FACT-0378",
+     "FACT-0341"
+    ],
+    "has_score": true,
+    "id": "EXP-0038",
+    "kernel": "aryaarun07/biohub-p32-public931-exact",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p32_public931_exact.json",
+    "status": "scored",
+    "submission": 55871868
+   },
+   "EXP-0039": {
+    "facts": [
+     "FACT-0381",
+     "FACT-0369",
+     "FACT-0370",
+     "FACT-0373"
+    ],
+    "has_score": false,
+    "id": "EXP-0039",
+    "kernel": "aryaarun07/biohub-p34-acquisition-f1",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p34_acquisition_f1.json",
+    "status": "running",
+    "submission": null
+   },
+   "EXP-0040": {
+    "facts": [
+     "FACT-0387"
+    ],
+    "has_score": false,
+    "id": "EXP-0040",
+    "kernel": "aryaarun07/biohub-p33-assoc-feature-parity-smoke",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json",
+    "status": "failed",
+    "submission": null
+   },
+   "EXP-0041": {
+    "facts": [
+     "FACT-0387",
+     "FACT-0382",
+     "FACT-0369",
+     "FACT-0373"
+    ],
+    "has_score": false,
+    "id": "EXP-0041",
+    "kernel": "aryaarun07/biohub-p33-assoc-feature-parity-smoke",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json",
+    "status": "failed",
+    "submission": null
+   },
+   "EXP-0042": {
+    "facts": [
+     "FACT-0393",
+     "FACT-0341",
+     "FACT-0345",
+     "FACT-0377",
+     "FACT-0378"
+    ],
+    "has_score": true,
+    "id": "EXP-0042",
+    "kernel": "aryaarun07/biohub-p35-dcveto-on-931",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p35_dcveto_on_931.json",
+    "status": "scored",
+    "submission": 55888865
+   },
+   "EXP-0043": {
+    "facts": [
+     "FACT-0403",
+     "FACT-0402",
+     "FACT-0400"
+    ],
+    "has_score": false,
+    "id": "EXP-0043",
+    "kernel": "aryaarun07/biohub-p36-assoc-feature-tap-smoke",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p36_assoc_feature_tap_smoke.json",
+    "status": "invalid",
+    "submission": null
+   },
+   "EXP-0044": {
+    "facts": [
+     "FACT-0416",
+     "FACT-0417",
+     "FACT-0418"
+    ],
+    "has_score": false,
+    "id": "EXP-0044",
+    "kernel": null,
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p37_assoc_feature_tap_c2_smoke.json",
+    "status": "prepared",
+    "submission": null
+   },
+   "EXP-0045": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0045",
+    "kernel": null,
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": null,
+    "status": "scored",
+    "submission": "55136759"
+   },
+   "EXP-0046": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0046",
+    "kernel": null,
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": null,
+    "status": "scored",
+    "submission": "55136908"
+   },
+   "EXP-0047": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0047",
+    "kernel": null,
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": null,
+    "status": "scored",
+    "submission": "55147215"
+   },
+   "EXP-0048": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0048",
+    "kernel": null,
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": null,
+    "status": "scored",
+    "submission": "55181562"
+   },
+   "EXP-0049": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0049",
+    "kernel": null,
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": null,
+    "status": "scored",
+    "submission": "55585140"
+   },
+   "EXP-0050": {
+    "facts": [],
+    "has_score": true,
+    "id": "EXP-0050",
+    "kernel": null,
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": null,
+    "status": "scored",
+    "submission": "55616685"
+   },
+   "EXP-0051": {
+    "facts": [
+     "FACT-0446"
+    ],
+    "has_score": true,
+    "id": "EXP-0051",
+    "kernel": "aryaarun07/biohub-p38-relink-bonus-b2",
+    "kind": "EXP",
+    "score_lives_in": "research/00-system/registry/experiments.yaml",
+    "spec": "scripts/kaggle_specs/p38_relink_bonus_b2.json",
+    "status": "scored",
+    "submission": "55915569"
+   }
+  },
+  "facts": {
+   "FACT-0001": {
+    "experiment": "EXP-0009",
+    "guarded": false,
+    "id": "FACT-0001",
+    "instrument": "kaggle submission 55753516",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0002": {
+    "experiment": "EXP-0003",
+    "guarded": true,
+    "id": "FACT-0002",
+    "instrument": "kaggle submission 55274582",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "SUPERSEDED",
+    "superseded_by": "FACT-0001",
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0003": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0003",
+    "instrument": "kaggle leaderboard read 2026-08-25",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0010": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0010",
+    "instrument": "public leaderboard",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "SUPERSEDED",
+    "superseded_by": "FACT-0332",
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0011": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0011",
+    "instrument": "public leaderboard",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "EXTERNAL",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0012": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0012",
+    "instrument": "FACT-0010 minus FACT-0001",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0020": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0020",
+    "instrument": "official patched scorer, biohub_tracking/metrics.py summarise()",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0021": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0021",
+    "instrument": null,
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "UNVERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0030": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0030",
+    "instrument": "scripts/win_bet/ea_atlas.py over C:/temp/error_atlas (LOEO-clean, verified FACT-0232)",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0031": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0031",
+    "instrument": "scripts/win_bet/ea_atlas.py over C:/temp/error_atlas (LOEO-clean, verified FACT-0232)",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0032": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0032",
+    "instrument": "scripts/win_bet/ea_atlas.py over C:/temp/error_atlas (LOEO-clean, verified FACT-0232)",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0033": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0033",
+    "instrument": "scripts/win_bet/ea_atlas.py over C:/temp/error_atlas (LOEO-clean, verified FACT-0232)",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0034": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0034",
+    "instrument": null,
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "UNVERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0040": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0040",
+    "instrument": "scripts/win_bet/nearest_parent_oracle.py calibrate_displacement()",
+    "instrument_paths": [
+     "scripts/win_bet/nearest_parent_oracle.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0041": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0041",
+    "instrument": "scripts/win_bet/nearest_parent_oracle.py",
+    "instrument_paths": [
+     "scripts/win_bet/nearest_parent_oracle.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0042": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0042",
+    "instrument": "scripts/win_bet/nearest_parent_oracle.py",
+    "instrument_paths": [
+     "scripts/win_bet/nearest_parent_oracle.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0043": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0043",
+    "instrument": null,
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "UNVERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0044": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0044",
+    "instrument": "scripts/win_bet/nearest_parent_oracle.py",
+    "instrument_paths": [
+     "scripts/win_bet/nearest_parent_oracle.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0045": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0045",
+    "instrument": "scripts/win_bet/nearest_parent_oracle.py",
+    "instrument_paths": [
+     "scripts/win_bet/nearest_parent_oracle.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0050": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0050",
+    "instrument": "scripts/win_bet/nearest_parent_oracle.py",
+    "instrument_paths": [
+     "scripts/win_bet/nearest_parent_oracle.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0051": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0051",
+    "instrument": "scripts/win_bet/nearest_parent_oracle.py",
+    "instrument_paths": [
+     "scripts/win_bet/nearest_parent_oracle.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0052": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0052",
+    "instrument": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb cell 6:1514",
+    "instrument_paths": [
+     "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0060": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0060",
+    "instrument": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb cell 5:388",
+    "instrument_paths": [
+     "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0061": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0061",
+    "instrument": "push refusal \"Maximum batch GPU session count of 2 reached\"",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0062": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0062",
+    "instrument": ".venv/Lib/site-packages/kaggle/api/kaggle_api_extended.py:6712",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0063": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0063",
+    "instrument": "scripts/core/kaggle_factory.py:295",
+    "instrument_paths": [
+     "scripts/core/kaggle_factory.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0070": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0070",
+    "instrument": "scripts/win_bet/e0c_score.py against cached graphs from 2026-07-11",
+    "instrument_paths": [
+     "scripts/win_bet/e0c_score.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0071": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0071",
+    "instrument": "scripts/win_bet/e0c_score.py against cached graphs from 2026-07-11",
+    "instrument_paths": [
+     "scripts/win_bet/e0c_score.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0072": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0072",
+    "instrument": null,
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "UNVERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0080": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0080",
+    "instrument": "scratchpad div_density.py over C:/temp/error_atlas gtnodes_f1/gtedges_f1",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "SUPERSEDED",
+    "superseded_by": "FACT-0130",
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0081": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0081",
+    "instrument": "scratchpad div_density.py over C:/temp/error_atlas",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0082": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0082",
+    "instrument": "scratchpad div_density.py over C:/temp/error_atlas edges_f1",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0083": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0083",
+    "instrument": "scratchpad div_density.py over C:/temp/error_atlas gtedges_pre1",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0084": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0084",
+    "instrument": "Kaggle discussion post, 2026-08-25, NOT independently verified",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "EXTERNAL",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0090": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0090",
+    "instrument": "scripts/win_bet/division_loss_diff.py",
+    "instrument_paths": [
+     "scripts/win_bet/division_loss_diff.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0091": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0091",
+    "instrument": "scripts/win_bet/division_loss_diff.py",
+    "instrument_paths": [
+     "scripts/win_bet/division_loss_diff.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0092": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0092",
+    "instrument": "scripts/win_bet/division_loss_diff.py with FACT-0082",
+    "instrument_paths": [
+     "scripts/win_bet/division_loss_diff.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0093": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0093",
+    "instrument": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb cell 6:487, inside motion_relink_edges defined at cell 6:420",
+    "instrument_paths": [
+     "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0100": {
+    "experiment": "EXP-0015",
+    "guarded": false,
+    "id": "FACT-0100",
+    "instrument": "kaggle submission 55768476",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0101": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0101",
+    "instrument": "kaggle submission 55768476 with the P9 baseline 55753516",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0102": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0102",
+    "instrument": "kaggle submissions 55768483, 55769398, 55753516, 55667537",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0110": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0110",
+    "instrument": "scripts/win_bet/detpeak_curve.py matcher over _evidence/p4_detpeak_f0_v2/detpeaks (71 crops, 2,885,180 peaks) vs gtnodes_f0",
+    "instrument_paths": [
+     "scripts/win_bet/detpeak_curve.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0111": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0111",
+    "instrument": "scripts/win_bet/detpeak_curve.py matcher over the p4 fold-0 export",
+    "instrument_paths": [
+     "scripts/win_bet/detpeak_curve.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0112": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0112",
+    "instrument": "FACT-0110 against the recorded scored-frame node_recall 0.9861",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0120": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0120",
+    "instrument": "observed on the EXP-0019 push; audited across all 44 specs by tests/test_spec_slug_contract.py",
+    "instrument_paths": [
+     "tests/test_spec_slug_contract.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0130": {
+    "experiment": "EXP-0019",
+    "guarded": false,
+    "id": "FACT-0130",
+    "instrument": "scripts/core/score_loeo_submission.py on _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz",
+    "instrument_paths": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "kind": "FACT",
+    "provenance": "SUPERSEDED",
+    "superseded_by": "FACT-0161",
+    "validity": "INVALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0131": {
+    "experiment": "EXP-0019",
+    "guarded": false,
+    "id": "FACT-0131",
+    "instrument": "EXP-0019 six LOEO exports scored by scripts/core/score_loeo_submission.py; control (penalty -1) reproduced the champion EXACTLY at 2,156,725 nodes / 2,077,140 edges / 6,314 forks",
+    "instrument_paths": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "INVALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0132": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0132",
+    "instrument": "FACT-0130 against FACT-0080 on the same 125-division population",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0140": {
+    "experiment": "EXP-0019",
+    "guarded": false,
+    "id": "FACT-0140",
+    "instrument": "scripts/core/score_loeo_submission.py on _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz",
+    "instrument_paths": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "kind": "FACT",
+    "provenance": "SUPERSEDED",
+    "superseded_by": "FACT-0161",
+    "validity": "INVALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0141": {
+    "experiment": "EXP-0019",
+    "guarded": false,
+    "id": "FACT-0141",
+    "instrument": "scripts/core/score_loeo_submission.py against the EXTERNAL mikelou1 forum report",
+    "instrument_paths": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "kind": "FACT",
+    "provenance": "SUPERSEDED",
+    "superseded_by": "FACT-0161",
+    "validity": "INVALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0150": {
+    "experiment": "EXP-0019",
+    "guarded": false,
+    "id": "FACT-0150",
+    "instrument": "scripts/core/score_loeo_submission.py semantics applied to _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz",
+    "instrument_paths": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0151": {
+    "experiment": "EXP-0019",
+    "guarded": false,
+    "id": "FACT-0151",
+    "instrument": "scripts/core/score_loeo_submission.py on _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz",
+    "instrument_paths": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0152": {
+    "experiment": "EXP-0019",
+    "guarded": false,
+    "id": "FACT-0152",
+    "instrument": "derived from divJ = 26a/(125 + 225b), since TP+FN is pinned at 125; re-derived independently by the lead",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "INVALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0153": {
+    "experiment": "EXP-0019",
+    "guarded": false,
+    "id": "FACT-0153",
+    "instrument": "agent analysis over _evidence/p19_relink_sweep_f1/sweep_pen_off.csv.gz and data/train",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0160": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0160",
+    "instrument": "scripts/kaggle_edits/loeo_retarget.py:15-18 (\"LOEO-CLEAN on fold 0 and LEAKY on fold 1\"); _evidence/p19_relink_sweep_f1/loeo_manifest.json weights field; comparison against the nine other fold-1 LOEO specs",
+    "instrument_paths": [
+     "scripts/kaggle_edits/loeo_retarget.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0161": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0161",
+    "instrument": "agent audit over _evidence/exports/loeo_f1_strict/ (OOF split_1 weights per its loeo_manifest) versus _evidence/p19_relink_sweep_f1/; populations verified identical (128 crops, 109,057 GT edges, 125 GT divisions)",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0162": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0162",
+    "instrument": null,
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "SUPERSEDED",
+    "superseded_by": "FACT-0161",
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0170": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0170",
+    "instrument": "research/06-knowledge-system/inventory/loeo_f1_strict.json",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0171": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0171",
+    "instrument": "agent analysis over research/06-knowledge-system/inventory/loeo_f1_strict.json and loeo_f0_strict",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0172": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0172",
+    "instrument": "research/06-knowledge-system/inventory/loeo_f1_strict.json",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0173": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0173",
+    "instrument": "agent computation over the champion export vs GT metadata",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0174": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0174",
+    "instrument": "agent measurement over data/train fold 1, reproducing research/06-knowledge-system/internal-reports/division_lane_2026-08-18.md",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0175": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0175",
+    "instrument": "repo prose audit; two decompositions both marked VERIFIED",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "EXTERNAL",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0176": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0176",
+    "instrument": "agent analysis across p0b/preilp/subvoxel exports with a node-overlap control",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0180": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0180",
+    "instrument": "agent analysis over _evidence/exports/loeo_f1_strict/ (honest OOF) and data/train; matcher validated against the official scorer (node_recall and reach reproduced exactly)",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0181": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0181",
+    "instrument": "derived and reproduced numerically by perturbing authoritative per-crop rows and re-running summarise(), which reproduced the published score to 4 decimals",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0182": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0182",
+    "instrument": "agent analysis over data/train and _evidence/exports/loeo_f1_strict/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0183": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0183",
+    "instrument": "agent analysis over _evidence/exports/loeo_f1_strict/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0184": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0184",
+    "instrument": "audit of research/00-system/registry/experiments.yaml",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0185": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0185",
+    "instrument": "agent analysis over _evidence/exports/loeo_f1_strict/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0190": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0190",
+    "instrument": ".venv/Lib/site-packages/tracking_cellmot/metrics.py - summarise() at :499-522 applies the node adjustment; evaluate_datasets() at :334-383 computes micro edge_jaccard + 0.1*divJ with NO node term",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0191": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0191",
+    "instrument": "tracking_cellmot/metrics.py:447-449 (no upper clamp) and official scoring of _evidence/exports/loeo_f0_strict/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0192": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0192",
+    "instrument": "recomputed from export CSVs and GT metadata directly, not inherited from FACT-0021",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0193": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0193",
+    "instrument": "oracle de-fork on honest fold 0 - removing exactly the 110 false fork branches gained +0.004696 on the EDGE term versus +0.006105 on the division term; algebra validated against measurement to 3 significant figures",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0194": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0194",
+    "instrument": "honest fold 0, division TP 2 / FP 100 / FN 24, reach 22/26",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0195": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0195",
+    "instrument": "official scorer on _evidence/exports/loeo_f0_strict/ and _evidence/exports/loeo_f1_strict/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0200": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0200",
+    "instrument": "agent harness reproducing the honest inventories exactly (f1 TP 1 / FP 491 / FN 124 / divJ 0.001623; f0 TP 2 / FP 100 / FN 24 / divJ 0.015873) over _evidence/exports/loeo_f1_strict/ and loeo_f0_strict/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0201": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0201",
+    "instrument": "control experiment - zeroing the velocity term makes forward and reverse disagree on 1 node out of 530,792 (0.0002%) versus 357 with the deployed velocity weight",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0202": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0202",
+    "instrument": "same harness run on _evidence/p19_relink_sweep_f1/ versus the honest exports",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0210": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0210",
+    "instrument": "official tracking_cellmot scorer on _evidence/exports/loeo_f1_strict/, cross-checked by an independent matcher that agreed exactly on edge TP, edge FN, node_recall and reach",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0211": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0211",
+    "instrument": "exact recomputation against the official scorer on the honest fold-1 export",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0212": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0212",
+    "instrument": "exact recomputation against the official scorer on the honest fold-1 export",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0213": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0213",
+    "instrument": "official scorer on the honest fold-1 export",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0220": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0220",
+    "instrument": "official scorer on _evidence/exports/loeo_f0_strict/ and loeo_f1_strict/, both channels",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0221": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0221",
+    "instrument": "_evidence/p19_relink_sweep_f1/loeo_manifest.json weights field; FACT-0160",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0230": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0230",
+    "instrument": "scripts/win_bet/ea_atlas.py over C:/temp/error_atlas/gtedges_f0.parquet and gtedges_f1.parquet",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0231": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0231",
+    "instrument": "scripts/win_bet/ea_atlas.py pushed through the real objective (adjacency + 0.1*divJ) on the LOEO-clean atlas; node band spans three FP models",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0232": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0232",
+    "instrument": "atlas built from C:/temp/subvoxel_f0 + subvoxel_f1 (71/71 and 128/128 crops identical on num_pred_nodes; subvoxel_f1 manifest weights = OOF split_1); independent runs reproduced atlas per-crop adjJ exactly and the published oracle table to 4 decimal places",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0240": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0240",
+    "instrument": "scripts/core/score_loeo_submission.py end-to-end on the filtered clean fold-0 export; labels reproduced the scorer with ZERO mismatches across all 128+71 crops",
+    "instrument_paths": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0241": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0241",
+    "instrument": "agent measurement over data/train, both folds, calibrated at 1.8168 um",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0242": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0242",
+    "instrument": "agent analysis over clean fold-0 and fold-1 exports; labels matched the scorer exactly",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0250": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0250",
+    "instrument": "src/biotrack/metric.py estimated_nodes() over data/train/*.geff, reading GEFF metadata extra.estimated_number_of_nodes",
+    "instrument_paths": [
+     "src/biotrack/metric.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0260": {
+    "experiment": "EXP-0015",
+    "guarded": false,
+    "id": "FACT-0260",
+    "instrument": "EXP-0015 (submission 55768476, LB 0.906) against EXP-0009 (55753516, LB 0.925), with the fork-drop replayed offline on both clean exports to bound the edge channel",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0261": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0261",
+    "instrument": "pairwise per-crop comparison of the LOEO export against the deployed champion export on identical crops and GT",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0262": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0262",
+    "instrument": "scorer-exact pooling over all 199 crops, plus simple/crop-count/edge-volume variants",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0263": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0263",
+    "instrument": "crop bootstrap, 4,000 resamples, exact scorer",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0264": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0264",
+    "instrument": "research/06-knowledge-system/internal-reports/instrument_repair_2026-08-18.md plus 4 configurations re-measured 2026-08-26",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0270": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0270",
+    "instrument": "C:/temp/edge_atlas_strict rebuilt directly on the two honest exports; metric recomputation reproduces the scorer's pred_valid rule with ZERO mismatches on both folds",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0271": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0271",
+    "instrument": "C:/temp/edge_atlas_strict arbitration analysis",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0272": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0272",
+    "instrument": "dose-response simulated with the official metric arithmetic on frozen node-to-GT matches; proxy calibrated - at k=1 it predicts the actual TP rate within 0.6 percentage points",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0273": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0273",
+    "instrument": "direct inspection of _evidence/exports/loeo_f0_strict/ and loeo_f1_strict/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0274": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0274",
+    "instrument": "C:/temp/edge_atlas_strict LAP replay on both honest exports",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0275": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0275",
+    "instrument": "full-scale exact metric recomputation on both honest exports",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0276": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0276",
+    "instrument": "C:/temp/edge_atlas_strict oracles on both honest exports",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0280": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0280",
+    "instrument": "dual scoring of every cycle-2 edge experiment under summarise() and evaluate_datasets()",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0281": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0281",
+    "instrument": ".venv/Lib/site-packages/tracking_cellmot/metrics.py (536 lines, installed/patched) versus artifacts/kaggle/lb897_calibration/... and artifacts/kaggle/lb897_trackastra_v2/tracking_repo (450-line metrics module, byte-identical to each other)",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0290": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0290",
+    "instrument": "scripts/win_bet/div_proposal_funnel.py over both clean exports",
+    "instrument_paths": [
+     "scripts/win_bet/div_proposal_funnel.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0291": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0291",
+    "instrument": "scripts/win_bet/div_proposal_funnel.py plus the deployed ranking at cell06:1049",
+    "instrument_paths": [
+     "scripts/win_bet/div_proposal_funnel.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0292": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0292",
+    "instrument": "agent analysis over the raised candidate pool (parent <= 12, sister <= 16) on both clean exports",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0293": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0293",
+    "instrument": "8-feature logistic fitted on one embryo and tested on the other, honest protocol",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0294": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0294",
+    "instrument": "_pred_division_fork_sets charging rule in vendor division_metrics.py, plus a held-out per-embryo scorer on Zebrahub (787-956 positives per embryo)",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0295": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0295",
+    "instrument": "vendor/kaggle-cell-tracking/src/tracking_cellmot/division_metrics.py _is_strongly_connected_division, plus edge-ownership analysis on both exports and the atlas",
+    "instrument_paths": [
+     "vendor/kaggle-cell-tracking/src/tracking_cellmot/division_metrics.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0296": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0296",
+    "instrument": "full-disk search including gitignored paths; independent recomputation of the Zebrahub edge and division counts",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0300": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0300",
+    "instrument": "official tracking_cellmot._evaluate / division_metrics.score_divisions rebuilt from the vendored path, verified crop-for-crop against scripts/core/score_loeo_submission.py",
+    "instrument_paths": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0301": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0301",
+    "instrument": "exported coordinates are int(round()) of LINEFIT-SMOOTHED values (biohub-p3-harmonic.ipynb:2116-2118); exported sib3d reaches 9.24 (f0) / 8.97 (f1) against a deployed 8.5 um cap",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0302": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0302",
+    "instrument": "deployed p3_harmonic and p0b_clean913_revtime notebooks both set BIOHUB_SAFE_DIV_SISTER_MAX_UM='8.5'; run_stats.csv reports safe_division_skipped_cap=137",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0303": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0303",
+    "instrument": "notebook line anchors verified to occur exactly once each",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0310": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0310",
+    "instrument": "scripts/win_bet/dc_checkpoint_audit.py --split-manifest on the pack's weights/full_frame_center/split_manifest.json (copy at C:/temp/dc_refine/deepcenter_split_manifest.json; re-downloadable with python -m kaggle datasets download -f weights/full_frame_center/split_manifest.json)",
+    "instrument_paths": [
+     "scripts/win_bet/dc_checkpoint_audit.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0311": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0311",
+    "instrument": "scripts/win_bet/dc_checkpoint_audit.py (history read from the checkpoint; heatmaps via the deployed preprocessing copied verbatim in scripts/win_bet/dc_subvoxel_refine.py) - output C:/temp/dc_refine/checkpoint_audit.json",
+    "instrument_paths": [
+     "scripts/win_bet/dc_checkpoint_audit.py",
+     "scripts/win_bet/dc_subvoxel_refine.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0312": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0312",
+    "instrument": "run_stats.csv emitted by the built P9-lineage notebooks (deepcenter_gap_* stat counters, deployed notebook cell 6:397-411), summed over the four movies; files at C:/temp/p12_forward_acceleration_20260824/, C:/temp/p13_p9_adabn_detection_only_20260824/, C:/temp/p10_deepcenter_best_20260824/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0313": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0313",
+    "instrument": "scripts/win_bet/dc_subvoxel_refine.py eval (calibration gate) on C:/temp/edge_atlas_strict nodes_/gtnodes_ parquets built by scripts/win_bet/ea_atlas.py from _evidence/exports/loeo_f{0,1}_strict/",
+    "instrument_paths": [
+     "scripts/win_bet/dc_subvoxel_refine.py",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0314": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0314",
+    "instrument": "scripts/win_bet/dc_subvoxel_refine.py refine/eval (frozen matches, calibration gate OK on both folds) and scripts/win_bet/ea_atlas.py + summarise() for the round-trip; outputs C:/temp/dc_refine/pilot_f{0,1}_best/",
+    "instrument_paths": [
+     "scripts/win_bet/dc_subvoxel_refine.py",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0315": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0315",
+    "instrument": "scripts/win_bet/dc_subvoxel_refine.py refine --gt-parquet (com1 operator seeded at each GT node) on the pilot crops; gt_seeded.parquet under C:/temp/dc_refine/pilot_f{0,1}_best/",
+    "instrument_paths": [
+     "scripts/win_bet/dc_subvoxel_refine.py"
+    ],
+    "kind": "FACT",
+    "provenance": "SUPERSEDED",
+    "superseded_by": "FACT-0317",
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0316": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0316",
+    "instrument": "scripts/win_bet/dc_subvoxel_refine.py snap/eval on the cached heatmaps (C:/temp/dc_refine/pilot_f{0,1}_best_hm/heatmaps) and scripts/win_bet/ea_atlas.py + summarise() for the round-trip; outputs C:/temp/dc_refine/pilot_f{0,1}_snap/",
+    "instrument_paths": [
+     "scripts/win_bet/dc_subvoxel_refine.py",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0317": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0317",
+    "instrument": "scripts/win_bet/dc_subvoxel_refine.py refine_points (com1 operator) seeded at GT + a known offset on the cached fold-1 heatmaps, C:/temp/dc_refine/pilot_f1_best_hm/heatmaps; residual measured to the GT",
+    "instrument_paths": [
+     "scripts/win_bet/dc_subvoxel_refine.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0318": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0318",
+    "instrument": "host message and screenshot, 2026-08-26 (session PKT-0017)",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "EXTERNAL",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0319": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0319",
+    "instrument": "scripts/core/colab_factory.py status/fetch reading runs/smoke-20260826t2116/status.json and out/metrics.json in the relay repo aryaarun0910-debug/biohub-colab-relay (copy at C:/temp/colab_runs/smoke-20260826t2116/)",
+    "instrument_paths": [
+     "scripts/core/colab_factory.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0320": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0320",
+    "instrument": "Colab relay runs p21_colab_parity_f0-20260826t2148 / t2152 / t2154 / t2204 (status.json + log_tail.txt under C:/temp/colab_runs/), local probes with requests against both API hosts, PyPI/pack wheel listings via the Kaggle API; fixes in scripts/core/colab_relay.py, scripts/core/colab_factory.py (commits 7e4275e, 7c7a903, 4837783)",
+    "instrument_paths": [
+     "scripts/core/colab_factory.py",
+     "scripts/core/colab_relay.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0321": {
+    "experiment": "EXP-0022",
+    "guarded": false,
+    "id": "FACT-0321",
+    "instrument": "scripts/win_bet/ea_atlas.py on C:/temp/p20_relink_sweep_f0/sweep_pen_off.csv.gz (EXP-0022 control, fetched via kaggle_factory fetch) and on _evidence/exports/loeo_f0_strict/ (C:/temp/edge_atlas_strict/crops_s0.parquet); tracking_cellmot summarise() over the same 71 crops; crop bootstrap 2,000 resamples",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0322": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0322",
+    "instrument": "env diff of scripts/kaggle_specs/p9_coupled_division.json, p20_relink_sweep_f0.json, p19_relink_sweep_f1.json, p4_detpeak_smoke_f0.json; per-crop node/edge/fork counts of sweep_pen_off.csv.gz vs _evidence/p4_detpeak_f0_v2/loeo_split0_strict.csv.gz",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0323": {
+    "experiment": "EXP-0022",
+    "guarded": false,
+    "id": "FACT-0323",
+    "instrument": "scripts/win_bet/ea_atlas.py on the six EXP-0022 exports (C:/temp/p20_relink_sweep_f0/sweep_pen_*.csv.gz, fetched with kaggle_factory fetch) and tracking_cellmot summarise(); per-arm crops parquets under C:/temp/p20_relink_sweep_f0/atlas/",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0324": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0324",
+    "instrument": "scripts/win_bet/dc_subvoxel_refine.py icentroid + eval (frozen matches, calibration gate OK on both folds) and scripts/win_bet/ea_atlas.py + summarise() round-trips on the EXP-0021/EXP-0022 control exports; outputs under C:/temp/icom/pilot_f{0,1}/",
+    "instrument_paths": [
+     "scripts/win_bet/dc_subvoxel_refine.py",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0325": {
+    "experiment": "EXP-0021",
+    "guarded": false,
+    "id": "FACT-0325",
+    "instrument": "scripts/win_bet/ea_atlas.py on the six EXP-0021 exports (C:/temp/p19_relink_sweep_f1/sweep_pen_*.csv.gz) and summarise(); per-arm crops parquets under C:/temp/p19_relink_sweep_f1/atlas/; kernel log fetched with kaggle_factory log confirms the split_1 override",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0326": {
+    "experiment": "EXP-0021",
+    "guarded": false,
+    "id": "FACT-0326",
+    "instrument": "scripts/win_bet/ea_atlas.py + summarise() over the same 128 crops for C:/temp/p19_relink_sweep_f1/sweep_pen_off.csv.gz (EXP-0021 control) and _evidence/exports/loeo_f1_strict/ (C:/temp/edge_atlas_strict/crops_s1.parquet)",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0327": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0327",
+    "instrument": "scripts/core/colab_cli.py ledger C:/temp/colab_cli/ledger.json; `colab status/sessions/log` transcripts; run logs C:/temp/colab_cli/run_p21-parity-f0-a7.log",
+    "instrument_paths": [
+     "scripts/core/colab_cli.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0328": {
+    "experiment": "EXP-0024",
+    "guarded": false,
+    "id": "FACT-0328",
+    "instrument": "Kaggle kernel log of aryaarun07/biohub-h1r-edge-s5-smoke version 1 (C:/temp/h1r_edge_s5_smoke/kernel.log); the assertion is the trainer's own detection_drift() gate",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0329": {
+    "experiment": "EXP-0024",
+    "guarded": false,
+    "id": "FACT-0329",
+    "instrument": "kaggle kernels output aryaarun07/biohub-h1r-edge-s5-smoke (version 2): metrics.json, summary.json under C:/temp/h1r_edge_s5_smoke_v2/; the drift number is the trainer's own detection_drift() gate",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0330": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0330",
+    "instrument": "scripts/win_bet/dc_subvoxel_refine.py icentroid + eval and scripts/win_bet/ea_atlas.py + summarise() on ALL crops of the EXP-0021/EXP-0022 control exports; outputs C:/temp/icom/full_f{0,1}/, summary C:/temp/icom/full_summary.json",
+    "instrument_paths": [
+     "scripts/win_bet/dc_subvoxel_refine.py",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0331": {
+    "experiment": "EXP-0023",
+    "guarded": false,
+    "id": "FACT-0331",
+    "instrument": "kaggle submission 55806155 (aryaarun07/biohub-p22-sdw060 v1), audit receipt notebooks/kaggle_p22_sdw060/_out/audit_receipt.json",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0332": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0332",
+    "instrument": "`python -m kaggle competitions leaderboard biohub-cell-tracking-during-development --show`, read 2026-08-27 in session PKT-0020; the same reading is recorded in C:/temp/intel/EXTERNAL_RESEARCH.md section 1 (outside git)",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "EXTERNAL",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0333": {
+    "experiment": "EXP-0022",
+    "guarded": false,
+    "id": "FACT-0333",
+    "instrument": "scripts/win_bet/div_reach_steal.py census on C:/temp/p20_relink_sweep_f0/sweep_pen_off.csv.gz and C:/temp/p19_relink_sweep_f1/sweep_pen_off.csv.gz; outputs C:/temp/div_reach/{f0,f1}/census_*.parquet, plans_*.parquet, census_summary_*.json; per-division status uses tracking_cellmot.division_metrics.score_divisions and _matched_division_nodes directly",
+    "instrument_paths": [
+     "scripts/win_bet/div_reach_steal.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0334": {
+    "experiment": "EXP-0022",
+    "guarded": false,
+    "id": "FACT-0334",
+    "instrument": "scripts/win_bet/div_reach_steal.py oracle (+ resummarise) - GT-guided edits applied to the control exports, both arms rescored per crop with tracking_cellmot.metrics.evaluate / per_sample_metrics / summarise (the ea_atlas path); outputs C:/temp/div_reach/{f0,f1}/oracle_summary_*.json, crops_control_*.parquet, crops_oracle_*.parquet, oracle_*.csv.gz",
+    "instrument_paths": [
+     "scripts/win_bet/div_reach_steal.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0335": {
+    "experiment": "EXP-0022",
+    "guarded": false,
+    "id": "FACT-0335",
+    "instrument": "atlas tables of scripts/win_bet/ea_atlas.py (gtedges src_detected/tgt_detected/is_tp; edges matched/pred_valid/gt_src/gt_tgt) for the EXP-0022 / EXP-0021 controls; computation saved at C:/temp/div_reach/soheil_split.json (2026-08-27)",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0336": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0336",
+    "instrument": "vendor/kaggle-cell-tracking/scripts/csv_to_geffs.py:22-30, read 2026-08-27",
+    "instrument_paths": [
+     "vendor/kaggle-cell-tracking/scripts/csv_to_geffs.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0337": {
+    "experiment": "EXP-0022",
+    "guarded": false,
+    "id": "FACT-0337",
+    "instrument": "scripts/win_bet/div_steal_rule.py (features / fit / run) - GT-free candidate population with oracle labels, cross-fold rule search, official per-crop round-trip; outputs C:/temp/div_reach/rule/e2e/run_summary_R*.json, rule_table.md, rulesearch_summary.json; end-to-end paired crop bootstrap 2000 resamples",
+    "instrument_paths": [
+     "scripts/win_bet/div_steal_rule.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0338": {
+    "experiment": "EXP-0022",
+    "guarded": false,
+    "id": "FACT-0338",
+    "instrument": "scratchpad audit anatomy.py + score_rule.py (rule oracle_delete_U) - official per-crop round-trip on the EXP-0021/EXP-0022 controls; outputs C:/temp/.../scratchpad/audit/score_f{0,1}_oracle_delete_U.json, anatomy_f{0,1}.json; atlas edge/node tables of scripts/win_bet/ea_atlas.py",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0339": {
+    "experiment": "EXP-0026",
+    "guarded": false,
+    "id": "FACT-0339",
+    "instrument": "kaggle_factory fetch of aryaarun07/biohub-p25-recipe-parity-loeo-f0 (EXP-0026) -> C:/temp/p25_recipe/loeo_split0_strict.csv.gz; scripts/win_bet/ea_atlas.py + tracking_cellmot.summarise paired over 71 identical fold-0 crops vs the EXP-0022 control (C:/temp/p20_relink_sweep_f0/atlas/crops_pen_off.parquet); summary C:/temp/p25_recipe/parity_summary.json",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0340": {
+    "experiment": "EXP-0028",
+    "guarded": false,
+    "id": "FACT-0340",
+    "instrument": "kaggle kernels output aryaarun07/biohub-h1r-edge-s5-rope4d-smoke: metrics.json, summary.json at C:/temp/h1r_rope4d_smoke/; detection_drift is the trainer's own frozen-trunk gate",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0341": {
+    "experiment": "EXP-0025",
+    "guarded": false,
+    "id": "FACT-0341",
+    "instrument": "kaggle submission 55820202 (aryaarun07/biohub-p24-deepcenter-best-veto v1); audit receipt C:/temp/queue/p24_deepcenter_best_veto/ - the kaggle_queue.py fetch location, where a complete receipt-passing set (25/25) has sat since 2026-08-27. CORRECTED TWICE, and the second correction matters more than the first. 2026-08-30 by the PKT-0036 release audit: the receipt path this fact cited, notebooks/kaggle_p24_deepcenter_best_veto/_out/, DOES NOT EXIST and there is no evidence it ever did. notebooks/**/_out/ is gitignored, so a missing directory is indistinguishable from an untracked one and the absence went undetected for as long as this fact has existed. The P24 graph was never fetched - no submission.csv, no structural audit, no version-bound receipt on disk - and P24 therefore FAILS the release receipt that P32 passes 26 of 26 (FACT-0396). THE LEADERBOARD SCORE BELOW STANDS: it is the competition's own number, read from the submissions path. What is NOT bound is the artifact that produced it.",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0342": {
+    "experiment": "EXP-0028",
+    "guarded": false,
+    "id": "FACT-0342",
+    "instrument": "kaggle kernels output aryaarun07/biohub-h1r-edge-s5 metrics.json/summary.json at C:/temp/h1r_edge_s5_full/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0343": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0343",
+    "instrument": "kaggle_factory audit on C:/temp/p27/ + direct pandas verification of the fetched submission.csv",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0344": {
+    "experiment": "EXP-0029",
+    "guarded": false,
+    "id": "FACT-0344",
+    "instrument": "kaggle submission 55827508 (aryaarun07/biohub-p27-champion-icom v1)",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0345": {
+    "experiment": "EXP-0030",
+    "guarded": false,
+    "id": "FACT-0345",
+    "instrument": "scripts/win_bet/ea_atlas.py + tracking_cellmot.summarise on C:/temp/p28_f{0,1}/loeo_split{0,1}_champion.csv.gz (champion arm, DeepCenter best.pt+veto ON, secondary OFF, f1 OOF split_1) paired vs the DeepCenter-OFF controls C:/temp/p{20,19}_relink_sweep_f{0,1}; crop bootstrap 2000; summary C:/temp/p28_substrate.json",
+    "instrument_paths": [
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0346": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0346",
+    "instrument": "column read of C:/temp/p28_f0/loeo_split0_champion.csv.gz; source read of extract_peaks in the vendored and pack predict_unet_transformer.py (2026-08-28)",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0347": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0347",
+    "instrument": "scripts/win_bet/checkpoint_inventory.py (torch.load weights_only=True state-dict census + SHA256), python -m kaggle datasets files/metadata, and downloaded MODEL_CARD.md/LICENSES.md under C:/temp/arch_inventory; output C:/temp/arch_inventory/checkpoints.json; 2026-08-28",
+    "instrument_paths": [
+     "scripts/win_bet/checkpoint_inventory.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0348": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0348",
+    "instrument": null,
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "EXTERNAL",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0349": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0349",
+    "instrument": "vendor/kaggle-cell-tracking/src/tracking_cellmot/division_metrics.py::extract_divisions, match_divisions, _matched_division_nodes, _is_strongly_connected_division and score_divisions; src/biotrack/metric.py:28-29; source read 2026-08-28",
+    "instrument_paths": [
+     "src/biotrack/metric.py",
+     "vendor/kaggle-cell-tracking/src/tracking_cellmot/division_metrics.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0350": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0350",
+    "instrument": "scripts/win_bet/fp_endpoint_dedup.py full-crop safe_v2 runs plus scripts/win_bet/compare_substrate_sentinel.py; committed instruments; summaries and comparison under C:/temp/node_budget/sentinel/; 2026-08-28",
+    "instrument_paths": [
+     "scripts/win_bet/compare_substrate_sentinel.py",
+     "scripts/win_bet/fp_endpoint_dedup.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0351": {
+    "experiment": "EXP-0032",
+    "guarded": false,
+    "id": "FACT-0351",
+    "instrument": "scripts/win_bet/validate_detpeak_export.py on C:/temp/node_budget/p29_smoke_v3 plus the committed create-if-absent sink in scripts/kaggle_edits/detpeak_export.py; P28 shard construction at notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb:698-727; 2026-08-28",
+    "instrument_paths": [
+     "notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb",
+     "scripts/kaggle_edits/detpeak_export.py",
+     "scripts/win_bet/validate_detpeak_export.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": null,
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0352": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0352",
+    "instrument": "scripts/win_bet/audit_detpeak_full_export.py on C:/temp/node_budget/p29_f{0,1} against C:/temp/p28_f{0,1}; outputs _evidence/node_budget/p29_f{0,1}_full_audit.json; 2026-08-28",
+    "instrument_paths": [
+     "scripts/win_bet/audit_detpeak_full_export.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0353": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0353",
+    "instrument": "per-crop join of the DetPeak sidecar pipeline_peak_count, run_stats.csv raw_nodes/nodes, and biotrack.metric.estimated_nodes over data/train/*.geff, saved at _evidence/node_budget/budget_ratio_f{0,1}.csv; the pre-ILP -> post-ILP path is source-verified at vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py:554-564 (build_graph(coords, edges) -> ILPSolver.solve -> save_graph, nothing between) and the deployed weights at notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb env block (BIOHUB_ILP_APPEARANCE_WEIGHT=0.0, BIOHUB_ILP_DISAPPEARANCE_WEIGHT=1.5)",
+    "instrument_paths": [
+     "notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb",
+     "vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0354": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0354",
+    "instrument": "scripts/win_bet/detpeak_fold_curve.py (wrapping detpeak_curve.py's official one-to-one matcher) over all 71 + 128 sidecars against data/train/*.geff; pooled output _evidence/node_budget/curve_f{0,1}_pooled.json",
+    "instrument_paths": [
+     "scripts/win_bet/detpeak_fold_curve.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0355": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0355",
+    "instrument": "scripts/win_bet/detpeak_retention.py, same official one-to-one matcher as FACT-0354, sidecars vs the P28 champion CSV node rows; output _evidence/node_budget/retention_f{0,1}_pooled.json",
+    "instrument_paths": [
+     "scripts/win_bet/detpeak_retention.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0356": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0356",
+    "instrument": "summation of the run_stats.csv stage counters at C:/temp/p28_f{0,1}/run_stats.csv against the DetPeak sidecar pipeline_peak_count totals (_evidence/node_budget/budget_ratio_f{0,1}.csv); the identity above closes with residual exactly 0 on both folds, which is what makes the attribution safe",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0357": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0357",
+    "instrument": "scripts/win_bet/lost_cell_atlas.py over the P29 sidecars, the P28 champion graphs and C:/temp/preilp_f1_v2/preilp_split1.parquet; official one-to-one 7 um matching shared with FACT-0354/0355 via detpeak_curve.match_one_to_one_pairs; outputs _evidence/retention/atlas_f{0,1}.json",
+    "instrument_paths": [
+     "scripts/win_bet/lost_cell_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0358": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0358",
+    "instrument": "per-crop comparison of raw_nodes/raw_edges in C:/temp/preilp_f1/run_stats.csv against C:/temp/p28_f1/run_stats.csv, plus the pre-ILP parquet node counts against the P29 sidecar pipeline_peak_count; solver configuration read from the 2026-08-19 kernel log and the P28 notebook",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0359": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0359",
+    "instrument": "scripts/win_bet/division_localisation.py on the P28 champion exports; outcome from the official score_divisions, tuple membership from the GT geff out-degree; outputs _evidence/retention/divloc_f{0,1}.json",
+    "instrument_paths": [
+     "scripts/win_bet/division_localisation.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0360": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0360",
+    "instrument": "scripts/win_bet/division_localisation.py; Fisher exact and a 20,000-draw paired bootstrap over the pooled fully-matched tuples",
+    "instrument_paths": [
+     "scripts/win_bet/division_localisation.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0361": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0361",
+    "instrument": "torch.load(weights_only=True) state-dict census and config read of C:/temp/arch_inventory/hoct/weights/{fold0_config.json, fold0_edge_predictor_best.pth, fold0_hoct_hard_negative_9294.pt, fold0_toql_9294.pt, fold0_pqlt_9294.pt} against the pack's split_0 edge_predictor_best.pth; 2026-08-28",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0362": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0362",
+    "instrument": "torch.load(weights_only=True) metadata of C:/temp/arch_inventory/hoct/weights/fold0_hoct_hard_negative_9294.pt and fold0_{pqlt,toql}_9294.pt; MODEL_CARD.md limitations section",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "EXTERNAL",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0363": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0363",
+    "instrument": "scripts/win_bet/ilp_replay.py full-fold parity run (C:/temp/retention/parity_f1.json) plus a direct three-trial and shuffled-insertion-order re-solve of 6bba_7b5d3b2c through the same tracksdata ILPSolver; 2026-08-28",
+    "instrument_paths": [
+     "scripts/win_bet/ilp_replay.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0364": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0364",
+    "instrument": "source read of the built P28 notebook - motion_relink_edges definition, the call site `edges = motion_edges`, and the module's own comment \"motion_relink_edges replaces the whole edge list and assigns one-to-one per frame pair\" - plus the run_stats motion_relink_replaced_raw_edges/raw_edges ratio over all 128 fold-1 crops of C:/temp/p28_f1",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0365": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0365",
+    "instrument": "scripts/win_bet/ilp_sweep.py over C:/temp/preilp_f1_v2/preilp_split1.parquet, official tracking_cellmot metric, 2000-draw paired crop bootstrap against the deployed setting; outputs _evidence/retention/sweep_disap{,_hi}.json",
+    "instrument_paths": [
+     "scripts/win_bet/ilp_sweep.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0366": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0366",
+    "instrument": "scripts/win_bet/ilp_sweep.py --factor min_track_len; output _evidence/retention/sweep_mtl.json",
+    "instrument_paths": [
+     "scripts/win_bet/ilp_sweep.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0367": {
+    "experiment": "EXP-0034",
+    "guarded": false,
+    "id": "FACT-0367",
+    "instrument": "scripts/win_bet/p28_full_chain_replay.py and scripts/win_bet/p28_full_chain_panel.py over C:/temp/preilp_f1_v2/preilp_split1.parquet, C:/temp/p28_f1/loeo_split1_champion.csv.gz, C:/temp/biohub_deepcenter_p10_audit/best.pt, and data/train; evidence C:/temp/full_chain_replay/{control_*.json,candidate_3p0_*.json,panel_20.json}; 2026-08-29",
+    "instrument_paths": [
+     "scripts/win_bet/p28_full_chain_panel.py",
+     "scripts/win_bet/p28_full_chain_replay.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0368": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0368",
+    "instrument": "scripts/win_bet/ceiling_ladder.py over the P28 champion exports and the P29 DetPeak sidecars; official tracking_cellmot evaluate/per_sample_metrics/summarise; one-to-one 7 um matching shared with FACT-0354/0355/0357; outputs _evidence/ceiling/ladder_f{0,1}.json",
+    "instrument_paths": [
+     "scripts/win_bet/ceiling_ladder.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0369": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0369",
+    "instrument": "source read of extract/predict edge construction in predict_unet_transformer.py, plus a degree and probability census of C:/temp/preilp_f1_v2/preilp_split1.parquet; 2026-08-29",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0370": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0370",
+    "instrument": "scripts/win_bet/association_reachability.py on C:/temp/preilp_f1_v2/preilp_split1.parquet against data/train/*.geff; output _evidence/ceiling/reach_f1.json",
+    "instrument_paths": [
+     "scripts/win_bet/association_reachability.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0371": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0371",
+    "instrument": "scripts/win_bet/ceiling_ladder.py; outputs _evidence/ceiling/ladder_f{0,1}.json",
+    "instrument_paths": [
+     "scripts/win_bet/ceiling_ladder.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0372": {
+    "experiment": "EXP-0033",
+    "guarded": false,
+    "id": "FACT-0372",
+    "instrument": "scripts/win_bet/p28_full_chain_replay.py over all 128 fold-1 crops plus scripts/win_bet/p28_full_chain_panel.py; outputs C:/temp/full_chain_replay/panel_full_f1.json, _evidence/full_chain_replay/panel_full_f1.json",
+    "instrument_paths": [
+     "scripts/win_bet/p28_full_chain_panel.py",
+     "scripts/win_bet/p28_full_chain_replay.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0373": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0373",
+    "instrument": "scripts/win_bet/audit_p30_acquisition.py over C:/temp/p30_f0/ against C:/temp/p28_f0/loeo_split0_champion.csv.gz; output _evidence/ecb/audit_f0.json",
+    "instrument_paths": [
+     "scripts/win_bet/audit_p30_acquisition.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0374": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0374",
+    "instrument": "scripts/win_bet/candidate_reach_curve.py over C:/temp/p30_f0/{preilp_split0.parquet,ecb/}; output _evidence/ecb/reach_f0.json",
+    "instrument_paths": [
+     "scripts/win_bet/candidate_reach_curve.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0375": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0375",
+    "instrument": "scripts/win_bet/p28_full_chain_replay.py over all 71 fold-0 crops at disappearance 3.0, paired by scripts/win_bet/p28_full_chain_panel.py against C:/temp/p28_f0/loeo_split0_champion.csv.gz; output _evidence/ecb/panel_l36_f0.json",
+    "instrument_paths": [
+     "scripts/win_bet/p28_full_chain_panel.py",
+     "scripts/win_bet/p28_full_chain_replay.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0376": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0376",
+    "instrument": "scripts/win_bet/lever37_conversion.py and scripts/win_bet/p28_full_chain_panel.py over the 71 fold-0 l37 replays; outputs _evidence/ecb/{conversion_l37.json,panel_l37_f0.json}",
+    "instrument_paths": [
+     "scripts/win_bet/lever37_conversion.py",
+     "scripts/win_bet/p28_full_chain_panel.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0377": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0377",
+    "instrument": "python -m kaggle kernels pull stephennedumpally/pls-upvote-share-higher-scoring-ideas; env extraction and source read of C:/temp/intel/sn931/code.py; presence check of every referenced code path in notebooks/kaggle_p28_champion_control_f0/; 2026-08-29",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "EXTERNAL",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0378": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0378",
+    "instrument": "python -m kaggle datasets files/download of the pack ARTIFACT_MANIFEST.json to C:/temp/intel/secmanifest; source read of SECONDARY_WEIGHTS_PATH in the P28 control notebook; 2026-08-29",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0379": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0379",
+    "instrument": "source read of predict_unet_transformer.py load_model and PredictConfig; grep of pool_kernel_um across local configs; the P30 fold-0 kernel log; 2026-08-29",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0380": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0380",
+    "instrument": "scripts/win_bet/division_localisation.py and scripts/win_bet/lost_cell_atlas.py outputs (_evidence/retention/divloc_f{0,1}.parquet, atlas_f{0,1}.parquet); 2026-08-29",
+    "instrument_paths": [
+     "scripts/win_bet/division_localisation.py",
+     "scripts/win_bet/lost_cell_atlas.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0381": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0381",
+    "instrument": "scripts/win_bet/assoc_parent_dataset.py over C:/temp/p30_f0/{preilp_split0.parquet,ecb/} and C:/temp/preilp_f1_v2/preilp_split1.parquet; outputs _evidence/assoc/f{0,1}.json",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_parent_dataset.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0382": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0382",
+    "instrument": "scripts/win_bet/assoc_parent_dataset.py evaluate() plus the candidate-floor sweep recorded in _evidence/assoc/f{0,1}.json; found by the PKT-0033 adversarial audit, re-derived independently by the primary agent before being recorded",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_parent_dataset.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0383": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0383",
+    "instrument": "scripts/win_bet/divverify_dataset.py census; outputs _evidence/divverify/census_f0.json and census_f1.json plus C:/temp/divverify/rows_f0.parquet and rows_f1.parquet",
+    "instrument_paths": [
+     "scripts/win_bet/divverify_dataset.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0384": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0384",
+    "instrument": "scripts/win_bet/divverify_adapter.py prove; outputs _evidence/divverify/adapter_proof_f0.json and adapter_proof_f1.json plus C:/temp/divverify/adapter_control_f0.parquet and adapter_ceiling_f0.parquet",
+    "instrument_paths": [
+     "scripts/win_bet/divverify_adapter.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0385": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0385",
+    "instrument": "scripts/win_bet/divverify_dataset.py viability probe, with training_rows_for and assert_no_leak; output _evidence/divverify/viability.json",
+    "instrument_paths": [
+     "scripts/win_bet/divverify_dataset.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0386": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0386",
+    "instrument": "scripts/win_bet/assoc_baseline_rankers.py, heartbeat ASSOC_BASELINE_RANKERS_COMPLETE, with six fail-closed guards including a crop-leak assertion and a sha256 pin of the modules the numbers came from; scored through scripts/win_bet/assoc_parent_dataset.py evaluate() and scripts/win_bet/assoc_report.py parent_conversions(); outputs _evidence/assoc/baselines/baselines_f0.json and C:/temp/assoc_baselines/",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_baseline_rankers.py",
+     "scripts/win_bet/assoc_parent_dataset.py",
+     "scripts/win_bet/assoc_report.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0387": {
+    "experiment": "EXP-0040",
+    "guarded": false,
+    "id": "FACT-0387",
+    "instrument": "scripts/core/kaggle_factory.py log/fetch on scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json; artifacts C:/temp/p33/kernel.log and C:/temp/p33/assoc_feature_parity.json",
+    "instrument_paths": [
+     "scripts/core/kaggle_factory.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0388": {
+    "experiment": "EXP-0039",
+    "guarded": false,
+    "id": "FACT-0388",
+    "instrument": "scripts/win_bet/assoc_parent_dataset.py over C:/temp/p34_f1/{preilp_split1.parquet,ecb/}; output _evidence/audit/receipts/f1_p34.json. Audited under PKT-0036 before use.",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_parent_dataset.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0389": {
+    "experiment": "EXP-0039",
+    "guarded": false,
+    "id": "FACT-0389",
+    "instrument": "scripts/win_bet/audit_p30_acquisition.py and audit_graph_parity_attribution.py under PKT-0036; receipts _evidence/audit/receipts/{p34_audit_ABCD.json,p34_parity_attribution_vs_p28.json, p34_parity_attribution_vs_p29.json,p34_crossrun_stability.json}",
+    "instrument_paths": [
+     "scripts/win_bet/audit_p30_acquisition.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0390": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0390",
+    "instrument": "scripts/win_bet/hoct_head.py equivalence command; evidence C:/temp/hoct/equivalence.json and C:/temp/hoct/code/",
+    "instrument_paths": [
+     "scripts/win_bet/hoct_head.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0391": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0391",
+    "instrument": "tests/test_hoct_head.py::test_a_strict_load_cannot_see_the_trunk_contract; scripts/win_bet/hoct_head.py",
+    "instrument_paths": [
+     "scripts/win_bet/hoct_head.py",
+     "tests/test_hoct_head.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0392": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0392",
+    "instrument": "PKT-0029 upstream audit, C:/temp/hoct/upstream_audit.json (12 items); publisher sources under C:/temp/hoct/code/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0393": {
+    "experiment": "EXP-0038",
+    "guarded": false,
+    "id": "FACT-0393",
+    "instrument": "python -m kaggle competitions submissions -c biohub-cell-tracking-during-development; spec scripts/kaggle_specs/p32_public931_exact.json",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0394": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0394",
+    "instrument": "PKT-0037 mutation harness; evidence _evidence/foundations/band_a_floor_mutation.json and the pending change set at _evidence/foundations/pending/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0395": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0395",
+    "instrument": "tests/test_loeo_weights_hygiene.py, effective-fold resolution with a positive heartbeat naming the inherited specs; PKT-0037",
+    "instrument_paths": [
+     "tests/test_loeo_weights_hygiene.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0396": {
+    "experiment": "EXP-0038",
+    "guarded": false,
+    "id": "FACT-0396",
+    "instrument": "scripts/win_bet/audit_release_receipt.py with tests/test_audit_release_receipt.py; receipts _evidence/audit/receipts/{release_p32,release_p24,champion_transition,p32_version_coherence}.json",
+    "instrument_paths": [
+     "scripts/win_bet/audit_release_receipt.py",
+     "tests/test_audit_release_receipt.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0397": {
+    "experiment": "EXP-0041",
+    "guarded": false,
+    "id": "FACT-0397",
+    "instrument": "scripts/core/kaggle_factory.py log/fetch; scripts/win_bet/audit_p33_gate1.py; artifacts C:/temp/p33_v2/{kernel.log,assoc_feature_parity.json}; receipt _evidence/audit/receipts/p33_gate1_v2.json",
+    "instrument_paths": [
+     "scripts/core/kaggle_factory.py",
+     "scripts/win_bet/audit_p33_gate1.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0398": {
+    "experiment": "EXP-0035",
+    "guarded": false,
+    "id": "FACT-0398",
+    "instrument": "scripts/win_bet/assoc_train_harness.py through scripts/win_bet/assoc_report.py; payloads _evidence/assoc/tournament/{discovery_fold1,noisefloor_fold1,sideb_fold1,consensus_fold1,gate_fold0, frozen_selection}.json",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_report.py",
+     "scripts/win_bet/assoc_train_harness.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0399": {
+    "experiment": "EXP-0041",
+    "guarded": false,
+    "id": "FACT-0399",
+    "instrument": "scripts/win_bet/gpu_preflight.py PF07 and the PKT-0036 independent reproduction; receipt _evidence/audit/receipts/a4_cycle_2026_08_30b.json",
+    "instrument_paths": [
+     "scripts/win_bet/gpu_preflight.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0400": {
+    "experiment": "EXP-0041",
+    "guarded": false,
+    "id": "FACT-0400",
+    "instrument": "source read of the materialised support pack at C:/temp/p7/tracking_repo/scripts/predict_unet_transformer.py:297-341 and C:/temp/p7/tracking_repo/src/biohub_tracking/io.py:37-44 - both OUTSIDE this repository, which is the point: the deployed pipeline lives in the vendored pack, not in our tree - compared against scripts/kaggle_edits/assoc_feature_parity.py, which is committed",
+    "instrument_paths": [
+     "scripts/kaggle_edits/assoc_feature_parity.py",
+     "scripts/predict_unet_transformer.py",
+     "src/biohub_tracking/io.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0401": {
+    "experiment": "EXP-0042",
+    "guarded": false,
+    "id": "FACT-0401",
+    "instrument": "scripts/core/kaggle_factory.py audit (13/13 PASS) and scripts/win_bet/audit_release_receipt.py; artifacts C:/temp/exploit931/p35/{kernel.log,submission.csv,audit_receipt.json}",
+    "instrument_paths": [
+     "scripts/core/kaggle_factory.py",
+     "scripts/win_bet/audit_release_receipt.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0402": {
+    "experiment": "EXP-0041",
+    "guarded": false,
+    "id": "FACT-0402",
+    "instrument": "_evidence/foundations/defect6_measurement.json and tests/test_assoc_feature_tap.py::test_the_cache_is_keyed_by_pair_and_role_not_by_frame",
+    "instrument_paths": [
+     "tests/test_assoc_feature_tap.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0403": {
+    "experiment": "EXP-0043",
+    "guarded": false,
+    "id": "FACT-0403",
+    "instrument": "scripts/kaggle_edits/assoc_feature_tap.py and scripts/win_bet/assoc_tap_replay.py under scripts/kaggle_edits/assoc_tap_gate.py; artifacts C:/temp/p36/{kernel.log, assoc_feature_tap_gate.json,aft_cache.tar.gz,aft_patch_receipt.json}",
+    "instrument_paths": [
+     "scripts/kaggle_edits/assoc_feature_tap.py",
+     "scripts/kaggle_edits/assoc_tap_gate.py",
+     "scripts/win_bet/assoc_tap_replay.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0404": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0404",
+    "instrument": "cell-by-cell notebook diff of C:/temp/public_kernels/rishabhr0y_933_biohub_bidir30/933-biohub-bidir30.ipynb against notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb",
+    "instrument_paths": [
+     "notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0405": {
+    "experiment": "EXP-0043",
+    "guarded": false,
+    "id": "FACT-0405",
+    "instrument": "scripts/win_bet/assoc_train_harness.py _preilp_parity; evidence _evidence/assoc/harness/p36_downsample_calibration.json",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_train_harness.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0406": {
+    "experiment": "EXP-0043",
+    "guarded": false,
+    "id": "FACT-0406",
+    "instrument": "scripts/win_bet/assoc_train_harness.py schema; evidence _evidence/assoc/harness/p36_schema.json",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_train_harness.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0407": {
+    "experiment": "EXP-0043",
+    "guarded": false,
+    "id": "FACT-0407",
+    "instrument": "_evidence/foundations/p36_blend_attribution.py and p36_blend_attribution.json, over C:/temp/p36/aft_cache.tar.gz",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0408": {
+    "experiment": "EXP-0043",
+    "guarded": false,
+    "id": "FACT-0408",
+    "instrument": "tests/test_assoc_feature_tap.py _deployed_pack; source counts over both trees",
+    "instrument_paths": [
+     "tests/test_assoc_feature_tap.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0409": {
+    "experiment": "EXP-0043",
+    "guarded": false,
+    "id": "FACT-0409",
+    "instrument": "tests/test_audit_feature_cache.py::test_the_auditor_required_keys_are_exactly_the_tap_schema and the real_cache / real_cache_with_fusion fixtures over the deployed support pack",
+    "instrument_paths": [
+     "tests/test_audit_feature_cache.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0410": {
+    "experiment": "EXP-0043",
+    "guarded": false,
+    "id": "FACT-0410",
+    "instrument": "scripts/win_bet/audit_feature_cache.py contract check over C:/temp/p36/aft_cache.tar.gz",
+    "instrument_paths": [
+     "scripts/win_bet/audit_feature_cache.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0411": {
+    "experiment": "EXP-0043",
+    "guarded": false,
+    "id": "FACT-0411",
+    "instrument": "tests/test_assoc_train_harness.py::test_the_archived_p36_cache_is_refused_as_contract_1_and_says_which_contract",
+    "instrument_paths": [
+     "tests/test_assoc_train_harness.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0412": {
+    "experiment": "EXP-0042",
+    "guarded": false,
+    "id": "FACT-0412",
+    "instrument": "python -m kaggle competitions submissions; kernel log C:/temp/exploit931/p35/kernel.log; structural audit 13/13 PASS",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0413": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0413",
+    "instrument": "scripts/win_bet/assoc_tournament.py over scripts/win_bet/assoc_train_harness.py; payloads _evidence/assoc/tournament/discovery_fold1.json and noisefloor_fold1.json; contracts tests/test_assoc_tournament.py",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_tournament.py",
+     "scripts/win_bet/assoc_train_harness.py",
+     "tests/test_assoc_tournament.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0414": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0414",
+    "instrument": "scripts/win_bet/assoc_tournament.py gate arms over scripts/win_bet/assoc_train_harness.py; payload _evidence/assoc/tournament/gate_fold0.json; contracts tests/test_assoc_tournament.py",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_tournament.py",
+     "scripts/win_bet/assoc_train_harness.py",
+     "tests/test_assoc_tournament.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0415": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0415",
+    "instrument": "scripts/win_bet/assoc_tournament.py consensus arm; payload _evidence/assoc/tournament/consensus_fold1.json",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_tournament.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0416": {
+    "experiment": "EXP-0044",
+    "guarded": false,
+    "id": "FACT-0416",
+    "instrument": "scripts/win_bet/gpu_preflight.py and scripts/win_bet/audit_feature_cache.py schema_bytes_per_node; evidence _evidence/foundations/p37_launch_plan.json",
+    "instrument_paths": [
+     "scripts/win_bet/audit_feature_cache.py",
+     "scripts/win_bet/gpu_preflight.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0417": {
+    "experiment": "EXP-0044",
+    "guarded": false,
+    "id": "FACT-0417",
+    "instrument": "scripts/win_bet/gpu_preflight.py selftest; tests/test_gpu_preflight.py",
+    "instrument_paths": [
+     "scripts/win_bet/gpu_preflight.py",
+     "tests/test_gpu_preflight.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0418": {
+    "experiment": "EXP-0044",
+    "guarded": false,
+    "id": "FACT-0418",
+    "instrument": "scripts/win_bet/gpu_preflight.py trunk inventory; evidence _evidence/foundations/p37_trunk_inventory.json",
+    "instrument_paths": [
+     "scripts/win_bet/gpu_preflight.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0419": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0419",
+    "instrument": "scripts/win_bet/assoc_fold_pathology.py; evidence _evidence/assoc/pathology/matrix_2x2.json and gate_fold0_REPRODUCTION.json; contracts tests/test_assoc_fold_pathology.py",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_fold_pathology.py",
+     "tests/test_assoc_fold_pathology.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0420": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0420",
+    "instrument": "scripts/win_bet/assoc_fold_pathology.py; evidence _evidence/assoc/pathology/strata_gate_a.json, argmax_agreement.json and apparent_ceiling.json",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_fold_pathology.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0421": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0421",
+    "instrument": "scripts/win_bet/assoc_fold_pathology.py ablation arms; evidence _evidence/assoc/pathology/ablations.json and standardised_margin.json",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_fold_pathology.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0422": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0422",
+    "instrument": "scripts/win_bet/assoc_lost_edge_ledger.py; evidence _evidence/assoc/pathology/lost_edge_ledger_f0.json and lost_edge_ledger_f1.json",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_lost_edge_ledger.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0423": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0423",
+    "instrument": "scripts/win_bet/focus3d_probe.py. CORRECTED 2026-08-31: this entry originally cited evidence under _evidence/focus3d/, WHICH DOES NOT EXIST - PKT-0041's working set lives under C:/temp/ and its 36 KB rules markdown was never persisted into the repository. That is the FACT-0043 class, an instrument naming a path a reader cannot open. The rules were independently RE-OBTAINED and RE-AUTHENTICATED on 2026-08-31 and are archived in-repo at _evidence/hoct_official/rules_2026-08-31.md (36,552 bytes, sha256 6d025a6e), which is the citable copy for both this fact and FACT-0452",
+    "instrument_paths": [
+     "scripts/win_bet/focus3d_probe.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0424": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0424",
+    "instrument": "scripts/win_bet/focus3d_probe.py; evidence _evidence/focus3d/ inventory snapshot",
+    "instrument_paths": [
+     "scripts/win_bet/focus3d_probe.py"
+    ],
+    "kind": "FACT",
+    "provenance": "EXTERNAL",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0425": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0425",
+    "instrument": "scripts/win_bet/focus3d_probe.py, whose payloads carry an `evidence_source` field and whose `arch` mode hard-codes provenance_ceiling UNVERIFIED; only its `ckpt` mode, which requires a real file and records its sha256, can support VERIFIED",
+    "instrument_paths": [
+     "scripts/win_bet/focus3d_probe.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0426": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0426",
+    "instrument": "scripts/win_bet/assoc_preilp_survival.py and scripts/win_bet/p28_full_chain_replay.py; evidence _evidence/assoc/survival/stage_map.json and _evidence/assoc/survival/crops/",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_preilp_survival.py",
+     "scripts/win_bet/p28_full_chain_replay.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0427": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0427",
+    "instrument": "source read at the cited lines; recorded in _evidence/assoc/survival/stage_map.json",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0428": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0428",
+    "instrument": "scripts/win_bet/assoc_preilp_survival.py over scripts/win_bet/p28_full_chain_replay.py, aggregated by scripts/win_bet/assoc_preilp_survival_panel.py; payloads _evidence/assoc/survival/survival_panel.json and _evidence/assoc/survival/crops/",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_preilp_survival.py",
+     "scripts/win_bet/assoc_preilp_survival_panel.py",
+     "scripts/win_bet/p28_full_chain_replay.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0429": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0429",
+    "instrument": "scripts/win_bet/assoc_preilp_survival.py and assoc_preilp_survival_panel.py; payload _evidence/assoc/survival/survival_panel.json",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_preilp_survival.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0430": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0430",
+    "instrument": "scripts/win_bet/assoc_preilp_survival.py; payload _evidence/assoc/survival/survival_panel.json; boundaries in _evidence/assoc/survival/stage_map.json ledger_category_boundaries",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_preilp_survival.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0431": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0431",
+    "instrument": "scripts/win_bet/gpu_protection_contract.py; contracts tests/test_gpu_protection_contract.py",
+    "instrument_paths": [
+     "scripts/win_bet/gpu_protection_contract.py",
+     "tests/test_gpu_protection_contract.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0432": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0432",
+    "instrument": "scripts/win_bet/assoc_report.py and scripts/win_bet/assoc_train_harness.py read at the named lines; verdict() exercised directly; receipts under _evidence/audit/receipts/",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_report.py",
+     "scripts/win_bet/assoc_train_harness.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0433": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0433",
+    "instrument": "scripts/win_bet/control_binding.py and scripts/win_bet/deployed_controls.json; contracts tests/test_control_binding.py; evidence _evidence/audit/control_binding/five_worlds.json",
+    "instrument_paths": [
+     "scripts/win_bet/control_binding.py",
+     "tests/test_control_binding.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0434": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0434",
+    "instrument": "scripts/win_bet/provenance_policy.py; contracts tests/test_provenance_policy.py; evidence _evidence/foundations/provenance_policy/policy_agreement_matrix.json",
+    "instrument_paths": [
+     "scripts/win_bet/provenance_policy.py",
+     "tests/test_provenance_policy.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0435": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0435",
+    "instrument": "scripts/win_bet/provenance_policy.py KNOWN_CHECKPOINTS",
+    "instrument_paths": [
+     "scripts/win_bet/provenance_policy.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0436": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0436",
+    "instrument": "scripts/win_bet/provenance_policy.py; tests/test_audit_feature_cache.py, where the two inverted assertions are stated as such",
+    "instrument_paths": [
+     "scripts/win_bet/provenance_policy.py",
+     "tests/test_audit_feature_cache.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0437": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0437",
+    "instrument": "scripts/win_bet/finaledge_gates.py and finaledge_batch.py over scripts/win_bet/p28_full_chain_replay.py; evidence _evidence/assoc/finaledge/ and C:/temp/finaledge/",
+    "instrument_paths": [
+     "scripts/win_bet/finaledge_gates.py",
+     "scripts/win_bet/p28_full_chain_replay.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0438": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0438",
+    "instrument": "scripts/win_bet/finaledge_gates.py; evidence _evidence/assoc/finaledge/ panel_gateA.json",
+    "instrument_paths": [
+     "scripts/win_bet/finaledge_gates.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0439": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0439",
+    "instrument": "scripts/win_bet/assoc_lost_edge_ledger.py under scripts/win_bet/finaledge_gates.py; evidence _evidence/assoc/finaledge/",
+    "instrument_paths": [
+     "scripts/win_bet/assoc_lost_edge_ledger.py",
+     "scripts/win_bet/finaledge_gates.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0440": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0440",
+    "instrument": "scripts/win_bet/finaledge_batch.py; timings recorded in C:/temp/finaledge/",
+    "instrument_paths": [
+     "scripts/win_bet/finaledge_batch.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0441": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0441",
+    "instrument": "scripts/win_bet/reach_oracle.py; payloads _evidence/assoc/reach/reach_oracle_f0.json and reach_oracle_f1.json",
+    "instrument_paths": [
+     "scripts/win_bet/reach_oracle.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0442": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0442",
+    "instrument": "scripts/win_bet/reach_rule.py and scripts/win_bet/reach_oracle.py; payloads _evidence/assoc/reach/; contracts tests/test_reach_oracle_partition.py",
+    "instrument_paths": [
+     "scripts/win_bet/reach_oracle.py",
+     "scripts/win_bet/reach_rule.py",
+     "tests/test_reach_oracle_partition.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0443": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0443",
+    "instrument": "scripts/win_bet/reach_oracle.py; payloads _evidence/assoc/reach/",
+    "instrument_paths": [
+     "scripts/win_bet/reach_oracle.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0444": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0444",
+    "instrument": "python -m kaggle competitions submissions -c biohub-cell-tracking-during-development",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0445": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0445",
+    "instrument": "curl read-only fetch to C:/temp/hoct_official/; sha256sum; zipfile inspection without torch.jit.load",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0446": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0446",
+    "instrument": "scripts/core/kaggle_factory.py fetch/audit/submitcmd; python -m kaggle competitions submit -k -v; artifacts notebooks/kaggle_p38_relink_bonus_b2/_out/ and C:/temp/p38/",
+    "instrument_paths": [
+     "scripts/core/kaggle_factory.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0447": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0447",
+    "instrument": "scripts/win_bet/revladder.py, revladder_batch.py, revladder_panel.py and revladder_calibrate.py, reusing the official-scorer path byte-for-byte; summaries by assoc_report.build_report; evidence _evidence/assoc/revladder/panel_f0.json and panel_f1.json",
+    "instrument_paths": [
+     "scripts/win_bet/revladder.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0448": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0448",
+    "instrument": "scripts/win_bet/revladder.py perfect_membership arm; evidence _evidence/assoc/revladder/panel_f0.json and panel_f1.json",
+    "instrument_paths": [
+     "scripts/win_bet/revladder.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0449": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0449",
+    "instrument": "scripts/win_bet/revladder.py; evidence _evidence/assoc/revladder/panel_f0.json and panel_f1.json",
+    "instrument_paths": [
+     "scripts/win_bet/revladder.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0450": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0450",
+    "instrument": "scripts/win_bet/revladder_batch.py; benchmark evidence C:/temp/revladder/bench/",
+    "instrument_paths": [
+     "scripts/win_bet/revladder_batch.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0451": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0451",
+    "instrument": "GitHub REST API reads over royerlab/hoct releases, PRs, commits, tree and issues; arXiv 2607.11754v1; our own dated snapshot _evidence/agent_runs/v7_diagnostic_20260807/researchR3/sources/hoct_README.md; zip-directory read of the checkpoint without execution; evidence _evidence/hoct_official/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "EXTERNAL",
+    "superseded_by": null,
+    "validity": "SUSPECT",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0452": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0452",
+    "instrument": "GitHub REST API; archived rules at _evidence/hoct_official/rules_2026-08-31.md; zip-directory read of the checkpoint",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0453": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0453",
+    "instrument": "pickle-opcode disassembly plus inert-stub unpickler over C:/temp/hoct_official/general_v1.pt; evidence _evidence/hoct_official/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0454": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0454",
+    "instrument": "source read at the cited lines of royerlab/hoct 2ccc5040; evidence _evidence/hoct_official/",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0455": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0455",
+    "instrument": "scripts/win_bet/hoct_scale_gate.py read_compiled_tau(); scripts/win_bet/hoct_feature_contract.py prove_slot_map(); evidence _evidence/maskassoc/feature_contract.json",
+    "instrument_paths": [
+     "scripts/win_bet/hoct_feature_contract.py",
+     "scripts/win_bet/hoct_scale_gate.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0456": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0456",
+    "instrument": "scripts/win_bet/hoct_scale_gate.py; evidence _evidence/maskassoc/",
+    "instrument_paths": [
+     "scripts/win_bet/hoct_scale_gate.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0457": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0457",
+    "instrument": "source read of the archived hoct package at the cited lines",
+    "instrument_paths": [],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0458": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0458",
+    "instrument": "scripts/win_bet/mask_node_adapter.py; evidence _evidence/maskassoc/fixture_f0.json and fixture_f1.json",
+    "instrument_paths": [
+     "scripts/win_bet/mask_node_adapter.py"
+    ],
+    "kind": "FACT",
+    "provenance": "MEASURED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0459": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0459",
+    "instrument": "scripts/win_bet/hoct_feature_contract.py mutation suite; tests/test_pkt0048_maskassoc.py",
+    "instrument_paths": [
+     "scripts/win_bet/hoct_feature_contract.py",
+     "tests/test_pkt0048_maskassoc.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0460": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0460",
+    "instrument": "scripts/win_bet/focus3d_probe.py; evidence _evidence/biohubx/focus3d_nuclei_ckpt_contract.json; tests/test_focus3d_probe_state_contract.py",
+    "instrument_paths": [
+     "scripts/win_bet/focus3d_probe.py",
+     "tests/test_focus3d_probe_state_contract.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0461": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0461",
+    "instrument": "scripts/win_bet/biohubx/hf_xet_digest.py; tests/test_hf_xet_digest.py; C:/temp/focus3d/weights/receipt_model_final_nuclei.json",
+    "instrument_paths": [
+     "scripts/win_bet/biohubx/hf_xet_digest.py",
+     "tests/test_hf_xet_digest.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   },
+   "FACT-0462": {
+    "experiment": null,
+    "guarded": false,
+    "id": "FACT-0462",
+    "instrument": "pytest full-suite result at commit 37f30c9; tests/test_biohubx_import_isolation.py at commit b3dfcdf; focused tests under tests/test_biohubx_*.py, tests/test_focus3d_probe_state_contract.py and tests/test_hf_xet_digest.py",
+    "instrument_paths": [
+     "tests/test_biohubx_import_isolation.py",
+     "tests/test_focus3d_probe_state_contract.py",
+     "tests/test_hf_xet_digest.py"
+    ],
+    "kind": "FACT",
+    "provenance": "VERIFIED",
+    "superseded_by": null,
+    "validity": "VALID",
+    "value_lives_in": "research/00-system/registry/facts.yaml"
+   }
+  },
+  "levers": {
+   "LEVER-0001": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0050",
+     "FACT-0051"
+    ],
+    "id": "LEVER-0001",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": []
+   },
+   "LEVER-0002": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0290",
+     "FACT-0291",
+     "FACT-0293",
+     "FACT-0294"
+    ],
+    "id": "LEVER-0002",
+    "kind": "LEVER",
+    "status": "closed",
+    "supporting": [
+     "FACT-0034",
+     "FACT-0083",
+     "FACT-0084",
+     "FACT-0161",
+     "FACT-0180"
+    ]
+   },
+   "LEVER-0003": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0102",
+     "FACT-0111"
+    ],
+    "id": "LEVER-0003",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": []
+   },
+   "LEVER-0004": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0070",
+     "FACT-0071"
+    ],
+    "id": "LEVER-0004",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": []
+   },
+   "LEVER-0005": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0005",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": []
+   },
+   "LEVER-0006": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0006",
+    "kind": "LEVER",
+    "status": "running",
+    "supporting": [
+     "FACT-0100",
+     "FACT-0101",
+     "FACT-0080"
+    ]
+   },
+   "LEVER-0007": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0007",
+    "kind": "LEVER",
+    "status": "closed",
+    "supporting": []
+   },
+   "LEVER-0008": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0008",
+    "kind": "LEVER",
+    "status": "closed",
+    "supporting": []
+   },
+   "LEVER-0009": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0009",
+    "kind": "LEVER",
+    "status": "closed",
+    "supporting": []
+   },
+   "LEVER-0010": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0063"
+    ],
+    "id": "LEVER-0010",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": []
+   },
+   "LEVER-0011": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0011",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0110",
+     "FACT-0112",
+     "FACT-0083"
+    ]
+   },
+   "LEVER-0012": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0323",
+     "FACT-0325"
+    ],
+    "id": "LEVER-0012",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": []
+   },
+   "LEVER-0013": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0232"
+    ],
+    "id": "LEVER-0013",
+    "kind": "LEVER",
+    "status": "closed",
+    "supporting": []
+   },
+   "LEVER-0014": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0171",
+     "FACT-0161"
+    ],
+    "id": "LEVER-0014",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": [
+     "FACT-0161"
+    ]
+   },
+   "LEVER-0015": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0153",
+     "FACT-0151"
+    ],
+    "id": "LEVER-0015",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": []
+   },
+   "LEVER-0016": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0201",
+     "FACT-0200"
+    ],
+    "id": "LEVER-0016",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": []
+   },
+   "LEVER-0017": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0176",
+     "FACT-0171"
+    ],
+    "id": "LEVER-0017",
+    "kind": "LEVER",
+    "status": "closed",
+    "supporting": []
+   },
+   "LEVER-0018": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0173"
+    ],
+    "id": "LEVER-0018",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": [
+     "FACT-0102",
+     "FACT-0111"
+    ]
+   },
+   "LEVER-0019": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0019",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0240",
+     "FACT-0241",
+     "FACT-0242"
+    ]
+   },
+   "LEVER-0020": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0020",
+    "kind": "LEVER",
+    "status": "running",
+    "supporting": [
+     "FACT-0184"
+    ]
+   },
+   "LEVER-0021": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0314",
+     "FACT-0316",
+     "FACT-0317"
+    ],
+    "id": "LEVER-0021",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": [
+     "FACT-0270",
+     "FACT-0272",
+     "FACT-0273",
+     "FACT-0274"
+    ]
+   },
+   "LEVER-0022": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0344"
+    ],
+    "id": "LEVER-0022",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": [
+     "FACT-0270",
+     "FACT-0314",
+     "FACT-0317"
+    ]
+   },
+   "LEVER-0023": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0023",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0296",
+     "FACT-0321",
+     "FACT-0183",
+     "FACT-0339"
+    ]
+   },
+   "LEVER-0024": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0341"
+    ],
+    "id": "LEVER-0024",
+    "kind": "LEVER",
+    "status": "closed",
+    "supporting": [
+     "FACT-0311",
+     "FACT-0312",
+     "FACT-0331"
+    ]
+   },
+   "LEVER-0025": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0025",
+    "kind": "LEVER",
+    "status": "parked",
+    "supporting": [
+     "FACT-0295",
+     "FACT-0290",
+     "FACT-0325",
+     "FACT-0323",
+     "FACT-0333",
+     "FACT-0334"
+    ]
+   },
+   "LEVER-0026": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0026",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0338",
+     "FACT-0335",
+     "FACT-0260"
+    ]
+   },
+   "LEVER-0027": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0027",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0182",
+     "FACT-0321",
+     "FACT-0329",
+     "FACT-0335",
+     "FACT-0339"
+    ]
+   },
+   "LEVER-0028": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0353",
+     "FACT-0354",
+     "FACT-0102"
+    ],
+    "id": "LEVER-0028",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": [
+     "FACT-0102",
+     "FACT-0335",
+     "FACT-0261"
+    ]
+   },
+   "LEVER-0029": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0029",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0339",
+     "FACT-0296",
+     "FACT-0335"
+    ]
+   },
+   "LEVER-0030": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0030",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0341",
+     "FACT-0331"
+    ]
+   },
+   "LEVER-0031": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0031",
+    "kind": "LEVER",
+    "status": "parked",
+    "supporting": [
+     "FACT-0335",
+     "FACT-0339",
+     "FACT-0332"
+    ]
+   },
+   "LEVER-0032": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0032",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0335",
+     "FACT-0339",
+     "FACT-0345"
+    ]
+   },
+   "LEVER-0033": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0033",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0335",
+     "FACT-0345"
+    ]
+   },
+   "LEVER-0034": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0034",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0335",
+     "FACT-0342",
+     "FACT-0345"
+    ]
+   },
+   "LEVER-0035": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0357",
+     "FACT-0364",
+     "FACT-0365",
+     "FACT-0366"
+    ],
+    "id": "LEVER-0035",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": [
+     "FACT-0353",
+     "FACT-0355",
+     "FACT-0356",
+     "FACT-0357",
+     "FACT-0363",
+     "FACT-0191",
+     "FACT-0192",
+     "FACT-0345",
+     "FACT-0335"
+    ]
+   },
+   "LEVER-0036": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0375"
+    ],
+    "id": "LEVER-0036",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": [
+     "FACT-0372",
+     "FACT-0367",
+     "FACT-0365",
+     "FACT-0364",
+     "FACT-0368",
+     "FACT-0191",
+     "FACT-0192",
+     "FACT-0102",
+     "FACT-0354"
+    ]
+   },
+   "LEVER-0037": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0376"
+    ],
+    "id": "LEVER-0037",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": [
+     "FACT-0376",
+     "FACT-0374",
+     "FACT-0368",
+     "FACT-0369",
+     "FACT-0370",
+     "FACT-0361",
+     "FACT-0364",
+     "FACT-0357"
+    ]
+   },
+   "LEVER-0038": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0393"
+    ],
+    "id": "LEVER-0038",
+    "kind": "LEVER",
+    "status": "closed",
+    "supporting": [
+     "FACT-0377",
+     "FACT-0378",
+     "FACT-0341"
+    ]
+   },
+   "LEVER-0039": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0386",
+     "FACT-0382"
+    ],
+    "id": "LEVER-0039",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": [
+     "FACT-0381",
+     "FACT-0382",
+     "FACT-0376",
+     "FACT-0369",
+     "FACT-0370",
+     "FACT-0368"
+    ]
+   },
+   "LEVER-0040": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0040",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0375",
+     "FACT-0380",
+     "FACT-0371",
+     "FACT-0362",
+     "FACT-0359",
+     "FACT-0383",
+     "FACT-0384",
+     "FACT-0385"
+    ]
+   },
+   "LEVER-0041": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0041",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0386",
+     "FACT-0382",
+     "FACT-0376",
+     "FACT-0368",
+     "FACT-0369",
+     "FACT-0371"
+    ]
+   },
+   "LEVER-0042": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0412"
+    ],
+    "id": "LEVER-0042",
+    "kind": "LEVER",
+    "status": "closed",
+    "supporting": [
+     "FACT-0393",
+     "FACT-0341",
+     "FACT-0345",
+     "FACT-0377"
+    ]
+   },
+   "LEVER-0043": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0043",
+    "kind": "LEVER",
+    "status": "parked",
+    "supporting": [
+     "FACT-0354",
+     "FACT-0368",
+     "FACT-0386",
+     "FACT-0380",
+     "FACT-0413",
+     "FACT-0414",
+     "FACT-0415",
+     "FACT-0378"
+    ]
+   },
+   "LEVER-0044": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0044",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0426",
+     "FACT-0427",
+     "FACT-0428",
+     "FACT-0429",
+     "FACT-0422",
+     "FACT-0420",
+     "FACT-0364",
+     "FACT-0376"
+    ]
+   },
+   "LEVER-0045": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [
+     "FACT-0442",
+     "FACT-0441",
+     "FACT-0443"
+    ],
+    "id": "LEVER-0045",
+    "kind": "LEVER",
+    "status": "killed",
+    "supporting": [
+     "FACT-0422",
+     "FACT-0370",
+     "FACT-0369",
+     "FACT-0362",
+     "FACT-0412",
+     "FACT-0426",
+     "FACT-0427",
+     "FACT-0428",
+     "FACT-0430",
+     "FACT-0368",
+     "FACT-0339"
+    ]
+   },
+   "LEVER-0046": {
+    "claim_lives_in": "research/00-system/registry/levers.yaml",
+    "closed_by": [],
+    "id": "LEVER-0046",
+    "kind": "LEVER",
+    "status": "open",
+    "supporting": [
+     "FACT-0428",
+     "FACT-0447",
+     "FACT-0442",
+     "FACT-0437",
+     "FACT-0448",
+     "FACT-0449",
+     "FACT-0422",
+     "FACT-0412",
+     "FACT-0446",
+     "FACT-0423",
+     "FACT-0424",
+     "FACT-0425",
+     "FACT-0457",
+     "FACT-0459",
+     "FACT-0040",
+     "FACT-0380"
+    ]
+   }
+  },
+  "packets": {
+   "PKT-0001": {
+    "id": "PKT-0001",
+    "input_artifacts": [
+     "_evidence/p4_detpeak_smoke_f0/"
+    ],
+    "input_code": [
+     "scripts/kaggle_edits/detpeak_export.py",
+     "scripts/win_bet/detpeak_curve.py"
+    ],
+    "input_facts": [
+     "FACT-0020",
+     "FACT-0021",
+     "FACT-0062"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0003",
+    "lock": "done",
+    "opened": "2026-08-25",
+    "owner": "primary"
+   },
+   "PKT-0002": {
+    "id": "PKT-0002",
+    "input_artifacts": [],
+    "input_code": [],
+    "input_facts": [
+     "FACT-0001",
+     "FACT-0020"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0006",
+    "lock": "running",
+    "opened": "2026-08-25",
+    "owner": "primary"
+   },
+   "PKT-0003": {
+    "id": "PKT-0003",
+    "input_artifacts": [],
+    "input_code": [],
+    "input_facts": [
+     "FACT-0034",
+     "FACT-0080",
+     "FACT-0082",
+     "FACT-0083",
+     "FACT-0084"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0002",
+    "lock": "done",
+    "opened": "2026-08-25",
+    "owner": "primary"
+   },
+   "PKT-0004": {
+    "id": "PKT-0004",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "input_facts": [
+     "FACT-0160",
+     "FACT-0161"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0013",
+    "lock": "done",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0005": {
+    "id": "PKT-0005",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "input_facts": [
+     "FACT-0160",
+     "FACT-0161"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0014",
+    "lock": "done",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0006": {
+    "id": "PKT-0006",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "input_facts": [
+     "FACT-0160",
+     "FACT-0161"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0015",
+    "lock": "done",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0007": {
+    "id": "PKT-0007",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "input_facts": [
+     "FACT-0160",
+     "FACT-0161"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0016",
+    "lock": "done",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0008": {
+    "id": "PKT-0008",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "input_facts": [
+     "FACT-0160",
+     "FACT-0161"
+    ],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "done",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0009": {
+    "id": "PKT-0009",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "input_facts": [
+     "FACT-0160",
+     "FACT-0161"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0017",
+    "lock": "done",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0010": {
+    "id": "PKT-0010",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "input_facts": [
+     "FACT-0160",
+     "FACT-0161"
+    ],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "done",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0011": {
+    "id": "PKT-0011",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "input_facts": [
+     "FACT-0160",
+     "FACT-0161"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0018",
+    "lock": "done",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0012": {
+    "id": "PKT-0012",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "_evidence/exports/loeo_f0_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "input_facts": [
+     "FACT-0210",
+     "FACT-0213",
+     "FACT-0231",
+     "FACT-0240",
+     "FACT-0250"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0011",
+    "lock": "running",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0013": {
+    "id": "PKT-0013",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "_evidence/exports/loeo_f0_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "input_facts": [
+     "FACT-0210",
+     "FACT-0213",
+     "FACT-0231",
+     "FACT-0240",
+     "FACT-0250"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0019",
+    "lock": "running",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0014": {
+    "id": "PKT-0014",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "_evidence/exports/loeo_f0_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "input_facts": [
+     "FACT-0210",
+     "FACT-0213",
+     "FACT-0231",
+     "FACT-0240",
+     "FACT-0250"
+    ],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "running",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0015": {
+    "id": "PKT-0015",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "_evidence/exports/loeo_f0_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "input_facts": [
+     "FACT-0210",
+     "FACT-0213",
+     "FACT-0231",
+     "FACT-0240",
+     "FACT-0250"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0002",
+    "lock": "done",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0016": {
+    "id": "PKT-0016",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/",
+     "_evidence/exports/loeo_f0_strict/",
+     "C:/temp/error_atlas/",
+     "_evidence/p19_relink_sweep_f1/"
+    ],
+    "input_code": [
+     "scripts/core/score_loeo_submission.py",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "input_facts": [
+     "FACT-0210",
+     "FACT-0213",
+     "FACT-0231",
+     "FACT-0240",
+     "FACT-0250"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0020",
+    "lock": "running",
+    "opened": "2026-08-26",
+    "owner": "rnd-agent"
+   },
+   "PKT-0017": {
+    "id": "PKT-0017",
+    "input_artifacts": [
+     "_evidence/exports/loeo_f1_strict/loeo_split1_strict.csv.gz",
+     "_evidence/exports/loeo_f0_strict/loeo_f0_strict_submission.csv",
+     "C:/temp/edge_atlas_strict/",
+     "C:/temp/biohub_deepcenter_p10_audit/best.pt",
+     "C:/temp/biohub_deepcenter_p10_audit/checkpoint_last.pt",
+     "data/train/*.zarr"
+    ],
+    "input_code": [
+     "scripts/win_bet/dc_subvoxel_refine.py",
+     "scripts/win_bet/ea_atlas.py",
+     "scripts/core/score_loeo_submission.py"
+    ],
+    "input_facts": [
+     "FACT-0270",
+     "FACT-0272",
+     "FACT-0273",
+     "FACT-0210",
+     "FACT-0040",
+     "FACT-0261",
+     "FACT-0263"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0021",
+    "lock": "done",
+    "opened": "2026-08-26",
+    "owner": "primary"
+   },
+   "PKT-0018": {
+    "id": "PKT-0018",
+    "input_artifacts": [
+     "C:/temp/p20_relink_sweep_f0/sweep_pen_off.csv.gz",
+     "C:/temp/p19_relink_sweep_f1/sweep_pen_off.csv.gz",
+     "C:/temp/p20_relink_sweep_f0/atlas/, C:/temp/p19_relink_sweep_f1/atlas/",
+     "data/train/*.zarr"
+    ],
+    "input_code": [
+     "scripts/win_bet/dc_subvoxel_refine.py (icentroid",
+     "eval)",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "input_facts": [
+     "FACT-0270",
+     "FACT-0313",
+     "FACT-0314",
+     "FACT-0317",
+     "FACT-0322"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0022",
+    "lock": "done",
+    "opened": "2026-08-27",
+    "owner": "primary"
+   },
+   "PKT-0019": {
+    "id": "PKT-0019",
+    "input_artifacts": [
+     "C:/temp/intel/H1_DOSSIER.md",
+     "C:/temp/intel/EXTERNAL_RESEARCH.md",
+     "data/external/zebrahub/zh001r_identity.npz",
+     "kaggle dataset josefreitasalvesneto/biohub-synthetic-dataset (165k divisions, CC0)",
+     "kaggle dataset daifanhao/biohub-synthetic-detector-pretrain-public-v1",
+     "kaggle dataset kkunizaw/biohub-zmnscrops"
+    ],
+    "input_code": [
+     "scripts/kaggle_specs/h1r_edge_s5_smoke.json",
+     "scripts/kaggle_specs/h1r_edge_s5.json",
+     "scripts/kaggle_specs/h1r_det_s1.json",
+     "scripts/kaggle_edits/h1r_edge_train.py, h1r_edge_data.py, h1r_edge_kernel_run.py",
+     "scripts/core/colab_cli.py"
+    ],
+    "input_facts": [
+     "FACT-0296",
+     "FACT-0318",
+     "FACT-0321",
+     "FACT-0322",
+     "FACT-0183",
+     "FACT-0261"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0023",
+    "lock": "claimed",
+    "opened": "2026-08-27",
+    "owner": "primary"
+   },
+   "PKT-0020": {
+    "id": "PKT-0020",
+    "input_artifacts": [
+     "notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb",
+     "notebooks/kaggle_p24_deepcenter_best_veto/",
+     "C:/temp/intel/arnav170_sdw60/REPORT.md"
+    ],
+    "input_code": [
+     "scripts/kaggle_specs/p24_deepcenter_best_veto.json",
+     "tests/test_p24_deepcenter_best_veto.py",
+     "scripts/kaggle_specs/p10_deepcenter_best.json"
+    ],
+    "input_facts": [
+     "FACT-0001",
+     "FACT-0310",
+     "FACT-0311",
+     "FACT-0312",
+     "FACT-0331"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0024",
+    "lock": "done",
+    "opened": "2026-08-27",
+    "owner": "primary"
+   },
+   "PKT-0021": {
+    "id": "PKT-0021",
+    "input_artifacts": [
+     "C:/temp/p20_relink_sweep_f0/sweep_pen_off.csv.gz",
+     "C:/temp/p19_relink_sweep_f1/sweep_pen_off.csv.gz",
+     "C:/temp/p20_relink_sweep_f0/atlas/, C:/temp/p19_relink_sweep_f1/atlas/",
+     "data/train/*.geff"
+    ],
+    "input_code": [
+     "scripts/win_bet/div_reach_steal.py",
+     "scripts/win_bet/ea_atlas.py",
+     "vendor/kaggle-cell-tracking/src/tracking_cellmot/division_metrics.py"
+    ],
+    "input_facts": [
+     "FACT-0295",
+     "FACT-0290",
+     "FACT-0291",
+     "FACT-0294",
+     "FACT-0322",
+     "FACT-0323",
+     "FACT-0325"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0025",
+    "lock": "claimed",
+    "opened": "2026-08-27",
+    "owner": "primary"
+   },
+   "PKT-0022": {
+    "id": "PKT-0022",
+    "input_artifacts": [
+     "C:/temp/p20_relink_sweep_f0/sweep_pen_off.csv.gz",
+     "C:/temp/p19_relink_sweep_f1/sweep_pen_off.csv.gz",
+     "C:/temp/p20_relink_sweep_f0/atlas/",
+     "C:/temp/p19_relink_sweep_f1/atlas/",
+     "C:/Users/aryaa/AppData/Local/Temp/claude/c--Users-aryaa-Documents-Biohub-CellTracking-2026/c1bc12ef-ad9b-4253-8215-eaeb30ffebc8/scratchpad/audit/"
+    ],
+    "input_code": [
+     "scripts/win_bet/div_reach_steal.py",
+     "scripts/win_bet/ea_atlas.py",
+     "scripts/kaggle_edits/coupled_division_transplant.py"
+    ],
+    "input_facts": [
+     "FACT-0001",
+     "FACT-0260",
+     "FACT-0321",
+     "FACT-0322",
+     "FACT-0335",
+     "FACT-0338"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0026",
+    "lock": "claimed",
+    "opened": "2026-08-27",
+    "owner": "codex-lead"
+   },
+   "PKT-0023": {
+    "id": "PKT-0023",
+    "input_artifacts": [
+     "aryaarun07/biohub-oof-weights",
+     "aryaarun07/biohub-zh001r-identity"
+    ],
+    "input_code": [
+     "scripts/kaggle_edits/h1r_rope4d.py",
+     "scripts/kaggle_edits/h1r_rope4d_inference_patch.py",
+     "scripts/kaggle_specs/h1r_edge_s5_rope4d_smoke.json",
+     "scripts/kaggle_specs/h1r_edge_s5_rope4d.json",
+     "scripts/kaggle_specs/deploy_h1r_edge_s5_rope4d_loeo_f0.json",
+     "tests/test_h1r_rope4d.py"
+    ],
+    "input_facts": [
+     "FACT-0182",
+     "FACT-0321",
+     "FACT-0322",
+     "FACT-0329",
+     "FACT-0335",
+     "FACT-0339"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0027",
+    "lock": "claimed",
+    "opened": "2026-08-27",
+    "owner": "codex-lead"
+   },
+   "PKT-0024": {
+    "id": "PKT-0024",
+    "input_artifacts": [
+     "C:/temp/p28_f0/, C:/temp/p28_f1/",
+     "C:/temp/p20_relink_sweep_f0/, C:/temp/p19_relink_sweep_f1/",
+     "data/train/*.geff"
+    ],
+    "input_code": [
+     "vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py",
+     "scripts/win_bet/ea_atlas.py + tracking_cellmot.summarise"
+    ],
+    "input_facts": [
+     "FACT-0102",
+     "FACT-0335",
+     "FACT-0345",
+     "FACT-0346",
+     "FACT-0261"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0028",
+    "lock": "done",
+    "opened": "2026-08-28",
+    "owner": "primary"
+   },
+   "PKT-0025": {
+    "id": "PKT-0025",
+    "input_artifacts": [
+     "C:/temp/node_budget/p29_f{0,1}/",
+     "C:/temp/p28_f{0,1}/",
+     "C:/temp/preilp_f1_v2/preilp_split1.parquet",
+     "data/train/*.geff"
+    ],
+    "input_code": [
+     "vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py",
+     "scripts/win_bet/ea_atlas.py",
+     "scripts/win_bet/audit_detpeak_full_export.py"
+    ],
+    "input_facts": [
+     "FACT-0353",
+     "FACT-0355",
+     "FACT-0356",
+     "FACT-0345",
+     "FACT-0335",
+     "FACT-0349",
+     "FACT-0350",
+     "FACT-0261",
+     "FACT-0352"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0035",
+    "lock": "done",
+    "opened": "2026-08-28",
+    "owner": "primary"
+   },
+   "PKT-0026": {
+    "id": "PKT-0026",
+    "input_artifacts": [
+     "C:/temp/preilp_f1_v2/preilp_split1.parquet",
+     "C:/temp/p28_f1/",
+     "C:/temp/biohub_deepcenter_p10_audit/best.pt",
+     "data/train/*.geff"
+    ],
+    "input_code": [
+     "notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb",
+     "scripts/win_bet/ilp_replay.py",
+     "scripts/win_bet/ea_atlas.py"
+    ],
+    "input_facts": [
+     "FACT-0345",
+     "FACT-0358",
+     "FACT-0363",
+     "FACT-0364",
+     "FACT-0365",
+     "FACT-0261"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0036",
+    "lock": "done",
+    "opened": "2026-08-28",
+    "owner": "primary"
+   },
+   "PKT-0027": {
+    "id": "PKT-0027",
+    "input_artifacts": [
+     "notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb",
+     "C:/temp/p28_f0/"
+    ],
+    "input_code": [
+     "scripts/kaggle_edits/edge_candidate_budget.py",
+     "scripts/kaggle_edits/pre_ilp_export.py",
+     "scripts/kaggle_edits/pre_ilp_rollup.py",
+     "scripts/win_bet/p28_full_chain_replay.py",
+     "scripts/win_bet/association_reachability.py"
+    ],
+    "input_facts": [
+     "FACT-0368",
+     "FACT-0369",
+     "FACT-0370",
+     "FACT-0367",
+     "FACT-0345",
+     "FACT-0364",
+     "FACT-0261",
+     "FACT-0310"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0037",
+    "lock": "done",
+    "opened": "2026-08-29",
+    "owner": "primary"
+   },
+   "PKT-0028": {
+    "id": "PKT-0028",
+    "input_artifacts": [
+     "notebooks/kaggle_p32_public931_exact/biohub-p32-public931-exact.ipynb",
+     "C:/temp/intel/sn931/"
+    ],
+    "input_code": [
+     "scripts/kaggle_specs/p32_public931_exact.json"
+    ],
+    "input_facts": [
+     "FACT-0377",
+     "FACT-0378",
+     "FACT-0341",
+     "FACT-0368",
+     "FACT-0376",
+     "FACT-0371"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0038",
+    "lock": "done",
+    "opened": "2026-08-29",
+    "owner": "primary"
+   },
+   "PKT-0029": {
+    "id": "PKT-0029",
+    "input_artifacts": [
+     "C:/temp/arch_inventory/hoct/weights/",
+     "C:/temp/p30_f0/preilp_split0.parquet",
+     "C:/temp/p28_f0/loeo_split0_champion.csv.gz"
+    ],
+    "input_code": [
+     "scripts/win_bet/p28_full_chain_replay.py",
+     "scripts/win_bet/lever37_conversion.py"
+    ],
+    "input_facts": [
+     "FACT-0361",
+     "FACT-0362",
+     "FACT-0368",
+     "FACT-0371",
+     "FACT-0376",
+     "FACT-0347"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0034",
+    "lock": "claimed",
+    "opened": "2026-08-29",
+    "owner": "agent-2-hoct-reuse"
+   },
+   "PKT-0030": {
+    "id": "PKT-0030",
+    "input_artifacts": [
+     "notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb",
+     "C:/temp/p28_f1/",
+     "C:/temp/preilp_f1_v2/preilp_split1.parquet"
+    ],
+    "input_code": [
+     "scripts/kaggle_specs/p34_acquisition_f1.json",
+     "scripts/kaggle_edits/edge_candidate_budget.py",
+     "scripts/kaggle_edits/pre_ilp_export.py",
+     "scripts/win_bet/audit_p30_acquisition.py",
+     "scripts/win_bet/assoc_parent_dataset.py"
+    ],
+    "input_facts": [
+     "FACT-0381",
+     "FACT-0369",
+     "FACT-0370",
+     "FACT-0373",
+     "FACT-0261",
+     "FACT-0376"
+    ],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "done",
+    "opened": "2026-08-29",
+    "owner": "primary"
+   },
+   "PKT-0031": {
+    "id": "PKT-0031",
+    "input_artifacts": [
+     "C:/temp/assoc/f0.parquet",
+     "C:/temp/assoc/f0.json",
+     "C:/temp/p30_f0/preilp_split0.parquet",
+     "C:/temp/p30_f0/ecb/"
+    ],
+    "input_code": [
+     "scripts/win_bet/assoc_parent_dataset.py",
+     "scripts/win_bet/assoc_report.py",
+     "scripts/win_bet/p28_full_chain_replay.py",
+     "scripts/win_bet/p28_full_chain_panel.py"
+    ],
+    "input_facts": [
+     "FACT-0381",
+     "FACT-0376",
+     "FACT-0369",
+     "FACT-0370",
+     "FACT-0375",
+     "FACT-0371"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0039",
+    "lock": "done",
+    "opened": "2026-08-29",
+    "owner": "agent-a-association"
+   },
+   "PKT-0032": {
+    "id": "PKT-0032",
+    "input_artifacts": [
+     "C:/temp/p30_f0/preilp_split0.parquet",
+     "C:/temp/preilp_f1_v2/preilp_split1.parquet",
+     "C:/temp/p28_f0/loeo_split0_champion.csv.gz",
+     "C:/temp/retention/divloc_f0.parquet",
+     "C:/temp/retention/divloc_f1.parquet"
+    ],
+    "input_code": [
+     "scripts/win_bet/division_localisation.py",
+     "scripts/win_bet/div_reach_steal.py",
+     "scripts/win_bet/assoc_report.py",
+     "scripts/win_bet/assoc_parent_dataset.py"
+    ],
+    "input_facts": [
+     "FACT-0375",
+     "FACT-0380",
+     "FACT-0371",
+     "FACT-0362",
+     "FACT-0359",
+     "FACT-0360",
+     "FACT-0296",
+     "FACT-0378"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0040",
+    "lock": "done",
+    "opened": "2026-08-29",
+    "owner": "agent-b-division"
+   },
+   "PKT-0033": {
+    "id": "PKT-0033",
+    "input_artifacts": [
+     "C:/temp/assoc/f0.parquet",
+     "C:/temp/assoc/f1.parquet",
+     "C:/temp/p30_f0/",
+     "_evidence/ecb/conversion_l37.json",
+     "_evidence/ecb/panel_l37_f0.json"
+    ],
+    "input_code": [
+     "scripts/win_bet/assoc_parent_dataset.py",
+     "scripts/win_bet/assoc_report.py",
+     "scripts/win_bet/lever37_conversion.py",
+     "scripts/win_bet/audit_p30_acquisition.py",
+     "scripts/kaggle_edits/assoc_feature_parity.py"
+    ],
+    "input_facts": [
+     "FACT-0376",
+     "FACT-0381",
+     "FACT-0378",
+     "FACT-0373",
+     "FACT-0369",
+     "FACT-0370",
+     "FACT-0354",
+     "FACT-0371"
+    ],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "done",
+    "opened": "2026-08-29",
+    "owner": "agent-c-auditor"
+   },
+   "PKT-0034": {
+    "id": "PKT-0034",
+    "input_artifacts": [
+     "C:/temp/assoc/f0.parquet",
+     "C:/temp/p30_f0/preilp_split0.parquet",
+     "C:/temp/p30_f0/ecb/"
+    ],
+    "input_code": [
+     "scripts/win_bet/assoc_parent_dataset.py",
+     "scripts/win_bet/assoc_report.py",
+     "scripts/win_bet/assoc_baseline_rankers.py",
+     "scripts/kaggle_edits/assoc_feature_parity.py"
+    ],
+    "input_facts": [
+     "FACT-0386",
+     "FACT-0382",
+     "FACT-0376",
+     "FACT-0381",
+     "FACT-0369",
+     "FACT-0371",
+     "FACT-0387"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0041",
+    "lock": "done",
+    "opened": "2026-08-29",
+    "owner": "agent-2-harness"
+   },
+   "PKT-0035": {
+    "id": "PKT-0035",
+    "input_artifacts": [
+     "C:/temp/divverify/",
+     "_evidence/divverify/",
+     "C:/temp/p28_f0/loeo_split0_champion.csv.gz",
+     "C:/temp/p28_f1/loeo_split1_champion.csv.gz",
+     "C:/temp/retention/divloc_f0.parquet",
+     "C:/temp/retention/divloc_f1.parquet"
+    ],
+    "input_code": [
+     "scripts/win_bet/divverify_dataset.py",
+     "scripts/win_bet/divverify_adapter.py",
+     "scripts/win_bet/assoc_report.py"
+    ],
+    "input_facts": [
+     "FACT-0383",
+     "FACT-0384",
+     "FACT-0385",
+     "FACT-0375",
+     "FACT-0380",
+     "FACT-0371",
+     "FACT-0362",
+     "FACT-0359"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0040",
+    "lock": "claimed",
+    "opened": "2026-08-29",
+    "owner": "agent-3-division"
+   },
+   "PKT-0036": {
+    "id": "PKT-0036",
+    "input_artifacts": [
+     "C:/temp/p33/",
+     "C:/temp/p30_f0/",
+     "C:/temp/preilp_f1_v2/preilp_split1.parquet"
+    ],
+    "input_code": [
+     "scripts/win_bet/audit_p30_acquisition.py",
+     "scripts/win_bet/preilp_crossrun_stability.py",
+     "scripts/win_bet/audit_assoc_contract.py",
+     "scripts/core/kaggle_factory.py"
+    ],
+    "input_facts": [
+     "FACT-0387",
+     "FACT-0382",
+     "FACT-0373",
+     "FACT-0378",
+     "FACT-0381",
+     "FACT-0364",
+     "FACT-0376"
+    ],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "claimed",
+    "opened": "2026-08-29",
+    "owner": "agent-4-release-auditor"
+   },
+   "PKT-0037": {
+    "id": "PKT-0037",
+    "input_artifacts": [
+     "C:/temp/p33_v2/",
+     "C:/temp/p30_f0/",
+     "C:/temp/p34_f1/",
+     "C:/temp/hoct/code/"
+    ],
+    "input_code": [
+     "scripts/kaggle_edits/assoc_feature_parity.py",
+     "tests/test_loeo_weights_hygiene.py",
+     "scripts/win_bet/audit_p33_gate1.py",
+     "scripts/win_bet/assoc_train_harness.py"
+    ],
+    "input_facts": [
+     "FACT-0387",
+     "FACT-0390",
+     "FACT-0391",
+     "FACT-0392",
+     "FACT-0382",
+     "FACT-0378",
+     "FACT-0369"
+    ],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "claimed",
+    "opened": "2026-08-30",
+    "owner": "agent-1-foundations"
+   },
+   "PKT-0038": {
+    "id": "PKT-0038",
+    "input_artifacts": [
+     "C:/temp/p34_f1/",
+     "C:/temp/p30_f0/",
+     "_evidence/audit/receipts/f1_p34.json"
+    ],
+    "input_code": [
+     "scripts/win_bet/assoc_train_harness.py",
+     "scripts/win_bet/assoc_parent_dataset.py",
+     "scripts/win_bet/assoc_report.py"
+    ],
+    "input_facts": [
+     "FACT-0388",
+     "FACT-0386",
+     "FACT-0382",
+     "FACT-0376",
+     "FACT-0364",
+     "FACT-0371",
+     "FACT-0392",
+     "FACT-0378"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0041",
+    "lock": "claimed",
+    "opened": "2026-08-30",
+    "owner": "agent-1-fold-transfer-pathologist"
+   },
+   "PKT-0039": {
+    "id": "PKT-0039",
+    "input_artifacts": [
+     "notebooks/kaggle_p32_public931_exact/",
+     "C:/temp/queue/p24_deepcenter_best_veto/"
+    ],
+    "input_code": [
+     "scripts/kaggle_specs/p32_public931_exact.json",
+     "scripts/core/kaggle_factory.py",
+     "scripts/win_bet/audit_release_receipt.py"
+    ],
+    "input_facts": [
+     "FACT-0393",
+     "FACT-0341",
+     "FACT-0345",
+     "FACT-0377",
+     "FACT-0378",
+     "FACT-0396"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0042",
+    "lock": "done",
+    "opened": "2026-08-30",
+    "owner": "agent-2-exploitation"
+   },
+   "PKT-0040": {
+    "id": "PKT-0040",
+    "input_artifacts": [
+     "C:/temp/p7/tracking_repo/scripts/predict_unet_transformer.py",
+     "notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb",
+     "notebooks/kaggle_p28_champion_control_f0/biohub-p28-champion-control-f0.ipynb",
+     "notebooks/kaggle_p35_dcveto_on_931/biohub-p35-dcveto-on-931.ipynb",
+     "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+     "C:/temp/p30_f0/preilp_split0.parquet",
+     "C:/temp/p30_f0/ecb/",
+     "C:/temp/p30_f0/graphs_ctl/",
+     "C:/temp/p34_f1/preilp_split1.parquet",
+     "C:/temp/p34_f1/ecb/",
+     "C:/temp/p28_f0/run_stats.csv",
+     "C:/temp/p28_f1/run_stats.csv",
+     "C:/temp/biohub_deepcenter_p10_audit/best.pt"
+    ],
+    "input_code": [
+     "scripts/win_bet/p28_full_chain_replay.py",
+     "scripts/win_bet/ilp_replay.py",
+     "scripts/win_bet/assoc_preilp_survival.py",
+     "scripts/win_bet/assoc_preilp_survival_panel.py"
+    ],
+    "input_facts": [
+     "FACT-0364",
+     "FACT-0369",
+     "FACT-0370",
+     "FACT-0368",
+     "FACT-0371",
+     "FACT-0376",
+     "FACT-0382",
+     "FACT-0387",
+     "FACT-0408",
+     "FACT-0413",
+     "FACT-0414"
+    ],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "claimed",
+    "opened": "2026-08-30",
+    "owner": "agent-3-final-edge-survival"
+   },
+   "PKT-0041": {
+    "id": "PKT-0041",
+    "input_artifacts": [
+     "C:/temp/p34_f1/",
+     "C:/temp/p30_f0/",
+     "_evidence/assoc/tournament/"
+    ],
+    "input_code": [
+     "scripts/win_bet/assoc_train_harness.py",
+     "scripts/win_bet/assoc_parent_dataset.py",
+     "scripts/win_bet/assoc_report.py"
+    ],
+    "input_facts": [
+     "FACT-0354",
+     "FACT-0368",
+     "FACT-0380",
+     "FACT-0386",
+     "FACT-0413",
+     "FACT-0414",
+     "FACT-0415",
+     "FACT-0378",
+     "FACT-0392",
+     "FACT-0061"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0043",
+    "lock": "done",
+    "opened": "2026-08-30",
+    "owner": "agent-5-focus3d-integration"
+   },
+   "PKT-0042": {
+    "id": "PKT-0042",
+    "input_artifacts": [
+     "_evidence/assoc/survival/",
+     "_evidence/assoc/pathology/",
+     "C:/temp/full_chain_replay/"
+    ],
+    "input_code": [
+     "scripts/win_bet/p28_full_chain_replay.py",
+     "scripts/win_bet/assoc_preilp_survival.py",
+     "scripts/win_bet/assoc_fold_pathology.py",
+     "scripts/win_bet/assoc_report.py",
+     "scripts/win_bet/assoc_lost_edge_ledger.py"
+    ],
+    "input_facts": [
+     "FACT-0426",
+     "FACT-0427",
+     "FACT-0428",
+     "FACT-0429",
+     "FACT-0430",
+     "FACT-0421",
+     "FACT-0422",
+     "FACT-0420",
+     "FACT-0419",
+     "FACT-0364",
+     "FACT-0376",
+     "FACT-0382",
+     "FACT-0371"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0044",
+    "lock": "claimed",
+    "opened": "2026-08-30",
+    "owner": "agent-6-final-edge-gates"
+   },
+   "PKT-0043": {
+    "id": "PKT-0043",
+    "input_artifacts": [
+     "_evidence/audit/receipts/",
+     "_evidence/foundations/p37_trunk_inventory.json"
+    ],
+    "input_code": [
+     "scripts/win_bet/assoc_report.py",
+     "scripts/win_bet/assoc_train_harness.py",
+     "scripts/win_bet/audit_feature_cache.py",
+     "scripts/win_bet/gpu_protection_contract.py"
+    ],
+    "input_facts": [
+     "FACT-0432",
+     "FACT-0418",
+     "FACT-0431",
+     "FACT-0382",
+     "FACT-0417",
+     "FACT-0392",
+     "FACT-0378"
+    ],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "done",
+    "opened": "2026-08-30",
+    "owner": "agent-7-provenance-guards"
+   },
+   "PKT-0044": {
+    "id": "PKT-0044",
+    "input_artifacts": [
+     "_evidence/assoc/pathology/lost_edge_ledger_f0.json",
+     "_evidence/assoc/pathology/lost_edge_ledger_f1.json",
+     "_evidence/assoc/survival/stage_map.json",
+     "C:/temp/p30_f0/",
+     "C:/temp/p34_f1/"
+    ],
+    "input_code": [
+     "scripts/win_bet/assoc_lost_edge_ledger.py",
+     "scripts/win_bet/p28_full_chain_replay.py",
+     "scripts/win_bet/assoc_report.py"
+    ],
+    "input_facts": [
+     "FACT-0422",
+     "FACT-0430",
+     "FACT-0370",
+     "FACT-0369",
+     "FACT-0412",
+     "FACT-0368",
+     "FACT-0376",
+     "FACT-0382",
+     "FACT-0428",
+     "FACT-0040"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0045",
+    "lock": "done",
+    "opened": "2026-08-31",
+    "owner": "agent-8-reach-oracle"
+   },
+   "PKT-0045": {
+    "id": "PKT-0045",
+    "input_artifacts": [],
+    "input_code": [],
+    "input_facts": [],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "claimed",
+    "opened": "2026-08-31",
+    "owner": "agent-0-coordinator"
+   },
+   "PKT-0046": {
+    "id": "PKT-0046",
+    "input_artifacts": [],
+    "input_code": [],
+    "input_facts": [],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "done",
+    "opened": "2026-08-31",
+    "owner": "agent-9-reversed-ladder"
+   },
+   "PKT-0047": {
+    "id": "PKT-0047",
+    "input_artifacts": [],
+    "input_code": [],
+    "input_facts": [],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "done",
+    "opened": "2026-08-31",
+    "owner": "agent-10-hoct-provenance"
+   },
+   "PKT-0048": {
+    "id": "PKT-0048",
+    "input_artifacts": [],
+    "input_code": [],
+    "input_facts": [],
+    "kind": "PKT",
+    "lever": null,
+    "lock": "done",
+    "opened": "2026-08-31",
+    "owner": "agent-11-mask-groundwork"
+   },
+   "PKT-0049": {
+    "id": "PKT-0049",
+    "input_artifacts": [
+     "C:/temp/focus3d/",
+     "C:/temp/revladder/slices/",
+     "_evidence/maskassoc/",
+     "_evidence/assoc/revladder/"
+    ],
+    "input_code": [
+     "scripts/win_bet/biohubx/contract.py",
+     "scripts/win_bet/biohubx/synthetic_t2.py",
+     "scripts/win_bet/biohubx/model.py",
+     "scripts/win_bet/biohubx/training.py",
+     "scripts/win_bet/spec_restriction.py",
+     "scripts/win_bet/mask_node_adapter.py",
+     "scripts/win_bet/hoct_scale_gate.py",
+     "scripts/win_bet/focus3d_probe.py",
+     "scripts/win_bet/assoc_specs/t2_correspondence_v1.json"
+    ],
+    "input_facts": [
+     "FACT-0428",
+     "FACT-0447",
+     "FACT-0448",
+     "FACT-0449",
+     "FACT-0458",
+     "FACT-0442",
+     "FACT-0437",
+     "FACT-0422",
+     "FACT-0412",
+     "FACT-0446",
+     "FACT-0423",
+     "FACT-0424",
+     "FACT-0425",
+     "FACT-0451",
+     "FACT-0454",
+     "FACT-0455",
+     "FACT-0456",
+     "FACT-0457",
+     "FACT-0459",
+     "FACT-0040",
+     "FACT-0061",
+     "FACT-0344",
+     "FACT-0380",
+     "FACT-0440"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0046",
+    "lock": "claimed",
+    "opened": "2026-08-31",
+    "owner": "coordinator-biohubx"
+   },
+   "PKT-0050": {
+    "id": "PKT-0050",
+    "input_artifacts": [
+     "the single reusable FOCUS export produced and bound by PKT-0049"
+    ],
+    "input_code": [
+     "scripts/win_bet/biohubx/contract.py"
+    ],
+    "input_facts": [
+     "FACT-0040",
+     "FACT-0428",
+     "FACT-0442",
+     "FACT-0458",
+     "FACT-0460",
+     "FACT-0462"
+    ],
+    "kind": "PKT",
+    "lever": "LEVER-0005",
+    "lock": "claimed",
+    "opened": "2026-09-01",
+    "owner": "coordinator-trackastra-owner"
+   }
+  }
+ },
+ "schema_version": "catalog_v1"
+}

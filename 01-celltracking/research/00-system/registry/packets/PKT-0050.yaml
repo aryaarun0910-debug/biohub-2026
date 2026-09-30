@@ -1,0 +1,75 @@
+id: PKT-0050
+title: "Trackastra as a complete graph owner over the reusable FOCUS export"
+lever: LEVER-0005
+owner: coordinator-trackastra-owner
+lock: claimed
+opened: '2026-09-01'
+
+claim: >-
+  Trackastra can consume the same contracted FOCUS mask/center/embedding export as Biohub-X and
+  emit the complete lineage graph with its background class live, replacing rather than pruning
+  the incumbent geometric graph, ILP and motion-relink consumer.
+
+falsifier: >-
+  THE TESTED ROUTE DIES if any of the following occurs: (a) the adapter cannot satisfy
+  `biohubx_io_v1` on one preregistered real crop from each fold; (b) the emitted graph names an
+  incumbent consumer, unresolved endpoint, non-integer node, cross-dataset edge, in-degree above
+  one or out-degree above two; (c) on complete fold 0 raw association does not improve with division
+  TP preserved, or fold 1 is materially unsafe; (d) any apparent gain exists only in the count
+  adjustment; or (e) a valid T=2 graph owner is not established by the checkpoint. Evidence about
+  Trackastra as a pruner cannot close or promote this packet because that is a different mechanism.
+
+prediction: >-
+  Integration is plausible because Trackastra accepts detections and models a background class,
+  but scientific transfer is uncertain. The first honest result may be a valid graph with no score
+  gain. No leaderboard band exists and no submission is authorised.
+
+inputs:
+  facts: [FACT-0040, FACT-0428, FACT-0442, FACT-0458, FACT-0460, FACT-0462]
+  artifacts:
+    - the single reusable FOCUS export produced and bound by PKT-0049
+  code:
+    - scripts/win_bet/biohubx/contract.py
+
+method: >-
+  PHASE 0, CPU ONLY: freeze a Trackastra adapter against `biohubx_io_v1`, including explicit source
+  and destination node identities, abstention/background interpretation, division semantics and
+  final graph provenance. Prove by mutation that it refuses the same coordinate, coverage, integer
+  export and lineage failures as PKT-0049. PHASE 1: consume PKT-0049's already-acquired one-crop-per-
+  fold export; do not acquire it again and do not spend a second inference session. Smoke serially
+  on one crop, audit immediately, then the other crop. PHASE 2: establish a valid T=2 owner before
+  any longer temporal context; T and depth remain separate axes. PHASE 3: only after a valid smoke,
+  score complete folds separately through the official round-trip and report raw edge, adjusted
+  edge, node recall, division TP/FP/FN and combined score. The Biohub-X and Trackastra consumers are
+  compared on the same frozen export; neither consumer may tune the export.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: 7 days
+
+forbidden:
+  - Trackastra as a pruner, veto, filter, or post-processor of an incumbent graph
+  - the incumbent ILP, geometric LAP, motion relink, or downstream re-parenting consumer
+  - reacquiring masks, centers, embeddings or raw volumes already exported by PKT-0049
+  - pooling embryo directions
+  - using GT identities, GT edges or visible placeholder movies to construct candidates or tune
+    thresholds
+  - temporal context above T=2 before a valid T=2 graph owner exists
+  - editing PKT-0042 or any file Gate B imports while its workers are live
+  - launching a GPU job, pushing a kernel, or making a submission without a new host decision
+  - .claude/settings.json or .gitignore
+
+outputs:
+  evidence: _evidence/biohubx/trackastra_owner/ and C:/temp/biohubx/trackastra_owner/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md after a measured result.
+
+result:
+  status: NOT_STARTED
+  gpu_sessions_spent: 0
+  submissions_spent: 0
+  dependency: >-
+    PKT-0049 owns the one reusable FOCUS acquisition. This packet begins with CPU adapter and
+    contract work and may consume that export only after PKT-0049's production adapter passes.

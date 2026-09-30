@@ -1,0 +1,26 @@
+{
+  "name": "p11_xhhuang_edge_swap",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p11_xhhuang_edge_swap.json",
+  "base_notebook": "notebooks/kaggle_p9_coupled_division/biohub-p9-coupled-division.ipynb",
+  "base_sha256": "6b93ef47b7f1b0fc623a9bd058eb11ffaec5c047ee6ae8cb48d6b84a3fc2ccc9",
+  "built_notebook": "notebooks\\kaggle_p11_xhhuang_edge_swap\\biohub-p11-xhhuang-edge-swap.ipynb",
+  "built_sha256": "330cab12172859c26748ece38d46c65c62d7de00e87e4c9d3f4316e4d708782c",
+  "config_hash": "22fa23406261",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "714bac71dd9ab76b7c2c2440c6bdd443c137bc9887ea71d01e6a94e01cc8ca29"
+    }
+  ],
+  "declared_slug": "biohub-p11-xhhuang-edge-swap",
+  "title": "Biohub P11 XHHuang Edge Swap",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p11-xhhuang-edge-swap"
+}

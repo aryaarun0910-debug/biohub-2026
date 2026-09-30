@@ -1,0 +1,48 @@
+id: PKT-0015
+title: "Raise the division ceiling and size the triple scorer"
+lever: LEVER-0002
+owner: rnd-agent
+lock: done
+opened: '2026-08-26'
+
+claim: >-
+  Real divisions become proposable only if the hard sibling ceiling is raised; a (mother, daughter-pair) scorer is the only untried class.
+
+falsifier: >-
+  If raising the ceiling admits candidates at a precision no pairwise feature set can rescue, or the fold cannot validate a selector, the lane closes.
+
+inputs:
+  facts: [FACT-0210, FACT-0213, FACT-0231, FACT-0240, FACT-0250]
+  artifacts:
+    - _evidence/exports/loeo_f1_strict/   # OOF split_1 - HONEST fold 1
+    - _evidence/exports/loeo_f0_strict/   # pack split_0 - CLEAN on fold 0
+    - C:/temp/error_atlas/                # LOEO-clean, verified FACT-0232
+    - _evidence/p19_relink_sweep_f1/      # LEAK-CONTAMINATED (FACT-0160) - never as truth
+  code: [scripts/core/score_loeo_submission.py, scripts/win_bet/ea_atlas.py]
+
+method: >-
+  Dispatched to a background R&D agent. Mandatory calibration - reproduce the GT inter-frame
+  displacement median of 1.8168 um before trusting any distance. Both embryo directions
+  reported separately. Agents do not write the registry; the lead integrates.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: analysis only
+
+forbidden:
+  - using _evidence/p19_relink_sweep_f1/ as an authoritative source
+  - launching any Kaggle kernel or submission
+  - re-proposing a killed lever without a NEW mechanism and a stated falsifier
+
+outputs:
+  evidence: agent report, integrated by the lead
+  facts_added: []
+  record: one row in experimental-records.md once integrated
+
+result: >-
+  RECONCILED 2026-09-01 (Phase 1.5 packet-lock audit). NO RESULT WAS EVER PRODUCED BY THIS PACKET. Its lever was closed the day after the packet opened, by evidence this packet did not generate, and nothing was written here afterwards. Recorded as overtaken, not completed.
+  .
+  LOCK RELEASED. It was `running` while LEVER-0002 had already been closed by FACT-0290, FACT-0291, FACT-0293, FACT-0294 on 2026-08-26, so the
+  anti-duplication lock was reserving a lever that was no longer available to claim - the opposite
+  of the failure AGENTS.md section 2 built it for. The lever is NOT reopened to preserve the lock.

@@ -1,0 +1,155 @@
+{
+  "name": "p3_d1_pilot_f0",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p3_d1_pilot_f0.json",
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "built_notebook": "notebooks\\kaggle_p3_d1_pilot_f0\\biohub-p3-d1-pilot-f0.ipynb",
+  "built_sha256": "aacf3cb9efef670938fbfe7b7ef93a50d2f562b19a5843ce69c89cdd2077c798",
+  "config_hash": "875a7ffd3c71",
+  "n_cells": 12,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "28285da5fb717ba96d498ef5dae98dc106191555f459ba8f93156a3c0fc3e25a"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "504ddcbe5188e98c49ad68fa70cdb7f77848118c9d276696beafad1d4e251daf"
+    },
+    {
+      "kind": "insert_after",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "a3c342dc00ae04b6a9cff6ff94f5283b3aeac7ef2a88303e38f40fd94abe770c"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "ad12ec0c431d32c447cef97b2ab605ddad7a3f2d78f8474edc5438eae5f3505b"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "8bfc2bb2e1e4dba79cb8ede2c74d6491cf1536ecf82b0938972f5ce541bae788"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "ab6dd300b37331b8a06a0cb38b2bc6b4c2c780b9a5d154e212f93668a16b8a9b"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "c1062775295dd5ee891ab311d7ef46b189f10e18b0a452563aefc93d12f8c964"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "30ccb6dcb54a49e77601ec508d051f034d348e9ebe5a1c5ca04df6b2e60d4983"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "cbe21a9e48c55ccb0959bd61e6cc3bf3169d480f1a3aba1e1384eb1c6be963f7"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "796cec522ee668284a17f063450248ee579a0563ca795eb5b637bb90bd388adc"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "7c39067c2051cbe95d05dfb52f32e76598c7914050b4c4157d4882a9ec325ba5"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "d24893642fdfb6bf94f8a0f281f68844f06cc2bc5803c76812ce0a64ba04e0e1"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "b56e0d711e6acf9ade3a533643d5c3a3ddde0472bf0c5f13a1cf675e8cf22d85"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "118a8f4569516a9d34711e90889cbe82aab2a5ee1bd0666ab9263919052649ae"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "b92e1c5eea65a5865af43655c52b3ae53249ce20164360ba2fffa15e736a6dcf"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "74478017bb95ea97bf52166c12fa2de4febeb3c343ce6b53d391f7cda3e7f0be"
+    },
+    {
+      "kind": "insert_after",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "0933d767cf943d86f4ef0c852308012330e19880a260e6f82ac6b95b8614331d"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "ef47aa3205536edbf1c5eb6ea5954b54b003b59348b45871243d6e27c19eb5c3"
+    },
+    {
+      "kind": "append_cell",
+      "cells": [
+        11
+      ],
+      "payload_sha256": "fe3d5976dc5c7daab1142ee0a24afc658f7f7224d3f7b9fd782dbe5308da0fed"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "65162e9754e47129a43ab7ffba681fea4e0b8d4d1edc5777a684e3aaeac5cd65"
+    }
+  ],
+  "declared_slug": "biohub-p3-d1-pilot-f0",
+  "title": "Biohub P3 D1 Pilot F0",
+  "pushed_slug": "biohub-p3-d1-pilot-f0"
+}

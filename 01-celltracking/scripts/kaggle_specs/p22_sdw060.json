@@ -1,0 +1,74 @@
+{
+  "name": "p22_sdw060",
+  "slug": "biohub-p22-sdw060",
+  "title": "Biohub P22 SDW060",
+  "code_file": "biohub-p22-sdw060.ipynb",
+  "out_dir": "notebooks/kaggle_p22_sdw060",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": true,
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "purpose": "One-factor A/B on the deployed P9 champion: BIOHUB_SECONDARY_DETECTION_WEIGHT 0.475 -> 0.60, the single knob that separates evgendvorkin/biohub-0-927-lb (self-declared 0.923) from arnav170/biohub-sdw60 (0.927) on an otherwise code-identical lineage (C:/temp/intel/arnav170_sdw60/REPORT.md). Everything else exactly P9. Pre-registered band 0.924-0.929, central 0.927; falsifier <= 0.925.",
+  "provenance": {
+    "base": "deployed P3 harmonic built notebook, sha256 70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8, public LB 0.915",
+    "public_sources": [
+      {
+        "kernel": "kunaldesale2408/biohub-cell-tracking",
+        "kernel_id": 130667075,
+        "leaderboard_score_observed_2026_08_24": 0.926,
+        "notebook_sha256": "1f1cbdb26779cc3a14cc2fa4e3649e78897d57ec0a69cd8cf77a0c185fda4a3a"
+      },
+      {
+        "kernel": "rockerritesh/0-926-biohub-divsub",
+        "kernel_id": 131694028,
+        "leaderboard_score_observed_2026_08_24": 0.926,
+        "notebook_sha256": "a0c44e988ca4eadfddb6022f933c128042eaf51b9f74c12e5aa4e6c62f0c18cf"
+      }
+    ],
+    "public_function_sha256": "b0d50a39e07624bc5a29207215fb4ec11908b49a8b60662e3527a513b1b35a5d",
+    "public_function_identity": "The complete 150-line add_safe_divisions_postlink function is byte-identical in both downloaded public notebooks. Full code differs only by blank-line whitespace at four positions.",
+    "routes_on": "graph topology and physical node coordinates only; no dataset, crop, acquisition, hidden label, or image-content routing",
+    "interaction_warning": "The three radii and C1/C2/C3 filters are one coupled treatment. Do not ablate or submit C3 alone; local GT shows that would discard about half of true divisions. The P3 harmonic association surface can change which nodes are orphans, so the public +0.013 is evidence for the mechanism family, not a guaranteed additive delta on P3.",
+    "derived_from": "scripts/kaggle_specs/p9_coupled_division.json + secondary detection weight 0.60 (arnav170/biohub-sdw60 cell9:651)"
+  },
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_SAFE_DIV_MAX_UM": "8.0",
+        "BIOHUB_SAFE_DIV_SISTER_MAX_UM": "11.0",
+        "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM": "10.0",
+        "BIOHUB_SAFE_DIV_DIVERGE_UM": "2.25"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "def filter_short_track_components(",
+      "anchor": "def filter_short_track_components(",
+      "code_file": "scripts/kaggle_edits/coupled_division_transplant.py",
+      "expect": 1
+    },
+    {
+      "kind": "env",
+      "cell_match": "os.environ[\"BIOHUB_SECONDARY_DETECTION_WEIGHT\"] = \"0.475\"",
+      "vars": {
+        "BIOHUB_SECONDARY_DETECTION_WEIGHT": "0.60"
+      },
+      "expect": 1
+    }
+  ]
+}

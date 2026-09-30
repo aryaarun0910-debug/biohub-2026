@@ -1,0 +1,43 @@
+id: PKT-0007
+title: Forward/reverse assignment disagreement as a division detector
+lever: LEVER-0016
+owner: rnd-agent
+lock: done
+opened: '2026-08-26'
+
+claim: >-
+  GT division parents are enriched among nodes where forward and reverse assignments disagree.
+
+falsifier: >-
+  No enrichment versus base rate closes LEVER-0016.
+
+inputs:
+  facts: [FACT-0160, FACT-0161]   # FACT-0130/0140/0141 RETRACTED - leak-contaminated
+  artifacts:
+    - _evidence/exports/loeo_f1_strict/  # OOF split_1 weights - HONEST fold 1, use this
+    - C:/temp/error_atlas/               # LOEO-CLEAN (p0b substrate, older but honest)
+    - _evidence/p19_relink_sweep_f1/     # LEAK-CONTAMINATED (FACT-0160) - do NOT treat as truth
+  code: [scripts/core/score_loeo_submission.py]
+
+method: >-
+  Dispatched to a background R&D agent. Mandatory calibration: reproduce the GT inter-frame
+  displacement median of 1.82 um before trusting any distance. Agents do not write to the
+  registry; the lead integrates their findings.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: analysis only
+
+forbidden:
+  - modifying research/00-system/registry/
+  - launching any Kaggle kernel or submission
+  - re-proposing a lever already killed without a NEW mechanism and a stated falsifier
+
+outputs:
+  evidence: agent report, integrated by the lead
+  facts_added: []
+  record: one row in experimental-records.md once integrated
+
+result: >-
+  KILLED at the mechanism - enrichment 0.00x both folds; fwd/rev is ONE problem. See experimental-records.md 2026-08-26 R&D TEAM entry.

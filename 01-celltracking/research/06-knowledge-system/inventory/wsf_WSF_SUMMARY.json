@@ -1,0 +1,254 @@
+{
+  "workstream": "WS-F arm B on the deployment substrate",
+  "question": "Does arm B (motion_relink gate quantity = kNN16 flow-compensated residual, same 6/10 um radius) hold on the deployment substrate?",
+  "route_taken": "route 2-variant: the P0-strict LOEO OOF PRE-WRAPPER prediction graphs. Fold 0 recovered with ZERO GPU from the FAILED biohub-loeo-f0-strict session (its /kaggle/working survived the failure, so the 71 geffs were never cleaned up). Fold 1 did not exist anywhere - that kernel COMPLETED, so its export cell deleted /kaggle/working - and was created by one new GPU kernel, biohub-loeo-f1-strict-pregraph, which is the loeo_f1_strict pipeline plus a pre-wrapper parquet dump and nothing else (cell-level diff vs the reference notebook: +118 lines in one cell, +2/-1 in another, ZERO other deletions).",
+  "route_1_rejected": "artifacts/kaggle/p0strict_cache is POST-wrapper and cannot express a PRE-wrapper gate change - see ROUTE1_VERDICT.json",
+  "basis_tag": "exact-pooled-OOF on the P0-strict LOEO substrate, complete wrapper, pinned patched scorer, prob=0 on newly admitted pairs (LOWER diagnostic)",
+  "coverage": {
+    "crops_scored": 144,
+    "of": 199,
+    "44b6": 57,
+    "44b6_of": 71,
+    "6bba": 87,
+    "6bba_of": 128,
+    "note": "crops were scheduled cheapest-first, so the measured set under-weights the largest crops; the runs continue and the aggregator re-runs on the fuller files"
+  },
+  "parity": {
+    "ok": 144,
+    "total": 144,
+    "mismatched_crops": []
+  },
+  "pooled": {
+    "label": "pooled",
+    "n_crops": 144,
+    "edge_mass": 95417,
+    "base": {
+      "score": 0.7359069916743018,
+      "edge": 0.7355324598390959,
+      "divJ": 0.003745318352059925,
+      "divTP": 2,
+      "divFP": 447,
+      "divFN": 85,
+      "edge_tp": 69353,
+      "edge_fp": 10025,
+      "edge_fn": 16039,
+      "n_pred": 1892050
+    },
+    "arm": {
+      "score": 0.7438891867942619,
+      "edge": 0.7435188164238915,
+      "divJ": 0.003703703703703704,
+      "divTP": 2,
+      "divFP": 453,
+      "divFN": 85,
+      "edge_tp": 69797,
+      "edge_fp": 9596,
+      "edge_fn": 15595,
+      "n_pred": 1893472
+    },
+    "delta": 0.007982195119960012,
+    "delta_edge": 0.007986356584795629,
+    "delta_divJ": -4.161464835622129e-06,
+    "PooledState_vs_summarise": {
+      "base": 0.0,
+      "arm": 0.0
+    },
+    "decomposition": {
+      "d_rawJ_w": 0.007993879251255604,
+      "d_mult_w": -8.960471499352098e-05,
+      "term_rawJ": 0.008090759716695045,
+      "term_mult": -6.838995281141721e-05,
+      "term_cross": -1.6019240826310819e-06,
+      "quality_share_pct": 100.8726331230625,
+      "multiplier_share_pct": -0.8526609194701991
+    },
+    "crops_better": 97,
+    "crops_worse": 42
+  },
+  "by_family": {
+    "44b6": {
+      "label": "44b6",
+      "n_crops": 57,
+      "edge_mass": 14119,
+      "base": {
+        "score": 0.9077237402116455,
+        "edge": 0.9053141016574286,
+        "divJ": 0.024096385542168676,
+        "divTP": 2,
+        "divFP": 63,
+        "divFN": 18,
+        "edge_tp": 12540,
+        "edge_fp": 889,
+        "edge_fn": 690,
+        "n_pred": 1270947
+      },
+      "arm": {
+        "score": 0.9244804698231713,
+        "edge": 0.9219488242535511,
+        "divJ": 0.02531645569620253,
+        "divTP": 2,
+        "divFP": 59,
+        "divFN": 18,
+        "edge_tp": 12638,
+        "edge_fp": 740,
+        "edge_fn": 592,
+        "n_pred": 1271917
+      },
+      "delta": 0.016756729611525856,
+      "delta_edge": 0.01663472259612242,
+      "delta_divJ": 0.00012200701540338553,
+      "PooledState_vs_summarise": {
+        "base": 0.0,
+        "arm": -1.1102230246251565e-16
+      },
+      "decomposition": {
+        "d_rawJ_w": 0.016303494217697823,
+        "d_mult_w": -5.615376093743375e-05,
+        "term_rawJ": 0.016335324570347615,
+        "term_mult": -4.2939438203516086e-05,
+        "term_cross": -2.9284454598716867e-06,
+        "quality_share_pct": 100.28158019353023,
+        "multiplier_share_pct": -0.2636026420612102
+      },
+      "crops_better": 35,
+      "crops_worse": 18,
+      "edge_mass_share_pct": 14.797153547061844
+    },
+    "6bba": {
+      "label": "6bba",
+      "n_crops": 87,
+      "edge_mass": 81298,
+      "base": {
+        "score": 0.7060465315157295,
+        "edge": 0.7060465315157295,
+        "divJ": 0.0,
+        "divTP": 0,
+        "divFP": 384,
+        "divFN": 67,
+        "edge_tp": 56813,
+        "edge_fp": 9136,
+        "edge_fn": 15349,
+        "n_pred": 621103
+      },
+      "arm": {
+        "score": 0.7127519842460996,
+        "edge": 0.7127519842460996,
+        "divJ": 0.0,
+        "divTP": 0,
+        "divFP": 394,
+        "divFN": 67,
+        "edge_tp": 57159,
+        "edge_fp": 8856,
+        "edge_fn": 15003,
+        "n_pred": 621555
+      },
+      "delta": 0.006705452730370154,
+      "delta_edge": 0.006705452730370154,
+      "delta_divJ": 0.0,
+      "PooledState_vs_summarise": {
+        "base": 0.0,
+        "arm": 0.0
+      },
+      "decomposition": {
+        "d_rawJ_w": 0.006550750838364787,
+        "d_mult_w": -9.541413244927506e-05,
+        "term_rawJ": 0.006658928537960996,
+        "term_mult": -7.280993627655726e-05,
+        "term_cross": -1.3715475011006622e-06,
+        "quality_share_pct": 101.12656542714925,
+        "multiplier_share_pct": -1.1057362671251068
+      },
+      "crops_better": 62,
+      "crops_worse": 24,
+      "edge_mass_share_pct": 85.20284645293816
+    }
+  },
+  "bootstrap": {
+    "pooled": {
+      "mean": 0.007953263102633898,
+      "lo95": 0.0056206360032756255,
+      "hi95": 0.01054201318986167,
+      "p_gt_0": 1.0,
+      "p_gt_0.002": 1.0,
+      "p_gt_0.005": 0.9945,
+      "n_boot": 2000,
+      "n_crops": 144
+    },
+    "44b6": {
+      "mean": 0.016748227679902847,
+      "lo95": 0.00839696746846419,
+      "hi95": 0.02525940623376806,
+      "p_gt_0": 1.0,
+      "p_gt_0.002": 1.0,
+      "p_gt_0.005": 0.9985,
+      "n_boot": 2000,
+      "n_crops": 57
+    },
+    "6bba": {
+      "mean": 0.0067144566606545854,
+      "lo95": 0.004405100536368575,
+      "hi95": 0.0093567733972715,
+      "p_gt_0": 1.0,
+      "p_gt_0.002": 1.0,
+      "p_gt_0.005": 0.9135,
+      "n_boot": 2000,
+      "n_crops": 87
+    }
+  },
+  "re_aim": {
+    "pairs": 420976947,
+    "admit_raw": 1982544,
+    "admit_arm": 1990241,
+    "newly_admitted": 87875,
+    "newly_excluded": 80178,
+    "net_admitted_delta": 7697,
+    "net_admitted_pct": 0.3882385460297476,
+    "re_aim_holds": false,
+    "crops_admitting_more": 99,
+    "crops_admitting_fewer": 43,
+    "base_newly_admitted": 0,
+    "base_newly_excluded": 0
+  },
+  "artifact_sha256": {
+    "data/ARMB_P0STRICT.json": {
+      "sha256": "80e56015821e88a419e02fba6daea2d03caddb8a71b92b68767b36465c4c0184",
+      "bytes": 35148
+    },
+    "data/armB_f0_merged.json": {
+      "sha256": "a379fa3bfcf8235ab092ec078730566ce5c26a29e105ca227291fc784d79202e",
+      "bytes": 307469
+    },
+    "data/armB_f1_replay.json": {
+      "sha256": "3595d3804626a8c58c2883a99e9cbd00f963f97fd87948b57cbbb2cf7f9aea11",
+      "bytes": 200744
+    },
+    "data/ROUTE1_VERDICT.json": {
+      "sha256": "0105f2db9a147f1a50d09da7e1ba98c170dc83087c5faf4242bda5537fe0e203",
+      "bytes": 3343
+    },
+    "data/REAIM_CORRECTION.json": {
+      "sha256": "247afe11f969884f714aea6dc6235156b2b52f8c5a73d95a868624c2c2b9eacb",
+      "bytes": 2652
+    },
+    "data/surface_gap_f0.json": {
+      "sha256": "34eb8669152c63301e639e498b5210a5df9f51393fd488db9cfd31b6d6e1b19e",
+      "bytes": 33762
+    },
+    "data/TRANSFER_44b6.json": {
+      "sha256": "3a92f46e336105c315360991a0ee3aeee1f2789751e0beb19a06a4d23bfeb5c6",
+      "bytes": 14982
+    },
+    "data/reaim_geometry.json": {
+      "sha256": "e63d048822408334bb50ae7f73dfd0a6d115b7ee426a011ea3942d212f87ff78",
+      "bytes": 8735
+    },
+    "raw/pregraphs_split1.parquet": {
+      "sha256": "8f6f44f0805d837c8002e7e633c4b88bc9cd5b2467d16af7a453a406b51a76c4",
+      "bytes": 25250945
+    },
+    "scripts/p0strict_pipeline.py": {
+      "sha256": "8a13bd0a2f12302e0bd42337944ff4a63690fe40a0eae64d23fd8ad842b75194",
+      "bytes": 75853
+    }
+  }
+}

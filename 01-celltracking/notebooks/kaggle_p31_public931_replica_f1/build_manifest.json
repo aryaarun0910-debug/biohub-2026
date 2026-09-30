@@ -1,0 +1,67 @@
+{
+  "name": "p31_public931_replica_f1",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p31_public931_replica_f1.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p31_public931_replica_f1\\biohub-p31-public931-replica-f1.ipynb",
+  "built_sha256": "96b630852b09da598b0f2aa779022eb4bb69d2948605bbc056d94288a170133d",
+  "config_hash": "7efccb59d4e3",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "8116888febaa4e7169c6eccdfb7a7f9ef6be3a051cb9d0025977ba4fcd041fcd"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "8d15030bec2f040f2bd186e7a3ebed167b0f17414de3aeef15f9994fb3710461"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "7956542e7190dbb71f06fef09d7e77f0785fcd2d46f3646c56fea5d162bb23a0"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "8be0433869eafd6adafa9c406db8e1848ca138020bb15d35aeecc7a39ebaf52c"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "32582192ed21aa95de8f1e718d0e31f8e6f85568f6d0579a0a13180ece9c3f09"
+    }
+  ],
+  "declared_slug": "biohub-p31-public931-replica-f1",
+  "title": "Biohub P31 Public931 Replica F1 NoSecondary",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}

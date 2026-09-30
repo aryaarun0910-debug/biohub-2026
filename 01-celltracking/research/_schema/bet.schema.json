@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "biohub/research/bet",
+  "title": "Research bet record",
+  "description": "One record per bet in 01-research-direction/bets.yaml. A bet is a hypothesis we will spend compute on; it must carry a falsification.",
+  "type": "object",
+  "required": ["id", "title", "theme", "hypothesis", "mechanism", "expected_benefit", "cost", "status", "falsification"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^bet-[a-z0-9-]+$" },
+    "title": { "type": "string", "minLength": 1 },
+    "theme": { "type": "string", "description": "Links to a theme in research-themes.md" },
+    "hypothesis": { "type": "string", "minLength": 1 },
+    "mechanism": { "type": "string", "description": "Why it should move the score" },
+    "expected_benefit": { "type": "string", "description": "Magnitude + basis, e.g. '+0.008 pooled LOEO'" },
+    "cost": { "type": "string", "enum": ["free-cpu", "low", "medium", "high"] },
+    "status": {
+      "type": "string",
+      "enum": ["proposed", "active", "measuring", "won", "lost", "parked", "closed"]
+    },
+    "falsification": { "type": "string", "minLength": 1, "description": "The cheapest experiment that would kill it" },
+    "links": { "type": "array", "items": { "type": "string" } },
+    "evidence": { "type": "array", "items": { "type": "string" } }
+  }
+}

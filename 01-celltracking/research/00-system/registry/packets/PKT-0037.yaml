@@ -1,0 +1,799 @@
+id: PKT-0037
+title: "AGENT 1 - upstream foundations: no cache launches until a null could be interpretable"
+lever: null              # infrastructure, not a hypothesis
+owner: agent-1-foundations
+lock: claimed
+opened: '2026-08-30'
+
+why_no_lever: >-
+  This packet moves no score and tests no hypothesis. It removes the ambiguities that would make a NULL
+  RESULT uninterpretable downstream - which is the expensive failure, because a null from an ambiguous cache
+  cannot distinguish "the head does not work" from "we fed it the wrong features". R6 permits a null lever.
+
+scope_rescope_2026_08_30: >-
+  RESCOPED BY THE HOST AFTER A SECOND GPU SESSION WAS LOST TO ENVIRONMENT DISCOVERY (FACT-0397). This packet
+  is no longer "upstream foundations" in general; it owns LAUNCH INFRASTRUCTURE, and its deliverable is ONE
+  REUSABLE PREFLIGHT SYSTEM that runs before every Kaggle GPU job:
+    - a CENTRAL bounded dataset resolver, so no experiment ever carries its own mount path again;
+    - a Kaggle CPU PREFLIGHT using the exact datasets, notebook, patches and subprocess command;
+    - verification of imports, file discovery, EXPECTED CROP COUNT, schemas, writable output, model paths
+      and patch heartbeats;
+    - the worker run in --preflight-only mode THROUGH THE REAL SUBPROCESS BOUNDARY, because both Gate 1
+      failures lived at boundaries a same-process check cannot see;
+    - a signed receipt carrying resolved paths, input hashes, crop names, code commit and expected GPU
+      outputs;
+    - EXACT POSITIVE COUNTS - "non-empty" is insufficient, and FACT-0394 is why: a band that compared
+      nothing passed every non-empty test it had;
+    - unified queue-fetch and factory-output artifact discovery, with P24 and P32 regression fixtures for
+      BOTH conventions - the two-convention split is what produced the false FAIL corrected in FACT-0396.
+  P33 attempt 3 receives GPU ONLY after this preflight passes against the exact built notebook. One
+  environment failure after that stops the mechanism until it is reproduced locally. No fourth speculative
+  kernel.
+
+authority: >-
+  TERMINAL GATE ON GPU. No feature cache launches until this packet certifies that every ambiguity capable
+  of making a null uninterpretable has been removed. That is a hard precondition on Slot A and Slot B, and
+  it sits upstream of PKT-0036's release veto rather than replacing it.
+
+claim: >-
+  Every cache this campaign trains on can be bound, after the fact and by an independent command, to the
+  trunk that produced it, the fold and embryo it belongs to, the normalisation and candidate rule it used,
+  and the exact notebook and commit that ran - so that a null result is attributable to the model rather
+  than to the substrate.
+
+falsifier: >-
+  (a) The band-A non-vacuity fix does not actually fire - if a crop with zero shared band-A pairs still
+      passes the in-kernel gate, the fix is decorative and the gate can still certify nothing;
+  (b) the fold-hygiene fix does not close the inherited-setting route - if a fold-1 spec that inherits its
+      fold from a base notebook is still skipped rather than checked, the hole Agent 4 measured (12 checked,
+      54 skipped) remains and the fold-1 cache run is built through it;
+  (c) the dual-trunk acquisition cannot be made to produce both trunks in ONE session - if it cannot, then
+      FACT-0392's third risk stands and any HOCT null remains confounded with trunk identity;
+  (d) the independent audit command does not FAIL on a deliberately swapped trunk, reordered nodes, an empty
+      probability band, or wrong-fold weights. A checker that has not been shown to reject is not a checker.
+
+prediction: >-
+  Stated before the work. (a) and (b) are small and I expect them to hold. (d) is where the real work is and
+  where I expect the surprises, because each of the four mutations has to be MANUFACTURED to prove the
+  checker rejects it - and manufacturing a convincing swapped-trunk cache is harder than checking one.
+  (c) is the one that could genuinely fail on cost rather than correctness: two trunks in one session
+  doubles the feature pass, and if that does not fit the session budget the honest answer is to say so and
+  propose the sequential alternative with its confound stated, not to quietly cache one.
+
+inputs:
+  facts: [FACT-0387, FACT-0390, FACT-0391, FACT-0392, FACT-0382, FACT-0378, FACT-0369]
+  artifacts:
+    - C:/temp/p33_v2/                       # Gate 1 attempt 2 output, when it lands
+    - C:/temp/p30_f0/                       # the fold-0 reproduction target
+    - C:/temp/p34_f1/                       # the fold-1 substrate, audited
+    - C:/temp/hoct/code/                    # publisher source, for the candidate rule
+  code:
+    - scripts/kaggle_edits/assoc_feature_parity.py
+    - tests/test_loeo_weights_hygiene.py
+    - scripts/win_bet/audit_p33_gate1.py
+    - scripts/win_bet/assoc_train_harness.py
+
+method: >-
+  CPU only, and in this order because each step gates the next.
+  (1) BAND-A NON-VACUITY IN-KERNEL. The gate currently floors band B only, so a crop whose band A compared
+  nothing passes conditions (3) and (4) having verified nothing. The floor is per-crop, so an uncapped run
+  is not immune. Add it, and prove it fires.
+  (2) FOLD HYGIENE. tests/test_loeo_weights_hygiene.py reads the fold from the spec env, so a spec inheriting
+  its fold from a base notebook is skipped. Resolve the EFFECTIVE fold - spec env first, then the base
+  notebook - and check every spec rather than the ones that happen to declare it.
+  (3) DUAL-TRUNK ACQUISITION in one session, so trunk identity is never confounded with contract error.
+  (4) CACHE BINDING. Every cache carries, in a manifest beside it: trunk checkpoint sha256 and provenance,
+  fold and embryo, feature normalisation, node ordering and ids, candidate-graph parameters, and the notebook
+  and source commit that produced it.
+  (5) THE INDEPENDENT AUDIT COMMAND, which must be shown to REJECT a swapped trunk, reordered nodes, an
+  empty band and wrong-fold weights - each demonstrated by mutation, not asserted.
+
+budget:
+  gpu_sessions: 0   # this packet does not launch; it decides whether launching is interpretable
+  submissions: 0
+  wall_clock: 1 day
+
+forbidden:
+  - launching a GPU job, pushing a kernel, or making a submission
+  - modifying scripts/kaggle_edits/assoc_feature_parity.py WHILE P33 v2 IS RUNNING - that would break the
+    version-coherence chain PKT-0036 verified, and the running kernel's code would no longer be the
+    committed code. Prepare the fix; apply it only once P33 has landed and been audited.
+  - claiming any lever, or editing PKT-0029, PKT-0035, PKT-0036 or PKT-0038
+  - running pytest concurrently with another agent - see the 2026-08-30 registry race; the planting lock
+    now serialises the registry suite, but confirm before assuming
+  - .claude/settings.json or .gitignore
+  - staging or committing to git - the primary agent commits explicit paths per packet
+
+outputs:
+  evidence: C:/temp/foundations/ and _evidence/foundations/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: >-
+  FOUNDATIONS ARE **NOT YET** CERTIFIED, AND EXACTLY ONE ITEM REMAINS - APPLYING A PATCH THAT IS
+  ALREADY WRITTEN, TESTED AND PROVEN BY MUTATION. Tasks 2, 3, 4 and 5 are complete and green;
+  task 1 is complete as a change set but is deliberately UNAPPLIED because P33 v2 was still
+  RUNNING at every check this session (kaggle_factory status, 2026-08-30). Applying it would have
+  broken the version-coherence chain this packet forbids breaking.
+
+  (1) BAND-A NON-VACUITY - PREPARED, PROVEN, NOT APPLIED. The gate floors band B at
+  b_checked > 0 but nothing floors band A, so a crop whose band A compared nothing satisfies
+  every band-A condition trivially and is reported passed
+  (scripts/kaggle_edits/assoc_feature_parity.py:232-262). The defect is not hypothetical and did
+  not need manufacturing: the repo own green test
+  tests/test_assoc_feature_parity.py::test_gate_passes_when_the_cache_is_faithful ALREADY runs a
+  crop whose band A compares ZERO pairs - every stub probability is 1/3, nothing clears the
+  deployed 0.5, and the pre-ILP fixture therefore records no band-A edge - and asserts
+  all_passed is True. Measured by running both workers against the identical fixture: committed
+  all_passed=True with band A recorded 0 and reproduced 0; prepared patch all_passed=False with
+  a_checked=0 while band B still checked 27 pairs, so the refusal is the band-A floor and not a
+  collateral band-B failure (_evidence/foundations/band_a_floor_mutation.json). The prepared test
+  additions FAIL against the committed worker and PASS 9/9 against the patched one. The change
+  set is a four-hunk diff plus a fixture correction, at _evidence/foundations/pending/ and
+  C:/temp/foundations/pending/.
+  NOTE FOR WHOEVER APPLIES IT: the fixture correction is NOT optional and NOT cosmetic. The
+  patched worker fails the existing happy-path test until the stub features vary between nodes
+  of a frame, and the spread must be 0.1 rather than 1.0 - at 1.0 the source-axis softmax
+  saturates and swallows the 0.05 perturbation that test_a_corrupted_cache_fails_the_gate
+  depends on, turning the corruption test green for the wrong reason. That was found by running
+  it, not by reading it.
+
+  (2) FOLD HYGIENE - APPLIED AND GREEN. kaggle_factory.apply_edit APPENDS a spec env block after
+  the base notebook existing text (scripts/core/kaggle_factory.py:499-508), so every
+  os.environ assignment the base already carries stays in force unless the spec names the same
+  key. tests/test_loeo_weights_hygiene.py read the fold from the spec env alone and therefore
+  SKIPPED every spec built by inheritance. It now resolves the EFFECTIVE fold - base notebook
+  first, spec env overriding - and fails closed on a base notebook that is not on disk. Coverage
+  measured before and after: the fold-1 guard goes from 12 checked / 54 skipped to 14 / 52,
+  reproducing the PKT-0036 audit numbers exactly, and the fold-0 guard from 19 to 22; 36 of 66
+  specs now have a resolvable fold against 31. Five specs were invisible and TWO OF THEM ARE
+  REALLY FOLD 1: p29_p28_detpeak_export_f1 and p34_acquisition_f1, both built on
+  notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb, which bakes in
+  BIOHUB_LOEO_FOLD = 1. Both happen to be clean, so this closes a hole rather than retracting a
+  result - but the fold-1 feature-cache run is built exactly that way. Seven mutation tests
+  manufacture the defect through the inheritance route and require the guard to fire, including
+  a positive heartbeat that names the two inherited specs so a future refactor cannot silently
+  skip everything again (_evidence/foundations/fold_hygiene_resolver.json).
+
+  (3) DUAL-TRUNK IN ONE SESSION - IT FITS, AND THE PARTITION SHOULD BE BY FOLD, NOT BY TRUNK.
+  Computed from artifacts on disk rather than estimated: fold 0 is 71 crops / 2,332,346 nodes /
+  1,973,714 candidate edges with a measured prediction pass of 86.65 min on T4x2
+  (C:/temp/p30_f0/biohub-p30-acquisition-f0.log); fold 1 is 128 crops / 2,523,479 nodes /
+  2,162,040 edges at 139.27 min (C:/temp/p34_f1/kernel.log). A feature pass is a strict SUBSET of
+  that work - no ILP solve, no post-ILP chain - so doubling it for two trunks is a genuine upper
+  bound and over-counts twice, since the detector pass and the candidate graph are shared. Dual
+  trunk is then at most 2.89 h (f0) and 4.64 h (f1) of prediction, plus 1.36 h of measured
+  non-prediction kernel overhead: 4.25 h and 6.00 h per fold. At 32 float32 per node the dual
+  trunk cache is 0.61 GB (f0) and 0.66 GB (f1) uncompressed. Everything in ONE session is 8.89 h
+  upper bound, which also fits, but one session PER FOLD with BOTH TRUNKS inside is the right
+  shape: the FACT-0392 confound is between TRUNKS, and splitting by trunk is precisely what puts
+  the resolving comparison across a session boundary, whereas splitting by fold introduces no new
+  confound because the contract already forbids pooling the embryo directions. Two fold sessions
+  also sit exactly at the FACT-0061 cap.
+  ONE HARD PRECONDITION INSIDE THE SESSION: both trunk passes must index ONE detector pass, so
+  the two caches differ ONLY in the 32-dim features. That is available rather than aspirational -
+  the PKT-0029 upstream audit item U1 establishes that the HOCT configuration takes node
+  coordinates from a node-graph provider and that peak extraction does not determine the node set
+  at all. audit_feature_cache.py audit-pair REFUSES a pair whose coordinate digests disagree and
+  equally refuses one whose feature digests AGREE.
+  THE SEQUENTIAL ALTERNATIVE, WITH ITS CONFOUND STATED because the packet requires it be stated
+  rather than quietly taken: four (fold, trunk) sessions, two at a time. Two sessions do not share
+  a detector pass unless the node set is carried between them as a fixed input, and FACT-0363
+  already measured that run-to-run identity is not free on this pipeline. Without that carry a
+  trunk-to-trunk difference is confounded with a node-set difference and no HOCT null may be read
+  as evidence about the head. Not recommended; recorded so the choice is visible.
+  UNREGISTERED NUMBER, FLAGGED RATHER THAN USED: the 12 h Kaggle single-session limit is a
+  platform figure that is NOT in facts.yaml. The longest run we have our own evidence for is
+  2.81 h. Every margin above is stated against that unverified 12, so if the primary wants the
+  headroom claim to be load-bearing it should be measured and registered first.
+
+  (4) CACHE BINDING - BUILT. scripts/win_bet/audit_feature_cache.py bind writes a manifest beside
+  the cache carrying trunk checkpoint sha256 plus bytes, role and provenance; fold and held-out
+  embryo and crop list; the feature normalisation and its statistics; the node-id convention with
+  the frame partition and SEPARATE coordinate and feature digests; the candidate rule with floor,
+  cap, gate, det threshold, pool kernel, softmax axis and abstain mass together with the per-band
+  pair counts; and the notebook sha256, spec, kernel and git commit.
+
+  (5) THE INDEPENDENT AUDIT COMMAND - BUILT AND SHOWN TO REJECT, 12/12 BY MUTATION. audit
+  re-derives the binding from disk alone; audit-pair checks a dual-trunk pair; self-test
+  manufactures the defects and requires rejection. Each of the four the packet names is rejected
+  BY THE CHECK DESIGNED FOR IT, which is a stronger claim than that it rejected: a swapped trunk
+  on an unchanged node set fires features_unchanged; a swapped checkpoint fires
+  trunk_checkpoint_sha256; a within-frame coordinate permutation that changes no shape, count or
+  feature value fires node_order_unchanged; a cache with nothing at or below the deployed 0.5
+  floor fires learnable_band_is_not_empty; split_0 weights on fold 1 fire
+  fold1_does_not_use_the_leaky_pack_weights; and a fold declared over the other embryo fires
+  embryo_matches_fold. Two accept controls and three dual-trunk cases are included, because an
+  auditor that rejects everything checks nothing. Getting there required splitting one digest
+  into two - the first version rejected the swapped trunk with a REORDER message, which would
+  have sent an operator to the wrong repair. 17 tests in tests/test_audit_feature_cache.py.
+  Two fail-closed refusals worth knowing BEFORE the cache run is built: a cache without its frame
+  partition is unauditable because node ids are not provable, and a cache without its candidate
+  surface cannot be checked for an empty band - and
+  scripts/win_bet/assoc_feature_cache.py --cache-out currently writes exactly that first shape.
+  The cache-writing run must emit coords, frames, starts, ends, feat_frames, feat_t, source_id,
+  target_id and edge_prob, or the auditor will refuse it.
+
+  VERDICT (first pass): NOT CERTIFIED. One item remained and it was mechanical: apply
+  _evidence/foundations/pending/*.diff once P33 v2 had landed. THAT IS NOW DONE - the band-A
+  floor is committed at scripts/kaggle_edits/assoc_feature_parity.py:271 (`and a_checked > 0`,
+  commit 43d770a) and tests/test_assoc_feature_parity.py is green.
+
+result_preflight_2026_08_30: >-
+  THE PREFLIGHT SYSTEM IS BUILT AND PROVEN, AND ITS FIRST VERDICT ON P33 ATTEMPT 3 IS **FAIL** -
+  ON THE SAME PROCESS-BOUNDARY DEFECT THAT KILLED ATTEMPT 1 (FACT-0387). Caught on CPU in
+  seconds. This is the one case the standing GPU rule names where infrastructure counts as the
+  cycle's output: the harness demonstrably prevented an already-scheduled GPU launch.
+
+  INSTRUMENTS (all new; nothing existing was modified, so the built notebook under audit is
+  untouched):
+    scripts/kaggle_edits/kaggle_mount_ladder.py  the ONE central bounded dataset resolver,
+      written as an INJECTABLE snippet so a kernel patch embeds this text instead of writing a
+      fourth private ladder. Bounded depth ladder, never `**`. Fails closed with a listing of
+      what IS mounted. Positive heartbeat MOUNT_RESOLVED on every hit.
+    scripts/win_bet/kaggle_mounts.py  the CPU face. It does NOT re-implement the ladder - it
+      execs that file, so the resolver the preflight proves and the resolver the kernel runs are
+      the same characters (test: resolve.__code__.co_filename == the ladder path). Also carries
+      simulate_mount_tree (flat / datasets / competitions) and rebase_and_exec, which lifts a
+      resolver OUT OF THE BUILT NOTEBOOK, re-points it at a sandbox and CALLS it. Execution, not
+      a regex over the text.
+    scripts/win_bet/kaggle_artifacts.py  unified queue-fetch / factory-output discovery with role
+      aliases, recording WHICH convention produced the hit and, on a miss, every root searched.
+    scripts/win_bet/gpu_preflight.py  the driver: 10 checks, a signed receipt, and --selftest.
+    tests/test_gpu_preflight.py  20 tests, 20 pass.
+
+  P33 ATTEMPT 3 VERDICT: FAIL, one check, and it is not cosmetic. PF07 launches the built
+  notebook's own worker across the REAL subprocess boundary, in preflight-only mode (argparse and
+  phase dispatch execute; only the GPU-bound phase bodies are stubbed), reproducing the
+  notebook's own launch kwargs. The notebook calls
+  `_afp_sub.run(_afp_cmd, cwd=str(REPO_DIR), text=True, capture_output=True)` with NO `env=`
+  (built notebook cell 5; source scripts/kaggle_edits/assoc_feature_parity.py:399). The worker
+  file lives at /kaggle/working/afp_gate1.py, so sys.path[0] is /kaggle/working, NOT
+  REPO_DIR/scripts - and cwd is not on sys.path for a script invocation. Measured in the probe:
+  sys_path0=<working>, PYTHONPATH=<unset>, and
+  `ModuleNotFoundError: No module named 'predict_unet_transformer'` - FACT-0387 verbatim, one
+  process over. A second, independent break rides with it: biohub_tracking is unresolvable too,
+  because the DEPLOYED shards are launched with env={**os.environ, "PYTHONPATH": "src"} (cell 5,
+  two call sites) and the gate's launcher omits it. The worker's own comment,
+  "resolves because cwd is the repo root", is false.
+  THE FIX IS ONE LINE, and it is proven rather than proposed: the same worker, same sandbox, same
+  probe, with env={**os.environ, "PYTHONPATH": "scripts" + os.pathsep + "src"} imports cleanly
+  and runs on to load_model (selftest M6). "src" alone is NOT enough - the worker is not inside
+  scripts/, which is why copying the deployed shards' env would still fail.
+
+  WHAT THE OTHER NINE CHECKS ESTABLISHED (all PASS):
+    PF01 built notebook sha256 e826a682 == build_manifest.built_sha256; slug, datasets and
+      competition sources agree with the spec; every patch file is committed clean.
+    PF02 both resolvers this spec injects (_afp_find, _loeo_find) were EXECUTED against simulated
+      mounts and resolve under BOTH conventions; no resolver in the notebook can `**`-walk.
+      Recorded finding: SIX independent ladders coexist in this one notebook, each with its own
+      depth ceiling. That is the FACT-0397 generator, and it is why the ladder is now central.
+    PF03 EXACT crops, not a count: ['44b6_0113de3b', '44b6_0b24845f'] - the notebook's own
+      selection rule evaluated against the real uploaded parquet; both are in the fold-0 stem
+      list and both have a train .zarr.
+    PF05 parquet columns and dtypes and every ECB sidecar key the worker reads.
+    PF06 EXACT POSITIVE COUNTS at the 8-frame cap, which is the FACT-0394 lesson applied BEFORE
+      the spend rather than after: 44b6_0113de3b band A 1488 / band B 835; 44b6_0b24845f band A
+      2174 / band B 7585. Every pair is frame-consecutive, node ids are contiguous and
+      time-ordered, and the sidecar's in-scope >0.5 count equals the pre-ILP band-A count exactly
+      (1488 and 2174) - an independent cross-artifact tie on node identity. So the in-kernel
+      a_checked>0 / b_checked>0 floors CAN be satisfied; the gate will not refuse for emptiness.
+    PF08 the gate report is written outside the try block and is in _LOEO_KEEP, so it survives
+      the export sweep.
+    PF09 WEIGHTS_RELATIVE is repo-relative and joined to REPO_DIR; the DeepCenter checkpoint,
+      which the spec env hardcodes as /kaggle/input/<slug>/..., has a datasets/ fallback in cell 6
+      and resolves under both conventions. STATED LIMIT: the pack's edge_predictor_best.pth is not
+      mirrored locally, so only the path SHAPE is checked - recorded, not silently passed.
+    PF10 heartbeat tokens the fetched log MUST carry, named in the receipt so their absence is the
+      alarm. Reported but NOT blocking: scripts/kaggle_edits/coupled_division_transplant.py
+      contains ZERO print calls and cannot prove it fired.
+    PF11 P24 resolves by the queue convention (C:/temp/queue/p24_deepcenter_best_veto) and P32 by
+      the factory convention (notebooks/kaggle_p32_public931_exact/_out) - the two artifacts whose
+      split produced the false FAIL corrected in FACT-0396, now regression fixtures in both the
+      selftest and the test suite.
+
+  PROVED BY MUTATION, 15/15, EVERY CHECK REJECTED BY ITS OWN CONDITION: M1 hardcoded flat mount
+  (finds under flat, misses under datasets); M2 a `**` walk; M3 a 1-frame cap that makes both
+  bands compare nothing; M4 a sidecar torn off the pre-ILP band-A tie; M5 a factory-only search
+  that misses the queue champion; M6 the as-built launcher vs the same worker with
+  PYTHONPATH=scripts+src; M7 one byte added to the built notebook; M8 a receipt edited after
+  signing; M9 a gate patch that cannot say it ran; M10 a selected crop absent from the fold stem
+  list; M11 a sidecar missing edge_prob; M12 the gate report dropped from the keep set; M13
+  weights pinned to an absolute mount path. TWO ACCEPT CONTROLS (A1 the central ladder under all
+  three conventions, A2 P32 by the factory convention), because an auditor that rejects
+  everything checks nothing.
+  ONE CHECKER BUG THE MUTATIONS FOUND, worth recording: the first is_bounded read `**` anywhere in
+  the text and therefore condemned _loeo_find for the sentence in its own docstring explaining why
+  it does NOT use `**`. It now parses glob call arguments with ast.
+
+  RECEIPT: _evidence/foundations/preflight_receipt_p33.json (also C:/temp/foundations/), carrying
+  resolved paths, input sha256s, the exact crop names, the code commit, the expected GPU outputs
+  and the per-crop minimum pair counts. Tamper-evident, NOT authenticated - no secret exists in
+  this repository, and claiming otherwise would be the decorative check this packet exists to
+  remove. `verify-receipt` rejects an edited body and a changed instrument.
+
+  VERDICT: PREFLIGHT SYSTEM CERTIFIED; P33 ATTEMPT 3 IS **NOT CLEARED FOR GPU**. See the
+  correction block below for the final state, which is stronger than this first pass.
+
+result_preflight_corrected_2026_08_30: >-
+  CORRECTED AFTER A FALSE NEGATIVE WAS REPORTED FROM THE FIELD, AND THE CORRECTION FOUND A THIRD
+  KERNEL DEFECT. Agent 2 ran gpu_preflight against a SUBMISSION notebook and PF09 failed on
+  arithmetic of its own: it split /kaggle/input/datasets/<owner>/<slug>/... positionally, took
+  "datasets" for the slug and left the slug inside the "relative" remainder, then mounted that
+  under <owner>/<slug>/ again - `datasets/pilkwang/datasets/pilkwang/...`. The notebook was fine.
+  A checker that cries wolf is worse than none: it teaches a reader to ignore the one time it is
+  right. FIVE bugs of that ONE class were then found in this instrument, all of them "read the
+  code" where the fix is "resolve the code", and every one is now fixed and pinned by a mutation:
+    (i)   PF09 path split -> parse_mount_path(), which handles flat, datasets/<owner>/<slug> and
+          competitions/<slug>, and every probe asserts no duplicated slug segment. Proved in BOTH
+          directions, which the packet's own standard requires: A3 the correct nested root must
+          PASS; M14 a checkpoint under a slug that is not mounted must FAIL.
+    (ii)  PF01 called git status with an EMPTY pathspec when a spec had no code_file edits, which
+          reports the WHOLE worktree - so any such spec failed on another agent's open files.
+          A4 proves the empty question now has an empty answer; M16 proves an uncommitted patch of
+          the spec's OWN is still rejected.
+    (iii) PF07 read the launcher's PYTHONPATH with a regex over the CALL text. When the launcher
+          was rewritten to build a NAMED env dict, the regex saw an env= it could not read and
+          passed none - reproducing a failure the notebook no longer had. It now parses and
+          evaluates the assignment (ast, supporting os.pathsep concatenation).
+    (iv)  PF07's model probe HARDCODED TemporalUNet3D - the UNet, which is a CONSTRUCTOR ARGUMENT
+          - and reported all four of the worker's model calls missing. load_model in fact returns
+          UNetNodeTransformer. The probe now resolves the class from load_model's own source and
+          checks __init__ assignments as well as class attributes.
+    (v)   is_bounded read `**` anywhere in the text and condemned _loeo_find for the sentence in
+          its own docstring explaining why it does not use `**`. It now parses glob arguments.
+
+  ARTIFACT CLASS, added on Agent 2's second point. A submission notebook has no Gate-1 report and
+  never will, so failing it for lacking one is noise - and noise is how a real FAIL gets ignored.
+  Each spec is now classified (submission / gate_smoke / feature_cache / generic) and each check
+  declares the classes it applies to. Out-of-class checks are SKIPPED, named in the receipt, and
+  EXCLUDED from the verdict - never counted as a PASS. The dangerous half is guarded too: a class
+  that SHOULD carry a check but has no implementing profile FAILS CLOSED (M15b), because the
+  original defect here was PF05 and PF06 reporting PASS on P32 while reading P33's dataset. With
+  this, P32 and P24 both preflight to PASS on their five applicable checks.
+
+  THE THIRD KERNEL DEFECT, found only because bug (iv) was fixed rather than worked around. The
+  Gate-1 worker's CACHE phase calls `model.detection_head(unet_out)` (built notebook cell 5, line
+  647; source scripts/kaggle_edits/assoc_feature_parity.py). The class load_model returns,
+  UNetNodeTransformer, has NO such attribute - it is `detect_head`
+  (scripts/train_unet_transformer.py:437, and used as self.detect_head at :487 and :503). The
+  string "detection_head" appears in the support pack ZERO times and in the whole built notebook
+  exactly ONCE, inside the AFP worker. Confirmed against FIVE independently materialised copies of
+  the pack (C:/temp/p7, p7b, lonnie_gap2_output, h1r_edge_s5_smoke_v2 and vendor/) - all say
+  detect_head. So the cache phase would raise AttributeError on the FIRST crop, and a third GPU
+  session would end with zero crops compared. This is exactly the failure the preflight exists to
+  price on CPU.
+
+  WHAT ELSE MOVED WHILE THIS RAN. scripts/kaggle_edits/assoc_feature_parity.py now carries the
+  PYTHONPATH fix diagnosed above (uncommitted at the time of writing, applied by another agent).
+  That is the right fix and the as-if-rebuilt probe confirms it: with it, import
+  predict_unet_transformer succeeds, every AFP attribute the worker uses resolves, and the
+  worker's argparse accepts and dispatches BOTH phases. But the BUILT notebook predates the edit,
+  so PF01 now fails as well - correctly. The built artifact and its patch source have diverged.
+
+  FINAL VERDICT ON P33 ATTEMPT 3: **FAIL - DO NOT PUSH.** Two failing checks, one cause each.
+  PF01: the built notebook no longer matches its patch source. PF07: that notebook still carries
+  the pre-fix launcher, and separately calls model.detection_head, which does not exist.
+  REQUIRED BEFORE GPU, in order: (1) rename detection_head -> detect_head in the worker;
+  (2) rebuild via kaggle_factory; (3) commit the patch and the built notebook; (4) re-run
+  `gpu_preflight run --spec scripts/kaggle_specs/p33_assoc_feature_parity_smoke.json` and require
+  PASS with an empty `failed`. The PYTHONPATH half is already done and already verified.
+  No GPU job, kernel push or submission was made by this packet.
+  SELFTEST: 21/21, every check rejected by its own condition, with four ACCEPT controls.
+
+result_passive_redesign_2026_08_30: >-
+  GATE 1 REBUILT AS PASSIVE INSTRUMENTATION ON HOST ORDER, AND A SIXTH DEFECT WAS FOUND AND
+  MEASURED WHILE DESIGNING IT. CPU only. No GPU job, kernel push or submission.
+
+  THE SIXTH DEFECT, AND IT IS THE SAME CLASS AS THE OTHER FIVE. The deployed node feature is NOT
+  a per-frame quantity. TemporalUNet3D contains _TemporalAttention, which mixes across the time
+  axis of the window (src/biohub_tracking/models/temporal_unet.py:30-48 and :125-131), so
+  unet_out[:, i] depends on every frame in the window. With the deployed window_size 2 and stride
+  W-1 = 1 an interior frame t is the TARGET of pair (t-1, t) from window [t-1, t] AND the SOURCE
+  of pair (t, t+1) from window [t, t+1] - two different forward passes, two different feature
+  vectors. The old worker cached feats[t] once at first sight and reused it for BOTH roles
+  (scripts/kaggle_edits/assoc_feature_parity.py:138-147), so for every pair (t, t+1) with t >= 1
+  it fed the head SOURCE features taken from the wrong window. MEASURED on the real deployed path,
+  not read: 66 of 173 role-nodes appear in both roles and their feature vectors differ by up to
+  0.0123 absolute (3.5% relative, median 1.0%) - 2.1 orders of magnitude above the gate's own 1e-4
+  tolerance (_evidence/foundations/defect6_measurement.json). The error is not uniform across the
+  source axis, so the softmax blind spot would NOT have hidden it: a fourth GPU session would have
+  ended in a FAIL caused entirely by the gate's own reimplementation.
+
+  THE REDESIGN. scripts/kaggle_edits/assoc_feature_tap.py injects a PASSIVE tap into the deployed
+  predict_video by rewriting its source text - the pattern pre_ilp_export.py and
+  edge_candidate_budget.py already use - and records the exact tensors handed to
+  model.predict_edges together with the deployed probabilities computed one line later. Nothing
+  about the image pipeline, normalisation, downsample, voxel scale, detection peaks, window
+  partition, masks or node ordering is recomputed, so the entire FACT-0400 defect class is gone
+  rather than fixed. scripts/win_bet/assoc_tap_replay.py reloads the persisted cache IN A FRESH
+  PROCESS and re-runs ONLY the head. The cache is keyed by (pair, role), not by frame.
+
+  PASSIVITY IS PROVED TWICE, NOT ASSERTED. Statically: every insertion is marker-wrapped and the
+  patch requires that stripping the spans restores the pre-patch bytes exactly; the kernel
+  re-proves that from disk after the run and prints AFT_PASSIVITY_VERIFIED. Dynamically: the CPU
+  suite runs the REAL predict_video over a real zarr, pristine versus tapped, and requires
+  bit-identical coords and edges.
+
+  THE TWO-BAND CONTRACT IS KEPT AND ITS THRESHOLDS ARE UNCHANGED - band A is > cfg.threshold
+  (0.5), band B is the ECB rule (floor 0.02, top-8 per target) minus band A, and both per-crop
+  floors a_checked>0 / b_checked>0 remain (FACT-0394, FACT-0382). What changed is the SOURCE: both
+  bands are recorded at the deployed site in THIS run, so no previous run's parquet or sidecar is
+  an input and none can be stale. That also removes a cross-run assumption FACT-0363 warns against.
+
+  ONE CORRECTION TO THE STATED BLIND SPOT. The invariance is a property of the LOGITS, not of the
+  features: softmax over the source axis is invariant to a PER-TARGET constant offset. The older
+  wording ("a uniform per-frame source shift") is not equivalent, because the head is not affine
+  in the source features. The precise version is asserted in both directions in the suite.
+
+  TESTS: tests/test_assoc_feature_tap.py, 22 passed, in PRODUCTION LAYOUT (module at
+  <repo>/scripts, worker at <working>, cwd=<repo>, real subprocess boundary) against the REAL
+  class surface - no stub anywhere, which is what let model.detection_head survive a green suite.
+  Rejections proved by mutation: the per-frame cache (defect 6), a single perturbed node, a
+  within-frame permutation, a torn window-shape record, an empty band A, an empty band B, an empty
+  cache directory. Accept controls: a lossless round trip, and the as-built launcher. FACT-0399 is
+  re-executed three ways (no PYTHONPATH -> ModuleNotFoundError, src only -> still fails,
+  scripts+src -> passes).
+
+  PREFLIGHT. The instrument now carries a second Gate-1 PROFILE (assoc_feature_tap) so the new
+  spec is classified rather than silently skipped; PF03/PF05/PF06 have profile implementations
+  and PF07 extracts and launches the tap's own worker. Verdict on the rebuilt notebook
+  (scripts/kaggle_specs/p36_assoc_feature_tap_smoke.json, built by kaggle_factory, sha256 in
+  _evidence/foundations/feature_tap_redesign.json): 9 of 10 applicable checks PASS, nothing
+  skipped, and the single FAIL is PF01 because the two new patch files are UNCOMMITTED - this
+  packet is forbidden from staging. Receipt: _evidence/foundations/preflight_receipt_p36.json.
+
+  A PRE-EXISTING SELFTEST FAILURE WAS FOUND AND FIXED. M6 was already failing on the committed
+  instrument (verified by running HEAD's copy: 20/21), because it used the LIVE P33 notebook as
+  its defective fixture and that notebook had since been rebuilt with the env= fix. A mutation
+  that borrows its defect stops proving anything the moment the artifact is repaired, and a
+  selftest that cries wolf teaches a reader to ignore it. M6 now MANUFACTURES the stripped
+  launcher. With that plus A5/M17/M18/M19 for the new profile, SELFTEST is 25/25.
+
+  WHAT REMAINS UNPROVEN UNTIL A GPU RUN. (i) Nothing here has been executed on T4x2 or against
+  the real 50-epoch weights; the CPU fixture uses a randomly initialised trunk. (ii) The
+  CPU-versus-GPU float path is the reason this gate runs on GPU at all, so the 1e-4 tolerance is
+  unverified for the real model. (iii) The cache SIZE at full-fold scale is estimated, not
+  measured - the role-keyed layout roughly doubles feature storage against the old per-frame
+  estimate, and positional features add more again. (iv) scripts/win_bet/audit_feature_cache.py
+  still expects the per-frame feat_{t} layout and will REFUSE the new cache; its schema must be
+  moved to the role-keyed one before a full acquisition, and that is a required follow-up, not an
+  optional one. (v) PF01 cannot pass until the primary commits the new patch files and the built
+  notebook.
+
+result_contract2_smoke_prepared_2026_08_30: >-
+  THE CONTRACT-2 GPU SMOKE IS BUILT, PREFLIGHTED AND HELD. CPU only. No kernel push, no GPU job,
+  no submission. It is a NEW EXPERIMENT and NOT a re-version of P36: FACT-0410 and FACT-0411 are
+  explicit that the archived P36 cache is contract 1, keeps its evidentiary value, loses its
+  training licence, and admits no legacy read-only mode. New spec, new out_dir, new slug, new
+  kernel id. The EXP id is REQUESTED FROM THE COORDINATOR (next free is EXP-0044); this packet
+  does not write experiments.yaml.
+
+  BUILD SHA 48d68bfbde052ecbb852ae583563a62852f9255b5924ff4c128003b1680f3c1f -
+  notebooks/kaggle_p37_assoc_feature_tap_c2_smoke/biohub-p37-assoc-feature-tap-c2-smoke.ipynb,
+  11 cells, base P3 harmonic 70b636b6..., spec
+  scripts/kaggle_specs/p37_assoc_feature_tap_c2_smoke.json.
+
+  THE EMBARGO IS LIFTED, AND HOW I VERIFIED IT. "python -m kaggle kernels status" (READ ONLY) on
+  aryaarun07/biohub-p33-assoc-feature-parity-smoke and on
+  aryaarun07/biohub-p36-assoc-feature-tap-smoke both return COMPLETE, so nothing this packet
+  edits is in flight. The band-A floor this packet recorded at
+  scripts/kaggle_edits/assoc_feature_parity.py:271 is in fact at :280-281 - a line-number drift
+  in our own record, corrected here. That worker is the SUPERSEDED design; the live floor is the
+  tap gate's per-band checked>0 over all three bands.
+
+  SCOPE, DELIBERATELY NARROW. FACT-0407 already re-derived the P36 cache on CPU against the real
+  pack weights and reproduced the GPU verdict to seven digits, so cache faithfulness on CPU is
+  settled and is NOT re-litigated. What remains is (i) the CPU/GPU float boundary on the real
+  50-epoch weights - every parity number we hold is a CPU number and the 1e-4 probability /
+  1e-3 logit tolerances have never met a T4 forward pass - and (ii) the contract-2 surfaces P36
+  never recorded.
+
+  THE SIX CONDITIONS, CONFIRMED IN THE BUILT ARTIFACT AT cell:line, NOT IN THE SPEC AND NOT IN
+  THE PATCH SOURCE (_evidence/foundations/p37_built_artifact_conditions.json):
+    (a) PRE-BLEND and POST-BLEND are SEPARATE columns - 6 _preblend and 4 _postblend columns,
+        ZERO unqualified probability or logit names anywhere in the cache schema or the flush
+        payload (cell 5 lines 703-711, 1005).
+    (b) PAIR-AND-ROLE identity - 8 role_* columns and an 8-column pair table, no frame-keyed
+        column survives (cell 5 lines 700, 965-971).
+    (c) contract_version 2 at three sites (cell 5:596, 5:627, 5:1360), schema EXACTLY 79 required
+        keys plus one optional, every required key emitted, and the flush raises on any set
+        difference in EITHER direction before a file is written (cell 5:1016).
+    (d) ONE POSITIVE HEARTBEAT PER CROP - AFT_TAP crop= at cell 5:1047 and AFT_REPLAY crop= at
+        cell 5:1841 - and the COUNT asserted EXTERNALLY, which is new. See the in-kernel fix
+        below.
+    (e) FAIL CLOSED at 11 named sites - no cache files, a missing per-crop file, a crop that
+        captured nothing (AFT_TAP_EMPTY), passivity broken, schema drift, an unqualified column,
+        a contract-1 cache, an anchor matching other than once, an unimportable worker, and the
+        new crop-count floor.
+    (f) THE DEPLOYED COORDINATE RESCALE - applied where the deployed code applies it
+        (coords * ds_t, cell 5:841, the same ds_arr as predict_unet_transformer.py:336-337 and
+        :801), the factor RECORDED (cell 5:920), the flush anchored AFTER the concatenate at :798
+        and BEFORE the rescale at :800-802 so the cache holds the downsampled grid, and now
+        CHECKED in-kernel.
+
+  TWO IN-KERNEL ADDITIONS, EACH PROVED BY MUTATION AGAINST A FIXTURE AT THE DEPLOYED (1,4,4).
+  (1) CROP-COUNT FLOOR. all_passed is an ALL over the crops that EXIST, so a run that captured
+  one of two - or whose second crop raised before the flush - passes it exactly as well as a
+  complete run; PKT-0036 measured that. The expectation is now carried IN from the spec
+  (BIOHUB_AFT_EXPECT_CROPS = 2 -> --expect-crops) and gates all_passed, with AFT_CROP_COUNT_OK as
+  the positive heartbeat and AFT_CROP_COUNT_FAILED as the alarm. Mutation
+  test_the_gate_refuses_a_run_that_captured_fewer_crops_than_expected requires the refusal while
+  every per-crop verdict still passes, so the refusal is the COUNT and nothing else; ACCEPT
+  control test_the_gate_accepts_the_crop_count_it_was_told_to_expect.
+  (2) COORDINATE-RESCALE INTEGRITY. The gate now requires
+  role_coord_scaled == coords[:, 1:] * downsample. Mutation
+  test_a_torn_coordinate_rescale_fails_the_gate ASSERTS the fixture downsample is (1,4,4) before
+  mutating - a (1,1,1) fixture is what let defect 7 through, and a mutation run there would be
+  vacuous.
+  Both hunks were written into scripts/win_bet/assoc_tap_replay.py, which is the SINGLE SOURCE
+  for the worker, and re-embedded by sync_tap_worker.py. Editing the kernel patch's string
+  literal directly would have passed every test I ran and drifted at the next sync; the repo's
+  own drift lock caught it.
+
+  PREFLIGHT VERDICT ON THE EXACT BUILT NOTEBOOK - 9 of 10 applicable checks PASS, NOTHING
+  SKIPPED, and the single FAIL is PF01 because scripts/kaggle_edits/assoc_tap_gate.py is
+  uncommitted and this packet is forbidden from staging. That is the whole remaining gap.
+  Receipt (signature verified) at _evidence/foundations/preflight_receipt_p37.json, also
+  C:/temp/foundations/. Resolved paths - support pack C:/temp/p7/tracking_repo, train root
+  data/train, local mirror C:/temp/identity_ds2. Input hashes - 10 of them - spec, built
+  notebook, base notebook, all five injected patch files, and the DEPLOYED predictor at sha256
+  25b3ebfd8849..., the 1047-line support-pack copy carrying BOTH fusion stages, never
+  vendor/kaggle-cell-tracking (FACT-0408). EXACT crops 44b6_0113de3b and 44b6_0b24845f, from the
+  notebook's own selection rule evaluated against the real stem list; both in the fold-0 list,
+  both with a train .zarr, each offering 99 frame pairs against a cap of 8. Code commit b52750f7.
+
+  FIVE INSTRUMENT DEFECTS FOUND AND FIXED, ALL ONE CLASS - read the code where the fix is resolve
+  the code - and every one would have produced a FALSE FAIL or a FALSE PASS on a correct
+  contract-2 notebook.
+    (vi)   PF05's dynamic-key expansion HARDCODED the contract-1 band fields and only bands a and
+           b, so it invented band_a_prob / band_b_prob as read-but-never-written and failed a
+           correct notebook. It now resolves the worker's own BANDS tuple and expands each
+           f-string subscript over it, following module-level constants so contract 1 still
+           resolves.
+    (vii)  PF06 detected the non-vacuity floor by matching the literal a['checked'] > 0. The
+           contract-2 worker floors every band in one comprehension over BANDS, so PF06 reported
+           a fully floored worker as unfloored. It now requires, for every band the worker
+           declares, a ["checked"] > 0 comparison that is either named for that band or lexically
+           inside a loop over BANDS - and M20 proves the generic form is NOT read as covering
+           bands it does not reach.
+    (viii) PF06's mutation-evidence list named test_the_gate_refuses_an_empty_band_a/_b, which
+           contract 2 replaced with one function parametrised over BANDS - and the decorator's
+           argument is a NAME, so a regex over the decorator text found nothing. It now parses
+           the fixture and follows the constant.
+    (ix)   THE RECEIPT'S OWN expected_gpu_outputs WAS HARDCODED TO THE CONTRACT-1 PARITY WORKER.
+           A passive-tap run was told to require AFP_PHASE, AFP_CACHE and
+           ASSOC_FEATURE_PARITY_COMPLETE - tokens a correct tap run NEVER prints - and told
+           nothing about AFT_TAP, whose absence is the only sign the instrument recorded nothing.
+           The post-run audit reads this file, so the hardcoding would have failed a good run and
+           said nothing about a bad one. It is now resolved from PF08 and PF10 and separates
+           tokens whose ABSENCE is the alarm from tokens whose PRESENCE is.
+    (x)    input_hashes held a single entry keyed on the string "None" whenever a profile had no
+           parquet input - a null wearing the name of a hash. It now hashes ten real inputs.
+    A LAUNCH DEFECT, NOT A CODE ONE - the spec's title slugified to
+    biohub-p37-assoc-feature-tap-contract-2-smoke while the declared slug was ...-c2-smoke.
+    Kaggle slugifies the TITLE, so the push would have diverged and status/fetch would have
+    broken. Title corrected before the final build; the slugified title now equals the declared
+    slug exactly.
+    A HARNESS DEFECT - the tap-profile selftest fixtures were pinned to the ARCHIVED P36 build,
+    which is contract 1, a program that cannot exhibit a contract-2 defect at all. Proving
+    PF05/PF06 there is FACT-0408's rule one level up. The block now discovers every tap spec with
+    a built notebook, derives each mutation from the artifact it is mutating, and A6 requires
+    that a contract-2 artifact was actually exercised.
+
+  TESTS AND SELFTESTS, ALL GREEN AND ALL RUN BY EXPLICIT PATH (no shared-registry suite, no
+  concurrent full pytest) - gpu_preflight selftest 35/35 with four new cases (M20 partial floor,
+  M21 the receipt names the tap's heartbeats, M22 the receipt hashes real inputs, A6 contract-2
+  coverage); audit_feature_cache self-test 38/38, which independently lands on the same
+  bytes-per-node figure; and pytest tests/test_gpu_preflight.py tests/test_audit_feature_cache.py
+  tests/test_assoc_feature_tap.py = 146 passed.
+
+  STORAGE, RE-DERIVED RATHER THAN INHERITED (_evidence/foundations/p37_launch_plan.json). Built
+  from the tap's own declared dtypes in the BUILT notebook - a role row is 302 B at feat_dim 32
+  and pos_dim 32, a band row 64 B, a union row 24 B, node-side 120 B - and the per-node bounds
+  are arithmetic, not fitted: at most 2 role rows by the stride, at most 1 band-A and 1 band-P
+  row per target because a source-axis softmax sums each column to 1 (FACT-0369), and at most 8
+  band-B rows by the tap's own cap. That gives 1580 B/node uncompressed, which the auditor's
+  independent constant reproduces exactly. FULL FOLD, from the run logs rather than prose - fold
+  0 is 71 crops / 2,332,346 nodes, 3.43 GiB single trunk and 6.86 GiB dual; fold 1 is 128 crops /
+  2,523,479 nodes, 3.71 GiB single and 7.43 GiB dual. THE FOLD-0 TABLE IS CALIBRATED - it gives
+  26,169 and 33,432 nodes for the two smoke crops, EXACTLY P36's recorded per-crop counts, so it
+  is the right arm to project from. The pre-ILP run_stats.csv tables (1,978,105 and 2,020,713
+  raw_nodes) do NOT tie on either crop and measure a different quantity; they are rejected here
+  rather than averaged in.
+  THIS SUPERSEDES THIS PACKET'S OWN EARLIER ESTIMATE of 0.61 GB (f0) and 0.66 GB (f1) dual trunk.
+  That figure assumed 32 float32 per node - 128 B - and no band, logit, positional or partition
+  storage. The contract-2 pair-and-role cache is 12.3x larger per node, so anyone sizing a
+  session from the old number would be out by an order of magnitude. NO CAPACITY VERDICT IS
+  OFFERED - the projector refuses a guessed budget by design, and the Kaggle output limit is not
+  in facts.yaml.
+
+  DUAL-TRUNK MANIFEST - PREPARED, AND THE HONEST STATE IS THAT THE MECHANISM EXISTS AND THE
+  ARTIFACT DOES NOT. Both trunks are located and pinned by sha256 on disk - official
+  d3e89eb361eeadef... (8,357,783 B, HOCT publisher DEFAULT_WEIGHTS loeo_official_f0_e3/split_0)
+  and stabledet 32d8048692aeb95f... (8,357,783 B, the StableDet trunk in the HOCT bundle). The
+  trunk the SMOKE itself runs is the support pack's split_0 primary, 12f6881ee3620a83...
+  (8,363,159 B), whose identity is checkable rather than asserted because the same sha256 appears
+  at three independent materialisations. The manifest binds trunk sha256, bytes, role, provenance
+  and state-dict shape; fold, held-out embryo and crop list; feature normalisation; node ordering
+  with SEPARATE coordinate and feature digests; the candidate-graph parameters; the cache
+  contract version; the fusion stages that ran; and the notebook sha256, spec, kernel and commit.
+  The exact bind and audit-pair commands are written out in the launch plan. This SMOKE is
+  single-trunk by design, so it does not close FACT-0411's third blocker; the hard precondition
+  for the run that does is that both trunk passes index ONE detector pass, and audit-pair refuses
+  a pair whose coordinate digests disagree and equally refuses one whose feature digests agree.
+
+  THE LAUNCH COMMAND, WRITTEN OUT AND NOT EXECUTED. Only after the coordinator commits
+  scripts/kaggle_edits/assoc_tap_gate.py, scripts/win_bet/assoc_tap_replay.py,
+  scripts/win_bet/gpu_preflight.py, tests/test_assoc_feature_tap.py, the new spec and the built
+  notebook, and PF01 then passes on a re-run -
+    .\.venv\Scripts\python.exe scripts\core\kaggle_factory.py push --spec scripts\kaggle_specs\p37_assoc_feature_tap_c2_smoke.json
+
+  WHAT COULD NOT BE EXERCISED ON CPU, NAMED RATHER THAN SKIPPED SILENTLY.
+    1. THE CPU/GPU FLOAT BOUNDARY ON REAL WEIGHTS. Applicable, and the ONLY scientific reason
+       this smoke needs GPU at all. The 1e-4 probability and 1e-3 logit tolerances are verified
+       on CPU against a randomly initialised trunk and, via FACT-0407, on CPU against the real
+       pack weights - never on a T4 forward pass.
+    2. THE REAL 50-EPOCH TRUNK IN THE KERNEL. Applicable. The support pack's
+       edge_predictor_best.pth is not mirrored under the local pack tree, so PF09 checks the path
+       SHAPE only. The file is on disk at three other locations and is sha256-pinned in the
+       launch plan, but the kernel's resolution of it is unverified until it runs.
+    3. T4x2 AND DataParallel BEHAVIOUR. Applicable in principle. The tap copies tensors at a site
+       inside predict_video; whether replica threads change what is captured is untested, and
+       AGENTS.md records two failures of exactly that class.
+    4. THE ACTUAL PER-BAND COUNTS. NOT predictable before the run, and correctly so - under
+       same-run instrumentation the bands are produced by the run itself, and predicting them
+       from a previous run is the cross-run assumption FACT-0363 warns against. Enforcement
+       replaces prediction: the per-band checked>0 floors, proved to fire by mutation.
+    5. TRUE FULL-FOLD STORAGE AND WALL CLOCK. Not applicable to this artifact class - the smoke
+       is capped at 8 frame pairs per crop, so its footprint says nothing about an uncapped run.
+       The projection above is analytic and its compression credit is deliberately zero.
+    6. DUAL-TRUNK ACQUISITION. Not applicable to this artifact class - the smoke is single-trunk
+       on purpose. It remains FACT-0411's third launch blocker for the full-fold run.
+
+  CANDIDATE FACTS FOR THE COORDINATOR (this packet does not write facts.yaml).
+    CF-A  Contract-2 worst-case cache storage is 1580 bytes per detected node, RE-DERIVED from
+          the tap's declared dtypes in the built notebook - role row 302 B at feat_dim 32 and
+          pos_dim 32 bounded at 2 rows per node, band row 64 B at 10 rows, union row 24 B at 9
+          rows, node-side 120 B - and independently reproduced by
+          audit_feature_cache.schema_bytes_per_node. Full fold, uncompressed, no credit - fold 0
+          2,332,346 nodes gives 3.43 GiB single and 6.86 GiB dual trunk; fold 1 2,523,479 nodes
+          gives 3.71 GiB single and 7.43 GiB dual. Scope - uncapped run, role_pos stored,
+          band_b_topk 8. Instrument _evidence/foundations/p37_launch_plan.json. Provenance
+          MEASURED. SUPERSEDES this packet's earlier 0.61/0.66 GB dual-trunk estimate, which was
+          128 B/node and 12.3x low.
+    CF-B  The fold-0 node table in C:/temp/p30_f0/biohub-p30-acquisition-f0.log (71 crops,
+          2,332,346 nodes) ties EXACTLY to P36's recorded per-crop node counts on both smoke
+          crops (26,169 and 33,432, FACT-0403), while the pre-ILP run_stats.csv tables give
+          25,639 and 22,830 and sum to 1,978,105. The two tables measure different quantities and
+          must not be substituted for one another in a capacity projection. Provenance VERIFIED,
+          instrument the parse recorded in _evidence/foundations/p37_launch_plan.json.
+    CF-C  DEFECT CLASS, INSTANCES 6 THROUGH 10, all in this packet's own instruments and all
+          caught on CPU - PF05's hardcoded contract-1 band fields, PF06's literal-form floor
+          detector, PF06's stale mutation-test names, the RECEIPT's hardcoded contract-1 expected
+          outputs, and input_hashes keyed on the string "None". Each produced a FALSE FAIL or a
+          FALSE PASS on a correct contract-2 notebook, and the receipt one is the most dangerous
+          because the post-run audit reads it and nobody re-derives it. Every one is now resolved
+          from the artifact and pinned by a mutation (selftest 35/35). Provenance VERIFIED,
+          instrument scripts/win_bet/gpu_preflight.py selftest.
+    CF-D  The band-A non-vacuity floor recorded at
+          scripts/kaggle_edits/assoc_feature_parity.py:271 is actually at :280-281. Line-number
+          drift in our own record; the file and the commit are correct. Provenance VERIFIED.
+
+  NOTHING WAS PUSHED, LAUNCHED OR SUBMITTED. No lever claimed. facts.yaml, levers.yaml and
+  experiments.yaml untouched; nothing staged or committed.
+
+addendum_auditor_v1_r4_r5_2026_08_30: >-
+  ANSWERING THE AUDITOR. CPU only; nothing pushed, staged or committed.
+
+  V1 - THE FILE IS FINAL, AND A SECOND FILE MUST TRAVEL WITH IT OR HEAD BREAKS.
+  scripts/kaggle_edits/assoc_tap_gate.py is in its final intended state. But it is NOT a
+  hand-written file: it is GENERATED from scripts/win_bet/assoc_tap_replay.py by
+  scripts/win_bet/sync_tap_worker.py, which embeds the worker's text in the kernel patch's
+  _AFTG_WORKER literal, and tests/test_assoc_feature_tap.py::
+  test_the_kernel_patch_carries_the_committed_worker fails the moment the two disagree.
+  assoc_tap_replay.py is ALSO dirty. COMMITTING THE GATE PATCH ALONE WOULD LEAVE HEAD WITH A
+  FAILING DRIFT LOCK. (This is not theoretical - I first wrote the two hunks straight into the
+  embedded literal, and that lock is what caught it.) Verified just now: `sync_tap_worker.py
+  --check` says "in sync", and of the six code_file sources P37 injects only assoc_tap_gate.py is
+  dirty, which matches the auditor's independent result exactly.
+  THE COMMIT SET, and each entry has a reason rather than being swept in:
+    scripts/win_bet/assoc_tap_replay.py          the SINGLE SOURCE for the replay worker
+    scripts/kaggle_edits/assoc_tap_gate.py       its sync output; the injected patch PF01 checks
+    scripts/win_bet/gpu_preflight.py             five instrument fixes + 4 new selftest cases
+    tests/test_assoc_feature_tap.py              3 new tests: crop-count reject, crop-count
+                                                 accept, torn coordinate rescale
+    scripts/kaggle_specs/p37_assoc_feature_tap_c2_smoke.json    the new spec
+    notebooks/kaggle_p37_assoc_feature_tap_c2_smoke/            built notebook, manifest, metadata
+  REBUILD AFTER THE COMMIT: a plain re-run of
+  `kaggle_factory.py build --spec scripts/kaggle_specs/p37_assoc_feature_tap_c2_smoke.json`, and
+  nothing else needs regenerating with it. The built notebook is a pure function of the base
+  notebook, the spec and the patch bytes; a commit changes none of those, so the rebuild
+  REPRODUCES 48d68bfbde052ecbb852ae583563a62852f9255b5924ff4c128003b1680f3c1f. I verified that
+  determinism twice, including across a spec title change that alters kernel-metadata.json but
+  not a byte of the notebook. THEN re-run the preflight - that IS required, because the receipt
+  records `code_commit` and PF01 re-reads git state; the receipt is stale the moment the commit
+  lands. Optionally run `sync_tap_worker.py --check` after the commit as a one-second guard.
+
+  R4 - CONFIRMED, AND THE PATH IS WRONG IN A SPECIFIC WAY WORTH KNOWING.
+  scripts/win_bet/assoc_specs/harness_f0.json names cache.trunk
+  "C:/temp/hoct/trunks/official_f0.pth". No such FILE exists; the artifact on disk is a
+  DIRECTORY, C:/temp/hoct/trunks/official_f0/edge_predictor_best.pth. harness_f1.json names
+  "C:/temp/hoct/trunks/official_f1.pth", and there is no official_f1 artifact in ANY form -
+  every trunk under C:/temp/hoct/trunks/ is an _f0 trunk. Neither spec carries fold_legitimate.
+  I did NOT edit either file: harness_f1.json carries a "REPOINTED 2026-08-30 (PKT-0038)" note
+  and that packet is live, so a concurrent write to another packet's spec is the race this
+  project has already paid for once. The corrected values are written out in
+  _evidence/foundations/p37_trunk_inventory.json for whoever owns them.
+
+  R5 - THE PESSIMISTIC READING IS WRONG ON ITS PREMISE, AND THE REAL PROBLEM IS BROADER THAN
+  ROUTED. FOLD 1 DOES HAVE A FOLD-LEGITIMATE TRUNK AND IT IS ON DISK: our own OOF split_1,
+  sha256 2e4ebf616b3d4fb5..., 8,357,783 bytes, at
+  artifacts/kaggle/weights_dataset/edge_predictor_best_split_1.pth, shipped as the Kaggle dataset
+  aryaarun07/biohub-oof-weights (verified read-only with `kaggle datasets files`), which every
+  fold-1 spec already attaches and resolves through
+  BIOHUB_LOEO_WEIGHTS_GLOB=/kaggle/input/*/edge_predictor_best_split_1.pth
+  (scripts/kaggle_edits/loeo_retarget.py:105-124).
+  A NEAR MISS WORTH RECORDING, because it would have inverted this verdict: a `find` over
+  C:/temp returns NOTHING for split_1, and on that evidence I would have reported the trunk
+  missing. The file lives in the repository's own `artifacts/` tree, which is gitignored and
+  skipped by default - the exact trap AGENTS.md names, and the same class as FACT-0396's
+  unfinished glob.
+  WHAT IS ACTUALLY TRUE, AND IT IS BROADER. Every declared dual_trunk_pair in
+  scripts/win_bet/assoc_specs/ is ['official', 'stabledet'], and BOTH are marked
+  fold_legitimate false on BOTH FOLDS, not only fold 1. The only legitimate roles are
+  pack_split0 (fold 0) and oof_split1 (fold 1), and NEITHER appears in any declared pair. So the
+  declared pair has no legitimate arm on either fold.
+  WHY THAT IS NOT AUTOMATICALLY FATAL, stated so the fix is not over-scoped: the dual-trunk pair
+  exists to remove FACT-0392's confound - trunk identity is a --weights argument recorded nowhere
+  in the checkpoint - and that is a CONTROL, not a claim. A control arm needs to be a DIFFERENT
+  trunk over the SAME node set; it does not need to be fold-legitimate. What it must never be is
+  read as a result.
+  THE HONEST SHAPE. Fold 1: pair oof_split1 (the CLAIM arm, fold_legitimate) against exactly one
+  control, and stabledet is the better control than official - see the correction below, official
+  is byte-identical to our split_0 and split_0 is LEAKY on fold 1 (the EXP-0019 defect), so an
+  official/oof_split1 pair would put a leaky checkpoint inside the fold-1 session for no gain.
+  Fold 0: pair pack_split0 (which is already the P37 smoke's trunk) against stabledet; fold 0 in
+  fact has TWO legitimate trunks, since our OOF split_0 is clean there too.
+  ONE THING THAT MUST CHANGE BEFORE ANY MANIFEST CLAIMS A PAIR, and it is not this packet's to
+  change: audit_feature_cache.PKT0029_REQUIRED_TRUNK_ROLES is ('official', 'stabledet'), so
+  audit-pair --require-roles would REFUSE the honest pair above and ACCEPT a pair with no
+  legitimate arm. That constant encodes the pre-R5 assumption. Named here so it is met on CPU
+  rather than at launch.
+  NOT A BLOCKER FOR THIS SMOKE: P37 is single-trunk on pack_split0 by design and claims no pair.
+
+  A CORRECTION TO THIS PACKET'S OWN LAUNCH PLAN, found while answering R5.
+  C:/temp/hoct/trunks/official_f0/edge_predictor_best.pth is BYTE-IDENTICAL (sha256
+  d3e89eb361eeadef...) to artifacts/kaggle/weights_dataset/edge_predictor_best_split_0.pth - OUR
+  OWN out-of-fold split_0. My earlier block recorded the role's documented provenance ("HOCT
+  publisher DEFAULT_WEIGHTS, loeo_official_f0_e3/split_0") instead of hashing the bytes. That is
+  the same mistake in miniature this whole lineage keeps making, and it is now retracted:
+  PROVENANCE FOR THE "official" ROLE IS UNVERIFIED and must not be asserted in any manifest until
+  someone establishes what that file actually is. Unchanged and still verified: the trunk the P37
+  smoke runs is the support pack's split_0 primary, sha256 12f6881ee3620a83..., 8,363,159 bytes -
+  a DIFFERENT checkpoint from our OOF split_0 despite the shared name, confirmed at three
+  independent materialisations. All five trunks are bare state dicts, 136 tensor entries and ZERO
+  non-tensor keys, with byte-identical config.json - so nothing but the sha256 distinguishes them,
+  which is exactly why the manifest binds it.
+
+  ADDITIONAL CANDIDATE FACTS FOR THE COORDINATOR:
+    CF-E  The trunk registered under the role "official"
+          (C:/temp/hoct/trunks/official_f0/edge_predictor_best.pth, sha256 d3e89eb3...) is
+          BYTE-IDENTICAL to our own OOF split_0
+          (artifacts/kaggle/weights_dataset/edge_predictor_best_split_0.pth). The role's
+          documented provenance as a publisher trunk is therefore unsupported by the bytes on
+          disk. All five candidate trunks are bare state dicts (136 tensor entries, zero
+          non-tensor keys) with byte-identical config.json, so sha256 is the only discriminator.
+          Provenance VERIFIED, instrument _evidence/foundations/p37_trunk_inventory.json.
+    CF-F  Fold 1 HAS a fold-legitimate trunk: our OOF split_1, sha256 2e4ebf61..., 8,357,783
+          bytes, at artifacts/kaggle/weights_dataset/ and in the Kaggle dataset
+          aryaarun07/biohub-oof-weights. But every declared dual_trunk_pair in
+          scripts/win_bet/assoc_specs/ is ['official','stabledet'], both marked fold_legitimate
+          false on BOTH folds, so no declared pair contains a legitimate arm on either fold - and
+          PKT0029_REQUIRED_TRUNK_ROLES would refuse a pair that did. Provenance VERIFIED, same
+          instrument.
+    CF-G  scripts/win_bet/assoc_specs/harness_f0.json and harness_f1.json name trunk paths that
+          do not exist (official_f0.pth against a directory official_f0/, and official_f1.pth
+          against nothing at all) and carry no fold_legitimate field. FACT-0043 class. Provenance
+          VERIFIED, same instrument. Not edited by this packet - PKT-0038 is live on harness_f1.

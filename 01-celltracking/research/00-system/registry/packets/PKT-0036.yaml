@@ -1,0 +1,631 @@
+id: PKT-0036
+title: "AGENT 4 - landing audits and launch control, with veto over every downstream launch"
+lever: null              # an auditor holds no hypothesis - see `why_no_lever`
+owner: agent-4-release-auditor
+lock: claimed
+opened: '2026-08-29'
+
+why_no_lever: >-
+  Same reason PKT-0033 held none: an auditor that owns a hypothesis has a stake in the answer. R6 permits a
+  null lever, which is also the mechanical reason this packet cannot collide with PKT-0029 (LEVER-0034),
+  PKT-0034 (LEVER-0041) or PKT-0035 (LEVER-0040).
+
+scope_extension_2026_08_30: >-
+  EXTENDED to RELEASE AUDITING, keeping the pending P33 audit. Added: bind every submission artifact into a
+  receipt joining notebook, weights, manifest, graph and predicted score; detect row-order dependence, empty-
+  band success, graph-id drift, cross-fold leakage and code-version mixing; and ENFORCE THE SEAM-CALIBRATION
+  EXCEPTION - exactly one standalone submission for the first genuinely new model class that passes the
+  honest fold-0 gate. That slot is this packet's to release and no other packet's to spend.
+  FIRST DUTY: the champion transition. FACT-0393 records submission 55871868 at 0.931, above the 0.928 P24
+  champion, but the champion of record stays P24 until this packet issues a release receipt binding the
+  artifact together. Baseline relocation is not capability, and the receipt is what makes the relocation
+  auditable rather than assumed.
+
+authority: >-
+  VETO OVER DOWNSTREAM LAUNCHES (host, 2026-08-29). No feature cache, no fold-1 surface materialisation and
+  no training run proceeds on an artifact this packet has not passed. A veto is exercised by recording a
+  FAIL receipt naming the condition and the evidence; it is not a matter of opinion and it is not overridden
+  by a passing heartbeat elsewhere. The authority runs one way - this packet can stop a launch, and cannot
+  authorise one that a gate did not license.
+
+claim: >-
+  Every artifact this cycle consumes carries a pass/fail receipt naming the condition it met, the evidence
+  that shows it, and the commit it was produced at - so no scientific claim downstream rests on an artifact
+  whose provenance was assumed.
+
+falsifier: >-
+  Inverted, as PKT-0033's was: this packet fails if it issues a PASS without having exercised the named
+  condition, or if it reports a clean audit without saying what it ran that would have caught a failure.
+  "The heartbeat was present" is not an audit of the thing the heartbeat describes. An empty grep is not
+  evidence - ripgrep -E means --encoding, and _evidence/ and artifacts/ are gitignored and skipped silently
+  by default.
+
+audit_targets:
+  p33_gate1: >-
+    EXP-0041, on landing. All six preregistered conditions, and the crop-count requirement is EXTERNAL by
+    construction: the kernel's all_passed does NOT assert two crops, so a report with a crop count other
+    than 2 is a FAIL regardless of what all_passed says. Also confirm the verify phase ran as a separate
+    process, that band B compared a non-zero number of sub-threshold pairs, and that node-count mismatches
+    are empty. Record the known blind spot - a uniform per-frame source shift is invisible to this gate - as
+    a limit on what the PASS licenses, not as a failure.
+  p34_acquisition: >-
+    EXP-0039, on landing. Champion graph parity against the P28 fold-1 control; ECB patch heartbeat with one
+    export line per crop and no zero-export crop; deployed candidate reconstruction; stable node IDs;
+    cross-run node ordering against the 2026-08-19 preilp_f1_v2 export via
+    scripts/win_bet/preilp_crossrun_stability.py; then the fold-1 contested census, INCLUDING the outcome
+    where fold 1 remains too thin to falsify a ranker, which PKT-0030 falsifier (e) named in advance.
+  leakage: >-
+    Independently verify every training split and cache manifest produced by PKT-0034 and PKT-0035 for
+    embryo leakage. Trace the subtle routes, not only the declared ones: fold-wide statistics reaching a
+    feature, hyperparameters selected on the judged fold, and checkpoints whose provenance is not
+    split-specific. FACT-0378 is the precedent.
+  version_coherence: >-
+    Confirm no running or landed artifact mixes commits or code versions - that the built notebook, the spec,
+    the patch sources and the committed tree agree, and that a fetched result names the kernel version it
+    came from.
+  report_completeness: >-
+    REJECT any model result missing raw association, the count-adjustment contribution, node recall, or
+    division TP/FP/FN. A summary not produced by scripts/win_bet/assoc_report.py is not a result.
+
+inputs:
+  facts: [FACT-0387, FACT-0382, FACT-0373, FACT-0378, FACT-0381, FACT-0364, FACT-0376]
+  artifacts:
+    - C:/temp/p33/           # attempt 1 evidence, for contrast with attempt 2
+    - C:/temp/p30_f0/
+    - C:/temp/preilp_f1_v2/preilp_split1.parquet
+  code:
+    - scripts/win_bet/audit_p30_acquisition.py
+    - scripts/win_bet/preilp_crossrun_stability.py
+    - scripts/win_bet/audit_assoc_contract.py
+    - scripts/core/kaggle_factory.py
+
+method: >-
+  CPU only, read-and-run. Build the receipt harness NOW against attempt 1's retained artifacts and the P30
+  fold-0 evidence, so that the moment P33 or P34 lands the audit is a command rather than a design exercise.
+  Verify every premise at file:line or by rerunning committed code. Where a check needs a script it goes in
+  scripts/win_bet/ and fails closed, with a positive heartbeat whose ABSENCE is the alarm.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: continuous through the cycle
+
+forbidden:
+  - editing any model implementation - this packet audits, it does not compete
+  - claiming any lever, or editing PKT-0029, PKT-0034 or PKT-0035
+  - polling submission 55871868 or touching PKT-0028 - audit it only after the score arrives through the
+    established path
+  - issuing a PASS on a condition it did not exercise
+  - launching a GPU job, pushing a kernel, or making a submission
+  - staging or committing to git - the primary agent commits explicit paths per packet
+  - .claude/settings.json
+
+outputs:
+  evidence: C:/temp/audit_receipts/ and _evidence/audit/receipts/
+  facts_added: []
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md per audited artifact
+
+result: >-
+  INTERIM 2026-08-30, P33 STILL RUNNING. The receipt harness is built, self-tested and dry-run; P34 is
+  fully audited; P33's audit is now a single command waiting on the kernel.
+
+  P34 (EXP-0039) - USABLE, with one named exception. Audits B, C and D PASS on all 128 crops
+  (heartbeat on 128 distinct crops with both treatment variables unset, all 2,162,040 deployed edges
+  contained in a 7,157,163-candidate export at 3.31x, zero unknown ids, zero non-adjacent edges,
+  128/128 sidecars present). Audit A FAILS AS SPECIFIED and the acquisition is NOT the cause: 127 of
+  128 crops are byte-identical to the P28 fold-1 control and the divergent crop is 6bba_e16ffc58 at
+  +5 nodes / +4 edges - the SAME crop and the SAME deltas FACT-0352 recorded under a completely
+  different patch. P34's decompressed graph is byte-identical to P29's, so two independently patched
+  runs agree with each other and disagree with P28; the common factor is P28's draw. Mechanism, from
+  run_stats: raw_nodes identical everywhere (detection bit-identical), ILP raw_edges differ on 5 crops
+  (FACT-0363 degeneracy), and on this one crop the extra edge changes which components fall under
+  OUTPUT_MIN_TRACK_LEN=6 (short_track_components_removed 61 vs 62). CONSEQUENCE: FACT-0363's "~2 edge"
+  noise floor understates the FINAL-graph amplification, which reaches 5 nodes / 4 edges on ~1 crop in
+  128, and any paired fold-1 delta against the P28 control must exclude that crop or declare it.
+
+  The pre-ILP export is BYTE-IDENTICAL to the 2026-08-19 preilp_f1_v2 parquet, and the kernel log shows
+  the roll-up computing that sha256 in-run, so it was re-derived rather than inherited (FACT-0350
+  satisfied). Cross-run stability passes on all 128 crops with zero node-identity failures and zero
+  edge differences: every fold-1 analysis keyed to that parquet stays joinable.
+
+  FOLD-1 CONTESTED CENSUS - PKT-0030 falsifier (e) DOES NOT FIRE. On the widened surface fold 1 has
+  91,410 decidable targets, 26,601 contested (29.1%) with deployed contested top-1 0.7084 and 7,757
+  errors, against fold 0's 4,157 / 0.8338 / 691. Fold 1 is now the RICHER surface by 6.4x in contested
+  targets and 11.2x in errors, at a materially lower deployed top-1. The FACT-0382 framing carries over
+  unchanged: this population exists only at the 0.1 acquisition floor, so a ranker must be scored as
+  (widened surface + ranker) against the DEPLOYED control through the full chain.
+
+  LEAKAGE. Three findings, ranked. (1) The EXP-0019 guard has a HOLE: test_loeo_weights_hygiene derives
+  the fold from BIOHUB_LOEO_FOLD in the spec env, so a fold-1 spec that inherits its fold from a fold-1
+  BASE NOTEBOOK is skipped - measured, 12 specs checked and 54 skipped, P34 among the skipped. P34 sets
+  the split_1 glob correctly anyway, and no fold-1 spec in the tree is missing it, but the fold-1
+  feature-cache run will be built exactly this way and the guard would not catch its omission.
+  (2) HOCT checkpoint provenance, PKT-0033 finding 12, is RESOLVED from the checkpoints themselves:
+  fold0_toql and fold0_pqlt carry an explicit cache_files list of 128 crop stems, ALL 6bba, and
+  fold0_hoct_hard_negative reports training_files 128 while fold1_hoct_hard_negative reports 71 - the
+  exact crop counts of the two embryos. HOCT's fold labels name the HELD-OUT fold, matching our
+  convention, so fold0_* is clean for our fold 0 and fold1_* for our fold 1, and crossing them is an
+  EXP-0019-class leak. But fold0_edge_predictor_best.pth is a BARE state_dict with no provenance at all
+  and there is no fold-1 base predictor in the inventory, so a fold-1 HOCT evaluation has no clean trunk
+  to use. (3) The PKT-0032 crossfit map still declares train_external true on Zebrahub, which PKT-0035's
+  own `forbidden` prohibits until the FACT-0385 anti-alignment is solved.
+
+  Agent 2's harness guards were EXERCISED, not read: assert_group_integrity refuses a straddling target,
+  a shared crop and an empty side while accepting a legal split; verify_licence refuses a missing
+  licence, a mutated cache and an uncovered crop and accepts an intact one; write_licence refuses a
+  failed gate. P33's Gate-1 fail-closed behaviour is exercised by its own 8 subprocess tests, which pass.
+
+  VERSION COHERENCE PASSES for both kernels by NON-DESTRUCTIVE REBUILD - the build manifest hashes the
+  edit SPEC, not the code_file bytes, so only a rebuild binds the patch source to the notebook that ran.
+  P33's built notebook is unchanged from commit 7c15b23, confirming EXP-0041's claim. Named gap: fetch
+  and log bind no kernel version, so a diagnostic run's recorded version stays an assertion.
+
+  P33 (EXP-0041) IS PENDING. scripts/win_bet/audit_p33_gate1.py enforces all six conditions, rejects
+  attempt 1 on all six as a dry run, and its self-test catches seven mutations INCLUDING two the
+  kernel's own all_passed reports true for: a one-crop run, and a band A that compared nothing - the
+  kernel imposes a non-zero floor on band B only, so a vacuous band A would make conditions (3) and (4)
+  pass having verified nothing. Until it returns PASS, no feature cache and no head training is licensed.
+
+  Instruments added: scripts/win_bet/audit_p33_gate1.py, audit_version_coherence.py,
+  audit_split_leakage.py, audit_result_completeness.py, audit_graph_parity_attribution.py, and
+  tests/test_audit_receipt_harness.py (13 tests). Receipts in _evidence/audit/receipts/ and
+  C:/temp/audit_receipts/. Zero GPU, zero submissions, no model implementation or foreign packet touched.
+  REGISTRY COLLISION - DETECTED, SCOPED, AND NOW REPAIRED; THE VETO IS LIFTED. Found by the closing gate
+  run: validate_registry.py exited 1 and 9 tests in tests/test_registry_validity.py failed, because
+  facts.yaml and experiments.yaml had been ROUND-TRIPPED THROUGH A YAML DUMPER - all 113 and 29 comment
+  lines destroyed - while levers.yaml, hand-edited, kept its 52. Established with yaml.safe_load of
+  `git show HEAD:<path>` against the worktree entry by entry, never from the diff. No entry was added or
+  lost (34 experiments, 195 facts both sides) but three semantic fields moved that no packet authorised:
+  EXP-0009 deployed -> void, which R8 propagated onto FACT-0001; FACT-0130 lost its validity_reason; and
+  FACT-0131 lost BOTH its validity: INVALID and its reason, silently undoing a leak retraction.
+
+  A SECOND, WORSE DEFECT APPEARED DURING THE REPAIR AND WAS CAUGHT BEFORE IT SETTLED. The dumper wrote the
+  facts sequence at column 0; the coordinator's re-appended FACT-0388 and FACT-0389 used the original
+  2-space indent; and YAML then parsed BOTH as items 6 and 7 of FACT-0387's `tags` LIST rather than as
+  facts. The file parsed, the validator passed, `yaml.safe_load` returned 195 entries ending at FACT-0387,
+  and the two new facts did not exist while also corrupting their host's tags. A silent no-op that looks
+  exactly like success - the AGENTS.md class - and no rule-based check can see it, because the rules only
+  run over entries that parsed as entries.
+
+  STATE AT CLOSE, RE-VERIFIED AFTER THE RESTORE SETTLED: facts.yaml 197 entries with all 113 comments,
+  experiments.yaml 34 entries with all 29, EXP-0009 back to `deployed`, FACT-0130 and FACT-0131 carrying
+  their validity_reason again (262 and 420 chars), FACT-0387's tags six clean scalars, FACT-0388 and
+  FACT-0389 present as real VALID entries. validate_registry.py exits 0 "registry OK" and all 16
+  registry-validity tests pass. levers.yaml's LEVER-0034 note and the PKT-0029 / PKT-0034 / PKT-0036
+  result blocks are intact - the collision touched none of them.
+
+  STANDING WARNING: a further `git checkout` of facts.yaml would now DESTROY FACT-0388 and FACT-0389,
+  which exist only in the working tree. This packet ran a load-then-dump on no shared file at any point
+  and holds no such code: its five instruments contain no yaml.dump or yaml.safe_dump, and the sixth,
+  scripts/win_bet/audit_registry_drift.py, reads with read_text, never serialises YAML, and refuses an
+  --out path inside the registry. Registry-wide changes are routed to the coordinator, not to the file.
+
+  CONTINUED 2026-08-30 (later). CHAMPION TRANSITION RELEASED; P33 STILL RUNNING SO THE FEATURE-CACHE
+  VETO STANDS.
+
+  RELEASE RECEIPT ISSUED for P32 / EXP-0038 / submission 55871868 (FACT-0393): 26 of 26 conditions
+  pass. The new instrument scripts/win_bet/audit_release_receipt.py joins notebook, weights, manifest,
+  graph and score in one artifact, and tests/test_audit_release_receipt.py plants 16 defects - float
+  coordinates, an illegal in-degree, a mutated graph, a notebook edited after build, slug divergence,
+  a smuggled dataset, a spec edited after audit, a score outside its band, a fired falsifier, a
+  registry disagreement, an upstream divergence, an applicable defect rule not recorded, and four
+  fail-closed cases - each caught by its own named condition. The strongest condition was not on the
+  inherited list: a FRESH PULL of stephennedumpally/pls-upvote-share-higher-scoring-ideas today has
+  cell sources byte-identical to the executed notebook (de60a4f0..., id_no 131761963), which
+  re-establishes the verbatim claim the build itself had destroyed. The score was re-derived through
+  the submissions path, and the preregistered band 0.925-0.932 is written into the submission
+  DESCRIPTION, so Kaggle timestamps the preregistration before the score existed.
+
+  THE OUTGOING CHAMPION FAILS THE SAME RECEIPT, at graph_fetched. P24 has no submission.csv, no
+  structural audit and no version-bound audit receipt on disk; FACT-0341 cites
+  notebooks/kaggle_p24_deepcenter_best_veto/_out/ and that directory does not exist, because
+  notebooks/**/_out/ is gitignored and the absence is silent. The transition moves the baseline from
+  an UNBOUND artifact to a BOUND one. Five exceptions are named rather than papered over: (E1) the
+  P32 spec sets base_notebook == built_notebook, so cmd_build overwrote its own base - spec/manifest
+  base_sha256 b998e582 exists nowhere in the worktree or in git history and `build` now aborts on
+  this spec; (E2) build_manifest.json is uncommitted, the only change being the push read-back
+  pushed_slug line; (E3) cmd_verify is VACUOUS for this spec for the same base==built reason; (E4)
+  dataset_sources carry no version pin; (E5) FACT-0378's scope.leaderboard_legitimacy - "the hidden
+  test movies are not among the 199" - has no instrument and is not covered by that fact's
+  validity_reason. Measured here: all four VISIBLE test movies ARE train movies, and the hidden set
+  cannot be inspected. It does not block the transition and it does bound the interpretation.
+
+  A LIVE VETO FOUND THIS SESSION. scripts/win_bet/assoc_specs/harness_f1.json names
+  C:/temp/assoc/f1.parquet, which is the DEPLOYED surface - 2,162,040 rows, 2,162,040 targets, max 1
+  candidate per target, contested share 0.0000, minimum probability exactly 0.5, i.e. FACT-0369's
+  set. Its cache.preilp and cache.ecb_dir are pre-P34 paths. The widened surface FACT-0388 was
+  measured on holds 3,704,355 rows at 38.1% contested. The harness's refusal was EXERCISED rather
+  than read: run_harness(allow_degenerate=False) raises HarnessRefusal on a synthetic
+  single-candidate table and runs clean on a two-candidate one, so nothing degenerate can be emitted
+  silently. Residual hazard: allow_degenerate true. A fold-1 ranker result carrying it is vetoed.
+
+  OPEN ITEMS RE-CHECKED. (a) Agent 1's effective-fold resolver verified by INDEPENDENT
+  re-implementation over all 66 specs - fold-1 visibility 12 -> 14, newly visible exactly
+  p29_p28_detpeak_export_f1 and p34_acquisition_f1, zero unreadable base notebooks, 78 passed /
+  131 skipped. Residual limit measured not assumed: the regex cannot see setdefault, update, a
+  trailing comment, str(1) or an f-string; latent today because the only setdefault key in
+  notebooks/ is POLARS_PREFER_PKG. THE FIX IS UNCOMMITTED. And the P34 kernel log independently
+  shows "LOEO primary weights OVERRIDDEN -> ...edge_predictor_best_split_1.pth", so the hole did not
+  bite on the one run it could have. (b) Still open and sharper: trunks/stabledet_f0 is
+  byte-identical (32d80486) to HOCT's bare fold0_edge_predictor_best.pth; all three trunks in play
+  are bare 136-tensor state dicts at 2,077,996 params with ZERO non-tensor keys; trunks/primary is
+  now identified by hash (12f6881e) as our DEPLOYED edge predictor via the P34 kernel log's own
+  "Weight sha256" line. Fold-1 HOCT stays vetoed; hoct_compat.py already scopes itself to fold 0.
+  (c) Unchanged - the PKT-0032 crossfit map still declares train_external true on Zebrahub. (d) The
+  in-kernel gate still floors band B only; the external audit's band-A floor stays binding.
+
+  FACT-0350 DISCHARGED BY MEASUREMENT: C:/temp/preilp_f1_v2/preilp_split1.parquet and
+  C:/temp/p34_f1/preilp_split1.parquet are both b94bb1fb..., and the P34 kernel log shows the
+  roll-up computing that digest in-run. The inherited path is admissible because the bytes are the
+  same, not because inheriting was permitted.
+
+  THE PLANTING LOCK HOLDS, EXERCISED ACROSS TWO PROCESSES: the holder held 8 s, a second process
+  attempting acquisition 2.9 s in blocked 5.13 s and acquired only after release, then the lock file
+  was gone. Cross-process mutual exclusion is real.
+
+  SEAM-CALIBRATION SLOT: UNSPENT, held here. No genuinely new learned association model has passed
+  the honest fold-0 full-chain gate - LEVER-0039's simple-feature form is killed (FACT-0386),
+  LEVER-0034's Gate 1 is still running, and the HOCT CPU reconstruction is explicitly not a Gate 1
+  pass.
+
+  P33 / EXP-0041 remains RUNNING at close (status read three times). No feature cache and no head
+  training is licensed. audit_p33_gate1.py --selftest re-exercised today: 7/7 mutations caught,
+  including the one-crop run and the vacuous band A the kernel's own all_passed reports true for.
+  Known limit of a future PASS, recorded so the licence is not over-read: the gate compares
+  post-softmax probabilities over the SOURCE axis, so a uniform per-frame source shift is
+  mathematically invisible to it.
+
+  Instruments added: scripts/win_bet/audit_release_receipt.py, tests/test_audit_release_receipt.py.
+  Receipts: _evidence/audit/receipts/{release_p32,release_p24,champion_transition,launch_control,
+  p32_version_coherence}.json and C:/temp/audit_receipts/. Zero GPU, zero submissions, no model
+  implementation and no foreign packet touched; nothing staged or committed.
+
+  SCOPE CORRECTION, SAME SESSION, ON THE F1 VETO. scripts/win_bet/assoc_specs/tournament_context_f0.json
+  and tournament_context_f1.json appeared in the worktree mid-audit and were read rather than assumed:
+  the fold-1 one points at C:/temp/audit_receipts/f1_p34.parquet (the WIDENED table) with
+  cache.preilp C:/temp/p34_f1/preilp_split1.parquet and cache.ecb_dir C:/temp/p34_f1/ecb,
+  allow_degenerate false and no_claim true. It supersedes harness_f1.json, so the veto attaches to
+  that STALE SPEC and not to the fold-1 lane. ONE NEW RISK REPLACES IT: the tournament reads its
+  evaluation table out of THIS PACKET'S OWN AUDIT SCRATCH, so an auditor clean-up would silently
+  destroy the fold-1 evaluation surface. Materialise the widened fold-1 table under C:/temp/p34_f1/
+  or C:/temp/assoc/ and repoint the spec before the tournament runs.
+
+  CORRECTION ISSUED AGAINST THIS PACKET'S OWN RECEIPT, SAME SESSION. The champion-transition receipt
+  schema_version 1 recorded the OUTGOING champion P24 as having no fetched submission artifact. THAT
+  WAS AN AUDITOR ERROR, not a finding. audit_release_receipt.py searched only <out_dir>/_out/, the
+  kaggle_factory fetch location, but P24 was run by kaggle_queue.py, which fetches to
+  C:/temp/queue/<spec name>/ - where a complete and PASSING artifact set had been on disk since
+  2026-08-27: audit_receipt.json verdict PASS at kernel version 1, submission.csv sha256 1f5c5900...,
+  structural_audit.json verdict PASS, 122,184 nodes / 117,944 edges / 309 divisions, fractional 0,
+  in-degree 1, out-degree 2. It was found only by FINISHING a search that had been started and
+  killed; the first pass used a depth-1 glob that cannot see /c/temp/queue/p24_*. An unfinished
+  search must never become a verified negative - the AGENTS.md "check whether it is already on disk"
+  class, and this packet's falsifier names precisely this failure. A SECOND false FAIL from the same
+  run: score_fact_present reported that P24 had preregistered no band, when FACT-0341 simply uses the
+  older flat scope.band_prereg / central_prereg / falsifier / fired shape instead of FACT-0393's
+  nested scope.preregistered. P24 declared 0.921-0.929 before its run.
+
+  CORRECTED RESULT: P24 passes 25 of 25 and P32 passes 26 of 26. The transition is between TWO FULLY
+  BOUND ARTIFACTS, not from an unbound baseline to a bound one. The release verdict is unchanged -
+  RELEASED - but its reasoning is not, and the earlier reasoning must not be quoted.
+
+  THE FINDING THAT SURVIVES, and it is narrower: FACT-0341's `instrument` field cites
+  "notebooks/kaggle_p24_deepcenter_best_veto/_out/", a path that does NOT exist. The registry points
+  at the wrong location for the champion's own evidence, and notebooks/**/_out/ is gitignored so the
+  absence is silent. That is what sent the auditor to an empty directory. PROPOSED REGISTRY CHANGE:
+  amend FACT-0341's instrument to C:/temp/queue/p24_deepcenter_best_veto/ and normalise its
+  preregistration fields to the scope.preregistered / scope.outcome shape.
+
+  INSTRUMENT REPAIRED AND PINNED. audit_release_receipt.py now searches both fetch conventions,
+  accepts --fetched-dir, RECORDS which location produced the evidence, and normalises both
+  preregistration shapes. Five new tests: the queue artifact is found; the resolved location is
+  recorded; a genuinely absent artifact still FAILS so the fix is not a pass-by-default; the legacy
+  preregistration shape is accepted; and the legacy shape still catches a fired falsifier. Suite for
+  this packet's instruments: 37 passed.
+
+  P33 / EXP-0041 LANDED WHILE THIS PACKET WAS CLOSING. GATE 1 FAILED AGAIN AND THE FEATURE-CACHE
+  VETO IS CONFIRMED, NOT LIFTED. Kernel version 2, status COMPLETE, fetched to C:/temp/p33_v2.
+  The report is crops: [] with all_passed false and error "FileNotFoundError: pre-ILP parity target
+  not found in the mounted inputs", raised at t=238 s; audit_p33_gate1.py returns verdict FAIL with
+  all six conditions failing. ZERO CROPS COMPARED, for the second attempt running.
+
+  ROOT CAUSE, READ OUT OF THE RUN'S OWN LOG RATHER THAN INFERRED. assoc_feature_parity.py:310-319
+  hardcodes /kaggle/input/biohub-identity-replay-f0/meta/preilp_split0.parquet and one sibling. In
+  this environment every dataset mounts at /kaggle/input/datasets/<owner>/<slug>/ - visible in this
+  kernel's log for all three pilkwang datasets, and in the P34 log for the support pack. The string
+  "identity" never appears anywhere in the P33 log. The dataset itself is correct and was attached:
+  aryaarun07/biohub-identity-replay-f0, 75,029,747 bytes, last updated 2026-08-29 17:02, and its
+  file list enumerated through the API is exactly 71 ecb/*.npz plus meta/preilp_split0.parquet and
+  meta/run_stats.csv. THE RELATIVE PATH IS RIGHT AND ONLY THE MOUNT ROOT IS WRONG - a one-line fix,
+  not a redesign.
+
+  AND THE TRAP WAS ALREADY WRITTEN DOWN IN THE SAME DIRECTORY, TWICE, IN A FILE THE NOTEBOOK ALREADY
+  LOADS. scripts/kaggle_edits/loeo_retarget.py:88-100 records it verbatim from 2026-08-01 - "a
+  fold-1 kernel died at t=628 s because the declared glob was /kaggle/input/*/<file> while datasets
+  were mounted at /kaggle/input/datasets/<owner>/<slug>/<file>" - and ships the fix, _loeo_find, a
+  bounded depth ladder on the basename. h1r_edge_kernel_run.py:35-42 implements the same defence
+  independently and ranker_block.py:209 hardcodes the correct owner-qualified form. This is the
+  premise-check rule in AGENTS.md section 4, against a premise already documented in the patch
+  directory the author was editing.
+
+  RECOMMENDED REPAIR, NOT APPLIED - THIS IS PKT-0029'S CODE AND THIS PACKET AUDITS IT: route the
+  lookup through the resolver already present in the notebook (_loeo_find or _find_input) rather
+  than a hardcoded candidate list, and assert the resolved path exists BEFORE any GPU work so the
+  failure lands at t~0 instead of t=238 s. The authority here runs one way - this packet can stop a
+  launch and cannot license one.
+
+  THE FAIL-CLOSED DESIGN PAID FOR ITSELF A SECOND TIME. AFP_FAILED printed, the report recorded zero
+  crops rather than silence, ASSOC_FEATURE_PARITY_COMPLETE all_passed= False was emitted, and the
+  two feature-cache sessions this gate would have unlocked were again NOT spent. Cost of the failure:
+  one GPU session, no submission, deployed output unchanged.
+
+  STANDING: the known blind spot of any FUTURE pass is unchanged and must be recorded with it - the
+  gate compares post-softmax probabilities over the SOURCE axis, so a uniform per-frame source shift
+  is mathematically invisible to it.
+  CYCLE 2026-08-30c - ADVERSARIAL AUDIT OF FOUR CONCURRENT AGENTS. Three vetoes, thirty-one verified
+  non-vetoes, seven findings routed to the coordinator. Receipts: _evidence/audit/receipts/
+  {a4_cycle_2026_08_30c, a4_repro_gate_f0, a4_repro_gate_a_refit, a4_repro_mirror_f0_to_f1,
+  a4_refusals_exercised, a4_ledger_refusals_exercised, a4_p37_preflight}.json and C:/temp/audit_receipts/a4c/.
+
+  VETO 1 - PHASE 2 IS BLOCKED, ON ITS OWN PREFLIGHT. gpu_preflight run against the P37 spec returns
+  VERDICT FAIL, failed=[PF01], skipped=[]. The evidence key is
+  body.checks[PF01].evidence.uncommitted_patch_files = ["M scripts/kaggle_edits/assoc_tap_gate.py"].
+  Confirmed independently: of the six code_file patch sources P37 injects, five are byte-identical to
+  HEAD after LF-normalisation and git-clean; assoc_tap_gate.py alone differs in CONTENT. The built
+  notebook therefore embeds code with no commit. Nothing else about the artifact failed and nothing was
+  skipped. Remedy is one commit and a rebuild; this packet does not stage or commit.
+
+  VETO 2 - THE WIDENED-CONTROL TRAP IS UNGUARDED IN THE ONLY PROMOTABLE SUMMARY. assoc_report.py:199-276
+  takes `control` as a caller-supplied list with no provenance binding, and verdict() at :279-317 applies
+  eight conditions, none of which binds control to the DEPLOYED arm. A finished grep for
+  widened|deployed control|control_provenance|FACT-0382 over assoc_report.py and test_assoc_report.py
+  returns ZERO hits in both. Latent, not fired - full_chain is None in every payload in flight. Scoped to
+  full-chain promotion; it does NOT block Phase 2.
+
+  VETO 3 - THE FOCUS-3D ACQUISITION RECORD CANNOT CARRY VERIFIED OR MEASURED. A FINISHED search across
+  C:/temp, ~/.cache and ~/Downloads for model_final* returns ZERO hits; no .pth over 100 MB exists in
+  C:/temp; the HF cache blobs/ directory is EMPTY and its snapshot holds one file, README.md. Yet
+  paramcount.json states 411,638,146 parameters, 886 state-dict entries and a per-module breakdown with
+  NO sha256, and `find scripts -iname "*focus*"` shows no committed instrument produced it. AGENTS.md
+  requires a named artifact and committed code for MEASURED, re-derivation for VERIFIED; neither exists,
+  which is FACT-0043's precedent verbatim. I cannot distinguish a count read off the released TENSORS from
+  one taken on a randomly-initialised instantiation of the architecture, and that is the whole claim. Two
+  licence facts ARE artifact-derived and may stand as VERIFIED: weights Apache-2.0 from the downloaded
+  README, code BSD-style from LICENSE at GitHub 184fc5f - they genuinely differ.
+
+  WHAT WAS REPRODUCED RATHER THAN READ. GATE_B was re-derived OUTSIDE the harness by unpickling the frozen
+  model and predicting once, with no fit() anywhere in the script: contested top-1 0.8171758479672842,
+  gained 133 / lost 202 / churn 335 - identical to FACT-0414 in all sixteen digits. GATE_A was
+  independently refitted: delta EXACTLY 0.0, gained 36 / lost 36, churn 72 - the exact cancellation is
+  REAL and reproducible, and tie-breaking is not the mechanism (ties-at-top are ZERO on all three arms).
+  The NEW 2x2 cell, the one with no published counterpart, reproduces exactly: 0.7150107138829367,
+  +0.006616292620578168, gained 473 / lost 297 / churn 770. Both surfaces carry exactly one true parent
+  per decidable target (19,444/19,444 and 91,410/91,410), zero duplicate candidate rows, zero join loss;
+  the folds are embryo-disjoint with an EMPTY crop intersection.
+
+  CONTRACT 2 IS REAL IN THE ARTIFACT THAT WOULD RUN, not only in the repo: the schema AST-extracted from
+  cell 5 of the built P37 notebook is 79 keys with exact set equality against the auditor in BOTH
+  directions, contract version 2, band P on primary_probs_preblend, and ZERO contract-1 markers in the
+  schema. The deployed-pack pin holds at 1,047 lines and 181 'secondary' against the vendored 677 and
+  ZERO, so FACT-0408's counts reproduce.
+
+  THE LOST-EDGE LEDGER PASSES, AND ITS CONTRACT WAS EXERCISED. Exhaustive on both folds pooled AND on
+  every one of 71 and 128 crops; assert_exhaustive REFUSES dropped mass, double-counted mass and cat6
+  absorbing cat4, and ACCEPTS a closing ledger. FACT-0370 reconciles exactly on all four fold-1 counts as
+  a code assertion, and fold 0's reachable 18,466 independently equals FACT-0382's floor sweep at 0.50.
+  The floor is declared DEPLOYED, cat5 is flagged provisional, and divisions are carried on their own
+  denominator.
+
+  THE LEVER-0043 FALSIFIER WAS NOT REWRITTEN, AND THE LIMIT OF THAT FINDING IS STATED. The authorisation
+  is a SIBLING KEY, host_authorisation_2026_08_30; all eleven authorisation probe tokens are ABSENT from
+  the falsifier scalar; clause (a) retains its full original gate force verbatim; the edit added one lever,
+  changed ZERO pre-existing ones and preserved all 86 comment lines. BUT no baseline exists - LEVER-0043
+  is in neither HEAD nor this packet's 00:21 snapshot - so byte-level non-modification is NOT provable.
+  The cross-source witness is PKT-0041, written earlier and carrying no authorisation field, whose
+  independent restatement of (a) and (f) agrees with the current text.
+
+  PRIOR VETO CLOSED BY EXERCISE. load_surface REFUSES C:/temp/audit_receipts/ by name and ACCEPTS the
+  relocated table (3,704,355 rows), so it is not a blanket guard; the two copies are byte-identical at
+  798e17cd7e2d7df7. run_harness REFUSES the degenerate deployed fold-1 surface before any fit, and I
+  measured that surface myself at 2,162,040 rows, 81,053 decidable, ZERO contested, prob_min 0.5000002.
+
+  ROUTED TO THE COORDINATOR, NOT WRITTEN HERE - this packet writes no registry file. R1 FACT-0413's
+  recorded value appears in neither payload (6.0e-14 from the emitted figure). R2 surface_sha256_16 hashes
+  WORKTREE bytes, so under core.autocrlf=true one commit yields two stamps and a payload cannot be bound
+  to a commit. R3 FACT-0414's "a silent refit would be visible in the payload" is false - n_fit_calls_
+  reaches no payload; the conclusion stands on the no-op itself. R4 harness_f0/f1.json name trunk .pth
+  files that do not exist and declare no fold_legitimate. R5 the fold-1 dual-trunk pair contains only
+  fold-ILLEGITIMATE trunks. R6 FACT-0370 is a DEPLOYED-floor partition - now satisfied by the ledger.
+  R7 the host authorisation is on the lever but NOT on PKT-0041, whose forbidden block still bars the
+  acquisition it now permits.
+
+  PHASE 2 VERDICT: BLOCKED, on VETO 1 alone. Everything else about the contract-2 smoke cleared.
+  Zero GPU, zero submissions, no kernel pushed, no model implementation touched, no foreign packet
+  edited, nothing staged or committed.
+  CYCLE 2026-08-30d - TWO DELIVERABLES. Receipts: _evidence/audit/receipts/
+  {a4_cycle_2026_08_30d, a4_p37_gpu_contract, a4_p37_preflight_pass}.json and C:/temp/audit_receipts/a4d/.
+
+  MY OWN V1 IS DISCHARGED, AND I RE-RAN IT RATHER THAN ACCEPTING THE CLEARANCE. gpu_preflight on the
+  P37 spec now returns VERDICT PASS, failed=[], skipped=[] - all eleven checks exercised. Both
+  assoc_tap_gate.py and assoc_tap_replay.py are git-clean at 07c4366, and the larger commit set was
+  NECESSARY: tests/test_assoc_feature_tap.py locks sync_tap_worker.rendered() to assoc_tap_gate.py, so
+  committing the file my veto named ALONE would have left HEAD failing its own drift lock. That trap is
+  now clause CODE-2.
+
+  DELIVERABLE 1 - THE GPU PROTECTION CONTRACT IS AN INSTRUMENT, NOT A CHECKLIST.
+  scripts/win_bet/gpu_protection_contract.py with tests/test_gpu_protection_contract.py. Seventeen
+  clauses across CODE, DATA, PROCESS and ARTIFACT, all failing closed; a clause that cannot be
+  evaluated is a FAILURE and never a skip, and signing REFUSES outright when the built notebook is
+  absent. Proved by MUTATION, not assertion: 22/22 mutations caught and 21 tests pass. Rejections
+  exercised include a generated file edited without re-rendering, two specs sharing slug and out_dir,
+  the vendored predictor against the deployed pin, the FACT-0418 pair with no fold-legitimate arm, an
+  illegitimate role EVEN WHEN the spec declares fold_legitimate true, a crop count absent or
+  disagreeing with the run limit, an env that never reaches the subprocess, and a capacity guard with
+  no denominator. Critically ART-2 refuses a 14M-node run that the SUPERSEDED 128 B/node would have
+  passed, and the test asserts that premise so a regression to the old constant fails loudly instead
+  of silently disarming the guard. TWO ACCEPT-CONTROLS pass - the honest fold-1 trunk pair and a
+  correct notebook - so it is not a reject-everything guard. P37 SIGNS 17 of 17.
+  NAMED LIMIT OF THAT SIGNATURE: P37 declares no trunk, so DATA-2 and DATA-3 pass as OUT OF SCOPE and
+  the receipt records that in evidence rather than hiding it. A trunk-bearing run gets the full DATA
+  section and does not inherit this signature.
+
+  DELIVERABLE 2 - PKT-0042. TWO NEW VETOES, BOTH PRE-EMPTIVE.
+  V4 THE WIDENED-CONTROL SUBSTITUTION IS NOW LIVE AND STILL UNGUARDED, and I exercised it rather than
+  reading it: assoc_report.verdict() on a report whose every channel is favourable and whose ONLY
+  defect is the identity of the control returns promotable TRUE with blockers []. build_report performs
+  no validation of `control`, and the control arrives at assoc_train_harness.py:1628 as an ARBITRARY
+  spec-supplied file path. Gate B is the first arm to supply chain_arms, so last cycle's latent V2 now
+  has a real caller. No Gate B full-chain result may be read until the control is ASSERTED to be the
+  DEPLOYED control.
+  V5 learned_prob SILENTLY TRANSFORMS TWO THINGS, and the second is the larger hazard. At
+  biohub-p3-harmonic.ipynb:1659-1661 an out-of-range score is sigmoided and clipped with no warning,
+  no counter and no refusal. At :1652 a pair the scorer does not cover silently receives 0.0 - the
+  WORST score, not a neutral one. Gate B combines the score with the WIDENED surface, so partial
+  coverage actively penalises every uncovered candidate and the arm would fail on coverage rather than
+  on mechanism. Range is latent (predict_proba is already in [0,1]); coverage is not.
+
+  THE LEVER-0044 AMENDMENT IS LEGITIMATE, PRE-DATA, AND TWO THINGS WERE ALSO DROPPED. Preservation is
+  clean: falsifier_original_2026_08_30 is its own 906-character key beside the 2,112-character live
+  falsifier, and the preserved text carries no 'AMENDED', no 'GATE B' and no 'narrows' - the same
+  beside-not-inside shape as the LEVER-0043 edit. PRE-DATA on both available tests: the HEAD copy at
+  07c4366 already carries the preserved original, so the lever was BORN amended and no pre-amendment
+  version exists to have been edited away; and a finished search found NO Gate A or Gate B artifact
+  anywhere, with PKT-0042 result None. The change genuinely narrows and adds - Gate A is explicitly
+  barred from killing the lever, Gate B is new, and original clauses (b) through (e) survive verbatim.
+  BUT original clause (f), the fold-0 arm reproducing FACT-0414's exact zero AT THE FULL-CHAIN STAGE,
+  is gone from the live text and the amendment reason does not mention it; it is NOT subsumed by the
+  Gate A narrowing, because it binds the very stage Gate B tests. The crop-paired interval requirement
+  was dropped too, though assoc_report.verdict() still enforces it at :304-305. Routed as R8 and R9
+  rather than vetoed: the net effect is a harder lever and both omissions are recoverable in text.
+
+  ROUTED, NOT WRITTEN HERE. R8 original clause (f) dropped without mention. R9 the interval
+  requirement dropped from the text but still enforced by the instrument. R10 FACT-0418's
+  PKT0029_REQUIRED_TRUNK_ROLES is unchanged and would still REFUSE the honest pair while ACCEPTING the
+  pair with no legitimate arm - my DATA-3 now refuses that pair independently, so two instruments
+  disagree about what a legal pair is and must be reconciled before any dual-trunk cache is built.
+
+  PRE-REGISTERED VETO CONDITIONS FOR PKT-0042, written before its data exists: a negative Gate A read
+  as evidence against LEVER-0044; a Gate B control that is not the DEPLOYED control; an isolated grid
+  optimum reported instead of the smallest value on a winning plateau; an unasserted range or coverage
+  on the score written into the edge_prob slot; and a control that does not reproduce EXACTLY, which I
+  will re-derive rather than read.
+
+  PHASE 2 IS CLEARED FROM MY SIDE. Zero GPU, zero submissions, no kernel pushed, no model
+  implementation touched, no foreign packet edited, nothing staged or committed.
+  CYCLE 2026-08-31a - HOST DIRECTIVE: GENERALISE THE CONTRACT, THEN ADJUDICATE THE P38 SUBMISSION.
+  Receipts: _evidence/audit/receipts/{a4_cycle_2026_08_31a, a4_p38_submission_contract,
+  a4_p38_contract_v1_for_contrast, a4_p37_contract_v2_corrected}.json and C:/temp/audit_receipts/a4e/.
+
+  THE CONTRACT WAS NOT A GPU CONTRACT; IT WAS A FEATURE-CACHE CONTRACT WEARING ONE. Pointed at a
+  submission it produced six wrong-class FAILs and - far worse - THREE FALSE PASSES, each measured on
+  the real candidate rather than imagined. ART-3 passed on the token "tar.gz", which at notebook line
+  500 is ("*.whl", "*.tar.gz", "*.zip") - a WHEEL-INSTALL glob - while its own evidence named
+  audit_feature_cache.py as the auditor: a cache-reconstruction check reporting green on an artifact
+  with aft_cache 0 hits and cache_manifest 0 hits. PROC-4 passed on the word BUDGET, matching
+  short_track_rescue_budget, an ILP rescue NODE budget with no temporal meaning, in a notebook with
+  zero occurrences of abort, deadline or elapsed. DATA-2 and DATA-3 reported PASS while their own
+  evidence said "no trunk declared". A false PASS is worse than a FAIL because nobody looks at it.
+
+  THE AMENDMENT. schema 2, profile-driven. The SPEC SELECTS A PROFILE and can decide nothing else;
+  every clause returns PASS, FAIL or OUT_OF_SCOPE; every OOS reason is written in the contract's own
+  OOS_REASONS table and never supplied by the submitting agent; an unknown profile RAISES rather than
+  defaulting; and sign() REFUSES outright if any inapplicable clause lacks a recorded reason, so a
+  clause cannot be dropped silently. submission_run_v1 enforces hidden-test scope with no LOEO claim,
+  hash-bound inputs, the live-treatment heartbeat (the spec's value must WIN the last write, be read
+  back, and be RECORDED in run_stats), a submission completion heartbeat, RUNTIME reconciliation of
+  discovered inputs against emitted outputs rather than a predetermined crop count, atomic
+  preservation of submission.csv, a submission-specific size/row guard, expected output re-derived as
+  submission.csv, and independent release-receipt reconstruction. All five CODE clauses remain
+  applicable to both profiles.
+
+  CROSS-CLASS LAUNDERING IS CLOSED, AND THAT IS THE CHECK THAT MATTERED. A notebook full of AFT/cache
+  tokens that satisfies every clause of its own class satisfies ZERO submission clauses; the mirror
+  holds. 31/31 mutations caught, 36 tests pass. One mutation initially MISSED and found a defect in MY
+  OWN clause: SART-4 accepted the variable NAME `_guard_digest`, so `_guard_digest = 0` would have
+  satisfied "the submission is hashed in-kernel". It now requires a sha256 over the submission BYTES.
+
+  VETO 6 - THE CANDIDATE IS REFUSED, ON TWO GENUINE DEFECTS AND NOTHING ELSE. failed=['SPROC-2',
+  'SART-1'], 12 out of scope. SART-1: submission.csv is written by a DIRECT TRUNCATING open at line
+  3005 with zero occurrences of os.replace, so a kernel killed mid-write leaves a truncated CSV that
+  still parses - and that file is the run's entire product. SPROC-2: there is no completion heartbeat
+  of any kind, so a truncated run and a complete one are indistinguishable in the fetched log. I
+  weakened nothing to reach this: six of the eight v1 failures were wrong-class and are now
+  OUT_OF_SCOPE with contract-owned reasons, and the two that remain are real.
+
+  WHAT THE CANDIDATE GETS RIGHT, VERIFIED NOT ASSUMED. The treatment is LIVE: the base sets the bonus
+  to 1.0 at line 6, the spec's edit sets 2.0 at line 55 and WINS the last write, it is read back at
+  169 and RECORDED into run_stats at 275 - exactly one env var exchanged, matching the one-variable
+  claim. Runtime reconciliation is real at lines 2994-2997, raising on any mismatch between discovered
+  test stems and emitted graphs. The row assertion at 3097, the post-write re-read at 3127-3131 and
+  the in-kernel digest at 3235 are all present. PKT-0045 is committed at 77e41ca, one commit BEFORE
+  the build at 718d5f8, so the preregistration genuinely precedes the artifact.
+
+  A CORRECTION AGAINST THIS PACKET'S OWN PRIOR RECEIPT, AND IT IS THE SECOND TIME. I reported last
+  cycle that P37 signed 17 of 17. THAT SIGNATURE RESTED IN PART ON THE SAME PROC-4 FALSE PASS. P37's
+  two time.time() calls are elapsed-time REPORTING; abort, deadline and elapsed have ZERO occurrences;
+  its BUDGET hits are edge_candidate_budget.py, a CANDIDATE budget. Under the amended contract P37 is
+  REFUSED, failed=['PROC-4']. I am not relaxing the clause to restore my earlier verdict - the host's
+  own PROCESS section requires a timing probe with early abort that banks its own result, and P37
+  lacks it. MY PHASE-2 CONTRACT SIGNATURE IS WITHDRAWN; the gpu_preflight PASS is a separate
+  instrument and still stands on its own re-run.
+
+  INSTRUMENTATION REQUIRED, PASSIVE AND SEPARABLE FROM THE TREATMENT. P38 SART-1: write to
+  SUBMISSION_PATH.with_suffix('.csv.part') and os.replace() it into place at line 3005. P38 SPROC-2:
+  print a terminal SUBMISSION_COMPLETE token, with rows and sha256, as the last statement after the
+  file is durably in place. P37 PROC-4: a wall-clock deadline checked between crops that banks the
+  partial result instead of dying at the platform limit. None of these touches the relink bonus or any
+  scientific parameter, so the one-variable claim survives. After the change: rebuild, update the
+  artifact hash, repeat the exact-diff audit, and I will re-sign FROM THE COMMITTED BYTES.
+
+  Zero GPU, zero submissions, no kernel pushed, no model implementation touched, no foreign packet
+  edited, nothing staged or committed.
+  CYCLE 2026-08-31b - THE INSTRUMENTED CANDIDATE IS RE-SIGNED FROM THE COMMITTED BYTES. Receipts:
+  _evidence/audit/receipts/{a4_cycle_2026_08_31b, a4_p38_submission_SIGNED}.json and
+  C:/temp/audit_receipts/a4f/.
+
+  VERDICT: submission_run_v1 SIGNS dad9cdf0..., failed=[], 11 clauses PASS and 12 OUT_OF_SCOPE with
+  contract-owned reasons. I recomputed both the candidate and the P35 base hashes myself and both
+  match; the spec and notebook directory are git-clean at 9d7f0cd, so the audited bytes are the bytes
+  that would push.
+
+  BOTH DEFECTS ARE FIXED BY MECHANISM, NOT BY TOKEN, AND I CHECKED WHICH. SART-1: line 3005 derives
+  _SUB_TMP from SUBMISSION_PATH.with_suffix, 3006 writes to it, 3101 os.replace(_SUB_TMP,
+  SUBMISSION_PATH) - and the direct truncating open on SUBMISSION_PATH is GONE. The ordering is right:
+  reconciliation raise 2994 < row assertions 3098 < swap 3101 < heartbeat 3109. SPROC-2: the heartbeat
+  at 3108-3114 computes its sha256 from _sub_bytes = SUBMISSION_PATH.read_bytes() at 3107 - FROM THE
+  FILE, after the swap - not from the in-memory buffer, and flushes.
+
+  I FOUND A RESIDUAL FALSE-PASS SHAPE IN MY OWN SART-1 AND CLOSED IT. Mutating the real candidate,
+  a comment plus a bare assignment of the string SUBMISSION_TMP still PASSED, because the clause
+  alternation accepted the token. That is precisely the ART-3 wheel-glob shape reappearing in the
+  clause I wrote to replace it. SART-1 now requires an os.replace() whose arguments name the
+  submission path; all three token-only mutations FAIL and the real candidate still passes. The
+  regression is pinned as a test.
+
+  THE SEPARATION CLAIM IS CONFIRMED INDEPENDENTLY, AND THE 228-LINE DIFF IS A SHIFT ARTIFACT. A
+  cell-by-cell SEMANTIC diff against the P35 champion gives 18 changed lines, +17/-1, exactly as
+  asserted. EIGHT OF TEN CELLS ARE BYTE-IDENTICAL to the champion; only cells 0 and 5 differ. Cell 0
+  carries three lines of which ONE is functional - the bonus set to 2.0, which WINS the last write
+  over the base value of 1.0 at line 6 - plus a comment and a blank. Cell 5 carries fifteen, all
+  inside the submission-writing region. NO node, edge, score, threshold, candidate-rule, division,
+  rescue or post-processing line appears anywhere in the diff. And the bytes written are identical BY
+  CONSTRUCTION: the seventeen lines after the open() - the DictWriter over the same CSV_COLUMNS, the
+  writeheader and the whole per-geff loop - are line-for-line identical, and the single deleted line
+  is the open() target itself. The one-variable claim survives the instrumentation.
+
+  THE THREE V1 FALSE PASSES CANNOT RECUR, ON TWO INDEPENDENT GROUNDS. Run DIRECTLY on this notebook
+  ART-3 now returns FAIL (the wheel glob no longer satisfies it) and PROC-4 returns FAIL (the ILP node
+  budget no longer satisfies it), so the shapes are dead on their own merits. And under
+  submission_run_v1 the applicable set contains NONE of ART-3, PROC-4, DATA-2 or DATA-3 - all four are
+  OUT_OF_SCOPE and cannot contribute to a signature at all.
+
+  ON THE CONSEQUENCE THE HOST FLAGGED: a failed run now leaving NO submission.csv is the INTENDED
+  reading, not a side effect. A truncated CSV still parses and would be scored as though it were the
+  honest output, spending a slot on a meaningless number; an absent file is an unambiguous failure
+  that costs no slot. The residual window - a run that dies between the last assertion and the swap -
+  is a few statements wide and is the correct place for it.
+
+  P37 remains REFUSED on PROC-4, deferred by the host, and I have not relaxed that clause to restore
+  my withdrawn signature. 37 tests pass, 31/31 mutations caught. Zero GPU, zero submissions, no
+  kernel pushed, no registry file written, nothing staged or committed.

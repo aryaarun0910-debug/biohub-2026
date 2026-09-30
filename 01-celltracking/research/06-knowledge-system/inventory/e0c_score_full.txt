@@ -1,0 +1,25 @@
+[e0c_score] cached ok: fold0(44b6)=71/71  fold1(6bba)=128/128  total=199
+Stage 2 (numpy edge, fast)...
+Stage 3 (authoritative edge+division, 4 workers)...
+[07/13/26 18:36:09] WARNING  No matching nodes found.       _base_graph.py:1256
+[07/13/26 18:36:18] WARNING  No matching edges found.       _base_graph.py:1281
+[07/13/26 18:36:19] WARNING  No matching edges found.       _base_graph.py:1281
+[07/13/26 18:36:22] WARNING  No matching nodes found.       _base_graph.py:1256
+[07/13/26 18:36:33] WARNING  No matching edges found.       _base_graph.py:1281
+[07/13/26 18:36:39] WARNING  No matching edges found.       _base_graph.py:1281
+                    WARNING  No matching edges found.       _base_graph.py:1281
+[07/13/26 18:36:59] WARNING  No matching nodes found.       _base_graph.py:1256
+
+=== E0c AUTHORITATIVE held-out 44b6 (71 crops) ===
+  adj_edge_jaccard = 0.7595
+  division_jaccard = 0.0000 (TP=0 FP=93 FN=26)
+  composite score  = 0.7595
+
+=== E0c AUTHORITATIVE held-out 6bba (128 crops) ===
+  adj_edge_jaccard = 0.6484
+  division_jaccard = 0.0057 (TP=4 FP=582 FN=121)
+  composite score  = 0.6490
+
+=== Stage 4 numpy-vs-authoritative EDGE parity over 199 crops ===
+  crops with edge TP/FP/FN mismatch: 5/199
+  max |adj_edge_J diff|: 5.51e-02

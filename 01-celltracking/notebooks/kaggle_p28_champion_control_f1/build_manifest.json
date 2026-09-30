@@ -1,0 +1,68 @@
+{
+  "name": "p28_champion_control_f1",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p28_champion_control_f1.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p28_champion_control_f1\\biohub-p28-champion-control-f1.ipynb",
+  "built_sha256": "f7ab7e083c352c6cfe8cc953396ae2531a1fc42d473ad5a285a9848dcb125da6",
+  "config_hash": "c3bd0c59e508",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "6f79ac3c9fb74341dd3b334e2d8e95cd6d74b59001af2bcb1fcb625d7c97739f"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "8d15030bec2f040f2bd186e7a3ebed167b0f17414de3aeef15f9994fb3710461"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "7956542e7190dbb71f06fef09d7e77f0785fcd2d46f3646c56fea5d162bb23a0"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "8be0433869eafd6adafa9c406db8e1848ca138020bb15d35aeecc7a39ebaf52c"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "32582192ed21aa95de8f1e718d0e31f8e6f85568f6d0579a0a13180ece9c3f09"
+    }
+  ],
+  "declared_slug": "biohub-p28-champion-control-f1",
+  "title": "Biohub P28 Champion Control F1",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p28-champion-control-f1"
+}

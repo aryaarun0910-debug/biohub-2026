@@ -1,0 +1,1545 @@
+[
+ {
+  "crop": "44b6_66f9292d",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 191,
+   "edge_fp": 8,
+   "edge_fn": 7,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 17723,
+   "total_node_ratio": -0.6637639916524378,
+   "node_recall": 0.99
+  },
+  "oracle": {
+   "edge_tp": 193,
+   "edge_fp": 5,
+   "edge_fn": 5,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 17723,
+   "total_node_ratio": -0.6637639916524378,
+   "node_recall": 0.99
+  },
+  "moves": {
+   "gt_gained": 4,
+   "swap2_reconnected": 2,
+   "changed": 8,
+   "swap1": 2,
+   "pairs": 1,
+   "deployed": 16795,
+   "oracle": 16795,
+   "gt_reachable": 4
+  },
+  "gt_edges": 198,
+  "gt_pairs_mapped": 195
+ },
+ {
+  "crop": "44b6_267148e4",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 248,
+   "edge_fp": 37,
+   "edge_fn": 29,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 1,
+   "num_pred_nodes": 21310,
+   "total_node_ratio": 0.11395713538944068,
+   "node_recall": 0.9785714285714285
+  },
+  "oracle": {
+   "edge_tp": 260,
+   "edge_fp": 24,
+   "edge_fn": 17,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 1,
+   "num_pred_nodes": 21310,
+   "total_node_ratio": 0.11395713538944068,
+   "node_recall": 0.9857142857142858
+  },
+  "moves": {
+   "gt_gained": 16,
+   "swap2_reconnected": 6,
+   "changed": 34,
+   "swap1": 8,
+   "swap2_dropped": 2,
+   "pairs": 1,
+   "deployed": 20392,
+   "oracle": 20390,
+   "gt_reachable": 16
+  },
+  "gt_edges": 277,
+  "gt_pairs_mapped": 268
+ },
+ {
+  "crop": "44b6_144b256d",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 119,
+   "edge_fp": 0,
+   "edge_fn": 0,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 23520,
+   "total_node_ratio": -0.6402349486049926,
+   "node_recall": 1.0
+  },
+  "oracle": {
+   "edge_tp": 119,
+   "edge_fp": 0,
+   "edge_fn": 0,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 23520,
+   "total_node_ratio": -0.6402349486049926,
+   "node_recall": 1.0
+  },
+  "moves": {
+   "pairs": 1,
+   "deployed": 22243,
+   "oracle": 22243,
+   "gt_reachable": 0
+  },
+  "gt_edges": 119,
+  "gt_pairs_mapped": 119
+ },
+ {
+  "crop": "44b6_0113de3b",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 47,
+   "edge_fp": 2,
+   "edge_fn": 3,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 25210,
+   "total_node_ratio": -0.021160939623374102,
+   "node_recall": 0.9423076923076923
+  },
+  "oracle": {
+   "edge_tp": 48,
+   "edge_fp": 0,
+   "edge_fn": 2,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 25210,
+   "total_node_ratio": -0.021160939623374102,
+   "node_recall": 0.9423076923076923
+  },
+  "moves": {
+   "gt_gained": 1,
+   "swap2_reconnected": 1,
+   "changed": 2,
+   "pairs": 1,
+   "deployed": 24444,
+   "oracle": 24444,
+   "gt_reachable": 1
+  },
+  "gt_edges": 50,
+  "gt_pairs_mapped": 48
+ },
+ {
+  "crop": "44b6_551a5dba",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 199,
+   "edge_fp": 35,
+   "edge_fn": 25,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 0,
+   "num_pred_nodes": 30580,
+   "total_node_ratio": -0.46934596630051884,
+   "node_recall": 0.9780701754385965
+  },
+  "oracle": {
+   "edge_tp": 216,
+   "edge_fp": 9,
+   "edge_fn": 8,
+   "division_tp": 0,
+   "division_fp": 2,
+   "division_fn": 0,
+   "num_pred_nodes": 30579,
+   "total_node_ratio": -0.46936331927742203,
+   "node_recall": 0.9780701754385965
+  },
+  "moves": {
+   "gt_gained": 20,
+   "swap2_reconnected": 10,
+   "changed": 42,
+   "swap2_dropped": 2,
+   "swap1": 8,
+   "pairs": 1,
+   "deployed": 29178,
+   "oracle": 29176,
+   "gt_reachable": 20
+  },
+  "gt_edges": 224,
+  "gt_pairs_mapped": 218
+ },
+ {
+  "crop": "44b6_8f5ab931",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 581,
+   "edge_fp": 26,
+   "edge_fn": 23,
+   "division_tp": 0,
+   "division_fp": 2,
+   "division_fn": 0,
+   "num_pred_nodes": 27220,
+   "total_node_ratio": -0.012730767835769468,
+   "node_recall": 0.987012987012987
+  },
+  "oracle": {
+   "edge_tp": 591,
+   "edge_fp": 15,
+   "edge_fn": 13,
+   "division_tp": 0,
+   "division_fp": 4,
+   "division_fn": 0,
+   "num_pred_nodes": 27217,
+   "total_node_ratio": -0.01283957781727177,
+   "node_recall": 0.987012987012987
+  },
+  "moves": {
+   "swap1": 11,
+   "gt_gained": 21,
+   "changed": 44,
+   "swap2_reconnected": 8,
+   "swap2_dropped": 2,
+   "pairs": 1,
+   "deployed": 26189,
+   "oracle": 26187,
+   "gt_reachable": 21
+  },
+  "gt_edges": 604,
+  "gt_pairs_mapped": 593
+ },
+ {
+  "crop": "44b6_3a861e03",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 875,
+   "edge_fp": 58,
+   "edge_fn": 44,
+   "division_tp": 0,
+   "division_fp": 2,
+   "division_fn": 0,
+   "num_pred_nodes": 37204,
+   "total_node_ratio": -0.08242490011345138,
+   "node_recall": 0.9871657754010695
+  },
+  "oracle": {
+   "edge_tp": 887,
+   "edge_fp": 40,
+   "edge_fn": 32,
+   "division_tp": 0,
+   "division_fp": 3,
+   "division_fn": 0,
+   "num_pred_nodes": 37204,
+   "total_node_ratio": -0.08242490011345138,
+   "node_recall": 0.9871657754010695
+  },
+  "moves": {
+   "gt_gained": 22,
+   "swap2_dropped": 6,
+   "changed": 50,
+   "swap1": 7,
+   "swap2_reconnected": 9,
+   "pairs": 1,
+   "deployed": 36094,
+   "oracle": 36088,
+   "gt_reachable": 22
+  },
+  "gt_edges": 919,
+  "gt_pairs_mapped": 903
+ },
+ {
+  "crop": "44b6_97725144",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 215,
+   "edge_fp": 9,
+   "edge_fn": 6,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 33593,
+   "total_node_ratio": -0.06096606473975513,
+   "node_recall": 0.9955555555555555
+  },
+  "oracle": {
+   "edge_tp": 218,
+   "edge_fp": 5,
+   "edge_fn": 3,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 0,
+   "num_pred_nodes": 33592,
+   "total_node_ratio": -0.060994018001900824,
+   "node_recall": 0.9955555555555555
+  },
+  "moves": {
+   "gt_gained": 4,
+   "swap2_reconnected": 2,
+   "changed": 9,
+   "swap1": 1,
+   "swap2_dropped": 1,
+   "pairs": 1,
+   "deployed": 32477,
+   "oracle": 32476,
+   "gt_reachable": 4
+  },
+  "gt_edges": 221,
+  "gt_pairs_mapped": 219
+ },
+ {
+  "crop": "44b6_d78e09d9",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 424,
+   "edge_fp": 32,
+   "edge_fn": 27,
+   "division_tp": 0,
+   "division_fp": 4,
+   "division_fn": 0,
+   "num_pred_nodes": 22817,
+   "total_node_ratio": 0.025068511613280022,
+   "node_recall": 0.978401727861771
+  },
+  "oracle": {
+   "edge_tp": 437,
+   "edge_fp": 14,
+   "edge_fn": 14,
+   "division_tp": 0,
+   "division_fp": 5,
+   "division_fn": 0,
+   "num_pred_nodes": 22817,
+   "total_node_ratio": 0.025068511613280022,
+   "node_recall": 0.978401727861771
+  },
+  "moves": {
+   "swap1": 8,
+   "gt_gained": 14,
+   "changed": 29,
+   "swap2_reconnected": 5,
+   "swap2_dropped": 1,
+   "pairs": 1,
+   "deployed": 21929,
+   "oracle": 21928,
+   "gt_reachable": 14
+  },
+  "gt_edges": 451,
+  "gt_pairs_mapped": 438
+ },
+ {
+  "crop": "44b6_e29f0176",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 44,
+   "edge_fp": 10,
+   "edge_fn": 6,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 13541,
+   "total_node_ratio": 0.04410517387616624,
+   "node_recall": 0.9803921568627451
+  },
+  "oracle": {
+   "edge_tp": 46,
+   "edge_fp": 6,
+   "edge_fn": 4,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 13541,
+   "total_node_ratio": 0.04410517387616624,
+   "node_recall": 0.9803921568627451
+  },
+  "moves": {
+   "gt_gained": 2,
+   "swap2_reconnected": 2,
+   "changed": 4,
+   "pairs": 1,
+   "deployed": 12927,
+   "oracle": 12927,
+   "gt_reachable": 2
+  },
+  "gt_edges": 50,
+  "gt_pairs_mapped": 48
+ },
+ {
+  "crop": "44b6_c50204e0",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 288,
+   "edge_fp": 37,
+   "edge_fn": 37,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 2,
+   "num_pred_nodes": 37575,
+   "total_node_ratio": -0.20185649347890736,
+   "node_recall": 0.9669669669669669
+  },
+  "oracle": {
+   "edge_tp": 303,
+   "edge_fp": 19,
+   "edge_fn": 22,
+   "division_tp": 0,
+   "division_fp": 4,
+   "division_fn": 2,
+   "num_pred_nodes": 37566,
+   "total_node_ratio": -0.20204766557627768,
+   "node_recall": 0.9669669669669669
+  },
+  "moves": {
+   "swap1": 9,
+   "gt_gained": 16,
+   "changed": 34,
+   "swap2_reconnected": 5,
+   "swap2_dropped": 2,
+   "pairs": 1,
+   "deployed": 35875,
+   "oracle": 35873,
+   "gt_reachable": 17
+  },
+  "gt_edges": 325,
+  "gt_pairs_mapped": 304
+ },
+ {
+  "crop": "44b6_7e557709",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 550,
+   "edge_fp": 20,
+   "edge_fn": 10,
+   "division_tp": 0,
+   "division_fp": 5,
+   "division_fn": 0,
+   "num_pred_nodes": 45824,
+   "total_node_ratio": -0.18259008205494112,
+   "node_recall": 1.0
+  },
+  "oracle": {
+   "edge_tp": 558,
+   "edge_fp": 10,
+   "edge_fn": 2,
+   "division_tp": 0,
+   "division_fp": 6,
+   "division_fn": 0,
+   "num_pred_nodes": 45824,
+   "total_node_ratio": -0.18259008205494112,
+   "node_recall": 1.0
+  },
+  "moves": {
+   "swap1": 8,
+   "gt_gained": 13,
+   "changed": 26,
+   "swap2_reconnected": 5,
+   "pairs": 1,
+   "deployed": 44511,
+   "oracle": 44511,
+   "gt_reachable": 13
+  },
+  "gt_edges": 560,
+  "gt_pairs_mapped": 560
+ },
+ {
+  "crop": "44b6_f28707c6",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 54,
+   "edge_fp": 11,
+   "edge_fn": 7,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 21649,
+   "total_node_ratio": 0.1604309605488851,
+   "node_recall": 1.0
+  },
+  "oracle": {
+   "edge_tp": 57,
+   "edge_fp": 6,
+   "edge_fn": 4,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 21648,
+   "total_node_ratio": 0.16037735849056603,
+   "node_recall": 1.0
+  },
+  "moves": {
+   "swap1": 2,
+   "gt_gained": 3,
+   "changed": 6,
+   "swap2_reconnected": 1,
+   "pairs": 1,
+   "deployed": 20840,
+   "oracle": 20840,
+   "gt_reachable": 3
+  },
+  "gt_edges": 61,
+  "gt_pairs_mapped": 61
+ },
+ {
+  "crop": "6bba_12665c0e",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 856,
+   "edge_fp": 97,
+   "edge_fn": 142,
+   "division_tp": 0,
+   "division_fp": 3,
+   "division_fn": 3,
+   "num_pred_nodes": 7426,
+   "total_node_ratio": -0.10680779408227087,
+   "node_recall": 0.9218146718146718
+  },
+  "oracle": {
+   "edge_tp": 880,
+   "edge_fp": 62,
+   "edge_fn": 118,
+   "division_tp": 0,
+   "division_fp": 5,
+   "division_fn": 3,
+   "num_pred_nodes": 7412,
+   "total_node_ratio": -0.1084917007457301,
+   "node_recall": 0.9218146718146718
+  },
+  "moves": {
+   "gt_gained": 26,
+   "swap2_reconnected": 14,
+   "changed": 53,
+   "swap1": 11,
+   "swap2_dropped": 1,
+   "pairs": 1,
+   "deployed": 7048,
+   "oracle": 7047,
+   "gt_reachable": 28
+  },
+  "gt_edges": 998,
+  "gt_pairs_mapped": 908
+ },
+ {
+  "crop": "6bba_2540cd90",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 457,
+   "edge_fp": 124,
+   "edge_fn": 66,
+   "division_tp": 0,
+   "division_fp": 8,
+   "division_fn": 0,
+   "num_pred_nodes": 2769,
+   "total_node_ratio": -0.26804123711340205,
+   "node_recall": 0.994328922495274
+  },
+  "oracle": {
+   "edge_tp": 475,
+   "edge_fp": 99,
+   "edge_fn": 48,
+   "division_tp": 0,
+   "division_fp": 9,
+   "division_fn": 0,
+   "num_pred_nodes": 2751,
+   "total_node_ratio": -0.2727993655828707,
+   "node_recall": 0.994328922495274
+  },
+  "moves": {
+   "gt_gained": 61,
+   "swap2_reconnected": 50,
+   "changed": 123,
+   "swap2_dropped": 1,
+   "swap1": 10,
+   "pairs": 1,
+   "deployed": 2693,
+   "oracle": 2692,
+   "gt_reachable": 61
+  },
+  "gt_edges": 523,
+  "gt_pairs_mapped": 520
+ },
+ {
+  "crop": "6bba_312f0dc3",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 420,
+   "edge_fp": 51,
+   "edge_fn": 80,
+   "division_tp": 0,
+   "division_fp": 7,
+   "division_fn": 0,
+   "num_pred_nodes": 7531,
+   "total_node_ratio": -0.24410318177255846,
+   "node_recall": 0.9057692307692308
+  },
+  "oracle": {
+   "edge_tp": 433,
+   "edge_fp": 36,
+   "edge_fn": 67,
+   "division_tp": 0,
+   "division_fp": 10,
+   "division_fn": 0,
+   "num_pred_nodes": 7527,
+   "total_node_ratio": -0.24450466726889492,
+   "node_recall": 0.9038461538461539
+  },
+  "moves": {
+   "swap1": 17,
+   "gt_gained": 24,
+   "changed": 49,
+   "swap2_reconnected": 6,
+   "swap2_dropped": 1,
+   "pairs": 1,
+   "deployed": 7058,
+   "oracle": 7057,
+   "gt_reachable": 24
+  },
+  "gt_edges": 500,
+  "gt_pairs_mapped": 443
+ },
+ {
+  "crop": "44b6_a2bb48bb",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 357,
+   "edge_fp": 54,
+   "edge_fn": 53,
+   "division_tp": 0,
+   "division_fp": 4,
+   "division_fn": 0,
+   "num_pred_nodes": 46605,
+   "total_node_ratio": -0.23110553841585138,
+   "node_recall": 0.9495192307692307
+  },
+  "oracle": {
+   "edge_tp": 378,
+   "edge_fp": 30,
+   "edge_fn": 32,
+   "division_tp": 0,
+   "division_fp": 4,
+   "division_fn": 0,
+   "num_pred_nodes": 46608,
+   "total_node_ratio": -0.2310560440829525,
+   "node_recall": 0.9543269230769231
+  },
+  "moves": {
+   "swap1": 14,
+   "gt_gained": 29,
+   "changed": 61,
+   "swap2_reconnected": 12,
+   "swap2_dropped": 3,
+   "pairs": 1,
+   "deployed": 44372,
+   "oracle": 44369,
+   "gt_reachable": 30
+  },
+  "gt_edges": 410,
+  "gt_pairs_mapped": 387
+ },
+ {
+  "crop": "6bba_55b7eebe",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 295,
+   "edge_fp": 12,
+   "edge_fn": 393,
+   "division_tp": 0,
+   "division_fp": 2,
+   "division_fn": 1,
+   "num_pred_nodes": 2850,
+   "total_node_ratio": -0.45786570287236067,
+   "node_recall": 0.4553191489361702
+  },
+  "oracle": {
+   "edge_tp": 300,
+   "edge_fp": 5,
+   "edge_fn": 388,
+   "division_tp": 0,
+   "division_fp": 2,
+   "division_fn": 1,
+   "num_pred_nodes": 2847,
+   "total_node_ratio": -0.45843637055354763,
+   "node_recall": 0.4553191489361702
+  },
+  "moves": {
+   "gt_gained": 7,
+   "swap2_reconnected": 3,
+   "changed": 14,
+   "swap1": 4,
+   "pairs": 1,
+   "deployed": 2708,
+   "oracle": 2708,
+   "gt_reachable": 7
+  },
+  "gt_edges": 688,
+  "gt_pairs_mapped": 303
+ },
+ {
+  "crop": "6bba_5c039895",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 987,
+   "edge_fp": 208,
+   "edge_fn": 158,
+   "division_tp": 0,
+   "division_fp": 8,
+   "division_fn": 3,
+   "num_pred_nodes": 8675,
+   "total_node_ratio": 0.012252042007001166,
+   "node_recall": 0.965076660988075
+  },
+  "oracle": {
+   "edge_tp": 1046,
+   "edge_fp": 126,
+   "edge_fn": 99,
+   "division_tp": 0,
+   "division_fp": 13,
+   "division_fn": 3,
+   "num_pred_nodes": 8636,
+   "total_node_ratio": 0.007701283547257876,
+   "node_recall": 0.9659284497444633
+  },
+  "moves": {
+   "swap1": 31,
+   "gt_gained": 99,
+   "changed": 210,
+   "swap2_reconnected": 56,
+   "swap2_dropped": 12,
+   "pairs": 1,
+   "deployed": 8317,
+   "oracle": 8305,
+   "gt_reachable": 102
+  },
+  "gt_edges": 1145,
+  "gt_pairs_mapped": 1099
+ },
+ {
+  "crop": "6bba_61ecbe65",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 506,
+   "edge_fp": 111,
+   "edge_fn": 108,
+   "division_tp": 0,
+   "division_fp": 3,
+   "division_fn": 1,
+   "num_pred_nodes": 5227,
+   "total_node_ratio": -0.09473501905091791,
+   "node_recall": 0.9421875
+  },
+  "oracle": {
+   "edge_tp": 528,
+   "edge_fp": 80,
+   "edge_fn": 86,
+   "division_tp": 0,
+   "division_fp": 6,
+   "division_fn": 1,
+   "num_pred_nodes": 5199,
+   "total_node_ratio": -0.09958434360928299,
+   "node_recall": 0.940625
+  },
+  "moves": {
+   "gt_gained": 40,
+   "swap2_reconnected": 21,
+   "changed": 84,
+   "swap1": 15,
+   "swap2_dropped": 4,
+   "pairs": 1,
+   "deployed": 4886,
+   "oracle": 4882,
+   "gt_reachable": 41
+  },
+  "gt_edges": 614,
+  "gt_pairs_mapped": 568
+ },
+ {
+  "crop": "6bba_07e24132",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 282,
+   "edge_fp": 19,
+   "edge_fn": 63,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 2,
+   "num_pred_nodes": 34253,
+   "total_node_ratio": 0.5942750756341634,
+   "node_recall": 0.8607242339832869
+  },
+  "oracle": {
+   "edge_tp": 287,
+   "edge_fp": 12,
+   "edge_fn": 58,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 2,
+   "num_pred_nodes": 34251,
+   "total_node_ratio": 0.5941819874330928,
+   "node_recall": 0.8607242339832869
+  },
+  "moves": {
+   "gt_gained": 8,
+   "swap2_reconnected": 4,
+   "changed": 17,
+   "swap2_dropped": 1,
+   "swap1": 3,
+   "pairs": 1,
+   "deployed": 33059,
+   "oracle": 33058,
+   "gt_reachable": 9
+  },
+  "gt_edges": 345,
+  "gt_pairs_mapped": 294
+ },
+ {
+  "crop": "44b6_cf8fed6b",
+  "family": "44b6",
+  "deployed": {
+   "edge_tp": 180,
+   "edge_fp": 14,
+   "edge_fn": 8,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 0,
+   "num_pred_nodes": 42187,
+   "total_node_ratio": -0.03526264035308377,
+   "node_recall": 1.0
+  },
+  "oracle": {
+   "edge_tp": 184,
+   "edge_fp": 10,
+   "edge_fn": 4,
+   "division_tp": 0,
+   "division_fp": 2,
+   "division_fn": 0,
+   "num_pred_nodes": 42185,
+   "total_node_ratio": -0.035308376592192825,
+   "node_recall": 1.0
+  },
+  "moves": {
+   "gt_gained": 6,
+   "swap2_dropped": 2,
+   "changed": 14,
+   "swap1": 3,
+   "swap2_reconnected": 1,
+   "pairs": 1,
+   "deployed": 40751,
+   "oracle": 40749,
+   "gt_reachable": 6
+  },
+  "gt_edges": 188,
+  "gt_pairs_mapped": 188
+ },
+ {
+  "crop": "6bba_1f58c2f6",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 229,
+   "edge_fp": 70,
+   "edge_fn": 70,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 0,
+   "num_pred_nodes": 29997,
+   "total_node_ratio": 0.03785074213749438,
+   "node_recall": 0.889589905362776
+  },
+  "oracle": {
+   "edge_tp": 239,
+   "edge_fp": 53,
+   "edge_fn": 60,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 0,
+   "num_pred_nodes": 29993,
+   "total_node_ratio": 0.03771234819914888,
+   "node_recall": 0.8927444794952681
+  },
+  "moves": {
+   "gt_gained": 11,
+   "swap2_dropped": 3,
+   "changed": 25,
+   "swap2_reconnected": 6,
+   "swap1": 2,
+   "pairs": 1,
+   "deployed": 28614,
+   "oracle": 28611,
+   "gt_reachable": 11
+  },
+  "gt_edges": 299,
+  "gt_pairs_mapped": 251
+ },
+ {
+  "crop": "6bba_7f87b3d8",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 685,
+   "edge_fp": 161,
+   "edge_fn": 249,
+   "division_tp": 0,
+   "division_fp": 3,
+   "division_fn": 3,
+   "num_pred_nodes": 7714,
+   "total_node_ratio": -0.270957376429449,
+   "node_recall": 0.838
+  },
+  "oracle": {
+   "edge_tp": 713,
+   "edge_fp": 124,
+   "edge_fn": 221,
+   "division_tp": 0,
+   "division_fp": 5,
+   "division_fn": 3,
+   "num_pred_nodes": 7698,
+   "total_node_ratio": -0.27246952083924014,
+   "node_recall": 0.84
+  },
+  "moves": {
+   "swap1": 18,
+   "gt_gained": 31,
+   "changed": 65,
+   "swap2_dropped": 3,
+   "swap2_reconnected": 10,
+   "pairs": 1,
+   "deployed": 7257,
+   "oracle": 7254,
+   "gt_reachable": 31
+  },
+  "gt_edges": 934,
+  "gt_pairs_mapped": 762
+ },
+ {
+  "crop": "6bba_789f8168",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 582,
+   "edge_fp": 40,
+   "edge_fn": 99,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 0,
+   "num_pred_nodes": 9030,
+   "total_node_ratio": -0.15417759460472086,
+   "node_recall": 0.8948106591865358
+  },
+  "oracle": {
+   "edge_tp": 585,
+   "edge_fp": 33,
+   "edge_fn": 96,
+   "division_tp": 0,
+   "division_fp": 2,
+   "division_fn": 0,
+   "num_pred_nodes": 9017,
+   "total_node_ratio": -0.1553952791307606,
+   "node_recall": 0.8877980364656382
+  },
+  "moves": {
+   "swap1": 6,
+   "gt_gained": 7,
+   "changed": 15,
+   "swap2_dropped": 1,
+   "pairs": 1,
+   "deployed": 8567,
+   "oracle": 8566,
+   "gt_reachable": 7
+  },
+  "gt_edges": 681,
+  "gt_pairs_mapped": 599
+ },
+ {
+  "crop": "6bba_907271db",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 769,
+   "edge_fp": 202,
+   "edge_fn": 152,
+   "division_tp": 0,
+   "division_fp": 9,
+   "division_fn": 1,
+   "num_pred_nodes": 7015,
+   "total_node_ratio": -0.03983027648508076,
+   "node_recall": 0.9597883597883597
+  },
+  "oracle": {
+   "edge_tp": 834,
+   "edge_fp": 103,
+   "edge_fn": 87,
+   "division_tp": 0,
+   "division_fp": 12,
+   "division_fn": 1,
+   "num_pred_nodes": 6971,
+   "total_node_ratio": -0.04585272378866685,
+   "node_recall": 0.9629629629629629
+  },
+  "moves": {
+   "swap1": 33,
+   "gt_gained": 104,
+   "changed": 217,
+   "swap2_reconnected": 62,
+   "swap2_dropped": 9,
+   "pairs": 1,
+   "deployed": 6694,
+   "oracle": 6685,
+   "gt_reachable": 104
+  },
+  "gt_edges": 921,
+  "gt_pairs_mapped": 869
+ },
+ {
+  "crop": "6bba_474be664",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 125,
+   "edge_fp": 48,
+   "edge_fn": 161,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 1,
+   "num_pred_nodes": 32181,
+   "total_node_ratio": 0.13741914961297846,
+   "node_recall": 0.5376712328767124
+  },
+  "oracle": {
+   "edge_tp": 140,
+   "edge_fp": 27,
+   "edge_fn": 146,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 1,
+   "num_pred_nodes": 32180,
+   "total_node_ratio": 0.13738380518149365,
+   "node_recall": 0.5445205479452054
+  },
+  "moves": {
+   "gt_gained": 21,
+   "swap2_reconnected": 12,
+   "changed": 46,
+   "swap2_dropped": 4,
+   "swap1": 5,
+   "pairs": 1,
+   "deployed": 30852,
+   "oracle": 30848,
+   "gt_reachable": 22
+  },
+  "gt_edges": 286,
+  "gt_pairs_mapped": 147
+ },
+ {
+  "crop": "6bba_6db0e9b4",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 374,
+   "edge_fp": 49,
+   "edge_fn": 66,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 0,
+   "num_pred_nodes": 26105,
+   "total_node_ratio": -0.08194126956215932,
+   "node_recall": 0.9175946547884187
+  },
+  "oracle": {
+   "edge_tp": 387,
+   "edge_fp": 37,
+   "edge_fn": 53,
+   "division_tp": 0,
+   "division_fp": 3,
+   "division_fn": 0,
+   "num_pred_nodes": 26095,
+   "total_node_ratio": -0.08229294883066643,
+   "node_recall": 0.9198218262806236
+  },
+  "moves": {
+   "gt_gained": 26,
+   "swap2_reconnected": 14,
+   "changed": 53,
+   "swap1": 11,
+   "swap2_dropped": 1,
+   "pairs": 1,
+   "deployed": 24934,
+   "oracle": 24933,
+   "gt_reachable": 26
+  },
+  "gt_edges": 440,
+  "gt_pairs_mapped": 404
+ },
+ {
+  "crop": "6bba_bbb708ca",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 704,
+   "edge_fp": 70,
+   "edge_fn": 157,
+   "division_tp": 0,
+   "division_fp": 3,
+   "division_fn": 0,
+   "num_pred_nodes": 6600,
+   "total_node_ratio": -0.027266028002947678,
+   "node_recall": 0.8733183856502242
+  },
+  "oracle": {
+   "edge_tp": 719,
+   "edge_fp": 55,
+   "edge_fn": 142,
+   "division_tp": 0,
+   "division_fp": 4,
+   "division_fn": 0,
+   "num_pred_nodes": 6577,
+   "total_node_ratio": -0.030655858511422256,
+   "node_recall": 0.8733183856502242
+  },
+  "moves": {
+   "swap1": 16,
+   "gt_gained": 27,
+   "changed": 54,
+   "swap2_reconnected": 11,
+   "pairs": 1,
+   "deployed": 6202,
+   "oracle": 6202,
+   "gt_reachable": 27
+  },
+  "gt_edges": 861,
+  "gt_pairs_mapped": 743
+ },
+ {
+  "crop": "6bba_9a41d029",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 1122,
+   "edge_fp": 190,
+   "edge_fn": 231,
+   "division_tp": 0,
+   "division_fp": 8,
+   "division_fn": 2,
+   "num_pred_nodes": 16675,
+   "total_node_ratio": -0.08534913060172235,
+   "node_recall": 0.9143468950749465
+  },
+  "oracle": {
+   "edge_tp": 1183,
+   "edge_fp": 106,
+   "edge_fn": 170,
+   "division_tp": 0,
+   "division_fp": 13,
+   "division_fn": 2,
+   "num_pred_nodes": 16641,
+   "total_node_ratio": -0.08721408589764687,
+   "node_recall": 0.9172019985724482
+  },
+  "moves": {
+   "gt_gained": 76,
+   "swap2_reconnected": 37,
+   "changed": 161,
+   "swap1": 30,
+   "swap2_dropped": 9,
+   "pairs": 1,
+   "deployed": 16042,
+   "oracle": 16033,
+   "gt_reachable": 77
+  },
+  "gt_edges": 1353,
+  "gt_pairs_mapped": 1210
+ },
+ {
+  "crop": "6bba_74686d6a",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 372,
+   "edge_fp": 67,
+   "edge_fn": 204,
+   "division_tp": 0,
+   "division_fp": 2,
+   "division_fn": 2,
+   "num_pred_nodes": 24204,
+   "total_node_ratio": -0.18786699325571252,
+   "node_recall": 0.726962457337884
+  },
+  "oracle": {
+   "edge_tp": 383,
+   "edge_fp": 51,
+   "edge_fn": 193,
+   "division_tp": 0,
+   "division_fp": 4,
+   "division_fn": 2,
+   "num_pred_nodes": 24204,
+   "total_node_ratio": -0.18786699325571252,
+   "node_recall": 0.7235494880546075
+  },
+  "moves": {
+   "gt_gained": 14,
+   "swap2_reconnected": 4,
+   "changed": 31,
+   "swap1": 7,
+   "swap2_dropped": 3,
+   "pairs": 1,
+   "deployed": 23074,
+   "oracle": 23071,
+   "gt_reachable": 14
+  },
+  "gt_edges": 576,
+  "gt_pairs_mapped": 397
+ },
+ {
+  "crop": "6bba_acd782a8",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 257,
+   "edge_fp": 99,
+   "edge_fn": 73,
+   "division_tp": 0,
+   "division_fp": 5,
+   "division_fn": 0,
+   "num_pred_nodes": 17767,
+   "total_node_ratio": -0.09857940131912735,
+   "node_recall": 0.9325842696629213
+  },
+  "oracle": {
+   "edge_tp": 280,
+   "edge_fp": 60,
+   "edge_fn": 50,
+   "division_tp": 0,
+   "division_fp": 6,
+   "division_fn": 0,
+   "num_pred_nodes": 17746,
+   "total_node_ratio": -0.09964485032978183,
+   "node_recall": 0.9325842696629213
+  },
+  "moves": {
+   "gt_gained": 23,
+   "swap2_dropped": 7,
+   "changed": 53,
+   "swap1": 5,
+   "swap2_reconnected": 11,
+   "pairs": 1,
+   "deployed": 16914,
+   "oracle": 16907,
+   "gt_reachable": 23
+  },
+  "gt_edges": 330,
+  "gt_pairs_mapped": 303
+ },
+ {
+  "crop": "6bba_ed9377fd",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 415,
+   "edge_fp": 105,
+   "edge_fn": 93,
+   "division_tp": 0,
+   "division_fp": 3,
+   "division_fn": 0,
+   "num_pred_nodes": 4024,
+   "total_node_ratio": -0.0943056493360342,
+   "node_recall": 0.943502824858757
+  },
+  "oracle": {
+   "edge_tp": 449,
+   "edge_fp": 57,
+   "edge_fn": 59,
+   "division_tp": 0,
+   "division_fp": 5,
+   "division_fn": 0,
+   "num_pred_nodes": 3998,
+   "total_node_ratio": -0.10015755120414134,
+   "node_recall": 0.943502824858757
+  },
+  "moves": {
+   "swap1": 20,
+   "gt_gained": 58,
+   "changed": 118,
+   "swap2_reconnected": 36,
+   "swap2_dropped": 2,
+   "pairs": 1,
+   "deployed": 3862,
+   "oracle": 3860,
+   "gt_reachable": 58
+  },
+  "gt_edges": 508,
+  "gt_pairs_mapped": 475
+ },
+ {
+  "crop": "6bba_f1fde7e0",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 282,
+   "edge_fp": 52,
+   "edge_fn": 164,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 0,
+   "num_pred_nodes": 5821,
+   "total_node_ratio": -0.35608407079646015,
+   "node_recall": 0.7226890756302521
+  },
+  "oracle": {
+   "edge_tp": 292,
+   "edge_fp": 42,
+   "edge_fn": 154,
+   "division_tp": 0,
+   "division_fp": 4,
+   "division_fn": 0,
+   "num_pred_nodes": 5812,
+   "total_node_ratio": -0.3570796460176991,
+   "node_recall": 0.7205882352941176
+  },
+  "moves": {
+   "swap1": 9,
+   "gt_gained": 11,
+   "changed": 23,
+   "swap2_reconnected": 1,
+   "swap2_dropped": 1,
+   "pairs": 1,
+   "deployed": 5401,
+   "oracle": 5400,
+   "gt_reachable": 11
+  },
+  "gt_edges": 446,
+  "gt_pairs_mapped": 303
+ },
+ {
+  "crop": "6bba_fc516dc6",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 613,
+   "edge_fp": 179,
+   "edge_fn": 149,
+   "division_tp": 0,
+   "division_fp": 4,
+   "division_fn": 0,
+   "num_pred_nodes": 6329,
+   "total_node_ratio": -0.19539791507754894,
+   "node_recall": 0.9479695431472082
+  },
+  "oracle": {
+   "edge_tp": 663,
+   "edge_fp": 95,
+   "edge_fn": 99,
+   "division_tp": 0,
+   "division_fp": 5,
+   "division_fn": 0,
+   "num_pred_nodes": 6257,
+   "total_node_ratio": -0.20455123315535215,
+   "node_recall": 0.9454314720812182
+  },
+  "moves": {
+   "swap1": 21,
+   "gt_gained": 67,
+   "changed": 137,
+   "swap2_reconnected": 43,
+   "swap2_dropped": 3,
+   "pairs": 1,
+   "deployed": 5963,
+   "oracle": 5960,
+   "gt_reachable": 67
+  },
+  "gt_edges": 762,
+  "gt_pairs_mapped": 713
+ },
+ {
+  "crop": "6bba_d3da753b",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 719,
+   "edge_fp": 163,
+   "edge_fn": 138,
+   "division_tp": 0,
+   "division_fp": 5,
+   "division_fn": 1,
+   "num_pred_nodes": 14357,
+   "total_node_ratio": -0.16751710541574857,
+   "node_recall": 0.9537767756482526
+  },
+  "oracle": {
+   "edge_tp": 755,
+   "edge_fp": 109,
+   "edge_fn": 102,
+   "division_tp": 0,
+   "division_fp": 9,
+   "division_fn": 1,
+   "num_pred_nodes": 14347,
+   "total_node_ratio": -0.16809695001739533,
+   "node_recall": 0.9537767756482526
+  },
+  "moves": {
+   "gt_gained": 58,
+   "swap2_reconnected": 34,
+   "changed": 121,
+   "swap1": 19,
+   "swap2_dropped": 5,
+   "pairs": 1,
+   "deployed": 13630,
+   "oracle": 13625,
+   "gt_reachable": 58
+  },
+  "gt_edges": 857,
+  "gt_pairs_mapped": 804
+ },
+ {
+  "crop": "6bba_b1ae37b9",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 482,
+   "edge_fp": 58,
+   "edge_fn": 97,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 18910,
+   "total_node_ratio": -0.22174664581447032,
+   "node_recall": 0.8937908496732027
+  },
+  "oracle": {
+   "edge_tp": 491,
+   "edge_fp": 44,
+   "edge_fn": 88,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 0,
+   "num_pred_nodes": 18912,
+   "total_node_ratio": -0.22166433451312864,
+   "node_recall": 0.8921568627450981
+  },
+  "moves": {
+   "gt_gained": 14,
+   "swap2_reconnected": 7,
+   "changed": 30,
+   "swap1": 5,
+   "swap2_dropped": 2,
+   "pairs": 1,
+   "deployed": 18136,
+   "oracle": 18134,
+   "gt_reachable": 14
+  },
+  "gt_edges": 579,
+  "gt_pairs_mapped": 497
+ },
+ {
+  "crop": "6bba_df673a83",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 592,
+   "edge_fp": 51,
+   "edge_fn": 62,
+   "division_tp": 0,
+   "division_fp": 4,
+   "division_fn": 4,
+   "num_pred_nodes": 20984,
+   "total_node_ratio": 0.09070117989500494,
+   "node_recall": 0.9520958083832335
+  },
+  "oracle": {
+   "edge_tp": 598,
+   "edge_fp": 44,
+   "edge_fn": 56,
+   "division_tp": 0,
+   "division_fp": 5,
+   "division_fn": 4,
+   "num_pred_nodes": 20981,
+   "total_node_ratio": 0.09054524663444045,
+   "node_recall": 0.9505988023952096
+  },
+  "moves": {
+   "gt_gained": 21,
+   "swap2_reconnected": 11,
+   "changed": 44,
+   "swap1": 8,
+   "swap2_dropped": 2,
+   "pairs": 1,
+   "deployed": 20179,
+   "oracle": 20177,
+   "gt_reachable": 22
+  },
+  "gt_edges": 654,
+  "gt_pairs_mapped": 616
+ },
+ {
+  "crop": "6bba_3abfe10a",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 696,
+   "edge_fp": 167,
+   "edge_fn": 239,
+   "division_tp": 0,
+   "division_fp": 1,
+   "division_fn": 1,
+   "num_pred_nodes": 42494,
+   "total_node_ratio": -0.18382790742341304,
+   "node_recall": 0.8525576730190572
+  },
+  "oracle": {
+   "edge_tp": 739,
+   "edge_fp": 99,
+   "edge_fn": 196,
+   "division_tp": 1,
+   "division_fp": 6,
+   "division_fn": 0,
+   "num_pred_nodes": 42487,
+   "total_node_ratio": -0.1839623547488716,
+   "node_recall": 0.8505516549648947
+  },
+  "moves": {
+   "gt_gained": 43,
+   "swap2_reconnected": 18,
+   "changed": 96,
+   "swap1": 15,
+   "swap2_dropped": 10,
+   "pairs": 1,
+   "deployed": 40227,
+   "oracle": 40217,
+   "gt_reachable": 44
+  },
+  "gt_edges": 935,
+  "gt_pairs_mapped": 763
+ },
+ {
+  "crop": "6bba_cf35214c",
+  "family": "6bba",
+  "deployed": {
+   "edge_tp": 762,
+   "edge_fp": 12,
+   "edge_fn": 55,
+   "division_tp": 0,
+   "division_fp": 0,
+   "division_fn": 0,
+   "num_pred_nodes": 33619,
+   "total_node_ratio": -0.03642877615362568,
+   "node_recall": 0.9489311163895487
+  },
+  "oracle": {
+   "edge_tp": 767,
+   "edge_fp": 10,
+   "edge_fn": 50,
+   "division_tp": 0,
+   "division_fp": 3,
+   "division_fn": 0,
+   "num_pred_nodes": 33617,
+   "total_node_ratio": -0.03648609916881628,
+   "node_recall": 0.9489311163895487
+  },
+  "moves": {
+   "swap1": 5,
+   "gt_gained": 5,
+   "changed": 10,
+   "pairs": 1,
+   "deployed": 32390,
+   "oracle": 32390,
+   "gt_reachable": 5
+  },
+  "gt_edges": 817,
+  "gt_pairs_mapped": 768
+ }
+]

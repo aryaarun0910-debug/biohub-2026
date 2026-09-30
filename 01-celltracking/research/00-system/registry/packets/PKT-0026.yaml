@@ -1,0 +1,73 @@
+id: PKT-0026
+title: "LEVER-0036: CPU full-chain feasibility and exact control replay before any new GPU export"
+lever: LEVER-0036
+owner: primary
+lock: done
+opened: '2026-08-28'
+
+claim: >-
+  The complete P28 post-ILP champion chain can be reproduced on CPU from existing local artifacts with control
+  parity at the known solver-degeneracy floor, allowing the tightened ILP node set to be evaluated without a new
+  GPU run once an honest fold-0 pre-ILP artifact exists.
+
+falsifier: >-
+  Any required parent-process state (image frames, DeepCenter checkpoint/config, learned-edge probabilities,
+  stage configuration, or stable node identity) is absent or cannot be reconstructed; or the deployed control
+  cannot reproduce P28 graph/scorer output within the explicit FACT-0363 solver-degeneracy floor. In either case
+  CPU replay is not a promotion instrument and LEVER-0036 must wait for a paired Kaggle export through the full
+  chain. No tolerance may be widened after observing the result.
+
+prediction: >-
+  The Python post-processing code and DeepCenter checkpoint are locally available, but raw image-frame access is
+  the likely blocker. Expect either exact graph parity on fold 1 after isolating the solver tie, or an early,
+  explicit asset failure that converts the next GPU action into one self-contained paired control/candidate run.
+
+inputs:
+  facts: [FACT-0345, FACT-0358, FACT-0363, FACT-0364, FACT-0365, FACT-0261]
+  artifacts:
+    - C:/temp/preilp_f1_v2/preilp_split1.parquet
+    - C:/temp/p28_f1/
+    - C:/temp/biohub_deepcenter_p10_audit/best.pt
+    - data/train/*.geff
+  code:
+    - notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb
+    - scripts/win_bet/ilp_replay.py
+    - scripts/win_bet/ea_atlas.py
+
+method: >-
+  STEP 0: inventory every file and runtime dependency read by filter_output_graph and record a fail-closed asset
+  matrix. STEP 1: extract the committed P28 post-processing implementation into an importable CPU harness without
+  changing its logic; unit-test configuration and stage ordering. STEP 2: replay the deployed solver setting on a
+  small fold-1 control and compare nodes, edges, stage counters, and scorer output to P28, explicitly separating
+  FACT-0363 solver ties. STEP 3: only if the small control passes, replay the complete fold-1 control. The old
+  pre-ILP artifact licenses plumbing only (FACT-0350/0358); no delta from it promotes the lever. Prepare, but do
+  not launch, a paired fold-0 export spec if honest fold-0 input remains the sole missing asset.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: 1-2 CPU days
+
+forbidden:
+  - treating the old fold-1 pre-ILP artifact as fold-0 or leaderboard evidence
+  - widening parity tolerance after observing a mismatch
+  - claiming the FACT-0365 pre-relink edge gain transfers through motion relink
+  - launching Kaggle or Colab GPU work or a submission
+  - changing the Kaggle-only host decision without explicit host instruction
+  - float-coordinate export
+  - .claude/settings.json
+
+outputs:
+  evidence: C:/temp/full_chain_replay/ and _evidence/full_chain_replay/
+  facts_added: [FACT-0367]
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md when the feasibility gate reaches a
+    terminal result.
+
+result: >-
+  Prediction's blocker was false: all raw frames were already local. The AST-extracted P28 chain reproduced the
+  deployed controls exactly across every predeclared stage counter and official scoring. A fixed fold-1 panel
+  remained positive through the complete chain (FACT-0367), so motion relink does not
+  automatically erase the selectivity gain. The result is intentionally SUSPECT and non-promotional because it
+  is a size-stratified fold-1 panel, signs split evenly, and no honest fold-0 pre-ILP artifact exists. LEVER-0036
+  stays open at priority 1; next gate is the preregistered complete fold-0 plus complete fold-1 replay.

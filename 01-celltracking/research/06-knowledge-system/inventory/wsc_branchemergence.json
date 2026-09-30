@@ -1,0 +1,187 @@
+{
+  "workstream": "C -- GT-free branch-emergence proposer (D1 denominator compression)",
+  "date": "2026-08-01",
+  "substrate": "E0c cache, 199 crops, frozen h0c_top3 shortlist (cfg 04eeac97500d)",
+  "prereg_hash": "46946bb0d50f",
+  "prereg": {
+    "version": 2,
+    "amendment": "v1 used cos_daughter_axis (axis-vs-migration alignment) as the anti-parallelism term; corrected to daughter_angle (dot(unit(d1-m),unit(d2-m))) after reading phaseb_h1g_features.py:137-139, before any corpus score was computed. Cardinality unchanged at 7.",
+    "name": "branch-emergence proposer (WS-C)",
+    "features": [
+      "cont_resid_um",
+      "flow_midpoint_residual",
+      "daughter_angle",
+      "pd_ratio",
+      "sep_growth2",
+      "sep_growth3",
+      "sep_mono"
+    ],
+    "n_features": 7,
+    "signs_from_mechanism": {
+      "cont_resid_um": 1,
+      "flow_midpoint_residual": -1,
+      "daughter_angle": -1,
+      "pd_ratio_asym": -1,
+      "sep_growth2": 1,
+      "sep_growth3": 1,
+      "sep_mono": 1,
+      "cos_daughter_axis": -1
+    },
+    "null_hypothesis": "continue: successor at mother+flow, residual cont_resid_um, scale = per-crop median cont_resid_um",
+    "alt_hypothesis": "branch: pair midpoint at mother+flow, residual flow_midpoint_residual",
+    "parameterisations": [
+      "BE_phys (global threshold)",
+      "BE_rank (per-crop rank-sum, per-crop top-k)"
+    ],
+    "nulls": {
+      "BE_phys": "neutral 0 contribution",
+      "BE_rank": "-1.0 (Lane 3 N1 convention)"
+    },
+    "nms": "temporal NMS W=2 over the mother's own parent/child chain (Lane 3 D3, verified zero true-fork loss)",
+    "excluded": [
+      "n_persist (sign-unstable)",
+      "m_terminates (proven empty)",
+      "steal_required (60/92 positives need it)",
+      "family id",
+      "crop id",
+      "absolute time",
+      "absolute position",
+      "N_est"
+    ],
+    "gates": {
+      "G1_max_proposed": 20000,
+      "G2_min_retention_of_92": 0.5,
+      "G3": "same-sign retention both families",
+      "G4": "no family/crop id",
+      "G5_min_base_rate_gain": 100.0,
+      "family_auc_budget": 0.65
+    },
+    "pi_vis": 1.0
+  },
+  "pi_vis": "PINNED 1.0 -- every candidate in the 4,957,806-mother denominator is charged; no arm was evaluated on the annotated subpopulation only",
+  "surface_parity": {
+    "candidate_rows": 14371002,
+    "expected_candidate_rows": 14371002,
+    "mothers": 4957806,
+    "expected_mothers": 4957806,
+    "reachable_gt_divisions": 113,
+    "expected": 113,
+    "true_pairs_in_shortlist": 92,
+    "expected_true_pairs": 92,
+    "pass": true
+  },
+  "scorer_parity": {
+    "method": "scripts/verify_pooled_objective.py -- regenerated reports/inventory/pooled_objective_parity.json BYTE-IDENTICALLY (git diff empty)",
+    "canonical_pooled": 0.6653932886896151,
+    "canonical_44b6": 0.7595490689190139,
+    "canonical_6bba": 0.6489523829566957,
+    "closed_form_reconstruction_abs_diff": 1.1102230246251565e-16,
+    "pytest": "42 passed",
+    "note": "no graph was edited and no arm was scored, so the relevant parity is the SURFACE parity above; the scorer anchors are recorded to show the environment is the one the anchors were set in"
+  },
+  "gates": {
+    "G1_max_20000_proposed": {
+      "budget": 20000,
+      "measured": 19900,
+      "pass": true,
+      "note": "BE_rank + D3 temporal NMS (W=2) + per-crop top-100 allocation over 199 crops"
+    },
+    "G2_retain_50pct_of_92": {
+      "budget": 0.5,
+      "measured": 0.11956521739130435,
+      "retained": 11,
+      "of": 92,
+      "pass": false,
+      "K_required_for_50pct_GT_free": 445357,
+      "K_required_for_50pct_GT_ORACLE_in_sample": 390677
+    },
+    "G3_same_sign_both_families": {
+      "44b6_retained": 3,
+      "44b6_of": 16,
+      "6bba_retained": 8,
+      "6bba_of": 76,
+      "44b6_rate": 0.1875,
+      "6bba_rate": 0.10526315789473684,
+      "pass": true,
+      "note": "same sign, but 4.2x apart in magnitude and both far under the G2 bar"
+    },
+    "G4_no_family_or_crop_identifier": {
+      "features": 7,
+      "family_auc_groupkfold_by_crop": 0.5601355053713033,
+      "budget": 0.65,
+      "pass": true,
+      "phys_arm_family_auc": 0.5558448312314103
+    },
+    "G5_base_rate_gain_100x": {
+      "budget": 100.0,
+      "base_rate_before": 1.8556595397238212e-05,
+      "base_rate_after": 0.0005527638190954774,
+      "measured_gain": 29.78799759667905,
+      "pass": false
+    }
+  },
+  "verdict": "CLOSE",
+  "headline_numbers": {
+    "best_GT_free_arm_at_20k": {
+      "arm": "BE_rank + NMS(W=2) + per-crop top-100",
+      "admitted": 19900,
+      "retained_of_92": 11,
+      "retention": 0.11956521739130435,
+      "base_rate": 0.0005527638190954774,
+      "gain": 29.78799759667905
+    },
+    "best_GT_free_arm_global_20k": {
+      "arm": "BE_rank + NMS(W=2), global top-20,000",
+      "admitted": 20000,
+      "retained_of_92": 3,
+      "gain": 8.083379347826087
+    },
+    "K_at_50pct_GT_free_best": 445357,
+    "K_at_50pct_GT_ORACLE_in_sample": 390677,
+    "required_binormal_mother_AUC_for_50pct_at_K20000": 0.9695,
+    "measured_mother_AUC_BE_rank": {
+      "44b6": 0.8559706623323131,
+      "6bba": 0.7766518805987845
+    },
+    "required_AUC_of_a_perfectly_independent_new_channel": 0.9386,
+    "measured_appearance_channel_half_max_volume_t_minus_1": {
+      "best": 0.657,
+      "worst": 0.496
+    },
+    "nms_true_mothers_destroyed": {
+      "BE_rank": 38,
+      "BE_phys": 48,
+      "note": "Lane 3 recorded temporal NMS as losing ZERO true forks; that is a property of Lane 3's score, not of the operator"
+    },
+    "best_structural_filter_gain": 4.395372975244474,
+    "branch_beats_cont_predicate": {
+      "mothers_kept": 315682,
+      "true_kept_strict": 8,
+      "true_44b6": 1,
+      "true_6bba": 7,
+      "compression": 15.705063956766619,
+      "base_rate": 2.5341958046388455e-05,
+      "gain": 1.3656577353710104
+    }
+  },
+  "runtimes_wall_s": {
+    "wsc_census.py --workers 3": 285.6330633163452,
+    "wsc_propose.py --workers 3 (scoring only, 3 workers)": 107.0,
+    "wsc_leak.py --per-crop 3000 --workers 3 (sampling only)": 14.0,
+    "wsc_filters.py --workers 3": 12.0
+  },
+  "sha256": {
+    "data/census_manifest.json": "6d1b77f082ca906f1f4483835196c028968d3d0b14622d6953689da93ba5a684",
+    "data/filters.json": "7893febfac66e7c928f6b37719aef45813f5e35094a96b2144b8c4427e3d4569",
+    "data/gates.json": "a1f005a4cecdb03a81ac2c9091220fcc5ffe73616818cae81dcfee02af368b4e",
+    "data/leak.json": "8732ce003c3f3b0fb4693a074c05ea94e4624512c41d1f0ec8cb04c22c0dec99",
+    "data/mother_terms.npz": "2c84d6df7b82c3f09781fbcd979ba223c04044cc4d8abceff4519ba50d83f0d5",
+    "data/propose.json": "85a510bae8e26991eda186d971c5e46b5f480e64a4a96ce045fc8045d9cb13c4",
+    "scripts/wsc_census.py": "2f580553f7f7858f105b78e567680a1eb2020b2400f756c2ecb495ed93cd988e",
+    "scripts/wsc_filters.py": "345fa93a7fce4396c5393a9f6d358d9cdb6d437df30ad4645c0500af17ba3310",
+    "scripts/wsc_gates.py": "8050d7e6bd575f4e2cf86ac30b6a66ad710536d31ea07f8e8c116835065f003c",
+    "scripts/wsc_leak.py": "e1fe26769445988ea5bd5244ac8000532f019441e87abb3ecc109dc9a689d7af",
+    "scripts/wsc_propose.py": "b51b45ca98c53281c9dff5a57e5f74f3492dcf6ebb9f8b7308f15e65100f0dfc",
+    "scripts/wsc_summary.py": "d595a74de2542764f63778d9fba7cf6a13b003966ab5ba2011ab7207a92cdd31"
+  }
+}

@@ -1,0 +1,343 @@
+id: PKT-0029
+title: "LEVER-0034: reconstruct the HOCT association head onto our identical trunk and measure parent choice"
+lever: LEVER-0034
+owner: agent-2-hoct-reuse
+lock: claimed
+opened: '2026-08-29'
+
+claim: >-
+  The published HOCT association head, reconstructed from its state dict and run on our architecturally
+  identical trunk over the UNCHANGED node surface, chooses better parents than our deployed edge predictor -
+  measured as an increase in true edges recovered on the honest fold with no node-set change.
+
+falsifier: >-
+  Any of, in order of when they bite:
+  (a) the reconstructed module does not load the published state dict with strict=True and exact shapes - the
+  architecture is then not what the tensors describe and nothing downstream is interpretable;
+  (b) the FEATURE CONTRACT cannot be pinned down. The publisher shipped weights and a config but NO model
+  code, so the 3 extra node inputs (35 = 32 UNet channels + 3) and the 4 extra edge inputs (196 = 2 x 96 + 4)
+  are inferred. A wrong ordering loads cleanly and scores garbage - a silent failure - so the contract must be
+  demonstrated, not assumed;
+  (c) the head fails an output-contract smoke: on fold-0 held-out crops with the official node set, its
+  parent-choice accuracy does not exceed our deployed predictor's on the same pairs;
+  (d) it improves top-1 parent choice but does not raise true edges recovered through the complete chain on
+  the honest fold.
+
+prediction: >-
+  Stated before any run. Reconstruction and strict load will succeed - the tensor names are standard
+  torch.nn.TransformerEncoder and Sequential patterns. THE FEATURE CONTRACT IS THE REAL RISK and is where I
+  expect to spend the effort; dimensional analysis narrows it but does not determine it. On association itself
+  the publisher's own held-out numbers are the honest prior: they report the official baseline improving from
+  0.7147 to 0.7315 in our fold-0 direction, a gain on a baseline far weaker than our champion, so expect the
+  transferred gain on OUR substrate to be SMALLER than theirs, possibly much smaller.
+
+inputs:
+  facts: [FACT-0361, FACT-0362, FACT-0368, FACT-0371, FACT-0376, FACT-0347]
+  artifacts:
+    - C:/temp/arch_inventory/hoct/weights/        # fold0 HN, v1, pqlt, toql, edge predictor, configs
+    - C:/temp/p30_f0/preilp_split0.parquet        # the honest fold-0 node and candidate surface
+    - C:/temp/p28_f0/loeo_split0_champion.csv.gz  # the control to beat
+  code:
+    - scripts/win_bet/p28_full_chain_replay.py
+    - scripts/win_bet/lever37_conversion.py
+
+method: >-
+  STEP 0 (architecture): reconstruct the module from the state dict - Linear(35->96), Embedding(2,96) frame
+  embedding, a 2-layer node TransformerEncoder (d_model 96, ffn 192), edge projection Linear(196->96) with
+  norm, the edge blocks, and the edge head. Require strict=True load with exact shapes for BOTH folds.
+  STEP 1 (feature contract) IS AN IDENTIFIABILITY EXPERIMENT, NOT FEATURE-ORDER TUNING. Host safeguards,
+  binding:
+  (a) CANDIDATE CONTRACTS ARE DEFINED FROM EVIDENCE BEFORE ANY SCORING - the checkpoint metadata (gate_um
+  15.0, edge_neighbors 64, feature_dim 32/33), the fold configs (downsample [1,4,4], window_size 2,
+  pool_kernel_um 5.0) and the tensor shapes. The list is frozen and written down before the first score;
+  contracts are not invented in response to results.
+  (b) SELECT ON ONE FOLD, APPLY THE FROZEN WINNER TO THE OTHER. A contract that wins on fold 0 and does not
+  transfer to fold 1 is not identified - it is fitted to a fold.
+  (c) THE PERMUTATION THRESHOLD IS CORRECTED FOR THE NUMBER OF CONTRACTS TESTED. Testing many orderings and
+  keeping the best is a multiple-comparisons problem; the null is random feature permutation and the
+  acceptance bar rises with the count.
+  (d) THE CRITERION IS PARENT TOP-1 ACCURACY AND MARGIN, NOT LOSS. A lower loss with unchanged ranking is not
+  evidence of a recovered contract.
+  (e) `not_identifiable` IS AN EXPLICIT TERMINAL OUTCOME, not a failure to report. If no contract clears the
+  corrected bar on selection AND transfers, that is the finding.
+  (f) UPSTREAM COMPATIBILITY IS CHECKED FIRST, because it may matter more than the unknown slots: HOCT's
+  pooling/NMS (pool_kernel_um 5.0 against our 3.0), coordinate scaling, neighbourhood construction (gate_um
+  15.0, 64 neighbours against our softmax-threshold rule, FACT-0369) and feature normalisation. A mismatch
+  there makes every contract look wrong.
+  (g) IF NO CONTRACT TRANSFERS, REUSE OF THE PUBLISHED WEIGHTS IS KILLED and the architecture is retained as a
+  TRAIN-FROM-KNOWN-CONTRACT lane - we own the contract when we train it, and the 447k-parameter head is small
+  enough to train on the association task alone with the detector frozen.
+  STEP 2 (output-contract smoke): on a small fold-0 crop set with the OFFICIAL node surface unchanged, compare
+  top-1 parent accuracy against our deployed edge predictor on the same pairs.
+  STEP 3 (association measurement): only if STEP 2 passes, score through the complete chain on the honest fold
+  with the node surface preserved, reporting raw association, node recall and division TP SEPARATELY.
+  The fork head is IGNORED throughout. Its published division recall is zero (FACT-0347) on 110 positive
+  training pairs (FACT-0362), and PKT-0027 rule (4) plus the FACT-0371 caution both forbid reading an
+  association gain as division recovery.
+
+harness_gates:
+  g1_feature_parity: >-
+    Cache frozen-trunk node features and prove the DEPLOYED head, re-run from the cache alone,
+    reproduces the candidate edges and probabilities already recorded in the P30 pre-ILP export.
+    Built as scripts/win_bet/assoc_feature_cache.py. IMPLEMENTATION CONSTRAINT, NOT A SCIENTIFIC ONE
+    (host correction 2026-08-29): tracking_cellmot.io.open_dataset calls pin_memory() during image
+    preprocessing and raises "Cannot access accelerator device when none is available" even when
+    passed device='cpu'. pin_memory is a HOST-TO-DEVICE TRANSPORT optimisation, not numerical
+    preprocessing, so this does NOT establish that the pipeline is intrinsically GPU-only - only
+    that this code path refuses to run without an accelerator. The harness is therefore NOT
+    redesigned around it. The parity smoke runs on GPU for a second and better reason: CPU and GPU
+    floating-point paths can differ by more than the 1e-4 probability tolerance, so running the
+    smoke on CPU would confound a numeric-backend difference with a genuine cache error - exactly
+    the ambiguity the gate exists to remove. Reading the zarr directly would additionally bypass the
+    deployed normalisation and defeat the parity being proven.
+    ---
+    ATTEMPT 1 FAILED 2026-08-29 (EXP-0040, FACT-0387) AND THE GATE IS BEING REDESIGNED, NOT REPAIRED.
+    It raised ModuleNotFoundError on `import predict_unet_transformer`, compared ZERO crops and
+    reported all_passed false. The cause is a PROCESS BOUNDARY: the deployed predictor is never
+    imported into the notebook process - it is launched as a subprocess with the repo directory as
+    cwd - and every patch in this tree that works reaches it by REWRITING THAT FILE'S SOURCE TEXT.
+    The fail-closed design is what made this cheap; it refused to report a pass, so the two full
+    feature-cache sessions it would have licensed were not spent.
+    THREE CONDITIONS NOW BIND THE REDESIGN, and a re-push satisfying fewer than all three is not
+    Gate 1. The last two come from the PKT-0033 audit and were established BEFORE this run returned,
+    so they are not rationalisation after a failure:
+    (i) IT RUNS INSIDE THE PREDICTOR'S OWN PROCESS, by source rewriting like every working patch.
+        Adding sys.path and re-importing would produce a gate that runs and still observes the head
+        somewhere other than where it executes.
+    (ii) IT SERIALISES THE CACHE TO DISK AND RELOADS IT. Attempt 1 wrote _afp_feats[t] and read it
+        back in the same process, so it exercised NO cache at all - every dtype, layout, index-remap
+        and staleness error a real cache can carry went untested, while the gate's stated purpose is
+        to prove the head can be re-run FROM THE CACHE ALONE.
+    (iii) IT COMPARES THE SUB-0.5 PROBABILITY BAND. Attempt 1 populated its comparison only above the
+        deployed threshold, and FACT-0382 measured that ALL 691 fold-0 contested errors have their
+        true parent BELOW that threshold - so it validated precisely the band the learnable task does
+        not use.
+    Two further audit observations to address while redesigning, neither of which alone blocks the
+    gate: it asserts no per-frame node-count parity, so a short detection would silently shrink the
+    comparison denominator; and a head trained from cached node features also needs the scaled
+    coordinates and the position features whose frame index is rewritten to window-local 0/1, which
+    a node-feature cache does not carry.
+    ---
+    ATTEMPT 2 BUILT 2026-08-29, NOT YET PUSHED. scripts/kaggle_edits/assoc_feature_parity.py now
+    writes a standalone worker and runs it as TWO SEPARATE SUBPROCESSES with cwd=REPO_DIR:
+    phase `cache` builds coords and frozen-trunk features and writes .npz to disk, then exits;
+    phase `verify` starts as a fresh interpreter, loads ONLY those files, and reproduces the edges.
+    Each condition is met by construction rather than by intent:
+    (i) cwd=REPO_DIR makes `import predict_unet_transformer` resolve exactly as it does for the
+        deployed shards, and it imports the PATCHED source, which is what actually ran;
+    (ii) the verifier cannot see the writer's memory, so "from the cache alone" is enforced by the
+        operating system - the defect that made attempt 1 hollow cannot recur silently;
+    (iii) the full probability matrix is retained rather than only pairs above 0.5, and band B is
+        checked against the ECB sidecars down to 0.02 - the band FACT-0382 shows the task uses.
+        The sidecars are ALREADY MOUNTED: aryaarun07/biohub-identity-replay-f0 carries both
+        meta/preilp_split0.parquet and ecb/ for all 71 fold-0 crops. If they do not resolve the
+        patch RAISES, because a band-A-only pass is not Gate 1.
+    Both audit extras are addressed: per-frame node-count parity is asserted, and the cache carries
+    coords and image shape as well as features so the verifier reconstructs the scaled coordinates
+    and the window-local position features rather than assuming them.
+    TESTED BY RUNNING, NOT BY READING. tests/test_assoc_feature_parity.py extracts the real worker
+    from the real patch and executes both phases as genuine subprocesses against a stubbed
+    predictor: a faithful cache passes, a cache perturbed by 0.05 FAILS, a node-count mismatch
+    FAILS, a missing cache file refuses to run, and band B is asserted to compare a non-zero number
+    of sub-threshold pairs. That last assertion is the one that would have caught attempt 1's
+    hollowness before a GPU session was spent.
+    ONE KNOWN BLIND SPOT, FOUND BY THAT TEST SUITE AND RECORDED RATHER THAN LEFT TO BE REDISCOVERED.
+    The gate compares probabilities AFTER a softmax over the SOURCE axis, and softmax is invariant
+    to a constant offset along the axis it normalises - so a cache error that shifts EVERY SOURCE IN
+    A FRAME by the same amount is mathematically invisible to it, not merely undetected in practice.
+    The first version of the corruption test perturbed a whole frame and PASSED, which is how this
+    was found; it now perturbs a single node and fails as it should, and a second test asserts the
+    uniform case passes so the limitation cannot be quietly forgotten. Errors that are not uniform
+    across the source axis - a single node's features wrong, an index remap, a dtype change, a stale
+    frame - all show up. Closing the blind spot entirely would mean comparing PRE-softmax logits,
+    and neither the pre-ILP export nor the ECB sidecars record logits, so that is a new acquisition
+    rather than a change to this gate. Not worth one on current evidence, but it is the honest
+    boundary of what a Gate 1 pass will license.
+  g2_label_contract: >-
+    Match predicted nodes to GT ONCE, define parent targets and an explicit abstain/null class, and
+    FREEZE the ambiguity rules before any training. Ambiguity rules decided after seeing results are
+    a tuning knob, not a contract.
+  g3_listwise_evaluation: >-
+    Held-out embryo only, and never training loss: parent top-1, true-parent margin, opportunity
+    conversion (the FACT-0376 quantity), and calibration.
+  g4_full_chain: >-
+    Predictions through the UNCHANGED ILP and post-processing, reporting raw association, node
+    recall and division TP SEPARATELY (FACT-0371 caution).
+
+time_box_2026_08_30: >-
+  HOST TIME BOX. ONE exact implementation and ONE compatibility evaluation. If neither cached trunk produces
+  transferable discrimination, KILL published-weight reuse immediately - do not spend cycles repairing public
+  weights. The architecture then survives only as the train-from-known-contract lane, which is PKT-0038's,
+  and this packet hands over rather than following it.
+  This lane does NOT block PKT-0038. They run in parallel: published-weight reuse is a compatibility test,
+  training from our own contract is the primary 0.950 lane, and a failure here does not slow that one.
+  FOLD-0 ONLY IF NO CLEAN FOLD-1 TRUNK EXISTS. Agent 4 established that fold0_edge_predictor_best.pth is a
+  bare state dict with no provenance and that there is no fold-1 base predictor, so a fold-1 HOCT evaluation
+  currently has no clean trunk. Say so and scope to fold 0 rather than manufacturing one.
+
+ownership_transfer: >-
+  2026-08-29: reassigned from `primary` to `agent-1-hoct`. This packet and LEVER-0034 are that agent's
+  exclusive territory - no other packet in this cycle may edit either record. The boundary with LEVER-0041
+  is stated in that lever: PKT-0029 owns PUBLISHED-WEIGHT REUSE and contract identification, PKT-0034 owns
+  the harness and training from a known contract, and they meet at exactly one handover - this packet's
+  `not_identifiable` terminal outcome.
+
+budget:
+  gpu_sessions: 2   # G1 feature cache is GPU-bound (see g1 note); then the two fold-specific heads
+  submissions: 0
+  wall_clock: 2-4 days
+  spent: >-
+    1 GPU session on EXP-0040, which failed at the import boundary and licensed nothing. The next
+    Gate 1 attempt is CPU work first - the redesign under g1 conditions (i)-(iii) - and only then a
+    push. NO FEATURE-CACHE SESSION MAY START UNTIL A GATE 1 ATTEMPT PASSES; that is the whole point
+    of the gate, and one slot being free is not a reason to spend it.
+
+forbidden:
+  - inheriting HOCT's division conclusion in either direction, or enabling its fork head
+  - changing the node surface - this lever is about parent CHOICE, and a node change would confound it
+  - reporting an association gain as division recovery (FACT-0371 host caution)
+  - assuming a feature ordering that merely loads; a clean strict load is necessary and not sufficient
+  - reconciling the pool_kernel_um mismatch by changing OUR detector (theirs is 5.0, ours 3.0 - FACT-0361);
+    if it matters, it is measured, not silently aligned
+  - .claude/settings.json
+
+terminal_outcomes:
+  identified: >-
+    A single contract clears the permutation bar corrected for the number tested on the selection fold AND
+    transfers frozen to the other fold, improving parent top-1 accuracy and margin. STEP 2 then runs.
+  not_identifiable: >-
+    No contract clears both. Published-weight reuse is KILLED. The architecture survives as a
+    train-from-known-contract lane with the detector frozen, which is a different and cleaner experiment
+    because the feature contract becomes ours by construction.
+
+outputs:
+  evidence: C:/temp/hoct/ and _evidence/hoct/
+  facts_added: []   # STEP 1 findings are pending id allocation by the primary - four agents share
+                    # this worktree and concurrent edits to facts.yaml would collide on ids
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md per gate
+
+result:
+  step_1_status: CONTRACT_DETERMINED   # neither `identified` nor `not_identifiable` - see below
+  date: '2026-08-29'
+  headline: >-
+    STEP 1 DID NOT NEED TO BE RUN AS AN EXPERIMENT. Its premise - falsifier (b)'s "the publisher
+    shipped weights and a config but NO model code" - is FALSE, and was falsified from the bundle's
+    own LICENSES.md, which names a second Kaggle dataset,
+    rudispresence/biohub-stabledet-hoct-code. That dataset exists (825 MB, 154 downloads) and ships
+    repo_overlay/methods/stabledet_hoct_fork/hoct_edge_transformer.py under the MIT licence. The
+    publisher's class StableDetHOCTFork(feature_dim=32) STRICT-LOADS BOTH published checkpoints at
+    exactly 447,376 parameters, so the published source IS the source that produced the weights and
+    the 3 node extras, 4 pair extras and 13 relation features are READ, not inferred. This is the
+    AGENTS.md standing rule "check whether it is already on disk" and "verify a premise at file:line
+    before building on it", firing on our own packet.
+  the_determined_contract:
+    node_extras_3: "(coords_um - center)/gate_um in (z,y,x); center is the mean over the source AND
+      target frames POOLED, not per frame. The frame tag is ADDED via frame_embedding.weight[0]/[1],
+      not concatenated, so it consumes none of the 35 slots."
+    pair_extras_4: "displacement (3) = (target_um[edge_target] - source_um[edge_source])/gate_um,
+      THEN distance (1) = its L2 norm. 96 + 96 + 3 + 1 = 196."
+    relation_13: "(n_mid-q_mid)/gate (3), (n_start-q_start)/gate (3), (n_end-q_end)/gate (3),
+      cosine, line_distance/gate, shared_source, shared_target."
+    frozen_manifest: "C:/temp/hoct/contract_manifest.json, written 2026-08-29T22:29:22Z BEFORE any
+      scoring, and recording the counterfactual candidate list that was NOT scored."
+  falsifier_a_strict_load: PASS - both folds, exact shapes, 447,376 params each.
+  falsifier_b_feature_contract: >-
+    RESOLVED BY EVIDENCE RATHER THAN BY EXPERIMENT, and the falsifier's own warning was vindicated
+    from an unexpected direction. The previous reconstruction strict-loaded both checkpoints AND
+    COMPUTED THE WRONG FUNCTION, in three ways that change no parameter shape and are therefore
+    invisible to strict=True: the node encoder used ReLU where the publisher uses GELU, used
+    norm_first=False where the publisher uses True, and omitted the 3-D RoPE applied to q and k at
+    edge midpoints entirely - its frequencies are a persistent=False buffer, so no checkpoint carries
+    them. A clean strict load is necessary and demonstrably not sufficient. Our reimplementation now
+    reproduces the publisher's edge and quiet logits with max abs delta 0.000e+00 on BOTH folds
+    (C:/temp/hoct/equivalence.json), and tests/test_hoct_head.py asserts a defective node encoder
+    diverges so the point cannot be forgotten.
+  multiple_comparisons_correction: >-
+    Bonferroni over the number of contracts SCORED: alpha_corrected = alpha / N. N = 1, because
+    determining the contract from publisher source before scoring collapses N from the
+    inferred-candidate count to one, so the bar stays alpha = 0.05.
+    The counterfactual N = 72 - a contract is a full assignment of all three slot
+    groups, so 6 x 4 x 3 - gives a bar of 0.000694 and is recorded in the frozen manifest so the
+    N = 1 claim is auditable rather than convenient. The manifest carries an explicit `amendments`
+    entry: the value written at freeze time was 24, which matched neither the cross product nor
+    the sum of its own enumerated list. It is corrected in the open rather than silently, and it
+    affects no result, because N = 1 is the number actually used.
+  permutation_power_counterfactual: >-
+    The ranking experiment was BUILT and its POWER measured, because "no contract cleared the bar"
+    must be distinguishable from "the bar could never have been cleared". On real fold-0 node
+    geometry (220 x 218 nodes, 1,385 candidate edges at HOCT's own 15 um gate) with the real trained
+    weights, permuting a contract slot group moves the argmax parent on this fraction of contested
+    targets - fold0 / fold1 checkpoints, and the two agree: pair_extras 0.932 / 0.927,
+    relation 0.061 / 0.041, node_extras 0.004 / 0.003. All three groups are perturbed the SAME way,
+    by reordering the weight columns that read the slot, so the three are comparable; an earlier
+    version permuted the coordinate AXES for node_extras, which is an isometry that also relabels
+    the displacement and relation channels and therefore measured a different question. The fix
+    did not change the conclusion (node_extras moved 0.001 -> 0.004 on fold 0).
+    SO THE EXPERIMENT AS SPECIFIED WOULD HAVE HAD STRONG POWER ON THE 4 PAIR EXTRAS, WEAK POWER ON
+    THE 13 RELATION FEATURES, AND ESSENTIALLY NONE ON THE 3 NODE EXTRAS. A `not_identifiable` verdict
+    on the node extras would have been a statement about the instrument, not about the weights.
+    Stated confound: node features are synthetic N(0,1) because the 32-channel UNet features are
+    GPU-bound, so the node-extra sensitivity is conditional on that feature scale - three coordinate
+    channels compete against 32 feature channels, and a different real feature magnitude would move
+    the number. This is a power measurement, not a performance claim, and no top-1 accuracy is
+    reported from it.
+  why_not_terminal_either_way: >-
+    `identified` as this packet defines it requires clearing the corrected bar on a selection fold
+    AND transferring frozen to the other, measured as parent top-1 and margin through
+    assoc_parent_dataset.evaluate. That CANNOT be run on CPU: the only missing input is the 32-channel
+    UNet node features, and cache_official_hoct_features.py:554 refuses to run without CUDA. Every
+    other input is CPU-reconstructible and now is - the 15 um candidate graph, the 64-slot
+    neighbourhood, the coordinates and all three feature blocks. So the honest terminal state is
+    CONTRACT_DETERMINED with scoring BLOCKED on the gated feature cache. Declaring
+    `not_identifiable` here would KILL published-weight reuse on absent evidence, which is not a
+    result; declaring `identified` would claim a held-out number nobody has measured.
+  upstream_audit: >-
+    C:/temp/hoct/upstream_audit.json, twelve items, each at file:line. Three matter.
+    (1) FACT-0379 RE-VERIFIED at vendor/kaggle-cell-tracking/scripts/predict_unet_transformer.py:70
+    and :162-199 - our load_model does read config.json and never applies pool_kernel_um. But its
+    stated REASON for HOCT is wrong: cache_official_hoct_features.py:561-568 re-injects the config
+    value explicitly, so it is not dropped for them. It is inert because --node-graphs-dir supplies
+    node COORDINATES that override peak extraction (overlay predict_unet_transformer.py:545-559),
+    and peak extraction at :508 is the only consumer of pool_kernel_um and det_threshold. Right
+    conclusion, stronger mechanism.
+    (2) THE REAL UPSTREAM MISMATCH IS THE CANDIDATE SURFACE, and it is larger than the one this
+    packet was carrying. HOCT's rule is a geometric 15 um ball over every source, uncapped and
+    unfiltered (cache_official_hoct_features.py:62-74); ours admits at most ONE parent per target by
+    arithmetic (FACT-0369) and the widened P30 surface at most four. The head cannot be evaluated as
+    a reranker of OUR candidate list - it needs its own graph, which is CPU-cheap and implemented.
+    Its probabilities also carry an explicit abstain mass (infer_stabledet_hoct.py:320-324) that ours
+    has no counterpart for, so only the WITHIN-TARGET RANKING is comparable, never the levels.
+    (3) A RISK THIS PACKET NEVER NAMED. Which detector trunk produced the 32-dim features is a
+    --weights CLI argument, absent from the checkpoint. The default points at the OFFICIAL LOEO
+    fold-0 detector and the model card says "fixed official predicted nodes", but the bundle also
+    ships its own detector whose weights differ (FACT-0361). Feeding official-trunk features to a
+    head trained on StableDet-trunk features would look EXACTLY like a wrong contract, so both must
+    be cached and compared in the SAME session.
+    Also resolved: licence. Publisher code is MIT, checkpoints CC BY 4.0 with a required attribution
+    string, so LEVER-0034's "licence/prize check required" is answered for use and modification.
+  favourable_finding: >-
+    The checkpoint metadata records hard_negative_objective = parental_nll_plus_top1_pairwise_logistic
+    with frozen_except_edge_head = True. The publisher optimised TOP-1 PARENT CHOICE DIRECTLY, which
+    is this packet's safeguard (d) criterion and the criterion FACT-0381 and FACT-0386 are measured
+    on. Fold naming also aligns with no inversion: their fold0 trained on 6bba / held out 44b6, 71
+    samples, which is our fold 0.
+  instruments:
+    - scripts/win_bet/hoct_head.py    # determined contract, forward pass, equivalence and power gates
+    - tests/test_hoct_head.py         # 14 tests, including that a strict load cannot see the trunk
+  evidence_files:
+    - C:/temp/hoct/contract_manifest.json      # FROZEN before scoring
+    - C:/temp/hoct/equivalence.json            # 0.000e+00 both folds
+    - C:/temp/hoct/permutation_power_fold0.json
+    - C:/temp/hoct/permutation_power_fold1.json
+    - C:/temp/hoct/upstream_audit.json
+    - C:/temp/hoct/code/                       # publisher sources, MIT
+  next_action: >-
+    UNCHANGED BY THIS RESULT AND STILL SERIAL: Gate 1 (g1) must pass before any feature-cache session.
+    What changed is what a cache must now produce - features from BOTH candidate trunks so item (3)
+    above is resolved in-session rather than left to confound the read - and that the head running on
+    them is no longer a guess. No GPU was launched and no submission was made by this packet.
+  boundary_with_pkt_0034: >-
+    NOT crossed. The `not_identifiable` handover to LEVER-0041 was NOT triggered, because the contract
+    was determined rather than failed. Published-weight reuse is NOT killed and must not be recorded
+    as killed.

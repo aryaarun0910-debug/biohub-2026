@@ -1,0 +1,159 @@
+{
+  "name": "p4_detsweep_export_f1",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p4_detsweep_export_f1.json",
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "built_notebook": "notebooks\\kaggle_p4_detsweep_export_f1\\biohub-p4-detsweep-export-f1.ipynb",
+  "built_sha256": "b8e61a45fa96e3adc3efbfaa7ffd5b5603461ed0d1b3625481947c7a4899f129",
+  "config_hash": "ff22d342b8a3",
+  "n_cells": 12,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "b4e3c16c767653be4b88d99358981fc4ce2260b3038294c76799bf2d8aa13e15"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "8ed0fc04f3cfa853ad326cb4bb160883d2a92c12a1b6a0e3e0b9a248c7866789"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "9621f91471ac447c09cafea63d559afe4717ae1cb50b1f72be7258b6fbd02548"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "4a5d28fd3c7d71d882def9b51782f64eab0c27c1ee2787679748ef3ce012a0c9"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "c2c01e6546923987cc25ca8cc34cbef7ee1d64fb2932d383f5a37287a84a390b"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "3781cdc0fbf75b49fa058fbf1c412d37b3a3f04a41e9ee50df5595b461d62366"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "586fd991cc14cae802995ed52342b97df52bf202170a5f58a3eeebdafcbcb168"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "e810b6443db50b91f761cb91395318cf7d3f831b5f41129516847c032aa2c86a"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "4a229f113df72061966d3296783c4f42e14fabadab9811554c85e3bb29756310"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "9005cc78a5840b6a180044d5d8e63857887dc9191cbdfc9ad198063d1cbf29f0"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "6a1829cd1507792d8332dcad36ad86b9f976466ae88d907d519546b741e20ff0"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "0245702f8037b13abf7efa784500d5550d3d94ce78fac44e41be81678f9bbb6e"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "3e367d9b478372c081cd6b8b2df65fbadf69cd3dee85f88cd4d9ffce9113e90f"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fce94e206a62557e9fc34ca9b7c0e677595c476e93df0fafda6fa9f5cc16fc83"
+    },
+    {
+      "kind": "append_cell",
+      "cells": [
+        11
+      ],
+      "payload_sha256": "7c47ea12b52febb3a192ede0a6909dd9d0da44df8e4982c99670f935b9a2b22d"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "d8e8bd4dac7f38677df1f68ba81b4344e1382155c8ad1fe7496b13f0c8d877ec"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "a546af45c3057302172c78f99cefdb9674132be557c78c571780e5bc759e0c68"
+    },
+    {
+      "kind": "replace_cell",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "7e2712e00a82f54ca9623544c04e5e8ec31b0fae7faa8cd79f01d50141c31fda"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "04152c5119e66e83b65f730847d06532e9bd80ef857f149324c58930d719ed48"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        7
+      ],
+      "payload_sha256": "024239b2f55598bbd2649eb35901119fb328259a878095c81d07cf8f893ec70f"
+    }
+  ],
+  "declared_slug": "biohub-p4-detpeak-superset-export-loeo-f1",
+  "title": "Biohub P4 DetPeak Superset Export LOEO F1",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p4-detpeak-superset-export-loeo-f1"
+}

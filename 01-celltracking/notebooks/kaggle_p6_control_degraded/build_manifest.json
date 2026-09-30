@@ -1,0 +1,92 @@
+{
+  "name": "p6_control_degraded",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p6_control_degraded.json",
+  "base_notebook": "notebooks/kaggle_p0b_clean913_revtime/biohub-p0b-clean913-revtime.ipynb",
+  "base_sha256": "01408a17152b2901ebe8ca887b0a1c51c4b299e801917008133c324abecc93ac",
+  "built_notebook": "notebooks\\kaggle_p6_control_degraded\\biohub-p6-control-degraded.ipynb",
+  "built_sha256": "2953aac4d6dcaa3024c7cc36cef2552a4fa89eb1caf3d1661766d00b84c75e6a",
+  "config_hash": "37cc8c1acf08",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "5d10ff4c43283051da0352f08f471451bbdf75ebb71a8bd718282e566a1dd606"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "8ed0fc04f3cfa853ad326cb4bb160883d2a92c12a1b6a0e3e0b9a248c7866789"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "9621f91471ac447c09cafea63d559afe4717ae1cb50b1f72be7258b6fbd02548"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "4a5d28fd3c7d71d882def9b51782f64eab0c27c1ee2787679748ef3ce012a0c9"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "c2c01e6546923987cc25ca8cc34cbef7ee1d64fb2932d383f5a37287a84a390b"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "3781cdc0fbf75b49fa058fbf1c412d37b3a3f04a41e9ee50df5595b461d62366"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "586fd991cc14cae802995ed52342b97df52bf202170a5f58a3eeebdafcbcb168"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "e810b6443db50b91f761cb91395318cf7d3f831b5f41129516847c032aa2c86a"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "4a229f113df72061966d3296783c4f42e14fabadab9811554c85e3bb29756310"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "9005cc78a5840b6a180044d5d8e63857887dc9191cbdfc9ad198063d1cbf29f0"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "6a1829cd1507792d8332dcad36ad86b9f976466ae88d907d519546b741e20ff0"
+    }
+  ],
+  "declared_slug": "biohub-p6-control-degraded",
+  "title": "Biohub P6 CONTROL degraded",
+  "pushed_slug": "biohub-p6-control-degraded"
+}

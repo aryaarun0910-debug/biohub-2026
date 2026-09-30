@@ -1,0 +1,108 @@
+id: PKT-0030
+title: "One passive fold-1 candidate acquisition, so a parent ranker can be cross-fitted at all"
+lever: null              # DELIBERATELY UNCLAIMED - see `why_no_lever` below
+owner: primary
+lock: done
+opened: '2026-08-29'
+
+why_no_lever: >-
+  This packet holds NO lever on purpose. It is a SUBSTRATE ACQUISITION, not a hypothesis about the score: it
+  asserts nothing about whether a better parent ranker exists, only that the fold on which one would be
+  cross-fitted must first be measurable. Claiming LEVER-0039 here would take it out of Agent A's reach under
+  the R6 one-lever-one-owner lock and make the acquisition look like the experiment, which is exactly the
+  conflation the lock exists to prevent. R6 permits a null lever; the validator only guards packets that name
+  one.
+
+claim: >-
+  A single passive fold-1 run on the P28 fold-1 champion control base produces the richer candidate surface
+  and its matching pre-ILP graph while reproducing the control's emitted graph, giving LEVER-0039 and
+  LEVER-0040 an honest held-out fold and removing the cross-fitting blocker named in FACT-0381.
+
+falsifier: >-
+  Any of, in the order they bite:
+  (a) the emitted fold-1 graph is not identical to the P28 fold-1 control (EXP-0031). The acquisition would
+      then have changed the thing it observes and NOTHING replayed against it is interpretable - not a
+      degraded result, a void one;
+  (b) the ECB patch does not print ECB_PATCH_APPLIED, or emits fewer than 128 ECB_EXPORT lines, or its
+      fail-closed assertion fires. A silent no-op looks exactly like "the richer candidates do not exist",
+      which is the wrong conclusion to reach for free (AGENTS.md standing rule);
+  (c) DEPLOYED RECONSTRUCTION fails - filtering the exported surface at the deployed threshold does not
+      contain every edge the pre-ILP graph actually consumed. The export is then not a superset of what ran
+      and no reachability or ranking claim built on it is safe;
+  (d) NODE-ID STABILITY fails - sidecar idx_src/idx_tgt do not address the same nodes the pre-ILP graph
+      addresses. This is the check that counts and heartbeats pass while an id-remapping boundary silently
+      corrupts the surface;
+  (e) the resulting fold-1 contested-target population is DEGENERATE in the FACT-0381 sense - if essentially
+      every target still has one candidate, the fold remains unable to falsify a ranker and the acquisition
+      has not delivered its purpose even though it ran cleanly. This is reported, not hidden.
+
+prediction: >-
+  Stated before the run. (a)-(d) pass, as the fold-0 mirror did on all four (FACT-0373). The real
+  uncertainty is (e) and the honest prior is UNFAVOURABLE relative to fold 0: fold 1 is the
+  association-degraded fold (FACT-0261) with 5x the matched cells (FACT-0380), so I expect a contested share
+  BROADER than fold 0's 21.4% (FACT-0381) rather than narrower - more crowded frames offer more plausible
+  parents. If it instead comes back near fold 0's share, that is a mild surprise worth recording. I also
+  expect the older 2026-08-19 preilp_f1_v2 parquet to match the new export's node ordering, but that is
+  measured as an extra check and no downstream work depends on it.
+
+inputs:
+  facts: [FACT-0381, FACT-0369, FACT-0370, FACT-0373, FACT-0261, FACT-0376]
+  artifacts:
+    - notebooks/kaggle_p28_champion_control_f1/biohub-p28-champion-control-f1.ipynb   # the control base
+    - C:/temp/p28_f1/                                                                 # the control output
+    - C:/temp/preilp_f1_v2/preilp_split1.parquet                                      # prior-run cross-check
+  code:
+    - scripts/kaggle_specs/p34_acquisition_f1.json
+    - scripts/kaggle_edits/edge_candidate_budget.py
+    - scripts/kaggle_edits/pre_ilp_export.py
+    - scripts/win_bet/audit_p30_acquisition.py
+    - scripts/win_bet/assoc_parent_dataset.py
+
+method: >-
+  Build on the P28 fold-1 champion control (base_sha256 f7ab7e08...). Verified before push: the built
+  notebook is a PURE SUPERSET of that control - zero deleted lines in every cell - so graph parity holds by
+  construction and is then confirmed empirically by audit A. Split-1 weights are RE-DECLARED explicitly in
+  the spec rather than inherited silently, so the enforcement is auditable in the artifact itself, and the
+  built notebook contains zero references to split_0 weights. The two TREATMENT variables
+  (BIOHUB_EDGE_CANDIDATE_THRESHOLD, BIOHUB_EDGE_CANDIDATE_TOPK) are unset and absent from the built
+  notebook; only the three EXPORT variables are set, at the same floor 0.02 / top-8 as the fold-0 mirror so
+  the two folds share a surface definition. The pre-ILP export ships in the SAME run because audit D can
+  only be self-consistent if both artifacts come from one run - joining new sidecars to the older parquet
+  would assume the node-id stability D exists to prove. On fetch, run audit A-D, then the additional
+  cross-run node-ordering check against preilp_f1_v2, then assoc_parent_dataset.py to report the fold-1
+  contested population.
+
+budget:
+  gpu_sessions: 1   # concurrent with P33 only; that is the FACT-0061 ceiling of 2, and no third is started
+  submissions: 0
+  wall_clock: 1 day
+
+forbidden:
+  - setting either treatment variable - that would destroy the control and confound the acquisition
+  - any change to the node surface, the weights, or the post-processing chain
+  - submitting anything from this run
+  - claiming LEVER-0039 or LEVER-0040
+  - .claude/settings.json
+
+outputs:
+  evidence: C:/temp/p34_f1/ and _evidence/p34/
+  facts_added: []   # the contested-target census becomes a fact only after the audits pass
+  record: >-
+    One compact row in research/06-knowledge-system/experimental-records.md
+
+result: >-
+  DONE 2026-08-30. All four falsifiers answered, and (e) answered in the direction opposite to the one
+  feared. (a) FAILS AS SPECIFIED but not because of the acquisition: 127 of 128 crops are byte-identical to
+  the P28 fold-1 control, and the single divergent crop is byte-identical to P29's, so P28's own solver
+  draw is the singleton (FACT-0389). The packet demanded bit-identical parity from a solver FACT-0363
+  already showed to have multiple optima - the specification assumed a determinism that does not exist.
+  (b), (c) and (d) PASS on all 128 crops: heartbeat on 128 distinct crops with both treatment variables
+  unset, every one of 2,162,040 deployed edges contained in a 7,157,163-candidate export, zero unknown ids,
+  zero non-adjacent edges. The pre-ILP export is byte-identical to the 2026-08-19 preilp_f1_v2 parquet with
+  its digest recomputed in-run, and cross-run stability passes 128/128, so every prior fold-1 analysis keyed
+  to that parquet stays joinable.
+  (e) DOES NOT FIRE, and this is the packet's real result. Fold 1 is not too thin - it is RICHER: 26,601
+  contested targets at deployed contested top-1 0.7084 with 7,757 errors, against fold 0's 4,157 / 0.8338 /
+  691 (FACT-0388). The preregistered prediction of a BROADER contested share than fold 0's 21.4% was correct
+  at 29.1%. Fold 1 becomes the development surface; fold 0 remains the promotion gate, and conflating those
+  roles would reintroduce the selection problem the folds exist to prevent.

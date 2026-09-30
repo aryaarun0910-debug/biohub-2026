@@ -1,0 +1,68 @@
+{
+  "name": "p27_champion_icom",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\p27_champion_icom.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_p27_champion_icom\\biohub-p27-champion-icom.ipynb",
+  "built_sha256": "c1cbf54bd0e9107d77d1920f254ef668c2015acab972307b7c2356224c74c843",
+  "config_hash": "eb792674e53d",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "env",
+      "cells": [
+        2
+      ],
+      "payload_sha256": "a88cf5231062da220b4a6908e8b899f33eeacaac63bb8fef3ae6041ef5664d6a"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "fb3bf9ffeead810b8adb28de9aed2cc0c884cf1395b669934d35ce8414d3bcef"
+    },
+    {
+      "kind": "insert_before",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "b3fe4a75257e39abe5e183a19801a35d8a99f66b094e21504496d1d989c94186"
+    },
+    {
+      "kind": "insert_after",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "9c79f5ce4db3773440b61bbee0b04f995f895c0c652d223d35b9ef26ff9281e8"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "ca3607480b4eec7c7df8f4b340064e91921a76952fece4d473f625ea6b3ea990"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "72b70b79f37aae4088748bd7d6b86e302d48b943e9540ecf15a57e54b1d063af"
+    },
+    {
+      "kind": "replace",
+      "cells": [
+        6
+      ],
+      "payload_sha256": "0a0d32f78628714beee9e57d89addda558e98938a161bcbbc3f24d53ca499616"
+    }
+  ],
+  "declared_slug": "biohub-p27-champion-icom",
+  "title": "Biohub P27 Champion ICOM",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  },
+  "pushed_slug": "biohub-p27-champion-icom"
+}

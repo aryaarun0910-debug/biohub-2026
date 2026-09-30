@@ -1,0 +1,43 @@
+id: PKT-0016
+title: "Offline-to-leaderboard calibration"
+lever: LEVER-0020
+owner: rnd-agent
+lock: running
+opened: '2026-08-26'
+
+claim: >-
+  A defensible offline->LB mapping exists, or can be shown not to exist with current data.
+
+falsifier: >-
+  If no pooling of the folds reconciles with the LB, offline cannot predict deployed performance and every cross-comparison must carry that caveat.
+
+inputs:
+  facts: [FACT-0210, FACT-0213, FACT-0231, FACT-0240, FACT-0250]
+  artifacts:
+    - _evidence/exports/loeo_f1_strict/   # OOF split_1 - HONEST fold 1
+    - _evidence/exports/loeo_f0_strict/   # pack split_0 - CLEAN on fold 0
+    - C:/temp/error_atlas/                # LOEO-clean, verified FACT-0232
+    - _evidence/p19_relink_sweep_f1/      # LEAK-CONTAMINATED (FACT-0160) - never as truth
+  code: [scripts/core/score_loeo_submission.py, scripts/win_bet/ea_atlas.py]
+
+method: >-
+  Dispatched to a background R&D agent. Mandatory calibration - reproduce the GT inter-frame
+  displacement median of 1.8168 um before trusting any distance. Both embryo directions
+  reported separately. Agents do not write the registry; the lead integrates.
+
+budget:
+  gpu_sessions: 0
+  submissions: 0
+  wall_clock: analysis only
+
+forbidden:
+  - using _evidence/p19_relink_sweep_f1/ as an authoritative source
+  - launching any Kaggle kernel or submission
+  - re-proposing a killed lever without a NEW mechanism and a stated falsifier
+
+outputs:
+  evidence: agent report, integrated by the lead
+  facts_added: []
+  record: one row in experimental-records.md once integrated
+
+result: null

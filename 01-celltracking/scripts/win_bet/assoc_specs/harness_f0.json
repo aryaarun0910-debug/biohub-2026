@@ -1,0 +1,109 @@
+{
+  "name": "assoc_harness_f0",
+  "fold": 0,
+  "no_claim": false,
+  "note": "PREPARED, NOT LAUNCHED. Fold 0 (embryo 44b6) is the honest fold and the only one with a contested population today (FACT-0381). Every arm here is refused until the `cache` section's licence exists, which requires Gate 1 (EXP-0041) to pass first - a head trained on an unlicensed cache measures the cache (FACT-0387). Crop-grouped folds are WITHIN-embryo: this spec makes no cross-embryo transfer claim. SCHEMA V2 (FACT-0402): the cache is keyed by (pair, role), never by frame, and `cache.manifest` is MANDATORY - it binds the producing TRUNK by sha256, because trunk identity is a --weights argument recorded nowhere in the checkpoint and official_f0 and stabledet_f0 share a byte size with different sha256 (FACT-0392). Build it with `audit_feature_cache.py bind`. The receipt is the PASSIVE TAP gate's report (assoc_tap_replay.py writes assoc_feature_tap_gate.json), not P33's retired assoc_feature_parity.json - that worker wrote the frame-keyed layout FACT-0402 retired.",
+  "table": "C:/temp/assoc/f0.parquet",
+  "cache": {
+    "dir": "C:/temp/assoc_harness/cache_f0",
+    "receipt": "C:/temp/assoc_harness/assoc_feature_tap_gate.json",
+    "licence": "C:/temp/assoc_harness/licence_f0.json",
+    "manifest": "C:/temp/assoc_harness/cache_f0/cache_manifest.json",
+    "trunk": "C:/temp/hoct/trunks/official_f0.pth",
+    "trunk_role": "official",
+    "fold": "0",
+    "preilp": "C:/temp/p30_f0/preilp_split0.parquet",
+    "ecb_dir": "C:/temp/p30_f0/ecb",
+    "reproducer": "receipt",
+    "crops": null
+  },
+  "cv": {
+    "kind": "GroupKFold",
+    "n_splits": 5
+  },
+  "preserve_single_candidate": true,
+  "allow_degenerate": false,
+  "models": [
+    {
+      "tag": "alldec.all_nine.linear",
+      "class": "linear",
+      "features": [
+        "prob",
+        "rank",
+        "margin_to_best",
+        "n_candidates",
+        "dist_um",
+        "dz_um",
+        "dy_um",
+        "dx_um",
+        "src_out_degree"
+      ],
+      "abstain": {
+        "kind": "none"
+      },
+      "population": "alldec"
+    },
+    {
+      "tag": "alldec.all_nine.tree",
+      "class": "tree",
+      "features": [
+        "prob",
+        "rank",
+        "margin_to_best",
+        "n_candidates",
+        "dist_um",
+        "dz_um",
+        "dy_um",
+        "dx_um",
+        "src_out_degree"
+      ],
+      "abstain": {
+        "kind": "none"
+      },
+      "population": "alldec"
+    },
+    {
+      "tag": "alldec.context.linear",
+      "class": "contextual",
+      "contract": {
+        "name": "frozen_trunk_node_features",
+        "dim": "from_cache",
+        "pair_builder": "concat_diff",
+        "extra_features": [
+          "prob",
+          "dist_um"
+        ],
+        "has_null_head": false
+      },
+      "abstain": {
+        "kind": "none"
+      },
+      "population": "alldec"
+    },
+    {
+      "tag": "alldec.context.linear.abstain",
+      "class": "contextual",
+      "contract": {
+        "name": "frozen_trunk_node_features",
+        "dim": "from_cache",
+        "pair_builder": "concat_diff",
+        "extra_features": [
+          "prob",
+          "dist_um"
+        ],
+        "has_null_head": false
+      },
+      "abstain": {
+        "kind": "train_quantile",
+        "q": 0.05
+      },
+      "population": "alldec"
+    }
+  ],
+  "out_dir": "C:/temp/assoc_harness/f0",
+  "binding_restriction": {
+    "fact": "FACT-0451",
+    "offline_scoreable": true,
+    "why": "Declared true: no artifact restricted by FACT-0451 reaches this spec. The claim is CHECKED at load, not trusted - spec_restriction.enforce_spec re-derives it from the sha256 of every checkpoint this spec names, and a restricted hash overrides a true declaration however the file is named (rule 3). Omission would be a refusal (rule 2)."
+  }
+}

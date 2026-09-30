@@ -1,0 +1,336 @@
+# P11: fail-closed primary-checkpoint swap to xhhuang's v6 edge predictor.
+#
+# This block runs after the P9 prediction command has been assembled and before
+# any inference worker starts. Kaggle has exposed this attachment through both
+# legacy and newer mount layouts, so the mount prefix is deliberately not assumed.
+# Identity remains fail-closed: exact filename, byte size and SHA-256 must resolve
+# to one and only one file across /kaggle/input.
+import hashlib as _p11_hashlib
+import json as _p11_json
+import shutil as _p11_shutil
+from pathlib import Path as _P11_Path
+
+
+_P11_INPUT_ROOT = _P11_Path("/kaggle/input")
+_P11_WEIGHT_FILENAME = "split_0_edge_predictor_best.pth"
+_P11_CONFIG_FILENAMES = ("split_0_config.json", "config.json")
+_P11_EXPECTED_WEIGHT_BYTES = 8_357_783
+_P11_EXPECTED_WEIGHT_SHA256 = (
+    "19cfbbeb082f54845564b77d48528998d43cfe1f8b1023101425427c834aa68f"
+)
+_P11_EXPECTED_CONFIG_BYTES = 165
+_P11_EXPECTED_CONFIG_SHA256 = (
+    "e9b4e396c58081bca08adf8275bd0bd1c2d3fd6eb091a1912a5116cb6de7b50a"
+)
+_P11_EXPECTED_STATE_SCHEMA_SHA256 = (
+    "5011bba0806057be37c5090fb7b7a1c081a145d64e626f02a25cf6c715af0868"
+)
+_P11_EXPECTED_CONFIG = {
+    "unet_out_channels": 32,
+    "unet_layers": [32, 64, 128],
+    "downsample": [1, 4, 4],
+    "window_size": 2,
+    "pool_kernel_um": 5.0,
+}
+
+
+def _p11_sha256_file(path: _P11_Path) -> str:
+    digest = _p11_hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _p11_find_unique_hashed_file(
+    root: _P11_Path,
+    filenames: tuple[str, ...],
+    expected_sha256: str,
+    expected_bytes: int,
+    *,
+    preferred_parent: _P11_Path | None = None,
+) -> _P11_Path:
+    """Resolve one immutable artifact across Kaggle's legacy/new mount layouts."""
+    if not root.is_dir():
+        raise FileNotFoundError(f"P11 attachment root is missing: {root}")
+
+    def matching(paths: list[_P11_Path]) -> list[_P11_Path]:
+        result = []
+        for path in paths:
+            if not path.is_file() or path.stat().st_size != expected_bytes:
+                continue
+            if _p11_sha256_file(path) == expected_sha256:
+                result.append(path)
+        return result
+
+    # Prefer an exact-hash config beside the already resolved weight. This avoids
+    # an unrelated config.json elsewhere in a large attachment tree.
+    if preferred_parent is not None:
+        preferred = [preferred_parent / name for name in filenames]
+        preferred_matches = matching(preferred)
+        if len(preferred_matches) == 1:
+            return preferred_matches[0]
+        if len(preferred_matches) > 1:
+            raise RuntimeError(
+                "P11 artifact resolution is ambiguous beside the checkpoint: "
+                f"{[str(path) for path in preferred_matches]}"
+            )
+
+    candidates = sorted(
+        {path for filename in filenames for path in root.rglob(filename)},
+        key=lambda path: str(path),
+    )
+    exact_matches = matching(candidates)
+    if len(exact_matches) != 1:
+        observed = [
+            {"path": str(path), "bytes": path.stat().st_size}
+            for path in candidates
+            if path.is_file()
+        ]
+        raise RuntimeError(
+            "P11 artifact resolution expected exactly one exact-hash match for "
+            f"{filenames}, got {len(exact_matches)}; candidates={observed}"
+        )
+    return exact_matches[0]
+
+
+def _p11_state_schema(state: dict[str, _torch.Tensor]) -> list[dict[str, object]]:
+    if not isinstance(state, dict):
+        raise RuntimeError(
+            "P11 checkpoint contract failed: expected a bare state_dict, "
+            f"got {type(state).__name__}"
+        )
+    bad = [key for key, value in state.items() if not isinstance(key, str) or not _torch.is_tensor(value)]
+    if bad:
+        raise RuntimeError(
+            "P11 checkpoint contract failed: non-tensor or non-string state entries: "
+            f"{bad[:5]}"
+        )
+    return [
+        {"key": key, "shape": list(value.shape), "dtype": str(value.dtype)}
+        for key, value in sorted(state.items())
+    ]
+
+
+_P11_SOURCE_WEIGHT_PATH = _p11_find_unique_hashed_file(
+    _P11_INPUT_ROOT,
+    (_P11_WEIGHT_FILENAME,),
+    _P11_EXPECTED_WEIGHT_SHA256,
+    _P11_EXPECTED_WEIGHT_BYTES,
+)
+_P11_SOURCE_CONFIG_PATH = _p11_find_unique_hashed_file(
+    _P11_INPUT_ROOT,
+    _P11_CONFIG_FILENAMES,
+    _P11_EXPECTED_CONFIG_SHA256,
+    _P11_EXPECTED_CONFIG_BYTES,
+    preferred_parent=_P11_SOURCE_WEIGHT_PATH.parent,
+)
+
+# The prediction loader has one canonical sidecar contract:
+# weights_path.parent / "config.json". Kaggle's source artifact calls that file
+# split_0_config.json, so stage the already hash-verified pair under canonical
+# names in writable /kaggle/working before rebinding predict_cmd.
+_P11_STAGE_DIR = WORKING_DIR / "p11_xhhuang_primary" / "split_0"
+_P11_STAGE_DIR.mkdir(parents=True, exist_ok=True)
+_P11_WEIGHT_PATH = _P11_STAGE_DIR / "edge_predictor_best.pth"
+_P11_CONFIG_PATH = _P11_STAGE_DIR / "config.json"
+_p11_shutil.copy2(_P11_SOURCE_WEIGHT_PATH, _P11_WEIGHT_PATH)
+_p11_shutil.copy2(_P11_SOURCE_CONFIG_PATH, _P11_CONFIG_PATH)
+
+_p11_staged_contract = (
+    (_P11_WEIGHT_PATH, _P11_EXPECTED_WEIGHT_BYTES, _P11_EXPECTED_WEIGHT_SHA256),
+    (_P11_CONFIG_PATH, _P11_EXPECTED_CONFIG_BYTES, _P11_EXPECTED_CONFIG_SHA256),
+)
+for _p11_staged_path, _p11_expected_bytes, _p11_expected_sha in _p11_staged_contract:
+    if not _p11_staged_path.is_file():
+        raise FileNotFoundError(f"P11 staged artifact is missing: {_p11_staged_path}")
+    if _p11_staged_path.stat().st_size != _p11_expected_bytes:
+        raise RuntimeError(
+            f"P11 staged byte-size mismatch for {_p11_staged_path}: "
+            f"expected {_p11_expected_bytes}, got {_p11_staged_path.stat().st_size}"
+        )
+    _p11_staged_sha = _p11_sha256_file(_p11_staged_path)
+    if _p11_staged_sha != _p11_expected_sha:
+        raise RuntimeError(
+            f"P11 staged SHA256 mismatch for {_p11_staged_path}: "
+            f"expected {_p11_expected_sha}, got {_p11_staged_sha}"
+        )
+
+# Fail closed on the deployed loader contract, then make the primary model's
+# verified pool_kernel_um operative. load_model reads the canonical config for
+# architecture/window/downsample; this adjacent check prevents its warning/fallback
+# branch and binds detection pooling to the same verified sidecar.
+_p11_predictor_source = _ps.read_text(encoding="utf-8")
+_p11_loader_contract = 'config_path = weights_path.parent / "config.json"'
+if _p11_predictor_source.count(_p11_loader_contract) != 1:
+    raise RuntimeError(
+        "P11 predictor config-loader contract drifted: expected exactly one "
+        f"{_p11_loader_contract!r}"
+    )
+_p11_pool_anchor = (
+    "    model, window_size, downsample = load_model(weights_path, device)\n\n"
+    "    secondary_model = None\n"
+)
+_p11_pool_patch = (
+    "    model, window_size, downsample = load_model(weights_path, device)\n\n"
+    "    # P11: the verified primary sidecar is mandatory; never use loader defaults.\n"
+    "    _p11_runtime_config_path = weights_path.parent / 'config.json'\n"
+    "    if not _p11_runtime_config_path.is_file():\n"
+    "        raise FileNotFoundError(\n"
+    "            f'P11 canonical config missing; refusing load_model fallback: '\n"
+    "            f'{_p11_runtime_config_path}'\n"
+    "        )\n"
+    "    _p11_runtime_config = json.loads(\n"
+    "        _p11_runtime_config_path.read_text(encoding='utf-8')\n"
+    "    )\n"
+    "    if _p11_runtime_config.get('pool_kernel_um') != 5.0:\n"
+    "        raise RuntimeError(\n"
+    "            'P11 pool_kernel_um contract mismatch: '\n"
+    "            f\"{_p11_runtime_config.get('pool_kernel_um')!r}\"\n"
+    "        )\n"
+    "    cfg.pool_kernel_um = float(_p11_runtime_config['pool_kernel_um'])\n"
+    "    print(\n"
+    "        f'P11 canonical config loaded: {_p11_runtime_config_path} | '\n"
+    "        f'pool_kernel_um={cfg.pool_kernel_um}', flush=True,\n"
+    "    )\n\n"
+    "    secondary_model = None\n"
+)
+if _p11_predictor_source.count(_p11_pool_anchor) != 1:
+    raise RuntimeError(
+        "P11 predictor pool-config anchor drifted; refusing an unverified runtime patch"
+    )
+_p11_predictor_source = _p11_predictor_source.replace(
+    _p11_pool_anchor, _p11_pool_patch, 1
+)
+compile(_p11_predictor_source, str(_ps), "exec")
+_ps.write_text(_p11_predictor_source, encoding="utf-8")
+_p11_deployed_predictor = _ps.read_text(encoding="utf-8")
+if _p11_deployed_predictor.count("P11 canonical config loaded:") != 1:
+    raise RuntimeError("P11 canonical-config runtime assertion was not deployed exactly once")
+if _P11_CONFIG_PATH != _P11_WEIGHT_PATH.parent / "config.json":
+    raise RuntimeError(
+        "P11 staged config is not at the predictor's canonical sibling path: "
+        f"weight={_P11_WEIGHT_PATH}, config={_P11_CONFIG_PATH}"
+    )
+
+_p11_weight_bytes = _P11_WEIGHT_PATH.stat().st_size
+if _p11_weight_bytes != _P11_EXPECTED_WEIGHT_BYTES:
+    raise RuntimeError(
+        "P11 checkpoint byte-size mismatch: "
+        f"expected {_P11_EXPECTED_WEIGHT_BYTES}, got {_p11_weight_bytes}"
+    )
+
+_p11_weight_sha256 = _p11_sha256_file(_P11_WEIGHT_PATH)
+if _p11_weight_sha256 != _P11_EXPECTED_WEIGHT_SHA256:
+    raise RuntimeError(
+        "P11 checkpoint SHA256 mismatch: "
+        f"expected {_P11_EXPECTED_WEIGHT_SHA256}, got {_p11_weight_sha256}"
+    )
+
+try:
+    _p11_external_config = _p11_json.loads(_P11_CONFIG_PATH.read_text(encoding="utf-8"))
+except Exception as exc:
+    raise RuntimeError(f"P11 external config is unreadable: {exc}") from exc
+if _p11_external_config != _P11_EXPECTED_CONFIG:
+    raise RuntimeError(
+        "P11 external config mismatch: "
+        f"expected {_P11_EXPECTED_CONFIG}, got {_p11_external_config}"
+    )
+
+_p11_reference_weight = REPO_DIR / WEIGHTS_RELATIVE
+_p11_reference_config_path = _p11_reference_weight.parent / "config.json"
+for _p11_required in (_p11_reference_weight, _p11_reference_config_path):
+    if not _p11_required.is_file():
+        raise FileNotFoundError(
+            "P11 reference-model contract failed: exact P9 artifact path is missing: "
+            f"{_p11_required}"
+        )
+
+try:
+    _p11_reference_config = _p11_json.loads(
+        _p11_reference_config_path.read_text(encoding="utf-8")
+    )
+except Exception as exc:
+    raise RuntimeError(f"P11 reference config is unreadable: {exc}") from exc
+_p11_model_config_keys = (
+    "unet_out_channels", "unet_layers", "downsample", "window_size", "pool_kernel_um"
+)
+_p11_reference_model_config = {
+    key: _p11_reference_config.get(key) for key in _p11_model_config_keys
+}
+if _p11_reference_model_config != _P11_EXPECTED_CONFIG:
+    raise RuntimeError(
+        "P11 P9/reference config mismatch: "
+        f"expected {_P11_EXPECTED_CONFIG}, got {_p11_reference_model_config}"
+    )
+
+_p11_external_state = _torch.load(
+    _P11_WEIGHT_PATH, map_location="cpu", weights_only=True
+)
+_p11_reference_state = _torch.load(
+    _p11_reference_weight, map_location="cpu", weights_only=True
+)
+_p11_external_schema = _p11_state_schema(_p11_external_state)
+_p11_reference_schema = _p11_state_schema(_p11_reference_state)
+if len(_p11_external_schema) != 136 or len(_p11_reference_schema) != 136:
+    raise RuntimeError(
+        "P11 state-count mismatch: expected external/reference 136/136, got "
+        f"{len(_p11_external_schema)}/{len(_p11_reference_schema)}"
+    )
+if _p11_external_schema != _p11_reference_schema:
+    _p11_external_by_key = {row["key"]: row for row in _p11_external_schema}
+    _p11_reference_by_key = {row["key"]: row for row in _p11_reference_schema}
+    _p11_bad_keys = sorted(
+        key
+        for key in set(_p11_external_by_key) | set(_p11_reference_by_key)
+        if _p11_external_by_key.get(key) != _p11_reference_by_key.get(key)
+    )
+    raise RuntimeError(
+        "P11 state schema is not 136/136 shape-compatible with P9; "
+        f"first mismatches: {_p11_bad_keys[:8]}"
+    )
+_p11_schema_bytes = _p11_json.dumps(
+    _p11_external_schema, sort_keys=True, separators=(",", ":")
+).encode("utf-8")
+_p11_schema_sha256 = _p11_hashlib.sha256(_p11_schema_bytes).hexdigest()
+if _p11_schema_sha256 != _P11_EXPECTED_STATE_SCHEMA_SHA256:
+    raise RuntimeError(
+        "P11 state-schema SHA256 mismatch: "
+        f"expected {_P11_EXPECTED_STATE_SCHEMA_SHA256}, got {_p11_schema_sha256}"
+    )
+
+# Prove that the command mutation changes exactly one field: the primary
+# --weights value.  The independent secondary seed and every P9 setting remain untouched.
+if predict_cmd.count("--weights") != 1:
+    raise RuntimeError(
+        f"P11 expected exactly one --weights selector, got {predict_cmd}"
+    )
+_p11_weights_index = predict_cmd.index("--weights") + 1
+if _p11_weights_index >= len(predict_cmd):
+    raise RuntimeError(f"P11 --weights selector has no value: {predict_cmd}")
+if predict_cmd[_p11_weights_index] != WEIGHTS_RELATIVE:
+    raise RuntimeError(
+        "P11 primary weight precondition failed: expected "
+        f"{WEIGHTS_RELATIVE!r}, got {predict_cmd[_p11_weights_index]!r}"
+    )
+_p11_predict_cmd_before = list(predict_cmd)
+predict_cmd[_p11_weights_index] = str(_P11_WEIGHT_PATH)
+_p11_changed_indices = [
+    index
+    for index, (before, after) in enumerate(zip(_p11_predict_cmd_before, predict_cmd, strict=True))
+    if before != after
+]
+if _p11_changed_indices != [_p11_weights_index]:
+    raise RuntimeError(
+        "P11 violated the isolated-swap contract; changed command indices "
+        f"{_p11_changed_indices}"
+    )
+
+del _p11_external_state, _p11_reference_state
+print(
+    "P11 PRIMARY EDGE CHECKPOINT VERIFIED AND REBOUND: "
+    f"{_P11_WEIGHT_PATH} | sha256={_p11_weight_sha256} | "
+    "state=136/136 exact key+shape+dtype compatibility | "
+    f"config={_p11_external_config}",
+    flush=True,
+)

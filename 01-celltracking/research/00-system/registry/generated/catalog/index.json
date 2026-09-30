@@ -1,0 +1,17 @@
+{
+ "authority": "The REGISTRY is authoritative for every scientific number. This catalog links by FACT/EXP/LEVER/PKT id and copies no values.",
+ "counts": {
+  "notebooks": 74,
+  "registry_experiments": 44,
+  "registry_facts": 270,
+  "registry_levers": 46,
+  "registry_packets": 50,
+  "research_docs": 103,
+  "scripts": 290,
+  "specs": 70,
+  "tests": 109
+ },
+ "do_not_edit": "Generated. Regenerate; --check locks it against hand edits.",
+ "generated_by": "scripts/core/catalog.py",
+ "schema_version": "catalog_v1"
+}

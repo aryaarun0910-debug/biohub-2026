@@ -1,0 +1,25 @@
+{
+  "name": "deploy_h1r_det_s1",
+  "spec": "C:\\Users\\aryaa\\Documents\\Biohub-CellTracking-2026\\scripts\\kaggle_specs\\deploy_h1r_det_s1.json",
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "built_notebook": "notebooks\\kaggle_deploy_h1r_det_s1\\biohub-deploy-h1r-det-s1.ipynb",
+  "built_sha256": "3fd7825d6b5c3147b2f09954b5a2313998db1ceff4d21ca0ef8840872d29ecbd",
+  "config_hash": "1dd435bde69a",
+  "n_cells": 11,
+  "edits": [
+    {
+      "kind": "insert_before",
+      "cells": [
+        5
+      ],
+      "payload_sha256": "5dc387fb9ea2fa11dee32d1588825e9a6009ad6db4360ac92afe1af27a75c45c"
+    }
+  ],
+  "declared_slug": "biohub-deploy-h1r-detector-s1",
+  "title": "Biohub Deploy H1R Detector S1",
+  "defect_gate": {
+    "ledger": "scripts\\core\\experiment_defects.json",
+    "passed": []
+  }
+}

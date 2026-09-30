@@ -1,0 +1,118 @@
+{
+  "name": "p21_colab_parity_f0",
+  "slug": "biohub-p21-colab-parity-loeo-f0",
+  "title": "Biohub P21 Colab Parity LOEO F0",
+  "code_file": "biohub-p21-colab-parity-loeo-f0.ipynb",
+  "out_dir": "notebooks/kaggle_p21_colab_parity_f0",
+  "datasets": [
+    "pilkwang/biohub-deepcenter-unet3d-center-prior-v1",
+    "pilkwang/biohub-temporal-unet3d-seed314159-v1",
+    "pilkwang/biohub-tracking-support-pack-50ep-v1",
+    "pilkwang/pilkwang-public-dataset-for-notebooks-figures",
+    "thtennant/taaf-kaggle-source-share-fork"
+  ],
+  "competition_sources": [
+    "biohub-cell-tracking-during-development"
+  ],
+  "enable_gpu": true,
+  "enable_internet": false,
+  "machine_shape": "NvidiaTeslaT4",
+  "expects_submission": false,
+  "base_notebook": "notebooks/kaggle_p3_harmonic/biohub-p3-harmonic.ipynb",
+  "base_sha256": "70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8",
+  "purpose": "Colab-lane parity + throughput pilot (PKT-0018 candidate): the EXP-0022 champion control arm (penalty -1 only) on the FIRST 20 fold-0 crops, executed on Colab L4 through the relay. Compared crop-for-crop against EXP-0022's control export when it lands: identical scorer rows = the Colab lane reproduces Kaggle. Also measures L4 minutes per crop for unit planning. No submission; never launched on Kaggle.",
+  "provenance": {
+    "base": "deployed P3 harmonic built notebook, sha256 70b636b64455f5fd24caa7ffbed661c43003f64764ba77f8768f8f53f9380ca8, public LB 0.915",
+    "public_sources": [
+      {
+        "kernel": "kunaldesale2408/biohub-cell-tracking",
+        "kernel_id": 130667075,
+        "leaderboard_score_observed_2026_08_24": 0.926,
+        "notebook_sha256": "1f1cbdb26779cc3a14cc2fa4e3649e78897d57ec0a69cd8cf77a0c185fda4a3a"
+      },
+      {
+        "kernel": "rockerritesh/0-926-biohub-divsub",
+        "kernel_id": 131694028,
+        "leaderboard_score_observed_2026_08_24": 0.926,
+        "notebook_sha256": "a0c44e988ca4eadfddb6022f933c128042eaf51b9f74c12e5aa4e6c62f0c18cf"
+      }
+    ],
+    "public_function_sha256": "b0d50a39e07624bc5a29207215fb4ec11908b49a8b60662e3527a513b1b35a5d",
+    "public_function_identity": "The complete 150-line add_safe_divisions_postlink function is byte-identical in both downloaded public notebooks. Full code differs only by blank-line whitespace at four positions.",
+    "routes_on": "graph topology and physical node coordinates only; no dataset, crop, acquisition, hidden label, or image-content routing",
+    "interaction_warning": "The three radii and C1/C2/C3 filters are one coupled treatment. Do not ablate or submit C3 alone; local GT shows that would discard about half of true divisions. The P3 harmonic association surface can change which nodes are orphans, so the public +0.013 is evidence for the mechanism family, not a guaranteed additive delta on P3.",
+    "derived_from": "scripts/kaggle_specs/p20_relink_sweep_f0.json (EXP-0022), LOEO_LIMIT 20, sweep -1 only"
+  },
+  "edits": [
+    {
+      "kind": "env",
+      "cell_match": "BIOHUB_PRESET",
+      "vars": {
+        "BIOHUB_SAFE_DIV_MAX_UM": "8.0",
+        "BIOHUB_SAFE_DIV_SISTER_MAX_UM": "11.0",
+        "BIOHUB_SAFE_DIV_EXISTING_CHILD_MAX_UM": "10.0",
+        "BIOHUB_SAFE_DIV_DIVERGE_UM": "2.25",
+        "BIOHUB_LOEO_FOLD": "0",
+        "BIOHUB_LOEO_ARM": "strict",
+        "BIOHUB_LOEO_LIMIT": "20",
+        "BIOHUB_LOEO_STEMS": "[\"44b6_0113de3b\", \"44b6_0b24845f\", \"44b6_0c582fdc\", \"44b6_0db75fae\", \"44b6_12dfb391\", \"44b6_144b256d\", \"44b6_1574802b\", \"44b6_18ced818\", \"44b6_1d530831\", \"44b6_24264f12\", \"44b6_267148e4\", \"44b6_2a2eff9f\", \"44b6_2f31fc2f\", \"44b6_33b596bf\", \"44b6_341df25f\", \"44b6_3a861e03\", \"44b6_3bb3690f\", \"44b6_40c45f5a\", \"44b6_415c0a3a\", \"44b6_53f95252\", \"44b6_551a5dba\", \"44b6_5740d24b\", \"44b6_587a1e22\", \"44b6_5f15d135\", \"44b6_668e0cc7\", \"44b6_66f9292d\", \"44b6_706092f0\", \"44b6_71a4179f\", \"44b6_74d0c52e\", \"44b6_7a302da0\", \"44b6_7e557709\", \"44b6_808952d6\", \"44b6_81c256f0\", \"44b6_87bba6c4\", \"44b6_8cc6506c\", \"44b6_8f5ab931\", \"44b6_8f9ecab4\", \"44b6_90724892\", \"44b6_949adeb1\", \"44b6_95029e92\", \"44b6_97725144\", \"44b6_996155de\", \"44b6_9be80b04\", \"44b6_9bfa6a0a\", \"44b6_a21120c2\", \"44b6_a2bb48bb\", \"44b6_aaf8b0ea\", \"44b6_abf82518\", \"44b6_b2c44266\", \"44b6_c15fded2\", \"44b6_c50204e0\", \"44b6_c771cb04\", \"44b6_c8e2a523\", \"44b6_c96cfa10\", \"44b6_cf2536e8\", \"44b6_cf8fed6b\", \"44b6_d29c9ab2\", \"44b6_d2f34f90\", \"44b6_d5e7d891\", \"44b6_d754aa59\", \"44b6_d78e09d9\", \"44b6_db3c847b\", \"44b6_ddf577ad\", \"44b6_deabac95\", \"44b6_e28840c6\", \"44b6_e29f0176\", \"44b6_e31261b4\", \"44b6_e35b117d\", \"44b6_e57ff5c6\", \"44b6_eb2880fc\", \"44b6_f28707c6\"]",
+        "BIOHUB_RELINK_DIVISION_SWEEP": "-1"
+      },
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "def filter_short_track_components(",
+      "anchor": "def filter_short_track_components(",
+      "code_file": "scripts/kaggle_edits/coupled_division_transplant.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "MOTION_RELINK_MAX_FRAME_NODES",
+      "old": "MOTION_RELINK_MAX_FRAME_NODES = int(os.environ.get(\"BIOHUB_MOTION_RELINK_MAX_FRAME_NODES\", \"2600\"))",
+      "new": "MOTION_RELINK_MAX_FRAME_NODES = int(os.environ.get(\"BIOHUB_MOTION_RELINK_MAX_FRAME_NODES\", \"2600\"))\n# Negative disables: cost matrix untouched, output byte-identical to the champion.\nRELINK_DIVISION_PENALTY = float(os.environ.get(\"BIOHUB_RELINK_DIVISION_PENALTY\", \"-1\"))",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "def motion_relink_edges(",
+      "old": "        row_ind, col_ind = linear_sum_assignment(cost)\n        matches: list[tuple[int, int, float, float, float]] = []\n        for r, c in zip(row_ind, col_ind):\n            if cost[r, c] >= big:\n                continue\n            matches.append((\n                source_ids[int(r)],\n                target_ids[int(c)],\n                float(raw_dist[r, c]),\n                float(motion_dist[r, c]),\n                float(prob_matrix[r, c]),\n            ))\n        return matches",
+      "new": "        # --- RELINK DIVISION (FACT-0090/0093) ---\n        # A bijection cannot express out-degree 2, so this call collapsed 14 of the 24\n        # divisions present pre-ILP. Duplicating each source row and PRICING the copy lets\n        # linear_sum_assignment SELECT which sources earn a second child, jointly over\n        # motion + raw distance + learned probability (the cost already carries all three).\n        # That is a joint scorer, not another AND-gate; blanket relaxation scored -0.0081.\n        # in-degree <= 1 is preserved (one row per column); out-degree <= 2 by construction.\n        _n_src = len(source_ids)\n        if RELINK_DIVISION_PENALTY >= 0.0:\n            cost_aug = np.vstack([cost, cost + RELINK_DIVISION_PENALTY])\n        else:\n            cost_aug = cost\n        row_ind, col_ind = linear_sum_assignment(cost_aug)\n        matches: list[tuple[int, int, float, float, float]] = []\n        _second = 0\n        for r, c in zip(row_ind, col_ind):\n            if cost_aug[r, c] >= big:\n                continue\n            _i = int(r) % _n_src\n            if int(r) >= _n_src:\n                _second += 1\n            matches.append((\n                source_ids[_i],\n                target_ids[int(c)],\n                float(raw_dist[_i, c]),\n                float(motion_dist[_i, c]),\n                float(prob_matrix[_i, c]),\n            ))\n        if _second:\n            stats[\"relink_division_second_children\"] = (\n                stats.get(\"relink_division_second_children\", 0) + _second\n            )\n        return matches",
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "def list_test_stems() -> list[str]:",
+      "anchor": "def list_test_stems() -> list[str]:",
+      "code_file": "scripts/kaggle_edits/loeo_retarget.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "old": "test_stems = list_test_stems()",
+      "new": "test_stems = list(LOEO_STEMS)  # LOEO retarget",
+      "expect": 1
+    },
+    {
+      "kind": "replace_cell",
+      "cell_match": "_guard_submission = Path(",
+      "code_file": "scripts/kaggle_edits/loeo_export.py",
+      "expect": 1
+    },
+    {
+      "kind": "insert_before",
+      "cell_match": "_loeo_csv = Path(\"/kaggle/working/submission.csv\")",
+      "anchor": "_loeo_csv = Path(\"/kaggle/working/submission.csv\")",
+      "code_file": "scripts/kaggle_edits/relink_sweep.py",
+      "expect": 1
+    },
+    {
+      "kind": "replace",
+      "cell_match": "_LOEO_KEEP = {",
+      "old": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\"}",
+      "new": "_LOEO_KEEP = {_loeo_gz.name, _loeo_out.name, \"loeo_manifest.json\", \"run_stats.csv\"}\n_LOEO_KEEP |= set(globals().get(\"_SWEEP_KEEP\", []))",
+      "expect": 1
+    }
+  ]
+}
